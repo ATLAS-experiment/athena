@@ -30,11 +30,11 @@ using namespace TMath;
 
 int main (int argc, const char * argv[]) {
 
-	if(argc!=2){
+  /*if(argc!=2){
 		printf("input parameters:\n./PrintPhotonSF [file] \n");
 		printf("example:\n PrintPhotonSF $ROOTCOREBIN/data/PhotonEfficiencyCorrection/INPUTFILE.root\n");
 		return 0;
-	}	
+		}	*/
 	
 	// Check the input file:
 	if(!std::filesystem::exists(argv[1])){
@@ -73,8 +73,10 @@ int main (int argc, const char * argv[]) {
 	if(getenv("ROOTCOREDIR")==nullptr){
 	  cout << "Please setup RootCore before running the PrintPhotonSF [file]"<<endl;
 	  return 0.;
-  }
-
+	}
+	
+	std::cout<<"after First Run Number"<<std::endl;
+	
 	// Create and initialize an instance for both types of photons
 	Root::TElectronEfficiencyCorrectionTool tool_SF;
 	tool_SF.addFileName(file.Data());
@@ -84,13 +86,23 @@ int main (int argc, const char * argv[]) {
 	  return 0;
 	}
 
+	std::cout<<" After creation and initialize"<<std::endl;
+
 	PATCore::ParticleDataType::DataType datatype=PATCore::ParticleDataType::Full;
 	if(file.Contains("AFII")) datatype=PATCore::ParticleDataType::Fast;
 
+
+	if (argv[2] == "FULL")
+	  {
+	    TDirectory * dir = (TDirectory*)TFile::Open(file)->Get(Form("%s/",dirName.Data()));
+	    
+	    
+	  }
 	// Access the file to get the histogram binning:
 	TH2F * h = file.Contains("AFII") ? (TH2F*)TFile::Open(file)->Get(Form("%s/AltFast2_sf",dirName.Data())) : (TH2F*)TFile::Open(file)->Get(Form("%s/FullSim_sf",dirName.Data()));
-
-
+	std::cout<<Form("%s/",dirName.Data())<<std::endl;
+	//TH2F * h = (TH2F*)TFile::Open(file)->Get(Form("%s/sf",dirName.Data()));
+	  
 	const Double_t * pTbounds = h->GetXaxis()->GetXbins()->GetArray();
 	const Double_t * Etabounds = h->GetYaxis()->GetXbins()->GetArray();
 
@@ -99,6 +111,8 @@ int main (int argc, const char * argv[]) {
 
 	double pt, eta;
 
+	std::cout<<"After naming histogram"<<std::endl;
+	
 	// loop over bins, in different pt/eta region, and print the SF
 	cout << "-----------------------------------------------------------------------------------"<<endl;
 	cout << "Table of photon ScaleFactors obtained by data-driven measurements for input file:"<<endl; cout << file <<endl;

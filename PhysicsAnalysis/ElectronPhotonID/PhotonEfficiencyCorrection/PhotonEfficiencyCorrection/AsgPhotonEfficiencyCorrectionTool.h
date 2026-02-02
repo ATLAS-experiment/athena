@@ -82,6 +82,10 @@ public:
     return *m_appliedSystematics;
   }
   
+ // Correlation Model     
+  std::string m_correlation_model_name;
+  int m_correlation_model;     
+
   /// Configure this tool for the given systematics
   virtual StatusCode applySystematicVariation ( const CP::SystematicSet& systConfig ) override;
 
@@ -146,8 +150,16 @@ private:
   bool m_useRandomRunNumber;
   int m_defaultRandomRunNumber;
 
+  int m_nCorrSyst;
+  
   // remove TRT converted photon for Run-3
   bool m_removeTRTConversion;
+
+  //For scale factor eigenvector variations list
+  std::vector<CP::SystematicVariation> m_corrVarUp;
+  std::vector<CP::SystematicVariation> m_corrVarDown;
+  std::vector<CP::SystematicVariation> m_uncorrVarUp;
+  std::vector<CP::SystematicVariation> m_uncorrVarDown;
 
   Gaudi::Property<bool> m_allowMissingLinks{ this, "AllowMissingLinks", false, "Allow missing links in the input objects. This should only be used by experts running on expert formats." };
 

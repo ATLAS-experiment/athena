@@ -40,13 +40,16 @@ ANA_MSG_SOURCE(TestxAODPhotonAlg, "")
 
 int main( int argc, char* argv[] ) {
 
+ 
+
+
   xAOD::TFileAccessTracer::enableDataSubmission(false);
    // The application's name:
    const char* APP_NAME = argv[ 0 ];
 
   using namespace asg::TestxAODPhotonAlg;
   ANA_CHECK_SET_TYPE(int);
-  MSG::Level mylevel = MSG::INFO;
+  MSG::Level mylevel = MSG::DEBUG;
   setMsgLevel(mylevel);
   msg().setName(APP_NAME);
 
@@ -75,7 +78,8 @@ int main( int argc, char* argv[] ) {
 		 
 		 
    // Decide how many events to run over:
-   Long64_t entries = event.getEntries();
+   //Long64_t entries = event.getEntries();
+   Long64_t entries = 10;//event.getEntries();
    if( argc > 2 ) {
       const Long64_t e = atoll( argv[ 2 ] );
       if( e < entries ) {
@@ -88,9 +92,10 @@ int main( int argc, char* argv[] ) {
    AsgPhotonEfficiencyCorrectionTool photonSF_Iso("AsgPhotonEfficiencyCorrectionTool_isoSF");
    AsgPhotonEfficiencyCorrectionTool photonSF_Trig("AsgPhotonEfficiencyCorrectionTool_TrigSF");
 
+   
    photonSF_ID.msg().setLevel( mylevel );
    photonSF_Iso.msg().setLevel( mylevel );
-   photonSF_Trig.msg().setLevel( mylevel );
+    photonSF_Trig.msg().setLevel( mylevel );
 
 
    //Set Properties for photonID_SF tool
@@ -108,23 +113,27 @@ int main( int argc, char* argv[] ) {
    // If the Pileup reweighting tool is not initialized, one can use next properties:
    ANA_CHECK(photonSF_ID.setProperty("UseRandomRunNumber",false));
    ANA_CHECK(photonSF_ID.setProperty("DefaultRandomRunNumber",428648)); // first runnumber of physics in run-3
+   ANA_CHECK(photonSF_ID.setProperty("CorrelationModel","FULL")); //FULL for the eigenvector decomposition one, TOTAL for one uncertainty 
+   
+
    ANA_CHECK(photonSF_Iso.setProperty("UseRandomRunNumber",false));
    ANA_CHECK(photonSF_Iso.setProperty("DefaultRandomRunNumber",428648)); // first runnumber of physics in run-3
    ANA_CHECK(photonSF_Trig.setProperty("UseRandomRunNumber",false));
    ANA_CHECK(photonSF_Trig.setProperty("DefaultRandomRunNumber",349534)); // first runnumber of 2018 data taking
 
+  
    if(!photonSF_ID.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
      return 1;
    }
-   if(!photonSF_Iso.initialize()){
+    if(!photonSF_Iso.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
      return 1;
    }
    if(!photonSF_Trig.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
      return 1;
-   }
+     }
    
    // Test that recommended systematics properly bieng registered:
    std::vector<CP::SystematicSet> sysList;
@@ -135,6 +144,8 @@ int main( int argc, char* argv[] ) {
    for (auto sysListItr = recommendedSystematics.begin(); sysListItr != recommendedSystematics.end(); ++sysListItr){
      std::cout <<(*sysListItr).name()<<std::endl;
    }
+
+
    
    // restructure all recommended systematic variations for the SF tool
    // for +/- nsigma variation see
@@ -156,7 +167,7 @@ int main( int argc, char* argv[] ) {
    {
      syst_PhotonTrig.emplace_back();
          syst_PhotonTrig.back().insert(SystematicsVariation);
-   }
+	 }
    //Print all recomended systemtaics
    for (const auto& sSystematicSet: syst_PhotonID){
 	  Info(APP_NAME,"PhotonEfficiencyCorrectionTool ID instance has next systematic variation  %s ",sSystematicSet.name().c_str());
@@ -167,11 +178,14 @@ int main( int argc, char* argv[] ) {
    for (const auto& sSystematicSet: syst_PhotonTrig){
           Info(APP_NAME,"PhotonEfficiencyCorrectionTool Iso instance has next systematic variation  %s ",sSystematicSet.name().c_str());
    }
-   
+    
+
+     
    double efficiencyScaleFactor=0, efficiencyScaleFactorError=0;
    // Loop over the events:
    std::cout << "loop on " << entries << " entries"<<std::endl;
    for( int entry = 0; entry < entries; ++entry ) {
+   //for( int entry = 0; entry < 1; ++entry ) {
 
      // Tell the object which entry to look at:
      event.getEntry( entry );   
@@ -241,20 +255,21 @@ int main( int argc, char* argv[] ) {
 		ANA_CHECK(photonSF_ID.applySystematicVariation(sSystematicSet));
 	    ANA_CHECK(photonSF_ID.getEfficiencyScaleFactor(*ph,efficiencyScaleFactor));
 		Info( APP_NAME,"===>>> apply %s: ScaleFactor = %f",photonSF_ID.appliedSystematics().name().c_str(),efficiencyScaleFactor);
-       }
+		}
 	   for (const auto& sSystematicSet: syst_PhotonIso){
-		ANA_CHECK(photonSF_Iso.applySystematicVariation(sSystematicSet));
-	    ANA_CHECK(photonSF_Iso.getEfficiencyScaleFactor(*ph,efficiencyScaleFactor));
-		Info( APP_NAME,"===>>> apply %s: ScaleFactor = %f",photonSF_Iso.appliedSystematics().name().c_str(),efficiencyScaleFactor);
-       }
+	     ANA_CHECK(photonSF_Iso.applySystematicVariation(sSystematicSet));
+	     ANA_CHECK(photonSF_Iso.getEfficiencyScaleFactor(*ph,efficiencyScaleFactor));
+	     Info( APP_NAME,"===>>> apply %s: ScaleFactor = %f",photonSF_Iso.appliedSystematics().name().c_str(),efficiencyScaleFactor);
+	   }
 	   for (const auto& sSystematicSet: syst_PhotonTrig){
                 ANA_CHECK(photonSF_Trig.applySystematicVariation(sSystematicSet));
             ANA_CHECK(photonSF_Trig.getEfficiencyScaleFactor(*ph,efficiencyScaleFactor));
                 Info( APP_NAME,"===>>> apply %s: ScaleFactor = %f",photonSF_Trig.appliedSystematics().name().c_str(),efficiencyScaleFactor);
-       }	   
+		}	   
 
 	}  // END LOOP ON PHOTONS
-     
+
+    
    } // END LOOP ON EVENTS
 
    // Return gracefully:
