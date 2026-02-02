@@ -12,7 +12,7 @@ atlas_add_component( MuonCondAlg
                      src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities 
-                                  Identifier GaudiKernel MuonCondData  MuonCondSvcLib 
+                                  Identifier GaudiKernel MuonCondData  
                                   CoralUtilitiesLib StoreGateLib MuonIdHelpersLib MuonReadoutGeometry 
                                   MdtCalibInterfacesLib MdtCalibData MuonCalibITools MdtCalibUtils MuonCalibToolsLib 
                                   PathResolver MuonNSWCommonDecode MdtCalibInterfacesLib 
