@@ -20,6 +20,7 @@ StatusCode gFEXCondAlgo::initialize() {
 
     ATH_MSG_INFO("Loading gFEX parameters from database");
     ATH_CHECK( m_GfexNoiseCutsKey.initialize(SG::AllowEmpty) );
+    ATH_CHECK( m_GfexModuleConditionsKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_gFEXDBParamsKey.initialize() );
 
     return StatusCode::SUCCESS;
@@ -43,13 +44,40 @@ StatusCode gFEXCondAlgo::execute(const EventContext& ctx) const {
 
     // Construct the output Cond Object and fill it in
     std::unique_ptr<gFEXDBCondData> writeDBTool(std::make_unique<gFEXDBCondData>() );
+    if (!m_GfexModuleConditionsKey.empty() && !m_isMC) {
+        SG::ReadCondHandle <CondAttrListCollection> load_gFexModuleConditions{m_GfexModuleConditionsKey, ctx };
+        if (load_gFexModuleConditions.isValid()) {
+            // CHECK HERE
+            writeCHandle.addDependency(load_gFexModuleConditions);
+            for (auto itr = load_gFexModuleConditions->begin(); itr != load_gFexModuleConditions->end(); ++itr) {
+                if ( itr->second["moduleName"].data<std::string>() !="l1calo-gfc0-gfex01" ) continue;
+                const coral::Blob& blob = (itr->second["json"]).data<coral::Blob>();
+                const std::string s((char*)blob.startingAddress(),blob.size());
+                nlohmann::json attrList = nlohmann::json::parse(s);
+                if (attrList.contains("FWVersion")) {
+                    writeDBTool->set_FWVersion(attrList["FWVersion"]);
+                }
+                else {
+                    writeDBTool->set_FWVersion(m_fwVersionDefault);
+                }
+            }
+        }
+        else {
+            ATH_MSG_ERROR("Values from "<<m_GfexModuleConditionsKey<< " not loaded. Wrong key?");
+            return StatusCode::FAILURE;
+        }
+    }
+    else {
+        writeCHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
+        writeDBTool->set_FWVersion(m_fwVersionDefault);
+    }
 
     if(!m_GfexNoiseCutsKey.empty() && useDBparams) {
 
         SG::ReadCondHandle <CondAttrListCollection> load_gFexNoiseCut{m_GfexNoiseCutsKey, ctx };
 
         std::vector<std::string> myStringsNoise;
-        myStringsNoise = { "Aslopes", "Bslopes", "Cslopes", "AnoiseCuts","BnoiseCuts","CnoiseCuts"};
+        myStringsNoise = { "Aslopes", "Bslopes", "Cslopes", "AnoiseCuts", "BnoiseCuts", "CnoiseCuts"};
 
         if (load_gFexNoiseCut.isValid()) {
             writeCHandle.addDependency(load_gFexNoiseCut);
