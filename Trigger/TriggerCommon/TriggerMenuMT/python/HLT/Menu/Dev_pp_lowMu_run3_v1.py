@@ -18,7 +18,6 @@ from .Physics_pp_run3_v1 import (
     PrimaryPhIGroup,
     SinglePhotonGroup,
     SingleJetGroup,
-    BphysicsGroup,
 )
 from .PhysicsP1_pp_lowMu_run3_v1 import (LowMuGroup, LowMuGroupPhI)
 
@@ -29,18 +28,6 @@ def getDevLowMuSignatures():
     chains['Muon'] += [
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_mu3_L1MU3V', stream=['MinBias', 'express'], groups=SingleMuonGroup+SupportGroup, monGroups=['muonMon:shifter','muonMon:online']),
-    ]
-
-    chains['Bphysics'] += [
-        # ATR-32209: B -> h+h-
-        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
     ]
 
     chains['Egamma'] += [
