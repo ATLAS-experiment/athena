@@ -72,7 +72,9 @@ testChains = {
     "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:key=HLT_IDTrack_Bmumux_FTF",
     "HLT_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:key=HLT_IDTrack_Bmumux_IDTrig",
 
-    "HLT_2mu4_l2io_invmDimu_L12MU3V:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
+    "HLT_mu10_bBhh_L1MU8F:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
+    "HLT_mu15_bBhh_L1MU14FCH:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
+    "HLT_mu15_bBhh_L1MU8F:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
     "HLT_mu4_bBhh_L1MU3V:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
 
   

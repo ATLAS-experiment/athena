@@ -136,7 +136,7 @@ class Chains:
 #bphysfsChains
             ],
             "signature": ['Muon','Bphysics',],
-            "menu": 'Dev_pp_lowMu_run3_v1'
+            "menu": 'PhysicsP1_pp_lowMu_run3_v1'
         }
 
         return d
