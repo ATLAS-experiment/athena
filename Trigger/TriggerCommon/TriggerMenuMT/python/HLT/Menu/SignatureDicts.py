@@ -1403,7 +1403,7 @@ UnconventionalTrackingChainParts_Default = {
 #==========================================================
 AllowedTopos_comb = [
     'idZmumu','idJpsimumu',
-    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB30','03dRAB35','dRAD04', 'dRAF04','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
+    'dRAA12', 'dRAB15', '03dRAB','02dRAB10','03dRAB10','03dRAB28', '03dRAB30','03dRAB35','dRAD04', 'dRAF04','dRAB03','dRAB04', 'dRAB05', '02dRAB','02dRAC','03dRAC30','03dRAC35','02dRBC','15dRBC45','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     'anomdet','anomdetL','anomdetM','anomdetT',
     '115masswisoABC','115masswisoABC135',
     '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
