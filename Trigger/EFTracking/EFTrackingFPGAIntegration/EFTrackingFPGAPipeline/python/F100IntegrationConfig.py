@@ -144,6 +144,13 @@ def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
     kwarg.setdefault('StripStartClusterKernelName','stripLoader')
     kwarg.setdefault('StripEndClusterKernelName','StripEDMWriter')
 
+    kwarg.setdefault('PixelLUTKernelName','LutPixelLoader')
+    kwarg.setdefault('StripLUTKernelName','LutStripLoader')
+
+    kwarg.setdefault('PixelLUTFilePath','/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_LUTS/v1/PixelLut.dat')
+    kwarg.setdefault('StripLUTFilePath','/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_LUTS/v1/StripLut.dat')
+
+
     if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
         if 'RegSelTool' not in kwarg:
             from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
@@ -242,11 +249,13 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
                                            'sortedxAODStripClusterContainer':
                                             'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 
             from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
             acc.merge(FPGATrackSimReportingCfg(flags,
-                                               perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                                perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
                                             **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
                                                 'xAODStripClusterContainers' : ['ITkStripClusters'],
                                                 'FPGAActsTracks' : [],

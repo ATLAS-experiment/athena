@@ -78,6 +78,10 @@ namespace EFTrackingFPGAIntegration
             // Strip clustering
             else if(cuName.find(m_stripEndClusterKernelName.value()) != std::string::npos)  m_stripEndClusteringKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
             else if(cuName.find(m_stripStartClusterKernelName.value()) != std::string::npos)  m_stripStartClusteringKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
+            // Strip clustering
+            else if(cuName.find(m_pixelLUTKernelName.value()) != std::string::npos)  m_pixelLUTKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
+            else if(cuName.find(m_stripLUTKernelName.value()) != std::string::npos)  m_stripLUTKernels.emplace_back(cl::Kernel(m_program, cuName.c_str()));
+
 
             else
             {
@@ -90,9 +94,102 @@ namespace EFTrackingFPGAIntegration
         ATH_MSG_INFO(m_stripStartClusterKernelName.value()<<" size: "<<m_stripStartClusteringKernels.size());
         ATH_MSG_INFO(m_stripEndClusterKernelName.value()<<" size: "<<m_stripEndClusteringKernels.size());
 
+        ATH_MSG_INFO(m_pixelLUTKernelName.value()<<" size: "<<m_pixelLUTKernels.size());
+        ATH_MSG_INFO(m_stripLUTKernelName.value()<<" size: "<<m_stripLUTKernels.size());
+
+        // if the LUT kernels are found, transfer the data there
+        if(m_pixelLUTKernels.size())
+        {
+            // read the information from the file
+            std::vector<uint64_t> data;
+            if(!readCalibfile(m_pixelLUTFilePath.value(), data)) return StatusCode::FAILURE;
+
+            if(data.size() != EFTrackingTransient::PIXEL_LUT_SIZE)
+            {
+                ATH_MSG_ERROR("Pixel LUT size of "<<data.size() <<" does not match expectation of "<<EFTrackingTransient::PIXEL_LUT_SIZE);
+            }
+
+            // Send the data to each LUT kernel
+            for(size_t i = 0; i < m_pixelLUTKernels.size(); i++)
+            {
+                cl::Kernel &lutKernel  = m_pixelLUTKernels[i];
+                auto lutBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::PIXEL_LUT_SIZE * sizeof(uint64_t), NULL, &err);
+                
+                // Set kernel arguments
+                lutKernel.setArg(0, lutBuffer);
+                lutKernel.setArg(2, static_cast<unsigned long long>(data.size()));
+
+                // Start the transfers
+                cl::Event lut_inputEvent;
+                // just use the first queue for this
+                auto queue = m_acc_queues[0];
+                
+                queue.enqueueWriteBuffer(lutBuffer, CL_FALSE, 0, sizeof(uint64_t) * data.size(), data.data(), NULL, &lut_inputEvent);
+                queue.enqueueTask(lutKernel, NULL, &lut_inputEvent);
+
+                // wait for this queue to finish
+                queue.finish();
+            }
+        }
+
+        if(m_stripLUTKernels.size())
+        {
+            // read the information from the file
+            std::vector<uint64_t> data;
+            if(!readCalibfile(m_stripLUTFilePath.value(), data)) return StatusCode::FAILURE;
+
+            if(data.size() != EFTrackingTransient::STRIP_LUT_SIZE)
+            {
+                ATH_MSG_ERROR("Strip LUT size of "<<data.size() <<" does not match expectation of "<<EFTrackingTransient::STRIP_LUT_SIZE);
+            }
+
+            // Send the data to each LUT kernel
+            for(size_t i = 0; i < m_stripLUTKernels.size(); i++)
+            {
+                cl::Kernel &lutKernel  = m_stripLUTKernels[i];
+
+                auto lutBuffer = cl::Buffer(m_context, CL_MEM_READ_ONLY, EFTrackingTransient::STRIP_LUT_SIZE * sizeof(uint64_t), NULL, &err);
+                
+                // Set kernel arguments
+                lutKernel.setArg(0, lutBuffer);
+                lutKernel.setArg(2, static_cast<unsigned long long>(data.size()));
+
+                // Start the transfers
+                cl::Event lut_inputEvent;
+                // just use the first queue for this
+                auto queue = m_acc_queues[0];
+                
+                queue.enqueueWriteBuffer(lutBuffer, CL_FALSE, 0, sizeof(uint64_t) * data.size(), data.data(), NULL, &lut_inputEvent);
+                queue.enqueueTask(lutKernel, NULL, &lut_inputEvent);
+
+                // wait for this queue to finish
+                queue.finish();
+            }
+        }
+
 
         return StatusCode::SUCCESS;
     }
+
+    StatusCode F110StreamIntegrationAlg::readCalibfile(std::string inputFileName, std::vector<uint64_t>& data)
+    {
+        ATH_MSG_INFO("Loading LUTs from " << inputFileName);
+
+
+        std::ifstream inputFile(inputFileName);
+        if (!inputFile.is_open()) {
+            std::cerr << "Error opening input file " << inputFileName << std::endl;
+            return StatusCode::FAILURE;
+        }
+
+        // Read the full file: expects hex tokens (e.g. "0x1234" or "1234")
+        uint64_t value = 0;
+        while (inputFile >> std::hex >> value) {
+            data.push_back(value);
+        }
+        return StatusCode::SUCCESS;
+    }
+
 
     StatusCode F110StreamIntegrationAlg::execute(const EventContext &ctx) const
     {
@@ -107,7 +204,7 @@ namespace EFTrackingFPGAIntegration
         const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
         ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
         ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));  
-    
+
         // logic
         unsigned int nthreads = m_FPGAThreads.value();
 

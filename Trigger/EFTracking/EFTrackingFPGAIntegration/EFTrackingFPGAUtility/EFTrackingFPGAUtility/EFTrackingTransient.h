@@ -24,6 +24,9 @@ namespace EFTrackingTransient
   // The struct of the StripCluster and PixelCluster are not aligned at the moment
   // They might be aligned in the future for efficient device memory usage
 
+  constexpr uint32_t PIXEL_LUT_SIZE = 73312;
+  constexpr uint32_t STRIP_LUT_SIZE = 236544;
+
   constexpr uint32_t MAX_PIXEL_CLUSTERS = 326400;
   constexpr uint32_t MAX_STRIP_CLUSTERS = 307200;
   constexpr uint16_t CLUSTER_SEG_SIZE = 256;
