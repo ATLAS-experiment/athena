@@ -22,6 +22,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Geometry/TrackingVolume.hpp"
 
 namespace MuonGMR4 { 
 
@@ -37,8 +38,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         bool isReEntrant() const override final {return false;}   
     
     private:
-        /** @brief Returns the 8 edge points from a trapezoidal / cuboid volume */
-        std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
+        /** @brief Returns the  edge points from a trapezoidal / cuboid /diamond volume */
+        std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
         std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
         std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface&) const;
         
@@ -52,6 +53,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         StatusCode checkChambers(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check envelopes */
         StatusCode checkEnvelopes(const ActsTrk::GeometryContext& gctx) const;
+        /** @brief Check tracking geometry volumes */
+        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, std::shared_ptr<const Acts::TrackingGeometry>& trackingGeometry) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         template <class EnvelopeType>
           StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
@@ -83,13 +86,13 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
                                const Amg::Vector3D& point,
                                const std::string& descr,
                                const Identifier& chamberId) const;
-        /** @brief Checks whether the 8 edge point from a trapezoid/cuboid form a volume
+        /** @brief Checks whether the edge points from a trapezoid/cuboid/diamond form a volume
          *         overlapping with the given volume
          *  @param gctx: Geometry context carrying all alignment & global transformations
          *  @param chamberEdges: Edge points of the volume that might overlap
          *  @param volume: Second volume used for the overlap checking */           
         bool hasOverlap(const ActsTrk::GeometryContext& gctx,
-                        const std::array<Amg::Vector3D, 8>& chamberEdges,
+                        const std::vector<Amg::Vector3D>& chamberEdges,
                         const Acts::Volume& volume) const;
         /** @brief Checks whether all channels of a given readout element are fully covered by the
          *         envelope.
@@ -138,6 +141,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         /** @brief The overlap of chamber volumes does not lead to a failure. In fact, the overlap between the T4 & BIS78 chambers
          *         is found to be unavoidable without boolean shapes in the tracking geometry*/
         Gaudi::Property<bool> m_ignoreOverlapCh{this, "ignoreChamberOverlap", true};
+         /** @brief The exceeding surfaces does not lead to a failure. In fact, the tubes are exceeded in BIS78 (TODO)*/
+        Gaudi::Property<bool> m_ignoreOutsideSurf{this, "ignoreOutsideSurface", true};
         /** @brief Dump the chambers & sectors as separate obj files */
         Gaudi::Property<bool> m_dumpObjs{this, "dumpVolumes" , false};
          const MuonDetectorManager* m_detMgr{nullptr};
