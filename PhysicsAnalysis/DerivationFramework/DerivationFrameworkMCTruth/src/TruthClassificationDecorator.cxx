@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
+#include "GaudiKernel/Chrono.h"
 #include <vector>
 #include <string>
 
@@ -30,21 +31,27 @@ StatusCode DerivationFramework::TruthClassificationDecorator::initialize()
     ATH_CHECK(m_outcomeDecoratorKey.initialize());
     ATH_CHECK(m_classificationDecoratorKey.initialize());
 
+    // get the chrono auditor
+    ATH_CHECK ( m_chronoSvc.retrieve() );
+
     return StatusCode::SUCCESS;
 }
+
 
 StatusCode DerivationFramework::TruthClassificationDecorator::finalize()
 {
     ATH_MSG_VERBOSE("finalize() ...");
     ATH_MSG_INFO("Processed and decorated "<< m_ntotpart <<" truth particles");
+
     return StatusCode::SUCCESS;
 }
 
-// Selection and collection creation
-StatusCode DerivationFramework::TruthClassificationDecorator::addBranches(const EventContext& ctx) const
-{
 
-    // Event context for multi-threading
+StatusCode DerivationFramework::TruthClassificationDecorator::execute(const EventContext& ctx) const
+{
+    // On your marks.... get set....
+    Chrono chrono( &(*m_chronoSvc), name() );
+    // GO!!
 
     // Retrieve truth collections
     SG::ReadHandle<xAOD::TruthParticleContainer> truthParticles(m_particlesKey,ctx);
