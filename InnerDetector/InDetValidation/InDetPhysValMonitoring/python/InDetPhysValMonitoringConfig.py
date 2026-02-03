@@ -404,7 +404,13 @@ def InDetPhysValMonitoringCfg(flags):
 
     if flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
         from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-        acc.merge(InDetLRTMergeCfg(flags))
+        acc.merge(InDetLRTMergeCfg(
+            flags,
+            InputTrackParticleLocations=[
+                "InDetTrackParticles",
+                flags.PhysVal.IDPVM.largeD0TrackCollection,
+            ],
+        ))
 
     mons = [(True,
              InDetPhysValMonitoringToolCfg),
