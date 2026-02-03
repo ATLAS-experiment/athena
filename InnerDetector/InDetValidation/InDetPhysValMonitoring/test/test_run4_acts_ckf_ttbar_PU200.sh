@@ -43,7 +43,7 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
-ignore_pattern="ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern=""
 
 # Run with Athena ambi. resolution
 run "Reconstruction-ckf" \

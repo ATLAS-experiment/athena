@@ -6,7 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=5
 
 # Ignore specific error messages from Acts GSF
-ignore_pattern="ActsReFitterAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit"
+ignore_pattern=""
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \

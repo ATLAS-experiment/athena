@@ -31,7 +31,7 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.args += ' --preExec "all:{:s};"'.format(preExec)
     rdo2aod.args += ' --preInclude "RAWtoALL:ActsConfig.ActsCIFlags.actsWorkflowFlags"'
     rdo2aod.args += ' --conditionsTag f"default:{defaultConditionsTags.RUN4_MC}"'
-    rdo2aod.args += ' --ignorePatterns "Propagation.+reached.+the.+step.+count.+limit,Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"'
+    rdo2aod.args += ' --ignorePatterns ""'
     rdo2aod.timeout = 5400 # default = 3600 s
     rdo2aod.flags = ['Trigger.useActsTracking=True',
                      'Acts.useCache=True',
