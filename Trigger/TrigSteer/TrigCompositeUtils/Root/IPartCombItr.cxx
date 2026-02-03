@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigCompositeUtils/IPartCombItr.h"
-#include <set>
+
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include <set>
+#include <ostream>
 
 namespace {
   using namespace TrigCompositeUtils;
@@ -68,8 +70,7 @@ namespace TrigCompositeUtils
 
   std::function<bool(const std::vector<LinkInfo<xAOD::IParticleContainer>> &)> getFilter(FilterType filter)
   {
-    switch (filter)
-    {
+    switch (filter){
     case FilterType::All:
       return [](const std::vector<LinkInfo<xAOD::IParticleContainer>> &) { return true; };
     case FilterType::UniqueObjects:
@@ -78,7 +79,6 @@ namespace TrigCompositeUtils
       return uniqueRoIs;
     default:
       throw std::runtime_error("Unhandled FilterType enum value!");
-      return {};
     }
   }
 
