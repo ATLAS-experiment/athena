@@ -89,13 +89,9 @@ SCT_DetectorTool::create()
     GeoModelExperiment* theExpt{nullptr};
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
 
-    // Retrieve the Geometry DB Interface
-    ATH_CHECK(m_geometryDBSvc.retrieve());
-
     // Pass athena services to factory, etc
     m_athenaComps.setDetStore(detStore().operator->());
     m_athenaComps.setGeoDbTagSvc(&*m_geoDbTagSvc);
-    m_athenaComps.setGeometryDBSvc(&*m_geometryDBSvc);
     m_athenaComps.setRDBAccessSvc(&*accessSvc);
     const SCT_ID* idHelper{nullptr};
     ATH_CHECK(detStore()->retrieve(idHelper, "SCT_ID"));
