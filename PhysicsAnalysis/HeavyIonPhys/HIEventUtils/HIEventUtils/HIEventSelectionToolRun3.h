@@ -46,6 +46,9 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual IonDataType toDataType(
       const xAOD::EventInfo* eventInfo) const override;
 
+  virtual unsigned int defaultMaskForPeriod(IonDataType period) const override;
+
+
  private:
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
   float ntrkCutValue(IonDataType, float fcalEt, PileupVariation) const;

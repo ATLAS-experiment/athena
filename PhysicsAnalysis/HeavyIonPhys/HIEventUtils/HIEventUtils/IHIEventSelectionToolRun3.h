@@ -30,7 +30,6 @@ enum class PileupVariation : uint8_t { Nominal = 0, Tight, Loose };
 
 std::string toString(PileupVariation);
 
-
 constexpr unsigned int bit(int n) {
   return 1 << n;
 }
@@ -47,19 +46,12 @@ enum class SelectionMask : unsigned int {
   PUFCalVsZDCNominal = bit(5),
   PUFCalVsZDCTight = bit(6),
   PUFCalVsZDCAny = PUFCalVsZDCLoose | PUFCalVsZDCNominal | PUFCalVsZDCTight,
-  PUOOVertexLoose = bit(7),
-  PUOOVertexNominal = bit(8),
-  PUOOVertexTight = bit(9),
-  PUOOVertexAny = PUOOVertexLoose | PUOOVertexNominal | PUOOVertexTight,
-
+  PUOOSingleVertexNominal = bit(7),
   // default cuts for PB
   PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose,
   // default cuts for OO
-  OODefault = NoEventError | PUOOVertexLoose
+  OODefault = NoEventError | PUOOSingleVertexNominal
 };
-
-
-
 
 class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
 
@@ -74,7 +66,8 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const = 0;
 
   /// @brief true if this is pileup event
-  /// It computes necessary quantities and invokes method defined next to perform actual selection
+  /// It computes necessary quantities and invokes method defined next to
+  /// perform actual selection
   virtual bool puZDCvsFCal(HI::IonDataType when,
                            const xAOD::HIEventShapeContainer* es,
                            const xAOD::ZdcModuleContainer* zdcModules,
@@ -113,6 +106,9 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
 
   /// @brief translates info in EV into HI data type
   virtual IonDataType toDataType(const xAOD::EventInfo* eventInfo) const = 0;
+
+  /// @brief provides default set of cuts for given period
+  virtual unsigned int defaultMaskForPeriod(IonDataType period) const = 0;
 };
 
 }  // namespace HI
