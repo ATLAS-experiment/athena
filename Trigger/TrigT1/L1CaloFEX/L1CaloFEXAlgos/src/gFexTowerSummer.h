@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -26,6 +26,12 @@
 
 #include "L1CaloFEXByteStream/gFexPos.h"
 
+#include <string>
+#include <array>
+
+class EventContext;
+
+
 namespace LVL1 {
 
 class gFexTowerSummer : public AthReentrantAlgorithm {
@@ -37,7 +43,6 @@ class gFexTowerSummer : public AthReentrantAlgorithm {
   /// Function executing the algorithm
   virtual StatusCode execute(const EventContext&) const override;
 
-  //typedef  std::array<std::array<int,      12>,  32>        gtFPGA;
   typedef  std::array<std::array<int, LVL1::gFEXPos::AB_COLUMNS>, LVL1::gFEXPos::ABC_ROWS> gtFPGA;
 
   
