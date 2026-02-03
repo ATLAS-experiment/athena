@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
@@ -16,7 +16,7 @@ TauGNNEvaluator::TauGNNEvaluator(const std::string &name):
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks and "<<m_max_clusters<<" clusters...");
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks, "<<m_max_clusters<<" clusters, and "<<m_max_hits<<" hits...");
 
   // We can either use an inclussive GNN (e.g. Offline GNTauv0), or a prong-dependent GNN (e.g. HLT GNTau), not both!
   
@@ -55,13 +55,33 @@ StatusCode TauGNNEvaluator::initialize() {
     if(!m_net_3p) return StatusCode::FAILURE;
   }
 
-  if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
+  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
 
-  if (!m_tauContainerName.empty()){
-    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
-    ATH_CHECK(m_scoreHandleKey.initialize());    
+  if(!m_tauContainerName.empty()) {
+    // We should move to using WriteDecorHandles in the future, but for now
+    // we create keys to enforce data-dependencies in the scheduler
+
+    if(m_output_discriminant != Discriminant::Disabled) {
+      m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+      ATH_CHECK(m_scoreHandleKey.initialize());
+    }
+
+    m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
+    ATH_CHECK(m_pTauHandleKey.initialize());
+
+    m_pJetHandleKey = m_tauContainerName + "." + m_output_pjet;
+    ATH_CHECK(m_pJetHandleKey.initialize());
+  }
+
+  if(!m_tauContainerName.empty() && !m_hitsHandleKey.empty()) {
+    m_hits_decor_name = m_hitsHandleKey.key();
+    m_hitsHandleKey = m_tauContainerName + "." + m_hitsHandleKey.key();
+    ATH_CHECK(m_hitsHandleKey.initialize());
+  } else if (m_max_hits > 0) {
+    ATH_MSG_ERROR("TauContainerName and HitsHandleKey must be provided to read hits for the GNN evaluation");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;
@@ -85,14 +105,17 @@ std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network
   config.input_layer_scalar   = m_input_layer_scalar.value();
   config.input_layer_tracks   = m_input_layer_tracks.value();
   config.input_layer_clusters = m_input_layer_clusters.value();
+  config.input_layer_hits     = m_input_layer_hits.value();
   config.output_node_tau      = m_outnode_tau.value();
   config.output_node_jet      = m_outnode_jet.value();
   config.n_max_tracks         = m_max_tracks.value();
   config.n_max_clusters       = m_max_clusters.value();
   config.max_dr_cluster       = m_max_cluster_dr.value();
+  config.n_max_hits           = m_max_hits.value();
   config.doVertexCorrection   = m_doVertexCorrection.value();
   config.trackClassification  = m_doTrackClassification.value();
   config.useTRT               = m_useTRT.value();
+  config.hits_decor_name      = m_hits_decor_name;
 
   std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(config);
   if(!net) ATH_MSG_ERROR("No network configured.");
@@ -107,7 +130,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::Accessor<float> out_pjet(m_output_pjet);
   const SG::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
-  output(tau) = -1111.0f;
+  if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
   out_pjet(tau) = -1111.0f;
 

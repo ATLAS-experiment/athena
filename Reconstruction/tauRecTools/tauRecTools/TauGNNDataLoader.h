@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #pragma once
@@ -13,10 +13,12 @@
 #include "FlavorTagInference/ConstituentsLoader.h"
 #include "tauRecTools/ConstituentsLoaderTauCluster.h"
 #include "tauRecTools/ConstituentsLoaderTauTrack.h"
+#include "tauRecTools/ConstituentsLoaderTauHit.h"
 
 // Functions to calculate (scalar) input variables
 // Returns a status code indicating success
 namespace TauScalarVars{ 
+    bool eta(const xAOD::TauJet &tau, float &out);
     bool absEta(const xAOD::TauJet &tau, float &out);
     bool centFrac(const xAOD::TauJet &tau, float &out);
     bool isolFrac(const xAOD::TauJet &tau, float &out); 
@@ -35,6 +37,8 @@ namespace TauScalarVars{
     bool pt_tau_log(const xAOD::TauJet &tau, float &out);
     bool ptDetectorAxis(const xAOD::TauJet &tau, float &out);
     bool ptIntermediateAxis(const xAOD::TauJet &tau, float &out);
+    bool ptJetSeed(const xAOD::TauJet &tau, float &out);
+    bool etaJetSeed(const xAOD::TauJet &tau, float &out);
     
     //functions to calculate input variables needed for the eVeto RNN
     bool ptJetSeed_log             (const xAOD::TauJet &tau, float &out);
@@ -61,14 +65,17 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             std::string input_layer_scalar;
             std::string input_layer_tracks;
             std::string input_layer_clusters;
+            std::string input_layer_hits;
             std::string output_node_tau;
             std::string output_node_jet;
             size_t n_max_tracks;
             size_t n_max_clusters; 
             float max_dr_cluster;
+            size_t n_max_hits; 
             bool doVertexCorrection; 
             bool trackClassification; 
             bool useTRT;
+            std::string hits_decor_name;
         };
         TauGNNDataLoader(
             std::shared_ptr<const FlavorTagInference::SaltModel> salt_model, 
@@ -93,6 +100,9 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             {"dRmax",                     TauScalarVars::dRmax},
             {"trFlightPathSig",           TauScalarVars::trFlightPathSig},
             {"massTrkSys",                TauScalarVars::massTrkSys},
-            {"pt",                        TauScalarVars::pt}
+            {"pt",                        TauScalarVars::pt},
+            {"eta",                       TauScalarVars::eta},
+            {"ptJetSeed",                 TauScalarVars::ptJetSeed},
+            {"etaJetSSeed",               TauScalarVars::etaJetSeed}
         };
 };
