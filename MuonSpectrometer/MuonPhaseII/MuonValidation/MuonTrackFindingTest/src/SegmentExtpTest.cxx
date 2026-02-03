@@ -150,7 +150,7 @@ namespace MuonValR4{
                     }
                 }
                 auto extpPars = extrapolate(startPars, *sp);
-                if (!extpPars) {
+                if (!extpPars.ok()) {
                    ATH_MSG_FATAL("Failed to propagte to "<<(*meas)
                                 <<",\n lPos: "<<Amg::toString(trf * meas->localPosition())
                                 <<", expected: "<<Amg::toString(lPos)<<", "<<targetSurf.bounds());

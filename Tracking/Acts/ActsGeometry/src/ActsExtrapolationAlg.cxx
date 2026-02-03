@@ -104,13 +104,16 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     pars << d0, z0, phi, theta, qop, t;
     std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
 
-    using PropagationOutput = ActsTrk::IExtrapolationTool::PropagationOutput;
-    PropagationOutput output;
-
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
       Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
-      output = m_extrapolationTool->propagationSteps(ctx, startParameters);
+      auto result = m_extrapolationTool->propagationSteps(ctx, startParameters);
+      if (!result.ok()) {
+        ATH_MSG_WARNING("Extrapolation tool failed to extrapolate the track: "
+                        << result.error().message());
+        continue;
+      }
+      auto &output = result.value();
       if(output.first.size() == 0) {
         ATH_MSG_WARNING("Got ZERO steps from the extrapolation tool");
       }

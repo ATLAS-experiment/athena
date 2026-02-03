@@ -238,22 +238,27 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 
   // create a Acts::Surface that correspond to the Trk::Surface
   auto destinationSurfaceActs = Acts::CurvilinearSurface(destinationSurface.center(), destinationSurface.normal()).planeSurface();
-  std::optional<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
+  Acts::Result<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
 											   *m_actsParameterCache, 
 											   *destinationSurfaceActs, 
 											   Acts::Direction::Forward(),
 											   std::numeric_limits<double>::max());
-
-  float X0Acts = m_actsExtrapolator->propagationSteps(ctx,
-                                                       *m_actsParameterCache, 
-                                                       *destinationSurfaceActs,
-                                                       Acts::Direction::Forward(),
-                                                       std::numeric_limits<double>::max()).second.materialInX0;
-                                                       
-  if(not actsParameters.has_value()){
+  if(not actsParameters.ok()){
     ATH_MSG_ERROR("Error in the Acts extrapolation, skip the current step");  
     return;
   }
+
+  auto actsSteps = m_actsExtrapolator->propagationSteps(ctx,
+                                                       *m_actsParameterCache, 
+                                                       *destinationSurfaceActs,
+                                                       Acts::Direction::Forward(),
+                                                       std::numeric_limits<double>::max());
+  if(not actsSteps.ok()){
+    ATH_MSG_ERROR("Error in the Acts extrapolation, skip the current step");  
+    return;
+  }
+  float X0Acts = actsSteps->second.materialInX0;
+
   int volID = trackingGeometry->lowestTrackingVolume(gctx.context(), actsParameters->position(gctx.context()))->geometryId().volume();
 
   // fill the geant information and the trk information
@@ -302,15 +307,15 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     m_treeData->m_trk_X0[m_treeData->m_g4_steps]      = tATLAS/m_treeData->m_trk_tX0[m_treeData->m_g4_steps];
   }
 
-  m_treeData->m_acts_status[m_treeData->m_g4_steps] = actsParameters ? 1 : 0;
-  m_treeData->m_acts_volumeID[m_treeData->m_g4_steps] = actsParameters ? volID : 0;
-  m_treeData->m_acts_pt[m_treeData->m_g4_steps]      = actsParameters ? actsParameters->transverseMomentum()*1000     : 0.;
-  m_treeData->m_acts_eta[m_treeData->m_g4_steps]    = actsParameters ? actsParameters->momentum().eta()     : 0.;
-  m_treeData->m_acts_theta[m_treeData->m_g4_steps]  = actsParameters ? actsParameters->momentum().theta()   : 0.;
-  m_treeData->m_acts_phi[m_treeData->m_g4_steps]    = actsParameters ? actsParameters->momentum().phi()     : 0.;
-  m_treeData->m_acts_x[m_treeData->m_g4_steps]      = actsParameters ? actsParameters->position(gctx.context()).x()   : 0.;
-  m_treeData->m_acts_y[m_treeData->m_g4_steps]      = actsParameters ? actsParameters->position(gctx.context()).y()   : 0.;
-  m_treeData->m_acts_z[m_treeData->m_g4_steps]      = actsParameters ? actsParameters->position(gctx.context()).z()   : 0.;
+  m_treeData->m_acts_status[m_treeData->m_g4_steps] = actsParameters.ok() ? 1 : 0;
+  m_treeData->m_acts_volumeID[m_treeData->m_g4_steps] = actsParameters.ok() ? volID : 0;
+  m_treeData->m_acts_pt[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->transverseMomentum()*1000     : 0.;
+  m_treeData->m_acts_eta[m_treeData->m_g4_steps]    = actsParameters.ok() ? actsParameters->momentum().eta()     : 0.;
+  m_treeData->m_acts_theta[m_treeData->m_g4_steps]  = actsParameters.ok() ? actsParameters->momentum().theta()   : 0.;
+  m_treeData->m_acts_phi[m_treeData->m_g4_steps]    = actsParameters.ok() ? actsParameters->momentum().phi()     : 0.;
+  m_treeData->m_acts_x[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).x()   : 0.;
+  m_treeData->m_acts_y[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).y()   : 0.;
+  m_treeData->m_acts_z[m_treeData->m_g4_steps]      = actsParameters.ok() ? actsParameters->position(gctx.context()).z()   : 0.;
   // Incremental extrapolation, the extrapolation correspond to one step
   if(m_extrapolateIncrementally || m_treeData->m_g4_steps == 0){
     float tActs = (actsParameters->position(gctx.context()) - m_actsParameterCache->position(gctx.context())).norm();
@@ -333,11 +338,11 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   }
 
   // update the parameters if needed/configured
-  if (m_extrapolateIncrementally && trkParameters && actsParameters) {
+  if (m_extrapolateIncrementally && trkParameters && actsParameters.ok()) {
     delete m_parameterCache;
     m_actsParameterCache.reset();
     m_parameterCache = trkParameters;
-    m_actsParameterCache = actsParameters;
+    m_actsParameterCache = actsParameters.value();
   }
   // delete cache and increment
   delete g4Parameters;

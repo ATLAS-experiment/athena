@@ -306,8 +306,12 @@ namespace MuonValR4{
         const std::string subDir = std::format("./ObjDisplays/{:}/", m_subDir.value());
         ensureDirectory(subDir);
         if (parsToExt.ok() && m_extrapolationTool.isEnabled()) {
-            MuonValR4::drawPropagation(m_extrapolationTool->propagationSteps(ctx, *parsToExt).first,
-                                       visualHelper);
+            auto stepsResult = m_extrapolationTool->propagationSteps(ctx, *parsToExt);
+            if (stepsResult.ok()) {
+                MuonValR4::drawPropagation(stepsResult->first, visualHelper);
+            } else {
+                ATH_MSG_WARNING("Failed to extrapolate the seed for visualization: " << stepsResult.error().message());
+            }
         }
         std::string segStr{removeNonAlphaNum(objName)};
         for (const xAOD::MuonSegment* seg : seed.segments()) {
