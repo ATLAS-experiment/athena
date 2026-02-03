@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for building the common truth collections
@@ -155,16 +155,6 @@ def TruthD2DecoratorCfg(flags, name, **kwargs):
     return acc
 
 
-def TruthClassificationDecoratorCfg(flags, name, **kwargs):
-    """Configure the TruthClassificationDecorator tool"""
-    acc = ComponentAccumulator()
-    from MCTruthClassifier.MCTruthClassifierConfig import DFCommonMCTruthClassifierCfg
-    kwargs.setdefault("MCTruthClassifier", acc.addPublicTool(acc.popToolsAndMerge(DFCommonMCTruthClassifierCfg(flags))))
-    TruthClassificationDecorator = CompFactory.DerivationFramework.TruthClassificationDecorator
-    acc.setPrivateTools(TruthClassificationDecorator(name = name, **kwargs))
-    return acc
-
-
 def MuonTruthClassifierFallbackCfg(flags, name, **kwargs):
     """Config the MuonTruthClassifierFallback tool"""
     acc = ComponentAccumulator()
@@ -250,14 +240,6 @@ def HardScatterCollectionMakerCfg(flags, name, **kwargs):
     """Add a mini-collection for the hard scatter and N subsequent generations"""
     acc = ComponentAccumulator()
     return acc
-
-
-#add the 'decoration' tool to dress the main truth collection with the classification
-def DFCommonTruthClassificationToolCfg(flags):
-    """dress the main truth collection with the classification"""
-    return TruthClassificationDecoratorCfg(flags,
-                                          name = "DFCommonTruthClassificationTool",
-                                          ParticlesKey = "TruthParticles")
 
 
 # Hadron origin decoration tools
