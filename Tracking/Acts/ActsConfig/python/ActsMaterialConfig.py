@@ -48,3 +48,37 @@ def MaterialTrackWriterCfg(configFlags, name="MaterialTrackWriter", **kwargs) :
 
   return acc
 
+def MaterialTrackReaderCfg(configFlags, name="MaterialTrackReader", **kwargs) :
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+
+  acc.addEventAlgo(CompFactory.ActsTrk.MaterialTrackReader(name, **kwargs), primary = True)
+
+  return acc
+
+def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwargs):
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+  acc.setPrivateTools(CompFactory.ActsTrk.RootMaterialWriterTool(name, **kwargs))
+  return acc
+
+def MaterialMappingCfg(configFlags, name="MaterialMapping", **kwargs) :
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+
+  # Need geometry
+  from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+  acc.merge( ActsTrackingGeometrySvcCfg(configFlags,
+                                        RunConsistencyChecks=False,
+                                        ObjDebugOutput=False))
+
+  mapwriters = [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
+  kwargs.setdefault("MaterialMapWriters", mapwriters)
+
+  acc.addEventAlgo(CompFactory.ActsTrk.MaterialMapping(name, **kwargs), primary = True)
+
+  return acc
+

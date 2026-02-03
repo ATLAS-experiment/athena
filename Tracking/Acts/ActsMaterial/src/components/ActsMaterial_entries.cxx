@@ -4,8 +4,14 @@
 
 #include "src/MaterialTrackRecorderTool.h"
 #include "src/MaterialTrackWriter.h"
+#include "src/MaterialTrackReader.h"
+#include "src/MaterialMapping.h"
+#include "src/RootMaterialWriterTool.h"
 
 DECLARE_COMPONENT(ActsTrk::MaterialTrackRecorderTool)
 DECLARE_COMPONENT(ActsTrk::MaterialTrackWriter)
+DECLARE_COMPONENT(ActsTrk::MaterialTrackReader)
+DECLARE_COMPONENT(ActsTrk::MaterialMapping)
+DECLARE_COMPONENT(ActsTrk::RootMaterialWriterTool)
 
 

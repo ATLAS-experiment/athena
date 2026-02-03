@@ -41,7 +41,7 @@ namespace ActsTrk {
             /// mutex used to protect multi-threaded writes
             mutable std::mutex m_writeMutex;
             /// The output file name
-            Gaudi::Property<std::string> m_fileName{this, "FileName", "MaterialTracks.root", "The output file name"};
+            Gaudi::Property<std::string> m_fileName{this, "FileName", "material-tracks.root", "The output file name"};
             /// The output file name
             Gaudi::Property<std::string> m_treeName{this, "TreeName", "material-tracks", "The output tree name"};
             /// Write the surface to which the material step correpond
