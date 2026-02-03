@@ -176,6 +176,10 @@ def error_check(errors_a, return_code):
             if 'python3.12 support is still experimental' in err:
                 mglog.info(err)
                 continue
+            # Another new python 3.12 message in MG5_aMC 3.6
+            if 'python3.12+ support: For reweighting feature, please use 3.6.X release.' in err:
+                mglog.info(err)
+                continue
             # silly ghostscript issue in 21.6.46 nightly
             if 'required by /lib64/libfontconfig.so' in err or\
                'required by /lib64/libgs.so' in err:
