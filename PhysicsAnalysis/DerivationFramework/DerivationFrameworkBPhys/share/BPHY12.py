@@ -66,6 +66,7 @@ BPHY12_MetaData = DerivationFramework__BdKstarMuMu_metadata( name              =
 # Local shorthand and ensure default contents of __slots__ dict are available as attributes
 from DerivationFrameworkBPhys.BPhysPyHelpers import BPhysEnsureAttributes
 BPHY12cf = BPhysEnsureAttributes(BPHY12_MetaData)
+BPHY12cf.mass_Kstar  = vars().get( "BPHY12_mass_Kstar", BPHY12cf.mass_Kstar ) # For pre-bugfix reproducibility from CLI...
 
 print '********** BPHY12 Default Metadata **********'
 ToolSvc += BPHY12_MetaData

@@ -46,7 +46,7 @@ namespace DerivationFramework {
     recordPropertyD( "GlobalPionMass"     , 139.570  ); // PDG: 139.57061
     recordPropertyD( "GlobalKaonMass"     , 493.677  );
     recordPropertyD( "GlobalJPsiMass"     , 3096.916 ); // PDG: 3096.92
-    recordPropertyD( "GlobalKstMass"      , 891.66   );
+    recordPropertyD( "GlobalKstMass"      , 895.55   ); // NOTE!! Corrected since 21.2.189.0+
     recordPropertyD( "GlobalB0Mass"       , 5279.6   ); // PDG: 5279.61
 
     /* Kinematic Cuts, in MeV if Relevant */

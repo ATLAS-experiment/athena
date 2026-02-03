@@ -44,7 +44,7 @@ namespace DerivationFramework {
       recordPropertyD("mass_pi"   ,  139.57 ); // PDG: 139.57039
       recordPropertyD("mass_p"    ,  938.272); // PDG: 938.272081
       recordPropertyD("mass_Jpsi" , 3096.916); // PDG:3096.900
-      recordPropertyD("mass_Kstar",  891.66 ); // PDG: 891.66
+      recordPropertyD("mass_Kstar",  895.55 ); // NOTE!! Corrected since 21.2.189.0+
       recordPropertyD("mass_Bd"   , 5279.65 ); // PDG:5279.65
       recordPropertyD("mass_Bs"   , 5366.88 ); // PDG:5366.88
 
