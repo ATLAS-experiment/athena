@@ -171,12 +171,14 @@ class Chains:
 
         d["bphysfs"] = {
             "chains": [
-                'HLT_2mu4_l2io_invmDimu_L12MU3V',
+                'HLT_mu10_bBhh_L1MU8F',
+                'HLT_mu15_bBhh_L1MU14FCH',
+                'HLT_mu15_bBhh_L1MU8F',
                 'HLT_mu4_bBhh_L1MU3V',
 
             ],
             "signature": ['Muon','Bphysics',],
-            "menu": 'Dev_pp_lowMu_run3_v1'
+            "menu": 'PhysicsP1_pp_lowMu_run3_v1'
         }
 
         return d
