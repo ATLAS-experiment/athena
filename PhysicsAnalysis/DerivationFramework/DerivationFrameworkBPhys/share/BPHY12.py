@@ -162,6 +162,34 @@ if BPHY12cf.skimTrig:
 include("DerivationFrameworkBPhys/configureVertexing.py")
 BPHY12_VertexTools = BPHYVertexTools("BPHY12")
 
+# TrackSelectionTool for Isolation Calculation
+from InDetTrackSelectionTool.InDetTrackSelectionToolConf \
+   import InDet__InDetTrackSelectionTool
+BPHY12_TrackSelToolDict = {}
+for trackSelWP, trackSelMinPt in list( zip( 
+                                    BPHY12cf.isoTrackWorkingPoints,
+                                    BPHY12cf.isoTrackMinPts
+                                ) ):
+    BPHY12_TrackSelToolDict[ trackSelWP ] = InDet__InDetTrackSelectionTool(
+        name        = "BPHY12_" + trackSelWP,
+        OutputLevel = INFO
+    )
+    BPHY12_TrackSelToolDict[ trackSelWP ].CutLevel = trackSelWP
+    BPHY12_TrackSelToolDict[ trackSelWP ].minPt    = trackSelMinPt
+
+    ToolSvc += BPHY12_TrackSelToolDict[ trackSelWP ]
+
+# TTVATool for Isolation Calculation
+from TrackVertexAssociationTool.TrackVertexAssociationToolConf \
+    import CP__TrackVertexAssociationTool
+BPHY12_VtxTVATool = CP__TrackVertexAssociationTool(
+                        name          = "BPHY12_VtxIsoTvaTool",
+                        WorkingPoint  = BPHY12cf.isoTTVAWorkingPoint,
+                        OutputLevel   = WARNING
+                    )
+ToolSvc += BPHY12_VtxTVATool
+
+
 print '********** BPHY12 Vertex Tools **********'
 print BPHY12_VertexTools
 print BPHY12_VertexTools.TrkV0Fitter
@@ -405,6 +433,81 @@ augsList += [ BPHY12_Select_KstarKpi_anti ]
 ToolSvc  +=   BPHY12_Select_KstarKpi_anti
 pprint      ( BPHY12_Select_KstarKpi_anti.properties() )
 print '********** BPHY12 K*bar->piK Selector (end) **********'
+
+# PV-independent isolations and multiplicities
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
+BPHY12_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+    BKllIsoMultiplicityToolName = "BPHY12",
+    TrackContainer             = "InDetTrackParticles",
+    InputVertexContainer       = "BPHY12_BdKstarKpiMuMu_Candidates",
+    IsolationCones             = [ "10", "20", "30", "40", "50" ],
+    OnlyInVertex               = BPHY12cf.isoMultOnlyInVertex,
+    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
+    TrackSelectorTool          = BPHY12_VertexTools.InDetTrackSelectorTool,
+    AddTrackSelectionCuts      = [ "Loose" ],
+    TrackPtCut                 = 500.,
+    TrackEtaCut                = 3.0,
+    MuonContainerKey           = "Muons",
+    MuonTrackContainerKey      = "InDetTrackParticles",
+    AddMuonTrackSelectionCuts  = [ "Loose" ],
+    MuonTrackPtCut             = 3000.,
+    MuonTrackEtaCut            = -1.,
+    MuonQualityCut             = 1,
+    RecordTrackMultiplicity    = True, 
+    RecordElectronMultiplicity = False, 
+    RecordMuonMultiplicity     = True,
+    OutputLevel                = DEBUG
+)
+
+
+print '********** BPHY12 Isolation+Multiplicity Tool **********'
+ToolSvc += BPHY12_IsoMultiplicityTool
+augsList += [ BPHY12_IsoMultiplicityTool ]
+pprint      ( BPHY12_IsoMultiplicityTool.properties() )
+print '********** BPHY12 Isolation+Multiplicity Tool (end) **********'
+
+
+# Isolation calculation involving PV association
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf \
+    import DerivationFramework__BMuonTrackIsoTool
+
+_isoTTVALogChi2CutValues = BPHY12cf.isoTTVALogChi2CutValues
+_isoTTVAChi2CutTypes     = BPHY12cf.isoTTVAChi2CutTypes
+if len( _isoTTVAChi2CutTypes ) != len( _isoTTVALogChi2CutValues ):
+   print( "isoTTVALogChi2CutValues and isoTTVAChi2CutTypes should have the same length!" )
+   exit(1) 
+_isoConeSizes            = BPHY12cf.isoConeSizes 
+isoConeSizes             = _isoConeSizes * len( _isoTTVAChi2CutTypes )
+isoTTVAChi2CutTypes      = [ i for i in _isoTTVAChi2CutTypes for _ in range( len( _isoConeSizes ) ) ]
+isoTTVALogChi2CutValues  = [ i for i in _isoTTVALogChi2CutValues for _ in range( len( _isoConeSizes ) ) ] 
+
+BPHY12_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
+    IsolationTargetLegTypes    = BPHY12cf.isoTargetLegTypes,
+    name                       = "BPHY12_TrackIsoTool",
+    BranchPrefixes             = [ "BPHY12_BdKstarKpiMuMu_Candidates" ],
+    BranchBaseName             = "legIso",
+    OutputLevel                = DEBUG,
+    VertexContainerNames       = [ "BPHY12_BdKstarKpiMuMu_Candidates" ],
+    RefPVContainerNames        = [ "BPHY12_BdKstarKpiMuMu_refitPV" ],
+    TrackParticleContainerName = "InDetTrackParticles",
+    PVContainerName            = "PrimaryVertices",
+    PVTypesToConsider          = BPHY12cf.isoPVTypesForTTVA,
+    TrackSelectionTools        = list( BPHY12_TrackSelToolDict.values() ),
+    TVATool                    =  BPHY12_VtxTVATool,
+    IsolationConeSizes         = isoConeSizes,
+    IsoTrkImpLogChi2Max        = isoTTVALogChi2CutValues,
+    IsoDoTrkImpLogChi2Cut      = isoTTVAChi2CutTypes,  
+    DoVertexType               = BPHY12cf.isoPVSVAssocType, # Only Min A0
+    UseTrackTypes              = BPHY12cf.isoTrackTypes,
+    DebugTrackTypes            = 1,
+    DebugTracksInEvents        = [])
+
+print '********** BPHY12 Leg Track Isolation Tool **********'
+ToolSvc += BPHY12_LegTrackIsoTool
+augsList += [ BPHY12_LegTrackIsoTool ]
+pprint      ( BPHY12_LegTrackIsoTool.properties() )
+print '********** BPHY12 Leg Track Isolation Tool (end) **********'
+
 
 
 

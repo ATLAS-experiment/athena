@@ -5,15 +5,6 @@
 #====================================================================
 
 
-#====================================================================
-# FLAGS TO PERSONALIZE THE DERIVATION
-#====================================================================
-
-onlyAugmentations = False  
-thinTruth = False
-skimTruth = False
-
-
 # Set up common services and job object. 
 from DerivationFrameworkCore.DerivationFrameworkMaster import *
 from DerivationFrameworkMuons.MuonsCommon import *
@@ -24,21 +15,100 @@ from DerivationFrameworkEGamma.ElectronsCPContent import *
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkHasTruth
 isSimulation = DerivationFrameworkHasTruth
 
-print isSimulation
+print( "Is simulation? : %s"%( isSimulation ) )
+
+#====================================================================
+# FLAGS TO PERSONALIZE THE DERIVATION
+#====================================================================
+
+onlyAugmentations = False  # Unused?
+thinTruth = False          # Unused?
+skimTruth = False          # Unused?
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf \
+import DerivationFramework__BeeKstMetaData
+BPHY18MetaDataTool = DerivationFramework__BeeKstMetaData(
+    name           = "BPHY18MetaData",
+    DerivationName = "BPHY18",
+    OutputLevel    = WARNING
+)
+from DerivationFrameworkBPhys.BPhysPyHelpers import BPhysEnsureAttributes 
+from pprint import pprint
+
+## Reading CLI Arguments
+BPHY18cf                          = BPhysEnsureAttributes( BPHY18MetaDataTool )
+BPHY18cf.runGSFCalo               = vars().get( "BPHY18_runGSFCalo"          , BPHY18cf.runGSFCalo          )
+BPHY18cf.JPsiFinderLegAndLeg      = vars().get( "BPHY18_JPsiFinderLegAndLeg" , BPHY18cf.JPsiFinderLegAndLeg )
+BPHY18cf.JPsiPreFitElPtCut        = vars().get( "BPHY18_JPsiPreFitElPtCut"   , BPHY18cf.JPsiPreFitElPtCut   )
+
+BPHY18cf.BeeKstUseElMass          = vars().get( "BPHY18_BeeKstUseElMass"         , BPHY18cf.BeeKstUseElMass          )
+BPHY18cf.GSFCaloRefitUsePosition  = vars().get( "BPHY18_GSFCaloRefitUsePosition" , BPHY18cf.GSFCaloRefitUsePosition  )
+BPHY18cf.GSFCaloRefitUseEnergy    = vars().get( "BPHY18_GSFCaloRefitUseEnergy"   , BPHY18cf.GSFCaloRefitUseEnergy    )
+BPHY18cf.GSFCaloRefitUseEta       = vars().get( "BPHY18_GSFCaloRefitUseEta"      , BPHY18cf.GSFCaloRefitUseEta       )
+BPHY18cf.GSFCaloRefitUsePhi       = vars().get( "BPHY18_GSFCaloRefitUsePhi"      , BPHY18cf.GSFCaloRefitUsePhi       )
+BPHY18cf.GSFCaloRefitDepthChoice  = vars().get( "BPHY18_GSFCaloRefitDepthChoice" , BPHY18cf.GSFCaloRefitDepthChoice  )
+BPHY18cf.isoMultOnlyInVertex      = vars().get( "BPHY18_isoMultOnlyInVertex"     , BPHY18cf.isoMultOnlyInVertex      )
+
+ToolSvc  += BPHY18MetaDataTool
+pprint ( BPHY18MetaDataTool.properties() )
+
+ELECTRON_MASS = BPHY18cf.GlobalElectronMass
+JPSI_MASS     = BPHY18cf.GlobalJPsiMass
+KAON_MASS     = BPHY18cf.GlobalKaonMass
+PION_MASS     = BPHY18cf.GlobalPionMass
+KSTAR_MASS    = BPHY18cf.GlobalKstMass
+B0_MASS       = BPHY18cf.GlobalB0Mass
+runGSFCalo    = BPHY18cf.runGSFCalo
+legAndLeg     = BPHY18cf.JPsiFinderLegAndLeg
+ 
+if legAndLeg == "elAndEl":
+    if runGSFCalo:
+        TrackParticleCollection         = "GSFCaloContainer" 
+        electronTrackParticleCollection = "GSFCaloContainer"
+    else:
+        TrackParticleCollection         = "GSFTrackParticles"
+        electronTrackParticleCollection = "GSFTrackParticles"
+    trackAndTrack        = False 
+    elAndTrack           = False 
+    elAndEl              = True 
+    gsfTrackVetoIndices  = [ 0, 1 ]
+    fakeVertexing        = False 
+elif legAndLeg == "trackAndTrack":
+    TrackParticleCollection             = "InDetTrackParticles"
+    if runGSFCalo:
+        electronTrackParticleCollection = "GSFCaloContainer"
+    else:
+        electronTrackParticleCollection = "GSFTrackParticles"
+    trackAndTrack        = True
+    elAndEl              = False 
+    elAndTrack           = False 
+    gsfTrackVetoIndices  = []
+    fakeVertexing        = True 
+elif legAndLeg == "elAndTrack":
+    TrackParticleCollection             = "InDetTrackParticles"
+    if runGSFCalo:
+        electronTrackParticleCollection = "GSFCaloContainer"
+    else:
+        electronTrackParticleCollection = "GSFTrackParticles"
+    trackAndTrack       = False 
+    elAndTrack          = True 
+    elAndEl             = False
+    gsfTrackVetoIndices = [ 0 ]
+    fakeVertexing       = True 
+else:
+    print( "Invalid option for `BJPsiFinderLegAndLeg` attribute!" )
+    exit( 1 )
 
 #====================================================================
 # AUGMENTATION TOOLS 
 #====================================================================
 
-TrackParticleCollection = "GSFTrackParticles"
-
 # GSF-EMCal refit
 # Following code is NEEDED in preExec!!!
 # from InDetRecExample.InDetJobProperties import InDetFlags; InDetFlags.useDynamicAlignFolders.set_Value_and_Lock(True);
-runGSFCalo = True # ON/OFF for the new GSF+EMCal reco
+# runGSFCalo = True # ON/OFF for the new GSF+EMCal reco
 
 if runGSFCalo:
-    TrackParticleCollection = "GSFCaloContainer"
 
     from TrkEventCnvTools import TrkEventCnvToolsConfig
     EventCnvSuperTool = TrkEventCnvToolsConfig.Trk__EventCnvSuperTool("EventCnvSuperTool", DoMuons = False)
@@ -47,11 +117,11 @@ if runGSFCalo:
 
     include("DerivationFrameworkBPhys/configureGSFCaloImprovement.py")
     BPHY18_GSFCaloImprovementTools = GSFCaloImprovementTools("BPHY18")
-    BPHY18_GSFCaloImprovementTools.RefitterTool.useClusterPosition = True
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEnergy    = True
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterPhi       = False
-    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEta       = False
-    BPHY18_GSFCaloImprovementTools.CaloDepthTool.DepthChoice       = "middle"
+    BPHY18_GSFCaloImprovementTools.RefitterTool.useClusterPosition = BPHY18cf.GSFCaloRefitUsePosition
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEnergy    = BPHY18cf.GSFCaloRefitUseEnergy
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterPhi       = BPHY18cf.GSFCaloRefitUsePhi
+    BPHY18_GSFCaloImprovementTools.CCOTBuilder.UseClusterEta       = BPHY18cf.GSFCaloRefitUseEta
+    BPHY18_GSFCaloImprovementTools.CaloDepthTool.DepthChoice       = BPHY18cf.GSFCaloRefitDepthChoice
 
     from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__GSFCaloImprovement
     BPHY18_GSFCaloImprovement = DerivationFramework__GSFCaloImprovement(name                     = "BPHY18_GSFCaloImprovement",
@@ -65,14 +135,41 @@ if runGSFCalo:
 
 
 ## 1/ setup vertexing tools and services
-include("DerivationFrameworkBPhys/configureVertexing.py")
-BPHY18_VertexTools = BPHYVertexTools("BPHY18")
 
+include("DerivationFrameworkBPhys/configureVertexing.py")
+BPHY18_VertexTools = BPHYVertexTools("BPHY18_BeeKst")
+
+# TrackSelectionTool for Isolation Calculation
+from InDetTrackSelectionTool.InDetTrackSelectionToolConf \
+   import InDet__InDetTrackSelectionTool
+BPHY18_TrackSelToolDict = {}
+for trackSelWP, trackSelMinPt in list( zip( 
+                                    BPHY18cf.isoTrackWorkingPoints,
+                                    BPHY18cf.isoTrackMinPts
+                                ) ):
+    BPHY18_TrackSelToolDict[ trackSelWP ] = InDet__InDetTrackSelectionTool(
+        name        = "BPHY18_" + trackSelWP,
+        OutputLevel = INFO
+    )
+    BPHY18_TrackSelToolDict[ trackSelWP ].CutLevel = trackSelWP
+    BPHY18_TrackSelToolDict[ trackSelWP ].minPt    = trackSelMinPt
+
+    ToolSvc += BPHY18_TrackSelToolDict[ trackSelWP ]
+
+# TTVATool for Isolation Calculation
+from TrackVertexAssociationTool.TrackVertexAssociationToolConf \
+    import CP__TrackVertexAssociationTool
+BPHY18_VtxTVATool = CP__TrackVertexAssociationTool(
+                        name          = "BPHY18_VtxIsoTvaTool",
+                        WorkingPoint  = BPHY18cf.isoTTVAWorkingPoint,
+                        OutputLevel   = WARNING
+                    )
+ToolSvc += BPHY18_VtxTVATool
 
 print '********************** VERTEX TOOLS ***********************'
 print BPHY18_VertexTools
 print BPHY18_VertexTools.TrkV0Fitter
-print '********************** END VERTEX TOOLS ***********************'
+print '******************** END VERTEX TOOLS *********************'
 
 #====================================================================
 # TriggerCounting for Kernel1 #Added by Matteo
@@ -83,7 +180,7 @@ triggersToMetadata = [
 "HLT_e5_lhvloose_nod0_bBeexM6000t",  #37,143,877
 "HLT_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #37,312,506
 "HLT_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #27,041,892
-"HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100	
+"HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100    
 "HLT_e9_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #2,681,764
 "HLT_e9_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #1,979,362
 "HLT_e9_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #3,359,105
@@ -113,7 +210,7 @@ ToolSvc += BPHY18TriggerCountToMetadata
 
 triggerList = ["HLT_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #37,312,506
 "HLT_e5_lhvloose_nod0_bBeexM6000t_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #27,041,892
-"HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100	
+"HLT_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #149,100    
 "HLT_e9_lhloose_bBeexM2700_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #2,681,764
 "HLT_e9_lhloose_bBeexM2700_mu6_nomucomb_L1BPH-0DR3-EM7J15_MU6",   #1,979,362
 "HLT_e9_lhloose_bBeexM6000_2mu4_nomucomb_L1BPH-0DR3-EM7J15_2MU4",   #3,359,105
@@ -127,7 +224,7 @@ triggerList = ["HLT_e5_lhvloose_nod0_bBeexM6000t_2mu4_nomucomb_L1BPH-0DR3-EM7J15
 "HLT_e9_lhvloose_nod0_e5_lhvloose_nod0_bBeexM6000_mu6_nomucomb_L1BPH-0M9-EM7-EM5_MU6",   #677,340
 "HLT_2e5_lhvloose_nod0_bBeexM6000t",  #37,143,877  inb
 "HLT_e5_lhvloose_nod0_bBeexM6000t"  #37,143,877
-]	# Seeded + Unseeded BeeX triggers
+]    # Seeded + Unseeded BeeX triggers
 
 triggerList_unseeded = ["HLT_2e5_lhvloose_nod0_bBeexM6000t",  #37,143,877  inb
 "HLT_e5_lhvloose_nod0_bBeexM6000t"  #37,143,877
@@ -136,7 +233,7 @@ triggerList_unseeded = ["HLT_2e5_lhvloose_nod0_bBeexM6000t",  #37,143,877  inb
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
 BPHY18TriggerSkim = DerivationFramework__TriggerSkimmingTool(name = "BPHY18TriggerSkim",
                                                              TriggerListOR = triggerList,
-							                                 TriggerListORHLTOnly = triggerList_unseeded )
+                                                             TriggerListORHLTOnly = triggerList_unseeded )
 
 ToolSvc += BPHY18TriggerSkim
 print BPHY18TriggerSkim
@@ -170,28 +267,32 @@ print ElectronPassLHvloosenod0
 ## 2/ setup JpsiFinder tool
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiFinder_ee
 BPHY18DiElectronFinder = Analysis__JpsiFinder_ee(
-    name                        = "BPHY18DiElectronFinder",
-    OutputLevel                 = INFO,
-    elAndEl                     = True,
-    elAndTrack                  = False,
-    TrackAndTrack               = False,
-    assumeDiElectrons           = True, 
-    elThresholdPt               = 4000.0,
-    invMassUpper                = 7000.0,
-    invMassLower                = 1.0,
-    Chi2Cut                     = 30.,
-    oppChargesOnly	            = False,
-    allChargeCombinations       = True,
-    useElectronTrackMeasurement = True, 
-    electronCollectionKey       = "Electrons",
-    TrackParticleCollection     = TrackParticleCollection,
-    useEgammaCuts               = True, 
-    V0VertexFitterTool          = BPHY18_VertexTools.TrkV0Fitter,            
-    useV0Fitter                 = False,                  
-    TrkVertexFitterTool         = BPHY18_VertexTools.TrkVKalVrtFitter,      
-    TrackSelectorTool           = BPHY18_VertexTools.InDetTrackSelectorTool,
-    VertexPointEstimator        = BPHY18_VertexTools.VtxPointEstimator,
-    ElectronSelection 		    = "d0_or_nod0"
+    name                            = "BPHY18DiElectronFinder",
+    OutputLevel                     = INFO,
+    elAndEl                         = elAndEl, 
+    elAndTrack                      = elAndTrack,
+    TrackAndTrack                   = trackAndTrack,
+    assumeDiElectrons               = True, 
+    elThresholdPt                   = BPHY18cf.JPsiPreFitElPtCut,
+    trackThresholdPt                = BPHY18cf.JPsiPreFitElPtCut,
+    invMassLower                    = BPHY18cf.JPsiPreFitDiElMassLowerCut,
+    invMassUpper                    = BPHY18cf.JPsiPreFitDiElMassUpperCut,
+    Chi2Cut                         = BPHY18cf.JPsiChi2Cut,
+    oppChargesOnly                  = False,
+    allChargeCombinations           = True,
+    useElectronTrackMeasurement     = True, 
+    electronCollectionKey           = "Electrons",
+    TrackParticleCollection         = TrackParticleCollection,
+    #electronTrackParticleCollection = electronTrackParticleCollection,
+    #doFakeVertexing                 = fakeVertexing,
+    #avoidSelfVertexing              = fakeVertexing,
+    useEgammaCuts                   = True, 
+    V0VertexFitterTool              = BPHY18_VertexTools.TrkV0Fitter,            
+    useV0Fitter                     = False,                  
+    TrkVertexFitterTool             = BPHY18_VertexTools.TrkVKalVrtFitter,      
+    TrackSelectorTool               = BPHY18_VertexTools.InDetTrackSelectorTool,
+    VertexPointEstimator            = BPHY18_VertexTools.VtxPointEstimator,
+    ElectronSelection               = "d0_or_nod0"
     )
 
 ToolSvc += BPHY18DiElectronFinder
@@ -217,10 +318,10 @@ BPHY18_Select_DiElectrons = DerivationFramework__Select_onia2mumu(
     name                  = "BPHY18_Select_DiElectrons",
     HypothesisName        = "Jpsi",
     InputVtxContainerName = "BPHY18DiElectronCandidates",
-    VtxMassHypo           = 3096.916,
-    MassMin               = 1.0,
-    MassMax               = 7000.0,
-    Chi2Max               = 30,
+    VtxMassHypo           = JPSI_MASS,
+    MassMin               = BPHY18cf.JPsiPostFitDiElMassLowerCut,
+    MassMax               = BPHY18cf.JPsiPostFitDiElMassUpperCut,
+    Chi2Max               = BPHY18cf.JPsiChi2Cut,
     DoVertexType          = 7
     )
   
@@ -242,40 +343,41 @@ print      BeeKstVertexFit
 ## 5/ setup the Jpsi+2 track finder
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiPlus2Tracks
 BPHY18BeeKst = Analysis__JpsiPlus2Tracks(
-    name                    = "BPHY18BeeKstFinder",
-    OutputLevel             = INFO,
-    kaonkaonHypothesis	    = False,
-    pionpionHypothesis      = False,
-    kaonpionHypothesis      = True,
-    oppChargesOnly          = False,
-    SameChargesOnly         = False,
-    trkThresholdPt          = 500.0,
-    trkMaxEta		        = 3.0, 
-    BThresholdPt            = 1000.,
-    BMassLower              = 3000.0,
-    BMassUpper		        = 6500.0,
-    JpsiContainerKey	    = "BPHY18DiElectronCandidates",
-    TrackParticleCollection = "InDetTrackParticles",
-    ExcludeCrossJpsiTracks  = False,   
-    TrkVertexFitterTool	    = BeeKstVertexFit,
-    TrackSelectorTool	    = BPHY18_VertexTools.InDetTrackSelectorTool,
-    UseMassConstraint	    = False, 
-    DiTrackMassUpper        = 1110., 
-    DiTrackMassLower        = 690.,  
-    Chi2Cut                 = 15.0, 
-    DiTrackPt               = 500.,
-    TrkQuadrupletMassLower  = 1000.0, 
-    TrkQuadrupletMassUpper  = 10000.0, 
-    FinalDiTrackPt          = 500.,
-    GSFCollection           = TrackParticleCollection,
-    UseGSFTrackIndices      = [0,1]
+    name                           = "BPHY18BeeKstFinder",
+    OutputLevel                    = INFO,
+    kaonkaonHypothesis             = False,
+    pionpionHypothesis             = False,
+    kaonpionHypothesis             = True,
+    oppChargesOnly                 = False,
+    SameChargesOnly                = False,
+    trkThresholdPt                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
+    trkMaxEta                      = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
+    BThresholdPt                   = BPHY18cf.BeeKstPostFitBPtCut,
+    BMassLower                     = BPHY18cf.BeeKstPostFitBMassLowerCut,
+    BMassUpper                     = BPHY18cf.BeeKstPostFitBMassUpperCut,
+    JpsiContainerKey               = "BPHY18DiElectronCandidates",
+    TrackParticleCollection        = "InDetTrackParticles",
+    ExcludeCrossJpsiTracks         = False, # Relax! Still doesn't allow repeated tracks within the same vertex.  
+    TrkVertexFitterTool            = BeeKstVertexFit,
+    TrackSelectorTool              = BPHY18_VertexTools.InDetTrackSelectorTool,
+    UseMassConstraint              = False, 
+    DiTrackMassLower               = BPHY18cf.BeeKstPreFitDiMesonMassLowerCut, 
+    DiTrackMassUpper               = BPHY18cf.BeeKstPreFitDiMesonMassUpperCut,
+    Chi2Cut                        = BPHY18cf.BeeKstChi2NDoFCut,
+    DiTrackPt                      = BPHY18cf.BeeKstPreFitDiMesonPtCut,
+    TrkQuadrupletMassLower         = BPHY18cf.BeeKstPreFitBMassLowerCut,
+    TrkQuadrupletMassUpper         = BPHY18cf.BeeKstPreFitBMassUpperCut,
+    FinalDiTrackPt                 = BPHY18cf.BeeKstPostFitDiMesonPtCut,
+    GSFCollection                  = electronTrackParticleCollection,
+    UseGSFTrackIndices             = gsfTrackVetoIndices,
+    AlternativeMassConstraintTrack = [ ELECTRON_MASS ] * 2 if BPHY18cf.BeeKstUseElMass else []
     )
 
 ToolSvc += BPHY18BeeKst
 print      BPHY18BeeKst
 
 ## 6/ setup the combined augmentation/skimming tool for the BeeKst
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrkTrk	
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrkTrk    
 BPHY18BeeKstSelectAndWrite  = DerivationFramework__Reco_dimuTrkTrk(
     name                   = "BPHY18BeeKstSelectAndWrite",
     Jpsi2PlusTrackName     = BPHY18BeeKst,
@@ -295,11 +397,11 @@ BPHY18_Select_BeeKst = DerivationFramework__Select_onia2mumu(
     name                  = "BPHY18_Select_BeeKst",
     HypothesisName        = "Bd", 
     InputVtxContainerName = "BeeKstCandidates",
-    TrkMasses             = [0.511, 0.511, 493.677, 139.570],
-    VtxMassHypo           = 5279.6, 
-    MassMin               = 1.0,     
-    MassMax               = 10000.0,  
-    Chi2Max               = 30.0
+    TrkMasses             = [ ELECTRON_MASS, ELECTRON_MASS, KAON_MASS, PION_MASS ],
+    VtxMassHypo           = B0_MASS, 
+    MassMin               = BPHY18cf.BeeKstPostFitBMassLowerCutContainer,
+    MassMax               = BPHY18cf.BeeKstPostFitBMassUpperCutContainer,
+    Chi2Max               = BPHY18cf.BeeKstChi2Cut,
     ) 
 
 ToolSvc += BPHY18_Select_BeeKst
@@ -310,11 +412,11 @@ BPHY18_Select_BeeKstbar = DerivationFramework__Select_onia2mumu(
     name                  = "BPHY18_Select_Bd2JpsiKstbar",
     HypothesisName        = "Bdbar", 
     InputVtxContainerName = "BeeKstCandidates",
-    TrkMasses             = [0.511, 0.511, 139.570, 493.677],
-    VtxMassHypo           = 5279.6,
-    MassMin               = 1.0,      
-    MassMax               = 10000.0,   
-    Chi2Max               = 30.0
+    TrkMasses             = [ ELECTRON_MASS, ELECTRON_MASS, PION_MASS, KAON_MASS ],
+    VtxMassHypo           = B0_MASS,
+    MassMin               = BPHY18cf.BeeKstPostFitBMassLowerCutContainer,
+    MassMax               = BPHY18cf.BeeKstPostFitBMassUpperCutContainer,
+    Chi2Max               = BPHY18cf.BeeKstChi2Cut,
     )
 
 ToolSvc += BPHY18_Select_BeeKstbar
@@ -336,11 +438,11 @@ BPHY18_Select_Kpi = DerivationFramework__Select_onia2mumu(
     name                  = "BPHY18_Select_Kpi",
     HypothesisName        = "Kpi", 
     InputVtxContainerName = "BPHY18DiMeson",
-    TrkMasses             = [ 493.677, 139.570 ],
-    VtxMassHypo           = 891.66, 
-    MassMin               = 1.0,     
-    MassMax               = 100000.0,  
-    Chi2Max               = 100.0
+    TrkMasses             = [ KAON_MASS, PION_MASS ],
+    VtxMassHypo           = KSTAR_MASS,
+    MassMin               = BPHY18cf.KstPostFitKstMassLowerCutContainer,
+    MassMax               = BPHY18cf.KstPostFitKstMassUpperCutContainer,
+    Chi2Max               = BPHY18cf.KstChi2Cut,
     ) 
 
 ToolSvc += BPHY18_Select_Kpi
@@ -350,15 +452,85 @@ BPHY18_Select_piK = DerivationFramework__Select_onia2mumu(
     name                  = "BPHY18_Select_piK",
     HypothesisName        = "piK", 
     InputVtxContainerName = "BPHY18DiMeson",
-    TrkMasses             = [ 139.570, 493.677 ],
-    VtxMassHypo           = 891.66, 
-    MassMin               = 1.0,     
-    MassMax               = 100000.0,  
-    Chi2Max               = 100.0
+    TrkMasses             = [ PION_MASS, KAON_MASS ],
+    VtxMassHypo           = KSTAR_MASS,
+    MassMin               = BPHY18cf.KstPostFitKstMassLowerCutContainer,
+    MassMax               = BPHY18cf.KstPostFitKstMassUpperCutContainer,
+    Chi2Max               = BPHY18cf.KstChi2Cut,
     ) 
 
 ToolSvc += BPHY18_Select_piK
 print      BPHY18_Select_piK
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BKllIsoMultiplicityTool
+BPHY18_IsoMultiplicityTool = DerivationFramework__BKllIsoMultiplicityTool(
+    BKllIsoMultiplicityToolName = "BPHY18",
+    TrackContainer             = "InDetTrackParticles",
+    InputVertexContainer       = "BeeKstCandidates",
+    IsolationCones             = [ "10", "20", "30", "40", "50" ],
+    OnlyInVertex               = BPHY18cf.isoMultOnlyInVertex,
+    VertexPassFlags            =  ["passed_Bd", "passed_Bdbar"], 
+    TrackSelectorTool          = BPHY18_VertexTools.InDetTrackSelectorTool,
+    AddTrackSelectionCuts      = [ "Loose" ],
+    TrackPtCut                 = BPHY18cf.BeeKstPreFitMesonTrackPtCut,
+    TrackEtaCut                = BPHY18cf.BeeKstPreFitMesonTrackEtaCut,
+    ElectronContainerKey       = "Electrons",
+    ElectronTrackContainerKey  = electronTrackParticleCollection,
+    AddElectronTrackSelectionCuts = [ "Loose", "LooseElectron" ],
+    ElectronTrackPtCut         = BPHY18cf.JPsiPreFitElPtCut,
+    ElectronTrackEtaCut        = -1.,
+    ElectronLikelihoodCut      = "DFCommonElectronsLHVeryLoosenod0",
+    MuonContainerKey           = "Muons",
+    MuonTrackContainerKey      = "InDetTrackParticles",
+    AddMuonTrackSelectionCuts  = [ "Loose" ],
+    MuonTrackPtCut             = 5000.,
+    MuonTrackEtaCut            = -1.,
+    MuonQualityCut             = 1,
+    RecordTrackMultiplicity    = True, 
+    RecordElectronMultiplicity = True, 
+    RecordMuonMultiplicity     = True
+)
+
+ToolSvc += BPHY18_IsoMultiplicityTool
+print BPHY18_IsoMultiplicityTool
+
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf \
+    import DerivationFramework__BMuonTrackIsoTool
+
+_isoTTVALogChi2CutValues = BPHY18cf.isoTTVALogChi2CutValues
+_isoTTVAChi2CutTypes     = BPHY18cf.isoTTVAChi2CutTypes
+if len( _isoTTVAChi2CutTypes ) != len( _isoTTVALogChi2CutValues ):
+   print( "isoTTVALogChi2CutValues and isoTTVAChi2CutTypes should have the same length!" )
+   exit(1) 
+_isoConeSizes            = BPHY18cf.isoConeSizes 
+isoConeSizes             = _isoConeSizes * len( _isoTTVAChi2CutTypes )
+isoTTVAChi2CutTypes      = [ i for i in _isoTTVAChi2CutTypes for _ in range( len( _isoConeSizes ) ) ]
+isoTTVALogChi2CutValues  = [ i for i in _isoTTVALogChi2CutValues for _ in range( len( _isoConeSizes ) ) ] 
+
+BPHY18_LegTrackIsoTool = DerivationFramework__BMuonTrackIsoTool(
+    IsolationTargetLegTypes    = BPHY18cf.isoTargetLegTypes,
+    name                       = "BPHY18_TrackIsoTool",
+    BranchPrefixes             = [ "BeeKstCandidates" ],
+    BranchBaseName             = "legIso",
+    OutputLevel                = DEBUG,
+    VertexContainerNames       = [ "BeeKstCandidates" ],
+    RefPVContainerNames        = [ "BPHY18RefittedPrimaryVertices" ],
+    TrackParticleContainerName = "InDetTrackParticles",
+    PVContainerName            = "PrimaryVertices",
+    PVTypesToConsider          = BPHY18cf.isoPVTypesForTTVA,
+    TrackSelectionTools        = list( BPHY18_TrackSelToolDict.values() ),
+    TVATool                    =  BPHY18_VtxTVATool,
+    IsolationConeSizes         = isoConeSizes,
+    IsoTrkImpLogChi2Max        = isoTTVALogChi2CutValues,
+    IsoDoTrkImpLogChi2Cut      = isoTTVAChi2CutTypes,  
+    DoVertexType               = BPHY18cf.isoPVSVAssocType, # Only Min A0
+    UseTrackTypes              = BPHY18cf.isoTrackTypes,
+    DebugTrackTypes            = 1,
+    DebugTracksInEvents        = [])
+
+ToolSvc += BPHY18_LegTrackIsoTool
+print BPHY18_LegTrackIsoTool
+
 
 if True:
     from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
@@ -386,15 +558,17 @@ BPHY18_thinningTool_Tracks = DerivationFramework__Thin_vtxTrk(
     VertexContainerNames       = ["BeeKstCandidates"],
     PassFlags                  = ["passed_Bd", "passed_Bdbar"] )
 
-BPHY18_thinningTool_GSFTracks = DerivationFramework__Thin_vtxTrk(
-    name                       = "BPHY18_thinningTool_GSFTracks",
-    ThinningService            = "BPHY18ThinningSvc",
-    TrackParticleContainerName = TrackParticleCollection,
-    VertexContainerNames       = ["BeeKstCandidates"],
-    PassFlags                  = ["passed_Bd", "passed_Bdbar"] )
+if legAndLeg == "elAndEl":
+    BPHY18_thinningTool_GSFTracks  = DerivationFramework__Thin_vtxTrk(
+        name                       = "BPHY18_thinningTool_GSFTracks",
+        ThinningService            = "BPHY18ThinningSvc",
+        TrackParticleContainerName = electronTrackParticleCollection,
+        VertexContainerNames       = ["BeeKstCandidates"],
+        PassFlags                  = ["passed_Bd", "passed_Bdbar"] )
 
 ToolSvc += BPHY18_thinningTool_Tracks
-ToolSvc += BPHY18_thinningTool_GSFTracks
+if legAndLeg == "elAndEl":
+    ToolSvc += BPHY18_thinningTool_GSFTracks
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BPhysPVThinningTool
 BPHY18_thinningTool_PV = DerivationFramework__BPhysPVThinningTool(
@@ -443,10 +617,11 @@ ToolSvc += BPHY18TruthThinNoChainTool
 # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS  
 #====================================================================
 
-thinningCollection = [ BPHY18_thinningTool_Tracks,  BPHY18_thinningTool_GSFTracks,
-                       BPHY18_thinningTool_PV, #BPHY18_thinningTool_PV_GSF, 
-                       BPHY18EgammaTPThinningTool, BPHY18MuonTPThinningTool
-                     ]
+thinningCollection  = [ BPHY18_thinningTool_Tracks ]
+thinningCollection += [ BPHY18_thinningTool_GSFTracks ] if legAndLeg == "elAndEl" else []
+thinningCollection += [ BPHY18_thinningTool_PV, #BPHY18_thinningTool_PV_GSF, 
+                        BPHY18EgammaTPThinningTool, BPHY18MuonTPThinningTool
+                      ]
 
 #if we're doing truth, add these [BPHY18TruthThinTool,BPHY18TruthThinNoChainTool] 
 if isSimulation:
@@ -463,12 +638,12 @@ if runGSFCalo:
 AugmentationToolList += [ ElectronPassLHvloosenod0,BPHY18DiElectronSelectAndWrite,  
                        BPHY18_Select_DiElectrons,
                        BPHY18BeeKstSelectAndWrite, BPHY18_Select_BeeKst, BPHY18_Select_BeeKstbar,
-                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK ]
+                       BPHY18_diMeson_revertex, BPHY18_Select_Kpi, BPHY18_Select_piK, BPHY18_IsoMultiplicityTool, BPHY18_LegTrackIsoTool ]
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
     "BPHY18Kernel",
-    AugmentationTools = AugmentationToolList,
+    AugmentationTools = [ BPHY18MetaDataTool ] + AugmentationToolList,
     #Only skim if not MC
     SkimmingTools     = [BPHY18SkimmingAND],
     ThinningTools     = thinningCollection
@@ -483,8 +658,8 @@ BPHY18Stream  = MSMgr.NewPoolRootStream( streamName, fileName )
 BPHY18Stream.AcceptAlgs(["BPHY18Kernel"])
 
 # GSF-EMCal refit
-BPHY18Stream.AddItem("xAOD::TrackParticleContainer#%s"        % TrackParticleCollection)
-BPHY18Stream.AddItem("xAOD::TrackParticleAuxContainer#%sAux." % TrackParticleCollection)
+BPHY18Stream.AddItem("xAOD::TrackParticleContainer#%s"        % electronTrackParticleCollection)
+BPHY18Stream.AddItem("xAOD::TrackParticleAuxContainer#%sAux." % electronTrackParticleCollection)
 
 # Special lines for thinning
 from AthenaServices.Configurables import ThinningSvc, createThinningSvc
@@ -536,8 +711,8 @@ AllVariables += [ "GSFTrackParticles"]
 
 # GSF-EMCal refit
 if runGSFCalo:
-    BPHY18SlimmingHelper.AppendToDictionary = { TrackParticleCollection: "xAOD::TrackParticleContainer", TrackParticleCollection + "Aux": "xAOD::TrackParticleAuxContainer" }
-    AllVariables += [ TrackParticleCollection ] # duplicates removed later, don't worry
+    BPHY18SlimmingHelper.AppendToDictionary = { electronTrackParticleCollection: "xAOD::TrackParticleContainer", electronTrackParticleCollection + "Aux": "xAOD::TrackParticleAuxContainer" }
+    AllVariables += [ electronTrackParticleCollection ] # duplicates removed later, don't worry
     ExtraVariables += [ "Electrons.gsfCaloTrackParticleLink" ]
 
 # Added by ASC
