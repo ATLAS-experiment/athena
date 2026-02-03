@@ -41,6 +41,7 @@ namespace EFTrackingFPGAIntegration
     private:
         ServiceHandle<IChronoSvc> m_chronoSvc{"ChronoStatSvc", name()}; //!< Service for timing the algorithm
 
+        // Input and output of the alg
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
         SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
 
@@ -50,6 +51,8 @@ namespace EFTrackingFPGAIntegration
         SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
         SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
         
+
+        // properties
         Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
         
         Gaudi::Property<std::string> m_xclbin{this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
@@ -60,7 +63,13 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripStartClusterKernelName{this, "StripStartClusterKernelName", "", "Name of the strip clustering start kernel"}; //!< Name of the strip clustering kernel start
         Gaudi::Property<std::string> m_stripEndClusterKernelName{this, "StripEndClusterKernelName", "", "Name of the strip clustering end kernel"}; //!< Name of the strip clustering kernel start
 
+        Gaudi::Property<std::string> m_pixelLUTKernelName{this, "PixelLUTKernelName", "", "Name of the pixel LUT loading kernel"}; //!< Name of the pixel lut loading kernel
+        Gaudi::Property<std::string> m_stripLUTKernelName{this, "StripLUTKernelName", "", "Name of the strip LUT loading kernel"}; //!< Name of the pixel lut loading kernel
 
+        Gaudi::Property<std::string> m_pixelLUTFilePath{this, "PixelLUTFilePath", "", "Path to the pixel LUT"}; 
+        Gaudi::Property<std::string> m_stripLUTFilePath{this, "StripLUTFilePath", "", "Path to the strip LUT"}; 
+
+        // to save information
         mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
@@ -76,6 +85,8 @@ namespace EFTrackingFPGAIntegration
         mutable std::vector<cl::Kernel> m_pixelEndClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripStartClusteringKernels ATLAS_THREAD_SAFE;
         mutable std::vector<cl::Kernel> m_stripEndClusteringKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_pixelLUTKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripLUTKernels ATLAS_THREAD_SAFE;
 
         // Buffers for input
         std::vector<cl::Buffer> m_pixelClusterInputBufferList;
@@ -88,6 +99,7 @@ namespace EFTrackingFPGAIntegration
         // Command queue
         std::vector<cl::CommandQueue> m_acc_queues;
         void getListofCUs(std::vector<std::string>& cuNames);
+        StatusCode readCalibfile(std::string inputFileName, std::vector<uint64_t>& data);
 
 
     };
