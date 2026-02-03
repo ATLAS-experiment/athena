@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * Name    : EFexEMAlgorithm.cxx
@@ -13,7 +13,7 @@
 #include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 
-#include <math.h>
+#include <cmath>
 #include <string>
 
 namespace
@@ -125,7 +125,10 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
          }
          TTs = triggerTowerHandle.cptr();
       }
-
+      if (!tileIDHelper){
+        ATH_MSG_ERROR("tileIDHelper pointer is null!");
+        return StatusCode::FAILURE;
+      }
       std::vector<LVL1::EFexEMClusterTool::AlgResult> algResults = m_eFexDefaultClusterTool->clusterAlg(m_apply_BaseLineCuts, &scells, TTs, idHelper, tileIDHelper, &tileCellCont);
       for (const auto &algCl : algResults)
       {
