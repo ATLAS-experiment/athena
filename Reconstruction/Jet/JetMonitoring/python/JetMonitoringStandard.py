@@ -181,7 +181,8 @@ def jetMonAlgConfig(  jetName, inputFlags, truthJetName='', trigger=''):
     """
     
     # Just a protection in case PhysVal is using this as well
-    if not inputFlags.Input.isMC:
+    # Do not apply calibration updates for HI jets
+    if not inputFlags.Input.isMC and jetName != "AntiKt4HIJets":
         from AthenaConfiguration.ComponentFactory import CompFactory
         configfile, calibArea, calibseq_def = calibToolConfigurations[jetName]
         toolname = "jetcalib_DQ_{0}".format(jetName)
