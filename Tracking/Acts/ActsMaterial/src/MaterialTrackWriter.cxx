@@ -23,6 +23,9 @@ ActsTrk::MaterialTrackWriter::~MaterialTrackWriter()
 
 StatusCode ActsTrk::MaterialTrackWriter::initialize()
 {
+    // Check the tracking geometry
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+
     // Check the input collection key
     ATH_CHECK(m_materialTrackCollectionKey.initialize());
 
