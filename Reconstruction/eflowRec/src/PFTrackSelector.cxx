@@ -57,7 +57,7 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
   }
 
   /* Do the track selection for tracks to be used in all of the following steps: */
-  int trackIndex = 0;
+
   for (const auto *thisTrack : *tracksReadHandle){
 
     if (!thisTrack){
@@ -67,6 +67,7 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
 
     ATH_MSG_DEBUG("Have track with E, pt, eta and phi of " << thisTrack->e() << ", " << thisTrack->pt() << ", "
                                                            << thisTrack->eta() << " and " << thisTrack->phi());
+
 
     bool rejectTrack(!selectTrack(*thisTrack));
 
@@ -88,14 +89,14 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
       }
 
       /* Create the eflowRecCluster and put it in the container */
-      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(trkcont, thisTrack->index()), m_theTrackExtrapolatorTool);
+      unsigned int trackIndex  = thisTrack->index();
+      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(trkcont, trackIndex), m_theTrackExtrapolatorTool);
       thisEFRecTrack->setTrackId(trackIndex);
       eflowRecTracksWriteHandle->push_back(std::move(thisEFRecTrack));
 
       // Fill histogram
       auto mon_trk = Monitored::Group(m_monTool, t_track, eta_track, pt_track);
     }
-    trackIndex++;
   }
 
   std::sort(eflowRecTracksWriteHandle->begin(), eflowRecTracksWriteHandle->end(), eflowRecTrack::SortDescendingPt());
