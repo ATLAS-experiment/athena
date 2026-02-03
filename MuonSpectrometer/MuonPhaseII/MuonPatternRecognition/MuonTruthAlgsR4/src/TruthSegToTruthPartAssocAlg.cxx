@@ -270,7 +270,7 @@ namespace MuonR4{
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start extrapolation");
                 const auto* sector = m_detMgr->getSectorEnvelope(bkgSeg->chamberIndex(), bkgSeg->sector(), bkgSeg->etaIndex());
                 auto propPars = m_extrapolationTool->propagate(ctx, *initialPars, sector->surface());
-                if (!propPars) {
+                if (!propPars.ok()) {
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extrapolation failed.");
                     continue;
                 }
