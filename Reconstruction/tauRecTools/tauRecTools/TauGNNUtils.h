@@ -14,6 +14,8 @@
 #include "AsgMessaging/AsgMessaging.h"
 #include <unordered_map>
 
+#include "GeoPrimitives/GeoPrimitives.h"
+
 
 namespace TauGNNUtils {
 
@@ -41,7 +43,8 @@ public:
                                  const xAOD::CaloVertexedTopoCluster &, double &);
 
     using HitCalc = bool (*)(const xAOD::TauJet &,
-                                 const xAOD::TrackMeasurementValidation &, double &);
+                                 const xAOD::TrackMeasurementValidation &, 
+                                 const Eigen::Matrix3d &, double &);
 
 public:
     GNNVarCalc();
@@ -79,6 +82,8 @@ private:
     std::unordered_map<std::string, TrackCalc> m_track_map;
     std::unordered_map<std::string, ClusterCalc> m_cluster_map;
     std::unordered_map<std::string, HitCalc> m_hit_map;
+
+    const Eigen::Matrix3d getJABInvMatrix(const xAOD::TauJet& p) const;
 };
 
 // Factory function to create a variable calculator populated with default
@@ -336,16 +341,16 @@ namespace Hit {
 // Returns a status code indicating success
 
 bool j(
-    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, const Eigen::Matrix3d &jab_inv, double &out);
 
 bool a(
-    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, const Eigen::Matrix3d &jab_inv, double &out);
 
 bool b(
-    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, const Eigen::Matrix3d &jab_inv, double &out);
 
 bool layer(
-    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, double &out);
+    const xAOD::TauJet &tau, const xAOD::TrackMeasurementValidation &hit, const Eigen::Matrix3d &jab_inv, double &out);
 
 } // namespace Hit
 } // namespace Variables
