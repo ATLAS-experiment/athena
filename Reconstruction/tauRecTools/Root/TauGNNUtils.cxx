@@ -95,11 +95,14 @@ bool GNNVarCalc::compute(const std::string &name, const xAOD::TauJet &tau,
         throw;
     }
 
-    // Calculate variables for selected clusters
+    // Calculate the JAB inverse transformation matrix
+    const Eigen::Matrix3d jab_inv = getJABInvMatrix(tau);
+
+    // Calculate variables for selected hits
     bool success = true;
     double value;
     for (const xAOD::TrackMeasurementValidation* hit : hits) {
-        success = success && func(tau, *hit, value);
+        success = success && func(tau, *hit, jab_inv, value);
         out.push_back(value);
     }
 
@@ -144,6 +147,32 @@ void GNNVarCalc::insert(const std::string &name, HitCalc func, const std::vector
         throw std::invalid_argument("Nullptr passed to GNNVarCalc::insert");
     }
     m_hit_map[name] = func;
+}
+
+const Eigen::Matrix3d GNNVarCalc::getJABInvMatrix(const xAOD::TauJet& p) const {
+    // We often work with hits associated to a particle in the following coordinates:
+    //  - jet (particle axis) projection, 
+    //  - adjacent projection (orthogonal to the jet axis and the beam), 
+    //  - beamline projection.
+    // Since the jet and the beam aren't perpendicular for eta != 0, this isn't a fully-orthogonal basis.
+    //
+    // We also approximate the eta-phi coordinates of the jet to be approximately constant w.r.t. the event vertex,
+    // considering the very-small displacements of the beamspot in the x-y plane, and the relatively small difference 
+    // in eta with small (+/- 50mm) changes in z. We might need to revisit this approximation, but we'll use it for now.
+    
+    // Use zhat as the beamline
+    Eigen::Vector3d bhat(0, 0, 1);
+
+    const TLorentzVector p4 = p.p4();
+    Eigen::Vector3d jhat = Eigen::Vector3d(p4.X(), p4.Y(), p4.Z()).normalized();
+
+    Eigen::Vector3d ahat = bhat.cross(jhat).normalized();
+
+    // Build the matrix m that maps the jab displacement such that m*jab = detector
+    Eigen::Matrix3d m;
+    m << jhat, ahat, bhat;
+
+    return m.inverse();
 }
 
 std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scalar_vars,
@@ -273,6 +302,7 @@ std::unique_ptr<GNNVarCalc> get_calculator(const std::vector<std::string>& scala
 
     return calc;
 }
+
 
 
 namespace Variables {
@@ -992,46 +1022,34 @@ bool CENTER_MAG(const xAOD::TauJet& /*tau*/, const xAOD::CaloVertexedTopoCluster
 
 namespace Hit {
 
-bool j(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
-    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
-    const std::vector<double>& jabInv = acc_jabInv(tau);
-    if(jabInv.size() != 9) return false;
+bool j(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation& hit, const Eigen::Matrix3d& jab_inv, double &out) {
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToBeamspot");
 
-    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
-
-    out = jabInv[0]*acc_localX(hit) + jabInv[1]*acc_localY(hit) + jabInv[2]*acc_localZ(hit);
+    out = jab_inv(0, 0)*acc_localX(hit) + jab_inv(0, 1)*acc_localY(hit) + jab_inv(0, 2)*acc_localZ(hit);
     return true;
 }
 
-bool a(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
-    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
-    const std::vector<double>& jabInv = acc_jabInv(tau);
-    if(jabInv.size() != 9) return false;
+bool a(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation& hit, const Eigen::Matrix3d& jab_inv, double &out) {
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToBeamspot");
 
-    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
-
-    out = jabInv[3]*acc_localX(hit) + jabInv[4]*acc_localY(hit) + jabInv[5]*acc_localZ(hit);
+    out = jab_inv(1, 0)*acc_localX(hit) + jab_inv(1, 1)*acc_localY(hit) + jab_inv(1, 2)*acc_localZ(hit);
     return true;
 }
 
-bool b(const xAOD::TauJet& tau, const xAOD::TrackMeasurementValidation &hit, double &out) {
-    static const SG::AuxElement::ConstAccessor<std::vector<double>> acc_jabInv("jabInvMatrix");
-    const std::vector<double>& jabInv = acc_jabInv(tau);
-    if(jabInv.size() != 9) return false;
+bool b(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation& hit, const Eigen::Matrix3d& jab_inv, double &out) {
+    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToBeamspot");
+    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToBeamspot");
 
-    static const SG::AuxElement::ConstAccessor<float> acc_localX("HitsXRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localY("HitsYRelToVertex");
-    static const SG::AuxElement::ConstAccessor<float> acc_localZ("HitsZRelToVertex");
-
-    out = jabInv[6]*acc_localX(hit) + jabInv[7]*acc_localY(hit) + jabInv[8]*acc_localZ(hit);
+    out = jab_inv(2, 0)*acc_localX(hit) + jab_inv(2, 1)*acc_localY(hit) + jab_inv(2, 2)*acc_localZ(hit);
     return true;
 }
 
-bool layer(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation &hit, double &out) {
+bool layer(const xAOD::TauJet& /*tau*/, const xAOD::TrackMeasurementValidation& hit, const Eigen::Matrix3d& /*jab_inv*/, double &out) {
     static const SG::AuxElement::ConstAccessor<int> acc_layer("layer");
     out = acc_layer(hit);
     return true;
