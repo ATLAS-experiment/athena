@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ElectronsCPContent = [
 "Electrons",
@@ -10,7 +10,7 @@ ElectronsCPContent = [
 "PrimaryVertices",
 "PrimaryVerticesAux.trackParticleLinks.vertexType.neutralParticleLinks",
 "egammaClusters",
-"egammaClustersAux.calE.calEta.calPhi.e_sampl.eta_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks",
+"egammaClustersAux.calE.calEta.calPhi.e_sampl.eta_sampl.phi_sampl.ETACALOFRAME.PHICALOFRAME.ETA2CALOFRAME.PHI2CALOFRAME.constituentClusterLinks",
 "TopoClusterIsoCentralEventShape",
 "TopoClusterIsoCentralEventShapeAux.Density",
 "TopoClusterIsoForwardEventShape",
