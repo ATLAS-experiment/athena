@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # #######################################
 ## JetMonitoringConfig
@@ -530,8 +530,6 @@ class JetMonAlgSpec(ConfigDict):
         args.setdefault('onlyPassingJets', True)
         args.setdefault('eventFiresAnyJetChain',False)
         args.setdefault('isExpressStreamJob', False)
-        args.setdefault('applyLatestCalibration',False)
-        args.setdefault('JetCalibTool',[])
         ConfigDict.__init__(self, defaultPath=defaultPath, TriggerChain=TriggerChain, **args)
         tmpL = self.FillerTools
         self.FillerTools = []
@@ -550,9 +548,6 @@ class JetMonAlgSpec(ConfigDict):
         alg.OnlyPassingJets = self.onlyPassingJets
         alg.EventFiresAnyJetChain = self.eventFiresAnyJetChain
         alg.EnforceExpressTriggers = self.isExpressStreamJob
-
-        if self.applyLatestCalibration:
-            alg.JetCalibTool = self.JetCalibTool
 
         path = self.defaultPath
         tools = []

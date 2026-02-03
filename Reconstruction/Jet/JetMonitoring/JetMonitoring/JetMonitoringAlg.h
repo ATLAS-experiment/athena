@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMONITORALGORITHM_H
@@ -11,7 +11,7 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "JetMonitoring/IJetHistoFiller.h"
-#include "JetCalibTools/IJetCalibrationTool.h"
+
 
 ////////////////////////////////////////////////////
 /// \class JetMonitoringAlg
@@ -37,7 +37,6 @@ private:
   SG::ReadHandleKey<xAOD::JetContainer> m_jetContainerKey;
   
   ToolHandleArray<IJetHistoFiller> m_jetFillerTools;
-  ToolHandle<IJetCalibrationTool> m_calibrationTool{this,"JetCalibTool", "", "Jet calibration tool name"};
 
   bool m_failureOnMissingContainer;
   bool m_onlyPassingJets;

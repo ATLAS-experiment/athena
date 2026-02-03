@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/JetMonitoringAlg.h"
@@ -7,7 +7,6 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "xAODJet/Jet.h"
-#include "xAODCore/ShallowCopy.h"
 
 JetMonitoringAlg::JetMonitoringAlg( const std::string& name, ISvcLocator* pSvcLocator )
 :AthMonitorAlgorithm(name,pSvcLocator)
@@ -91,16 +90,10 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
       if (!eventFiresAnyJetChain) return StatusCode::SUCCESS;
     }
 
-    // Apply more up-to-date jet calibrations for offline jet DQ monitoring
-    auto shallowCopy = xAOD::shallowCopyContainer( *jets );
-    if(!m_calibrationTool.empty()){
-      ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCopy.first));
-    }
-
     // call each histograming tool on the container
     for(const auto& t: m_jetFillerTools){
       ATH_MSG_DEBUG( " now run "<< t->name() );
-      ATH_CHECK( t->processJetContainer(*this, *shallowCopy.first, ctx) );
+      ATH_CHECK( t->processJetContainer(*this, *jets, ctx) );
     }
  }
   return StatusCode::SUCCESS;

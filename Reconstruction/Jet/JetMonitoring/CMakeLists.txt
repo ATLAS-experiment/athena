@@ -11,7 +11,7 @@ atlas_add_library( JetMonitoringLib
                    INTERFACE
                    PUBLIC_HEADERS JetMonitoring
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel JetInterface StoreGateLib xAODEventInfo xAODHIEvent xAODJet JetCalibToolsLib)
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthenaBaseComps AthenaMonitoringKernelLib AthenaMonitoringLib GaudiKernel JetInterface StoreGateLib xAODEventInfo xAODHIEvent xAODJet )
 
 # Component(s) in the package:
 atlas_add_component( JetMonitoring

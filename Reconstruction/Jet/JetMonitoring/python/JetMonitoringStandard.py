@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetMonitoringExample.py
@@ -170,43 +170,18 @@ pflowHistosSpec = [
     "fCharged",
 ]
 
-calibToolConfigurations = {
-    "AntiKt4EMPFlowJets":("AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config","00-04-83","JetArea_Residual_EtaJES"),
-    "AntiKt4EMTopoJets":("PreRec_R22_EMTopo_ResPU_EtaJES_October23_231024.config","00-04-82","JetArea_Residual_EtaJES"),
-    "AntiKt4LCTopoJets":("JES_MC16Recommendation_28Nov2017.config","00-04-81","JetArea_Residual_EtaJES")
-}
+
 
 def jetMonAlgConfig(  jetName, inputFlags, truthJetName='', trigger=''):
     """returns a specification of a JetMonitoringAlg (in the form of a JetMonAlgSpec dictionnary).
     """
     
-    # Just a protection in case PhysVal is using this as well
-    if not inputFlags.Input.isMC:
-        from AthenaConfiguration.ComponentFactory import CompFactory
-        configfile, calibArea, calibseq_def = calibToolConfigurations[jetName]
-        toolname = "jetcalib_DQ_{0}".format(jetName)
-        jct = CompFactory.JetCalibrationTool(toolname,
-                                             JetCollection = jetName.replace('Jets',''),
-                                             ConfigFile = configfile,
-                                             CalibArea = calibArea,
-                                             CalibSequence = calibseq_def,
-                                             IsData = True)
-
-        # we use a specialized dictionnary (JetMonAlgSpec) which will be translated into the final C++ tool
-        jetAlgConfig = JetMonAlgSpec(
-            jetName+"MonAlg",
-            JetContainerName = jetName,
-            applyLatestCalibration = True,
-            JetCalibTool = jct,
-            TriggerChain = trigger,
-        )
-    else:
-        jetAlgConfig = JetMonAlgSpec(
-            jetName+"MonAlg",
-            JetContainerName = jetName,
-            applyLatestCalibration = False,
-            TriggerChain = trigger,
-        )
+    # we use a specialized dictionnary (JetMonAlgSpec) which will be translated into the final C++ tool
+    jetAlgConfig = JetMonAlgSpec(
+        jetName+"MonAlg",
+        JetContainerName = jetName,
+        TriggerChain = trigger ,  
+    )
 
     # the list of histos specifications
     histoSpecs = []
