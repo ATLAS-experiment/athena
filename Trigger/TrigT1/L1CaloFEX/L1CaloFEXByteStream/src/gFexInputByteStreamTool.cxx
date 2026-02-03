@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -1485,8 +1485,9 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int FPGA_CONVLIN_TH5 = 4029;
     int FPGA_CONVLIN_TH6 = 4062;
 
-    int FPGA_CONVLIN_OF0 = -5072;
-    int FPGA_CONVLIN_OF1 = -2012;
+    //These variables are unused
+    //int FPGA_CONVLIN_OF0 = -5072;
+    //int FPGA_CONVLIN_OF1 = -2012;
     int FPGA_CONVLIN_OF2 = -1262;
     int FPGA_CONVLIN_OF3 = -3036;
     int FPGA_CONVLIN_OF4 = -8120;
@@ -1499,32 +1500,31 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int oth4 = 0;
     int oth5 = 0;
     int oth6 = 0;
-  
-    int r1shv = 0;
-    int r2shv = 0;
+    //these variables are unused
+    //int r1shv = 0;
+    //int r2shv = 0;
     int r3shv = 0;
     int r4shv = 0;
     int r5shv = 0;
     int r6shv = 0;
     // int trxv = 0;
 
-    int r1conv = 0;
-    int r2conv = 0;
+    
     int r3conv = 0;
     int r4conv = 0;
     int r5conv = 0;
     int r6conv = 0;
     // int r3offs = 0;
 
-    r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
-    r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
+    //r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
+    //r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
     r3shv = (din &  0x00000FFF) ;
     r4shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
     r5shv = ((din & 0x00000FFF) << 2 )  & 0x00003FFC ;
     r6shv = ((din & 0x00000FFF) << 10 ) & 0x003FFC00 ;
 
-    r1conv =  r1shv + FPGA_CONVLIN_OF0;
-    r2conv =  r2shv + FPGA_CONVLIN_OF1;
+    //r1conv =  r1shv + FPGA_CONVLIN_OF0;
+    //r2conv =  r2shv + FPGA_CONVLIN_OF1;
     r3conv =  r3shv + FPGA_CONVLIN_OF2;
     r4conv =  r4shv + FPGA_CONVLIN_OF3;
     r5conv =  r5shv + FPGA_CONVLIN_OF4;
@@ -1576,12 +1576,14 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )   ) {
         dout = 0;
     }
+    /* These cases are logically unreachable, given preceding conditions
     else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout =  r1conv >>1;
     }
     else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r2conv >>1;
     }
+    */
     else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r3conv >>1;
     }
@@ -1597,10 +1599,11 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
         dout = 0;
     }
+    /* logically unreachable
     else {
         dout = 0; 
     }
-
+    */
     signExtend(&dout,15);
 
     datumPtr = dout;
