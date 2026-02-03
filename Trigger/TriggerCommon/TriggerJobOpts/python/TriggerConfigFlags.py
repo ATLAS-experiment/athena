@@ -475,7 +475,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
         muonflags.Muon.runCommissioningChain=False
-        muonflags.Muon.enableErrorTuning=False
+        muonflags.Muon.enableErrorTuning=False 
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
 
@@ -501,6 +501,8 @@ def createTriggerRecoFlags():
     
     from AthenaCommon.SystemOfUnits import mm
     flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
+
+    flags.addFlag('Trigger.Muon.useNewRegionSelector', True, help='usage of new region selector')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags
