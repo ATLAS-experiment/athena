@@ -42,12 +42,16 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
       "Mask required to pass the event, by default only NoEventError is "
       "required"};
 
+  Gaudi::Property<bool> m_useIonDataTypeDefaultMask{
+      this, "UseIonDataTypeDefaultMask", true,
+      "use predefined selection for each data taking IonDataType"};
+
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "EventInfo", "EventInfo", "EventInfo key"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey{
       this, "Tracks", "InDetTrackParticle", "Tracks key"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{
-      this, "Vertices", "Vertices", "Vertices key"};
+      this, "Vertices", "PrimaryVertices", "Vertices key"};
   SG::ReadHandleKey<xAOD::HIEventShapeContainer> m_hiEventShapeKey{
       this, "HIEventShape", "HIEventShape", "Vertices key"};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcKey{
@@ -60,13 +64,14 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   ToolHandle<HI::IHIEventSelectionToolRun3> m_tool{this, "SelectionTool",
                                                    "HIEventSelectionToolRun3"};
 
-  auto isRequested(HI::SelectionMask m) const {
-    return (m_selectionMask & static_cast<mask_t>(m)) != 0;
+  auto isRequested(const mask_t mask, HI::SelectionMask req) const {
+    return (mask & static_cast<mask_t>(req)) != 0;
   }
 
   void store(HI::SelectionMask m, mask_t& mask) {
     mask |= static_cast<mask_t>(m);
   }
+
 };
 }  // namespace HI
 #endif  //> !HIEVENTUTILS_HIEVENTFILTERALGRUN3_H

@@ -138,17 +138,38 @@ bool HI::HIEventSelectionToolRun3::puZDCPSvsFCal(
 
 bool HI::HIEventSelectionToolRun3::puOOVertexCuts(
     HI::IonDataType, const xAOD::VertexContainer* vertices) const {
-  if (!vertices)
-    return false;
 
-  unsigned int nPrimary = 0;
-  for (const xAOD::Vertex* vx : *vertices) {
-    if (vx->vertexType() == xAOD::VxType::PriVtx)
-      ++nPrimary;
+  //This is probably redundant as the vx->vertexType() should not be xAOD::VxType::PriVtx for the dummy vertex
+  if(vertices->size()<=1){
+    ATH_MSG_DEBUG("Only dummy vertex present, returning false");
+    return false;
   }
 
-  // Typical HI requirement: exactly one PV
-  return (nPrimary == 1);
+  unsigned int nPrimary = 0;
+  unsigned int nSplit   = 0;
+  unsigned int nOther   = 0;
+  // count primary vertices with sigma_z^2 < threshold
+  // documentation: https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
+  for (const xAOD::Vertex* vx : *vertices) {
+    if (vx->vertexType() == xAOD::VxType::PriVtx) {
+      //check Primary vertices to see if there are some of good quality
+      AmgSymMatrix(3) vtx_err = vx->covariancePosition();
+      const double sigmaZSq = vtx_err(2, 2);
+      if (sigmaZSq >= 0.02) ++nSplit  ;  // cut in mm^2
+      else                  ++nPrimary;
+    }
+    //vertices that are not PV, note that dummy vertex probably will get assigned here
+    else ++nOther;
+  }
+  ATH_MSG_DEBUG("n primary " << nPrimary<<",   nSplit "<<nSplit << ",  nOther " << nOther);
+
+  //If all vertices were classified as split, then we consider one of them to be a real vertex
+  if(nSplit>0 && nPrimary==0){
+    ATH_MSG_DEBUG("Returning true as all vertices classified as split");
+    return true;
+  }
+
+  return nPrimary == 1;
 }
 
 float HI::HIEventSelectionToolRun3::zdcCutValue(
@@ -219,4 +240,15 @@ HI::IonDataType HI::HIEventSelectionToolRun3::runNumberToDataType(
   throw std::runtime_error(std::to_string(run) +
                            " not handled by selection tool");
 }
+
+unsigned int HI::HIEventSelectionToolRun3::defaultMaskForPeriod(
+    HI::IonDataType period) const {
+  if (period == HI::IonDataType::OO2025 or
+      period == HI::IonDataType::NeNe2025) {
+    return static_cast<unsigned int>(HI::SelectionMask::OODefault);
+  }
+  // this will likely evolve
+  return static_cast<unsigned int>(HI::SelectionMask::PBDefault);
+}
+
 // }  // namespace HI
