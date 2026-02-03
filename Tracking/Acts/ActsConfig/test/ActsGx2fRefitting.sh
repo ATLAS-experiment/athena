@@ -10,7 +10,7 @@ n_events=5
 #  2) in addition to only use the --postInclude option:  ActsConfig.ActsTrackFittingConfig.forceITkActsReFitterAlgCfg
 
 # Ignore specific error messages from Acts GX2F
-ignore_pattern="ActsReFitterAlg.+ERROR.+No start volume resolved,Acts.+ERROR.+Propagation reached the step count limit,Acts.+ERROR Propagation failed"
+ignore_pattern=""
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \

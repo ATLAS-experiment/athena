@@ -34,7 +34,7 @@ run () {
     return $rc
 }
 
-ignore_pattern="ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern=""
 
 run "Reconstruction-acts" \
     Reco_tf.py --CA \
