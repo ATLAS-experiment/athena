@@ -40,6 +40,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
         self.algSeq = algSeq
+        self.modifyAlgSequence()
         return algSeq
     
     def readSamples(self):
