@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETMATERIALMANAGER_H
@@ -16,7 +16,6 @@
 class GeoElement;
 class StoredMaterialManager;
 class StoreGateSvc;
-class IGeometryDBSvc;
 
 namespace InDetDD
 {
@@ -181,7 +180,6 @@ private:
   StoredMaterialManager * retrieveManager(const StoreGateSvc* detStore);
   const GeoMaterial* getAdditionalMaterial(const std::string & materialName) const; 
   bool compareDensity(double d1, double d2) const;
-  void addWeightTableOld(const IRDBRecordset_ptr& weightTable, const std::string & space);
 
   // Internal versions. The public versions allow materials to be have extra scaling.
   const GeoMaterial* getMaterialInternal(const std::string & materialName);
@@ -204,8 +202,6 @@ private:
   const GeoMaterial * extraScaledMaterial(const std::string & materialName, 
 					  const GeoMaterial * origMaterial);
 
-  const IGeometryDBSvc * db();
-  void addTextFileMaterials();
   void createMaterial(const MaterialDef & material);
   double getExtraScaleFactor(const std::string & materialName);
 

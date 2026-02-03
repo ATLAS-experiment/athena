@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ServiceVolumeMaker_H 
-#define ServiceVolumeMaker_H 
+#ifndef INDETGEOMODELUTILS_SERVICEVOLUMEMAKER_H
+#define INDETGEOMODELUTILS_SERVICEVOLUMEMAKER_H
 
 #include <string>
 #include <vector>
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "CxxUtils/checker_macros.h"
-
-class IGeometryDBSvc;
 
 namespace InDetDD {
 
@@ -123,7 +121,6 @@ namespace InDetDD {
     
     unsigned int numElements() const;
 
-    const IGeometryDBSvc *db() const;
     const ServiceVolumeSchema & schema() const {return m_schema;}
     
   private:

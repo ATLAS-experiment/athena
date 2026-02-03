@@ -1,10 +1,8 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <utility>
-
-
 
 #include "InDetGeoModelUtils/ServiceVolumeMaker.h"
 #include "InDetGeoModelUtils/ServiceVolume.h"
@@ -13,7 +11,6 @@
 #include "GeoModelUtilities/DecodeVersionKey.h"
 
 #include "RDBAccessSvc/IRDBRecordset.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 namespace InDetDD {
@@ -94,81 +91,76 @@ namespace InDetDD {
     m_athenaComps(athenaComps)
   {}
 
-  const IGeometryDBSvc*
-  ServiceVolumeMakerMgr::db() const {
-    return std::as_const(*m_athenaComps).geomDB();
-  }
-
   double
   ServiceVolumeMakerMgr::rmin(int index) const {
-    return db()->getDouble(m_table, m_schema.rmin(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.rmin()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::rmax(int index) const {
-    return db()->getDouble(m_table, m_schema.rmax(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.rmax()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::rmin2(int index) const {
-    return db()->getDouble(m_table, m_schema.rmin2(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.rmin2()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::rmax2(int index) const {
-    return db()->getDouble(m_table, m_schema.rmax2(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.rmax2()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::zmin(int index) const {
-    return db()->getDouble(m_table, m_schema.zmin(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.zmin()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::zmax(int index) const {
-    return db()->getDouble(m_table, m_schema.zmax(), index) * Gaudi::Units::mm;
+    return (*m_table)[index]->getDouble(m_schema.zmax()) * Gaudi::Units::mm;
   }
 
   double
   ServiceVolumeMakerMgr::phiDelta(int index) const {
-    return db()->getDouble(m_table, m_schema.phiDelta(), index) * Gaudi::Units::deg;
+    return (*m_table)[index]->getDouble(m_schema.phiDelta()) * Gaudi::Units::deg;
   }
 
   double
   ServiceVolumeMakerMgr::width(int index) const {
     if (m_schema.has_width()) {
-      return db()->getDouble(m_table, m_schema.width(), index) * Gaudi::Units::mm;
+      return (*m_table)[index]->getDouble(m_schema.width()) * Gaudi::Units::mm;
     }
     return 0;
   }
 
   double
   ServiceVolumeMakerMgr::phiStart(int index) const {
-    return db()->getDouble(m_table, m_schema.phiStart(), index) * Gaudi::Units::deg;
+    return (*m_table)[index]->getDouble(m_schema.phiStart()) * Gaudi::Units::deg;
   }
 
   double
   ServiceVolumeMakerMgr::phiStep(int index) const {
     if (m_schema.has_phiStep()) {
-      return db()->getDouble(m_table, m_schema.phiStep(), index) * Gaudi::Units::deg;
+      return (*m_table)[index]->getDouble(m_schema.phiStep()) * Gaudi::Units::deg;
     }
     return 0;
   }
 
   bool
   ServiceVolumeMakerMgr::zsymm(int index) const {
-    return db()->getInt(m_table, m_schema.zsymm(), index);
+    return (*m_table)[index]->getInt(m_schema.zsymm());
   }
 
   int
   ServiceVolumeMakerMgr::repeat(int index) const {
-    return db()->getInt(m_table, m_schema.repeat(), index);
+    return (*m_table)[index]->getInt(m_schema.repeat());
   }
 
   int
   ServiceVolumeMakerMgr::radialDiv(int index) const {
     if (m_schema.has_radial()) {
-      return db()->getInt(m_table, m_schema.radialDiv(), index);
+      return (*m_table)[index]->getInt(m_schema.radialDiv());
     } else {
       return 0;
     }
@@ -177,37 +169,44 @@ namespace InDetDD {
   std::string
   ServiceVolumeMakerMgr::shapeType(int index) const {
     if (m_schema.has_shapeType()) {
-      if (db()->testField(m_table, m_schema.shapeType(), index)) {
-        return db()->getString(m_table, m_schema.shapeType(), index);
-      } else {
-        return "TUBE";
+      try {
+	if (!(*m_table)[index]->isFieldNull(m_schema.shapeType())) {
+	  return (*m_table)[index]->getString(m_schema.shapeType());
+	}
       }
+      catch(std::runtime_error&) {
+      }
+      return "TUBE";
     }
     return "UNKNOWN";
   }
 
   std::string
   ServiceVolumeMakerMgr::volName(int index) const {
-    if (db()->testField(m_table, m_schema.volName(), index)) {
-      return db()->getString(m_table, m_schema.volName(), index);
+    try {
+      if (!(*m_table)[index]->isFieldNull(m_schema.volName())) {
+	return (*m_table)[index]->getString(m_schema.volName());
+      }
+    }
+    catch(std::runtime_error&) {
     }
     return "";
   }
 
   std::string
   ServiceVolumeMakerMgr::materialName(int index) const {
-    return db()->getString(m_table, m_schema.materialName(), index);
+    return (*m_table)[index]->getString(m_schema.materialName());
   }
 
   unsigned int
   ServiceVolumeMakerMgr::numElements() const {
-    return db()->getTableSize(m_table);
+    return m_table->size();
   }
 
   int
   ServiceVolumeMakerMgr::volId(int index) const {
     if (m_schema.has_volId()) {
-      return db()->getInt(m_table, m_schema.volId(), index);
+      return (*m_table)[index]->getInt(m_schema.volId());
     }
     return 0;
   }
@@ -215,8 +214,13 @@ namespace InDetDD {
   int
   ServiceVolumeMakerMgr::shiftFlag(int index) const {
     if (m_schema.has_shiftFlag()) {
-      if (db()->testField(m_table, m_schema.shiftFlag(), index)) return db()->getInt(m_table,
-                                                                                     m_schema.shiftFlag(), index);
+      try {
+	if (!(*m_table)[index]->isFieldNull(m_schema.shiftFlag())) {
+	  return (*m_table)[index]->getInt(m_schema.shiftFlag());
+	}
+      }
+      catch(std::runtime_error&) {
+      }
     }
     return 0;
   }
@@ -235,11 +239,17 @@ namespace InDetDD {
     IRDBRecordset_ptr PixelBarrelGeneral = rdbSvc->getRecordsetPtr("PixelBarrelGeneral", detectorKey, detectorNode);
     IRDBRecordset_ptr PixelLayer = rdbSvc->getRecordsetPtr("PixelLayer", detectorKey, detectorNode);
 
-    int numLayers = db()->getInt(std::move(PixelBarrelGeneral), "NLAYER");
+    int numLayers = (*PixelBarrelGeneral)[0]->getInt("NLAYER");
     layerShift.reserve(numLayers);
-    for (int iLayer = 0; iLayer < numLayers; iLayer++) {
+    for(const auto& rec : *PixelLayer) {
       double shift = 0;
-      if (db()->testField(PixelLayer, "GBLSHIFT", iLayer)) shift = db()->getDouble(PixelLayer, "GBLSHIFT", iLayer);
+      try {
+	if(!rec->isFieldNull("GBLSHIFT")) {
+	  shift = rec->getDouble("GBLSHIFT");
+	}
+      }
+      catch(std::runtime_error&) {
+      }
       layerShift.push_back(shift);
     }
 
@@ -252,8 +262,6 @@ namespace InDetDD {
     : m_label(label) {
     m_mgr = new ServiceVolumeMakerMgr(std::move(table), schema, athenaComps);
     m_layerShift = m_mgr->readLayerShift();
-    //  std::cout<<"LAYER SHIFT "<<m_layerShift[0]<<" "<<m_layerShift[1]<<" "<<m_layerShift[2]<<"
-    // "<<m_layerShift[3]<<std::endl;
   }
 
   ServiceVolumeMaker::~ServiceVolumeMaker() {

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
@@ -12,7 +12,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 #include "RDBAccessSvc/IRDBRecord.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "CxxUtils/close_to_zero.h"
 
@@ -76,7 +75,6 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
   m_extraFunctionality(true),
   m_athenaComps(athenaComps) {
   m_materialManager = retrieveManager(athenaComps->detStore());
-  addTextFileMaterials();
 }
 
 InDetMaterialManager::~InDetMaterialManager() = default;
@@ -327,27 +325,32 @@ InDetMaterialManager::compareDensity(double d1, double d2) const {
 void
 InDetMaterialManager::addWeightTable(const IRDBRecordset_ptr& weightTable, const std::string& space) {
   ATH_MSG_DEBUG("Reading in weight table: " << weightTable->nodeName());
-  // If not using geometryDBSvc revert to old version
-  if (!db()) {
-    ATH_MSG_DEBUG("GeometryDBSvc not available. Using old version.");
-    addWeightTableOld(weightTable, space);
-    return;
-  }
-  for (unsigned int i = 0; i < db()->getTableSize(weightTable); i++) {
-    std::string materialName = db()->getString(weightTable, "MATERIAL", i);
+  for(const auto& rec : *weightTable) {
+    std::string materialName = rec->getString("MATERIAL");
     if (!space.empty()) {
       materialName = space + "::" + materialName;
     }
     std::string materialBase;
-    if (db()->testField(weightTable, "BASEMATERIAL", i)) {
-      materialBase = db()->getString(weightTable, "BASEMATERIAL", i);
+    try {
+      if (!rec->isFieldNull("BASEMATERIAL")) {
+	materialBase = rec->getString("BASEMATERIAL");
+      }
     }
-    double weight = db()->getDouble(weightTable, "WEIGHT", i) * GeoModelKernelUnits::gram;
-    //std::cout << materialName << " " << materialBase << " " << weight/CLHEP::g <<  std::endl;
+    catch(std::runtime_error&) {
+      ATH_MSG_DEBUG(weightTable->nodeName() << " table has no column named BASEMATERIAL");
+    }
+    double weight = rec->getDouble("WEIGHT") * GeoModelKernelUnits::gram;
 
     bool linearWeightFlag = false;
-    if (m_extraFunctionality && db()->testField(weightTable, "LINWEIGHTFLAG", i)) {
-      linearWeightFlag = db()->getInt(weightTable, "LINWEIGHTFLAG", i);
+    if (m_extraFunctionality) {
+      try {
+	if(!rec->isFieldNull("LINWEIGHTFLAG")) {
+	  linearWeightFlag = rec->getInt("LINWEIGHTFLAG");
+	}
+      }
+      catch(std::runtime_error&) {
+	ATH_MSG_DEBUG(weightTable->nodeName() << " table has no column named LINWEIGHTFLAG");
+      }
     }
 
     if (m_weightMap.find(materialName) != m_weightMap.end()) {
@@ -356,7 +359,7 @@ InDetMaterialManager::addWeightTable(const IRDBRecordset_ptr& weightTable, const
       ATH_MSG_DEBUG("Adding " << materialName
                     << " weight " << weight
                     << " linearWeightFlag " << linearWeightFlag
-                    << " raw weight " << db()->getDouble(weightTable, "WEIGHT", i)
+                    << " raw weight " << rec->getDouble("WEIGHT")
                     << " m_extraFunctionality " << m_extraFunctionality
                     << " to weight table");
       m_weightMap[materialName] = MaterialByWeight(materialBase, weight, linearWeightFlag);
@@ -382,50 +385,19 @@ InDetMaterialManager::addWeightMaterial(const std::string& materialName, const s
 }
 
 void
-InDetMaterialManager::addWeightTableOld(const IRDBRecordset_ptr& weightTable, const std::string& space) {
-  for (unsigned int i = 0; i < weightTable->size(); i++) {
-    const IRDBRecord* record = (*weightTable)[i];
-    std::string materialName = record->getString("MATERIAL");
-    if (!space.empty()) {
-      materialName = space + "::" + materialName;
-    }
-    std::string materialBase;
-    if (!record->isFieldNull("BASEMATERIAL")) {
-      materialBase = record->getString("BASEMATERIAL");
-    }
-    double weight = record->getDouble("WEIGHT") * GeoModelKernelUnits::gram;
-    //std::cout << materialName << " " << materialBase << " " << weight/CLHEP::g <<  std::endl;
-
-    bool linearWeightFlag = false;
-    if (m_extraFunctionality) {
-      linearWeightFlag = record->getInt("LINWEIGHTFLAG");
-    }
-
-    if (m_weightMap.find(materialName) != m_weightMap.end()) {
-      ATH_MSG_WARNING("Material: " << materialName << " already exists in weight table");
-    } else {
-      m_weightMap[materialName] = MaterialByWeight(materialBase, weight, linearWeightFlag);
-    }
-  }
-}
-
-void
 InDetMaterialManager::addCompositionTable(const IRDBRecordset_ptr& compositionTable, const std::string& space) {
   ATH_MSG_DEBUG("Reading in composition table: " << compositionTable->nodeName());
 
-  if (!db()) {
-    ATH_MSG_ERROR("GeometryDBSvc not available. Unable to read in composition table.");
-  }
-  for (unsigned int i = 0; i < db()->getTableSize(compositionTable); i++) {
-    std::string materialName = db()->getString(compositionTable, "MATERIAL", i);
+  for (const auto& rec : *compositionTable) {
+    std::string materialName = rec->getString("MATERIAL");
     if (!space.empty()) {
       materialName = space + "::" + materialName;
     }
 
-    std::string componentName = db()->getString(compositionTable, "COMPONENT", i);
-    int count = db()->getInt(compositionTable, "COUNT", i);
-    double factor = db()->getDouble(compositionTable, "FACTOR", i);
-    double actualLength = db()->getDouble(compositionTable, "ACTUALLENGTH", i);
+    std::string componentName = rec->getString("COMPONENT");
+    int count = rec->getInt("COUNT");
+    double factor = rec->getDouble("FACTOR");
+    double actualLength = rec->getDouble("ACTUALLENGTH");
 
     m_matCompositionMap.insert(std::pair<std::string, MaterialComponent>(materialName,
                                                                          MaterialComponent(componentName,
@@ -436,25 +408,17 @@ InDetMaterialManager::addCompositionTable(const IRDBRecordset_ptr& compositionTa
 
 void
 InDetMaterialManager::addScalingTable(const IRDBRecordset_ptr& scalingTable) {
-  if (!scalingTable) return;
-
-  if (db()->getTableSize(scalingTable) == 0) return;
-
+  if (!scalingTable || scalingTable->size()==0) return;
   ATH_MSG_DEBUG("Reading in extra material scaling table: " << scalingTable->nodeName());
-  if (!db()) {
-    ATH_MSG_ERROR("GeometryDBSvc not available. Unable to read in scaling table.");
-  }
-  for (unsigned int i = 0; i < db()->getTableSize(scalingTable); i++) {
-    std::string materialName = db()->getString(scalingTable, "MATERIAL", i);
-    double scalingFactor = db()->getDouble(scalingTable, "FACTOR", i);
+  for (const auto& rec : *scalingTable) {
+    std::string materialName = rec->getString("MATERIAL");
+    double scalingFactor = rec->getDouble("FACTOR");
 
-    if (msgLvl(MSG::DEBUG)) {
-      if (scalingFactor >= 0 || scalingFactor == 1) {
-        msg(MSG::DEBUG) << "Material " << materialName << " will be scaled by: " << scalingFactor << endmsg;
-      } else {
-        // -ve or scalefactor = 1 means will not be scaled.
-        msg(MSG::DEBUG) << "Material " << materialName << " will be NOT be scaled." << endmsg;
-      }
+    if (scalingFactor >= 0 || scalingFactor == 1) {
+      ATH_MSG_DEBUG("Material " << materialName << " will be scaled by: " << scalingFactor);
+    } else {
+      // -ve or scalefactor = 1 means will not be scaled.
+      ATH_MSG_DEBUG("Material " << materialName << " will be NOT be scaled.");
     }
     if (m_scalingMap.find(materialName) != m_scalingMap.end()) {
       ATH_MSG_WARNING("Overriding material: " << materialName << " which already exists in scaling table");
@@ -726,94 +690,6 @@ InDetMaterialManager::getMaterialInternal(const std::string& name,
     newMaterial = newMaterialTmp;
   }
   return newMaterial;
-}
-
-const IGeometryDBSvc*
-InDetMaterialManager::db() {
-  if (m_athenaComps) return m_athenaComps->geomDB();
-
-  return nullptr;
-}
-
-void
-InDetMaterialManager::addTextFileMaterials() {
-  const std::string materialTable = "ExtraMaterials";
-  const std::string componentsTable = "ExtraMatComponents";
-
-  // Look for tables ExtraMaterials and ExtraMatComponents.
-  // These are text file only tables where extra materials are desired or
-  // one wants to override some database ones.
-  if (!db() || !db()->testField("", "TableSize:" + materialTable) || !db()->getTableSize(materialTable)
-      || !db()->testField("", "TableSize:" + componentsTable) || !db()->getTableSize(componentsTable)) return;
-
-
-  ATH_MSG_INFO("Extra materials being read in from text file.");
-
-  using MatMap = std::map<std::string, MaterialDef>;
-  MatMap materials;
-
-  // read in material table
-  for (unsigned int iMat = 0; iMat < db()->getTableSize(materialTable); iMat++) {
-    std::string materialName = db()->getString(materialTable, "NAME", iMat);
-    double density = db()->getDouble(materialTable, "DENSITY", iMat) * Gaudi::Units::g / Gaudi::Units::cm3;
-    materials[materialName] = MaterialDef(materialName, density);
-  }
-
-  // read in material component table
-  for (unsigned int iComp = 0; iComp < db()->getTableSize(componentsTable); iComp++) {
-    std::string materialName = db()->getString(componentsTable, "NAME", iComp);
-    std::string compName = db()->getString(componentsTable, "COMPNAME", iComp);
-    double fracWeight = db()->getDouble(componentsTable, "FRACTION", iComp);
-    MatMap::iterator iter = materials.find(materialName);
-    if (iter != materials.end()) {
-      iter->second.addComponent(compName, fracWeight);
-    } else {
-      ATH_MSG_ERROR("Attemp to add material component, " << compName << ", to non-existing material: "
-                    << materialName);
-    }
-  }
-
-  //Now create the materials
-  int matCount = 0;
-  int matCountLast = -1;
-  bool someUndefined = true;
-  // While there are still undefined materials keep creating materials.
-  // Check also that the matCount had change to avoid endless loop due to cyclicly
-  // defined materials.
-  while (someUndefined && matCount != matCountLast) {
-    matCountLast = matCount;
-    someUndefined = false;
-    for (MatMap::iterator iter = materials.begin(); iter != materials.end(); ++iter) {
-      MaterialDef& tmpMat = iter->second;
-      if (!tmpMat.isCreated()) {
-        // Check if any components are materials in this table and if they are defined.
-        // If not flag that there are undefined materials and go to next material
-        bool compsDefined = true;
-        for (unsigned int iComp = 0; iComp < tmpMat.numComponents(); ++iComp) {
-          const std::string& compName = tmpMat.compName(iComp);
-          MatMap::iterator iter2 = materials.find(compName);
-          if (iter2 != materials.end()) {
-            if (!iter2->second.isCreated()) {
-              compsDefined = false;
-              break;
-            }
-          }
-        }
-        if (compsDefined) {
-          createMaterial(tmpMat);
-          tmpMat.setCreated();
-          matCount++;
-        } else {
-          someUndefined = true;
-        }
-      }
-    }
-  }
-
-
-  if (someUndefined) {
-    ATH_MSG_ERROR("Not all materials could be defined due to cyclic definitions");
-  }
 }
 
 void
