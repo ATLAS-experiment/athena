@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -13,6 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h" //also has gTowersType typedef
+#include "L1CaloFEXCond/gFEXDBCondData.h"
 
 
 #include <vector>
@@ -46,6 +47,7 @@ namespace LVL1 {
 
 
   private:
+    SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
 
     float m_aFPGA_A{};
     float m_bFPGA_A{};
@@ -56,6 +58,7 @@ namespace LVL1 {
     float m_gBlockthresholdA{};
     float m_gBlockthresholdB{};
     float m_gBlockthresholdC{};
+    std::string m_fwVersion;
  
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
