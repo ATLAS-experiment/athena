@@ -24,9 +24,7 @@
     #include "AthenaKernel/CLASS_DEF.h"
 #endif // XAOD_STANDALONE
 
-#if HAVE_VECTOR_SIZE_ATTRIBUTE
-    #include "vec_parametrized_sincos.h"
-#endif
+#include "vec_parametrized_sincos.h"
 #include "GeoSpecialShapes/LArWheelCalculatorEnums.h"
 
 #include <array>
@@ -236,10 +234,7 @@ class LArWheelCalculator
     LArWheelCalculator_Impl::IDistanceCalculator *m_distanceCalcImpl;
     LArWheelCalculator_Impl::IFanCalculator *m_fanCalcImpl;
     void fill_sincos_parameterization();
-#if HAVE_VECTOR_SIZE_ATTRIBUTE
     vsincos_par m_vsincos_par{};
-#endif
-
 };
 
 #if !defined(XAOD_STANDALONE) && !defined(PORTABLE_LAR_SHAPE)
