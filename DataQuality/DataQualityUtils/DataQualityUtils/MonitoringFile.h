@@ -246,11 +246,11 @@ namespace dqutils {
 
     //For HLT Muon
     static void HLTMuonPostProcess(const std::string& inFilename, bool isIncremental = false);
-    static void HLTMuonHistogramDivision(const std::string& inFilename, TString& run_dir);
-    static void HLTMuonTriggerOverlapMatrix(const std::string& inFilename, TString& run_dir);
+    static void HLTMuonHistogramDivision(const std::string& inFilename, std::string& run_dir);
+    static void HLTMuonTriggerOverlapMatrix(const std::string& inFilename, std::string& run_dir);
     static bool HLTMuonCheckHistogram(TFile* f, TString& hname);
-    static void HLTMuonHDiv(PostProcessorFileWrapper& mf, TString sdir, TString snum, TString sden, TString seff,
-                            TString seffg);
+    static void HLTMuonHDiv(PostProcessorFileWrapper& mf, const std::string& sdir, const std::string& snum, const std::string& sden, const std::string& seff,
+                            const std::string& seffg);
 
     //HLT Egamma
     static void HLTEgammaPostProcess(const std::string& inFilename, bool isIncremental = false);
