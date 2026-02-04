@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -191,7 +191,7 @@ def HistoInDetGlobalTrackMonAlgCfg(helper, alg):
 def InDetGlobalTrackMonAlgCfg(helper, acc,
                               flags, name="InDetGlobalTrackMonAlg", **kwargs):
 
-    from InDetConfig.InDetTrackSelectionToolConfig import (
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
         InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg,
         InDetTrackSelectionTool_Loose_Cfg)
 

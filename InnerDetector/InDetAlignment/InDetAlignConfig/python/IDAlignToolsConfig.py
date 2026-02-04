@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # File: InDetAlignConfig/python/IDAlignToolsConfig.py
 # Author: David Brunner (david.brunner@cern.ch), Thomas Strebler (thomas.strebler@cern.ch)
@@ -348,13 +348,13 @@ def BeamspotVertexPreProcessorCfg(
             TrackToVertexIPEstimatorCfg(flags)))
 
     if "BSConstraintTrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             Align_InDetTrackSelectionToolCfg)
         kwargs.setdefault("BSConstraintTrackSelector", cfg.popToolsAndMerge(
             Align_InDetTrackSelectionToolCfg(flags)))
             
     if "TrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             Align_InDetTrackSelectionToolCfg)
         kwargs.setdefault("TrackSelector", cfg.popToolsAndMerge(
             Align_InDetTrackSelectionToolCfg(flags)))

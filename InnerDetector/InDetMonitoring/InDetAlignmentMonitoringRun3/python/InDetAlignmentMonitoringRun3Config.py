@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 ####################################################
@@ -16,7 +16,8 @@ def InDetAlignmentMonitoringRun3Config(flags, TrackCollectionName = "ExtendedTra
     helper = AthMonitorCfgHelper(flags, "InDetAlignmentMonitoringRun3")
         
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from InDetConfig.InDetTrackSelectionToolConfig import Align_InDetTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        Align_InDetTrackSelectionToolCfg)
     from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
     from AthenaConfiguration.Enums import BeamType
     

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """ Instantiate more custom track isolation in derivation
 """
@@ -87,7 +87,7 @@ def DerivationTrackIsoCfg(flags,**jwarg):
                 toolkwargs['TTVATool'] = ttvaCA
             # and a track selection tool
 
-            from InDetConfig.InDetTrackSelectionToolConfig import (
+            from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
                 isoTrackSelectionToolCfg )
             toolkwargs['TrackSelectionTool'] = acc.popToolsAndMerge(
                 isoTrackSelectionToolCfg(flags, minPt = track_pt))

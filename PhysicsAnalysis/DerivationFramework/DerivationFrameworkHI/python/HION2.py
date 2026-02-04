@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # HION2.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND
-from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HITight_Cfg
 
 #########################################################################################
 #Skiming
@@ -41,7 +40,8 @@ def HION2AugmentationToolCfg(flags):
     """Configure the example augmentation tool"""
     acc = ComponentAccumulator()
     
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HILoose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_HILoose_Cfg, InDetTrackSelectionTool_HITight_Cfg)
     
     TrkSelTool_hi_loose = acc.popToolsAndMerge(InDetTrackSelectionTool_HILoose_Cfg(flags,
                                                             name = "TrackSelectionTool_hi_loose",

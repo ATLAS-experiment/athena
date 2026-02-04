@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetPhysValMonitoringConfig.py
@@ -264,7 +264,7 @@ def InDetPhysValMonitoringToolLooseCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_Loose_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_Loose_Cfg(flags)))
@@ -281,7 +281,7 @@ def InDetPhysValMonitoringToolTightPrimaryCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_TightPrimary_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_TightPrimary_Cfg(flags)))
@@ -298,7 +298,7 @@ def InDetPhysValMonitoringToolHILooseCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_HILoose_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_HILoose_Cfg(flags)))

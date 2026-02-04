@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.CFElements import parOR
@@ -40,7 +40,8 @@ def PFTrackExtensionCfg(flags, tracktype, tracksin):
     pretracks_name = f"HLTPFPreselTracks_{tracktype}"
     cache_name = f"HLTPFTrackExtensionCache_{tracktype}"
 
-    from InDetConfig.InDetTrackSelectionToolConfig import PFTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        PFTrackSelectionToolCfg)
     result.addEventAlgo(CompFactory.PFTrackPreselAlg(
         f"HLTPFTrackPresel_{tracktype}",
         InputTracks=tracksin,
@@ -170,7 +171,8 @@ def HLTPFTrackSelectorCfg(inputFlags,tracktype,tracksin,verticesin,clustersin,ce
             raise ValueError(f"Invalid muon removal mode '{muon_mode}'")
         result.merge(tag_acc)
 
-    from InDetConfig.InDetTrackSelectionToolConfig import PFTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        PFTrackSelectionToolCfg)
     from TrackToCalo.TrackToCaloConfig import HLTPF_ParticleCaloExtensionToolCfg
 
 
