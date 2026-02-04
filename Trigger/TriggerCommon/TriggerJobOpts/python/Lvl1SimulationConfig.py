@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @brief this function sets up the top L1 simulation sequence
 ##
@@ -61,11 +61,12 @@ if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     flags = initConfigFlags()
-    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4159_s4114_r14799_tid34171421_00/RDO.34171421._000011.pool.root.1']
+    flags.Input.Files = ['root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00/RDO.42189392._000001.pool.root.1']
     flags.Exec.MaxEvents = 5
     flags.Concurrency.NumThreads = 1
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
-    flags.IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-05" # temporary override until the input RDO is updated to a MC23e setup
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags
+    flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     flags.Trigger.doHLT = True # this is necessary so that the simulation of L1Calo (if running on MC) gets output with keys that Topo sim expects
     flags.fillFromArgs()
     flags.lock()
