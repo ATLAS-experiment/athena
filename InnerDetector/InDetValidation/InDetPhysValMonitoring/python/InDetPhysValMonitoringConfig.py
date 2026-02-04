@@ -412,6 +412,8 @@ def InDetPhysValMonitoringCfg(flags):
             ],
         ))
 
+    from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
+
     mons = [(True,
              InDetPhysValMonitoringToolCfg),
             (flags.PhysVal.IDPVM.doValidateMuonMatchedTracks,
@@ -431,7 +433,9 @@ def InDetPhysValMonitoringCfg(flags):
             (flags.PhysVal.IDPVM.doValidateHILoose,
              InDetPhysValMonitoringToolHILooseCfg),
             (flags.PhysVal.IDPVM.doValidateGSFTracks,
-             InDetPhysValMonitoringToolGSFCfg)
+             InDetPhysValMonitoringToolGSFCfg),
+            (flags.PhysVal.IDPVM.doActs,
+             PhysValActsCfg)
             ]
 
     tools = []
