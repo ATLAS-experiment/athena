@@ -41,6 +41,9 @@ namespace FlavorTagDiscriminants {
       SG::ReadHandleKey< xAOD::EventInfo > m_eventInfoKey {
         this,"eventInfo","EventInfo","Key for EventInfo"};
 
+      SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey{
+        this, "PrimaryVertices", "PrimaryVertices", "Key for Primary Vertex"};
+
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitXKey {
         this, "hitsXRelToBeamspotDecorator", m_HitContainerKey, "HitsXRelToBeamspot", "Key for output hits x coordinate relative to beamspot"};
 
@@ -50,6 +53,14 @@ namespace FlavorTagDiscriminants {
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitZKey {
         this, "hitsZRelToBeamspotDecorator", m_HitContainerKey, "HitsZRelToBeamspot", "Key for output hits z coordinate relative to beamspot"};
 
+      SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputPVXKey {
+        this, "hitsXRelToPVDecorator", m_HitContainerKey, "HitsXRelToPV", "Key for output hits x coordinate relative to PV"};
+
+      SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputPVYKey {
+        this, "hitsYRelToPVDecorator", m_HitContainerKey, "HitsYRelToPV", "Key for output hits y coordinate relative to PV"};
+
+      SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputPVZKey {
+        this, "hitsZRelToPVDecorator", m_HitContainerKey, "HitsZRelToPV", "Key for output hits z coordinate relative to PV"};
   };
 }
 
