@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ namespace dqutils {
     if (fpdbg) std::cout << "Start HLTMuon post-processing" << std::endl;
 
     //start postprocessing
-    TString run_dir;
+    std::string run_dir;
     HLTMuonHistogramDivision(inFilename, run_dir);
 
     //trigger overlap matrix
@@ -68,7 +68,7 @@ namespace dqutils {
   }//MonitoringFile::HLTMuonCheckHistogram
 
   void
-  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string& inFilename, TString& run_dir) {
+  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string& inFilename, std::string& run_dir) {
     if (fpdbg) std::cout << "  Start to fill HLTMuon Trigger Overlap Matrix" << std::endl;
 
     PostProcessorFileWrapper mf(inFilename, "HLT Trigger Overlap Matrix");
@@ -99,12 +99,12 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) { //== the while commented out at$
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
       break;
     }
-    if (!run_dir.Contains("run")) {
+    if (run_dir.find("run") == std::string::npos) {
       std::cerr << "HLTMuon: unable to find run directory ..." << std::endl;
       return;
     }
@@ -115,7 +115,7 @@ namespace dqutils {
         std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 

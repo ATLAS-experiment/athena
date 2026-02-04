@@ -32,7 +32,6 @@
 #include "TTree.h"
 #include "TBranch.h"
 #include "TGraph.h"
-#include "TString.h"
 #include "TGraphAsymmErrors.h"
 
 
@@ -40,7 +39,7 @@ namespace dqutils {
   //   static const bool fdbg = false;
   static const bool fdbg = true;
 
-  void MonitoringFile::HLTMuonHistogramDivision(const std::string& inFilename, TString& run_dir) {
+  void MonitoringFile::HLTMuonHistogramDivision(const std::string& inFilename, std::string& run_dir) {
     bool HI_pp_key = false;//true::HI false::pp
 
     if (fdbg) std::cout << "  Start to Divide HLTMuon Histograms for Efficiency and Rate Ratio" << std::endl;
@@ -66,15 +65,15 @@ namespace dqutils {
 
     dir0->cd();
 
-    auto getHPointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const TString &hname)->TH1F * {
+    auto getHPointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const std::string &hname)->TH1F * {
       TH1F* pH {};
-      mf.get(hname, pH);
+      mf.get(hname.c_str(), pH);
       if (!pH and fdbg) {
         std::cerr << "HLTMuon PostProcessing: no such histogram!! " << hname << std::endl;
       }
       return pH;
     };
-    auto getHistogramPair  = [&getHPointer] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+    auto getHistogramPair  = [&getHPointer] (const std::string &numeratorName, const std::string &denominatorName)->std::pair<TH1F *, TH1F *>  {
       TH1F* pH2 {};
       TH1F* pH1 = getHPointer(numeratorName);
       if (pH1){
@@ -83,9 +82,9 @@ namespace dqutils {
       return std::pair{pH1, pH2};
     };
     
-    auto getH2Pointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const TString &hname)->TH2F * {
+    auto getH2Pointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const std::string &hname)->TH2F * {
       TH2F* pH {};
-      mf.get(hname, pH);
+      mf.get(hname.c_str(), pH);
       if (!pH and fdbg) {
         std::cerr << "HLTMuon PostProcessing: no such histogram!! " << hname << std::endl;
       }
@@ -102,12 +101,12 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) { //== the while commented out at the end
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
       break;
     }
-    if (!run_dir.Contains("run")) {
+    if (run_dir.find("run") == std::string::npos) {
       std::cerr << "HLTMuon: unable to find run directory ..." << std::endl;
       return;
     }
@@ -115,39 +114,39 @@ namespace dqutils {
       if (fdbg) {
         std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
 
       //===HLTMuon
 
       TH1F* hHI_PP_Flag(0);
-      TString hi_pp_flag = run_dir + "/HLT/MuonMon/Common/HI_PP_Flag";
+      std::string hi_pp_flag = run_dir + "/HLT/MuonMon/Common/HI_PP_Flag";
       hHI_PP_Flag = getHPointer(hi_pp_flag);
       if (hHI_PP_Flag) {
         HI_pp_key = hHI_PP_Flag->GetBinContent(1) > 0;
       }
 
-      TString muon_dir = run_dir + "/HLT/MuonMon/";
+      std::string muon_dir = run_dir + "/HLT/MuonMon/";
 
-      TString cm_dir = muon_dir + "Common/";
-      TString mf_dir = muon_dir + "L2MuonSA/";
-      TString mc_dir = muon_dir + "muComb/";
-      TString mi_dir = muon_dir + "muIso/";
-      TString tm_dir = muon_dir + "TileMu/";
-      TString ef_dir = muon_dir + "MuonEF/";
+      std::string cm_dir = muon_dir + "Common/";
+      std::string mf_dir = muon_dir + "L2MuonSA/";
+      std::string mc_dir = muon_dir + "muComb/";
+      std::string mi_dir = muon_dir + "muIso/";
+      std::string tm_dir = muon_dir + "TileMu/";
+      std::string ef_dir = muon_dir + "MuonEF/";
       // YY added
-      TString ztp_dir = muon_dir + "MuZTP/";
+      std::string ztp_dir = muon_dir + "MuZTP/";
 
-      TString eff_dir = muon_dir + "Efficiency/";
-      TString nd_dir = muon_dir + "Efficiency/NumDenom/";
-      TString rate_dir = muon_dir + "Rate/";
-      TString rr_dir = muon_dir + "Rate/Ratio/";
+      std::string eff_dir = muon_dir + "Efficiency/";
+      std::string nd_dir = muon_dir + "Efficiency/NumDenom/";
+      std::string rate_dir = muon_dir + "Rate/";
+      std::string rr_dir = muon_dir + "Rate/Ratio/";
 
-      TString seff;
-      TString seffg; // YY added
-      TString snum;
-      TString sden;
-      TString stmp;
-      TString stmpg;
+      std::string seff;
+      std::string seffg; // YY added
+      std::string snum;
+      std::string sden;
+      std::string stmp;
+      std::string stmpg;
 
       TH1F* h1tmp(0);
       TH1F* h1eff(0);
@@ -157,29 +156,29 @@ namespace dqutils {
 
       //==Efficiency
       //  L2MuonSA efficiency
-      TDirectory* dir = mf.GetDirectory(eff_dir);
+      TDirectory* dir = mf.GetDirectory(eff_dir.c_str());
       if (!dir) {
         std::cerr << "HLTMuonHistogramDivision: directory " << eff_dir << " not found" << std::endl;
         return;
       }
 
-      std::vector<TString> effnames;
-      effnames.push_back("L2MuonSA_effi_toRecMuonCB_pt");
-      effnames.push_back("L2MuonSA_effi_toRecMuonCB_pt_barrel");
-      effnames.push_back("L2MuonSA_effi_toRecMuonCB_pt_endcap");
-      effnames.push_back("L2MuonSA_effi_toRecMuonCB_eta");
-      effnames.push_back("L2MuonSA_effi_toRecMuonCB_phi");
+      static const std::string effnames_L2MuonSA[] = {
+        "L2MuonSA_effi_toRecMuonCB_pt",
+        "L2MuonSA_effi_toRecMuonCB_pt_barrel",
+        "L2MuonSA_effi_toRecMuonCB_pt_endcap",
+        "L2MuonSA_effi_toRecMuonCB_eta",
+        "L2MuonSA_effi_toRecMuonCB_phi",
+      };
 
-      for (std::vector<TString>::iterator it = effnames.begin(); it != effnames.end(); ++it) {
-        seff = eff_dir + (*it);
-        snum = mf_dir + (*it) + "_numer";
-        sden = mf_dir + (*it) + "_denom";
-        stmp = (*it);
+      for (const std::string& effname : effnames_L2MuonSA) {
+        seff = eff_dir + effname;
+        snum = mf_dir + effname + "_numer";
+        sden = mf_dir + effname + "_denom";
         const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (not h1num) continue;
         //
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
+        h1tmp->SetName(effname.c_str());
         std::string stcar = h1tmp->GetTitle();
         stcar.replace(stcar.end() - 5, stcar.end(), "");
         h1tmp->SetTitle(stcar.c_str());
@@ -192,23 +191,23 @@ namespace dqutils {
       mf.Write();
 
       //  muComb efficiency
-      effnames.clear();
-      effnames.push_back("muComb_effi_toOffl_pt");
-      effnames.push_back("muComb_effi_toOffl_pt_barrel");
-      effnames.push_back("muComb_effi_toOffl_pt_endcap");
-      effnames.push_back("muComb_effi_toOffl_eta");
-      effnames.push_back("muComb_effi_toOffl_phi");
+      static const std::string effnames_muComb[] = {
+        "muComb_effi_toOffl_pt",
+        "muComb_effi_toOffl_pt_barrel",
+        "muComb_effi_toOffl_pt_endcap",
+        "muComb_effi_toOffl_eta",
+        "muComb_effi_toOffl_phi",
+      };
 
-      for (std::vector<TString>::iterator it = effnames.begin(); it != effnames.end(); ++it) {
-        seff = eff_dir + (*it);
-        snum = mc_dir + (*it) + "_numer";
-        sden = mc_dir + (*it) + "_denom";
-        stmp = (*it);
+      for (const std::string& effname : effnames_muComb) {
+        seff = eff_dir + effname;
+        snum = mc_dir + effname + "_numer";
+        sden = mc_dir + effname + "_denom";
         const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
         //
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
+        h1tmp->SetName(effname.c_str());
         std::string stcar = h1tmp->GetTitle();
         stcar.replace(stcar.end() - 5, stcar.end(), "");
         h1tmp->SetTitle(stcar.c_str());
@@ -221,19 +220,19 @@ namespace dqutils {
       mf.Write();
 
       //  muIso efficiency
-      effnames.clear();
-      effnames.push_back("muIso_effi_toOffl_pt");
+      static const std::string effnames_muIso[] = {
+        "muIso_effi_toOffl_pt",
+      };
 
-      for (std::vector<TString>::iterator it = effnames.begin(); it != effnames.end(); ++it) {
-        seff = eff_dir + (*it);
-        snum = mi_dir + (*it) + "_numer";
-        sden = mi_dir + (*it) + "_denom";
-        stmp = (*it);
+      for (const std::string& effname : effnames_muIso) {
+        seff = eff_dir + effname;
+        snum = mi_dir + effname + "_numer";
+        sden = mi_dir + effname + "_denom";
         const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
         //
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
+        h1tmp->SetName(effname.c_str());
         std::string stcar = h1tmp->GetTitle();
         stcar.replace(stcar.end() - 5, stcar.end(), "");
         h1tmp->SetTitle(stcar.c_str());
@@ -246,36 +245,39 @@ namespace dqutils {
       mf.Write();
 
       //  TileMu efficiency
-      effnames.clear();
-      std::vector<TString> numnames;
-      std::vector<TString> dennames;
-      effnames.push_back("TileMu_RecCBMuon_EffEta");
-      numnames.push_back("Rec_Eta_Num");
-      dennames.push_back("Rec_Eta");
-      effnames.push_back("TileMu_RecCBMuon_EffPhi");
-      numnames.push_back("Rec_Phi_Num");
-      dennames.push_back("Rec_Phi");
-      effnames.push_back("TileTrackMu_RecCBMuon_EffEta");
-      numnames.push_back("TileTrackMu_Eta");
-      dennames.push_back("Rec_Eta");
-      effnames.push_back("TileTrackMu_RecCBMuon_EffPhi");
-      numnames.push_back("TileTrackMu_Phi");
-      dennames.push_back("Rec_Phi");
-      effnames.push_back("TileTrackMu_RecCBMuon_EffPt");
-      numnames.push_back("TileTrackMu_Pt");
-      dennames.push_back("Rec_Pt");
+      static const std::string effnames_TileMu[] = {
+        "TileMu_RecCBMuon_EffEta",
+        "TileMu_RecCBMuon_EffPhi",
+        "TileTrackMu_RecCBMuon_EffEta",
+        "TileTrackMu_RecCBMuon_EffPhi",
+        "TileTrackMu_RecCBMuon_EffPt",
+      };
+      static const std::string numnames_TileMu[] = {
+        "Rec_Eta_Num",
+        "Rec_Phi_Num",
+        "TileTrackMu_Eta",
+        "TileTrackMu_Phi",
+        "TileTrackMu_Pt",
+      };
+      static const std::string dennames_TileMu[] = {
+        "Rec_Eta",
+        "Rec_Phi",
+        "Rec_Eta",
+        "Rec_Phi",
+        "Rec_Pt",
+      };
 
-      for (unsigned int i = 0; i < effnames.size(); i++) {
-        seff = eff_dir + effnames.at(i);
-        snum = tm_dir + numnames.at(i);
-        sden = tm_dir + dennames.at(i);
-        stmp = effnames.at(i);
+      for (unsigned int i = 0; i < std::size(effnames_TileMu); i++) {
+        seff = eff_dir + effnames_TileMu[i];
+        snum = tm_dir + numnames_TileMu[i];
+        sden = tm_dir + dennames_TileMu[i];
+        stmp = effnames_TileMu[i];
         const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
-        std::istringstream iss(stmp.Data());
+        h1tmp->SetName(stmp.c_str());
+        std::istringstream iss(stmp);
         std::string token;
         int ili = 0;
         while (std::getline(iss, token, '_')) {
@@ -291,7 +293,7 @@ namespace dqutils {
         }
         if (stcar.find("Eta") != std::string::npos) stmp = "Efficiency on #eta (" + stmp;
         if (stcar.find("Phi") != std::string::npos) stmp = "Efficiency on #phi (" + stmp;
-        h1tmp->SetTitle(stmp);
+        h1tmp->SetTitle(stmp.c_str());
         h1tmp->GetYaxis()->SetTitle("Efficiency");
         h1tmp->Reset();
         h1tmp->Divide(h1num, h1den, 1., 1., "B");
@@ -301,25 +303,23 @@ namespace dqutils {
       mf.Write();
 
       //  MuonEF efficiency
-      effnames.clear();
-      numnames.clear();
-      dennames.clear();
-      effnames.push_back("EFMS_effi_toOffl_pt");
-      effnames.push_back("EFMS_effi_toOffl_eta");
-      effnames.push_back("EFMS_effi_toOffl_phi");
-      effnames.push_back("EFSA_effi_toOffl_pt");
-      effnames.push_back("EFCB_effi_toOffl_pt");
+      static const std::string effnames_MuonEF[] = {
+        "EFMS_effi_toOffl_pt",
+        "EFMS_effi_toOffl_eta",
+        "EFMS_effi_toOffl_phi",
+        "EFSA_effi_toOffl_pt",
+        "EFCB_effi_toOffl_pt",
+      };
 
-      for (std::vector<TString>::iterator it = effnames.begin(); it != effnames.end(); ++it) {
-        seff = eff_dir + (*it);
-        snum = ef_dir + (*it) + "_numer";
-        sden = ef_dir + (*it) + "_denom";
-        stmp = (*it);
+      for (const std::string& effname : effnames_MuonEF) {
+        seff = eff_dir + effname;
+        snum = ef_dir + effname + "_numer";
+        sden = ef_dir + effname + "_denom";
         const auto & [h1num, h1den] = getHistogramPair(snum, sden);
         if (!h1num) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
+        h1tmp->SetName(effname.c_str());
         std::string stcar = h1tmp->GetTitle();
         stcar.replace(stcar.end() - 5, stcar.end(), "");
         h1tmp->SetTitle(stcar.c_str());
@@ -332,13 +332,13 @@ namespace dqutils {
       mf.Write();
 
       //==Turn on
-      std::vector<TString> chainsMSonly;
-      std::vector<TString> chainsStandard;
-      std::vector<TString> chainsMG;
-      std::vector<TString> chainsMI;
-      std::vector<TString> chainsGeneric;
-      std::vector<TString> chainsEFiso;
-      std::vector<TString> chainsEFFS;
+      std::vector<std::string> chainsMSonly;
+      std::vector<std::string> chainsStandard;
+      std::vector<std::string> chainsMG;
+      std::vector<std::string> chainsMI;
+      std::vector<std::string> chainsGeneric;
+      std::vector<std::string> chainsEFiso;
+      std::vector<std::string> chainsEFFS;
 
       // Generic (EFsuper etc.)
 
@@ -360,7 +360,7 @@ namespace dqutils {
       enum indexINDEP {
         INDORTH, INDEGAMMA, INDMET, INDJET, INDTAU, INDMBIAS
       };
-      TString trigger[INDMBIAS + 1];
+      std::string trigger[INDMBIAS + 1];
 
       trigger[INDORTH] = "Orthog";//EGamma + Tau + Jet + MET
       trigger[INDEGAMMA] = "EGamma";
@@ -370,9 +370,9 @@ namespace dqutils {
       //int maxindep = 0; // YY 20.01.2012
 
       // YY added:
-      TString ESchainName = "_ES";
+      static const std::string ESchainName = "_ES";
 
-      TString bestr[2] = {
+      static const std::string bestr[2] = {
         "_Barrel", "_Endcap"
       };
 
@@ -412,8 +412,8 @@ namespace dqutils {
       vectkwd.push_back("_Jet");
       vectkwd.push_back("_all");
 
-      TString hptName = "_hpt";
-      TString MSchainName = "_MSb";
+      std::string hptName = "_hpt";
+      std::string MSchainName = "_MSb";
 
       // YY: pt range.
       int iSTDL;
@@ -446,17 +446,17 @@ namespace dqutils {
       };
 
       //  Standard Chains
-      //TString alg[5] = {"_L2MuonSA", "_MuComb", "_MuonEFMS", "_MuonEFSA", "_MuonEFCB"};
-      //TString wrtalg[5] = {"_L1", "_L2MuonSA", "_MuComb", "_MuComb", "_MuComb"};
+      //std::string alg[5] = {"_L2MuonSA", "_MuComb", "_MuonEFMS", "_MuonEFSA", "_MuonEFCB"};
+      //std::string wrtalg[5] = {"_L1", "_L2MuonSA", "_MuComb", "_MuComb", "_MuComb"};
 
       // ******************************************************//
       // start the code add by Yuan //
-      //TString FS_pre_trigger = "mu18it_tight";
-      TString FS_pre_trigger = "EFFSpre";
+      //std::string FS_pre_trigger = "mu18it_tight";
+      std::string FS_pre_trigger = "EFFSpre";
       for (unsigned int i = 0; i < chainsEFFS.size(); i++) {
-        TString chainName = chainsEFFS.at(i);
+        std::string chainName = chainsEFFS.at(i);
 
-        TString hists_str[9] = {
+        std::string hists_str[9] = {
           chainName + "_tagEFFSpre" + "_Turn_On_Curve_wrt_probe_MuidCB",
           chainName + "_tagEFFSpre" + "_Turn_On_Curve_wrt_probe_MuidCB_Barrel",
           chainName + "_tagEFFSpre" + "_Turn_On_Curve_wrt_probe_MuidCB_Endcap",
@@ -470,15 +470,15 @@ namespace dqutils {
 
         bool for_mydebug = false;
         auto getHPointerQuietly ATLAS_THREAD_SAFE =
-        [&mf, for_mydebug] ATLAS_NOT_THREAD_SAFE(const TString &hname)->TH1F * {
+        [&mf, for_mydebug] ATLAS_NOT_THREAD_SAFE(const std::string &hname)->TH1F * {
           TH1F* pH {};
-          mf.get(hname, pH);
+          mf.get(hname.c_str(), pH);
           if (!pH and for_mydebug) {
             std::cerr << "HLTMuon PostProcessing: no such histogram!! " << hname << std::endl;
           }
           return pH;
         };
-        auto getHistogramPairQuietly = [&getHPointerQuietly] (const TString &numeratorName, const TString &denominatorName)->std::pair<TH1F *, TH1F *>  {
+        auto getHistogramPairQuietly = [&getHPointerQuietly] (const std::string &numeratorName, const std::string &denominatorName)->std::pair<TH1F *, TH1F *>  {
           TH1F* pH2 {};
           TH1F* pH1 = getHPointerQuietly(numeratorName);
           if (pH1){
@@ -500,8 +500,8 @@ namespace dqutils {
           if (!h1num) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
-          h1tmp->SetName(stmp);
-          h1tmp->SetTitle(stmp);
+          h1tmp->SetName(stmp.c_str());
+          h1tmp->SetTitle(stmp.c_str());
           h1tmp->GetYaxis()->SetTitle("Efficiency");
           h1tmp->Reset();
           h1tmp->Divide(h1num, h1den, 1., 1., "B");
@@ -514,12 +514,12 @@ namespace dqutils {
           h1tmpg->BayesDivide(h1num, h1den);
           h1tmpg->GetYaxis()->SetTitle("Efficiency");
           h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
-          h1tmpg->SetName(stmpg);
+          h1tmpg->SetName(stmpg.c_str());
           h1tmpg->Write();
           delete h1tmpg;
         } // end the loop on individual turn-on curves
 
-        TString L1_TP_str = FS_pre_trigger + "_dimuonTP_L1" + "_Turn_On_Curve_wrt_probe_MuidCB";
+        std::string L1_TP_str = FS_pre_trigger + "_dimuonTP_L1" + "_Turn_On_Curve_wrt_probe_MuidCB";
         sden = nd_dir + FS_pre_trigger + "_dimuonTP" + "_Turn_On_Curve_wrt_probe_MuidCB" + "_Denominator";
         snum = nd_dir + FS_pre_trigger + "_dimuonTP" + "_Turn_On_Curve_wrt_L1_probe_MuidCB" + "_Denominator";
         seff = eff_dir + L1_TP_str;
@@ -530,8 +530,8 @@ namespace dqutils {
         if (!h1num) continue;
 
         h1tmp = (TH1F*) h1den->Clone();
-        h1tmp->SetName(stmp);
-        h1tmp->SetTitle(stmp);
+        h1tmp->SetName(stmp.c_str());
+        h1tmp->SetTitle(stmp.c_str());
         h1tmp->GetYaxis()->SetTitle("Efficiency");
         h1tmp->Reset();
         h1tmp->Divide(h1num, h1den, 1., 1., "B");
@@ -545,17 +545,17 @@ namespace dqutils {
         h1tmpg->GetYaxis()->SetTitle("Efficiency");
         h1tmpg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
         dir->cd();
-        h1tmpg->SetName(stmpg);
+        h1tmpg->SetName(stmpg.c_str());
         h1tmpg->Write();
         delete h1tmpg;
 
         //**** summargy plot **********//
 
-        TString histNumB = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Barrel_Numerator";
-        TString histDenB = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Barrel_Denominator";
-        TString histNumE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Numerator";
-        TString histDenE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Denominator";
-        TString histL1sum = eff_dir + chainName + "_EFplateau_wrtOffline";
+        std::string histNumB = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Barrel_Numerator";
+        std::string histDenB = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Barrel_Denominator";
+        std::string histNumE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Numerator";
+        std::string histDenE = nd_dir + chainName + "_tagEFFSpre_Turn_On_Curve_wrt_probe_MuidCB_Endcap_Denominator";
+        std::string histL1sum = eff_dir + chainName + "_EFplateau_wrtOffline";
         const auto & [h1numb, h1denb] = getHistogramPairQuietly(histNumB, histDenB);
         if (!h1numb) continue;
         
@@ -600,13 +600,13 @@ namespace dqutils {
         dir->cd();
         h1sumL->Write("", TObject::kOverwrite);
 
-        TString histNum_mu0_15 = nd_dir + chainName + "_tagEFFSpre_mu0_15_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
-        TString histDen_mu0_15 = nd_dir + chainName + "_tagEFFSpre_mu0_15_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
-        TString histNum_mu15_20 = nd_dir + chainName + "_tagEFFSpre_mu15_20_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
-        TString histDen_mu15_20 = nd_dir + chainName + "_tagEFFSpre_mu15_20_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
-        TString histNum_mu20 = nd_dir + chainName + "_tagEFFSpre_mu20_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
-        TString histDen_mu20 = nd_dir + chainName + "_tagEFFSpre_mu20_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
-        TString histEFsum_mu = eff_dir + chainName + "_EFplateau_wrtOffline_mu_dependence";
+        std::string histNum_mu0_15 = nd_dir + chainName + "_tagEFFSpre_mu0_15_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
+        std::string histDen_mu0_15 = nd_dir + chainName + "_tagEFFSpre_mu0_15_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
+        std::string histNum_mu15_20 = nd_dir + chainName + "_tagEFFSpre_mu15_20_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
+        std::string histDen_mu15_20 = nd_dir + chainName + "_tagEFFSpre_mu15_20_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
+        std::string histNum_mu20 = nd_dir + chainName + "_tagEFFSpre_mu20_Turn_On_Curve_wrt_probe_MuidCB_Numerator";
+        std::string histDen_mu20 = nd_dir + chainName + "_tagEFFSpre_mu20_Turn_On_Curve_wrt_probe_MuidCB_Denominator";
+        std::string histEFsum_mu = eff_dir + chainName + "_EFplateau_wrtOffline_mu_dependence";
 
         TH1F* h1num_mu0_15 = getHPointerQuietly(histNum_mu0_15);
         if (!h1num_mu0_15) continue;
@@ -674,10 +674,10 @@ namespace dqutils {
       }
       //  end of the code add by Yuan //
       // ******************************************************//
-      TString alg2[3] = {
+      static const std::string alg2[3] = {
         "_L2MuonSA", "_MuonEFMS", "_MuonEFSA"
       };
-      TString wrtalg2[3] = {
+      static const std::string wrtalg2[3] = {
         "_L1", "_L2MuonSA", "_L2MuonSA"
       };
 
@@ -685,7 +685,7 @@ namespace dqutils {
       // ******************  MSonly Chains ********************//
       // ******************************************************//
       for (unsigned int i = 0; i < chainsMSonly.size(); i++) {
-        TString chainName = chainsMSonly.at(i);
+        std::string chainName = chainsMSonly.at(i);
 
 #if 0
         for (int trg = 0; trg < maxindep; trg++) {
@@ -738,7 +738,7 @@ namespace dqutils {
                 }
 
                 if (iholx >= 0) {
-                  TString s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(2);
+                  std::string s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(2);
                   h1sumeff = getHPointer(s);
                   if (!h1sumeff) continue;
 
@@ -770,15 +770,15 @@ namespace dqutils {
           if (!pNum) continue;
 
           h1tmp = (TH1F*) pDen->Clone();
-          h1tmp->SetName(stmp);
-          h1tmp->SetTitle(stmp);
+          h1tmp->SetName(stmp.c_str());
+          h1tmp->SetTitle(stmp.c_str());
           h1tmp->GetYaxis()->SetTitle("Efficiency");
           h1tmp->Reset();
           h1tmp->Divide(pNum, pDen, 1., 1., "B");
           dir->cd();
           h1tmp->Write();
           h1tmpg = new TGraphAsymmErrors();
-          h1tmpg->SetName(stmpg);
+          h1tmpg->SetName(stmpg.c_str());
           h1tmpg->SetMarkerStyle(20);
           h1tmpg->SetMinimum(0.0);
           h1tmpg->SetMaximum(1.05);
@@ -805,7 +805,7 @@ namespace dqutils {
             }
 
             if (iholx >= 0) {
-              TString s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(3);
+              std::string s = eff_dir + chainName + "_highpt_effsummary_by" + vectkwd.at(3);
               h1sumeff = getHPointer(s);
               if (!h1sumeff) continue;
               h1sumeff->GetYaxis()->SetTitleOffset(1.3);
@@ -835,15 +835,15 @@ namespace dqutils {
               if (!h1num) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
-              h1tmp->SetName(stmp);
-              h1tmp->SetTitle(stmp);
+              h1tmp->SetName(stmp.c_str());
+              h1tmp->SetTitle(stmp.c_str());
               h1tmp->GetYaxis()->SetTitle("Efficiency");
               h1tmp->Reset();
               h1tmp->Divide(h1num, h1den, 1., 1., "B");
               dir->cd();
               h1tmp->Write();
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -867,15 +867,15 @@ namespace dqutils {
                 if (!h1num) continue;
 
                 h1tmp = (TH1F*) h1den->Clone();
-                h1tmp->SetName(stmp);
-                h1tmp->SetTitle(stmp);
+                h1tmp->SetName(stmp.c_str());
+                h1tmp->SetTitle(stmp.c_str());
                 h1tmp->GetYaxis()->SetTitle("Efficiency");
                 h1tmp->Reset();
                 h1tmp->Divide(h1num, h1den, 1., 1., "B");
                 dir->cd();
                 h1tmp->Write();
                 h1tmpg = new TGraphAsymmErrors();
-                h1tmpg->SetName(stmpg);
+                h1tmpg->SetName(stmpg.c_str());
                 h1tmpg->SetMarkerStyle(20);
                 h1tmpg->SetMinimum(0.0);
                 h1tmpg->SetMaximum(1.05);
@@ -899,15 +899,15 @@ namespace dqutils {
             if (!h1num) continue;
 
             h1tmp = (TH1F*) h1den->Clone();
-            h1tmp->SetName(stmp);
-            h1tmp->SetTitle(stmp);
+            h1tmp->SetName(stmp.c_str());
+            h1tmp->SetTitle(stmp.c_str());
             h1tmp->GetYaxis()->SetTitle("Efficiency");
             h1tmp->Reset();
             h1tmp->Divide(h1num, h1den, 1., 1., "B");
             dir->cd();
             h1tmp->Write();
             h1tmpg = new TGraphAsymmErrors();
-            h1tmpg->SetName(stmpg);
+            h1tmpg->SetName(stmpg.c_str());
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
@@ -938,7 +938,7 @@ namespace dqutils {
                 }
 
                 if (iholx >= 0) {
-                  TString s = eff_dir + chainName + "_highpt_effsummary_by" + triggerES[ies];
+                  std::string s = eff_dir + chainName + "_highpt_effsummary_by" + triggerES[ies];
                   h1sumeff = getHPointer(s);
                   if (!h1sumeff) continue;
                   h1sumeff->GetYaxis()->SetTitleOffset(1.3);
@@ -968,15 +968,15 @@ namespace dqutils {
               if (!h1num) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
-              h1tmp->SetName(stmp);
-              h1tmp->SetTitle(stmp);
+              h1tmp->SetName(stmp.c_str());
+              h1tmp->SetTitle(stmp.c_str());
               h1tmp->GetYaxis()->SetTitle("Efficiency");
               h1tmp->Reset();
               h1tmp->Divide(h1num, h1den, 1., 1., "B");
               dir->cd();
               h1tmp->Write();
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1000,15 +1000,15 @@ namespace dqutils {
           if (!h1num) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
-          h1tmp->SetName(stmp);
-          h1tmp->SetTitle(stmp);
+          h1tmp->SetName(stmp.c_str());
+          h1tmp->SetTitle(stmp.c_str());
           h1tmp->GetYaxis()->SetTitle("Efficiency");
           h1tmp->Reset();
           h1tmp->Divide(h1num, h1den, 1., 1., "B");
           dir->cd();
           h1tmp->Write();
           h1tmpg = new TGraphAsymmErrors();
-          h1tmpg->SetName(stmpg);
+          h1tmpg->SetName(stmpg.c_str());
           h1tmpg->SetMarkerStyle(20);
           h1tmpg->SetMinimum(0.0);
           h1tmpg->SetMaximum(1.05);
@@ -1035,15 +1035,15 @@ namespace dqutils {
             if (!h1num) continue;
 
             h1tmp = (TH1F*) h1den->Clone();
-            h1tmp->SetName(stmp);
-            h1tmp->SetTitle(stmp);
+            h1tmp->SetName(stmp.c_str());
+            h1tmp->SetTitle(stmp.c_str());
             h1tmp->GetYaxis()->SetTitle("Efficiency");
             h1tmp->Reset();
             h1tmp->Divide(h1num, h1den, 1., 1., "B");
             dir->cd();
             h1tmp->Write();
             h1tmpg = new TGraphAsymmErrors();
-            h1tmpg->SetName(stmpg);
+            h1tmpg->SetName(stmpg.c_str());
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
@@ -1069,15 +1069,15 @@ namespace dqutils {
               if (!h1num) continue;
 
               h1tmp = (TH1F*) h1den->Clone();
-              h1tmp->SetName(stmp);
-              h1tmp->SetTitle(stmp);
+              h1tmp->SetName(stmp.c_str());
+              h1tmp->SetTitle(stmp.c_str());
               h1tmp->GetYaxis()->SetTitle("Efficiency");
               h1tmp->Reset();
               h1tmp->Divide(h1num, h1den, 1., 1., "B");
               dir->cd();
               h1tmp->Write();
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1094,7 +1094,7 @@ namespace dqutils {
       }//i
 
       //==Rate
-      dir = mf.GetDirectory(rr_dir);
+      dir = mf.GetDirectory(rr_dir.c_str());
       if (!dir) {
         if (fdbg) {
           std::cerr << "HLTMuonHistogramDivision: directory " << rr_dir << " not found" << std::endl;
@@ -1103,13 +1103,13 @@ namespace dqutils {
       }
 
       //  EF rate / offline rate
-      std::string type[3] = {
+      static const std::string type[3] = {
         "MS_", "SA_", "CB_"
       };
-      std::string off[3] = {
+      static const std::string off[3] = {
         "Moore_MS_", "Moore_SA_", "Muid_"
       };
-      std::string cut[2] = {
+      static const std::string cut[2] = {
         "4", "10"
       };
 
@@ -1124,8 +1124,8 @@ namespace dqutils {
           if (!h1num) continue;
 
           h1tmp = (TH1F*) h1den->Clone();
-          h1tmp->SetName(stmp);
-          h1tmp->SetTitle(stmp);
+          h1tmp->SetName(stmp.c_str());
+          h1tmp->SetTitle(stmp.c_str());
           h1tmp->GetYaxis()->SetTitle("Efficiency");
           h1tmp->Reset();
           h1tmp->Divide(h1num, h1den, 1., 1., "B");
@@ -1136,8 +1136,8 @@ namespace dqutils {
       mf.Write();
 
       // Triggers / Event
-      std::vector<TString> chains;
-      std::vector<TString> chains2;
+      std::vector<std::string> chains;
+      std::vector<std::string> chains2;
 
       {
         std::map<std::string, std::string> ztpmap;
@@ -1158,8 +1158,8 @@ namespace dqutils {
         ztp_isomap["muChainMSonly2"] = 0;
 
         for (std::map<std::string, std::string>::iterator itmap = ztpmap.begin(); itmap != ztpmap.end(); ++itmap) {
-          TString histdirmuztp = run_dir + "/HLT/MuonMon/MuZTP/" + itmap->first;
-          TDirectory* ztpdir = mf.GetDirectory(histdirmuztp);
+          std::string histdirmuztp = run_dir + "/HLT/MuonMon/MuZTP/" + itmap->first;
+          TDirectory* ztpdir = mf.GetDirectory(histdirmuztp.c_str());
           bool isefisochain = ztp_isomap[itmap->first] > 0;
 
           //efficiency histograms
@@ -1190,7 +1190,7 @@ namespace dqutils {
               if (!h1num) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1210,7 +1210,7 @@ namespace dqutils {
               if (!h1num2) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1234,7 +1234,7 @@ namespace dqutils {
               //if (!h1den) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmp);
+              h1tmpg->SetName(stmp.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1254,7 +1254,7 @@ namespace dqutils {
               if (!h1num4) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1274,7 +1274,7 @@ namespace dqutils {
               if (!h1num5) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1302,8 +1302,8 @@ namespace dqutils {
               if (!h2den) continue;
 
               h2tmp = (TH2F*) h1den->Clone();
-              h2tmp->SetName(stmp);
-              h2tmp->SetTitle(stmp);
+              h2tmp->SetName(stmp.c_str());
+              h2tmp->SetTitle(stmp.c_str());
               h2tmp->GetYaxis()->SetTitle("Efficiency");
               h2tmp->Reset();
               h2tmp->Divide(h1num, h1den, 1., 1., "B");
@@ -1321,7 +1321,7 @@ namespace dqutils {
             if (!h1num) continue;
 
             h1tmpg = new TGraphAsymmErrors();
-            h1tmpg->SetName(stmpg);
+            h1tmpg->SetName(stmpg.c_str());
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
@@ -1341,7 +1341,7 @@ namespace dqutils {
             if (!h1num2) continue;
 
             h1tmpg = new TGraphAsymmErrors();
-            h1tmpg->SetName(stmpg);
+            h1tmpg->SetName(stmpg.c_str());
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
@@ -1361,7 +1361,7 @@ namespace dqutils {
             if (!h1num3) continue;
 
             h1tmpg = new TGraphAsymmErrors();
-            h1tmpg->SetName(stmpg);
+            h1tmpg->SetName(stmpg.c_str());
             h1tmpg->SetMarkerStyle(20);
             h1tmpg->SetMinimum(0.0);
             h1tmpg->SetMaximum(1.05);
@@ -1382,7 +1382,7 @@ namespace dqutils {
               if (!h1num) continue;
 
               h1tmpg = new TGraphAsymmErrors();
-              h1tmpg->SetName(stmpg);
+              h1tmpg->SetName(stmpg.c_str());
               h1tmpg->SetMarkerStyle(20);
               h1tmpg->SetMinimum(0.0);
               h1tmpg->SetMaximum(1.05);
@@ -1401,7 +1401,7 @@ namespace dqutils {
 
 
       {
-        TDirectory* efdir = mf.GetDirectory(eff_dir);
+        TDirectory* efdir = mf.GetDirectory(eff_dir.c_str());
         if (!efdir) {
           if (fdbg) {
             std::cerr << "HLTMuonHistogramDivision: directory " << eff_dir << " not found" << std::endl;
@@ -1411,13 +1411,13 @@ namespace dqutils {
 
         // MAM
         const int MAXARR = 6;
-        std::string charr[MAXARR] = {
+        static const std::string charr[MAXARR] = {
           "muChain1", "muChain2", "muChainEFiso1", "muChainEFiso2", "muChainMSonly1", "muChainMSonly2"
         };
-        std::string monarr[MAXARR] = {
+        static const std::string monarr[MAXARR] = {
           "_EFmuon", "_EFmuon", "_EFmuon", "_EFmuon", "_MuonEFSA", "_MuonEFSA"
         };
-        std::string monL2arr[MAXARR] = {
+        static const std::string monL2arr[MAXARR] = {
           "_L2MuonSA", "_L2MuonSA", "_L2MuonSA", "_L2MuonSA", "_L2MuonSA", "_L2MuonSA"
         };
         bool isBarrelMon[MAXARR] = {
@@ -1440,8 +1440,8 @@ namespace dqutils {
           std::string MoniL2Alg = monL2arr[ialg];
 
           /* 1. Picking up ztp graph */
-          TString hdirztp = muon_dir + "MuZTP/" + chainName + "/";
-          TString histZtpNum, histZtpDen;
+          std::string hdirztp = muon_dir + "MuZTP/" + chainName + "/";
+          std::string histZtpNum, histZtpDen;
           if (!isBarrelMon[ialg]) {
             histZtpNum = hdirztp + "muZTP_Pt_4bins_EFfired_" + chainName;
             histZtpDen = hdirztp + "muZTP_Pt_4bins_L1fired_" + chainName;
@@ -1450,7 +1450,7 @@ namespace dqutils {
             histZtpDen = hdirztp + "muZTP_Pt_B_4bins_L1fired_" + chainName;
           }
           if (isefIsolation[ialg]) histZtpNum = hdirztp + "muZTP_Pt_4bins_EFIsofired_" + chainName; // add by Yuan
-          TString histZtpEff = eff_dir + chainName + "_highpt3bins_effwrtL1";
+          std::string histZtpEff = eff_dir + chainName + "_highpt3bins_effwrtL1";
           const auto & [h1num, h1den] = getHistogramPair(histZtpNum, histZtpDen);
           if (!h1num) continue;
           h1eff = getHPointer(histZtpEff);
@@ -1481,12 +1481,12 @@ namespace dqutils {
           h1eff->Write("", TObject::kOverwrite);
 
           if (monL1[ialg]) { // MUST skip muGirl, muIso and MSonly as histograms are not defined!!!
-            TString hdirztp = muon_dir + "MuZTP/" + chainName + "/";
-            TString histZtpNumB = hdirztp + "muZTP_Pt_B_L1fired_" + chainName;
-            TString histZtpDenB = hdirztp + "muZTP_Pt_B_" + chainName;
-            TString histZtpNumE = hdirztp + "muZTP_Pt_EC_L1fired_" + chainName;
-            TString histZtpDenE = hdirztp + "muZTP_Pt_EC_" + chainName;
-            TString histZtpL1sum = eff_dir + chainName + "_highptL1plateau_wrtOffline";
+            std::string hdirztp = muon_dir + "MuZTP/" + chainName + "/";
+            std::string histZtpNumB = hdirztp + "muZTP_Pt_B_L1fired_" + chainName;
+            std::string histZtpDenB = hdirztp + "muZTP_Pt_B_" + chainName;
+            std::string histZtpNumE = hdirztp + "muZTP_Pt_EC_L1fired_" + chainName;
+            std::string histZtpDenE = hdirztp + "muZTP_Pt_EC_" + chainName;
+            std::string histZtpL1sum = eff_dir + chainName + "_highptL1plateau_wrtOffline";
 
             TH1F* h1numb = getHPointer(histZtpNumB);
             if (!h1numb) continue;
@@ -1541,16 +1541,16 @@ namespace dqutils {
       // ******************************************************//
       // *********************  generic ***********************//
       // ******************************************************//
-      TString monalg[3] = {
+      std::string monalg[3] = {
         "_L2MuonSA", "_MuComb", "_EFmuon"
       };
-      TString wrtalg[3] = {
+      std::string wrtalg[3] = {
         "_L1", "_L2MuonSA", "_MuComb"
       };
-      TString numer, denom, effi;
-      TString histdireff = eff_dir;
+      std::string numer, denom, effi;
+      std::string histdireff = eff_dir;
 
-      TDirectory* efdir = mf.GetDirectory(eff_dir);
+      TDirectory* efdir = mf.GetDirectory(eff_dir.c_str());
       if (!efdir) {
         if (fdbg) {
           std::cerr << "HLTMuonHistogramDivision: directory " << eff_dir << " not found" << std::endl;
@@ -1562,7 +1562,7 @@ namespace dqutils {
       chainsGeneric.insert(chainsGeneric.end(), chainsEFiso.begin(), chainsEFiso.end());
 
       for (unsigned int i = 0; i < chainsGeneric.size(); i++) {
-        TString chainName = chainsGeneric.at(i);
+        std::string chainName = chainsGeneric.at(i);
         if (fdbg) {
           std::cout << "proc generic " << chainName << std::endl;
         }
@@ -1624,7 +1624,7 @@ namespace dqutils {
                     sumerr = sqrt((double) sumn * (1. - sumeff)) / (double) sumd;
                   }
 
-                  TString s = histdireff + chainName + "_L1plateau_wrtOffline_by_ESindep";
+                  std::string s = histdireff + chainName + "_L1plateau_wrtOffline_by_ESindep";
                   TH1F* h1effL1 = getHPointer(s);
                   if (!h1effL1) continue;
                   h1effL1->SetBinContent(be + 1, sumeff);
@@ -1664,7 +1664,7 @@ namespace dqutils {
                 iholx = static_cast<int>(iEFCB);
               }
 
-              TString s = histdireff + chainName + "_highpt_effsummary_by" + triggerES[i];
+              std::string s = histdireff + chainName + "_highpt_effsummary_by" + triggerES[i];
               h1effsum = getHPointer(s);
               if (!h1effsum) continue;
               //
@@ -1722,10 +1722,10 @@ namespace dqutils {
   }//MonitoringFile::HLTMuonHistogramDivision
 
   void MonitoringFile::HLTMuonHDiv(PostProcessorFileWrapper& mf,
-                                   TString sdir, TString snum, TString sden, TString seff, TString seffg) {
-    auto getHPointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const TString &hname)->TH1F * {
+                                   const std::string& sdir, const std::string& snum, const std::string& sden, const std::string& seff, const std::string& seffg) {
+    auto getHPointer ATLAS_THREAD_SAFE = [&mf] ATLAS_NOT_THREAD_SAFE(const std::string &hname)->TH1F * {
       TH1F* pH {};
-      mf.get(hname, pH);
+      mf.get(hname.c_str(), pH);
       if (!pH and fdbg) {
         std::cerr << "HLTMuon PostProcessing: no such histogram!! " << hname << std::endl;
       }
@@ -1736,8 +1736,7 @@ namespace dqutils {
     TH1F* h1den(0);
     TGraphAsymmErrors* h1tmpfg = new TGraphAsymmErrors();
 
-    ;
-    TString stmp = seff + seffg;
+    std::string stmp = seff + seffg;
 
     h1num = getHPointer(sdir + "NumDenom/" + snum);
     if (!h1num) return;
@@ -1745,18 +1744,18 @@ namespace dqutils {
     h1den = getHPointer(sdir + "NumDenom/" + sden);
     if (!h1den) return;
 
-    TDirectory* dir = mf.GetDirectory(sdir);
+    TDirectory* dir = mf.GetDirectory(sdir.c_str());
 
     h1tmpf = (TH1F*) h1den->Clone();
-    h1tmpf->SetName(stmp);
-    h1tmpf->SetTitle(stmp);
+    h1tmpf->SetName(stmp.c_str());
+    h1tmpf->SetTitle(stmp.c_str());
     h1tmpf->GetYaxis()->SetTitle("Efficiency");
     h1tmpf->Reset();
     h1tmpf->Divide(h1num, h1den, 1., 1., "B");
     h1tmpf->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
     h1tmpf->SetMinimum(0.0);
     h1tmpfg->SetMaximum(1.05);
-    h1tmpf->SetName(stmp);
+    h1tmpf->SetName(stmp.c_str());
     dir->cd();
     h1tmpf->Write();
     h1tmpfg->SetMarkerStyle(20);
@@ -1766,7 +1765,7 @@ namespace dqutils {
     h1tmpfg->GetYaxis()->SetTitle("Efficiency");
     h1tmpfg->GetXaxis()->SetTitle(h1den->GetXaxis()->GetTitle());
     dir->cd();
-    h1tmpfg->SetName(stmp);
+    h1tmpfg->SetName(stmp.c_str());
     h1tmpfg->Write();
     delete h1tmpfg;
   }
