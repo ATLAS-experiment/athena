@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # PixelNtupleConfig.py
@@ -11,7 +11,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def PixelNtupleMakerCfg(flags, name="PixelMonitoringTool", **kwargs):
     acc= ComponentAccumulator()
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     InDetTrackSelectionTool = acc.popToolsAndMerge(
         InDetTrackSelectionTool_Loose_Cfg(flags))
     acc.addPublicTool(InDetTrackSelectionTool, primary=False)

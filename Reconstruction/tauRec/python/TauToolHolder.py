@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -32,7 +32,8 @@ def TauVertexFinderCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        Tau_InDetTrackSelectionToolForTJVACfg)
     from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TauTTVAToolCfg
 
     # Algorithm that overwrites numTrack() and charge() of tauJets in container

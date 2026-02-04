@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -213,7 +213,8 @@ def ITkBeamspotVertexPreProcessorCfg(flags, name="ITkBeamspotVertexPreProcessor"
             cfg.popToolsAndMerge(TrackToVertexIPEstimatorCfg(flags))))
 
     if "BSConstraintTrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import Align_InDetTrackSelectionToolCfg
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+            Align_InDetTrackSelectionToolCfg)
         kwargs.setdefault("BSConstraintTrackSelector", cfg.addPublicTool(
             cfg.popToolsAndMerge(Align_InDetTrackSelectionToolCfg(flags))))
 

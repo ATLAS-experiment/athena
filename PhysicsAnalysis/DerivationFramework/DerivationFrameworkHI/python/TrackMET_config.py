@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from METReconstruction.METRecoCfg import BuildConfig, RefConfig, METConfig, getMETRecoAlg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,7 +16,8 @@ def Cfg_METTrack(configFlags, ptCut):
     cfg_trk.refiners['TrackFilter'].DoEoverPSel=False
     cfg_trk.refiners['TrackFilter'].InputClusterKey = 'SubtractedCaloCalTopoClusters'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HITight_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_HITight_Cfg)
     
     TrkSelTool_hi_tight = acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(configFlags,
                                                             name = "TrackSelectionTool_hi_tight_pt"+str(ptCut),

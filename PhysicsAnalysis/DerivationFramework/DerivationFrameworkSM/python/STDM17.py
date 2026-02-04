@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_STDM17.py
@@ -72,7 +72,8 @@ def STDM17AugmentationToolsForSkimmingCfg(flags):
 
     # Loose tracks with pT > 1000 MeV and Nonprompt_All_MaxWeight TTVA
     toolkwargs = {}
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                               name = "TrackSelectionTool1000_STDM17",
                                                                                               minPt = 1000.))
@@ -105,7 +106,8 @@ def STDM17AugmentationToolsCfg(flags):
 
     toolkwargs = {}
     # Loose tracks with pT > 500 MeV
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                               name = "TrackSelectionTool500_STDM17",
                                                                                               minPt = 500.))
