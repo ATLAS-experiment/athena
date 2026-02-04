@@ -814,8 +814,8 @@
       <hist1D name="Tau_TauJets_Nominal_Fake_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Fake_GNTauJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Fake_GNTauJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_GNTauScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Fake_GNTauScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptGNTauSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptGNTauSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Fake_ptGNTauSigMedium" plotopts="" tests="KS" type="TH1F"/>
@@ -846,8 +846,8 @@
       <hist1D name="Tau_TauJets_Nominal_Matched_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Matched_GNTauJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_Matched_GNTauJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_GNTauScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_Matched_GNTauScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigMedium" plotopts="" tests="KS" type="TH1F"/>
@@ -878,8 +878,8 @@
       <hist1D name="Tau_TauJets_Nominal_RecTau_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_GNTauJetScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_GNTauJetScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_GNTauScore" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="Tau_TauJets_Nominal_RecTau_GNTauScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptGNTauSigLoose" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptGNTauSigLooseHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_RecTau_ptGNTauSigMedium" plotopts="" tests="KS" type="TH1F"/>
