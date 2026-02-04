@@ -1,6 +1,5 @@
-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PixelGeoModelXml_PIXELDETECTORTOOL_H
@@ -13,11 +12,8 @@
 #include <InDetGeoModelUtils/GeoModelXmlTool.h>
 #include <InDetGeoModelUtils/WaferTree.h>
 #include <ReadoutGeometryBase/SiCommonItems.h>
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 
 #include <memory>
-
-class GeoPhysVol;
 
 namespace InDetDD
 {
@@ -44,7 +40,6 @@ private:
   Gaudi::Property<std::string> m_alignmentFolderName{this, "AlignmentFolderName", "/Indet/Align", ""};
   // Print out how many of each layer/eta/phi etc. have been set up.
   void doNumerology(InDetDD::PixelDetectorManager *manager);
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
 
 };
 

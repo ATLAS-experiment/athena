@@ -42,14 +42,10 @@ StatusCode TRT_DetectorTool::create()
   ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
   GeoPhysVol *world = theExpt->getPhysVol();
 
-  // Retrieve the Geometry DB Interface
-  ATH_CHECK( m_geometryDBSvc.retrieve() );
-
   // Pass athena services to factory, etc
   m_athenaComps.setDetStore(detStore().operator->());
   m_athenaComps.setGeoDbTagSvc(m_geoDbTagSvc.get());
   m_athenaComps.setRDBAccessSvc(accessSvc.get());
-  m_athenaComps.setGeometryDBSvc(m_geometryDBSvc.get());
 
   std::unique_ptr<TRTStrawStatusAccessor> strawStatusAccessor;
   ATH_CHECK(m_sumTool.retrieve(DisableTool{ !m_dumpStrawStatus }));

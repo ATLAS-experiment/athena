@@ -14,11 +14,8 @@
 #include <InDetGeoModelUtils/GeoModelXmlTool.h>
 #include <InDetGeoModelUtils/WaferTree.h>
 #include <ReadoutGeometryBase/SiCommonItems.h>
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 
 #include <memory>
-
-class GeoPhysVol;
 
 namespace InDetDD
 {
@@ -49,7 +46,6 @@ private:
 
   // Print out how many of each layer/eta/phi etc. have been set up.
   void doNumerology(InDetDD::SCT_DetectorManager *manager);
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
 };
 
 } // namespace ITk

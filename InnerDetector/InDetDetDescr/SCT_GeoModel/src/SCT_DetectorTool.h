@@ -8,7 +8,6 @@
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "SCT_GeoModelAthenaComps.h"
 
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -41,7 +40,6 @@ private:
   SCT_GeoModelAthenaComps m_athenaComps;
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
 };
 
 #endif // SCT_GEOMODEL_SCT_DETECTORTOOL_H
