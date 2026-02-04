@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExtParameterisedVolumeBuilder.h"
@@ -25,21 +25,15 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include <iostream>
+#include <format>
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 ExtParameterisedVolumeBuilder::ExtParameterisedVolumeBuilder(const std::string& n, Geo2G4AssemblyFactory* G4AssemblyFactory):
-  VolumeBuilder(n),
-  AthMessaging(n),
-  m_getMatEther(true),
-  m_matEther(nullptr),
-  m_matHypUr(nullptr),
-  m_G4AssemblyFactory(G4AssemblyFactory)
-{
-}
+    VolumeBuilder(n), AthMessaging(n), m_G4AssemblyFactory(G4AssemblyFactory) {}
 
-G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPhysVolume, OpticalVolumesMap* optical_volumes)
-{
+G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPhysVolume, OpticalVolumesMap* optical_volumes) {
+
   PVConstLink theGeoPhysChild;
   const GeoSerialTransformer* serialTransformerChild{nullptr};
   G4LogicalVolume* theG4LogChild{nullptr};
@@ -48,14 +42,18 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   bool serialExists = false;                       // flag for existence of ST among childs
   std::string nameChild;
 
-  if(m_getMatEther) getMatEther();
+  if(m_getMatEther) {
+    getMatEther();
+  }
+  // BuildAssembly
 
   static Geo2G4LVFactory LVFactory;
 
-  G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume,descend);
+  G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume, descend);
 
-  if(!descend) return theG4LogVolume;
-
+  if(!descend) {
+    return theG4LogVolume;
+  }
   numChildNodes = theGeoPhysVolume->getNChildVolAndST();
 
   // *****************************************************************
@@ -65,19 +63,19 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   // **
   // *****************************************************************
 
-  if(m_paramOn)
-    for(size_t counter1=0; counter1<numChildNodes; counter1++)
-      {
+  if(m_paramOn){
+    for(size_t counter1=0; counter1<numChildNodes; ++counter1) {
         GeoAccessVolAndSTAction actionVolAndST(counter1);
         theGeoPhysVolume->exec(&actionVolAndST);
 
-        if((serialTransformerChild=actionVolAndST.getSerialTransformer()))
-          {
+        serialTransformerChild=actionVolAndST.getSerialTransformer();
+        if(serialTransformerChild) {
             nameChild = actionVolAndST.getName();
             serialExists = true;
             break;
           }
       }
+  }
   // ***************************************************************************
   // **                Next steps:
   // **
@@ -90,14 +88,17 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   // **
   // ***************************************************************************
 
-  if(serialExists && (numChildNodes==1))
-    {
+  if(serialExists && numChildNodes==1) {
       theGeoPhysChild = serialTransformerChild->getVolume();
 
       // Build the child
-      if(!(theG4LogChild = Build(theGeoPhysChild,optical_volumes))) return nullptr;
-
-      if (nameChild == "ANON") nameChild=theG4LogChild->GetName();
+      theG4LogChild = Build(theGeoPhysChild,optical_volumes);
+      if(!theG4LogChild) {
+        return nullptr;
+      }
+      if (nameChild == "ANON") {
+        nameChild=theG4LogChild->GetName();
+      }
       nameChild += "_Param";
 
       Geo2G4STParameterisation* stParameterisation = new Geo2G4STParameterisation(serialTransformerChild->getFunction(),
@@ -109,18 +110,13 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
                                                                                  kUndefined,
                                                                                  serialTransformerChild->getNCopies(),
                                                                                  stParameterisation);
-    }
-  else
-    {
-      if(serialExists)
-        {
-          std::string volName = theGeoPhysVolume->getLogVol()->getName();
-          PrintSTInfo(volName);
-        }
+  } else {
+      if(serialExists) {
+        PrintSTInfo(theGeoPhysVolume->getLogVol()->getName());
+      }
 
       GeoVolumeCursor av(theGeoPhysVolume);
-      while (!av.atEnd())
-        {
+      while (!av.atEnd()) {
           int id = 16969;
 
           // Get child phys volume
@@ -128,119 +124,116 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
           // Get its transform
           G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
 
-	  std::optional<int> Qint =  av.getId();
-          if(Qint) id = *Qint;
+          std::optional<int> Qint =  av.getId();
+          if(Qint) {
+            id = *Qint;
+          }
 
-	  bool isEther = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::Ether")==0;
-	  bool isHypUr = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::HyperUranium")==0;
+          const bool isEther = theGeoPhysChild->getLogVol()->getMaterial()->getName() =="special::Ether";
+          const bool isHypUr = theGeoPhysChild->getLogVol()->getMaterial()->getName() =="special::HyperUranium";
 
-	  if(isEther) {
-	    Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
-	    
-	    if(Qint) {
-	      assembly->MakeImprint(theG4LogVolume,theG4Position,id);
-	    }
-	    else {
-	      assembly->MakeImprint(theG4LogVolume,theG4Position);
-	    }
-	  }
-          else if(isHypUr) {
-	    Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
-	    
-	    if(Qint) {
-	      assembly->MakeImprint(theG4LogVolume,theG4Position,id,true);
-	    }
-	    else {
-	      assembly->MakeImprint(theG4LogVolume,theG4Position,0,true);
-	    }
-	  }
-          else {
-	    nameChild = av.getName();
+          if(isEther) {
+            Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
+      
+            if(Qint) {
+              assembly->MakeImprint(theG4LogVolume,theG4Position, id);
+            } else {
+               assembly->MakeImprint(theG4LogVolume,theG4Position);
+            }
+          } else if(isHypUr) {
+            Geo2G4AssemblyVolume* assembly = BuildAssembly(theGeoPhysChild);
 
-	    // Build the child
-	    if(!(theG4LogChild = Build(theGeoPhysChild,optical_volumes))) return nullptr;
-	    
-	    if (nameChild == "ANON") nameChild=theG4LogChild->GetName();
-	    
-	    G4PhysicalVolumesPair pvPair = G4ReflectionFactory::Instance()->Place(theG4Position
-										  , nameChild
-										  , theG4LogChild
-										  , theG4LogVolume
-										  , false
-										  , id);
+            if(Qint) {
+              assembly->MakeImprint(theG4LogVolume,theG4Position,id,true);
+            } else {
+              assembly->MakeImprint(theG4LogVolume,theG4Position,0,true);
+            }
+          } else {
+            nameChild = av.getName();
 
-	    // if GeoModel volume is optical store it in the map
-	    if(optical_volumes!=0) {
-	      const GeoOpticalPhysVol* opticalGeoPhysChild =
-		dynamic_cast < const GeoOpticalPhysVol* >(theGeoPhysChild.operator->());
-	      if(opticalGeoPhysChild)
-		(*optical_volumes)[opticalGeoPhysChild] = pvPair.first;
-	    }
-	  }
+            // Build the child
+            theG4LogChild = Build(theGeoPhysChild,optical_volumes);
+            if(!theG4LogChild) {
+              return nullptr;
+            }
+            if (nameChild == "ANON") {
+              nameChild=theG4LogChild->GetName();
+            }
+            G4PhysicalVolumesPair pvPair = G4ReflectionFactory::Instance()->Place(theG4Position, nameChild, 
+                                                                                  theG4LogChild, theG4LogVolume, false, id);
 
-          av.next();
+            // if GeoModel volume is optical store it in the map
+            if(optical_volumes!=nullptr) {
+              const GeoOpticalPhysVol* opticalGeoPhysChild = dynamic_cast < const GeoOpticalPhysVol* >(theGeoPhysChild.get());
+              if(opticalGeoPhysChild) {
+                (*optical_volumes)[opticalGeoPhysChild] = pvPair.first;
+              }
+            }
         }
-    }
+        av.next();
+      }
+  }
 
   return theG4LogVolume;
 }
 
-Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConstLink& pv)
-{
+Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConstLink& pv) {
   PVConstLink theGeoPhysChild;
   G4LogicalVolume* theG4LogChild{nullptr};
   Geo2G4AssemblyVolume* theG4AssemblyChild{nullptr};
-  bool descend;                                    // flag to continue geo tree navigation
+  bool descend{false};                                    // flag to continue geo tree navigation
 
-  if(m_getMatEther) getMatEther();
+  if(m_getMatEther) {
+    getMatEther();
+  }
+  Geo2G4AssemblyVolume* assemblyVolume = m_G4AssemblyFactory->Build(pv, descend);
 
-  Geo2G4AssemblyVolume* assemblyVolume = m_G4AssemblyFactory->Build(pv,descend);
-
-  if(!descend) return assemblyVolume;
-
+  if(!descend) {
+    return assemblyVolume;
+  }
   // Loop over child volumes and add them to the Geo2G4AssemblyVolume
   GeoVolumeCursor av(pv);
-  while (!av.atEnd())
-    {
+  while (!av.atEnd()) {
       theGeoPhysChild = av.getVolume();
       std::string nameChild = av.getName();
 
-      std::string strVolume = std::string("Volume ") + nameChild + " ("
-        + theGeoPhysChild->getLogVol()->getName() + ")";
+      std::string strVolume = std::format("Volume {:} ({:})", nameChild,
+                                          theGeoPhysChild->getLogVol()->getName());
 
       // Check if it is an assembly
-      bool isEther = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::Ether")==0;
-      bool isHypUr = theGeoPhysChild->getLogVol()->getMaterial()->getName().compare("special::HyperUranium")==0;
+      bool isEther = theGeoPhysChild->getLogVol()->getMaterial()->getName() ==  "special::Ether";
+      bool isHypUr = theGeoPhysChild->getLogVol()->getMaterial()->getName() ==  "special::HyperUranium";
       
       if(isEther || isHypUr) {
-	// Build the child assembly
-	if(!(theG4AssemblyChild = BuildAssembly(theGeoPhysChild))) return nullptr;
-	
-	// Get its transform
-	G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
-	
-	assemblyVolume->AddPlacedAssembly(theG4AssemblyChild,theG4Position);
+        // Build the child assembly
+        theG4AssemblyChild = BuildAssembly(theGeoPhysChild);
+        if(!theG4AssemblyChild) {
+          return nullptr;
+        }
+        // Get its transform
+        G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
+  
+        assemblyVolume->AddPlacedAssembly(theG4AssemblyChild,theG4Position);
+      } else {
+        std::optional<int> Qint =  av.getId();
+
+        // Build the child
+        theG4LogChild = Build(theGeoPhysChild);
+        if(!theG4LogChild) {
+          return nullptr;
+        }
+        // Get its transform
+        G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
+  
+        int placedID = 0;
+        if(Qint) placedID = *Qint;
+  
+        std::string placedName = nameChild=="ANON" ? "" : nameChild;
+
+        assemblyVolume->AddPlacedVolume(theG4LogChild,theG4Position,placedID,placedName);
       }
-      else {
-	std::optional<int> Qint =  av.getId();
-
-	// Build the child
-	if(!(theG4LogChild = Build(theGeoPhysChild))) return nullptr;
-
-	// Get its transform
-	G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(av.getTransform()));
-	
-	int placedID = 0;
-	if(Qint) placedID = *Qint;
-	
-	std::string placedName = nameChild=="ANON" ? "" : nameChild;
-
-	assemblyVolume->AddPlacedVolume(theG4LogChild,theG4Position,placedID,placedName);
-      }
-
       av.next();
-    }
-
+  }
   return assemblyVolume;
 }
 

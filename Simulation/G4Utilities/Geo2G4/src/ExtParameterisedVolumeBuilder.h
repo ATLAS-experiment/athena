@@ -30,9 +30,9 @@ public:
   ///
   void getMatEther();
 
-  bool               m_getMatEther;
-  const GeoMaterial* m_matEther;
-  const GeoMaterial* m_matHypUr;
+  bool               m_getMatEther{true};
+  const GeoMaterial* m_matEther{nullptr};
+  const GeoMaterial* m_matHypUr{nullptr};
 
   Geo2G4AssemblyFactory* m_G4AssemblyFactory;
 };
