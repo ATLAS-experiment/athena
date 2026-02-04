@@ -13,7 +13,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "AsgTools/ToolHandleArray.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsMaterial/RecordedMaterialTrackCollection.h"
+#include "ActsEvent/RecordedMaterialTrackCollection.h"
 #include "ActsMaterial/IMaterialWriterTool.h"
 #include "Acts/Material/MaterialMapper.hpp"
 

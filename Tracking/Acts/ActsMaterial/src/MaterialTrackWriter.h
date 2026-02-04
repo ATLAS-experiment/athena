@@ -10,7 +10,7 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsMaterial/RecordedMaterialTrackCollection.h"
+#include "ActsEvent/RecordedMaterialTrackCollection.h"
 
 #include <ActsPlugins/Root/RootMaterialTrackIo.hpp>
 
