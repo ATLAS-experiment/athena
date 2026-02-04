@@ -132,7 +132,7 @@ def STDM7KernelCfg(flags, name='STDM7Kernel', **kwargs):
     ))
     # Needed to decorate taus with DFTauGNTau WPs
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(flags, prefix="STDM7", doGNTauLoose=True))
+    acc.merge(AddTauAugmentationCfg(flags, wp="GNTauLoose"))
 
     ## IFF augmentation - Adding Lepton Taggers 
     from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
