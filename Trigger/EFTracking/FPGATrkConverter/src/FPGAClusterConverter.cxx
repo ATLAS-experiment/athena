@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAClusterConverter.h"
 
@@ -47,7 +47,7 @@ StatusCode FPGAClusterConverter::convertHits(const FPGATrackSimHitCollection& hi
   // reserve some memory
   pixelColl.reserve(hits.size());
   SCTColl.reserve(hits.size());
-  for(const auto& hit : hits) {
+  for(const FPGATrackSimHit* hit : hits) {
       const FPGATrackSimHit & h = *hit;
       std::vector<Identifier> rdoList{Identifier(h.getRdoIdentifier())};
 
@@ -133,7 +133,7 @@ StatusCode FPGAClusterConverter::convertHits(const FPGATrackSimHitCollection& hi
     // reserve some memory
   pixelCont.reserve(hits.size());
   SCTCont.reserve(hits.size());
-  for(const auto& hit : hits) {
+  for(const FPGATrackSimHit* hit : hits) {
       const FPGATrackSimHit & h = *hit;
       std::vector<Identifier> rdoList{Identifier(h.getIdentifier())};
 
