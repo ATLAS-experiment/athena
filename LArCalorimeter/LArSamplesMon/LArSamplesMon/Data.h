@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <atomic>
+#include <memory>
 
 class TH1D;
 
@@ -75,7 +76,8 @@ namespace LArSamples {
       
       /** @brief Constructor  */
       
-      Data(const DataContainer& container, const EventData& eventData, const History* history, int index, bool takeOwnership = false);      
+      Data(const DataContainer& container, const EventData& eventData, const History* history, int index);
+      Data(std::unique_ptr<const DataContainer> container, const EventData& eventData, const History* history, int index);
       Data(const Data& other, const EventData* eventData = 0, const History* history = 0, int index = -1);
       
       /** @brief Destructor */
@@ -92,7 +94,7 @@ namespace LArSamples {
       float pedestalSubtractedSample(unsigned int i) const { return sample(i) - pedestal(); }
       std::vector<float> pedestalSubtractedSamples() const;
 
-      const EventData* eventData() const { return m_eventData; }
+      const EventData& eventData() const { return m_eventData; }
       
       /** @return run */
       int run() const;
@@ -278,8 +280,8 @@ namespace LArSamples {
     private:
      
       //bool fit(const AbsShape& reference, double& k, double& deltaT, double& chi2) const;
-      const DataContainer* const m_container;
-      const EventData* const m_eventData;
+      std::unique_ptr<const DataContainer> m_container;
+      const EventData& m_eventData;
       mutable const History* m_history;
       mutable unsigned int m_index;
       inline static std::atomic<double> m_timeShift{0}; // specify a global time shift between first sample time and reported ofc time

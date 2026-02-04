@@ -405,9 +405,9 @@ TreeAccessor::filter(const Accessor& accessor,
       HistoryContainer newHist(new CellInfo(*history->cellInfo()));
       for (unsigned int k = 0; k < history->nData(); k++) {
         if (!filterList.filterParams(f).passEvent(*history->data(k))) continue;
-        const EventData* eventData = history->data(k)->eventData();
+        const EventData& eventData = history->data(k)->eventData();
         std::map<std::pair<unsigned int, unsigned int>, unsigned int>::const_iterator findIndex = 
-          eventIndices.find(std::pair<unsigned int, unsigned int>(eventData->run(), eventData->event()));
+          eventIndices.find(std::pair<unsigned int, unsigned int>(eventData.run(), eventData.event()));
         if (findIndex == eventIndices.end()) { 
           cout << "Inconsistent event numbering!!!" << endl; 
           return std::vector<std::unique_ptr<TreeAccessor> >();
@@ -417,7 +417,7 @@ TreeAccessor::filter(const Accessor& accessor,
         unsigned int newEvtIndex = (isNewEvt ? eventsToKeep[f].size() : eventsToKeep[f][oldEvtIndex]);      
         if (isNewEvt) eventsToKeep[f][oldEvtIndex] = newEvtIndex;
 
-        int oldRunIndex = history->data(k)->eventData()->runIndex();
+        int oldRunIndex = history->data(k)->eventData().runIndex();
         bool isNewRun = (runsToKeep[f].find(oldRunIndex) == runsToKeep[f].end());
         unsigned int newRunIndex = (isNewRun ? runsToKeep[f].size() : runsToKeep[f][oldRunIndex]);      
         if (isNewRun) runsToKeep[f][oldRunIndex] = newRunIndex;

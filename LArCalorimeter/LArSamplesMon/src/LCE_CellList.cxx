@@ -188,9 +188,8 @@ std::vector< LCE_CellList::thrCounter_t>  LCE_CellList::buildList(const char* in
 
     for (int iEvent=0;iEvent<nEvents;++iEvent) {
       const LArSamples::Data* data = hist->data(iEvent);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      unsigned lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      unsigned lumiBlock = Evdata.lumiBlock();
       if (checkBadLBList(lumiBlock)) continue; //skip bad LBs
 
 

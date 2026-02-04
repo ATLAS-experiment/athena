@@ -287,9 +287,8 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
       double noise = data->noise()*GeV;
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata){ noEvdata++; continue; }// avoid crash
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       double energy = data->energy()*GeV; 
 
       if (energy > nsigmaHits*noise){ // E>10sigma
@@ -775,9 +774,8 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
       noise = data->noise()*GeV;
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata){ noEvdata++; continue; }// avoid crash
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       double energy = data->energy()*GeV; 
 
       // checks whether or not an event is in a bad LB when the bad LB list is read in manually
@@ -1040,9 +1038,8 @@ void LArCellsEmptyMonitoring::GetLimits_EqLB(const char* inputfile, int& lbmin, 
     // loop on the events for each cells
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
 
       
       if (data->energy() != 0. && data->noise() != 0.){    // record only events with real energy/noise values 
@@ -1104,9 +1101,8 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
 
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       //int lumiBlock = data->lumiBlock();
       
       lb = (int)lumiBlock;
@@ -1260,9 +1256,8 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
     // loop on the events for each cells
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      lumiBlock = Evdata.lumiBlock();
 
       energy = data->energy();
       noise = data->noise();

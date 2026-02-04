@@ -189,7 +189,7 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
     }
    
     for (unsigned int j = 0; j < thisHistory->nData(); j++) {
-      allData.push_back(new Data(*thisHistory->data(j), eventMap[thisHistory->data(j)->eventData()], nullptr, -1));
+      allData.push_back(new Data(*thisHistory->data(j), eventMap[&thisHistory->data(j)->eventData()], nullptr, -1));
       if (!cellInfo->shape(thisHistory->data(j)->gain())) {
         const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(j)->gain());
         cellInfo->setShape(thisHistory->data(j)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
@@ -228,7 +228,7 @@ const History* MultiTreeAccessor::getSCHistory(unsigned int i) const
    
     for (unsigned int ii = 0; ii < thisHistory->nData(); ii++) {
      //cout << "------> Creating new data " << i << endl; 
-      allData.push_back(new Data(*thisHistory->data(ii), eventMap[thisHistory->data(ii)->eventData()], nullptr, -1));
+      allData.push_back(new Data(*thisHistory->data(ii), eventMap[&thisHistory->data(ii)->eventData()], nullptr, -1));
      //cout << "------> done Creating new data " << i << endl; 
       if (!cellInfo->shape(thisHistory->data(ii)->gain())) {
         const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(ii)->gain());
