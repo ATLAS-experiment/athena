@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PersistencySvc )
@@ -12,9 +12,9 @@ atlas_add_library( PersistencySvc
    PersistencySvc/*.h PersistencySvc/*.inl
    src/*.cpp src/*.h src/*.inl
    PUBLIC_HEADERS PersistencySvc
-   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} GaudiUtils FileCatalog
+   PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} GaudiUtils
    LINK_LIBRARIES CxxUtils DataModelRoot POOLCore StorageSvc
-   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel FileCatalog
+   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel
    GaudiKernel PersistentDataModel )
 
 atlas_add_dictionary( PersistencySvcDict PersistencySvc/dict.h PersistencySvc/dict.xml
@@ -26,4 +26,8 @@ atlas_add_executable( pool_extractFileIdentifier
 
 atlas_add_executable( pool_insertFileToCatalog
    utilities/pool_insertFileToCatalog.cpp
-   LINK_LIBRARIES CxxUtils FileCatalog POOLCore PersistencySvc )
+   LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
+
+atlas_add_executable( FCcmd
+   utilities/FCcmd.cpp utilities/CommandLine.cpp
+   LINK_LIBRARIES POOLCore PersistencySvc )

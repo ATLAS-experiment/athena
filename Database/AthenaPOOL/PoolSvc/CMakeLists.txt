@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PoolSvc )
@@ -15,4 +15,4 @@ atlas_add_library( PoolSvcLib
 atlas_add_component( PoolSvc
                      PoolSvc/*.h src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DBReplicaSvcLib DataModelRoot FileCatalog GaudiKernel POOLCore PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DBReplicaSvcLib DataModelRoot GaudiKernel POOLCore PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )
