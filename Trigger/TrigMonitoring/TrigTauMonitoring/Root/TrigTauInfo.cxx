@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauMonitoring/TrigTauInfo.h"
-#include <ranges>
+#include <regex>
+#include <ranges> //std::views::split
 #include <cstdint>
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger)
@@ -158,22 +159,23 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
         // Get all individual L1 TAU items
         std::regex_token_iterator<std::string::iterator> rgx_iter(m_L1Item.begin(), m_L1Item.end(), l1_tau_rgx);
         while(rgx_iter != rend) {
-            std::string s = *rgx_iter;
-            std::regex_match(s, match, l1_tau_rgx);
-            size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
-            std::string item_type = match[2].str(); // e, j, c, or ""
-            int threshold = std::stoi(match[3].str());
-            std::string item_isolation = match[4].str(); // "", L, M, T, HL, HM, HT, IM, H
-            
-            // Set the Phase 1 thresholds to -1
-            if(remove_L1_phase1_thresholds && (item_type == "e" || item_type == "j" || item_type == "c")) threshold = -1;
-
-            for(size_t j = 0; j < multiplicity; j++) {
-                m_tauL1Items.push_back(s.substr(match[1].str().size()));
-                m_tauL1Thr.push_back(threshold);
-                m_tauL1Type.push_back(item_type + "TAU");
-                m_tauL1Iso.push_back(item_isolation);
-                m_tauL1ThresholdPattern.push_back(-1);
+            const std::string & s = *rgx_iter;
+            if (std::regex_match(s, match, l1_tau_rgx)){
+              size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
+              std::string item_type = match[2].str(); // e, j, c, or ""
+              int threshold = std::stoi(match[3].str());
+              std::string item_isolation = match[4].str(); // "", L, M, T, HL, HM, HT, IM, H
+              
+              // Set the Phase 1 thresholds to -1
+              if(remove_L1_phase1_thresholds && (item_type == "e" || item_type == "j" || item_type == "c")) threshold = -1;
+  
+              for(size_t j = 0; j < multiplicity; j++) {
+                  m_tauL1Items.push_back(s.substr(match[1].str().size()));
+                  m_tauL1Thr.push_back(threshold);
+                  m_tauL1Type.push_back(item_type + "TAU");
+                  m_tauL1Iso.push_back(item_isolation);
+                  m_tauL1ThresholdPattern.push_back(-1);
+              }
             }
             rgx_iter++;
         }

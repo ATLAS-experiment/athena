@@ -452,7 +452,6 @@ def TIDAbphys( flags, key, toolkey, tools, monlevel, mcTruth ) :
                               "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig",
                               "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_FTF",
                               "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig",
-                              "HLT_.*invmDimu.*:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
                               "HLT_.*Bhh.*:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh"], monlevel )
 
         if len(chains)>0 :
