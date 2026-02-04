@@ -39,6 +39,7 @@ atlas_add_component( ActsMonitoring
 		ActsTruthLib
                 InDetMeasurementUtilitiesLib
                 HGTD_ReadoutGeometry
+                MuonTesterTreeLib
                 TrkSurfaces )
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
