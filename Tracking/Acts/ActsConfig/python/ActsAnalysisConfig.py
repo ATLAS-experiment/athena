@@ -1017,3 +1017,15 @@ def ActsResidualAnalysisAlgCfg(flags,
     return acc
 
 
+def ActsGeoDumpCfg(flags, name="ActsReadoutDump",
+                   outFile="ActsGeoDump.root", **kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ROOT.ActsTrk import DetectorType
+    kwargs.setdefault("Detectors", [DetectorType.Pixel, DetectorType.Sct])
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags, outFile=outFile, outStream="ActsReadoutGeoDump"))
+    the_alg = CompFactory.ActsTrk.ReadoutGeoDumpAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
