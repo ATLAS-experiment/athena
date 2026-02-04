@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """
           Instantiate more custom track isolation in derivation
@@ -17,7 +17,7 @@ def DerivationTrackIsoCfg(flags,**jwarg):
 
     from IsolationAlgs.IsoToolsConfig import (
         isoTTVAToolCfg, TrackIsolationToolCfg )
-    from InDetConfig.InDetTrackSelectionToolConfig import (
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
         isoTrackSelectionToolCfg )
     from xAODPrimitives.xAODIso import xAODIso as isoPar
     # dR in decreasing order

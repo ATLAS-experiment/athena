@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -12,7 +12,8 @@ deco_prefix = 'MUON_'
 def TrackIsolationToolCfg(ConfigFlags,name= "TrackIsolationTool", **kwargs):
 
     acc = ComponentAccumulator()
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TrackTools_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_TrackTools_Cfg)
     kwargs.setdefault("TrackSelectionTool",acc.popToolsAndMerge(InDetTrackSelectionTool_TrackTools_Cfg(ConfigFlags,
                                                                                      maxZ0SinTheta = 3.,
                                                                                      minPt         = 1000.,
@@ -26,7 +27,8 @@ def TrackIsolationToolCfg(ConfigFlags,name= "TrackIsolationTool", **kwargs):
 def MuonTrackIsolationDecorAlgCfg(ConfigFlags, name="MuonTrackIsolationDecorator", ttvaWP = "Nonprompt_All_MaxWeight", trackPt=500., **kwargs):
 
     from IsolationAlgs.IsoToolsConfig import isoTTVAToolCfg, TrackIsolationToolCfg
-    from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        isoTrackSelectionToolCfg)
     result = ComponentAccumulator()    
     ttvaTool = result.popToolsAndMerge(isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
     trackSelTool = result.popToolsAndMerge(isoTrackSelectionToolCfg(ConfigFlags, minPt=trackPt))

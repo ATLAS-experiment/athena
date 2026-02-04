@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import LHCPeriod
@@ -19,7 +19,8 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
 
     PFTrackSelector.trackExtrapolatorTool = TrackCaloExtensionTool
 
-    from InDetConfig.InDetTrackSelectionToolConfig import PFTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        PFTrackSelectionToolCfg)
     PFTrackSelector.trackSelectionTool = result.popToolsAndMerge(PFTrackSelectionToolCfg(inputFlags))
 
     # P->T conversion extra dependencies

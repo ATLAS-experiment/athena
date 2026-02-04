@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY24.py
@@ -295,7 +295,8 @@ def BPHY24Cfg(flags):
                                                   doUsedInFit = False))
     acc.addPublicTool(TTVATool)
 
-    from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        isoTrackSelectionToolCfg)
     TrackSelTool = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags,
                                                                 maxZ0SinTheta= 2,
                                                                 minPt= 1000,

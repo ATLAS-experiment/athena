@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Tool configuration to instantiate all
  isolationTools with default configuration"""
@@ -19,7 +19,8 @@ def TrackIsolationToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
         
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+            isoTrackSelectionToolCfg)
         kwargs['TrackSelectionTool'] = acc.popToolsAndMerge(isoTrackSelectionToolCfg(flags))
     if 'TTVATool' not in kwargs:
         kwargs['TTVATool'] = acc.popToolsAndMerge(isoTTVAToolCfg(flags))
