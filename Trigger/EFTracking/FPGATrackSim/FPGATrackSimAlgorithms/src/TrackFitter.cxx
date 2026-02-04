@@ -84,7 +84,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
     }
 
     int sector = 0;
-    if (!m_fitFromRoad) {
+    if (!m_fitFromRoad || m_do2ndStage) {
       // Error checking
       sector = road.getSector();
       if (sector < 0) {
@@ -116,7 +116,7 @@ int TrackFitter::fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vect
     }
     else{
       temp.setTrackStage(TrackStage::SECOND);
-      if (!m_fitFromRoad) temp.setSecondSectorID(road.getSector());
+      temp.setSecondSectorID(road.getSector());
     }
     temp.setNLayers(m_pmap->getNLogiLayers());
     temp.setBankID(-1); // TODO
