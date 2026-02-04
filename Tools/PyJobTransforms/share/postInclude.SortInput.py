@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Joboptions fragment that should be post-included after a typicaly configured Athena job
 # It will read original input files, create a list of Events in memory, sort them and produce
@@ -24,7 +24,8 @@ sorter = SortedCollectionCreator(name="SortEvents")
 # Sort Inputs based on one of the EventInfoTag attributes
 # Store sorted event collection in a temporary file
 # This should run as postInclude, so we assume EventSelector.InputCollections is set earlier
-sorter.execute(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+from PyUtils import PoolFile
+sorter.execute(inputs, outputCollection=tmpCollFile, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootTTreeCollection, sortAttribute=sortTag, sortOrder=sortOrd)
 
 # Reading Events through References require a populated FileCatalog
 for inpfile in inputs:

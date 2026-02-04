@@ -118,9 +118,9 @@ public: // Non-static members
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection(const std::string& collectionType,
-	   const std::string& connection,
+   pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
+           const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
 
    /// @return a token for a container entry.

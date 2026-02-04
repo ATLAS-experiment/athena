@@ -44,6 +44,7 @@ class SortedCollectionCreator:
 
    def readInputCollections(self, inputCollections):
       """read all input collections into memory"""
+      from PyUtils import PoolFile
       self.collDescription = None
       self.allRows = []
       self.attrNames = []
@@ -51,7 +52,7 @@ class SortedCollectionCreator:
       self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "Input", "RootCollection", inFileName)
+         iColl = self.collSvc.open( "Input", PoolFile.PoolOpts.CollectionType.RootCollection, inFileName)
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)
@@ -105,8 +106,8 @@ class SortedCollectionCreator:
       dstColl.commit()
       dstColl.close()
        
-   def execute(self, inputCollections, outputCollection="PFN:collection.root", sortAttribute="LumiBlockN",
-               sortOrder="Ascending", outputCollectionType="RootCollection"):
+   def execute(self, inputCollections, outputCollection, outputCollectionType, sortAttribute="LumiBlockN",
+               sortOrder="Ascending"):
       sort_opts = ("Ascending", "Descending")
       self.info("Executing SortedCollectionCreator, inputs={}, output='{}' ({}), sort by: {}, order: {}"
                 .format(inputCollections, outputCollection, outputCollectionType, sortAttribute, sortOrder))

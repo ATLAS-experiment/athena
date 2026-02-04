@@ -6,6 +6,9 @@
 #define COLLECTIONSVC_COLLECTIONSERVICE_H
 
 #include "ICollection.h"
+
+#include "StorageSvc/DbType.h"
+
 #include "CxxUtils/checker_macros.h"
 
 
@@ -59,7 +62,7 @@ namespace pool {
      * @param session Reference to database session (need only be set for implicit collections).
      */
     virtual ICollection* open( const std::string & name,
-                               const std::string & type,
+                               const DbType& type,
                                const std::string & connection = "",
                                ISession* session = 0 ) const;
 

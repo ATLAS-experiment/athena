@@ -15,6 +15,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/ICollectionDescription.h"
+#include "StorageSvc/DbType.h"
 #include "RootUtils/APRDefaults.h"
 
 // Gaudi
@@ -57,11 +58,11 @@ StatusCode PoolCollectionConverter::initialize() {
       m_connection = std::format("PFN:{}", m_inputCollection);
    }
    try {
-      if (m_collectionType == "RootCollection" || m_collectionType == "RNTCollection") {
-         m_poolCollection = m_poolSvc->createCollection(m_collectionType, m_connection, "Input", m_contextId);
+      if (m_collectionType == "RootCollection") {
+         m_poolCollection = m_poolSvc->createCollection(m_connection, "Input", pool::ROOT_StorageType.type(), m_contextId);
       }
       if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
-         m_poolCollection = m_poolSvc->createCollection("ImplicitCollection", m_connection, "Input", m_contextId);
+         m_poolCollection = m_poolSvc->createCollection(m_connection, "Input", pool::POOL_StorageType.type(), m_contextId);
       }
    } catch (std::exception &e) {
       if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
@@ -73,7 +74,7 @@ StatusCode PoolCollectionConverter::disconnectDb() {
    if (m_poolCollection == nullptr) {
       return StatusCode::SUCCESS;
    }
-   if (m_poolCollection->description().type() == "ImplicitCollection") {
+   if (m_poolCollection->description().type() == pool::POOL_StorageType.type()) {
       return m_poolSvc->disconnectDb(m_connection);
    }
    return StatusCode::SUCCESS;
