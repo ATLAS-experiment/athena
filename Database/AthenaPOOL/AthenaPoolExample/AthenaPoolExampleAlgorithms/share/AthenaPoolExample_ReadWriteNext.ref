@@ -8,7 +8,7 @@ ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
 PoolSvc                                             DEBUG OutputLevel is 2
 PoolSvc                                             DEBUG POOL ReadCatalog is file:Catalog1.xml
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -94,7 +94,7 @@ ApplicationMgr                                       INFO Application Manager In
 StorageSvc                                          DEBUG Disconnect request for database: FID=A811B014-0297-AD47-AF4C-B75EF418982D PFN=SimplePoolFile3.root
 StorageSvc                                          DEBUG Closing database: FID=A811B014-0297-AD47-AF4C-B75EF418982D
 RootDatabase                                        DEBUG Closing DB SimplePoolFile3.root
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile3.root, name=Input, contextID=0
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile3.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening

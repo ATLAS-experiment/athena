@@ -264,6 +264,11 @@ class PoolOpts(object):
         EventTag    = "EventTag"
         DataHeader  = "DataHeader"
         MetaData    = "MetaData"
+    class CollectionType:
+        PoolCollection        = 256 # Also known as "ImplicitCollection"
+        RootCollection        = 512
+        RootTTreeCollection   = 514
+        RootRNTupleCollection = 516
 
     FAST_MODE   = False
     SUPER_DETAILED_BRANCH_SZ = False

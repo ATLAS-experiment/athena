@@ -16,9 +16,9 @@
 using namespace std;
 
 pool::CollectionDescription::CollectionDescription( const std::string& name,
-                                                    const std::string& type,
+                                                    const pool::DbType& type,
                                                     const std::string& connection,
-                                                    const std::string& eventReferenceColumnName ) 
+                                                    const std::string& eventReferenceColumnName )
   : m_name( name ),
     m_type( type ),
     m_connection( connection ),
@@ -58,7 +58,7 @@ pool::CollectionDescription::
 copyFrom( const pool::ICollectionDescription& rhs )
 {
    clearAll();
-   
+
    m_name = rhs.name();
    m_type = rhs.type();
    m_connection = rhs.connection();
@@ -108,15 +108,15 @@ pool::CollectionDescription::operator=( const pool::ICollectionDescription& rhs 
 }
 
 
-void 
+void
 pool::CollectionDescription::setName( const std::string& name )
 {
    m_name = name;
 }
 
 
-void 
-pool::CollectionDescription::setType( const std::string& type )
+void
+pool::CollectionDescription::setType( const DbType& type )
 {
   m_type = type;
 }
@@ -129,7 +129,7 @@ pool::CollectionDescription::setConnection( const std::string& connection )
 }
 
 
-void 
+void
 pool::CollectionDescription::setEventReferenceColumnName( const std::string& columnName )
 {
    if( eventReferenceColumnName() == columnName ) {
@@ -179,7 +179,7 @@ insertColumn( const std::string& columnName,
      return insertTokenColumn( columnName );
   }
   const std::string methodName("insertColumn");
-  
+
    // Check if description for column already exists.
   checkNewColumnName( columnName, methodName );
 
@@ -212,27 +212,27 @@ insertTokenColumn( const std::string& columnName )
    // Create and record a description object for new Token column.
    CollectionColumn* column = new CollectionColumn( columnName, CollectionNames::tokenTypeName, 0, true );
    setColumnId( column );
-   m_tokenColumns.push_back( column );  
+   m_tokenColumns.push_back( column );
    m_tokenColumnForColumnName[ columnName ] = column;
    return *column;
 }
 
 
-const std::string& 
+const std::string&
 pool::CollectionDescription::name() const
 {
   return m_name;
 }
 
 
-const std::string& 
+const pool::DbType&
 pool::CollectionDescription::type() const
 {
   return m_type;
 }
 
 
-const std::string& 
+const std::string&
 pool::CollectionDescription::connection() const
 {
   return m_connection;
@@ -261,7 +261,7 @@ pool::CollectionDescription::column( const std::string& name, const std::string&
    }
    return iColumn->second;
 }
-   
+
 
 
 const pool::CollectionColumn *
@@ -278,9 +278,9 @@ pool::CollectionDescription::column( const std::string& name, const std::string&
    }
    return iColumn->second;
 }
-   
 
-int 
+
+int
 pool::CollectionDescription::numberOfTokenColumns() const
 {
    // Return total number of Tokens
@@ -303,7 +303,7 @@ pool::CollectionDescription::tokenColumn( int columnId ) const
 }
 
 
-int 
+int
 pool::CollectionDescription::numberOfAttributeColumns() const
 {
    // Return total number of Attributes in the collection.

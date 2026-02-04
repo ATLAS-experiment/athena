@@ -11,7 +11,7 @@ PoolSvc                                             DEBUG POOL ReadCatalog is fi
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -70,7 +70,7 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=E8353C9A-1573-094C-8D68-B9F75DAECAFE
 RootDatabase                                        DEBUG Closing DB SimplePoolFile_xAOD.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile_xAOD.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile_xAOD.root, name=Input, contextID=0
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening

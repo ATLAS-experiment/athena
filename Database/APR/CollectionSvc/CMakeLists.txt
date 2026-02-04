@@ -10,11 +10,11 @@ find_package( XercesC )
 
 # Component(s) in the package:
 atlas_add_library( CollectionSvc
-    src/*.cpp
-		PUBLIC_HEADERS CollectionSvc
-    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-    LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} FileCatalog CxxUtils
-    PRIVATE_LINK_LIBRARIES CxxUtils POOLCore PersistencySvc StorageSvc )
+                   src/*.cpp
+		   PUBLIC_HEADERS CollectionSvc
+                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
+		   LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} FileCatalog CxxUtils StorageSvc
+                   PRIVATE_LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
 
 atlas_add_component( CollectionSvcComponents
     src/components/*.cpp

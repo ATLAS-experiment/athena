@@ -107,34 +107,59 @@ namespace pool {
         ATH_MSG_DEBUG( "Created Branch " <<  name << ", Type=" <<  type_name );
      }
 
+     void RootCollection::addField(ROOT::RNTupleModel* model, const std::string& field_name, const std::string& field_type)
+     {
+        ATH_MSG_DEBUG( "Adding new column: name=" << field_name << " of type " << field_type );
+        const std::string actual_type = (field_type == CollectionNames::tokenTypeName? "std::string" : field_type);
+        auto field = ROOT::RFieldBase::Create(field_name, actual_type).Unwrap();
+        model->AddField( std::move(field) );
+     }
+
      void RootCollection::insertRow( const pool::CollectionRowBuffer& inputRowBuffer )
      {
         if( m_mode == pool::ICollection::READ ) {
            throw std::runtime_error( "Cannot modify the data of a collection in READ open mode. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
         }
-        std::map< std::string, TBranch* > branchByName;
-        const TObjArray* branches = m_tree->GetListOfBranches();
-        Int_t nbranches = branches->GetEntriesFast();
-        for(int i = 0; i < nbranches; ++i) {
-           TBranch* branch = (TBranch*)branches->UncheckedAt(i);
-           branchByName[ branch->GetName() ] = branch;
-        }
-        std::deque<std::string> stringBuffer;
-        for( pool::TokenList::const_iterator iToken = inputRowBuffer.tokenList().begin();
-              iToken != inputRowBuffer.tokenList().end(); ++iToken )  {
-           stringBuffer.push_back( iToken->toString() );
-           branchByName[ iToken.tokenName() ]->SetAddress( stringBuffer.back().data() );
-        }
-        coral::AttributeList attribs_nc = inputRowBuffer.attributeList();
-        for( coral::Attribute& att : attribs_nc ) {
-           if( att.specification().type() == typeid(std::string) ) {
-              std::string&       str = att.data<std::string>();
-              branchByName[ att.specification().name() ]->SetAddress( str.data() );
-           } else {
-              branchByName[ att.specification().name() ]->SetAddress( att.addressOfData() );
+        if (m_tree) {
+           std::map< std::string, TBranch* > branchByName;
+           const TObjArray* branches = m_tree->GetListOfBranches();
+           Int_t nbranches = branches->GetEntriesFast();
+           for(int i = 0; i < nbranches; ++i) {
+              TBranch* branch = (TBranch*)branches->UncheckedAt(i);
+              branchByName[ branch->GetName() ] = branch;
            }
+           std::deque<std::string> stringBuffer;
+           for( pool::TokenList::const_iterator iToken = inputRowBuffer.tokenList().begin();
+                 iToken != inputRowBuffer.tokenList().end(); ++iToken )  {
+              stringBuffer.push_back( iToken->toString() );
+              branchByName[ iToken.tokenName() ]->SetAddress( stringBuffer.back().data() );
+           }
+           coral::AttributeList attribs_nc = inputRowBuffer.attributeList();
+           for( coral::Attribute& att : attribs_nc ) {
+              if( att.specification().type() == typeid(std::string) ) {
+                 std::string&       str = att.data<std::string>();
+                 branchByName[ att.specification().name() ]->SetAddress( str.data() );
+              } else {
+                 branchByName[ att.specification().name() ]->SetAddress( att.addressOfData() );
+              }
+           }
+           if( m_tree->Fill() <= 0 ) throw std::runtime_error( "TTree::Fill() failed. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
+        } else if (m_rntupleWriter) {
+           // MN: TODO: migrate to a const REntry API once ROOT delivers it.
+           auto entry = m_rntupleWriter->GetModel().CreateBareEntry();
+           std::deque<std::string> stringBuffer;
+           for( pool::TokenList::const_iterator iToken = inputRowBuffer.tokenList().begin();
+              iToken != inputRowBuffer.tokenList().end(); ++iToken )  {
+              stringBuffer.push_back( iToken->toString() );
+              entry->BindRawPtr( iToken.tokenName(), &stringBuffer.back() );
+           }
+           for( const coral::Attribute& att : inputRowBuffer.attributeList() ) {
+              void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(att.addressOfData());
+              entry->BindRawPtr( att.specification().name(), ptr );
+           }
+           auto wbytes = m_rntupleWriter->Fill(*entry);
+           if( wbytes <= 0 ) throw std::runtime_error( "RNTuple::Fill() failed. (APR: \" RootCollection::insertRow \" from \" RootCollection \")");
         }
-        if( m_tree->Fill() <= 0 ) throw std::runtime_error( "TTree::Fill() failed. (APR: \" RootCollection::insertRow \" from \" RootCollection \")" );
      }
 
 
@@ -165,6 +190,7 @@ namespace pool {
 
     void RootCollection::cleanup()
     {
+       m_rntupleWriter.reset();
        if( m_file ) {
           int n = 0;
           if( m_fileMgr ) {
@@ -231,8 +257,10 @@ namespace pool {
 
       if( m_mode == ICollection::READ ) {
          // retrieve the TTree from file
-         m_tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
-         if( !m_tree ) {
+         if ( m_description.type() == pool::ROOT_StorageType.type() ) {
+           m_tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
+	 }
+         if ( (!m_tree && m_description.type() == pool::ROOT_StorageType.type()) || m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type()) ) {
            m_reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
          }
          if( !m_tree && !m_reader ) {
@@ -324,16 +352,39 @@ namespace pool {
       }
 
       if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
-        // create a new TTree
-        m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
-        ATH_MSG_DEBUG( "Created Collection TTree. Collection file will be " << m_fileName );
-        for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
-             std::string columnName = m_description.tokenColumn(col_id).name();
-             addTreeBranch( columnName, CollectionNames::tokenTypeName );
-        }
-        for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
-             const ICollectionColumn& column = m_description.attributeColumn(col_id);
-             addTreeBranch( column.name(), column.type() );
+        if ( m_description.type().exactMatch(pool::ROOTTREE_StorageType.type()) ) {
+          // create a new TTree
+          m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
+          ATH_MSG_DEBUG( "Created Collection TTree. Collection file will be " << m_fileName );
+          for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
+               std::string columnName = m_description.tokenColumn(col_id).name();
+               addTreeBranch( columnName, CollectionNames::tokenTypeName );
+          }
+          for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
+               const ICollectionColumn& column = m_description.attributeColumn(col_id);
+               addTreeBranch( column.name(), column.type() );
+	  }
+        } else {
+          // create a new Collection
+          std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
+          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
+          m_file->Delete( (rntupleName+";*").c_str() );
+          // (Create Schema)
+          auto model { ROOT::RNTupleModel::Create() };
+          model->SetDescription( rntupleName );
+          for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
+            std::string columnName = m_description.tokenColumn(col_id).name();
+            addField( model.get(), columnName, CollectionNames::tokenTypeName );
+          }
+          for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
+            const ICollectionColumn& column = m_description.attributeColumn(col_id);
+            addField( model.get(), column.name(), column.type() );
+          }
+
+          ROOT::RNTupleWriteOptions opts;
+          opts.SetCompression( m_file->GetCompressionSettings() );
+          opts.SetUseBufferedWrite( true );
+          m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
         }
       }
       m_open = true;

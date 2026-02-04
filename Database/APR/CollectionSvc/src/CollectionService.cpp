@@ -22,18 +22,6 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
       std::string errorMsg = "Must specify name of collection in description input argument.";
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
    }
-
-   if( description.type().empty() ) {
-      std::string errorMsg = "Must specify type of collection in description input argument.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
-   }
-
-   if ( description.type() == "ImplicitCollection" )  {
-      std::string errorMsg = 
-         "Can only open a collection of type 'ImplicitCollection' for read transtions.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionService::create \" from \" CollectionSvc \")" );
-   }
-
    pool::ICollection::OpenMode openMode = pool::ICollection::CREATE_AND_OVERWRITE;
    return plugin( description, openMode );
 }
@@ -41,8 +29,8 @@ pool::CollectionService::create( const pool::ICollectionDescription& description
 
 pool::ICollection* 
 pool::CollectionService::open( const std::string& name,
-                               const std::string& type,
-                               const std::string & connection,
+                               const DbType& type,
+                               const std::string& connection,
                                pool::ISession* session ) const
 {
    pool::CollectionDescription description( name, type, connection );
@@ -61,10 +49,14 @@ pool::CollectionService::plugin( const ICollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session ) const
 {
-   std::string type( description.type() );
-   ICollection *coll = Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)>::create( type, &description, openMode, session ).release();
+   pool::DbType type( description.type() );
+   std::string typeString = "ImplicitCollection";
+   if (type.majorType() == pool::ROOT_StorageType.type()) {
+      typeString = "RootCollection";
+   }
+   ICollection *coll = Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)>::create( typeString, &description, openMode, session ).release();
    if( !coll ) {
-      std::string errorMsg = "FAILED!  Plugin for " + type + "," + description.name() + " could not be loaded.";
+      std::string errorMsg = "FAILED!  Plugin for " + typeString + "," + description.name() + " could not be loaded.";
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::plugin \" from \" CollectionSvc \")" );
    }
    return coll;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_COLLECTIONDESCRIPTION_H
@@ -14,21 +14,21 @@
 namespace pool {
 
   class CollectionColumn;
-  
-  /** 
+
+  /**
    * @class CollectionDescription CollectionDescription.h CollectionSvc/CollectionDescription.h
    *
    * An implementation of the ICollectionDescription interface used to define the properties of
-   * a collection to be constructed and to retrieve these properties after construction. The 
-   * schema editor of the collection should be used for any modifications to these properties 
-   * after construction. 
+   * a collection to be constructed and to retrieve these properties after construction. The
+   * schema editor of the collection should be used for any modifications to these properties
+   * after construction.
    */
   class CollectionDescription : virtual public ICollectionDescription
   {
   public:
     /**
      * Constructor that takes as input the minimum amount of properties needed to describe
-     * the collection. An event reference Token column is inserted by default but may be renamed 
+     * the collection. An event reference Token column is inserted by default but may be renamed
      * via a call to `setEventReferenceColumnName'.
      *
      * @param name Name of collection.
@@ -37,10 +37,10 @@ namespace pool {
      * @param eventReferenceColumnName Name of event reference column.
      */
     CollectionDescription( const std::string& name,
-                           const std::string& type,
+                           const DbType& type,
                            const std::string& connection = "",
                            const std::string& eventReferenceColumnName = "" );
-    
+
     /**
      * Copy constructor.
      *
@@ -82,7 +82,7 @@ namespace pool {
      *
      * @param type Storage technology type of collection.
      */
-    virtual void setType( const std::string& type );
+    virtual void setType( const DbType& type );
 
     /**
      * Sets the connection to the database containing the collection.
@@ -107,7 +107,7 @@ namespace pool {
      * @param sizeIsFixed Flag indicating whether size of column data type is fixed (useful for string or blob data types).
      */
     virtual const ICollectionColumn&    insertColumn(
-       const std::string& columnName, 
+       const std::string& columnName,
        const std::string& columnType,
        int maxSize = 0,
        bool sizeIsFixed = true );
@@ -119,18 +119,18 @@ namespace pool {
      */
     virtual const ICollectionColumn&    insertTokenColumn(
        const std::string& columnName);
-    
+
 
     /// Returns the name of the collection and the top level collection fragment.
     virtual const std::string& name() const;
 
     /// Returns the storage technology type of the collection.
-    virtual const std::string& type() const;
+    virtual const DbType& type() const;
 
     /// Returns the connection to the database containing the collection.
     virtual const std::string& connection() const;
 
-    /** 
+    /**
      * Returns the name reserved for the event reference Token column. If the name has not
      * been set by the user a default name is returned.
      */
@@ -147,9 +147,9 @@ namespace pool {
      *
      * @param columnId Position of column in associated collection fragment.
      */
-    virtual const ICollectionColumn& tokenColumn( int columnId ) const; 
+    virtual const ICollectionColumn& tokenColumn( int columnId ) const;
 
-    /** 
+    /**
      * Returns the number of Attribute columns in the collection.
      */
     virtual int numberOfAttributeColumns() const;
@@ -164,13 +164,13 @@ namespace pool {
 
     // set column ID, return the ID
     virtual int		setColumnId( const std::string& columnName, int id, const std::string& methodName );
-    
+
  protected:
     // some helper methods for internal use:
 
     /// make this description a copy of 'rhs'
     virtual void	copyFrom( const ICollectionDescription& rhs );
-    
+
     // clear all internal structures
     virtual void	clearAll();
 
@@ -190,7 +190,7 @@ namespace pool {
     std::string m_name;
 
     /// Storage technology type of collection.
-    std::string m_type;
+    DbType m_type;
 
     /// Connection to database containing collection.
     std::string m_connection;

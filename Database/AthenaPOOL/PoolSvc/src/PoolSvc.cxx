@@ -440,11 +440,11 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
    m_catalog->renamePFN(pf, newpf);
 }
 //__________________________________________________________________________
-pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
-		const std::string& connection,
+pool::ICollection* PoolSvc::createCollection(const std::string& connection,
 		const std::string& collectionName,
+		const pool::DbType& collectionType,
 		unsigned int contextId) const {
-   ATH_MSG_DEBUG("createCollection() type=" << collectionType << ", connection=" << connection
+   ATH_MSG_DEBUG("createCollection() type=" << collectionType.storageName() << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
@@ -461,7 +461,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   if (collectionType == "ImplicitCollection") {
+   if (collectionType.majorType() == pool::POOL_StorageType.type()) {
       // Check whether Collection Container exists.
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
       if (dbH == nullptr) {

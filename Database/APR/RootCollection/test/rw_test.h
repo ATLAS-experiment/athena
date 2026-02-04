@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "StorageSvc/DbType.h"
 
 #include "CxxUtils/checker_macros.h"
 #include <string>
@@ -9,7 +11,7 @@
 class TestDriver {
 public:
   explicit TestDriver( const std::string& name,
-              const std::string& coll_type = "RootCollection",
+              const pool::DbType& coll_type = pool::ROOT_StorageType.type(),
               const std::string& connection = "" );
 
   ~TestDriver() {}
@@ -20,6 +22,6 @@ public:
 
 private:
   std::string m_name;
-  std::string m_type;
+  pool::DbType m_type;
   std::string m_connection;
 };

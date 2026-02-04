@@ -11,7 +11,7 @@ PoolSvc                                             DEBUG POOL ReadCatalog is fi
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -94,7 +94,7 @@ StorageSvc                                          DEBUG Disconnect request for
 StorageSvc                                          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile1.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile1.root, name=Input, contextID=0
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
