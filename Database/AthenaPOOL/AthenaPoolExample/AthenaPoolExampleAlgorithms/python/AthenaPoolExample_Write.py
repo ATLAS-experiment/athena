@@ -1,6 +1,6 @@
 #!/env/python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @file AthenaPoolExample_Write.py
 ## @brief Example job options file to illustrate how to write event data to Pool.
@@ -57,6 +57,9 @@
 #
 #==============================================================
 
+
+import os
+os.system ('rm -f *.root Catalog1.xml')
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
