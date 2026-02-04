@@ -61,12 +61,7 @@ atlas_add_component( ActsGeometry
                      src/ActsWriteTrackingGeometry.cxx
                      src/ActsWriteTrackingGeometryTransforms.cxx
                      src/ExtrapolationTool.cxx
-                     src/ActsMaterialMapping.cxx
-                     src/ActsSurfaceMappingTool.cxx
-                     src/ActsVolumeMappingTool.cxx
-                     src/ActsMaterialStepConverterTool.cxx
                      src/ActsMaterialJsonWriterTool.cxx
-                     src/ActsMaterialTrackWriterSvc.cxx
                      src/ActsTrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
@@ -76,6 +71,7 @@ atlas_add_component( ActsGeometry
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
+                     ActsEventLib
                      ActsInteropLib
                      EventPrimitives
                      GeoPrimitives

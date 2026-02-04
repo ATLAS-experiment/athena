@@ -6,7 +6,7 @@
 #define ACTSGEOMETRY_MATERIALTRACKRECORDER_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "ActsMaterial/RecordedMaterialTrackCollection.h"
+#include "ActsEvent/RecordedMaterialTrackCollection.h"
 
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Units.hpp"
