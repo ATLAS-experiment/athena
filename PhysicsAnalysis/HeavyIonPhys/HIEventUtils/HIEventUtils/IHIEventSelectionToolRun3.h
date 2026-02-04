@@ -9,6 +9,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODHIEvent/HIEventShapeContainer.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
 namespace HI {
@@ -50,8 +51,10 @@ enum class SelectionMask : unsigned int {
   // default cuts for PB
   PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose,
   // default cuts for OO
-  OODefault = NoEventError | PUOOSingleVertexNominal
+  OODefault = NoEventError | PUOOSingleVertexNominal | PUFCalVsNTrackLoose
 };
+
+std::string toString(SelectionMask);
 
 class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
 
@@ -79,7 +82,14 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
   /// @brief true if this is pileup event
-  virtual bool puNtrkvsFCal(
+  /// The fool performs track selection
+  virtual bool puFCalVsNtracks(
+      IonDataType dataType, const xAOD::HIEventShapeContainer* es,
+      const xAOD::TrackParticleContainer* tracks,
+      const xAOD::VertexContainer* vertices,
+      PileupVariation variation = PileupVariation::Nominal) const = 0;
+
+  virtual bool puFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
@@ -96,7 +106,7 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
   ///     (ZdcModule->zdcSide()<0)
   ///     PreSamplerAmp_A+=accPreSamplerAmpA(*ZdcModule);
   /// }
-  virtual bool puZDCPSvsFCal(
+  virtual bool puFCalVsZDC(
       IonDataType dataType, float fcalEt, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 

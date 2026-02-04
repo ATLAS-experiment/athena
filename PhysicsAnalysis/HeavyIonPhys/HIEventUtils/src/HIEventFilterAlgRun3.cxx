@@ -28,7 +28,9 @@ StatusCode HI::HIEventFilterAlgRun3::initialize() {
           "The selection mask is set while the flag UseIonDataTypeDefaultMask");
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Will use selection cuts that are default for the data that is processed");
+    ATH_MSG_INFO(
+        "Will use selection cuts that are default for the data that is "
+        "processed");
   }
 
   return StatusCode::SUCCESS;
@@ -50,6 +52,7 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
   const mask_t maskToUse = m_useIonDataTypeDefaultMask
                                ? m_tool->defaultMaskForPeriod(period)
                                : m_selectionMask.value();
+  ATH_MSG_DEBUG("Mask requested " << maskToString(maskToUse));
 
   if (isRequested(maskToUse, HI::SelectionMask::PUFCalVsZDCAny)) {
     auto esHandle = SG::makeHandle(m_hiEventShapeKey);
@@ -68,7 +71,7 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
       store(HI::SelectionMask::PUFCalVsZDCLoose, mask);
     }
   }
-  
+
   if (isRequested(maskToUse, HI::SelectionMask::PUOOSingleVertexNominal)) {
     auto vertexHandle = SG::makeHandle(m_verticesKey);
     if (m_tool->puOOVertexCuts(period, vertexHandle.cptr())) {
@@ -76,12 +79,26 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
     }
   }
 
+  if (isRequested(maskToUse, HI::SelectionMask::PUFCalVsNTrackAny)) {
+    auto esHandle = SG::makeHandle(m_hiEventShapeKey);
+    auto vertexHandle = SG::makeHandle(m_verticesKey);
+    auto tracksHandle = SG::makeHandle(m_tracksKey);
+    if (m_tool->puFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
+                                vertexHandle.cptr(),
+                                HI::PileupVariation::Loose)) {
+      store(HI::SelectionMask::PUFCalVsNTrackLoose, mask);
+    }
+    if (m_tool->puFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
+                                vertexHandle.cptr(),
+                                HI::PileupVariation::Nominal)) {
+      store(HI::SelectionMask::PUFCalVsNTrackNominal, mask);
+    }
+
+  }
+
   const bool filterDecision = (maskToUse & mask) == maskToUse;
-  ATH_MSG_DEBUG("Mask produced "
-                << std::bitset<8 * sizeof(mask_t)>(mask) << " mask & maskTouse "
-                << std::bitset<8 * sizeof(mask_t)>(maskToUse & mask)
-                << " maskToUse " << std::bitset<8 * sizeof(mask_t)>(maskToUse)
-                << " filter decision " << filterDecision);
+  ATH_MSG_DEBUG("Mask produced " << maskToString(mask) << " filter decision "
+                                 << filterDecision);
   if (m_doFilter)
     setFilterPassed(filterDecision);
 
@@ -91,4 +108,17 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
   handle(*handle) = mask;
 
   return StatusCode::SUCCESS;
+}
+
+std::string HI::HIEventFilterAlgRun3::maskToString(
+    const HI::HIEventFilterAlgRun3::mask_t m) const {
+  std::bitset<8 * sizeof(m)> bits(m);
+  std::string ret;
+  for (size_t b = 0; b < bits.size(); ++b) {
+    if (bits[b]) {
+      ret += std::to_string(b) + ":" +
+             toString(static_cast<HI::SelectionMask>(1 << b)) + " ";
+    }
+  }
+  return ret;
 }

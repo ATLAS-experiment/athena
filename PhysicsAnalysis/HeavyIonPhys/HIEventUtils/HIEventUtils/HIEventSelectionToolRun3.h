@@ -8,6 +8,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
 #include "HIEventUtils/IHIEventSelectionToolRun3.h"
+#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
 namespace HI {
 
@@ -31,11 +32,17 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
       IonDataType dataType, float fcalEt, float zdcE,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puNtrkvsFCal(
+  virtual bool puFCalVsNtracks(
+      IonDataType dataType, const xAOD::HIEventShapeContainer* es,
+      const xAOD::TrackParticleContainer* tracks,
+      const xAOD::VertexContainer* vertices,
+      PileupVariation variation = PileupVariation::Nominal) const override;
+
+  virtual bool puFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puZDCPSvsFCal(
+  virtual bool puFCalVsZDC(
       IonDataType dataType, float fcalEt, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
@@ -48,8 +55,10 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
 
   virtual unsigned int defaultMaskForPeriod(IonDataType period) const override;
 
-
  private:
+  ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{
+      this, "TrackSelectionTool", "", ""};
+
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
   float ntrkCutValue(IonDataType, float fcalEt, PileupVariation) const;
   IonDataType runNumberToDataType(uint32_t run) const;

@@ -49,7 +49,7 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "EventInfo", "EventInfo", "EventInfo key"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey{
-      this, "Tracks", "InDetTrackParticle", "Tracks key"};
+      this, "Tracks", "InDetTrackParticles", "Tracks key"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{
       this, "Vertices", "PrimaryVertices", "Vertices key"};
   SG::ReadHandleKey<xAOD::HIEventShapeContainer> m_hiEventShapeKey{
@@ -68,10 +68,10 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
     return (mask & static_cast<mask_t>(req)) != 0;
   }
 
-  void store(HI::SelectionMask m, mask_t& mask) {
+  void store(HI::SelectionMask m, mask_t& mask) const {
     mask |= static_cast<mask_t>(m);
   }
-
+  std::string maskToString(const mask_t m) const;
 };
 }  // namespace HI
 #endif  //> !HIEVENTUTILS_HIEVENTFILTERALGRUN3_H

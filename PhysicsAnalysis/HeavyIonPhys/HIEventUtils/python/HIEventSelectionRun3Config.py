@@ -2,10 +2,16 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
+import AthenaCommon.SystemOfUnits as Units
+from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HILoose_Cfg
 
 def HIEventSelectionRun3Cfg(flags):
     acc = ComponentAccumulator()
-    filterTool = CompFactory.HI.HIEventSelectionToolRun3()
+    # in future decide cut level for tracks depending on input dataset
+    # for now default to HILoose cuts set with 0.5 GeV
+    trackSelectionTool = acc.popToolsAndMerge(InDetTrackSelectionTool_HILoose_Cfg(flags,
+                                                                                  minPt=0.5*Units.GeV))
+    filterTool = CompFactory.HI.HIEventSelectionToolRun3(TrackSelectionTool=trackSelectionTool)
 
     # ZDC modules collection change its name
     zdcKey=None
@@ -16,7 +22,7 @@ def HIEventSelectionRun3Cfg(flags):
         zdcKey="ZdcSums"
 
     if zdcNeeded and not zdcKey:
-        raise ConfigurationError("The input file does not have any zdcmodules (any capitalisation) container and ZDC info is needed for selection")
+        raise ConfigurationError("The input file does not have any ZDCModules (any capitalisation) container and ZDC info is needed for selection")
 
     filterAlg = CompFactory.HI.HIEventFilterAlgRun3(name="HIEventFilterAlgRun3",
                                                     SelectionTool=filterTool,
@@ -30,6 +36,9 @@ if __name__ == '__main__':
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     # test needs to wait for files to be on CVMFS
     inputAOD = f"{defaultTestFiles.d}/DerivationFrameworkART/data18_hi.00365602.physics_HardProbes.merge.AOD.f1021_m2037._lb0203._0001.1"
+    # let me keep it for the moment as it helps in development
+    # inputAOD = "/ATLAS/tbold/DATA/data18_hi.00365709.physics_HardProbes.merge.AOD.r16298_p6665/AOD.45808281._001414.pool.root.1"
+    # inputAOD= "/ATLAS/tbold/DATA/data25_hi.00501879.physics_MinBias.merge.AOD.f1606_m2272/data25_hi.00501879.physics_MinBias.merge.AOD.f1606_m2272._lb0142._0040.1"
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
