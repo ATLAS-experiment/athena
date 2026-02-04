@@ -11,6 +11,7 @@
 // Containers
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 // Read and write handle keys
 #include "StoreGate/WriteDecorHandleKey.h"
