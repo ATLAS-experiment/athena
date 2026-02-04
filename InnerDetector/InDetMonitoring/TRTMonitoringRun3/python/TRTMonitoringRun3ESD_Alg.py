@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 '''@file TRTMonitoringRun3ESD_Alg.py
 @author N. Belyaev
@@ -23,7 +23,8 @@ def TRTMonitoringRun3ESD_AlgConfig(flags):
                                                   'AlgTRTMonitoringRun3',
                                                   ComTimeObjectName = 'TRT_Phase' if have_trt_phase else '')
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     algTRTMonitoringRun3ESD.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags))
 
     # trigger flag

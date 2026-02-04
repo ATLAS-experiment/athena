@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -429,7 +429,8 @@ def HITrackSelAlgCfg(flags, name="TrackSelAlgHI", **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import HI_InDetTrackSelectionToolForHITrackJetsCfg
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+            HI_InDetTrackSelectionToolForHITrackJetsCfg)
         tracksel = acc.popToolsAndMerge(HI_InDetTrackSelectionToolForHITrackJetsCfg(flags))
         kwargs.setdefault("TrackSelector", tracksel)
     kwargs.setdefault("InputContainer", "InDetTrackParticles")
