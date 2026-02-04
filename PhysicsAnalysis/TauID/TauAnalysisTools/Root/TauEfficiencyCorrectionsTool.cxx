@@ -263,8 +263,16 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
     }
     else if (iEfficiencyCorrectionType == SFEleIDHadTau)
     {
-      // the path must be updated once RNN eVeto SFs are available
-      if (m_sInputFilePathEleIDHadTau.empty()) m_sInputFilePathEleIDHadTau = sDirectory + "EleOLR_TrueHadTau_2016-ichep.root";
+      if (m_sInputFilePathEleIDHadTau.empty()) {
+        if( m_iEleIDLevel == static_cast<int>(ELEIDRNNLOOSE)){	       
+	  m_sInputFilePathEleIDHadTau = sDirectory + "EleRNN_TrueHadTau_2026_eRNNLoose.root";
+        } else if( m_iEleIDLevel == static_cast<int>(ELEIDRNNMEDIUM)){
+          m_sInputFilePathEleIDHadTau = sDirectory + "EleRNN_TrueHadTau_2026_eRNNMedium.root"; 		
+	} else {
+          ATH_MSG_ERROR("SFEleIDHadTau correction not supported for EleIDLevel="<<m_iEleIDLevel);
+          return StatusCode::FAILURE;
+        }
+      }	
       m_sVarName = "TauScaleFactorEleIDHadTau";
 
       asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool", this);
@@ -272,6 +280,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
       ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
       ATH_CHECK(tTool->setProperty("VarName", m_sVarName));
       ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
+      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
     }
     else if (iEfficiencyCorrectionType == SFEleIDElectron)
     {
