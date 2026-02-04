@@ -2,17 +2,20 @@
 
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# TileSynchronizeBch.py <TAG1> <TAG2> <MASKONLY> <RUN1> <RUN2> <SCHEMA> <OUTPUT_DIR> <AUTHOR>
-# sanya.solodkov@cern.ch July 2016
-# copy bad status from one tag to another (e.g. from UPD4 to UPD1)
-# <TAG1> - origin tag (no default), can be UPD1 or UPD4 or exact tag
-# <TAG2> - destination (no default) can be UPD1 or UPD4 or ONL (for online DB)
-# <MASKONLY> - if "1" or "yes" or "True", channels are only masked and never unmasked
-# <RUN1> - run number to use for <TAG1> (default = MAXRUN)
-# <RUN2> - run number to use for <TAG2> and for sqlite (default = next run)
-# <SCHEMA> - full schema string for input database (optional)
-# <OUTPUT_DIR> - directory for output file tileSqlite.db (optional)
-# <AUTHOR> - user name for comment string (optional)
+# File: TileSyncBch.py
+# Sanya Solodkov Sanya.Solodkov@cern.ch February 2026
+# Purpose: copy bad status from one tag to another (e.g. from UPD4 to ONL) in CREST DB
+#
+# Usage:
+# TileSynchronizeBch.py <TAG1> <TAG2> [MASKONLY] [RUN1] [RUN2] [SCHEMA] [OUTPUT] [AUTHOR]
+#   <TAG1> - origin tag (no default), can be UPD1 or UPD4 or exact tag
+#   <TAG2> - destination (no default) can be UPD1 or UPD4 or exact tag or ONL (for online tags)
+#   [MASKONLY] - if "1" or "yes" or "True", channels are only masked and never unmasked
+#   [RUN1] - run number to use for <TAG1> (default = MAXRUN)
+#   [RUN2] - run number to use for <TAG2> and for sqlite (default = next run)
+#   [SCHEMA] - full schema string for input database (optional)
+#   [OUTPUT] - directory for output file "tileCalib.json" of full path with output file name (optional)
+#   [AUTHOR] - user name for comment string (optional)
 
 import os,sys
 
@@ -21,14 +24,17 @@ tag2 = "" if len(sys.argv) < 3 else sys.argv[2].rpartition("=")[2]
 opt  = "" if len(sys.argv) < 4 else sys.argv[3].rpartition("=")[2]
 run1 = "" if len(sys.argv) < 5 else sys.argv[4].rpartition("=")[2]
 run2 = "" if len(sys.argv) < 6 else sys.argv[5].rpartition("=")[2]
-schema="" if len(sys.argv) < 7 else sys.argv[6]
-if len(sys.argv) >= 8:
-    os.chdir(sys.argv[7])
+schema = "CREST"       if len(sys.argv) < 7 else sys.argv[6]
+output = ""            if len(sys.argv) < 8 else sys.argv[7]
 author = os.getlogin() if len(sys.argv) < 9 else sys.argv[8]
+if not output or output.endswith("/") or os.path.isdir(output):
+    output = os.path.join(output,"tileCalib.json")
+elif not output.endswith(".json"):
+    output += ".json"
 
 from TileCalibBlobPython import TileCalibTools
-from TileCalibBlobPython import TileBchTools
-from TileCalibBlobPython.TileCalibTools import MAXRUN
+from TileCalibBlobPython import TileBchCrest
+from TileCalibBlobPython.TileCalibCrest import MAXRUN
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileBchPrbs, \
      TileBchDecoder
 
@@ -78,15 +84,8 @@ if not run2.isdigit() or int(run2) < 0:
 else:
     run2=int(run2)
 if not schema:
-    schema="COOLOFL_TILE/CONDBR2"
+    schema="CREST"
 log.info( "Using schema  %s", schema)
-if tag2[0:3].upper()=="ONL":
-    schema2=schema.replace("COOLOFL_TILE","COOLONL_TILE")
-    schema=schema2.replace("COOLONL_TILE","COOLOFL_TILE")
-    if schema!=schema2:
-        log.info( "Second schema %s", schema2)
-else:
-    schema2=schema
 
 log.info("")
 
@@ -94,32 +93,39 @@ log.info("")
 #====================== FILL DB BELOW ==============================
 #===================================================================
 
-#=== get DB1
-db1 = TileCalibTools.openDbConn(schema)
+#--- check first tag
 folder1 = "/TILE/OFL02/STATUS/ADC"
-folderTag1 = TileCalibTools.getFolderTag(db1, folder1, tag1)
+if "ONL" in tag1.upper():
+    log.error( "Copy from ONL tag is not supported")
+    sys.exit(2)
+if tag1.upper().startswith("TILE"):
+    folder1 = ""
 
 #--- create first bad channel manager
-mgr1 = TileBchTools.TileBchMgr()
+mgr1 = TileBchCrest.TileBchMgr()
 mgr1.setLogLvl(logging.DEBUG)
-log.info("Initializing with offline bad channels at tag=%s and time=%s", folderTag1, (run1, 0))
-mgr1.initialize(db1, folder1, folderTag1, (run1,0))
+log.info("Initializing with offline bad channels at tag=%s and time=%s", tag1, (run1, 0))
+mgr1.initialize(schema, folder1, tag1, (run1,0))
+tag1 = mgr1.getBlobReader().getTag()
 
-#=== get DB2
-online = tag2[0:3].upper()=="ONL"
+#--- check second tag
+online = "ONL" in tag2.upper()
 if online:
-    db2 = TileCalibTools.openDbConn(schema2)
     folder2 = "/TILE/ONL01/STATUS/ADC"
-    folderTag2 = ""
+    if tag2.upper().endswith('-HEAD'):
+        tag2 = tag2.upper()
+    else:
+        tag2=""
 else:
-    db2 = TileCalibTools.openDbConn(schema)
     folder2 = "/TILE/OFL02/STATUS/ADC"
-    folderTag2 = TileCalibTools.getFolderTag(db2, folder2, tag2)
+if tag2.upper().startswith("TILE"):
+    folder2 = ""
 
 #--- create second bad channel manager
-mgr2 = TileBchTools.TileBchMgr()
+mgr2 = TileBchCrest.TileBchMgr()
 mgr2.setLogLvl(logging.DEBUG)
-mgr2.initialize(db2, folder2, folderTag2, (run2,0), 2)
+mgr2.initialize(schema, folder2, tag2, (run2,0), 2)
+tag2 = mgr2.getBlobReader().getTag()
 
 #=== synchronize
 comment=""
@@ -249,16 +255,7 @@ for ros in range(1,5):
 
 #=== commit changes
 if len(comment):
-    if online:
-        dbw = TileCalibTools.openDb('SQLITE', 'CONDBR2', 'RECREATE','COOLONL_TILE')
-        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_onl01, author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
-    else:
-        dbw = TileCalibTools.openDb('SQLITE', 'CONDBR2', 'RECREATE','COOLOFL_TILE')
-        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_ofl01, author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
-    dbw.closeDatabase()
+    mgr2.commitToDb(output, folder2, tag2, (TileBchDecoder.BitPat_onl01 if online else TileBchDecoder.BitPat_ofl01), author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
 else:
     log.warning("Folders are in sync, nothing to update")
 
-#=== close databases
-db1.closeDatabase()
-db2.closeDatabase()
