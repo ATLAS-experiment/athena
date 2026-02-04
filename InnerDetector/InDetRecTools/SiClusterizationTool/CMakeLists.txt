@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SiClusterizationTool )
@@ -22,7 +22,7 @@ atlas_add_library( SiClusterizationToolLib
    BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives Identifier InDetCondTools InDetConditionsSummaryService 
    InDetIdentifier InDetPrepRawData InDetRawData InDetReadoutGeometry SCT_ReadoutGeometry InDetRecToolInterfaces
    InDetSimData PixelConditionsData PixelGeoModelLib PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters LwtnnUtils xAODInDetMeasurement
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${LWTNN_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib FileCatalog ReadoutGeometryBase TrkEventPrimitives TrkSurfaces VxVertex CxxUtils xAODCore )
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${LWTNN_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib ReadoutGeometryBase TrkEventPrimitives TrkSurfaces VxVertex CxxUtils xAODCore )
 
 atlas_add_component( SiClusterizationTool
    src/components/*.cxx

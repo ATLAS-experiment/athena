@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( IOVDbSvc )
@@ -26,7 +26,7 @@ atlas_add_component( IOVDbSvc
    ${Boost_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS} CxxUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} ${COOL_LIBRARIES}
    ${Boost_LIBRARIES} nlohmann_json::nlohmann_json GaudiKernel
-   AthenaBaseComps AthenaKernel StoreGateLib FileCatalog AthenaPoolUtilities
+   AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities
    CoraCool IOVDbDataModel EventInfoUtils GeoModelInterfaces
    IOVDbMetaDataToolsLib EventInfoMgtLib PoolSvcLib IOVDbSvcLib 
    CxxUtils DBLock SGTools CrestApi::CrestApiLib )
