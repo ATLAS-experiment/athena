@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # TileSynchronizeOnlBchWithOfl.py <TAG> <RUN>
 # lukas.pribyl@cern.ch March 2010
@@ -8,7 +8,7 @@
 # sanya.solodkov@cern.ch July 2016
 # taking latest status from given tag in offline DB and prepare sqlite file for online DB
 # first parameter - tag to use can be UPD1 or UPD4 (default is UPD1)
-# second parameter - run number for start of IOV in sqlite file (default is current run)
+# second parameter - run number for start of IOV in sqlite file (default is next run)
 # if ADC is bad in offline DB, OnlineGeneralMaskAdc is set in online DB for this ADC
 # and in addition IgnoredInHlt is set for both ADCs of a channel
 
@@ -30,11 +30,11 @@ log.setLevel(logging.DEBUG)
 
 if run is None or run < 0:
     badrun=run
-    run=TileCalibTools.getLastRunNumber()
+    run=TileCalibTools.getNextRunNumber()
     if badrun is None:
-        log.info( "Run number was not specified, using current run number %d", run )
+        log.info( "Run number was not specified, using next run number %d", run )
     else:
-        log.warning( "Bad run number %d was set, using current run number %d", badrun, run)
+        log.warning( "Bad run number %d was set, using next run number %d", badrun, run)
     if run is None or run<0:
         log.error( "Still bad run number")
         sys.exit(2)

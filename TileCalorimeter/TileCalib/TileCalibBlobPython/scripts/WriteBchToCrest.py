@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # File:    WriteBchToCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-10-30
@@ -215,8 +215,8 @@ else:
             run=TileCalibTools.getPromptCalibRunNumber()
             log.warning( "Run number is not specified, using minimal run number in calibration loop %d", run )
         else:
-            run=TileCalibTools.getLastRunNumber()
-            log.warning( "Run number is not specified, using current run number %d", run )
+            run=TileCalibTools.getNextRunNumber()
+            log.warning( "Run number is not specified, using next run number %d", run )
         if run<0:
             log.error( "Bad run number" )
             sys.exit(2)
@@ -305,9 +305,9 @@ if len(execFile):
             comment = Comment
             author = user
         else:
-            if comment=="None":
+            if comment=="None" or comment=="keep":
                 comment = comments[io]
-            elif iov and comments[io] not in comment:
+            elif (iov and comments[io] not in comment) or (not iov and adjust):
                 comment += "  //  " + comments[io]
             if io>0 and since!=until and 'ALL' not in moduleList:
                 author=commentsSplit[io]
