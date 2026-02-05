@@ -110,6 +110,7 @@ int main(int argc, char** argv)
         return 1;
     }
     string  catName;
+    // In case none of the options below work, the default FC name is specified in IFileCatalog::addCatalog()
     if( options.exists('u') ){
         catName=options.getOptByName('u');
     }else{
