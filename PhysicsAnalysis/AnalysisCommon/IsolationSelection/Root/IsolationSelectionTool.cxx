@@ -664,14 +664,18 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
         "0.16*x", m_isoDecSuffix));
   } else if (elWPname == "isolPLITVeryTightRun3" ||
              elWPname == "isolPLITTightRun3" ||
-             elWPname == "isolPLITVeryLooseRun3") {
+             elWPname == "isolPLITVeryLooseRun3" ||
+	     elWPname == "isolPLITVeryTightRun2" ||
+             elWPname == "isolPLITTightRun2" ||
+             elWPname == "isolPLITVeryLooseRun2"     
+	     ) {
     // open the file path to read out WP definition file
     // if (!m_filePathName.empty()) { should never be empty --> default value
     std::string filename =
         PathResolverFindCalibFile(m_filePathName + "/" + elWPname + ".root");
 
     ATH_MSG_INFO("Reading input file " << elWPname << " from " << m_filePathName
-                                       << "  " << filename);
+                                       << "  " << filename << ": " << (m_filePathName + "/" + elWPname + ".root"));
     m_WPdefinitionFile = std::make_unique<TFile>(filename.c_str(), "READ");
 
     if (!m_WPdefinitionFile || m_WPdefinitionFile->IsZombie()) {
@@ -687,7 +691,7 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
       return StatusCode::FAILURE;
     }
 
-    std::vector<TGraph*> cutGraphUPtr;
+    std::vector<std::unique_ptr<TGraph>> cutGraphUPtr;
 
     TIter nextkey(m_WPdefinitionFile->GetListOfKeys());
     TKey* key;
@@ -695,7 +699,8 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
     while ((key = (TKey*)nextkey())) {
       TObject* obj = key->ReadObj();
       if (obj->InheritsFrom(TGraph::Class())) {
-        cutGraphUPtr.push_back(static_cast<TGraph*>(obj));
+	std::unique_ptr<TGraph> graph(static_cast<TGraph*>(obj));
+	cutGraphUPtr.push_back(std::move(graph));
 
         // keep this as hint on how to read out RunNumber validity
         // TObjArray* tokens = Obj_name.Tokenize("_");
@@ -712,19 +717,36 @@ StatusCode IsolationSelectionTool::addElectronWP(const std::string& elWPname) {
     if (elWPname == "isolPLITVeryTightRun3") {
       wp->addCut(std::make_unique<IsolationConditionGraph>(
           "isolPLITVeryTightRun3", isoTypes,
-          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), cutGraphUPtr,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
           std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
     } else if (elWPname == "isolPLITTightRun3") {
       wp->addCut(std::make_unique<IsolationConditionGraph>(
           "isolPLITTightRun3", isoTypes,
-          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), cutGraphUPtr,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
           std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
     } else if (elWPname == "isolPLITVeryLooseRun3") {
       wp->addCut(std::make_unique<IsolationConditionGraph>(
           "isolPLITVeryLooseRun3", isoTypes,
-          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), cutGraphUPtr,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
           std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
-    } else {
+    } 
+    else if (elWPname == "isolPLITVeryTightRun2") {
+      wp->addCut(std::make_unique<IsolationConditionGraph>(
+          "isolPLITVeryTightRun2", isoTypes,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
+          std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
+    } else if (elWPname == "isolPLITTightRun2") {
+      wp->addCut(std::make_unique<IsolationConditionGraph>(
+          "isolPLITTightRun2", isoTypes,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
+          std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
+    } else if (elWPname == "isolPLITVeryLooseRun2") {
+      wp->addCut(std::make_unique<IsolationConditionGraph>(
+          "isolPLITVeryLooseRun2", isoTypes,
+          std::make_unique<TF2>("elePLIT", "TMath::Log(x / y)"), std::move(cutGraphUPtr),
+          std::make_unique<TH1F>(*binning), m_isoDecSuffix.value(), false));
+    } 
+ else {
       ATH_MSG_ERROR("Unknown electron isolation WP: " << elWPname);
       return StatusCode::FAILURE;
     }
