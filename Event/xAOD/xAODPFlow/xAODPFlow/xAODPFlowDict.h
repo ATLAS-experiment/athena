@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODPFLOW_XAODPFODICT_H
 #define XAODPFLOW_XAODPFODICT_H
@@ -19,6 +19,10 @@
 #include "xAODPFlow/versions/TrackCaloCluster_v1.h"
 #include "xAODPFlow/versions/TrackCaloClusterContainer_v1.h"
 #include "xAODPFlow/versions/TrackCaloClusterAuxContainer_v1.h"
+#include "xAODPFlow/FlowElement.h"
+#include "xAODPFlow/FlowElementContainer.h"
+#include "xAODPFlow/FlowElementAuxContainer.h"
+#include "xAODPFlow/versions/FlowElement_v1.h"
 #include "xAODPFlow/versions/FlowElementContainer_v1.h"
 #include "xAODPFlow/versions/FlowElementAuxContainer_v1.h"
 

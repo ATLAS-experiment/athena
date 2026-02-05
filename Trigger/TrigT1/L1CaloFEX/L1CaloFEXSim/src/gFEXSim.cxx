@@ -190,13 +190,16 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int pucA = 0;
    int pucB = 0;
    int pucC = 0;
+   int pucA_JWJ = 0;
+   int pucB_JWJ = 0;
+   int pucC_JWJ = 0;
    //note that jetThreshold is not a configurable parameter in firmware, it is used to check that jet values are positive
    int jetThreshold = FEXAlgoSpaceDefs::jetThr; //this threshold is set by the online software 
 
    if (FEXAlgoSpaceDefs::ENABLE_PUC == true){
-      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA,  1,  pucA);
-      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB,  1,  pucB);
-      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC,  1,  pucC);
+      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA, 1, pucA, pucA_JWJ);
+      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB, 1, pucB, pucB_JWJ);
+      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC, 1, pucC, pucC_JWJ);
    }
    
    
@@ -278,7 +281,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
                                        aFPGA_C, bFPGA_C,
                                        gXE_seedThrA, gXE_seedThrB, gXE_seedThrC);
 
-   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, Btwr, Ctwr, outJwojTOB);
+   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, pucA_JWJ, Btwr, pucB_JWJ, Ctwr, pucC_JWJ, outJwojTOB);
 
    m_gScalarEJwojTobWords.resize(1);
    m_gMETComponentsJwojTobWords.resize(1);
