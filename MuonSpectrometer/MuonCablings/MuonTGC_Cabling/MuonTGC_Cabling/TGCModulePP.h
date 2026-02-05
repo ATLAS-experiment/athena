@@ -4,30 +4,25 @@
 
 #ifndef MUONTGC_CABLING_TGCMODULEPP_HH
 #define MUONTGC_CABLING_TGCMODULEPP_HH
- 
+
 #include "MuonTGC_Cabling/TGCModuleId.h"
 
-namespace MuonTGC_Cabling
-{
- 
-class TGCModulePP : public TGCModuleId
-{
-public:
-  // Constructor & Destructor
-  TGCModulePP(TGCId::SideType side,
-	       TGCId::ModuleType module,
-	       TGCId::RegionType region,
-	       int sector,
-	       int id);
+namespace MuonTGC_Cabling {
 
-  virtual ~TGCModulePP(void) {}  
+class TGCModulePP : public TGCModuleId {
+   public:
+    // Constructor & Destructor
+    TGCModulePP(TGCId::SideType side, TGCId::ModuleType module,
+                TGCId::RegionType region, int sector, int id);
 
-  virtual bool isValid(void) const;
-  
-private:
-  TGCModulePP(void) {}
+    virtual ~TGCModulePP(void) {}
+
+    virtual bool isValid(void) const;
+
+   private:
+    TGCModulePP(void) {}
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

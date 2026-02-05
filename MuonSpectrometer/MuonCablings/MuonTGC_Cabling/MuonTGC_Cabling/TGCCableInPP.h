@@ -4,39 +4,38 @@
 
 #ifndef MUONTGC_CABLING_TGCCABLEINPP_HH
 #define MUONTGC_CABLING_TGCCABLEINPP_HH
- 
-#include "MuonTGC_Cabling/TGCCable.h"
 
-#include <string>
-#include <memory>
 #include <array>
+#include <memory>
+#include <string>
 
+#include "MuonTGC_Cabling/TGCCable.h"
 #include "MuonTGC_Cabling/TGCId.h"
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
 class TGCDatabase;
-  
-class TGCCableInPP : public TGCCable
-{
- public:
-  TGCCableInPP(const std::string& filename);
-  virtual ~TGCCableInPP();
-  
-  virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
-                                   const bool orChannel=false) const;
 
- private:
-  TGCCableInPP(void) = delete;
-  virtual TGCChannelId* getChannelIn(const TGCChannelId* ppout, 
-                                     const bool orChannel=false) const;
-  virtual TGCChannelId* getChannelOut(const TGCChannelId* ppin,
-                                      const bool orChannel=false) const;
+class TGCCableInPP : public TGCCable {
+   public:
+    TGCCableInPP(const std::string& filename);
+    virtual ~TGCCableInPP();
 
-  std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>, TGCId::MaxRegionType> m_database;
+    virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
+                                     const bool orChannel = false) const;
+
+   private:
+    TGCCableInPP(void) = delete;
+    virtual TGCChannelId* getChannelIn(const TGCChannelId* ppout,
+                                       const bool orChannel = false) const;
+    virtual TGCChannelId* getChannelOut(const TGCChannelId* ppin,
+                                        const bool orChannel = false) const;
+
+    std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
+               TGCId::MaxRegionType>
+        m_database;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif
