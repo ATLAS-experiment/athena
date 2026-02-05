@@ -403,12 +403,7 @@ void CommonSmearingTool::ReadInputs(TFile* fFile, std::map<std::string, T>& mMap
       TNamed* tObj = (TNamed*)kKey->ReadObj();
       std::string sTitle = tObj->GetTitle();
       delete tObj;
-      if (sTitle == "track-eta")
-      {
-        m_fY = &tauLeadTrackEta;
-        ATH_MSG_DEBUG("using leading track eta for y-axis");
-      }
-      else if (sTitle == "|eta|")
+      if (sTitle == "|eta|")
       {
         m_fY = &finalTauAbsEta;
         ATH_MSG_DEBUG("using absolute tau eta for y-axis");
