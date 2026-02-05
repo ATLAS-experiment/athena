@@ -139,7 +139,9 @@ namespace FlavorTagInference {
       TypeRegexes hits_type_regexes {
           // hits variables
           // ConstituentsEDMType picked correspond to the first matching regex
-          {"(j|a|b)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(j|a|b)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(deta|dphi|radius_local)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(splitProbability1|splitProbability2)"_r, ConstituentsEDMType::CUSTOM_GETTER},
       };
       TypeRegexes flow_type_regexes {
           // FlowElement variables

@@ -25,11 +25,19 @@ namespace FlavorTagDiscriminants {
     // Initialize reader
     ATH_CHECK( m_eventInfoKey.initialize() );
     ATH_CHECK( m_HitContainerKey.initialize() );
+    ATH_CHECK( m_vertexKey.initialize() );
 
     // Initialize decorator
     ATH_CHECK( m_OutputHitXKey.initialize() );
     ATH_CHECK( m_OutputHitYKey.initialize() );
     ATH_CHECK( m_OutputHitZKey.initialize() );
+
+    m_OutputPVXKey = m_HitContainerKey.key() + "." + m_OutputPVXKey.key();
+    ATH_CHECK(m_OutputPVXKey.initialize());
+    m_OutputPVYKey = m_HitContainerKey.key() + "." + m_OutputPVYKey.key();
+    ATH_CHECK(m_OutputPVYKey.initialize());
+    m_OutputPVZKey = m_HitContainerKey.key() + "." + m_OutputPVZKey.key();
+    ATH_CHECK(m_OutputPVZKey.initialize());
 
     return StatusCode::SUCCESS;
   }
@@ -51,10 +59,26 @@ namespace FlavorTagDiscriminants {
       return StatusCode::FAILURE;
     }
 
+    // Read out PV info
+    SG::ReadHandle<xAOD::VertexContainer> vtxHandle(m_vertexKey, ctx);
+    if (!vtxHandle.isValid() || vtxHandle->empty()) return StatusCode::FAILURE;
+
+    const xAOD::Vertex* pv = nullptr;
+    for (const xAOD::Vertex* v : *vtxHandle) {
+      if (v->vertexType() == xAOD::VxType::PriVtx) { pv = v; break; }
+    }
+    if (!pv) pv = vtxHandle->front();
+
+    const float pvx = pv->x(), pvy = pv->y(), pvz = pv->z();
+
     // Set up decorator
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> correctedHitX (m_OutputHitXKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> correctedHitY (m_OutputHitYKey, ctx);
     SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> correctedHitZ (m_OutputHitZKey, ctx);
+
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> pvRelHitX (m_OutputPVXKey,  ctx);
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> pvRelHitY (m_OutputPVYKey,  ctx);
+    SG::WriteDecorHandle<xAOD::TrackMeasurementValidationContainer, float> pvRelHitZ (m_OutputPVZKey,  ctx);
 
     // Construct beamspot vector
     const xAOD::EventInfo& ei = *event_info;
@@ -64,11 +88,18 @@ namespace FlavorTagDiscriminants {
       float localX = hit->globalX() - ei.beamPosX();
       float localY = hit->globalY() - ei.beamPosY();
       float localZ = hit->globalZ() - ei.beamPosZ();
+
+      float pvX = hit->globalX() - pvx;
+      float pvY = hit->globalY() - pvy;
+      float pvZ = hit->globalZ() - pvz;
       
       correctedHitX(*hit) = localX;
       correctedHitY(*hit) = localY;
       correctedHitZ(*hit) = localZ;
 
+      pvRelHitX(*hit) = pvX;
+      pvRelHitY(*hit) = pvY;
+      pvRelHitZ(*hit) = pvZ;
     }
     
     return StatusCode::SUCCESS;

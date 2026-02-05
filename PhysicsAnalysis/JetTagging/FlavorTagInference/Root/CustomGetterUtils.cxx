@@ -410,6 +410,39 @@ namespace {
     SG::AuxElement::ConstAccessor<float> local_hitY("HitsYRelToBeamspot");
     SG::AuxElement::ConstAccessor<float> local_hitZ("HitsZRelToBeamspot");
 
+    // PV-relative coordinates (for angular variables)                                                                                              
+    SG::AuxElement::ConstAccessor<float> pv_hitX("HitsXRelToPV");                                                                                   
+    SG::AuxElement::ConstAccessor<float> pv_hitY("HitsYRelToPV");                                                                                   
+    SG::AuxElement::ConstAccessor<float> pv_hitZ("HitsZRelToPV");                                                                                   
+                                                                                                                                                    
+    // Split probabilities (pixel only)                                                                                                             
+    SG::AuxElement::ConstAccessor<float> sp1("splitProbability1");                                                                                  
+    SG::AuxElement::ConstAccessor<float> sp2("splitProbability2");  
+
+    // Helper to compute eta from xyz                                                                                                               
+    auto eta_from_xyz = [](double x, double y, double z) -> double {                                                                                
+      const double rT = std::hypot(x, y);                                                                                                           
+      const double theta = std::atan2(rT, z);                                                                                                       
+      const double t = std::tan(0.5 * theta);                                                                                                       
+      return (t > 0.0) ? -std::log(t) : 0.0;                                                                                                        
+    };                                                                                                                                              
+                                                                                                                                                    
+    // Helper to compute phi from xy                                                                                                                
+    auto phi_from_xy = [](double x, double y) -> double {                                                                                           
+      return std::atan2(y, x);                                                                                                                      
+    };                                                                                                                                              
+                                                                                                                                                    
+    // Helper for delta phi                                                                                                                         
+    auto delta_phi = [](double phi1, double phi2) -> double {                                                                                       
+      double dphi = phi1 - phi2;                                                                                                                    
+      if (dphi > M_PI) {                                                                                                                            
+        dphi -= M_PI * 2;                                                                                                                           
+      } else if (dphi <= -M_PI) {                                                                                                                   
+        dphi += M_PI * 2;                                                                                                                           
+      }                                                                                                                                             
+      return dphi;                                                                                                                                  
+    }; 
+
     if (name == "j") {
       return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
         return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(0);
@@ -424,7 +457,46 @@ namespace {
       return CustomSeqGetter<Tmv>([local_hitX, local_hitY, local_hitZ](const Tmv& tmv, const Jet& j) {
         return getJab(local_hitX(tmv), local_hitY(tmv), local_hitZ(tmv), j)(2);
       });
-    }
+    }                                                                                                                                          
+    // Angular variables (PV-relative)                                                                                                              
+    else if (name == "deta") {                                                                                                                           
+      return CustomSeqGetter<Tmv>([pv_hitX, pv_hitY, pv_hitZ, eta_from_xyz](const Tmv& h, const Jet& j) {                                       
+        const double eta_local = eta_from_xyz(pv_hitX(h), pv_hitY(h), pv_hitZ(h));                                                                  
+        return eta_local - j.eta();                                                                                                                 
+      });                                                                                                                                           
+    }                                                                                                                                               
+                                                                                                                                                    
+    else if (name == "dphi") {                                                                                                                           
+      return CustomSeqGetter<Tmv>([pv_hitX, pv_hitY, phi_from_xy, delta_phi](const Tmv& h, const Jet& j) {                                          
+        const double phi_local = phi_from_xy(pv_hitX(h), pv_hitY(h));                                                                               
+        return delta_phi(phi_local, j.phi());  // negative to match convention                                                                     
+      });                                                                                                                                           
+    }                                                                                                                                               
+                                                                                                                                                    
+    else if (name == "radius_local") {                                                                                                                   
+      return CustomSeqGetter<Tmv>([pv_hitX, pv_hitY](const Tmv& h, const Jet&) {                                                                    
+        return std::hypot(pv_hitX(h), pv_hitY(h));                                                                                                  
+      });                                                                                                                                           
+    }                                                                                                                                               
+                                                                                                                                                    
+    // Split probabilities (pixel only, with availability check)                                                                                    
+    else if (name == "splitProbability1") {                                                                                                              
+      return CustomSeqGetter<Tmv>([sp1](const Tmv& h, const Jet&) {                                                                                 
+        float v = 0.0;                                                                                                                              
+        if (sp1.isAvailable(h)) v = sp1(h);                                                                                                         
+        if (!std::isfinite(v)) v = 0.0;                                                                                                             
+        return v;                                                                                                                                   
+      });                                                                                                                                           
+    }                                                                                                                                               
+                                                                                                                                                    
+    else if (name == "splitProbability2") {                                                                                                              
+      return CustomSeqGetter<Tmv>([sp2](const Tmv& h, const Jet&) {                                                                                 
+        float v = 0.0;                                                                                                                              
+        if (sp2.isAvailable(h)) v = sp2(h);                                                                                                         
+        if (!std::isfinite(v)) v = 0.0;                                                                                                             
+        return v;                                                                                                                                   
+      });                                                                                                                                           
+    }                                                                                                                                               
     return std::nullopt;
   }
 

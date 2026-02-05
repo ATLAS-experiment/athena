@@ -53,11 +53,23 @@ namespace FlavorTagDiscriminants {
       SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_HitsYRelToBeamspotKey{
         this, "hitReaderY","HitsYRelToBeamspot","Key for output hits y coordinate relative to beamspot"};
 
+      SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_HitsXRelToPVKey{
+        this, "hitReaderXRelPV","HitsXRelToPV","Key for output hits x coordinate relative to primary vertex"};
+
+      SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_HitsYRelToPVKey{
+        this, "hitReaderYRelPV","HitsYRelToPV","Key for output hits y coordinate relative to primary vertex"};
+
+      SG::ReadDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_HitsZRelToPVKey{
+        this, "hitReaderZRelPV","HitsZRelToPV","Key for output hits z coordinate relative to primary vertex"};
+
       SG::WriteDecorHandleKey< xAOD::JetContainer > m_hitAssociationKey{
         this,"hitAssociation","hitsAssociatedWithJet","Key for decorating links"};
       
-      Gaudi::Property <float>  m_dPhiHitToJet{
-        this, "dphiHitToJet", 0.2, "Phi difference between hit and jet"};
+      Gaudi::Property<std::string> m_hitMetric{
+        this, "HitMetric", "dphi", "Hit Association Metric: 'dphi' or 'dr' to jet"};
+
+      Gaudi::Property <float>  m_maxDistToJet{
+        this, "MaxDistToJet", 0.2, "Max distance between hit and jet"};
 
       Gaudi::Property <int>  m_maxHits{
         this, "maxHits", 200, "Maximum number of hits"};
