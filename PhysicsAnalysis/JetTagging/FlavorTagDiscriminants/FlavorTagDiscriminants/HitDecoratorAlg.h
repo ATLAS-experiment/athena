@@ -43,11 +43,6 @@ namespace FlavorTagDiscriminants {
       SG::ReadHandleKey<xAOD::TrackMeasurementValidationContainer> m_HitContainerKey {
         this, "hitContainer", "PixelClusters", "Key for hits"};
 
-      SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_OutputHitXKey {
-        this, "hitsXRelToBeamspotDecorator", m_HitContainerKey, "HitsXRelToBeamspot", "Key for output hits x coordinate relative to the vertex"};
-
-      SG::WriteDecorHandleKey<xAOD::TrackMeasurementValidationContainer> m_OutputHitYKey {
-        this, "hitsYRelToBeamspotDecorator", m_HitContainerKey, "HitsYRelToBeamspot", "Key for output hits y coordinate relative to the vertex"};
 
       SG::WriteDecorHandleKey< xAOD::TrackMeasurementValidationContainer > m_OutputHitXKey {
         this, "hitsXRelToBeamspotDecorator", m_HitContainerKey, "HitsXRelToBeamspot", "Key for output hits x coordinate relative to beamspot"};
