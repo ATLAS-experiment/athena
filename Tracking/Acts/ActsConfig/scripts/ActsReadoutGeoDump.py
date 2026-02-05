@@ -9,10 +9,6 @@ def setupArgParser():
                         help="Input file to run on ", nargs="+")
     parser.add_argument("--geoModelFile", default = "", help="GeoModel SqLite file containing the muon geometry.")
     parser.add_argument("--outRootFile", default="NewGeoModelDump.root", help="Output ROOT file to dump the geomerty")
-    parser.add_argument("--condTag", default=defaultConditionsTags.RUN3_MC, help="Conditions tag to use",
-                                                                            choices=[defaultConditionsTags.RUN3_MC,
-                                                                                     defaultConditionsTags.RUN3_DATA,
-                                                                                     defaultConditionsTags.RUN4_MC ])
     parser.add_argument("--geoTag", default=defaultGeometryTags.RUN3, help="Geometry tag to use", choices=[defaultGeometryTags.RUN4,
                                                                                                            defaultGeometryTags.RUN3])
     return parser
@@ -27,7 +23,6 @@ if __name__ == "__main__":
     flags.Concurrency.NumConcurrentEvents = 1  # Might change this later, but good enough for the moment.
     flags.Input.Files = args.inputFile 
     flags.GeoModel.AtlasVersion = args.geoTag
-    flags.IOVDb.GlobalTag = args.condTag
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
     flags.Exec.MaxEvents = 1
@@ -37,7 +32,9 @@ if __name__ == "__main__":
         flags.GeoModel.SQLiteDB = True
         from MuonGeoModelTestR4.testGeoModel import configureDefaultTagsCfg
         configureDefaultTagsCfg(flags)
-
+    else:
+        from MuonConfig.MuonConfigUtils import configureCondTag
+        configureCondTag(flags)
     flags.lock()
     flags.dump(evaluate = True)
 
