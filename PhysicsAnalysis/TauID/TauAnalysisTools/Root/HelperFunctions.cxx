@@ -123,23 +123,6 @@ double TauAnalysisTools::finalTauAbsEta(const xAOD::TauJet& xTau)
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::tauLeadTrackEta(const xAOD::TauJet& xTau)
-{
-  // return leading charge tau track eta
-  double dTrackEta = 0.;
-  double dTrackMaxPt = 0.;
-  for( unsigned int iNumTrack = 0; iNumTrack < xTau.nTracks(); iNumTrack++)
-  {
-    if (xTau.track(iNumTrack)->pt() > dTrackMaxPt)
-    {
-      dTrackMaxPt = xTau.track(iNumTrack)->pt();
-      dTrackEta = xTau.track(iNumTrack)->eta();
-    }
-  }
-  return dTrackEta;
-}
-
-//______________________________________________________________________________
 double TauAnalysisTools::truthTauPt(const xAOD::TauJet& xTau)
 {
   // return truth tau Pt in GeV

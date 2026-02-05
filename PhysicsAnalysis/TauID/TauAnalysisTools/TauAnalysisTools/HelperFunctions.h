@@ -52,8 +52,6 @@ double finalTauPt(const xAOD::TauJet& xTau);
 double finalTauEta(const xAOD::TauJet& xTau);
 /** return MVA based absolute tau eta*/
 double finalTauAbsEta(const xAOD::TauJet& xTau);
-/** return leading charge tau track eta*/
-double tauLeadTrackEta(const xAOD::TauJet& xTau);
 /** return truth match tau pt in GeV (if hadronic truth tau match)*/
 double truthTauPt(const xAOD::TauJet& xTau);
 /** return truth match visible tau pt in GeV (if hadronic truth tau match)*/
