@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * KalmanMETCorrection.cpp
@@ -11,8 +11,7 @@
  * @param NumberLeading
 **********************************/
 
-#include <cmath>
-#include <string>
+
 
 #include "L1TopoAlgorithms/KalmanMETCorrection.h"
 #include "L1TopoCommon/Exception.h"
@@ -24,6 +23,9 @@
 #include "L1TopoSimulationUtils/Trigo.h"
 #include "L1TopoSimulationUtils/Conversions.h"
 //
+#include <cmath>
+#include <string>
+
 
 REGISTER_ALG_TCS(KalmanMETCorrection)
 
@@ -144,8 +146,8 @@ TCS::KalmanMETCorrection::processBitCorrect( const std::vector<TCS::TOBArray con
       }
       int scaledEt = (*tob)->Et() * p_correctionLut[etaBin][etBin];
       unsigned tobPhi = (*tob)->phi();
-      jetSumXY[0] += scaledEt * TSU::Trigo::CosInt.at(tobPhi);
-      jetSumXY[1] += scaledEt * TSU::Trigo::SinInt.at(tobPhi);
+      jetSumXY[0] += static_cast<int64_t>(scaledEt) * TSU::Trigo::CosInt.at(tobPhi);
+      jetSumXY[1] += static_cast<int64_t>(scaledEt) * TSU::Trigo::SinInt.at(tobPhi);
       
    }
    
@@ -158,7 +160,8 @@ TCS::KalmanMETCorrection::processBitCorrect( const std::vector<TCS::TOBArray con
    uint64_t kfmetSq = kfmetXY[0] * kfmetXY[0] + kfmetXY[1] * kfmetXY[1];
    
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
-      decision.setBit( i, kfmetSq > p_XE[i]*p_XE[i] );
+      const auto XE64 = static_cast<uint64_t >(p_XE[i]);
+      decision.setBit( i, kfmetSq > XE64 * XE64 );
     }    
     
     return TCS::StatusCode::SUCCESS;

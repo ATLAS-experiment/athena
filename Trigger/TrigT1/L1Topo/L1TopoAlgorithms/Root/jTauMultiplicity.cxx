@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * jTauMultiplicity.cpp
@@ -12,7 +12,7 @@
 
 **********************************/
 
-#include <cmath>
+
 
 #include "L1TopoAlgorithms/jTauMultiplicity.h"
 #include "L1TopoCommon/Exception.h"
@@ -22,7 +22,7 @@
 #include "L1TopoEvent/jTauTOBArray.h"
 
 #include "TrigConfData/L1ThrExtraInfo.h"
-
+#include <cmath>
 REGISTER_ALG_TCS(jTauMultiplicity)
 
 using namespace std;
@@ -30,7 +30,7 @@ using namespace std;
 
 TCS::jTauMultiplicity::jTauMultiplicity(const std::string & name) : CountingAlg(name)
 {
-   setNumberOutputBits(12); //To-Do: Make this flexible to addapt to the menu. Each counting requires more than one bit
+   setNumberOutputBits(12); //To-Do: Make this flexible to adapt to the menu. Each counting requires more than one bit
 }
 
 TCS::jTauMultiplicity::~jTauMultiplicity(){}
@@ -39,6 +39,9 @@ TCS::jTauMultiplicity::~jTauMultiplicity(){}
 TCS::StatusCode
 TCS::jTauMultiplicity::initialize() { 
   m_threshold = dynamic_cast<const TrigConf::L1Threshold_jTAU*>(getThreshold());
+  if (not m_threshold){
+    return StatusCode::FAILURE;
+  }
   m_extraInfo = m_threshold->getExtraInfo();
 
   // book histograms
