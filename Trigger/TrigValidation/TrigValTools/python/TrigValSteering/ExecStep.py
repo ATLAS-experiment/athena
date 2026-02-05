@@ -78,7 +78,7 @@ class ExecStep(Step):
             self.misconfig_abort('Cannot configure a step without specified type or executable')
 
         # Configure executable from type
-        known_types = ['athena', 'athenaHLT', 'Reco_tf', 'Trig_reco_tf', 'Derivation_tf']
+        known_types = ['athena', 'athenaHLT', 'athenaEF', 'Reco_tf', 'Trig_reco_tf', 'Derivation_tf']
         if self.type in known_types:
             if self.executable is not None:
                 self.log.warning('type=%s was specified, so executable=%s '
@@ -194,7 +194,7 @@ class ExecStep(Step):
             if self.imf:
                 athenaopts += ' --imf'
             if self.perfmon:
-                if self.type == 'athenaHLT':
+                if self.type == 'athenaHLT' or self.type == 'athenaEF':
                     athenaopts += ' --perfmon'
                 elif self.type == 'athena':
                     athenaopts += ' --perfmon=fastmonmt'
@@ -211,7 +211,7 @@ class ExecStep(Step):
         # Run config-only if requested
         if self.config_only :
 
-            if self.type == 'athenaHLT' or (self.type == "other" and self.executable == "athenaHLT.py") :
+            if self.type == 'athenaHLT' or self.type == 'athenaEF' or (self.type == "other" and self.executable == "athenaHLT.py") or (self.type == "other" and self.executable == "athenaEF.py") :
                 athenaopts += ' --dump-config-exit'
 
             elif self.type == 'athena' or self.type == 'Reco_tf' or self.type == 'Derivation_tf' or (self.type == "other" and self.executable == "athena.py") :
@@ -230,6 +230,11 @@ class ExecStep(Step):
                 self.concurrent_events = 1
             if self.forks is None:
                 self.forks = 1
+        if test.package_name == 'TrigP1Test' and self.type == 'athenaEF':
+            if self.threads is None:
+                self.threads = 1
+            if self.concurrent_events is None:
+                self.concurrent_events = 1
 
         # Append threads/concurrent_events/forks
         if self.threads is not None:
@@ -237,7 +242,7 @@ class ExecStep(Step):
         if self.concurrent_events is not None:
             athenaopts += ' --concurrent-events={}'.format(
                 self.concurrent_events)
-        if self.forks is not None:
+        if self.forks is not None and self.type != 'athenaEF':
             athenaopts += ' --nprocs={}'.format(self.forks)
 
         # Append athenaopts
@@ -267,14 +272,14 @@ class ExecStep(Step):
         # Append max/skip events
         if self.type == 'athena':
             self.args += ' --evtMax={}'.format(self.max_events)
-        elif self.type == 'athenaHLT':
+        elif self.type == 'athenaHLT' or self.type == 'athenaEF':
             self.args += ' --number-of-events={}'.format(self.max_events)
         elif self.type.endswith('_tf'):
             self.args += ' --maxEvents={}'.format(self.max_events)
         if self.skip_events is not None:
             if self.type == 'athena':
                 self.args += ' --skipEvents={}'.format(self.skip_events)
-            elif self.type == 'athenaHLT':
+            elif self.type == 'athenaHLT' or self.type == 'athenaEF':
                 self.args += ' --skip-events={}'.format(self.skip_events)
             elif self.type.endswith('_tf'):
                 self.args += ' --skipEvents={}'.format(self.skip_events)
@@ -282,7 +287,7 @@ class ExecStep(Step):
         # Append input
         if len(self.input) > 0:
             if self.input_object is not None:
-                if self.type == 'athenaHLT':
+                if self.type == 'athenaHLT' or self.type == 'athenaEF':
                     input_str = ' --file='.join(self.input_object.paths)
                 else:
                     input_str = ','.join(self.input_object.paths)
@@ -290,7 +295,7 @@ class ExecStep(Step):
                 input_str = self.input
             if self.type == 'athena':
                 self.args += ' --filesInput={}'.format(input_str)
-            elif self.type == 'athenaHLT':
+            elif self.type == 'athenaHLT' or self.type == 'athenaEF':
                 self.args += ''.join([f" --file={inputFile}" for inputFile in input_str.split(',')])
             elif self.type.endswith('_tf'):
                 if self.input_object is None:
