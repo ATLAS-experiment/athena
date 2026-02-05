@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MDTCALIBINTEFACES_MDTCALIBINPUT_H
 #define MDTCALIBINTEFACES_MDTCALIBINPUT_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include <GaudiKernel/PhysicalConstants.h>
+#include <CxxUtils/CachedValue.h>
 #include <xAODMuonPrepData/MdtDriftCircleFwd.h>
 #include <Identifier/Identifier.h>
 #include <Identifier/IdentifierHash.h>
@@ -134,20 +134,23 @@ class MdtCalibInput {
       double signalPropagationDistance() const;
       /// Returns the assocaited ideal surface  (Throw exception if no legacy RE is available)
       const Trk::StraightLineSurface& legacySurface() const;
-
-      /// Returns the center of the associated surface
-      const Amg::Vector3D& surfaceCenter() const;
       /// Returns the tube length
       double tubeLength() const;
       /// Returns the sign of the readout position in local coordinates
       double readOutSide() const;
       /// Returns the inner tube radius
       double innerTubeR() const;
+
+      friend std::ostream& operator<<(std::ostream& ostr, const MdtCalibInput& input) {
+          input.print(ostr);
+          return ostr;
+      }
   private:
+    /** @brief Print the object on screen
+     *  @param ostr: Outstream into which the object is piped  */
+    void print(std::ostream& ostr) const;
     /** @brief Local to global transformation of the tube */
     const Amg::Transform3D& localToGlobal() const;
-    /** @brief Translational part of the local -> global transform */
-    Amg::Vector3D center() const;
     /** @brief Tube identifier */
     Identifier m_id{};
     /** @brief Adc counts of the hit */
@@ -164,14 +167,13 @@ class MdtCalibInput {
     /** @brief Measurement hash of the Identifier (needed for Phase II) */
     IdentifierHash m_hash{};
     /** @brief Point of closest approach of the track */  
-    Amg::Vector3D m_approach{center()};
+    CxxUtils::CachedValue<Amg::Vector3D> m_approach{};
     /** @brief Global track direction */
     Amg::Vector3D m_trackDir{Amg::Vector3D::Zero()};
     /** @brief Does the track direction contain a phi constraint */
     bool m_trackHasPhi{false};
     /// Time of flight 
-    static constexpr double s_inverseSpeed{1. / Gaudi::Units::c_light};
-    double m_ToF{center().mag() * s_inverseSpeed};
+    CxxUtils::CachedValue<double> m_ToF{};
     /// Trigger time
     double m_trigTime{0.};
     /// Distance to track (signed)
@@ -179,7 +181,7 @@ class MdtCalibInput {
 
 };
 
-std::ostream& operator<<(std::ostream& ostr, const MdtCalibInput& input);
+
 
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibrationTool.h"
@@ -93,11 +93,9 @@ StatusCode MdtCalibrationTool::initialize() {
 
 const MuonCalib::MdtFullCalibData* MdtCalibrationTool::getCalibConstants(const EventContext& ctx,
                                                                          const Identifier& channelId) const {
-    SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
-    if (!constantHandle.isValid()){
-         THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
-    }
-    return constantHandle->getCalibData(channelId, msgStream());
+    const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
+    return SG::get(calibData, m_calibDbKey, ctx).isSuccess() ? 
+              calibData->getCalibData(channelId, msgStream()) : nullptr;
 }
 MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx, 
                                              const MdtCalibInput& calibIn,
@@ -105,12 +103,12 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
   
   const Identifier& id{calibIn.identify()};
   
-  SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
-  if (!constantHandle.isValid()){
+  const MuonCalib::MdtCalibDataContainer* calibData{nullptr};
+  if (ATH_UNLIKELY(!SG::get(calibData, m_calibDbKey, ctx).isSuccess())) {
       THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
 
-  const MuonCalib::MdtFullCalibData* calibConstants = constantHandle->getCalibData(id, msgStream());
+  const MuonCalib::MdtFullCalibData* calibConstants = calibData->getCalibData(id, msgStream());
   if (!calibConstants) {
      ATH_MSG_WARNING("Could not find calibration data for channel "<<m_idHelperSvc->toString(id));
      return MdtCalibOutput{};
@@ -134,7 +132,7 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
      ATH_MSG_WARNING("Failed to access tubedata for " << m_idHelperSvc->toString(id));
      return MdtCalibOutput{};
   }
-  const float invPropSpeed = constantHandle->inversePropSpeed();
+  const float invPropSpeed = calibData->inversePropSpeed();
   
   MdtCalibOutput calibResult{};
   // correct for global t0 of rt-region
@@ -176,12 +174,11 @@ MdtCalibOutput MdtCalibrationTool::calibrate(const EventContext& ctx,
    
       if (m_doField && corrections->bField()) {
         MagField::AtlasFieldCache fieldCache{};
-
-        SG::ReadCondHandle readHandle{m_fieldCacheCondObjInputKey, ctx};
-        if (!readHandle.isValid()) {
+        const AtlasFieldCacheCondObj* bFieldCondCache{nullptr};
+        if (ATH_UNLIKELY(!SG::get(bFieldCondCache, m_fieldCacheCondObjInputKey, ctx).isSuccess())) {
           THROW_EXCEPTION("calibrate: Failed to retrieve AtlasFieldCacheCondObj with key " << m_fieldCacheCondObjInputKey.key());
         }
-        readHandle->getInitializedCache(fieldCache);
+        bFieldCondCache->getInitializedCache(fieldCache);
  
         Amg::Vector3D  globalB{Amg::Vector3D::Zero()};
         fieldCache.getField(calibIn.closestApproach().data(), globalB.data());
@@ -321,8 +318,8 @@ MdtCalibTwinOutput MdtCalibrationTool::calibrateTwinTubes(const EventContext& ct
   const Identifier& twinId = twinHit.identify();
 
   // get calibration constants from DbTool
-  SG::ReadCondHandle constantHandle{m_calibDbKey, ctx};
-  if (!constantHandle.isValid()){
+  const MuonCalib::MdtCalibDataContainer* constantHandle{nullptr};
+  if (ATH_UNLIKELY(!SG::get(constantHandle, m_calibDbKey, ctx).isSuccess())) {
     THROW_EXCEPTION("Failed to retrieve the Mdt calibration constants "<<m_calibDbKey.fullKey());
   }
 
