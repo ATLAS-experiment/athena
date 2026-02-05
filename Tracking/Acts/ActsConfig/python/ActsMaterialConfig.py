@@ -82,3 +82,19 @@ def MaterialMappingCfg(configFlags, name="MaterialMapping", **kwargs) :
 
   return acc
 
+
+def MaterialValidationCfg(configFlags, name="MaterialValidation", **kwargs) :
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+
+  # Need geometry
+  from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+  acc.merge( ActsTrackingGeometrySvcCfg(configFlags,
+                                        RunConsistencyChecks=False,
+                                        ObjDebugOutput=False))
+
+  acc.addEventAlgo(CompFactory.ActsTrk.MaterialValidation(name, **kwargs), primary = True)
+
+  return acc
+

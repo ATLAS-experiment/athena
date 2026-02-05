@@ -11,9 +11,7 @@
 #include <vector>
 
 namespace ActsTrk {
-  using RecordedMaterial = Acts::MaterialInteractor::result_type;
-  using RecordedMaterialTrack = std::pair<std::pair<Acts::Vector3, Acts::Vector3>, RecordedMaterial>;
-  using RecordedMaterialTrackCollection = std::vector<RecordedMaterialTrack>;
+  using RecordedMaterialTrackCollection = std::vector<Acts::RecordedMaterialTrack>;
 }
 
 CLASS_DEF( ActsTrk::RecordedMaterialTrackCollection , 1338004588 , 1 )

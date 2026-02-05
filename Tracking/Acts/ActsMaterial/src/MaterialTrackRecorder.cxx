@@ -134,6 +134,8 @@ namespace ActsTrk
         Acts::Vector3 vertex = convertPosition(g4Track->GetVertexPosition());
         Acts::Vector3 direction = convertDirection(g4Track->GetMomentumDirection());
         rmTrack.first = {vertex, direction};
+        rmTrack.second.materialInX0 = mInteraction.materialSlab.thicknessInX0();
+        rmTrack.second.materialInL0 = mInteraction.materialSlab.thicknessInL0();
         rmTrack.second.materialInteractions.push_back(mInteraction);
         m_rmtCollection->push_back(std::move(rmTrack));
     }

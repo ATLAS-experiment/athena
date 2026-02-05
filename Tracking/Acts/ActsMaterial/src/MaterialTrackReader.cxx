@@ -53,11 +53,6 @@ StatusCode ActsTrk::MaterialTrackReader::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode ActsTrk::MaterialTrackReader::finalize()
-{
-   return StatusCode::SUCCESS;
-}
-
 StatusCode
 ActsTrk::MaterialTrackReader::execute (const EventContext& ctx) const
 {
