@@ -1,6 +1,6 @@
 
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // AthAsgExUnittest includes
@@ -8,13 +8,8 @@
 
 AthAsgExUnittestAlg::AthAsgExUnittestAlg( const std::string& name, 
 			    ISvcLocator* pSvcLocator ) : 
-  AthAnalysisAlgorithm( name, pSvcLocator ),
-  m_property( 1 ),
-  m_tool( "AthAsgExUnittestTool/MyTool", this ) {
+  AthAnalysisAlgorithm( name, pSvcLocator ) {
   addRef(); // workaround until fix in Gaudi
-  // example property declarations
-  declareProperty( "MyProperty", m_property ); 
-  declareProperty( "MyTool", m_tool );
 }
 
 
