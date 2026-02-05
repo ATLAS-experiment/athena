@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
@@ -778,7 +778,7 @@ def ExtendedPRDInfoCfg(flags):
         result.merge(SiSPTSOS_CommonKernelCfg(
             flags, listOfExtensions = listOfExtensionsRequesting))
 
-    if flags.Input.isMC:
+    if flags.Tracking.doTruth:
         #check if we want to add it for other passes
         listOfExtensionsRequesting = [
             e for e in _extensions_list if (e == '') or

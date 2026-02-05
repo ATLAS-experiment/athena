@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataToxAOD package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -25,7 +25,7 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
     kwargs.setdefault("WriteExtendedPRDinformation", True)
 
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
@@ -58,7 +58,7 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
     kwargs.setdefault("WriteExtendedPRDinformation", True)
     kwargs.setdefault("PixelReadoutManager", "ITkPixelReadoutManager")
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
@@ -83,7 +83,7 @@ def ITkPixelPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAOD_
 def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
 
@@ -111,7 +111,7 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("SctxAodContainer", "ITkStripClusters")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
 
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
@@ -123,7 +123,7 @@ def ITkStripPrepDataToxAODCfg_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAOD_
 
 def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
 
     if "TRTCalDbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (

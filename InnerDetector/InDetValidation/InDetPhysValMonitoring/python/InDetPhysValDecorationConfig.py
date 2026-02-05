@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -162,7 +162,7 @@ def AddDecoratorCfg(flags, **kwargs):
 
     acc.merge(TrackDecoratorsCfg(flags))
 
-    if flags.Input.isMC:
+    if flags.Tracking.doTruth:
         from BeamSpotConditions.BeamSpotConditionsConfig import (
             BeamSpotCondAlgCfg)
         acc.merge(BeamSpotCondAlgCfg(flags))
