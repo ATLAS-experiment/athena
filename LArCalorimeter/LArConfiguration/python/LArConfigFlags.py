@@ -60,6 +60,15 @@ def createLArConfigFlags():
     lcf.addFlag("LAr.ROD.forceIter",False)
     # NN based energy reconstruction
     lcf.addFlag("LAr.ROD.NNRawChannelBuilding", False)
+    # OFFC based energy reconstruction
+    lcf.addFlag("LAr.ROD.OFFCRawChannelBuilding", False)
+
+    lcf.addFlag("LAr.ROD.OFFCBelowThreshold", 3)
+    lcf.addFlag("LAr.ROD.OFFCBelowTillReset", 7)
+    lcf.addFlag("LAr.ROD.OFFCNPulse", 7)
+    lcf.addFlag("LAr.ROD.OFFCQ3Cut", 2500)
+    lcf.addFlag("LAr.ROD.OFFCFilterThreshold", 2.0)
+
     # default LArRawSC container 
     lcf.addFlag("LAr.LATOME.DTInfoForL1","SC_ET_ID")
     # storing SC CaloCellContainer with bcid'ed energies
