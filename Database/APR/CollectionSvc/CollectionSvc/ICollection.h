@@ -10,7 +10,7 @@
 namespace pool {
 
   class ICollectionCursor;
-  class ICollectionDescription;
+  class CollectionDescription;
   class CollectionRowBuffer;
 
   /** 
@@ -41,7 +41,7 @@ namespace pool {
     virtual void close() = 0;
 
     /// Returns an object used to describe the collection properties.
-    virtual const ICollectionDescription& description() const = 0;
+    virtual const CollectionDescription& description() const = 0;
 
     /// Returns an cursor for the collection.
     virtual ICollectionCursor& cursor() = 0;

@@ -16,7 +16,7 @@ using namespace pool;
 namespace pool { class ISession; }
 
 pool::ICollection*
-pool::CollectionService::create( const pool::ICollectionDescription& description )
+pool::CollectionService::create( const pool::CollectionDescription& description )
 {
    if( description.name().empty() ) {
       std::string errorMsg = "Must specify name of collection in description input argument.";
@@ -45,7 +45,7 @@ pool::CollectionService::setMessageSvcQuiet( bool quiet )
 }
 
 pool::ICollection*
-pool::CollectionService::plugin( const ICollectionDescription& description,
+pool::CollectionService::plugin( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session ) const
 {
@@ -54,7 +54,7 @@ pool::CollectionService::plugin( const ICollectionDescription& description,
    if (type.majorType() == pool::ROOT_StorageType.type()) {
       typeString = "RootCollection";
    }
-   ICollection *coll = Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)>::create( typeString, &description, openMode, session ).release();
+   ICollection *coll = Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, ISession*)>::create( typeString, &description, openMode, session ).release();
    if( !coll ) {
       std::string errorMsg = "FAILED!  Plugin for " + typeString + "," + description.name() + " could not be loaded.";
       throw std::runtime_error( errorMsg + " (APR: \" CollectionService::plugin \" from \" CollectionSvc \")" );

@@ -14,7 +14,7 @@
 // Pool
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/CollectionDescription.h"
 #include "StorageSvc/DbType.h"
 #include "RootUtils/APRDefaults.h"
 

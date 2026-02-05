@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "RootCollectionCursor.h"
+#include "TTreeCollectionCursor.h"
 
 #include "CoralBase/Attribute.h"
 
@@ -10,9 +10,9 @@
 
 #include <exception>
 
-pool::RootCollection::RootCollectionCursor::
-RootCollectionCursor(
-   const pool::ICollectionDescription& description,
+pool::RootCollection::TTreeCollectionCursor::
+TTreeCollectionCursor(
+   const pool::CollectionDescription& description,
    const pool::CollectionRowBuffer& collectionRowBuffer,
    TTree *tree
    )
@@ -20,40 +20,33 @@ RootCollectionCursor(
       m_description( description ),
       m_collectionRowBuffer( collectionRowBuffer ),
       m_idx(-1),
-      m_entries( tree->GetEntries() ),
-      m_dummyRef( false )
+      m_entries( tree->GetEntries() )
 {
    for( coral::AttributeList::iterator attrI = m_collectionRowBuffer.attributeList().begin();
         attrI != m_collectionRowBuffer.attributeList().end();
         ++attrI ) {
-      std::string        branchName = attrI->specification().name();
+      std::string branchName = attrI->specification().name();
       TBranch* branch = tree->GetBranch( branchName.c_str() );
       if( !branch ) {
          std::string errorMsg = "Failed to retrieve TBranch " + branchName + " from the CollectionTree";
-         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionCursor() \" from \" RootCollection \")");
+         throw std::runtime_error( errorMsg + " (APR: \" TTreeCollectionCursor() \" from \" TTreeCollection \")");
       }
       if( attrI->specification().type() == typeid(std::string) ) {
          branch->SetAddress( m_charBuffer );
          m_attrBranches.push_back( std::make_pair(branch, &attrI->data<std::string>()) );
       } else {
-         branch->SetAddress( attrI->addressOfData() );         
+         branch->SetAddress( attrI->addressOfData() );
          m_attrBranches.push_back( std::make_pair( branch, (std::string*)0 ) );
       }
    }
 
-   if( m_description.eventReferenceColumnName() == "DummyRef" )  {
-      // Athena "fake" collection with no Tokens
-      m_dummyRef = true;
-      return;  
-   }
-   
    for( pool::TokenList::iterator tokenI = m_collectionRowBuffer.tokenList().begin();
         tokenI != m_collectionRowBuffer.tokenList().end();
         ++tokenI ) {
       TBranch* branch = tree->GetBranch( tokenI.tokenName().c_str() );
       if( !branch ) {
          std::string errorMsg = "Failed to retrieve TBranch " + tokenI.tokenName() + " from the CollectionTree";
-         throw std::runtime_error( errorMsg + " (APR: \" RootCollectionCursor() \" from \" RootCollection \")");
+         throw std::runtime_error( errorMsg + " (APR: \" TTreeCollectionCursor() \" from \" TTreeCollection \")");
       }
       branch->SetAddress( m_charBuffer );
       m_tokenBranches.push_back( std::make_pair(branch, &*tokenI) );
@@ -61,20 +54,20 @@ RootCollectionCursor(
 }
 
 
-pool::RootCollection::RootCollectionCursor::~RootCollectionCursor()
+pool::RootCollection::TTreeCollectionCursor::~TTreeCollectionCursor()
 {
-   RootCollectionCursor::close();
+   TTreeCollectionCursor::close();
 }
 
 
 void
-pool::RootCollection::RootCollectionCursor::close()
+pool::RootCollection::TTreeCollectionCursor::close()
 {
 }
 
 
 bool
-pool::RootCollection::RootCollectionCursor::next()
+pool::RootCollection::TTreeCollectionCursor::next()
 {
    if( ++m_idx >= size() ) {
       return false;
@@ -95,46 +88,37 @@ pool::RootCollection::RootCollectionCursor::next()
       branchI->first->GetEntry(entry);
       branchI->second->fromString( m_charBuffer );
    }
-
-  
-   // Get iterator over current row.
-
-  return true;
+   return true;
 }
 
 
-const pool::CollectionRowBuffer& 
-pool::RootCollection::RootCollectionCursor::currentRow() const
+const pool::CollectionRowBuffer&
+pool::RootCollection::TTreeCollectionCursor::currentRow() const
 {
   return m_collectionRowBuffer;
 }
 
 
 std::size_t
-pool::RootCollection::RootCollectionCursor::size()
+pool::RootCollection::TTreeCollectionCursor::size()
 {
   return m_entries;
 }
 
 
 bool
-pool::RootCollection::RootCollectionCursor::seek(std::size_t position)
+pool::RootCollection::TTreeCollectionCursor::seek(std::size_t position)
 {
    if( position >= size() ) {
       return false;
    }
-
    m_idx = position-1;
    return true;
 }
 
 
-const Token& 
-pool::RootCollection::RootCollectionCursor::eventRef() const
+const Token&
+pool::RootCollection::TTreeCollectionCursor::eventRef() const
 {
-   static const Token dummyToken;
-   if( m_dummyRef )  return dummyToken; 
    return m_collectionRowBuffer.tokenList()[ m_description.eventReferenceColumnName() ];
 }
-
-
