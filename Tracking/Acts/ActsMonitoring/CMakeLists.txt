@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsMonitoring )
@@ -48,3 +48,17 @@ atlas_add_test( ActsSeedingToolComparison
   SCRIPT test/ActsSeedingAlgorithmTest.py
   PROPERTIES TIMEOUT 900
   POST_EXEC_SCRIPT nopost.sh )
+
+file(GLOB_RECURSE files "util/*.cxx")
+foreach(_exeFile ${files})
+  get_filename_component(_theExec ${_exeFile} NAME_WE)
+  get_filename_component(_theLoc ${_exeFile} DIRECTORY)
+  # we specify a folder for programs we do not want to compile. Useful during r21 transition...
+  if(${_theLoc} MATCHES "DoNotBuild")
+    continue()
+  endif() 
+  atlas_add_executable( ${_theExec} ${_exeFile}
+                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
+                       LINK_LIBRARIES ${ROOT_LIBRARIES}  PathResolver Acts::Core  ActsGeometryInterfacesLib GeoPrimitives)
+ 
+endforeach()
