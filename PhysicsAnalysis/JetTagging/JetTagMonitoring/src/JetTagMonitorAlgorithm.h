@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGMONITORALGORITHM_H
@@ -77,43 +77,43 @@ class JetTagMonitorAlgorithm : public AthMonitorAlgorithm {
 
   ToolHandle<InDet::IInDetTrackSelectionTool> m_TrackSelectionTool{this, "TrackSelectionTool", "InDetTrackSelectionTool", "Tool for selecting tracks"};
 
-  bool m_SkipPreSelection; //true for HI/HI-p collisions, false for pp collisions
-  bool m_SkipJetFilter; //true for HI/HI-p collisions, false for pp collisions
+  bool m_SkipPreSelection{false}; //true for HI/HI-p collisions, false for pp collisions
+  bool m_SkipJetFilter{false}; //true for HI/HI-p collisions, false for pp collisions
 
-  bool m_DoExtraTaggerHistos; //true if interested in extra tagger histograms
+  bool m_DoExtraTaggerHistos{false}; //true if interested in extra tagger histograms
 
-  int m_MinGoodTrackCut;
-  float m_TrackPtCut;
-  float m_Trackd0Cut;
-  float m_Trackz0sinCut;
-  int m_TrackHitIBLCut;
+  int m_MinGoodTrackCut{};
+  float m_TrackPtCut{};
+  float m_Trackd0Cut{};
+  float m_Trackz0sinCut{};
+  int m_TrackHitIBLCut{};
 
-  float m_JetPtCut;
-  float m_JetEtaCut;
-  float m_SoftMuonPtMin;
-  float m_SoftMuonPtMax;
-  float m_MuonPtCut;
-  float m_MuonEtaCut;
-  float m_ElectronPtCut;
-  float m_ElectronEtaCut;
-  float m_ElectronEtaCrackLowCut;
-  float m_ElectronEtaCrackHighCut;
-  float m_ElectronTopoEtCone20Cut;
-  float m_ElectronPtVarCone20Cut;
-  float m_MuonTopoEtCone20Cut;
-  float m_MuonPtVarCone30Cut;
-  float m_JVTCut;
-  float m_JVTpTCut;
-  float m_JVTetaCut;
+  float m_JetPtCut{};
+  float m_JetEtaCut{};
+  float m_SoftMuonPtMin{};
+  float m_SoftMuonPtMax{};
+  float m_MuonPtCut{};
+  float m_MuonEtaCut{};
+  float m_ElectronPtCut{};
+  float m_ElectronEtaCut{};
+  float m_ElectronEtaCrackLowCut{};
+  float m_ElectronEtaCrackHighCut{};
+  float m_ElectronTopoEtCone20Cut{};
+  float m_ElectronPtVarCone20Cut{};
+  float m_MuonTopoEtCone20Cut{};
+  float m_MuonPtVarCone30Cut{};
+  float m_JVTCut{};
+  float m_JVTpTCut{};
+  float m_JVTetaCut{};
  
   std::string m_TaggerName;
-  float m_cFraction;
-  float m_tauFraction;
-  float m_WP65Cut;
-  float m_WP70Cut;
-  float m_WP77Cut;
-  float m_WP85Cut;
-  float m_WP90Cut;
+  float m_cFraction{};
+  float m_tauFraction{};
+  float m_WP65Cut{};
+  float m_WP70Cut{};
+  float m_WP77Cut{};
+  float m_WP85Cut{};
+  float m_WP90Cut{};
 
   enum Jet_t {goodJet, suspectJet, badJet};
   void fillGoodJetHistos(const xAOD::Jet *jet) const;
