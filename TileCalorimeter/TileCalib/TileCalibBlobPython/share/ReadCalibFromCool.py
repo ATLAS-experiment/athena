@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # ReadCalibFromCool.py
 # Andrei Artamonov 2009-11-03
@@ -34,12 +34,13 @@ def usage():
     print ("-P, --pmt       print pmt number in addition to channel number")
     print ("-p, --prefix=   print some prefix on every line ")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
+    print ("-o, --double    print values with double precision")
     print ("-s, --schema=   specify schema to use, like 'COOLONL_TILE/CONDBR2' or 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2' or tileSqlite.db")
     print ("-D, --dbname=   specify dbname part of schema if schema only contains file name, default is CONDBR2")
     print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
 
-letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV"]
+letters = "hr:l:s:t:f:D:S:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:o"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","dbname=","server=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV","double"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -83,6 +84,7 @@ iovonly = False
 IOVONLY = False
 comment = False
 keep=[]
+doubl  = False
 
 for o, a in opts:
     a = a.strip()
@@ -145,6 +147,8 @@ for o, a in opts:
         prefix = a
     elif o in ("-k","--keep"):
         keep = a.split(",")
+    elif o in ("-o","--double"):
+        doubl = True
     elif o in ("-h","--help"):
         usage()
         sys.exit(2)
@@ -310,7 +314,9 @@ if iovonly or IOVONLY:
                 since    = "(%d,%d)" % (sinceRun, sinceLum)
                 if sinceRun>lastRun:
                     lastRun = sinceRun
-                if sinceRun>=begin:
+                if sinceRun>end:
+                    break
+                elif sinceRun>=begin:
                     if iovs[0]!="None":
                         iovs += [since]
                     else:
@@ -327,9 +333,7 @@ if iovonly or IOVONLY:
         print("")
         all=[]
         for since in allsince:
-            if comment and allsince[since][-1]!="Comment":
-                allsince[since] += ["NO_COMMENT"]
-            all+=["%s %s" % (since," ".join(allsince[since]))]
+            all += ["%s %s" % (since,TileCalibTools.moduleListToString(allsince[since],(rosmin==0),True,comment))]
         if len(all)>0:
             all.sort()
             for s in all:
@@ -508,6 +512,8 @@ for iovs in iovList:
                                             msg += "  %3d" % v
                                     elif typeName=='Bch':
                                         msg += "  %d" % flt.getData(chn, adc, val)
+                                    elif doubl:
+                                        msg += "  %s" % flt.getData(chn, adc, val)
                                     else:
                                         msg += "  %f" % flt.getData(chn, adc, val)
                             print (pref+msg)
