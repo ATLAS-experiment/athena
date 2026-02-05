@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -20,6 +20,7 @@
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileConditions/TileInfo.h"
 #include "StoreGate/ReadHandle.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include "TH1S.h"
 #include "TH2S.h"
@@ -519,6 +520,12 @@ StatusCode TileRawChannelMonTool::fillHists()
   m_cispar = dqStatus->cispar();
   ++m_nEventsTileMon;
 
+  uint32_t runNum = 0;
+  const xAOD::EventInfo* eventInfo = nullptr;
+  if (evtStore()->retrieve(eventInfo).isSuccess()) {
+    runNum = eventInfo->runNumber();
+  }
+
   m_efitMap.clear();
   m_tfitMap.clear();
 
@@ -601,8 +608,10 @@ StatusCode TileRawChannelMonTool::fillHists()
       int fragId = (*collItr)->identify();
       bool demonstrator = (std::binary_search(m_fragIDsDemonstrators.begin(), m_fragIDsDemonstrators.end(), fragId));
       if (demonstrator) {
-        hg_small_charge *= 2.;
-        hg_charge_cut *= 2;
+        if (runNum <= 494800 || runNum >= 555555) {
+          hg_small_charge *= 2.;
+          hg_charge_cut *= 2;
+        }
         cap_index *= 2;
       }
       double charge = (m_cispar[6] < 1024) ? m_cispar[6] * m_dac2Charge[cap_index] : 0;

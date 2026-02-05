@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRawChannelMonitorAlgorithm.h"
@@ -8,6 +8,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
+#include "xAODEventInfo/EventInfo.h"
 
 StatusCode TileRawChannelMonitorAlgorithm::initialize() {
 
@@ -148,6 +149,11 @@ StatusCode TileRawChannelMonitorAlgorithm::fillHistograms( const EventContext& c
   // Ignore charges above 750. pC in LG (full range is 800. pC)
   std::array<double, 2> maxChargeForNormalModule = {750., 11.5};
   std::array<double, 2> maxChargeForDemonstrator = {750., 23.0};
+  const xAOD::EventInfo* eventInfo = GetEventInfo(ctx).get();
+  if (eventInfo->runNumber() > 494800 && eventInfo->runNumber() < 555555 ) {
+    minChargeForDemonstrator[1] = minChargeForNormalModule[1];
+    maxChargeForDemonstrator[1] = maxChargeForNormalModule[1];
+  }
 
   const std::vector<std::vector<int>>& ampOverQCapGroups = cap ? m_ampOverQ5Groups : m_ampOverQ100Groups;
   const std::vector<std::vector<int>>& ampVsQCapGroups = cap ? m_ampVsQ5Groups : m_ampVsQ100Groups;
