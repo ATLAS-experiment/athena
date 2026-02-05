@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
-Run material mapping
+Run material validation
 """
 
 from argparse import ArgumentParser
@@ -10,7 +10,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 # Argument parsing
-parser = ArgumentParser("RunMaterialMapping.py")
+parser = ArgumentParser("RunMaterialValidation.py")
 parser.add_argument("detectors", metavar="detectors", type=str, nargs="*",
                     help="Specify the list of detectors")
 parser.add_argument("--localgeo", default=False, action="store_true",
@@ -28,19 +28,18 @@ parser.add_argument("--skipEvents",default=0, type=int,
                     help="The number of events to skip")
 parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-03-00-00", type=str,
                     help="The geometry tag to use")
-parser.add_argument("--inputFile",
-                    required=True, type=str,
-                    help="Input files to be used for the mapping procedure. They must contain the material track information, which was previously produced with the 'RunGeantinoMaterialTrackProduction.py'")
+# parser.add_argument("--inputMaterial",
+#                     required=True, type=str,
+#                     help="Input material maps produced in the material mapping process.")
 args = parser.parse_args()
 
 
 # Some info about the job
-print("----RunMaterialMapping for ITk geometry----")
+print("----RunMaterialValidation for ITk geometry----")
 print()
 print("Using Geometry Tag: "+args.geometrytag)
 if args.localgeo:
     print("...overridden by local Geometry Xml files")
-print("Input material track file:"+args.inputFile)
 if not args.detectors:
     print("Running complete detector")
 else:
@@ -96,22 +95,16 @@ if args.verboseStoreGate:
 log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
-from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg
-import glob
-acc.merge(MaterialTrackReaderCfg(flags,
-                                 FileNames=glob.glob(args.inputFile)))
-
-from ActsConfig.ActsMaterialConfig import MaterialMappingCfg
-acc.merge(MaterialMappingCfg(flags))
+from ActsConfig.ActsMaterialConfig import MaterialValidationCfg
+acc.merge(MaterialValidationCfg(flags))
 
 from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-acc.merge(MaterialTrackWriterCfg(flags, name="MappedMaterialTrackWriter", FileName="material-tracks-mapped.root",
-                                 MaterialTrackCollectionKey="OutputMappedMaterialTracks"))
-acc.merge(MaterialTrackWriterCfg(flags, name="UnmappedMaterialTrackWriter", FileName="material-tracks-unmapped.root",
-                                 MaterialTrackCollectionKey="OutputUnmappedMaterialTracks"))
+acc.merge(MaterialTrackWriterCfg(flags, FileName="material-tracks-validation.root",
+                                 MaterialTrackCollectionKey="OutputMaterialTracks"))
 
 acc.printConfig(withDetails = True, summariseProps = True)
 
 acc.run(maxEvents=args.maxEvents)
+
 
 

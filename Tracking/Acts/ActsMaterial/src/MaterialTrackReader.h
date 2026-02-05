@@ -33,7 +33,6 @@ namespace ActsTrk {
             MaterialTrackReader(const std::string &name, ISvcLocator *pSvcLocator);
             virtual StatusCode initialize() override;
             virtual StatusCode execute (const EventContext& ctx) const override;
-            virtual StatusCode finalize() override;
             virtual ~MaterialTrackReader();
 
         private:

@@ -127,7 +127,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
       }
 
       if(m_writeMaterialTracks){
-        ActsTrk::RecordedMaterialTrack track;
+        Acts::RecordedMaterialTrack track;
         track.first.first = Acts::Vector3::Zero();
         track.first.second = momentum;
         track.second = std::move(output.second);

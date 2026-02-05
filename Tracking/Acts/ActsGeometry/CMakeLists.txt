@@ -4,7 +4,7 @@
 atlas_subdir( ActsGeometry )
 
 # External dependencies:
-find_package( Acts COMPONENTS Core PluginJson PluginGeoModel )
+find_package( Acts COMPONENTS Core PluginJson PluginGeoModel PluginRoot)
 find_package( Boost )
 find_package( CLHEP )
 find_package( GeoModel COMPONENTS GeoModelKernel )
@@ -32,6 +32,7 @@ atlas_add_library( ActsGeometryLib
                    ActsInteropLib
                    Acts::PluginJson
                    Acts::PluginGeoModel
+                   Acts::PluginRoot
                    AthenaBaseComps
                    AthenaKernel
                    CaloDetDescrLib

@@ -40,6 +40,7 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
+#include <ActsPlugins/Root/RootMaterialDecorator.hpp>
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #include <Acts/Surfaces/PlanarBounds.hpp>
@@ -186,8 +187,27 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
     root.addChild(std::move(currentTop));
     
-    m_trackingGeometry = blueprint->construct(
+    std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
       {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
+
+    if (not m_materialMapRootInputFileBase.empty()) {
+      // The material decorator
+      ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
+      decoratorConfig.fileName = m_materialMapRootInputFileBase;
+      auto materialDecorator = std::make_shared<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
+                                                                                    ActsTrk::actsLevelVector(msg().level()));
+
+      // Apply material decoration to every surface
+      auto applyMaterial = [materialDecorator](const Acts::Surface* surface) -> void {
+        if (!surface) return;
+        materialDecorator->decorate(*const_cast<Acts::Surface*>(surface));
+      };
+
+      // Visit all surfaces (false = visit all, not only sensitive)
+      trackingGeometry->visitSurfaces(applyMaterial, false);
+    }
+
+    m_trackingGeometry = std::shared_ptr<const Acts::TrackingGeometry>(std::move(trackingGeometry));
 
     if (m_objDebugOutput) {
     Acts::ObjVisualization3D vis;
@@ -205,8 +225,7 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
                                 {.visible = true}, {.visible = false});
     vis.write("blueprint_portals.obj");
 
-
-  }
+    }
     if (m_printGeo) {
         Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
         m_trackingGeometry->apply(printer);

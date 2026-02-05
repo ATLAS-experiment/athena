@@ -108,6 +108,9 @@ private:
   Gaudi::Property<std::string> m_materialMapInputFileBase{this, "MaterialMapInputFile", "", ""};
   Gaudi::Property<std::string> m_materialMapCalibFolder{this, "MaterialMapCalibFolder", ".", ""};
   Gaudi::Property<bool> m_buildBeamPipe{this, "BuildBeamPipe", false, ""};
+
+  Gaudi::Property<std::string> m_materialMapRootInputFileBase{this, "MaterialMapRootInputFile", "", ""};
+
   /// @brief Print the assembled tracking geometry after building
   Gaudi::Property<bool> m_printGeo{this, "printGeometry", false};
 
