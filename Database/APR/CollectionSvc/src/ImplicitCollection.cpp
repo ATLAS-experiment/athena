@@ -18,7 +18,7 @@
 
 namespace pool {
 
-   ImplicitCollection::ImplicitCollection( const ICollectionDescription* description,
+   ImplicitCollection::ImplicitCollection( const CollectionDescription* description,
                        ICollection::OpenMode mode,
                        ISession* session )
          : APRMessaging("ImplicitCollection"),
@@ -152,7 +152,7 @@ namespace pool {
    }
 
 
-   const ICollectionDescription& ImplicitCollection::description() const
+   const CollectionDescription& ImplicitCollection::description() const
    {
       return m_description;
    }

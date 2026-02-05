@@ -2,14 +2,14 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ROOTCOLLECTION_ROOTCOLLECTIONCURSOR_H
-#define ROOTCOLLECTION_ROOTCOLLECTIONCURSOR_H
+#ifndef ROOTCOLLECTION_TTREECOLLECTIONCURSOR_H
+#define ROOTCOLLECTION_TTREECOLLECTIONCURSOR_H
 
 
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/ICollectionCursor.h"
 
 class TTree;
@@ -17,21 +17,20 @@ class TBranch;
 
 namespace pool {
    namespace RootCollection {
-      /** 
-       * @class RootcollectionCursor RootcollectionCursor.h Rootcollection/RootcollectionCursor.h
+      /**
+       * @class TTreeCollectionCursor TTreeCollectionCursor.h RootCollection/TTreeCollectionCursor.h
        *
        * An interface used to navigate a collection.
        */
-      class RootCollectionCursor : public ICollectionCursor
+      class TTreeCollectionCursor : public ICollectionCursor
       {
      public:
 
-        RootCollectionCursor(
-           const pool::ICollectionDescription& description,
+        TTreeCollectionCursor(
+           const pool::CollectionDescription& description,
            const pool::CollectionRowBuffer& collectionRowBuffer,
            TTree *tree );
 
-        
         /// Advances the cursor to the next row
         virtual bool next() override;
 
@@ -50,18 +49,17 @@ namespace pool {
         /// Cleanup.
         virtual void close() override;
 
-        virtual ~RootCollectionCursor();
+        virtual ~TTreeCollectionCursor();
 
      protected:
-    
-        static const unsigned int       c_maxLengthOfStrings = 5000;    
-        
-        const ICollectionDescription    &m_description;
+
+        const CollectionDescription    &m_description;
 
         /// Row buffer containing Tokens and Attributes
         pool::CollectionRowBuffer       m_collectionRowBuffer;
 
-        char                             m_charBuffer[c_maxLengthOfStrings];
+        static const unsigned int       c_maxLengthOfStrings = 5000;
+        char                            m_charBuffer[c_maxLengthOfStrings];
 
         typedef std::vector< std::pair<TBranch*, std::string*> >  AttrBranchVector_t;
         typedef std::vector< std::pair<TBranch*, Token*> >        TokenBranchVector_t;
@@ -71,11 +69,8 @@ namespace pool {
 
         std::size_t                     m_idx;
         std::size_t                     m_entries;
-        bool                            m_dummyRef;
       };
    }
 }
 
 #endif
-
-

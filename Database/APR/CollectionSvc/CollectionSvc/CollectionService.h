@@ -14,7 +14,7 @@
 
 namespace pool {
 
-  class ICollectionDescription;
+  class CollectionDescription;
   class ISession;
 
   /**
@@ -46,7 +46,7 @@ namespace pool {
      *
      * @param description Specification of collection or collection fragment properties.
      */
-    virtual ICollection* create( const ICollectionDescription& description );
+    virtual ICollection* create( const CollectionDescription& description );
 
 
     /**
@@ -71,7 +71,7 @@ namespace pool {
      */
     static void setMessageSvcQuiet( bool quiet=true );
 
-    pool::ICollection* plugin( const ICollectionDescription& description,
+    pool::ICollection* plugin( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session = 0 ) const;
 

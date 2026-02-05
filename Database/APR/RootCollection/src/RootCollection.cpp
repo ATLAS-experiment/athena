@@ -3,9 +3,8 @@
 */
 
 #include "RootCollection.h"
-#include "CollectionCommon.h"
-#include "RootCollectionCursor.h"
-#include "RNTCollectionCursor.h"
+#include "TTreeCollectionCursor.h"
+#include "RNTupleCollectionCursor.h"
 
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
@@ -13,7 +12,7 @@
 #include "PersistentDataModel/Token.h"
 #include "RootUtils/APRDefaults.h"
 
-#include "CollectionSvc/ICollectionColumn.h"
+#include "CollectionSvc/CollectionColumn.h"
 #include "CollectionSvc/CollectionNames.h"
 
 #include "GaudiKernel/Bootstrap.h"
@@ -43,7 +42,7 @@ namespace pool {
   namespace RootCollection {
 
      RootCollection::RootCollection(
-            const pool::ICollectionDescription* description,
+            const pool::CollectionDescription* description,
             pool::ICollection::OpenMode mode,
             pool::ISession* )
         : APRMessaging( "RootCollection"),
@@ -51,8 +50,8 @@ namespace pool {
          m_name( description->name() ),
          m_fileName( description->connection() ),
          m_mode( mode ),
-         m_tree( 0 ),
          m_file( 0 ),
+         m_tree( 0 ),
          m_session( 0 ),
          m_open( false ) {
         RootCollection::open();
@@ -259,7 +258,7 @@ namespace pool {
          // retrieve the TTree from file
          if ( m_description.type() == pool::ROOT_StorageType.type() ) {
            m_tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
-	 }
+         }
          if ( (!m_tree && m_description.type() == pool::ROOT_StorageType.type()) || m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type()) ) {
            m_reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
          }
@@ -278,8 +277,6 @@ namespace pool {
          CollectionDescription desc( m_description.name(), m_description.type(), m_description.connection() );
          // clear the description
          m_description = std::move(desc);
-         ATH_MSG_INFO( " Collection Description not found in file, reconstructing " );
-         bool      foundToken = false;
          if ( m_tree ) {
             for( int i = 0; i < m_tree->GetNbranches(); i++ ) {
                TBranch* branch = (TBranch*)m_tree->GetListOfBranches()->UncheckedAt(i);
@@ -305,12 +302,7 @@ namespace pool {
                   ATH_MSG_DEBUG( "Replaced type  " << column_type << " with " << it->second );
                   column_type = it->second;
                }
-               if( column_name ==  m_description.eventReferenceColumnName() ) {
-                  foundToken = true;
-               } else if( column_name == pool::CollectionNames::defaultEventReferenceColumnName ) {
-                  m_description.setEventReferenceColumnName( column_name );
-                  foundToken = true;
-               } else {
+               if( column_name != m_description.eventReferenceColumnName() ) {
                   m_description.insertColumn( column_name, column_type );
                }
             }
@@ -336,18 +328,10 @@ namespace pool {
                   ATH_MSG_DEBUG( "Replaced type  " << column_type << " with " << it->second );
                   column_type = it->second;
                }
-               if( column_name ==  m_description.eventReferenceColumnName() ) {
-                  foundToken = true;
-               } else if( column_name == pool::CollectionNames::defaultEventReferenceColumnName ) {
-                  m_description.setEventReferenceColumnName( column_name );
-                  foundToken = true;
-               } else {
+               if( column_name != m_description.eventReferenceColumnName() ) {
                   m_description.insertColumn( column_name, column_type );
                }
             }
-         }
-         if( !foundToken ) {
-            m_description.setEventReferenceColumnName( "DummyRef" );
          }
       }
 
@@ -355,21 +339,18 @@ namespace pool {
         if ( m_description.type().exactMatch(pool::ROOTTREE_StorageType.type()) ) {
           // create a new TTree
           m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
-          ATH_MSG_DEBUG( "Created Collection TTree. Collection file will be " << m_fileName );
           for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
-               std::string columnName = m_description.tokenColumn(col_id).name();
-               addTreeBranch( columnName, CollectionNames::tokenTypeName );
+            std::string columnName = m_description.tokenColumn(col_id).name();
+            addTreeBranch( columnName, CollectionNames::tokenTypeName );
           }
           for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
-               const ICollectionColumn& column = m_description.attributeColumn(col_id);
-               addTreeBranch( column.name(), column.type() );
-	  }
+            const CollectionColumn& column = m_description.attributeColumn(col_id);
+            addTreeBranch( column.name(), column.type() );
+          }
         } else {
-          // create a new Collection
+          // create a new RNTuple
           std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
-          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
           m_file->Delete( (rntupleName+";*").c_str() );
-          // (Create Schema)
           auto model { ROOT::RNTupleModel::Create() };
           model->SetDescription( rntupleName );
           for( int col_id = 0; col_id < m_description.numberOfTokenColumns(); col_id++ ) {
@@ -377,7 +358,7 @@ namespace pool {
             addField( model.get(), columnName, CollectionNames::tokenTypeName );
           }
           for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
-            const ICollectionColumn& column = m_description.attributeColumn(col_id);
+            const CollectionColumn& column = m_description.attributeColumn(col_id);
             addField( model.get(), column.name(), column.type() );
           }
 
@@ -395,8 +376,8 @@ namespace pool {
        throw;
     }
 
-    const ICollectionDescription& RootCollection::description() const {
-      return m_description;
+    const CollectionDescription& RootCollection::description() const {
+       return m_description;
     }
 
     ICollectionCursor& RootCollection::cursor() {
@@ -404,22 +385,14 @@ namespace pool {
           throw std::runtime_error( "Attempt to get cursor for a closed collection. (APR: \" RootCollection::cursor \" from \" RootCollection \")" );
        }
 
-       pool::TokenList outputTokenList;
-       coral::AttributeList outputAttributeList;
-       for( int j = 0; j < m_description.numberOfAttributeColumns(); j++ )    {
-          outputAttributeList.extend( m_description.attributeColumn( j ).name() , m_description.attributeColumn( j ).type() );
-       }
-       for( int j = 0; j < m_description.numberOfTokenColumns(); j++ )    {
-          outputTokenList.extend( m_description.tokenColumn( j ).name() );
-       }
-
        // Create collection row buffer
-       pool::CollectionRowBuffer collectionRowBuffer( outputTokenList, outputAttributeList );
+       pool::CollectionRowBuffer collectionRowBuffer;
+       this->initNewRow(collectionRowBuffer);
        ICollectionCursor* cursor = nullptr;
        if ( m_tree ) {
-          cursor = new RootCollectionCursor( m_description, collectionRowBuffer, m_tree );
+          cursor = new TTreeCollectionCursor( m_description, collectionRowBuffer, m_tree );
        } else if ( m_reader ) {
-          cursor = new RNTCollectionCursor( m_description, collectionRowBuffer, m_reader.get() );
+          cursor = new RNTupleCollectionCursor( m_description, collectionRowBuffer, m_reader.get() );
        }
        return *cursor;
     }

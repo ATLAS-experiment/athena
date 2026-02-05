@@ -27,11 +27,11 @@ namespace pool {
   //    ^ due to not thread-safe ImplicitCollectionIterator
   {
   public:
-    typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;  
+    typedef Gaudi::PluginService::Factory<ICollection*( const CollectionDescription*, ICollection::OpenMode, ISession*)> Factory;  
 
     /// Constructor compying to the new Collections API
     /// parameters as above, but name and connection passed in description
-    ImplicitCollection( const ICollectionDescription* description,
+    ImplicitCollection( const CollectionDescription* description,
                         ICollection::OpenMode mode,
                         ISession* session );
     
@@ -54,7 +54,7 @@ namespace pool {
     void open() override;
 
     /// Returns an object used to describe the collection properties.
-    virtual const ICollectionDescription& description() const override;
+    virtual const CollectionDescription& description() const override;
 
     /// Returns a cursor for the collection.
     virtual ICollectionCursor& cursor() final override;

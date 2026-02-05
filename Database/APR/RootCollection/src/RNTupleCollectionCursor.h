@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef RNTCOLLECTIONCURSOR_H
-#define RNTCOLLECTIONCURSOR_H
+#ifndef RNTUPLECOLLECTIONCURSOR_H
+#define RNTUPLECOLLECTIONCURSOR_H
 
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/ICollectionDescription.h"
+#include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/ICollectionCursor.h"
 
 #include <memory>
@@ -23,22 +23,21 @@ namespace ROOT {
 namespace pool {
    namespace RootCollection {
 
-      /** 
-       * @class RNTCollectionCursor RNTCollectionCursor.h Rootcollection/RNTCollectionCursor.h
+      /**
+       * @class RNTupleCollectionCursor RNTupleCollectionCursor.h Rootcollection/RNTupleCollectionCursor.h
        *
        * An interface used to navigate
        * stored in RNTuple
        */
-      class RNTCollectionCursor : public ICollectionCursor
+      class RNTupleCollectionCursor : public ICollectionCursor
       {
       public:
 
-         RNTCollectionCursor(
-            const pool::ICollectionDescription& description,
+         RNTupleCollectionCursor(
+            const pool::CollectionDescription& description,
             const pool::CollectionRowBuffer& collectionRowBuffer,
             ROOT::RNTupleReader* reader );
 
-        
          /// Advances the cursor to the next row of the result set.
          virtual bool next() override;
 
@@ -57,11 +56,11 @@ namespace pool {
          /// Cleanup.
          virtual void close() override;
 
-         virtual ~RNTCollectionCursor();
+         virtual ~RNTupleCollectionCursor();
 
       protected:
 
-         const ICollectionDescription&  m_description;
+         const CollectionDescription&         m_description;
 
          ROOT::RNTupleReader*                 m_RNTReader;
 
@@ -75,7 +74,6 @@ namespace pool {
          std::vector< std::pair< Token*, std::string > >  m_tokens;
 
 	 std::size_t                    m_idx;
-         bool                           m_dummyRef;
       };
    }
 }

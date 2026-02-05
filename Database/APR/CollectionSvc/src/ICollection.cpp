@@ -3,10 +3,10 @@
 */
 
 #include "CollectionSvc/ICollection.h"
-#include "CollectionSvc/ICollectionDescription.h"
-#include "CollectionSvc/TokenList.h"
-#include "CollectionSvc/ICollectionColumn.h"
+#include "CollectionSvc/CollectionDescription.h"
+#include "CollectionSvc/CollectionColumn.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/TokenList.h"
 #include "CoralBase/Attribute.h"
 
 /// Initialize a new RowBuffer by adding all Attributes and Tokens of this collection to it
@@ -14,7 +14,7 @@ void pool::ICollection::initNewRow( pool::CollectionRowBuffer& rowBuffer ) const
 {
    pool::TokenList                      tokenList;
    coral::AttributeList                 attributeList;
-   const ICollectionDescription&        descr = description();
+   const CollectionDescription&        descr = description();
    
    for( int j = 0; j < descr.numberOfTokenColumns(); j++ ) {
       tokenList.extend( descr.tokenColumn( j ).name() );

@@ -5,9 +5,10 @@
 #ifndef COLLECTIONSVC_COLLECTIONDESCRIPTION_H
 #define COLLECTIONSVC_COLLECTIONDESCRIPTION_H
 
-#include "ICollectionDescription.h"
+#include "StorageSvc/DbType.h"
 
 #include <map>
+#include <string>
 #include <vector>
 
 
@@ -18,12 +19,12 @@ namespace pool {
   /**
    * @class CollectionDescription CollectionDescription.h CollectionSvc/CollectionDescription.h
    *
-   * An implementation of the ICollectionDescription interface used to define the properties of
+   * An implementation used to define the properties of
    * a collection to be constructed and to retrieve these properties after construction. The
    * schema editor of the collection should be used for any modifications to these properties
    * after construction.
    */
-  class CollectionDescription : virtual public ICollectionDescription
+  class CollectionDescription
   {
   public:
     /**
@@ -34,19 +35,16 @@ namespace pool {
      * @param name Name of collection.
      * @param type Storage technology type of collection.
      * @param connection Connection to database containing collection.
-     * @param eventReferenceColumnName Name of event reference column.
      */
     CollectionDescription( const std::string& name,
                            const DbType& type,
-                           const std::string& connection = "",
-                           const std::string& eventReferenceColumnName = "" );
+                           const std::string& connection = "" );
 
     /**
      * Copy constructor.
      *
      * @param rhs Collection description object to copy.
      */
-    CollectionDescription( const ICollectionDescription& rhs );
     CollectionDescription( const CollectionDescription& rhs );
 
     /// Default destructor.
@@ -55,17 +53,13 @@ namespace pool {
     /**
      * Assignment operator.
      *
-     * @param rhs source ICollectionDescription object to copy.
+     * @param rhs source CollectionDescription object to copy.
      */
-    CollectionDescription& operator=( const ICollectionDescription& rhs );
-
-    // Redirect to the copy operator accepting interface reference
-    CollectionDescription& operator=( const CollectionDescription& rhs )
-    { operator=( (const ICollectionDescription&) rhs ); return *this; }
+    CollectionDescription& operator=( const CollectionDescription& rhs );
 
     // Force the use of the user-defined copy operator (the default one leaks)
     CollectionDescription& operator= (CollectionDescription&& rhs)
-    { operator=( (const ICollectionDescription&) rhs ); return *this; }
+    { operator=( (const CollectionDescription&) rhs ); return *this; }
 
     // Defaults should work for move.
     CollectionDescription (CollectionDescription&&) = default;
@@ -92,32 +86,21 @@ namespace pool {
     virtual void setConnection( const std::string& connection );
 
     /**
-     * Sets the name of the event reference Token column. Otherwise a default name is used.
-     *
-     * @param columnName Name of event reference Token column.
-     */
-    virtual void setEventReferenceColumnName( const std::string& columnName );
-
-    /**
      * Adds a new column to the collection.
      *
      * @param columnName Name of new column.
      * @param columnType Data type of new column.
-     * @param maxSize Maximum size of column data type (useful for string or blob data types).
-     * @param sizeIsFixed Flag indicating whether size of column data type is fixed (useful for string or blob data types).
      */
-    virtual const ICollectionColumn&    insertColumn(
+    virtual const CollectionColumn&    insertColumn(
        const std::string& columnName,
-       const std::string& columnType,
-       int maxSize = 0,
-       bool sizeIsFixed = true );
+       const std::string& columnType );
 
     /**
      * Adds a new column of type pool::Token to the collection.
      *
      * @param columnName Name of new column.
      */
-    virtual const ICollectionColumn&    insertTokenColumn(
+    virtual const CollectionColumn&    insertTokenColumn(
        const std::string& columnName);
 
 
@@ -147,7 +130,7 @@ namespace pool {
      *
      * @param columnId Position of column in associated collection fragment.
      */
-    virtual const ICollectionColumn& tokenColumn( int columnId ) const;
+    virtual const CollectionColumn& tokenColumn( int columnId ) const;
 
     /**
      * Returns the number of Attribute columns in the collection.
@@ -160,16 +143,16 @@ namespace pool {
      *
      * @param columnId Position of column in associated collection fragment.
      */
-    virtual const ICollectionColumn& attributeColumn( int columnId ) const;
+    virtual const CollectionColumn& attributeColumn( int columnId ) const;
 
     // set column ID, return the ID
-    virtual int		setColumnId( const std::string& columnName, int id, const std::string& methodName );
+    virtual int		setColumnId( const std::string& columnName, int id );
 
  protected:
     // some helper methods for internal use:
 
     /// make this description a copy of 'rhs'
-    virtual void	copyFrom( const ICollectionDescription& rhs );
+    virtual void	copyFrom( const CollectionDescription& rhs );
 
     // clear all internal structures
     virtual void	clearAll();
@@ -179,11 +162,10 @@ namespace pool {
     virtual int 	setColumnId( pool::CollectionColumn *column, int id = -1 );
 
     // rise an exception if the column aleready exists
-    virtual void 	checkNewColumnName( const std::string& name, const std::string& method ) const;
+    virtual void 	checkNewColumnName( const std::string& name ) const;
 
-    // this version includes the 'method name' in the error message
-    virtual pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName );
-    virtual const pool::CollectionColumn* column( const std::string& columnName, const std::string& methodName ) const;
+    // get column by name
+    virtual pool::CollectionColumn* column( const std::string& columnName );
 
   private:
     /// Name of the collection
@@ -218,4 +200,3 @@ namespace pool {
 }
 
 #endif
-

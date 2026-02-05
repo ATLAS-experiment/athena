@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "RNTCollectionCursor.h"
+#include "RNTupleCollectionCursor.h"
 
 #include "CoralBase/Attribute.h"
 
@@ -11,27 +11,20 @@
 
 using namespace pool::RootCollection;
 
-RNTCollectionCursor::RNTCollectionCursor(
-   const pool::ICollectionDescription& description,
-   const pool::CollectionRowBuffer& collectionRowBuffer,        
+RNTupleCollectionCursor::RNTupleCollectionCursor(
+   const pool::CollectionDescription& description,
+   const pool::CollectionRowBuffer& collectionRowBuffer,
    ROOT::RNTupleReader* reader )
    : m_description( description ),
      m_RNTReader( reader ),
      m_RNTEntry( reader->GetModel().CreateEntry() ),
      m_collectionRowBuffer( collectionRowBuffer ),
-     m_idx(-1),
-     m_dummyRef( false )
+     m_idx(-1)
 {
    for( auto& attr : m_collectionRowBuffer.attributeList() ) {
       m_RNTEntry->BindRawPtr( attr.specification().name(), attr.addressOfData() );
    }
 
-   if( m_description.eventReferenceColumnName() == "DummyRef" )  {
-      // A collection with no Tokens, just attributes
-      m_dummyRef = true;
-      return;  
-   }
-   
    for( pool::TokenList::iterator tokenI = m_collectionRowBuffer.tokenList().begin();
         tokenI != m_collectionRowBuffer.tokenList().end(); ++tokenI )
    {
@@ -41,18 +34,18 @@ RNTCollectionCursor::RNTCollectionCursor(
 }
 
 
-RNTCollectionCursor::~RNTCollectionCursor()
+RNTupleCollectionCursor::~RNTupleCollectionCursor()
 {
-   RNTCollectionCursor::close();
+   RNTupleCollectionCursor::close();
 }
 
 
-void RNTCollectionCursor::close()
+void RNTupleCollectionCursor::close()
 {
 }
 
 
-bool RNTCollectionCursor::next()
+bool RNTupleCollectionCursor::next()
 {
    if( ++m_idx >= size() ) {
       return false;
@@ -67,20 +60,20 @@ bool RNTCollectionCursor::next()
 }
 
 
-const pool::CollectionRowBuffer& 
-RNTCollectionCursor::currentRow() const
+const pool::CollectionRowBuffer&
+RNTupleCollectionCursor::currentRow() const
 {
   return m_collectionRowBuffer;
 }
 
 
-std::size_t RNTCollectionCursor::size()
+std::size_t RNTupleCollectionCursor::size()
 {
   return m_RNTReader->GetNEntries();
 }
 
 
-bool RNTCollectionCursor::seek(std::size_t position)
+bool RNTupleCollectionCursor::seek(std::size_t position)
 {
    if( position >= size() ) {
       return false;
@@ -90,9 +83,7 @@ bool RNTCollectionCursor::seek(std::size_t position)
 }
 
 
-const Token&  RNTCollectionCursor::eventRef() const
+const Token& RNTupleCollectionCursor::eventRef() const
 {
-   static const Token dummyToken;
-   if( m_dummyRef )  return dummyToken; 
    return m_collectionRowBuffer.tokenList()[ m_description.eventReferenceColumnName() ];
 }
