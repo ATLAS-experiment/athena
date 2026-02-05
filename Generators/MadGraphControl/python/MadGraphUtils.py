@@ -8,6 +8,9 @@
 
 import os,time,subprocess,glob,re,sys
 # These Import lines are temporary for backwards compatibility of clients.
+from MCJobOptionUtils.JOsupport import check_reset_proc_number # noqa: F401
+from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_DATA_PATH # noqa: F401
+from MCJobOptionUtils.LHEsupport import remap_lhe_pdgids # noqa: F401
 from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name # noqa: F401
 from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_PATHS # noqa: F401
 from MCJobOptionUtils.JOsupport import get_physics_short 
@@ -41,17 +44,15 @@ if 'shutil' in sys.modules:
 sys.path.insert(0,patched_shutil_loc)
 import shutil
 
-from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,getDictFromCard,get_runArgs_info,error_check,setup_path_protection,is_NLO_run,get_default_config_card,get_mg5_version
+
+from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,get_runArgs_info,error_check,setup_path_protection,get_mg5_version
+from MadGraphControl.MadGraphSystematicsUtils import setup_pdf_and_systematic_weights
 from MadGraphControl.MadGraphParamHelpers import check_PMG_updates
 
 def stack_subprocess(command,**kwargs):
     global MADGRAPH_COMMAND_STACK
     MADGRAPH_COMMAND_STACK += [' '.join(command)]
     return subprocess.Popen(command,**kwargs)
-
-
-
-
 
 def generate_prep(process_dir):
     global MADGRAPH_COMMAND_STACK
@@ -80,12 +81,7 @@ def generate_prep(process_dir):
 
 def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False):
     global my_MGC_instance
-    print(process,plugin,keepJpegs,usePMGSettings)
     my_MGC_instance = MGControl(process, plugin, keepJpegs, usePMGSettings)
-    # Sync options as an intermediate solution until the full migration is done
-    modify_run_card(process_dir=my_MGC_instance.process_dir,settings=my_MGC_instance.runCardDict,skipBaseFragment=True)
-    # This should be enabled ASAP, but isn't yet ready
-    #modify_config_card(process_dir=my_MGC_instance.process_dir,settings=my_MGC_instance.configCardDict)
     return my_MGC_instance.process_dir
 
 def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
@@ -110,9 +106,12 @@ def get_default_runcard(process_dir=MADGRAPH_GRIDPACK_LOCATION):
 
 
 def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False, extlhapath=None, required_accuracy=0.01, runArgs=None, bias_module=None, requirePMGSettings=False):
+    global my_MGC_instance # noqa: F824
+
+    
     # Just in case
     setup_path_protection()
-
+    
     # Set consistent mode and number of jobs
     mode = 0
     njobs = 1
@@ -121,7 +120,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Lucky you - you are running on a full node queue.  Will re-configure for '+str(njobs)+' jobs.')
         mode = 2
 
-    cluster_type = get_cluster_type(process_dir=process_dir)
+    cluster_type = get_cluster_type()
     if cluster_type is not None:
         mode = 1
 
@@ -138,7 +137,11 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     beamEnergy,random_seed = get_runArgs_info(runArgs)
 
     # Check if process is NLO or LO
-    isNLO=is_NLO_run(process_dir=process_dir)
+    isNLO = my_MGC_instance.isNLO 
+
+    # Setup PDF and systematics
+    setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,my_MGC_instance.runCardDict,isNLO)
+
 
     # temporary fix of makefile, needed for 3.3.1., remove in future
     if isNLO:
@@ -172,8 +175,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 os.rename(f'{process_dir}/Cards/madspin_card.dat',f'{process_dir}/Cards/madspin_card.tmp.dat')
                 LO_has_madspin = True
             my_settings = {'gridpack':'true'}
-        modify_run_card(process_dir=process_dir,settings=my_settings,skipBaseFragment=True)
-
+        my_MGC_instance.runCardDict.update(my_settings)
     else:
         #Running in on-the-fly mode
         mglog.info('Started generating at '+str(time.asctime()))
@@ -214,16 +216,19 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     MADGRAPH_COMMAND_STACK += [ 'cd ${MGaMC_PROCESS_DIR}' ]
 
     # Check the run card
-    run_card_consistency_check(isNLO=isNLO)
+    my_MGC_instance.run_card_consistency_check()
+    
 
     # For grid packs we also need to move the systematics program aside
     if grid_pack:
         original_systematics_program = None if 'systematics_program' not in my_MGC_instance.runCardDict else my_MGC_instance.runCardDict['systematics_program']
-        modify_run_card(process_dir=process_dir,settings={'systematics_program':'None'},skipBaseFragment=True)
+        my_MGC_instance.runCardDict['systematics_program'] = 'None'
+        mglog.info('systematics set to NONE')
 
-    # Since the consistency check can update some settings, print the cards now
-    print_cards_from_dir(process_dir=os.getcwd())
 
+    
+    
+    
     # Check the param card
     code = check_PMG_updates(process_dir=os.getcwd())
     if requirePMGSettings and code!=0:
@@ -235,7 +240,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     if isNLO:
         command += ['--name='+MADGRAPH_RUN_NAME]
         mglog.info('Removing Cards/shower_card.dat to ensure we get parton level events only')
-        os.unlink('Cards/shower_card.dat')
+        try:
+            os.unlink('Cards/shower_card.dat')
+        except FileNotFoundError:
+            mglog.info('Cannot find Cards/shower_card.dat.')
     else:
         command += [MADGRAPH_RUN_NAME]
     # Set the number of cores to be used
@@ -243,7 +251,8 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
     # Special handling for mode 1
     if mode==1:
         mglog.info('Setting up cluster running')
-        modify_config_card(process_dir=os.getcwd(),settings={'run_mode':1})
+        my_MGC_instance.configCardDict['run_mode'] = 1
+        
         if cluster_type=='pbs':
             mglog.info('Modifying bin/internal/cluster.py for PBS cluster running')
             os.system("sed -i \"s:text += prog:text += './'+prog:g\" bin/internal/cluster.py")
@@ -251,7 +260,14 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Setting up multi-core running on '+os.environ['ATHENA_CORE_NUMBER']+' cores')
     elif mode==0:
         mglog.info('Setting up serial generation.')
+    
+    # Writing cards to disk
+    my_MGC_instance.write_configCard()
+    my_MGC_instance.write_runCard(runArgs=runArgs)
 
+    print_cards_from_dir(process_dir=my_MGC_instance.process_dir)
+    
+    
     generate_prep(process_dir=os.getcwd())
     generate = stack_subprocess(command,stdin=subprocess.PIPE, stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
@@ -270,8 +286,10 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         mglog.info('Tidying up gridpack '+gridpack_name)
 
         # Return the setting for the systematics_program
-        modify_run_card(process_dir=process_dir,settings={'systematics_program':original_systematics_program})
-
+        my_MGC_instance.runCardDict.update({'systematics_program':original_systematics_program})
+        # Write out run Card Dictionary
+        my_MGC_instance.write_runCard()
+        
         if not isNLO:
             # At LO, no events are generated. That means we need to move the MS card aside and back.
             if LO_has_madspin:
@@ -313,7 +331,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
                 mglog.info('Tidying up complete!')
 
         else:
-
+            my_MGC_instance.write_runCard(runArgs=runArgs)
             ### NLO RUN ###
             mglog.info('Package up process_dir')
             MADGRAPH_COMMAND_STACK += ['mv '+process_dir+' '+MADGRAPH_GRIDPACK_LOCATION]
@@ -336,13 +354,15 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
 
 
 def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None, requirePMGSettings=False):
+    global my_MGC_instance # noqa: F824
+
     # Get of info out of the runArgs
     beamEnergy,random_seed = get_runArgs_info(runArgs)
 
     # Just in case
     setup_path_protection()
 
-    isNLO=is_NLO_run(process_dir=MADGRAPH_GRIDPACK_LOCATION)
+    isNLO = my_MGC_instance.isNLO 
 
     setupFastjet(process_dir=MADGRAPH_GRIDPACK_LOCATION)
 
@@ -368,15 +388,15 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
     settings={'iseed':str(random_seed)}
     if not isNLO:
         settings['python_seed']=str(random_seed)
-    modify_run_card(process_dir=MADGRAPH_GRIDPACK_LOCATION,settings=settings,skipBaseFragment=True)
-
+    my_MGC_instance.runCardDict.update(settings)
+    
     mglog.info('Generating events from gridpack')
 
     # Ensure that things are set up normally
     if not os.path.exists(MADGRAPH_GRIDPACK_LOCATION):
         raise RuntimeError('Gridpack directory not found at '+MADGRAPH_GRIDPACK_LOCATION)
 
-    nevents = getDictFromCard(MADGRAPH_GRIDPACK_LOCATION+'/Cards/run_card.dat')['nevents']
+    nevents = my_MGC_instance.runCardDict['nevents']
     mglog.info('>>>> FOUND GRIDPACK <<<<  <- This will be used for generation')
     mglog.info('Generation of '+str(int(nevents))+' events will be performed using the supplied gridpack with random seed '+str(random_seed))
     mglog.info('Started generating events at '+str(time.asctime()))
@@ -395,14 +415,14 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
     ls_dir(MADGRAPH_GRIDPACK_LOCATION)
 
     # Update the run card according to consistency checks
-    run_card_consistency_check(isNLO=isNLO,process_dir=MADGRAPH_GRIDPACK_LOCATION)
+    my_MGC_instance.run_card_consistency_check()
 
     # Now all done with updates, so print the cards with the final settings
     print_cards_from_dir(process_dir=MADGRAPH_GRIDPACK_LOCATION)
 
     if isNLO:
         #turn off systematics for gridpack generation and store settings for standalone run
-        run_card_dict=getDictFromCard(MADGRAPH_GRIDPACK_LOCATION+'/Cards/run_card.dat')
+        run_card_dict= my_MGC_instance.runCardDict 
         systematics_settings=None
         if checkSetting('systematics_program','systematics',run_card_dict):
             if not checkSettingIsTrue('store_rwgt_info',run_card_dict):
@@ -412,8 +432,12 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
             else:
                 systematics_settings={}
             mglog.info('Turning off systematics for now, running standalone later')
-            modify_run_card(process_dir=MADGRAPH_GRIDPACK_LOCATION,settings={'systematics_program':'none'},skipBaseFragment=True)
+            
+            my_MGC_instance.runCardDict['systematics_program'] = 'none'
 
+    # Writing run card to disk
+    my_MGC_instance.write_runCard(runArgs=runArgs)
+    
     global MADGRAPH_COMMAND_STACK
     if not isNLO:
         ### LO RUN ###
@@ -536,8 +560,9 @@ def generate_from_gridpack(runArgs=None, extlhapath=None, gridpack_compile=None,
 
 
 def setupFastjet(process_dir=None):
-
-    isNLO=is_NLO_run(process_dir=process_dir)
+    global my_MGC_instance # noqa: F824
+    
+    isNLO = my_MGC_instance.isNLO 
 
     mglog.info('Path to fastjet install dir: '+os.environ['FASTJETPATH'])
     fastjetconfig = os.environ['FASTJETPATH']+'/bin/fastjet-config'
@@ -568,7 +593,9 @@ def setupFastjet(process_dir=None):
 
 
 def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
-    isNLO=is_NLO_run(process_dir=process_dir)
+    global my_MGC_instance # noqa: F824
+
+    isNLO = my_MGC_instance.isNLO 
 
     origLHAPATH=os.environ['LHAPATH']
     origLHAPDF_DATA_PATH=os.environ['LHAPDF_DATA_PATH']
@@ -579,9 +606,7 @@ def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
     pdfid=-999
 
     ### Reading LHAPDF ID from run card
-    run_card=process_dir+'/Cards/run_card.dat'
-    mydict=getDictFromCard(run_card)
-
+    mydict= my_MGC_instance.runCardDict
     if mydict["pdlabel"].replace("'","") == 'lhapdf':
         #Make local LHAPDF dir
         mglog.info('creating local LHAPDF dir: MGC_LHAPDF/')
@@ -690,8 +715,9 @@ def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
     mglog.info('lhapdf-config --datadir:      '+str(subprocess.Popen([lhapdfconfig, '--datadir'],stdout = subprocess.PIPE).stdout.read().strip()))
     mglog.info('lhapdf-config --pdfsets-path: '+str(subprocess.Popen([lhapdfconfig, '--pdfsets-path'],stdout = subprocess.PIPE).stdout.read().strip()))
 
-    modify_config_card(process_dir=process_dir,settings={'lhapdf':lhapdfconfig,'lhapdf_py3':lhapdfconfig})
-
+    
+    my_MGC_instance.configCardDict.update({'lhapdf':lhapdfconfig,'lhapdf_py3':lhapdfconfig})
+    
     mglog.info('Creating links for LHAPDF')
     if os.path.islink(process_dir+'/lib/PDFsets'):
         os.unlink(process_dir+'/lib/PDFsets')
@@ -714,6 +740,8 @@ def setupLHAPDF(process_dir=None, extlhapath=None, allow_links=True):
 
 # Function to set the number of cores and the running mode in the run card
 def setNCores(process_dir, Ncores=None):
+    global my_MGC_instance # noqa: F824
+    
     my_Ncores = Ncores
     my_runMode = 2 if 'ATHENA_CORE_NUMBER' in os.environ else 0
     if Ncores is None and 'ATHENA_CORE_NUMBER' in os.environ and int(os.environ['ATHENA_CORE_NUMBER'])>0:
@@ -722,9 +750,7 @@ def setNCores(process_dir, Ncores=None):
     if my_Ncores is None:
         mglog.info('Setting up for serial run')
         my_Ncores = 1
-
-    modify_config_card(process_dir=process_dir,settings={'nb_core':my_Ncores,'run_mode':my_runMode,'automatic_html_opening':'False'})
-
+    my_MGC_instance.configCardDict.update({'nb_core':my_Ncores,'run_mode':my_runMode,'automatic_html_opening':'False'})
 
 
 
@@ -1429,170 +1455,6 @@ def update_lhe_file(lhe_file_old,param_card_old=None,lhe_file_new=None,masses={}
 
 
 
-def find_key_and_update(akey,dictionary):
-    """ Helper function when looking at param cards
-    In some cases it's tricky to match keys - they may differ
-    only in white space. This tries to sort out when we have
-    a match, and then uses the one in blockParams afterwards.
-    In the case of no match, it returns the original key.
-    """
-    test_key = ' '.join(akey.strip().replace('\t',' ').split())
-    for key in dictionary:
-        mod_key = ' '.join(key.strip().replace('\t',' ').split())
-        if mod_key==test_key:
-            return key
-    return akey
-
-
-def modify_param_card(param_card_input=None,param_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOCATION,params={},output_location=None):
-    """Build a new param_card.dat from an existing one.
-    Params should be a dictionary of dictionaries. The first key is the block name, and the second in the param name.
-    Keys can include MASS (for masses) and DECAY X (for decays of particle X)"""
-    # Grab the old param card and move it into place
-
-    # Check for the default run card location
-    if param_card_input is None:
-        param_card_input=process_dir+'/Cards/param_card.dat'
-    elif param_card_input is not None and not os.access(param_card_input,os.R_OK):
-        paramcard = subprocess.Popen(['get_files','-data',param_card_input])
-        paramcard.wait()
-        if not os.access(param_card_input,os.R_OK):
-            raise RuntimeError('Could not get param card '+param_card_input)
-        mglog.info('Using input param card at '+param_card_input)
-
-    #ensure all blocknames and paramnames are upper case
-    paramsUpper = {}
-    for blockName in list(params.keys()):
-       paramsUpper[blockName.upper()] = {}
-       for paramName in list(params[blockName].keys()):
-          paramsUpper[blockName.upper()][paramName.upper()] = params[blockName][paramName]
-
-    if param_card_backup is not None:
-        mglog.info('Keeping backup of original param card at '+param_card_backup)
-        param_card_old = param_card_backup
-    else:
-        param_card_old = param_card_input+'.old_to_be_deleted'
-    if os.path.isfile(param_card_old):
-        os.unlink(param_card_old) # delete old backup
-    os.rename(param_card_input, param_card_old) # change name of original card
-
-    oldcard = open(param_card_old,'r')
-    param_card_location= process_dir+'/Cards/param_card.dat' if output_location is None else output_location
-    newcard = open(param_card_location,'w')
-    decayEdit = False #only becomes true in a DECAY block when specifying the BR
-    blockName = ""
-    doneParams = {} #tracks which params have been done
-    for linewithcomment in oldcard:
-        line=linewithcomment.split('#')[0]
-        if line.strip().upper().startswith('BLOCK') or line.strip().upper().startswith('DECAY')\
-                    and len(line.strip().split()) > 1:
-            if decayEdit and blockName == 'DECAY':
-                decayEdit = False # Start a new DECAY block
-            pos = 0 if line.strip().startswith('DECAY') else 1
-            if blockName=='MASS' and 'MASS' in paramsUpper:
-                # Any residual masses to set?
-                if "MASS" in doneParams:
-                    leftOvers = [ x for x in paramsUpper['MASS'] if x not in doneParams['MASS'] ]
-                else:
-                    leftOvers = [ x for x in paramsUpper['MASS'] ]
-
-                for pdg_id in leftOvers:
-                    mglog.warning('Adding mass line for '+str(pdg_id)+' = '+str(paramsUpper['MASS'][pdg_id])+' which was not in original param card')
-                    newcard.write('   '+str(pdg_id)+'  '+str(paramsUpper['MASS'][pdg_id])+'\n')
-                    doneParams['MASS'][pdg_id]=True
-            if blockName=='DECAY' and 'DECAY' not in line.strip().upper() and 'DECAY' in paramsUpper:
-                # Any residual decays to include?
-                leftOvers = [ x for x in paramsUpper['DECAY'] if x not in doneParams['DECAY'] ]
-                for pdg_id in leftOvers:
-                    mglog.warning('Adding decay for pdg id '+str(pdg_id)+' which was not in the original param card')
-                    newcard.write( paramsUpper['DECAY'][pdg_id].strip()+'\n' )
-                    doneParams['DECAY'][pdg_id]=True
-            blockName = line.strip().upper().split()[pos]
-        if decayEdit:
-            continue #skipping these lines because we are in an edit of the DECAY BR
-
-        akey = None
-        if blockName != 'DECAY' and len(line.strip().split()) > 0:
-            # The line is already without the comment.
-            # In the case of mixing matrices this is a bit tricky
-            if len(line.split())==2:
-                akey = line.upper().strip().split()[0]
-            else:
-                # Take everything but the last word
-                akey = line.upper().strip()[:line.strip().rfind(' ')].strip()
-        elif blockName == 'DECAY' and len(line.strip().split()) > 1:
-            akey = line.strip().split()[1]
-        if akey is None:
-           newcard.write(linewithcomment)
-           continue
-
-        #check if we have params for this block
-        if blockName not in paramsUpper:
-           newcard.write(linewithcomment)
-           continue
-        blockParams = paramsUpper[blockName]
-        # Check the spacing in the key
-        akey = find_key_and_update(akey,blockParams)
-
-        # look for a string key, which would follow a #
-        stringkey = None
-        if '#' in linewithcomment: #ignores comment lines
-           stringkey = linewithcomment[linewithcomment.find('#')+1:].strip()
-           if len(stringkey.split()) > 0:
-               stringkey = stringkey.split()[0].upper()
-
-        if akey not in blockParams and not (stringkey is not None and stringkey in blockParams):
-           newcard.write(linewithcomment)
-           continue
-
-        if akey in blockParams and (stringkey is not None and stringkey in blockParams):
-           raise RuntimeError('Conflicting use of numeric and string keys '+akey+' and '+stringkey)
-
-        theParam = blockParams.get(akey,blockParams[stringkey] if stringkey in blockParams else None)
-        if blockName not in doneParams:
-            doneParams[blockName] = {}
-        if akey in blockParams:
-            doneParams[blockName][akey]=True
-        elif stringkey is not None and stringkey in blockParams:
-            doneParams[blockName][stringkey]=True
-
-        #do special case of DECAY block
-        if blockName=="DECAY":
-           if theParam.splitlines()[0].split()[0].upper()=="DECAY":
-               #specifying the full decay block
-               for newline in theParam.splitlines():
-                    newcard.write(newline+'\n')
-                    mglog.info(newline)
-               decayEdit = True
-           else: #just updating the total width
-              newcard.write('DECAY   '+akey+'    '+str(theParam)+'  # '+(linewithcomment[linewithcomment.find('#')+1:].strip() if linewithcomment.find('#')>0 else "")+'\n')
-              mglog.info('DECAY   '+akey+'    '+str(theParam)+'  # '+(linewithcomment[linewithcomment.find('#')+1:].strip() if linewithcomment.find('#')>0 else "")+'\n')
-        # second special case of QNUMBERS
-        elif blockName=='QNUMBERS':
-           #specifying the full QNUMBERS block
-           for newline in theParam.splitlines():
-                newcard.write(newline+'\n')
-                mglog.info(newline)
-           decayEdit = True
-        else: #just updating the parameter
-           newcard.write('   '+akey+'    '+str(theParam)+'  # '+(linewithcomment[linewithcomment.find('#')+1:].strip() if linewithcomment.find('#')>0 else "")+'\n')
-           mglog.info('   '+akey+'    '+str(theParam)+'  # '+(linewithcomment[linewithcomment.find('#')+1:].strip() if linewithcomment.find('#')>0 else "")+'\n')
-        # Done editing the line!
-
-    #check that all specified parameters have been updated (helps to catch typos)
-    for blockName in paramsUpper:
-       if blockName not in doneParams and len(paramsUpper[blockName].keys())>0:
-          raise RuntimeError('Did not find any of the parameters for block '+blockName+' in param_card')
-       for paramName in paramsUpper[blockName]:
-          if paramName not in doneParams[blockName]:
-            raise RuntimeError('Was not able to replace parameter '+paramName+' in param_card')
-
-    # Close up and return
-    oldcard.close()
-    newcard.close()
-
-
-
 def print_cards_from_dir(process_dir=MADGRAPH_GRIDPACK_LOCATION):
     card_dir=process_dir+'/Cards/'
     print_cards(proc_card=card_dir+'proc_card_mg5.dat',run_card=card_dir+'run_card.dat',param_card=card_dir+'param_card.dat',\
@@ -1663,6 +1525,11 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     Settings is a dictionary of keys (no spaces needed) and values to replace.
     """
 
+    global my_MGC_instance # noqa: F824
+    # my_MGC_instance.getRunCardDict(card_loc=process_dir+'/Cards/run_card.dat')
+    my_MGC_instance.runCardDict.update(settings)
+    # my_MGC_instance.write_runCard()
+    
     # Operate on lower case settings, and choose the capitalization MG5 has as the default (or all lower case)
     settings_lower = {}
     for s in list(settings.keys()):
@@ -1678,10 +1545,10 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
             raise RuntimeError('Could not get run card '+run_card_input)
 
     # guess NLO
-    isNLO=is_NLO_run(process_dir=process_dir)
+    isNLO = my_MGC_instance.isNLO 
     # add gobal PDF and scale uncertainty config to extras, except PDF or weights for syscal config are explictly set
     if not skipBaseFragment:
-        MadGraphControl.MadGraphSystematicsUtils.setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,settings_lower,isNLO)
+        setup_pdf_and_systematic_weights(MADGRAPH_PDFSETTING,settings_lower,isNLO)
 
     # Get some info out of the runArgs
     if runArgs is not None:
@@ -1762,7 +1629,8 @@ def modify_run_card(run_card_input=None,run_card_backup=None,process_dir=MADGRAP
     if 'mcatnlo_delta' in settings_lower:	    
         if settings_lower['mcatnlo_delta'] == 'True':
             modify_config_card(process_dir=process_dir,settings={'pythia8_path':os.getenv("PY8PATH")})
-    
+
+        
     # Clean up unused options
     for asetting in settings_lower:
         if asetting in used_settings:
@@ -1784,8 +1652,11 @@ def modify_config_card(config_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOC
     This function can get a fresh runcard from DATAPATH or start from the process directory.
     Settings is a dictionary of keys (no spaces needed) and values to replace.
     """
+    global my_MGC_instance # noqa: F824
+    
+    my_MGC_instance.configCardDict.update(settings)
     # Check for the default config card location
-    config_card=get_default_config_card(process_dir=process_dir)
+    config_card = my_MGC_instance.config_path 
 
     # The format is similar to the run card, but backwards
     mglog.info('Modifying config card located at '+config_card)
@@ -1836,150 +1707,15 @@ def modify_config_card(config_card_backup=None,process_dir=MADGRAPH_GRIDPACK_LOC
 
 
 
-def get_cluster_type(process_dir=MADGRAPH_GRIDPACK_LOCATION):
-    card_in = open(get_default_config_card(process_dir=process_dir),'r')
-    for l in card_in.readlines():
-        if 'cluster_type' not in l.split('#')[0]:
-            continue
-        cluster_type = l.split('#')[0].split('=')[1]
-        mglog.info('Returning cluster type: '+cluster_type)
-        return cluster_type
-    return None
-
-
-
-def run_card_consistency_check(isNLO=False,process_dir='.'):
-    cardpath=process_dir+'/Cards/run_card.dat'
-    mydict=getDictFromCard(cardpath)
-    # We should always use event_norm = average [AGENE-1725] otherwise Pythia cross sections are wrong
-    # Modification: average or bias is ok; sum is incorrect. Change the test to set sum to average
-    if checkSetting('event_norm','sum',mydict):
-        modify_run_card(process_dir=process_dir,settings={'event_norm':'average'},skipBaseFragment=True)
-        mglog.warning("setting event_norm to average, there is basically no use case where event_norm=sum is a good idea")
-
-    if not isNLO:
-        #Check CKKW-L setting
-        if 'ktdurham' in mydict and float(mydict['ktdurham']) > 0 and int(mydict['ickkw']) != 0:
-            log='Bad combination of settings for CKKW-L merging! ktdurham=%s and ickkw=%s.'%(mydict['ktdurham'],mydict['ickkw'])
-            mglog.error(log)
-            raise RuntimeError(log)
-
-        # Check if user is trying to use deprecated syscalc arguments with the other systematics script
-        if 'systematics_program' not in mydict or mydict['systematics_program']=='systematics':
-            syscalc_settings=['sys_pdf', 'sys_scalefact', 'sys_alpsfact', 'sys_matchscale']
-            found_syscalc_setting=False
-            for s in syscalc_settings:
-                if s in mydict:
-                    mglog.warning('Using syscalc setting '+s+' with new systematics script. Systematics script is default from 2.6.2 and steered differently (https://cp3.irmp.ucl.ac.be/projects/madgraph/wiki/Systematics#Systematicspythonmodule)')
-                    found_syscalc_setting=True
-            if found_syscalc_setting:
-                syst_arguments=MadGraphControl.MadGraphSystematicsUtils.convertSysCalcArguments(mydict)
-                mglog.info('Converted syscalc arguments to systematics arguments: '+syst_arguments)
-                syst_settings_update={'systematics_arguments':syst_arguments}
-                for s in syscalc_settings:
-                    syst_settings_update[s]=None
-                modify_run_card(process_dir=process_dir,settings=syst_settings_update,skipBaseFragment=True)
-
-
-    # usually the pdf and systematics should be set during modify_run_card
-    # but check again in case the user did not call the function or provides a different card here
-    mglog.info('Checking PDF and systematics settings')
-    if not MadGraphControl.MadGraphSystematicsUtils.base_fragment_setup_check(MADGRAPH_PDFSETTING,mydict,isNLO):
-        # still need to set pdf and systematics
-        syst_settings=MadGraphControl.MadGraphSystematicsUtils.get_pdf_and_systematic_settings(MADGRAPH_PDFSETTING,isNLO)
-        modify_run_card(process_dir=process_dir,settings=syst_settings,skipBaseFragment=True)
-
-    mydict_new=getDictFromCard(cardpath)
-    if 'systematics_arguments' in mydict_new:
-        systematics_arguments=MadGraphControl.MadGraphSystematicsUtils.parse_systematics_arguments(mydict_new['systematics_arguments'])
-        if 'weight_info' not in systematics_arguments:
-            mglog.info('Enforcing systematic weight name convention')
-            dyn = None
-            if '--dyn' in systematics_arguments or ' dyn' in systematics_arguments:
-                if '--dyn' in systematics_arguments:
-                    dyn = systematics_arguments.split('--dyn')[1]
-                if ' dyn' in systematics_arguments:
-                    dyn = systematics_arguments.split(' dyn')[1]
-                dyn = dyn.replace('\'',' ').replace('=',' ').split()[0]
-            if dyn is not None and len(dyn.split(','))>1:
-                systematics_arguments['weight_info']=MadGraphControl.MadGraphSystematicsUtils.SYSTEMATICS_WEIGHT_INFO_ALTDYNSCALES
-            else:
-                systematics_arguments['weight_info']=MadGraphControl.MadGraphSystematicsUtils.SYSTEMATICS_WEIGHT_INFO
-            modify_run_card(process_dir=process_dir,settings={'systematics_arguments':MadGraphControl.MadGraphSystematicsUtils.write_systematics_arguments(systematics_arguments)},skipBaseFragment=True)
-
-    if not isNLO:
-        if 'python_seed' not in mydict:
-            mglog.warning('No python seed set in run_card -- adding one with same value as iseed')
-            modify_run_card(process_dir=process_dir,settings={'python_seed':mydict['iseed']},skipBaseFragment=True)
-
-    # consistency check of 4/5 flavour shceme settings
-    FS_updates={}
-    proton_5flav = False
-    jet_5flav = False
-    with open(process_dir+'/Cards/proc_card_mg5.dat', 'r') as file:
-        content = file.readlines()
-        for rawline in content:
-            line = rawline.split('#')[0]
-            if line.startswith("define p"):
-                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
-                    proton_5flav = True
-                if 'j' in line.split() and jet_5flav:
-                    proton_5flav = True
-            if line.startswith("define j"):
-                if ('b' in line.split() and 'b~' in line.split()) or ('5' in line.split() and '-5' in line.split()):
-                    jet_5flav = True
-                if 'p' in line.split() and proton_5flav:
-                    jet_5flav = True
-    if proton_5flav or jet_5flav:
-        FS_updates['asrwgtflavor'] = 5
-        if not proton_5flav:
-            mglog.warning('Found 5-flavour jets but 4-flavour proton. This is inconsistent - please pick one.')
-            mglog.warning('Will proceed assuming 5-flavour scheme.')
-        if not jet_5flav:
-            mglog.warning('Found 5-flavour protons but 4-flavour jets. This is inconsistent - please pick one.')
-            mglog.warning('Will proceed assuming 5-flavour scheme.')
+def get_cluster_type():
+    global my_MGC_instance # noqa: F824
+    if 'cluster_type' in my_MGC_instance.configCardDict:
+        return my_MGC_instance.configCardDict['cluster_type']
     else:
-        FS_updates['asrwgtflavor'] = 4
+        return None
+    
 
-    if len(FS_updates)==0:
-        mglog.warning(f'Could not identify 4- or 5-flavor scheme from process card {process_dir}/Cards/proc_card_mg5.dat')
 
-    if 'asrwgtflavor' in mydict or 'maxjetflavor' in mydict or 'pdgs_for_merging_cut' in mydict:
-        if FS_updates['asrwgtflavor'] == 5:
-            # Process card says we are in the five-flavor scheme
-            if ('asrwgtflavor' in mydict and int(mydict['asrwgtflavor']) != 5) or ('maxjetflavor' in mydict and int(mydict['maxjetflavor']) != 5) or ('pdgs_for_merging_cut' in mydict and '5' not in mydict['pdgs_for_merging_cut']):
-                # Inconsistent setting detected; warn the users and correct the settings
-                mglog.warning('b and b~ included in p and j for 5-flavor scheme but run card settings are inconsistent; adjusting run card')
-                run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
-                modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
-                modify_param_card(process_dir=process_dir, params={'MASS': {'5': '0.000000e+00'}})
-            else:
-                mglog.debug('Consistent 5-flavor scheme setup detected.')
-        if FS_updates['asrwgtflavor'] == 4:
-            # Process card says we are in the four-flavor scheme
-            if ('asrwgtflavor' in mydict and int(mydict['asrwgtflavor']) != 4) or ('maxjetflavor' in mydict and int(mydict['maxjetflavor']) != 4) or ('pdgs_for_merging_cut' in mydict and '5' in mydict['pdgs_for_merging_cut']):
-                # Inconsistent setting detected; warn the users and correct the settings
-                mglog.warning('b and b~ not included in p and j (4-flavor scheme) but run card settings are inconsistent; adjusting run card')
-                run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
-                modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
-                modify_param_card(process_dir=process_dir, params={'MASS': {'5': '4.700000e+00'}})
-            else:
-                mglog.debug('Consistent 4-flavor scheme setup detected.')
-    else:
-        # Flavor scheme setup is missing, adding by hand
-        if FS_updates['asrwgtflavor'] == 4:
-            # Warn the users and add the settings according to process card
-            mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ not included in p and j, 4-flavor scheme setup will be used; adjusting run card.')
-            run_card_updates = {'asrwgtflavor': 4, 'maxjetflavor': 4, 'pdgs_for_merging_cut': '1, 2, 3, 4, 21'}
-            modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)
-            modify_param_card(process_dir=process_dir, params={'MASS': {'5': '4.700000e+00'}})
-        elif FS_updates['asrwgtflavor'] == 5:
-            mglog.warning('Flavor scheme setup is missing, adding by hand according to process card - b and b~ included in p and j, 5-flavor scheme setup will be used; adjusting run card.')
-            run_card_updates = {'asrwgtflavor': 5, 'maxjetflavor': 5, 'pdgs_for_merging_cut': '1, 2, 3, 4, 5, 21'}
-            modify_run_card(process_dir=process_dir,settings=run_card_updates,skipBaseFragment=True)        
-            modify_param_card(process_dir=process_dir, params={'MASS': {'5': '0.000000e+00'}})
-
-    mglog.info('Finished checking run card - All OK!')
 
 def add_reweighting(run_name,reweight_card=None,process_dir=MADGRAPH_GRIDPACK_LOCATION):
     mglog.info('Running reweighting module on existing events')
