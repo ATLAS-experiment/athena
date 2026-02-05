@@ -94,7 +94,7 @@ namespace CP {
         std::unique_ptr<TFile> m_calibFile{nullptr};
 
         /// cvfms path for files containing WP definitions (e.g. for TGraphs)
-        Gaudi::Property<std::string> m_filePathName{this, "filePathName", "ElectronIsolationSelection/2022_2025/", " The nominal file path to use"};
+        Gaudi::Property<std::string> m_filePathName{this, "filePathName", "ElectronIsolationSelection/2022_2025/v1/", " The nominal file path to use"};
         std::unique_ptr<TFile> m_WPdefinitionFile{nullptr};
 
         /// internal use

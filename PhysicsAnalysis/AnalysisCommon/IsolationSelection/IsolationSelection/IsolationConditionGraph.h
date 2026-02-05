@@ -17,7 +17,7 @@ class IsolationConditionGraph : public IsolationCondition {
   IsolationConditionGraph(const std::string& name,
                           const std::vector<std::string>& isoType,
                           std::unique_ptr<TF1> isoFunction,
-                          std::vector<TGraph*>& cutGraphs,  // std::vector<std::unique_ptr<TGraph>>
+			  std::vector<std::unique_ptr<TGraph>>&& cutGraphs,
                           std::unique_ptr<TH1F> binning,
                           const std::string& isoDecSuffix = "",
                           bool invertCut = false);
@@ -27,7 +27,7 @@ class IsolationConditionGraph : public IsolationCondition {
   bool accept(const strObj& x) const override;
 
  private:
-  std::vector<TGraph*> m_cutGraphs;  // std::vector<std::unique_ptr<TGraph>> m_cutGraphs;
+  std::vector<std::unique_ptr<TGraph>> m_cutGraphs;
   std::unique_ptr<TF1> m_isoFunction;
   std::unique_ptr<TH1F> m_binning;
   bool m_invertCut{false};
