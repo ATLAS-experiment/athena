@@ -14,6 +14,7 @@
 #include "MuonRIO_OnTrack/MMClusterOnTrack.h"
 #include "MuonPrepRawData/MMPrepData.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // *********************************************************************
@@ -77,6 +78,8 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 	  float theta_mu=saTP->theta();
 	  float phi_mu=saTP->phi();
 
+
+	  
 	  std::string side = "sideA";
 	  int iside = 1;
 	  if(eta_mu<0) {
@@ -85,7 +88,9 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 	  }
 
 	  auto mu_phi = Monitored::Scalar<float>("phi_mu_"+side, phi_mu);
-	  
+
+
+
 	  std::vector<int> layers_mm;	    std::vector<int> layers_stg;
 	  int layer_max=-99;
 	  float min_z_nsw=9999;
@@ -152,6 +157,12 @@ StatusCode NSWDataMonAlg::fillHistograms(const EventContext& ctx) const
 
 	  }//loop trackStates
 
+	  // --- fallback: assign sector from phi if no NSW hits and eta > 1.2
+	  if (ref_sector < 0 && std::fabs(eta_mu) > 1.25) {
+	    Muon::MuonSectorMapping smapping;
+	    ref_sector = smapping.getSector(mu_phi);
+	  }
+	  
 	  float x_mu=z_nsw*tan(theta_mu)*cos(phi_mu);
 	  float y_mu=z_nsw*tan(theta_mu)*sin(phi_mu);
 	  auto x_trk = Monitored::Scalar<float>("x_trk_"+side, x_mu);
