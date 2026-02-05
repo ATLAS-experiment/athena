@@ -9,39 +9,43 @@
 
 namespace MuonTGC_Cabling {
 
-class TGCModuleId : public TGCId
-{
-public:
-  enum ModuleIdType {NoModuleIdType=-1, 
-		     PP, SLB, HPB, SL, SSW, ROD, SROD,
-		     MaxModuleIdType};
-  
-  // Constructor & Destructor
-  TGCModuleId(ModuleIdType type=NoModuleIdType)
-    : TGCId(IdType::Module) {
-      this->m_type = type;
+class TGCModuleId : public TGCId {
+   public:
+    enum ModuleIdType {
+        NoModuleIdType = -1,
+        PP,
+        SLB,
+        HPB,
+        SL,
+        SSW,
+        ROD,
+        SROD,
+        MaxModuleIdType
+    };
+
+    // Constructor & Destructor
+    TGCModuleId(ModuleIdType type = NoModuleIdType) : TGCId(IdType::Module) {
+        this->m_type = type;
     }
-  virtual ~TGCModuleId(void) {}
+    virtual ~TGCModuleId(void) {}
 
-  enum {
-    NumberOfSReadoutSector = 3
-  };
+    enum { NumberOfSReadoutSector = 3 };
 
-  ModuleIdType getModuleIdType(void) const { return m_type; }
+    ModuleIdType getModuleIdType(void) const { return m_type; }
 
-  virtual bool operator ==(const TGCModuleId& moduleId) const;
+    virtual bool operator==(const TGCModuleId& moduleId) const;
 
-  virtual bool isValid(void) const { return true; }
+    virtual bool isValid(void) const { return true; }
 
-  int getReadoutSector() const { return m_sectorRO; }
-  void setReadoutSector(int sector) { m_sectorRO = sector; }
-  virtual void setSector(int v_sector);
+    int getReadoutSector() const { return m_sectorRO; }
+    void setReadoutSector(int sector) { m_sectorRO = sector; }
+    virtual void setSector(int v_sector);
 
-private:
-  ModuleIdType m_type;
-  int m_sectorRO{-1};
+   private:
+    ModuleIdType m_type;
+    int m_sectorRO{-1};
 };
 
-} // end of namespace
- 
+}  // namespace MuonTGC_Cabling
+
 #endif

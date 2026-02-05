@@ -9,36 +9,33 @@
 
 #include "MuonTGC_Cabling/TGCModuleId.h"
 
-namespace MuonTGC_Cabling
-{
- 
-class TGCModuleMap
-{
-public:
-  // Constructor & Destructor
-  TGCModuleMap(void)
-  {}
+namespace MuonTGC_Cabling {
 
-  virtual ~TGCModuleMap(void);
-  
-  int connector(int entry);
+class TGCModuleMap {
+   public:
+    // Constructor & Destructor
+    TGCModuleMap(void) {}
 
-  TGCModuleId* moduleId(int entry);
+    virtual ~TGCModuleMap(void);
 
-  TGCModuleId* popModuleId(int entry);
+    int connector(int entry);
 
-  void insert(int connector, TGCModuleId* moduleId);
+    TGCModuleId* moduleId(int entry);
 
-  int find(int connector);
-  
-  int size(void);
+    TGCModuleId* popModuleId(int entry);
 
-  void clear(void);
+    void insert(int connector, TGCModuleId* moduleId);
 
-private:
-  std::map<int,TGCModuleId*> m_moduleMap;
+    int find(int connector);
+
+    int size(void);
+
+    void clear(void);
+
+   private:
+    std::map<int, TGCModuleId*> m_moduleMap;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif
