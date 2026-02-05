@@ -187,11 +187,11 @@ def getL1BKeeLowMu():
         'L1_JPSI-1M5-eEM9',
         # Next Higher Thresholds for Buffer
         'L1_eEM18',
-        'L1_2eEM',
+        'L1_2eEM12',
         # Prescaled
         'L1_eEM9',
         'L1_eEM9_VjTE200',
-        'L1_2eEM5_VjTE200'
+        'L1_2eEM5_jTE200'
     ]
 
 #####################################

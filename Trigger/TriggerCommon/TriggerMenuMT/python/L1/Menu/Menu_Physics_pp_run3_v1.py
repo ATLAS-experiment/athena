@@ -91,6 +91,9 @@ def defineMenu():
         'L1_eEM22M_3jJ50',
         'L1_eEM24L_3jJ50',
 
+        # Combined em - TE
+        'L1_2eEM5_jTE200',
+
         # combined mu - jet 
         'L1_BTAG-MU3VjJ40', 'L1_BTAG-MU5VFjJ80',
 
