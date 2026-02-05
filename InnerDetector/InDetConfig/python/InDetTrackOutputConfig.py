@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -173,6 +173,12 @@ def InDetTrackRecoOutputCfg(flags, extensions_list=None):
         "xAOD::TrackParticleContainer#InDetLargeD0TrackParticles",
         f"xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.{excludedAuxData}"
     ]
+
+    if flags.Tracking.storeBeamLineTrackParticles:
+        toAOD += [
+            "xAOD::TrackParticleContainer#InDetBeamLineTrackParticles",
+            f"xAOD::TrackParticleAuxContainer#InDetBeamLineTrackParticlesAux.{excludedAuxData}",
+        ]
 
     if flags.Tracking.doTrackSegmentsDisappearing:
         toAOD += [

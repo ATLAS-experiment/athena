@@ -152,6 +152,9 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLargeD0", doLargeD0)
     icf.addFlag("Tracking.storeSeparateLargeD0Container", True)
 
+    # Store separate track particles collection reconstructed in regards to the beam line
+    icf.addFlag("Tracking.storeBeamLineTrackParticles", lambda prevFlags: prevFlags.Overlay.DataOverlay)
+
     # Special configuration for low-mu runs
     icf.addFlag("Tracking.doLowMu", False)
     # Turn running of doLowPt second pass on and off
