@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexFractionTool.cxx
@@ -17,8 +17,8 @@ JetVertexFractionTool::JetVertexFractionTool(const std::string& name)
 //**********************************************************************
 
 StatusCode JetVertexFractionTool::initialize() {
-  ATH_MSG_INFO("Initializing JetVertexFractionTool " << name());
-  ATH_MSG_INFO("Using origin vertex: " << m_useOriginVertex);
+  ATH_MSG_DEBUG("Initializing JetVertexFractionTool " << name());
+  ATH_MSG_DEBUG("Using origin vertex: " << m_useOriginVertex);
 
   if(m_jetContainerName.empty()){
     ATH_MSG_ERROR("JetVertexFractionTool needs to have its input jet container name configured!");
@@ -26,11 +26,11 @@ StatusCode JetVertexFractionTool::initialize() {
   }
 
   if ( m_htsel.empty() ) {
-    ATH_MSG_INFO("  No track selector.");
+    ATH_MSG_DEBUG("  No track selector.");
   } else {
-    ATH_MSG_INFO("  Track selector: " << m_htsel->name());
+    ATH_MSG_DEBUG("  Track selector: " << m_htsel->name());
   }
-  ATH_MSG_INFO("  Attribute name: " << m_jvfKey.key());
+  ATH_MSG_DEBUG("  Attribute name: " << m_jvfKey.key());
 
   m_sumPtTrkKey = m_jetContainerName + "." + m_sumPtTrkKey.key();
   m_jvfKey = m_jetContainerName + "." + m_jvfKey.key();

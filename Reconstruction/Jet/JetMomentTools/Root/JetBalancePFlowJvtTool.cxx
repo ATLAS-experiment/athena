@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetBalancePFlowJvtTool.cxx
@@ -44,7 +44,7 @@
   ////////////////////////////
   StatusCode JetBalancePFlowJvtTool::initialize()
   {
-    ATH_MSG_INFO ("Initializing " << name() << "...");
+    ATH_MSG_DEBUG ("Initializing " << name() << "...");
     //WPs have not been calculated yet. Using holdover fJVT values here for now
     if (m_tightOP) m_fjvtThresh = 0.53; //Closer to 1 ==> more likely to be PU
     else m_fjvtThresh = 0.72;

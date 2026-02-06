@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -64,7 +64,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
   // Set m_caloBased
   if( m_jetAlgo == "AntiKt4EMTopoTrig" && !m_PFlow ) {
     m_caloBased = true;
-    ATH_MSG_INFO("Using calo based GSC");
+    ATH_MSG_DEBUG("Using calo based GSC");
   } else{
     // better to read from config which type of GSC: caloBased for trigger jets.
     m_caloBased = m_config->GetValue("caloBasedGSC",false);
@@ -220,7 +220,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
       ATH_MSG_FATAL("Vector of PunchThrough histograms may be empty. Please check your GSCFactors file: " << GSCFile);
       return StatusCode::FAILURE;
     }
-    else ATH_MSG_INFO("GSC Tool has been initialized with binning and eta fit factors from: " << fileName);
+    else ATH_MSG_DEBUG("GSC Tool has been initialized with binning and eta fit factors from: " << fileName);
   }
   else if (m_caloBased) {
     if ( (m_depth & ApplyEM3) && m_respFactorsEM3.size() < 3 ) {
@@ -244,7 +244,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
       return StatusCode::FAILURE;
     }
     
-    else ATH_MSG_INFO("GSC Tool has been initialized with binning and eta fit factors from: " << fileName << "\n");
+    else ATH_MSG_DEBUG("GSC Tool has been initialized with binning and eta fit factors from: " << fileName << "\n");
   }
   else{
     if ( (m_depth & ApplyChargedFraction) && m_respFactorsChargedFraction.size() < 3 ) {
@@ -271,7 +271,7 @@ StatusCode GlobalSequentialCorrection::initialize() {
       ATH_MSG_FATAL("Vector of PunchThrough histograms may be empty. Please check your GSCFactors file: " << GSCFile);
       return StatusCode::FAILURE;
     }
-    else ATH_MSG_INFO("GSC Tool has been initialized with binning and eta fit factors from: " << fileName);
+    else ATH_MSG_DEBUG("GSC Tool has been initialized with binning and eta fit factors from: " << fileName);
   }
   return StatusCode::SUCCESS;
 
