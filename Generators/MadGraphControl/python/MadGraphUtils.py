@@ -19,6 +19,9 @@ from MadGraphControl.MGC import MGControl
 mglog = Logging.logging.getLogger('MadGraphUtils')
 my_MGC_instance = None
 
+# Import that allows transparent migration for current users
+from MadGraphControl.MadGraphUtilsHelpers import modify_param_card # noqa: F401
+
 # Name of python executable
 python='python'
 # Magic name of gridpack directory
