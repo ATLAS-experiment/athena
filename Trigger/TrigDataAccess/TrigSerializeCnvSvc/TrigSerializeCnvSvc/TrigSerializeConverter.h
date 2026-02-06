@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -162,8 +162,11 @@ public:
 
       DATA *nObj = ( DATA* ) ptr;
       nObj = TrigSerialization::finishRead (nObj);
+      if (!nObj){
+        *m_log << MSG::ERROR << "TrigSerializeConverter::createObj: nObj is null."<<  endmsg;
+        return StatusCode::FAILURE;
+      }
       pO = SG::asStorable( nObj );
-
       if( m_log->level() <= MSG::DEBUG ) {
          *m_log << MSG::DEBUG << "IOpaq: " << iAddr 
                 << " created nObj: " << nObj << endmsg;
@@ -172,7 +175,7 @@ public:
       
       
 
-      if( m_sgsvc && nObj ){
+      if( m_sgsvc){
          TrigStreamAddress *addr = dynamic_cast< TrigStreamAddress* >( iAddr );
          if( addr ) {
             if( m_sgsvc->contains< DATA >( addr->sgkey() ) ) {
