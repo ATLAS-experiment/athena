@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,13 +55,13 @@ namespace dqutils {
     }
 
     std::stringstream ss;
-    TString sac[2] = {
+    static const std::string sac[2] = {
       "A", "C"
     };
-    TString sws[2] = {
+    static const std::string sws[2] = {
       "Wire", "Strip"
     };
-    TString smethod[3] = {
+    static const std::string smethod[3] = {
       "SegmTrack", "MidOnly", ""
     };
 
@@ -69,34 +69,34 @@ namespace dqutils {
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      TString seff;
-      TString snum;
-      TString sden;
-      TString serr;
+      std::string seff;
+      std::string snum;
+      std::string sden;
+      std::string serr;
 
       TH2F* h2eff(0);
       TH2F* h2num(0);
       TH2F* h2den(0);
       TH2F* h2err(0);
 
-      TString mdtvstgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/MDTvsTGC/";
+      std::string mdtvstgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/MDTvsTGC/";
 
-      TString mdtvstgc_sub_dir[2] = {
+      std::string mdtvstgc_sub_dir[2] = {
         mdtvstgc_dir + "TGCEA/", mdtvstgc_dir + "TGCEC/"
       };
 
-      if (mf.cd(mdtvstgc_dir)) mf.cd(mdtvstgc_dir);
+      if (mf.cd(mdtvstgc_dir.c_str())) mf.cd(mdtvstgc_dir.c_str());
       else {
         //std::cerr << "No MDTvsTGC Directory! " << std::endl; mf.error();
         return;
       }
 
       for (int ac = 0; ac < 2; ac++) {
-        TString eff_dir = mdtvstgc_sub_dir[ac];
-        TDirectory* dir = mf.GetDirectory(eff_dir);
+        std::string eff_dir = mdtvstgc_sub_dir[ac];
+        TDirectory* dir = mf.GetDirectory(eff_dir.c_str());
         if (!dir) {
           //std::cerr<< "TGCHistogramDivision: directory "<<eff_dir<<" not found"<<std::endl;
           return;
@@ -112,7 +112,7 @@ namespace dqutils {
             snum = ss.str();
             ss.str("");
             h2num = 0;
-            mf.get(snum, h2num, dir);
+            mf.get(snum.c_str(), h2num, dir);
             if (!h2num) {
               //std::cerr <<"MDTvsTGC PostProcessing: no such histogram!! "<< snum << std::endl;
               oktomerge = false;
@@ -123,7 +123,7 @@ namespace dqutils {
           snum = ss.str();
           ss.str("");
           h2num = 0;
-          mf.get(snum, h2num, dir);
+          mf.get(snum.c_str(), h2num, dir);
           if (!h2num) {
             //std::cerr <<"MDTvsTGC PostProcessing: no such histogram!! "<< snum << std::endl;
             oktomerge = false;
@@ -135,7 +135,7 @@ namespace dqutils {
             sden = ss.str();
             ss.str("");
             h2den = 0;
-            mf.get(sden, h2den, dir);
+            mf.get(sden.c_str(), h2den, dir);
             if (!h2den) {
               //std::cerr <<"MDTvsTGC PostProcessing: no such histogram!! "<< sden << std::endl;
               oktomerge = false;
@@ -146,7 +146,7 @@ namespace dqutils {
           sden = ss.str();
           ss.str("");
           h2den = 0;
-          mf.get(sden, h2den, dir);
+          mf.get(sden.c_str(), h2den, dir);
           if (!h2den) {
             //std::cerr <<"MDTvsTGC PostProcessing: no such histogram!! "<< sden << std::endl;
             oktomerge = false;
@@ -180,13 +180,13 @@ namespace dqutils {
             ss.str("");
 
             h2eff = 0;
-            mf.get(seff, h2eff, dir);
+            mf.get(seff.c_str(), h2eff, dir);
             h2num = 0;
-            mf.get(snum, h2num, dir);
+            mf.get(snum.c_str(), h2num, dir);
             h2den = 0;
-            mf.get(sden, h2den, dir);
+            mf.get(sden.c_str(), h2den, dir);
             h2err = 0;
-            mf.get(serr, h2err, dir);
+            mf.get(serr.c_str(), h2err, dir);
 
             if (h2eff && h2num && h2den) {
               MDTvsTGCResetContents(h2eff);
