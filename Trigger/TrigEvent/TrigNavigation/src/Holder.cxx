@@ -154,7 +154,7 @@ bool HLTNavDetails::IHolder::deserializePayload(const std::vector<uint32_t>& dat
   if ( m_storeGate->transientContains(container_clid, sgkey) ) {
     ATH_MSG_VERBOSE("deserialize: while working on: " << container_typename << " and key: " << sgkey
                     << " from serialized form found it in SG already, sync with it");
-    syncWithSG();
+    if (!syncWithSG()) return false;
   }
 
   ATH_MSG_VERBOSE("deserializing a data blob of size " << dataBlob.size() << " navi version is " << version);

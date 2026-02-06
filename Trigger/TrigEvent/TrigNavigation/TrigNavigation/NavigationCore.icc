@@ -110,7 +110,7 @@ bool HLT::NavigationCore::getFeature( const TriggerElement* te,
   const T* dv = nullptr;
   if (!getFeature (te, dv, label, sourcelabel))
     return false;
-
+  //coverity[FORWARD_NULL:FALSE]
   feature = ConstDataVector<T>::fromDataVector (dv);
   return feature != nullptr;
 }
