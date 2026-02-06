@@ -132,6 +132,8 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu6_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu8_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
