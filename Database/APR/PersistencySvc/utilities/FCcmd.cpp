@@ -73,11 +73,11 @@ Options::Options(int argc, char* argv[]) {
         if( argc > pos ) {
             arg = string( argv[pos] );
             if( arg.length() != 2 or arg[0] != '-' ) {
-                val = arg;
+                val = std::move(arg);
                 pos++;
             }
         }
-        m_argMap[opt] = val;
+        m_argMap[opt] = std::move(val);
     }
 }
 
