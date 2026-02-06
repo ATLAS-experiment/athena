@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  KalmanMETCorrection.h
 //  TopoCore
@@ -9,7 +9,6 @@
 #ifndef __TopoCore__KalmanMETCorrection__
 #define __TopoCore__KalmanMETCorrection__
 
-#include <iostream>
 #include "L1TopoInterfaces/DecisionAlg.h"
 #include "L1TopoAlgorithms/KalmanMETCorrectionConstants.h"
 
