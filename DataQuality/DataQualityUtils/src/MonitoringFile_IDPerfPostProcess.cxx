@@ -400,7 +400,7 @@ namespace dqutils {
       h_rate->Write("", TObject::kOverwrite);
     }
 //   TH1F* h_mass_scaled = (TH1F*)(f->Get((path+"/ks_mass").c_str())->Clone("ks_mass_scaled_copy"));
-//   TString title(h_mass_scaled->GetTitle());
+//   std::string title(h_mass_scaled->GetTitle());
 //   if (CheckHistogram(f,(path+"/ks_mass_scaled").c_str())) {
 //     if (CheckHistogram(f,(path+"/Nevents").c_str())) {
 //       TH1F* h_Nevents=(TH1F*)f->Get((path+"/Nevents").c_str());
@@ -918,7 +918,7 @@ namespace dqutils {
     }
 //   TH1F* h_mass_scaled = (TH1F*)(f->Get((path+"/Jpsi_invmass").c_str())->Clone("Jpsi_invmass_scaled_copy"));
 //   h_mass_scaled->SetMarkerStyle(21);
-//   TString title(h_mass_scaled->GetTitle());
+//   std::string title(h_mass_scaled->GetTitle());
 //   if (CheckHistogram(f,(path+"/Jpsi_invmass_scaled").c_str())) {
 //     if (CheckHistogram(f,(path+"/Nevents").c_str())) {
 //       TH1F* h_Nevents=(TH1F*)f->Get((path+"/Nevents").c_str());
@@ -931,10 +931,10 @@ namespace dqutils {
 //   delete h_mass_scaled;
     if (CheckHistogram(f, (path + "/Jpsi_invmass").c_str())) {
       TH1F* h_mass_rebin = (TH1F*) (f->Get((path + "/Jpsi_invmass").c_str())->Clone("Jpsi_invmass_rebin"));
-      TString title = h_mass_rebin->GetTitle();
+      std::string title = h_mass_rebin->GetTitle();
       h_mass_rebin->SetMarkerStyle(21);
       h_mass_rebin->Rebin(2);
-      h_mass_rebin->SetTitle(title + " (larger binning for low Stats.)");
+      h_mass_rebin->SetTitle((title + " (larger binning for low Stats.)").c_str());
       h_mass_rebin->Write("Jpsi_invmass_rebin", TObject::kOverwrite);
     }
 
@@ -1331,7 +1331,7 @@ namespace dqutils {
     }
 //   TH1F* h_mass_scaled = (TH1F*)(f->Get((path+"/Upsilon_invmass").c_str())->Clone("Upsilon_invmass_scaled_copy"));
 //   h_mass_scaled->SetMarkerStyle(21);
-//   TString title(h_mass_scaled->GetTitle());
+//   std::string title(h_mass_scaled->GetTitle());
 //   if (CheckHistogram(f,(path+"/Upsilon_invmass_scaled").c_str())) {
 //     if (CheckHistogram(f,(path+"/Nevents").c_str())) {
 //       TH1F* h_Nevents=(TH1F*)f->Get((path+"/Nevents").c_str());
@@ -1344,10 +1344,10 @@ namespace dqutils {
 //   delete h_mass_scaled;
     if (CheckHistogram(f, (path + "/Upsilon_invmass").c_str())) {
       TH1F* h_mass_rebin = (TH1F*) (f->Get((path + "/Upsilon_invmass").c_str())->Clone("Upsilon_invmass_rebin"));
-      TString title = h_mass_rebin->GetTitle();
+      std::string title = h_mass_rebin->GetTitle();
       h_mass_rebin->SetMarkerStyle(21);
       h_mass_rebin->Rebin(8);
-      h_mass_rebin->SetTitle(title + " (larger binning for low Stats.)");
+      h_mass_rebin->SetTitle((title + " (larger binning for low Stats.)").c_str());
       h_mass_rebin->Write("Upsilon_invmass_rebin", TObject::kOverwrite);
     }
 
@@ -1571,7 +1571,7 @@ namespace dqutils {
       h_rate->Write("", TObject::kOverwrite);
     }
 //   TH1F* h_mass_scaled = (TH1F*)(f->Get((path+"/Zee_trk_invmass").c_str())->Clone("Zee_trk_invmass_scaled_copy"));
-//   TString title(h_mass_scaled->GetTitle());
+//   std::string title(h_mass_scaled->GetTitle());
 //   if (CheckHistogram(f,(path+"/Zee_trk_invmass_scaled").c_str())) {
 //     if (CheckHistogram(f,(path+"/Nevents").c_str())) {
 //       TH1F* h_Nevents=(TH1F*)f->Get((path+"/Nevents").c_str());
@@ -1772,7 +1772,7 @@ namespace dqutils {
     }
 //   TH1F* h_mass_scaled =
 // (TH1F*)(f->Get((path+"/Wenu_trk_transmass_sel").c_str())->Clone("Wenu_trk_transmass_sel_scaled_copy"));
-//   TString title(h_mass_scaled->GetTitle());
+//   std::string title(h_mass_scaled->GetTitle());
 //   if (CheckHistogram(f,(path+"/Wenu_trk_transmass_sel_scaled").c_str())) {
 //     if (CheckHistogram(f,(path+"/Nevents").c_str())) {
 //       TH1F* h_Nevents=(TH1F*)f->Get((path+"/Nevents").c_str());
