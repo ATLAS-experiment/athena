@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,9 +9,7 @@
 
 
 StatusCode JetTrackVtxAssoAlg::initialize() {
-  ATH_MSG_DEBUG("Initializing  " );
-
-  ATH_MSG_INFO("Initializing tool " << name() << "...");
+  ATH_MSG_DEBUG("Initializing tool " << name() << "...");
   ATH_MSG_DEBUG("initializing version with data handles");
   
   ATH_CHECK(m_trackContainer_key.initialize());

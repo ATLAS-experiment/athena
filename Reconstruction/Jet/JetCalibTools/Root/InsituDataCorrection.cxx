@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
@@ -92,7 +92,7 @@ StatusCode InsituDataCorrection::initialize() {
   std::unique_ptr<TFile> insitu_file(TFile::Open(insitu_filename));
   if ( !insitu_file ) { ATH_MSG_FATAL( "Cannot open InsituCalibrationFile: " << insitu_filename ); return StatusCode::FAILURE; }
 
-  ATH_MSG_INFO("Reading In-situ correction factors from: " << insitu_filename);
+  ATH_MSG_DEBUG("Reading In-situ correction factors from: " << insitu_filename);
 
   rel_histoname.ReplaceAll("JETALGO",m_jetAlgo); abs_histoname.ReplaceAll("JETALGO",m_jetAlgo);
   if(m_applyRelativeandAbsoluteInsitu){
@@ -200,8 +200,8 @@ StatusCode InsituDataCorrection::initialize() {
     }
   }
 
-  ATH_MSG_INFO("Tool configured to calibrate data");
-  ATH_MSG_INFO("In-situ correction to be applied: " << insitu_desc);
+  ATH_MSG_DEBUG("Tool configured to calibrate data");
+  ATH_MSG_DEBUG("In-situ correction to be applied: " << insitu_desc);
   return StatusCode::SUCCESS;
 
 }

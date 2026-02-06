@@ -25,11 +25,11 @@ JetTrackSumMomentsTool::JetTrackSumMomentsTool(const std::string& name)
 //**********************************************************************
 
 StatusCode JetTrackSumMomentsTool::initialize() {
-  ATH_MSG_INFO("Initializing JetTrackSumMomentsTool " << name());
+  ATH_MSG_DEBUG("Initializing JetTrackSumMomentsTool " << name());
   if ( m_htsel.empty() ) {
-    ATH_MSG_INFO("  No track selector.");
+    ATH_MSG_DEBUG("  No track selector.");
   } else {
-    ATH_MSG_INFO("  Track selector: " << m_htsel->name());
+    ATH_MSG_DEBUG("  Track selector: " << m_htsel->name());
   }
 
   ATH_CHECK(m_vertexContainer_key.initialize());

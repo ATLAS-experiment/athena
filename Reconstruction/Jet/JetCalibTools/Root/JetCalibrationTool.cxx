@@ -54,7 +54,7 @@ JetCalibrationTool::~JetCalibrationTool() {
 /////////////////////////////////////////////////////////////////// 
 
 StatusCode JetCalibrationTool::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << "jets");
+  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << "Jets");
 
   TString jetAlgo = m_jetAlgo;
   TString calibSeq = m_calibSeq;
@@ -78,8 +78,9 @@ StatusCode JetCalibrationTool::initialize() {
   std::string configPath=dir+m_config; // Full path
   TString fn =  PathResolverFindCalibFile(configPath);
 
-  ATH_MSG_INFO("Reading global JES settings from: " << m_config);
-  ATH_MSG_INFO("resolved in: " << fn);
+  ATH_MSG_INFO("  Reading global JES settings from: " << m_config);
+  ATH_MSG_DEBUG("  resolved in: " << fn);
+  ATH_MSG_INFO("  Calibration sequence: " << calibSeq);
   
   m_globalConfig = new TEnv();
   int status=m_globalConfig->ReadFile(fn ,EEnvLevel(0));

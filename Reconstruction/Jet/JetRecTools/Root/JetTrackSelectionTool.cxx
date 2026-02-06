@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRecTools/JetTrackSelectionTool.h"
@@ -15,7 +15,7 @@ JetTrackSelectionTool::JetTrackSelectionTool(const std::string &name):
 }
 
 StatusCode JetTrackSelectionTool::initialize() {
-  ATH_MSG_INFO("Initializing tool " << "...");
+  ATH_MSG_DEBUG("Initializing tool " << "...");
   ATH_MSG_DEBUG("initializing version with data handles");
 
 

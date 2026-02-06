@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRec/MuonSegmentPseudoJetAlgorithm.h"
@@ -86,11 +86,11 @@ MuonSegmentPseudoJetAlgorithm::createPseudoJets(const xAOD::MuonSegmentContainer
 //**********************************************************************
 
 void MuonSegmentPseudoJetAlgorithm::print() const {
-  ATH_MSG_INFO("Properties for MuonSegmentPseudoJetGetter " << name());
-  ATH_MSG_INFO("             Label: " << m_label);
-  ATH_MSG_INFO("   Input container: " << m_incoll.key());
-  ATH_MSG_INFO("  Output container: " << m_outcoll.key());
-  ATH_MSG_INFO("      Pseudojet pT: " << m_pt);
+  ATH_MSG_DEBUG("Properties for MuonSegmentPseudoJetGetter " << name());
+  ATH_MSG_DEBUG("             Label: " << m_label);
+  ATH_MSG_DEBUG("   Input container: " << m_incoll.key());
+  ATH_MSG_DEBUG("  Output container: " << m_outcoll.key());
+  ATH_MSG_DEBUG("      Pseudojet pT: " << m_pt);
 }
 
 //**********************************************************************

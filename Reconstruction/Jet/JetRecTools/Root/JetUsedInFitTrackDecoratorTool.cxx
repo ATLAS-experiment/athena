@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS)
@@ -14,7 +14,7 @@ JetUsedInFitTrackDecoratorTool::JetUsedInFitTrackDecoratorTool(const std::string
 }
 
 StatusCode JetUsedInFitTrackDecoratorTool::initialize() {
-  ATH_MSG_INFO("Initializing tool " << name() << "...");
+  ATH_MSG_DEBUG("Initializing tool " << name() << "...");
   ATH_CHECK(m_decoTool.retrieve());
   return StatusCode::SUCCESS;
 }
