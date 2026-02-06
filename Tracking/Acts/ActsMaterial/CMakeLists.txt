@@ -23,8 +23,9 @@ set_target_properties( ActsMaterial PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${AT
 atlas_install_scripts( scripts/*.py )
 
 # Test(s) in the package:
-atlas_add_test( MateriaStepWriter
+atlas_add_test( MaterialStepWriter
                 SCRIPT RunGeantinoMaterialTrackProduction.py
+                PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh )
 
 
