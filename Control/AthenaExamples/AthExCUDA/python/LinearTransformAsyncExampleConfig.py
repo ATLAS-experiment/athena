@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Simple ComponentAccumulator configuration for running
 # AthCUDAExamples::LinearTransformAsyncExampleAlg#
@@ -33,7 +33,7 @@ if __name__ == '__main__':
    # Set up the job's flags.
    flags = initConfigFlags()
    flags.Concurrency.NumOffloadThreads = 2
-   flags.Exec.MaxEvents = 10000
+   flags.Exec.MaxEvents = 100
    flags.Input.Files = defaultTestFiles.AOD_RUN3_DATA
    flags.fillFromArgs()
    flags.lock()
