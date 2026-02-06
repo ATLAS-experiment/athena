@@ -48,6 +48,10 @@ endif()
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+# Aliases:
+atlas_add_alias( EventPicking "EventPicking.py" )
+atlas_add_alias( EventInfo "EventInfo.py" )
+
 # Test(s) in the package:
 atlas_add_test( AODEventPicking_run2_data
                 SCRIPT test/AODEventPicking_run2_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
