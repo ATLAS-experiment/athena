@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TwinTubeMappingCondAlg.h"
 
@@ -46,6 +46,7 @@ namespace Muon{
                 return StatusCode::FAILURE;
             }
             writeHandle.addDependency(readHandle);
+            //coverity[UNREACHABLE]
             for (const auto& itr : **readHandle) {
                 const coral::AttributeList& atr = itr.second;
                 blob = nlohmann::json::parse(*(static_cast<const std::string*>((atr["data"]).addressOfData())));
