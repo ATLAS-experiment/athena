@@ -49,8 +49,8 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
     bool LoadIdTranslator(const TString& file);
 
     bool IsInitialized(){ return m_kInitialized; }
-    TCanvas* CaloPartitionLayerDisplay(TH2** h,const Char_t* title="",bool kLogz=true);
-    TH2* GetCaloPartitionLayerMap(const int index,bool kProfile=false);
+    std::unique_ptr<TCanvas> CaloPartitionLayerDisplay(TH2** h,const Char_t* title="",bool kLogz=true);
+    std::unique_ptr<TH2> GetCaloPartitionLayerMap(const int index,bool kProfile=false);
     const Char_t* GetPartitonLayerName(const int index);
     void MakeTranslatorMapping(const char* inputtreefile,const char* inputhistfile,const int run);
     bool IsHVLine(const int hvline) const;
@@ -63,7 +63,7 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
 
     bool m_kInitialized;
     TTree* m_tree;
-    TFile* m_file;
+    std::unique_ptr<TFile> m_file;
     Int_t m_ntotal,m_extrabins;
 
     Int_t m_canvas_counts,m_clonemap_counts;
