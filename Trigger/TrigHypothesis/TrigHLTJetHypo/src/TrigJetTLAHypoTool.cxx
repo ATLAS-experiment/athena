@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -66,8 +66,6 @@ TrigJetTLAHypoTool::decide(TrigCompositeUtils::DecisionContainer* outputDecision
 
   int decision_count=0;
 
-  std::unique_ptr<ITrigJetHypoInfoCollector> infocollector(nullptr);
-
   // jet hypo inputs:
   // pairs of const xAOD::Jet* (first) and mutable Decision* (second)
 
@@ -87,10 +85,6 @@ TrigJetTLAHypoTool::decide(TrigCompositeUtils::DecisionContainer* outputDecision
 
   ATH_MSG_DEBUG("TrigJetTLAHypoTool: Passthrough decision count " + std::to_string(decision_count)); 
 
-  if (infocollector){
-    infocollector->collect("TrigJetTLAHypoTool", "TrigJetTLAHypoTool: Passthrough decision count " + std::to_string(decision_count));
-    infocollector->write();
-  }
   return StatusCode::SUCCESS;
 }
 
