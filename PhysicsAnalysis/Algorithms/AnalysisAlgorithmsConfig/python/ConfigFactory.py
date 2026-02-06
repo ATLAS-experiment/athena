@@ -357,6 +357,8 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="PL_Taus", alg=ParticleLevelTausBlock)
         from TruthParticleLevelAnalysisAlgorithms.ParticleLevelPhotonsConfig import ParticleLevelPhotonsBlock
         self.addAlgConfigBlock(algName="PL_Photons", alg=ParticleLevelPhotonsBlock)
+        from TruthParticleLevelAnalysisAlgorithms.ParticleLevelResonancesConfig import ParticleLevelResonancesBlock
+        self.addAlgConfigBlock(algName="PL_Resonances", alg=ParticleLevelResonancesBlock)
         from TruthParticleLevelAnalysisAlgorithms.ParticleLevelMissingETConfig import ParticleLevelMissingETBlock
         self.addAlgConfigBlock(algName="PL_MissingET", alg=ParticleLevelMissingETBlock)
         from TruthParticleLevelAnalysisAlgorithms.ParticleLevelOverlapRemovalConfig import ParticleLevelOverlapRemovalBlock
@@ -383,7 +385,7 @@ class ConfigFactory():
             defaults={'selectionName': ''},
             superBlocks=[self.ROOTNAME,
                          "Jets", "Electrons", "Photons", "Muons", "TauJets", "DiTauJets",
-                         "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos"])
+                         "PL_Jets", "PL_Electrons", "PL_Photons", "PL_Muons", "PL_Taus", "PL_Neutrinos", "PL_Resonances"])
 
         # met
         from MetAnalysisAlgorithms.MetAnalysisConfig import MetAnalysisConfig
