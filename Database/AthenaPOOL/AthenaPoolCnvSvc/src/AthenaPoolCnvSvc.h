@@ -210,11 +210,6 @@ private: // properties
    Gaudi::Property<std::vector<std::string>> m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
    std::vector<std::vector<std::string> > m_inputAttrPerEvent;
 
-   /// MaxFileSizes, vector with maximum file sizes for Athena POOL output files
-   Gaudi::Property<std::vector<std::string>> m_maxFileSizes{this,"MaxFileSizes",{}};
-   long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
-   std::map<std::string, long long> m_databaseMaxFileSize;
-
    /// Default container type (from PoolSvc)
    std::string m_defContainerType{};
 
