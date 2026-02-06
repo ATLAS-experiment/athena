@@ -29,9 +29,10 @@ Interface definition for gFEXJwoJAlgo
                                  int aFPGA_C, int bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) = 0;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<int32_t, 4> & outTOB) const = 0;
-
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+                                                               const gTowersType& Btwr, int pucB_JWJ,
+                                                               const gTowersType& Ctwr, int pucC_JWJ,
+                                                               std::array<int32_t, 4> & outTOB) const = 0;
 
 
   };

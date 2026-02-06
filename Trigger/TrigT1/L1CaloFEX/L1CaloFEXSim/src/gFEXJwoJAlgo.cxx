@@ -49,7 +49,9 @@ void gFEXJwoJAlgo::setAlgoConstant(int aFPGA_A, int bFPGA_A,
   m_gBlockthresholdC = gXE_seedThrC;
 }
 
-std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
+std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+                                                                 const gTowersType& Btwr, int pucB_JWJ,
+                                                                 const gTowersType& Ctwr, int pucC_JWJ,
                                                                  std::array<int32_t, 4> & outTOB) const {
 
 
@@ -62,6 +64,7 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
   std::string fwVersion = myDBTool->get_FWVersion();
   int major = std::stoi(fwVersion);
   bool SumETfast = (major >= 1);
+  bool metRho = (major >= 2);
 
   // find gBlocks
   gTowersType AgBlk;
@@ -151,17 +154,20 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const gTowersTy
 
 
   // will need to hard code etFPGA ,a's and b's 
-  int etBprime =0;
+  int etBprime = 0;
 
-  metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
+  if (metRho) metFPGA_rho(0, Ascaled, pucA_JWJ, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
+  else metFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, m_bFPGA_A, A_MHT_x, A_MHT_y, A_MST_x, A_MST_y, A_MET_x, A_MET_y);
   if (SumETfast) etFastFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
   else etFPGA(0, Ascaled, AgBlk, m_gBlockthresholdA, m_aFPGA_A, etBprime, A_eth, A_ets, A_etw);
 
-  metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
+  if (metRho) metFPGA_rho(1, Bscaled, pucB_JWJ, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
+  else metFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, m_bFPGA_B, B_MHT_x, B_MHT_y, B_MST_x, B_MST_y, B_MET_x, B_MET_y);
   if (SumETfast) etFastFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
   else etFPGA(1, Bscaled, BgBlk, m_gBlockthresholdB, m_aFPGA_B, etBprime, B_eth, B_ets, B_etw);
 
-  metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  if (metRho) metFPGA_rho(2, Cscaled, pucC_JWJ, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
+  else metFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, m_bFPGA_C, C_MHT_x, C_MHT_y, C_MST_x, C_MST_y, C_MET_x, C_MET_y);
   if (SumETfast) etFastFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
   else etFPGA(2, Cscaled, CgBlk, m_gBlockthresholdC, m_aFPGA_C, etBprime, C_eth, C_ets, C_etw);
 
@@ -326,6 +332,147 @@ void gFEXJwoJAlgo::gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTo
     }
   }
 }
+void gFEXJwoJAlgo::metFPGA_rho(int FPGAnum, const gTowersType& twrs, int puc_jwj,
+                           const gTowersType & gBlkSum, int gBlockthreshold,
+                           int aFPGA, int bFPGA,
+                           int & MHT_x, int & MHT_y,
+                           int & MST_x, int & MST_y,
+                           int & MET_x, int & MET_y) const {
+  gBlockthreshold = gBlockthreshold * 200 / 800;
+
+  int64_t h_tx_hi = 0;
+  int64_t h_ty_hi = 0;
+  int64_t h_tx_lw = 0;
+  int64_t h_ty_lw = 0;
+  
+  int64_t e_tx_hi = 0;
+  int64_t e_ty_hi = 0;
+  int64_t e_tx_lw = 0;
+  int64_t e_ty_lw = 0;  
+
+
+  int64_t RHO_SUM_OF_COS_h_tx_hi = 0;
+  int64_t RHO_SUM_OF_SIN_h_ty_hi = 0;
+  int64_t RHO_SUM_OF_COS_h_tx_lw = 0;
+  int64_t RHO_SUM_OF_SIN_h_ty_lw = 0;
+  
+  int64_t RHO_SUM_OF_COS_e_tx_hi = 0;
+  int64_t RHO_SUM_OF_SIN_e_ty_hi = 0;
+  int64_t RHO_SUM_OF_COS_e_tx_lw = 0;
+  int64_t RHO_SUM_OF_SIN_e_ty_lw = 0;  
+
+
+  for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(int jcolumn = 6; jcolumn<12; jcolumn++){
+      if( FPGAnum == 2){
+        int frow = 2*(irow/2)  + 1; 
+        
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_hi += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          h_ty_hi += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+          RHO_SUM_OF_COS_h_tx_hi += (cosLUT(frow, 5));
+          RHO_SUM_OF_SIN_h_ty_hi += (sinLUT(frow, 5));
+
+        } else {
+          e_tx_hi += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          e_ty_hi += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+          RHO_SUM_OF_COS_e_tx_hi += (cosLUT(frow, 5));
+          RHO_SUM_OF_SIN_e_ty_hi += (sinLUT(frow, 5));
+        }
+
+      } else {
+  
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_hi += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          h_ty_hi += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+          RHO_SUM_OF_COS_h_tx_hi += (cosLUT(irow, 5));
+          RHO_SUM_OF_SIN_h_ty_hi += (sinLUT(irow, 5));
+        } else {
+          e_tx_hi += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          e_ty_hi += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+          RHO_SUM_OF_COS_e_tx_hi += (cosLUT(irow, 5));
+          RHO_SUM_OF_SIN_e_ty_hi += (sinLUT(irow, 5));
+        }
+      }
+    }
+     
+    for(int jcolumn = 0; jcolumn<6; jcolumn++){
+      if( FPGAnum == 2){
+        int frow = 2*(irow/2)  + 1;
+        
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_lw += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          h_ty_lw += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+          RHO_SUM_OF_COS_h_tx_lw += (cosLUT(frow, 5));
+          RHO_SUM_OF_SIN_h_ty_lw += (sinLUT(frow, 5));
+        } else{
+          e_tx_lw += (twrs[irow][jcolumn])*(cosLUT(frow, 5));
+          e_ty_lw += (twrs[irow][jcolumn])*(sinLUT(frow, 5));
+          RHO_SUM_OF_COS_e_tx_lw += (cosLUT(frow, 5));
+          RHO_SUM_OF_SIN_e_ty_lw += (sinLUT(frow, 5));
+        }
+      } else {
+  
+        if(gBlkSum[irow][jcolumn] > gBlockthreshold){
+          h_tx_lw += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          h_ty_lw += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+          RHO_SUM_OF_COS_h_tx_lw += (cosLUT(irow, 5));
+          RHO_SUM_OF_SIN_h_ty_lw += (sinLUT(irow, 5));
+        } else {
+          e_tx_lw += (twrs[irow][jcolumn])*(cosLUT(irow, 5));
+          e_ty_lw += (twrs[irow][jcolumn])*(sinLUT(irow, 5));
+          RHO_SUM_OF_COS_e_tx_lw += (cosLUT(irow, 5));
+          RHO_SUM_OF_SIN_e_ty_lw += (sinLUT(irow, 5));
+        }
+      }
+    }
+  }
+
+  // REMEMBER TO DO BIT ADJUSTMENTS FOR SUBTRACTION 
+
+  long int fMHT_x =  (h_tx_hi + h_tx_lw) ;
+  long int fMHT_y =  (h_ty_hi + h_ty_lw) ;
+  long int fMST_x =  (e_tx_hi + e_tx_lw) ;
+  long int fMST_y =  (e_ty_hi + e_ty_lw) ;
+
+  long int RHO_MULTIPLIED_BY_SUM_OF_COS_HARD_RESULT_hi = ( puc_jwj * (RHO_SUM_OF_COS_h_tx_hi) ) >> 4 ; // could be >> 2, or >> 14 
+  long int RHO_MULTIPLIED_BY_SUM_OF_SIN_HARD_RESULT_hi = ( puc_jwj * (RHO_SUM_OF_SIN_h_ty_hi) ) >> 4 ;
+  long int RHO_MULTIPLIED_BY_SUM_OF_COS_SOFT_RESULT_hi = ( puc_jwj * (RHO_SUM_OF_COS_e_tx_hi) ) >> 4 ;
+  long int RHO_MULTIPLIED_BY_SUM_OF_SIN_SOFT_RESULT_hi = ( puc_jwj * (RHO_SUM_OF_SIN_e_ty_hi) ) >> 4 ;
+
+
+  long int RHO_MULTIPLIED_BY_SUM_OF_COS_HARD_RESULT_lw = ( puc_jwj * (RHO_SUM_OF_COS_h_tx_lw) ) >> 4 ;
+  long int RHO_MULTIPLIED_BY_SUM_OF_SIN_HARD_RESULT_lw = ( puc_jwj * (RHO_SUM_OF_SIN_h_ty_lw) ) >> 4 ;
+  long int RHO_MULTIPLIED_BY_SUM_OF_COS_SOFT_RESULT_lw = ( puc_jwj * (RHO_SUM_OF_COS_e_tx_lw) ) >> 4 ;
+  long int RHO_MULTIPLIED_BY_SUM_OF_SIN_SOFT_RESULT_lw = ( puc_jwj * (RHO_SUM_OF_SIN_e_ty_lw) ) >> 4 ;
+
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_hi =  (h_tx_hi - RHO_MULTIPLIED_BY_SUM_OF_COS_HARD_RESULT_hi) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_hi =  (h_ty_hi - RHO_MULTIPLIED_BY_SUM_OF_SIN_HARD_RESULT_hi) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_hi =  (e_tx_hi - RHO_MULTIPLIED_BY_SUM_OF_COS_SOFT_RESULT_hi) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_hi =  (e_ty_hi - RHO_MULTIPLIED_BY_SUM_OF_SIN_SOFT_RESULT_hi) ;
+
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_lw =  (h_tx_lw - RHO_MULTIPLIED_BY_SUM_OF_COS_HARD_RESULT_lw) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_lw =  (h_ty_lw - RHO_MULTIPLIED_BY_SUM_OF_SIN_HARD_RESULT_lw) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_lw =  (e_tx_lw - RHO_MULTIPLIED_BY_SUM_OF_COS_SOFT_RESULT_lw) ;
+  long int RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_lw =  (e_ty_lw - RHO_MULTIPLIED_BY_SUM_OF_SIN_SOFT_RESULT_lw) ;
+
+  MHT_x =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_lw) >> 3;
+  MHT_y =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_lw) >> 3;
+  MST_x =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_lw) >> 3;
+  MST_y =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_lw) >> 3;
+ 
+  fMHT_x =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_tx_lw) ;
+  fMHT_y =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_h_ty_lw) ;
+  fMST_x =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_tx_lw) ;
+  fMST_y =  (RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_hi + RHO_SUBTRACTED_BEFORE_FINAL_MULTIPLY_e_ty_lw) ;
+   
+  long int fMET_x = ( aFPGA * (fMHT_x) + bFPGA * (fMST_x) ) >> 13 ;
+  long int fMET_y = ( aFPGA * (fMHT_y) + bFPGA * (fMST_y) ) >> 13 ;
+
+  MET_x  = fMET_x;
+  MET_y  = fMET_y;
+    
+}
 
 
 void gFEXJwoJAlgo::metFPGA(int FPGAnum, const gTowersType& twrs, 
@@ -437,23 +584,15 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
 
   int64_t ethard = 0.0;
   int64_t etsoft = 0.0; 
- 
-  int multiplicitiveFactor = 0;
-
-  if(FPGAnum < 2 ) {
-   multiplicitiveFactor = cosLUT(0, 5);
-  } else{
-    multiplicitiveFactor = cosLUT(1, 5);
-  }
 
 // firmware treats upper and lower columns differnetly 
 
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int jcolumn = 0; jcolumn<6; jcolumn++){
       	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-	  ethard_lo = ethard_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	  ethard_lo = ethard_lo + twrs[irow][jcolumn]; 
 	} else {
-	  etsoft_lo = etsoft_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	  etsoft_lo = etsoft_lo + twrs[irow][jcolumn]; 
 	}
     }
   }
@@ -461,35 +600,24 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int jcolumn = 6; jcolumn<12; jcolumn++){
       	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-	  ethard_hi = ethard_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	  ethard_hi = ethard_hi + twrs[irow][jcolumn]; 
 	} else {
-	  etsoft_hi = etsoft_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
+	  etsoft_hi = etsoft_hi + twrs[irow][jcolumn]; 
 	}
     }
   }
 
   ethard = ethard_hi + ethard_lo;
-  
   etsoft = etsoft_hi + etsoft_lo;
 
-
-  int64_t etsum_hi = ethard_hi*A  + etsoft_hi*B  ;
-  if ( etsum_hi < 0 ) etsum_hi = 0; 
-
-  int64_t etsum_lo = ethard_lo*A  + etsoft_lo*B  ;
-  if ( etsum_lo < 0 ) etsum_lo = 0; 
-  
-  int64_t etsum = etsum_hi + etsum_lo; 
-
+  int64_t etsum = ethard*A  + etsoft*B;
+  if ( etsum < 0 ) etsum = 0;
+  if( etsum >= 268435455 )  etsum  = 0X0FFFFFFF;
 
   // convert 200 MeV LSB here 
   eth  = ethard>>3;
   ets  = etsoft>>3;
-  etw  = (etsum  >>13 ) ;
-
-  if( etw < 0 )  etw  = 0;
-  // max value is 15 bits with 800 MeV LSB -- so 17 bits here 
-  if( etw > 0X001FFFF ) etw  =  0X001FFFF ; 
+  etw  = (etsum  >>13 );
 
 
   if(msgLvl(MSG::DEBUG)) { 
@@ -580,7 +708,7 @@ void gFEXJwoJAlgo::etTotal(int A_ET,
   if (B_ET < 0 ) B_ET = 0;
   if (C_ET < 0 ) C_ET = 0;
 
-  ET = (A_ET + B_ET + C_ET) ; 
+  ET = (A_ET + B_ET + C_ET);
 
   // main value of ET is always positive 
   if( ET > 0x0000FFF) ET =  0x0000FFF;

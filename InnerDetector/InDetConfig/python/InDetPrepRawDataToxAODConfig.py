@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataToxAOD package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -31,8 +31,8 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
-    if flags.Input.isMC:
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if flags.InDet.doTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -100,8 +100,8 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
 
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
-    if flags.Input.isMC:
+    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if flags.ITk.doTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -133,8 +133,8 @@ def ITkPixelPrepDataToxAOD_ExtraTruthCfg(flags, name='ITkPixelPrepDataToxAOD_Ext
 def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
     acc = SCT_ReadoutGeometryCfg(flags)
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
-    if flags.Input.isMC:
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
+    if flags.InDet.doTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -167,8 +167,8 @@ def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     kwargs.setdefault("SctxAodContainer", "ITkStripMeasurements")
     kwargs.setdefault("SctxAodOffset", "ITkStripClustersOffsets")
     kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
-    if flags.Input.isMC:
+    kwargs.setdefault("UseTruthInfo", flags.ITk.doTruth)
+    if flags.ITk.doTruth:
         # need to decorate truth particles and clusters with same unique identified
         # which is the origin truth particle index
         acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
@@ -183,7 +183,7 @@ def ITkStripPrepDataToxAOD_ExtraTruthCfg(flags, name='ITkStripPrepDataToxAOD_Ext
 
 def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
     acc = ComponentAccumulator()
-    kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
+    kwargs.setdefault("UseTruthInfo", flags.InDet.doTruth)
 
     if "TRTCalDbTool" not in kwargs:
         from TRT_ConditionsServices.TRT_ConditionsServicesConfig import (
