@@ -228,9 +228,9 @@ def ITkSiCombinatorialTrackFinder_xkCfg(
     #
     # --- Local track finding using sdCaloSeededSSSpace point seed
     #
-    from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
-    ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(
-        flags, name="ITkRotCreator"+flags.Tracking.ActiveConfig.extension))
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorDigitalCfg
+    ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorDigitalCfg(
+        flags, name="ITkRotCreatorDigital"+flags.Tracking.ActiveConfig.extension))
     acc.addPublicTool(ITkRotCreator)
     kwargs.setdefault("RIOonTrackTool", ITkRotCreator)
 
