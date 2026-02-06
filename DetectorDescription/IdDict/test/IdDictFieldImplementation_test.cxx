@@ -12,6 +12,7 @@ namespace utf = boost::unit_test;
 #include "Identifier/IdentifierField.h"
 #include "TestTools/initGaudi.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/MsgStream.h"
 #include <string>
 #include <sstream>
 #include <vector>
