@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHASGEXUNITTEST_ATHEXUNITTESTTOOL_H
 #define ATHASGEXUNITTEST_ATHEXUNITTESTTOOL_H 1
@@ -22,9 +22,8 @@ public:
   virtual double useTheProperty() override;
 
 private:
-
-  double m_nProperty;
-  unsigned int m_enumProperty;
+  Gaudi::Property<double> m_nProperty{this, "Property", 3.0, "A double property"};
+  Gaudi::Property<unsigned int> m_enumProperty{this, "ENumProperty", Val1, "A enum property"};
 
 };
 
