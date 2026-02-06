@@ -223,8 +223,6 @@ private:
   // Has linear weight flag.
   bool m_extraFunctionality;
 
-  const InDetDD::AthenaComps * m_athenaComps;
-
 };
 
 
