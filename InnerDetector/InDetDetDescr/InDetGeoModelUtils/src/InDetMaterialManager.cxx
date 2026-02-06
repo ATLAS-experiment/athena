@@ -28,8 +28,8 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
                                            StoreGateSvc* detStore)
   : AthMessaging(managerName),
   m_managerName(managerName),
-  m_extraFunctionality(false),
-  m_athenaComps(nullptr) {
+  m_extraFunctionality(false)
+{
   m_materialManager = retrieveManager(detStore);
 }
 
@@ -41,8 +41,8 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
                                            bool extraFunctionality)
   : AthMessaging(managerName),
   m_managerName(managerName),
-  m_extraFunctionality(extraFunctionality),
-  m_athenaComps(nullptr) {
+  m_extraFunctionality(extraFunctionality)
+{
   m_materialManager = retrieveManager(detStore);
 
   if (weightTable) addWeightTable(weightTable, space);
@@ -60,8 +60,8 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName, Store
                                            const std::string& space)
   : AthMessaging(managerName),
   m_managerName(managerName),
-  m_extraFunctionality(true),
-  m_athenaComps(nullptr) {
+  m_extraFunctionality(true)
+{
   m_materialManager = retrieveManager(detStore);
 
   if (weightTable) addWeightTable(weightTable, space);
@@ -72,8 +72,8 @@ InDetMaterialManager::InDetMaterialManager(const std::string& managerName,
                                            InDetDD::AthenaComps* athenaComps)
   : AthMessaging(managerName),
   m_managerName(managerName),
-  m_extraFunctionality(true),
-  m_athenaComps(athenaComps) {
+  m_extraFunctionality(true)
+{
   m_materialManager = retrieveManager(athenaComps->detStore());
 }
 
