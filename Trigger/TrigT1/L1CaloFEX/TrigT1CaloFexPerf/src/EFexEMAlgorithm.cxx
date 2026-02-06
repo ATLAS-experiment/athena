@@ -220,8 +220,8 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
             clusterTime += cellAround->time() * cellAround->et();
             clusterTimeWeight += cellAround->et();
          }
-         if (std::abs(clusterTimeWeight) > 0.1)
-         {
+         if (std::abs(clusterTimeWeight) > 0.1){
+            //coverity[DIVIDE_BY_ZERO:FALSE]
             clusterTime /= clusterTimeWeight;
          }
          else
@@ -277,8 +277,10 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
                wstot_nor += (cellAround->et());
             }
          }
-         if (std::abs(wstot_nor) > 0.01)
+         if (std::abs(wstot_nor) > 0.01){
+            //coverity[DIVIDE_BY_ZERO:FALSE]
             wstot = std::sqrt(wstot / wstot_nor);
+          }
          cl->setWstot(wstot);
       }
    }
