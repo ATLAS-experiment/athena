@@ -223,6 +223,16 @@ def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
+def ToroidGeoDetectorToolCfg(flags, name="Toroid", **kwargs):
+    kwargs.setdefault("DetectorName", "Toroid")
+    result = ComponentAccumulator()
+    if not flags.Detector.SpecialGeometryToroid:
+        return result
+    from MuonGeoModelR4.MuonGeoModelConfig import ToroidGeoModelToolCfg
+    result.merge(ToroidGeoModelToolCfg(flags))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
+    return result
+
 
 def ITKEnvelopeCfg(flags, name="ITK", **kwargs):
     result = ComponentAccumulator()
@@ -354,7 +364,8 @@ def MUONEnvelopeCfg(flags, name="MUONQ02", **kwargs): #FIXME rename to MUON when
     if flags.Detector.GeometryMuon:
         toolMuon = result.popToolsAndMerge(MuonGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolMuon ]
-
+    elif flags.Detector.SpecialGeometryToroid:
+        SubDetectorList += [ result.popToolsAndMerge(ToroidGeoDetectorToolCfg(flags))]
     kwargs.setdefault("SubDetectors", SubDetectorList)
     result.setPrivateTools(PolyconicalEnvelope(name, **kwargs))
     return result
@@ -379,9 +390,8 @@ def generateSubDetectorList(flags):
         if flags.Beam.Type is BeamType.Cosmics and flags.hasFlag("Sim.ReadTR"):
             SubDetectorList += [ CosmicShortCutCfg(flags) ]
 
-    if flags.Detector.GeometryMuon:
-        accMuon = MUONEnvelopeCfg(flags)
-        toolMuon = accMuon.popPrivateTools()
+    if flags.Detector.GeometryMuon or flags.Detector.SpecialGeometryToroid:
+        toolMuon = result.popToolsAndMerge(MUONEnvelopeCfg(flags))
         SubDetectorList += [ toolMuon ] #FIXME rename to MUON when safe
     if flags.Detector.GeometryID:
         toolIDET = result.popToolsAndMerge(IDETEnvelopeCfg(flags))
@@ -392,8 +402,6 @@ def generateSubDetectorList(flags):
     if flags.Detector.GeometryCalo:
         toolCALO = result.popToolsAndMerge(CALOEnvelopeCfg(flags))
         SubDetectorList += [ toolCALO ]
-    if flags.Detector.GeometryMuon:
-        result.merge(accMuon) #add the acc later to match the old style config
     if flags.Detector.GeometryBpipe:
         toolBpipe = result.popToolsAndMerge(BeamPipeGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolBpipe ]
