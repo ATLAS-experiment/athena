@@ -256,8 +256,8 @@ namespace pool {
 
       if( m_mode == ICollection::READ ) {
          // retrieve the TTree from file
-         if ( m_description.type() == pool::ROOT_StorageType.type() ) {
-           m_tree = dynamic_cast<TTree*>(m_file->Get(APRDefaults::TTreeNames::EventTag));
+         if ( m_description.type() == pool::ROOT_StorageType.type() && !m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type())) {
+           m_tree = m_file->Get<TTree>( APRDefaults::TTreeNames::EventTag );
          }
          if ( (!m_tree && m_description.type() == pool::ROOT_StorageType.type()) || m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type()) ) {
            m_reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
