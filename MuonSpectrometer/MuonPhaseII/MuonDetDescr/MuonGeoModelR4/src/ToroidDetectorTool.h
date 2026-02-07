@@ -10,7 +10,7 @@
 namespace MuonGMR4{
     class ToroidDetectorManager;
 
-    class ToroidDetectorTool: public GeoModelTool { 
+    class ToroidDetectorTool final : public GeoModelTool {
         public:
             // Constructor
             using GeoModelTool::GeoModelTool;
