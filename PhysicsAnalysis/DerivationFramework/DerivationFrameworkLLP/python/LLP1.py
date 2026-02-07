@@ -1032,7 +1032,7 @@ def LLP1Cfg(flags):
                                         "LVL1MuonRoIs",
                                         "NCB_MuonSegments"]
     if flags.Tracking.doLargeD0:
-        LLP1SlimmingHelper.AllVariables = ["MuonSegments_LRT",
+        LLP1SlimmingHelper.AllVariables += ["MuonSegments_LRT",
                                            "CombinedMuonsLRTTrackParticles",
                                            "ExtraPolatedMuonsLRTTrackParticles",
                                            "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
