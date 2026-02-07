@@ -12,12 +12,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from InDetTrackPerfMon.ConfigUtils import get_flags
-from InDetTrackPerfMon.ConfigUtils import hasFlag
+from InDetTrackPerfMon.ConfigUtils import print_obj
+# from InDetTrackPerfMon.ConfigUtils import hasFlag
 from InDetTrackPerfMon.ConfigUtils import has_in
 from InDetTrackPerfMon.ConfigUtils import kwargs_setdefault
 from InDetTrackPerfMon.ConfigUtils import get_opt
 from InDetTrackPerfMon.ConfigUtils import sanitise
 
+def cleankwargs( kwargs ):
+    for k, v in list(kwargs.items()):
+        if v is None:
+            del kwargs[k]
     
 def RoiSelectionToolCfg( flags, name="RoiSelectionTool", **kwargs ) :
     '''
@@ -104,13 +109,15 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
 
     # Default configurations 
     # ----------------------
-    minHitsVector = get_opt( iflags, "offlMinHitsVector" )
-    minPtVector = get_opt( iflags, "offlMinPtVector" )
-    maxD0Vector = get_opt( iflags, "offlMaxD0Vector" )
-    maxZ0Vector = get_opt( iflags, "offlMaxZ0Vector" )
-    etaBins     = get_opt( iflags, "offlEtaBins" )
+    minHitsVector = get_opt( iflags, "offlMinHitsVector", [] )
+    minPtVector = get_opt( iflags, "offlMinPtVector", [] )
+    maxD0Vector = get_opt( iflags, "offlMaxD0Vector", [] )
+    maxZ0Vector = get_opt( iflags, "offlMaxZ0Vector", [] )
+    etaBins     = get_opt( iflags, "offlEtaBins", [] )
     qualityWP   = get_opt( iflags, "OfflineQualityWP" )
 
+    print( "etabins: ", etaBins )
+    
     #if iflags.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
     ## Selection Working Point common for EF Tracking studies
     if qualityWP == "EFTracking" :
@@ -119,12 +126,15 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
         minPtVector = [900., 400., 400.]
         maxD0Vector = [2., 2., 10.]
         maxZ0Vector = [150., 150., 150.]
-        qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options
+        # this breaks everything cannit have a CutLevel of ""
+        qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options - WHY NOT JUST GIVE IT A DIFFERENT NAME THEN ?
 
     kwargs_InDetTrackSelectionTool = {}
 
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minPt",     iflags, "offlMinPt",     -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxAbsEta", iflags, "offlMaxAbsEta", -9999, True )
+    print_obj( kwargs_InDetTrackSelectionTool )
+
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minPt",         iflags, "offlMinPt",     -9999., True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxAbsEta",     iflags, "offlMaxAbsEta", -9999, True )
     kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0SinTheta", iflags, "offlMaxZ0SinTheta", -9999, True )
     kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0", iflags, "offlMaxZ0", -9999, True ) 
     kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxD0", iflags, "offlMaxD0", -9999, True ) 
@@ -144,22 +154,9 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxChiSqperNdf",    iflags, "offlMaxChiSqperNdf",    -9999, True )
     kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minProb",           iflags, "offlMinProb",           -9999, True )
 
-
-
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minPt",         iflags, "offlMinPt",     -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxAbsEta",     iflags, "offlMaxAbsEta", -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0SinTheta", iflags, "offlMaxZ0SinTheta", -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0",         iflags, "offlMaxZ0", -9999, True )
-    
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxD0", iflags, "offlMaxD0", -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNInnermostLayerHits",       iflags, "offlMinNInnermostLayerHits",       -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNBothInnermostLayersHits",  iflags, "offlMinNBothInnermostLayersHits",  -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNInnermostLayerSharedHits", iflags, "offlMaxNInnermostLayerSharedHits", -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNSiHits",       iflags, "offlMinNSiHits", -9999, True )
-    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNSiSharedHits", iflags, "offlMaxNSiSharedHits", -9999, True )
-
+    print_obj( kwargs_InDetTrackSelectionTool )
          
-    kwargs_InDetTrackSelectionTool.setdefaul( "CutLevel", qualityWP )
+#    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
 
     from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
@@ -190,6 +187,7 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     kwargs.setdefault( "maxD0Vec",   maxD0Vector )
     kwargs.setdefault( "maxZ0Vec",   maxZ0Vector )
 
+#    acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( iname._value, **kwargs ) )
     acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( iname, **kwargs ) )
 
     return acc    
@@ -204,20 +202,39 @@ def TruthSelectionBaseToolCfg( flags, name="TruthSelectionBaseTool", **kwargs ) 
     
     iflags, iname = get_flags( flags, name )
 
+#    cleankwargs( kwargs )
     
     ## Baseline requirements to be applied to all analyses
     kwargs.setdefault( "requireStable", True )
     kwargs.setdefault( "requireCharged", True )
     kwargs.setdefault( "selectedCharge", 0 )
 
-    # values in case the geometry is not set
-    kwargs.setdefault( "maxEta", 2.5 )
-    kwargs.setdefault( "minPt", 500 ) 
+    # whny are these flags all set to none somewhere ??
+    # this configuration is far, far, FAR too complicated,
+    # setting should be set in ONE PLACE, and ONE PLACE ONLY
+    # unless the user explicitly wants to change some later
 
-    if hasFlag( flags, "Detector.GeometryITk" ) :
+    # values in case the geometry is not set, AAAAARRRGH!!!!!
+    if kwargs.get("maxEta") is None:
+        kwargs["maxEta"] = 2.5
+    else:
+        # this clause won't do anything, because set
+        kwargs.setdefault( "maxEta", 2.5 )
+
+    if kwargs.get("minPt") is None:
+    # values in case the geometry is not set
+        kwargs["minPt"] = 500
+    else:
+        kwargs.setdefault( "minPt", 500 ) 
+
+    
+    if flags.hasFlag( "Detector.GeometryITk" ) :
+        #  do anything is the parameter is already set
         kwargs.setdefault( "maxEta", 4.0 if flags.Detector.GeometryITk else 2.5 )
         kwargs.setdefault( "minPt", 1000 if flags.Detector.GeometryITk else 500 )
-        
+
+    print( "by christ 2 !", kwargs["minPt"] )
+
     kwargs.setdefault( "requireOnlyPrimary", True )
     kwargs.setdefault( "maxProdVertRadius", 300. )
 
@@ -235,6 +252,8 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
 
     iflags, iname = get_flags( flags, name )
 
+    #    cleankwargs( kwargs )
+    
     # Default configurations 
     # ----------------------
     truthMinPt      = get_opt( iflags, "truthMinPt" )
@@ -245,10 +264,13 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     truthMinParentPt = get_opt( iflags, "truthMinParentPt" )
     truthMaxParentPt = get_opt( iflags, "truthMaxParentPt" )
 
+    print( "truthMinPt: ", truthMinPt )
+    print( "truthMaxPt: ", truthMaxPt )
+    
     ## SelectTruthObject: customised Pt range selection
     if has_in( "HighPt", iflags, "SelectTruthObject" ) :
         truthMinPt = 10000  # 10 GeV
-        truthMaxPt = -9999. # +inf
+        truthMaxPt = -9999  # +inf
     elif has_in( "VeryLowPt", iflags, "SelectTruthObject" ) :
         truthMinPt = 1000   # 1 GeV
         truthMaxPt = 2000   # 2 GeV
@@ -265,7 +287,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
         if has_in( "HighPt", iflags, "SelectTruthObject" ) :
             truthMinPt = 20000  # 20 GeV
             truthMaxPt = -9999. # +inf
-        if has_in( "LowPt", iflags, "SelectTruthObject") :
+        if has_in( "LowPt", iflags, "SelectTruthObject" ) :
             truthMinPt = 10000  # 10 GeV
             truthMaxPt = 20000  # 20 GeV
 
@@ -297,11 +319,21 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     if truthMaxAbsEta!=-9999.   : kwargs_base.setdefault( "maxEta", truthMaxAbsEta )
     if truthPdgId!=-9999.       : kwargs_base.setdefault( "pdgId",  truthPdgId )
 
+#    print( "truthMaxPt:     ", truthMaxPt )
+#    print( "truthMaxPt: (kw)", kwargs["maxPt"] )
+    
+    
     ## remove only primary requirements for Heavy Flavour truth selection - removed for now
     #doHF = truthIsFromB or truthIsFromC or truthIsFromHeavyFlav
     #if doHF                         : kwargs_base.setdefault( "requireOnlyPrimary", False )
     #if doHF or truthIsFromLightFlav : kwargs_base.setdefault( "maxProdVertRadius", -1. )
 
+
+    if "maxPt" in kwargs_base:
+        print( "maxPt in kwargs_base" )
+    else:
+        print( "maxPt NOT in kwargs_base" )
+        
     kwargs.setdefault("truthTool" ,
         acc.popToolsAndMerge( TruthSelectionBaseToolCfg( flags, **kwargs_base ) ) )
 
@@ -351,7 +383,7 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
         
     ## Offline tracks quality selection
     #    if iflags.OfflineQualityWP != "" or iflags.DoOfflineSelection:
-    if get_opt(iflags, "OfflineQualityWP", "") != "" or get_opt(iflags, "DoOfflineSelection", False):
+    if get_opt(iflags, "OfflineQualityWP") != "" or get_opt(iflags, "DoOfflineSelection"):
         kwargs.setdefault(  "DoOfflineSelection", True )
 
         # naming insanity !!!!
@@ -363,14 +395,14 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
     # want the truth selection ?
     # there should be a flag DoTruthSelection so that
     # if flags.Input.isMC and DoTruthSelection: kwargs.setdefault( "DoTruthSelection", True )
-    if get_opt( flags, "Input.isMC", False ):
+    if get_opt( flags, "Input.isMC") == True:
         kwargs.setdefault( "DoTruthSelection", True )
     
         kwargs.setdefault(  "TruthSelectionTool", acc.popToolsAndMerge(
             TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool_"+sanitise(name) ) ) )
 
     ## offline track-object selection
-    if get_opt( iflags, "SelectOfflineObject", False ):
+    if get_opt( iflags, "SelectOfflineObject") == True:
         kwargs.setdefault( "DoObjectSelection", True )
     
         if "TrackObjectSelectionTool" not in kwargs:

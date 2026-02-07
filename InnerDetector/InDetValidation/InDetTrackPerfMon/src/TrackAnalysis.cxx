@@ -85,10 +85,8 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   ATH_CHECK( m_roiSelectionTool.retrieve() );
 
   ATH_CHECK( m_trackRoiSelectionTool.retrieve() );
+
   ATH_CHECK( m_trackMatchingTool.retrieve() );
-
-
-
   
   // ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
   // ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
@@ -139,6 +137,8 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   //           thisChain ) );
   // } // close m_configuredChains loop 
 
+  std::cout << "TrackAnalysis::execute() exitting" << std::endl;
+  
   return StatusCode::SUCCESS;
 }
 
@@ -178,12 +178,12 @@ StatusCode IDTPM::TrackAnalysis::bookHistograms()
 /// ------- fillHistograms -------
 /// ------------------------------
 StatusCode IDTPM::TrackAnalysis::fillHistograms() {
-  execute();
-  return StatusCode::SUCCESS;
+  if ( execute() )  return StatusCode::SUCCESS;
+  return StatusCode::FAILURE;
 }
 
 
-void IDTPM::TrackAnalysis::execute() {
+bool IDTPM::TrackAnalysis::execute() {
 
   //  ATH_MSG_INFO("Filling hists " << name() << "\ttrigger: " << m_trigger.value() << " ...");
 
@@ -191,18 +191,30 @@ void IDTPM::TrackAnalysis::execute() {
 
   std::cout << "TrackAnalysis:execute() " << name() << std::endl;
   
-  IDTPM::TrackAnalysisCollections thisTrkAnaCollections("cock");
+  //  IDTPM::TrackAnalysisCollections thisTrkAnaCollections("duff");
 
-  //  ATH_CHECK( thisTrkAnaCollections.initialize() );
+  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks << "\ttesttracks: " << m_testTracks << std::endl;
+
+  m_refTracks = m_offlineTracks;
+  m_testTracks = m_triggerTracks;
+
+  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks << "\ttesttracks: " << m_testTracks << std::endl;
+
+  std::cout << "TrackAnalysis:execute() " << "ana collections" << std::endl;
+  
+  //  bool anacollections = thisTrkAnaCollections.initialize().isSuccess();
+
+  //  std::cout << "\t ana collections: " << anacollections << std::endl;
+  
+  //  if ( !anacollections )  return false;
 
 #if 0
-  
-  if ( ! thisTrkAnaCollections.initialize().isSuccess() ) return;
 
   /// filling TrackAnalysisCollections
   // ATH_CHECK( loadCollections( thisTrkAnaCollections ) );
   if ( ! loadCollections( thisTrkAnaCollections ).isSuccess() ) return;
 
+  
   ATH_MSG_DEBUG( "Processing event = " << thisTrkAnaCollections.eventInfo()->eventNumber() << "\n==========================================" );
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
 
@@ -409,6 +421,8 @@ void IDTPM::TrackAnalysis::execute() {
   //   ATH_MSG_DEBUG( m_trkAnaInfoWriteTool->printInfo( outTrkAnaInfoContHandle ) );
   // }
 
+  return true;
+  
 }
 
 

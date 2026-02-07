@@ -82,7 +82,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "offlMaxNSctHoles",                -9999. )
     icf.addFlag( "offlMaxChiSq",                    -9999. )
     icf.addFlag( "offlMaxChiSqperNdf",              -9999. )
-    icf.addFlag( "offlMinPt"   , -9999.)
+    icf.addFlag( "offlMinPt"   , -9999. )
     icf.addFlag( "offlMaxPt"   , -9999. )
     icf.addFlag( "offlMinEta"  , -9999. )
     icf.addFlag( "offlMaxEta"  , -9999. )
@@ -139,10 +139,10 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMaxAbsZ0"   , -9999., help="Apply maximum |z0| cut to truth particle" )
     icf.addFlag( "truthMinAbsQoPT" , -9999., help="Apply minimum |q/pt| cut to truth particle" )
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
-    icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
+    icf.addFlag( "truthPdgId"      , -9999., help="Apply pdgId selection to truth particle" )
 
     icf.addFlag( "truthMinParentPt" , -9999. )
-    icf.addFlag( "truthMaxParentPt", -9999. )
+    icf.addFlag( "truthMaxParentPt",  -9999. )
 
 
     # Jet-track matching properties

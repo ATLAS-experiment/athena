@@ -13,11 +13,11 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
         
 from InDetTrackPerfMon.ConfigUtils import get_flags
-from InDetTrackPerfMon.ConfigUtils import hasFlag
 from InDetTrackPerfMon.ConfigUtils import has_in
 from InDetTrackPerfMon.ConfigUtils import kwargs_setdefault
 from InDetTrackPerfMon.ConfigUtils import get_opt
-from InDetTrackPerfMon.ConfigUtils import sanitise
+
+# from InDetTrackPerfMon.ConfigUtils import sanitise
 
 
 def DeltaRMatchingTool_trkTruthCfg( flags, name="DeltaRMatchingTool_trkTruth", **kwargs ):
@@ -108,11 +108,14 @@ def TrackTruthMatchingToolCfg( flags, name="TrackTruthMatchingTool", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+    iflags, iname = get_flags( flags, name )
+        
+    kwargs_setdefault( kwargs, "MatchingTruthProb", iflags, "truthProbCut" )
 
     acc.setPrivateTools(
         CompFactory.IDTPM.TrackTruthMatchingTool( name, **kwargs ) )
     return acc
+
 
 
 def TruthTrackMatchingToolCfg( flags, name="TruthTrackMatchingTool", **kwargs ):
@@ -121,7 +124,9 @@ def TruthTrackMatchingToolCfg( flags, name="TruthTrackMatchingTool", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+    iflags, iname = get_flags( flags, name )
+    
+    kwargs_setdefault( kwargs, "MatchingTruthProb", flags, "truthProbCut" )
 
     acc.setPrivateTools(
         CompFactory.IDTPM.TruthTrackMatchingTool( name, **kwargs ) )
@@ -134,7 +139,9 @@ def EFTrackMatchingToolCfg( flags, name="EFTrackMatchingTool", **kwargs ):
     '''
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+    iflags, iname = get_flags( flags, name )
+
+    kwargs_setdefault( kwargs, "MatchingTruthProb", flags.PhysVal, "truthProbCut" )
 
     acc.setPrivateTools(
         CompFactory.IDTPM.EFTrackMatchingTool( name, **kwargs ) )
@@ -157,7 +164,7 @@ def TrackMatchingToolCfg( flags, name="MatchingTool", **kwargs ):
     # classes, which would have been cleaner, and more efficient 
     
     # Stable SeltaR matching
-    if get_opt( iflags, "MatchingType", "" ) == "StableDeltaRMatch":
+    if get_opt( iflags, "MatchingType") == "StableDeltaRMatch":
         log.debug( "Stable deltaR matching configuration chosen." )
 
         ## Track->Truth via stable DeltaR
@@ -172,7 +179,7 @@ def TrackMatchingToolCfg( flags, name="MatchingTool", **kwargs ):
         return StableDeltaRMatchingTool_trkCfg(iflags, name="StableDeltaRMatchingTool_trk" + iname, **kwargs )
 
     ## DeltaR matching
-    if get_opt( iflags, "MatchingType", "" ) == "DeltaRMatch":
+    if get_opt( iflags, "MatchingType") == "DeltaRMatch":
 
         ## Track->Truth via DeltaR
         if has_in( "Truth", iflags, "RefType" ) :
@@ -186,7 +193,7 @@ def TrackMatchingToolCfg( flags, name="MatchingTool", **kwargs ):
         return DeltaRMatchingTool_trkCfg( iflags, name="DeltaRMatchingTool_trk" + iname, **kwargs )
 
     ## Matching via truthParticleLink decorations
-    if get_opt( iflags, "MatchingType", "" ) == "TruthMatch":
+    if get_opt( iflags, "MatchingType") == "TruthMatch":
 
         ## Track->Truth via truthParticleLink decorations
         if has_in( "Truth", iflags, "RefType" ) :
@@ -202,7 +209,7 @@ def TrackMatchingToolCfg( flags, name="MatchingTool", **kwargs ):
         return None
 
     ## Matching track to track via truthParticleLink decorations
-    if get_opt( iflags, "MatchingType", "" ) == "EFTruthMatch":
+    if get_opt( iflags, "MatchingType") == "EFTruthMatch":
         if not get_opt( iflags, "Input.isMC", False ):
             log.error( "Matching EFTruthMatch not available for non-MC samples" )
             return None

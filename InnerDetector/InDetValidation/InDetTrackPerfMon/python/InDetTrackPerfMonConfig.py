@@ -12,7 +12,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
-
 def JsonPlotsDefReadToolCfg( flags, name="JsonPlotsDefReadTool", **kwargs ):
     '''
     Tool to read the plots definitions from an input file in JSON format
@@ -325,7 +324,10 @@ def InDetTrackPerfMonCfg( flags ):
     ## IDTPM tool instances
     tools = []
 
+    print( "trkAnaNames: ", flags.PhysVal.IDTPM.trkAnaNames )
+
     for trkAnaName in flags.PhysVal.IDTPM.trkAnaNames :
+
         ## cloning flags of current TrackAnalysis to PhysVal.IDTPM.currentTrkAna
         flags_thisTrkAna = flags.cloneAndReplace( "PhysVal.IDTPM.currentTrkAna",
                                                   "PhysVal.IDTPM."+trkAnaName )

@@ -24,7 +24,6 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     
 #   print( "in montool: ", mtool.name )
 
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     # created this in case we need it later, but if we use my mktool wrapper
@@ -32,7 +31,7 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     # in principle, we may be able to get away with sharing some tools betwen
     # analyses in the same signature rather than all these independent tools
     # but we can sort that out later
-    kak = ComponentAccumulator()
+#    kak = ComponentAccumulator()
 
     tool = CompFactory.IDTPM.TrackAnalysis(name )
 
@@ -54,7 +53,7 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
     from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
 
-    from InDetTrackPerfMon.InDetMatchingConfig import TrackMatchingToolCfg
+    from InDetTrackPerfMon.InDetMatchingConfig  import TrackMatchingToolCfg
 
     from InDetTrackPerfMon.InDetSelectionConfig import sanitise
     

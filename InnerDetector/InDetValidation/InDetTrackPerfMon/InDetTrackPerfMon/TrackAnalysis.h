@@ -65,7 +65,7 @@ public :
   virtual StatusCode fillHistograms();
   virtual StatusCode procHistograms();
   
-  void execute();
+  bool execute();
   
   /// can't clone a gaudi algorithm ...
   //    TrackAnalysis* clone() const { return new TrackAnalysis(*this); }
@@ -87,8 +87,6 @@ private :
 
   /// retrieve all collections && load them into trkAnaCollections object
   StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
-
-
   
   ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool { this, "TrackQualitySelectionTool", "", "" };
 
