@@ -265,7 +265,7 @@ private: // properties
    /// Use DBReplicaSvc to sort database connections, default = true.
    Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
    /// Default ROOT container type
-   Gaudi::Property<std::string> m_defaultROOTContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
+   Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
    // delete all APR::Persistency Services, Catalog, Mutexes and Indexes
