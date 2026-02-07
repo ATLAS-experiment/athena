@@ -60,6 +60,8 @@ private:
   // max decay radius for secondaries [mm];
   // set to within (Run2) pixel by default
   FloatProperty m_maxProdVertRadius{this, "maxProdVertRadius", 110.};
+  FloatProperty m_minProdVertRadius{this, "minProdVertRadius", 0.};
+  FloatProperty m_minAbsD0{this, "minAbsD0", 0.};
   IntegerProperty m_pdgId{this, "pdgId", -1};
   IntegerProperty m_vetoPdgId{this, "vetoPdgId", -1};
   BooleanProperty m_grandparent{this, "hasNoGrandparent", false};
