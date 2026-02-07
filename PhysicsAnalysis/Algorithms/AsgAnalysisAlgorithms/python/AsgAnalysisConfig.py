@@ -119,7 +119,7 @@ class CommonServicesConfig (ConfigBlock) :
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
                 weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|JET_.*JvtEfficiency_|PRW_).*"
 
-        if self.metadataHistogram is not None:
+        if self.metadataHistogram:
             # add histogram with metadata
             if not config.flags:
                 raise ValueError ("Writing out the metadata histogram requires to pass config flags")
@@ -128,6 +128,7 @@ class CommonServicesConfig (ConfigBlock) :
             metadataHistAlg.dataType = str(config.dataType().value)
             metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
             metadataHistAlg.mcChannelNumber = str(config.dsid())
+            metadataHistAlg.RootStreamName = self.streamName
             if config.dataType() is DataType.Data:
                 etag = "unavailable"
             else:
