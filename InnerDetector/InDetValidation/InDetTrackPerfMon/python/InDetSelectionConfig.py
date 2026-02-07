@@ -116,8 +116,6 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     etaBins     = get_opt( iflags, "offlEtaBins", [] )
     qualityWP   = get_opt( iflags, "OfflineQualityWP" )
 
-    print( "etabins: ", etaBins )
-    
     #if iflags.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
     ## Selection Working Point common for EF Tracking studies
     if qualityWP == "EFTracking" :

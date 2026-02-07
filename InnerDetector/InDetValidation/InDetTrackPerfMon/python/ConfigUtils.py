@@ -43,7 +43,7 @@ def kwargs_setdefault(kwargs, key, obj, attr=None, default=..., skip_if_default=
     if attr is None:
         attr = key
 
-    print("kwargs_setdefault: ", key, attr, default, skip_if_default )
+#   print("kwargs_setdefault: ", key, attr, default, skip_if_default )
         
     try:
         val = value(getattr(obj, attr))
@@ -196,7 +196,7 @@ class Node:
 
             
 def print_obj(obj):
-    print("print_obj:")
+    # print("print_obj:")
     for key, value in obj.items():
         print( "obj:", key, value )
             
@@ -310,7 +310,7 @@ def get_flags( flags, name ):
 
     if isinstance(flags, AthConfigFlags):
         if flags.hasFlag("PhysVal.IDTPM.currentTrkAna.anaTag"):
-            print( "WITH IDTPM" )
+            # print( "WITH IDTPM" )
 
             iflags = mknode( flags, "PhysVal.IDTPM.currentTrkAna" )
             
@@ -318,7 +318,7 @@ def get_flags( flags, name ):
                 iname = iflags.anaTag
                 
         else:
-            print( "WITHOUT IDTPM" )
+            # print( "WITHOUT IDTPM" )
             iflags = mkbarenode(flags)
             iname  = sanitise(name)
             
