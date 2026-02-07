@@ -47,6 +47,10 @@ def InDetRttTruthSelectionToolCfg(
                       else False)
     kwargs.setdefault("maxProdVertRadius",
                       flags.PhysVal.IDPVM.maxProdVertRadius)
+    kwargs.setdefault("minProdVertRadius",
+                      flags.PhysVal.IDPVM.minProdVertRadius)
+    kwargs.setdefault("minAbsD0",
+                      flags.PhysVal.IDPVM.minAbsD0)
 
     if flags.Detector.GeometryID:
         if flags.PhysVal.IDPVM.doValidateLargeD0Tracks or flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
