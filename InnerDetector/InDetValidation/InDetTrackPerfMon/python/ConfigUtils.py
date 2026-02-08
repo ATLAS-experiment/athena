@@ -5,7 +5,7 @@ from AthenaCommon.Utils.unixtools import find_datafile
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
-import sys
+# import sys
 
 def value(obj):
     return obj._value if hasattr(obj, "_value") else obj
@@ -129,44 +129,44 @@ def print_attrs(obj):
 
 
 
-def getflags(flags, prefix=None):
-    """
-    flags_obj: the original flat flags object
-    prefix: string, e.g., "PhysVal.IDTPM.currentAna"
-    Returns: a nested FlagNode tree containing all attributes under this prefix
-    NB: THIS SHOULD NO LONGER BE NEEDED
-    """
+# def getflags(flags, prefix=None):
+#     """
+#     flags_obj: the original flat flags object
+#     prefix: string, e.g., "PhysVal.IDTPM.currentAna"
+#     Returns: a nested FlagNode tree containing all attributes under this prefix
+#     NB: THIS SHOULD NO LONGER BE NEEDED
+#     """
 
-    if not hasattr(flags, "_flagdict"):
-        return
+#     if not hasattr(flags, "_flagdict"):
+#         return
 
-    if prefix is not None:
-        parts = prefix.split(".")
-        top_name = parts[0]
+#     if prefix is not None:
+#         parts = prefix.split(".")
+#         top_name = parts[0]
     
-    # create top node
-#    top_node = FlagNode(top_name)
+#     # create top node
+# #    top_node = FlagNode(top_name)
     
-    # find all attributes of flags_obj that start with the prefix
-    for name, value in flags._flagdict.items():
+#     # find all attributes of flags_obj that start with the prefix
+#     for name, value in flags._flagdict.items():
 
-        if prefix is not None and not name.startswith(prefix):
-            continue
+#         if prefix is not None and not name.startswith(prefix):
+#             continue
 
-        print ("name: ", name, value )
+#         print ("name: ", name, value )
         
-        if prefix is not None:
-            # remove the prefix + dot
-            suffix = name[len(prefix):]
-            if suffix.startswith("."):
-                suffix = suffix[1:]
+#         if prefix is not None:
+#             # remove the prefix + dot
+#             suffix = name[len(prefix):]
+#             if suffix.startswith("."):
+#                 suffix = suffix[1:]
         
-        # split remaining suffix by dots
+#         # split remaining suffix by dots
 
-            sub_parts = suffix.split(".") if suffix else []
+#             sub_parts = suffix.split(".") if suffix else []
         
-#   return top_node
-    return 
+# #   return top_node
+#     return 
 
 
  

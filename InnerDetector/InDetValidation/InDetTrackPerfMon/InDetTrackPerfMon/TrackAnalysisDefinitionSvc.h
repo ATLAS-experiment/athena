@@ -18,6 +18,7 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
+#include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
 
 /// STL includes
 #include <string>
@@ -34,38 +35,47 @@ public:
 
   virtual StatusCode finalize() override final;
 
+  virtual const ITrackAnalysisDefinition& get() const { return m_def; }  
+  
+  /// TrackAnalysisDefinition delegates ...
   virtual const std::vector< std::string >& configuredChains() const override { return m_configuredChains; }
-  virtual const std::string& subFolder() const override { return m_subFolder; };
-  virtual const std::string& anaTag() const override { return m_trkAnaTag; };
+  virtual const std::string& subFolder() const override { return m_def.subFolder(); };
+  /// why do the accessors have different names to the actual variables ?????
+  virtual const std::string& anaTag()    const override { return m_def.anaTag(); };
+
+  virtual bool useTrigger()   const override { return m_def.useTrigger(); }
+  virtual bool useEFTrigger() const override { return m_def.useEFTrigger(); }
+  virtual bool useTruth()     const override { return m_def.useTruth(); }
+  virtual bool useOffline()   const override { return m_def.useOffline(); }
+  virtual bool doTrigNavigation() const override { return m_def.doTrigNavigation(); }
+
+  virtual bool isTestTrigger()   const override { return m_def.isTestTrigger(); }
+  virtual bool isTestEFTrigger() const override { return m_def.isTestEFTrigger(); }
+  virtual bool isTestTruth()     const override { return m_def.isTestTruth(); }
+  virtual bool isTestOffline()   const override { return m_def.isTestOffline(); }
+
+  /// why do the accessors have different names to the actual variables ?? AAARGH  
+  virtual bool isReferenceTrigger()   const override { return m_def.isReferenceTrigger(); }
+  virtual bool isReferenceEFTrigger() const override { return m_def.isReferenceEFTrigger(); }
+  virtual bool isReferenceTruth()     const override { return m_def.isReferenceTruth(); }
+  virtual bool isReferenceOffline()   const override { return m_def.isReferenceOffline(); }
+
+  virtual const std::string& testType()      const override { return m_def.testType(); };
+  virtual const std::string& referenceType() const override { return m_def.referenceType(); };
+  virtual const std::string& testTag()       const override { return m_def.testTag(); };
+  virtual const std::string& referenceTag()  const override { return m_def.referenceTag(); };
+  virtual const std::string& matchingType()  const override { return m_def.matchingType(); };
+  virtual float truthProbCut()               const override { return m_def.truthProbCut(); };
+
+  virtual const std::vector<float>& etaBins()           const override { return m_def.etaBins(); };
+  virtual const std::vector<unsigned int>& minSilHits() const override { return m_def.minSilHits(); };
+  virtual const std::string& pileupSwitch()             const override { return m_def.pileupSwitch(); };
+  virtual bool hasFullPileupTruth()                     const override { return m_def.hasFullPileupTruth(); };
+
+
+  /// TrackAnalysisDefniitionSvc specific functions ...
   virtual std::string plotsFullDir( std::string chain="" ) const override;
-
-  virtual bool useTrigger() const override { return m_useTrigger; }
-  virtual bool useEFTrigger() const override { return m_useEFTrigger; }
-  virtual bool useTruth() const override { return m_useTruth; }
-  virtual bool useOffline() const override { return m_useOffline; }
-  virtual bool doTrigNavigation() const override { return m_doTrigNavigation; }
-
-  virtual bool isTestTrigger() const override { return m_isTestTrigger; }
-  virtual bool isTestEFTrigger() const override { return m_isTestEFTrigger; }
-  virtual bool isTestTruth() const override { return m_isTestTruth; }
-  virtual bool isTestOffline() const override { return m_isTestOffline; }
-  virtual bool isReferenceTrigger() const override { return m_isRefTrigger; }
-  virtual bool isReferenceEFTrigger() const override { return m_isRefEFTrigger; }
-  virtual bool isReferenceTruth() const override { return m_isRefTruth; }
-  virtual bool isReferenceOffline() const override { return m_isRefOffline; }
-
-  virtual const std::string& testType() const override { return m_testTypeStr.value(); };
-  virtual const std::string& referenceType() const override { return m_refTypeStr.value(); };
-  virtual const std::string& testTag() const override { return m_testTag.value(); };
-  virtual const std::string& referenceTag() const override { return m_refTag.value(); };
-  virtual const std::string& matchingType() const override { return m_matchingType.value(); };
-  virtual float truthProbCut() const override { return m_truthProbCut.value(); };
-
-  virtual const std::vector<float>& etaBins() const override { return m_etaBins; };
-  virtual const std::vector<unsigned int>& minSilHits() const override { return m_minSilHits; };
-  virtual const std::string& pileupSwitch() const override { return m_pileupSwitch; };
-  virtual bool hasFullPileupTruth() const override { return m_hasFullPileupTruth.value(); };
-
+  
   virtual bool plotTrackParameters() const override { return m_plotTrackParameters.value(); };
   virtual bool plotTrackParametersErrors() const override { return m_plotTrackParametersErrors.value(); };
   virtual bool plotTrackMultiplicities() const override { return m_plotTrackMultiplicities.value(); };
@@ -89,32 +99,42 @@ public:
 
 private:
 
-  StringArrayProperty m_chainNames { this, "ChainNames", {}, "Vector of trigger chain names to process" }; 
-  StringProperty m_dirName{ this, "DirName", "InDetTrackPerfMonPlots/", "Top level directory to write histograms into" };
-  StringProperty m_subFolder { this, "SubFolder", "", "Subfolder to add for plots in. Used when working with multiple IDTPM tool instances && initialised by default to TrkAnaName/" }; 
-  StringProperty m_trkAnaTag { this, "TrkAnaTag", "", "Track analysis tag name" }; 
+  StringArrayProperty m_chainNames_prop { this, "ChainNames", {}, "Vector of trigger chain names to process" }; 
+  StringProperty      m_dirName_prop    { this, "DirName", "InDetTrackPerfMonPlots/", "Top level directory to write histograms into" };
+  StringProperty      m_subFolder_prop  { this, "SubFolder", "", "Subfolder to add for plots in. Used when working with multiple IDTPM tool instances && initialised by default to TrkAnaName/" }; 
+  StringProperty      m_trkAnaTag_prop  { this, "TrkAnaTag", "", "Track analysis tag name" }; 
 
-  StringProperty m_testTypeStr { this, "TestType", "Offline", "Type of track collection to be used as test" }; 
-  StringProperty m_refTypeStr { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
-  BooleanProperty m_doTrigNavigation { this, "doTrigNavigation", false, "Run Trigger Navigation monitoring" };
+  StringProperty      m_testTypeStr_prop      { this, "TestType", "Offline", "Type of track collection to be used as test" }; 
+  StringProperty      m_refTypeStr_prop       { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
 
-  bool m_useTrigger{}, m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
+  /// the trig navigation should be automatcially conmfigured whenere we want to run an analysis using
+  /// any trigger data, so for instance if any collection name, or a trigger instance
+  /// includes HLT_ then the navigation should be required
+  BooleanProperty     m_doTrigNavigation_prop { this, "doTrigNavigation", false, "Run Trigger Navigation monitoring" };
+
+  bool m_useTrigger{},    m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
   bool m_isTestTrigger{}, m_isTestEFTrigger{}, m_isTestTruth{}, m_isTestOffline{};
   bool m_isRefTrigger{}, m_isRefEFTrigger{}, m_isRefTruth{}, m_isRefOffline{};
 
-  StringProperty m_testTag { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
-  StringProperty m_refTag { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 
+  StringProperty m_testTag_prop { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
+  StringProperty m_refTag_prop  { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 
 
-  StringProperty m_matchingType { this, "MatchingType", "DeltaRMatch", "Type of test-reference matching performed" }; 
-  FloatProperty m_truthProbCut { this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
+  StringProperty m_matchingType_prop { this, "MatchingType", "DeltaRMatch", "Type of test-reference matching performed" }; 
+  FloatProperty  m_truthProbCut_prop { this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
 
   std::vector< std::string > m_configuredChains;
 
-  FloatArrayProperty m_etaBins { this, "EtaBins", {}, "Eta bins for determination of reconstructable particle" };
-  UnsignedIntegerArrayProperty m_minSilHits { this, "MinSilHits", {}, "Minimum number of Si hits for determination of reconstructable particle" };
-  StringProperty m_pileupSwitch { this, "pileupSwitch", "HardScatter", "Type of truth particles to consider (HardScatter, PileUp, All)" }; 
-  BooleanProperty m_hasFullPileupTruth { this, "hasFullPileupTruth", false, "Is full PileUp truth information available" };
+  FloatArrayProperty           m_etaBins_prop       { this, "EtaBins", {}, "Eta bins for determination of reconstructable particle" };
+  UnsignedIntegerArrayProperty m_minSilHits_prop    { this, "MinSilHits", {}, "Minimum number of Si hits for determination of reconstructable particle" };
+  StringProperty               m_pileupSwitch_prop  { this, "pileupSwitch", "HardScatter", "Type of truth particles to consider (HardScatter, PileUp, All)" }; 
+  BooleanProperty              m_hasFullPileupTruth_prop { this, "hasFullPileupTruth", false, "Is full PileUp truth information available" };
 
+  /// the container for the actual parameters that are needed wlsewhere
+  /// since this is essentially the only purpose of this class to distribute
+  /// these parameters, there ia absolutely nbo need whatsoever to actually
+  /// have this class implemented as a service
+  TrackAnalysisDefinition m_def;
+  
   /// histogram properties
   BooleanProperty m_sortPlotsByChain { this, "sortPlotsByChain", false, "Save plots in <mainDir>/<chain>/<subDir/TrkAnaName>/... instead of the default <mainDir>/<subDir/TrkAnaName>/<chain>/..." };
   BooleanProperty m_plotTrackParameters { this, "plotTrackParameters", true, "Book/fill track parameters histograms" };
@@ -135,7 +155,7 @@ private:
   BooleanProperty m_useSelectedVertexTracks { this, "useSelectedVertexTracks", false, "Get only vertex-associated tracks which pass the track selection" };
   BooleanProperty m_plotOfflineElectrons { this, "plotOfflineElectrons", false, "Book/fill reference offline electrons histograms" };
   BooleanProperty m_plotTracksInJets { this, "plotTracksInJets", false, "plot tracks in jets" };
-  StringProperty m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
+  StringProperty  m_resolMethod { this, "ResolutionMethod", "iterRMS", "Type of computation method for resolutions" };
   BooleanProperty m_isITk { this, "isITk", true, "Use ITk configuration for plots, etc." };
 };
 

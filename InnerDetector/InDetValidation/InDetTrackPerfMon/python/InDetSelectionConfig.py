@@ -393,14 +393,14 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
     # want the truth selection ?
     # there should be a flag DoTruthSelection so that
     # if flags.Input.isMC and DoTruthSelection: kwargs.setdefault( "DoTruthSelection", True )
-    if get_opt( flags, "Input.isMC") == True:
+    if get_opt( flags, "Input.isMC") is True:
         kwargs.setdefault( "DoTruthSelection", True )
     
         kwargs.setdefault(  "TruthSelectionTool", acc.popToolsAndMerge(
             TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool_"+sanitise(name) ) ) )
 
     ## offline track-object selection
-    if get_opt( iflags, "SelectOfflineObject") == True:
+    if get_opt( iflags, "SelectOfflineObject") is True:
         kwargs.setdefault( "DoObjectSelection", True )
     
         if "TrackObjectSelectionTool" not in kwargs:
