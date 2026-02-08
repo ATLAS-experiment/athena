@@ -46,6 +46,10 @@ namespace MuonPRDTest {
                 m_RPC_dig_time.push_back(digit->time());
                 m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
+		// HALF-SECTOR
+		m_RPC_secIndex.push_back(idHelperSvc()->sector(Id));
+		m_RPC_secName.push_back(idHelperSvc()->stationNameString(Id));
+
                 ++n_digits;
             }
         }
