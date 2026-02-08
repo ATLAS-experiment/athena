@@ -139,6 +139,12 @@ private :
     /// TrackAnalysisDefinitionSvc
     SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
 
+    /// really don't want to be using the raw service everywhere, and passing
+    /// the service about and then forcing other tools to retrieve a service
+    /// and so on, and so on, since this is just a class to pass parameters
+    /// so just extract the paraketers and have done with it
+    const ITrackAnalysisDefinition* m_trkAnaDef;
+  
     /// plots
     std::vector< std::unique_ptr< IDTPM::TrackAnalysisPlotsMgr > >  m_trkAnaPlotsMgrVec;
 };

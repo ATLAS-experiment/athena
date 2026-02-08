@@ -31,7 +31,7 @@ public:
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID( ITrackAnalysisDefinitionSvc, 1, 0 );
 
-  virtual const ITrackAnalysisDefinition& get() const = 0;
+  virtual const ITrackAnalysisDefinition* get() const = 0;
 
   virtual std::string plotsFullDir( std::string chain="" ) const = 0;
 

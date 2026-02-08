@@ -35,7 +35,7 @@ public:
 
   virtual StatusCode finalize() override final;
 
-  virtual const ITrackAnalysisDefinition& get() const { return m_def; }  
+  virtual const ITrackAnalysisDefinition* get() const { return &m_def; }  
   
   /// TrackAnalysisDefinition delegates ...
   virtual const std::vector< std::string >& configuredChains() const override { return m_configuredChains; }

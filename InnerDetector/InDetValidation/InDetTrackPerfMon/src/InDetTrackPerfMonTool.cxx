@@ -33,7 +33,7 @@ InDetTrackPerfMonTool::InDetTrackPerfMonTool(
     const std::string& type,
     const std::string& name,
     const IInterface* parent ) :
-        ManagedMonitorToolBase( type, name, parent )
+  ManagedMonitorToolBase( type, name, parent ), m_trkAnaDef(0)
 { }
 
 
@@ -54,17 +54,20 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   if( ! m_trkAnaDefSvc ) {
     ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
     m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
+    // not initialized ??
     ATH_CHECK( m_trkAnaDefSvc.isValid() );
   }
 
+  m_trkAnaDef = m_trkAnaDefSvc->get();
+
   ATH_MSG_DEBUG( "Initializing sub-tools" );
 
-  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
+  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
   ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
   ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
-  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
-  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
-  ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
+  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
+  ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
   ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
 
@@ -73,32 +76,32 @@ StatusCode InDetTrackPerfMonTool::initialize() {
   /// Events
   ATH_CHECK( m_eventInfoContainerName.initialize() );
   ATH_CHECK( m_truthEventName.initialize(
-      m_trkAnaDefSvc->useTruth() && ! m_truthEventName.key().empty() ) );
+      m_trkAnaDef->useTruth() && ! m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize(
-      m_trkAnaDefSvc->useTruth() && ! m_truthPileUpEventName.key().empty() and
-      m_trkAnaDefSvc->hasFullPileupTruth() ) );
+      m_trkAnaDef->useTruth() && ! m_truthPileUpEventName.key().empty() and
+      m_trkAnaDef->hasFullPileupTruth() ) );
 
   /// Tracks
   ATH_CHECK( m_offlineTrkParticleName.initialize(
-      m_trkAnaDefSvc->useOffline() && ! m_offlineTrkParticleName.key().empty() ) );
+      m_trkAnaDef->useOffline() && ! m_offlineTrkParticleName.key().empty() ) );
   ATH_CHECK( m_triggerTrkParticleName.initialize(
-      m_trkAnaDefSvc->useTrigger() && ! m_triggerTrkParticleName.key().empty() ) );
+      m_trkAnaDef->useTrigger() && ! m_triggerTrkParticleName.key().empty() ) );
   ATH_CHECK( m_truthParticleName.initialize(
-      m_trkAnaDefSvc->useTruth() && ! m_truthParticleName.key().empty() ) );
+      m_trkAnaDef->useTruth() && ! m_truthParticleName.key().empty() ) );
 
   /// Vertex
   ATH_CHECK( m_offlineVertexContainerName.initialize( 
-      m_trkAnaDefSvc->useOffline() && ! m_offlineVertexContainerName.key().empty() ) );
+      m_trkAnaDef->useOffline() && ! m_offlineVertexContainerName.key().empty() ) );
   ATH_CHECK( m_triggerVertexContainerName.initialize(
-      m_trkAnaDefSvc->useTrigger() && ! m_triggerVertexContainerName.key().empty() ) );
+      m_trkAnaDef->useTrigger() && ! m_triggerVertexContainerName.key().empty() ) );
   ATH_CHECK( m_truthVertexContainerName.initialize(
-      m_trkAnaDefSvc->useTruth() && ! m_truthVertexContainerName.key().empty() ) );
+      m_trkAnaDef->useTruth() && ! m_truthVertexContainerName.key().empty() ) );
 
   /// TrkAnaInfo for AOD_IDTPM output
   ATH_CHECK( m_trkAnaInfoKey.initialize() );
 
   /// Retrieving list of configured chains
-  const std::vector< std::string >& configuredChains = m_trkAnaDefSvc->configuredChains();
+  const std::vector< std::string >& configuredChains = m_trkAnaDef->configuredChains();
   m_trkAnaPlotsMgrVec.reserve( configuredChains.size() );
 
   /// booking analyses
@@ -212,7 +215,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// ----------------------------------
 
     /// skipping TrkAnalysis if chain is ! passed for this event
-    if( m_trkAnaDefSvc->doTrigNavigation() && 
+    if( m_trkAnaDef->doTrigNavigation() && 
         ! thisChain.empty() && thisChain != "Offline" ) {
 
       unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
@@ -229,7 +232,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     std::vector< TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > > selectedRois;
     size_t selectedRoisSize(1); // by default only one "dummy" RoI, i.e. for offline analysis
 
-    if( m_trkAnaDefSvc->doTrigNavigation() ) {
+    if( m_trkAnaDef->doTrigNavigation() ) {
       selectedRois = m_roiSelectionTool->getRois( thisChain ); 
       selectedRoisSize = selectedRois.size();
     }
@@ -246,7 +249,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// Getting RoI ElementLink
       ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
       std::string thisRoiStr( "Full Scan" );
-      if( m_trkAnaDefSvc->doTrigNavigation() ) {
+      if( m_trkAnaDef->doTrigNavigation() ) {
         thisRoiLink = selectedRois.at(ir).link;
 
         /// skip non-valid RoI link
@@ -264,7 +267,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// ---------------------------------------------------
       /// --- Track (and Vertex) selection within the RoI ---
       /// ---------------------------------------------------
-      if( m_trkAnaDefSvc->doTrigNavigation() ) {
+      if( m_trkAnaDef->doTrigNavigation() ) {
         /// Tracks in RoI selection
         ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
                           thisTrkAnaCollections, thisRoiLink ) );
@@ -286,7 +289,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --- Test/Reference Matching ---
       /// -------------------------------
       std::string chainRoIName = thisChain;
-      if( m_trkAnaDefSvc->doTrigNavigation() ) {
+      if( m_trkAnaDef->doTrigNavigation() ) {
         chainRoIName += "_RoI_"+std::to_string(ir);
       }
 
