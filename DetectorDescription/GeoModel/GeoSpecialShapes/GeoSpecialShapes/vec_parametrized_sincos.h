@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -43,7 +43,10 @@ struct vsincos_par
     void
     eval(const double r,
          double &ATH_RESTRICT sin_a,
-         double &ATH_RESTRICT cos_a) const ATH_RESTRICT
+         double &ATH_RESTRICT cos_a) const
+#ifndef __CLING__
+           ATH_RESTRICT
+#endif
     {
         const double r2 = r * r;
         CxxUtils::vec<double, 4> P = r2 * param_0 + param_1;

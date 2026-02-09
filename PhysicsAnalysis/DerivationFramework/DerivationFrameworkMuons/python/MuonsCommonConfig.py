@@ -124,7 +124,7 @@ def MuonVariablesCfg(flags):
 
 
 def CombinedTrackVarsCfg(flags):
-    return ["phi","theta","qOverP","d0","z0","vz",
+    return ["phi","theta","qOverP","d0","z0","vz","truthType","truthOrigin","truthClassification",
             "definingParametersCovMatrixDiag", "definingParametersCovMatrixOffDiag",
             "chiSquared","numberDoF",
             "vertexLink",
@@ -144,7 +144,7 @@ def CombinedTrackVarsCfg(flags):
 def MuonCPMETrkVarsCfg(flags):
     return [
         #Perigee
-     "phi", "theta","qOverP", "d0", "z0", "vz",
+     "phi", "theta","qOverP", "d0", "z0", "vz", "truthType", "truthOrigin", "truthClassification",
         "definingParametersCovMatrixDiag", "definingParametersCovMatrixOffDiag",
         "chiSquared", "numberDoF",
 

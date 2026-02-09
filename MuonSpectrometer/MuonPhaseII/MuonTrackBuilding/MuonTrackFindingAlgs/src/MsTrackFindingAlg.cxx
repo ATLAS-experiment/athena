@@ -129,7 +129,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
                     const Acts::Surface& surf{xAOD::muonSurface(m)};
                     sstr<<" ***  "<<m_idHelperSvc->toString(xAOD::identify(m))
                         <<", "<<m->numDimensions()<<", "
-                        <<", "<<surf.geometryId()<<" @ "<<Amg::toString(surf.transform(tgContext))<<std::endl;
+                        <<", "<<surf.geometryId()<<" @ "<<Amg::toString(surf.localToGlobalTransform(tgContext))<<std::endl;
                 }
                 ATH_MSG_VERBOSE("Fetch measurements from segment: "<<Amg::toString(segment->position())
                          <<", direction: "<<Amg::toString(segment->direction())<<"\n"<<sstr.str());
@@ -150,7 +150,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         if (false && refSeg != seed.segments().front()) {
             const MuonGMR4::SpectrometerSector* innerPlane = m_seeder->envelope(*seed.segments().front());
             const Acts::PlaneSurface& surf = innerPlane->surface();
-            const Amg::Transform3D toInnerPlane = surf.transform(tgContext).inverse();
+            const Amg::Transform3D toInnerPlane = surf.localToGlobalTransform(tgContext).inverse();
             const Amg::Vector3D locSeedPos = toInnerPlane * seedPos;
             const Amg::Vector3D locSeedDir = toInnerPlane.linear() * seedDir;
 
@@ -166,9 +166,9 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
             const Amg::Vector3D combSegDir = 
                     Acts::makeDirectionFromAxisTangents(houghTanAlpha(locSeedDir),
                                                         houghTanBeta(innerSegDir));
-            seedPos = surf.transform(tgContext) * Amg::Vector3D{innerPars[Acts::toUnderlying(x0)],
+            seedPos = surf.localToGlobalTransform(tgContext) * Amg::Vector3D{innerPars[Acts::toUnderlying(x0)],
                                                                 innerPars[Acts::toUnderlying(y0)], 0};
-            seedDir = surf.transform(tgContext).linear() * combSegDir;
+            seedDir = surf.localToGlobalTransform(tgContext).linear() * combSegDir;
         }
         /// Create a surface which is shortly before the first measurement
         const double propDistance = (xAOD::muonSurface(measurements[0]).center(tgContext) - 

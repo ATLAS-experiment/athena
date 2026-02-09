@@ -123,7 +123,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doRNNLoose=True))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="RNNLoose"))
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
 
     # Overlap for EMTopo

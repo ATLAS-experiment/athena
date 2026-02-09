@@ -451,7 +451,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
          sectorArgs.bounds = envelopeBox;
          sectorArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toCenter.inverse() * envelopeCentre, envelopePlane);
 
-         const Amg::Transform3D globalToSector = sectorArgs.surface->transform(gctx.context()).inverse();
+         const Amg::Transform3D globalToSector = sectorArgs.surface->localToGlobalTransform(gctx.context()).inverse();
 
          /// now, build simplified 2D representations of the sorted chambers we collected. 
          for (auto & chamber : sectorArgs.chambers){

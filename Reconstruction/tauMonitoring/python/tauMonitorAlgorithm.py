@@ -199,7 +199,7 @@ def tauMonitoringConfig(inputFlags,tauContainer='TauJets',**kwargs):
     ##############
 
     # define which ID is running
-    tauid = "GNTau" if "TMTauJets" in tauContainer else "RNN"
+    tauid = "GNTau" if "TauMonTauJets" in tauContainer else "RNN"
 
     # Configure histograms
     for itup in [(myKinGroupBA,'BA'),

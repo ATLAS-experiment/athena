@@ -7,25 +7,20 @@
 namespace MuonTGC_Cabling {
 
 // Constructor
-TGCModuleSSW::TGCModuleSSW(TGCId::SideType vside,
-			   int vreadoutSector,
-			   int vid)
-  : TGCModuleId(TGCModuleId::SSW)
-{
-  setSideType(vside);
-  setReadoutSector(vreadoutSector);
-  setId(vid);
-}
-  
-bool TGCModuleSSW::isValid(void) const
-{
-  if((getSideType()      >TGCId::NoSideType)    &&
-     (getSideType()      <TGCId::MaxSideType)   &&
-     (getReadoutSector() >=0)                   &&
-     (getReadoutSector() < N_RODS)  &&
-     (getId()            >=0)  )
-    return true;
-  return false;
+TGCModuleSSW::TGCModuleSSW(TGCId::SideType vside, int vreadoutSector, int vid)
+    : TGCModuleId(TGCModuleId::SSW) {
+    setSideType(vside);
+    setReadoutSector(vreadoutSector);
+    setId(vid);
 }
 
-} // end of namespace
+bool TGCModuleSSW::isValid(void) const {
+    if ((getSideType() > TGCId::NoSideType) &&
+        (getSideType() < TGCId::MaxSideType) && (getReadoutSector() >= 0) &&
+        (getReadoutSector() < N_RODS) && (getId() >= 0)) {
+        return true;
+    }
+    return false;
+}
+
+}  // namespace MuonTGC_Cabling

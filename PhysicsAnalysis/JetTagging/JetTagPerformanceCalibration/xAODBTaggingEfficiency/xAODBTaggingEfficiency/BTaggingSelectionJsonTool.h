@@ -25,7 +25,7 @@ class BTaggingSelectionJsonTool: public asg::AsgTool,
   virtual int accept(double pt, double eta, double mass, double tagger_discriminant) const override;
 
   virtual double getTaggerDiscriminant( const xAOD::Jet& jet ) const override;
-
+  
 private:
   bool m_initialised = false;
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
@@ -38,6 +38,9 @@ private:
   Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "", "jet collection"};
   Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "", "operating point"};
   Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
+  
+  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_massAcc;
+  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
 
   json m_json_config;
 
@@ -55,7 +58,8 @@ private:
   std::vector<std::vector<float>> m_OPCutValues;
 
   int findBin(const std::vector<float>& bins, float value) const;
-
+  float getJetMass( const xAOD::Jet& jet ) const;
+  float getJetPt( const xAOD::Jet& jet ) const;
 };
 
 #endif // CPBTAGGINGSELECTIONJSONTOOL_H

@@ -242,6 +242,9 @@ namespace columnar
         if (!m_branch)
           throw std::runtime_error ("failed to get branch: " + m_branchName);
         m_branch->SetMakeClass (1);
+        // FIX ME: I have to have some hard-coded size, see explanation
+        // below.
+        m_dataVec.resize (100);
         if (!m_dataVec.empty())
           m_branch->SetAddress (m_dataVec.data());
       }
@@ -252,8 +255,18 @@ namespace columnar
           throw std::runtime_error ("branch not connected: " + m_branchName);
         if (m_dataVec.size() < size)
         {
-          m_dataVec.resize (size);
-          m_branch->SetAddress (m_dataVec.data());
+          // FIX ME: in one of the latest releases the repointing below
+          // breaks, and causes memory corruption. so I'm now
+          // preallocating and fail rather than reallocate, and the
+          // problem goes away. maybe it should be investigated at some
+          // point, but this is a test and I already spend a fair amount
+          // of time investigating this. the harm is that this test
+          // consumes a few hundreds bytes more in memory and we may have
+          // to occasionally increase the buffer size to cover all test
+          // files and branch lengths.
+          throw std::runtime_error ("requested size exceeds buffer size for branch: " + m_branchName);
+          // m_dataVec.resize (size);
+          // m_branch->SetAddress (m_dataVec.data());
         }
         if (size > 0 && m_branch->GetEntry (entry) <= 0)
           throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);

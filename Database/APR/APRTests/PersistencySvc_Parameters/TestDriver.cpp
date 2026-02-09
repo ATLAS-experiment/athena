@@ -10,16 +10,14 @@
 #include <filesystem>
 
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbType.h"
-#include "FileCatalog/IFileCatalog.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
-//#include "PersistencySvc/IDatabaseParameters.h"
 #include "PersistencySvc/IPersistencySvc.h"
 
+#include "StorageSvc/DbType.h"
 
 pool::TestDriver::TestDriver():
   m_fileCatalog( 0 ),
@@ -35,7 +33,6 @@ pool::TestDriver::TestDriver():
   const std::string catname = "PAR.catalog.xml";
   std::filesystem::remove( {catname} );
   m_fileCatalog->setWriteCatalog( catname );
-  m_fileCatalog->connect();
 }
 
 pool::TestDriver::~TestDriver()
@@ -73,20 +70,6 @@ pool::TestDriver::write()
   db->setTechnology( pool::ROOT_StorageType.type() );
   db->connectForWrite();
 
-/*
-  // Retrieving the existing parameters
-  pool::IDatabaseParameters& databaseParameters = db->parameters();
-  std::set< std::string > parameterNames = databaseParameters.parameterNames();
-  for ( std::set< std::string >::const_iterator iParameterName = parameterNames.begin();
-	iParameterName != parameterNames.end(); ++iParameterName ) {
-    m_parameters.insert( std::make_pair( *iParameterName, databaseParameters.value( *iParameterName ) ) );
-  }
-
-  // adding a new parameter
-  databaseParameters.addParameter( std::string( "newParameterName" ), std::string( "newParameterValue" ) );
-  m_parameters.insert( std::make_pair( std::string( "newParameterName" ), std::string( "newParameterValue" ) ) );
-*/
-
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
   if ( ! persistencySvc->session().transaction().commit() ) {
@@ -118,44 +101,6 @@ pool::TestDriver::read()
   }
 
   db->connectForRead();
-
-/*
-  // Retrieve the database parameters
-  const pool::IDatabaseParameters& databaseParameters = db->parameters();
-  std::set< std::string > parameterNames = databaseParameters.parameterNames();
-  std::map< std::string, std::string > retrievedParameters;
-  for ( std::set< std::string >::const_iterator iParameterName = parameterNames.begin();
-	iParameterName != parameterNames.end(); ++iParameterName ) {
-    retrievedParameters.insert( std::make_pair( *iParameterName, databaseParameters.value( *iParameterName ) ) );
-  }
-
-  // Check if the number of parameters is the expected one
-  if ( retrievedParameters.size() != m_parameters.size() ) {
-    std::ostringstream error;
-    error << "Retrieved " << retrievedParameters.size() << " parameters instead of " << m_parameters.size();
-    throw std::runtime_error( error.str() );
-  }
-
-  // Check the parameters that I expect to be existing and their values
-  for ( std::map< std::string, std::string >::const_iterator iParameter = m_parameters.begin();
-	iParameter != m_parameters.end(); ++iParameter ) {
-    const std::string& parameterName = iParameter->first;
-    std::map< std::string, std::string >::const_iterator iRetrievedParameter = retrievedParameters.find( parameterName );
-    if ( iRetrievedParameter == retrievedParameters.end() ) {
-      throw std::runtime_error( "Parameter \"" + parameterName + "\" not found in the database file" );
-    }
-    const std::string& parameterValue = iParameter->second;
-    const std::string& retrievedParameterValue = iRetrievedParameter->second;
-    if ( retrievedParameterValue != parameterValue ) {
-      throw std::runtime_error( "Parameter \"" + parameterName + "\" has the value \"" + retrievedParameterValue + "\" instead of \"" + parameterValue + "\"" );
-    }
-    if ( parameterName != "FID" )
-      std::cout << "[OVAL] ";
-    else
-      std::cout << "       ";
-    std::cout << "\"" << parameterName << "\" : \"" << parameterValue << "\"" << std::endl;
-  }
-*/
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;

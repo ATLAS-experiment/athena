@@ -9,6 +9,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self.logger.info("AthenaCPRunScript initialized")
         self._cfg = None
         self.addCustomArguments()
+        self.configSeq = None
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
         
     @property
@@ -34,6 +35,8 @@ class AthenaCPRunScript(CPBaseRunner):
                                               noSystematics=self.args.no_systematics)
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
+        self.configSeq = configSeq
+        self.modifyAlgSequence()
         return configAccumulator.CA
     
     def initServiceCfg(self):

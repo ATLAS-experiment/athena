@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Data.h"
@@ -24,13 +24,21 @@ using std::endl;
 using namespace LArSamples;
 
 
-int Data::run()       const { return eventData()->run(); }
-int Data::event()     const { return eventData()->event(); }
-int Data::lumiBlock() const { return eventData()->lumiBlock(); }
-int Data::bunchId()   const { return eventData()->bunchId(); }
+int Data::run()       const { return eventData().run(); }
+int Data::event()     const { return eventData().event(); }
+int Data::lumiBlock() const { return eventData().lumiBlock(); }
+int Data::bunchId()   const { return eventData().bunchId(); }
 
-Data::Data(const DataContainer& container, const EventData& eventData, const History* history, int index, bool takeOwnership)
-   : AbsShape(), m_container(takeOwnership ? &container : new DataContainer(container)), m_eventData(&eventData),
+Data::Data(const DataContainer& container, const EventData& eventData, const History* history, int index)
+   : AbsShape(), m_container(std::make_unique<DataContainer>(container)), m_eventData(eventData),
+     m_history(history), m_index(index)
+{
+  ClassCounts::incrementInstanceCount("Data");
+}
+
+
+Data::Data(std::unique_ptr<const DataContainer> container, const EventData& eventData, const History* history, int index)
+   : AbsShape(), m_container(std::move(container)), m_eventData(eventData),
      m_history(history), m_index(index) 
 {
   ClassCounts::incrementInstanceCount("Data"); 
@@ -39,7 +47,7 @@ Data::Data(const DataContainer& container, const EventData& eventData, const His
 
 Data::Data(const Data& other, const EventData* eventData, const History* history, int index) 
   : AbsShape(), m_container(new DataContainer(other.container())), 
-    m_eventData(eventData ? eventData : other.eventData()),
+    m_eventData(eventData ? *eventData : other.eventData()),
     m_history(history ? history : other.m_history), m_index(index >= 0 ? index : other.m_index)
 { 
   ClassCounts::incrementInstanceCount("Data"); 
@@ -49,13 +57,12 @@ Data::Data(const Data& other, const EventData* eventData, const History* history
 Data::~Data() 
 { 
   ClassCounts::decrementInstanceCount("Data"); 
-  delete m_container;
 }
 
       
 const DataContainer* Data::dissolve()
 {
-  const DataContainer* container = new DataContainer(*m_container);
+  const DataContainer* container = m_container.release();
   delete this;
   return container;
 }
@@ -232,15 +239,12 @@ double Data::_chi2_k(const DataFuncArgs& args) const
 bool Data::calcRefit(double& chi2, double& k, double& dT) const
 {
   ShapeFitter fitter;
-  SimpleShape* reference = referenceShape();
-  const ScaledErrorData* sed = scaledErrorData();
+  std::unique_ptr<SimpleShape> reference (referenceShape());
   if (!reference){
-   delete sed;
    return false;
   }
-  bool result = fitter.fit(*this, *reference, k, dT, chi2, sed);
-  delete sed;
-  delete reference;
+  std::unique_ptr<const ScaledErrorData> sed (scaledErrorData());
+  bool result = fitter.fit(*this, *reference, k, dT, chi2, sed.get());
   return result;
 }
 
@@ -272,12 +276,11 @@ double Data::_refitChi2(const DataFuncArgs&) const
 bool Data::calcAdjust(double& k, double& dT) const
 {
   if (!m_history) return false;
-  OFC* ofc = m_history->ofc(m_index);
+  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
   if (!ofc) return false;
   
   k = ofc->A(*this)/adcMax();
   dT = ofc->time(*this);
-  delete ofc;
   return true;
 }
 
@@ -461,10 +464,9 @@ double Data::xi(short sample, ShapeErrorType type, CaloGain::CaloGain g, bool xi
   if (!m_history) return -999;
   //njpb don't see the point of next line, commenting out
   //if (g != CaloGain::UNKNOWNGAIN && type != RingShapeError) type = CellShapeError;
-  const ShapeErrorData* sed = m_history->shapeErrorData(g == CaloGain::UNKNOWNGAIN ? gain() : g, type);
+  std::unique_ptr<const ShapeErrorData> sed (m_history->shapeErrorData(g == CaloGain::UNKNOWNGAIN ? gain() : g, type));
   if (!sed) return -999;
   double val = (sed->isInRange(sample) ? (xip ? sed->xip()(sample) : sed->xi()(sample)) : -999);
-  delete sed;
   return val;
 }
 
@@ -472,10 +474,9 @@ double Data::xi(short sample, ShapeErrorType type, CaloGain::CaloGain g, bool xi
 double Data::xiNorm(ShapeErrorType type) const
 {
   if (!m_history) return -1;
-  const ShapeErrorData* sed = m_history->shapeErrorData(gain(), type);
+  std::unique_ptr<const ShapeErrorData> sed (m_history->shapeErrorData(gain(), type));
   if (!sed) return -1;
   double val = TMath::Sqrt(sed->xi().Norm2Sqr());
-  delete sed;
   return val;
 }
 
@@ -528,7 +529,7 @@ TString Data::description(unsigned int verbosity) const
 
 bool Data::isPassed(const TString& bitName) const 
 { 
-  return (eventData() ? eventData()->isPassed(bitName) : false); 
+  return eventData().isPassed(bitName);
 }
 
 
@@ -566,10 +567,9 @@ double Data::_ofcSigma(const DataFuncArgs& args) const
 {
   double result = -9999;
   if (!m_history) return result;
-  OFC* ofc = m_history->ofc(m_index);
+  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
   if (ofc->isInRange(args.i1))
     result = TMath::Sqrt(ofc->Gamma()(args.i1, args.i1));
-  delete ofc;
   return result;
 }
 
@@ -578,10 +578,9 @@ double Data::_ofcGamma(const DataFuncArgs& args) const
 {
   double result = -9999;
   if (!m_history) return result;
-  OFC* ofc = m_history->ofc(m_index);
+  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
   if (ofc->isInRange(args.i1) && ofc->isInRange(args.i2))
     result = ofc->Gamma()(args.i1, args.i2);
-  delete ofc;
   return result;
 }
       

@@ -1,22 +1,17 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 def SCT_GeoModelCfg(flags):
-    from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
-    db = InDetGeometryDBSvcCfg(flags)
-
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     sctDetectorTool = CompFactory.SCT_DetectorTool()
-    sctDetectorTool.GeometryDBSvc = db.getPrimary()
     sctDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
     sctDetectorTool.Alignable = True # make this a flag?
     geoModelSvc.DetectorTools += [ sctDetectorTool ]
-    acc.merge(db)
     return acc
 
 

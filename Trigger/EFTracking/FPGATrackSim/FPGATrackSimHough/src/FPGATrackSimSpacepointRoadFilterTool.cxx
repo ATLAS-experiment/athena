@@ -288,14 +288,14 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::setSector(FPGATrackSimRoad& road)
     // We've now removed any ambiguity, and so can assign the road's sector.
     int sectorbin = road.getSectorBin();
     std::vector<module_t> modules;
-    
+
     ATH_MSG_DEBUG("Road has sector bin ID: " << sectorbin << ", layers: " << road.getNLayers());
     unsigned num_pixel = 0;
     unsigned num_spacepoints = 0;
     for (unsigned int il = 0; il < road.getNLayers(); il++) {
         if (road.getNHits_layer()[il] == 0) {
             modules.push_back(-1);
-        } else if (road.getNHits_layer()[il] == 1 && road.getHits(il)[0]->getHitType() == HitType::wildcard) {
+        } else if (road.getNHits_layer()[il] == 1 && !(road.getHits(il)[0]->isReal())) {
             modules.push_back(-1);
             //ATH_MSG_INFO("  modules[" << il << "] = -1");
         } else {

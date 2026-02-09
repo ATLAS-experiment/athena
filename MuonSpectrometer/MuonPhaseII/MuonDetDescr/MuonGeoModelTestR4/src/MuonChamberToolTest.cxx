@@ -20,6 +20,7 @@
 
 #include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Geometry/DiamondVolumeBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 
 #include "Acts/Visualization/ObjVisualization3D.hpp"
@@ -28,11 +29,11 @@
 
 #include "MuonVisualizationHelpersR4/FileHelpers.h"
 
+#include <format>
+
 using namespace Acts::UnitLiterals;
 using namespace Muon::MuonStationIndex;
 
-
-#include <format>
 namespace{
     constexpr double tolerance = 10. *Gaudi::Units::micrometer;
 
@@ -63,22 +64,20 @@ namespace MuonGMR4 {
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-    StatusCode MuonChamberToolTest::pointInside(const EnvelopeType& chamb,
+    StatusCode MuonChamberToolTest::pointInside(const ActsTrk::GeometryContext& gctx,
+                                                const EnvelopeType& chamb,
                                                 const Acts::Volume& boundVol,
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
 
-        // Explicitly inline Volume::inside here so that it gets
-        // flattened in debug builds.
-        Acts::Vector3 posInVolFrame((boundVol.transform().inverse()) * point);
-        if (boundVol.volumeBounds().inside(posInVolFrame,tolerance)) {
+        if (boundVol.inside(gctx.context(), point, tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
                             <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
-                            <<"Local position:" <<Amg::toString(boundVol.itransform() * point));
+                            <<"Local position:" <<Amg::toString(boundVol.globalToLocalTransform(gctx.context()) * point));
             return StatusCode::SUCCESS;
         }
-        const Amg::Vector3D locPos{boundVol.itransform() * point};
+        const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
         
         StripDesign planeTrapezoid{};
         planeTrapezoid.defineTrapezoid(chamb.halfXShort(), chamb.halfXLong(), chamb.halfY());
@@ -99,18 +98,20 @@ namespace MuonGMR4 {
         return StatusCode::FAILURE;
     }
 
-    StatusCode MuonChamberToolTest::pointInside(const Acts::TrackingVolume& volume,
+    StatusCode MuonChamberToolTest::pointInside(const ActsTrk::GeometryContext& gctx,
+                                                const Acts::TrackingVolume& volume,
                                                 const Amg::Vector3D& point,
                                                 const std::string& descr,
                                                 const Identifier& chamberId) const {
-        if (volume.inside(point, tolerance)) {
+        if (volume.inside(gctx.context(), point, tolerance)) {
             return StatusCode::SUCCESS;
         }
-        const std::array<Amg::Vector3D, 8> volumeCorners = cornerPoints(volume);
+        const std::vector<Amg::Vector3D> volumeCorners = cornerPoints(gctx, volume);
         ATH_MSG_FATAL("In channel "<<m_idHelperSvc->toString(chamberId) <<", the point "
-                     << descr <<" "<<Amg::toString(volume.itransform()* point)<<" is not part of the chamber volume. The corners of the volume are:");
+                     << descr <<" "<<Amg::toString(volume.globalToLocalTransform(gctx.context())* point)
+                     <<" is not part of the chamber volume. The corners of the volume are:");
         for(const auto& corner : volumeCorners) {
-            ATH_MSG_FATAL("  "<<Amg::toString(volume.itransform()*corner));
+            ATH_MSG_FATAL("  "<<Amg::toString(volume.globalToLocalTransform(gctx.context())*corner));
         }
         return StatusCode::FAILURE;
     }
@@ -166,18 +167,54 @@ namespace MuonGMR4 {
         return StatusCode::SUCCESS;
     }
 
-    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const Acts::Volume& volume) const {
-        std::array<Amg::Vector3D, 8> edges{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
-        unsigned int edgeIdx{0};
-        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(volume.transform()));
+    std::vector<Amg::Vector3D> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const {
+        
         const auto& bounds = volume.volumeBounds();
+        unsigned int edgeIdx{0};
+        //diamond volume bounds case - there are 12 edges
+        if(bounds.type() == Acts::VolumeBounds::BoundsType::eDiamond){
+            const auto& diamondBounds = static_cast<const Acts::DiamondVolumeBounds&>(bounds);
+            using BoundEnum = Acts::DiamondVolumeBounds::BoundValues;        
+            std::vector<Amg::Vector3D> edges(12, Amg::Vector3D::Zero());
+            double xCord{0};
+            double yCord{0};
+            for(double signX : {-1.,1.}){
+                for(double signY : {-1., 0., 1.}){
+                    for(double signZ : {-1.,1.}){
+                        if(signY == 0){
+                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX2);
+                        }else if(signY < 0){
+                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX1);
+                            yCord = diamondBounds.get(BoundEnum::eLengthY1);
+
+                        }else{
+                            xCord = diamondBounds.get(BoundEnum::eHalfLengthX3);
+                            yCord = diamondBounds.get(BoundEnum::eLengthY2);
+
+                        }
+
+                        const Amg::Vector3D edge{signX*xCord, 
+                                                signY*yCord, 
+                                                signZ*diamondBounds.get(BoundEnum::eHalfLengthZ)};
+                        edges[edgeIdx] = volume.localToGlobalTransform(gctx.context())*edge;
+                        edgeIdx++;
+                    }
+                }
+            }
+
+            return edges;
+        }
+
+        //trapezoid or rectangular bounds case
+        std::vector<Amg::Vector3D> edges(8, Amg::Vector3D::Zero());
+        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(volume.localToGlobalTransform(gctx.context())));
         for (const double signX : {-1., 1.}) {
             for (const double signY : { -1., 1.}) {
                 for (const double signZ: {-1., 1.}) {
                     const Amg::Vector3D edge{signX* (signY>0 ? MuonGMR4::halfXhighY(bounds) : MuonGMR4::halfXlowY(bounds)), 
                                              signY*MuonGMR4::halfY(bounds), 
                                              signZ*MuonGMR4::halfZ(bounds)};
-                    edges[edgeIdx] = volume.transform() * edge;
+                    edges[edgeIdx] = volume.localToGlobalTransform(gctx.context()) * edge;
                     ATH_MSG_VERBOSE("Local edge "<<Amg::toString(edge)<<", global edge: "<<Amg::toString(edges[edgeIdx]));
                     ++edgeIdx;
                 }
@@ -186,20 +223,20 @@ namespace MuonGMR4 {
         return edges;
     }
 
-    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const Acts::GeometryContext& gctx, const Acts::StrawSurface& surface) const {
+    std::array<Amg::Vector3D, 8> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const {
         std::array<Amg::Vector3D, 8> edges{make_array<Amg::Vector3D,8>(Amg::Vector3D::Zero())};
         using BoundEnum = Acts::LineBounds::BoundValues;
         const auto& bounds = static_cast<const Acts::LineBounds&>(surface.bounds());
         unsigned int edgeIdx{0};
         
-        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.transform(gctx)));
+        ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.localToGlobalTransform(gctx.context())));
         for (const double signX : {-1., 1.}) {
             for (const double signY : { -1., 1.}) {
                 for (const double signZ: {-1., 1.}) {
                     const Amg::Vector3D edge{signX*bounds.get(BoundEnum::eR),
                                              signY*bounds.get(BoundEnum::eR),
                                              signZ*bounds.get(BoundEnum::eHalfLengthZ)};
-                    edges[edgeIdx] = surface.transform(gctx) * edge;
+                    edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
                     ++edgeIdx;
                 }
             }
@@ -207,7 +244,7 @@ namespace MuonGMR4 {
         return edges;
     }
     
-    std::array<Amg::Vector3D, 4> MuonChamberToolTest::cornerPoints(const Acts::GeometryContext& gctx, const Acts::PlaneSurface& surface) const {
+    std::array<Amg::Vector3D, 4> MuonChamberToolTest::cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface& surface) const {
         std::array<Amg::Vector3D, 4> edges{make_array<Amg::Vector3D,4>(Amg::Vector3D::Zero())};
         if(surface.bounds().type() == Acts::SurfaceBounds::BoundsType::eRectangle) { //RPC surfaces are rectangles
             const Acts::RectangleBounds& bounds = static_cast<const Acts::RectangleBounds&>(surface.bounds());
@@ -218,7 +255,7 @@ namespace MuonGMR4 {
                 for (const double signY : { -1., 1.}) {
                     const Amg::Vector3D edge{signX < 0 ? bounds.get(BoundEnum::eMinX) : bounds.get(BoundEnum::eMaxX), 
                                              signY < 0 ? bounds.get(BoundEnum::eMinY) : bounds.get(BoundEnum::eMaxY), 0.};
-                    edges[edgeIdx] = surface.transform(gctx) * edge;
+                    edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
                     ++edgeIdx;  
                 }
             } 
@@ -228,14 +265,14 @@ namespace MuonGMR4 {
             const auto& bounds = static_cast<const Acts::TrapezoidBounds&>(surface.bounds());
             unsigned int edgeIdx{0};
 
-            ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.transform(gctx)));
+            ATH_MSG_VERBOSE("Fetch volume bounds "<<Amg::toString(surface.localToGlobalTransform(gctx.context())));
             for (const double signX : {-1., 1.}) {
                 for (const double signY : { -1., 1.}) {
                         const Amg::Vector3D edge{Amg::getRotateZ3D(-1.*bounds.get(BoundEnum::eRotationAngle)) * /// Account for the stereo angle of the micromega geometry
                                                  Amg::Vector3D(signX*bounds.get(signY < 0 ? BoundEnum::eHalfLengthXnegY : BoundEnum::eHalfLengthXposY),
                                                                signY*bounds.get(BoundEnum::eHalfLengthY), 0.)};
                     
-                        edges[edgeIdx] = surface.transform(gctx) * edge;
+                        edges[edgeIdx] = surface.localToGlobalTransform(gctx.context()) * edge;
                         ++edgeIdx;
                 }
             }
@@ -255,35 +292,32 @@ namespace MuonGMR4 {
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-    bool MuonChamberToolTest::hasOverlap(const std::array<Amg::Vector3D, 8>& chamberEdges,
+    bool MuonChamberToolTest::hasOverlap(const ActsTrk::GeometryContext& gctx,
+                                         const std::vector<Amg::Vector3D>& chamberEdges,
                                          const Acts::Volume& volume) const {
         
         /// First check that there's at least a chance that the edges might overlap with the center
-        const Amg::Vector3D center{volume.center()};
+        const Amg::Vector3D center{volume.center(gctx.context())};
         double minDist = 1._km;
         for (const Amg::Vector3D& edge : chamberEdges) {
             minDist = std::min(minDist, (edge - center).mag());
         }
         /// The bound values contain the half length's if the minDist is within reach
         /// Then continue the check
-        std::vector<double> boundValues = volume.volumeBounds().values();
-        if (std::ranges::none_of(boundValues, [minDist](const double bound){
+        if (std::ranges::none_of(volume.volumeBounds().values(), 
+            [minDist](const double bound){
                 return minDist < 2.5*bound;
-        })) {
+            })) {
             return false;
         }
         const double stepLength = 1. / m_overlapSamples;
 
-        const Acts::VolumeBounds& volBounds = volume.volumeBounds();
-        const Acts::Transform3& itransform = volume.itransform();
         for (unsigned edge1 = 1; edge1 < chamberEdges.size(); ++edge1) {
             for (unsigned edge2 = 0; edge2 < edge1; ++edge2) {
                 for (unsigned step = 0 ; step <= m_overlapSamples; ++step) {
                     const double section = stepLength * step;
                     const Amg::Vector3D testPoint = section* chamberEdges[edge1] + (1. -section) *chamberEdges[edge2];
-                    // Using acts::Volume::inside is horribly slow in dbg builds.
-                    Acts::Vector3 posInVolFrame = itransform * testPoint;
-                    if (volBounds.inside (posInVolFrame)) {
+                    if (volume.inside (gctx.context(), testPoint)) {
                         return true;
                     }
                 }
@@ -321,7 +355,7 @@ namespace MuonGMR4 {
                             *chamber.boundingVolume(gctx), chamber.readoutEles());
             }
             ATH_CHECK(allReadoutInEnvelope(gctx, chamber));
-            const std::array<Amg::Vector3D, 8> chambCorners = cornerPoints(*chamber.boundingVolume(gctx));
+            const std::vector<Amg::Vector3D> chambCorners = cornerPoints(gctx, *chamber.boundingVolume(gctx));
             /// Check the overlap with other chambers
             std::vector<const Chamber*> overlaps{};
             for (std::size_t chIdx1 = 0; chIdx1<chamberVec.size(); ++chIdx1) {
@@ -329,7 +363,7 @@ namespace MuonGMR4 {
                     continue;
                 }
                 const Chamber* overlapTest{chamberVec[chIdx1]};
-                if (hasOverlap(chambCorners, *(overlapTest->boundingVolume(gctx)))) {
+                if (hasOverlap(gctx, chambCorners, *(overlapTest->boundingVolume(gctx)))) {
                     overlaps.push_back(overlapTest);
                 }
             }
@@ -392,16 +426,128 @@ namespace MuonGMR4 {
             ATH_CHECK(allReadoutInEnvelope(gctx, *sector));
             const std::shared_ptr<Acts::Volume> secVolume = sector->boundingVolume(gctx);
             for (const SpectrometerSector::ChamberPtr& chamber : sector->chambers()){
-                const std::array<Amg::Vector3D, 8> edges = cornerPoints(*chamber->boundingVolume(gctx));
+                const std::vector<Amg::Vector3D> edges = cornerPoints(gctx, *chamber->boundingVolume(gctx));
                 unsigned int edgeCount{0};
                 for (const Amg::Vector3D& edge : edges) {
-                    ATH_CHECK(pointInside(*sector,*secVolume, edge, std::format("Edge {:}", ++edgeCount),
+                    ATH_CHECK(pointInside(gctx, *sector, *secVolume, edge, std::format("Edge {:}", ++edgeCount),
                                           chamber->readoutEles().front()->identify()));
                 }
             }
         }
         return StatusCode::SUCCESS;
     }
+
+    StatusCode MuonChamberToolTest::checkTrackingGeometry(const ActsTrk::GeometryContext& gctx,
+                                                          std::shared_ptr<const Acts::TrackingGeometry>& trackingGeometry) const {
+        //visit the volumes and check the overlaps
+        std::vector<const Acts::TrackingVolume*> volumeVec{};
+        std::vector<const Acts::TrackingVolume*> overlapVolumes{};
+        //keep onyl the chamber volumes - not the cylinders
+        trackingGeometry->visitVolumes([&](const Acts::TrackingVolume* vol){
+            if(!(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder)){
+                //dump the tracking volumes into obj 
+                if(m_dumpObjs){
+                    Acts::ObjVisualization3D visualHelper{};   
+                    for(const auto& surf : vol->surfaces()){                
+                   
+                        Acts::GeometryView3D::drawSurface(visualHelper, surf, gctx.context());
+                         
+                    }
+                    std::string volName = vol->volumeName();
+                    Acts::GeometryView3D::drawVolume(visualHelper, *vol, gctx.context());
+                    ATH_MSG_DEBUG("Save new tracking volume 'MsTrackingVol_"<<volName<<".obj'");
+                    visualHelper.write(std::format("MsTrackingVol_{:}.obj", volName));
+
+                }
+                volumeVec.push_back(vol);            
+            }
+        });
+
+        for(std::size_t vIdx = 0; vIdx < volumeVec.size(); vIdx++){
+            const Acts::TrackingVolume* testVol{volumeVec[vIdx]};
+            std::vector<const Acts::TrackingVolume*> overlaps{};
+            const std::vector<Amg::Vector3D> edges = cornerPoints(gctx, *testVol);
+            const auto childrenVol = testVol->volumes();
+            const auto innerSurfaces = testVol->surfaces();
+            
+            for(const auto& surface : innerSurfaces){
+                //only plane or straw surfaces expected
+                std::vector<Amg::Vector3D> surfEdges = {};
+                if(const auto* strawSurf = dynamic_cast<const Acts::StrawSurface*>(&surface)){
+                   ATH_MSG_VERBOSE("Checking straw surface "<<surface.geometryId()
+                   <<" in volume "<<testVol->volumeName());
+                   
+                  auto edges = cornerPoints(gctx, *strawSurf);
+                  surfEdges = {edges.begin(), edges.end()};
+                }else if(const auto* planeSurf = dynamic_cast<const Acts::PlaneSurface*>(&surface)){ 
+                    ATH_MSG_VERBOSE("Checking plane surface "<<surface.geometryId()
+                    <<" in volume "<<testVol->volumeName());
+                    
+                    auto edges = cornerPoints(gctx, *planeSurf);
+                    surfEdges = {edges.begin(), edges.end()};
+                } else{
+                    ATH_MSG_FATAL("The surface "<< surface.geometryId() 
+                    <<" is neither a straw nor a plane surface");
+                    return StatusCode::FAILURE;
+                }
+        
+               
+                for(const auto& edge : surfEdges){
+                    if(!(testVol->inside(gctx.context(), edge,0.01))){
+                        ATH_MSG_FATAL("The surface " <<  surface.geometryId() <<" at vertex point " <<Amg::toString(edge)
+                        <<" is outside the parent volume" << testVol->volumeName());
+                        return m_ignoreOutsideSurf ?  StatusCode::SUCCESS : StatusCode::FAILURE;
+
+                    }
+                }
+            }
+
+            //check if this test volume overlaps with the other volumes in the tracking geometry
+            for(std::size_t vIdx1 = 0 ; vIdx1 < volumeVec.size(); vIdx1++){
+            bool isChild = std::ranges::find_if(childrenVol,
+                [&](const Acts::TrackingVolume& tv){ return &tv == volumeVec[vIdx1]; }
+            ) != childrenVol.end();
+
+            bool isMother = (testVol->motherVolume() == volumeVec[vIdx1]);
+
+            if(vIdx1 == vIdx || isMother){
+                    continue;
+            }
+             //check if the child volume is entirely enclosed by the mother volume
+            if(isChild){
+                std::vector<Amg::Vector3D> childEdges = cornerPoints(gctx,*volumeVec[vIdx1]);
+                for(const auto& edge : childEdges){
+                    if(!(testVol->inside(gctx.context(), edge, 0.01))){
+                        ATH_MSG_FATAL("The children volume's " << volumeVec[vIdx1]->volumeName() 
+                        <<" vertex point " <<Amg::toString(edge)
+                        <<" is outside the parent volume" << testVol->volumeName());
+                        return StatusCode::FAILURE;
+                    }
+                }
+                continue;
+
+            }
+            if(hasOverlap(gctx, edges, *volumeVec[vIdx1])){
+                overlaps.push_back(volumeVec[vIdx1]);
+            }
+        }
+        if(overlaps.empty()){
+            ATH_MSG_DEBUG("No overlaps detected for the volume "<<testVol->volumeName());
+            continue;
+        }else{
+            overlapVolumes.push_back(testVol);
+            ATH_MSG_ALWAYS("The volume " << testVol->volumeName() << " overlaps with: ");
+            for(const auto& overlap: overlaps){
+                    ATH_MSG_ALWAYS(" Volume: " << overlap->volumeName());
+            }
+        }
+    }
+    if(overlapVolumes.empty()){
+        ATH_MSG_ALWAYS("No overlaps detected in the tracking geometry!!");
+    }
+    return overlapVolumes.empty() || m_ignoreOverlapCh ? StatusCode::SUCCESS : StatusCode::FAILURE;    
+    }
+    
     void MuonChamberToolTest::saveEnvelope(const ActsTrk::GeometryContext& gctx,
                                            const std::string& envName,
                                            const Acts::Volume& envelopeVol,
@@ -429,6 +575,7 @@ namespace MuonGMR4 {
         /** Check that all chambers covered by their sector envelopes */
         ATH_CHECK(checkChambers(*gctx));
         ATH_CHECK(checkEnvelopes(*gctx));
+        ATH_CHECK(checkTrackingGeometry(*gctx, trackingGeometry));
  
         return StatusCode::SUCCESS;
     }
@@ -448,19 +595,19 @@ namespace MuonGMR4 {
                 const Amg::Transform3D& locToGlob{mdtMl.localToGlobalTransform(gctx, idHash)}; 
                 const Identifier measId{mdtMl.measurementId(idHash)};
 
-                ATH_CHECK(pointInside(chamber, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));
 
-                ATH_CHECK(pointInside(chamber, detVol, mdtMl.readOutPos(gctx, idHash), "tube readout", measId));
-                ATH_CHECK(pointInside(chamber, detVol, mdtMl.highVoltPos(gctx, idHash), "tube HV", measId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mdtMl.readOutPos(gctx, idHash), "tube readout", measId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mdtMl.highVoltPos(gctx, idHash), "tube HV", measId));
 
-                ATH_CHECK(pointInside(chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
+                ATH_CHECK(pointInside(gctx, chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
                                       "bottom of the tube box", measId));
-                ATH_CHECK(pointInside(chamber, detVol, locToGlob*(mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
+                ATH_CHECK(pointInside(gctx, chamber, detVol, locToGlob*(mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
                                       "sealing of the tube box", measId));
 
-                ATH_CHECK(pointInside(chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
+                ATH_CHECK(pointInside(gctx, chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
                                       "wall to the previous tube", measId));
-                ATH_CHECK(pointInside(chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
+                ATH_CHECK(pointInside(gctx, chamber, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
                                       "wall to the next tube", measId));
             }
         }
@@ -482,9 +629,9 @@ namespace MuonGMR4 {
                     for (int strip = 1; strip <= nStrips; ++strip) {
                         const Identifier stripId = idHelper.channelID(rpc.identify(),rpc.doubletZ(), 
                                                                       doubletPhi, gasGap, measPhi, strip);
-                        ATH_CHECK(pointInside(chamber, detVol, rpc.stripPosition(gctx, stripId), "center", stripId));
-                        ATH_CHECK(pointInside(chamber, detVol, rpc.leftStripEdge(gctx, stripId), "right edge", stripId));
-                        ATH_CHECK(pointInside(chamber, detVol, rpc.rightStripEdge(gctx, stripId), "left edge", stripId));
+                        ATH_CHECK(pointInside(gctx, chamber, detVol, rpc.stripPosition(gctx, stripId), "center", stripId));
+                        ATH_CHECK(pointInside(gctx, chamber, detVol, rpc.leftStripEdge(gctx, stripId), "right edge", stripId));
+                        ATH_CHECK(pointInside(gctx, chamber, detVol, rpc.rightStripEdge(gctx, stripId), "left edge", stripId));
                     }
                 }
             }
@@ -502,7 +649,8 @@ namespace MuonGMR4 {
                 const unsigned int nChannel = tgc.numChannels(layHash);
                 for (unsigned int channel = 1; channel <= nChannel ; ++channel) {
                     const IdentifierHash measHash = tgc.constructHash(channel, gasGap, isStrip);
-                    ATH_CHECK(pointInside(chamber, detVol, tgc.channelPosition(gctx, measHash), "center", tgc.measurementId(measHash)));
+                    ATH_CHECK(pointInside(gctx, chamber, detVol, tgc.channelPosition(gctx, measHash), 
+                                          "center", tgc.measurementId(measHash)));
                 }
             }
         }
@@ -520,9 +668,9 @@ namespace MuonGMR4 {
            unsigned int firstStrip = mm.firstStrip(gasGapHash);
             for(unsigned int strip = firstStrip; strip <= mm.numStrips(gasGapHash); ++strip){
                 const Identifier stripId = idHelper.channelID(mm.identify(), mm.multilayer(), gasGap, strip);
-                ATH_CHECK(pointInside(chamber, detVol, mm.stripPosition(gctx, stripId), "center", stripId));
-                ATH_CHECK(pointInside(chamber, detVol, mm.leftStripEdge(gctx, mm.measurementHash(stripId)), "left edge", stripId));
-                ATH_CHECK(pointInside(chamber, detVol, mm.rightStripEdge(gctx, mm.measurementHash(stripId)), "right edge", stripId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mm.stripPosition(gctx, stripId), "center", stripId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mm.leftStripEdge(gctx, mm.measurementHash(stripId)), "left edge", stripId));
+                ATH_CHECK(pointInside(gctx, chamber, detVol, mm.rightStripEdge(gctx, mm.measurementHash(stripId)), "right edge", stripId));
             }
         }
 
@@ -545,11 +693,11 @@ namespace MuonGMR4 {
                 for(unsigned int strip = 1; strip <= nStrips; ++strip){
                     const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);
                     const IdentifierHash stripHash = stgc.measurementHash(stripId);
-                     ATH_CHECK(pointInside(chamber, detVol, stgc.globalChannelPosition(gctx, stripHash), "channel position", stripId));
+                    ATH_CHECK(pointInside(gctx, chamber, detVol, stgc.globalChannelPosition(gctx, stripHash), "channel position", stripId));
                 
                     if(channelType == sTgcReadoutElement::ReadoutChannelType::Wire || channelType == sTgcReadoutElement::ReadoutChannelType::Strip){
-                        ATH_CHECK(pointInside(chamber, detVol, stgc.rightStripEdge(gctx, stripHash), "channel position", stripId));
-                        ATH_CHECK(pointInside(chamber, detVol, stgc.leftStripEdge(gctx, stripHash), "channel position", stripId));
+                        ATH_CHECK(pointInside(gctx, chamber, detVol, stgc.rightStripEdge(gctx, stripHash), "channel position", stripId));
+                        ATH_CHECK(pointInside(gctx, chamber, detVol, stgc.leftStripEdge(gctx, stripHash), "channel position", stripId));
                     }
                 }
             }            

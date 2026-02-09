@@ -22,11 +22,10 @@
 #include <TKey.h>
 #include <TProfile.h>
 #include <TMath.h>
-#include <TString.h>
 
 namespace dqutils {
 // define helper methods here rather then in this central MonitoringFile.h "beast"
-  void plotResolution(const TString& coordinate, const TString& versus);
+  void plotResolution(const std::string& coordinate, const std::string& versus);
   void plotEfficiency();
   double error_func(float x, const Double_t* par);
   double scaleFactorFitFcn(double* x, double* par);
@@ -54,7 +53,7 @@ namespace dqutils {
     }
 
     bool dirExists = false;
-    TString run_dir;
+    std::string run_dir;
     TIter next_run(f->GetListOfKeys());
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*>(next_run())) != 0) {
@@ -65,10 +64,10 @@ namespace dqutils {
         if (tdir_run_name.find("run") != std::string::npos) {
           run_dir = tdir_run_name;
 
-          dirExists = f->GetDirectory(run_dir + "/InDetGlobal/PrimaryVertex");
+          dirExists = f->GetDirectory((run_dir + "/InDetGlobal/PrimaryVertex").c_str());
           if (dirExists) {
 //          std::cout << run_dir << "/InDetGlobal/PrimaryVertex exists. Creating and saving plots:" << std::endl;
-            f->cd(run_dir + "/InDetGlobal/PrimaryVertex");
+            f->cd((run_dir + "/InDetGlobal/PrimaryVertex").c_str());
           }
         }
       } else {
@@ -104,22 +103,22 @@ namespace dqutils {
   }
 
   void
-  plotResolution(const TString& coordinate = "Z", const TString& versus = "Ntrk") {
+  plotResolution(const std::string& coordinate = "Z", const std::string& versus = "Ntrk") {
 //  cout << "Creating and writing histos for resolution " << coordinate << " versus " << versus << endl;
 
     TH2F* h_Vrt_pullVsSomething_split(0);
     TH2F* h_Vrt_err_vs_Something(0);
 //   TH2F* h_Vrt_Tag_err_vs_Something(0);
-    TString xAxisLabel("");
+    std::string xAxisLabel("");
 
     if (versus == "Ntrk") {
-      h_Vrt_pullVsSomething_split = (TH2F*) gDirectory->Get("Vrt_" + coordinate + "pullVsNtrkAverage_split");
-      h_Vrt_err_vs_Something = (TH2F*) gDirectory->Get("Vrt_" + coordinate + "err_vs_ntrk");
+      h_Vrt_pullVsSomething_split = (TH2F*) gDirectory->Get(("Vrt_" + coordinate + "pullVsNtrkAverage_split").c_str());
+      h_Vrt_err_vs_Something = (TH2F*) gDirectory->Get(("Vrt_" + coordinate + "err_vs_ntrk").c_str());
 //     h_Vrt_Tag_err_vs_Something      = (TH2F*)gDirectory->Get("Vrt_Tag_"+coordinate+"err_vs_ntrk");
       xAxisLabel = "Number of fitted tracks";
     } else if (versus == "SumPt2") {
-      h_Vrt_pullVsSomething_split = (TH2F*) gDirectory->Get("Vrt_" + coordinate + "pullVsPt2Average_split");
-      h_Vrt_err_vs_Something = (TH2F*) gDirectory->Get("Vrt_" + coordinate + "err_vs_pt2");
+      h_Vrt_pullVsSomething_split = (TH2F*) gDirectory->Get(("Vrt_" + coordinate + "pullVsPt2Average_split").c_str());
+      h_Vrt_err_vs_Something = (TH2F*) gDirectory->Get(("Vrt_" + coordinate + "err_vs_pt2").c_str());
 //     h_Vrt_Tag_err_vs_Something      = (TH2F*)gDirectory->Get("Vrt_Tag_"+coordinate+"err_vs_pt2");
       xAxisLabel = "#sqrt{#sum p_{T}^{2}} [GeV]";
     } else return;
@@ -196,17 +195,17 @@ namespace dqutils {
 
     TGraphErrors* krms_z_vs_ntrk = new TGraphErrors(
       bins_z_nt.size(), &(bins_z_nt[0]), &(rms_z[0]), &(bins_z_nt_er[0]), &(rms_z_er[0]));
-    krms_z_vs_ntrk->GetYaxis()->SetTitle(coordinate + " scale factor from RMS");
-    krms_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel);
-    krms_z_vs_ntrk->SetTitle("scaleFactor" + coordinate + "_RMS");
-    krms_z_vs_ntrk->SetName("scaleFactor" + coordinate + "_" + versus + "_RMS");
+    krms_z_vs_ntrk->GetYaxis()->SetTitle((coordinate + " scale factor from RMS").c_str());
+    krms_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel.c_str());
+    krms_z_vs_ntrk->SetTitle(("scaleFactor" + coordinate + "_RMS").c_str());
+    krms_z_vs_ntrk->SetName(("scaleFactor" + coordinate + "_" + versus + "_RMS").c_str());
 
     TGraphErrors* kgs_z_vs_ntrk = new TGraphErrors(
       bins_z_nt.size(), &(bins_z_nt[0]), &(sigma_z[0]), &(bins_z_nt_er[0]), &(sigma_z_er[0]));
-    kgs_z_vs_ntrk->GetYaxis()->SetTitle(coordinate + " scale factor from gauss fit");
-    kgs_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel);
-    kgs_z_vs_ntrk->SetTitle("scaleFactor" + coordinate + "_Fit");
-    kgs_z_vs_ntrk->SetName("scaleFactor_" + coordinate + "_" + versus + "_Fit");
+    kgs_z_vs_ntrk->GetYaxis()->SetTitle((coordinate + " scale factor from gauss fit").c_str());
+    kgs_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel.c_str());
+    kgs_z_vs_ntrk->SetTitle(("scaleFactor" + coordinate + "_Fit").c_str());
+    kgs_z_vs_ntrk->SetName(("scaleFactor_" + coordinate + "_" + versus + "_Fit").c_str());
 
 // approximating the graph with 2nd order polynomial.
     float maxFitRange(100.);
@@ -328,10 +327,10 @@ namespace dqutils {
     }
     TGraphErrors* res_z_vs_ntrk =
       new TGraphErrors(err_bins_z_nt.size(), &(err_bins_z_nt[0]), &(res_z[0]), &(err_bins_z_nt_er[0]), &(res_z_er[0]));
-    res_z_vs_ntrk->GetYaxis()->SetTitle(coordinate + " Vertex Resolution [mm]");
-    res_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel);
-    res_z_vs_ntrk->SetTitle(coordinate + " Vertex Resolution");
-    res_z_vs_ntrk->SetName("resolution_" + coordinate + "_" + versus);
+    res_z_vs_ntrk->GetYaxis()->SetTitle((coordinate + " Vertex Resolution [mm]").c_str());
+    res_z_vs_ntrk->GetXaxis()->SetTitle(xAxisLabel.c_str());
+    res_z_vs_ntrk->SetTitle((coordinate + " Vertex Resolution").c_str());
+    res_z_vs_ntrk->SetName(("resolution_" + coordinate + "_" + versus).c_str());
 
 //   TGraphErrors * res_tag_z_vs_ntrk = new TGraphErrors(err_bins_z_nt.size(),
 // &(err_bins_z_nt[0]),&(res_tag_z[0]),&(err_bins_z_nt_er[0]), &(res_tag_z_er[0]) );

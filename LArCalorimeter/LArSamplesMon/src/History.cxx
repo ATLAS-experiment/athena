@@ -640,12 +640,12 @@ Residuals* History::residuals(CaloGain::CaloGain gain, double absResCut, bool co
 double History::upstreamEnergy(unsigned int k) const
 {
   if (!m_interface || !cellInfo()) return -1;
-  if (k >= nData() || !data(k)->eventData()) return -1;
+  if (k >= nData()) return -1;
   std::vector<unsigned int> upstreamNeighbors;
   if (!m_interface->firstNeighbors(hash(), upstreamNeighbors, cellInfo()->layer() - 1)) return -1;
   if (upstreamNeighbors.empty()) return -1;
   std::vector<const Data*> unData;
-  if (!m_interface->data(upstreamNeighbors, *data(k)->eventData(), unData)) return -1;
+  if (!m_interface->data(upstreamNeighbors, data(k)->eventData(), unData)) return -1;
   double upstreamE = 0;
   for (const Data* data : unData) {
     upstreamE += data->energy();

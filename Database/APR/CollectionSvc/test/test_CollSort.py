@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Marcin Nowak"
 __doc__ = """
@@ -15,9 +15,10 @@ pool = ROOT.pool
 collSvc = pool.CollectionService()
 collSvc.setMessageSvcQuiet()
 
+from PyUtils import PoolFile
 primaryColl = { 'name' : 'EventNumber',  'type' : 'unsigned long' }
 sampleCollName = 'sample_apr_collection.root'
-desc = pool.CollectionDescription(sampleCollName, 'RootCollection', sampleCollName)
+desc = pool.CollectionDescription(sampleCollName, PoolFile.PoolOpts.CollectionType.RootTTreeCollection, sampleCollName)
 desc.insertColumn( primaryColl['name'], primaryColl['type'] )
 
 # Create a small collection to serve as input to the Sorter
@@ -36,9 +37,9 @@ outputCollNameRNTup = "collection.rntuple.root"
 from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
 sorter = SortedCollectionCreator(name="SortEvents")
 sorter.execute( sampleCollName, sortAttribute = primaryColl['name'],
-                outputCollection = outputCollNameTree, outputCollectionType="RootCollection" )
+                outputCollection = outputCollNameTree, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootTTreeCollection )
 sorter.executeInSubprocess( sampleCollName, sortAttribute = primaryColl['name'],
-                outputCollection = outputCollNameRNTup, outputCollectionType="RNTCollection" )
+                outputCollection = outputCollNameRNTup, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootRNTupleCollection )
 
 # Read the collections in VERBOSE mode to see the content
 Logging.log.setLevel(Constants.VERBOSE)

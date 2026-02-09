@@ -31,8 +31,7 @@ function( _add_test name )
    atlas_add_test( "${name}_test"
       SOURCES ${name}/*.cpp
       INCLUDE_DIRS ${CPPUNIT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PersistencySvc TestTools
-      StorageSvc AthContainers  FileCatalog
+      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PersistencySvc TestTools StorageSvc AthContainers
       PersistentDataModel TestTools AthenaKernel
       # Need to explicitly link against ROOT libraries to suppress
       # spurious ubsan warnings.

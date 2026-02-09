@@ -246,11 +246,11 @@ namespace dqutils {
 
     //For HLT Muon
     static void HLTMuonPostProcess(const std::string& inFilename, bool isIncremental = false);
-    static void HLTMuonHistogramDivision(const std::string& inFilename, TString& run_dir);
-    static void HLTMuonTriggerOverlapMatrix(const std::string& inFilename, TString& run_dir);
-    static bool HLTMuonCheckHistogram(TFile* f, TString& hname);
-    static void HLTMuonHDiv(PostProcessorFileWrapper& mf, TString sdir, TString snum, TString sden, TString seff,
-                            TString seffg);
+    static void HLTMuonHistogramDivision(const std::string& inFilename, std::string& run_dir);
+    static void HLTMuonTriggerOverlapMatrix(const std::string& inFilename, std::string& run_dir);
+    static bool HLTMuonCheckHistogram(TFile* f, const std::string& hname);
+    static void HLTMuonHDiv(PostProcessorFileWrapper& mf, const std::string& sdir, const std::string& snum, const std::string& sden, const std::string& seff,
+                            const std::string& seffg);
 
     //HLT Egamma
     static void HLTEgammaPostProcess(const std::string& inFilename, bool isIncremental = false);
@@ -264,10 +264,12 @@ namespace dqutils {
     static void HLTTauPostProcess(const std::string& inFilename, bool isIncremental = false);
 
     static void HLTTauPostProcess(TFile* f, TDirectory* dir,
-                                  TString pathApp, TString pathAppEff,
-                                  const std::vector<TString>& lvlN, const std::vector<TString>& varN,
+                                  const std::string& pathApp,
+                                  const std::string& pathAppEff,
+                                  const std::vector<std::string>& lvlN,
+                                  const std::vector<std::string>& varN,
                                   const std::vector< std::pair< int, int > >& ratioIndex, int nameStyle,
-                                  TString nameApp = "");
+                                  const std::string& nameApp = "");
 
     static std::string getPath(TDirectory* dir);
 
@@ -305,11 +307,11 @@ namespace dqutils {
 
     // L1Calo
     static void L1CaloPostProcess(const std::string& inFileName, bool isIncremental = false);
-    static void L1CaloStabilityRMS(TFile* f, const TString& nameDir, const TString& nameTag);
-    static void L1CaloFillWithError(TFile* f, const TString& nameDir, const TString& nameData,
-                                    const TString& nameError);
-    static void L1CaloResetEfficiencies(TFile* f, const TString& effDir,
-                                        const TString& nameDen, const TString& nameEff,
+    static void L1CaloStabilityRMS(TFile* f, const std::string& nameDir, const std::string& nameTag);
+    static void L1CaloFillWithError(TFile* f, const std::string& nameDir, const std::string& nameData,
+                                    const std::string& nameError);
+    static void L1CaloResetEfficiencies(TFile* f, const std::string& effDir,
+                                        const std::string& nameDen, const std::string& nameEff,
                                         int items, double threshold, int binSkip);
 
     // Pixel

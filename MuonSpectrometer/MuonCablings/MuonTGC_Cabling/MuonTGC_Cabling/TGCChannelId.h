@@ -11,48 +11,52 @@ namespace MuonTGC_Cabling {
 
 class TGCModuleId;
 
-class TGCChannelId : public TGCId
-{
- public:
-  enum class ChannelIdType {
-    NoChannelIdType,
-    ASDIn, ASDOut,
-    PPIn, PPOut, SLBIn, SLBOut, HPBIn
-  };
+class TGCChannelId : public TGCId {
+   public:
+    enum class ChannelIdType {
+        NoChannelIdType,
+        ASDIn,
+        ASDOut,
+        PPIn,
+        PPOut,
+        SLBIn,
+        SLBOut,
+        HPBIn
+    };
 
- public:
-  TGCChannelId(ChannelIdType type = ChannelIdType::NoChannelIdType)
-    : TGCId(IdType::Channel) {
-    m_channelType = type;
-  }
-  virtual ~TGCChannelId(void) = default;
-  
-  virtual TGCModuleId* getModule(void) const { return 0; }
-  
-  virtual bool operator ==(const TGCChannelId& channelId) const;
+   public:
+    TGCChannelId(ChannelIdType type = ChannelIdType::NoChannelIdType)
+        : TGCId(IdType::Channel) {
+        m_channelType = type;
+    }
+    virtual ~TGCChannelId(void) = default;
 
-  virtual bool isValid() const { return true; }
+    virtual TGCModuleId* getModule(void) const { return 0; }
 
-  ChannelIdType getChannelIdType() const;
-  int getLayer() const;
-  int getBlock() const;
-  int getChannel() const;
-  virtual int getGasGap() const;
+    virtual bool operator==(const TGCChannelId& channelId) const;
 
-  void setChannelIdType(ChannelIdType type);
-  void setLayer(int layer);
-  virtual void setBlock(int block);
-  virtual void setChannel(int channel);
+    virtual bool isValid() const { return true; }
 
-  bool isBackward() const;
+    ChannelIdType getChannelIdType() const;
+    int getLayer() const;
+    int getBlock() const;
+    int getChannel() const;
+    virtual int getGasGap() const;
 
- protected:
-  ChannelIdType m_channelType{ChannelIdType::NoChannelIdType};
-  int m_layer{-1};
-  int m_block{-1};
-  int m_channel{-1};
+    void setChannelIdType(ChannelIdType type);
+    void setLayer(int layer);
+    virtual void setBlock(int block);
+    virtual void setChannel(int channel);
+
+    bool isBackward() const;
+
+   protected:
+    ChannelIdType m_channelType{ChannelIdType::NoChannelIdType};
+    int m_layer{-1};
+    int m_block{-1};
+    int m_channel{-1};
 };
 
-} // end of namespace
- 
+}  // namespace MuonTGC_Cabling
+
 #endif

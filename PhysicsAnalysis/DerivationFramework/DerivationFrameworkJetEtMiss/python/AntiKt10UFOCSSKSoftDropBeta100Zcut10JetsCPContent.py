@@ -3,7 +3,7 @@
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m",
-"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Tau4_wta.Split12.Split23.Qw.PlanarFlow.FoxWolfram2.FoxWolfram0.Angularity.Aplanarity.KtDR.ZCut12",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Tau4_wta.Split12.Split23.Qw.D2.C2.PlanarFlow.FoxWolfram2.FoxWolfram0.Angularity.Aplanarity.KtDR.ZCut12",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.ThrustMaj.L2.L3",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.EMFracCaloBased.EM3FracCaloBased.Tile0FracCaloBased.EffNClustsCaloBased.groomMRatio.NeutralEFrac.ChargePTFrac.ChargeMFrac.Width",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.Parent.DetectorEta.DetectorY",

@@ -55,8 +55,8 @@ namespace {
       // We are excluding non measurement states and outlier here. Those can
       // decrease resolution because only the smoothing corrected the very
       // first prediction as filtering is not possible.
-      if (not st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) continue;
-      if (st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag)) continue;
+      if (not st.typeFlags().hasMeasurement()) continue;
+      if (st.typeFlags().isOutlier()) continue;
       firstMeasurement = st;
     }
     return firstMeasurement;
@@ -770,7 +770,7 @@ namespace ActsTrk
         volume_ptr->visitSurfaces([&counter, det_el_status, &measurements,this](const Acts::Surface *surface_ptr) {
           if (!surface_ptr) return;
           const Acts::Surface &surface = *surface_ptr;
-          const Acts::DetectorElementBase*detector_element = surface.associatedDetectorElement();
+          const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
           if (detector_element) {
             ++counter.n_detector_elements;
             const ActsDetectorElement *acts_detector_element = static_cast<const ActsDetectorElement*>(detector_element);
@@ -833,27 +833,28 @@ namespace ActsTrk
 
 namespace {
 struct Collector {
-
   using result_type = TrackFindingAlg::ExpectedLayerPattern*;
 
   template <typename propagator_state_t, typename stepper_t,
   typename navigator_t>
-  void act(propagator_state_t& state, const stepper_t& /*stepper*/,
+  Acts::Result<void> act(propagator_state_t& state, const stepper_t& /*stepper*/,
            const navigator_t& navigator, result_type& result,
            const Acts::Logger& /*logger*/) const {
-    const auto* currentSurface = navigator.currentSurface(state.navigation);
+    const Acts::Surface* currentSurface = navigator.currentSurface(state.navigation);
     if (currentSurface == nullptr) {
-      return;
+      return Acts::Result<void>::success();
     }
 
     assert(result != nullptr && "Result type is nullptr");
 
-    if (currentSurface->associatedDetectorElement() != nullptr) {
-      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->associatedDetectorElement());
+    if (currentSurface->surfacePlacement() != nullptr) {
+      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->surfacePlacement());
       if(detElem != nullptr) {
         detail::addToExpectedLayerPattern(*result, *detElem);
       }
     }
+
+    return Acts::Result<void>::success();
   }
 };
 }
@@ -965,8 +966,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     // Before trimming, inspect encountered surfaces from all track states
     for(const auto ts : track.trackStatesReversed()) {
       const auto& surface = ts.referenceSurface();
-      if(surface.associatedDetectorElement() != nullptr) {
-        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.associatedDetectorElement());
+      if(surface.surfacePlacement() != nullptr) {
+        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
         if(detElem != nullptr) {
           detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
         }

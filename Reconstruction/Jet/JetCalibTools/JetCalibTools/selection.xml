@@ -11,6 +11,7 @@
   <class name="SmearingCalibStep" />
   <class name="InSituCalibStep" />
   <class name="GSCCalibStep" />
+  <class name="Generic4VecCorrectionStep" />
 
   
 <!-- <class name="JetCalibratorAthena" /> -->

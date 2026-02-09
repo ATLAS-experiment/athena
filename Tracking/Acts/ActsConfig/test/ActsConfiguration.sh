@@ -95,7 +95,7 @@ source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=True; \
        " \
-       "ActsExtrapolationTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:..,ActsLargeRadius.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Propagation.+failed:.+PropagatorError:.*" \
+       "" \
        >& ActsConfiguration1.log
 
 reco_rc=$?
@@ -120,7 +120,7 @@ source ActsLegacyConfiguration.sh \
        "${activate_all_flags} \
 	flags.Acts.doAmbiguityResolution=False; \
        " \
-       "ActsExtrapolationTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:..,ActsLargeRadius.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Propagation.+failed:.+PropagatorError:.*" \
+       "" \
        >& ActsConfiguration2.log
 
 reco_rc=$?
@@ -178,7 +178,7 @@ source ActsLegacyConfiguration.sh \
 	flags.Acts.doAmbiguityResolution=True; \
 	flags.Tracking.doTruth=False; \
        " \
-       "ActsExtrapolationTool.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Got.+error.+during.+propagation:.+PropagatorError:..,ActsLargeRadius.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadius.+ERROR.+Propagation.+failed:.+PropagatorError:.*" \
+       "" \
        >& ActsConfiguration4.log
 
 reco_rc=$?

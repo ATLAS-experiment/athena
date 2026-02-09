@@ -16,10 +16,11 @@ def TritonToolCfg(flags, model_name: str, url: str,
     kwargs.setdefault("Port", port)
     kwargs.setdefault("ModelVersion", model_version)
     kwargs.setdefault("ClientTimeout", timeout)
-    kwargs.setdefault("UseSSL", ssl)  # Default to not using SSL
 
     if port == 443: # If the port is 443, that's typically used for HTTPS.
-        kwargs.setdefault("UseSSL", True)
+        ssl = True
+
+    kwargs.setdefault("UseSSL", ssl)  # Default to not using SSL
 
 
     acc.setPrivateTools(CompFactory.AthInfer.TritonTool(name=name, **kwargs))

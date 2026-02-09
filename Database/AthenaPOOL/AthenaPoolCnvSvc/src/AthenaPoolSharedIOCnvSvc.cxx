@@ -21,10 +21,9 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "FileCatalog/IFileCatalog.h"
 
 #include "AuxDiscoverySvc.h"
 

@@ -11,6 +11,7 @@
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsEvent/RecordedMaterialTrackCollection.h"
 
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
@@ -30,8 +31,6 @@ namespace Acts {
   }
 }
 
-
-class IActsMaterialTrackWriterSvc;
 
 class EventContext;
 class IAthRNGSvc;
@@ -61,13 +60,15 @@ private:
   // material track writer for the material map validation
   Gaudi::Property<bool> m_writeMaterialTracks{this, "WriteMaterialTracks", false, "Write material track"};
   Gaudi::Property<bool> m_writePropStep{this, "WritePropStep", false, "Write propagation step"};
-  ServiceHandle<IActsMaterialTrackWriterSvc> m_materialTrackWriterSvc{this, "MaterialTrackWriterSvc", "ActsMaterialTrackWriterSvc"};
 
   // Mutex and members for optional debugging output
   mutable std::mutex m_writeMutex;
   mutable size_t m_objVtxCount ATLAS_THREAD_SAFE {0};
 
   void writeStepsObj(const std::vector<Acts::detail::Step>& steps) const;
+
+  /// The RecordedMaterialTrackCollection to write
+  SG::WriteHandleKey<ActsTrk::RecordedMaterialTrackCollection> m_materialTrackCollectionKey {this, "MaterialTrackCollectionKey", "MaterialTracks", "Name of the RecordedMaterialTrackCollection"};
 
 };
 

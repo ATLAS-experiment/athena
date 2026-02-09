@@ -153,13 +153,15 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         auto newDC = std::make_unique<DataContainer>(history->data(j)->container());
         std::map<std::pair<int, int>, int>::const_iterator newIndex 
           = evtMap.find(std::make_pair(history->data(j)->run(), history->data(j)->event()));
-        if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
+        if (newIndex == evtMap.end()) std::cout << "Event not found for cell " << i << ", data " << j << ".\n";
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
           const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
-          if (!shape) 
+          if (!shape) {
             cout << "Shape not filled for hash = " << i << ", index = " << j << ", gain = " << Data::gainStr(history->data(j)->gain()) << endl;
+          }
           info->setShape(history->data(j)->gain(), (shape ? new ShapeInfo(*shape) : nullptr));
         }
       }
@@ -278,6 +280,7 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         //if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
          const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
          if (!shape) 
@@ -314,6 +317,7 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
         //if (newIndex == evtMap.end()) cout << "Event not found for cell " << i << ", data " << j << "." << endl;
         newDC->setEventIndex(newIndex != evtMap.end() ? newIndex->second : -1);
         historyContainer->add(newDC.release());
+        if (not info) continue;
         if (!info->shape(history->data(j)->gain())) {
          const ShapeInfo* shape = history->cellInfo()->shape(history->data(j)->gain());
          if (!shape) 
@@ -401,9 +405,9 @@ TreeAccessor::filter(const Accessor& accessor,
       HistoryContainer newHist(new CellInfo(*history->cellInfo()));
       for (unsigned int k = 0; k < history->nData(); k++) {
         if (!filterList.filterParams(f).passEvent(*history->data(k))) continue;
-        const EventData* eventData = history->data(k)->eventData();
+        const EventData& eventData = history->data(k)->eventData();
         std::map<std::pair<unsigned int, unsigned int>, unsigned int>::const_iterator findIndex = 
-          eventIndices.find(std::pair<unsigned int, unsigned int>(eventData->run(), eventData->event()));
+          eventIndices.find(std::pair<unsigned int, unsigned int>(eventData.run(), eventData.event()));
         if (findIndex == eventIndices.end()) { 
           cout << "Inconsistent event numbering!!!" << endl; 
           return std::vector<std::unique_ptr<TreeAccessor> >();
@@ -413,7 +417,7 @@ TreeAccessor::filter(const Accessor& accessor,
         unsigned int newEvtIndex = (isNewEvt ? eventsToKeep[f].size() : eventsToKeep[f][oldEvtIndex]);      
         if (isNewEvt) eventsToKeep[f][oldEvtIndex] = newEvtIndex;
 
-        int oldRunIndex = history->data(k)->eventData()->runIndex();
+        int oldRunIndex = history->data(k)->eventData().runIndex();
         bool isNewRun = (runsToKeep[f].find(oldRunIndex) == runsToKeep[f].end());
         unsigned int newRunIndex = (isNewRun ? runsToKeep[f].size() : runsToKeep[f][oldRunIndex]);      
         if (isNewRun) runsToKeep[f][oldRunIndex] = newRunIndex;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -74,6 +74,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
 
     m_bounds = rectangleBounds;
     m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
+    m_surface->assignThickness(thickness());
 
   } else if (boundsType == Trk::SurfaceBounds::Trapezoid) {
 
@@ -89,6 +90,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     m_bounds = trapezoidBounds;
 
     m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(trapezoidBounds, *this);
+    m_surface->assignThickness(thickness());
 
 
   } else if (boundsType == Trk::SurfaceBounds::Annulus) {
@@ -120,6 +122,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::SiDetectorElement &detEl
     m_bounds = annulusBounds;
 
     m_surface = Acts::Surface::makeShared<Acts::DiscSurface>(annulusBounds, *this);
+    m_surface->assignThickness(thickness());
 
   } else {
     std::cout << boundsType << std::endl;
@@ -162,6 +165,7 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
   m_bounds = lineBounds;
 
   m_surface = Acts::Surface::makeShared<Acts::StrawSurface>(lineBounds, *this);
+  m_surface->assignThickness(thickness());
 }
 
 ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &detElem, const Identifier &id) :
@@ -187,6 +191,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
     m_bounds = rectangleBounds;
 
     m_surface = Acts::Surface::makeShared<Acts::PlaneSurface>(rectangleBounds, *this);
+    m_surface->assignThickness(thickness());
         
   } else {
     throw std::domain_error(
@@ -194,7 +199,7 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
   }
 }
 
-Amg::Transform3D ActsDetectorElement::transform(const ActsTrk::DetectorAlignStore* store) const {
+Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlignStore* store) const {
    
     GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
     Amg::Transform3D l2g{Amg::Transform3D::Identity()};
@@ -244,8 +249,8 @@ IdentityHelper ActsDetectorElement::identityHelper() const {
   }
 }
 
-const Acts::Transform3 &ActsDetectorElement::transform(const Acts::GeometryContext &anygctx) const {
-    return m_trfCache.transform(anygctx);
+const Acts::Transform3 &ActsDetectorElement::localToGlobalTransform(const Acts::GeometryContext &anygctx) const {
+    return m_trfCache.localToGlobalTransform(anygctx);
 }
 
 unsigned int ActsDetectorElement::storeAlignedTransforms(const ActsTrk::DetectorAlignStore& store) const {

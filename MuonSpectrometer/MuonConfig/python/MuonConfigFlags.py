@@ -54,9 +54,10 @@ def createMuonConfigFlags():
     ### Load the GeoModel XML detector factory & MuonReaoudGeometryR4    
     from AthenaConfiguration.AutoConfigFlags import DetDescrInfo
     
-    mcf.addFlag("Muon.usePhaseIIGeoSetup",lambda prevFlags : DetDescrInfo(prevFlags.GeoModel.AtlasVersion, 
-                                                                          prevFlags.GeoModel.SQLiteDB ,
-                                                                          prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
+    mcf.addFlag("Muon.usePhaseIIGeoSetup",lambda prevFlags : prevFlags.Detector.GeometryMuon and
+                                                                  DetDescrInfo(prevFlags.GeoModel.AtlasVersion, 
+                                                                               prevFlags.GeoModel.SQLiteDB ,
+                                                                               prevFlags.GeoModel.SQLiteDBFullPath)["Muon"]["useR4Plugin"] )
     
     mcf.addFlag("Muon.AlignedGeoTrfCacheMode",  GeoTrfCacheMode.FullCacheCond)
     # 1. Digitization
@@ -75,6 +76,9 @@ def createMuonConfigFlags():
                             prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
+        
+    #### Enable ML bucket filter inference for muon reconstruction
+    mcf.addFlag("Muon.enableMLBucketFilter", False)
 
     mcf.addFlag("Muon.doMSVertex", True) # Run MS vertex (arXiv:1311.7070)
     mcf.addFlag("Muon.doSegmentT0Fit",lambda prevFlags : prevFlags.Beam.Type is not BeamType.Collisions) # Fit MDT segments using a variable t0. Used for cosmics and single beam to compensate for large errors on the trigger time.
@@ -183,10 +187,6 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.writexAODPRD", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup) # Output new xAOD format from convertors (to be removed once the old format is deprecated)
     # use the MDT DCS data to determine if a chamber is alive or not. This is used in the hole search and the region selector. Needs to be false if the job is running online or is the reconstruction of the MDT calib stream
     mcf.addFlag("Muon.useMdtDcsData", lambda prevFlags : not prevFlags.Common.isOnline and prevFlags.Detector.GeometryMDT)
-
-
-
-
 
 
     # TODO - add configuration for above    

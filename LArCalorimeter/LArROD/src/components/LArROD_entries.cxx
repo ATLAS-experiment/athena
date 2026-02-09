@@ -11,6 +11,7 @@
 #include "../LArLATOMEBuilderAlg.h"
 #include "../LArRawChannelBuilderIterAlg.h"
 #include "../LArNNRawChannelBuilder.h"
+#include "../LArOFFCRawChannelBuilder.h"
 #include "../LArSCSimpleMaker.h"
 #include "../LArSuperCellBCIDEmAlg.h"
 #include "../LArSuperCellBCIDAlg.h"
@@ -30,6 +31,7 @@ DECLARE_COMPONENT( LArRawChannelBuilderSCAlg )
 DECLARE_COMPONENT( LArLATOMEBuilderAlg )
 DECLARE_COMPONENT( LArRawChannelBuilderIterAlg )
 DECLARE_COMPONENT( LArNNRawChannelBuilder )
+DECLARE_COMPONENT( LArOFFCRawChannelBuilder )
 DECLARE_COMPONENT( LArSCSimpleMaker )
 DECLARE_COMPONENT( LArSuperCellBCIDEmAlg )
 DECLARE_COMPONENT( LArSuperCellBCIDAlg )

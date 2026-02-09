@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserDatabase.h"
@@ -9,9 +9,9 @@
 #include "DatabaseRegistry.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/ITransaction.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/pool.h"
-#include "FileCatalog/IFileCatalog.h"
 
 #include <exception>
 

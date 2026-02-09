@@ -7,33 +7,30 @@
 
 #include "MuonTGC_Cabling/TGCDatabase.h"
 
-namespace MuonTGC_Cabling
-{
- 
-class TGCDatabaseSLBToROD : public TGCDatabase
-{
-public:
-  // Constructor & Destructor
-  TGCDatabaseSLBToROD(const std::string& filename,
-                      const std::string& blockname);
+namespace MuonTGC_Cabling {
 
-  TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD&) = default;
+class TGCDatabaseSLBToROD : public TGCDatabase {
+   public:
+    // Constructor & Destructor
+    TGCDatabaseSLBToROD(const std::string& filename,
+                        const std::string& blockname);
 
-  virtual ~TGCDatabaseSLBToROD(void);
+    TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD&) = default;
 
-  virtual bool update(const std::vector<int>& );
- 
-  virtual int  find(const std::vector<int>&) const;
-  
-  
-private:
-  virtual void readDB(void);
-  TGCDatabaseSLBToROD(void) {}
+    virtual ~TGCDatabaseSLBToROD(void);
 
-  /** hidden assignment operator */
-  TGCDatabaseSLBToROD & operator=(const TGCDatabaseSLBToROD &right);
+    virtual bool update(const std::vector<int>&);
+
+    virtual int find(const std::vector<int>&) const;
+
+   private:
+    virtual void readDB(void);
+    TGCDatabaseSLBToROD(void) {}
+
+    /** hidden assignment operator */
+    TGCDatabaseSLBToROD& operator=(const TGCDatabaseSLBToROD& right);
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

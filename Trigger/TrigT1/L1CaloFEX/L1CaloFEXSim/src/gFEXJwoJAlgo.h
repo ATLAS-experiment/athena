@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -13,6 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h" //also has gTowersType typedef
+#include "L1CaloFEXCond/gFEXDBCondData.h"
 
 
 #include <vector>
@@ -40,12 +41,15 @@ namespace LVL1 {
                                  int aFPGA_C, int bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<int32_t, 4> & outTOB) const override;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+                                                               const gTowersType& Btwr, int pucB_JWJ,
+                                                               const gTowersType& Ctwr, int pucC_JWJ,
+                                                               std::array<int32_t, 4> & outTOB) const override;
 
 
 
   private:
+    SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
 
     float m_aFPGA_A{};
     float m_bFPGA_A{};
@@ -56,9 +60,17 @@ namespace LVL1 {
     float m_gBlockthresholdA{};
     float m_gBlockthresholdB{};
     float m_gBlockthresholdC{};
+    std::string m_fwVersion;
  
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
+
+    void metFPGA_rho(int FPGAnum, const gTowersType& twrs, int puc_jwj, 
+                 const gTowersType & gBlkSum, int gBlockthreshold,
+                 int aFPGA, int bFPGA,
+                 int & MHT_x, int & MHT_y,
+                 int & MST_x, int & MST_y,
+                 int & MET_x, int & MET_y) const;
 
     void metFPGA(int FPGAnum,const gTowersType& twrs, 
                  const gTowersType & gBlkSum, int gBlockthreshold,

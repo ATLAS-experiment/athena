@@ -86,7 +86,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
       if (!surface)
         return;
       const auto *actsElement = dynamic_cast<const IDetectorElementBase*>(
-          surface->associatedDetectorElement());
+          surface->surfacePlacement());
       if (!actsElement) {
         return;
       }
@@ -119,7 +119,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
     for (auto readoutElement : muonMgr->getAllReadoutElements()) {
       std::vector<std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
       for ( const auto& surf : reSurfaces) {
-        const Identifier id = static_cast<const SurfaceCache*>(surf->associatedDetectorElement())->identify();
+        const Identifier id = static_cast<const SurfaceCache*>(surf->surfacePlacement())->identify();
         m_actsSurfaceMap.insert(std::make_pair(id, surf.get()));
       }
     }
@@ -131,7 +131,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
 const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
     const Acts::Surface &actsSurface) const {
 
-  const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.associatedDetectorElement());
+  const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
   if (!detEleBase) {
     ATH_MSG_ERROR(actsSurface.toString(m_trackingGeometryTool->getNominalGeometryContext().context()));
     throw std::domain_error("ActsToTrkConverterTool() - Surface does not have an associated detector element. ");
@@ -458,7 +458,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
       }
 
       // Setup the index of the trackstate
-      auto index = Acts::MultiTrajectoryTraits::kInvalid;
+      auto index = Acts::kTrackIndexInvalid;
       if (!first_tsos) {
         index = actsTrack.tipIndex();
       }
@@ -492,7 +492,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
             actsTSOS.smoothed() = parameters.parameters();
             actsTSOS.smoothedCovariance() = *parameters.covariance();
             // Not yet implemented in MultiTrajectory.icc
-            // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
+            // actsTSOS.typeFlags().setHasParameters();
             if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
               ATH_MSG_WARNING("TrackState does not have smoothed state ["
                               << actsTSOS.hasSmoothed()
@@ -769,7 +769,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
       [&] (const auto &state) -> void {
         // First only consider state with an associated detector element
         const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
-                                        state.referenceSurface().associatedDetectorElement());
+                                        state.referenceSurface().surfacePlacement());
        
         if (not associatedDetEl) {
             ATH_MSG_VERBOSE("State is not associated with a measurement sruface");
@@ -784,7 +784,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
         std::unique_ptr<Trk::MeasurementBase> measState{};
     
         // State is a hole (no associated measurement), use predicted parameters   
-        if (flag.test(Acts::TrackStateFlag::HoleFlag)){
+        if (flag.isHole()){
           const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                      state.parameters(),
                                                      state.covariance(),
@@ -807,7 +807,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
           typePattern.set(Trk::TrackStateOnSurface::Hole);
         }
         // The state is a measurement state, use smoothed parameters 
-        else if (flag.test(Acts::TrackStateFlag::MeasurementFlag)) {
+        else if (flag.hasMeasurement()) {
           Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                state.parameters(),
                                                state.covariance(),

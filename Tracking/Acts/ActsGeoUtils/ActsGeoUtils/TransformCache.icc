@@ -30,7 +30,7 @@ namespace ActsTrk {
     inline IdentifierHash TransformCache::hash() const { return m_hash; }
 #ifndef SIMULATIONBASE
     ATH_FLATTEN
-    inline const Amg::Transform3D& TransformCache::transform(const Acts::GeometryContext& anygctx) const {
+    inline const Amg::Transform3D& TransformCache::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
         const GeometryContext* gctx = anygctx.get<const GeometryContext*>();    
         // unpack the alignment store from the context
         return getTransform(gctx->getStore(m_type).get());

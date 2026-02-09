@@ -29,7 +29,8 @@ public:
 
     void sliceHits(const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits,
                    std::vector<std::shared_ptr<const FPGATrackSimHit>>& firstHits,
-                   std::vector<std::shared_ptr<const FPGATrackSimHit>>& secondHits);
+                   std::vector<std::shared_ptr<const FPGATrackSimHit>>& secondHits,
+                   std::vector<const FPGATrackSimHit*>& stripHits);
 
     // Helper function to hook up branches for output test vector creation.
     void setupSlices(FPGATrackSimLogicalEventInputHeader *slicedFirstPixelHeader,

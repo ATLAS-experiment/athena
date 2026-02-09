@@ -25,7 +25,7 @@ def TRIG9KernelCfg(flags, name='TRIG9Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
    
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(flags, prefix="TRIG9", doGNTauLoose=True))
+    acc.merge(AddTauAugmentationCfg(flags, wp="GNTauLoose"))
 
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod

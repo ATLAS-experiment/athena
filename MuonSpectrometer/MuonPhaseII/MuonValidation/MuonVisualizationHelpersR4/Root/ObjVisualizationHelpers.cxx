@@ -103,7 +103,7 @@ namespace  MuonValR4 {
                                     lBounds.get(Acts::LineBounds::eHalfLengthZ) :
                                     std::sqrt(meas->localCovariance<2>()(1,1));
             auto newBounds = std::make_unique<Acts::LineBounds>(dR, hZ);
-            auto dummySurface = Acts::Surface::makeShared<Acts::StrawSurface>(surf.transform(tgContext)*
+            auto dummySurface = Acts::Surface::makeShared<Acts::StrawSurface>(surf.localToGlobalTransform(tgContext)*
                                                                               Amg::getTranslate3D(driftCirc->localMeasurementPos()),
                                                                               std::move(newBounds));
             Acts::GeometryView3D::drawSurface(visualHelper, *dummySurface, tgContext,
@@ -186,7 +186,7 @@ namespace  MuonValR4 {
             }
         }
         auto newBounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
-        auto dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.transform(tgContext)*
+        auto dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.localToGlobalTransform(tgContext)*
                                                                        Amg::getTranslate3D(locPos),
                                                                        std::move(newBounds));
         Acts::GeometryView3D::drawSurface(visualHelper, *dummySurf, tgContext,

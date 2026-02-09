@@ -131,6 +131,10 @@ namespace InDet {
     float eta = track->eta();
 
     int origin = m_trackOriginTool->getTrackOrigin(track);
+    const static SG::ConstAccessor<int> acc_ftagTruthOrigin("ftagTruthOriginLabel");
+    if (acc_ftagTruthOrigin.isAvailable(*track)) {
+      origin = acc_ftagTruthOrigin(*track);
+    }
 
     if ( InDet::TrkOrigin::isFake(origin) ) {
       bool isActiveLoose = isActive( TRK_FAKE_RATE_LOOSE );

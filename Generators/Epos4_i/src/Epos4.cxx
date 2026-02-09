@@ -116,21 +116,21 @@ Epos4::Epos4( const std::string &name, ISvcLocator *pSvcLocator ): GenModule( na
 
 
 namespace fs = std::filesystem;
-std::string  Epos4::create_file(const std::string&  filein) {
+std::string Epos4::create_file(const std::string& filein) {
 
     fs::path source = filein;
-    fs::path destination = fs::current_path() / fs::path(std::string("z-")+source.filename().string());
+    fs::path destination = fs::current_path() / fs::path(std::string("z-") + source.filename().string());
 
     std::ifstream src(source);             // Open in text mode
     std::ofstream dst(destination);        // Open in text mode
 
     if (!src) {
-        std::cerr << "Error: Cannot open source file.\n";
+        std::cerr << "Error: Cannot open source file: " << source << "\n";
         return "";
     }
 
     if (!dst) {
-        std::cerr << "Error: Cannot create destination file.\n";
+        std::cerr << "Error: Cannot create destination file: " << destination << "\n";
         return "";
     }
 

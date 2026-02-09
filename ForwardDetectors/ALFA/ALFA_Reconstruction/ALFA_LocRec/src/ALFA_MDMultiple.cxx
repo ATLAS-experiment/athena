@@ -48,21 +48,14 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Execute()");
 
-	FIBERS structFibers;
-	m_MapLayers.clear();
+	LayerMap_t mapLayers;
 
 	std::list<MDHIT>::const_iterator iter;
 	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); ++iter)
 	{
 		if (m_iRPot == (*iter).iRPot)
 		{
-			if(m_MapLayers.find((*iter).iPlate)==m_MapLayers.end())
-			{
-				structFibers.ListFibers.clear();
-				m_MapLayers.insert(std::pair<int, FIBERS>((*iter).iPlate, structFibers));
-				m_MapLayers[(*iter).iPlate].ListFibers.push_back((*iter).iFiber);
-			}
-			else m_MapLayers[(*iter).iPlate].ListFibers.push_back((*iter).iFiber);
+			mapLayers[(*iter).iPlate].ListFibers.push_back((*iter).iFiber);
 		}
 	}
 
@@ -78,7 +71,7 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 	//At least more than UV_cut layers have a multiplicity lower than multi_cut
 
 	{
-		Reco_Track(b_p, b_n, Ov_p, Ov_n, Num_p, Num_n, FSel_n, FSel_p, iTrackMatch);
+		Reco_Track(mapLayers, b_p, b_n, Ov_p, Ov_n, Num_p, Num_n, FSel_n, FSel_p, iTrackMatch);
 
 		//Now sorting the tracks using NumU+NumV criteria -------------------------------
 		Int_t iCntSort=0;
@@ -140,14 +133,14 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Finalize()");
 
-	Int_t iTrackNum=0, iSize=0;
+	size_t iTrackNum=0, iSize=0;
 	std::fill_n(&fRecXPos[0], sizeof(fRecXPos)/sizeof(Float_t), -9999.0);
 	std::fill_n(&fRecYPos[0], sizeof(fRecYPos)/sizeof(Float_t), -9999.0);
 
 	iSize = std::min(m_fRecXPos.size(), m_fRecYPos.size());
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 
-	for (Int_t i=0; i<iTrackNum; i++)
+	for (size_t i=0; i<iTrackNum; i++)
 	{
 		fRecXPos[i] = m_fRecXPos.at(i);
 		fRecYPos[i] = m_fRecYPos.at(i);
@@ -159,7 +152,8 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDMultiple::Proj_Store(LayerMap_t& mapLayers,
+                                 Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Pro_Store()");
 
@@ -179,7 +173,7 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float
 	{
 		const unsigned int thisSideLayer = iLayer*2+iSideFlag;
 		const unsigned int thisLayer = 2*iLayer+iFiberSide;
-		const std::list<int> & thisFiberContainer = m_MapLayers[thisLayer].ListFibers;
+		const std::list<int> & thisFiberContainer = mapLayers[thisLayer].ListFibers;
 		for (const auto & thisFiber:thisFiberContainer)
 		{
 			if (thisFiber!=9999)
@@ -310,7 +304,8 @@ void ALFA_MDMultiple::Find_Proj(const std::span<const Int_t>& iOver, Float_t fbR
 /************************************************/
 /************************************************/
 
-void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int_t (&iFSel)[10], Int_t iSideFlag)
+void ALFA_MDMultiple::Finding_Fib(LayerMap_t& mapLayers,
+                                  Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int_t (&iFSel)[10], Int_t iSideFlag)
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Finding_Fib()");
 
@@ -345,7 +340,7 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 
 		const unsigned int thisSideLayer = iLayer*2+iSideFlag;
 		const unsigned int thisLayer = 2*iLayer+iFiberSide;
-		const std::list<int> & thisFiberContainer = m_MapLayers[thisLayer].ListFibers;
+		const std::list<int> & thisFiberContainer = mapLayers[thisLayer].ListFibers;
 		for (const auto & thisFiber:thisFiberContainer)
 		{
 			if (thisFiber != 9999)
@@ -374,7 +369,8 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 /*				Finding all tracks				*/
 /************************************************/
 
-void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &b_n,
+void ALFA_MDMultiple::Reco_Track(LayerMap_t& mapLayers,
+                                 std::vector<double> &b_p, std::vector<double> &b_n,
 								std::vector<double> &Ov_p, std::vector<double> &Ov_n,
 								std::vector<int> &Num_p, std::vector<int> &Num_n,
 								std::vector<int> (&FSel_n)[ALFAPLATESCNT], std::vector<int> (&FSel_p)[ALFAPLATESCNT],
@@ -382,7 +378,6 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Reco_Track()");
 
-//	Int_t FSel_pos[ALFAPLATESCNT];
 	Int_t FSel_neg[ALFAPLATESCNT];
 	Int_t FSel_pos_tmp[ALFAPLATESCNT];
 	std::vector<Int_t> Over_p(72000);
@@ -424,7 +419,7 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 	{
 		Fiber_MB_n[iLayer].clear();
 		const unsigned int thisLayer=2*iLayer+1;
-		const std::list<int> & thisFiberContainer = m_MapLayers[thisLayer].ListFibers;
+		const std::list<int> & thisFiberContainer = mapLayers[thisLayer].ListFibers;
 		for (const auto & thisFiber:thisFiberContainer)
 		{
 //			std::cout << "thisFiber: " << thisFiber << std::endl;
@@ -439,43 +434,28 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 //		First projection step on U side
 //		-------------------------------
 //		filling the array for U side with reference value
-		Proj_Store(0, Over_p, b_ref_n, 0);
-//		Proj_Store(1, Over_p, b_ref_n, 0);   //just for test
-//		Proj_Store(1, Over_p, b_ref_n, 1);   //just for test
+		Proj_Store(mapLayers, 0, Over_p, b_ref_n, 0);
 
 //		Find first maxium
 		Find_Proj(Over_p, b_ref_n, b_pos, OvU, NumU);
 
-		Finding_Fib(0, b_ref_n, b_pos, FSel_pos_tmp, 0);
-//		Finding_Fib(1, b_ref_n, b_pos, FSel_pos_tmp, 0);   //just for test
-//		Finding_Fib(1, b_ref_n, b_pos, FSel_pos_tmp, 1);   //just for test
+		Finding_Fib(mapLayers, 0, b_ref_n, b_pos, FSel_pos_tmp, 0);
 		for (int i=0; i<ALFAPLATESCNT; i++)
 		{
 			Fiber_MB_tmp[i].clear();
 			Fiber_MB_tmp[i].push_back(FSel_pos_tmp[i]);
 		}
 
-//		// added ----------
-//		std::cout << "FSel_pos after 1st U proj: ";
-//		for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
-//		{
-//			std::cout << " " << FSel_pos[iLayer];
-//		}
-//		std::cout << std::endl;
-
 		//Then reconstruction all tracks possible using the second side
 		for (UInt_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
 		{
-			m_MapLayers[2*iLayer+1].ListFibers.clear();
-//			m_MapLayers[2*iLayer].ListFibers.clear();   //just for test
+                        FIBERS& fibers = mapLayers[2*iLayer+1];
+                        fibers.ListFibers.clear();
 			for (unsigned int i=0; i<Fiber_MB_n[iLayer].size(); i++)
 			{
-				m_MapLayers[2*iLayer+1].ListFibers.push_back(Fiber_MB_n[iLayer][i]);
-//				m_MapLayers[2*iLayer].ListFibers.push_back(Fiber_MB_n[iLayer][i]);   //just for test
+				fibers.ListFibers.push_back(Fiber_MB_n[iLayer][i]);
 			}
 		}
-
-//		std::cout << "NumU " << NumU << std::endl;
 
 //		Then reconstruct all tracks possible using the second side
 		if (NumU>=m_iUVCut)
@@ -488,56 +468,40 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 				iNumVFiberHits=0;
 				for (UInt_t iLayer=0;iLayer<ALFAPLATESCNT;iLayer++)
 				{
-					if ((Int_t)m_MapLayers[2*iLayer].ListFibers.size()<=m_iMultiplicityCut && !m_MapLayers[2*iLayer].ListFibers.empty()) iNumUFiberHits++;
-					if ((Int_t)m_MapLayers[2*iLayer+1].ListFibers.size()<=m_iMultiplicityCut && !m_MapLayers[2*iLayer+1].ListFibers.empty()) iNumVFiberHits++;
-//					if ((Int_t)m_MapLayers[2*iLayer+1].ListFibers.size()<=m_iMultiplicityCut && m_MapLayers[2*iLayer+1].ListFibers.size()>0) iNumUFiberHits++;   //just for test
-//					if ((Int_t)m_MapLayers[2*iLayer].ListFibers.size()<=m_iMultiplicityCut && m_MapLayers[2*iLayer].ListFibers.size()>0) iNumVFiberHits++;       //just for test
+                                        Int_t sz0 = mapLayers[2*iLayer].ListFibers.size();
+					if (sz0 > 0 && sz0<=m_iMultiplicityCut) iNumUFiberHits++;
+                                        Int_t sz1 = mapLayers[2*iLayer].ListFibers.size();
+					if (sz1 > 0 && sz1<=m_iMultiplicityCut) iNumVFiberHits++;
 				}
-
-//				std::cout << "2nd multiplicity cut " << iNumUFiberHits << " " << iNumVFiberHits << std::endl;
 
 				if (iNumUFiberHits>=m_iNumLayerCut && iNumVFiberHits>=m_iNumLayerCut)
 				{
 					//First projection on V side
 					//-------------------------------
 					//filling the array for V side with reference value
-					Proj_Store(1, Over_n, b_ref_p, 1);
-//					Proj_Store(0, Over_n, b_ref_p, 1);   //just for test
-//					Proj_Store(0, Over_n, b_ref_p, 0);   //just for test
+					Proj_Store(mapLayers, 1, Over_n, b_ref_p, 1);
 					Find_Proj(Over_n, b_ref_p, b_neg, OvV, NumV);
-
-//					std::cout << "NumV " << NumV << std::endl;
 
 					if (NumV>=m_iUVCut)
 					{
 						//Now make the second projection step
 						//-----------------------------------
 						//U side
-//						Proj_Store(0, Over_p, b_neg, 0);
-	//					Proj_Store(1, Over_p, b_neg, 0);   //just for test
 						Proj_Store(Fiber_MB_tmp, Over_p, b_neg, 0);
-//						Proj_Store(Fiber_MB_tmp, Over_p, b_neg, 1);   //just for test
 						Find_Proj(Over_p, b_neg, b_pos, OvU, NumU);
 
 						//V side
-						Proj_Store(1, Over_n, b_pos, 1);
-//						Proj_Store(0, Over_n, b_pos, 1);   //just for test
-//						Proj_Store(0, Over_n, b_pos, 0);   //just for test
+						Proj_Store(mapLayers, 1, Over_n, b_pos, 1);
 						Find_Proj(Over_n, b_pos, b_neg, OvV, NumV);
 
 						//Third projection steps
 						//----------------------
 						//U side
-//						Proj_Store(0, Over_p, b_neg, 0);
-	//					Proj_Store(1, Over_p, b_neg, 0);   //just for test
 						Proj_Store(Fiber_MB_tmp, Over_p, b_neg, 0);
-//						Proj_Store(Fiber_MB_tmp, Over_p, b_neg, 1);   //just for test
 						Find_Proj(Over_p, b_neg, b_pos, OvU, NumU);
 
 						//V side
-						Proj_Store(1, Over_n, b_pos, 1);
-//						Proj_Store(0, Over_n, b_pos, 1);   //just for test
-//						Proj_Store(0, Over_n, b_pos, 0);   //just for test
+						Proj_Store(mapLayers, 1, Over_n, b_pos, 1);
 						Find_Proj(Over_n, b_pos, b_neg, OvV, NumV);
 
 	//					//We store the information in the vector
@@ -554,12 +518,7 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 
 						//Once done we want to remove the hit belonging to the first track on side V
 						//We first find the corresponding fibers
-//						Finding_Fib(0,b_neg, b_pos, FSel_pos, 0);
-						Finding_Fib(1,b_pos, b_neg, FSel_neg, 1);
-//						Finding_Fib(1,b_neg, b_pos, FSel_pos, 0);   //just for test
-//						Finding_Fib(0,b_pos, b_neg, FSel_neg, 1);   //just for test
-//						Finding_Fib(1,b_neg, b_pos, FSel_pos, 1);   //just for test
-//						Finding_Fib(0,b_pos, b_neg, FSel_neg, 0);   //just for test
+						Finding_Fib(mapLayers, 1,b_pos, b_neg, FSel_neg, 1);
 
 						for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
 						{
@@ -568,60 +527,22 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 							FSel_p[iLayer].push_back(FSel_pos_tmp[iLayer]);
 						}
 
-						//added -----------------------------------------------------
-//						std::cout << "FSel_n ";
-//						for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
-//						{
-//							std::cout << " " << FSel_neg[iLayer];
-//						}
-//						std::cout << std::endl;
-//						std::cout << "FSel_p ";
-//						for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
-//						{
-//							std::cout << " " << FSel_pos[iLayer];
-//						}
-//						std::cout << std::endl;
-
 						//Removing fibers used for the first track for V Side
 						for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; ++iLayer)
 						{
-							// coverity bug 30038 fixed bellow
-//							std::list<int>::iterator itBeg = m_MapLayers[2*iLayer+1].ListFibers.begin();
-//							std::list<int>::iterator itEnd = m_MapLayers[2*iLayer+1].ListFibers.end();
-//							for (; itBeg != itEnd; itBeg++)
-//							{
-//								if (*itBeg == (int)FSel_neg[iLayer])
-//								{
-//									m_MapLayers[2*iLayer+1].ListFibers.erase(itBeg);
-//									break;
-//								}
-//							}
-
 							const unsigned int thisLayer=2*iLayer+1;
-							const std::list<int> & thisFiberContainer = m_MapLayers[thisLayer].ListFibers;
+							const std::list<int> & thisFiberContainer = mapLayers[thisLayer].ListFibers;
 							for (const auto & thisFiber:thisFiberContainer)
 							{
 								if (thisFiber == (int)FSel_neg[iLayer])
 								{
 									auto it = std::find(begin(thisFiberContainer), end(thisFiberContainer), thisFiber);
-									m_MapLayers[2*iLayer+1].ListFibers.erase(it);
+									mapLayers[2*iLayer+1].ListFibers.erase(it);
 									break;
 								}
 							}
 
 
-//							for (intIter=m_MapLayers[2*iLayer+1].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer+1].ListFibers.end(); intIter++)
-////							for (intIter=m_MapLayers[2*iLayer].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer].ListFibers.end(); intIter++)   //just for test
-//							{
-//// 								if (*intIter==(int)FSel_neg[iLayer])
-//								if (*intIter==(int)FSel_neg[iLayer])
-//								{
-////									*intIter = 9999;
-// 									m_MapLayers[2*iLayer+1].ListFibers.erase(intIter);
-////									m_MapLayers[2*iLayer].ListFibers.erase(intIter);   //just for test
-//									break;
-//								}
-//							}
 						}
 						cnt_step_V++;
 					}
@@ -633,81 +554,50 @@ void ALFA_MDMultiple::Reco_Track(std::vector<double> &b_p, std::vector<double> &
 //			When we cannot find tracks anymore for the V side, and that all combinations with the U side has been done, we start again with the U side
 //			But first we remove the fibers belonging to this track
 
-//			std::cout << "cnt_step_V " << cnt_step_V << std::endl;
-
-//			Int_t iNumErasedFibs=0;
 			if (cnt_step_V>0)
 			{
 				for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
 				{
-					std::list<int>::iterator itBeg = m_MapLayers[2*iLayer].ListFibers.begin();
-					std::list<int>::iterator itEnd = m_MapLayers[2*iLayer].ListFibers.end();
+                                        FIBERS& fiber = mapLayers[2*iLayer];
+					std::list<int>::iterator itBeg = fiber.ListFibers.begin();
+					std::list<int>::iterator itEnd = fiber.ListFibers.end();
 					for (; itBeg != itEnd; ++itBeg)
 					{
 						if (*itBeg == (int)FSel_pos_tmp[iLayer])
 						{
-							m_MapLayers[2*iLayer].ListFibers.erase(itBeg);
+							fiber.ListFibers.erase(itBeg);
 							break;
 						}
 					}
 
 
-//					for (intIter=m_MapLayers[2*iLayer].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer].ListFibers.end(); intIter++)
-////					for (intIter=m_MapLayers[2*iLayer+1].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer+1].ListFibers.end(); intIter++)   //just for test
-//					{
-////						if (*intIter==(int)FSel_pos[iLayer])
-//						if (*intIter==(int)FSel_pos_tmp[iLayer])
-//						{
-////							*intIter = 9999;
-//							m_MapLayers[2*iLayer].ListFibers.erase(intIter);
-////							m_MapLayers[2*iLayer+1].ListFibers.erase(intIter);   //just for test
-////							iNumErasedFibs++;
-//							break;
-//						}
 
-//					}
 				}
 			}
 			else
 			{
 				if (NumV>0)
 				{
-//					Finding_Fib(0, b_ref_n, b_pos, FSel_pos, 0);
-//					Finding_Fib(1, b_ref_n, b_pos, FSel_pos, 0);   //just for test
-
 					for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
 					{
-						std::list<int>::iterator itBeg = m_MapLayers[2*iLayer].ListFibers.begin();
-						std::list<int>::iterator itEnd = m_MapLayers[2*iLayer].ListFibers.end();
+                                                FIBERS& fiber = mapLayers[2*iLayer];
+						std::list<int>::iterator itBeg = fiber.ListFibers.begin();
+						std::list<int>::iterator itEnd = fiber.ListFibers.end();
 						for (; itBeg != itEnd; ++itBeg)
 						{
 							if (*itBeg == (int)FSel_pos_tmp[iLayer])
 							{
-								m_MapLayers[2*iLayer].ListFibers.erase(itBeg);
+								fiber.ListFibers.erase(itBeg);
 								break;
 							}
 						}
 
 
-//						for (intIter=m_MapLayers[2*iLayer].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer].ListFibers.end(); intIter++)
-////						for (intIter=m_MapLayers[2*iLayer+1].ListFibers.begin(); intIter!=m_MapLayers[2*iLayer+1].ListFibers.end(); intIter++)   //just for test
-//						{
-////							if (*intIter==(int)FSel_pos[iLayer])
-//							if (*intIter==(int)FSel_pos_tmp[iLayer])
-//							{
-//	//							*intIter = 9999;
-//								m_MapLayers[2*iLayer].ListFibers.erase(intIter);
-////								m_MapLayers[2*iLayer+1].ListFibers.erase(intIter);   //just for test
-////								iNumErasedFibs++;
-//								break;
-//							}
-//						}
 					}
 				}
 				else break;
 			}
 			cnt_step_U++;
-//			if (iNumErasedFibs==0) NumU=0;
 		}
 	}
 	while (NumU>=m_iUVCut);
@@ -718,7 +608,7 @@ void ALFA_MDMultiple::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRA
 	ATH_MSG_DEBUG("ALFA_MDMultiple::GetData()");
 
 	Int_t iTrackNum;
-	Int_t iSize;
+	size_t iSize;
 	std::fill_n(&fOvU[0], sizeof(fOvU)/sizeof(Float_t), -9999.0);
 	std::fill_n(&fOvV[0], sizeof(fOvV)/sizeof(Float_t), -9999.0);
 	std::fill_n(&iNumU[0], sizeof(iNumU)/sizeof(Int_t), -9999);
@@ -729,7 +619,7 @@ void ALFA_MDMultiple::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRA
 	iSize=0;
 	for (auto & iLayer : m_iFibSel)
 	{
-		iSize = std::max(static_cast<Int_t>(iLayer.size()), iSize);
+		iSize = std::max(iLayer.size(), iSize);
 	}
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)

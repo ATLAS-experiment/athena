@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetSelectionConfig.py
@@ -137,7 +137,8 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
         kwargs_InDetTrackSelectionTool.setdefault( "minProb", flags.PhysVal.IDTPM.currentTrkAna.offlMinProb )
     kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionToolCfg)
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )

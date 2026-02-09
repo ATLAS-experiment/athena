@@ -243,13 +243,13 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
     // count the number of relevant modules in each direction
     auto phiEqual = [this](const Acts::Surface &a,
                            const Acts::Surface &b) {
-      Acts::GeometryContext gctx; // unused in matcher
+      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
       return m_cfg.surfaceMatcher(gctx, AxisPhi, &a, &b);
     };
 
     auto zEqual = [this](const Acts::Surface &a,
                          const Acts::Surface &b) {
-      Acts::GeometryContext gctx; // unused in matcher
+      Acts::GeometryContext gctx = Acts::GeometryContext::dangerouslyDefaultConstruct(); // unused in matcher
       return m_cfg.surfaceMatcher(gctx, AxisZ, &a, &b);
     };
 
@@ -554,7 +554,7 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     // want to figure out bins in phi
     for (const auto &srf : pl.surfaces()) {
       auto elm = dynamic_cast<const ActsDetectorElement *>(
-          srf->associatedDetectorElement());
+          srf->surfacePlacement());
       if (elm) {
         auto id = elm->identityHelper();
         int ring_number;

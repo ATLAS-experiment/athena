@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # File:    ReadCalibFromCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
@@ -37,10 +37,11 @@ def usage():
     print ("-P, --pmt       print pmt number in addition to channel number")
     print ("-p, --prefix=   print some prefix on every line ")
     print ("-k, --keep=     field numbers or channel numbers to ignore, e.g. '0,2,3,EBch0,EBch1,EBch12,EBch13,EBspD4ch18,EBspD4ch19,EBspC10ch4,EBspC10ch5' ")
+    print ("-o, --double    print values with double precision")
     print ("-s, --schema=   specify name of input JSON file or CREST_SERVER_PATH")
 
-letters = "hr:l:s:t:f:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV"]
+letters = "hr:l:s:t:f:n:b:e:m:N:X:c:a:g:p:dBCiIHPk:o:"
+keywords = ["help","run=","lumi=","schema=","tag=","folder=","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","nval=","prefix=","default","blob","hex","pmt","keep=","comment","iov","IOV","double"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -82,6 +83,7 @@ iovonly = False
 IOVONLY = False
 comment = False
 keep=[]
+doubl  = False
 
 for o, a in opts:
     a = a.strip()
@@ -140,6 +142,8 @@ for o, a in opts:
         prefix = a
     elif o in ("-k","--keep"):
         keep = a.split(",")
+    elif o in ("-o","--double"):
+        doubl = True
     elif o in ("-h","--help"):
         usage()
         sys.exit(2)
@@ -407,6 +411,8 @@ for iovs in iovList:
                                             msg += "  %3d" % v
                                     elif typeName=='Bch':
                                         msg += "  %d" % flt.getData(chn, adc, val)
+                                    elif doubl:
+                                        msg += "  %s" % flt.getData(chn, adc, val)
                                     else:
                                         msg += "  %f" % flt.getData(chn, adc, val)
                             print (pref+msg)

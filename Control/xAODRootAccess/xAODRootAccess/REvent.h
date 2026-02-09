@@ -63,7 +63,7 @@ class REvent : public Event {
 
   /// Get how many entries are available from the current input file(s)
   ::Long64_t getEntries() const override;
-  /// Function loading a given entry of the input TTree
+  /// Function loading a given entry of the input RNTuple
   ::Int_t getEntry(::Long64_t entry, ::Int_t getall = 0) override;
   
   // Bring the definition of Event::record into scope to allow an REvent object to record object
@@ -120,7 +120,7 @@ class REvent : public Event {
 
   /// @}
 
-  /// Function to initialise the statistics for all Tree content
+  /// Function to initialise the statistics for all RNTuple content
   StatusCode initStats();
 
   /// event uses RNTupleReader:
@@ -134,7 +134,7 @@ class REvent : public Event {
   /// The metadata reader
   std::unique_ptr<ROOT::RNTupleReader> m_metaReader;
 
-  /// The entry to look at from the input tree
+  /// The entry to look at from the input
   ::Long64_t m_entry{};
 
   /// The RNTuple model used for event fields

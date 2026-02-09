@@ -157,41 +157,6 @@ def ActsExtrapolationToolCfg(flags,
   return acc
 
 
-def ActsMaterialTrackWriterSvcCfg(flags,
-                                  name: str = "ActsMaterialTrackWriterSvc",
-                                  **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.merge(ActsTrackingGeometrySvcCfg(flags))
-  acc.addService(CompFactory.ActsMaterialTrackWriterSvc(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsMaterialStepConverterToolCfg(flags,
-                                     name: str = "ActsMaterialStepConverterTool",
-                                     **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.addPublicTool(CompFactory.ActsMaterialStepConverterTool(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsSurfaceMappingToolCfg(flags,
-                              name: str = "ActsSurfaceMappingTool",
-                              **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-  acc.addPublicTool(CompFactory.ActsSurfaceMappingTool(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsVolumeMappingToolCfg(flags,
-                             name: str = "ActsVolumeMappingTool",
-                             **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-  acc.addPublicTool(CompFactory.ActsVolumeMappingTool(name, **kwargs), primary=True)
-  return acc
-
-
 def ActsMaterialJsonWriterToolCfg(flags,
                                   name: str = "ActsMaterialJsonWriterTool",
                                   **kwargs) -> ComponentAccumulator:
@@ -262,30 +227,6 @@ def ActsWriteTrackingGeometryTransformsAlgCfg(flags,
       kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
 
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometryTransforms(name,**kwargs))
-    return acc
-
-def ActsMaterialMappingCfg(flags,
-                           name: str = "ActsMaterialMapping",
-                           **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    if 'MaterialStepConverterTool' not in kwargs:
-      kwargs.setdefault("MaterialStepConverterTool", acc.getPrimaryAndMerge(ActsMaterialStepConverterToolCfg(flags)))
-
-    if 'SurfaceMappingTool' not in kwargs:
-      kwargs.setdefault("SurfaceMappingTool", acc.getPrimaryAndMerge(ActsSurfaceMappingToolCfg(flags)))
-
-    if 'VolumeMappingTool' not in kwargs:
-      kwargs.setdefault("VolumeMappingTool", acc.getPrimaryAndMerge(ActsVolumeMappingToolCfg(flags)))
-
-    if 'MaterialJsonWriterTool' not in kwargs:
-      kwargs.setdefault("MaterialJsonWriterTool",
-                        acc.getPrimaryAndMerge( ActsMaterialJsonWriterToolCfg(flags,
-                                                                              OutputFile = "material-maps.json",
-                                                                              processSensitives = False,
-                                                                              processNonMaterial = False) ))
-      
-    acc.addEventAlgo(CompFactory.ActsMaterialMapping(name, **kwargs))
     return acc
 
 def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,

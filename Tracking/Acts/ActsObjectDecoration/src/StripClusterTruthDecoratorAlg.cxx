@@ -247,8 +247,7 @@ StatusCode StripClusterTruthDecoratorAlg::labelMeasurementToKeep(const EventCont
 			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
 			{
 			  auto flags = state.typeFlags();
-			  if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
-			      not flags.test(Acts::TrackStateFlag::OutlierFlag)) return;
+			  if (not flags.hasMeasurement()) return;
 			  
 			  auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
 			  if (sl == nullptr) return;

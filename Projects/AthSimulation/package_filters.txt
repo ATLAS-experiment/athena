@@ -35,7 +35,6 @@
 + Control/AthenaCommon
 + Control/AthenaExamples/AthExHelloWorld
 + Control/AthenaExamples/AthExHive
-+ Control/AthenaExamples/AthExUnittest
 + Control/AthenaInterprocess
 + Control/AthenaKernel
 + Control/AthenaMP
@@ -62,7 +61,6 @@
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 + Database/APR/CollectionSvc
-+ Database/APR/FileCatalog
 + Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection

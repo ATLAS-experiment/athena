@@ -1690,7 +1690,14 @@ class ItemDef:
         MenuItem('L1_VZDC_A_VZDC_C_jJ10_VjTE200' ).setLogic( PHYS_VZDC_A_VZDC_C & d.jJ10 & Not(d.jTE200)   & physcond)
         MenuItem('L1_1ZDC_NZDC_jJ10_VjTE200' ).setLogic( PHYS_1ZDC_NZDC & d.jJ10 & Not(d.jTE200)   & physcond)
         MenuItem('L1_ZDC_XOR_jJ10_VjTE200' ).setLogic( ZDC_XOR & d.jJ10 & Not(d.jTE200)   & physcond)
-
+        # ATR-32290
+        MenuItem('L1_ZDC_LIS_E0').setLogic( d.ZDC_ALT_0 & physcond)
+        MenuItem('L1_ZDC_LIS_E0_EMPTY').setLogic( d.ZDC_ALT_0 & cosmiccond)
+        MenuItem('L1_ZDC_LIS_E0_UNPAIRED_ISO').setLogic( d.ZDC_ALT_0 & unpaired_isocond)
+        MenuItem('L1_ZDC_LIS_E0_UNPAIRED_NONISO').setLogic( d.ZDC_ALT_0 & unpaired_nonisocond)
+        MenuItem('L1_ZDC_LIS_E1').setLogic( d.ZDC_ALT_1 & physcond)
+        MenuItem('L1_ZDC_LIS_E2').setLogic( d.ZDC_ALT_2 & physcond)
+        
         # jJ + ZDC + TeATIME for 2025
         MenuItem('L1_TEA_1ZDC_NZDC_jJ10_VjTE200'             ).setLogic( PHYS_1ZDC_NZDC     & TeATIME & d.jJ10        & Not(d.jTE200) & physcond)
         MenuItem('L1_TEA_1ZDC_NZDC_jJ5_VjTE200'              ).setLogic( PHYS_1ZDC_NZDC     & TeATIME & d.jJ5         & Not(d.jTE200) & physcond)

@@ -443,11 +443,6 @@ void CommonEfficiencyTool::ReadInputs(const TFile& fFile)
       TNamed* tObj = (TNamed*)kKey->ReadObj();
       std::string sTitle = tObj->GetTitle();
       delete tObj;
-      if (sTitle == "P" || sTitle == "PFinalCalib")
-      {
-        m_fX = &finalTauP;
-        ATH_MSG_DEBUG("using full momentum for x-axis");
-      }
       if (sTitle == "TruthDecayMode")
       {
         m_fX = &truthDecayMode;
@@ -476,34 +471,10 @@ void CommonEfficiencyTool::ReadInputs(const TFile& fFile)
       TNamed* tObj = (TNamed*)kKey->ReadObj();
       std::string sTitle = tObj->GetTitle();
       delete tObj;
-      if (sTitle == "track-eta")
-      {
-        m_fY = &tauLeadTrackEta;
-        ATH_MSG_DEBUG("using leading track eta for y-axis");
-      }
-      else if (sTitle == "|eta|")
+      if (sTitle == "|eta|")
       {
         m_fY = &finalTauAbsEta;
         ATH_MSG_DEBUG("using absolute tau eta for y-axis");
-      }
-      else if (sTitle == "mu")
-      {
-	m_fY = [this](const xAOD::TauJet&) -> double {
-          const xAOD::EventInfo* xEventInfo = nullptr;
-          if (evtStore()->retrieve(xEventInfo,"EventInfo").isFailure()) {
-            return 0;
-          }
-          if (xEventInfo->runNumber()==284500)
-          {
-            return xEventInfo->averageInteractionsPerCrossing();
-          }
-          else if (xEventInfo->runNumber()==300000 || xEventInfo->runNumber()==310000)
-          {
-            return xEventInfo->actualInteractionsPerCrossing();
-          }
-          return 0;
-        };
-	ATH_MSG_DEBUG("using average mu for y-axis");
       }
       else if (sTitle == "truth |eta|")
       {

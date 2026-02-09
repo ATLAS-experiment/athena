@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file JetTagMonitorAlgorithm.py
@@ -93,7 +93,8 @@ def JetTagMonitorConfig(inputFlags):
     jetTagMonAlg.SoftMuonPtMax = 25.0
 
     #Track selection Tool, Loose WP: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TrackingCPRecsEarly2018#Track_Selection
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     jetTagMonAlg.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(inputFlags))
 
     #Additional track selection for jet quality assessment

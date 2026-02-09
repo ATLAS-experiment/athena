@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibTool.h"
@@ -414,7 +414,7 @@ bool CscCalibTool::findCharge(const float samplingTime, const unsigned int sampl
 
   /** now the parabolic interpolation */
   
-  double a, b, c;
+  double a{}, b{}, c{};
 
   int midIndex = maxIndex;
   if (maxIndex == 0) { // peaks on the first sample
@@ -427,7 +427,7 @@ bool CscCalibTool::findCharge(const float samplingTime, const unsigned int sampl
     b = samples[maxIndex-1];
     c = samples[maxIndex];
     midIndex -=1;
-  } else { // normal case
+  } else if (maxIndex > 0){ // normal case
     a = samples[maxIndex-1];
     b = samples[maxIndex];
     c = samples[maxIndex+1];

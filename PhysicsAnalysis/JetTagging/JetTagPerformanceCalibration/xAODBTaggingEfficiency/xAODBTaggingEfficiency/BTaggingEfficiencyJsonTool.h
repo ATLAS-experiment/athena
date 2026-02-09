@@ -46,6 +46,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::map<std::string, std::vector<float>> m_ptMap;
   std::map<std::string, std::vector<float>> m_sfMap;
   std::map<std::string, std::map<std::string, std::vector<float>>> m_sysMap;
+  std::unique_ptr<SG::AuxElement::ConstAccessor<float>> m_ptAcc;
 
   struct sysData {
     float xbb_syst {0};
@@ -54,7 +55,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   const sysData* m_currentSys{nullptr};
   StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& mySys ) const;
   float getSFSys ( const std::string& label, size_t bin_index) const;
-
+  float getJetPt( const xAOD::Jet& jet ) const;
 };
 
 #endif

@@ -19,18 +19,19 @@
 #include <Acts/Geometry/TrackingVolume.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/CuboidVolumeBounds.hpp>
-//#include <Acts/Geometry/ConvexPolygonVolumeBounds.hpp>
+#include <Acts/Geometry/DiamondVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
-#include <Acts/Visualization/ObjVisualization3D.hpp>
 
 
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
+#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
 #include <MuonStationIndex/MuonStationIndex.h>
 
 #include "GeoModelValidation/GeoMaterialHelper.h"
 
+using namespace Acts::UnitLiterals;
 namespace {
   //Muon System IDs
 constexpr std::size_t s_muonBarrelId = 30;
@@ -97,7 +98,6 @@ std::visit([&](auto& elems) {
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
-
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI",Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory);
 auto endcapANode = buildMuonNode(gctx, endcapAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
 auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
@@ -108,7 +108,6 @@ auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts
 if(childNode){
   barrelNode->addChild(std::move(childNode));
 }
-
 muonNode->addChild(std::move(barrelNode));
 muonNode->addChild(std::move(endcapANode));
 muonNode->addChild(std::move(endcapCNode));
@@ -137,9 +136,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
     double outerRadius = std::numeric_limits<double>::lowest();
     double maxZ = std::numeric_limits<double>::lowest();
     double minZ = std::numeric_limits<double>::max();
-
-    int chamberId = 1;
-    
+    int chamberId = 1;    
     std::visit([&](const auto& elems){
   
     for(const auto& element : elems){
@@ -157,13 +154,10 @@ MuonBlueprintNodeBuilder::buildMuonNode(
       // //the chamber geometry id
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
-
       std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *element, chId, boundsFactory);
-
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
       }
-
       //calculate the bounds of the cylinder container
       for(const auto& surface: vol->boundarySurfaces()){
         const auto& surfaceRepr = surface->surfaceRepresentation();
@@ -178,17 +172,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(
           outerRadius = std::max(outerRadius, vertex.perp());
         }
       }
-      if(m_dumpVolumes){
-        //for visualizing each chamber volume individually
-        Acts::ObjVisualization3D helper;
-        vol->visualize(helper, gctx, {.visible = true},
-                                {.visible = true}, {.visible = true});
-        helper.write(volName + ".obj");
-        helper.clear();
-      }
-
+     
       std::shared_ptr<Acts::Experimental::StaticBlueprintNode> node;
-
       const bool isSingleMdt =
           (element->readoutEles().size() == 1 &&
           element->readoutEles().front()->detectorType() == DetectorType::Mdt);
@@ -196,22 +181,17 @@ MuonBlueprintNodeBuilder::buildMuonNode(
       if (isSingleMdt) {
           // Take ownership of the single existing node
           node = std::move(innerStructure.first.front());
-          innerStructure.first.clear();
       } else {
           node = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(vol));
-
           for (auto& childNode : innerStructure.first) {
               node->addChild(std::move(childNode));
           }
           innerStructure.first.clear();
       }
-
       if (!node) {
           THROW_EXCEPTION("No blueprint node constructed");
       }
-
       nodes.emplace_back(std::move(node));
-
       }
 
     }, elements);
@@ -249,6 +229,21 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
   std::vector<surfacePtr> readoutSurfaces;
   Acts::GeometryIdentifier::Value mdtId{1};
 
+  //lamda function for BIS78 MDT case
+  auto isBIS78 = [this](const MuonGMR4::MuonReadoutElement* rElem) {
+
+    if(rElem->detectorType() != DetectorType::Mdt){
+      return false;
+    }
+    
+    auto& mdtIdHelper = m_detMgr->idHelperSvc()->mdtIdHelper();
+    const int BIS = mdtIdHelper.stationNameIndex("BIS");
+    int stEta = rElem->stationEta();
+
+    return rElem->stationName() == BIS && std::abs(stEta) >= 7;
+
+  };
+
   for (const MuonGMR4::MuonReadoutElement* readoutEle : element.readoutEles()) {
 
     std::vector<surfacePtr> detSurfaces = readoutEle->getSurfaces();
@@ -259,7 +254,7 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
 
           // get the transform to the sector's frame
           const Amg::Vector3D toChamber = element.globalToLocalTransform(gctx)*mdtReadoutEle->center(gctx);
-          const Acts::Transform3 mdtTransform = element.localToGlobalTransform(gctx) * Amg::getTranslate3D(toChamber);
+          Acts::Transform3 mdtTransform = element.localToGlobalTransform(gctx) * Amg::getTranslate3D(toChamber);
 
           // create the MDT multilayer volume with the dedicated builder
           Acts::Experimental::MultiWireVolumeBuilder::Config mwCfg;
@@ -267,20 +262,41 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
           mwCfg.mlSurfaces = detSurfaces;
           mwCfg.transform = mdtTransform;
 
-          //check for rectangular or trapezoidal shape bounds 
+          //special treatment of BIS78 MDT multilayer
+          //use different shape because of clashes with EIL chambers 
           std::shared_ptr<Acts::VolumeBounds> mdtBounds{nullptr};
-          
-          if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
-
-            mdtBounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, parameters.halfY, parameters.halfHeight);
-           
-          } else {
+          if(isBIS78(readoutEle) && mdtReadoutEle->multilayer() == 2){
             
-              mdtBounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, 
+            //find the minimum and the maximum tube length (x dimension of the diamond bounds)
+            std::vector<double> tubeLengths;
+            tubeLengths.reserve(mdtReadoutEle->numTubesInLay());
+            for(std::size_t tube = 1; tube < mdtReadoutEle->numTubesInLay(); ++tube){
+              const IdentifierHash tubeHash = MuonGMR4::MdtReadoutElement::measurementHash(1,tube);
+              double tubeLength = mdtReadoutEle->tubeLength(tubeHash);
+              tubeLengths.push_back(tubeLength);
+            }
+            auto [minX,maxX] = std::ranges::minmax_element(tubeLengths);
+            int nSmallTubes = std::count_if(tubeLengths.begin(), tubeLengths.end(), [minX](double length){
+              return std::abs(*minX-length) < Acts::s_epsilon;
+            });
+
+            //create the diamond bounds for the volume
+            double y2 = (nSmallTubes+1)*parameters.tubePitch ;
+            double y1 = 2*parameters.halfY - y2;           
+            mdtTransform = mdtTransform*Amg::getTranslateY3D(parameters.halfY-y2);    
+            mdtBounds = boundsFactory.makeBounds<Acts::DiamondVolumeBounds>(0.5*(*maxX), 0.5*(*maxX), 0.5*(*minX), 
+                                                                            y1, y2, parameters.halfHeight);            
+          }else{
+          //check for rectangular or trapezoidal shape bounds       
+          if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
+            mdtBounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, parameters.halfY, parameters.halfHeight);           
+          } else {            
+            mdtBounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, 
               parameters.longHalfX, parameters.halfY, parameters.halfHeight);
           }
-          
+          }          
           mwCfg.bounds = mdtBounds;
+          mwCfg.transform = mdtTransform;
           using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
           mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
                             -parameters.halfY,

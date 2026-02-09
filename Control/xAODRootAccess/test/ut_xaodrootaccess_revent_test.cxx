@@ -220,43 +220,49 @@ int main() {
    }
 
 
-   //////////////////////////////////////////////////////////////
-   // RDS: 2026/01/21 getName will be implemented in a future MR
-   //////////////////////////////////////////////////////////////
+   // test listing object keys
+   {
+      std::vector<std::string> keys;
+      RETURN_CHECK( APP_NAME, event->keys<xAOD::FileMetaData>(keys, true) );
+      Info( APP_NAME, "Looking for keys for FileMetaData. Found: " );
+      int ikey = 0;
+      for ( auto& key : keys ) {
+         Info( APP_NAME, "%i - %s", ikey, key.c_str() );
+         ++ikey;
+      }
+      if (keys.size() != 1) {
+         ::Error( APP_NAME,
+               XAOD_MESSAGE( "keys<xAOD::FileMetaData>(true).size = %u (!=1)" ),
+               static_cast<unsigned>(keys.size()) );
+         return 1;
+      }
+      keys.clear();
+      keys.reserve(5); // Only 5 containers for TrackParticles in OpenData, whereas there are 6 for std DAODs
+      RETURN_CHECK( APP_NAME, event->keys<DataVector< xAOD::TrackParticle > >(keys, false) );
+      Info( APP_NAME, "Looking for keys for TrackParticle. Found: " );
+      ikey = 0;
+      for ( auto& key : keys ) {
+         Info( APP_NAME, "%i - %s", ikey, key.c_str() );
+         ++ikey;
+      }
+      if (keys.size() != 5) {
+         ::Error( APP_NAME,
+               XAOD_MESSAGE( "keys<xAOD::TrackParticle >().size = %u (!=6)" ),
+               static_cast<unsigned>(keys.size()) );
+         return 1;
+      }
+      auto begin = keys.begin();
+      auto end = keys.end();
+      if (std::find(begin, end, "InDetTrackParticles") == end) {
+         ::Error( APP_NAME,
+               XAOD_MESSAGE( "keys<xAOD::TrackParticle >() did not find "
+                             "\"InDetTrackParticles\"" ) );
+         return 1;
+      }
 
+      // $TODO: test scanning through output
 
-
-   // // test listing object keys
-   // {
-   //    std::vector<std::string> keys;
-   //    RETURN_CHECK( APP_NAME, event->keys<xAOD::FileMetaData>(keys, true) );
-   //    if (keys.size() != 1) {
-   //       ::Error( APP_NAME,
-   //             XAOD_MESSAGE( "keys<xAOD::FileMetaData>(true).size = %u (!=1)" ),
-   //             static_cast<unsigned>(keys.size()) );
-   //       return 1;
-   //    }
-   //    keys.clear();
-   //    keys.reserve(5); // Only 5 containers for TrackParticles in OpenData, whereas there are 6 for std DAODs
-   //    RETURN_CHECK( APP_NAME, event->keys<DataVector< xAOD::TrackParticle > >(keys, false) );
-   //    if (keys.size() != 5) {
-   //       ::Error( APP_NAME,
-   //             XAOD_MESSAGE( "keys<xAOD::TrackParticle >().size = %u (!=6)" ),
-   //             static_cast<unsigned>(keys.size()) );
-   //       return 1;
-   //    }
-   //    auto begin = keys.begin();
-   //    auto end = keys.end();
-   //    if (std::find(begin, end, "InDetTrackParticles") == end) {
-   //       ::Error( APP_NAME,
-   //             XAOD_MESSAGE( "keys<xAOD::TrackParticle >() did not find "
-   //                           "\"InDetTrackParticles\"" ) );
-   //       return 1;
-   //    }
-
-   //    // $TODO: test scanning through output
-
-   // }
+   }
 
 
    // Create another REvent instance to test the file writing capabilities of
@@ -267,7 +273,7 @@ int main() {
    // wevent.msg().setLevel(MSG::DEBUG);
 
    // And connect it to an output file:
-   static const char* const OFNAME = "test.xAOD.root";
+   static const char* const OFNAME = "test_rntuple.xAOD.root";
    std::unique_ptr< ::TFile > ofile( ::TFile::Open( OFNAME, "RECREATE" ) );
    if( ! ofile.get() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't create test output file: %s" ),
@@ -403,7 +409,7 @@ int main() {
    RETURN_CHECK( APP_NAME, wevent.finishWritingTo(*ofile) );
 
    xAOD::Experimental::REvent rwevent;
-   RETURN_CHECK( APP_NAME, rwevent.readFrom( "test.xAOD.root" ) );
+   RETURN_CHECK( APP_NAME, rwevent.readFrom( OFNAME ) );
 
    // Read in the first event:
    if( rwevent.getEntry( 0 ) < 0 ) {
@@ -412,11 +418,11 @@ int main() {
    }
 
    // And delete the file from disk:
-   // if( gSystem->Unlink( OFNAME ) ) {
-   //    ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't remove temporary file: %s" ),
-   //             OFNAME );
-   //    return 1;
-   // }
+   if( gSystem->Unlink( OFNAME ) ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't remove temporary file: %s" ),
+               OFNAME );
+      return 1;
+   }
 
    // Return gracefully:
    return 0;

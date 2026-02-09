@@ -10,7 +10,6 @@
 
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -47,7 +46,6 @@ private:
   Gaudi::Property<bool> m_doKryptonMixture{this,"DoKryptonMixture",true};
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
 
   Gaudi::Property<bool> m_dumpStrawStatus{this, "DumpStrawStatus", false};
   Gaudi::Property<std::string> m_strawStatusFile{this, "StrawStatusFile", ""};

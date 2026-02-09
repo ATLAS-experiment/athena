@@ -363,6 +363,15 @@ def defineMenu():
 
         # ATR-31830
         'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s',
+
+        # ATR-32290
+        'L1_ZDC_LIS_E0',
+        'L1_ZDC_LIS_E0_EMPTY',
+        'L1_ZDC_LIS_E0_UNPAIRED_ISO',
+        'L1_ZDC_LIS_E0_UNPAIRED_NONISO',
+        'L1_ZDC_LIS_E1',
+        'L1_ZDC_LIS_E2',
+        'L1_RD0_UNPAIRED_NONISO',
         
         ]
 

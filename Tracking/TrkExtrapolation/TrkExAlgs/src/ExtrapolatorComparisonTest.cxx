@@ -273,7 +273,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
       auto end_fwd = xclock::now();
       float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
       
-      if (destParameters) {
+      if (destParameters.ok()) {
         ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Forward" );           
         ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position(anygctx).x() << ", " << destParameters->position(anygctx).y() << ", " << destParameters->position(anygctx).z() );   
         ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters() );   
@@ -285,13 +285,13 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
         auto end_bkw = xclock::now();
         float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
         
-        if (finalperigee) {
+        if (finalperigee.ok()) {
            ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Backward" );           
            ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << startParameters->parameters() );   
            ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters() );   
            ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << *finalperigee->covariance() );
            
-         } else if (!finalperigee) {
+         } else if (!finalperigee.ok()) {
            ATH_MSG_DEBUG(" ACTS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
          }
 
@@ -302,7 +302,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
 
          m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get(), destWrapper.get(), ms_fwd, finalWrapper.get(), ms_bkw);
 
-      } else if (!destParameters) {
+      } else if (!destParameters.ok()) {
         ATH_MSG_DEBUG(" ACTS Extrapolation not successful! " );
         auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
         m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get());

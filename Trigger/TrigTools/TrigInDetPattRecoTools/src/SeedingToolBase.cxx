@@ -208,6 +208,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
       unsigned short num_created_edges = 0;//the counter for the incoming graph edges created for n1
 
+      bool is_connected = false;
+      
       const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
 
       float phi1 = n1pars[2];
@@ -241,6 +243,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
 
+	  if ((lk1 == 80000) && (B2.m_vIsConnected[n2Idx] == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
+ 
 	  unsigned int   n2_first_edge = B2.m_vFirstEdge[n2Idx];
           unsigned short n2_num_edges  = B2.m_vNumEdges[n2Idx];
 	  unsigned int   n2_last_edge  = n2_first_edge + n2_num_edges;
@@ -366,6 +370,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      }
             
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
+
+	      is_connected = true;//there is at least one good match
 	    
 	      nConnections++;
 	    
@@ -375,7 +381,12 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	} //loop over n2 (outer) nodes inside a sliding window on n2 bin
       } //loop over sliding windows associated with n2 bins
 
-      B1.m_vNumEdges[n1Idx] = num_created_edges;//update
+      //updating the n1 node attributes
+      
+      B1.m_vNumEdges[n1Idx] = num_created_edges;
+      if (is_connected) {
+        B1.m_vIsConnected[n1Idx] = 1;
+      }
       
     } //loop over n1 (inner) nodes
   } //loop over bin groups: a single n1 bin and multiple n2 bins

@@ -74,7 +74,7 @@ public:
   std::vector<std::array<float,5> > m_params;//node attributes: m_minCutOnTau, m_maxCutOnTau, m_phi, m_r, m_z;
   std::vector<unsigned int> m_vFirstEdge;//the index of the first incoming graph edge attached to the node
   std::vector<unsigned short> m_vNumEdges;//the total number of incoming graph edges attached to this node
-
+  std::vector<unsigned short> m_vIsConnected;//flag to indicate the node's outer neighbourhood isolation from previously built graph
   float m_minRadius, m_maxRadius;
   unsigned int m_layerKey{0};
 };

@@ -87,14 +87,6 @@ double TauAnalysisTools::tauPt(const xAOD::TauJet& xTau)
   // return tau pt in GeV
   return xTau.pt()/1000.;
 }
-
-//______________________________________________________________________________
-double TauAnalysisTools::tauP(const xAOD::TauJet& xTau)
-{
-  // return tau P in GeV
-  return xTau.p4().P()/1000.;
-}
-
 //______________________________________________________________________________
 double TauAnalysisTools::tauEta(const xAOD::TauJet& xTau)
 {
@@ -128,30 +120,6 @@ double TauAnalysisTools::finalTauAbsEta(const xAOD::TauJet& xTau)
 {
   // return MVA based absolute tau eta
   return std::abs(xTau.etaFinalCalib());
-}
-
-//______________________________________________________________________________
-double TauAnalysisTools::finalTauP(const xAOD::TauJet& xTau)
-{
-  // return tau P in GeV
-  return xTau.p4(xAOD::TauJetParameters::FinalCalib).P()/GeV;
-}
-
-//______________________________________________________________________________
-double TauAnalysisTools::tauLeadTrackEta(const xAOD::TauJet& xTau)
-{
-  // return leading charge tau track eta
-  double dTrackEta = 0.;
-  double dTrackMaxPt = 0.;
-  for( unsigned int iNumTrack = 0; iNumTrack < xTau.nTracks(); iNumTrack++)
-  {
-    if (xTau.track(iNumTrack)->pt() > dTrackMaxPt)
-    {
-      dTrackMaxPt = xTau.track(iNumTrack)->pt();
-      dTrackEta = xTau.track(iNumTrack)->eta();
-    }
-  }
-  return dTrackEta;
 }
 
 //______________________________________________________________________________

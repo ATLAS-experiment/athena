@@ -32,7 +32,8 @@ int main(int , char** )
   SystemTools::initGaudi();
   
   const string collConnection = "Collection";
-  const string collType = "RootCollection";
+  const pool::DbType collWriteType = pool::ROOTTREE_StorageType.type();
+  const pool::DbType collReadType = pool::ROOT_StorageType.type();
   
   Token* token = new Token();
   token->fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
@@ -49,7 +50,7 @@ int main(int , char** )
     cout << "Create collection" << endl;
     
     ICollection* out_collection = 0;
-    CollectionDescription out_desc("Collection", collType, collConnection);
+    CollectionDescription out_desc("Collection", collWriteType, collConnection);
     out_collection = service.plugin(out_desc, ICollection::CREATE_AND_OVERWRITE);
 
     out_collection->commit();
@@ -59,7 +60,7 @@ int main(int , char** )
     ICollection* in_collection = 0;
     
     cout << "Open collection with physical name .... ";
-    CollectionDescription	in_desc("Collection", collType, collConnection);
+    CollectionDescription	in_desc("Collection", collReadType, collConnection);
     in_collection = service.plugin(in_desc, ICollection::READ);
     cout << (in_collection ? "OK":"KO") << endl;
     delete in_collection;

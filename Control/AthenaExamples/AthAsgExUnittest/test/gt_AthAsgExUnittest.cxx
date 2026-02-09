@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -16,7 +16,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 
 #include "AthAsgExUnittest/IAthAsgExUnittestTool.h"
-#include "AthAsgExUnittest/AthAsgExUnittestTool.h"
+#include "../Root//AthAsgExUnittestTool.h"
 
 #include "GaudiKernel/IAlgManager.h"
 #include "Gaudi/Algorithm.h"

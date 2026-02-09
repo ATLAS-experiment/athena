@@ -164,13 +164,17 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     }
 
     // Set up write handles.
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
-    SG::WriteHandle<FPGATrackSimHitCollection> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
+    SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
+    SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
     SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
-    ATH_CHECK( FPGAHits_1st.record (std::make_unique<FPGATrackSimHitCollection>()));
-    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<FPGATrackSimHitCollection>()));
+    // Use ConstDataVector with VIEW_ELEMENTS for non-owning const pointer storage
+    ATH_CHECK( FPGAHits_1st.record (std::make_unique<ConstDataVector<FPGATrackSimHitCollection>>(SG::VIEW_ELEMENTS)) );
+    ATH_CHECK( FPGAHits_2nd.record (std::make_unique<ConstDataVector<FPGATrackSimHitCollection>>(SG::VIEW_ELEMENTS)) );
+    auto* FPGAHits_1st_cdv = FPGAHits_1st.ptr();
+    auto* FPGAHits_2nd_cdv = FPGAHits_2nd.ptr();
+
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
     ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
 
@@ -217,6 +221,8 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     m_slicedStripHeaderPreSP->newEvent(eventInfo);
 
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_output, phits_all, phits_1st, phits_2nd;
+    std::vector<const FPGATrackSimHit*> phits_strips; // this should store pointers to strip hits for this region
+
     {
         std::optional<Athena::Chrono> chronoSplitHits;
         if constexpr (enableBenchmark) chronoSplitHits.emplace("1st Stage: Split hits to 1st and 2nd stage", m_chrono.get());
@@ -229,12 +235,12 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
         }
 
         // Use the slicing engine tool to do the stage-based separation. Does not use the pmap.
-        m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd);
+        m_slicingEngineTool->sliceHits(phits_all, phits_1st, phits_2nd, phits_strips);
     }
 
-    // record 1st stage hits in SG
+    // record 1st stage hits in SG (VIEW_ELEMENTS - no copy, just store pointers)
     for (auto& hit : phits_1st) {
-        FPGAHits_1st->push_back(new FPGATrackSimHit(*hit));
+        FPGAHits_1st_cdv->push_back(hit.get());
     }
 
     if(m_writeOutputData) *m_slicedStripHeaderPreSP = *m_slicedStripHeader;
@@ -242,19 +248,33 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     // The slicing engine puts strip hits into a logical event input header. That header now needs to go
     // to the spacepoint tool if it's turned on. Those hits then get added to phits_1st or phits_2nd as appropriate.
     if (m_doSpacepoints) {
+        std::vector<FPGATrackSimCluster> spacepoints;
         std::optional<Athena::Chrono> chronoSPFormation;
-        if constexpr (enableBenchmark) chronoSPFormation.emplace("1st Stage: SP fornmation", m_chrono.get());
-        m_spacepoints.clear();
-        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_slicedStripHeader, m_spacepoints));
-        for (const FPGATrackSimCluster& cluster : m_spacepoints) FPGASpacePoints->push_back(cluster);
+        if constexpr (enableBenchmark) chronoSPFormation.emplace("1st Stage: SP formation", m_chrono.get());
+        ATH_CHECK(m_spacepointsTool->DoSpacePoints(*m_slicedStripHeader, spacepoints));
+        // Move spacepoints into the output container to avoid unnecessary copies
+        for (FPGATrackSimCluster& cluster : spacepoints) {
+            FPGASpacePoints->push_back(std::move(cluster));
+        }
+        
+        // Add spacepoint hits to appropriate stage (using FPGASpacePoints directly from StoreGate)
+        for (const auto& cluster : *FPGASpacePoints) {
+            // Keep the exact constituent hits of the spacepoint (not just the cluster-equivalent summary)
+            for (const auto& hit : cluster.getHitList()) {
+                (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(&hit, [](const FPGATrackSimHit*){});
+            }
+        }
+    } else {
+        // If spacepoints are disabled, add strip hits from phits_strips (filled by slicing engine)
+        // These pointers point to hits in FPGAHits, which has stable lifetime in StoreGate
+        for (const FPGATrackSimHit* hit : phits_strips) {
+            (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(hit, [](const FPGATrackSimHit*){});
+        }
     }
 
-    // Use a property to control whether the strips/SPs go to 1st or second stage.
-    for (const FPGATrackSimHit& hit : m_slicedStripHeader->towers().at(0).hits()) {
-        (m_secondStageStrips ? phits_2nd : phits_1st).emplace_back(&hit, [](const FPGATrackSimHit*){});
-    }
+    // VIEW_ELEMENTS - no copy, just store pointers
     for (auto& hit : phits_2nd) {
-        FPGAHits_2nd->push_back(new FPGATrackSimHit(*hit));
+        FPGAHits_2nd_cdv->push_back(hit.get());
     }
 
     // Add all hits including SPs to this for the HoughRootOutputTool

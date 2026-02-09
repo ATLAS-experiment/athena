@@ -50,13 +50,11 @@ class MuonBlueprintNodeBuilder : public extends<AthAlgTool, IBlueprintNodeBuilde
 
 public:
 
-
   enum class EndcapSide {
       A,
       C,
       Both
   };
-
   StatusCode initialize() override;
   using base_class::base_class;
   
@@ -66,12 +64,9 @@ public:
   std::shared_ptr<Acts::Experimental::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
                                               std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) override;
                                 
-
 private:
 
   const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-
-  Gaudi::Property<bool> m_dumpVolumes{this, "dumpVolumes", false}; // Flag to control if we want to visualize each chamber volume individually
 
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; // Flag to control if we want to build the muon node from sectors or chambers
 

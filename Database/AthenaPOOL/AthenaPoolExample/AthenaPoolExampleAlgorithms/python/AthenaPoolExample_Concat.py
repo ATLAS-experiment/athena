@@ -1,9 +1,12 @@
 #!/env/python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @file AthenaPoolExample_Concat.py
 ## @brief Example job options file to illustrate how to concatenate two write jobs
+
+import os
+os.system ('rm -f SimplePoolFile[13].root')
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory

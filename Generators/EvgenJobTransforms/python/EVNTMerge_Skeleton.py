@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -57,6 +57,13 @@ def fromRunArgs(runArgs):
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
+
+    # Old EVNT files may have only an old EventInfo called McEventInfo.
+    # Schedule a conversion in that case.
+    if ('EventInfo' not in flags.Input.Collections and
+        'McEventInfo' in flags.Input.Collections):
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+        cfg.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot = True))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags, "EVNT", disableEventTag = True, takeItemsFromInput = True, extendProvenanceRecord = False))

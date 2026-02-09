@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootCollection )
@@ -18,13 +18,12 @@ atlas_add_library( RootCollection
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES}
 		   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionSvc POOLCore
-                        FileCatalog GaudiKernel PersistencySvc PersistentDataModel RootUtils AthenaBaseComps
-                        CxxUtils)
+                        GaudiKernel PersistencySvc PersistentDataModel RootUtils AthenaBaseComps CxxUtils)
 
 atlas_add_component( RootCollectionComponents
                    src/components/*.cpp
                    NO_PUBLIC_HEADERS
-		   LINK_LIBRARIES CollectionSvc RootCollection )
+		   LINK_LIBRARIES CollectionSvc RootCollection POOLCore )
 
 atlas_add_test( ttree_coll_rw_test
                 SOURCES test/ttree_rw_test.cxx test/rw_test.cxx

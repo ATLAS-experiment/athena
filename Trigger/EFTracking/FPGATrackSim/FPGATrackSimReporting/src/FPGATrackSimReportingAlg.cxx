@@ -95,15 +95,14 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         m_allActsTracks[actsTrackContainer.key()].push_back(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr())));
 
         // initialize ReadHandle stats map for all tracks if necessary
-        m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
+        m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<Acts::TrackStateFlag, std::vector<uint32_t>>{});
 
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::OutlierFlag, std::vector<uint32_t>{});
+            Acts::TrackStateFlag::IsOutlier, std::vector<uint32_t>{});
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::HoleFlag, std::vector<uint32_t>{});
+            Acts::TrackStateFlag::IsHole, std::vector<uint32_t>{});
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::MeasurementFlag, std::vector<uint32_t>{});
-
+            Acts::TrackStateFlag::HasMeasurement, std::vector<uint32_t>{});
         for (const auto& track : m_allActsTracks[actsTrackContainer.key()].back()) {
             uint32_t t_nOutliers = 0, t_nMeasurements = 0, t_nHoles = 0;
             for (const auto& measurement : track->trackMeasurements)
@@ -112,9 +111,9 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
                 if (measurement->measurementFlag) ++t_nMeasurements;
                 if (measurement->holeFlag) ++t_nHoles;
             }
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::OutlierFlag].push_back(t_nOutliers);
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HoleFlag].push_back(t_nHoles);
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::MeasurementFlag].push_back(t_nMeasurements);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::IsOutlier].push_back(t_nOutliers);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::IsHole].push_back(t_nHoles);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HasMeasurement].push_back(t_nMeasurements);
         }
         if (m_printoutForEveryEvent) ATH_MSG_INFO("ACTS tracks in " << actsTrackContainer.key() << m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
     }

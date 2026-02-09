@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SegmentFittingAlg.h"
@@ -8,9 +8,9 @@
 
 #include <MuonPatternHelpers/MdtSegmentSeedGenerator.h>
 #include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
+#include <ActsCalibBase/CalibrationContext.h>
+#include <ActsInterop/Logger.h>
 
-#include <xAODMuonSimHit/MuonSimHitContainer.h>
-#include <xAODMuonPrepData/MdtDriftCircle.h>
 #include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
 
 #include <format>
@@ -19,7 +19,6 @@ using namespace Acts;
 namespace MuonR4 {
     using namespace SegmentFit;
     using namespace MuonValR4;
-
  
     using PrimitiveVec = MuonValR4::IPatternVisualizationTool::PrimitiveVec;
 
@@ -54,7 +53,18 @@ namespace MuonR4 {
         fitCfg.maxIter = m_maxIter;
 
         m_fitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
-  
+
+        MdtSegmentSeedGenerator::Config genCfg{};
+        genCfg.hitPullCut = m_seedHitChi2;
+        genCfg.busyLayerLimit = m_busyLayerLimit;
+        genCfg.startWithPattern = m_tryPatternPars;
+        ATH_MSG_DEBUG("Seeder configuration: \n - "<<m_tryPatternPars
+                    <<"\n - "<<m_seedHitChi2
+                    <<"\n - "<<m_busyLayerLimit);  
+        m_seeder = std::make_unique<SegmentFit::MdtSegmentSeedGenerator>(genCfg, makeActsAthenaLogger(this, name()));
+        genCfg.busyLayerLimit += 2;
+        m_seederBEE = std::make_unique<SegmentFit::MdtSegmentSeedGenerator>(genCfg, makeActsAthenaLogger(this, name()));
+     
         return StatusCode::SUCCESS;
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
@@ -65,9 +75,9 @@ namespace MuonR4 {
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
-        std::vector<std::unique_ptr<Segment>> allSegments{};
+        SegmentVec_t allSegments{};
         for (const SegmentSeed* seed : *segmentSeeds) {
-            std::vector<std::unique_ptr<Segment>> segments = fitSegmentSeed(ctx, *gctx, seed);
+            SegmentVec_t segments = fitSegmentSeed(ctx, *gctx, seed);
              if (m_visionTool.isEnabled() && segments.size() > 1) {
                 auto drawFinalReco = [this, &segments, &gctx, &ctx,&seed](const std::string& nameTag) {
                     PrimitiveVec segmentLines{};
@@ -116,7 +126,7 @@ namespace MuonR4 {
         return StatusCode::SUCCESS; 
     }
 
-    std::vector<std::unique_ptr<Segment>>
+    SegmentFittingAlg::SegmentVec_t
          SegmentFittingAlg::fitSegmentSeed(const EventContext& ctx,
                                            const ActsTrk::GeometryContext& gctx,
                                            const SegmentSeed* patternSeed) const {
@@ -124,46 +134,45 @@ namespace MuonR4 {
         const Amg::Transform3D& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
         std::vector<std::unique_ptr<Segment>> segments{};
 
-        MdtSegmentSeedGenerator::Config genCfg{};
-        genCfg.hitPullCut = m_seedHitChi2;
-        genCfg.recalibSeedCircles = m_recalibSeed;
-        genCfg.calibrator = m_calibTool.get();
-        genCfg.startWithPattern = m_tryPatternPars;
+        Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
+
+        using State_t = MdtSegmentSeedGenerator::State_t;
+        State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed};
+
+        const auto* seeder = patternSeed->parameters()[toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg ?
+                             m_seederBEE.get() : m_seeder.get();
    
-        /// At very high inclanation angles, the muon may traverse 3 hits in the same layer (E.g. BEE)
-        genCfg.busyLayerLimit = 2 + 2*(patternSeed->parameters()[toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg);
         /** Draw the pattern with all possible seeds */
-         if (m_visionTool.isEnabled()) { 
+        if (m_visionTool.isEnabled()) { 
             PrimitiveVec seedLines{};
-            MdtSegmentSeedGenerator drawMe{name(), patternSeed, genCfg};
-            while(auto s = drawMe.nextSeed(ctx)) {
+            State_t drawMe{seedState};
+            while(auto s = seeder->nextSeed(cctx, drawMe)) {
                 seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
             }
-            seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.numGenerated()), 0.2, 0.85, 14));
+            seedLines.push_back(drawLabel(std::format("possible seeds: {:d}",  drawMe.nGenSeeds()), 0.2, 0.85, 14));
             m_visionTool->visualizeSeed(ctx, *patternSeed, "pattern", std::move(seedLines));
         }
 
-        MdtSegmentSeedGenerator seedGen{name(), patternSeed, std::move(genCfg)};
         ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
-        while (auto seed = seedGen.nextSeed(ctx)) {
+        while (auto seed = seeder->nextSeed(cctx, seedState)) {
             auto segment = m_fitter->fitSegment(ctx, patternSeed, seed->parameters,
-                                                locToGlob, std::move(seed->measurements));
+                                                locToGlob, std::move(seed->hits));
             if (segment) {
                 segments.push_back(std::move(segment));
             }
         }
         ATH_MSG_VERBOSE("fitSegmentHits() - In total "<<segments.size()<<" segment were constructed ");
         return segments;
+
     }
    
     void SegmentFittingAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
-                                               std::vector<std::unique_ptr<Segment>>& segmentCandidates) const {
+                                               SegmentVec_t& segmentCandidates) const {
         if (segmentCandidates.empty()) {
             return;
         }
-        using SegmentVec = std::vector<std::unique_ptr<Segment>>;
         ATH_MSG_VERBOSE("Resolve ambiguities amongst "<<segmentCandidates.size()<<" segment candidates. ");
-        std::unordered_map<const MuonGMR4::SpectrometerSector*, SegmentVec> candidatesPerChamber{};
+        std::unordered_map<const MuonGMR4::SpectrometerSector*, SegmentVec_t> candidatesPerChamber{};
         
         for (std::unique_ptr<Segment>& sortMe : segmentCandidates) {
             const MuonGMR4::SpectrometerSector* chamb = sortMe->msSector();
@@ -171,7 +180,7 @@ namespace MuonR4 {
         }
         segmentCandidates.clear();
         for (auto& [chamber, resolveMe] : candidatesPerChamber) {
-            SegmentVec resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));
+            SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));
             segmentCandidates.insert(segmentCandidates.end(), 
                                      std::make_move_iterator(resolvedSegments.begin()),
                                      std::make_move_iterator(resolvedSegments.end()));

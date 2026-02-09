@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DataTweaker.h"
@@ -103,13 +103,12 @@ Data* DataTweaker::tweak(const Data& data, int evtIndex) const
   
   if (evtIndex < 0) evtIndex = data.container().eventIndex();
   
-  DataContainer* newContainer = new DataContainer(data.container().gain(), samples, corrs,
+  auto newContainer = std::make_unique<DataContainer>(data.container().gain(), samples, corrs,
                 evtIndex,
                 data.container().energy(), time + deltaT, data.container().quality(),
                 data.container().pedestal(), data.container().pedestalRMS(),
                 data.container().status(), k*data.container().adcMax());
-  Data* newData = new Data(*newContainer, *data.eventData(), data.history(), data.index(), true);
-  return newData;
+  return new Data(std::move(newContainer), data.eventData(), data.history(), data.index());
 }
 
 

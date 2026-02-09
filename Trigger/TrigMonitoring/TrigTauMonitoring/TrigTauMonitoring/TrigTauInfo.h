@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUMONITORING_TRIGTAUINFO_H
 #define TRIGTAUMONITORING_TRIGTAUINFO_H
 
 #include <string>
-#include <regex>
+#include <vector>
 #include <map>
-#include <iostream>
-#include <cstdint>
+#include <algorithm> //for std::find_if
+#include <cctype>   //for std::isdigit
+#include <cstdint> // int64_t
 
 class TrigTauInfo {
 public:

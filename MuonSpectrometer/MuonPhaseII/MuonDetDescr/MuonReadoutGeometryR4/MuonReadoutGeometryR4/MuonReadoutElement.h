@@ -174,7 +174,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Wrapper function of the localToGlobalTransform method to satisfy the 
      *         Acts::IDetectorElementBase interface
      *  @param gctx: Acts representation of the GeometryContext */
-    const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const override final;
+    const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
     /** @brief Returns the surface associated with the readout element. It is placed in the 
      *         center of the readout element's volume and has the volumes surface bounds */
     const Acts::Surface& surface() const override final;
@@ -202,12 +202,12 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     const SpectrometerSector* msSector() const;
     /** @brief Returns the pointer to the chamber enclosing this readout element */
     const Chamber* chamber() const;
-#else
-    /** @brief AthSimulation does not compile Acts and hence there's no interface declared
-     *         for the thickness method which is implemented by each detector technology
-     *         To keep the override in both cases declare the dummy for AthSimulation only */
-    virtual double thickness() const = 0;
+    /** @brief Returns whether the detector element is sensitive */
+    virtual bool isSensitive() const final override { return true; }
 #endif
+    /** @brief Returns the thickness in normal direction of the strip readout
+     *         planes */
+    virtual double thickness() const = 0;
     /** @brief Release all transforms from the memory that are not connected with a geometry context
      *         but cached by the readout element itself */
     void releaseUnAlignedTrfs() const;

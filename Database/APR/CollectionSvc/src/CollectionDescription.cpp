@@ -16,32 +16,20 @@
 using namespace std;
 
 pool::CollectionDescription::CollectionDescription( const std::string& name,
-                                                    const std::string& type,
-                                                    const std::string& connection,
-                                                    const std::string& eventReferenceColumnName ) 
+                                                    const pool::DbType& type,
+                                                    const std::string& connection )
   : m_name( name ),
     m_type( type ),
     m_connection( connection ),
-    m_eventReferenceColumnName( eventReferenceColumnName )
+    m_eventReferenceColumnName( CollectionNames::defaultEventReferenceColumnName )
 {
   // Insert a Token column for the event references by default.
-  if( !m_eventReferenceColumnName.size() )  {
-     m_eventReferenceColumnName = CollectionNames::defaultEventReferenceColumnName;
-  }
   CollectionDescription::insertTokenColumn( m_eventReferenceColumnName );
 }
 
-// NOT a copy constructor
-pool::CollectionDescription::
-CollectionDescription( const pool::ICollectionDescription& rhs )
-{
-   CollectionDescription::copyFrom( rhs );
-}
-
-// Real copy constructor
+// copy constructor
 pool::CollectionDescription::
 CollectionDescription( const pool::CollectionDescription& rhs )
-      : ICollectionDescription()
 {
    CollectionDescription::copyFrom( rhs );
 }
@@ -55,26 +43,24 @@ pool::CollectionDescription::~CollectionDescription()
 
 void
 pool::CollectionDescription::
-copyFrom( const pool::ICollectionDescription& rhs )
+copyFrom( const pool::CollectionDescription& rhs )
 {
    clearAll();
-   
+
    m_name = rhs.name();
    m_type = rhs.type();
    m_connection = rhs.connection();
    m_eventReferenceColumnName = rhs.eventReferenceColumnName();
 
    for( int col_id = 0; col_id < rhs.numberOfAttributeColumns(); col_id++ ) {
-     const ICollectionColumn& column = rhs.attributeColumn(col_id);
-     insertColumn(column.name(), column.type(),
-                  column.maxSize(), column.sizeIsFixed());
-     setColumnId(column.name(), column.id(), "CollectionDescription");
+     const CollectionColumn& column = rhs.attributeColumn(col_id);
+     insertColumn(column.name(), column.type());
+     setColumnId(column.name(), column.id());
    }
    for( int col_id = 0; col_id < rhs.numberOfTokenColumns(); col_id++ ) {
-     const ICollectionColumn& column = rhs.tokenColumn(col_id);
-     insertColumn(column.name(), column.type(),
-                  column.maxSize(), column.sizeIsFixed());
-     setColumnId(column.name(), column.id(), "CollectionDescription");
+     const CollectionColumn& column = rhs.tokenColumn(col_id);
+     insertColumn(column.name(), column.type());
+     setColumnId(column.name(), column.id());
    }
 }
 
@@ -100,7 +86,7 @@ pool::CollectionDescription::clearAll()
 
 
 pool::CollectionDescription&
-pool::CollectionDescription::operator=( const pool::ICollectionDescription& rhs )
+pool::CollectionDescription::operator=( const pool::CollectionDescription& rhs )
 {
    if( this != &rhs )
       copyFrom( rhs );
@@ -108,15 +94,15 @@ pool::CollectionDescription::operator=( const pool::ICollectionDescription& rhs 
 }
 
 
-void 
+void
 pool::CollectionDescription::setName( const std::string& name )
 {
    m_name = name;
 }
 
 
-void 
-pool::CollectionDescription::setType( const std::string& type )
+void
+pool::CollectionDescription::setType( const DbType& type )
 {
   m_type = type;
 }
@@ -128,24 +114,12 @@ pool::CollectionDescription::setConnection( const std::string& connection )
   m_connection = connection;
 }
 
-
-void 
-pool::CollectionDescription::setEventReferenceColumnName( const std::string& columnName )
-{
-   if( eventReferenceColumnName() == columnName ) {
-      // nothing to do
-      return;
-   }
-   m_eventReferenceColumnName = columnName;
-}
-
-
 // set new column ID
 // return the ID
 int
-pool::CollectionDescription::setColumnId( const std::string& columnName, int id, const std::string& methodName )
+pool::CollectionDescription::setColumnId( const std::string& columnName, int id )
 {
-   return setColumnId( column( columnName, methodName ), id );
+   return setColumnId( column( columnName ), id );
 }
 
 
@@ -168,23 +142,18 @@ int pool::CollectionDescription::setColumnId(pool::CollectionColumn* column, int
 }
 
 
-const pool::ICollectionColumn&
+const pool::CollectionColumn&
 pool::CollectionDescription::
-insertColumn( const std::string& columnName,
-	      const std::string& columnType,
-	      int maxSize,
-	      bool sizeIsFixed )
+insertColumn( const std::string& columnName, const std::string& columnType )
 {
   if( columnType == CollectionNames::tokenTypeName )  {
      return insertTokenColumn( columnName );
   }
-  const std::string methodName("insertColumn");
-  
-   // Check if description for column already exists.
-  checkNewColumnName( columnName, methodName );
+  // Check if description for column already exists.
+  checkNewColumnName( columnName );
 
   // Create and record a description object for new column.
-  CollectionColumn* column = new CollectionColumn( columnName, columnType, maxSize, sizeIsFixed );
+  CollectionColumn* column = new CollectionColumn( columnName, columnType );
   setColumnId( column );
   m_attributeColumns.push_back( column );
   m_attributeColumnForColumnName[ columnName ] = column;
@@ -192,12 +161,10 @@ insertColumn( const std::string& columnName,
 }
 
 
-const pool::ICollectionColumn&
+const pool::CollectionColumn&
 pool::CollectionDescription::
 insertTokenColumn( const std::string& columnName )
 {
-   const std::string methodName("insertTokenColumn");
-
    if( columnName == eventReferenceColumnName() ) {
      std::map<std::string, CollectionColumn*>::const_iterator columnI =
          m_tokenColumnForColumnName.find(columnName);
@@ -207,32 +174,32 @@ insertTokenColumn( const std::string& columnName )
    }
 
    // Check if description for this column already exists.
-   checkNewColumnName( columnName, methodName );
+   checkNewColumnName( columnName );
 
    // Create and record a description object for new Token column.
-   CollectionColumn* column = new CollectionColumn( columnName, CollectionNames::tokenTypeName, 0, true );
+   CollectionColumn* column = new CollectionColumn( columnName, CollectionNames::tokenTypeName);
    setColumnId( column );
-   m_tokenColumns.push_back( column );  
+   m_tokenColumns.push_back( column );
    m_tokenColumnForColumnName[ columnName ] = column;
    return *column;
 }
 
 
-const std::string& 
+const std::string&
 pool::CollectionDescription::name() const
 {
   return m_name;
 }
 
 
-const std::string& 
+const pool::DbType&
 pool::CollectionDescription::type() const
 {
   return m_type;
 }
 
 
-const std::string& 
+const std::string&
 pool::CollectionDescription::connection() const
 {
   return m_connection;
@@ -248,7 +215,7 @@ pool::CollectionDescription::eventReferenceColumnName() const
 
 // internal use protected method (when non-const column is needed). throws exceptions
 pool::CollectionColumn *
-pool::CollectionDescription::column( const std::string& name, const std::string& method )
+pool::CollectionDescription::column( const std::string& name )
 {
    std::map< std::string, pool::CollectionColumn* >::const_iterator iColumn;
    iColumn = m_attributeColumnForColumnName.find( name );
@@ -256,31 +223,15 @@ pool::CollectionDescription::column( const std::string& name, const std::string&
       iColumn = m_tokenColumnForColumnName.find( name );
       if( iColumn == m_tokenColumnForColumnName.end() )  {
          std::string errorMsg = "Column with name `" + name + "' does NOT exist.";
-         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionSvc" );
+         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription \" from \" CollectionSvc" );
       }
    }
    return iColumn->second;
 }
-   
 
 
-const pool::CollectionColumn *
-pool::CollectionDescription::column( const std::string& name, const std::string& method ) const
-{
-   std::map< std::string, pool::CollectionColumn* >::const_iterator iColumn;
-   iColumn = m_attributeColumnForColumnName.find( name );
-   if( iColumn == m_attributeColumnForColumnName.end() ) {
-      iColumn = m_tokenColumnForColumnName.find( name );
-      if( iColumn == m_tokenColumnForColumnName.end() )  {
-         std::string errorMsg = "Column with name `" + name + "' does NOT exist.";
-         throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionSvc" );
-      }
-   }
-   return iColumn->second;
-}
-   
 
-int 
+int
 pool::CollectionDescription::numberOfTokenColumns() const
 {
    // Return total number of Tokens
@@ -288,7 +239,7 @@ pool::CollectionDescription::numberOfTokenColumns() const
 }
 
 
-const pool::ICollectionColumn&
+const pool::CollectionColumn&
 pool::CollectionDescription::tokenColumn( int columnId ) const
 {
    if( columnId >= 0 && columnId < (int)m_tokenColumns.size() )    {
@@ -303,7 +254,7 @@ pool::CollectionDescription::tokenColumn( int columnId ) const
 }
 
 
-int 
+int
 pool::CollectionDescription::numberOfAttributeColumns() const
 {
    // Return total number of Attributes in the collection.
@@ -311,7 +262,7 @@ pool::CollectionDescription::numberOfAttributeColumns() const
 }
 
 
-const pool::ICollectionColumn&
+const pool::CollectionColumn&
 pool::CollectionDescription::attributeColumn( int columnId ) const
 {
    if( columnId >= 0 && columnId < (int) m_attributeColumns.size() )  {
@@ -327,12 +278,12 @@ pool::CollectionDescription::attributeColumn( int columnId ) const
 
 
 void
-pool::CollectionDescription::checkNewColumnName( const std::string& name, const std::string& method ) const
+pool::CollectionDescription::checkNewColumnName( const std::string& name ) const
 {
    if( m_attributeColumnForColumnName.find( name ) != m_attributeColumnForColumnName.end()
        ||  m_tokenColumnForColumnName.find( name ) != m_tokenColumnForColumnName.end() )
    {
       std::string errorMsg = "Column with name `" + name + "' already exists.";
-      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription::" + method + " \" from \" CollectionSvc" );
+      throw std::runtime_error( errorMsg + " (APR: \" CollectionDescription \" from \" CollectionSvc" );
    }
 }

@@ -35,6 +35,7 @@
 #include <fstream>
 
 #include "StoreGate/StoreGateSvc.h"
+#include "AthContainers/ConstDataVector.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
@@ -169,7 +170,6 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         // Event storage
         std::vector<FPGATrackSimTrack>   m_tracks_1st_guessedcheck, m_tracks_1st_nomiss, m_tracks_2nd_guessedcheck, m_tracks_2nd_nomiss;
-        std::vector<FPGATrackSimCluster> m_spacepoints{};
 
         // internal counters
         double m_evt = 0; // number of events passing event selection, independent of truth
@@ -202,8 +202,8 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         SG::WriteHandleKey<FPGATrackSimClusterCollection> m_FPGASpacePointsKey{this, "FPGATrackSimSpacePoints1stKey","FPGASpacePoints_1st","FPGATrackSim SpacePoints key"};
 
         // Write out roads, hits in roads, and tracks.
-        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_1st{this, "FPGATrackSimHitKey_1st","FPGAHits_1st","FPGATrackSim 1st stage hits key"};
-        SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
+        SG::WriteHandleKey<ConstDataVector<FPGATrackSimHitCollection>> m_FPGAHitKey_1st{this, "FPGATrackSimHitKey_1st","FPGAHits_1st","FPGATrackSim 1st stage hits key"};
+        SG::WriteHandleKey<ConstDataVector<FPGATrackSimHitCollection>> m_FPGAHitKey_2nd{this, "FPGATrackSimHitKey_2nd","FPGAHits_2nd","FPGATrackSim 2nd stage hits key"};
         SG::WriteHandleKey<FPGATrackSimHitCollection> m_FPGAHitFilteredKey{this, "FPGATrackSimHitFiltered1stKey","FPGAHitsFiltered_1st","FPGATrackSim Filtered Hits 1st stage key"};
         SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads1stKey","FPGAHitsInRoads_1st","FPGATrackSim Hits in 1st stage roads key"};
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad1stKey","FPGARoads_1st","FPGATrackSim Roads 1st stage key"};

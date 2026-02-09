@@ -31,6 +31,7 @@ tc::InferenceServerGrpcClient* AthInfer::TritonTool::getClient() const {
         tc::Error err = tc::InferenceServerGrpcClient::Create(&threadClient, url, verbose, m_useSSL);
         if (!err.IsOk()) {
             ATH_MSG_ERROR("Failed to create Triton gRPC client for model: " + m_modelName.value() + " at url: " + url);
+            ATH_MSG_ERROR("useSSL is set to: " + std::to_string(m_useSSL));
             ATH_MSG_ERROR("Error message: " + err.Message());
             return nullptr;
         }

@@ -63,7 +63,7 @@ namespace InDet{
         tracking_geometry->visitSurfaces([&counter, &module_data, &module_pattern_idx, this](const Acts::Surface *surface_ptr) {
            if (!surface_ptr) return;
            const Acts::Surface &surface = *surface_ptr;
-           const Acts::DetectorElementBase*detector_element = surface.associatedDetectorElement();
+           const Acts::SurfacePlacementBase*detector_element = surface.surfacePlacement();
            if (detector_element) {
               const ActsDetectorElement *acts_detector_element = dynamic_cast<const ActsDetectorElement*>(detector_element);
               if (acts_detector_element) {

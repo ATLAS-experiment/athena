@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # File:    WriteCalibToCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
@@ -237,7 +237,7 @@ if inRun<0:
     if "UPD4" in outtag:
         inRun=TileCalibTools.getPromptCalibRunNumber()
     else:
-        inRun=TileCalibTools.getLastRunNumber()
+        inRun=TileCalibTools.getNextRunNumber()
     if inRun<0:
         log.error( "Bad run number" )
         sys.exit(2)
@@ -364,8 +364,8 @@ else:
             run=TileCalibTools.getPromptCalibRunNumber()
             log.warning( "Run number is not specified, using minimal run number in calibration loop %d", run )
         else:
-            run=TileCalibTools.getLastRunNumber()
-            log.warning( "Run number is not specified, using current run number %d", run )
+            run=TileCalibTools.getNextRunNumber()
+            log.warning( "Run number is not specified, using next run number %d", run )
         if run<0:
             log.error( "Bad run number" )
             sys.exit(2)
@@ -690,6 +690,9 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
             if (comment is None) or (comment == "None"):
                 comm = "None"
                 author = "None"
+            elif comment == "keep":
+                comm = comments[io]
+                author = commentsSplit[io]
             else:
                 if len(comment)==0:
                     if undoCmt:
@@ -706,9 +709,9 @@ if (mval!=0 or Comment is not None) and (len(comment)>0 or len(txtFile)>0):
                     comm = comment
                     if undoCmt:
                         comm = "UNDO " + comm
-                if iov and appendCmt:
+                if (iov and appendCmt) or (not iov and adjust):
                     comm += "  //  " + comments[io]
-                if not undoCmt and iov and (nvalUpdated[io]==0 or comment=="keep"):
+                if not undoCmt and iov and nvalUpdated[io]==0:
                     author = commentsSplit[io]
                 else:
                     author = user

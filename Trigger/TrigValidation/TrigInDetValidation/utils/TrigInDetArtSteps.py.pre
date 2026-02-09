@@ -121,6 +121,10 @@ class TrigInDetReco(ExecStep):
             if (i=='bphys') :
 #bphysChains
                 flags += "'Muon','Bphysics',"
+            if (i=='bphysfs') :
+#bphysfsChains
+                flags += "'Muon','Bphysics',"
+                self.preexec_trig += "flags.Trigger.triggerMenuSetup='Dev_pp_lowMu_run3_v1';"
         if ( flags=='' ) : 
             print( "ERROR: no chains configured" )
 

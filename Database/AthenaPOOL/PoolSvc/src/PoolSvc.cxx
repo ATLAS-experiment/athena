@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -21,7 +21,6 @@
 
 #include "CollectionSvc/CollectionService.h"
 
-#include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 #include "PersistencySvc/IPersistencySvc.h"
 #include "PersistencySvc/ISession.h"
@@ -30,6 +29,7 @@
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
 
 #include "RelationalAccess/ConnectionService.h"
@@ -203,7 +203,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
    m_persistencySvcVec[IPoolSvc::kOutputStream]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[IPoolSvc::kOutputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultROOTContainerType).type())) {
+   if (!m_persistencySvcVec[IPoolSvc::kOutputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_FATAL("Failed to set ROOT default container type via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -348,7 +348,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
    m_persistencySvcVec[id]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultROOTContainerType).type())) {
+   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
       return(IPoolSvc::kOutputStream);
    }
@@ -440,11 +440,11 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
    m_catalog->renamePFN(pf, newpf);
 }
 //__________________________________________________________________________
-pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
-		const std::string& connection,
+pool::ICollection* PoolSvc::createCollection(const std::string& connection,
 		const std::string& collectionName,
+		const pool::DbType& collectionType,
 		unsigned int contextId) const {
-   ATH_MSG_DEBUG("createCollection() type=" << collectionType << ", connection=" << connection
+   ATH_MSG_DEBUG("createCollection() type=" << collectionType.storageName() << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
@@ -461,7 +461,7 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   if (collectionType == "ImplicitCollection") {
+   if (collectionType.majorType() == pool::POOL_StorageType.type()) {
       // Check whether Collection Container exists.
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
       if (dbH == nullptr) {
@@ -943,7 +943,6 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
    try {
       ATH_MSG_INFO("POOL WriteCatalog is " << m_writeCatalog.value());
       ctlg->setWriteCatalog(m_writeCatalog.value());
-      ctlg->connect();
    } catch(std::exception& e) {
       ATH_MSG_ERROR("setWriteCatalog - caught exception: " << e.what());
       return(nullptr); // This catalog is not setup properly!

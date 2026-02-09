@@ -627,21 +627,18 @@ namespace ActsTrk
                                                         const Acts::PerigeeSurface &perigee_surface) const {
      const Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
 
-     std::optional<const Acts::BoundTrackParameters>
+     Acts::Result<Acts::BoundTrackParameters>
         perigeeParam = m_extrapolationTool->propagate(ctx,
                                                       trackParam,
                                                       perigee_surface,
                                                       Acts::Direction::Backward(), // @TODO try forward if backward fails ?
                                                       m_paramExtrapolationParLimit.value());
-     if (!perigeeParam.has_value()) {
+     if (!perigeeParam.ok()) {
         ATH_MSG_WARNING( "Failed to extrapolate to perigee, started from \n" << trackParam << " " << trackParam.referenceSurface().name() );
-
         return trackParam;
      }
-     else {
-        ATH_MSG_DEBUG( "Succeeded to extrapolate to perigee ");
-        return perigeeParam.value();
-     }
+
+     return perigeeParam.value();
   }
 
 }

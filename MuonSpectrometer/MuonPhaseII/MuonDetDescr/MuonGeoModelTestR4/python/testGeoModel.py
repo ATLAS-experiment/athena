@@ -42,7 +42,8 @@ class MuonPhaseIITestDefaults:
     GEODB_R4MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_MSOnly.db"
     ### ITk + Calo + R3-MS ATLAS layout
     GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
-   
+    #### Only the passive material
+    GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/MUON_TOROID.db"
 
 def SetupArgParser():
     from argparse import ArgumentParser

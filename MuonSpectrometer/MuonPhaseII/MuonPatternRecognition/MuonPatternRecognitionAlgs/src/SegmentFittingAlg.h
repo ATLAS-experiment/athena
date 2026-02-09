@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
 #define MUONR4_MUONPATTERNRECOGNTIONALGS_SEGMENTFITTINGALG__H
@@ -20,32 +20,47 @@
 
 #include "MuonPatternHelpers/SegmentAmbiSolver.h"
 #include "MuonPatternHelpers/SegmentLineFitter.h"
-
-#include "xAODMuon/MuonSegmentContainer.h"
-
-
-#include <set>
+#include "MuonPatternHelpers/MdtSegmentSeedGenerator.h"
 
 
 namespace MuonR4 {
-    /// @brief Algorithm to handle segment fits  
-    /// 
-    /// This is currently a placeholder to test ideas! 
-    class SegmentFittingAlg: public AthReentrantAlgorithm{
+    /**  @brief The SegmentFittingAlg fits straight lines to the 
+     *          Mdt/Rpc/Tgc hits associated with the SegmentSeedPatterns.
+     *          The pattern parameters in the bending direction are refined 
+     *          by constructing the tangent to two Mdt measurements and then
+     *          by associating other measurements to the seed. If the procedure
+     *          succeeds, the hits are passed through the straight line procedure.
+     *          At the end of the fit, ambiguities amongst the segment candidates 
+     *          are removed based on the degrees of freedom and the chi2 fit quality */
+    class SegmentFittingAlg: public AthReentrantAlgorithm {
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;
             virtual ~SegmentFittingAlg();
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
         private:
-            using Parameters = SegmentFit::Parameters;
+            using SegmentVec_t = std::vector<std::unique_ptr<Segment>>;
 
-            std::vector<std::unique_ptr<Segment>> fitSegmentSeed(const EventContext& ctx,
-                                                                 const ActsTrk::GeometryContext& gctx,
-                                                                 const SegmentSeed* seed) const;             
-           
+            using Parameters = SegmentFit::Parameters;
+            /** @brief Fit the hits from the pattern seed to segment candidates. Tangent lines
+             *         to a pair of drift circles are constructed. The remaining hits are associated
+             *         based on their chi2 compability. Good seeds are then fitted to segments including
+             *         an outlier rejection and hole recovery procedure
+             * @param ctx: Event context to access the conditions data needed for calibration
+             * @param gctx: Geometry context to access the transforms of the particular reference
+             *              surfaces.
+             * @param seed: The segment seed from which the parameters in non-bending direction &
+             *              the associated hits are taken */
+            SegmentVec_t fitSegmentSeed(const EventContext& ctx,
+                                        const ActsTrk::GeometryContext& gctx,
+                                        const SegmentSeed* seed) const;             
+            /** @brief Resolve the ambiguity amongst the segment candidates within a spectrometer
+                       sector. Segments are rejected if they share hits with other segments and if 
+                       they have poorer quality.
+              @param gctx: GeometryContext to compare the local parameters
+              @param segmentCandidates: The list of segments to be resolved */
             void resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
-                                    std::vector<std::unique_ptr<Segment>>& segmentCandidates) const;
+                                    SegmentVec_t& segmentCandidates) const;
 
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
@@ -70,8 +85,6 @@ namespace MuonR4 {
             Gaudi::Property<bool> m_doBeamspotConstraint{this, "doBeamspotConstraint", false};
             Gaudi::Property<double> m_beamSpotR{this, "BeamSpotRadius", 30.* Gaudi::Units::cm};
             Gaudi::Property<double> m_beamSpotL{this, "BeamSpotLength", 2. * Gaudi::Units::m};
-
-            
             /** @brief Two mdt seeds are the same if their defining parameters match wihin */
             Gaudi::Property<double> m_seedHitChi2{this, "ResoSeedHitAssoc", 5. };
             /** @brief Toggle seed recalibration. The two seed circles are recalibrated using 
@@ -88,11 +101,17 @@ namespace MuonR4 {
             Gaudi::Property<bool> m_fastPreFitter{this, "useFastPreFitter", false};
             /** @brief Tune the number of iterations */
             Gaudi::Property<unsigned> m_maxIter{this, "maxIterations", 50};
+            /** @brief Cut on the number of hits per layer to use the layer for seeding */
+            Gaudi::Property<unsigned> m_busyLayerLimit{this, "busyLayerLimit",  2};
             /** @brief Pointer to the ambiguity reosolution */
             std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
             /** @brief Pointer to the actual segment fitter */
             std::unique_ptr<SegmentFit::SegmentLineFitter> m_fitter{};
-
+            /** @brief Pointer to the L-R segment seeder */
+            std::unique_ptr<SegmentFit::MdtSegmentSeedGenerator> m_seeder{};
+            /** @brief Pointer to the L-R segment seeder used for the BEE
+             *         chambers -> increased hit occupancy */
+            std::unique_ptr<SegmentFit::MdtSegmentSeedGenerator> m_seederBEE{};
     };
 }
 

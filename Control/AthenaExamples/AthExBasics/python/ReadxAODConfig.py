@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configure the ReadxAOD algorithm
 # For guidelines on writing configuration scripts see the following pages:
 # https://atlas-software.docs.cern.ch/athena/configuration/
@@ -16,7 +16,8 @@ def ReadxAODCfg(flags):
     # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/InDetTrackSelectionTool
     # The exact configuration of the tool is set in InDetTrackSelectionTool_Loose_Cfg
     # One could also configure the tool directly here if bespoke settings were needed
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     trackSelectionTool = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags))
 
     # Configure the algorithm.... note that the tool from above is passed

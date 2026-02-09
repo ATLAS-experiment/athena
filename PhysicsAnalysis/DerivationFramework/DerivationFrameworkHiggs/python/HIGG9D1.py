@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #========================================================================
 # HIGG9D1.py for J/psi+bbbar, J/psi+tautau and J/psi+diphoton
 # This requires the flag "HIGG9D1" in Derivation_tf.py   
@@ -138,7 +138,8 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         DoVertexType           = 7)
     acc.addPublicTool(HIGG9D1_Upsi)
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     HIGG9D1_isoTrackSelTool = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(
         flags,
         name          = "HIGG9D1_isoTrackSelTool",

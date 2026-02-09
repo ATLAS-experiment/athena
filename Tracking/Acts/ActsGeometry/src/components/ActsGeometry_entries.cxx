@@ -8,14 +8,9 @@
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ExtrapolationTool.h"
 #include "ActsGeometry/ActsMaterialJsonWriterTool.h"
-#include "ActsGeometry/ActsMaterialMapping.h"
-#include "ActsGeometry/ActsMaterialStepConverterTool.h"
-#include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
 #include "ActsGeometry/ActsPropStepRootWriterSvc.h"
-#include "ActsGeometry/ActsSurfaceMappingTool.h"
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
-#include "ActsGeometry/ActsVolumeMappingTool.h"
 #include "ActsGeometry/ActsWriteTrackingGeometry.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
@@ -29,12 +24,6 @@ DECLARE_COMPONENT(ActsWriteTrackingGeometry)
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
 DECLARE_COMPONENT(ActsTrackingGeometrySvc)
 
-
-DECLARE_COMPONENT(ActsMaterialMapping)
-DECLARE_COMPONENT(ActsSurfaceMappingTool)
-DECLARE_COMPONENT(ActsVolumeMappingTool)
-DECLARE_COMPONENT(ActsMaterialTrackWriterSvc)
-DECLARE_COMPONENT(ActsMaterialStepConverterTool)
 DECLARE_COMPONENT(ActsMaterialJsonWriterTool)
 
 DECLARE_COMPONENT(ActsTrackingGeometryTool)

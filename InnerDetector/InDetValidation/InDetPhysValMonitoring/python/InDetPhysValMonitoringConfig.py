@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetPhysValMonitoringConfig.py
@@ -47,6 +47,10 @@ def InDetRttTruthSelectionToolCfg(
                       else False)
     kwargs.setdefault("maxProdVertRadius",
                       flags.PhysVal.IDPVM.maxProdVertRadius)
+    kwargs.setdefault("minProdVertRadius",
+                      flags.PhysVal.IDPVM.minProdVertRadius)
+    kwargs.setdefault("minAbsD0",
+                      flags.PhysVal.IDPVM.minAbsD0)
 
     if flags.Detector.GeometryID:
         if flags.PhysVal.IDPVM.doValidateLargeD0Tracks or flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
@@ -159,7 +163,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     kwargs.setdefault("doPerAuthorPlots",
                       flags.PhysVal.IDPVM.doPerAuthorPlots)
 
-    if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
+    if flags.Tracking.doTruth and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
         if 'TruthSelectionTool' not in kwargs:
             kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(
@@ -204,8 +208,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
 
         # Options for Truth Strategy : Requires full pile-up truth containers for some
         if flags.PhysVal.IDPVM.setTruthStrategy in ['All', 'PileUp']:
-            if not("xAOD::TruthPileupEventContainer#TruthPileupEvents"
-                   in flags.Input.TypedCollections):
+            if "xAOD::TruthPileupEventContainer#TruthPileupEvents" not in flags.Input.TypedCollections:
                 print('WARNING Truth Strategy for InDetPhysValMonitoring set to %s but TruthPileupEvents are missing in the input' % (flags.PhysVal.IDPVM.setTruthStrategy))
             kwargs.setdefault("PileupSwitch",
                               flags.PhysVal.IDPVM.setTruthStrategy)
@@ -264,7 +267,7 @@ def InDetPhysValMonitoringToolLooseCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_Loose_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_Loose_Cfg(flags)))
@@ -281,7 +284,7 @@ def InDetPhysValMonitoringToolTightPrimaryCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_TightPrimary_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_TightPrimary_Cfg(flags)))
@@ -298,7 +301,7 @@ def InDetPhysValMonitoringToolHILooseCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     if 'TrackSelectionTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionTool_HILoose_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionTool_HILoose_Cfg(flags)))
@@ -404,7 +407,15 @@ def InDetPhysValMonitoringCfg(flags):
 
     if flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
         from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-        acc.merge(InDetLRTMergeCfg(flags))
+        acc.merge(InDetLRTMergeCfg(
+            flags,
+            InputTrackParticleLocations=[
+                "InDetTrackParticles",
+                flags.PhysVal.IDPVM.largeD0TrackCollection,
+            ],
+        ))
+
+    from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
 
     mons = [(True,
              InDetPhysValMonitoringToolCfg),
@@ -425,7 +436,9 @@ def InDetPhysValMonitoringCfg(flags):
             (flags.PhysVal.IDPVM.doValidateHILoose,
              InDetPhysValMonitoringToolHILooseCfg),
             (flags.PhysVal.IDPVM.doValidateGSFTracks,
-             InDetPhysValMonitoringToolGSFCfg)
+             InDetPhysValMonitoringToolGSFCfg),
+            (flags.PhysVal.IDPVM.doActs,
+             PhysValActsCfg)
             ]
 
     tools = []

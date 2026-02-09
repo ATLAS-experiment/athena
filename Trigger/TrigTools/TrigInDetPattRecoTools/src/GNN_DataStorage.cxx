@@ -57,6 +57,7 @@ void TrigFTF_GNN_EtaBin::initializeNodes() {
   m_params.resize(m_vn.size());
   m_vFirstEdge.resize(m_vn.size(), 0);
   m_vNumEdges.resize(m_vn.size(), 0);
+  m_vIsConnected.resize(m_vn.size(), 0);
   
   std::transform(m_vn.begin(), m_vn.end(), m_params.begin(),
                    [](const TrigFTF_GNN_Node* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});

@@ -30,6 +30,7 @@ StatusCode GSCCalibStep::initialize() {
   ATH_CHECK( m_histTool_trackWIDTH.retrieve());
 
   ATH_CHECK(m_vertexContainer_key.initialize());
+  ATH_CHECK(m_eventInfo_key.initialize());
 
   return StatusCode::SUCCESS;
 }
@@ -40,20 +41,42 @@ StatusCode GSCCalibStep::calibrate(xAOD::JetContainer& jets) const {
   ATH_MSG_DEBUG("calibrating jet collection.");
 
   // Retrieve the primary vertex location:
-  SG::ReadHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle (m_vertexContainer_key);
-  const xAOD::VertexContainer& vertices = *vertexHandle;
-  const xAOD::Vertex *HSvertex = findHSVertex(vertices);
-  if(!HSvertex) {
-    ATH_MSG_WARNING("Invalid primary vertex found, will not continue applying the GSC.");
-    return StatusCode::FAILURE;
+  int PVindex = 0;
+
+  // Check if an analysis choose their own PV vertex ("PVIndex")
+  static const SG::AuxElement::ConstAccessor<int> pvIndexAccessor("PVIndex");
+  SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfo_key);
+  if(eventInfo.isValid()) {
+    if(pvIndexAccessor.isAvailable(*eventInfo)){
+      PVindex = pvIndexAccessor(*eventInfo);
+    }
   }
-  int PVindex = HSvertex->index();
+  else{
+    // Get the PV index directly from the vertices
+    SG::ReadHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle (m_vertexContainer_key);
+    const xAOD::VertexContainer& vertices = *vertexHandle;
+    const xAOD::Vertex *HSvertex = findHSVertex(vertices);
+    if(!HSvertex) {
+      ATH_MSG_WARNING("Invalid primary vertex found, will not continue applying the GSC.");
+      return StatusCode::FAILURE;
+    }
+    PVindex = HSvertex->index();
+  }
+
   ATH_MSG_DEBUG("PV index:" << PVindex);
+
+  // Needed for per-vertex reconstructed jets
+  static const SG::ConstAccessor<xAOD::Vertex> originVertexAcc("OriginVertex");
 
   // Calibrate the jets
   for (xAOD::Jet* jet : jets){ 
 
     JetHelper::JetContext jc;
+
+    // For the per-vertex reconstructed jets, use the vertex the jet was reconstructed with respect to
+    if(originVertexAcc.isAvailable(*jet)){
+      PVindex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex")->index();
+    }
 
     xAOD::JetFourMom_t jetconstitP4 = jet->getAttribute<xAOD::JetFourMom_t>("JetConstitScaleMomentum");
     std::vector<float> samplingFrac = jet->getAttribute<std::vector<float> >("EnergyPerSampling");

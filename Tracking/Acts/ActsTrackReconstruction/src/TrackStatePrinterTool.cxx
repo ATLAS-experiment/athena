@@ -39,15 +39,15 @@ namespace ActsTrk
   /// TrackStatePrinter class method definitions comes later.
   /// =========================================================================
 
-  std::string TrackStatePrinterTool::trackStateName(Acts::ConstTrackStateType trackStateType)
+  std::string TrackStatePrinterTool::trackStateName(Acts::ConstTrackStateTypeMap trackStateType)
   {
     static constexpr std::array<std::tuple<bool, Acts::TrackStateFlag, char>, 6> trackStateNames{{
-        {false, Acts::TrackStateFlag::ParameterFlag, '-'},
-        {true, Acts::TrackStateFlag::MeasurementFlag, 'M'},
-        {true, Acts::TrackStateFlag::OutlierFlag, 'O'},
-        {true, Acts::TrackStateFlag::HoleFlag, 'H'},
-        {true, Acts::TrackStateFlag::MaterialFlag, 'm'},
-        {true, Acts::TrackStateFlag::SharedHitFlag, 'S'},
+        {false, Acts::TrackStateFlag::HasParameters, '-'},
+        {true, Acts::TrackStateFlag::HasMeasurement, 'M'},
+        {true, Acts::TrackStateFlag::IsOutlier, 'O'},
+        {true, Acts::TrackStateFlag::IsHole, 'H'},
+        {true, Acts::TrackStateFlag::HasMaterial, 'm'},
+        {true, Acts::TrackStateFlag::IsSharedHit, 'S'},
     }};
     std::string s;
     for (const auto &[b, f, c] : trackStateNames)
@@ -93,7 +93,7 @@ namespace ActsTrk
   {
      if (measurement_surface) {
         const ActsDetectorElement *
-           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->associatedDetectorElement());
+           acts_detector_element = dynamic_cast<const ActsDetectorElement *>(measurement_surface->surfacePlacement());
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
            if (detElem) {
@@ -250,7 +250,7 @@ namespace ActsTrk
       if (compareMeasurementTransforms)
       {
         const ActsDetectorElement *
-            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->associatedDetectorElement());
+            acts_detector_element = dynamic_cast<const ActsDetectorElement *>(surface->surfacePlacement());
         if (acts_detector_element) {
            const InDetDD::SiDetectorElement *detElem = dynamic_cast< const InDetDD::SiDetectorElement *>(acts_detector_element->upstreamDetectorElement());
 

@@ -152,7 +152,7 @@ private:
     double m_fitChi2_phi = 0;
     double m_fitChi2_eta = 0;
 
-    std::vector<FPGATrackSimHitCollection> m_hits; // [layer, hit#] (used for ROOT storing)
+    std::vector<std::vector<FPGATrackSimHit>> m_hits; // [layer, hit#] (used for ROOT storing)
     std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> m_hits_trans; //! (transient) [layer, hit#]
     // A list of hits in the road for each layer.
     // These pointers are not owned by the road.

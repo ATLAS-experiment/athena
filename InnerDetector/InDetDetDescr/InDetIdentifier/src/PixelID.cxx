@@ -677,10 +677,10 @@ PixelID::initLevelsFromDict() {
 
   ATH_MSG_DEBUG("decode index and bit fields for each level:");
   for (int i{};i != nImplementations; ++i){
-    ATH_MSG_DEBUG( std::left << std::setw(14) << m_implNames[i] << m_impl[i]);
+    ATH_MSG_DEBUG( std::left << std::setw(15) << m_implNames[i] << m_impl[i]);
   }
   
-  if (msgLvl(MSG::INFO)){ 
+  if (msgLvl(MSG::DEBUG)){ 
     for (int i{};i != nImplementations; ++i){
       std::cout<< formatOutput(m_implNames[i], m_impl[i]);
       m_impl[i].ored_field().show();

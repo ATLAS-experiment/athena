@@ -282,7 +282,7 @@ namespace ActsTrk {
                     continue;
                 }
 
-                const SurfaceCache* sCache = dynamic_cast<const SurfaceCache *>(step.surface->associatedDetectorElement());
+                const SurfaceCache* sCache = dynamic_cast<const SurfaceCache *>(step.surface->surfacePlacement());
                 if(!sCache) {
                     ATH_MSG_VERBOSE("Surface found but it's a portal, continuing..");
                     continue;

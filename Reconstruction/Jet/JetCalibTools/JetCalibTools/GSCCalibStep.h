@@ -23,6 +23,7 @@
 #include "JetAnalysisInterfaces/IJetCalibStep.h"
 #include "JetAnalysisInterfaces/IVarTool.h"
 
+#include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/VertexContainer.h"
 
 class GSCCalibStep
@@ -65,6 +66,8 @@ private:
   /// Retrieve hard scatter vertex for its index. Return nullptr if one cannot be found
   const xAOD::Vertex *findHSVertex(const xAOD::VertexContainer& vertices) const;
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "SG key for input vertex container"};
+  /// EventInfo to retrieve PV index for analyses choosing their own PV (e.g. H to yy)
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfoKey", "EventInfo"};
 
 }; 
 

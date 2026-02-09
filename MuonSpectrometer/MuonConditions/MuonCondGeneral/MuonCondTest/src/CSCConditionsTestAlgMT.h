@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CSCConditionsTestAlgMT_H
@@ -17,7 +17,6 @@
 // Athena
 #include "Identifier/IdentifierHash.h"
 #include "MuonCondData/CscCondDbData.h"
-#include "MuonCondSvc/MuonHierarchy.h"
 
 // Forward declarations
 class ISvcLocator;

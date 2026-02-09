@@ -102,7 +102,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]
     deco_prefix = 'LLP1_'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     TrackSelectionToolStd = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                    name = "TrackSelectionToolStd",
                                                                                    maxZ0SinTheta = 3.0,
@@ -1031,7 +1032,7 @@ def LLP1Cfg(flags):
                                         "LVL1MuonRoIs",
                                         "NCB_MuonSegments"]
     if flags.Tracking.doLargeD0:
-        LLP1SlimmingHelper.AllVariables = ["MuonSegments_LRT",
+        LLP1SlimmingHelper.AllVariables += ["MuonSegments_LRT",
                                            "CombinedMuonsLRTTrackParticles",
                                            "ExtraPolatedMuonsLRTTrackParticles",
                                            "MSOnlyExtraPolatedMuonsLRTTrackParticles"]

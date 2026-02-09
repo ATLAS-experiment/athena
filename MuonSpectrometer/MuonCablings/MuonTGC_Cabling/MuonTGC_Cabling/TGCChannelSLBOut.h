@@ -7,51 +7,44 @@
 
 #include "MuonTGC_Cabling/TGCChannelId.h"
 
-namespace MuonTGC_Cabling
-{
-  
-class TGCChannelSLBOut : public TGCChannelId
-{
- public:
-  // Constructor & Destructor
-  TGCChannelSLBOut(TGCId::SideType side,
-		   TGCId::ModuleType module,
-		   TGCId::RegionType region,
-		   int sector,
-		   int id,
-		   int block,
-		   int channel);
+namespace MuonTGC_Cabling {
 
-  virtual ~TGCChannelSLBOut(void) {}
+class TGCChannelSLBOut : public TGCChannelId {
+   public:
+    // Constructor & Destructor
+    TGCChannelSLBOut(TGCId::SideType side, TGCId::ModuleType module,
+                     TGCId::RegionType region, int sector, int id, int block,
+                     int channel);
 
-  virtual TGCModuleId* getModule(void) const;
+    virtual ~TGCChannelSLBOut(void) {}
 
-  virtual bool isValid(void) const;
+    virtual TGCModuleId* getModule(void) const;
 
-private:
-  static const int s_numberOfBlockInWD;
-  static const int s_numberOfBlockInSD;
-  static const int s_numberOfBlockInWT;
-  static const int s_numberOfBlockInST;
-  static const int s_numberOfLayerInWD;
-  static const int s_numberOfLayerInSD;
-  static const int s_numberOfLayerInWT;
-  static const int s_numberOfLayerInST;
-  static const int s_channelInBlockForWD;
-  static const int s_channelInBlockForSD;
-  static const int s_channelInBlockForWT;
-  static const int s_channelInBlockForST;
+    virtual bool isValid(void) const;
 
-public:
-  static int getNumberOfBlock(TGCId::ModuleType moduleType);
-  static int getNumberOfLayer(TGCId::ModuleType moduleType);
-  static int getChannelInBlock(TGCId::ModuleType moduleType);
+   private:
+    static const int s_numberOfBlockInWD;
+    static const int s_numberOfBlockInSD;
+    static const int s_numberOfBlockInWT;
+    static const int s_numberOfBlockInST;
+    static const int s_numberOfLayerInWD;
+    static const int s_numberOfLayerInSD;
+    static const int s_numberOfLayerInWT;
+    static const int s_numberOfLayerInST;
+    static const int s_channelInBlockForWD;
+    static const int s_channelInBlockForSD;
+    static const int s_channelInBlockForWT;
+    static const int s_channelInBlockForST;
 
-private:
-  TGCChannelSLBOut(void) {}
+   public:
+    static int getNumberOfBlock(TGCId::ModuleType moduleType);
+    static int getNumberOfLayer(TGCId::ModuleType moduleType);
+    static int getChannelInBlock(TGCId::ModuleType moduleType);
 
+   private:
+    TGCChannelSLBOut(void) {}
 };
 
-} // end of namespace
- 
+}  // namespace MuonTGC_Cabling
+
 #endif

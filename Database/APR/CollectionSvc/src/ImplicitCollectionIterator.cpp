@@ -13,7 +13,7 @@
 
 pool::ImplicitCollectionIterator::
 ImplicitCollectionIterator( pool::IContainer& container,
-                            const pool::ICollectionDescription& description )
+                            const pool::CollectionDescription& description )
       :
       m_container( container ),
       m_tokenIterator( m_container.tokens() ),

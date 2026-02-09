@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 """
@@ -196,7 +196,7 @@ def InDetGlobalLRTMonAlgCfg(helper, acc,
                             flags, name="InDetGlobalLRTMonAlg", **kwargs):
 
     if "TrackSelectionTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetGlobalLRTMonAlg_TrackSelectionToolCfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetGlobalLRTMonAlg_TrackSelectionToolCfg(flags)))

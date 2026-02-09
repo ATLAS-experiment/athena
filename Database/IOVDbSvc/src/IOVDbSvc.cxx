@@ -18,7 +18,7 @@
 #include "AthenaKernel/IOVRange.h"
 #include "IOVDbDataModel/IOVMetaDataContainer.h"
 #include "AthenaKernel/IAddressProvider.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "EventInfoUtils/EventIDFromStore.h"
 #include "DBLock/DBLock.h"
 #include "CxxUtils/checker_macros.h"

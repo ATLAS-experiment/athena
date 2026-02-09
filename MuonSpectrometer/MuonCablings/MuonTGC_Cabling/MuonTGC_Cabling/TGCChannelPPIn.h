@@ -4,34 +4,28 @@
 
 #ifndef MUONTGC_CABLING_TGCCHANNELPPIN_HH
 #define MUONTGC_CABLING_TGCCHANNELPPIN_HH
- 
+
 #include "MuonTGC_Cabling/TGCChannelId.h"
- 
-namespace MuonTGC_Cabling
-{
- 
-class TGCChannelPPIn : public TGCChannelId
-{
-public:
-  // Constructor & Destructor
-  TGCChannelPPIn(TGCId::SideType side,
-		 TGCId::ModuleType module,
-		 TGCId::RegionType region,
-		 int sector,
-		 int id,
-		 int block,
-		 int channel);
 
-  virtual ~TGCChannelPPIn(void) {}
-  
-  virtual TGCModuleId* getModule(void) const;
+namespace MuonTGC_Cabling {
 
-  virtual bool isValid(void) const;
+class TGCChannelPPIn : public TGCChannelId {
+   public:
+    // Constructor & Destructor
+    TGCChannelPPIn(TGCId::SideType side, TGCId::ModuleType module,
+                   TGCId::RegionType region, int sector, int id, int block,
+                   int channel);
 
-private:
-  TGCChannelPPIn(void) {}
+    virtual ~TGCChannelPPIn(void) {}
+
+    virtual TGCModuleId* getModule(void) const;
+
+    virtual bool isValid(void) const;
+
+   private:
+    TGCChannelPPIn(void) {}
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

@@ -13,6 +13,7 @@
 #include "GaudiKernel/IService.h"
 #include "CollectionSvc/ICollection.h"
 #include "PersistencySvc/ITransaction.h"
+#include "StorageSvc/DbType.h"
 #include "DataModelRoot/RootType.h"
 
 #include <string>
@@ -100,9 +101,9 @@ public: // Non-static members
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   virtual pool::ICollection* createCollection(const std::string& collectionType,
-	   const std::string& connection,
+   virtual pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
+	   const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
    /// @return a token for a container entry.

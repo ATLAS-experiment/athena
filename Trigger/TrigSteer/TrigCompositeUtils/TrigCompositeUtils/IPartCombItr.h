@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMPOSITEUTILS_IPARTCOMBITR_H
 #define TRIGCOMPOSITEUTILS_IPARTCOMBITR_H
 
-#include <iterator>
-#include <vector>
-#include <tuple>
-#include <utility>
-#include <algorithm>
-#include <functional>
 #include "xAODBase/IParticleContainer.h"
 #include "TrigCompositeUtils/KFromNItr.h"
 #include "TrigCompositeUtils/LinkInfo.h"
 #include "TrigCompositeUtils/ProductItr.h"
+
+#include <iterator>
+#include <vector>
+#include <tuple>
+#include <functional>
+
 
 namespace TrigCompositeUtils
 {

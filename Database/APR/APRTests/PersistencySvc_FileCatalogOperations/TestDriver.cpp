@@ -13,10 +13,7 @@
 
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
-
-#include "StorageSvc/DbType.h"
-#include "FileCatalog/IFileCatalog.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
@@ -24,6 +21,8 @@
 #include "PersistencySvc/IContainer.h"
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/IPersistencySvc.h"
+
+#include "StorageSvc/DbType.h"
 
 
 pool::TestDriver::TestDriver( const std::string& catname ):
@@ -40,7 +39,6 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   m_fileCatalog = new pool::IFileCatalog;
   std::filesystem::remove( {catname} );
   m_fileCatalog->setWriteCatalog( catname );
-  m_fileCatalog->connect();
 }
 
 pool::TestDriver::~TestDriver()

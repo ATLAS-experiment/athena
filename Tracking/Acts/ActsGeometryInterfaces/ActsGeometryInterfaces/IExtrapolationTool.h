@@ -39,7 +39,7 @@ namespace ActsTrk {
        *         the track parameter's direction
        *  @param pathLimit: Maximum length of the propagated trajectory, if not aborted
        *         by the end of the world condition otherwise. */
-      virtual PropagationOutput propagationSteps(const EventContext& ctx,
+      virtual Acts::Result<PropagationOutput> propagationSteps(const EventContext& ctx,
                        const Acts::BoundTrackParameters& startParameters,
                        Acts::Direction navDir = Acts::Direction::Forward(),
                        double pathLimit = std::numeric_limits<double>::max()) const = 0;
@@ -54,7 +54,7 @@ namespace ActsTrk {
        *         the track parameter's direction 
        *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
        *         aborted if the limit is exceeded and the surface not yet reached. */
-      virtual PropagationOutput propagationSteps(const EventContext& ctx,
+      virtual Acts::Result<PropagationOutput> propagationSteps(const EventContext& ctx,
                                                  const Acts::BoundTrackParameters& startParameters,
                                                  const Acts::Surface& target,
                                                  Acts::Direction navDir = Acts::Direction::Forward(),
@@ -71,7 +71,7 @@ namespace ActsTrk {
        *         the track parameter's direction 
        *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
        *         aborted if the limit is exceeded and the surface not yet reached. */
-      virtual std::optional<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+      virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
                                                                   const Acts::BoundTrackParameters& startParameters,
                                                                   const Acts::Surface& target,
                                                                   Acts::Direction navDir = Acts::Direction::Forward(),
@@ -85,7 +85,7 @@ namespace ActsTrk {
        *         the track parameter's direction 
        *  @param pathLimit: Maximum length of the propagated trajectory. The extrapolation is
        *         aborted if the limit is exceeded and no surface is not yet reached. */
-      virtual std::optional<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
+      virtual Acts::Result<Acts::BoundTrackParameters> propagate(const EventContext& ctx,
                                                                   const Acts::BoundTrackParameters& startParameters,
                                                                   Acts::Direction navDir = Acts::Direction::Forward(),
                                                                   double pathLimit = std::numeric_limits<double>::max()) const = 0;

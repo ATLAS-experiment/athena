@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -15,6 +15,8 @@
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/pool.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 #include "TError.h"
 
 using namespace pool;
@@ -23,6 +25,9 @@ using namespace pool;
 SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
       technologyName( pool::ROOT_StorageType.storageName() )
 {
+   // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
+   Athena::getMessageSvcQuiet = true;
+
    if( argc > 0 && argv[0] )
       executableName = argv[0];
    for ( int i = 1; i < argc; ++i )

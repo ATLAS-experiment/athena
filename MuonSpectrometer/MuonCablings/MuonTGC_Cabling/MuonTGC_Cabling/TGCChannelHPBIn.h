@@ -7,42 +7,35 @@
 
 #include "MuonTGC_Cabling/TGCChannelId.h"
 
-namespace MuonTGC_Cabling
-{
-  
-class TGCChannelHPBIn : public TGCChannelId
-{
-public:
-  // Constructor & Destructor
-  TGCChannelHPBIn(TGCId::SideType side,
-		  TGCId::SignalType signal,
-		  TGCId::RegionType region,
-		  int sector,
-		  int id,
-		  int block,
-		  int channel);
-  
-  virtual ~TGCChannelHPBIn(void) {}
-  
-  virtual TGCModuleId* getModule(void) const;
+namespace MuonTGC_Cabling {
 
-  virtual bool isValid(void) const;
+class TGCChannelHPBIn : public TGCChannelId {
+   public:
+    // Constructor & Destructor
+    TGCChannelHPBIn(TGCId::SideType side, TGCId::SignalType signal,
+                    TGCId::RegionType region, int sector, int id, int block,
+                    int channel);
 
-private:
-  static const int s_numberOfBlock;
-  static const int s_channelInBlock;
-  static const int s_slbInBlock;
-  
-public:
-  static int getNumberOfBlock(void);
-  static int getChannelInBlock(void);
-  static int getSlbInBlock(void);
+    virtual ~TGCChannelHPBIn(void) {}
 
-private:
-  TGCChannelHPBIn(void) {}
+    virtual TGCModuleId* getModule(void) const;
 
+    virtual bool isValid(void) const;
+
+   private:
+    static const int s_numberOfBlock;
+    static const int s_channelInBlock;
+    static const int s_slbInBlock;
+
+   public:
+    static int getNumberOfBlock(void);
+    static int getChannelInBlock(void);
+    static int getSlbInBlock(void);
+
+   private:
+    TGCChannelHPBIn(void) {}
 };
 
-} // end of namespace
- 
+}  // namespace MuonTGC_Cabling
+
 #endif

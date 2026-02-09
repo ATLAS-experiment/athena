@@ -266,7 +266,7 @@ def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
     result.merge(MdtCondDbAlgCfg(flags))
 
     the_alg = None
-    if flags.Muon.usePhaseIIGeoSetup:
+    if (flags.Muon.usePhaseIIGeoSetup and flags.Trigger.Muon.useNewRegionSelector ):
         if not flags.Detector.GeometryMDT: 
             kwargs.setdefault("MdtCablingKey", "")
         if not flags.Detector.GeometryRPC:

@@ -5,6 +5,7 @@
 #include "GeneratorFilters/MultiElecMuTauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include <cmath>
 
 MultiElecMuTauFilter::MultiElecMuTauFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -78,7 +79,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
           }
         }
 
-        if (taunu) {
+        if (taunu and tau) {
           // Good hadronic decay
           CLHEP::HepLorentzVector tauVisMom = CLHEP::HepLorentzVector(tau->momentum().px() - taunu->momentum().px(),
                                                         tau->momentum().py() - taunu->momentum().py(),

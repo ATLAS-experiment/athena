@@ -19,7 +19,7 @@ if __name__=="__main__":
                         default=False, action='store_true')
     parser.add_argument("--houghR4", help="Schedules the R4 pattern -> legacy segment -> legacy track chain",
                         action="store_true", default = False)
-    parser.add_argument("--use-gpu", action="store_true", default=True, 
+    parser.add_argument("--use-gpu", action="store_true", dest="use_gpu", default=None,
                        help="Use GPU for ONNX inference (default: True)")
     parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
                        help="Use CPU for ONNX inference")
@@ -34,8 +34,8 @@ if __name__=="__main__":
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
     from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
-    # Determine whether user requested GPU (parser sets args.use_gpu)
-    use_gpu_requested = getattr(args, "use_gpu", True)
+    # Use command line argument if provided, otherwise default to True
+    use_gpu_requested = args.use_gpu if args.use_gpu is not None else True
     # Runtime check for GPU availability. Prefer ONNXRuntime provider list,
     # fall back to PyTorch if ONNX runtime isn't available.
     gpu_available = False

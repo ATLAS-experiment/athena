@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSLITE.py
 # This defines DAOD_PHYSLITE, an unskimmed DAOD format for Run 3.
@@ -453,8 +453,10 @@ def PHYSLITECfg(flags):
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSLITESlimmingHelper)
-        from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
-        acc.merge(HFClassificationCommonCfg(flags))
+        # This block is only needed if input is AOD, as it is already done for PHYS->PHYSLITE
+        if 'StreamAOD' in flags.Input.ProcessingTags:
+            from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
+            acc.merge(HFClassificationCommonCfg(flags))
 
     # Save the extra variables which aren't included by other means
     btag_variables = [f'GN2v01_p{x}' for x in ['b', 'c', 'u', 'tau']]

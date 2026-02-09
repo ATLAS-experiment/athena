@@ -127,8 +127,15 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_2mu4_bBmumux_BpmumuKp_L12MU3V', l1SeedThresholds=['MU3V'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3V']),
         ChainProp(name='HLT_2mu4_bBmumux_BpmumuKp_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
 
-
-
+        # ATR-32209: B -> h+h-
+        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
     ]
 
     chains['Egamma'] = [

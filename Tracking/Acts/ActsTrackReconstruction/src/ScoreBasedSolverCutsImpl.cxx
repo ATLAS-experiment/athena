@@ -103,7 +103,7 @@ addSummaryInformation(const ActsTrk::TrackContainer& trackContainer)
         continue;
       }
 
-      if (ts.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) {
+      if (ts.typeFlags().hasMeasurement()) {
 
         // Check if the volume is the innermost pixel volume
         // Compute the number of hits in the innermost pixel layer
@@ -128,10 +128,10 @@ addSummaryInformation(const ActsTrk::TrackContainer& trackContainer)
       // Check if the track state has a hole flag
       // Compute the number of double holes
       auto iTypeFlags = ts.typeFlags();
-      if (!iTypeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (!iTypeFlags.isHole()) {
         doubleFlag = false;
       }
-      if (iTypeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (iTypeFlags.isHole()) {
         if (doubleFlag) {
           nDoubleHoles++;
           doubleFlag = false;

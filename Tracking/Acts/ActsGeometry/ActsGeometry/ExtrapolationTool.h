@@ -63,28 +63,20 @@ public:
 
   ~ExtrapolationTool();
 
-private:
-  // set up options for propagation
-  using SteppingLogger = Acts::detail::SteppingLogger;
-  using EndOfWorld = Acts::EndOfWorldReached;
-  using ResultType = Acts::Result<PropagationOutput>;
-
-
-public:
-  virtual PropagationOutput
+  virtual Acts::Result<PropagationOutput>
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    Acts::Direction navDir = Acts::Direction::Forward(),
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
-  std::optional<Acts::BoundTrackParameters>
+  Acts::Result<Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::Direction navDir = Acts::Direction::Forward(),
             double pathLimit = std::numeric_limits<double>::max()) const override;
 
-  virtual PropagationOutput
+  virtual Acts::Result<PropagationOutput>
   propagationSteps(const EventContext& ctx,
                    const Acts::BoundTrackParameters& startParameters,
                    const Acts::Surface& target,
@@ -92,7 +84,7 @@ public:
                    double pathLimit = std::numeric_limits<double>::max()) const override;
 
   virtual
-  std::optional<Acts::BoundTrackParameters>
+  Acts::Result<Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,

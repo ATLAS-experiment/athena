@@ -7,31 +7,30 @@
 
 #include "MuonTGC_Cabling/TGCDatabase.h"
 
-namespace MuonTGC_Cabling
-{
- 
-class TGCDatabasePPToSL : public TGCDatabase
-{
-public:
-  // Constructor & Destructor
-  TGCDatabasePPToSL(const std::string& filename, const std::string& blockname);
+namespace MuonTGC_Cabling {
 
-  TGCDatabasePPToSL(const TGCDatabasePPToSL&);
+class TGCDatabasePPToSL : public TGCDatabase {
+   public:
+    // Constructor & Destructor
+    TGCDatabasePPToSL(const std::string& filename,
+                      const std::string& blockname);
 
-  virtual ~TGCDatabasePPToSL(void);
+    TGCDatabasePPToSL(const TGCDatabasePPToSL&);
 
-  virtual bool update(const std::vector<int>& );
- 
-  virtual int  find(const std::vector<int>&) const;
-    
-private:
-  virtual void readDB(void);
-  TGCDatabasePPToSL(void) {}
+    virtual ~TGCDatabasePPToSL(void);
 
-  /** hidden assignment operator */
-  TGCDatabasePPToSL & operator=(const TGCDatabasePPToSL &right);
+    virtual bool update(const std::vector<int>&);
+
+    virtual int find(const std::vector<int>&) const;
+
+   private:
+    virtual void readDB(void);
+    TGCDatabasePPToSL(void) {}
+
+    /** hidden assignment operator */
+    TGCDatabasePPToSL& operator=(const TGCDatabasePPToSL& right);
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

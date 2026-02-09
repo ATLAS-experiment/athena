@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -13,7 +13,6 @@
 #include <TFile.h>
 #include <TH1.h>
 #include <TKey.h>
-#include <TString.h>
 #include <string>
 
 namespace dqutils {
@@ -47,8 +46,8 @@ namespace dqutils {
       }
 
       bool dirExists = false;
-      TString run_dir;
-      TString lb_dir;
+      std::string run_dir;
+      std::string lb_dir;
       int writeEOS = 0;
       int writeLOCAL = -1;
       bool IsFirstTime = true;
@@ -91,7 +90,7 @@ namespace dqutils {
                 if (tdir_lb_name.find("lb") != std::string::npos) {
                   lb_dir = tdir_lb_name;
 
-                  dirExists = f->GetDirectory(run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity");
+                  dirExists = f->GetDirectory((run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity").c_str());
                   if (dirExists) {
                     out_inStem = run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity/nVx";
                     out_outStem = "nVx_" + lb_dir;
@@ -123,8 +122,8 @@ namespace dqutils {
 
             if (writeEOS != 0 && writeLOCAL == 0) {
               int return_code = system(
-                "xrdcp VxMon_" + run_dir + "_" + AthenaTAG + ".root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" + run_dir + "_" + AthenaTAG +
-                ".root");
+                ("xrdcp VxMon_" + run_dir + "_" + AthenaTAG + ".root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" + run_dir + "_" + AthenaTAG +
+                 ".root").c_str());
               if (return_code == 0) std::ignore = remove(out_LOCAL.c_str()); //returns zero on success
               else {
                 delete f;

@@ -34,6 +34,9 @@
 #include <memory>
 
 namespace {
+    using SteppingLogger = Acts::detail::SteppingLogger;
+    using EndOfWorld = Acts::EndOfWorldReached;
+
     using CurvedStepper_t = Acts::EigenStepper<Acts::EigenStepperDefaultExtension>;
     using CurvedPropagator_t = Acts::Propagator<CurvedStepper_t, Acts::Navigator>;
     using StraightStepper_t = Acts::StraightLineStepper;
@@ -41,9 +44,6 @@ namespace {
 }
 
 namespace ActsExtrapolationDetail {
-
-
-  
   using VariantPropagatorBase = boost::variant<CurvedPropagator_t, StraightPropagator_t>;
 
   class VariantPropagator : public VariantPropagatorBase
@@ -51,7 +51,6 @@ namespace ActsExtrapolationDetail {
   public:
     using VariantPropagatorBase::VariantPropagatorBase;
   };
-
 }
 
 using ActsExtrapolationDetail::VariantPropagator;
@@ -123,7 +122,7 @@ ExtrapolationTool::initialize()
 }
 
 
-ExtrapolationTool::PropagationOutput
+Acts::Result<ExtrapolationTool::PropagationOutput>
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -139,7 +138,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
   PropagationOutput output;
 
-  auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
+  auto res = boost::apply_visitor([&](const auto& propagator) -> Acts::Result<ExtrapolationTool::PropagationOutput> {
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
@@ -164,10 +163,10 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
     }, *m_varProp);
 
   if (!res.ok()) {
-    ATH_MSG_ERROR("Got error during propagation: "
+    ATH_MSG_DEBUG("Got error during propagation: "
 		              << res.error() << " " << res.error().message()
                   << ". Returning empty step vector.");
-    return {};
+    return res.error();
   }
   output = std::move(*res);
 
@@ -183,7 +182,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 
-std::optional<Acts::BoundTrackParameters>
+Acts::Result<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::Direction navDir /*= Acts::Direction::Forward()*/,
@@ -196,7 +195,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
+  auto parameters = boost::apply_visitor([&](const auto& propagator) -> Acts::Result<Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
@@ -209,17 +208,20 @@ ExtrapolationTool::propagate(const EventContext& ctx,
       
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
-        ATH_MSG_ERROR("Got error during propagation:" << result.error()
-                      << ". Returning empty parameters.");
-        return std::nullopt;
+        ATH_MSG_DEBUG("Got error during propagation:" << result.error());
+        return result.error();
       }
-      return result.value().endParameters;
+      if (!result.value().endParameters.has_value()) {
+        ATH_MSG_DEBUG("Propagation did not result in valid end parameters.");
+        return Acts::PropagatorError::Failure;
+      }
+      return result.value().endParameters.value();
     }, *m_varProp);
 
   return parameters;
 }
 
-ExtrapolationTool::PropagationOutput
+Acts::Result<ExtrapolationTool::PropagationOutput>
 ExtrapolationTool::propagationSteps(const EventContext& ctx,
                                         const Acts::BoundTrackParameters& startParameters,
                                         const Acts::Surface& target,
@@ -235,7 +237,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  auto res = boost::apply_visitor([&](const auto& propagator) -> ResultType {
+  auto res = boost::apply_visitor([&](const auto& propagator) -> Acts::Result<ExtrapolationTool::PropagationOutput> {
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
@@ -264,9 +266,9 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
     }, *m_varProp);
 
   if (!res.ok()) {
-    ATH_MSG_ERROR("Got error during propagation:" << res.error()
+    ATH_MSG_DEBUG("Got error during propagation:" << res.error()
                   << ". Returning empty step vector.");
-    return {};
+    return res.error();
   }
   output = std::move(*res);
 
@@ -276,7 +278,7 @@ ExtrapolationTool::propagationSteps(const EventContext& ctx,
   return output;
 }
 
-std::optional<Acts::BoundTrackParameters>
+Acts::Result<Acts::BoundTrackParameters>
 ExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
@@ -291,7 +293,7 @@ ExtrapolationTool::propagate(const EventContext& ctx,
     = m_trackingGeometryTool->getGeometryContext(ctx);
   auto anygctx = geo_ctx.context();
 
-  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
+  auto parameters = boost::apply_visitor([&](const auto& propagator) -> Acts::Result<Acts::BoundTrackParameters> {
       using Propagator = std::decay_t<decltype(propagator)>;
 
       // Action list and abort list
@@ -306,11 +308,14 @@ ExtrapolationTool::propagate(const EventContext& ctx,
         propagator.template propagate<Acts::BoundTrackParameters, Options,
                                     Acts::SurfaceReached, Acts::PathLimitReached>(startParameters, target, options);
       if (!result.ok()) {
-        ATH_MSG_ERROR("Got error during propagation: " << result.error()
-                      << ". Returning empty parameters.");
-        return std::nullopt;
+        ATH_MSG_DEBUG("Got error during propagation: " << result.error());
+        return result.error();
       }
-      return result.value().endParameters;
+      if (!result.value().endParameters.has_value()) {
+        ATH_MSG_DEBUG("Propagation did not result in valid end parameters.");
+        return Acts::PropagatorError::Failure;
+      }
+      return result.value().endParameters.value();
     }, *m_varProp);
 
   return parameters;

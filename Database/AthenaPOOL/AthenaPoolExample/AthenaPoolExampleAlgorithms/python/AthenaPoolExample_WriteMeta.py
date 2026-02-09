@@ -1,6 +1,6 @@
 #!/env/python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @file AthenaPoolExample_WriteMeta.py
 ## @brief Example job options file to illustrate how to write metadata to Pool.
@@ -10,6 +10,9 @@
 # ----------------
 # 1. Writes a SimplePoolFile5.root file with ExampleHit, using WriteData algorithm
 # ------------------------------------------------------------
+
+import os
+os.system ('rm -f Catalog2.xml')
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory

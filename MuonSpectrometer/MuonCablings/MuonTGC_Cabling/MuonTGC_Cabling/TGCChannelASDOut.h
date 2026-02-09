@@ -10,32 +10,23 @@
 namespace MuonTGC_Cabling {
 
 class TGCChannelASDOut : public TGCChannelId {
- public:
-  // Constructor & Destructor
-  TGCChannelASDOut(TGCId::SideType side,
-		   TGCId::SignalType signal,
-		   TGCId::RegionType region,
-		   int sector,
-		   int layer,
-		   int chamber,
-		   int channel);
+   public:
+    // Constructor & Destructor
+    TGCChannelASDOut(TGCId::SideType side, TGCId::SignalType signal,
+                     TGCId::RegionType region, int sector, int layer,
+                     int chamber, int channel);
 
-  TGCChannelASDOut(TGCId::SideType side,
-		   TGCId::SignalType signal,
-		   int octant,
-		   int moduleSector,
-		   int layer,
-		   int chamber,
-		   int channel);
+    TGCChannelASDOut(TGCId::SideType side, TGCId::SignalType signal, int octant,
+                     int moduleSector, int layer, int chamber, int channel);
 
-  virtual ~TGCChannelASDOut(void) = default;
+    virtual ~TGCChannelASDOut(void) = default;
 
-  virtual bool isValid(void) const;
+    virtual bool isValid(void) const;
 
- private:
-  TGCChannelASDOut() = delete;
+   private:
+    TGCChannelASDOut() = delete;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

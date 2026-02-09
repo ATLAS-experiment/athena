@@ -24,6 +24,8 @@ def MuonNSWSegmentFinderAlgCfg(flags, name = "MuonNswSegmentFinderAlg", **kwargs
 def MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlg", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("downWeightPrdMultiplicity", True)
+    if flags.Muon.enableMLBucketFilter and name == "MuonEtaHoughTransformAlg":
+        kwargs.setdefault("SpacePointContainer", "FilteredMlBuckets")
     theAlg = CompFactory.MuonR4.EtaHoughTransformAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
     return result
@@ -63,6 +65,12 @@ def MuonPatternRecognitionCfg(flags):
     result = ComponentAccumulator()
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
     result.merge(ActsGeometryContextAlgCfg(flags))
+    
+    if flags.Muon.enableMLBucketFilter:
+        from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
+        bucketTool = result.popToolsAndMerge(GraphBucketFilterToolCfg(flags))
+        result.merge(GraphInferenceAlgCfg(flags, InferenceTools=[bucketTool]))
+    
     segmentContainers = []
     if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
         segmentContainers+=["MuonNswSegments"]

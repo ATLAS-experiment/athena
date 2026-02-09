@@ -244,7 +244,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 return False
 
             # if OR decision is added to selection of input container, there is also no point in adding to output
-            if len(containerName.split(".")) > 1 and containerName.split(".")[1] == selectionName:
+            if selectionName in config.getSelectionNames(containerName.split(".")[0]):
                 return False
 
             # otherwise, OR decision is standalone selection, so add it to output

@@ -48,32 +48,7 @@ StatusCode TauSmearingTool::initialize()
         m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
       }
 
-    } else if (m_sRecommendationTag == "2022-prerec") {
-
-      ATH_MSG_WARNING("2022-prerec tag are pre-recommendations superseeded by 2025-prerec");
-
-      if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
-        ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);
-        return StatusCode::FAILURE;
-      }
-
-      if (m_sGenerator!="PoPy" && m_sCampaign!="Sherpa"){
-        ATH_MSG_ERROR("unknown generator tag (PoPy|Sherpa):" << m_sCampaign);
-        return StatusCode::FAILURE;
-      }
-
-      if(m_useFastSim) {
-        ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
-      }
-
-      if (m_sGenerator == "PoPy" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc20-prerec_v2.root";
-      if (m_sCampaign=="mc21") {
-        m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc21-prerec_v2.root";
-        if (m_sGenerator=="Sherpa")ATH_MSG_WARNING("No Sherpa mc21 recommendations available yet, using PoPy8!");
-      }
-      if (m_sGenerator == "Sherpa" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_Sherpa2211-prerec_v2.root";
-    }
-    else {
+    } else {
       ATH_MSG_ERROR("unknown recommendation tag " << m_sRecommendationTag);
       return StatusCode::FAILURE;
     }

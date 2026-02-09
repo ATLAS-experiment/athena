@@ -125,7 +125,7 @@ void FPGATrackSimRoad::repopulateTransHits() {  // this is needed if trying to r
     for (unsigned ilayer = 0; ilayer < m_hits.size(); ilayer++) {
        m_hits_trans[ilayer].resize(m_hits[ilayer].size());
        for (unsigned ihit = 0; ihit < m_hits[ilayer].size(); ihit++) {
-          m_hits_trans[ilayer][ihit] = std::make_shared<const FPGATrackSimHit>(*m_hits[ilayer][ihit]);
+          m_hits_trans[ilayer][ihit] = std::make_shared<const FPGATrackSimHit>(m_hits[ilayer][ihit]);
        }
     }
 }
@@ -134,7 +134,7 @@ void FPGATrackSimRoad::setHits(unsigned layer, std::vector<std::shared_ptr<const
     m_hits_trans[layer] = std::move(hits);
     m_hits[layer].clear();
     for (const auto& hit : m_hits_trans[layer]) {
-      m_hits[layer].push_back(new FPGATrackSimHit(*hit));
+      m_hits[layer].push_back(*hit);
     }
 } // ensure setNLayers is called first
 

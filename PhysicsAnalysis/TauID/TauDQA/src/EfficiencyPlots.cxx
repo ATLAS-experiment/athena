@@ -19,16 +19,6 @@ namespace Tau{
 
   void EfficiencyPlots::initializePlots()
   {
-    m_eff_pt_jetRNNloose       = BookTProfile("Eff_Pt_jetRNNloose"," Matched Tau loose RNN eff in pt; pt; eff",20, 0., 150.0);
-    m_eff_pt_jetRNNmed         = BookTProfile("Eff_Pt_jetRNNmed","Matched Tau med RNN eff in pt; pt; eff", 20, 0.0, 150.0);
-    m_eff_pt_jetRNNtight       = BookTProfile("Eff_Pt_jetRNNtight","Matched Tau tight RNN eff in pt; pt; eff", 20, 0.0, 150.0);
-    m_eff_pt_jetRNNlooseHighPt = BookTProfile("Eff_Pt_jetRNNlooseHightPt"," Matched Tau loose RNN eff in pt; pt; eff", 20, 0.0, 1500.0);
-    m_eff_pt_jetRNNmedHighPt   = BookTProfile("Eff_Pt_jetRNNmedHightPt","Matched Tau med RNN eff in pt; pt; eff", 20, 0.0, 1500.0);
-    m_eff_pt_jetRNNtightHighPt = BookTProfile("Eff_Pt_jetRNNtightHightPt","Matched Tau tight RNN eff in pt; pt; eff", 20, 0.0, 1500.0);
-    m_eff_jetRNNloose          = BookTProfile("Eff_jetRNNloose"," Matched Tau loose RNN eff total; bin; eff",3,-1.5,1.5);
-    m_eff_jetRNNmed            = BookTProfile("Eff_jetRNNmed","Matched Tau med RNN eff total; bin; eff",3,-1.5,1.5);
-    m_eff_jetRNNtight          = BookTProfile("Eff_jetRNNtight","Matched Tau tight RNN eff total; bin; eff",3,-1.5,1.5);
-
     m_eff_pt_jetGNTauloose       = BookTProfile("Eff_Pt_jetGNTauloose"," Matched Tau loose GNTau eff in pt; pt; eff", 20, 0., 150.0);
     m_eff_pt_jetGNTaumed         = BookTProfile("Eff_Pt_jetGNTaumed","Matched Tau med GNTau eff in pt; pt; eff", 20, 0.0, 150.0);
     m_eff_pt_jetGNTautight       = BookTProfile("Eff_Pt_jetGNTautight","Matched Tau tight GNTau eff in pt; pt; eff", 20, 0.0, 150.0);
@@ -59,40 +49,6 @@ namespace Tau{
 
   void EfficiencyPlots::fill(const xAOD::TauJet& tau, float weight, float avg_mu)
   {
-    if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigLoose) ) {
-      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_jetRNNloose         ->Fill(0., 1., weight);
-    }
-    else {
-      m_eff_pt_jetRNNloose      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_pt_jetRNNlooseHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_jetRNNloose         ->Fill(0., 0., weight);
-    }
-   
-    if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigMedium) ) {
-      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_jetRNNmed         ->Fill(0., 1., weight);
-    }
-    else {
-      m_eff_pt_jetRNNmed      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_pt_jetRNNmedHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_jetRNNmed         ->Fill(0., 0., weight);
-    }
-
-    if ( tau.isTau(xAOD::TauJetParameters::JetRNNSigTight) ) {
-      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, 1., weight);
-      m_eff_jetRNNtight         ->Fill(0., 1., weight);
-    }
-    else {
-      m_eff_pt_jetRNNtight      ->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_pt_jetRNNtightHighPt->Fill(tau.pt()/Athena::Units::GeV, 0., weight);
-      m_eff_jetRNNtight         ->Fill(0., 0., weight);
-    }
-
-
     static const SG::ConstAccessor<char> acc_GNTauL("GNTauL_v0prune");
     double pass_loose = acc_GNTauL.withDefault(tau,false);
     m_eff_pt_jetGNTauloose->Fill(tau.pt()/Athena::Units::GeV, pass_loose, weight);

@@ -428,6 +428,13 @@ class TauWorkingPointConfig (ConfigBlock) :
                 alg.efficiencyCorrectionsTool.useFastSim = config.dataType() is DataType.FastSim
                 alg.efficiencyCorrectionsTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
                 alg.scaleFactorDecoration = 'tau_EvetoTrueTau_effSF' + selectionPostfix + '_%SYS%'
+                # since all TauSelectionTool config files have loose eRNN, code only this option for now
+                alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                #overwrite decision in case user selects a WP manually
+                if self.manual_sel_evetowp == "loose":
+                    alg.efficiencyCorrectionsTool.EleIDLevel = 2
+                elif self.manual_sel_evetowp == "medium":
+                    alg.efficiencyCorrectionsTool.EleIDLevel = 3
                 alg.outOfValidity = 2 #silent
                 alg.outOfValidityDeco = 'bad_EvetoTrueTau_eff' + selectionPostfix
                 alg.taus = config.readName (self.containerName)
@@ -546,3 +553,4 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.tauID)
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{chain_out}")
+

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -320,6 +320,7 @@ if __name__ == '__main__':
   flags.Concurrency.NumConcurrentEvents = 1
   flags.Exec.SkipEvents = args.skipEvents
   flags.Output.AODFileName = 'AOD.pool.root'
+  flags.Trigger.doLVL1 = True
   flags.Trigger.L1.doMuon = True
   flags.Trigger.enableL1MuonPhase1 = True
   flags.Trigger.L1.doMuonTopoInputs = True
@@ -327,8 +328,6 @@ if __name__ == '__main__':
   flags.PerfMon.doFullMonMT = args.perfmon
   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
   flags.Trigger.enableL1TopoDump = args.enableL1TopoDump
-  from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag
-  flags.IOVDb.GlobalTag = getLastGlobalTag(flags)
 
   if not flags.Input.isMC:
     from AthenaConfiguration.TestDefaults import defaultGeometryTags

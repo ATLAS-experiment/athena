@@ -148,6 +148,8 @@ def BCMPrimeHitAnalysisCfg(flags, name='BCMPrimeHitAnalysis', **kwargs):
 def SiHitAnalysisCfg(flags):
     acc = ComponentAccumulator()
 
+    acc.merge(TruthHitAnalysisCfg(flags))
+
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelHitAnalysisCfg(flags))
 
