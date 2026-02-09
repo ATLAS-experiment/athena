@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelMaterialMap.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "RDBAccessSvc/IRDBRecordset.h"
 
 #include <iostream>
@@ -24,13 +23,13 @@ PixelMaterialMap::Key::operator<(const PixelMaterialMap::Key &rhs) const
 }
 
 
-PixelMaterialMap::PixelMaterialMap(const IGeometryDBSvc * db, const IRDBRecordset_ptr& mapTable)
+PixelMaterialMap::PixelMaterialMap(const IRDBRecordset_ptr& mapTable)
 {
-  for (unsigned int i = 0; i < db->getTableSize(mapTable); i++) {
-    int layerdisk = db->getInt(mapTable,"LAYERDISK",i);
-    int typenum    = db->getInt(mapTable,"TYPENUM",i);
-    std::string volumeName = db->getString(mapTable,"VOLUMENAME",i);
-    std::string material   = db->getString(mapTable,"MATERIAL",i);
+  for (const auto& rec : *mapTable) {
+    int layerdisk = rec->getInt("LAYERDISK");
+    int typenum    = rec->getInt("TYPENUM");
+    std::string volumeName = rec->getString("VOLUMENAME");
+    std::string material   = rec->getString("MATERIAL");
     addMaterial(layerdisk, typenum, volumeName, material);
   }
 }
