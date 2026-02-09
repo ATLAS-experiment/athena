@@ -8,14 +8,16 @@
 #ifndef COLUMNAR_TOOL_WRAPPER_COLUMN_VECTOR_WRAPPER_H
 #define COLUMNAR_TOOL_WRAPPER_COLUMN_VECTOR_WRAPPER_H
 
+#include <ColumnarInterfaces/ColumnInfo.h>
+
 #include <span>
 #include <string>
 #include <typeinfo>
+#include <unordered_map>
 #include <vector>
 
 namespace columnar
 {
-  struct ColumnInfo;
   class IColumnarTool;
 
 
@@ -82,6 +84,22 @@ namespace columnar
     /// offset column for their container. This is used to check that
     /// the size of the column matches the size of the offset column.
     std::size_t offsetIndex = 0u;
+
+
+    /// @brief the access mode for the column
+    ColumnAccessMode accessMode = ColumnAccessMode::input;
+
+    /// @brief the name of the offset column (or empty for none)
+    std::string offsetName;
+
+    /// @brief for link columns: the target container names
+    std::vector<std::string> linkTargetNames;
+
+    /// @brief if this is a variant link column, the name of the key column
+    std::string variantLinkKeyColumn;
+
+    /// @brief the fixed dimensions (if any)
+    std::vector<unsigned> fixedDimensions;
   };
 
 
@@ -131,6 +149,15 @@ namespace columnar
     getColumn (std::size_t index) const {
       return m_elements.at (index); }
 
+    /// @brief get the column index for the given name, or nullIndex if not found
+    [[nodiscard]] std::size_t
+    getColumnIndex (const std::string& name) const noexcept {
+      auto iter = m_nameToIndex.find(name);
+      return (iter != m_nameToIndex.end()) ? iter->second : nullIndex; }
+
+    /// @brief get all columns as a map of ColumnInfo for use with IColumnData::connect
+    [[nodiscard]] std::unordered_map<std::string, ColumnInfo> getAllColumnInfo() const;
+
 
     /// @brief check the self-consistency of the header
     void checkSelf () const;
@@ -145,6 +172,9 @@ namespace columnar
 
     /// @brief the elements in the columnar data vector
     std::vector<ColumnVectorElementHeader> m_elements;
+
+    /// @brief map from column name to index for deduplication
+    std::unordered_map<std::string, std::size_t> m_nameToIndex;
   };
 
 
