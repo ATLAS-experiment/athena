@@ -169,7 +169,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
   /// Defining TrackAnalysisCollections object
   /// to contain all collections for this event
-  IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value() );
+  IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value(), m_trkAnaDef );
   ATH_CHECK( thisTrkAnaCollections.initialize() );
 
   /// filling TrackAnalysisCollections

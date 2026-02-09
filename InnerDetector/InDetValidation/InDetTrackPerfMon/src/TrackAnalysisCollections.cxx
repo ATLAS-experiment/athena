@@ -19,10 +19,12 @@
 /// -------------------
 /// --- Constructor ---
 /// -------------------
-IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
-  const std::string& anaTag ) :
+IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& anaTag, const ITrackAnalysisDefinition* trkAnaDef) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag ), m_newChain( true ), m_newRoi( true )
+    m_anaTag(anaTag),
+    /// cheat with the name for the time being, this is NOT a service handle,
+    m_trkAnaDefSvc(trkAnaDef),
+    m_newChain(true),m_newRoi(true) 
 {
   /// tracks
   m_truthPartVec.resize( NStages );
@@ -38,12 +40,29 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections(
 /// ------------------
 /// --- initialize ---
 /// ------------------
+/// this is a tool, instantiated, AS NEW for EVERY event, therefor
+/// having an initialize() method of this nature is completely
+/// inappropriate and utterly pointless - do everything, as the 
+/// pattern of use becomes Tool atool(); atool.initialise();
+/// always, so why simply initialise it correctly in the
+/// constructor ? And why for it to retrieve this trkAnaDefSvc
+/// all the time, when the top level tool has already retieved
+/// it, and the information doesn't, and indeed mustn't change
+/// throughout the job. So the correct approach is to pass the
+/// existing config object into the constructor for every event
+/// rather than for the framework to needlessly retrieve the
+/// every time it is needed.
+
 StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
+
+#if 0
+  /// nope, get this during construction ...
   /// load trkAnaDefSvc
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
   ATH_CHECK( m_trkAnaDefSvc.isValid() );
-
+#endif
+  
   /// construct track matching lookup table
   /// based on the types of test && reference
   /// Truth->Track

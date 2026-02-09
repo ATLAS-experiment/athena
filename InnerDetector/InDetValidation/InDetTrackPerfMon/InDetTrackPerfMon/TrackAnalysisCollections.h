@@ -57,7 +57,7 @@ namespace IDTPM {
     enum Counter : size_t { ALL, SELECTED, INROI, MATCHED, NCOUNTERS };
 
     /// Constructor 
-    TrackAnalysisCollections( const std::string& anaTag );
+    TrackAnalysisCollections( const std::string& anaTag, const ITrackAnalysisDefinition* trkAnaDef=0 );
 
     /// Destructor
     ~TrackAnalysisCollections() = default;
@@ -287,8 +287,19 @@ namespace IDTPM {
   private:
 
     /// TrackAnalysis properties
+    /// why do ALL these classes have independen m_anaTag variables ? this is very
+    /// deangerous, as none of them applear to ever be checked - there should be
+    /// one analTag for an analysis, and all the tools in the analysis use the
+    /// same thing
     std::string m_anaTag;
-    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
+
+    /// actually, we don;t want to use a service handle for this,
+    /// we extract it at the tool level, and pass it in when this
+    /// tool is constructed for each event We stick with the Svc
+    /// name however for the time being to avoid having to change
+    /// the code that much
+    //    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
+    const ITrackAnalysisDefinition* m_trkAnaDefSvc;
     bool m_newChain, m_newRoi;
 
     /// --- Collections class variables ---
