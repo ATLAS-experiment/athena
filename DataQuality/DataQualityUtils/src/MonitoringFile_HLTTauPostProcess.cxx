@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -148,7 +148,6 @@ namespace dqutils {
 
     f->Close();
     delete f;
-    //std::cout << "--> HLTTauPostProcess: finished HLT Tau post-processing"<<std::endl;
   }
 
   void MonitoringFile::HLTTauPostProcess(TFile* f, TDirectory* dir,
@@ -160,18 +159,14 @@ namespace dqutils {
                                          const std::string& nameApp) {
     std::string path = getPath(dir);
 
-    //cout<<"HLTTauPostProcess in "<< path
-//         <<" pathApp="<<pathApp
-//         <<" pathAppEff="<<pathAppEff
-//         <<" nameStyle="<<nameStyle<<endl;
+
 
     std::string basePath = path + pathApp + "/";
     if (f->cd(basePath.c_str()) == 0) {
-      //cout<<"basePath isn't there!"<<endl;
       return;
     }
 
-    //TH1F* hRoI[lvlN.size()][varN.size()];
+    //coverity[STACK_USE]
     TH1F* hRoI[100][100];
     for (unsigned int iLvl = 0; iLvl < lvlN.size(); iLvl++) {
       for (unsigned int iVar = 0; iVar < varN.size(); iVar++) {
@@ -179,7 +174,6 @@ namespace dqutils {
         if (nameStyle == 1) hName = basePath + "h" + lvlN[iLvl] + "RoI" + varN[iVar] + (iLvl == 0 ? "Denom" : "Num") + nameApp;
         if (nameStyle == 2) hName = basePath + "hTau" + varN[iVar] + lvlN[iLvl] + nameApp;
         if (!CheckHistogram(f, hName.c_str())) {
-          //cout<<" histo "<<hName<<" is not in f "<<f->GetName()<<endl;
           return;
         }
         hRoI[iLvl][iVar] = (TH1F*) (f->Get(hName.c_str()))->Clone();

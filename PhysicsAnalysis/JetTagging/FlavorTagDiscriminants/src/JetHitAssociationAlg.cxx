@@ -12,8 +12,11 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "RoiDescriptor/RoiDescriptor.h"
 
 //Include some helpful ROOT objects here.
-#include "math.h"
+
 #include "CxxUtils/phihelper.h"
+#include <cmath>
+#include <memory> //unique_ptr
+#include <algorithm> //sort, min, max
 
 
 namespace FlavorTagDiscriminants {
@@ -98,7 +101,7 @@ namespace FlavorTagDiscriminants {
         ));
       }
 
-      hitAssociation(*jet) = links;
+      hitAssociation(*jet) = std::move(links);
     }
 
     return StatusCode::SUCCESS;
