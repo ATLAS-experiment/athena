@@ -1131,11 +1131,23 @@ def setupMenu():
         ChainProp(name='HLT_j200_3timeSig15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
         ChainProp(name='HLT_j250_2timing15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
         ChainProp(name='HLT_j250_3timeSig15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
+        ChainProp(name='HLT_j450_2timing15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_j450_3timeSig15_L1jJ160', groups=SingleJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED'],stream=[PhysicsStream]),
+
         # Multi-Jet
         ChainProp(name='HLT_2j45_2j55_3timeSig15_L14jJ40', groups=MultiJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream]),
         ChainProp(name='HLT_2j100_2timeSig15_L1jJ90', groups=MultiJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream]),
         ChainProp(name='HLT_j220_j150_2timing15_L1jJ160', groups=MultiJetGroup+PrimaryPhIGroup, l1SeedThresholds=['FSNOSEED']*2, stream=[PhysicsStream]), 
-        
+
+        #Support Chains
+        ChainProp(name='HLT_j200_L1jJ160', groups=SingleJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_2j45_2j55_L14jJ40', groups=MultiJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED']*2,stream=[PhysicsStream]),
+        ChainProp(name='HLT_2j100_L1jJ90', groups=MultiJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED'],stream=[PhysicsStream]),
+        ChainProp(name='HLT_j220_j150_L1jJ160', groups=MultiJetGroup+SupportPhIGroup, l1SeedThresholds=['FSNOSEED']*2,stream=[PhysicsStream]),
+
+
+
+
         # ATR-21596 HT Delayed for Dark Showers 
         ChainProp(name='HLT_j0_HT650XX0eta240_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SupportPhIGroup+SingleJetGroup+Topo3Group),
 
