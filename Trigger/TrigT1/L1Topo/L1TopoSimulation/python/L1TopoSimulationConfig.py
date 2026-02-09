@@ -485,7 +485,6 @@ if __name__ == '__main__':
       sequenceName="AthAlgSeq"
   )
 
-  from GaudiSvc.GaudiSvcConf import THistSvc # noqa: F401
   histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring-l1topo.root', OPT='RECREATE'"])
   acc.addService(histSvc)
 
