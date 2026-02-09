@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -46,24 +46,23 @@ namespace CP
     // Don't let exceptions escape from destructors.
     try {
       m_combiner.m_params.m_eventDecisionOutputDecoration.set (*m_eventInfo, m_passed, m_sys);
+      // only recording nominal event selection for now
+      if (m_passed && m_sys.empty())
+        m_combiner.m_params.m_passedNominal += 1;
+  
+#ifndef XAOD_STANDALONE
+      // only recording nominal event selection for now
+      if (m_passed && m_sys.empty() && m_combiner.m_params.m_cutID != 0)
+      {
+        // FIX ME: this is passing an event weight of 1, which is
+        // probably not the correct thing to do.
+        m_combiner.m_params.m_cutFlowSvc->addEvent (m_combiner.m_params.m_cutID, 1.);
+      }
+#endif
     }
     catch (...) {
       ANA_MSG_DEBUG ("exception in ~SysFilterReporter for " << m_sys.name());
     }
-
-    // only recording nominal event selection for now
-    if (m_passed && m_sys.empty())
-      m_combiner.m_params.m_passedNominal += 1;
-
-#ifndef XAOD_STANDALONE
-    // only recording nominal event selection for now
-    if (m_passed && m_sys.empty() && m_combiner.m_params.m_cutID != 0)
-    {
-      // FIX ME: this is passing an event weight of 1, which is
-      // probably not the correct thing to do.
-      m_combiner.m_params.m_cutFlowSvc->addEvent (m_combiner.m_params.m_cutID, 1.);
-    }
-#endif
   }
 
 
