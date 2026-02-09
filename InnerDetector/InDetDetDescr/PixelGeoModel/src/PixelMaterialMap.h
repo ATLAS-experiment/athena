@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PixelMaterialMap_H
-#define PixelMaterialMap_H
+#ifndef PIXELGEOMODEL_PIXELMATERIALMAP_H
+#define PIXELGEOMODEL_PIXELMATERIALMAP_H
 
 // Class to interpret and query table PixelMaterialMap
 
@@ -11,13 +11,11 @@
 #include <map>
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
-class IGeometryDBSvc;
-
 class PixelMaterialMap
 {
 
 public:
-  PixelMaterialMap(const IGeometryDBSvc * db, const IRDBRecordset_ptr& mapTable);
+  PixelMaterialMap(const IRDBRecordset_ptr& mapTable);
 
   void addMaterial(int layerdisk, int typenum, const std::string & volumeName, const std::string & materialName);
   std::string getMaterial(int layerdisk, int typenum, const std::string & volumeName) const;
