@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PseudoJetAlgorithm.cxx 
@@ -16,7 +16,7 @@ constexpr float ghostscale = 1e-40;
 //**********************************************************************
 
 StatusCode PseudoJetAlgorithm::initialize() {
-  ATH_MSG_INFO("Initializing " << name() << "...");
+  ATH_MSG_INFO("Initializing " << name() << " with properties:");
 
   // This is horrible, but still necessary for the time being
   // PJG needs to know if this is the basic EMTopo cluster collection
@@ -29,6 +29,8 @@ StatusCode PseudoJetAlgorithm::initialize() {
   // "Ghost" in output collection name? If so is a ghost collection.
   m_isGhost = (m_outcoll.key()).find("Ghost") != std::string::npos;
 
+  ATH_MSG_INFO("   " << m_label.value() << ": " << m_incoll.key() << " -> " << m_outcoll.key());
+  
   print();
 
   if(m_incoll.key().empty() || m_outcoll.key().empty()) {
@@ -126,29 +128,24 @@ PseudoJetAlgorithm::createPseudoJets(const xAOD::IParticleContainer& ips, const 
 
 void PseudoJetAlgorithm::print() const {
   std::string sskip = m_skipNegativeEnergy ? "true" : "false";
-  // May want to change to DEBUG
-  ATH_MSG_INFO("Properties for PseudoJetGetter " << name());
-  ATH_MSG_INFO("             Label: " << m_label);
-  ATH_MSG_INFO("   Input container: " << m_incoll.key());
-  ATH_MSG_INFO("  Output container: " << m_outcoll.key());
-  ATH_MSG_INFO("   Skip negative E: " << sskip);
-  ATH_MSG_INFO("         Is EMTopo: " << m_emtopo);
-  ATH_MSG_INFO("          Is PFlow: " << m_pflow);
-  ATH_MSG_INFO("            Is UFO: " << m_ufo);
-  ATH_MSG_INFO("          Is ghost: " << m_isGhost);
-  ATH_MSG_INFO(" Treat negative E as ghost: " << m_negEnergyAsGhosts.value());
-  ATH_MSG_INFO(" Running by-vertex reco: " << m_byVertex.value());
-  ATH_MSG_INFO(" Vertex input container: " << m_vertexContainer_key.key());
+  ATH_MSG_DEBUG("   Skip negative E: " << sskip);
+  ATH_MSG_DEBUG("         Is EMTopo: " << m_emtopo);
+  ATH_MSG_DEBUG("          Is PFlow: " << m_pflow);
+  ATH_MSG_DEBUG("            Is UFO: " << m_ufo);
+  ATH_MSG_DEBUG("          Is ghost: " << m_isGhost);
+  ATH_MSG_DEBUG(" Treat negative E as ghost: " << m_negEnergyAsGhosts.value());
+  ATH_MSG_DEBUG(" Running by-vertex reco: " << m_byVertex.value());
+  ATH_MSG_DEBUG(" Vertex input container: " << m_vertexContainer_key.key());
 
   if(m_pflow){
-    ATH_MSG_INFO("   Use charged FEs: " << m_useCharged.value());
-    ATH_MSG_INFO("   Use neutral FEs: " << m_useNeutral.value());
-    ATH_MSG_INFO("Use charged PV FEs: " << m_useChargedPV.value());
-    ATH_MSG_INFO("   PU sideband def: " << m_useChargedPUsideband.value());
+    ATH_MSG_DEBUG("   Use charged FEs: " << m_useCharged.value());
+    ATH_MSG_DEBUG("   Use neutral FEs: " << m_useNeutral.value());
+    ATH_MSG_DEBUG("Use charged PV FEs: " << m_useChargedPV.value());
+    ATH_MSG_DEBUG("   PU sideband def: " << m_useChargedPUsideband.value());
   }
   if(m_ufo){
-    ATH_MSG_INFO("   Use charged UFOs: " << m_useCharged.value());
-    ATH_MSG_INFO("   Use neutral UFOs: " << m_useNeutral.value());
+    ATH_MSG_DEBUG("   Use charged UFOs: " << m_useCharged.value());
+    ATH_MSG_DEBUG("   Use neutral UFOs: " << m_useNeutral.value());
   }
 }
 

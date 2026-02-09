@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * Name    : EFexEMClusterTool.cxx
@@ -9,6 +9,7 @@
 
 #include "EFexEMClusterTool.h"
 #include "TileEvent/TileCellContainer.h"
+#include <cmath>
 
 
 LVL1::EFexEMClusterTool::EFexEMClusterTool(const std::string& type, const std::string& name, const IInterface* parent)
@@ -1364,10 +1365,13 @@ LVL1::EFexEMClusterTool::NextEtaCell_OW( const CaloCell*inputCell, bool upwards,
    else ATH_MSG_DEBUG ( "ISSUE: " << __LINE__ );
 
    // Calculate the increment for eta: it depends on whether we are moving 'up' & which side we are on
-   int incrementEta;
-   int ithSide = ithPos_neg / abs(ithPos_neg);
-   if (upwards) incrementEta = ithSide;
-   else incrementEta = ithSide * -1;
+   int incrementEta = upwards ? 1 : -1;
+   
+   int ithSide{};
+   if (auto denom = std::abs(ithPos_neg); denom!=0){
+     ithSide = ithPos_neg / denom;
+   }
+   incrementEta *= ithSide;
    int tracker = 0;
    // Lower end of OW, going inwards
    if (ithEta_index==minEta_index && ithRegion==0 && incrementEta==-1){
@@ -1439,29 +1443,21 @@ LVL1::EFexEMClusterTool::NextEtaCell_OW( const CaloCell*inputCell, bool upwards,
          tracker = 9;
       }
       else if (ithSampling==1){
-         if (ithRegion==0){     // haven't we covered this? (ATW)
-            nextPos_neg = ithSide;
-            nextRegion = 1;
-            nextEta_index = 2;
-            tracker = 10;
-         }
-         else {
-            tracker = 11;
-            // Layer one has muliple regions
-            nextRegion = ithRegion-1;
-            if (nextRegion==0) {
-               nextEta_index=0;
-               ATH_MSG_DEBUG ( "ISSUE: "<< __LINE__);
-            }
-            else if (nextRegion==1) {
-               nextRegion = 0;
-               nextEta_index= 0;
-            }
-            else if (nextRegion==2) nextEta_index=11;
-            else if (nextRegion==3) nextEta_index=7;
-            else if (nextRegion==4) nextEta_index=15;
-         }
-      }
+          tracker = 11;
+          // Layer one has muliple regions
+          nextRegion = ithRegion-1;
+          if (nextRegion==0) {
+             nextEta_index=0;
+             ATH_MSG_DEBUG ( "ISSUE: "<< __LINE__);
+          }
+          else if (nextRegion==1) {
+             nextRegion = 0;
+             nextEta_index= 0;
+          }
+          else if (nextRegion==2) nextEta_index=11;
+          else if (nextRegion==3) nextEta_index=7;
+          else if (nextRegion==4) nextEta_index=15;
+       }
    }
    // Middle of region in middle of endcap
    else {
@@ -1521,8 +1517,11 @@ LVL1::EFexEMClusterTool::NextEtaCell_IW( const CaloCell* inputCell, bool upwards
    else if (ithRegion!=1) ATH_MSG_DEBUG ( "ISSUE: " <<__LINE__);
 
    // Calculate the increment for eta: it depends on whether we are moving 'up' & which side we are on
-   int incrementEta;
-   int ithSide = ithPos_neg / abs(ithPos_neg);
+   int incrementEta{};
+   int ithSide{};
+   if (ithPos_neg != 0){
+     ithSide = ithPos_neg / std::abs(ithPos_neg);
+   }
    if (upwards) incrementEta = ithSide;
    else incrementEta = ithSide * -1;
    // Lower end of region IW, going inwards

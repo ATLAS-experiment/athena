@@ -18,7 +18,6 @@ StatusCode JetAlgorithm::initialize() {
   ATH_MSG_INFO("  Tool count: " << m_exetools.size());
   for ( const ToolHandle<IJetExecuteTool>& tool : m_exetools ) {
     ATH_MSG_INFO("    " << tool->name());
-    tool->print();
   }
   return StatusCode::SUCCESS;
 }

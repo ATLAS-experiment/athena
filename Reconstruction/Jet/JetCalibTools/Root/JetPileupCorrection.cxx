@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TEnv.h>
@@ -39,7 +39,7 @@ JetPileupCorrection::~JetPileupCorrection() {
 
 StatusCode JetPileupCorrection::initialize() {
 
-  ATH_MSG_INFO("Initializing pileup correction.");
+  ATH_MSG_DEBUG("Initializing pileup correction.");
 
   if (m_doOrigin) ATH_MSG_INFO("OriginScale: " << m_originScale);
 
@@ -102,14 +102,14 @@ StatusCode JetPileupCorrection::initialize() {
   }
 
   m_jetStartScale = m_config->GetValue("PileupStartingScale","JetConstitScaleMomentum");
-  ATH_MSG_INFO("JetPileupCorrection: Starting scale: " << m_jetStartScale);
+  ATH_MSG_DEBUG("JetPileupCorrection: Starting scale: " << m_jetStartScale);
   if ( m_jetStartScale.compare("DO_NOT_USE") == 0 ) {
     ATH_MSG_WARNING("Configuration file does not specify the jet starting scale!");
   }
 
   m_useFull4vectorArea = m_config->GetValue("ApplyFullJetArea4MomentumCorrection", false);
-  if(m_doJetArea) ATH_MSG_INFO("Jet area pile up correction will be applied.");
-  if ( m_useFull4vectorArea ) ATH_MSG_INFO("  Full 4-vector jet area correction is activated.");
+  if(m_doJetArea) ATH_MSG_DEBUG("Jet area pile up correction will be applied.");
+  if ( m_useFull4vectorArea ) ATH_MSG_DEBUG("  Full 4-vector jet area correction is activated.");
   //ATH_MSG_INFO(" \n");
 
   if(m_do3Dcorrection){
