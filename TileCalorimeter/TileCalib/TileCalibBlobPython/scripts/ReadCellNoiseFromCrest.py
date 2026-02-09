@@ -138,12 +138,14 @@ hashMgrBC=TileCellTools.TileCellHashMgr("UpgradeBC")
 hashMgrABC=TileCellTools.TileCellHashMgr("UpgradeABC")
 
 #=== Initialize blob reader
-folderTAG = tag.upper()
-if folderTAG.startswith("TILE") or folderTAG.startswith("CALO") or folderTAG.startswith("LAR") :
+folderTag = tag
+tag = tag.upper()
+tag1 = tag.split('_')[1][:4] if '_' in tag else tag[:4]
+if tag1 == "TILE" or tag1 == "CALO" or tag1[:3] == "LAR" or tag.startswith("TILE") or tag.startswith("CALO") or tag.startswith("LAR"):
     folderPath=""
 if not os.path.isfile(schema):
-    log.info("Initializing folder %s with tag %s", folderPath, tag)
-blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath, tag, run, lumi)
+    log.info("Initializing folder %s with tag %s", folderPath, folderTag)
+blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath, folderTag, run, lumi)
 log.info("Comment: %s", blobReader.getComment())
 
 #=== create CaloCondBlobFlt
