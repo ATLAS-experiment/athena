@@ -147,9 +147,9 @@ class TileBlobReaderCrest(TileCalibLogger):
             prefix=prefix.strip('-').split('-')[0]
         if prefix.startswith('Calo') and 'NoiseCell' not in prefix:
             prefix='CALO'+prefix[4:]
-        if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
+        if 'UPD1' in globalTag or 'UPD4' in globalTag or ('COND' not in globalTag and 'CREST' not in globalTag):
             if prefix != '':
-                if globalTag.startswith(prefix) or globalTag.startswith(prefix.upper()):
+                if prefix in globalTag or prefix.upper() in globalTag:
                     tag=globalTag
                 else:
                     tag=prefix+'-'+globalTag
