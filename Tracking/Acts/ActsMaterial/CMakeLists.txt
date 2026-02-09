@@ -20,13 +20,22 @@ atlas_add_library( ActsMaterial
 set_target_properties( ActsMaterial PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 # Install files from the package:
-atlas_install_scripts( scripts/*.py )
+atlas_install_scripts( scripts/*.py test/*.sh)
 
 # Test(s) in the package:
 atlas_add_test( MaterialStepWriter
-                SCRIPT RunGeantinoMaterialTrackProduction.py
+                SCRIPT RunGeantinoMaterialTrackProduction.py --maxEvents 1
                 PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( MaterialStepWriterToroid
+                SCRIPT testMaterialWriteToroid.sh
+                PROPERTIES TIMEOUT 600
+                PRIVATE_WORKING_DIRECTORY
+                POST_EXEC_SCRIPT nopost.sh )
+
+
 
 
 
