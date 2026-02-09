@@ -5,6 +5,8 @@
 #ifndef MuonPRDTEST_RPCDigitVARIABLES_H
 #define MuonPRDTEST_RPCDigitVARIABLES_H
 
+#include <string>
+
 #include "MuonDigitContainer/RpcDigitContainer.h"
 #include "MuonPRDTest/PrdTesterModule.h"
 #include "MuonTesterTree/TwoVectorBranch.h"
@@ -26,7 +28,9 @@ namespace MuonPRDTest {
         VectorBranch<float>& m_RPC_tot{parent().newVector<float>("Digits_RPC_timeOverThresh")};
         ThreeVectorBranch m_RPC_dig_globalPos{parent(), "Digits_RPC_globalPos"};
         TwoVectorBranch m_RPC_dig_localPos{parent(), "Digits_RPC_localPos"};
-        RpcIdentifierBranch m_RPC_dig_id{parent(), "Digits_RPC"};
+        RpcIdentifierBranch m_RPC_dig_id{parent(), "Digits_RPC"};	
+	VectorBranch<int>& m_RPC_secIndex{parent().newVector<int>("Digits_RPC_sectorIndex")};
+	VectorBranch<std::string>& m_RPC_secName{parent().newVector<std::string>("Digits_RPC_sectorName")};
     };
 }  // namespace MuonPRDTest
 #endif  // MuonPRDTEST_RPCDigitVARIABLES_H
