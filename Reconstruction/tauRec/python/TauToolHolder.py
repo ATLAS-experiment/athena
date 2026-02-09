@@ -171,7 +171,8 @@ def TauTrackRNNClassifierCfg(flags):
 
     myTauTrackClassifier = TauTrackRNNClassifier( name = _name,
                                                   Classifiers = [ result.popToolsAndMerge(TauTrackRNNCfg(flags)) ],
-                                                  classifyLRT = _classifyLRT )
+                                                  classifyLRT = _classifyLRT,
+                                                  classifyLRTWithDedicated = flags.Tau.classifyLRTWithDedicated)
 
     result.setPrivateTools(myTauTrackClassifier)
     return result

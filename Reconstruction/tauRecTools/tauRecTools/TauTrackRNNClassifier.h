@@ -61,11 +61,15 @@ public:
   virtual StatusCode executeTrackClassifier(xAOD::TauJet& pTau, xAOD::TauTrackContainer& tauTrackContainer) const override;
 
  private:
+
+  StatusCode classifyLRTTracks(std::vector<xAOD::TauTrack*>& vTracks, xAOD::TauJet& xTau) const;
+
   ToolHandleArray<TrackRNN> m_vClassifier {this, "Classifiers", {}};
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainerKey {this, "Key_vertexInputContainer", "PrimaryVertices", "Vertex container key"};
 
   Gaudi::Property<bool> m_classifyLRT{this, "classifyLRT", true}; 
+  Gaudi::Property<bool> m_classifyLRTWithDedicated{this, "classifyLRTWithDedicated", false};
   Gaudi::Property<bool> m_classifyOnlyCoreTracks{this, "ClassifyOnlyCoreTracks", false};
   Gaudi::Property<bool> m_skipBadTracks{this, "SkipBadTracks", false};
 

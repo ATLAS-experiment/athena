@@ -22,6 +22,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.isStandalone", False)
     # Classify Large Radius Tracks in tau track classifier
     tau_cfg.addFlag("Tau.classifyLRT", False)
+    tau_cfg.addFlag("Tau.classifyLRTWithDedicated", False)
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
@@ -71,7 +72,6 @@ def createTauConfigFlags():
                         ["GNTauVL_v0prune", "GNTauL_v0prune", "GNTauM_v0prune", "GNTauT_v0prune"],
                         ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
                     ])
-
 
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags

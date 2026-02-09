@@ -43,6 +43,7 @@ StatusCode TauTrackRNNClassifier::initialize()
   return StatusCode::SUCCESS;
 }
 
+
 //______________________________________________________________________________
 StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAOD::TauTrackContainer& tauTrackCon) const {
 
@@ -64,23 +65,29 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
     xTrack->setFlag(xAOD::TauJetParameters::unclassified, true);
   }
 
-  // don't classify LRTs even if LRTs were associated with taus in TauTrackFinder
-  if(!m_classifyLRT) {
+  // Collect the associated tracks from TauTrackFinder and either classify 
+  // with dedicated TC or not at all
+  if(!m_classifyLRT || m_classifyLRTWithDedicated) {
     std::vector<xAOD::TauTrack*> vLRTs;
     std::vector<xAOD::TauTrack*>::iterator it = vTracks.begin(); 
     while(it != vTracks.end()) {      
       if((*it)->flag(xAOD::TauJetParameters::LargeRadiusTrack)) {	
-	vLRTs.push_back(*it);
+	    vLRTs.push_back(*it);
         it = vTracks.erase(it);
       }
       else {
-	++it;
+	    ++it;
       }
     }
 
-    // decorate LRTs with default RNN scores
-    for (auto classifier : m_vClassifier) {
-      ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
+    if (m_classifyLRTWithDedicated) {
+      // decorate LRTs with dedicated TC scores
+      ATH_CHECK(classifyLRTTracks(vLRTs, xTau));
+    } else {
+      // decorate LRTs with default RNN scores
+      for (auto classifier : m_vClassifier) {
+        ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
+      }
     }
   }
 
@@ -162,6 +169,42 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
   }
   xTau.setDetail(xAOD::TauJetParameters::nModifiedIsolationTracks, static_cast<int>(xTau.nTracks(xAOD::TauJetParameters::modifiedIsolationTrack)));
 
+  return StatusCode::SUCCESS;
+}
+
+//______________________________________________________________________________
+
+StatusCode TauTrackRNNClassifier::classifyLRTTracks(std::vector<xAOD::TauTrack*>& vTracks, xAOD::TauJet& xTau) const {
+  static const SG::Accessor<float> idScoreCharged("rnn_chargedScore");
+  static const SG::Accessor<float> idScoreIso("rnn_isolationScore");
+  static const SG::Accessor<float> idScoreConv("rnn_conversionScore");
+  static const SG::Accessor<float> idScoreFake("rnn_fakeScore");
+  for(xAOD::TauTrack* xTrack : vTracks) {
+    idScoreCharged(*xTrack) = 0.;
+    idScoreConv(*xTrack) = 0.;
+    idScoreIso(*xTrack) = 0.;
+    idScoreFake(*xTrack) = 0.;
+
+    double dR = xTau.p4().DeltaR(xTrack->p4());
+
+    float weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
+
+    // Cut values taken from a cut optimisation study
+    bool passed = (xTrack->pt() > 1000.0) && (dR < 0.2) && (weight > 40.);
+
+    ANA_MSG_DEBUG("xTrack: " << xTrack->pt() << " dR: " << dR << " weight: " << weight << " passed: " << passed);
+
+    if (passed) {
+      xTrack->setFlag(xAOD::TauJetParameters::classifiedCharged, true);
+      xTrack->setFlag(xAOD::TauJetParameters::classifiedFake, false);
+    } else {
+      xTrack->setFlag(xAOD::TauJetParameters::classifiedCharged, false);
+      xTrack->setFlag(xAOD::TauJetParameters::classifiedFake, true);
+    }
+    xTrack->setFlag(xAOD::TauJetParameters::classifiedConversion, false);
+    xTrack->setFlag(xAOD::TauJetParameters::classifiedIsolation, false);
+    xTrack->setFlag(xAOD::TauJetParameters::unclassified, false);
+  }
   return StatusCode::SUCCESS;
 }
 
