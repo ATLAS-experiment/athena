@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,7 +16,7 @@
 
 #include "InDetRawData/TRT_LoLumRawData.h"
 #include "InDetRawData/TRT_RDORawData.h"
-
+#include <cassert>
 
 
 // default constructor
