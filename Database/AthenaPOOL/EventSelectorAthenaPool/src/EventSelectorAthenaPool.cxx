@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file EventSelectorAthenaPool.cxx
@@ -33,7 +33,6 @@
 // Pool
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/TokenList.h"
 #include "StorageSvc/DbType.h"
 
 #include <boost/tokenizer.hpp>
@@ -1020,12 +1019,10 @@ StatusCode EventSelectorAthenaPool::recordAttributeList() const {
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::fillAttributeList(coral::AttributeList *attrList, const std::string &suffix, bool copySource) const
 {
-   const pool::TokenList& tokenList = m_headerIterator->currentRow().tokenList();
-   for (pool::TokenList::const_iterator iter = tokenList.begin(), last = tokenList.end(); iter != last; ++iter) {
-      attrList->extend(iter.tokenName() + suffix, "string");
-      (*attrList)[iter.tokenName() + suffix].data<std::string>() = iter->toString();
-      ATH_MSG_DEBUG("record AthenaAttribute, name = " << iter.tokenName() + suffix << " = " << iter->toString() << ".");
-   }
+   const auto& row = m_headerIterator->currentRow();
+   attrList->extend( row.tokenName() + suffix, "string" );
+   (*attrList)[ row.tokenName() + suffix ].data<std::string>() = row.token().toString();
+   ATH_MSG_DEBUG("record AthenaAttribute, name = " << row.tokenName() + suffix << " = " << row.token().toString() << ".");
 
    std::string eventRef = "eventRef";
    if (m_isSecondary.value()) {

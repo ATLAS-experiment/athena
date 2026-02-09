@@ -30,8 +30,7 @@ namespace pool {
 
 
    void
-   ImplicitCollection::open( ICollection::OpenMode mode,
-         ISession* session )
+   ImplicitCollection::open( ICollection::OpenMode mode, ISession* session )
    {
       if ( mode != ICollection::READ ) {
          ATH_MSG_ERROR( "An implicit collection can be opened only in READ mode" );
@@ -159,7 +158,7 @@ namespace pool {
 
    ICollectionCursor& ImplicitCollection::cursor()
    {
-      ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container, m_description );
+      ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container );
       return *cursor;
    }
 }

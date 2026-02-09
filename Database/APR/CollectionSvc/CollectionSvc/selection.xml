@@ -5,7 +5,4 @@
   <class name="pool::CollectionDescription" />
   <class name="pool::CollectionColumn" />
   <class name="pool::CollectionRowBuffer" />
-  <class name="pool::TokenList" />
-  <class name="pool::TokenList::iterator" />
-  <class name="pool::TokenList::iterator_base" />
 </lcgdict>

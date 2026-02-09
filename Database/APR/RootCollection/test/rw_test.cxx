@@ -6,7 +6,6 @@
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/TokenList.h"
 #include "CollectionSvc/ICollectionCursor.h"
 #include "StorageSvc/DbType.h"
 
