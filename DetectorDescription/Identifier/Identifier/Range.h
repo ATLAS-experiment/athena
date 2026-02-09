@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_RANGE_H
 #define IDENTIFIER_RANGE_H
  
+
 #include <Identifier/ExpandedIdentifier.h>
 #include "Identifier/IdentifierField.h"
 #include <vector>
 #include <cassert>
 #include <stdexcept>
 #include <bit>
-#include <iosfwd>
+#include <iostream>
+class MsgStream;
  
 /** 
  *    A Range describes the possible ranges for the field values of an ExpandedIdentifier 
@@ -130,8 +132,8 @@ public:
   /// Check if two Ranges overlap. 
   bool overlaps_with (const Range& other) const; 
  
-  void show () const; 
-  void show (std::ostream& s) const; 
+  void show (std::ostream& s = std::cout) const; 
+  void show (MsgStream & s) const; 
  
   /// Produce a textual representation of the range using the input format 
   operator std::string () const; 

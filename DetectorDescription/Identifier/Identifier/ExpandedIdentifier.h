@@ -1,14 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_EXPANDEDIDENTIFIER_H
 #define IDENTIFIER_EXPANDEDIDENTIFIER_H
 
+
 #include <string>
 #include <algorithm>//for lexicographical_compare in the .icc file
 #include <boost/container/small_vector.hpp>
-#include <iosfwd>
+#include <iostream>
+
+class MsgStream;
 
 //-----------------------------------------------
 //
@@ -155,9 +158,10 @@ public:
   operator std::string () const;
   /// Returns whether the expanded Identifier contains any information
   bool isValid() const;
-  /// Send to std::cout
-  void show () const;
-
+  /// Display detail to ostream
+  void show (std::ostream & out = std::cout) const;
+  /// Display detail to MsgStream
+  void show (MsgStream & out) const;
 private:
 
   element_vector m_fields;
