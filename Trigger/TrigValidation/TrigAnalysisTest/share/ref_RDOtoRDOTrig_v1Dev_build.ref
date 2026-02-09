@@ -13779,58 +13779,6 @@ HLT_g50_nopid_L1eEM26M:
     1: 8
     2: 8
     3: 8
-HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L1110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s:
-  eventCount: 1
-  stepCounts:
-    0: 5
-    1: 5
-    2: 5
-    3: 5
-    4: 5
-    5: 5
-    6: 1
-  stepFeatures:
-    0: 28
-    1: 28
-    2: 27
-    3: 26
-    4: 5
-    5: 16
-    6: 7
-HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L12eEM24L:
-  eventCount: 0
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-    4: 2
-    5: 2
-  stepFeatures:
-    0: 8
-    1: 8
-    2: 8
-    3: 8
-    4: 2
-    5: 7
-    6: 4
-HLT_g50_nopid_g10_nopid_j50c_020jvt_bgn285_pf_ftf_115masswisoABC135_L1eEM40L_2eEM18L:
-  eventCount: 0
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-    4: 2
-    5: 2
-  stepFeatures:
-    0: 9
-    1: 9
-    2: 9
-    3: 9
-    4: 2
-    5: 7
-    6: 4
 HLT_g50_nopid_g10_nopid_j50c_020jvt_pf_ftf_115masswisoABC135_L12eEM24L:
   eventCount: 0
   stepCounts:
