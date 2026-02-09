@@ -3,6 +3,8 @@
 */
 
 #include "TTreeCollectionCursor.h"
+#include "CollectionSvc/CollectionColumn.h"
+#include "PersistentDataModel/Token.h"
 
 #include "CoralBase/Attribute.h"
 
@@ -39,18 +41,14 @@ TTreeCollectionCursor(
          m_attrBranches.push_back( std::make_pair( branch, (std::string*)0 ) );
       }
    }
-
-   for( pool::TokenList::iterator tokenI = m_collectionRowBuffer.tokenList().begin();
-        tokenI != m_collectionRowBuffer.tokenList().end();
-        ++tokenI ) {
-      TBranch* branch = tree->GetBranch( tokenI.tokenName().c_str() );
-      if( !branch ) {
-         std::string errorMsg = "Failed to retrieve TBranch " + tokenI.tokenName() + " from the CollectionTree";
-         throw std::runtime_error( errorMsg + " (APR: \" TTreeCollectionCursor() \" from \" TTreeCollection \")");
-      }
-      branch->SetAddress( m_charBuffer );
-      m_tokenBranches.push_back( std::make_pair(branch, &*tokenI) );
+   
+   std::string branchName = description.tokenColumn().name();
+   m_tokenBranch = tree->GetBranch( branchName.c_str() );
+   if( !m_tokenBranch ) {
+      std::string errorMsg = "Failed to retrieve TBranch " + branchName + " from the CollectionTree";
+      throw std::runtime_error( errorMsg + " (APR: \" TTreeCollectionCursor() \" from \" TTreeCollection \")");
    }
+   m_tokenBranch->SetAddress( m_charBuffer );
 }
 
 
@@ -62,8 +60,7 @@ pool::RootCollection::TTreeCollectionCursor::~TTreeCollectionCursor()
 
 void
 pool::RootCollection::TTreeCollectionCursor::close()
-{
-}
+{ }
 
 
 bool
@@ -72,22 +69,20 @@ pool::RootCollection::TTreeCollectionCursor::next()
    if( ++m_idx >= size() ) {
       return false;
    }
-
    Long64_t entry = m_idx;
 
    // read attributes
-   for( AttrBranchVector_t::const_iterator branchI = m_attrBranches.begin(); branchI != m_attrBranches.end(); ++branchI) {
-      branchI->first->GetEntry(entry);
-      if( branchI->second ) {
+   for( auto& branchEl : m_attrBranches ) {
+      branchEl.first->GetEntry(entry);
+      if( branchEl.second ) {
          // copy the read string from character buffer to std::string of the coral attribute
-         *branchI->second = m_charBuffer;
+         *branchEl.second = m_charBuffer;
       }
    }
-   // read tokens
-   for( TokenBranchVector_t::const_iterator branchI = m_tokenBranches.begin(); branchI != m_tokenBranches.end(); ++branchI) {
-      branchI->first->GetEntry(entry);
-      branchI->second->fromString( m_charBuffer );
-   }
+   // read token
+   m_tokenBranch->GetEntry(entry);
+   m_collectionRowBuffer.token().fromString( m_charBuffer );
+   
    return true;
 }
 
@@ -120,5 +115,5 @@ pool::RootCollection::TTreeCollectionCursor::seek(std::size_t position)
 const Token&
 pool::RootCollection::TTreeCollectionCursor::eventRef() const
 {
-   return m_collectionRowBuffer.tokenList()[ m_description.eventReferenceColumnName() ];
+   return m_collectionRowBuffer.token();
 }

@@ -1,19 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionSvc/CollectionRowBuffer.h"
+#include "CollectionSvc/CollectionDescription.h"
+#include "CollectionSvc/CollectionColumn.h"
+#include "PersistentDataModel/Token.h"
+
 
 pool::CollectionRowBuffer::CollectionRowBuffer()
- : m_tokenList(),
-   m_attributeList (new coral::AttributeList)
+    : m_token( new Token ),
+      m_attributeList( new coral::AttributeList )
 {}
 
 
-pool::CollectionRowBuffer::CollectionRowBuffer( const pool::TokenList& tokenList,
-                                                coral::AttributeList& attributeList )
-      : m_tokenList( tokenList ),
-        m_attributeList( new coral::AttributeList )
+pool::CollectionRowBuffer::CollectionRowBuffer( coral::AttributeList& attributeList )
+    : m_token( new Token ),
+      m_attributeList( new coral::AttributeList )
 {
    // share data
    m_attributeList->merge( attributeList );
@@ -21,18 +24,19 @@ pool::CollectionRowBuffer::CollectionRowBuffer( const pool::TokenList& tokenList
 
 
 pool::CollectionRowBuffer::CollectionRowBuffer( const pool::CollectionRowBuffer& rhs )
-  : m_tokenList( rhs.m_tokenList ),
-    m_attributeList( new coral::AttributeList )
+    : m_token( new Token ),
+      m_attributeList( new coral::AttributeList )
 {
-   // share the data
-   m_attributeList->merge( *rhs.m_attributeList );
+  rhs.token().setData( m_token );
+  // share the data
+  m_attributeList->merge( *rhs.m_attributeList );
 }
 
 
 bool pool::CollectionRowBuffer::deleteAL ATLAS_NOT_THREAD_SAFE()
 {
-  delete m_attributeList;
-  m_attributeList = nullptr;
+  delete m_attributeList;  m_attributeList = nullptr;
+  delete m_token; m_token = nullptr;
   return true;
 }
 
@@ -46,7 +50,7 @@ pool::CollectionRowBuffer::~CollectionRowBuffer()
 pool::CollectionRowBuffer&
 pool::CollectionRowBuffer::operator=( const pool::CollectionRowBuffer& rhs )
 {
-  m_tokenList = rhs.m_tokenList;
+  rhs.token().setData( m_token );
   *m_attributeList = *rhs.m_attributeList;
 
   return *this;
@@ -56,12 +60,7 @@ pool::CollectionRowBuffer::operator=( const pool::CollectionRowBuffer& rhs )
 bool
 pool::CollectionRowBuffer::operator==( const pool::CollectionRowBuffer& rhs ) const
 {
-  if ( ( m_tokenList != rhs.m_tokenList ) || ( *m_attributeList != *rhs.m_attributeList ) )
-  {
-    return false;
-  }
-
-  return true;
+  return *m_attributeList == *rhs.m_attributeList;
 }
 
 
@@ -73,23 +72,29 @@ pool::CollectionRowBuffer::operator!=( const pool::CollectionRowBuffer& rhs ) co
 
 
 void
-pool::CollectionRowBuffer::setTokenList( const pool::TokenList& tokenList )
-{
-  m_tokenList = tokenList;
-}
-
-
-void
 pool::CollectionRowBuffer::setAttributeList( const coral::AttributeList& attributeList )
 {
   *m_attributeList = attributeList;
 }
 
 
-pool::TokenList&
-pool::CollectionRowBuffer::tokenList()
+Token&
+pool::CollectionRowBuffer::token()
 {
-  return m_tokenList;
+  return *m_token;
+}
+
+const Token&
+pool::CollectionRowBuffer::token() const
+{
+  return *m_token;
+}
+
+
+const std::string&
+pool::CollectionRowBuffer::tokenName() const
+{
+  return CollectionDescription::tokenColumn().name();
 }
 
 
@@ -97,13 +102,6 @@ coral::AttributeList&
 pool::CollectionRowBuffer::attributeList()
 {
   return *m_attributeList;
-}
-
-
-const pool::TokenList&
-pool::CollectionRowBuffer::tokenList() const
-{
-  return m_tokenList;
 }
 
 

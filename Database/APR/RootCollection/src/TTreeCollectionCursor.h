@@ -6,12 +6,11 @@
 #define ROOTCOLLECTION_TTREECOLLECTIONCURSOR_H
 
 
-#include "PersistentDataModel/Token.h"
-
 #include "CollectionSvc/CollectionRowBuffer.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/ICollectionCursor.h"
 
+class Token;
 class TTree;
 class TBranch;
 
@@ -62,10 +61,8 @@ namespace pool {
         char                            m_charBuffer[c_maxLengthOfStrings];
 
         typedef std::vector< std::pair<TBranch*, std::string*> >  AttrBranchVector_t;
-        typedef std::vector< std::pair<TBranch*, Token*> >        TokenBranchVector_t;
-
         AttrBranchVector_t              m_attrBranches;
-        TokenBranchVector_t             m_tokenBranches;
+        TBranch*                        m_tokenBranch;
 
         std::size_t                     m_idx;
         std::size_t                     m_entries;
