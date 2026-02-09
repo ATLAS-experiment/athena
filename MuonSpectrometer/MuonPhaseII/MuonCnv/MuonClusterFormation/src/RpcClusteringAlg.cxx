@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcClusteringAlg.h"
 
@@ -78,13 +78,13 @@ namespace MuonR4{
                 /// Sort the hits by channel
                 std::sort(hitsInLay.begin(), hitsInLay.end(), 
                         [](const xAOD::RpcStrip*a, const xAOD::RpcStrip* b ){
-                            return a->stripNumber() < b->stripNumber();
+                            return a->channelNumber() < b->channelNumber();
                         });
-                uint16_t lastChannel = hitsInLay[0]->stripNumber();
+                uint16_t lastChannel = hitsInLay[0]->channelNumber();
                 std::vector<const xAOD::RpcStrip*> groupedHits{};
                 for (const xAOD::RpcStrip* strip : hitsInLay) {
-                    if (strip->stripNumber() - lastChannel  -1u > m_maxHoles ||
-                        (!groupedHits.empty() && 1u*(strip->stripNumber() - groupedHits[0]->stripNumber()) > m_maxSize)){
+                    if (strip->channelNumber() - lastChannel  -1u > m_maxHoles ||
+                        (!groupedHits.empty() && 1u*(strip->channelNumber() - groupedHits[0]->channelNumber()) > m_maxSize)){
                         createCluster(groupedHits);
                     }
                     groupedHits.push_back(strip);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONPREPDATA_VERSIONS_BIRPCSTRIPAUXCONTAINER_V1_H
@@ -32,7 +32,7 @@ class RpcStrip2DAuxContainer_v1 : public AuxContainerBase {
     std::vector<uint8_t> ambiguityFlag{};
     std::vector<float> timeOverThreshold{};
 
-    std::vector<uint16_t> stripNumber{};
+    std::vector<uint16_t> channelNumber{};
     std::vector<uint8_t> gasGap{};
     std::vector<uint8_t> doubletPhi{};
     /// @}

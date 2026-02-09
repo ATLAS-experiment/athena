@@ -183,7 +183,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
         strip->setDoubletPhi(idHelper.doubletPhi(id));
         strip->setGasGap(idHelper.gasGap(id));
         strip->setMeasuresPhi(idHelper.measuresPhi(id));
-        strip->setStripNumber(idHelper.channel(id));
+        strip->setChannelNumber(idHelper.channel(id));
         strip->setAmbiguityFlag(prd->ambiguityFlag());
         strip->setTimeOverThreshold(prd->timeOverThreshold());
         strip->setTime(prd->time());
