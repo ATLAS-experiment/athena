@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
@@ -6,7 +7,7 @@
 # Usefull for quick testing of run4 reconstruction using LCTopo jets for tau seeding
 # run with
 #
-# athena --CA runTauOnly_run4.py 
+# athena runTauOnly_run4.py 
 # or
 # python runTauOnly_run4.py
 

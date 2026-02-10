@@ -284,7 +284,7 @@ AtlCoolCopy "sqlite://;schema=larnoisesqlite.db;dbname=CONDBR2" "sqlite://;schem
 
 echo "Doing check of the noise sqlite against P1HLT cache....."
 echo "Will take 3-5 minutes, be patient......"
-(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; ln -s caloSqlite_UPD1_online.db noise.db; athena.py --CA --evtMax=6 TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
+(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; ln -s caloSqlite_UPD1_online.db noise.db; athena.py --evtMax=6 TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
 if [ $? -ne 0 ];  then
       echo "Testing job reported an error ! "
       echo "Please, do not upload constants to online ! "

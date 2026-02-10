@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file    PyDumper.SgDumpLib
 # @purpose API for the sg-dump script
@@ -157,7 +157,7 @@ def _run_jobo(job, msg, options):
     if options.athena_opts:
         import shlex
         athena_opts = shlex.split(options.athena_opts)
-    cmd = [sh, app,] + athena_opts + ['--CA'] + [jobo.name,]
+    cmd = [sh, app,] + athena_opts + [jobo.name,]
     import subprocess as sub
     app_handle = sub.Popen (args=cmd,
                             stdout=logfile,
