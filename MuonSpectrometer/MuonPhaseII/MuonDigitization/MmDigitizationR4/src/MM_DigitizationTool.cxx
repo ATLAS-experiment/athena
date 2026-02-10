@@ -19,7 +19,7 @@ namespace
     }
 
     using ChVec_t = std::vector<std::uint16_t>;
-    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    /// @brief Declare the eta channels matched to the SDO
     static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
     // thresholds for the shortest and longest strips
     // values from https://indico.cern.ch/event/1131762/contributions/4749097/attachments/2431773/4164431/MMGcoord2022.04.26.pdf
@@ -373,7 +373,13 @@ namespace MuonR4 {
                 v_stripDigitOutput[hitGapInNsw].push_back(std::move(stripDigitOutput));
 
                 addSDO(simHit, sdoContainer)->setIdentifier(clusId);
-                dec_etaChannel(*sdoContainer->back()).clear();
+                // lets decorate all the channels that could potentially be fired by this hit. This does not take into account the electronics simulation, e..g the charge merging on strips from different hits, and the electronics threshold.
+                ChVec_t& etaChannels = dec_etaChannel(*sdoContainer->back());
+                etaChannels.clear();
+                for (int stripNum : tmpStripOutput.NumberOfStripsPos()) {
+                        etaChannels.push_back(stripNum);
+                }
+                
                 ++m_acceptedHits[hitGapInNsw];
             } // end of loop over hits
 
