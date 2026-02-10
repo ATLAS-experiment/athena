@@ -23,7 +23,7 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& an
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
     m_anaTag(anaTag),
     /// cheat with the name for the time being, this is NOT a service handle,
-    //    m_trkAnaDefSvc(trkAnaDef),
+    m_trkAnaDefSvc(trkAnaDef),
     m_newChain(true),m_newRoi(true) 
 {
   /// tracks
@@ -56,7 +56,7 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& an
 StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
 
-#if 1
+#if 0
   /// nope, get this during construction ...
   /// load trkAnaDefSvc
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
