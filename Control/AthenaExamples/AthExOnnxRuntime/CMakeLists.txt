@@ -24,7 +24,7 @@ atlas_add_test( AthExOnnxRuntimeTest
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthExOnnxRuntimeTest_pkl
-   SCRIPT athena --evtMax 2 --CA test_AthExOnnxRuntimeExampleCfg.pkl
+   SCRIPT athena --evtMax 2 test_AthExOnnxRuntimeExampleCfg.pkl
    LOG_IGNORE_PATTERN "ERROR Locating dev file"
    DEPENDS AthExOnnxRuntimeTest
    POST_EXEC_SCRIPT noerror.sh )
@@ -35,7 +35,7 @@ atlas_add_test( AthInferORTTest
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( AthInferORTTest_pkl
-   SCRIPT athena --evtMax 2 --CA test_AthInferORTExampleCfg.pkl
+   SCRIPT athena --evtMax 2 test_AthInferORTExampleCfg.pkl
    LOG_IGNORE_PATTERN "ERROR Locating dev file"
    DEPENDS AthInferORTTest
    POST_EXEC_SCRIPT noerror.sh )
