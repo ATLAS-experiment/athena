@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBOUT_HH
@@ -18,9 +18,9 @@ class TGCChannelSLBOut : public TGCChannelId {
 
     virtual ~TGCChannelSLBOut() = default;
 
-    virtual std::unique_ptr<TGCModuleId> getModule() const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
 
    private:
     static const int s_numberOfBlockInWD;

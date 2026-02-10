@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBIN_HH
@@ -17,9 +17,9 @@ class TGCChannelSLBIn : public TGCChannelId {
 
     virtual ~TGCChannelSLBIn() = default;
 
-    virtual std::unique_ptr<TGCModuleId> getModule() const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
 
     // internal structure in 200 channel of SLBIn
    public:
@@ -52,7 +52,7 @@ class TGCChannelSLBIn : public TGCChannelId {
 
     virtual int getChannelInSLB() const;
 
-    virtual void setChannel(int channel);
+    virtual void setChannel(int channel) override;
 
    private:
     CellType m_cellType;
