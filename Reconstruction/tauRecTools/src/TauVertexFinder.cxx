@@ -13,7 +13,6 @@ TauVertexFinder::~TauVertexFinder() {}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 StatusCode TauVertexFinder::initialize() {
   ATH_CHECK( m_vertexInputContainer.initialize(SG::AllowEmpty) );
-  ATH_CHECK( m_trackPartInputContainer.initialize(SG::AllowEmpty) );
  
   if( m_useTJVA) {
      ATH_MSG_INFO("using TJVA to determine tau vertex");	  
