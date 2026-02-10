@@ -14,7 +14,7 @@ JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase(const std::string
 
 StatusCode JetSubStructureMomentToolsBase::initialize() {
 
-  ATH_MSG_INFO("Initializing " << name());
+  ATH_MSG_DEBUG("Initializing " << name());
   
   if(!m_inputContainer.empty() && m_prefix.empty()) {
     ATH_MSG_WARNING("No prefix defined, defaulting to " << m_inputContainer);

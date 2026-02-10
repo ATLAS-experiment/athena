@@ -18,8 +18,13 @@ StatusCode ChargedHadronSubtractionTool::initialize()
                   << m_inputType);
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Running ChargedHadronSubtractionTool by-vertex: " << m_byVertex.value());
-  ATH_MSG_INFO("Running ChargedHadronSubtractionTool using TTVA: " << m_useTrackToVertexTool.value());
+
+  if(m_byVertex){
+    ATH_MSG_INFO("Running ChargedHadronSubtractionTool by-vertex: " << m_byVertex.value());
+  }
+  if(m_useTrackToVertexTool){
+    ATH_MSG_INFO("Running ChargedHadronSubtractionTool using TTVA: " << m_useTrackToVertexTool.value());
+  }
 
   ATH_CHECK(m_trkVtxAssoc_key.initialize(m_useTrackToVertexTool && !m_ignoreVertex));
   ATH_CHECK(m_vertexContainer_key.initialize(!m_ignoreVertex));
