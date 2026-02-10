@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -7,11 +7,8 @@
  -----------------------------------------
  ***************************************************************************/
 
-//<version>	$Name: not supported by cvs2svn $
-
 #ifndef IOVDBTESTALG_IOVDBTESTALG_H
-# define IOVDBTESTALG_IOVDBTESTALG_H
-
+#define IOVDBTESTALG_IOVDBTESTALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "IOVDbTestConditions/IOVDbTestMDTEleMap.h"
@@ -19,10 +16,8 @@
 
 #include "RegistrationServices/IIOVRegistrationSvc.h"
 #include "StoreGate/DataHandle.h"
-#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class EventInfo;
 class IIOVRegistrationSvc;
@@ -38,7 +33,7 @@ public:
     IOVDbTestAlg (const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~IOVDbTestAlg();
 
-    virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE() override;
+    virtual StatusCode initialize() override;
     virtual StatusCode execute (const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
@@ -50,7 +45,6 @@ private:
     StatusCode registerCondObjects();
     StatusCode readWithBeginRun();
     void       waitForSecond() const;
-    StatusCode testCallBack(  IOVSVC_CALLBACK_ARGS  );
     StatusCode registerIOV(const CLID& clid);
 
     BooleanProperty           m_writeCondObjs{this, "WriteCondObjs", false};
