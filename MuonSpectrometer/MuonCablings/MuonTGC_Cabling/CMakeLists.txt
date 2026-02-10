@@ -9,12 +9,13 @@ atlas_subdir( MuonTGC_Cabling )
 atlas_add_library( MuonTGC_CablingLib
                    src/*.cxx
                    PUBLIC_HEADERS MuonTGC_Cabling
-                   LINK_LIBRARIES AthenaKernel GaudiKernel MuonCondInterface StoreGateLib MuonIdHelpersLib CxxUtils
+                   LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib MuonIdHelpersLib CxxUtils
                    PRIVATE_LINK_LIBRARIES AthenaPoolUtilities PathResolver )
 
 atlas_add_component( MuonTGC_Cabling
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaKernel GaudiKernel MuonCondInterface StoreGateLib AthenaPoolUtilities MuonIdHelpersLib PathResolver MuonTGC_CablingLib )
+                     LINK_LIBRARIES AthenaKernel GaudiKernel MuonCondInterface StoreGateLib 
+                                    AthenaPoolUtilities MuonIdHelpersLib PathResolver MuonTGC_CablingLib )
 
 # Install files from the package:
 atlas_install_runtime( share/*.db )

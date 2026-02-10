@@ -14,7 +14,7 @@ TGCModuleSSW::TGCModuleSSW(TGCId::SideType vside, int vreadoutSector, int vid)
     setId(vid);
 }
 
-bool TGCModuleSSW::isValid(void) const {
+bool TGCModuleSSW::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) && (getReadoutSector() >= 0) &&
         (getReadoutSector() < N_RODS) && (getId() >= 0)) {

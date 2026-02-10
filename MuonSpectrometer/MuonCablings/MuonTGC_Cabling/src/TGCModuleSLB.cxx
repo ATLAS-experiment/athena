@@ -20,7 +20,7 @@ TGCModuleSLB::TGCModuleSLB(TGCId::SideType vside, TGCId::ModuleType vmodule,
     m_slbAddr = vslbAddr;
 }
 
-bool TGCModuleSLB::isValid(void) const {
+bool TGCModuleSLB::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getModuleType() > TGCId::NoModuleType) &&

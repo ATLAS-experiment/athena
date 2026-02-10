@@ -23,12 +23,12 @@ TGCChannelHPBIn::TGCChannelHPBIn(TGCId::SideType vside,
     setChannel(vchannel);
 }
 
-TGCModuleId* TGCChannelHPBIn::getModule(void) const {
-    return (new TGCModuleHPB(getSideType(), getSignalType(), getRegionType(),
-                             getSector(), getId()));
+std::unique_ptr<TGCModuleId> TGCChannelHPBIn::getModule() const {
+    return std::make_unique<TGCModuleHPB>(
+        getSideType(), getSignalType(), getRegionType(), getSector(), getId());
 }
 
-bool TGCChannelHPBIn::isValid(void) const {
+bool TGCChannelHPBIn::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getSignalType() > TGCId::NoSignalType) &&
@@ -46,15 +46,15 @@ const int TGCChannelHPBIn::s_numberOfBlock = 2;
 const int TGCChannelHPBIn::s_channelInBlock = 12;
 const int TGCChannelHPBIn::s_slbInBlock = 3;
 
-int TGCChannelHPBIn::getNumberOfBlock(void) {
+int TGCChannelHPBIn::getNumberOfBlock() {
     return s_numberOfBlock;
 }
 
-int TGCChannelHPBIn::getChannelInBlock(void) {
+int TGCChannelHPBIn::getChannelInBlock() {
     return s_channelInBlock;
 }
 
-int TGCChannelHPBIn::getSlbInBlock(void) {
+int TGCChannelHPBIn::getSlbInBlock() {
     return s_slbInBlock;
 }
 

@@ -214,7 +214,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     w_slbin.setChannel(41+offset+8*block);
     
     const MuonTGC_Cabling::TGCCabling* tgcCabling = m_cabling->getTGCCabling();
-    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(&w_slbin));
+    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(w_slbin));
     return w_asdout;
 }
   
@@ -239,7 +239,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     w_slbin.setChannel(41+wireOffset+8*block);
     
     const MuonTGC_Cabling::TGCCabling* tgcCabling = m_cabling->getTGCCabling();
-    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(&w_slbin));
+    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(w_slbin));
 
     // strip
     int stripSLBId = w_asdout->getChamber();
@@ -252,7 +252,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     s_slbin.setId(stripSLBId);
     s_slbin.setChannel(41+stripOffset+8*phi);
     
-    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> s_asdout(tgcCabling->getASDOutChannel(&s_slbin));
+    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> s_asdout(tgcCabling->getASDOutChannel(s_slbin));
     return s_asdout;
 }
   

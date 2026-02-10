@@ -24,25 +24,23 @@ class TGCModuleId : public TGCId {
     };
 
     // Constructor & Destructor
-    TGCModuleId(ModuleIdType type = NoModuleIdType) : TGCId(IdType::Module) {
-        this->m_type = type;
-    }
-    virtual ~TGCModuleId(void) {}
-
+    TGCModuleId(ModuleIdType type = NoModuleIdType)
+        : TGCId(IdType::Module), m_type{type} {}
+    virtual ~TGCModuleId() = default;
     enum { NumberOfSReadoutSector = 3 };
 
-    ModuleIdType getModuleIdType(void) const { return m_type; }
+    ModuleIdType getModuleIdType() const { return m_type; }
 
     virtual bool operator==(const TGCModuleId& moduleId) const;
 
-    virtual bool isValid(void) const { return true; }
+    virtual bool isValid() const { return true; }
 
     int getReadoutSector() const { return m_sectorRO; }
     void setReadoutSector(int sector) { m_sectorRO = sector; }
     virtual void setSector(int v_sector);
 
    private:
-    ModuleIdType m_type;
+    ModuleIdType m_type{ModuleIdType::MaxModuleIdType};
     int m_sectorRO{-1};
 };
 

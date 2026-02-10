@@ -21,15 +21,15 @@ class TGCCableInPP : public TGCCable {
     TGCCableInPP(const std::string& filename);
     virtual ~TGCCableInPP();
 
-    virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
-                                     const bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannel(
+        const TGCChannelId& channelId, const bool orChannel = false) const;
 
    private:
-    TGCCableInPP(void) = delete;
-    virtual TGCChannelId* getChannelIn(const TGCChannelId* ppout,
-                                       const bool orChannel = false) const;
-    virtual TGCChannelId* getChannelOut(const TGCChannelId* ppin,
-                                        const bool orChannel = false) const;
+    TGCCableInPP() = delete;
+    std::unique_ptr<TGCChannelId> getChannelIn(
+        const TGCChannelId& ppout, const bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannelOut(
+        const TGCChannelId& ppin, const bool orChannel = false) const;
 
     std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
                TGCId::MaxRegionType>

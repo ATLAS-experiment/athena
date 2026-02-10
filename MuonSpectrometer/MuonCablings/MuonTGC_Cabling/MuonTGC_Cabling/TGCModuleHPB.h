@@ -15,12 +15,9 @@ class TGCModuleHPB : public TGCModuleId {
     TGCModuleHPB(TGCId::SideType side, TGCId::SignalType signal,
                  TGCId::RegionType region, int sector, int id);
 
-    virtual ~TGCModuleHPB(void) {}
+    virtual ~TGCModuleHPB() = default;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCModuleHPB(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

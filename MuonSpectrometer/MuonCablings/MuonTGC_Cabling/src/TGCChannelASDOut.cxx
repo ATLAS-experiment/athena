@@ -36,7 +36,7 @@ TGCChannelASDOut::TGCChannelASDOut(TGCId::SideType vside,
     setChannel(vchannel);
 }
 
-bool TGCChannelASDOut::isValid(void) const {
+bool TGCChannelASDOut::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getSignalType() > TGCId::NoSignalType) &&

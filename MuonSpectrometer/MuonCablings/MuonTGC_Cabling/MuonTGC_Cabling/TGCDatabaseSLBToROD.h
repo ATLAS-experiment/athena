@@ -17,18 +17,14 @@ class TGCDatabaseSLBToROD : public TGCDatabase {
 
     TGCDatabaseSLBToROD(const TGCDatabaseSLBToROD&) = default;
 
-    virtual ~TGCDatabaseSLBToROD(void);
+    virtual ~TGCDatabaseSLBToROD();
 
     virtual bool update(const std::vector<int>&);
 
     virtual int find(const std::vector<int>&) const;
 
    private:
-    virtual void readDB(void);
-    TGCDatabaseSLBToROD(void) {}
-
-    /** hidden assignment operator */
-    TGCDatabaseSLBToROD& operator=(const TGCDatabaseSLBToROD& right);
+    virtual void readDB();
 };
 
 }  // namespace MuonTGC_Cabling

@@ -16,20 +16,17 @@ class TGCModuleSLB : public TGCModuleId {
                  TGCId::RegionType region, int sector, int id, int sbLoc = -1,
                  int slbAddr = -1);
 
-    virtual ~TGCModuleSLB(void) {}
+    virtual ~TGCModuleSLB() = default;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const;
 
     // special method for SLB
-    int getSBLoc(void) const { return m_sbLoc; }
-    int getSlbAddr(void) const { return m_slbAddr; }
+    int getSBLoc() const { return m_sbLoc; }
+    int getSlbAddr() const { return m_slbAddr; }
 
    private:
-    TGCModuleSLB(void) {}
-
-   private:
-    int m_sbLoc;
-    int m_slbAddr;
+    int m_sbLoc{0};
+    int m_slbAddr{0};
 };
 
 }  // namespace MuonTGC_Cabling

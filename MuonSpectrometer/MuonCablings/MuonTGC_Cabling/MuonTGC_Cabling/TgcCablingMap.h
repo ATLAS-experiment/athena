@@ -3,37 +3,37 @@
 */
 
 /***************************************************************************
-    MuonTGC_CablingSvc.h
+    TgcCablingMap.h
     Description : online-offline ID mapper for TGC
 ***************************************************************************/
 
-#ifndef MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
-#define MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
+#ifndef MUONTGC_CABLING_MUONTGC_CABLINGMAP_H
+#define MUONTGC_CABLING_MUONTGC_CABLINGMAP_H
 
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <vector>
-
-#include "AthenaBaseComps/AthService.h"
-#include "GaudiKernel/Service.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonTGC_Cabling/TgcCablingMap.h"
+#include "AthenaBaseComps/AthMessaging.h"
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/CondCont.h"
+#include "MuonTGC_Cabling/TGCCabling.h"
 
 class Identifier;
-
-class MuonTGC_CablingSvc : public AthService {
+namespace Muon {
+class IMuonIdHelperSvc;
+class TgcCablingMap : public AthMessaging, public MuonTGC_Cabling::TGCCabling {
    public:
-    using AthService::AthService;
+    struct Config : public MuonTGC_Cabling::TGCCabling::Config {
 
-    virtual ~MuonTGC_CablingSvc() = default;
-
-    virtual StatusCode initialize() override;
+        const Muon::IMuonIdHelperSvc* idHelperSvc{};
+        int AsideId{103};
+        int CsideId{104};
+    };
+    TgcCablingMap(const Config& cfg);
 
     const MuonTGC_Cabling::TGCCabling* getTGCCabling() const;
 
     // give max value of the ROD ID
-    int getMaxRodId() { return MuonTGC_Cabling::TGCCabling::MAXRODID; }
+    static constexpr int getMaxRodId() {
+        return MuonTGC_Cabling::TGCCabling::MAXRODID;
+    }
 
     // give max value of ReadoutID parameters
     /** @todo Tobe ported */
@@ -203,42 +203,13 @@ class MuonTGC_CablingSvc : public AthService {
                                             bool middle = false) const;
 
    private:
-    /////////////////////////////////////////////////////////////
-    // channel connection
-    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> getChannel(
-        const MuonTGC_Cabling::TGCChannelId& channelId,
-        MuonTGC_Cabling::TGCChannelId::ChannelIdType type,
-        bool orChannel = false) const;
-
-    // module connection
-    MuonTGC_Cabling::TGCModuleMap getModule(
-        const MuonTGC_Cabling::TGCModuleId& moduleId,
-        MuonTGC_Cabling::TGCModuleId::ModuleIdType type) const;
-
-    ///////////////////////
-
-    std::unique_ptr<Muon::TgcCablingMap> m_cabling;
-    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
-        this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-    IntegerProperty m_AsideId{this, "AsideId", 103};
-    IntegerProperty m_CsideId{this, "CsideId", 104};
-
-    StringProperty m_databaseASDToPP{this, "databaseASDToPP",
-                                     "MuonTGC_Cabling_ASD2PP.db"};
-    StringProperty m_databaseInPP{this, "databaseInPP",
-                                  "MuonTGC_Cabling_PP.db"};
-    StringProperty m_databasePPToSL{this, "databasePPToSL",
-                                    "MuonTGC_Cabling_PP2SL.db"};
-    StringProperty m_databaseSLBToROD{this, "databaseSLBToROD",
-                                      "MuonTGC_Cabling_SLB2ROD.db"};
-    StringProperty m_databaseASDToPPdiff{this, "databaseASDtoPPdiff",
-                                         "ASD2PP_diff_12_OFL.db"};
+    const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
+    int m_AsideId{103};
+    int m_CsideId{104};
 };
 
-inline const MuonTGC_Cabling::TGCCabling* MuonTGC_CablingSvc::getTGCCabling()
-    const {
-    return m_cabling.get();
-}
+}  // namespace Muon
+CLASS_DEF(Muon::TgcCablingMap, 52396898, 1);
+CONDCONT_DEF(Muon::TgcCablingMap, 150802588);
 
-#endif  // MUONTGC_CABLING_MUONTGC_CABLINGSVC_H
+#endif

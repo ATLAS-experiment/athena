@@ -38,56 +38,54 @@ TGCCableSSWToROD& TGCCableSSWToROD::operator=(const TGCCableSSWToROD& right) {
 
 TGCCableSSWToROD::~TGCCableSSWToROD() = default;
 
-TGCModuleMap* TGCCableSSWToROD::getModule(const TGCModuleId* moduleId) const {
-    if (moduleId) {
-        if (moduleId->getModuleIdType() == TGCModuleId::SSW) {
-            return getModuleOut(moduleId);
-        }
-        if (moduleId->getModuleIdType() == TGCModuleId::ROD) {
-            return getModuleIn(moduleId);
-        }
+TGCModuleMap TGCCableSSWToROD::getModule(const TGCModuleId& moduleId) const {
+
+    if (moduleId.getModuleIdType() == TGCModuleId::SSW) {
+        return getModuleOut(moduleId);
     }
-    return nullptr;
+    if (moduleId.getModuleIdType() == TGCModuleId::ROD) {
+        return getModuleIn(moduleId);
+    }
+
+    return TGCModuleMap{};
 }
 
-TGCModuleMap* TGCCableSSWToROD::getModuleIn(const TGCModuleId* rod) const {
-    if (!rod->isValid()) {
-        return nullptr;
+TGCModuleMap TGCCableSSWToROD::getModuleIn(const TGCModuleId& rod) const {
+    if (!rod.isValid()) {
+        return TGCModuleMap{};
     }
 
-    const TGCId::SideType rodSideType = rod->getSideType();
-    const int rodReadoutSector = rod->getReadoutSector();
+    const TGCId::SideType rodSideType = rod.getSideType();
+    const int rodReadoutSector = rod.getReadoutSector();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int MaxEntry = m_database->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         int id = m_database->getEntry(i, 0);
         int block = m_database->getEntry(i, 1);
-        TGCModuleSSW* ssw = new TGCModuleSSW(rodSideType, rodReadoutSector, id);
-        if (mapId == nullptr) {
-            mapId = new TGCModuleMap();
-        }
-        mapId->insert(block, ssw);
+        auto ssw =
+            std::make_unique<TGCModuleSSW>(rodSideType, rodReadoutSector, id);
+        mapId.insert(block, std::move(ssw));
     }
     return mapId;
 }
 
-TGCModuleMap* TGCCableSSWToROD::getModuleOut(const TGCModuleId* ssw) const {
-    if (!ssw->isValid()) {
-        return nullptr;
+TGCModuleMap TGCCableSSWToROD::getModuleOut(const TGCModuleId& ssw) const {
+    if (!ssw.isValid()) {
+        return TGCModuleMap{};
     }
 
-    const int sswId = ssw->getId();
+    const int sswId = ssw.getId();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int MaxEntry = m_database->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (m_database->getEntry(i, 0) == sswId) {
             int block = m_database->getEntry(i, 1);
-            TGCModuleROD* rod =
-                new TGCModuleROD(ssw->getSideType(), ssw->getReadoutSector());
-            mapId = new TGCModuleMap();
-            mapId->insert(block, rod);
+            auto rod = std::make_unique<TGCModuleROD>(ssw.getSideType(),
+                                                      ssw.getReadoutSector());
+
+            mapId.insert(block, std::move(rod));
             break;
         }
     }

@@ -15,7 +15,7 @@ TGCModuleSROD::TGCModuleSROD(TGCId::SideType vside, int vreadoutSector)
     setId(srodId);
 }
 
-bool TGCModuleSROD::isValid(void) const {
+bool TGCModuleSROD::isValid() const {
     return (getSideType() > TGCId::NoSideType) &&
            (getSideType() < TGCId::MaxSideType) && (getReadoutSector() >= 0) &&
            (getReadoutSector() < N_RODS);

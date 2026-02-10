@@ -16,14 +16,11 @@ class TGCChannelPPIn : public TGCChannelId {
                    TGCId::RegionType region, int sector, int id, int block,
                    int channel);
 
-    virtual ~TGCChannelPPIn(void) {}
+    virtual ~TGCChannelPPIn() = default;
 
-    virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCChannelPPIn(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

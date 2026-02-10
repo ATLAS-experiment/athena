@@ -37,12 +37,12 @@ TGCChannelSLBIn::TGCChannelSLBIn(TGCId::SideType vside,
     TGCChannelSLBIn::setChannel(vchannel);
 }
 
-TGCModuleId* TGCChannelSLBIn::getModule(void) const {
-    return (new TGCModuleSLB(getSideType(), getModuleType(), getRegionType(),
-                             getSector(), getId()));
+std::unique_ptr<TGCModuleId> TGCChannelSLBIn::getModule() const {
+    return std::make_unique<TGCModuleSLB>(
+        getSideType(), getModuleType(), getRegionType(), getSector(), getId());
 }
 
-bool TGCChannelSLBIn::isValid(void) const {
+bool TGCChannelSLBIn::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getModuleType() > TGCId::NoModuleType) &&
@@ -199,11 +199,11 @@ int TGCChannelSLBIn::convertChannel(TGCId::ModuleType moduleType,
     return getOffsetOfCell(cellType) + offset + channelInSLB;
 }
 
-int TGCChannelSLBIn::getChannelInCell(void) const {
+int TGCChannelSLBIn::getChannelInCell() const {
     return m_channelInCell;
 }
 
-int TGCChannelSLBIn::getChannelInSLB(void) const {
+int TGCChannelSLBIn::getChannelInSLB() const {
     return m_channelInSLB;
 }
 

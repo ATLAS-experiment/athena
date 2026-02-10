@@ -21,12 +21,11 @@ class TGCCableHPBToSL : public TGCCable {
     TGCCableHPBToSL(const std::string& filename);
     virtual ~TGCCableHPBToSL();
 
-    virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
+    TGCModuleMap getModule(const TGCModuleId& moduleId) const;
 
    private:
-    TGCCableHPBToSL() = delete;
-    virtual TGCModuleMap* getModuleIn(const TGCModuleId* sl) const;
-    virtual TGCModuleMap* getModuleOut(const TGCModuleId* hpt) const;
+    TGCModuleMap getModuleIn(const TGCModuleId& sl) const;
+    TGCModuleMap getModuleOut(const TGCModuleId& hpt) const;
     std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxSignalType>,
                TGCId::MaxRegionType>
         m_database;
