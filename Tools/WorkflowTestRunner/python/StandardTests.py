@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from typing import List
 
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
@@ -214,6 +214,12 @@ class DerivationTest(WorkflowTest):
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
         test_def = ID.split("_")
+        multithreaded = False
+        if test_def[-2] == "MT":
+            multithreaded = True
+            test_run = test_def.pop()
+            test_def.pop()  # remove MT
+            test_def.append(test_run)  # add run back to the end
         data_type = test_def[0].lower()
         formats = [format.upper() for format in test_def[1:-1]]
 
@@ -224,24 +230,32 @@ class DerivationTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             base_events = 100
             events = threads * base_events + 1
-            flush = 80
-
             extra_args += f" --maxEvents {events}"
-            format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
-            extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
 
-        if "inputAODFile" not in extra_args:
+            if not multithreaded:
+                flush = 80
+                format_flush = ", ".join([f"\"DAOD_{format}\": {flush}" for format in formats])
+                extra_args += f" --preExec 'flags.Output.TreeAutoFlush={{{format_flush}}}'"
+
+        if "inputAODFile" not in extra_args and "inputDAOD_PHYSFile" not in extra_args:
             extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
 
         # could also use p5503
-        self.command = \
-            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
-             f" --formats {' '.join(formats)}"
-             " --multiprocess --multithreadedFileValidation True"
-             " --athenaMPMergeTargetSize 'DAOD_*:0'"
-             " --sharedWriter True"
-             " --outputDAODFile myOutput.pool.root"
-             f" --imf False {extra_args}")
+        if not multithreaded:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
+                f" --formats {' '.join(formats)}"
+                " --multiprocess --multithreadedFileValidation True"
+                " --athenaMPMergeTargetSize 'DAOD_*:0'"
+                " --sharedWriter True"
+                " --outputDAODFile myOutput.pool.root"
+                f" --imf False {extra_args}")
+        else:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
+                f" --formats {' '.join(formats)}"
+                " --outputDAODFile myOutput.pool.root"
+                f" --imf False {extra_args}")
 
         # skip performance checks for now
         self.skip_performance_checks = True
@@ -250,38 +264,6 @@ class DerivationTest(WorkflowTest):
         for format in formats:
             self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
             self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
-
-        super().__init__(ID, run, type, steps, setup)
-
-class DerivationTestMT(WorkflowTest):
-    """Derivations test with AthenaMT"""
-
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
-        test_def = ID.split("_")
-        data_type = test_def[0].lower()
-        formats = [format.upper() for format in test_def[1:-1]]
-        extra_args = extra_args.replace("mtDerivation", "")
-
-        threads = 0
-        if setup.custom_threads is not None:
-            threads = setup.custom_threads
-
-        if "maxEvents" not in extra_args:
-            events = 10
-            extra_args += f" --maxEvents {events}"
-
-        if "inputAODFile" not in extra_args:
-            extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
-
-        self.command = \
-            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
-             f" --athenaopts='--threads=1'"
-             f" --formats {' '.join(formats)}"
-             " --outputDAODFile myOutput.pool.root"
-             f" --imf False {extra_args}")
-
-        # skip performance checks for now
-        self.skip_performance_checks = True
 
         super().__init__(ID, run, type, steps, setup)
 
