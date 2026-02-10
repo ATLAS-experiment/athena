@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCDatabaseASDToPP.h"
@@ -228,6 +228,7 @@ void TGCDatabaseASDToPP::readDB() {
             m_database[i].at(1) != m_database[i + 1].at(1)) {
             // increase with R in chamber    [0..n]
             int totline = m_database[i].at(2) + 1;
+            //coverity[TAINTED_SCALAR]
             for (int j = 0; j < totline; j++) {
                 m_database[i - j].push_back(j);
             }
