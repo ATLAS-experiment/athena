@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLING_HH
@@ -12,8 +12,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "MuonTGC_Cabling/TGCChannelId.h"
 #include "MuonTGC_Cabling/TGCModuleId.h"
-
-class StatusCode;
 
 namespace MuonTGC_Cabling {
 
@@ -32,19 +30,23 @@ class TGCModuleMap;
 class TGCModuleSLB;
 
 class TGCCabling {
-   private:  // hide default constructor, copy constructor and assignment
-    TGCCabling() = delete;
+   public:
+    //
     TGCCabling(const TGCCabling&) = delete;
+    //
     TGCCabling& operator=(const TGCCabling&) = delete;
 
-   public:
+    struct Config {
+        std::string fileNameASDtoPP{"MuonTGC_Cabling_ASD2PP.db"};
+        std::string fileNameInPP{"MuonTGC_Cabling_PP.db"};
+        std::string fileNamePPtoSL{"MuonTGC_Cabling_PP2SL.db"};
+        std::string fileNameSLBtoROD{"MuonTGC_Cabling_SLB2ROD.db"};
+        std::string fileNameASDtoPPdiff{"ASD2PP_diff_12_ONL.db"};
+    };
     // Constructor & Destructor
-    TGCCabling(const std::string& filenameASDToPP,
-               const std::string& filenameInPP,
-               const std::string& filenamePPToSL,
-               const std::string& filenameSLBToROD);
+    TGCCabling(const Config& cfg);
 
-    virtual ~TGCCabling(void);
+    virtual ~TGCCabling();
 
     enum MAXMINREADOUTIDS {
         MAXRODID = 12,
@@ -60,7 +62,8 @@ class TGCCabling {
     };
 
     // slbIn --> AsdOut
-    virtual TGCChannelId* getASDOutChannel(const TGCChannelId* slb_in) const;
+    std::unique_ptr<TGCChannelId> getASDOutChannel(
+        const TGCChannelId& slb_in) const;
 
     /////////////////////////////////////////////////////
     // readout ID -> SLB Module
@@ -72,20 +75,20 @@ class TGCCabling {
                            int sbLoc) const;
 
     // SSW ID/RX ID-> SLB Module
-    TGCModuleId* getSLBFromRxId(TGCId::SideType side, int rodId, int sswId,
-                                int rxId) const;
+    std::unique_ptr<TGCModuleId> getSLBFromRxId(TGCId::SideType side, int rodId,
+                                                int sswId, int rxId) const;
 
     // SLB Module -> readout ID
-    bool getReadoutFromSLB(const TGCModuleSLB* slb, TGCId::SideType& side,
+    bool getReadoutFromSLB(const TGCModuleSLB& slb, TGCId::SideType& side,
                            int& rodId, int& sswId, int& sbLoc) const;
 
     // readout channel -> chamber channel
-    TGCChannelId* getASDOutFromReadout(TGCId::SideType side, int rodId,
-                                       int sswId, int sbLoc, int channel,
-                                       bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getASDOutFromReadout(
+        TGCId::SideType side, int rodId, int sswId, int sbLoc, int channel,
+        bool orChannel = false) const;
 
     // chamber channel -> readout channel
-    bool getReadoutFromASDOut(const TGCChannelASDOut* asdout,
+    bool getReadoutFromASDOut(const TGCChannelASDOut& asdout,
                               TGCId::SideType& side, int& rodId, int& sswId,
                               int& sbLoc, int& channel,
                               bool orChannel = false) const;
@@ -120,30 +123,27 @@ class TGCCabling {
                                         bool middle = false) const;
 
     // channel connection
-    TGCChannelId* getChannel(const TGCChannelId* channelId,
-                             TGCChannelId::ChannelIdType type,
-                             bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannel(const TGCChannelId& channelId,
+                                             TGCChannelId::ChannelIdType type,
+                                             bool orChannel = false) const;
     // module connection
-    TGCModuleMap* getModule(const TGCModuleId* moduleId,
-                            TGCModuleId::ModuleIdType type) const;
-
-   public:
-    // readin database which describes difference from ASDToPP.db
-    StatusCode updateCableASDToPP();
+    TGCModuleMap getModule(const TGCModuleId& moduleId,
+                           TGCModuleId::ModuleIdType type) const;
 
    private:
-    TGCCableInASD* m_cableInASD;
-    TGCCableASDToPP* m_cableASDToPP;
-    TGCCableInPP* m_cableInPP;
-    TGCCablePPToSLB* m_cablePPToSLB;
-    TGCCableInSLB* m_cableInSLB;
-    TGCCableSLBToHPB* m_cableSLBToHPB;
-    TGCCableHPBToSL* m_cableHPBToSL;
-    TGCCableSLBToSSW* m_cableSLBToSSW;
-    TGCCableSSWToROD* m_cableSSWToROD;
+    std::unique_ptr<TGCCableInASD> m_cableInASD{};
+    std::unique_ptr<TGCCableASDToPP> m_cableASDToPP{};
+    std::unique_ptr<TGCCableInPP> m_cableInPP{};
+    std::unique_ptr<TGCCablePPToSLB> m_cablePPToSLB{};
+    std::unique_ptr<TGCCableInSLB> m_cableInSLB{};
+    std::unique_ptr<TGCCableSLBToHPB> m_cableSLBToHPB{};
+    std::unique_ptr<TGCCableHPBToSL> m_cableHPBToSL{};
+    std::unique_ptr<TGCCableSLBToSSW> m_cableSLBToSSW{};
+    std::unique_ptr<TGCCableSSWToROD> m_cableSSWToROD{};
 
     // Protected by mutex.
-    mutable std::map<int, TGCModuleId*> m_slbModuleIdMap ATLAS_THREAD_SAFE;
+    mutable std::map<int, std::unique_ptr<TGCModuleId>> m_slbModuleIdMap
+        ATLAS_THREAD_SAFE;
     mutable std::mutex m_mutex;
 
     int getIndexFromReadoutWithoutChannel(const TGCId::SideType side,

@@ -19,7 +19,7 @@ TGCDatabasePPToSL::TGCDatabasePPToSL(const std::string& filename,
 TGCDatabasePPToSL::TGCDatabasePPToSL(const TGCDatabasePPToSL& right)
     : TGCDatabase(right) {}
 
-void TGCDatabasePPToSL::readDB(void) {
+void TGCDatabasePPToSL::readDB() {
     std::ifstream file(m_filename.c_str());
     std::string buf;
 
@@ -89,7 +89,7 @@ void TGCDatabasePPToSL::readDB(void) {
     file.close();
 }
 
-TGCDatabasePPToSL::~TGCDatabasePPToSL(void) {}
+TGCDatabasePPToSL::~TGCDatabasePPToSL() {}
 
 bool TGCDatabasePPToSL::update(const std::vector<int>& input) {
     int ip = find(input);

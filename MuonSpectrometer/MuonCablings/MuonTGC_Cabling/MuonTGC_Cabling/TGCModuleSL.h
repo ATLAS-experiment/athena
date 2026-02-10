@@ -14,12 +14,9 @@ class TGCModuleSL : public TGCModuleId {
     // Constructor & Destructor
     TGCModuleSL(TGCId::SideType side, TGCId::RegionType region, int sector);
 
-    virtual ~TGCModuleSL(void) {}
+    virtual ~TGCModuleSL() = default;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCModuleSL(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

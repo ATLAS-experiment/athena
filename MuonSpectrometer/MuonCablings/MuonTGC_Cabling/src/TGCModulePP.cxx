@@ -17,7 +17,7 @@ TGCModulePP::TGCModulePP(TGCId::SideType vside, TGCId::ModuleType vmodule,
     setId(vid);
 }
 
-bool TGCModulePP::isValid(void) const {
+bool TGCModulePP::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getModuleType() > TGCId::NoModuleType) &&

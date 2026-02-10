@@ -42,38 +42,34 @@ TGCCableInPP::TGCCableInPP(const std::string& filename)
 
 TGCCableInPP::~TGCCableInPP() = default;
 
-TGCChannelId* TGCCableInPP::getChannel(const TGCChannelId* channelId,
-                                       const bool orChannel) const {
-    if (channelId) {
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::PPIn) {
-            return getChannelOut(channelId, orChannel);
-        }
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::PPOut) {
-            return getChannelIn(channelId, orChannel);
-        }
+std::unique_ptr<TGCChannelId> TGCCableInPP::getChannel(
+    const TGCChannelId& channelId, const bool orChannel) const {
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::PPIn) {
+        return getChannelOut(channelId, orChannel);
+    }
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::PPOut) {
+        return getChannelIn(channelId, orChannel);
     }
     return nullptr;
 }
 
-TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
-                                         const bool orChannel) const {
-    if (ppout->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelIn(
+    const TGCChannelId& ppout, const bool orChannel) const {
+    if (ppout.isValid() == false) {
         return nullptr;
     }
 
-    TGCId::ModuleType moduleType = ppout->getModuleType();
+    TGCId::ModuleType moduleType = ppout.getModuleType();
 
     int ndatabaseP = 1;
     TGCDatabase* databaseP[2];
-    databaseP[0] = m_database[ppout->getRegionType()][moduleType].get();
+    databaseP[0] = m_database[ppout.getRegionType()][moduleType].get();
     // EI/FI
     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
     //  use the same SLB chip
     //  The SLB chip is treated as TGCId::WI in TGCCableSLBToSSW.cxx
     if (moduleType == TGCId::WI) {
-        databaseP[1] = m_database[ppout->getRegionType()][TGCId::SI].get();
+        databaseP[1] = m_database[ppout.getRegionType()][TGCId::SI].get();
         ndatabaseP = 2;
     }
 
@@ -90,7 +86,7 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
         }
 
         int indexIn[TGCDatabaseInPP::NIndexIn] = {
-            ppout->getId(), ppout->getBlock(), ppout->getChannel()};
+            ppout.getId(), ppout.getBlock(), ppout.getChannel()};
         int i = databaseP[idatabaseP]->getIndexDBIn(indexIn);
         if (i < 0) {
             continue;
@@ -121,27 +117,24 @@ TGCChannelId* TGCCableInPP::getChannelIn(const TGCChannelId* ppout,
         return nullptr;
     }
 
-    TGCChannelPPIn* ppin = new TGCChannelPPIn(
-        ppout->getSideType(), moduleType, ppout->getRegionType(),
-        ppout->getSector(), id, block, channel);
-
-    return ppin;
+    return std::make_unique<TGCChannelPPIn>(
+        ppout.getSideType(), moduleType, ppout.getRegionType(),
+        ppout.getSector(), id, block, channel);
 }
 
-TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
-                                          const bool orChannel) const {
-    if (ppin->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableInPP::getChannelOut(
+    const TGCChannelId& ppin, const bool orChannel) const {
+    if (ppin.isValid() == false) {
         return nullptr;
     }
 
-    const int ppinChannel = ppin->getChannel();
-    const int ppinBlock = ppin->getBlock();
-    const int ppinId = ppin->getId();
+    const int ppinChannel = ppin.getChannel();
+    const int ppinBlock = ppin.getBlock();
+    const int ppinId = ppin.getId();
 
     TGCDatabase* databaseP =
-        m_database[ppin->getRegionType()][ppin->getModuleType()].get();
+        m_database[ppin.getRegionType()][ppin.getModuleType()].get();
 
-    TGCChannelPPOut* ppout = nullptr;
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         bool cond1 = (databaseP->getEntry(i, 5) == ppinChannel) &&
@@ -161,7 +154,7 @@ TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
             // TGCChannelSLBIn::CellType cellType = TGCChannelSLBIn::NoCellType;
             int channelInSLB = -1;
             bool adjacent = false;
-            TGCId::ModuleType moduleType = ppin->getModuleType();
+            TGCId::ModuleType moduleType = ppin.getModuleType();
             if (block == 0 || block == 2) {  // C,D
                 int lengthOfC = TGCChannelSLBIn::getLengthOfSLB(
                     moduleType, TGCChannelSLBIn::CellC);
@@ -214,22 +207,21 @@ TGCChannelId* TGCCableInPP::getChannelOut(const TGCChannelId* ppin,
             }
 
             if ((moduleType == TGCId::SD) &&
-                (ppin->getRegionType() == TGCId::Endcap)) {
+                (ppin.getRegionType() == TGCId::Endcap)) {
                 // Strips of Middle doublets are ORed to the adjacent chamber
                 adjacent = cond2;
             }
 
             if (adjacent == orChannel) {
-                ppout = new TGCChannelPPOut(
-                    ppin->getSideType(), ppin->getModuleType(),
-                    ppin->getRegionType(), ppin->getSector(), id, block,
-                    channel);
+                return std::make_unique<TGCChannelPPOut>(
+                    ppin.getSideType(), ppin.getModuleType(),
+                    ppin.getRegionType(), ppin.getSector(), id, block, channel);
                 break;
             }
         }
     }
 
-    return ppout;
+    return nullptr;
 }
 
 }  // namespace MuonTGC_Cabling

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelSLBOut.h"
@@ -23,12 +23,12 @@ TGCChannelSLBOut::TGCChannelSLBOut(TGCId::SideType vside,
     setChannel(vchannel);
 }
 
-TGCModuleId* TGCChannelSLBOut::getModule(void) const {
-    return (new TGCModuleSLB(getSideType(), getModuleType(), getRegionType(),
-                             getSector(), getId()));
+std::unique_ptr<TGCModuleId> TGCChannelSLBOut::getModule() const {
+    return std::make_unique<TGCModuleSLB>(
+        getSideType(), getModuleType(), getRegionType(), getSector(), getId());
 }
 
-bool TGCChannelSLBOut::isValid(void) const {
+bool TGCChannelSLBOut::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getModuleType() > TGCId::NoModuleType) &&

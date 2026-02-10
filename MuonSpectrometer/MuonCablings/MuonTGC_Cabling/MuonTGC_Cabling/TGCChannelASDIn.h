@@ -16,16 +16,13 @@ class TGCChannelASDIn : public TGCChannelId {
                     TGCId::RegionType region, int sector, int layer,
                     int chamber, int channel);
 
-    virtual ~TGCChannelASDIn(void) {}
+    virtual ~TGCChannelASDIn() = default;
 
     virtual void setSector(int sector);
 
-    virtual int getSector(void) const;
+    virtual int getSector() const;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCChannelASDIn(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

@@ -271,6 +271,8 @@ def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
             kwargs.setdefault("MdtCablingKey", "")
         if not flags.Detector.GeometryRPC:
             kwargs.setdefault("RpcCablingKey", "")
+        if not flags.Detector.GeometryTGC:
+            kwargs.setdefault("TgcCablingKey", "")
         alignDet = ""
         if detector == "MDT":    alignDet = "Mdt"
         elif detector == "RPC":  alignDet = "Rpc"

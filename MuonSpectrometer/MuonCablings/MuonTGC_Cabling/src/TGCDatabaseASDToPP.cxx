@@ -50,7 +50,7 @@ TGCDatabaseASDToPP::TGCDatabaseASDToPP(const TGCDatabaseASDToPP& right,
     right.getminIndexOut(m_minIndexOut);
 }
 
-TGCDatabaseASDToPP::~TGCDatabaseASDToPP(void) {}
+TGCDatabaseASDToPP::~TGCDatabaseASDToPP() {}
 
 bool TGCDatabaseASDToPP::update(const std::vector<int>& input) {
     int ip = find(input);
@@ -179,7 +179,7 @@ bool TGCDatabaseASDToPP::isCommon() const {
     return m_isCommon;
 }
 
-void TGCDatabaseASDToPP::readDB(void) {
+void TGCDatabaseASDToPP::readDB() {
     std::ifstream file(m_filename.c_str());
     std::string buf;
 
@@ -263,7 +263,7 @@ void TGCDatabaseASDToPP::readDB(void) {
     makeIndexDBOut();
 }
 
-void TGCDatabaseASDToPP::makeIndexDBIn(void) {
+void TGCDatabaseASDToPP::makeIndexDBIn() {
     m_NIndexDBIn = 1;
     for (int iIndexIn = 0; iIndexIn < NIndexIn; iIndexIn++) {
         m_NIndexDBIn *= (m_maxIndexIn[iIndexIn] - m_minIndexIn[iIndexIn] + 1);
@@ -291,7 +291,7 @@ int TGCDatabaseASDToPP::convertIndexDBIn(int* indexIn) const {
     return converted;
 }
 
-void TGCDatabaseASDToPP::makeIndexDBOut(void) {
+void TGCDatabaseASDToPP::makeIndexDBOut() {
     m_NIndexDBOut = 1;
     for (int iIndexOut = 0; iIndexOut < NIndexOut; iIndexOut++) {
         m_NIndexDBOut *=

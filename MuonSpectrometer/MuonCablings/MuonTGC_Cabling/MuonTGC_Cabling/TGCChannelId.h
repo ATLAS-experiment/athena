@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELID_H
 #define MUONTGC_CABLING_TGCCHANNELID_H
 
+#include <memory>
+
 #include "MuonTGC_Cabling/TGCId.h"
+#include "MuonTGC_Cabling/TGCModuleId.h"
 
 namespace MuonTGC_Cabling {
 
@@ -29,9 +32,9 @@ class TGCChannelId : public TGCId {
         : TGCId(IdType::Channel) {
         m_channelType = type;
     }
-    virtual ~TGCChannelId(void) = default;
+    virtual ~TGCChannelId() = default;
 
-    virtual TGCModuleId* getModule(void) const { return 0; }
+    virtual std::unique_ptr<TGCModuleId> getModule() const { return nullptr; }
 
     virtual bool operator==(const TGCChannelId& channelId) const;
 

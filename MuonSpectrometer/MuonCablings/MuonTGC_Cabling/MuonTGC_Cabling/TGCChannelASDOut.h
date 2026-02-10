@@ -19,9 +19,9 @@ class TGCChannelASDOut : public TGCChannelId {
     TGCChannelASDOut(TGCId::SideType side, TGCId::SignalType signal, int octant,
                      int moduleSector, int layer, int chamber, int channel);
 
-    virtual ~TGCChannelASDOut(void) = default;
+    virtual ~TGCChannelASDOut() = default;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const;
 
    private:
     TGCChannelASDOut() = delete;

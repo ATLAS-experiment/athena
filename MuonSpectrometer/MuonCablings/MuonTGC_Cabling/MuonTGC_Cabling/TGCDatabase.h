@@ -29,18 +29,18 @@ class TGCDatabase {
 
     TGCDatabase(const TGCDatabase&) = default;
 
-    virtual ~TGCDatabase(void);
+    virtual ~TGCDatabase();
 
     // assignment operator
     TGCDatabase& operator=(const TGCDatabase&) = default;
 
-    DatabaseType getDatabaseType(void) const { return m_type; }
+    DatabaseType getDatabaseType() const { return m_type; }
 
     virtual int getEntry(int entry, int column) const;
 
     virtual int getEntrySize(int entry) const;
 
-    virtual int getMaxEntry(void) const;
+    virtual int getMaxEntry() const;
 
     virtual bool update(const std::vector<int>&);
 
@@ -50,7 +50,7 @@ class TGCDatabase {
     virtual int getIndexDBOut(int* indexOut) const;
 
    protected:
-    virtual void readDB(void) {}
+    virtual void readDB() {}
     std::string m_filename;
     std::string m_blockname;
     std::vector<std::vector<int> > m_database;

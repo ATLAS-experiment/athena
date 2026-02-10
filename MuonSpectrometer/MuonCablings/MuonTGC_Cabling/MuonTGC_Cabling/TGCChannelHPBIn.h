@@ -16,11 +16,11 @@ class TGCChannelHPBIn : public TGCChannelId {
                     TGCId::RegionType region, int sector, int id, int block,
                     int channel);
 
-    virtual ~TGCChannelHPBIn(void) {}
+    virtual ~TGCChannelHPBIn() = default;
 
-    virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const;
 
    private:
     static const int s_numberOfBlock;
@@ -28,12 +28,12 @@ class TGCChannelHPBIn : public TGCChannelId {
     static const int s_slbInBlock;
 
    public:
-    static int getNumberOfBlock(void);
-    static int getChannelInBlock(void);
-    static int getSlbInBlock(void);
+    static int getNumberOfBlock();
+    static int getChannelInBlock();
+    static int getSlbInBlock();
 
    private:
-    TGCChannelHPBIn(void) {}
+    TGCChannelHPBIn() {}
 };
 
 }  // namespace MuonTGC_Cabling

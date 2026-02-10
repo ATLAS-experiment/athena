@@ -58,7 +58,7 @@ class TGCSlaveBoard
   void setPatchPanelOut(TGCPatchPanelOut* PPOut){ m_patchPanelOut=PPOut;};
 
   void storeSlbIn();
-  const std::bitset<200>& GetSlbIn(void) const { return m_slbin; } // for readout
+  const std::bitset<200>& GetSlbIn() const { return m_slbin; } // for readout
 
  protected:
   void collectInput();

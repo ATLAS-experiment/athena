@@ -41,44 +41,36 @@ TGCCableInASD::TGCCableInASD(const std::string& filename)
 
 TGCCableInASD::~TGCCableInASD() = default;
 
-TGCChannelId* TGCCableInASD::getChannel(const TGCChannelId* channelId,
-                                        bool orChannel) const {
-    if (channelId) {
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::ASDIn) {
-            return getChannelOut(channelId, orChannel);
-        }
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::ASDOut) {
-            return getChannelIn(channelId, orChannel);
-        }
+std::unique_ptr<TGCChannelId> TGCCableInASD::getChannel(
+    const TGCChannelId& channelId, bool orChannel) const {
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::ASDIn) {
+        return getChannelOut(channelId, orChannel);
     }
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::ASDOut) {
+        return getChannelIn(channelId, orChannel);
+    }
+
     return nullptr;
 }
 
-TGCChannelId* TGCCableInASD::getChannelIn(const TGCChannelId* asdout,
-                                          bool orChannel) const {
-    if (orChannel) {
-        return nullptr;
-    }
-    if (asdout->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableInASD::getChannelIn(
+    const TGCChannelId& asdout, bool orChannel) const {
+    if (orChannel || !asdout.isValid()) {
         return nullptr;
     }
 
     TGCDatabase* databaseP =
-        m_database[asdout->getRegionType()][asdout->getModuleType()].get();
-
-    TGCChannelASDIn* asdin = nullptr;
+        m_database[asdout.getRegionType()][asdout.getModuleType()].get();
 
     // sector ASDIn [1..48, 1..24], ASDOut [0..47, 0..23]
     int sector;
-    if (asdout->isEndcap() && !asdout->isInner()) {
-        sector = asdout->getSector() - 1;
+    if (asdout.isEndcap() && !asdout.isInner()) {
+        sector = asdout.getSector() - 1;
         if (sector <= 0) {
             sector += TGCId::NUM_ENDCAP_SECTOR;
         }
     } else {
-        sector = asdout->getSector();
+        sector = asdout.getSector();
         if (sector <= 0) {
             sector += TGCId::NUM_FORWARD_SECTOR;
         }
@@ -86,98 +78,94 @@ TGCChannelId* TGCCableInASD::getChannelIn(const TGCChannelId* asdout,
 
     // chamber ASDIn [1(F),1,2,3,4,5(E)], ASDOut [0(F),4,3,2,1,0(E)]
     int chamber;
-    if (asdout->isEndcap() && !asdout->isInner()) {
-        chamber = 5 - asdout->getChamber();
+    if (asdout.isEndcap() && !asdout.isInner()) {
+        chamber = 5 - asdout.getChamber();
     } else {
-        chamber = asdout->getChamber() + 1;
+        chamber = asdout.getChamber() + 1;
     }
 
     int channel = -1;
     // channel ASDIn [1..32(S),1..n(W chamber)], ASDOut [0..31(S),n..0(W
     // sector)]
-    if (asdout->isWire()) {
+    if (asdout.isWire()) {
         // Endcap Triplet chamberId start from 1 in ASDOut
-        int dbChamber = asdout->getChamber();
-        if (asdout->isEndcap() && asdout->isTriplet()) {
+        int dbChamber = asdout.getChamber();
+        if (asdout.isEndcap() && asdout.isTriplet()) {
             dbChamber = dbChamber - 1;
         }
         int indexIn[TGCDatabaseASDToPP::NIndexIn] = {
-            asdout->getLayer(), dbChamber, asdout->getChannel()};
+            asdout.getLayer(), dbChamber, asdout.getChannel()};
         int i = databaseP->getIndexDBIn(indexIn);
         if (i < 0) {
             return nullptr;
         }
         channel = databaseP->getEntry(i, 7) + 1;
     } else {
-        if ((asdout->isBackward() && asdout->isAside()) ||
-            (!asdout->isBackward() && asdout->isCside())) {
-            channel = 32 - asdout->getChannel();
+        if ((asdout.isBackward() && asdout.isAside()) ||
+            (!asdout.isBackward() && asdout.isCside())) {
+            channel = 32 - asdout.getChannel();
         } else {
-            channel = asdout->getChannel() + 1;
+            channel = asdout.getChannel() + 1;
         }
     }
     if (channel == -1) {
         return nullptr;
     }
 
-    asdin = new TGCChannelASDIn(asdout->getSideType(), asdout->getSignalType(),
-                                asdout->getRegionType(), sector,
-                                asdout->getLayer(), chamber, channel);
-
-    return asdin;
+    return std::make_unique<TGCChannelASDIn>(
+        asdout.getSideType(), asdout.getSignalType(), asdout.getRegionType(),
+        sector, asdout.getLayer(), chamber, channel);
 }
 
-TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
-                                           bool orChannel) const {
-    if (orChannel) {
-        return nullptr;
-    }
-    if (asdin->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableInASD::getChannelOut(
+    const TGCChannelId& asdin, bool orChannel) const {
+    if (orChannel || asdin.isValid() == false) {
         return nullptr;
     }
 
-    const bool asdinisEndcap = asdin->isEndcap();
-    const bool asdinisTriplet = asdin->isTriplet();
-    const int asdinLayer = asdin->getLayer();
-    const int asdinChannel = asdin->getChannel();
+    const bool asdinisEndcap = asdin.isEndcap();
+    const bool asdinisTriplet = asdin.isTriplet();
+    const int asdinLayer = asdin.getLayer();
+    const int asdinChannel = asdin.getChannel();
 
     TGCDatabase* databaseP =
-        m_database[asdin->getRegionType()][asdin->getModuleType()].get();
+        m_database[asdin.getRegionType()][asdin.getModuleType()].get();
 
-    TGCChannelASDOut* asdout = nullptr;
-
+    if (!databaseP) {
+        return nullptr;
+    }
     // sector ASDIn [1..48, 1..24], ASDOut [2..47.0.1, 1..23.0]
-    int sector;
-    if (asdin->isEndcap()) {
-        if (!asdin->isInner()) {
+    int sector{0};
+    if (asdin.isEndcap()) {
+        if (!asdin.isInner()) {
             // Endcap
-            sector = (asdin->getSector() + 1) % TGCId::NUM_ENDCAP_SECTOR;
+            sector = (asdin.getSector() + 1) % TGCId::NUM_ENDCAP_SECTOR;
         } else {
             // EI
-            sector = (asdin->getSector()) % TGCId::NUM_INNER_SECTOR;
+            sector = (asdin.getSector()) % TGCId::NUM_INNER_SECTOR;
         }
     } else {
-        if (!asdin->isInner()) {
+        if (!asdin.isInner()) {
             // Forward
-            sector = (asdin->getSector()) % TGCId::NUM_FORWARD_SECTOR;
+            sector = (asdin.getSector()) % TGCId::NUM_FORWARD_SECTOR;
         } else {
             // FI
-            sector = (asdin->getSector()) % TGCId::NUM_INNER_SECTOR;
+            sector = (asdin.getSector()) % TGCId::NUM_INNER_SECTOR;
         }
     }
 
     // chamber ASDIn [1(F),1,2,3,4,5(E)], ASDOut [0(F),4,3,2,1,0(E)]
-    int chamber;
-    if (asdin->isEndcap() && !asdin->isInner()) {
-        chamber = 5 - asdin->getChamber();
+    int chamber{0};
+    if (asdin.isEndcap() && !asdin.isInner()) {
+        chamber = 5 - asdin.getChamber();
     } else {
-        chamber = asdin->getChamber() - 1;
+        chamber = asdin.getChamber() - 1;
     }
 
     int channel = -1;
     // channel ASDIn [1..32(S),1..n(W chamber)], ASDOut [0..31(S),n..0(W
     // sector)]
-    if (asdin->isWire()) {
+    if (asdin.isWire()) {
         const int MaxEntry = databaseP->getMaxEntry();
         for (int i = 0; i < MaxEntry; i++) {
             // Endcap Triplet chamberId start from 1 in ASDOut
@@ -195,12 +183,12 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
             }
         }
     } else {
-        // asdin->isBackward() can not be used because this method rely on
+        // asdin.isBackward() can not be used because this method rely on
         // sector number for asdout
         bool is_Backward = false;
-        if (asdin->isEndcap()) {
-            if (!asdin->isInner()) {
-                if (asdin->isAside()) {
+        if (asdin.isEndcap()) {
+            if (!asdin.isInner()) {
+                if (asdin.isAside()) {
                     is_Backward = (sector % 2 == 1);
                 } else {
                     is_Backward = (sector % 2 == 0);
@@ -209,13 +197,13 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
                 // EI
                 // Special case of EI11
                 if (sector == 15) {
-                    if (asdin->isAside()) {
+                    if (asdin.isAside()) {
                         is_Backward = false;
                     } else {
                         is_Backward = true;
                     }
                 } else if (sector == 16) {
-                    if (asdin->isAside()) {
+                    if (asdin.isAside()) {
                         is_Backward = true;
                     } else {
                         is_Backward = false;
@@ -223,7 +211,7 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
                 } else {
                     //  A-side phi0 F: phi1 F: phi2 B
                     //  C-side phi0 B: phi1 B: phi2 F
-                    if (asdin->isAside()) {
+                    if (asdin.isAside()) {
                         is_Backward = (sector % 3 == 2);
                     } else {
                         is_Backward = (sector % 3 != 2);
@@ -231,26 +219,24 @@ TGCChannelId* TGCCableInASD::getChannelOut(const TGCChannelId* asdin,
                 }
             }
         } else {
-            if (asdin->isAside()) {
+            if (asdin.isAside()) {
                 is_Backward = true;  // All Backward for A-side
             }
         }
-        if ((is_Backward && asdin->isAside()) ||
-            (!is_Backward && asdin->isCside())) {
-            channel = 32 - asdin->getChannel();
+        if ((is_Backward && asdin.isAside()) ||
+            (!is_Backward && asdin.isCside())) {
+            channel = 32 - asdin.getChannel();
         } else {
-            channel = asdin->getChannel() - 1;
+            channel = asdin.getChannel() - 1;
         }
     }
     if (channel == -1) {
         return nullptr;
     }
 
-    asdout = new TGCChannelASDOut(asdin->getSideType(), asdin->getSignalType(),
-                                  asdin->getRegionType(), sector,
-                                  asdin->getLayer(), chamber, channel);
-
-    return asdout;
+    return std::make_unique<TGCChannelASDOut>(
+        asdin.getSideType(), asdin.getSignalType(), asdin.getRegionType(),
+        sector, asdin.getLayer(), chamber, channel);
 }
 
 }  // namespace MuonTGC_Cabling
