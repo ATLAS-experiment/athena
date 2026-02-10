@@ -14,6 +14,7 @@
 #include "MuonPrepRawData/sTgcPrepData.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODJet/JetConstituentVector.h"
+#include "FourMomUtils/xAODP4Helpers.h"
 
 namespace {
 constexpr float const& myConst = 1e-3 / 3e8 / 1e-9;
@@ -296,7 +297,7 @@ StatusCode BeamBackgroundFiller::FillMatchMatrix(const EventContext& ctx,
 
         if ( m_isRun3 ) { 
           // match in phi  
-          if (std::abs(phiClus - phiSeg) > m_cutPhiNsw) continue; 
+          if (std::abs(xAOD::P4Helpers::deltaPhi(phiClus, phiSeg)) > m_cutPhiNsw) continue; 
           // match in radius 
           if (std::abs(rClus - rSeg) > m_cutRadiusNsw) continue; 
         } else { 
@@ -496,7 +497,7 @@ void BeamBackgroundFiller::NSWMDTMatching(const EventContext& ctx, Cache& cache)
       if (m_idHelperSvc->sector(idNSW) != m_idHelperSvc->sector(idMDT)) continue;
 
       // phi matching
-      if (std::abs(phiSegNSW - phiSegMDT) > m_cutPhiSegMdt) continue;
+      if (std::abs(xAOD::P4Helpers::deltaPhi(phiSegNSW, phiSegMDT)) >m_cutPhiSegMdt) continue;
 
       // radius matching
       if ((rSegNSW - rSegMDT) < m_cutRadSegMdt) continue;
