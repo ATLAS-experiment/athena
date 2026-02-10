@@ -5,7 +5,6 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include "EFTrackingFPGAPipeline/F600IntegrationAlg.h"
 #include "EFTrackingFPGAUtility/EFTrackingTransient.h"
 #include "AthenaKernel/Chrono.h"
-#include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
 
 namespace EFTrackingFPGAIntegration
 {

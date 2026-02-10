@@ -44,7 +44,7 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('RunnerKernelName', 'runner')
 
     # Set up Cluster maker tool
-    from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
+    from EFTrackingFPGAPipeline.FPGAToolsConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
     kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
     
