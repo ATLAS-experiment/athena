@@ -57,9 +57,12 @@ StatusCode TRT_StrawAlignDbSvc::initialize()
   bool dxcontainerexists = m_detStore->StoreGateSvc::contains<StrawDxContainer>(m_par_dxcontainerkey) ;
   
   if( dxcontainerexists ) {
+    /*
     ATH_MSG_INFO (" dx container exists - reg callback ");
     if( (m_detStore->regFcn(&TRT_StrawAlignDbSvc::IOVCallBack,this,m_dxcontainer,m_par_dxcontainerkey)).isFailure()) 
       ATH_MSG_ERROR ("Could not register IOV callback for key: " << m_par_dxcontainerkey);
+    */
+    ATH_MSG_DEBUG(" dx container exists - do nothing ");
     
   } else {
     
@@ -152,7 +155,7 @@ StatusCode TRT_StrawAlignDbSvc::readTextFile(StrawDxContainer* dxcontainer,
   ATH_MSG_INFO (" (no compression) ");
 
   // force a call back in the geometry
-  (const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align().ignore() ;
+//  (const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align().ignore() ;
 
   return StatusCode::SUCCESS ;
 }
@@ -164,7 +167,7 @@ StatusCode TRT_StrawAlignDbSvc::streamOutObjects() const
   
   // Get Output Stream tool for writing
   ATH_CHECK( m_streamer.retrieve() );
-  
+
   IAthenaOutputStreamTool*  streamer=const_cast<IAthenaOutputStreamTool*>(&(*m_streamer));
     
   ATH_CHECK( streamer->connectOutput() );
@@ -201,11 +204,13 @@ StatusCode TRT_StrawAlignDbSvc::registerObjects(std::string tag, int run1, int e
 }
 
 
-StatusCode TRT_StrawAlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
+StatusCode TRT_StrawAlignDbSvc::IOVCallBack()
 {
+  /*
   for (std::list<std::string>::const_iterator 
 	 itr=keys.begin(); itr!=keys.end(); ++itr) 
     ATH_MSG_INFO (" IOVCALLBACK for key " << *itr << " number " << I);
+  */
   
   // if constants need to be read from textfile, we use the call back routine to refill the IOV objects
   if(!m_par_strawtextfile.empty()) return readTextFile( getDxContainer(), m_par_strawtextfile ) ;
