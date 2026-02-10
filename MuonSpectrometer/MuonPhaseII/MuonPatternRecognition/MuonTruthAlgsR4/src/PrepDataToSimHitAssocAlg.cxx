@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PrepDataToSimHitAssocAlg.h"
 
@@ -8,32 +8,94 @@
 #include "xAODMuonPrepData/RpcMeasurement.h"
 #include "xAODMuonPrepData/TgcStrip.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
+#include "xAODMuonPrepData/sTgcStripCluster.h"
+#include "xAODMuonPrepData/sTgcPadHit.h"
+#include "xAODMuonPrepData/sTgcWireHit.h"
 #include "xAODMuonPrepData/MMCluster.h"
+#include "xAODMuonPrepData/MdtDriftCircle.h"
+
 #include "xAODMuonViews/ChamberViewer.h"
+
+#include "Acts/Utilities/Helpers.hpp"
 #include <span>
+#include <cassert>
+namespace{
+    /** @brief phi channel decorator of the rpcs && tgcs  */
+    using ChVec_t = std::vector<std::uint16_t>;
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::ConstAccessor<ChVec_t> acc_phiChannel{"SDO_phiChannels"};
+    static const SG::ConstAccessor<ChVec_t> acc_etaChannel{"SDO_etaChannels"};
+    static const SG::ConstAccessor<ChVec_t> acc_padChannel{"SDO_padChannels"};
+}
+
 namespace MuonR4{
+
+ 
     StatusCode PrepDataToSimHitAssocAlg::initialize() {
         ATH_CHECK(m_simHitsKey.initialize());
         ATH_CHECK(m_prdHitKey.initialize());
         ATH_CHECK(m_decorKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
-        ATH_CHECK(m_geoCtxKey.initialize());
         return StatusCode::SUCCESS;
-    }    
+    }
+    template <typename PrdType_t>
+        const xAOD::MuonSimHit*
+            PrepDataToSimHitAssocAlg::truthMatchPrd(Viewer_t<xAOD::MuonSimHitContainer>& simHits,
+                                                    const xAOD::UncalibratedMeasurement* measurement) const {
+
+        const auto* prd = dynamic_cast<const  PrdType_t*>(measurement);
+        // const MuonGMR4::MuonReadoutElement* re = prd->readoutElement();
+        for (const xAOD::MuonSimHit* hit : simHits) {
+            /// Match via the identifier
+            const Identifier hitId = hit->identify();
+            if (hitId == prd->identify()) {
+                return hit;
+            }
+            if constexpr(!std::is_same_v<PrdType_t, xAOD::MdtDriftCircle>) {
+                if (prd->readoutElement()->layerHash(hitId) != prd->layerHash()) {
+                    continue;
+                }
+            }
+            if constexpr(std::is_same_v<PrdType_t, xAOD::TgcStrip> ||
+                         std::is_same_v<PrdType_t, xAOD::RpcMeasurement>) {
+                if (( prd->measuresPhi() && Acts::rangeContainsValue(acc_phiChannel(*hit), prd->channelNumber())) ||
+                    (!prd->measuresPhi() && Acts::rangeContainsValue(acc_etaChannel(*hit), prd->channelNumber()))) {
+                    return hit;
+                }
+            } else if constexpr (std::is_same_v<PrdType_t, xAOD::MMCluster> ||
+                                 std::is_same_v<PrdType_t, xAOD::sTgcStripCluster>) {
+                for (auto ch : prd->stripNumbers()) {
+                    if (Acts::rangeContainsValue(acc_etaChannel(*hit), ch)) {
+                        return hit;
+                    }
+                }
+            } else if constexpr(std::is_same_v<PrdType_t, xAOD::sTgcWireHit>) {
+                if (Acts::rangeContainsValue(acc_phiChannel(*hit), prd->channelNumber())){
+                    return hit;
+                }
+            } else if constexpr(std::is_same_v<PrdType_t, xAOD::sTgcPadHit>) {
+                if (Acts::rangeContainsValue(acc_padChannel(*hit), prd->channelNumber())){
+                    return hit;
+                }
+            }
+        }
+        return nullptr;
+    }
+    
     StatusCode PrepDataToSimHitAssocAlg::execute(const EventContext & ctx) const {
-        const ActsTrk::GeometryContext* gctx{nullptr};
         const xAOD::MuonSimHitContainer* simHits{nullptr};
         const xAOD::UncalibratedMeasurementContainer* measurements{nullptr};
-        ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         ATH_CHECK(SG::get(simHits, m_simHitsKey, ctx));
         ATH_CHECK(SG::get(measurements, m_prdHitKey, ctx));
+
+        if (measurements->empty()){
+            return StatusCode::SUCCESS;
+        }
 
         xAOD::ChamberViewer prdViewer{*measurements};
         xAOD::ChamberViewer simHitViewer{*simHits, m_idHelperSvc.get(), xAOD::ChamberView::Mode::DetElement};
         SG::WriteDecorHandle<xAOD::UncalibratedMeasurementContainer, LinkType> decorHandle{m_decorKey, ctx};
-        if (measurements->empty()){
-            return StatusCode::SUCCESS;
-        }
         /** Loop over the measurements */
         do {
             const Identifier chambId = xAOD::identify(prdViewer.at(0));
@@ -52,89 +114,53 @@ namespace MuonR4{
                       })) {
                 continue;
             }
-            ATH_MSG_VERBOSE("Container size "<<simHits->size()<<" viewer size: "<<simHitViewer.size()<<" view hash: "<<viewHash);
-            std::unordered_set<Identifier> prds{};
+            ATH_MSG_VERBOSE("Container size "<<simHits->size()<<" viewer size: "<<simHitViewer.size()
+                            <<" view hash: "<<viewHash);
             for (const xAOD::UncalibratedMeasurement* measurement : prdViewer) {
                 /** Define the place holder for the closest simHit */
                 const xAOD::MuonSimHit* bestSimHit{nullptr};
                 switch (measurement->type()) {
-                    /** Drift circles can be directly matched via Identifier */
-                    case xAOD::UncalibMeasType::MdtDriftCircleType: {
-                        const Identifier prdId{xAOD::identify(measurement)};                
-                        xAOD::MuonSimHitContainer::const_iterator matching_itr = 
-                            std::ranges::find_if(simHitViewer,[&prdId](const xAOD::MuonSimHit* hit){
-                                return hit->identify() == prdId;
-                            });
-                        if (matching_itr != simHitViewer.end()) {
-                            bestSimHit =(*matching_itr);
-                        }
+                    case xAOD::UncalibMeasType::MdtDriftCircleType:{
+                        bestSimHit = truthMatchPrd<xAOD::MdtDriftCircle>(simHitViewer, measurement);
+                        break;
+                    } case xAOD::UncalibMeasType::RpcStripType: {
+                        bestSimHit = truthMatchPrd<xAOD::RpcMeasurement>(simHitViewer, measurement);
+                        break;
+                    } case xAOD::UncalibMeasType::TgcStripType: {
+                        bestSimHit = truthMatchPrd<xAOD::TgcStrip>(simHitViewer, measurement);
                         break;
                     } case xAOD::UncalibMeasType::MMClusterType: {
-                        prds.clear();
-                        const auto* mmHit = static_cast<const xAOD::MMCluster*>(measurement);
-                        const MmIdHelper& mmIdHelper{m_idHelperSvc->mmIdHelper()};
-                        const int ml = mmIdHelper.multilayer(mmHit->identify());
-                        for (const uint16_t strip : mmHit->stripNumbers()) {
-                            prds.insert(mmIdHelper.channelID(mmHit->identify(), ml, mmHit->gasGap(), strip));
-                        }
-                        xAOD::MuonSimHitContainer::const_iterator matching_itr = 
-                            std::ranges::find_if(simHitViewer,[&prds](const xAOD::MuonSimHit* hit){
-                                return prds.count(hit->identify());
-                            });
-                        if (matching_itr != simHitViewer.end()) {
-                            bestSimHit =(*matching_itr);
+                        bestSimHit = truthMatchPrd<xAOD::MMCluster>(simHitViewer, measurement);
+                        break;
+                    } case xAOD::UncalibMeasType::sTgcStripType:{
+                        const auto* prd = static_cast<const xAOD::sTgcMeasurement*>(measurement);
+                        switch (prd->channelType()) {
+                            using enum sTgcIdHelper::sTgcChannelTypes;
+                            case Strip:{
+                                bestSimHit = truthMatchPrd<xAOD::sTgcStripCluster>(simHitViewer, measurement);
+                                break;
+                            }
+                            case Wire:{
+                                bestSimHit = truthMatchPrd<xAOD::sTgcWireHit>(simHitViewer, measurement);
+                                break;
+                            }
+                            case Pad:{
+                                bestSimHit = truthMatchPrd<xAOD::sTgcPadHit>(simHitViewer, measurement);
+                                break;
+                            }
                         }
                         break;
-                    } case xAOD::UncalibMeasType::RpcStripType:
-                      case xAOD::UncalibMeasType::TgcStripType:
-                      case xAOD::UncalibMeasType::sTgcStripType: {
-                    const Identifier prdId{xAOD::identify(measurement)};
-                    const MuonGMR4::MuonReadoutElement* readOutEle = xAOD::muonReadoutElement(measurement);
-                    const Amg::Transform3D& locToGlob{readOutEle->localToGlobalTransform(*gctx, readOutEle->layerHash(prdId))};
-                    
-                    const Identifier gasGapId = m_idHelperSvc->gasGapId(prdId);
-                    /** Calculate the local position */                    
-                    Amg::Vector3D locPos{Amg::Vector3D::Zero()};
-                    if (measurement->numDimensions() == 1) {
-                        locPos = measurement->localPosition<1>().x() * Amg::Vector3D::UnitX();
-                    } else {
-                        locPos.block<2,1>(0,0) = xAOD::toEigen(measurement->localPosition<2>());
+                    } default: {
+                        ATH_MSG_FATAL("Non muon measurement is parsed");
+                        return StatusCode::FAILURE;
                     }
-                    double closestDistance{m_PullCutOff};
-                    for ( const xAOD::MuonSimHit* simHit : simHitViewer) {
-                        if (gasGapId != m_idHelperSvc->gasGapId(simHit->identify())) {
-                            continue; 
-                        }
-                        const IdentifierHash simLayHash{readOutEle->layerHash(simHit->identify())};
-                        const Amg::Transform3D globToLoc{readOutEle->globalToLocalTransform(*gctx, simLayHash) *locToGlob};
-                        /** If the prepdata is expressed in the phi view, it's automatically rotated into the eta view */
-                        const Amg::Vector3D prdPos = globToLoc * locPos;
-                        /** 2D space points closest eucledian disance -> otherwise closest local x */
-                        double dist{0.};
-                        if (measurement->numDimensions() == 1) {
-                            dist = std::abs(prdPos.x() - simHit->localPosition().x()) 
-                                 / std::sqrt(measurement->localCovariance<1>()(0,0));
-                        } else{
-                            const Amg::Vector2D diff = (prdPos - xAOD::toEigen(simHit->localPosition())).block<2,1>(0,0);
-                            dist = std::sqrt(diff.dot(xAOD::toEigen(measurement->localCovariance<2>()).inverse() * diff));
-                        }
-                        if (dist < closestDistance) {
-                            closestDistance = dist;
-                            bestSimHit = simHit;
-                        }
-                    }
-                    break;
-                } default: {
-                    ATH_MSG_FATAL("Non muon measurement is parsed");
-                    return StatusCode::FAILURE;
                 }
+                if (!bestSimHit) {
+                    continue;
+                }
+                
+                decorHandle(*measurement) = LinkType{*simHits, bestSimHit->index()};
             }
-            if (!bestSimHit) {
-                continue;
-            }
-            decorHandle(*measurement) = LinkType{*simHits, bestSimHit->index()};
-            }
-
         } while (prdViewer.next());
         
         return StatusCode::SUCCESS;

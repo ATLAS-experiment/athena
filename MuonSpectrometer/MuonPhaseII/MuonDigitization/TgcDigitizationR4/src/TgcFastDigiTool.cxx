@@ -10,7 +10,10 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
-    static const SG::Decorator<std::int16_t> dec_phiChannel{"SDO_phiChannel"};
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    using ChVec_t = std::vector<std::uint16_t>;
+    static const SG::Decorator<ChVec_t> dec_phiChannel{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
 }
 namespace MuonR4 {
 
@@ -221,7 +224,13 @@ namespace MuonR4 {
                 if (digitizedEta || digitizedPhi) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
                     sdo->setIdentifier(outColl->back()->identify());
-                    dec_phiChannel(*sdo) = phiChannel;
+
+                    dec_phiChannel(*sdo).clear();
+                    dec_etaChannel(*sdo).clear();
+
+                    if (digitizedPhi) {
+                        dec_phiChannel(*sdo).push_back(phiChannel);
+                    }
                 }
             }
         } while(viewer.next());
