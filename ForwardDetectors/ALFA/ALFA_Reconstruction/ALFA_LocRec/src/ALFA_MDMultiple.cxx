@@ -8,7 +8,7 @@
 ALFA_MDMultiple::ALFA_MDMultiple() :
     AthMessaging("ALFA_MDMultiple")
 {
-	memset(&m_iNumHitsLayer, 0.0, sizeof(m_iNumHitsLayer));
+	std::ranges::fill (m_iNumHitsLayer, 0.0);
 
 	m_fOverlapCut      = 0.0;
 	m_iMultiplicityCut = 0;
@@ -133,18 +133,11 @@ StatusCode ALFA_MDMultiple::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::Finalize()");
 
-	size_t iTrackNum=0, iSize=0;
-	std::fill_n(&fRecXPos[0], sizeof(fRecXPos)/sizeof(Float_t), -9999.0);
-	std::fill_n(&fRecYPos[0], sizeof(fRecYPos)/sizeof(Float_t), -9999.0);
-
-	iSize = std::min(m_fRecXPos.size(), m_fRecYPos.size());
-	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
-
-	for (size_t i=0; i<iTrackNum; i++)
-	{
-		fRecXPos[i] = m_fRecXPos.at(i);
-		fRecYPos[i] = m_fRecYPos.at(i);
-	}
+	Int_t iTrackNum = std::min ({m_fRecXPos.size(), m_fRecYPos.size(), MAXTRACKNUM});
+	std::copy_n (m_fRecXPos.begin(), iTrackNum, fRecXPos);
+	std::copy_n (m_fRecYPos.begin(), iTrackNum, fRecYPos);
+	std::fill_n (fRecXPos+iTrackNum, MAXTRACKNUM-iTrackNum, -9999.0);
+	std::fill_n (fRecYPos+iTrackNum, MAXTRACKNUM-iTrackNum, -9999.0);
 
 	return StatusCode::SUCCESS;
 }
@@ -607,46 +600,28 @@ void ALFA_MDMultiple::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRA
 {
 	ATH_MSG_DEBUG("ALFA_MDMultiple::GetData()");
 
-	Int_t iTrackNum;
-	size_t iSize;
-	std::fill_n(&fOvU[0], sizeof(fOvU)/sizeof(Float_t), -9999.0);
-	std::fill_n(&fOvV[0], sizeof(fOvV)/sizeof(Float_t), -9999.0);
-	std::fill_n(&iNumU[0], sizeof(iNumU)/sizeof(Int_t), -9999);
-	std::fill_n(&iNumV[0], sizeof(iNumV)/sizeof(Int_t), -9999);
-	std::fill_n(&iFibSel[0][0], sizeof(iFibSel)/sizeof(Int_t), -9999);
+        for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+        {
+          size_t iTrackNum = std::min ({m_iFibSel[iLayer].size(), MAXTRACKNUM});
+          for (size_t iTrack=0; iTrack<iTrackNum; iTrack++)
+            iFibSel[iTrack][iLayer] = m_iFibSel[iLayer].at(iTrack);
+          for (size_t iTrack=iTrackNum; iTrack<MAXTRACKNUM; iTrack++)
+            iFibSel[iTrack][iLayer] = -9999;
+        }
 
-	iTrackNum=0;
-	iSize=0;
-	for (auto & iLayer : m_iFibSel)
-	{
-		iSize = std::max(iLayer.size(), iSize);
-	}
-	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
-	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
-	{
-		for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
-		{
-			iFibSel[iTrack][iLayer] = m_iFibSel[iLayer].at(iTrack);
-		}
-	}
+        {
+          size_t iTrackNum = std::min ({m_fOvU.size(), m_fOvV.size(), MAXTRACKNUM});
+          std::copy_n (m_fOvU.begin(), iTrackNum, fOvU);
+          std::copy_n (m_fOvV.begin(), iTrackNum, fOvV);
+          std::fill_n (fOvU+iTrackNum, MAXTRACKNUM-iTrackNum, -9999.0);
+          std::fill_n (fOvV+iTrackNum, MAXTRACKNUM-iTrackNum, -9999.0);
+        }
 
-	iTrackNum=0;
-	iSize=0;
-	iSize = std::min(m_fOvU.size(), m_fOvV.size());
-	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
-	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
-	{
-		fOvU[iTrack] = m_fOvU.at(iTrack);
-		fOvV[iTrack] = m_fOvV.at(iTrack);
-	}
-
-	iTrackNum=0;
-	iSize=0;
-	iSize = std::min(m_iNU.size(),  m_iNV.size());
-	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
-	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)
-	{
-		iNumU[iTrack] = m_iNU.at(iTrack);
-		iNumV[iTrack] = m_iNV.at(iTrack);
-	}
+        {
+          size_t iTrackNum = std::min ({m_iNU.size(), m_iNV.size(), MAXTRACKNUM});
+          std::copy_n (m_iNU.begin(), iTrackNum, iNumU);
+          std::copy_n (m_iNV.begin(), iTrackNum, iNumV);
+          std::fill_n (iNumU+iTrackNum, MAXTRACKNUM-iTrackNum, -9999);
+          std::fill_n (iNumV+iTrackNum, MAXTRACKNUM-iTrackNum, -9999);
+        }
 }
