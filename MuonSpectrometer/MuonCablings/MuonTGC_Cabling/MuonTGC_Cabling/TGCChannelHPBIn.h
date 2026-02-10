@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELHPBIN_HH
@@ -20,7 +20,7 @@ class TGCChannelHPBIn : public TGCChannelId {
 
     virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid() const;
+    virtual bool isValid() const override;
 
    private:
     static const int s_numberOfBlock;
