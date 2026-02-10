@@ -88,13 +88,6 @@ namespace pool    {
     virtual StatusCode onOpen(DbDatabase& dbH, 
                             DbAccessMode      mode) = 0;
 
-    /// Re-open database with changing access permissions
-    /** @param mode     [IN]  Desired session access mode.
-      *
-      * @return StatusCode code indicating success or failure.  
-      */
-    virtual StatusCode reopen(DbAccessMode mode) = 0;
-
     /// Execute Database Transaction action
     /** @param   action     [IN]  action to perform
       * @return Status code indicating success or failure.

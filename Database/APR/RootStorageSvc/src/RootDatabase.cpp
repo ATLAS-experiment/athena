@@ -241,24 +241,6 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAcce
   return SUCCESS;
 }
 
-/// Re-open database with changing access permissions
-StatusCode RootDatabase::reopen(DbAccessMode mode)   {
-  int result = -1;
-  if ( m_file )   {
-    TDirectory::TContext dirCtxt(0);
-    if ( mode == pool::READ ) {
-      result = m_file->ReOpen("READ");
-    }
-    else if ( mode == pool::UPDATE )  {
-      result = m_file->ReOpen("UPDATE");
-    }
-    else  {
-      ATH_MSG_ERROR("Failed to reopen file: " << name() << " in mode " << accessMode(mode));
-    }
-  }
-  return (0 == result) ? SUCCESS : FAILURE;
-}
-
 void RootDatabase::printErrno(const char* nam, int err) {
   switch( err )  {
     case 0:      /// No error - all fine.

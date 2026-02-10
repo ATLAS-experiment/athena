@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -215,13 +215,6 @@ namespace pool  {
     virtual StatusCode   open(const DbDomain&     domH,
                               const std::string&  nam,
                               DbAccessMode        mode);
-
-    /// Re-open database with changing access permissions
-    /** @param mode     [IN]  Desired session access mode.
-      *
-      * @return StatusCode code indicating success or failure.  
-      */
-    virtual StatusCode   reopen(DbAccessMode mode);
 
     /// Callback after successful open of a database object
     /** @param dbH      [IN]  Handle to valid database object
