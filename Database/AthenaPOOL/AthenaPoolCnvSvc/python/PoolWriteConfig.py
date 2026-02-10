@@ -204,10 +204,12 @@ def PoolWriteCfg(flags):
                                            StorageTechnology=storageTechnologyMap,
                                            OutputMetadataContainers=OutputMetadataContainers,
                                            OneDataHeaderForm=oneDHForm,
-                                           FileFlushSetting=fileFlushSetting)
+                                           FileFlushSetting=fileFlushSetting,
+                                           PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         return AthenaPoolCnvSvcCfg(flags,
                                    PoolAttributes=PoolAttributes,
                                    StorageTechnology=storageTechnologyMap,
-                                   OneDataHeaderForm=oneDHForm)
+                                   OneDataHeaderForm=oneDHForm,
+                                   PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))

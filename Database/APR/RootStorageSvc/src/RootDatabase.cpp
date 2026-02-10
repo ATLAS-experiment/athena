@@ -15,7 +15,7 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDomain.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 #include "RootAuxDynIO/IRootAuxDynIO.h"
 #include "RNTupleWriterHelper.h"
 
@@ -702,15 +702,17 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        else if ( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") )  {
           StatusCode s = opt._getValue(m_defTreeCacheLearnEvents);
           if( s.isSuccess() ) {
-             TTree *tree = getTree(APRDefaults::TTreeNames::EventData);
-             if (tree != nullptr && tree->GetAutoFlush() > 0) {
-                if (m_defTreeCacheLearnEvents < tree->GetAutoFlush()) {
-                   ATH_MSG_INFO(n << ": Overwriting LearnEvents with CollectionTree AutoFlush");
+            for ( auto scheme : APRDefaults::getAllNamingSchemes() ) {
+              if ( TTree *tree = getTree( APRDefaults::getEventDataName(scheme) ) ) {
+                if ( tree->GetAutoFlush() > 0 && m_defTreeCacheLearnEvents < tree->GetAutoFlush() ) {
+                   ATH_MSG_INFO(n << ": Overwriting LearnEvents with " << APRDefaults::getEventDataName(scheme) << " AutoFlush");
                    m_defTreeCacheLearnEvents = tree->GetAutoFlush();
                 }
-             }
-             TTreeCache::SetLearnEntries(m_defTreeCacheLearnEvents);
-             ATH_MSG_DEBUG(n << " = " << m_defTreeCacheLearnEvents);
+                break;
+              }
+            }
+            TTreeCache::SetLearnEntries(m_defTreeCacheLearnEvents);
+            ATH_MSG_DEBUG(n << " = " << m_defTreeCacheLearnEvents);
           }
           return s;
        }

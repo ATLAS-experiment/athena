@@ -10,7 +10,7 @@
 #include "CoralBase/AttributeList.h"
 
 #include "PersistentDataModel/Token.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include "CollectionSvc/CollectionColumn.h"
 
@@ -28,6 +28,7 @@
 #include "TFile.h"
 #include "TDirectory.h"
 #include "TSystem.h"
+#include "TKey.h"
 
 #include <exception>
 #include <map>
@@ -245,12 +246,21 @@ namespace pool {
       }
 
       if( m_mode == ICollection::READ ) {
-         // retrieve the TTree from file
-         if ( m_description.type() == pool::ROOT_StorageType.type() && !m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type())) {
-           m_tree = m_file->Get<TTree>( APRDefaults::TTreeNames::EventTag );
+         // Find the right EventTag in the file
+         std::string eventTagName, className;
+         for ( auto scheme : APRDefaults::getAllNamingSchemes() ) {
+            if ( auto* key = m_file->GetKey( APRDefaults::getEventTagName(scheme) ) ) {
+               eventTagName = key->GetName();
+               className = key->GetClassName();
+               break;
+            }
          }
-         if ( (!m_tree && m_description.type() == pool::ROOT_StorageType.type()) || m_description.type().exactMatch(pool::ROOTRNTUPLE_StorageType.type()) ) {
-           m_reader = ROOT::RNTupleReader::Open( APRDefaults::RNTupleNames::EventTag, m_fileName );
+         // retrieve the TTree from file
+         if ( !eventTagName.empty() && className.find("TTree") != std::string::npos ) {
+           m_tree = m_file->Get<TTree>( eventTagName.c_str() );
+         }
+         else if ( !eventTagName.empty() && className.find("RNTuple") != std::string::npos ) {
+           m_reader = ROOT::RNTupleReader::Open( eventTagName, m_fileName );
          }
          if( !m_tree && !m_reader ) {
            int n(0);
@@ -326,20 +336,23 @@ namespace pool {
       }
 
       if( m_mode == ICollection::CREATE_AND_OVERWRITE ) {
+        // Get the EventTag name
+        std::string eventTagName = APRDefaults::getEventTagName();
         if ( m_description.type().exactMatch(pool::ROOTTREE_StorageType.type()) ) {
           // create a new TTree
-          m_tree = new TTree(APRDefaults::TTreeNames::EventTag, m_name.c_str());
+          m_tree = new TTree(eventTagName.c_str(), m_name.c_str());
           addTreeBranch( m_description.tokenColumn().name(), m_description.tokenColumn().type() );
           for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
             const CollectionColumn& column = m_description.attributeColumn(col_id);
             addTreeBranch( column.name(), column.type() );
           }
         } else {
-          // create a new RNTuple
-          std::string rntupleName = std::string(APRDefaults::RNTupleNames::EventTag);
-          m_file->Delete( (rntupleName+";*").c_str() );
+          // create a new Collection
+          ATH_MSG_DEBUG( "Creating collection in overwrite mode..." );
+          m_file->Delete( (eventTagName+";*").c_str() );
+          // (Create Schema)
           auto model { ROOT::RNTupleModel::Create() };
-          model->SetDescription( rntupleName );
+          model->SetDescription( eventTagName );
           addField( model.get(), m_description.tokenColumn().name(), m_description.tokenColumn().type() );
           for( int col_id = 0; col_id < m_description.numberOfAttributeColumns(); col_id++ ) {
             const CollectionColumn& column = m_description.attributeColumn(col_id);
@@ -349,7 +362,7 @@ namespace pool {
           ROOT::RNTupleWriteOptions opts;
           opts.SetCompression( m_file->GetCompressionSettings() );
           opts.SetUseBufferedWrite( true );
-          m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), rntupleName, *m_file, opts);
+          m_rntupleWriter = ROOT::RNTupleWriter::Append(std::move(model), eventTagName, *m_file, opts);
         }
       }
       m_open = true;

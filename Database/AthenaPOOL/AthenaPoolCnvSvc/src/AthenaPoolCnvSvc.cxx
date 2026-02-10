@@ -22,7 +22,7 @@
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include <algorithm>
 #include <charconv>
@@ -68,6 +68,13 @@ StatusCode AthenaPoolCnvSvc::initialize() {
         ATH_MSG_FATAL(std::format("Unknown exception while getting storage type for file {}", key));
         return StatusCode::FAILURE;
       }
+   }
+   // Global POOL container naming scheme
+   if (auto scheme = APRDefaults::parseNamingScheme(m_containerNamingSchemeProp.value())) {
+      APRDefaults::setNamingScheme(*scheme);
+   } else {
+      ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
+      return StatusCode::FAILURE;
    }
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);

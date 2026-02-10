@@ -16,7 +16,6 @@
 #include "CollectionSvc/ICollectionCursor.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "StorageSvc/DbType.h"
-#include "RootUtils/APRDefaults.h"
 
 // Gaudi
 #include "GaudiKernel/StatusCode.h"
