@@ -60,7 +60,6 @@ private:
   ToolHandle<CP::ITrackVertexAssociationTool> m_trkVertexAssocTool{this, "TVATool", "Tau track-vertex association tool"};
   
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexInputContainer{this,"Key_vertexInputContainer", "PrimaryVertices", "input vertex container key"};
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackPartInputContainer{this,"Key_trackPartInputContainer", "InDetTrackParticles", "input track particle container key"};
 
 };
 
