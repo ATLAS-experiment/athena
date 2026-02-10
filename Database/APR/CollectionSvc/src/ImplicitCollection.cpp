@@ -9,7 +9,7 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
 #include "StorageSvc/DbType.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include <sstream>
 #include <memory>
@@ -92,9 +92,9 @@ namespace pool {
          }
       }
 
-      const std::string& ttreeName = std::format("{}(DataHeader)", APRDefaults::TTreeNames::DataHeader);
-      const std::string& rntupleName = std::format("{}(DataHeader)", APRDefaults::RNTupleNames::DataHeader);
-      const std::string& oldTtreeName = std::format("{}_DataHeader", APRDefaults::TTreeNames::DataHeader);
+      const std::string& ttreeName = std::format("{}(DataHeader)", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Historical));
+      const std::string& rntupleName = std::format("{}(DataHeader)", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Canonical));
+      const std::string& oldTtreeName = std::format("{}_DataHeader", APRDefaults::getDataHeaderName(APRDefaults::NamingScheme::Historical));
       std::vector< std::string > containers = database->containers();
       for( std::vector< std::string >::const_iterator iContainer = containers.begin();
            iContainer != containers.end(); ++iContainer ) {

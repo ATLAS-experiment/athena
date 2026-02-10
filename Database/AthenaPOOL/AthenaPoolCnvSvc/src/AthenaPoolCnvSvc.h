@@ -195,6 +195,8 @@ private: // properties
    Gaudi::Property<std::string> m_containerNameHintProp{this,"TopLevelContainerName",""};
    /// SubLevelBranchName, naming hint policy for POOL branching: ("" = no branching)
    Gaudi::Property<std::string> m_branchNameHintProp{this,"SubLevelBranchName", "<type>/<key>"};
+   /// POOL container naming scheme selection
+   Gaudi::Property<std::string> m_containerNamingSchemeProp{this, "PoolContainerNamingScheme", "Historical"};
 
    /// Output PoolAttributes, vector with names and values of technology specific attributes for POOL
    Gaudi::Property<std::vector<std::string>> m_poolAttr{this,"PoolAttributes",{},"Pool Attributes","OrderedSet<std::string>"};

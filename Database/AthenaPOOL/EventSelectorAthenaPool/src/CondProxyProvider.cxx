@@ -14,7 +14,6 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PoolSvc/IPoolSvc.h"
-#include "RootUtils/APRDefaults.h"
 
 // Framework
 #include "GaudiKernel/ClassID.h"
