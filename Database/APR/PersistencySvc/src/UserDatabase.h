@@ -51,11 +51,9 @@ namespace pool {
 
       /// Connects explicitly to the database for read operations
       virtual void connectForRead() override;
-      virtual void connectForRead( const DatabaseConnectionPolicy& policy ) override;
 
       /// Connects explicitly to the database for write/update operations
       virtual void connectForWrite() override;
-      virtual void connectForWrite( const DatabaseConnectionPolicy& policy ) override;
 
       /// Disconnects from the database
       virtual void disconnect() override;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_TECHNOLOGYDISPATCHER_H
@@ -39,8 +39,6 @@ namespace pool {
       /// Returns the technology given a technology type.
       MicroSessionManager& microSessionManager( long technology );
       const MicroSessionManager& microSessionManager( long technology ) const;
-      MicroSessionManager& microSessionManager( const std::string& technology );
-      const MicroSessionManager& microSessionManager( const std::string& technology ) const;
 
       /// Disconnects from all the databases
       bool disconnectAll();
@@ -49,7 +47,6 @@ namespace pool {
       DatabaseRegistry&                             m_registry;
       ITransaction&                                 m_transaction;
       std::map< long, MicroSessionManager* >        m_technologyTypes;
-      std::map< std::string, MicroSessionManager* > m_technologyNames;
     };
   }
 }
