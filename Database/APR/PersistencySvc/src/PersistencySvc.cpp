@@ -26,20 +26,6 @@ pool::PersistencySvc::PersistencySvc::~PersistencySvc()
   delete m_session; m_session = 0;
 }
 
-/*
-void
-pool::PersistencySvc::PersistencySvc::setFileCatalog( pool::IFileCatalog& catalog )
-{
-  m_session->setFileCatalog( catalog );
-}
-
-pool::IFileCatalog&
-pool::PersistencySvc::PersistencySvc::fileCatalog()
-{
-  return m_session->fileCatalog();
-}
-*/
-
 void*
 pool::PersistencySvc::PersistencySvc::readObject( const Token& token, void* object )
 {
