@@ -46,6 +46,9 @@ def defineMenu():
         # ATR-32259: L1 items for L1BKeePrimary
         'L1_MU18VFCH', 'L1_MU8VF_2MU5VF', 
 
+        # L1 items to seed low-mu calratio ATR-32297
+        'L1_eTAU40HT','L1_eTAU60HM',
+
         ##
         # combined lepton (e and mu)
         # new calo
