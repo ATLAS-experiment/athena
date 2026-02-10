@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CSCcabling )
@@ -8,7 +8,7 @@ atlas_add_library( CSCcablingLib
                    src/*.cxx
                    PUBLIC_HEADERS CSCcabling
                    LINK_LIBRARIES AthenaBaseComps
-                   PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelInterfaces GeometryDBSvcLib RDBAccessSvcLib )
+                   PRIVATE_LINK_LIBRARIES GaudiKernel GeoModelInterfaces RDBAccessSvcLib )
 
 atlas_add_component( CSCcabling
                      src/components/*.cxx

@@ -113,7 +113,6 @@
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoModel/GeoSpecialShapes
 + DetectorDescription/GeoPrimitives
-+ DetectorDescription/GeometryDBSvc
 + DetectorDescription/IdDict
 + DetectorDescription/IdDictDetDescr
 + DetectorDescription/IdDictDetDescrCnv
