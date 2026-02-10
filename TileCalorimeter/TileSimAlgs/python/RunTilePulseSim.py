@@ -123,7 +123,7 @@ if __name__ == '__main__':
     Or one can use --run to specify run number from which conditions should be used \
     (probably conditions and geometries tags should be changed also in this case). \
     Or one can use --filesInput to specify input file with HITS to take conditions from. \
-    Example: athena --CA RunTilePulseSim.py --evtMax 10')
+    Example: athena RunTilePulseSim.py --evtMax 10')
 
     parser.add_argument('--preExec', help='Code to execute before locking configs')
     parser.add_argument('--postExec', help='Code to execute after setup')

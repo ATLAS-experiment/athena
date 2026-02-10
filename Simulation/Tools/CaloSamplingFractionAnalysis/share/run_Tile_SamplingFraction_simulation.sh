@@ -49,8 +49,8 @@ do if [[ "$v" -lt 1 ]] && [[ "$v" -gt -1 ]] && [ "${v/./}" != "${v}" ]
    echo "========== Running Tile Test Beam digitization: $nevt events =========="
    echo
    postExec="cfg.getCondAlgo(\"TileSamplingFractionCondAlg\").G4Version=-1;"
-   echo  athena --CA TileSimEx/TileDigiRec.py --testbeam --evtMax -1 --filesInput tiletb${v}.HITS.pool.root --d3pd --hits-ntuple --file-prefix tiletb${v} --postExec \'${postExec}\'
-   echo; athena --CA TileSimEx/TileDigiRec.py --testbeam --evtMax -1 --filesInput tiletb${v}.HITS.pool.root --d3pd --hits-ntuple --file-prefix tiletb${v} --postExec="${postExec}"
+   echo  athena TileSimEx/TileDigiRec.py --testbeam --evtMax -1 --filesInput tiletb${v}.HITS.pool.root --d3pd --hits-ntuple --file-prefix tiletb${v} --postExec \'${postExec}\'
+   echo; athena TileSimEx/TileDigiRec.py --testbeam --evtMax -1 --filesInput tiletb${v}.HITS.pool.root --d3pd --hits-ntuple --file-prefix tiletb${v} --postExec="${postExec}"
    echo  "art-result: $? Tile Test Beam Digitization: theta = ${v}"
 
    echo; root -b -q "tile_sf.C(\"$v\");" > sf$v.log
