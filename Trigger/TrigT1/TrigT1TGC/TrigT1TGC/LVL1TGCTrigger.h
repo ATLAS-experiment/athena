@@ -20,7 +20,7 @@
 #include "TrigT1Interfaces/Lvl1MuCTPIInput.h"
 #include "TrigT1Interfaces/Lvl1MuCTPIInputPhase1.h"
 #include "Identifier/Identifier.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 // EIFI-SL connection
 #include "TrigT1TGC/TGCInnerTrackletSlotHolder.h"
@@ -77,28 +77,28 @@ class LVL1TGCTrigger : public AthAlgorithm
     virtual StatusCode start() override;
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
-    
  private:
-    StatusCode processOneBunch(const TgcDigitContainer*,
+    StatusCode processOneBunch(const Muon::TgcCablingMap& cabling,
+                               const TgcDigitContainer*,
 			       LVL1MUONIF::Lvl1MuCTPIInputPhase1*,
 			       std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     void doMaskOperation(const TgcDigitContainer* ,std::map<Identifier, int>& );
-    void fillTGCEvent(const std::map<Identifier, int>& ,  TGCEvent&);
+    void fillTGCEvent(const Muon::TgcCablingMap& cabling, const std::map<Identifier, int>& ,  TGCEvent&);
     
     // record bare-RDO for LowPT coincidences (on m_OutputTgcRDO=True):
-    void recordRdoSLB(TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
+    void recordRdoSLB(const Muon::TgcCablingMap& cabling,TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     
     // record bare-RDO for HighPT coincidences (on OutputTgcRDO=True):
-    void recordRdoHPT(TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
+    void recordRdoHPT(const Muon::TgcCablingMap& cabling,TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     
     // record bare-RDO for Inner coincidences (on OutputTgcRDO=True):
-    void recordRdoInner(TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
+    void recordRdoInner(const Muon::TgcCablingMap& cabling,TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     
     // record bare-RDO for R-phi coincidences (on m_OutputTgcRDO=True):
-    void recordRdoSL(TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
+    void recordRdoSL(const Muon::TgcCablingMap& cabling,TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     
     // Retrieve Masked channel list
-    StatusCode getMaskedChannel();
+    StatusCode getMaskedChannel(const Muon::TgcCablingMap& cabling);
     
     // useful functions
     int getCharge(int dR, int Zdir);
@@ -147,17 +147,13 @@ class LVL1TGCTrigger : public AthAlgorithm
     // EIFI-SL connection
     TGCInnerTrackletSlotHolder m_innerTrackletSlotHolder;
     
-    // getCabling method
-    StatusCode getCabling();
-    
     // log
     bool                m_debuglevel;
     
     TGCArguments m_tgcArgs;
     TGCArguments* tgcArgs();
 
-
-    ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc", ""};
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{this, "CablingKey", "MuonTgc_CablingMap"};   
 
     SG::WriteHandleKey<TgcRdoContainer> m_keyTgcRdo{this,"TgcRdo","TGCRDO2","Location of TgcRdoContainer"};
     SG::ReadHandleKey<TgcRdoContainer> m_keyTgcRdoIn{this,"InputRDO","TGCRDO","Location of input TgcRdoContainer"};

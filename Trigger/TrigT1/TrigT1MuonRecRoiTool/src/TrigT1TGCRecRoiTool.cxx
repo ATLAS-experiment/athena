@@ -22,7 +22,7 @@ TrigT1TGCRecRoiTool::~TrigT1TGCRecRoiTool() {
 StatusCode TrigT1TGCRecRoiTool::initialize() {
   ATH_CHECK(m_DetectorManagerKey.initialize());
   ATH_CHECK( m_idHelperSvc.retrieve() );
-  ATH_CHECK( m_cabling.retrieve() );
+  ATH_CHECK( m_cablingKey.initialize() );
   if(m_useRun3Config){
     ATH_MSG_INFO("update to Run 3 bit mask");
     updateBitMask( Run3 );
@@ -213,9 +213,8 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     w_slbin.setId(wireSLBId);
     w_slbin.setChannel(41+offset+8*block);
     
-    const MuonTGC_Cabling::TGCCabling* tgcCabling = m_cabling->getTGCCabling();
-    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(w_slbin));
-    return w_asdout;
+    SG::ReadCondHandle tgcCabling{m_cablingKey};
+    return tgcCabling->getASDOutChannel(w_slbin);
 }
   
 std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
@@ -238,7 +237,7 @@ std::unique_ptr<MuonTGC_Cabling::TGCChannelId>
     w_slbin.setId(wireSLBId);
     w_slbin.setChannel(41+wireOffset+8*block);
     
-    const MuonTGC_Cabling::TGCCabling* tgcCabling = m_cabling->getTGCCabling();
+    SG::ReadCondHandle tgcCabling{m_cablingKey};
     std::unique_ptr<MuonTGC_Cabling::TGCChannelId> w_asdout(tgcCabling->getASDOutChannel(w_slbin));
 
     // strip
@@ -266,7 +265,8 @@ void TrigT1TGCRecRoiTool::getWireInfo(double& w_eta, double& w_phi,
     //
     int subsystemNumber = (w_asdout->isAside())? 1 : -1;
     int wireOrStrip = (w_asdout->isStrip())? 1 : 0;
-    bool status = m_cabling->getOfflineIDfromOnlineID (wireId,
+    SG::ReadCondHandle tgcCabling{m_cablingKey};
+    bool status = tgcCabling->getOfflineIDfromOnlineID (wireId,
 						       subsystemNumber,
 						       w_asdout->getOctant(),
 						       w_asdout->getSectorModule(),
@@ -314,7 +314,8 @@ void TrigT1TGCRecRoiTool::getStripInfo(double& s_eta,double& s_phi,
     //
     int subsystemNumber = (s_asdout->isAside())? 1 : -1;
     int wireOrStrip = (s_asdout->isStrip())? 1 : 0;
-    bool status = m_cabling->getOfflineIDfromOnlineID (stripId,
+    SG::ReadCondHandle tgcCabling{m_cablingKey};
+    bool status = tgcCabling->getOfflineIDfromOnlineID (stripId,
 						       subsystemNumber,
 						       s_asdout->getOctant(),
 						       s_asdout->getSectorModule(),
