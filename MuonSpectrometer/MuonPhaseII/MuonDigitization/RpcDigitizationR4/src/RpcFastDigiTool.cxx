@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcFastDigiTool.h"
 
@@ -12,7 +12,10 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
-    static const SG::Decorator<std::int16_t> dec_phiChannel{"SDO_phiChannel"};
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_phiChannel{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
 }
 namespace MuonR4 {
     
@@ -59,11 +62,17 @@ namespace MuonR4 {
                     if (digitizedEta || digitizedPhi) {
                         xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
                         sdo->setIdentifier(digiColl->back()->identify());
-                        dec_phiChannel(*sdo) = phiChannel; 
+                        ChVec_t& phiChs{dec_phiChannel(*sdo)}; 
+                        if (digitizedPhi) {
+                            phiChs.push_back(phiChannel);
+                        }
+                        dec_etaChannel(*sdo).clear(); 
                     }
                 } else if (digitizeHitBI(simHit, efficiencyMap, *digiColl, rndEngine, deadTimes)) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
                     sdo->setIdentifier(digiColl->back()->identify());
+                    dec_etaChannel(*sdo).clear(); 
+                    dec_phiChannel(*sdo).clear(); 
                 }
             }
         } while (viewer.next());

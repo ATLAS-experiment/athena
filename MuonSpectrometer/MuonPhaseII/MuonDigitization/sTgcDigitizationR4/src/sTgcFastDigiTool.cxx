@@ -12,10 +12,10 @@ namespace {
     }
     using channelType = sTgcIdHelper::sTgcChannelTypes;
     using ChVec_t = std::vector<std::uint16_t>;
-      
-    static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
-    static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
-    static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_stripCh{"SDO_etaChannels"};
+    static const SG::Decorator<ChVec_t> dec_wireCh{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_padCh{"SDO_padChannels"};
    
 }
 namespace MuonR4 {
@@ -80,10 +80,12 @@ namespace MuonR4 {
             
                 if (digitizedStrip || digitizedPad || digitizedWire) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    ChVec_t& stripChV{dec_stripCh(*sdo)}, wireCh{dec_wireCh(*sdo)}, padCh{dec_padCh(*sdo)};
+                    ChVec_t& stripChV{dec_stripCh(*sdo)};
+                    ChVec_t& wireChV{dec_wireCh(*sdo)};
+                    ChVec_t& padChV{dec_padCh(*sdo)};
                     if (stripCh > 0) { stripChV.push_back(stripCh); }
-                    if (wireChannel > 0) { stripChV.push_back(wireChannel); }
-                    if (padChannel > 0) { stripChV.push_back(padChannel); }
+                    if (wireChannel > 0) { wireChV.push_back(wireChannel); }
+                    if (padChannel > 0) { padChV.push_back(padChannel); }
                     sdo->setIdentifier(digiColl->back()->identify());
                 }
             }

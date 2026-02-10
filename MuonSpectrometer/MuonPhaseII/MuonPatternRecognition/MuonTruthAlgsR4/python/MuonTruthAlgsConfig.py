@@ -58,8 +58,7 @@ def TruthHitAssociationCfg(flags):
         result.merge(MeasToSimHitAssocAlgCfg(flags,
                                              name=f"{cont_name}PrepDataToSimHitAssoc",
                                              SimHits = simHits,
-                                             Measurements=cont_name,
-                                             AssocPull = 1. if cont_name=="xAODsTgcPads" else 3. ))
+                                             Measurements=cont_name))
     return result
 
 def SimHitToTruthPartAlgCfg(flags, useSDO = False):
