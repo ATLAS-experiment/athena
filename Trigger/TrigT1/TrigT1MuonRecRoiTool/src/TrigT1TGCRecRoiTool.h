@@ -7,7 +7,7 @@
 
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 namespace MuonTGC_Cabling {
   class TGCId;
@@ -92,7 +92,8 @@ namespace LVL1 {
       BooleanProperty m_useConditionData{this,"UseConditionData",true,"use condition data"};
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
       SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_DetectorManagerKey {this, "DetectorManagerKey","MuonDetectorManager","Key of input MuonDetectorManager condition data"};
-      ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc"};
+      SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{this, "CablingKey", "MuonTgc_CablingMap"};   
+
   };  // end of TrigT1TGCRecRoiTool
 }  // namespace LVL1
 
