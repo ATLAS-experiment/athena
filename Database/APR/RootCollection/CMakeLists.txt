@@ -11,7 +11,6 @@ find_package( VDT )
 # Component(s) in the package:
 atlas_add_library( RootCollection
                    src/*.cpp
-                   ${RootCollectionDictSource}
                    PUBLIC_HEADERS RootCollection
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                                 ${VDT_INCLUDE_DIRS} #VDT needed by RNTuple 
