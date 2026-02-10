@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "InDetTrackPerfMon/ITrackAnalysisDefinition.h"
+#include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
 
 class ITrackAnalysisDefinitionSvc :
   virtual public asg::IAsgService, virtual public ITrackAnalysisDefinition {

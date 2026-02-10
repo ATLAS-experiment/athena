@@ -10,6 +10,8 @@
 /// local include
 #include "InDetTrackPerfMon/InDetTrackPerfMonTool.h"
 
+#include "InDetTrackPerfMon/ITrackAnalysisDefinition.h"
+
 /// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -50,7 +52,9 @@ StatusCode InDetTrackPerfMonTool::initialize() {
 
   ATH_CHECK( ManagedMonitorToolBase::initialize() );
 
-  /// Retrieving trkAnaDefSvc
+  std::cout << "SUTT IDTPM::anaTag " << m_anaTag.value() << std::endl;
+  
+  /// Retrievingm_trkAnaDefSvcSvc
   if( ! m_trkAnaDefSvc ) {
     ATH_MSG_DEBUG( "Retrieving TrkAnaDefSvc" << m_anaTag.value() );
     m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag.value() );
@@ -58,54 +62,88 @@ StatusCode InDetTrackPerfMonTool::initialize() {
     ATH_CHECK( m_trkAnaDefSvc.isValid() );
   }
 
-  m_trkAnaDef = m_trkAnaDefSvc->get();
+  const ITrackAnalysisDefinition*  trkAnaDefSvc = m_trkAnaDef = m_trkAnaDefSvc->get();
+  
+  std::cout << "SUTT:m_trkAnaDefSvcSvc: " << m_trkAnaDefSvc << std::endl;
+  
+  ATH_MSG_INFO( "Initializing sub-tools" );
 
-  ATH_MSG_DEBUG( "Initializing sub-tools" );
-
-  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
+  std::cout << "SUTT " << name() << "\t nitiialising subtools" << std::endl; 
+  
+  ATH_CHECK( m_trigDecTool.retrieve( EnableTool{m_trkAnaDefSvc->doTrigNavigation() } ) );
   ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
   ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
-  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
-  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
-  ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDef->doTrigNavigation() } ) );
+  ATH_CHECK( m_roiSelectionTool.retrieve( EnableTool{m_trkAnaDefSvc->doTrigNavigation() } ) );
+  ATH_CHECK( m_trackRoiSelectionTool.retrieve( EnableTool{m_trkAnaDefSvc->doTrigNavigation() } ) );
+  ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{m_trkAnaDefSvc->doTrigNavigation() } ) );
   ATH_CHECK( m_trackMatchingTool.retrieve( EnableTool{ m_doMatch.value() } ) );
   ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
 
-  ATH_MSG_DEBUG( "Initializing collections" );
+  ATH_MSG_INFO( "Initializing collections" );
 
+  std::cout << "SUTT " << name() << "\t nitiialising collections" << std::endl; 
+  
   /// Events
   ATH_CHECK( m_eventInfoContainerName.initialize() );
   ATH_CHECK( m_truthEventName.initialize(
-      m_trkAnaDef->useTruth() && ! m_truthEventName.key().empty() ) );
+     trkAnaDefSvc->useTruth() && ! m_truthEventName.key().empty() ) );
   ATH_CHECK( m_truthPileUpEventName.initialize(
-      m_trkAnaDef->useTruth() && ! m_truthPileUpEventName.key().empty() and
-      m_trkAnaDef->hasFullPileupTruth() ) );
+     trkAnaDefSvc->useTruth() && ! m_truthPileUpEventName.key().empty() and
+     trkAnaDefSvc->hasFullPileupTruth() ) );
+
+  std::cout << "SUTT " << name() << "\t initiialising tracks" << std::endl; 
 
   /// Tracks
+
+  std::cout << "SUTT useOffline " << trkAnaDefSvc->useOffline() << std::endl; 
+  std::cout << "SUTT useTrigger " << trkAnaDefSvc->useTrigger() << std::endl; 
+  std::cout << "SUTT useTruth   " << trkAnaDefSvc->useTruth()   << std::endl; 
+
+  std::cout << "SUTT " << name() << "\t offline tracks:" << m_offlineTrkParticleName.key() << std::endl; 
+
+  //  bool useOffline = m_trkAnaDefSvc->useOffline();;
+  //  bool useOffline = t->useOffline();;
+  
+  //  std::cout << "useOffline bool: " << useOffline<< std::endl;
+    
+  //  if ( m_trkAnaDef->useOffline() && ! m_offlineTrkParticleName.key().empty() ) { 
+    
   ATH_CHECK( m_offlineTrkParticleName.initialize(
-      m_trkAnaDef->useOffline() && ! m_offlineTrkParticleName.key().empty() ) );
+     trkAnaDefSvc->useOffline() && ! m_offlineTrkParticleName.key().empty() ) );
+
+  std::cout << "SUTT " << name() << "\t offline tracks:" << m_triggerTrkParticleName.key() << std::endl; 
+  
   ATH_CHECK( m_triggerTrkParticleName.initialize(
-      m_trkAnaDef->useTrigger() && ! m_triggerTrkParticleName.key().empty() ) );
+     trkAnaDefSvc->useTrigger() && ! m_triggerTrkParticleName.key().empty() ) );
+
+  std::cout << "SUTT " << name() << "\t offline tracks:" << m_truthParticleName.key() << std::endl; 
+
   ATH_CHECK( m_truthParticleName.initialize(
-      m_trkAnaDef->useTruth() && ! m_truthParticleName.key().empty() ) );
+     m_trkAnaDefSvc->useTruth() && ! m_truthParticleName.key().empty() ) );
+
+  std::cout << "SUTT " << name() << "\t nitiialising vertices" << std::endl; 
 
   /// Vertex
   ATH_CHECK( m_offlineVertexContainerName.initialize( 
-      m_trkAnaDef->useOffline() && ! m_offlineVertexContainerName.key().empty() ) );
+     trkAnaDefSvc->useOffline() && ! m_offlineVertexContainerName.key().empty() ) );
   ATH_CHECK( m_triggerVertexContainerName.initialize(
-      m_trkAnaDef->useTrigger() && ! m_triggerVertexContainerName.key().empty() ) );
+     trkAnaDefSvc->useTrigger() && ! m_triggerVertexContainerName.key().empty() ) );
   ATH_CHECK( m_truthVertexContainerName.initialize(
-      m_trkAnaDef->useTruth() && ! m_truthVertexContainerName.key().empty() ) );
+     trkAnaDefSvc->useTruth() && ! m_truthVertexContainerName.key().empty() ) );
+
+  std::cout << "SUTT " << name() << "\t infokey ..." << std::endl; 
 
   /// TrkAnaInfo for AOD_IDTPM output
   ATH_CHECK( m_trkAnaInfoKey.initialize() );
 
   /// Retrieving list of configured chains
-  const std::vector< std::string >& configuredChains = m_trkAnaDef->configuredChains();
+  const std::vector< std::string >& configuredChains = m_trkAnaDefSvc->configuredChains();
   m_trkAnaPlotsMgrVec.reserve( configuredChains.size() );
 
   /// booking analyses
   for( const std::string& thisChain : configuredChains ) {
+    std::cout <<  "SUTT " << name() << " Booking TrkAnalysis/histograms for chain : " << thisChain << std::endl;;
+
     ATH_MSG_DEBUG( "Booking TrkAnalysis/histograms for chain : " << thisChain );
 
     /// Instantiating a different TrkAnalysis object (with corresponding histograms) 
@@ -116,6 +154,8 @@ StatusCode InDetTrackPerfMonTool::initialize() {
             m_anaTag.value(),
             thisChain ) );
   } // close m_configuredChains loop 
+
+  std::cout << "SUTT " << name() << "\t done initialisation" << std::endl; 
 
   return StatusCode::SUCCESS;
 }
@@ -169,7 +209,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
   /// Defining TrackAnalysisCollections object
   /// to contain all collections for this event
-  IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value(), m_trkAnaDef );
+  IDTPM::TrackAnalysisCollections thisTrkAnaCollections( m_anaTag.value() ); //, m_trkAnaDef );
   ATH_CHECK( thisTrkAnaCollections.initialize() );
 
   /// filling TrackAnalysisCollections
@@ -215,7 +255,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// ----------------------------------
 
     /// skipping TrkAnalysis if chain is ! passed for this event
-    if( m_trkAnaDef->doTrigNavigation() && 
+    if( m_trkAnaDefSvc->doTrigNavigation() && 
         ! thisChain.empty() && thisChain != "Offline" ) {
 
       unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
@@ -232,7 +272,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     std::vector< TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > > selectedRois;
     size_t selectedRoisSize(1); // by default only one "dummy" RoI, i.e. for offline analysis
 
-    if( m_trkAnaDef->doTrigNavigation() ) {
+    if( m_trkAnaDefSvc->doTrigNavigation() ) {
       selectedRois = m_roiSelectionTool->getRois( thisChain ); 
       selectedRoisSize = selectedRois.size();
     }
@@ -249,7 +289,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// Getting RoI ElementLink
       ElementLink< TrigRoiDescriptorCollection > thisRoiLink;
       std::string thisRoiStr( "Full Scan" );
-      if( m_trkAnaDef->doTrigNavigation() ) {
+      if( m_trkAnaDefSvc->doTrigNavigation() ) {
         thisRoiLink = selectedRois.at(ir).link;
 
         /// skip non-valid RoI link
@@ -267,7 +307,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// ---------------------------------------------------
       /// --- Track (and Vertex) selection within the RoI ---
       /// ---------------------------------------------------
-      if( m_trkAnaDef->doTrigNavigation() ) {
+      if( m_trkAnaDefSvc->doTrigNavigation() ) {
         /// Tracks in RoI selection
         ATH_CHECK( m_trackRoiSelectionTool->selectTracksInRoI(
                           thisTrkAnaCollections, thisRoiLink ) );
@@ -289,7 +329,7 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
       /// --- Test/Reference Matching ---
       /// -------------------------------
       std::string chainRoIName = thisChain;
-      if( m_trkAnaDef->doTrigNavigation() ) {
+      if( m_trkAnaDefSvc->doTrigNavigation() ) {
         chainRoIName += "_RoI_"+std::to_string(ir);
       }
 

@@ -23,7 +23,7 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& an
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
     m_anaTag(anaTag),
     /// cheat with the name for the time being, this is NOT a service handle,
-    m_trkAnaDefSvc(trkAnaDef),
+    //    m_trkAnaDefSvc(trkAnaDef),
     m_newChain(true),m_newRoi(true) 
 {
   /// tracks
@@ -56,7 +56,7 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& an
 StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
 
-#if 0
+#if 1
   /// nope, get this during construction ...
   /// load trkAnaDefSvc
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
@@ -129,7 +129,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
 {
   if( m_trkAnaDefSvc->useTruth() ) {
     ATH_MSG_DEBUG( "Loading collection: " << truthPartHandleKey.key() );
-    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( truthPartHandleKey );
+    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( truthPartHandleKey.key() );
     if( ! pTruthColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid truth particles collection: " << truthPartHandleKey.key() );
       return StatusCode::FAILURE;
@@ -188,7 +188,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
   if( m_trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
-    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey );
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey.key() );
 
     if( ! pColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid offline tracks collection: " << handleKey.key() );
@@ -218,7 +218,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
   if( m_trkAnaDefSvc->useTrigger()) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
-    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey );
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey.key() );
 
     if( ! pColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid trigger tracks collection: " << handleKey.key() );

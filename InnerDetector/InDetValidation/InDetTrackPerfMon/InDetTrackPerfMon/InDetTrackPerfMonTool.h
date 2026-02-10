@@ -27,6 +27,7 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
+#include "InDetTrackPerfMon/ITrackAnalysisDefinition.h"
 #include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 #include "InDetTrackPerfMon/RoiSelectionTool.h"
 #include "InDetTrackPerfMon/TrackRoiSelectionTool.h"

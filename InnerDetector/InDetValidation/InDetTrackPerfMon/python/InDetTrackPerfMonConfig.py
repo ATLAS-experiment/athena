@@ -12,6 +12,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 
+from InDetTrackPerfMon.ConfigUtils import get_flags
+from InDetTrackPerfMon.ConfigUtils import get_opt
+from InDetTrackPerfMon.ConfigUtils import has_in
+from InDetTrackPerfMon.ConfigUtils import kwargs_setdefault
+
+
 def JsonPlotsDefReadToolCfg( flags, name="JsonPlotsDefReadTool", **kwargs ):
     '''
     Tool to read the plots definitions from an input file in JSON format
@@ -67,11 +73,14 @@ def TrackAnalysisInfoWriteToolCfg( flags, name="TrackAnalysisInfoWriteTool", **k
     '''
     Tool to write TrackAnalysisInfo to StoreGate
     '''
+
+    iflags, iname = get_flags( flags, name )
+
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "AnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+    kwargs_setdefault( kwargs, "AnaTag", iflags, "anaTag" )
 
-    acc.setPrivateTools( CompFactory.IDTPM.TrackAnalysisInfoWriteTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.TrackAnalysisInfoWriteTool( iname, **kwargs ) )
     return acc
 
 
@@ -79,61 +88,74 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     '''
     CA-based configuration for the TrackAnalysisDefinition Service
     '''
-    log = logging.getLogger( "TrkAnaDefSvc"+flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+
+    iflags, iname = get_flags( flags, name )
+    
+    log = logging.getLogger( "TrkAnaDefSvc"+iname )
+    
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "DirName", flags.PhysVal.IDTPM.DirName )
-    kwargs.setdefault( "sortPlotsByChain", flags.PhysVal.IDTPM.sortPlotsByChain )
-    kwargs.setdefault( "SubFolder", flags.PhysVal.IDTPM.currentTrkAna.SubFolder )
-    kwargs.setdefault( "TrkAnaTag", flags.PhysVal.IDTPM.currentTrkAna.anaTag )
+    kwargs_setdefault( kwargs, "DirName",          iflags, "DirName" )
+    kwargs_setdefault( kwargs, "sortPlotsByChain", iflags, "sortPlotsByChain" )
+    kwargs_setdefault( kwargs, "SubFolder",        iflags, "SubFolder" )
+    kwargs_setdefault( kwargs, "TrkAnaTag",        iflags, "anaTag" )
 
-    kwargs.setdefault( "TestType", flags.PhysVal.IDTPM.currentTrkAna.TestType )
-    kwargs.setdefault( "RefType",  flags.PhysVal.IDTPM.currentTrkAna.RefType )
-    kwargs.setdefault( "doTrigNavigation",  flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation )
+    kwargs_setdefault( kwargs, "TestType", iflags, "TestType" )
+    kwargs_setdefault( kwargs, "RefType",  iflags, "RefType" )
+    kwargs_setdefault( kwargs, "doTrigNavigation",  iflags, "doTrigNavigation" )
 
-    kwargs.setdefault( "pileupSwitch",  flags.PhysVal.IDTPM.currentTrkAna.pileupSwitch )
+    kwargs_setdefault( kwargs, "pileupSwitch",  iflags, "pileupSwitch" )
+    # what abomination is this ???
     kwargs.setdefault( "hasFullPileupTruth",
                         ( "xAOD::TruthPileupEventContainer#TruthPileupEvents" in flags.Input.TypedCollections ) )
 
     from InDetTrackPerfMon.ConfigUtils import getTag
-    kwargs.setdefault( "TestTag", getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.TestType ) )
-    kwargs.setdefault( "RefTag",  getTag( flags, flags.PhysVal.IDTPM.currentTrkAna.RefType ) )
 
-    kwargs.setdefault( "MatchingType", flags.PhysVal.IDTPM.currentTrkAna.MatchingType )
-    kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.truthProbCut )
+    kwargs_setdefault( kwargs, "TestTag", getTag( flags, get_opt( iflags, "TestType" ) ) )
+    kwargs_setdefault( kwargs, "RefTag",  getTag( flags, iflags.RefType ) )
 
-    kwargs.setdefault( "ChainNames", flags.PhysVal.IDTPM.currentTrkAna.ChainNames )
-    if ( flags.PhysVal.IDTPM.currentTrkAna.doTrigNavigation and
-         not flags.PhysVal.IDTPM.currentTrkAna.ChainNames ):
+    kwargs_setdefault( kwargs, "MatchingType",      iflags, "MatchingType" )
+    kwargs_setdefault( kwargs, "MatchingTruthProb", iflags, "truthProbCut" )
+
+    kwargs_setdefault( kwargs, "ChainNames", iflags, "ChainNames" )
+    if ( get_opt( iflags, "doTrigNavigation", False ) and not get_opt( iflags, "ChainNames", [] ) ):
         log.error( "Trying to set up Trigger navigation without specifying any trigger chain" )
         return None
 
-    kwargs.setdefault( "plotTrackParameters", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParameters )
-    kwargs.setdefault( "plotTrackParametersErrors", flags.PhysVal.IDTPM.currentTrkAna.plotTrackParametersErrors )
-    kwargs.setdefault( "plotTrackMultiplicities", flags.PhysVal.IDTPM.currentTrkAna.plotTrackMultiplicities )
-    kwargs.setdefault( "plotEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotEfficiencies )
-    kwargs.setdefault( "plotTechnicalEfficiencies", flags.PhysVal.IDTPM.currentTrkAna.plotTechnicalEfficiencies )
-    kwargs.setdefault( "plotResolutions", flags.PhysVal.IDTPM.currentTrkAna.plotResolutions )
-    kwargs.setdefault( "plotFakeRates", flags.PhysVal.IDTPM.currentTrkAna.plotFakeRates )
-    kwargs.setdefault( "unlinkedAsFakes", flags.PhysVal.IDTPM.currentTrkAna.unlinkedAsFakes )
-    kwargs.setdefault( "plotDuplicateRates", flags.PhysVal.IDTPM.currentTrkAna.plotDuplicateRates )
-    kwargs.setdefault( "plotHitsOnTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracks )
-    kwargs.setdefault( "plotHitsOnTracksExpert", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracksExpert )
-    kwargs.setdefault( "plotHitsOnTracksReference", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnTracksReference )
-    kwargs.setdefault( "plotHitsOnMatchedTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnMatchedTracks )
-    kwargs.setdefault( "plotHitsOnFakeTracks", flags.PhysVal.IDTPM.currentTrkAna.plotHitsOnFakeTracks )
-    kwargs.setdefault( "plotVertexParameters", flags.PhysVal.IDTPM.currentTrkAna.plotVertexParameters )
-    kwargs.setdefault( "useSelectedVertexTracks", flags.PhysVal.IDTPM.currentTrkAna.useSelectedVertexTracks )
-    kwargs.setdefault( "plotOfflineElectrons", flags.PhysVal.IDTPM.currentTrkAna.plotOfflineElectrons )
-    kwargs.setdefault( "ResolutionMethod", flags.PhysVal.IDTPM.currentTrkAna.ResolutionMethod )
+    kwargs_setdefault( kwargs, "plotTrackParameters",       iflags, "plotTrackParameters" )
+    kwargs_setdefault( kwargs, "plotTrackParametersErrors", iflags, "plotTrackParametersErrors" )
+    kwargs_setdefault( kwargs, "plotTrackMultiplicities",   iflags, "plotTrackMultiplicities" )
+    kwargs_setdefault( kwargs, "plotEfficiencies",          iflags, "plotEfficiencies" )
+    kwargs_setdefault( kwargs, "plotTechnicalEfficiencies", iflags, "plotTechnicalEfficiencies" )
+    kwargs_setdefault( kwargs, "plotResolutions",           iflags, "plotResolutions" )
+    kwargs_setdefault( kwargs, "plotFakeRates",             iflags, "plotFakeRates" )
+    kwargs_setdefault( kwargs, "unlinkedAsFakes",           iflags, "unlinkedAsFakes" )
+    kwargs_setdefault( kwargs, "plotDuplicateRates",        iflags, "plotDuplicateRates" )
+    kwargs_setdefault( kwargs, "plotHitsOnTracks",          iflags, "plotHitsOnTracks" )
+    kwargs_setdefault( kwargs, "plotHitsOnTracksExpert",    iflags, "plotHitsOnTracksExpert" )
+    kwargs_setdefault( kwargs, "plotHitsOnTracksReference", iflags, "plotHitsOnTracksReference" )
+    kwargs_setdefault( kwargs, "plotHitsOnMatchedTracks",   iflags, "plotHitsOnMatchedTracks" )
+    kwargs_setdefault( kwargs, "plotHitsOnFakeTracks",      iflags, "plotHitsOnFakeTracks" )
+    kwargs_setdefault( kwargs, "plotVertexParameters",      iflags, "plotVertexParameters" )
+    kwargs_setdefault( kwargs, "useSelectedVertexTracks",   iflags, "useSelectedVertexTracks" )
+    kwargs_setdefault( kwargs, "plotOfflineElectrons",      iflags, "plotOfflineElectrons" )
+    kwargs_setdefault( kwargs, "ResolutionMethod",          iflags, "ResolutionMethod" )
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
-    kwargs.setdefault( "plotTracksInJets", "Jet" in flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject )
+    #  AAAAAAARGHHHH !!!!!!!!!!!
+    if has_in( "Jet", iflags, "SelectOfflineObject" ):
+        kwargs.setdefault( "plotTracksInJets", True )
+    else:
+        kwargs.setdefault( "plotTracksInJets", False )
 
-    kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk else [-1, 9999.]) # for technical efficiencies
-    kwargs.setdefault("MinSilHits", flags.Tracking.ITkMainPass.minClusters if flags.Detector.GeometryITk else [flags.Tracking.MainPass.minClusters]) # for technical efficiencies
+    if flags.Detector.GeometryITk: 
+         kwargs_setdefault( kwargs, "EtaBins",    iflags, "etaBins", [] )
+         kwargs_setdefault( kwargs, "MinSilHits", iflags, "minClusters" )
+    else:
+         kwargs.setdefault( "EtaBins", [-1, 9999.] ) # for technical efficiencies ?????
+         kwargs.setdefault( "MinSilHits", [flags.Tracking.MainPass.minClusters] ) # for technical efficiencies ????
 
-    trkAnaSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
-    acc.addService( trkAnaSvc )
+    trkAnaDefSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
+    acc.addService( trkAnaDefSvc )
     return acc
 
 

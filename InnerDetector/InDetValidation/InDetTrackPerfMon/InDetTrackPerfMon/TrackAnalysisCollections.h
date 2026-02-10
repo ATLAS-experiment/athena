@@ -31,6 +31,7 @@
 
 /// local includes
 #include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
+#include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
 #include "InDetTrackPerfMon/ITrackMatchingLookup.h"
 
 /// STD includes
@@ -298,8 +299,8 @@ namespace IDTPM {
     /// tool is constructed for each event We stick with the Svc
     /// name however for the time being to avoid having to change
     /// the code that much
-    //    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
-    const ITrackAnalysisDefinition* m_trkAnaDefSvc;
+    SmartIF< ITrackAnalysisDefinitionSvc > m_trkAnaDefSvc;
+    // const ITrackAnalysisDefinition* m_trkAnaDefSvc;
     bool m_newChain, m_newRoi;
 
     /// --- Collections class variables ---
