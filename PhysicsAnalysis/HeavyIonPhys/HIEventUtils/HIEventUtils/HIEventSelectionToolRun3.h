@@ -9,6 +9,7 @@
 #include "AsgTools/ToolHandle.h"
 #include "HIEventUtils/IHIEventSelectionToolRun3.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "TH1D.h"
 
 namespace HI {
 
@@ -59,7 +60,10 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{
       this, "TrackSelectionTool", "", ""};
 
+  std::unique_ptr<TH1D> m_ZDCEt_UpperCut_5p5Sigma_OO  ;
+  std::unique_ptr<TH1D> m_ZDCEt_UpperCut_4p0Sigma_NeNe;
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
+
   float ntrkCutValue(IonDataType, float fcalEt, PileupVariation) const;
   IonDataType runNumberToDataType(uint32_t run) const;
 };
