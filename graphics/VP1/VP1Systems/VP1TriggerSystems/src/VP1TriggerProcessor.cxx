@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -34,7 +34,6 @@ int muonsInEvt=-1;
 //_____________________________________________________________________________________________
 VP1Trig::VP1TriggerProcessor::VP1TriggerProcessor()
   : Logger("VP1TriggerProcessor"),
-    m_triggersystem(nullptr),
     m_initStatus(false), 
     m_daqStatus(false),
     m_trigLvl("all"),
@@ -49,7 +48,6 @@ VP1Trig::VP1TriggerProcessor::VP1TriggerProcessor()
 VP1Trig::VP1TriggerProcessor::~VP1TriggerProcessor()
 {
   log_verbose("destructor");
-  delete m_triggersystem;
 }
 
 
@@ -58,7 +56,7 @@ VP1Trig::VP1TriggerProcessor::~VP1TriggerProcessor()
 void VP1Trig::VP1TriggerProcessor::initialize()
 {
   log_info("Initializing VP1Trig::VP1TriggerSystem");
-  m_triggersystem = new VP1TriggerSystem();
+  m_triggersystem = std::make_unique<VP1TriggerSystem>();
   m_initStatus=true;
 }
 
@@ -362,7 +360,7 @@ int VP1Trig::VP1TriggerProcessor::getMuonsInEvt()
 
 //Return collected Trigger Data in QTree container format
 //_____________________________________________________________________________________________
-QList<QTreeWidgetItem *> VP1Trig::VP1TriggerProcessor::getQTrigData(QString triglvl)
+QList<QTreeWidgetItem *> VP1Trig::VP1TriggerProcessor::getQTrigData(const QString& triglvl)
 {
   log_verbose("User request: return collected trigger data in QTree container format");
   QList<QTreeWidgetItem *> customDataSet;
@@ -406,7 +404,7 @@ QList<QTreeWidgetItem *> VP1Trig::VP1TriggerProcessor::getQTrigData(QString trig
 
 //Set Trigger Level flag to Process
 //_____________________________________________________________________________________________
-void VP1Trig::VP1TriggerProcessor::setTrigLvl(QString triglvl)
+void VP1Trig::VP1TriggerProcessor::setTrigLvl(const QString& triglvl)
 {
   if(triglvl.compare("L1", Qt::CaseInsensitive)==0 || triglvl.compare("L2", Qt::CaseInsensitive)==0 || triglvl.compare("EF", Qt::CaseInsensitive)==0 || triglvl.compare("ALL", Qt::CaseInsensitive)==0) {
     log_verbose("User request: set trigger level flag to "+triglvl);

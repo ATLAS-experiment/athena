@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -76,7 +76,7 @@ std::string muonTrackName[18] =
 
 //Muon Track Info: Data
 //_____________________________________________________________________________________________
-double VP1Trig::VP1TriggerHandleEF::muonTrackData(QString type, int id)
+double VP1Trig::VP1TriggerHandleEF::muonTrackData(const QString& type, int id)
 {
   double data=-101;
   
@@ -232,7 +232,7 @@ bool VP1Trig::VP1TriggerHandleEF::loadTrackContainer()
 
 //Load Muon Track data to corresponding vectors
 //_____________________________________________________________________________________________
-void VP1Trig::VP1TriggerHandleEF::loadMuonTrack(int trackNo, QString type)
+void VP1Trig::VP1TriggerHandleEF::loadMuonTrack(int trackNo, const QString& type)
 {
   //PROCESS TRACK DATA AND STORE IN TEMP. VECTOR ---------------------------->
   std::vector<QString> data;

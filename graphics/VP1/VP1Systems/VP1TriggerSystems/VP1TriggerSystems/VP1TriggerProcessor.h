@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERPROCESSOR_H
@@ -23,6 +23,7 @@
 #include <QString>
 #include <QList>
 #include <QTreeWidgetItem>
+#include <memory>
 
 
 namespace VP1Trig {
@@ -50,14 +51,14 @@ namespace VP1Trig {
     int getMuonsInEvt();              //ret: muonsInEvt
     
     void setDataFormat(char ctnid);   //ctnid -> m_dataFormat
-    void setTrigLvl(QString triglvl); //triglvl -> m_trigLvl
+    void setTrigLvl(const QString& triglvl); //triglvl -> m_trigLvl
     
     //***** Data Export *****
-    QList<QTreeWidgetItem *> getQTrigData(QString);           //ret: m_trigLvlDataSet
+    QList<QTreeWidgetItem *> getQTrigData(const QString&);           //ret: m_trigLvlDataSet
     //--------------------------------------------------------<
     
   private:
-    VP1TriggerSystem* m_triggersystem;
+    std::unique_ptr<VP1TriggerSystem> m_triggersystem;
     
     //Basic System Setup Variables --------------------------->
     bool m_initStatus;

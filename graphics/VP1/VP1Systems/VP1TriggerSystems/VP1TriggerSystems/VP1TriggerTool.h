@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERTOOL_H
@@ -47,7 +47,7 @@ namespace VP1Trig {
     bool isReady();
     
     //+ set/get trigger level to process
-    void setTrigLvlToProcess(QString triglvl);
+    void setTrigLvlToProcess(const QString& triglvl);
     QString getTrigLvlToProcess();
     
     //+ set/get data container format
@@ -58,7 +58,7 @@ namespace VP1Trig {
     int getMuonCount();
     
     //+ get all trigger data in QTree container format 
-    QList<QTreeWidgetItem *> getTriggerData_QTree(QString);
+    QList<QTreeWidgetItem *> getTriggerData_QTree(const QString&);
     //-----------------------------------------------<
     
   private:
