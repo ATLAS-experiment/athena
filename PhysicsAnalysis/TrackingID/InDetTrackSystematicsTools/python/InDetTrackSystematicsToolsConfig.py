@@ -57,12 +57,29 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", **kwargs):
             InDetTrackTruthOriginToolCfg(flags)))
 
     from AthenaConfiguration.Enums import LHCPeriod
-    # Run 3 recommendations (MC23): https://indico.cern.ch/event/1587937/#40-fake-tracks-in-the-jet-core
+
+    # TIDE fake rate recommendations:
+    # Run 3 (MC23): https://indico.cern.ch/event/1587937/#40-fake-tracks-in-the-jet-core
     if flags.GeoModel.Run >= LHCPeriod.Run3:
         kwargs.setdefault("FakeUncertainty", 0.25)
-    # Run 2 recommendations (MC20): https://cds.cern.ch/record/2859907
+    # Run 2 (MC20): https://cds.cern.ch/record/2859907
     else:
         kwargs.setdefault("FakeUncertainty", 0.35)
+
+    # TIDE FLost recommendations:
+    # Run 3 (MC23)
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        # 2022/23 (MC23a/d): https://indico.cern.ch/event/1531052/#38-flost-update
+        if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d]:
+            kwargs.setdefault("FLostUncertainty", 0.24)
+        # *Preliminary* 2024 (MC23e): https://indico.cern.ch/event/1643176/#42-flost
+        elif flags.Input.MCCampaign is Campaign.MC23e:
+            kwargs.setdefault("FLostUncertainty", 0.50)
+        else:
+            raise ValueError(f"JetTrackFilterTool: Recommendations not yet available for campaign {flags.Input.MCCampaign}! Please check the configuration and contact Tracking CP if you believe this message is in error.")
+    # Run 2 (MC20)
+    else:
+        kwargs.setdefault("FLostUncertainty", 0.24)
 
     acc.setPrivateTools(CompFactory.InDet.JetTrackFilterTool(name, **kwargs))
     return acc
