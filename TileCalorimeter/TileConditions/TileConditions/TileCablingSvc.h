@@ -10,7 +10,6 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthService.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "Identifier/Identifier.h"
 #include "CxxUtils/checker_macros.h"
 

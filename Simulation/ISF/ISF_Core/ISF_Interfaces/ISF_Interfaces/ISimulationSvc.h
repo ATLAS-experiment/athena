@@ -11,7 +11,6 @@
 // Framework includes
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/StatusCode.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 // ISF includes
 #include "ISF_Event/ISFParticleContainer.h"

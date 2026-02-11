@@ -12,7 +12,6 @@
 // Include Files
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/StatusCode.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 
 namespace Trk {

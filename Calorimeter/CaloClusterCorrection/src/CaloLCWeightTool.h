@@ -22,7 +22,6 @@
 #include "CaloConditions/CaloLocalHadCoeff.h"
 #include "GaudiKernel/ToolHandle.h" 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloConditions/CaloNoise.h"
 #include "GaudiKernel/EventContext.h"

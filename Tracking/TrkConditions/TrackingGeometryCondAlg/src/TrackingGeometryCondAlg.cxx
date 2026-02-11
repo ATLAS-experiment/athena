@@ -5,7 +5,6 @@
 
 #include "TrkGeometry/TrackingGeometry.h"
 #include "GaudiKernel/EventContext.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "TrackingGeometryCondAlg/TrackingGeometryCondAlg.h"
 

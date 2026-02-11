@@ -25,7 +25,6 @@
 #include "LArRawConditions/LArADC2MeV.h" //read handle
 #include "LArRawConditions/LArOFC.h" //read handle
 #include "LArElecCalib/ILArNoise.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class AtlasDetectorID;
 class CaloIdManager;
