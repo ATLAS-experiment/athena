@@ -1,59 +1,49 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCModuleMap.h"
 
 namespace MuonTGC_Cabling {
 
-TGCModuleMap::~TGCModuleMap(void) {
-    clear();
-}
+TGCModuleMap::~TGCModuleMap() = default;
 
-int TGCModuleMap::connector(int entry) {
-    std::map<int, TGCModuleId*>::iterator iter = m_moduleMap.begin();
-    advance(iter, entry);
-    return iter->first;
-}
-
-TGCModuleId* TGCModuleMap::moduleId(int entry) {
-    std::map<int, TGCModuleId*>::iterator iter = m_moduleMap.begin();
-    advance(iter, entry);
-    return iter->second;
-}
-
-TGCModuleId* TGCModuleMap::popModuleId(int entry) {
-    std::map<int, TGCModuleId*>::iterator iter = m_moduleMap.begin();
-    advance(iter, entry);
-    TGCModuleId* moduleId = iter->second;
-    m_moduleMap.erase(iter);
-    return moduleId;
-}
-
-void TGCModuleMap::insert(int connector, TGCModuleId* moduleId) {
-    if (m_moduleMap.find(connector) == m_moduleMap.end()) {
-        m_moduleMap.insert(std::pair<int, TGCModuleId*>(connector, moduleId));
-    } else {
-        // duplicate with key of connector
-        delete moduleId;
+std::unique_ptr<TGCModuleId> TGCModuleMap::popModule(const int port) {
+    auto itr = m_moduleMap.find(port);
+    if (itr != m_moduleMap.end()) {
+        std::unique_ptr<TGCModuleId> returnMe = std::move(itr->second);
+        m_moduleMap.erase(itr);
+        return returnMe;
     }
-    return;
+    return nullptr;
+}
+TGCModuleMap::Store_t::const_iterator TGCModuleMap::begin() const {
+    return m_moduleMap.begin();
+}
+TGCModuleMap::Store_t::const_iterator TGCModuleMap::end() const {
+    return m_moduleMap.end();
+}
+TGCModuleMap::Store_t::iterator TGCModuleMap::begin() {
+    return m_moduleMap.begin();
+}
+TGCModuleMap::Store_t::iterator TGCModuleMap::end() {
+    return m_moduleMap.end();
 }
 
-int TGCModuleMap::find(int connector) {
-    return distance(m_moduleMap.begin(), m_moduleMap.find(connector));
+void TGCModuleMap::insert(int connector,
+                          std::unique_ptr<TGCModuleId> moduleId) {
+    m_moduleMap.emplace(connector, std::move(moduleId));
 }
 
-int TGCModuleMap::size(void) {
+bool TGCModuleMap::empty() const {
+    return m_moduleMap.empty();
+}
+std::size_t TGCModuleMap::size() const {
     return m_moduleMap.size();
 }
 
-void TGCModuleMap::clear(void) {
-    for (auto& p : m_moduleMap) {
-        delete p.second;
-    }
+void TGCModuleMap::clear() {
     m_moduleMap.clear();
-    return;
 }
 
 }  // namespace MuonTGC_Cabling

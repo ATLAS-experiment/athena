@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELPPIN_HH
@@ -16,14 +16,11 @@ class TGCChannelPPIn : public TGCChannelId {
                    TGCId::RegionType region, int sector, int id, int block,
                    int channel);
 
-    virtual ~TGCChannelPPIn(void) {}
+    virtual ~TGCChannelPPIn() = default;
 
-    virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCChannelPPIn(void) {}
+    virtual bool isValid() const override;
 };
 
 }  // namespace MuonTGC_Cabling

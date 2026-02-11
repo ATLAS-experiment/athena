@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TEnv.h>
@@ -77,8 +77,8 @@ StatusCode ResidualOffsetCorrection::initialize() {
   //Retrieve information specific to the residual offset correction from the TEnv
   TString offsetName = m_config->GetValue("ResidualOffsetCorrection.Name","");
   m_resOffsetDesc = m_config->GetValue(offsetName+".Description","");
-  ATH_MSG_INFO("Reading residual jet-area pile-up correction factors from: " << calibFile);
-  ATH_MSG_INFO("Description: " << m_resOffsetDesc);
+  ATH_MSG_DEBUG("Reading residual jet-area pile-up correction factors from: " << calibFile);
+  ATH_MSG_DEBUG("Description: " << m_resOffsetDesc);
 
   //Check if the config is set to apply the beamspot correction to NPV
   m_applyNPVBeamspotCorrection = m_config->GetValue("ApplyNPVBeamspotCorrection",false);

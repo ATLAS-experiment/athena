@@ -1,13 +1,16 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __Identifier32_h__
 #define __Identifier32_h__
 
+
 #include <vector>
 #include <string>
-#include <iosfwd>
+#include <iostream>
+
+class MsgStream;
 
 /**
  **-----------------------------------------------
@@ -53,7 +56,8 @@ public:
     std::string  getString() const;
 
     /// Print out in hex form
-    void show () const;
+    void show (std::ostream & out = std::cout) const;
+    void show (MsgStream & out) const;
     
     //convert to string representation
     explicit operator std::string() const {return getString();}

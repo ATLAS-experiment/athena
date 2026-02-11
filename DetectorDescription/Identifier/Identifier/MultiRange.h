@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_MULTIRANGE_H
 #define IDENTIFIER_MULTIRANGE_H
 
-
 #include "Identifier/ExpandedIdentifier.h"
 #include "Identifier/Range.h"
 #include "Identifier/RangeIterator.h"
 #include <vector>
-#include <iosfwd>
+#include <iostream>
 #include <string>
+class MsgStream;
 
 /// @brief A MultiRange combines several Ranges 
 class MultiRange { 
@@ -119,8 +119,8 @@ public:
   const_identifier_factory 	factory_begin () const; 
   identifier_factory 		factory_end (); 
   const_identifier_factory 	factory_end () const; 
-  void show () const; 
-  void show (std::ostream& s) const; 
+  void show (std::ostream& s = std::cout) const; 
+  void show (MsgStream & out) const; 
   /// Generate a textual representation of the multirange using the input format 
   operator std::string () const; 
  

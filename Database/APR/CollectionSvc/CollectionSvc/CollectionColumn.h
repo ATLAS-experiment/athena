@@ -45,42 +45,39 @@ namespace pool {
 	    m_id( rhs.m_id ) 
     {}
      
-    /// Default destructor.
-    virtual ~CollectionColumn() {}
-
     /**
      * Sets the name of the column.
      *
      * @param name Name of column.
      */
-    virtual void setName( const std::string& name ) { m_name = name; }
+    void setName( const std::string& name ) { m_name = name; }
 
     /**
      * Sets the data type of the column.
      *
      * @param type Data type of column.
      */
-    virtual void setType( const std::string& type ) { m_type = type; }
+    void setType( const std::string& type ) { m_type = type; }
 
     /**
      * Sets the data type of the column.
      *
      * @param type Data type of column.
      */
-    virtual void setType( const std::type_info& type )
+    void setType( const std::type_info& type )
     { m_type = coral::AttributeSpecification::typeNameForId( type ); }
 
     /// Sets the position of the column in its associated collection fragment.
-    virtual void setId( int id ) { m_id = id; }
+    void setId( int id ) { m_id = id; }
   
     /// Returns the name of the column.
-    virtual const std::string& name() const { return m_name; }
+    const std::string& name() const { return m_name; }
 
     /// Returns the data type of the column.
-    virtual const std::string& type() const { return m_type; }
+    const std::string& type() const { return m_type; }
 
     /// Returns the position of the column in its associated collection fragment.
-    virtual int id() const { return m_id; }
+    int id() const { return m_id; }
 
   private:
     /// Name of column.

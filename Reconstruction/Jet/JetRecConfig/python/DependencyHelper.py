@@ -79,6 +79,9 @@ def solveGroomingDependencies( groomdef0, flags ):
         modInstance = aliasToModDef(mod, groomdef)
         groomdef._prereqDic['mod:'+mod] = modInstance
         groomdef._prereqOrder.append('mod:'+mod)
+
+    groomdef._prereqOrder[:] = list(dict.fromkeys(groomdef._prereqOrder) )
+
     return groomdef
 
 

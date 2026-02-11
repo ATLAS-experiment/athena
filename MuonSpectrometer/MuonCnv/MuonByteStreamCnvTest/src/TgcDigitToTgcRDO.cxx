@@ -18,8 +18,6 @@ namespace {
     }
 }
 
-TgcDigitToTgcRDO::TgcDigitToTgcRDO(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator){}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -29,32 +27,38 @@ StatusCode TgcDigitToTgcRDO::initialize() {
 
     ATH_MSG_DEBUG("standard digitization job: "
                   << "initialize now the TGC cabling and TGC container.");
-    ATH_CHECK(getCabling());
 
     ATH_CHECK(m_rdoContainerKey.initialize());
-    ATH_MSG_VERBOSE("Initialized WriteHandleKey: " << m_rdoContainerKey);
     ATH_CHECK(m_digitContainerKey.initialize());
-    ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_digitContainerKey);
+    ATH_CHECK(m_cablingKey.initialize());
+    // NOTE: although this function has no clients in release 22, currently the Run2 trigger simulation is still run in
+    //       release 21 on RDOs produced in release 22. Since release 21 accesses the TagInfo, it needs to be written to the
+    //       RDOs produced in release 22. The fillTagInfo() function thus needs to stay in release 22 until the workflow changes
+  
+    ServiceHandle<ITagInfoMgr> tagInfoMgr("TagInfoMgr", name());
+    
+    ATH_CHECK(tagInfoMgr.retrieve());   
+    ATH_CHECK(tagInfoMgr->addTag("TGC_CablingType", "TGCcabling12Svc"));
 
     return StatusCode::SUCCESS;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
  
-    SG::WriteHandle<TgcRdoContainer> rdoContainer(m_rdoContainerKey, ctx);
+    SG::WriteHandle rdoContainer(m_rdoContainerKey, ctx);
     ATH_CHECK(rdoContainer.record(std::make_unique<TgcRdoContainer>()));
     ATH_MSG_DEBUG("Recorded TgcRdoContainer called " << rdoContainer.name() << " in store " << rdoContainer.store());
-    SG::ReadHandle<TgcDigitContainer> container(m_digitContainerKey, ctx);
-    ATH_CHECK(container.isPresent());
-    ATH_MSG_DEBUG("Found TgcDigitContainer called " << container.name() << " in store " << container.store());
+    const TgcDigitContainer* container{};
+    ATH_CHECK(SG::get(container, m_digitContainerKey, ctx));
 
+    const Muon::TgcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
     std::map<uint16_t, std::unique_ptr<TgcRdo>> tgcRdoMap{};
 
-     const TgcRdoIdHash hashF;
+    const TgcRdoIdHash hashF;
 
     // loop over collections
     for (const TgcDigitCollection* tgcCollection : *container) {
@@ -73,17 +77,19 @@ StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
 
                 // check if this channel has Adjacent partner only when 2nd time
                 if (iAd != 0) {
-                    bool a_found = m_cabling->hasAdjacentChannel(channelId);
+                    bool a_found = cabling->hasAdjacentChannel(channelId);
 
                     // set Adjacent flag
-                    if (a_found)
+                    if (a_found) {
                         adFlag = true;
-                    else
+                    } else {
                         continue;
+                    }
                 }
 
                 // get Online ID
-                bool status = m_cabling->getReadoutIDfromOfflineID(channelId, subDetectorID, rodID, sswID, slbID, channelID, adFlag);
+                bool status = cabling->getReadoutIDfromOfflineID(channelId, subDetectorID, 
+                                                                 rodID, sswID, slbID, channelID, adFlag);
 
                 if (!status) {
                     ATH_MSG_DEBUG("MuonTGC_CablingSvc can't return an online ID for the channel : "
@@ -134,39 +140,3 @@ StatusCode TgcDigitToTgcRDO::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
 }
 
-// NOTE: although this function has no clients in release 22, currently the Run2 trigger simulation is still run in
-//       release 21 on RDOs produced in release 22. Since release 21 accesses the TagInfo, it needs to be written to the
-//       RDOs produced in release 22. The fillTagInfo() function thus needs to stay in release 22 until the workflow changes
-StatusCode TgcDigitToTgcRDO::fillTagInfo() const {
-    ServiceHandle<ITagInfoMgr> tagInfoMgr("TagInfoMgr", name());
-    if (tagInfoMgr.retrieve().isFailure()) return StatusCode::FAILURE;
-
-    StatusCode sc = tagInfoMgr->addTag("TGC_CablingType", m_cablingType);
-
-    if (sc.isFailure()) {
-        ATH_MSG_WARNING("TGC_CablingType " << m_cablingType << " not added to TagInfo ");
-        return sc;
-    } else {
-        ATH_MSG_DEBUG("TGC_CablingType " << m_cablingType << " is Added TagInfo ");
-    }
-
-    return StatusCode::SUCCESS;
-}
-
-StatusCode TgcDigitToTgcRDO::getCabling() {
-    ATH_CHECK(m_cabling.retrieve());
-
-    int maxRodId = m_cabling->getMaxRodId();
-    if (maxRodId == 12) {
-        ATH_MSG_INFO(m_cabling->name() << " (12-fold) is selected ");
-        m_cablingType = "TGCcabling12Svc";
-    } else {
-        ATH_MSG_INFO("Other TGC cabling scheme is (e.g. 8-fold) is selected");
-        m_cablingType = "TGCcabling8Svc";
-    }
-
-    // Fill Tag Info
-    ATH_CHECK(fillTagInfo());
-
-    return StatusCode::SUCCESS;
-}

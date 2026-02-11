@@ -21,12 +21,12 @@ class TGCCableSSWToROD : public TGCCable {
     TGCCableSSWToROD& operator=(const TGCCableSSWToROD&);
     virtual ~TGCCableSSWToROD();
 
-    virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
+    TGCModuleMap getModule(const TGCModuleId& moduleId) const;
 
    private:
     TGCCableSSWToROD() = delete;
-    virtual TGCModuleMap* getModuleIn(const TGCModuleId* rod) const;
-    virtual TGCModuleMap* getModuleOut(const TGCModuleId* ssw) const;
+    TGCModuleMap getModuleIn(const TGCModuleId& rod) const;
+    TGCModuleMap getModuleOut(const TGCModuleId& ssw) const;
     std::unique_ptr<TGCDatabase> m_database{nullptr};
 };
 

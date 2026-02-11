@@ -49,7 +49,7 @@ namespace Muon
 		 uint16_t sswId, uint16_t slbId);
 
       /** Destructor */
-      virtual ~TgcSlbData(void) ;
+      virtual ~TgcSlbData() ;
   
       /** Check input IDs and held IDs are equal or not */ 
       bool equal(uint16_t bcId,
@@ -75,19 +75,19 @@ namespace Muon
       void setType(int vType) ;
 
       /** Check if the SLB type is coincidence. */ 
-      bool isCoincidence(void) const;
+      bool isCoincidence() const;
 
       /** Check if the SLB type is LowPt. */ 
-      bool isLowPt(void) const;
+      bool isLowPt() const;
   
       /** Check if the SLB type is HighPt. No SLB for HighPt and SLB for SL is used. */
-      bool isHighPt(void) const;
+      bool isHighPt() const;
 
       /** Check if the SLB type is SL. */ 
-      bool isSL(void) const;
+      bool isSL() const;
 
       /** Check if the SLB type is inner LowPt. */ 
-      bool isInner(void) const;
+      bool isInner() const;
 
       /** Set bcId */ 
       void setBcId(uint16_t bcId);
@@ -122,7 +122,7 @@ namespace Muon
       };
 
       /** Costructor */
-      TgcSlbData(void); 
+      TgcSlbData(); 
 
       /** Get bitArray for a BC tag. */
       // Non-const version which is used in this class only

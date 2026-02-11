@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TimingClass.h"
@@ -12,6 +12,7 @@
 #include "LArCafJobs/Geometry.h"
 
 #include "TFile.h"
+#include <sstream>
 
 using namespace TMath;
 using namespace std;

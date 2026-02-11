@@ -31,6 +31,7 @@ set(FTDSource
   Root/TrackClassifier.cxx
 )
 
+
 # Build a shared library:
 atlas_add_library( FlavorTagDiscriminants
   ${FTDSource}
@@ -63,6 +64,13 @@ set_target_properties( FlavorTagDiscriminants
                        PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
 
 if (NOT XAOD_STANDALONE)
+  set ( athena_only_libs )
+  set ( athena_only_algs )
+  if( NOT XAOD_ANALYSIS )
+    set ( athena_only_libs BeamSpotConditionsData )
+    set ( athena_only_algs src/HitBeamSpotDataDecoratorAlg.cxx )
+  endif()
+
   atlas_add_component( FlavorTagDiscriminantsLib
     src/PoorMansIpAugmenterAlg.cxx
     src/HitDecoratorAlg.cxx
@@ -77,8 +85,9 @@ if (NOT XAOD_STANDALONE)
     src/CountIParticleAlg.cxx
     src/CountTrackParticleAlg.cxx
     src/FTagGhostLeptonAssociationAlg.cxx
+    ${athena_only_algs}
     src/components/FlavorTagDiscriminants_entries.cxx
-    LINK_LIBRARIES FlavorTagDiscriminants
+    LINK_LIBRARIES FlavorTagDiscriminants RoiDescriptor ${athena_only_libs}
     )
 
   # Suppress spurious warnings seen in the LTO build originating in

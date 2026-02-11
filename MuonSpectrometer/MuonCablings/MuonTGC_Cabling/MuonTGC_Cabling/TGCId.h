@@ -64,14 +64,14 @@ class TGCId {
     };
     enum RegionType { NoRegionType = -1, Endcap, Forward, MaxRegionType };
 
-    IdType getIdType(void) const;
-    SideType getSideType(void) const;
-    ModuleType getModuleType(void) const;
-    SignalType getSignalType(void) const;
-    MultipletType getMultipletType(void) const;
-    RegionType getRegionType(void) const;
+    IdType getIdType() const;
+    SideType getSideType() const;
+    ModuleType getModuleType() const;
+    SignalType getSignalType() const;
+    MultipletType getMultipletType() const;
+    RegionType getRegionType() const;
 
-    int getSectorInReadout(void) const;
+    int getSectorInReadout() const;
 
     virtual int getSectorInOctant() const;
     virtual int getSectorModule() const;

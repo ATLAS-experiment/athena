@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_STGCRAWDATA_H
 #define MUONRDO_STGCRAWDATA_H
 
-#include <iostream>
-#include "Identifier/Identifier.h"
 
+#include "Identifier/Identifier.h"
+#include <iosfwd>
+#include <cstdint>
 class MsgStream;
 
 namespace Muon {

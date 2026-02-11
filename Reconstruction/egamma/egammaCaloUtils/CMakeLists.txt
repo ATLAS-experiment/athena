@@ -4,7 +4,7 @@
 atlas_subdir( egammaCaloUtils )
 
 atlas_add_library( egammaCaloUtils
-   egammaUtils/*.h src/*.cxx
+   egammaCaloUtils/*.h src/*.cxx
    PUBLIC_HEADERS egammaCaloUtils
    LINK_LIBRARIES CaloDetDescrLib CaloEvent CaloGeoHelpers 
    CaloIdentifier CaloUtilsLib xAODCaloEvent FourMomUtils)

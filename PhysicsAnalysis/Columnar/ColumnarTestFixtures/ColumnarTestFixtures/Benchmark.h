@@ -83,6 +83,12 @@ namespace columnar
         return m_ticks;
       }
 
+      static float getTickDuration()
+      {
+        using period = std::chrono::high_resolution_clock::period;
+        return static_cast<float>(period::num) / period::den * 1e9f;
+      }
+
       void startTimer ()
       {
         m_start = std::chrono::high_resolution_clock::now();

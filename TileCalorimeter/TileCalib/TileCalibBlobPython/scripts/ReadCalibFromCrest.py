@@ -194,9 +194,12 @@ if len(tag)==0 or tag.endswith('HEAD'):
         tag=''
 
 folderTag = tag
-if folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO") :
+tag = tag.upper()
+tag1 = tag.split('_')[1][:4] if '_' in tag else tag[:4]
+if tag1 == "TILE" or tag1 == "CALO" or tag.startswith("TILE") or tag.startswith("CALO"):
     folderPath=""
-log.info("Initializing folder %s with tag %s", folderPath, folderTag)
+if not os.path.isfile(schema):
+    log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 blobReader = TileCalibCrest.TileBlobReaderCrest(schema,folderPath, folderTag, run, lumi,
     TileCalibUtils.getDrawerIdx(max(rosmin,0),max(modmin,0)),

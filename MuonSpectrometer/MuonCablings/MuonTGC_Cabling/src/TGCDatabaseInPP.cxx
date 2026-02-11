@@ -29,7 +29,7 @@ TGCDatabaseInPP::TGCDatabaseInPP(const TGCDatabaseInPP& right)
     right.getminIndexIn(m_minIndexIn);
 }
 
-TGCDatabaseInPP::~TGCDatabaseInPP(void) {}
+TGCDatabaseInPP::~TGCDatabaseInPP() {}
 
 bool TGCDatabaseInPP::update(const std::vector<int>& input) {
     int ip = find(input);
@@ -102,7 +102,7 @@ void TGCDatabaseInPP::getminIndexIn(int* tmpminIndexIn) const {
     }
 }
 
-void TGCDatabaseInPP::readDB(void) {
+void TGCDatabaseInPP::readDB() {
     std::ifstream file(m_filename.c_str());
     std::string buf;
 
@@ -154,7 +154,7 @@ void TGCDatabaseInPP::readDB(void) {
     makeIndexDBIn();
 }
 
-void TGCDatabaseInPP::makeIndexDBIn(void) {
+void TGCDatabaseInPP::makeIndexDBIn() {
     m_NIndexDBIn = 1;
     for (int iIndexIn = 0; iIndexIn < NIndexIn; iIndexIn++) {
         m_NIndexDBIn *= (m_maxIndexIn[iIndexIn] - m_minIndexIn[iIndexIn] + 1);

@@ -85,6 +85,9 @@ namespace columnar
 
       /// @brief the MET output term names (if empty, MET output columns are omitted)
       std::vector<std::string> metTermNames = {};
+
+      /// @brief skip the repeat call even when runToolTwice is enabled
+      bool noRepeatCall = false;
     };
   }
 }

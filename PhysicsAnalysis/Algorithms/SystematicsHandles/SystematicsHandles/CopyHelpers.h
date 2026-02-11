@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -95,6 +95,10 @@ namespace CP
               // element.
               const T* originContainer =
                  dynamic_cast< const T* >( ( *inputObject )[ 0 ]->container() );
+              if (!originContainer){
+                ANA_MSG_ERROR( "Dynamic cast failed." );
+                return StatusCode::FAILURE;
+              }
               // Make sure that every element in the view container has the same
               // parent.
               for( size_t i = 1; i < inputObject->size(); ++i ) {

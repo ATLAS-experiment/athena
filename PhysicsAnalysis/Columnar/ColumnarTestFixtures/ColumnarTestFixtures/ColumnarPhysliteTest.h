@@ -17,6 +17,7 @@
 #include <gtest/gtest.h>
 
 #include <functional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -25,6 +26,7 @@ class TTree;
 
 namespace columnar
 {
+  class ColumnVectorHeader;
   class ToolColumnVectorMap;
 
   namespace TestUtils
@@ -51,11 +53,13 @@ namespace columnar
     /// @brief check whether we have the right mode
     static bool checkMode ();
 
-    void setupKnownColumns (const TestUtils::TestDefinition& testDefinition);
+    void setupKnownColumns (std::span<const TestUtils::TestDefinition> testDefinitions);
 
-    void setupColumns (ToolColumnVectorMap& toolWrapper);
+    void setupColumns (const ColumnVectorHeader& columnHeader);
 
     void doCall (const TestUtils::TestDefinition& testDefinition);
+
+    void doCallMulti (const std::vector<TestUtils::TestDefinition>& testDefinitions);
   };
 }
 

@@ -26,7 +26,3 @@ struct TreeTest
 #include "RootUtils/ILogger.h"
 #include "RootUtils/ScatterH2.h"
 
-// Default names of ROOT file storage elements used by APR
-#include "RootUtils/APRDefaults.h"
-
-

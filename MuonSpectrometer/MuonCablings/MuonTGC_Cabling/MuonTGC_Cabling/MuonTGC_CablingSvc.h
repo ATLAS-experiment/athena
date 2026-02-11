@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,22 +16,19 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthService.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "GaudiKernel/Service.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "MuonCondInterface/ITGCCablingDbTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "MuonTGC_Cabling/TGCCabling.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 class Identifier;
 
 class MuonTGC_CablingSvc : public AthService {
    public:
-    MuonTGC_CablingSvc(const std::string& name, ISvcLocator* svc);
+    using AthService::AthService;
+
     virtual ~MuonTGC_CablingSvc() = default;
 
-    virtual StatusCode initialize(void) override;
+    virtual StatusCode initialize() override;
 
     const MuonTGC_Cabling::TGCCabling* getTGCCabling() const;
 
@@ -39,22 +36,10 @@ class MuonTGC_CablingSvc : public AthService {
     int getMaxRodId() { return MuonTGC_Cabling::TGCCabling::MAXRODID; }
 
     // give max value of ReadoutID parameters
+    /** @todo Tobe ported */
     void getReadoutIDRanges(int& maxRodId, int& maxSRodId, int& maxSswId,
                             int& maxSbloc, int& minChannelId,
                             int& maxChannelId) const;
-
-    // give phi-range which a ROD covers
-    bool getCoveragefromRodID(const int rodID, double& startPhi,
-                              double& endPhi) const;
-
-    bool getCoveragefromRodID(const int rodID, int& startEndcapSector,
-                              int& coverageOfEndcapSector,
-                              int& startForwardSector,
-                              int& coverageOfForwardSector) const;
-
-    // give phi-range which a SROD covers
-    bool getCoveragefromSRodID(const int srodID, double& startPhi,
-                               double& endPhi) const;
 
     bool getCoveragefromSRodID(const int srodID, int& startEndcapSector,
                                int& coverageOfEndcapSector,
@@ -62,20 +47,15 @@ class MuonTGC_CablingSvc : public AthService {
                                int& coverageOfForwardSector) const;
 
     // Readout ID is ored
+    /** @brief To be ported */
     bool isOredChannel(const int subDetectorID, const int rodID,
                        const int sswID, const int sbLoc,
                        const int channelID) const;
 
     // Offline ID has adjacent Readout ID
     bool hasAdjacentChannel(const Identifier& offlineID) const;
-
-    // Online ID has adjacent Readout ID
-    bool hasAdjacentChannel(const int subsystemNumber, const int octantNumber,
-                            const int moduleNumber, const int layerNumber,
-                            const int rNumber, const int wireOrStrip,
-                            const int channelNumber) const;
-
     // readout IDs -> offline IDs
+    /** @brief To be ported */
     bool getOfflineIDfromReadoutID(Identifier& offlineID,
                                    const int subDetectorID, const int rodID,
                                    const int sswID, const int sbLoc,
@@ -150,10 +130,6 @@ class MuonTGC_CablingSvc : public AthService {
                                     const int rodID, const int sswID,
                                     const int sbLoc) const;
 
-    // readout ID -> RxID
-    bool getRxIDfromReadoutID(int& rxId, const int subsectorID, const int rodID,
-                              const int sswID, const int sbLoc) const;
-
     // ROD_ID / SSW_ID / RX_ID -> SLB ID
     bool getSLBIDfromRxID(int& phi, bool& isAside, bool& isEndcap,
                           int& moduleType, int& id, const int subsectorID,
@@ -175,7 +151,6 @@ class MuonTGC_CablingSvc : public AthService {
     bool getSLIDfromSReadoutID(int& phi, bool& isAside, const int subsectorID,
                                const int srodID, const int sector,
                                const bool forward) const;
-
     // SL ID -> readout ID ( ROD )
     bool getReadoutIDfromSLID(const int phi, const bool isAside,
                               const bool isEndcap, int& subsectorID, int& rodID,
@@ -185,7 +160,6 @@ class MuonTGC_CablingSvc : public AthService {
     bool getSReadoutIDfromSLID(const int phi, const bool isAside,
                                const bool isEndcap, int& subsectorID,
                                int& srodID, int& sswID, int& sbLoc) const;
-
     // HighPtID used in Simulation -> HighPtID in RDO
     bool getRDOHighPtIDfromSimHighPtID(const bool isForward, const bool isStrip,
                                        int& index, int& chip, int& hitId) const;
@@ -228,45 +202,38 @@ class MuonTGC_CablingSvc : public AthService {
                                             const int pos,
                                             bool middle = false) const;
 
-    // offline IDs -> low pt coincidence IDs
-    bool getLowPtCoincidenceIDfromOfflineID(const Identifier& offlineID,
-                                            int& subDetectorID, int& rodID,
-                                            int& sswID, int& sbLoc, int& block,
-                                            int& pos,
-                                            bool middle = false) const;
-
+   private:
     /////////////////////////////////////////////////////////////
     // channel connection
-    MuonTGC_Cabling::TGCChannelId* getChannel(
-        const MuonTGC_Cabling::TGCChannelId* channelId,
+    std::unique_ptr<MuonTGC_Cabling::TGCChannelId> getChannel(
+        const MuonTGC_Cabling::TGCChannelId& channelId,
         MuonTGC_Cabling::TGCChannelId::ChannelIdType type,
         bool orChannel = false) const;
 
     // module connection
-    MuonTGC_Cabling::TGCModuleMap* getModule(
-        const MuonTGC_Cabling::TGCModuleId* moduleId,
+    MuonTGC_Cabling::TGCModuleMap getModule(
+        const MuonTGC_Cabling::TGCModuleId& moduleId,
         MuonTGC_Cabling::TGCModuleId::ModuleIdType type) const;
 
     ///////////////////////
 
-   private:
-    std::unique_ptr<MuonTGC_Cabling::TGCCabling> m_cabling;
+    std::unique_ptr<Muon::TgcCablingMap> m_cabling;
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-    ToolHandle<ITGCCablingDbTool> m_condDataTool{this, "TGCCablingDbTool",
-                                                 "TGCCablingDbTool"};
 
-   protected:
-    IntegerProperty m_AsideId;
-    IntegerProperty m_CsideId;
-    IntegerArrayProperty m_rodId;
+    IntegerProperty m_AsideId{this, "AsideId", 103};
+    IntegerProperty m_CsideId{this, "CsideId", 104};
 
-    StringProperty m_databaseASDToPP;
-    StringProperty m_databaseInPP;
-    StringProperty m_databasePPToSL;
-    StringProperty m_databaseSLBToROD;
-
-    StringProperty m_databaseASDToPPdiff;
+    StringProperty m_databaseASDToPP{this, "databaseASDToPP",
+                                     "MuonTGC_Cabling_ASD2PP.db"};
+    StringProperty m_databaseInPP{this, "databaseInPP",
+                                  "MuonTGC_Cabling_PP.db"};
+    StringProperty m_databasePPToSL{this, "databasePPToSL",
+                                    "MuonTGC_Cabling_PP2SL.db"};
+    StringProperty m_databaseSLBToROD{this, "databaseSLBToROD",
+                                      "MuonTGC_Cabling_SLB2ROD.db"};
+    StringProperty m_databaseASDToPPdiff{this, "databaseASDtoPPdiff",
+                                         "ASD2PP_diff_12_OFL.db"};
 };
 
 inline const MuonTGC_Cabling::TGCCabling* MuonTGC_CablingSvc::getTGCCabling()

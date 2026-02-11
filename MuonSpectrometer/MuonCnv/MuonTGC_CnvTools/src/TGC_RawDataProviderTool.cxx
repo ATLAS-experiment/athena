@@ -1,55 +1,143 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_RawDataProviderTool.h"
 
-#include "MuonRDO/TgcRdoContainer.h"
 
-//================ Constructor =================================================
-
-Muon::TGC_RawDataProviderTool::TGC_RawDataProviderTool(
-						       const std::string& t,
-						       const std::string& n,
-						       const IInterface*  p) :
-  base_class(t, n, p)
-{
-}
 
 //================ Initialisation =================================================
+namespace Muon{
+StatusCode TGC_RawDataProviderTool::initialize() {
+  ATH_CHECK(m_idHelperSvc.retrieve());
 
-StatusCode Muon::TGC_RawDataProviderTool::initialize()
-{
-  // call base class initialise
-  ATH_CHECK( TGC_RawDataProviderToolCore::initialize() );
+  ATH_CHECK(m_decoder.retrieve());
+  ATH_MSG_DEBUG( "Retrieved tool " << m_decoder );
+
+  // Get ROBDataProviderSvc
+  ATH_CHECK(m_robDataProvider.retrieve());
+  ATH_MSG_DEBUG( "Retrieved service " << m_robDataProvider );
+
+  m_maxhashtoUse = m_idHelperSvc->tgcIdHelper().module_hash_max();  
+
+  ATH_CHECK(m_rdoContainerKey.initialize());
+
+  //try to configure the cabling service
+  if (!getCabling()) {
+    // ??? Is deferred initialization still needed here?
+    ATH_MSG_INFO( "TGCCablingServerSvc not yet configured; postpone TGCcabling initialization at first event. " );
+  }
+
+  m_hid2re.fillAllRobIds();
+  // Initialise the container cache if available
+  ATH_CHECK( m_rdoContainerCacheKey.initialize( !m_rdoContainerCacheKey.key().empty() ) );
   
   ATH_MSG_INFO( "initialize() successful in " << name() );
   return StatusCode::SUCCESS;
 }
 
-//============================================================================================
+StatusCode TGC_RawDataProviderTool::convertIntoContainer(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, TgcRdoContainer& tgcRdoContainer) const
+{    
 
-StatusCode Muon::TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs) const {
-  return this->convert( vecRobs, Gaudi::Hive::currentContext() );
+  /// Static variables are not thread safe
+  static thread_local int DecodeErrCount = 0;
+
+  // Update to range based loop
+  for(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* fragment : vecRobs){
+    if(m_decoder->fillCollection(*fragment, tgcRdoContainer).isFailure()) {
+      if(DecodeErrCount < 100) {
+        ATH_MSG_INFO( "Problem with TGC ByteStream Decoding!" );
+        DecodeErrCount++;
+      } 
+      else if(100 == DecodeErrCount) {
+        ATH_MSG_INFO( "Too many Problems with TGC Decoding messages. Turning message off." );
+        DecodeErrCount++;
+      }
+    }
+  }
+  ATH_MSG_DEBUG("Size of TgcRdoContainer is " << tgcRdoContainer.size());
+  return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const 
+const MuonTGC_CablingSvc*  TGC_RawDataProviderTool::getCabling() const
+{
+  const MuonTGC_CablingSvc* cabling = m_cabling.get();
+  if (cabling) {
+    return cabling;
+  }
+
+  ServiceHandle<MuonTGC_CablingSvc> TgcCabGet("MuonTGC_CablingSvc", name());
+  if (TgcCabGet.retrieve().isFailure()) {
+    ATH_MSG_FATAL( "Could not get MuonTGC_CablingSvc !" );
+    return nullptr;
+  }
+
+  m_cabling.set(TgcCabGet.get());
+  
+  return m_cabling.get();
+}
+
+
+std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> TGC_RawDataProviderTool::getROBData(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const
+{
+  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
+  const MuonTGC_CablingSvc* cabling = getCabling();
+  if(!cabling) {
+    ATH_MSG_ERROR("Could not get cabling, return empty vector of ROB fragments");
+    return vecOfRobf;
+  }
+
+  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
+  
+  std::vector<uint32_t> robIds;
+
+  unsigned int size = rdoIdhVect.size();
+  for(unsigned int i=0; i<size; ++i) {
+    Identifier Id;
+    if(m_idHelperSvc->tgcIdHelper().get_id(rdoIdhVect[i], Id, &tgcContext)) {
+      ATH_MSG_WARNING( "Unable to get TGC Identifier from collection hash id " );
+      continue;
+    }
+    const Identifier tgcId = Id;
+    uint32_t rodId = m_hid2re.getRodID(tgcId, cabling);
+    uint32_t robId = m_hid2re.getRobID(rodId);
+    std::vector<uint32_t>::iterator it_robId = std::find(robIds.begin(), robIds.end(), robId); 
+    if(it_robId==robIds.end()) {
+      robIds.push_back(robId);
+    }
+  }
+  m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
+  ATH_MSG_VERBOSE( "Number of ROB fragments " << vecOfRobf.size() );
+  return vecOfRobf;
+}
+
+
+//============================================================================================
+
+StatusCode TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs) const {
+  return convert( vecRobs, Gaudi::Hive::currentContext() );
+}
+
+
+StatusCode TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const 
 {    
 
   SG::WriteHandle<TgcRdoContainer> rdoContainerHandle(m_rdoContainerKey, ctx); 
 
-  TgcRdoContainer* rdoContainer = nullptr;
-
-  // if the container is already in store gate, then we have to retrieve from SG
-  if (rdoContainerHandle.isPresent()) {
-    const TgcRdoContainer* rdoContainer_c = nullptr;
-    ATH_CHECK( evtStore()->retrieve( rdoContainer_c, m_rdoContainerKey.key() ) );
-    rdoContainer = const_cast<TgcRdoContainer*>(rdoContainer_c);
-  } else {
+  // Split the methods to have one where we use the cache and one where we just setup the container
+  const bool externalCacheRDO = !m_rdoContainerCacheKey.key().empty();
+  if(!externalCacheRDO){
     ATH_CHECK( rdoContainerHandle.record( std::make_unique<TgcRdoContainer> (m_maxhashtoUse) ) );
     ATH_MSG_DEBUG( "Created TGC container" );
-    rdoContainer = rdoContainerHandle.ptr();
   }
+  else{
+    SG::UpdateHandle<TgcRdo_Cache> update(m_rdoContainerCacheKey, ctx);
+    ATH_CHECK(update.isValid());
+    ATH_CHECK(rdoContainerHandle.record (std::make_unique<TgcRdoContainer>( update.ptr() )));
+    ATH_MSG_DEBUG("Created container using cache for " << m_rdoContainerCacheKey.key());
+  }
+
+  TgcRdoContainer* rdoContainer = rdoContainerHandle.ptr();
 
   // this should never happen, but since we dereference the pointer, we should check
   if(!rdoContainer) {
@@ -60,21 +148,21 @@ StatusCode Muon::TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs
   return convertIntoContainer(vecRobs, *rdoContainer);
 }
 
-StatusCode  Muon::TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>&) const {
+StatusCode  TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>&) const {
   // This function does not use the IdentifierHash so we pass to the EventContext function which also does not use it
-  return this->convert( vecRobs, Gaudi::Hive::currentContext() );
+  return convert( vecRobs, Gaudi::Hive::currentContext() );
 }
 
-StatusCode  Muon::TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>& /*ids*/, const EventContext& ctx) const 
+StatusCode  TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>& /*ids*/, const EventContext& ctx) const 
 {
   return convert(vecRobs, ctx);
 }
 
-StatusCode  Muon::TGC_RawDataProviderTool::convert() const {
-  return this->convert( Gaudi::Hive::currentContext() );
+StatusCode  TGC_RawDataProviderTool::convert() const {
+  return convert( Gaudi::Hive::currentContext() );
 }
 
-StatusCode  Muon::TGC_RawDataProviderTool::convert(const EventContext& ctx) const
+StatusCode  TGC_RawDataProviderTool::convert(const EventContext& ctx) const
 {
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
   const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
@@ -84,15 +172,15 @@ StatusCode  Muon::TGC_RawDataProviderTool::convert(const EventContext& ctx) cons
   return convert(vecOfRobf, ctx); 
 }
 
-StatusCode  Muon::TGC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect) const {
-  return this->convert( rdoIdhVect, Gaudi::Hive::currentContext() );
+StatusCode  TGC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect) const {
+  return convert( rdoIdhVect, Gaudi::Hive::currentContext() );
 }
 
-
-StatusCode  Muon::TGC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const
+StatusCode  TGC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const
 {
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf = getROBData(rdoIdhVect, ctx);
 
   return convert(vecOfRobf, rdoIdhVect, ctx);
 }
 
+}

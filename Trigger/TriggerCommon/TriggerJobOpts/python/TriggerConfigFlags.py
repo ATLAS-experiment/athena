@@ -502,7 +502,7 @@ def createTriggerRecoFlags():
     from AthenaCommon.SystemOfUnits import mm
     flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
 
-    flags.addFlag('Trigger.Muon.useNewRegionSelector', True, help='usage of new region selector')
+    flags.addFlag('Trigger.Muon.useNewRegionSelector', False, help='usage of new region selector')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags

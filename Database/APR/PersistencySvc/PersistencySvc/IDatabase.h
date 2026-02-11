@@ -34,11 +34,9 @@ namespace pool {
 
     /// Connects explicitly to the database for read operations
     virtual void connectForRead() = 0;
-    virtual void connectForRead( const DatabaseConnectionPolicy& policy ) = 0;
 
     /// Connects explicitly to the database for write/update operations
     virtual void connectForWrite() = 0;
-    virtual void connectForWrite( const DatabaseConnectionPolicy& policy ) = 0;
 
     /// Disconnects from the database
     virtual void disconnect() = 0;

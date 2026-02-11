@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_VERSION_RPCMEASUREMENT_V1_H
 #define XAODMUONPREPDATA_VERSION_RPCMEASUREMENT_V1_H
@@ -14,8 +14,8 @@ namespace MuonGMR4{
 }
 namespace xAOD {
 
-/** @brief RpcMeasurement_v1: Class storing the geneic 
- * 
+/** @brief RpcMeasurement_v1: Class to store the common information for
+ *                            RpcMeasurements 
 */
 
 class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
@@ -37,7 +37,7 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     Amg::Vector3D localMeasurementPos() const;
     
     /** @brief returns the associated strip number*/
-    uint16_t stripNumber() const;
+    uint16_t channelNumber() const;
     /** @brief returns the associated gas gap */
     uint8_t gasGap() const;
     /** @brief returns whether the hit measures the phi coordinate */
@@ -84,7 +84,7 @@ class RpcMeasurement_v1 : public UncalibratedMeasurement_v1 {
     /** @brief Sets the  associated gasGap identifier field */
     void setGasGap(uint8_t gap);
     /** @brief Sets the associated strip number identifier field */
-    void setStripNumber(uint16_t strip);
+    void setChannelNumber(uint16_t strip);
     /** @brief set the pointer to the ReadoutElement */
     void setReadoutElement(const MuonGMR4::RpcReadoutElement* readoutEle);
     /** @brief Set the time covariance of the Measurement */

@@ -23,12 +23,12 @@ TGCChannelPPOut::TGCChannelPPOut(TGCId::SideType vside,
     setChannel(vchannel);
 }
 
-TGCModuleId* TGCChannelPPOut::getModule(void) const {
-    return (new TGCModulePP(getSideType(), getModuleType(), getRegionType(),
-                            getSector(), getId()));
+std::unique_ptr<TGCModuleId> TGCChannelPPOut::getModule() const {
+    return std::make_unique<TGCModulePP>(getSideType(), getModuleType(),
+                                         getRegionType(), getSector(), getId());
 }
 
-bool TGCChannelPPOut::isValid(void) const {
+bool TGCChannelPPOut::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getModuleType() > TGCId::NoModuleType) &&

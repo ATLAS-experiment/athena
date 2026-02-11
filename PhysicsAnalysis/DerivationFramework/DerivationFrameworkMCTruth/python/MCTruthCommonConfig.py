@@ -521,6 +521,6 @@ def addTruth3ContentToSlimmerTool(slimmer):
         "BornLeptons.prodVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.classifierParticleOrigin.Classification.barcode.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.uid",
         "TruthBosonsWithDecayParticles.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.barcode.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid",
         "TruthBosonsWithDecayVertices.barcode.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid.status",
-        "TruthBSMWithDecayParticles.barcode.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status",
-        "TruthBSMWithDecayVertices.barcode.id.incomingParticleLinks.outgoingParticleLinks.t.x.y.z"
+        "TruthBSMWithDecayParticles.barcode.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status.uid",
+        "TruthBSMWithDecayVertices.barcode.id.incomingParticleLinks.outgoingParticleLinks.t.x.y.z.uid"
     ]

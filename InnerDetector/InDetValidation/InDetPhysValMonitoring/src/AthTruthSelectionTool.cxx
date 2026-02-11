@@ -74,6 +74,19 @@ AthTruthSelectionTool::initialize() {
                   },
                   "decay_before_" + std::to_string(m_maxProdVertRadius)));
   }
+  if (m_minProdVertRadius>0) {
+    m_cutList.add(Accept_t([&m_minProdVertRadius = std::as_const(m_minProdVertRadius)](const P_t& p) -> bool {
+                       return((not (p.hasProdVtx()))or(p.prodVtx()->perp() > m_minProdVertRadius));
+                  },
+                  "decay_after_" + std::to_string(m_minProdVertRadius)));
+  }
+  if (m_minAbsD0>0) {
+    m_cutList.add(Accept_t([&m_minAbsD0 = std::as_const(m_minAbsD0)](const P_t& p) -> bool {
+      static const SG::ConstAccessor<float> d0Acc("d0");
+      if (d0Acc.isAvailable(p)) return (std::abs(d0Acc(p)) > m_minAbsD0);
+      else return false;
+      }, "min_abs_d0_" + std::to_string(m_minAbsD0)));
+  }
   if (m_maxPt > 0) {
     m_cutList.add(Accept_t([&m_maxPt = std::as_const(m_maxPt)](const P_t& p) {
       return(p.pt() < m_maxPt);

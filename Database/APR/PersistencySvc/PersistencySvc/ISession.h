@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ISESSION_H
@@ -49,9 +49,6 @@ namespace pool {
     /// Returns the transaction object
     virtual ITransaction& transaction() = 0;
     virtual const ITransaction& transaction() const = 0;
-
-    /// Returns a vector with the file identifiers of the presently open databases.
-    virtual std::vector< std::string > connectedDatabases() const = 0;
 
     /// Returns a pointer to a database object. The user acquires ownership of that object.
     virtual std::unique_ptr<IDatabase> databaseHandle( const std::string& dbName,

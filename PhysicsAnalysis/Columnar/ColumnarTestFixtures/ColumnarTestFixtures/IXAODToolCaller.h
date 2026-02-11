@@ -44,6 +44,9 @@ namespace columnar
 
       /// @brief call the tool for a single event
       virtual StatusCode call () = 0;
+
+      /// @brief clear any cached data between events
+      virtual void clear () {}
     };
   }
 }

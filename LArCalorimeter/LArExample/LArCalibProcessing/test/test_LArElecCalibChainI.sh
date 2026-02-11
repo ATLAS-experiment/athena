@@ -6,12 +6,12 @@
 # art-include: 24.0/Athena
 # art-include: main/Athena
  
-athena --CA LArCalibProcessing/LArCalib_PedestalAutoCorrConfig.py 
+athena LArCalibProcessing/LArCalib_PedestalAutoCorrConfig.py 
 echo  "art-result: $? pedestal"
 
-athena --CA LArCalibProcessing/LArCalib_Delay_OFCCaliConfig.py
+athena LArCalibProcessing/LArCalib_Delay_OFCCaliConfig.py
 echo  "art-result: $? delay"
 
-athena --CA LArCalibProcessing/LArCalib_RampConfig.py 
+athena LArCalibProcessing/LArCalib_RampConfig.py 
 
 echo  "art-result: $? ramp"

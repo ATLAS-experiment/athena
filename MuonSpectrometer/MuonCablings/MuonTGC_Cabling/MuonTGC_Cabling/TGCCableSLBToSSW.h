@@ -25,12 +25,12 @@ class TGCCableSLBToSSW : public TGCCable {
     TGCCableSLBToSSW(const std::string& filename);
     virtual ~TGCCableSLBToSSW() = default;
 
-    virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
+    TGCModuleMap getModule(const TGCModuleId& moduleId) const;
 
    private:
     TGCCableSLBToSSW() = delete;
-    virtual TGCModuleMap* getModuleIn(const TGCModuleId* ssw) const;
-    virtual TGCModuleMap* getModuleOut(const TGCModuleId* slb) const;
+    TGCModuleMap getModuleIn(const TGCModuleId& ssw) const;
+    TGCModuleMap getModuleOut(const TGCModuleId& slb) const;
     std::array<std::array<std::unique_ptr<TGCDatabase>, MaxModuleType>,
                TGCId::MaxRegionType>
         m_database;

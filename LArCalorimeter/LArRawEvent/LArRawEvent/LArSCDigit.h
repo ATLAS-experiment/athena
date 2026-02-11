@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARSCDIGIT_H
 #define LARSCDIGIT_H
 #include "LArDigit.h"
+#include <vector>
+#include <cstdint> //for uint32_t
 
 /**
 

@@ -16,7 +16,7 @@ TGCDatabaseSLBToROD::TGCDatabaseSLBToROD(const std::string& filename,
     TGCDatabaseSLBToROD::readDB();
 }
 
-void TGCDatabaseSLBToROD::readDB(void) {
+void TGCDatabaseSLBToROD::readDB() {
     std::ifstream file(m_filename.c_str());
     std::string buf;
 
@@ -53,7 +53,7 @@ void TGCDatabaseSLBToROD::readDB(void) {
     file.close();
 }
 
-TGCDatabaseSLBToROD::~TGCDatabaseSLBToROD(void) {}
+TGCDatabaseSLBToROD::~TGCDatabaseSLBToROD() {}
 
 bool TGCDatabaseSLBToROD::update(const std::vector<int>& input) {
     int ip = find(input);

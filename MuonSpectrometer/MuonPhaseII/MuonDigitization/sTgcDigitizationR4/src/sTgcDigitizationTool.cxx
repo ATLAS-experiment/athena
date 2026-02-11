@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sTgcDigitizationR4/sTgcDigitizationTool.h>
@@ -7,6 +7,15 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "GaudiKernel/PhysicalConstants.h"
+
+namespace {
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_stripCh{"SDO_etaChannels"};
+    static const SG::Decorator<ChVec_t> dec_wireCh{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_padCh{"SDO_padChannels"};
+}
+
 namespace MuonR4 {
   StatusCode sTgcDigitizationTool::initialize() {
     ATH_MSG_DEBUG("sTgcDigitizationTool::initialize()");
@@ -242,10 +251,6 @@ namespace MuonR4 {
           sdoHit->setIdentifier(assocIds.front());
           assocIds.erase(assocIds.begin());
 
-          using ChVec_t = std::vector<std::uint16_t>;
-          static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
-          static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
-          static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
           ChVec_t& stripCh{dec_stripCh(*sdoHit)}, wireCh{dec_wireCh(*sdoHit)}, padCh{dec_padCh(*sdoHit)};
 
           std::ranges::for_each(assocIds,[&](const Identifier& secId){

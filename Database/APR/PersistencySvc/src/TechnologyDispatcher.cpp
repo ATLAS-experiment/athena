@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TechnologyDispatcher.h"
@@ -12,8 +12,7 @@ pool::PersistencySvc::TechnologyDispatcher::TechnologyDispatcher( pool::Persiste
                                                                   pool::ITransaction& transaction ):
   m_registry( registry ),
   m_transaction( transaction ),
-  m_technologyTypes(),
-  m_technologyNames()
+  m_technologyTypes()
 {}
 
 
@@ -41,11 +40,8 @@ pool::PersistencySvc::TechnologyDispatcher::microSessionManager( long technology
                                                                                                   m_transaction,
                                                                                                   majorType );
   m_technologyTypes.insert( std::make_pair( majorType, mgr ) );
-  pool::DbType dbTypeMajor( majorType );
-  m_technologyNames.insert( std::make_pair( dbTypeMajor.storageName(), mgr ) );
   return *mgr;
 }
-
 
 const pool::PersistencySvc::MicroSessionManager&
 pool::PersistencySvc::TechnologyDispatcher::microSessionManager( long technology ) const
@@ -58,31 +54,6 @@ pool::PersistencySvc::TechnologyDispatcher::microSessionManager( long technology
     throw std::runtime_error( "Unregistered technology (APR: \" TechnologyDispatcher::microSessionManager \" from \" PersistencySvc");
   }
   return *(iManager->second);
-}
-
-
-pool::PersistencySvc::MicroSessionManager&
-pool::PersistencySvc::TechnologyDispatcher::microSessionManager( const std::string& technology )
-{
-  std::map< std::string, pool::PersistencySvc::MicroSessionManager* >::iterator iManager = m_technologyNames.find( technology );
-  if ( iManager != m_technologyNames.end() ) {
-    return *(iManager->second);
-  }
-  else {
-    return this->microSessionManager( pool::DbType::getType( technology ).type() );
-  }
-}
-
-const pool::PersistencySvc::MicroSessionManager&
-pool::PersistencySvc::TechnologyDispatcher::microSessionManager( const std::string& technology ) const
-{
-  std::map< std::string, pool::PersistencySvc::MicroSessionManager* >::const_iterator iManager = m_technologyNames.find( technology );
-  if ( iManager != m_technologyNames.end() ) {
-    return *(iManager->second);
-  }
-  else {
-    return this->microSessionManager( pool::DbType::getType( technology ).type() );
-  }
 }
 
 bool

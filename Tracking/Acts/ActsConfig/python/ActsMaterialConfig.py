@@ -33,17 +33,20 @@ def MaterialTrackRecorderUserActionSvcCfg(configFlags, name="ActsTrk::MaterialTr
 
   return acc
 
-def MaterialTrackWriterCfg(configFlags, name="MaterialTrackWriter", **kwargs) :
+def MaterialTrackWriterCfg(configFlags, name="MaterialTrackWriter", FileName="MaterialTracks.root", **kwargs) :
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
+  kwargs.setdefault("OutStream", "ACTSMATERIALWRITER")
+  kwargs.setdefault("useTrackingGeometry", True)
+  
+  from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+  acc.merge(setupHistSvcCfg(configFlags, outFile = FileName, outStream=kwargs["OutStream"]))
 
   # Need geometry
-  from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-  acc.merge( ActsTrackingGeometrySvcCfg(configFlags,
-                                        RunConsistencyChecks=False,
-                                        ObjDebugOutput=False))
-
+  if kwargs["useTrackingGeometry"]:
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(configFlags)))
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialTrackWriter(name, **kwargs), primary = True)
 
   return acc

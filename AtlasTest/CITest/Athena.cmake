@@ -143,6 +143,11 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun2Data_PHYS )
+
 atlas_add_citest( DerivationRun2MC_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
@@ -150,6 +155,11 @@ atlas_add_citest( DerivationRun2MC_PHYS
 atlas_add_citest( DerivationRun2MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( DerivationRun2MCAF3_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYS --threads 4
@@ -163,14 +173,14 @@ atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
-atlas_add_citest( DerivationRun3MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e 'mtDerivation' --tag mc_PHYS --threads 1
-   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
-   PROPERTIES PROCESSORS 1 )
-
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun3Data_PHYS )
 
 atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
@@ -189,9 +199,19 @@ atlas_add_citest( DerivationRun3MC_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --no-output-checks
+   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun3MC_PHYS )
 
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh

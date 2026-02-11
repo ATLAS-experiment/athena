@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,13 +11,14 @@
 
 
 #include "Identifier/Range.h" 
+
+#include "GaudiKernel/MsgStream.h"
 #include <algorithm> 
 #include <cstdio> 
 #include <string> 
 #include <vector> 
- 
+#include <sstream>
 #include <limits>
-#include <iostream> 
 #include <iomanip> 
 #include <stdexcept>
 #include <cassert> 
@@ -266,12 +267,10 @@ bool Range::overlaps_with (const Range& other) const {
   return (true); 
 } 
  
-//----------------------------------------------- 
-void Range::show () const {
-  show (std::cout);
-}
 
-void Range::show (std::ostream& s) const { 
+
+void 
+Range::show (std::ostream& s) const { 
   const Range& me = *this; 
   s << (std::string) me << " (";
   int allbits = 0;
@@ -292,7 +291,14 @@ void Range::show (std::ostream& s) const {
     s << bits; 
   } 
   s << "=" << allbits << ") ";
-} 
+}
+
+void 
+Range::show (MsgStream & out) const{
+  std::ostringstream os;
+  show(os);
+  out << os.str();
+}
  
 //----------------------------------------------- 
 Range::operator std::string () const { 

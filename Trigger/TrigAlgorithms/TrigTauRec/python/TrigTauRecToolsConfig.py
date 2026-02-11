@@ -13,7 +13,6 @@ def trigTauVertexFinderCfg(flags, name=''):
         UseTJVA                         = False,
         AssociatedTracks                = 'GhostTrack',
         InDetTrackSelectionToolForTJVA  = '',
-        Key_trackPartInputContainer     = '',
         Key_vertexInputContainer        = '',
         TVATool                         = '', 
     ))

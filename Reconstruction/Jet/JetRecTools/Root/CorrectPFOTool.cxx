@@ -44,7 +44,10 @@ StatusCode CorrectPFOTool::initialize() {
   }
   ATH_CHECK( m_vertexContainer_key.initialize() );
 
-  ATH_MSG_INFO("Running CorrectPFOTool by vertex:" << m_doByVertex);
+  if(m_doByVertex){
+    ATH_MSG_INFO("Running CorrectPFOTool by vertex:" << m_doByVertex);
+  }
+  
   return StatusCode::SUCCESS;
 }
 

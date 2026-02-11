@@ -37,7 +37,7 @@ if __name__=='__main__':
 
   flags.lock()
 
-  if flags.Trigger.EDMVersion != 3:
+  if flags.Trigger.EDMVersion < 3:
     log.error("Can only run over a Run 3 AOD or ESD file")
     sys.exit(1)
 

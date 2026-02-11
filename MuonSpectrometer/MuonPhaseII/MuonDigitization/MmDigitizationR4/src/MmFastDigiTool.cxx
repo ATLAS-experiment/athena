@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MmFastDigiTool.h"
 #include "xAODMuonViews/ChamberViewer.h"
@@ -11,12 +11,11 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
+    using ChVec_t = std::vector<std::uint16_t>;
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
 }
 namespace MuonR4 {
     
-    MmFastDigiTool::MmFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID):
-        MuonDigitizationTool{type,name, pIID} {}
-
     StatusCode MmFastDigiTool::initialize() {
         ATH_CHECK(MuonDigitizationTool::initialize());
         ATH_CHECK(m_writeKey.initialize());
@@ -160,6 +159,9 @@ namespace MuonR4 {
                 const double w3 = pull + w1;
                 MmDigitCollection* outColl = fetchCollection(hitId, digitCache);
 
+                xAOD::MuonSimHit* sdoHit = addSDO(simHit, sdoContainer);
+                sdoHit->setIdentifier(clusId);
+                ChVec_t& sdoCh{dec_etaChannel(*sdoHit)};
                 const Identifier digitIdB = idHelper.channelID(hitId, 
                                                                idHelper.multilayer(hitId), 
                                                                idHelper.gasGap(hitId), 
@@ -167,6 +169,7 @@ namespace MuonR4 {
 
                 if (isValid) {
                     outColl->push_back(std::make_unique<MmDigit>(digitIdB, dummyResponseTime, w1 * dummyDepositedCharge));
+                    sdoCh.push_back(newChannel - 1);
                 }
                 outColl->push_back(std::make_unique<MmDigit>(digitId,dummyResponseTime, w2 * dummyDepositedCharge));
 
@@ -176,10 +179,9 @@ namespace MuonR4 {
                                                                newChannel + 1, isValid);
                 if (isValid) {
                     outColl->push_back(std::make_unique<MmDigit>(digitIdA, dummyResponseTime, w3 * dummyDepositedCharge));
+                    sdoCh.push_back(newChannel + 1);
                 }
 
-                xAOD::MuonSimHit* sdoHit = addSDO(simHit, sdoContainer);
-                sdoHit->setIdentifier(clusId);
                 ++m_acceptedHits[hitGapInNsw];
             }
         } while(viewer.next());

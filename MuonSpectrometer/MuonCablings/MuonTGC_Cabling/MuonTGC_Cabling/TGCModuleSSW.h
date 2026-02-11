@@ -14,12 +14,9 @@ class TGCModuleSSW : public TGCModuleId {
     // Constructor & Destructor
     TGCModuleSSW(TGCId::SideType side, int readoutSector, int id);
 
-    virtual ~TGCModuleSSW(void) {}
+    virtual ~TGCModuleSSW() = default;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCModuleSSW(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

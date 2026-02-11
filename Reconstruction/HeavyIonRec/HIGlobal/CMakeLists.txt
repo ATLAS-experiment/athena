@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( HIGlobal )
@@ -8,7 +8,7 @@ atlas_add_library( HIGlobalLib
                    HIGlobal/*.h
                    INTERFACE
                    PUBLIC_HEADERS HIGlobal
-                   LINK_LIBRARIES AsgTools AthenaBaseComps CaloEvent GaudiKernel HIEventUtilsLib NavFourMom StoreGateLib xAODCaloEvent xAODHIEvent )
+                   LINK_LIBRARIES ActsVertexReconstructionLib AsgTools AthenaBaseComps CaloEvent GaudiKernel xAODInDetMeasurement xAODTracking HIEventUtilsLib NavFourMom StoreGateLib xAODCaloEvent xAODHIEvent )
 
 atlas_add_component( HIGlobal
                      src/*.cxx

@@ -1,19 +1,15 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <iostream>
-#include <ostream>
-#include <iomanip>
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TKey.h>
-#include <TString.h>
 #include <string>
 
 namespace dqutils {
@@ -47,8 +43,8 @@ namespace dqutils {
       }
 
       bool dirExists = false;
-      TString run_dir;
-      TString lb_dir;
+      std::string run_dir;
+      std::string lb_dir;
       int writeEOS = 0;
       int writeLOCAL = -1;
       bool IsFirstTime = true;
@@ -75,7 +71,7 @@ namespace dqutils {
         if (tdir_run != 0) {
           std::string tdir_run_name(tdir_run->GetName());
           if (tdir_run_name.find("run") != std::string::npos) {
-            run_dir = tdir_run_name;
+            run_dir = std::move(tdir_run_name);
             out_EOS = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" +
                       run_dir + "_" + AthenaTAG + ".root";
             out_LOCAL = "VxMon_" + run_dir + "_" + AthenaTAG + ".root";
@@ -84,14 +80,12 @@ namespace dqutils {
             while ((key_lb = dynamic_cast<TKey*>(lb_keys())) != 0) {
               TObject* obj_lb = key_lb->ReadObj();
               TDirectory* tdir_lb = dynamic_cast<TDirectory*>(obj_lb);
-              //cout << "tdir_lb " << tdir_lb << endl;
               if (tdir_lb != 0) {
                 std::string tdir_lb_name(tdir_lb->GetName());
-                //cout << "tdir_lb_name " << tdir_lb_name << endl;
                 if (tdir_lb_name.find("lb") != std::string::npos) {
-                  lb_dir = tdir_lb_name;
+                  lb_dir = std::move(tdir_lb_name);
 
-                  dirExists = f->GetDirectory(run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity");
+                  dirExists = f->GetDirectory((run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity").c_str());
                   if (dirExists) {
                     out_inStem = run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity/nVx";
                     out_outStem = "nVx_" + lb_dir;
@@ -123,8 +117,8 @@ namespace dqutils {
 
             if (writeEOS != 0 && writeLOCAL == 0) {
               int return_code = system(
-                "xrdcp VxMon_" + run_dir + "_" + AthenaTAG + ".root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" + run_dir + "_" + AthenaTAG +
-                ".root");
+                ("xrdcp VxMon_" + run_dir + "_" + AthenaTAG + ".root root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" + run_dir + "_" + AthenaTAG +
+                 ".root").c_str());
               if (return_code == 0) std::ignore = remove(out_LOCAL.c_str()); //returns zero on success
               else {
                 delete f;

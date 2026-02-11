@@ -17,7 +17,7 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 #include <format>
 
 //__________________________________________________________________________
@@ -185,9 +185,9 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
 
    std::string containerPrefix = m_containerPrefix;
    if( containerPrefix == "Default" ) {
-      containerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
+      containerPrefix = APRDefaults::getEventDataName();
    }
-   std::string dhContainerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::DataHeader : APRDefaults::TTreeNames::DataHeader;
+   std::string dhContainerPrefix = APRDefaults::getDataHeaderName();
    std::string containerName;
 
    // Get Technology from containerPrefix
@@ -220,8 +220,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    }
 
    // ---  Special types:   DataHeader & Form
-   if( tname.compare(0, 10, "DataHeader") == 0 ) {
-      if( tname.compare(10, 4, "Form") == 0 ) {
+   if( tname.starts_with(APRDefaults::DataHeaderTypeName) ) {
+      if( tname.starts_with(APRDefaults::DataHeaderFormTypeName) ) {
          containerName = dhContainerPrefix + "Form" + "(" + tname + ")";
       } else {
          if (key[key.size() - 1] == '/') {
@@ -232,15 +232,14 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       }
    }
    // AttributeList - writing attributes separately to EventTag container group
-   else if (tname.compare(0, 13, "AttributeList") == 0) {
+   else if ( tname.starts_with(APRDefaults::EventTagTypeName) ) {
       // Find the right storage type and name for EventTag values
-      if( pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ) {
-         containerName = std::string(APRDefaults::RNTupleNames::EventTag) + "(" + key + ")";
-      } else {
+      std::string eventTagName = APRDefaults::getEventTagName();
+      containerName = eventTagName + "(" + key + ")";
+      if( !pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ) {
          // no indexing needed (nothing points to Tags)
          // safe to set tech here - it will not be overwritten by decodeOutput
          tech = pool::ROOTTREE_StorageType.type();
-         containerName = std::string(APRDefaults::TTreeNames::EventTag) + "(" + key + ")";
       }
    }
    // all other object types

@@ -36,7 +36,7 @@ Muon::TgcSlbData::TgcSlbData(uint16_t bcId, uint32_t l1Id,
   }
 }
 
-Muon::TgcSlbData::~TgcSlbData(void) 
+Muon::TgcSlbData::~TgcSlbData() 
 = default;    
 
 bool Muon::TgcSlbData::equal(uint16_t /* bcId */,
@@ -142,27 +142,27 @@ void Muon::TgcSlbData::setType(int vType)
   m_type = vType;
 }
 
-bool Muon::TgcSlbData::isCoincidence(void) const 
+bool Muon::TgcSlbData::isCoincidence() const 
 {
   return (m_type != SLB_HIT);
 }
 
-bool Muon::TgcSlbData::isLowPt(void) const 
+bool Muon::TgcSlbData::isLowPt() const 
 {
   return ((m_type >= SLB_LPT_D_W)&&(m_type<=SLB_LPT_I_S));
 }
 
-bool Muon::TgcSlbData::isHighPt(void) const
+bool Muon::TgcSlbData::isHighPt() const
 {
   return ((m_type == SLB_SL_E)||(m_type==SLB_SL_F));
 }
 
-bool Muon::TgcSlbData::isSL(void) const 
+bool Muon::TgcSlbData::isSL() const 
 {
   return ((m_type == SLB_SL_E)||(m_type==SLB_SL_F));
 }
 
-bool Muon::TgcSlbData::isInner(void) const
+bool Muon::TgcSlbData::isInner() const
 {
   return ((m_type == SLB_LPT_I_W)||(m_type==SLB_LPT_I_S));
 }

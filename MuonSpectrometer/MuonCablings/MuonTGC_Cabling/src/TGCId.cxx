@@ -141,7 +141,7 @@ void TGCId::setOctant(int v_octant) {
     m_octant = v_octant;
 }
 
-int TGCId::getSectorModule(void) const {
+int TGCId::getSectorModule() const {
     if (m_sector == -1) {
         return -1;
     }

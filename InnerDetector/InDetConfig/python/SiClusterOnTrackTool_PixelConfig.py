@@ -179,6 +179,10 @@ def ITkPixelClusterOnTrackToolCfg(
         ITkPixelClusterOnTrackToolBaseCfg(flags, name, **kwargs)))
     return acc
 
+def ITkPixelClusterOnTrackToolDigitalCfg(
+        flags, name="ITkPixelClusterOnTrackToolDigital", **kwargs):
+    kwargs.setdefault("SplitClusterAmbiguityMap", "")
+    return ITkPixelClusterOnTrackToolBaseCfg(flags, name, **kwargs)
 
 def ITkBroadPixelClusterOnTrackToolCfg(
         flags, name='ITkBroadPixelClusterOnTrackTool', **kwargs):

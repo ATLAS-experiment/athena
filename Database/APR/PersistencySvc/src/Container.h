@@ -32,9 +32,6 @@ namespace pool {
       /// destructor
       ~Container();
       
-      /// Returns the name (fid) of the parent database
-      virtual const std::string& parentDatabaseName() const override;
-
       /// Returns the technology identifier for this container
       virtual long technology() const override;
 

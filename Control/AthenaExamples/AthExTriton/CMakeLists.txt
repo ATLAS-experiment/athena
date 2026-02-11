@@ -21,6 +21,6 @@ atlas_install_python_modules( python/*.py
 #    POST_EXEC_SCRIPT noerror.sh )
 
 # atlas_add_test( AthExTritonTest_pkl
-#    SCRIPT athena --evtMax 2 --CA test_AthExTritonCfg.pkl
+#    SCRIPT athena --evtMax 2 test_AthExTritonCfg.pkl
 #    DEPENDS AthExTritonTest
 #    POST_EXEC_SCRIPT noerror.sh )

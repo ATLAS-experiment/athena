@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToPrepDataToolMT.h"
@@ -183,7 +183,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
         strip->setDoubletPhi(idHelper.doubletPhi(id));
         strip->setGasGap(idHelper.gasGap(id));
         strip->setMeasuresPhi(idHelper.measuresPhi(id));
-        strip->setStripNumber(idHelper.channel(id));
+        strip->setChannelNumber(idHelper.channel(id));
         strip->setAmbiguityFlag(prd->ambiguityFlag());
         strip->setTimeOverThreshold(prd->timeOverThreshold());
         strip->setTime(prd->time());
@@ -209,7 +209,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
   state.rpcPrepDataCollections.clear();
 
   if (msgLvl(MSG::DEBUG)) {
-    for (const auto& [hash, ptr] : state.prepDataCont->GetAllHashPtrPair()) {
+    for (const auto [hash, ptr] : state.prepDataCont->GetAllHashPtrPair()) {
       ATH_MSG_DEBUG("Contents of CONTAINER in this view : " << hash);
     }
   }
@@ -243,7 +243,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordCoinData(const EventContext&
   }
   state.rpcCoinDataCollections.clear();
   if (msgLvl(MSG::DEBUG)) {
-    for (const auto& [hash, ptr] : state.coinDataCont->GetAllHashPtrPair()) {
+    for (const auto [hash, ptr] : state.coinDataCont->GetAllHashPtrPair()) {
       ATH_MSG_DEBUG("Contents of LOCAL in this view : " << hash);
     }
   }
