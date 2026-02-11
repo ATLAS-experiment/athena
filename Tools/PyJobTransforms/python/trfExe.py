@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfExe
 #
@@ -1407,7 +1407,7 @@ class athenaExecutor(scriptExecutor):
             msg.warning('Found ERRORs in the logfile, but ignoring this as ignoreErrors=True (see jobReport for details)')
         # Act as if ignoreErrors=True if running in MPI, because we want to be tolerant to the occasional event failure
         elif worstError['nLevel'] >= stdLogLevels['ERROR'] and (not mpi.mpiShouldValidate()):
-            msg.warning(f'Found {worstError['level']} in the logfile in MPI rank {mpi.getMPIRank()} but moving on to be failure-tolerant')
+            msg.warning(f'Found {worstError["level"]} in the logfile in MPI rank {mpi.getMPIRank()} but moving on to be failure-tolerant')
         elif worstError['nLevel'] >= stdLogLevels['ERROR']:
             self._isValidated = False
             msg.error('Fatal error in athena logfile (level {0})'.format(worstError['level']))
