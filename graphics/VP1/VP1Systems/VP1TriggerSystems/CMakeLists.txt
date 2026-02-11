@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TriggerSystems )
@@ -35,4 +35,11 @@ atlas_add_library( VP1TriggerSystems VP1TriggerSystems/*.h src/*.h src/*.cxx src
                    Qt5::Gui Qt5::Core
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${EIGEN_LIBRARIES} GeoPrimitives GaudiKernel TrkParameters TrkTrack 
                  )
+
+
+# Enable Qt support for cppcheck:
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1TriggerSystems
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
 

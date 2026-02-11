@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -40,7 +40,7 @@ std::vector<QString> roi_id; //--- once complete -->|
 
 //Tokenize and Store Feature items
 //_____________________________________________________________________________________________
-bool VP1Trig::VP1TriggerHandleL1::processFeature(int processId, QString roiId, QString feature)
+bool VP1Trig::VP1TriggerHandleL1::processFeature(int processId, const QString& roiId, QString feature)
 {
   feature = feature.simplified();
   QStringList featureSeg = feature.split(QRegExp("\\s+"));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -121,9 +121,7 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
     std::vector<float> mdt_tube_z        = (*itMfd)->mdt_tube_z();
     
     //INIT counters
-    int n_mdt_hits_inner  = 0;
     int n_mdt_hits_middle = 0;
-    int n_mdt_hits_outer  = 0;
     
     //Process systems
     if(systemID==0) { //Barrel
@@ -139,7 +137,6 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
         
 	//Dump to vectors
         if(imr==0) {
-          n_mdt_hits_inner++;
 	        tube = (QString::number(i_tube));
           barrelID.push_back(QString("muFast_MDT_Inn_residual_barrel Tube No-")+tube);
           barrelData.push_back(QString::number(res));
@@ -163,7 +160,6 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
 	        } **/
         }
         else if(imr==2) {
-          n_mdt_hits_outer++;
 	        tube = (QString::number(i_tube));
           barrelID.push_back(QString("muFast_MDT_Out_residual_barrel tube No-")+tube);
           barrelData.push_back(QString::number(res));
@@ -187,7 +183,6 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
 	
 	//Dump to vectors
         if(imr == 0) {
-          n_mdt_hits_inner++;
 	        tube = (QString::number(i_tube));
           endcapID.push_back(QString("muFast_MDT_Inn_residual_endcap Tube No-")+tube);
           endcapData.push_back(QString::number(TGCMidRhoChi2));
@@ -210,7 +205,6 @@ bool VP1Trig::VP1TriggerHandleL2::processitem()
             endcapData.push_back(QString::number(TGCMidRhoChi2));
 	        } **/
         } else if(imr == 2) {
-          n_mdt_hits_outer++;
 	        tube = (QString::number(i_tube));
           endcapID.push_back(QString("muFast_MDT_Out_residual_endcap Tube No-" )+tube);
           endcapData.push_back(QString::number(TGCMidRhoChi2));
