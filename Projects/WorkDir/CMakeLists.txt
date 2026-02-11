@@ -60,6 +60,9 @@ unset( _defaultParentProject )
 # we use the QUIET keyword.
 find_package( AtlasCMake QUIET )
 
+# Potentially override the Acts package to use a local checkout.
+include(${CMAKE_CURRENT_SOURCE_DIR}/ActsOverride.cmake)
+
 # Find the project that we depend on:
 find_package( ${ATLAS_PROJECT} REQUIRED )
 
