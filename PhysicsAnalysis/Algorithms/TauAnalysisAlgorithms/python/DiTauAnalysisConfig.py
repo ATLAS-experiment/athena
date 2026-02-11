@@ -125,9 +125,6 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
-        self.addOption ('quality', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
-            "`Loose`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only ditau-jets satisfying the working point "
             "requirements.")
@@ -151,18 +148,6 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        # using enum value from: https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h
-        # the dictionary is missing in Athena, so hard-coding values here
-        if self.quality == 'Tight' :
-            IDLevel = 4 # ROOT.TauAnalysisTools.JETIDBDTTIGHT
-        elif self.quality == 'Medium' :
-            IDLevel = 3 # ROOT.TauAnalysisTools.JETIDBDTMEDIUM
-        elif self.quality == 'Loose' :
-            IDLevel = 2 # ROOT.TauAnalysisTools.JETIDBDTLOOSE
-        else :
-            raise ValueError ("invalid tau quality: \"" + self.quality +
-                              "\", allowed values are Tight, Medium, Loose")
-
         inputfile = 'TauAnalysisAlgorithms/ditau_selection_highpt.conf'
         if "DiTauJetsLowPt" in self.containerName:
             inputfile = 'TauAnalysisAlgorithms/ditau_selection_lowpt.conf' 
@@ -178,19 +163,20 @@ class DiTauWorkingPointConfig (ConfigBlock) :
                              preselection=self.addSelectionToPreselection) 
 
 
+        # keep this commented out until TauCP won't provide official recommendations
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
-        if config.dataType() is not DataType.Data:
-            alg = config.createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
-                                   'DiTauEfficiencyCorrectionsAlg' )
-            config.addPrivateTool( 'efficiencyCorrectionsTool',
-                            'TauAnalysisTools::DiTauEfficiencyCorrectionsTool' )
-            alg.efficiencyCorrectionsTool.JetIDLevel = IDLevel
-            alg.scaleFactorDecoration = 'tau_effSF' + postfix + '_%SYS%'
-            # alg.outOfValidity = 2 #silent
-            # alg.outOfValidityDeco = "bad_eff"
-            alg.taus = config.readName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                 'effSF' + postfix)
+        #if config.dataType() is not DataType.Data:
+        #    alg = config.createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
+        #                           'DiTauEfficiencyCorrectionsAlg' )
+        #    config.addPrivateTool( 'efficiencyCorrectionsTool',
+        #                    'TauAnalysisTools::DiTauEfficiencyCorrectionsTool' )
+        #    alg.efficiencyCorrectionsTool.JetIDLevel = IDLevel
+        #    alg.scaleFactorDecoration = 'tau_effSF' + postfix + '_%SYS%'
+        #    # alg.outOfValidity = 2 #silent
+        #    # alg.outOfValidityDeco = "bad_eff"
+        #    alg.taus = config.readName (self.containerName)
+        #    alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+        #    config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
+        #                         'effSF' + postfix)
 
