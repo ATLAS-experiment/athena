@@ -23,7 +23,7 @@ PixelID             DEBUG eta_mod_shift  decode 0 vals 0               mask/zero
 PixelID             DEBUG phi_index      decode 0 vals 0:327           mask/zero mask/shift/bits/offset 1ff ffffe00fffffffff 36 9  19 indexes                     mode  both_bounded  
 PixelID             DEBUG eta_index      decode 0 vals 0:191           mask/zero mask/shift/bits/offset ff  fffffff00fffffff 28 8  28 indexes                     mode  both_bounded  
 PixelID             DEBUG bec_eta_mod    decode 0 vals 0               mask/zero mask/shift/bits/offset 0   0 0  0  0  indexes                     mode  both_bounded  
-indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0 min/max 2 13 values  2 4 5 7 10 11 12 13 indexes  0 0 1 2 0 3 0 0 4 5 6 7 indices  8 prev  0 next  0 mode  enumerated  cont mode  none  
+PixelID              DEBUG indet 1 2,4,5,7,10,11,12,13 7 1fffffffffffffff 61 3 0 min/max 2 13 values  2 4 5 7 10 11 12 13 indexes  0 0 1 2 0 3 0 0 4 5 6 7 indices  8 prev  0 next  0 mode  enumerated  cont mode  none  
 pixel 1 1:3 3 e7ffffffffffffff 59 2 3 min/max 1 3 values  indexes  indices  3 prev  0 next  0 mode  both_bounded  cont mode  none  
 bec 1 -2,0,2 3 f9ffffffffffffff 57 2 5 min/max -2 2 values  -2 0 2 indexes  0 0 1 0 2 indices  3 prev  0 next  0 mode  enumerated  cont mode  none  
 bec_shift 0 0 0 0 0 0 0 min/max 0 0 values  indexes  indices  0 prev  0 next  0 mode  both_bounded  cont mode  none  
@@ -45,7 +45,7 @@ phi_module    4
 eta_module    5
 phi_index     6
 eta_index     7
-PixelID             DEBUG  PixelID::initialize_from_dict Set barrel field values: 0
+ PixelID::initialize_from_dict Set barrel field values: 0
 PixelID             DEBUG  PixelID::initialize_from_dict Set dbm field values: -999,999
 PixelID             DEBUG  PixelID::initialize_from_dict Found field values: InDet/Pixel 2/1
 PixelID             DEBUG PixelID::init_neighbors 
