@@ -486,10 +486,6 @@ def defineMenu():
 
         #ATR-32300
         'L1_DY-BOX-2MU3VF', 'L1_DY-BOX-2MU5VF',
-
-        #ATR-32397 - VAE AD 
-        'L1_ARTEMISL',
-        'L1_ARTEMIST',
     ]
 
 
