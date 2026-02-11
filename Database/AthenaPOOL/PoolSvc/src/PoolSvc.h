@@ -159,10 +159,6 @@ public: // Non-static members
    StatusCode disconnectDb(const std::string& connection,
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
 
-   /// Get POOL FileSize attribute for database without logging a message
-   virtual
-   long long int getFileSize(const std::string& dbName, long tech, unsigned int contextId) const override;
-
    /// Get POOL attributes - domain
    virtual
    StatusCode getAttribute(const std::string& optName,
