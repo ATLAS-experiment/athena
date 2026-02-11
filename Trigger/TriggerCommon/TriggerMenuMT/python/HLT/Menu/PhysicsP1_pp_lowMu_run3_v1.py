@@ -128,16 +128,16 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_2mu4_bBmumux_BpmumuKp_L12MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=BphysicsGroup+['RATE:CPS_2MU3VF']),
 
         # ATR-32209: B -> h+h-
-        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup, monGroups=['idMon:t0']),
         ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+SupportGroup),
         ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu6_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu8_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
-        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup, monGroups=['idMon:t0']),
         ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup),
+        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup, monGroups=['idMon:t0']),
+        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup, monGroups=['idMon:shifter']),
     ]
 
     chains['Egamma'] = [
@@ -242,7 +242,15 @@ def getLowMuPhysicsSignatures():
     ]
 
     chains['Jet'] = [
+    
+        # low-mu calratio ATR-32297
 
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac011_calratio_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac011_calratio_L1eTAU40HT', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
+        ChainProp(name='HLT_j20_CLEANllp_momemfrac006_calratio_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
+        ChainProp(name='HLT_j30_CLEANllp_momemfrac011_calratio_L1eTAU60HM', l1SeedThresholds=['FSNOSEED'], groups=SingleJetGroup),
 
         # Low threshold hadronic searches and measurements with calorimeter info
         

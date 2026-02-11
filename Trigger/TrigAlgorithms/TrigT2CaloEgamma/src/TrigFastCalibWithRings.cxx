@@ -17,7 +17,7 @@ StatusCode TrigFastCalibWithRings::initialize() {
     ATH_CHECK(m_ringerKey.initialize());
 
     //Setup the BDTs ...
-    ATH_CHECK(setupBDTFastCalo(PathResolverFindCalibFile(m_CalibPath)));
+    ATH_CHECK(setupBDTFastCalo(PathResolverFindCalibFile(m_CalibPath+"integratedBDTFastCaloCalib.root")));
    
  
     return StatusCode::SUCCESS;
