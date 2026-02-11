@@ -96,8 +96,7 @@ namespace MuonR4{
                                                        const SpacePoint* spacePoint,
                                                        const Amg::Vector3D& posInChamb,
                                                        const Amg::Vector3D& dirInChamb,
-                                                       const double timeOffset) const {
-        
+                                                       const double timeDelay) const {
         const ActsTrk::GeometryContext* gctx{nullptr};
         if (!SG::get(gctx, m_geoCtxKey, ctx).isSuccess()) {
             return nullptr;
@@ -121,7 +120,7 @@ namespace MuonR4{
                                                                            posInChamb, dirInChamb).value_or(0) * dirInChamb;
 
                 Amg::Vector3D closestApproach{locToGlob* locClosestApproach};
-                const double timeOfArrival = closestApproach.mag() * c_inv  + timeOffset;
+                const double timeOfArrival = closestApproach.mag() * c_inv  + ActsTrk::timeToAthena(timeDelay);
 
                 if (ATH_LIKELY(spacePoint->dimension() == 1)) {
                     auto* dc = static_cast<const xAOD::MdtDriftCircle*>(spacePoint->primaryMeasurement());
@@ -146,6 +145,9 @@ namespace MuonR4{
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), fitState);
                     calibSP->setCovariance(cov);
                     calibSP->setDriftRadius(calibOutput.driftRadius());
+                    /** Set time measurement used by the fast fitter, corrected by the tube T0 and a fast estimate of the time of flight */
+                    double fastToF {(locToGlob * calibSP->localPosition()).norm() * c_inv};
+                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(dc->tdc() * IMdtCalibrationTool::tdcBinSize - calibOutput.tubeT0() - fastToF));
                 } else {
                     auto* dc = static_cast<const xAOD::MdtTwinDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
@@ -174,6 +176,10 @@ namespace MuonR4{
                     calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos), fitState);
                     calibSP->setCovariance(cov);
                     calibSP->setDriftRadius(calibOutput.primaryDriftR());
+                    /** Set time measurement used by the fast fitter, corrected by the tube T0 and a fast estimate of the time of flight */
+                    double fastToF {(locToGlob * calibSP->localPosition()).norm() * c_inv};
+                    double tubeT0 {m_mdtCalibrationTool->getCalibConstants(ctx, dc->identify())->tubeCalib->getCalib(dc->identify())->t0};
+                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(calibOutput.primaryTdc() * IMdtCalibrationTool::tdcBinSize - tubeT0 - fastToF));
                 }
                 break;
            }
@@ -297,11 +303,11 @@ namespace MuonR4{
                                                        const std::vector<const SpacePoint*>& spacePoints,
                                                        const Amg::Vector3D& posInChamb,
                                                        const Amg::Vector3D& dirInChamb,
-                                                       const double timeOffset) const {
+                                                       const double timeDelay) const {
         CalibSpacePointVec calibSpacePoints{};
         calibSpacePoints.reserve(spacePoints.size());
         for(const SpacePoint* spacePoint : spacePoints) {
-            CalibSpacePointPtr hit = calibrate(ctx, spacePoint, posInChamb, dirInChamb, timeOffset);
+            CalibSpacePointPtr hit = calibrate(ctx, spacePoint, posInChamb, dirInChamb, timeDelay);
             if (hit) {
                 calibSpacePoints.push_back(std::move(hit));
             }
@@ -314,7 +320,7 @@ namespace MuonR4{
             
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
-            return calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.));
+            return ActsTrk::velocityToActs(calibConsts->rtRelation->rt()->driftVelocity(driftTime.value_or(0.)));
         }
         return 0.;
     }
@@ -323,7 +329,7 @@ namespace MuonR4{
         if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
             const MuonCalib::MdtFullCalibData* calibConsts = m_mdtCalibrationTool->getCalibConstants(*ctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
             const std::optional<double> driftTime = calibConsts->rtRelation->tr()->driftTime(spacePoint.driftRadius());
-            return calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.));
+            return ActsTrk::accelerationToActs(calibConsts->rtRelation->rt()->driftAcceleration(driftTime.value_or(0.)));
         }
         return 0.;
     }
@@ -665,4 +671,37 @@ namespace MuonR4{
             }
         }
     }
+
+    double SpacePointCalibrator::driftRadius(const Acts::CalibrationContext& cctx,
+                                             const CalibratedSpacePoint& spacePoint, 
+                                             const double timeDelay) const {
+        if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            const MuonCalib::MdtFullCalibData* calibConsts = 
+                    m_mdtCalibrationTool->getCalibConstants(*cctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
+            return calibConsts->rtRelation->rt()->radius(ActsTrk::timeToAthena(spacePoint.time() - timeDelay));
+        }
+        return 0.;   
+    }
+    
+    double SpacePointCalibrator::driftVelocity(const Acts::CalibrationContext& cctx,
+                                               const CalibratedSpacePoint& spacePoint, 
+                                               const double timeDelay) const {
+        if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            const MuonCalib::MdtFullCalibData* calibConsts = 
+                    m_mdtCalibrationTool->getCalibConstants(*cctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
+            return ActsTrk::velocityToActs(calibConsts->rtRelation->rt()->driftVelocity(ActsTrk::timeToAthena(spacePoint.time() - timeDelay)));
+        }
+        return 0.;  
+    }
+    double SpacePointCalibrator::driftAcceleration(const Acts::CalibrationContext& cctx,
+                                                   const CalibratedSpacePoint& spacePoint, 
+                                                   const double timeDelay) const {
+        if(spacePoint.type() == xAOD::UncalibMeasType::MdtDriftCircleType) {
+            const MuonCalib::MdtFullCalibData* calibConsts = 
+                    m_mdtCalibrationTool->getCalibConstants(*cctx.get<const EventContext*>(), spacePoint.spacePoint()->identify());
+            return ActsTrk::accelerationToActs(calibConsts->rtRelation->rt()->driftAcceleration(ActsTrk::timeToAthena(spacePoint.time() - timeDelay)));
+        }
+        return 0.;                              
+    }
+    
 }

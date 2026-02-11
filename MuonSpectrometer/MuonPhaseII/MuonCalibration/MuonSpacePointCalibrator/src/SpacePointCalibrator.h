@@ -76,6 +76,18 @@ namespace MuonR4{
                                      ActsTrk::MutableTrackContainer::TrackStateProxy state) const override final;
 
             void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const override final;
+
+            double driftRadius(const Acts::CalibrationContext& cctx,
+                               const CalibratedSpacePoint& spacePoint, 
+                               const double timeDelay) const override final;
+            
+            double driftVelocity(const Acts::CalibrationContext& cctx,
+                                 const CalibratedSpacePoint& spacePoint, 
+                                 const double timeDelay) const override final;
+
+            double driftAcceleration(const Acts::CalibrationContext& cctx,
+                                     const CalibratedSpacePoint& spacePoint, 
+                                     const double timeDelay) const override final;
         private:
             /** @brief Calibrates the track states from a combined muon strip. It's a pseudo measurement composed
              *         out of two 1D strip measurements residing in the same gas gap (Relevant for Rpc/Tgc/sTgc)
