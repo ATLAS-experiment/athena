@@ -99,6 +99,8 @@ namespace MuonR4 {
             Gaudi::Property<bool> m_useFastFitter{this, "useFastFitter", true};
             /** @brief The fast fitter is treated as a pre fitter */
             Gaudi::Property<bool> m_fastPreFitter{this, "useFastPreFitter", false};
+            /** @brief Switch to try the full fit when the fast pre-fitter fails */
+            Gaudi::Property<bool> m_ignoreFailedPreFit{this, "ignoreFailedPreFit", false};
             /** @brief Tune the number of iterations */
             Gaudi::Property<unsigned> m_maxIter{this, "maxIterations", 50};
             /** @brief Cut on the number of hits per layer to use the layer for seeding */

@@ -47,7 +47,8 @@ namespace MuonR4{
              *  @param spacePoint: Pointer to the space point to calibrate.
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
-             *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path */
             virtual CalibSpacePointPtr calibrate(const EventContext& ctx,
                                                  const SpacePoint* spacePoint,
                                                  const Amg::Vector3D& seedPosInChamb,
@@ -62,7 +63,8 @@ namespace MuonR4{
              *  @param spacePoint: Pointer to the space point to calibrate.
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
-             *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path */
             virtual CalibSpacePointPtr calibrate(const EventContext& ctx,
                                                  const CalibratedSpacePoint& spacePoint,
                                                  const Amg::Vector3D& seedPosInChamb,
@@ -73,7 +75,8 @@ namespace MuonR4{
              *  @param spacePoints: List of space points that will be calibrated
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
-             *  @param timeDelay: Shift in time to be added to the time of flight of a particle going a straight path */
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path */
             virtual CalibSpacePointVec calibrate(const EventContext& ctx,
                                                  const std::vector<const SpacePoint*>& spacePoints,
                                                  const Amg::Vector3D& seedPosInChamb,
@@ -84,8 +87,8 @@ namespace MuonR4{
              *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param seedPosInChamb: Position of the external seed expressed in the sector frame
              *  @param seedDirInChamb: Direction of the external seed expressed in the sector frame
-             *  @param timeDelay: Shift in time to be added to the time of flight of a particle 
-             *                    going a straight path 
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path 
              *  @param spacePoints: List of already calibrated space points that's eaten by the method */
           
              virtual CalibSpacePointVec calibrate(const Acts::CalibrationContext& cctx,                                            
@@ -94,13 +97,13 @@ namespace MuonR4{
                                                   const double timeDelay,
                                                   const CalibSpacePointVec& spacePoints) const = 0;
 
-            /** @brief Returns the drift velocity for a given drift-circle space point
-             *  @param ctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+            /** @brief Returns the drift velocity (in ACTS units) for a given drift-circle space point
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the velocity needs to be calculated. */
             virtual double driftVelocity(const Acts::CalibrationContext& cctx,
                                          const CalibratedSpacePoint& spacePoint) const = 0;
-            /** @brief Returns the drift acceleration for a given drift-circle space point
-             *  @param ctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+            /** @brief Returns the drift acceleration (in ACTS units) for a given drift-circle space point
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
              *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated. */
             virtual double driftAcceleration(const Acts::CalibrationContext& cctx,
                                              const CalibratedSpacePoint& spacePoint) const = 0;
@@ -129,6 +132,31 @@ namespace MuonR4{
              * @param segment: Reference to the reconstructed segment for which the sign
              *                 stamp shall be executed */
             virtual void stampSignsOnMeasurements(const xAOD::MuonSegment& segment) const = 0;
+            
+            /** @brief Returns the drift radius for a given drift-circle space point and time delay. Needed for the fast fitter.
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param spacePoint: Reference to the calibrated space point for which the drift radius needs to be calculated
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a  
+             *                    particle going a straight path . */
+            virtual double driftRadius(const Acts::CalibrationContext& cctx,
+                                       const CalibratedSpacePoint& spacePoint, 
+                                       const double timeDelay) const = 0;
+            /** @brief Returns the drift velocity (in ACTS units) for a given drift-circle space point and time delay. Needed for the fast fitter.
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param spacePoint: Reference to the calibrated space point for which the drift velocity needs to be calculated
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path . */
+            virtual double driftVelocity(const Acts::CalibrationContext& cctx,
+                                         const CalibratedSpacePoint& spacePoint, 
+                                         const double timeDelay) const = 0;
+            /** @brief Returns the drift acceleration (in ACTS units) for a given drift-circle space point and time delay. Needed for the fast fitter.
+             *  @param cctx: Calibration context which is a packed pointer to the current ATLAS EventContext
+             *  @param spacePoint: Reference to the calibrated space point for which the acceleration needs to be calculated
+             *  @param timeDelay: Shift in time (in ACTS units) to be added to the time of flight of a 
+             *                    particle going a straight path . */
+            virtual double driftAcceleration(const Acts::CalibrationContext& cctx,
+                                             const CalibratedSpacePoint& spacePoint, 
+                                             const double timeDelay) const = 0;
     };
 
 }
