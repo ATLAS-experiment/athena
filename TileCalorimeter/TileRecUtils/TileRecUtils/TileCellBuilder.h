@@ -43,7 +43,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "Identifier/HWIdentifier.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 

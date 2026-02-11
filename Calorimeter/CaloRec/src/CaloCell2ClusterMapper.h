@@ -22,7 +22,6 @@
 class CaloCell_ID;
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "CaloEvent/CaloCell2ClusterMap.h"
 #include "CaloEvent/CaloClusterContainer.h"
 

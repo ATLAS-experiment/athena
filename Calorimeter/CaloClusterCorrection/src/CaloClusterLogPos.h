@@ -11,7 +11,6 @@
 
 #include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloCluster.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 /**
  * @file   CaloClusterLogPos.h

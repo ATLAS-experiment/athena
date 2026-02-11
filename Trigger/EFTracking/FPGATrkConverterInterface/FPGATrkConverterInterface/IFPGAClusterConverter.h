@@ -8,7 +8,6 @@
 // Include Files
 #include <string>
 #include "GaudiKernel/IInterface.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "InDetPrepRawData/PixelClusterCollection.h"

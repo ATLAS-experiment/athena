@@ -40,7 +40,6 @@
 #include "CaloClusterCorrection/CaloClusterCorrection.h"
 #include "CaloInterface/ISetCaloCellContainerName.h"
 #include <string>
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "StoreGate/ReadCondHandleKey.h"

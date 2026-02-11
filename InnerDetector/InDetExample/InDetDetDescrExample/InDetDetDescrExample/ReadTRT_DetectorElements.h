@@ -13,7 +13,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 
