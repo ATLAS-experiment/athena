@@ -225,9 +225,6 @@ class MonitorDef:
                     "L1_3eEM12L",
                     #
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
-                    # AD monitoring - ATR-32397
-                    "L1_ADVAET", "L1_ADVAEL", "L1_ADBDTT", "L1_ADBDTL",
-                    "L1_ARTEMISL", "L1_ARTEMIST"
                 ]
 
         else: # HI L1 menu
