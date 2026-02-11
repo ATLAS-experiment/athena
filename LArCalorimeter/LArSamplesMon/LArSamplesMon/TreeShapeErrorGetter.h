@@ -43,10 +43,11 @@ namespace LArSamples {
       int addRing(const ResidualCalculator& calc, CaloGain::CaloGain gain);
 
       void dump(CaloGain::CaloGain gain) const;
-      TH2D* correlate(const TreeShapeErrorGetter& other, CaloGain::CaloGain gain, unsigned short sample, bool xip, 
-                      unsigned int nBins, double xMin, double xMax) const; 
+      std::unique_ptr<TH2D> correlate(const TreeShapeErrorGetter& other, CaloGain::CaloGain gain, unsigned short sample, bool xip,
+                                      unsigned int nBins, double xMin, double xMax) const;
  
       bool compare(const TreeShapeErrorGetter& other, const TString& fileName, const Interface* tmpl = 0) const;
+
       
       const ResidualCalculator* cellCalc() const { return m_cellCalc; }
       const ResidualCalculator* ringCalc() const { return m_ringCalc; }
@@ -55,13 +56,13 @@ namespace LArSamples {
       TTree* ringTree(CaloGain::CaloGain gain) const;
       
       static bool merge(const TString& listFile, const TString& outputFile);
-      static bool merge(const std::vector<const TreeShapeErrorGetter*>& getters, const TString& outputFile);
+      static bool merge(std::vector<std::unique_ptr<const TreeShapeErrorGetter> >&& getters, const TString& outputFile);
       
-      TFile* file() const { return m_file; }
+      TFile* file() const { return m_file.get(); }
       
     private:
       
-      TFile* m_file;
+      std::unique_ptr<TFile> m_file;
       std::vector<TTree*> m_cellTrees;
       std::vector<TTree*> m_ringTrees;    
       mutable ResidualCalculator* m_cellCalc, *m_ringCalc;
