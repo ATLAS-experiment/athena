@@ -25,7 +25,7 @@ namespace GlobalSim {
   StatusCode Egamma1BDTAlgTool::initialize() {
        
     CHECK(m_nbhdTOBContainerReadKey.initialize());
-    CHECK(m_BDTResultKey.initialize());
+    CHECK(m_BDTScoreKey.initialize());
     
     return StatusCode::SUCCESS;
   }
@@ -43,8 +43,8 @@ namespace GlobalSim {
 
     ATH_MSG_DEBUG("read in " << (*in).size() << " neighborhoods");
 
-    SG::WriteHandle<eEmEg1BDTTOBContainer> h_BDTResult(m_BDTResultKey, ctx);
-    CHECK(h_BDTResult.record(std::make_unique<eEmEg1BDTTOBContainer>()));
+    SG::WriteHandle<std::vector<float> > h_BDTScore(m_BDTScoreKey, ctx);
+    CHECK(h_BDTScore.record(std::make_unique<std::vector<float> >()));
     
     for (const auto nbhdTOB : *in) {
       auto c_phi = combine_phi(nbhdTOB);
@@ -78,8 +78,8 @@ namespace GlobalSim {
 	result[i] = scores[0][0];
       }
 
-      h_BDTResult->push_back(std::make_unique<IOBitwise::eEmEg1BDTTOB>(*nbhdTOB, result));
-      
+      //Just output the float equivalent at the moment
+      h_BDTScore->push_back(scores[0].to_float());
     }
     return StatusCode::SUCCESS;
   }

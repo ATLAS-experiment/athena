@@ -15,7 +15,7 @@ def Egamma1_LArStrip_Fex_RowAwareCfg(
         dump=False,
         dumpTerse=False,
         makeCaloCellContainerChecks=True,
-        OutputLevel=None):
+        OutputLevel=DEBUG):
     
     cfg = ComponentAccumulator()
 
