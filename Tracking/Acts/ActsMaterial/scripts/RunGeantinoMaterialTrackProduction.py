@@ -74,7 +74,10 @@ if __name__ == "__main__":
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
-    
+    from SimulationConfig.SimEnums import SimulationFlavour
+    flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
+
+
     flags.GeoModel.AtlasVersion = args.geometrytag
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
     flags.GeoModel.Align.Dynamic = False
