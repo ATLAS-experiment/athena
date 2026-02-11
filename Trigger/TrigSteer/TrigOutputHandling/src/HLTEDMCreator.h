@@ -44,6 +44,7 @@
 #include "xAODBTagging/BTagVertexContainer.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODPFlow/FlowElementContainer.h"
 
 #include "xAODTrigMinBias/TrigT2MbtsBitsContainer.h"
 
@@ -140,6 +141,7 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
   DEF_XAOD_KEY( DiTauJetContainer );
   DEF_XAOD_KEY( TauTrackContainer );
   DEF_XAOD_KEY( CaloClusterContainer );
+  DEF_XAOD_KEY( FlowElementContainer );
   DEF_XAOD_KEY( JetContainer );
   DEF_XAOD_KEY( VertexContainer );
   DEF_XAOD_KEY( BTaggingContainer );
