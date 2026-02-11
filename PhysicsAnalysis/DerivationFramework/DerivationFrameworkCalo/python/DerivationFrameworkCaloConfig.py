@@ -7,6 +7,12 @@ def CaloCellDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("SGKey_electrons", flags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", flags.Egamma.Keys.Output.Photons)
+    kwargs.setdefault("SGKey_CaloCells", flags.Egamma.Keys.Input.CaloCells)
+
+    from egammaCaloTools.egammaCaloToolsConfig import egammaLargeClusterCellRecoveryToolCfg
+    kwargs.setdefault("egammaLargeClusterCellRecoveryTool",
+                    acc.popToolsAndMerge(egammaLargeClusterCellRecoveryToolCfg(flags)))
+
     acc.setPrivateTools(CompFactory.DerivationFramework.CaloCellDecorator(**kwargs))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
 

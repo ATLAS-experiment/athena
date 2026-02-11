@@ -74,6 +74,27 @@ def egammaHadCaloClusterSelectorCfg(
     result.setPrivateTools(CompFactory.egammaCaloClusterSelector(name, **kwargs))
     return result
 
+def egammaLargeClusterCellRecoveryToolCfg(
+    flags, name="egammaLargeClusterCellRecoveryTool", **kwargs
+):
+    result = ComponentAccumulator()
+
+    # Configure to fill 7x11 cluster with cells
+    toolArgs = dict(
+        eta_size = 7,
+        phi_size = 11,
+        fill_cluster = True,
+    )
+
+    kwargs["CaloFillRectangularClusterTool"] = result.popToolsAndMerge(
+        CaloFillRectangularClusterCfg(flags, **toolArgs)
+    )
+
+    result.setPrivateTools(
+        CompFactory.egammaLargeClusterCellRecoveryTool(name, **kwargs)
+    )
+
+    return result
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
