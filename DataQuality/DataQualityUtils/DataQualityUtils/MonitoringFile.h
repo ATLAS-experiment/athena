@@ -9,7 +9,6 @@
 
 #include <TObject.h>
 #include <TFile.h>
-#include <TString.h>
 #include "RooRealVar.h"
 #include <TH1.h>
 
@@ -241,7 +240,7 @@ namespace dqutils {
     };
     //
     //static bool TGCCheckFile(std::string inFilename, std::string& run_dir);
-    static bool TGCCheckHistogram(TFile* f, TString& hname);
+    static bool TGCCheckHistogram(TFile* f, const std::string& hname);
     static void TGCSetMetaData(TDirectory* targetDir, TH1* h1, TH1* h2 = 0, TH1* h3 = 0);
 
     //For HLT Muon
