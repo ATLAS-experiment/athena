@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TreeShapeErrorGetter.h"
@@ -23,9 +23,9 @@ using namespace LArSamples;
 
 
 TreeShapeErrorGetter::TreeShapeErrorGetter(const TString& fileName, bool recreate)
- : m_file(nullptr), m_cellTrees(3), m_ringTrees(3), m_cellCalc(nullptr), m_ringCalc(nullptr)
+ : m_cellTrees(3), m_ringTrees(3), m_cellCalc(nullptr), m_ringCalc(nullptr)
 {
-  m_file = TFile::Open(fileName, (recreate ? "RECREATE" : "READ"));
+  m_file.reset(TFile::Open(fileName, (recreate ? "RECREATE" : "READ")));
   if (!m_file || !m_file->IsOpen()) {
     cout << "File " << fileName << " is not accessible" << endl;
     return;
@@ -78,7 +78,6 @@ TreeShapeErrorGetter::~TreeShapeErrorGetter()
       m_ringTrees[g]->Write();
     }
   }
-  delete m_file;
 }
 
 
@@ -152,32 +151,29 @@ void TreeShapeErrorGetter::dump(CaloGain::CaloGain gain) const
 {
   if (!cellTree(gain)) return;
   for (long long i = 0; i < cellTree(gain)->GetEntries(); i++) {
-    ShapeErrorData* sed = shapeErrorData(i, gain);
+    std::unique_ptr<ShapeErrorData> sed (shapeErrorData(i, gain));
     if (!sed) continue;
     cout << "-> " << i << endl;
     sed->xi().Print();
     sed->xip().Print();
-    delete sed;
   }
 }
 
-TH2D* TreeShapeErrorGetter::correlate(const TreeShapeErrorGetter& other, CaloGain::CaloGain gain, unsigned short sample, bool xip, 
-                                       unsigned int nBins, double xMin, double xMax) const
+std::unique_ptr<TH2D> TreeShapeErrorGetter::correlate(const TreeShapeErrorGetter& other, CaloGain::CaloGain gain, unsigned short sample, bool xip,
+                                                      unsigned int nBins, double xMin, double xMax) const
 {
-  TH2D* h = new TH2D(Form("%s_%d", xip ? "xip" : "xi", sample), "", nBins, xMin, xMax, nBins, xMin, xMax);
+  auto h = std::make_unique<TH2D>(Form("%s_%d", xip ? "xip" : "xi", sample), "", nBins, xMin, xMax, nBins, xMin, xMax);
   for (long long i = 0; i < Definitions::nChannels; i++) {
-    ShapeErrorData* data1 = shapeErrorData(i, gain);
+    std::unique_ptr<ShapeErrorData> data1 (shapeErrorData(i, gain));
     if (!data1) continue;
-    ShapeErrorData* data2 = other.shapeErrorData(i, gain);
-    if (!data2) { delete data1; continue; }
+    std::unique_ptr<ShapeErrorData> data2 (other.shapeErrorData(i, gain));
+    if (!data2) { continue; }
     cout << i << endl;
     unsigned int sample1 = sample + data1->xip().GetLwb(); // sample indices may not match, but we assume the range covered for the reference shape is the same
     unsigned int sample2 = sample + data2->xip().GetLwb();
     if (data1->isInRange(sample1) && data2->isInRange(sample2))
       h->Fill(xip ? data1->xip()(sample1) : data1->xi()(sample1), 
               xip ? data2->xip()(sample2) : data2->xi()(sample2));
-    delete data1;
-    delete data2;
   }
   return h;
 } 
@@ -193,34 +189,29 @@ bool TreeShapeErrorGetter::merge(const TString& listFile, const TString& outputF
   
   std::string fileName;  
   unsigned int i = 0;
-  std::vector<const TreeShapeErrorGetter*> getters;
+  std::vector<std::unique_ptr<const TreeShapeErrorGetter> > getters;
   
   while (f >> fileName) {
     //gSystem->Exec("free");
-    const TreeShapeErrorGetter* getter = new TreeShapeErrorGetter(fileName.c_str());
+    auto getter = std::make_unique<TreeShapeErrorGetter>(fileName.c_str());
     if (!getter) {
       cout << "Skipping invalid file " << fileName << endl;
       continue;
     }
     cout << std::setw(2) << ++i << " - " << fileName << endl;
-    getters.push_back(getter);
+    getters.push_back(std::move(getter));
   }
-  bool result = merge(getters, outputFile);
-
-  for (const TreeShapeErrorGetter* getter : getters)
-     delete getter;
-  
-  return result;
+  return merge(std::move(getters), outputFile);
 }
 
 
-bool TreeShapeErrorGetter::merge(const std::vector<const TreeShapeErrorGetter*>& getters, const TString& outputFile)
+bool TreeShapeErrorGetter::merge(std::vector<std::unique_ptr<const TreeShapeErrorGetter> >&& getters, const TString& outputFile)
 {
   auto output = std::make_unique<TreeShapeErrorGetter>(outputFile, true);
   for (unsigned int i = 0; i < Definitions::nChannels; i++) {
     for (unsigned int g = 0; g < 3; g++) {
       bool gotResult = false;
-      for (const TreeShapeErrorGetter* getter : getters) {
+      for (std::unique_ptr<const TreeShapeErrorGetter>& getter : getters) {
         if (getter->shapeErrorData(i, (CaloGain::CaloGain)g)) {
           if (gotResult) {
             cout << "TreeShapeErrorGetter::merge : input getters have non-zero overlap for cell " << i << " -- not supported, exiting." << endl;
@@ -238,7 +229,7 @@ bool TreeShapeErrorGetter::merge(const std::vector<const TreeShapeErrorGetter*>&
   for (int i = 0; i < Geo::nPhiRings(); i++) {
     for (unsigned int g = 0; g < 3; g++) {
       bool gotResult = false;
-      for (const TreeShapeErrorGetter* getter : getters) {
+      for (std::unique_ptr<const TreeShapeErrorGetter>& getter : getters) {
         if (getter->phiSymShapeErrorData(i, (CaloGain::CaloGain)g)) {
           if (gotResult) {
             cout << "TreeShapeErrorGetter::merge : input getters have non-zero overlap for ring " << i << " -- not supported, exiting." << endl;
@@ -259,7 +250,7 @@ bool TreeShapeErrorGetter::merge(const std::vector<const TreeShapeErrorGetter*>&
 bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TString& fileName, const Interface* tmpl) const
 {
   std::unique_ptr<TFile> f(TFile::Open(fileName, "RECREATE"));
-  auto tree = std::make_unique<TTree>("tree", "");
+  TTree tree ("tree", "");
 
   int hash, gain, lwb1, lwb2, nSamples;
   double xi1[99], xi2[99], xip1[99], xip2[99];
@@ -267,25 +258,25 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
   int layer, ft, slot, channel;
   double eta, phi;
 
-  tree->Branch("hash", &hash);
+  tree.Branch("hash", &hash);
 
   if (tmpl) {
-    tree->Branch("calo", &calo);
-    tree->Branch("layer", &layer);
-    tree->Branch("ft", &ft);
-    tree->Branch("slot", &slot);
-    tree->Branch("channel", &channel);
-    tree->Branch("eta", &eta);
-    tree->Branch("phi", &phi);
+    tree.Branch("calo", &calo);
+    tree.Branch("layer", &layer);
+    tree.Branch("ft", &ft);
+    tree.Branch("slot", &slot);
+    tree.Branch("channel", &channel);
+    tree.Branch("eta", &eta);
+    tree.Branch("phi", &phi);
   }
-  tree->Branch("gain", &gain);
-  tree->Branch("lwb1", &lwb1);
-  tree->Branch("lwb2", &lwb2);
-  tree->Branch("nSamples", &nSamples);
-  tree->Branch("xi1",  xi1,  "xi1[nSamples]/D");
-  tree->Branch("xi2",  xi2,  "xi2[nSamples]/D");
-  tree->Branch("xip1", xip1, "xip1[nSamples]/D");
-  tree->Branch("xip2", xip2, "xip2[nSamples]/D");
+  tree.Branch("gain", &gain);
+  tree.Branch("lwb1", &lwb1);
+  tree.Branch("lwb2", &lwb2);
+  tree.Branch("nSamples", &nSamples);
+  tree.Branch("xi1",  xi1,  "xi1[nSamples]/D");
+  tree.Branch("xi2",  xi2,  "xi2[nSamples]/D");
+  tree.Branch("xip1", xip1, "xip1[nSamples]/D");
+  tree.Branch("xip2", xip2, "xip2[nSamples]/D");
 
   for (long long k = 0; k < Definitions::nChannels; k++) {
     if (k % 10000 == 0) cout << "Processing entry " << k << endl;
@@ -316,10 +307,10 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
         xi2[j]  = (data2 && data2->isInRange(j) ? data2->xi()(j)  : -999);
         xip2[j] = (data2 && data2->isInRange(j) ? data2->xip()(j) : -999);
       }
-      tree->Fill();
+      tree.Fill();
     }
   }
   f->cd();
-  tree->Write();
+  tree.Write();
   return true;
 }
