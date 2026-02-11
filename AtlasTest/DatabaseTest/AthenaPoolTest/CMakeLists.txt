@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolTest )
@@ -23,7 +23,6 @@ atlas_add_component( AthenaPoolTest
                      LINK_LIBRARIES AthenaPoolTestData CaloDetDescrLib CaloEvent CaloIdentifier AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities CxxUtils GeoModelInterfaces GeoPrimitives Identifier GaudiKernel InDetIdentifier InDetReadoutGeometry InDetRawData InDetCompetingRIOsOnTrack InDetPrepRawData InDetRIO_OnTrack LArRecEvent TrkSurfaces TrkCompetingRIOsOnTrack TrkEventPrimitives TrkMaterialOnTrack TrkParameters TrkTrack TrkVertexOnTrack EventInfo EventInfoMgtLib xAODEventInfo )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests in the package:
@@ -67,21 +66,6 @@ athenapooltest_runca_test( AthenaPoolTestRead AthenaPoolTestRead
                            "AthenaPoolTestD"
                            DEPENDS AthenaPoolTestWrite )
 
-# Write with DoubleEventSelector
-# TODO: migrate to CA
-# athenapooltest_run_test( AthenaPoolTestWriteDoubleSelector AthenaPoolTestWriteDoubleSelector
-#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest" )
-# athenapooltest_run_test( AthenaPoolTestReadDoubleSelector AthenaPoolTestReadDoubleSelector
-#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
-
-# Add on test of navigation still using simple objects:
-# AthenaPoolTestWrite - Step2 - rewrite part in another file
-# DoubleEventSelector
-# TODO: migrate to CA
-# athenapooltest_run_test( AthenaPoolTestStep2WriteDoubleSelector AthenaPoolTestStep2WriteDoubleSelector
-#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolTest"
-#                          DEPENDS AthenaPoolTestWriteDoubleSelector )
 # normal EventSelector
 athenapooltest_runca_test( AthenaPoolTestStep2Write AthenaPoolTestStep2Write
                            "^AthenaPoolTestD"
@@ -94,28 +78,6 @@ athenapooltest_runca_test( InDetRawDataWriter InDetRawDataWriter
 athenapooltest_runca_test( InDetRawDataReader InDetRawDataReader
                            "InDetRawDataFakeReader"
                            DEPENDS InDetRawDataWriter )
-
-# Read two RDOs with the DoubleEventSelector
-# TODO: migrate to CA
-# athenapooltest_run_test( ReadRDODoubleSelector ReadRDODoubleSelector
-#                          "^DoubleEvent|^SecondaryEvent|^RDOReader"
-#                          DEPENDS InDetRawDataWriter LArCellContWriter )
-# athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
-#                          "^DoubleEvent|^SecondaryEvent|^LArCellContFake|^InDetRawDataFak"
-#                          DEPENDS ReadRDODoubleSelector )
-
-# Test basic overlay algorithms with DoubleEventSelector
-# TODO: migrate to CA
-# athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
-#                          "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
-#                          PRIVATE_WORKING_DIRECTORY )
-
-# # AthenaMT test for DoubleEventSelector
-# atlas_add_test( DoubleEventSelectorOverlayTestMT
-#                 SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
-#                 PRIVATE_WORKING_DIRECTORY
-#                 LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
-#                 PROPERTIES TIMEOUT 900 PROCESSORS 4)
 
 # Check for adding DetDescr tags to event info object:
 athenapooltest_runca_test( EventInfoWrite EventInfoWrite
