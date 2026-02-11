@@ -400,9 +400,6 @@ if __name__ == '__main__':
     # (online via configuration settings of isTestbed & stream type/name in OKS that this python scripts reads as environment input)
     # add the algorithms as in ZdcRecConfig
 
-    from GaudiSvc.GaudiSvcConf import THistSvc
-    THistSvc.OutputLevel = 5 #ERROR (we get a list of unnecessary warnings - turn the outputs off)
-
     from AtlasGeoModel.ForDetGeoModelConfig import ForDetGeometryCfg
     acc.merge(ForDetGeometryCfg(flags))
 

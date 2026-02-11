@@ -37,7 +37,7 @@ def createTrigEgammaConfigFlags():
 
     # Fastcalo bdt calibration 
     flags.addFlag('Trigger.egamma.fastCaloETCalibration',False)
-    flags.addFlag('Trigger.egamma.fastCaloETCalibrationVersion','egammaFastCaloCalib/online/v0')
+    flags.addFlag('Trigger.egamma.fastCaloETCalibrationVersion','ElectronPhotonSelectorTools/trigger/calib_240626_v1/')
     flags.addFlag('Trigger.egamma.CalibrationETThreshold', 3.)
 
     # Precision Electron Isolation

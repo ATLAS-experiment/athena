@@ -35,9 +35,9 @@ def zdcGeometry(flags):
             return defaultGeometryTags.RUN2_ZDC
         case "data18_hi":
             return defaultGeometryTags.RUN2_ZDC
-        case "data16_hi":
+        case "data16_hip5TeV":
             return defaultGeometryTags.RUN2_ZDC
-        case "data16_hip":
+        case "data16_hip8TeV":
             return defaultGeometryTags.RUN2_ZDC
         case "data23_hi":
             return defaultGeometryTags.RUN3_ZDC23
@@ -64,7 +64,8 @@ def zdcGeometry(flags):
 def GenerateConfigTagDict():
 
     zdcConfigMap['data15_hi'] = {}
-    zdcConfigMap['data16_hip'] = {}
+    zdcConfigMap['data16_hip5TeV'] = {}
+    zdcConfigMap['data16_hip8TeV'] = {}
     zdcConfigMap['data17_13TeV'] = {}
     zdcConfigMap['data18_hi'] = {}
     zdcConfigMap['data22_13p6TeV'] = {}
@@ -147,7 +148,9 @@ def SetConfigTag(flags):
                 config = "PbPb2015"
             elif flags.Input.ProjectName == "data17_13TeV":
                 config = "PbPb2015"
-            elif flags.Input.ProjectName == "data16_hip":
+            elif flags.Input.ProjectName == "data16_hip5TeV":
+                config = "pPb2016"
+            elif flags.Input.ProjectName == "data16_hip8TeV":
                 config = "pPb2016"
             elif flags.Input.ProjectName == "data18_hi":
                 config = "PbPb2018"
@@ -201,7 +204,7 @@ def ZdcStreamDependentFlagSetting(flags):
     isComm = (flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib")
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
     isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib" or isComm)
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
+    isCalib = (flags.Input.TriggerStream in ["calibration_ZDCCalib","calibration_zdcCalib"] or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
     
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         runInjForStandaloneDataArgValid = False
@@ -388,7 +391,11 @@ def ZdcRecRun2Cfg(flags):
         doCalib = False
         doTimeCalib = False
         doTrigEff = False
-    elif flags.Input.ProjectName == "data16_hip":
+    elif flags.Input.ProjectName == "data16_hip5TeV":
+        doCalib = True
+        doTimeCalib = False
+        doTrigEff = False
+    elif flags.Input.ProjectName == "data16_hip8TeV":
         doCalib = True
         doTimeCalib = False
         doTrigEff = False
@@ -549,7 +556,7 @@ def ZdcNtupleRun2Cfg(flags,**kwargs):
                            nsamplesZdc = 7,
                            **kwargs))
 
-    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
     return acc
 
 def ZdcNtupleRun3Cfg(flags,**kwargs):
@@ -729,11 +736,14 @@ if __name__ == '__main__':
             acc.merge(ZdcLEDNtupleCfg(flags))
             
         if isCalib:
-            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-            zdcMonitorAcc = ZdcMonitoringConfig(flags)
-            acc.merge(zdcMonitorAcc)
+            
+            if (flags.GeoModel.Run==LHCPeriod.Run3):
+                from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
+                acc.merge(ZdcMonitoringConfig(flags))
+            
             if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
                 acc.merge(ZdcNtupleLocalCfg(flags))
+                
         if isInj:
             from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
             zdcMonitorAcc = ZdcMonitoringConfig(flags)

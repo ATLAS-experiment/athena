@@ -25,6 +25,31 @@ from TrigEDMConfig.TriggerEDMDefs import Alias, InViews, allowTruncation
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 
 # ------------------------------------------------------------
+
+cPFOVarsToKeep = ['IsInDenseEnvironment',
+                  'TracksExpectedEnergyDeposit',
+                 ]
+
+nPFOVarsToKeep = ['AVG_LAR_Q', 'AVG_TILE_Q', 'BADLARQ_FRAC',
+                  'CENTER_LAMBDA', 'CENTER_MAG',
+                  'EM_PROBABILITY',
+                  'N_BAD_CELLS', 'ENG_BAD_CELLS', 'ENG_POS',
+                  'ISOLATION',
+                  'LAYERENERGY_EMB1', 'LAYERENERGY_EMB2', 'LAYERENERGY_EMB3',
+                  'LAYERENERGY_EME1', 'LAYERENERGY_EME2', 'LAYERENERGY_EME3',
+                  'LAYERENERGY_FCAL0', 'LAYERENERGY_FCAL1', 'LAYERENERGY_FCAL2',
+                  'LAYERENERGY_HEC0', 'LAYERENERGY_HEC1', 'LAYERENERGY_HEC2', 'LAYERENERGY_HEC3',
+                  'LAYERENERGY_MINIFCAL0', 'LAYERENERGY_MINIFCAL1', 'LAYERENERGY_MINIFCAL2', 'LAYERENERGY_MINIFCAL3',
+                  'LAYERENERGY_PreSamplerB', 'LAYERENERGY_PreSamplerE',
+                  'LAYERENERGY_TILE0',
+                  'LAYERENERGY_TileBar0', 'LAYERENERGY_TileBar1', 'LAYERENERGY_TileBar2',
+                  'LAYERENERGY_TileExt0', 'LAYERENERGY_TileExt1', 'LAYERENERGY_TileExt2',
+                  'LAYERENERGY_TileGap1', 'LAYERENERGY_TileGap2', 'LAYERENERGY_TileGap3',
+                  'SECOND_LAMBDA', 'SECOND_R',
+                  'TIMING',
+        ]
+
+
 # ============
 # === JETS ===
 JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt', 'AlgorithmType',
@@ -889,6 +914,12 @@ TriggerHLTListRun3 = [
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                                                             'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+getJetCopyVars('pf_subresjesgscIS_ftf_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    
+    # PFlow for TLA - ATR-32289 - leaving empty target (ie no "BS PhysicsTLA") for low-mu run 
+    ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', '', 'Jet'),
+    ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), '', 'Jet'),
+    ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', '', 'Jet'),
+    ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), '', 'Jet'),
 
 
     # TLA Photons
