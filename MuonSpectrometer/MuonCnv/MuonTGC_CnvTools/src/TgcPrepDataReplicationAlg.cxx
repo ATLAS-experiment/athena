@@ -4,24 +4,22 @@
 
 #include "TgcPrepDataReplicationAlg.h"
 
-namespace Muon
-{
-  TgcPrepDataReplicationAlg::TgcPrepDataReplicationAlg(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
+namespace Muon {
+TgcPrepDataReplicationAlg::TgcPrepDataReplicationAlg(const std::string& name,
+                                                     ISvcLocator* pSvcLocator)
+    : AthReentrantAlgorithm(name, pSvcLocator) {}
 
-  StatusCode TgcPrepDataReplicationAlg::initialize() {
+StatusCode TgcPrepDataReplicationAlg::initialize() {
     ATH_MSG_DEBUG("initialize()");
 
     // Retrieve TgcPrepDataReplicationTool
-    ATH_CHECK( m_tool.retrieve());
+    ATH_CHECK(m_tool.retrieve());
     return StatusCode::SUCCESS;
-  }
- 
-  StatusCode TgcPrepDataReplicationAlg::execute(const EventContext& ctx) const {
-    ATH_MSG_DEBUG("execute()");    
+}
+
+StatusCode TgcPrepDataReplicationAlg::execute(const EventContext& ctx) const {
+    ATH_MSG_DEBUG("execute()");
     ATH_CHECK(m_tool->replicate(ctx));
     return StatusCode::SUCCESS;
-  }
-} // end of namespace Muon 
+}
+}  // end of namespace Muon

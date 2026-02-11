@@ -6,35 +6,36 @@
 #define MUONTGC_CNVTOOLS_TGCBYTESTREAM_H
 
 #include <inttypes.h>
+
 #include <vector>
 
 class TgcRdo;
 class MsgStream;
 
-namespace Muon 
-{
+namespace Muon {
 
-  /** @class TgcByteStream 
-   *  This class provides conversions between RDO and ByteStream. 
-   *  
-   *  @author Susumu Oda <Susumu.Oda@cern.ch>
-   */
-  
-  class TgcByteStream
-    {
-    private:
-      typedef std::vector<uint32_t> ByteStream;
+/** @class TgcByteStream
+ *  This class provides conversions between RDO and ByteStream.
+ *
+ *  @author Susumu Oda <Susumu.Oda@cern.ch>
+ */
 
-    public:
-      /** Constructor */
-      TgcByteStream();
-      /** Destructor */
-      ~TgcByteStream();
-      /** Convert RDO to ByteStream */
-      static void rdo2ByteStream(const TgcRdo* rdo, ByteStream& bs, MsgStream& log);
-      /** Convert ByteStream to RDO */
-      static void byteStream2Rdo(const ByteStream& bs, TgcRdo& rdo, uint32_t source_id, MsgStream& log);
-    };
-} // end of namespace
+class TgcByteStream {
+   private:
+    typedef std::vector<uint32_t> ByteStream;
 
-#endif // MUONTGC_CNVTOOLS_TGCBYTESTREAM_H
+   public:
+    /** Constructor */
+    TgcByteStream();
+    /** Destructor */
+    ~TgcByteStream();
+    /** Convert RDO to ByteStream */
+    static void rdo2ByteStream(const TgcRdo* rdo, ByteStream& bs,
+                               MsgStream& log);
+    /** Convert ByteStream to RDO */
+    static void byteStream2Rdo(const ByteStream& bs, TgcRdo& rdo,
+                               uint32_t source_id, MsgStream& log);
+};
+}  // namespace Muon
+
+#endif  // MUONTGC_CNVTOOLS_TGCBYTESTREAM_H
