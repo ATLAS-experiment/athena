@@ -191,10 +191,6 @@ StatusCode DbDatabase::containers(vector<const Token*>& conts,bool with_internal
 StatusCode DbDatabase::containers(vector<IDbContainer*>& conts,bool with_internal)
 {  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
 
-/// Allow access to all known associations between containers
-StatusCode DbDatabase::associations(vector<const Token*>& assocs)
-{  return isValid() ? ptr()->associations(assocs) : StatusCode::FAILURE;              }
-
 /// Allow access to all known shapes used by the database
 StatusCode DbDatabase::shapes(vector<const DbTypeInfo*>& shaps)
 {  return isValid() ? ptr()->shapes(shaps) : StatusCode::FAILURE;                     }
