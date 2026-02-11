@@ -72,7 +72,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                   << " [" << type().storageName() << "] " << name() 
                   << " impossible." << endmsg
                   << "                          " << logon());
-    type().missingDriver(msg());
+    throw std::runtime_error("POOL::DbDatabase: Unknown storage type requested: " + type().storageName());
     return;
   }
   if( !m_dom.add( name(), this ).isSuccess() ) {
