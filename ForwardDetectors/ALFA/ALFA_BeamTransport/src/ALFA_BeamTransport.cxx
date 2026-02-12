@@ -141,9 +141,7 @@ StatusCode ALFA_BeamTransport::execute()
      ATH_MSG_INFO("successful load of HepMC info");
      for (const HepMC::GenEvent* itr  : *mcColl){
        HepMC::GenEvent evt = (*itr);
-       // convert unit MeV to GeV for energy and momenta
-       MeVToGeV(evt);
-
+       MC::MeVToGeV(&evt);  //Only scales momenta and masses
        HepMC::Print::line(std::cout, evt);
 
        // Select final state particle from event generator
@@ -169,35 +167,6 @@ StatusCode ALFA_BeamTransport::execute()
      //-----------------------------------------------------------------------------------------
 
      return StatusCode::SUCCESS;
-}
-
-
-//convert unit MeV to GeV for energy and momenta
-///////////////
-void ALFA_BeamTransport::MeVToGeV (HepMC::GenEvent& evt)
-{
-  for (const HepMC::GenParticlePtr& p:  evt) {
-    const HepMC::FourVector fv(p->momentum().px() / 1000.,
-                               p->momentum().py() / 1000.,
-                               p->momentum().pz() / 1000.,
-                               p->momentum().e() / 1000.);
-
-    p->set_momentum(fv);
-  }
-}
-
-//convert unit MeV to GeV for energy and momenta
-///////////////
-void ALFA_BeamTransport::GeVToMeV (HepMC::GenEvent& evt)
-{
-  for (const HepMC::GenParticlePtr& p : evt) {
-    const HepMC::FourVector fv(p->momentum().px() * 1000.,
-                               p->momentum().py() * 1000.,
-                               p->momentum().pz() * 1000.,
-                               p->momentum().e() * 1000.);
-
-    p->set_momentum(fv);
-  }
 }
 
 
@@ -401,8 +370,7 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent& evt, int evt_
             evt.add_vertex(std::move(VertexRP3));
           }
      }
-    
-    //convert HepMC data back to HepMC standart ( momentum and energy in MeV)
-    ALFA_BeamTransport::GeVToMeV(evt);
+
+    MC::GeVToMeV(&evt);  //Only scales momenta and masses
     return true;
 }
