@@ -12,7 +12,7 @@
 #include "CaloSimEvent/SrCaloCalibrationHitContainer.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "map"
+#include <map>
 
 void SrCaloCalibrationHitContainerCnv_p1::transToPers(
     const SrCaloCalibrationHitContainer* transCont,
@@ -60,9 +60,9 @@ void SrCaloCalibrationHitContainerCnv_p1::transToPers(
   // storage ?
   // Compressor A; A.setNrBits(18);
   // A.reduce(tempE,persCont->m_energy); // packs energy
-  persCont->m_energy = tempE;            // Store directly without compression
+  persCont->m_energy = std::move(tempE);            // Store directly without compression
   persCont->m_name = transCont->Name();  // stores name
-  persCont->m_particleID = tempPID;
+  persCont->m_particleID = std::move(tempPID);
 }
 
 void SrCaloCalibrationHitContainerCnv_p1::persToTrans(
