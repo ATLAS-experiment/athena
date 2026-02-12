@@ -450,26 +450,6 @@ HLT_2j20_2j20_pf_ftf_presel3c20XX1c20bgtwo85_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA
     0: 2
   stepFeatures:
     0: 4
-HLT_2j20_ftf_mb_afprec_afpdz10_L1RD0_FILLED:
-  eventCount: 0
-  stepCounts:
-    0: 50
-    1: 33
-    2: 33
-  stepFeatures:
-    0: 50
-    1: 183
-    2: 33
-HLT_2j20_ftf_mb_afprec_afpdz5_L1RD0_FILLED:
-  eventCount: 0
-  stepCounts:
-    0: 50
-    1: 33
-    2: 33
-  stepFeatures:
-    0: 50
-    1: 183
-    2: 33
 HLT_2j20_mb_afprec_afpdijet_L1RD0_FILLED:
   eventCount: 0
   stepCounts:
