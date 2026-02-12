@@ -9,7 +9,7 @@
 
 from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerIDTruth,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from CLIDComps.clidGenerator import clidGenerator
@@ -135,6 +135,10 @@ def getRawTriggerEDMList(flags, runVersion=-1):
 
     if runVersion == 3:
         edmListCopy = TriggerHLTListRun3.copy()
+        if flags and flags.Trigger.addRun3LowMuEDM:
+            LowMuEDM = getRun3LowMuEDM(flags)
+            log.info( "Adding low mu collections to EDM %i: %s", runVersion, str(LowMuEDM))
+            _addExtraCollectionsToEDMList(edmListCopy, LowMuEDM)
     elif runVersion == 4:
         edm4ListCopy = TriggerHLTListRun4.copy()
         edm3ListCopy = TriggerHLTListRun3.copy()

@@ -333,6 +333,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.ESDEDMSet', 'ESD',
                   help='list of EDM objects to be written to ESD')
 
+    flags.addFlag('Trigger.addRun3LowMuEDM', lambda prevFlags: "pp_lowMu_run3" in prevFlags.Trigger.triggerMenuSetup, help="Specify whether to add dedicated low mu EDM. Default is dependent on the menu setup." )
+
     flags.addFlag('Trigger.ExtraEDMList', [],
                   help='list of extra EDM objects to be stored (for testing). Supported features: Add new items. Add extra decorations to existing Aux. Add additional output targets.')
 
