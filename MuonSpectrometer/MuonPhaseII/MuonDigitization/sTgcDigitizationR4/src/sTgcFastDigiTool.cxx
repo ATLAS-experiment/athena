@@ -322,7 +322,7 @@ namespace MuonR4 {
         const MuonGMR4::PadDesign& design{readOutEle->padDesign(hitHash)};
         
         const auto [padEta, padPhi] = design.channelNumber(padPos);
-        if (padEta < 0 || padPhi < 0) {
+        if (padEta <= 0 || padPhi <= 0) {
             ATH_MSG_VERBOSE("The pad "<<Amg::toString(padPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the acceptance of "<<std::endl<<design);
             return false;
@@ -333,7 +333,7 @@ namespace MuonR4 {
 
 
         if (!isValid) {
-            ATH_MSG_WARNING("Failed to decuce a valid pad Identifier from "<<Amg::toString(padPos)
+            ATH_MSG_WARNING("Failed to deduce a valid pad Identifier from "<<Amg::toString(padPos)
                             <<" in "<<m_idHelperSvc->toStringGasGap(hitId));
             return false;
         }
