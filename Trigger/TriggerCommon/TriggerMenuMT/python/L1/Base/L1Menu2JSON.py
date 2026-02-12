@@ -60,7 +60,7 @@ class L1MenuJSONConverter(object):
         }
         confObj["thresholds"].update( self.menu.thresholds.json() )
 
-        confObj["L0Global"] = self.menu.topoAlgos.json()
+        confObj["L0Global"] = self.menu.topoAlgos.json(run=4)
 
         # board definition
         confObj["boards"] = self.menu.boards.json()

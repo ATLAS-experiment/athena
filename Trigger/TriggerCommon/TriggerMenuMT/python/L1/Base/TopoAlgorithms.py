@@ -13,15 +13,15 @@ class AlgType(Enum):
     SORT = ('sortingAlgorithms')
     DEC = ('decisionAlgorithms') 
     MULT = ('multiplicityAlgorithms')
-    def __init__(self, key):
-        self.key = key
+    def __init__(self, key: str):
+        self.key: str = key
     
 class AlgCategory(Enum):
     TOPO = (1, 'TOPO', 'new topo', 'TopoAlgoDef')
     MUCTPI = (2, 'MUTOPO', 'muctpi topo', 'TopoAlgoDefMuctpi')
     LEGACY = (3, 'R2TOPO', 'legacy topo', 'TopoAlgoDefLegacy')
     MULTI = (4, 'MULTTOPO', 'multiplicity topo', 'TopoAlgoDefMultiplicity')
-    GLOBHYPO = (5, 'hypoAlgorithm', 'L0 global hypo', 'GlobalHypoAlgoDef')
+    GLOBHYPO = (5, 'HypoAlgorithms', 'L0 global hypo', 'GlobalHypoAlgoDef')
 
     def __init__(self, _, key, desc, defFile ):
         self.key: str = key  # key for json output
@@ -94,14 +94,27 @@ class MenuTopoAlgorithmsCollection:
         self.topoAlgos[category][algType][algo.name] = algo
 
 
-    def json(self):
-
+    def json(self, run=3):
         confObj = {}
-        for cat in self.topoAlgos:
-            confObj[cat.key] = {}
-            for typ in self.topoAlgos[cat]:
-                confObj[cat.key][typ.key] = {}
-                for alg in sorted(self.topoAlgos[cat][typ].values(), key=attrgetter('name')):
-                    confObj[cat.key][typ.key][alg.name] = alg.json()
-
+        if run <= 3:
+            for cat in self.topoAlgos:
+                confObj[cat.key] = {}
+                for typ in self.topoAlgos[cat]:
+                    confObj[cat.key][typ.key] = {}
+                    for alg in sorted(self.topoAlgos[cat][typ].values(), key=attrgetter('name')):
+                        confObj[cat.key][typ.key][alg.name] = alg.json()
+        else:
+            cat: AlgCategory
+            typ: AlgType
+            for cat in self.topoAlgos: # GlobalAlgo
+                confObj[cat.key] = {}
+                for typ in self.topoAlgos[cat]: 
+                    confObj[cat.key][typ.key] = {}
+                    for alg in self.topoAlgos[cat][typ].values():
+                        if isinstance(alg, GlobalMultiplicityAlgo):
+                            multType = f"Mult_{alg.inputs[0]}"
+                            multTypeList = confObj[cat.key][typ.key].setdefault(multType, [])
+                            algJson = {"slot": len(multTypeList)}
+                            algJson.update(alg.json())
+                            multTypeList += [ algJson ]
         return confObj

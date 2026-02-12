@@ -4,7 +4,7 @@ import re
 from importlib import import_module
 from collections import defaultdict as ddict
 from itertools import chain
-from typing import Iterator
+from typing import Any, Iterator
 
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
@@ -73,7 +73,7 @@ class L1MenuConfig(object):
             })
 
         # all registered topo algos
-        self._registeredTopoAlgos = {}
+        self._registeredTopoAlgos: dict[AlgCategory, dict[str, Any]] = {}
         for cat in AlgCategory.getAllCategories(run=4):
             self._registeredTopoAlgos[cat] = {}
 
@@ -446,7 +446,6 @@ class L1MenuConfig(object):
                         else:
                             thrName, nBits = thr, nbitsDefault
                         thrDef = self.getDefinedThreshold(thrName)
-                        print(f"{thrDef=}", flush=True)
                         if thrDef is None:
                             msg = (
                                 f'Threshold {thrName} is required for board {boardName}, connector {connDef["name"]} (file L1/Menu/Menu_{self.menuInfo.menuInputFile}.py), but it is not registered. '

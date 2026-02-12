@@ -362,7 +362,7 @@ class L1Menu:
             if thrset is not None:
                 log.debug("Threshold set %s: %s", thrset, ",".join(ctpInputNameSets[thrset]) )
             else:
-                log.info("Unrecognised CTP input bits: %s", ",".join(ctpInputNameSets[thrset]) )
+                log.warning("Unrecognised CTP input bits: %s", ",".join(ctpInputNameSets[thrset]) )
             totalInputs += ctpInputBitSets[thrset]
         log.info("Number of used inputs bits: %i" , totalInputs )
         totalUnusedInputs = 0

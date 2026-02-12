@@ -57,13 +57,6 @@ class MenuThresholdsCollection:
         thr.name = thrName
         self += thr
 
-
-    # def names(self, ttype = None):
-    #     if not ttype:
-    #         return self.thresholdsNames
-    #     return set([thr.name for thr in self if thr.ttype == ttype])
-
-
     def typeWideThresholdConfig(self, ttype):
         return getTypeWideThresholdConfig(ttype, self.flags.Trigger.L1.Menu.doHeavyIonTobThresholds, self.flags.Trigger.L1.Menu.doeFexBDTTau)
 
