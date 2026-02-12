@@ -1335,5 +1335,20 @@ def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
             (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')]
 
 
+def getRun3LowMuEDM(flags):
+    """
+    Get additional EDM entries recorded only for low mu runs.
+    """
 
+    TLAEDMTargets = 'BS PhysicsTLA'
+    if flags.Input.isMC:
+        TLAEDMTargets += ' ESD'
 
+    lowMuEDM = [
+        ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+    ]
+ 
+    return lowMuEDM
