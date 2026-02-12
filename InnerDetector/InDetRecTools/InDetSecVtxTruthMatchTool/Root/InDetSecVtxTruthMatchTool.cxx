@@ -4,6 +4,9 @@
 #include "InDetSecVtxTruthMatchTool/InDetSecVtxTruthMatchTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h" // <-- Add this
 
+#include "TVector3.h"
+#include <cmath>
+#include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "TruthUtils/MagicNumbers.h"
@@ -18,6 +21,12 @@ StatusCode InDetSecVtxTruthMatchTool::initialize() {
 
   // Retrieve the TrackTruthOriginTool
   ATH_CHECK(m_trackTruthOriginTool.retrieve());
+  if (m_doMuSA) {
+    ATH_MSG_INFO("MuSA mode enabled. Muon container: " << m_muonContainerName);
+    if (!m_muonFallbackContainerName.value().empty()) {
+      ATH_MSG_INFO("MuSA fallback muon container: " << m_muonFallbackContainerName);
+    }
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -43,6 +52,24 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
                                                         const xAOD::TrackParticleContainer* trackParticles) {
 
   ATH_MSG_DEBUG("Start vertex matching");
+
+  const xAOD::MuonContainer* muonContainer = nullptr;
+  if (m_doMuSA) {
+    if (evtStore()->retrieve(muonContainer, m_muonContainerName).isFailure()) {
+      muonContainer = nullptr;
+      if (!m_muonFallbackContainerName.value().empty()) {
+        ATH_MSG_WARNING("Failed to retrieve muon container '" << m_muonContainerName
+                        << "'. Attempting fallback container '" << m_muonFallbackContainerName << "'.");
+        if (evtStore()->retrieve(muonContainer, m_muonFallbackContainerName).isFailure()) {
+          ATH_MSG_ERROR("Failed to retrieve fallback muon container: " << m_muonFallbackContainerName);
+          return StatusCode::FAILURE;
+        }
+      } else {
+        ATH_MSG_ERROR("Failed to retrieve muon container: " << m_muonContainerName);
+        return StatusCode::FAILURE;
+      }
+    }
+  }
 
   //setup decorators for truth matching info
   static const xAOD::Vertex::Decorator<std::vector<VertexTruthMatchInfo> > matchInfoDecor("truthVertexMatchingInfos");
@@ -364,7 +391,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       const xAOD::TruthParticle* outPart = reconstructibleParticles.at(n);
       
       if (trackParticles){
-        particleInfo = checkParticle(*outPart, trackParticles);
+  particleInfo = checkParticle(*outPart, trackParticles, muonContainer);
       
         for(size_t h = 0; h < particleInfo.size(); h++){
           vertexInfo.at(h) += particleInfo.at(h);
@@ -374,7 +401,7 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
       
     int truthMatchType = 0;
     if( vertexInfo.at(0) > 1 && 
-        ((m_doMuSA && truthVtx->perp() < 8000 && std::abs(truthVtx->z()) < 10000) ||
+        ((m_doMuSA && (truthVtx->perp() < 8000 && std::abs(truthVtx->z()) < 10000)) ||
         (!m_doMuSA && truthVtx->perp() < 320 && std::abs(truthVtx->z()) < 1500))){
       ATH_MSG_DEBUG("Vertex is reconstructable and in " << (m_doMuSA ? "Muon Spectrometer" : "Inner Det") << " region");
       truthMatchType = truthMatchType | (0x1 << InDetSecVtxTruthMatchUtils::Reconstructable);
@@ -403,7 +430,9 @@ StatusCode InDetSecVtxTruthMatchTool::matchVertices( std::vector<const xAOD::Ver
 
 }
 
-std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParticle &truthPart, const xAOD::TrackParticleContainer* trkCont) const {
+std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParticle &truthPart,
+                                                          const xAOD::TrackParticleContainer* trkCont,
+                                                          const xAOD::MuonContainer* muonCont) const {
 
   xAOD::TrackParticle::ConstAccessor<char>  trackPass(m_selectedTrackFlag);
   xAOD::TrackParticle::ConstAccessor<ElementLink<xAOD::TruthParticleContainer> > trk_truthPartAcc("truthParticleLink");
@@ -430,15 +459,34 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
         const xAOD::TruthParticle& linkedTruth = **truthLink;
         if (HepMC::is_same_particle(linkedTruth, truthPart)) {
           // We found a match between truth particle and MS track!
-          // no selected decoration so need to implement manually -- MSTP must be |eta| < 2.5
-          // ideally we would want to check if the MSTP is also an SA muon but this is more complicated given we need the muon container
-          if (std::abs(trkPart->eta()) < 2.5) {
-            ATH_MSG_DEBUG("Particle has a track that passes track selection.");
-            return {1,1,1};
-          } else {
-            ATH_MSG_DEBUG("Particle has a track, but did not pass track selection.");
+          if (!muonCont) {
+            ATH_MSG_DEBUG("Muon container unavailable in MuSA mode; cannot evaluate acceptance criteria.");
+            return {1,0,0};
+          }
+
+          const xAOD::Muon* saMuon = findStandAloneMuon(*trkPart, muonCont);
+          if (!saMuon) {
+            ATH_MSG_DEBUG("Muon track matched but is not associated with a StandAlone muon.");
+            return {1,0,0};
+          }
+
+          float spectrometerFieldIntegral = 0.0f;
+          bool hasSpectrometerField = saMuon->parameter(spectrometerFieldIntegral, xAOD::Muon::spectrometerFieldIntegral);
+          if (!hasSpectrometerField) {
+            ATH_MSG_DEBUG("Standalone muon missing spectrometer field integral parameter; proceeding without field cut.");
+          } else if (spectrometerFieldIntegral < 0.1f) {
+            ATH_MSG_DEBUG("Skipping SA muon with spectrometerFieldIntegral " << spectrometerFieldIntegral << " T*m!");
             return {1,1,0};
           }
+
+          const bool passesKinematic = std::abs(trkPart->eta()) < 2.5 && trkPart->pt() < 13000000; // emulates bad egg MSTP rejection used in MuSA algorithm
+          if (passesKinematic) {
+            ATH_MSG_DEBUG("Standalone muon passes MuSA kinematic requirements.");
+            return {1,1,1};
+          }
+
+          ATH_MSG_DEBUG("Standalone muon failed MuSA kinematic requirements.");
+          return {1,1,0};
         }
       }
       
@@ -482,6 +530,25 @@ std::vector<int> InDetSecVtxTruthMatchTool::checkParticle(const xAOD::TruthParti
     
   }
   return {0,0,0};
+}
+
+const xAOD::Muon* InDetSecVtxTruthMatchTool::findStandAloneMuon(const xAOD::TrackParticle& mstp,
+                                                                const xAOD::MuonContainer* muonContainer) const {
+  if (!muonContainer) {
+    return nullptr;
+  }
+
+  for (const xAOD::Muon* muon : *muonContainer) {
+    if (!muon) {
+      continue;
+    }
+    const xAOD::TrackParticle* msTrack = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+    if (msTrack == &mstp && muon->muonType() == xAOD::Muon::MuonStandAlone) {
+      return muon;
+    }
+  }
+
+  return nullptr;
 }
 
 // check if truth particle originated from decay of particle in the pdgIdList
@@ -560,20 +627,16 @@ void InDetSecVtxTruthMatchTool::countReconstructibleDescendentParticles(const xA
     const auto* particle = signalTruthVertex.outgoingParticle(itrk);
     if (!particle) continue;
   
+    auto isInsideID = [](const TVector3& v) { return (v.Perp() < 300. && std::abs(v.z()) < 1500.); };
+    auto isOutsideID = [](const TVector3& v) { return (v.Perp() > 563. || std::abs(v.z()) > 2720.); };
+    auto isWithinMuSAWindow = [](const TVector3& v) { return (v.Perp() < 8000. && std::abs(v.z()) < 10000.); };
+
     // Recursively add descendents
     if (particle->hasDecayVtx()) {
-    
+
       TVector3 decayPos(particle->decayVtx()->x(), particle->decayVtx()->y(), particle->decayVtx()->z());
       TVector3 prodPos(particle->prodVtx()->x(), particle->prodVtx()->y(), particle->prodVtx()->z());
-    
-      // Inner detector criteria
-      auto isInsideID = [](TVector3& v) { return (v.Perp() < 300. && std::abs(v.z()) < 1500.); };
-      auto isOutsideID = [](TVector3& v) { return (v.Perp() > 563. || std::abs(v.z()) > 2720.); };
-    
-      // Muon Spectrometer criteria
-      auto isOutsideID_MuSA = [](TVector3& v) { return (v.Perp() > 563. || std::abs(v.z()) > 2720.); };
-      auto isInsideMS_MuSA = [](TVector3& v) { return (v.Perp() < 8000. && std::abs(v.z()) < 10000.); };
-    
+
       const auto distance = (decayPos - prodPos).Mag();
 
       if (counter > 100) {
@@ -585,8 +648,8 @@ void InDetSecVtxTruthMatchTool::countReconstructibleDescendentParticles(const xA
       if (distance < 10.0) {
         countReconstructibleDescendentParticles(*particle->decayVtx(), set, counter);
       } else if (m_doMuSA) {
-      // MuSA: particle originates outside ID and ends in MS
-        if (isOutsideID_MuSA(prodPos) && isInsideMS_MuSA(decayPos) && (particle->isCharged() || particle->isMuon())) {
+        // MuSA: consider particles within the MS window to study reconstruction turn-on
+        if (isWithinMuSAWindow(decayPos) && (particle->isCharged() || particle->isMuon())) {
           set.push_back(particle);
         }
       } else {
@@ -600,7 +663,17 @@ void InDetSecVtxTruthMatchTool::countReconstructibleDescendentParticles(const xA
     } else {
       if (!(particle->isCharged())) continue;
       // For particles without decay vertex, include them if they're charged
-      set.push_back(particle);
+      if (m_doMuSA) {
+        const xAOD::TruthVertex* prodVtx = particle->prodVtx();
+        if (prodVtx) {
+          TVector3 prodPos(prodVtx->x(), prodVtx->y(), prodVtx->z());
+          if (isWithinMuSAWindow(prodPos)) {
+            set.push_back(particle);
+          }
+        }
+      } else {
+        set.push_back(particle);
+      }
     }
   }
 }
