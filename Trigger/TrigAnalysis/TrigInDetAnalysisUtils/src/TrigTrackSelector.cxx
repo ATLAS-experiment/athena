@@ -803,21 +803,7 @@ TIDA::Track* TrigTrackSelector::makeTrack( const TruthParticle* track, unsigned 
 
 
 
-    //// AAAARGHHH!!!! For some *stupid* reason, when converting from a 
- 
-    /// static HepPDT::ParticleDataTable* m_pdt = new ParticleDataTable();
-    ///
-    /// // Get the Particle Properties Service
-    /// if ( m_pdt==0 ) {  
-    ///   ServiceHandle<IPartPropSvc> partPropSvc("PartPropSvc", "TrigTestMonToolAC"); // , name());
-    ///   if ( !partPropSvc.retrieve().isSuccess() ) {
-    ///      m_pdt = partPropSvc->PDT();
-    ///   }
-    ///   else { 
-    ///      std::cerr << " Could not initialize Particle Properties Service" << std::endl;
-    ///      return; // StatusCode::FAILURE;
-    ///   }
-    /// }    
+    //// AAAARGHHH!!!! For some *stupid* reason, when converting from a  
 
     /// how about storing uniqueID/status/pidg info?
     int author  = track->pdgId();   /// this isn't good!! but it will do for testing 
