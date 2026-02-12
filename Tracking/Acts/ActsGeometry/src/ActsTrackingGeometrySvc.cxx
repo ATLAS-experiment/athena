@@ -194,37 +194,33 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
       // The material decorator
       ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
       decoratorConfig.fileName = m_materialMapRootInputFileBase;
-      auto materialDecorator = std::make_shared<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
-                                                                                    ActsTrk::actsLevelVector(msg().level()));
+      ActsPlugins::RootMaterialDecorator materialDecorator{decoratorConfig,
+                                                           ActsTrk::actsLevelVector(msg().level())};
 
       // Apply material decoration to every surface
-      auto applyMaterial = [materialDecorator](const Acts::Surface* surface) -> void {
-        if (!surface) return;
-        materialDecorator->decorate(*const_cast<Acts::Surface*>(surface));
+      auto applyMaterial = [&materialDecorator](Acts::Surface& surface) {
+        materialDecorator.decorate(surface);
       };
-
-      // Visit all surfaces (false = visit all, not only sensitive)
-      trackingGeometry->visitSurfaces(applyMaterial, false);
+      trackingGeometry->apply(applyMaterial);
     }
 
-    m_trackingGeometry = std::shared_ptr<const Acts::TrackingGeometry>(std::move(trackingGeometry));
+    m_trackingGeometry = std::move(trackingGeometry);
 
     if (m_objDebugOutput) {
-    Acts::ObjVisualization3D vis;
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = false}, {.visible = true});
-    vis.write("blueprint_sensitive.obj");
-    vis.clear();
+      Acts::ObjVisualization3D vis;
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = false}, {.visible = true});
+      vis.write("blueprint_sensitive.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
-                                {.visible = false}, {.visible = false});
-    vis.write("blueprint_volume.obj");
-    vis.clear();
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
+                                  {.visible = false}, {.visible = false});
+      vis.write("blueprint_volume.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = true}, {.visible = false});
-    vis.write("blueprint_portals.obj");
-
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = true}, {.visible = false});
+      vis.write("blueprint_portals.obj");
     }
     if (m_printGeo) {
         Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
