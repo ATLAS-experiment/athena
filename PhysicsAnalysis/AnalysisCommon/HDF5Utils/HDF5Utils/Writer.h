@@ -552,7 +552,7 @@ namespace H5Utils {
     const Consumers<I>& consumers,
     const std::array<hsize_t, N>& extent = internal::uniform<N>(5),
     hsize_t batch_size = defaults::batch_size) {
-    WriterConfiguration<N>& config;
+    WriterConfiguration<N> config;
     config.name = name;
     config.extent = extent;
     config.batch_size = batch_size;
