@@ -101,7 +101,6 @@ atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions(
-   share/ReadAthenaPoolSeek_jobOptions.py
    share/AthenaOutputStream_test.txt
    share/FPEControlSvc_test.txt
    share/AthenaEventLoopMgr_test.txt
