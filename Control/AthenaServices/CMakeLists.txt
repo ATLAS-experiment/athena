@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
@@ -82,7 +82,8 @@ atlas_add_test( AthTPCnvSvc
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( AthDictLoaderSvc
-   SCRIPT athena.py --evtMax 1 AthenaServices/AthDictLoaderSvc_test.py
+   SCRIPT test/AthDictLoaderSvc_test.py
+   LOG_SELECT_PATTERN "AthDictLoaderTestAlg"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest
@@ -100,7 +101,6 @@ atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions(
-   share/AthDictLoaderSvc_test.py
    share/ReadAthenaPoolSeek_jobOptions.py
    share/AthenaOutputStream_test.txt
    share/FPEControlSvc_test.txt

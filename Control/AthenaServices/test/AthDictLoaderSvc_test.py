@@ -1,7 +1,13 @@
+#!/usr/bin/env athena.py
 # @file: AthenaServices/share/AthDictLoaderSvc_test.py
 # @purpose: make sure we can reliably load dictionaries with AthDictLoaderSvc
 # @author:  Sebastien Binet <binet@cern.ch>
 # @date:    October 2008
+
+import sys
+
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
 import AthenaPython.PyAthena as PyAthena
 StatusCode = PyAthena.StatusCode
@@ -80,6 +86,13 @@ class AthDictLoaderTestAlg (PyAthena.Alg):
         return StatusCode.Success
     pass # AthDictLoaderTestAlg
 
-from AthenaCommon.AlgSequence import AlgSequence
-job = AlgSequence()
-job += AthDictLoaderTestAlg()
+
+flags = initConfigFlags()
+flags.Exec.MaxEvents = 1
+flags.fillFromArgs()
+flags.lock()
+
+cfg = MainServicesCfg(flags)
+cfg.addEventAlgo(AthDictLoaderTestAlg())
+
+sys.exit(cfg.run().isFailure())
