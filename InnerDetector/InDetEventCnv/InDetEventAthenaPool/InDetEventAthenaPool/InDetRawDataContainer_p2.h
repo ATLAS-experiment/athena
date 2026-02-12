@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETRAWDATACONTAINER_P2_H
@@ -35,6 +35,8 @@ class InDetRawDataContainer_p2
   friend class TRT_LoLumRawDataContainerCnv_p2;
   friend class SCT1_RawDataContainerCnv_p2;
   friend class Pixel1RawDataContainerCnv_p2;
+  friend class PhaseIIPixelRawDataContainerCnv;
+
  private:
   std::vector<InDetRawDataCollection_p1>  m_collections;
   std::vector<InDetRawData_p2>            m_rawdata;
