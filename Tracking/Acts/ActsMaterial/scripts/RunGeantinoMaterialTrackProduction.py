@@ -38,6 +38,8 @@ def setupArgParser():
                         help="The input EVNT file to use")
     parser.add_argument("--outputhitsfile",default="myHITS.pool.root", type=str,
                         help="The output HITS filename")
+    parser.add_argument("--outputfile",default="material-tracks.root", type=str,
+                        help="The output Geantino filename")
     return parser
 
 if __name__ == "__main__":
@@ -155,7 +157,7 @@ if __name__ == "__main__":
 
 
     from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-    acc.merge(MaterialTrackWriterCfg(flags, useTrackingGeometry= False))
+    acc.merge(MaterialTrackWriterCfg(flags, useTrackingGeometry= False, FileName=args.outputfile))
 
     from MuonConfig.MuonConfigUtils import executeTest
     executeTest(acc)
