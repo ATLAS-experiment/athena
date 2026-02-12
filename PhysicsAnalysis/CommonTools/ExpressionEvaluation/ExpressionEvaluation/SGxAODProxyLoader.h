@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 #define SG_XAOD_PROXY_LOADER_H
 
 #include "ExpressionEvaluation/IProxyLoader.h"
-#include "ExpressionEvaluation/xAODVariableProxyLoaders.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -23,6 +22,8 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthContainers/AuxVectorBase.h"
+
+#include "RootUtils/TSMethodCall.h"
 
 #include "CxxUtils/CachedUniquePtr.h"
 #include <any>
@@ -50,14 +51,17 @@ namespace ExpressionParsing {
       SGxAODProxyLoader(StoreGateSvc_t &evtStore, bool verbose=false);
       virtual ~SGxAODProxyLoader();
 
-      virtual void reset();
+      virtual void reset() override;
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
+      virtual VariableType variableType(const std::string &var_name) const;
 
-      virtual int loadIntVariableFromString(const std::string &varname) const;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+      virtual std::pair< IProxyLoader::VariableType, const IAccessor &>
+              getAccessorFromString(const EventContext &ctx, const std::string &varname) const override;
+
+      virtual int loadInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual double loadDouble(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<double> loadVec(const EventContext& ctx,const std::string &varname) const override;
 
      /** Interface of an auxiliary class to pass the parent, e.g. @ref AthCommonDataStore, to this loader to declare new data handles.
       */

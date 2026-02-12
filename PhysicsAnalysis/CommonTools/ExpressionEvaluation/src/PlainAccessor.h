@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ExpressionParsing_PlainAccessor_h_
 #define ExpressionParsing_PlainAccessor_h_
@@ -138,7 +138,7 @@ namespace ExpressionParsing {
          return true;
       }
 
-      template <typename T, IProxyLoader::VariableType T_variable_type>
+      template <typename T, IAccessor::VariableType T_variable_type>
       class StdVectorKit : public IKit {
       public:
          virtual std::unique_ptr<IAccessor> createAccessor( const std::any &handle_key) const override {
@@ -158,7 +158,7 @@ namespace ExpressionParsing {
             return PlainAccessorFactory::registerReadKey<std::vector<T> >(read_keys, parent, var_name, new_input_handles, verbose);
          }
       };
-      template <typename T, IProxyLoader::VariableType T_variable_type>
+      template <typename T, IAccessor::VariableType T_variable_type>
       class PlainValueKit : public IKit {
       public:
          virtual std::unique_ptr<IAccessor> createAccessor( const std::any &handle_key) const override {
@@ -179,12 +179,12 @@ namespace ExpressionParsing {
          }
       };
 
-      template <typename T,IProxyLoader::VariableType T_variable_type>
+      template <typename T,IAccessor::VariableType T_variable_type>
       void registerStdVectorKit() {
          m_kits.insert( std::make_pair(typeid(std::vector<T>).hash_code(), std::make_unique< StdVectorKit<T,T_variable_type> >()));
          m_kits.insert( std::make_pair(typeid(SG::ReadHandleKey<std::vector<T> >).hash_code(), std::make_unique< StdVectorKit<T,T_variable_type> >()));
       }
-      template <typename T,IProxyLoader::VariableType T_variable_type>
+      template <typename T,IAccessor::VariableType T_variable_type>
       void registerPlainValueKit() {
          m_kits.insert( std::make_pair(typeid(SG::ReadHandleKey<T>).hash_code(), std::make_unique<PlainValueKit<T,T_variable_type> >()));
          m_kits.insert( std::make_pair(typeid(T).hash_code(), std::make_unique<PlainValueKit<T,T_variable_type> >()));

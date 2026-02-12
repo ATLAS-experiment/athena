@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType TriggerDecisionProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType TriggerDecisionProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     static const std::set<std::string> knownPrefixes{"L1", "L2", "EF", "HLT"};
 
@@ -35,7 +35,7 @@ namespace ExpressionParsing {
     else return VT_UNK;    
   }
 
-  int TriggerDecisionProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int TriggerDecisionProxyLoader::loadInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     bool passed(false);
     if ( varname == "" ) return(0); // no name => ?
@@ -45,17 +45,17 @@ namespace ExpressionParsing {
     else return(0); 
   }
 
-  double TriggerDecisionProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double TriggerDecisionProxyLoader::loadDouble([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     throw std::runtime_error("Trigger decision can't be a double: check " + varname);
   }
 
-  std::vector<int> TriggerDecisionProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> TriggerDecisionProxyLoader::loadVecInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     throw std::runtime_error("Trigger decision can't be vector<int>: check " + varname);
   }
 
-  std::vector<double> TriggerDecisionProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> TriggerDecisionProxyLoader::loadVec([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     throw std::runtime_error("Trigger decision can't be vector<double>: check " + varname);
   }
