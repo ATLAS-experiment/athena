@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import LHCPeriod
 
 def InDetSecVtxTruthMatchToolCfg(flags, name="InDetSecVtxTruthMatchTool", **kwargs):
     acc = ComponentAccumulator()
@@ -22,6 +23,8 @@ def InDetSecVtxTruthMatchToolMuSaCfg(flags, name="InDetSecVtxTruthMatchTool", **
     kwargs.setdefault("trackPtCut", 1000.0)
     kwargs.setdefault("doMuSA", True)
     kwargs.setdefault("doSMOrigin", False)
+    kwargs.setdefault("MuonContainer", "StdWithLRTMuons")
+    kwargs.setdefault("FallbackMuonContainer", "Muons")
 
     acc.setPrivateTools(CompFactory.InDetSecVtxTruthMatchTool(**kwargs))
     return acc
@@ -52,6 +55,11 @@ def SecVertexTruthMatchMuSaAlgCfg(flags, name="SecVertexTruthMatchMuSaAlg", **kw
 
     acc = ComponentAccumulator()
 
+    promptMuonContainer = kwargs.pop("PromptMuonContainer", "Muons")
+    lrtMuonContainer = kwargs.pop("LRTMuonContainer", "MuonsLRT")
+    mergedMuonContainer = kwargs.pop("MergedMuonContainer", "StdWithLRTMuons")
+    fallbackMuonContainer = kwargs.pop("FallbackMuonContainer", promptMuonContainer)
+
     kwargs.setdefault("TruthVertexContainer", "TruthVertices")
     kwargs.setdefault("SecondaryVertexContainer", "MuSAVertices")
     kwargs.setdefault("TrackParticleContainer", "MuonSpectrometerTrackParticles")
@@ -59,8 +67,20 @@ def SecVertexTruthMatchMuSaAlgCfg(flags, name="SecVertexTruthMatchMuSaAlg", **kw
     kwargs.setdefault("doMuSA", True)
     kwargs.setdefault("doSMOrigin", False)
 
+    from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+    acc.merge(LRTMuonMergerAlg(
+        flags,
+        PromptMuonLocation=promptMuonContainer,
+        LRTMuonLocation=lrtMuonContainer,
+        OutputMuonLocation=mergedMuonContainer,
+        CreateViewCollection=True,
+        UseRun3WP=(flags.GeoModel.Run == LHCPeriod.Run3)))
+
     kwargs.setdefault("MatchTool", acc.popToolsAndMerge(InDetSecVtxTruthMatchToolMuSaCfg(
-        flags, doSMOrigin=kwargs["doSMOrigin"])))
+        flags,
+        doSMOrigin=kwargs["doSMOrigin"],
+        MuonContainer=mergedMuonContainer,
+        FallbackMuonContainer=fallbackMuonContainer)))
 
     acc.addEventAlgo(CompFactory.CP.SecVertexTruthMatchAlg(name, **kwargs))
     acc.addService(CompFactory.THistSvc(Output = [f"ANALYSIS DATAFILE='{flags.Output.HISTFileName}' OPT='RECREATE'"]))
