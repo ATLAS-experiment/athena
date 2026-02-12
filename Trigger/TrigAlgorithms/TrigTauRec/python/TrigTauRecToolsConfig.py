@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -120,18 +120,28 @@ def trigTauJetONNXEvaluatorCfg(flags, tau_id=''):
     try: id_flags = getattr(flags.Trigger.Offline.Tau, tau_id)
     except NameError: raise ValueError(f'Invalid ONNX TauID configuration: {tau_id}')
 
+    if isinstance(id_flags.ONNXConfig, str):
+        network_config = {'NetworkFileInclusive': id_flags.ONNXConfig}
+    elif isinstance(id_flags.ONNXConfig, (list, tuple)) and len(id_flags.ONNXConfig) == 3:
+        network_config = {
+            'NetworkFile0P': id_flags.ONNXConfig[0],
+            'NetworkFile1P': id_flags.ONNXConfig[1],
+            'NetworkFile3P': id_flags.ONNXConfig[2],
+        }
+    else:
+        raise ValueError(f'Invalid {tau_id} ONNX network config file')
+
     acc.setPrivateTools(CompFactory.TauGNNEvaluator(
         name                = f'TrigTau_TauJetONNXEvaluator_{tau_id}',
 
         # Network config:
-        NetworkFile0P       = id_flags.ONNXConfig[0],
-        NetworkFile1P       = id_flags.ONNXConfig[1],
-        NetworkFile3P       = id_flags.ONNXConfig[2],
+        **network_config,
         InputLayerScalar    = 'tau_vars',
         InputLayerTracks    = 'track_vars',
         InputLayerClusters  = 'cluster_vars',
-        NodeNameTau         = 'pTau',
-        NodeNameJet         = 'pJet',
+        NodeNameTau         = id_flags.NodeNameTau if hasattr(id_flags, 'NodeNameTau') else 'pTau',
+        NodeNameJet         = id_flags.NodeNameJet if hasattr(id_flags, 'NodeNameJet') else 'pJet',
+
 
         # Inputs:
         MaxTracks           = id_flags.MaxTracks,
@@ -199,16 +209,30 @@ def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str, tauContai
     try: id_flags = getattr(flags.Trigger.Offline.Tau, tau_id)
     except NameError: raise ValueError(f'Invalid TauID configuration: {tau_id}')
 
+    if isinstance(id_flags.ScoreFlatteningConfig, str):
+        cfg = {
+            'flatteningFile0Prong': id_flags.ScoreFlatteningConfig,
+            'flatteningFile1Prong': id_flags.ScoreFlatteningConfig,
+            'flatteningFile3Prong': id_flags.ScoreFlatteningConfig,
+        }
+    elif isinstance(id_flags.ScoreFlatteningConfig, (list, tuple)) and len(id_flags.ONNXConfig) == 3:
+        cfg = {
+            'flatteningFile0Prong': id_flags.ScoreFlatteningConfig[0],
+            'flatteningFile1Prong': id_flags.ScoreFlatteningConfig[1],
+            'flatteningFile3Prong': id_flags.ScoreFlatteningConfig[2],
+        }
+    else:
+        raise ValueError(f'Invalid {tau_id} WP decorator flattening config')
+
+
     acc.setPrivateTools(CompFactory.TauWPDecorator(
-        name=f'TrigTau_TauWPDecoratorRNN_{precision_seq_name}_{tau_id}',
-        flatteningFile0Prong=id_flags.ScoreFlatteningConfig[0],
-        flatteningFile1Prong=id_flags.ScoreFlatteningConfig[1],
-        flatteningFile3Prong=id_flags.ScoreFlatteningConfig[2],
+        name=f'TrigTau_TauWPDecorator_{precision_seq_name}_{tau_id}',
+        **cfg,
         TauContainerName=tauContainerName,
-        DecorWPNames=[f'{tau_id}_{wp}' for wp in id_flags.WPNames],
-        DecorWPCutEffs0P=id_flags.TargetEff[0],
-        DecorWPCutEffs1P=id_flags.TargetEff[1],
-        DecorWPCutEffs3P=id_flags.TargetEff[2],
+        DecorWPNames=[f'{tau_id}_{wp}' for wp in id_flags.TargetWPs],
+        DecorWPCutEffs0P=[eff[0] for eff in id_flags.TargetWPs.values()],
+        DecorWPCutEffs1P=[eff[1] for eff in id_flags.TargetWPs.values()],
+        DecorWPCutEffs3P=[eff[2] for eff in id_flags.TargetWPs.values()],
         ScoreName=f'{tau_id}_Score',
         NewScoreName=f'{tau_id}_ScoreSigTrans',
         DefineWPs=True,
