@@ -3,6 +3,7 @@
 */
 
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -244,7 +245,7 @@ StatusCode Sherpa_i::fillEvt(HepMC::GenEvent* event) {
 #ifdef HEPMC3
   event->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 #else
-  GeVToMeV(event); //unit check
+  MC::GeVToMeV(event); //Only scales momenta and masses
 #endif
 
 

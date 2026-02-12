@@ -187,7 +187,7 @@ StatusCode FixHepMC::execute() {
       }
       if (units_problem>0){ // No particles should have momenta above 1 PeV; this must be a units issue
         ATH_MSG_INFO("Apparent units problem; beam particles have z-momentum " << units_problem << " in MeV. Will divide by 1000.");
-        MeVToGeV(evt);
+        MC::MeVToGeV(evt);  //Only scales momenta and masses
       }
     }
 

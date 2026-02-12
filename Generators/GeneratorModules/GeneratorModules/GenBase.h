@@ -128,7 +128,6 @@ public:
   }
   //@}
 
-
 protected:
 
   /// @name Properties
@@ -138,21 +137,6 @@ protected:
   /// Flag to determine if a new MC event collection should be made if it doesn't exist
   BooleanProperty m_mkMcEvent{this, "MakeMcEvent", false, "Create a new MC event collection if it doesn't exist"};
   //@}
-
-
-  /// @name Utility event-mangling functions
-  /// @todo Replace with HepMC units when available
-  //@{
-  /// Scale event energies/momenta by x 1000
-  void GeVToMeV(HepMC::GenEvent* evt);
-  /// Scale event energies/momenta by x 1/1000
-  void MeVToGeV(HepMC::GenEvent* evt);
-  /// Scale event lengths by x 10
-  void cmTomm(HepMC::GenEvent* evt);
-  /// Scale event lengths by x 1/10
-  void mmTocm(HepMC::GenEvent* evt);
-  //@}
-
 
 private:
 
