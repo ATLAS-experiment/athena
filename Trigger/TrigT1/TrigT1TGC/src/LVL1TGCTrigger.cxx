@@ -61,10 +61,9 @@ LVL1TGCTrigger::LVL1TGCTrigger(const std::string& name, ISvcLocator* pSvcLocator
 LVL1TGCTrigger::~LVL1TGCTrigger()
 {
   ATH_MSG_DEBUG("LVL1TGCTrigger destructor called");
-  if (m_db) {
-    delete m_db;
-    m_db =0;
-  }
+  delete m_db;
+  m_db = nullptr;
+  
 }
 
 ////////////////////////////////////////////////////////////
@@ -668,11 +667,11 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
   if(sector->hasHit() == false) return;
 
     // readoutID
-    int subDetectorId, rodId, sswId, sbLoc, secId;
+    int subDetectorId{}, rodId{}, sswId{}, sbLoc{}, secId{};
     
     // get numbering scheme info from cabling svc
-    int startEndcapSector, coverageOfEndcapSector;
-    int startForwardSector, coverageOfForwardSector;
+    int startEndcapSector{}, coverageOfEndcapSector{};
+    int startForwardSector{}, coverageOfForwardSector{};
     rodId = 1;
     m_cabling->getCoveragefromSRodID(rodId,
                                      startEndcapSector,
@@ -684,12 +683,13 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
     uint16_t bcTag=m_CurrentBunchTag, l1Id=0, bcId=0;
     
     // HPTID
-    bool isAside, isEndcap, isStrip; int phi;
-    isAside = (sector->getSideId()==0);
-    isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
+    bool isStrip{}; 
+    int phi{};
+    bool isAside = (sector->getSideId()==0);
+    bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
     int module = sector->getModuleId();
     //  sector Id = 0..47 (Endcap) 0..23 (forward)
-    int sectorId;
+    int sectorId{};
     if (isEndcap){
       sectorId = ((module/3)*2+module%3) + sector->getOctantId()*6;
     } else {
@@ -698,11 +698,15 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
     // secId for TgcRawData
     //  0-3(EC), 0-1(FWD) for new TGCcabling (1/12sector)
     //  0-5(EC), 0-2(FWD) for new TGCcabling (octant)
+    int modulo = coverageOfForwardSector;
     if (isEndcap){
-      secId = sectorId % coverageOfEndcapSector;
-    } else {
-      secId = sectorId % coverageOfForwardSector;
+      modulo = coverageOfEndcapSector;
     }
+    if (modulo == 0){
+      ATH_MSG_WARNING("recordRdoHPT fails due to modulo = 0.");
+      return;
+    }
+    secId = sectorId % modulo;
     // phi=1-48(EC), 1-24(FWD) in detector ID scheme
     phi = (isEndcap ? (sectorId+46)%48+1 : (sectorId+23)%24+1);
     
@@ -950,7 +954,7 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
 
     //  sector Id = 0..47 (Endcap) 0..23 (forward)
     int module = sector->getModuleId();
-    int sectorId;
+    int sectorId{};
     if (isEndcap){
       sectorId = ((module/3)*2+module%3) + sector->getOctantId()*6;
     } else {
@@ -960,8 +964,8 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     //  secID for TGCRawData
     //  0-3(EC), 0-1(FWD) for new TGCcabling (1/12sector)
     //  0-5(EC), 0-2(FWD) for new TGCcabling (octant)
-    int startEndcapSector, coverageOfEndcapSector;
-    int startForwardSector, coverageOfForwardSector;
+    int startEndcapSector{}, coverageOfEndcapSector{};
+    int startForwardSector{}, coverageOfForwardSector{};
     int rodId = 1;
     m_cabling->getCoveragefromSRodID(rodId,
                                      startEndcapSector,
@@ -970,12 +974,16 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
                                      coverageOfForwardSector
                                      ) ;
     int secId = 0;
+    int modulo = coverageOfForwardSector;
     if (isEndcap){
-      secId = sectorId % coverageOfEndcapSector;
-    } else {
-      secId = sectorId % coverageOfForwardSector;
+      modulo = coverageOfEndcapSector;
+    }
+    if (modulo == 0){
+      ATH_MSG_WARNING("recordRdoSL fails due to modulo = 0." );
+      return;
     }
     
+    secId = sectorId % modulo;
     // phi=1-48(EC), 1-24(FWD) in detector ID scheme
     phi = (isEndcap ? (sectorId+46)%48+1 : (sectorId+23)%24+1);
     
