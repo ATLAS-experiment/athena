@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -13,9 +13,8 @@
 #include "ParsingInternals.h"
 #include "ProxyLoaderSingleton.h"
 #include "UnitInterpreterSingleton.h"
-
+#include "AthContainers/CurrentContext.h"
 #include <boost/algorithm/string.hpp>
-
 namespace ExpressionParsing {
 
   ExpressionParser::ExpressionParser()
@@ -96,9 +95,15 @@ namespace ExpressionParsing {
     return vars;
   }
 
+  StackElement ExpressionParser::evaluate(const EventContext& ctx) const
+  {
+     return m_vm->execute(ctx, m_code);
+  }
+
   StackElement ExpressionParser::evaluate() const
   {
-    return m_vm->execute(m_code);
+     const EventContext& ctx = Gaudi::Hive::currentContext();
+     return m_vm->execute(ctx, m_code);
   }
 
   bool ExpressionParser::evaluateAsBool() const

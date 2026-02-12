@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,24 +12,24 @@
 #ifndef TEST_PROXY_LOADER_H
 #define TEST_PROXY_LOADER_H
 
-#include "ExpressionEvaluation/IProxyLoader.h"
+#include "ExpressionEvaluation/RelayProxyLoader.h"
 
 #include <atomic>
 
 namespace ExpressionParsing {
-  class TestProxyLoader : public IProxyLoader {
+  class TestProxyLoader : public RelayProxyLoader {
     public:
       TestProxyLoader() : m_intAccessCount(0) { }
       virtual ~TestProxyLoader();
 
-      virtual void reset();
+      virtual void reset() override;
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
+      virtual IAccessor::VariableType variableTypeFromString(const std::string &varname) const override;
 
-      virtual int loadIntVariableFromString(const std::string &varname) const;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+      virtual int loadInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual double loadDouble(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<double> loadVec(const EventContext& ctx,const std::string &varname) const override;
 
     private:
       mutable std::atomic<unsigned int> m_intAccessCount;

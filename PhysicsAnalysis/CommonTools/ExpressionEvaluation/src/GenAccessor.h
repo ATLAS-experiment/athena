@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionEvaluation_GenAccessor_h_
 #define _ExpressionEvaluation_GenAccessor_h_
@@ -62,22 +62,22 @@ namespace ExpressionParsing {
    template <class T_Cont, class T_HelperKit, class T_ScalarVectorHelper>
    class GenAccessor : public BaseAccessor {
    public:
-      GenAccessor(const SG::ReadHandleKey<T_Cont> &key, T_HelperKit &&helper_kit, IProxyLoader::VariableType variable_type)
+      GenAccessor(const SG::ReadHandleKey<T_Cont> &key, T_HelperKit &&helper_kit, IAccessor::VariableType variable_type)
          : BaseAccessor(variable_type),
            m_key(&key),
            m_helperKit(std::move(helper_kit))
       {}
 
-      virtual int loadInt(const EventContext& ctx) const override {
+      virtual int loadInt(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadScalar<int>(ctx);
       }
-      virtual double loadDouble(const EventContext& ctx) const override {
+      virtual double loadDouble(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadScalar<double>(ctx);
       }
-      virtual std::vector<int> loadVecInt(const EventContext& ctx) const override {
+      virtual std::vector<int> loadVecInt(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadVector<int>(ctx);
       }
-      virtual std::vector<double> loadVec(const EventContext& ctx) const override {
+      virtual std::vector<double> loadVec(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadVector<double>(ctx);
       }
    protected:

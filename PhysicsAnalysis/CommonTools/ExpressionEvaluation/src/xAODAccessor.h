@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionEvaluation_xAODAccessor_h_
 #define _ExpressionEvaluation_xAODAccessor_h_
@@ -138,7 +138,7 @@ namespace ExpressionParsing {
 
    /** Implementation of an accessor creator which provides accessors for xAOD accessor or decor handle access to content of AuxElement or AuxVectorBase
     */
-   template <class T, IProxyLoader::VariableType T_variable_type>
+   template <class T, IAccessor::VariableType T_variable_type>
    class AccessorKit : public IAccessorKit {
       virtual std::unique_ptr<IAccessor> create( const SG::ReadHandleKey<SG::AuxVectorBase> &key,
                                                  SG::auxid_t auxid,

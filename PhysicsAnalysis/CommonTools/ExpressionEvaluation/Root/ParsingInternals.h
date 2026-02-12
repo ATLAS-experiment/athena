@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -33,6 +33,8 @@
 #include "ExpressionEvaluation/StackElement.h"
 #include "ExpressionEvaluation/IProxyLoader.h"
 #include "ExpressionEvaluation/IUnitInterpreter.h"
+
+class EventContext;
 
 namespace ExpressionParsing
 { 
@@ -150,7 +152,7 @@ namespace ExpressionParsing
         : m_stackSize(stackSize)
       { }
 
-      StackElement execute(std::vector<StackElement> const& code) const;
+      StackElement execute(const EventContext& ctx, std::vector<StackElement> const& code) const;
   private:
       unsigned m_stackSize;
   };
