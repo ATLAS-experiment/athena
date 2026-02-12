@@ -21,7 +21,6 @@
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 #include "TRT_ConditionsData/FloatArrayStore.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 // Amg
 #include "EventPrimitives/EventPrimitives.h"
@@ -141,7 +140,7 @@ StatusCode TRT_AlignDbSvc::initialize()
   if( alignFolderExists ) {    
     
     /** register the callback */
-    ATH_CHECK( m_detStore->regFcn(&TRT_AlignDbSvc::IOVCallBack,this,m_aligncontainerhandle,m_alignroot) );
+//    ATH_CHECK( m_detStore->regFcn(&TRT_AlignDbSvc::IOVCallBack,this,m_aligncontainerhandle,m_alignroot) );
     
     /** Reminder that the constants will be read from text file. */
     if( alignTextFileExists ) 
@@ -179,7 +178,7 @@ StatusCode TRT_AlignDbSvc::finalize()
 }
 
 /** Call back function for alignment folders */
-StatusCode TRT_AlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
+StatusCode TRT_AlignDbSvc::IOVCallBack()
 {
   ATH_MSG_DEBUG( "In IOVCallBack"  );
   
@@ -194,8 +193,8 @@ StatusCode TRT_AlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
   
   /** Print the keys were setting 
    */
-  for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr)
-    ATH_MSG_INFO( "IOVCALLBACK for key " << *itr<< " number " << I  );
+//  for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr)
+//    ATH_MSG_INFO( "IOVCALLBACK for key " << *itr<< " number " << I  );
   
   
   if(!m_par_alitextfile.empty()){

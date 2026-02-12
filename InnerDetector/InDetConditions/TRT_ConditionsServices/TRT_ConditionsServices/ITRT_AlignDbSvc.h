@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_ALIGNDBSVC_H
@@ -13,7 +13,6 @@
 
 
 #include "GaudiKernel/IService.h"
-#include "AthenaKernel/IOVSvcDefs.h" // For IOVSVC_CALLBACK_ARGS macro def.
 // Amg
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -33,7 +32,7 @@ class ITRT_AlignDbSvc: virtual public IService
   DeclareInterfaceID(ITRT_AlignDbSvc,1,0);
   
   /** Call back function for alignment folders */
-  virtual StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS) =0;
+  virtual StatusCode IOVCallBack() =0;
   
   /** write AlignableTransforms to flat text file */
   virtual StatusCode writeAlignTextFile(const std::string & filename) const =0;

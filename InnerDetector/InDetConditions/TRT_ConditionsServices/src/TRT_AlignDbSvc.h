@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CONDITIONSSERVICES_TRT_ALIGNDBSVC_H
@@ -61,7 +61,7 @@ class TRT_AlignDbSvc: public extends<AthService, ITRT_AlignDbSvc>
   // TOOL METHODS
 
   /** Call back function for alignment folders */
-  StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS);
+  StatusCode IOVCallBack();
 
   /** write AlignableTransforms to flat text file */
   StatusCode writeAlignTextFile(const std::string & file) const;
