@@ -8,8 +8,8 @@
 namespace ExpressionParsing {
    class RelayProxyLoader : public IProxyLoader {
    public:
-      std::pair< IAccessor::VariableType, const IAccessor &>
-      getAccessorFromString([[maybe_unused]] const EventContext &ctx, const std::string &varname) const {
+      virtual std::pair< IAccessor::VariableType, const IAccessor &>
+      getAccessorFromString([[maybe_unused]] const EventContext &ctx, const std::string &varname) const override {
          return {variableTypeFromString(varname), *this};
       }
       virtual VariableType variableType([[maybe_unused]] const std::string &var_name) const override {

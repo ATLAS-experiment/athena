@@ -53,7 +53,7 @@ namespace ExpressionParsing {
 
       virtual void reset() override;
 
-      virtual VariableType variableType(const std::string &var_name) const;
+      virtual VariableType variableType(const std::string &var_name) const override;
 
       virtual std::pair< IProxyLoader::VariableType, const IAccessor &>
               getAccessorFromString(const EventContext &ctx, const std::string &varname) const override;
