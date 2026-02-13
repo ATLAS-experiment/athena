@@ -591,7 +591,16 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                         xbins=partxbins,
                                         ybins=partybins,
                                         pattern=[(part)])
-
+            if part=="ALL":
+                partGroup_sc.defineHistogram('SC_part_LB,SC_part_latomesourceidbin;InvalideCodes_vs_LB_vs_LATOME_'+thisSel, 
+                                             title='Invalide code entries vs LB vs LATOME '+selStrPart[thisSel]+'; LB ; LATOME',
+                                             type='TH2F',
+                                             cutmask='SC_part_'+thisSel,
+                                             path=thisTopPath,
+                                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
+                                             ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
+                                             ylabels=BinLabel_LATOME,
+                                             pattern=[(part)])
                 
 
     return helper.result()
