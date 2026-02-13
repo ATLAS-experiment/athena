@@ -6,7 +6,7 @@
 #    updates to LHE handling and SUSY functionality by Emma Kuwertz <ekuwertz@cern.ch>
 #  Attempts to remove path-dependence of MadGraph
 
-import os,time,subprocess,glob,re,sys
+import os,time,subprocess,glob,re
 # These Import lines are temporary for backwards compatibility of clients.
 from MCJobOptionUtils.JOsupport import check_reset_proc_number # noqa: F401
 from MCJobOptionUtils.LHAPDFsupport import get_LHAPDF_DATA_PATH # noqa: F401
@@ -34,17 +34,7 @@ MADGRAPH_CATCH_ERRORS=True
 MADGRAPH_PDFSETTING=None
 MADGRAPH_COMMAND_STACK = []
 
-patched_shutil_loc='/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/shutil_patch'
-if 'PYTHONPATH' in os.environ and patched_shutil_loc not in os.environ['PYTHONPATH']:
-    # add shutil_patch in first place so that the patched version of shutil.py is picked up by MG instead of original version
-    # the patched version does not throw the errors that has made running MG and this code impossible on some file systems
-    os.environ['PYTHONPATH'] = patched_shutil_loc+':'+os.environ['PYTHONPATH']
-    MADGRAPH_COMMAND_STACK += ['export PYTHONPATH='+patched_shutil_loc+':${PYTHONPATH}']
-# we need to remove shutil from modules before we can use our version
-if 'shutil' in sys.modules:
-    sys.modules.pop('shutil')
-# make sure this python instance uses fixed shutil
-sys.path.insert(0,patched_shutil_loc)
+
 import shutil
 
 
@@ -291,7 +281,7 @@ def generate(process_dir='PROC_mssm_0', grid_pack=False, gridpack_compile=False,
         # Return the setting for the systematics_program
         my_MGC_instance.runCardDict.update({'systematics_program':original_systematics_program})
         # Write out run Card Dictionary
-        my_MGC_instance.write_runCard()
+        my_MGC_instance.write_runCard(runArgs=runArgs)
         
         if not isNLO:
             # At LO, no events are generated. That means we need to move the MS card aside and back.
