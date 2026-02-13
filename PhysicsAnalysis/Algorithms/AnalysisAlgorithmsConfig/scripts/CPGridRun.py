@@ -22,6 +22,7 @@ class CPGridRun:
         self._tarballRecreated = False
         self._inputList = None 
         self._errorCollector = {} # Delay the error collection until the end of the script for better user experience
+        self._yamlPath = None
         self.cmd = {} # sample name -> command
 
     def _initRunscript(self):
@@ -72,6 +73,7 @@ class CPGridRun:
         submissionGroup.add_argument('--testRun', dest='testRun', action='store_true', help='Will submit job to the grid but greatly limit the number of files per job (10) and number of events (300)')
         submissionGroup.add_argument('--checkInputDS', dest='checkInputDS', action='store_true', help='Check if the input datasets are available on the AMI.')
         submissionGroup.add_argument('--recreateTar', dest='recreateTar', action='store_true', help='Re-compress the source code. Source code are compressed by default in submission, this is useful when the source code is updated')
+        submissionGroup.add_argument('--useCentralPackage', dest='useCentralPackage', action='store_true', help='Use central package instead of custom packages')
         self.args, self.unknown_args = parser.parse_known_args()
         self.outputFilesParsing()
         return parser
@@ -134,7 +136,6 @@ class CPGridRun:
         config = {
             'inDS': input,
             'outDS': self.args.outDS if self.args.outDS else self.outputDSFormatter(input) ,
-            'useAthenaPackages': True,
             'cmtConfig': os.environ["CMTCONFIG"],
             'writeInputToTxt': 'IN:in.txt',
             'outputs': self.outputsFormatter(),
@@ -151,11 +152,19 @@ class CPGridRun:
         if self.args.mergeType != 'None':
             config['mergeOutput'] = True
 
-        if not self._tarballRecreated and (self.args.recreateTar or not os.path.exists(self._tarfile) or self._filesChanged()):
+        # Three types of files sending the grid 
+        if self.args.useCentralPackage: # 1. Using central package and have a yaml file only
+            config['extFile'] = self._yamlPath
+            config['noBuild'] = True
+            config['noCompile'] = True
+            config['athenaTag'] = f"AnalysisBase,{os.environ['AnalysisBase_VERSION']}"
+        elif self._filesChangedOrTarballNotCreated(): # 2. Using custom packages and haven't compressed the tarball since the last changes
             config['outTarBall'] = self._tarfile
+            config['useAthenaPackages'] = True
             self._tarballRecreated = True
-        elif os.path.exists(self._tarfile) or self._tarballRecreated:
+        elif self._hasCompressedTarball(): # 3. Using custom packages and have compressed the tarball
             config['inTarBall'] = self._tarfile
+            config['useAthenaPackages'] = True
 
         if self.args.groupProduction:
             config['official'] = True
@@ -165,8 +174,8 @@ class CPGridRun:
             config['destSE'] = self.args.destSE
 
         if self.args.testRun:
-            config['nEventsPerFile'] = 300
-            config['nFiles'] = 10
+            config['nEventsPerFile'] = 100
+            config['nFiles'] = 5
         config.update(self.prunArgsDict)
         cmd = 'prun \\\n'
         for k, v in config.items():
@@ -304,7 +313,13 @@ class CPGridRun:
             return False
     
         return True
-        
+    
+    def _filesChangedOrTarballNotCreated(self):
+        return not self._tarballRecreated and (self.args.recreateTar or not os.path.exists(self._tarfile) or self._filesChanged())
+    
+    def _hasCompressedTarball(self):
+        return os.path.exists(self._tarfile) or self._tarballRecreated
+    
     def outputDSFormatter(self, name):
         if CPGridRun.isAtlasProductionFormat(name):
             return self._outputDSFormatter(name)
@@ -446,6 +461,7 @@ class CPGridRun:
             self._errorCollector['no yaml'] = "No YAML configuration file is specified in the exec string. Please provide one using --text-config"
             return
         yamlPath = getattr(runscriptArgs, 'text_config')
+        self._yamlPath = yamlPath 
         haveLocalYaml = CPBaseRunner.findLocalPathYamlConfig(yamlPath)
         if haveLocalYaml:
             logCPGridRun.warning("A path to a local YAML configuration file is found, but it may not be grid-usable.")
@@ -458,11 +474,15 @@ class CPGridRun:
             logCPGridRun.info(f"Found a grid-usable YAML configuration file in the analysis repository: {repoYamls[0]}")
             return
         
-        if not repoYamls:
+        if haveLocalYaml and self.args.useCentralPackage:
+            logCPGridRun.warning("A path to a local YAML configuration file is found, no custom packages are found, proceed with /cvmfs packages only.")
+            
+        if not repoYamls and not self.args.useCentralPackage:
             self._errorCollector['no usable yaml'] = f"Grid usable YAML configuration file not found: {yamlPath}"
             if haveLocalYaml:
                 self._errorCollector['have local yaml'] = f"Only a local YAML configuration file is found: {yamlPath}, not usable in the grid.\n" \
-                f"Make sure the YAML file is in build/x86_64-el9-gcc14-opt/data/package_name/config.yaml. You can install the YAML file through CMakeList.txt with `atlas_install_data( data/* )`; use `-t package_name/config.yaml` in the --exec"
+                f"Make sure the YAML file is in build/x86_64-el9-gcc14-opt/data/package_name/config.yaml. You can install the YAML file through CMakeList.txt with `atlas_install_data( data/* )`; use `-t package_name/config.yaml` in the --exec\n"\
+                f"Or if you are only using central packages, please use the `--useCentralPackage` flag."
 
     def outputsFormatter(self):
         outputs = [f'{output.split(".")[0]}:{output}' for output in self.args.output_files]
