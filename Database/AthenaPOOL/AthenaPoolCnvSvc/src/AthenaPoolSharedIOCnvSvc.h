@@ -84,11 +84,6 @@ public:
 		   const std::string& refAddress,
 		   IOpaqueAddress*& refpAddress) override;
 
-
-   /// Extract/deduce the DB technology from the connection
-   /// string/file specification
-   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const override;
-
    /// Implement cleanUp to call all registered IAthenaPoolCleanUp cleanUp() function.
    virtual StatusCode cleanUp(const std::string& connection) override;
 
