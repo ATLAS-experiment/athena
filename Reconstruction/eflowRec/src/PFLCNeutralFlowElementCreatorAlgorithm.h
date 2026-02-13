@@ -1,7 +1,7 @@
 #ifndef PFLCNEUTRALFLOWELEMENTCREATORALGORITHM_H
 #define PFLCNEUTRALFLOWELEMENTCREATORALGORITHM_H
 
-#include "eflowRec/eflowCaloObject.h"
+#include "eflowCaloObject.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"

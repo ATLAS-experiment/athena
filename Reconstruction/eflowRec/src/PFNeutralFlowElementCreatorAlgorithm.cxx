@@ -1,6 +1,6 @@
 #include "PFNeutralFlowElementCreatorAlgorithm.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/PFClusterWidthCalculator.h"
+#include "eflowRecCluster.h"
+#include "PFClusterWidthCalculator.h"
 #include "xAODCore/ShallowCopy.h"
 #include "xAODPFlow/FlowElementAuxContainer.h"
 #include "xAODPFlow/FEHelpers.h"

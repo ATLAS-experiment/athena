@@ -4,12 +4,12 @@
 
 #include "PFRadialEnergyCalculatorTool.h"
 
-#include "eflowRec/eflowCellList.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowRingThicknesses.h"
-#include "eflowRec/eflowSubtractor.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "eflowCellList.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowRingThicknesses.h"
+#include "eflowSubtractor.h"
+#include "eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
 StatusCode PFRadialEnergyCalculatorTool::execute(eflowCaloObjectContainer& theEflowCaloObjectContainer){

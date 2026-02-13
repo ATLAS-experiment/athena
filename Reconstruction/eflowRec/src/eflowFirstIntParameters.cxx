@@ -13,9 +13,9 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowCaloRegions.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowFirstIntParameters.h"
+#include "eflowCaloRegions.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowFirstIntParameters.h"
 #include <iostream>
 
 const int eflowFirstIntParameters::m_nShapeParams = 4;

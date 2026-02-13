@@ -9,13 +9,13 @@
 #include "StoreGate/DataHandle.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowRecTrack.h"
+#include "eflowCaloObject.h"
+#include "eflowRecTrack.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "eflowRec/IPFClusterSelectorTool.h"
-#include "eflowRec/IPFBaseTool.h"
-#include "eflowRec/IPFSubtractionTool.h"
+#include "IPFClusterSelectorTool.h"
+#include "IPFBaseTool.h"
+#include "IPFSubtractionTool.h"
 
 class eflowRecClusterContainer;
 
