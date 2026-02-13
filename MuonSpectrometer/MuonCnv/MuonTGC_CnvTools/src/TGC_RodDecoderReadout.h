@@ -28,8 +28,7 @@ namespace Muon {
 class TGC_RodDecoderReadout : public extends<AthAlgTool, ITGC_RodDecoder> {
    public:
     /** Default constructor */
-    TGC_RodDecoderReadout(const std::string& t, const std::string& n,
-                          const IInterface* p);
+    using base_class::base_class;
     /** default destructor */
     virtual ~TGC_RodDecoderReadout();
 
@@ -40,11 +39,11 @@ class TGC_RodDecoderReadout : public extends<AthAlgTool, ITGC_RodDecoder> {
     /** Convert ROBFragment to RDO */
     virtual StatusCode fillCollection(
         const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-        TgcRdoContainer& rdoIdc) const override;
+        TgcRdoContainer& rdoIdc, const EventContext& ctx) const override;
 
    private:
     /** TGC ID helper */
-    const TgcIdHelper* m_tgcIdHelper;
+    const TgcIdHelper* m_tgcIdHelper{nullptr};
 
     /** Retrieve header of ROBFragment */
     void getCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
@@ -59,10 +58,11 @@ class TGC_RodDecoderReadout : public extends<AthAlgTool, ITGC_RodDecoder> {
     void showStatusWords(const uint32_t source_id, const uint16_t rdoId,
                          const int idHash, const uint32_t nstatus,
                          const uint32_t* status) const;
+
     /** Flag for showStatusWords */
-    bool m_showStatusWords;
+    Gaudi::Property<bool> m_showStatusWords{this, "ShowStatusWords", false};
     /** Flag for skipping coincidence objects (for TrigT1TGC running on data) */
-    bool m_skipCoincidence;
+    Gaudi::Property<bool> m_skipCoincidence{this, "SkipCoincidence", false};
 
     // counters to see how often we use the cache for the raw data collections
     mutable std::atomic<unsigned int> m_nCache = 0;

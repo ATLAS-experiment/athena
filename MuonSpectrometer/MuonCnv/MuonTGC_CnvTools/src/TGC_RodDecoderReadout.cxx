@@ -21,14 +21,6 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 //================ Constructor =================================================
 
-Muon::TGC_RodDecoderReadout::TGC_RodDecoderReadout(const std::string& t,
-                                                   const std::string& n,
-                                                   const IInterface* p)
-    : base_class(t, n, p), m_tgcIdHelper(nullptr) {
-    declareProperty("ShowStatusWords", m_showStatusWords = false);
-    declareProperty("SkipCoincidence", m_skipCoincidence = false);
-}
-
 //================ Destructor =================================================
 
 Muon::TGC_RodDecoderReadout::~TGC_RodDecoderReadout() = default;
@@ -36,17 +28,9 @@ Muon::TGC_RodDecoderReadout::~TGC_RodDecoderReadout() = default;
 //================ Initialisation =================
 
 StatusCode Muon::TGC_RodDecoderReadout::initialize() {
-    StatusCode sc = AthAlgTool::initialize();
-
-    if (sc.isFailure()) {
-        return sc;
-    }
 
     // Retrieve the TgcIdHelper
-    if (detStore()->retrieve(m_tgcIdHelper, "TGCIDHELPER").isFailure()) {
-        ATH_MSG_FATAL(" Cannot retrieve TgcIdHelper ");
-        return StatusCode::FAILURE;
-    }
+    ATH_CHECK(detStore()->retrieve(m_tgcIdHelper, "TGCIDHELPER"));
 
     ATH_MSG_INFO("initialize() successful in " << name());
     return StatusCode::SUCCESS;
@@ -55,7 +39,6 @@ StatusCode Muon::TGC_RodDecoderReadout::initialize() {
 //================ Finalisation ===================
 
 StatusCode Muon::TGC_RodDecoderReadout::finalize() {
-    StatusCode sc = AthAlgTool::finalize();
 
     if (m_nCache > 0 || m_nNotCache > 0) {
         const float cacheFraction =
@@ -64,13 +47,14 @@ StatusCode Muon::TGC_RodDecoderReadout::finalize() {
             "Fraction of fills that use the cache = " << cacheFraction);
     }
 
-    return sc;
+    return StatusCode::SUCCESS;
 }
 
 //================ fillCollection ===============
 
 StatusCode Muon::TGC_RodDecoderReadout::fillCollection(
-    const ROBFragment& robFrag, TgcRdoContainer& rdoIdc) const {
+    const ROBFragment& robFrag, TgcRdoContainer& rdoIdc,
+    const EventContext& /*ctx*/) const {
     try {
         robFrag.check();
     } catch (eformat::Issue& ex) {  // error in fragment

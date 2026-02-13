@@ -6,7 +6,7 @@
 
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoIdHash.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "eformat/SourceIdentifier.h"
 using eformat::helper::SourceIdentifier;
 
@@ -34,7 +34,7 @@ uint32_t Muon::TGC_Hid2RESrcID::getRodID(uint16_t subDetectorId,
 
 // get source ID for an TgcDigitCollection
 uint32_t Muon::TGC_Hid2RESrcID::getRodID(const Identifier& offlineId,
-                                         const MuonTGC_CablingSvc* cabling) {
+                                         const TgcCablingMap* cabling) {
     int subDetectorId;
     int rodId;
     cabling->getReadoutIDfromElementID(offlineId, subDetectorId, rodId);

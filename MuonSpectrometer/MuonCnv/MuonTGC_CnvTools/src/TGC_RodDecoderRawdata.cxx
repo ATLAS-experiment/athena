@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGC_RodDecoderRawdata.h"
@@ -8,62 +8,38 @@
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "TgcByteStreamData.h"
-#include "TgcRODReadOut.h"
 #include "eformat/Issue.h"
 #include "eformat/SourceIdentifier.h"
 
 using eformat::helper::SourceIdentifier;
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
-//================ Constructor =================================================
-
-Muon::TGC_RodDecoderRawdata::TGC_RodDecoderRawdata(const std::string& t,
-                                                   const std::string& n,
-                                                   const IInterface* p)
-    : base_class(t, n, p), m_tgcRODReadOut(nullptr) {
-    declareProperty("ReadSlbHeaderId", m_readSlbHeaderId = false);
-    declareProperty("CheckRawData", m_checkRawData = false);
-    declareProperty("ShowStatusWords", m_showStatusWords = false);
-}
-
 //================ Destructor =================================================
-
 Muon::TGC_RodDecoderRawdata::~TGC_RodDecoderRawdata() = default;
 
 //================ Initialisation =================
 
 StatusCode Muon::TGC_RodDecoderRawdata::initialize() {
-    ATH_CHECK(AthAlgTool::initialize());
-
-    ATH_CHECK(m_cablingSvc.retrieve());
-    m_tgcRODReadOut = new TgcRODReadOut(*(m_cablingSvc.get()));
-
+    m_tgcRODReadOut = std::make_unique<TgcRODReadOut>();
+    ATH_CHECK(m_cablingKey.initialize());
     ATH_MSG_INFO("initialize() successful in " << name());
     return StatusCode::SUCCESS;
-}
-
-//================ Finalisation ===================
-
-StatusCode Muon::TGC_RodDecoderRawdata::finalize() {
-    delete m_tgcRODReadOut;
-    m_tgcRODReadOut = nullptr;
-
-    StatusCode sc = AthAlgTool::finalize();
-    return sc;
 }
 
 //================ fillCollection
 //===============================================
 
 StatusCode Muon::TGC_RodDecoderRawdata::fillCollection(
-    const ROBFragment& robFrag, TgcRdoContainer& rdoIdc) const {
+    const ROBFragment& robFrag, TgcRdoContainer& rdoIdc,
+    const EventContext& ctx) const {
     try {
         robFrag.check();
     } catch (eformat::Issue& ex) {  // error in fragment
         ATH_MSG_WARNING(ex.what());
         return StatusCode::SUCCESS;
     }
-
+    const TgcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
     uint32_t source_id = robFrag.rod_source_id();
     SourceIdentifier sid(robFrag.rod_source_id());
 
@@ -87,15 +63,16 @@ StatusCode Muon::TGC_RodDecoderRawdata::fillCollection(
 
         if (m_checkRawData) {
             byteStream2Rdo(bs, *rdo, robFrag.rod_source_id());
-            if (!m_tgcRODReadOut->check(bs, *rdo, robFrag.rod_source_id())) {
+            if (!m_tgcRODReadOut->check(bs, *rdo, robFrag.rod_source_id(),
+                                        *cabling, msgStream())) {
                 ATH_MSG_WARNING(
                     " Can't Check the contents of TgcRdo: Skip decoding of "
                     "remaining hits of this event...");
                 return StatusCode::SUCCESS;
             }
         } else {
-            if (!m_tgcRODReadOut->byteStream2Rdo(bs, *rdo,
-                                                 robFrag.rod_source_id())) {
+            if (!m_tgcRODReadOut->byteStream2Rdo(
+                    bs, *rdo, robFrag.rod_source_id(), *cabling, msgStream())) {
                 ATH_MSG_WARNING(
                     " Can't Convert the TGC BS to Rdo: Skip decoding of "
                     "remaining hits of this event...");

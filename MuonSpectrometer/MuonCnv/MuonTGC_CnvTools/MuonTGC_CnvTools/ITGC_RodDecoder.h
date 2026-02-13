@@ -9,6 +9,7 @@
 #define MUONTGC_CNVTOOLS_IMUONTGC_RODDECODER_H
 
 #include "ByteStreamData/RawEvent.h"
+#include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
 
 class TgcRdoContainer;
@@ -28,7 +29,7 @@ class ITGC_RodDecoder : virtual public IAlgTool {
     /** Convert ROBFragments to RDOs */
     virtual StatusCode fillCollection(
         const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-        TgcRdoContainer& rdoIdc) const = 0;
+        TgcRdoContainer& rdoIdc, const EventContext& ctx) const = 0;
 };
 
 }  // namespace Muon

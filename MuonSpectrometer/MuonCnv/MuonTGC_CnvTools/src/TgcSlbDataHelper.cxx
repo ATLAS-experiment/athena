@@ -258,8 +258,9 @@ void Muon::TgcSlbDataHelper::convertToCoincidences(
                         slb->getBcId(),   // uint16_t bcId
                         (i < (N_LPT_I / 2)
                              ? TgcRawData::SLB_TYPE_INNER_STRIP
-                             : TgcRawData::SLB_TYPE_INNER_WIRE),  // TgcRawData::SlbType
-                                                                  // slbType
+                             : TgcRawData::
+                                   SLB_TYPE_INNER_WIRE),  // TgcRawData::SlbType
+                                                          // slbType
                         // TRIGA HIT (bits 0..3) is for Strip and TRIGB HIT
                         // (bits 4..7) is for Wire
                         // https://twiki.cern.ch/twiki/pub/Main/TgcDocument/celladdress2_asic_rev2.pdf

@@ -5,13 +5,11 @@
 #ifndef MUONTGC_CNVTOOL_ITGC_RDO_Decoder_H
 #define MUONTGC_CNVTOOL_ITGC_RDO_Decoder_H
 
+#include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-
 class TgcDigit;
 class TgcRawData;
 class Identifier;
-
-static const InterfaceID IID_ITGC_RDO_Decoder("Muon::ITGC_RDO_Decoder", 1, 0);
 
 namespace Muon {
 
@@ -25,16 +23,18 @@ class ITGC_RDO_Decoder : virtual public IAlgTool {
 
    public:
     /** Provide interface ID of ITGC_RDO_Decoder */
-    static const InterfaceID& interfaceID() { return IID_ITGC_RDO_Decoder; };
+    DeclareInterfaceID(ITGC_RDO_Decoder, 1, 0);
 
     /** Set a flag for application of patch.
      *  Need to describe when patch is required. */
     virtual void applyPatch(bool patch) = 0;
     /** Get TGC Digit from TGC RDO */
-    virtual TgcDigit* getDigit(const TgcRawData* rawData,
-                               bool orFlag) const = 0;
+    virtual std::unique_ptr<TgcDigit> getDigit(const EventContext& ctx,
+                                               const TgcRawData& rawData,
+                                               bool orFlag) const = 0;
     /** Get offline ID and bcTag from TGC RDO */
-    virtual Identifier getOfflineData(const TgcRawData* rawData, bool orFlag,
+    virtual Identifier getOfflineData(const EventContext& ctx,
+                                      const TgcRawData& rawData, bool orFlag,
                                       uint16_t& bctag) const = 0;
 };
 

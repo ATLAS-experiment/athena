@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGC_RODDECODERRAWDATA_H
@@ -7,13 +7,12 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTGC_CnvTools/ITGC_RodDecoder.h"
-
+#include "TgcRODReadOut.h"
 class TgcRdo;
 
 namespace Muon {
-class TgcRODReadOut;
 
 /** @class TGC_RodDecoderRawdata
  *  A tool to decode a TGC ROB fragment written in the raw data format into TGC
@@ -31,19 +30,16 @@ class TgcRODReadOut;
 class TGC_RodDecoderRawdata : public extends<AthAlgTool, ITGC_RodDecoder> {
    public:
     /** Default constructor */
-    TGC_RodDecoderRawdata(const std::string& t, const std::string& n,
-                          const IInterface* p);
+    using base_class::base_class;
     /** Default destructor */
     virtual ~TGC_RodDecoderRawdata();
 
     /** Standard AlgTool method */
     virtual StatusCode initialize() override;
-    /** Standard AlgTool method */
-    virtual StatusCode finalize() override;
     /** Convert ROBFragment to RDO */
     virtual StatusCode fillCollection(
         const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-        TgcRdoContainer& rdoIdc) const override;
+        TgcRdoContainer& rdoIdc, const EventContext& ctx) const override;
 
    private:
     /** Retrieve header of ROBFragment */
@@ -60,16 +56,16 @@ class TGC_RodDecoderRawdata : public extends<AthAlgTool, ITGC_RodDecoder> {
                          const int idHash, const uint32_t nstatus,
                          const uint32_t* status) const;
     /** Switch for reading IDs in SLB Header or ROD Header */
-    bool m_readSlbHeaderId;
+    Gaudi::Property<bool> m_readSlbHeaderId{this, "ReadSlbHeaderId", false};
     /** Switch for checking rawdata format with readout format */
-    bool m_checkRawData;
+    Gaudi::Property<bool> m_checkRawData{this, "CheckRawData", false};
     /** RawData format converter */
-    TgcRODReadOut* m_tgcRODReadOut;
+    std::unique_ptr<TgcRODReadOut> m_tgcRODReadOut{};
     /** Flag for showStatusWords */
-    bool m_showStatusWords;
+    Gaudi::Property<bool> m_showStatusWords{this, "ShowStatusWords", false};
 
-    ServiceHandle<MuonTGC_CablingSvc> m_cablingSvc{this, "TGCCablingSvc",
-                                                   "MuonTGC_CablingSvc", ""};
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
+        this, "CablingKey", "MuonTgc_CablingMap"};
 };
 
 }  // namespace Muon
