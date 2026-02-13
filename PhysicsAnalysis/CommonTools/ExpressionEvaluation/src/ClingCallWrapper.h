@@ -89,7 +89,7 @@ public:
 private:
    TClingCallFuncWrapper_t m_methodWrapper = nullptr;
    const TMethod *m_method = nullptr;
-   TMethodCall::EReturnType m_returnType;
+   TMethodCall::EReturnType m_returnType{};
 };
 
 /// @brief Helper class to wrap a cling method call of an object's method with defined return type and argument list.

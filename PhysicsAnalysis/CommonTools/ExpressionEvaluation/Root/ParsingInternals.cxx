@@ -42,8 +42,8 @@ namespace ExpressionParsing {
     while (pc != code.end())
     {
        if (stack.size() > max_stack_size) max_stack_size = stack.size();
-      ++pc;
-      switch (pc[-1].asInt())
+      
+      switch ((pc++)->asInt())
       {
         case op_neg: {
           stack.back() = -std::move(stack.back());

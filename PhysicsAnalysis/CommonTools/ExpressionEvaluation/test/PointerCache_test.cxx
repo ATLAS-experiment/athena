@@ -1,6 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
+#include "ExpressionEvaluation/PointerCache.h"
+
 #include <atomic>
 #include <thread>
 #include <cassert>
@@ -9,8 +11,8 @@
 #include <iostream>
 #include <cstring>
 #include <span>
+#include <memory>
 
-#include "ExpressionEvaluation/PointerCache.h"
 
 class IAccessor {
 public:
@@ -60,6 +62,7 @@ int main (int argc, char **argv) {
    std::vector<unsigned int> random_numbers;
    random_numbers.reserve(n_threads*n_events);
    for (unsigned int i=0; i<random_numbers.capacity(); ++i) {
+      //coverity[DC.WEAK_CRYPTO]
       random_numbers.push_back(rand());
    }
 
@@ -68,6 +71,7 @@ int main (int argc, char **argv) {
    AccessorCache cache;
 
    std::vector< std::thread > tasks;
+   //coverity[TAINTED_SCALAR]
    for (unsigned int i=0; i<n_threads; ++i) {
       unsigned int start=n_events*i;
       if (start+n_events>random_numbers.size()) { std::cerr << "not enough random numbers for thread." << std::endl; abort(); }
@@ -76,6 +80,7 @@ int main (int argc, char **argv) {
          accessor_task(global_accesor,end_of_loop, cache,processed,event_count,updates, numbers);
       });
    }
+   //coverity[TAINTED_SCALAR]
    for (unsigned int i=0; i<n_events; ++i) {
       processed=0;
       ++event_count;
