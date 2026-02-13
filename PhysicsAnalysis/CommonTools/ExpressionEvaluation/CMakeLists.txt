@@ -27,6 +27,5 @@ atlas_add_test( ExpressionParser_test
 
 atlas_add_test( PointerCache_test
                 SOURCES test/PointerCache_test.cxx
-                LINK_LIBRARIES ExpressionEvaluationLib TestTools
                 POST_EXEC_SCRIPT nopost.sh
                 PROPERTIES TIMEOUT 300 )
