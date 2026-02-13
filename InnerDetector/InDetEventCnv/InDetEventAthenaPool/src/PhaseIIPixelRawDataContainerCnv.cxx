@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PhaseIIPixelRawDataContainerCnv.h"
-#include "MsgUtil.h"
+
 #include "InDetIdentifier/PixelID.h"
 
 #include <memory>
@@ -85,7 +85,7 @@ PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient()
     rdo_container_dest.reserve(n_rdos_total);
     assert(persCont->m_rawdata.size() == n_rdos_total);
 
-    unsigned int n_rejected_ranges=0u;
+    [[maybe_unused]] unsigned int n_rejected_ranges=0u;
     for (  const InDetRawDataCollection_p1 &a_collection : persCont->m_collections) {
 
        PhaseII::DataRange new_range( static_cast<RangeBeginIndex_t>(rdo_container_dest.size()),

@@ -2,6 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #undef NDEBUG
+#include <atomic>
 #include <array>
 #include <vector>
 #include <cassert>
@@ -100,7 +101,7 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
                         unsigned int n_cols,
                         unsigned int n_rows,
                         PhaseIIPixelRawDataContainer &container) {
-   unsigned int n_rejected_ranges=0u;
+   [[maybe_unused]] unsigned int n_rejected_ranges=0u;
 
    // get the actual hit data container for the given slot
    PhaseII::PixelRawDataContainer &rdo_data = container.data(slot_i);
@@ -193,9 +194,9 @@ void conversionTest(PhaseIIPixelRawDataContainer &rdo_container ) {
       // test that these indices indeed recover the same element
       auto element0 = rdo_container_collection_proxy[index0];
       auto element_back = rdo_container_collection_proxy[back_index];
-#endif
       assert( element0.index() == a_module_proxy.index() && &element0.container() == &a_module_proxy.container());
       assert( element_back.index() == a_module_proxy_back.index() && &element_back.container() == &a_module_proxy_back.container());
+#endif
    }
 
    for (auto module_proxy : rdo_container_collection_proxy) {
@@ -213,10 +214,10 @@ void conversionTest(PhaseIIPixelRawDataContainer &rdo_container ) {
          // test that these indices indeed recover the same element
          auto element0 = module_proxy[index0];
          auto element_back = module_proxy[back_index];
-#endif
-
          assert( element0.index() == pixel_proxy.index() && &element0.container() == &pixel_proxy.container());
          assert( element_back.index() == pixel_proxy_back.index() && &element_back.container() == &pixel_proxy_back.container());
+#endif
+
 
          break;
       }
@@ -422,10 +423,9 @@ std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
    // hit data of that particular ROI.
    std::vector<std::thread> threads;
    threads.reserve(rois.size());
-   unsigned int roi_i=0;
    std::atomic<unsigned int> n_container_changes=0;
    for (const std::vector<unsigned int> &roi : rois) {
-      threads.emplace_back( [&a_roi_rdo_container=roi_rdo_container, &roi, &rdo_container, slot_i=roi_i, &n_rejected_work, &n_container_changes] () {
+      threads.emplace_back( [&a_roi_rdo_container=roi_rdo_container, &roi, &rdo_container, &n_rejected_work, &n_container_changes] () {
          // each thread will try to copy the input hit data of all modules of an ROI to the output hit container
          PhaseIIPixelRawDataContainerMT::ContainerPtr rdo_container_dest = a_roi_rdo_container.getNewContainerPtr();
          // estimate the number RDOs for this container (rdo_container_dest)
@@ -485,7 +485,6 @@ std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
          }
          n_container_changes += n_container_changes_per_roi;
       });
-      ++roi_i;
    }
    // wait for all threads to finish
    for (std::thread &a_thread : threads) {
