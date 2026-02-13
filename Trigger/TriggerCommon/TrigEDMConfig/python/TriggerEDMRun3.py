@@ -252,9 +252,11 @@ L1TopoErrorFlagVars = '.'.join(['hasGenericRoiError', 'hasGenericDaqError', 'has
                                 'hasCrcDaqError', 'hasRoibDaqDifference', 'hasRoibCtpDifference', 'hasDaqCtpDifference'])
 # ===========
 # === Tau ===
-def getTauIDVars(name: str) -> list[str]:
+def getTauIDVars(name: str, wps: list[str] | None = None, extra_wps: list[str] | None = None) -> list[str]:
+    if wps is None: wps = ['VeryLoose', 'Loose', 'Medium', 'Tight']
+    if extra_wps is not None: wps += extra_wps
     # Default list of variables required for all triggers, according to the naming convention
-    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans', 'VeryLoose', 'Loose', 'Medium', 'Tight']]
+    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans'] + wps]
 
 TauJet_vars = []
 TauJet_vars += getTauIDVars('GNTau')
@@ -1335,5 +1337,20 @@ def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
             (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')]
 
 
+def getRun3LowMuEDM(flags):
+    """
+    Get additional EDM entries recorded only for low mu runs.
+    """
 
+    TLAEDMTargets = 'BS PhysicsTLA'
+    if flags.Input.isMC:
+        TLAEDMTargets += ' ESD'
 
+    lowMuEDM = [
+        ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+    ]
+ 
+    return lowMuEDM
