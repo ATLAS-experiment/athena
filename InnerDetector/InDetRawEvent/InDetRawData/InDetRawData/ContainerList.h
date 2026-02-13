@@ -90,7 +90,7 @@ struct DynamicContainerListHelper {
 
    /// @brief Helper which provides a pointer to a container and the index of the container in the container list.
    struct ContainerPtr {
-      friend class DynamicContainerListHelper;
+      friend struct DynamicContainerListHelper;
    protected:
       ContainerPtr(T_Container *ptr, unsigned int container_idx) : m_container(ptr),m_containerIdx(container_idx) {}
    public:

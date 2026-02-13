@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PhaseIIStripRawDataContainerCnv.h"
-#include "MsgUtil.h"
+
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetEventAthenaPool/SCT3_RawData_p4.h"
 #include "InDetEventAthenaPool/InDetRawDataCollection_p1.h"
@@ -122,7 +122,7 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient()
     rdo_container_dest.reserve(n_rdos_total);
     assert(persCont->m_rawdata.size() == n_rdos_total);
 
-    unsigned int n_rejected_ranges=0u;
+    [[maybe_unused]] unsigned int n_rejected_ranges=0u;
     if (type==PhaseII::StripRawDataContainer::SCT1) {
        assert(persCont->m_rawdata.size() == n_rdos_total);
        // type 1

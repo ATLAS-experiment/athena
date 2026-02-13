@@ -3,13 +3,14 @@
   */
 #ifndef PHASEII_RAWDATACONTAINER_H
 #define PHASEII_RAWDATACONTAINER_H
+
 #include <array>
 #include <vector>
 #include <cassert>
-#include <limits>
 #include <cstdint>
 #include <cstring>
 #include <atomic>
+
 #include "ProxyContainer.h"
 #include "ContainerList.h"
 
@@ -320,9 +321,9 @@ namespace PhaseII {
    /// It provides access to hit coordinates of a single hit and an associated data word, but
    /// lacks the means to interpret the data word.
    template <class T_RawDataContainer, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   class RawDataProxyBase : public ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::ElementProxyBase<accessPolicy> {
+   class RawDataProxyBase : public ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy> {
    public:
-      using BASE = typename ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::ElementProxyBase<accessPolicy>;
+      using BASE = typename ContainerProxyBase<T_RawDataContainer, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy>;
       using BASE::BASE;
 
       const auto &coordinates() const {
@@ -409,7 +410,7 @@ namespace PhaseII {
    template <class T_RawDataContainerCollection, class T_RawDataProxy, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
    class ContainerProxyAdapter : public ContainerProxyBase<T_RawDataContainerCollection,
                                                             unsigned int,
-                                                            accessPolicy >::ElementProxyBase<accessPolicy>
+                                                            accessPolicy >::template ElementProxyBase<accessPolicy>
    {
       using T_Range = typename T_RawDataContainerCollection::T_RangeTypeBase;
       using T_RawDataContainer = std::remove_cvref_t<decltype(std::declval<T_RawDataContainerCollection>().data(std::uint32_t{}))>;
@@ -433,7 +434,7 @@ namespace PhaseII {
          return &(container.data(range.containerIndex()));
       }
    public:
-      using BASE = typename ContainerProxyBase<T_RawDataContainerCollection, unsigned int, accessPolicy >::ElementProxyBase<accessPolicy>;
+      using BASE = typename ContainerProxyBase<T_RawDataContainerCollection, unsigned int, accessPolicy >::template ElementProxyBase<accessPolicy>;
       using BASE::BASE;
 
       /// @brief Create the actual container proxy for the elements this proxy refers to.
@@ -488,7 +489,7 @@ namespace PhaseII {
    template <class T_RawDataContainer, AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
    struct RawDataCollectionTypes {
       using ContainerCollection = PhaseII::IndexedRanges<T_RawDataContainer, std::atomic<PhaseII::DataRange> >;
-      using RawDataProxy = typename RawData::details::traits<T_RawDataContainer>::RawDataProxy<accessPolicy>;
+      using RawDataProxy = typename RawData::details::traits<T_RawDataContainer>::template RawDataProxy<accessPolicy>;
       using RawDataContainerProxy  = PhaseII::RawDataContainerProxy<T_RawDataContainer, RawDataProxy, accessPolicy>;
       using ContainerProxyAdapter  = PhaseII::ContainerProxyAdapter<ContainerCollection, RawDataProxy, accessPolicy>;
       using ContainerCollectionProxy = PhaseII::ContainerCollectionProxy<ContainerCollection, RawDataProxy, accessPolicy>;

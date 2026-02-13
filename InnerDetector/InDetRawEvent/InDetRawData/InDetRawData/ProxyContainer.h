@@ -4,8 +4,9 @@
 #ifndef UTILS_PROXY_CONTAINER_H
 #define UTILS_PROXY_CONTAINER_H
 
-#include <limits>
 #include <cassert>
+#include <utility>
+
 // Helper classes to construct proxy container objects
 // to handle iteration over containers like jagged vectors.
 // A use case would be a container which contains containers
@@ -328,7 +329,7 @@ struct ContainerProxy : ContainerProxyBase<Container, typename ElementProxy::ind
 
    // base class of proxy objects referring to elements of this container proxy
    template <AccessPolicy elementAccessPolicy>
-   using ElementProxyBase = typename  BASE::ElementProxyBase<elementAccessPolicy>;
+   using ElementProxyBase = typename  BASE::template ElementProxyBase<elementAccessPolicy>;
 
    /// @brief Base class of iterators to iterate over the elements of this proxy container
    template <AccessPolicy iteratorAccessPolicy>
