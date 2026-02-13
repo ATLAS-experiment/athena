@@ -9,7 +9,7 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/PFMatcher.h"
+#include "PFMatcher.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 namespace PFMatch {

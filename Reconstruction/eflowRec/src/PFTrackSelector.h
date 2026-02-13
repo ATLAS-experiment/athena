@@ -17,7 +17,7 @@
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "Particle/TrackParticleContainer.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
-#include "eflowRec/eflowRecTrack.h"
+#include "eflowRecTrack.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/VertexContainer.h"

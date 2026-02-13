@@ -14,7 +14,7 @@
 ///
 //////////////////////////////////////////////////
 
-#include "eflowRec/IPFOContainerCorrectionTool.h"
+#include "IPFOContainerCorrectionTool.h"
 
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/FlowElementContainer.h"

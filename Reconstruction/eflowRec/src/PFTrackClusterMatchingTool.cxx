@@ -9,13 +9,13 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/PFTrackClusterMatchingTool.h"
+#include "PFTrackClusterMatchingTool.h"
 
-#include "eflowRec/PFMatcher.h"
-#include "eflowRec/PFMatchDistance.h"
-#include "eflowRec/PFMatchPositions.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowRecCluster.h"
+#include "PFMatcher.h"
+#include "PFMatchDistance.h"
+#include "PFMatchPositions.h"
+#include "eflowRecTrack.h"
+#include "eflowRecCluster.h"
 
 using namespace PFMatch;
 

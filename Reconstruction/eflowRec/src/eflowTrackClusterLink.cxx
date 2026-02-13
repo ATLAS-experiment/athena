@@ -9,7 +9,7 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "eflowTrackClusterLink.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "CxxUtils/checker_macros.h"
 

@@ -1,11 +1,11 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "eflowRec/PFSimulateTruthShowerTool.h"
+#include "PFSimulateTruthShowerTool.h"
 
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
 

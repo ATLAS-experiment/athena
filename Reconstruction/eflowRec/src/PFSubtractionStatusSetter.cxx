@@ -4,10 +4,10 @@
 
 
 #include "GaudiKernel/Bootstrap.h"
-#include "eflowRec/PFSubtractionStatusSetter.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "PFSubtractionStatusSetter.h"
+#include "eflowCaloObject.h"
+#include "eflowRecCluster.h"
+#include "eflowTrackClusterLink.h"
 
 #include <numeric>
 

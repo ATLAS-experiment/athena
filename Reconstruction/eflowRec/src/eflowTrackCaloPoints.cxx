@@ -17,7 +17,7 @@ CREATED:  4th January, 2006
 #include <iostream>
 #include <cmath>
 
-#include "eflowRec/eflowTrackCaloPoints.h"
+#include "eflowTrackCaloPoints.h"
 
 using std::pair;
 
