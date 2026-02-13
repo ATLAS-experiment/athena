@@ -72,6 +72,13 @@ StatusCode HI::HIEventFilterAlgRun3::execute() {
     }
   }
 
+  if ( isRequested(maskToUse, HI::SelectionMask::PUZDCPresampler)) {
+    auto zdcHandle = SG::makeHandle(m_zdcKey);
+    if ( m_tool->puZDCPresampler(period, zdcHandle.cptr(), HI::PileupVariation::Nominal)) {
+      store(HI::SelectionMask::PUZDCPresampler, mask);
+    }
+  }
+
   if (isRequested(maskToUse, HI::SelectionMask::PUOOSingleVertexNominal)) {
     auto vertexHandle = SG::makeHandle(m_verticesKey);
     if (m_tool->puOOVertexCuts(period, vertexHandle.cptr())) {
