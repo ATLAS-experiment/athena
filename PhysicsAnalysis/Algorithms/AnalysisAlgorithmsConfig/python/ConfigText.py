@@ -300,6 +300,11 @@ class TextConfig(ConfigFactory):
                         if extraOptions is None:
                             extraOptions = {}
                         extraOptions[i['name']] = i['value']
+                    # TODO: figure out why onlyForDSIDs is not properly updated in algOpts
+                    if i['name'] == "onlyForDSIDs" and "onlyForDSIDs" in options and options["onlyForDSIDs"]:
+                        if extraOptions is None:
+                            extraOptions = {}
+                        extraOptions[i['name']] = options["onlyForDSIDs"]
             else:
                 algOpts = seq.setOptions(extraOptions.copy())
 
