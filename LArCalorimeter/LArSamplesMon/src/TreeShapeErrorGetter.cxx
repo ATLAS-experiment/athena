@@ -192,12 +192,9 @@ bool TreeShapeErrorGetter::merge(const TString& listFile, const TString& outputF
   std::vector<std::unique_ptr<const TreeShapeErrorGetter> > getters;
   
   while (f >> fileName) {
-    //gSystem->Exec("free");
+    //std::make_unique cannot return nullptr
     auto getter = std::make_unique<TreeShapeErrorGetter>(fileName.c_str());
-    if (!getter) {
-      cout << "Skipping invalid file " << fileName << endl;
-      continue;
-    }
+    
     cout << std::setw(2) << ++i << " - " << fileName << endl;
     getters.push_back(std::move(getter));
   }
