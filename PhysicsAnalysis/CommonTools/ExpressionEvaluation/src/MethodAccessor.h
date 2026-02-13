@@ -20,8 +20,8 @@
 #include <memory>
 #include <map>
 #include <stdexcept>
-#include <sstream>
 #include <cassert>
+#include <cstdint> //for uint64_t etc.
 
 namespace ExpressionParsing {
 
@@ -168,9 +168,8 @@ namespace ExpressionParsing {
                                                     RootUtils::ClingCallWrapperUncheckedReturnValue<> &&method_wrapper,
                                                     TVirtualCollectionProxy *proxy) const override {
             if (!proxy) {
-               std::stringstream msg;
-               msg << "Cannot use method access of types SG::AuxVectorBase without a collection proxy.";
-               throw std::logic_error(msg.str());
+               const auto msg = "Cannot use method access of types SG::AuxVectorBase without a collection proxy.";
+               throw std::logic_error(msg);
             }
             return createAccessor<SG::AuxVectorBase, VectorHelper>(key,std::move(method_wrapper),proxy,m_vectorType);
          }
@@ -180,10 +179,10 @@ namespace ExpressionParsing {
                                                     RootUtils::ClingCallWrapperUncheckedReturnValue<> &&method_wrapper,
                                                     TVirtualCollectionProxy *proxy=nullptr) const override {
             if (proxy) {
-               return createAccessor<SG::AuxElement,VectorHelper>(key,std::move(method_wrapper),proxy, (!proxy ? m_scalarType : m_vectorType));
+               return createAccessor<SG::AuxElement,VectorHelper>(key,std::move(method_wrapper),proxy, m_vectorType);
             }
             else {
-               return createAccessor<SG::AuxElement,ScalarHelper>(key,std::move(method_wrapper),proxy, (!proxy ? m_scalarType : m_vectorType));
+               return createAccessor<SG::AuxElement,ScalarHelper>(key,std::move(method_wrapper),proxy, m_scalarType );
             }
             // @TODO really vectorType and GenScalarAccessor if collection proxy is given ?
          }
@@ -241,7 +240,7 @@ namespace ExpressionParsing {
          m_kits.insert( std::make_pair(std::string("int64_t"),
                                        std::make_pair(std::make_unique<MethodAccessorKit<std::int64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
                                                       TInterpreter::EReturnType::kLong)));
-m_kits.insert( std::make_pair(std::string("std::int64_t"),
+         m_kits.insert( std::make_pair(std::string("std::int64_t"),
                               std::make_pair(std::make_unique<MethodAccessorKit<std::int64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
                                              TInterpreter::EReturnType::kLong)));
          m_kits.insert( std::make_pair(std::string("unsigned long"),
@@ -286,10 +285,9 @@ m_kits.insert( std::make_pair(std::string("std::int64_t"),
          std::map<std::string, std::pair<std::unique_ptr<IMethodAccessorKit>, TInterpreter::EReturnType> >::const_iterator
             iter = m_kits.find(method_wrapper.getReturnTypeNormalizedName());
          if (iter == m_kits.end()) {
-            std::stringstream amsg;
-            amsg << "ExpressionParsing::MethodAccessorFactory: no kit for return type " << method_wrapper.getReturnTypeNormalizedName()
-                 << " wrapper " << typeid(method_wrapper).name();
-            throw std::runtime_error(amsg.str());
+            const std::string amsg = "ExpressionParsing::MethodAccessorFactory: no kit for return type " + method_wrapper.getReturnTypeNormalizedName()
+                 + " wrapper " + typeid(method_wrapper).name();
+            throw std::runtime_error(amsg);
          }
          return *(iter->second.first);
       }
