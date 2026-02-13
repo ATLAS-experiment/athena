@@ -43,69 +43,58 @@ TGCCablePPToSLB::TGCCablePPToSLB(const std::string& filename)
 
 TGCCablePPToSLB::~TGCCablePPToSLB() = default;
 
-TGCChannelId* TGCCablePPToSLB::getChannel(const TGCChannelId* channelId,
-                                          bool orChannel) const {
-    if (channelId) {
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::PPOut) {
-            return getChannelOut(channelId, orChannel);
-        }
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::SLBIn) {
-            return getChannelIn(channelId, orChannel);
-        }
+std::unique_ptr<TGCChannelId> TGCCablePPToSLB::getChannel(
+    const TGCChannelId& channelId, bool orChannel) const {
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::PPOut) {
+        return getChannelOut(channelId, orChannel);
     }
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::SLBIn) {
+        return getChannelIn(channelId, orChannel);
+    }
+
     return nullptr;
 }
 
-TGCModuleMap* TGCCablePPToSLB::getModule(const TGCModuleId* moduleId) const {
-    if (moduleId) {
-        if (moduleId->getModuleIdType() == TGCModuleId::PP) {
-            return getModuleOut(moduleId);
-        }
-        if (moduleId->getModuleIdType() == TGCModuleId::SLB) {
-            return getModuleIn(moduleId);
-        }
+TGCModuleMap TGCCablePPToSLB::getModule(const TGCModuleId& moduleId) const {
+    if (moduleId.getModuleIdType() == TGCModuleId::PP) {
+        return getModuleOut(moduleId);
     }
-    return nullptr;
+    if (moduleId.getModuleIdType() == TGCModuleId::SLB) {
+        return getModuleIn(moduleId);
+    }
+    return TGCModuleMap{};
 }
 
-TGCChannelId* TGCCablePPToSLB::getChannelIn(const TGCChannelId* slbin,
-                                            bool orChannel) const {
-    if (orChannel) {
+std::unique_ptr<TGCChannelId> TGCCablePPToSLB::getChannelIn(
+    const TGCChannelId& slbin, bool orChannel) const {
+    if (orChannel || slbin.isValid() == false) {
         return nullptr;
     }
-    if (slbin->isValid() == false) {
-        return nullptr;
-    }
-    TGCChannelPPOut* ppout = nullptr;
 
     // SLB channel
     const TGCChannelSLBIn* slbIn = nullptr;
-    if (slbin->getChannelIdType() == TGCChannelId::ChannelIdType::SLBIn) {
-        slbIn = dynamic_cast<const TGCChannelSLBIn*>(slbin);
+    if (slbin.getChannelIdType() == TGCChannelId::ChannelIdType::SLBIn) {
+        slbIn = dynamic_cast<const TGCChannelSLBIn*>(&slbin);
     }
     if (!slbIn) {
         return nullptr;
     }
 
     // SLB module
-    TGCModuleId* slb = slbIn->getModule();
+    std::unique_ptr<TGCModuleId> slb = slbIn->getModule();
     if (!slb) {
         return nullptr;
     }
 
     // SLB -> PP module connection
-    TGCModuleMap* mapId = getModule(slb);
-    delete slb;
-    if (!mapId) {
+    TGCModuleMap mapId = getModule(*slb);
+    if (!mapId.size()) {
         return nullptr;
     }
 
     // PP module
-    int port = mapId->connector(0);
-    TGCModuleId* pp = mapId->popModuleId(0);
-    delete mapId;
+    int port = mapId.begin()->first;
+    auto pp = mapId.popModule(port);
     if (!pp) {
         return nullptr;
     }
@@ -115,7 +104,6 @@ TGCChannelId* TGCCablePPToSLB::getChannelIn(const TGCChannelId* slbin,
     int channel = -1;
     TGCChannelSLBIn::CellType cellType = slbIn->getCellType();
     if (cellType == TGCChannelSLBIn::NoCellType) {
-        delete pp;
         return nullptr;
     }
 
@@ -139,50 +127,34 @@ TGCChannelId* TGCCablePPToSLB::getChannelIn(const TGCChannelId* slbin,
         block = 0 + 2 * port;
         channel = slbIn->getChannelInSLB();
     }
-    ppout = new TGCChannelPPOut(pp->getSideType(), pp->getModuleType(),
-                                pp->getRegionType(), pp->getSector(),
-                                pp->getId(), block, channel);
-
-    delete pp;
-    return ppout;
+    return std::make_unique<TGCChannelPPOut>(
+        pp->getSideType(), pp->getModuleType(), pp->getRegionType(),
+        pp->getSector(), pp->getId(), block, channel);
 }
 
-TGCChannelId* TGCCablePPToSLB::getChannelOut(const TGCChannelId* ppout,
-                                             bool orChannel) const {
-    if (orChannel) {
-        return nullptr;
-    }
-    if (ppout->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCablePPToSLB::getChannelOut(
+    const TGCChannelId& ppout, bool orChannel) const {
+    if (orChannel || ppout.isValid() == false) {
         return nullptr;
     }
 
-    const int ppoutBlock = ppout->getBlock();
-
-    TGCChannelSLBIn* slbin = nullptr;
+    const int ppoutBlock = ppout.getBlock();
 
     // PP module
-    TGCModuleId* pp = ppout->getModule();
+    std::unique_ptr<TGCModuleId> pp{ppout.getModule()};
     if (!pp) {
         return nullptr;
     }
 
     // PP -> SLB module connection
-    TGCModuleMap* mapId = getModule(pp);
-    delete pp;
-    if (!mapId) {
+    TGCModuleMap mapId = getModule(*pp);
+    if (!mapId.size()) {
         return nullptr;
     }
 
     // SLB module
-    TGCModuleId* slb = nullptr;
-    const int size = mapId->size();
-    for (int i = 0; i < size; i++) {
-        if (mapId->connector(i) == ppoutBlock / 2) {
-            slb = mapId->popModuleId(i);
-            break;
-        }
-    }
-    delete mapId;
+    auto slb = mapId.popModule(ppoutBlock / 2);
+
     if (!slb) {
         return nullptr;
     }
@@ -193,65 +165,60 @@ TGCChannelId* TGCCablePPToSLB::getChannelOut(const TGCChannelId* ppout,
     if (ppoutBlock % 2 == 0) {  // D,C
         int lengthOfSLB = TGCChannelSLBIn::getLengthOfSLB(
             slb->getModuleType(), TGCChannelSLBIn::CellD);
-        if (ppout->getChannel() < lengthOfSLB) {
+        if (ppout.getChannel() < lengthOfSLB) {
             cellType = TGCChannelSLBIn::CellD;
-            channelInSLB = ppout->getChannel();
+            channelInSLB = ppout.getChannel();
         } else {
             cellType = TGCChannelSLBIn::CellC;
-            channelInSLB = ppout->getChannel() - lengthOfSLB;
+            channelInSLB = ppout.getChannel() - lengthOfSLB;
         }
     } else {  // B,A
         int lengthOfSLB = TGCChannelSLBIn::getLengthOfSLB(
             slb->getModuleType(), TGCChannelSLBIn::CellB);
-        if (ppout->getChannel() < lengthOfSLB) {
+        if (ppout.getChannel() < lengthOfSLB) {
             cellType = TGCChannelSLBIn::CellB;
-            channelInSLB = ppout->getChannel();
+            channelInSLB = ppout.getChannel();
         } else {
             cellType = TGCChannelSLBIn::CellA;
-            channelInSLB = ppout->getChannel() - lengthOfSLB;
+            channelInSLB = ppout.getChannel() - lengthOfSLB;
         }
     }
 
     int channel = TGCChannelSLBIn::convertChannel(slb->getModuleType(),
                                                   cellType, channelInSLB);
-    slbin = new TGCChannelSLBIn(slb->getSideType(), slb->getModuleType(),
-                                slb->getRegionType(), slb->getSector(),
-                                slb->getId(), channel);
-    delete slb;
-
-    return slbin;
+    return std::make_unique<TGCChannelSLBIn>(
+        slb->getSideType(), slb->getModuleType(), slb->getRegionType(),
+        slb->getSector(), slb->getId(), channel);
 }
 
-TGCModuleMap* TGCCablePPToSLB::getModuleIn(const TGCModuleId* slb) const {
-    if (slb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCablePPToSLB::getModuleIn(const TGCModuleId& slb) const {
+    if (slb.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int slbId = slb->getId();
+    const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb->getRegionType()][slb->getModuleType()].get();
-    TGCModuleMap* mapId = nullptr;
+        m_database[slb.getRegionType()][slb.getModuleType()].get();
+    TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 1) == slbId) {
             int id = databaseP->getEntry(i, 0);
-            TGCModulePP* pp =
-                new TGCModulePP(slb->getSideType(), slb->getModuleType(),
-                                slb->getRegionType(), slb->getSector(), id);
+            auto pp = std::make_unique<TGCModulePP>(
+                slb.getSideType(), slb.getModuleType(), slb.getRegionType(),
+                slb.getSector(), id);
 
-            mapId = new TGCModuleMap();
-            mapId->insert(0, pp);
+            mapId.insert(0, std::move(pp));
             break;
         }
         if (databaseP->getEntry(i, 2) == slbId) {
             int id = databaseP->getEntry(i, 0);
-            TGCModulePP* pp =
-                new TGCModulePP(slb->getSideType(), slb->getModuleType(),
-                                slb->getRegionType(), slb->getSector(), id);
+            auto pp = std::make_unique<TGCModulePP>(
+                slb.getSideType(), slb.getModuleType(), slb.getRegionType(),
+                slb.getSector(), id);
 
-            mapId = new TGCModuleMap();
-            mapId->insert(1, pp);
+            mapId.insert(1, std::move(pp));
             break;
         }
     }
@@ -259,39 +226,37 @@ TGCModuleMap* TGCCablePPToSLB::getModuleIn(const TGCModuleId* slb) const {
     return mapId;
 }
 
-TGCModuleMap* TGCCablePPToSLB::getModuleOut(const TGCModuleId* pp) const {
-    if (pp->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCablePPToSLB::getModuleOut(const TGCModuleId& pp) const {
+    if (pp.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int ppId = pp->getId();
+    const int ppId = pp.getId();
 
     TGCDatabase* databaseP =
-        m_database[pp->getRegionType()][pp->getModuleType()].get();
-    TGCModuleMap* mapId = nullptr;
+        m_database[pp.getRegionType()][pp.getModuleType()].get();
+    TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 0) == ppId) {
             int id = -1;
-            TGCModuleSLB* slb = nullptr;
-            mapId = new TGCModuleMap();
 
             id = databaseP->getEntry(i, 1);
             if (id != -1) {
-                slb =
-                    new TGCModuleSLB(pp->getSideType(), pp->getModuleType(),
-                                     pp->getRegionType(), pp->getSector(), id);
+                auto slb = std::make_unique<TGCModuleSLB>(
+                    pp.getSideType(), pp.getModuleType(), pp.getRegionType(),
+                    pp.getSector(), id);
 
-                mapId->insert(0, slb);
+                mapId.insert(0, std::move(slb));
             }
 
             id = databaseP->getEntry(i, 2);
             if (id != -1) {
-                slb =
-                    new TGCModuleSLB(pp->getSideType(), pp->getModuleType(),
-                                     pp->getRegionType(), pp->getSector(), id);
+                auto slb = std::make_unique<TGCModuleSLB>(
+                    pp.getSideType(), pp.getModuleType(), pp.getRegionType(),
+                    pp.getSector(), id);
 
-                mapId->insert(1, slb);
+                mapId.insert(1, std::move(slb));
             }
             break;
         }

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "Identifier/ExpandedIdentifier.h"
+#include "GaudiKernel/MsgStream.h"
 #include <cstdio>
 #include <cstring>
 #include <iomanip>
-#include <iostream>
 #include <charconv>
 #include <stdexcept>
 #include <ranges>
@@ -57,8 +57,13 @@ ExpandedIdentifier::operator std::string () const{
 }
 
 void 
-ExpandedIdentifier::show () const{
-  std::cout<<  "["<< show_vector (m_fields,".") <<"]";
+ExpandedIdentifier::show (std::ostream & out) const{
+  out<<  "["<< show_vector (m_fields,".") <<"]";
+}
+
+void 
+ExpandedIdentifier::show (MsgStream & out) const{
+  out<<  "["<< show_vector (m_fields,".") <<"]";
 }
 
 std::ostream & operator << (std::ostream &out, const ExpandedIdentifier & x){

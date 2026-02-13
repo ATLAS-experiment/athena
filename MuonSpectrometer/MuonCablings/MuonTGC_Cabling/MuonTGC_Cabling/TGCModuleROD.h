@@ -14,12 +14,9 @@ class TGCModuleROD : public TGCModuleId {
     // Constructor & Destructor
     TGCModuleROD(TGCId::SideType side, int readoutSector);
 
-    virtual ~TGCModuleROD(void) {}
+    virtual ~TGCModuleROD() = default;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCModuleROD(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

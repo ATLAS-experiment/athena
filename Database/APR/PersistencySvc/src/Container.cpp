@@ -28,12 +28,6 @@ pool::PersistencySvc::Container::tokens()
                                                   this->name() );
 }
 
-const std::string&
-pool::PersistencySvc::Container::parentDatabaseName() const
-{
-  return m_fileDescriptor.FID();
-}
-
 long
 pool::PersistencySvc::Container::technology() const
 {

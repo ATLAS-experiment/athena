@@ -145,11 +145,6 @@ namespace pool  {
                   const std::string& pfn,
                   const std::string& fid,
                   DbAccessMode mode = pool::READ);
-    /// Re-open database with changing access permissions
-    /** @param   mode      [IN]  Open mode (Valid modes are READ, UPDATE).
-      * @return Status code indicating success or failure.
-      */
-    StatusCode reopen(DbAccessMode mode = pool::READ);
     /// Close Database
     StatusCode close();
     /// End database access, but still leave database accessible

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/TGCRDOVariables.h"
@@ -9,17 +9,28 @@
 
 using namespace Muon;
 namespace MuonPRDTest {
-    TGCRDOVariables::TGCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl, ServiceHandle<MuonTGC_CablingSvc> cabling_svc) :
-        PrdTesterModule(tree, "RDO_TGC", msglvl), m_key{container_name}, m_tgcCabling{cabling_svc} {}
-    bool TGCRDOVariables::declare_keys() { return declare_dependency(m_key); }
+    TGCRDOVariables::TGCRDOVariables(MuonTesterTree& tree, 
+                                     const std::string& container_name,
+                                     const std::string& cabling_key,
+                                      MSG::Level msglvl) :
+        PrdTesterModule(tree, "RDO_TGC", msglvl), 
+        m_key{container_name}, 
+        m_tgcCablingKey{cabling_key} {}
+    bool TGCRDOVariables::declare_keys() { 
+        return declare_dependency(m_key) &&
+               declare_dependency(m_tgcCablingKey); 
+    }
 
     bool TGCRDOVariables::fill(const EventContext& ctx) {
         ATH_MSG_DEBUG("do fillTGCRDOVariables()");
         const MuonGM::MuonDetectorManager* MuonDetMgr = getDetMgr(ctx);
         if (!MuonDetMgr) { return false; }
-        SG::ReadHandle<TgcRdoContainer> tgcrdoContainer{m_key, ctx};
-        if (!tgcrdoContainer.isValid()) {
-            ATH_MSG_FATAL("Failed to retrieve tgc rdo container " << m_key.fullKey());
+        const TgcRdoContainer* tgcrdoContainer{};       
+        if (!SG::get(tgcrdoContainer, m_key, ctx).isSuccess()) {
+            return false;
+        }
+        const Muon::TgcCablingMap* cabling{nullptr};
+        if (!SG::get(cabling, m_tgcCablingKey, ctx).isSuccess()) {
             return false;
         }
         ATH_MSG_DEBUG("retrieved TGC rdo Container with size " << tgcrdoContainer->size());
@@ -30,14 +41,14 @@ namespace MuonPRDTest {
             ATH_MSG_DEBUG("processing collection with size " << coll->size());
             for (const TgcRawData* rdo: *coll) {
 
-                bool orFlag = m_tgcCabling->isOredChannel(rdo->subDetectorId(),
+                bool orFlag = cabling->isOredChannel(rdo->subDetectorId(),
                                                           rdo->rodId(),
                                                           rdo->sswId(),
                                                           rdo->slbId(),
                                                           rdo->bitpos());
 
                 Identifier Id;
-                bool e_found = m_tgcCabling->getElementIDfromReadoutID(Id,
+                bool e_found = cabling->getElementIDfromReadoutID(Id,
                                              rdo->subDetectorId(),
                                              rdo->rodId(),
                                              rdo->sswId(),

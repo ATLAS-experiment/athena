@@ -8,11 +8,13 @@
 #include "../MuonDetectorTool.h"
 #include "../MuonGeoUtilityTool.h"
 #include "../sTgcReadoutGeomTool.h"
+#include "../ToroidDetectorTool.h"
 #ifndef SIMULATIONBASE
 #   include "../ChamberAssembleTool.h"
 #endif
 
 DECLARE_COMPONENT(MuonGMR4::MuonDetectorTool)
+DECLARE_COMPONENT(MuonGMR4::ToroidDetectorTool)
 DECLARE_COMPONENT(MuonGMR4::MdtReadoutGeomTool)
 DECLARE_COMPONENT(MuonGMR4::TgcReadoutGeomTool)
 DECLARE_COMPONENT(MuonGMR4::RpcReadoutGeomTool)

@@ -37,7 +37,6 @@ class SortedCollectionCreator:
          name = attr.name()
          self.attrNames.append(name)
          self.attrTypes[name] = attr.type()
-      self.tokenName = desc.eventReferenceColumnName()
       # make a local copy of the description
       self.collDescription = self.pool.CollectionDescription( desc )
 
@@ -49,7 +48,6 @@ class SortedCollectionCreator:
       self.allRows = []
       self.attrNames = []
       self.attrTypes = {}
-      self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
          iColl = self.collSvc.open( "Input", PoolFile.PoolOpts.CollectionType.RootCollection, inFileName)
@@ -63,7 +61,7 @@ class SortedCollectionCreator:
          while cursor.next():
             row = cursor.currentRow()
             # put the token first in the attribute list, for convenience
-            t = [ row.tokenList()[self.tokenName].toString() ]
+            t = [ row.token().toString() ]
             for nam in self.attrNames:
                t.append( row.attributeList()[nam].data[ self.attrTypes[nam] ]() )
             self.allRows.append(t)   
@@ -97,7 +95,7 @@ class SortedCollectionCreator:
       row = self.pool.CollectionRowBuffer()
       dstColl.initNewRow( row )
       for t in self.allRows:
-         row.tokenList()[0].fromString( t[0] )
+         row.token().fromString( t[0] )
          for idx,nam in enumerate(self.attrNames):
             type = self.attrTypes[nam]
             row.attributeList()[nam].setValue[type]( t[idx+1] )

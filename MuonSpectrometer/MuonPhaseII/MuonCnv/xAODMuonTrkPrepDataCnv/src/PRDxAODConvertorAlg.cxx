@@ -116,7 +116,7 @@ template<> bool Muon::PRDxAODConvertorAlg::fillxPRD(const Muon::RpcPrepData& prd
   const Identifier prdId{prd.identify()};
   xprd.setIdentifier(prdId.get_identifier32().get_compact());
   
-  xprd.setStripNumber(idHelper.strip(prdId));
+  xprd.setChannelNumber(idHelper.strip(prdId));
   xprd.setGasGap(idHelper.gasGap(prdId));
   xprd.setMeasuresPhi(idHelper.measuresPhi(prdId));
   xprd.setDoubletPhi(idHelper.doubletPhi(prdId));

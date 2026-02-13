@@ -50,6 +50,6 @@ atlas_add_test( pyCA
    LOG_SELECT_PATTERN "Py:My" )
 
 atlas_add_test( pyCA_pkl
-   SCRIPT athena --evtMax 2 --CA test_CA.pkl
+   SCRIPT athena --evtMax 2 test_CA.pkl
    LOG_SELECT_PATTERN "Py:My"
    DEPENDS pyCA )

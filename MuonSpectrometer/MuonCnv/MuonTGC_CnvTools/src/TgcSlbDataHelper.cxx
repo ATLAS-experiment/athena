@@ -18,12 +18,12 @@
 #include "MuonRDO/TgcRawData.h"
 #include "TgcSlbData.h"
 
-Muon::TgcSlbDataHelper::TgcSlbDataHelper(void)
+Muon::TgcSlbDataHelper::TgcSlbDataHelper()
   : AthMessaging ("Muon::TgcSlbDataHelper")
 {
 }
 
-Muon::TgcSlbDataHelper::~TgcSlbDataHelper(void)
+Muon::TgcSlbDataHelper::~TgcSlbDataHelper()
 = default;
  
 // reconstruct to Hits. subDetectorID and ROD ID are dummy

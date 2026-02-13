@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <cmath>
+#include <functional>
 //For fabsf...
 
 #include "CaloGeoHelpers/CaloSampling.h"
@@ -697,7 +698,7 @@ namespace CaloRecGPU
 
 
 #define CALORECGPU_FORALLMOMENTS_HELPER(MOMENTNAME, ...) \
-  std::forward<F>(f)(this->moments. MOMENTNAME, std::forward<Args>(args)...);
+  std::invoke(f, this->moments.MOMENTNAME, std::forward<Args>(args)...);
 
     ///F receives the array associated with the moment
     ///and any additional arguments.
@@ -706,6 +707,7 @@ namespace CaloRecGPU
     template <class F, class ... Args>
     constexpr void for_all_moments(F && f, Args && ... args) const
     {
+      // call f as an lvalue every time
       CALORECGPU_FORALLMOMENTS_INSTANTIATE(CALORECGPU_FORALLMOMENTS_HELPER)
     }
 

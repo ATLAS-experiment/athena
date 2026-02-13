@@ -1,6 +1,4 @@
-################################################################################
-# Package: MuonPrdSelector
-################################################################################
+# Copyright (C) 2002-2026 by CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonPrdSelector )
@@ -15,8 +13,4 @@ atlas_add_library( MuonPrdSelectorLib
 atlas_add_component( MuonPrdSelector
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES MuonPrdSelectorLib StoreGateLib MuonReadoutGeometry )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
+                     LINK_LIBRARIES CxxUtils MuonCalibIdentifier MuonCalibToolsLib MuonPrdSelectorLib )

@@ -13,5 +13,3 @@ atlas_add_component( xAODJiveXML
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel CaloEvent CaloGeoHelpers JiveXMLLib TrkTrack xAODBTagging xAODCaloEvent xAODEgamma xAODJet xAODMissingET xAODMuon xAODTau xAODTracking xAODPFlow FTagAnalysisInterfacesLib)
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

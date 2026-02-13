@@ -12,7 +12,7 @@ TGCDatabase::TGCDatabase(DatabaseType vtype, const std::string& vfilename,
                          const std::string& vblockname)
     : m_filename(vfilename), m_blockname(vblockname), m_type(vtype) {}
 
-TGCDatabase::~TGCDatabase(void) {}
+TGCDatabase::~TGCDatabase() {}
 
 int TGCDatabase::getEntry(int entry, int column) const {
     return m_database[entry].at(column);
@@ -22,7 +22,7 @@ int TGCDatabase::getEntrySize(int entry) const {
     return m_database[entry].size();
 }
 
-int TGCDatabase::getMaxEntry(void) const {
+int TGCDatabase::getMaxEntry() const {
     return m_database.size();
 }
 

@@ -15,12 +15,9 @@ class TGCModulePP : public TGCModuleId {
     TGCModulePP(TGCId::SideType side, TGCId::ModuleType module,
                 TGCId::RegionType region, int sector, int id);
 
-    virtual ~TGCModulePP(void) {}
+    virtual ~TGCModulePP() = default;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCModulePP(void) {}
+    virtual bool isValid() const;
 };
 
 }  // namespace MuonTGC_Cabling

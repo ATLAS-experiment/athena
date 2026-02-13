@@ -29,7 +29,7 @@ void TGCChannelASDIn::setSector(int sector) {
     }
 }
 
-int TGCChannelASDIn::getSector(void) const {
+int TGCChannelASDIn::getSector() const {
     int sector;
     if (isEndcap() && !isInner()) {
         sector = TGCId::getSector() - 1;
@@ -46,7 +46,7 @@ int TGCChannelASDIn::getSector(void) const {
     return sector;
 }
 
-bool TGCChannelASDIn::isValid(void) const {
+bool TGCChannelASDIn::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getSignalType() > TGCId::NoSignalType) &&

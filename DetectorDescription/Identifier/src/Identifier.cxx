@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "Identifier/Identifier.h"
+#include "GaudiKernel/MsgStream.h"
 #include <charconv>
-#include <iostream>
 #include <format>
 
 
@@ -27,9 +27,26 @@ Identifier::getString() const{
 }
 
 void 
-Identifier::show () const{
-    const Identifier& me = *this;
-    std::cout << me.getString();
+Identifier::show (std::ostream & out) const{
+    out << getString();
 }
+
+void 
+Identifier::show (MsgStream & out) const{
+    out << getString();
+}
+
+MsgStream&
+operator<<(MsgStream& f, const Identifier& id){
+  f << id.getString();
+  return f;
+}
+
+std::ostream&
+operator<<(std::ostream& os, const Identifier& id){
+  os << id.getString();
+  return os;
+}
+
 
 

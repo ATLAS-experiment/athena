@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELASDOUT_H
@@ -19,9 +19,9 @@ class TGCChannelASDOut : public TGCChannelId {
     TGCChannelASDOut(TGCId::SideType side, TGCId::SignalType signal, int octant,
                      int moduleSector, int layer, int chamber, int channel);
 
-    virtual ~TGCChannelASDOut(void) = default;
+    virtual ~TGCChannelASDOut() = default;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const override;
 
    private:
     TGCChannelASDOut() = delete;

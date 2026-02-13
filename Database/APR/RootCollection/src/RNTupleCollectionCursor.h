@@ -60,20 +60,20 @@ namespace pool {
 
       protected:
 
-         const CollectionDescription&         m_description;
+         const CollectionDescription&        m_description;
 
-         ROOT::RNTupleReader*                 m_RNTReader;
+         ROOT::RNTupleReader*                m_RNTReader;
 
          /// RNtuple row with Field addresses set to collectionRowBuffer attributes
-         std::unique_ptr< ROOT::REntry >      m_RNTEntry;
+         std::unique_ptr< ROOT::REntry >     m_RNTEntry;
 
          /// Row buffer containing Tokens and Attributes
-         pool::CollectionRowBuffer      m_collectionRowBuffer;
+         pool::CollectionRowBuffer           m_collectionRowBuffer;
 
-         /// "Token rowBuffer" for reading Tokens as strings and converting them later
-         std::vector< std::pair< Token*, std::string > >  m_tokens;
+         /// Temporary storage for Event Reference in string format as it is in RNTuple
+         std::string                         m_tokenStr;
 
-	 std::size_t                    m_idx;
+	      std::size_t                         m_idx;
       };
    }
 }

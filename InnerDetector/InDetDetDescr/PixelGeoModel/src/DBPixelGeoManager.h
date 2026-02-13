@@ -23,7 +23,6 @@ class PixelMaterialMap;
 class PixelStaveTypes;
 class GeoMaterial;
 class PixelID;
-class IGeometryDBSvc;
 
 namespace InDetDD {
   class PairIndexMap;
@@ -783,9 +782,6 @@ class DBPixelGeoManager : public PixelGeometryManager {
   virtual bool partPresent(const std::string & partName) const override;
   
   virtual std::string getMaterialName(const std::string & volumeName, int layerdisk = 0, int typenum = 0) override;
-  
-  // Geometry DB Interface
-  const IGeometryDBSvc * db() const {return athenaComps()->geomDB();}
 
   virtual double PixelDiskRMin() override;
   virtual int    PixelDiskNumSupports() override;

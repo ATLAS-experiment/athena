@@ -5,57 +5,51 @@
 #ifndef MUONTGC_CABLING_TGCCABLEASDTOPP_H
 #define MUONTGC_CABLING_TGCCABLEASDTOPP_H
 
+#include <array>
 #include <string>
 #include <vector>
 
-#include "GaudiKernel/ToolHandle.h"
-#include "MuonCondInterface/ITGCCablingDbTool.h"
 #include "MuonTGC_Cabling/TGCCable.h"
 #include "MuonTGC_Cabling/TGCDatabaseASDToPP.h"
 #include "MuonTGC_Cabling/TGCId.h"
-
-class StatusCode;
 
 namespace MuonTGC_Cabling {
 
 class TGCCableASDToPP : public TGCCable {
    public:
-    TGCCableASDToPP(const std::string& filename);
+    TGCCableASDToPP(const std::string& fileName, const std::string& diffFile);
     virtual ~TGCCableASDToPP();
 
-    virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
-                                     bool orChannel = false) const;
-
-    StatusCode updateDatabase();
+    std::unique_ptr<TGCChannelId> getChannel(const TGCChannelId& channelId,
+                                             bool orChannel = false) const;
 
    private:
-    TGCCableASDToPP() {}
+    void initialize(const std::string& filename, const std::string& diffFile);
 
-    void initialize(const std::string& filename);
+    void updateDatabase(const std::string& diffFile);
 
-    virtual TGCChannelId* getChannelIn(const TGCChannelId* ppin,
-                                       bool orChannel = false) const;
-    virtual TGCChannelId* getChannelOut(const TGCChannelId* asdout,
-                                        bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannelIn(const TGCChannelId& ppin,
+                                               bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannelOut(const TGCChannelId& asdout,
+                                                bool orChannel = false) const;
 
-    StatusCode getUpdateInfo(const int side, const int sector,
-                             const std::string& blockname,
-                             std::vector<std::vector<int> >& info);
+    std::vector<std::vector<int> > getUpdateInfo(
+        const int side, const int sector,
+        const std::vector<std::string>& diffFile, const std::string& blockname);
 
     TGCDatabaseASDToPP* getDatabase(const int side, const int region,
                                     const int sector, const int module) const;
 
-    StatusCode updateIndividualDatabase(
-        const int side, const int sector, const std::string& blockname,
+    void updateIndividualDatabase(
+        const int side, const int sector,
+        const std::vector<std::string>& diffFile, const std::string& blockname,
         std::shared_ptr<TGCDatabaseASDToPP>& database);
 
    private:
-    static const int s_stripForward[];
+    // reverse layers in Forward sector
 
-    ToolHandle<ITGCCablingDbTool>
-        m_tgcCablingDbTool;  // cannot declare inline, since TGCCableASDToPP is
-                             // no athena component
-    std::vector<std::string> m_ASD2PP_DIFF_12;
+    static constexpr std::array<int, 9> s_stripForward{2, 1, 0, 4, 3,
+                                                       6, 5, 8, 7};
 
    private:
     using ForwardSectorDB =

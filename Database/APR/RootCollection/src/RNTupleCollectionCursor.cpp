@@ -3,6 +3,7 @@
 */
 
 #include "RNTupleCollectionCursor.h"
+#include "CollectionSvc/CollectionColumn.h"
 
 #include "CoralBase/Attribute.h"
 
@@ -24,13 +25,7 @@ RNTupleCollectionCursor::RNTupleCollectionCursor(
    for( auto& attr : m_collectionRowBuffer.attributeList() ) {
       m_RNTEntry->BindRawPtr( attr.specification().name(), attr.addressOfData() );
    }
-
-   for( pool::TokenList::iterator tokenI = m_collectionRowBuffer.tokenList().begin();
-        tokenI != m_collectionRowBuffer.tokenList().end(); ++tokenI )
-   {
-      m_tokens.emplace_back( &*tokenI, std::string() );
-      m_RNTEntry->BindRawPtr( tokenI.tokenName(), &m_tokens.back().second );
-   }
+   m_RNTEntry->BindRawPtr( description.tokenColumn().name(), &m_tokenStr );
 }
 
 
@@ -52,10 +47,8 @@ bool RNTupleCollectionCursor::next()
    }
    // read the row
    m_RNTReader->LoadEntry(m_idx, *m_RNTEntry);
-   // convert Token strings
-   for( auto& elem : m_tokens ) {
-      elem.first->fromString( elem.second );
-   }
+   // convert Token string
+   m_collectionRowBuffer.token().fromString( m_tokenStr );
    return true;
 }
 
@@ -85,5 +78,5 @@ bool RNTupleCollectionCursor::seek(std::size_t position)
 
 const Token& RNTupleCollectionCursor::eventRef() const
 {
-   return m_collectionRowBuffer.tokenList()[ m_description.eventReferenceColumnName() ];
+   return m_collectionRowBuffer.token();
 }

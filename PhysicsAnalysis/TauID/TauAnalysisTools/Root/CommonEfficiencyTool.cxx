@@ -448,11 +448,6 @@ void CommonEfficiencyTool::ReadInputs(const TFile& fFile)
         m_fX = &truthDecayMode;
         ATH_MSG_DEBUG("using truth decay mode for x-axis");
       }
-      if (sTitle == "truth pt")
-      {
-        m_fX = &truthTauPt;
-        ATH_MSG_DEBUG("using truth pT for x-axis");
-      }
       if (sTitle == "truth visible pt")
       {
         m_fX = &truthVisTauPt;

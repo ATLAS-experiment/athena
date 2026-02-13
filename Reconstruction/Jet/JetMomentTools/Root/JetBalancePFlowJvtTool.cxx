@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetBalancePFlowJvtTool.cxx
@@ -44,7 +44,7 @@
   ////////////////////////////
   StatusCode JetBalancePFlowJvtTool::initialize()
   {
-    ATH_MSG_INFO ("Initializing " << name() << "...");
+    ATH_MSG_DEBUG ("Initializing " << name() << "...");
 
     if(m_FEKey.empty()){
       ATH_MSG_ERROR("Flow Element container is empty");

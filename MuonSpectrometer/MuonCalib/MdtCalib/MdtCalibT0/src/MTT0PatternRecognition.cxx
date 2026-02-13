@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/MTT0PatternRecognition.h"
@@ -50,19 +50,23 @@ namespace MuonCalib {
         m_background = 0.0;
         double back_squared = 0.0;
         double n_bins = 0.0;
-        double referece_chi2 = 0.0;
+        double referenceChi2 = 0.0;
         for (int i = min; i < max; i++) {
             n_bins++;
             m_background += hist->GetBinContent(i);
             back_squared += hist->GetBinContent(i) * hist->GetBinContent(i);
             if (n_bins == m_settings->MinBackgroundBins()) {
+                //coverity[DIVIDE_BY_ZERO:FALSE]
                 double bac = m_background / n_bins;
-                referece_chi2 = 2 * (back_squared / n_bins - bac * bac);
+                //coverity[DIVIDE_BY_ZERO:FALSE]
+                referenceChi2 = 2 * (back_squared / n_bins - bac * bac);
             }
             if (n_bins > m_settings->MinBackgroundBins()) {
+                //coverity[DIVIDE_BY_ZERO:FALSE]
                 double bac = m_background / n_bins;
+                //coverity[DIVIDE_BY_ZERO:FALSE]
                 double chi2 = 2 * (back_squared / n_bins - bac * bac);
-                if (chi2 > 5 * referece_chi2) break;
+                if (chi2 > 5 * referenceChi2) break;
             }
         }
         if (n_bins == 0){

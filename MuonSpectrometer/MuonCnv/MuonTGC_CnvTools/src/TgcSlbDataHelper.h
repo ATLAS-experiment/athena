@@ -43,9 +43,9 @@ namespace Muon
       };
 
       /** Constructor */
-      TgcSlbDataHelper(void);
+      TgcSlbDataHelper();
       /** Destructor */
-      virtual ~TgcSlbDataHelper(void);
+      virtual ~TgcSlbDataHelper();
 
       TgcSlbDataHelper (const TgcSlbDataHelper&) = delete;
       TgcSlbDataHelper& operator= (const TgcSlbDataHelper&) = delete;

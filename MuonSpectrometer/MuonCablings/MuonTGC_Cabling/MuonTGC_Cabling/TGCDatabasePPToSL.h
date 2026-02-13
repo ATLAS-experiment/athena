@@ -17,15 +17,15 @@ class TGCDatabasePPToSL : public TGCDatabase {
 
     TGCDatabasePPToSL(const TGCDatabasePPToSL&);
 
-    virtual ~TGCDatabasePPToSL(void);
+    virtual ~TGCDatabasePPToSL();
 
     virtual bool update(const std::vector<int>&);
 
     virtual int find(const std::vector<int>&) const;
 
    private:
-    virtual void readDB(void);
-    TGCDatabasePPToSL(void) {}
+    virtual void readDB();
+    TGCDatabasePPToSL() {}
 
     /** hidden assignment operator */
     TGCDatabasePPToSL& operator=(const TGCDatabasePPToSL& right);

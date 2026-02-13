@@ -649,7 +649,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 
   if(m_SaveRootFile){
     for (int ii=0;ii<npl;ii++){
-      Cellmaps[ii].reset(m_LarIdTranslator->GetCaloPartitionLayerMap(ii));
+      Cellmaps[ii] = m_LarIdTranslator->GetCaloPartitionLayerMap(ii);
       Cellmaps[ii]->GetXaxis()->SetTitle("#eta"); Cellmaps[ii]->GetYaxis()->SetTitle("#Phi"); 
       hname.Form("%s_PulseShape_%dsigma",m_LarIdTranslator->GetPartitonLayerName(ii),(int)nsigmaHits);
       Pulsemaps[ii].reset((TH2D*)NormPulse.Clone(hname));
@@ -1597,15 +1597,15 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   std::vector<TH2*> hmap_energy_cut (nhists);
   std::vector<TH2*> hmap_quality_cut (nhists);
   for(int j=0;j<nhists;j++){
-    hmap_counts_all[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_counts_all[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"counst_all_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_counts_all[j]->SetName(hname);
     //
-    hmap_energy_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_energy_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"energy_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_energy_cut[j]->SetName(hname);
     //
-    hmap_quality_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_quality_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"quality_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_quality_cut[j]->SetName(hname);
   }
@@ -1659,11 +1659,10 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   }
 
   std::unique_ptr<TFile> tout;
-  TCanvas* c0 = nullptr, *c1 = nullptr;
 
   if(!strcmp(optionsave,"root")){
     tout.reset(new TFile("EtaPhiMonitoring.root","recreate"));
-    c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
+    std::unique_ptr<TCanvas> c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
     c0->SetName("Normalization");
     c0->Write();
     for(int j=0;j<nhists;j++) hmap_counts_all[j]->Write();
@@ -1681,21 +1680,21 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
     }
     tout->Close(); 
   } else {
-    c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
+    std::unique_ptr<TCanvas> c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
     c0->SaveAs("Normalization.png");
-    c1 = new TCanvas("c1","");
-    for(int j=0;j<nhists;j++){ hmap_counts_all[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_counts_all[j]->GetName()); c1->SaveAs(hname); }
+    TCanvas c1("c1","");
+    for(int j=0;j<nhists;j++){ hmap_counts_all[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_counts_all[j]->GetName()); c1.SaveAs(hname); }
     if(kcuttype==1){
       c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_energy_cut.data(),"EnergyCut",1);
       c0->SaveAs("EnergyCut.png");
-      c1->cd();
-      for(int j=0;j<nhists;j++){ hmap_energy_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_energy_cut[j]->GetName()); c1->SaveAs(hname); }
+      c1.cd();
+      for(int j=0;j<nhists;j++){ hmap_energy_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_energy_cut[j]->GetName()); c1.SaveAs(hname); }
     }
     if(kcuttype==2){
       c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_quality_cut.data(),"QualityCut",1);
       c0->SaveAs("QualityCut.png");
-      c1->cd();
-      for(int j=0;j<nhists;j++){ hmap_quality_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_quality_cut[j]->GetName()); c1->SaveAs(hname); }
+      c1.cd();
+      for(int j=0;j<nhists;j++){ hmap_quality_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_quality_cut[j]->GetName()); c1.SaveAs(hname); }
     }
   }
   return;

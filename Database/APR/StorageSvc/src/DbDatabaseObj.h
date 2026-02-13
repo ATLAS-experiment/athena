@@ -129,8 +129,6 @@ namespace pool    {
 
     /// Open Database object
     StatusCode open();
-    /// Re-open database with changing access permissions
-    StatusCode reopen(DbAccessMode mode);
     /// Close database object
     StatusCode close();
     /// End database access, but still leave database accessible

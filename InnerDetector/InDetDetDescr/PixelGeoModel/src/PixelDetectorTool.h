@@ -10,7 +10,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "GeoModelInterfaces/IGeoSubDetTool.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "PixelGeoModel/IIBLParameterSvc.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
@@ -54,7 +53,6 @@ private:
   ToolHandle< IGeoSubDetTool > m_bcmTool{this,"BCM_Tool","",""};
   ToolHandle< IGeoSubDetTool > m_blmTool{this,"BLM_Tool","",""};
   PublicToolHandle< IInDetServMatBuilderTool > m_serviceBuilderTool{this,"ServiceBuilderTool","",""};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
   const InDetDD::PixelDetectorManager * m_manager{nullptr};
   std::string m_overrideVersionName;
 

@@ -94,10 +94,6 @@ StatusCode DbDatabase::close() {
 long long int DbDatabase::size()
 {  return isValid() ? ptr()->size() : -1;                               }
 
-/// Re-open database with changing access permissions
-StatusCode DbDatabase::reopen(DbAccessMode mod)
-{  return isValid() ? ptr()->reopen(mod) : StatusCode::FAILURE;                       }
-
 /// End database access, but still leave database accessible
 StatusCode DbDatabase::retire()
 {  return isValid() ? ptr()->retire() : StatusCode::FAILURE;                          }

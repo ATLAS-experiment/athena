@@ -83,15 +83,15 @@ log = getLogger("ReadLumi")
 import logging
 log.setLevel(logging.DEBUG)
 
-#=== Set tag and schema name:
-
 #=== Initialize blob reader
-folderTAG = tag.upper()
-if folderTAG.startswith("CALO") :
+folderTag = tag
+tag = tag.upper()
+tag1 = tag.split('_')[1][:4] if '_' in tag else tag[:4]
+if tag1 == "CALO" or tag.startswith("CALO"):
     folderPath=""
 if not os.path.isfile(schema):
-    log.info("Initializing folder %s with tag %s", folderPath, tag)
-blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath, tag, run, lumi, channels[0], channels[-1], True)
+    log.info("Initializing folder %s with tag %s", folderPath, folderTag)
+blobReader = TileCalibCrest.TileBlobReaderCrest(schema, folderPath, folderTag, run, lumi, channels[0], channels[-1], True)
 
 #=== Filling the iovList
 iovList = []

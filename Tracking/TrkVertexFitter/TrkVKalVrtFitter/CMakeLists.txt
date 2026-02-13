@@ -23,9 +23,6 @@ atlas_add_component( TrkVKalVrtFitter
    src/components/*.cxx
    LINK_LIBRARIES TrkVKalVrtFitterLib )
 
-# Install files from the package.
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-
 # Test(s) in the package.
 atlas_add_test( TrkVKalVrtFitter_test
    SCRIPT python -m TrkConfig.TrkVKalVrtFitterConfig

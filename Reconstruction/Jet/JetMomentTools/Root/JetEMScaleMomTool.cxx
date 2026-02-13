@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <functional>
@@ -52,7 +52,7 @@ JetEMScaleMomTool::JetEMScaleMomTool(const std::string& name)
 //**********************************************************************
 
 StatusCode JetEMScaleMomTool::initialize() {
-  ATH_MSG_INFO("Initializing JetEMScaleMomTool " << name());
+  ATH_MSG_DEBUG("Initializing JetEMScaleMomTool " << name());
   
   if(m_jetContainerName.empty()){
     ATH_MSG_ERROR("JetEMScaleMomTool needs to have its input jet container configured!");

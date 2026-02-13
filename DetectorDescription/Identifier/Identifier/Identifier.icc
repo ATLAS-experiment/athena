@@ -153,19 +153,6 @@ Identifier::operator==(int other) const{
   return ((*this) == Identifier(other));
 }
 
-/// This is for logging
-
-inline MsgStream&
-operator<<(MsgStream& f, const Identifier& id){
-  f << id.getString();
-  return f;
-}
-
-inline std::ostream&
-operator<<(std::ostream& os, const Identifier& id){
-  os << id.getString();
-  return os;
-}
 
 inline bool
 Identifier::is_valid() const{

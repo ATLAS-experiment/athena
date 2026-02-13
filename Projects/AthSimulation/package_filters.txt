@@ -35,7 +35,6 @@
 + Control/AthenaCommon
 + Control/AthenaExamples/AthExHelloWorld
 + Control/AthenaExamples/AthExHive
-+ Control/AthenaExamples/AthExUnittest
 + Control/AthenaInterprocess
 + Control/AthenaKernel
 + Control/AthenaMP
@@ -114,7 +113,6 @@
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoModel/GeoSpecialShapes
 + DetectorDescription/GeoPrimitives
-+ DetectorDescription/GeometryDBSvc
 + DetectorDescription/IdDict
 + DetectorDescription/IdDictDetDescr
 + DetectorDescription/IdDictDetDescrCnv

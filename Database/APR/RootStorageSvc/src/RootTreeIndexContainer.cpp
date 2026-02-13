@@ -6,7 +6,7 @@
 #include "StorageSvc/DbOption.h"
 #include "RootDatabase.h"
 #include "RootTreeIndexContainer.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 // Root include files
 #include "TTree.h"

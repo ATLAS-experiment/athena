@@ -688,7 +688,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       }
     } else {
       m_layer_recalibration_tool =
-          new egammaLayerRecalibTool(m_layer_recalibration_tune);
+          new egammaLayerRecalibTool(m_layer_recalibration_tune, m_useSaccCorrection);
     }
     if (m_layer_recalibration_tool) {
       m_layer_recalibration_tool->msg().setLevel(this->msg().level());

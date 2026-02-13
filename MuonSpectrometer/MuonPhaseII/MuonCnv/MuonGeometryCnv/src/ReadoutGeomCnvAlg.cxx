@@ -92,7 +92,6 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
     /// Prepare the Geometry context
     ActsTrk::GeometryContext geoContext{};
-    using TrackingAlignment = ActsTrk::DetectorAlignStore::TrackingAlignStore;
     for (const SG::ReadCondHandleKey<ActsTrk::DetectorAlignStore>& key : m_alignStoreKeys) {
         SG::ReadCondHandle readHandle{key, ctx};
         if (!readHandle.isValid()) {

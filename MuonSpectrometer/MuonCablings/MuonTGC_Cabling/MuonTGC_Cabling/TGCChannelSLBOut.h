@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBOUT_HH
@@ -16,11 +16,11 @@ class TGCChannelSLBOut : public TGCChannelId {
                      TGCId::RegionType region, int sector, int id, int block,
                      int channel);
 
-    virtual ~TGCChannelSLBOut(void) {}
+    virtual ~TGCChannelSLBOut() = default;
 
-    virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const override;
 
    private:
     static const int s_numberOfBlockInWD;
@@ -42,7 +42,7 @@ class TGCChannelSLBOut : public TGCChannelId {
     static int getChannelInBlock(TGCId::ModuleType moduleType);
 
    private:
-    TGCChannelSLBOut(void) {}
+    TGCChannelSLBOut() {}
 };
 
 }  // namespace MuonTGC_Cabling

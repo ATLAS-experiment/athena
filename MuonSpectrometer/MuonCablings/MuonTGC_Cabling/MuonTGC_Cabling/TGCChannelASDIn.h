@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELASDIN_HH
@@ -16,16 +16,13 @@ class TGCChannelASDIn : public TGCChannelId {
                     TGCId::RegionType region, int sector, int layer,
                     int chamber, int channel);
 
-    virtual ~TGCChannelASDIn(void) {}
+    virtual ~TGCChannelASDIn() = default;
 
-    virtual void setSector(int sector);
+    virtual void setSector(int sector) override;
 
-    virtual int getSector(void) const;
+    virtual int getSector() const override;
 
-    virtual bool isValid(void) const;
-
-   private:
-    TGCChannelASDIn(void) {}
+    virtual bool isValid() const override ;
 };
 
 }  // namespace MuonTGC_Cabling

@@ -22,7 +22,7 @@
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include <algorithm>
 #include <charconv>
@@ -52,24 +52,6 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
       return(StatusCode::FAILURE);
    }
-   // Extracting MaxFileSizes for global default and map by Database name.
-   for (const auto& maxFileSizeSpec : m_maxFileSizes.value()) {
-      if (auto p = maxFileSizeSpec.find('='); p != std::string::npos) {
-         long long maxFileSize = 0;
-         const char* start = maxFileSizeSpec.data() + (p + 1);
-         const char* end = maxFileSizeSpec.data() + maxFileSizeSpec.size();
-         if (auto [ptr, ec] = std::from_chars(start, end, maxFileSize); ec != std::errc{}) {
-            ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", std::string(start, end)));
-         }
-         std::string databaseName = maxFileSizeSpec.substr(0, maxFileSizeSpec.find_first_of(" 	="));
-         std::unique_lock<std::mutex> lock(m_mutex);
-         m_databaseMaxFileSize.emplace(std::move(databaseName), maxFileSize);
-      } else {
-         if (auto [ptr, ec] = std::from_chars(maxFileSizeSpec.data(), maxFileSizeSpec.data() + maxFileSizeSpec.size(), m_domainMaxFileSize); ec != std::errc{}) {
-            ATH_MSG_WARNING(std::format("Invalid MaxFileSize value: {}", maxFileSizeSpec));
-         }
-      }
-   }
    // Validate provided event data technologies and fill the internal cache
    for (const auto& [key, value] : m_storageTechProp.value()) {
       try {
@@ -86,6 +68,13 @@ StatusCode AthenaPoolCnvSvc::initialize() {
         ATH_MSG_FATAL(std::format("Unknown exception while getting storage type for file {}", key));
         return StatusCode::FAILURE;
       }
+   }
+   // Global POOL container naming scheme
+   if (auto scheme = APRDefaults::parseNamingScheme(m_containerNamingSchemeProp.value())) {
+      APRDefaults::setNamingScheme(*scheme);
+   } else {
+      ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
+      return StatusCode::FAILURE;
    }
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
@@ -345,17 +334,6 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    if (!this->cleanUp(outputConnection).isSuccess()) {
       ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
       return(StatusCode::FAILURE);
-   }
-   // Check FileSize
-   long long int currentFileSize = m_poolSvc->getFileSize(outputConnection, tech, contextId);
-   if (m_databaseMaxFileSize.find(outputConnection) != m_databaseMaxFileSize.end()) {
-      if (currentFileSize > m_databaseMaxFileSize[outputConnection]) {
-         ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_databaseMaxFileSize[outputConnection], outputConnection));
-         return(StatusCode::RECOVERABLE);
-      }
-   } else if (currentFileSize > m_domainMaxFileSize) {
-      ATH_MSG_WARNING(std::format("FileSize {} > {} for {}", currentFileSize, m_domainMaxFileSize, outputConnection));
-      return(StatusCode::RECOVERABLE);
    }
    return(StatusCode::SUCCESS);
 }

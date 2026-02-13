@@ -28,9 +28,6 @@ namespace pool {
     /// Returns the name of this container
     const std::string& name() const;
 
-    /// Returns the name (fid) of the parent database
-    virtual const std::string& parentDatabaseName() const = 0;
-
     /// Returns the technology identifier for this container
     virtual long technology() const = 0;
 

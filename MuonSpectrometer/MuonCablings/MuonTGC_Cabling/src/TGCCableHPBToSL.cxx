@@ -24,76 +24,67 @@ TGCCableHPBToSL::TGCCableHPBToSL(const std::string& filename)
 
 TGCCableHPBToSL::~TGCCableHPBToSL() = default;
 
-TGCModuleMap* TGCCableHPBToSL::getModule(const TGCModuleId* moduleId) const {
-    if (moduleId) {
-        if (moduleId->getModuleIdType() == TGCModuleId::HPB) {
-            return getModuleOut(moduleId);
-        }
-        if (moduleId->getModuleIdType() == TGCModuleId::SL) {
-            return getModuleIn(moduleId);
-        }
+TGCModuleMap TGCCableHPBToSL::getModule(const TGCModuleId& moduleId) const {
+    if (moduleId.getModuleIdType() == TGCModuleId::HPB) {
+        return getModuleOut(moduleId);
     }
-    return nullptr;
+    if (moduleId.getModuleIdType() == TGCModuleId::SL) {
+        return getModuleIn(moduleId);
+    }
+    return TGCModuleMap{};
 }
 
-TGCModuleMap* TGCCableHPBToSL::getModuleIn(const TGCModuleId* sl) const {
-    if (sl->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableHPBToSL::getModuleIn(const TGCModuleId& sl) const {
+    if (sl.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    TGCDatabase* wireP = m_database[sl->getRegionType()][TGCId::Wire].get();
-    TGCDatabase* stripP = m_database[sl->getRegionType()][TGCId::Strip].get();
+    TGCDatabase* wireP = m_database[sl.getRegionType()][TGCId::Wire].get();
+    TGCDatabase* stripP = m_database[sl.getRegionType()][TGCId::Strip].get();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int wireMaxEntry = wireP->getMaxEntry();
     for (int i = 0; i < wireMaxEntry; i++) {
         int id = wireP->getEntry(i, 0);
         int block = wireP->getEntry(i, 1);
-        TGCModuleHPB* hpb =
-            new TGCModuleHPB(sl->getSideType(), TGCId::Wire,
-                             sl->getRegionType(), sl->getSector(), id);
-        if (mapId == nullptr) {
-            mapId = new TGCModuleMap();
-        }
-        mapId->insert(block, hpb);
+        auto hpb = std::make_unique<TGCModuleHPB>(sl.getSideType(), TGCId::Wire,
+                                                  sl.getRegionType(),
+                                                  sl.getSector(), id);
+        mapId.insert(block, std::move(hpb));
     }
 
     const int stripMaxEntry = stripP->getMaxEntry();
     for (int i = 0; i < stripMaxEntry; i++) {
         int id = stripP->getEntry(i, 0);
         int block = stripP->getEntry(i, 1);
-        TGCModuleHPB* hpb =
-            new TGCModuleHPB(sl->getSideType(), TGCId::Strip,
-                             sl->getRegionType(), sl->getSector(), id);
-        if (mapId == nullptr) {
-            mapId = new TGCModuleMap();
-        }
-        mapId->insert(block, hpb);
+        auto hpb = std::make_unique<TGCModuleHPB>(
+            sl.getSideType(), TGCId::Strip, sl.getRegionType(), sl.getSector(),
+            id);
+        mapId.insert(block, std::move(hpb));
     }
 
     return mapId;
 }
 
-TGCModuleMap* TGCCableHPBToSL::getModuleOut(const TGCModuleId* hpb) const {
-    if (hpb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableHPBToSL::getModuleOut(const TGCModuleId& hpb) const {
+    if (hpb.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int hpbId = hpb->getId();
+    const int hpbId = hpb.getId();
 
     TGCDatabase* databaseP =
-        m_database[hpb->getRegionType()][hpb->getSignalType()].get();
+        m_database[hpb.getRegionType()][hpb.getSignalType()].get();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 0) == hpbId) {
             int block = databaseP->getEntry(i, 1);
-            TGCModuleSL* sl = new TGCModuleSL(
-                hpb->getSideType(), hpb->getRegionType(), hpb->getSector());
+            auto sl = std::make_unique<TGCModuleSL>(
+                hpb.getSideType(), hpb.getRegionType(), hpb.getSector());
 
-            mapId = new TGCModuleMap();
-            mapId->insert(block, sl);
+            mapId.insert(block, std::move(sl));
             break;
         }
     }

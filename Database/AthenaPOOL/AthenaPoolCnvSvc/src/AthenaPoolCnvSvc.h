@@ -195,6 +195,8 @@ private: // properties
    Gaudi::Property<std::string> m_containerNameHintProp{this,"TopLevelContainerName",""};
    /// SubLevelBranchName, naming hint policy for POOL branching: ("" = no branching)
    Gaudi::Property<std::string> m_branchNameHintProp{this,"SubLevelBranchName", "<type>/<key>"};
+   /// POOL container naming scheme selection
+   Gaudi::Property<std::string> m_containerNamingSchemeProp{this, "PoolContainerNamingScheme", "Historical"};
 
    /// Output PoolAttributes, vector with names and values of technology specific attributes for POOL
    Gaudi::Property<std::vector<std::string>> m_poolAttr{this,"PoolAttributes",{},"Pool Attributes","OrderedSet<std::string>"};
@@ -209,11 +211,6 @@ private: // properties
    /// to be printed each event
    Gaudi::Property<std::vector<std::string>> m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
    std::vector<std::vector<std::string> > m_inputAttrPerEvent;
-
-   /// MaxFileSizes, vector with maximum file sizes for Athena POOL output files
-   Gaudi::Property<std::vector<std::string>> m_maxFileSizes{this,"MaxFileSizes",{}};
-   long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
-   std::map<std::string, long long> m_databaseMaxFileSize;
 
    /// Default container type (from PoolSvc)
    std::string m_defContainerType{};

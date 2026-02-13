@@ -43,24 +43,24 @@ TGCCableSLBToSSW::TGCCableSLBToSSW(const std::string& filename)
         std::make_unique<TGCDatabaseSLBToROD>(filename, "SLB FSL");
 }
 
-TGCModuleMap* TGCCableSLBToSSW::getModule(const TGCModuleId* moduleId) const {
-    if (moduleId) {
-        if (moduleId->getModuleIdType() == TGCModuleId::SLB) {
-            return getModuleOut(moduleId);
-        }
-        if (moduleId->getModuleIdType() == TGCModuleId::SSW) {
-            return getModuleIn(moduleId);
-        }
+TGCModuleMap TGCCableSLBToSSW::getModule(const TGCModuleId& moduleId) const {
+
+    if (moduleId.getModuleIdType() == TGCModuleId::SLB) {
+        return getModuleOut(moduleId);
     }
-    return nullptr;
+    if (moduleId.getModuleIdType() == TGCModuleId::SSW) {
+        return getModuleIn(moduleId);
+    }
+
+    return TGCModuleMap{};
 }
 
-TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
-    if (ssw->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableSLBToSSW::getModuleIn(const TGCModuleId& ssw) const {
+    if (ssw.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int sswId = ssw->getId();
+    const int sswId = ssw.getId();
 
     TGCDatabase* databaseP[TGCId::MaxRegionType * MaxModuleType];
     TGCId::ModuleType module[TGCId::MaxRegionType * MaxModuleType];
@@ -73,7 +73,7 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
         }
     }
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     for (int type = 0; type < TGCId::MaxRegionType * MaxModuleType; type++) {
         const int MaxEntry = databaseP[type]->getMaxEntry();
         for (int i = 0; i < MaxEntry; i++) {
@@ -87,7 +87,7 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
                     //  wire(TGCId::WI) and strip(TGCId::SI) of a chamber
                     //  use the same SLB chip
 
-                    int sswSector = ssw->getReadoutSector();
+                    int sswSector = ssw.getReadoutSector();
                     // one ROD (rodId = 2,5,8,11) covers 6 Inner sectors
                     if (sswSector % 3 != 1) {
                         continue;
@@ -104,14 +104,11 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
                         int pblock = block + ip * 4;
                         int psbLoc = sbLoc + ip * 4;
                         int pslbAddr = slbAddr + ip * 2;
-                        TGCModuleSLB* slb = new TGCModuleSLB(
-                            ssw->getSideType(), module[type], region[type],
+                        auto slb = std::make_unique<TGCModuleSLB>(
+                            ssw.getSideType(), module[type], region[type],
                             psector, id, psbLoc, pslbAddr);
 
-                        if (mapId == nullptr) {
-                            mapId = new TGCModuleMap();
-                        }
-                        mapId->insert(pblock, slb);
+                        mapId.insert(pblock, std::move(slb));
                     }
 
                 } else if (module[type] == TGCId::SI) {
@@ -123,24 +120,21 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
 
                 } else {
                     if (region[type] == TGCId::Endcap) {
-                        sector += ssw->getReadoutSector() *
+                        sector += ssw.getReadoutSector() *
                                   (TGCId::NUM_ENDCAP_SECTOR / TGCId::N_RODS);
                     } else {
-                        sector += ssw->getReadoutSector() *
+                        sector += ssw.getReadoutSector() *
                                   (TGCId::NUM_FORWARD_SECTOR / TGCId::N_RODS);
                     }
                     int id = databaseP[type]->getEntry(i, 1);
                     int sbLoc = databaseP[type]->getEntry(i, 2);
                     int slbAddr = databaseP[type]->getEntry(i, 3);
                     int block = databaseP[type]->getEntry(i, 5);
-                    TGCModuleSLB* slb = new TGCModuleSLB(
-                        ssw->getSideType(), module[type], region[type], sector,
+                    auto slb = std::make_unique<TGCModuleSLB>(
+                        ssw.getSideType(), module[type], region[type], sector,
                         id, sbLoc, slbAddr);
 
-                    if (mapId == nullptr) {
-                        mapId = new TGCModuleMap();
-                    }
-                    mapId->insert(block, slb);
+                    mapId.insert(block, std::move(slb));
                 }
             }
         }
@@ -149,22 +143,21 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleIn(const TGCModuleId* ssw) const {
     return mapId;
 }
 
-TGCModuleMap* TGCCableSLBToSSW::getModuleOut(const TGCModuleId* slb) const {
-    if (slb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableSLBToSSW::getModuleOut(const TGCModuleId& slb) const {
+    if (slb.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int slbId = slb->getId();
-    const int sector = slb->getSectorInReadout();
-    int readoutSector = slb->getReadoutSector();
+    const int slbId = slb.getId();
+    const int sector = slb.getSectorInReadout();
+    int readoutSector = slb.getReadoutSector();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
 
     TGCDatabase* databaseP =
-        m_database[slb->getRegionType()][slb->getModuleType()].get();
+        m_database[slb.getRegionType()][slb.getModuleType()].get();
     const int MaxEntry = databaseP->getMaxEntry();
-    if (slb->getModuleType() == TGCId::WI ||
-        slb->getModuleType() == TGCId::SI) {
+    if (slb.getModuleType() == TGCId::WI || slb.getModuleType() == TGCId::SI) {
         // inner
         for (int i = 0; i < MaxEntry; i++) {
             if (databaseP->getEntry(i, 0) == sector &&
@@ -174,10 +167,10 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleOut(const TGCModuleId* slb) const {
                 int id = databaseP->getEntry(i, 4);
                 int block = databaseP->getEntry(i, 5) + 4 * (readoutSector % 3);
 
-                TGCModuleSSW* ssw =
-                    new TGCModuleSSW(slb->getSideType(), sswSectorRO, id);
-                mapId = new TGCModuleMap();
-                mapId->insert(block, ssw);
+                auto ssw = std::make_unique<TGCModuleSSW>(slb.getSideType(),
+                                                          sswSectorRO, id);
+
+                mapId.insert(block, std::move(ssw));
                 break;
             }
         }
@@ -189,10 +182,10 @@ TGCModuleMap* TGCCableSLBToSSW::getModuleOut(const TGCModuleId* slb) const {
 
                 int id = databaseP->getEntry(i, 4);
                 int block = databaseP->getEntry(i, 5);
-                TGCModuleSSW* ssw =
-                    new TGCModuleSSW(slb->getSideType(), readoutSector, id);
-                mapId = new TGCModuleMap();
-                mapId->insert(block, ssw);
+                auto ssw = std::make_unique<TGCModuleSSW>(slb.getSideType(),
+                                                          readoutSector, id);
+
+                mapId.insert(block, std::move(ssw));
                 break;
             }
         }

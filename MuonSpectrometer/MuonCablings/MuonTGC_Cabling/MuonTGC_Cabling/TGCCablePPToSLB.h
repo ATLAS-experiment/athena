@@ -20,18 +20,18 @@ class TGCCablePPToSLB : public TGCCable {
     TGCCablePPToSLB(const std::string& filename);
     virtual ~TGCCablePPToSLB();
 
-    virtual TGCChannelId* getChannel(const TGCChannelId* channelId,
-                                     bool orChannel = false) const;
-    virtual TGCModuleMap* getModule(const TGCModuleId* moduleId) const;
+    std::unique_ptr<TGCChannelId> getChannel(const TGCChannelId& channelId,
+                                             bool orChannel = false) const;
+    TGCModuleMap getModule(const TGCModuleId& moduleId) const;
 
    private:
     TGCCablePPToSLB() = delete;
-    virtual TGCChannelId* getChannelIn(const TGCChannelId* slbin,
-                                       bool orChannel = false) const;
-    virtual TGCChannelId* getChannelOut(const TGCChannelId* ppout,
-                                        bool orChannel = false) const;
-    virtual TGCModuleMap* getModuleIn(const TGCModuleId* slb) const;
-    virtual TGCModuleMap* getModuleOut(const TGCModuleId* pp) const;
+    std::unique_ptr<TGCChannelId> getChannelIn(const TGCChannelId& slbin,
+                                               bool orChannel = false) const;
+    std::unique_ptr<TGCChannelId> getChannelOut(const TGCChannelId& ppout,
+                                                bool orChannel = false) const;
+    TGCModuleMap getModuleIn(const TGCModuleId& slb) const;
+    TGCModuleMap getModuleOut(const TGCModuleId& pp) const;
 
     std::array<std::array<std::unique_ptr<TGCDatabase>, TGCId::MaxModuleType>,
                TGCId::MaxRegionType>

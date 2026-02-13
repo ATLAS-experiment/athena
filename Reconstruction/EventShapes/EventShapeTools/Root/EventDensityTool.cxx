@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventDensityTool.cxx 
@@ -44,7 +44,7 @@ EventDensityTool::~EventDensityTool() {}
 //**********************************************************************
 
 StatusCode EventDensityTool::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_DEBUG ("Initializing " << name() << "...");
 
   // Initialise output handle
   ATH_CHECK( m_outEDKey.initialize() );
@@ -83,24 +83,23 @@ StatusCode EventDensityTool::initialize() {
                     << m_rapmin << ", " << m_rapmax << ")");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_INFO("Configured properties:");
-  ATH_MSG_INFO("     JetAlgorithm: " << m_jetalg);
-  ATH_MSG_INFO("        JetRadius: " << m_jetrad);
+  ATH_MSG_DEBUG("Configured properties:");
+  ATH_MSG_DEBUG("     JetAlgorithm: " << m_jetalg);
+  ATH_MSG_DEBUG("        JetRadius: " << m_jetrad);
   if(!m_inPJKey.key().empty()) {
-    ATH_MSG_INFO("   InputContainer: " << m_inPJKey.key());
+    ATH_MSG_INFO("   Input: " << m_inPJKey.key() << " -> Output: " << m_outEDKey.key());
   } else {
-    ATH_MSG_INFO("     TrigPJGetter: " << m_trigPJGet.name());
+    ATH_MSG_INFO("     TrigPJGetter: " << m_trigPJGet.name() << " -> Output: " << m_outEDKey.key());
   }
-  ATH_MSG_INFO("   AbsRapidityMin: " << m_rapmin);
-  ATH_MSG_INFO("   AbsRapidityMax: " << m_rapmax);
-  ATH_MSG_INFO("   AreaDefinition: " << m_areadef);
-  ATH_MSG_INFO("     VoronoiRfact: " << m_vrfact);
-  ATH_MSG_INFO("  OutputContainer: " << m_outEDKey.key());
-  ATH_MSG_INFO("Derived properties:");
-  ATH_MSG_INFO("        Fastjet jet defn: " << m_fjjetdef.description());
-  ATH_MSG_INFO("       Fastjet area defn: " << m_fjareadef.description());
-  ATH_MSG_INFO("    Fastjet jet selector: " << m_fjselector.description());
-  ATH_MSG_INFO("  Use area four-momentum: " << m_useAreaFourMom);
+  ATH_MSG_DEBUG("   AbsRapidityMin: " << m_rapmin);
+  ATH_MSG_DEBUG("   AbsRapidityMax: " << m_rapmax);
+  ATH_MSG_DEBUG("   AreaDefinition: " << m_areadef);
+  ATH_MSG_DEBUG("     VoronoiRfact: " << m_vrfact);
+  ATH_MSG_DEBUG("Derived properties:");
+  ATH_MSG_DEBUG("        Fastjet jet defn: " << m_fjjetdef.description());
+  ATH_MSG_DEBUG("       Fastjet area defn: " << m_fjareadef.description());
+  ATH_MSG_DEBUG("    Fastjet jet selector: " << m_fjselector.description());
+  ATH_MSG_DEBUG("  Use area four-momentum: " << m_useAreaFourMom);
 
   // Input sources
   if(!m_inPJKey.key().empty() && m_trigPJGet.empty()) {

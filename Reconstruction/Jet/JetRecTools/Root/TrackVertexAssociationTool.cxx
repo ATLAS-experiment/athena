@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetRecTools/TrackVertexAssociationTool.h"
@@ -27,7 +27,7 @@ TrackVertexAssociationTool::TrackVertexAssociationTool(const std::string& t)
 }
 
 StatusCode TrackVertexAssociationTool::initialize(){
-  ATH_MSG_INFO("Initializing tool " << name() << "...");
+  ATH_MSG_DEBUG("Initializing tool " << name() << "...");
   ATH_MSG_DEBUG("initializing version with data handles");
   
   ATH_CHECK(m_trackContainer_key.initialize());

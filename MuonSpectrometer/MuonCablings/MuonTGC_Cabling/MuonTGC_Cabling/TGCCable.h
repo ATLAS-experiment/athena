@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLE_HH
@@ -28,27 +28,13 @@ class TGCCable {
     };
 
     // Constructor & Destructor
-    TGCCable(CableType type = NoCableType) { this->m_type = type; }
-    virtual ~TGCCable(void) {}
+    TGCCable(CableType type = NoCableType) : m_type{type} {}
+    virtual ~TGCCable() = default;
 
-    CableType getCableType(void) const { return m_type; }
-
-   protected:
-    // channel connection
-    virtual TGCChannelId* getChannelIn(const TGCChannelId*,
-                                       bool /*orChannel=false*/) const {
-        return 0;
-    }
-    virtual TGCChannelId* getChannelOut(const TGCChannelId*,
-                                        bool /*orChannel=false*/) const {
-        return 0;
-    }
-    // module connection
-    virtual TGCModuleMap* getModuleIn(const TGCModuleId*) const { return 0; }
-    virtual TGCModuleMap* getModuleOut(const TGCModuleId*) const { return 0; }
+    CableType getCableType() const { return m_type; }
 
    private:
-    CableType m_type;
+    CableType m_type{CableType::NoCableType};
 };
 
 }  // namespace MuonTGC_Cabling

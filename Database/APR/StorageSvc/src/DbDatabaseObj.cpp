@@ -472,33 +472,6 @@ StatusCode DbDatabaseObj::open()   {
   return StatusCode::SUCCESS;
 }
 
-/// Re-open database with changing access permissions
-StatusCode DbDatabaseObj::reopen(DbAccessMode mod) {
-  if (mod == pool::READ || mod == pool::UPDATE )  {
-    if ( mode() != mod )   {
-      setMode(mod);
-      StatusCode sc = (0==m_info) ? open() : m_info->reopen(mod);
-      if ( sc.isSuccess() )   {
-        for (const_iterator i=begin(); i != end(); ++i )  {
-          (*i).second->cancelTransaction();
-          (*i).second->setMode(mod);
-        }
-        return sc;
-      }
-      ATH_MSG_ERROR("Failed to reopen the database " << name()
-          << " in mode " << accessMode(mod));
-      return sc;
-    }
-    ATH_MSG_DEBUG("Database already open in the requested access mode.");
-    for (const_iterator i=begin(); i != end(); ++i )  {
-      (*i).second->setMode(mod);
-    }
-    return StatusCode::SUCCESS;
-  }
-  ATH_MSG_ERROR("A database can only be re-opened in UPDATE or READ mode!");
-  return StatusCode::FAILURE;
-}
-
 /// Close Database object
 StatusCode DbDatabaseObj::close()  {
   StatusCode sc = retire();

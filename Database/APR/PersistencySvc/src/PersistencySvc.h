@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENCYSVC_PERSISTENCYSVC
@@ -29,13 +29,7 @@ namespace pool {
 
       PersistencySvc (const PersistencySvc&) = delete;
       PersistencySvc& operator= (const PersistencySvc&) = delete;
-/*
-      /// Returns the file catalog in use
-      IFileCatalog& fileCatalog();
 
-      /// Set the attached file catalog
-      void setFileCatalog( IFileCatalog& catalog );
-*/
       /** Retrieves an object from persistent store and return with type information
        *  The handle to the reflection class is necessary to later delete the object.
        *  The Guid of the transient class is assumed to be the classID of the token
@@ -70,7 +64,6 @@ namespace pool {
     private:
       /// The session object.
       UserSession* m_session;
-
     };
   }
 }

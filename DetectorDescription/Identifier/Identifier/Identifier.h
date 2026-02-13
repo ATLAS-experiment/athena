@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_IDENTIFIER_H
 #define IDENTIFIER_IDENTIFIER_H
 
-#include "GaudiKernel/MsgStream.h"
+
 #include "Identifier/Identifier32.h"
 #include <string>
+#include <iostream>
 
+class MsgStream;
 /*
  *
  *  @brief Identifier is a simple type-safe 64 bit unsigned integer. An
@@ -105,7 +107,8 @@ public:
     std::string  getString() const;
 
     /// Print out in hex form
-    void show () const;
+    void show (std::ostream & out = std::cout) const;
+    void show (MsgStream & out) const;
 
 private:
     /// extract field from identifier (shift first, then mask)
@@ -130,6 +133,11 @@ private:
     value_type m_id = max_value;
 };
 
+MsgStream&
+operator<<(MsgStream& f, const Identifier& id);
+
+std::ostream&
+operator<<(std::ostream& os, const Identifier& id);
 
 /// Define a hash functional
 namespace std {
