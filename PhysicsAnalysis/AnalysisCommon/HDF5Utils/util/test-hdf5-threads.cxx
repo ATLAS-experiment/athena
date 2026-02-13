@@ -16,6 +16,7 @@ struct out_t
 };
 using consumer_t = H5Utils::Consumers<const out_t&>;
 
+//coverity[UNCAUGHT_EXCEPT]
 int main(int nargs, char* argv[]) {
   H5::H5File h5_file("mt_output.h5", H5F_ACC_TRUNC);
   size_t n_threads = 5;
