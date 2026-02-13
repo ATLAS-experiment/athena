@@ -271,7 +271,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(
     SG::ReadHandle<TgcRdoContainer> rdoContainer{m_rdoContainerKey, ctx};
     ATH_CHECK(rdoContainer.isValid());
     ///////////// here the RDO container is retrieved and filled -whatever input
-    ///type we start with- => check the size
+    /// type we start with- => check the size
     if (rdoContainer->empty()) {
         // empty csm container - no tgc rdo in this event
         ATH_MSG_DEBUG("Empty rdo container - no tgc rdo in this event");

@@ -10,24 +10,15 @@ StatusCode TGC_RawDataProviderTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
 
     ATH_CHECK(m_decoder.retrieve());
-    ATH_MSG_DEBUG("Retrieved tool " << m_decoder);
 
     // Get ROBDataProviderSvc
     ATH_CHECK(m_robDataProvider.retrieve());
-    ATH_MSG_DEBUG("Retrieved service " << m_robDataProvider);
 
     m_maxhashtoUse = m_idHelperSvc->tgcIdHelper().module_hash_max();
 
     ATH_CHECK(m_rdoContainerKey.initialize());
 
-    // try to configure the cabling service
-    if (!getCabling()) {
-        // ??? Is deferred initialization still needed here?
-        ATH_MSG_INFO(
-            "TGCCablingServerSvc not yet configured; postpone TGCcabling "
-            "initialization at first event. ");
-    }
-
+    ATH_CHECK(m_cablingKey.initialize());
     m_hid2re.fillAllRobIds();
     // Initialise the container cache if available
     ATH_CHECK(m_rdoContainerCacheKey.initialize(
@@ -39,14 +30,15 @@ StatusCode TGC_RawDataProviderTool::initialize() {
 
 StatusCode TGC_RawDataProviderTool::convertIntoContainer(
     const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-    TgcRdoContainer& tgcRdoContainer) const {
+    TgcRdoContainer& tgcRdoContainer, const EventContext& ctx) const {
 
     /// Static variables are not thread safe
     static thread_local int DecodeErrCount = 0;
 
     // Update to range based loop
     for (const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* fragment : vecRobs) {
-        if (m_decoder->fillCollection(*fragment, tgcRdoContainer).isFailure()) {
+        if (m_decoder->fillCollection(*fragment, tgcRdoContainer, ctx)
+                .isFailure()) {
             if (DecodeErrCount < 100) {
                 ATH_MSG_INFO("Problem with TGC ByteStream Decoding!");
                 DecodeErrCount++;
@@ -62,30 +54,13 @@ StatusCode TGC_RawDataProviderTool::convertIntoContainer(
     return StatusCode::SUCCESS;
 }
 
-const MuonTGC_CablingSvc* TGC_RawDataProviderTool::getCabling() const {
-    const MuonTGC_CablingSvc* cabling = m_cabling.get();
-    if (cabling) {
-        return cabling;
-    }
-
-    ServiceHandle<MuonTGC_CablingSvc> TgcCabGet("MuonTGC_CablingSvc", name());
-    if (TgcCabGet.retrieve().isFailure()) {
-        ATH_MSG_FATAL("Could not get MuonTGC_CablingSvc !");
-        return nullptr;
-    }
-
-    m_cabling.set(TgcCabGet.get());
-
-    return m_cabling.get();
-}
-
 std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>
 TGC_RawDataProviderTool::getROBData(
     const std::vector<IdentifierHash>& rdoIdhVect,
     const EventContext& ctx) const {
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    const MuonTGC_CablingSvc* cabling = getCabling();
-    if (!cabling) {
+    const TgcCablingMap* cabling{};
+    if (!SG::get(cabling, m_cablingKey, ctx).isSuccess()) {
         ATH_MSG_ERROR(
             "Could not get cabling, return empty vector of ROB fragments");
         return vecOfRobf;
@@ -155,7 +130,7 @@ StatusCode TGC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs,
         return StatusCode::FAILURE;
     }
 
-    return convertIntoContainer(vecRobs, *rdoContainer);
+    return convertIntoContainer(vecRobs, *rdoContainer, ctx);
 }
 
 StatusCode TGC_RawDataProviderTool::convert(

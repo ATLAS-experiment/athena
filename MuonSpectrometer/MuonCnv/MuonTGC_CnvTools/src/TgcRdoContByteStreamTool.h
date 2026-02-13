@@ -10,7 +10,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "ByteStreamData/RawEvent.h"
-#include "MuonTGC_CnvTools/ITGC_RDOtoByteStreamTool.h"
+#include "MuonCnvToolInterfaces/ITGC_RDOtoByteStreamTool.h"
 #include "TGC_Hid2RESrcID.h"
 
 class TgcRdoContainer;

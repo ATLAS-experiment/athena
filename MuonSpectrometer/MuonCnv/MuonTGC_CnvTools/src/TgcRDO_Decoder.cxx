@@ -8,46 +8,38 @@
 #include "MuonDigitContainer/TgcDigit.h"
 #include "MuonRDO/TgcRawData.h"
 
+namespace Muon {
 // constructor
-Muon::TgcRDO_Decoder::TgcRDO_Decoder(const std::string& type,
-                                     const std::string& name,
-                                     const IInterface* parent)
-    : AthAlgTool(type, name, parent), m_applyPatch(false) {
-    declareInterface<ITGC_RDO_Decoder>(this);
-}
-
-StatusCode Muon::TgcRDO_Decoder::initialize() {
+StatusCode TgcRDO_Decoder::initialize() {
     ATH_MSG_DEBUG("TgcRDO_Decoder::initialize");
 
     // try to configure the cabling service
-    ATH_CHECK(m_cabling.retrieve());
+    ATH_CHECK(m_cablingKey.initialize());
 
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::TgcRDO_Decoder::finalize() {
-    return StatusCode::SUCCESS;
-}
-
-void Muon::TgcRDO_Decoder::applyPatch(bool patch) {
+void TgcRDO_Decoder::applyPatch(bool patch) {
     m_applyPatch = patch;
 }
 
-TgcDigit* Muon::TgcRDO_Decoder::getDigit(const TgcRawData* rawData,
-                                         bool orFlag) const {
+std::unique_ptr<TgcDigit> TgcRDO_Decoder::getDigit(const EventContext& ctx,
+                                                   const TgcRawData& rawData,
+                                                   bool orFlag) const {
     // MuonTGC_CablingSvc should be configured at initialise
-    if (!m_cabling) {
+    const TgcCablingMap* cabling{nullptr};
+    if (!SG::get(cabling, m_cablingKey, ctx).isSuccess()) {
         ATH_MSG_ERROR(
-            "MuonTGC_CablingSvc is not available in "
+            "Cabling is not available in "
             "TgcRDO_Decoder::getDigit()");
         return nullptr;
     }
 
     int offset = 0, offsetORed = 0;
 
-    const uint16_t sswId = rawData->sswId();
-    const uint16_t slbId = rawData->slbId();
-    const uint16_t bitpos = rawData->bitpos();
+    const uint16_t sswId = rawData.sswId();
+    const uint16_t slbId = rawData.slbId();
+    const uint16_t bitpos = rawData.bitpos();
 
     if (m_applyPatch) {
         if (sswId == 9) {
@@ -78,35 +70,36 @@ TgcDigit* Muon::TgcRDO_Decoder::getDigit(const TgcRawData* rawData,
 
     // get official channel ID
     Identifier chanId;
-    bool c_found = m_cabling->getOfflineIDfromReadoutID(
-        chanId, rawData->subDetectorId(), rawData->rodId(), sswId, slbId,
+    bool c_found = cabling->getOfflineIDfromReadoutID(
+        chanId, rawData.subDetectorId(), rawData.rodId(), sswId, slbId,
         bitpos + corr, orFlag);
 
     if (!c_found) {
         return nullptr;
     }
 
-    return new TgcDigit(chanId, rawData->bcTag());
+    return std::make_unique<TgcDigit>(chanId, rawData.bcTag());
 }
 
-Identifier Muon::TgcRDO_Decoder::getOfflineData(const TgcRawData* rawData,
-                                                bool orFlag,
-                                                uint16_t& bctag) const {
-    Identifier chanId(0);
+Identifier TgcRDO_Decoder::getOfflineData(const EventContext& ctx,
+                                          const TgcRawData& rawData,
+                                          bool orFlag, uint16_t& bctag) const {
+    Identifier chanId{};
 
     // ITGCcablingSvc should be configured at initialise
-    if (!m_cabling) {
+    const TgcCablingMap* cabling{nullptr};
+    if (!SG::get(cabling, m_cablingKey, ctx).isSuccess()) {
         ATH_MSG_ERROR(
-            "ITGCcablingSvc is not available in "
+            "Cabling is not available in "
             "TgcRDO_Decoder::getOfflineData()");
         return chanId;
     }
 
     bctag = TgcDigit::BC_UNDEFINED;
 
-    const uint16_t sswId = rawData->sswId();
-    const uint16_t slbId = rawData->slbId();
-    const uint16_t bitpos = rawData->bitpos();
+    const uint16_t sswId = rawData.sswId();
+    const uint16_t slbId = rawData.slbId();
+    const uint16_t bitpos = rawData.bitpos();
 
     int offset = 0, offsetORed = 0;
     if (m_applyPatch) {
@@ -137,14 +130,15 @@ Identifier Muon::TgcRDO_Decoder::getOfflineData(const TgcRawData* rawData,
     int corr = orFlag ? offsetORed : offset;
 
     // get official channel ID
-    bool c_found = m_cabling->getOfflineIDfromReadoutID(
-        chanId, rawData->subDetectorId(), rawData->rodId(), sswId, slbId,
+    bool c_found = cabling->getOfflineIDfromReadoutID(
+        chanId, rawData.subDetectorId(), rawData.rodId(), sswId, slbId,
         bitpos + corr, orFlag);
 
     if (!c_found) {
         return chanId;
     }
 
-    bctag = rawData->bcTag();
+    bctag = rawData.bcTag();
     return chanId;
 }
+}  // namespace Muon

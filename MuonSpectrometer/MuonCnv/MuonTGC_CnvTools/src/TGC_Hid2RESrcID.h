@@ -11,9 +11,9 @@
 
 class TgcRdo;
 class Identifier;
-class MuonTGC_CablingSvc;
 
 namespace Muon {
+class TgcCablingMap;
 
 /** @class TGC_Hid2RESrcID
  *  This class provides conversion between TGC RDO Id and RESrcID.
@@ -28,10 +28,10 @@ namespace Muon {
 class TGC_Hid2RESrcID {
    public:
     /** Constrcutor */
-    TGC_Hid2RESrcID() {}
+    TGC_Hid2RESrcID() = default;
 
     /** Destrcutor */
-    ~TGC_Hid2RESrcID() {}
+    ~TGC_Hid2RESrcID() = default;
 
     /** Make a ROD Source ID for TGC RDO. */
     static uint32_t getRodID(const TgcRdo* rdo);
@@ -39,7 +39,7 @@ class TGC_Hid2RESrcID {
     static uint32_t getRodID(uint16_t subDetectorId, uint16_t rodId);
     /** Make a ROD Source ID for TgcDigitCollection. */
     static uint32_t getRodID(const Identifier& offlineId,
-                             const MuonTGC_CablingSvc* cabling);
+                             const TgcCablingMap* cabling);
     /** Make a ROB Source ID from a ROD source ID. */
     static uint32_t getRobID(uint32_t rod_id);
     /** Make a ROS Source ID from a ROB source ID. */

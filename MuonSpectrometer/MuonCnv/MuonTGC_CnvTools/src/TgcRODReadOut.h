@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRODREADOUT_H
@@ -11,7 +11,8 @@
 
 #include "ByteStreamData/RawEvent.h"
 #include "MuonRDO/TgcRdo.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
+#include "TgcSlbDataHelper.h"
 
 namespace Muon {
 class TgcSlbData;
@@ -37,25 +38,30 @@ class TgcRODReadOut {
 
    public:
     /** Constructor */
-    TgcRODReadOut(const MuonTGC_CablingSvc& cabling);
+    TgcRODReadOut() = default;
     /** Destructor */
     virtual ~TgcRODReadOut();
 
     /** Convert BS (ROB fragment) to RDO */
     StatusCode byteStream2Rdo(const ByteStream& bs, TgcRdo& tgcRdo,
-                              uint32_t source_id) const;
+                              uint32_t source_id, const TgcCablingMap& cabling,
+                              MsgStream& log) const;
     /** Convert BS (ROB fragment) to RDO and compare decoded RDO container
      *  and another RDO container decoded by other converter */
-    StatusCode check(const ByteStream& bs, TgcRdo& tgcRdo,
-                     uint32_t source_id) const;
+    bool check(const ByteStream& bs, const TgcRdo& tgcRdo, uint32_t source_id,
+               const TgcCablingMap& cabling,
+
+               MsgStream& log) const;
     /** Compare two RDO containers */
-    StatusCode compare(TgcRdo* rdo, TgcRdo* newRdo) const;
+    void compare(const TgcRdo& rdo, const TgcRdo& newRdo, MsgStream& msg) const;
     /** Compare two RDOs */
-    static bool isMatched(const TgcRawData* rdo1, const TgcRawData* rdo2);
+    static bool isMatched(const TgcRawData& rdo1, const TgcRawData& rdo2);
     /** Decode BS to RDO container */
     StatusCode decodeRodToRdo(TgcRdo& tgcRdo, const ByteStream& vData,
                               uint16_t subDetectorId, uint16_t rodId,
-                              uint32_t l1Id, uint16_t bcId) const;
+                              uint32_t l1Id, uint16_t bcId,
+                              const TgcCablingMap& cabling,
+                              MsgStream& log) const;
 
    protected:
     enum {
@@ -79,7 +85,7 @@ class TgcRODReadOut {
 
     /** Set sbLoc */
     bool setSbLoc(uint16_t subDetectorId, uint16_t rodId, TgcSlbData* slb,
-                  int rxId) const;
+                  int rxId, const TgcCablingMap& cabling, MsgStream& log) const;
 
    private:
     /** The number of RODs (1-24 for 12-fold) */
@@ -90,26 +96,27 @@ class TgcRODReadOut {
         CSIDE = 0x68   // 104
     };
     /** The number of failures on decodeRodToRdo */
-    mutable std::atomic<unsigned int> m_failedDecodeRodToRdo[NROD + 1];
+    mutable std::array<std::atomic<unsigned int>, NROD + 1>
+        m_failedDecodeRodToRdo ATLAS_THREAD_SAFE{};
     /** The number of strange header and SizeRawData */
-    mutable std::atomic<unsigned int> m_failedHeaderSizeRawData[NROD + 1];
+    mutable std::array<std::atomic<unsigned int>, NROD + 1>
+        m_failedHeaderSizeRawData ATLAS_THREAD_SAFE{};
     /** The number of failures on setSbLoc */
-    mutable std::atomic<unsigned int> m_failedSetSbLoc[NROD + 1];
+    mutable std::array<std::atomic<unsigned int>, NROD + 1> m_failedSetSbLoc
+        ATLAS_THREAD_SAFE{};
     /** The number of failures on setType */
-    mutable std::atomic<unsigned int> m_failedSetType[NROD + 1];
+    mutable std::array<std::atomic<unsigned int>, NROD + 1> m_failedSetType
+        ATLAS_THREAD_SAFE{};
     /** The number of failures on getSLBIDfromRxID */
-    mutable std::atomic<unsigned int> m_failedGetSLBIDfromRxID[NROD + 1];
+    mutable std::array<std::atomic<unsigned int>, NROD + 1>
+        m_failedGetSLBIDfromRxID ATLAS_THREAD_SAFE{};
     /** The number of failures on getReadoutIDfromSLBID */
-    mutable std::atomic<unsigned int> m_failedGetReadoutIDfromSLBID[NROD + 1];
-
-    /** TGC Cabling Svc */
-    const MuonTGC_CablingSvc& m_cabling;
+    mutable std::array<std::atomic<unsigned int>, NROD + 1>
+        m_failedGetReadoutIDfromSLBID ATLAS_THREAD_SAFE{};
 
     /** TGC SLB data helper */
-    TgcSlbDataHelper* m_tgcSlbDataHelper;
-
-    TgcRODReadOut& operator=(const TgcRODReadOut& right);
-    TgcRODReadOut(const TgcRODReadOut&);
+    std::unique_ptr<TgcSlbDataHelper> m_tgcSlbDataHelper{
+        std::make_unique<TgcSlbDataHelper>()};
 };
 
 }  // namespace Muon

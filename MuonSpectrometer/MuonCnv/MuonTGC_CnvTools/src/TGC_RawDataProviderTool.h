@@ -13,7 +13,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonRDO/TgcRdo_Cache.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTGC_CnvTools/ITGC_RodDecoder.h"
 #include "TGC_Hid2RESrcID.h"
 
@@ -69,7 +69,7 @@ class TGC_RawDataProviderTool
     StatusCode convertIntoContainer(
         const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&
             vecRobs,
-        TgcRdoContainer& tgcRdoContainer) const;
+        TgcRdoContainer& tgcRdoContainer, const EventContext& ctx) const;
 
     /** Function to get the ROB data from a vector of IdentifierHash **/
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> getROBData(
@@ -90,13 +90,12 @@ class TGC_RawDataProviderTool
 
     /** ID converter */
     TGC_Hid2RESrcID m_hid2re;
-    /** TGC cabling Svc */
-    CxxUtils::CachedPointer<const MuonTGC_CablingSvc> m_cabling;
     /** Rob Data Provider handle */
     ServiceHandle<IROBDataProviderSvc> m_robDataProvider{
         this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
 
-    const MuonTGC_CablingSvc* getCabling() const;
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
+        this, "CablingKey", "MuonTgc_CablingMap"};
     // TGC container cache key
     SG::UpdateHandleKey<TgcRdo_Cache> m_rdoContainerCacheKey{
         this, "TgcContainerCacheKey", ""};

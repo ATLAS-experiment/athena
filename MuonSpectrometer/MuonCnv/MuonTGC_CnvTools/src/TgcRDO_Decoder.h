@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTGC_CnvTools/ITGC_RDO_Decoder.h"
 
 class TgcDigit;
@@ -26,28 +26,30 @@ namespace Muon {
  *  CscRDO_Decoder written by Ketevi A. Assamagan.
  */
 
-class TgcRDO_Decoder : virtual public ITGC_RDO_Decoder, public AthAlgTool {
+class TgcRDO_Decoder : public extends<AthAlgTool, ITGC_RDO_Decoder> {
    public:
-    TgcRDO_Decoder(const std::string& type, const std::string& name,
-                   const IInterface* parent);
+    using base_class::base_class;
     ~TgcRDO_Decoder() = default;
 
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
 
     /** Set a flag for application of patch.
      *  Need to describe when patch is required. */
     void applyPatch(bool patch);
     /** Get TGC Digit from TGC RDO */
-    TgcDigit* getDigit(const TgcRawData* rawData, bool orFlag) const;
+    std::unique_ptr<TgcDigit> getDigit(const EventContext& ctx,
+                                       const TgcRawData& rawData,
+                                       bool orFlag) const override;
     /** Get offline ID and bcTag from TGC RDO */
-    Identifier getOfflineData(const TgcRawData* rawData, bool orFlag,
-                              uint16_t& bctag) const;
+    Identifier getOfflineData(const EventContext& ctx,
+                              const TgcRawData& rawData, bool orFlag,
+                              uint16_t& bctag) const override;
 
    private:
-    ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "CablingSvc",
-                                                "MuonTGC_CablingSvc"};
-    bool m_applyPatch;
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
+        this, "CablingKey", "MuonTgc_CablingMap"};
+
+    bool m_applyPatch{false};
 };
 
 }  // namespace Muon
