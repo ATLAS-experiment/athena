@@ -130,10 +130,6 @@ public:
    /// @param refAddress [OUT] converted string form.
    virtual StatusCode convertAddress(const IOpaqueAddress* pAddress, std::string& refAddress) override;
 
-   /// Extract/deduce the DB technology from the connection
-   /// string/file specification
-   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const override;
-
    /// Implement registerCleanUp to register a IAthenaPoolCleanUp to be called during cleanUp.
    virtual StatusCode registerCleanUp(IAthenaPoolCleanUp* cnv) override;
 
@@ -185,16 +181,6 @@ private: // properties
    /// default = false.
    Gaudi::Property<bool> m_useDetailChronoStat{this,"UseDetailChronoStat",false};
 
-   /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
-   Gaudi::Property<std::map<std::string, std::string>> m_storageTechProp{this, "StorageTechnology", {{"*","ROOTTREEINDEX"}}};
-   std::map<std::string, int> m_storageTechMap;
-   /// POOL Container name prefix - will be part of or whole TTree/RNTuple name
-   /// 'Default' takes the prefix from APRDefaults according to StorageTech
-   Gaudi::Property<std::string> m_containerPrefixProp{this,"PoolContainerPrefix","Default"};
-   /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"
-   Gaudi::Property<std::string> m_containerNameHintProp{this,"TopLevelContainerName",""};
-   /// SubLevelBranchName, naming hint policy for POOL branching: ("" = no branching)
-   Gaudi::Property<std::string> m_branchNameHintProp{this,"SubLevelBranchName", "<type>/<key>"};
    /// POOL container naming scheme selection
    Gaudi::Property<std::string> m_containerNamingSchemeProp{this, "PoolContainerNamingScheme", "Historical"};
 
@@ -211,9 +197,6 @@ private: // properties
    /// to be printed each event
    Gaudi::Property<std::vector<std::string>> m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
    std::vector<std::vector<std::string> > m_inputAttrPerEvent;
-
-   /// Default container type (from PoolSvc)
-   std::string m_defContainerType{};
 
 protected: // properties
    /// PersSvcPerOutput, boolean property to use multiple persistency services, one per output stream.

@@ -18,6 +18,7 @@ def IOVDbTestAlgFlags():
    flags.IOVDb.DBConnection = "sqlite://;schema=mytest.db;dbname=TESTCOOL"
    flags.IOVDb.DatabaseInstance = ""
    flags.IOVDb.GlobalTag = ""
+   flags.PoolSvc.DefaultContainerType = "ROOTTREE"
 
    return flags
 
@@ -45,11 +46,7 @@ def IOVDbTestAlgWriteCfg(flags, registerIOV = False):
                                  TimeStampInterval = 5) )
 
    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-   acc.merge( AthenaPoolCnvSvcCfg(flags,
-                                  PoolContainerPrefix = "CollectionTree",
-                                  StorageTechnology = {"*":"ROOTTREE"},
-                                  TopLevelContainerName = "<type>",
-                                  SubLevelBranchName = "") )
+   acc.merge( AthenaPoolCnvSvcCfg(flags) )
 
    # Testing algorithm
    acc.addEventAlgo( CompFactory.IOVDbTestAlg(
@@ -64,6 +61,8 @@ def IOVDbTestAlgWriteCfg(flags, registerIOV = False):
       PrintLB       = True) )
 
    acc.addPublicTool( CompFactory.AthenaOutputStreamTool("CondStream2",
+                                                         TopLevelContainerName = "<type>",
+                                                         SubLevelBranchName = "",
                                                          OutputFile = "SimplePoolFile.root") )
    return acc
 

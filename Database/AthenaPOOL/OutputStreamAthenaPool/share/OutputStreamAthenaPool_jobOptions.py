@@ -20,17 +20,17 @@ WritingTool.OutputCollection = "POOLContainer_";
 # The following properties are similar to the corresponding AthenaPoolCnvSvc properties,
 # but affect this Stream only.
 # Prefix for top level POOL container.
-AthenaPoolCnvSvc.PoolContainerPrefix = "CollectionTree"
+WritingTool.PoolContainerPrefix = "CollectionTree"
 # Naming hint policy for top level POOL container. E.G.:
 # - "", no hint will cause all objects to be written to the same tree (requires branches).
 # - "<type>", use the data object type as container name (tree per type).
 # - "<type>/<key>", use the data object type and key as container name (tree per type/key).
-AthenaPoolCnvSvc.TopLevelContainerName = ""
+WritingTool.TopLevelContainerName = ""
 # Naming hint policy for top level POOL branching. E.G.:
 # - "", no hint will cause all objects of a tree to be written to the same branch.
 # - "<type>", use the data object type as branch name (required if type is not used for tree name).
 # - "<type>/<key>", use the data object type and key as branch name.
-AthenaPoolCnvSvc.SubLevelBranchName = "<type>/<key>"
+WritingTool.SubLevelBranchName = "<type>/<key>"
 # Optional key for AttributeList to be written as part of the DataHeader
 # - "", no AttributeList list is written to the payload file.
 AthenaPoolCnvSvc.AttributeListKey = ""

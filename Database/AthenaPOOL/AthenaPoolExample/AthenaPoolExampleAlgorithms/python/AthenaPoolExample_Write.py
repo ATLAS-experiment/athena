@@ -67,11 +67,11 @@ from AthenaCommon.Constants import DEBUG
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg, outputStreamName
 
 stream1name = "Stream1"
-file1Name = "ROOTTREE:SimplePoolFile1.root"
+file1Name = "SimplePoolFile1.root"
 stream2name = "Stream2"
-file2Name = "ROOTTREE:SimplePoolFile2.root"
+file2Name = "SimplePoolFile2.root"
 stream3name = "Stream3"
-file3Name =  "ROOTTREE:EmptyPoolFile.root"
+file3Name =  "EmptyPoolFile.root"
 noTag = True
 
 # Setup flags

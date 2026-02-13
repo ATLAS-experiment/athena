@@ -662,22 +662,6 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
 		IOpaqueAddress*& refpAddress) {
    return AthenaPoolCnvSvc::createAddress(svcType, clid, refAddress, refpAddress);
 }
-//__________________________________________________________________________
-StatusCode AthenaPoolSharedIOCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-    auto pos = fileSpec.find("?pmerge=");
-    std::string suffix;
-    // Remove trailing TMemFile for decoding
-    if (pos != std::string::npos) {
-      suffix = fileSpec.substr(pos);
-      fileSpec.erase(pos);
-    }
-    StatusCode sc = AthenaPoolCnvSvc::decodeOutputSpec(fileSpec, outputTech);
-    // Append back the suffix
-    if (!suffix.empty()) {
-        fileSpec += suffix;
-    }
-    return sc;
-}
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::cleanUp(const std::string& connection) {
    auto pos = connection.find("?pmerge=");

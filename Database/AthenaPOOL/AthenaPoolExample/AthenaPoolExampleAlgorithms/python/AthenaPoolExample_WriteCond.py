@@ -19,7 +19,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
 outputStreamName = "ExampleCond"
-outputFileName = "ROOTTREE:SimplePoolFile4.root"
+outputFileName = "SimplePoolFile4.root"
 noTag = True
 
 # Setup flags

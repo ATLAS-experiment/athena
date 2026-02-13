@@ -50,8 +50,6 @@ public:
                                     std::string& /*refAddress*/) override
   
   { std::abort(); }
-  virtual StatusCode decodeOutputSpec(std::string& /*connectionSpec*/, int& /*outputTech*/) const override
-  { std::abort(); }
   virtual StatusCode cleanUp(const std::string& /*connection*/) override
   { std::abort(); }
   virtual StatusCode setInputAttributes(const std::string& /*fileName*/) override

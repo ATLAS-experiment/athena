@@ -14,7 +14,7 @@ Derivation_tf.py \
       --perfmon 'fullmonmt' \
       --inputAODFile ${DATAFILE} \
       --outputDAODFile 'pool.root' \
-      --preExec="flags.Output.StorageTechnology.EventData={\"*\":\"ROOTRNTUPLE\"};" \
+      --preExec="flags.PoolSvc.DefaultContainerType=\"ROOTRNTUPLE\";" \
       --formats ${FORMAT} > __log.txt 2>&1;
 
  echo $? > __exitcode;
