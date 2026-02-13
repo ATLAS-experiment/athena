@@ -761,13 +761,13 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_xe30_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
         ChainProp(name='HLT_xe30_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
         ChainProp(name='HLT_xe25_cell_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe25_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe25_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe25_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe20_cell_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe20_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe20_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
-        ChainProp(name='HLT_xe20_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=PrimaryPhIGroup+METGroup),
+        ChainProp(name='HLT_xe25_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe25_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe25_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe20_cell_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe20_pfopufit_L1eEM12L',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe20_cell_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
+        ChainProp(name='HLT_xe20_pfopufit_L1eEM15',  l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SupportPhIGroup+METGroup),
     ]
 
 
