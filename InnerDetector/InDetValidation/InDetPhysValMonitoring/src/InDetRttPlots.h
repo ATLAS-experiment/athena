@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETRTTPLOTS
@@ -162,6 +162,7 @@ private:
   /// No explicit initialisation, since unique_ptr will default-construct 
   /// to return a nullptr
   std::unique_ptr<InDetPerfPlot_TrackParameters> m_trackParameters;
+  std::unique_ptr<InDetPerfPlot_Resolution> m_unmatchedBiasPlots;
   std::unique_ptr<InDetPerfPlot_nTracks> m_nTracks;
   std::unique_ptr<InDetPerfPlot_HitResidual> m_hitResidualPlot;
   std::unique_ptr<InDetPerfPlot_HitEfficiency> m_hitEffPlot;
