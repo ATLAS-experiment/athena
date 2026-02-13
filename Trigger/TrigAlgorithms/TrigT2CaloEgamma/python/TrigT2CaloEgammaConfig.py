@@ -127,6 +127,30 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
 
 #=======================================================================
 
+def t2CaloEgamma_PhotonPointCfg(flags, name="T2CaloEgamma_PhotonPoint", RoIs=inputEDM, ExtraInputs=set(), ClustersName="HLT_FastCaloEMClusters",doNotRecord=False):
+    acc = ComponentAccumulator()
+    tool = CompFactory.EgammaPhotonPoint("EgammaPhotonPoint",
+                                    ExtraInputs={('TileEMScale','ConditionStore+TileEMScale'),
+                                                 ('TileBadChannels','ConditionStore+TileBadChannels')})
+
+    alg = CompFactory.T2CaloEgammaReFastAlgo(name,
+                                             IReAlgToolList= [tool],
+                                             EtaWidth = 0.1,
+                                             PhiWidth = 0.1,
+                                             ExtraInputs = _T2CaloEgamma_ExtraInputs)
+    alg.RoIs=RoIs
+    alg.ExtraInputs |= ExtraInputs
+    if(not flags.Input.isMC):
+      alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
+    if not doNotRecord:
+       alg.ClustersName = recordable(ClustersName)
+    else:
+       alg.ClustersName = ClustersName
+    acc.addEventAlgo(alg)
+    return acc
+
+#=======================================================================
+
 def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName="HLT_FastCaloEMClusters",
                                doRinger=False, doRingerCalib=False,RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=set()):
     acc = ComponentAccumulator()

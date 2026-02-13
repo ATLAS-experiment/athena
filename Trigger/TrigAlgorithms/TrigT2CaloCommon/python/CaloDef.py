@@ -49,8 +49,8 @@ def fastCaloPhotonPointRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_Fas
         # using jet seeds for testing. we should use EM as soon as we have EM seeds into the L1
         inputEDM = mapThresholdToL1RoICollection("EM")
 
-    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_AllEmCfg
-    acc.merge(t2CaloEgamma_AllEmCfg(flags, "L2CaloPhotonPointFex",RoIs=inputEDM,ExtraInputs= CaloDataAccessSvcDependencies, ClustersName = ClustersName,doNotRecord=True))
+    from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_PhotonPointCfg
+    acc.merge(t2CaloEgamma_PhotonPointCfg(flags, "L2CaloPhotonPointFex",RoIs=inputEDM,ExtraInputs= CaloDataAccessSvcDependencies, ClustersName = ClustersName,doNotRecord=True))
     return acc
 
 
