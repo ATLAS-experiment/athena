@@ -10,8 +10,9 @@ if __name__=='__main__':
    if len(sys.argv)>1 and (sys.argv[1]=="-h" or sys.argv[1]=="--help"):
         print("Usage:")
         print(" ")
-        print("StateLessPT_TestFile_NewConfig.py {--input=<infile>} {--config=XXX} {--stream=YYY} {--noPost} {--postFreq=ZZ}")
-        print("                         default input: /det/dqm/GlobalMonitoring/SMW_test/testpart_sample/data21_900GeV.00405543.physics_MinBias.daq.RAW._lb1977._SFO-6._0001.data")
+        print("StateLessPT_TestFile_NewConfig.py {--input=<infile>} {--runnb=run} {--config=XXX} {--stream=YYY} {--noPost} {--postFreq=ZZ}")
+        print("                         default input: /detwork/dqm/GlobalMonitoring_test_data/data25_13p6TeV.00502618.express_express.merge.RAW._lb0982._SFO-ALL._0001.1")
+        print("                         default runnb: 502618")
         print("                         default XXX: LArMon")
         print("                         default YYY: ''")
         print("                         --noPost is switching off postProcessing")
@@ -20,12 +21,13 @@ if __name__=='__main__':
    #some defaults
    #INPUT = '/det/dqm/GlobalMonitoring/SMW_test/testpart_sample/data21_900GeV.00405543.physics_MinBias.daq.RAW._lb1977._SFO-6._0001.data'
    # At P1 use:     
-   #INPUT = '/detwork/dqm/GlobalMonitoring_test_data/data22_13p6TeV.00428353.express_express.merge.RAW._lb0479._SFO-ALL._0001.1'
-   INPUT = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/data18_13TeV/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0083._SFO-1._0001.data'
+   INPUT = '/detwork/dqm/GlobalMonitoring_test_data/data25_13p6TeV.00502618.express_express.merge.RAW._lb0982._SFO-ALL._0001.1'
+   #INPUT = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/data18_13TeV/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0083._SFO-1._0001.data'
    CONFIG = 'LArMon'
    STREAM = "NONE"
    DOPOSTPROC = True
    POSTFREQ = 10
+   RUNNB = 502618
    if len(sys.argv)>1:
       for ii in range(1,len(sys.argv)):
          print(ii," ",sys.argv[ii])
@@ -83,6 +85,7 @@ if __name__=='__main__':
           except:
               print("Could not find Run Parameters in IS - Set default beam type to 'cosmics'")
               beamType='cosmics'
+              runnumber = RUNNB
           else:
               y.checkout()
               beamtype = y.beam_type
@@ -136,6 +139,7 @@ if __name__=='__main__':
       LArFormat = 1
       ReadDigits = False
       beamType='collisions'
+      runnumber = RUNNB
 
    print("RUN CONFIGURATION: ReadDigits =", ReadDigits)
    
@@ -198,10 +202,11 @@ if __name__=='__main__':
    flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
    flags.Input.Files=[INPUT]
+   flags.Input.RunNumbers = [runnumber]
 
    #test multithreads
-   flags.Concurrency.NumThreads=4
-   flags.Concurrency.NumConcurrentEvents=4
+   #flags.Concurrency.NumThreads=4
+   #flags.Concurrency.NumConcurrentEvents=4
 
    def __monflags():
       from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
@@ -223,8 +228,13 @@ if __name__=='__main__':
 
    #from RecoPT_NewConfig import LArMonitoringConfig
    # include("RecoPT_NewConfig.py")
-   from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
-   acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM))
+   if CONFIG!="LArDTMon":
+      from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
+      acc.merge(LArMonitoringConfig(flags,CONFIG,STREAM))
+   else:   
+      from LArMonitoring.RecoPT_Phase1NewConfig import LArDTMonitoringConfig
+      acc.merge(LArDTMonitoringConfig(flags,STREAM))
+
    
    # somehow needs to add postprocessing
    if DOPOSTPROC:
