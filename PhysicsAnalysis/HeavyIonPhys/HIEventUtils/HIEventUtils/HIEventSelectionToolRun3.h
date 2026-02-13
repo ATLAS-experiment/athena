@@ -43,8 +43,12 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puFCalVsZDC(
-      IonDataType dataType, float fcalEt, float presamplerA, float presamplerC,
+  virtual bool puZDCPresampler(HI::IonDataType when,
+                               const xAOD::ZdcModuleContainer* zdcModules,
+                               HI::PileupVariation variation) const override;
+
+  virtual bool puZDCPresampler(
+      IonDataType dataType, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
   virtual bool puOOVertexCuts(
@@ -60,7 +64,7 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   ToolHandle<InDet::IInDetTrackSelectionTool> m_trackSelectionTool{
       this, "TrackSelectionTool", "", ""};
 
-  std::unique_ptr<TH1D> m_ZDCEt_UpperCut_5p5Sigma_OO  ;
+  std::unique_ptr<TH1D> m_ZDCEt_UpperCut_5p5Sigma_OO;
   std::unique_ptr<TH1D> m_ZDCEt_UpperCut_4p0Sigma_NeNe;
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
 
