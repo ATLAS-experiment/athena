@@ -8,6 +8,7 @@
 
 #include "MuonPRDTest/MDTDigitVariables.h"
 #include "MuonPRDTest/RPCDigitVariables.h"
+//#include "MuonPRDTestR4/RpcDigitVariablesR4.h"
 #include "MuonPRDTest/TGCDigitVariables.h"
 #include "MuonPRDTest/MMDigitVariables.h"
 #include "MuonPRDTest/sTGCDigitVariables.h"
@@ -125,6 +126,7 @@ namespace MuonValR4 {
         }
         if (m_writeRpcDigits) {
             m_tree.addBranch(std::make_shared<RpcDigitVariables>(m_tree, m_rpcDigitKey, msgLevel()));
+	    //m_tree.addBranch(std::make_shared<RpcDigitVariablesR4>(m_tree, m_rpcDigitKey, msgLevel()));
         }
         if (m_writeTgcDigits) {
             m_tree.addBranch(std::make_shared<TgcDigitVariables>(m_tree, m_tgcDigitKey, msgLevel()));
