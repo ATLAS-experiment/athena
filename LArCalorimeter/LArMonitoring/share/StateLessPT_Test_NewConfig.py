@@ -9,9 +9,10 @@ if __name__=='__main__':
    if len(sys.argv)>1 and (sys.argv[1]=="-h" or sys.argv[1]=="--help"):
         print("Usage:")
         print(" ")
-        print("StateLessPT_NewConfig.py {--config XXX} {--stream YYY}")
+        print("StateLessPT_NewConfig.py {--config XXX} {--stream YYY} {--run Z}")
         print("                         default XXX: LArMon")
         print("                         default YYY: ''")
+        print("                         default Z: '435946'")
 
    # #####################################################
    #  Read jobOpt configuration options
@@ -20,11 +21,12 @@ if __name__=='__main__':
    #some defaults
    CONFIG = 'LArMon'
    STREAM = "NONE"
+   RUNN   = 448285
    if len(sys.argv)>1:
       for ii in range(1,len(sys.argv)):
          print(ii," ",sys.argv[ii])
       try:
-         opts,args=getopt.getopt(sys.argv[1:],"t:",["config=","stream="])
+         opts,args=getopt.getopt(sys.argv[1:],"t:",["config=","stream=","run="])
       except getopt.GetoptError as e:
          print("Failed to interpret arguments")
          print(e)
@@ -36,6 +38,7 @@ if __name__=='__main__':
              print("Got option --config: ",a)
              CONFIG=a
           if o=="--stream": STREAM=a
+          if o=="--run": RUNN=int(a)
 
    from AthenaConfiguration.Enums import Format
 
@@ -57,7 +60,8 @@ if __name__=='__main__':
    
    ### ATLAS partition: Read Global Run Parameters to configure the jobs
    from AthenaConfiguration.Enums import BeamType
-   if partition == "ATLAS":
+   runnumber = RUNN
+   if partition == "ATLAS" or partition[0:3] == "LAr":
        try:
            y = ISObject(p, 'RunParams.SOR_RunParams', 'RunParams')
        except:
@@ -84,7 +88,7 @@ if __name__=='__main__':
    try:
       x = ISObject(p, 'LArParams.LAr.RunLogger.GlobalParams', 'GlobalParamsInfo')
    except:
-      print("Couldn not find IS Parameters - Set default flag")
+      print("Could not find IS Parameters - Set default flag")
       ReadDigits = False
       FirstSample = 3
       NSamples = 4
@@ -146,17 +150,20 @@ if __name__=='__main__':
    flags.Input.Format=Format.BS
    flags.Input.isMC=False
 
-   flags.IOVDb.DatabaseInstance="CONDBR2"
-   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2016-03"
 
-   flags.GeoModel.Layout="atlas"
-   from AthenaConfiguration.TestDefaults import defaultGeometryTags
-   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN2
-
+   from AthenaCommon.Constants import WARNING
    flags.Exec.MaxEvents=-1
 
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import autoConfigOnlineRecoFlags
    autoConfigOnlineRecoFlags(flags,partition)
+
+   flags.IOVDb.DatabaseInstance="CONDBR2"
+   flags.IOVDb.GlobalTag="CONDBR2-ES1PA-2023-03"
+
+   flags.GeoModel.Layout="atlas"
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   flags.GeoModel.AtlasVersion=defaultGeometryTags.RUN3
+
    #overwrite the run number 
    flags.Input.RunNumbers=[runnumber]
    # overwrite LB number for playback partition if needed....
@@ -173,6 +180,8 @@ if __name__=='__main__':
    flags.Trigger.doLVL1=False
    flags.Trigger.Online.isPartition=True
    flags.Trigger.triggerConfig='DB'
+   flags.Trigger.DecisionMakerValidation.Execute=False
+   flags.Trigger.enableL1CaloPhase1=False
 
    flags.DQ.doMonitoring=True
    flags.DQ.disableAtlasReadyFilter=True
@@ -180,8 +189,16 @@ if __name__=='__main__':
    flags.DQ.FileKey=''
    flags.DQ.Environment='online'
    
-   flags.LAr.doAlign=True
+   flags.LAr.doAlign=False
    flags.LAr.doHVCorr=False
+
+   # in case to debug FPE:
+   #flags.Exec.FPE=3
+   #if 'DTMon' in CONFIG:
+   #   flags.Exec.FPE=5
+
+   if RunType == 0:
+      flags.LAr.ROD.forceIter=True
 
    flags.Calo.TopoCluster.doTopoClusterLocalCalib=False
 
@@ -201,7 +218,7 @@ if __name__=='__main__':
    if 'CaloMon' in CONFIG: # needs Lumi access
       flags.DQ.enableLumiAccess=False
    else:
-      flags.DQ.enableLumiAccess=False
+      flags.DQ.enableLumiAccess=True
 
    if 'PEB' in STREAM: # do not have HLT results
       flags.Trigger.decodeHLT=False
@@ -432,21 +449,30 @@ if __name__=='__main__':
 
 
    # fixes for splashes
-   if RunType == 0:
+   if RunType == 0 and CONFIG!="LArDTMon":
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
 
-   #example for blocking the folder not filled during cosmics
-   #cil=acc.getCondAlgo('CondInputLoader')
-   #iovdbsvc=acc.getService('IOVDbSvc') 
-   #folder='/TRIGGER/LUMI/LBLB'
-   #for i in range(0,len(iovdbsvc.Folders)):
-   #         if (iovdbsvc.Folders[i].find(folder)>=0):
-   #             del iovdbsvc.Folders[i]
-   #             break
-   #for i in range(0, len(cil.Load)):
-   #         if (cil.Load[i][-1] == folder):
-   #             del cil.Load[i]
-   #             break
+   # example for blocking the folder not filled during cosmics
+   cil=acc.getCondAlgo('CondInputLoader')
+   iovdbsvc=acc.getService('IOVDbSvc') 
+   folder='/TRIGGER/LUMI/LBLB'
+   for i in range(0,len(iovdbsvc.Folders)):
+      if (iovdbsvc.Folders[i].find(folder)>=0):
+         del iovdbsvc.Folders[i]
+         break
+
+   remove_folder = False
+   for cil_Loadval in cil.Load:
+      if folder in cil_Loadval:
+         print(f"Removing {cil_Loadval} from cil/Load")
+         remove_folder = True
+         break
+   if remove_folder: cil.Load.remove(cil_Loadval)
+
+   if flags.DQ.enableLumiAccess:
+      lbd = acc.getCondAlgo('LBDurationCondAlg')
+      lbd.LBLBFolderInputKey=""
+      print('lbd ',lbd)
 
    # somehow needs to add postprocessing
    from AthenaCommon.Constants import WARNING
@@ -466,4 +492,5 @@ if __name__=='__main__':
    #acc.getService("StoreGateSvc").OutputLevel=DEBUG
    #acc.getService("MessageSvc").OutputLevel=DEBUG
 
+   acc.printConfig()
    acc.run()

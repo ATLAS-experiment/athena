@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_InDetPerfPlot_Resolution
@@ -43,9 +43,12 @@ public:
     D0, Z0, QOVERP, QOVERPT, THETA, PHI, PT, Z0SIN, NPARAMS
   };
 
-  InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& dirName);
+  InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& dirName, bool d0Only=false);
 
   void fill(const xAOD::TrackParticle& trkprt, const xAOD::TruthParticle& truthprt, float weight);
+  void fill(const xAOD::TrackParticle& trkprt, float weight);
+
+
 //  virtual bool isDefined(TString t);
   virtual ~InDetPerfPlot_Resolution() {/** nop **/
   }
@@ -76,6 +79,8 @@ private:
  
   IDPVM::ResolutionHelper m_resolutionHelper;
   IDPVM::ResolutionHelper::methods m_resolutionMethod;
+
+  bool m_d0Only = false;
   
   bool m_primTrk;
   bool m_secdTrk;
@@ -88,7 +93,7 @@ private:
   void getTrackParameters(const xAOD::TruthParticle& truthprt);
   void getTrackParameters(const xAOD::TrackParticle& truthprt);
   void getPlotParameters();
-  void getPlots(float weight=1.0);
+  void getPlots(float weight=1.0, bool useTruthKin=true);
 
   float m_trkP[NPARAMS];
   float m_truetrkP[NPARAMS];
