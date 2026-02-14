@@ -40,11 +40,11 @@ def getDevLowMuSignatures():
         ChainProp(name='HLT_e6_lhmedium_L1eEM5', stream=['MinBias'], groups=SingleElectronGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_e10_etcut_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e10_nopid_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter','caloMon:t0']),
-        ChainProp(name='HLT_e10_loose_L1eEM9',    stream=['MinBias', 'express'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter','caloMon:t0']),
-        ChainProp(name='HLT_e10_lhloose_L1eEM9',  stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_nopid_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_e10_loose_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_lhloose_L1eEM9',  stream=['MinBias', 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
         ChainProp(name='HLT_e10_medium_L1eEM9',   stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e10_lhmedium_L1eEM9', stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_lhmedium_L1eEM9', stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp']),
 
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_g6_etcut_L1eEM5',  stream=['MinBias'], groups=SinglePhotonGroup+SupportPhIGroup),
