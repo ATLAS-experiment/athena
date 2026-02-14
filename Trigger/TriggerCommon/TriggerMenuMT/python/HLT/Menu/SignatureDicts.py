@@ -921,7 +921,7 @@ PhotonChainParts = {
     'trigType'       : ['g'],
     'threshold'      : '',
     'tnpInfo'        : ['probe'],
-    'extra'          : ['hiptrt', 'ion'],
+    'extra'          : ['hiptrt', 'ion','PhotonPoint'],
     'IDinfo'         : ['etcut','loose','medium','tight'],
     'isoInfo'        : ['noiso', 'icaloloose','icalomedium','icalotight'],
     'reccalibInfo'   : [],

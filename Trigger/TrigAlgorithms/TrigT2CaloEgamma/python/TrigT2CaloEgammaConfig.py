@@ -103,7 +103,7 @@ def t2CaloEgamma_AllCfg(flags, name="T2CaloEgamma_All",RoIs=inputEDM,ExtraInputs
 
 #=======================================================================
 
-def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, ExtraInputs=set(), ClustersName="HLT_FastCaloEMClusters"):
+def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, ExtraInputs=set(), ClustersName="HLT_FastCaloEMClusters",doNotRecord=False):
     acc = ComponentAccumulator()
     tool = CompFactory.EgammaAllFex("EgammaAllEmFex",
                                     ExtraInputs={('TileEMScale','ConditionStore+TileEMScale'),
@@ -118,7 +118,10 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
     alg.ExtraInputs |= ExtraInputs
     if(not flags.Input.isMC):
       alg.ExtraInputs |= {('LArDeadOTXFromSC' , 'StoreGateSvc+DeadOTXFromSC' )}
-    alg.ClustersName = recordable(ClustersName)
+    if not doNotRecord:
+       alg.ClustersName = recordable(ClustersName)
+    else:
+       alg.ClustersName = ClustersName
     acc.addEventAlgo(alg)
     return acc
 

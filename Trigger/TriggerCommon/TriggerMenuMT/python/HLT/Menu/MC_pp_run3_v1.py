@@ -395,6 +395,9 @@ def getMCSignatures():
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26L', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26T', groups=SingleElectronGroup),
+
+        # special Chain for photon pointing study
+        ChainProp(name='HLT_g0_nopid_PhotonPoint_L1eEM5', l1SeedThresholds=['eEM5'], stream=['BphysDelayed'], groups=BphysElectronGroup),
         
         
         

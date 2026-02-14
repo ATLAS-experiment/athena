@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from ..CommonSequences.CaloSequences import fastCaloSequenceGenCfg
+from ..CommonSequences.CaloSequences import fastCaloSequenceGenCfg, fastCaloPhotonPointSequenceGenCfg
 from ..Photon.FastPhotonMenuSequences import fastPhotonSequenceGenCfg
 from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoSequenceGenCfg
 from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonSequenceGenCfg
@@ -63,7 +63,14 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         stepNames = [] # This will contain the name of the steps we will want to configure
         # Put first fast Calo. Two possible variants now: 
         # Step 1
-        stepNames += ['getFastCalo']
+        # OK now, unless its a PhotonPoint chain we need to do fastPhoton here:
+        if self.chainPart['extra'] == 'PhotonPoint':
+            stepNames += ['getPhotonPoint']
+            # for photon chains, there is noprecision Calo nor precision Photon so returning sequence here:
+            return stepNames
+        else:
+            stepNames += ['getFastCalo']
+
 
         # OK now, unless its a HipTRT chain we need to do fastPhoton here:
         if self.chainPart['extra'] == 'hiptrt':
@@ -145,6 +152,10 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     def getHipTRT(self, flags, is_probe_leg=False):
         stepName = "hipTRT"
         return self.getStep(flags, stepName,[TRTHitGeneratorSequenceGenCfg], is_probe_leg=is_probe_leg)
+
+    def getPhotonPoint(self, flags, is_probe_leg=False):
+        stepName = "PhotonPoint"
+        return self.getStep(flags, stepName,[fastCaloPhotonPointSequenceGenCfg], name='PhotonPoint',is_probe_leg=is_probe_leg)
 
     def getPrecisionPhoton(self, flags, is_probe_leg=False):
 
