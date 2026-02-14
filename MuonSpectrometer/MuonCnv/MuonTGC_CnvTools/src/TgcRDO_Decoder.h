@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CNVTOOLS_TGCRDO_DECODER_H
 #define MUONTGC_CNVTOOLS_TGCRDO_DECODER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CxxUtils/checker_macros.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTGC_CnvTools/ITGC_RDO_Decoder.h"
 
@@ -35,13 +34,13 @@ class TgcRDO_Decoder : public extends<AthAlgTool, ITGC_RDO_Decoder> {
 
     /** Set a flag for application of patch.
      *  Need to describe when patch is required. */
-    void applyPatch(bool patch);
+    virtual void applyPatch(bool patch) override;
     /** Get TGC Digit from TGC RDO */
-    std::unique_ptr<TgcDigit> getDigit(const EventContext& ctx,
+    virtual std::unique_ptr<TgcDigit> getDigit(const EventContext& ctx,
                                        const TgcRawData& rawData,
                                        bool orFlag) const override;
     /** Get offline ID and bcTag from TGC RDO */
-    Identifier getOfflineData(const EventContext& ctx,
+    virtual Identifier getOfflineData(const EventContext& ctx,
                               const TgcRawData& rawData, bool orFlag,
                               uint16_t& bctag) const override;
 
