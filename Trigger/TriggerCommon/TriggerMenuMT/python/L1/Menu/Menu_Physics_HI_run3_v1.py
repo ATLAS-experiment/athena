@@ -130,14 +130,22 @@ def defineMenu():
         'L1_jTE50_VjTE600',
         'L1_jTE50_VjTE200',
 
-        # jTEFWD UCC seeds: ATR-30726
-        'L1_jTEFWD2600',
-        'L1_jTEFWD5600',
-        'L1_jTEFWD6300',
-        'L1_jTEFWD6600',
-        'L1_ZDC_PU_jTEFWD5600',
-        'L1_ZDC_PU_jTEFWD6300',
-        'L1_ZDC_PU_jTEFWD6600',
+        # CALMTEA version of some items needed for lowMu HLT menu and L1_ARTEMIS, will need to be removed to make room for jTEFWD items for HI menu below
+        'L1_CALMTEA_jJ10',
+        'L1_CALMTEA_jTE5',
+        'L1_CALMTEA_jTE10',
+        'L1_ARTEMISL',
+        'L1_ARTEMIST',
+        
+        # temporarily commented out to make room for items needed for lowMu HLT menu added above
+        # # jTEFWD UCC seeds: ATR-30726
+        # 'L1_jTEFWD2600',
+        # 'L1_jTEFWD5600',
+        # 'L1_jTEFWD6300',
+        # 'L1_jTEFWD6600',
+        # 'L1_ZDC_PU_jTEFWD5600',
+        # 'L1_ZDC_PU_jTEFWD6300',
+        # 'L1_ZDC_PU_jTEFWD6600',
 
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
