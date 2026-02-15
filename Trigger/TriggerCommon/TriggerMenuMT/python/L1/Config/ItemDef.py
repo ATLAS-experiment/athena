@@ -341,6 +341,7 @@ class ItemDef:
         MenuItem('L1_eEM5_VjTE200_GAP_AANDC').setLogic( d.eEM5      & Not(d.jTE200) & GAPAC & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM1_VjTE200').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM2_VjTE200').setLogic( d.eEM2.x(2)      & Not(d.jTE200) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2eEM5_jTE200').setLogic( d.eEM5.x(2)      & d.jTE200 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM1_VjTE200_EMPTY').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & cosmiccond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM1_VjTE200_UNPAIRED_ISO').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & unpaired_isocond).setTriggerType(TT.calo)
         MenuItem('L1_2eEM1_VjTE200_UNPAIRED_NONISO').setLogic( d.eEM1.x(2)      & Not(d.jTE200) & unpaired_nonisocond).setTriggerType(TT.calo)

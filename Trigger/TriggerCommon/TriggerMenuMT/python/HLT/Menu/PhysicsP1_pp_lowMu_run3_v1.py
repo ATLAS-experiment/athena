@@ -243,6 +243,9 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5'], stream=['Main'], groups=EOFBeePhIGroup+BphysElectronGroup),
         ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], stream=['Main','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
         ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled', l1SeedThresholds=['eEM5','eEM5'], stream=['Main'], groups=EOFBeePhIGroup+BphysElectronGroup),
+        ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BKeeLowMu', l1SeedThresholds=['eEM5'], stream=['Main','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L1BKeeLowMu', l1SeedThresholds=['eEM5'], stream=['Main','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online']),
+        ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeeLowMu', l1SeedThresholds=['eEM5','eEM5'], stream=['Main'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
 
         #----------- Electron LRT chains (ATR-32273)
         ChainProp(name='HLT_e10_lhloose_nopix_lrtmedium_L1eEM9', groups=PrimaryPhIGroup+SingleElectronGroup),

@@ -160,6 +160,9 @@ def defineMenu():
 
         'L1_eTAU1',
         'L1_eTAU2', 'L1_eTAU2_VjTE200', 'L1_2eTAU2_VjTE200',
+
+        # Combined em - TE
+        'L1_2eEM5_jTE200',
         
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE20', 'L1_TRT_VjTE50', 'L1_TRT_VjTE200', 'L1_TRT_ZDC_XOR_VjTE200', 'L1_TRT_1ZDC_NZDC_VjTE200',
