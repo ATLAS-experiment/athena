@@ -178,12 +178,9 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, cons
     unsigned int muonCounter=0;
     
     if(storeGate->retrieve(trigMuon,lastTrigMuon).isSuccess()) {
-      for(int i=0; trigMuon!=lastTrigMuon; ++trigMuon, ++i) {
-	TrigMuonEFInfoContainer::const_iterator MuonItr  = trigMuon->begin(); //Iterators over top-level EDM
-	TrigMuonEFInfoContainer::const_iterator MuonItrE = trigMuon->end();   //objects (TrigMuonEFInfoContainer)
+      for(; trigMuon!=lastTrigMuon; ++trigMuon) {
 	
-	for(int j=0; MuonItr!=MuonItrE; ++MuonItr, ++j ) { //looping over TrigMuonEFInfo objects
-	  const TrigMuonEFInfo* muonInfo = (*MuonItr);
+	for(const TrigMuonEFInfo* muonInfo : *trigMuon) {
           std::vector<std::string> chains
             // chainsPassedByObject() doesn't compile because
             // TrigMuonEFInfo does not provide eta()/phi().
