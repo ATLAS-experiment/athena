@@ -39,6 +39,7 @@ find_package( tdaq-common )
 find_package( XercesC )
 find_package( libffi )
 find_package( gl2ps )
+find_package( Vc )
 
 # Set up the build/runtime environment:
 set( DetCommonReleaseEnvironment_DIR ${CMAKE_SOURCE_DIR}/cmake CACHE PATH
