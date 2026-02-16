@@ -63,8 +63,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
-            info="name of the output stream to save the cut bookkeeper in.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save metadata histograms in.")
         self.addOption ('setupONNX', False, type=bool,
             info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
@@ -75,6 +75,9 @@ class CommonServicesConfig (ConfigBlock) :
     def makeAlgs (self, config) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         if self.runSystematics is False :
             runSystematics = self.runSystematics
@@ -111,7 +114,7 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
-            allSysDumper.RootStreamName = self.streamName
+            allSysDumper.RootStreamName = streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
@@ -128,7 +131,7 @@ class CommonServicesConfig (ConfigBlock) :
             metadataHistAlg.dataType = str(config.dataType().value)
             metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
             metadataHistAlg.mcChannelNumber = str(config.dsid())
-            metadataHistAlg.RootStreamName = self.streamName
+            metadataHistAlg.RootStreamName = streamName
             if config.dataType() is DataType.Data:
                 etag = "unavailable"
             else:
@@ -388,7 +391,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             "`False` or `True` to override.")
         self.addOption ('histPattern', None, type=str,
             info="the histogram name pattern for the cut-bookkeeper histogram names.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
+        self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline.")
@@ -403,10 +406,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('doHFProdFracReweighting', False, type=bool,
             info="whether to apply HF production fraction reweighting.")
         self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
-            info="the name of the truth particle container to use for HF production fraction reweighting.")
+            info="the name of the truth particle container to use for HF production fraction reweighting.")       
+
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.streamName
+        return self.streamName or "DEFAULT"
 
     def makeAlgs (self, config) :
 
@@ -414,6 +418,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             # there are no generator weights in data!
             return
         log = logging.getLogger('makeGeneratorAnalysisSequence')
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -424,7 +431,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
-            alg.RootStreamName = self.streamName
+            alg.RootStreamName = streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
@@ -500,7 +507,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             if DSID == "000000":
                 log.warning("HF production fraction reweighting will return dummy weights of 1.0")
 
-            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
             alg.decoration = 'prodFracWeight_%SYS%'
             alg.TruthParticleContainer = self.truthParticleContainer
@@ -596,14 +603,18 @@ class ObjectCutFlowBlock (ConfigBlock):
         self.addOption ('forceCutSequence', False, type=bool,
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cutflow histogram in.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
+        streamName = self.streamName or config.defaultHistogramStream()
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)

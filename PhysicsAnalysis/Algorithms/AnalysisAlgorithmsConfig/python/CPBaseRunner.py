@@ -94,6 +94,7 @@ class CPBaseRunner(ABC):
                                action='store_true', help='Disable systematics')
         baseGroup.add_argument('--skip-n-events', dest='skip_n_events', type=int, default=0,
                                help='Skip the first N events in the run, not first N events for each file. This is meant for debugging only. \nIn Eventloop, this option disable the cutbookkeeper algorithms due to technical reasons, and can only be ran in direct-driver.')
+        baseGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         return parser
 
     def _mergeYamlconfig(self, yaml_path):
