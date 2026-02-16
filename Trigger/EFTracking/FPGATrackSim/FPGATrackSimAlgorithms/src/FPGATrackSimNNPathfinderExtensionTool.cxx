@@ -218,6 +218,10 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
         int count = 0;
 	// FIXED: Add maximum iteration limit to prevent infinite loops
         const int MAX_ROADS = 10000;
+        
+        // Batching structures
+        std::vector<std::pair<miniRoad, std::vector<float>>> roadsAwaitingInference; // pairs of (road, input_tensor)
+        
 	while(!roadsToExtrapolate.empty() && count < MAX_ROADS ) {
 	  miniRoad currentRoad = std::move(roadsToExtrapolate.front());
 
@@ -234,90 +238,117 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 completedRoads.push_back(std::move(currentRoad));
                 continue; // this one is done
             }
-            // Other try to find the next hit in this road
+            
+            // Prepare input tensor for NN
             std::vector<float> inputTensorValues;
-            std::vector<float> predhit;
-            long fineID;
-            {
-                Athena::Chrono chronoNN("NNPathfinder:NNInference", m_chronoSvc.get());
-                if (!fillInputTensorForNN(currentRoad, inputTensorValues)) {
-                    ATH_MSG_WARNING("Failed to create input tensor for this road");
-                    continue;
-                }
-                if (!getPredictedHit(inputTensorValues, predhit, fineID)) {
-                    ATH_MSG_WARNING("Failed to predict hit for this road");
-                    continue;
-                }
-            }
-            // Check if exist conditions are there
-            if (m_doOutsideIn) {
-                // Make sure we are not predicting inside the inner most layer (x and y < 25, or r < 25)
-                // If we are, road is done
-	      if ((m_useCartesian && (abs(predhit[0]) < 25 && abs(predhit[1]) < 25)) ||
-		  (!m_useCartesian && abs(predhit[0]) < 25))
-		{
-                    completedRoads.push_back(std::move(currentRoad));
-                    continue;
-                }
-            }
-            else {
-                // Make sure we are not predicting outside the outer most layer	      
-                // if we are, road is done
-                double radius = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
-                if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
-		    (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
-                    completedRoads.push_back(std::move(currentRoad));
-                    continue;
-                }
-            }
-            if(m_debugEvent) {
-                ATH_MSG_DEBUG("Predicted hit at: " << predhit[0] << " " << predhit[1] << " " << predhit[2]);
-            }
-
-            // Now search for the hits
-            bool foundhitForRoad = false;
-            if(fineID == 215){
-                ATH_MSG_DEBUG("Stopping condition reached");
-                completedRoads.push_back(std::move(currentRoad));
+            if (!fillInputTensorForNN(currentRoad, inputTensorValues)) {
+                ATH_MSG_WARNING("Failed to create input tensor for this road");
                 continue;
             }
-            // Get the last layer and hit in the road
-            unsigned lastLayerInRoad = 0;
-            std::shared_ptr<const FPGATrackSimHit> lastHit;
-            if(!getLastLayer(currentRoad, lastLayerInRoad, lastHit) or !lastHit) {
-                ATH_MSG_WARNING("Failed to find last layer this road");
-                continue;
-            }
-            unsigned layer = lastLayerInRoad+1; // the layer we're looking to find
-            bool lastHitWasReal = lastHit->isReal();
-            float lastHitR = lastHit->getR();
-            if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
-                completedRoads.push_back(std::move(currentRoad));
-                continue;
-            }
-            unsigned int hitsInWindow = 0;
-
-            // Cache predicted values and window parameters once per road, not per hit
-            const double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
-            const double predphi = predhit[1];
-            const double predz = predhit[2];
             
-            // Calculate window parameters once
-            double windowR = m_windowR[0];
-            double windowPhi = m_windowPhi[0];
-            double windowZ = m_windowZ[0];
-            int fineID_index = 0;
+            // Collect road for batching
+            roadsAwaitingInference.push_back(std::make_pair(std::move(currentRoad), inputTensorValues));
             
-            if (m_windowZ.size() > 1 || m_windowR.size() > 1 || m_windowPhi.size() > 1) {
-                auto fineID_it = std::find(m_windowFineID.begin(), m_windowFineID.end(), fineID);
-                if (fineID_it == m_windowFineID.end()){
-                    ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
-                    fineID_index = -1;
+            // When batch is full OR queue is empty, process batch
+            bool processBatch = (roadsAwaitingInference.size() >= (size_t)m_batchSize) || roadsToExtrapolate.empty();
+            
+            if (processBatch && !roadsAwaitingInference.empty()) {
+                // Prepare batched inputs
+                std::vector<std::vector<float>> batchInputTensors;
+                std::vector<std::pair<miniRoad, std::vector<float>>> roadBatch = std::move(roadsAwaitingInference);
+                roadsAwaitingInference.clear();
+                
+                for (const auto& [road, tensor] : roadBatch) {
+                    batchInputTensors.push_back(tensor);
                 }
-                else {
-                    fineID_index = fineID_it - m_windowFineID.begin();
+                
+                // Run batched inference
+                std::vector<std::vector<float>> batchOutputTensors;
+                std::vector<long> batchFineIDs;
+                {
+                    Athena::Chrono chronoNN("NNPathfinder:NNInference", m_chronoSvc.get());
+                    if (getPredictedHitBatched(batchInputTensors, batchOutputTensors, batchFineIDs) != StatusCode::SUCCESS) {
+                        ATH_MSG_WARNING("Batched NN inference failed");
+                        continue;
+                    }
                 }
-            }
+                
+                // Process each result in the batch
+                for (size_t batchIdx = 0; batchIdx < roadBatch.size(); ++batchIdx) {
+                    miniRoad processRoad = std::move(roadBatch[batchIdx].first);
+                    std::vector<float> predhit = batchOutputTensors[batchIdx];
+                    long fineID = batchFineIDs[batchIdx];
+                    
+                    // Check if exit conditions are met
+                    if (m_doOutsideIn) {
+                        // Make sure we are not predicting inside the inner most layer (x and y < 25, or r < 25)
+                        // If we are, road is done
+                        if ((m_useCartesian && (abs(predhit[0]) < 25 && abs(predhit[1]) < 25)) ||
+                            (!m_useCartesian && abs(predhit[0]) < 25))
+                        {
+                            completedRoads.push_back(std::move(processRoad));
+                            continue;
+                        }
+                    }
+                    else {
+                        // Make sure we are not predicting outside the outer most layer	      
+                        // if we are, road is done
+                        double radius = std::sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]);
+                        if ((m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[1]) > 1024 || radius > 1024 || abs(predhit[2]) > 3000)) ||
+                            (!m_useCartesian && (abs(predhit[0]) > 1024 || abs(predhit[2]) > 3000))) {
+                            completedRoads.push_back(std::move(processRoad));
+                            continue;
+                        }
+                    }
+                    if(m_debugEvent) {
+                        ATH_MSG_DEBUG("Predicted hit at: " << predhit[0] << " " << predhit[1] << " " << predhit[2]);
+                    }
+
+                    // Now search for the hits
+                    bool foundhitForRoad = false;
+                    if(fineID == 215){
+                        ATH_MSG_DEBUG("Stopping condition reached");
+                        completedRoads.push_back(std::move(processRoad));
+                        continue;
+                    }
+
+                    // Get the last layer and hit in the road
+                    unsigned lastLayerInRoad = 0;
+                    std::shared_ptr<const FPGATrackSimHit> lastHit;
+                    if(!getLastLayer(processRoad, lastLayerInRoad, lastHit) or !lastHit) {
+                        ATH_MSG_WARNING("Failed to find last layer this road");
+                        continue;
+                    }
+                    unsigned layer = lastLayerInRoad+1; // the layer we're looking to find
+                    bool lastHitWasReal = lastHit->isReal();
+                    float lastHitR = lastHit->getR();
+                    if(layer >= (m_nLayers_1stStage + m_nLayers_2ndStage)) {
+                        completedRoads.push_back(std::move(processRoad));
+                        continue;
+                    }
+                    unsigned int hitsInWindow = 0;
+
+                    // Cache predicted values and window parameters once per road, not per hit
+                    const double predr = (m_useCartesian ? sqrt(predhit[0] * predhit[0] + predhit[1] * predhit[1]) : predhit[0]);
+                    const double predphi = predhit[1];
+                    const double predz = predhit[2];
+                    
+                    // Calculate window parameters once
+                    double windowR = m_windowR[0];
+                    double windowPhi = m_windowPhi[0];
+                    double windowZ = m_windowZ[0];
+                    int fineID_index = 0;
+                    
+                    if (m_windowZ.size() > 1 || m_windowR.size() > 1 || m_windowPhi.size() > 1) {
+                        auto fineID_it = std::find(m_windowFineID.begin(), m_windowFineID.end(), fineID);
+                        if (fineID_it == m_windowFineID.end()) {
+                            ATH_MSG_DEBUG("No windows for predicted fineID " << fineID << ", using maximum in provided list instead!");
+                            fineID_index = -1;
+                        }
+                        else {
+                            fineID_index = fineID_it - m_windowFineID.begin();
+                        }
+                    }
             if (m_windowR.size() > 1) {
                 windowR = (fineID_index == -1) ? 
                     *std::max_element(m_windowR.begin(), m_windowR.end()) : 
@@ -491,7 +522,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
 
                 // We got a hit, lets make a road
                 miniRoad newRoad;
-                if(!addHitToRoad(newRoad, currentRoad, std::move(hitsFound))) {
+                if(!addHitToRoad(newRoad, processRoad, std::move(hitsFound))) {
                     ATH_MSG_WARNING("Failed to make a new road");
                     continue;
                 }
@@ -505,14 +536,14 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
             // If the hit wasn't found, push a fake hit
             if (!foundhitForRoad) {
                 // did not find a hit to extrapolate to, check if we need to delete this road. if not, add a guessed hit if still useful
-                if (currentRoad.getNWCLayers() >= m_maxMiss) {
+                if (processRoad.getNWCLayers() >= m_maxMiss) {
                     // we don't want this road, so we continue
                     continue;
                 }
                 else {
                     std::vector<std::shared_ptr<const FPGATrackSimHit>> theseHits;
                     // first make the fake hit that we will add
-                    if (!getFakeHit(currentRoad, predhit, fineID, theseHits)) {
+                    if (!getFakeHit(processRoad, predhit, fineID, theseHits)) {
                         ATH_MSG_WARNING("Failed adding a guessed hit in extrapolation");
                         continue;
                     }
@@ -522,7 +553,7 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                     }
                     // add the hit to the road
                     miniRoad newroad;
-                    if (!addHitToRoad(newroad, currentRoad, std::move(theseHits))) {
+                    if (!addHitToRoad(newroad, processRoad, std::move(theseHits))) {
                         ATH_MSG_WARNING("Failed making a new road with fake hit");
                         continue;
                     }
@@ -530,8 +561,9 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::extendTracks(const std::vector
                 }
             }
             } // end RoadBuilding timing
-        }
-        // This track has been extrapolated, copy the completed tracks to the full list with full road objects
+                } // end batch processing for individual road
+            } // end batch inference processing
+        } // end while loop for all roads
         {
         Athena::Chrono chronoRoadConversion("NNPathfinder:RoadConversion", m_chronoSvc.get());
         for (const auto &miniroad : completedRoads) {
@@ -832,4 +864,79 @@ StatusCode FPGATrackSimNNPathfinderExtensionTool::getLastLayer(miniRoad& current
     lastHit = currentRoad.getHit(lastHitLayer);
     return StatusCode::SUCCESS;
 
+}
+
+StatusCode FPGATrackSimNNPathfinderExtensionTool::getPredictedHitBatched(const std::vector<std::vector<float>>& batchInputTensors, 
+                                                                         std::vector<std::vector<float>>& batchOutputTensors, 
+                                                                         std::vector<long>& batchFineIDs)
+{
+    if (batchInputTensors.empty()) {
+        return StatusCode::SUCCESS;
+    }
+
+    size_t batchSize = batchInputTensors.size();
+    size_t featureSize = batchInputTensors[0].size();
+    
+    // Convert to Eigen matrix format for proper batch dimension handling
+    // Rows = batch_size, Cols = features
+    NetworkBatchInput volInputMatrix(batchSize, featureSize);
+    for (size_t i = 0; i < batchSize; ++i) {
+        for (size_t j = 0; j < featureSize; ++j) {
+            volInputMatrix(i, j) = batchInputTensors[i][j];
+        }
+    }
+
+    // Run volume NN in batch using proper tensor format
+    auto volNNBatchedOutput = m_extensionVolNN.runONNXInference(volInputMatrix);
+    
+    // Extract fineIDs from volume NN output (one per sample in batch)
+    // Output shape: [batch_size, num_classes]
+    batchFineIDs.reserve(batchSize);
+    
+    for (size_t i = 0; i < volNNBatchedOutput.size(); ++i) {
+        const auto& output = volNNBatchedOutput[i];
+        auto maxIdx = std::distance(output.begin(), std::max_element(output.begin(), output.end()));
+        batchFineIDs.push_back(maxIdx);
+    }
+
+    // Prepare input for hit NN: concatenate original inputs with volume NN outputs
+    // Hit NN takes [original_features, volume_nn_output] as input
+    size_t numClasses = volNNBatchedOutput[0].size();
+    NetworkBatchInput hitInputMatrix(batchSize, featureSize + numClasses);
+    
+    for (size_t i = 0; i < batchSize; ++i) {
+        // First part: original input features
+        for (size_t j = 0; j < featureSize; ++j) {
+            hitInputMatrix(i, j) = batchInputTensors[i][j];
+        }
+        // Second part: volume NN outputs
+        for (size_t j = 0; j < numClasses; ++j) {
+            hitInputMatrix(i, featureSize + j) = volNNBatchedOutput[i][j];
+        }
+    }
+
+    // Run hit NN in batch using proper tensor format
+    auto hitNNBatchedOutput = m_extensionHitNN.runONNXInference(hitInputMatrix);
+
+    batchOutputTensors.reserve(batchSize);
+    
+    // Output (already in correct format: vector<vector<float>>) with batch_size samples
+    for (size_t i = 0; i < hitNNBatchedOutput.size(); ++i) {
+        std::vector<float> output = hitNNBatchedOutput[i];
+        
+        // Scale back to original units
+        if (m_useCartesian) {
+            output[0] *= getXScale();
+            output[1] *= getYScale();
+            output[2] *= getZScale();
+        } else {
+            output[0] *= getRScale();
+            output[1] *= getPhiScale();
+            output[2] *= getZScale();
+        }
+        
+        batchOutputTensors.push_back(output);
+    }
+
+    return StatusCode::SUCCESS;
 }
