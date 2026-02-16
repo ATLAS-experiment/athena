@@ -43,22 +43,22 @@ std::unique_ptr<TreeAccessor> TreeAccessor::open(const TString& fileName)
 }
 
 
-const CellInfo* TreeAccessor::getCellInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> TreeAccessor::getCellInfo(unsigned int i) const
 { 
   const HistoryContainer* cont = historyContainer(i);
   if (!cont || !cont->cellInfo()) return nullptr;
-  return new CellInfo(*cont->cellInfo());
+  return std::make_unique<CellInfo>(*cont->cellInfo());
 }
 
-const CellInfo* TreeAccessor::getSCInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> TreeAccessor::getSCInfo(unsigned int i) const
 { 
   const HistoryContainer* cont = historyContainerSC(i);
   if (!cont || !cont->cellInfo()) return nullptr;
-  return new CellInfo(*cont->cellInfo());
+  return std::make_unique<CellInfo>(*cont->cellInfo());
 }
 
 
-const History* TreeAccessor::getCellHistory(unsigned int i) const 
+std::unique_ptr<const History> TreeAccessor::getCellHistory(unsigned int i) const
 { 
   if (i >= cellTree().GetEntries()) return nullptr;
   getCellEntry(i);
@@ -70,10 +70,12 @@ const History* TreeAccessor::getCellHistory(unsigned int i) const
     EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
     eventDatas.push_back(newEvtData);
   }
-  return (currentContainer()->cellInfo() ? new History(*currentContainer(), eventDatas, i) : nullptr);
+  if (currentContainer()->cellInfo())
+    return std::make_unique<History>(*currentContainer(), eventDatas, i);
+  return nullptr;
 }
 
-const History* TreeAccessor::getSCHistory(unsigned int i) const 
+std::unique_ptr<const History> TreeAccessor::getSCHistory(unsigned int i) const
 { 
   if (i >= SCTree().GetEntries()) return nullptr;
   getSCEntry(i);
@@ -85,7 +87,9 @@ const History* TreeAccessor::getSCHistory(unsigned int i) const
     EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
     eventDatas.push_back(newEvtData);
   }
-  return (currentContainerSC()->cellInfo() ? new History(*currentContainerSC(), eventDatas, i) : nullptr);
+  if (currentContainerSC()->cellInfo())
+    return std::make_unique<History>(*currentContainerSC(), eventDatas, i);
+  return nullptr;
 }
 
 std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Accessor*>& accessors,
@@ -304,7 +308,7 @@ std::unique_ptr<TreeAccessor> TreeAccessor::merge(const std::vector<const Access
     std::optional<HistoryContainer> historyContainer;
   CellInfo* info = nullptr;
   for (const Accessor* accessor : accessors) {
-      const History* history = accessor->getSCHistory(i);
+      std::unique_ptr<const History> history = accessor->getSCHistory(i);
       if (!history || !history->isValid()) continue;
       if (!historyContainer) {
         info = new CellInfo(*history->cellInfo());

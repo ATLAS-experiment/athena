@@ -279,7 +279,7 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
     if (k % 10000 == 0) cout << "Processing entry " << k << endl;
     hash = k;
     if (tmpl) {
-      const CellInfo* cellInfo = tmpl->cellInfo(k);
+      std::unique_ptr<const CellInfo> cellInfo = tmpl->cellInfo(k);
       calo    = (cellInfo ? cellInfo->calo()    : -999 );
       layer   = (cellInfo ? cellInfo->layer()   : -999 );
       ft      = (cellInfo ? cellInfo->feedThrough() : -999 );
