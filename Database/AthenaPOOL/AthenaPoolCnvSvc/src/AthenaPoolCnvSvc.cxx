@@ -146,20 +146,20 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    }
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, m_chronoMap);
-   if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
+   if (!m_persSvcPerInputType.value().empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
       if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "(") || tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "_"))) {
          const unsigned int maxContext = m_poolSvc->getInputContextMapSize();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
+         if (m_poolSvc->getInputContextMapSize() > maxContext) {
+            if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, auxContext, false, true, false).isSuccess()) {
+               ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
+            }
+         }
          char text[32];
          const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
          std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
          text[sizeof(text) - 1] = '\0';
-         if (m_poolSvc->getInputContextMapSize() > maxContext) {
-            if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
-               ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for id = " << auxContext << ".");
-            }
-         }
          tokAddr->getToken()->setAuxString(text);
       }
    }
@@ -432,20 +432,20 @@ StatusCode AthenaPoolCnvSvc::cleanUp(const std::string& connection) {
 StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
    // Set attributes for input file
    m_lastInputFileName = fileName; // Save file name for printing attributes per event
+   if (!m_persSvcPerInputType.empty()) {
+// Loop over all extra event input contexts
+      const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
+      for (const auto& [label, id]: extraInputContextMap) {
+         if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, id, false, true, false).isSuccess()) {
+            ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
+         }
+      }
+   }
    if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, IPoolSvc::kInputStream, false, true, false).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
    }
    if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, IPoolSvc::kInputStream, true, false).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed getting POOL database/container attributes.");
-   }
-   if (!m_persSvcPerInputType.empty()) {
-      // Loop over all extra event input contexts and switch off TTreeCache
-      const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
-      for (const auto& [label, id]: extraInputContextMap) {
-         if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
-            ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for = " << label << ".");
-         }
-      }
    }
    return(StatusCode::SUCCESS);
 }
