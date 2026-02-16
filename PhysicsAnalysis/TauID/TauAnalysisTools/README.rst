@@ -27,8 +27,8 @@ analysis. Currently following tools are available:
 * **TauTruthTrackMatchingTool:** performs matching of tracks to truth taus and tracks to truth charged particles
     
 All relevant information about the actual measurement of uncertainties
-can be found here: `TauRecommendationsR22
-<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_.
+can be found in the twiki here: `TauRecommendationsR22-twiki
+<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_ or in the mkdoc here: `TauRecommendationsR22-mkdoc <https://atlas-taucp.docs.cern.ch/Pre-recommendations-2025/>`_  .
 
 In case of any problems, issues or suggestions don't hesitate to contact the
 authorsi or the TauCP conveners.
