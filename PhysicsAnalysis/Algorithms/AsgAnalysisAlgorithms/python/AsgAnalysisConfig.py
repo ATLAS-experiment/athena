@@ -666,6 +666,7 @@ class OutputThinningBlock (ConfigBlock):
 
     def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
+        self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")

@@ -39,6 +39,7 @@ class EventSelectionConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionConfig, self).__init__()
+        self.setBlockName('EventSelection')
         self.addOption('name', '', type=str,
             noneAction='error',
             info="the name of the event selection, used to uniquely identify "
