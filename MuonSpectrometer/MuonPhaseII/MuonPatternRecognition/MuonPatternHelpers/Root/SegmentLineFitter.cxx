@@ -193,7 +193,9 @@ namespace MuonR4::SegmentFit{
             auto seedCopy = convertToSegment(localToGlobal, parent, copy(segFit));
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Intermediate fit"); 
         }
-        if (!removeOutliers(cctx, *parent, localToGlobal, segFit)) {
+        if (!removeOutliers(cctx, *parent, localToGlobal,
+                            segFit.converged? segFit.parameters : startPars,
+                            segFit)) {
             return nullptr;
         }          
         if (!plugHoles(cctx, *parent, localToGlobal, segFit)) {           
@@ -240,6 +242,7 @@ namespace MuonR4::SegmentFit{
     bool SegmentLineFitter::removeOutliers(const Acts::CalibrationContext& cctx,
                                            const SegmentSeed& seed,
                                            const Amg::Transform3D& localToGlobal,
+                                           const LinePar_t& startPars,
                                            Result_t& fitResult) const {
       
 
@@ -281,8 +284,8 @@ namespace MuonR4::SegmentFit{
         fitResult.measurements.back()->setFitState(HitState::Outlier);
 
         /** Refit the segment line without the measurement */
-        Result_t newAttempt = callLineFit(cctx, fitResult.parameters, 
-                                          localToGlobal, std::move(fitResult.measurements));
+        Result_t newAttempt = callLineFit(cctx, startPars, localToGlobal, 
+                                          std::move(fitResult.measurements));
         if (newAttempt.converged) {
             newAttempt.nIter+=fitResult.nIter;
             fitResult = std::move(newAttempt);
@@ -295,7 +298,9 @@ namespace MuonR4::SegmentFit{
             fitResult.nIter+=newAttempt.nIter;
             fitResult.measurements = std::move(newAttempt.measurements);
         }
-        return removeOutliers(cctx, seed, localToGlobal, fitResult);
+        return removeOutliers(cctx, seed, localToGlobal,
+                              fitResult.converged ? fitResult.parameters : startPars, 
+                              fitResult);
     }
 
     void SegmentLineFitter::eraseWrongHits(Result_t& candidate) const {
