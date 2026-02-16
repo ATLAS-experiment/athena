@@ -147,7 +147,11 @@ namespace MuonR4{
                     calibSP->setDriftRadius(calibOutput.driftRadius());
                     /** Set time measurement used by the fast fitter, corrected by the tube T0 and a fast estimate of the time of flight */
                     double fastToF {(locToGlob * calibSP->localPosition()).norm() * c_inv};
-                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(dc->tdc() * IMdtCalibrationTool::tdcBinSize - calibOutput.tubeT0() - fastToF));
+                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(dc->tdc() * IMdtCalibrationTool::tdcBinSize - 
+                                                                    calibOutput.tubeT0() - fastToF - calibOutput.signalPropagationTime()));
+                    ATH_MSG_VERBOSE("Mdt time Meas: " << ActsTrk::timeToAthena(calibSP->time()) 
+                                  << ", ToF / fastToF: " << fastToF << " / " << closestApproach.mag() * c_inv
+                                  << ", tubeT0: " << calibOutput.tubeT0() << ", Signal Prop Time: " << calibOutput.signalPropagationTime());
                 } else {
                     auto* dc = static_cast<const xAOD::MdtTwinDriftCircle*>(spacePoint->primaryMeasurement());
                     MdtCalibInput calibInput{*dc, *gctx};
@@ -179,6 +183,7 @@ namespace MuonR4{
                     /** Set time measurement used by the fast fitter, corrected by the tube T0 and a fast estimate of the time of flight */
                     double fastToF {(locToGlob * calibSP->localPosition()).norm() * c_inv};
                     double tubeT0 {m_mdtCalibrationTool->getCalibConstants(ctx, dc->identify())->tubeCalib->getCalib(dc->identify())->t0};
+                    // Remember to add the signal propagation time!!
                     calibSP->setTimeMeasurement(ActsTrk::timeToActs(calibOutput.primaryTdc() * IMdtCalibrationTool::tdcBinSize - tubeT0 - fastToF));
                 }
                 break;
@@ -192,7 +197,7 @@ namespace MuonR4{
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
         
-                cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(m_rpcTimeResolution);
+                cov[Acts::toUnderlying(AxisDefs::timeCov)] = Acts::square(ActsTrk::timeToActs(m_rpcTimeResolution));
 
                 const double time1 = strip->time() 
                                    - strip->readoutElement()->distanceToEdge(strip->layerHash(), lPos,
@@ -204,14 +209,17 @@ namespace MuonR4{
                     const double time2 = strip2->time() -
                                          strip2->readoutElement()->distanceToEdge(strip2->layerHash(),lPos, EdgeSide::readOut)/m_rpcSignalVelocity;
                     /// Average the time
-                    calibSP->setTimeMeasurement(0.5*(time1 + time2));
+                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(0.5*(time1 + time2)));
                     /// Add the difference to the covariance though
-                    cov[Acts::toUnderlying(AxisDefs::timeCov)] += Acts::square(0.5*(time1 - time2));
-                } 
+                    cov[Acts::toUnderlying(AxisDefs::timeCov)] += Acts::square(ActsTrk::timeToActs(0.5*(time1 - time2)));
+                } else {
+                    calibSP->setTimeMeasurement(ActsTrk::timeToActs(time1));
+                }
                 calibSP->setCovariance(cov);
                 ATH_MSG_VERBOSE("Create rpc space point "<<m_idHelperSvc->toString(strip->identify())<<", dimension "<<spacePoint->dimension()
                                 << ", at "<<Amg::toString(calibSP->localPosition())<<", uncalib time: "
-                                <<strip->time()<<", calib time: "<<calibSP->time()<<" cov " <<calibSP->covariance());
+                                <<strip->time()<<", calib time: "<<ActsTrk::timeToAthena(calibSP->time())<<" cov " <<calibSP->covariance() 
+                                <<", time Uncert: "<<ActsTrk::timeToAthena(std::sqrt(calibSP->covariance()[Acts::toUnderlying(AxisDefs::timeCov)])));
                 break;
            }
            case xAOD::UncalibMeasType::TgcStripType: {
