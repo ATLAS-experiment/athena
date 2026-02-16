@@ -44,7 +44,7 @@ case $ArtProcess in
     if ls art_core_*/${idtide} >/dev/null 2>&1 ; then
 
       echo "Merging physval.DAOD_TIDE.root"
-      hadd ${idtide} art_core_*/${idtide}
+      hadd -f505 ${idtide} art_core_*/${idtide}
 
       #run IDPVM for IDTIDE derivation
       run runIDPVM.py --doIDTIDE --doTracksInJets --doTracksInBJets --filesInput $idtide --outputFile physval_idtide.ntuple.root
