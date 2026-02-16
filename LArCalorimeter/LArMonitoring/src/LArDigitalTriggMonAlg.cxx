@@ -87,14 +87,14 @@ StatusCode LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_bcContKey.initialize());
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
 
-  ATH_CHECK(m_digitContainerKey.initialize());
+  ATH_CHECK(m_digitContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_keyPedestalSC.initialize());
   ATH_CHECK(m_caloSuperCellMgrKey.initialize());
   ATH_CHECK(m_rawSCContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_rawSCEtRecoContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_actualMuKey.initialize());
-  ATH_CHECK(m_LATOMEHeaderContainerKey.initialize());
+  ATH_CHECK(m_LATOMEHeaderContainerKey.initialize(SG::AllowEmpty));
 
   // Property check:
   constexpr unsigned expSize=MAXLYRNS*2+1;
@@ -289,13 +289,19 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
     ATH_MSG_DEBUG("hSCetRecoContainer.size() " << hSCetRecoContainer->size());
   }
 
-  SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer{m_LATOMEHeaderContainerKey,ctx}; //"SC_LATOME_HEADER"
-  if (!hLArLATOMEHeaderContainer.isValid()) {
-    ATH_MSG_WARNING("The requested LATOME header container key could not be retrieved. Was there a problem retrieving information from the run logger?");
-  }else{
-    ATH_MSG_DEBUG("hLArLATOMEHeaderContainer.size() " << hLArLATOMEHeaderContainer->size());
+  SG::ReadHandle<LArLATOMEHeaderContainer> hLArLATOMEHeaderContainer;
+  if (!m_LATOMEHeaderContainerKey.empty()) { 
+    hLArLATOMEHeaderContainer= SG::ReadHandle<LArLATOMEHeaderContainer>{m_LATOMEHeaderContainerKey,ctx}; //"SC_LATOME_HEADER"
+    if (!hLArLATOMEHeaderContainer.isValid()) {
+      ATH_MSG_WARNING("The requested LATOME header container key could not be retrieved. Was there a problem retrieving information from the run logger?");
+    }else{
+      ATH_MSG_DEBUG("hLArLATOMEHeaderContainer.size() " << hLArLATOMEHeaderContainer->size());
+    }
   }
-
+  else {
+    ATH_MSG_WARNING("No LATOME header container key given");
+  }
+  
   if (isEmptyCont(hLArDigitContainer) && isEmptyCont(hSCetContainer) && isEmptyCont(hSCetRecoContainer) && isEmptyCont(hLArLATOMEHeaderContainer)) {
     //Make this only warning, come CI tests use the runs without DT info
     ATH_MSG_WARNING("All of the requested containers are empty. Was there a problem retrieving information from the run logger?");
@@ -325,7 +331,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
     SG::ReadCondHandle<LArBadChannelCont> bcContHdl{m_bcContKey, ctx};
     bcCont = (*bcContHdl);
 
-    if ((hLArDigitContainer.isValid())) {
+    if (!isEmptyCont(hLArDigitContainer)) {
       std::vector<std::vector<Digi_MonValues>> digiMonValueVec(m_layerNames.size());
       for (auto& innerVec : digiMonValueVec) {
         innerVec.reserve(1600);  // (m_layerNcells[ilayer]) * nsamples;
@@ -760,7 +766,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
 
     // LATOME event size
-    if ((hLArLATOMEHeaderContainer.isValid())) {
+    if (!isEmptyCont(hLArLATOMEHeaderContainer)) {
       auto event_size = Monitored::Scalar<float>("event_size", 0);
       for (const LArLATOMEHeader* pLArLATOMEHeader : *hLArLATOMEHeaderContainer) {
         event_size += pLArLATOMEHeader->ROBFragSize() + 48;  // 48 is the offset between rod_ndata and ROB fragment size
