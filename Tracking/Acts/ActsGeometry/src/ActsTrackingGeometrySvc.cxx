@@ -40,7 +40,6 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
-#include <ActsPlugins/Root/RootMaterialDecorator.hpp>
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #include <Acts/Surfaces/PlanarBounds.hpp>
@@ -157,9 +156,10 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
     std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
-                                    m_buildSubdetectors.end());
+                                     m_buildSubdetectors.end());
 
     ATH_CHECK(m_blueprintNodeBuilders.retrieve());
+    ATH_CHECK(m_refineVisitors.retrieve());
 
     using enum Acts::AxisDirection;
   
@@ -190,20 +190,12 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
       {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
 
-    if (not m_materialMapRootInputFileBase.empty()) {
-      // The material decorator
-      ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-      decoratorConfig.fileName = m_materialMapRootInputFileBase;
-      ActsPlugins::RootMaterialDecorator materialDecorator{decoratorConfig,
-                                                           ActsTrk::actsLevelVector(msg().level())};
-
-      // Apply material decoration to every surface
-      auto applyMaterial = [&materialDecorator](Acts::Surface& surface) {
-        materialDecorator.decorate(surface);
-      };
-      trackingGeometry->apply(applyMaterial);
+    for (auto& refineVisitor : m_refineVisitors) {
+        trackingGeometry->apply(*refineVisitor);
+        ATH_CHECK(refineVisitor->finalize());
     }
-
+    m_refineVisitors.clear();
+    
     m_trackingGeometry = std::move(trackingGeometry);
 
     if (m_objDebugOutput) {

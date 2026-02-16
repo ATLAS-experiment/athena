@@ -18,7 +18,6 @@ atlas_add_library( ActsGeometryLib
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
-                   src/DetectorVolumeSvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
                    src/ItkBlueprintNodeBuilder.cxx    
                    src/CaloBlueprintNodeBuilder.cxx              
@@ -66,6 +65,7 @@ atlas_add_component( ActsGeometry
                      src/ActsTrackingGeometryTool.cxx
                      src/ActsPropStepRootWriterSvc.cxx
                      src/ActsCaloTrackingVolumeBuilder.cxx
+                     src/ITkMaterialDecoratorTool.cxx
                      src/ActsVolumeIdToDetectorElementCollectionMappingAlg.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
