@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONPATTERNHELPERS_MDTSEGMENTFITTER_H
 #define MUONPATTERNHELPERS_MDTSEGMENTFITTER_H
@@ -132,11 +132,15 @@ namespace MuonR4::SegmentFit {
              *               The seed is mainly used for visualization purposes
              *  @param localToGlobal: Transform to align the spectrometer sector within ATLAS
              *                         mainly used for the t0 fit
+             *  @param startPars: The initial parameters from which the fit shall be launched
+             *                    In case of out of bound parameters, the start parameters are 
+             *                    returned otherwise the last obtained fit parameters
              *  @param fitResult: Previously achieved fit result to be checked. The measurements
              *                    on the result and the paramters are updated accordingly */
             bool removeOutliers(const Acts::CalibrationContext& cctx,
                                 const SegmentSeed& seed,
                                 const Amg::Transform3D& localToGlobal,
+                                const LinePar_t& startPars,
                                 Result_t& fitResult) const;
             /** @brief Recovery of missed hits. Hits in the space point bucket  that are maximally
              *         <RecoveryPull> away from the fitted segment are put onto the segment candidate
