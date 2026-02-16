@@ -40,9 +40,11 @@ run_F610(){
         Trigger.FPGATrackSim.ParamNNonnxFile2nd=$ONNX_INPUT_PARAM_2ND \
         Trigger.FPGATrackSim.ExtensionNNVolonnxFile=$ONNX_INPUT_VOL \
         Trigger.FPGATrackSim.ExtensionNNHitonnxFile=$ONNX_INPUT_HIT \
+        Trigger.FPGATrackSim.NNBatchSize=64 \
         Trigger.FPGATrackSim.outputMonitorFile="monitoring_${TEST_LABEL}.root" \
         Trigger.FPGATrackSim.writeOfflPRDInfo=True \
-        Output.AODFileName=$xAODOutput 
+        Output.AODFileName=$xAODOutput \
+        PerfMon.doFullMonMT=True
 }
 
 echo "... Running ${TEST_LABEL} analysis"
