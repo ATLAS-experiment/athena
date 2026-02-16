@@ -20,35 +20,30 @@ using namespace LArSamples;
 
 AbsLArCells::AbsLArCells():
   m_pos(nChannels() + 1), 
-  m_cellCache(nullptr),  
-  m_cellInfoCache(nChannels(),nullptr)
+  m_cellInfoCache(nChannels())
 { }
 
 AbsLArCells::~AbsLArCells()
 {
   AbsLArCells::resetCache();
-  resetCellInfoCache();
 }
 
 
 void AbsLArCells::resetCache() const
 {
-  if (m_cellCache) {
-    delete m_cellCache;
-    m_cellCache = nullptr;
-  }
+  m_cellCache.reset();
   m_pos = nChannels() + 1;
 }
 
 
-const History* AbsLArCells::newCellHistory(unsigned int i) const 
+std::unique_ptr<const History> AbsLArCells::newCellHistory(unsigned int i) const
 { 
-  const History* history = getCellHistory(i);
+  std::unique_ptr<const History> history = getCellHistory(i);
   if (!history) return nullptr;
   if (!m_cellInfoCache[i]) {
     const CellInfo* ci=history->cellInfo();
     if (ci) {
-      m_cellInfoCache[i]=new CellInfo(*ci,false);
+      m_cellInfoCache[i]=std::make_unique<CellInfo>(*ci,false);
     }
   }
   //  m_cellInfoCache[i] = (history->cellInfo() ? new CellInfo(*history->cellInfo(), false) : new CellInfo());
@@ -58,41 +53,43 @@ const History* AbsLArCells::newCellHistory(unsigned int i) const
 
 const History* AbsLArCells::cellHistory(unsigned int i) const 
 { 
-  if (m_pos == i) return m_cellCache;
+  if (m_pos == i) return m_cellCache.get();
   resetCache();
-  const History* history = newCellHistory(i);
+  std::unique_ptr<const History> history = newCellHistory(i);
   if (!history) return nullptr;
-  m_cellCache = history;
+  m_cellCache = std::move(history);
   m_pos = i;
-  return m_cellCache;
+  return m_cellCache.get();
 }
 
 
-const CellInfo* AbsLArCells::cellInfo(unsigned int i) const
+std::unique_ptr<const CellInfo> AbsLArCells::cellInfo(unsigned int i) const
 {
   const CellInfo* info = cellInfoCache(i);
-  if (info) return (info->isValid() ? new CellInfo(*info) : nullptr);
-  info = getCellInfo(i);
-  if (info)  m_cellInfoCache[i] =  new CellInfo(*info, false); 
-  //m_cellInfoCache[i] = (info ? new CellInfo(*info, false) : new CellInfo());
-  return info;
+  if (info) {
+    if (info->isValid()) {
+      return std::make_unique<CellInfo> (*info);
+    }
+    return nullptr;
+  }
+  std::unique_ptr<const CellInfo> infop = getCellInfo(i);
+  if (infop)  m_cellInfoCache[i] =  std::make_unique<CellInfo>(*infop, false);
+  return infop;
 }
 
 
 const CellInfo* AbsLArCells::cellInfoCache(unsigned int i) const
 {
-  return m_cellInfoCache[i];
+  return m_cellInfoCache[i].get();
 }
 
 
-const CellInfo* AbsLArCells::getCellInfo(unsigned int i) const
+std::unique_ptr<const CellInfo> AbsLArCells::getCellInfo(unsigned int i) const
 {
-  const History* history = this->getCellHistory(i);
+  std::unique_ptr<const History> history = this->getCellHistory(i);
   if (!history) return nullptr;
-  if (!history->cellInfo()) { delete history; return nullptr; }
-  CellInfo* info = new CellInfo(*history->cellInfo());
-  delete history;
-  return info;
+  if (!history->cellInfo()) return nullptr;
+  return std::make_unique<CellInfo>(*history->cellInfo());
 }
 
 
@@ -100,23 +97,13 @@ const History* AbsLArCells::pass(unsigned int i, const FilterParams& f) const
 { 
   //std::cout << "Called AbsLArCells with hash " << i  << std::endl;
   if (!f.passHash(i)) return nullptr;
-  const CellInfo* info = cellInfo(i);
+  std::unique_ptr<const CellInfo> info = cellInfo(i);
   if (!info) {
     return nullptr;
   }
   //std::cout << "Called AbsLArCells::pass on a cell belonging to " << Id::str(info->calo()) << std::endl;
   bool result = f.passCell(*info);
-  delete info;  
   return result ? cellHistory(i) : nullptr;
 }
 
 
-void AbsLArCells::resetCellInfoCache()
-{
-  for (std::vector<CellInfo*>::iterator cellInfo = m_cellInfoCache.begin();
-       cellInfo != m_cellInfoCache.end(); ++cellInfo)
-    if (*cellInfo) {
-      delete *cellInfo;
-      *cellInfo = 0;
-    }
-}

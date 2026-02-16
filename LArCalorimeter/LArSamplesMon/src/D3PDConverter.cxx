@@ -71,7 +71,7 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
       HistoryContainer* histCont = samples->hist_cont(hash);
       CellInfo* info = nullptr;
       if (!histCont) {
-        const CellInfo* templateInfo = m_template->cellInfo(hash);
+        std::unique_ptr<const CellInfo> templateInfo = m_template->cellInfo(hash);
         info = new CellInfo(templateInfo->calo(), templateInfo->layer(),
                             templateInfo->iEta(), templateInfo->iPhi(),
                             templateInfo->feedThrough(), templateInfo->slot(), templateInfo->channel(),
@@ -112,7 +112,7 @@ bool D3PDConverter::initMapping(const TString& templateFile, const TString& tran
   cout << "Making online->hash map" << endl;
   std::map<unsigned long long, unsigned int> on2hash;
   for (unsigned int i = 0; i < m_template->nChannels(); i++) {
-    const CellInfo* info = m_template->cellInfo(i);
+    std::unique_ptr<const CellInfo> info = m_template->cellInfo(i);
     if (!info) continue;
     on2hash[info->onlid()] = i;
   }
