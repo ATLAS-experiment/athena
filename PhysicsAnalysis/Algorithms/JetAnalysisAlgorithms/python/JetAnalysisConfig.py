@@ -95,8 +95,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
 
         if self.outputTruthLabelIDs and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, 'HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', noSys=True)
-            config.addOutputVar (self.containerName, 'PartonTruthLabelID', 'PartonTruthLabelID', noSys=True)
+            config.addOutputVar (self.containerName, 'HadronConeExclTruthLabelID', 'HadronConeExclTruthLabelID', noSys=True, auxType="int")
+            config.addOutputVar (self.containerName, 'PartonTruthLabelID', 'PartonTruthLabelID', noSys=True, auxType="int")
 
 
 
