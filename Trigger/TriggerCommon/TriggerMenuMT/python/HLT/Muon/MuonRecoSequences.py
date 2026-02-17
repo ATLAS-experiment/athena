@@ -372,11 +372,11 @@ def muEFSARecoSequenceCfg( flags, RoIs, name):
 
         # Schedule muon EF reco
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-        acc.merge( MuonSpacePointFormationCfg( flags ) )
+        acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{name}' ) )
         
         ### Setup the new chain
         from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        acc.merge(MuonPatternRecognitionCfg(flags))
+        acc.merge(MuonPatternRecognitionCfg(flags, suffix = f'_{name}' ))
 
     else: 
         acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
