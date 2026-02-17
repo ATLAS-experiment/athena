@@ -72,7 +72,7 @@ private:
 
 
    /// A container "list" which can only contain a single container
-   T_Container                                              *m_singleElementContainerList;
+   T_Container                                              *m_singleElementContainerList{};
    /// The current container list
    std::span<T_ContainerPtr>                                 m_containerList;
 

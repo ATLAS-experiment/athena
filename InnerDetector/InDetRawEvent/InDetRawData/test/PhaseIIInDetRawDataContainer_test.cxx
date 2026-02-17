@@ -25,9 +25,11 @@ std::vector< std::vector< unsigned int> > makeROIs( unsigned int max_modules, un
    std::vector< std::vector< unsigned int> >  rois;
    rois.resize( max_ROIs );
    for ( std::vector<unsigned int> &roi : rois ) {
+      //coverity[DC.WEAK_CRYPTO]
       unsigned int n_modules = rand() % max_modules_per_ROI;
       roi.reserve(n_modules);
       for (unsigned int module_i=0; module_i<n_modules; ++module_i) {
+         //coverity[DC.WEAK_CRYPTO]
          unsigned int a_module =  rand() % max_modules;
          if (std::find(roi.begin(), roi.end(), a_module) == roi.end()) {
             roi.push_back(a_module);
@@ -113,6 +115,7 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
       if (!range.empty()) continue;
 
       // throw number of hits to be generated for this module
+      //coverity[DC.WEAK_CRYPTO]
       unsigned int n_rdos = rand() % max_hits_per_module;
       if (n_rdos>0) {
          // reserve storage and initialize range data pointing to the first element to be used for this module
@@ -126,7 +129,9 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
 
          // fill the random hit data
          for (unsigned int rdo_i=0; rdo_i< n_rdos; ++rdo_i) {
+            //coverity[DC.WEAK_CRYPTO]
             unsigned int coordinate_pair = rand();
+            //coverity[DC.WEAK_CRYPTO]
             unsigned int rand_data_word = rand();
             rdo_data.emplace_back(std::array<std::int16_t, 2>{ static_cast<std::int16_t>((coordinate_pair >>16) % n_cols),
                                                                static_cast<std::int16_t>((coordinate_pair) % n_rows) },
@@ -608,9 +613,14 @@ int main(int argc, char **argv) {
          return 1;
       }
     }
+    if (max_modules == 0){
+      std::cerr << "Max modules cannot be zero.\n";
+      return 1;
+    }
+    
     // create toy data
     unsigned int max_slots=max_ROIs;
-
+    //coverity[TAINTED_SCALAR]
     //first create random ROIs
     std::vector< std::vector< unsigned int> > rois = makeROIs( max_modules, max_ROIs, max_modules_per_ROI );
 
@@ -623,6 +633,10 @@ int main(int argc, char **argv) {
     std::unique_ptr< PhaseIIPixelRawDataContainer>  rdo_container = createPixelRawDataContainer(max_modules, max_slots);
     // @TODO could use rois_no_overlap, but hit data only created if nothing had been registered yet for the corresponding
     // module, so this does not matter.
+    if (max_hits_per_module == 0 or n_columns == 0){
+      std::cerr << "Neither max_hits_per_module nor n_columns cannot be zero.\n";
+      return 1;
+    }
     for (unsigned int roi_i=0; roi_i<rois.size(); ++roi_i) {
        fillPixelRawDataContainer(roi_i, rois[roi_i], max_hits_per_module, n_columns, n_rows, *rdo_container);
     }
