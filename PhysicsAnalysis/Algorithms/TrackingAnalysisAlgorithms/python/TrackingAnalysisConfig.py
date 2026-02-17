@@ -28,12 +28,12 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             "disable the tool if no recommendations are available. This should "
             "not be used in an analysis.")
         self.addOption ('biasD0', None, type=float,
-            info="a manual bias to $d_0$ in mm. Will be applied by the "
+            info="a manual bias to $d_0$ (in mm). Will be applied by the "
             "`InDetTrackBiasingTool`. Expert option in addition to the "
             "recommendations.",
             expertMode=True)
         self.addOption ('biasZ0', None, type=float,
-            info="a manual bias to $z_0$ in mm. Will be applied by the "
+            info="a manual bias to $z_0$ (in mm). Will be applied by the "
             "`InDetTrackBiasingTool`. Expert option in addition to the "
             "recommendations.",
             expertMode=True)
@@ -56,7 +56,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             info="random seed to be used by the `InDetTrackSmearingTool`.",
             expertMode=True)
         self.addOption ('minPt', 0.5*GeV, type=float,
-            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated tracks.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated tracks.")
         self.addOption ('maxEta', 2.5, type=float,
             info=r"maximum track $\vert\eta\vert$.")
         self.addOption ('outputTrackSummaryInfo', False, type=bool,

@@ -58,7 +58,7 @@ class OutputAnalysisConfig (ConfigBlock):
         self.addOption ('storeSelectionFlags', True, type=bool,
             info="whether to store one branch for each object selection.")
         self.addOption ('selectionFlagPrefix', 'select', type=str,
-            info="the prefix used when naming selection branches")
+            info="the prefix used when naming selection branches.")
         self.addOption ('commands', [], type=None,
             info="a list of strings containing commands (regexp strings "
             "prefaced by the keywords `enable` or `disable`) to turn on/off the "

@@ -46,7 +46,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
             "PHYSLITE derivations.")
         self.addOption ('minPt', 10*GeV, type=float,
-            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated photons.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated photons.")
         self.addOption ('maxEta', 2.37, type=float,
             info=r"maximum photon $\vert\eta\vert$.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -309,7 +309,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             "`loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally.")
+            "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.")
         self.addOption ('isolationWP', None, type=str,
@@ -321,7 +321,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points.")
         self.addOption ('recomputeIsEM', False, type=bool,
-            info="whether to rerun the cut-based selection, or rely on derivation flags.")
+            info="whether to rerun the cut-based selection (`True`), or rely on derivation flags (`False`).")
         self.addOption ('doFSRSelection', False, type=bool,
             info="whether to accept additional photons close to muons for the "
             "purpose of FSR corrections to these muons. Expert feature "

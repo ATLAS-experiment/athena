@@ -29,7 +29,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('InnerDR', 0.2, type=float,
             info="radius of the inner cone for removing jets (`EleJetORT`/`MuJetORT`).")
         self.addOption ('OuterDR', 0.4, type=float,
-            info="radius of the outer cone for removing leptons (`EleJetORT`/`MuJetORT`)")
+            info="radius of the outer cone for removing leptons (`EleJetORT`/`MuJetORT`).")
         self.addOption ('boostedLeptons', False, type=bool,
             info="whether to enable boosted lepton overlap removal (toggles on the property `UseSlidingDR` of the `ORUtils::EleJetOverlapTool` and `ORUtils::MuJetOverlapTool` tools).")
         self.addOption ('nominalOnly', False, type=bool,

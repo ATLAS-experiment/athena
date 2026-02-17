@@ -32,7 +32,7 @@ class EventCleaningBlock (ConfigBlock):
         self.addOption ('noFilter', False, type=bool,
             info="whether to toggle off event filtering.")
         self.addOption ('useRandomRunNumber', False, type=bool,
-            info="use `RandomRunNumber` to compute GRL info. Only supported for MC")
+            info="use `RandomRunNumber` to compute GRL info. Only supported for MC.")
 
         if self.runGRL and self.userGRLFiles:
             raise ValueError("No userGRLFiles should be specified if runGRL=False")

@@ -137,7 +137,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
             info="name of the CVMFS area to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations",
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
             info="name of the sequence to use for the jet calibration "
@@ -442,17 +442,17 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('minPt', 200.*GeV, type=float,
-            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxPt', 3000.*GeV, type=float,
-            info=r"the maximum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
+            info=r"the maximum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxEta', 0., type=float,
             info=r"the maximum $\vert\eta\vert$ cut to apply to calibrated large-R jets.")
         self.addOption ('maxRapidity', 2., type=float,
             info="the maximum rapidity cut to apply to calibrated large-R jets.")
         self.addOption ('minMass', 40.*GeV, type=float,
-            info="the minimum mass cut to apply to calibrated large-R jets.")
+            info="the minimum mass cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxMass', 600.*GeV, type=float,
-            info="the maximum mass cut to apply to calibrated large-R jets.")
+            info="the maximum mass cut (in MeV) to apply to calibrated large-R jets.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

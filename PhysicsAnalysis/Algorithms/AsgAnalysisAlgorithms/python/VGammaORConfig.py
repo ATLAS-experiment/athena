@@ -11,7 +11,7 @@ class VGammaORBlock(ConfigBlock):
         self.addOption("dR_lepton_photon_cuts", [0.0, 0.05, 0.075, 0.1, 0.125, 0.15, 0.2], type=list,
                        info=r"list of cuts on $\Delta R$ between the leptons and the photon.")
         self.addOption("photon_pT_cuts", [10e3], type=list,
-                       info=r"list of  $p_\mathrm{T}$ cuts (in MeV) on the photon.")
+                       info=r"list of $p_\mathrm{T}$ cuts (in MeV) on the photon.")
         self.addOption("noFilter", False, type=bool,
                        info="do not apply an event filter, i.e. setting it to `False` "
                        "removes events not passing the overlap removal. If set to `True`, "

@@ -145,7 +145,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             "Recommendations: set it to `True` if electrons mis-reconstructed as tau-jets are a large background for your analysis.")
         self.addOption ('use_muonOLR', False, type=bool,
             info="use selection with or without muonOLR with TauID. "
-            "Recommendations: set it to `True` if muons mis-reconstructed as tau-jets are a large background for your analysis")
+            "Recommendations: set it to `True` if muons mis-reconstructed as tau-jets are a large background for your analysis.")
         self.addOption ('useGNTau', False, type=bool,
             info="use GNTau-based ID instead of RNNTau ID. "
             "Recommendations: experimental feature and might become default soon.",
@@ -162,25 +162,25 @@ class TauWorkingPointConfig (ConfigBlock) :
             info="use pre-defined configuration files for selecting tau-jets. "
             "Recommendations: set this to `False` only if you want to test/optimise the tau-jet selection for selections not already provided through config files.")
         self.addOption ('manual_sel_minpt', 20.0, type=float,
-            info=r"minimum $p_\mathrm{T}$ cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
+            info=r"minimum $p_\mathrm{T}$ cut (in GeV) used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_absetaregion', [0, 1.37, 1.52, 2.5], type=list,
-            info=r"$\vert\eta\vert$ regions cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`") 
+            info=r"$\vert\eta\vert$ regions cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.") 
         self.addOption ('manual_sel_abscharges', [1,], type=list,
-            info="charge of the tau-jet cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="charge of the tau-jet cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_ntracks', [1,3], type=list,
-            info="number of tau-jet tracks used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="number of tau-jet tracks used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_minrnnscore', -1, type=float,
-            info="minimum RNN score cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="minimum RNN score cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_mingntauscore', -1, type=float,
-            info="minimum GNTau score selection when `useSelectionConfigFile` is set to `False`")
+            info="minimum GNTau score selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_rnnwp', None, type=str,
-            info="RNN working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="RNN working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_gntauwp', None, type=str,
-            info="GNTau working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="GNTau working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_evetowp', None, type=str, 
-            info="eveto working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`")
+            info="eveto working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_muonolr', False, type=bool,
-            info="use `muonolr` used for tau-jet selection when `useSelectionConfigFile` is set to `False`")    
+            info="use `muonolr` used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('noEffSF', False, type=bool,
             info="disables the calculation of efficiencies and scale factors. "
             "Experimental! only useful to test a new WP for which scale "

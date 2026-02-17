@@ -533,9 +533,9 @@ class PtEtaSelectionBlock (ConfigBlock):
             "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('minPt', None, type=float,
-            info=r"minimum $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
-            info=r"maximum  $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"maximum  $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('minEta', None, type=float,
             info=r"minimum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxEta', None, type=float,
@@ -700,7 +700,7 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('deepCopy', False, type=bool,
             info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
-            info=r"whether to sort objects in $p_\mathrm{T}.")
+            info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
 
