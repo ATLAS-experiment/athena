@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -21,7 +21,7 @@
 #include "TROOT.h"
 
 #include <chrono>
-#include <exception> 
+#include <exception>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -33,53 +33,30 @@ using namespace std;
 
 
 namespace VKalVrtAthena {
-  
+
   //Constructor and destructor
   //__________________________________________________________________________
   VrtSecInclusive::VrtSecInclusive(const std::string& name, ISvcLocator* pSvcLocator):
     AthAlgorithm                   (name,pSvcLocator),
-    
-    m_primaryVertices              ( nullptr ),
-    m_thePV                        ( nullptr ),
-  
-    // ToolsHandles
-    m_fitSvc                       ( "Trk::TrkVKalVrtFitter", this ),
-    m_truthToTrack                 ( "Trk::TruthToTrack/InDetTruthToTrack" ),
-    m_trackToVertexTool            ( "Reco::TrackToVertex" ),
-    m_trackToVertexIPEstimatorTool ( "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator" ),
-    m_extrapolator                 ( "Trk::Extrapolator/AtlasExtrapolator" ),
-    m_vertexMapper                 ( "" ),
-    
-    m_checkPatternStrategy         ( "Classical" ),
-    
-    // Pointers of Ntuple variable vectors
-    m_tree_Vert                    ( nullptr ),
     m_ntupleVars                   ( nullptr )
-    
   {
-    
     m_patternStrategyFuncs["Classical"]           = &VrtSecInclusive::checkTrackHitPatternToVertex;
     m_patternStrategyFuncs["ClassicalOuter"]      = &VrtSecInclusive::checkTrackHitPatternToVertexOuterOnly;
     m_patternStrategyFuncs["Extrapolation"]       = &VrtSecInclusive::checkTrackHitPatternToVertexByExtrapolation;
     m_patternStrategyFuncs["ExtrapolationAssist"] = &VrtSecInclusive::checkTrackHitPatternToVertexByExtrapolationAssist;
 
-    this->declareProperties();
-    
-    if( m_jp.FillNtuple ) {
+    if( m_FillNtuple ) {
       m_ntupleVars = std::make_unique<NtupleVars>( );
     }
-    
   }
-  
-  
+
 
   //__________________________________________________________________________
   VrtSecInclusive::~VrtSecInclusive()
-  { 
-    ATH_MSG_DEBUG("destructor called");
+  {
   }
-  
-  
+
+
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::initialize()
   {
@@ -90,7 +67,7 @@ namespace VKalVrtAthena {
     //  VKalVrt vertex fitter
     if (m_fitSvc.retrieve().isFailure()) {
       ATH_MSG_ERROR("initialize: Can't find Trk::TrkVKalVrtFitter");
-      return StatusCode::SUCCESS; 
+      return StatusCode::SUCCESS;
     } else {
       ATH_MSG_INFO("initialize: Trk::TrkVKalVrtFitter found");
     }
@@ -121,7 +98,7 @@ namespace VKalVrtAthena {
     else {
       ATH_MSG_INFO("initialize: Retrieved Trk::TrackToVertexIPEstimator Tool" << m_trackToVertexIPEstimatorTool);
     }
-    
+
     if( detStore()->retrieve(m_atlasId, "AtlasID").isFailure() ) return StatusCode::FAILURE;
     if( detStore()->retrieve(m_pixelId, "PixelID").isFailure() ) return StatusCode::FAILURE;
     if( detStore()->retrieve(m_sctId,   "SCT_ID") .isFailure() ) return StatusCode::FAILURE;
@@ -140,69 +117,69 @@ namespace VKalVrtAthena {
     else {
       ATH_MSG_INFO("initialize: Retrieved SCTConditionsSummaryTool" << m_sctCondSummaryTool);
     }
-    
+
     ATH_CHECK( m_extrapolator.retrieve() );
-    
+
     // extract VertexMapper
-    if( m_jp.doMapToLocal ) {
+    if( m_doMapToLocal ) {
       ATH_CHECK( m_vertexMapper.retrieve() );
     }
-    
+
     // Track selection algorithm configuration
-    if( m_jp.doSelectTracksFromMuons )     { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromMuons );     }
-    if( m_jp.doSelectTracksFromElectrons ) { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromElectrons ); }
-    if( m_jp.doSelectIDAndGSFTracks )      { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectInDetAndGSFTracks );   }
-    
+    if( m_doSelectTracksFromMuons )     { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromMuons );     }
+    if( m_doSelectTracksFromElectrons ) { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksFromElectrons ); }
+    if( m_doSelectIDAndGSFTracks )      { m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectInDetAndGSFTracks );   }
+
     // if none of the above two flags are activated, use ID tracks (default)
-    if( !m_jp.doSelectTracksFromMuons && !m_jp.doSelectTracksFromElectrons && !m_jp.doSelectIDAndGSFTracks) {
-      
+    if( !m_doSelectTracksFromMuons && !m_doSelectTracksFromElectrons && !m_doSelectIDAndGSFTracks) {
+
       m_trackSelectionAlgs.emplace_back( &VrtSecInclusive::selectTracksInDet );
-      
+
     }
-    
-    
+
+
     // Vertexing algorithm configuration
     m_vertexingAlgorithms.emplace_back( "extractIncompatibleTrackPairs", &VrtSecInclusive::extractIncompatibleTrackPairs     );
     m_vertexingAlgorithms.emplace_back( "findNtrackVertices",            &VrtSecInclusive::findNtrackVertices                );
     m_vertexingAlgorithms.emplace_back( "rearrangeTracks",               &VrtSecInclusive::rearrangeTracks                   );
-    
-    if( m_jp.doReassembleVertices ) {
+
+    if( m_doReassembleVertices ) {
       m_vertexingAlgorithms.emplace_back( "reassembleVertices",          &VrtSecInclusive::reassembleVertices                );
     }
-      
-    if( m_jp.doMergeByShuffling ) {
+
+    if( m_doMergeByShuffling ) {
       m_vertexingAlgorithms.emplace_back( "mergeByShuffling",           &VrtSecInclusive::mergeByShuffling                   );
     }
-      
-    if ( m_jp.doMergeFinalVerticesDistance ) {
+
+    if ( m_doMergeFinalVerticesDistance ) {
       m_vertexingAlgorithms.emplace_back( "mergeFinalVertices",          &VrtSecInclusive::mergeFinalVertices                );
     }
-    
-    if( m_jp.doAssociateNonSelectedTracks ) {
+
+    if( m_doAssociateNonSelectedTracks ) {
       m_vertexingAlgorithms.emplace_back( "associateNonSelectedTracks",  &VrtSecInclusive::associateNonSelectedTracks        );
     }
-    
+
     m_vertexingAlgorithms.emplace_back( "refitAndSelect",                &VrtSecInclusive::refitAndSelectGoodQualityVertices );
 
-    
+
     // now make histograms/ntuples
 
     ServiceHandle<ITHistSvc> hist_root("THistSvc", name());
     ATH_CHECK( hist_root.retrieve() );
-    
-    if( m_jp.FillHist ) {
-      
+
+    if( m_FillHist ) {
+
       std::vector<double> rbins = { 0.1, 0.3, 0.5, 1, 2, 3, 5, 7, 10, 14, 20, 28, 38, 50, 64, 80, 100, 130, 170, 220, 280, 350, 450, 600 };
       std::vector<double> nbins = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 20, 24, 28, 38, 50, 70, 100, 150 };
-      
+
       const size_t& nAlgs = m_vertexingAlgorithms.size();
-      
+
       ATH_MSG_INFO("initialize: Filling Histograms");
       //
       m_hists["trkSelCuts"]        = new TH1F("trkSelCuts",        ";Cut Order;Tracks",                         10, -0.5, 10-0.5                                         );
       m_hists["selTracksDist"]     = new TH1F("selTracksDist",     ";Selected Tracks;Events",                   2000, -0.5, 2000-0.5                                     );
-      m_hists["initVertexDispD0"]  = new TH2F("initVertexDispD0",  ";Rough d0 wrt init [mm];r [mm];Vertices",   1000, -100, 100, rbins.size()-1, &(rbins[0])             ); 
-      m_hists["initVertexDispZ0"]  = new TH2F("initVertexDispZ0",  ";Rough z0 wrt init [mm];z [mm];Vertices",   1000, -100, 100, 100, -1000, 1000                        ); 
+      m_hists["initVertexDispD0"]  = new TH2F("initVertexDispD0",  ";Rough d0 wrt init [mm];r [mm];Vertices",   1000, -100, 100, rbins.size()-1, &(rbins[0])             );
+      m_hists["initVertexDispZ0"]  = new TH2F("initVertexDispZ0",  ";Rough z0 wrt init [mm];z [mm];Vertices",   1000, -100, 100, 100, -1000, 1000                        );
       m_hists["incompMonitor"]     = new TH1F("incompMonitor",     ";Setp;Track Pairs",                         10, -0.5, 10-0.5                                         );
       m_hists["2trkVerticesDist"]  = new TH1F("2trkVerticesDist",  ";2-track Vertices;Events",                  1000, -0.5, 1000-0.5                                     );
       m_hists["2trkChi2Dist"]      = new TH1F("2trkChi2Dist",      ";log10(#chi^{2}/N_{dof});Entries",          100, -3, 7                                               );
@@ -228,38 +205,38 @@ namespace VKalVrtAthena {
       m_hists["vPosMomAng3D"]      = new TH1F("vPosMomAng3D",      ";cos(#vec{r},#vec{p})",                     200, -1.0, 1.0                                           );
       m_hists["2trkVtxDistFromPV"] = new TH1F("2trkVtDistFromPV",  ";2tr vertex distance from PV;Events",       100, 0, 3                                                );
 
-      
-      std::string histDir("/AANT/VrtSecInclusive" + m_jp.augVerString + "/");
-      
+
+      std::string histDir("/AANT/VrtSecInclusive" + m_augVerString + "/");
+
       for( auto& pair : m_hists ) {
         ATH_CHECK( hist_root->regHist( histDir + pair.first, pair.second ) );
       }
     }
-    
-    
-    if( m_jp.FillNtuple ) {
-      
+
+
+    if( m_FillNtuple ) {
+
       ATH_CHECK( setupNtupleVariables() );
 
-      m_tree_Vert = new TTree("tree_VrtSecInclusive","TTree of VrtSecInclusive"); 
+      m_tree_Vert = new TTree("tree_VrtSecInclusive","TTree of VrtSecInclusive");
       ATH_CHECK( hist_root->regTree("/AANT/tree_VrtSecInclusive", m_tree_Vert) );
-      
+
       ATH_CHECK( setupNtuple() );
-      
+
     }
 
     // initialize keys
     ATH_CHECK(m_eventInfoKey.initialize());
 
     // Instantiate and initialize our event info decorator write
-    m_vertexingStatusKey = SG::WriteDecorHandleKey<xAOD::EventInfo>(m_eventInfoKey.key() + "." + "VrtSecInclusive_"+ m_jp.secondaryVerticesContainerName + m_jp.augVerString + "_status");
+    m_vertexingStatusKey = SG::WriteDecorHandleKey<xAOD::EventInfo>(m_eventInfoKey.key() + "." + "VrtSecInclusive_"+ m_secondaryVerticesContainerName + m_augVerString + "_status");
     this->declare(m_vertexingStatusKey);
     m_vertexingStatusKey.setOwner(&(*this));
     ATH_CHECK(m_vertexingStatusKey.initialize());
 
-    // 
+    //
     ATH_MSG_INFO("initialize: Exit VrtSecInclusive::initialize()");
-    return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS;
   }
 
 
@@ -267,9 +244,9 @@ namespace VKalVrtAthena {
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::finalize()
   {
-    
+
     ATH_MSG_INFO("finalize: VrtSecInclusive finalize()");
-    return StatusCode::SUCCESS; 
+    return StatusCode::SUCCESS;
   }
 
   //__________________________________________________________________________
@@ -277,19 +254,19 @@ namespace VKalVrtAthena {
   {
 
     ATH_MSG_DEBUG("initEvent: begin");
-    
+
     // Clear all variables to be stored to the AANT
-    if( m_jp.FillNtuple ) {
+    if( m_FillNtuple ) {
       ATH_CHECK( clearNtupleVariables() );
     }
 
-    
+
     ATH_MSG_DEBUG("initEvent: from initEvent ");
     return StatusCode::SUCCESS;
-   
+
   }
-  
-  
+
+
   //__________________________________________________________________________
   StatusCode VrtSecInclusive::execute()
   {
@@ -313,9 +290,9 @@ namespace VKalVrtAthena {
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
     }
-    
+
     // add event level info to ntuple
-    if( m_jp.FillNtuple ) sc = addEventInfo();
+    if( m_FillNtuple ) sc = addEventInfo();
 
     if (sc.isFailure() ) {
       ATH_MSG_WARNING("Failure in getEventInfo() ");
@@ -323,15 +300,15 @@ namespace VKalVrtAthena {
       return StatusCode::SUCCESS;
     }
 
-    
+
     ///////////////////////////////////////////////////////////////////////////
     //
     // Setup StoreGate Variables
     //
-    
+
     // Check Return StatusCode::Failure if the user-specified container names have duplication.
     {
-      std::vector<std::string> userContainerNames { m_jp.secondaryVerticesContainerName, m_jp.all2trksVerticesContainerName };
+      std::vector<std::string> userContainerNames { m_secondaryVerticesContainerName, m_all2trksVerticesContainerName };
       std::set<std::string> userContainerNamesSet;
       for( auto& name : userContainerNames ) userContainerNamesSet.insert( name );
       if( userContainerNamesSet.size() != userContainerNames.size() ) {
@@ -339,120 +316,120 @@ namespace VKalVrtAthena {
         return StatusCode::FAILURE;
       }
     }
-    
+
     auto *secondaryVertexContainer    = new xAOD::VertexContainer;
     auto *secondaryVertexAuxContainer = new xAOD::VertexAuxContainer;
-    
+
     secondaryVertexContainer ->setStore( secondaryVertexAuxContainer );
-    
-    ATH_CHECK( evtStore()->record( secondaryVertexContainer,    "VrtSecInclusive_" + m_jp.secondaryVerticesContainerName + m_jp.augVerString          ) );
-    ATH_CHECK( evtStore()->record( secondaryVertexAuxContainer, "VrtSecInclusive_" + m_jp.secondaryVerticesContainerName + m_jp.augVerString + "Aux." ) );
-    
-    if( m_jp.FillIntermediateVertices ) {
+
+    ATH_CHECK( evtStore()->record( secondaryVertexContainer,    "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString          ) );
+    ATH_CHECK( evtStore()->record( secondaryVertexAuxContainer, "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString + "Aux." ) );
+
+    if( m_FillIntermediateVertices ) {
       auto *twoTrksVertexContainer      = new xAOD::VertexContainer;
       auto *twoTrksVertexAuxContainer   = new xAOD::VertexAuxContainer;
-      
+
       twoTrksVertexContainer   ->setStore( twoTrksVertexAuxContainer );
-      
-      ATH_CHECK( evtStore()->record( twoTrksVertexContainer,      "VrtSecInclusive_" + m_jp.all2trksVerticesContainerName + m_jp.augVerString          ) );
-      ATH_CHECK( evtStore()->record( twoTrksVertexAuxContainer,   "VrtSecInclusive_" + m_jp.all2trksVerticesContainerName + m_jp.augVerString + "Aux."  ) );
-    
+
+      ATH_CHECK( evtStore()->record( twoTrksVertexContainer,      "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString          ) );
+      ATH_CHECK( evtStore()->record( twoTrksVertexAuxContainer,   "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString + "Aux."  ) );
+
       for( auto itr = m_vertexingAlgorithms.begin(); itr!=m_vertexingAlgorithms.end(); ++itr ) {
-      
+
         auto& name = itr->first;
-      
+
         auto *intermediateVertexContainer      = new xAOD::VertexContainer;
         auto *intermediateVertexAuxContainer   = new xAOD::VertexAuxContainer;
-      
+
         intermediateVertexContainer   ->setStore( intermediateVertexAuxContainer );
-      
-        ATH_CHECK( evtStore()->record( intermediateVertexContainer,      "VrtSecInclusive_IntermediateVertices_" + name + m_jp.augVerString           ) );
-        ATH_CHECK( evtStore()->record( intermediateVertexAuxContainer,   "VrtSecInclusive_IntermediateVertices_" + name + m_jp.augVerString + "Aux."  ) );
+
+        ATH_CHECK( evtStore()->record( intermediateVertexContainer,      "VrtSecInclusive_IntermediateVertices_" + name + m_augVerString           ) );
+        ATH_CHECK( evtStore()->record( intermediateVertexAuxContainer,   "VrtSecInclusive_IntermediateVertices_" + name + m_augVerString + "Aux."  ) );
       }
-    
+
     }
-    
+
     dumpTruthInformation();
 
-    
+
     // Later use elsewhere in the algorithm
     m_selectedTracks.clear();
     m_associatedTracks.clear();
     m_leptonicTracks.clear();
 
     m_extrapolatedPatternBank.clear();
-    
+
     ///////////////////////////////////////////////////////////////////////////
     //
     // now start algorithm
     //
-    
+
     //--------------------------------------------------------
     //  Primary vertex processing
-    // 
+    //
     sc = this->processPrimaryVertices(); // fetch the 1st primary reconstructed vertex
-    
+
     if( sc.isFailure() or !m_thePV ) {
-      
+
       ATH_MSG_WARNING("processPrimaryVertices() failed");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       return StatusCode::SUCCESS;
-    }    
+    }
 
     // Perform track selection and store it to selectedBaseTracks
     for( auto alg : m_trackSelectionAlgs ) {
       ATH_CHECK( (this->*alg)() );
     }
 
-    if( m_jp.FillNtuple )
+    if( m_FillNtuple )
       m_ntupleVars->get<unsigned int>( "NumSelTrks" ) = static_cast<int>( m_selectedTracks.size() );
-    
+
     // fill information about selected tracks in AANT
     ATH_CHECK( fillAANT_SelectedBaseTracks() );
-    
+
     //-------------------------------------------------------
-    // Skip the event if the number of selected tracks is more than m_jp.SelTrkMaxCutoff
+    // Skip the event if the number of selected tracks is more than m_SelTrkMaxCutoff
     if( m_selectedTracks.size() < 2 ) {
       ATH_MSG_DEBUG( "execute: Too few (<2) selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       ATH_CHECK( lockTrackDecorations( true ) );
-      return StatusCode::SUCCESS;   
+      return StatusCode::SUCCESS;
     }
-      
-    if( m_selectedTracks.size() > m_jp.SelTrkMaxCutoff ) {
+
+    if( m_selectedTracks.size() > m_SelTrkMaxCutoff ) {
       ATH_MSG_INFO( "execute: Too many selected reco tracks. Terminated reconstruction." );
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       ATH_CHECK( lockTrackDecorations( true ) );
-      return StatusCode::SUCCESS;   
+      return StatusCode::SUCCESS;
     }
-      
+
     //-------------------------------------------------------
     // Core part of Vertexing
     //
-    
+
     {
 
       m_vertexingAlgorithmStep = 0;
-    
+
       // set of vertices created in the following while loop.
       std::vector<WrkVrt> workVerticesContainer;
-    
+
       // the main sequence of the main vertexing algorithms
       // see initialize() what kind of algorithms exist.
       for( auto itr = m_vertexingAlgorithms.begin(); itr!=m_vertexingAlgorithms.end(); ++itr ) {
-      
+
         auto& name = itr->first;
         auto alg   = itr->second;
-      
+
         auto t_start = std::chrono::system_clock::now();
-      
+
         ATH_CHECK( (this->*alg)( &workVerticesContainer ) );
-      
+
         auto t_end = std::chrono::system_clock::now();
-      
-        if( m_jp.FillHist ) {
+
+        if( m_FillHist ) {
           auto sec = std::chrono::duration_cast<std::chrono::microseconds>( t_end - t_start ).count();
           m_hists["CPUTime"]->Fill( m_vertexingAlgorithmStep, sec/1.e6 );
         }
@@ -463,29 +440,29 @@ namespace VKalVrtAthena {
                        );
 
         ATH_CHECK( monitorVertexingAlgorithmStep( &workVerticesContainer, name, std::next( itr ) == m_vertexingAlgorithms.end() ) );
-      
+
         m_vertexingAlgorithmStep++;
-      
+
       }
     }
-    
+
     m_vertexingStatus = 0;
     vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
-    
+
     // Fill AANT
-    if( m_jp.FillNtuple ) {
+    if( m_FillNtuple ) {
       m_tree_Vert->Fill();
       ATH_CHECK( clearNtupleVariables() );
     }
-    
+
     ATH_CHECK( lockTrackDecorations( false ) );
-    
+
     ATH_MSG_VERBOSE( "execute: process done." );
     // end
-    return StatusCode::SUCCESS;   
-    
+    return StatusCode::SUCCESS;
+
   }
-    
+
   void VrtSecInclusive::lockTrackDecorations( const xAOD::TrackParticle* trk, bool onlySelection ) const {
     SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
       const_cast<SG::AuxVectorData*> (trk->container());
@@ -505,7 +482,7 @@ namespace VKalVrtAthena {
     }
   }
 
-void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) const {
+  void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) const {
     SG::AuxVectorData* cont_nc ATLAS_THREAD_SAFE =
       const_cast<SG::AuxVectorData*> (cont);
     for (const IPDecoratorType& dec : m_ipDecors) {
@@ -523,14 +500,14 @@ void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) con
 
   StatusCode VrtSecInclusive::lockTrackDecorations( bool onlySelection ) const
   {
-    const xAOD::TrackParticleContainer* trackParticleContainer ( nullptr );
-    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_jp.TrackLocation) );
+    const xAOD::TrackParticleContainer* trackParticleContainer{};
+    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
     for( const xAOD::TrackParticle* trk : *trackParticleContainer ) {
       lockTrackDecorations( trk, onlySelection );
     }
 
-    const xAOD::MuonContainer* muons ( nullptr );
-    ATH_CHECK( evtStore()->retrieve( muons, m_jp.MuonLocation) );
+    const xAOD::MuonContainer* muons{};
+    ATH_CHECK( evtStore()->retrieve( muons, m_MuonLocation) );
     if (muons->ownPolicy() != SG::VIEW_ELEMENTS) {
       lockLeptonDecorations (muons);
     }
@@ -543,8 +520,8 @@ void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) con
       }
     }
 
-    const xAOD::ElectronContainer *electrons( nullptr );
-    ATH_CHECK( evtStore()->retrieve( electrons, m_jp.ElectronLocation ) );
+    const xAOD::ElectronContainer *electrons{};
+    ATH_CHECK( evtStore()->retrieve( electrons, m_ElectronLocation ) );
     if (electrons->ownPolicy() != SG::VIEW_ELEMENTS) {
       lockLeptonDecorations (electrons);
     }
@@ -559,8 +536,8 @@ void VrtSecInclusive::lockLeptonDecorations( const SG::AuxVectorData* cont ) con
       }
     }
 
-    const xAOD::TrackParticleContainer* IDtracks ( nullptr );
-    ATH_CHECK( evtStore()->retrieve( IDtracks, m_jp.TrackLocation) );
+    const xAOD::TrackParticleContainer* IDtracks{};
+    ATH_CHECK( evtStore()->retrieve( IDtracks, m_TrackLocation) );
     for( const auto *trk : *IDtracks ) {
       lockTrackDecorations( trk, onlySelection );
     }
