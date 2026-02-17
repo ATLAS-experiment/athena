@@ -59,7 +59,6 @@ then
       --autoConfiguration=everything \
       --conditionsTag "default:${conditions}" \
       --geometryVersion "default:${geometry}" \
-      --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --athenaopts "all:--threads=1" \
       --imf False
      rec=$?
