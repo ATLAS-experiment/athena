@@ -178,6 +178,24 @@ def getL1LowLumi():
     ]
 
 #####################################
+
+def getL1BKeeLowMu():
+    return [
+        # Unprescaled
+        'L1_eEM15',
+        'L1_2eEM9',
+        'L1_JPSI-1M5-eEM9',
+        # Next Higher Thresholds for Buffer
+        'L1_eEM18',
+        'L1_2eEM12',
+        # Prescaled
+        'L1_eEM9',
+        'L1_eEM9_VjTE200',
+        'L1_2eEM5_jTE200'
+    ]
+
+#####################################
+
 def getL1BKeePrimary():
 
     return [
@@ -321,6 +339,7 @@ L1_multiseed_simple_getters = {
     'L1_Bkg': getL1BackgroundSeed,
     'L1_BS': getL1BSSeed,
     'L1_LowLumi': getL1LowLumi,
+    'L1_BKeeLowMu': getL1BKeeLowMu,
     'L1_BKeePrimary': getL1BKeePrimary,
     'L1_BKeePrimaryLegacy': getL1BKeePrimaryLegacy,
     'L1_BKeePrescaled': getL1BKeePrescaled,

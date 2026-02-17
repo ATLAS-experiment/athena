@@ -10364,17 +10364,17 @@ HLT_mu80_msonly_3layersEC_L1MU18VFCH:
   stepFeatures:
     0: 1
 HLT_mu8_L1MU5VF:
-  eventCount: 2
+  eventCount: 3
   stepCounts:
     0: 6
     1: 5
     2: 3
-    3: 2
+    3: 3
   stepFeatures:
     0: 6
     1: 5
     2: 3
-    3: 2
+    3: 3
 HLT_noalg_AFPPEB_L12MU5VF:
   eventCount: 1
   stepCounts:

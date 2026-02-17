@@ -452,18 +452,6 @@ HLT_g50_loose_ion_L1eEM26:
     1: 15
     2: 11
     3: 4
-HLT_hi_uccTh1_L1ZDC_PU_jTEFWD5600:
-  eventCount: 0
-HLT_hi_uccTh1_L1jTEFWD5600:
-  eventCount: 0
-HLT_hi_uccTh2_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_hi_uccTh2_L1jTEFWD6300:
-  eventCount: 0
-HLT_hi_uccTh3_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
-HLT_hi_uccTh3_L1jTEFWD6600:
-  eventCount: 0
 HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1TRT_VjTE200:
   eventCount: 0
 HLT_j0_MULT0mult11XX10ptXX0eta490_j10_pf_jes_ftf_L1TRT_ZDC_XOR_VjTE200:
@@ -776,14 +764,6 @@ HLT_j40_a2_ion_L1jJ40:
     0: 19
   stepFeatures:
     0: 53
-HLT_j40_a2_ion_hi_uccTh2_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_j40_a2_ion_hi_uccTh2_L1jTEFWD6300:
-  eventCount: 0
-HLT_j40_a2_ion_hi_uccTh3_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
-HLT_j40_a2_ion_hi_uccTh3_L1jTEFWD6600:
-  eventCount: 0
 HLT_j40_ion_L1RD0_FILLED:
   eventCount: 20
   stepCounts:
@@ -828,14 +808,6 @@ HLT_j50_a2_ion_L1jJ50:
     0: 19
   stepFeatures:
     0: 46
-HLT_j50_a2_ion_hi_uccTh2_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_j50_a2_ion_hi_uccTh2_L1jTEFWD6300:
-  eventCount: 0
-HLT_j50_a2_ion_hi_uccTh3_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
-HLT_j50_a2_ion_hi_uccTh3_L1jTEFWD6600:
-  eventCount: 0
 HLT_j50_ion_L1RD0_FILLED:
   eventCount: 19
   stepCounts:
@@ -866,14 +838,6 @@ HLT_j60_a2_ion_L1jJ55:
     0: 17
   stepFeatures:
     0: 35
-HLT_j60_a2_ion_hi_uccTh2_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_j60_a2_ion_hi_uccTh2_L1jTEFWD6300:
-  eventCount: 0
-HLT_j60_a2_ion_hi_uccTh3_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
-HLT_j60_a2_ion_hi_uccTh3_L1jTEFWD6600:
-  eventCount: 0
 HLT_j60_ion_L1jJ40:
   eventCount: 19
   stepCounts:
@@ -2051,14 +2015,6 @@ HLT_mu4noL1_L1ZDC_HELT35_jTEFWD2600:
   eventCount: 0
 HLT_mu4noL1_L1ZDC_HELT50_jTEFWD2600:
   eventCount: 0
-HLT_mu4noL1_hi_uccTh2_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_mu4noL1_hi_uccTh2_L1jTEFWD6300:
-  eventCount: 0
-HLT_mu4noL1_hi_uccTh3_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
-HLT_mu4noL1_hi_uccTh3_L1jTEFWD6600:
-  eventCount: 0
 HLT_mu6_L1MU3V:
   eventCount: 7
   stepCounts:
@@ -2323,12 +2279,6 @@ HLT_noalg_L1ZDC_HELT35_jTEFWD2600:
   eventCount: 0
 HLT_noalg_L1ZDC_HELT50_jTEFWD2600:
   eventCount: 0
-HLT_noalg_L1ZDC_PU_jTEFWD5600:
-  eventCount: 0
-HLT_noalg_L1ZDC_PU_jTEFWD6300:
-  eventCount: 0
-HLT_noalg_L1ZDC_PU_jTEFWD6600:
-  eventCount: 0
 HLT_noalg_L1eEM12:
   eventCount: 19
 HLT_noalg_L1eEM15:
@@ -2392,12 +2342,6 @@ HLT_noalg_L1jTE5_VjTE200:
 HLT_noalg_L1jTE600:
   eventCount: 0
 HLT_noalg_L1jTE6500:
-  eventCount: 0
-HLT_noalg_L1jTEFWD5600:
-  eventCount: 0
-HLT_noalg_L1jTEFWD6300:
-  eventCount: 0
-HLT_noalg_L1jTEFWD6600:
   eventCount: 0
 HLT_noalg_eb_L12eEM18:
   eventCount: 15

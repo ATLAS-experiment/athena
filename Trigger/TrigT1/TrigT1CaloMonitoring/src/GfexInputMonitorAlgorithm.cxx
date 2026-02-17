@@ -69,6 +69,12 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
     unsigned int nTowers = 0;
 
+    /* 
+    FPGAc -> In the FPGAc region (abs(eta) > 3.2), the size of the gTowers in phi is twice the size of the gTowers in FPGAa and FPGAb. 
+    Using one fill() method for all eta bins results in a checker pattern in the forward region. To ensure that the histogram 
+    reflects the difference in the size of gTowers in the forward region, the fill() method is used twice for abs(eta) > 3.2
+    */
+
     for(const xAOD::gFexTower* gfexTowerRoI : *gFexTowerContainer){ //data gfex towers
 		// working with "local" fiber number, iFiber
         unsigned int towerID = gfexTowerRoI->gFEXtowerID();
@@ -120,7 +126,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
                 }
                 else {
                     Decision = "ETMismatch_SCell";
-                    if (std::abs(eta) >= 3.2 ){ //FPGAc
+                    if (std::abs(eta) >= 3.2 ){ //FPGAc 
                         Towerphi = phi- 0.1;
                         fill("errorsSCell",Towereta,Towerphi);	
                         Towerphi = phi + 0.1;
@@ -142,7 +148,8 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
         if (dataType != 1) fill("gTowers",Toweret);
         else fill("gTileTowers",Toweret);
 
-		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
+        // ECAL and FCAL overlap
+		if (eta < -3.17 && eta > -3.25){ eta = -3.225;} 
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}
 
 		Towereta = eta;	
@@ -167,7 +174,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 
 		//GREATER THAN 2GEV MLE=1342
 		if (gfexTowerRoI->towerEt() >= 1342){
-			if (std::abs(eta) >= 3.2 ){
+			if (std::abs(eta) >= 3.2 ){ //FPGAc
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("highEtgTowers",Towereta,Towerphi,Toweret);
@@ -186,7 +193,7 @@ StatusCode GfexInputMonitorAlgorithm::fillHistograms( const EventContext& ctx ) 
 		}
       	//only for h_gTower_coldtowers_etaphimap MLE = 1182
 		else if (gfexTowerRoI->towerEt() <= 1182){
-			if (std::abs(eta) >= 3.2){
+			if (std::abs(eta) >= 3.2){ //FPGAc
 				Towerphi = phi- 0.1;
 				binNumber = getBinNumberTower(eta,phi-0.1,0,0);
 				fill("lowEtgTowers",Towereta,Towerphi,Toweret);
