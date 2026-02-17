@@ -79,17 +79,21 @@ class CommonServicesConfig (ConfigBlock) :
         # Setup stream name
         streamName = self.streamName or config.defaultHistogramStream()
 
-        if self.runSystematics is False :
+        # Handle all possible configuration options for systematics
+        if self.runSystematics is False:
             runSystematics = self.runSystematics
-        elif config.noSystematics() is not None :
+        elif config.noSystematics() is not None:
             # if option not set:
             # check to see if set in config accumulator
             self.runSystematics = not config.noSystematics()
             runSystematics = self.runSystematics
-        else :
+        else:
             runSystematics = True
 
-        if runSystematics :
+        # Now update the global configuration
+        config._noSystematics = not runSystematics
+
+        if runSystematics:
             sysService.sigmaRecommended = 1
             if config.dataType() is DataType.Data:
                 # Only one type of allowed systematics on data: the JER variations!
