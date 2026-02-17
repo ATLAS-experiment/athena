@@ -200,15 +200,6 @@ def LLJ1Cfg(flags):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(LLJ1SlimmingHelper,writeLC=True,writeEM=True)
 
-    ### ufo jet taggers
-    taggers_list = []
-    for tagger in ["TopTransformer", "WTransformer", "WTransformer_massdec"]:
-        taggers_list.append(f"{tagger}_ConstScore")
-    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(taggers_list)]
-
-    ### qg tagger
-    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.QGTransformer_ConstScore"]
- 
     # Truth extra content
     if flags.Input.isMC:
 
