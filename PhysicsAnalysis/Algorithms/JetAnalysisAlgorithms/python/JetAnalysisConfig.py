@@ -31,7 +31,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runGhostMuonAssociation', None, type=bool,
             info="whether to set up the jet-ghost-muon association algorithm "
             "`CP::JetGhostMuonAssociationAlg`. If left empty, automatically defaults to `False` for PHYSLITE and `True` otherwise.")
-        self.addOption ('runTruthJetTagging', None, type=bool,
+        self.addOption ('runTruthJetTagging', True, type=bool,
             info="whether to set up the jet truth tagging algorithm "
             "`CP::JetTruthTagAlg`.")
 
@@ -71,10 +71,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
 
-        # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
-        # need to change
-        if (self.runTruthJetTagging or (self.runTruthJetTagging is None)
-        ) and config.dataType() is not DataType.Data:
+        if self.runTruthJetTagging and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
