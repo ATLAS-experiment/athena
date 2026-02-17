@@ -42,6 +42,7 @@ namespace {
         return marker;
     }
 
+
     inline int stationMarkerSyle(const Muon::MuonStationIndex::ChIndex ch,
                                  const bool openMarker, const bool onSeed) {
         switch (Muon::MuonStationIndex::toLayerIndex(ch)) {
@@ -65,6 +66,19 @@ namespace {
 
 namespace MuonValR4{
 
+    //** @brief Visualizing seeds and corresponding segments with different colors */
+    int seedColorIdx(std::size_t iSeed){
+        // Golden ratio hue stepping -> good spread even for many seeds
+        constexpr double phi = 0.6180339887498949;
+        const double h = 360 * std::fmod(0.13 + phi * double(iSeed), 1.0);  // [0,1)
+        constexpr double s = 0.75;
+        constexpr double v = 0.95;
+
+        float r=0.f, g=0.f, b=0.f;
+        TColor::HLS2RGB(h, s, v, r, g, b);
+        return TColor::GetColor(r, g, b);
+    }
+
     void TrackVisualizationTool::PlotLegend::addColor(const int color, const std::string& label){
         if (colors.find(color) != colors.end()) {
             return;
@@ -73,11 +87,11 @@ namespace MuonValR4{
         legend->AddEntry(box.get(), label.c_str(), "F");
         colors.insert(std::make_pair(color, std::move(box)));
     }
-    void TrackVisualizationTool::PlotLegend::addMarker(const int marker, const std::string& label){
+    void TrackVisualizationTool::PlotLegend::addMarker(const int marker, const std::string& label, const int color){
         if (markers.find(marker)!= markers.end()) {
             return;
         }
-        auto tMarker = drawMarker(Amg::Vector2D{2.*Gaudi::Units::km, 0.}, marker, kBlack);
+        auto tMarker = drawMarker(Amg::Vector2D{2.*Gaudi::Units::km, 0.}, marker, color);
         legend->AddEntry(tMarker.get(), label.c_str(), "P");
         markers.insert(std::make_pair(marker, std::move(tMarker)));
     }
@@ -133,10 +147,128 @@ namespace MuonValR4{
         if (m_plotsDone || segments.empty()) {
             return;
         }
+
+
+
         displaySeeds(ctx, seederObj, DisplayView::RZ, segments, seeds, clone(extPrimitives));        
         displaySeeds(ctx, seederObj, DisplayView::XY, segments, seeds, std::move(extPrimitives));
+
+        //For each seed plot respective segment parameters
+
+        displaySeedSegmentsGlobalWithTruth(ctx, DisplayView::RZ, seeds);
+        displaySeedSegmentsGlobalWithTruth(ctx, DisplayView::XY, seeds);
     
     }
+
+void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
+    const EventContext& ctx,
+    const DisplayView view,
+    const MsTrackSeedContainer& seeds) const {
+
+  auto canvas = m_visualSvc->prepareCanvas(
+      ctx, m_clientToken,
+      std::format("SeedSegsGlobalTruth{:}", view == DisplayView::XY ? "XY" : "RZ"));
+
+  if (!canvas) { m_plotsDone = true; return; }
+
+  canvas->setAxisTitles(view == DisplayView::XY ? "x [m]" : "z [m]",
+                        view == DisplayView::XY ? "y [m]" : "R [m]");
+
+  PlotLegend legend{0.005, 0.005, 0.6, 0.1};
+
+  PrimitivesVec_t primitives{};
+  bool drewAny{false};
+
+  // -----------------------
+  // (A) Draw TRUTH segments
+  // -----------------------
+  const xAOD::MuonSegmentContainer* truthSegs{nullptr};
+  if (!SG::get(truthSegs, m_truthSegKey, ctx).isSuccess()) {
+    THROW_EXCEPTION("Failed to fetch the truth segment container");
+  }
+  if (truthSegs) {
+    for (const xAOD::MuonSegment* seg : *truthSegs) {
+      if (!seg) continue;
+
+      const Amg::Vector3D p = seg->position();
+      const double x = p.x() * inM;
+      const double y = p.y() * inM;
+      const double z = p.z() * inM;
+      const double r = std::hypot(x, y);
+
+      const Amg::Vector2D plotPos =
+          (view == DisplayView::XY) ? Amg::Vector2D{x, y}
+                                   : Amg::Vector2D{z, r};
+
+      // Same station-based marker, but OPEN marker to visually separate truth vs reco
+      const auto chIdx = seg->chamberIndex();
+      const int mStyleTruth = stationMarkerSyle(chIdx, /*openMarker=*/true, /*onSeed=*/true);
+
+      primitives.emplace_back(drawMarker(plotPos, mStyleTruth, truthColor, /*mSize=*/3));
+      legend.addMarker(
+          mStyleTruth,
+          std::string(Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx))) + " (truth)", truthColor);
+
+      canvas->expandPad(plotPos.x() - extraMargin, plotPos.y() - extraMargin);
+      canvas->expandPad(plotPos.x() + extraMargin, plotPos.y() + extraMargin);
+      drewAny = true;
+    }
+  }
+
+  // ---------------------------------
+  // (B) Draw RECO seed-associated segs
+  // ---------------------------------
+  for (std::size_t iSeed = 0; iSeed < seeds.size(); ++iSeed) {
+    const MsTrackSeed& seed = seeds[iSeed];
+    const int color = seedColorIdx(iSeed);
+
+    std::string seedLabel = std::format("s{:d}: ", static_cast<int>(iSeed));
+
+    for (const xAOD::MuonSegment* seg : seed.segments()) {
+      if (!seg) continue;
+
+      const Amg::Vector3D p = seg->position();
+      const double x = p.x() * inM;
+      const double y = p.y() * inM;
+      const double z = p.z() * inM;
+      const double r = std::hypot(x, y);
+
+      const Amg::Vector2D plotPos =
+          (view == DisplayView::XY) ? Amg::Vector2D{x, y}
+                                   : Amg::Vector2D{z, r};
+
+      const auto chIdx = seg->chamberIndex();
+      const int mStyle = stationMarkerSyle(chIdx, /*openMarker=*/false, /*onSeed=*/true);
+
+      primitives.emplace_back(drawMarker(plotPos, mStyle, color));
+
+      std::string label = printID(*seg);
+      seedLabel += label + "_";
+
+      primitives.emplace_back(MuonValR4::drawLabel(label, plotPos.x() + 0.01, plotPos.y() + 0.01, 10, false, color));
+
+      // Marker legend: only one entry per station style (PlotLegend dedups)
+      legend.addMarker(
+          mStyle,
+          std::string(Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx))));
+
+      canvas->expandPad(plotPos.x() - extraMargin, plotPos.y() - extraMargin);
+      canvas->expandPad(plotPos.x() + extraMargin, plotPos.y() + extraMargin);
+      drewAny = true;
+    }
+      //Add text which shows segment names associated to the respective seeed
+      primitives.emplace_back(MuonValR4::drawLabel(seedLabel, 0.15, 0.9 - (0.03*iSeed), 10, true, color));
+  }
+
+  if (!drewAny) { canvas->trash(); return; }
+
+  for (auto& p : primitives) canvas->add(std::move(p));
+  legend.fillPrimitives(*canvas);
+}
+
+
+
+
     void TrackVisualizationTool::displaySeeds(const EventContext& ctx,
                                               const MsTrackSeeder& seeder,
                                               const DisplayView view,
@@ -192,7 +324,7 @@ namespace MuonValR4{
                     }
                     drawnPoint = true;
                     const bool isGood = onSeed(segment, loc);
-                    const int mStyle = stationMarkerSyle(chIdx, false, isGood);
+                    const int mStyle = stationMarkerSyle(chIdx, true, isGood);
                     const double phi = seeder.projectedPhi(segment->sector(), secProj);
                     const Amg::Vector2D markerPos{viewVector(phi, projPos, view)};
                     extPrimitives.emplace_back(drawMarker(markerPos, mStyle, mColor));
@@ -206,7 +338,7 @@ namespace MuonValR4{
                         canvas->expandPad(markerPos[0] + extraMargin, markerPos[1] + extraMargin);
                     }
                     legend.addMarker(mStyle, std::format("{:}{:}", MuonStationIndex::layerName(MuonStationIndex::toLayerIndex(chIdx)), 
-                                                         isGood ? "" : " (discarded)"));
+                                                         isGood ? "" : " (discarded)"), mColor);
                     legend.addColor(mColor, msSector->barrel() ? "Barrel" : msSector->side() > 0 ? "Endcap A" : "Endcap C");
                 }
             }
@@ -267,7 +399,7 @@ namespace MuonValR4{
         bool addedEntry{false};
         for (const xAOD::MuonSegment* segment: *truthSegs) {
             const auto chIdx = segment->chamberIndex();
-            const int mStyle = stationMarkerSyle(chIdx, false, true);
+            const int mStyle = stationMarkerSyle(chIdx, true, true);
 
             using enum Location;
             using enum MsTrackSeeder::SectorProjector;
@@ -283,7 +415,7 @@ namespace MuonValR4{
                     }
                     const double phi = MsTrackSeeder::projectedPhi(segment->sector(), secProj);
                     canvas.add(drawMarker(viewVector(phi, projected, view), mStyle, truthColor, 3));
-                    legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)));
+                    legend.addMarker(mStyle, Muon::MuonStationIndex::layerName(Muon::MuonStationIndex::toLayerIndex(chIdx)), truthColor);
                     addedEntry = true;
                 }
             }
