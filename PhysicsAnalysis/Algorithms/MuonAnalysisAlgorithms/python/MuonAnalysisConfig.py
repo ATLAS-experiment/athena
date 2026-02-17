@@ -28,7 +28,7 @@ class MuonCalibrationConfig (ConfigBlock):
             "Typically not needed here since the calibration is common to "
             "all muons.")
         self.addOption ('minPt', 3.0*GeV, type=float,
-            info=r"$p_\mathrm{T}$ cut to apply to calibrated muons, in MeV.")
+            info=r"$p_\mathrm{T}$ cut (in MeV) to apply to calibrated muons.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::MuonCalibrationAndSmearingAlg` on "
             "PHYSLITE derivations.")
@@ -43,7 +43,7 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('writeTrackD0Z0', False, type = bool,
             info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
-            info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple (EXPERIMENTAL).",
             expertMode=True)
         self.addOption ('runTrackBiasing', False, type=bool,
             info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
@@ -182,7 +182,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('maxD0Significance', 3, type=float,
             info="maximum $d_0$ significance used for the track selection.")
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
-            info=r"maximum $\Delta z_0\sin\theta$ in mm used for the track selection.")
+            info=r"maximum $\Delta z_0\sin\theta$ (in mm) used for the track selection.")
         self.addOption ('quality', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
             "`Loose`, `LowPt`, `HighPt`.")
@@ -192,7 +192,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             "`Tight_VarRad`, `NonIso`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only muons satisfying the working point "
-            "requirements")
+            "requirements.")
         self.addOption ('isoDecSuffix', '', type=str,
             info="the `isoDecSuffix` name if using close-by-corrected isolation working points.")
         self.addOption ('systematicBreakdown', False, type=bool,

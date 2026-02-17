@@ -44,9 +44,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             expertMode=True)
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
-            "PHYSLITE derivations")
+            "PHYSLITE derivations.")
         self.addOption ('minPt', 4.5*GeV, type=float,
-            info="the minimum pT cut to apply to calibrated electrons.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated electrons.")
         self.addOption ('maxEta', 2.47, type=float,
             info=r"maximum electron $\vert\eta\vert$.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -296,11 +296,11 @@ class ElectronWorkingPointConfig (ConfigBlock) :
         self.addOption ('trackSelection', True, type=bool,
             info="whether or not to set up an instance of "
             "`CP::AsgLeptonTrackSelectionAlg`, with the recommended $d_0$ and "
-            r"$z_0\sin\theta$ cuts")
+            r"$z_0\sin\theta$ cuts.")
         self.addOption ('maxD0Significance', 5, type=float,
             info="maximum $d_0$ significance used for the track selection.")
         self.addOption ('maxDeltaZ0SinTheta', 0.5, type=float,
-            info=r"maximum $z_0\sin\theta$ in mm used for the track selection.")
+            info=r"maximum $z_0\sin\theta$ (in mm) used for the track selection.")
         self.addOption ('identificationWP', None, type=str,
             info="the ID WP to use. Supported ID WPs: `TightLH`, "
             "`MediumLH`, `LooseBLayerLH`, `TightDNN`, `MediumDNN`, `LooseDNN`, "
@@ -316,7 +316,7 @@ class ElectronWorkingPointConfig (ConfigBlock) :
             "`Veto`, `MatConv`, `GammaStar`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only electrons satisfying the working point "
-            "requirements")
+            "requirements.")
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points.")
         self.addOption ('recomputeID', False, type=bool,

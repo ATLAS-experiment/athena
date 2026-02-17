@@ -23,7 +23,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
             noneAction='error',
             info="the type of jet input. Refer to the corresponding small- or large-R jet options.")
         self.addOption('analysisJetSelection', '', type=str,
-            info="the jet selection to use to calculate N jets for an analysis specific "
+            info="the jet selection to use when calculating the jet multiplicity for an analysis specific "
             "jet flavor composition uncertainty. Of the form `jvt_selection,as_char&&passesOR,as_char...`.")
         self.addOption('analysisFile', '', type=str,
             info="the file containing gluon fraction histograms needed to calculate an analysis specific "
@@ -38,7 +38,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
         self.addOption ('systematicsModelJMS', "Full", type=str,
             info="the NP reduction scheme to use for JMS: `Full`, `Simple`.")
         self.addOption ('runJERsystematicsOnData', False, type=bool,
-            info="whether to run the `All`/`Full` JER model variations also on data samples",
+            info="whether to run the `All`/`Full` JER model variations also on data samples.",
             expertMode=True)
         # Uncertainties tool options
         self.addOption ('uncertToolConfigPath', None, type=str,
