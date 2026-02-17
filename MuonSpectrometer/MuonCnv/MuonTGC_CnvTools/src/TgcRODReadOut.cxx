@@ -3,8 +3,8 @@
 */
 
 #include "TgcRODReadOut.h"
-
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/MsgStream.h"
 #include "TgcSlbData.h"
 
 // destructor
@@ -650,7 +650,7 @@ StatusCode Muon::TgcRODReadOut::decodeRodToRdo(
         log << MSG::DEBUG << n_vCh
             << "words of were recorded in TgcRdo container" << endmsg;
     }
-
+    log<<std::dec; //restore ostream format
     return StatusCode::SUCCESS;
 }
 
