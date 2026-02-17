@@ -31,10 +31,10 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& info = {})
+                      ColumnAccessorOptions&& options = {})
       : m_columnBase (&columnBase), m_key (name)
     {
-      if (info.addMTDependency)
+      if (options.addMTDependency)
         throw std::runtime_error ("adding MT dependencies not supported for non-const ObjectColumn");
     }
 
@@ -109,12 +109,12 @@ namespace columnar
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
                       const std::string& name,
-                      ColumnInfo&& info = {})
+                      ColumnAccessorOptions&& options = {})
       : m_columnBase (&columnBase), m_keyPtr(std::make_shared<KeyType>(name))
     {
-      if (info.addMTDependency && info.isOptional)
+      if (options.addMTDependency && options.isOptional)
         throw std::runtime_error ("adding MT dependencies not supported for optional ObjectColumn");
-      columnBase.internalAddKey (m_keyPtr, info.addMTDependency);
+      columnBase.internalAddKey (m_keyPtr, options.addMTDependency);
     }
 
     ObjectRange<CI,CM> operator() (ObjectId<ContainerId::eventContext,CM> eventId) const

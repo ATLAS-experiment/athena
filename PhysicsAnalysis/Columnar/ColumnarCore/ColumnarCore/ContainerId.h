@@ -111,6 +111,9 @@ namespace columnar
       /// whether to use the regular ObjectId/ObjectRange
       static constexpr bool regularObjectId = true;
 
+      /// whether to use a variant ObjectId
+      static constexpr bool variantObjectId = false;
+
       /// whether to use a regular column accessor in array mode
       static constexpr bool regularColumnAccessorArray = true;
 

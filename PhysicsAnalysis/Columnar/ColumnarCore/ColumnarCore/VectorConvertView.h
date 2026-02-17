@@ -57,7 +57,7 @@ namespace columnar
       [[no_unique_address]] FunctionType m_function;
       IteratorType m_iterator;
     };
-    template<typename FunctionType,typename IteratorType> VectorConvertIterator (FunctionType&&,IteratorType&&) -> VectorConvertIterator<std::remove_cv_t<FunctionType>,std::remove_cv_t<IteratorType>>;
+    template<typename FunctionType,typename IteratorType> VectorConvertIterator (FunctionType&&,IteratorType&&) -> VectorConvertIterator<std::decay_t<FunctionType>,std::decay_t<IteratorType>>;
 
 
 
@@ -102,7 +102,7 @@ namespace columnar
       [[no_unique_address]] FunctionType m_function;
       ViewType m_view;
     };
-    template<typename FunctionType,typename ViewType> VectorConvertView (FunctionType&&,ViewType&&) -> VectorConvertView<std::remove_cv_t<FunctionType>,std::remove_cv_t<ViewType>>;
+    template<typename FunctionType,typename ViewType> VectorConvertView (FunctionType&&,ViewType&&) -> VectorConvertView<std::decay_t<FunctionType>,std::decay_t<ViewType>>;
   }
 }
 
