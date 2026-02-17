@@ -24,8 +24,8 @@
 #include "CoralKernel/Context.h"
 #include "CoralBase/Exception.h"
 
-#include <boost/algorithm/string/case_conv.hpp>
-
+#include <ranges>
+#include <cctype>
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
@@ -117,7 +117,8 @@ TrigConf::SessionMgr::createSession() {
 
 void
 TrigConf::SessionMgr::setDbType(const std::string & s) {
-   m_dbtype = boost::to_lower_copy(s);
+   m_dbtype = s; 
+   std::ranges::transform(m_dbtype, m_dbtype.begin(), [](unsigned char c) { return std::tolower(c); });
    m_connectionString = "";
 }
 

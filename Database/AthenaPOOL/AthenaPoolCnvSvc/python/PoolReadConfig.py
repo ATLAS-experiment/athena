@@ -80,6 +80,9 @@ def PoolReadCfg(flags):
     if flags.MP.UseSharedReader or flags.MP.UseSharedWriter:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolSharedIOCnvSvcCfg
         result.merge(AthenaPoolSharedIOCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))
+    elif flags.PoolSvc.PersSvcPerInputType: # Switch off caching when using many TFiles
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '0'"]))
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         result.merge(AthenaPoolCnvSvcCfg(flags, InputPoolAttributes=["DatabaseName = '*'; ContainerName = 'CollectionTree'; TREE_CACHE = '-1'"]))

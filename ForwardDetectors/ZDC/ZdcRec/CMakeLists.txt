@@ -19,6 +19,17 @@ atlas_add_library( ZdcRecLib
 atlas_add_component( ZdcRec
                      src/components/*.cxx
                      LINK_LIBRARIES ZdcRecLib )
+
+# Disabled in main as the test do not run
+# atlas_add_test( ZDCCalibTest15
+#   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data15_hi.00287321.calibration_zdcCalib.daq.RAW._lb0000._SFO-2._0001.data --evtMax=10
+#   POST_EXEC_SCRIPT noerror.sh)
+# atlas_add_test( ZDCCalibTest16
+#   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data16_hip8TeV.00313063.calibration_zdcCalib.daq.RAW._lb0000._SFO-3._0001.data --evtMax=10
+#   POST_EXEC_SCRIPT noerror.sh)
+# atlas_add_test( ZDCCalibTest18
+#   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data18_hi.00367365.calibration_zdcCalib.daq.RAW._lb0000._SFO-5._0002.data --evtMax=10
+#   POST_EXEC_SCRIPT noerror.sh)
 atlas_add_test( ZDCCalibTest
   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   PRIVATE_WORKING_DIRECTORY

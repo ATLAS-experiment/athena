@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 #define MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
@@ -135,7 +135,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
 
         ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc","ActsTrackingGeometrySvc"};
         /** @brief Number of points to scan along the lines between two volume corners to check whether they belong to an another volume */
-        Gaudi::Property<unsigned> m_overlapSamples{this, "overlapSamples", 100};
+        Gaudi::Property<unsigned> m_overlapSamples{this, "overlapSamples", 50};
         /** @brief Name of the chamber output obj file */
         Gaudi::Property<std::string> m_overlapChambObj{this, "chamberOverlapFile", "OverlapingChambers.obj"};
         /** @brief The overlap of chamber volumes does not lead to a failure. In fact, the overlap between the T4 & BIS78 chambers

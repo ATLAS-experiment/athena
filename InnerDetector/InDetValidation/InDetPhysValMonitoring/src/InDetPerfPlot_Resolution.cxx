@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -26,7 +26,7 @@ namespace{
   constexpr float smallestAllowableQoverPt(1e-8);
 }
 
-InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& sDir)  : InDetPlotBase(pParent, sDir),
+InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const std::string& sDir, bool d0Only)  : InDetPlotBase(pParent, sDir),
   m_resolutionMethod(IDPVM::ResolutionHelper::iterRMS_convergence),
   m_primTrk(false),
   m_secdTrk(false),
@@ -97,6 +97,7 @@ InDetPerfPlot_Resolution::InDetPerfPlot_Resolution(InDetPlotBase* pParent, const
   m_sigma_vs_pt{},
   m_sigma_vs_lowpt{}
   {
+  m_d0Only = d0Only;
     
   TString tsDir = (TString) sDir;
 
@@ -133,6 +134,8 @@ InDetPerfPlot_Resolution::initializePlots() {
     //
 
     if(iparam == PT) continue;
+    if(m_d0Only && iparam != D0) continue;
+
     book(m_pull[iparam], "pull_" + m_paramProp[iparam]);
     book(m_res[iparam],  "res_" + m_paramProp[iparam]);
 
@@ -320,37 +323,51 @@ InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, const xAOD::Tr
 
 }
 
+
 void
-InDetPerfPlot_Resolution::getPlots(float weight) {
-  const float tanHalfTheta = std::tan(m_truetrkP[THETA] * 0.5);
+InDetPerfPlot_Resolution::fill(const xAOD::TrackParticle& trkprt, float weight) {
+  for (int iParams = 0; iParams < NPARAMS; iParams++) m_truetrkP[iParams] = 0.;
+  getTrackParameters(trkprt);
+  getPlotParameters();
+  getPlots(weight, false);
+}
+
+
+
+void
+InDetPerfPlot_Resolution::getPlots(float weight, bool useTruthKin) {
+  float pt = useTruthKin ? m_truetrkP[PT] : m_trkP[PT];
+  float theta = useTruthKin ? m_truetrkP[THETA] : m_trkP[THETA];
+  const float tanHalfTheta = std::tan(theta * 0.5);
   const bool tanThetaIsSane = std::abs(tanHalfTheta) > smallestAllowableTan;
   float eta = undefinedValue;
   if (tanThetaIsSane) eta = -std::log(tanHalfTheta);
   for (unsigned int iparam = 0; iparam < NPARAMS; iparam++) {    
     if(iparam == PT) continue;
+    if(m_d0Only && iparam != D0) continue;
     m_pull[iparam]->Fill(m_pullP[iparam], weight);
     m_res[iparam]->Fill(m_resP[iparam], weight);
     m_sigma[iparam]->Fill(m_sigP[iparam], weight);
     m_sigma_vs_eta[iparam]->Fill(eta, m_sigP[iparam], weight);
-    m_sigma_vs_pt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
-    m_sigma_vs_lowpt[iparam]->Fill(m_truetrkP[PT], m_sigP[iparam], weight);
+    m_sigma_vs_pt[iparam]->Fill(pt, m_sigP[iparam], weight);
+    m_sigma_vs_lowpt[iparam]->Fill(pt, m_sigP[iparam], weight);
     m_resHelpereta[iparam]->Fill(eta, m_resP[iparam], weight);
-    m_resHelperpt[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
-    m_resHelperlowpt[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
-    m_pullHelperpt[iparam]->Fill(m_truetrkP[PT], m_pullP[iparam], weight);
-    m_pullHelperlowpt[iparam]->Fill(m_truetrkP[PT], m_pullP[iparam], weight);
+    m_resHelperpt[iparam]->Fill(pt, m_resP[iparam], weight);
+    m_resHelperlowpt[iparam]->Fill(pt, m_resP[iparam], weight);
+    m_pullHelperpt[iparam]->Fill(pt, m_pullP[iparam], weight);
+    m_pullHelperlowpt[iparam]->Fill(pt, m_pullP[iparam], weight);
     m_pullHelpereta[iparam]->Fill(eta, m_pullP[iparam], weight);
     
     if(m_iDetailLevel >= 200){
       if (m_trkP[QOVERPT] >= 0.) {
         m_resHelpereta_pos[iparam]->Fill(eta, m_resP[iparam], weight);
-        m_resHelperpt_pos[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
-        m_resHelperlowpt_pos[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
+        m_resHelperpt_pos[iparam]->Fill(pt, m_resP[iparam], weight);
+        m_resHelperlowpt_pos[iparam]->Fill(pt, m_resP[iparam], weight);
       }
       if (m_trkP[QOVERPT] < 0.) {
         m_resHelpereta_neg[iparam]->Fill(eta, m_resP[iparam], weight);
-        m_resHelperpt_neg[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
-        m_resHelperlowpt_neg[iparam]->Fill(m_truetrkP[PT], m_resP[iparam], weight);
+        m_resHelperpt_neg[iparam]->Fill(pt, m_resP[iparam], weight);
+        m_resHelperlowpt_neg[iparam]->Fill(pt, m_resP[iparam], weight);
       }
     }
 
@@ -474,6 +491,7 @@ InDetPerfPlot_Resolution::finalizePlots() {
   bool saveProjections = (m_iDetailLevel > 200);
   for (unsigned int iparam = 0; iparam < NPARAMS; iparam++) {
     if(iparam == PT) continue;
+    if(m_d0Only && iparam != D0) continue;
     //
     //Only save vert detailed information if... high detail level
     //Reduces output for ART / PhysVal

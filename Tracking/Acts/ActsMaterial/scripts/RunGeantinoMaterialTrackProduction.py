@@ -38,6 +38,8 @@ def setupArgParser():
                         help="The input EVNT file to use")
     parser.add_argument("--outputhitsfile",default="myHITS.pool.root", type=str,
                         help="The output HITS filename")
+    parser.add_argument("--outputfile",default="material-tracks.root", type=str,
+                        help="The output Geantino filename")
     return parser
 
 if __name__ == "__main__":
@@ -74,7 +76,10 @@ if __name__ == "__main__":
     flags.Scheduler.ShowControlFlow = True
     flags.Scheduler.EnableVerboseViews = True
     flags.Scheduler.AutoLoadUnmetDependencies = True
-    
+    from SimulationConfig.SimEnums import SimulationFlavour
+    flags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
+
+
     flags.GeoModel.AtlasVersion = args.geometrytag
     flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
     flags.GeoModel.Align.Dynamic = False
@@ -152,7 +157,7 @@ if __name__ == "__main__":
 
 
     from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-    acc.merge(MaterialTrackWriterCfg(flags, useTrackingGeometry= False))
+    acc.merge(MaterialTrackWriterCfg(flags, useTrackingGeometry= False, FileName=args.outputfile))
 
     from MuonConfig.MuonConfigUtils import executeTest
     executeTest(acc)

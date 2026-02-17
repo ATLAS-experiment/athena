@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -10,6 +10,7 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.R10TruthLabel_R21Precision.R10TruthLabel_R21Precision_2022v1.R10TruthLabel_R22v1",
 "AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.bJR10v00_mass.bJR10v00_pt.bJR10v00Ext_mass.bJR10v00Ext_pt.bJR10v01_mass.bJR10v01_pt",
+"AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux.TopTransformer_ConstScore.WTransformer_ConstScore.WTransformer_massdec_ConstScore",
 "AntiKt10UFOCSSKJets",
 "AntiKt10UFOCSSKJetsAux.NumTrkPt500.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets.PartonTruthLabelID",
 "AntiKt10TruthSoftDropBeta100Zcut10Jets",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -90,7 +90,7 @@ QString VP1Trig::Logger::qstr(char c)
 
 //VP1String addition for std::string variables
 //_____________________________________________________________________________________________
-QString VP1Trig::Logger::qstr(std::string str)
+QString VP1Trig::Logger::qstr(const std::string& str)
 {
   return QString::fromStdString(str);
 }

@@ -454,6 +454,7 @@ def getFolderTag(db, folderPath, globalTag):
             tag = TileCalibUtils.getFullTag(folderPath, globalTag)
             if tag.startswith('Calo') and 'NoiseCell' not in tag:
                 tag='CALO'+tag[4:]
+                tag=tag.replace('Pileupnoiselumi','PileUpNoiseLumi')
             log.info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
         else:
             if not isinstance(db, str):

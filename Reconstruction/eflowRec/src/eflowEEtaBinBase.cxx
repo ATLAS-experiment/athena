@@ -13,7 +13,7 @@ CREATED:  17th May, 2006
 ********************************************************************/
 
 #include <cmath>
-#include "eflowRec/eflowEEtaBinBase.h"
+#include "eflowEEtaBinBase.h"
 
 
 ////////////////////////////////

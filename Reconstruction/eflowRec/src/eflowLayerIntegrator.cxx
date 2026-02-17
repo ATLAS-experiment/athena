@@ -13,16 +13,16 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowLayerIntegrator.h"
-#include "eflowRec/eflowCellIntegrator.h"
-#include "eflowRec/eflowDepthCalculator.h"
-#include "eflowRec/LegendreWeights.h"
-#include "eflowRec/eflowDatabase.h"
-#include "eflowRec/eflowTrackCaloPoints.h"
-#include "eflowRec/eflowCaloRegions.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowRecCluster.h"
+#include "eflowLayerIntegrator.h"
+#include "eflowCellIntegrator.h"
+#include "eflowDepthCalculator.h"
+#include "LegendreWeights.h"
+#include "eflowDatabase.h"
+#include "eflowTrackCaloPoints.h"
+#include "eflowCaloRegions.h"
+#include "eflowTrackClusterLink.h"
+#include "eflowRecTrack.h"
+#include "eflowRecCluster.h"
 
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloEvent/CaloCell.h"

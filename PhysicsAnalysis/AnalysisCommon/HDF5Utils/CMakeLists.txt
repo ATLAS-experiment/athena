@@ -65,24 +65,36 @@ endif()
 
 # unit tests
 
+# test writer
 atlas_add_executable( test-hdf5-writer
   util/test-hdf5-writer.cxx
   LINK_LIBRARIES HDF5Utils )
 atlas_install_scripts( test/test-h5-output )
 
+atlas_add_test( test_hdf5_writer
+  SCRIPT test-hdf5-writer
+  POST_EXEC_SCRIPT test-h5-output)
+
+# test histograms
 atlas_add_executable( test-histogram
   util/test-histogram.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES HDF5Utils ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 atlas_install_scripts( test/test-histogram-output )
 
-atlas_add_test( test_hdf5_writer
-  SCRIPT test-hdf5-writer
-  POST_EXEC_SCRIPT test-h5-output)
-
 atlas_add_test( test_histogram
   SCRIPT test-histogram
   POST_EXEC_SCRIPT test-histogram-output)
+
+# test multithreadding
+atlas_add_executable( test-hdf5-threads
+  util/test-hdf5-threads.cxx
+  LINK_LIBRARIES HDF5Utils )
+atlas_install_scripts( test/test-h5-threads-output )
+
+atlas_add_test( test_hdf5_threads
+  SCRIPT test-h5-threads-output
+  POST_EXEC_SCRIPT nopost.sh )
 
 
 # half precision tests

@@ -37,16 +37,16 @@ namespace LArSamples {
 
       virtual ~MultiTreeAccessor();
 
-      unsigned int nEvents() const;
-      unsigned int nRuns() const;
+      virtual unsigned int nEvents() const override;
+      virtual unsigned int nRuns() const override;
       
-      const EventData* eventData(unsigned int i) const;
-      const RunData* runData(unsigned int i) const;
-      
-      unsigned int historySize(unsigned int i) const;
-      unsigned int historySizeSC(unsigned int i) const;
+      virtual const EventData* eventData(unsigned int i) const override;
+      virtual const RunData* runData(unsigned int i) const override;
+
+      virtual unsigned int historySize(unsigned int i) const override;
+      virtual unsigned int historySizeSC(unsigned int i) const override;
           
-      bool writeToFile(const TString& fileName) const;
+      virtual bool writeToFile(const TString& fileName) const override;
 
       const TreeAccessor& accessor(unsigned int i) const { return *m_accessors[i]; }
       unsigned int nAccessors() const { return m_accessors.size(); }
@@ -55,9 +55,9 @@ namespace LArSamples {
 
     protected:
       
-      const History* getCellHistory(unsigned int i) const;      
-      const History* getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;      
+      virtual std::unique_ptr<const History> getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History> getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
 
     private:
       

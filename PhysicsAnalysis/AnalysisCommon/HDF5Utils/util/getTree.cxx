@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "getTree.h"
@@ -62,7 +62,10 @@ namespace H5Utils {
       throw std::logic_error(prob);
     }
     auto* key = dynamic_cast<TKey*>(file->GetListOfKeys()->At(0));
-    std::string name = key->GetName();
+    std::string name;
+    if (key){
+      name = key->GetName();
+    }
     file->Close();
     return name;
   }

@@ -40,7 +40,6 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
-#include <ActsPlugins/Root/RootMaterialDecorator.hpp>
 #include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
 #include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
 #include <Acts/Surfaces/PlanarBounds.hpp>
@@ -157,9 +156,10 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
     std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
-                                    m_buildSubdetectors.end());
+                                     m_buildSubdetectors.end());
 
     ATH_CHECK(m_blueprintNodeBuilders.retrieve());
+    ATH_CHECK(m_refineVisitors.retrieve());
 
     using enum Acts::AxisDirection;
   
@@ -190,41 +190,29 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
       {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
 
-    if (not m_materialMapRootInputFileBase.empty()) {
-      // The material decorator
-      ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-      decoratorConfig.fileName = m_materialMapRootInputFileBase;
-      auto materialDecorator = std::make_shared<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
-                                                                                    ActsTrk::actsLevelVector(msg().level()));
-
-      // Apply material decoration to every surface
-      auto applyMaterial = [materialDecorator](const Acts::Surface* surface) -> void {
-        if (!surface) return;
-        materialDecorator->decorate(*const_cast<Acts::Surface*>(surface));
-      };
-
-      // Visit all surfaces (false = visit all, not only sensitive)
-      trackingGeometry->visitSurfaces(applyMaterial, false);
+    for (auto& refineVisitor : m_refineVisitors) {
+        trackingGeometry->apply(*refineVisitor);
+        ATH_CHECK(refineVisitor->finalize());
     }
-
-    m_trackingGeometry = std::shared_ptr<const Acts::TrackingGeometry>(std::move(trackingGeometry));
+    m_refineVisitors.clear();
+    
+    m_trackingGeometry = std::move(trackingGeometry);
 
     if (m_objDebugOutput) {
-    Acts::ObjVisualization3D vis;
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = false}, {.visible = true});
-    vis.write("blueprint_sensitive.obj");
-    vis.clear();
+      Acts::ObjVisualization3D vis;
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = false}, {.visible = true});
+      vis.write("blueprint_sensitive.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
-                                {.visible = false}, {.visible = false});
-    vis.write("blueprint_volume.obj");
-    vis.clear();
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
+                                  {.visible = false}, {.visible = false});
+      vis.write("blueprint_volume.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = true}, {.visible = false});
-    vis.write("blueprint_portals.obj");
-
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = true}, {.visible = false});
+      vis.write("blueprint_portals.obj");
     }
     if (m_printGeo) {
         Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};

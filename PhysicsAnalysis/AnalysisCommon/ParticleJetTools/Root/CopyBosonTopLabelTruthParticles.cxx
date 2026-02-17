@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/CopyBosonTopLabelTruthParticles.h"
@@ -31,7 +31,10 @@ namespace {
     if (!f(tp)) return false;
     if (!tp->hasDecayVtx()) return false;
     for (unsigned int i = 0; i < tp->decayVtx()->nOutgoingParticles(); ++i) {
-      if (f(tp->decayVtx()->outgoingParticle(i))) return false;
+    if (tp->decayVtx()->outgoingParticle(i)) {
+    if (f(tp->decayVtx()->outgoingParticle(i)))
+      return false;
+      }
     }
     return true;
   }

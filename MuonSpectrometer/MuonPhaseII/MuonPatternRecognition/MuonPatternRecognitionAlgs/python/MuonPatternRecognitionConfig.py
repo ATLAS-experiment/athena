@@ -36,9 +36,21 @@ def MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlg", **kwargs):
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("ResoSeedHitAssoc", 5. )
     kwargs.setdefault("RecoveryPull", 3.)
+    # Configure T0 fitting, disabled by default
     kwargs.setdefault("fitSegmentT0", False)
-    kwargs.setdefault("recalibInFit", False)
+    if kwargs.get("fitSegmentT0"):
+        kwargs.setdefault("useHessianResidual", True)
+        kwargs.setdefault("recalibInFit", True)
+        kwargs.setdefault("maxIterations", 400)
+        # temporarily disable beamspot constraint when fitting T0, as it causes FPEs
+        kwargs.setdefault("doBeamspotConstraint", False)
+    # Configure pre-fitting, disabled by default
+    kwargs.setdefault("useFastPreFitter", False)
+    if kwargs.get("useFastPreFitter"):
+        kwargs.setdefault("useFastFitter", True)
+    # Configure main (full) fitting
     kwargs.setdefault("useFastFitter", False)
+    kwargs.setdefault("recalibInFit", False)
     kwargs.setdefault("doBeamspotConstraint", True)
     theAlg = CompFactory.MuonR4.SegmentFittingAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary=True)
@@ -87,7 +99,7 @@ def MuonPatternRecognitionCfg(flags):
         result.merge(MuonPhiHoughTransformAlgCfg(flags))
         segmentContainers+=["R4MuonSegments"]
     
-        result.merge(MuonSegmentFittingAlgCfg(flags,  OutSegmentContainer=segmentContainers[-1]))
+        result.merge(MuonSegmentFittingAlgCfg(flags, OutSegmentContainer=segmentContainers[-1]))
         
     from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
     result.merge(xAODSegmentCnvAlgCfg(flags, InSegmentKeys = segmentContainers))

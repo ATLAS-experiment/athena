@@ -18,7 +18,7 @@ from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Constants import DEBUG
 
-outputFileName = "ROOTTREE:SimplePoolFile5.root"
+outputFileName = "SimplePoolFile5.root"
 outputStreamName = "ExampleMeta"
 noTag = True
 

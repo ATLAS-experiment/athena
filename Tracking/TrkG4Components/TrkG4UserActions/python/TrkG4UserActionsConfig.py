@@ -57,7 +57,9 @@ def MaterialStepRecorder(configFlags, name="G4UA::ISFFullUserActionSvc", **kwarg
   
   AthenaOutputStream=CompFactory.AthenaOutputStream
   AthenaOutputStreamTool=CompFactory.AthenaOutputStreamTool
-  writingTool = AthenaOutputStreamTool( "MaterialStepCollectionStreamTool" )
+  writingTool = AthenaOutputStreamTool( "MaterialStepCollectionStreamTool",
+                                         TopLevelContainerName = "",
+                                         SubLevelBranchName = "<type>/<key>" )
   
   outputStream = AthenaOutputStream(name = "MaterialStepCollectionStream",
                                     WritingTool = writingTool,

@@ -464,7 +464,7 @@ bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut& asdout,
     }
 
     // SLB Module -> readout ID
-    return getReadoutFromSLB(*dynamic_cast<TGCModuleSLB*>(slb.get()), side,
+    return getReadoutFromSLB(*static_cast<TGCModuleSLB*>(slb.get()), side,
                              rodId, sswId, sbLoc);
 }
 

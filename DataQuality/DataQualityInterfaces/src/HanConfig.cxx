@@ -42,12 +42,13 @@
 #include "dqm_core/ParameterConfig.h"
 #include "dqm_core/Region.h"
 #include "dqm_core/RegionConfig.h"
-#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <utility>
+#include <cctype>
+#include <ranges>
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
@@ -83,7 +84,7 @@ HanConfig::
 namespace {
   bool TestMiniNodeIsRegex(const MiniConfigTreeNode* node) {
     std::string regexflag(node->GetAttribute("regex"));
-    boost::algorithm::to_lower(regexflag);
+    std::ranges::transform(regexflag, regexflag.begin(), [](unsigned char c) { return std::tolower(c); });
     if (regexflag == "1" || regexflag == "true" || regexflag == "yes") {
     	return true;
     }

@@ -5,40 +5,41 @@
 #ifndef MUONTGC_CNVTOOLS_TGCPREPDATAREPLICATIONTOOL3BCtoALLBC_H
 #define MUONTGC_CNVTOOLS_TGCPREPDATAREPLICATIONTOOL3BCtoALLBC_H
 
-#include "MuonTGC_CnvTools/ITgcPrepDataReplicationTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ServiceHandle.h"
-
-#include "MuonPrepRawData/TgcPrepDataContainer.h"
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "CxxUtils/checker_macros.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonPrepRawData/TgcPrepDataContainer.h"
+#include "MuonTGC_CnvTools/ITgcPrepDataReplicationTool.h"
 
-namespace Muon 
-{
-  class ATLAS_NOT_THREAD_SAFE TgcPrepDataReplicationTool3BCtoAllBC 
-    : public extends<AthAlgTool, ITgcPrepDataReplicationTool>
-  {
-    public:
-      /** Constructor */
-      TgcPrepDataReplicationTool3BCtoAllBC(const std::string& t, const std::string& n, const IInterface* p);
-      
-      /** Destructor */
-      virtual ~TgcPrepDataReplicationTool3BCtoAllBC()=default;
+namespace Muon {
+class ATLAS_NOT_THREAD_SAFE TgcPrepDataReplicationTool3BCtoAllBC
+    : public extends<AthAlgTool, ITgcPrepDataReplicationTool> {
+   public:
+    /** Constructor */
+    TgcPrepDataReplicationTool3BCtoAllBC(const std::string& t,
+                                         const std::string& n,
+                                         const IInterface* p);
 
-      virtual StatusCode initialize() override;
-      virtual StatusCode replicate(const EventContext& ctx) const override;
- 
-      
-    private:
-      StatusCode convert3BCtoAllBC(const EventContext& ctx) const;
+    /** Destructor */
+    virtual ~TgcPrepDataReplicationTool3BCtoAllBC() = default;
 
-      enum {BC_PREVIOUS=0, BC_CURRENT, BC_NEXT, BC_ALL, BC_NUM};
+    virtual StatusCode initialize() override;
+    virtual StatusCode replicate(const EventContext& ctx) const override;
 
-      ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+   private:
+    StatusCode convert3BCtoAllBC(const EventContext& ctx) const;
 
-      SG::ReadHandleKeyArray<TgcPrepDataContainer> m_3BCKeys{this, "BC3Keys", {"dummy", "dummy", "dummy"}};
-      SG::WriteHandleKey<TgcPrepDataContainer> m_AllBCKey{this, "AllBCKey", "TGC_MeasurementsAllBCs"};
-   }; 
-} // end of namespace
+    enum { BC_PREVIOUS = 0, BC_CURRENT, BC_NEXT, BC_ALL, BC_NUM };
 
-#endif // MUONTGC_CNVTOOLS_TGCPREPDATAREPLICATIONTOOL3BCtoALLBC_H
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
+        this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+
+    SG::ReadHandleKeyArray<TgcPrepDataContainer> m_3BCKeys{
+        this, "BC3Keys", {"dummy", "dummy", "dummy"}};
+    SG::WriteHandleKey<TgcPrepDataContainer> m_AllBCKey{
+        this, "AllBCKey", "TGC_MeasurementsAllBCs"};
+};
+}  // namespace Muon
+
+#endif  // MUONTGC_CNVTOOLS_TGCPREPDATAREPLICATIONTOOL3BCtoALLBC_H

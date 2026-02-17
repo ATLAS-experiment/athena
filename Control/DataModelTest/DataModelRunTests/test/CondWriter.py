@@ -45,7 +45,9 @@ def CondWriterCfg (flags):
     DMTest = CompFactory.DMTest
 
     condstream = CompFactory.AthenaOutputStreamTool ('CondStream',
-                                                     OutputFile = 'condtest.pool.root')
+                                                     OutputFile = 'condtest.pool.root',
+                                                     TopLevelContainerName = '<type>',
+                                                     SubLevelBranchName = '<key>')
 
     acc.addEventAlgo (DMTest.CondWriterAlg (Streamer = condstream))
 
@@ -57,6 +59,7 @@ flags = DataModelTestFlags()
 flags.Exec.MaxEvents = 30
 # Configure conditions DB output to local sqlite file.
 flags.IOVDb.DBConnection = 'sqlite://;schema=condtest.db;dbname=OFLP200'
+flags.PoolSvc.DefaultContainerType = 'ROOTTREE'
 flags.fillFromArgs()
 flags.lock()
 

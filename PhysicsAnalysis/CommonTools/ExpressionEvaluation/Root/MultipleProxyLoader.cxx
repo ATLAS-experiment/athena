@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 
 #include "ExpressionEvaluation/MultipleProxyLoader.h"
+#include "AthContainers/CurrentContext.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -40,23 +41,35 @@ namespace ExpressionParsing {
     }
   }
 
-  IProxyLoader::VariableType MultipleProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType MultipleProxyLoader::variableType(const std::string &varname) const {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    std::pair< IProxyLoader::VariableType, const IAccessor &>
+       ret = getAccessorFromString(ctx, varname);
+    return ret.first;
+  }
+
+  std::pair<IAccessor::VariableType, const IAccessor & >
+  MultipleProxyLoader::getAccessorFromString(const EventContext &ctx, const std::string &varname) const
   {
     auto itr = m_varnameToProxyLoader.find(varname);
     if (itr != m_varnameToProxyLoader.end()) {
-      return itr->second->variableTypeFromString(varname);
+      return {itr->second->variableType(varname),*itr->second};
     }
 
-    IProxyLoader::VariableType result;
     for (const auto &proxyLoader : m_proxyLoaders) {
-      try {
-        result = proxyLoader->variableTypeFromString(varname);
-        if (result == VT_UNK) continue;
-      } catch (const std::runtime_error &) {
-        continue;
-      }
-      m_varnameToProxyLoader.emplace(varname, proxyLoader.get());
-      return result;
+       try {
+          std::pair<IAccessor::VariableType, const IAccessor &>
+             result = proxyLoader->getAccessorFromString(ctx, varname);
+          if (result.first == VT_UNK) continue;
+          if (result.first != VT_VECEMPTY) {
+             // do not cache the result for an "empty vector", since in such cases there is
+             // not enough information available to decide the correct accessor.
+             m_varnameToProxyLoader.emplace(varname, &result.second);
+          }
+          return result;
+       } catch (const std::runtime_error &) {
+          continue;
+       }
     }
     std::stringstream msg;
     msg << "MultipleProxyLoader: unable to find valid proxy loader for " << varname << "."
@@ -70,23 +83,23 @@ namespace ExpressionParsing {
     throw std::runtime_error(msg.str());
   }
 
-  int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int MultipleProxyLoader::loadInt(const EventContext& ctx,const std::string &varname) const
   {
-    return m_varnameToProxyLoader.at(varname)->loadIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadInt(ctx,varname);
   }
 
-  double MultipleProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double MultipleProxyLoader::loadDouble(const EventContext& ctx,const std::string &varname) const
   {
-    return m_varnameToProxyLoader.at(varname)->loadDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadDouble(ctx,varname);
   }
 
-  std::vector<int> MultipleProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> MultipleProxyLoader::loadVecInt(const EventContext& ctx,const std::string &varname) const
   {
-    return m_varnameToProxyLoader.at(varname)->loadVecIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVecInt(ctx,varname);
   }
 
-  std::vector<double> MultipleProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> MultipleProxyLoader::loadVec(const EventContext& ctx,const std::string &varname) const
   {
-    return m_varnameToProxyLoader.at(varname)->loadVecDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVec(ctx,varname);
   }
 }

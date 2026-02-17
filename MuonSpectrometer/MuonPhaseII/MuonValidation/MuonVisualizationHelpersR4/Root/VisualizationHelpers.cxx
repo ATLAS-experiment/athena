@@ -39,14 +39,16 @@ namespace MuonValR4{
     }
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
                                       const double xPos, const double yPos,
-                                      const unsigned int fontSize,
-                                      const bool useNDC /*= true*/) {
+                                      const double textSize,
+                                      const bool useNDC,
+                                      const int color) {
         auto tl = std::make_unique<TLatex>(xPos, yPos, text.c_str());
         tl->SetTextFont(43);
         if(useNDC){
             tl->SetNDC();
         } 
-        tl->SetTextSize(fontSize); 
+        tl->SetTextSize(textSize); 
+        tl->SetTextColor(color);
         return tl;
     }
     std::unique_ptr<TBox> drawBox(const Amg::Vector3D& boxCenter,

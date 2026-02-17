@@ -167,14 +167,12 @@ hashMgrABC=TileCellTools.TileCellHashMgr("UpgradeABC")
 
 db = CaloCondTools.openDbConn(schema, server)
 
-if folderPath.startswith('/TILE') or tag=='UPD1' or tag=='UPD4' or 'COND'in tag:
+if folderPath.startswith('/TILE') or folderPath.startswith('/CALO') or tag=='UPD1' or tag=='UPD4' or 'COND' in tag or 'CURRENT' in tag or 'NEXT' in tag:
     folderTag = TileCalibTools.getFolderTag(db, folderPath, tag )
-elif folderPath.startswith('/CALO/Ofl'):
-    folderTag = 'CaloOflNoiseCellnoise-'+tag
-elif folderPath.startswith('/CALO'):
-    folderTag = 'CaloNoiseCellnoise-'+tag
-elif folderPath.startswith('/LAR'):
+elif folderPath.startswith('/LAR') and not 'LAR' in tag:
     folderTag = 'LARNoiseOflCellNoise-'+tag
+else:
+    folderTag = tag
 
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 

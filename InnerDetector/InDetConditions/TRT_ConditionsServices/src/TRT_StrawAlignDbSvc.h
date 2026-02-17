@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_CONDITIONSSERVICES_TRT_STRAWALIGNDBSVC_H
@@ -79,7 +79,7 @@ class TRT_StrawAlignDbSvc: public extends<AthService, ITRT_StrawAlignDbSvc>
   const StrawDxContainer* getConstDxContainer() const ;
 
   /// IOV call back for dx objects. normally this doesn't do anything.
-  StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS);
+  StatusCode IOVCallBack();
 
   /** get shift near electronics */
   float getDx1( const Identifier& id ) const ;

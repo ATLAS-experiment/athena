@@ -178,7 +178,7 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const EventContext& ctx,
             }
 
             // convert RawData to Digit
-            std::unique_ptr<TgcDigit> newDigit(m_tgcRdoDecoderTool->getDigit(rawData, orFlag));
+            std::unique_ptr<TgcDigit> newDigit(m_tgcRdoDecoderTool->getDigit(ctx, *rawData, orFlag));
 
             // check if converted correctly
             if (!newDigit) continue;

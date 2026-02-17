@@ -51,11 +51,11 @@ void makeKey(const Token* tok, Guid& guid)  {
 }
 
 // Standard Constructor
-DbDatabaseObj::DbDatabaseObj( DbDomain&       dom, 
-                              const std::string&   pfn, 
-                              const std::string&   fid, 
-                              DbAccessMode    mod) 
-: Base(fid, mod, dom.type(), dom.db()), 
+DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
+                              const std::string&   pfn,
+                              const std::string&   fid,
+                              DbAccessMode    mod)
+: Base(fid, mod, dom.type(), dom.db()),
   APRMessaging( pfn ),
   m_dom(dom), m_info(0), m_string_t(0), m_fileAge(0)
 {
@@ -69,10 +69,10 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   m_token = tok.release();
   if ( 0 == db() )    {
     ATH_MSG_ERROR("->  Access   DbDatabase   " << accessMode(mode())
-                  << " [" << type().storageName() << "] " << name() 
+                  << " [" << type().storageName() << "] " << name()
                   << " impossible." << endmsg
                   << "                          " << logon());
-    type().missingDriver(msg());
+    throw std::runtime_error("POOL::DbDatabase: Unknown storage type requested: " + type().storageName());
     return;
   }
   if( !m_dom.add( name(), this ).isSuccess() ) {
@@ -153,7 +153,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
       link->oid().first = m_linkVec.size();
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
-        ATH_MSG_DEBUG("--->Adding Assoc :" << link->dbID() 
+        ATH_MSG_DEBUG("--->Adding Assoc :" << link->dbID()
                       << "/" << link->contID() << " [" << std::hex << link->technology() << "] "
                       << " (" << link->oid().first << " , " << link->oid().second << ")" << std::dec << endmsg
                       << "---->ClassID:" << link->classID().toString() );
@@ -237,10 +237,10 @@ StatusCode DbDatabaseObj::addShape (const DbTypeInfo* pShape) {
       // Add the persistent entry to the links container
       if ( 0 != m_string_t )   {
         // Update the transient list of links
-        // This must be done BEFORE the entry 
+        // This must be done BEFORE the entry
         // is inserted into the container!
-        // Otherwise save will add the type 
-        // again and again ending in an 
+        // Otherwise save will add the type
+        // again and again ending in an
         // infinite recursion
         const DbTypeInfo::Columns& cols = pShape->columns();
         ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
@@ -401,11 +401,11 @@ StatusCode DbDatabaseObj::open()   {
                m_linkMap.insert( LinkMap::value_type(tmp_key, link.get()));
             }
             m_indexMap.insert( IndexMap::value_type(link->oid().first, m_linkVec.size()));
-           m_linkVec.push_back(link.release());
+            m_linkVec.push_back(link.release());
             ++oid.second;
           }
         }
-        
+
         if ( m_params.open(dbH,"##Params",m_string_t,containerType,mode()).isSuccess() )    {
           std::vector<std::string> fids;
           Token::OID_t oid(0, 0);
@@ -432,18 +432,18 @@ StatusCode DbDatabaseObj::open()   {
             }
             ++oid.second;
           }
-      // We assume that the last FID is the true FID of the file...
-      ParamMap::const_iterator fidIt = m_paramMap.find("FID");
-      if ( fidIt != m_paramMap.end() ) {
-        const std::string& fid = (*fidIt).second;
-        for(size_t i=0; fids.size()>0 && i<fids.size()-1;++i)  {	    
-          char num[32];
-          ::sprintf(num, "FID.%d", static_cast<int>(i+1));
-          ATH_MSG_DEBUG("--->Redirect FID[" << i << "]: " << fids[i] << " to " << fid);
-          m_paramMap[num] = fid;
+          // We assume that the last FID is the true FID of the file...
+          ParamMap::const_iterator fidIt = m_paramMap.find("FID");
+          if ( fidIt != m_paramMap.end() ) {
+            const std::string& fid = (*fidIt).second;
+            for(size_t i=0; fids.size()>0 && i<fids.size()-1;++i)  {
+              char num[32];
+              ::sprintf(num, "FID.%d", static_cast<int>(i+1));
+              ATH_MSG_DEBUG("--->Redirect FID[" << i << "]: " << fids[i] << " to " << fid);
+              m_paramMap[num] = fid;
+            }
+          }
         }
-      }
-    }
         if ( mode()&pool::CREATE || mode()&pool::UPDATE)  {
           std::string par_val;
           if ( !param("FID", par_val).isSuccess() )  {
@@ -585,7 +585,7 @@ std::string DbDatabaseObj::cntName(Token& token) {
     int lnk = m_indexMap[token.oid().first]; // Map link to index
     if ( lnk >= 0 )  {
       if ( lnk < int(m_linkVec.size()) )   {
-    Token* link = m_linkVec[lnk];
+        Token* link = m_linkVec[lnk];
         if ( link != 0 ) {
           if ( token.contID().empty() ) {
             token.setCont(link->contID());
@@ -598,7 +598,7 @@ std::string DbDatabaseObj::cntName(Token& token) {
   return "";
 }
 
-StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object) 
+StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
 {
    if( 0 == m_info ) open().ignore();
    if( 0 != m_info ) {
@@ -633,7 +633,7 @@ StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
          if ( typ_info && typ_info == shape ) {
             return cntH.load(object, shape, oid);
          }
-         ATH_MSG_ERROR("Token ClassID " << token.classID().toString() 
+         ATH_MSG_ERROR("Token ClassID " << token.classID().toString()
               << " is different from requested Shape " << shape->shapeID().toString());
       }
    }
@@ -675,7 +675,6 @@ StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts,bool with
   return StatusCode::FAILURE;
 }
 
-
 /// Access local container token (if container exists)
 const Token* DbDatabaseObj::cntToken(const std::string& cntName)  {
   if ( 0 == m_info ) open().ignore();
@@ -703,22 +702,6 @@ StatusCode DbDatabaseObj::shapes(std::vector<const DbTypeInfo*>& shaps)  {
   return StatusCode::FAILURE;
 }
 
-/// Allow access to all known associations between containers
-StatusCode DbDatabaseObj::associations(std::vector<const Token*>& assocs) {
-  assocs.clear();
-  if ( 0 == m_info ) open().ignore();
-  if ( 0 != m_info )    {
-    LinkVector::const_iterator j=m_linkVec.begin();
-    for(; j != m_linkVec.end(); ++j ) {
-      if ( (*j)->oid().second != INVALID )  {
-        assocs.push_back(*j);
-      }
-    }
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
-}
-
 /// Execute Database Transaction action
 StatusCode DbDatabaseObj::transAct(Transaction::Action action)  {
   bool upda = (0 != (mode()&pool::CREATE) || 0 != (mode()&pool::UPDATE));
@@ -738,7 +721,7 @@ StatusCode DbDatabaseObj::transAct(Transaction::Action action)  {
     if ( status.isSuccess() )  {
       status = m_shapes.transAct(action);
     }
-      if ( status.isSuccess() )  {
+    if ( status.isSuccess() )  {
       status = m_links.transAct(action);
     }
     // now execute the action on the DB implementation

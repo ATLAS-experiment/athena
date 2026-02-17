@@ -6,44 +6,42 @@
 #define MUONTGC_CNVTOOLS_TGCROD_ENCODER_H
 
 #include <inttypes.h>
+
 #include <vector>
 
 class TgcRdo;
 
-namespace Muon 
-{
+namespace Muon {
 
-  /** @class TgcROD_Encoder
-   *  This class provides conversion from TgcRdo to ROD format. 
-   * 
-   *  @author Susumu Oda <Susumu.Oda@cern.ch>
-   *
-   *  This class was devloped by Tadashi Maeno based on 
-   *  RpcROD_Encoder written by Ketevi A. Assamagan
-   */
+/** @class TgcROD_Encoder
+ *  This class provides conversion from TgcRdo to ROD format.
+ *
+ *  @author Susumu Oda <Susumu.Oda@cern.ch>
+ *
+ *  This class was devloped by Tadashi Maeno based on
+ *  RpcROD_Encoder written by Ketevi A. Assamagan
+ */
 
-  class TgcROD_Encoder
-    {
-    public: 
+class TgcROD_Encoder {
+   public:
+    /** Constructor */
+    TgcROD_Encoder();
 
-      /** Constructor */
-      TgcROD_Encoder(); 
+    /** Destructor */
+    ~TgcROD_Encoder();
 
-      /** Destructor */
-      ~TgcROD_Encoder(); 
+    /** Set TgcRdo */
+    void setRdo(const TgcRdo* rdo);
 
-      /** Set TgcRdo */ 
-      void setRdo(const TgcRdo* rdo);
+    /** Convert all ROB fragment in the current list to
+     *  a vector of 32bit words.
+     */
+    void fillROD(std::vector<uint32_t>& v);
 
-      /** Convert all ROB fragment in the current list to 
-       *  a vector of 32bit words. 
-       */ 
-      void fillROD(std::vector<uint32_t>& v) ; 
+   private:
+    const TgcRdo* m_tgcRdo;
+};
 
-    private:
-      const TgcRdo * m_tgcRdo;
-    }; 
+}  // namespace Muon
 
-} // end of namespace
-
-#endif // MUONTGC_CNVTOOLS_TGCROD_ENCODER_H
+#endif  // MUONTGC_CNVTOOLS_TGCROD_ENCODER_H

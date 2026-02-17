@@ -2,18 +2,25 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-/*
- * @file DerivationFrameworkCalo/src/CaloCellDecorator.cxx
- * @author Gabriel P. Matos <gpinheir@cern.ch>, adapted from MaxCellDecorator by Nikiforos K. Nikiforou and others.
- * @date Aug, 2025
- * @brief Adds cell-level features as decorations to e/gamma objects.
- */
+/**
+ * @file CaloCellDecorator.cxx
+ * @author Gabriel P. Matos <gpinheir@cern.ch>
+ * @date Nov 2025
+*/
 
 #include "DerivationFrameworkCalo/CaloCellDecorator.h"
-#include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloUtils/CaloClusterStoreHelper.h"
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "StoreGate/ReadHandle.h"
 
+// Calo includes
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloUtils/CaloLayerCalculator.h"
+#include "CaloUtils/CaloCellList.h"
+#include "egammaInterfaces/IegammaLargeClusterCellRecoveryTool.h"
+
+#include <cstdint>
 #include <string>
+#include <sys/types.h>
 #include <vector>
 
 
@@ -26,21 +33,28 @@ DerivationFramework::CaloCellDecorator::initialize()
 {
   ATH_MSG_VERBOSE("initialize() ...");
 
+  // Cabling and calo initialize
   ATH_CHECK(m_cablingKey.initialize());
+  ATH_CHECK(m_SGKey_CaloCells.initialize());
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
 
   // Setup for photons
   ATH_CHECK(m_SGKey_photons.initialize(SG::AllowEmpty));
   if (!m_SGKey_photons.key().empty()) {
-    ATH_MSG_INFO("Using " << m_SGKey_photons.key() << " for photons");
+    ATH_MSG_INFO("Decorating photons with calo cells using " << m_SGKey_photons.key() << " container");
   }
   ATH_CHECK(m_SGKey_photons_decorations.initialize(!m_SGKey_photons.key().empty()));
 
   // Setup for electrons
   ATH_CHECK(m_SGKey_electrons.initialize(SG::AllowEmpty));
   if (!m_SGKey_electrons.key().empty()) {
-    ATH_MSG_INFO("Using " << m_SGKey_electrons.key() << " for electrons");
+    ATH_MSG_INFO("Decorating electrons with calo cells using " << m_SGKey_electrons.key() << " container");
   }
   ATH_CHECK(m_SGKey_electrons_decorations.initialize(!m_SGKey_electrons.key().empty()));
+
+  // Initialize tools
+  ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
+  ATH_CHECK(m_egammaLargeClusterCellRecoveryTool.retrieve());
 
   return StatusCode::SUCCESS;
 
@@ -51,7 +65,6 @@ DerivationFramework::CaloCellDecorator::addBranches(const EventContext& ctx) con
 {
 
   if (!m_SGKey_photons.key().empty()) {
-
     // Decorate photons
     ATH_CHECK(
               DerivationFramework::CaloCellDecorator::decorateCells(
@@ -64,7 +77,6 @@ DerivationFramework::CaloCellDecorator::addBranches(const EventContext& ctx) con
   }
 
   if (!m_SGKey_electrons.key().empty()) {
-
     // Decorate electrons
     ATH_CHECK(
               DerivationFramework::CaloCellDecorator::decorateCells(
@@ -86,8 +98,13 @@ DerivationFramework::CaloCellDecorator::decorateCells(
                                                       const EventContext& ctx) const
 {
 
-  // Retrieve container
+  // Retrieve containers
   SG::ReadHandle<xAOD::EgammaContainer> egammaContainer(contKey, ctx);
+  SG::ReadHandle<CaloCellContainer> caloCellContainer(m_SGKey_CaloCells, ctx);
+
+  // Calo detector description manager
+  SG::ReadCondHandle<CaloDetDescrManager> caloDetDescrMgrHandle(m_caloDetDescrMgrKey, ctx);
+  ATH_CHECK(caloDetDescrMgrHandle.isValid());
 
   // Setup decorators
   SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<float>>
@@ -112,15 +129,18 @@ DerivationFramework::CaloCellDecorator::decorateCells(
     decoration9(decorKeys[9], ctx);
   SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<uint64_t>>
     decoration10(decorKeys[10], ctx);
-  SG::WriteDecorHandle<xAOD::EgammaContainer, int>
+  SG::WriteDecorHandle<xAOD::EgammaContainer, std::vector<uint8_t>>
     decoration11(decorKeys[11], ctx);
 
   // Loop through egamma objects and decorate
   const xAOD::EgammaContainer* importedEgamma = egammaContainer.ptr();
+  const CaloCellContainer* caloCells = caloCellContainer.ptr();
+  const CaloDetDescrManager* cmgr = *caloDetDescrMgrHandle;
+
   for (const auto* egamma : *importedEgamma) {
     const xAOD::CaloCluster *cluster = egamma->caloCluster();
-    DerivationFramework::CaloCellDecorator::cell_decorations res =
-      getDecorations(cluster, ctx);
+    DerivationFramework::CaloCellDecorator::CellDecorationData res =
+      getDecorations(cluster, caloCells, cmgr, ctx);
 
     // Decorate
     decoration0(*egamma) = res.cells_E;
@@ -134,20 +154,22 @@ DerivationFramework::CaloCellDecorator::decorateCells(
     decoration8(*egamma) = res.cells_layer;
     decoration9(*egamma) = res.cells_quality;
     decoration10(*egamma) = res.cells_onlId;
-    decoration11(*egamma) = res.ncells;
+    decoration11(*egamma) = res.cells_clusterOriginInfo;
   }
 
   return StatusCode::SUCCESS;
 
 };
 
-DerivationFramework::CaloCellDecorator::cell_decorations
+DerivationFramework::CaloCellDecorator::CellDecorationData
 DerivationFramework::CaloCellDecorator::getDecorations(
                                                        const xAOD::CaloCluster* cluster,
+                                                       const CaloCellContainer* caloCells,
+                                                       const CaloDetDescrManager* cmgr,
                                                        const EventContext& ctx) const
 {
 
-  DerivationFramework::CaloCellDecorator::cell_decorations decorations;
+  DerivationFramework::CaloCellDecorator::CellDecorationData decorations;
 
   if (cluster) {
     if (!cluster->getCellLinks()) {
@@ -161,53 +183,87 @@ DerivationFramework::CaloCellDecorator::getDecorations(
       throw std::runtime_error("Cabling retrieval failed");
     }
 
-    for (const CaloCell* cell : *cluster) {
+    std::unordered_map<const CaloCell*, CaloCellDecorator::CellClusterInfo> info;
 
-      int sampling = cell->caloDDE()->getSampling();
+    // Lambda function to keep track of cells already added to the decorations
+    // and to update origin info depending on whether they were in the supercluster,
+    // recovered by timing cut recovery, or in the 7x11 cluster.
+    auto registerCell = [&](const CaloCell* cell, uint8_t originMask) {
+      int layer = layerFromSampling(cell->caloDDE()->getSampling());
+      if (layer < 0) return; // Ignore non-LAr cells
 
-      // Keep track of total number of cells
-      decorations.ncells++;
+      auto [it, inserted] = info.emplace(cell, CellClusterInfo{});
+      CellClusterInfo& ci = it->second;
 
-      // Fill with layer information
-      if (sampling == CaloCell_ID::PreSamplerB || sampling == CaloCell_ID::PreSamplerE){
-        decorations.cells_layer.push_back(0);
-      }
+      // Update origin mask
+      ci.mask |= originMask;
 
-      else if (sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1){
-        decorations.cells_layer.push_back(1);
-      }
+      if (inserted) {
+        ci.index = decorations.cells_E.size();
 
-      else if (sampling == CaloCell_ID::EMB2 || sampling == CaloCell_ID::EME2){
-        decorations.cells_layer.push_back(2);
-      }
-
-      else if (sampling == CaloCell_ID::EMB3 || sampling == CaloCell_ID::EME3){
-        decorations.cells_layer.push_back(3);
-      }
-
+        uint64_t onlId = (uint64_t)(cabling->createSignalChannelID(cell->caloDDE()->identify())).get_compact();
+        decorations.cells_E.push_back(cell->e());
+        decorations.cells_time.push_back(cell->time());
+        decorations.cells_eta.push_back(cell->eta());
+        decorations.cells_phi.push_back(cell->phi());
+        decorations.cells_x.push_back(cell->x());
+        decorations.cells_y.push_back(cell->y());
+        decorations.cells_z.push_back(cell->z());
+        decorations.cells_gain.push_back((int)cell->gain());
+        decorations.cells_layer.push_back(layer);
+        decorations.cells_quality.push_back(cell->quality());
+        decorations.cells_clusterOriginInfo.push_back(ci.mask);
+        decorations.cells_onlId.push_back(onlId);
+      } 
       else {
-        // Don't do anything with Tile cells aside from tabulating
-        continue;
+        // Update origin info if cell already exists
+        decorations.cells_clusterOriginInfo[ci.index] = ci.mask;
       }
 
-      // Fill vectors with cell features
-      decorations.cells_E.push_back(cell->e());
-      decorations.cells_time.push_back(cell->time());
-      decorations.cells_eta.push_back(cell->eta());
-      decorations.cells_phi.push_back(cell->phi());
-      decorations.cells_x.push_back(cell->x());
-      decorations.cells_y.push_back(cell->y());
-      decorations.cells_z.push_back(cell->z());
-      decorations.cells_gain.push_back((int)cell->gain());
-      decorations.cells_quality.push_back(cell->quality());
+    };
 
-      // Keep online ID to debug
-      decorations.cells_onlId.push_back(
-                                        (uint64_t)(cabling->createSignalChannelID(cell->caloDDE()->identify()))
-                                        .get_compact()
-                                        );
+    double emax = 0.;
+    const CaloCell* maxcell = nullptr;
+
+    // Loop through supercluster cells
+    for (const CaloCell* cell : *cluster) {
+      // Find maximum energy cell in L2 from those in the supercluster
+      int layer = layerFromSampling(cell->caloDDE()->getSampling());
+      if (layer == 2) {
+        if (cell->e() > emax) {
+          emax = cell->e();
+          maxcell = cell;
+        }
+      }
+      registerCell(cell,  0x01); // Supercluster cell
+    }
+
+    IegammaCellRecoveryTool::Info timeCutRecoveryInfo{};
+    if (maxcell->e() > 0.) {
+      timeCutRecoveryInfo.etamax = maxcell->caloDDE()->eta_raw();
+      timeCutRecoveryInfo.phimax = maxcell->caloDDE()->phi_raw();
+      if (m_egammaCellRecoveryTool->execute(*cluster, timeCutRecoveryInfo).isFailure()) {
+        ATH_MSG_WARNING("egammaCellRecoveryTool execution failed");
+      }
+    } else {
+      ATH_MSG_WARNING("Max cell in L2 has zero energy, should never happen! Skipping timing cut recovery");
+    }
+
+    // Loop through timing cut recovered cells
+    for (const CaloCell* cell : timeCutRecoveryInfo.addedCells) {
+      registerCell(cell, 0x02); // Timing cut recovered cell
+    }
+
+    IegammaLargeClusterCellRecoveryTool::Info largeClusterInfo{};
+    if (m_egammaLargeClusterCellRecoveryTool->execute(cluster, cmgr, caloCells, largeClusterInfo).isFailure()) {
+      ATH_MSG_WARNING("egammaLargeClusterCellRecoveryTool execution failed");
+    }
+
+    // Loop through 7x11 cluster cells
+    for (const CaloCell* cell : largeClusterInfo.cells711) {
+      registerCell(cell, 0x04); // 7x11 cluster cell
     }
   }
 
   return decorations;
-}
+};

@@ -121,6 +121,12 @@ StatusCode GfexMonitorAlgorithm::fillJetHistograms(const std::string& handleKey,
 		if (eta < -3.17 && eta > -3.25){ eta = -3.225;}
 		if (eta < 3.3 && eta > 3.17){ eta = 3.275;}
 		jetEta = eta;		
+
+		 /* 
+		FPGAc -> In the FPGAc region (abs(eta) > 3.2), the size of the gTowers in phi is twice the size of the gTowers in FPGAa and FPGAb. 
+		Using one fill() method for all eta bins results in a checker pattern in the forward region. To ensure that the histogram 
+		reflects the difference in the size of gTowers in the forward region, the fill() method is used twice for abs(eta) > 3.2
+		*/
 			
 		if(jetPt > ptCutValue){		
 			

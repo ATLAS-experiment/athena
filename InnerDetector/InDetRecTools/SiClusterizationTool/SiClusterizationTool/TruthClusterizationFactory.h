@@ -16,7 +16,6 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include "GaudiKernel/ToolHandle.h"
 

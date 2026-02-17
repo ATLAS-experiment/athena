@@ -2058,7 +2058,6 @@ void ZDCPulseAnalyzer::checkTF1Limits(TF1* func)
 				  )
     		   );
     
-    //if (std::abs(parLimitHigh / parLimitLow - 1) > 1e-6) {
     if (std::abs(parLimitHigh - parLimitLow) > (1e-6)*std::abs(parLimitLow)) {
       double value = func->GetParameter(ipar);
       if (value >= parLimitHigh) {
@@ -2086,7 +2085,7 @@ std::unique_ptr<TFitter> ZDCPulseAnalyzer::MakeCombinedFitter(TF1* func)
     double parLimitLow, parLimitHigh;
 
     func->GetParLimits(ipar, parLimitLow, parLimitHigh);
-    if (std::abs(parLimitHigh / parLimitLow - 1) < 1e-6) {
+    if (std::abs(parLimitHigh - parLimitLow) < (1e-6)*std::abs(parLimitLow)) {
       double value   = func->GetParameter(ipar);
       double lowLim  = std::min(value * 0.99, value * 1.01);
       double highLim = std::max(value * 0.99, value * 1.01);

@@ -2,9 +2,9 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFClusterCollectionTool.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowRecCluster.h"
+#include "PFClusterCollectionTool.h"
+#include "eflowCaloObject.h"
+#include "eflowRecCluster.h"
 
 PFClusterCollectionTool::PFClusterCollectionTool(const std::string& type,const std::string& name,const IInterface* parent) : base_class( type, name, parent)
 {

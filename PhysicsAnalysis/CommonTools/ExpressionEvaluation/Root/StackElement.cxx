@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -379,38 +379,51 @@ namespace ExpressionParsing {
       return;
    }
 
-   StackElement StackElement::valueFromProxy() const {
+   StackElement StackElement::valueFromProxy([[maybe_unused]] const EventContext& ctx) const {
 
       StackElement tmp;
       if( ! isProxy() ) {
          return tmp;
       }
 
-      if( ! m_determinedVariableType ) {
-         m_variableType = m_proxyLoader->variableTypeFromString( m_varName );
-         if ( m_variableType != IProxyLoader::VT_VECEMPTY) {
-            m_determinedVariableType = true;
+      IAccessor::VariableType the_variable_type=m_variableType.load(std::memory_order_seq_cst);
+      if( the_variable_type==IProxyLoader::VT_UNK) {
+         auto [variable_type, accessor] = m_proxyLoader->getAccessorFromString(ctx, m_varName);
+         //         if ( m_variableType != IProxyLoader::VT_UNK) {
+         if (variable_type != IProxyLoader::VT_VECEMPTY) {
+            // do not cache the accessor and variable type if it was an empty vector because
+            // in such cases there is not enough information to decide the variable type.
+            // otherwise set the accessor if still unset and set the variable type.
+            // Other threads would come to the same conclusion in case the vector is not empty
+            // (or empty), so which thread sets the variable type and/or accessor does not matter.
+            m_accessor.setIfUnset(accessor);
+            m_variableType.store(variable_type, std::memory_order_seq_cst);
          }
+         // for the current event what ever getAccessorFromString returned is a good choice
+         // independent of other threads which might have had more information for a final
+         // decision. So, for this evaluation what ever getAccessorFromString returned will
+         // be used.
+         the_variable_type = variable_type;
       }
+      assert((the_variable_type == IProxyLoader::VT_UNK && m_accessor == true)  );
 
-      switch( m_variableType ) {
-
+      switch( the_variable_type ) {
       case IProxyLoader::VT_INT:
-         tmp = m_proxyLoader->loadIntVariableFromString( m_varName );
+         tmp = m_accessor->loadInt(ctx, m_varName );
          break;
 
       case IProxyLoader::VT_DOUBLE:
-         tmp = m_proxyLoader->loadDoubleVariableFromString( m_varName );
+         tmp = m_accessor->loadDouble(ctx, m_varName );
          break;
 
       case IProxyLoader::VT_VECINT:
-         tmp = m_proxyLoader->loadVecIntVariableFromString( m_varName );
+         tmp = m_accessor->loadVecInt(ctx, m_varName );
          break;
 
-      case IProxyLoader::VT_VECDOUBLE:
-         tmp = m_proxyLoader->loadVecDoubleVariableFromString( m_varName );
+      case IProxyLoader::VT_VECDOUBLE: {
+         tmp = m_accessor->loadVec(ctx, m_varName );
          break;
-
+      }
       case IProxyLoader::VT_VECEMPTY:
          tmp=std::vector<double>();
          break;

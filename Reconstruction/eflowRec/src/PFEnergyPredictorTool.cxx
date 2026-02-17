@@ -2,10 +2,10 @@
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFEnergyPredictorTool.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/eflowRecCluster.h"
+#include "PFEnergyPredictorTool.h"
+#include "eflowCaloObject.h"
+#include "eflowTrackClusterLink.h"
+#include "eflowRecCluster.h"
 
 #include "CaloGeoHelpers/CaloSampling.h"
 

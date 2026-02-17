@@ -151,6 +151,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   
   int nEdges = 0;
 
+  float z0_histo_coeff = 16/(max_z0 - min_z0 + 1e-6);//assuming 16-bit z0 bitmask
+
   for(const auto& bg : m_geo->bin_groups()) {//loop over bin groups
     
     TrigFTF_GNN_EtaBin& B1 = storage->getEtaBin(bg.first);
@@ -209,7 +211,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       unsigned short num_created_edges = 0;//the counter for the incoming graph edges created for n1
 
       bool is_connected = false;
-      
+
+      std::array<unsigned char, 16> z0_histo = {};
+  
       const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
 
       float phi1 = n1pars[2];
@@ -243,7 +247,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
 
-	  if ((lk1 == 80000) && (B2.m_vIsConnected[n2Idx] == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
+	  unsigned short node_info = B2.m_vIsConnected[n2Idx];
+
+	  if ((lk1 == 80000) && (node_info == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
  
 	  unsigned int   n2_first_edge = B2.m_vFirstEdge[n2Idx];
           unsigned short n2_num_edges  = B2.m_vNumEdges[n2Idx];
@@ -273,11 +279,21 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
 	  if(ftau < n2pars[0]) continue;
 	  if(ftau > n2pars[1]) continue;
-		
-	  if (m_doubletFilterRZ) {
-		  
-	    float z0 = z1 - r1*tau;
+
+	  float z0 = z1 - r1*tau;
+
+	  if (lk1 == 80000) {//check against non-empty z0 histogram
+	    
+	    if ( !check_z0_bitmask(node_info, z0, min_z0, z0_histo_coeff) ) {
+
+	      continue;
+
+	    }
+	    
+      }
 	  
+	  if (m_doubletFilterRZ) {
+	    
 	    if(z0 < min_z0 || z0 > max_z0) continue;
 	  
 	    float zouter = z0 + maxOuterRadius*tau;
@@ -372,7 +388,13 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
 
 	      is_connected = true;//there is at least one good match
-	    
+
+	      //edge confirmed - update z0 histogram
+
+          int z0_bin_index = z0_histo_coeff*(z0 - min_z0);
+
+          ++z0_histo[z0_bin_index];
+	      
 	      nConnections++;
 	    
 	    }
@@ -384,8 +406,19 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
       //updating the n1 node attributes
       
       B1.m_vNumEdges[n1Idx] = num_created_edges;
+
       if (is_connected) {
-        B1.m_vIsConnected[n1Idx] = 1;
+
+        unsigned short z0_bitmask = 0x0;
+
+        for(unsigned int bIdx = 0; bIdx < 16; bIdx++) {
+
+	      if (z0_histo[bIdx] == 0) continue;
+
+	      z0_bitmask |= (1 << bIdx);
+        }
+
+        B1.m_vIsConnected[n1Idx] = z0_bitmask;//non-zero mask indicates that there is at least one connected edge
       }
       
     } //loop over n1 (inner) nodes
@@ -599,4 +632,40 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
     }
 
   }
+}
+
+bool SeedingToolBase::check_z0_bitmask(const unsigned short& z0_bitmask, const float& z0, const float& min_z0, const float& z0_histo_coeff) const {
+
+  if (z0_bitmask == 0) return true;
+
+  float dz = z0 - min_z0; 
+  int z0_bin_index = z0_histo_coeff*dz;
+
+  if ((z0_bitmask >> z0_bin_index) & 1) return true;
+
+  //check adjacent bins as well
+            
+  const float z0_resolution = 2.5;
+  
+  float dzm = dz - z0_resolution;
+
+  int next_bin  = z0_histo_coeff*dzm;
+
+  if (next_bin >= 0 && next_bin != z0_bin_index) {
+      
+      if ((z0_bitmask >> next_bin) & 1) return true;
+
+  }				  
+
+  float dzp = dz + z0_resolution;
+
+  next_bin  = z0_histo_coeff*dzp;
+
+  if (next_bin < 16 && next_bin != z0_bin_index) {
+		    
+    if ((z0_bitmask >> next_bin) & 1) return true;
+      
+  }
+    
+  return false;
 }

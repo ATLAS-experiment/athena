@@ -160,6 +160,18 @@ class OutputAnalysisConfig (ConfigBlock):
                                 if var_container == self.containers[container]:
                                     self.vars.remove(var)
                                     log.info("Skipping branch definition '%s' for excluded container %s...", var, var_container)
+                            # filter branches for MET variables
+                            for var in set(self.metVars):  # make a copy of the list to avoid modifying it while iterating
+                                var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
+                                if var_container == self.containers[container]:
+                                    self.metVars.remove(var)
+                                    log.info("Skipping MET branch definition '%s' for excluded container %s...", var, var_container)
+                            # filter branches for truth MET variables
+                            for var in set(self.truthMetVars):  # make a copy of the list to    avoid modifying it while iterating
+                                var_container = var.split('.')[0].replace('_NOSYS', '').replace('_%SYS%', '')
+                                if var_container == self.containers[container]:
+                                    self.truthMetVars.remove(var)
+                                    log.info("Skipping truth MET branch definition '%s' for excluded container %s...", var, var_container)
                             # remove the container from the list at the end
                             self.containers.pop (container)
                     # clear the dictionary to avoid warnings during the second pass

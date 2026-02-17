@@ -548,6 +548,20 @@ def FPGATrackSimNNPathfinderExtensionToolCfg(flags,name="FPGATrackSimNNPathfinde
         FPGATrackSimNNPathfinderExtensionTool.doOutsideIn = False
         FPGATrackSimNNPathfinderExtensionTool.predictionWindowLength = 4
 
+    # CRITICAL: NN inference batch size configuration
+    # ONNX Runtime exhibits non-deterministic behavior with batch_size > 1 due to Eigen library
+    # choosing different SIMD/vectorization paths based on memory alignment (see https://github.com/microsoft/onnxruntime/issues/10058).
+    # Different batch sizes produce different numerical results for identical inputs, causing
+    # FineID mismatches and coordinate divergence.
+    # 
+    # Root cause: Eigen selects different code paths for different tensor layouts, leading to
+    # floating-point operation reordering in softmax/exp operations. Microsoft has officially
+    # stated they will not fix this for CPU execution provider (see ticket above).
+    #
+    # ONLY batchSize=1 guarantees deterministic, reproducible results.
+    # However, this is a significant performance bottleneck. In practice, batch sizes of 4 or 8 may yield acceptable stability, but this requires validation.
+    FPGATrackSimNNPathfinderExtensionTool.batchSize = flags.Trigger.FPGATrackSim.NNBatchSize
+
     # Other settings
     FPGATrackSimNNPathfinderExtensionTool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
     result.setPrivateTools(FPGATrackSimNNPathfinderExtensionTool)

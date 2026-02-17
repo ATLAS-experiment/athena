@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TrigLogger_h
@@ -45,7 +45,7 @@ namespace VP1Trig {
     
     //Addon to VP1String class
     QString qstr(char c);
-    QString qstr(std::string str);
+    QString qstr(const std::string& str);
     
     //Sub-output prefix definition
     static const QString pfx1() {return " ";}

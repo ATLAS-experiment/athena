@@ -1,6 +1,6 @@
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
 Py:AutoConfigFlags    INFO Running an input-less job. Will have empty metadata.
-ApplicationMgr       INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Configured successfully
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
 EventInfoCnvAlg                                      INFO Initializing EventInfoCnvAlg
 MetaDataSvc                                          INFO Initializing MetaDataSvc
@@ -20,7 +20,7 @@ DecisionSvc                                          INFO Inserting stream: Stre
 AthDictLoaderSvc                                     INFO in initialize...
 AthDictLoaderSvc                                     INFO acquired Dso-registry
 StreamExampleMeta.StreamExampleMetaTool              INFO Initializing StreamExampleMeta.StreamExampleMetaTool
-StreamExampleMeta                                    INFO Data output: ROOTTREE:SimplePoolFile5.root
+StreamExampleMeta                                    INFO Data output: SimplePoolFile5.root
 StreamExampleMeta                                    INFO ../O reinitialization...
 EventSelector                                        INFO  Enter McEventSelector Initialization 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
@@ -68,42 +68,45 @@ SimplePoolFile5.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
 ##Params                                            DEBUG No objects passing selection criteria... Container has 0 Entries in total.
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
+RootDatabase                                        DEBUG File name SimplePoolFile5.root
+RootDatabase                                        DEBUG File name SimplePoolFile5.root
+RootDatabase                                        DEBUG File name SimplePoolFile5.root
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opened container CollectionTree(EventInfo_p4/McEventInfo) of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG ---->Class:EventInfo_p4
 SimplePoolFile5.root                                DEBUG ---->[0]:EventInfo_p4 Typ:EventInfo_p4 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(ExampleHitContainer_p1/MyHits)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(ExampleHitContainer_p1/MyHits)
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opened container CollectionTree(ExampleHitContainer_p1/MyHits) of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG ---->Class:ExampleHitContainer_p1
 SimplePoolFile5.root                                DEBUG ---->[0]:ExampleHitContainer_p1 Typ:ExampleHitContainer_p1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG ---->Class:xAOD::EventAuxInfo_v3
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventAuxInfo_v3 Typ:xAOD::EventAuxInfo_v3 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] CollectionTree(xAOD::EventInfo_v1/EventInfo)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Branch container 'xAOD::EventInfo_v1_EventInfo'
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opened container CollectionTree(xAOD::EventInfo_v1/EventInfo) of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG ---->Class:xAOD::EventInfo_v1
 SimplePoolFile5.root                                DEBUG ---->[0]:xAOD::EventInfo_v1 Typ:xAOD::EventInfo_v1 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLContainer(DataHeader)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
 SimplePoolFile5.root                                DEBUG ---->Class:DataHeader_p6
 SimplePoolFile5.root                                DEBUG ---->[0]:DataHeader_p6 Typ:DataHeader_p6 [21] Size:0 Offset:0 #Elements:1
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_Tree] POOLContainerForm(DataHeaderForm)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  CREA/UPDA [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
@@ -372,13 +375,11 @@ PoolSvc                                             DEBUG Disconnect request for
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 PoolSvc                                             DEBUG Disconnect request for contextId=1
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile5.root
-StorageSvc                                          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43 PFN=SimplePoolFile5.root
-StorageSvc                                          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43
 RootDatabase                                        DEBUG Closing DB SimplePoolFile5.root
 PoolSvc                                             DEBUG Disconnected PersistencySvc session
 ApplicationMgr                                       INFO Application Manager Stopped successfully
 WriteData                                            INFO in finalize()
-PoolSvc                                             DEBUG Disconnect request for contextId=2
+PoolSvc                                             DEBUG Disconnect request for contextId=1
 AthDictLoaderSvc                                     INFO in finalize...
 ToolSvc                                              INFO Removing all tools created by ToolSvc
 FPEAuditor                                           INFO FPE summary for this job

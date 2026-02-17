@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/NeutralPFOClusterMLCorrectionTool.h"
+#include "NeutralPFOClusterMLCorrectionTool.h"
 
 NeutralPFOClusterMLCorrectionTool::NeutralPFOClusterMLCorrectionTool(const std::string &type, const std::string &name, const IInterface *parent) 
   : base_class(type, name, parent) {}

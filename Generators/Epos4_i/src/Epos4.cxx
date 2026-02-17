@@ -111,16 +111,23 @@ Epos4::Epos4( const std::string &name, ISvcLocator *pSvcLocator ): GenModule( na
     epos_rndm_stream = "EPOS4_INIT";
     declareProperty( "BeamMomentum",    m_beamMomentum    = -6500.0 );      // GeV
     declareProperty( "TargetMomentum",  m_targetMomentum  = 6500.0 );
+    declareProperty( "InputCard",  m_inputcard  = "foo.optns" );
     m_events = 0; // current event number (counted by interface)
 }
 
 
 namespace fs = std::filesystem;
 std::string Epos4::create_file(const std::string& filein) {
+    
+    if (filein.size() < 6 || filein.compare(filein.size() - 6, 6, ".optns") != 0) {
+	    std::cerr << "Error: Input file name: " << filein << " does not end with \".optns\"\n";
+        return "";
+   }	 
 
     fs::path source = filein;
     fs::path destination = fs::current_path() / fs::path(std::string("z-") + source.filename().string());
 
+    
     std::ifstream src(source);             // Open in text mode
     std::ofstream dst(destination);        // Open in text mode
 
@@ -138,11 +145,11 @@ std::string Epos4::create_file(const std::string& filein) {
     while (std::getline(src, line)) {
         dst << line << '\n';
     }
-    dst<<"set ihepmc 1"<< '\n';
+    dst << "set ihepmc 1" << '\n';
 
-    std::string file = source.filename().string().size()>6 ? source.filename().string().substr(0,source.filename().string().size()-6) : "";
+    std::string file = source.filename().string().size() > 6 ? source.filename().string().substr(0, source.filename().string().size() - 6 ) : "";
 
-    std::string num="0";
+    std::string num = "0";
     std::string one = file;
     if (num != "0") {
         one = file + "-" + num;
@@ -152,8 +159,9 @@ std::string Epos4::create_file(const std::string& filein) {
     std::ofstream ofile(clinput);
 
     std::string CHK     = std::getenv("CHK")     ? std::getenv("CHK")     : (std::cerr << "Warning: CHK not set\n", "");
-    std::string seedi   = std::to_string(m_seeds.at(0));// Should be something like "222222222";
-    std::string seedj   = std::to_string(m_seeds.at(1));// Should be something like "111111111";
+    if (m_seeds.size() < 2) std::cerr << "Warning: m_seeds should contain at least 2 elements\n";
+    std::string seedi   = m_seeds.size() < 1 ? "111111111" : std::to_string(m_seeds.at(0));// Should be something like "222222222"; //WARNING: SEEDS SHOUD EXIST HERE!
+    std::string seedj   = m_seeds.size() < 2 ? "222222222" : std::to_string(m_seeds.at(1));// Should be something like "111111111";
     std::string rootcproot = "nono";
     std::string system  = "i";
     std::string ext1    = "-";
@@ -165,8 +173,8 @@ std::string Epos4::create_file(const std::string& filein) {
     std::string HTO     = std::getenv("HTO")     ? std::getenv("HTO")     : (std::cerr << "Warning: HTO not set\n", "");
     std::string SRC     = std::getenv("SRC")     ? std::getenv("SRC")     : (std::cerr << "Warning: SRC not set\n", "");
     std::string CONF    = std::getenv("CONF")    ? std::getenv("CONF")    : (std::cerr << "Warning: CONF not set\n", "");
-    std::string OPT    = std::getenv("OPT")    ? std::getenv("OPT")    : (std::cerr << "Warning: OPT not set\n", "");
-    std::string OPX="";
+    std::string OPT     = std::getenv("OPT")    ? std::getenv("OPT")    : (std::cerr << "Warning: OPT not set\n", "");
+    std::string OPX     = "";
     if (std::string(OPT) == "./") {
         OPX = std::filesystem::current_path().string() + "/";
     } else {
@@ -241,18 +249,15 @@ StatusCode Epos4::genInitialize()
     epos_rndm_stream = "EPOS4";
     m_events = 0;
 
-    std::string in("someinputfoo.txt");
     writer = std::make_shared<HepMC3::WriterEPOS>("foo");
-    auto x = this->create_file(in);
+    auto x = this->create_file(m_inputcard);
     set_job_common(x.c_str());
-
     showMemoryAtStart();
     checkTime();
     eposStart();
     readInputFile();
     initializeHeavyQuarkPart();
     initializeElectronProtonPart();
-
     int currentnumberOfEnergyValues = numberOfEnergyValues();
     /// This value should be 1!
     for (int k=1; k<=currentnumberOfEnergyValues; k++) {
@@ -273,7 +278,6 @@ StatusCode Epos4::callGenerator()
     const EventContext& ctx = Gaudi::Hive::currentContext();
     ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
     p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
-
     // save the random number seeds in the event
     const long *s = p_rndmEngine->getSeeds();
     m_seeds.assign({s[0], s[1]});

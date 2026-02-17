@@ -51,7 +51,16 @@ def addPhysicsP1Chains(chains):
         ChainProp(name='HLT_j0_perf_L1jJ30_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
         # ATR-31286 Higher Threshold Duplicate
         ChainProp(name='HLT_j0_perf_L1jJ60_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleJetGroup+SupportPhIGroup, monGroups=['jetMon:online']),
+    ]
 
+    chainsP1['Combined'] = [
+        # AFP ToF Vertex Delta Z: ATR-15719
+        ChainProp(name='HLT_2j20_ftf_mb_afprec_afpdz5_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2, stream=['Main'], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_2j20_ftf_mb_afprec_afpdz10_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED']*2, stream=['Main'], groups=MinBiasGroup+SupportGroup),
+
+        # AFP ToF Delta Z correlated with central detector: ATR-32338
+        ChainProp(name='HLT_j20_ftf_mb_afprec_afpdz5_L1AFP_A_AND_C_TOF_jJ20', l1SeedThresholds=['FSNOSEED']*2, stream=['Main'], groups=MinBiasGroup+SupportPhIGroup),
+        ChainProp(name='HLT_j20_ftf_mb_afprec_afpdz10_L1AFP_A_AND_C_TOF_jJ20', l1SeedThresholds=['FSNOSEED']*2, stream=['Main'], groups=MinBiasGroup+SupportPhIGroup),
     ]
 
     # Streamers with L1 items removed from MC menu

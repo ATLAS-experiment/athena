@@ -173,6 +173,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
         Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
+        Gaudi::Property <unsigned int> m_batchSize { this, "batchSize", 1, "Batch size for NN inference (1 = sequential, >1 for true batching on GPU)"};
 
 
         std::vector<FPGATrackSimRoad> m_roads;
@@ -196,6 +197,9 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
 
         StatusCode fillInputTensorForNN(miniRoad& thisRoad, std::vector<float>& inputTensorValues);
         StatusCode getPredictedHit(std::vector<float>& inputTensorValues, std::vector<float>& outputTensorValues, long& fineID);
+        StatusCode getPredictedHitBatched(const std::vector<std::vector<float>>& batchInputTensors, 
+                                          std::vector<std::vector<float>>& batchOutputTensors, 
+                                          std::vector<long>& batchFineIDs);
         StatusCode addHitToRoad(miniRoad& newroad, miniRoad& currentRoad, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
         StatusCode getFakeHit(miniRoad& currentRoad, std::vector<float>& predhit, const long& fineID, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
         StatusCode getLastLayer(miniRoad& currentRoad, unsigned& lastHitLayer, std::shared_ptr<const FPGATrackSimHit>& lastHit);

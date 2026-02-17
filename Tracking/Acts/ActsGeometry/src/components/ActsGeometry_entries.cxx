@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventPrimitives/EventPrimitives.h"
@@ -17,6 +17,7 @@
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../ItkBlueprintNodeBuilder.h"
 #include "../CaloBlueprintNodeBuilder.h"
+#include "../ITkMaterialDecoratorTool.h"
 
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
@@ -35,4 +36,4 @@ DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ExtrapolationTool)
 DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
-
+DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)

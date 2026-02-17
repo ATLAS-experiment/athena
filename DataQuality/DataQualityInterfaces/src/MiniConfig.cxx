@@ -10,8 +10,9 @@
 #include <optional>
 #include <sstream>
 #include <utility>
+#include <cctype>
+#include <ranges>
 
-#include "boost/algorithm/string/case_conv.hpp"
 #include "boost/algorithm/string/trim.hpp"
 
 #include "DataQualityInterfaces/MiniConfig.h"
@@ -176,7 +177,7 @@ ReadFile( std::string fileName )
     // (Should be fixed in 13.2.)
     //const std::string& lokey = boost::algorithm::to_lower_copy(key);
     std::string lokey = key;
-    boost::algorithm::to_lower (lokey);
+    std::ranges::transform(lokey, lokey.begin(), [](unsigned char c) { return std::tolower(c); });
     id = sep;
     linestream >> sep;
     if( !linestream ) {

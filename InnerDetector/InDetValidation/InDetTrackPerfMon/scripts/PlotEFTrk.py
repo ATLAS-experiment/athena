@@ -11,6 +11,7 @@ ROOT.gROOT.SetBatch()
 #### Dictionaries
 
 category_dict = {
+
     'eff'           : 'Efficiencies',
     'tech_eff'      : 'Efficiencies/Technical',
     'purity'        : 'Efficiencies/Purities',
@@ -43,6 +44,8 @@ def GetParserArgs() :
     parser.add_argument( '--test',              help="Input test ROOT files", nargs = '+')
     parser.add_argument( '--ref',               help="Input reference ROOT files", nargs = '+')
     parser.add_argument( '-o', '--output',      help="Output directory")
+    parser.add_argument( '--vertex','--pv','--vtx', help="Include this tag if plotting vertex parameters.", action='store_true', default = False)
+    parser.add_argument( '--vertexcategory',    help="Type for vertex parameters if plotting vertex. Default is AllPrimary", default = "AllPrimary")
     parser.add_argument( '--trkAnalysisTest',   help='IDTPM TrackAnalysis for test (e.g. TrkAnaEF)', nargs = '+')
     parser.add_argument( '--trkAnalysisRef',    help='IDTPM TrackAnalysis for reference (e.g. TrkAnaEF)', nargs = '+')
     parser.add_argument( '--chain',		        help="Trigger chain (or Offline)", default = 'Offline')
@@ -62,6 +65,9 @@ def GetParserArgs() :
     parser.add_argument( '--sample',            help="Sample (e.g. 't#bar{t}' / 'single e, p_{T}>10 GeV', ...). Will be printed in ATLAS legend", default = '')
     parser.add_argument( '--particle',          help="Truth particle (e.g. B-hadrons / #tau, p_{T}>15 GeV). Will be printed in ATLAS legend", default = '')
     parser.add_argument( '--legend-coord',	    help="xmin, ymin, xmax, ymax TLegend coordinates", default = [0.65,0.65,0.9,0.87], type = float, nargs = '+')
+    parser.add_argument( '--layout', '--l',     help="ITk layout of samples (default 03-00-01)",   default="03-00-01")
+    parser.add_argument( '--layoutTest',        help = "ITk layout of test if different ITk layout", default = None)
+    parser.add_argument( '--layoutRef',         help = "ITk layout of ref if different ITk layout", default = None)
     parser.add_argument( '--tag',               help="output file tag", default = '')
     parser.print_help()
     return parser.parse_args()
@@ -75,23 +81,30 @@ def isTProfile(obj):
 def getHistoName(category, args):
 
     par = args.param
-    match category:
-        case 'Parameters': return par
-        case 'Resolutions': return f"{resolution_dict[args.resplot]}_{par}"
-        case 'Efficiencies': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
-        case 'Efficiencies/Technical': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
-        case 'Efficiencies/Purities': return f"eff_vs_offl_{par}" if par!="truthMu" else "eff_vs_truthMu"
-        case 'FakeRates': return f"fakerate_vs_offl_{par}" if par!="truthMu" else "fakerate_vs_truthMu"
-        case 'Duplicates': return f"duplrate_vs_truth_{par}" if par!="truthMu" else "duplrate_vs_truthMu"
-        case 'Multiplicities': return par
-        case 'HitsOnTracks': return par
-        case 'PixelClusters': return par
-        case 'StripClusters': return par
-        case _: return 'None'
+    if args.vertex:
+       match category:
+            case 'Parameters': return f"offl_vtx_{par}" if args.chain == 'Offline' else f"vtx_{par}"
+            case _: return 'None'
+    else:
+        match category:
+            case 'Parameters': return par
+            case 'Resolutions': return f"{resolution_dict[args.resplot]}_{par}"
+            case 'Efficiencies': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
+            case 'Efficiencies/Technical': return f"eff_vs_truth_{par}" if par!="truthMu" else "eff_vs_truthMu"
+            case 'Efficiencies/Purities': return f"eff_vs_offl_{par}" if par!="truthMu" else "eff_vs_truthMu"
+            case 'FakeRates': return f"fakerate_vs_offl_{par}" if par!="truthMu" else "fakerate_vs_truthMu"
+            case 'Duplicates': return f"duplrate_vs_truth_{par}" if par!="truthMu" else "duplrate_vs_truthMu"
+            case 'Multiplicities': return par
+            case 'HitsOnTracks': return par
+            case 'PixelClusters': return par
+            case 'StripClusters': return par
+            case _: return 'None'
 
-def getHistoPath(cfg):
-
-    histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/{cfg['chain']}/Tracks/{cfg['category']}/{cfg['histo']}" if 'Clusters' not in cfg['category'] else f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/{cfg['category']}/{cfg['histo']}"
+def getHistoPath(cfg, args):
+    if args.vertex:
+        histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/{cfg['chain']}/Vertices/{args.vertexcategory}/{cfg['category']}/{cfg['histo']}" 
+    else:
+        histopath = f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/{cfg['chain']}/Tracks/{cfg['category']}/{cfg['histo']}" if 'Clusters' not in cfg['category'] else f"InDetTrackPerfMonPlots/{cfg['trkAnalysis']}/Offline/{cfg['category']}/{cfg['histo']}"
     h = cfg['input'].Get(histopath) 
     if cfg['norm']: h.Scale(1./h.Integral())
     print(cfg['input'])
@@ -153,9 +166,12 @@ def getATLASLabel(args):
     else: sample = args.sample
     if args.particle != '': sample += f', {args.particle}'
 
-    subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{ITk Layout: 03-00-01}{<#mu> = %s, %s}}}" %(args.mu, sample))
+    diffItkLayout = args.layoutTest != args.layoutRef
+    itklayout = f"{args.layoutTest} vs {args.layoutRef}" if diffItkLayout else f"ITk Layout: {args.layout}"
+    subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{%s}{<#mu> = %s, %s}}}" %(itklayout, args.mu, sample))
     if args.pu_comparison:   
-        subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{ITk Layout: 03-00-01}{%s}}}" %(sample))
+        subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{%s}{%s}}}" %(itklayout,sample))
+
     subatlas.SetNDC(1)
     subatlas.SetTextFont(42)
     subatlas.SetTextSize(0.05)
@@ -445,7 +461,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
     canv.cd(1)
 
     for i,cfg in enumerate(configs): # loop over the trkAnalysis to be compared (if single plot, there will be only 1 trkAnalysis)
-        h = getHistoPath(cfg)
+        h = getHistoPath(cfg,args)
         isTEfficiencyObj = isTEfficiency(h)
         histos.append(h)
 

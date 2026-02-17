@@ -18,7 +18,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "AthenaKernel/getMessageSvc.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include <list>
 #include <string>

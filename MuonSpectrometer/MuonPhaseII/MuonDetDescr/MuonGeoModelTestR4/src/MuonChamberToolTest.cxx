@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -71,13 +71,16 @@ namespace MuonGMR4 {
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
 
-        if (boundVol.inside(gctx.context(), point, tolerance)) {
+        // Explicitly inline Volume::inside here so that it gets
+        // flattened in debug builds.  Gives a significant speedup.
+        //if (boundVol.inside(gctx.context(), point, tolerance)) {
+        const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
+        if (boundVol.volumeBounds().inside(locPos,tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
                             <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
                             <<"Local position:" <<Amg::toString(boundVol.globalToLocalTransform(gctx.context()) * point));
             return StatusCode::SUCCESS;
         }
-        const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
         
         StripDesign planeTrapezoid{};
         planeTrapezoid.defineTrapezoid(chamb.halfXShort(), chamb.halfXLong(), chamb.halfY());
@@ -312,12 +315,17 @@ namespace MuonGMR4 {
         }
         const double stepLength = 1. / m_overlapSamples;
 
+        const Acts::VolumeBounds& volBounds = volume.volumeBounds();
+        const Acts::Transform3& transform = volume.globalToLocalTransform(gctx.context());
         for (unsigned edge1 = 1; edge1 < chamberEdges.size(); ++edge1) {
             for (unsigned edge2 = 0; edge2 < edge1; ++edge2) {
                 for (unsigned step = 0 ; step <= m_overlapSamples; ++step) {
                     const double section = stepLength * step;
                     const Amg::Vector3D testPoint = section* chamberEdges[edge1] + (1. -section) *chamberEdges[edge2];
-                    if (volume.inside (gctx.context(), testPoint)) {
+                    // Using acts::Volume::inside is horribly slow in dbg builds.
+                    // Using the bounds method directly is much faster.
+                    //if (volume.inside (gctx.context(), testPoint)) {
+                    if (volBounds.inside (transform * testPoint)) {
                         return true;
                     }
                 }
@@ -341,10 +349,18 @@ namespace MuonGMR4 {
             return StatusCode::FAILURE;
         }
 
+        // Retrieve bounds here rather than inside the loop below,
+        // so we only need to do it O(N) rather than O(N^2) times.
+        std::vector<std::shared_ptr<Acts::Volume> > chamberBoundsVec;
+        chamberBoundsVec.reserve (chamberVec.size());
+        for (const Chamber* ch : chamberVec)
+          chamberBoundsVec.push_back (ch->boundingVolume(gctx));
+
         std::set<const Chamber*> overlapChambers{};
         std::stringstream overlapstream{};
         for (std::size_t chIdx = 0; chIdx< chamberVec.size(); ++chIdx) {
             const Chamber& chamber{*chamberVec[chIdx]};
+            const Acts::Volume& chamberBounds = *chamberBoundsVec[chIdx];
             if (m_dumpObjs) {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
                                                 ActsTrk::to_string(chamber.detectorType()),
@@ -352,10 +368,10 @@ namespace MuonGMR4 {
                                                 Acts::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',
                                                 chamber.stationPhi()), 
-                            *chamber.boundingVolume(gctx), chamber.readoutEles());
+                            chamberBounds, chamber.readoutEles());
             }
             ATH_CHECK(allReadoutInEnvelope(gctx, chamber));
-            const std::vector<Amg::Vector3D> chambCorners = cornerPoints(gctx, *chamber.boundingVolume(gctx));
+            const std::vector<Amg::Vector3D> chambCorners = cornerPoints(gctx, chamberBounds);
             /// Check the overlap with other chambers
             std::vector<const Chamber*> overlaps{};
             for (std::size_t chIdx1 = 0; chIdx1<chamberVec.size(); ++chIdx1) {
@@ -363,7 +379,7 @@ namespace MuonGMR4 {
                     continue;
                 }
                 const Chamber* overlapTest{chamberVec[chIdx1]};
-                if (hasOverlap(gctx, chambCorners, *(overlapTest->boundingVolume(gctx)))) {
+                if (hasOverlap(gctx, chambCorners, *chamberBoundsVec[chIdx1])) {
                     overlaps.push_back(overlapTest);
                 }
             }

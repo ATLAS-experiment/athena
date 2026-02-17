@@ -12,14 +12,14 @@ CREATED:  22nd November, 2004
 
 ********************************************************************/
 
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/eflowLayerIntegrator.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowRingSubtractionManager.h"
-#include "eflowRec/PFEnergyPredictorTool.h"
+#include "eflowCaloObject.h"
+#include "eflowRecTrack.h"
+#include "eflowRecCluster.h"
+#include "eflowTrackClusterLink.h"
+#include "eflowLayerIntegrator.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowRingSubtractionManager.h"
+#include "PFEnergyPredictorTool.h"
 
 eflowCaloObject::~eflowCaloObject() = default;
 

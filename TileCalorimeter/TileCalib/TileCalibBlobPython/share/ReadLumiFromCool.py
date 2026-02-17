@@ -82,6 +82,7 @@ for o, a in opts:
         sys.exit(2)
 
 from CaloCondBlobAlgs import CaloCondTools, CaloCondLogger
+from TileCalibBlobPython import TileCalibTools
 
 #=== get a logger
 log = CaloCondLogger.getLogger("ReadLumi")
@@ -132,15 +133,7 @@ if len(folderPath)==0:
     else:
         folderPath = '/CALO/Ofl/Noise/PileUpNoiseLumi'
 
-if tag=='UPD1' or tag=='UPD4' or 'COND'in tag:
-    from TileCalibBlobPython import TileCalibTools
-    folderTag = TileCalibTools.getFolderTag(schema if 'COMP200' in schema or 'OFLP200' in schema else db, folderPath, tag )
-elif folderPath.startswith('/CALO/Ofl/Noise/PileUpNoiseLumi'):
-    folderTag = 'CALOOflNoisePileUpNoiseLumi-'+tag
-elif folderPath.startswith('/CALO/Noise/PileUpNoiseLumi'):
-    folderTag = 'CALONoisePileUpNoiseLumi-'+tag
-else:
-    folderTag = tag
+folderTag = TileCalibTools.getFolderTag(schema if 'COMP200' in schema or 'OFLP200' in schema else db, folderPath, tag )
 
 log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 

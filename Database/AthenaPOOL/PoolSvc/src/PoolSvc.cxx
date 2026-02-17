@@ -665,24 +665,6 @@ StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int con
    return(StatusCode::SUCCESS);
 }
 //_______________________________________________________________________
-long long int PoolSvc::getFileSize(const std::string& dbName, long tech, unsigned int contextId) const {
-   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
-   if (dbH == nullptr) {
-      ATH_MSG_DEBUG("getFileSize: Failed to get Session/DatabaseHandle to get POOL FileSize property.");
-      return 0; // failure
-   }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-         dbH->setTechnology(tech);
-         dbH->connectForWrite();
-      } else {
-         dbH->connectForRead();
-      }
-   }
-   return(dbH->technologySpecificAttributes().attribute<long long int>("FILE_SIZE"));
-}
-//_______________________________________________________________________
 StatusCode PoolSvc::getAttribute(const std::string& optName,
 		std::string& data,
 		long tech,

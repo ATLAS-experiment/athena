@@ -234,6 +234,13 @@ class MonitorDef:
                     "L1_3eEM12L",
                     #
                     "L1_eTAU20L", "L1_eTAU35", "L1_eTAU40HM",
+                    # 
+                    # AD monitoring - ATR-32397
+                    "L1_ADVAET", "L1_ADVAEL", "L1_ADBDTT", "L1_ADBDTL",
+                    "L1_ARTEMISL", "L1_ARTEMIST",
+                    #
+                    # splash items
+                    "L1_eEM22A", "L1_eEM22C",
                 ]
 
         else: # HI L1 menu
@@ -333,6 +340,7 @@ class MonitorDef:
                     "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
                     "L1_jJ10", "L1_jJ20",
                     "L1_eEM5", "L1_eEM9",
+                    "L1_ARTEMISL", "L1_ARTEMIST",
                 ])
 
                 # lowMu HLT menu: Add triggers that are not in the MC menu
@@ -387,7 +395,9 @@ class MonitorDef:
                     "L1_jJ5p30ETA49","L1_jJ10p30ETA49",
                     #
                     "L1_jTE3", "L1_jTE4", "L1_jTE5", "L1_jTE10", "L1_jTE20", "L1_jTE50",
-                    "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500", "L1_jTEFWD2600", "L1_jTEFWD5600", "L1_jTEFWD6300", "L1_jTEFWD6600",
+                    "L1_jTE100", "L1_jTE600", "L1_jTE1500", "L1_jTE6500",
+                    # temporarily commented out to make room for items needed for lowMu HLT menu
+                    # "L1_jTEFWD2600", "L1_jTEFWD5600", "L1_jTEFWD6300", "L1_jTEFWD6600",
                     "L1_jTE5_VjTE200",
                     #
                     "L1_VjTE10", "L1_VjTE200", "L1_VjTE600", "L1_jTE50_VjTE600",

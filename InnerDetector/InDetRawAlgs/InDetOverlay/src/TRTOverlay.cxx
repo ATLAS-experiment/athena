@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/RNGWrapper.h"
@@ -168,7 +168,7 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
   // There are some use cases where background is empty
   if (!bkgContainer) {
     // Only loop through the signal collections and copy them over
-    for (const auto &[hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
+    for (const auto [hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
       // Copy the signal collection
       // pools own the individual elements
       std::unique_ptr<TRT_RDO_Collection> signalCollection = copyCollection(hashId, ptr, dataItemsPool);
@@ -201,12 +201,12 @@ StatusCode TRTOverlay::overlayContainer(const EventContext &ctx,
   // Thus we firstly iterate over signal hashes and store them in a map.
   std::vector < std::pair<IdentifierHash, bool> > overlapMap;
   overlapMap.reserve(signalContainer->numberOfCollections());
-  for (const auto &[hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
+  for (const auto [hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
     overlapMap.emplace_back(hashId, false);
   }
 
   // Now loop through the background hashes and copy unique ones over
-  for (const auto &[hashId, ptr] : bkgContainer->GetAllHashPtrPair()) {
+  for (const auto [hashId, ptr] : bkgContainer->GetAllHashPtrPair()) {
     auto search = std::lower_bound( overlapMap.begin(), overlapMap.end(), hashId,
      [](const std::pair<IdentifierHash, bool> &lhs,  IdentifierHash rhs) -> bool { return lhs.first < rhs; } );
     if (search == overlapMap.end() || search->first != hashId) {

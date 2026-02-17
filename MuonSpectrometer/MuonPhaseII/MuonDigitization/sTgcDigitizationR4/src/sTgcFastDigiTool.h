@@ -66,7 +66,7 @@ namespace MuonR4{
 
             Gaudi::Property<bool> m_digitizeStrip{this, "doStrips", true, "Digitize strip hits"};
             Gaudi::Property<bool> m_digitizeWire{this, "doWires", true, "Digitize wire hits"};
-            Gaudi::Property<bool> m_digitizePads{this, "doPads", false, "Digitize pad hits"};
+            Gaudi::Property<bool> m_digitizePads{this, "doPads", true, "Digitize pad hits"};
 
             Gaudi::Property<double> m_deadTime{this, "deadTime", 300. * Gaudi::Units::ns};
 

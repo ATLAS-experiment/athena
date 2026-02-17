@@ -13,10 +13,10 @@ CREATED:  18th Aug, 2005
  ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowRingSubtractionManager.h"
-#include "eflowRec/eflowFirstIntParameters.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowRingThicknesses.h"
+#include "eflowRingSubtractionManager.h"
+#include "eflowFirstIntParameters.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowRingThicknesses.h"
 
 #include <cmath>
 #include <list>

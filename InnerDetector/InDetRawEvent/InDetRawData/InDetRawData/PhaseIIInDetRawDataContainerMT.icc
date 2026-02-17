@@ -1,0 +1,46 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  */
+namespace PhaseII {
+template <typename T_RawDataContainerCollection, typename T_RawDataContainerPtr, typename T_RangeType>
+inline void moveModuleDataToNewContainer(T_RawDataContainerCollection &rdo_container_collection,
+                                         ContainerRangeGuard<T_RawDataContainerPtr, T_RangeType> &range_guard) {
+   // estimate the size of the new container.
+   // Currently the capacity of old and new container together simply doubles the
+   // capacity.
+   // @TODO if startIndex ==0 then no data of this container was "published", so more storage
+   //       could just be reserved for this container. Is it useful to handle this even less
+   //       likely case than the case that the container list needs to be extended ?
+   std::size_t new_size = range_guard.ptr()->capacity()*2 - range_guard.startIndex();
+   // the new container needs to store at least one element.
+   if (new_size==0u) ++new_size;
+   // create a new guard for the element range in the new container.
+   ContainerRangeGuard<T_RawDataContainerPtr, T_RangeType> new_range_guard(rdo_container_collection.getNewContainerPtr());
+   // reserve enough storeage and move the data which had been added already for the current module.
+   new_range_guard.ptr()->reserve(new_size);
+   range_guard.ptr()->move(*new_range_guard.ptr(), range_guard.startIndex());
+   // update the range guard, with the information about the new container, and the new element range.
+   range_guard=new_range_guard;
+}
+
+template <typename T_RawDataContainerCollection, typename T_RawDataContainerPtr, typename T_RangeType, typename T_Coordinates >
+inline void addDataForModule(T_RawDataContainerCollection &rdo_container_collection,
+                             ContainerRangeGuard<T_RawDataContainerPtr, T_RangeType> &range_guard,
+                             T_Coordinates &&coordinates,
+                             std::uint32_t data_word) {
+   // if the container has a dynamic container list assume that the capacity of a single container
+   // must not be exceeded, but rather than resizing the container obtain a new container when
+   // that happens.
+   if constexpr(hasDynamicContainerList<T_RawDataContainerCollection>) {
+      if (range_guard.ptr()->size() == range_guard.ptr()->capacity()) {
+         // if this happens, the only solution is to get a new container, copy all the data that has been added already
+         // for the current module to the new rdo_container, delete this data from the old container, and from now
+         // on add the data to the new container.
+         moveModuleDataToNewContainer(rdo_container_collection,range_guard);
+      }
+   }
+   // store the data of one hit
+   range_guard.ptr()->emplace_back(std::forward<decltype(coordinates)>(coordinates),
+                                   data_word);
+}
+}

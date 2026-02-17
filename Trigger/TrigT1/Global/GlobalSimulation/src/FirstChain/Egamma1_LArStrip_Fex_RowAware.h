@@ -14,6 +14,7 @@
 #include "eFexRoIAlgTool.h"
 #include "Egamma1_LArStrip_Fex.h"
 #include "CaloEvent/CaloCellContainer.h"
+#include "CaloConditions/CaloNoise.h"
 
 #include "../IO/LArStripNeighborhood.h"
 #include "../IO/eEmNbhoodTOB.h"
@@ -57,6 +58,14 @@ namespace GlobalSim {
 		 "EMB1CellFromCaloCells",
 		 "AlgTool to provide a vector<const xAOD::eFexEMRoI*>"};
 
+    /** @brief Key to the total noise used for each CaloCell */
+    SG::ReadCondHandleKey<CaloNoise>
+    m_totalNoiseKey{
+      this,
+      "totalNoiseKey",
+      "totalNoise",
+      "SG Key of CaloNoise data object"};
+    
     Gaudi::Property<bool> m_dump {
       this,
       "dump",
@@ -76,24 +85,17 @@ namespace GlobalSim {
       "stripNeighborhoodTOBContainer",
       "location to write strip neighborhoods of EFex RoIs, with the associated TOBs"};
 
-    SG::WriteHandleKey<std::vector<int>>
-    m_phimaxKey {
-      this,
-      "phimaxKey",
-      "phimax"};
-      //"location to write strip neighborhoods of EFex RoIs"};
-
     StatusCode
     findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>&,
 			       const std::vector<const CaloCell*>&,
 			       IOBitwise::eEmNbhoodTOBContainer&,
-			       std::vector<int>&) const;
+			       const CaloNoise&) const;
 
     StatusCode
     findNeighborhood_RowAware(const xAOD::eFexEMRoI*,
 			      const std::vector<const CaloCell*>&,
 			      IOBitwise::eEmNbhoodTOBContainer&,
-			      std::vector<int>&) const;
+			      const CaloNoise&) const;
 
     StatusCode
     findClosestCellToRoI(const xAOD::eFexEMRoI*,

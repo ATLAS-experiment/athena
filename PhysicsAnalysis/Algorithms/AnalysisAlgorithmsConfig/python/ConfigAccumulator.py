@@ -140,6 +140,11 @@ class ConfigAccumulator :
     step before the algorithms are created, as the naming of
     containers will depend on where in the chain the container is
     used.
+
+    All arguments passed to the ConfigAccumulator constructor are used
+    as they are. The only exception is the systematics flag:
+    If not explicitly set the decision to run systematics or not
+    will be taken depending on the CommonServicesConfig setup.
     """
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
@@ -241,6 +246,7 @@ class ConfigAccumulator :
         self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
         self._algPostfix = ''
+        self._defaultHistogramStream = 'ANALYSIS'
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -312,6 +318,17 @@ class ConfigAccumulator :
     def hltSummary(self) :
         """the HLTSummary configuration to be used for the trigger decision tool"""
         return self._hltSummary
+
+    def defaultHistogramStream(self):
+        """the default histogram stream to be used for output histograms"""
+        return self._defaultHistogramStream
+
+    def setDefaultHistogramStream(self, streamName: str):
+        """set the default histogram stream to be used for output histograms
+        
+        As an advanced option this is not directly exposed by the constructor,
+        but can be set by the user if needed before configuring the job."""
+        self._defaultHistogramStream = streamName
     
     def algPostfix (self) :
         """the current postfix to be appended to algorithm names

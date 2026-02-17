@@ -168,13 +168,13 @@ unsigned int MultiTreeAccessor::historySizeSC(unsigned int i) const
 }
 
 
-const History* MultiTreeAccessor::getCellHistory(unsigned int i) const 
+std::unique_ptr<const History> MultiTreeAccessor::getCellHistory(unsigned int i) const
 { 
   std::unique_ptr<CellInfo> cellInfo;
   std::vector<const Data*> allData;
   std::vector<const EventData*> allEventData;
   for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
-    std::unique_ptr<const History> thisHistory (accessor->getCellHistory(i));
+    std::unique_ptr<const History> thisHistory = accessor->getCellHistory(i);
     if (!thisHistory) continue;
     if (!cellInfo) {
       cellInfo = std::make_unique<CellInfo>(*thisHistory->cellInfo());
@@ -197,11 +197,12 @@ const History* MultiTreeAccessor::getCellHistory(unsigned int i) const
     }
   }
   //data are copied from cellInfo into History member variable
-  auto * h  = cellInfo ? new History(allData, *cellInfo, allEventData, i): nullptr;
-  return h; 
+  if (cellInfo)
+    return std::make_unique<History>(allData, *cellInfo, allEventData, i);
+  return nullptr;
 }
       
-const History* MultiTreeAccessor::getSCHistory(unsigned int i) const 
+std::unique_ptr<const History> MultiTreeAccessor::getSCHistory(unsigned int i) const
 { 
   std::unique_ptr<CellInfo> cellInfo;
   std::vector<const Data*> allData;
@@ -238,17 +239,19 @@ const History* MultiTreeAccessor::getSCHistory(unsigned int i) const
     }
      //cout << "---> done Creating new data, deleting treeAcc history" << endl; 
   }
-  //cout << "--->returning new history..." << endl; 
-  return (cellInfo ? new History(allData, *cellInfo, allEventData, i) : nullptr); 
+  //cout << "--->returning new history..." << endl;
+  if (cellInfo)
+    return std::make_unique<History>(allData, *cellInfo, allEventData, i);
+  return nullptr;
 }
       
         
-const CellInfo* MultiTreeAccessor::getCellInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> MultiTreeAccessor::getCellInfo(unsigned int i) const
 {
   resetCache();
   for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     const HistoryContainer* cont = accessor->historyContainer(i);
-    if (cont && cont->cellInfo()) return new CellInfo(*cont->cellInfo());
+    if (cont && cont->cellInfo()) return std::make_unique<CellInfo>(*cont->cellInfo());
   }
   return nullptr;
 }

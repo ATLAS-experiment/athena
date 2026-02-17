@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExpressionEvaluation/xAODVariableProxyLoaders.h"
@@ -31,7 +31,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType TMethodWrapper::variableType()
+  IAccessor::VariableType TMethodWrapper::variableType()
   {
     TMethodCall* mc = m_methodCall.call();
     if (!mc) return IProxyLoader::VT_UNK;
@@ -112,7 +112,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType TMethodCollectionWrapper::variableType()
+  IAccessor::VariableType TMethodCollectionWrapper::variableType()
   {
     TMethodCall* mc = m_methodCall.call();
     if (!mc) return IProxyLoader::VT_UNK;
@@ -217,7 +217,7 @@ namespace ExpressionParsing {
   }
 
   template <class AUX>
-  IProxyLoader::VariableType xAODProxyLoader::try_all_known_types(const std::string& varname,
+  IAccessor::VariableType xAODProxyLoader::try_all_known_types(const std::string& varname,
                                                                   const AUX* data, bool isVector) const
   {
     const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -256,7 +256,7 @@ namespace ExpressionParsing {
     m_auxElement = auxElement;
   }
 
-  IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     // Try TMethodWrapper
     auto container = m_auxElement->container();
@@ -277,7 +277,7 @@ namespace ExpressionParsing {
         }
       }
       if (accWrap && accWrap->isValid(m_auxElement)) {
-        const IProxyLoader::VariableType vtype = accWrap->variableType();
+        const IAccessor::VariableType vtype = accWrap->variableType();
         m_accessorCache.insert_or_assign(varname, accWrap.release());
         return vtype;
       }
@@ -286,22 +286,22 @@ namespace ExpressionParsing {
     return try_all_known_types(varname, m_auxElement, false);
   }
 
-  int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int xAODElementProxyLoader::loadInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     return m_accessorCache.at(varname)->getIntValue(m_auxElement);
   }
 
-  double xAODElementProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double xAODElementProxyLoader::loadDouble([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     return m_accessorCache.at(varname)->getDoubleValue(m_auxElement);
   }
 
-  std::vector<int> xAODElementProxyLoader::loadVecIntVariableFromString(const std::string &) const
+  std::vector<int> xAODElementProxyLoader::loadVecInt([[maybe_unused]] const EventContext& ctx,const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
 
-  std::vector<double> xAODElementProxyLoader::loadVecDoubleVariableFromString(const std::string &) const
+  std::vector<double> xAODElementProxyLoader::loadVec([[maybe_unused]] const EventContext& ctx,const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
@@ -319,16 +319,16 @@ namespace ExpressionParsing {
     m_auxVectorData = auxVectorData;
   }
 
-  IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     auto accWrap = std::make_unique<TMethodCollectionWrapper>(typeid(*m_auxVectorData), varname);
     if (accWrap && accWrap->isValid(m_auxVectorData)) {
-      const IProxyLoader::VariableType vtype = accWrap->variableType();
+      const IAccessor::VariableType vtype = accWrap->variableType();
       m_accessorCache.insert_or_assign(varname, accWrap.release());
       return vtype;
     }
 
-    IProxyLoader::VariableType vtype = try_all_known_types(varname, m_auxVectorData, true);
+    IAccessor::VariableType vtype = try_all_known_types(varname, m_auxVectorData, true);
 
     // Before giving up completely, check the size of the vector. If it's
     // 0, it may be that it's empty on *all* events of the current input
@@ -343,22 +343,22 @@ namespace ExpressionParsing {
     return vtype;
   }
 
-  int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &) const
+  int xAODVectorProxyLoader::loadInt([[maybe_unused]] const EventContext& ctx,const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  double xAODVectorProxyLoader::loadDoubleVariableFromString(const std::string &) const
+  double xAODVectorProxyLoader::loadDouble([[maybe_unused]] const EventContext& ctx,const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  std::vector<int> xAODVectorProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> xAODVectorProxyLoader::loadVecInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     return m_accessorCache.at(varname)->getVecIntValue(m_auxVectorData);
   }
 
-  std::vector<double> xAODVectorProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> xAODVectorProxyLoader::loadVec([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {/*
      // Check whether we have an accessor already:
      std::map< std::string, BaseAccessorWrapper* >::const_iterator itr;

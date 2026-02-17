@@ -14,7 +14,6 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 
 // Athena
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 // DetectorDescription

@@ -10,8 +10,7 @@ namespace GlobalSim::IOBitwise {
   CommonTOB::CommonTOB(const xAOD::eFexEMRoI& eFexTOB):
     m_et_bits(static_cast<ulong>(eFexTOB.et())/CommonTOB::s_eFex_granularity),
     m_eta_bits(eFexTOB.iEtaTopo()),
-    m_phi_bits(eFexTOB.iPhiTopo()){
-  }
+    m_phi_bits(eFexTOB.iPhiTopo()){}
 
   CommonTOB::CommonTOB(const GlobalSim::IOBitwise::CommonTOB& tob):
     m_et_bits(tob.et_bits()),

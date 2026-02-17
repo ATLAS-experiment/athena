@@ -18,7 +18,13 @@
 #include "TSystem.h"  // Replace with PathResolver
 #include "xAODEventInfo/EventInfo.h"
 #include "AthOnnxInterfaces/IAthInferenceTool.h"
-
+#include "MVAUtils/BDT.h"
+#include <string>
+#include <vector>
+#include <memory>
+#include <mutex>
+#include <cstdint>
+#include <stdexcept>
 
 namespace CP {
 
@@ -164,6 +170,7 @@ namespace CP {
 
     private:
         bool passedLowPtEfficiencyMVACut(const xAOD::Muon&) const;
+        bool passedLowPtEfficiencyMVACutRun3(const xAOD::Muon&) const;
 
         /// Returns true if the muon passed the tight working point cuts
         bool passTight(const xAOD::Muon& mu, float rho, float oneOverPSig) const;
@@ -265,6 +272,14 @@ namespace CP {
         std::unique_ptr<TMVA::Reader> m_reader_MUTAGIMO_etaBin1{nullptr};
         std::unique_ptr<TMVA::Reader> m_reader_MUTAGIMO_etaBin2{nullptr};
         std::unique_ptr<TMVA::Reader> m_reader_MUTAGIMO_etaBin3{nullptr};
+
+        // MVAUtils for Run-3 low-pT working point
+        std::unique_ptr<MVAUtils::BDT> m_MuidCO{nullptr};
+        std::vector<double> m_lowPtMuidCO_means;
+        std::vector<double> m_lowPtMuidCO_scaler;
+        std::unique_ptr<MVAUtils::BDT> m_MuGirl{nullptr};
+        std::vector<double> m_lowPtMuGirl_means;
+        std::vector<double> m_lowPtMuGirl_scaler;
 
         // variables for the TMVA readers
         mutable std::mutex m_low_pt_mva_mutex;

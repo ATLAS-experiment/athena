@@ -23,7 +23,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
-#include "AthenaKernel/IOVSvcDefs.h"
 
 //this is a typedef: no forward decl possible
 #include "TrkParameters/TrackParameters.h"
