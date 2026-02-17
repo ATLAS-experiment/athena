@@ -140,6 +140,11 @@ class ConfigAccumulator :
     step before the algorithms are created, as the naming of
     containers will depend on where in the chain the container is
     used.
+
+    All arguments passed to the ConfigAccumulator constructor are used
+    as they are. The only exception is the systematics flag:
+    If not explicitly set the decision to run systematics or not
+    will be taken depending on the CommonServicesConfig setup.
     """
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
