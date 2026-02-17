@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IIOVSVCTOOL_H
@@ -31,19 +31,6 @@ public:
   virtual void setStoreName(const std::string& storeName) = 0;
   virtual const std::string& getStoreName() const = 0;
 
-  // register callback functions
-  virtual StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c, 
-                            const IOVSvcCallBackFcn& fcn, bool trigger) = 0;
-
-  virtual StatusCode regFcn(const CallBackID& c1,
-                            const CallBackID& c2, 
-                            const IOVSvcCallBackFcn& fcn2, 
-                            bool trigger) = 0;
-  
-  virtual StatusCode regFcn(const IAlgTool* ia,
-                            const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                            bool trigger) = 0;
-  
   // Update Range from dB
   virtual StatusCode setRange(const CLID& clid, const std::string& key, 
                               IOVRange&) = 0;
