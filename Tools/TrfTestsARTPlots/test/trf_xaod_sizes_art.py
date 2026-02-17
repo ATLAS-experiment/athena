@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os, glob, sys
 import argparse
@@ -20,14 +20,7 @@ def readfile(filename):
   domaindict2 = {}
   domaindict3 = {}
 
-  ncontainer1 = ncontainer2 = 0
-  count1 = count2 = count3 = count4 = 0
-  containerlist1 = []
-  containerlist2 = []
-  unknown1 = []
-  unknown2 = []
   filetype = ""
-
   testName = 'test'
 
   # Loop through all lines
