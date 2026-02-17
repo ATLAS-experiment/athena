@@ -5,15 +5,19 @@
 #ifndef MUONTGC_CNVTOOLS_TGCRODREADOUT_H
 #define MUONTGC_CNVTOOLS_TGCRODREADOUT_H
 
-#include <inttypes.h>
-
-#include <vector>
 
 #include "ByteStreamData/RawEvent.h"
 #include "MuonRDO/TgcRdo.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "TgcSlbDataHelper.h"
 
+#include <inttypes.h>
+#include <vector>
+#include <memory>
+#include <array>
+#include <atomic>
+
+class MsgStream;
 namespace Muon {
 class TgcSlbData;
 class TgcSlbDataHelper;
