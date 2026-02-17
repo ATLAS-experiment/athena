@@ -101,6 +101,12 @@ namespace columnar
     /// identify this as a container id definition
     static constexpr bool isContainerId = true;
 
+    /// whether to use the regular ObjectId/ObjectRange
+    static constexpr bool regularObjectId = false;
+
+    /// whether to use a variant ObjectId
+    static constexpr bool variantObjectId = true;
+
     /// whether this is a non-const container
     static constexpr bool isMutable = CIBase::isMutable;
 

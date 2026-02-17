@@ -6,12 +6,114 @@
 
 
 #include <ColumnarCore/ColumnAccessorDataArray.h>
+#include <ColumnarCore/VectorConvertView.h>
 
 namespace columnar
 {
-  // the external mode specialization for native types
+  namespace detail
+  {
+    struct ColumnAccessorOptionsArray final
+    {
+      std::string_view offsetName;
+      std::string baseName;
+      std::string dataSuffix = "";
+      bool isOffset = false;
+      unsigned numOffsets = 0u;
+    };
+
+    // the Array mode specialization for native types
+    template<typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+      requires (MemoryAccessor<CT,CM>::isDefined)
+    class ContainerFreeAccessor<CT,CAM,CM> final
+    {
+      /// Common Public Members
+      /// =====================
+    public:
+
+      static_assert (CAM == ColumnAccessMode::input || MemoryAccessor<CT,CM>::viewIsReference || MemoryAccessor<CT,CM>::hasSetter, "output access not supported for this type");
+
+      using ColumnType = typename MemoryAccessor<CT,CM>::MemoryType;
+
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = MemoryAccessor<CT,CM>::viewIsReference;
+      static constexpr unsigned internalOffsetColumns = 0;
+
+      ContainerFreeAccessor () noexcept = default;
+
+      ContainerFreeAccessor (ColumnarTool<CM>& columnarTool, ColumnAccessorOptions&& options, ColumnAccessorOptionsArray&& optionsArray)
+      {
+        auto info = options.makeColumnInfo();
+        info.offsetName = optionsArray.offsetName;
+        info.isOffset = optionsArray.isOffset;
+        MemoryAccessor<CT,CM>::updateColumnInfo (info);
+        m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename MemoryAccessor<CT,CM>::MemoryType), CAM);
+        columnarTool.addColumn (optionsArray.baseName + optionsArray.dataSuffix, m_accessorData.get(), std::move (info));
+      }
+
+      ContainerFreeAccessor (ContainerFreeAccessor&& that)
+      {
+        moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
+      }
+
+      ContainerFreeAccessor& operator = (ContainerFreeAccessor&& that)
+      {
+        if (this != &that)
+          moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
+        return *this;
+      }
+
+      ContainerFreeAccessor (const ContainerFreeAccessor&) = delete;
+      ContainerFreeAccessor& operator = (const ContainerFreeAccessor&) = delete;
+
+      [[nodiscard]] ColumnType& operator () (void** dataArea, std::size_t index) const noexcept
+        requires (viewIsReference)
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        return data[index];
+      }
+
+      [[nodiscard]] decltype(auto) operator () (void** dataArea, std::size_t index) const noexcept
+        requires (!viewIsReference && CAM == ColumnAccessMode::input)
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        return MemoryAccessor<CT,CM>::makeViewer (dataArea)(data[index]);
+      }
+
+      [[nodiscard]] std::span<ColumnType> operator () (void** dataArea, std::size_t beginIndex, std::size_t endIndex) const noexcept
+        requires (viewIsReference)
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        return std::span<ColumnType> (data+beginIndex, endIndex-beginIndex);
+      }
+
+      [[nodiscard]] auto operator () (void** dataArea, std::size_t beginIndex, std::size_t endIndex) const noexcept
+        requires (!viewIsReference && CAM == ColumnAccessMode::input)
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        std::span<ColumnType> mySpan (data+beginIndex, endIndex-beginIndex);
+        return VectorConvertView (MemoryAccessor<CT,CM>::makeViewer (dataArea), std::span (mySpan));
+      }
+
+      [[nodiscard]] bool isAvailable (void** dataArea) const noexcept
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        return data != nullptr;
+      }
+
+      /// Private Members
+      /// ===============
+    private:
+
+      unsigned m_dataIndex = 0u;
+      std::unique_ptr<ColumnAccessorDataArray> m_accessorData;
+    };
+  }
+
+
+
+  // the Array mode specialization for native types
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
-    requires (CI::regularColumnAccessorArray && ColumnTypeTraits<CT,CM>::isNativeType)
+    requires (CI::regularColumnAccessorArray && detail::ContainerFreeAccessor<CT,CAM,CM>::isDefined)
   class AccessorTemplate<CI,CT,CAM,CM> final
   {
     /// Common Public Members
@@ -20,77 +122,61 @@ namespace columnar
 
     static_assert (!std::is_const_v<CT>, "CT must not be const");
 
-    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,CM>::ColumnType>;
-
     AccessorTemplate () noexcept = default;
 
-    AccessorTemplate (ColumnarTool<CM>& columnBase,
-                  const std::string& name, ColumnInfo&& info = {})
-    {
-      ColumnTypeTraits<CT,CM>::updateColumnInfo (columnBase, info);
-      info.offsetName = CI::idName;
-      m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename ColumnTypeTraits<CT,CM>::ColumnType), CAM);
-      columnBase.addColumn (std::string(CI::idName) + "." + name, m_accessorData.get(), std::move (info));
-    }
+    AccessorTemplate (ColumnarTool<CM>& columnarTool, const std::string& name, ColumnAccessorOptions&& options = {})
+      : m_accessor (columnarTool, std::move (options), detail::ColumnAccessorOptionsArray{.offsetName = CI::idName, .baseName = std::string (CI::idName) + "." + name})
+    {}
 
-    AccessorTemplate (AccessorTemplate&& that)
-    {
-      moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
-    }
-
-    AccessorTemplate& operator = (AccessorTemplate&& that)
-    {
-      if (this != &that)
-        moveAccessor (m_dataIndex, m_accessorData, that.m_dataIndex, that.m_accessorData);
-      return *this;
-    }
-
+    AccessorTemplate (AccessorTemplate&& that) = default;
+    AccessorTemplate& operator = (AccessorTemplate&& that) = default;
     AccessorTemplate (const AccessorTemplate&) = delete;
     AccessorTemplate& operator = (const AccessorTemplate&) = delete;
 
-    void reset (ColumnarTool<CM>& columnBase, const std::string& name, ColumnInfo&& info = {})
+    void reset (ColumnarTool<CM>& columnarTool, const std::string& name, ColumnAccessorOptions&& options = {})
     {
-      *this = AccessorTemplate (columnBase, name, std::move (info));
+      *this = AccessorTemplate (columnarTool, name, std::move (options));
     }
 
-    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const noexcept
+    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const noexcept
     {
-      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
-      return data[id.getIndex()];
+      return m_accessor(id.getDataArea(), id.getIndex());
     }
 
-    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const noexcept
+    [[nodiscard]] decltype(auto) operator () (ObjectRange<CI,CM> range) const noexcept
     {
-      auto *data = static_cast<ColumnType*>(range.getData()[m_dataIndex]);
-      return std::span<ColumnType> (data+range.beginIndex(), range.endIndex()-range.beginIndex());
+      return m_accessor(range.getDataArea(), range.beginIndex(), range.endIndex());
+    }
+
+    template<typename T>
+      requires requires(T value) {std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>().set (nullptr,0,value);}
+    void set (ObjectId<CI,CM> id, T&& value) const noexcept
+    {
+      m_accessor.set (id.getDataArea(), id.getIndex(), std::forward<T>(value));
     }
 
     [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
     {
-      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
-      return data != nullptr;
+      return m_accessor.isAvailable (id.getDataArea());
     }
 
     [[nodiscard]] bool isAvailable (const ObjectRange<CI,CM>& range) const noexcept
     {
-      auto *data = static_cast<ColumnType*>(range.getData()[m_dataIndex]);
-      return data != nullptr;
+      return m_accessor.isAvailable (range.getDataArea());
     }
 
-    [[nodiscard]] std::optional<ColumnType> getOptional (ObjectId<CI,CM> id) const
+    [[nodiscard]] auto getOptional (ObjectId<CI,CM> id) const
     {
-      auto *data = static_cast<ColumnType*>(id.getData()[m_dataIndex]);
-      if (data != nullptr)
-        return data[id.getIndex()];
-      else
-        return std::nullopt;
+      std::optional<std::decay_t<decltype(std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>()(nullptr,0))>> result;
+      if (m_accessor.isAvailable (id.getDataArea()))
+        result = m_accessor (id.getDataArea(), id.getIndex());
+      return result;
     }
 
     /// Private Members
     /// ===============
   private:
 
-    unsigned m_dataIndex = 0u;
-    std::unique_ptr<ColumnAccessorDataArray> m_accessorData;
+    detail::ContainerFreeAccessor<CT,CAM,CM> m_accessor;
   };
 }

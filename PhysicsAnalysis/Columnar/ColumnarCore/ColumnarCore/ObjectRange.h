@@ -228,17 +228,17 @@ namespace columnar
     using xAODContainer = typename CI::xAODObjectRangeType;
 
     ObjectRangeIteratorArray<CI,1,CM> begin () const noexcept {
-      return ObjectRangeIteratorArray<CI,1,CM> (m_data, m_beginIndex);}
+      return ObjectRangeIteratorArray<CI,1,CM> (m_dataArea, m_beginIndex);}
     ObjectRangeIteratorArray<CI,1,CM> end () const noexcept {
-      return ObjectRangeIteratorArray<CI,1,CM> (m_data, m_endIndex);}
+      return ObjectRangeIteratorArray<CI,1,CM> (m_dataArea, m_endIndex);}
     ObjectRangeIteratorArray<CI,-1,CM> rbegin () const noexcept {
       // note that as a reverse iterator, the meaning of begin and end
       // is reversed, and the new "end" can be -1.
-      return ObjectRangeIteratorArray<CI,-1,CM> (m_data, m_endIndex-1);}
+      return ObjectRangeIteratorArray<CI,-1,CM> (m_dataArea, m_endIndex-1);}
     ObjectRangeIteratorArray<CI,-1,CM> rend () const noexcept {
       // note that as a reverse iterator, the meaning of begin and end
       // is reversed, and the new "end" can be -1.
-      return ObjectRangeIteratorArray<CI,-1,CM> (m_data, m_beginIndex-1);}
+      return ObjectRangeIteratorArray<CI,-1,CM> (m_dataArea, m_beginIndex-1);}
 
     [[nodiscard]] std::size_t beginIndex () const noexcept {
       return m_beginIndex;}
@@ -268,7 +268,7 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");}
 
     [[nodiscard]] ObjectId<CI,CM> operator [] (std::size_t index) const noexcept {
-      return ObjectId<CI,CM> (m_data, index + m_beginIndex);
+      return ObjectId<CI,CM> (m_dataArea, index + m_beginIndex);
     }
 
     template<typename Acc,typename... Args>
@@ -286,13 +286,13 @@ namespace columnar
     /// ============================
   public:
 
-    explicit ObjectRange (void **val_data, std::size_t val_beginIndex,
+    explicit ObjectRange (void **val_dataArea, std::size_t val_beginIndex,
                           std::size_t val_endIndex) noexcept
-      : m_data (val_data), m_beginIndex (val_beginIndex), m_endIndex (val_endIndex)
+      : m_dataArea (val_dataArea), m_beginIndex (val_beginIndex), m_endIndex (val_endIndex)
     {}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -300,7 +300,7 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_beginIndex = 0u;
     std::size_t m_endIndex = 0u;
   };
@@ -314,11 +314,11 @@ namespace columnar
   {
   public:
 
-    ObjectRangeIteratorArray (void **val_data, std::size_t val_index) noexcept
-      : m_data (val_data), m_index (val_index) {}
+    ObjectRangeIteratorArray (void **val_dataArea, std::size_t val_index) noexcept
+      : m_dataArea (val_dataArea), m_index (val_index) {}
 
     ObjectId<CI,CM> operator * () const noexcept {
-      return ObjectId<CI,CM> (m_data, m_index);
+      return ObjectId<CI,CM> (m_dataArea, m_index);
     }
 
     ObjectRangeIteratorArray<CI,stepSize,CM>& operator ++ () noexcept {
@@ -330,7 +330,7 @@ namespace columnar
       return m_index != that.m_index;}
 
   private:
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_index = 0u;
   };
 }
