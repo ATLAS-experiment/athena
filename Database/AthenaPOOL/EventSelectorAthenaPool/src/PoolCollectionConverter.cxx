@@ -29,7 +29,6 @@ PoolCollectionConverter::PoolCollectionConverter(const std::string& collectionTy
 	unsigned int contextId,
 	const IPoolSvc* svc) :
 	m_collectionType(collectionType),
-	m_connection(),
 	m_inputCollection(inputCollection),
 	m_contextId(contextId),
 	m_poolSvc(svc),
@@ -47,21 +46,18 @@ PoolCollectionConverter::~PoolCollectionConverter() {
 //______________________________________________________________________________
 StatusCode PoolCollectionConverter::initialize() {
    // Check if already prefixed
-   if (m_inputCollection.starts_with( "PFN:")
-           || m_inputCollection.starts_with( "LFN:")
-           || m_inputCollection.starts_with( "FID:")) {
-      // Already prefixed
-      m_connection = m_inputCollection;
-   } else {
+   if (!m_inputCollection.starts_with( "PFN:")
+           && !m_inputCollection.starts_with( "LFN:")
+           && !m_inputCollection.starts_with( "FID:")) {
       // Prefix with PFN:
-      m_connection = std::format("PFN:{}", m_inputCollection);
+      m_inputCollection = std::format("PFN:{}", m_inputCollection);
    }
    try {
       if (m_collectionType == "RootCollection") {
-         m_poolCollection = m_poolSvc->createCollection(m_connection, "Input", pool::ROOT_StorageType.type(), m_contextId);
+         m_poolCollection = m_poolSvc->createCollection(m_inputCollection, "Input", pool::ROOT_StorageType.type(), m_contextId);
       }
       if (m_poolCollection == nullptr) { // Open as ImplicitCollection if technologies fail, or none was specified
-         m_poolCollection = m_poolSvc->createCollection(m_connection, "Input", pool::POOL_StorageType.type(), m_contextId);
+         m_poolCollection = m_poolSvc->createCollection(m_inputCollection, "Input", pool::POOL_StorageType.type(), m_contextId);
       }
    } catch (std::exception &e) {
       if (m_poolCollection == nullptr) return StatusCode::RECOVERABLE;
@@ -74,7 +70,7 @@ StatusCode PoolCollectionConverter::disconnectDb() {
       return StatusCode::SUCCESS;
    }
    if (m_poolCollection->description().type() == pool::POOL_StorageType.type()) {
-      return m_poolSvc->disconnectDb(m_connection);
+      return m_poolSvc->disconnectDb(m_inputCollection);
    }
    return StatusCode::SUCCESS;
 }
