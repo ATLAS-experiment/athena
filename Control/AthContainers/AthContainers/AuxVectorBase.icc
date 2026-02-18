@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -579,6 +579,11 @@ void AuxVectorBase::shift1 (const std::true_type&,
  * @param p The new element being added.
  * @param clear If true, then any auxiliary data initially associated
  *              with @c p are cleared after being copied.
+ * @param skipDestClear Normally, if the elements do not have auxiliary data,
+ *                      then the variables of the destination are cleared.
+ *                      If this flag is true, then this clear is skipped.
+ *                      This can be appropriate as part of a push_back,
+ *                      where the destination is already known to be clear.
  *
  * Overload for the no-auxdata case.
  */
@@ -692,6 +697,49 @@ void AuxVectorBase::moveAux1 (const std::true_type&,
     ++beg;
     ++index;
   }
+}
+
+
+/**
+ * @brief Set index on an element and copy auxiliary data,
+ *        specialized for the case of no clearing (and inlined).
+ * @param index Container index at which the new element is being added.
+ * @param p The new element being added.
+ *
+ * Element @c p is being added to the container at @c index.
+ * If @c p has associated auxiliary data, copy it to the container
+ * at @c index.  Then set the container / index on @c p.
+ *
+ * This is equivalent to moveAux with clear=false and skipDestClear=true.
+ * m_trackIndices must also be true to call this.
+ */
+inline
+void AuxVectorBase::moveAuxNoClear (size_t index, SG::AuxElement* p)
+{
+  if (p->hasStore()) {
+    AuxElement::copyAuxHelper (*this, index, *p, false);
+  }
+  p->setIndex (index, this);
+}
+
+
+/**
+ * @brief Set index on an element and copy auxiliary data,
+ *        specialized for the case of no clearing (and inlined).
+ * @param index Container index at which the new element is being added.
+ * @param p The new element being added.
+ *
+ * Element @c p is being added to the container at @c index.
+ * If @c p has associated auxiliary data, copy it to the container
+ * at @c index.  Then set the container / index on @c p.
+ *
+ * This is equivalent to moveAux with clear=false and skipDestClear=true.
+ * m_trackIndices must also be true to call this.
+ * Overload for the no-auxdata case.
+ */
+inline
+void AuxVectorBase::moveAuxNoClear (size_t /*index*/, const void* /*p*/)
+{
 }
 
 
