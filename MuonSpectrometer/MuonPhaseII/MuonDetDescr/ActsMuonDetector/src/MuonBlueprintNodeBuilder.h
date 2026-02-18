@@ -70,13 +70,6 @@ private:
 
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; // Flag to control if we want to build the muon node from sectors or chambers
 
-  /** @brief Blend the sector's/chamber's material as plane surface
-    * @param element The element for which to blend the material for
-    *  This function returns a plane surface with the element's (chamber or sector) material
-    *  assigned to be placed at the center of the element. */
-  template<typename T>
-  std::shared_ptr<Acts::Surface> blendMaterial(const T& element) const;
-
   /** @brief Get the chamber's sensitive elements
     * @param gctx The geometry context
     * @param element The element for which to get the sensitive elements (chamber or sector)
@@ -88,6 +81,14 @@ private:
                                                                                   const T& element,
                                                                                   const Acts::GeometryIdentifier& chId,
                                                                                   Acts::VolumeBoundFactory& boundsFactory) const;
+
+  /** @brief Construct and return the surfaces for the passive material description (e.g cylinders for barrel/ discs for endcaps)
+   *  @param gctx The geometry context
+   *  @param elementsPerStation The elements (chambers or sectors) grouped per station to which we want to assign passive material
+   * This function uses the elements of the station to construct the surfaces and define their bounds */
+  template<typename MuonElementsSet>
+  std::vector<std::shared_ptr<Acts::Surface>> getPassiveMaterialSurfaces(const Acts::GeometryContext& gctx,
+  const std::unordered_map<StIdx,MuonElementsSet>& elementsPerStation) const;
 
   /** @brief Check if the chamber is in this node
     * @param element The element to check (chamber or sector)
@@ -103,14 +104,16 @@ private:
    *  @param elements The name of the stations to include
    *  @param side The side (A, C or Both)
    *  @param id The geometry identifier of this node
-   * @param boundsFactory The factory for volume bounds
+   *  @param boundsFactory The factory for volume bounds
+   *  @param passiveStationIds The station Ids for which we apply passive material surfaces (e.g to keep only BI,BM,BO for the barrel node)
    */
   template<typename MuonElementsSet>
   std::shared_ptr<Acts::Experimental::StaticBlueprintNode> buildMuonNode(const Acts::GeometryContext& gctx,
     const MuonElementsSet& elements,
     const std::string& name,
     const Acts::GeometryIdentifier& id,
-    Acts::VolumeBoundFactory& boundsFactory) const;
+    Acts::VolumeBoundFactory& boundsFactory,
+    const std::vector<StIdx>& passiveStationIds = {}) const;
 };
 
 } //namespace ActsTrk
