@@ -301,10 +301,38 @@ class MGControl:
 
         #create anew run card in the same location as the old card
         newCard = open(self.process_dir+'/Cards/run_card.dat', 'w')
-        
-        #write out each line of self.runCardDict to the newCard
+
+        # Read in old run card, we want to copy over the comments
+        oldCard = open(runCard_old)
+        listSettings = []
+        for line in iter(oldCard):
+            #if the line starts with a '#' (ie. is a comment) copy it straight over
+            if line.strip().startswith('#'):
+                newCard.write(line)
+            else: #if not we want to grab the comment after the '!' as well as the associated command (before '!')
+                command= line.split('!',1)[0]
+                if len(line.split('!',1)) > 1:
+                    comment= line.split('!',1)[1]
+                else:
+                    comment = '\n'
+                if '=' in command:
+                    setting = command.split('=')[-1].strip()
+                    # Check if the setting is in the dictionary and then print with the comment and the updated value
+                    if setting in self.runCardDict:
+                        newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+' ! '+ comment)
+                        listSettings.append(str(setting))
+                    else:
+                        raise RuntimeError('Could not find '+str(setting)+' in the Run Card Dictionary!')
+                else:
+                    newCard.write(line)
+        # Add a commented region
+        newCard.write("#***********************************************************************\n# Any Additional settings can be added here                            *\n#***********************************************************************\n")
+
+            
+        #check that all settings have been writen
         for setting in self.runCardDict:
-            newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+'\n')
+            if setting not in listSettings:
+                newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+'\n')
             
         # Check whether mcatnlo_delta is applied to setup pythia8 path
         if 'mcatnlo_delta' in self.runCardDict:	    
