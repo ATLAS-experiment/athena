@@ -55,6 +55,4 @@ endif()
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_data( data/*.conf 
-                    data/ForwardElectronCalibration
-                    data/ForwardElectronID )
+atlas_install_data( data/*.conf  )
