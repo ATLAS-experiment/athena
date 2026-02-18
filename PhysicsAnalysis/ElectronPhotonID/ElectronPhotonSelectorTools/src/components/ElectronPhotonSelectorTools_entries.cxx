@@ -7,6 +7,8 @@
 #include "ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h"
 #include "ElectronPhotonSelectorTools/AsgForwardElectronLikelihoodTool.h"
 #include "ElectronPhotonSelectorTools/AsgElectronSelectorTool.h"
+#include "ElectronPhotonSelectorTools/AsgForwardElectronCalibrationTool.h"
+#include "ElectronPhotonSelectorTools/AsgForwardElectronSelectorTool.h"
 #include "ElectronPhotonSelectorTools/AsgPhotonBDTSelector.h"
 #include "ElectronPhotonSelectorTools/PhotonBDTCalculator.h"
 #include "ElectronPhotonSelectorTools/PhotonSingleBDTCalculator.h"
@@ -23,6 +25,8 @@ DECLARE_COMPONENT( AsgElectronChargeIDSelectorTool )
 DECLARE_COMPONENT( AsgDeadHVCellRemovalTool )
 DECLARE_COMPONENT( AsgForwardElectronLikelihoodTool )
 DECLARE_COMPONENT( AsgElectronSelectorTool )
+DECLARE_COMPONENT( AsgForwardElectronCalibrationTool )
+DECLARE_COMPONENT( AsgForwardElectronSelectorTool )
 DECLARE_COMPONENT( PhotonIDBDT::AsgPhotonBDTSelector )
 DECLARE_COMPONENT( PhotonIDBDT::PhotonBDTCalculator )
 DECLARE_COMPONENT( PhotonIDBDT::PhotonSingleBDTCalculator )
