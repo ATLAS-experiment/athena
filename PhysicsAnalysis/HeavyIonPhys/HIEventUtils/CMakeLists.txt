@@ -5,6 +5,7 @@ atlas_subdir( HIEventUtils )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_library( HIEventUtilsLib
@@ -12,7 +13,7 @@ atlas_add_library( HIEventUtilsLib
                    PUBLIC_HEADERS HIEventUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CaloGeoHelpers InDetTrackSelectionToolLib PATCoreAcceptLib xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo
-                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils )
+                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils nlohmann_json::nlohmann_json PathResolver)
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( HIEventUtils
@@ -25,6 +26,8 @@ atlas_add_dictionary( HIEventUtilsDict
    HIEventUtils/HIEventUtilsDict.h
    HIEventUtils/selection.xml
    LINK_LIBRARIES HIEventUtilsLib )
+
+atlas_install_data(data/*)
 
 if (NOT XAOD_STANDALONE)
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
