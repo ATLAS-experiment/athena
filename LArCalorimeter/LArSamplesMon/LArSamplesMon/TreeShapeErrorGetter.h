@@ -36,8 +36,8 @@ namespace LArSamples {
       TreeShapeErrorGetter& operator = (const TreeShapeErrorGetter &) = delete;
       virtual ~TreeShapeErrorGetter();
 
-      ShapeErrorData* shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const;
-      ShapeErrorData* phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude = 0) const;
+      virtual std::unique_ptr<ShapeErrorData> shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const override;
+      virtual std::unique_ptr<ShapeErrorData> phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude = 0) const override;
       
       int addCell(const ResidualCalculator& calc, CaloGain::CaloGain gain);
       int addRing(const ResidualCalculator& calc, CaloGain::CaloGain gain);

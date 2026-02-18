@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,7 @@
 #include "LArSamplesMon/ShapeErrorData.h"
 #include "LArCafJobs/CaloId.h"
 #include "CaloIdentifier/CaloGain.h"
+#include <memory>
 
 class TH1D;
 
@@ -26,8 +27,8 @@ namespace LArSamples {
 
       virtual ~AbsShapeErrorGetter() { }
       
-      virtual ShapeErrorData* shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const = 0;
-      virtual ShapeErrorData* phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude = 0) const = 0;
+      virtual std::unique_ptr<ShapeErrorData> shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const = 0;
+      virtual std::unique_ptr<ShapeErrorData> phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude = 0) const = 0;
   };
 }
 #endif
