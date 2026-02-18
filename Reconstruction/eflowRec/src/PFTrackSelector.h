@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PFTRACKSELECTOR_H
 #define PFTRACKSELECTOR_H
@@ -10,7 +10,6 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"

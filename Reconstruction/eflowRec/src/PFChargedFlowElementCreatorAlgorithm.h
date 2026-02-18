@@ -5,7 +5,6 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 
 #include "xAODPFlow/FlowElementContainer.h"
 
