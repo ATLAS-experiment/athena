@@ -88,3 +88,12 @@ atlas_add_test( EventPicking_ESD_run3_data22
                 LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 900 )
+
+# tests that should not run in AthGeneration, AthSimulation or analysis releases
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
+    atlas_add_test( EventPicking_RAW_run2_data15
+                    SCRIPT test/EventPicking_RAW_run2_data15.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+endif()
