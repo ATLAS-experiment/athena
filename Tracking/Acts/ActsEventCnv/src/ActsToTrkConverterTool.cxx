@@ -69,8 +69,8 @@ static void ActsMeasurementCheck(const Acts::GeometryContext &gctx,
 
 static void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface);
 
 
@@ -276,7 +276,7 @@ ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParam
              atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV), 0.;
   }
 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   if (atlasParameter.covariance()) {
     cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
 
@@ -676,8 +676,8 @@ static void ActsMeasurementCheck(
 
 void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface) {
 
   std::cout << "ANNULUS PAR COV: ";

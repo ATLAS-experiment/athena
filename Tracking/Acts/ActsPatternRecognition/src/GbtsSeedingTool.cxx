@@ -52,7 +52,7 @@ namespace ActsTrk {
     
     //parse connection 
 
-    m_connector =  std::make_unique<Acts::Experimental::GbtsConnector>(m_finderCfg.connectorInputFile, m_finderCfg.LRTmode);
+    m_connector =  std::make_unique<Acts::Experimental::GbtsConnector>(m_finderCfg.connectorInputFile, m_finderCfg.lrtMode);
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_finderCfg.etaBinOverride != 0.0f) {
@@ -90,10 +90,10 @@ namespace ActsTrk {
       Acts::SpacePointColumns::Phi
     );
 
-    //add new coloumn for layer ID and clusterwidth
-    auto LayerColoumn = coreSpacePoints.createColumn<int>("LayerID");
-    auto ClusterWidthColoumn = coreSpacePoints.createColumn<float>("Cluster_Width");
-    auto LocalPositionColoumn = coreSpacePoints.createColumn<float>("LocalPositionY");
+    //add new column for layer ID and clusterwidth
+    auto layerColumn = coreSpacePoints.createColumn<std::uint32_t>("LayerID");
+    auto clusterWidthColumn = coreSpacePoints.createColumn<float>("Cluster_Width");
+    auto localPositionColumn = coreSpacePoints.createColumn<float>("LocalPositionY");
     coreSpacePoints.reserve(spContainer.size());
 
     //add spacepoints to new container and seedContainer
@@ -134,30 +134,30 @@ namespace ActsTrk {
         newSp.phi() = std::atan2(extSP.y(), extSP.x());
       }
       
-      newSp.extra(LayerColoumn) = layer;
+      newSp.extra(layerColumn) = layer;
       
       if(m_finderCfg.useML){
           
           assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
           const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
-          newSp.extra(ClusterWidthColoumn) = pCL->widthInEta();
-          newSp.extra(LocalPositionColoumn) = pCL->localPosition<2>().y();
+          newSp.extra(clusterWidthColumn) = pCL->widthInEta();
+          newSp.extra(localPositionColumn) = pCL->localPosition<2>().y();
           
         }else{
-          newSp.extra(ClusterWidthColoumn) = 0;
-          newSp.extra(LocalPositionColoumn) = 0;
+          newSp.extra(clusterWidthColumn) = 0;
+          newSp.extra(localPositionColumn) = 0;
           
         }
     }    
     ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
     
     //collect all spacepoint containers objects so they can be passed into the seedfinder
-    auto SPContainerComponents = std::make_tuple(std::move(coreSpacePoints), LayerColoumn.asConst(), ClusterWidthColoumn.asConst(), LocalPositionColoumn.asConst());
+    auto sPContainerComponents = std::make_tuple(std::move(coreSpacePoints), layerColumn.asConst(), clusterWidthColumn.asConst(), localPositionColumn.asConst());
 
     //compute seeds
     int max_layers = m_are_pixels.size(); 
     Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
-    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, SPContainerComponents, max_layers); 
+    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, sPContainerComponents, max_layers); 
     
     
     //add seeds to the output container
@@ -178,7 +178,7 @@ namespace ActsTrk {
   GbtsSeedingTool::prepareConfiguration()
   {
 
-    m_finderCfg.LRTmode = m_LRTmode;
+    m_finderCfg.lrtMode = m_LRTmode;
     m_finderCfg.useML = m_useML;
     m_finderCfg.matchBeforeCreate = m_matchBeforeCreate;
     m_finderCfg.useOldTunings = m_useOldTunings;
@@ -223,7 +223,7 @@ namespace ActsTrk {
   ATH_MSG_DEBUG( "BeamSpotCorrection: " << cfg.BeamSpotCorrection << " (default: false)");
   ATH_MSG_DEBUG( "connectorInputFile: " << cfg.connectorInputFile << " (default: empty string)");
   ATH_MSG_DEBUG( "lutInputFile: " << cfg.lutInputFile << " (default: empty string)");
-  ATH_MSG_DEBUG( "LRTmode: " << cfg.LRTmode << " (default: false)");
+  ATH_MSG_DEBUG( "lrtMode: " << cfg.lrtMode << " (default: false)");
   ATH_MSG_DEBUG( "useML: " << cfg.useML << " (default: false)");
   ATH_MSG_DEBUG( "matchBeforeCreate: " << cfg.matchBeforeCreate << " (default: false)");
   ATH_MSG_DEBUG( "useOldTunings: " << cfg.useOldTunings << " (default: false)");

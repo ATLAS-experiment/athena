@@ -73,7 +73,7 @@ std::unique_ptr<Acts::BoundTrackParameters> ActsTrk::RandomProtoTrackCreatorTool
  
 
   // Covariance - let's be honest and say we have no clue ;-) 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= 100000; 
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
