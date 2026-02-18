@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/AuxVectorBase.cxx
@@ -225,7 +225,6 @@ AuxVectorBase::moveAux (size_t index, SG::AuxElement* p,
   if (!m_trackIndices)
     return;
 
-  SG::AuxElement to (this, index);
   if (!p) {
     if (!skipDestClear) {
       AuxElement::clearAuxHelper (*this, index);
