@@ -405,7 +405,7 @@ namespace ExpressionParsing {
          // be used.
          the_variable_type = variable_type;
       }
-      assert((the_variable_type == IProxyLoader::VT_UNK && m_accessor == true)  );
+      assert((the_variable_type == IProxyLoader::VT_UNK || the_variable_type == IProxyLoader::VT_VECEMPTY || m_accessor == true)  );
 
       switch( the_variable_type ) {
       case IProxyLoader::VT_INT:
