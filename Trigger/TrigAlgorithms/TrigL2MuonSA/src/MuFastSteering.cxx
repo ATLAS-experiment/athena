@@ -311,12 +311,9 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
     auto muFastContainer = SG::makeHandle(m_muFastContainerKey, ctx);
     ATH_CHECK(muFastContainer.record(std::make_unique<xAOD::L2StandAloneMuonContainer>(), std::make_unique<xAOD::L2StandAloneMuonAuxContainer>()));
 
-    xAOD::TrigCompositeContainer* muCompositeContainer{nullptr};
-    if (!m_muCompositeContainerKey.empty()){
-      SG::WriteHandle<xAOD::TrigCompositeContainer> wh_muCompositeCont(m_muCompositeContainerKey, ctx);
-      ATH_CHECK(wh_muCompositeCont.record(std::make_unique<xAOD::TrigCompositeContainer>(), std::make_unique<xAOD::TrigCompositeAuxContainer>()));
-      muCompositeContainer = wh_muCompositeCont.ptr();
-    }
+    auto muCompositeContainer = std::make_unique<xAOD::TrigCompositeContainer>();
+    auto muCompositeAuxContainer = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+    muCompositeContainer->setStore(muCompositeAuxContainer.get());
     
     auto muIdContainer = SG::makeHandle(m_muIdContainerKey, ctx);
     ATH_CHECK(muIdContainer.record(std::make_unique<TrigRoiDescriptorCollection>()));
@@ -357,9 +354,14 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
     }
     else {
         ATH_CHECK(findMuonSignature(internalRoI, recRoIVector,
-                    *muFastContainer, muCompositeContainer, *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
+				    *muFastContainer, muCompositeContainer.get(), *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
     }
 
+    if (!m_muCompositeContainerKey.empty()){
+      SG::WriteHandle<xAOD::TrigCompositeContainer> wh_muCompositeCont(m_muCompositeContainerKey, ctx);
+      ATH_CHECK(wh_muCompositeCont.record(std::move(muCompositeContainer), std::move(muCompositeAuxContainer)));
+    }
+    
     if (msgLvl(MSG::DEBUG)) {
         // DEBUG TEST: Recorded data objects
         ATH_MSG_DEBUG("Recorded data objects");
@@ -689,11 +691,9 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
         }
         // if it's a data scouting chain
         if ( m_calDataScouting ) {
-            
             ATH_MSG_DEBUG("Retrieved the buffer, with size: " << localBuffer.size());
 
             // create the TrigCompositeContainer to store the calibration buffer
-            // add the trigcomposite object to the container outputMuonCal
             xAOD::TrigComposite* tc = new xAOD::TrigComposite();
 	    if (outputMuonCal){
 	      outputMuonCal->push_back(tc);
@@ -702,11 +702,10 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 	      ATH_MSG_ERROR("Trying to fill nullptr container.");
 	      return StatusCode::FAILURE;
 	    }
-	      
 	    
-            // set the detail of the trigcomposite object
             tc->setDetail("muCalibDS", localBuffer );
-            }
+	      
+	}
         }
 
         ++p_roids;
