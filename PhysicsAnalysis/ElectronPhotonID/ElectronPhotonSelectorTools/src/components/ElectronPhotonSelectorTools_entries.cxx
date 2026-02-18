@@ -7,6 +7,9 @@
 #include "ElectronPhotonSelectorTools/AsgDeadHVCellRemovalTool.h"
 #include "ElectronPhotonSelectorTools/AsgForwardElectronLikelihoodTool.h"
 #include "ElectronPhotonSelectorTools/AsgElectronSelectorTool.h"
+#include "ElectronPhotonSelectorTools/AsgForwardElectronCalibrationTool.h"
+#include "ElectronPhotonSelectorTools/AsgForwardElectronSelectorTool.h"
+
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -20,3 +23,5 @@ DECLARE_COMPONENT( AsgElectronChargeIDSelectorTool )
 DECLARE_COMPONENT( AsgDeadHVCellRemovalTool )
 DECLARE_COMPONENT( AsgForwardElectronLikelihoodTool )
 DECLARE_COMPONENT( AsgElectronSelectorTool )
+DECLARE_COMPONENT( AsgForwardElectronCalibrationTool )
+DECLARE_COMPONENT( AsgForwardElectronSelectorTool )
