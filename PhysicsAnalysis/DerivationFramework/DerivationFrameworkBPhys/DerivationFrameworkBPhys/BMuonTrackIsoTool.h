@@ -59,11 +59,11 @@ namespace DerivationFramework {
     virtual std::string muLinkName();
     
   public:
-    mutable std::vector<float>  vIsoValues;
-    mutable std::vector<int>    vNTracks;
-    mutable MuonBag             vMuons;
-    mutable TrackBag            vTracks;
-    mutable ElectronBag         vElectrons;
+    std::vector<float>  vIsoValues;
+    std::vector<int>    vNTracks;
+    MuonBag             vMuons;
+    TrackBag            vTracks;
+    ElectronBag         vElectrons;
   }; // MuIsoItem 
   protected:
     class TrackIsoItem : public BaseItem {
@@ -83,9 +83,9 @@ namespace DerivationFramework {
     virtual std::string trackLinkName();
     
   public:
-    mutable std::vector<float>  vIsoValues;
-    mutable std::vector<int>    vNTracks;
-    mutable TrackBag             vTracks;
+    std::vector<float>  vIsoValues;
+    std::vector<int>    vNTracks;
+    TrackBag             vTracks;
   }; // TrackIsoItem 
 
   public: 
