@@ -25,7 +25,7 @@ namespace MuonR4{
     }
      template <typename Key_t,
                 typename... OtherKey_t>
-    StatusCode RegionSelectorCondAlg::addDependency(const EventContext& ctx,
+    StatusCode RegionSelectorCondAlg::addCondDependency(const EventContext& ctx,
                                 SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
                                const SG::ReadCondHandleKey<Key_t>& key,
                                OtherKey_t... others) const {
@@ -38,7 +38,7 @@ namespace MuonR4{
             writeHandle.addDependency(readHandle);
         }
         if constexpr(sizeof...(others) > 0) {
-            ATH_CHECK(addDependency(ctx, writeHandle, others...));
+            ATH_CHECK(addCondDependency(ctx, writeHandle, others...));
         }
         return StatusCode::SUCCESS;
     }
@@ -107,8 +107,8 @@ namespace MuonR4{
             return StatusCode::SUCCESS;
         }
         writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
-        ATH_CHECK(addDependency(ctx, writeHandle, m_alignKey, m_cablingMdtKey, 
-                                                  m_cablingRpcKey, m_cablingTgcKey));
+        ATH_CHECK(addCondDependency(ctx, writeHandle, m_alignKey, m_cablingMdtKey,
+                                                      m_cablingRpcKey, m_cablingTgcKey));
 
         auto writeCdo = std::make_unique<RegSelSiLUT>();
         const ActsTrk::DetectorAlignStore* alignDeltas{nullptr};
