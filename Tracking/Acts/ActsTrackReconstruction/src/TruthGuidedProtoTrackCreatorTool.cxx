@@ -143,7 +143,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
  
 
   // Covariance - let's be honest and say we have no clue ;-) 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= 100000; 
 
   // some ACTS paperwork 

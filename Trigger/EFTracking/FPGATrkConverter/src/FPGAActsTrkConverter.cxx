@@ -176,7 +176,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   params << d0, z0, phi, theta, qop, t; 
 
   // Covariance - TODO
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= (GeVToMeV*GeVToMeV); 
 
   // some ACTS paperwork 
@@ -218,7 +218,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   ATH_MSG_DEBUG("\td0= " << d0 << " z0=" <<z0 << " phi=" <<phi << " theta=" << theta<< " qoverp=" << qop);
 
   // Covariance - let's be honest and say we have no clue ;-) 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   
   (cov)(0,0) *= 0.16; // d0: 0.4 **2 (conservative)
   (cov)(1,1) *= 25; // z0: 5**2 = 25 (conservative)

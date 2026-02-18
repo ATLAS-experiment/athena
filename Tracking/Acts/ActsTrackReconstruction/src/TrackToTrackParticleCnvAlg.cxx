@@ -552,7 +552,7 @@ namespace ActsTrk
 
              auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
              if (curvilinear_cov_result.has_value()) {
-                Acts::BoundSquareMatrix &curvilinear_cov = curvilinear_cov_result.value();
+                Acts::BoundMatrix &curvilinear_cov = curvilinear_cov_result.value();
 
                 // convert q/p components from GeV (Acts) to MeV (Athena)
                 for (unsigned int col_i=0; col_i<4; ++col_i) {

@@ -316,7 +316,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       // TODO: check if the following works as well:
       // cov->col(4) *= 1./1_MeV;
       // cov->row(4) *= 1./1_MeV;
-      Acts::BoundSquareMatrix covMat;
+      Acts::BoundMatrix covMat;
       covMat << cov(0,0) , cov(0,1) , cov(0,2) , cov(0,3) , cov(0,4) *1./(1_MeV), 0      
       , cov(1,0) , cov(1,1) , cov(1,2) , cov(1,3) , cov(1,4) *1./(1_MeV) , 0
       , cov(2,0) , cov(2,1) , cov(2,2) , cov(2,3) , cov(2,4) *1./(1_MeV) , 0
