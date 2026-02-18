@@ -19,6 +19,7 @@ class TrigBphysMonAlgBuilder:
   monitored_mumu_list = []
   monitored_mumux_list = []
   monitored_elel_list = []
+  monitored_bhh_list = []
 
   __acceptable_keys_list=['useMonGroups']
   useMonGroups = True
@@ -74,6 +75,8 @@ class TrigBphysMonAlgBuilder:
           return "MuMuX"
         elif "_bBee" in self.chain() :
           return "ElEl"
+        elif "_bBhh" in self.chain() :
+          return "Bhh"
         else :
           return "Unknown"
         
@@ -144,6 +147,8 @@ class TrigBphysMonAlgBuilder:
       # ElEl
       'HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary',
       'HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary',
+      # Bhh
+      'HLT_mu10_bBhh_L1MU8F',
       ]
     
     for chain in monitoring_bphys :
@@ -154,16 +159,20 @@ class TrigBphysMonAlgBuilder:
         self.monitored_mumux_list.append(chain)
       elif info.getTopo() == "ElEl" :
         self.monitored_elel_list.append(chain)
+      elif info.getTopo() == "Bhh" :
+        self.monitored_bhh_list.append(chain)
 
     self.__logger.info('  Configured bphys MuMu chains: %s',self.monitored_mumu_list)
     self.__logger.info('  Configured bphys MuMuX chains: %s',self.monitored_mumux_list)
     self.__logger.info('  Configured bphys ElEl chains: %s',self.monitored_elel_list)
+    self.__logger.info('  Configured bphys Bhh chains: %s',self.monitored_bhh_list)
     
     self.monitored_containers = ['HLT_DimuEF',
                                  'HLT_Bmumux',
                                  'HLT_Bmutrk',
                                  'HLT_DiElecPrecisionGSF', 
                                  'HLT_NoMuonDiElecPrecisionGSF',
+                                 'HLT_Bhh',
                                  ]
     
     self.require_explicit_ES_decision = False
@@ -214,6 +223,7 @@ class TrigBphysMonAlgBuilder:
     self.bphysMonAlg.ChainNames_MuMu = self.monitored_mumu_list
     self.bphysMonAlg.ChainNames_MuMuX = self.monitored_mumux_list
     self.bphysMonAlg.ChainNames_ElEl = self.monitored_elel_list
+    self.bphysMonAlg.ChainNames_Bhh = self.monitored_bhh_list
     
     self.bphysMonAlg.requireExplicitESDecision = self.require_explicit_ES_decision
 
@@ -247,7 +257,7 @@ class TrigBphysMonAlgBuilder:
 
 
   def bookChains(self):
-    fullChainList = self.monitored_mumu_list + self.monitored_mumux_list + self.monitored_elel_list
+    fullChainList = self.monitored_mumu_list + self.monitored_mumux_list + self.monitored_elel_list + self.monitored_bhh_list
     for chain in fullChainList :
       monGroupName = 'Chain_'+chain
       monGroupPath = 'Chains/'+chain
@@ -267,7 +277,9 @@ class TrigBphysMonAlgBuilder:
       elif chain in self.monitored_elel_list :
         self.bookBphysObjectHists(chain, monGroup, "diel")
         self.bookLeptonHists(chain, monGroup, "el")
-        
+      elif chain in self.monitored_bhh_list :
+        self.bookBphysObjectHists(chain, monGroup, "B")
+        self.bookTrkHists(chain, monGroup)
         
   def bookOfflineDimuons(self):
     fullOfflDimuList = self.monitored_mumu_list + self.monitored_mumux_list + ["Any"]
