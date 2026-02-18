@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -22,7 +22,6 @@
 #include <mutex>
 
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
 
 //'ordinary' Look-up & its Builder
