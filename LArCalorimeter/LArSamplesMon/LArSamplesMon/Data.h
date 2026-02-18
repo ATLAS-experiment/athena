@@ -159,10 +159,10 @@ namespace LArSamples {
       
       const DataContainer* dissolve();
 
-      SimpleShape* referenceShape() const; 
+      std::unique_ptr<SimpleShape> referenceShape() const;
       SimpleShape* timeAlignedShape() const;
 
-      const ScaledErrorData* scaledErrorData() const; 
+      std::unique_ptr<const ScaledErrorData> scaledErrorData() const;
       
       const History* history() const { return m_history; }
       short index() const { return m_index; }

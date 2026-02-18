@@ -187,14 +187,14 @@ SimpleShape* Data::timeAlignedShape() const
 }
 
 
-SimpleShape* Data::referenceShape() const
+std::unique_ptr<SimpleShape> Data::referenceShape() const
 {
   if (!m_history) return nullptr;
   return m_history->referenceShape(m_index);
 }
 
 
-const ScaledErrorData* Data::scaledErrorData() const
+std::unique_ptr<const ScaledErrorData> Data::scaledErrorData() const
 {
   if (!m_history) return nullptr;
   return m_history->scaledErrorData(m_index);
@@ -239,7 +239,7 @@ double Data::_chi2_k(const DataFuncArgs& args) const
 bool Data::calcRefit(double& chi2, double& k, double& dT) const
 {
   ShapeFitter fitter;
-  std::unique_ptr<SimpleShape> reference (referenceShape());
+  std::unique_ptr<SimpleShape> reference = referenceShape();
   if (!reference){
    return false;
   }
@@ -276,7 +276,7 @@ double Data::_refitChi2(const DataFuncArgs&) const
 bool Data::calcAdjust(double& k, double& dT) const
 {
   if (!m_history) return false;
-  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
+  std::unique_ptr<OFC> ofc = m_history->ofc(m_index);
   if (!ofc) return false;
   
   k = ofc->A(*this)/adcMax();
@@ -446,7 +446,7 @@ double Data::residual(short sample) const
 double Data::resCorrN(ShapeErrorType type) const
 {
   if (!m_history) return -999;
-  const ShapeErrorData* sed = m_history->shapeErrorData(gain(), type);
+  std::unique_ptr<const ShapeErrorData> sed = m_history->shapeErrorData(gain(), type);
   return (sed ? sed->n() : 0);
 }
 
@@ -464,7 +464,7 @@ double Data::xi(short sample, ShapeErrorType type, CaloGain::CaloGain g, bool xi
   if (!m_history) return -999;
   //njpb don't see the point of next line, commenting out
   //if (g != CaloGain::UNKNOWNGAIN && type != RingShapeError) type = CellShapeError;
-  std::unique_ptr<const ShapeErrorData> sed (m_history->shapeErrorData(g == CaloGain::UNKNOWNGAIN ? gain() : g, type));
+  std::unique_ptr<const ShapeErrorData> sed = m_history->shapeErrorData(g == CaloGain::UNKNOWNGAIN ? gain() : g, type);
   if (!sed) return -999;
   double val = (sed->isInRange(sample) ? (xip ? sed->xip()(sample) : sed->xi()(sample)) : -999);
   return val;
@@ -474,7 +474,7 @@ double Data::xi(short sample, ShapeErrorType type, CaloGain::CaloGain g, bool xi
 double Data::xiNorm(ShapeErrorType type) const
 {
   if (!m_history) return -1;
-  std::unique_ptr<const ShapeErrorData> sed (m_history->shapeErrorData(gain(), type));
+  std::unique_ptr<const ShapeErrorData> sed = m_history->shapeErrorData(gain(), type);
   if (!sed) return -1;
   double val = TMath::Sqrt(sed->xi().Norm2Sqr());
   return val;
@@ -567,7 +567,7 @@ double Data::_ofcSigma(const DataFuncArgs& args) const
 {
   double result = -9999;
   if (!m_history) return result;
-  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
+  std::unique_ptr<OFC> ofc = m_history->ofc(m_index);
   if (ofc->isInRange(args.i1))
     result = TMath::Sqrt(ofc->Gamma()(args.i1, args.i1));
   return result;
@@ -578,7 +578,7 @@ double Data::_ofcGamma(const DataFuncArgs& args) const
 {
   double result = -9999;
   if (!m_history) return result;
-  std::unique_ptr<OFC> ofc (m_history->ofc(m_index));
+  std::unique_ptr<OFC> ofc = m_history->ofc(m_index);
   if (ofc->isInRange(args.i1) && ofc->isInRange(args.i2))
     result = ofc->Gamma()(args.i1, args.i2);
   return result;

@@ -755,7 +755,8 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
 }
 
 
-bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const
+bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event,
+                     std::vector<std::unique_ptr<const Data> >& data) const
 {
   if (hashes != m_neighborHistoryPos) {
     m_neighborHistories.clear();
@@ -770,7 +771,7 @@ bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& ev
   for (const std::unique_ptr<const History>& history : m_neighborHistories) {
     if (!history) continue;
     const Data* dataForEvent = history->data_for_event(event);
-    if (dataForEvent) data.push_back(new Data(*dataForEvent));
+    if (dataForEvent) data.push_back(std::make_unique<Data>(*dataForEvent));
   }
   return true;
 }

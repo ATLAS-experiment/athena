@@ -74,7 +74,7 @@ namespace LArSamples {
 
       bool neighbors(const CellInfo& cell, double dRCut, std::vector<unsigned int>& hashes) const;
       bool firstNeighbors(unsigned int hash, std::vector<unsigned int>& hashes, short layer = -2) const;
-      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const;
+      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<std::unique_ptr<const Data> >& data) const;
     
       std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName) const;
       std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName, const TString& LBFile) const;
