@@ -33,17 +33,19 @@ def HIEventSelectionRun3Cfg(flags):
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    # test needs to wait for files to be on CVMFS
-    inputAOD = f"{defaultTestFiles.d}/DerivationFrameworkART/data18_hi.00365602.physics_HardProbes.merge.AOD.f1021_m2037._lb0203._0001.1"
-    # let me keep it for the moment as it helps in development
-    # inputAOD = "/ATLAS/tbold/DATA/data18_hi.00365709.physics_HardProbes.merge.AOD.r16298_p6665/AOD.45808281._001414.pool.root.1"
-    # inputAOD= "/ATLAS/tbold/DATA/data25_hi.00501879.physics_MinBias.merge.AOD.f1606_m2272/data25_hi.00501879.physics_MinBias.merge.AOD.f1606_m2272._lb0142._0040.1"
+    data_hi="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/data_hi/"
+    test_files = {"23":"data23_hi.00463364.physics_HardProbes.AOD.r16069_p6447_skim",
+                  "24":"data24_hi.00490145.physics_HardProbes.AOD.f1550_m2267_skim",
+                  "25OO": "data25_hi.00501859.physics_MinBias.AOD.f1606_m2272_skim", 
+                  "25NeNe": "data25_hi.00502008.physics_MinBias.AOD.f1606_m2272_skim",
+                  "25pO": "data25_hip.00501607.physics_MinBias.AOD.f1604_m2272_skim" }
+    
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
     flags = initConfigFlags()
+    flags.addFlag("HIPeriodToTest", "23")
     flags.Exec.MaxEvents=10
-    flags.Input.Files=[inputAOD]
+    flags.Input.Files=lambda fl: [data_hi+test_files[fl.HIPeriodToTest]]
     flags.lock()
 
     acc=MainServicesCfg(flags)
