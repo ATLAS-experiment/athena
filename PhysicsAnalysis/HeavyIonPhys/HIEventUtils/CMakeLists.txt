@@ -33,7 +33,30 @@ if (NOT XAOD_STANDALONE)
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 
-atlas_add_test( HIEventSelectionRun3
-                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config
+atlas_add_test( HIEventSelectionRun3_25OO
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25OO
+                PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_25NeNe
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25NeNe
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_25pO
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25pO
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_23
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=23
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_24
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=24
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+
 endif()
