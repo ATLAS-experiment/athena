@@ -27,6 +27,9 @@ def main(args):
     cfg.merge(MuonBucketDumpCfg(flags,
                                 DoCaloDump=getattr(args, "doCaloDump", False),
                                 VisualizationTool = cfg.popToolsAndMerge(PatternVisualizationToolCfg(flags, CanvasLimits =0))))
+    if args.doTruthMuonVertexDump:
+        from MuonBucketDump.MuonBucketDumpConfig import TruthMuonVertexDumpCfg
+        cfg.merge(TruthMuonVertexDumpCfg(flags))
 
     executeTest(cfg)
 
@@ -38,6 +41,8 @@ if __name__=="__main__":
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.HITS_PG_R3)
     parser.add_argument("--doCaloDump", action="store_true", default=False, 
                         help="Run calorimeter reconstruction and dump cell energy/position.")
+
+    parser.add_argument("--doTruthMuonVertexDump", action="store_true", help="Run the TruthMuonVertexDumperAlg to dump truth muon vertex information", default=False)
     args = parser.parse_args()
     main(args)
 

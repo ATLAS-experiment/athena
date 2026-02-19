@@ -92,3 +92,9 @@ def CaloCellsDumperCfg(flags, name="CaloCellsDumper", **kwargs):
 
     result.addEventAlgo(CompFactory.MuonR4.CaloCellsDumperAlg(name, **kwargs))
     return result
+
+def TruthMuonVertexDumpCfg(flags, name="TruthMuonVertexDumper", **kwargs):
+    result = ComponentAccumulator()
+    the_alg=CompFactory.MuonR4.TruthMuonVertexDumperAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
