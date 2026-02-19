@@ -24,7 +24,7 @@ public:
    using BASE = PhaseII::IndexedRanges<T_RawDataContainer, std::atomic<PhaseII::DataRange> >;
 
    using ContainerPtr = typename DynamicContainerListHelper<T_RawDataContainer>::ContainerPtr;
-   IndexedRangesMT(unsigned int n_ranges, unsigned int n_slots) : BASE(n_ranges,n_slots) {}
+   IndexedRangesMT(unsigned int n_ranges, unsigned int container_list_size) : BASE(n_ranges,container_list_size) {}
 
    /// @brief get an unused container to add new RDOs.
    /// @return will return an used preallocated container or grow the container list and return a newly
@@ -33,17 +33,6 @@ public:
    /// new storage will need to be allocated which is mutex protected.
    ContainerPtr getNewContainerPtr() {
       return m_containerListHelper.getNewContainer(this->m_containers);
-   }
-
-   /// @brief Add a new container to the list of containers and return its index.
-   /// if the container list capacity is not exhausted a new container list will be created with
-   /// a larger capacity and the contents of the current list will be copied to it. All future
-   /// requests will use that new list, but the old list is kept arround since there may still
-   /// be users, and there is no reference counting.
-   unsigned int getNewContainerIndex() {
-      ContainerPtr container_ptr = getNewContainerPtr();
-      unsigned int container_index = container_ptr.containerId();
-      return container_index < this->slotsMax() ? container_index : std::numeric_limits<unsigned int>::max();
    }
 
 private:

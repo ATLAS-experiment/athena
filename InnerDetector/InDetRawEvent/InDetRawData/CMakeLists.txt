@@ -3,20 +3,11 @@
 # Declare the package name:
 atlas_subdir( InDetRawData )
 
-find_library(ATLAS_ATOMIC_LIB NAMES atomic
-   HINTS ENV LD_LIBRARY_PATH
-   DOC "Path to the atomic library to use during the build")
-mark_as_advanced(ATLAS_ATOMIC_LIB)
-set(ATLAS_ATOMIC_LIBS)
-if (ATLAS_ATOMIC_LIB)
-   set(ATLAS_ATOMIC_LIBS ${ATLAS_ATOMIC_LIB})
-endif()
-
 # Component(s) in the package:
 atlas_add_library( InDetRawData
                    src/*.cxx
                    PUBLIC_HEADERS InDetRawData
-                   LINK_LIBRARIES ${ATLAS_ATOMIC_LIBS} AthenaKernel AthContainers AthLinks Identifier EventContainers
+                   LINK_LIBRARIES AthenaKernel AthContainers AthLinks Identifier EventContainers
                    PRIVATE_LINK_LIBRARIES GaudiKernel )
 
 atlas_add_dictionary( InDetRawDataDict

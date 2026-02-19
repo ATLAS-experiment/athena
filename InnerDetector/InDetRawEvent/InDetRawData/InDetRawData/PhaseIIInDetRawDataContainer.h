@@ -29,39 +29,68 @@ namespace PhaseII {
       static auto value(const T &value) requires (  isAtomic<T> ) { return value.load(); }
    };
 
-   /// @brief Type describing a range of elements living in a container of one of N slots.
+   /// @brief Type describing a range of elements living in a one of N containers.
    ///
-   /// The types of the index of the first element, number of elements, and container slot index
+   /// The types of the index of the first element, number of elements, and container index
    /// are chosen such that the resulting struct does not exceed 64 bits to allow for an atomic
    /// update of a range.
    /// @TODO make members private ?
-   struct DataRange {
-      std::uint32_t m_beginIndex{};     ///< the index of the first element in the range in the container of the given slot index
-      std::uint16_t m_n{};              ///< the number of elements in this range.
-      std::uint16_t m_containerIndex{}; ///< the index which identifies the the container within a container collection
+   struct  DataRange {
+      using RangeBeginIndex_t = std::uint32_t;
+      using RangeSize_t = std::uint16_t;
+      using ContainerIndex_t = std::uint16_t;
+      // wrap members of the DataRange into union to convince clang to
+      // use this type as a value for a lock free atomic.
+      union {
+         struct Range {
+            RangeBeginIndex_t m_beginIndex{};    ///< the index of the first element in the range in the container defined by the container index
+            RangeSize_t m_n{};                   ///< the number of elements in this range.
+            ContainerIndex_t m_containerIndex{}; ///< the index which identifies the the container within a container collection
+         } m_range;
+         std::uint64_t m_compactRange;
+      } m_payload;
 
-      std::uint16_t containerIndex() const { return m_containerIndex; }
-      unsigned int beginIndex() const { return m_beginIndex;}
-      unsigned int endIndex() const { return m_beginIndex + m_n; }
-      std::uint16_t size() const { return m_n; }
-      bool empty() const { return m_n==0u; }
+      DataRange() : m_payload{.m_compactRange = std::uint64_t{} }{}
+      DataRange(std::uint64_t compact_range) : m_payload{.m_compactRange = compact_range }{}
+      DataRange(unsigned int  begin_val, unsigned int n, unsigned int idx)
+         : m_payload{ .m_range = {static_cast<std::uint32_t>(begin_val), static_cast<std::uint16_t>(n), static_cast<std::uint16_t>(idx)} }
+      {
+         assert(begin_val<std::numeric_limits<std::uint32_t>::max());
+         assert(n<std::numeric_limits<std::uint16_t>::max());
+         assert(idx<std::numeric_limits<std::uint16_t>::max());
+      }
+      DataRange(std::uint32_t begin_val, std::uint16_t  n, std::uint16_t idx)
+         : m_payload{ .m_range= {begin_val, n, idx} }
+      {
+      }
+      std::uint64_t makeCompact() const {
+         static_assert( sizeof(m_payload.m_range) == sizeof(std::uint64_t));
+         return m_payload.m_compactRange;
+      }
+
+      void setSize(RangeSize_t new_size) { m_payload.m_range.m_n=new_size; }
+      std::uint16_t containerIndex() const { return m_payload.m_range.m_containerIndex; }
+      unsigned int beginIndex() const { return m_payload.m_range.m_beginIndex;}
+      unsigned int endIndex() const { return m_payload.m_range.m_beginIndex + m_payload.m_range.m_n; }
+      std::uint16_t size() const { return m_payload.m_range.m_n; }
+      bool empty() const { return m_payload.m_range.m_n==0u; }
       template <typename T_ElementIndex, typename T_ContainerIndex>
       static DataRange makeDataRange(T_ElementIndex begin_index,
                                      T_ElementIndex end_index,
                                      T_ContainerIndex container_index) {
          // ensure that the inputs are within the allowed range in (debug build only!)
          // @TODO check some of these always during runtime ?
-         //       Replace this convenience method into a constructor ? But here an exception could be thrown, where
-         //       a constructor should not.
+         //       Replace this convenience method into a constructor ? But an exception could be thrown here.
          assert( end_index >= begin_index ) ;
          assert( static_cast<std::uint32_t>(begin_index) == begin_index);
          assert( static_cast<std::size_t>(end_index -  begin_index) < std::numeric_limits<std::uint16_t>::max());
          assert( static_cast<std::uint16_t>(container_index) == container_index);
-         return DataRange{static_cast<std::uint32_t>(begin_index),
+         return DataRange(static_cast<std::uint32_t>(begin_index),
                           static_cast<std::uint16_t>(end_index - begin_index),
-                          static_cast<std::uint16_t>(container_index)};
+                          static_cast<std::uint16_t>(container_index));
       }
    };
+
 
    /// @brief Helper class to associate ranges of elements in multiple containers to a contiguous index.
    ///
