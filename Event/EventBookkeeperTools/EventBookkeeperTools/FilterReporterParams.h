@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -30,8 +30,7 @@ class StatusCode;
 /// recording filter decisions by algorithms, i.e. calling
 /// setFilterPassed() on the algorithm base class.  This allows to
 /// selectively add filter capabilties to algorithms without having
-/// to derive from a dedicated algorithm class like
-/// `AthFilterAlgorithm`.
+/// to derive from a dedicated class.
 ///
 /// One of the particular reasons to handle filter decisions through
 /// a handle is that it makes it fairly easy to add instrumentation
