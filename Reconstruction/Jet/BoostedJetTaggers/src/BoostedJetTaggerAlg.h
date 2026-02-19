@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -15,8 +15,9 @@
 
 
 #include <AthenaBaseComps/AthAlgorithm.h>
-
 #include <AthContainers/ConstDataVector.h>
+#include <SystematicsHandles/SysListHandle.h>
+#include <SystematicsHandles/SysReadHandle.h>
 #include <xAODJet/JetContainer.h>
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
@@ -38,8 +39,9 @@ namespace BJT{
 
         private:
 
-            SG::ReadHandleKey<xAOD::JetContainer> m_jets{ this, "jets", "", "jet container to read"};
-            
+            CP::SysListHandle m_systematicsList{this};
+            CP::SysReadHandle<xAOD::JetContainer> m_jets{ this, "jets", "", "jet container to read"};
+
             // jet tagger
             // ToDo: should add interface?
             ToolHandle<JSSTaggerBase> m_tagger {this, "tagger", "", "Tagger Tool"};

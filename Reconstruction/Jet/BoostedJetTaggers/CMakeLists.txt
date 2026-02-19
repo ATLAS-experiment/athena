@@ -53,7 +53,7 @@ else()
    atlas_add_component( BoostedJetTaggers
       src/components/*.cxx
       src/*.cxx
-      LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib)
+      LINK_LIBRARIES BoostedJetTaggersLib JetCalibToolsLib SystematicsHandlesLib)
 endif()
 
 atlas_add_dictionary( BoostedJetTaggersDict
