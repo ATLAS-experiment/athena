@@ -780,7 +780,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
     def __init__ (self) :
         super (ElectronTriggerAnalysisSFBlock, self).__init__ ()
 
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
         self.addOption ('electronID', '', type=str,

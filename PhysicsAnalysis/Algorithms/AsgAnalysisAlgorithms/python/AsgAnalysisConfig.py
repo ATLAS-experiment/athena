@@ -199,21 +199,21 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
-        self.addOption ('files', None, type=None,
+        self.addOption ('files', None, type=list,
             info="the input files being processed (list of strings). "
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
-        self.addOption ('userLumicalcFiles', None, type=None,
+        self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=dict,
             info="user-provided lumicalc files (dictionary of list of strings, "
             "with MC campaigns as the keys). Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigs', None, type=None,
+        self.addOption ('userPileupConfigs', None, type=list,
             info="user-provided PRW files (list of strings). Alternative to "
             "auto-configuration.")
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+        self.addOption ('userPileupConfigsPerCampaign', None, type=dict,
             info="user-provided PRW files (dictionary of list of strings, with "
             "MC campaigns as the keys).")
         self.addOption ('postfix', '', type=str,

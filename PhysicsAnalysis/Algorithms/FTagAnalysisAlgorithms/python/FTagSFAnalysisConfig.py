@@ -87,7 +87,7 @@ class FTagJetSFBlock(ConfigBlock):
             "eigenvector decomposition exclusion lists.")
         self.addOption ('savePerJetSF', False, type=bool,
             info="whether or not to save the per-jet FTAG SF as output variable.")
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,
@@ -286,7 +286,7 @@ class FTagEventSFBlock(ConfigBlock):
             info="the flavour tagging WP.")
         self.addOption('btagger', "GN2v01", type=str,
             info="the flavour tagging algorithm: `DL1dv01`, `GN2v01`.")
-        self.addOption ('triggerChainsPerYear', {}, type=None,
+        self.addOption ('triggerChainsPerYear', {}, type=dict,
             info="a dictionary with key (string) the year and value (list of "
             "strings) the trigger chains.")
         self.addOption ('includeAllYearsPerRun', False, type=bool,

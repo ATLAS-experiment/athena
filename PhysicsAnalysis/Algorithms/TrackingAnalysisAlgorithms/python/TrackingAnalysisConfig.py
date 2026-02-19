@@ -240,7 +240,7 @@ class InDetTrackWorkingPointConfig (ConfigBlock):
             expertMode=["NoCut", "LoosePrimary", "LooseElectron",
             "LooseMuon", "LooseTau", "MinBias", "HILoose", "HITight",
             "HILooseOptimized", "HITightOptimized"])
-        self.addOption ('additionalCuts', None, type=None,
+        self.addOption ('additionalCuts', None, type=dict,
             info="additional cuts to modify the selection WP. Only meant for "
             "expert studies of track selection. Passed as pairs of `cutName: value`. "
             "For an overview of available cuts, see twiki.cern.ch/twiki/bin/viewauth/"
