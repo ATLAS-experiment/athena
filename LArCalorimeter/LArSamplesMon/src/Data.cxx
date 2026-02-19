@@ -181,9 +181,9 @@ short Data::minSample() const
 }
 
 
-SimpleShape* Data::timeAlignedShape() const
+std::unique_ptr<SimpleShape> Data::timeAlignedShape() const
 {
-  return new SimpleShape(*this, 1, -ofcTime());
+  return std::make_unique<SimpleShape>(*this, 1, -ofcTime());
 }
 
 

@@ -328,7 +328,7 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
   if (!mt){
     return 0;
   } 
-  std::vector<MultiTreeAccessor*> filtered_mts = mt->filterComponents(filterList, tweak);
+  std::vector<std::unique_ptr<MultiTreeAccessor> > filtered_mts = mt->filterComponents(filterList, tweak);
   if (filtered_mts.size() != filterList.size()){
     return 0;
   } 
@@ -342,7 +342,6 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
       files.push_back(((const TreeAccessor*)&filtered_mts[f]->accessor(i))->fileName());
       cout << "Added " << files.back() << endl;
     }
-    delete filtered_mts[f];
     std::unique_ptr<const Interface> filtered_multi = open(files);
     //
     std::vector<const Interface*> justOne { filtered_multi.get() };

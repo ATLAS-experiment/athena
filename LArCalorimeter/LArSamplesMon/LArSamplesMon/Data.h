@@ -160,7 +160,7 @@ namespace LArSamples {
       const DataContainer* dissolve();
 
       std::unique_ptr<SimpleShape> referenceShape() const;
-      SimpleShape* timeAlignedShape() const;
+      std::unique_ptr<SimpleShape> timeAlignedShape() const;
 
       std::unique_ptr<const ScaledErrorData> scaledErrorData() const;
       

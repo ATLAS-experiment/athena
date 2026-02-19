@@ -268,10 +268,13 @@ bool MultiTreeAccessor::writeToFile(const TString& fileName) const
 }
 
 
-std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const
+std::vector<std::unique_ptr<MultiTreeAccessor> >
+MultiTreeAccessor::filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const
 {
   std::vector< std::vector<std::unique_ptr<const TreeAccessor> > > filteredAccessors(filterList.size());
   
+  std::vector<std::unique_ptr<MultiTreeAccessor> > result;
+
   for (unsigned int i = 0; i < nAccessors(); i++) {
     const TreeAccessor* treeAcc = dynamic_cast<const TreeAccessor*>(&accessor(i));
     cout << "Processing data " << i << " of " << nAccessors();
@@ -297,12 +300,12 @@ std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const Filter
     std::vector<std::unique_ptr<TreeAccessor> > filteredTreeAccs = TreeAccessor::filter(accessor(i), thisFilterList, tweaker);
     if (filteredTreeAccs.size() != filterList.size()) {
       cout << "Filtering failed, exiting" << endl;
-      return std::vector<MultiTreeAccessor*>();
+      return result;
     }
     for (unsigned int f = 0; f < filteredTreeAccs.size(); f++) filteredAccessors[f].push_back(std::move(filteredTreeAccs[f]));
   }
 
-  std::vector<MultiTreeAccessor*> result;
-  for (unsigned int f = 0; f < filteredAccessors.size(); f++) result.push_back(new MultiTreeAccessor(std::move(filteredAccessors[f])));
+  for (unsigned int f = 0; f < filteredAccessors.size(); f++)
+    result.push_back(std::make_unique<MultiTreeAccessor>(std::move(filteredAccessors[f])));
   return result;
 }
