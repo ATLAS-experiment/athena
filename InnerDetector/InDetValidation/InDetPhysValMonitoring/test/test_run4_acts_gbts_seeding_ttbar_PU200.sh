@@ -42,18 +42,22 @@ export ATHENA_CORE_NUMBER=8
 # Run Athena with ACTS fast tracking and GBTS core seeding
 run "Reconstruction-gbts" \
     Reco_tf.py \
-     --CA \
-     --inputRDOFile  ${rdo} \
-     --outputAODFile AOD.gbts.pool.root \
      --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;flags.Tracking.doStoreTrackSeeds=True; \
-flags.Tracking.doStoreSiSPSeededTracks=True;\
-flags.Tracking.ITkActsValidateSeedsPass.storeTrackSeeds=True;\
-flags.Tracking.ITkActsValidateSeedsPass.storeSiSPSeededTracks=True; \
-flags.Tracking.writeExtendedSi_PRDInfo=True;" \
-     --postExec "from OutputStreamAthenaPool.OutputStreamConfig import addToAOD;toAOD=['xAOD::TrackParticleContainer#SiSPSeedSegments*','xAOD::TrackParticleAuxContainer#SiSPSeedSegments*'];cfg.merge(addToAOD(flags,toAOD))" \
-     --maxEvents ${n_events} \
-     --multithreaded
+    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
+               flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.writeExtendedSi_PRDInfo=True; \
+               flags.Acts.doMonitoring=True; \
+               flags.Acts.doAnalysis=True; \
+               flags.Acts.doAnalysisNtuples=False; \
+               flags.DQ.useTrigger=False; \
+               flags.Output.HISTFileName='acts-analysis.gbts.root'" \
+    --inputRDOFile ${rdo} \
+    --outputAODFile AOD.gbts.pool.root \
+    --perfmon fullmonmt \
+    --maxEvents ${n_events} \
+    --multithreaded
+
 
 reco_rc=$?
 
@@ -68,10 +72,11 @@ run "IDPVM-gbts" \
     runIDPVM.py \
     --filesInput AOD.gbts.pool.root \
     --outputFile idpvm.gbts.root \
-    --doExpertPlots \
+    --doHitLevelPlots \
+    --HSFlag All \
     --doTechnicalEfficiency \
-    --OnlyTrackingPreInclude \
-    --validateExtraTrackCollections "SiSPSeedSegmentsActsValidateSeedsTrackParticles"
+    --doExpertPlots \
+    --OnlyTrackingPreInclude
 
 reco_rc=$?
 if [  $reco_rc != 0 -a $reco_rc != 68 ]; then
