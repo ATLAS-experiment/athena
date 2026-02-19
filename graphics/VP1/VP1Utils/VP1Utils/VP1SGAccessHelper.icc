@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Base/VP1Msg.h"
@@ -61,7 +61,7 @@ inline bool VP1SGAccessHelper::retrieve(SG::ConstIterator<T>& begin, SG::ConstIt
 {
 
   if (VP1Msg::verbose())
-    messageVerbose("retrieve(DataHandle<"+QString(typeid(T).name())+">,DataHandle<"
+    messageVerbose("retrieve(SG::ConstIterator<"+QString(typeid(T).name())+">,SG::ConstIterator<"
 		   +QString(typeid(T).name())+">) called.");
   if (!storeGate()) {
     QString str("ERROR Does not have StoreGate pointer. Returning null pointer.");
@@ -78,21 +78,21 @@ inline bool VP1SGAccessHelper::retrieve(SG::ConstIterator<T>& begin, SG::ConstIt
     exception = true;
   }
   if (exception) {
-    QString str("ERROR: Exception thrown during call to StoreGateSvc::retrieve(DataHandle<"
-		+QString(typeid(T).name())+">,DataHandle<"+QString(typeid(T).name())+">)"); 
+    QString str("ERROR: Exception thrown during call to StoreGateSvc::retrieve(SG::ConstIterator<"
+		+QString(typeid(T).name())+">,SG::ConstIterator<"+QString(typeid(T).name())+">)"); 
     silent ? messageVerbose(str) : message(str);
     sc.isFailure();//To make sure it is checked.
     return false;
   }
   if (sc.isFailure()) {
-    QString str( "ERROR: Failed StoreGateSvc::retrieve(DataHandle<"
-		 +QString(typeid(T).name())+">,DataHandle<"
+    QString str( "ERROR: Failed StoreGateSvc::retrieve(SG::ConstIterator<"
+		 +QString(typeid(T).name())+">,SG::ConstIterator<"
 		 +QString(typeid(T).name())+">)");
     silent ? messageVerbose(str) : message(str);
     return false;
   }
 
   if (VP1Msg::verbose())
-    messageVerbose("Successfully retrieved datahandles to "+QString(typeid(T).name())+".");
+    messageVerbose("Successfully retrieved iterators to "+QString(typeid(T).name())+".");
   return true;
 }
