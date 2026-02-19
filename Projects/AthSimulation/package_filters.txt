@@ -50,7 +50,6 @@
 + Control/Navigation
 + Control/PerformanceMonitoring/PerfMonComps
 + Control/PerformanceMonitoring/PerfMonKernel
-+ Control/PyKernel
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
