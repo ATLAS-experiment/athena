@@ -443,10 +443,10 @@ _stdSeqList = [
     JetInputConstitSeq("EMPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'JetETMissParticleFlowObjects', 'CHSParticleFlowObjects'),
 
     # EM-scale particle flow objects with correction to ML cluster scale, with charged hadron subtraction
-    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
+    JetInputConstitSeq("GPFlowML", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalClusterMLCorrectedParticleFlowObjects', 'CHSGlobalClusterMLCorrectedParticleFlowObjects', label = 'EMPFlow',),
 
     # GPFlow are the same than EMPFlow except they have pflow linked to elec or muons filtered out.
-    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
+    JetInputConstitSeq("GPFlow", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects', 'CHSGParticleFlowObjects',
                        label='EMPFlow'),
     
     JetInputConstitSeq("GPFlow_noElectrons", xAODType.FlowElement,["CorrectPFO", "CHS"] , 'GlobalParticleFlowObjects_noElectrons', 'CHSGParticleFlowObjects_noElectrons',
@@ -582,7 +582,15 @@ _stdModList = [
                        prereqs=[inputsFromContext("Vertices")],
                        properties=dict(VertexContainerKey=propFromContext("Vertices"),
                                        WeightPFOTool= _getPFOTool,
-                                       DoByVertex = lambda jdef, _: jdef.byVertex) ), 
+                                       DoByVertex = lambda jdef, _: jdef.byVertex) ),
+    JetConstitModifier("CorrectPFO_neutral", "CorrectPFOTool",
+                       # get the track properties from the context with wich jet will be configured with propFromContext
+                       # See StandardJetContext.py for the default values.
+                       prereqs=[inputsFromContext("Vertices")],
+                       properties=dict(VertexContainerKey=propFromContext("Vertices"),
+                                       CorrectNeutral = True,
+                                       CorrectCharged = False,
+                                       UseChargedWeights = False)),
           
     JetConstitModifier("CHS",    "ChargedHadronSubtractionTool",
                        # get the track properties from the context with wich jet will be configured with propFromContext
