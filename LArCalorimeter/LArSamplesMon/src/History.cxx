@@ -209,7 +209,6 @@ History::ofc(unsigned int k, int lwb, int upb, double time, bool withAutoCorr) c
   if (!reference) return nullptr;
   std::unique_ptr<const ShapeErrorData> sed = shapeErrorData(CaloGain::LARHIGHGAIN);
   auto result = std::make_unique<OFC>(*reference, *m_data[k], lwb, upb, sed.get(), withAutoCorr); // FixMe
-  if (!result) return nullptr;
   if (result->g().GetNrows() == 0) result.reset();
   return result;
 }
