@@ -246,10 +246,6 @@ ATH_FLATTEN
     if (spBegin == spEnd)
       return StatusCode::SUCCESS;
 
-    seedContainer.spacePoints().reserve(std::distance(spBegin, spEnd));
-    for (auto sp = spBegin; sp != spEnd; ++sp) {
-      seedContainer.spacePoints().push_back(&(*sp).externalSpacePoint());
-    }
     std::vector< seed_type > seeds;
 
     // Space Point Grid Options
@@ -352,11 +348,9 @@ ATH_FLATTEN
       seeds.erase(seeds.begin() + acceptedSeeds, seeds.end());     
     }
 
-
-    // Store seeds
-    seedContainer.reserve(seeds.size());
-    for(const auto& seed: seeds) {
-      seedContainer.push_back(&seed);
+    // Convert the seeds
+    for (auto seed : seeds) {
+      seedContainer.push_back(seed);
     }
 
     return StatusCode::SUCCESS;
