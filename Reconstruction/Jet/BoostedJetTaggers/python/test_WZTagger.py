@@ -1,14 +1,14 @@
-# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-from BoostedJetTaggerConfig import qgTagAlgCfg
+from BoostedJetTaggerConfig import WZTagAlgCfg
 
 
 if __name__=='__main__':
 
     # Setup logs
     from AthenaCommon.Logging import log
-    from AthenaCommon.Constants import DEBUG 
-    log.setLevel(DEBUG)
+    from AthenaCommon.Constants import INFO 
+    log.setLevel(INFO)
 
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     fileName = "/eos/atlas/atlascerngroupdisk/perf-jets/TreeStorage/TAGGING/test-files/DAOD/mc20_13TeV.701125.Sh_2214_WlvWqq.deriv.DAOD_PHYS.e8547_s3797_r13145_p7018/DAOD_PHYS.46768158._000231.pool.root.1"
@@ -23,11 +23,10 @@ if __name__=='__main__':
     cfg = MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
 
-    # config files
-    config_file = "/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/QGTagger_AntiKt04PFlow_Transformer.dat"
-    wps_file = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/QGTagger_WPs.root'
+    # config file
+    config_file = "/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/WTagger/"
 
-    testacc = qgTagAlgCfg(flags, tagger='qg', generation='ParT', WP='50',
-                          cfg_file=config_file, wps_file=wps_file)
+    testacc = WZTagAlgCfg(flags, tagger='WZ', generation='ParT', WP='50',
+                          cfg_file=config_file)
     cfg.merge(testacc)
     cfg.run(15)

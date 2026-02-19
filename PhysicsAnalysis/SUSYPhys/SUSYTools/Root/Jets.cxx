@@ -298,8 +298,13 @@ namespace ST {
     }
 
 
-    for (const auto jet : *copy) {
+    // apply boosted jet taggers
+    if (!m_WtagConfig.empty()) 
+      ATH_CHECK(m_WTaggerTool->decorate(*copy));
+    if (!m_ZtagConfig.empty()) 
+      ATH_CHECK(m_ZTaggerTool->decorate(*copy));
 
+    for (const auto jet : *copy) {
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //
       //  For OR, selected if it passed cuts
@@ -414,7 +419,6 @@ namespace ST {
 
           // Retrieve large-R tagging results for W/Z/top
           if (!m_WtagConfig.empty()) {
-            ATH_CHECK(m_WTaggerTool->tag(input));
             // Only tag jets if they are inside the kinematic range
             if ( !acc_wValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R W candidate jet outside of recommended tagging range. Will set score to 0.");
@@ -423,7 +427,6 @@ namespace ST {
             else dec_wtagged(input) = acc_wtagged(input);
           }
           if (!m_ZtagConfig.empty()) {
-            ATH_CHECK(m_ZTaggerTool->tag(input));
             // Only tag jets if they are inside the kinematic range
             if ( !acc_zValidKinRange(input) ) {
               ATH_MSG_VERBOSE("Large-R Z candidate jet outside of recommended tagging range. Will set score to 0.");
