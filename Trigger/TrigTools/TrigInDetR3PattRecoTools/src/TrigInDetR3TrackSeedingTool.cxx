@@ -83,7 +83,7 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
   float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
   float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
 
-  //std::unique_ptr<GNNR3_DataStorage> storage = std::make_unique<GNNR3_DataStorage>(*m_geo);
+  std::unique_ptr<GNNR3_DataStorage> storage = std::make_unique<GNNR3_DataStorage>(*m_geo);
   
   int nPixels = 0;
   int nStrips = 0;
@@ -172,11 +172,9 @@ TrigInDetTrackSeedingResult TrigInDetR3TrackSeedingTool::findSeeds(const IRoiDes
 
       short layerIndex = lColl.first;
 
-      //int layerKey = m_geo->getTrigFTF_GNNR3_LayerByIndex(layerIndex)->m_layer.m_subdet;  // varaiable needed in later Dev
+      int layerKey = m_geo->getTrigFTF_GNNR3_LayerByIndex(layerIndex)->m_layer.m_subdet;
 
-      //bool isPixel = layerKey > 20000;
-
-	  bool isPixel = true;
+      bool isPixel = layerKey > 20000;
 
       auto pCont = isPixel ? pixelSpacePointsContainer : sctSpacePointsContainer;
 

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
-#define TRIGINDETPATTRECOTOOLS_SEEDINGTOOLBASE_H
+#ifndef TRIGINDETR3PATTRECOTOOLS_SEEDINGTOOLBASE_H
+#define TRIGINDETR3PATTRECOTOOLS_SEEDINGTOOLBASE_H
 
 #include "GaudiKernel/ToolHandle.h"
 #include "TrigInDetToolInterfaces/ITrigInDetTrackSeedingTool.h"
@@ -15,8 +15,8 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
-#include "GNNR3_FasTrackConnector.h"
-#include "GNNR3_Geometry.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_FasTrackConnector.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_Geometry.h"
 #include "GNNR3_DataStorage.h"
 
 class AtlasDetectorID;
@@ -40,7 +40,7 @@ class SeedingToolBase: public AthAlgTool {
 
   int runCCA(int, std::vector<GNNR3_Edge>&) const;
   
-  ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
+  ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberTool"};
 
   const AtlasDetectorID* m_atlasId = nullptr;
   const SCT_ID*  m_sctId = nullptr;
@@ -58,7 +58,7 @@ class SeedingToolBase: public AthAlgTool {
   FloatProperty m_minPt{this, "pTmin", 1000.0};
   FloatProperty m_etaBinOverride{this, "etaBin", 0.0f, "specify non-zero to override eta bin width from connection file (default 0.2 in createLinkingScheme.py)"};
   IntegerProperty m_nMaxEdges{this, "MaxGraphEdges", 2000000};
-  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_ITK_RUN4.txt"};
+  StringProperty  m_connectionFile{this, "ConnectionFileName", "binTables_Run3.txt"};
 
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
 

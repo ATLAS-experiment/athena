@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_FASTRACK_CONNECTOR_H
-#define TRIGINDETPATTRECOTOOLS_FASTRACK_CONNECTOR_H
+#ifndef TRIGINDETR3PATTRECOTOOLS_GNNR3_FASTRACK_CONNECTOR_H
+#define TRIGINDETR3PATTRECOTOOLS_GNNR3_FASTRACK_CONNECTOR_H
 
 #include<fstream>
 #include<vector>
@@ -33,7 +33,7 @@ typedef class GNNR3_FasTrackConnector {
 
  public:
 
-  GNNR3_FasTrackConnector(std::ifstream&, bool LRTmode);
+  GNNR3_FasTrackConnector(std::ifstream& inFile, bool LRT_Mode);
   ~GNNR3_FasTrackConnector();
 
   float m_etaBin;

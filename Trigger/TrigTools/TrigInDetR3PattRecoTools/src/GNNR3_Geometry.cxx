@@ -2,8 +2,9 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#include "GNNR3_Geometry.h"
+#include "TrigInDetEvent/TrigSiSpacePointBase.h"
+#include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_Geometry.h"
 
 #include<cmath>
 #include<cstring>

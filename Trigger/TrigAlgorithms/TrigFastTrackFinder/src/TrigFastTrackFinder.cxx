@@ -25,6 +25,7 @@
 #include "TrigInDetEvent/TrigSiSpacePointBase.h"
 #include "TrigInDetPattRecoTools/TrigTrackSeedGenerator.h"
 
+
 //
 #include "InDetIdentifier/SCT_ID.h"
 #include "InDetIdentifier/PixelID.h"
@@ -46,9 +47,12 @@
 #include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "TrigInDetPattRecoTools/TrigTrackSeedGenerator_ITk.h"
 
-#include "TrigInDetPattRecoTools/TrigCombinatorialSettings.h"
-#include "TrigInDetPattRecoTools/TrigSeedML_LUT.h"
 #include "TrigInDetPattRecoTools/TrigInDetUtils.h"
+#include "TrigInDetPattRecoTools/TrigSeedML_LUT.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_Geometry.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/TrigCombinatorialSettings.h"
+
 
 //for UTT
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
@@ -284,7 +288,7 @@ StatusCode TrigFastTrackFinder::initialize() {
   }
   if (m_ITkMode) {
     //read data from layer connections file 
-    std::string conn_fileName = PathResolver::find_file("binTables_ITK_RUN4.txt", "DATAPATH");
+    std::string conn_fileName = PathResolver::find_file(m_connectionFileName, "DATAPATH");
 
     ATH_CHECK(m_spacePointTool.retrieve());
     m_seedingTool.disable();
@@ -302,16 +306,29 @@ StatusCode TrigFastTrackFinder::initialize() {
       ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
     }
   }
-  else {
-    if (m_useGBTSeedingTool){
+  else if (m_useGBTSeedingTool){
+    
+      std::string conn_fileName = PathResolver::find_file(m_connectionFileName, "DATAPATH");
+
       ATH_CHECK(m_seedingTool.retrieve());
-      m_spacePointTool.disable();   
+      m_spacePointTool.disable();
+
+    if (conn_fileName.empty()) {
+      ATH_MSG_WARNING("Cannot find layer connections file " << conn_fileName);
     } 
+    else {
+        
+      ATH_MSG_INFO(conn_fileName);
+      std::ifstream ifs(conn_fileName.c_str());
+
+      m_tcs.m_useEtaBinning = m_useEtaBinning;
+      ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
+    }
+  } 
     else {
       m_seedingTool.disable();
       ATH_CHECK(m_spacePointTool.retrieve());
     }
-  }
 
   // UTT tools
   if( m_doDisappearingTrk ) {

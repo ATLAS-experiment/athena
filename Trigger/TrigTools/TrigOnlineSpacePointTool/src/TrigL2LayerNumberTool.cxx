@@ -101,7 +101,7 @@ void TrigL2LayerNumberTool::report() const {
 
 void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >& hashMap) {
 
-  short subdetid = 1;
+  short subdetid = 1; //Pixel
 
   for(int hash = 0; hash<(int)m_pixelId->wafer_hash_max(); hash++) {
 
@@ -114,16 +114,15 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
     short layer_disk = m_pixelId->layer_disk(offlineId);
     short phi_index = m_pixelId->phi_module(offlineId);
     short eta_index = m_pixelId->eta_module(offlineId);
-    //auto t = std::make_tuple(subdetid, barrel_ec, layer_disk); 
 
     auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, layer_disk); 
 
     std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
     if(it==hashMap.end())
-      hashMap.insert(std::pair<std::tuple<short,short,short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash) )));
+      hashMap.insert(std::pair<std::tuple<short, short, short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash) )));
     else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
   }
-  subdetid = 2;
+  subdetid = 2; //SCT
   for(int hash = 0; hash<(int)m_sctId->wafer_hash_max(); hash++) {
 
     Identifier offlineId = m_sctId->wafer_id(hash);
@@ -135,13 +134,11 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
     short phi_index = m_sctId->phi_module(offlineId);
     short eta_index = m_sctId->eta_module(offlineId);
 
-    //    auto t = std::make_tuple(subdetid, barrel_ec, layer_disk); 
-    
-    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, layer_disk); 
+    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, layer_disk);
 
     std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
     if(it==hashMap.end())
-      hashMap.insert(std::pair<std::tuple<short,short,short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash))));
+      hashMap.insert(std::pair<std::tuple<short, short, short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash))));
     else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
   }
 
@@ -158,8 +155,8 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
 
     short subdetId = std::get<1>((*it).first);
     short barrel_ec = std::get<0>((*it).first);
+
     if(barrel_ec==-100) barrel_ec = 0;
-    //short layer_disc = std::get<2>((*it).first);
 
     if(barrel_ec == 0) m_LastBarrelLayer++;
 
