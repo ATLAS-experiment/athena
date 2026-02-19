@@ -168,7 +168,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
                   ' (e.g. 410.* to select all 410xxx DSIDs, or'
                   ' ^(?!410) to veto them). An empty list means no'
                   ' DSID restriction.'))
-        self.addOption('propertyOverrides', {}, type=None,
+        self.addOption('propertyOverrides', {}, type=dict,
             info=('EXPERT USE ONLY: A dictionary of properties to'
                   ' override at the end of configuration. This should'
                   ' take the form'
@@ -324,7 +324,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
         """
         if name in self._options :
             raise KeyError (f'duplicate option: {name}')
-        if type not in [str, bool, int, float, list, None] :
+        if type not in [str, bool, int, float, list, dict, None] :
             raise TypeError (f'unknown option type: {type}')
         noneActions = ['error', 'set', 'ignore']
         if noneAction not in noneActions :

@@ -17,18 +17,18 @@ class EventCleaningBlock (ConfigBlock):
             "`CP::EventFlagSelectionAlg`).")
         self.addOption ('runGRL', True, type=bool,
             info="whether to run GRL decoration/selection.")
-        self.addOption ('userGRLFiles', [], type=None,
+        self.addOption ('userGRLFiles', [], type=list,
             info="a list of GRL files (list of strings) to select data from.")
         self.addOption ('minTracksPerVertex', 2, type=int,
             info="minimum number of tracks per vertex.")
-        self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=None,
+        self.addOption ('selectionFlags', ['DFCommonJets_eventClean_LooseBad'], type=list,
             info="flags (list of strings) to use for jet cleaning.")
         # This is a vector<bool>, so parsing True/False is not handled
         # in AnalysisBase, but we can evade this with numerical values
-        self.addOption ('invertFlags', [0], type=None,
+        self.addOption ('invertFlags', [0], type=list,
             info="list of booleans determining whether to invert the cut of the "
             "above selectionFlags. In AnalysisBase, use 0/1 values instead.")
-        self.addOption ('GRLDict', {}, type=None, info="a custom GRL dictionary with key some name and value a GRL file. Leaving it empty will use the recommended values.")
+        self.addOption ('GRLDict', {}, type=dict, info="a custom GRL dictionary with key some name and value a GRL file. Leaving it empty will use the recommended values.")
         self.addOption ('noFilter', False, type=bool,
             info="whether to toggle off event filtering.")
         self.addOption ('useRandomRunNumber', False, type=bool,
