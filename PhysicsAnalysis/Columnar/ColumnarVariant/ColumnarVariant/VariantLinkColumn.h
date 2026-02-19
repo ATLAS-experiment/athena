@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -168,7 +168,7 @@ namespace columnar
       {
         template<ContainerIdConcept CI2>
           requires (CI::template isValidContainer<CI2>())
-        auto operator() (MemoryType& link, const ObjectId<CI2,ColumnarModeXAOD>& obj) noexcept
+        auto operator() (MemoryType& link, const ObjectId<CI2,ColumnarModeXAOD>& obj)
         {
           auto* container = static_cast<const typename CIBase::xAODElementLinkType*>(obj.getXAODObjectNoexcept().container());
           link = MemoryType(*container, obj.getXAODObjectNoexcept().index());

@@ -125,7 +125,7 @@ namespace columnar
         MemoryAccessor<CT,CM>::makeSetter(dataPtr)(m_accessor(element), std::forward<T>(value));
       }
 
-      [[nodiscard]] bool isAvailable (const SG::AuxElement& element) const noexcept
+      [[nodiscard]] bool isAvailable (const SG::AuxElement& element) const
       {
         return m_accessor.isAvailable (element);
       }

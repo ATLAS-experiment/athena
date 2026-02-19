@@ -141,8 +141,8 @@ namespace columnar
       {
         auto *offset = static_cast<const ColumnarOffsetType*>(dataArea[m_offsetIndex]);
         return detail::VectorConvertView ([&dataAccessor = m_dataAccessor, dataArea] (const auto& internalIndex) noexcept {
-            const ColumnarOffsetType& endIndex = (&internalIndex)[1];
-            return dataAccessor (dataArea, internalIndex, endIndex);},
+            const ColumnarOffsetType& thisEndIndex = (&internalIndex)[1];
+            return dataAccessor (dataArea, internalIndex, thisEndIndex);},
           std::span<const ColumnarOffsetType> (offset + beginIndex, offset + endIndex));
       }
 
