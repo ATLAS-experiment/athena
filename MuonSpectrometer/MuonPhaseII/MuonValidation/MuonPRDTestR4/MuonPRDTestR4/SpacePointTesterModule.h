@@ -29,7 +29,7 @@ namespace MuonValR4{
            std::string m_collName{};
            SG::ReadHandleKey<MuonR4::SpacePointContainer> m_key{};
            /** @brief Space point bucket information */
-           VectorBranch<uint16_t>& m_bucketNumber{parent().newVector<uint16_t>(m_collName+"bucket_index")};
+           VectorBranch<uint16_t>& m_bucketNumber{parent().newVector<uint16_t>(m_collName+"_bucket_index")};
            /** @brief stationIndex / stationEta / stationPhi of the bucket chamber */
            MuonIdentifierBranch m_bucketId{parent(), m_collName+"_bucket"};
            /** @brief Range of the space point bucket */
@@ -40,7 +40,7 @@ namespace MuonValR4{
 
          
            /** @brief Space point position */
-           ThreeVectorBranch m_spPos{parent(), m_collName+"spacePoint_Position"};
+           ThreeVectorBranch m_spPos{parent(), m_collName+"_spacePoint_Position"};
            /** @brief Space point drift radius */
            VectorBranch<float>& m_driftR{parent().newVector<float>(m_collName+"_spacePointDriftR")};
            /** @brief Covariance of the space point */

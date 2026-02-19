@@ -21,6 +21,8 @@
 #include "MuonPRDTestR4/TgcStripVariables.h"
 #include "MuonPRDTestR4/MmClusterVariables.h"
 
+#include "MuonPRDTestR4/SpacePointTesterModule.h"
+
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/xAODTruthHelpers.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
@@ -41,6 +43,7 @@ namespace MuonValR4 {
         ATH_CHECK(setupSimHits());
         ATH_CHECK(setupDigits());
         ATH_CHECK(setupPrds());
+        ATH_CHECK(setupSpacePoints());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
@@ -153,6 +156,18 @@ namespace MuonValR4 {
         }
         if (m_writeMmPrds) {
             m_tree.addBranch(std::make_shared<MmClusterVariables>(m_tree, m_mmPrdKey, msgLevel()));
+        }
+        return StatusCode::SUCCESS;
+    }
+    StatusCode MuonHitTesterAlg::setupSpacePoints() {
+        if (!m_writeSpacePoints) {
+            return StatusCode::SUCCESS;
+        }
+        if (m_writeMuonSp) {
+            m_tree.addBranch(std::make_shared<SpacePointTesterModule>(m_tree, m_generalSpKey, msgLevel(), "Muon"));
+        }
+        if (m_writeNswSp) {
+            m_tree.addBranch(std::make_shared<SpacePointTesterModule>(m_tree, m_nswSpKey, msgLevel(), "NSW"));
         }
         return StatusCode::SUCCESS;
     }
