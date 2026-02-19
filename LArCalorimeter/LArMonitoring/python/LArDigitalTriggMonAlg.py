@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 # Define some handy strings for plot labels
@@ -165,9 +165,22 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
 
         BinLabel_LATOME+=[Label+str(phi)]
         phi+=1
-        
-    
 
+    NLTDBbins = 124
+    BinLabel_LTDB = [
+    "H09L","H08R","H08L","H07R","H07L","H06R","H06L","H05R","H05L","H04R","H04L","H03R",
+    "H03L","H02R","H02L","H01R","H01L","H16R","H16L","H15R","H15L","H14R","H14L","H13R",
+    "H13L","H12R","H12L","H11R","H11L","H10R","H10L","H09R",
+    "I01L","I02R","I02L","I03R","I03L","I04R","I04L","I05R","I05L","I06R","I06L","I07R",
+    "I07L","I08R","I08L","I09R","I09L","I10R","I10L","I11R","I11L","I12R","I12L","I13R",
+    "I13L","I14R","I14L","I15R","I15L","I16R","I16L","I01R",
+    "C07R","C07L","C06L","C06R","C06H","C05R","C05L","C04R","C04L","C03R","C03L","C02L",
+    "C02R","C02H","C01R","C01L","C13R","C13L","C12L","C12R","C12H","C11R","C11L","C10R",
+    "C10L","C09L","C09R","C09H","C08R","C08L",
+    "A01R","A01L","A02L","A02R","A02H","A03R","A03L","A04R","A04L","A05R","A05L","A06L",
+    "A06R","A06H","A07R","A07L","A08R","A08L","A09L","A09R","A09H","A10R","A10L","A11R",
+    "A11L","A12L","A12R","A12H","A13R","A13L"
+    ]
 
     iphi_bins_dict = {"ALL": 63, "EMB": 63, "EMEC": 63, "HEC": 63, "FCAL": 15}
 
@@ -592,14 +605,13 @@ def LArDigitalTriggMonConfig(flags,larLATOMEBuilderAlg, nsamples=32, streamTypes
                                         ybins=partybins,
                                         pattern=[(part)])
             if part=="ALL":
-                partGroup_sc.defineHistogram('SC_part_LB,SC_part_latomesourceidbin;InvalideCodes_vs_LB_vs_LATOME_'+thisSel, 
-                                             title='Invalide code entries vs LB vs LATOME '+selStrPart[thisSel]+'; LB ; LATOME',
-                                             type='TH2F',
+                partGroup_sc.defineHistogram('SC_part_ltdbsourceid;InvalideCodes_vs_LTDB_'+thisSel,
+                                             title='Invalide code entries vs LTDB '+selStrPart[thisSel]+'; LTDB ; Invalide Codes entries',
+                                             type='TH1F',
                                              cutmask='SC_part_'+thisSel,
                                              path=thisTopPath,
-                                             xbins=lArDQGlobals.LB_Bins, xmin=lArDQGlobals.LB_Min, xmax=lArDQGlobals.LB_Max,
-                                             ybins=NLatomeBins,ymin=1,ymax=NLatomeBins+1,
-                                             ylabels=BinLabel_LATOME,
+                                             xbins=NLTDBbins,xmin=0,xmax=NLTDBbins,
+                                             xlabels=BinLabel_LTDB,
                                              pattern=[(part)])
                 
 
