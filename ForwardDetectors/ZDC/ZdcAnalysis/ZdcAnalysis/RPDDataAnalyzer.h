@@ -9,6 +9,7 @@
 #include <vector>
 #include <functional>
 #include <bitset>
+#include <cstdint>
 
 #include "ZdcAnalysis/ZDCMsg.h"
 #include "ZdcUtils/RPDUtils.h"
@@ -63,7 +64,7 @@ class RPDDataAnalyzer {
   RPDDataAnalyzer(RPDDataAnalyzer &&) = delete;
   RPDDataAnalyzer& operator=(RPDDataAnalyzer &&) = delete;
 
-  void loadChannelData(unsigned int channel, const std::vector<uint16_t>& FadcData);
+  void loadChannelData(unsigned int channel, const std::vector<std::uint16_t>& FadcData);
   void analyzeData();
 
   unsigned int getChMaxSample(unsigned int channel) const;
@@ -119,7 +120,7 @@ class RPDDataAnalyzer {
   unsigned int m_AdcOverflow; /** ADC values greater than or equal to this number are considered overflow */
   std::array<float, s_nChannels> m_outputCalibFactors {}; /** multiplicative calibration factors to apply to output, e.g., max and sum ADC; per channel */
 
-  std::array<std::vector<uint16_t>, s_nChannels> m_chFADCData; /** raw RPD data; index channel then sample */
+  std::array<std::vector<std::uint16_t>, s_nChannels> m_chFADCData; /** raw RPD data; index channel then sample */
   std::array<std::vector<float>, s_nChannels> m_chCorrectedFadcData; /** RPD data with baseline and pileup subtracted; index channel then sample */
   std::array<unsigned int, s_nChannels> m_chMaxSample {}; /** sample of max of RPD data in signal range after pileup subtraction; per channel */
   std::array<float, s_nChannels> m_chSumAdc {}; /** sum of RPD data in signal range after baseline and pileup subtraction; per channel */
