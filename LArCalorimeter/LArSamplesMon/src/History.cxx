@@ -510,9 +510,9 @@ bool History::drawResiduals(int k, bool errors, bool rescale) const
     if (m_data[i]->adcMax() < 1) continue;
     if (k >= 0 && k != (int)i) continue;
     std::unique_ptr<SimpleShape> shape = deltaShape(i);
+    if (!shape) continue;
     if (!errors) 
       for (unsigned int idx = 0; idx < shape->nPoints(); idx++) shape->setError(idx, 0);
-    if (!shape) continue;
     if (rescale) {
       auto scaled = std::make_unique<SimpleShape>(*shape, 1/m_data[i]->adcMax(), 9.0*i/nData() - m_data[i]->ofcTime());
       shape = std::move(scaled);
