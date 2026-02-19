@@ -75,5 +75,5 @@ class AthenaCPRunScript(CPBaseRunner):
         self.cfg.merge(self.makeAlgSequence())
         self.cfg.printConfig()
 
-        sc = self.cfg.run(self.flags.Exec.MaxEvents)
+        sc = self.cfg.run()
         sys.exit(sc.isFailure())
