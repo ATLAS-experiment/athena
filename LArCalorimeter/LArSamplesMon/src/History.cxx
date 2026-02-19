@@ -47,7 +47,7 @@ History::History(const HistoryContainer& container,
     m_hash(hash), m_shapeErrorGetter(shapeErrorGetter)
 {
   ClassCounts::incrementInstanceCount("History");
-  if (container.nDataContainers() != eventData.size()) return;
+  if (container.nDataContainers() != m_eventData.size()) return;
   for (unsigned int i = 0; i < container.nDataContainers(); i++) 
     m_data.push_back(std::make_unique<Data>(*container.dataContainer(i), *eventData[i], this, i));
 }
