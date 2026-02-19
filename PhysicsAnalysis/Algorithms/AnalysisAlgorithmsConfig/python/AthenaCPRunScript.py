@@ -19,8 +19,10 @@ class AthenaCPRunScript(CPBaseRunner):
         return self._cfg
 
     def addCustomArguments(self):
-        # derivedGroup = self.parser.add_argument_group('Athena specific arguments') # commented out for now to avoid compilation warning in Athena, add it back when needed
-        # add arguments here derivedGroup.add_argument(...)
+        # add arguments here
+        derivedGroup = self.parser.add_argument_group('Athena specific arguments')
+        derivedGroup.add_argument('--pool-file-reading', dest='pool_file_reading',
+                                 action='store_true', help='Run the job with the POOL-based file reading')
         return
 
     def makeAlgSequence(self):
@@ -52,10 +54,14 @@ class AthenaCPRunScript(CPBaseRunner):
         self.flags.lock()
         self.printFlags()
 
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
         self.initServiceCfg()
-        self.cfg.merge(PoolReadCfg(self.flags))
+        if self.args.pool_file_reading:
+            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+            self.cfg.merge(PoolReadCfg(self.flags))
+        else:
+            from AthenaRootComps.xAODEventSelectorConfig import xAODReadCfg
+            self.cfg.merge(xAODReadCfg(self.flags))
+        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
         self.cfg.merge(CutFlowSvcCfg(self.flags))
 
         outputFile = f"ANALYSIS DATAFILE='{self.outputName}.root' OPT='RECREATE'"
