@@ -75,12 +75,12 @@ PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient()
     }
     assert( persCont->m_collections.size() <= transCont->size());
 
-    using RangeBeginIndex_t = decltype(PhaseII::DataRange::m_beginIndex);
-    using RangeSize_t = decltype(PhaseII::DataRange::m_n);
-    using ContainerIndex_t = decltype(PhaseII::DataRange::m_containerIndex);
-    constexpr ContainerIndex_t slot_i=0u;
+    using RangeBeginIndex_t = PhaseII::DataRange::RangeBeginIndex_t;
+    using RangeSize_t = PhaseII::DataRange::RangeSize_t;
+    using ContainerIndex_t = PhaseII::DataRange::ContainerIndex_t;
+    constexpr ContainerIndex_t container_i=0u;
 
-    PhaseII::PixelRawDataContainer &rdo_container_dest = transCont->data(slot_i);
+    PhaseII::PixelRawDataContainer &rdo_container_dest = transCont->data(container_i);
 
     rdo_container_dest.reserve(n_rdos_total);
     assert(persCont->m_rawdata.size() == n_rdos_total);
@@ -90,7 +90,7 @@ PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient()
 
        PhaseII::DataRange new_range( static_cast<RangeBeginIndex_t>(rdo_container_dest.size()),
                                      static_cast<RangeSize_t>(0u) ,
-                                     slot_i);
+                                     container_i);
        // @TODO should use the ContainerRangeGuard, and the convenience method addDataForModule
        for (unsigned int rdo_i = a_collection.m_begin; rdo_i < a_collection.m_end; ++rdo_i) {
           assert( rdo_i < persCont->m_rawdata.size() );
@@ -109,7 +109,14 @@ PhaseIIPixelRawDataContainer* PhaseIIPixelRawDataContainerCnv::createTransient()
 
        assert( static_cast<std::size_t>(rdo_container_dest.size() - new_range.beginIndex()) < std::numeric_limits<RangeSize_t>::max() );
        // update the number of elements in this range.
-       new_range.m_n  = static_cast<RangeSize_t>( rdo_container_dest.size() - new_range.beginIndex());
+       std::size_t capped_size = rdo_container_dest.size() - new_range.beginIndex();
+       if (capped_size >= std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max()) {
+          ATH_MSG_WARNING( "Too many RDOs registered for module hash " << a_collection.m_hashId
+                           << " : " << capped_size << " !< " << std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max()
+                           << ". Elements above maximum possible size will not be accessible.");
+          capped_size =std::numeric_limits<PhaseII::DataRange::RangeSize_t>::max();
+       }
+       new_range.setSize(static_cast<RangeSize_t>( capped_size));
 
        // register the new hit range
        n_rejected_ranges += !(transCont->registerOrEraseNewData( a_collection.m_hashId, new_range));
