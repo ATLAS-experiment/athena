@@ -332,7 +332,7 @@ def TrigR3SeedingToolCfg(flags: AthConfigFlags, **kwargs) -> ComponentAccumulato
   kwargs.setdefault("UseSctSpacePoints",False) 
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT)
   kwargs.setdefault("MaxGraphEdges", 3000000)
-  kwargs.setdefault("ConnectionFileName", "binTables_ITK_RUN4_LRT.txt" if flags.Tracking.ActiveConfig.isLRT else "binTables_ITK_RUN4.txt")
+  kwargs.setdefault("ConnectionFileName", "binTables_Run3.txt")
 
   from RegionSelector.RegSelToolConfig import (regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg)
   
@@ -479,6 +479,18 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     
+    ITkMode = False
+    ConnectionFileName = ""
+    
+    if flags.Detector.GeometryITk:
+      ITkMode = True
+      ConnectionFileName = "binTables_ITK_RUN4.txt"
+      
+    useGBTSeedingTool = flags.Tracking.ActiveConfig.useGBTSeedingTool
+    
+    if useGBTSeedingTool:
+      ConnectionFileName = "binTables_Run3.txt"
+    
     ftf = CompFactory.TrigFastTrackFinder(
         name = name,
         useNewLayerNumberScheme = useNewLayerNumberScheme,
@@ -498,7 +510,7 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         TrackInitialD0Max     = flags.Tracking.ActiveConfig.TrackInitialD0Max,
         TrackZ0Max            = flags.Tracking.ActiveConfig.TrackZ0Max,
         TripletDoPPS    = flags.Tracking.ActiveConfig.TripletDoPPS,
-        useGBTSeedingTool = flags.Tracking.ActiveConfig.useGBTSeedingTool,
+        useGBTSeedingTool = useGBTSeedingTool,
         TripletDoPSS    = False,
         pTmin           = flags.Tracking.ActiveConfig.minPT[0] if flags.Detector.GeometryITk else flags.Tracking.ActiveConfig.minPT,
         DoubletDR_Max   = flags.Tracking.ActiveConfig.DoubletDR_Max,
@@ -509,12 +521,13 @@ def TrigFastTrackFinderCfg(flags: AthConfigFlags, name: str, RoIs: str, inputTra
         TrackSummaryTool = trackSummaryTool,
         doCloneRemoval = flags.Tracking.ActiveConfig.doCloneRemoval,
         TracksName     = flags.Tracking.ActiveConfig.trkTracks_FTF,
-        doResMon = flags.Tracking.ActiveConfig.doResMon,
-        MonTool = monTool,
-        Extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
-        RoIs = RoIs,
-        ITkMode = True if flags.Detector.GeometryITk else False,
-        SeedingTool = seedingTool,
+        doResMon       = flags.Tracking.ActiveConfig.doResMon,
+        MonTool        = monTool,
+        Extrapolator   = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
+        RoIs           = RoIs,
+        ITkMode        = ITkMode,
+        SeedingTool    = seedingTool,
+        ConnectionFileName = ConnectionFileName
     )
     
   ftf.LRT_D0Min = flags.Tracking.ActiveConfig.LRT_D0Min

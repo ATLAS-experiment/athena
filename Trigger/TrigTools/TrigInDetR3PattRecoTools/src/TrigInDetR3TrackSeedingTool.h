@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
-#define TRIGINDETPATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
+#ifndef TRIGINDETR3PATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
+#define TRIGINDETR3PATTRECOTOOLS_TRIGINDETTRACKSEEDINGTOOL_H
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -25,8 +25,8 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "TrigInDetToolInterfaces/ITrigL2LayerNumberTool.h"
 
-#include "GNNR3_FasTrackConnector.h"
-#include "GNNR3_Geometry.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_FasTrackConnector.h"
+#include "TrigInDetR3PattRecoTools/GNNR3_Geometry.h"
 #include "GNNR3_DataStorage.h"
 
 #include "SeedingToolBase.h"

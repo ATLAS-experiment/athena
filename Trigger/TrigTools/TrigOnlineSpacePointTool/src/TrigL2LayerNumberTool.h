@@ -93,9 +93,9 @@ class TrigL2LayerNumberTool : virtual public ITrigL2LayerNumberTool, public AthA
   const InDetDD::PixelDetectorManager* m_pixelManager = nullptr;
   const InDetDD::SCT_DetectorManager* m_sctManager = nullptr;
 
-  void createModuleHashMap(std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >&);
+  void createModuleHashMap(std::map<std::tuple<short, short, short>,std::vector<PhiEtaHash> >&);
 
-  std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> > m_hashMap;
+  std::map<std::tuple<short, short, short>,std::vector<PhiEtaHash> > m_hashMap;
   std::vector<short> m_pixelLayers, m_sctLayers;//hashid addressable arrays of layer numbers
   std::vector<TrigInDetSiLayer> m_layerGeometry;
 };

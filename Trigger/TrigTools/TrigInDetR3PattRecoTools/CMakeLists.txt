@@ -4,6 +4,10 @@
 atlas_subdir( TrigInDetR3PattRecoTools )
 
 # Component(s) in the package:
+atlas_add_library( TrigInDetR3PattRecoToolsLib
+                   PUBLIC_HEADERS TrigInDetR3PattRecoTools
+                   LINK_LIBRARIES TrigInDetPattRecoEvent)
+
 atlas_add_component( TrigInDetR3PattRecoToolsComp
                      src/SeedingToolBase.cxx
                      src/TrigInDetR3TrackSeedingTool.cxx

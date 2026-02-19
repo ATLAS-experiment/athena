@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_GNNR3_GEOMETRY_H
-#define TRIGINDETPATTRECOTOOLS_GNNR3_GEOMETRY_H
+#ifndef TRIGINR3DETPATTRECOTOOLS_GNNR3_GEOMETRY_H
+#define TRIGINR3DETPATTRECOTOOLS_GNNR3_GEOMETRY_H
 
 #include<vector>
 #include<map>
@@ -47,7 +47,7 @@ protected:
 
 class TrigFTF_GNNR3_Geometry {
 public:
-  TrigFTF_GNNR3_Geometry(const std::vector<TrigInDetSiLayer>&, const std::unique_ptr<GNNR3_FasTrackConnector>&);
+  TrigFTF_GNNR3_Geometry(const std::vector<TrigInDetSiLayer>&, const std::unique_ptr<GNNR3_FASTRACK_CONNECTOR>&);
   ~TrigFTF_GNNR3_Geometry();
   
   const TrigFTF_GNNR3_Layer* getTrigFTF_GNNR3_LayerByKey(unsigned int) const;

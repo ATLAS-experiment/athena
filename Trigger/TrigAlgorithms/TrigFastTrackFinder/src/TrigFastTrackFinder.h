@@ -280,6 +280,7 @@ protected:
   Gaudi::Property<bool> m_doCloneRemoval{this,  "doCloneRemoval", true, "Remove tracks sharing too many hits"};
   Gaudi::Property<bool> m_doTrackRefit  {this, "doTrackRefit",    true, "Refit tracks after the combinatorial track following"};
   Gaudi::Property<bool> m_useGBTSeedingTool {this, "useGBTSeedingTool", false, "use GBT seeding tool for tracker"};
+  Gaudi::Property<std::string> m_connectionFileName {this, "ConnectionFileName", "", ""};
   ToolHandle< ITrigInDetTrackSeedingTool > m_seedingTool { this, "SeedingTool", "TrigInDetTrackSeedingTool"};
   
 };
