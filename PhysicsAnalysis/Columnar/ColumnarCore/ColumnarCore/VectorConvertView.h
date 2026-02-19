@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -8,7 +8,9 @@
 #ifndef COLUMNAR_CORE_VECTOR_CONVERT_VIEW_H
 #define COLUMNAR_CORE_VECTOR_CONVERT_VIEW_H
 
-#include <ColumnarCore/ColumnAccessor.h>
+#include <cstddef> //std::size_t
+#include <stdexcept> //std::out_of_range
+#include <utility> //for std::move
 
 namespace columnar
 {
