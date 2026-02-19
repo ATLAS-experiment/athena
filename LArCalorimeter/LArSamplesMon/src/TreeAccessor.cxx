@@ -430,13 +430,13 @@ TreeAccessor::filter(const Accessor& accessor,
         unsigned int newRunIndex = (isNewRun ? runsToKeep[f].size() : runsToKeep[f][oldRunIndex]);      
         if (isNewRun) runsToKeep[f][oldRunIndex] = newRunIndex;
 
-        Data* newData = tweaker.tweak(*history->data(k), newEvtIndex);
+        std::unique_ptr<Data> newData = tweaker.tweak(*history->data(k), newEvtIndex);
         if (!newData) {
           cout << "Filtering failed on data " << k << " of cell " << i << ", aborting" << endl;
           return std::vector<std::unique_ptr<TreeAccessor> >();
         }
         nPass++;
-        newHist.add(newData->dissolve());
+        newHist.add(newData.release()->dissolve());
       }
       newAccessors[f]->add(&newHist);
     }

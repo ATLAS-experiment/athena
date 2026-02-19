@@ -44,7 +44,7 @@ bool DataTweaker::findOption(TString& tweaks, const TString& option) const
 }
 
 
-Data* DataTweaker::tweak(const Data& data, int evtIndex) const
+std::unique_ptr<Data> DataTweaker::tweak(const Data& data, int evtIndex) const
 {
   std::vector<short> samples = data.container().samples();
   std::vector<float> corrs = data.container().corrs();
@@ -106,13 +106,13 @@ Data* DataTweaker::tweak(const Data& data, int evtIndex) const
                 data.container().energy(), time + deltaT, data.container().quality(),
                 data.container().pedestal(), data.container().pedestalRMS(),
                 data.container().status(), k*data.container().adcMax());
-  return new Data(std::move(newContainer), data.eventData(), data.history(), data.index());
+  return std::make_unique<Data>(std::move(newContainer), data.eventData(), data.history(), data.index());
 }
 
 
-EventData* DataTweaker::tweak(const EventData& eventData, int runIndex) const
+std::unique_ptr<EventData> DataTweaker::tweak(const EventData& eventData, int runIndex) const
 {
-  EventData* newEventData = new EventData(eventData, runIndex);
+  auto newEventData = std::make_unique<EventData>(eventData, runIndex);
   if (m_removeRoIs) newEventData->removeRoIs();
   return newEventData;
 }
