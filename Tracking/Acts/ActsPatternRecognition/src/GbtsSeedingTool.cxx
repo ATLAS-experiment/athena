@@ -82,6 +82,7 @@ namespace ActsTrk {
   (void) bField;
     //define new custom spacepoint container
     Acts::SpacePointContainer2 coreSpacePoints(
+      Acts::SpacePointColumns::CopyFromIndex |
       Acts::SpacePointColumns::SourceLinks |
       Acts::SpacePointColumns::X |
       Acts::SpacePointColumns::Y |
@@ -96,13 +97,11 @@ namespace ActsTrk {
     auto localPositionColumn = coreSpacePoints.createColumn<float>("LocalPositionY");
     coreSpacePoints.reserve(spContainer.size());
 
-    //add spacepoints to new container and seedContainer
-    seedContainer.spacePoints().reserve(spContainer.size());
+    //add spacepoints to new container
     for(size_t idx=0; idx<spContainer.size(); idx++){
       //obtain module hash for spacepoint
       const auto & sp = spContainer.at(idx);
       const auto & extSP = sp.externalSpacePoint();
-      seedContainer.spacePoints().push_back(&extSP);
       const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
 
       bool isPixel(elementlist.size() == 1);
@@ -112,6 +111,7 @@ namespace ActsTrk {
       //obtain coordinates	
 
       auto newSp = coreSpacePoints.createSpacePoint();
+      newSp.copyFromIndex() = idx;
 
       //apply beamspot corrections if needed
       if(m_finderCfg.BeamSpotCorrection){
@@ -158,15 +158,18 @@ namespace ActsTrk {
     int max_layers = m_are_pixels.size(); 
     Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
     Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, sPContainerComponents, max_layers); 
-    
-    
+
     //add seeds to the output container
-    seedContainer.reserve(seeds.size(), 7.0f);
+    seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
     for (Acts::MutableSeedProxy2 seed : seeds) {
-    
-      seedContainer.push_back(seed);
-    } 
-    ATH_MSG_VERBOSE("Number of seeds created is" << seedContainer.size());
+      seedContainer.push_back(
+        Acts::ConstSeedProxy2(seed),
+        [&](const Acts::SpacePointIndex2 spIndex) {
+          return &spContainer.at(spIndex).externalSpacePoint();
+        });
+    }
+
+    ATH_MSG_VERBOSE("Number of seeds created is " << seedContainer.size());
     return StatusCode::SUCCESS;
   }
 
