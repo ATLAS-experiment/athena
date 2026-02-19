@@ -47,7 +47,7 @@ History::History(const HistoryContainer& container,
     m_hash(hash), m_shapeErrorGetter(shapeErrorGetter)
 {
   ClassCounts::incrementInstanceCount("History");
-  if (container.nDataContainers() != eventData.size()) return;
+  if (container.nDataContainers() != m_eventData.size()) return;
   for (unsigned int i = 0; i < container.nDataContainers(); i++) 
     m_data.push_back(std::make_unique<Data>(*container.dataContainer(i), *eventData[i], this, i));
 }
@@ -209,7 +209,6 @@ History::ofc(unsigned int k, int lwb, int upb, double time, bool withAutoCorr) c
   if (!reference) return nullptr;
   std::unique_ptr<const ShapeErrorData> sed = shapeErrorData(CaloGain::LARHIGHGAIN);
   auto result = std::make_unique<OFC>(*reference, *m_data[k], lwb, upb, sed.get(), withAutoCorr); // FixMe
-  if (!result) return nullptr;
   if (result->g().GetNrows() == 0) result.reset();
   return result;
 }
@@ -510,9 +509,9 @@ bool History::drawResiduals(int k, bool errors, bool rescale) const
     if (m_data[i]->adcMax() < 1) continue;
     if (k >= 0 && k != (int)i) continue;
     std::unique_ptr<SimpleShape> shape = deltaShape(i);
+    if (!shape) continue;
     if (!errors) 
       for (unsigned int idx = 0; idx < shape->nPoints(); idx++) shape->setError(idx, 0);
-    if (!shape) continue;
     if (rescale) {
       auto scaled = std::make_unique<SimpleShape>(*shape, 1/m_data[i]->adcMax(), 9.0*i/nData() - m_data[i]->ofcTime());
       shape = std::move(scaled);
