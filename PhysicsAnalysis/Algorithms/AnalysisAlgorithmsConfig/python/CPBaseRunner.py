@@ -140,7 +140,7 @@ class CPBaseRunner(ABC):
                 raise FileExistsError(
                     f'Multiple files named \"{self.args.text_config}\" found in the analysis repository. Please provide a more specific path to the config file.\nMatches found:\n' + '\n'.join(yamlConfig))
             else:
-                return yamlConfig[0], yamlBasePath[0]
+                return yamlConfig[0], [yamlBasePath[0]]
 
     @staticmethod
     def findLocalPathYamlConfig(textConfigPath):
