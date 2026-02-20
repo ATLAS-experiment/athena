@@ -21,6 +21,8 @@ class AthenaCPRunScript(CPBaseRunner):
     def addCustomArguments(self):
         # add arguments here
         derivedGroup = self.parser.add_argument_group('Athena specific arguments')
+        derivedGroup.add_argument('--config-only', dest='config_only',
+                                 action='store_true', help='Only generate the configuration and save it to a pickle file')
         derivedGroup.add_argument('--pool-file-reading', dest='pool_file_reading',
                                  action='store_true', help='Run the job with the POOL-based file reading')
         return
@@ -74,6 +76,12 @@ class AthenaCPRunScript(CPBaseRunner):
 
         self.cfg.merge(self.makeAlgSequence())
         self.cfg.printConfig()
+
+        # dump pickle if requested
+        if self.args.config_only:
+            with open("CPRunConfig.pkl", "wb") as f:
+                self.cfg.store(f)
+            sys.exit(0)
 
         sc = self.cfg.run()
         sys.exit(sc.isFailure())
