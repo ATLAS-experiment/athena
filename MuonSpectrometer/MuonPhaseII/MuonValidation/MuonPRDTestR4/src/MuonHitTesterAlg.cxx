@@ -7,8 +7,7 @@
 #include "MuonPRDTestR4/SimHitTester.h"
 
 #include "MuonPRDTest/MDTDigitVariables.h"
-// #include "MuonPRDTest/RPCDigitVariables.h"
-#include "MuonPRDTestR4/RpcDigitVariablesR4.h"
+#include "MuonPRDTest/RPCDigitVariables.h"
 #include "MuonPRDTest/TGCDigitVariables.h"
 #include "MuonPRDTest/MMDigitVariables.h"
 #include "MuonPRDTest/sTGCDigitVariables.h"
@@ -21,6 +20,8 @@
 #include "MuonPRDTestR4/RpcMeasurementVariables.h"
 #include "MuonPRDTestR4/TgcStripVariables.h"
 #include "MuonPRDTestR4/MmClusterVariables.h"
+
+#include "MuonPRDTestR4/SpacePointTesterModule.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/xAODTruthHelpers.h"
@@ -42,6 +43,7 @@ namespace MuonValR4 {
         ATH_CHECK(setupSimHits());
         ATH_CHECK(setupDigits());
         ATH_CHECK(setupPrds());
+        ATH_CHECK(setupSpacePoints());
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         ATH_CHECK(m_tree.init(this));
         return StatusCode::SUCCESS;
@@ -125,8 +127,7 @@ namespace MuonValR4 {
             m_tree.addBranch(std::make_shared<MdtDigitVariables>(m_tree, m_mdtDigitKey, msgLevel()));
         }
         if (m_writeRpcDigits) {
-            // m_tree.addBranch(std::make_shared<RpcDigitVariables>(m_tree, m_rpcDigitKey, msgLevel()));
-	    m_tree.addBranch(std::make_shared<RpcDigitVariablesR4>(m_tree, m_rpcDigitKey, msgLevel()));
+            m_tree.addBranch(std::make_shared<RpcDigitVariables>(m_tree, m_rpcDigitKey, msgLevel()));
         }
         if (m_writeTgcDigits) {
             m_tree.addBranch(std::make_shared<TgcDigitVariables>(m_tree, m_tgcDigitKey, msgLevel()));
@@ -155,6 +156,18 @@ namespace MuonValR4 {
         }
         if (m_writeMmPrds) {
             m_tree.addBranch(std::make_shared<MmClusterVariables>(m_tree, m_mmPrdKey, msgLevel()));
+        }
+        return StatusCode::SUCCESS;
+    }
+    StatusCode MuonHitTesterAlg::setupSpacePoints() {
+        if (!m_writeSpacePoints) {
+            return StatusCode::SUCCESS;
+        }
+        if (m_writeMuonSp) {
+            m_tree.addBranch(std::make_shared<SpacePointTesterModule>(m_tree, m_generalSpKey, msgLevel(), "Muon"));
+        }
+        if (m_writeNswSp) {
+            m_tree.addBranch(std::make_shared<SpacePointTesterModule>(m_tree, m_nswSpKey, msgLevel(), "NSW"));
         }
         return StatusCode::SUCCESS;
     }
