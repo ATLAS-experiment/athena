@@ -127,6 +127,11 @@ def getDevSignatures():
         ChainProp(name='HLT_e140_dnnloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:t0_tp']),
         ChainProp(name='HLT_e26_dnntight_ivarloose_L1eEM26M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:t0_tp']),
 
+        # ATR-32380: test for electron calibrated chains
+        ChainProp(name='HLT_e26_lhtight_calibringer_ivarloose_L1eEM26M', stream=[PhysicsStream], groups=SupportPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_e26_lhtight_calibringer_L1eEM26M', stream=[PhysicsStream], groups=SupportPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_e60_lhmedium_calibringer_L1eEM26M', stream=[PhysicsStream], groups=SupportPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp']),
+        ChainProp(name='HLT_e140_lhloose_calibringer_L1eEM26M', stream=[PhysicsStream], monGroups=['egammaMon:shifter_tp'], groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM26M']),
     ]
 
     chains['MET'] = [
