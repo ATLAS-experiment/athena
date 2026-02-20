@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -72,7 +72,7 @@ void Muon::RpcCoinDataContainerCnv_p1::transToPers(const RpcCoinDataContainerCnv
         log << MSG::DEBUG  << " Preparing " << persCont->m_collections.size() << "Collections" << endmsg;
         for (pcollIndex = 0; it_Coll != it_CollEnd; ++pcollIndex, ++it_Coll)  {
             // Add in new collection
-            const Muon::MuonCoinDataCollection<RpcCoinData>& collection = (**it_Coll);
+            const Muon::RpcCoinDataCollection& collection = (**it_Coll);
             Muon::MuonPRD_Collection_p2& pcollection = persCont->m_collections[pcollIndex];
             
             pcollBegin  = pcollEnd; // Next collection starts at end of previous one.
@@ -115,7 +115,7 @@ void  Muon::RpcCoinDataContainerCnv_p1::persToTrans(const RpcCoinDataContainerCn
       // from the vector.
 
 
-      Muon::MuonCoinDataCollection<RpcCoinData>* coll = nullptr;
+      Muon::RpcCoinDataCollection* coll = nullptr;
 
       RpcCoinDataCnv_p1  chanCnv;
       unsigned int pchanIndex(0); // position within persCont->m_prds. Incremented inside innermost loop 
@@ -165,7 +165,7 @@ void  Muon::RpcCoinDataContainerCnv_p1::persToTrans(const RpcCoinDataContainerCn
           }
       }
 
-      log << MSG::DEBUG  << " ***  Reading Muon::MuonCoinDataCollection<RpcCoinData>" << endmsg;
+      log << MSG::DEBUG  << " ***  Reading Muon::RpcCoinDataCollection" << endmsg;
 
 }
 

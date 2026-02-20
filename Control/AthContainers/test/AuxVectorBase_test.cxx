@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorBase_test.cxx
@@ -150,6 +150,7 @@ public:
   using AuxVectorBase::resize;
   using AuxVectorBase::shift; 
   using AuxVectorBase::moveAux;
+  using AuxVectorBase::moveAuxNoClear;
   using AuxVectorBase::swapElementsAux;
   using AuxVectorBase::resortAux;
   using AuxVectorBase::swap;
@@ -807,6 +808,13 @@ void test_copy_aux()
   assert (b2.getData<int> (ityp2, 2) == 0);
   assert (b2.getData<int> (ityp3, 2) == 0);
   assert (b2.getData<float> (ftyp, 2) == 0);
+
+  SG::AuxElement elt5;
+  b2.getData<int> (ityp1, 2) = 10;
+  b2.moveAuxNoClear (2, &elt5);
+  assert (elt5.index() == 2);
+  assert (elt5.container() == &b2);
+  assert (b2.getData<int> (ityp1, 2) == 10);
 }
 
 

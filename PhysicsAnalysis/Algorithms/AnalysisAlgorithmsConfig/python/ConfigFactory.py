@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # This file defines a factory method that can create a configuration
 # block sequence based on a passed in name.  This avoids having to
@@ -279,8 +279,8 @@ class ConfigFactory():
         # electrons
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig
         self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPointConfig
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPointConfig,
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPoint,
             superBlocks="Electrons")
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronLRTMergedConfig
         self.addAlgConfigBlock(algName="LRTMerging", alg=ElectronLRTMergedConfig,
@@ -292,8 +292,8 @@ class ConfigFactory():
         # photons
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonCalibrationConfig
         self.addAlgConfigBlock(algName="Photons", alg=PhotonCalibrationConfig)
-        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPointConfig
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPointConfig,
+        from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import PhotonWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=PhotonWorkingPoint,
             superBlocks="Photons")
         from EgammaAnalysisAlgorithms.PhotonExtraVariablesConfig import PhotonExtraVariablesBlock
         self.addAlgConfigBlock(algName="ExtraVariables", alg=PhotonExtraVariablesBlock,
@@ -302,8 +302,8 @@ class ConfigFactory():
         # muons
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
         self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPointConfig
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPointConfig,
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
             superBlocks="Muons")
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
@@ -318,8 +318,8 @@ class ConfigFactory():
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig
         self.addAlgConfigBlock(algName="TauJets", alg=TauCalibrationConfig)
-        from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPointConfig
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPointConfig,
+        from TauAnalysisAlgorithms.TauAnalysisConfig import TauWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=TauWorkingPoint,
             superBlocks="TauJets")
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauTriggerAnalysisSFBlock
         self.addAlgConfigBlock(algName="TriggerSF", alg=TauTriggerAnalysisSFBlock,
@@ -328,8 +328,8 @@ class ConfigFactory():
         # diTauJets
         from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauCalibrationConfig
         self.addAlgConfigBlock(algName="DiTauJets", alg=DiTauCalibrationConfig)
-        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauWorkingPointConfig
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=DiTauWorkingPointConfig,
+        from TauAnalysisAlgorithms.DiTauAnalysisConfig import DiTauWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=DiTauWorkingPoint,
             superBlocks="DiTauJets")
 
         # tracks
@@ -375,10 +375,6 @@ class ConfigFactory():
             superBlocks=["Electrons", "Muons", "TauJets",
                          "PL_Electrons", "PL_Muons", "PL_Taus"])
 
-        # generator level analysis
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
-        self.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=GeneratorAnalysisBlock)
-
         # pT/Eta Selection
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import PtEtaSelectionBlock
         self.addAlgConfigBlock(algName="PtEtaSelection", alg=PtEtaSelectionBlock,
@@ -416,6 +412,10 @@ class ConfigFactory():
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import EventCutFlowBlock
         self.addAlgConfigBlock(algName='EventCutFlow', alg=EventCutFlowBlock,
             defaults={'containerName': 'EventInfo', 'selectionName': ''})
+
+        # generator level analysis
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import GeneratorAnalysisBlock
+        self.addAlgConfigBlock(algName="GeneratorLevelAnalysis", alg=GeneratorAnalysisBlock)
 
         # bootstraps
         from AsgAnalysisAlgorithms.BootstrapGeneratorConfig import BootstrapGeneratorConfig

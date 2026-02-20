@@ -46,10 +46,10 @@ namespace MuonR4 {
              *  @param others: Other keys for recursive dependency declaration */
             template <typename Key_t,
                       typename... OtherKey_t>
-            StatusCode addDependency(const EventContext& ctx,
-                                     SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
-                                     const SG::ReadCondHandleKey<Key_t>& key,
-                                     OtherKey_t... others) const;
+            StatusCode addCondDependency(const EventContext& ctx,
+                                         SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
+                                         const SG::ReadCondHandleKey<Key_t>& key,
+                                         OtherKey_t... others) const;
             /** @brief Retrieve the idHelper for the given detector technology
              *  @param type: Muon detector technology type */
             const MuonIdHelper& getIdHelper(const ActsTrk::DetectorType type) const;

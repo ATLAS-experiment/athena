@@ -6,7 +6,7 @@ atlas_subdir( VP1TriggerSystems )
 # External dependencies:
 find_package( Coin3D )
 find_package( Eigen )
-find_package( Qt5 COMPONENTS Core Gui  )
+find_package( Qt5 COMPONENTS Core Gui Widgets )
 
 
 
@@ -14,12 +14,6 @@ find_package( Qt5 COMPONENTS Core Gui  )
 set( CMAKE_AUTOUIC TRUE )
 # Generate MOC files automatically:
 set( CMAKE_AUTOMOC TRUE )
-set( CMAKE_AUTOMOC_MOC_OPTIONS "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED") 
-# ### NOTE! ###
-# "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" is needed when using Qt < 5.0 together with BOOST > 1.52. 
-# Details: 
-# - https://its.cern.ch/jira/browse/ATLASRECTS-3097
-# - https://its.cern.ch/jira/browse/ATLASVPONE-184
 
 
 # Generate resource files automatically:

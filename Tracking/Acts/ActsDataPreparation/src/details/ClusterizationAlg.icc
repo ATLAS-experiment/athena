@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "ActsInterop/TableUtils.h"
+#include "AthAllocators/DataPool.h"
 
 namespace ActsTrk {
 
@@ -165,12 +166,13 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   mon_nclusters = nClusters;
   
   SG::WriteHandle<ClusterContainer> clusterHandle = SG::makeHandle(m_clusterContainerKey, ctx);
-  ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(),
+  ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
 
   using xAODCluster_t = typename ClusterContainer::base_value_type;
-  clusterContainer->push_new(nClusters, [] () {return new xAODCluster_t();});
+  DataPool<xAODCluster_t> pool (nClusters);
+  clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
 
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;

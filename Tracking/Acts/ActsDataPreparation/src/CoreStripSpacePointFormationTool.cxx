@@ -523,7 +523,7 @@ namespace ActsTrk
       const auto &atlasSLink = slink.get<ATLASUncalibSourceLink>();
       const xAOD::UncalibratedMeasurement *measurement = &getUncalibratedMeasurement(atlasSLink);
       Acts::BoundVector loc = Acts::BoundVector::Zero();
-      Acts::BoundSquareMatrix cov = Acts::BoundMatrix::Zero();
+      Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
       switch (measurement->type()) {
       case (xAOD::UncalibMeasType::StripClusterType):
          loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];

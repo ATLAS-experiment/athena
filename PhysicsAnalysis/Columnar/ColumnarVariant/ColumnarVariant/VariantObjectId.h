@@ -128,7 +128,7 @@ namespace columnar
     template<ContainerIdConcept CI2>
       requires (CI2::regularObjectId && CI::template isValidContainer<CI2>())
     ObjectId (const ObjectId<CI2,CM>& that) noexcept
-      : m_data (that.getData()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (that.getIndex())
+      : m_dataArea (that.getDataArea()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (that.getIndex())
     {}
 
     ObjectId& operator = (const ObjectId<VariantContainerId<CIList...>,CM>& that) noexcept = default;
@@ -144,7 +144,7 @@ namespace columnar
     [[nodiscard]] OptObjectId<CI2,CM> tryGetVariant () const
     {
       if (m_variantIndex == CI::template getVariantIndex<CI2>())
-        return OptObjectId<CI2,CM> (m_data, m_objectIndex);
+        return OptObjectId<CI2,CM> (m_dataArea, m_objectIndex);
       else
         return OptObjectId<CI2,CM> ();
     }
@@ -160,8 +160,8 @@ namespace columnar
     /// ============================
   public:
 
-    explicit ObjectId (void **val_data, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
-      : m_data (val_data), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
+    explicit ObjectId (void **val_dataArea, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
+      : m_dataArea (val_dataArea), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
     {}
 
     [[nodiscard]] std::size_t getVariantIndex () const noexcept {
@@ -170,8 +170,8 @@ namespace columnar
     [[nodiscard]] std::size_t getObjectIndex () const noexcept {
       return m_objectIndex;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -179,7 +179,7 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_variantIndex = 0u;
     std::size_t m_objectIndex = 0u;
   };

@@ -199,21 +199,21 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
-        self.addOption ('files', None, type=None,
+        self.addOption ('files', None, type=list,
             info="the input files being processed (list of strings). "
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
-        self.addOption ('userLumicalcFiles', None, type=None,
+        self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=dict,
             info="user-provided lumicalc files (dictionary of list of strings, "
             "with MC campaigns as the keys). Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigs', None, type=None,
+        self.addOption ('userPileupConfigs', None, type=list,
             info="user-provided PRW files (list of strings). Alternative to "
             "auto-configuration.")
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+        self.addOption ('userPileupConfigsPerCampaign', None, type=dict,
             info="user-provided PRW files (dictionary of list of strings, with "
             "MC campaigns as the keys).")
         self.addOption ('postfix', '', type=str,
@@ -533,9 +533,9 @@ class PtEtaSelectionBlock (ConfigBlock):
             "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('minPt', None, type=float,
-            info=r"minimum $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
-            info=r"maximum  $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"maximum  $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('minEta', None, type=float,
             info=r"minimum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxEta', None, type=float,
@@ -700,7 +700,7 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('deepCopy', False, type=bool,
             info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
-            info=r"whether to sort objects in $p_\mathrm{T}.")
+            info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
 

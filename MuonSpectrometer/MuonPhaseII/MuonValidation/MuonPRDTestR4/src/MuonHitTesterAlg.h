@@ -96,8 +96,21 @@ namespace MuonValR4 {
             Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcMeasurements"};
             Gaudi::Property<std::string> m_tgcPrdKey{this, "TgcPrdKey", "xTgcStrips"};
             Gaudi::Property<std::string> m_mmPrdKey{this, "MmPrdKey", "xAODMMClusters"};
+            /**
+             *  @brief Toggle whether the spacepoint collections shall be tested
+             * */
+            StatusCode setupSpacePoints();
+            Gaudi::Property<bool> m_writeSpacePoints{this, "dumpSpacePoints", false,
+                                              "Master switch toggling the spacepoint collection dump"};
+   
+            Gaudi::Property<bool> m_writeMuonSp{this, "dumpMuonSpacePoints", true};
+            Gaudi::Property<bool> m_writeNswSp{this, "dumpNswSpacePoints", true};
+            /**
+             *  @brief Prd collection names
+             */
+            Gaudi::Property<std::string> m_generalSpKey{this, "MuonSpacePointKey", "MuonSpacePoints"};
+            Gaudi::Property<std::string> m_nswSpKey{this, "NswSpacePointKey", "NswSpacePoints"};
 
-            
             StatusCode setupTruth();
             /** @brief Flag toggling whether the truth particle container shall be written  */
             Gaudi::Property<bool> m_writeTruthMuon{this, "dumpTruthMuon", false};

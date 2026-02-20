@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Muon
@@ -694,6 +694,9 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     }
     // create VolumeArray (1DX)
 
+
+    // Exit now if no volumes --- avoids FPE/ERRORs.
+    if (trkVols.empty()) return nullptr;
 
     Trk::BinUtility binUtility(volSteps, Trk::BinningOption::open,Trk::BinningValue::binX);
     std::unique_ptr<Trk::TrackingVolumeArray> components{m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(trkVols,

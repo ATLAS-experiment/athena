@@ -81,11 +81,15 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
   for (const FPGATrackSimTrack& track : tracks) {
     if (not track.passedOR()) continue;
     std::vector<ActsTrk::ATLASUncalibSourceLink> points;
-    const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+    const auto& hits = track.getFPGATrackSimHitPtrs();
     auto hitCollection = std::make_unique<FPGATrackSimHitCollection>();
     hitCollection->reserve(hits.size());
     for (const auto& hit : hits) {
-      hitCollection->push_back(new FPGATrackSimHit(hit));
+      if (!hit) {
+        ATH_MSG_ERROR("Null hit pointer in track");
+        return StatusCode::FAILURE;
+      }
+      hitCollection->push_back(new FPGATrackSimHit(*hit));
     }
     ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, *hitCollection));
     if (points.size()) {
@@ -176,7 +180,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   params << d0, z0, phi, theta, qop, t; 
 
   // Covariance - TODO
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= (GeVToMeV*GeVToMeV); 
 
   // some ACTS paperwork 
@@ -218,7 +222,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   ATH_MSG_DEBUG("\td0= " << d0 << " z0=" <<z0 << " phi=" <<phi << " theta=" << theta<< " qoverp=" << qop);
 
   // Covariance - let's be honest and say we have no clue ;-) 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   
   (cov)(0,0) *= 0.16; // d0: 0.4 **2 (conservative)
   (cov)(1,1) *= 25; // z0: 5**2 = 25 (conservative)

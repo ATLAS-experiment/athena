@@ -5,6 +5,7 @@ atlas_subdir( HIEventUtils )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
+find_package( nlohmann_json )
 
 # Component(s) in the package:
 atlas_add_library( HIEventUtilsLib
@@ -12,7 +13,7 @@ atlas_add_library( HIEventUtilsLib
                    PUBLIC_HEADERS HIEventUtils
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgDataHandlesLib AsgTools CaloGeoHelpers InDetTrackSelectionToolLib PATCoreAcceptLib xAODForward xAODHIEvent xAODTracking xAODTrigL1Calo
-                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils )
+                   PRIVATE_LINK_LIBRARIES AsgMessagingLib CxxUtils nlohmann_json::nlohmann_json PathResolver)
 
 if (NOT XAOD_STANDALONE)
   atlas_add_component( HIEventUtils
@@ -26,11 +27,36 @@ atlas_add_dictionary( HIEventUtilsDict
    HIEventUtils/selection.xml
    LINK_LIBRARIES HIEventUtilsLib )
 
+atlas_install_data(data/*)
+
 if (NOT XAOD_STANDALONE)
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 
-atlas_add_test( HIEventSelectionRun3
-                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config
+atlas_add_test( HIEventSelectionRun3_25OO
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25OO
+                PROPERTIES TIMEOUT 300
                 POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_25NeNe
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25NeNe
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_25pO
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=25pO
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_23
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=23
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+atlas_add_test( HIEventSelectionRun3_24
+                SCRIPT python -m HIEventUtils.HIEventSelectionRun3Config HIPeriodToTest=24
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh )
+
+
 endif()

@@ -25,6 +25,12 @@ namespace columnar
     /// Whether this is an array mode
     static constexpr bool isArrayMode = false;
 
+    /// Whether links have an intrinsic type
+    static constexpr bool hasTypedLinks = true;
+
+    /// Whether we use nested vectors for std::vector<...> columns
+    static constexpr bool useNestedVectors = true;
+
     /// Whether for this columnar mode decorators that replace the
     /// original column will also refer to the input column.
     ///
@@ -45,6 +51,12 @@ namespace columnar
 
     /// Whether this is an array mode
     static constexpr bool isArrayMode = true;
+
+    /// Whether links have an intrinsic type
+    static constexpr bool hasTypedLinks = false;
+
+    /// Whether we use nested vectors for std::vector<...> columns
+    static constexpr bool useNestedVectors = false;
 
     /// Whether for this columnar mode decorators that replace the
     /// original column will also refer to the input column.
@@ -126,6 +138,12 @@ namespace columnar
 
     /// Whether this is an array mode
     static constexpr bool isArrayMode = true;
+
+    /// Whether links have an intrinsic type
+    static constexpr bool hasTypedLinks = true;
+
+    /// Whether we use nested vectors for std::vector<...> columns
+    static constexpr bool useNestedVectors = true;
 
     /// Whether for this columnar mode decorators that replace the
     /// original column will also refer to the input column.

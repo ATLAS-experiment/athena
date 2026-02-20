@@ -107,7 +107,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     Acts::BoundVector pars;
     // cppcheck-suppress constStatement; will be able to initialize this directly with eigen 3.4
     pars << d0, z0, phi, theta, qop, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context

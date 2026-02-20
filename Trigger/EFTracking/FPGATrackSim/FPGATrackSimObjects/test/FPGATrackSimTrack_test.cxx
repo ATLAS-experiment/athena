@@ -25,17 +25,17 @@ int main(int, char**)
     hits[i].setEtaIndex(i+1);
     hits[i].setLayer(i);
     hits[i].setHitType(HitType::mapped);
-    track.setFPGATrackSimHit(i,hits[i]);
+    track.setFPGATrackSimHit(i, std::make_shared<FPGATrackSimHit>(hits[i]));
   }
   track.setQOverPt(qoverpt);
   track.setChi2(chi2);
   std::cout << "q/pt = " << track.getQOverPt() << std::endl;
   std::cout << "chi2 = " << track.getChi2() << std::endl;
 
-  const std::vector <FPGATrackSimHit> returned_hits = track.getFPGATrackSimHits();
+  const auto& returned_hits = track.getFPGATrackSimHitPtrs();
   for (unsigned i = 0; i < 8; i++) {
-    std::cout << "layer = " << returned_hits[i].getLayer() << " and phi = " << returned_hits[i].getPhiIndex() << 
-      " " << " and eta = " << returned_hits[i].getEtaIndex() << std::endl;
+    std::cout << "layer = " << returned_hits[i]->getLayer() << " and phi = " << returned_hits[i]->getPhiIndex() << 
+      " " << " and eta = " << returned_hits[i]->getEtaIndex() << std::endl;
   }
 
   return 0;

@@ -25,9 +25,11 @@ std::vector< std::vector< unsigned int> > makeROIs( unsigned int max_modules, un
    std::vector< std::vector< unsigned int> >  rois;
    rois.resize( max_ROIs );
    for ( std::vector<unsigned int> &roi : rois ) {
+      //coverity[DC.WEAK_CRYPTO]
       unsigned int n_modules = rand() % max_modules_per_ROI;
       roi.reserve(n_modules);
       for (unsigned int module_i=0; module_i<n_modules; ++module_i) {
+         //coverity[DC.WEAK_CRYPTO]
          unsigned int a_module =  rand() % max_modules;
          if (std::find(roi.begin(), roi.end(), a_module) == roi.end()) {
             roi.push_back(a_module);
@@ -60,15 +62,15 @@ std::vector<std::vector<unsigned int> > removeOverlap(unsigned int max_modules, 
 }
 
 // create from non overlapping ROIs a simple association which associates a module index to the ROI index which contains the module index
-std::vector<std::pair<unsigned int, unsigned int> > findSlot(unsigned int max_modules, const std::vector<std::vector<unsigned int> > &rois) {
+std::vector<std::pair<unsigned int, unsigned int> > findContainer(unsigned int max_modules, const std::vector<std::vector<unsigned int> > &rois) {
    std::vector<std::pair<unsigned int,unsigned int> > used_modules;
-   std::vector<unsigned int> slot(max_modules, std::numeric_limits<unsigned int>::max());
+   std::vector<unsigned int> container_index(max_modules, std::numeric_limits<unsigned int>::max());
    unsigned int n_modules_used=0;
    unsigned int roi_i=0;
    for (const std::vector<unsigned int> &an_roi : rois ) {
       for (unsigned int module_i : an_roi) {
-         if (slot[module_i]==std::numeric_limits<unsigned int>::max()) {
-            slot[module_i]=roi_i;
+         if (container_index[module_i]==std::numeric_limits<unsigned int>::max()) {
+            container_index[module_i]=roi_i;
             ++n_modules_used;
          }
       }
@@ -76,9 +78,9 @@ std::vector<std::pair<unsigned int, unsigned int> > findSlot(unsigned int max_mo
    }
    used_modules.reserve(n_modules_used);
    unsigned int module_i=0;
-   for(unsigned int slot_i : slot ) {
-      if (slot[module_i]!=std::numeric_limits<unsigned int>::max()) {
-         used_modules.push_back(std::make_pair(module_i, slot_i) );
+   for(unsigned int container_i : container_index ) {
+      if (container_index[module_i]!=std::numeric_limits<unsigned int>::max()) {
+         used_modules.push_back(std::make_pair(module_i, container_i) );
       }
       ++module_i;
    }
@@ -86,16 +88,19 @@ std::vector<std::pair<unsigned int, unsigned int> > findSlot(unsigned int max_mo
    return used_modules;
 }
 
-// create a new pixel hit container for at most max_modules which can be distributed over at most n_slots independent data containers
-std::unique_ptr< PhaseIIPixelRawDataContainer>  createPixelRawDataContainer(unsigned int max_modules, unsigned int n_slots) {
-   std::unique_ptr< PhaseIIPixelRawDataContainer> ret = std::make_unique< PhaseIIPixelRawDataContainer>(max_modules, n_slots);
+// create a new pixel hit container for at most max_modules which can be distributed over at most container_list_size
+// independent data containers
+std::unique_ptr< PhaseIIPixelRawDataContainer>  createPixelRawDataContainer(unsigned int max_modules,
+                                                                            unsigned int container_list_size) {
+   std::unique_ptr< PhaseIIPixelRawDataContainer> ret = std::make_unique< PhaseIIPixelRawDataContainer>(max_modules,
+                                                                                                        container_list_size);
    return ret;
 }
 
 // create toy pixel hit data for the given set of modules, where at most max_hits_per_module are added per module
 // the hits will get coordinates on a matrix n_cols x n_rows, where no attempt is made to avoid hit overlaps
-// the hit data will be stored in the hit data container of the specified slot.
-void fillPixelRawDataContainer ( unsigned int slot_i,
+// the hit data will be stored in the hit data container of the specified container.
+void fillPixelRawDataContainer ( unsigned int container_i,
                         std::span<unsigned int> modules,
                         unsigned int max_hits_per_module,
                         unsigned int n_cols,
@@ -103,8 +108,8 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
                         PhaseIIPixelRawDataContainer &container) {
    [[maybe_unused]] unsigned int n_rejected_ranges=0u;
 
-   // get the actual hit data container for the given slot
-   PhaseII::PixelRawDataContainer &rdo_data = container.data(slot_i);
+   // get the actual hit data container for the given container index
+   PhaseII::PixelRawDataContainer &rdo_data = container.data(container_i);
    rdo_data.reserve( max_hits_per_module * modules.size());
    for (unsigned int module : modules) {
 
@@ -113,20 +118,23 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
       if (!range.empty()) continue;
 
       // throw number of hits to be generated for this module
+      //coverity[DC.WEAK_CRYPTO]
       unsigned int n_rdos = rand() % max_hits_per_module;
       if (n_rdos>0) {
          // reserve storage and initialize range data pointing to the first element to be used for this module
          // the range is empty initially.
          rdo_data.reserve( rdo_data.size() + n_rdos);
-         using RangeSize_t = decltype(PhaseII::DataRange::m_n);
-         using ContainerIndex_t = decltype(PhaseII::DataRange::m_containerIndex);
+         using RangeSize_t = PhaseII::DataRange::RangeSize_t;
+         using ContainerIndex_t = PhaseII::DataRange::ContainerIndex_t;
          PhaseII::DataRange new_range( rdo_data.size(),
                               static_cast<RangeSize_t>( 0u) ,
-                              static_cast<ContainerIndex_t>(slot_i));
+                              static_cast<ContainerIndex_t>(container_i));
 
          // fill the random hit data
          for (unsigned int rdo_i=0; rdo_i< n_rdos; ++rdo_i) {
+            //coverity[DC.WEAK_CRYPTO]
             unsigned int coordinate_pair = rand();
+            //coverity[DC.WEAK_CRYPTO]
             unsigned int rand_data_word = rand();
             rdo_data.emplace_back(std::array<std::int16_t, 2>{ static_cast<std::int16_t>((coordinate_pair >>16) % n_cols),
                                                                static_cast<std::int16_t>((coordinate_pair) % n_rows) },
@@ -140,13 +148,14 @@ void fillPixelRawDataContainer ( unsigned int slot_i,
                  && static_cast<std::size_t>(rdo_data.size() - new_range.beginIndex()) < std::numeric_limits<RangeSize_t>::max());
 
          // update range to the final number of elements
-         new_range.m_n  = static_cast<RangeSize_t>( rdo_data.size() - new_range.beginIndex());
+         new_range.setSize( static_cast<RangeSize_t>( rdo_data.size() - new_range.beginIndex()) );
          // ... and register the new hit range, or if somehow a range was already registered in the mean time
          // erase the hit data which was just added here to the end of the container.
          static_assert( std::is_same_v<PhaseIIPixelRawDataContainer::T_RangeTypeBase, PhaseII::DataRange>);
          n_rejected_ranges += !(container.registerOrEraseNewData( module, new_range));
       }
    }
+   assert( n_rejected_ranges==0);
 }
 
 // dump the contents of the entire hit container collection
@@ -311,8 +320,8 @@ std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
                          const std::vector<std::pair<unsigned int, unsigned int> > &used_modules) {
    // container for which the Range is not atomic
    using PixelRawDataContainerNonMT = PhaseII::IndexedRanges<PhaseII::PixelRawDataContainer, PhaseII::DataRange >;
-   using RangeNType  = decltype(PhaseII::DataRange::m_n);
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange::m_containerIndex);
+   using RangeNType  = decltype(PhaseII::DataRange().size());
+   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
 
    // create one hit container per ROI (or thread) without an atomic range structure
    std::vector<PixelRawDataContainerNonMT> roi_rdo_container;
@@ -378,10 +387,10 @@ std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
    // only using the data of each module at most once.
    FNVHash fnvHash;
    if (!rois.empty()) {
-   for (const std::pair<unsigned int, unsigned int> &module_slot : used_modules) {
-      assert( module_slot.second < roi_rdo_container.size());
-      const PhaseII::DataRange &range = roi_rdo_container[module_slot.second].range(module_slot.first);
-      const PhaseII::PixelRawDataContainer &data = roi_rdo_container[module_slot.second].data( range.containerIndex());
+   for (auto [module_index, container_index]  : used_modules) {
+      assert( container_index < roi_rdo_container.size());
+      const PhaseII::DataRange &range = roi_rdo_container[container_index].range(module_index);
+      const PhaseII::PixelRawDataContainer &data = roi_rdo_container[container_index].data( range.containerIndex());
       for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
          for (auto elm :  data.coordinates(rdo_idx)) {
             fnvHash.add(elm);
@@ -400,8 +409,9 @@ std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
 // registered for the module by a different thread, which may happen if the ROIs overlap.
 std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
                       const std::vector<std::vector<unsigned int> > &rois) {
-   using RangeNType  = decltype(PhaseII::DataRange::m_n);
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange::m_containerIndex);
+   static_assert( std::atomic<PhaseII::DataRange>::is_always_lock_free );
+   using RangeNType  = decltype(PhaseII::DataRange().size());
+   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
    std::atomic<unsigned int> n_rejected_work=0u;
 
 
@@ -542,9 +552,9 @@ std::size_t roiFillOverhead(const PhaseIIPixelRawDataContainer &rdo_container,
    // get the hit data from the input collection. The per module hit data is process in module
    // index order and each module is only counted once.
    FNVHash fnvHash;
-   for (const std::pair<unsigned int, unsigned int> &module_slot : used_modules) {
-      assert( module_slot.second < roi_rdo_container.size());
-      const PhaseII::DataRange &range = rdo_container.range(module_slot.first);
+   for (auto [module_index, container_index] : used_modules) {
+      assert( container_index < roi_rdo_container.size());
+      const PhaseII::DataRange &range = rdo_container.range(module_index);
       const PhaseII::PixelRawDataContainer &data = rdo_container.data( range.containerIndex());
       for (unsigned int rdo_idx = range.beginIndex(); rdo_idx <range.endIndex(); ++rdo_idx) {
          for (auto elm :  data.coordinates(rdo_idx)) {
@@ -608,21 +618,30 @@ int main(int argc, char **argv) {
          return 1;
       }
     }
+    if (max_modules == 0){
+      std::cerr << "Max modules cannot be zero.\n";
+      return 1;
+    }
+    
     // create toy data
-    unsigned int max_slots=max_ROIs;
-
+    unsigned int max_containers=max_ROIs;
+    //coverity[TAINTED_SCALAR]
     //first create random ROIs
     std::vector< std::vector< unsigned int> > rois = makeROIs( max_modules, max_ROIs, max_modules_per_ROI );
 
     // create auxiliary containers from the ROI collection, which are overlap free:
     std::vector< std::vector< unsigned int> > rois_no_overlap=removeOverlap(max_modules, rois);
     // .. and provide pairs of module index and associated ROI index for all modules in module index order
-    std::vector< std::pair<unsigned int,unsigned int> > slot=findSlot(max_modules, rois_no_overlap);
+    std::vector< std::pair<unsigned int,unsigned int> > container_index=findContainer(max_modules, rois_no_overlap);
 
     // copy the toy data to RDO containers, which is used as an input in the tests.
-    std::unique_ptr< PhaseIIPixelRawDataContainer>  rdo_container = createPixelRawDataContainer(max_modules, max_slots);
+    std::unique_ptr< PhaseIIPixelRawDataContainer>  rdo_container = createPixelRawDataContainer(max_modules, max_containers);
     // @TODO could use rois_no_overlap, but hit data only created if nothing had been registered yet for the corresponding
     // module, so this does not matter.
+    if (max_hits_per_module == 0 or n_columns == 0){
+      std::cerr << "Neither max_hits_per_module nor n_columns cannot be zero.\n";
+      return 1;
+    }
     for (unsigned int roi_i=0; roi_i<rois.size(); ++roi_i) {
        fillPixelRawDataContainer(roi_i, rois[roi_i], max_hits_per_module, n_columns, n_rows, *rdo_container);
     }
@@ -644,10 +663,10 @@ int main(int argc, char **argv) {
        // only run the thread tests once and compare the resulting check sums
        // To estimate the overhead of creating the one container collection per ROI for the non-MT version,
        // the thread creation and the computation of the FNV hash at the end, run a dummy.
-       std::size_t checksum0 = roiFillOverhead(*rdo_container,rois_no_overlap,slot);
+       std::size_t checksum0 = roiFillOverhead(*rdo_container,rois_no_overlap,container_index);
        // for the non-MT version use input data for which the overlap region in some ROIs are removed
        // such that a module appears at most once in all ROIs together.
-       std::size_t checksum1 = roiFillNonMT(*rdo_container,rois_no_overlap,slot);
+       std::size_t checksum1 = roiFillNonMT(*rdo_container,rois_no_overlap,container_index);
        // for the MT version the input data may contain overlapping ROIs, As a consequence part of the
        // work is eventually done multiple times, although only one result is stored.
        std::size_t checksum2 = roiFillMT(*rdo_container,rois);

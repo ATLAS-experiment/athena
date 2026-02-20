@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGIMPLSVC_H
@@ -230,25 +230,6 @@ public:
   }
 
   //@}
-
-  /////////////////////////////////////////////////////////////////////////
-  /// \name IOVSvc interface
-  //@{
-
-  /// register a callback function(2) with an already registered function(1)
-  StatusCode regFcn (const CallBackID& c1,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-
-  /// register a callback function(2) with an already registered AlgTool
-  StatusCode regFcn (const std::string& toolName,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-  
-  //@}
-  /////////////////////////////////////////////////////////////////////////
 
   /// get proxy for a given data object address in memory
   virtual SG::DataProxy* proxy(const void* const pTransient) const override final;

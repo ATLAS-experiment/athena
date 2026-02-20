@@ -74,15 +74,6 @@ namespace MuonValR4 {
                                           const std::string& extraLabel,
                                           PrimitiveVec&& extraPaints) const override final;
 
-            virtual void visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
-                                                          const MuonR4::Segment& segment,
-                                                          const std::string& extraLabel) const override final;
-            
-            virtual void visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
-                                                          const MuonR4::Segment::MeasVec& measVec,
-                                                          const std::string& extraLabel) const override final;
-
-
             using LabeledSegmentSet = std::unordered_set<const xAOD::MuonSegment*>;
 
             /** @brief Returns whether the hit has been used on the labeled segments we refer to (e.g. truth or data Zµµ)
@@ -153,15 +144,6 @@ namespace MuonValR4 {
                               Canvas_t& canvas,
                               const int view) const;
 
-            /** @brief Append hits from a segment in an obj file
-             *  @param  geoCtx: The reference to the geometry context used fro the local to global transformations
-             *  @param measVec: The reference of the measurements from the segment that are visualized
-             *  @param visualHelper: The Acts Obj visualization helper
-             *  @param viewConfig: The ACTS viewConfig reference */    
-            void drawObjHits(const ActsTrk::GeometryContext& geoCtx,
-                             const MuonR4::Segment::MeasVec& measVec, 
-                             Acts::ObjVisualization3D& visualHelper) const;
-    
             /** @brief Service handle of the visualization service */
             ServiceHandle<IRootVisualizationService> m_visualSvc{this, "VisualSvc", "MuonValR4::RootVisualizationService"};
             /** @brief Token to present to the visualization service such that the display froms this 

@@ -63,15 +63,17 @@ std::unique_ptr<const History> TreeAccessor::getCellHistory(unsigned int i) cons
   if (i >= cellTree().GetEntries()) return nullptr;
   getCellEntry(i);
 
-  std::vector<const EventData*> eventDatas;
+  std::vector<std::unique_ptr<const EventData> > eventDatas;
   
   for (unsigned int k = 0; k < currentContainer()->nDataContainers(); k++) {
     const EventData* evtData = eventData(currentContainer()->dataContainer(k)->eventIndex());
-    EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
-    eventDatas.push_back(newEvtData);
+    std::unique_ptr<const EventData> newEvtData;
+    if (evtData)
+      newEvtData = std::make_unique<EventData> (*evtData);
+    eventDatas.push_back(std::move(newEvtData));
   }
   if (currentContainer()->cellInfo())
-    return std::make_unique<History>(*currentContainer(), eventDatas, i);
+    return std::make_unique<History>(*currentContainer(), std::move(eventDatas), i);
   return nullptr;
 }
 
@@ -80,15 +82,17 @@ std::unique_ptr<const History> TreeAccessor::getSCHistory(unsigned int i) const
   if (i >= SCTree().GetEntries()) return nullptr;
   getSCEntry(i);
 
-  std::vector<const EventData*> eventDatas;
+  std::vector<std::unique_ptr<const EventData> > eventDatas;
   
   for (unsigned int k = 0; k < currentContainerSC()->nDataContainers(); k++) {
     const EventData* evtData = eventData(currentContainerSC()->dataContainer(k)->eventIndex());
-    EventData* newEvtData = (evtData ? new EventData(*evtData) : nullptr);
-    eventDatas.push_back(newEvtData);
+    std::unique_ptr<const EventData> newEvtData;
+    if (evtData)
+      newEvtData = std::make_unique<EventData> (*evtData);
+    eventDatas.push_back(std::move(newEvtData));
   }
   if (currentContainerSC()->cellInfo())
-    return std::make_unique<History>(*currentContainerSC(), eventDatas, i);
+    return std::make_unique<History>(*currentContainerSC(), std::move(eventDatas), i);
   return nullptr;
 }
 
@@ -426,13 +430,13 @@ TreeAccessor::filter(const Accessor& accessor,
         unsigned int newRunIndex = (isNewRun ? runsToKeep[f].size() : runsToKeep[f][oldRunIndex]);      
         if (isNewRun) runsToKeep[f][oldRunIndex] = newRunIndex;
 
-        Data* newData = tweaker.tweak(*history->data(k), newEvtIndex);
+        std::unique_ptr<Data> newData = tweaker.tweak(*history->data(k), newEvtIndex);
         if (!newData) {
           cout << "Filtering failed on data " << k << " of cell " << i << ", aborting" << endl;
           return std::vector<std::unique_ptr<TreeAccessor> >();
         }
         nPass++;
-        newHist.add(newData->dissolve());
+        newHist.add(newData.release()->dissolve());
       }
       newAccessors[f]->add(&newHist);
     }

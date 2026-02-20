@@ -19,7 +19,7 @@
 #include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/Seeding/SeedFinderGbts.hpp" 
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/Seeding/SeedFinderGbtsConfig.hpp" 
+#include "Acts/Seeding/GbtsConfig.hpp" 
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
@@ -76,14 +76,14 @@ namespace ActsTrk {
     
     //prints all current config settings used either with default settings or properties changed by the gaudi options
     //tells what the defaults in the config are
-    void printSeedFinderGbtsConfig(const Acts::Experimental::SeedFinderGbtsConfig& cfg);
+    void printGbtsConfig(const Acts::Experimental::GbtsConfig& cfg);
     
     //sets configs based on gaudi properties defined below
     StatusCode prepareConfiguration();
 
     std::unique_ptr<Acts::Experimental::GbtsConnector> m_connector = nullptr; //holds the connection information on what detector layers are linked
     
-    Acts::Experimental::SeedFinderGbtsConfig m_finderCfg; //steering for seeding algorithm
+    Acts::Experimental::GbtsConfig m_cfg; //steering for seeding algorithm
     
     std::unique_ptr<Acts::Experimental::GbtsGeometry> m_gbtsGeo = nullptr; //holds all geometry information (m_layergeomtry and connection table)
     

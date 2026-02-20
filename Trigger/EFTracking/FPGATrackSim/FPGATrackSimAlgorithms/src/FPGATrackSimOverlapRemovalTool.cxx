@@ -142,15 +142,16 @@ StatusCode FPGATrackSimOverlapRemovalTool::removeOverlapping(FPGATrackSimTrack &
             return hash_a <  hash_b; 
         }
     };
-
     std::set<const FPGATrackSimHit*, HitCompare > hitsInTrack1;
-    for ( auto& hit : track1.getFPGATrackSimHits()) {
-        if (hit.isReal()) hitsInTrack1.insert(&hit);
+    for ( const auto& hit_ptr : track1.getFPGATrackSimHitPtrs()) {
+      if (!hit_ptr) throw std::runtime_error("Null hit pointer in compareTrackQuality: tracks should not have unassigned layers");
+      if (hit_ptr->isReal()) hitsInTrack1.insert(hit_ptr.get());
     }
 
     std::set<const FPGATrackSimHit*, HitCompare> hitsInTrack2;
-    for ( auto& hit: track2.getFPGATrackSimHits()){
-        if (hit.isReal()) hitsInTrack2.insert(&hit);
+    for ( const auto& hit_ptr: track2.getFPGATrackSimHitPtrs()){
+      if (!hit_ptr) throw std::runtime_error("Null hit pointer in compareTrackQuality: tracks should not have unassigned layers");
+      if (hit_ptr->isReal()) hitsInTrack2.insert(hit_ptr.get());
     }
 
     std::vector<const FPGATrackSimHit*> sharedHits;    
@@ -193,13 +194,15 @@ StatusCode FPGATrackSimOverlapRemovalTool::removeOverlapping(FPGATrackSimTrack &
 bool FPGATrackSimOverlapRemovalTool::compareTrackQuality(const FPGATrackSimTrack & track1, const FPGATrackSimTrack & track2)
 {
     std::vector<const FPGATrackSimHit*> hitsInTrack1;
-    for ( auto& hit : track1.getFPGATrackSimHits()) {
-        if (hit.isReal()) hitsInTrack1.push_back(&hit);
+    for ( const auto& hit_ptr : track1.getFPGATrackSimHitPtrs()) {
+      if (!hit_ptr) throw std::runtime_error("Null hit pointer in countOverlappingHits_v2: tracks should not have unassigned layers");
+      if (hit_ptr->isReal()) hitsInTrack1.push_back(hit_ptr.get());
     }
 
     std::vector<const FPGATrackSimHit*> hitsInTrack2;
-    for ( auto& hit: track2.getFPGATrackSimHits()){
-        if (hit.isReal()) hitsInTrack2.push_back(&hit);
+    for ( const auto& hit_ptr: track2.getFPGATrackSimHitPtrs()){
+      if (!hit_ptr) throw std::runtime_error("Null hit pointer in countOverlappingHits_v2: tracks should not have unassigned layers");
+      if (hit_ptr->isReal()) hitsInTrack2.push_back(hit_ptr.get());
     }
 
     // If one track has more hits than the other, it's better.
@@ -302,8 +305,9 @@ bool FPGATrackSimOverlapRemovalTool::compareTrackQuality_v2(const FPGATrackSimTr
 int FPGATrackSimOverlapRemovalTool::countRealHits_v2(const FPGATrackSimTrack& track)
 {
     int nHits = 0;
-    for (const auto& hit : track.getFPGATrackSimHits()) {
-        if (hit.isReal()) nHits++;
+    for (const auto& hit_ptr : track.getFPGATrackSimHitPtrs()) {
+        if (!hit_ptr) throw std::runtime_error("Null hit pointer in countRealHits_v2: tracks should not have unassigned layers");
+        if (hit_ptr->isReal()) nHits++;
     }
     return nHits;
 }

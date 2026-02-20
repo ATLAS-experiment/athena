@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /* Second stage alg needs to:
  *  retrieve Tracks_1st and Hits_2nd from storegate
@@ -155,7 +155,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
     // If we get here, FPGAHits_2nd is valid, copy it over.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
     phits_2nd.reserve(FPGAHits->size());
-    for (const auto& hit : *FPGAHits) {
+    for (const FPGATrackSimHit* hit : *FPGAHits) {
         phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(*hit));
     }
 
@@ -197,7 +197,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
             ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
             for (size_t l = 0; l < road.getNLayers(); ++l) {
-                for (const auto& layerH : road.getHits(l)) {
+                for (const auto& layerH : road.getHitPtrs(l)) {
                     road_hits->push_back(new FPGATrackSimHit(*layerH));
                 }
             }

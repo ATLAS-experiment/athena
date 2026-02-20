@@ -22,6 +22,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
 
 namespace MuonGMR4 { 
@@ -41,8 +42,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         /** @brief Returns the  edge points from a trapezoidal / cuboid /diamond volume */
         std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
         std::array<Amg::Vector3D, 8> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::StrawSurface& surface) const;
-        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface&) const;
-        
+        std::array<Amg::Vector3D, 4> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::PlaneSurface& surface) const;        
         
         void saveEnvelope(const ActsTrk::GeometryContext& gctx,
                           const std::string& envName,

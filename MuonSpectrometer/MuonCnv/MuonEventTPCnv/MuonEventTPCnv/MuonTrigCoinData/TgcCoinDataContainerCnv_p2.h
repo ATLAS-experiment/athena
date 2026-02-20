@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCCOINDATACONTAINERCNV_P2_H
@@ -29,17 +29,17 @@ namespace Muon{
     public:
         typedef Muon::MuonCoinDataContainer_p1 PERS; 
         typedef Muon::TgcCoinDataContainer TRANS;
-        TgcCoinDataContainerCnv_p2(): m_TgcId(0), m_isInitialized(0) {}
+        TgcCoinDataContainerCnv_p2() = default;
         virtual void persToTrans(const PERS* persCont, TRANS* transCont, MsgStream &log); 
         virtual void transToPers(const TRANS* transCont, PERS* persCont, MsgStream &log);
         virtual Muon::TgcCoinDataContainer* createTransient(const Muon::MuonCoinDataContainer_p1* persObj, MsgStream& log);
     private:
         StatusCode initialize(MsgStream &log);
 
-        const TgcIdHelper *m_TgcId;
+        const TgcIdHelper *m_TgcId{nullptr};
         ToolHandle  < Trk::IEventCnvSuperTool >   m_eventCnvTool{"Trk::EventCnvSuperTool/EventCnvSuperTool"}; 
         const MuonGM::TgcReadoutElement* getReadOutElement(const Identifier& id ) const;
-        bool m_isInitialized;
+        bool m_isInitialized{false};
     };
 
 }

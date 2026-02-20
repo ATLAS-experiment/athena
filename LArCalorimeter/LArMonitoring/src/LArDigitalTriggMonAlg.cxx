@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -147,6 +147,7 @@ struct SC_MonValues {
   float sc_time;
   int sc_bcid;
   unsigned int sc_lb;
+  int sc_ltdbsourceid;
   bool sc_zeroET; 
   bool sc_passSCNomInvalid;
   bool sc_passSCNom0_0p325;
@@ -208,6 +209,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   auto SC_eta = Monitored::Scalar<float>("SC_eta",0.0); // MSCeta
   auto SC_iphi = Monitored::Scalar<int>("SC_iphi",0.0);
   auto SC_ieta = Monitored::Scalar<int>("SC_ieta",0.0);
+  auto SC_ltdbsourceid = Monitored::Scalar<int>("SC_ltdbsourceid",-1);
   auto SC_energy_onl = Monitored::Scalar<int>("SC_energy_onl",0.0); // Menergy_onl
   auto SC_ET_onl = Monitored::Scalar<float>("SC_ET_onl",0.0); // Menergy_onl
   auto SC_ET_onl_muscaled = Monitored::Scalar<float>("SC_ET_onl_muscaled",0.0); // Menergy_onl
@@ -549,6 +551,9 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
         SC_latomeSourceIdBIN = getXbinFromSourceID(rawSC->SourceId());
 
+        HWIdentifier ltdbId = m_LArOnlineIDHelper->feb_Id(id);
+        IdentifierHash ltdbHash = m_LArOnlineIDHelper->feb_Hash(ltdbId);
+
         // initialise cuts
         notMasked = false;
         passTauSel = false;
@@ -577,6 +582,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         nonZeroETofl = false;
         eToflGt1GeV = false;
         passSCNomInvalid = false;
+        SC_ltdbsourceid = -1;
         // Check if this is a maskedOSUM SC
         if (!m_bcMask.cellShouldBeMasked(bcCont, id)) {
           notMasked = true;
@@ -692,6 +698,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
           }
           if  (SC_energy_onl == -99999) {
             passSCNomInvalid = true;
+            SC_ltdbsourceid = ltdbHash;
           }
 
           //if ( passTauSel ){
@@ -718,10 +725,10 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         }  // end nominal selections
 
         lvaluemap_sc.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time, BCID,
-                                  lumi_block, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0,
+                                  lumi_block, SC_ltdbsourceid, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked, notMaskedEoflNe0,
                                   notMaskedEoflGt1);
         lvaluemap_sc_ALL.emplace_back(SC_eta, SC_phi, SC_ieta, SC_iphi, SC_latomeSourceIdBIN, SC_ET_ofl, SC_ET_diff, SC_ET_onl, SC_ET_onl_muscaled, SC_time,
-                                      BCID, lumi_block, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked,
+                                      BCID, lumi_block, SC_ltdbsourceid, zeroET, passSCNomInvalid, passSCNom0_0p325, passSCNom0p325_1, passSCNom1, passSCNom10, passSCNom10tauGt3, saturNotMasked, OFCbOFNotMasked,
                                       notMaskedEoflNe0, notMaskedEoflGt1);
 
       }  // end loop over SCs
@@ -741,6 +748,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
         auto sc_part_time = Monitored::Collection("SC_part_time", tool, [](const auto& v) { return v.sc_time; });
         auto sc_part_bcid = Monitored::Collection("SC_part_BCID", tool, [](const auto& v) { return v.sc_bcid; });
         auto sc_part_lb = Monitored::Collection("SC_part_LB", tool, [](const auto& v) { return v.sc_lb; });
+        auto sc_part_ltdbsourceid = Monitored::Collection("SC_part_ltdbsourceid", tool, [](const auto& v) { return v.sc_ltdbsourceid; });
         // auto sc_part_passSCNom = Monitored::Collection("SC_part_passSCNom", tool, [](const auto& v) { return v.sc_passSCNom; });
         auto sc_zeroET = Monitored::Collection("SC_part_zeroET", tool, [](const auto& v) { return v.sc_zeroET; });
         auto sc_part_passSCNomInvalid = Monitored::Collection("SC_part_passSCNomInvalid", tool, [](const auto& v) { return v.sc_passSCNomInvalid; });
@@ -756,7 +764,7 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
 
         fill(m_tools[m_toolmapLayerNames_sc.at(m_layerNames[ilayer])], sc_part_eta, sc_part_phi, sc_part_ieta, sc_part_iphi, sc_part_latomesourceidbin,
-             sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_zeroET, sc_part_passSCNomInvalid,
+             sc_part_et_ofl, sc_part_et_diff, sc_part_et_onl, sc_part_et_onl_muscaled, sc_part_time, sc_part_bcid, sc_part_lb, sc_part_ltdbsourceid, sc_zeroET, sc_part_passSCNomInvalid,
              sc_part_passSCNom0_0p325, sc_part_passSCNom0p325_1, sc_part_passSCNom1, sc_part_passSCNom10, sc_part_passSCNom10tauGt3, sc_part_saturNotMasked, sc_part_OFCbOFNotMasked, sc_part_notMaskedEoflNe0,
              sc_part_notMaskedEoflGt1);
       }

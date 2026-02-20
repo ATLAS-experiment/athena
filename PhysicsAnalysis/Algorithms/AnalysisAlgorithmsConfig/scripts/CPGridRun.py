@@ -466,7 +466,7 @@ class CPGridRun:
         if haveLocalYaml:
             logCPGridRun.warning("A path to a local YAML configuration file is found, but it may not be grid-usable.")
 
-        repoYamls = CPBaseRunner.findRepoPathYamlConfig(yamlPath)
+        repoYamls, _ = CPBaseRunner.findRepoPathYamlConfig(yamlPath)
         if repoYamls and len(repoYamls) > 1:
             self._errorCollector['ambiguous yamls'] = f'Multiple files named \"{yamlPath}\" found in the analysis repository. Please provide a more specific path to the config file.\nMatches found:\n' + '\n'.join(repoYamls)
             return

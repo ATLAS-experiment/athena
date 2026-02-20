@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackPATHFINDEREXTENSION_H
 #define FPGATrackPATHFINDEREXTENSION_H
@@ -32,6 +32,7 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 
 #include <vector>
+#include <memory>
 
   // internal object for book-keeping during the tree branching, basically just a vector of hits with helper functions - NOTHING else
   struct miniRoad {

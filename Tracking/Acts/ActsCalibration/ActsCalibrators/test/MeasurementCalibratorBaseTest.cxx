@@ -12,14 +12,14 @@ template <size_t dim>
 
   struct DummyMeasurement{
 
-    DummyMeasurement(unsigned int id, Acts::ActsVector<dim> pos,
-                     Acts::ActsSquareMatrix<dim> cov):
+    DummyMeasurement(unsigned int id, Acts::Vector<dim> pos,
+                     Acts::SquareMatrix<dim> cov):
         m_id{id}, m_pos{pos}, m_cov{cov}{}
     
     constexpr std::size_t size() const { return dim; }
     unsigned int m_id{0};
-    Acts::ActsVector<dim> m_pos{Acts::ActsVector<dim>::Zero()};
-    Acts::ActsSquareMatrix<dim> m_cov{Acts::ActsSquareMatrix<dim>::Identity()};
+    Acts::Vector<dim> m_pos{Acts::Vector<dim>::Zero()};
+    Acts::SquareMatrix<dim> m_cov{Acts::SquareMatrix<dim>::Identity()};
 
 };
 
@@ -71,7 +71,7 @@ int main() {
     TrackState_t simpleStripState = trackStateBackend.getTrackState(0);
     assert(not simpleStripState.hasCalibrated());
 
-    DummyMeasurement<1> meas{1, Acts::ActsVector<1>{10.}, 20.*Acts::ActsSquareMatrix<1>::Identity()};
+    DummyMeasurement<1> meas{1, Acts::Vector<1>{10.}, 20.*Acts::SquareMatrix<1>::Identity()};
     calibrator.setState<1, Backend_t>(ProjectorType::e1DimNoTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, simpleStripState);
     checkList<1, Backend_t>(meas, simpleStripState, Acts::BoundSubspaceIndices{Acts::eBoundLoc0});
@@ -81,7 +81,7 @@ int main() {
     TrackState_t rotated = trackStateBackend.getTrackState(1);
     assert(not rotated.hasCalibrated());
 
-    DummyMeasurement<1> meas{1, Acts::ActsVector<1>{35.}, 66.*Acts::ActsSquareMatrix<1>::Identity()};
+    DummyMeasurement<1> meas{1, Acts::Vector<1>{35.}, 66.*Acts::SquareMatrix<1>::Identity()};
     calibrator.setState<1, Backend_t>(ProjectorType::e1DimRotNoTime, meas.m_pos, meas.m_cov, 
                                     Acts::SourceLink{&meas}, rotated);
     checkList<1, Backend_t>(meas, rotated, Acts::BoundSubspaceIndices{Acts::eBoundLoc1});
@@ -94,7 +94,7 @@ int main() {
     AmgSymMatrix(2) cov{AmgSymMatrix(2)::Identity()};
     cov(0,0) = 63;
     cov(1,1) = 683;
-    DummyMeasurement<2> meas{3, Acts::ActsVector<2>{35., 74.}, cov};
+    DummyMeasurement<2> meas{3, Acts::Vector<2>{35., 74.}, cov};
     calibrator.setState<2, Backend_t>(ProjectorType::e1DimWithTime, meas.m_pos, meas.m_cov, 
                                       Acts::SourceLink{&meas}, oneDimTime);
     checkList<2, Backend_t>(meas, oneDimTime, Acts::BoundSubspaceIndices{Acts::eBoundLoc0, Acts::eBoundTime});

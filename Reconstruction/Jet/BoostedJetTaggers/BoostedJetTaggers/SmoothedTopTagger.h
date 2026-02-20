@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_SMOOTHEDTOPTAGGER_H_
@@ -18,6 +18,9 @@ class SmoothedTopTagger :
 
       // Decorate jet with tagging information
       virtual StatusCode tag(const xAOD::Jet& jet) const override;
+
+      // Decorate jet container with tagging info
+      virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
       // Run once at the start of the job to setup everything
       virtual StatusCode initialize() override;
@@ -39,16 +42,18 @@ class SmoothedTopTagger :
       // declaration of decorators for cut values
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_dec_mcut{this, "mcutName", "Cut_m", "SG key for Cut_m"};
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_dec_sphericitycut{this, "sphericitycutName", "Cut_Sphericity", "SG key for Cut_Sphericity"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_dec_scorecut{this, "CutScoreName", "Cut_Score", "SG key for Cut_Score"};
 
       // declaration of decorators for cut information
       SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassSphericityKey{this, "PassSphericityName", "PassSphericity", "SG key for PassSphericity"};
+      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
 
       // vector of recognised cut names
       // add to this vector as necessary when additional taggers are implemented
       // variables are duplicated to allow cases where variable names are not provided with first
       // letter capitalised, but all decorations to jets will assume the capitalised version is being used
       // e.g. PassMass, PassSphericity, etc.
-      std::vector<std::string> m_recognisedCuts = {"Mass", "mass", "Sphericity", "sphericity"};
+      std::vector<std::string> m_recognisedCuts = {"Mass", "mass", "Sphericity", "sphericity", "Score", "score"};
 
   };
 

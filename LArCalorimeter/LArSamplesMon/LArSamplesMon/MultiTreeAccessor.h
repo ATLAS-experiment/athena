@@ -51,7 +51,7 @@ namespace LArSamples {
       const TreeAccessor& accessor(unsigned int i) const { return *m_accessors[i]; }
       unsigned int nAccessors() const { return m_accessors.size(); }
       
-      std::vector<MultiTreeAccessor*> filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const;
+      std::vector<std::unique_ptr<MultiTreeAccessor> > filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const;
 
     protected:
       

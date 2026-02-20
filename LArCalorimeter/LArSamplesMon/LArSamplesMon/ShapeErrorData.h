@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -53,7 +53,7 @@ namespace LArSamples {
     double tbar() const { return m_tbar; }
     int    n()    const { return m_n; }
     
-    ShapeErrorData* add(const ShapeErrorData& other) const;
+    std::unique_ptr<ShapeErrorData> add(const ShapeErrorData& other) const;
   
     ShapeErrorType shapeErrorType() const { return m_shapeErrorType; }
     void setShapeErrorType(ShapeErrorType type) { m_shapeErrorType = type; }

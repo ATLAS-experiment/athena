@@ -31,7 +31,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
         self.addOption ('runGhostMuonAssociation', None, type=bool,
             info="whether to set up the jet-ghost-muon association algorithm "
             "`CP::JetGhostMuonAssociationAlg`. If left empty, automatically defaults to `False` for PHYSLITE and `True` otherwise.")
-        self.addOption ('runTruthJetTagging', None, type=bool,
+        self.addOption ('runTruthJetTagging', True, type=bool,
             info="whether to set up the jet truth tagging algorithm "
             "`CP::JetTruthTagAlg`.")
 
@@ -71,10 +71,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
 
-        # NB: I'm assuming that the truth tagging is done in PHYSLITE, if not this will
-        # need to change
-        if (self.runTruthJetTagging or (self.runTruthJetTagging is None)
-        ) and config.dataType() is not DataType.Data:
+        if self.runTruthJetTagging and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
             alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'JetPileupLabelAlg' )
             config.addPrivateTool( 'decorator', 'JetPileupLabelingTool' )
@@ -140,7 +137,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             expertMode=True)
         self.addOption ('calibToolCalibArea', None, type=str,
             info="name of the CVMFS area to use for the jet calibration "
-            "tool. Expert option to override JetETmiss recommendations",
+            "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('calibToolCalibSeq', None, type=str,
             info="name of the sequence to use for the jet calibration "
@@ -445,17 +442,17 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             "tool. Expert option to override JetETmiss recommendations.",
             expertMode=True)
         self.addOption ('minPt', 200.*GeV, type=float,
-            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxPt', 3000.*GeV, type=float,
-            info=r"the maximum $p_\mathrm{T}$ cut to apply to calibrated large-R jets.")
+            info=r"the maximum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxEta', 0., type=float,
             info=r"the maximum $\vert\eta\vert$ cut to apply to calibrated large-R jets.")
         self.addOption ('maxRapidity', 2., type=float,
             info="the maximum rapidity cut to apply to calibrated large-R jets.")
         self.addOption ('minMass', 40.*GeV, type=float,
-            info="the minimum mass cut to apply to calibrated large-R jets.")
+            info="the minimum mass cut (in MeV) to apply to calibrated large-R jets.")
         self.addOption ('maxMass', 600.*GeV, type=float,
-            info="the maximum mass cut to apply to calibrated large-R jets.")
+            info="the maximum mass cut (in MeV) to apply to calibrated large-R jets.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

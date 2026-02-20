@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -73,7 +73,7 @@ class MaterialComposition : public std::vector<ElementFraction> {
                       const std::vector<unsigned char>& ifrac) {
     reserve(iel.size());
     for (std::size_t elvc = 0; elvc < iel.size() && !ifrac.empty(); ++elvc)
-      push_back(ElementFraction(iel[elvc], ifrac[elvc]));
+      push_back(ElementFraction(iel.at(elvc), ifrac.at(elvc)));
   }
 
   /** constructor for persistency (2), size optimized */

@@ -45,68 +45,6 @@ namespace Muon
 RpcCoinData::~RpcCoinData()
 = default;
 
-// Default constructor:
-RpcCoinData::RpcCoinData():
-    RpcPrepData( ), 
-    m_ijk(0),
-    m_threshold(99),
-    m_overlap(99),
-    m_parentCmId(0),
-    m_parentPadId(0), 
-    m_parentSectorId(0),
-    m_lowPtCm(false)
-{ }
-
-//copy constructor:
-RpcCoinData::RpcCoinData(const RpcCoinData& RIO)
-    
-= default;
-
-//move constructor:
-RpcCoinData::RpcCoinData(RpcCoinData&& RIO) noexcept :
-    RpcPrepData(std::move(RIO)), 
-    m_ijk( RIO.m_ijk ),
-    m_threshold( RIO.m_threshold ),
-    m_overlap( RIO.m_overlap ),
-    m_parentCmId( RIO.m_parentCmId ),
-    m_parentPadId( RIO.m_parentPadId ), 
-    m_parentSectorId( RIO.m_parentSectorId ),
-    m_lowPtCm( RIO.m_lowPtCm )
-{ }
-
-//assignment operator
-RpcCoinData& RpcCoinData::operator=(const RpcCoinData& RIO)
-{
-  if(&RIO !=this)
-    {
-      RpcPrepData::operator=(RIO);
-      m_ijk            = RIO.m_ijk;
-      m_threshold      = RIO.m_threshold;
-      m_overlap        = RIO.m_overlap;
-      m_parentCmId     = RIO.m_parentCmId;
-      m_parentPadId    = RIO.m_parentPadId; 
-      m_parentSectorId = RIO.m_parentSectorId;
-      m_lowPtCm        = RIO.m_lowPtCm;
-    }
-  return *this;
-}
-
-//move operator
-RpcCoinData& RpcCoinData::operator=(RpcCoinData&& RIO)
- noexcept {
-  if(&RIO !=this)
-    {
-      m_ijk            = RIO.m_ijk;
-      m_threshold      = RIO.m_threshold;
-      m_overlap        = RIO.m_overlap;
-      m_parentCmId     = RIO.m_parentCmId;
-      m_parentPadId    = RIO.m_parentPadId; 
-      m_parentSectorId = RIO.m_parentSectorId;
-      m_lowPtCm        = RIO.m_lowPtCm;
-      RpcPrepData::operator=(std::move(RIO));
-    }
-  return *this;
-}
 
 // << operator
 
@@ -116,14 +54,14 @@ MsgStream& RpcCoinData::dump( MsgStream&    stream) const
     
   RpcPrepData::dump(stream);
   
-  stream<<"ijk                  = "<<this->ijk()<<", ";
-  stream<<"threshold            = "<<this->threshold()<<", ";
-  stream<<"overlap              = "<<this->overlap()<<", ";
-  stream<<"parentCmId           = "<<this->parentCmId()<<", ";
-  stream<<"parentPadId          = "<<this->parentPadId()<<", ";
-  stream<<"parentSectorId       = "<<this->parentSectorId()<<", ";
-  stream<<"lowPtCm              = "<<this->isLowPtCoin()<<", ";
-  stream<<"lowPtInputToHighPtCm = "<<this->isLowPtInputToHighPtCm()<<", ";
+  stream<<"ijk                  = "<<ijk()<<", ";
+  stream<<"threshold            = "<<threshold()<<", ";
+  stream<<"overlap              = "<<overlap()<<", ";
+  stream<<"parentCmId           = "<<parentCmId()<<", ";
+  stream<<"parentPadId          = "<<parentPadId()<<", ";
+  stream<<"parentSectorId       = "<<parentSectorId()<<", ";
+  stream<<"lowPtCm              = "<<isLowPtCoin()<<", ";
+  stream<<"lowPtInputToHighPtCm = "<<isLowPtInputToHighPtCm()<<", ";
   stream<<"}"<<endmsg;
   
   return stream;
@@ -135,14 +73,14 @@ std::ostream& RpcCoinData::dump( std::ostream&    stream) const
     
   RpcPrepData::dump(stream);
   
-  stream<<"ijk                  = "<<this->ijk()<<", ";
-  stream<<"threshold            = "<<this->threshold()<<", ";
-  stream<<"overlap              = "<<this->overlap()<<", ";
-  stream<<"parentCmId           = "<<this->parentCmId()<<", ";
-  stream<<"parentPadId          = "<<this->parentPadId()<<", ";
-  stream<<"parentSectorId       = "<<this->parentSectorId()<<", ";
-  stream<<"lowPtCm              = "<<this->isLowPtCoin()<<", ";
-  stream<<"lowPtInputToHighPtCm = "<<this->isLowPtInputToHighPtCm()<<", ";
+  stream<<"ijk                  = "<<ijk()<<", ";
+  stream<<"threshold            = "<<threshold()<<", ";
+  stream<<"overlap              = "<<overlap()<<", ";
+  stream<<"parentCmId           = "<<parentCmId()<<", ";
+  stream<<"parentPadId          = "<<parentPadId()<<", ";
+  stream<<"parentSectorId       = "<<parentSectorId()<<", ";
+  stream<<"lowPtCm              = "<<isLowPtCoin()<<", ";
+  stream<<"lowPtInputToHighPtCm = "<<isLowPtInputToHighPtCm()<<", ";
   stream<<"}"<<std::endl;
 
   return stream;

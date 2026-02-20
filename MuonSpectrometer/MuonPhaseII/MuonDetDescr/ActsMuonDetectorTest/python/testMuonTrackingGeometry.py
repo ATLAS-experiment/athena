@@ -48,6 +48,7 @@ if __name__ == "__main__":
     cfg.merge(setupHistSvcCfg(flags, outFile=args.outRootFile, outStream="MuonNavigationTestGen3R4"))
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
+
     cfg.merge(MuonTrackingGeometryTestCfg(flags))
 
     executeTest(cfg)

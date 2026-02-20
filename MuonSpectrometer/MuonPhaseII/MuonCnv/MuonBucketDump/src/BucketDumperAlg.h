@@ -16,6 +16,7 @@
 #include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include "xAODMuon/MuonSegmentContainer.h"
+#include "xAODTruth/TruthParticle.h"
 
 #include "MuonTesterTree/MuonTesterTree.h"
 #include "MuonTesterTree/ThreeVectorBranch.h"
@@ -63,7 +64,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     /// Pattern visualization tool
     ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
     CLHEP::HepRandomEngine* getRandomEngine(const EventContext&ctx) const;
-
+    
     MuonVal::MuonTesterTree m_tree{"MuonBucketDump","MuonBucketDump"};
 
     MuonVal::ScalarBranch<float>&           m_bucket_min{m_tree.newScalar<float>("bucket_min", -1)};

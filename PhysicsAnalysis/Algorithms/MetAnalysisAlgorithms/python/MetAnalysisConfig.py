@@ -67,7 +67,7 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('tauUseMVAResolution', True, type=bool,
             info="whether to use MVA resolution for taus-jets (for MET significance).")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
-            info="whether to save some additional (event-based) MET significance variables")
+            info="whether to save some additional (event-based) MET significance variables.")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map.")
         self.addOption ('useCaloSoftTerm', False, type=bool,

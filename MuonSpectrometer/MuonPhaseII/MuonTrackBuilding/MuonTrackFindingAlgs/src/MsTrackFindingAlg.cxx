@@ -182,7 +182,7 @@ std::pair<MsTrackFindingAlg::OptBoundPars_t,
         auto initialPars = Acts::BoundTrackParameters::create(tgContext, target, fourPos, 
                                                               seedDir,
                                                               ActsTrk::energyToActs(qOverP),
-                                                              Acts::BoundSquareMatrix::Identity(), 
+                                                              Acts::BoundMatrix::Identity(), 
                                                               Acts::ParticleHypothesis::muon());
         return std::make_pair(std::move(initialPars),  std::move(measurements));
 

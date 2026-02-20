@@ -9,6 +9,7 @@
 #include "JetMomentTools/JetForwardJvtTool.h"
 #include "JetMomentTools/JetLArHVTool.h"
 #include "JetMomentTools/JetMuonSegmentMomentsTool.h"
+#include "JetMomentTools/JetNumConstitTool.h"
 #include "JetMomentTools/JetOriginCorrectionTool.h"
 #include "JetMomentTools/JetPtAssociationTool.h"
 #include "JetMomentTools/JetTrackMomentsTool.h"
@@ -35,6 +36,7 @@
 #pragma link C++ class JetForwardJvtTool+;
 #pragma link C++ class JetLArHVTool+;
 #pragma link C++ class JetMuonSegmentMomentsTool+;
+#pragma link C++ class JetNumConstitTool+;
 #pragma link C++ class JetOriginCorrectionTool+;
 #pragma link C++ class JetPtAssociationTool+;
 #pragma link C++ class JetTrackMomentsTool+;

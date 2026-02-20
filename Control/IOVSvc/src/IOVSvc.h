@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_IOVSVC_H
@@ -63,21 +63,6 @@ public:
 
   virtual StatusCode createIOVTool( const std::string& storeName ) override;
   virtual std::vector<std::string> getStoreNames() const override;
-
-  /// register callback functions
-  virtual
-  StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c, 
-                    const IOVSvcCallBackFcn& fcn, bool trigger=false) override;
-
-  virtual
-  StatusCode regFcn(const CallBackID& c1,
-                    const CallBackID& c2, const IOVSvcCallBackFcn& fcn2, 
-                    bool trigger) override;
-
-  virtual
-  StatusCode regFcn(const std::string& toolName,
-                    const CallBackID& c2, const IOVSvcCallBackFcn& fcn2,
-                    bool trigger) override;
 
   /// Update Range from dB
   virtual StatusCode setRange(const CLID& clid, const std::string& key, 

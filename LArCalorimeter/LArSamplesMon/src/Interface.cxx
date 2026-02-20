@@ -328,7 +328,7 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
   if (!mt){
     return 0;
   } 
-  std::vector<MultiTreeAccessor*> filtered_mts = mt->filterComponents(filterList, tweak);
+  std::vector<std::unique_ptr<MultiTreeAccessor> > filtered_mts = mt->filterComponents(filterList, tweak);
   if (filtered_mts.size() != filterList.size()){
     return 0;
   } 
@@ -342,7 +342,6 @@ bool Interface::filterAndMerge(const TString& listFileName, const TString& outFi
       files.push_back(((const TreeAccessor*)&filtered_mts[f]->accessor(i))->fileName());
       cout << "Added " << files.back() << endl;
     }
-    delete filtered_mts[f];
     std::unique_ptr<const Interface> filtered_multi = open(files);
     //
     std::vector<const Interface*> justOne { filtered_multi.get() };
@@ -755,7 +754,8 @@ bool Interface::firstNeighbors(unsigned int hash, std::vector<unsigned int>& has
 }
 
 
-bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const
+bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& event,
+                     std::vector<std::unique_ptr<const Data> >& data) const
 {
   if (hashes != m_neighborHistoryPos) {
     m_neighborHistories.clear();
@@ -770,7 +770,7 @@ bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& ev
   for (const std::unique_ptr<const History>& history : m_neighborHistories) {
     if (!history) continue;
     const Data* dataForEvent = history->data_for_event(event);
-    if (dataForEvent) data.push_back(new Data(*dataForEvent));
+    if (dataForEvent) data.push_back(std::make_unique<Data>(*dataForEvent));
   }
   return true;
 }

@@ -105,7 +105,8 @@ TTree* TreeShapeErrorGetter::ringTree(CaloGain::CaloGain gain) const
 }
 
 
-ShapeErrorData* TreeShapeErrorGetter::shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude) const
+std::unique_ptr<ShapeErrorData>
+TreeShapeErrorGetter::shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude) const
 {
   if (!cellTree(gain) || hash >= cellTree(gain)->GetEntries()) return nullptr;
   cellTree(gain)->GetEntry(hash);
@@ -116,7 +117,8 @@ ShapeErrorData* TreeShapeErrorGetter::shapeErrorData(unsigned int hash, CaloGain
 }
 
 
-ShapeErrorData* TreeShapeErrorGetter::phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude) const
+std::unique_ptr<ShapeErrorData>
+TreeShapeErrorGetter::phiSymShapeErrorData(short ring, CaloGain::CaloGain gain, const Residual* toExclude) const
 { 
   if (!ringTree(gain) || ring >= ringTree(gain)->GetEntries()) return nullptr;
   ringTree(gain)->GetEntry(ring);
@@ -151,7 +153,7 @@ void TreeShapeErrorGetter::dump(CaloGain::CaloGain gain) const
 {
   if (!cellTree(gain)) return;
   for (long long i = 0; i < cellTree(gain)->GetEntries(); i++) {
-    std::unique_ptr<ShapeErrorData> sed (shapeErrorData(i, gain));
+    std::unique_ptr<ShapeErrorData> sed = shapeErrorData(i, gain);
     if (!sed) continue;
     cout << "-> " << i << endl;
     sed->xi().Print();
@@ -164,9 +166,9 @@ std::unique_ptr<TH2D> TreeShapeErrorGetter::correlate(const TreeShapeErrorGetter
 {
   auto h = std::make_unique<TH2D>(Form("%s_%d", xip ? "xip" : "xi", sample), "", nBins, xMin, xMax, nBins, xMin, xMax);
   for (long long i = 0; i < Definitions::nChannels; i++) {
-    std::unique_ptr<ShapeErrorData> data1 (shapeErrorData(i, gain));
+    std::unique_ptr<ShapeErrorData> data1 = shapeErrorData(i, gain);
     if (!data1) continue;
-    std::unique_ptr<ShapeErrorData> data2 (other.shapeErrorData(i, gain));
+    std::unique_ptr<ShapeErrorData> data2 = other.shapeErrorData(i, gain);
     if (!data2) { continue; }
     cout << i << endl;
     unsigned int sample1 = sample + data1->xip().GetLwb(); // sample indices may not match, but we assume the range covered for the reference shape is the same
@@ -290,8 +292,8 @@ bool TreeShapeErrorGetter::compare(const TreeShapeErrorGetter& other, const TStr
     }
     for (unsigned int g = 0; g < 3; g++) {
       gain = g;
-      std::unique_ptr<ShapeErrorData> data1(shapeErrorData(k, (CaloGain::CaloGain)g));
-      std::unique_ptr<ShapeErrorData> data2(other.shapeErrorData(k, (CaloGain::CaloGain)g));
+      std::unique_ptr<ShapeErrorData> data1 = shapeErrorData(k, (CaloGain::CaloGain)g);
+      std::unique_ptr<ShapeErrorData> data2 = other.shapeErrorData(k, (CaloGain::CaloGain)g);
 
       lwb1 = (data1 ? data1->lwb() : -1);
       lwb2 = (data2 ? data2->lwb() : -1);

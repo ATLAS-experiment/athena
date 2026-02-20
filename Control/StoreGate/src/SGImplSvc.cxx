@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef DEBUG_SGIMPL
@@ -495,29 +495,6 @@ bool SGImplSvc::isSymLinked(const CLID& linkID, DataProxy* dp)
 {        
   return (0 != dp) ? dp->transientID(linkID) : false;        
 }
-
-
-StatusCode 
-SGImplSvc::regFcn( const CallBackID& c1,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(c1,c2,fcn,trigger) );
-}
-
-
-StatusCode 
-SGImplSvc::regFcn( const std::string& toolName,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(toolName,c2,fcn,trigger) );
-}
-
 
 //////////////////////////////////////////////////////////////////
 // Dump Contents in store:
@@ -1402,16 +1379,14 @@ bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string&
 
 bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
                                               IResetable* ir, SG::DataProxy *&dp,
-                                              const CallBackID& c,
-                                              const IOVSvcCallBackFcn& fcn,
-                                              bool trigger)
+                                              const CallBackID& /*c*/,
+                                              const IOVSvcCallBackFcn& /*fcn*/,
+                                              bool /*trigger*/)
 {
   lock_t lock (m_mutex);
   bool ret = bindHandleToProxy (id, key, ir, dp);
   if (ret) {
     StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-    sc = m_pIOVSvc->regFcn(dp,c,fcn,trigger);
     if (sc.isFailure()) return false;
   }
   return true;
