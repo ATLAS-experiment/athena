@@ -44,10 +44,10 @@ StatusCode ZdcByteStreamLucrodData::execute() {
   //
   //  High word of source ID indicates the ZDC (0x83)
   //  Low word numbers the modules: 0-5 for the 6 LUCRODs in Run 3
-  //
+  //  Update Jan 2026: LIS added as module 6 
   const unsigned int RODSourceIdShifted = eformat::FORWARD_ZDC << 16;
 
-  for (unsigned int lucrodModuleNum = 0; lucrodModuleNum < 6; lucrodModuleNum++) {
+  for (unsigned int lucrodModuleNum = 0; lucrodModuleNum < 7; lucrodModuleNum++) {
     ROBIDs.push_back(RODSourceIdShifted + lucrodModuleNum);
   }
 

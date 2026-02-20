@@ -54,6 +54,7 @@ public:
 private:
 	
 	int m_ownPolicy;
+	int m_DecodeRunMode; // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS	
 	Gaudi::Property<unsigned int> m_nFragments{this,"NFragments",6,"Number of expected LUCROD fragments"};
 
 	SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};

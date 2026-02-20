@@ -100,7 +100,10 @@ StatusCode ZdcRecRun3::execute()
   // Get event info
   //
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
-  if (!eventInfo.isValid()) return StatusCode::FAILURE;
+  if (!eventInfo.isValid()) {
+    ATH_MSG_WARNING("EventInfo not valid");
+    return StatusCode::FAILURE;
+  }
 
   if (eventInfo->errorState(xAOD::EventInfo::ForwardDet)==xAOD::EventInfo::Error)
     {
