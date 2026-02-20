@@ -78,11 +78,11 @@ void ActsTrk::MutableMultiTrajectory::allocateCalibrated_impl(IndexType istate,
   m_trackMeasurementsAux->covMatrix.at(idx).resize(measdim*measdim);
 
   double* measPtr = m_trackMeasurementsAux->meas[idx].data();
-  Eigen::Map<Acts::ActsVector<measdim>> valMap(measPtr);
+  Eigen::Map<Acts::Vector<measdim>> valMap(measPtr);
   valMap = val;
 
   double* covPtr = m_trackMeasurementsAux->covMatrix[idx].data();
-  Eigen::Map<Acts::ActsSquareMatrix<measdim>> covMap(covPtr);
+  Eigen::Map<Acts::SquareMatrix<measdim>> covMap(covPtr);
   covMap = cov;
 }
 

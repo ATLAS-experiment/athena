@@ -286,7 +286,7 @@ for(const auto& trk : allTracks){
 
   if(!m_useBeamConstraint){
     beamSpotConstraintVtx.setPosition(Acts::Vector3::Zero());
-    beamSpotConstraintVtx.setCovariance(Acts::ActsSquareMatrix<3>::Zero());
+    beamSpotConstraintVtx.setCovariance(Acts::SquareMatrix<3>::Zero());
   }
   vertexingOptions.useConstraintInFit = m_useBeamConstraint;
 
@@ -405,7 +405,7 @@ ActsTrk::IterativePriVtxFinderTool::actsBoundToTrkPerigee(const Acts::BoundTrack
   AmgSymMatrix(5) cov =  AmgSymMatrix(5)(bound.covariance()->block<5,5>(0,0));
   cov.col(Trk::qOverP) *= 1_MeV;
   cov.row(Trk::qOverP) *= 1_MeV;
-  Acts::ActsVector<5> params = bound.parameters().head<5>();
+  Acts::Vector<5> params = bound.parameters().head<5>();
   params[Trk::qOverP] *= 1_MeV;
 
   return new Trk::Perigee(params, Trk::PerigeeSurface(surfCenter), std::move(cov));

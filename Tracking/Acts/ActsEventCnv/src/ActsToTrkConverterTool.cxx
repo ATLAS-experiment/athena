@@ -589,7 +589,7 @@ static void ActsMeasurementCheck(
 
   Amg::Vector2D locxy = loc.head<2>();
 
-  Acts::ActsMatrix<2, 2> covxy = measurement.localCovariance();
+  Acts::Matrix<2, 2> covxy = measurement.localCovariance();
 
   Amg::Vector3D global = surf.localToGlobal(locxy, Amg::Vector3D{});
   Acts::Vector2 locpc;
@@ -615,7 +615,7 @@ static void ActsMeasurementCheck(
   auto boundToFree = planeSurface->boundToFreeJacobian(
         gctx, globalxypar.segment<3>(Acts::eFreePos0),
         globalxypar.segment<3>(Acts::eFreeDir0));
-  Acts::ActsSquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::SquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
 
   Acts::BoundVector locpcpar;
   locpcpar.head<2>() = locpc;
@@ -629,11 +629,11 @@ static void ActsMeasurementCheck(
   boundToFree = surface.boundToFreeJacobian(
         gctx, globalpcpar.segment<3>(Acts::eFreePos0),
   globalpcpar.segment<3>(Acts::eFreeDir0));
-  Acts::ActsSquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
-  Acts::ActsSquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
+  Acts::SquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::SquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
 
   // convert cluster covariance
-  Acts::ActsMatrix<2, 2> covpc = covxy;
+  Acts::SquareMatrix<2> covpc = covxy;
   covpc = xyToXyzJac * covpc * xyToXyzJac.transpose();
   covpc = xyzToPcJac * covpc * xyzToPcJac.transpose();
 
@@ -641,8 +641,8 @@ static void ActsMeasurementCheck(
   std::normal_distribution<double> normal{0, 1};
   std::uniform_real_distribution<double> uniform{-1, 1};
 
-  Acts::ActsMatrix<2, 2> lltxy = covxy.llt().matrixL();
-  Acts::ActsMatrix<2, 2> lltpc = covpc.llt().matrixL();
+  Acts::SquareMatrix<2> lltxy = covxy.llt().matrixL();
+  Acts::SquareMatrix<2> lltpc = covpc.llt().matrixL();
 
   for (size_t i = 0; i < 1e4; i++) {
     std::cout << "ANNULUS COV: ";
@@ -698,20 +698,20 @@ void ActsTrackParameterCheck(
                    actsParameter.referenceSurface().geometryId().value()};
   std::normal_distribution<double> normal{0, 1};
 
-  Acts::ActsMatrix<2, 2> lltxy =
+  Acts::SquareMatrix<2> lltxy =
       targetCov.topLeftCorner<2, 2>().llt().matrixL();
-  Acts::ActsMatrix<2, 2> lltpc = covpc.topLeftCorner<2, 2>().llt().matrixL();
+  Acts::SquareMatrix<2> lltpc = covpc.topLeftCorner<2, 2>().llt().matrixL();
 
   for (size_t i = 0; i < 1e4; i++) {
     std::cout << "ANNULUS PAR: ";
     std::cout << actsParameter.referenceSurface().geometryId();
 
-    Acts::ActsVector<2> rnd;
+    Acts::Vector<2> rnd;
     rnd << normal(gen), normal(gen);
 
     // XY
     {
-      Acts::ActsVector<2> xy =
+      Acts::Vector<2> xy =
           lltxy.topLeftCorner<2, 2>() * rnd + targetPars.head<2>();
       Amg::Vector3D xyz;
       planeSurface->localToGlobal(Amg::Vector2D{xy.head<2>()}, Amg::Vector3D{},
@@ -723,7 +723,7 @@ void ActsTrackParameterCheck(
     }
     // PC
     {
-      Acts::ActsVector<2> rt = lltpc.topLeftCorner<2, 2>() * rnd +
+      Acts::Vector<2> rt = lltpc.topLeftCorner<2, 2>() * rnd +
                                actsParameter.parameters().head<2>();
       Amg::Vector3D xyz = actsParameter.referenceSurface().localToGlobal(
           gctx, Acts::Vector2{rt.head<2>()}, Acts::Vector3{});
