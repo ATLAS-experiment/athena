@@ -4,6 +4,7 @@ from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 from ..external import ExternalMadSpin
 import os
+import glob
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -209,3 +210,20 @@ class ttj_MiNNLO(PowhegV2):
         if self.decay_mode == "t t~ > semileptonic":
             # Parameter semileptonic must be set to 1 to actually get semileptonic decays, because the topdecaymode=11111 also allows fully hadronic decays (with one up and one charm quark)
             self.parameters_by_keyword("semileptonic")[0].value = 1
+
+    def stage_is_completed(self, stage):
+        """! Specialised version for this process, which has different grids file patterns than other V2 processes."""
+        if stage == 1:
+            required_files = ["pwg*xg*.dat"]
+        elif stage == 2:
+            required_files = ["pwg-????-stat.dat", "pwg-st2-????-stat.dat", "pwggrid*.dat"]
+        elif stage == 3:
+            required_files = ["pwg-st3-????-stat.dat", "pwgubound*.dat"]
+        else:
+            return False
+
+        # Check that required files have been found
+        for required_file in required_files:
+            if not glob.glob(required_file):
+                return False
+        return True
