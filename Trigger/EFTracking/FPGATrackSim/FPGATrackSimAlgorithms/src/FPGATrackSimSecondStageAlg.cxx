@@ -197,7 +197,7 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
             auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
             ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
             for (size_t l = 0; l < road.getNLayers(); ++l) {
-                for (const auto& layerH : road.getHits(l)) {
+                for (const auto& layerH : road.getHitPtrs(l)) {
                     road_hits->push_back(new FPGATrackSimHit(*layerH));
                 }
             }

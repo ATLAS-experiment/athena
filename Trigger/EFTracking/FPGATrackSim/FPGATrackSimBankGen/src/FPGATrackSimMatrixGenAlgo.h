@@ -157,8 +157,8 @@ class FPGATrackSimMatrixGenAlgo : public AthAlgorithm
         selectHit_returnCode selectHit(FPGATrackSimHit const & old_hit, FPGATrackSimHit const & new_hit, bool is1ststage, int subregion) const;
         bool filterSectorHits(std::vector<FPGATrackSimHit> const & all_hits, std::vector<FPGATrackSimHit> & sector_hits, FPGATrackSimTruthTrack const & t, bool is1ststage, int subregion) const;
         int getRegion(std::vector<FPGATrackSimHit> const & hits, bool is1ststage) const;
-        StatusCode makeAccumulator(std::vector<FPGATrackSimHit> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
-        StatusCode fillAccumulatorByDropping(std::vector<FPGATrackSimHit> & sector_hits, bool is1ststage, double x, double y, std::vector<module_t> &modules, AccumulateMap &map, FPGATrackSimTruthTrack const & track, int subregion) const;
+        StatusCode makeAccumulator(std::vector<std::shared_ptr<const FPGATrackSimHit>> const & sector_hits, FPGATrackSimTruthTrack const & track, std::pair<std::vector<module_t>, FPGATrackSimMatrixAccumulator> & accumulator) const;
+        StatusCode fillAccumulatorByDropping(std::vector<std::shared_ptr<const FPGATrackSimHit>> const & sector_hits, bool is1ststage, double x, double y, std::vector<module_t> &modules, AccumulateMap &map, FPGATrackSimTruthTrack const & track, int subregion) const;
   
         std::vector<TTree*> createMatrixTrees();
         void fillMatrixTrees(std::vector<TTree*> const & matrixTrees);

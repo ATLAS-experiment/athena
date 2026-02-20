@@ -54,18 +54,19 @@ namespace FPGATrackSim {
         // loop over the tracks and make seeds based on the hits in FPGATrackSimTracks
         for (const auto& track : *tracksHandle) {
             std::vector<const xAOD::SpacePoint*> spacePointsToStoreInSeed;
-            for (const FPGATrackSimHit& hit : track.getFPGATrackSimHits()) {
-                if (hit.isReal() && hit.isPixel()) {
-                    ATH_MSG_DEBUG("Hit coordinates in module " << hit.getRdoIdentifier() 
-                                  << ": (" << hit.getPhiCoord() << ", " << hit.getEtaCoord() << ")");
+            for (const auto& hit : track.getFPGATrackSimHitPtrs()) {
+                if (!hit) continue;
+                if (hit->isReal() && hit->isPixel()) {
+                    ATH_MSG_DEBUG("Hit coordinates in module " << hit->getRdoIdentifier() 
+                                  << ": (" << hit->getPhiCoord() << ", " << hit->getEtaCoord() << ")");
                     
                     // map lookup
-                    auto it = spacePointMap.find(hit.getRdoIdentifier());
+                    auto it = spacePointMap.find(hit->getRdoIdentifier());
                     if (it != spacePointMap.end()) {
                         spacePointsToStoreInSeed.push_back(it->second);
                     } else {
                         ATH_MSG_ERROR("No SP found for hit identifier 0x"
-                                      << std::hex << hit.getRdoIdentifier() << std::dec);
+                                      << std::hex << hit->getRdoIdentifier() << std::dec);
                     }
                     
                     // stop in case we reach the maximum number of space points allowed
