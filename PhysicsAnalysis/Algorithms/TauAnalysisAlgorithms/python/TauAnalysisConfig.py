@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.Enums import LHCPeriod
@@ -120,13 +121,12 @@ class TauCalibrationConfig (ConfigBlock):
             config.addOutputVar (self.containerName, 'nTracksCharged', 'nTracksCharged', noSys=True)
 
 
-class TauWorkingPointConfig (ConfigBlock) :
-    """the ConfigBlock for the tau working point
-
-    This may at some point be split into multiple blocks (16 Mar 22)."""
+class TauWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the tau working point selection"""
 
     def __init__ (self) :
-        super (TauWorkingPointConfig, self).__init__ ()
+        super (TauWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('TauWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -164,7 +164,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('manual_sel_minpt', 20.0, type=float,
             info=r"minimum $p_\mathrm{T}$ cut (in GeV) used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_absetaregion', [0, 1.37, 1.52, 2.5], type=list,
-            info=r"$\vert\eta\vert$ regions cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.") 
+            info=r"$\vert\eta\vert$ regions cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_abscharges', [1,], type=list,
             info="charge of the tau-jet cut used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_ntracks', [1,3], type=list,
@@ -180,16 +180,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.addOption ('manual_sel_evetowp', None, type=str, 
             info="eveto working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('manual_sel_muonolr', False, type=bool,
-            info="use `muonolr` used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Experimental! only useful to test a new WP for which scale "
-            "factors are not available.",
-            expertMode=True)
-        self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors.")
-        self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor.")
+            info="use `muonolr` for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
         self.addOption ('addSelectionToPreselection', True, type=bool,
             info="whether to retain only tau-jets satisfying the working point "
             "requirements.")
@@ -323,6 +314,73 @@ class TauWorkingPointConfig (ConfigBlock) :
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection)
 
+
+class TauWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the tau working point efficiency computation"""
+
+    def __init__ (self) :
+        super (TauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.addDependency('TauWorkingPointSelection', required=True)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the tau-jet selection to define (e.g. `tight` or "
+            "`loose`).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as selectionName is used internally.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
+            "`Loose`, `VeryLoose`, `Baseline`, `BaselineForFakes`.")
+        self.addOption ('use_eVeto', False, type=bool,
+            info="use selection with or without eVeto combined with TauID. "
+            "Recommendations: set it to `True` if electrons mis-reconstructed as tau-jets are a large background for your analysis.")
+        self.addOption ('useGNTau', False, type=bool,
+            info="use GNTau-based ID instead of RNNTau ID. "
+            "Recommendations: experimental feature and might become default soon.",
+            expertMode=True)
+        self.addOption ('manual_sel_rnnwp', None, type=str,
+            info="RNN working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
+        self.addOption ('manual_sel_evetowp', None, type=str, 
+            info="eveto working point used for tau-jet selection when `useSelectionConfigFile` is set to `False`.")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available.",
+            expertMode=True)
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None:
+            return self.containerName + '_' + self.selectionName + self.postfix
+        else:
+            return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
+        if self.quality is not None and self.quality not in ['Tight', 'Medium', 'Loose', 'VeryLoose', 'Baseline', 'BaselineForFakes'] :
+            raise ValueError ("invalid tau quality: \"" + self.quality +
+                              "\", allowed values are Tight, Medium, Loose, " +
+                              "VeryLoose, Baseline, BaselineForFakes")
+
         sfList = []
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
@@ -453,7 +511,7 @@ class TauWorkingPointConfig (ConfigBlock) :
                 config.addOutputVar (self.containerName, alg.outScaleFactor,
                                      'effSF' + postfix)
 
-
+                
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
     def __init__ (self) :
         super (EXPERIMENTAL_TauCombineMuonRemovalConfig, self).__init__ ()
@@ -491,7 +549,8 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
 
     def __init__ (self) :
         super (TauTriggerAnalysisSFBlock, self).__init__ ()
-
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
@@ -554,3 +613,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 alg.preselection = config.getPreselection (self.containerName, self.tauID)
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{chain_out}")
 
+@groupBlocks
+def TauWorkingPoint(seq):
+    seq.append(TauWorkingPointSelectionConfig())
+    seq.append(TauWorkingPointEfficiencyConfig())

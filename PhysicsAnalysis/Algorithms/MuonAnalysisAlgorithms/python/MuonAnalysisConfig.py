@@ -2,6 +2,7 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
 from TrackingAnalysisAlgorithms.TrackingAnalysisConfig import InDetTrackCalibrationConfig
@@ -158,14 +159,12 @@ class MuonCalibrationConfig (ConfigBlock):
         
         config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
 
-class MuonWorkingPointConfig (ConfigBlock) :
-    """the ConfigBlock for the muon working point
-
-    This may at some point be split into multiple blocks (10 Mar 22)."""
+class MuonWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the muon working point selection"""
 
     def __init__ (self) :
-        super (MuonWorkingPointConfig, self).__init__ ()
-        self.setBlockName('MuonsWorkingPoint')
+        super (MuonWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('MuonWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -174,7 +173,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             info="the name of the muon selection to define (e.g. `tight` or `loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally.")
+            "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('trackSelection', True, type=bool,
             info="whether or not to set up an instance of "
             "`CP::AsgLeptonTrackSelectionAlg`, with the recommended $d_0$ and "
@@ -195,22 +194,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
             "requirements.")
         self.addOption ('isoDecSuffix', '', type=str,
             info="the `isoDecSuffix` name if using close-by-corrected isolation working points.")
-        self.addOption ('systematicBreakdown', False, type=bool,
-            info="enables the full breakdown of efficiency SF systematics "
-            "(1 NP per uncertainty source, instead of 1 NP in total).")
-        self.addOption ('noEffSF', False, type=bool,
-            info="disables the calculation of efficiencies and scale factors. "
-            "Experimental! Only useful to test a new WP for which scale "
-            "factors are not available.",
-            expertMode=True)
-        self.addOption ('onlyRecoEffSF', False, type=bool,
-            info="same as `noEffSF`, but retains the ID scale factor. "
-            "Experimental! Only useful for CI tests.",
-            expertMode=True)
-        self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors.")
-        self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor.")
         self.addOption ('excludeNSWFromPrecisionLayers', False, type=bool,
             info="only for testing purposes, turn on to ignore NSW hits and "
             "fix a crash with older derivations (p-tag <p5834).")
@@ -222,7 +205,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
             return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
-        log = logging.getLogger('MuonWorkingPointConfig')
+        log = logging.getLogger('MuonWorkingPointSelectionConfig')
 
         from xAODMuon.xAODMuonEnums import xAODMuonEnums
         if self.quality == 'Tight' :
@@ -244,7 +227,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
-            raise ValueError ("Can't set up the MuonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
+            raise ValueError ("Can't set up the MuonWorkingPointSelectionConfig with %s, there must be something wrong!" % config.geometry().value)
 
         postfix = self.postfix
         if postfix is None :
@@ -298,6 +281,70 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName,
                                  alg.isolationDecoration,
                                  preselection=self.addSelectionToPreselection)
+
+
+class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the muon working point efficiency computation"""
+
+    def __init__ (self) :
+        super (MuonWorkingPointEfficiencyConfig, self).__init__ ()
+        self.addDependency('MuonWorkingPointSelection', required=True)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the muon selection to define (e.g. `tight` or `loose`).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as `selectionName` is used internally.")
+        self.addOption ('trackSelection', True, type=bool,
+            info="whether or not to set up an instance of "
+            "`CP::AsgLeptonTrackSelectionAlg`, with the recommended $d_0$ and "
+            r"$z_0\sin\theta$ cuts.")
+        self.addOption ('quality', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, "
+            "`Loose`, `LowPt`, `HighPt`.")
+        self.addOption ('isolation', None, type=str,
+            info="the isolation WP to use. Supported isolation WPs: "
+            "`PflowLoose_VarRad`, `PflowTight_VarRad`, `Loose_VarRad`, "
+            "`Tight_VarRad`, `NonIso`.")
+        self.addOption ('systematicBreakdown', False, type=bool,
+            info="enables the full breakdown of efficiency SF systematics "
+            "(1 NP per uncertainty source, instead of 1 NP in total).")
+        self.addOption ('noEffSF', False, type=bool,
+            info="disables the calculation of efficiencies and scale factors. "
+            "Experimental! Only useful to test a new WP for which scale "
+            "factors are not available.",
+            expertMode=True)
+        self.addOption ('onlyRecoEffSF', False, type=bool,
+            info="same as `noEffSF`, but retains the ID scale factor. "
+            "Experimental! Only useful for CI tests.",
+            expertMode=True)
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor.")
+    
+    def instanceName (self) :
+        if self.postfix is not None:
+            return self.containerName + '_' + self.postfix
+        else:
+            return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        # The setup below is inappropriate for Run 1
+        if config.geometry() is LHCPeriod.Run1:
+            raise ValueError ("Can't set up the MuonWorkingPointEfficiencyConfig with %s, there must be something wrong!" % config.geometry().value)
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
         sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
@@ -400,7 +447,8 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
     def __init__ (self) :
         super (MuonTriggerAnalysisSFBlock, self).__init__ ()
-
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
@@ -598,3 +646,8 @@ class MuonContainerMergingConfig (ConfigBlock) :
         alg.InputMuonContainers = self.inputMuonContainers
         alg.OutputMuonLocation = self.outputMuonLocation
         alg.CreateViewCollection = self.createViewCollection
+
+@groupBlocks
+def MuonWorkingPoint(seq):
+    seq.append(MuonWorkingPointSelectionConfig())
+    seq.append(MuonWorkingPointEfficiencyConfig())

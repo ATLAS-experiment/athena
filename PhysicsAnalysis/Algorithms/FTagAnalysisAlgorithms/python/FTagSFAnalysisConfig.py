@@ -36,6 +36,9 @@ class FTagJetSFBlock(ConfigBlock):
     """the ConfigBlock for the FTAG scale factor per jet"""
     def __init__(self):
         super(FTagJetSFBlock, self).__init__()
+        self.setBlockName('FTagJetSF')
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -270,7 +273,10 @@ class FTagEventSFBlock(ConfigBlock):
 
     def __init__(self):
         super(FTagEventSFBlock, self).__init__()
+        self.addDependency('FTagJetSF', required=True)
         self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption('containerName', '', type=str,
             noneAction='error',
             info="the input jet container with a possible selection, in the format "

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
@@ -10,6 +10,7 @@ class EventSelectionMergerConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionMergerConfig, self).__init__()
+        self.setBlockName('EventSelectionMerger')
         self.addOption('selections', [], type=list,
             info="the selection decisions to unify into a "
             "final decision (internally: `selection_1 || selection_2 || ...`). ")
