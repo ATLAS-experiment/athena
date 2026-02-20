@@ -453,7 +453,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::actsBoundToTrkPerigee(const Acts::BoundT
   AmgSymMatrix(5) cov =  AmgSymMatrix(5)(bound.covariance()->block<5,5>(0,0));
   cov.col(Trk::qOverP) *= 1_MeV;
   cov.row(Trk::qOverP) *= 1_MeV;
-  Acts::ActsVector<5> params = bound.parameters().head<5>();
+  Acts::Vector<5> params = bound.parameters().head<5>();
   params[Trk::qOverP] *= 1_MeV;
 
   return new Trk::Perigee(params, Trk::PerigeeSurface(surfCenter), std::move(cov));
