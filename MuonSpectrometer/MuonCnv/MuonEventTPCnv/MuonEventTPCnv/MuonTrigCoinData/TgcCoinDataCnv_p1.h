@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -26,9 +26,8 @@ class TgcCoinDataCnv_p1
     : public T_AthenaPoolTPPolyCnvBase< Muon::TgcCoinData, Muon::TgcCoinData, Muon::TgcCoinData_p1 >
 {
 public:
-  //    TgcCoinDataCnv_p1() : m_coindataCnv(0) {}
-    TgcCoinDataCnv_p1() : m_localPosCnv(0), m_errorMxCnv(0) {}
-
+    TgcCoinDataCnv_p1() = default;
+   
     void persToTrans( const Muon::TgcCoinData_p1 *persObj,
         Muon::TgcCoinData    *transObj,
         MsgStream                &log );
@@ -37,8 +36,8 @@ public:
         MsgStream                &log );
 
  protected:        
-    LocalPositionCnv_p1   *m_localPosCnv;
-    ErrorMatrixCnv_p1     *m_errorMxCnv;
+    LocalPositionCnv_p1   *m_localPosCnv{nullptr};
+    ErrorMatrixCnv_p1     *m_errorMxCnv{nullptr};
 
 };
 
