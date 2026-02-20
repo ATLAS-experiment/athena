@@ -435,7 +435,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
         for (unsigned int i = 0; i < road.getNLayers(); ++i)
         {
             hitCounter = 0;
-            const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHits(i);
+            const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHitPtrs(i);
             for (auto const& hit : hits)
             {
                 if (!hit) {
@@ -468,12 +468,15 @@ void FPGATrackSim::FPGATrackSimReportingAlg::processFPGATracks(SG::ReadHandle<FP
 {
     for (auto const& track : *FPGATracks)
     {
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+        const auto& hits = track.getFPGATrackSimHitPtrs();
         uint32_t pixelHits = 0, stripHits = 0;
-        for (const FPGATrackSimHit& hit : hits)
+        for (const auto& hit_ptr : hits)
         {
-            if (hit.isPixel()) ++pixelHits;
-            if (hit.isStrip()) ++stripHits;
+            if (!hit_ptr) {
+                throw std::runtime_error("Null hit pointer in track");
+            }
+            if (hit_ptr->isPixel()) ++pixelHits;
+            if (hit_ptr->isStrip()) ++stripHits;
         }
         m_pixelClustersPerFPGATrack.push_back(pixelHits);
         m_stripClustersPerFPGATrack.push_back(stripHits);
@@ -512,21 +515,24 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGA
                      "|        |    ##  |   type   | layer |             Global coordinates    | isReal |     HashID     |\n"
                      "|        |        |          |       |      x    |      y    |      z    |        |                |\n"
                      "|        |.........................................................................................|\n";
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+        const auto& hits = track.getFPGATrackSimHitPtrs();
         unsigned int hitCounter = 0;
-        for (auto const& hit : hits)
+        for (const auto& hit_ptr : hits)
         {
+            if (!hit_ptr) {
+                throw std::runtime_error("Null hit pointer in track");
+            }
             try {
                 ++hitCounter;
                 maintable += std::format("|        | {:>6} | {:>8} | {:>5} | {:>9.3f} | {:>9.3f} | {:>9.3f} | {:>6} | {:>14} |\n",
                 hitCounter,
-                (hit.isPixel() ? "Pixel" : hit.isStrip() ? "Strip" : "FAILED"),
-                hit.getLayer(),
-                hit.getX(),
-                hit.getY(),
-                hit.getZ(),
-                hit.isReal(),
-                hit.getIdentifierHash());
+                (hit_ptr->isPixel() ? "Pixel" : hit_ptr->isStrip() ? "Strip" : "FAILED"),
+                hit_ptr->getLayer(),
+                hit_ptr->getX(),
+                hit_ptr->getY(),
+                hit_ptr->getZ(),
+                hit_ptr->isReal(),
+                hit_ptr->getIdentifierHash());
             } catch (const std::exception& e) {
                 ATH_MSG_ERROR("Exception while processing FPGATrackSimHits: " << e.what());
             }

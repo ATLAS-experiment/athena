@@ -220,9 +220,13 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
     for (const FPGATrackSimTrack& track : *tracks) 
     {
         int bitmask = 0;
-        for(const auto& hit: track.getFPGATrackSimHits())
+        for (const auto& hit : track.getFPGATrackSimHitPtrs())
         {
-            bitmask |= 2 << hit.getLayer();
+            if (!hit){
+                ATH_MSG_ERROR("Null hit pointer from getFPGATrackSimHitPtrs() in convertFPGATracks");
+                return StatusCode::FAILURE;
+            }
+            bitmask |= 2 << hit->getLayer();
         }
 
         ATH_MSG_DEBUG("Encoded GTrack: ");
@@ -261,17 +265,17 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
                 trackBinsIndex[3]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
 
-        auto hits = track.getFPGATrackSimHits();
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> hits = track.getFPGATrackSimHitPtrs();
         hits.erase(
         std::remove_if(hits.begin(), hits.end(),
-            [](const FPGATrackSimHit& hit) { return !hit.isReal(); }),
+            [](const std::shared_ptr<const FPGATrackSimHit>& hit) { return !hit || !hit->isReal(); }),
         hits.end());
 
         for(unsigned int i = 0 ; i < hits.size(); i++)
         {
             const auto& hit = hits[i];
             bool isLast = (i+1 == hits.size());
-            fillHit(&hit, isLast, false, encodedData);
+            fillHit(hit.get(), isLast, false, encodedData);
         }
 
 

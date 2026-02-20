@@ -112,7 +112,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad& initial_r
         // Get the hits in these two layers, split by whether or not they are SPs.
         std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_in;
         std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_in;
-        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_in = initial_road.getHits(layer);
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_in = initial_road.getHitPtrs(layer);
         for (auto& hit : hits_in) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_in.push_back(hit);
@@ -124,7 +124,7 @@ bool FPGATrackSimSpacepointRoadFilterTool::splitRoad(FPGATrackSimRoad& initial_r
         // Do the same for the next layer.
         std::vector<std::shared_ptr<const FPGATrackSimHit>> strip_hits_out;
         std::vector<std::shared_ptr<const FPGATrackSimHit>> spacepoints_out;
-        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_out = initial_road.getHits(layer + 1);
+        const std::vector<std::shared_ptr<const FPGATrackSimHit>> hits_out = initial_road.getHitPtrs(layer + 1);
         for (auto& hit : hits_out) {
             if (hit->getHitType() == HitType::spacepoint) {
                 spacepoints_out.push_back(hit);
@@ -295,15 +295,15 @@ unsigned FPGATrackSimSpacepointRoadFilterTool::setSector(FPGATrackSimRoad& road)
     for (unsigned int il = 0; il < road.getNLayers(); il++) {
         if (road.getNHits_layer()[il] == 0) {
             modules.push_back(-1);
-        } else if (road.getNHits_layer()[il] == 1 && !(road.getHits(il)[0]->isReal())) {
+        } else if (road.getNHits_layer()[il] == 1 && !(road.getHitPtrs(il)[0]->isReal())) {
             modules.push_back(-1);
             //ATH_MSG_INFO("  modules[" << il << "] = -1");
         } else {
             // Add 100 to the sector bin if this layer contains spacepoints.
             // We know at this stage that a layer will only have spacepoints or hits
             // so we can just check teh first hit.
-            bool is_spacepoint = (road.getHits(il)[0]->getHitType() == HitType::spacepoint);
-            bool is_pixel = (road.getHits(il)[0]->isPixel());
+            bool is_spacepoint = (road.getHitPtrs(il)[0]->getHitType() == HitType::spacepoint);
+            bool is_pixel = (road.getHitPtrs(il)[0]->isPixel());
             modules.push_back(is_spacepoint ? sectorbin + fpgatracksim::SPACEPOINT_SECTOR_OFFSET : sectorbin);
             //ATH_MSG_INFO("  modules[" << il << "] = " << (is_spacepoint ? 100+sectorbin : sectorbin));
             if (is_spacepoint) {

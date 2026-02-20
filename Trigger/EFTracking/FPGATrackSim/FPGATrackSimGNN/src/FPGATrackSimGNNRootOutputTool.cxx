@@ -175,7 +175,7 @@ StatusCode FPGATrackSimGNNRootOutputTool::fillTree(const std::vector<std::shared
     std::vector<std::vector<float>> road_hit_z(road.getNLayers());
     std::vector<std::vector<float>> road_hit_r(road.getNLayers());
     for (size_t l = 0; l < road.getNLayers(); ++l) {
-      for (const auto &layerH : road.getHits(l)) {
+      for (const auto &layerH : road.getHitPtrs(l)) {
         road_hit_uniqueID[l].push_back((*layerH).getUniqueID());
         road_hit_barcode[l].push_back((*layerH).getBarcode());
         road_hit_eventIndex[l].push_back((*layerH).getEventIndex());

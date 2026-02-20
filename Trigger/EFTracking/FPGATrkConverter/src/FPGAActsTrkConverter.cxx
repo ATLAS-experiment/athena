@@ -81,11 +81,15 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
   for (const FPGATrackSimTrack& track : tracks) {
     if (not track.passedOR()) continue;
     std::vector<ActsTrk::ATLASUncalibSourceLink> points;
-    const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+    const auto& hits = track.getFPGATrackSimHitPtrs();
     auto hitCollection = std::make_unique<FPGATrackSimHitCollection>();
     hitCollection->reserve(hits.size());
     for (const auto& hit : hits) {
-      hitCollection->push_back(new FPGATrackSimHit(hit));
+      if (!hit) {
+        ATH_MSG_ERROR("Null hit pointer in track");
+        return StatusCode::FAILURE;
+      }
+      hitCollection->push_back(new FPGATrackSimHit(*hit));
     }
     ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, *hitCollection));
     if (points.size()) {

@@ -20,13 +20,17 @@ FPGATrackSimTrack::~FPGATrackSimTrack() {}
 std::vector<float> FPGATrackSimTrack::getCoords(unsigned ilayer) const
 {
   std::vector<float> coords;
-  if (ilayer >= m_hits.size())
+  if (ilayer >= m_hit_ptrs.size())
     throw std::range_error("FPGATrackSimTrack::getCoords() out of bounds");
+  if (!m_hit_ptrs[ilayer])
+    throw std::range_error("FPGATrackSimTrack::getCoords() null pointer at index " + std::to_string(ilayer));
+
+  const auto& hit = *m_hit_ptrs[ilayer];
 
   if (m_trackCorrType == TrackCorrType::None)
   {
-    coords.push_back(m_hits[ilayer].getEtaIndex());
-    coords.push_back(m_hits[ilayer].getPhiIndex());
+    coords.push_back(hit.getEtaIndex());
+    coords.push_back(hit.getPhiIndex());
   }
   else
   {
@@ -40,8 +44,11 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
 {
   
   double target_r = m_idealRadii[ilayer];
-  if (m_hits[ilayer].getHitType() == HitType::spacepoint) {
-    unsigned other_layer = (m_hits[ilayer].getSide() == 0) ? ilayer + 1 : ilayer - 1;
+  if (ilayer >= m_hit_ptrs.size() || !m_hit_ptrs[ilayer])
+    throw std::range_error("FPGATrackSimTrack::computeIdealCoords() invalid hit access at index " + std::to_string(ilayer));
+  const auto& hit = *m_hit_ptrs[ilayer];
+  if (hit.getHitType() == HitType::spacepoint) {
+    unsigned other_layer = (hit.getSide() == 0) ? ilayer + 1 : ilayer - 1;
     target_r = (target_r + m_idealRadii[other_layer]) / 2.;
   }
 
@@ -49,7 +56,7 @@ std::vector<float> FPGATrackSimTrack::computeIdealCoords(unsigned ilayer) const
   double hough_y =  getHoughY();
   
   // Use the centralized computeIdealCoords function from FPGATrackSimFunctions
-  std::vector<float> coords = ::computeIdealCoords(m_hits[ilayer], hough_x, hough_y, target_r,  m_doDeltaGPhis, m_trackCorrType);
+  std::vector<float> coords = ::computeIdealCoords(hit, hough_x, hough_y, target_r,  m_doDeltaGPhis, m_trackCorrType);
 
   return coords;
 }
@@ -74,8 +81,15 @@ float FPGATrackSimTrack::getPhiCoord(int ilayer) const {
   // This makes it easy to mix and match spacepoints with strip hits that aren't
   // spacepoints (since the number of strip layers is held fixed).
   unsigned target_coord = 1;
-  if (m_hits[ilayer].getHitType() == HitType::spacepoint && (m_hits[ilayer].getPhysLayer() % 2) == 1) {
-    target_coord = 0;
+  if (!m_hit_ptrs.empty()) {
+    const auto& hit_ptr = m_hit_ptrs.at(ilayer);
+    if (hit_ptr && hit_ptr->getHitType() == HitType::spacepoint && (hit_ptr->getPhysLayer() % 2) == 1) {
+      target_coord = 0;
+    }
+  } else if (!m_hits.empty()) {
+    if (m_hits.at(ilayer).getHitType() == HitType::spacepoint && (m_hits.at(ilayer).getPhysLayer() % 2) == 1) {
+      target_coord = 0;
+    }
   }
 
   if (coords.size() > target_coord) {
@@ -88,26 +102,44 @@ float FPGATrackSimTrack::getPhiCoord(int ilayer) const {
 
 int FPGATrackSimTrack::getNCoords() const {
   int nCoords = 0;
-  for (const auto& hit : m_hits) {
-    nCoords += hit.getDim();
+  if (!m_hit_ptrs.empty()) {
+    for (const auto& hit : m_hit_ptrs) {
+      if (hit) nCoords += hit->getDim();
+    }
+  }
+  else {
+    for (const auto& hit : m_hits) {
+      nCoords += hit.getDim();
+    }
   }
   return nCoords;
 }
 
-//set a specific position in m_hits
-void FPGATrackSimTrack::setFPGATrackSimHit(unsigned i, const FPGATrackSimHit& hit)
+// Set a specific transient hit (shared_ptr only).
+// Caller is responsible for creating the shared_ptr:
+// - For owned/synthetic hits: pass std::make_shared<FPGATrackSimHit>(...)
+// - For SG hits: pass std::shared_ptr<const FPGATrackSimHit>(ptr, [](auto*){})
+// This only modifies m_hit_ptrs; use persistifyHits() to copy to m_hits.
+void FPGATrackSimTrack::setFPGATrackSimHit(unsigned i, std::shared_ptr<const FPGATrackSimHit> hit)
 {
-  if (m_hits.size() > i)
-    m_hits[i] = hit;
-  else
-    throw std::range_error("FPGATrackSimTrack::setFPGATrackSimHit() out of bounds");
+  if (m_hit_ptrs.size() <= i) m_hit_ptrs.resize(i+1);
+  m_hit_ptrs[i] = hit;
 }
 
 /** set the number of layers in the track. =0 is used to clear the track */
 void FPGATrackSimTrack::setNLayers(int dim)
 {
-  if (m_hits.size() > 0) m_hits.clear();
-  m_hits.resize(dim);
+  // Pre-fill with dummy hits to ensure dense vector model.
+  // This guarantees that all layers 0 to dim-1 have entries (no sparse nulls).
+  // setFPGATrackSimHit() will replace these dummies with real hits as needed.
+  m_hit_ptrs.clear();
+  m_hit_ptrs.reserve(dim);
+  for (int i = 0; i < dim; i++) {
+    FPGATrackSimHit dummy;
+    dummy.setLayer(i);
+    dummy.setSection(0);
+    m_hit_ptrs.push_back(std::make_shared<FPGATrackSimHit>(dummy));
+  }
 }
 
 
@@ -220,19 +252,36 @@ ostream& operator<<(ostream& out, const FPGATrackSimTrack& track)
 void FPGATrackSimTrack::calculateTruth()
 {
   vector<FPGATrackSimMultiTruth> mtv;
-  mtv.reserve(m_hits.size());
+  mtv.reserve(m_hit_ptrs.size());
 
   // don't loop over coordinates, since we only calculate truth *per hit* and not per coordinate, though hitmap is saved for coordinates, so be careful
-  for (const auto& thishit : m_hits)
-  {
-    if (thishit.isReal())
+  if (!m_hit_ptrs.empty()) {
+    for (const auto& thishit : m_hit_ptrs)
     {
-      FPGATrackSimMultiTruth this_mt(thishit.getTruth());
-      this_mt.assign_equal_normalization();
-      if (thishit.isPixel())
-        for ( auto& x : this_mt)
-          x.second *= 2;
-      mtv.push_back(this_mt);
+      if (!thishit) throw std::runtime_error("Null hit pointer in FPGATrackSimTrack::calculateTruth()");
+      if (thishit->isReal())
+      {
+        FPGATrackSimMultiTruth this_mt(thishit->getTruth());
+        this_mt.assign_equal_normalization();
+        if (thishit->isPixel())
+          for ( auto& x : this_mt)
+            x.second *= 2;
+        mtv.push_back(this_mt);
+      }
+    }
+  }
+  else {
+    for (const auto& thishit : m_hits)
+    {
+      if (thishit.isReal())
+      {
+        FPGATrackSimMultiTruth this_mt(thishit.getTruth());
+        this_mt.assign_equal_normalization();
+        if (thishit.isPixel())
+          for ( auto& x : this_mt)
+            x.second *= 2;
+        mtv.push_back(this_mt);
+      }
     }
   }
 
