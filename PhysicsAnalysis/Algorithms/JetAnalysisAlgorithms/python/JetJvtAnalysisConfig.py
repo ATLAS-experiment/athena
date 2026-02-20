@@ -13,6 +13,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         super (JetJvtAnalysisConfig, self).__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")

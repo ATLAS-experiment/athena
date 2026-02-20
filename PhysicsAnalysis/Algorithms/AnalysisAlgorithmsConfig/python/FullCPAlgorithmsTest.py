@@ -346,10 +346,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq.setOptionValue ('.useRapidityForDeltaR', False)
 
 
-    if dataType is not DataType.Data :
-        # Include, and then set up the generator analysis sequence:
-        configSeq += config.makeConfig( 'GeneratorLevelAnalysis')
-
 
     # Include, and then set up the met analysis algorithm config:
     configSeq += config.makeConfig ('MissingET')
@@ -413,6 +409,10 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
                                           met = 'AnaMET', btagDecoration = 'ftag_select_ftag',
                                           selectionCutsDict = exampleSelectionCuts, noFilter = True,
                                           cutFlowHistograms = True)
+
+    if dataType is not DataType.Data :
+        # Include, and then set up the generator analysis sequence:
+        configSeq += config.makeConfig( 'GeneratorLevelAnalysis')
 
     configSeq += config.makeConfig ('Bootstraps')
     configSeq.setOptionValue ('.nReplicas', 2000 )
