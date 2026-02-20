@@ -100,7 +100,6 @@ def SetConfigTag(flags):
         if aa is not None:
             aa_type = aa.getBeam1Type()
     print('ZdcRecConfig::SetConfigTag(): Getting config for type %d' % (aa_type))    
-    
     # terrible kludge for early 2025
     if flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib":
         config = "InjectorPbPb2024"
@@ -151,7 +150,10 @@ def SetConfigTag(flags):
             elif flags.Input.ProjectName == "data16_hip5TeV":
                 config = "pPb2016"
             elif flags.Input.ProjectName == "data16_hip8TeV":
-                config = "pPb2016"
+                if(aa_type == 1):
+                    config = "configZDC_pPb2016.v1.json"
+                if(aa_type == 82):
+                    config = "configZDC_Pbp2016.v1.json"
             elif flags.Input.ProjectName == "data18_hi":
                 config = "PbPb2018"
 
@@ -314,7 +316,8 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
         ForceCalibRun = ForceCalibRun,
         ForceCalibLB = ForceCalibLB,
         JSONConfigurationFile=jsonFile,
-        LHCRun = run ))
+        LHCRun = run,
+        CombineDelay = True if flags.Input.ProjectName == "data16_hip8TeV" else False))
     return acc
 
 def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023', DoFADCCorr = True):  
@@ -391,7 +394,7 @@ def ZdcRecRun2Cfg(flags):
         doTrigEff = False
     elif flags.Input.ProjectName == "data16_hip8TeV":
         doCalib = True
-        doTimeCalib = False
+        doTimeCalib = True
         doTrigEff = False
     elif flags.Input.ProjectName == "data18_hi":
         doCalib = True
