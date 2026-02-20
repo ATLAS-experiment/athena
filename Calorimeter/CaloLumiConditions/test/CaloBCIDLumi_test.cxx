@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloLumiConditions/CaloBCIDLumi_test.cxx
@@ -53,7 +53,7 @@ LArOnlineIDTest::LArOnlineIDTest()
 {
   m_parser->register_external_entity("LArCalorimeter", "IdDictLArCalorimeter_DC3-05.xml");
   IdDictMgr& idd = m_parser->parse("IdDictParser/ATLAS_IDS.xml");
-  m_helper.set_quiet (true);
+  m_helper.setLevel(MSG::WARNING);
   if (m_helper.initialize_from_dictionary(idd) != 0) {
     std::abort();
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1PRDSystems/PRDHandle_CSC_Strip.h"
@@ -75,18 +75,14 @@ void PRDHandle_CSC_Strip::buildShapes(SoNode*&shape_simple, SoNode*&shape_detail
         // rdos->addChild( transparent );
     double chargeLength=striplength/static_cast<double>(charges.size()); // size of one charge cell
         // std::cout<<"Number of charges="<<charges.size()<<", chargeLength="<<chargeLength<<" striplength="<<striplength<<std::endl;
-    unsigned int i=0;
     double ypos=(chargeLength-striplength)/2.0;
-    std::vector<float>::const_iterator st = charges.begin();
-    std::vector<float>::const_iterator en = charges.end();
     double stripPitch=m_csc->detectorElement()->cathodeReadoutPitch(idhelper->chamberLayer( id ),idhelper->measuresPhi( id ));
     SoTranslation * localtrans = new SoTranslation;
     localtrans->translation.setValue(0.0,ypos,0.0);
     rdos->addChild(localtrans);
 
-    for( std::vector<float>::const_iterator it = st; it!=en; ++it, ++i){
-            // std::cout<<"Charge: "<<i<<" \ty="<<ypos<<" has charge=:"<<*it<<std::endl;  
-      float charge = std::max(1.0f,(*it)); // keep charges positive until I understand if it is okay to be -ve
+    for( float charge : charges ) {
+      charge = std::max(1.0f,charge); // keep charges positive until I understand if it is okay to be -ve
       const double stripHeightCharge = (1.0 + 4*sqrt(charge/maxCharge))*CLHEP::mm;
             // std::cout<<"stripHeightCharge: "<<stripHeightCharge<<std::endl;
       rdos->addChild(common()->nodeManager()->getShapeNode_Strip(chargeLength, stripPitch, stripHeightCharge));

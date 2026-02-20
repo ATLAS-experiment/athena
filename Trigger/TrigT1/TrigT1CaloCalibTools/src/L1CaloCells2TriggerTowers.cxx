@@ -51,7 +51,7 @@ namespace LVL1{
         }
         cc.push_back(*itCells);
       }
-      ccByLayer.push_back(cc);
+      ccByLayer.push_back(std::move(cc));
     }
 
     return ccByLayer;

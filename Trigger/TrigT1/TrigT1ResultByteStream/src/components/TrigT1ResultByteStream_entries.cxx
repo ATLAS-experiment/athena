@@ -7,6 +7,7 @@
 #include "../RecCTPByteStreamCnv.h"
 
 #include "../CTPByteStreamTool.h"
+#include "../CTPResultByteStreamTool.h"
 #include "../MuCTPIByteStreamTool.h"
 #include "../MuCTPIPhase1ByteStreamAlgo.h"
 #include "../RecCTPByteStreamTool.h"
@@ -32,6 +33,7 @@ DECLARE_CONVERTER( RecMuCTPIByteStreamCnv )
 DECLARE_CONVERTER( RecCTPByteStreamCnv )
 
 DECLARE_COMPONENT( CTPByteStreamTool )
+DECLARE_COMPONENT( CTPResultByteStreamTool )
 DECLARE_COMPONENT( MuCTPIByteStreamTool )
 DECLARE_COMPONENT( MuCTPIPhase1ByteStreamAlgo )
 DECLARE_COMPONENT( RecCTPByteStreamTool )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -74,7 +74,10 @@ namespace LArSamples {
 
     double A(const AbsShape& data) const;
     double B(const AbsShape& data) const;
-    double time(const AbsShape& data) const { return B(data)/A(data); }
+    double time(const AbsShape& data) const {
+      double den = A(data);
+      return den == 0 ? 0 : B(data)/den;
+    }
 
     const CovMatrix& invGamma() const { return m_invGamma; }
     const CovMatrix& Gamma() const { return m_Gamma; }

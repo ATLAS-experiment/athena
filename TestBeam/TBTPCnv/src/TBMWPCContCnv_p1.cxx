@@ -110,7 +110,7 @@ TBMWPCContCnv_p1::transToPers(const TBMWPCCont* trans,
       if(MWPC->isCPosOverflow()[nBoolNow])
         cPosOverflowNow[nBoolNow] = 1;
     }
-    pers -> m_cPosOverflow.push_back(   cPosOverflowNow  );
+    pers -> m_cPosOverflow.push_back(   std::move(cPosOverflowNow) );
     // ------------------------------------------------------------------------------------------------
 
     pers -> m_tbDetectorName.push_back( MWPC->getDetectorName() );

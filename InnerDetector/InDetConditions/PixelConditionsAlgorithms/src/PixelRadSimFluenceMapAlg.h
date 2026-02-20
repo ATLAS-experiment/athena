@@ -11,14 +11,14 @@
 #ifndef PIXELRADSIMFLUENCEMAPALG
 #define PIXELRADSIMFLUENCEMAPALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "PixelConditionsData/PixelModuleData.h"
 #include "PixelConditionsData/PixelRadiationDamageFluenceMapData.h"
 
-class PixelRadSimFluenceMapAlg : public AthReentrantAlgorithm {
+class PixelRadSimFluenceMapAlg : public AthCondAlgorithm {
   public:
     PixelRadSimFluenceMapAlg(const std::string& name, ISvcLocator* pSvcLocator);
 

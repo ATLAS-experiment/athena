@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_HalfReco.h"
@@ -143,7 +143,8 @@ void ALFA_HalfReco::HistFill(Float_t &b_p, Float_t &b_n, Float_t &Ov_p, Float_t 
 	Int_t iMinN_tmp, iMaxN_tmp;
 	Int_t iFullWidth;
 	const Int_t NBINTOT = 72000;
-	Int_t Over_p[NBINTOT], Over_n[NBINTOT];
+        std::vector<Int_t> Over_p(NBINTOT);
+        std::vector<Int_t> Over_n(NBINTOT);
 
 	if (iFlag==0) //First call, Event not reconstructed for U and V
 	{

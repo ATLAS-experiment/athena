@@ -28,16 +28,6 @@ namespace {
     constexpr double C_VEL = 1./ Gaudi::Units::c_light; // ns/m
 }
 namespace Muon {
-
-    //================================================================================
-    MuonClusterOnTrackCreator::MuonClusterOnTrackCreator(const std::string& ty, const std::string& na, const IInterface* pa) :
-        AthAlgTool(ty, na, pa) {
-        // algtool interface - necessary!
-        declareInterface<IMuonClusterOnTrackCreator>(this);
-        declareInterface<IRIO_OnTrackCreator>(this);
-
-    }
-
     //================================================================================
     StatusCode MuonClusterOnTrackCreator::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
@@ -48,27 +38,17 @@ namespace Muon {
     }
 
     //================================================================================
-    MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const
-
-    {
+    MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, 
+                                                                     const Amg::Vector3D& GP) const {
         MuonClusterOnTrack* MClT = nullptr;
 
         // check whether PrepRawData has detector element, if not there print warning
         const Trk::TrkDetElementBase* EL = RIO.detectorElement();
-        if (!EL) {
-            ATH_MSG_WARNING("RIO does not have associated detectorElement!, cannot produce ROT");
-            return nullptr;
-        }
+        
+        ATH_MSG_VERBOSE("Create ROT from "<<m_idHelperSvc->toString(RIO.identify())<<".");
 
         // in RIO_OnTrack the local param and cov should have the same dimension
         Trk::LocalParameters locpar(RIO.localPosition());
-
-        if (RIO.localCovariance().cols() != RIO.localCovariance().rows()) {
-            ATH_MSG_WARNING("Rows and colums not equal!");
-            if (m_idHelperSvc->isRpc(RIO.identify())) {
-               ATH_MSG_WARNING("RPC hit with (r,c)=" << RIO.localCovariance().rows() << "," << RIO.localCovariance().cols());
-            }
-        }
 
         if (RIO.localCovariance().cols() > 1 || (m_idHelperSvc->isTgc(RIO.identify()) && m_idHelperSvc->measuresPhi(RIO.identify()))) {
             ATH_MSG_VERBOSE("Making 2-dim local parameters: " << m_idHelperSvc->toString(RIO.identify()));
@@ -95,143 +75,148 @@ namespace Muon {
 
         Amg::MatrixX loce = RIO.localCovariance();
         ATH_MSG_DEBUG("All: new err matrix is " << loce);
+        switch (m_idHelperSvc->technologyIndex(RIO.identify())) {
+            using enum Muon::MuonStationIndex::TechnologyIndex;
+            case RPC: {
+                //***************************
+                // RPC: cast to RpcPrepData
+                //***************************
+                const RpcPrepData* MClus = static_cast<const RpcPrepData*>(&RIO);
+                const bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
 
-        if (m_idHelperSvc->isRpc(RIO.identify())) {
-
-            //***************************
-            // RPC: cast to RpcPrepData
-            //***************************
-
-            const RpcPrepData* MClus = static_cast<const RpcPrepData*>(&RIO);
-            bool measphi = m_idHelperSvc->measuresPhi(RIO.identify());
-
-            double fixedError = 1.;
-            bool scale = false;
-            // check whether to scale eta/phi hit
-            if (m_doFixedErrorRpcEta && !measphi) {
-                scale = true;
-                fixedError = m_fixedErrorRpcEta;
-            } else if (m_doFixedErrorRpcPhi && measphi) {
-                scale = true;
-                fixedError = m_fixedErrorRpcPhi;
-            }
-            if (scale) {
-                Amg::MatrixX mat(1, 1);
-                mat(0, 0) = fixedError * fixedError;
-                loce = mat;
-            }
-
-            const MuonGM::RpcReadoutElement* rpc_readout_element = MClus->detectorElement();
-            Amg::Vector3D posi = rpc_readout_element->stripPos(RIO.identify());
-
-            // let's correct rpc time subtracting delay due to the induced electric signal propagation along strip
-            double correct_time_along_strip = 0;
-            if (measphi == 0) {
-                correct_time_along_strip = rpc_readout_element->distanceToEtaReadout(GP) / 1000. * SIG_VEL;
-            } else {
-                correct_time_along_strip = rpc_readout_element->distanceToPhiReadout(GP) / 1000. * SIG_VEL;
-            }
-            if (positionAlongZ) correct_time_along_strip = 0;  // no correction if extrapolated GlobalPosition not on detector surface!
-
-            // let's evaluate the average  delay due to the induced electric signal propagation along strip
-            double av_correct_time_along_strip = 0;
-            if (measphi == 0) {
-                av_correct_time_along_strip = rpc_readout_element->distanceToEtaReadout(posi) / 1000. * SIG_VEL;
-            } else {
-                av_correct_time_along_strip = rpc_readout_element->distanceToPhiReadout(posi) / 1000. * SIG_VEL;
-            }
-
-            // let's evaluate [real TOF - nominal TOF]
-            double real_TOF_onRPCgap = GP.mag() / 1000. * C_VEL;
-            double nominal_TOF_onRPCgap = posi.mag() / 1000. * C_VEL;
-
-            // let's evaluate the total time correction
-            double correct_time_tot = real_TOF_onRPCgap - nominal_TOF_onRPCgap + correct_time_along_strip - av_correct_time_along_strip;
-
-            MClT = new RpcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip, MClus->time() - correct_time_tot);
-
-            ATH_MSG_DEBUG(" correct_time_along_strip " << correct_time_along_strip << " av_correct_time_along_strip "
-                                                       << av_correct_time_along_strip << " real_TOF_onRPCgap " << real_TOF_onRPCgap
-                                                       << " nominal_TOF_onRPCgap " << nominal_TOF_onRPCgap << " MClus->time() "
-                                                       << MClus->time() << " correct_time_tot " << correct_time_tot);
-
-        } else if (m_idHelperSvc->isTgc(RIO.identify())) {
-
-            //***************************
-            // TGC: cast to TgcPrepData
-            //***************************
-
-            const TgcPrepData* MClus = static_cast<const TgcPrepData*>(&RIO);
-            const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
-
-            // calculation of 2D error matrix for TGC phi strips
-            if (idHelper.measuresPhi(RIO.identify())) {
-                const int stripNo    = idHelper.channel(RIO.identify());
-                const int gasGap     = idHelper.gasGap(RIO.identify());
-
-                const MuonGM::TgcReadoutElement* ele = MClus->detectorElement();
-
-                double stripLength = ele->stripLength();
-                double stripWidth = std::abs(ele->stripPitch(gasGap, stripNo, lp[Trk::locZ]));
-                const Amg::Vector3D lStripDir = ele->transform(RIO.identify()).inverse().linear()*
-                                                ele->stripDir(RIO.identify());
-
-                Amg::MatrixX mat(2, 2);
-                
-                double phistereo = lStripDir.phi() - 90.*Gaudi::Units::deg;
-                double Sn = std::sin(phistereo);
-                double Sn2 = Sn * Sn;
-                double Cs2 = 1. - Sn2;
-
-                double V0 = stripWidth * stripWidth / 12;
-                if (m_doFixedErrorTgcPhi) V0 = m_fixedErrorTgcPhi * m_fixedErrorTgcPhi;
-                double V1 = stripLength * stripLength / 12;
-                mat(0, 0) = (Cs2 * V0 + Sn2 * V1);
-                mat.fillSymmetric(1, 0, (Sn * std::sqrt(Cs2) * (V0 - V1)));
-                mat(1, 1) = (Sn2 * V0 + Cs2 * V1);
-                loce = mat;
-            } else {
-                if (m_doFixedErrorTgcEta) {
+                if ((m_doFixedErrorRpcEta && !measphi) || 
+                    (m_doFixedErrorRpcPhi && measphi) ) {
+                    const double fixedError = measphi ? m_fixedErrorRpcPhi 
+                                                      : m_fixedErrorRpcEta;
                     Amg::MatrixX mat(1, 1);
-                    mat(0, 0) = m_fixedErrorTgcEta * m_fixedErrorTgcEta;
+                    mat(0, 0) = fixedError * fixedError;
                     loce = mat;
                 }
-            }
 
-            MClT = new TgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
+                const MuonGM::RpcReadoutElement* re = MClus->detectorElement();
+                Amg::Vector3D clusPos = re->stripPos(RIO.identify());
 
-        } else if (m_idHelperSvc->issTgc(RIO.identify())) {
+                // let's correct rpc time subtracting delay due to the induced electric signal propagation along strip
+                double timeAlongStrip = 0;
+                if (!measphi) {
+                    timeAlongStrip = re->distanceToEtaReadout(GP) / 1000. * SIG_VEL;
+                } else {
+                    timeAlongStrip = re->distanceToPhiReadout(GP) / 1000. * SIG_VEL;
+                }
+                if (positionAlongZ) timeAlongStrip = 0;  // no correction if extrapolated GlobalPosition not on detector surface!
 
-            //***************************
-            // sTGC: cast to sTgcPrepData
-            //***************************
+                // let's evaluate the average  delay due to the induced electric signal propagation along strip
+                double assignedTimFromPrd = 0;
+                if (!measphi) {
+                    assignedTimFromPrd = re->distanceToEtaReadout(clusPos) / 1000. * SIG_VEL;
+                } else {
+                    assignedTimFromPrd = re->distanceToPhiReadout(clusPos) / 1000. * SIG_VEL;
+                }
 
-            const sTgcPrepData* MClus = static_cast<const sTgcPrepData*>(&RIO);
-            Amg::Vector2D localPos(lp[Trk::locX], lp[Trk::locY]);
+                // let's evaluate [real TOF - nominal TOF]
+                double real_TOF_onRPCgap = GP.mag() / 1000. * C_VEL;
+                double nominal_TOF_onRPCgap = clusPos.mag() / 1000. * C_VEL;
 
-            // Dont make RIO On tracks for sTGC wires in inner Q1
-            if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && 
-                MClus->detectorElement()->isEtaZero(MClus->identify(), lp)) {
-              ATH_MSG_DEBUG("sTgcReadoutElement with isEtaZero() ?! "<<m_idHelperSvc->toString(MClus->identify()));
-              return nullptr;
-            }
-            // Wires are already considered in the above check. Dont remove them here
-            if (!rio_surface.insideBounds(localPos) && 
-                 m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire) {
-              ATH_MSG_DEBUG("sTgc measurement "<<m_idHelperSvc->toString(MClus->identify())<<" out of bounds. "
-                             <<Amg::toString(localPos));
-              return nullptr;
-        }
-            MClT = new sTgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), positionAlongStrip);
+                // let's evaluate the total time correction
+                double correct_time_tot = real_TOF_onRPCgap 
+                                        - nominal_TOF_onRPCgap 
+                                        + timeAlongStrip 
+                                        - assignedTimFromPrd;
 
-        } else if (m_idHelperSvc->isMM(RIO.identify())) {
+                MClT = new RpcClusterOnTrack(MClus, std::move(locpar), std::move(loce), 
+                                             positionAlongStrip, MClus->time() - correct_time_tot);
 
-            //***************************
-            // MM: cast to MMPrepData
-            //***************************
+                ATH_MSG_DEBUG(" correct_time_along_strip " << timeAlongStrip << " assignedTimFromPrd "
+                        << assignedTimFromPrd << " real_TOF_onRPCgap " << real_TOF_onRPCgap
+                        << " nominal_TOF_onRPCgap " << nominal_TOF_onRPCgap << " MClus->time() "
+                        << MClus->time() << " correct_time_tot " << correct_time_tot);
+                break;
 
-            const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
-            MClT = new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), positionAlongStrip, {}, {});
+            } case TGC: {
+
+                //***************************
+                // TGC: cast to TgcPrepData
+                //***************************
+
+                const TgcPrepData* MClus = static_cast<const TgcPrepData*>(&RIO);
+                const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};
+
+                // calculation of 2D error matrix for TGC phi strips
+                if (idHelper.measuresPhi(RIO.identify())) {
+                    const int stripNo    = idHelper.channel(RIO.identify());
+                    const int gasGap     = idHelper.gasGap(RIO.identify());
+
+                    const MuonGM::TgcReadoutElement* ele = MClus->detectorElement();
+
+                    double stripLength = ele->stripLength();
+                    double stripWidth = std::abs(ele->stripPitch(gasGap, stripNo, lp[Trk::locZ]));
+                    const Amg::Vector3D lStripDir = ele->transform(RIO.identify()).inverse().linear()*
+                                                    ele->stripDir(RIO.identify());
+
+                    Amg::MatrixX mat(2, 2);
+                    
+                    double phistereo = lStripDir.phi() - 90.*Gaudi::Units::deg;
+                    double Sn = std::sin(phistereo);
+                    double Sn2 = Sn * Sn;
+                    double Cs2 = 1. - Sn2;
+
+                    double V0 = stripWidth * stripWidth / 12;
+                    if (m_doFixedErrorTgcPhi) V0 = m_fixedErrorTgcPhi * m_fixedErrorTgcPhi;
+                    double V1 = stripLength * stripLength / 12;
+                    mat(0, 0) = (Cs2 * V0 + Sn2 * V1);
+                    mat.fillSymmetric(1, 0, (Sn * std::sqrt(Cs2) * (V0 - V1)));
+                    mat(1, 1) = (Sn2 * V0 + Cs2 * V1);
+                    loce = mat;
+                } else {
+                    if (m_doFixedErrorTgcEta) {
+                        Amg::MatrixX mat(1, 1);
+                        mat(0, 0) = m_fixedErrorTgcEta * m_fixedErrorTgcEta;
+                        loce = mat;
+                    }
+                }
+
+                MClT = new TgcClusterOnTrack(MClus, std::move(locpar), std::move(loce), 
+                                             positionAlongStrip);
+                break;
+
+            } case STGC: {
+
+                //***************************
+                // sTGC: cast to sTgcPrepData
+                //***************************
+
+                const sTgcPrepData* MClus = static_cast<const sTgcPrepData*>(&RIO);
+                Amg::Vector2D localPos(lp[Trk::locX], lp[Trk::locY]);
+
+                // Dont make RIO On tracks for sTGC wires in inner Q1
+                if (m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) == sTgcIdHelper::Wire && 
+                    MClus->detectorElement()->isEtaZero(MClus->identify(), lp)) {
+                    ATH_MSG_DEBUG("sTgcReadoutElement with isEtaZero() ?! "
+                                 <<m_idHelperSvc->toString(MClus->identify()));
+                    return nullptr;
+                }
+                // Wires are already considered in the above check. Dont remove them here
+                if (!rio_surface.insideBounds(localPos) && 
+                     m_idHelperSvc->stgcIdHelper().channelType(MClus->identify()) != sTgcIdHelper::Wire) {
+                    ATH_MSG_DEBUG("sTgc measurement "<<m_idHelperSvc->toString(MClus->identify())
+                                <<" out of bounds. "<<Amg::toString(localPos));
+                  return nullptr;
+                }
+                MClT = new sTgcClusterOnTrack(MClus, std::move(locpar), 
+                                             std::move(loce), positionAlongStrip);
+                break;
+
+            } case MM:{
+                //***************************
+                // MM: cast to MMPrepData
+                //***************************
+                const MMPrepData* mmPRD = static_cast<const MMPrepData*>(&RIO);
+                MClT = new MMClusterOnTrack(mmPRD, std::move(locpar), std::move(loce), 
+                                        positionAlongStrip, {}, {});
+                break;
+            } default:
+                ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Measurement not supported:" 
+                            <<m_idHelperSvc->toString(RIO.identify()));
         }
 
         return MClT;
@@ -250,19 +235,20 @@ namespace Muon {
 
     //================================================================================
     MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
-
-        if (m_idHelperSvc->isMM(RIO.identify())) {
-            // Micromegas
-            return calibratedClusterMMG(RIO, GP, GD);
+        ATH_MSG_VERBOSE("Apply calibration correction to "<<RIO);
+        
+        switch (m_idHelperSvc->technologyIndex(RIO.identify())) {
+            using enum Muon::MuonStationIndex::TechnologyIndex;
+            case MM:
+                return calibratedClusterMMG(RIO, GP, GD);
+            case STGC: {
+                if (!m_idHelperSvc->measuresPhi(RIO.identify())){
+                    return calibratedClusterSTG(RIO, GP, GD);
+                }
+                return createRIO_OnTrack(RIO, GP); 
+            } default:
+                return createRIO_OnTrack(RIO, GP);
         }
-
-        if (m_idHelperSvc->issTgc(RIO.identify()) && !m_idHelperSvc->measuresPhi(RIO.identify())) {
-            // sTGC: calibration is currently available for strips.
-            return calibratedClusterSTG(RIO, GP, GD);
-        }
-
-        // Default case
-        return createRIO_OnTrack(RIO, GP, GD);
     }
 
 

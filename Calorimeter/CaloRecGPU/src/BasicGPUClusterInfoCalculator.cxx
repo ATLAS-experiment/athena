@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -32,7 +32,7 @@ StatusCode BasicGPUClusterInfoCalculator::initialize_CUDA()
 }
 
 StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, const ConstantDataHolder & constant_data,
-                                                  EventDataHolder & event_data, void * temporary_buffer) const
+                                                  EventDataHolder & event_data, void * /*temporary_buffer*/) const
 {
   using clock_type = boost::chrono::thread_clock;
   auto time_cast = [](const auto & before, const auto & after)
@@ -42,17 +42,13 @@ StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, cons
 
   const auto start = clock_type::now();
 
-  void * temp_store = (m_preserveClusterMoments ? temporary_buffer : (ClusterMomentsArr *) event_data.m_moments_dev);
-
-  Helpers::CUDA_kernel_object<ClusterInfoCalculatorTemporaries> temporaries((ClusterInfoCalculatorTemporaries *) temp_store);
-
   const auto before_seed_properties = clock_type::now();
 
-  updateSeedCellProperties(event_data, temporaries, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  updateSeedCellProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
 
   const auto before_calculating = clock_type::now();
 
-  calculateClusterProperties(event_data, temporaries, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
+  calculateClusterProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
 
   const auto end = clock_type::now();
 

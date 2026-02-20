@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLETRACKCONTAINER_H
@@ -21,9 +21,9 @@ class ExampleTrackContainer : public DataVector<ExampleTrack> {
 
 public: // Constructor and Destructor
    /// Default Constructor
-   ExampleTrackContainer(SG::OwnershipPolicy ownPolicy = SG::OWN_ELEMENTS) : DataVector<ExampleTrack>(ownPolicy) {};
+   ExampleTrackContainer(SG::OwnershipPolicy ownPolicy = SG::OWN_ELEMENTS) : DataVector<ExampleTrack>(ownPolicy) {}
    /// Destructor
-   virtual ~ExampleTrackContainer() {};
+   virtual ~ExampleTrackContainer() = default;
 };
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(ExampleTrackContainer, 9103, 1)

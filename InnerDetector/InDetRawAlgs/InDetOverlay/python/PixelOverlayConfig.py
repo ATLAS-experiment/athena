@@ -1,6 +1,6 @@
 """Define methods to construct configured Pixel overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,12 +16,8 @@ def PixelOverlayAlgCfg(flags, name="PixelOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "PixelRDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        from PixelRawDataByteStreamCnv.PixelRawDataByteStreamCnvConfig import PixelRawDataProviderAlgCfg
-        acc.merge(PixelRawDataProviderAlgCfg(flags))
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do Pixel overlay
     acc.addEventAlgo(CompFactory.PixelOverlay(name, **kwargs))

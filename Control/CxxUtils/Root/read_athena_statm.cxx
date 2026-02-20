@@ -14,7 +14,7 @@
 struct athena_statm
 read_athena_statm()
 {
-  struct athena_statm res = {0, 0};
+  struct athena_statm res = {0, 0, 0};
 #ifndef __APPLE__
   
     const char *filename = "/proc/self/statm";
@@ -27,7 +27,7 @@ read_athena_statm()
       return res;
     }
 
-    if (fscanf(fd, "%80u %80u", &res.vm_pages, &res.rss_pages) < 2) {
+    if (fscanf(fd, "%80u %80u %80u", &res.vm_pages, &res.rss_pages, &res.shr_pages) < 3) {
       fprintf(stderr,
 	      "read_statm: problem reading file %s:\n", filename);
     }

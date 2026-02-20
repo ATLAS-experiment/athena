@@ -13,5 +13,3 @@ atlas_add_component( LUCID_RawDataByteStreamCnv
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib ByteStreamCnvSvcBaseLib ByteStreamData LUCID_RawEvent GaudiKernel )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

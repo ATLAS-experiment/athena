@@ -96,7 +96,7 @@ StatusCode FPGADataFormatTool::convertFPGASlices(
 
     for (size_t i = 0; i < hitsinSlice->size(); i++)
     {
-        const FPGATrackSimHit& hit = hitsinSlice->at(i);
+        const FPGATrackSimHit& hit = *hitsinSlice->at(i);
 
         if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
             organizedHits[hit.getIdentifier()].push_back(&hit);
@@ -164,7 +164,7 @@ StatusCode FPGADataFormatTool::convertFPGAHits(
 
     for (size_t i = 0; i < allHits->size(); i++)
     {
-        const FPGATrackSimHit& hit = allHits->at(i);
+        const FPGATrackSimHit& hit = *allHits->at(i);
 
         if((doPixel && hit.isPixel()) || (doStrip && hit.isStrip()))
             organizedHits[hit.getIdentifier()].push_back(&hit);
@@ -220,9 +220,13 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
     for (const FPGATrackSimTrack& track : *tracks) 
     {
         int bitmask = 0;
-        for(const auto& hit: track.getFPGATrackSimHits())
+        for (const auto& hit : track.getFPGATrackSimHitPtrs())
         {
-            bitmask |= 2 << hit.getLayer();
+            if (!hit){
+                ATH_MSG_ERROR("Null hit pointer from getFPGATrackSimHitPtrs() in convertFPGATracks");
+                return StatusCode::FAILURE;
+            }
+            bitmask |= 2 << hit->getLayer();
         }
 
         ATH_MSG_DEBUG("Encoded GTrack: ");
@@ -235,42 +239,43 @@ StatusCode FPGADataFormatTool::convertFPGATracks(
         ATH_MSG_DEBUG("\tphi: " << track.getPhi());
         ATH_MSG_DEBUG("\teta: " << track.getEta());
 
+        auto trackBinsIndex = track.getBinIdx();
         auto gtrackWord_w1 = FPGADataFormatUtilities::fill_GTRACK_HDR_w1(
                 0xee,
                 0,
                 track.getHoughY(),
                 track.getHoughX(),
-                0,
-                0,
+                trackBinsIndex[0],
+                trackBinsIndex[1],
                 0,
                 bitmask);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w1(gtrackWord_w1));      
 
         auto gtrackWord_w2 = FPGADataFormatUtilities::fill_GTRACK_HDR_w2(
-                0, 
+                trackBinsIndex[2], 
                 track.getD0(),
                 track.getZ0(), 
-                0);
+                trackBinsIndex[3]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w2(gtrackWord_w2));  
 
         auto gtrackWord_w3 = FPGADataFormatUtilities::fill_GTRACK_HDR_w3(
                 track.getQOverPt(), 
                 track.getPhi(),
                 track.getEta(), 
-                0);
+                trackBinsIndex[3]);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_GTRACK_HDR_w3(gtrackWord_w3));  
 
-        auto hits = track.getFPGATrackSimHits();
+        std::vector<std::shared_ptr<const FPGATrackSimHit>> hits = track.getFPGATrackSimHitPtrs();
         hits.erase(
         std::remove_if(hits.begin(), hits.end(),
-            [](const FPGATrackSimHit& hit) { return !hit.isReal(); }),
+            [](const std::shared_ptr<const FPGATrackSimHit>& hit) { return !hit || !hit->isReal(); }),
         hits.end());
 
         for(unsigned int i = 0 ; i < hits.size(); i++)
         {
             const auto& hit = hits[i];
             bool isLast = (i+1 == hits.size());
-            fillHit(&hit, isLast, false, encodedData);
+            fillHit(hit.get(), isLast, false, encodedData);
         }
 
 
@@ -289,11 +294,13 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
         const EventContext &/*ctx*/
         ) const {
 
+    constexpr int maxChannels = 1000;
     bool filledHeader = false;
     for (const InDetRawDataCollection<PixelRDORawData>* pixel_rdoCollection : pixelRDO) 
     {
         if (pixel_rdoCollection == nullptr) { continue; }
 
+        int nChannels = 0;
         // loop on all RDOs
         for (const PixelRDORawData* pixelRawData : *pixel_rdoCollection) 
         {
@@ -315,7 +322,7 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
 
             // Get the pixel word
             auto pixelWord = FPGADataFormatUtilities::fill_PIXEL_EF_RDO (
-                    (pixelRawData == pixel_rdoCollection->back()), // last
+                    (pixelRawData == pixel_rdoCollection->back()) || (nChannels == maxChannels), // last
                     m_pixelId->phi_index(rdoId), // ROW
                     m_pixelId->eta_index(rdoId), // COL
                     pixelRawData->getToT(), // TOT
@@ -325,6 +332,9 @@ StatusCode FPGADataFormatTool::convertPixelRDO(
 
             // Push the word into the vector
             encodedData.push_back(FPGADataFormatUtilities::get_dataformat_PIXEL_EF_RDO(pixelWord));
+
+            if(nChannels == maxChannels) break;
+            nChannels++;
             //}
     } // end for each RDO in the collection
 

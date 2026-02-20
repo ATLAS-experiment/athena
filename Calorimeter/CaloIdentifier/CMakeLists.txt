@@ -1,17 +1,13 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloIdentifier )
-
-# External dependencies:
-find_package( Boost COMPONENTS thread )
 
 # Component(s) in the package:
 atlas_add_library( CaloIdentifier
                    src/*.cxx
                    PUBLIC_HEADERS CaloIdentifier
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel
+                   LINK_LIBRARIES CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel
                    PRIVATE_LINK_LIBRARIES CxxUtils IdDictParser PathResolver )
 
 atlas_add_dictionary( CaloIdentifierDict
@@ -41,7 +37,7 @@ atlas_add_executable( caloCellLookup
 
 # Tests in the package:
 
-set( _ignore "mask/zero|Reading file|^AtlasDetectorID(Helper)?::|WARNING MessageSvc not found" )
+set( _ignore "mask/zero|Reading file|^AtlasDetectorID(Helper)?::|WARNING MessageSvc not found|register_dict_tag:" )
 
 #atlas_add_test( GTower_ID_test
 #                SOURCES

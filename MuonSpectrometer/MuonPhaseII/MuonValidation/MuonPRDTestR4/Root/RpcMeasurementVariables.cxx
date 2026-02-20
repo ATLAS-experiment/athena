@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool RpcMeasurementVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void RpcMeasurementVariables::dump(const ActsGeometryContext& gctx,
+    void RpcMeasurementVariables::dump(const ActsTrk::GeometryContext& gctx,
                                        const xAOD::RpcMeasurement& strip) {
         const MuonGMR4::RpcReadoutElement* re = strip.readoutElement();
         const Identifier id{re->measurementId(strip.measurementHash())};
@@ -81,7 +81,7 @@ namespace MuonValR4{
         } else {
             locCov = xAOD::toEigen(strip.localCovariance<2>());
         }
-        const Amg::Vector3D globPos{re->localToGlobalTrans(gctx, strip.layerHash()) *locPos};
+        const Amg::Vector3D globPos{re->localToGlobalTransform(gctx, strip.layerHash()) *locPos};
         m_globPos.push_back(globPos);
         m_locPos.push_back(locPos.block<2,1>(0,0));
         m_locCov.push_back(locCov(0,0), locCov(1,1));

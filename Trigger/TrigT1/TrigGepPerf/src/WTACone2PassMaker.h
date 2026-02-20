@@ -32,7 +32,7 @@ inline void WTACone2PassMaker::FillLists(const std::vector<WTATrigObj>& InputTow
     m_ConstituentList.clear(); m_SeedSortingList.clear(); m_RollOffList.clear();
     const unsigned int MaxSeedSortingN = m_WTAConeMakerParameter.GetMaxSeedSortingN();
     const unsigned int MaxConstN = m_WTAConeMakerParameter.GetMaxConstN();
-    for(auto tower: InputTowers)
+    for(const auto& tower: InputTowers)
     {
         if(tower.pt() < m_WTAConeMakerParameter.GetConstEtCut())continue; // Skip Et < 2GeV
         if(tower.pt() >= m_WTAConeMakerParameter.GetSeedEtCut())// Harmonize >=
@@ -97,7 +97,7 @@ inline void WTACone2PassMaker::MergeConstsToSeeds()
 {
     if(m_RollOffList.size() > 0)
     {
-        for (auto off_seed: m_RollOffList)InsertToConstList(off_seed); // m_AddConstFirst is true by default
+        for (const auto& off_seed: m_RollOffList)InsertToConstList(off_seed); // m_AddConstFirst is true by default
     }
     for(auto constituent: m_ConstituentList)
     {

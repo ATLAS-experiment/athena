@@ -21,7 +21,6 @@ class FastSimulationMasterTool : public extends<AthAlgTool , IFastSimulationMast
 
   // Base class methods
   StatusCode initializeFastSims() override final; ///!< Base class method to initialize all the fast simulation models
-  bool HasFastSimulationModels() const override final; ///!< Base class method to check if we have any fast simulation models
   StatusCode BeginOfAthenaEvent() override final; ///!< Base class method that calls BeginOfAthenaEvent for all fast simulation models.
   StatusCode EndOfAthenaEvent() override final; ///!< Base class method that calls EndOfAthenaEvent for all fast simulation models.
 

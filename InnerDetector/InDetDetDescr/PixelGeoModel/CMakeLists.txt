@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PixelGeoModel )
@@ -11,7 +11,7 @@ atlas_add_library( PixelGeoModelLib
    PixelGeoModel/*.h src/*.cxx
    PUBLIC_HEADERS PixelGeoModel
    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoModelUtilities GeometryDBSvcLib InDetGeoModelUtils
+   LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoModelUtilities InDetGeoModelUtils
    PRIVATE_LINK_LIBRARIES ${GEOMODEL_LIBRARIES} AthenaKernel CxxUtils DetDescrConditions GeoModelInterfaces GeoPrimitives Identifier InDetIdentifier InDetReadoutGeometry PixelReadoutGeometryLib ReadoutGeometryBase RDBAccessSvcLib SGTools StoreGateLib
    PRIVATE_DEFINITIONS "-DGEOTORUS=1" )
 
@@ -21,7 +21,6 @@ atlas_add_component( PixelGeoModel
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( test/*.py )
 
 # Test(s) in the package:
 atlas_add_test( PixelGMConfig_test

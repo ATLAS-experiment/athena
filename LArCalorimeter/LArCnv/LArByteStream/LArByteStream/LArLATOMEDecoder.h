@@ -197,6 +197,7 @@ private:
     Word m_region{};
     Word m_nStreams{};
     Word m_streamNumber{};
+    Word m_at0at1Swap{};
     Word m_at0typeRec{};
     Word m_at1typeRec{};
     Word m_at0type{};

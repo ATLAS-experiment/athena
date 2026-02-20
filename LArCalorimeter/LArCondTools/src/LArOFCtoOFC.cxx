@@ -44,7 +44,7 @@ StatusCode LArOFCtoOFC::stop()
   const LArOFCComplete* cellOFC = nullptr;
   CHECK(detStore()->retrieve(cellOFC,m_inKey));
 
-  //Retrive online id
+  //Retrieve online id
   const LArOnlineID* onlID = nullptr;
   CHECK(detStore()->retrieve(onlID));
 

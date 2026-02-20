@@ -29,4 +29,3 @@ SG::ExcBadIterSwap: Attempt to swap between containers with inconsistent ownersh
 SG::ExcAllocOwnership: Bad allocation ownership.
 SG::ExcBadVarName: Bad name for auxiliary variable `foo asd'. Variable and class names must consist of only digits, letters, and underscores, and cannot start with a digit.  Variable names may not be empty, but class names may be.
 SG::ExcJaggedVecOverlappingCopy: Overlapping copies not implemented for jagged vectors.  Talk to core software if this is an issue.
-SG::ExcOutOfRange: Range reference out of bounds in foo; 10 >= 1

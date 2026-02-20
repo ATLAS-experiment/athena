@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <exception>
@@ -190,6 +190,7 @@ StatusCode L1TopoByteStreamTool::convert(const std::string& sgKey,
     StatusCode sc = convert(ROBData(it).getROBFragment(), rdo);
     if (sc.isFailure()) {
       ATH_MSG_ERROR(" Failed to create Objects: " << sgKey);
+      delete rdo;//memory was allocated by convert
       return sc;
     } else {
       result->push_back(rdo);  // append a copy of the pointer to the

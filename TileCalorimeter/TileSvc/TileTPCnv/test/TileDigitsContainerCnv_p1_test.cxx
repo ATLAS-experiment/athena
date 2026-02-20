@@ -30,9 +30,6 @@ public:
   {
     tileid.set_do_neighbours (false);
     IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
-    hwid.set_quiet (true);
-    tbid.set_quiet (true);
-    tileid.set_quiet (true);
     assert (hwid.initialize_from_dictionary (idd) == 0);
     assert (tbid.initialize_from_dictionary (idd) == 0);
     assert (tileid.initialize_from_dictionary (idd) == 0);

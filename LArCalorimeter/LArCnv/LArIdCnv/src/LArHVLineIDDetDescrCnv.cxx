@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdCnv/LArHVLineIDDetDescrCnv.h"
@@ -40,8 +40,6 @@ LArHVLineIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 
     // create the helper
     LArHVLineID* hvline_id = new LArHVLineID;
-    // pass a pointer to IMessageSvc to the helper
-    hvline_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*hvline_id) == 0 );
 

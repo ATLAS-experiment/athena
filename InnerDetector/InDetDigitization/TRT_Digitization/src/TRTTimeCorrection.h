@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTTIMECORRECTION_H
@@ -13,6 +13,7 @@
 
 namespace InDetDD {
   class TRT_DetectorManager;
+  class TRT_DetElementContainer;
 }
 
 class TRTDigSettings;
@@ -41,7 +42,8 @@ public:
    * @return time correction
    */
 
-  double TimeShift(const int& strawID);
+  double TimeShift(const int& strawID,
+		   const InDetDD::TRT_DetElementContainer* detElements);
 
   /**
    * Calculates the time between the signal reaching the wire and when it
@@ -71,13 +73,15 @@ private:
                                     const unsigned int& iRing,
                                     const unsigned int& iLayer,
                                     const unsigned int& iStraw,
-                                    const int strawID) ; //Note: Changed from const due to message service hick ups
+                                    const int strawID,
+				    const InDetDD::TRT_DetElementContainer* detElements) ; //Note: Changed from const due to message service hick ups
 
   /** Time shift for end cap straws */
   double calculateTimeShift_EndCap( const unsigned int& iPhi,
                                     const unsigned int& iWheel,
                                     const unsigned int& iLayer,
-                                    const int strawID) ; //Note: Changed from const due to message service hick ups
+                                    const int strawID,
+				    const InDetDD::TRT_DetElementContainer* detElements) ; //Note: Changed from const due to message service hick ups
 
   /** Time shift from straw endpoints in global system */
   double calculateTimeShiftFromStrawEnds( const Amg::Vector3D& strawend1_globalcoord,

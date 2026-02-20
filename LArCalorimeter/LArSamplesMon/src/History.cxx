@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -39,46 +39,43 @@ using std::endl;
 using namespace LArSamples;
 
 
-History::History(const HistoryContainer& container, 
-                 const std::vector<const EventData*>& eventData, unsigned hash, 
+History::History(const HistoryContainer& container,
+                 std::vector<std::unique_ptr<const EventData> >&& eventData, unsigned hash,
                  const AbsShapeErrorGetter* shapeErrorGetter)
   : m_cellInfo(*container.cellInfo()),
-    m_eventData(eventData),
+    m_eventData(std::move(eventData)),
     m_hash(hash), m_shapeErrorGetter(shapeErrorGetter)
 {
   ClassCounts::incrementInstanceCount("History");
-  if (container.nDataContainers() != eventData.size()) return;
+  if (container.nDataContainers() != m_eventData.size()) return;
   for (unsigned int i = 0; i < container.nDataContainers(); i++) 
-    m_data.push_back(new Data(*container.dataContainer(i), *eventData[i], this, i));
+    m_data.push_back(std::make_unique<Data>(*container.dataContainer(i), *eventData[i], this, i));
 }
 
 
-History::History(const std::vector<const Data*>& data, const CellInfo& info, 
-		 const std::vector<const EventData*>& eventData, 
+History::History(std::vector<std::unique_ptr<const Data> >&& data,
+                 const CellInfo& info,
+		 std::vector<std::unique_ptr<const EventData> >&& eventData,
 		 unsigned int hash, const AbsShapeErrorGetter* shapeErrorGetter)
-  : m_data(data), m_cellInfo(info), m_eventData(eventData), m_hash(hash), 
-    m_shapeErrorGetter(shapeErrorGetter) 
+  : m_data(std::move(data)), m_cellInfo(info), m_eventData(std::move(eventData)), m_hash(hash),
+    m_shapeErrorGetter(shapeErrorGetter)
 {
   ClassCounts::incrementInstanceCount("History");
   unsigned int i = 0;
-  for (const Data* data : m_data)
-    data->setCallBacks(this, i);
+  for (std::unique_ptr<const Data>& pdata : m_data)
+    pdata->setCallBacks(this, i);
 }
       
 
 History::~History()
 {
   ClassCounts::decrementInstanceCount("History");
-  for (const Data* data : m_data)
-    delete data;
-  for (const EventData* eventData : m_eventData)
-    delete eventData;  
 }
 
 
-HistoryContainer* History::dissolve()
+std::unique_ptr<HistoryContainer> History::dissolve()
 {
-  HistoryContainer* histCont = new HistoryContainer(new CellInfo(*cellInfo()));
+  auto histCont = std::make_unique<HistoryContainer>(new CellInfo(*cellInfo()));
   for (unsigned int k = 0; k < nData(); k++) {
     Data* newData = new Data(*data(k));
     histCont->add(newData->dissolve());
@@ -91,7 +88,7 @@ HistoryContainer* History::dissolve()
 const Data* History::data(unsigned int i) const 
 { 
   if (i >= nData()) return nullptr;
-  return m_data[i]; 
+  return m_data[i].get();
 }
 
 
@@ -124,25 +121,25 @@ const Data* History::data_for_event(const EventData& eventData) const
 }
 
 
-bool History::sum(SimpleShape*& sum, SimpleShape*& reference) const
+bool History::sum(std::unique_ptr<SimpleShape>& sum,
+                  std::unique_ptr<SimpleShape>& reference) const
 {
-  reference = sum = nullptr;
+  reference.reset();
+  sum.reset();
   if (nData() == 0) return false;
   
-  sum = new SimpleShape(m_data[0]->nSamples());
-  reference = nullptr;
+  sum = std::make_unique<SimpleShape>(m_data[0]->nSamples());
 
   for (unsigned int j = 0; j < nData(); j++) {
     if (sum->nPoints() !=  m_data[j]->nSamples()) return false;
     for (unsigned int k = 0; k < m_data[j]->nSamples(); k++)
       sum->add(k, m_data[j]->pedestalSubtractedSample(k), m_data[j]->error(k));
-    SimpleShape* thisRef = referenceShape(j);
-    if (!thisRef) { delete sum; return false; }
+    std::unique_ptr<SimpleShape> thisRef = referenceShape(j);
+    if (!thisRef) return false;
     if (reference) {
       reference->add(*thisRef);
-      delete thisRef;
     }
-    else reference = thisRef;
+    else reference = std::move(thisRef);
   }
     
   return true;
@@ -154,7 +151,7 @@ bool History::isValid() const
   if (!m_cellInfo.isValid()) return false;
   if (nData() == 0) return false;
   
-  for (const Data* data : m_data)
+  for (const std::unique_ptr<const Data>& data : m_data)
     if (!data->isValid()) return false;
   
   return true;
@@ -163,16 +160,14 @@ bool History::isValid() const
 
 double History::chi2(int i, int lwb, int upb, int chi2Params, ShapeErrorType shapeErrorType, unsigned int* nDof) const
 {
-  SimpleShape* reference = referenceShape(i);
+  std::unique_ptr<SimpleShape> reference = referenceShape(i);
   if (!reference) return -1;
   Chi2Calc c2c(chi2Params);
   if ( m_data[i]->isDisconnected()) return -1;
-  const ScaledErrorData* sea = scaledErrorData(i, -1, Definitions::none, shapeErrorType);
+  std::unique_ptr<const ScaledErrorData> sea = scaledErrorData(i, -1, Definitions::none, shapeErrorType);
   if (!sea && shapeErrorType != NoShapeError && shapeErrorType != BestShapeError) return -1;
-  double chi2Value = c2c.chi2(*m_data[i], *reference, sea, lwb, upb);
+  double chi2Value = c2c.chi2(*m_data[i], *reference, sea.get(), lwb, upb);
   if (nDof) *nDof = c2c.nDof();
-  if (sea) delete sea;
-  delete reference;
   return chi2Value;
 }
 
@@ -180,15 +175,13 @@ double History::chi2(int i, int lwb, int upb, int chi2Params, ShapeErrorType sha
 double History::chi2_k(int i, double k, int lwb, int upb, int chi2Params) const
 {
   const AbsShapeErrorGetter* oldGetter = shapeErrorGetter();
-  UniformShapeErrorGetter* uniGetter = new UniformShapeErrorGetter(k);
-  CombinedShapeErrorGetter* combGetter = new CombinedShapeErrorGetter();
-  if (oldGetter) combGetter->add(*oldGetter);
-  combGetter->add(*uniGetter);
-  setShapeErrorGetter(combGetter);
+  UniformShapeErrorGetter uniGetter(k);
+  CombinedShapeErrorGetter combGetter;
+  if (oldGetter) combGetter.add(*oldGetter);
+  combGetter.add(uniGetter);
+  setShapeErrorGetter(&combGetter);
   double chi2Value = chi2(i, lwb, upb, chi2Params);
   setShapeErrorGetter(oldGetter);
-  delete combGetter;
-  delete uniGetter;
   return chi2Value;
 }
 
@@ -204,19 +197,19 @@ double History::maxChi2(int lwb, int upb, int chi2Params) const
 }
 
 
-OFC* History::ofc(unsigned int k, int lwb, int upb, double time, bool withAutoCorr) const
+std::unique_ptr<OFC>
+History::ofc(unsigned int k, int lwb, int upb, double time, bool withAutoCorr) const
 {
   if (k >= nData()) return nullptr;
   if (Definitions::isNone(time)) {
     time = data(k)->ofcTime();
     //cout << "Using reference time = " << time << endl;
   }
-  SimpleShape* reference = referenceShape(k, 1, time); // ADC=1 : we need a normalized shape
+  std::unique_ptr<SimpleShape> reference = referenceShape(k, 1, time); // ADC=1 : we need a normalized shape
   if (!reference) return nullptr;
-  OFC* result = new OFC(*reference, *m_data[k], lwb, upb, shapeErrorData(CaloGain::LARHIGHGAIN), withAutoCorr); // FixMe
-  delete reference;
-  if (!result) return nullptr;
-  if (result->g().GetNrows() == 0) { delete result; result = nullptr; }
+  std::unique_ptr<const ShapeErrorData> sed = shapeErrorData(CaloGain::LARHIGHGAIN);
+  auto result = std::make_unique<OFC>(*reference, *m_data[k], lwb, upb, sed.get(), withAutoCorr); // FixMe
+  if (result->g().GetNrows() == 0) result.reset();
   return result;
 }
 
@@ -224,94 +217,92 @@ OFC* History::ofc(unsigned int k, int lwb, int upb, double time, bool withAutoCo
 bool History::refVal(unsigned int k, unsigned int sample, double& val, double& err) const
 {
   if (k >= nData()) return false;
-  SimpleShape* reference = referenceShape(k);
+  std::unique_ptr<SimpleShape> reference = referenceShape(k);
   if (!reference) return false;  
-  if (reference->interpolate(m_data[k]->time(sample), val, err) != 0) { delete reference; return false; }
-  delete reference;
+  if (reference->interpolate(m_data[k]->time(sample), val, err) != 0) return false;
   return true;
 }
 
 
-History* History::refit(Chi2Params pars) const
+std::unique_ptr<History> History::refit(Chi2Params pars) const
 {
-  std::vector<const Data*> datas;
+  std::vector<std::unique_ptr<const Data> > datas;
   DataTweaker tw;
   tw.setRefit(true);
   tw.setFitParams(pars);
 
   for (unsigned int j = 0; j < nData(); j++) {
-    Data* refitData = tw.tweak(*data(j));
+    std::unique_ptr<const Data> refitData (tw.tweak(*data(j)));
     if (!refitData) {
-      for (unsigned int k = 0; k < datas.size(); k++) delete datas[k];
       return nullptr;
     }
-    datas.push_back(refitData);
+    datas.push_back(std::move(refitData));
   }
 
-  std::vector<const EventData*> eventData;
-  for (const EventData* event : m_eventData)
-    eventData.push_back(new EventData(*event));
+  std::vector<std::unique_ptr<const EventData> > eventData;
+  for (const std::unique_ptr<const EventData>& event : m_eventData)
+    eventData.push_back(std::make_unique<EventData>(*event));
 
-  return new History(datas, *cellInfo(), eventData, hash(), shapeErrorGetter());
+  return std::make_unique<History>(std::move(datas), *cellInfo(), std::move(eventData), hash(), shapeErrorGetter());
 }
 
 
-History* History::adjust() const
+std::unique_ptr<History> History::adjust() const
 {
-  std::vector<const Data*> datas;
+  std::vector<std::unique_ptr<const Data> > datas;
   DataTweaker tw;
   tw.setAdjust(true);
 
   for (unsigned int j = 0; j < nData(); j++) {
-    Data* newData = tw.tweak(*data(j));
+    std::unique_ptr<const Data> newData (tw.tweak(*data(j)));
     if (!newData) {
-      for (unsigned int k = 0; k < datas.size(); k++) delete datas[k];
       return nullptr;
     }
-    datas.push_back(newData);
+    datas.push_back(std::move(newData));
   }
 
-  std::vector<const EventData*> eventData;
-  for (const EventData* event : m_eventData)
-    eventData.push_back(new EventData(*event));
+  std::vector<std::unique_ptr<const EventData> > eventData;
+  for (const std::unique_ptr<const EventData>& event : m_eventData)
+    eventData.push_back(std::make_unique<EventData>(*event));
 
-  return new History(datas, *cellInfo(), eventData, hash(), shapeErrorGetter());
+  return std::make_unique<History>(std::move(datas), *cellInfo(), std::move(eventData), hash(), shapeErrorGetter());
 }
 
 
-History* History::filter(const TString& cuts) const
+std::unique_ptr<History> History::filter(const TString& cuts) const
 {
   FilterParams f;
   if (!f.set(cuts)) return nullptr;
   
-  std::vector<const Data*> datas;
+  std::vector<std::unique_ptr<const Data> > datas;
 
   for (unsigned int j = 0; j < nData(); j++) {
     if (!f.pass(hash(), *this, j)) continue;
-    datas.push_back(new Data(*data(j)));
+    datas.push_back(std::make_unique<Data>(*data(j)));
   }
 
-  std::vector<const EventData*> eventData;
-  for (const EventData* event : m_eventData)
-    eventData.push_back(new EventData(*event));
+  std::vector<std::unique_ptr<const EventData> > eventData;
+  for (const std::unique_ptr<const EventData>& event : m_eventData)
+    eventData.push_back(std::make_unique<EventData>(*event));
 
-  return new History(datas, *cellInfo(), eventData, hash(), shapeErrorGetter());
+  return std::make_unique<History>(std::move(datas), *cellInfo(), std::move(eventData), hash(), shapeErrorGetter());
 }
 
 
-const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErrorType shapeErrorType, const Residual* res) const
+std::unique_ptr<const ShapeErrorData>
+History::shapeErrorData(CaloGain::CaloGain gain, ShapeErrorType shapeErrorType, const Residual* res) const
 {
   if (shapeErrorType == NoShapeError || !shapeErrorGetter()) return nullptr;
   if (shapeErrorType == BestShapeError) {
     for (unsigned int i = 0; i < NShapeErrorTypes; i++) {
-      const ShapeErrorData* sed = shapeErrorData(gain, (ShapeErrorType)i, res);
+      std::unique_ptr<const ShapeErrorData> sed = shapeErrorData(gain, (ShapeErrorType)i, res);
       if (sed) return sed;
     }
     return nullptr;
   }
   
   if (shapeErrorType == CellShapeError) {
-    ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), gain, res);
+    std::unique_ptr<ShapeErrorData> sed = shapeErrorGetter()->shapeErrorData(hash(), gain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(CellShapeError);
     return sed;
@@ -319,15 +310,15 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
   
   if (shapeErrorType == LowGainCellShapeError || shapeErrorType == MedGainCellShapeError || shapeErrorType == HighGainCellShapeError) {
     CaloGain::CaloGain fbGain = (shapeErrorType == LowGainCellShapeError ? CaloGain::LARLOWGAIN :
-                                (shapeErrorType == MedGainCellShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
-    ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), fbGain, res);
+                                 (shapeErrorType == MedGainCellShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
+    std::unique_ptr<ShapeErrorData> sed = shapeErrorGetter()->shapeErrorData(hash(), fbGain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(shapeErrorType);
     return sed;
   }
   
   if (shapeErrorType == RingShapeError) {
-    ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), gain, res);
+    std::unique_ptr<ShapeErrorData> sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), gain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(RingShapeError);
     return sed;
@@ -335,8 +326,8 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
 
   if (shapeErrorType == LowGainRingShapeError || shapeErrorType == MedGainRingShapeError || shapeErrorType == HighGainRingShapeError) {
     CaloGain::CaloGain fbGain = (shapeErrorType == LowGainRingShapeError ? CaloGain::LARLOWGAIN :
-                                (shapeErrorType == MedGainRingShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
-    ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), fbGain, res);
+                                 (shapeErrorType == MedGainRingShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
+    std::unique_ptr<ShapeErrorData> sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), fbGain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(shapeErrorType);
     return sed;
@@ -346,20 +337,20 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
 }
 
 
-const ScaledErrorData* History::scaledErrorData(unsigned int k, double adcMax, double time,
-                                                ShapeErrorType shapeErrorType) const
+std::unique_ptr<const ScaledErrorData>
+History::scaledErrorData(unsigned int k, double adcMax, double time,
+                         ShapeErrorType shapeErrorType) const
 {
   if (shapeErrorType == NoShapeError || !shapeErrorGetter()) return nullptr;
   if (k >= nData() || data(k)->adcMax() <= 0) return nullptr;
 
-  const ShapeErrorData* sed = shapeErrorData(data(k)->gain(), shapeErrorType, residual(k, false));
+  std::unique_ptr<Residual> res = residual(k, false);
+  std::unique_ptr<const ShapeErrorData> sed = shapeErrorData(data(k)->gain(), shapeErrorType, res.get());
   if (!sed) return nullptr;
 
   double sf = (adcMax < 0 ? data(k)->adcMax() : adcMax);
   double ts = (Definitions::isNone(time) ? data(k)->ofcTime() : time);  
-  ScaledErrorData* sced = new ScaledErrorData(*sed, sf, ts);
-  delete sed;
-  return sced;
+  return std::make_unique<ScaledErrorData>(*sed, sf, ts);
 }
 
 
@@ -376,60 +367,55 @@ bool History::delta(unsigned int k, unsigned int sample, double& del) const
 TVectorD History::deltas(unsigned int k, int lwb, int upb, bool correct) const
 {
   if (k >= nData()) return TVectorD();
-  SimpleShape* reference = referenceShape(k);
+  std::unique_ptr<SimpleShape> reference = referenceShape(k);
   if (!reference) return TVectorD();  
   Chi2Calc c2c;
   CovMatrix errors;
-  const ScaledErrorData* sea = (correct ? scaledErrorData(k) : nullptr);
-  TVectorD dv = c2c.deltas(*data(k), *reference, errors, sea, lwb, upb);
-  if (sea) delete sea;
-  delete reference;
+  std::unique_ptr<const ScaledErrorData> sea = (correct ? scaledErrorData(k) : nullptr);
+  TVectorD dv = c2c.deltas(*data(k), *reference, errors, sea.get(), lwb, upb);
   return dv;
 }
 
 
 bool History::residualOffset(unsigned int k, short sample, double& offset, double adcMax, double time) const
 {
-  const ScaledErrorData* sea = scaledErrorData(k, adcMax, time);
+  std::unique_ptr<const ScaledErrorData> sea = scaledErrorData(k, adcMax, time);
   if (!sea) return false;
-  if (!sea->isInRange(sample)) { delete sea; return false; }
+  if (!sea->isInRange(sample)) return false;
   offset = sea->offsets()(sample);
-  delete sea;
   return true;
 }
 
 
 bool History::residualError(unsigned int k, short sample1, short sample2, double& error, double adcMax, double time) const
 {
-  const ScaledErrorData* sea = scaledErrorData(k, adcMax, time);
+  std::unique_ptr<const ScaledErrorData> sea = scaledErrorData(k, adcMax, time);
   if (!sea) return false;
-  if (!sea->isInRange(sample1) || !sea->isInRange(sample2)) { delete sea; return false; }
+  if (!sea->isInRange(sample1) || !sea->isInRange(sample2)) return false;
   error = sea->errors()(sample1, sample2);
-  delete sea;
   return true;
 }
 
       
-bool History::allShape(GraphShape*& allData, SimpleShape*& allRef) const
+bool History::allShape(std::unique_ptr<GraphShape>& allData,
+                       std::unique_ptr<SimpleShape>& allRef) const
 {
-  allData = nullptr;
-  allRef  = nullptr;
+  allData.reset();
+  allRef.reset();
   
   for (unsigned int j = 0; j < nData(); j++) {
-   if ( m_data[j]->isDisconnected()) continue; 
-   if (m_data[j]->adcMax() < 1) continue;
-    GraphShape* thisData = new GraphShape(*m_data[j], 1/m_data[j]->adcMax(), -m_data[j]->ofcTime());
+    if ( m_data[j]->isDisconnected()) continue;
+    if (m_data[j]->adcMax() < 1) continue;
+    auto thisData = std::make_unique<GraphShape>(*m_data[j], 1/m_data[j]->adcMax(), -m_data[j]->ofcTime());
     if (allData) {
       allData->add(*thisData);
-      delete thisData;
     }
-    else allData = thisData;
-    SimpleShape* thisRef = referenceShape(j, 1); // normalized to 1, like the data
+    else allData = std::move(thisData);
+    std::unique_ptr<SimpleShape> thisRef = referenceShape(j, 1); // normalized to 1, like the data
     if (allRef) {
       allRef->add(*thisRef);
-      delete thisRef;
     }
-    else allRef = thisRef;
+    else allRef = std::move(thisRef);
   }
 
   return true;
@@ -440,12 +426,10 @@ double History::allChi2(Chi2Params pars) const
 {
   Chi2Calc c2c(pars);
   
-  GraphShape* allData = nullptr;
-  SimpleShape* allRef = nullptr;
+  std::unique_ptr<GraphShape> allData;
+  std::unique_ptr<SimpleShape> allRef;
   if (!allShape(allData, allRef)) return -1;
   double chi2Value = c2c.chi2(*allData, *allRef);
-  delete allData;
-  delete allRef;
   return chi2Value;
 }
 
@@ -453,8 +437,8 @@ double History::allChi2(Chi2Params pars) const
 bool History::drawWithReference(int k, const TString& atlasTitle) const
 {
   if ((unsigned int)k >= nData()) return false;
-  auto refShape = std::unique_ptr<SimpleShape>(referenceShape(k));
-  auto smpShape = std::unique_ptr<SimpleShape>(referenceShape(k, -1, Definitions::none, true));
+  std::unique_ptr<SimpleShape> refShape = referenceShape(k);
+  std::unique_ptr<SimpleShape> smpShape = referenceShape(k, -1, Definitions::none, true);
   
   if (!refShape || !smpShape) return false;
   int pars = DataFirst | Legend;
@@ -466,18 +450,19 @@ bool History::drawWithReference(int k, const TString& atlasTitle) const
   else 
     title = Form("%s, run %d, event %d", cellInfo()->location(1).Data(), m_data[k]->run(), m_data[k]->event());
   ShapeDrawer drawer(pars);
-  bool result = drawer.draw(title, m_data[k], refShape.get(), smpShape.get());
+  bool result = drawer.draw(title, m_data[k].get(), refShape.get(), smpShape.get());
   return result;
 }
 
 
 bool History::drawSumWithReference() const
 {
-  SimpleShape* dataShape, *refShape;
+  std::unique_ptr<SimpleShape> dataShape;
+  std::unique_ptr<SimpleShape> refShape;
   if (!sum(dataShape, refShape)) return false;
     
   ShapeDrawer drawer(DataFirst | Legend);
-  return drawer.drawAndDelete("", dataShape, refShape);
+  return drawer.drawAndDelete("", std::move(dataShape), std::move(refShape));
 }
 
 
@@ -489,83 +474,77 @@ bool History::drawAllWithReference(bool doRefit) const
   }
   
   if (doRefit) {
-    History* refitted_history = refit(DefaultChi2);
+    std::unique_ptr<History> refitted_history = refit(DefaultChi2);
     if (!refitted_history) return false;
     bool result = refitted_history->drawAllWithReference(false);
-    delete refitted_history;
     return result;
   }
   
   // Use the shape of the gain of the first pulse...
-  SimpleShape* refShape = referenceShape(0, 1000, 0);
-  SimpleShape* smpShape = referenceShape(0, 1000, 0, true);
-  std::vector<const AbsShape*> shapes;
+  std::unique_ptr<SimpleShape> refShape = referenceShape(0, 1000, 0);
+  std::unique_ptr<SimpleShape> smpShape = referenceShape(0, 1000, 0, true);
+  std::vector<std::unique_ptr<const AbsShape> > shapes;
   
   for (unsigned int i = 0; i < nData(); i++) {
     if (m_data[i]->adcMax() < 1) continue;
-    SimpleShape* shape = new SimpleShape(*m_data[i], 1000/m_data[i]->adcMax(), -m_data[i]->ofcTime());
-    const ScaledErrorData* sed = scaledErrorData(i, 1000);
+    auto shape = std::make_unique<SimpleShape>(*m_data[i], 1000/m_data[i]->adcMax(), -m_data[i]->ofcTime());
+    std::unique_ptr<const ScaledErrorData> sed = scaledErrorData(i, 1000);
     if (sed) {
       for (unsigned int k = 0; k < shape->nPoints(); k++)
         if (sed->isInRange(k))
           shape->set(k, shape->value(k) - sed->offsets()(k));
-      delete sed;
     }
-    shapes.push_back(shape);
+    shapes.push_back(std::move(shape));
   }
   
   ShapeDrawer drawer(Legend);
-  return drawer.drawAndDelete(Form("%s (Normalized Shape, max at 1000)", cellInfo()->location(2).Data()), shapes, refShape, smpShape);
+  return drawer.drawAndDelete(Form("%s (Normalized Shape, max at 1000)", cellInfo()->location(2).Data()), std::move(shapes), std::move(refShape), std::move(smpShape));
 }
 
 
 bool History::drawResiduals(int k, bool errors, bool rescale) const
 {  
-  std::vector<const AbsShape*> shapes;
+  std::vector<std::unique_ptr<const AbsShape> > shapes;
   for (unsigned int i = 0; i < nData(); i++) {
     if (m_data[i]->adcMax() < 1) continue;
     if (k >= 0 && k != (int)i) continue;
-    SimpleShape* shape = deltaShape(i);
+    std::unique_ptr<SimpleShape> shape = deltaShape(i);
+    if (!shape) continue;
     if (!errors) 
       for (unsigned int idx = 0; idx < shape->nPoints(); idx++) shape->setError(idx, 0);
-    if (!shape) continue;
     if (rescale) {
-      SimpleShape* scaled = new SimpleShape(*shape, 1/m_data[i]->adcMax(), 9.0*i/nData() - m_data[i]->ofcTime());
-      delete shape;
-      shape = scaled;
+      auto scaled = std::make_unique<SimpleShape>(*shape, 1/m_data[i]->adcMax(), 9.0*i/nData() - m_data[i]->ofcTime());
+      shape = std::move(scaled);
     }
-    shapes.push_back(shape);
+    shapes.push_back(std::move(shape));
   }
   ShapeDrawer drawer(DataFirst);
   TString title = (rescale ? "Normalized " : "") + TString("residuals for %s");
-  return drawer.drawAndDelete(Form(title.Data(), cellInfo()->location(2).Data()), shapes);  
+  return drawer.drawAndDelete(Form(title.Data(), cellInfo()->location(2).Data()), std::move(shapes));
 }
 
 
-SimpleShape* History::referenceShape(unsigned int k, double adcMax, double time, 
-                                                             bool samplesOnly) const
+std::unique_ptr<SimpleShape> History::referenceShape(unsigned int k, double adcMax, double time,
+                                                     bool samplesOnly) const
 {
   if (!cellInfo()->shape(m_data[k]->gain())) return nullptr;
   if (adcMax < 0) adcMax = m_data[k]->adcMax();
   if (Definitions::isNone(time)) time = m_data[k]->ofcTime();
-  SimpleShape* shape = new SimpleShape(*cellInfo()->shape(m_data[k]->gain()), adcMax, time, samplesOnly);
-  return shape;
+  return std::make_unique<SimpleShape>(*cellInfo()->shape(m_data[k]->gain()), adcMax, time, samplesOnly);
 }
 
 
-SimpleShape* History::deltaShape(unsigned int k, int lwb, int upb) const
+std::unique_ptr<SimpleShape> History::deltaShape(unsigned int k, int lwb, int upb) const
 {
   if (k >= nData()) return nullptr;
-  SimpleShape* reference = referenceShape(k);
+  std::unique_ptr<SimpleShape> reference = referenceShape(k);
   if (!reference) return nullptr;  
   Chi2Calc c2c;
   CovMatrix errors;
-  const ScaledErrorData* sea = scaledErrorData(k);
-  TVectorD dv = c2c.deltas(*data(k), *reference, errors, sea, lwb, upb);
-  if (sea) delete sea;
-  delete reference;
+  std::unique_ptr<const ScaledErrorData> sea = scaledErrorData(k);
+  TVectorD dv = c2c.deltas(*data(k), *reference, errors, sea.get(), lwb, upb);
   if (dv.GetNrows() == 0) return nullptr;
-  SimpleShape* shape = new SimpleShape(dv.GetNrows(), Definitions::samplingInterval, data(k)->time(c2c.lwb()) + data(k)->ofcTime());
+  std::unique_ptr<SimpleShape> shape = std::make_unique<SimpleShape>(dv.GetNrows(), Definitions::samplingInterval, data(k)->time(c2c.lwb()) + data(k)->ofcTime());
   for (int l = c2c.lwb(); l <= c2c.upb(); l++) shape->set(l - c2c.lwb(), dv(l), TMath::Sqrt(errors(l, l)));
   return shape;
 }
@@ -581,12 +560,12 @@ TString History::description(unsigned int verbosity) const
 }
 
 
-Averager* History::calculatePedestal(int i) const
+std::unique_ptr<Averager> History::calculatePedestal(int i) const
 {
-  Averager* avg = new Averager(1);
+  auto avg = std::make_unique<Averager>(1);
   for (unsigned int k = 0; k < nData(); k++) {
     if (i >= 0 && i != (int)k) continue;
-    SimpleShape* reference = referenceShape(k);
+    std::unique_ptr<SimpleShape> reference = referenceShape(k);
     if (!reference) continue;  
     double v,e;
     for (unsigned int l = 0; l < data(k)->nPoints(); l++)
@@ -595,22 +574,23 @@ Averager* History::calculatePedestal(int i) const
         ped(0) = data(k)->value(l);
         avg->fill(ped);
       }
-    delete reference;
   }
   return avg;
 }
 
 
-Residual* History::residual(unsigned int k, bool correct, bool zeroTime) const
+std::unique_ptr<Residual>
+History::residual(unsigned int k, bool correct, bool zeroTime) const
 {
   if (k >= nData()) return nullptr;
   TVectorD del = deltas(k, -1, -1, correct);
-  return new Residual(del, data(k)->run(), data(k)->event(), data(k)->adcMax(), 
-                      (zeroTime ? 0 : data(k)->ofcTime() /*- Definitions::samplingTime(del.GetLwb()) */));
+  return std::make_unique<Residual>(del, data(k)->run(), data(k)->event(), data(k)->adcMax(),
+                                    (zeroTime ? 0 : data(k)->ofcTime() /*- Definitions::samplingTime(del.GetLwb()) */));
 }
 
 
-Residuals* History::residuals(CaloGain::CaloGain gain, double absResCut, bool correct, bool zeroTime) const
+std::unique_ptr<Residuals>
+History::residuals(CaloGain::CaloGain gain, double absResCut, bool correct, bool zeroTime) const
 {
   Chi2Calc c2c;
   CovMatrix dummyErrors;
@@ -633,23 +613,22 @@ Residuals* History::residuals(CaloGain::CaloGain gain, double absResCut, bool co
     }
     if (pass) residuals->add(*res);
   }
-  return residuals.release();
+  return residuals;
 }
 
 
 double History::upstreamEnergy(unsigned int k) const
 {
   if (!m_interface || !cellInfo()) return -1;
-  if (k >= nData() || !data(k)->eventData()) return -1;
+  if (k >= nData()) return -1;
   std::vector<unsigned int> upstreamNeighbors;
   if (!m_interface->firstNeighbors(hash(), upstreamNeighbors, cellInfo()->layer() - 1)) return -1;
   if (upstreamNeighbors.empty()) return -1;
-  std::vector<const Data*> unData;
-  if (!m_interface->data(upstreamNeighbors, *data(k)->eventData(), unData)) return -1;
+  std::vector<std::unique_ptr<const Data> > unData;
+  if (!m_interface->data(upstreamNeighbors, data(k)->eventData(), unData)) return -1;
   double upstreamE = 0;
-  for (const Data* data : unData) {
+  for (std::unique_ptr<const Data>& data : unData) {
     upstreamE += data->energy();
-    delete data;
   }
   return upstreamE;
 }

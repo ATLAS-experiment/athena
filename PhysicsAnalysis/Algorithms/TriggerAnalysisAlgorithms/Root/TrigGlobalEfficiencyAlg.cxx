@@ -122,7 +122,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 						"AsgElectronEfficiencyCorrectionTool/ElTrigEff_"
 						+ std::to_string(isSFTool) + "_" + std::to_string(nTools) + "_" + m_electronID.value() + "_" + m_electronIsol.value());
 	if (!m_isRun3Geo) {
-	  ANA_CHECK(t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"));
+	  ANA_CHECK(t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3/map1.txt"));
 	}
 	ANA_CHECK(t->setProperty("IdKey", m_electronID.value()));
 	ANA_CHECK(t->setProperty("IsoKey", m_electronIsol.value()));

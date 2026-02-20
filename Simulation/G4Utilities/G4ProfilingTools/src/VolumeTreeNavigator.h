@@ -80,7 +80,7 @@ inline std::string stringify(T obj)
 template<class T>
 inline std::string cleanstr(T obj)
 {
-  std::string s = stringify(obj);
+  std::string s = stringify(std::move(obj));
   std::string::size_type col = s.find_first_of(":");
   while (col != std::string::npos) {
       (s.substr(col,2) == "::") ? s.replace(col,2,"_") : s.replace(col,1,"-");

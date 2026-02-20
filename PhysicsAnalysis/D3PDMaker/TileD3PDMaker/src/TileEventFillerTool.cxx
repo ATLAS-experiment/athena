@@ -345,7 +345,7 @@ StatusCode TileEventFillerTool::fill(const xAOD::EventInfo& p){
         
       } else {
         m_isMissingEtAvailable = false;
-        ATH_MSG_ERROR("COULD NOT RETRIVE MET!");       
+        ATH_MSG_ERROR("COULD NOT RETRIEVE MET!");
       }
 
     } // IF

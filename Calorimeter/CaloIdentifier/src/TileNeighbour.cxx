@@ -7,7 +7,7 @@
  -----------------------------------------
  ***************************************************************************/
 
-
+#include "AthenaKernel/getMessageSvc.h"
 #include "CaloIdentifier/TileNeighbour.h"
 #include "CaloIdentifier/TileID.h"
 #include "Identifier/Identifier.h"
@@ -56,7 +56,7 @@ TileNeighbour::~TileNeighbour(void)
 
 int TileNeighbour::initialize(const Tile_Base_ID* tileID, const std::string& filename)
 {
-  MsgStream log(tileID->m_msgSvc, "TileNeighbour" );
+  MsgStream log(Athena::getMessageSvc(), "TileNeighbour" );
   MSG::Level logLevel = log.level();
   if (logLevel==MSG::VERBOSE) m_debug = 1;
   if (logLevel< MSG::VERBOSE) m_debug = 2;

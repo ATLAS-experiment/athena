@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,15 +13,14 @@
 #include<algorithm>
 
 TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin(): m_minRadius(0), m_maxRadius(0) {
-
-  m_in.clear();
   m_vn.clear();
   m_params.clear();
   m_vn.reserve(1000);
+  m_vFirstEdge.reserve(1000);
+  m_vNumEdges.reserve(1000);
 }
 
 TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
-  m_in.clear();
   m_vn.clear();
   m_params.clear();
 }
@@ -56,9 +55,9 @@ void TrigFTF_GNN_EtaBin::initializeNodes() {
   if(m_vn.empty()) return;
   
   m_params.resize(m_vn.size());
-  
-  m_in.resize(m_vn.size());
-  for(auto& v : m_in) v.reserve(50);//reasonably high number of incoming edges per node
+  m_vFirstEdge.resize(m_vn.size(), 0);
+  m_vNumEdges.resize(m_vn.size(), 0);
+  m_vIsConnected.resize(m_vn.size(), 0);
   
   std::transform(m_vn.begin(), m_vn.end(), m_params.begin(),
                    [](const TrigFTF_GNN_Node* pN) { std::array<float,5> a = {-100.0, 100.0, pN->phi(), pN->r(), pN->z()}; return a;});
@@ -184,6 +183,9 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
   
   for(auto& b : m_etaBins) {
     b.initializeNodes();
+    if(!b.m_vn.empty()) {
+      b.m_layerKey = m_geo.getTrigFTF_GNN_LayerKeyByIndex((*b.m_vn.begin())->m_layer);
+    }
   }
   
   if(!useML) return;
@@ -198,11 +200,11 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
       continue;
     }
     
-    bool isBarrel = (pL->m_layer.m_type == 0);
+    bool isBarrel = (pL->m_layer.m_type == 0);//TO-DO: implement a separate id for inclined barrel layers
 
     if(!isBarrel) continue;
-
-    // adjusting cuts on |cot(theta)| using pre-trained LUT
+    
+    // adjusting cuts on |cot(theta)| using pre-trained LUT loaded from a file
     
     int lutSize = m_mlLUT.size();
     
@@ -224,7 +226,7 @@ void TrigFTF_GNN_DataStorage::initializeNodes(bool useML) {
 
 	if (lutBinIdx >= lutSize) continue;
 
-	const std::array<float, 5> lutBin = m_mlLUT.at(lutBinIdx);
+	const std::array<float, 5> lutBin = m_mlLUT[lutBinIdx];
 	
 	float dist2border = 10.0 - std::abs(locPosY);
 

@@ -10,7 +10,6 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "CoolKernel/IObject.h"
-#include "FileCatalog/IFileCatalog.h"
 
 // NN includes
 #include "lwtnn/parse_json.hh"
@@ -33,7 +32,7 @@
 namespace InDet {
 
   LWTNNCondAlg::LWTNNCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthReentrantAlgorithm( name, pSvcLocator )
+    : ::AthCondAlgorithm( name, pSvcLocator )
   {}
 
   StatusCode LWTNNCondAlg::initialize() {

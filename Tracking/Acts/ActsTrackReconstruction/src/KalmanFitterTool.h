@@ -29,7 +29,7 @@
 // PACKAGE
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 
@@ -166,7 +166,7 @@ private:
                                  detail::SourceLinkType slType) const;
 
 
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   // the settable job options

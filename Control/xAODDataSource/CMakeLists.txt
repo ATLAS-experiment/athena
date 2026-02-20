@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( xAODDataSource )
@@ -13,7 +13,7 @@ atlas_add_library( xAODDataSourceLib
    xAODDataSource/*.h Root/*.h Root/*.cxx
    PUBLIC_HEADERS xAODDataSource
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} RootUtils xAODRootAccess )
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} xAODRootAccess )
 
 # Build its dictionary.
 atlas_add_dictionary( xAODDataSourceDict

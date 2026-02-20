@@ -65,10 +65,10 @@ namespace columnar
     };
 
     /// @brief the main tool that is associated with this object
-    ColumnarTool<ColumnarModeArray>* mainTool = nullptr;
+    ColumnarToolArray* mainTool = nullptr;
 
     /// @brief the list of all tools that reference this object
-    std::vector<ColumnarTool<ColumnarModeArray>*> sharedTools;
+    std::vector<ColumnarToolArray*> sharedTools;
 
     /// @brief the names associated with all container ids
     std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> containerInternalToUserNames;

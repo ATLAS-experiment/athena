@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigZFinderInternal.h"
@@ -659,7 +659,7 @@ TrigZFinderInternal::findZInternal( const std::vector<TrigSiSpacePointBase>& spV
       }
     }
     
-    if ( dist2closestVtx < m_nvrtxSeparation*ZBinSize || dist2closestVtx < fabs(weightedMax)*m_vrtxDistCut ) {
+    if ( (closestVtx > -1) and (dist2closestVtx < m_nvrtxSeparation*ZBinSize || dist2closestVtx < fabs(weightedMax)*m_vrtxDistCut )) {
       zoutput[closestVtx] = m_vrtxMixing * weightedMax + (1.0 - m_vrtxMixing) * zoutput[closestVtx] ;
       woutput[closestVtx] = m_vrtxMixing * maxh        + (1.0 - m_vrtxMixing) * woutput[closestVtx] ;
     }  

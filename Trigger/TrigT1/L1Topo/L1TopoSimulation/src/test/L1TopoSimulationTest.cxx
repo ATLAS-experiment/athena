@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./L1TopoSimulationTest.h"
@@ -71,7 +71,7 @@ LVL1::L1TopoSimulationTest::initialize ATLAS_NOT_THREAD_SAFE() {
    topoHistSvc->setBaseDir("/EXPERT/" + m_OffhistBaseDir.value());
   
    
-   m_OfftopoSteering->setHistSvc(topoHistSvc);
+   m_OfftopoSteering->setHistSvc(std::move(topoHistSvc));
    
    try {
       m_OfftopoSteering->initializeAlgorithms();

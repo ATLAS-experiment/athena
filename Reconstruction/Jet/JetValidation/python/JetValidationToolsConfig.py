@@ -13,7 +13,6 @@ def PhysValJetToolCfg(flags, name="PhysValJetTool", **kwargs):
                         "AntiKt4LCTopoJets",
                         "AntiKt4EMTopoJets",
                         "AntiKt4EMPFlowJets",
-                        "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                         "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                         "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                     ]
@@ -21,7 +20,6 @@ def PhysValJetToolCfg(flags, name="PhysValJetTool", **kwargs):
     if flags.Input.isMC:
         jetcollections +=[
             "AntiKt4TruthJets",
-            "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
             "AntiKt10TruthSoftDropBeta100Zcut10Jets",
         ]
     

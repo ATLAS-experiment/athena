@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _TO_EMEC_DATA_H
 #define _TO_EMEC_DATA_H
 #include "GeoSpecialShapes/EMECData.h"
 class IRDBAccessSvc;
 class DecodeVersionKey;
-#include <iostream> 
 // This code is inline in order to be inoffensive in environments 
 // that do not link to the full ATLAS software. Link dependencies
 // then only arise when the routine is actually needed. 
@@ -42,7 +41,7 @@ inline EMECData toEMECData(IRDBAccessSvc *rdbAccess, const DecodeVersionKey  &la
     emecparams.SAGGING=(*emecParams)[i]->getString("SAGGING");
     emecparams.INNERSLANTPARAM=(*emecParams)[i]->getString("INNERSLANTPARAM");
     emecparams.OUTERSLANTPARAM=(*emecParams)[i]->getString("OUTERSLANTPARAM");
-    data.emecparams.push_back(emecparams);
+    data.emecparams.push_back(std::move(emecparams));
   }
 
 

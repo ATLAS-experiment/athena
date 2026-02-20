@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_ROISUNPACKINGEMULATIONTOOL_H
 #define HLTSEEDING_ROISUNPACKINGEMULATIONTOOL_H
@@ -7,6 +7,8 @@
 #include "RoIsUnpackingToolBase.h"
 
 #include <string>
+#include <vector>
+#include <cstdint>
 
 class RoIsUnpackingEmulationTool : public RoIsUnpackingToolBase {
  public:
@@ -39,9 +41,9 @@ class RoIsUnpackingEmulationTool : public RoIsUnpackingToolBase {
   /// @name Emulation
   /// @{
   struct FakeRoI {
-    double eta;
-    double phi;
-    uint32_t roIWord;
+    double eta{};
+    double phi{};
+    uint32_t roIWord{};
     std::vector<std::string> passedThresholdIDs;
   };
 

@@ -36,10 +36,6 @@ private:
   TrackTruthCollectionCnv_p2 m_converter_p2;
   TrackTruthCollectionCnv_p3 m_converter_p3;
 
-  static const pool::Guid s_p0_guid;
-  static const pool::Guid s_p1_guid;
-  static const pool::Guid s_p2_guid;
-  static const pool::Guid s_p3_guid;
 };
 
 #endif // TRACKTRUTHTPCNV_TRACKTRUTHCOLLECTIONCNV_H

@@ -10,7 +10,7 @@
 #define MAGFIELDSERVICES_ATLASFIELDCACHECONDALG_H
 
 // FrameWork includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -20,7 +20,7 @@
 
 namespace MagField {
 
-class AtlasFieldCacheCondAlg : public AthReentrantAlgorithm
+class AtlasFieldCacheCondAlg : public AthCondAlgorithm
 {
 public:
   AtlasFieldCacheCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -28,7 +28,6 @@ public:
 
   StatusCode initialize() override final;
   StatusCode execute(const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 
 private:
   /*

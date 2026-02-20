@@ -88,7 +88,8 @@ public:
     inline float &x() { return m_eta_x; };
     inline float &y() { return m_phi_y; };
     inline float &E() { return m_E; };
-    inline float &z() { return m_z; }
+    inline float &z() { return m_z; };
+    inline long unsigned int &idx() { return m_hit_index; };
     inline float r() {
       if (m_useXYZ)
         return sqrt(m_eta_x * m_eta_x + m_phi_y * m_phi_y);
@@ -109,6 +110,7 @@ public:
     float m_phi_y; // phi for barrel and end-cap, y for FCal
     float m_z;
     float m_E;
+    long unsigned int m_hit_index{};
     bool m_useXYZ;
     // Variables used to store extrapolated position
     float m_center_r;

@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef REGSELECTORMAP_H
@@ -159,9 +159,9 @@ private:
   
   std::vector<double> m_phimin, m_phimax;
   
-  double m_etaminDet, m_etamaxDet;
+  double m_etaminDet=0, m_etamaxDet=0;
   
-  double m_phiminDet, m_phimaxDet;
+  double m_phiminDet=0, m_phimaxDet=0;
 
 
 protected:

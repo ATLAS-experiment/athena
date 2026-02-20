@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1082,7 +1082,7 @@ const std::vector<Jet::mkey_t>& Jet::getAssociationKeys() const
 
 const Jet::assoc_t* Jet::getAssociationBase(const mkey_t& key) const
 {
-  return getObject<assoc_t,assostore_t>(key, m_assocStore, JetKeyConstants::AssoCat, false);
+  return getObject<assoc_t,assostore_t>(key, m_assocStore, JetKeyConstants::AssoCat);
 }
 
 
@@ -1110,7 +1110,7 @@ Jet::mkey_t Jet::jetAuthor() const
   std::string full_auth = keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);  
   // return the first part in JetAuth_XXX_YYY
   size_t found=full_auth.find_first_of('_');
-  return found != std::string::npos ? full_auth.substr(0 , found) : full_auth; 
+  return found != std::string::npos ? full_auth.substr(0 , found) : std::move(full_auth); 
 }
 
 

@@ -125,7 +125,7 @@ def t2CaloEgamma_AllEmCfg(flags, name="T2CaloEgamma_AllEm", RoIs=inputEDM, Extra
 #=======================================================================
 
 def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersName="HLT_FastCaloEMClusters",
-                               doRinger=False, RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=set()):
+                               doRinger=False, doRingerCalib=False,RingerKey="HLT_FastCaloRinger", RoIs=inputEDM, ExtraInputs=set()):
     acc = ComponentAccumulator()
 
     samp2 = CompFactory.EgammaReSamp2Fex("ReFaAlgoSamp2FexConfig",
@@ -171,7 +171,7 @@ def t2CaloEgamma_ReFastAlgoCfg(flags, name="T2CaloEgamma_ReFastAlgo", ClustersNa
                                    ClustersName = ClustersName)
         alg.IReAlgToolList += [ringer]
 
-        if flags.Trigger.egamma.fastCaloETCalibration:
+        if flags.Trigger.egamma.fastCaloETCalibration or doRingerCalib:
             ringerCalib = CompFactory.TrigFastCalibWithRings(name="FastCalibRingsTool",
             CalibPath = flags.Trigger.egamma.fastCaloETCalibrationVersion, RingerKey="HLT_FastCaloRinger")
             alg.CalibWRingsTool = ringerCalib

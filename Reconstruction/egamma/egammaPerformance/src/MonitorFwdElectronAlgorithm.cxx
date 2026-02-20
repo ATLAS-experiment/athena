@@ -182,6 +182,7 @@ StatusCode MonitorFwdElectronAlgorithm::fillHistograms( const EventContext& ctx 
 
     np = mynp; np_endcap = mynp_endcap ; np_forward = mynp_forward ;
     fill("MonitorFwdElectron",np,np_endcap);
+    fill("MonitorFwdElectron",np,np_forward);
 
     return StatusCode::SUCCESS;
 }

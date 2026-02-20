@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 21:53:46 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -13,7 +13,7 @@
 #include "TrigInDetAnalysisUtils/VertexMatcher.h"
 
 
-VtxAnalysis::VtxAnalysis( const std::string& n ) : VertexAnalysis( n ), m_initialised(false), m_dir(0) { }
+VtxAnalysis::VtxAnalysis( const std::string& n ) : VertexAnalysis( n ), m_initialised(false) { }
 
 
 void VtxAnalysis::initialise() { 
@@ -23,7 +23,7 @@ void VtxAnalysis::initialise() {
   //  std::cout << "VtxAnalysis::initialise() " << name() << std::endl;
 
 
-  m_dir = new TIDDirectory(name());
+  m_dir = std::make_unique<TIDDirectory>(name());
   m_dir->push();
 
 #if 0

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //-*-c++-*-
@@ -36,8 +36,8 @@ public:
 
   struct Input { 
     std::string name; //<- requires unique strings or none at all
-    double offset; //<- this value is added to the input before giving to nn
-    double scale; //<- after offset is added, input is scaled by this value 
+    double offset{}; //<- this value is added to the input before giving to nn
+    double scale{}; //<- after offset is added, input is scaled by this value 
   }; 
 
   typedef std::vector<Double_t> DVec; 

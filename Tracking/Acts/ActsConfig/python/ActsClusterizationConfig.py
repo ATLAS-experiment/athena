@@ -4,11 +4,17 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from ActsConfig.ActsUtilities import extractChildKwargs
+from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
 def ActsHgtdClusteringToolCfg(flags,
                               name: str = "ActsHgtdClusteringTool",
                               **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
     acc.setPrivateTools(CompFactory.ActsTrk.HgtdClusteringTool(name, **kwargs))    
     return acc
 
@@ -16,6 +22,12 @@ def ActsHgtdTimedClusteringToolCfg(flags,
                                    name: str = "ActsHgtdTimedClusteringTool",
                                    **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+        kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
+    
     acc.setPrivateTools(CompFactory.ActsTrk.HgtdTimedClusteringTool(name, **kwargs))    
     return acc
 
@@ -31,6 +43,7 @@ def ActsHgtdClusterizationAlgCfg(flags,
     acc.merge(HGTD_ReadoutGeometryCfg(flags))
 
     kwargs.setdefault('RDOContainerName', 'HGTD_RDOs')
+    kwargs.setdefault('AltirocRDOContainerName', 'HGTD_ALTIROC_RDOs')
     kwargs.setdefault('ClusterContainerName', 'HGTD_Clusters')
 
     if 'ClusteringTool' not in kwargs:
@@ -42,8 +55,13 @@ def ActsHgtdClusterizationAlgCfg(flags,
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsHgtdClusterizationMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))        
-        
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHgtdClusterizationMonitoringToolCfg(flags)))
+
+    if flags.HGTD.useALTIROC_RDO:
+        kwargs.setdefault("useALTIROC_RDO", True)
+    else:
+        kwargs.setdefault("useALTIROC_RDO", False)
+       
     acc.addEventAlgo(CompFactory.ActsTrk.HgtdClusterizationAlg(name, **kwargs))
     return acc
 
@@ -60,15 +78,14 @@ def ActsPixelClusteringToolCfg(flags,
         acc.merge(ITkPixelOfflineCalibCondAlgCfg(flags))        
         kwargs.setdefault('PixelChargeCalibCondData', 'ITkPixelChargeCalibCondData')
 
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-    acc.merge(ITkPixelReadoutManagerCfg(flags))
-    
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
         kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge( ITkPixelLorentzAngleToolCfg(flags) ))
 
     kwargs.setdefault('UseWeightedPosition', flags.Acts.Clusters.UseWeightedPosition)
-    kwargs.setdefault('UseBroadErrors', flags.Beam.Type is BeamType.Cosmics)
+
+    #Always use broad errors if cosmics
+    kwargs.setdefault('UseBroadErrors', flags.Acts.Clusters.UsePixelBroadErrors or flags.Beam.Type is BeamType.Cosmics)
 
     acc.setPrivateTools(CompFactory.ActsTrk.PixelClusteringTool(name, **kwargs))
     return acc
@@ -96,6 +113,10 @@ def ActsStripClusteringToolCfg(flags,
     if flags.ITk.selectStripIntimeHits and 'timeBins' not in kwargs:
         coll_25ns = flags.Beam.BunchSpacing<=25 and flags.Beam.Type is BeamType.Collisions
         kwargs.setdefault("timeBins", "01X" if coll_25ns else "X1X")
+
+
+    #Error strategy
+    kwargs.setdefault("errorStrategy",flags.Acts.Clusters.StripClusteringErrorMode.value)
 
     acc.setPrivateTools(CompFactory.ActsTrk.StripClusteringTool(name, **kwargs))
     return acc

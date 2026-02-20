@@ -8,7 +8,7 @@ find_package( Boost COMPONENTS unit_test_framework )
 atlas_add_library( IdDict
                    src/*.cxx
                    PUBLIC_HEADERS IdDict
-                   LINK_LIBRARIES Identifier )
+                   LINK_LIBRARIES Identifier GaudiKernel)
 
 atlas_add_test(IdDictLabel_test
   SOURCES test/IdDictLabel_test.cxx
@@ -86,6 +86,6 @@ atlas_add_test(IdDictGroup_test
 atlas_add_test(IdDictFieldImplementation_test
   SOURCES test/IdDictFieldImplementation_test.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} IdDict
+  LINK_LIBRARIES ${Boost_LIBRARIES} IdDict TestTools AthenaKernel
   POST_EXEC_SCRIPT nopost.sh
 )

@@ -41,15 +41,13 @@ def TEST1Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track", 
+
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
                                             "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     TEST1ItemList = TEST1SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST1", ItemList=TEST1ItemList, AcceptAlgs=["TEST1Kernel"]))

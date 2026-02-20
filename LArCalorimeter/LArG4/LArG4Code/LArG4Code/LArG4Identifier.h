@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4Identifier.hh
@@ -147,6 +147,7 @@ public:
     // Copy constructor
     //----------------------------------------------------------------
   LArG4Identifier (const LArG4Identifier& other);
+  LArG4Identifier (LArG4Identifier&& other) = default;
 
     //----------------------------------------------------------------
     // Constructor from a subset of another LArG4Identifier
@@ -163,7 +164,8 @@ public:
     //----------------------------------------------------------------
     // Modifications
     //----------------------------------------------------------------
-LArG4Identifier& operator=(const LArG4Identifier&);//coverity issue fix.
+   LArG4Identifier& operator=(const LArG4Identifier&);//coverity issue fix.
+   LArG4Identifier& operator=(LArG4Identifier&&) = default;
 
     //----------------------------------------------------------------
     // Append a value into a new field.

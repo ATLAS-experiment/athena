@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HECHitsTestTool.h"
@@ -25,11 +25,10 @@ StatusCode HECHitsTestTool::initialize()
   _TH1D(m_edep,"HEC_edep",100,0.,4.);
   _TH1D(m_etot,"HEC_etot",100,0.,20.);
   _TH1D_WEIGHTED(m_edep_eta,"HEC_edep_eta",25,-3.5,3.5);
-  //_TH1D_WEIGHTED(m_edep_z,"HEC_edep_z",100,-5200.,5200.); 
   _TH1D_WEIGHTED(m_edep_r,"HEC_edep_r",100,300.,2200.);
   _TPROFILE(m_etot_eta,"HEC_etot_eta",25,-3.,3.); 
 
-  m_path = origpath;
+  m_path = std::move(origpath);
 
   return LArHitsTestTool::initialize();
 }

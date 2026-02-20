@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import unittest
 
@@ -50,8 +50,17 @@ class TestVarHandleKeyArray(unittest.TestCase):
 
    def test_semantics(self):
       alg = Configurables.HiveAlgV()
-      self.assertIsInstance(alg._descriptors['Key_WV'].semantics,
-                            AtlasSemantics.VarHandleArraySematics)
+      s = alg._descriptors['Key_RV'].semantics
+      self.assertIsInstance(s, AtlasSemantics.VarHandleArraySematics)
+      self.assertEqual(s._mode, 'R')
+      self.assertEqual(s._isCond, False)
+      self.assertEqual(s._type, 'HiveDataObj')
+
+      s = alg._descriptors['Key_WV'].semantics
+      self.assertIsInstance(s, AtlasSemantics.VarHandleArraySematics)
+      self.assertEqual(s._mode, 'W')
+      self.assertEqual(s._isCond, False)
+      self.assertEqual(s._type, 'HiveDataObj')
 
    def test_assign(self):
       alg1 = Configurables.HiveAlgV()

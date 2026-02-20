@@ -32,14 +32,18 @@ function (datamodel_run_test testName)
 
   if( ARG_RNTUPLE )
     set( testName "${testName}RNTup" )
-    set( _options " Output.StorageTechnology.EventData={\\'*\\':\\'ROOTRNTUPLE\\'} " )
+    if( ARG_COMMAND )
+      set( _options "--rntuple" )
+    else()
+      set( _options "rntuple=True" )
+    endif()
   endif()
 
   atlas_add_test( ${testName}
                   SCRIPT ${_command} ${_arg} ${_options}
                   PROPERTIES TIMEOUT 600
-                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created"
-                  ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03"
+                  LOG_IGNORE_PATTERN "has different type than the branch|no dictionary for class|^StorageSvc +INFO|Cache alignment|Unable to locate catalog|IOVDbSvc[0-9 ]+INFO|Invalid ./TagInfo${ARG_EXTRA_IGNORE}|The database does not exist|IDatabaseSvc::openDatabase.*=>|New file created|MessageSvc not found"
+                  ENVIRONMENT "ATLAS_REFERENCE_TAG=DataModelRunTests/DataModelRunTestsReference-01-00-03;CREST_URL=http://crest-j23.cern.ch:8081/api-v6.0"
                   DEPENDS ${ARG_DEPENDS} )
 endfunction (datamodel_run_test)
 
@@ -96,7 +100,25 @@ datamodel_run_test (CondReader MT
                     DEPENDS CondWriter
                     EXTRA_IGNORE "|^xAODTe|none|OUTPUT.*McEventInfo|^Avalan.*INFO")
 
-datamodel_run_test (CondReadWrite)
+datamodel_run_test (CondReadWriteCool
+  COMMAND athena.py
+  ARG "CondReadWrite.py --condDB=cool"
+)
+
+# Uncomment the lines below to enable the CondReadWriteCrest test.
+# Note: This test requires network access to the CREST service set
+# via CREST_URL
+#datamodel_run_test (CondReadWriteCrest
+#  COMMAND athena.py
+#  ARG "CondReadWrite.py --condDB=crest"
+#  EXTRA_IGNORE "|--host=http://.*"
+#)
+
+datamodel_run_test (CondReadWriteCrestFS
+  COMMAND athena.py
+  ARG "CondReadWrite.py --condDB=crestfs"
+  EXTRA_IGNORE "|--host="
+)
 
 datamodel_run_test (xAODTestWriteThinned)
 datamodel_run_test (xAODTestReadThinned DEPENDS xAODTestWriteThinned)
@@ -159,6 +181,11 @@ datamodel_run_test (xAODTestReadRename RNTUPLE DEPENDS xAODTestWriteRNTup)
 datamodel_run_test (xAODTestReadFilter RNTUPLE DEPENDS xAODTestWriteRNTup)
 datamodel_run_test (xAODTestWriteThinned RNTUPLE)
 datamodel_run_test (xAODTestReadThinned RNTUPLE DEPENDS xAODTestWriteThinnedRNTup)
+
+datamodel_run_test (xAODRootTestRead RNTUPLE
+                    COMMAND python
+                    ARG xAODRootTestRead_t.py
+                    DEPENDS xAODTestWriteRNTup)
 
 
 ##############################################################################

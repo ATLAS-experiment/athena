@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -10,7 +10,6 @@
 #include "InfracolorForce.h"
 #include "QuirkTransportation.h"
 #include "QuirkWatcher.h"
-//#include "TestProcess.h"
 #include "QuirkStackingAction.h"
 #include "DebugSteppingAction.h"
 
@@ -52,22 +51,22 @@ QuirksPhysicsTool::QuirksPhysicsTool( const std::string& type,
   : base_class ( type, nam , parent )
 {
   m_physicsOptionType = G4AtlasPhysicsOption::Type::BSMPhysics;
- std::ifstream f;
-    f.open("quirks_setup.txt");
-    f >> m_mass;                m_mass *= CLHEP::MeV;
-    f >> m_charge;              m_charge *= CLHEP::eplus;
-    f >> m_pdgid;
-    f >> m_stringForce;         m_stringForce *= CLHEP::MeV/CLHEP::mm;
-    f >> m_firstStringLength;   m_firstStringLength *= CLHEP::mm;
-    f >> m_maxBoost;
-    f >> m_maxMergeT;           m_maxMergeT *= CLHEP::mm;
-    f >> m_maxMergeMag;         m_maxMergeMag *= CLHEP::mm;
-    f >> m_enableDebug;
-    if (m_enableDebug) {
-        f >> m_debugStep;           m_debugStep *= CLHEP::mm;
-        f >> m_numDebugSteps;
-    }
-    f.close();
+  std::ifstream f;
+  f.open("quirks_setup.txt");
+  f >> m_mass;                m_mass *= CLHEP::MeV;
+  f >> m_charge;              m_charge *= CLHEP::eplus;
+  f >> m_pdgid;
+  f >> m_stringForce;         m_stringForce *= CLHEP::MeV/CLHEP::mm;
+  f >> m_firstStringLength;   m_firstStringLength *= CLHEP::mm;
+  f >> m_maxBoost;
+  f >> m_maxMergeT;           m_maxMergeT *= CLHEP::mm;
+  f >> m_maxMergeMag;         m_maxMergeMag *= CLHEP::mm;
+  f >> m_enableDebug;
+  if (m_enableDebug) {
+      f >> m_debugStep;           m_debugStep *= CLHEP::mm;
+      f >> m_numDebugSteps;
+  }
+  f.close();
 }
 
 //=============================================================================

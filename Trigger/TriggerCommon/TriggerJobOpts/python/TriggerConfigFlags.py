@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -21,7 +21,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2025-01'
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2026-01'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
@@ -303,6 +303,14 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.Online.isPartition', lambda prevFlags: len(prevFlags.Trigger.Online.partitionName)>0,
                   help='check if job is running in a partition (i.e. partition name is not empty)')
 
+    flags.addFlag("Trigger.Online.useEFByteStreamSvc", False,
+                  help='use online EF ByteStream services')
+    flags.addFlag('Trigger.Online.EFInterface.Files', [])
+    flags.addFlag('Trigger.Online.EFInterface.LoopFiles', False)
+    flags.addFlag('Trigger.Online.EFInterface.NumEvents', -1)
+    flags.addFlag('Trigger.Online.EFInterface.SkipEvents', 0)
+    flags.addFlag('Trigger.Online.EFInterface.RunNumber', 0)
+    
     flags.addFlag('Trigger.Online.useOnlineTHistSvc', False,
                   help='use online THistSvc')
 
@@ -325,6 +333,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.ESDEDMSet', 'ESD',
                   help='list of EDM objects to be written to ESD')
 
+    flags.addFlag('Trigger.addRun3LowMuEDM', lambda prevFlags: "pp_lowMu_run3" in prevFlags.Trigger.triggerMenuSetup, help="Specify whether to add dedicated low mu EDM. Default is dependent on the menu setup." )
+
     flags.addFlag('Trigger.ExtraEDMList', [],
                   help='list of extra EDM objects to be stored (for testing). Supported features: Add new items. Add extra decorations to existing Aux. Add additional output targets.')
 
@@ -338,9 +348,9 @@ def createTriggerFlags(doTriggerRecoFlags):
             raise RuntimeError('Trigger.availableRecoMetadata is ill-defined if Trigger.doHLT==True')
         # RAW: check if keys are in COOL
         elif flags.Input.Format is Format.BS:
-            from TrigConfigSvc.TriggerConfigAccess import getKeysFromCool
-            keys = getKeysFromCool(flags.Input.RunNumbers[0], lbNr = 1)  # currently only checking first file
-            return ( (['L1'] if 'L1PSK' in keys else []) +
+            from TrigConfigSvc.TriggerConfigAccess import getKeysFromConditions
+            keys = getKeysFromConditions(flags.Input.RunNumbers[0], lbNr = 1, flags = flags)  # currently only checking first file
+            return ( (['L1'] if 'LVL1PSK' in keys else []) +
                      (['HLT'] if 'HLTPSK' in keys else []) )
         # POOL: metadata (do not distinguish L1/HLT yet, see discussions on GitLab commit f83ae2bc)
         else:
@@ -404,6 +414,12 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.triggerConfig', lambda flags: __triggerConfig(flags),
                   help='Trigger configuration source (https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag)')
 
+    flags.addFlag('Trigger.useCrest', lambda prevFlags: prevFlags.IOVDb.UseCREST, # only effective if Trigger.triggerConfig is set to 'DB'
+                  help='Flag enables trigger configuration database access through CREST')
+
+    flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.CrestServer,
+                  help='CREST server to access trigger configuration')
+
     flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',
                   help='name of the trigger menu')
 
@@ -461,7 +477,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
         muonflags.Muon.runCommissioningChain=False
-        muonflags.Muon.enableErrorTuning=False
+        muonflags.Muon.enableErrorTuning=False 
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
 
@@ -484,6 +500,11 @@ def createTriggerRecoFlags():
         muonflags.MuonCombined.doCombinedFit = True
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.Combined', __muonCombined, prefix=True)
+    
+    from AthenaCommon.SystemOfUnits import mm
+    flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
+
+    flags.addFlag('Trigger.Muon.useNewRegionSelector', False, help='usage of new region selector')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTTimeCorrection.h"
@@ -7,6 +7,7 @@
 //TRT detector information:
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Numerology.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 
 #include "TRTDigSettings.h"
 
@@ -93,7 +94,7 @@ void TRTTimeCorrection::Initialize() {
 }
 
 //__________________________________________________________________________________________________________
-double TRTTimeCorrection::TimeShift(const int& strawID) {
+double TRTTimeCorrection::TimeShift(const int& strawID, const InDetDD::TRT_DetElementContainer* detElements) {
 
   //TODO: Use hit id helpers (but resolve efficiency issues first).
 
@@ -127,7 +128,7 @@ double TRTTimeCorrection::TimeShift(const int& strawID) {
 
     if (timeshift==m_notInitVal) {
       //We need to initialize
-      timeshift = calculateTimeShift_EndCap(iPhi,iWheel,iLayer,strawID);
+      timeshift = calculateTimeShift_EndCap(iPhi,iWheel,iLayer,strawID,detElements);
       m_timeShiftForEndCapPlanes[iPhi][iWheel][iLayer] = timeshift;
     }
 
@@ -159,7 +160,7 @@ double TRTTimeCorrection::TimeShift(const int& strawID) {
 
     if (timeshift==m_notInitVal) {
       //We need to initialize
-      timeshift = calculateTimeShift_Barrel(iPhi,iRing,iLayer,iStraw,strawID);
+      timeshift = calculateTimeShift_Barrel(iPhi,iRing,iLayer,iStraw,strawID,detElements);
       m_timeShiftForBarrelStraws[iPhi][iRing][iLayer][iStraw] = timeshift;
     }
 
@@ -173,10 +174,11 @@ double TRTTimeCorrection::calculateTimeShift_Barrel( const unsigned int& iPhi,
                                                      const unsigned int& iRing,
                                                      const unsigned int& iLayer,
                                                      const unsigned int& iStraw,
-                                                     const int strawID)  {
+                                                     const int strawID,
+						     const InDetDD::TRT_DetElementContainer* detElements)  {
 
-  const InDetDD::TRT_BarrelElement * barrel_element(m_detmgr->getBarrelElement(0/*positive*/,
-                                                                               iRing, iPhi, iLayer ));
+  const InDetDD::TRT_BarrelElement * barrel_element(detElements->getBarrelDetElement(0/*positive*/,
+										     iRing, iPhi, iLayer ));
 
   //Sanity checks:
   if (!barrel_element) {
@@ -208,10 +210,11 @@ double TRTTimeCorrection::calculateTimeShift_Barrel( const unsigned int& iPhi,
 double TRTTimeCorrection::calculateTimeShift_EndCap( const unsigned int& iPhi,
                                                      const unsigned int& iWheel,
                                                      const unsigned int& iLayer,
-                                                     const int strawID) {
+                                                     const int strawID,
+						     const InDetDD::TRT_DetElementContainer* detElements) {
 
-  const InDetDD::TRT_EndcapElement * ec_element(m_detmgr->getEndcapElement(0/*positive*/,
-                                                                           iWheel, iLayer, iPhi ));
+  const InDetDD::TRT_EndcapElement * ec_element(detElements->getEndcapDetElement(0/*positive*/,
+										 iWheel, iLayer, iPhi ));
 
   //Sanity check:
   if (!ec_element) {

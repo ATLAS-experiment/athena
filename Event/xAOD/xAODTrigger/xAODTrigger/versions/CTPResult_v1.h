@@ -162,6 +162,41 @@ namespace xAOD {
     const CTPResult_v1::CTPBunchCrossing getBC(const int bunch=-1) const;
 
     /**
+    * @brief Get the header words.
+    * @return vector of header words.
+    */
+    const std::vector<uint32_t> header() const;
+
+    /**
+    * @brief Set the header words.
+    * @param marker Header maker.
+    * @param version Header format version.
+    * @param sourceid Sub detector source ID.
+    * @param runNum Run number.
+    * @param l1id Extended LVL1 ID.
+    * @param bcid Bunch crossing ID.
+    * @param trigType LVL1 trigger type.
+    * @param evtType LVL1 event type.
+    */
+    void setHeader(const uint32_t marker, const uint32_t version, const uint32_t sourceid, const uint32_t l1id=0, const uint32_t runNum=0, const uint32_t bcid=0, const uint32_t trigType=0, const uint32_t evtType=0);
+
+    /**
+    * @brief Get the trailer words.
+    * @return vector of trailer words.
+    */
+    const std::vector<uint32_t> trailer() const;
+
+    /**
+    * @brief Set the trailer words.
+    * @param errStat Error status.
+    * @param infoStat Info status.
+    * @param numStat Number of status words.
+    * @param numData Number of data words.
+    * @param statPos Position of status information in ROD (LVL1 assumes 1).
+    */
+    void setTrailer(const uint32_t numData, const uint32_t errStat=0, const uint32_t infoStat=0, const uint32_t numStat=2, const uint32_t statPos=1);
+
+    /**
     * @brief Get the number of bunch crossings.
     * @return Number of BCs.
     */

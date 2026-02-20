@@ -48,7 +48,7 @@
   <class name="TrigMuonEFInfo" id="A040AFAE-973D-489C-852A-E0520E40CB73"/>
   <class name="DataVector<TrigMuonEFInfo>" />
   <class name="std::vector<TrigMuonEFInfo*>" />
-  <class name="TrigMuonEFTrack" id="A17F6DA3-2C0A-4F06-82D6-8302F63B786"/>
+  <class name="TrigMuonEFTrack" id="A17F6DA3-2C0A-4F06-82D6-8302F63B7806"/>
   <class name="DataVector<TrigMuonEFTrack>" />
   <class name="std::vector<TrigMuonEFTrack*>" />
   <class name="std::vector<const TrigMuonEFTrack*>" />

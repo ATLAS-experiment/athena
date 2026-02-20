@@ -7,8 +7,8 @@
 #include "AthenaKernel/DataBucket.h"
 #include "AthenaKernel/DataObjectSharedPtr.h"
 #include "AthenaKernel/StorableConversions.h"
-#include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "SGCore/ILockable.h"
 #include "CxxUtils/checker_macros.h"
 #include <atomic>
 #include <iostream>
@@ -35,10 +35,10 @@ CLASS_DEF( std::vector<int> ,             22592129 , 1 )
 
 
 class GaudiDataObj : public DataObject {
- 
-public: 
+
+public:
   static std::atomic<int> count;
- 
+
   GaudiDataObj(): DataObject(), m_val(0) { ++count; };
   GaudiDataObj(int i): DataObject(), m_val(i) { ++count; };
   virtual ~GaudiDataObj(){ --count; };
@@ -67,8 +67,8 @@ public:
 CLASS_DEF(AbstractDataObj, 8019, 0)
 
 class MyDataObj {
- 
-public: 
+
+public:
   static std::atomic<int> count;
 
   MyDataObj(): m_val(0) { ++count; };
@@ -83,7 +83,7 @@ private:
 };
 std::atomic<int> MyDataObj::count;
 
-CLASS_DEF(MyDataObj, 8000, 3) 
+CLASS_DEF(MyDataObj, 8000, 3)
 
 #include <vector>
 
@@ -244,7 +244,7 @@ int main () {
   SG::DataBucket<const int*> pintBucket(0);
   SG::DataBucket<vector<int> > vintBucket(0);
   std::cerr << "int has_classID " <<  intBucket.clID() << " version "
-            << ClassID_traits<int>::s_version << " and " 
+            << ClassID_traits<int>::s_version << " and "
             << (ClassID_traits<int>::s_isDataObject ? "does" : "does not")
             << " inherit from DataObject" <<std::endl;
   std::cerr << "const int* has_classID " <<  pintBucket.clID() <<std::endl;
@@ -253,14 +253,14 @@ int main () {
 
   std::cerr << "vector<int> has_classID " <<  vintBucket.clID() <<std::endl;
   SG::DataBucket<GaudiDataObj> gdobjBucket(0);
-  std::cerr << "GaudiDataObj has_classID " <<  gdobjBucket.clID() << " and " 
+  std::cerr << "GaudiDataObj has_classID " <<  gdobjBucket.clID() << " and "
             << (ClassID_traits<GaudiDataObj>::s_isDataObject ? "does" : "does not")
             << " inherit from DataObject" <<std::endl;
   assert(gdobjBucket.clID() == ClassID_traits<GaudiDataObj>::ID());
   assert(ClassID_traits<GaudiDataObj>::s_isDataObject);
 
   SG::DataBucket<MyDataObj> dobjBucket(0);
-  std::cerr << "MyDataObj has_classID " <<  dobjBucket.clID() << " and " 
+  std::cerr << "MyDataObj has_classID " <<  dobjBucket.clID() << " and "
             << (ClassID_traits<MyDataObj>::s_isDataObject ? "does" : "does not")
             << " inherit from DataObject" <<std::endl;
   assert(dobjBucket.clID() == ClassID_traits<MyDataObj>::ID());
@@ -278,7 +278,7 @@ int main () {
 
   assert("int" == ClassID_traits<int>::typeName());
   assert("GaudiDataObj" == ClassID_traits<GaudiDataObj>::typeName());
-  if("std::map<int,float>" != 
+  if("std::map<int,float>" !=
      ClassID_traits<map<int, float> >::typeName()) {
     std::cerr << "error checking type name for map<int,float>: ClassID has it as " << ClassID_traits<map<int, float> >::typeName() <<std::endl;
     assert(0);
@@ -300,19 +300,19 @@ int main () {
   static const bool VERBOSE(false);
   pRes = SG::Storable_cast<MyDataObj>(pBucket, VERBOSE);
   assert (0 != pRes);
-  
-  std::cerr << "Now we expect to see an error message:" << std::endl 
-	    << "----Error Message Starts--->>" << std::endl; 
+
+  std::cerr << "Now we expect to see an error message:" << std::endl
+	    << "----Error Message Starts--->>" << std::endl;
   pWrong = SG::Storable_cast<WrongType>(pBucket, VERBOSE);
   assert(0 == pWrong);
   std::cerr<< "<<---Error Message Ends-------" << std::endl;
-  std::cerr << "Now we expect to see an error message:" << std::endl 
-	    << "----Error Message Starts--->>" << std::endl; 
+  std::cerr << "Now we expect to see an error message:" << std::endl
+	    << "----Error Message Starts--->>" << std::endl;
   pWrong = SG::Storable_cast<WrongType>((DataObject*)0);
   assert(0 == pWrong);
   std::cerr<< "<<---Error Message Ends-------" << std::endl;
   delete pBucket;
-	 
+
   GaudiDataObj* pGDO = new GaudiDataObj(2);
   GaudiDataObj* pGRes(0);
   DataObject* DBGDO(asStorable(pGDO));
@@ -361,7 +361,7 @@ int main () {
   DataObject* b2(asStorable(gdo));
   assert(3 == gdo->addRef());
   delete b2; //this must not delete gdo, only decrease its refcount
-  assert(2 == gdo->refCount()); 
+  assert(2 == gdo->refCount());
   assert (c1 + 1 == GaudiDataObj::count);
   //this is simpler: no DataObj in play
   b2 = asStorable(new MyDataObj);
@@ -433,5 +433,3 @@ int main () {
   return 0;
 
 }
-
-

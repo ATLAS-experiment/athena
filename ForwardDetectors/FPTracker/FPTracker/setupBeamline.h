@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_SETUPBEAMLINE_H
 #define FPTRACKER_SETUPBEAMLINE_H
 
-#include "FPTracker/FPTrackerConstants.h"
+#include "FPTracker/FPTrackerConstants.h" //Side
 #include <memory>
-#include <fstream>
+#include <iosfwd>  //std::ifstream
 
 
 namespace FPTracker{

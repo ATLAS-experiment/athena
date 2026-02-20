@@ -344,7 +344,7 @@ def LArFEBMonConfigCore(helper,algoinstance,flags, cellDebug=False, dspDebug=Fal
                               ybins=ft_n, ymin=ft_low, ymax=ft_up)
 
        darray.defineHistogram('nbFEBpart;nbOfFebBlocks',
-                              title='# of readout FEBs (DSP header check only) ;Slot;FT',
+                              title='# of readout FEBs (DSP header check only) ;Number of read-out FEBs per event;Entries',
                               type='TH1I',
                               path=hist_path,
                               xbins=lArDQGlobals.N_FEB_Parttions_Max, xmin=-0.5, xmax=lArDQGlobals.N_FEB_Parttions_Max-0.5)

@@ -24,7 +24,7 @@
 
 
 MuonRegSelCondAlg::MuonRegSelCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm( name, pSvcLocator )  { 
+  AthCondAlgorithm( name, pSvcLocator )  { 
   ATH_MSG_DEBUG( "MuonRegSelCondAlg::MuonRegSelCondAlg() " << name );
   
 }

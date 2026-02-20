@@ -33,8 +33,8 @@ SDWrapper<SDType, HitContainerType>::SDWrapper(
 // Add a unique SD to the list
 //-------------------------------------------------------------------------
 template <class SDType, class HitContainerType>
-void SDWrapper<SDType, HitContainerType>::addSD(std::unique_ptr<SDType> sd) {
-  m_sdList.push_back(std::move(sd));
+void SDWrapper<SDType, HitContainerType>::addSD(SDType* sd) {
+  m_sdList.push_back(sd);
 }
 
 //-------------------------------------------------------------------------

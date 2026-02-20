@@ -10,7 +10,6 @@ EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-ToolSvc.Trk::St...   INFO StraightLineIntersector::initialize() - package version TrkExStraightLineIntersector-00-00-00
 test_plane
 test_line
 test_cylinder

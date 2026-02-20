@@ -10,6 +10,7 @@
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
 
@@ -21,7 +22,7 @@ using Gaudi::Units::GeV;
 //////////////////////////////////////////////////
 
 CaloNoiseCompCondAlg::CaloNoiseCompCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm( name, pSvcLocator),
+  AthCondAlgorithm( name, pSvcLocator),
     m_atlas_id(nullptr),
     m_calo_id_man(nullptr),
     m_lar_em_id(nullptr),
@@ -45,10 +46,13 @@ StatusCode
 CaloNoiseCompCondAlg::initialize() {
 
    ATH_CHECK( detStore()->retrieve( m_calo_id_man ) );
-   m_lar_em_id   = m_calo_id_man->getEM_ID();
-   m_lar_hec_id  = m_calo_id_man->getHEC_ID();
-   m_lar_fcal_id = m_calo_id_man->getFCAL_ID();
    m_calosupercell_id = m_calo_id_man->getCaloCell_SuperCell_ID();
+   m_lar_em_id   = m_isSC ? static_cast<const LArEM_Base_ID*>(m_calosupercell_id->em_idHelper()) : 
+                            static_cast<const LArEM_Base_ID*>(m_calo_id_man->getEM_ID());
+   m_lar_hec_id  = m_isSC ? static_cast<const LArHEC_Base_ID*>(m_calosupercell_id->hec_idHelper()) : 
+                            static_cast<const LArHEC_Base_ID*>(m_calo_id_man->getHEC_ID());
+   m_lar_fcal_id = m_isSC ? static_cast<const LArFCAL_Base_ID*>(m_calosupercell_id->fcal_idHelper()) : 
+                            static_cast<const LArFCAL_Base_ID*>(m_calo_id_man->getFCAL_ID());
 
    ATH_CHECK(m_LArOFCObjKey.initialize());
    ATH_CHECK(m_shapeKey.initialize());
@@ -100,6 +104,7 @@ CaloNoiseCompCondAlg::initialize() {
    ATH_CHECK(m_outputPileupKey.initialize());
 
    ATH_CHECK( m_caloMgrKey.initialize() );
+   ATH_CHECK( m_caloSCMgrKey.initialize(m_isSC) );
 
    return StatusCode::SUCCESS;
 }
@@ -107,17 +112,28 @@ CaloNoiseCompCondAlg::initialize() {
 //////////////////////////////////////////////////
 
 StatusCode 
-CaloNoiseCompCondAlg::execute() {
-   
+CaloNoiseCompCondAlg::stop() {
+
    const EventContext& ctx = Gaudi::Hive::currentContext();
+   
+   if(m_isSC) {
+      SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSCMgrHandle{m_caloSCMgrKey};
+      if(!caloSCMgrHandle.isValid()) {
+         ATH_MSG_ERROR( "Do not have CaloSuperCellDetDescrMgr");
+         return StatusCode::FAILURE;
+      }
 
-   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
-   if(!caloMgrHandle.isValid()) {
-      ATH_MSG_ERROR( "Do not have CaloDetDescrMgr");
-      return StatusCode::FAILURE;
+      m_calo_dd_man  = static_cast<const CaloDetDescrManager_Base*>(*caloSCMgrHandle);
+
+   } else {
+      SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
+      if(!caloMgrHandle.isValid()) {
+         ATH_MSG_ERROR( "Do not have CaloDetDescrMgr");
+         return StatusCode::FAILURE;
+      }
+
+      m_calo_dd_man  = static_cast<const CaloDetDescrManager_Base*>(*caloMgrHandle);
    }
-
-   m_calo_dd_man  = *caloMgrHandle;
    m_calocell_id = m_calo_dd_man->getCaloCell_ID();
 
 
@@ -260,7 +276,6 @@ CaloNoiseCompCondAlg::initContainers()
   //initialize the maps m_ElecNoiseContainer and m_ScaleContainer 
   //(assuming type of elements of the containers is the same for LAr)
 
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_INFO( "initContainers() begin " );
 
   // intialise indices
@@ -360,7 +375,6 @@ CaloNoiseCompCondAlg::initIndex() {
       }
       else
       {
-        MsgStream log( msgSvc(), name() );
         ATH_MSG_WARNING("CaloNoiseCompCondAlg::chooseIndex  wrong id ! " << m_lar_em_id->show_to_string(id));
         continue ;
       }
@@ -437,7 +451,6 @@ CaloNoiseCompCondAlg::index(const IdentifierHash &idCaloHash)
 StatusCode 
 CaloNoiseCompCondAlg::initData(const LArADC2MeV *adc2mev)
 {
-  MsgStream log( msgSvc(), name() );
 
   StatusCode sc ;
   sc = this->initContainers();
@@ -447,7 +460,8 @@ CaloNoiseCompCondAlg::initData(const LArADC2MeV *adc2mev)
   }
  
   // reset diagnostics
-  for(int igain=0;igain<CaloGain::LARNGAIN;++igain)
+  int maxgain =  m_isSC ? CaloGain::LARMEDIUMGAIN : CaloGain::LARNGAIN;
+  for(int igain=0;igain<maxgain;++igain)
   {
     m_nCellsWithProblem[igain]=0;
     for(int i=0;i<5000;++i) m_nReason[i][igain]=0;
@@ -479,7 +493,6 @@ CaloNoiseCompCondAlg::initData(const LArADC2MeV *adc2mev)
 StatusCode 
 CaloNoiseCompCondAlg::initAdc2MeV(const LArADC2MeV *adc2mev) 
 {
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_INFO( "initAdc2MeV() begin " );
   for (unsigned int it=0; it<m_adc2mevContainer.size(); ++it)
   { 
@@ -490,8 +503,9 @@ CaloNoiseCompCondAlg::initAdc2MeV(const LArADC2MeV *adc2mev)
     if(iCalo!=CaloCell_ID::TILE) 
     {
       std::vector<float>& adc2mevVector = m_adc2mevContainer[it];
-      adc2mevVector.reserve (CaloGain::LARNGAIN);
-      for(unsigned int igain=0;igain<CaloGain::LARNGAIN;++igain)
+      unsigned int maxgain =  m_isSC ? CaloGain::LARMEDIUMGAIN : CaloGain::LARNGAIN;
+      adc2mevVector.reserve (maxgain);
+      for(unsigned int igain=0;igain<maxgain;++igain)
       {
         auto polynom_adc2mev = adc2mev->ADC2MEV(id,igain);
         if(polynom_adc2mev.size()==0)
@@ -525,9 +539,11 @@ CaloNoiseCompCondAlg::initElecNoise()
 	this->calculateElecNoiseForLAR(m_idSymmCaloHashContainer[it]);
     //::::::::::::::::::::::::::::::::::::::
   }
+  ATH_MSG_INFO("it filled");
 
   //print diagnostic
-  for(int igain=0;igain<CaloGain::LARNGAIN;++igain)
+  int maxgain =  m_isSC ? CaloGain::LARMEDIUMGAIN : CaloGain::LARNGAIN;
+  for(int igain=0;igain<maxgain;++igain)
     if(m_diagnostic[igain])
     {
       ATH_MSG_INFO("===== Diagnostic for  gain "<<igain<<" =====");
@@ -560,7 +576,6 @@ CaloNoiseCompCondAlg::initPileUpNoise()
   // initialize the parameters (the same for each event for each Identifier) 
   // for the calculation of the PileUp noise
 
-  MsgStream log( msgSvc(), name() );
   ATH_MSG_DEBUG( "initPileUpNoise() begin " );
   ATH_MSG_INFO( "N events of Minimum Bias per bunch crossing =  " << m_Nminbias);
   //::::::::::::::::::::::::::::::::::::::
@@ -595,12 +610,13 @@ E=SUMi { OFCi * (short[ (PulseShapei*Ehit/Adc2MeV(gain) + Noisei(gain)
 
 */
 
-  std::vector<float> sigmaVector (CaloGain::LARNGAIN,BADVALUE);
+  int maxgain =  m_isSC ? CaloGain::LARMEDIUMGAIN : CaloGain::LARNGAIN;
+  std::vector<float> sigmaVector (maxgain,BADVALUE);
   float sigma;
 
   Identifier id = m_calocell_id->cell_id(idCaloHash);
 
-  for(int igain=0;igain<CaloGain::LARNGAIN;++igain) 
+  for(int igain=0;igain<maxgain;++igain) 
   {
     bool noiseOK=true;
     //::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -640,7 +656,6 @@ E=SUMi { OFCi * (short[ (PulseShapei*Ehit/Adc2MeV(gain) + Noisei(gain)
       {
         sigma=-std::sqrt(-sigma);
         //:::::::::::::::::
-        //      MsgStream log(msgSvc(), name());
         //      if(igain==0) log << MSG::ERROR 
         //	  <<m_lar_em_id->show_to_string(id)<<" gain "<<igain
         //	  <<" : negative root square => WRONG noise "
@@ -882,6 +897,7 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
 {
   StatusCode StatusDatabase=StatusCode::SUCCESS;
 
+  ATH_MSG_DEBUG("checkCellDatabase starts for "<<id.get_identifier32().get_compact()<<" gain: "<<igain);
   bool dummy=false;
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
   //ADC2MEV
@@ -952,13 +968,11 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   {
     if (!m_Shape.valid()) 
     {
-      MsgStream log(msgSvc(), name());
       ATH_MSG_WARNING( "  Shape pointer null -> PileUp will be 0 for " <<m_lar_em_id->show_to_string(id) );
       StatusDatabase=StatusCode::FAILURE;
     }
     if (m_Shape.size()==0) 
     {      
-      //      MsgStream log(msgSvc(), name());
       //      log<<MSG::WARNING
       //       <<"  Shape vector empty -> PileUp will be 0 for "
       //       <<m_lar_em_id->show_to_string(id)<<endreq;
@@ -982,7 +996,6 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
      && m_OFC.size()!=m_AutoCorr.size()+1)
   {
     m_nsamples=std::min(m_OFC.size(),m_AutoCorr.size()+1);
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_DEBUG( "AutoCorr and OFC vectors have not the same " <<"number of elements" <<" ("<<m_AutoCorr.size()<<"/"<<m_OFC.size() <<" ) => will take into account only " << m_nsamples << " samples !" );
   }
 
@@ -1002,13 +1015,13 @@ CaloNoiseCompCondAlg::checkCellDatabase(const Identifier & id, int igain, std::v
   {
     if (m_fSampl<0.000001) 
     {
-      MsgStream log(msgSvc(), name());
       ATH_MSG_WARNING("  fSampl null -> PileUp will be 0 for " <<m_lar_em_id->show_to_string(id) );
       StatusDatabase=StatusCode::FAILURE;
     }
   }
 
   //:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+  ATH_MSG_DEBUG("checkCellDatabase "<<id.get_identifier32().get_compact()<<" status: "<<StatusDatabase);
   return StatusDatabase;
 }
 
@@ -1069,14 +1082,12 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
   } 
 
   if (gain==CaloGain::INVALIDGAIN || gain==CaloGain::UNKNOWNGAIN) {
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_WARNING( " ask noise for invalid/unknown gain, will return noise for high gain " );
     igain=static_cast<int>(CaloGain::LARHIGHGAIN);
   }
 
   if (iCalo<0 || index<0)
   {
-    MsgStream log(msgSvc(), name());
     ATH_MSG_WARNING( "CaloNoiseCompCondAlg::elecNoiseRMS  wrong id ! " << "iCalo="<<iCalo << "index="<<index << "id:" << m_lar_em_id->show_to_string(caloDDE->identify()) );
     return 0.;
   } 
@@ -1105,7 +1116,6 @@ CaloNoiseCompCondAlg::elecNoiseRMS(const CaloDetDescrElement* caloDDE,
       {
 	++shift_gain;
 	if(shift_gain<=igain) retry=true;
-	MsgStream log(msgSvc(), name());
 	ATH_MSG_WARNING( "noise is missing for this cell " << m_lar_em_id->show_to_string(caloDDE->identify()) << " at this gain (" <<gain_wanted<<"), return the noise at next gain (" <<gain_shifted<<")" );
       }
       //:::::::::::::::::
@@ -1121,11 +1131,12 @@ std::vector<float>
 CaloNoiseCompCondAlg::elecNoiseRMS3gains(const CaloDetDescrElement* caloDDE)
 {  
   std::vector<float> sigma;
-  sigma.reserve (CaloGain::LARNGAIN);
-  for(int igain=0;igain<CaloGain::LARNGAIN;++igain)
+  int maxgain =  m_isSC ? CaloGain::LARMEDIUMGAIN : CaloGain::LARNGAIN;
+  sigma.reserve (maxgain);
+  for(int igain=0;igain<maxgain;++igain)
     sigma.push_back(this->elecNoiseRMS(caloDDE,
 				       static_cast<CaloGain::CaloGain>(igain)));
-  for(int igain=0;igain<CaloGain::LARNGAIN;++igain)
+  for(int igain=0;igain<maxgain;++igain)
     if(this->isBadValue(sigma[igain]) && 
        igain!=CaloGain::LARHIGHGAIN) 
       sigma[igain]=sigma[igain-1];//take the next gain (low->medium->high)
@@ -1263,7 +1274,6 @@ CaloNoiseCompCondAlg::adc2mev(const CaloDetDescrElement* caloDDE,
   else if(iCalo==CaloCell_ID::TILE)
   {
     //TILE_PART
-    MsgStream log( msgSvc(), name() );
     ATH_MSG_WARNING("CaloNoiseCompCondAlg::adc2mev(id,gain) : NOT IMPLEMENTED !" <<"for TILE (-> returns 1. for the moment)" );    
     factor=1.; 
   }  

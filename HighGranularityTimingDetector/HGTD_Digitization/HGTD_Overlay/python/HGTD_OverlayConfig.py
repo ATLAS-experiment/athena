@@ -1,6 +1,6 @@
 """Define methods to construct configured HGTD overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -15,11 +15,9 @@ def HGTD_OverlayAlgCfg(flags, name="HGTD_Overlay", **kwargs):
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
     kwargs.setdefault("OutputKey", "HGTD_RDOs")
 
-    if flags.Overlay.ByteStream:
-        pass
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'HGTD_RDO_Container#{kwargs["BkgInputKey"]}']))
+    # Input setup
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'HGTD_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do HGTD overlay
     acc.addEventAlgo(CompFactory.HGTD_Overlay(name, **kwargs))

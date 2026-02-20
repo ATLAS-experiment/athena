@@ -72,13 +72,13 @@ StatusCode
 TrackParticleCnvAlg::execute(const EventContext& ctx) const
 {
 
-  const Rec::TrackParticleContainer* aod = nullptr;
-  const TrackCollection* tracks = nullptr;
-  const xAODTruthParticleLinkVector* truthLinks = nullptr;
-  const TrackParticleTruthCollection* aodTruth = nullptr;
-  const TrackTruthCollection* trackTruth = nullptr;
-  const ObservedTrackMap* tracksMap = nullptr;
-  const xAOD::Vertex* primaryVertex = nullptr;
+  const Rec::TrackParticleContainer* aod{};
+  const TrackCollection* tracks{};
+  const xAODTruthParticleLinkVector* truthLinks{};
+  const TrackParticleTruthCollection* aodTruth{};
+  const TrackTruthCollection* trackTruth{};
+  const ObservedTrackMap* tracksMap{};
+  const xAOD::Vertex* primaryVertex{};
 
   //timer object for total execution time
   auto mnt_timer_Total  = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
@@ -145,7 +145,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
       ATH_MSG_WARNING("No xAOD::VertexContainer with key "<< m_primaryVertexContainer.key() << " found. Do nothing.");
       return StatusCode::SUCCESS;
     }
-    const xAOD::Vertex* dummyVertex = nullptr;
+    const xAOD::Vertex* dummyVertex{};
     for(auto vtx : *vtx_container) {
       if(vtx->vertexType()==xAOD::VxType::PriVtx) {
         primaryVertex = vtx;
@@ -344,6 +344,7 @@ TrackParticleCnvAlg::convert(
       MCTruthPartClassifier::ParticleType type = MCTruthPartClassifier::Unknown;
       MCTruthPartClassifier::ParticleOrigin origin =
         MCTruthPartClassifier::NonDefined;
+      unsigned int classification = 0; // Better default value here?
       float probability = -1.0;
       ElementLink<xAOD::TruthParticleContainer> link;
 
@@ -378,9 +379,12 @@ TrackParticleCnvAlg::convert(
                 result->second.particleLink());
               type = truthClass.first;
               origin = truthClass.second;
+              classification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(result->second.particleLink().cptr())); // See AGENE-2351
               ATH_MSG_VERBOSE("Got truth type  " << static_cast<int>(type)
                                                  << "  origin "
-                                                 << static_cast<int>(origin));
+                                                 << static_cast<int>(origin)
+                                                 << "  classification "
+                                                 << static_cast<unsigned int>(classification));
             }
           } else {
             if (HepMC::uniqueID(result->second.particleLink()) > 0) {
@@ -402,8 +406,10 @@ TrackParticleCnvAlg::convert(
       if (!m_truthClassifier.empty()) {
         static const SG::AuxElement::Accessor<int> theType("truthType");
         static const SG::AuxElement::Accessor<int> theOrigin("truthOrigin");
+        static const SG::AuxElement::Accessor<unsigned int> theClassification("truthClassification");
         theType(*particle) = static_cast<int>(type);
         theOrigin(*particle) = static_cast<int>(origin);
+        theClassification(*particle) = static_cast<unsigned int>(classification);
       }
     }
   } // loop over aod tracks

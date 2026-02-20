@@ -35,7 +35,16 @@ def PreTrackingCfg(flags):
    if flags.Detector.GeometryITk:
        itemsToRecord= ['TrackCollection#CombinedITkTracks', 'TrackCollection#ResolvedConversionTracks', 'InDet::PixelClusterContainer#ITkPixelClusters', "InDet::SCT_ClusterContainer#ITkStripClusters"]
    else:
-       itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#DisappearingTracks', 'TrackCollection#ResolvedForwardTracks', 'TrackCollection#ExtendedLargeD0Tracks', 'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
+       # Include xAOD::TrackParticleContainer to ensure TrackSummary objects are created and saved
+       itemsToRecord = ['TrackCollection#CombinedInDetTracks',
+                        'xAOD::TrackParticleContainer#InDetTrackParticles',
+                        'xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux.',
+                        'TrackCollection#DisappearingTracks',
+                        'TrackCollection#ResolvedForwardTracks',
+                        'TrackCollection#ExtendedLargeD0Tracks',
+                        'InDet::TRT_DriftCircleContainer#TRT_DriftCircles',
+                        "InDet::PixelClusterContainer#PixelClusters",
+                        "InDet::SCT_ClusterContainer#SCT_Clusters"]
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    acc.merge(OutputStreamCfg(flags, "RDO", ItemList=itemsToRecord, takeItemsFromInput=True))
    # Add in-file MetaData

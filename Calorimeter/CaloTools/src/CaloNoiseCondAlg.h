@@ -7,7 +7,7 @@
 #ifndef CALOTOOLS_CALRNOISECONDALG_H
 #define CALOTOOLS_CALRNOISECONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -18,9 +18,9 @@
 
 class CaloCell_ID;
 
-class CaloNoiseCondAlg: public AthReentrantAlgorithm {
+class CaloNoiseCondAlg: public AthCondAlgorithm {
  public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~CaloNoiseCondAlg() = default;
 
   StatusCode initialize() override final;

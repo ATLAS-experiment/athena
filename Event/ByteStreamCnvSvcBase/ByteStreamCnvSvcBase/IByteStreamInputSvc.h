@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_BYTESTREAMINPUTSVC_H
@@ -39,7 +39,7 @@ public:
 };
 
 inline unsigned int IByteStreamInputSvc::currentEventStatus() const {
-  return(0);
+  return 0;
 }
 
 // Virtual methods needed for file input

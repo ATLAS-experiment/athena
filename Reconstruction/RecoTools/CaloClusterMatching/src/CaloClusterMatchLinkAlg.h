@@ -1,13 +1,13 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// CaloClusterMatchLinkAlg.h 
+// CaloClusterMatchLinkAlg.h
 // Header file for class CaloClusterMatchLinkAlg
 // Author: S.Binet<binet@cern.ch>
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 #ifndef CALOCLUSTERMATCHING_CALOCLUSTERMATCHLINKALG_H
 #define CALOCLUSTERMATCHING_CALOCLUSTERMATCHLINKALG_H 1
 
@@ -25,26 +25,26 @@
 namespace ClusterMatching {
   class CaloClusterMatchLinkAlg
     : public ::AthReentrantAlgorithm
-  { 
+  {
 
-    /////////////////////////////////////////////////////////////////// 
-    // Public methods: 
-    /////////////////////////////////////////////////////////////////// 
-  public: 
+    ///////////////////////////////////////////////////////////////////
+    // Public methods:
+    ///////////////////////////////////////////////////////////////////
+  public:
     /// Delegate constructor to base-class
     using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
-    /// Destructor: 
-    virtual ~CaloClusterMatchLinkAlg(); 
+    /// Destructor:
+    virtual ~CaloClusterMatchLinkAlg();
 
     // Athena algorithm's Hooks
     virtual StatusCode  initialize();
     virtual StatusCode  execute(const EventContext& ctx) const;
     virtual StatusCode  finalize();
 
-  private: 
+  private:
 
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterKey{this,"ClustersToDecorate","","The input CaloClusterContainer to match to CaloCalTopoClusters"}; 
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterKey{this,"ClustersToDecorate","","The input CaloClusterContainer to match to CaloCalTopoClusters"};
     Gaudi::Property<bool> m_useLeadCellEtaPhi{this,"UseLeadCellEtaPhi",false};
     Gaudi::Property<int> m_clusterSortMethod{this,"ClusterSortMethod",(int)MatchedE};
     ToolHandle<ICaloClusterMatchingTool> m_clusterMatch{this,"ClusterMatchTool","ClusterMatching::CaloClusterMatchingTool/CaloClusterMatch","Tool for the acutal matching"};
@@ -53,10 +53,11 @@ namespace ClusterMatching {
     SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_elementLinkName{
       this,
       "ElementLinkName",
-      "MuonClusterCollection.constituentClusterLinks"
+      m_clusterKey,
+      "constituentClusterLinks"
     };
 
-  }; 
+  };
 }
 
 #endif //> !CALOCLUSTERMATCHING_CALOCLUSTERMATCHLINKALG_H

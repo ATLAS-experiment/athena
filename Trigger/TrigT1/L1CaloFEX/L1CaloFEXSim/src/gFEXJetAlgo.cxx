@@ -1357,7 +1357,7 @@ void gFEXJetAlgo::jetOutAB(const gTowersType & jets,
 }
 
 
-void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp /*, int &PUChres*/) const {
+void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int inputScale,  int &PUCp, int &PUC_JWJ /*, int &PUChres*/) const {
   // input are 50 MeV "fine" scale towers (i.e. inputScale = 1)
   // to use 200 MeV towers use inputScale = 4  
   // PUCp output is the pileup correction for 69 towers at 200 MeV energy scale 
@@ -1365,6 +1365,7 @@ void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int
   int rows = twrs.size();
   int cols = twrs[0].size();
   int pucSum = 0;
+  int pucSumJWJ = 0;
   int nSum   = 0; 
   for(int irow=0; irow<rows; irow++){
     for( int icolumn=0; icolumn<cols; icolumn++){
@@ -1384,21 +1385,29 @@ void gFEXJetAlgo::pileUpCalculation(gTowersType &twrs, int rhoThreshold_Max, int
 
   // oneOverN is stored as a 32 bit number in inv_lut19
   unsigned int oneOverNTab = 69<<25;
+  unsigned int JWJoneOverNTab = 69<<25;
   if( nSum > 0 && nSum < 385  ) {
     oneOverNTab = FEXAlgoSpaceDefs::inv19[nSum]; 
+    JWJoneOverNTab = FEXAlgoSpaceDefs::jwjinv19[nSum];
   } else {
     oneOverNTab = 0;
+    JWJoneOverNTab = 0;
   }
 
-  int oneOverN = oneOverNTab ;
+  int oneOverN = oneOverNTab;
+  int JWJoneOverN = JWJoneOverNTab;
 
   // largest value should be 255*2^14 ~ 2^22  -- should easily fit in int -- try expliciting putting in int here.  
+  pucSumJWJ = pucSum * JWJoneOverN;
   pucSum  = pucSum * oneOverN;
+
   // PUChres = pucSum;
 
   // current system 19 bits in table (69*4096 is max value) sign exten
   pucSum = ( pucSum >> 14); 
+  pucSumJWJ = ( pucSumJWJ >> 16);
   PUCp   = pucSum;
+  PUC_JWJ = pucSumJWJ;
 
 }
 

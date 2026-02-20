@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEventAthenaPool )
@@ -14,7 +14,8 @@ atlas_add_library( InDetEventAthenaPool
    InDetLowBetaInfo InDetPrepRawData SCT_ConditionsData TrkTrack )
 
 atlas_add_poolcnv_library( InDetEventAthenaPoolPoolCnv
-   FILES InDetRawData/PixelRDO_Container.h InDetRawData/SCT_RDO_Container.h
+   FILES InDetRawData/PixelRDO_Container.h InDetRawData/SCT_RDO_Container.h InDetRawData/PhaseIIPixelRawDataContainer.h
+   InDetRawData/PhaseIIStripRawDataContainer.h
    InDetRawData/TRT_RDO_Container.h InDetPrepRawData/TRT_DriftCircleContainer.h
    InDetPrepRawData/PixelClusterContainer.h
    InDetPrepRawData/SCT_ClusterContainer.h

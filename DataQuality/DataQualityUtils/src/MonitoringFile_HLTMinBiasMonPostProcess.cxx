@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -19,7 +19,6 @@
 #include <TMath.h>
 #include <TROOT.h>
 #include <TCanvas.h>
-#include <TString.h>
 
 namespace dqutils {
   //--------------------------------------------------------------------------------
@@ -56,9 +55,9 @@ namespace dqutils {
     //build iterator
     TIter next_run(f->GetListOfKeys());
     TKey* key_run(0);
-    TString minbiasmonDirName;
+    std::string minbiasmonDirName;
 
-    std::vector< std::pair<TString, TString> >* v_targetNames = new std::vector< std::pair<TString, TString> >(0);
+    std::vector< std::pair<std::string, std::string> >* v_targetNames = new std::vector< std::pair<std::string, std::string> >(0);
 
 
     //loop over keys in root directory
@@ -84,7 +83,7 @@ namespace dqutils {
       //find MinBiasMon dir
       minbiasmonDirName = runDirName + "/HLT/MinBiasMon";
       TDirectory* minbiasmonDir(0);
-      if (!(minbiasmonDir = f->GetDirectory(minbiasmonDirName))) {
+      if (!(minbiasmonDir = f->GetDirectory(minbiasmonDirName.c_str()))) {
 //  std::cerr << "--> HLTMinBiasMonPostProcess: directory " << minbiasmonDirName << " not found." << std::endl;
         delete v_targetNames;
         return;
@@ -97,10 +96,10 @@ namespace dqutils {
 
     f = TFile::Open(inFilename.c_str(), "UPDATE");
 
-    const TString repPath = TString(f->GetPath());
+    const std::string repPath = std::string(f->GetPath());
 
     //first update global efficiency
-    f->cd(minbiasmonDirName);
+    f->cd(minbiasmonDirName.c_str());
 
     TH1F* h_triggEffic = dynamic_cast<TH1F*>(gDirectory->Get("TriggerEfficiencies"));
     TH1F* h_triggEfficPass = dynamic_cast<TH1F*>(gDirectory->Get("TriggerEfficienciesPassed"));
@@ -118,13 +117,15 @@ namespace dqutils {
     h_triggEffic->Write("", TObject::kOverwrite);
 
     for (uint k = 0; k < v_targetNames->size(); k++) {
-      v_targetNames->at(k).first.ReplaceAll(repPath, "");
+      TString stmp = v_targetNames->at(k).first;
+      stmp.ReplaceAll(repPath, "");
+      v_targetNames->at(k).first = stmp.Data();
 
-      f->cd(v_targetNames->at(k).first);
+      f->cd(v_targetNames->at(k).first.c_str());
 
-      TH1F* h_target = dynamic_cast<TH1F*>(gDirectory->Get(v_targetNames->at(k).second));
-      TH1F* h_num = dynamic_cast<TH1F*>(gDirectory->Get(v_targetNames->at(k).second + "Passed"));
-      TH1F* h_den = dynamic_cast<TH1F*>(gDirectory->Get(v_targetNames->at(k).second + "All"));
+      TH1F* h_target = dynamic_cast<TH1F*>(gDirectory->Get(v_targetNames->at(k).second.c_str()));
+      TH1F* h_num = dynamic_cast<TH1F*>(gDirectory->Get((v_targetNames->at(k).second + "Passed").c_str()));
+      TH1F* h_den = dynamic_cast<TH1F*>(gDirectory->Get((v_targetNames->at(k).second + "All").c_str()));
 
       if (h_target != 0 && h_num != 0 && h_den != 0) {
         h_target->Divide(h_num, h_den, 1., 1., "B");
@@ -140,8 +141,8 @@ namespace dqutils {
     delete f;
   }
 
-  void MonitoringFile::HLTMinBiasMonGetTargetHistos(TDirectory* source, std::vector< std::pair< TString,
-                                                                                                TString > >& targetNames)
+  void MonitoringFile::HLTMinBiasMonGetTargetHistos(TDirectory* source, std::vector< std::pair< std::string,
+                                                                                                std::string > >& targetNames)
   {
     TKey* key;
     TIter nextkey(source->GetListOfKeys());
@@ -151,21 +152,19 @@ namespace dqutils {
       TClass* cl = gROOT->GetClass(classname);
       if (!cl) continue;
       if (cl->InheritsFrom(TDirectory::Class())) {
-        TString kname = key->GetName();
-
         source->cd(key->GetName());
         TDirectory* nextdir = gDirectory;
         HLTMinBiasMonGetTargetHistos(nextdir, targetNames);
       }
       if (cl->InheritsFrom(TH1F::Class())) {
-        TString cRatio = TString(key->GetName());
+        std::string cRatio = std::string(key->GetName());
         if (cRatio == "Efficiency" ||
             cRatio == "Purity" ||
             cRatio == "EfficienciesTrigger" ||
             cRatio == "EfficiencyTracks" ||
             cRatio ==
-            "TriggerPurities") targetNames.push_back(std::pair<TString, TString>(TString(gDirectory->GetPath()),
-                                                                                 TString(key->GetName())));
+            "TriggerPurities") targetNames.push_back(std::pair<std::string, std::string>(std::string(gDirectory->GetPath()),
+                                                                                 std::string(key->GetName())));
       }
     }
   }

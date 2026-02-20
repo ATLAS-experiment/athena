@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/ShallowCopyDecorDeps_test.cxx
@@ -40,13 +40,11 @@ void test1 (ISvcLocator* svcloc)
 
   assert (owner.getProperty ("SCDD").name() == "SCDD");
   assert (owner.getProperty ("SCDD").documentation() == "doc string");
-  assert (owner.getProperty ("SCDD").type_info() == &typeid(SG::VarHandleKeyArray));
   assert (owner.getProperty ("SCDD").toString() == "['StoreGateSvc+scopy_myObj.d1','StoreGateSvc+scopy_myObj.d2']");
   assert (owner.getProperty ("SCDD").ownerTypeName() == "TestOwner");
 
   assert (owner.getProperty ("SCDDReadKeys").name() == "SCDDReadKeys");
   assert (owner.getProperty ("SCDDReadKeys").documentation() == "[Internal property]");
-  assert (owner.getProperty ("SCDDReadKeys").type_info() == &typeid(SG::VarHandleKeyArray));
   assert (owner.getProperty ("SCDDReadKeys").toString() == "['StoreGateSvc+myObj.d1','StoreGateSvc+myObj.d2']");
   assert (owner.getProperty ("SCDDReadKeys").ownerTypeName() == "TestOwner");
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "L1TopoInterfaces/AlgFactory.h"
 #include "L1TopoInterfaces/ConfigurableAlg.h"
 #include "L1TopoCommon/Exception.h"
@@ -21,7 +21,7 @@ TCS::ConfigurableAlg *
 TCS::AlgFactory::create(const std::string & algType, const std::string & algName) ATLAS_NOT_THREAD_SAFE {
 
    if( algorithm(algName) ) {
-      TCS_EXCEPTION("AlgFactory: algorithm " << algName << " already exists. Serious configuration error.")
+      TCS_EXCEPTION("AlgFactory: algorithm " << algName << " already exists. Serious configuration error.");
    }
 
    // find creator function

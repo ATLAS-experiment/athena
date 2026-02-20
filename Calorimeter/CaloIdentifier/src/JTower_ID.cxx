@@ -16,7 +16,7 @@
 
 
 JTower_ID::JTower_ID() :
-  JGTowerBase_ID("JTowerID", "Reg_JTower")
+  JGTowerBase_ID("JTower_ID", "Reg_JTower")
 {
 }
 
@@ -25,17 +25,15 @@ JTower_ID::~JTower_ID() = default;
 int  JTower_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 /*=================================================================*/
 {
-  MsgStream log(m_msgSvc, "JTower_ID" );
-
-  log << MSG::DEBUG << "initialize_from_dictionary" << endmsg;
+  ATH_MSG_DEBUG("initialize_from_dictionary");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    if(m_msgSvc)log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
   // init base object

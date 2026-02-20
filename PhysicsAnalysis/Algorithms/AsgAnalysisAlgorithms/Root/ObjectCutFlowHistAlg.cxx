@@ -41,7 +41,7 @@ namespace CP
         // Remove "_%SYS%" from the end of the string
         label.erase(label.size() - 6);
       }
-      m_labels.push_back (label);
+      m_labels.push_back (std::move(label));
       m_allCutsNum ++;
     }
     assert (m_allCutsNum+1 == m_labels.size());

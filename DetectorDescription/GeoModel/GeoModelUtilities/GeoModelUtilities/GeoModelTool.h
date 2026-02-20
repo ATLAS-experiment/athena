@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELUTILITIES_GEOMODELTOOL_H
@@ -11,7 +11,6 @@
 #include "GeoModelKernel/GeoVDetectorManager.h"
 #include "GeoModelInterfaces/IGeoModelTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CxxUtils/checker_macros.h"
 
 class GeoModelTool : public extends<AthAlgTool, IGeoModelTool> {
 
@@ -23,8 +22,7 @@ public:
   virtual const GeoVDetectorManager* manager() const {return m_detector;}
 
   virtual StatusCode clear() override {return StatusCode::SUCCESS;}
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override {return StatusCode::FAILURE;}
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override {return StatusCode::SUCCESS;}
+  virtual StatusCode align() override {return StatusCode::SUCCESS;}
 
 protected:
   GeoVDetectorManager*   m_detector{nullptr};

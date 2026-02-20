@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsVertexReconstruction )
@@ -7,6 +7,11 @@ atlas_subdir( ActsVertexReconstruction )
 find_package( Acts COMPONENTS Core )
 
 # Component(s) in the package:
+atlas_add_library( ActsVertexReconstructionLib
+                   src/*.cxx
+                   PUBLIC_HEADERS ActsVertexReconstruction
+                   LINK_LIBRARIES Acts::Core ActsGeometryLib ActsGeometryInterfacesLib ActsInteropLib AthenaBaseComps GaudiKernel BeamSpotConditionsData InDetRecToolInterfaces InDetTrackSelectionToolLib TrkLinks xAODInDetMeasurement xAODTracking)
+
 atlas_add_component( ActsVertexReconstruction
                      src/*.h src/*.cxx
                      src/components/*.cxx
@@ -14,6 +19,7 @@ atlas_add_component( ActsVertexReconstruction
 		       Acts::Core
 		       ActsGeometryLib
 		       ActsGeometryInterfacesLib
+					 ActsVertexReconstructionLib
 		       AthenaBaseComps
 		       BeamSpotConditionsData
 		       GaudiKernel
@@ -23,4 +29,5 @@ atlas_add_component( ActsVertexReconstruction
 		       TrkParticleBase
 		       TrkTrack
 		       TrkTrackLink
+					 xAODInDetMeasurement
 		       xAODTracking )

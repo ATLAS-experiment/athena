@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
@@ -10,10 +10,6 @@
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkFitterUtils/FitterTypes.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
-
-#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
-#include "TrkAlignInterfaces/IAlignResidualCalculator.h"
-#include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 #include "TrkAlignEvent/AlignTSOS.h"
 #include "TrkAlignEvent/AlignModule.h"
@@ -41,76 +37,17 @@ namespace Trk {
                                                const IInterface* parent)
 
     : AthAlgTool(type,name,parent)
-    , m_trackFitterTool("Trk::GlobalChi2Fitter/MCTBFitter")
-    , m_SLTrackFitterTool("Trk::GlobalChi2Fitter/MCTBSLFitter")
-    //,m_fitter?
-    , m_residualCalculator("Trk::AlignResidualCalculator/ResidualCalculator")
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_traSize(.1)
-    , m_rotSize(.1)
-    , m_runOutlierRemoval(false)
-    , m_particleHypothesis(Trk::muon)
-    , m_particleNumber(2)
-    , m_nChamberShifts{}
-    , m_nIterations(0)
-    , m_unshiftedResiduals(nullptr)
-    , m_unshiftedResErrors(nullptr)
-    //m_chi2VAlignParamVec
-    //m_chi2VAlignParamXVec
-    , m_tmpChi2VAlignParam(nullptr)
-    , m_tmpChi2VAlignParamX(nullptr)
-    , m_tmpChi2VAlignParamMeasType(nullptr)
-    //m_chi2VAlignParamVecMeasType
-    , m_unshiftedTrackChi2{}
-    , m_unshiftedTrackChi2MeasType(new double  [TrackState::NumberOfMeasurementTypes])
-    //m_trackAlignParamCut
-    //m_setMinIterations
-    //m_maxIter
-    //m_minIter
-    //m_removeScatteringBeforeRefit
-    , m_ntracksProcessed(0)
-    , m_ntracksPassInitScan(0)
-    , m_ntracksPassSetUnshiftedRes(0)
-    , m_ntracksPassDerivatives(0)
-    , m_ntracksPassGetDeriv(0)
-    , m_ntracksPassGetDerivSecPass(0)
-    , m_ntracksPassGetDerivLastPass(0)
-    , m_ntracksFailMaxIter(0)
-    , m_ntracksFailTrackRefit(0)
-    , m_ntracksFailAlignParamCut(0)
-    , m_ntracksFailFinalAttempt(0)
-    , m_secPass{}
+    , m_unshiftedTrackChi2MeasType(std::make_unique<double[]>(TrackState::NumberOfMeasurementTypes))
   {
     declareInterface<IDerivCalcTool>(this);
 
-    declareProperty("TrackFitterTool",               m_trackFitterTool);
-    declareProperty("SLTrackFitterTool",             m_SLTrackFitterTool);
-    declareProperty("TranslationSize",               m_traSize);
-    declareProperty("RotationSize",                  m_rotSize);
-    declareProperty("RunOutlierRemoval",             m_runOutlierRemoval);
-    declareProperty("ParticleNumber",                m_particleNumber);
-    declareProperty("doChi2VChamberShiftsMeasType",  m_doChi2VAlignParamMeasType = false);
-    declareProperty("doResidualFits",                m_doFits = true);
-    declareProperty("NumberOfShifts",                m_nFits=5);
-    declareProperty("ResidualCalculator",            m_residualCalculator);
-    declareProperty("AlignModuleTool",               m_alignModuleTool);
-    declareProperty("doResidualPlots",               m_doResidualPlots=false);
-    declareProperty("TrackAlignParamCut",            m_trackAlignParamCut=1e6);//.001
-    declareProperty("SetMinIterations",              m_setMinIterations=false);
-    declareProperty("MaxIterations",                 m_maxIter=50);
-    declareProperty("MinIterations",                 m_minIter=10);
-
-    declareProperty("RemoveScatteringBeforeRefit",   m_removeScatteringBeforeRefit=false);
-
     m_logStream = nullptr;
-
   }
 
   //________________________________________________________________________
   ShiftingDerivCalcTool::~ShiftingDerivCalcTool()
   {
     deleteChi2VAlignParam();
-    delete [] m_unshiftedTrackChi2MeasType;
   }
 
   //________________________________________________________________________
@@ -132,7 +69,6 @@ namespace Trk {
       m_nFits = 2;
     }
 
-    m_nChamberShifts = m_nFits;
     m_traSize = 5.*m_traSize/(double)m_nFits;
     m_rotSize = 5.*m_rotSize/(double)m_nFits;
 
@@ -200,15 +136,13 @@ namespace Trk {
     ATH_MSG_DEBUG("initial nIterations: "<<m_nIterations);
 
     // loop over AlignModules
-    int imod(0);
     for (std::vector<AlignModule*>::const_iterator moduleIt=alignModules.begin();
-   moduleIt!=alignModules.end(); ++moduleIt,imod++) {
+   moduleIt!=alignModules.end(); ++moduleIt) {
 
       // loop over AlignPar
-      int ipar(0);
       DataVector<AlignPar>* alignPars=m_alignModuleTool->getAlignPars(*moduleIt);
       for (DataVector<AlignPar>::iterator alignParIt=alignPars->begin();
-     alignParIt!=alignPars->end(); ++alignParIt,ipar++) {
+     alignParIt!=alignPars->end(); ++alignParIt) {
 
   for (int ishift=0;ishift<2;ishift++) {
 

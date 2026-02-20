@@ -11,7 +11,6 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 
-#include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
 #include "xAODEgamma/Electron.h"
 
@@ -71,6 +70,13 @@ StatusCode egammaForwardBuilder::initialize()
 
   // Retrieve track match builder.
   ATH_CHECK(RetrieveEMTrackMatchBuilder());
+
+  // Retrive MVA energy calibration
+  if (m_doEnergyCal) {
+    ATH_CHECK(m_pVtxKey.initialize());
+    ATH_CHECK(m_eiKey.initialize());
+    ATH_CHECK(m_MVACalibSvc.retrieve());
+  }
 
   ATH_MSG_DEBUG("Initialization completed successfully");
 
@@ -134,7 +140,16 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
   EgammaRecContainer egammaRecsFwd;
   size_t origClusterIndex = 0;
 
+  egammaMVACalib::GlobalEventInfo gei;
+  if (m_doEnergyCal) {
+    std::pair<float,float> nPVmu = this->getnPVmu(ctx);
+    gei.nPV = nPVmu.first;
+    gei.acmu = nPVmu.second;
+    ATH_MSG_DEBUG("Retrieved nPV = " << gei.nPV << " and mu = " << gei.acmu);
+  }
+
   // Loop over input cluster container and create egRecs to store the electrons.
+  ATH_MSG_VERBOSE("Will run on " << inputClusters->size() << " input clusters, doing cookie cut ? " << m_doCookieCutting);
   for (const xAOD::CaloCluster* cluster : *inputClusters) {
 
     // Create links back to the original clusters.
@@ -168,9 +183,14 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
 					cellCont, m_CookieCutPars) :
         std::make_unique<xAOD::CaloCluster>(*cluster);
 
-    if (!newCluster) {
+    if (!newCluster || newCluster->size() == 0) {
+      ATH_MSG_DEBUG("Could not build a new cluster, or has 0 cell");
       continue;
     }
+
+    if (m_doEnergyCal &&
+	m_MVACalibSvc->execute(*newCluster, xAOD::EgammaParameters::forwardelectron, gei).isFailure())
+      { ATH_MSG_ERROR("Problem executing MVA cluster tool for fwd electron"); }
 
     caloClusterLinks(*newCluster) = constituentLinks;
     outClusterContainer->push_back(std::move(newCluster));
@@ -292,4 +312,30 @@ egammaForwardBuilder::RetrieveEMTrackMatchBuilder()
   }
 
   return StatusCode::SUCCESS;
+}
+
+std::pair<unsigned int, float> egammaForwardBuilder::getnPVmu(
+  const EventContext& ctx) const {
+  unsigned int npv(0);
+  float mu(0);
+
+  SG::ReadHandle<xAOD::VertexContainer> vtxCont(m_pVtxKey, ctx);
+  if (!vtxCont.isValid()) {
+    ATH_MSG_WARNING("Cannot find " << m_pVtxKey.key()
+            << " container, returning nPV = 0");
+  } else {
+    for (const auto *vtx : *vtxCont) {
+      if (vtx->vertexType() == xAOD::VxType::PriVtx ||
+	  vtx->vertexType() == xAOD::VxType::PileUp) { ++npv; }
+    }
+  }
+
+  SG::ReadHandle<xAOD::EventInfo> eiCont(m_eiKey, ctx);
+  if (!eiCont.isValid()) {
+    ATH_MSG_WARNING("Cannot find " << m_eiKey.key() << " returning mu = 0");
+  } else {
+    mu = eiCont.get()->actualInteractionsPerCrossing();
+  }
+
+  return std::make_pair(npv,mu);
 }

@@ -21,10 +21,6 @@ def ClusterMakerToolCfg(flags, name="InDetClusterMakerTool", **kwargs):
         acc.merge(PixelChargeCalibCondCfg(flags))
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
 
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
-        PixelReadoutManagerCfg)
-    acc.merge(PixelReadoutManagerCfg(flags))
-
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.PixelLorentzAngleConfig import (
             PixelLorentzAngleToolCfg)
@@ -46,15 +42,10 @@ def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool", **kwargs):
 
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
         ITkPixelChargeCalibCondAlgCfg)
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
-        ITkPixelReadoutManagerCfg)
 
     # This directly needs the following Conditions data:
     # PixelModuleData & PixelChargeCalibCondData
     acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
-
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(
-        ITkPixelReadoutManagerCfg(flags)))
 
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import (
@@ -113,9 +104,6 @@ def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
                 ITkPixelDetectorElementStatusAlgCfg)
             acc.merge(ITkPixelDetectorElementStatusAlgCfg(flags))
         kwargs.setdefault("PixelDetElStatus", "ITkPixelDetectorElementStatus")
-
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimaryAndMerge(ITkPixelReadoutManagerCfg(flags)))
 
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("CheckGanged", False)
@@ -228,13 +216,9 @@ def LWTNNCondAlgCfg(flags, name="LWTNNCondAlg", **kwargs):
 
 
 def NnClusterizationFactoryCfg(flags, name="NnClusterizationFactory", **kwargs):
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
-        PixelReadoutManagerCfg)
-    acc = PixelReadoutManagerCfg(flags)
-
     from PixelConditionsAlgorithms.PixelConditionsConfig import (
         PixelChargeCalibCondCfg)
-    acc.merge(PixelChargeCalibCondCfg(flags))
+    acc = PixelChargeCalibCondCfg(flags)
 
     if flags.GeoModel.Run is LHCPeriod.Run1:
         acc.merge(PixelClusterNnCondAlgCfg(flags))
@@ -297,13 +281,9 @@ def TrigNnClusterizationFactoryCfg(flags, name="TrigNnClusterizationFactory"):
     return acc
 
 def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kwargs):
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import (
-        ITkPixelReadoutManagerCfg)
-    acc = ITkPixelReadoutManagerCfg(flags)
-
     from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
         ITkPixelChargeCalibCondAlgCfg)
-    acc.merge(ITkPixelChargeCalibCondAlgCfg(flags))
+    acc = ITkPixelChargeCalibCondAlgCfg(flags)
 
     acc.merge(LWTNNCondAlgCfg(flags))
 
@@ -318,7 +298,6 @@ def ITkNnClusterizationFactoryCfg(flags, name="ITkNnClusterizationFactory", **kw
     kwargs.setdefault("NnCollectionWithTrackReadKey", "")
     kwargs.setdefault("NnCollectionJSONReadKey", "PixelClusterNNJSON")
 
-    kwargs.setdefault("PixelReadoutManager", acc.getPrimary())
     kwargs.setdefault("PixelChargeCalibCondData", "ITkPixelChargeCalibCondData")
 
     acc.setPrivateTools(

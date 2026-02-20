@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/AuxVectorBase.h
@@ -450,6 +450,39 @@ protected:
   void moveAux (size_t index, SG::AuxElement* p,
                 bool clear = false,
                 bool skipDestClear = false);
+
+
+  /**
+   * @brief Set index on an element and copy auxiliary data,
+   *        specialized for the case of no clearing (and inlined).
+   * @param index Container index at which the new element is being added.
+   * @param p The new element being added.
+   *
+   * Element @c p is being added to the container at @c index.
+   * If @c p has associated auxiliary data, copy it to the container
+   * at @c index.  Then set the container / index on @c p.
+   *
+   * This is equivalent to moveAux with clear=false and skipDestClear=true.
+   * m_trackIndices must also be true to call this.
+   */
+  void moveAuxNoClear (size_t index, SG::AuxElement* p);
+
+
+  /**
+   * @brief Set index on an element and copy auxiliary data,
+   *        specialized for the case of no clearing (and inlined).
+   * @param index Container index at which the new element is being added.
+   * @param p The new element being added.
+   *
+   * Element @c p is being added to the container at @c index.
+   * If @c p has associated auxiliary data, copy it to the container
+   * at @c index.  Then set the container / index on @c p.
+   *
+   * This is equivalent to moveAux with clear=false and skipDestClear=true.
+   * m_trackIndices must also be true to call this.
+   * Overload for the no-auxdata case.
+   */
+  void moveAuxNoClear (size_t /*index*/, const void* /*p*/);
 
 
   /**

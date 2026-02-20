@@ -93,6 +93,9 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
   Gaudi::Property<bool> m_writeAllCells {this, "WriteAllCells", false, 
     "If true, all cells are considered regardless whether they are truncated or below the 2sigma threshold"};
 
+  Gaudi::Property<bool> m_cleanOutputCells {this, "CleanOutputCells", false, 
+    "If true, all output cells are included in the output, but those truncated or below 2sigma will have their energies set to 0; to be used only with WriteAllCells"};
+
   Gaudi::Property<std::string> m_LArCellMap {this, "LArCellMapFile", "UpgradePerformanceFunctions/LAr_Cell_Map_offlineID_0.csv", 
     "File associating LAr cells with readout FEBs and connection technology"};
 

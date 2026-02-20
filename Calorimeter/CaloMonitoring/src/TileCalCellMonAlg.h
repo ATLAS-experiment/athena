@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOMONITORING_TILECALMONALG_H
@@ -43,7 +43,7 @@ class TileCalCellMonAlg : public CaloMonAlgBase {
        "CaloNoise", "totalNoise", "Calo noise object name"};
 
     const TileID* m_tileID{nullptr};
-    static const int N_TILE_SAMPLES{4};
+    static constexpr int N_TILE_SAMPLES{4};
 
     std::vector<int> m_noiseEtaPhiGroups;
     std::vector<int> m_energyModuleGroups;

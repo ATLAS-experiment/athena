@@ -1,6 +1,6 @@
 """Define methods to construct configured ITk Strip overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,11 +16,8 @@ def ITkStripOverlayAlgCfg(flags, name="ITkStripOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "ITkStripRDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        pass
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do SCT overlay
     acc.addEventAlgo(CompFactory.SCTOverlay(name, **kwargs))

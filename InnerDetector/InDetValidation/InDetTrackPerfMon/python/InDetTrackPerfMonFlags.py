@@ -104,6 +104,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "offlMaxAbsZ0"   , -9999. )
     icf.addFlag( "offlMinAbsQoPT" , -9999. )
     icf.addFlag( "offlMaxAbsQoPT" , -9999. )
+
     icf.addFlag( "offlEtaBins"  , [] )
     icf.addFlag( "offlMinHitsVector" , [] )
     icf.addFlag( "offlMinPtVector" , [] )
@@ -139,6 +140,11 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "truthMinAbsQoPT" , -9999., help="Apply minimum |q/pt| cut to truth particle" )
     icf.addFlag( "truthMaxAbsQoPT" , -9999., help="Apply maximum |q/pt| cut to truth particle" )
     icf.addFlag( "truthPdgId"   , -9999., help="Apply pdgId selection to truth particle" )
+
+    icf.addFlag( "truthMinParentPt" , -9999. )
+    icf.addFlag( "truthMaxParentPt", -9999. )
+
+
     # Jet-track matching properties
     icf.addFlag( "JetContainerName", "InTimeAntiKt4TruthJets" )
     icf.addFlag( "maxTrkJetDR", 0.4 )
@@ -158,6 +164,7 @@ def __createIDTPMTrkAnaConfigFlags():
     icf.addFlag( "unlinkedAsFakes"          , True )
     icf.addFlag( "plotDuplicateRates"       , False )
     icf.addFlag( "plotHitsOnTracks"         , True )
+    icf.addFlag( "plotHitsOnTracksExpert"   , False )
     icf.addFlag( "plotHitsOnTracksReference", False )
     icf.addFlag( "plotHitsOnMatchedTracks"  , False )
     icf.addFlag( "plotHitsOnFakeTracks"     , False )

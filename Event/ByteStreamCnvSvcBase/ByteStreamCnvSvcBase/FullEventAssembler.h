@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTRAMCNVSVC_FULLEVENTASSEMBLER_H
-#define BYTESTRAMCNVSVC_FULLEVENTASSEMBLER_H
+#ifndef BYTESTREAMCNVSVC_FULLEVENTASSEMBLER_H
+#define BYTESTREAMCNVSVC_FULLEVENTASSEMBLER_H
 
 #include <cstdint>
 #include <map>
@@ -11,9 +11,7 @@
 #include "ByteStreamCnvSvcBase/SrcIdMap.h"
 #include "ByteStreamData/RawEvent.h" 
 
-class MsgStream; 
-
-#include <string>
+class MsgStream;
 
 /** @class FullEventAssemblerBase
     @brief base class for assembling a full atlas raw event from subfragments
@@ -43,23 +41,23 @@ class FullEventAssembler:public FullEventAssemblerBase {
  public:
    FullEventAssembler( );
    ~FullEventAssembler( );
-   // typedefs for ROD data, and maps 
+   // type aliases for ROD data, and maps
 
    /** @brief type for Identifier mapping
     */
-   typedef IDMAP IDMAP_t; 
+   using IDMAP_t = IDMAP;
 
    /** @brief ROD data as a vector of unsigned int
     */
-   typedef std::vector<uint32_t>  RODDATA; 
+   using RODDATA = std::vector<uint32_t>;
 
    /** @brief map of ROD data, indexed by ROD ids
     */
-   typedef std::map< uint32_t, RODDATA* > RODMAP; 
- 
+   using RODMAP = std::map< uint32_t, RODDATA* >;
+
    /** @brief map of ROB data, indexed by ROB ids
     */
-   typedef std::map< uint32_t, OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* > ROBMAP; 
+   using ROBMAP = std::map< uint32_t, OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* >; 
 
    /** @brief get a block of ROD data 
 

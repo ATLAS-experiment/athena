@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # ReadBchFromCool.py  --schema='COOLOFL_TILE/CONDBR2'  --folder='OFL02' --tag='UPD4'
 # Sanya Solodkov 2011-07-15
@@ -302,7 +302,9 @@ if iovonly or IOVONLY:
                 since    = "(%d,%d)" % (sinceRun, sinceLum)
                 if sinceRun>lastRun:
                     lastRun = sinceRun
-                if sinceRun>=begin:
+                if sinceRun>end:
+                    break
+                elif sinceRun>=begin:
                     if iovs[0]!="None":
                         iovs += [since]
                     else:
@@ -319,9 +321,7 @@ if iovonly or IOVONLY:
         print("")
         all=[]
         for since in allsince:
-            if comment and allsince[since][-1]!="Comment":
-                allsince[since] += ["NO_COMMENT"]
-            all+=["%s %s" % (since," ".join(allsince[since]))]
+            all += ["%s %s" % (since,TileCalibTools.moduleListToString(allsince[since],(rosmin==0),True,comment))]
         if len(all)>0:
             all.sort()
             for s in all:

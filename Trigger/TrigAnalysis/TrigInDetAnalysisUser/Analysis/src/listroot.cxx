@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -392,7 +392,7 @@ protected:
     
     if ( cck ) cck->cd();
 
-    spacer = inspace;
+    spacer = std::move(inspace);
   }
 
 protected:
@@ -425,7 +425,7 @@ std::vector<std::string> split( std::string s, const std::string& regex ) {
     pos = s.find(regex);
   }
 
-  out.push_back( s );
+  out.push_back( std::move(s) );
 
   return out;
 
@@ -531,12 +531,12 @@ int main(int argc, char** argv) {
     else if ( arg=="--logy" )     logy = true;
     else if ( arg=="--overlay" )  overlay = true;
     else if ( arg=="--binwidth" ) binwidth = true;
-    else files.push_back( arg );
+    else files.push_back( std::move(arg) );
     
   }
 
 
-  if ( dir!="" ) directories = split( dir, "/" );
+  if ( dir!="" ) directories = split( std::move(dir), "/" );
 
   /// navigate files
 

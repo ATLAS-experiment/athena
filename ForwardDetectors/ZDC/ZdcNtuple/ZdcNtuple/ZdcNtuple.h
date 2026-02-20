@@ -351,8 +351,12 @@ public:
   uint16_t t_raw7[2][4][2][2][7];
   uint16_t t_raw15[2][4][2][2][15];
   uint16_t t_raw24[2][4][2][2][24];
+  uint16_t t_raw32[2][4][2][2][32];
+  uint16_t t_raw40[2][4][2][2][40];
 
   uint16_t t_rpdRaw[2][16][24];
+  uint16_t t_rpdRaw32[2][16][32];
+  uint16_t t_rpdRaw40[2][16][40];
 
   // tracks
   uint32_t t_ntrk;

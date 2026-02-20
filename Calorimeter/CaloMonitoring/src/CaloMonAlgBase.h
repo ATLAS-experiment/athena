@@ -28,9 +28,9 @@ class CaloMonAlgBase : public AthMonitorAlgorithm {
 
   // Handles on filtering tools
   bool m_useBadLBTool;
-  ToolHandle<IDQFilterTool> m_BadLBTool;
+  ToolHandle<IDQFilterTool> m_BadLBTool{this, "DQBadLBFilterTool","DQBadLBFilterTool"};
   bool m_useReadyFilterTool;
-  ToolHandle<IDQFilterTool> m_ReadyFilterTool;
+  ToolHandle<IDQFilterTool> m_ReadyFilterTool{this, "DQAtlasReadyFilterTool", "DQAtlasReadyFilterTool"};
 
   bool m_useLArNoisyAlg;
   //bool m_useTriggerFilter;

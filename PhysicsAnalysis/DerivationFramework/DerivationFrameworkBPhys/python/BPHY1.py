@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY1.py
@@ -14,14 +14,16 @@ streamName = "StreamDAOD_BPHY1"
 OniaContainerName = "BPHY1OniaCandidates"
 
 def BPHY1Kernel(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     acc = ComponentAccumulator()
+
+    BPHY1_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY1_AugOriginalCounts"))
+    
     doLRT = flags.Tracking.doLargeD0
-    BPHY1_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-       name = "BPHY1_AugOriginalCounts",
-       VertexContainer = "PrimaryVertices",
-       TrackContainer = "InDetTrackParticles",
-       TrackLRTContainer = "InDetLargeD0TrackParticles" if doLRT else "" )
     mainMuonInput = "StdWithLRTMuons" if doLRT else "Muons"
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
@@ -113,9 +115,11 @@ def BPHY1Kernel(flags):
           MassMax               = 12500.0,
           Chi2Max               = 200,
           DoVertexType          = 7)
-    augTools = [BPHY1_AugOriginalCounts, BPHY1_Reco_mumu, BPHY1_Select_Jpsi2mumu, BPHY1_Select_Psi2mumu,  BPHY1_Select_Upsi2mumu]
-    for t in [BPHY1JpsiFinder] + augTools : acc.addPublicTool(t)
 
+    augTools = [BPHY1_AugOriginalCounts, BPHY1_Reco_mumu,
+                BPHY1_Select_Jpsi2mumu, BPHY1_Select_Psi2mumu,
+                BPHY1_Select_Upsi2mumu]
+    for t in [BPHY1JpsiFinder] + augTools : acc.addPublicTool(t)
 
     BPHY1Thin_vtxTrk = CompFactory.DerivationFramework.Thin_vtxTrk(
           name                       = "BPHY1Thin_vtxTrk",
@@ -139,8 +143,11 @@ def BPHY1Kernel(flags):
         
 
     SelectExpression = "count(BPHY1OniaCandidates.passed_Jpsi) > 0 || count(BPHY1OniaCandidates.passed_Psi) > 0 || count(BPHY1OniaCandidates.passed_Upsi) > 0"
-    BPHY1_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "BPHY1_SelectEvent", expression = SelectExpression)
-    acc.addPublicTool(BPHY1_SelectEvent)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY1_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "BPHY1_SelectEvent", expression = SelectExpression))
+
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY1Kernel",
                             SkimmingTools = [BPHY1_SelectEvent],
                             ThinningTools     = BPHY1ThinningTools,

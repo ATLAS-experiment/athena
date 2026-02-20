@@ -110,9 +110,8 @@ StatusCode MuFastSteering::initialize()
   ATH_MSG_DEBUG("Multi-TrackMode: " << m_multiTrack << "/ run for endcap RoI -> " << m_doEndcapForl2mt);
 
   //
-  // Initialize the calibration streamer  
-  // 
-  
+  // Initialize the calibration streamer
+  ATH_CHECK(m_calStreamer.retrieve(EnableTool(m_doCalStream)));
   if (m_doCalStream) {
     ATH_CHECK(m_jobOptionsSvc.retrieve());
 
@@ -132,8 +131,6 @@ StatusCode MuFastSteering::initialize()
       ATH_MSG_DEBUG("Could not parse MuonHltCalibrationConfig.MuonCalBufferSize from JobOptionsSvc");
     }
     
-    // retrieve the calibration streamer
-    ATH_CHECK(m_calStreamer.retrieve());
     // set properties
     m_calStreamer->setBufferName(m_calBufferName);
     ATH_MSG_DEBUG("Initialized the Muon Calibration Streamer. Buffer name: " << m_calBufferName 
@@ -311,12 +308,9 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
     auto muFastContainer = SG::makeHandle(m_muFastContainerKey, ctx);
     ATH_CHECK(muFastContainer.record(std::make_unique<xAOD::L2StandAloneMuonContainer>(), std::make_unique<xAOD::L2StandAloneMuonAuxContainer>()));
 
-    xAOD::TrigCompositeContainer* muCompositeContainer{nullptr};
-    if (!m_muCompositeContainerKey.empty()){
-      SG::WriteHandle<xAOD::TrigCompositeContainer> wh_muCompositeCont(m_muCompositeContainerKey, ctx);
-      ATH_CHECK(wh_muCompositeCont.record(std::make_unique<xAOD::TrigCompositeContainer>(), std::make_unique<xAOD::TrigCompositeAuxContainer>()));
-      muCompositeContainer = wh_muCompositeCont.ptr();
-    }
+    auto muCompositeContainer = std::make_unique<xAOD::TrigCompositeContainer>();
+    auto muCompositeAuxContainer = std::make_unique<xAOD::TrigCompositeAuxContainer>();
+    muCompositeContainer->setStore(muCompositeAuxContainer.get());
     
     auto muIdContainer = SG::makeHandle(m_muIdContainerKey, ctx);
     ATH_CHECK(muIdContainer.record(std::make_unique<TrigRoiDescriptorCollection>()));
@@ -357,9 +351,14 @@ StatusCode MuFastSteering::execute(const EventContext& ctx) const
     }
     else {
         ATH_CHECK(findMuonSignature(internalRoI, recRoIVector,
-                    *muFastContainer, muCompositeContainer, *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
+				    *muFastContainer, muCompositeContainer.get(), *muIdContainer, *muMsContainer, dynamicDeltaRpc, ctx));
     }
 
+    if (!m_muCompositeContainerKey.empty()){
+      SG::WriteHandle<xAOD::TrigCompositeContainer> wh_muCompositeCont(m_muCompositeContainerKey, ctx);
+      ATH_CHECK(wh_muCompositeCont.record(std::move(muCompositeContainer), std::move(muCompositeAuxContainer)));
+    }
+    
     if (msgLvl(MSG::DEBUG)) {
         // DEBUG TEST: Recorded data objects
         ATH_MSG_DEBUG("Recorded data objects");
@@ -689,11 +688,9 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
         }
         // if it's a data scouting chain
         if ( m_calDataScouting ) {
-            
             ATH_MSG_DEBUG("Retrieved the buffer, with size: " << localBuffer.size());
 
             // create the TrigCompositeContainer to store the calibration buffer
-            // add the trigcomposite object to the container outputMuonCal
             xAOD::TrigComposite* tc = new xAOD::TrigComposite();
 	    if (outputMuonCal){
 	      outputMuonCal->push_back(tc);
@@ -702,11 +699,10 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
 	      ATH_MSG_ERROR("Trying to fill nullptr container.");
 	      return StatusCode::FAILURE;
 	    }
-	      
 	    
-            // set the detail of the trigcomposite object
             tc->setDetail("muCalibDS", localBuffer );
-            }
+	      
+	}
         }
 
         ++p_roids;
@@ -1575,7 +1571,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       mdtId.push_back(mdtHit.Id.getString());
     }
   }
-  SG::AuxElement::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
+  static const SG::Accessor< std::vector<std::string> > accessor_mdthitid( "mdtHitId" );
   accessor_mdthitid( *muonSA ) = mdtId;
 
   //CSC hits
@@ -1609,7 +1605,7 @@ bool MuFastSteering::storeMuonSA(const xAOD::MuonRoI*                roi,
       }
     }
   }
-  SG::AuxElement::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
+  static const SG::Accessor< std::vector<float> > accessor_cschitresol( "cscHitResolution" );
   accessor_cschitresol( *muonSA ) = cscResol;
 
   // RPC hits
@@ -2133,15 +2129,6 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
   std::vector<float> r_inner, r_middle, r_outer;
   std::vector<float> f_residuals;
 
-  t_eta.clear();
-  t_phi.clear();
-  f_eta.clear();
-  f_phi.clear();
-  r_inner.clear();
-  r_middle.clear();
-  r_outer.clear();
-  f_residuals.clear();
-
   auto track_eta	= Monitored::Collection("TrackEta", t_eta);
   auto track_phi	= Monitored::Collection("TrackPhi", t_phi);
   auto failed_eta	= Monitored::Collection("FailedRoIEta", f_eta);
@@ -2159,7 +2146,7 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   const float ZERO_LIMIT = 1e-5;
 
-  if( trackPatterns.size() > 0 ) {
+  if( !trackPatterns.empty() ) {
 
     efficiency  = 1;
 
@@ -2218,6 +2205,3 @@ StatusCode MuFastSteering::updateMonitor(const xAOD::MuonRoI*                   
 
   return StatusCode::SUCCESS;
 }
-
-
-

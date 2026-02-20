@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// KeepChildrenTruthStrategy.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "KeepChildrenTruthStrategy.h"
@@ -20,29 +16,6 @@
 /** Constructor **/
 ISF::KeepChildrenTruthStrategy::KeepChildrenTruthStrategy(const std::string& t, const std::string& n, const IInterface* p)
   : base_class(t,n,p)
-  , m_vertexTypesVector(0)
-  , m_vertexTypes()
-  , m_doVertexRangeCheck(false)
-  , m_vertexTypeRangeLow(0)
-  , m_vertexTypeRangeHigh(0)
-  , m_vertexTypeRangeLength(0)
-  , m_passProcessCategory(0)
-  , m_bsmParent(false)
-  , m_parentPdgCodesVector(0)
-  , m_parentPdgCodes()
-{
-    // if set to true, kinetic cuts are passed even if only child particles pass them
-    // (used for special cases such as de-excitation)
-    declareProperty("VertexTypes"                , m_vertexTypesVector    );
-    declareProperty("VertexTypeRangeLow"         , m_vertexTypeRangeLow   );
-    declareProperty("VertexTypeRangeHigh"        , m_vertexTypeRangeHigh  );
-    declareProperty("PassProcessCategory",      m_passProcessCategory=9);
-    declareProperty("ParentPDGCodes"             , m_parentPdgCodesVector );
-    declareProperty("BSMParent"                  , m_bsmParent            );
-}
-
-/** Destructor **/
-ISF::KeepChildrenTruthStrategy::~KeepChildrenTruthStrategy()
 {
 }
 

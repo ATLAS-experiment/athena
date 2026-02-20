@@ -19,11 +19,13 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 #include "InDetIdentifier/PixelID.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 
 class IInDetConditionsTool;
 template <class T> class ServiceHandle;
 
+namespace InDetDD {
+   class PixelModuleDesign;
+}
 namespace InDet {
 
 class ClusterMakerTool;
@@ -69,23 +71,7 @@ public:
      // The second argument is the pixel module the hit belongs to.
      static std::optional<Identifier>
      isGanged(const Identifier& rdoID,
-	      const InDetDD::SiDetectorElement* element);
-
-     // Determines if a pixel cell is in a good state, either using
-     // the detector element status or the module-map-based summary tool
-  bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
-		    const IdentifierHash& moduleHash,
-		    const Identifier& rdoID,
-                    const EventContext& ctx,
-                    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
-
-  // Same method to check for a pixel in a good state, but with less id look-ups 
-  bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
-		    const IdentifierHash& moduleHash,
-		    const InDetDD::SiDetectorElement* element,
-		    const Identifier& rdoID,
-		    const EventContext& ctx,
-		    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
+             const InDetDD::SiDetectorElement* element);
 
     // Method to check if an RDO is duplicated.
     // If it is, update lvl1 value.
@@ -104,6 +90,13 @@ public:
 
 
 private:
+    // Same method to check for a pixel in a good state, but with less id look-ups
+    bool isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
+                   const IdentifierHash& moduleHash,
+                   const InDetDD::PixelModuleDesign &pixel_design,
+                   const Identifier& rdoID,
+                   const EventContext& ctx,
+                   const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const;
     
     ToolHandle<IInDetConditionsTool> m_summaryTool {
 	this,
@@ -122,13 +115,6 @@ private:
 	"PixelDetElStatus",
 	"" ,
 	"Key of SiDetectorElementStatus for Pixel"
-    };
-
-    ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout {
-        this,
-	"PixelReadoutManager",
-	"PixelReadoutManager",
-	"Pixel readout manager"
     };
 
     const PixelID* m_pixelId = nullptr;

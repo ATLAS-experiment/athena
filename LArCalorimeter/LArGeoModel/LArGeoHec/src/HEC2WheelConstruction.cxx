@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////
@@ -207,7 +207,7 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::HEC2WheelConstruction::GetEnvelope(bool 
   //--- Now the Rear Wheel:
 
   double Zpos = TotalHECLength - HEC2length  ;  // It is fixed at its end; position it from there.
-  const IRDBRecord *posHec2 = GeoDBUtils::getTransformRecord(larPosition, m_posZSide ? "HEC2_POS":"HEC2_NEG");
+  const IRDBRecord *posHec2 = GeoDBUtils::getTransformRecord(std::move(larPosition), m_posZSide ? "HEC2_POS":"HEC2_NEG");
   Transform3D xfPosHec2 = posHec2 ? GeoDBUtils::getTransform(posHec2):Translate3D(0.,0.,Zpos);
 
  

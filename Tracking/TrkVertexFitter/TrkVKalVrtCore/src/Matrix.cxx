@@ -22,9 +22,8 @@ namespace{
 
 using namespace Trk;
 double vkPythag(double a, double b) {
-  double absa, absb;
-  absa = std::abs(a);
-  absb = std::abs(b);
+  double absa = std::abs(a);
+  double absb = std::abs(b);
   if (absa > absb)
     return absa * std::sqrt(1.0 + (absb / absa) * absb / absa);
   return (absb == 0.0 ? 0.0
@@ -111,12 +110,12 @@ int vkSInvSVD(const double *ci, long int DIM, double *co, double Chk) {
 
   // Singular value limitation
   double svMax = 0.;
-  for (k = 1; k <= DIM; k++)
-    if (svMax < w[k])
-      svMax = w[k];
-  for (k = 1; k <= DIM; k++) { /*std::cout<<w[k]<<'\n';*/
-    if (w[k] < 0. || std::abs(w[k] / svMax) < Chk)
-      w[k] = 0.;
+  for (k = 1; k <= DIM; k++){
+    if (svMax < w[k]) svMax = w[k];
+  }
+  if (svMax == 0.) throw std::runtime_error("Matrix::vkSInvSVD: svMax is zero!");
+  for (k = 1; k <= DIM; k++) { 
+    if (w[k] < 0. || std::abs(w[k] / svMax) < Chk) w[k] = 0.;
   }
   // Get inverse matrix
   for (i = 1; i <= DIM; i++) {
@@ -218,10 +217,11 @@ int vkInvSVD(const double *ci, long int DIM, double *co, double Chk,
 
   // Singular value limitation
   double svMax = 0.;
-  for (k = 1; k <= DIM; k++)
-    if (svMax < w[k])
-      svMax = w[k];
-  for (k = 1; k <= DIM; k++) { /*std::cout<<w[k]<<'\n';*/
+  for (k = 1; k <= DIM; k++){
+    if (svMax < w[k]) svMax = w[k];
+  }
+  if (svMax == 0.) throw std::runtime_error("Matrix::vkInvSVD: svMax is zero!");
+  for (k = 1; k <= DIM; k++) { 
     if (w[k] < 0. || std::abs(w[k] / svMax) < Chk)
       w[k] = 0.;
   }

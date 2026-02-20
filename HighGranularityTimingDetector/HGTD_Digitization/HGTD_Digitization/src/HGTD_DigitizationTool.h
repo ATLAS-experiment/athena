@@ -28,9 +28,12 @@
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElementCollection.h"
 #include "HGTD_RawData/HGTD_RDO_Collection.h"
 #include "HGTD_RawData/HGTD_RDO_Container.h"
+#include "HGTD_RawData/HGTD_ALTIROC_RDO_Collection.h"
+#include "HGTD_RawData/HGTD_ALTIROC_RDO_Container.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "InDetSimData/InDetSimDataCollection.h"
 #include "InDetSimEvent/SiHitCollection.h"
+#include "HGTD_Calibration/HGTD_TdcCalibrationTool.h"
 
 #include <memory>
 #include <string>
@@ -92,9 +95,7 @@ private:
    */
   void applyProcessorTools(SiChargedDiodeCollection*, CLHEP::HepRandomEngine* rndmEngine) const;
 
-  std::unique_ptr<HGTD_RDO_Collection> createRDOCollection(SiChargedDiodeCollection*) const;
-
-  StatusCode storeRDOCollection(std::unique_ptr<HGTD_RDO_Collection>);
+  StatusCode createAndStoreRDO(SiChargedDiodeCollection*, const InDetDD::SolidStateDetectorElementBase*) ;
 
   // inserts the created SDO elements into the m_sdo_collection_map object.
   void createAndStoreSDO(SiChargedDiodeCollection* collection);
@@ -109,6 +110,10 @@ private:
 
   SG::WriteHandle<HGTD_RDO_Container> m_hgtd_rdo_container; //!< RDO container handle
   SG::WriteHandleKey<HGTD_RDO_Container> m_output_rdo_cont_key{this, "OutputObjectName", "HGTD_RDOs", "Output Object name"};
+  
+  SG::WriteHandle<HGTD_ALTIROC_RDO_Container> m_hgtd_altiroc_rdo_container; //!< ALTIROC RDO container handle
+  SG::WriteHandleKey<HGTD_ALTIROC_RDO_Container> m_output_altiroc_rdo_cont_key{this, "AltirocOutputObject", "", "Key of HGTD_ALTIROC_RDO container"};
+
   SG::WriteHandle<InDetSimDataCollection> m_sdo_collection_map; //!< SDO Map handle
   SG::WriteHandleKey<InDetSimDataCollection> m_output_sdo_coll_key{this, "OutputSDOName", "HGTD_SDO_Map", "Output SDO container name"};
   SG::ReadCondHandleKey<InDetDD::HGTD_DetectorElementCollection> m_HGTDDetEleCollKey{this, "HGTDDetEleCollKey", "HGTD_DetectorElementCollection", "Key of HGTD_DetectorElementCollection for HGTD"};
@@ -118,6 +123,7 @@ private:
   std::list<ISiChargedDiodesProcessorTool*> m_diode_processor_tools;
   ToolHandle<IFrontEnd> m_hgtd_front_end_tool{this, "FrontEnd", "HGTD_FrontEndTool", "Tool for pulse shape simulation"};
   ToolHandle<IHGTD_SurfaceChargesGenerator> m_hgtd_surf_charge_gen{this, "SurfaceChargesGenerator", "HGTD_SurfaceChargesGenerator", "Choice of using a more detailed charge drift model"};
+  ToolHandle<HGTD_TdcCalibrationTool> m_hgtd_tdc_calib_tool{this, "HGTD_TdcCalibrationTool","HGTD_TdcCalibrationTool", "Tool that handles the Time to Digital Converter (TDC)"};
 
   const HGTD_ID* m_id_helper{nullptr}; //!< Handle to the ID helper
   // NB: even though it is a flat collection, it acts more like a container,

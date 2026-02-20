@@ -15,12 +15,13 @@
 #include "ISF_Interfaces/IParticleFilter.h"
 #include "ISF_Interfaces/IGeoIDSvc.h"
 #include "ISF_Interfaces/IEntryLayerTool.h"
-#include "G4AtlasTools/ThreadLocalHolder.h"
 
 // TrackRecordCollection (and TrackRecord)
 #include "TrackRecord/TrackRecordCollection.h"
 
 // stl includes
+#include <array>
+#include <memory>
 #include <string>
 
 namespace ISF {
@@ -80,7 +81,7 @@ namespace ISF {
     size_t                                    m_numParticleFilters{0};
 
     /** The entry layer collections */
-    thread_utils::ThreadLocalOwner< std::array<TrackRecordCollection*, ISF::fNumAtlasEntryLayers> > m_collectionHolder;
+    static thread_local std::unique_ptr<std::array<TrackRecordCollection*, ISF::fNumAtlasEntryLayers>> s_collection;
     std::string                               m_volumeName[ISF::fNumAtlasEntryLayers];
   };
 

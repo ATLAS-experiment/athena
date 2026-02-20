@@ -47,9 +47,6 @@ InDetPhysValTruthDecoratorAlg::initialize() {
   }
 
   ATH_CHECK( m_truthParticleName.initialize());
-  if (!m_truthParticleIndexDecor.key().empty()) {
-     m_truthParticleIndexDecor = m_truthParticleName.key()+"."+m_truthParticleIndexDecor.key();
-  }
   ATH_CHECK( m_truthParticleIndexDecor.initialize( !m_truthParticleIndexDecor.key().empty()));
 
   std::vector<std::string> decor_names(kNDecorators);

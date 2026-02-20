@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTDIGITIZATIONTOOL_H
@@ -20,6 +20,7 @@
 #include "TRT_ConditionsServices/ITRT_StrawNeighbourSvc.h"
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
+#include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 
 #include "InDetRawData/TRT_RDO_Container.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -131,6 +132,8 @@ private:
   // Read handle for conditions object to get the field cache
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj",
                                                                              "Name of the Magnetic Field conditions object key"};
+  SG::ReadCondHandleKey<InDetDD::TRT_DetElementContainer> m_trtDetElementsInputKey {this, "TRT_DetEltContKey", "TRT_DetElementContainer",
+                                                                                    "Name of the TRT Detector Element container conditions object key"};
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
   SG::ReadHandleKey<TRTUncompressedHitCollection> m_hitsContainerKey{this, "DataObjectName", "TRTUncompressedHits", "Data Object Name"};
   std::string m_dataObjectName{""};

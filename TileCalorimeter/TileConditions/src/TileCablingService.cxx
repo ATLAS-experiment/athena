@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileCablingService.h"
@@ -200,9 +200,7 @@ void
 TileCablingService::setTestBeam (bool testBeam)
 { 
   if (testBeam) // don't print anything for full ATLAS configuration 
-    std::cout << "==> Setting testbeam flag to " 
-              << ((testBeam) ? "TRUE" : "FALSE")
-              << " in TileCablingService " << std::endl;
+    std::cout << "==> Setting testbeam flag to TRUE in TileCablingService " << std::endl;
   m_testBeam = testBeam;
   if (testBeam) {
     m_cablingType = TileCablingService::TestBeam;
@@ -285,50 +283,45 @@ TileCablingService::setCablingType(TileCablingService::TileCablingType type)
 
     if (type == TileCablingService::UpgradeABC) {
 
-      if (m_tileID) {
+      m_maxChannels = 240;
+      const int nBarrelAndExtendedChannels(m_maxChannels * 2);
         
-        m_maxChannels = 240;
-        const int nBarrelAndExtendedChannels(m_maxChannels * 2);
-        
-        m_ch2towerUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
-        m_ch2sampleUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
-        m_ch2pmtUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
+      m_ch2towerUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
+      m_ch2sampleUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
+      m_ch2pmtUpgradeABC.resize(nBarrelAndExtendedChannels, -1);
         
         
-        IdContext pmtContext = m_tileID->pmt_context();
-        unsigned int maxPmtHash = m_tileID->pmt_hash_max();
+      IdContext pmtContext = m_tileID->pmt_context();
+      unsigned int maxPmtHash = m_tileID->pmt_hash_max();
         
-        for (IdentifierHash pmtHash = 0; pmtHash < maxPmtHash; pmtHash += 1) {
-          Identifier swid;
-          if (m_tileID->get_id(pmtHash, swid, &pmtContext) == 0) {
-            int module = m_tileID->module(swid);
-            if (module == 0) { // Use module 0 to fill caches
-              int side = m_tileID->side(swid);
-              if (side == TileID::POSITIVE) { // Use only positive side to fill caches
-                int section = m_tileID->section(swid);
-                int tower = m_tileID->tower(swid);
-                int sample = m_tileID->sample(swid);
-                int pmt = m_tileID->pmt(swid);
+      for (IdentifierHash pmtHash = 0; pmtHash < maxPmtHash; pmtHash += 1) {
+        Identifier swid;
+        if (m_tileID->get_id(pmtHash, swid, &pmtContext) == 0) {
+          int module = m_tileID->module(swid);
+          if (module == 0) { // Use module 0 to fill caches
+            int side = m_tileID->side(swid);
+            if (side == TileID::POSITIVE) { // Use only positive side to fill caches
+              int section = m_tileID->section(swid);
+              int tower = m_tileID->tower(swid);
+              int sample = m_tileID->sample(swid);
+              int pmt = m_tileID->pmt(swid);
 
-                if (tower == 41 || (tower > 42 && tower < 46)) continue; // Skip dummy towers
+              if (tower == 41 || (tower > 42 && tower < 46)) continue; // Skip dummy towers
                 
-                int channel = swid2channel_upgradeABC(section, TileID::POSITIVE, tower, sample, pmt);
+              int channel = swid2channel_upgradeABC(section, TileID::POSITIVE, tower, sample, pmt);
                 
-                if (channel >= 0 && (unsigned int) channel < m_ch2towerUpgradeABC.size()) {
-                  if (section != TileID::BARREL) channel += m_maxChannels; 
-                  m_ch2towerUpgradeABC[channel] = tower;
-                  m_ch2sampleUpgradeABC[channel] = sample;
-                  m_ch2pmtUpgradeABC[channel] = pmt;
-                }
-                
+              if (channel >= 0 && (unsigned int) channel < m_ch2towerUpgradeABC.size()) {
+                if (section != TileID::BARREL) channel += m_maxChannels;
+                m_ch2towerUpgradeABC[channel] = tower;
+                m_ch2sampleUpgradeABC[channel] = sample;
+                m_ch2pmtUpgradeABC[channel] = pmt;
               }
+
             }
           }
         }
-        
-      } else {
-        return false;
       }
+
     }
 
   }

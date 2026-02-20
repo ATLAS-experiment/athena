@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ======================================================================
@@ -713,7 +713,7 @@ bool Pythia8B_i::signalAccept(Pythia8::Event &theEvent, const std::vector<int> &
         std::vector<Pythia8::Particle> decayMembers;
         descendThroughDecay(theEvent,decayMembers,*iItr);
         std::vector<int> pdgCodes = getCodes(decayMembers);
-        if (!compare(requiredDecay,pdgCodes)) {
+        if (!compare(requiredDecay,std::move(pdgCodes))) {
             ATH_MSG_DEBUG("Signal event REJECTED as does not contain required decay chain");
             continue;
         }

@@ -60,6 +60,9 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_dec_uniqueID.initialize() );
     ATH_CHECK( m_dec_parent_uniqueID.initialize() );
 
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    if (m_use_barcode) m_uid = SG::ConstAccessor<int>("barcode");
+
     return StatusCode::SUCCESS;
   }
 
@@ -118,7 +121,8 @@ namespace FlavorTagDiscriminants {
         dec_vertex_index(*electron) = acc_vertex_index(*truth);
         dec_type_label(*electron) = acc_type_label(*truth);
         dec_source_label(*electron) = acc_source_label(*truth);
-        dec_uniqueID(*electron) = HepMC::uniqueID(truth);
+        // ATLASRECTS-8290: replace m_uid with ->uid() eventually
+        dec_uniqueID(*electron) = m_uid(*truth);
         dec_parent_uniqueID(*electron) = acc_parent_uniqueID(*truth);
       }
     }

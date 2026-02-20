@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 21:53:46 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -16,7 +16,7 @@
 
 
 ConfVtxAnalysis::ConfVtxAnalysis( const std::string& n, bool use_secVtx_limits ) : 
-  VertexAnalysis( n ), m_initialised(false), m_finalised(false), m_use_secVtx_limits(use_secVtx_limits), m_dir(0) { }
+  VertexAnalysis( n ), m_initialised(false), m_finalised(false), m_use_secVtx_limits(use_secVtx_limits) { }
 
 
 extern TIDA::Event* gevent;
@@ -36,7 +36,7 @@ void ConfVtxAnalysis::initialise() {
 
   //  std::cout << "ConfVtxAnalysis::initialise() " << name() << std::endl;
 
-  m_dir = new TIDDirectory(name());
+  m_dir = std::make_unique<TIDDirectory>(name());
   m_dir->push();
 
 #if 0

@@ -1,15 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/RpcCondDbAlg.h"
+#include "RpcCondDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
 
-// constructor
-RpcCondDbAlg::RpcCondDbAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
-
+namespace Muon{
 // Initialize
 StatusCode RpcCondDbAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -249,4 +246,5 @@ StatusCode RpcCondDbAlg::loadMcElementStatus(const EventContext& ctx,  RpcCondDb
        
     }
     return StatusCode::SUCCESS;
+}
 }

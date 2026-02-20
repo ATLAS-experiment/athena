@@ -134,13 +134,10 @@ StatusCode TauCombinedTES::initialize() {
 StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
   TLorentzVector combinedP4(tau.p4(xAOD::TauJetParameters::TauEnergyScale));
 
-  // used to store immediate results
-  Variables variables;
-
   // Parameterization is only valid for |eta| < 2.5, and decay modes of 1p0n, 1p1n, 1pXn, 3p0n, 3pXn
   // If these variables of the given tau candidate are outside the range, we just use calo TES
   if(isValid(tau)) {
-    combinedP4 = getCombinedP4(tau, variables);
+    combinedP4 = getCombinedP4(tau);
   }
 
   static const SG::Accessor<float> decPtCombined("ptCombined");
@@ -152,26 +149,6 @@ StatusCode TauCombinedTES::execute(xAOD::TauJet& tau) const {
   decEtaCombined(tau) = combinedP4.Eta();
   decPhiCombined(tau) = combinedP4.Phi();
   decMCombined(tau) = combinedP4.M();
-
-  if (m_addCalibrationResultVariables){
-    static const SG::Accessor<float> decPtConstituent("pt_constituent");
-    static const SG::Accessor<float> decPtTauRecCalibrated("pt_tauRecCalibrated");
-    static const SG::Accessor<float> decPtWeighted("pt_weighted");
-    static const SG::Accessor<float> decWeightWeighted("weight_weighted");
-    static const SG::Accessor<float> decSigmaCompatibility("sigma_compatibility");
-    static const SG::Accessor<float> decSigmaTaurec("sigma_tauRec");
-    static const SG::Accessor<float> decSigmaConstituent("sigma_constituent");
-    static const SG::Accessor<float> decCorrelationCoefficient("correlation_coefficient");
-
-    decPtConstituent(tau) = variables.pt_constituent;
-    decPtTauRecCalibrated(tau) = variables.pt_tauRecCalibrated;
-    decPtWeighted(tau) = variables.pt_weighted;
-    decWeightWeighted(tau) = variables.weight;
-    decSigmaCompatibility(tau) = variables.sigma_compatibility;
-    decSigmaTaurec(tau) = variables.sigma_tauRec;
-    decSigmaConstituent(tau) = variables.sigma_constituent;
-    decCorrelationCoefficient(tau) = variables.corrcoeff;
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -374,8 +351,7 @@ double TauCombinedTES::getNsigmaCompatibility(double et, int decayModeIndex) con
 double TauCombinedTES::getCombinedEt(double caloEt,
 				     double panTauEt,
 				     xAOD::TauJetParameters::DecayMode decayMode,
-				     float eta,
-				     Variables& variables) const {
+				     float eta) const {
   // Obtain the index of calibration graph
   int decayModeIndex = getDecayModeIndex(decayMode);
   int etaIndex = getEtaIndex(eta);
@@ -421,16 +397,6 @@ double TauCombinedTES::getCombinedEt(double caloEt,
     weightedEt = caloEt;
   }
 
-  // Store the results
-  variables.corrcoeff = correlation;
-  variables.sigma_tauRec = caloSigma;
-  variables.sigma_constituent = panTauSigma;
-  variables.pt_tauRecCalibrated = caloCalEt;
-  variables.pt_constituent = panTauCalEt;
-  variables.pt_weighted = weightedEt;
-  variables.weight = weight;
-  variables.sigma_compatibility = compatibilitySigma;
-
   ATH_MSG_DEBUG("Intermediate results\n" <<
                 "coff: " << correlation << " sigma(calo): " << caloSigma << " sigma(constituent): " << panTauSigma <<
                 "\ncalibrated et(calo): " << caloCalEt << " calibrated et(constituent): " << panTauCalEt <<
@@ -441,7 +407,7 @@ double TauCombinedTES::getCombinedEt(double caloEt,
 
 
 
-TLorentzVector TauCombinedTES::getCombinedP4(const xAOD::TauJet& tau, Variables& variables) const {
+TLorentzVector TauCombinedTES::getCombinedP4(const xAOD::TauJet& tau) const {
   TLorentzVector caloP4 = tau.p4(xAOD::TauJetParameters::TauEnergyScale);
   TLorentzVector panTauP4 = tau.p4(xAOD::TauJetParameters::PanTauCellBased);
 
@@ -452,7 +418,7 @@ TLorentzVector TauCombinedTES::getCombinedP4(const xAOD::TauJet& tau, Variables&
 
   xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau);
 
-  double combinedEt = getCombinedEt(caloP4.Et(), panTauP4.Et(), decayMode, caloP4.Eta(), variables);
+  double combinedEt = getCombinedEt(caloP4.Et(), panTauP4.Et(), decayMode, caloP4.Eta());
 
   // Et is the combination of calo TES and PanTau, but eta and phi is from PanTau
   TLorentzVector combinedP4;

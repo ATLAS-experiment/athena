@@ -130,7 +130,7 @@ namespace InDetDD {
     virtual const Trk::Surface & elementSurface() const override;
     /** create the cache for the element */
     virtual void createSurfaceCache(GeoAlignmentStore* alignStore) const override;
-    SurfaceCache createSurfaceCacheHelper() const;
+    SurfaceCache createSurfaceCacheHelper(GeoAlignmentStore* alignStore) const;
 
     // Private Member data:
     TRT_BarrelCode m_code;

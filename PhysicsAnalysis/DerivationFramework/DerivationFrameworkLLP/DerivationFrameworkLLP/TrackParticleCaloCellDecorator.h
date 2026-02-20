@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*  TrackParticleCaloCellDecorator.h  */
@@ -20,58 +20,61 @@ namespace DerivationFramework {
 
   class TrackParticleCaloCellDecorator : public extends<AthAlgTool, IAugmentationTool> {
   public:
-    TrackParticleCaloCellDecorator(const std::string& t, const std::string& n, const IInterface* p);
-    virtual StatusCode initialize() override;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
-    StringProperty m_sgName {
-      this, "DecorationPrefix", "", "decoration prefix"};
-    SG::ReadHandleKey< xAOD::TrackParticleClusterAssociationContainer > m_trackContainerKey{
+    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackParticleContainerKey{
       this, "ContainerName", "", "track particle container name"};
 
+    SG::ReadHandleKey< xAOD::TrackParticleClusterAssociationContainer > m_trackContainerKey{
+      this, "ClusterAssocContainerName", "", "track particle container name"};
+
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellEtaKey{
-      this, "decCellEtaKey", "_CaloCellEta"};
+      this, "decCellEtaKey", m_trackParticleContainerKey, "_CaloCellEta"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellPhiKey{
-      this, "decCellPhiKey", "_CaloCellPhi"};
+      this, "decCellPhiKey", m_trackParticleContainerKey, "_CaloCellPhi"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellRKey{
-      this, "decCellRKey", "_CaloCellR"};
+      this, "decCellRKey", m_trackParticleContainerKey, "_CaloCellR"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldEtaKey{
-      this, "decCelldEtaKey", "_CaloCelldEta"};
+      this, "decCelldEtaKey", m_trackParticleContainerKey, "_CaloCelldEta"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldPhiKey{
-      this, "decCelldPhiKey", "_CaloCelldPhi"};
+      this, "decCelldPhiKey", m_trackParticleContainerKey, "_CaloCelldPhi"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldRKey{
-      this, "decCelldRKey", "_CaloCelldR"};
+      this, "decCelldRKey", m_trackParticleContainerKey, "_CaloCelldR"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellXKey{
-      this, "decCellXKey", "_CaloCellX"};
+      this, "decCellXKey", m_trackParticleContainerKey, "_CaloCellX"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellYKey{
-      this, "decCellYKey", "_CaloCellY"};
+      this, "decCellYKey", m_trackParticleContainerKey, "_CaloCellY"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellZKey{
-      this, "decCellZKey", "_CaloCellZ"};
+      this, "decCellZKey", m_trackParticleContainerKey, "_CaloCellZ"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldXKey{
-      this, "decCelldXKey", "_CaloCelldX"};
+      this, "decCelldXKey", m_trackParticleContainerKey, "_CaloCelldX"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldYKey{
-      this, "decCelldYKey", "_CaloCelldY"};
+      this, "decCelldYKey", m_trackParticleContainerKey, "_CaloCelldY"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCelldZKey{
-      this, "decCelldZKey", "_CaloCelldZ"};
+      this, "decCelldZKey", m_trackParticleContainerKey, "_CaloCelldZ"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellTKey{
-      this, "decCellTKey", "_CaloCellTime"};
+      this, "decCellTKey", m_trackParticleContainerKey, "_CaloCellTime"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellEKey{
-      this, "decCellEKey", "_CaloCellE"};
+      this, "decCellEKey", m_trackParticleContainerKey, "_CaloCellE"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellIDKey{
-      this, "decCellIDKey", "_CaloCellID"};
+      this, "decCellIDKey", m_trackParticleContainerKey, "_CaloCellID"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellSamplingKey{
-      this, "decCellSamplingKey", "_CaloCellSampling"};
+      this, "decCellSamplingKey", m_trackParticleContainerKey, "_CaloCellSampling"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellQualityKey{
-      this, "decCellQualityKey", "_CaloCellQuality"};
+      this, "decCellQualityKey", m_trackParticleContainerKey, "_CaloCellQuality"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellProvenanceKey{
-      this, "decCellProvenanceKey", "_CaloCellProvenance"};
+      this, "decCellProvenanceKey", m_trackParticleContainerKey, "_CaloCellProvenance"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellGainKey{
-      this, "decCellGainKey", "_CaloCellGain"};
+      this, "decCellGainKey", m_trackParticleContainerKey, "_CaloCellGain"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellEneDiffKey{
-      this, "decCellEneDiffKey", "_CaloCellEneDiff"};
+      this, "decCellEneDiffKey", m_trackParticleContainerKey, "_CaloCellEneDiff"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_decCellTimeDiffKey{
-      this, "decCellTimeDiffKey", "_CaloCellTimeDiff"};
+      this, "decCellTimeDiffKey", m_trackParticleContainerKey, "_CaloCellTimeDiff"};
   };
 }
 

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// HardScatterVertexDecorator.h, (c) ATLAS Detector software
+// UsedInVertexFitTrackDecorator.h
 ///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_USEDINVERTEXFITTRACKDECORATOR_H
@@ -32,7 +32,7 @@ namespace DerivationFramework {
     /// @name Constructor
     /// @{
 
-    UsedInVertexFitTrackDecorator(const std::string& type, const std::string& name, const IInterface* parent);
+    using base_class::base_class;
 
     /// @}
 
@@ -59,7 +59,7 @@ namespace DerivationFramework {
     /// @{
 
     /// ToolHandle for the IInDetUsedInFitTrackDecoratorTool
-    ToolHandle<InDet::IInDetUsedInFitTrackDecoratorTool> m_decoTool;
+    ToolHandle<InDet::IInDetUsedInFitTrackDecoratorTool> m_decoTool{this, "UsedInFitDecoratorTool", "InDet::InDetUsedInFitTrackDecoratorTool/IDUsedInFitDecoratorTool"};
 
     /// @}
 

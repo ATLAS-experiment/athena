@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigCaloEventTPCnv/test/TrigT2JetCnv_p3_test.cxx
@@ -51,7 +51,7 @@ void compare (const TrigT2Jet& p1,
   for (size_t i = 0; i < g1.size(); i++)
     compare (g1[i], g2[i]);
 #endif
-  assert (p2.grid() == nullptr);
+  assert (p2.grid()->empty());
 }
 
 
@@ -86,10 +86,10 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   trans1.setEmf (0.7);
   trans1.setJetTimeCells (0.4);
 
-  auto grid = std::make_unique<std::vector<Trig3Momentum> >();
-  grid->emplace_back (80000, 3, 1);
-  grid->emplace_back (60000, 2, 4);
-  trans1.setGrid (grid.release());
+  std::vector<Trig3Momentum> grid;
+  grid.emplace_back (80000, 3, 1);
+  grid.emplace_back (60000, 2, 4);
+  trans1.setGrid (std::move (grid));
   
   testit (trans1);
 }

@@ -101,6 +101,7 @@ def addStandardRecoFiles(parser):
 #  can import these steps easily
 def addRecoSubsteps(executorSet):
     executorSet.add(athenaExecutor(name = 'RDOtoBS',
+                                   skeletonCA = 'RecJobTransforms.RDOtoBS_Skeleton',
                                    substep = 'r2b', inData = ['RDO'], outData = ['BS']))
     executorSet.add(athenaExecutor(name = 'RDOtoRDOTrigger', skeletonFile = 'RecJobTransforms/skeleton.RDOtoRDOtrigger.py',  # needs to keep legacy for older releases
                                    skeletonCA = 'RecJobTransforms.RDOtoRDO_TRIG_Skeleton',

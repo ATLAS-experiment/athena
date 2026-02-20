@@ -83,12 +83,6 @@ ISF::SimKernel::SimKernel( const std::string& name, ISvcLocator* pSvcLocator ) :
     declareProperty("DoMemoryMonitoring"         , m_doMemMon                        );
     declareProperty("MemoryMonitoringTool"       , m_memMon                          );
     declareProperty("SummarizeMemUsageEveryNEvts", m_memUsageEvts                    );
-    // routing tool
-    declareProperty("BeamPipeSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasForward]  );
-    declareProperty("IDSimulationSelectors"      , m_simSelectors[AtlasDetDescr::fAtlasID]       );
-    declareProperty("CaloSimulationSelectors"    , m_simSelectors[AtlasDetDescr::fAtlasCalo]     );
-    declareProperty("MSSimulationSelectors"      , m_simSelectors[AtlasDetDescr::fAtlasMS]       );
-    declareProperty("CavernSimulationSelectors"  , m_simSelectors[AtlasDetDescr::fAtlasCavern]   );
     // Quasi-stable particle sim
     declareProperty("QuasiStablePatcher", m_qspatcher);
     // event filter

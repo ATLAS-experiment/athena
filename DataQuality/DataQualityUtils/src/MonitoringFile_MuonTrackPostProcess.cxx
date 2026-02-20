@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 
@@ -134,9 +134,9 @@ void TwoDto1D_Mean(TH2* h_parent, TH1* h_child, int rebinning = 1) {
     }
     h_child->SetBinContent(bin_itrX, parent_sum / parent_event);
   }
-  TString sHistTitle = h_child->GetTitle();
+  std::string sHistTitle = h_child->GetTitle();
   h_child->Rebin(rebinning);
-  h_child->SetTitle(sHistTitle + " per event");
+  h_child->SetTitle((sHistTitle + " per event").c_str());
   h_child->Write("", TObject::kOverwrite);
   return;
 }
@@ -165,7 +165,7 @@ void TwoDto1D_Sum(TH2* h_parent, TH1* h_child, int rebinning = 2) {
   return;
 }
 
-void SetMassInfo(int iBin, TH1* InputHist, TH1* OutMean, TH1* OutSigma, TString recalg_path) {
+void SetMassInfo(int iBin, TH1* InputHist, TH1* OutMean, TH1* OutSigma, const std::string& recalg_path) {
   if (InputHist == NULL || OutMean == NULL || OutSigma == NULL) {
     return;
   }
@@ -214,11 +214,12 @@ namespace dqutils {
   }
 
   //subfunctions
-  void MonitoringFile::MuonTrack_Main(const std::string& inFilename, TString dirname) {
-    TString plotdirname = dirname;//set the plottting dir anme
+  void MonitoringFile::MuonTrack_Main(const std::string& inFilename, const std::string& dirname_in) {
+    TString stmp = dirname_in;
+    stmp.ReplaceAll("/", "_");//name clean
+    std::string plotdirname = stmp.Data();//set the plottting dir name
 
-    plotdirname.ReplaceAll("/", "_");//name clean
-    dirname = "MuonPhysics/" + dirname;//give it the full path
+    std::string dirname = "MuonPhysics/" + dirname_in;//give it the full path
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
 
     if (f == 0) {
@@ -239,57 +240,57 @@ namespace dqutils {
     if (dir0 == 0) return;
 
     dir0->cd();
-    TString runNumber = dir0->GetName();
-    TString motherDir = runNumber + "/" + dirname;
+    std::string runNumber = dir0->GetName();
+    std::string motherDir = runNumber + "/" + dirname;
     ///finish getting basci information
 
     //Do the segment part
-    TString mDir = motherDir + "Segments/";
-    if (!f->cd(mDir)) return;
+    std::string mDir = motherDir + "Segments/";
+    if (!f->cd(mDir.c_str())) return;
 
     TIter nextcd1(gDirectory->GetListOfKeys());
     while (TKey* key1 = dynamic_cast<TKey*>(nextcd1())) {
       //While in the segments
-      TString recalg_path = key1->GetName();
-      TString recalg_fullStr = mDir + key1->GetName();
-      TDirectory* dir1 = f->GetDirectory(recalg_fullStr);
+      std::string recalg_path = key1->GetName();
+      std::string recalg_fullStr = mDir + key1->GetName();
+      TDirectory* dir1 = f->GetDirectory(recalg_fullStr.c_str());
       if (!dir1) continue;
       dir1->cd();
 
       // Divide the efficiency histograms
       TH2F* h_EffNumerator =
-        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector_numerator", plotdirname.Data(),
-                               recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector_numerator", plotdirname.c_str(),
+                               recalg_path.c_str()));
       TH2F* h_EffDenominator =
-        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector_denominator", plotdirname.Data(),
-                               recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector_denominator", plotdirname.c_str(),
+                               recalg_path.c_str()));
       TH2F* h_Efficiency =
-        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sSegments_%s_eff_chamberIndex_perSector", plotdirname.c_str(), recalg_path.c_str()));
 
       TwoDto2D_Eff(h_EffNumerator, h_EffDenominator, h_Efficiency);
 
       //add the efficiency for precision
       for (int i = 0; i < 17; i++) {
         TH2F* seg_prec_EffNumerator =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_%s_etastation_nPrechit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_%s_etastation_nPrechit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
         TH2F* seg_prec_EffDenominator =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nPrechit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nPrechit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
         TH2F* seg_prec_Efficiency =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nPrechit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nPrechit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
 
         TwoDto2D_Eff(seg_prec_EffNumerator, seg_prec_EffDenominator, seg_prec_Efficiency);
 
         TH2F* seg_trig_EffNumerator =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_%s_etastation_nTrighit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_%s_etastation_nTrighit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
         TH2F* seg_trig_EffDenominator =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nTrighit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nTrighit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
         TH2F* seg_trig_Efficiency =
-          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nTrighit", plotdirname.Data(), recalg_path.Data(),
+          (TH2F*) dir1->Get(Form("%sSegments_%s_eff_%s_etastation_nTrighit", plotdirname.c_str(), recalg_path.c_str(),
                                  SegStationName[i]));
 
         TwoDto2D_Eff(seg_trig_EffNumerator, seg_trig_EffDenominator, seg_trig_Efficiency);
@@ -297,69 +298,69 @@ namespace dqutils {
     }//ends different subfolder for segment efficiency
 
     //Do the muon part
-    TString mDir_muons = motherDir + "Muons/";
-    if (!f->cd(mDir_muons)) return;
+    std::string mDir_muons = motherDir + "Muons/";
+    if (!f->cd(mDir_muons.c_str())) return;
 
     TIter nextcd_muons(gDirectory->GetListOfKeys());
     while (TKey* key1 = dynamic_cast<TKey*>(nextcd_muons())) {
       //While in the segments
-      TString recalg_path = key1->GetName();
-      TString recalg_fullStr = mDir_muons + key1->GetName();
-      TDirectory* dir1 = f->GetDirectory(recalg_fullStr);
+      std::string recalg_path = key1->GetName();
+      std::string recalg_fullStr = mDir_muons + key1->GetName();
+      TDirectory* dir1 = f->GetDirectory(recalg_fullStr.c_str());
       if (!dir1) continue;
       dir1->cd();
 
-      TString muonqualstr[4] = {
+      std::string muonqualstr[4] = {
         "Tight", "Medium", "Loose", "Veryloose"
       };
       // Divide the efficiency histograms
       TH2F* h_EffDenominator =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_Origin_eta_phi", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_Origin_eta_phi", plotdirname.c_str(), recalg_path.c_str()));
       //m_EffDenominator->Rebin2D();//here change the default binnning of eta-phi! disabled once we are in 64 bins
       for (int i = 0; i < 4; i++) {
         TH2F* h_EffNumerator =
-          (TH2F*) dir1->Get(Form("%sMuons_%s_%s_eta_phi", plotdirname.Data(), recalg_path.Data(),
-                                 muonqualstr[i].Data()));
+          (TH2F*) dir1->Get(Form("%sMuons_%s_%s_eta_phi", plotdirname.c_str(), recalg_path.c_str(),
+                                 muonqualstr[i].c_str()));
         TH2F* h_Efficiency =
-          (TH2F*) dir1->Get(Form("%sMuons_%s_%s_eff", plotdirname.Data(), recalg_path.Data(), muonqualstr[i].Data()));
+          (TH2F*) dir1->Get(Form("%sMuons_%s_%s_eff", plotdirname.c_str(), recalg_path.c_str(), muonqualstr[i].c_str()));
         TwoDto2D_Eff(h_EffNumerator, h_EffDenominator, h_Efficiency);//here change the default binnning of eta-phi
       }
 
-      TH2F* eff_nPrec = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nPrec", plotdirname.Data(), recalg_path.Data()));
-      TH2F* eff_nPhi = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nPhi", plotdirname.Data(), recalg_path.Data()));
-      TH2F* eff_nTrigEta = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nTrigEta", plotdirname.Data(), recalg_path.Data()));
-      TH2F* eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_ndof", plotdirname.Data(), recalg_path.Data()));
-      TH2F* eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_chi2", plotdirname.Data(), recalg_path.Data()));
-      TH2F* ID_eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_ID_eff_ndof", plotdirname.Data(), recalg_path.Data()));
-      TH2F* ID_eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_ID_eff_chi2", plotdirname.Data(), recalg_path.Data()));
-      TH2F* MS_eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_MS_eff_ndof", plotdirname.Data(), recalg_path.Data()));
-      TH2F* MS_eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_MS_eff_chi2", plotdirname.Data(), recalg_path.Data()));
+      TH2F* eff_nPrec = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nPrec", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* eff_nPhi = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nPhi", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* eff_nTrigEta = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_nTrigEta", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_ndof", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_eff_chi2", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* ID_eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_ID_eff_ndof", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* ID_eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_ID_eff_chi2", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* MS_eff_ndof = (TH2F*) dir1->Get(Form("%sMuons_%s_MS_eff_ndof", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* MS_eff_chi2 = (TH2F*) dir1->Get(Form("%sMuons_%s_MS_eff_chi2", plotdirname.c_str(), recalg_path.c_str()));
 
       TH2F* avg_hits_precision_inner =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_inner", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_inner", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_precision_middle =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_middle", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_middle", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_precision_outer =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_outer", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_outer", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_precision_extended =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_extended", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_precision_extended", plotdirname.c_str(), recalg_path.c_str()));
 
       TH2F* avg_hits_trigger_layer1 =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer1", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer1", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_trigger_layer2 =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer2", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer2", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_trigger_layer3 =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer3", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer3", plotdirname.c_str(), recalg_path.c_str()));
       TH2F* avg_hits_trigger_layer4 =
-        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer4", plotdirname.Data(), recalg_path.Data()));
+        (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trigger_layer4", plotdirname.c_str(), recalg_path.c_str()));
 
-      TH2F* avg_hits_ibl = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_ibl", plotdirname.Data(), recalg_path.Data()));
-      TH2F* avg_hits_pix = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_pix", plotdirname.Data(), recalg_path.Data()));
-      TH2F* avg_hits_sct = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_sct", plotdirname.Data(), recalg_path.Data()));
-      TH2F* avg_hits_trt = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trt", plotdirname.Data(), recalg_path.Data()));
+      TH2F* avg_hits_ibl = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_ibl", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* avg_hits_pix = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_pix", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* avg_hits_sct = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_sct", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* avg_hits_trt = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_hits_trt", plotdirname.c_str(), recalg_path.c_str()));
 
-      TH2F* avg_ddpt_idme = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_ddpt_idme", plotdirname.Data(), recalg_path.Data()));
-      TH2F* avg_dptsignif = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_dptsignif", plotdirname.Data(), recalg_path.Data()));
+      TH2F* avg_ddpt_idme = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_ddpt_idme", plotdirname.c_str(), recalg_path.c_str()));
+      TH2F* avg_dptsignif = (TH2F*) dir1->Get(Form("%sMuons_%s_avg_dptsignif", plotdirname.c_str(), recalg_path.c_str()));
 
       TwoDto2D_Eff(eff_nPrec, h_EffDenominator, eff_nPrec);
       TwoDto2D_Eff(eff_nPhi, h_EffDenominator, eff_nPhi);
@@ -392,57 +393,57 @@ namespace dqutils {
 
 
     //Do the luminoisty part
-    TString mDir_lb = motherDir + "Overview/";
-    if (!f->cd(mDir_lb)) return;
+    std::string mDir_lb = motherDir + "Overview/";
+    if (!f->cd(mDir_lb.c_str())) return;
 
     TIter nextcd_lb(gDirectory->GetListOfKeys());
     while (TKey* key1 = dynamic_cast<TKey*>(nextcd_lb())) {
       //While in the segments
-      TString recalg_path = key1->GetName();
-      TString recalg_fullStr = mDir_lb + key1->GetName();
-      TDirectory* dir1 = f->GetDirectory(recalg_fullStr);
+      std::string recalg_path = key1->GetName();
+      std::string recalg_fullStr = mDir_lb + key1->GetName();
+      TDirectory* dir1 = f->GetDirectory(recalg_fullStr.c_str());
       if (!dir1) continue;
       dir1->cd();
 
-      TString montype[3] = {
+      std::string montype[3] = {
         "Segment", "MuonTrack", "Muon"
       };
       // Divide the efficiency histograms
       for (int i = 0; i < 3; i++) {
         TH2F* h_parent_lb =
-          (TH2F*) dir1->Get(Form("%sOverview_%s_n%s_LB_2D", plotdirname.Data(), recalg_path.Data(), montype[i].Data()));
+          (TH2F*) dir1->Get(Form("%sOverview_%s_n%s_LB_2D", plotdirname.c_str(), recalg_path.c_str(), montype[i].c_str()));
         TH1F* h_child_lb =
-          (TH1F*) dir1->Get(Form("%sOverview_%s_n%s_LB", plotdirname.Data(), recalg_path.Data(), montype[i].Data()));
-        //TH2F* h_parent_inst = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_Inst_2D", plotdirname.Data(),
-        // recalg_path.Data(), montype[i].Data()));
-        //TH1F* h_child_inst = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_Inst", plotdirname.Data(), recalg_path.Data(),
-        // montype[i].Data()));
-        //TH2F* h_parent_intlumi = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi_2D", plotdirname.Data(),
-        // recalg_path.Data(), montype[i].Data()));
-        //TH1F* h_child_intlumi = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi", plotdirname.Data(),
-        // recalg_path.Data(), montype[i].Data()));
+          (TH1F*) dir1->Get(Form("%sOverview_%s_n%s_LB", plotdirname.c_str(), recalg_path.c_str(), montype[i].c_str()));
+        //TH2F* h_parent_inst = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_Inst_2D", plotdirname.c_str(),
+        // recalg_path.c_str(), montype[i].c_str()));
+        //TH1F* h_child_inst = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_Inst", plotdirname.c_str(), recalg_path.c_str(),
+        // montype[i].c_str()));
+        //TH2F* h_parent_intlumi = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi_2D", plotdirname.c_str(),
+        // recalg_path.c_str(), montype[i].c_str()));
+        //TH1F* h_child_intlumi = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi", plotdirname.c_str(),
+        // recalg_path.c_str(), montype[i].c_str()));
         TwoDto1D_Mean(h_parent_lb, h_child_lb);
         //TwoDto1D_Mean(h_parent_inst, h_child_inst);
         //TwoDto1D_Mean(h_parent_intlumi, h_child_intlumi);
       }
-      TString resonance[2] = {
+      std::string resonance[2] = {
         "Z", "Jpsi"
       };
       // Divide the efficiency histograms
       for (int i = 0; i < 2; i++) {
         TH2F* h_parent_lb =
-          (TH2F*) dir1->Get(Form("%sOverview_%s_n%s_LB_2D", plotdirname.Data(), recalg_path.Data(),
-                                 resonance[i].Data()));
+          (TH2F*) dir1->Get(Form("%sOverview_%s_n%s_LB_2D", plotdirname.c_str(), recalg_path.c_str(),
+                                 resonance[i].c_str()));
         TH1F* h_child_lb =
-          (TH1F*) dir1->Get(Form("%sOverview_%s_n%s_LB", plotdirname.Data(), recalg_path.Data(), resonance[i].Data()));
-        //TH2F* h_parent_inst = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_Inst_2D", plotdirname.Data(),
-        // recalg_path.Data(), resonance[i].Data()));
-        //TH1F* h_child_inst = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_Inst", plotdirname.Data(), recalg_path.Data(),
-        // resonance[i].Data()));
-        //TH2F* h_parent_intlumi = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi_2D", plotdirname.Data(),
-        // recalg_path.Data(), resonance[i].Data()));
-        //TH1F* h_child_intlumi = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi", plotdirname.Data(),
-        // recalg_path.Data(), resonance[i].Data()));
+          (TH1F*) dir1->Get(Form("%sOverview_%s_n%s_LB", plotdirname.c_str(), recalg_path.c_str(), resonance[i].c_str()));
+        //TH2F* h_parent_inst = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_Inst_2D", plotdirname.c_str(),
+        // recalg_path.c_str(), resonance[i].c_str()));
+        //TH1F* h_child_inst = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_Inst", plotdirname.c_str(), recalg_path.c_str(),
+        // resonance[i].c_str()));
+        //TH2F* h_parent_intlumi = (TH2F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi_2D", plotdirname.c_str(),
+        // recalg_path.c_str(), resonance[i].c_str()));
+        //TH1F* h_child_intlumi = (TH1F*)dir1->Get(Form("%sOverview_%s_n%s_IntLumi", plotdirname.c_str(),
+        // recalg_path.c_str(), resonance[i].c_str()));
         TwoDto1D_Sum(h_parent_lb, h_child_lb);
         //TwoDto1D_Sum(h_parent_inst, h_child_inst);
         //TwoDto1D_Sum(h_parent_intlumi, h_child_intlumi);
@@ -451,30 +452,30 @@ namespace dqutils {
 
 
     //Do the muon part; only for the main directory!
-    if (!dirname.Contains("NoTrig")) {
+    if (dirname.find("NoTrig") == std::string::npos) {
       //std::cout << "get to trackphys " << std::endl;
-      TString mDir_phys = motherDir + "MuonTrkPhys/";
-      if (!f->cd(mDir_phys)) return;
+      std::string mDir_phys = motherDir + "MuonTrkPhys/";
+      if (!f->cd(mDir_phys.c_str())) return;
 
       TIter nextcd_phys(gDirectory->GetListOfKeys());
       while (TKey* key1 = dynamic_cast<TKey*>(nextcd_phys())) {
         //While in the segments
-        TString recalg_path = key1->GetName();
-        TString recalg_fullStr = mDir_phys + key1->GetName();
-        TDirectory* dir1 = f->GetDirectory(recalg_fullStr);
+        std::string recalg_path = key1->GetName();
+        std::string recalg_fullStr = mDir_phys + key1->GetName();
+        TDirectory* dir1 = f->GetDirectory(recalg_fullStr.c_str());
         if (!dir1) continue;
         dir1->cd();
 
-        TH1* h_Mass_Mean = (TH1F*) dir1->Get(Form("m_%s_M_Mean", recalg_path.Data()));
-        TH1* h_Mass_Sigma = (TH1F*) dir1->Get(Form("m_%s_M_Sigma", recalg_path.Data()));
+        TH1* h_Mass_Mean = (TH1F*) dir1->Get(Form("m_%s_M_Mean", recalg_path.c_str()));
+        TH1* h_Mass_Sigma = (TH1F*) dir1->Get(Form("m_%s_M_Sigma", recalg_path.c_str()));
         // Get each of the mass histograms
-        TString det_region[4] = {
+        std::string det_region[4] = {
           "EC", "BC", "BA", "EA"
         };
         for (int i = 0; i < 4; i++) {
           for (int j = 0; j < 4; j++) {
-            TH1* h_Mass_region = (TH1F*) dir1->Get(Form("m_%s_M_%s_%s", recalg_path.Data(),
-                                                        det_region[i].Data(), det_region[j].Data()));
+            TH1* h_Mass_region = (TH1F*) dir1->Get(Form("m_%s_M_%s_%s", recalg_path.c_str(),
+                                                        det_region[i].c_str(), det_region[j].c_str()));
             //std::cout << " bin " << i * 4 + (j + 1) << " content " << det_region[i] << " " << det_region[j] <<
             // std::endl;
             SetMassInfo(i * 4 + (j + 1), h_Mass_region, h_Mass_Mean, h_Mass_Sigma, recalg_path);

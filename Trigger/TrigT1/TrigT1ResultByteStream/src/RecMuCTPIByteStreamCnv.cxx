@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -117,9 +117,14 @@ StatusCode RecMuCTPIByteStreamCnv::createObj( IOpaqueAddress* pAddr, DataObject*
   }
 
   IROBDataProviderSvc::VROBFRAG::const_iterator it = robFrags.begin();
-  MuCTPI_RIO* result;
+  MuCTPI_RIO* result{};
   // Convert to Object
-  ATH_CHECK(  m_tool->convert( ROBData( *it ).getROBFragment(), result ) );
+  auto sc =  m_tool->convert( ROBData( *it ).getROBFragment(), result ) ;
+  if (sc.isFailure()){
+    log << MSG::ERROR<<"RecMuCTPIByteStreamCnv::createObj failed."<<endmsg;
+    delete result; //object new'ed in convert
+    return sc;
+  }
   pObj = SG::asStorable( result ) ;
   
   return StatusCode::SUCCESS;

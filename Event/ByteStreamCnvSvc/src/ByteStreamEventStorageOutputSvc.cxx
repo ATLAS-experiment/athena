@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 #include "ByteStreamEventStorageOutputSvc.h"
 
 #include <stdexcept>
@@ -11,7 +11,6 @@
 
 #include "AthenaKernel/StoreID.h"
 
-#include "ByteStreamCnvSvcLegacy/offline_eformat/old/util.h"
 #include "ByteStreamData/RawEvent.h"
 
 #include "EventStorage/EventStorageRecords.h"
@@ -24,6 +23,8 @@
 #include "GaudiKernel/IIoComponentMgr.h"
 
 #include "StoreGate/ReadHandle.h"
+
+#include "EventInfoMgt/ITagInfoMgr.h"
 
 
 ByteStreamEventStorageOutputSvc::ByteStreamEventStorageOutputSvc(
@@ -38,6 +39,8 @@ ByteStreamEventStorageOutputSvc::initialize() {
 
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_byteStreamMetadataKey.initialize());
+  ATH_CHECK(m_tagInfoMgr.retrieve());
+  ATH_CHECK(m_metaDataStore.retrieve());
 
   // register this service for 'I/O' events
   ATH_CHECK(m_ioMgr.retrieve());
@@ -50,29 +53,6 @@ ByteStreamEventStorageOutputSvc::initialize() {
     ATH_MSG_VERBOSE("io_register[" << this->name() << "]("
                     << m_simpleFileName << ") [ok]");
   }
-
-  // validate m_eformatVersion
-  const std::vector< std::string > choices_ef{"current", "v40", "run1"};
-  if (std::find(choices_ef.begin(), choices_ef.end(), m_eformatVersion)
-      == choices_ef.end()) {
-    ATH_MSG_FATAL("Unexpected value for EformatVersion property: "
-                  << m_eformatVersion);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("eformat version to use: \"" << m_eformatVersion << "\"");
-
-  // validate m_eventStorageVersion
-  const std::vector< std::string > choices_es{"current", "v5", "run1"};
-  if (std::find(choices_es.begin(), choices_es.end(), m_eventStorageVersion)
-      == choices_es.end()) {
-    ATH_MSG_FATAL("Unexpected value for EventStorageVersion property: "
-                  << m_eventStorageVersion);
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_INFO("event storage (BS) version to use: \""
-               << m_eventStorageVersion << "\"");
-
-  m_isRun1 = (m_eformatVersion == "v40" or m_eformatVersion == "run1");
 
   ATH_CHECK(reinit());
 
@@ -107,8 +87,8 @@ StatusCode
 ByteStreamEventStorageOutputSvc::finalize() {
   // clean up
   ATH_MSG_DEBUG("deleting DataWriter");
-  m_dataWriter.reset();
   std::lock_guard< std::mutex > lock(m_dataWriterMutex);
+  m_dataWriter.reset();
   ATH_MSG_INFO("number of events written: " << m_totalEventCounter);
   return StatusCode::SUCCESS;
 }
@@ -188,35 +168,8 @@ ByteStreamEventStorageOutputSvc::putEvent(
   cache->size = re->fragment_size_word();
   ATH_MSG_DEBUG("event size = " << cache->size << ", start = " << re->start());
 
-  if (m_isRun1) {
-    // convert to current eformat
-    // allocate some extra space just in case
-    ATH_MSG_DEBUG("converting Run 1 format ");
-
-    cache->size += 128;
-    cache->buffer = std::make_unique< DataType[] >(cache->size);
-    ATH_MSG_DEBUG("created buffer 0x"
-                  << std::hex << cache->buffer.get() << std::dec);
-
-    // This builds no-checksum headers, should use the same
-    // checksum type as original event
-    cache->size = offline_eformat::old::convert_to_40(
-        re->start(), cache->buffer.get(), cache->size);
-    ATH_MSG_DEBUG("filled buffer");
-
-    if (cache->size == 0) {
-      // not enough space in buffer
-      ATH_MSG_ERROR("Failed to convert event, buffer is too small");
-      return false;
-    }
-
-    ATH_MSG_DEBUG("event size after conversion =  " << cache->size
-                  << "  version = " << cache->buffer.get()[3]);
-
-  } else {
-    cache->buffer = std::make_unique< DataType[] >(cache->size);
-    std::copy(re->start(), re->start() + cache->size, cache->buffer.get());
-  }
+  cache->buffer = std::make_unique< DataType[] >(cache->size);
+  std::copy(re->start(), re->start() + cache->size, cache->buffer.get());
 
   {
     // multiple data writers concurrently sounds like a bad idea
@@ -263,12 +216,9 @@ ByteStreamEventStorageOutputSvc::io_reinit() {
     std::string &fname = outputFile;
     if (!m_ioMgr->io_contains(this, fname)) {
       ATH_MSG_ERROR("IoComponentMgr does not know about [" << fname << "] !");
-      return(StatusCode::FAILURE);
+      return StatusCode::FAILURE;
     }
-    if (!m_ioMgr->io_retrieve(this, fname).isSuccess()) {
-      ATH_MSG_FATAL("Could not retrieve new value for [" << fname << "] !");
-      return(StatusCode::FAILURE);
-    }
+    ATH_CHECK(m_ioMgr->io_retrieve(this, fname));
     // all good... copy over.
     // modify directory
     m_inputDir.setValue(outputFile.substr(0, outputFile.find_last_of("/")));
@@ -323,10 +273,7 @@ void
 ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
     DataWriterParameters& params) const {
 
-  if (m_eventStorageVersion == "v5" or m_eventStorageVersion == "run1")
-    params.version = 5;
-  else params.version = 0;
-
+  params.version = 0;
   params.writingPath = m_inputDir;
 
   if (m_run != 0) params.rPar.run_number = m_run;
@@ -395,6 +342,38 @@ ByteStreamEventStorageOutputSvc::updateDataWriterParameters(
 
   for (const auto& tag : eventInfo.detDescrTags())
     params.fmdStrings.push_back(tag.first + ' ' + tag.second);
+
+  // Get beam metadata from TagInfo
+  std::string beamTypeStr = m_tagInfoMgr->findInputTag("beam_type");
+  if (!beamTypeStr.empty()) {
+    ATH_MSG_DEBUG("Got beam_type from input file metadata: " << beamTypeStr);
+    if (beamTypeStr == "collisions") {
+      params.rPar.beam_type = 1;
+    } else if (beamTypeStr == "cosmics") {
+      params.rPar.beam_type = 0;
+    }
+  }
+
+  std::string beamEnergyStr = m_tagInfoMgr->findInputTag("beam_energy");
+  if (!beamEnergyStr.empty()) {
+    try {
+      params.rPar.beam_energy = std::stoul(beamEnergyStr);
+      ATH_MSG_DEBUG("Got beam_energy from input file metadata: " << params.rPar.beam_energy);
+    } catch (const std::exception& e) {
+      ATH_MSG_WARNING("Could not convert beam_energy '" << beamEnergyStr << "' to number: " << e.what());
+    }
+  }
+
+  // Get IOV metadata strings from MetaDataStore
+  const std::vector<std::string>* iovMetaStrings = m_metaDataStore->tryRetrieve<std::vector<std::string>>("IOVMetaDataStrings");
+  if (iovMetaStrings != nullptr) {
+    ATH_MSG_DEBUG("Retrieved " << iovMetaStrings->size() << " IOV metadata strings from MetaDataStore");
+    for (const std::string& str : *iovMetaStrings) {
+      params.fmdStrings.push_back(str);
+    }
+  } else {
+    ATH_MSG_DEBUG("No IOV metadata strings found in MetaDataStore (this is normal if not configured)");
+  }
 
   params.rPar.trigger_type = eventInfo.level1TriggerType();
   params.rPar.detector_mask_LS = eventInfo.detectorMask();

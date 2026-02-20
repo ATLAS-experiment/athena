@@ -63,9 +63,9 @@ namespace CP
         // Do nothing, if it is data
         if(mu.CB.isData) return CorrectionCode::Ok;
 
-        auto cat = ConvertToMacroCategory(mu.raw_mst_category);
+        auto cat = ConvertToMacroCategory(mu.raw_mst_category.value());
 
-        ATH_MSG_VERBOSE("Doing high pT smearing: "<<int(cat)<<" for year: "<<int(mu.CB.year)<<" raw: "<<mu.raw_mst_category);
+        ATH_MSG_VERBOSE("Doing high pT smearing: "<<int(cat)<<" for year: "<<int(mu.CB.year)<<" raw: "<<mu.raw_mst_category.value());
 
         // If undefined, don't perform any smearing
         if(cat == MCP::MST_Categories::Undefined)

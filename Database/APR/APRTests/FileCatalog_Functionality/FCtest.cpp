@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,7 +13,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 using namespace pool;
 
@@ -87,7 +87,6 @@ public:
       singlesetUp(xml);
       std::cout<<"TEST --> testregisterFile"<<std::endl;
       mycatalog->setWriteCatalog(mycatalogurl);
-      mycatalog->connect();
       mycatalog->start();
       std::set<std::string>     registered_pfns;
       const std::string         new_filetype = "root/tree";
@@ -104,12 +103,8 @@ public:
          CPPUNIT_ASSERT_MESSAGE("wrong pfn", new_pfn==pfn );  
          CPPUNIT_ASSERT_MESSAGE("wrong filetype", new_filetype==filetype );
          registered_pfns.emplace( std::move(new_pfn) );
-         //register LFN 
-         // mycatalog->registerLFN(pfn,std::string("lfn:")+names[i]);
+         //register LFN
          mycatalog->registerLFN(fid, std::string("lfn:")+names[i]);
-
-         //test addReplicaFilename
-         // addReplicaPFN(pfn,std::string("replicapfn:")+names[i]);
       }
       //test reading back
       /*
@@ -125,8 +120,6 @@ public:
       //commmit changes
       mycatalog->commit();
       std::cout<<"committed"<<std::endl;
-      mycatalog->disconnect();
-      std::cout<<"disconnect"<<std::endl;
     }catch(const std::runtime_error& er){
       std::cerr << er.what() << std::endl;
       throw er;

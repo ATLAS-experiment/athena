@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "gtest/gtest.h"
@@ -37,9 +37,9 @@ TEST(JetGroupRegisterTester, empty) {
 
   HypoJetVector jets2 = jets;
 
-  jets2.push_back(hjet);
+  jets2.push_back(std::move(hjet));
 
-  idx = jg_register.record(jets2);
+  idx = jg_register.record(std::move(jets2));
 
   EXPECT_EQ(idx, 1u);
 

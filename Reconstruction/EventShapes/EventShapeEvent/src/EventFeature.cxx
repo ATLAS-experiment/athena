@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,13 +34,20 @@ EventFeature::FeatureType EventFeature::featureType(const std::string& tag)
 
 const std::string& EventFeature::featureTag()
 {
-  return m_featureTags.find(DEFAULT)->second;
+  auto it = m_featureTags.find(DEFAULT);
+  if (it == m_featureTags.end()) std::abort();
+  return it->second;
 }
 
 const std::string& EventFeature::featureTag(FeatureType type)
 {
   std::map<FeatureType,std::string>::const_iterator fMap(m_featureTags.find(type));
-  return fMap != m_featureTags.end() ? fMap->second : m_featureTags.find(UNKNOWN)->second;
+  if (fMap != m_featureTags.end()) {
+    return fMap->second;
+  }
+  fMap = m_featureTags.find (UNKNOWN);
+  if (fMap == m_featureTags.end()) std::abort();
+  return fMap->second;
 }
 
 EventFeature::EventFeature() 

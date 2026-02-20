@@ -19,16 +19,18 @@
 #include "MuonTrackEvent/MsTrackSeed.h"
 
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRecToolInterfacesR4/ISegmentSelectionTool.h"
+#include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
 #include "MuonRecToolInterfacesR4/ITrackVisualizationTool.h"
 
-#include "ActsEvent/TrackContainerHandlesHelper.h"
 
+#include "ActsEvent/TrackContainerHandlesHelper.h"
+#include "MuonTrackFindingTools/MsTrackSeeder.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 
@@ -43,20 +45,42 @@ namespace MuonR4{
             virtual StatusCode initialize() override final;
             /** @brief Standard algorithm execution hook */
             virtual StatusCode execute(const EventContext& ctx) const override final;
+
+            using OptBoundPars_t = Acts::Result<Acts::BoundTrackParameters>;
+            using MeasVec_t = std::vector<const xAOD::UncalibratedMeasurement*>;
         private:
             /** @brief Iterates over the search tree and combines close-by segments to a track seed.
              *         Seeds with the same segments as other seeds are deduplicated
-             *  @brief ctx: The event's context to access StoreGate & Conditions
+             *  @param ctx: The event's context to access StoreGate & Conditions
              *  @param segments: Full segment container */
             std::unique_ptr<MsTrackSeedContainer> findTrackSeeds(const EventContext& ctx,
                                                                  const xAOD::MuonSegmentContainer& segments) const;
 
-            
-            void fitSeedCandidate(const Acts::GeometryContext& gCtx,
+            /** @brief Attempts to fit the track seed candidate to a full track and returns whether the
+             *         fit succeeded.
+             *  @param gCtx: Geometry context to access the alignment of the surfaces
+             *  @param mCtxc: Magnetic field context to access the field map during the fit
+             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+             *               during the track state filling
+             *  @param seed: The seed of interest to fit
+             *  @param outContainer: Mutable track container to which the output track is written */
+            bool fitSeedCandidate(const Acts::GeometryContext& gCtx,
                                   const Acts::MagneticFieldContext& mCtx,
                                   const Acts::CalibrationContext& cCtx,
                                   const MsTrackSeed& seed,
                                   ActsTrk::MutableTrackContainer& outContainer) const;
+
+            /** @brief Prepares the input by the fit by collecting the measurements on the segment & 
+             *  @param gCtx: Geometry context to access the alignment of the surfaces
+             *  @param mCtxc: Magnetic field context to access the field map during the fit
+             *  @param cCtx: Calibration context to access the calibration constants from Store gate
+             *               during the track state filling
+             *  @param seed: The seed of interest to fit */
+            std::pair<OptBoundPars_t, MeasVec_t> prepareFit(const Acts::GeometryContext& tgContext,
+                                                            const Acts::MagneticFieldContext& mfContext,
+                                                            const Acts::CalibrationContext& calContext,
+                                                            const MsTrackSeed& seed) const;
+            
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
@@ -64,24 +88,26 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Pointer to the MuonDetectorManager */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
-            
             /** @brief Temporary container write handle to push the seeds to store gate for later efficiency analysis */
             SG::WriteHandleKey<MsTrackSeedContainer> m_msTrkSeedKey{this, "MsTrkSeedKey", "MsTrackSeeds"};
             /** @brief Segment selection tool to pick the good quality segments */
             ToolHandle<ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
             /** @brief Track fitting tool */
             ToolHandle<ActsTrk::IFitterTool> m_trackFitTool{this, "FittingTool", ""};
+            /** @brief Calibration tool to fill the track states */
+            ToolHandle<ISpacePointCalibrator> m_calibTool{this, "Calibrator", ""};
             /** @brief Tracking geometry tool */
             PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
             /** @brief Track extrapolation tool */
-            ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
             /** @brief Visualization tool to debug the track finding */
             ToolHandle<MuonValR4::ITrackVisualizationTool> m_visualizationTool{this, "VisualizationTool", ""};
             /** @brief Maximum search window to search segments for */
             Gaudi::Property<double> m_seedHalfLength{this, "SeedHalfLength", 50.*Gaudi::Units::cm};
-            /** @brief Output track container prefix */
-            Gaudi::Property<std::string> m_writePrefix{this, "WritePrefix", "MuonSA"};
-            ActsTrk::MutableTrackContainerHandlesHelper m_trackContKeys{this};
+            /** @brief Key to the output track container */
+            SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
+            /** @brief Pointer to the actual seeder implementation */
+            std::unique_ptr<MsTrackSeeder> m_seeder{};
     };      
 }
 

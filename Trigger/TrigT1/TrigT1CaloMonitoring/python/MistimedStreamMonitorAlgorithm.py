@@ -2,8 +2,7 @@
 #  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
-
-def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
+def MistimedStreamMonitorConfig(flags, myflags):
     '''Function to configure LVL1 Mistimed Stream algorithm in the monitoring system.'''
     import math 
 
@@ -18,10 +17,16 @@ def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
 
     # get any algorithms
     MistimedMonAlg = helper.addAlgorithm(CompFactory.MistimedStreamMonitorAlgorithm,'MistimedStreamMonitorAlg')
-    if (Legacy):
+    if myflags.get("legacy") is True:
         MistimedMonAlg.UseLegacy = True
-    if (PhaseI):
+    if myflags.get("phaseI") is True:
         MistimedMonAlg.UsePhase1 = True
+
+    MistimedMonAlg.IsIons = myflags.get("ions")
+
+    MistimedMonAlg.EfexTriggers = myflags.get("efex")
+    MistimedMonAlg.JfexTriggers = myflags.get("jfex")
+    MistimedMonAlg.GfexTriggers = myflags.get("gfex")
 
     # import tools
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
@@ -58,13 +63,14 @@ def MistimedStreamMonitorConfig(flags, Legacy, PhaseI):
     phimin = 0
 
     
-    NumberOfGlobalErrors=7
+    NumberOfGlobalErrors=8
     globalStatus_xlabels = [
         "All",
         "unsuitable readout",
         "HLT_mistimemonj400",
         "L1_Trigger",
-        ">= 2 late TT",
+        ">= 2 late TTs",
+        ">= 2 late eTOBs",
         "<= 3 in-time",
         "spatial overlap"
     ]
@@ -179,11 +185,14 @@ if __name__=='__main__':
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc = MainServicesCfg(flags)
     acc.merge(PoolReadCfg(flags))
-    
-    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, Legacy=False, PhaseI=True)
+
+    # minimal set of default flags
+    myflags = { "legacy": False, "phaseI": True }
+
+    MistimedStreamMonitorCfg = MistimedStreamMonitorConfig(flags, myflags)
     acc.merge(MistimedStreamMonitorCfg)
 
     MistimedStreamMonitorCfg.getEventAlgo('MistimedStreamMonitorAlg').OutputLevel = 2 # 1/2 INFO/DEBUG
-    acc.printConfig(withDetails=True, summariseProps = True)
+    acc.printConfig(withDetails=False, summariseProps = True)
 
     sys.exit(acc.run().isFailure())

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloTPCnv )
@@ -56,6 +56,4 @@ atlas_add_test( CaloCompactCellTool_test
    LINK_LIBRARIES CaloDetDescrLib CaloEvent CaloIdentifier
    AthenaKernel StoreGateLib GaudiKernel LArRecEvent TileEvent TestTools
    IdDictParser CaloTPCnv
-   LOG_IGNORE_PATTERN "SGAudSvc +INFO|^lar decode|initialize_from_dict|mask/zero|^AtlasDetectorID::"
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
-

@@ -8,7 +8,7 @@
     <class name="SiHitCollection_p1" id="36D1FF8E-5734-4A93-A133-F286CF47DB72" />
     <class name="SiHitCollection_p2" id="BD1469C5-C904-40B8-82B9-43D25888D884" />
     <class name="SiHitCollection_p3" id="59E13FDA-2799-4362-8423-44D57F08734D" />
-    <class name="SiHitCollection_p4" id="018E1E2B-6C61-752E-b26D-6ABB05FBD4D9" />
+    <class name="SiHitCollection_p4" id="018E1E2B-6C61-752E-B26D-6ABB05FBD4D9" />
     <class name="TRT_Hit_p1" />
     <class name="std::vector<TRT_Hit_p1>" />
     <class name="TRT_Hit_p2" />

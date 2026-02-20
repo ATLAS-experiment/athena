@@ -1,6 +1,6 @@
 // this is -*- C++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HDF_TUPLE_HH
 #define HDF_TUPLE_HH
@@ -26,6 +26,7 @@
 #include <memory>
 #include <cassert>
 #include <set>
+#include <mutex>
 
 namespace H5Utils {
 
@@ -143,7 +144,7 @@ namespace H5Utils {
       >
     void add(const std::string& name, const F func, const T& def = T(),
              Compression comp = Compression::STANDARD) {
-      add<R>(name, std::function<R(I)>(func), R(def), comp);
+      add<R>(name, std::function<R(I)>(std::move(func)), R(def), comp);
     }
 
 
@@ -331,6 +332,7 @@ namespace H5Utils {
     std::array<hsize_t, N> uniform(size_t val) {
       std::array<hsize_t, N> ar;
       ar.fill(val);
+      //coverity[UNINIT:FALSE]
       return ar;
     }
 
@@ -376,6 +378,7 @@ namespace H5Utils {
     std::vector<SharedConsumer<I> > m_consumers;
     H5::DataSet m_ds;
     H5::DataSpace m_file_space;
+    std::recursive_mutex m_mutex;
   };
 
   template <size_t N, typename I>
@@ -385,11 +388,12 @@ namespace H5Utils {
                        hsize_t batch_size):
     Writer<N,I>(
       group, consumers, WriterConfiguration<N>{
-        name, // name
-        extent, // extent
-        batch_size, // batch_size
-        extent, // chunks
-        defaults::deflate // deflate
+        .name = name, // name
+        .extent = extent, // extent
+        .batch_size = batch_size, // batch_size
+        .chunks = extent, // chunks
+        .deflate = defaults::deflate, // deflate
+        .plist_callbacks = {} // plist_callbacks
       })
   {}
 
@@ -441,8 +445,14 @@ namespace H5Utils {
   template <size_t N, typename I>
   template <typename T>
   void Writer<N, I>::fill(T arg) {
-    if (m_buffer_rows == m_par.batch_size) {
-      flush();
+    // lock witin a scope here to check the buffer size and
+    // (potentially) flush, but we can release it to compute the
+    // output array since that's thread local
+    {
+      std::lock_guard lock(m_mutex);
+      if (m_buffer_rows == m_par.batch_size) {
+        flush();
+      }
     }
 
     // make some assertions to simplify debugging, the errors can be
@@ -473,9 +483,14 @@ namespace H5Utils {
       " \n");
 
     internal::DataFlattener<N, decltype(m_consumers), T> buf(
-      m_consumers, arg, m_par.extent);
+      m_consumers, std::move(arg), m_par.extent);
     hsize_t n_el = buf.element_offsets.size();
     std::vector<hsize_t> elements;
+
+    // lock again here since we're done with the local stuff: there's
+    // some access to class variables below which we need to do one
+    // thread at a time.
+    std::lock_guard lock(m_mutex);
     for (const auto& el_local: buf.element_offsets) {
       std::array<hsize_t, N+1> el_global;
       el_global[0] = m_offset + m_buffer_rows;
@@ -491,6 +506,7 @@ namespace H5Utils {
 
   template <size_t N, typename I>
   void Writer<N, I>::flush() {
+    std::lock_guard lock(m_mutex);
     const hsize_t buffer_size = m_buffer_rows;
     if (buffer_size == 0) return;
 
@@ -536,7 +552,18 @@ namespace H5Utils {
     const Consumers<I>& consumers,
     const std::array<hsize_t, N>& extent = internal::uniform<N>(5),
     hsize_t batch_size = defaults::batch_size) {
-    return Writer<N,I>(group, name, consumers, extent, batch_size);
+    WriterConfiguration<N> config;
+    config.name = name;
+    config.extent = extent;
+    config.batch_size = batch_size;
+    return Writer<N,I>(group, consumers, config);
+  }
+  template <size_t N, class I>
+  Writer<N,I> makeWriter(
+    H5::Group& group,
+    const Consumers<I>& consumers,
+    const WriterConfiguration<N>& config) {
+    return Writer<N,I>(group, consumers, config);
   }
 
   /** @brief CRefConsumer

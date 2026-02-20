@@ -5,22 +5,20 @@
 #ifndef TGCTRIGGERCONDALG_H
 #define TGCTRIGGERCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "TGCTriggerCondSvc/TGCTriggerLUTs.h"
 #include "TGCTriggerCondSvc/TGCTriggerBWCWReader.h"
 
-  class TGCTriggerCondAlg: public AthReentrantAlgorithm {
+  class TGCTriggerCondAlg: public AthCondAlgorithm {
 
   public:
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    using AthCondAlgorithm::AthCondAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    // avoids running CondAlg multiple times for the same input (ATEAM-617)
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
 

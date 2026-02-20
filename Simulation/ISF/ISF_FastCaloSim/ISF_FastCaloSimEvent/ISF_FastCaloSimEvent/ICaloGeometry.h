@@ -17,13 +17,13 @@ public:
 
   virtual void Validate ATLAS_NOT_THREAD_SAFE(int nrnd = 100) = 0;
 
-  virtual const CaloDetDescrElement *getDDE(Identifier identify) = 0;
+  virtual const CaloDetDescrElement *getDDE(Identifier identify) const = 0;
   virtual const CaloDetDescrElement *getDDE(int sampling, float eta, float phi,
                                             float *distance = 0,
-                                            int *steps = 0) = 0;
+                                            int *steps = 0) const = 0;
   virtual const CaloDetDescrElement *getFCalDDE(int sampling, float x, float y,
                                                 float z, float *distance = 0,
-                                                int *steps = 0) = 0;
+                                                int *steps = 0) const = 0;
 
   virtual double deta(int sample, double eta) const = 0;
   virtual void minmaxeta(int sample, double eta, double &mineta,

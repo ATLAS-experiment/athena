@@ -7,7 +7,7 @@
 #ifndef SCT_CONDITIONSALGORITHMS_SCT_DETECTORELEMENTCONDALG_H
 #define SCT_CONDITIONSALGORITHMS_SCT_DETECTORELEMENTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"
@@ -24,7 +24,7 @@ namespace InDetDD {
   class SCT_DetectorManager;
 }
 
-class SCT_DetectorElementCondAlg : public AthReentrantAlgorithm
+class SCT_DetectorElementCondAlg : public AthCondAlgorithm
 {
  public:
   SCT_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -33,7 +33,6 @@ class SCT_DetectorElementCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<GeoAlignmentStore> m_readKey;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/CTPConfig.h"
@@ -19,12 +19,10 @@ CTPConfig::CTPConfig() : L1DataBaseclass(),
                          m_LoadCtpFiles( true ),
                          m_LoadCtpcoreFiles( true ),
                          m_LoadCtpinFiles( true ),
-                         m_LoadCtpmonFiles( true ),
-                         m_CTPFiles( nullptr )
+                         m_LoadCtpmonFiles( true )
 {}
 
 CTPConfig::~CTPConfig() {
-   delete m_CTPFiles;
 }
 
 

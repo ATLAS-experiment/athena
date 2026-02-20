@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -101,6 +101,18 @@ def fromRunArgs(runArgs):
                 flags.Input.MCCampaign = mc_campaign
                 logDerivation.info('Will recover MC campaign to: %s', mc_campaign.value)
 
+    # Fix MC channel number with EVNT files
+    if allowedInputTypes[idx] == 'EVNT':
+        # runNumber is MC channel number in reco
+        if hasattr(runArgs, 'runNumber') and flags.Input.MCChannelNumber != runArgs.runNumber:
+            logDerivation.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
+            flags.Input.MCChannelNumber = runArgs.runNumber
+        elif flags.Input.MCChannelNumber == 0 and flags.Input.RunNumbers and flags.Input.RunNumbers[0] != 0:
+            logDerivation.info('Will recover MC channel number to: %d', flags.Input.RunNumbers[0])
+            flags.Input.MCChannelNumber = flags.Input.RunNumbers[0]
+        else:
+            logDerivation.info('MC channel number: %d', flags.Input.MCChannelNumber)
+
     # Pre-include
     processPreInclude(runArgs, flags)
 
@@ -179,11 +191,6 @@ def fromRunArgs(runArgs):
         for algo in cfg.getEventAlgos():
             if isinstance(algo, CompFactory.DerivationFramework.DerivationKernel):
                 algo.SkimmingTools = []
-
-    # PerfMonSD
-    if flags.PerfMon.doFullMonMT or flags.PerfMon.doFastMonMT:
-       from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-       cfg.merge(PerfMonMTSvcCfg(flags))
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg

@@ -24,7 +24,7 @@ StatusCode FPGATrackSimGNNRoadMakerTool::initialize()
 ///////////////////////////////////////////////////////////////////////
 // Functions
 
-StatusCode FPGATrackSimGNNRoadMakerTool::makeRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+StatusCode FPGATrackSimGNNRoadMakerTool::makeRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges, std::vector<FPGATrackSimRoad> & roads)
 {
     m_num_nodes = gnn_hits.size();
     doScoreCut(edges);
@@ -76,6 +76,7 @@ void FPGATrackSimGNNRoadMakerTool::doConnectedComponents()
     for (size_t i = 0; i < m_unique_indices.size(); i++) {
         m_labels[m_unique_indices[i]][0] = m_component[i][0];
     }
+
 }
 
 void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
@@ -94,14 +95,18 @@ void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
     std::vector<bool> visited(num_vertices(g), false);
 
     m_control_var.resize(num_vertices(g), -1);
-    m_component.resize(num_vertices(g));
+    m_component.resize(num_vertices(g), std::vector<int>(1, -1));
     int comp_id = 0;
-
+    
     for (Vertex v = 0; v < num_vertices(g); ++v){
         if(!visited[v] && boost::in_degree(v,g) == 0){
-            JunctionAwareVisitor JA_vis(comp_id, m_control_var, m_component, pred_map);
-            std::vector<boost::default_color_type> color_map(num_vertices(g)); 
-            breadth_first_search(g, v, visitor(JA_vis).color_map(boost::make_iterator_property_map(color_map.begin(), get(boost::vertex_index, g))));
+
+            // Create a color map to store state of the nodes during the BFS
+            std::vector<boost::default_color_type> color_storage(num_vertices(g)); 
+            auto color_map = boost::make_iterator_property_map(color_storage.begin(), get(boost::vertex_index,g));
+
+            JunctionAwareVisitor JA_vis(comp_id, m_control_var, m_component, pred_map, color_map);
+            breadth_first_search(g, v, visitor(JA_vis).color_map(color_map));
             // Mark visited vertices and reset control variables
             for (unsigned long u = 0; u != num_vertices(g); ++u){
                 if (m_control_var[u] != -1){
@@ -109,6 +114,8 @@ void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
                     m_control_var[u] = -1;
                 }
             }
+            // Clear predecessor map
+            pred_map.clear();
             ++comp_id;
         }
     }
@@ -123,7 +130,7 @@ void FPGATrackSimGNNRoadMakerTool::doJunctionAwareCC()
 
 void FPGATrackSimGNNRoadMakerTool::addRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, 
                                             const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits, 
-                                            std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+                                            std::vector<FPGATrackSimRoad> & roads)
 {
     roads.clear();
     m_roads.clear();
@@ -142,7 +149,7 @@ void FPGATrackSimGNNRoadMakerTool::addRoads(const std::vector<std::shared_ptr<co
     }
 
     roads.reserve(m_roads.size());
-    for (const FPGATrackSimRoad & r : m_roads) roads.emplace_back(std::make_shared<const FPGATrackSimRoad>(r));
+    roads = std::move(m_roads);
 }
 
 void FPGATrackSimGNNRoadMakerTool::addRoad(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, const std::vector<int>& road_hitIDs)
@@ -282,9 +289,9 @@ void FPGATrackSimGNNRoadMakerTool::reorderIndices()
 }
 
 JunctionAwareVisitor::JunctionAwareVisitor(int& in_current, std::vector<int>& in_control_vars, std::vector<std::vector<int>>& in_comps,
-                                           std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map) :
+                                           std::unordered_map<Vertex, std::vector<Vertex>>& in_pred_map, ColorMap in_cmap) :
   m_current_comp(in_current), m_control_vars(in_control_vars), m_components(in_comps),
-  m_pred_map(in_pred_map), m_initial_comp(in_current) {}
+  m_pred_map(in_pred_map), m_initial_comp(in_current), m_color_map(in_cmap) {}
 
 template <typename VertexT, typename GraphT>
 void JunctionAwareVisitor::discover_vertex(VertexT v, const GraphT& g)
@@ -301,27 +308,27 @@ void JunctionAwareVisitor::examine_edge(EdgeT e, const GraphT& g)
     auto src_node = source(e,g);
     auto tar_node = target(e,g);
     m_pred_map[tar_node].push_back(src_node);
+    process_edges(src_node, tar_node, g);
 
+    // If target node was already visited, propagate the component also to the nodes it is connected to
+    if ((get(m_color_map, tar_node) == boost::black_color) && (boost::out_degree(tar_node, g) > 0)){
+        m_control_vars[tar_node] = boost:: out_degree(tar_node,g) < 2 ? 1 : -2;
+        auto out_edges = boost::out_edges(tar_node, g);
+        for (auto it = out_edges.first; it != out_edges.second; ++ it){
+            Vertex next_dst = target(*it, g);
+            process_edges(tar_node, next_dst, g);
+        }
+    }
+}
+
+template <typename VertexT, typename GraphT>
+void JunctionAwareVisitor::process_edges(VertexT src_node, VertexT tar_node, const GraphT& g){
     std::vector<int> src_comp; // Store the components of the source that need to be tracked
 
     for(int comp : m_components[src_node]){
         if(comp >= m_initial_comp && 
            std::find(m_components[tar_node].begin(), m_components[tar_node].end(), comp) == m_components[tar_node].end()){
             src_comp.push_back(comp); // Components of source node not in target
-        }
-    }
-
-    // If source node has multiple in-edges, add the components from its predecessors
-    if (boost::in_degree(src_node, g) > 1){
-        auto in_edges = boost::in_edges(src_node, g);
-        for (auto it = in_edges.first; it != in_edges.second; ++it){
-            auto edge_src = source(*it, g);
-            for (int comp : m_components[edge_src]){
-                if((comp >= m_initial_comp) && (std::find(src_comp.begin(), src_comp.end(), comp) == src_comp.end()) &&
-                   (std::find(m_components[tar_node].begin(), m_components[tar_node].end(), comp) == m_components[tar_node].end())){
-                    src_comp.push_back(comp);
-                }
-            }
         }
     }
 
@@ -352,7 +359,7 @@ void JunctionAwareVisitor::examine_edge(EdgeT e, const GraphT& g)
                 visited.insert(node);
                 const auto& node_comps = m_components[node];
                 if((std::find(node_comps.begin(), node_comps.end(), m_current_comp) == node_comps.end()) &&
-                   (src_comp.empty() || std::find(node_comps.begin(), node_comps.end(), src_comp[i]) == node_comps.end())){ // Backpropagate with junction awareness
+                   (src_comp.empty() || std::find(node_comps.begin(), node_comps.end(), src_comp[i]) != node_comps.end())){ // Backpropagate with junction awareness
                     m_components[node].push_back(m_current_comp);
                 }
                 for (const auto& pred : m_pred_map[node]){

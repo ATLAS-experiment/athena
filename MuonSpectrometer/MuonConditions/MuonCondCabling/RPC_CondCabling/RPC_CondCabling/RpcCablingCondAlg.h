@@ -1,15 +1,11 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONCONDALG_RPCCABLINGCONDALG_H
 #define MUONCONDALG_RPCCABLINGCONDALG_H
 
-#include <array>
-#include <map>
-#include <string>
-
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
@@ -17,13 +13,18 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class RpcCablingCondAlg : public AthAlgorithm {
+#include <array>
+#include <map>
+#include <string>
+#include <list>
+
+class RpcCablingCondAlg : public AthCondAlgorithm {
 public:
     RpcCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual ~RpcCablingCondAlg() = default;
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
     typedef std::array<int, 64> sectorMap_t;

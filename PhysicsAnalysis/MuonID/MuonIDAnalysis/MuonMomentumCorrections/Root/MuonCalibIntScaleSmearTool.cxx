@@ -226,10 +226,18 @@ namespace CP
         // If no correction was found
         if(weightID == 0.5 && weightME == 0.5)
         {
-            double wME = mu.ME.calib_pt / mu.CB.calib_pt / std::pow(mu.expectedPercentResME, 2);
-            double wID = mu.ID.calib_pt / mu.CB.calib_pt / std::pow(mu.expectedPercentResID, 2);
-            weightID = wID / (wME + wID);
-            weightME = wME / (wME + wID);
+            if(mu.expectedPercentResME<std::numeric_limits<double>::epsilon() || 
+                mu.CB.calib_pt<std::numeric_limits<double>::epsilon()  || mu.expectedPercentResID<std::numeric_limits<double>::epsilon() ){
+                ATH_MSG_VERBOSE("Potential FPE caught! Continue with averaging ID+MS");
+                ATH_MSG_VERBOSE("mu.expectedPercentResME = "<<mu.expectedPercentResME); 
+                ATH_MSG_VERBOSE("mu.expectedPercentResID = "<<mu.expectedPercentResID);
+                ATH_MSG_VERBOSE("mu.CB.calib_pt          = "<<mu.CB.calib_pt);
+            } else {
+                double wME = mu.ME.calib_pt / mu.CB.calib_pt / std::pow(mu.expectedPercentResME, 2);
+                double wID = mu.ID.calib_pt / mu.CB.calib_pt / std::pow(mu.expectedPercentResID, 2);
+                weightID = wID / (wME + wID);
+                weightME = wME / (wME + wID);
+            }
         }
 
 

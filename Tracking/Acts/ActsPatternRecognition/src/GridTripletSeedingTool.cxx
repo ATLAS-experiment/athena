@@ -425,23 +425,21 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   }
 
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
-    std::ranges::sort(grid.at(i), [&](const Acts::SpacePointIndex2& a,
-                                      const Acts::SpacePointIndex2& b) {
-      return selectedSpacePointsR[a] < selectedSpacePointsR[b];
-    });
+    std::ranges::sort(
+        grid.at(i), [&](Acts::SpacePointIndex2 a, Acts::SpacePointIndex2 b) {
+          return selectedSpacePointsR[a] < selectedSpacePointsR[b];
+        });
   }
 
   Acts::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
-      Acts::SpacePointColumns::SourceLinks | Acts::SpacePointColumns::XY |
+      Acts::SpacePointColumns::CopyFromIndex | Acts::SpacePointColumns::XY |
       Acts::SpacePointColumns::ZR | Acts::SpacePointColumns::VarianceZ |
       Acts::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(Acts::SpacePointColumns::Strip);
   }
   selectedSpacePoints.reserve(grid.numberOfSpacePoints());
-  std::vector<Acts::SpacePointIndex2> copyFromIndices;
-  copyFromIndices.reserve(grid.numberOfSpacePoints());
   std::vector<Acts::SpacePointIndexRange2> gridSpacePointRanges;
   gridSpacePointRanges.reserve(grid.numberOfBins());
   for (std::size_t i = 0; i < grid.numberOfBins(); ++i) {
@@ -450,8 +448,7 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       const xAOD::SpacePoint* sp = selectedXAODSpacePoints[spIndex];
 
       auto newSp = selectedSpacePoints.createSpacePoint();
-      newSp.assignSourceLinks(
-          std::array<Acts::SourceLink, 1>{Acts::SourceLink(sp)});
+      newSp.copyFromIndex() = spIndex;
       newSp.xy() =
           std::array<float, 2>{static_cast<float>(sp->x() - beamSpotPos[0]),
                                static_cast<float>(sp->y() - beamSpotPos[1])};
@@ -478,15 +475,12 @@ StatusCode GridTripletSeedingTool::createSeeds2(
         newSp.topStripCenter() = std::array<float, 3>{
             topStripCenter.x(), topStripCenter.y(), topStripCenter.z()};
       }
-
-      copyFromIndices.push_back(spIndex);
     }
     std::uint32_t end = selectedSpacePoints.size();
     gridSpacePointRanges.emplace_back(begin, end);
   }
 
   // clear temporary
-  selectedXAODSpacePoints = {};
   selectedSpacePointsR = {};
 
   ACTS_VERBOSE("Number of space points after selection "
@@ -534,7 +528,6 @@ StatusCode GridTripletSeedingTool::createSeeds2(
   std::vector<Acts::SpacePointContainer2::ConstRange> topSpRanges;
 
   Acts::SeedContainer2 tmpSeedContainer;
-  tmpSeedContainer.reserve(seedContainer.capacity());
 
   for (const auto [bottom, middle, top] : grid.binnedGroup()) {
     ACTS_VERBOSE("Process middle bin " << middle);
@@ -592,31 +585,18 @@ StatusCode GridTripletSeedingTool::createSeeds2(
            topQuality <= seedQuality;
   };
 
-  seedContainer.reserve(tmpSeedContainer.size());
+  seedContainer.reserve(seedContainer.size() + tmpSeedContainer.size());
 
-  // Select the seeds
+  // Select and convert the seeds
   for (Acts::MutableSeedProxy2 seed : tmpSeedContainer) {
     if (m_seedQualitySelection && !selectionFunction(seed)) {
       continue;
     }
 
-    const xAOD::SpacePoint* bottom =
-        selectedSpacePoints.at(seed.spacePointIndices()[0])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-    const xAOD::SpacePoint* middle =
-        selectedSpacePoints.at(seed.spacePointIndices()[1])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-    const xAOD::SpacePoint* top =
-        selectedSpacePoints.at(seed.spacePointIndices()[2])
-            .sourceLinks()[0]
-            .get<const xAOD::SpacePoint*>();
-
-    auto outputSeed = std::make_unique<ActsTrk::Seed>(*bottom, *middle, *top);
-    outputSeed->setVertexZ(seed.vertexZ());
-    outputSeed->setQuality(seed.quality());
-    seedContainer.push_back(std::move(outputSeed));
+    seedContainer.push_back(Acts::ConstSeedProxy2(seed),
+                            [&](const Acts::SpacePointIndex2 spIndex) {
+                              return selectedXAODSpacePoints[spIndex];
+                            });
   }
 
   return StatusCode::SUCCESS;

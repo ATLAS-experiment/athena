@@ -6,7 +6,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/A
 n_events=5
 log_file="reco.log"
 
-ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern=""
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
@@ -14,7 +14,9 @@ Reco_tf.py \
              from ActsConfig.ActsConfigFlags import SeedingStrategy; \
              flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2; \
              flags.Tracking.doTruth=False; \
-             flags.Tracking.doPixelDigitalClustering=True" \
+             flags.Tracking.doPixelDigitalClustering=True; \
+             from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
+             flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;" \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --inputRDOFile ${input_rdo} \

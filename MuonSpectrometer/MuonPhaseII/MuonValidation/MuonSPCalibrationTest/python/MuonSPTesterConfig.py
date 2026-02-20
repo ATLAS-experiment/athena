@@ -29,7 +29,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
-    flags.Muon.doFastMMDigitization = True
     flags, cfg = setupGeoR4TestCfg(args,flags)
 
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg

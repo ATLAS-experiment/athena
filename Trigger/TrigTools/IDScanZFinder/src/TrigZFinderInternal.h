@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -58,8 +58,8 @@ public:
 
 protected:  // member functions
 
-    const std::string& getType() const { return m_type; }
-    const std::string& getName() const { return m_name; }
+    const std::string & getType() const { return m_type; }
+    const std::string & getName() const { return m_name; }
 
 
     // fills phi, rho, z, layer of spacepoints to simple vectors

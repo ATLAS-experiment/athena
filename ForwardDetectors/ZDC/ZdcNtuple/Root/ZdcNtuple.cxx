@@ -54,7 +54,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   declareProperty("flipDelay",  flipDelay = 0, "comment");
   declareProperty("reprocZdc",  reprocZdc = 0, "comment");
   declareProperty("auxSuffix",  auxSuffix = "", "comment");
-  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24 = Run 3");
+  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24,32,40 = Run 3");
   declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
   declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
   declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
@@ -150,9 +150,21 @@ StatusCode ZdcNtuple :: initialize ()
 	    
 	    if (nsamplesZdc == 24)
 	      {
-		ANA_MSG_INFO("Setting up forr 24 samples");
+		ANA_MSG_INFO("Setting up for 24 samples");
 		m_outputTree->Branch("zdc_raw", &t_raw24, "zdc_raw[2][4][2][2][24]/s"); // 24 samples
 		m_outputTree->Branch("rpd_raw", &t_rpdRaw, "rpd_raw[2][16][24]/s"); // 24 samples
+	      }
+	    if (nsamplesZdc == 32)
+	      {
+		ANA_MSG_INFO("Setting up for 32 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw32, "zdc_raw[2][4][2][2][32]/s"); // 32 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw32, "rpd_raw[2][16][32]/s"); // 32 samples
+	      }
+	    if (nsamplesZdc == 40)
+	      {
+		ANA_MSG_INFO("Setting up for 40 samples");
+		m_outputTree->Branch("zdc_raw", &t_raw40, "zdc_raw[2][4][2][2][40]/s"); // 40 samples
+		m_outputTree->Branch("rpd_raw", &t_rpdRaw40, "rpd_raw[2][16][40]/s"); // 40 samples
 	      }
 	  }
 	
@@ -692,10 +704,12 @@ void ZdcNtuple::processZdcNtupleFromModules()
 			  if (nsamplesZdc==7) t_raw7[iside][imod][ig][id][isamp]=0;
 			  if (nsamplesZdc==15) t_raw15[iside][imod][ig][id][isamp]=0;
 			  if (nsamplesZdc==24) t_raw24[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==32) t_raw32[iside][imod][ig][id][isamp]=0;
+			  if (nsamplesZdc==40) t_raw40[iside][imod][ig][id][isamp]=0;
 			}
 		    }
 		}
-	      if (nsamplesZdc==24)
+	      if (nsamplesZdc==24||nsamplesZdc==32||nsamplesZdc==40)
 		{
 		  for (int ch=0;ch<16;ch++)
 		    {
@@ -865,11 +879,13 @@ void ZdcNtuple::processZdcNtupleFromModules()
       ANA_MSG_DEBUG( "accessing ZdcSums" );
       for (const auto zdcSum : *zdcSums)
 	{
-	  if (zdcSum->zdcSide()==0 && enableCentroid && t_centroidDecorationsAvailable)
-	    {
-	      // new global sum
-	      t_centroidEventValid = centroidEventValidAcc(*zdcSum);
-	      t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
+	  if (zdcSum->zdcSide()==0) {
+	      // trap new global sum
+	      if (enableCentroid && t_centroidDecorationsAvailable) {
+	        t_centroidEventValid = centroidEventValidAcc(*zdcSum);
+	        t_cosDeltaReactionPlaneAngle = cosDeltaReactionPlaneAngleAcc(*zdcSum);
+	      }
+	      // no other branches are filled from global sum - skip to the real sides (C=-1 and A=1)
 	      continue;
 	    }
 	  int iside = 0;
@@ -1031,6 +1047,16 @@ void ZdcNtuple::processZdcNtupleFromModules()
 			{
 			  t_raw24[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
 			  t_raw24[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+			}
+		      if (nsamplesZdc == 32)
+			{
+			  t_raw32[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+			  t_raw32[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
+			}
+		      if (nsamplesZdc == 40)
+			{
+			  t_raw40[iside][imod][0][0][isamp] = g0dataAcc(*zdcMod).at(isamp);
+			  t_raw40[iside][imod][1][0][isamp] = g1dataAcc(*zdcMod).at(isamp);
 			}
 		    }
 		}

@@ -7,7 +7,7 @@
 #ifndef LARRECCONDITIONS_LARONOFFMAPPINGALG_H
 #define LARRECCONDITIONS_LARONOFFMAPPINGALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -15,16 +15,16 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 
-class LArOnOffMappingAlg: public AthAlgorithm {
+class LArOnOffMappingAlg: public AthCondAlgorithm {
 
 public:
   //Delegate constructor:
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   
   virtual ~LArOnOffMappingAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 
  private:

@@ -73,6 +73,7 @@ public:
   virtual bool unlinkedAsFakes() const = 0;
   virtual bool plotDuplicateRates() const = 0;
   virtual bool plotHitsOnTracks() const = 0;
+  virtual bool plotHitsOnTracksExpert() const = 0;
   virtual bool plotHitsOnTracksReference() const = 0;
   virtual bool plotHitsOnMatchedTracks() const = 0;
   virtual bool plotHitsOnFakeTracks() const = 0;

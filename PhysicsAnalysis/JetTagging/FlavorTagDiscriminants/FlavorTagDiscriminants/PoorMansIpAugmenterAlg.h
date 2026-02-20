@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOR_MANS_TRACK_AUGMENTER_ALG_HH
@@ -65,21 +65,21 @@ namespace FlavorTagDiscriminants {
 
     // accessors for beam spot uncertainty
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_beam_sigma_x {
-      this, "beamspotSigmaX", "EventInfo.beamPosSigmaX",
+      this, "beamspotSigmaX", m_eventInfoKey, "beamPosSigmaX",
       "Beam spot position sigma in X"
     };
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_beam_sigma_y {
-      this, "beamspotSigmaY", "EventInfo.beamPosSigmaY",
+      this, "beamspotSigmaY", m_eventInfoKey, "beamPosSigmaY",
       "Beam spot position sigma in Y"
     };
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_beam_sigma_z {
-      this, "beamspotSigmaZ", "EventInfo.beamPosSigmaZ",
+      this, "beamspotSigmaZ", m_eventInfoKey, "beamPosSigmaZ",
       "Beam spot position sigma in Z"
     };
     // note that this last entry is a covariance: the units are mm^2,
     // whereas the above have units of mm
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_beam_cov_xy {
-      this, "beamspotCovarianceXY", "EventInfo.beamPosSigmaXY",
+      this, "beamspotCovarianceXY", m_eventInfoKey, "beamPosSigmaXY",
       "Beam spot covariance in XY"
     };
   };

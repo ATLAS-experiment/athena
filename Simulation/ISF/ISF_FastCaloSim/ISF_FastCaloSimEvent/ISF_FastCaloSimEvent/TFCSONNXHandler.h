@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *
  * Class for a neural network read in the ONNX format.
  * Derived from the abstract base class VNetworkBase
@@ -64,7 +64,7 @@ public:
    *
    * @param bytes    byte content of a .onnx file, (which are a subset
    *                 if proto files). Allows TFCSONNXHandler objects to be
-   *                 created from data in memory, retrived rom any source.
+   *                 created from data in memory, retrieved from any source.
    *                 The bytes are not copied interally, and must remain
    *                 in memory while the net is in use.
    *                 (TODO check that assertion)

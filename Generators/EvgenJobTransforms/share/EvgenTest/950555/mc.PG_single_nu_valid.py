@@ -11,17 +11,20 @@ class Sample(EvgenConfig):
         self.keywords = ["singleParticle", "neutrino"]
         self.contact = ["dhirsch@mail.cern.ch"]
         self.nEventsPerJob = 100
-        self.generators += ["ParticleGun"]
 
     def setupProcess(self, flags):
         # TODO: update once we have a proper PG fragment
         sampleConfig = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
 
-        import ParticleGun as PG
-        pg = PG.ParticleGun(randomStream="SINGLE", randomSeed=flags.Random.SeedOffset)
-        pg.sampler.pid = 12
-        pg.sampler.mom = PG.EEtaMPhiSampler(energy=50000, eta=0)
+        from ParticleGun.ParticleGunConfig import ParticleGun_SteeredSingleParticleCfg
+        pg = ParticleGun_SteeredSingleParticleCfg(
+            flags,
+            pid=12,
+            samplerType="EEtaMPhi",
+            energy=50000,
+            eta=0,
+        )
 
-        sampleConfig.addEventAlgo(pg)
+        sampleConfig.merge(pg)
 
         return sampleConfig

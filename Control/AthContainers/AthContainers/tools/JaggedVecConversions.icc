@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/tools/JaggedVecConversions.icc
@@ -7,6 +7,9 @@
  * @date Jul, 2024
  * @brief Conversions for accessing jagged vector variables.
  */
+
+
+#include "CxxUtils/throw_out_of_range.h"
 
 
 namespace SG { namespace detail {
@@ -39,7 +42,7 @@ auto JaggedVecConstConverter<PAYLOAD_T>::operator() (const JaggedVecEltBase& elt
   size_t beg = elt.begin(&elt - m_elts);
   size_t end = elt.end();
   if (beg > end || end > m_payload.size()) {
-    throw std::out_of_range ("JaggedVecConstConverter");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, end, m_payload.size(), this);
   }
   const Payload_t* payload = m_payload.data();
   return element_type (payload + beg, payload + end);
@@ -218,7 +221,7 @@ auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) -> reference
 {
   size_t beg = this->elt_begin();
   size_t end = this->elt_end();
-  if (i >= (end-beg)) throw std::out_of_range ("JaggedVecProxyT");
+  if (i >= (end-beg)) CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, i, end-beg, this);
   return m_payload[i+beg];
 }
 
@@ -233,7 +236,7 @@ auto JaggedVecProxyT<PAYLOAD_T, BASE>::at (size_t i) const -> const_reference
 {
   size_t beg = this->elt_begin();
   size_t end = this->elt_end();
-  if (i >= (end-beg)) throw std::out_of_range ("JaggedVecProxyT");
+  if (i >= (end-beg)) CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, i, end-beg, this);
   return m_payload[i+beg];
 }
 
@@ -815,7 +818,7 @@ auto JaggedVecConverter<PAYLOAD_T>::operator() (const SG::JaggedVecEltBase& elt)
   size_t beg = elt.begin(idx);
   size_t end = elt.end();
   if (beg > end || end > m_payload.size()) {
-    throw std::out_of_range ("JaggedVecConverter");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, end, m_payload.size(), this);
   }
   const Payload_t* payload = m_payload.data();
   return element_type (payload + beg, payload + end);

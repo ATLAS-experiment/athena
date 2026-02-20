@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_GEOMODEL_TRTDETECTORTOOL_H
@@ -10,11 +10,9 @@
 
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "CxxUtils/checker_macros.h"
 #include <string>
 
 namespace InDetDD {
@@ -33,11 +31,8 @@ public:
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
 
-  // Register callback function on CondDB object
-  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override final;
-
   // Callback function itself
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override final;
+  virtual StatusCode align() override final;
 
 private:
   Gaudi::Property<bool> m_useOldActiveGasMixture{this,"UseOldActiveGasMixture",false};
@@ -51,7 +46,6 @@ private:
   Gaudi::Property<bool> m_doKryptonMixture{this,"DoKryptonMixture",true};
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
 
   Gaudi::Property<bool> m_dumpStrawStatus{this, "DumpStrawStatus", false};
   Gaudi::Property<std::string> m_strawStatusFile{this, "StrawStatusFile", ""};

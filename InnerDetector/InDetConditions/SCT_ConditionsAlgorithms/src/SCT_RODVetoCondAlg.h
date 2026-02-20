@@ -17,7 +17,7 @@
 #define SCT_CONDITIONSALGORITHMS_RODVETOCONDALG_H 
 
 // Athena
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "SCT_Cabling/ISCT_CablingTool.h"
 #include "SCT_ConditionsData/IdentifierSet.h"
@@ -31,7 +31,7 @@
 class SCT_ID;
 
 /// Algorithm needs to show calling the SCT_RODVeto to exclude bad components
-class SCT_RODVetoCondAlg : public AthReentrantAlgorithm {
+class SCT_RODVetoCondAlg : public AthCondAlgorithm {
  public:
   SCT_RODVetoCondAlg(const std::string &name, ISvcLocator *pSvcLocator);
   virtual ~SCT_RODVetoCondAlg() = default;
@@ -39,7 +39,6 @@ class SCT_RODVetoCondAlg : public AthReentrantAlgorithm {
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   ToolHandle<ISCT_CablingTool> m_cabling{this, "SCT_CablingTool", "SCT_CablingTool", "Tool to retrieve SCT Cabling"};

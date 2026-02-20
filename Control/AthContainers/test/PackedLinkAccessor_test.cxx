@@ -517,7 +517,7 @@ size_t asmtest [[maybe_unused]] (SG::AuxElement& e,
   return out;
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainers/PackedLinkAccessor_test\n";

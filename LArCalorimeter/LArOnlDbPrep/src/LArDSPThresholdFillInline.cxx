@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDSPThresholdFillInline.h"
@@ -289,33 +289,33 @@ StatusCode LArDSPThresholdFillInline::stop() {
 
     ATH_CHECK( detStore()->retrieve(attr,m_key) );
 
-    const LArDSPThresholdsFlat* cont=new LArDSPThresholdsFlat(attr);
+    LArDSPThresholdsFlat cont(attr);
 
 
-    std::ostream *out = &(std::cout); 
     std::ofstream outfile;
-    if (m_outFileName.size()) {
-      outfile.open(m_outFileName.c_str(),std::ios::out);
-      if (outfile.is_open()) {
-	ATH_MSG_INFO ( "Writing to file " << m_outFileName );
-	out = &outfile;
-      }
-      else
-	ATH_MSG_ERROR ( "Failed to open file " << m_outFileName );
+    if (!m_outFileName.size()) {
+      ATH_MSG_ERROR("No output file specified");
+      return StatusCode::FAILURE;
+    }
+    outfile.open(m_outFileName.c_str(),std::ios::out);
+    if (outfile.is_open()) {
+      ATH_MSG_INFO ( "Writing to file " << m_outFileName );
+    }
+    else {
+      ATH_MSG_ERROR ( "Failed to open file " << m_outFileName );
+      return StatusCode::FAILURE;
     }
 
     std::vector<HWIdentifier>::const_iterator chanIt=m_onlineID->channel_begin();
     std::vector<HWIdentifier>::const_iterator chanIt_e=m_onlineID->channel_end ();
     for (;chanIt!=chanIt_e;++chanIt) {
       const HWIdentifier chid=*chanIt;    
-      (*out) << std::fixed << chid.get_compact() << " " << cont->tQThr(chid) << " " << cont->samplesThr(chid) << " " << cont->trigSumThr(chid) 
-	     << std::endl;
+      outfile << std::fixed << chid.get_compact() << " " << cont.tQThr(chid) << " " << cont.samplesThr(chid) << " " << cont.trigSumThr(chid)
+              << std::endl;
 
     } //end if loop over channels
 
-    if (outfile.is_open())
-      outfile.close();
-    delete cont;
+    outfile.close();
   }// end if m_dump
 
   return StatusCode::SUCCESS;

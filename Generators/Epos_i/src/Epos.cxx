@@ -21,6 +21,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/HeavyIon.h"
 #include "AtlasHepMC/SimpleVector.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "Epos_i/Epos.h"
 #include "CRMChepevt.h"
@@ -204,7 +205,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
     evt->set_event_number(m_events);
     HepMC::set_random_states(evt, m_seeds );
     evt->weights().push_back(1.0);
-    GeVToMeV(evt);
+    MC::GeVToMeV(evt); //Only scales momenta and masses
 #endif
 
     std::vector<HepMC::GenParticlePtr> beams;

@@ -286,16 +286,16 @@ bool absleadTrackEta(const xAOD::TauJet &tau, double &out){
   return true;
 }
 
+// -1111 is a default/fallback value used in the original code where this variable was previously calculated 
 bool leadTrackDeltaEta(const xAOD::TauJet &tau, double &out){
-  static const SG::ConstAccessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
-  float absDeltaEta = acc_absDeltaEta(tau);
+  float absDeltaEta =  tau.nTracks() > 0 ? std::abs( tau.track(0)->track()->eta() - tau.eta() ) : -1111.;   
   out = std::max(0.f, absDeltaEta);
   return true;
 }
 
+// -1111 is a default/fallback value used in the original code where this variable was previously calculated. 
 bool leadTrackDeltaPhi(const xAOD::TauJet &tau, double &out){
-  static const SG::ConstAccessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
-  float absDeltaPhi = acc_absDeltaPhi(tau);
+  float absDeltaPhi =  tau.nTracks() > 0 ? std::abs( tau.track(0)->track()->p4().DeltaPhi(tau.p4()) ) : -1111.;  
   out = std::max(0.f, absDeltaPhi);
   return true;
 }

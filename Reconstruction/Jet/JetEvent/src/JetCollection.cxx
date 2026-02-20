@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,6 +21,9 @@ JetCollection::JetCollection( SG::OwnershipPolicy own)  :
   m_keyDescInstance.m_Stores = JetKeyDescriptorInstance::instance()->m_Stores;
   m_keyDescInstance.m_ConstStores = JetKeyDescriptorInstance::instance()->m_ConstStores;
 }
+// Coverity warns about SG::ExcConstStorable being thrown from the isValid(),
+// but that can't actually happen.
+//coverity[uncaught_except]
 JetCollection::~JetCollection(){
 
   //std::cout << " JetCollection deleting " << m_jetAuthor <<std::endl;

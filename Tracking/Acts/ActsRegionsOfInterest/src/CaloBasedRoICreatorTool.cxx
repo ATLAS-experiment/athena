@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/CaloBasedRoICreatorTool.h"
@@ -40,7 +40,7 @@ StatusCode CaloBasedRoICreatorTool::defineRegionsOfInterest(const EventContext& 
   SG::ReadHandle< ROIPhiRZContainer > caloClustersHandle = SG::makeHandle( m_caloClusterROIKey, ctx );
   ATH_CHECK( caloClustersHandle.isValid() );
   const ROIPhiRZContainer* caloClusters = caloClustersHandle.cptr();
-  ATH_MSG_DEBUG("   \\__ Retrived " << caloClusters->size() << " elements");
+  ATH_MSG_DEBUG("   \\__ Retrieved " << caloClusters->size() << " elements");
 
   // Add component RoIs
   collectionRoI.back()->reserve(caloClusters->size());

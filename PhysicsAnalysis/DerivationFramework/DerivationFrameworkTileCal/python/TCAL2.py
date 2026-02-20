@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,12 +16,19 @@ def TCAL2MbtsToVectorsToolCfg(flags, **kwargs):
     acc.merge(LArGMCfg(flags))
 
     kwargs.setdefault('name', 'TCAL2MbtsToVectorsTool')
-    kwargs.setdefault('Prefix', 'TCAL2_mbts_')
+    prefix = kwargs.pop('Prefix', 'TCAL2_mbts_')
+    kwargs.setdefault("Energy", prefix + "energy")
+    kwargs.setdefault("Time", prefix + "time")
+    kwargs.setdefault("Eta", prefix + "eta")
+    kwargs.setdefault("Phi", prefix + "phi")
+    kwargs.setdefault("Quality", prefix + "quality")
+    kwargs.setdefault("Type", prefix + "type")
+    kwargs.setdefault("Module", prefix + "module")
+    kwargs.setdefault("Channel", prefix + "channel")
     kwargs.setdefault('SaveEtaPhiInfo', True)
     kwargs.setdefault('CellContainer', 'MBTSContainer')
 
-    MbtsToVectorsTool = CompFactory.DerivationFramework.MbtsToVectorsTool
-    acc.addPublicTool(MbtsToVectorsTool(**kwargs), primary = True)
+    acc.setPrivateTools(CompFactory.DerivationFramework.MbtsToVectorsTool(**kwargs))
 
     return acc
 
@@ -29,23 +36,11 @@ def TCAL2MbtsToVectorsToolCfg(flags, **kwargs):
 def TCAL2E4prToVectorsToolCfg(flags, **kwargs):
     """ Configure the E4prToVectorsTool augmentation tool """
 
-    acc = ComponentAccumulator()
-
-    from TileGeoModel.TileGMConfig import TileGMCfg
-    acc.merge(TileGMCfg(flags))
-
-    from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    acc.merge(LArGMCfg(flags))
-
     kwargs.setdefault('name', 'TCAL2E4prToVectorsTool')
     kwargs.setdefault('Prefix', 'TCAL2_e4pr')
     kwargs.setdefault('SaveEtaPhiInfo', False)
     kwargs.setdefault('CellContainer', 'E4prContainer')
-
-    MbtsToVectorsTool = CompFactory.DerivationFramework.MbtsToVectorsTool
-    acc.addPublicTool(MbtsToVectorsTool(**kwargs), primary = True)
-
-    return acc
+    return TCAL2MbtsToVectorsToolCfg(flags, **kwargs)
 
 
 def TCAL2KernelCfg(flags, name='TCAL2Kernel', **kwargs):
@@ -57,9 +52,9 @@ def TCAL2KernelCfg(flags, name='TCAL2Kernel', **kwargs):
 
     cellsToVectorstools = []
     if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:
-        cellsToVectorstools.append( acc.getPrimaryAndMerge(TCAL2MbtsToVectorsToolCfg(flags, Prefix=f'{prefix}mbts_')) )
+        cellsToVectorstools.append( acc.addPublicTool(acc.popToolsAndMerge(TCAL2MbtsToVectorsToolCfg(flags, Prefix=f'{prefix}mbts_'))) )
     if flags.GeoModel.Run is LHCPeriod.Run2:
-        cellsToVectorstools += acc.getPrimaryAndMerge(TCAL2E4prToVectorsToolCfg(flags, Prefix=f'{prefix}e4pr_'))
+        cellsToVectorstools.append ( acc.addPublicTool(acc.popToolsAndMerge(TCAL2E4prToVectorsToolCfg(flags, Prefix=f'{prefix}e4pr_'))) )
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, AugmentationTools = cellsToVectorstools))

@@ -13,7 +13,6 @@
 
    <class name="ITPCnvSvc" />
    <class name="ITPCnvBase" />
-   <class name="ILockable" />
 
    <class name="Ath::DsoDb" />
    <class name="Ath::DsoDb::DsoMap_t" />

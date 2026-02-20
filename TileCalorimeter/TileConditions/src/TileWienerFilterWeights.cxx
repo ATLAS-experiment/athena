@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TileWienerFilterWeights.h"
@@ -14,21 +14,18 @@ using std::memset;
 TileWienerFilterWeights::TileWienerFilterWeights()
   : m_Luminosity(40)
   , m_loaded(false)
-  , m_weights(nullptr)
 {
 }
 
 TileWienerFilterWeights::~TileWienerFilterWeights()
 {
-  if (m_weights) delete m_weights;
 }
 
 void TileWienerFilterWeights::loadWeights(MsgStream &log)
 {
   log<<MSG::DEBUG<<"TileWienerFilterWeights::loadWeights"<<endmsg;
 
-  m_weights = new TileWienerFilterWeightsStruct;
-  memset(m_weights,0,sizeof(TileWienerFilterWeightsStruct));
+  m_weights = std::make_unique<TileWienerFilterWeightsStruct>();
 
   // set luminosity
   m_weights->luminosity = m_Luminosity;

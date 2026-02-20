@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************************************
@@ -13,7 +13,6 @@
 #define PIXCALIB_H
 
 #include "TKey.h"
-#include "TString.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TF1.h"
@@ -38,7 +37,7 @@ class Calib {
             
             if(saveFile){
                 m_savefile = saveFile;
-                m_wFile = std::make_unique<TFile>(m_layers.at(whichPart)+".HIST.root","RECREATE");
+                m_wFile = std::make_unique<TFile>((m_layers.at(whichPart)+".HIST.root").c_str(),"RECREATE");
             }
             if( not moduleName.empty() ){
                 m_runOneMOD = true;
@@ -61,14 +60,14 @@ class Calib {
         std::unique_ptr<TFile> m_wFile; 
         
         bool m_runOneMOD = false;
-        TString m_testMOD = "";
+        std::string m_testMOD = "";
         
         static constexpr float m_chi_error = 0.05;
         
         // privated vars 
         int m_whichPart = -1;
-        const std::array<TString, 4> m_MODprefixes{"L0", "L1", "L2", "D"};
-        const std::array<TString, 4> m_layers{"Blayer", "L1", "L2", "Disk"};
+        const std::array<std::string, 4> m_MODprefixes{"L0", "L1", "L2", "D"};
+        const std::array<std::string, 4> m_layers{"Blayer", "L1", "L2", "Disk"};
         
         static constexpr int   m_etaBins  = 144;
         static constexpr int   m_phiBins  = 320;
@@ -104,8 +103,8 @@ class Calib {
         int pixelType(int iphi, int ieta, bool isForTOT = false);
         TIter getRodIterator(const TFile & inputFile);
         TIter getModuleIterator( TDirectoryFile* rodDir);
-        TH2F* get2DHistogramFromPath( TDirectoryFile* rodDir, const TString & moduleName, const TString & histName, int charge=-1);
-        bool moduleInPart(const TString & modName);
+        TH2F* get2DHistogramFromPath( TDirectoryFile* rodDir, const std::string & moduleName, const std::string & histName, int charge=-1);
+        bool moduleInPart(const std::string & modName);
         std::vector<float> getParams(const TF1 *f, unsigned int params);
         std::vector<float> getParams_quality(const TF1 *f);
         bool reFit_normalPix(std::vector<float> &params, std::vector<float> &q, std::vector<float> &qerr, std::vector<float> &tot, std::vector<float> &toterr, std::vector<float> &sig, std::vector<float> &sigerr, const unsigned int fe);

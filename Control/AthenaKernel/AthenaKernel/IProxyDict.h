@@ -1,14 +1,14 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IPROXYDICT_H
 # define ATHENAKERNEL_IPROXYDICT_H
 
 // INCLUDES
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "AthenaKernel/IStringPool.h"
 #include "AthenaKernel/IHiveStore.h"
 #include "AthenaKernel/DataObjectSharedPtr.h"
@@ -29,7 +29,7 @@ class IConverter;
 
 
 /**
- * @brief A proxy dictionary. 
+ * @brief A proxy dictionary.
  *
  * This is the internal interface used by StoreGateSvc and similar.
  * It provides interfaces for taking a set of @c DataProxy objects
@@ -69,7 +69,7 @@ public:
    * is exactly one object with the given @c CLID in the store.
    * Finding a proxy via a default key is considered deprecated
    * for the case of the event store.
-   * 
+   *
    * Returns 0 to flag failure
    */
   virtual SG::DataProxy* proxy(const CLID& id,
@@ -79,7 +79,7 @@ public:
   /**
    * @brief Get a proxy referencing a given transient object.
    * @param pTransient The object to find.
-   * 
+   *
    * Returns 0 to flag failure
    */
   virtual SG::DataProxy* proxy(const void* const pTransient) const=0;

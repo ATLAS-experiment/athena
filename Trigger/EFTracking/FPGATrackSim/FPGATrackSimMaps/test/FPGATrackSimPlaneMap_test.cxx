@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 /**
  * @file FPGATrackSimSSMap_test.cxx
  * @brief Unit tests for FPGATrackSimSSMap
@@ -63,7 +63,8 @@ int main(int, char**)
     std::ifstream finTest(pmap_path);
     if (!finTest.is_open())
     {
-        throw ("FPGATrackSimPlaneMap Couldn't open " + pmap_path);
+        std::cerr << "FPGATrackSimPlaneMap Couldn't open " << pmap_path << std::endl;
+        return 1;
     }
     vector<int> overrides;    
     finTest.close();

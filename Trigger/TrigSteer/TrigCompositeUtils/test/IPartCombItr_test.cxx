@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -150,7 +150,7 @@ void checkReset()
   std::vector<std::unique_ptr<Decision>> owning;
   std::vector<LinkInfo<xAOD::IParticleContainer>> features1 = createLinkInfoVec(3, owning);
   std::vector<LinkInfo<xAOD::IParticleContainer>> features2 = createLinkInfoVec(2, owning);
-  Combinations combos({2, 1}, {features1, features2}, FilterType::All);
+  Combinations combos({2, 1}, {std::move(features1), std::move(features2)}, FilterType::All);
   auto itr = combos.begin();
   // Purposefully exhaust it
   while(!itr.exhausted())

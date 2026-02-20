@@ -179,12 +179,12 @@ dqm_core::Result * dqm_algorithms::BinsDiffFromStripMedianOnline::execute(const 
       binOnline onebin = {eta,phi,k,l,binvalue,outstandingRatio};
       Allbins.push_back(onebin);
       if(std::abs(outstandingRatio) > rthreshold ) {
-        if( VisualMode  && (binvalue / maxInMap < suppressRedFactor) ){
+        if( VisualMode  && maxInMap > 0 && (binvalue / maxInMap < suppressRedFactor) ){
 	  continue;
 	}
         redbins.push_back(onebin);
       }else if(std::abs(outstandingRatio) > gthreshold ){ 
-	if( VisualMode  && (binvalue / maxInMap < suppressFactor) ){
+	if( VisualMode  && maxInMap > 0 && (binvalue / maxInMap < suppressFactor) ){
 	  continue;
 	}
 	yellowbins.push_back(onebin);

@@ -1,11 +1,12 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
+from typing import Any, cast
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
+from TrigConfStorage.TriggerCrestUtil import TriggerCrestUtil
 
-from typing import Optional
 from functools import cache
 import json
 
@@ -21,55 +22,60 @@ def l1menu_generated():
         return False
 
 
-@cache
-def getTrigConfFromCool(runNumber, lumiBlock):
-    from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil 
-    db = TriggerCoolUtil.GetConnection('CONDBR2' if runNumber > 230000 else 'COMP200')
-    runRange = [[(runNumber,lumiBlock), (runNumber,lumiBlock)]]
-    d = {key: value for key, value in TriggerCoolUtil.getHLTConfigKeys(db, runRange)[runNumber].items() if  key in ["SMK", "DB"]}
-    for (hltpsk, firstlb, lastlb) in TriggerCoolUtil.getHLTPrescaleKeys(db, runRange)[runNumber]['HLTPSK2']:
-        if firstlb<=lumiBlock and lumiBlock<=lastlb:
-            d['HLTPSK'] = hltpsk
-            break
-    for (l1psk, firstlb, lastlb) in TriggerCoolUtil.getL1ConfigKeys(db, runRange)[runNumber]['LVL1PSK']:
-        if firstlb<=lumiBlock and lumiBlock<=lastlb:
-            d['L1PSK'] = l1psk
-            break
-    for (bgsk, firstlb, lastlb) in TriggerCoolUtil.getBunchGroupKey(db, runRange)[runNumber]['BGKey']:
-        if firstlb<=lumiBlock and lumiBlock<=lastlb:
-            d['BGSK'] = bgsk
-            break
-
-    if 'L1PSK' not in d:
-        msg = f"Did not find an L1 PSK for run {runNumber} and lumi block {lumiBlock} in COOL"
-        log.error(msg)
-        raise RuntimeError(msg)
-    if 'HLTPSK' not in d:
-        msg = f"Did not find an HLT PSK for run {runNumber} and lumi block {lumiBlock} in COOL"
-        log.error(msg)
-        raise RuntimeError(msg)
-    if 'BGSK' not in d:
-        msg = f"Did not find a bunch group set key for run {runNumber} and lumi block {lumiBlock} in COOL"
-        log.error(msg)
-        raise RuntimeError(msg)
-    log.info("Extracted the following info for run %d and lumi block %d from COOL: %r", runNumber, lumiBlock, d)
-    return d
-
+def getTrigConfFromConditions(runNumber, lumiBlock, flags) -> dict[str, int | str]:
+    if flags.Trigger.useCrest:
+        return getTrigConfFromCrest(runNumber, lumiBlock, flags.Trigger.crestServer)
+    else:
+        return getTrigConfFromCool(runNumber, lumiBlock)
 
 @cache
-def createJsonMenuFiles(run, lb):
-    """Retrieve Run-2 trigger configuration from the DB and save as Run3 .JSON files"""
+def getTrigConfFromCrest(runNumber, lumiBlock, crestServer) -> dict[str, int | str]:
+    trigConf = TriggerCrestUtil.getTrigConfKeys(runNumber, lumiBlock, server=crestServer)
+    log.info("Extracted the following info for run %d and lumi block %d from CREST: %r",
+             runNumber, lumiBlock, trigConf)
+    for key, value in trigConf.items():
+        if value is None:
+            msg: str = f"Did not find {key} for run {runNumber} and lumi block {lumiBlock}"
+            log.error(msg)
+            raise RuntimeError(msg)
+    return trigConf
+
+@cache
+def getTrigConfFromCool(runNumber, lumiBlock) -> dict[str, int | str]:
+    from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
+    trigConf = TriggerCoolUtil.getTrigConfKeys(runNumber, lumiBlock)
+    log.info("Extracted the following info for run %d and lumi block %d from COOL: %r",
+             runNumber, lumiBlock, trigConf)
+    for key, value in trigConf.items():
+        if value is None:
+            msg: str = f"Did not find {key} for run {runNumber} and lumi block {lumiBlock}"
+            log.error(msg)
+            raise RuntimeError(msg)
+    return trigConf
+
+def createJsonMenuFiles(run, lb, flags):
+    crestServer: str | None = flags.Trigger.crestServer if flags.Trigger.useCrest else None
+    return _createJsonMenuFiles(run, lb, crestServer)
+
+@cache
+def _createJsonMenuFiles(run, lb, crestServer: str | None = None) -> dict[str, int | str]:
+    """Retrieve Run-2 trigger configuration from the DB and save as Run3 .JSON files
+    returns the trigger DB keys used, or None if the L1 menu has already been generated
+    """
     import subprocess
 
     if l1menu_generated():
         log.error("L1 menu has already been generated")
-        return None
+        return None  # type: ignore
 
     log.info("Configuring Run-1&2 to Run-3 configuration metadata conversion")
-    triggerDBKeys = getTrigConfFromCool(run, lb)
+    if crestServer is not None:
+        triggerDBKeys = getTrigConfFromCrest(run, lb, crestServer)
+    else:
+        triggerDBKeys = getTrigConfFromCool(run, lb)
     triggerDBKeys['DB'] = 'TRIGGERDB' if run > 230000 else 'TRIGGERDB_RUN1'
 
-    cmd = "TrigConfReadWrite -i {DB} {SMK},{L1PSK},{HLTPSK},{BGSK} -o r3json > Run3ConfigFetchJSONFiles.log".format(**triggerDBKeys)
+    cmd = "TrigConfReadWrite -i {DB} {SMK},{LVL1PSK},{HLTPSK},{BGSK} -o r3json > Run3ConfigFetchJSONFiles.log".format(**triggerDBKeys)
     log.info("Running command '%s'", cmd)
     filesFetchStatus = subprocess.run(cmd, shell=True)
     assert filesFetchStatus.returncode == 0, "TrigConfReadWrite failed to fetch JSON files"
@@ -79,33 +85,63 @@ def createJsonMenuFiles(run, lb):
 # This interprets the Trigger.triggerConfig flag according to
 # https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag#triggerConfig_in_Run_3
 def getTrigConfigFromFlag( flags ):
+    flags.dump("Input", evaluate=True)
+    # run and lb are only needed if source is DB
+    run: int = flags.Input.RunNumbers[0] if flags.Input.RunNumbers else -1
+    lb: int = flags.Input.LumiBlockNumbers[0] if flags.Input.LumiBlockNumbers else 0
+    return _getTrigConfigFromFlag(triggerConfig=flags.Trigger.triggerConfig, run=run, lb=lb,
+                                  useCrest=flags.Trigger.useCrest, crestServer=flags.Trigger.crestServer)
+
+@cache
+def _getTrigConfigFromFlag(*, triggerConfig, run, lb, useCrest, crestServer) -> dict[str, Any]:
+    log.info("Parsing trigger configuration from flag Trigger.triggerConfig='%s' for run=%d and lb=%d", 
+             triggerConfig, run, lb)
+    log.info("Crest usage flags are: Trigger.useCrest=%s, Trigger.crestServer=%s", useCrest, crestServer)
     # Pad the triggerConfig value and extract available fields:
-    source, dbconn, keys = (flags.Trigger.triggerConfig+":::").split(":")[:3]
+    dbconn: str
+    source, dbconn, keys = (triggerConfig+":::").split(":")[:3]
     smk,l1psk,hltpsk,bgsk = (keys+",,,").split(",")[:4]
     # Convert to int or None:
     smk, l1psk, hltpsk, bgsk = (int(k) if k!="" else None for k in (smk, l1psk, hltpsk, bgsk))
+    source: str = source.upper()
 
-    if source == "DB" and (smk is None or l1psk is None or hltpsk is None or bgsk is None):
-        runNumber = flags.Input.RunNumbers[0]
-        lbNumber = flags.Input.LumiBlockNumbers[0]
+    if source == "DB":
+        if run < 0:
+            msg: str = "Run number is required to extract trigger conditions"
+            log.error(msg)
+            raise RuntimeError(msg)
+        # If any of the keys or DB connection is missing, retrieve from conditions:
+        if useCrest:
+            trigConf: dict[str, int | str] = getTrigConfFromCrest(run, lb, crestServer)
+        else:
+            trigConf: dict[str, int | str] = getTrigConfFromCool(run, lb)
         if dbconn == "":
-            dbconn = getTrigConfFromCool(runNumber, lbNumber)["DB"]
+            dbconn = cast(str, trigConf["DB"])
+            
         if dbconn in ["TRIGGERDB_RUN3", "TRIGGERDBDEV1_I8", "TRIGGERDBDEV1", "TRIGGERDBDEV2"]:
-            d = getTrigConfFromCool(runNumber, lbNumber)            
             if smk is None:
-                smk = d["SMK"]
+                smk = trigConf["SMK"]
             if l1psk is None:
-                l1psk = d['L1PSK']
+                l1psk = trigConf['LVL1PSK']
             if hltpsk is None:
-                hltpsk = d['HLTPSK']
+                hltpsk = trigConf['HLTPSK']
             if bgsk is None:
-                bgsk = d['BGSK']
+                bgsk = trigConf['BGSK']
+
+        if useCrest:
+            # need to modify the DB connection alias (e.g. TRIGGERDB_RUN3) to the corresponding CREST server URL
+            crestConn = TriggerCrestUtil.getCrestConnection(dbconn)
+            if crestConn is None:
+                msg: str = f"Could not find CREST triggerdb connection from DB connection alias '{dbconn}'"
+                log.error(msg)
+                raise RuntimeError(msg)
+            dbconn = f"{crestServer}/{crestConn}"
 
     tcdict = {
-        "SOURCE" : source.upper(),  # DB, FILE, COOL
+        "SOURCE" : source,  # DB, FILE, COOL
         "DBCONN" : dbconn, # db connection (if origin==DB or COOL) or "JOSVC" if connection is to be taken from TrigConf::IJobOptionsSvc 
         "SMK"    : smk,
-        "L1PSK"  : l1psk,
+        "LVL1PSK": l1psk,
         "HLTPSK" : hltpsk,
         "BGSK"   : bgsk
     }
@@ -162,7 +198,7 @@ def getHLTJobOptionsFileName( ):
     return 'HLTJobOptions.json'
 
 # Creates an L1 Prescale file from the menu
-def createL1PrescalesFileFromMenu(flags, prescales: Optional[dict[str, float]] = None):
+def createL1PrescalesFileFromMenu(flags, prescales: dict[str, float] | None = None):
     from TriggerMenuMT.L1.Base.PrescaleHelper import getCutFromPrescale
 
     menuFN = getL1MenuFileName(flags)
@@ -201,32 +237,32 @@ def generateL1Menu( flags ):
 # provide L1 config service in new JO
 @AccumulatorCache
 def L1ConfigSvcCfg( flags ):
+    log.info( "Setting up LVL1ConfigSvc" )
     acc = ComponentAccumulator()
 
     cfg = getTrigConfigFromFlag( flags )
-    log.info( "Configure LVL1ConfigSvc" )
 
     # configure config svc
-    l1ConfigSvc = CompFactory.getComp("TrigConf::LVL1ConfigSvc")("LVL1ConfigSvc")
+    l1ConfigSvc = CompFactory.getComp("TrigConf::LVL1ConfigSvc")("LVL1ConfigSvc")  # type: ignore
 
     if cfg["SOURCE"] == "FILE":
         if _doMenuConversion(flags):
             # Save the menu in JSON format
             dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
-                                         lb = flags.Input.LumiBlockNumbers[0])
+                                         lb = flags.Input.LumiBlockNumbers[0], flags=flags)
             l1ConfigSvc.SMK = dbKeys['SMK']
 
         l1ConfigSvc.InputType = "FILE"
         l1ConfigSvc.L1JsonFileName = getL1MenuFileName(flags)
         l1ConfigSvc.HLTJsonFileName = getHLTMenuFileName(flags)
-        log.info( "For run 3 style menu access configured LVL1ConfigSvc with InputType='FILE', L1JsonFileName=%s (and HLT, used to compute SMK:%s) ", l1ConfigSvc.L1JsonFileName, l1ConfigSvc.HLTJsonFileName )
+        log.info( "Configured LVL1ConfigSvc with InputType='FILE', L1JsonFileName=%s (and HLT, used to compute SMK:%s) ", l1ConfigSvc.L1JsonFileName, l1ConfigSvc.HLTJsonFileName )
     elif cfg["SOURCE"] == "DB":
         l1ConfigSvc.InputType = "DB"
         l1ConfigSvc.L1JsonFileName = ""
         l1ConfigSvc.HLTJsonFileName = ""
         l1ConfigSvc.TriggerDB = cfg["DBCONN"]
         l1ConfigSvc.SMK = cfg["SMK"]
-        log.info( "For run 3 style menu access configured LVL1ConfigSvc with InputType='DB', SMK %d", cfg['SMK'] )
+        log.info( "Configured LVL1ConfigSvc with InputType='DB', TriggerDB='%s' and SMK %d", l1ConfigSvc.TriggerDB, cfg['SMK'] )
 
     acc.addService( l1ConfigSvc, create=True )
     return acc
@@ -234,25 +270,25 @@ def L1ConfigSvcCfg( flags ):
 # provide HLT config service in new JO
 @AccumulatorCache
 def HLTConfigSvcCfg( flags ):
+    log.info( "Setting up HLTConfigSvc" )
     acc = ComponentAccumulator()
     cfg = getTrigConfigFromFlag( flags )
-    log.info( "Configure HLTConfigSvc" )
 
-    hltConfigSvc = CompFactory.getComp("TrigConf::HLTConfigSvc")("HLTConfigSvc")
+    hltConfigSvc = CompFactory.getComp("TrigConf::HLTConfigSvc")("HLTConfigSvc")  # type: ignore
 
     if cfg["SOURCE"] == "FILE":
         if _doMenuConversion(flags):
             # Save the menu in JSON format
             dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
-                                         lb = flags.Input.LumiBlockNumbers[0])
+                                         lb = flags.Input.LumiBlockNumbers[0], flags=flags)
             hltConfigSvc.SMK = dbKeys['SMK']
 
         hltConfigSvc.InputType = "FILE"
         hltConfigSvc.L1JsonFileName = getL1MenuFileName( flags )
         hltConfigSvc.HLTJsonFileName = getHLTMenuFileName( flags )
         hltConfigSvc.MonitoringJsonFileName = getHLTMonitoringFileName( flags )
-        log.info( "Configured HLTConfigSvc with InputType='FILE', HLTJsonFileName=%s and MonitoringJsonFileName=%s (and L1, used to compute MC-SMK:%s)",
-          hltConfigSvc.HLTJsonFileName, hltConfigSvc.MonitoringJsonFileName, hltConfigSvc.L1JsonFileName)
+        log.info("Configured HLTConfigSvc with InputType='FILE', HLTJsonFileName=%s and MonitoringJsonFileName=%s (and L1, used to compute MC-SMK:%s)",
+                 hltConfigSvc.HLTJsonFileName, hltConfigSvc.MonitoringJsonFileName, hltConfigSvc.L1JsonFileName)
     elif cfg["SOURCE"] == "DB":
         hltConfigSvc.InputType = "DB"
         hltConfigSvc.L1JsonFileName = ""
@@ -260,7 +296,7 @@ def HLTConfigSvcCfg( flags ):
         hltConfigSvc.MonitoringJsonFileName = ""
         hltConfigSvc.TriggerDB = cfg["DBCONN"]
         hltConfigSvc.SMK = cfg["SMK"]
-        log.info( "For run 3 style menu access configured HLTConfigSvc with InputType='DB' and SMK %d", cfg['SMK'] )
+        log.info("Configured HLTConfigSvc with InputType='DB', TriggerDB='%s' and SMK %d", hltConfigSvc.TriggerDB, cfg['SMK'])
     acc.addService( hltConfigSvc, create=True )
     return acc
 
@@ -279,7 +315,7 @@ def L1PrescaleCondAlgCfg( flags ):
     log.info("Setting up L1PrescaleCondAlg")
     acc = ComponentAccumulator()
     TrigConf__L1PrescaleCondAlg = CompFactory.getComp("TrigConf::L1PrescaleCondAlg")
-    l1PrescaleCondAlg = TrigConf__L1PrescaleCondAlg("L1PrescaleCondAlg")
+    l1PrescaleCondAlg = TrigConf__L1PrescaleCondAlg("L1PrescaleCondAlg")  # type: ignore
 
     tc = getTrigConfigFromFlag( flags )
     l1PrescaleCondAlg.Source = tc["SOURCE"]
@@ -291,14 +327,16 @@ def L1PrescaleCondAlgCfg( flags ):
         l1PrescaleCondAlg.TriggerDB = tc["DBCONN"]
     elif tc["SOURCE"] == "DB":
         l1PrescaleCondAlg.TriggerDB = tc["DBCONN"]
-        l1PrescaleCondAlg.L1Psk    = tc["L1PSK"]
+        l1PrescaleCondAlg.L1Psk    = tc["LVL1PSK"]
+        log.info("Configured L1PrescaleCondAlg with InputType='DB', TriggerDB='%s' and L1Psk %d", 
+                 l1PrescaleCondAlg.TriggerDB, l1PrescaleCondAlg.L1Psk)
     elif tc["SOURCE"] == "FILE":
         l1PrescaleCondAlg.Filename = getL1PrescalesSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
             dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
-                                         lb = flags.Input.LumiBlockNumbers[0])
-            l1PrescaleCondAlg.L1Psk = dbKeys['L1PSK']
+                                         lb = flags.Input.LumiBlockNumbers[0], flags=flags)
+            l1PrescaleCondAlg.L1Psk = dbKeys['LVL1PSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])
     acc.addCondAlgo(l1PrescaleCondAlg)
@@ -309,7 +347,7 @@ def BunchGroupCondAlgCfg( flags ):
     log.info("Setting up BunchGroupCondAlg")
     acc = ComponentAccumulator()
     TrigConf__BunchGroupCondAlg = CompFactory.getComp("TrigConf::BunchGroupCondAlg")
-    bunchGroupCondAlg = TrigConf__BunchGroupCondAlg("TrigConf__BunchGroupCondAlg")
+    bunchGroupCondAlg = TrigConf__BunchGroupCondAlg("TrigConf__BunchGroupCondAlg")  # type: ignore
 
     tc = getTrigConfigFromFlag( flags )
     bunchGroupCondAlg.Source = tc["SOURCE"]
@@ -318,12 +356,14 @@ def BunchGroupCondAlgCfg( flags ):
     elif tc["SOURCE"] == "DB":
         bunchGroupCondAlg.TriggerDB = tc["DBCONN"]
         bunchGroupCondAlg.BGSK    = tc["BGSK"]
+        log.info("Configured BunchGroupCondAlg with InputType='DB', TriggerDB='%s' and BGSK %d", 
+                 bunchGroupCondAlg.TriggerDB, bunchGroupCondAlg.BGSK)
     elif tc["SOURCE"] == "FILE":
         bunchGroupCondAlg.Filename = getBunchGroupSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
             dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
-                                         lb = flags.Input.LumiBlockNumbers[0])
+                                         lb = flags.Input.LumiBlockNumbers[0], flags=flags)
             bunchGroupCondAlg.BGSK = dbKeys['BGSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])
@@ -334,7 +374,7 @@ def BunchGroupCondAlgCfg( flags ):
 def HLTPrescaleCondAlgCfg( flags ):
     log.info("Setting up HLTPrescaleCondAlg")
     acc = ComponentAccumulator()
-    hltPrescaleCondAlg = CompFactory.getComp("TrigConf::HLTPrescaleCondAlg")("HLTPrescaleCondAlg")
+    hltPrescaleCondAlg = CompFactory.getComp("TrigConf::HLTPrescaleCondAlg")("HLTPrescaleCondAlg")  # type: ignore
 
     tc = getTrigConfigFromFlag( flags )
     hltPrescaleCondAlg.Source = tc["SOURCE"]
@@ -349,12 +389,14 @@ def HLTPrescaleCondAlgCfg( flags ):
     elif tc["SOURCE"] == "DB":
         hltPrescaleCondAlg.TriggerDB = tc["DBCONN"]
         hltPrescaleCondAlg.HLTPsk    = tc["HLTPSK"]
+        log.info("Configured HLTPrescaleCondAlg with InputType='DB', TriggerDB='%s' and HLTPsk %d", 
+                 hltPrescaleCondAlg.TriggerDB, hltPrescaleCondAlg.HLTPsk)
     elif tc["SOURCE"] == "FILE":
         hltPrescaleCondAlg.Filename = getHLTPrescalesSetFileName( flags )
         if _doMenuConversion(flags):
             # Save the menu in JSON format
             dbKeys = createJsonMenuFiles(run = flags.Input.RunNumbers[0],
-                                         lb = flags.Input.LumiBlockNumbers[0])
+                                         lb = flags.Input.LumiBlockNumbers[0], flags=flags)
             hltPrescaleCondAlg.HLTPsk = dbKeys['HLTPSK']
     else:
         raise RuntimeError("trigger configuration flag 'trigConfig' starts with %s, which is not understood" % tc["SOURCE"])
@@ -389,8 +431,9 @@ if __name__ == "__main__":
             TrigConfigSvcCfg( flags )
 
         def test_jsonConverter(self):
-            keys = createJsonMenuFiles(run=360026, lb=151)
-            for k,v in {"SMK" : 2749, "L1PSK" : 23557, "HLTPSK" : 17824, "BGSK" : 2181}.items():
+            keys = _createJsonMenuFiles(run=360026, lb=151, crestServer=None)
+            assert keys is not None, "No keys returned"
+            for k,v in {"SMK" : 2749, "LVL1PSK" : 23557, "HLTPSK" : 17824, "BGSK" : 2181}.items():
                 assert  k in keys, "Missing key {}".format(k)
                 assert v == keys[k], "Wrong value {}".format(v)
 

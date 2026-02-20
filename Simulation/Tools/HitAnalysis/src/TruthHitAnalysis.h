@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTH_HIT_ANALYSIS_H
@@ -33,6 +33,14 @@ class TruthHitAnalysis : public AthHistogramAlgorithm {
    TH1* m_h_vtx_y{nullptr};
    TH1* m_h_vtx_z{nullptr};
    TH1* m_h_vtx_r{nullptr};
+   TH1* m_h_vtx_proc_x{nullptr};
+   TH1* m_h_vtx_proc_y{nullptr};
+   TH1* m_h_vtx_proc_z{nullptr};
+   TH1* m_h_vtx_proc_r{nullptr};
+   TH1* m_h_vtx_prim_x{nullptr};
+   TH1* m_h_vtx_prim_y{nullptr};
+   TH1* m_h_vtx_prim_z{nullptr};
+   TH1* m_h_vtx_prim_r{nullptr};
    TH2* m_h_vtx_prim_xy{nullptr};
    TH2* m_h_vtx_prim_zr{nullptr};
    TH2* m_h_vtx_sec_xy{nullptr};
@@ -57,6 +65,16 @@ class TruthHitAnalysis : public AthHistogramAlgorithm {
    std::vector<float>* m_vtx_z{nullptr};
    std::vector<float>* m_vtx_r{nullptr};
    std::vector<float>* m_vtx_barcode{nullptr};
+   std::vector<float>* m_vtx_proc_x{nullptr};
+   std::vector<float>* m_vtx_proc_y{nullptr};
+   std::vector<float>* m_vtx_proc_z{nullptr};
+   std::vector<float>* m_vtx_proc_r{nullptr};
+   std::vector<float>* m_vtx_proc_barcode{nullptr};
+   std::vector<float>* m_vtx_prim_x{nullptr};
+   std::vector<float>* m_vtx_prim_y{nullptr};
+   std::vector<float>* m_vtx_prim_z{nullptr};
+   std::vector<float>* m_vtx_prim_r{nullptr};
+   std::vector<float>* m_vtx_prim_barcode{nullptr};
    std::vector<float>* m_truth_px{nullptr};
    std::vector<float>* m_truth_py{nullptr};
    std::vector<float>* m_truth_pz{nullptr};

@@ -27,8 +27,8 @@ namespace EFTrackingFPGAIntegration
         auto stripOutput = SG::get(m_FPGAStripOutput, ctx);
 
         // use 64-bit pointer to access output
-        const uint64_t *stripClusters = (*stripOutput).data();
-        const uint64_t *pixelClusters = (*pixelOutput).data();
+        const uint32_t *stripClusters = (*stripOutput).data();
+        const uint32_t *pixelClusters = (*pixelOutput).data();
 
         unsigned int numStripClusters = stripClusters[0];
         ATH_MSG_DEBUG("numStripClusters: " << numStripClusters);

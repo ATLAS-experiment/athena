@@ -234,12 +234,12 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             if (is_good1 && matchesEnergyRange(sample, tower, ene1, gain1)) {
               if (m_do1DHistograms) {
                 std::string name = TileCalibUtils::getDrawerString(ros1, module) + "_ch_" + std::to_string(chan1) + "_1d";
-                auto channelTime = Monitored::Scalar<float>(name, tilecell->time1());
+                auto channelTime = Monitored::Scalar<float>(std::move(name), tilecell->time1());
                 fill("TileJetChanTime1D", channelTime);
               }
 
               if (m_do2DHistograms) {
-                ATH_MSG_WARNING("This histograms are not implemented yet!");
+                ATH_MSG_WARNING("These histograms are not implemented yet!");
               }
 
               // info for DQ histograms
@@ -256,13 +256,12 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                                << ", LB " << lumiBlock
                                << ", time: " << tilecell->time1());
 
-                std::string name("channelTime" + partitionName[ros1]);
-                auto channelTime = Monitored::Scalar<float>(name, tilecell->time1());
+                auto channelTime = Monitored::Scalar<float>("channelTime" + partitionName[ros1], tilecell->time1());
                 fill("TileJetChanTime", channelTime);
 
                 if ((ros1 > 2) && (sample < TileID::SAMP_E)) {
                   std::string nameNoScint("channelTime" + partitionName[ros1] + "_NoScint");
-                  auto channelTimeNoScint = Monitored::Scalar<float>(nameNoScint, tilecell->time1());
+                  auto channelTimeNoScint = Monitored::Scalar<float>(std::move(nameNoScint), tilecell->time1());
                   fill("TileJetChanTime", channelTimeNoScint);
                 }
               }
@@ -272,7 +271,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
             if (is_good2 && matchesEnergyRange(sample, tower, ene2, gain2)) {
               if (m_do1DHistograms) {
                 std::string name = TileCalibUtils::getDrawerString(ros2, module) + "_ch_" + std::to_string(chan2) + "_1d";
-                auto channelTime = Monitored::Scalar<float>(name, tilecell->time2());
+                auto channelTime = Monitored::Scalar<float>(std::move(name), tilecell->time2());
                 fill("TileJetChanTime1D", channelTime);
               }
 
@@ -295,13 +294,12 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                                << ", time: " << tilecell->time2()
                                <<" (qbit2 " << qbit2 << ", ch1 " << chan1 << ", ene1 " << ene1 << ", bad1 " << bad1 << ", qbit1 " << qbit1 << ")" );
 
-                std::string name("channelTime" + partitionName[ros2]);
-                auto channelTime = Monitored::Scalar<float>(name, tilecell->time2());
+                auto channelTime = Monitored::Scalar<float>("channelTime" + partitionName[ros2], tilecell->time2());
                 fill("TileJetChanTime", channelTime);
 
                 if ((ros2 > 2) && (sample < TileID::SAMP_E)) {
                   std::string nameNoScint("channelTime" + partitionName[ros2] + "_NoScint");
-                  auto channelTimeNoScint = Monitored::Scalar<float>(nameNoScint, tilecell->time2());
+                  auto channelTimeNoScint = Monitored::Scalar<float>(std::move(nameNoScint), tilecell->time2());
                   fill("TileJetChanTime", channelTimeNoScint);
                 }
               }
@@ -321,7 +319,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                 int evenChannnel = (chan1 % 2 == 0) ? chan1 : chan2;
                 std::string name = TileCalibUtils::getDrawerString(ros1, module) + "_enediff_" 
                                    + gainName[gain1] + "_ch1_" + std::to_string(evenChannnel);
-                auto energyDifference = Monitored::Scalar<float>(name, tilecell->eneDiff() / tilecell->energy());
+                auto energyDifference = Monitored::Scalar<float>(std::move(name), tilecell->eneDiff() / tilecell->energy());
                 fill("TileJetEnergyDiff", energyDifference);
               }
 
@@ -338,7 +336,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                   
                 // TD adding histograms per partition and per radial sampling
                 std::string name1("Cell_time_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                auto cellTime1 = Monitored::Scalar<float>(name1, tilecell->time());
+                auto cellTime1 = Monitored::Scalar<float>(std::move(name1), tilecell->time());
                 fill("TileJetCellTime", cellTime1);
 
                 // Adding histograms per selected individual cell
@@ -347,30 +345,30 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                 if (m_doCellHistograms)
                 {
                   std::string name_sel("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                  auto cellTime_sel = Monitored::Scalar<float>(name_sel, tilecell->time());
+                  auto cellTime_sel = Monitored::Scalar<float>(std::move(name_sel), tilecell->time());
                   fill("TileJetSelCellTime", cellTime_sel);
 
                   // Adding histograms per channels of selected individual cell
                   // First channel
                   index_ch1 = findIndex(gain1, tilecell->ene1() * 2);   // Using twice the channel energy to find the correct index
                   std::string name_selCh1("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1] + "_slice_" + std::to_string(index_ch1));
-                  auto cellTime_selCh1 = Monitored::Scalar<float>(name_selCh1, tilecell->time1());
+                  auto cellTime_selCh1 = Monitored::Scalar<float>(std::move(name_selCh1), tilecell->time1());
                   fill("TileJetSelChanTime", cellTime_selCh1);
 
                   // Second channel
                   index_ch2 = findIndex(gain2, tilecell->ene2() * 2);   // Using twice the channel energy to find the correct index
                   std::string name_selCh2("Cell_time_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2] + "_slice_" + std::to_string(index_ch2));
-                  auto cellTime_selCh2 = Monitored::Scalar<float>(name_selCh2, tilecell->time2());
+                  auto cellTime_selCh2 = Monitored::Scalar<float>(std::move(name_selCh2), tilecell->time2());
                   fill("TileJetSelChanTime", cellTime_selCh2);
                 }
 
                 if (m_doEnergyProfiles) {
                   // TD adding energy profiles per partition and per radial sampling
                   std::string indexName1("index_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
-                  auto energyIndex1 = Monitored::Scalar<float>(indexName1, index);
+                  auto energyIndex1 = Monitored::Scalar<float>(std::move(indexName1), index);
                   
                   std::string energyName1("energy_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1]);
-                  auto cellEnergy1 = Monitored::Scalar<float>(energyName1, tilecell->energy());
+                  auto cellEnergy1 = Monitored::Scalar<float>(std::move(energyName1), tilecell->energy());
 
                   fill("TileJetCellEnergyProfile", energyIndex1, cellEnergy1);
 
@@ -378,54 +376,54 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                   if (m_doCellHistograms)
                   {
                     std::string indexname_sel("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1]);
-                    auto energyIndex_sel = Monitored::Scalar<float>(indexname_sel, index);
+                    auto energyIndex_sel = Monitored::Scalar<float>(std::move(indexname_sel), index);
 
                     std::string energyname_sel("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1]);
-                    auto cellEnergy_sel = Monitored::Scalar<float>(energyname_sel, tilecell->energy());
+                    auto cellEnergy_sel = Monitored::Scalar<float>(std::move(energyname_sel), tilecell->energy());
 
                     fill("TileJetSelCellEnergyProfile", energyIndex_sel, cellEnergy_sel);
 
                     // Adding histograms per channels of selected individual cell
                     // First channel
                     std::string indexname_selCh1("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1]);
-                    auto energyIndex_selCh1 = Monitored::Scalar<float>(indexname_selCh1, index_ch1);
+                    auto energyIndex_selCh1 = Monitored::Scalar<float>(std::move(indexname_selCh1), index_ch1);
 
                     std::string energyname_selCh1("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1]);
-                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(energyname_selCh1, tilecell->ene1());
+                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(std::move(energyname_selCh1), tilecell->ene1());
 
                     fill("TileJetSelChanEnergyProfile", energyIndex_selCh1, cellEnergy_selCh1);
 
                     // Second channel
                     std::string indexname_selCh2("index_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2]);
-                    auto energyIndex_selCh2 = Monitored::Scalar<float>(indexname_selCh2, index_ch2);
+                    auto energyIndex_selCh2 = Monitored::Scalar<float>(std::move(indexname_selCh2), index_ch2);
 
                     std::string energyname_selCh2("energy_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2]);
-                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(energyname_selCh2, tilecell->ene2());
+                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(std::move(energyname_selCh2), tilecell->ene2());
 
                     fill("TileJetSelChanEnergyProfile", energyIndex_selCh2, cellEnergy_selCh2);
                   }
                 } else {
                   // TD adding energy histograms per partition and per radial sampling
                   std::string name1("Cell_ene_" + partitionName[ros1] + "_" + sampleName(ros1, sample, tower) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                  auto cellEnergy1 = Monitored::Scalar<float>(name1, tilecell->energy());
+                  auto cellEnergy1 = Monitored::Scalar<float>(std::move(name1), tilecell->energy());
                   fill("TileJetCellEnergy", cellEnergy1);
 
                   // Adding energy histograms per selected individual cell
                   if (m_doCellHistograms)
                   {
                     std::string name_sel("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                    auto cellEnergy_sel = Monitored::Scalar<float>(name_sel, tilecell->energy());
+                    auto cellEnergy_sel = Monitored::Scalar<float>(std::move(name_sel), tilecell->energy());
                     fill("TileJetSelCellEnergy", cellEnergy_sel);
 
                     // Adding histograms per channels of selected individual cell
                     // First channel
                     std::string name_selCh1("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan1) + "_" + gainName[gain1] + "_slice_" + std::to_string(index_ch1));
-                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(name_selCh1, tilecell->ene1());
+                    auto cellEnergy_selCh1 = Monitored::Scalar<float>(std::move(name_selCh1), tilecell->ene1());
                     fill("TileJetSelChanEnergy", cellEnergy_selCh1);
 
                     // Second channel
                     std::string name_selCh2("Cell_ene_" + TileCalibUtils::getDrawerString(ros1, module) + "_" + cellName(ros1, sample, tower, module) + "_ch" + std::to_string(chan2) + "_" + gainName[gain2] + "_slice_" + std::to_string(index_ch2));
-                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(name_selCh2, tilecell->ene2());
+                    auto cellEnergy_selCh2 = Monitored::Scalar<float>(std::move(name_selCh2), tilecell->ene2());
                     fill("TileJetSelChanEnergy", cellEnergy_selCh2);
                   }
                 }

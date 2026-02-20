@@ -218,11 +218,10 @@ std::shared_ptr<Acts::Experimental::BlueprintNode> ItkBlueprintNodeBuilder::buil
     const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
 
     if(childNode) {
-      ATH_MSG_ERROR("Child node for the Itk should be null - no child expected");
-      throw std::runtime_error("Child node is not null");
+    ATH_MSG_ERROR("Child node for the Calo should be null - no child expected");
+    throw std::runtime_error("Child node is not null");
     }
-    
-    // The itk node is a container node that will hold both the pixel and strip nodes  
+
     auto itkNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("ItkNode", AxisR);
 
     // Add the itk pixel to the node
@@ -239,7 +238,6 @@ std::shared_ptr<Acts::Experimental::BlueprintNode> ItkBlueprintNodeBuilder::buil
     }
 
     return itkNode;
-
 }
 
 void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(

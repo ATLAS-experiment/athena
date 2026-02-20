@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PixelGeometryManager_H
-#define PixelGeometryManager_H
+#ifndef PIXELGEOMODEL_PIXELGEOMETRYMANAGER_H
+#define PIXELGEOMODEL_PIXELGEOMETRYMANAGER_H
 
 #include <string>
 #include <iostream>
@@ -15,7 +15,6 @@
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 
 class InDetMaterialManager;
-class IGeoSubDetTool;
 class PixelLegacyManager;
 class PixelID;
 

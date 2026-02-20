@@ -1,0 +1,23 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "TrigAnalysisHelpers/FeatureRequestHelpers.h"
+
+namespace Trig {
+
+  template<class CONTAINER>
+  std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> ITrigDecisionToolLite::features(const std::string& chain, const EventContext& ctx) const 
+  {
+    return features<CONTAINER>(FeatureRequestDescriptor(chain), ctx);
+  }
+
+  template<class CONTAINER>
+  std::vector<TrigCompositeUtils::LinkInfo<CONTAINER>> ITrigDecisionToolLite::features(const FeatureRequestDescriptor& frd, const EventContext& ctx) const 
+  {
+    const CLID clid = ClassID_traits<CONTAINER>::ID();
+    const std::vector<TrigCompositeUtils::TypelessLinkInfo> features = typelessFeatures(frd, clid, ctx);
+    return FeatureRequestHelpers::typedFeaturesWrapper<CONTAINER>(features, ctx, getEventStore());
+  }
+
+} // namespace Trig

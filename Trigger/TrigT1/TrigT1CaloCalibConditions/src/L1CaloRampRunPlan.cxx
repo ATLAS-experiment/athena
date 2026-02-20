@@ -78,14 +78,12 @@ void L1CaloRampRunPlan::makeTransient(const AthenaAttributeList*& athenaAttribut
 
     m_nEventsPerStep = nEventsPerStep;
 
-    m_vEnergySteps  = vEnergySteps;
+    m_vEnergySteps  = std::move(vEnergySteps);
     m_itCurrentStep = m_vEnergySteps.begin();
 }
 
 void L1CaloRampRunPlan::nextEvent() {
     if(m_bEndOfRampRun) {
-        //log << MSG::INFO << "No more steps to generate - End of ramp run" << endmsg;
-        //std::cout << "End of ramp run - No more steps to iterate" << std::endl;
         return;
     }
 
@@ -95,9 +93,7 @@ void L1CaloRampRunPlan::nextEvent() {
         ++m_itCurrentStep;
         m_iCurrentEvent=0;
         if(m_itCurrentStep!=m_vEnergySteps.end()) {
-            //std::cout << "nEventsPerStep reached, next step: "<< *m_itCurrentStep << std::endl;
         } else {
-            //std::cout << "nEventsPerStep reached, no more steps to iterate"<< std::endl;
             m_iCurrentEvent = -1;
             m_bEndOfRampRun = true;
             return;
@@ -109,8 +105,6 @@ std::string L1CaloRampRunPlan::status() {
     std::ostringstream oss;
     if(!m_bEndOfRampRun) {
         oss << "L1CaloRampRunPlan - Current event: "<<m_iCurrentEvent<<", current step: "<<*m_itCurrentStep;
-        //if(m_itCurrentStep!=0) oss <<*m_itCurrentStep;
-        //else oss << "not initialized, there might be a problem !";
     } else {
         oss << "L1CaloRampRunPlan: No more events/steps to process";
     }

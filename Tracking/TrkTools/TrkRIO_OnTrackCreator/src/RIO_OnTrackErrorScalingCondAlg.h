@@ -5,7 +5,7 @@
 #ifndef _RIO_OnTrackErrorScalingCondAlg_H_
 #define _RIO_OnTrackErrorScalingCondAlg_H_
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -16,13 +16,13 @@
 
 class RIO_OnTrackErrorScalingKit;
 
-class RIO_OnTrackErrorScalingCondAlg final: public AthAlgorithm 
+class RIO_OnTrackErrorScalingCondAlg final: public AthCondAlgorithm 
 {  
  public:
   RIO_OnTrackErrorScalingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~RIO_OnTrackErrorScalingCondAlg() = default;
   StatusCode initialize() override;
-  StatusCode execute() override;
+  StatusCode execute(const EventContext& ctx) const override;
   StatusCode finalize() override;
 
  private:

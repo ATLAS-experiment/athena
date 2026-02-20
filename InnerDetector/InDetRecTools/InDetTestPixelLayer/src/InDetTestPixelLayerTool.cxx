@@ -60,9 +60,6 @@ InDetTestPixelLayerTool::initialize()
   ATH_CHECK(m_pixelCondSummaryTool.retrieve(DisableTool{
 	!m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED }));
   ATH_CHECK(m_pixelDetElStatus.initialize(!m_pixelDetElStatus.empty()));
-  if (!m_pixelDetElStatus.empty()) {
-    ATH_CHECK(m_pixelReadout.retrieve());
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -699,16 +696,21 @@ InDet::InDetTestPixelLayerTool::getFracGood(
 
   if (m_checkDisabledFEs) {
     const InDetConditions::Hierarchy context = InDetConditions::PIXEL_CHIP;
-    Identifier centreId = sielem->identifierOfPosition(LocPos);
-    if (centreId.is_valid()) {
-      Identifier moduleID = m_pixelId->wafer_id(centreId);
-      IdentifierHash id_hash = m_pixelId->wafer_hash(moduleID);
+    InDetDD::PixelDiodeTree::DiodeProxy si_param = design->diodeProxyFromPosition(LocPos);
 
+    if (si_param.isValid()) {
+      std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx(si_param.computeIndex(LocPos));
+      Identifier centreId = m_pixelId->pixel_id(moduleid, diode_idx[0],diode_idx[1]);
+      assert( centreId == sielem->identifierOfPosition(LocPos) );
+
+      assert( sielem->identifyHash() == m_pixelId->wafer_hash(m_pixelId->wafer_id(centreId)));
+      InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design->diodeProxyFromIdxCachePosition(diode_idx));
+      std::uint32_t feValue = design->getFE(si_param);
       VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),
-                            pixelDetElStatus->isChipGood(id_hash, m_pixelReadout->getFE(centreId, moduleID)),
+                            pixelDetElStatus->isChipGood(id_hash, feValue),
                             m_pixelCondSummaryTool->isGood(centreId, context));
       bool is_chip_good((!m_pixelDetElStatus.empty() &&
-                         pixelDetElStatus->isChipGood(id_hash, m_pixelReadout->getFE(centreId, moduleID))) ||
+                         pixelDetElStatus->isChipGood(id_hash, feValue)) ||
                         (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context, ctx)));
       if (!is_chip_good){
         return 0.;
@@ -731,7 +733,7 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   double frac =0.;
 
   if (pixelDetElStatus) {
-    frac = Pixel::getGoodFraction(*pixelDetElStatus, *m_pixelReadout, *m_pixelId, moduleid, id_hash, startId, endId);
+    frac = Pixel::getGoodFraction(*pixelDetElStatus, *design, *m_pixelId, id_hash, startId, endId);
     VALIDATE_STATUS_ARRAY(
       !m_pixelDetElStatus.empty(), frac, m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId, ctx));
 

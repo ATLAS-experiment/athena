@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY22.py
@@ -14,7 +14,10 @@ streamName = "StreamDAOD_BPHY22"
 
 def BPHY22Cfg(flags):
     from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+        BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
+        BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+        AugOriginalCountsCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
@@ -29,10 +32,6 @@ def BPHY22Cfg(flags):
     acc.addPublicTool(vpest)
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
-    BPHY22_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-                        name = "BPHY22_AugOriginalCounts",
-                        VertexContainer = "PrimaryVertices",
-                        TrackContainer = "InDetTrackParticles" )
 
     BPHY22MuPiFinder = CompFactory.Analysis.JpsiFinder(
           name                       = "BPHY22MuPiFinder",
@@ -245,6 +244,9 @@ def BPHY22Cfg(flags):
     CascadeCollections += BPHY22MuDs.CascadeVertexCollections
     CascadeCollections += BPHY22MuLambdaC.CascadeVertexCollections
 
+    BPHY22_AugOriginalCounts = acc.popToolsAndMerge(
+        AugOriginalCountsCfg(flags, name = "BPHY22_AugOriginalCounts"))
+    
     if not isSimulation: #Only Skim Data
         BPHY22_SelectBMuDxEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY22_AnyVertexSkimmingTool",
                                                                         VertexContainerNames =CascadeCollections,

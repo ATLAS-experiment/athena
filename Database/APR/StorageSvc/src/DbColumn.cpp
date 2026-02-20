@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbColumn.cpp 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  Implementation file of a Database column
 //--------------------------------------------------------------------
@@ -77,7 +76,7 @@ static const char* const itm[] = {
   "{CNT="
 };
 
-DbStatus DbColumn::fromString( const string& string_rep)  {
+StatusCode DbColumn::fromString( const string& string_rep)  {
   m_colName = typeName(UNKNOWN);
   string tmp = string_rep;
   const char* p1 = tmp.c_str();
@@ -121,10 +120,10 @@ DbStatus DbColumn::fromString( const string& string_rep)  {
       }
     }
   }
-  if ( nread == 6 )   { // Must match the number of elements in sscanf
-    return Success;
+  if ( nread == 7 )   { // Must match the number of elements in sscanf
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 #define _NAME_(x) #x

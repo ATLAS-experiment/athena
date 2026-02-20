@@ -16,6 +16,26 @@ if debug:
     from AthenaCommon.Constants import DEBUG
     logger.setLevel(DEBUG)
 
+def _find_momemfrac_cut(chain_dict):
+    """
+    Return momemfrac cut value as string from chain_dict, or None if not found.
+    """
+    parts = chain_dict.get("chainParts") or []
+
+    for idx, cp in enumerate(parts):
+        momcuts = (cp.get("momCuts") or "").strip()
+        if not momcuts:
+            continue
+
+        m = re.search(r"momemfrac(?P<cut>\d{3})(?!\d)", momcuts)
+        if not m:
+            continue
+
+        val = m.group("cut") 
+
+        return val 
+
+    return None
 
 def trigJetHypoToolFromDict(flags, chain_dict):
     
@@ -186,7 +206,37 @@ def  trigJetCRHypoToolFromDict(flags, chain_dict):
         raise Exception("misconfiguration of new calratio jet chain")
 
     hypo = CompFactory.TrigJetCRHypoTool(chain_name)
-    hypo.MinjetlogR      = 1.2
+    
+    
+    hypo = CompFactory.TrigJetCRHypoTool(chain_name)
+    hypo.MinjetlogR = 1.2
+    import math
+    emf_cut = _find_momemfrac_cut(chain_dict)
+    if emf_cut is None:
+       pass  
+    else:
+      try:
+        emf_val = int(emf_cut) / 100.0
+      except (TypeError, ValueError):
+        logger.warning(
+            "Invalid emf_cut '%s' for chain %s; using default MinjetlogR=%s",
+            emf_cut, chain_name, 1.2,
+        )
+      else:
+        if not (0.0 < emf_val < 1.0):
+            logger.warning(
+                "emf_cut '%s' -> %s out of (0,1) range for chain %s; using default MinjetlogR=%s",
+                emf_cut, emf_val, chain_name, 1.2,
+            )
+        else:
+            try:
+                hypo.MinjetlogR = math.log10(1.0 / emf_val - 1.0)
+            except (ValueError, OverflowError):
+                logger.warning(
+                    "Computed MinjetlogR invalid for emf_cut='%s' (emf_val=%s) in chain %s; using default %s",
+                    emf_cut, emf_val, chain_name, 1.2,
+                )
+
     hypo.MintrackPt      = 2*GeV
     hypo.MindeltaR       = 0.2
     hypo.countBIBcells   = 4

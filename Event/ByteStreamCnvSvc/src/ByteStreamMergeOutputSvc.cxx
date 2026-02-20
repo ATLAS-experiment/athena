@@ -13,8 +13,8 @@
 
 #include <map>
 
-typedef OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment ROBF;
-typedef std::map<uint32_t, ROBF*> ROBMAP;
+using ROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
+using ROBMAP = std::map<uint32_t, ROBF*>;
 
 // Constructor.
 ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc) :
@@ -24,16 +24,12 @@ ByteStreamMergeOutputSvc::ByteStreamMergeOutputSvc(const std::string& name, ISvc
    m_bsOutputStreamName = name;
 }
 
-// Destructor.
-ByteStreamMergeOutputSvc::~ByteStreamMergeOutputSvc() {
-}
-
 // setup input and output paths
 StatusCode ByteStreamMergeOutputSvc::initialize() {
    ATH_CHECK( m_outSvc.retrieve() );
    ATH_CHECK( m_inSvc.retrieve() );
 
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
 
 // ROBs from the L2 and event filter needs to be treated specially since the module id
@@ -133,9 +129,9 @@ bool  ByteStreamMergeOutputSvc::putEvent(const RawEvent* newEvent) {
    RawEvent newRawEvent(buffer);
    StatusCode sc = m_outSvc->putEvent(&newRawEvent) ? StatusCode::SUCCESS : StatusCode::FAILURE;
    for(ROBMAP::iterator it = robsToAdd.begin(), itEnd = robsToAdd.end(); it != itEnd; ++it) {
-      delete it->second; it->second = 0;
+      delete it->second; it->second = nullptr;
    }
-   delete mergedEventWrite; mergedEventWrite = 0;
+   delete mergedEventWrite; mergedEventWrite = nullptr;
    delete [] buffer;
    if (sc != StatusCode::SUCCESS) {
       ATH_MSG_ERROR("Failed to put RawEvent");

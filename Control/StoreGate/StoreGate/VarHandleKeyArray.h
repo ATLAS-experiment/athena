@@ -69,29 +69,48 @@ namespace SG {
     VarHandleKeyArrayCommon() : std::vector<Base>() {};
     
     /**
-     * @brief base Constructor from a VarHandleKeyArray that takes a vector
+     * @brief base Constructor that takes a vector
      * @param v vector of Read/Write/UpdateHandleKey
      */
     VarHandleKeyArrayCommon( const std::vector<Base>& v ):
       std::vector<Base>(v) {};
     
     /**
-     * @brief base Constructor from a VarHandleKeyArray that takes an 
-     * initializer list of VarHandleKeys
+     * @brief base Constructor that takes an initializer list of VarHandleKeys
      * @param l initializer list of Read/Write/UpdateHandleKey
      */
     VarHandleKeyArrayCommon( std::initializer_list<Base> l ):
       std::vector<Base>{l} {};
     
     /**
-     * @brief base Constructor from a VarHandleKeyArray that takes an 
-     * initializer list of std::strings.
+     * @brief base Constructor that takes an initializer list of std::strings.
      * @param l initializer list of std::strings used to create the
      *          VarHandleKeys
      */
     VarHandleKeyArrayCommon( std::initializer_list<std::string> l ) {
-      for (auto &e : l) {
-        std::vector<Base>::push_back( Base{e} );
+      for (const auto &e : l) {
+        std::vector<Base>::emplace_back( e );
+      }
+    }
+
+    /**
+     * @brief base Constructor that takes an associated container and an
+     * initializer list of std::strings.
+     * @param contKey VarHandleKey of the associated container
+     * @param l initializer list of std::strings used to create the
+     *          VarHandleKeys
+     *
+     * All decorations will be read from the container referenced
+     * by @contKey.
+     */
+    template <class T = Base>
+    requires T::isDecorHandleKey
+    VarHandleKeyArrayCommon( VarHandleKey& contKey,
+                             std::initializer_list<std::string> l )
+      : m_contKey (&contKey)
+    {
+      for (const auto &e : l) {
+        std::vector<Base>::emplace_back( contKey, e );
       }
     }    
     
@@ -114,7 +133,7 @@ namespace SG {
      * @param key name of the key
      */
     virtual void push_back(const std::string& key) override {
-      std::vector<Base>::push_back( Base(key) );
+      std::vector<Base>::emplace_back( keyFromString(key) );
     }
 
     /**
@@ -145,9 +164,34 @@ namespace SG {
     virtual IDataHandleHolder* owner() override { return m_owner; }
 
   private:
+    /**
+     * Create a HandleKey from a string.
+     * @param s String from which to create the HandleKey.
+     *
+     * This is for decoration handle keys.  If this array was initialized
+     * with a container key, then that will be used to for the handle keys.
+     */
+    template <class T = Base>
+    requires T::isDecorHandleKey
+    Base keyFromString (const std::string& s) const;
+
+
+    /**
+     * Create a HandleKey from a string.
+     * @param s String from which to create the HandleKey.
+     *
+     * This is for non-decoration handle keys.
+     */
+    template <class T = Base>
+    requires (!T::isDecorHandleKey)
+    Base keyFromString (const std::string& s) const;
     
+
     bool m_isRenounced{ false };
     IDataHandleHolder* m_owner{ nullptr };
+
+    /// Optional container on which decorations are applied
+    const VarHandleKey* m_contKey = nullptr;
 
   };
   

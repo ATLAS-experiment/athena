@@ -5,9 +5,7 @@
 #include "CaloMonAlgBase.h" 
 
 CaloMonAlgBase::CaloMonAlgBase(const std::string& name, ISvcLocator* pSvcLocator) 
-  :AthMonitorAlgorithm(name, pSvcLocator),
-   m_BadLBTool(this, "DQBadLBFilterTool"),
-   m_ReadyFilterTool(this, "DQAtlasReadyFilterTool")
+  :AthMonitorAlgorithm(name, pSvcLocator)
  {
   declareProperty("useBadLBTool", m_useBadLBTool=false);
   declareProperty("BadLBTool", m_BadLBTool);

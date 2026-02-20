@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserHooksUtils.h"
@@ -93,7 +93,7 @@ namespace Pythia8{
         if(leg->pT() < m_powhegScale )m_powhegScale = leg->pT();
       }
       
-      double norm = -1./eCMS;
+      double norm = (eCMS == 0.) ? 0: -1./eCMS;
       pxCMS *= norm;
       pyCMS *= norm;
       pzCMS *= norm;

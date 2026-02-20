@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToPrepDataToolMT.h"
@@ -77,6 +77,11 @@ StatusCode RpcRdoToPrepDataToolMT::initialize() {
   ATH_CHECK(m_prdContainerCacheKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_coindataContainerCacheKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
+  m_spuriousHitCounter=0;
+  return StatusCode::SUCCESS;
+}
+StatusCode Muon::RpcRdoToPrepDataToolMT::finalize() {
+  ATH_MSG_INFO(" Total number of spurious RPC channels in RAW data that are not associated to RPC strips: " << m_spuriousHitCounter);
   return StatusCode::SUCCESS;
 }
 StatusCode RpcRdoToPrepDataToolMT::loadProcessedChambers(const EventContext& ctx, State& state) const {
@@ -178,7 +183,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
         strip->setDoubletPhi(idHelper.doubletPhi(id));
         strip->setGasGap(idHelper.gasGap(id));
         strip->setMeasuresPhi(idHelper.measuresPhi(id));
-        strip->setStripNumber(idHelper.channel(id));
+        strip->setChannelNumber(idHelper.channel(id));
         strip->setAmbiguityFlag(prd->ambiguityFlag());
         strip->setTimeOverThreshold(prd->timeOverThreshold());
         strip->setTime(prd->time());
@@ -204,7 +209,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordPrepData(const EventContext&
   state.rpcPrepDataCollections.clear();
 
   if (msgLvl(MSG::DEBUG)) {
-    for (const auto& [hash, ptr] : state.prepDataCont->GetAllHashPtrPair()) {
+    for (const auto [hash, ptr] : state.prepDataCont->GetAllHashPtrPair()) {
       ATH_MSG_DEBUG("Contents of CONTAINER in this view : " << hash);
     }
   }
@@ -238,7 +243,7 @@ StatusCode RpcRdoToPrepDataToolMT::transferAndRecordCoinData(const EventContext&
   }
   state.rpcCoinDataCollections.clear();
   if (msgLvl(MSG::DEBUG)) {
-    for (const auto& [hash, ptr] : state.coinDataCont->GetAllHashPtrPair()) {
+    for (const auto [hash, ptr] : state.coinDataCont->GetAllHashPtrPair()) {
       ATH_MSG_DEBUG("Contents of LOCAL in this view : " << hash);
     }
   }
@@ -945,8 +950,9 @@ StatusCode RpcRdoToPrepDataToolMT::processNrpcRdo(const EventContext& ctx,
     Identifier chanId{};
     if (!readCdo->getOfflineId(translateCache, msgStream()) ||
         !readCdo->convert(translateCache, chanId, false)) {
-      ATH_MSG_FATAL("Failed to retrieve the offline Identifier");
-      return StatusCode::FAILURE;
+      // If online channel is not associated to offline, continue to decode the remaining part of the RDO
+      m_spuriousHitCounter++;
+      continue;
     }
 
     RpcPrepDataCollection* collection = state.getPrepCollection(chanId);

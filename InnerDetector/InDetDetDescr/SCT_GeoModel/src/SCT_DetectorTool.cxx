@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_DetectorTool.h"
@@ -89,13 +89,9 @@ SCT_DetectorTool::create()
     GeoModelExperiment* theExpt{nullptr};
     ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
 
-    // Retrieve the Geometry DB Interface
-    ATH_CHECK(m_geometryDBSvc.retrieve());
-
     // Pass athena services to factory, etc
     m_athenaComps.setDetStore(detStore().operator->());
     m_athenaComps.setGeoDbTagSvc(&*m_geoDbTagSvc);
-    m_athenaComps.setGeometryDBSvc(&*m_geometryDBSvc);
     m_athenaComps.setRDBAccessSvc(&*accessSvc);
     const SCT_ID* idHelper{nullptr};
     ATH_CHECK(detStore()->retrieve(idHelper, "SCT_ID"));
@@ -146,15 +142,14 @@ SCT_DetectorTool::clear()
 }
 
 StatusCode
-SCT_DetectorTool::align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS_P(I, keys))
-//Not thread safe as the call m_manager->align will invalidateAllElements it holds
+SCT_DetectorTool::align()
 {
   if (m_manager==nullptr) {
     ATH_MSG_FATAL("Manager does not exist");
     return StatusCode::FAILURE;
   }
   if (m_alignable.value()) {
-    return const_cast<InDetDD::SCT_DetectorManager*>(m_manager)->align(I, keys);
+    return const_cast<InDetDD::SCT_DetectorManager*>(m_manager)->align();
   } else {
     ATH_MSG_DEBUG("Alignment disabled. No alignments applied");
     return StatusCode::SUCCESS;

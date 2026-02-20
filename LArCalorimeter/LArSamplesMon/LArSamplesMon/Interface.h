@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,6 +21,7 @@
 #include "LArSamplesMon/Chi2Calc.h"
 #include "TString.h"
 #include <vector>
+#include <memory>
 
 class IdentifierHash;
 class TH1I;
@@ -38,24 +39,25 @@ namespace LArSamples {
     public:
    
       /** @brief Constructor  */
-      Interface(const Accessor& accessor)
-        : m_accessor(&accessor), m_shapeErrorGetter(0), m_ownShapeErrorGetter(0), m_neighborCache(nChannels()) { }
-      
-      static Interface* open(const TString& fileName);
-      static Interface* open(const std::vector<TString>& fileNames);
-      static Interface* openList(const TString& fileList);
-      static Interface* openWild(const TString& wcName);
+      Interface(std::unique_ptr<const Accessor> accessor);
+      Interface(const Interface& ) = delete;
+      Interface& operator = (const Interface& ) = delete;
+
+      static std::unique_ptr<Interface> open(const TString& fileName);
+      static std::unique_ptr<Interface> open(const std::vector<TString>& fileNames);
+      static std::unique_ptr<Interface> openList(const TString& fileList);
+      static std::unique_ptr<Interface> openWild(const TString& wcName);
 
       virtual ~Interface();
 
-      unsigned int nEvents() const { return accessor().nEvents(); }
-      unsigned int nRuns() const { return accessor().nRuns(); }
+      virtual unsigned int nEvents() const override { return accessor().nEvents(); }
+      virtual unsigned int nRuns() const override { return accessor().nRuns(); }
 
-      const EventData* eventData(unsigned int i) const { return accessor().eventData(i); }
-      const RunData* runData(unsigned int i) const { return accessor().runData(i); }
+      virtual const EventData* eventData(unsigned int i) const override { return accessor().eventData(i); }
+      virtual const RunData* runData(unsigned int i) const override { return accessor().runData(i); }
       
-      unsigned int historySize(unsigned int i) const { return accessor().historySize(i); }
-      unsigned int historySizeSC(unsigned int i) const { return accessor().historySizeSC(i); }
+      virtual unsigned int historySize(unsigned int i) const override { return accessor().historySize(i); }
+      virtual unsigned int historySizeSC(unsigned int i) const override { return accessor().historySizeSC(i); }
 
       HistoryIterator begin(unsigned int pos = 0, double eMin = -1, double adcMaxMin = -1) const;
       unsigned int end() const { return nChannels(); }
@@ -72,24 +74,24 @@ namespace LArSamples {
 
       bool neighbors(const CellInfo& cell, double dRCut, std::vector<unsigned int>& hashes) const;
       bool firstNeighbors(unsigned int hash, std::vector<unsigned int>& hashes, short layer = -2) const;
-      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const;
+      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<std::unique_ptr<const Data> >& data) const;
     
-      Interface* merge(const Interface& other, const TString& fileName) const;
-      Interface* merge(const Interface& other, const TString& fileName, const TString& LBFile) const;
+      std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName) const;
+      std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName, const TString& LBFile) const;
 #ifndef __GCCXML__
-      static Interface* merge(const std::vector<const Interface*>& interfaces, const TString& fileName);
-      static Interface* merge(const std::vector<const Interface*>& interfaces, const TString& fileName, const TString& LBFile);
+      static std::unique_ptr<Interface> merge(const std::vector<const Interface*>& interfaces, const TString& fileName);
+      static std::unique_ptr<Interface> merge(const std::vector<const Interface*>& interfaces, const TString& fileName, const TString& LBFile);
 #endif
-      static Interface* merge(const TString& listFileName, const TString& fileName);
-      static Interface* merge(const TString& listFileName, const TString& fileName, const TString& LBFile);
+      static std::unique_ptr<Interface> merge(const TString& listFileName, const TString& fileName);
+      static std::unique_ptr<Interface> merge(const TString& listFileName, const TString& fileName, const TString& LBFile);
       static bool filterAndMerge(const TString& listFileName, const TString& outFile, const TString& filters, const TString& tweaks = "");
 
-      Interface* filter(const TString& sel, const TString& fileName, const TString& tweaks = "") const;
-      Interface* filter(const FilterParams& filterParams, const DataTweaker& tweaker, const TString& fileName) const;
+      std::unique_ptr<Interface> filter(const TString& sel, const TString& fileName, const TString& tweaks = "") const;
+      std::unique_ptr<Interface> filter(const FilterParams& filterParams, const DataTweaker& tweaker, const TString& fileName) const;
 
-      Interface* makeTemplate(const TString& fileName) const;
+      std::unique_ptr<Interface> makeTemplate(const TString& fileName) const;
 
-      Interface* refit(const TString& newFileName, Chi2Params pars = DefaultChi2) const;
+      std::unique_ptr<Interface> refit(const TString& newFileName, Chi2Params pars = DefaultChi2) const;
       
       const Accessor& accessor() const { return *m_accessor; }
       bool isValid() const;
@@ -122,24 +124,25 @@ namespace LArSamples {
       void setShapeError(const TString& fileName);
       const AbsShapeErrorGetter* shapeErrorGetter() const { return m_shapeErrorGetter; }
 
-      bool writeToFile(const TString& fileName) const { return accessor().writeToFile(fileName); }
+      virtual bool writeToFile(const TString& fileName) const override { return accessor().writeToFile(fileName); }
       
       static TString addSuffix(const TString& fileName, const TString& suffix);
       
-      const History*  cellHistory(unsigned int i) const;      
-      const History*  getCellHistory(unsigned int i) const;      
-      const History*  getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;
+      virtual const History*  cellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History>  getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History>  getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
       
     private:
       
-      const Accessor* m_accessor;
+      std::unique_ptr<const Accessor> m_accessor;
       const AbsShapeErrorGetter* m_shapeErrorGetter;
-      bool m_ownShapeErrorGetter;
-    
-      mutable std::vector<std::vector<unsigned int>*> m_neighborCache;
+      std::unique_ptr<const AbsShapeErrorGetter> m_ownedShapeErrorGetter;
+
+      using CacheEntry_t = std::pair<bool, std::vector<unsigned int> >;
+      mutable std::vector<CacheEntry_t> m_neighborCache;
       mutable std::vector<unsigned int> m_neighborHistoryPos;
-      mutable std::vector<const History*> m_neighborHistories;
+      mutable std::vector<std::unique_ptr<const History> > m_neighborHistories;
   };
 }
   

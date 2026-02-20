@@ -1,18 +1,19 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileGeoModel )
 
 # External dependencies:
 find_package( GeoModel COMPONENTS GeoModelKernel GeoModelRead GeoModelDBManager )
+find_package( Boost )
 
 # Component(s) in the package:
 atlas_add_library( TileGeoModelLib
                    src/*.cxx
                    PUBLIC_HEADERS TileGeoModel
-                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} GeoModelUtilities TileDetDescr StoreGateLib CaloDetDescrLib TileConditionsLib
-                   PRIVATE_LINK_LIBRARIES CaloIdentifier CxxUtils SGTools GaudiKernel TileIdentifier )
+                   PRIVATE_LINK_LIBRARIES CaloIdentifier CxxUtils SGTools GaudiKernel TileIdentifier ${Boost_LIBRARIES} )
 
 atlas_add_component( TileGeoModel
                      src/components/*.cxx

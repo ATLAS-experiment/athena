@@ -6,6 +6,7 @@
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgTools/PropertyWrapper.h"
 
 // EDM include(s).
@@ -44,6 +45,9 @@ class TruthParticleFixerAlg final : public EL::AnaReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outputContainerKey{
       this, "OutputContainer", "TruthParticles",
       "Output TruthParticles container"};
+
+  SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_uidKey{
+    this, "UIDKey", m_inputContainerKey, "uid"};
 
   /// Names of the truth particle links to fix
   Gaudi::Property<std::vector<std::string>> m_particleLinks{

@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityTools/DQTBackgroundMon.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 DQTBackgroundMon::DQTBackgroundMon( const std::string& name, ISvcLocator* pSvcLocator )
 : AthMonitorAlgorithm(name,pSvcLocator)

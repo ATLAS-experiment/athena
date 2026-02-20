@@ -4,6 +4,9 @@
 # art-description: DAOD building SUSY20 mc20
 # art-type: grid
 # art-output: *.pool.root
+# art-output: checkFile*.txt
+# art-output: checkxAOD*.txt
+# art-output: checkIndexRefs*.txt
 
 set -e
 
@@ -13,19 +16,16 @@ Derivation_tf.py \
 --formats SUSY20 \
 --maxEvents -1 \
 
-rc=$?
-echo "art-result: $? derivation"
-status=$rc
+echo "art-result: $? reco"
 
-rc2=-9999
-if [ $rc -eq 0 ]
-then
-  ArtPackage=$1
-  ArtJobName=$2
-  art.py compare grid --entries 3 ${ArtPackage} ${ArtJobName} --mode=semi-detailed
-  rc2=$?
-  status=$rc2
-fi
-echo "art-result: $rc2 regression"
+checkFile.py DAOD_SUSY20.art.pool.root > checkFile_SUSY20.txt
 
-exit $status
+echo "art-result: $?  checkfile"
+
+checkxAOD.py DAOD_SUSY20.art.pool.root > checkxAOD_SUSY20.txt
+
+echo "art-result: $?  checkxAOD"
+
+checkIndexRefs.py DAOD_SUSY20.art.pool.root > checkIndexRefs_SUSY20.txt 2>&1
+
+echo "art-result: $?  checkIndexRefs"

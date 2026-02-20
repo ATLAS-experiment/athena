@@ -146,7 +146,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 #endif
 
   //.....add new vertex with geantino
-  ge.add_vertex(genVertex);
+  ge.add_vertex(std::move(genVertex));
   HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE );
 }
 

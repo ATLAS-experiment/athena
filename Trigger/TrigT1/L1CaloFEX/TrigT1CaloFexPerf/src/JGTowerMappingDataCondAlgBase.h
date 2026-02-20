@@ -5,7 +5,7 @@
 #ifndef TRIGT1CALOFEXPERF_JGTOWERMAPPINGDATACONDALGBASE_H
 #define TRIGT1CALOFEXPERF_JGTOWERMAPPINGDATACONDALGBASE_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrigT1CaloFexPerf/JGTowerMappingData.h"
@@ -16,7 +16,7 @@
 
 namespace LVL1
 {
-  class JGTowerMappingDataCondAlgBase : public AthReentrantAlgorithm
+  class JGTowerMappingDataCondAlgBase : public AthCondAlgorithm
   {
   public:
     JGTowerMappingDataCondAlgBase(const std::string &name, ISvcLocator *pSvcLocator);
@@ -40,7 +40,7 @@ namespace LVL1
     virtual StatusCode loadTowerAreas(JGTowerMappingData &data) const = 0;
     const CaloCell_SuperCell_ID *m_scid{nullptr};
     const CaloCell_ID *m_ccid{nullptr};
-  }; //> end class AthReentrantAlgorithm
+  }; //> end class AthCondAlgorithm
 } // namespace LVL1
 
 #endif //> !TRIGT1CALOFEXPERF_JGTOWERMAPPINGDATACONDALGBASE_H

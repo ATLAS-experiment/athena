@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,6 +35,7 @@ std::unique_ptr<T> make_helper (const IdDictParser& parser,
                                 bool do_checks = true)
 {
   auto idhelper = std::make_unique<T>();
+  idhelper->setLevel(MSG::DEBUG);
   idhelper->set_do_neighbours (do_neighbours);
   int stat = idhelper->initialize_from_dictionary (parser.m_idd);
   assert (stat == 0);

@@ -18,6 +18,8 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include "CaloUtils/CaloClusterStoreHelper.h"
+
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
@@ -53,6 +55,10 @@ StatusCode TauRunnerAlg::initialize() {
   ATH_CHECK( m_vertexOutputContainer.initialize() );
   ATH_CHECK( m_chargedPFOOutputContainer.initialize() );
   ATH_CHECK( m_pi0Container.initialize() );
+
+  ATH_CHECK( m_tauShotClusOutputContainer.initialize() );
+  ATH_CHECK( m_tauShotClusLinkContainer.initialize() );
+  ATH_CHECK( m_tauShotPFOOutputContainer.initialize() );
 
   //-------------------------------------------------------------------------
   // Allocate tools
@@ -107,7 +113,15 @@ StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
   SG::WriteHandle<xAOD::ParticleContainer> pi0Handle(m_pi0Container, ctx);
   ATH_CHECK(pi0Handle.record(std::make_unique<xAOD::ParticleContainer>(), std::make_unique<xAOD::ParticleAuxContainer>()));
   xAOD::ParticleContainer* pi0Container = pi0Handle.ptr();
-  
+
+  SG::WriteHandle<xAOD::CaloClusterContainer> tauShotClusHandle( m_tauShotClusOutputContainer, ctx );
+  ATH_CHECK(tauShotClusHandle.record(std::make_unique<xAOD::CaloClusterContainer>(), std::make_unique<xAOD::CaloClusterAuxContainer>()));
+  xAOD::CaloClusterContainer* tauShotClusContainer = tauShotClusHandle.ptr();
+
+  SG::WriteHandle<xAOD::PFOContainer> tauShotPFOHandle( m_tauShotPFOOutputContainer, ctx );
+  ATH_CHECK(tauShotPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
+  xAOD::PFOContainer* tauShotPFOContainer = tauShotPFOHandle.ptr();
+
   // Read the CaloClusterContainer created by the CaloClusterMaker
   SG::ReadHandle<xAOD::CaloClusterContainer> pi0ClusterInHandle(m_pi0ClusterInputContainer, ctx);
   if (!pi0ClusterInHandle.isValid()) {
@@ -150,6 +164,10 @@ StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
       else if ( tool->type() == "TauVertexVariables"){
 	sc = tool->executeVertexVariables(*pTau, *pSecVtxContainer);
       }
+      else if (tool->type() == "TauShotFinder") {
+        sc = tool->executeShotFinder(*pTau, *tauShotClusContainer,
+                                     *tauShotPFOContainer);
+      }
       else if ( tool->type() == "TauPi0ClusterScaler"){
 	sc = tool->executePi0ClusterScaler(*pTau, *neutralPFOContainer, *chargedPFOContainer);
       }
@@ -171,6 +189,10 @@ StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
       ATH_MSG_VERBOSE("The tau candidate has been modified successfully by all the invoked tools.");
     }
   } // end iterator over shallow copy
+
+  // build cell link container for shot clusters
+  SG::WriteHandle<CaloClusterCellLinkContainer> tauShotClusLinkHandle( m_tauShotClusLinkContainer, ctx );
+  ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (tauShotClusLinkHandle, tauShotClusContainer));
 
   // sort taus by decreasing pt
   auto sortByPt = [](const xAOD::TauJet* tau1, const xAOD::TauJet* tau2 ) { return tau1->pt() > tau2->pt(); };

@@ -12,8 +12,8 @@ find_package( Acts COMPONENTS Core )
 atlas_add_component( MuonSpacePointCalibrator
                      src/components/*.cxx  src/*.cxx                 
                      LINK_LIBRARIES AthenaKernel GaudiKernel AthenaBaseComps StoreGateLib MuonRecToolInterfacesR4
-                                    MdtCalibInterfacesLib MuonReadoutGeometryR4 MuonSpacePoint xAODMuonPrepData ActsCalibratorsLib
-                                    ActsGeometryInterfacesLib MdtCalibData MuonPatternHelpers NSWCalibToolsLib MMClusterizationLib
-                                    Acts::Core)
+                                    MdtCalibInterfacesLib MuonReadoutGeometryR4 MuonSpacePoint xAODMuonPrepData 
+                                    ActsCalibratorsLib MuonTrackEvent ActsGeometryInterfacesLib MdtCalibData 
+                                    MuonPatternHelpers NSWCalibToolsLib MMClusterizationLib Acts::Core)
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

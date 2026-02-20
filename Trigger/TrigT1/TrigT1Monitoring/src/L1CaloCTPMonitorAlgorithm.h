@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_L1CALOCTPMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_L1CALOCTPMONITORALGORITHM_H
@@ -27,6 +27,7 @@
 #include "TrigConfL1Data/TriggerThreshold.h"
 #include "TrigConfData/L1Menu.h"
 #include "TrigConfL1Data/PIT.h"
+#include "TrigConfInterfaces/ITrigConfigSvc.h"
 
 
 /** Monitoring of L1Calo --> CTP transmission

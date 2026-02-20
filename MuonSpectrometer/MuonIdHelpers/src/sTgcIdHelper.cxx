@@ -50,12 +50,12 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("stgcMultilayer");
+    const IdDictField* field = m_dict->find_field("stgcMultilayer");
     if (field) {
         m_DETECTORELEMENT_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stgcMultilayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("stgcGasGap");
@@ -63,7 +63,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_GASGAP_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'stgcGasGap' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("stgcChannelType");
@@ -71,7 +71,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNELTYPE_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channelType' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("stgcChannel");
@@ -79,18 +79,19 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channel' field ");
-        status = 1;
+        return 1;
     }
 
     // reinitialize the module ndex
     // m_DETECTORELEMENT_INDEX = m_MODULE_INDEX;
 
     // save an index to the first region of tgc
-    IdDictGroup* stgcGroup = m_dict->find_group("stgc");
+    const IdDictGroup* stgcGroup = m_dict->find_group("stgc");
     if (!stgcGroup) {
         ATH_MSG_ERROR("Cannot find stgc group");
+        return 1;
     } else {
-        m_GROUP_INDEX = stgcGroup->regions()[0]->index();
+        m_GROUP_INDEX = stgcGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
@@ -135,6 +136,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_range.size());
     } else {
         ATH_MSG_ERROR("Muon sTGC detector element MultiRange is empty");
+        return 1;
     }
 
     // Build MultiRange down to "detector element" for all sTGC regions
@@ -159,12 +161,13 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_channel_range.size());
     } else {
         ATH_MSG_ERROR("Muon sTGC detector MultiRange is empty for channels");
+        return 1;
     }
 
     // build sTGC module ranges
     // Find the regions that have a "technology field" that matches the sTGC and save them
     int stgcField = -1;
-    status = m_dict->get_label_value("technology", "STGC", stgcField);
+    status += m_dict->get_label_value("technology", "STGC", stgcField);
 
     for (int i = 0; i < (int)muon_range.size(); ++i) {
         const Range& range = muon_range[i];
@@ -202,26 +205,26 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     // test to see that the multi range is not empty
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("sTGC MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     }
 
     // test to see that the detector element multi range is not empty
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("sTGC MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     // test to see that the multi range is not empty
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("sTGC MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     }
 
     // Setup the hash tables for sTGC
     ATH_MSG_INFO("Initializing sTGC hash indices ... ");
-    status = init_hashes();
-    status = init_detectorElement_hashes();  // same as module hash
-    status = init_id_to_hashes();
+    status += init_hashes();
+    status += init_detectorElement_hashes();  // same as module hash
+    status += init_id_to_hashes();
 
     /*
     //comment out this bit to test the identifiers
@@ -239,7 +242,7 @@ int sTgcIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     // Setup hash tables for finding neighbors
     ATH_MSG_INFO("Initializing sTGC hash indices for finding neighbors ... ");
-    status = init_neighbors();
+    status += init_neighbors();
 
     m_init = true;
     return (status);

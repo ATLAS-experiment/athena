@@ -17,7 +17,7 @@
 #include "Blob2ToolConstants.h"
 #include "CaloConditions/ToolConstants.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -38,11 +38,11 @@
  * To read from the detector store, the DetStoreKey property should be set.
  */
 class ToolConstantsCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Inherit constructor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.
@@ -51,7 +51,6 @@ public:
 
   /// Gaudi execute method.
   StatusCode execute (const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 
 private:
   ToolHandle<Blob2ToolConstants> m_blobTool

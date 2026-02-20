@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/InnerDetector/InDetDetDescr/InDetIdentifier/test/test_indet_id.cxx,v 1.11 2009-01-06 17:37:49 schaffer Exp $ 
@@ -33,7 +33,7 @@ check_zdc_decoding(IdDictMgr& idd)
 
 }
 
-
+//coverity[root_function]
 int main (int argc, char* argv[])  
 {  
     if (argc < 2) return (1);  

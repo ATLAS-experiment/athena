@@ -167,7 +167,6 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   for (auto &&colName : colNames)
   {
     if ((baseBranchName.empty() || colName.find(baseBranchName) != std::string::npos) &&  // include
-        (colName.find("Trig") == std::string::npos) &&                                    // exclude, not meaningful
         (colName.find("Link") == std::string::npos) &&                                    // exclude, elementlinks
         (colName.find("m_persIndex") == std::string::npos) &&                             // exclude, elementlinks
         (colName.find("m_persKey") == std::string::npos) &&                               // exclude, elementlinks

@@ -13,9 +13,7 @@ namespace pool {
   /** @class ITransaction ITransaction.h PersistencySvc/ITransaction.h
    *
    *  ITransaction is the interface class for user (macroscopic transactions)
-   *  Every operation with the pool storage system should be performed
-   *  within a transaction. It is up to the specific implementation to
-   *  perform proper transaction handling (rollbacks, locking, etc...)
+   *  Every operation with the pool storage system should be performed within a transaction.
    */
 
   class ITransaction {
@@ -37,9 +35,6 @@ namespace pool {
 
     /// Commits the holds transaction.
     virtual bool commitAndHold() = 0;
-
-    /// Rolls back the transaction
-    virtual void rollback() = 0;
 
     /// Checks if the transaction is active
     virtual bool isActive() const = 0;

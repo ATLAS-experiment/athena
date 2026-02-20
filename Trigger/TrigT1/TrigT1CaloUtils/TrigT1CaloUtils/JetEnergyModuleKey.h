@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetEnergyModuleKey.h  -  description
@@ -63,9 +63,9 @@ public:
   /** returns the phi coord of the row of the JEM at the coordinates passed*/
   double rowPhiCoord(unsigned int row, const Coordinate& jemCoord);
   /** height */
-  double dPhi(const Coordinate& coord) const;
+  virtual double dPhi(const Coordinate& coord) const override;
   /** width */
-  double dEta(const Coordinate& coord) const;
+  virtual double dEta(const Coordinate& coord) const override;
   /** region */
   JEMRegion region(const Coordinate& coord) const;
   /** return row of passed coordinate */
@@ -80,9 +80,9 @@ public:
 private: // Private methods
   /** converts integer phi, eta coordinates to phi, eta trigger bins,
   and central coords*/
-  BinAndCoord* calculateTriggerBin(ICoordinate* iCoord);
+  virtual BinAndCoord calculateTriggerBin(const ICoordinate& iCoord) override;
   /** sets the eta and phi bins*/
-  void setBins(ICoordinate* iCoord,unsigned int& phiBin, int& etaBin);
+  void setBins(const ICoordinate& iCoord,unsigned int& phiBin, int& etaBin);
   /** No descriptions */
   unsigned int midJEMEtaCol(const Coordinate& coord) const;
   /** returns eta row of JEMs 0, or 8*/

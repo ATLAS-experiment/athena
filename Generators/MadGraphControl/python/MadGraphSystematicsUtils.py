@@ -165,20 +165,27 @@ def setup_pdf_and_systematic_weights(the_base_fragment,extras,isNLO):
     ### options in run cards that affect PDF and systematics weights behavior
 
     ### set all relevant keys to lowercase and clean them up
+    list = []
+    tmp_dict = {}
     for k in extras:
         k_clean=k.lower().replace("'",'').replace('"','')
         if k_clean!=k and k_clean in systematics_run_card_options(isNLO):
-            extras[k_clean]=extras[k]
-            extras.pop(k,None)
-        
+            list.append(k)
+            tmp_dict[k_clean] = extras[k]
+    # Removing systematics with incorrect formatting 
+    for o in list:
+        if o in extras:
+            extras.pop(o,None)
+    # Adding cleaned up systematics into dictionary
+    extras.update(tmp_dict)
     ### Check compatibility of user setting and base fragment inclusion
     if base_fragment_setup_check(the_base_fragment,extras,isNLO):
         return
     # if something is set that contradicts the base fragment: bad!
     for o in systematics_run_card_options(isNLO):
         if o in extras:
-            raise RuntimeError('Error, you tried to set "'+str(o)+'" by hand, but you should trust the base fragment with the following options: '+', '.join(systematics_run_card_options(isNLO)))
-
+            mgsyslog.warning('You tried to set "'+str(o)+'" by hand, but you should trust the base fragment with the following options: '+', '.join(systematics_run_card_options(isNLO)))
+            mgsyslog.info('We will update "'+str(o))
 
     new_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
     ### backup extras (user set parameters for run_card)
@@ -217,6 +224,7 @@ def base_fragment_setup_check(the_base_fragment,extras,isNLO):
     else:
         # if setting is already exactly as it should be -- great!
         correct_settings=get_pdf_and_systematic_settings(the_base_fragment,isNLO)
+        
         allgood=True
         for s in correct_settings:
             if s is None and s in extras:

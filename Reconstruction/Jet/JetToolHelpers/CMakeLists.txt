@@ -42,11 +42,9 @@ if( NOT XAOD_STANDALONE )
       LINK_LIBRARIES AthenaBaseComps GaudiKernel JetToolHelpersLib StoreGateLib xAODJet AnaAlgorithmLib AthContainers)
 endif()
 
-if( XAOD_STANDALONE )
 atlas_add_dictionary( JetToolHelpersDict
    JetToolHelpers/JetToolHelpersDict.h
    JetToolHelpers/selection.xml
    LINK_LIBRARIES JetToolHelpersLib )
-endif()
 
 atlas_install_python_modules( python/*.py )

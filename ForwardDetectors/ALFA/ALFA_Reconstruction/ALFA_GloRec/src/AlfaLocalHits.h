@@ -6,21 +6,12 @@
 #define AlfaLocalHits_h
 
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/Algorithm.h"
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ServiceHandle.h"
-
-#include "ALFA_Geometry/ALFA_GeometryReader.h"
-#include "ALFA_LocRecEv/ALFA_LocRecEvent.h"
-#include "ALFA_LocRecCorrEv/ALFA_LocRecCorrEvent.h"
-
-
 // ROOT headers
-#include <TROOT.h>
+#include "CLHEP/Geometry/Point3D.h"
 #include "TString.h"
-#include "TObjArray.h"
-#include "TObjString.h"
+#include <vector>
+class ALFA_LocRecCorrEvent;
+
 
 
 

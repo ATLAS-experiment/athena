@@ -17,11 +17,12 @@
 
 #include "EventContainers/IdentifiableCacheBase.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
+#include <bit>
 
 namespace EventContainers {
 
-const void* const INVALID = reinterpret_cast<const void*>(IdentifiableCacheBase::INVALIDflag);
-const void* const ABORTED = reinterpret_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
+const void* const INVALID = std::bit_cast<const void*>(IdentifiableCacheBase::INVALIDflag);
+const void* const ABORTED = std::bit_cast<const void*>(IdentifiableCacheBase::ABORTEDflag);
 
 
 
@@ -152,7 +153,7 @@ const void* IdentifiableCacheBase::get (IdentifierHash hash)
        ptr = m_maker->typelessMake (hash).release();
      }
      catch (...) {
-       // FIXME: Can this be done with RAII?
+       m_vec[hash].store( ABORTED );
        notifyHash(hash);
        throw;
      }

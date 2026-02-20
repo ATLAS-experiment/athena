@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -14,9 +14,9 @@
 #include "LArRawConditions/LArShapeP1.h"
 INSTAN_CC(LArShapeP1);
 INSTAN_CS(LArShapeP);
-namespace LArRawConditionsDict {
+struct LArRawConditionsDict2a {
   DataVector<LArConditionsSubset<LArShapeP1> > dcs_LArShapeP1;
-}
+};
 //PYGATE(LArShape32MC);
 
 
@@ -92,7 +92,7 @@ INSTAN_BOTH(LArPhysWave);
 #include "LArRawConditions/LArCalibParams.h"
 #include "LArRawConditions/LArGlobalTimeOffset.h"
 
-namespace LArRawConditionsDict {
+struct LArRawConditionsDict2b {
   std::pair< HWIdentifier, LArCalibParams::CalibBoard>     pair0;
-}
+};
 

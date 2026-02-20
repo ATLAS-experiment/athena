@@ -45,16 +45,16 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::initialize(){
 
 
 
-StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHeader* header, bool &last)
+StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHeader* header, bool &last) const
 {
   return readData(header, last, false); // by default with this tool don't reset data
 }
 
-StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHeader* header, bool &last, bool doReset)
+StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHeader* header, bool &last, bool doReset) const
 {
-
+  std::lock_guard<std::mutex> lock(m_readMutex);
+  
   last = false;
-  //unsigned entry = static_cast<unsigned>(CLHEP::RandFlat::shoot() * m_nEntries);
   m_EventTree->GetEntry(m_entry++);
 
   // Truth Info
@@ -111,7 +111,7 @@ StatusCode FPGATrackSimReadRawRandomHitsTool::readData(FPGATrackSimEventInputHea
 }
 
 
-StatusCode FPGATrackSimReadRawRandomHitsTool::writeData(FPGATrackSimEventInputHeader* /*header*/)  {  
+StatusCode FPGATrackSimReadRawRandomHitsTool::writeData(FPGATrackSimEventInputHeader* /*header*/) const {
   ATH_MSG_FATAL("This tool is being forced to write things. But it is only designed to read things. Don't worry, everything is fine");
   return StatusCode::FAILURE;// this tool is not designed to write things
 }

@@ -1,6 +1,6 @@
 """Define methods to construct configured PLR overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,11 +16,8 @@ def PLR_OverlayAlgCfg(flags, name="PLR_Overlay", **kwargs):
     kwargs.setdefault("OutputKey", "PLR_RDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        pass
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'PixelRDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do PLR overlay
     acc.addEventAlgo(CompFactory.PixelOverlay(name, **kwargs))

@@ -12,6 +12,9 @@
 #include <stdexcept>
 #include <string_view>
 #include <memory>
+#include <mutex>
+
+#include <curl/curl.h>
 
 #include "TFile.h"
 #include "TSystem.h"
@@ -23,21 +26,68 @@ namespace {
   const char path_separator = ':'; // Linux and MacOS
   const char* const pathResolverEnvVar = "PATHRESOLVER_DEVAREARESPONSE";
 
-  /// Workaround for ATLASG-2948: TFile::Cp stopped working for
-  /// non-ROOT files at some point around release 25.2.60.
-  bool download_with_curl(const std::string& url, const std::string& output_path) {
-    // -L follows redirects
-    // -s silent mode (no progress bar), remove if you want curl's output
-    std::string cmd = "curl -L -s -o " + output_path + " " + url;
-    int ret = std::system(cmd.c_str());
-    return ret == 0;
+  // Callback function to write received data into an ofstream
+  size_t write_data(void* ptr, size_t size, size_t nmemb, void* userdata) {
+    std::ostream* stream = static_cast<std::ostream*>(userdata);
+    size_t total_size = size * nmemb;
+    stream->write(static_cast<char*>(ptr), total_size);
+    return total_size;
+  }
+  bool download_file(const std::string& url, const std::string& output_path,
+    asg::AsgMessaging& asgmsg)
+  {
+
+    // We intentionally skip curl_global_cleanup to avoid races in
+    // multithreaded use. This leaks a small amount of global state,
+    // but the OS reclaims it at process exit.
+    static std::once_flag curl_setup;
+    std::call_once(curl_setup, curl_global_init, CURL_GLOBAL_DEFAULT);
+
+    using owner_t = std::unique_ptr<CURL, decltype(&curl_easy_cleanup)>;
+    owner_t curl_owner(curl_easy_init(), curl_easy_cleanup);
+
+    auto* curl = curl_owner.get();
+
+    if (!curl) {
+      asgmsg.msg(MSG::WARNING) << "unable to setup curl" << endmsg;
+      return false;
+    }
+
+    std::ofstream file(output_path, std::ios::binary);
+    if (!file.is_open()) {
+      asgmsg.msg(MSG::WARNING) << "unable to open " << output_path << endmsg;
+      return false;
+    }
+    auto setCurlOption =[curl](auto option, const auto &value)->bool{
+      CURLcode ret = curl_easy_setopt(curl, option, value);
+      return (ret == CURLE_OK);
+    };
+    bool setupOk = setCurlOption(CURLOPT_TIMEOUT, 60L);
+    setupOk &= setCurlOption(CURLOPT_URL, url.c_str());
+    setupOk &= setCurlOption(CURLOPT_WRITEFUNCTION, write_data);
+    setupOk &= setCurlOption(CURLOPT_WRITEDATA, &file);
+    // Optional: follow redirects
+    setupOk &= setCurlOption(CURLOPT_FOLLOWLOCATION, 1L);
+    if (not setupOk) {
+      asgmsg.msg(MSG::WARNING) << "curl setup failed in PathResolver." <<endmsg;
+      return false;
+    }
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+      asgmsg.msg(MSG::WARNING) << "error downloading file: "
+                             << curl_easy_strerror(res)
+                             << " (" << res << ")" << endmsg;
+      return false;
+    }
+
+    return true;
   }
 
   /// Check if a file from "dev/" is loaded and warn/throw if requested
   void checkForDev(asg::AsgMessaging& asgmsg,
                    const std::string& logical_file_name) {
 
-    asgmsg.msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
+    if (asgmsg.msgLvl(MSG::DEBUG)) asgmsg.msg(MSG::DEBUG) << "Trying to locate " << logical_file_name << endmsg;
 
     if (logical_file_name.starts_with("dev/")) {
       const char* env = std::getenv(pathResolverEnvVar);
@@ -77,17 +127,16 @@ namespace {
 
 
 asg::AsgMessaging& PathResolver::asgMsg() {
+
 #ifdef XAOD_STANDALONE
    static thread_local asg::AsgMessaging asgMsg("PathResolver");
 #else
    static asg::AsgMessaging asgMsg ATLAS_THREAD_SAFE ("PathResolver");
 #endif
-/// In AnalysisBase this method is not available
-#ifndef XAOD_ANALYSIS
-   asgMsg.setLevel(m_level);   
-#else
-   asgMsg.msg().setLevel(m_level);
-#endif
+
+   // Set default OutputLevel unless user already set one
+   if (m_level==MSG::NIL) setOutputLevel(MSG::INFO);
+
    return asgMsg;
 }
 
@@ -123,32 +172,20 @@ bool PathResolver::PR_find( const std::string& logical_file_name, const std::str
       const fs::path targetPath = locationToDownloadTo / file;
       fs::path targetDir = targetPath;
       targetDir.remove_filename();
-      msg(MSG::DEBUG) << "Attempting http download of " << fileToDownload << " to " << targetDir << endmsg;
+      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Attempting http download of " << fileToDownload << " to " << targetDir << endmsg;
 
       if (!is_directory(targetDir)) {
-        msg(MSG::DEBUG) << "Creating directory " << targetDir  << endmsg;
+        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Creating directory " << targetDir  << endmsg;
         if(!fs::create_directories(targetDir)) {
           msg(MSG::ERROR) << "Unable to create directories to write file to " << targetDir << endmsg;
           return false;
         }
       }
 
-      if (!TFile::Cp(fileToDownload.c_str(), targetPath.c_str(), false)) {
-        msg(MSG::INFO) << "Unable to download file "
-                       << fileToDownload
-                       << " with ROOT, falling back to command line tools"
-                       << endmsg;
-        if (download_with_curl(fileToDownload, targetPath)) {
-          msg(MSG::INFO) << "Successfully curled " << fileToDownload << endmsg;
-          result = targetPath;
-          return true;
-        } else {
-          msg(MSG::WARNING) << "Unable to download file "
-                            << fileToDownload
-                            << endmsg;
-        }
+      if (!download_file(fileToDownload, targetPath, asgMsg())) {
+        msg(MSG::WARNING) << "Unable to download file " << fileToDownload << endmsg;
       } else {
-        msg(MSG::DEBUG) << "Successfully downloaded " << fileToDownload << endmsg;
+        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Successfully downloaded " << fileToDownload << endmsg;
         result = targetPath;
         return true;
       }
@@ -268,6 +305,11 @@ std::string PathResolver::find_calib_directory (const std::string& logical_file_
 
 void PathResolver::setOutputLevel(MSG::Level level) {
    m_level = level;
+#ifndef XAOD_ANALYSIS
+   asgMsg().setLevel(m_level);
+#else
+   asgMsg().msg().setLevel(m_level);
+#endif
 }
 
 std::string PathResolverFindXMLFile (const std::string& logical_file_name)

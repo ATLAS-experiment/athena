@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_RDOAnalysis.h"
@@ -182,7 +182,7 @@ bool HGTD_RDOAnalysis::isHSGoodParticle(HepMC::ConstGenParticlePtr particlePtr,c
   if( MC::isGenStable(particlePtr) and
       isCharged(particlePtr) and
       particlePtr->momentum().perp() >= min_pt_cut and
-      particlePtr->momentum().eta() < 4. and
+      particlePtr->momentum().eta() < 4.0 and
       particlePtr->parent_event() == hardScatterGenEvent)
   decision = true;
 

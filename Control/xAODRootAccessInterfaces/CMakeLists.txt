@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 # Build configuration for the xAODRootAccessInterfaces package.
 #
@@ -13,5 +13,5 @@ find_package( ROOT COMPONENTS Core )
 atlas_add_library( xAODRootAccessInterfaces
    xAODRootAccessInterfaces/*.h xAODRootAccessInterfaces/*.icc Root/*.cxx
    PUBLIC_HEADERS xAODRootAccessInterfaces
-   LINK_LIBRARIES ${ROOT_LIBRARIES}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} SGCoreLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} )

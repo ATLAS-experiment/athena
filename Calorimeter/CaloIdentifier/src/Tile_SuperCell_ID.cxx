@@ -13,8 +13,6 @@
 #include "Identifier/IdentifierHash.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 
-#include "GaudiKernel/MsgStream.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -29,18 +27,15 @@ Tile_SuperCell_ID::Tile_SuperCell_ID()
 
 int Tile_SuperCell_ID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 {
-  MsgStream log(m_msgSvc, "Tile_SuperCell_ID" );
-  
-  std::string strg = "initialize_from_dictionary";
-  log << MSG::DEBUG << strg << endmsg;
+  ATH_MSG_DEBUG("initialize_from_dictionary");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
   // init base object

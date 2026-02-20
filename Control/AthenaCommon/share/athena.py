@@ -1,7 +1,7 @@
 #!/bin/sh
 # Emacs, this is mostly -*-Python-*-
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # athena.py is born as shell script to preload some optional libraries.
 #
@@ -22,8 +22,6 @@ fi
 for a in "$@"
 do
     case "$a" in
-        --leak-check*)   USETCMALLOC=0;;
-        --delete-check*) USETCMALLOC=0;;
         --stdcmalloc)    USETCMALLOC=0;;
         --tcmalloc)      USETCMALLOC=1;;
         --stdcmath)      USEIMF=0;;

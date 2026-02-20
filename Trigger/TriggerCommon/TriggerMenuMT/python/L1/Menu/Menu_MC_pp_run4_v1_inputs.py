@@ -11,6 +11,9 @@ def defineInputsMenu():
     L1MenuFlags.ThresholdMap = {
         'eEM1': 'eEM20M',
         'eEM2': 'eEM24M',
+        'eTAU140': 'eTAU120',
+        'eTAU35' : 'eTAU28M',
+        'jJ90' : 'jJ70',
     }
     remapThresholds(L1MenuFlags)
 

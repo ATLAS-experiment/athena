@@ -70,7 +70,7 @@ namespace DerivationFramework {
     // retrieve primary vertices
     //----------------------------------------------------
     SG::ReadHandle<xAOD::VertexContainer> pvContainer{m_pvContainerName, ctx};
-    ATH_CHECK(!pvContainer.isValid());
+    ATH_CHECK(pvContainer.isValid());
     //----------------------------------------------------
     // Refit primary vertices
     //----------------------------------------------------

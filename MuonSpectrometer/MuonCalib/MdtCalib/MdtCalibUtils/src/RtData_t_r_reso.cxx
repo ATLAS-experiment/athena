@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibUtils/RtData_t_r_reso.h"
@@ -27,7 +27,7 @@ namespace MuonCalib {
         m_resoVec.reserve(m_npars);
 
         // read data from file
-        for (unsigned int i = 0; i < m_npars; ++i) {
+        for (int i = 0; i < static_cast<int>(m_npars); ++i) {
             // check if eof reached before last entry was read
             if (is.eof()) {
                 MsgStream log(Athena::getMessageSvc(), "RtData_t_r_reso");

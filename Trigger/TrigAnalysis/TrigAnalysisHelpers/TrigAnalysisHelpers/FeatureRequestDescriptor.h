@@ -15,6 +15,7 @@
  ***********************************************************************************/
 #include <string>
 #include <sstream>
+#include <regex>
 
 #include "AsgMessaging/MsgStream.h"
 #include "TrigDecisionInterface/Conditions.h"
@@ -29,7 +30,7 @@ namespace Trig {
     /**
      * @brief Default Constructor supplying all properties except for the chain group. See below for individual property descriptions.
      * @param[in] chainGroupName Chain or Chain Group, supplied by name.
-     * Regex supported with TrigDecisionTool. Only one exact individual chain name is supported in TrigDecisionToolLite.
+     * Regex supported for chainGroupName with TrigDecisionTool. Only one exact individual chain name is supported in TrigDecisionToolLite.
      **/
     FeatureRequestDescriptor(const std::string& chainGroupName = "",
       const unsigned int condition = TrigDefs::Physics,
@@ -131,6 +132,11 @@ namespace Trig {
     const std::string& SGKey() const;
 
     /**
+     * @return The regex compiled StoreGate key filter.
+     **/
+    const std::regex& SGKeyExpression() const;
+
+    /**
      * @return The feature collection mode, TrigDefs::lastFeatureOfType or TrigDefs::allFeatureOfType
      **/
     unsigned int featureCollectionMode() const;
@@ -150,6 +156,7 @@ namespace Trig {
     std::string m_chainGroupName;
     int m_condition;
     std::string m_containerSGKey;
+    std::regex m_containerSGKeyExpression;
     int m_featureCollectionMode;
     std::string m_navElementLinkKey;
     int m_restrictToLegIndex;

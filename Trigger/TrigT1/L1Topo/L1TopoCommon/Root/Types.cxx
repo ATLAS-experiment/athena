@@ -37,6 +37,8 @@ TCS::inputTypeAsString(TCS::inputTOBType_t type) {
   else if(type == TCS::GXERHO ) return "gXERHO";
   else if(type == TCS::GMHT ) return "gMHT";
   else if(type == TCS::GTE ) return "gTE";
+  else if(type == TCS::CXE ) return "cXE";
+  else if(type == TCS::GESPRESSO ) return "gESPRESSO";
   else return "None";
 }
 
@@ -137,6 +139,12 @@ TCS::inputType(const std::string& input) {
    if ( input == "gTE")
       return TCS::GTE;
           
+   if ( input == "cXE" || input == "cXeTobArray" || input == "cXeTobs" || input == "cXe")
+      return TCS::CXE;
+      
+   if ( input == "gESPRESSO" ||  input == "gEspresso" )
+      return TCS::GESPRESSO;
+      
    TCS_EXCEPTION("L1TopoCommon: unknown input type " + input);
    
    return TCS::NONE;

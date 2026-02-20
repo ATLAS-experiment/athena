@@ -27,7 +27,6 @@
 #include "../AthIncFirerAlg.h"
 #include "../ConditionsCleanerSvc.h"
 #include "../DelayedConditionsCleanerSvc.h"
-#include "../DecisionAlg.h"
 #include "../AthReadAlg.h"
 #include "../../test/MetaDataToolStub.h"
 #include "../MPIHiveEventLoopMgr.h"
@@ -63,7 +62,6 @@ DECLARE_COMPONENT( Athena::ThinningCacheTool )
 DECLARE_COMPONENT( AthIncFirerAlg )
 DECLARE_COMPONENT( Athena::ConditionsCleanerSvc )
 DECLARE_COMPONENT( Athena::DelayedConditionsCleanerSvc )
-DECLARE_COMPONENT( DecisionAlg )
 DECLARE_COMPONENT( AthReadAlg )
 DECLARE_COMPONENT( MetaDataToolStub )
 DECLARE_COMPONENT( Athena::ROOTMessageFilterSvc )

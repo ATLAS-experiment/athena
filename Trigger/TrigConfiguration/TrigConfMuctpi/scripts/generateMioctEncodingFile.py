@@ -7,11 +7,6 @@ from itertools import groupby
 from operator import attrgetter
 from math import pi as PI
 
-# settings temporary
-global shiftPhi
-shiftPhi = True
-
-
 
 class Entry:
     """Represents a single input ROI (one line in the .dat file)
@@ -33,13 +28,11 @@ class Entry:
         self.etacode      = etacode
         self.phicode      = phicode
 
-        global shiftPhi
-        if shiftPhi:
-            # make sure to have everything between 0 and 2*PI
-            if max(self.phimin, self.phimax) < 0:
-                self.phimin += 2 * PI
-                self.phimax += 2 * PI
-                self.phi    += 2 * PI
+        # make sure to have everything between 0 and 2*PI
+        if max(self.phimin, self.phimax) < 0:
+            self.phimin += 2 * PI
+            self.phimax += 2 * PI
+            self.phi    += 2 * PI
 
 
         if self.phimin * self.phimax < -1:

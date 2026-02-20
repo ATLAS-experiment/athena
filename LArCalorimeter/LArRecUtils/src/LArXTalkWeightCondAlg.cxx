@@ -46,7 +46,7 @@ LArXTalkWeightCondAlg::execute(const EventContext& ctx) const {
 }
 
 LArXTalkWeightCondAlg::LArXTalkWeightCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthReentrantAlgorithm(name,pSvcLocator){}
+	AthCondAlgorithm(name,pSvcLocator){}
 
 LArXTalkWeightCondAlg_strip::LArXTalkWeightCondAlg_strip(const std::string& name,ISvcLocator* pSvcLocator) : LArXTalkWeightCondAlg(name,pSvcLocator){
     m_xtalk_to_inject.insert(m_xtalk_to_inject.end(),std::begin(LArXTalkWeightConstants::xtalk_strip),std::end(LArXTalkWeightConstants::xtalk_strip));

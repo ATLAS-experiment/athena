@@ -6,42 +6,27 @@
 #include "GeoModelKernel/GeoMaterial.h"
 #include "GeoModelKernel/GeoBox.h"  
 #include "GeoModelKernel/GeoTube.h"
-#include "GeoModelKernel/GeoPcon.h"
-#include "GeoModelKernel/GeoEllipticalTube.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
-#include "GeoModelKernel/GeoShapeIntersection.h"
 #include "GeoModelKernel/GeoShapeUnion.h"
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoLogVol.h"  
 #include "GeoModelKernel/GeoNameTag.h"  
 #include "GeoModelKernel/GeoPhysVol.h"  
-#include "GeoModelKernel/GeoFullPhysVol.h"  
 #include "GeoModelKernel/GeoDefinitions.h"  
 #include "GeoModelKernel/Units.h"  
-#include "GeoGenericFunctions/AbsFunction.h"
-#include "GeoGenericFunctions/Variable.h"
-#include "GeoGenericFunctions/Sin.h"
-#include "GeoGenericFunctions/Cos.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "CLHEP/Geometry/Point3D.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
-#include "GeoModelInterfaces/StoredMaterialManager.h"
-
 #include "PathResolver/PathResolver.h"
 
 #include <iostream>
+#include <sstream>
 #include <fstream>
-#include <string>
-#include <vector>
+#include <math.h> //for abs, tan, atan2
 
-#include <math.h>
-#include <algorithm>
-
-// #include <stdio.h> // FILENAME_MAX
-// #include <unistd.h> // getcwd()
-
-#include <stdlib.h>
+#include <stdlib.h>// for atof
 
 
 void FWD_CONFIGURATION::clear()
@@ -445,8 +430,8 @@ void ForwardRegionGeoModelFactory::create(GeoPhysVol *world)
   world->add(fwrPhys);
   m_detectorManager->addTreeTop(fwrPhys);
 
-  constructElements(fwrPhys,loadedDataFileR,1);
-  constructElements(fwrPhys,loadedDataFileL,2);
+  constructElements(fwrPhys,std::move(loadedDataFileR),1);
+  constructElements(fwrPhys,std::move(loadedDataFileL),2);
 
   LogStream << MSG::INFO << "Forward region model succesfully constructed." << endmsg;
 }

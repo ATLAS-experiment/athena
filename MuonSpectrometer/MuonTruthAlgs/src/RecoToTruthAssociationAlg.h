@@ -29,13 +29,16 @@ private:
    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuKey{
         this, "MuonTruthParticleContainerName", "MuonTruthParticles"};
 
-    SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
-        this, "MuonContainerName", "Muons",
-        "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
-
+    /** @brief Decorations for the filtered muon truth particles  */
     SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_muonTruthRecoLink{
         this, "MuonTruthParticleRecoLink", m_truthMuKey, "",
         "container name for muon truth particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
+
+    SG::ReadHandleKey<xAOD::MuonContainer> m_recoMuKey{
+        this, "MuonContainerName", "Muons",
+        "container name for reco muon particles; the full handle name, including the reco muon link auxdata, is set in initialize()"};
+
+    /** @brief Decorations for the reconstructed muon particles  */
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleLink{
         this, "MuonTruthParticleLink", m_recoMuKey, "truthParticleLink",
         "muon truth particle link auxdata name; name will be reset in initialize() based on m_muonName"};
@@ -45,6 +48,9 @@ private:
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleOrigin{
         this, "MuonTruthParticleOrigin", m_recoMuKey, "truthOrigin",
         "muon truth origin auxdata name; name will be reset in initialize() based on m_muonName"};
+    SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleClassification{
+        this, "MuonTruthParticleClassification", m_recoMuKey, "truthClassification",
+        "muon truth classification auxdata name; name will be reset in initialize() based on m_muonName"};
     SG::WriteDecorHandleKey<xAOD::MuonContainer> m_muonTruthParticleNPrecMatched{
         this, "MuonTruthParticleNPrecMatched", m_recoMuKey, "nprecMatchedHitsPerChamberLayer",
         "muon vector of number of precision matched hits per chamber layer auxdata name; name will be reset in initialize() based on "

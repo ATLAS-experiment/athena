@@ -7,7 +7,7 @@
 #ifndef LARLATOMEMAPPINGALG_H
 #define LARLATOMEMAPPINGALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -18,16 +18,16 @@
  * @brief class to fill SC mapping object from conditions DB
  */
 
-class LArLATOMEMappingAlg: public AthAlgorithm {
+class LArLATOMEMappingAlg: public AthCondAlgorithm {
 
 public:
   //Delegate constructor:
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   
   virtual ~LArLATOMEMappingAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 
  private:

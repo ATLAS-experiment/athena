@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @brief Helper macro to compare the output from the readout geometry dumps:
@@ -357,7 +357,7 @@ std::set<TgcChamber> readTreeDump(const std::string& inputFile) {
         chambOk = false;                                                           \
     }
 
-int main( int argc, char** argv ) {
+int main1( int argc, char** argv ) {
     std::string refFile{}, testFile{};
     
     for (int arg = 1; arg < argc; ++arg) {
@@ -528,4 +528,17 @@ int main( int argc, char** argv ) {
         }
     }
     return retCode;
+}
+
+
+int main (int argc, char** argv )
+{
+  int ret = 1;
+  try {
+    ret = main1 (argc, argv);
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+  }
+  return ret;
 }

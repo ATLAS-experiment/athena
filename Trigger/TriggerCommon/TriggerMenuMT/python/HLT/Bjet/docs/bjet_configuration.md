@@ -1,4 +1,4 @@
-<!--Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration-->
+<!--Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration-->
 
 # Bjet Trigger configuration guide
 
@@ -40,7 +40,7 @@ In our example chain there are two chain parts '*2j55_0eta290_020jvt_pf_ftf_bdl1
 
 Before the b-tagging weight of a jet can be calculated, the jet itself has to be reconstructed first. Hence, the first step in each bjet-chain is always the execution of jet-signature code. Because of the close relation between the two signatures, they both share the common chain part identifier '*j*' and chain part (sub-)dictionary JetChainParts-Dictionary.
 
-This is only a brief introduction to the trigger menu in order to better understand the structure of the signature code below. For more informations on the trigger menu consult [Trigger Developers Guide](https://atlassoftwaredocs.web.cern.ch/guides/trigger/).
+This is only a brief introduction to the trigger menu in order to better understand the structure of the signature code below. For more informations on the trigger menu consult [Trigger Developers Guide](https://atlas-software.docs.cern.ch/athena/trigger/developers/).
 
 
 
@@ -354,7 +354,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
        )
       ```
       The inputs to it are the names of the jet, b-Tagging, tracks and PV collections.\
-      The hypo-algorithms retrive the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
+      The hypo-algorithms retrieve the collections from the view. For this reason online monitoring is being performed at this instance (see [TrigBjetMonitoringConfig.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetMonitoringConfig.py)).\
       In the end the hypothesis is being tested with the help of the hypotool (see [TrigBjetBtagHypoTool.py](https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigHypothesis/TrigBjetHypo/python/TrigBjetBtagHypoTool.py))
       ```python
         from TrigBjetHypo.TrigBjetBtagHypoTool import TrigBjetBtagHypoToolFromDict
@@ -451,7 +451,7 @@ In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the c
        - DL1d_loose: `HLT_{jc_key}BTagging.DL1d20210519r22_pb`, `.DL1d20210519r22_pc`, `.DL1d20210519r22_pu`
        - DL1d: `HLT_{jc_key}BTagging.DL1d20210528r22_pb`, `.DL1d20210528r22_pc`, `.DL1d20210528r22_pu`
 
-     For more informations on the specific flavour-tagging algorithms consult [atlassoftwaredocs-ftag](https://atlassoftwaredocs.web.cern.ch/_staging/create-ftag-guides/guides/ftag/).\
+     For more informations on the specific flavour-tagging algorithms consult the [ATLAS Flavour Tagging Documentation](https://ftag.docs.cern.ch/).\
      For the "old" Run2 taggers the calibration of the algorithms are stored in the conditions database. The function `JetTagCalibConfig` is a condition algorithm that takes care of loading the correct calibrations
      ```python
        acc.merge(JetTagCalibCfg(flags, scheme="Trig",

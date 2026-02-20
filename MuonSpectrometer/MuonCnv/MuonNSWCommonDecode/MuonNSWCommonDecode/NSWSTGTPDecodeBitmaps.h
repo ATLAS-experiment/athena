@@ -183,6 +183,24 @@ namespace Muon
           buffer = (buffer) | (shifted_word & static_cast<uint32_t>(prop));
       }
     }
+
+    namespace STGTPStrips {
+       constexpr std::size_t num_strips =                     112;
+       constexpr std::size_t num_offsets =                      8;
+
+       constexpr int strip_stream_header  =              0xC01A;
+       constexpr int size_padding =                           70;
+       constexpr int size_strip_adc =                          6;
+       constexpr int size_offset =                            16;
+       constexpr int size_phi_id_value =                       5;
+       constexpr int size_phi_id_sign =                        1;
+       constexpr int size_band_id =                            8;
+       constexpr int size_bcid =                              12;
+
+       constexpr std::size_t size_v1 =                       896;
+       constexpr std::size_t size_v2 =                       896;
+       constexpr std::size_t size_v3 =                       896;
+    }
   }
 }
 

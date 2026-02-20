@@ -15,23 +15,16 @@ ApplicationMgr    SUCCESS
                                           running on lxplus0006 on Wed May  8 02:24:12 2013
 ====================================================================================================================================
 ApplicationMgr       INFO Application Manager Configured successfully
-E1                   INFO Initializing E1 - package version StoreGate-02-39-07-branch
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-06-07
 ClassIDSvc           INFO  getRegistryEntries: read 137 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO  getRegistryEntries: read 137 CLIDRegistry entries for module ALL
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-01-06
-E2                   INFO Initializing E2 - package version StoreGate-02-39-07-branch
 EventLoopMgr      WARNING Unable to locate service "EventSelector" 
 EventLoopMgr      WARNING No events will be processed from external input.
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-SG::HiveStoreSvc     INFO Initializing SG::HiveStoreSvc - package version StoreGate-02-39-07-branch
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-02-39-07-branch
 StoreGateSvc        DEBUG Service base class initialized successfully
 StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service IncidentSvc
 StoreGateSvc      VERBOSE ServiceLocatorHelper::service: found service ProxyProviderSvc
-ActiveStoreSvc       INFO Initializing ActiveStoreSvc - package version StoreGate-02-39-07-branch
 ActiveStoreSvc       INFO ActiveStoreSvc will use SG::HiveStoreSvc
 *** ActiveStoreHiveTest OK ***
 

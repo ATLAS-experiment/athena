@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file intentionally sparse on comments
@@ -7,23 +7,9 @@
 // Please see quick_retrieve.cxx for detailed information on these functions.
 
 
-#ifdef _POSIX_C_SOURCE
-# undef _POSIX_C_SOURCE
-#endif
-#ifdef _XOPEN_SOURCE
-# undef _XOPEN_SOURCE
-#endif
-// Following needed to avoid deprecated/removed "register" keyword
-#ifdef __clang__
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wkeyword-macro"
-#endif
-#define register
+#include <string>
+#include <vector>
 #include <Python.h>
-#undef register
-#ifdef __clang__
-# pragma clang diagnostic pop
-#endif
 
 #include <CoolKernel/ChannelSelection.h>
 #include <CoolKernel/IObject.h>
@@ -37,9 +23,6 @@
 
 #include <CoolApplication/DatabaseSvcFactory.h>
 
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
-
 using cool::DatabaseSvcFactory;
 using cool::IDatabasePtr;
 using cool::IObject;
@@ -50,8 +33,6 @@ using cool::IObjectIteratorPtr;
 using cool::IObjectVectorPtr;
 using cool::ValidityKey;
 
-#include <string>
-#include <vector>
 using std::string;
 using std::vector;
 

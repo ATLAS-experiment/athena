@@ -11,7 +11,6 @@
 
 #include "InDetIdentifier/SiliconID.h"
 #include "Identifier/IdentifierHash.h"
-#include "GaudiKernel/MsgStream.h"
 #include <iostream>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -43,15 +42,14 @@ SiliconID::~SiliconID() = default;
 
 int
 SiliconID::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
-  MsgStream log(m_msgSvc, "SiliconID");
-  log << MSG::INFO << "Initialize from dictionary" << endmsg;
+  ATH_MSG_INFO("Initialize from dictionary");
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::INFO << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_INFO("Request to reinitialize not satisfied - tags have not changed");
     
     return(0);
   } else {
-    log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
   // init base object
   if (AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return(1);
@@ -93,13 +91,9 @@ SiliconID::get_hash(const Identifier& /*id*/,
 
 int
 SiliconID::test_wafer_hashes() const {
-  MsgStream log(m_msgSvc, "IdDictTest_SiliconID");
 
-  log << MSG::INFO << "test_wafer_packing: wafer hash max, pix, sct "
-                    << wafer_hash_max() << " "
-                    << m_pixel_helper->wafer_hash_max() << " "
-                    << m_sct_helper->wafer_hash_max() << " "
-                    << endmsg;
+  ATH_MSG_INFO("test_wafer_packing: wafer hash max, pix, sct "
+               << wafer_hash_max() << " " << m_pixel_helper->wafer_hash_max() << " " << m_sct_helper->wafer_hash_max());
  
 
   bool error = false;
@@ -114,19 +108,14 @@ SiliconID::test_wafer_hashes() const {
   for (unsigned int i = 0; i < wafer_hash_max(); ++i, ++nids) {
     Identifier id = wafer_id(i);
     if (i < 10) {
-      log << MSG::INFO << "test_wafer_packing: id "
-                        << show_to_string(id)
-                        << endmsg;
+      ATH_MSG_INFO("test_wafer_packing: id " << show_to_string(id));
      
     }
 
     // Check hash
     IdentifierHash hash = wafer_hash(id);
     if (hash != i) {
-      log << MSG::ERROR << "test_wafer_packing: wafer_hash not equal to i "
-                        << "hash: " << hash << " i: " << i << " "
-                        << show_to_string(id)
-                        << endmsg;
+      ATH_MSG_ERROR("test_wafer_packing: wafer_hash not equal to i hash: " << hash << " i: " << i << " " << show_to_string(id));
      
       error = true;
     }
@@ -137,20 +126,14 @@ SiliconID::test_wafer_hashes() const {
       if (is_sct(id)) {
         nbars++;
         if (!m_sct_helper->is_barrel(id)) {
-          log << MSG::ERROR << "test_wafer_packing: is_barrel fails for sct. "
-                            << "hash: " << hash << " i: " << i << " "
-                            << show_to_string(id)
-                            << endmsg;
+          ATH_MSG_ERROR("test_wafer_packing: is_barrel fails for sct. hash: " << hash << " i: " << i << " " << show_to_string(id));
         
           error = true;
         }
       } else {
         nbarp++;
         if (!m_pixel_helper->is_barrel(id)) {
-          log << MSG::ERROR << "test_wafer_packing: is_barrel fails for pixel. "
-                            << "hash: " << hash << " i: " << i << " "
-                            << show_to_string(id)
-                            << endmsg;
+          ATH_MSG_ERROR("test_wafer_packing: is_barrel fails for pixel. hash: " << hash << " i: " << i << " " << show_to_string(id));
           
           error = true;
         }
@@ -161,18 +144,12 @@ SiliconID::test_wafer_hashes() const {
     if (is_blayer(id)) {
       nblay++;
       if (is_sct(id)) {
-        log << MSG::ERROR << "test_wafer_packing: is_blayer is sct. "
-                          << "hash: " << hash << " i: " << i << " "
-                          << show_to_string(id)
-                          << endmsg;
+        ATH_MSG_ERROR("test_wafer_packing: is_blayer is sct. hash: " << hash << " i: " << i << " " << show_to_string(id));
         
         error = true;
       } else {
         if (!m_pixel_helper->is_blayer(id)) {
-          log << MSG::ERROR << "test_wafer_packing: is_blayer fails for pixel. "
-                            << "hash: " << hash << " i: " << i << " "
-                            << show_to_string(id)
-                            << endmsg;
+          ATH_MSG_ERROR("test_wafer_packing: is_blayer fails for pixel. hash: " << hash << " i: " << i << " " << show_to_string(id));
           
           error = true;
         }
@@ -181,10 +158,7 @@ SiliconID::test_wafer_hashes() const {
 
     // Check is_pixel
     if (is_hash_pixel(i) != is_pixel(id)) {
-      log << MSG::ERROR << "test_wafer_packing: is_hash_pixel "
-                        << "hash: " << hash << " i: " << i << " "
-                        << show_to_string(id)
-                        << endmsg;
+      ATH_MSG_ERROR("test_wafer_packing: is_hash_pixel hash: " << hash << " i: " << i << " " << show_to_string(id));
      
       error = true;
     } else {
@@ -193,15 +167,10 @@ SiliconID::test_wafer_hashes() const {
   }
 
   
-    log << MSG::INFO << "Looped over " << nids << " hashes "
-        << endmsg;
-    log << MSG::INFO << "Number of is_barrel (pix/sct): " << nbar
-        << " " << nbarp << " " << nbars
-        << endmsg;
-    log << MSG::INFO << "Number of is_blayer: " << nblay
-        << endmsg;
-    log << MSG::INFO << "Number of matching is_hash_pixel/is_pixel: " << nHashPix
-        << endmsg;
+    ATH_MSG_INFO("Looped over " << nids << " hashes");
+    ATH_MSG_INFO("Number of is_barrel (pix/sct): " << nbar << " " << nbarp << " " << nbars);
+    ATH_MSG_INFO("Number of is_blayer: " << nblay);
+    ATH_MSG_INFO("Number of matching is_hash_pixel/is_pixel: " << nHashPix);
   
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "muonEvent/DepositInCalo.h"
@@ -41,20 +41,10 @@ void DepositInCalo::print() const
             << " Et Deposited " << etDeposited() << std::endl;
 }
 
-/** copy constructor */
-DepositInCalo::DepositInCalo (const DepositInCalo& rhs)
-  
-        
-= default;
+/** copy, etc */
+DepositInCalo::DepositInCalo (const DepositInCalo& rhs) = default;
+DepositInCalo & DepositInCalo::operator= (const DepositInCalo & rhs) = default;
+DepositInCalo::DepositInCalo (DepositInCalo&& rhs) = default;
+DepositInCalo & DepositInCalo::operator= (DepositInCalo&& rhs) = default;
 
-/** assignment operator */
-DepositInCalo & DepositInCalo::operator= (const DepositInCalo & rhs) {
-  if ( this != &rhs ) {
-    m_subCaloId       = rhs.m_subCaloId;
-    m_energyDeposited = rhs.m_energyDeposited;
-    m_muonEnergyLoss  = rhs.m_muonEnergyLoss;
-    m_etDeposited     = rhs.m_etDeposited;
-  }
-  return *this;
-}
 

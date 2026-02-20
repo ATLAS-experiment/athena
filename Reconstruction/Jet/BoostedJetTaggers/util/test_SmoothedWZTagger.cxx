@@ -42,12 +42,13 @@ int main( int argc, char* argv[] ) {
   char* APP_NAME = argv[ 0 ];
 
   // arguments
-  TString fileName = "/eos/atlas/atlascerngroupdisk/perf-jets/ReferenceFiles/DAOD_JETM2.Wprime.pool.root";
+  //TString fileName = "/eos/atlas/atlascerngroupdisk/perf-jets/ReferenceFiles/DAOD_JETM2.Wprime.pool.root";
+  TString fileName = "/eos/user/a/angianni/JetTagging/DAOD/mc20_13TeV.701125.Sh_2214_WlvWqq.deriv.DAOD_PHYS.e8547_s3797_r13145_p7018/DAOD_PHYS.46768158._000231.pool.root.1";
   int  ievent=-1;
   int  nevents=-1;
   bool isMC=true;
   bool verbose=false;
-  bool runSystematics=true;
+  bool runSystematics=false;
 
 
   Info( APP_NAME, "==============================================" );
@@ -214,14 +215,17 @@ int main( int argc, char* argv[] ) {
   asg::StandaloneToolHandle<SmoothedWZTagger> m_Tagger; //!
   m_Tagger.setTypeAndName("SmoothedWZTagger/MyTagger");
   if(verbose) ANA_CHECK( m_Tagger.setProperty("OutputLevel", MSG::DEBUG) );
+
+  // smoothed 3-var tagger
+  std::string tagger = "SmoothWContained50";
   ANA_CHECK( m_Tagger.setProperty( "CalibArea", "SmoothedWZTaggers/Rel21/February2022/") );
-  ANA_CHECK( m_Tagger.setProperty( "ConfigFile",   "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency50_20220221.dat") );
+  ANA_CHECK( m_Tagger.setProperty( "ConfigFile", "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency50_20220221.dat") );
   ANA_CHECK( m_Tagger.setProperty( "IsMC", isMC ) );
   ANA_CHECK( m_Tagger.retrieve() );
 
+  // ToDo: update to rel.22+
   static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
 
-  std::string tagger = "SmoothWContained50";
   static const SG::ConstAccessor<bool> acc_Tagged(tagger+"_Tagged");
   static const SG::ConstAccessor<bool> acc_PassD2(tagger+"_PassD2");
   static const SG::ConstAccessor<bool> acc_PassNtrk(tagger+"_PassNtrk");

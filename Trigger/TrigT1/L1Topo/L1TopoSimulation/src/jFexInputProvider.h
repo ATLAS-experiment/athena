@@ -18,6 +18,8 @@
 #include "xAODTrigger/jFexMETRoIContainer.h"
 #include "xAODTrigger/jFexSumETRoIContainer.h"
 #include "xAODTrigger/jFexFwdElRoIContainer.h"
+// gFEX EDMs for combinedMET (cXE)
+#include "xAODTrigger/gFexGlobalRoIContainer.h"
 
 namespace LVL1 {
 
@@ -49,10 +51,16 @@ namespace LVL1 {
       SG::ReadHandleKey<xAOD::jFexTauRoIContainer> m_jTau_EDMKey {this, "jFexTauRoIKey", "L1_jFexTauRoI", "jFEX Tau EDM"};
       SG::ReadHandleKey<xAOD::jFexMETRoIContainer> m_jXE_EDMKey {this, "jFexMETRoIKey", "L1_jFexMETRoI", "jFEX XE EDM"};
       SG::ReadHandleKey<xAOD::jFexSumETRoIContainer> m_jTE_EDMKey {this, "jFexSumETRoIKey", "L1_jFexSumETRoI", "jFEX TE EDM"};
-     
+      // gFEX XE to build "combined MET" (cXE)
+      SG::ReadHandleKey<xAOD::gFexGlobalRoIContainer> m_gXEJWOJ_EDMKey {this, "gMETComponentsJwojKey", "L1_gMETComponentsJwoj", "gFEX XEJWOJ EDM"};
+      //cXE coefficients
+      Gaudi::Property<float> m_cXEweight_jFEX{this, "cXEweight_jFEX", 0.0, "cXE coefficient for jXE component"};
+      Gaudi::Property<float> m_cXEweight_gFEX{this, "cXEweight_gFEX", 0.0, "cXE coefficient for gXE component"};
+      
       // jFex to L1Topo conversion factors
       static const int m_Et_conversion;
       static const double m_sumEt_conversion;
+      static const double m_gXE_conversion;
       static const int m_phi_conversion;
       static const int m_eta_conversion;
 

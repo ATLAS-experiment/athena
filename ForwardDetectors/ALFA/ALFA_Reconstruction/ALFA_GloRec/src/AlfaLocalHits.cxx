@@ -1,18 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#define AlfaLocalHits_cxx
-
-// C, C++ headers
-#include <cstdio>
-#include <cstdlib>
-#include <iostream>
 
 #include "AlfaLocalHits.h"
 #include "ALFA_LocRecEv/ALFA_LocRecEvent.h"
 #include "ALFA_LocRecCorrEv/ALFA_LocRecCorrEvent.h"
-
+#include "GaudiKernel/MsgStream.h"
+#include "AthenaKernel/getMessageSvc.h"
+#include "TObjArray.h"
+#include "TObjString.h"
+#include <iostream>
+#include <iomanip>
 using std::cout;
 using std::endl;
 
@@ -239,7 +238,7 @@ void AlfaLocalHits::ApplyPathPattern(const char * pattern){
     }
   }
   alh_tmp.SetPathPattern(m_pathpattern.Data());
-  m_paths.push_back(alh_tmp);
+  m_paths.push_back(std::move(alh_tmp));
   update();
 }
 
@@ -454,7 +453,8 @@ void AlfaTrackCand::CalcImpactPoints() {
 
 
 void AlfaTrackCand::Dump() const {
-  //cout.precision(8);
+  std::ios oldState(nullptr);
+  oldState.copyfmt(std::cout);
   cout << "Dumping AlfaTrackCand:" << endl;
   cout << " arm = "  << std::setprecision(8) << m_arm
        << " x = "  << std::setprecision(8) << m_x
@@ -463,6 +463,8 @@ void AlfaTrackCand::Dump() const {
        << " x'= "  << std::setprecision(8) << m_xslope
        << " y' = " << std::setprecision(8) << m_yslope
 	   << endl;
+	std::cout.copyfmt(oldState);
+	   
 }
 
 

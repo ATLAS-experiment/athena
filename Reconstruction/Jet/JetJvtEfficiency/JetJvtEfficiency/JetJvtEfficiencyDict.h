@@ -9,7 +9,6 @@
 #   define EIGEN_DONT_VECTORIZE
 #endif // __GCCXML__
 
-#include "JetJvtEfficiency/JetJvtEfficiency.h"
 #include "JetJvtEfficiency/FJvtSelectionTool.h"
 #include "JetJvtEfficiency/JvtSelectionTool.h"
 #include "JetJvtEfficiency/NNJvtSelectionTool.h"

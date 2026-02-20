@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Baptiste Ravina
@@ -40,7 +40,7 @@ namespace CP
         // Remove "_%SYS%" from the end of the string
         label.erase(label.size() - 6);
       }
-      m_labels.push_back (label);
+      m_labels.push_back (std::move(label));
       m_allCutsNum ++;
     }
     assert (m_allCutsNum+1 == m_labels.size());

@@ -13,7 +13,7 @@ atlas_add_component( MuonCondTest
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CoralUtilitiesLib GaudiKernel 
-                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData MuonCondInterface MuonIdHelpersLib 
+                                    GeoPrimitives Identifier MuonAlignmentData MuonCondData  MuonIdHelpersLib 
                                     MuonReadoutGeometry MdtCalibData StoreGateLib MuonCablingData MuonReadoutGeometryR4 )
 
 # Install files from the package:

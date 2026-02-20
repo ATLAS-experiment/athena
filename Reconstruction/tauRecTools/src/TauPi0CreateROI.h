@@ -41,10 +41,12 @@ public:
 
 private:
   Gaudi::Property<bool> m_removeElectronCells {this, "RemoveElectronCells", false};
+  Gaudi::Property<double> m_maxDeltaRTauCells {this, "MaxDeltaRTauCells", 0.4, "max DeltaR for cells-tau association"};
 
   SG::ReadHandleKey<CaloCellContainer>          m_caloCellInputContainer       {this,"Key_caloCellInputContainer",       "AllCalo",           "input calo cell container key"};
   SG::ReadCondHandleKey<CaloDetDescrManager>    m_caloMgrKey                   {this,"CaloDetDescrManager",              "CaloDetDescrManager"                               };
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_removedClusterInputContainer {this,"Key_RemovedClusterInputContainer", "",                   "input removed cluster key"   };
 };
+ 
 
 #endif	// TAURECTOOLS_TAUPI0CREATEROI_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -11,6 +11,24 @@
 
 using namespace std;
 using namespace TCS;
+
+namespace {
+  struct ios_state_guard {
+    std::ostream& os;
+    std::ios::fmtflags flags;
+    char fill;
+    std::streamsize width;
+
+    explicit ios_state_guard(std::ostream& o)
+      : os(o), flags(o.flags()), fill(o.fill()), width(o.width()) {}
+
+    ~ios_state_guard() {
+      os.flags(flags);
+      os.fill(fill);
+      os.width(width);
+    }
+  };
+}
 
 void
 GlobalDecision::setTriggerLines(const vector<TrigConf::TriggerLine> & triggers) {
@@ -113,7 +131,7 @@ namespace TCS {
 
 std::ostream&
 operator<<(std::ostream& o, const TCS::GlobalDecision & dec) {
-
+   ios_state_guard guard{o};
    if(!dec.isValid()) 
       o << "Note that the overall decision has not been calculated" << endl;
 

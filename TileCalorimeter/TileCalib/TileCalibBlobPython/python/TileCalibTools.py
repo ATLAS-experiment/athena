@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TileCalibTools.py
 # Nils Gollub <nils.gollub@cern.ch>, 2007-11-23
 #
@@ -14,13 +14,8 @@ Python helper module for managing COOL DB connections and TileCalibBlobs.
 
 import cx_Oracle # noqa: F401
 from PyCool import cool
-import datetime, time, re, os
-try:
-    # For Python 3.0 and later
-    from urllib.request import urlopen
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import urlopen
+import datetime, time, re, os, json
+from urllib.request import urlopen
 import cppyy
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
@@ -55,9 +50,18 @@ LASPARTCHAN = 43
 def getLastRunNumber():
     """
     Return the run number of next run to be taken in the pit
+    Keep this function temporary for backward compatibility
+    """
+    return getNextRunNumber()
+
+#
+#______________________________________________________________________
+def getNextRunNumber():
+    """
+    Return the run number of next run to be taken in the pit
     """
 
-    urls = ["http://atlas-service-db-runlist.web.cern.ch/atlas-service-db-runlist/cgi-bin/latestRun.py",
+    urls = ["http://atlas-run-info-api.web.cern.ch/api/runs?sort=runnumber:DESC&size=1",
             "http://pcata007.cern.ch/cgi-bin/getLastRunNumber.py",
             "http://pcata007.cern.ch/latestRun"]
 
@@ -68,6 +72,10 @@ def getLastRunNumber():
                 r=line.strip()
                 if r.isdigit():
                     run=int(r)
+                    break
+                else:
+                    jdata=json.loads(r)
+                    run=int(jdata['resources'][0]['runnumber'])
                     break
             if run>0:
                 break
@@ -119,7 +127,7 @@ def getPromptCalibRunNumber():
         promptCalibRuns.sort()
         return promptCalibRuns[0]
     else:
-        return getLastRunNumber()
+        return getNextRunNumber()
 
 #
 #______________________________________________________________________
@@ -246,6 +254,32 @@ def openDb(db, instance, mode="READONLY", schema="COOLOFL_TILE", sqlfn="tileSqli
 
 #
 #______________________________________________________________________
+def openDbOracle(db, schema, folder):
+    """
+    Opens a COOL db connection.
+    - db:       The DB type. The following names are recognized:
+                    * ORACLE or FRONTIER: Opens ORACLE DB, forces READONLY
+    - schema:   Full schema string for sqlite file, dbname will be extracted from this string
+    - folder:   Fill folder path, schema string will be construced using folder name
+    """
+
+    connStr = 'COOL'
+    if '/OFL' in folder.upper():
+        connStr += 'OFL_'
+    else:
+        connStr += 'ONL_'
+    connStr += folder.strip('/').split('/')[0].upper()
+    dbn=schema.split('dbname=')
+    if len(dbn)==2:
+        dbname=dbn[1].split(';')[0]
+    else:
+        dbname='CONDBR2'
+    connStr += '/' + dbname
+
+    return openDbConn(connStr,db)
+
+#
+#______________________________________________________________________
 def openDbConn(connStr, mode="READONLY"):
     """
     Opens a COOL db connection.
@@ -368,7 +402,9 @@ def getCoolValidityKey(pointInTime, isSince=True):
 def getFolderTag(db, folderPath, globalTag):
 
     tag=""
-    if globalTag.startswith("/") or globalTag.startswith("TileO") or globalTag.startswith("CALO"):
+    gTAG = globalTag.upper()
+    findTAG = (gTAG == "ANY" or gTAG == "FIRST" or gTAG == "LAST")
+    if globalTag.startswith("/") or globalTag.startswith("TileO") or globalTag.upper().startswith("CALO"):
         tag = globalTag
         log.warning("Using tag as-is for folder %s", folderPath)
     elif '/TILE/ONL01' in folderPath:
@@ -394,8 +430,10 @@ def getFolderTag(db, folderPath, globalTag):
             elif 'COMP200' in db or 'RUN1' in db:
                 schema=dbname+'/COMP200'
                 if globalTag!='UPD1' and globalTag!='UPD4' and ('UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag):
-                    log.info("Using suffix \'%s\' as it is", globalTag)
+                    if not findTAG:
+                        log.info("Using suffix \'%s\' as it is", globalTag)
                 else:
+                    findTAG = False
                     globalTag='COMCOND-BLKPA-RUN1-06'
                     log.info("Using RUN1 global tag \'%s\'", globalTag)
         if schema == dbname+'/CONDBR2':
@@ -412,16 +450,20 @@ def getFolderTag(db, folderPath, globalTag):
                 globalTag=getAliasFromFile('NextES')
                 log.info("Resolved NEXT ES globalTag to \'%s\'", globalTag)
         globalTag=globalTag.replace('*','')
-        if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
+        if not findTAG and ('UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag):
             tag = TileCalibUtils.getFullTag(folderPath, globalTag)
-            if tag.startswith('Calo'):
+            if tag.startswith('Calo') and 'NoiseCell' not in tag:
                 tag='CALO'+tag[4:]
+                tag=tag.replace('Pileupnoiselumi','PileUpNoiseLumi')
             log.info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
         else:
             if not isinstance(db, str):
                 try:
                     folder = db.getFolder(folderPath)
-                    tag = folder.resolveTag(globalTag)
+                    if findTAG:
+                        tag = findTag(folder,gTAG)
+                    else:
+                        tag = folder.resolveTag(globalTag)
                     log.info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
                     schema=""
                 except Exception as e:
@@ -430,11 +472,26 @@ def getFolderTag(db, folderPath, globalTag):
             if len(schema):
                 dbr = openDbConn(schema,'READONLY')
                 folder = dbr.getFolder(folderPath)
-                tag = folder.resolveTag(globalTag)
+                if findTAG:
+                    tag = findTag(folder,gTAG)
+                else:
+                    tag = folder.resolveTag(globalTag)
                 dbr.closeDatabase()
                 log.info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
 
     return tag
+
+#
+#____________________________________________________________________
+def findTag(folder,tag):
+    taglist=folder.listTags()
+    if len(taglist):
+        if tag=='FIRST':
+            return taglist[0]
+        else:
+            return taglist[-1]
+    else:
+        return 'tag-not-found'
 
 #
 #____________________________________________________________________
@@ -472,6 +529,66 @@ def copyFolder(dbr, dbw, folder, tagr, tagw, chanNum, pointInTime1, pointInTime2
         untilTup = runLumiFromCoolTime(untilCool)
         log.debug("Copy entry: [%i,%i] - [%i,%i]: %s", sinceTup[0],sinceTup[1],untilTup[0],untilTup[1], data)
         folderW.storeObject(sinceCool, untilCool, data, chanNum, tagw, multiVersion)
+
+#
+#____________________________________________________________________
+def moduleListToString(modules, checkAUX=True, checkMOD=True, checkComment=True, shortLength=15, exceptLength=15):
+
+    fulllist = "@".join(modules)
+    mlist = []
+
+    if checkAUX:
+        list1=re.findall("AUX..",fulllist)
+        if len(list1)==20:
+            mlist += ["ALL 20 AUX modules"]
+        elif list1:
+            mlist += [" ".join(list1)]
+        else:
+            mlist += ["NO AUX modules"]
+
+    if checkMOD:
+        list2=re.findall("[LE]B[AC]..",fulllist)
+        if len(list2)==256:
+            mlist += ["ALL 256 modules"]
+        elif 256-len(list2)<=exceptLength:
+            list3 = []
+            for p in ["LBA","LBC","EBA","EBC"]:
+                for n in range(1,65):
+                    m = "%s%02d" % (p,n)
+                    if m not in list2:
+                        list3 += [m]
+            mlist += ["%d modules: all except %s" % (len(list2)," ".join(list3))]
+        elif list2:
+            if len(list2)<=shortLength:
+                mlist += [" ".join(list2)]
+            else:
+                for p in ["LBA","LBC","EBA","EBC"]:
+                    list2=re.findall(p+"..",fulllist)
+                    if len(list2)==64:
+                        mlist += ["64 %s modules" % p]
+                    elif 64-len(list2)<=exceptLength:
+                        list3 = []
+                        for n in range(1,65):
+                            m = "%s%02d" % (p,n)
+                            if m not in list2:
+                                list3 += [m]
+                        mlist += ["%d %s modules: all except %s" % (len(list2),p," ".join(list3))]
+                    elif list2:
+                        mlist += [" ".join(list2)]
+                    else:
+                        mlist += ["NO %s modules" % p]
+        else:
+            mlist += ["NO modules"]
+
+    if checkComment:
+        list4=re.findall("Comment[^@]*",fulllist)
+        if list4:
+            mlist += [" ".join(list4)]
+        else:
+            mlist += ["NO COMMENT"]
+
+    all = ", ".join(mlist)
+    return all
 
 
 

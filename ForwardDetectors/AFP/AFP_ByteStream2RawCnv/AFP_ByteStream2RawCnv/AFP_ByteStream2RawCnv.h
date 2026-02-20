@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_BYTESTREAM2RAWCNV_H
 #define AFP_BYTESTREAM2RAWCNV_H
 
-#include <stdint.h>
 
-#include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -17,12 +15,14 @@
 #include "GaudiKernel/MsgStream.h"
 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "ByteStreamData/RawEvent.h"
+
 
 #include "AFP_RawEv/AFP_RawContainer.h"
 #include "AFP_RawEv/AFP_RawDataCommonHead.h"
 
 #include "AFP_WordReadOut.h"
+#include <stdint.h> //uint32_t etc
+#include <string>
 
 class AFP_ByteStream2RawCnv : public ::AthAlgTool {
 public:

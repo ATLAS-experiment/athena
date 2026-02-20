@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICT_IdDictDictEntry_H
@@ -17,7 +17,7 @@ public:
     virtual Range build_range () const = 0; 
     virtual std::string group_name () const = 0; 
     virtual void set_index (size_t index) = 0;
-    virtual void resolve_references (const IdDictMgr& idd,  
+    virtual void resolve_references (IdDictMgr& idd,
                                      IdDictDictionary& dictionary) = 0;  
     virtual void generate_implementation (const IdDictMgr& idd,  
                                           IdDictDictionary& dictionary, 

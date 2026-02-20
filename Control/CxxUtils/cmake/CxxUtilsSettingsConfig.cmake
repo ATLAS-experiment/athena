@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Additional CMake settings for the build. Used by Projects/.
 #
@@ -37,6 +37,8 @@ set( ATLAS_CPPCHECK_OPTIONS "--enable=warning,portability,performance"
 set( CMAKE_CPPCHECK_DEFAULT
    ${ATLAS_CPPCHECK_OPTIONS}
    "--quiet" "--inline-suppr" "--template=gcc"
+   # speedup checking of badly written code, default is 100 (ATLINFR-5742)
+   "--performance-valueflow-max-if-count=50"
    # allow conditionalizing code on cppcheck
    "-D__CPPCHECK__"
    # Lock-free atomic pointers (required by CxxUtils/CachedPointer.h)

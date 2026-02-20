@@ -1,0 +1,18 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+DiTauJets:
+- containerName: AnaDiTauJets
+  rerunTruthMatching: true
+  decorateTruth: true
+  decorateExtraVariables: true
+
+GeneratorLevelAnalysis: {}
+
+PrintConfiguration: {}
+

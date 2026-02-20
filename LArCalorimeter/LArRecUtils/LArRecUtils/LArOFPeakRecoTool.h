@@ -8,7 +8,6 @@
 #define LARCALIBUTILS_LAROFPEAKRECOTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include "LArElecCalib/ILArOFC.h"
 #include "LArElecCalib/ILArShape.h"

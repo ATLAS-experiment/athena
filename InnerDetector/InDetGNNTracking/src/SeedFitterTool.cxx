@@ -29,8 +29,25 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
     return nullptr;
   }
 
+  // Try to use first last and midlle SP in pixel, for better lever arm 
+  std::vector<const Trk::SpacePoint*> pixelSP,SP;
+
+  for(const auto& sp : spacePoints){
+    if( sp->clusterList().first->type(Trk::PrepRawDataType::PixelCluster) ){
+      pixelSP.push_back(sp);
+    }
+  }
+
+  if(pixelSP.size()<3){
+    SP = spacePoints;
+  }
+  else{
+    unsigned int middleIdx = pixelSP.size() == 3 ? 1 : pixelSP.size()/2;
+    SP = {pixelSP[0], pixelSP[middleIdx], pixelSP.back()};
+  }
+
   /// get the first cluster on the first hit
-  const Trk::PrepRawData*       cl  = spacePoints[0]->clusterList().first;
+  const Trk::PrepRawData*       cl  = SP[0]->clusterList().first;
   if(!cl) return nullptr;
   /// and use the surface from this cluster as our reference plane
   const Trk::PlaneSurface*      pla = 
@@ -38,16 +55,16 @@ std::unique_ptr<const Trk::TrackParameters> InDet::SeedFitterTool::fit(
   if(!pla) return nullptr;
 
   // translate second and third SP w.r.t first one
-  double x0 = spacePoints[0]->globalPosition().x();
-  double y0 = spacePoints[0]->globalPosition().y();
-  double z0 = spacePoints[0]->globalPosition().z();
+  double x0 = SP[0]->globalPosition().x();
+  double y0 = SP[0]->globalPosition().y();
+  double z0 = SP[0]->globalPosition().z();
 
-  double x1 = spacePoints[1]->globalPosition().x() - x0;
-  double y1 = spacePoints[1]->globalPosition().y() - y0;
+  double x1 = SP[1]->globalPosition().x() - x0;
+  double y1 = SP[1]->globalPosition().y() - y0;
 
-  double x2 = spacePoints[2]->globalPosition().x() - x0;
-  double y2 = spacePoints[2]->globalPosition().y() - y0;
-  double z2 = spacePoints[2]->globalPosition().z() - z0; 
+  double x2 = SP[2]->globalPosition().x() - x0;
+  double y2 = SP[2]->globalPosition().y() - y0;
+  double z2 = SP[2]->globalPosition().z() - z0; 
 
   // distance of second SP to first in transverse plane
   // Also happens to be u-coordinate of second SP in conformal mapping

@@ -14,20 +14,16 @@ def PhysAugmentationsHION7Cfg(flags):
     acc = ComponentAccumulator()
 
     # MC truth
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
             AddStandardTruthContentsCfg,
             AddHFAndDownstreamParticlesCfg,
             AddMiniTruthCollectionLinksCfg,
             AddPVCollectionCfg)
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
-        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
+        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
             flags,
-            name                    = "PhysCommonTruthCharmTool",
-            NewCollectionName       = "TruthCharm",
-            KeepNavigationInfo      = False,
-            ParticleSelectionString = "(abs(TruthParticles.pdgId) == 4)",
-            Do_Compress             = True))
+            name = "PhysCommonTruthCharmTool"))
         CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
         acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
         acc.merge(AddHFAndDownstreamParticlesCfg(flags))
@@ -101,7 +97,7 @@ def HION7SkimmingToolCfg(flags):
     isSmallSystem = False
     if (info.getBeam1Type() < 11) or (info.getBeam2Type() < 11):
         isSmallSystem = True
-    if not flags.Input.isMC:
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         print('project: ', flags.Input.ProjectName,', isSmallSystem: ', isSmallSystem)
         TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
         for i, key in enumerate(TriggerDict):
@@ -111,12 +107,10 @@ def HION7SkimmingToolCfg(flags):
     else:
         expression = expression + 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
 
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg    
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION7StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION7StringSkimmingTool", expression = expression)), primary = True)
 
     return(acc)                             
 
@@ -138,10 +132,33 @@ def HION7GlobalAugmentationToolCfg(flags):
                                                                                  doTopoClusDec = doTopoClus,
                                                                                  CaloClusterKey = caloClusterKey
                                                                                 )
-
     acc.addPublicTool(augmentation_tool, primary=True)
 
     return acc
+
+
+def HION7JetAugmentationToolCfg(flags):
+    """Configure the example augmentation tool"""
+    acc = ComponentAccumulator()
+    
+    # Configure the augmentation tool
+    # This adds FCalEtA, FCalEtC, ...
+    jvtTool = CompFactory.JetVertexTaggerTool(name="JVTToolEMTopo",
+                                              JetContainer="AntiKt4EMTopoJets")
+                                            
+
+    augmentation_tool = CompFactory.DerivationFramework.HIJetAugmentationTool(name="HION7JetAugmentationTool",
+                                                                                 DeltaRJetMatching = 0.3,
+                                                                                 HIJetContainerKey="DFAntiKt4HIJets",
+                                                                                 CaloJetContainerKey = "AntiKt4EMTopoJets",
+                                                                                 JVTToolEMTopo = jvtTool
+                                                                                 )
+    acc.addPublicTool(jvtTool)
+    acc.addPublicTool(augmentation_tool, primary=True)
+
+    return acc
+
+#########################################################################################
 
 
 def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
@@ -192,7 +209,7 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
     thinningTools = [TrackParticleThinningTool,
                     AntiKt2HIJetsThinningTool,
                     AntiKt4HIJetsThinningTool]
-    if flags.Input.isMC:
+    if flags.Input.isMC or flags.Overlay.DataOverlay:
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import GenericTruthThinningCfg
         truth_thinning_expression = "(TruthParticles.status==1) && (TruthParticles.pt > "+str(minTrackPt-0.2)+"*GeV) && (abs(TruthParticles.eta) < 2.7)"
         TruthParticleThinningTool = acc.getPrimaryAndMerge(GenericTruthThinningCfg(flags,
@@ -207,6 +224,10 @@ def HION7KernelCfg(flags, name='HION7Kernel', **kwargs):
     skimmingTool = acc.getPrimaryAndMerge(HION7SkimmingToolCfg(flags))
     globalAugmentationTool = acc.getPrimaryAndMerge(HION7GlobalAugmentationToolCfg(flags))
     augmentationTool=[globalAugmentationTool]
+    from AthenaConfiguration.Enums import HIMode
+    if flags.Reco.HIMode != HIMode.HI:
+        jetAugmentationTool = acc.getPrimaryAndMerge(HION7JetAugmentationToolCfg(flags))
+        augmentationTool=[globalAugmentationTool,jetAugmentationTool]
 
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,ThinningTools = thinningTools, SkimmingTools = [skimmingTool], AugmentationTools=augmentationTool),sequenceName="HION7Sequence")
 

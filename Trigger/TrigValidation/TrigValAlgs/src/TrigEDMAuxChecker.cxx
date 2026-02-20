@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
@@ -87,8 +87,8 @@ void TrigEDMAuxChecker::dumpDecorators(const xAOD::AuxContainerBase *x,const std
         }
        
     }
-    m_auxmap[key]=auxvar;
-    m_dynauxmap[key]=dynauxvar;
+    m_auxmap[key]=std::move(auxvar);
+    m_dynauxmap[key]=std::move(dynauxvar);
 }
 
 StatusCode TrigEDMAuxChecker::execute() {

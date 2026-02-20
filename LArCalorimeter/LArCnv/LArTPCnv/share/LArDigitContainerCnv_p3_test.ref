@@ -1,62 +1,54 @@
 test1
-initialize_from_dictionary
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+LArOnlineID          INFO initialize_from_dictionary
+LArOnlineID         DEBUG (Re)initialize
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-decode index and bit fields for each level: 
-lar     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-online  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-bec     decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57 1  6  indexes                     mode  both_bounded  
-side    decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   feffffffffffffff 56 1  7  indexes                     mode  both_bounded  
-ft      decode 0 vals 0:31            mask/zero mask/shift/bits/offset 1f  ff07ffffffffffff 51 5  8  indexes                     mode  both_bounded  
-solt    decode 1 vals 1:16            mask/zero mask/shift/bits/offset f   fff87fffffffffff 47 4  13 indexes                     mode  both_bounded  
-channel decode 0 vals 0:127           mask/zero mask/shift/bits/offset 7f  ffff80ffffffffff 40 7  17 indexes                     mode  both_bounded  
- initialize_from_dictionary :
- feedthrough range -> 4/4/0/0,1/0:31 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24 | 4/4/1/0,1/2,9,15,21 | 4/4/1/0,1/3,10,16,22 | 4/4/1/0,1/6
- feedthrough slot range -> 4/4/0/0,1/0:31/1:14 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1:13 | 4/4/1/0,1/2,9,15,21/1:15 | 4/4/1/0,1/3,10,16,22/1,2,5,6,7,8,9,10 | 4/4/1/0,1/6/1:7 | 4/4/1/0,1/6/9:15
- channel range -> 4/4/0/0,1/0:31/1:14/0:127/0 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1:13/0:127/0 | 4/4/1/0,1/2,9,15,21/1:15/0:127/0 | 4/4/1/0,1/3,10,16,22/1,2,5,6,7,8,9,10/0:127/0 | 4/4/1/0,1/6/1:7/0:127/0 | 4/4/1/0,1/6/9:15/0:127/0
-LArOnlineID: [initialize_from_dictionary] version= fullAtlas
-initialize_from_dictionary
+LArOnlineID         DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArOnlineID         DEBUG initLevelsFromDict - unable to find 'MM' label
+LArOnlineID         DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArOnlineID         DEBUG initialize_from_dictionary - OK
+LArOnlineID         DEBUG decode index and bit fields for each level:
+LArOnlineID         DEBUG lar     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61  3   0   indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
+LArOnlineID         DEBUG online  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58  3   3   indexes 0 1 2 0 3 4 5 6 7    mode  enumerated  
+LArOnlineID         DEBUG bec     decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57  1   6   indexes                      mode  both_bounded  
+LArOnlineID         DEBUG side    decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   feffffffffffffff 56  1   7   indexes                      mode  both_bounded  
+LArOnlineID         DEBUG ft      decode 0 vals 0:31            mask/zero mask/shift/bits/offset 1f  ff07ffffffffffff 51  5   8   indexes                      mode  both_bounded  
+LArOnlineID         DEBUG slot    decode 1 vals 1:16            mask/zero mask/shift/bits/offset f   fff87fffffffffff 47  4   13  indexes                      mode  both_bounded  
+LArOnlineID         DEBUG channel decode 0 vals 0:127           mask/zero mask/shift/bits/offset 7f  ffff80ffffffffff 40  7   17  indexes                      mode  both_bounded  
+LArOnlineID         DEBUG initialize_from_dictionary :
+LArOnlineID         DEBUG feedthrough range -> 4/4/0/0,1/0:31 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24 | 4/4/1/0,1/2,9,15,21 | 4/4/1/0,1/3,10,16,22 | 4/4/1/0,1/6
+LArOnlineID         DEBUG feedthrough slot range -> 4/4/0/0,1/0:31/1:14 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1:13 | 4/4/1/0,1/2,9,15,21/1:15 | 4/4/1/0,1/3,10,16,22/1,2,5,6,7,8,9,10 | 4/4/1/0,1/6/1:7 | 4/4/1/0,1/6/9:15
+LArOnlineID         DEBUG channel range -> 4/4/0/0,1/0:31/1:14/0:127/0 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1:13/0:127/0 | 4/4/1/0,1/2,9,15,21/1:15/0:127/0 | 4/4/1/0,1/3,10,16,22/1,2,5,6,7,8,9,10/0:127/0 | 4/4/1/0,1/6/1:7/0:127/0 | 4/4/1/0,1/6/9:15/0:127/0
+LArOnlineID         DEBUG [initialize_from_dictionary] version= fullAtlas
+LArOnlineID         DEBUG initialize_from_dictionary -> calibModuleHash= 0
+LArOnlineID         DEBUG initialize_from_dictionary -> calibChannelHash= 0
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+LArOnline_Super...   INFO initialize_from_dictionary
+LArOnline_Super...  DEBUG (Re)initialize
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-decode index and bit fields for each level: 
-lar     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
-online  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58 3  3  indexes 0 1 2 0 3 4 5 6 7   mode  enumerated  
-bec     decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57 1  6  indexes                     mode  both_bounded  
-side    decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   feffffffffffffff 56 1  7  indexes                     mode  both_bounded  
-ft      decode 0 vals 0:31            mask/zero mask/shift/bits/offset 1f  ff07ffffffffffff 51 5  8  indexes                     mode  both_bounded  
-solt    decode 1 vals 1:2             mask/zero mask/shift/bits/offset 1   fffbffffffffffff 50 1  13 indexes                     mode  both_bounded  
-channel decode 0 vals 0:311           mask/zero mask/shift/bits/offset 1ff fffc01ffffffffff 41 9  14 indexes                     mode  both_bounded  
-slar    decode 1 vals 1               mask/zero mask/shift/bits/offset 1   fffffeffffffffff 40 1  23 indexes                     mode  both_bounded  
-Finished initLevelsFromDict
- initialize_from_dictionary :
- feedthrough range -> 4/4/0/0,1/0:31 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24 | 4/4/1/0,1/2,9,15,21 | 4/4/1/0,1/3,10,16,22 | 4/4/1/0,1/6
- feedthrough slot range -> 4/4/0/0,1/0:31/1 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1 | 4/4/1/0,1/2,9,15,21/1 | 4/4/1/0,1/2,9,15,21/2 | 4/4/1/0,1/3,10,16,22/1 | 4/4/1/0,1/6/1:2
- channel range -> 4/4/0/0,1/0:31/1/0:289/1 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1/0:311/1 | 4/4/1/0,1/2,9,15,21/1/0:239/1 | 4/4/1/0,1/2,9,15,21/2/0:159/1 | 4/4/1/0,1/3,10,16,22/1/0:191/1 | 4/4/1/0,1/6/1:2/0:191/1
-LArOnline_SuperCellID: [initialize_from_dictionary] version= fullAtlas
+LArOnline_Super...  DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArOnline_Super...  DEBUG initLevelsFromDict - unable to find 'MM' label
+LArOnline_Super...  DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArOnline_Super...  DEBUG initialize_from_dictionary - OK
+LArOnline_Super...  DEBUG decode index and bit fields for each level:
+LArOnline_Super...  DEBUG lar     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61  3   0   indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
+LArOnline_Super...  DEBUG online  decode 1 vals -3,-2,-1,1,2,3,4,5 mask/zero mask/shift/bits/offset 7   e3ffffffffffffff 58  3   3   indexes 0 1 2 0 3 4 5 6 7    mode  enumerated  
+LArOnline_Super...  DEBUG bec     decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   fdffffffffffffff 57  1   6   indexes                      mode  both_bounded  
+LArOnline_Super...  DEBUG side    decode 0 vals 0:1             mask/zero mask/shift/bits/offset 1   feffffffffffffff 56  1   7   indexes                      mode  both_bounded  
+LArOnline_Super...  DEBUG ft      decode 0 vals 0:31            mask/zero mask/shift/bits/offset 1f  ff07ffffffffffff 51  5   8   indexes                      mode  both_bounded  
+LArOnline_Super...  DEBUG slot    decode 1 vals 1:2             mask/zero mask/shift/bits/offset 1   fffbffffffffffff 50  1   13  indexes                      mode  both_bounded  
+LArOnline_Super...  DEBUG channel decode 0 vals 0:311           mask/zero mask/shift/bits/offset 1ff fffc01ffffffffff 41  9   14  indexes                      mode  both_bounded  
+LArOnline_Super...  DEBUG is-slar decode 1 vals 1               mask/zero mask/shift/bits/offset 1   fffffeffffffffff 40  1   23  indexes                      mode  both_bounded  
+LArOnline_Super...   INFO Finished initLevelsFromDict
+LArOnline_Super...  DEBUG  initialize_from_dictionary :
+LArOnline_Super...  DEBUG  feedthrough range -> 4/4/0/0,1/0:31 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24 | 4/4/1/0,1/2,9,15,21 | 4/4/1/0,1/3,10,16,22 | 4/4/1/0,1/6
+LArOnline_Super...  DEBUG  feedthrough slot range -> 4/4/0/0,1/0:31/1 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1 | 4/4/1/0,1/2,9,15,21/1 | 4/4/1/0,1/2,9,15,21/2 | 4/4/1/0,1/3,10,16,22/1 | 4/4/1/0,1/6/1:2
+LArOnline_Super...  DEBUG  channel range -> 4/4/0/0,1/0:31/1/0:289/1 | 4/4/1/0,1/0,1,4,5,7,8,11,12,13,14,17,18,19,20,23,24/1/0:311/1 | 4/4/1/0,1/2,9,15,21/1/0:239/1 | 4/4/1/0,1/2,9,15,21/2/0:159/1 | 4/4/1/0,1/3,10,16,22/1/0:191/1 | 4/4/1/0,1/6/1:2/0:191/1
+LArOnline_Super...  DEBUG [initialize_from_dictionary] version= fullAtlas
 
 
-Initializing Gaudi ApplicationMgr using job opts ./LArDigitContainerCnv_p3_test_generated.txt
-JobOptionsSvc        INFO Job options successfully read in from ./LArDigitContainerCnv_p3_test_generated.txt
-ApplicationMgr    SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r6)
-                                          running on pcaz004 on Tue Sep 20 19:09:05 2022
-====================================================================================================================================
-ApplicationMgr       INFO Successfully loaded modules : StoreGate
 ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 3528 CLIDRegistry entries for module ALL
-StoreGateSvc        DEBUG Property update for OutputLevel : new value = 2
-StoreGateSvc        DEBUG Service base class initialized successfully
-StoreGateSvc        DEBUG trying to create store SGImplSvc/StoreGateSvc_Impl
-StoreGateSvc_Impl   DEBUG Property update for OutputLevel : new value = 2
-StoreGateSvc_Impl   DEBUG Service base class initialized successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
-StoreGateSvc        DEBUG Recorded object @0x7ffc39c29370 with key myLArDigitContainer of type LArDigitContainer(CLID 2711)
- in DataObject @0x26edd90
  object modifiable when retrieved
-StoreGateSvc        DEBUG Recorded object @0x7ffc39c29480 with key myLArDigitContainerSC of type LArDigitContainer(CLID 2711)
- in DataObject @0x2a50cc0
  object modifiable when retrieved

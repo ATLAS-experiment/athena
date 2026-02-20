@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Note: please don't include any ROOT in here (i.e. xAOD::Jet or
@@ -47,7 +47,7 @@ namespace FlavorTagDiscriminants {
           subjet_set.insert(var.name);
         }
         if (k.n_subjets == 0) {
-          k.subjet = subjet_set;
+          k.subjet = std::move(subjet_set);
           first_match = node.name;
         } else if (k.subjet != subjet_set) {
           std::string error = "mismatch in subjet keys: we expect the same"

@@ -32,6 +32,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 // Forward declarations
 #include "xAODCaloEvent/CaloClusterFwd.h"
+#include "xAODJet/JetContainer.h"
 class CaloCellContainer;
 class CaloCellList;
 
@@ -140,6 +141,13 @@ class CaloRingsBuilder : public ::AthAlgTool,
         const xAOD::RingSetConf::RawConf &/*rawConf*/,
         const xAOD::IParticle &part,
         AtlasGeoPoint &seed);
+    /**
+    //  * @brief Fill RingSet seed for IParticle.
+     **/
+    // static StatusCode getRingSetSeed(
+    //     const xAOD::RingSetConf::RawConf &/*rawConf*/,
+    //     const xAOD::Jet_v1 &jet,
+    //     AtlasGeoPoint &seed);
     /// @}
 
     /// Tool props (python configurables):

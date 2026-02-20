@@ -71,8 +71,12 @@ def ITkTrackingSiPatternCfg(flags,
 
         # FPGA seed
         if flags.Tracking.ActiveConfig.doFPGASeed:
-            from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
-            acc.merge(FPGATrackSimAnalysisConfig.FPGATrackSimSeedingCfg(flags)) 
+            if flags.Tracking.ActiveConfig.doFPGATrackSim:
+                from FPGATrackSimConfTools import FPGATrackSimAnalysisConfig
+                acc.merge(FPGATrackSimAnalysisConfig.FPGATrackSimSeedingCfg(flags)) 
+            else:
+                from EFTrackingFPGAPipeline.F150IntegrationConfig import FPGA150Pipeline
+                acc.merge(FPGA150Pipeline(flags, runStandalone=False))
         
         # ACTS seed
         if flags.Tracking.ActiveConfig.doActsSeed:

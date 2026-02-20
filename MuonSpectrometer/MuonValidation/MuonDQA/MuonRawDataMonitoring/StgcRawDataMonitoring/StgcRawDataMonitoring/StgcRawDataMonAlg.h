@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,8 +37,10 @@
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "MuonDetDescrUtils/MuonSectorMapping.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODMuon/MuonContainer.h"
 
-// stl includes                                                                                 
+// stl includes
 #include <string>
 
 namespace Muon {
@@ -66,7 +68,7 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator {this, "ResPullCalc", "Trk::ResidualPullCalculator/ResidualPullCalculator"};
   
-  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer*, const MuonGM::MuonDetectorManager*) const;
+  void fillsTgcOccupancyHistograms(const Muon::sTgcPrepDataContainer*, const MuonGM::MuonDetectorManager*, const int lb) const;
   void fillsTgcLumiblockHistograms(const Muon::sTgcPrepDataContainer*, const int lb) const;
   void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;  
   void fillsTgcPadTriggerDataHistograms(const xAOD::MuonContainer*, const Muon::NSW_PadTriggerDataContainer*, const int lb) const;

@@ -116,20 +116,12 @@ void APWeightSum::AddEvt(APEvtWeight* evt_weight, double ext_weight) {
   vector<APWeightEntry*> temp_vec_dijet = evt_weight->GetWeightObjects(APEvtWeight::kDiJet);
   vector<APWeightEntry*> temp_vec_jetmo = evt_weight->GetWeightObjects(APEvtWeight::kJetMO);
   
-  vector< vector<APWeightEntry*> > temp_vec_all;
+  vector< vector<APWeightEntry*> > temp_vec_all{
+    temp_vec_mu, temp_vec_tau, temp_vec_el, temp_vec_jet,
+    std::move(temp_vec_mumo), std::move(temp_vec_taumo), std::move(temp_vec_elmo), std::move(temp_vec_jetmo),
+    temp_vec_dimu, temp_vec_ditau, temp_vec_diel, temp_vec_dijet
+  };
   
-  temp_vec_all.push_back(temp_vec_mu);
-  temp_vec_all.push_back(temp_vec_tau);
-  temp_vec_all.push_back(temp_vec_el);
-  temp_vec_all.push_back(temp_vec_jet);
-  temp_vec_all.push_back(temp_vec_mumo);
-  temp_vec_all.push_back(temp_vec_taumo);
-  temp_vec_all.push_back(temp_vec_elmo);
-  temp_vec_all.push_back(temp_vec_jetmo);
-  temp_vec_all.push_back(temp_vec_dimu);
-  temp_vec_all.push_back(temp_vec_ditau);
-  temp_vec_all.push_back(temp_vec_diel);
-  temp_vec_all.push_back(temp_vec_dijet);
 
   /* check if histogram for error propagation is already there; if not, create it */
   for( unsigned int iAll = 0, IAll = temp_vec_all.size(); iAll < IAll; ++iAll ) {

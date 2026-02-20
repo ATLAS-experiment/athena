@@ -30,6 +30,7 @@ namespace ActsTrk {
   class TrackContainer
     : public TrackContainerBase {
   public:
+    //coverity[pass_by_value]
     using TrackContainerBase::TrackContainerBase;
     using value_type = typename TrackContainerBase::ConstTrackProxy;
     

@@ -5,10 +5,7 @@
 #ifndef TRIGCOMBOHYPO_TRIGCOMBOHYPOTOOL_H
 #define TRIGCOMBOHYPO_TRIGCOMBOHYPOTOOL_H
 
-#include <string>
-#include <vector>
-#include <tuple>
-#include <limits>
+
 
 #include "DecisionHandling/ComboHypoToolBase.h"
 
@@ -20,6 +17,10 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
+#include <string>
+#include <vector>
+#include <tuple>
+#include <limits>
 
 /**
  * \class TrigComboHypoTool

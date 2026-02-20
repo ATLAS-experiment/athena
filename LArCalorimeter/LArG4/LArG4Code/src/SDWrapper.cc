@@ -39,9 +39,9 @@ namespace LArG4
     //-------------------------------------------------------------------------
     template<class SDType, class HitContainerType>
     void SDWrapper<SDType, HitContainerType>::
-    addSD(std::unique_ptr<SDType> sd)
+    addSD(SDType* sd)
     {
-      m_sdList.push_back( std::move(sd) );
+      m_sdList.push_back( sd );
     }
 
     //-------------------------------------------------------------------------

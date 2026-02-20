@@ -334,12 +334,15 @@ StatusCode TileRawCorrelatedNoise::execute() {
 
   // prepare new samples
   const int nSamples = 7;
-  float NewSamples[4][64][48][nSamples];
+  struct Arrays {
+    float NewSamples[4][64][48][nSamples];
+  };
+  auto a = std::make_unique<Arrays>();
   for (int Ros = 1; Ros < 5; ++Ros) {
     for (int Drawer = 0; Drawer < 64; ++Drawer) {
       for (int Channel = 0; Channel < 48; ++Channel) {
         for (int Sample = 0; Sample < nSamples; ++Sample) {
-          NewSamples[Ros - 1][Drawer][Channel][Sample] =
+          a->NewSamples[Ros - 1][Drawer][Channel][Sample] =
               ((OriginalDigits[Ros - 1][Drawer][Channel])->samples())[Sample];
         }
       }
@@ -361,8 +364,8 @@ StatusCode TileRawCorrelatedNoise::execute() {
                       < m_nRMS_threshold * m_sample3RMS[Ros - 1][Drawer][jCh]) {
 
                 for (int Sample = 0; Sample < nSamples; ++Sample)
-                  NewSamples[Ros - 1][Drawer][Channel][Sample] =
-                      NewSamples[Ros - 1][Drawer][Channel][Sample]
+                  a->NewSamples[Ros - 1][Drawer][Channel][Sample] =
+                      a->NewSamples[Ros - 1][Drawer][Channel][Sample]
                            - m_alphaMatrix->m[Ros - 1][Drawer][Channel][jCh]
                               * (((OriginalDigits[Ros - 1][Drawer][jCh])->samples())[Sample]
                                   - m_meanSamples[Ros - 1][Drawer][jCh][Sample]);
@@ -375,7 +378,6 @@ StatusCode TileRawCorrelatedNoise::execute() {
   }
 
   // create new container
-  TileDigits* NewDigits[4][64][48];
 
   auto outputDigitsContainer = std::make_unique<TileMutableDigitsContainer>();
   ATH_CHECK( outputDigitsContainer->status() );
@@ -388,11 +390,11 @@ StatusCode TileRawCorrelatedNoise::execute() {
           int nSamples = (OriginalDigits[Ros - 1][Drawer][Channel])->nsamples();
           std::vector<float> digits(nSamples);
           for (int Sample = 0; Sample < nSamples; ++Sample) {
-            digits[Sample] = NewSamples[Ros - 1][Drawer][Channel][Sample];
+            digits[Sample] = a->NewSamples[Ros - 1][Drawer][Channel][Sample];
           }
-          NewDigits[Ros - 1][Drawer][Channel] = new TileDigits(
+          TileDigits* NewDigits = new TileDigits(
               (OriginalDigits[Ros - 1][Drawer][Channel])->adc_HWID(), digits);
-          ATH_CHECK( outputDigitsContainer->push_back(NewDigits[Ros - 1][Drawer][Channel]) );
+          ATH_CHECK( outputDigitsContainer->push_back(NewDigits) );
         }
       }
     }

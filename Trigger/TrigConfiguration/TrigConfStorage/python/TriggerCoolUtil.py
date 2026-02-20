@@ -3,11 +3,12 @@
 import sys
 from re import match
 from time import ctime
+from typing import Any
 
 from PyCool import cool
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
-def iterate_runlist(runlist):
+def iterate_runlist(runlist: list[tuple[int, int]]):
     """Helper to iterate through runlist. The format is:
     runlist: [[run1,run2], [run3,run4], ... ]
     In addition each "run" can be a tuple of format (run,LB)
@@ -32,7 +33,7 @@ def iterate_runlist(runlist):
 class TriggerCoolUtil:
 
     @staticmethod
-    def GetConnection(dbconn,verbosity=0):
+    def GetConnection(dbconn, verbosity=0):
         connection = None
         m = match(r".*?([^/.]+)\.db",dbconn)
         if dbconn in ["CONDBR2","COMP200","OFLP200"]:
@@ -49,6 +50,14 @@ class TriggerCoolUtil:
             traceback.print_exc()
             sys.exit(-1)
         return openConn
+
+
+    @staticmethod
+    def getMenuConfigKey(run: int, db = None) -> dict[str, Any] | None:
+        if db is None:
+            db = TriggerCoolUtil.getDBConnectionForRun(run)
+        configs = TriggerCoolUtil.getHLTConfigKeys(db, [(run, run)])
+        return configs.get(run, None)
 
     @staticmethod
     def getHLTConfigKeys(db,runlist):
@@ -83,7 +92,9 @@ class TriggerCoolUtil:
 
     @staticmethod
     def _getKeys(db, runlist, folder, in_name, out_name):
-        """Helper to retrieve run/LB-index configuration keys"""
+        """Helper to retrieve run/LB-index configuration keys
+        returns empty dict if not iov is found
+        """
         lbmask = 0xFFFFFFFF
         configKeys = {}
         f = db.getFolder( folder )
@@ -108,14 +119,69 @@ class TriggerCoolUtil:
                                         "HltPrescaleKey", "HLTPSK2")
 
     @staticmethod
+    def getHLTPrescaleKey(run: int, lb: int, db = None) -> int | None:
+        if db is None:
+            db = TriggerCoolUtil.getDBConnectionForRun(run)
+        prescales = TriggerCoolUtil.getHLTPrescaleKeys(db, [(run, run)])
+        if(run not in prescales):
+            return None
+        for (hltpsk, firstlb, lastlb) in prescales[run]['HLTPSK2']:
+            if firstlb<=lb and lb<=lastlb:
+                return hltpsk
+        return None
+    
+    @staticmethod
     def getL1ConfigKeys(db,runlist):
         return TriggerCoolUtil._getKeys(db, runlist, "/TRIGGER/LVL1/Lvl1ConfigKey",
                                         "Lvl1PrescaleConfigurationKey", "LVL1PSK")
 
     @staticmethod
-    def getBunchGroupKey(db,runlist):
+    def getL1PrescaleKey(run: int, lb: int, db = None) -> int | None:
+        if db is None:
+            db = TriggerCoolUtil.getDBConnectionForRun(run)
+        prescales = TriggerCoolUtil.getL1ConfigKeys(db, [(run, run)])
+        if(run not in prescales):
+            return None
+        for (l1psk, firstlb, lastlb) in prescales[run]['LVL1PSK']:
+            if firstlb<=lb and lb<=lastlb:
+                return l1psk
+        return None
+
+    @staticmethod
+    def getBunchGroupKey(db,runlist) -> dict[int, Any]:
         return TriggerCoolUtil._getKeys(db, runlist, "/TRIGGER/LVL1/BunchGroupKey",
                                         "Lvl1BunchGroupConfigurationKey", "BGKey")
+
+    @staticmethod
+    def getBunchGroupKeyForRunLB(run: int, lb: int, db = None) -> int | None:
+        if db is None:
+            db = TriggerCoolUtil.getDBConnectionForRun(run)
+        bunches = TriggerCoolUtil.getBunchGroupKey(db, [(run, run)])
+        if(run not in bunches):
+            return None
+        for (bgsk, firstlb, lastlb) in bunches[run]['BGKey']:
+            if firstlb<=lb and lb<=lastlb:
+                return bgsk
+        return None
+
+    @staticmethod
+    def getDBConnectionForRun(runNumber: int):
+        return TriggerCoolUtil.GetConnection('CONDBR2' if runNumber > 230000 else 'COMP200')
+
+    @staticmethod
+    def getTrigConfKeys(runNumber: int, lumiBlock: int) -> dict[str, Any]:
+        db = TriggerCoolUtil.getDBConnectionForRun(runNumber)
+        bgkey =  TriggerCoolUtil.getBunchGroupKeyForRunLB(runNumber, lumiBlock, db)
+        l1pskey = TriggerCoolUtil.getL1PrescaleKey(runNumber, lumiBlock, db)
+        hltpskey = TriggerCoolUtil.getHLTPrescaleKey(runNumber, lumiBlock, db)
+        menucfg = TriggerCoolUtil.getMenuConfigKey(runNumber, db)
+        return {
+            "SMK": menucfg['SMK'] if menucfg else None,
+            "DB": menucfg['DB'] if menucfg else None,
+            "LVL1PSK": l1pskey,
+            "HLTPSK": hltpskey,
+            "BGSK": bgkey
+        }
 
     @staticmethod
     def getRunStartTime(db,runlist, runs):
@@ -219,9 +285,7 @@ class TriggerCoolUtil:
                 chainExtraInfo[(name,level)] = (version, prescale, passthr, stream, lower)
         sizePS = len("%i"%sizePS)
         sizePT = len("%i"%sizePT)
-        counters = chainNames.keys()
-        counters.sort()
-        for c in counters:
+        for c in sorted(chainNames):
             name = chainNames[c]
             print ("%s %4i: %-*s" % (c[0], c[1], sizeName, name),)
             if verbosity>0:

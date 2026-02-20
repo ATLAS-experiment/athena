@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXCRYYTABLEREAD_H
@@ -8,11 +8,12 @@
 // class TBXCryYTableRead 
 //
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 
 class IToolSvc;
 class TBEventInfo;
 
-class TBXCryYTableRead: public AthAlgorithm {
+class ATLAS_NOT_THREAD_SAFE TBXCryYTableRead : public AthAlgorithm {
  public:    
   
   TBXCryYTableRead(const std::string& name, ISvcLocator* pSvcLocator);

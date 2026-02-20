@@ -879,6 +879,11 @@ void RatesAnalysisAlg::writeMetadata() {
   m_metadataTree->Branch("targetMu", &m_targetMu);
   m_metadataTree->Branch("targetBunches", &m_targetBunches);
   m_metadataTree->Branch("targetLumi", &m_targetLumi);
+  
+  double bunchCrossingRate = m_enhancedBiasRatesTool->getBunchCrossingRate();
+  m_metadataTree->Branch("bunchCrossingRate", &bunchCrossingRate);
+  int doMultiSliceDiJet = m_doMultiSliceDiJet;
+  m_metadataTree->Branch("multiSliceDiJet", &doMultiSliceDiJet);
 
   std::vector<std::string> triggers;
   std::vector<std::string> lowers;
@@ -920,15 +925,19 @@ void RatesAnalysisAlg::writeMetadata() {
   if(!m_enhancedBiasRatesTool->isMC()){
   	bunchGroups = m_enhancedBiasRatesTool->getBunchGroups();
   }
-  if(!m_configSvc.empty() && m_configSvc.isValid() && ( bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; }) ) && (!m_enhancedBiasRatesTool->isMC())) {
-    const TrigConf::L1BunchGroupSet& bgs = m_configSvc->l1BunchGroupSet(Gaudi::Hive::currentContext());
-    for (size_t i = 0; i < bgs.maxNBunchGroups(); ++i ) {
-      bunchGroups.push_back(bgs.getBunchGroup(i)->size());
+  if(!m_configSvc.empty() && m_configSvc.isValid() ){
+    if  ((bunchGroups.size() == 0 || std::all_of(bunchGroups.begin(), bunchGroups.end(), [](int i) { return i==0; }) ) && (!m_enhancedBiasRatesTool->isMC())) {
+      const TrigConf::L1BunchGroupSet& bgs = m_configSvc->l1BunchGroupSet(Gaudi::Hive::currentContext());
+      for (size_t i = 0; i < bgs.maxNBunchGroups(); ++i ) {
+        bunchGroups.push_back(bgs.getBunchGroup(i)->size());
+      }
     }
     masterKey = m_configSvc->masterKey();
     hltPrescaleKey = m_configSvc->hltPrescaleKey();
     lvl1PrescaleKey = m_configSvc->lvl1PrescaleKey();
   }
+
+	  
   m_metadataTree->Branch("bunchGroups", &bunchGroups);
   
   m_metadataTree->Branch("hltChainIDGroup", &m_hltChainIDGroup);

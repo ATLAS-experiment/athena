@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -16,6 +16,7 @@
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkParameters/TrackParameters.h"
 #include "EventPrimitives/EventPrimitives.h"
+#include <memory>
 //
 //class HepMatrix; class HepSymMatrix;
 
@@ -39,10 +40,10 @@ namespace Trk {
 
     /** access to the matrix of derivatives used during the latest
         global-chi2 track fit. */
-     Amg::MatrixX*	m_derivMatrix = nullptr;
+      std::unique_ptr<Amg::MatrixX>	m_derivMatrix;
 
     /** access to the global fitter's full covariance matrix. */
-     Amg::MatrixX*	m_fullCovarianceMatrix = nullptr;
+      std::unique_ptr<Amg::MatrixX>	m_fullCovarianceMatrix;
 
     /** returns the number of iterations used by the last fit
         (count starts at 1 for a single-iteration fit) */
@@ -51,10 +52,7 @@ namespace Trk {
         track fit. */
      int m_minIterations = 0;
 
-     ~AlignmentCache(){
-       delete m_derivMatrix;
-       delete m_fullCovarianceMatrix;
-     }
+     ~AlignmentCache() = default;
 
     };
 

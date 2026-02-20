@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -1303,6 +1303,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
           serr += 1.0 / err2;
         }
 
+        if (serr == 0) serr = 1;
         dgg = sgg - sg * sg / serr;
         dggp = sggp - sg * sgp / serr;
         dgpgp = sgpgp - sgp * sgp / serr;

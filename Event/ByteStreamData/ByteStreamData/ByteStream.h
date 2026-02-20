@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMDATA_BYTESTREAM_H
@@ -17,10 +17,10 @@
 class ByteStream {
 public:
   /// default constructor
-  ByteStream() : m_nWord(0), m_start(0) {}
+  ByteStream() : m_nWord(0), m_start(nullptr) {}
 
   /// constructor with nWord
-  ByteStream(int nWord) : m_nWord(nWord) {
+  explicit ByteStream(int nWord) : m_nWord(nWord) {
     m_start = new OFFLINE_FRAGMENTS_NAMESPACE::DataType[m_nWord];
   }
 
@@ -29,8 +29,9 @@ public:
 
   /// destructor
   virtual ~ByteStream() {
-    if (m_start != 0) {
-      delete [] m_start; m_start = 0;
+    if (m_start != nullptr) {
+      delete [] m_start;
+      m_start = nullptr;
     }
   }
 

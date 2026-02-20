@@ -13,7 +13,7 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "PixelConditionsData/PixelCablingCondData.h"
 #include "SCT_Cabling/SCT_CablingData.h"
@@ -29,7 +29,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class SiRegSelCondAlg : public AthReentrantAlgorithm {
+class SiRegSelCondAlg : public AthCondAlgorithm {
 
 public:
 

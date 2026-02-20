@@ -20,6 +20,7 @@
 #include "StorageSvc/DbTransform.h"
 
 #include "PersistentDataModel/Token.h"
+#include "GaudiKernel/StatusCode.h"
 
 #include <cstdio>
 
@@ -203,14 +204,14 @@ TypeH DbTypeInfo::clazz( bool noIdScan )  const  {
 }
 
 /// Allow usage of base classes
-DbStatus DbTypeInfo::declareBase(const DbTypeInfo* pInfo) {
+StatusCode DbTypeInfo::declareBase(const DbTypeInfo* pInfo) {
   if ( pInfo )    {
     for(size_t i = 0; i < pInfo->m_columns.size(); ++i )   {
       m_columns.push_back(new DbColumn(*(pInfo->m_columns[i])));
     }
-    return Success;
+    return StatusCode::SUCCESS;
   }
-  return Error;
+  return StatusCode::FAILURE;
 }
 
 /// Create persistable description
@@ -242,7 +243,7 @@ static const char* const itm[][2] = {
   {"{COL={", "}}"} 
 };
 
-DbStatus DbTypeInfo::i_fromString( const std::string& string_rep)  {
+StatusCode DbTypeInfo::i_fromString( const std::string& string_rep)  {
   size_t i;
   int ncol=-1;
   std::string tmp = string_rep;
@@ -286,7 +287,7 @@ Again:
           break;
         case 3:
           m_columns.push_back(col=new DbColumn());
-          col->fromString(s);
+          if( !col->fromString(s).isSuccess() )  return StatusCode::FAILURE;
           break;
         default:
           break;
@@ -298,7 +299,7 @@ Again:
       }
     }
   }  
-  return int(m_columns.size()) == ncol ? Success : Error;
+  return int(m_columns.size()) == ncol ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 
 /// Access type name by type identifier from RTTI
@@ -331,18 +332,17 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
       if (new_type_info->m_class.isValid()) {
         cls = *new_type_info->m_class.ptr();
       }
-      if( DbTransform::getShape( new_type_info->shapeID() , main_type_info) != DbStatus::Success) {
+      if( !DbTransform::getShape( new_type_info->shapeID() , main_type_info).isSuccess() ) {
          // new shape
          if( !cls ) {
             // no transient type info for this type, use the string description as it is          
-            DbTransform::regShape( new_type_info );
-            //cout << "DbTypeInfo::fromString:  registered new  " << string_rep << endl;
+            DbTransform::regShape( new_type_info ).ignore();
             return new_type_info;
          }
          // create new shape from transient type
          Columns cols;
          main_type_info = new DbTypeInfo( new_type_info->shapeID(), cls, cols );
-         DbTransform::regShape(main_type_info);
+         DbTransform::regShape(main_type_info).ignore();
          created_main_ti = true;
          // cout << "DbTypeInfo::fromString:  registered new " <<  main_type_info->toString() << endl;
       } 
@@ -364,7 +364,7 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
          } else {
             // register the new extra shape and use it in this database
             // cout << "DbTypeInfo::fromString:  registered new EXTRA " << string_rep << endl;
-            DbTransform::regShape( new_type_info );
+            DbTransform::regShape( new_type_info ).ignore();
             return new_type_info;
          }
       } else {
@@ -399,7 +399,7 @@ const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid)  {
 DbTypeInfo* DbTypeInfo::regShape(const Guid& guid, const TypeH& type, Columns& cols)
 {
    DbTypeInfo* typ_info = new DbTypeInfo(guid, type, cols); 
-   DbTransform::regShape(typ_info);
+   DbTransform::regShape(typ_info).ignore();
    return typ_info;
 }
 
@@ -410,7 +410,7 @@ const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols) 
   if ( type )    {
     Guid guid(DbReflex::guid(type));
     const DbTypeInfo* typ_info = 0;
-    if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
+    if (DbTransform::getShape(guid, typ_info).isSuccess()) {
        clearColumns(cols);
        return typ_info;
     }
@@ -425,7 +425,7 @@ const DbTypeInfo* DbTypeInfo::create(const std::string& cl_name, Columns& cols) 
 /// Create type information using Guid only Class must already be registered.
 const DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
   const DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
+  if (DbTransform::getShape(guid, typ_info).isSuccess()) {
     clearColumns(cols);
     return typ_info;
   }
@@ -440,7 +440,7 @@ const DbTypeInfo* DbTypeInfo::create(const Guid& guid, Columns& cols)   {
 /// Create type information using Guid only Class must already be registered.
 const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
   const DbTypeInfo* typ_info = 0;
-  if (DbTransform::getShape(guid, typ_info) == DbStatus::Success) {
+  if (DbTransform::getShape(guid, typ_info).isSuccess()) {
     clearColumns(cols);
     return typ_info;
   }
@@ -455,7 +455,7 @@ const DbTypeInfo* DbTypeInfo::createEx(const Guid& guid, Columns& cols)   {
 /// Delete reference to object
 void DbTypeInfo::deleteRef() const {
   if (--m_refCount <= 0) {
-    DbTransform::removeShape(this);
+    DbTransform::removeShape(this).ignore();
     delete this;
   }
 }

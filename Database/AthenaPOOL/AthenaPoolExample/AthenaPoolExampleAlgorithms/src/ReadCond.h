@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEALGORITHMS_READCOND_H
@@ -19,17 +19,15 @@ namespace AthPoolEx {
  *  @brief This class provides an example for reading conditions data objects from Pool.
  **/
 class ReadCond : public AthAlgorithm {
-public: // Constructor and Destructor
-   /// Standard Service Constructor
+public:
    ReadCond(const std::string& name, ISvcLocator* pSvcLocator);
-   /// Destructor
-   virtual ~ReadCond();
+   virtual ~ReadCond() = default;
 
 public:
-/// Gaudi Service Interface method implementations:
-   StatusCode initialize();
-   StatusCode execute();
-   StatusCode finalize();
+   /// Gaudi Service Interface method implementations:
+   virtual StatusCode initialize() override final;
+   virtual StatusCode execute() override final;
+   virtual StatusCode finalize() override final;
 };
 
 } // end AthPoolEx namespace

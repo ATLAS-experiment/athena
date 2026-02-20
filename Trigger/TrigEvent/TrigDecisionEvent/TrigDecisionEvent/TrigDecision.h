@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -31,6 +31,7 @@
 
 #include "xAODCore/CLASS_DEF.h"
 #include <string>
+#include <memory>
 #include <stdint.h>
 
 
@@ -64,6 +65,8 @@ namespace TrigDec {
                   uint32_t masterKey = 0,
                   char bgCode = 0);
 
+    TrigDecision& operator= (TrigDecision&&);
+
     virtual ~TrigDecision();
 
 
@@ -95,9 +98,8 @@ namespace TrigDec {
     DataLink<HLT::HLTResult>      m_ef_result;  //!< HLTResult of trigger level EF
     DataLink<HLT::HLTResult>      m_hlt_result;  //!< HLTResult of merged L2EF 
 
-    HLT::HLTResult* m_l2_result_ptr; // this is for backward compatibility // remove in the next non-cache release
-    HLT::HLTResult* m_ef_result_ptr; // this is for backward compatibility
-    HLT::HLTResult* m_hlt_result_ptr; // this is for backward compatibility 
+    std::unique_ptr<HLT::HLTResult> m_l2_result_ptr; // this is for backward compatibility // remove in the next non-cache release
+    std::unique_ptr<HLT::HLTResult> m_ef_result_ptr; // this is for backward compatibility
   };
 
 } // end of namespace

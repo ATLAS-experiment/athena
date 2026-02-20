@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_USERSESSION_H
@@ -55,9 +55,6 @@ namespace pool {
       virtual ITransaction& transaction() override final;
       virtual const ITransaction& transaction() const override final;
 
-      /// Returns a vector with the file identifiers of the presently open databases.
-      virtual std::vector< std::string > connectedDatabases() const override final;
-      
       /// Creates and returns a new database handle object
       virtual std::unique_ptr<IDatabase>
       databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;

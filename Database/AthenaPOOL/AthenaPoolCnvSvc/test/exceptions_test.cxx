@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -35,6 +35,12 @@ void test1()
 // coverity[root_function]
 int main()
 {
-  test1();
+  try {
+    test1();
+  }
+  catch (const std::exception& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }

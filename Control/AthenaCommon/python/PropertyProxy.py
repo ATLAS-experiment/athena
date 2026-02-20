@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/PropertyProxy.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -270,7 +270,6 @@ class GaudiHandlePropertyProxyBase(PropertyProxy):
    def getDefaultConfigurable(self,typeAndName,requester):
       """Return the configurable instance corresponding to the toolhandle if possible.
       Otherwise return None"""
-      global log
       # find the module
       typeAndNameTuple = typeAndName.split('/')
       confType = typeAndNameTuple[0]

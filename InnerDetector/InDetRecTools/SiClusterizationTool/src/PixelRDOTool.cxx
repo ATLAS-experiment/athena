@@ -10,9 +10,10 @@
 
 #include "SiClusterizationTool/PixelRDOTool.h"
 #include "SiClusterizationTool/ClusterMakerTool.h"
+#include "ReadoutGeometryBase/PixelDiodeTree.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetIdentifier/PixelID.h"
 #include "TrkSurfaces/RectangleBounds.h"
-
 #include <boost/container/flat_set.hpp>
 
 namespace InDet
@@ -36,9 +37,6 @@ namespace InDet
     ATH_CHECK(m_summaryTool.retrieve(DisableTool{disable_smry}));
 
     ATH_CHECK( m_pixelDetElStatus.initialize( !m_pixelDetElStatus.empty()) );
-    if (!m_pixelDetElStatus.empty()) {
-       ATH_CHECK( m_pixelReadout.retrieve() );
-    }
     ATH_CHECK( detStore()->retrieve(m_pixelId, "PixelID") );
 
     return StatusCode::SUCCESS;
@@ -47,7 +45,7 @@ namespace InDet
 
   std::optional<Identifier>
   PixelRDOTool::isGanged(const Identifier& rdoID,
-			 const InDetDD::SiDetectorElement* element) 
+                         const InDetDD::SiDetectorElement* element)
   {
     // If the pixel is ganged, returns a new identifier for it
     InDetDD::SiCellId cellID = element->cellIdFromIdentifier(rdoID);
@@ -60,12 +58,20 @@ namespace InDet
   
   bool PixelRDOTool::isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
 		 const IdentifierHash& moduleHash,
+		 const InDetDD::PixelModuleDesign &design,
 		 const Identifier& rdoID, const EventContext& ctx,
                  const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const
   {
+
+    std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelId->phi_index(rdoID),
+                                                m_pixelId->eta_index(rdoID));
+    InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
+    std::uint32_t feValue = design.getFE(si_param);
+    
     VALIDATE_STATUS_ARRAY(
       m_useModuleMap && pixelDetElStatus,
-      pixelDetElStatus ? pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))) : false,
+      pixelDetElStatus ? pixelDetElStatus->isChipGood(moduleHash,feValue) : false,
       m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry));
 
     if (!m_useModuleMap) {
@@ -73,37 +79,8 @@ namespace InDet
     }
     
     if (pixelDetElStatus) {
-      const auto waferId = m_pixelId->wafer_id(rdoID);
-      const auto fe = m_pixelReadout->getFE(rdoID, waferId);
-      return pixelDetElStatus->isChipGood(moduleHash, fe);
-    } else {
-      return m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry);
-    }
-  }
-
-  
-  bool PixelRDOTool::isGoodRDO(const InDet::SiDetectorElementStatus *pixelDetElStatus,
-		 const IdentifierHash& moduleHash,
-		 const InDetDD::SiDetectorElement* element,
-		 const Identifier& rdoID, const EventContext& ctx,
-                 const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const
-  {
-
-    
-    VALIDATE_STATUS_ARRAY(
-      m_useModuleMap && pixelDetElStatus,
-      pixelDetElStatus ? pixelDetElStatus->isChipGood(moduleHash,m_pixelReadout->getFE(rdoID, m_pixelId->wafer_id(rdoID))) : false,
-      m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry));
-
-    if (!m_useModuleMap) {
-      return true;
-    }
-    
-    if (pixelDetElStatus) {
-      const auto waferId = element->identify();
-      const auto fe = m_pixelReadout->getFE(rdoID, waferId, element);
       
-      return pixelDetElStatus->isChipGood(moduleHash, fe);
+      return pixelDetElStatus->isChipGood(moduleHash, feValue);
     } else {
       return m_summaryTool->isGood(moduleHash, rdoID, ctx, cacheEntry);
     }
@@ -205,6 +182,7 @@ namespace InDet
     const IdentifierHash idHash = collection.identifyHash();
     const InDet::SiDetectorElementStatus *pixelDetElStatus = getPixelDetElStatus(ctx);
     IInDetConditionsTool::IDCCacheEntry* cacheEntry = (pixelDetElStatus ? nullptr : m_summaryTool->getCacheEntryOut(ctx));
+    const InDetDD::PixelModuleDesign &pixel_design=dynamic_cast<const InDetDD::PixelModuleDesign &>(element->design());
 
     // For ttbar200 we have ~70 RDO in average per element, with a max of ~1000.
     // A flat set brings marginal improvements wrt unordered set for those sizes.
@@ -218,7 +196,7 @@ namespace InDet
       
       if (!isGoodRDO(pixelDetElStatus,
 		     idHash,
-		     element,
+		     pixel_design,
 		     rdoID,
 		     ctx,
 		     cacheEntry))

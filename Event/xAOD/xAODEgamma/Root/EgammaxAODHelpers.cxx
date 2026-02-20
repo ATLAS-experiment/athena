@@ -52,6 +52,18 @@ bool xAOD::EgammaHelpers::isFCAL(const xAOD::CaloCluster *cluster){
   return hasFCAL0;
 }
 // ==================================================================
+const xAOD::CaloCluster* xAOD::EgammaHelpers::getCluster(
+  const xAOD::Egamma* eg, bool cook)
+{
+  if (!eg) { return nullptr; }
+  if (!cook) { return eg->caloCluster(); }
+  static const SG::AuxElement::Accessor<ElementLink< xAOD::CaloClusterContainer > >
+    cookClusLinkAcc( "cookiecutClusterLink" );
+  if (!cookClusLinkAcc.isAvailable(*eg) || !cookClusLinkAcc(*eg).isValid())
+    { return nullptr; }
+  return (*cookClusLinkAcc(*eg));
+}
+// ==================================================================
 std::vector< ElementLink< xAOD::CaloClusterContainer > > xAOD::EgammaHelpers::getAssociatedTopoClustersLinks(const xAOD::CaloCluster *cluster){
 
   static const SG::AuxElement::Accessor < std::vector< ElementLink< xAOD::CaloClusterContainer > > > caloClusterLinks("constituentClusterLinks");

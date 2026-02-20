@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -59,7 +59,7 @@ StatusCode InDet::InDetHardScatterSelectionTool::initialize()
   ATH_MSG_DEBUG("Using SelectionMode: "       << m_mode);
   ATH_MSG_DEBUG("Using TrackSelectionTool: "  << m_trkSelectTool);
   ATH_MSG_DEBUG("Using ReturnDeco: "          << m_returnDeco);
-  ATH_MSG_DEBUG("Using HardScatterLinkDeco: " << m_hardScatterDeco.toString());
+  ATH_MSG_DEBUG("Using HardScatterLinkDeco: " << m_hardScatterDecoKey);
   ATH_MSG_DEBUG("Using VertexContainer: "     << m_vtxContKey);
   ATH_MSG_DEBUG("Using JetContainer: "        << m_jetContKey);
 
@@ -103,17 +103,8 @@ StatusCode InDet::InDetHardScatterSelectionTool::initialize()
 
   }
 
-  // If we are returning a decoration
-  else if (m_returnDeco) {
-    if (m_hardScatterDeco.empty()) {
-      ATH_MSG_ERROR("Hardscatter vertex decoration cannot be empty!");
-      return StatusCode::FAILURE;
-    }
-  }
-
   // Initialize our EventInfo container and decoration reads
   ATH_CHECK(m_evtInfoKey.initialize());
-  m_hardScatterDecoKey = m_evtInfoKey.key() + "." + m_hardScatterDeco;
   ATH_CHECK(m_hardScatterDecoKey.initialize(m_returnDeco));
 
   // Initialize our vertex container read

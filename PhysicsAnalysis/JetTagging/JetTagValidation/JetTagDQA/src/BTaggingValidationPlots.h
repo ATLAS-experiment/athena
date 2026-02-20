@@ -29,18 +29,18 @@ namespace JetTagDQA{
 
       // fill methods
       void fillJetKinVars(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, const xAOD::EventInfo* event);
-      void fillDiscriminantVariables(const xAOD::BTagging* btag, const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& has_muon, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
+      void fillDiscriminantVariables(const xAOD::Jet* jet, const double& jet_Lxy, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
       void fillDiscriminantVariables_for_largeRjet(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
       void fillMultiplicities(const unsigned int& nJets, const unsigned int& nTracks, const int& nPrimVtx, const unsigned int& nTracksPrimVtx, const unsigned int& nJetsWithMuon, const unsigned int& nJetsWithSV, std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
       void fillPVVariables(const double& PV_x, const double& PV_y, const double& PV_z, const xAOD::EventInfo* event);
-      void fillOther(const xAOD::Jet* jet, const xAOD::BTagging* btag, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event); 
-      void fillTrackVariables(const xAOD::Jet* jet, const xAOD::BTagging* btag, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event); 
+      void fillOther(const xAOD::Jet* jet, bool& contains_muon, double& jet_Lxy, const int& truth_label, const xAOD::EventInfo* event); 
+      void fillTrackVariables(const xAOD::Jet* jet, const xAOD::Vertex *myVertex, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, int& num_HF_tracks_in_jet, const xAOD::EventInfo* event); 
       void fillTrackVariables_for_largeRjet(const xAOD::Jet* jet, const xAOD::Vertex *myVertex, const int& truth_label, const xAOD::EventInfo* event); 
-      void fillSVVariables(const xAOD::BTagging* btag, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event); 
+      void fillSVVariables(const xAOD::Jet* jet, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& contains_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event); 
 
       void bookNJetsThatPassedWPCutsHistos();
       void initializeNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts);
-      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& discr_IP3D, const double& discr_IP2D, const double& discr_RNNIP, const double& discr_DIPS, const double& discr_SV1, const double& DL1dv01, const double& discr_DL1r, const double& GN2v01, const double& GN2Xv01);
+      void updateNJetsThatPassedWPCutsMap(std::map<std::string, int>& nJetsThatPassedWPCuts, const double& GN2v01, const double& GN3XPV01);
       void fillNJetsThatPassedWPCutsHistos(std::map<std::string, int>& nJetsThatPassedWPCuts, const xAOD::EventInfo* event);
 
       void setTaggerInfos();    
@@ -216,48 +216,6 @@ namespace JetTagDQA{
       TH1* m_SV1_fracTracks_OtherOrigin_c = nullptr; 
       TH1* m_SV1_fracTracks_OtherOrigin_u = nullptr; 
       TH1* m_SV1_fracTracks_OtherOrigin_muon = nullptr; 
-
-      // JetFitter related vars
-      TH1* m_JetFitter_N2Tpair_incl = nullptr;
-      TH1* m_JetFitter_nVTX_incl = nullptr;
-      TH1* m_JetFitter_nSingleTracks_incl = nullptr;
-      TH1* m_JetFitter_nTracksAtVtx_incl = nullptr;
-      TH1* m_JetFitter_mass_incl = nullptr;
-      TH1* m_JetFitter_energyFraction_incl = nullptr;
-      TH1* m_JetFitter_significance3d_incl = nullptr;
-      TH1* m_JetFitter_purity_incl = nullptr;
-      TH1* m_JetFitter_N2Tpair_b = nullptr;
-      TH1* m_JetFitter_nVTX_b = nullptr;
-      TH1* m_JetFitter_nSingleTracks_b = nullptr;
-      TH1* m_JetFitter_nTracksAtVtx_b = nullptr;
-      TH1* m_JetFitter_mass_b = nullptr;
-      TH1* m_JetFitter_energyFraction_b = nullptr;
-      TH1* m_JetFitter_significance3d_b = nullptr;
-      TH1* m_JetFitter_purity_b = nullptr;
-      TH1* m_JetFitter_N2Tpair_c = nullptr;
-      TH1* m_JetFitter_nVTX_c = nullptr;
-      TH1* m_JetFitter_nSingleTracks_c = nullptr;
-      TH1* m_JetFitter_nTracksAtVtx_c = nullptr;
-      TH1* m_JetFitter_mass_c = nullptr;
-      TH1* m_JetFitter_energyFraction_c = nullptr;
-      TH1* m_JetFitter_significance3d_c = nullptr;
-      TH1* m_JetFitter_purity_c = nullptr;
-      TH1* m_JetFitter_N2Tpair_l = nullptr;
-      TH1* m_JetFitter_nVTX_l = nullptr;
-      TH1* m_JetFitter_nSingleTracks_l = nullptr;
-      TH1* m_JetFitter_nTracksAtVtx_l = nullptr;
-      TH1* m_JetFitter_mass_l = nullptr;
-      TH1* m_JetFitter_energyFraction_l = nullptr;
-      TH1* m_JetFitter_significance3d_l = nullptr;
-      TH1* m_JetFitter_purity_l = nullptr;
-      TH1* m_JetFitter_N2Tpair_muon = nullptr;
-      TH1* m_JetFitter_nVTX_muon = nullptr;
-      TH1* m_JetFitter_nSingleTracks_muon = nullptr;
-      TH1* m_JetFitter_nTracksAtVtx_muon = nullptr;
-      TH1* m_JetFitter_mass_muon = nullptr;
-      TH1* m_JetFitter_energyFraction_muon = nullptr;
-      TH1* m_JetFitter_significance3d_muon = nullptr;
-      TH1* m_JetFitter_purity_muon = nullptr;
 
       // IPs and IP significances
       TH1* m_track_d0_incl = nullptr;
@@ -476,78 +434,21 @@ namespace JetTagDQA{
       TH1* m_nsharedSCTHits_top = nullptr;
 
       // tagger
-      TH1* m_IP3D_pb = nullptr;
-      TH1* m_IP3D_pc = nullptr;
-      TH1* m_IP3D_pu = nullptr;
-
-      TH1* m_RNNIP_pb = nullptr;
-      TH1* m_RNNIP_pc = nullptr;
-      TH1* m_RNNIP_pu = nullptr;
-
-      TH1* m_DIPS_pb = nullptr;
-      TH1* m_DIPS_pc = nullptr;
-      TH1* m_DIPS_pu = nullptr;
-
-      TH1* m_SV1_pb = nullptr;
-      TH1* m_SV1_pc = nullptr;
-      TH1* m_SV1_pu = nullptr;
-      
-      TH1* m_DL1dv01_pb = nullptr;
-      TH1* m_DL1dv01_pc = nullptr;
-      TH1* m_DL1dv01_pu = nullptr;
-      TH1* m_DL1r_pb = nullptr;
-      TH1* m_DL1r_pc = nullptr;
-      TH1* m_DL1r_pu = nullptr;
-
       TH1* m_GN2v01_pb = nullptr;
       TH1* m_GN2v01_pc = nullptr;
       TH1* m_GN2v01_pu = nullptr;
       TH1* m_GN2v01_ptau = nullptr;
 
-      TH1* m_GN2Xv01_phbb = nullptr;
-      TH1* m_GN2Xv01_phcc = nullptr;
-      TH1* m_GN2Xv01_ptop = nullptr;
-      TH1* m_GN2Xv01_pqcd = nullptr;
+      TH1* m_GN3XPV01_phtautauhad = nullptr;
+      TH1* m_GN3XPV01_phbb = nullptr;
+      TH1* m_GN3XPV01_phcc = nullptr;
+      TH1* m_GN3XPV01_ptop = nullptr;
+      TH1* m_GN3XPV01_pqcdbb = nullptr;
+      TH1* m_GN3XPV01_pqcdbx = nullptr;
+      TH1* m_GN3XPV01_pqcdcx = nullptr;
+      TH1* m_GN3XPV01_pqcdll = nullptr;
+      TH1* m_GN3XPV01_pwqq = nullptr;
 
-      TH1* m_nGTinSV1_incl = nullptr;
-      TH1* m_nGTinSV1_b = nullptr;
-      TH1* m_nGTinSV1_c = nullptr;
-      TH1* m_nGTinSV1_l = nullptr;
-      TH1* m_nGTinSV1_muon = nullptr;
-
-      TH1* m_IP2D_nTracks_incl = nullptr;
-      TH1* m_IP2D_nTracks_b = nullptr;
-      TH1* m_IP2D_nTracks_c = nullptr;
-      TH1* m_IP2D_nTracks_l = nullptr;
-      TH1* m_IP2D_nTracks_muon = nullptr;
-
-      TH1* m_IP3D_nTracks_incl = nullptr;
-      TH1* m_IP3D_nTracks_b = nullptr;
-      TH1* m_IP3D_nTracks_c = nullptr;
-      TH1* m_IP3D_nTracks_l = nullptr;
-      TH1* m_IP3D_nTracks_muon = nullptr;
-
-      TH1* m_IP3D_gradeOfTracks_incl = nullptr;
-      TH1* m_IP2D_gradeOfTracks_incl = nullptr;
-      TH1* m_IP3D_gradeOfTracks_b = nullptr;
-      TH1* m_IP2D_gradeOfTracks_b = nullptr;
-      TH1* m_IP3D_gradeOfTracks_c = nullptr;
-      TH1* m_IP2D_gradeOfTracks_c = nullptr;
-      TH1* m_IP3D_gradeOfTracks_l = nullptr;
-      TH1* m_IP2D_gradeOfTracks_l = nullptr;
-      TH1* m_IP3D_gradeOfTracks_muon = nullptr;
-      TH1* m_IP2D_gradeOfTracks_muon = nullptr;
-
-      TH1* m_tmpD0 = nullptr;
-      TH1* m_tmpZ0 = nullptr;
-      TH1* m_tmpD0sig = nullptr;
-      TH1* m_tmpZ0sig = nullptr;
-      TH1* m_IP3D_weightBofTracks = nullptr;
-      TH1* m_IP3D_weightCofTracks = nullptr;
-      TH1* m_IP3D_weightUofTracks = nullptr;
-      TH1* m_IP2D_weightBofTracks = nullptr;
-      TH1* m_IP2D_weightCofTracks = nullptr;
-      TH1* m_IP2D_weightUofTracks = nullptr;
 
       // B hadron Lxy
       TH1* m_Truth_Lxy_b = nullptr;
@@ -559,25 +460,13 @@ namespace JetTagDQA{
       
       std::vector<std::string> m_taggers;
       std::map<std::string, int> m_truthLabels;
-      std::map<std::string, double> m_IP3D_workingPoints;
-      std::map<std::string, double> m_IP2D_workingPoints;
-      std::map<std::string, double> m_RNNIP_workingPoints;
-      std::map<std::string, double> m_DIPS_workingPoints;
-      std::map<std::string, double> m_SV1_workingPoints;
-      std::map<std::string, double> m_JetFitter_workingPoints;
-      std::map<std::string, double> m_DL1dv01_workingPoints;
-      std::map<std::string, double> m_DL1r_workingPoints;
       std::map<std::string, double> m_GN2v01_workingPoints;
-      std::map<std::string, double> m_GN2Xv01_workingPoints;
+      std::map<std::string, double> m_GN3XPV01_workingPoints; // TODO: Change this in the future since GN3 has WPs pT and mass dependent
 
-      double m_RNNIP_fc = 0.0;
-      double m_DIPS_fc = 0.0;
-      double m_DL1dv01_fc = 0.0;
-      double m_DL1r_fc = 0.0;
-      double m_GN2v01_fc = 0.2;
-      double m_GN2v01_ftau = 0.01;
-      double m_GN2Xv01_hcc_fc = 0.0;
-      double m_GN2Xv01_top_fc = 0.0;
+      double m_GN2v01_fc = 0.0;
+      double m_GN2v01_ftau = 0.0;
+      double m_GN3XPV01_hcc_fc = 0.0;
+      double m_GN3XPV01_top_fc = 0.0;
       std::map<std::string, TH1*> m_weight_histos; 
 
       std::map<std::string, TH1*> m_nJetsThatPassedWPCutsHistos; 
@@ -588,7 +477,7 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
-      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv01Name, const std::string& GN2v01Name, const std::string& GN2Xv01Name);
+      void setTaggerNames(const std::string& GN2v01Name, const std::string& GN3XPV01Name);
 
       // jvt variables 
       bool m_JVT_defined{};
@@ -619,10 +508,8 @@ namespace JetTagDQA{
       void fillHistoWithTruthCases_for_largeRjet(T value, TH1* histo_incl, TH1* histo_bb, TH1* histo_cc, TH1* histo_uu, TH1* histo_top, const int& truth_label, const xAOD::EventInfo* event);
 
       // tagger names
-      std::string m_dipsName;
-      std::string m_DL1dv01Name;
       std::string m_GN2v01Name;
-      std::string m_GN2Xv01Name;
+      std::string m_GN3XPV01Name;
   
   };
     

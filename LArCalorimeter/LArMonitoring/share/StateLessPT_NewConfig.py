@@ -302,6 +302,9 @@ if __name__=='__main__':
    
    bytestream_input.Timeout = 3600000
    
+   # FIXME, hack for bad events from IBL
+   bytestream_input.ProcessCorruptedEvents = True
+
    # ###################################################
    #          Stream/trigger Selection
    # --> For LAr partitions, no stream available
@@ -321,6 +324,9 @@ if __name__=='__main__':
            bytestream_input.StreamNames = ['LArCellsEmpty']
        if STREAM=="Main":
            bytestream_input.StreamNames = ['Main']
+           #bytestream_input.StreamNames = ['HardProbes'] # to be used for HI runs
+       if STREAM=="UPC":
+           bytestream_input.StreamNames = ['UPC']
        if STREAM=="CosmicCalo":
            bytestream_input.StreamNames = ['CosmicCalo']
        if STREAM=="L1Topo":
@@ -367,6 +373,8 @@ if __name__=='__main__':
        bytestream_input.StreamLogic = "Or"
        # not possible to ignore one stream, so creating a full list
        bytestream_input.StreamNames = ["Main","CosmicCalo","L1Topo","L1Calo","Standby","ZeroBias","Background", "EnhancedBias", "MinBias", "LArCells", "LArCellsEmpty", "LArNoiseBurst", "BphysDelayed", "Late"]
+       # for HI:
+       #bytestream_input.StreamNames = ["HardProbes","UPC","UCC","PC","CC","CosmicCalo","L1Topo","L1Calo","Standby","ZeroBias","Background", "EnhancedBias", "MinBias", "LArCells", "LArCellsEmpty", "LArNoiseBurst", "BphysDelayed", "Late"]
     
             
    # #################################################

@@ -52,6 +52,9 @@ std::unique_ptr<xAOD::CaloCluster> egammaClusterCookieCut::cookieCut(
   if (!pars.recomputeMoments) {
     copyMoments(cluster,
 		newCluster,
+		xAOD::CaloCluster::CENTER_X,
+		xAOD::CaloCluster::CENTER_Y,
+		xAOD::CaloCluster::CENTER_Z,
 		xAOD::CaloCluster::SECOND_LAMBDA,
 		xAOD::CaloCluster::LATERAL,
 		xAOD::CaloCluster::LONGITUDINAL,
@@ -78,7 +81,8 @@ std::unique_ptr<xAOD::CaloCluster> egammaClusterCookieCut::cookieCut(
       (deltaEta2 + deltaPhi2 >= pars.maxDelR2);
 
     if (!excludeCell) {
-      newCellLinks->addCell(cellItr.index(), cellItr.weight());
+      double w = pars.fixCellWeights ? 1. : cellItr.weight();
+      newCellLinks->addCell(cellItr.index(), w);
     }
   }
 

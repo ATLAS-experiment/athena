@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReadCond.cxx
@@ -10,16 +10,13 @@
 
 #include "ReadCond.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 
 using namespace AthPoolEx;
 
 //___________________________________________________________________________
 ReadCond::ReadCond(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {
-}
-//___________________________________________________________________________
-ReadCond::~ReadCond() {
 }
 //___________________________________________________________________________
 StatusCode ReadCond::initialize() {
@@ -32,20 +29,14 @@ StatusCode ReadCond::execute() {
 
    if (detStore()->contains<ExampleHitContainer>("PedestalWriteData")) {
       const ExampleHitContainer* ep = nullptr;
-      if (detStore()->retrieve(ep, "PedestalWriteData").isFailure()) {
-         ATH_MSG_ERROR("Could not find DataObject: PedestalWriteData");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( detStore()->retrieve(ep, "PedestalWriteData") );
       for (const ExampleHit* obj : *ep) {
          ATH_MSG_INFO("Pedestal x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
       }
    }
    if (detStore()->contains<ExampleHitContainer>("PedestalAppendData")) {
       const ExampleHitContainer* ep = nullptr;
-      if (detStore()->retrieve(ep, "PedestalAppendData").isFailure()) {
-         ATH_MSG_ERROR("Could not find DataObject: PedestalAppendData");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( detStore()->retrieve(ep, "PedestalAppendData") );
       for (const ExampleHit* obj : *ep) {
          ATH_MSG_INFO("Pedestal (2) x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
       }

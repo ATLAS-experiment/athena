@@ -15,7 +15,6 @@
 #include "xAODTrigMissingET/TrigMissingETContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
-#include <vector>
 #include <algorithm>
 #include <cmath>
 
@@ -119,7 +118,7 @@ StatusCode TrigComboHypoTool::initialize()
       return StatusCode::FAILURE;
     }
 
-    m_varInfo_vec.push_back(info);
+    m_varInfo_vec.push_back(std::move(info));
   }
   ATH_MSG_DEBUG("Initialization completed successfully");
   
@@ -288,7 +287,7 @@ StatusCode TrigComboHypoTool::decide(Combo::LegDecisionsMap& passingLegs, const 
     // Assess the collective decision on the combination
     if (lastDecision) {
       combinationToRecord.insert(combinationToRecord.end(),extraLegs.cbegin(),extraLegs.cend());
-      passingCombinations.push_back(combinationToRecord);
+      passingCombinations.push_back(std::move(combinationToRecord));
       if (m_modeOR == true and m_enableOverride) {
         break;
       }
@@ -486,9 +485,10 @@ bool TrigComboHypoTool::fillKineInfo(TrigComboHypoTool::KineInfo& kinematics, Co
       ATH_MSG_ERROR("link for IParticle not valid");
       return false;
     }
-    eta = (*pLink)->p4().Eta();
-    phi = (*pLink)->p4().Phi();
-    pt  = (*pLink)->p4().Pt();
+    auto p4 = (*pLink)->p4();
+    eta = p4.Eta();
+    phi = p4.Phi();
+    pt  = p4.Pt();
   }
   ATH_MSG_VERBOSE("      Filled kinematics with pt " << pt*invGeV << ", eta " << eta << ", phi " << phi);
   kinematics = std::make_tuple(eta,phi,pt);

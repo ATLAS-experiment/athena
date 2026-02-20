@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/JetQGTagger.h"
@@ -258,8 +258,8 @@ namespace CP {
     ATH_CHECK( checkKinRange( jet, acceptData ) );
 
     /// Create WriteDecorHandles
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidEventContent(m_decValidEventContentKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, char> decValidEventContent(m_decValidEventContentKey);
 
     /// If the jet isn't valid there's no point applying the remaining cuts
     /// TODO: Is this actually needed?

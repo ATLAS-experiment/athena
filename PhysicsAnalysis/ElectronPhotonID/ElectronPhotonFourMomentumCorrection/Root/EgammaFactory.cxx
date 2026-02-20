@@ -297,7 +297,6 @@ xAOD::Photon* EgammaFactory::create_photon(float eta, float phi, float e0,
 
   ph->setEta(eta);
   ph->setPhi(phi);
-  ph->setM(0);
   ph->setPt(e / cosh(eta));
 
   return ph;
@@ -338,7 +337,6 @@ xAOD::Electron* EgammaFactory::create_electron(float eta, float phi, float e0,
 
   el->setEta(eta);
   el->setPhi(phi);
-  el->setM(0);
   el->setPt(e / cosh(eta));
 
   return el;

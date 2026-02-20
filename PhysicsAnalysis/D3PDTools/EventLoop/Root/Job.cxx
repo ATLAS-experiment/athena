@@ -59,6 +59,7 @@ namespace EL
   const std::string Job::optPerfTree = "nc_EventLoop_PerfTree";
   const std::string Job::optXAODInput = "nc_EventLoop_XAODInput";
   const std::string Job::optXaodAccessMode = "nc_EventLoop_XaodAccessMode";
+  const std::string Job::optOtherMetaDataTreeNamePattern = "nc_EventLoop_otherMetaDataTreeNamePattern";
   const std::string Job::optXaodAccessMode_branch = "branch";
   const std::string Job::optXaodAccessMode_class = "class";
   const std::string Job::optXaodAccessMode_athena = "athena";
@@ -88,6 +89,7 @@ namespace EL
   const std::string Job::optGridAddNthFieldOfInDSToLFN = "nc_addNthFieldOfInDSToLFN";
   const std::string Job::optGridWorkingGroup = "nc_workingGroup";
   const std::string Job::optGridPrunShipAdditionalFilesOrDirs = "nc_prunShipAdditionalFilesOrDirs";
+  const std::string Job::optGridPrunNRetrySubmitToGrid = "nc_prunNRetrySubmitToGrid";
   const std::string Job::optGridShowCmd = "nc_showCmd";
   const std::string Job::optGridCpuTimePerEvent = "nc_cpuTimePerEvent";
   const std::string Job::optGridMaxWalltime = "nc_maxWalltime";

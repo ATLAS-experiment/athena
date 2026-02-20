@@ -19,6 +19,7 @@
 
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 
@@ -27,7 +28,7 @@
 #include <StoreGate/ReadHandleKey.h>
 
 class IAthRNGSvc;
-class IActsExtrapolationTool;
+
 
 namespace ActsTrk {
 
@@ -60,7 +61,7 @@ namespace ActsTrk {
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", 
           "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleKey{this, "TruthKey", "MuonTruthParticles"};
 
@@ -80,9 +81,9 @@ namespace ActsTrk {
 
         Gaudi::Property<bool> m_startFromFirstHit{this, "StartFromFirstHit", false, "Start from first hit"};
 
-        Amg::Transform3D toLocalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const;
+        Amg::Transform3D toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
 
-        Amg::Transform3D toGlobalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const;
+        Amg::Transform3D toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
 
         IdentifierHash layerHash(const Identifier& id) const;
 

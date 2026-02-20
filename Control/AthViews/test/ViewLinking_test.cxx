@@ -225,12 +225,12 @@ void testFallThroughLinks( const EventContext& ctx, MsgStream& log ) {
 
   // Element links need to point to the right object
   // even if it's not in the current view
+  View childView1 ( "childView", -1 );
   {
     // Child to parent
-    auto childView = new View( "childView", -1 );
-    childView->linkParent( parentView );
+    childView1.linkParent( parentView );
     SG::ReadHandle<TestContainer> rh( "inParent" );
-    auto link = ViewHelper::makeLink( childView, rh, 1 );
+    auto link = ViewHelper::makeLink( &childView1, rh, 1 );
     EXPECT_TRUE( link.isValid() );
     EXPECT_EQ( ( *link )->value, 2 );
     EXPECT_EQ( link.proxy()->name(), "_parentView_inParent" );
@@ -243,19 +243,19 @@ void testFallThroughLinks( const EventContext& ctx, MsgStream& log ) {
     EXPECT_EQ( ( *link )->value, 5 );
     EXPECT_EQ( link.proxy()->name(), "inStore" );
   }
+  View childView2( "childView", -1 );
   {
     // Child to store
-    auto childView = new View( "childView", -1 );
-    childView->linkParent( parentView );
+    childView2.linkParent( parentView );
     SG::ReadHandle<TestContainer> rh( "inStore" );
-    auto link = ViewHelper::makeLink( childView, rh, 1 );
+    auto link = ViewHelper::makeLink( &childView2, rh, 1 );
     EXPECT_TRUE( link.isValid() );
     EXPECT_EQ( ( *link )->value, 4 );
     EXPECT_EQ( link.proxy()->name(), "inStore" );
   }
   log << MSG::INFO << "Fall through works with links as expected" << endmsg;
 }
-
+//coverity[root_function]
 int main() {
   using namespace std;
 

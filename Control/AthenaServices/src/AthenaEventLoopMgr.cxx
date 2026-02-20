@@ -15,7 +15,7 @@
 // Athena includes
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/errorcheck.h"
-#include "AthenaKernel/IEventSeek.h"
+#include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IAthenaEvtLoopPreSelectTool.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "AthenaKernel/EventContextClid.h"
@@ -34,7 +34,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/EventIDBase.h"
 #include "GaudiKernel/ThreadLocalContext.h"
-#include "GaudiKernel/Algorithm.h"
+#include "GaudiKernel/AppReturnCode.h"
 
 #include "StoreGate/StoreGateSvc.h"
 
@@ -43,9 +43,6 @@
 #include "EventInfo/EventType.h"
 
 #include "xAODEventInfo/EventInfo.h"             
-#include "xAODEventInfo/EventAuxInfo.h"          
-#include "xAODEventInfo/EventInfoContainer.h"    
-#include "xAODEventInfo/EventInfoAuxContainer.h" 
 #include "EventInfoUtils/EventInfoFromxAOD.h"
 
 #include "ClearStorePolicy.h"
@@ -361,6 +358,19 @@ AthenaEventLoopMgr::setupPreSelectTools(Gaudi::Details::PropertyBase&) {
 
   return;
 
+}
+
+/* Called from ApplicationMgr::stopRun()
+   usually when a stop was requested by a signal
+*/
+StatusCode AthenaEventLoopMgr::stopRun()
+{
+  ATH_MSG_DEBUG("In stopRun()");
+  CHECK( MinimalEventLoopMgr::stopRun() );
+  // change the appMgr return code to ScheduledStop so no errors are reported
+  auto appProp = m_appMgrUI.as<IProperty>();
+  CHECK( Gaudi::setAppReturnCode( appProp, Gaudi::ReturnCode::ScheduledStop, true ) );
+  return StatusCode::SUCCESS;
 }
 
 //=========================================================================

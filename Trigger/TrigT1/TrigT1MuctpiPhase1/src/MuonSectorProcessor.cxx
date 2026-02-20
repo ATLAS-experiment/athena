@@ -91,7 +91,7 @@ namespace LVL1MUCTPIPHASE1 {
 	  auto left = region.substr(0,split);
 	  auto right = region.substr(split+1,std::string::npos);
 	  lhs_index[side_regions.first][left].push_back(right);
-	  rhs_index[side_regions.first][right].push_back(left);
+	  rhs_index[side_regions.first][right].push_back(std::move(left));
 	}
       }
     }
@@ -175,7 +175,7 @@ namespace LVL1MUCTPIPHASE1 {
 	  auto lhs_key = make_key(System1,sec_left,roi1);
 	  auto rhs_key = make_key(System2,sec_right,roi2);
 	  auto region = make_pair(lhs_key,rhs_key);
-	  global_pairs[active_side].insert(region);
+	  global_pairs[active_side].insert(std::move(region));
 	}
       }
       create_indices();

@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/MuonChamberNameConverter.h"
 #include <cstdlib>
+#include <sstream>
+#include <vector>
+#include <iostream>
 
 //Function converting from ATHENA identifier int StationName,int StationEta, int StationPhi, std::string ChamberType 
 //to the (hopefully) corresponding Hardware chamber name.Works only for Barrel MDTs (for the moment) 
@@ -150,7 +153,7 @@ std::string convertChamberName(int ChamberName , int ChamberEta , int ChamberPhi
       std::string phi_str;
       phi_inttostring << Phi_int;
       phi_inttostring >> phi_str;
-      Phi_string = phi_str ;
+      Phi_string = std::move(phi_str) ;
     } else { // for Type ==TGC
       if (limits[6]==1) {//Long chamber
         Phi_int = (2*Phi_int)-1;
@@ -161,7 +164,7 @@ std::string convertChamberName(int ChamberName , int ChamberEta , int ChamberPhi
         if (Phi_int<10) {
           Phi_string = "0"+phi_str;		
         } else {
-          Phi_string = phi_str;
+          Phi_string = std::move(phi_str);
         }
       }
       if (limits[6]==-1) {//Short chamber
@@ -172,7 +175,7 @@ std::string convertChamberName(int ChamberName , int ChamberEta , int ChamberPhi
         phi_inttostring >> phi_str; 		
         if (Phi_int<10){
           Phi_string = "0"+phi_str;		
-        } else {Phi_string = phi_str;}						
+        } else {Phi_string = std::move(phi_str);}						
       }
     } // end of else ; MDT / RPC
   } else {

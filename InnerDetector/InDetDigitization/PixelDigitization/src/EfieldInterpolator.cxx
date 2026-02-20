@@ -542,6 +542,7 @@ double EfieldInterpolator::estimateEfieldInvDistance(const std::vector<double> &
       }
     }
   }
+  if (weight == 0.) return 0.;
   return(meanEf / weight);
 }
 

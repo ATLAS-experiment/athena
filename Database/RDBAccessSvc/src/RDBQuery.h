@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RDBACCESSSVC_RDBQUERY_H
@@ -49,8 +49,8 @@ class RDBQuery final : public IRDBQuery
   RDBQuery() = delete;
 
   Athena::DBLock           m_dblock;
-  coral::IQuery*           m_query;
-  coral::IQuery*           m_queryCount;
+  std::unique_ptr<coral::IQuery>  m_query;
+  std::unique_ptr<coral::IQuery>  m_queryCount;
   RDBAccessSvc*            m_accessSvc;
   std::string              m_nodeName;
   std::string              m_tagId;

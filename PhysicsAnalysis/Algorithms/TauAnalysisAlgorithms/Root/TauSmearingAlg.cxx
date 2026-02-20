@@ -18,6 +18,9 @@
 
 namespace CP
 {
+  // do this accessor at the file level to ensure it gets constructed
+  // before we configure the output
+  static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
 
   StatusCode TauSmearingAlg ::
   initialize ()
@@ -41,7 +44,6 @@ namespace CP
       ANA_CHECK (m_smearingTool->applySystematicVariation (sys));
       xAOD::TauJetContainer *taus = nullptr;
       ANA_CHECK (m_tauHandle.getCopy (taus, sys));
-      static const SG::Accessor<char> accTESCompatibility("TESCompatibility");
       for (xAOD::TauJet *tau : *taus)
       {
         if (m_preselection.getBool (*tau, sys))

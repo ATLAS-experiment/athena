@@ -221,12 +221,12 @@ StatusCode DiTauTruthMatchingTool::checkTruthMatch (const xAOD::DiTauJet& xDiTau
   static const SG::Decorator<float> decTruthLeadEta("TruthVisLeadEta");
   static const SG::Decorator<float> decTruthLeadPhi("TruthVisLeadPhi");
   static const SG::Decorator<float> decTruthLeadM("TruthVisLeadM");
-  static const SG::Decorator<float> decTruthLeadPdgID("TruthLeadPdgID");
+  static const SG::Decorator<int> decTruthLeadPdgID("TruthLeadPdgID");
   static const SG::Decorator<float> decTruthSubleadPt("TruthVisSubleadPt");
   static const SG::Decorator<float> decTruthSubleadEta("TruthVisSubleadEta");
   static const SG::Decorator<float> decTruthSubleadPhi("TruthVisSubleadPhi");
   static const SG::Decorator<float> decTruthSubleadM("TruthVisSubleadM");
-  static const SG::Decorator<float> decTruthSubleadPdgID("TruthSubleadPdgID");
+  static const SG::Decorator<int> decTruthSubleadPdgID("TruthSubleadPdgID");
   static const SG::Decorator<float> decTruthDeltaR("TruthVisDeltaR");
   static const SG::Decorator<float> decTruthMass("TruthVisMass");
 

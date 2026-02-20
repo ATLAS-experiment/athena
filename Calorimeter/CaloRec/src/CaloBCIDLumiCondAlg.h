@@ -18,7 +18,7 @@
 #include "CaloLumiConditions/CaloBCIDCoeffs.h"
 #include "LumiBlockData/LuminosityCondData.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -34,10 +34,10 @@
  * luminosities.  There are two distinct conditions objects because
  * the luminosity changes much faster than then calibrations.
  */
-class CaloBCIDLumiCondAlg : public AthReentrantAlgorithm
+class CaloBCIDLumiCondAlg : public AthCondAlgorithm
 {
 public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /**
@@ -51,7 +51,6 @@ public:
    * @param ctx Event context.
    */
   virtual StatusCode execute (const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 private:
   /// Property: Coefficients object (conditions input).
   SG::ReadCondHandleKey<CaloBCIDCoeffs> m_coeffsKey

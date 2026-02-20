@@ -14,6 +14,9 @@ HLT_mu4_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF
 HLT_mu20_LRT_d0tight_L1MU14FCH
 HLT_mu20_msonly_iloosems_mu6noL1_msonly_nscan40_L1MU14FCH_jXE80
 
+# To help working around an early 2022 issue with noL1 muons. Note this chain was highly precaled in data. See https://twiki.cern.ch/twiki/bin/viewauth/Atlas/TriggerIssues2022#Other_issues
+HLT_mu22_L1MU14FCH
+
 ############################
 # Electron triggers        #
 # Legacy EM                #

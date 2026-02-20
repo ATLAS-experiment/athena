@@ -32,6 +32,7 @@
 + Control/AthToolSupport/.*
 + Control/CxxUtils
 + Control/RootUtils
++ Control/SGCore
 + Control/xAODDataSource
 + Control/xAODRootAccess.*
 + DataQuality/GoodRunsLists
@@ -144,7 +145,7 @@
 #+ Trigger/TrigValidation/TrigAnalysisTest
 
 #
-### Onnxruntime Service 
+### Onnxruntime Service
 #
 
 + Control/AthOnnx/.*

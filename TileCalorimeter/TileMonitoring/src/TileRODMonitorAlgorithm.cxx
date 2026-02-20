@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileRODMonitorAlgorithm.h"
@@ -111,7 +111,9 @@ StatusCode TileRODMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
   TileRawChannelUnit::UNIT rawChannelUnit = rawChannelContainer->get_unit();
 
+  //coverity[STACK_USE]
   float referenceTimes[Tile::MAX_ROS - 1][Tile::MAX_DRAWER][Tile::MAX_CHAN] = {{{0}}};
+  //coverity[STACK_USE]
   float referenceEnergies[Tile::MAX_ROS - 1][Tile::MAX_DRAWER][Tile::MAX_CHAN] = {{{0}}};
 
   for (const TileRawChannelCollection* rawChannelCollection : *rawChannelContainer) {

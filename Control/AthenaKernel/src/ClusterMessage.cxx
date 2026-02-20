@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaKernel/ClusterMessage.h"
 #include <cstdint>
@@ -26,13 +26,16 @@ ClusterMessage::DataDescr::DataDescr(const WireMsgBody& body)
       fileNumber((std::uint64_t(body[8]) << 32) + std::uint64_t(body[9])) {}
 
 ClusterMessage::DataDescr::~DataDescr() {
-  if (received && (ptr != nullptr)) {
+  if (received) {
     std::free(ptr);
   }
 }
 
 ClusterMessage::DataDescr& ClusterMessage::DataDescr::operator=(
     DataDescr&& rhs) noexcept {
+  if (received) {
+    std::free(ptr); //release the object memory before assigning a new one
+  }
   ptr = rhs.ptr;
   len = rhs.len;
   align = rhs.align;

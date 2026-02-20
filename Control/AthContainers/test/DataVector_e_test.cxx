@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/DataVector_e_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -28,6 +26,12 @@ void test2_e()
 
 int main()
 {
-  test2_e();
+  try {
+    test2_e();
+  }
+  catch (const std::runtime_error& e) {
+    std::cerr << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }

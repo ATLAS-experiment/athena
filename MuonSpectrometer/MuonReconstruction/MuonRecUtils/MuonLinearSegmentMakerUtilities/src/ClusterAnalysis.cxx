@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -198,7 +198,8 @@ namespace ClusterSeg {
     Long64_t nentries = m_tree->GetEntries();
     m_ncalls = 0;
     for( Long64_t evt=0;evt<nentries;++evt ){
-      m_tree->LoadTree(evt);
+      auto retval = m_tree->LoadTree(evt);
+      if (retval < 0) continue;
       m_tree->GetEntry(evt);
     
 
@@ -378,7 +379,7 @@ namespace ClusterSeg {
                  theSeed.push_back(it1);
                  theSeed.push_back(it2);
                  theSeed.push_back(it3);
-                 seeds.push_back(theSeed);
+                 seeds.push_back(std::move(theSeed));
               }
             } //end loop of layer2points
           }
@@ -414,7 +415,7 @@ namespace ClusterSeg {
             if (angle < m_ang2_cut){
               theSeed.push_back(it1);
               theSeed.push_back(it3);
-              seeds.push_back(theSeed);
+              seeds.push_back(std::move(theSeed));
             }
           }//layer2Points
         } //layer1Points

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TrigT1CaloCalibUtils includes
@@ -74,7 +74,7 @@ StatusCode L1CaloDumpRampData::finalize()
 
   std::unique_ptr<TGraphErrors> graph_temp = make_unique<TGraphErrors>();
   std::unique_ptr<TF1> func = make_unique<TF1>("func", "pol1", 0., 255.);
-  for(auto rampDataIt : *rampDataContainer) {
+  for(const auto & rampDataIt : *rampDataContainer) {
     auto coolId = rampDataIt.first;
     const L1CaloRampData& rampData = rampDataIt.second;
     ATH_MSG_DEBUG("Processing RampData for 0x" << std::hex << coolId << std::dec);

@@ -32,7 +32,7 @@ namespace MuonG4R4 {
        *  @param gctx: Geometry context to transform the hit accordingly
        *  @param readOutEle: ReadoutElement that's identified from the TouchableHistory
        *  @param hitAtGapPlane: Position of the hit expressed at the gasGap centre in global coordinates  */
-      Identifier getIdentifier(const ActsGeometryContext& gctx,
+      Identifier getIdentifier(const ActsTrk::GeometryContext& gctx,
                                const MuonGMR4::TgcReadoutElement* readOutEle, 
                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const;
 };

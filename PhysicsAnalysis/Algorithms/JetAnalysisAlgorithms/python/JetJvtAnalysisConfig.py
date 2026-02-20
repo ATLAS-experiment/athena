@@ -13,6 +13,8 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         super (JetJvtAnalysisConfig, self).__init__ ()
         self.setBlockName('JVT')
         self.addDependency('OverlapRemoval', required=False)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -20,7 +22,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. Typically "
             "not needed here.")
         self.addOption ('enableFJvt', False, type=bool,
-            info="whether to enable forward JVT calculations. The default is False.")
+            info="whether to enable forward JVT calculations.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

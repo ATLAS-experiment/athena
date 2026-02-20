@@ -10,7 +10,7 @@ if __name__=="__main__":
     cfgFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PFlowTests/mc21_14TeV/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4383_r15934/AOD.41490164._005514.pool.root.1"]
     cfgFlags.Output.AODFileName="output_AOD.root"
     cfgFlags.Output.doWriteAOD=True
-    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
+    cfgFlags.DiTau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 

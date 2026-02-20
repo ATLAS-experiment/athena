@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibMath/DataBin.h"
@@ -229,8 +229,8 @@ DataBin * DataBin::splitBin(const unsigned int & ref_coord) {
     bin_2->setPoints(bin_2_points);
 
 // resize the current bin //
-    m_lower_boundaries = bin_1_low;
-    m_upper_boundaries = bin_2_up;
+    m_lower_boundaries = std::move(bin_1_low);
+    m_upper_boundaries = std::move(bin_2_up);
     setPoints(bin_1_points);
 
     return bin_2;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file LumiBlockComps/test/LuminosityAlg_test.cxx
@@ -492,6 +492,7 @@ void test4 ATLAS_NOT_REENTRANT (ISvcLocator* svcloc)
 }
 
 
+// coverity[uncaught_except]
 int main ATLAS_NOT_REENTRANT ()
 {
   std::cout << "LumiBlockComps/LuminosityCondAlg_test\n";

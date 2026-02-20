@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/Identifier.h"
@@ -10,7 +10,6 @@
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/Volume.hpp>
-#include <ActsGeoUtils/NoDeletePtr.h>
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
@@ -43,19 +42,10 @@ SpectrometerSector::SpectrometerSector(defineArgs&& args):
     }
 
 bool SpectrometerSector::operator<(const SpectrometerSector& other) const {
-    if (side() != other.side()) {
-        return side() < other.side();
-    }
-    if (sector() != other.sector()) {
-        return sector() < other.sector();
-    }
-    if (other.chamberIndex() != chamberIndex()) {
-        return chamberIndex() < other.chamberIndex();
-    }
-    return (*m_args.chambers.front()) < (*other.m_args.chambers.front()); 
+    return m_args.id < other.m_args.id; 
 }
 int8_t SpectrometerSector::side() const {
-    return m_args.chambers.front()->stationEta() > 0 ? 1 : -1;
+    return Acts::copySign(1, chambers().front()->stationEta());
 }
 const SpectrometerSector::defineArgs& SpectrometerSector::parameters() const { return m_args; }
 const Muon::IMuonIdHelperSvc* SpectrometerSector::idHelperSvc() const { return m_args.chambers.front()->idHelperSvc();}
@@ -64,32 +54,30 @@ int SpectrometerSector::stationPhi() const { return m_args.chambers.front()->sta
 int SpectrometerSector::sector() const {return m_args.chambers.front()->sector(); }
 bool SpectrometerSector::barrel() const { return m_args.chambers.front()->barrel(); }
 std::string SpectrometerSector::identString() const {
-    return std::format("{:} {:}-side sector: {:2} _ {} readout elements",  
+    return std::format("id: {:3d}, {:} {:}-side sector: {:2},",  m_args.id, 
                        Muon::MuonStationIndex::chName(chamberIndex()), 
-                       side() == 1 ? 'A' : 'C' , sector(), readoutEles().size());
+                       side() == 1 ? 'A' : 'C' , sector());
 }
 const ChamberSet& SpectrometerSector::chambers() const{ return m_args.chambers; }
 const Acts::PlaneSurface& SpectrometerSector::surface() const {
     return *m_args.surface;
 }
-const Amg::Transform3D& SpectrometerSector::localToGlobalTrans(const ActsGeometryContext& gctx) const {
-    return surface().transform(gctx.context());
+const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
+    return surface().localToGlobalTransform(gctx.context());
 }            
-Amg::Transform3D SpectrometerSector::globalToLocalTrans(const ActsGeometryContext& gctx) const {
-    return localToGlobalTrans(gctx).inverse(); 
+Amg::Transform3D SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+    return localToGlobalTransform(gctx).inverse(); 
 }
-double SpectrometerSector::halfXLong() const { return m_args.bounds->get(BoundEnums::eHalfLengthXposY); }
-double SpectrometerSector::halfXShort() const { return m_args.bounds->get(BoundEnums::eHalfLengthXnegY); }
-double SpectrometerSector::halfY() const { return  m_args.bounds->get(BoundEnums::eHalfLengthY); }
-double SpectrometerSector::halfZ() const { return m_args.bounds->get(BoundEnums::eHalfLengthZ); }
+double SpectrometerSector::halfXLong() const { return MuonGMR4::halfXhighY(*m_args.bounds); }
+double SpectrometerSector::halfXShort() const { return MuonGMR4::halfXlowY(*m_args.bounds);  }
+double SpectrometerSector::halfY() const { return MuonGMR4::halfY(* m_args.bounds); }
+double SpectrometerSector::halfZ() const { return MuonGMR4::halfZ(*m_args.bounds);}
 
 
-std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume(const ActsGeometryContext& gctx) const {
-    return std::make_shared<Acts::Volume>(localToGlobalTrans(gctx), bounds());
+std::shared_ptr<Acts::Volume> SpectrometerSector::boundingVolume(const ActsTrk::GeometryContext& gctx) const {
+    return std::make_shared<Acts::Volume>(localToGlobalTransform(gctx), bounds());
 }
-std::shared_ptr<Acts::TrapezoidVolumeBounds> SpectrometerSector::bounds() const {
-    return m_args.bounds;
-}
+std::shared_ptr<Acts::VolumeBounds> SpectrometerSector::bounds() const { return m_args.bounds; }
 Chamber::ReadoutSet SpectrometerSector::readoutEles() const {
     Chamber::ReadoutSet toReturn{};
     for (const ChamberPtr& ch : chambers()) {
@@ -103,11 +91,10 @@ const std::vector<SpectrometerSector::chamberLocation> & SpectrometerSector::cha
 }
 std::ostream& operator<<(std::ostream& ostr, 
                          const SpectrometerSector::defineArgs& args) {
-    ostr<<std::endl
-        <<"halfX (S/L): "<<args.bounds->get(BoundEnums::eHalfLengthXnegY)
-        <<"/"<<args.bounds->get(BoundEnums::eHalfLengthXposY)<<" [mm], ";
-    ostr<<"halfY: "<<args.bounds->get(BoundEnums::eHalfLengthY)<<" [mm], ";
-    ostr<<"halfZ: "<<args.bounds->get(BoundEnums::eHalfLengthZ)<<" [mm], ";
+    ostr<<std::endl;
+    ostr<<"halfX (S/L): "<<halfXlowY(*args.bounds)<<"/"<<halfXhighY(*args.bounds)<<" [mm], ";
+    ostr<<"halfY: "<<halfY(*args.bounds)<<" [mm], ";
+    ostr<<"halfZ: "<<halfZ(*args.bounds)<<" [mm], ";
     ostr<<"************************************************************************"<<std::endl;
     for (const SpectrometerSector::ChamberPtr& ch : args.chambers) {
         ostr<<" --- "<<(*ch)<<std::endl;
@@ -127,8 +114,8 @@ std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>>
 SpectrometerSector::fillDetLayIdCache() const{
 
     std::unordered_map<const MuonReadoutElement*, std::vector<unsigned int>> cache{};
-    const ActsGeometryContext gctx{};
-    const Amg::Transform3D sectorTrans = globalToLocalTrans(gctx);
+    const ActsTrk::GeometryContext gctx{};
+    const Amg::Transform3D sectorTrans = globalToLocalTransform(gctx);
 
     // sort the Readout elements by z in the sector fram
     Chamber::ReadoutSet reEleSorted {readoutEles()};

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 #/** @file post.sh
 # @brief sh script that checks the return code of an executable and compares
@@ -54,10 +54,6 @@ fi
 
 # consider these name pairs identical in the diff
 read -d '' II <<EOF
-s/^StoreGateSvc_Impl VERBOSE/StoreGateSvc      VERBOSE/
-s/^StoreGateSvc_Impl   DEBUG/StoreGateSvc        DEBUG/
-s/StoreGateSvc_Impl/StoreGateSvc/
-s/SGImplSvc/StoreGateSvc/
 s/SG::DataProxyHolder::sgkey_t/sgkey_t/
 s/Conversion service:/Conversion service /      # printout change (Gaudi!1598)
 s!(ERROR|INFO|WARNING|FATAL) [^ ]*/!\\\\1 ../!
@@ -67,17 +63,14 @@ s/([0-9][0-9]* ms)/(xx ms)/
 s/([0-9][0-9]* ms total)/(xx ms total)/
 s/[[][0-9;]*m//g
 s/INFO set[(][)]/INFO set([])/  #py2 vs py3
+s/^RootDatabase[^ ]\\+/RootDatabase/   #logging change in APR RootStorageSvc
 EOF
 
 # Patterns that cannot be ignored
 ERRORS="^ERROR | ERROR | FATAL "
 
-# ignore package names e.g. Package-00-00-00
-PP='\w+-[[:digit:]]{2}-[[:digit:]]{2}-[[:digit:]]{2}'
-# ignore trunk package names e.g. Package-r123456
-PP="$PP"'|\w+-r[[:digit:]]+'
 # ignore cpu usage printouts
-PP="$PP"'|ChronoStatSvc +INFO Time'
+PP='ChronoStatSvc +INFO Time'
 PP="$PP"'|Time left.+ Seconds'
 PP="$PP"'|Timeleft.+ sec'
 PP="$PP"'|INFO Time User'
@@ -87,18 +80,14 @@ PP="$PP"'|from CLIDDB file'
 PP="$PP"'| Machine: .* System and Processor Info'
 PP="$PP"'| Jobname = .* Machine ='
 # ignore slug pid printout
-PP="$PP"'|Atlas Detector Simulation, Reconstruction and Analysis Running on'
 PP="$PP"'|Athena job with pid +[[:digit:]]+'
-#ignore DllClassManager DEBUG messages
-PP="$PP"'|DllClassManager     DEBUG'
 # ignore slug Library printout
 PP="$PP"'|Library of +[[:digit:]]+ at +[[:digit:]]+'
 PP="$PP"'|Library compiled on +[[:digit:]]'
-# ignore ClassIDSvc "in memory db" printouts
+# ClassIDSvc
 PP="$PP"'|CLID: .* - type name:'
-# ignore ClassIDSvc "already set" printouts
 PP="$PP"'|ClassIDSvc .* setTypeNameForID: .* already set for'
-# ignore ClassIDSvc finalize output
+PP="$PP"'|ClassIDSvc[ [:digit:]]+INFO\s+getRegistryEntries: read'
 PP="$PP"'|ClassIDSvc .* finalize: wrote .*'
 # PoolSvc
 PP="$PP"'|^PoolSvc.*INFO'
@@ -108,46 +97,31 @@ PP="$PP"'|CoreDumpSvc.*INFO'
 PP="$PP"'|^.*INFO\s+AlgTool:\s'
 # ignore any finalize output
 PP="$PP"'|^.*INFO [Ff]inali[sz]'
-# ignore rcs version comments
-PP="$PP"'|Id: .+ Exp \$'
-# ignore plugin count
-PP="$PP"'|PluginMgr +INFO loaded plugin info for'
 # ignore HistorySvc registered count
 PP="$PP"'|HistorySvc +INFO Registered'
-# ignore clid registry entries count
-PP="$PP"'|ClassIDSvc[ [:digit:]]+INFO\s+getRegistryEntries: read'
 # ignore existsDir path WARNINGS
 PP="$PP"'|DirSearchPath::existsDir: WARNING not a directory'
 # ignore warnings about duplicate services/converters.
 PP="$PP"'|Service factory for type [^ ]+ already declared'
 PP="$PP"'|Converter for class:[^ ]+ already exists'
 # Number of configurables read can vary from build to build.
-PP="$PP"'|INFO Read module info for|confDb modules in'
-PP="$PP"'|INFO Read module info for|configurables from'
+PP="$PP"'|INFO Read module info for|confDb modules in|configurables from'
 # ignore ApplicationMgr header.
 PP="$PP"'|^ApplicationMgr *SUCCESS *$'
 PP="$PP"'|^=+$'
 PP="$PP"'|^ *Welcome to ApplicationMgr'
 PP="$PP"'|^ *running on .* on '
-PP="$PP"'|//GP: '
+PP="$PP"'|^ApplicationMgr +INFO Successfully loaded'
 #ignore which malloc we are using
 PP="$PP"'|^Preloading tcmalloc'
 PP="$PP"'|^WARNING: TCMALLOCDIR not defined'
 PP="$PP"'|^HistogramPersis...   INFO *.CnvServices.:'
 PP="$PP"'|^HistogramPersis.*Histograms saving not required.'
 PP="$PP"'|^StatusCodeSvc'
-PP="$PP"'|^ApplicationMgr +INFO Successfully loaded'
-PP="$PP"'|^IncidentSvc +DEBUG Service base class'
-PP="$PP"'|^IncidentSvc         DEBUG Adding .* listener '.*' with priority .*'
 PP="$PP"'|MessageSvc not found, will use std::cerr'
-PP="$PP"'|^AtRndmGenSvc         INFO Initializing AtRndmGenSvc'
-PP="$PP"'|^AtRanluxGenSvc2      INFO Initializing AtRanluxGenSvc2'
-PP="$PP"'|^AtRanluxGenSvc       INFO Initializing AtRanluxGenSvc'
-PP="$PP"'|^Py:Athena            INFO executing ROOT6Setup'
+PP="$PP"'|^Py:Athena +INFO executing ROOT6Setup'
 #ignore personal .athenarc files
 PP="$PP"'|including file "\$HOME/.athenarc'
-#ignore known gaudi python warning
-PP="$PP"'|Bindings.py:660: DeprecationWarning'
 #ignore the ignored
 PP="$PP"'|Warning in <TEnvRec::ChangeValue>: duplicate entry <Root.ErrorIgnoreLevel=Print> for level 1; ignored'
 PP="$PP"'|^JobOptionsSvc +INFO'
@@ -157,9 +131,6 @@ PP="$PP"'|PluginService::SetDebug|setting LC_ALL'
 PP="$PP"'|^Warning in .* (header|class) .* is already in'
 # Ignore GaudiHive timeline printouts
 PP="$PP"'|^TimelineSvc +INFO'
-# StoreGate v3 migration
-PP="$PP"'|VERBOSE ServiceLocatorHelper::service: found service IncidentSvc'
-PP="$PP"'|VERBOSE ServiceLocatorHelper::service: found service ProxyProviderSvc'
 # Pathnames / versions / times / hosts
 PP="$PP"'|^IOVDb(Svc|Folder).*INFO (Folder|Connection|Total payload|.*bytes in)'
 PP="$PP"'|^DBReplicaSvc.*INFO Read replica configuration'
@@ -171,18 +142,21 @@ PP="$PP"'|INFO Database being retired|^Domain.*INFO'
 PP="$PP"'|SZ='
 PP="$PP"'|using job opts'
 
+# TDAQ ERS debug messages in dbg builds
+PP="$PP"'| DEBUG_0 \['
+
 # Hive ordering.
 PP="$PP"'|Terminating thread-pool resources|Joining Scheduler thread|Disconnecting from sqlite|Opening COOL connection|Initializing CondInputLoader|preLoadAddresses: Removing|IOVRanges will be checked|User session with|ConnectionService I[nN][fF][oO]|Disconnect from the database|RalSessionMgr I[nN][fF][oO]|Connect to the database'
 
 # Outputs dependent on whether or not a file catalog already exists.
-PP="$PP"'|XMLFileCatalog|File is not in Catalog|Failed to open container to check POOL collection|Open     DbSession|Access   DbDomain|Access   DbDatabase|^RootDatabase.open|Deaccess DbDatabase'
+PP="$PP"'|XMLFileCatalog|File is not in Catalog|Failed to open container to check POOL collection'
+PP="$PP"'|Open     DbSession|Access   DbDomain|Access   DbDatabase|^RootDatabase.*File version:|Deaccess DbDatabase|AUTO_FLUSH'
 
 PP="$PP"'|^Py:ConfigurableDb'
 PP="$PP"'|^DBReplicaSvc.*INFO'
 PP="$PP"'|INFO ... COOL  exception caught: The database does not exist|Create a new conditions database'
 PP="$PP"'|SetGeometryVersion.py obtained'
-PP="$PP"'|^ConditionStore +INFO Start ConditionStore'
-PP="$PP"'|^ConditionStore +INFO Stop ConditionStore'
+PP="$PP"'|^ConditionStore +INFO (Start|Stop) ConditionStore'
 PP="$PP"'|INFO Found XML file:|INFO copying from'
 
 # Differences between Gaudi versions.
@@ -237,9 +211,6 @@ PP="$PP"'|^xAODMaker::Even.*(WARNING|INFO)'
 # gtest
 PP="$PP"'|Ran [0-9]+ tests in'
 
-# Verbosity cleanup in TileInfoLoader.
-PP="$PP"'|^TileInfoLoader +INFO'
-
 # Ignore new output stream helper tools.
 PP="$PP"'|Found HelperTools'
 
@@ -249,13 +220,9 @@ PP="$PP"'|filling address for'
 # MetaInputLoader addresses and SIDs
 PP="$PP"'|MetaInputLoader *INFO ( address|.*is still valid for|.*and sid)'
 
-# Message useless for judging test success
-PP="$PP"'|^FileMgr +DEBUG Successfully registered handler for tech'
-
 # TagInfoMgr not longer a ConversionSvc
 # these lines are gone
 PP="$PP"'|Added successfully Conversion service TagInfoMgr'
-PP="$PP"'|TagInfoMgr +DEBUG in queryInterface'
 # this line moved around
 PP="$PP"'|Added successfully Conversion service AthenaPoolCnvSvc'
 

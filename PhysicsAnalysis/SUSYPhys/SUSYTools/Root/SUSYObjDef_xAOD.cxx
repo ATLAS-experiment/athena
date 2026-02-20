@@ -28,7 +28,6 @@
 #include "JetCPInterfaces/ICPJetUncertaintiesTool.h"
 #include "JetInterface/IJetUpdateJvt.h"
 #include "JetInterface/IJetModifier.h"
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "AsgAnalysisInterfaces/IEfficiencyScaleFactorTool.h"
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
@@ -406,6 +405,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_trig2017combination_singleLep(""),
     m_trig2018combination_singleLep(""),
     m_trig2022combination_singleLep(""),
+    m_trig2023combination_singleLep(""),
+    m_trig2024combination_singleLep(""),
     m_trigNToys_diLep(-99),
     m_trig2015combination_diLep(""),
     m_trig2016combination_diLep(""),
@@ -1468,7 +1469,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EG_corrModel, "Ele.EffNPcorrModel", rEnv, "TOTAL");
   configFromFile(m_EG_corrFNList, "Ele.EffCorrFNList", rEnv, "None");
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
-  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Prerecom_v3/map1.txt");
+  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4/map2.txt");
   configFromFile(m_eleAllowRun3TrigSFFallback, "Ele.AllowRun3TrigSFFallback", rEnv, false);
   configFromFile(m_eleForceFullSimCalib, "Ele.ForceFullSimCalib", rEnv, false);
   
@@ -1477,6 +1478,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_trig2017combination_singleLep, "Trig.Singlelep2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2018combination_singleLep, "Trig.Singlelep2018", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50");
   configFromFile(m_trig2022combination_singleLep, "Trig.Singlelep2022", rEnv, "e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI || HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH");
+  configFromFile(m_trig2023combination_singleLep, "Trig.Singlelep2023", rEnv, "e26_lhtight_ivarloose_L1eEM26M_OR_e60_lhmedium_L1eEM26M_OR_e140_lhloose_L1eEM26M || HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH");
+  configFromFile(m_trig2024combination_singleLep, "Trig.Singlelep2024", rEnv, "e26_lhtight_ivarloose_L1eEM26M_OR_e60_lhmedium_L1eEM26M_OR_e140_lhloose_L1eEM26M || HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH");
   configFromFile(m_trigNToys_diLep, "Trig.DilepNToys", rEnv, 250); // 0 means calculate from formula instead - needs to be supported for the trigger combination
   configFromFile(m_trig2015combination_diLep, "Trig.Dilep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu40 || 2e12_lhloose_L12EM10VH || e17_lhloose_mu14 || e7_lhmedium_mu24 || mu18_mu8noL1 || 2mu10");
   configFromFile(m_trig2016combination_diLep, "Trig.Dilep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50 || 2e17_lhvloose_nod0 || e17_lhloose_nod0_mu14 || e7_lhmedium_nod0_mu24 || e26_lhmedium_nod0_L1EM22VHI_mu8noL1 || mu22_mu8noL1 || 2mu14");
@@ -1775,16 +1778,18 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   ATH_CHECK( validConfig(m_strictConfigCheck) );
 
   //** cache trigger chains for electron matching
-  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle,m_v_trigs22_cache_singleEle);
+  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle, m_v_trigs22_cache_singleEle, m_v_trigs23_cache_singleEle, m_v_trigs24_cache_singleEle);
 
   //** cache trigger chains for matching (both electrons and muons)
-  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle,m_v_trigs22_cache_singleEle);
+  GetTriggerTokens(m_electronTriggerSFStringSingle, m_v_trigs15_cache_singleEle, m_v_trigs16_cache_singleEle, m_v_trigs17_cache_singleEle, m_v_trigs18_cache_singleEle, m_v_trigs22_cache_singleEle, m_v_trigs23_cache_singleEle, m_v_trigs24_cache_singleEle);
 
   m_v_trigs15_cache_singleLep = GetTriggerOR(m_trig2015combination_singleLep);
   m_v_trigs16_cache_singleLep = GetTriggerOR(m_trig2016combination_singleLep);
   m_v_trigs17_cache_singleLep = GetTriggerOR(m_trig2017combination_singleLep);
   m_v_trigs18_cache_singleLep = GetTriggerOR(m_trig2018combination_singleLep);
   m_v_trigs22_cache_singleLep = GetTriggerOR(m_trig2022combination_singleLep);
+  m_v_trigs23_cache_singleLep = GetTriggerOR(m_trig2023combination_singleLep);
+  m_v_trigs24_cache_singleLep = GetTriggerOR(m_trig2024combination_singleLep);
 
   m_v_trigs15_cache_diLep = GetTriggerOR(m_trig2015combination_diLep);
   m_v_trigs16_cache_diLep = GetTriggerOR(m_trig2016combination_diLep);

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimSectorBank.cxx
@@ -38,6 +38,7 @@ FPGATrackSimSectorBank::FPGATrackSimSectorBank(std::string const & filepath)
     readSectors(fin);
 
     // Make m2sMap
+    //coverity[tainted_data]
     makeInverseMap();
 }
 
@@ -56,7 +57,7 @@ void FPGATrackSimSectorBank::readHeader(std::ifstream & fin)
     ok = ok && (sline >> nSectors >> m_nLayers);
 
     if (!ok) throw "Error reading header";
-
+    // coverity [tainted_data]
     m_s2mMap.resize(nSectors, std::vector<module_t>(m_nLayers));
 }
 
@@ -133,7 +134,7 @@ sector_t FPGATrackSimSectorBank::findSector(std::vector<module_t> const & module
                 sectors_new.insert(it_m2s->second);
 
         if (sectors_new.empty()) return -1;
-        sectors_good = sectors_new;
+        sectors_good = std::move(sectors_new);
     }
     
     assert(sectors_good.size() == 1);

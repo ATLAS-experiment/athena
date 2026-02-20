@@ -111,8 +111,7 @@ namespace xAOD {
 
    RDataSource::RDataSource( const std::vector< std::string >& fileNames,
                              std::string_view treeName )
-      : m_fileNames( fileNames ), m_treeName( treeName ),
-        m_verboseOutput( kFALSE ) {
+      : m_fileNames( fileNames ), m_treeName( treeName ) {
 
       readInputMetadata();
    }
@@ -150,7 +149,8 @@ namespace xAOD {
 
          // Set up the chain, event and store.
          m_chains.push_back( ::makeChain( m_fileNames, m_treeName ) );
-         m_events.push_back( std::make_unique< RDataSourceEvent >() );
+         m_events.push_back(
+            std::make_unique< RDataSourceEvent >( m_auxmode ) );
          m_stores.push_back( std::make_unique< TStore >() );
          TChain* chain = m_chains.back().get();
          RDataSourceEvent* event = m_events.back().get();
@@ -186,11 +186,7 @@ namespace xAOD {
       return;
    }
 
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,00)
-   void RDataSource::Initialise() {
-#else
    void RDataSource::Initialize() {
-#endif
 
       // A sanity check.
       if( m_entryRanges.size() != 0 ) {
@@ -277,25 +273,6 @@ namespace xAOD {
       return;
    }
 
-#if ROOT_VERSION_CODE < ROOT_VERSION(6,28,00)
-   void RDataSource::FinaliseSlot( unsigned int slot ) {
-
-      // Simply print what's happening.
-      PRINT_VERBOSE( "FinaliseSlot: Called for slot " << slot );
-
-      // Return gracefully.
-      return;
-   }
-
-   void RDataSource::Finalise() {
-
-      // Simply print what's happening.
-      PRINT_VERBOSE( "Finalise: Function called" );
-
-      // Return gracefully.
-      return;
-   }
-#else
    void RDataSource::FinalizeSlot( unsigned int slot ) {
 
       // Simply print what's happening.
@@ -313,7 +290,6 @@ namespace xAOD {
       // Return gracefully.
       return;
    }
-#endif
 
    const std::vector< std::string >& RDataSource::GetColumnNames() const {
 
@@ -391,6 +367,17 @@ namespace xAOD {
    Bool_t RDataSource::isVerboseOutput() const {
 
       return m_verboseOutput;
+   }
+
+   void RDataSource::setAuxMode( TEvent::EAuxMode mode ) {
+
+      m_auxmode = mode;
+      return;
+   }
+
+   TEvent::EAuxMode RDataSource::auxMode() const {
+
+      return m_auxmode;
    }
 
    RDataSource::Record_t

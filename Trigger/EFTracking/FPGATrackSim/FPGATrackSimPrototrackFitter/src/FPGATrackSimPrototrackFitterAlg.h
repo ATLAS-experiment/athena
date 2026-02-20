@@ -6,7 +6,7 @@
 #define ACTSTRACKRECONSTRUCTION_FPGATRACKSIMPROTOTRACKFITTERALG_H 1
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
@@ -34,7 +34,7 @@ namespace FPGATrackSim{
       // tracking geometry - used to translate ATLAS to ACTS geometry
       PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
       // ACTS extrapolation tool - provides the magnetic field 
-      ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+      ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
       // output location to write to 
       SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackContainerKey{this, "ACTSTracksLocation", "", "Output track collection (ActsTrk variant)"};
       // acts helper for the output

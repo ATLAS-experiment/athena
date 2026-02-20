@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -34,7 +34,6 @@ cfg.merge(MetaDataSvcCfg(flags))
 
 confSvc = CompFactory.TrigConf.xAODConfigSvc("xAODConfigSvc")
 cfg.addService(confSvc)
-from AthenaCommon.Constants import DEBUG
 
 from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 triggerListsHelper = TriggerListsHelper(flags)
@@ -54,7 +53,7 @@ cfg.merge(TileGMCfg(flags))
 # cfg.merge(TrigEDMCheckerCfg(flags, doDumpAll=False))
 # cfg.getEventAlgo("TrigEDMChecker").doDumpTrigCompsiteNavigation=True
 
-msg = cfg.getService('MessageSvc'); 
+msg = cfg.getService('MessageSvc')
 msg.verboseLimit=0 # this is option for verbose log
 msg.debugLimit=0
 msg.infoLimit=0 

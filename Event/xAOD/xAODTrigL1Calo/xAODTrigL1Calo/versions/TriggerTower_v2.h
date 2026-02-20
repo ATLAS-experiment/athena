@@ -228,6 +228,7 @@ namespace xAOD {
 
 // Declare IParticle as a base class of TriggerTower_v2:
 #include "AthContainers/DataVector.h"
+#include "xAODBase/IParticleContainer.h"
 DATAVECTOR_BASE( xAOD::TriggerTower_v2, xAOD::IParticle );
 
 #endif // XAODTRIGL1CALO_VERSIONS_TRIGGERTOWER_V2_H

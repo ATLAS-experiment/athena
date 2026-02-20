@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalcPed.h"
@@ -25,9 +25,6 @@ namespace MuonCalib {
     AthAlgorithm(name,pSvcLocator),
     m_maxStripHash(0),
     m_numBits(12),
-    m_ampHists(nullptr),
-    m_sampHists(nullptr),
-    m_bitHists(nullptr),
     m_bitProds(nullptr),
     m_bitCorrelation(nullptr),
     m_peds(nullptr),
@@ -85,11 +82,10 @@ namespace MuonCalib {
 
     ATH_CHECK(m_cscRdoDecoderTool.retrieve());
 
-    //Set to SG::VIEW_ELEMENTS, since we want root to do its own memory
-    //management.
-    m_ampHists = new DataVector<TH1I>(SG::VIEW_ELEMENTS);
-    if(m_doSampleHists) m_sampHists = new DataVector< DataVector<TH1I> >;
-    if(m_doBitHists) m_bitHists = new DataVector<TH1I>(SG::VIEW_ELEMENTS);
+    // Histograms are owned by ROOT.
+    m_ampHists.clear();
+    if(m_doSampleHists) m_sampHists.clear();
+    if(m_doBitHists) m_bitHists.clear();
 
     //Loop through ids to find out what hash range we're working on (in case we're using some 
     //unusual geometry)
@@ -151,10 +147,10 @@ namespace MuonCalib {
             m_ampHistHighBound);
         hist->GetXaxis()->SetTitle("Amplitude (ADC value)");
         hist->GetYaxis()->SetTitle("Counts");
-        m_ampHists->push_back(hist);
+        m_ampHists.push_back(hist);
 
         if(m_doSampleHists) {
-          DataVector<TH1I>* tempVect  = new DataVector<TH1I>(SG::VIEW_ELEMENTS);
+          std::vector<TH1I*> tempVect;
           for(int cnt = 0; cnt < m_numSamplesExpected ; cnt++) {
             sprintf(name, "sampHist%u_%d",stripItr,cnt);
             sprintf(titleSeed, "Amplitude Histogram for eta %d, sector %d, layer %d%c, strip %d, sample %d",
@@ -162,13 +158,13 @@ namespace MuonCalib {
 
             hist = new TH1I(name,title.c_str(),m_ampHistNumBins,m_ampHistLowBound,
                 m_ampHistHighBound);
-            tempVect->push_back(hist);
+            tempVect.push_back(hist);
 
           }
-          m_sampHists->push_back(tempVect);
+          m_sampHists.push_back(std::move(tempVect));
         }
 
-        if(m_bitHists)
+        if(m_doBitHists)
         {
           //Bit histogram (for looking for stuck-bits)
           sprintf(name, "bitHist%u",stripItr);
@@ -178,7 +174,7 @@ namespace MuonCalib {
           hist = new TH1I(name, title.c_str(), m_numBits, 0, m_numBits); //12 bits
           hist->GetXaxis()->SetTitle("Bit");
           hist->GetYaxis()->SetTitle("Counts");
-          m_bitHists->push_back(hist);
+          m_bitHists.push_back(hist);
           if(m_doCorrelation) { 
             (*m_bitProds)[stripItr] = new TH2F(TString::Format("bitProds%d",stripItr),"Bit products", m_numBits,0,m_numBits, m_numBits, 0, m_numBits);
 
@@ -187,9 +183,9 @@ namespace MuonCalib {
       }
       else
       {
-        m_ampHists->push_back(nullptr);
-        if(m_bitHists) m_bitHists->push_back(nullptr);
-        if(m_doSampleHists) m_sampHists->push_back(nullptr);
+        m_ampHists.push_back(nullptr);
+        if(m_doBitHists) m_bitHists.push_back(nullptr);
+        if(m_doSampleHists) m_sampHists.push_back(std::vector<TH1I*>());
       }
     }//end strip loop
 
@@ -456,17 +452,17 @@ namespace MuonCalib {
            
             for(const auto & thisSample: samples)
             {
-              (*m_ampHists)[stripHash]->Fill(thisSample);
+              m_ampHists[stripHash]->Fill(thisSample);
               if(m_doSampleHists)
-                (*((*m_sampHists)[stripHash]))[sampCnt]->Fill(thisSample);
-              if(m_bitHists && sampCnt==1)
+                m_sampHists[stripHash][sampCnt]->Fill(thisSample);
+              if(m_doBitHists && sampCnt==1)
               {
                 TH2F* prodHist = nullptr;
                 if(m_bitProds)
                   prodHist = (*m_bitProds)[stripHash];
-                if(!fillBitHist((*m_bitHists)[stripHash],thisSample, prodHist).isSuccess())
+                if(!fillBitHist(m_bitHists[stripHash],thisSample, prodHist).isSuccess())
                   ATH_MSG_WARNING("Failed recording bits for strip " << stripHash);
-              }//end if(m_bitHists)
+              }//end if(m_doBitHists)
 
               if(m_doOnlineDbFile){//m_doF001){
                 //test if any samples are obvoe the online threshold
@@ -507,7 +503,7 @@ namespace MuonCalib {
           ATH_MSG_VERBOSE((float)clock()/((float)CLOCKS_PER_SEC) << " is the time");
         }
 
-        TH1I * ampHist = (*m_ampHists)[stripHash];
+        TH1I * ampHist = m_ampHists[stripHash];
         if(ampHist)
         {
           ATH_MSG_VERBOSE("Have data for strip hash " << stripHash);
@@ -803,10 +799,10 @@ namespace MuonCalib {
 
       //CscCalibReport has extraraneous monitoring information
       CscCalibReportPed * report = new CscCalibReportPed("pedAmps");
-      report->setPedAmpHists(m_ampHists); //report now has ownership of the DataVector
-      report->setBitHists(m_bitHists); //report now has ownership of the DataVector
+      report->setPedAmpHists(std::move(m_ampHists));
+      report->setBitHists(std::move(m_bitHists));
       if(m_doSampleHists){
-        report->setSampHists(m_sampHists);
+        report->setSampHists(std::move(m_sampHists));
       }
       if(m_bitProds){
         report->setBitCorrelation( makeBitCorrelation());
@@ -853,13 +849,13 @@ namespace MuonCalib {
     }
 
     //Does bit correlation study. Likely will be dropped
-    DataVector<TH2F> * CscCalcPed::makeBitCorrelation() {
+    std::vector<TH2F*> CscCalcPed::makeBitCorrelation() {
 
-      if(!m_bitProds || !m_bitHists)
-        return nullptr;
+      std::vector<TH2F*> correlations;
+      if(!m_bitProds || !m_doBitHists)
+        return correlations;
 
-      DataVector<TH2F> * correlations = new DataVector<TH2F>(SG::VIEW_ELEMENTS);
-      correlations->resize(m_maxStripHash +1);
+      correlations.resize(m_maxStripHash +1);
 
       for(unsigned int hashItr =0; hashItr <= m_maxStripHash; hashItr++) {
         IdentifierHash stripHash =hashItr;
@@ -892,12 +888,12 @@ namespace MuonCalib {
               m_numBits, 0, m_numBits,
               m_numBits, 0, m_numBits
               );
-          (*correlations)[hashItr] = correlationHist;
+          correlations[hashItr] = correlationHist;
 
           //each amphis is filled exaclty the number of times the bits are sampled,
           //so its a good place to get n
-          double n = (*m_ampHists)[hashItr]->GetEntries();
-          TH1I * bitHist = (*m_bitHists)[hashItr];
+          double n = m_ampHists[hashItr]->GetEntries();
+          TH1I * bitHist = m_bitHists[hashItr];
           TH2F * bitProds = (*m_bitProds)[hashItr];
           for(unsigned int bit1 = 1; bit1 <=m_numBits; bit1++){
             for(unsigned int bit2 = 1; bit2 <=bit1; bit2++){

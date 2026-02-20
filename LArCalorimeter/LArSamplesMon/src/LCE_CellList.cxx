@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -168,7 +168,7 @@ std::vector< LCE_CellList::thrCounter_t>  LCE_CellList::buildList(const char* in
   
   std::set<unsigned> nLBsSeenSet;
 
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   const unsigned nchannels = tuple->nChannels();
 
   retvec.reserve(nchannels);
@@ -188,9 +188,8 @@ std::vector< LCE_CellList::thrCounter_t>  LCE_CellList::buildList(const char* in
 
     for (int iEvent=0;iEvent<nEvents;++iEvent) {
       const LArSamples::Data* data = hist->data(iEvent);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      unsigned lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      unsigned lumiBlock = Evdata.lumiBlock();
       if (checkBadLBList(lumiBlock)) continue; //skip bad LBs
 
 
@@ -214,7 +213,6 @@ std::vector< LCE_CellList::thrCounter_t>  LCE_CellList::buildList(const char* in
   nLBsSeen=nLBsSeenSet.size();
   std::cout << "Evaluated a total of " << nLBsSeen << "LBs" << std::endl;
 
-  delete tuple;
   return retvec;
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIGlobal/HIEventShapeFillerTool.h"
@@ -9,6 +9,9 @@
 #include <xAODHIEvent/HIEventShape.h>
 #include "HIEventUtils/HIEventDefs.h"
 #include "HIEventUtils/HIEventShapeMapTool.h"
+#include "LArElecCalib/LArProvenance.h"
+#include "AtlasDetDescr/AtlasDetectorID.h"
+#include "CaloDetDescr/CaloDetDescrElement.h"
 
 #include <iostream>
 #include <iomanip>
@@ -16,6 +19,17 @@
 HIEventShapeFillerTool::HIEventShapeFillerTool(const std::string& myname) : asg::AsgTool(myname),
 m_index(nullptr)
 {
+}
+
+StatusCode HIEventShapeFillerTool::initialize()
+{
+
+  ATH_MSG_INFO("In HIEventShapeFillerTool::initialize()");
+
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
+  ATH_CHECK(m_caloCellKey.initialize(SG::AllowEmpty));
+
+  return StatusCode::SUCCESS;
 }
 
 
@@ -51,7 +65,9 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowers(std::unique_ptr<xAOD
 
 StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const INavigable4MomentumCollection* navInColl) const
 {
-  //loop on towers
+
+  SG::ReadHandle<CaloCellContainer> cellContainer{m_caloCellKey};
+        //loop on towers
   for (INavigable4MomentumCollection::const_iterator towerItr = navInColl->begin();
     towerItr != navInColl->end(); ++towerItr)
   {
@@ -67,7 +83,26 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(std::unique_
 
     if (cellToken.size() == 0) continue;
     for (NavigationToken<CaloCell, double, CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-      cellItr != cellToken.end(); ++cellItr) updateShape(evtShape, m_index, *cellItr, cellToken.getParameter(*cellItr), eta0, phi0);
+      cellItr != cellToken.end(); ++cellItr) 
+    {
+
+     const CaloCell* cell=*cellItr;
+     std::unique_ptr<const CaloCell> mirroredCell{};
+
+     bool isDeadFEB = (!cell->caloDDE()->is_tile() && LArProv::test(cell->provenance(),LArProv::DEADFEB));
+
+     if (isDeadFEB) {
+        mirroredCell=getMirroredCell(cell,cellContainer.cptr());
+        if (mirroredCell)
+          cell=mirroredCell.get();
+        else {
+           ATH_MSG_WARNING("Failed to obtain mirrored cell for deadFEB cell with id" << std::hex << cell->ID().get_compact());
+        }
+
+     }//end if dead FEB
+
+     updateShape(evtShape, m_index, cell, cellToken.getParameter(*cellItr), eta0, phi0);
+    }
   }//end tower loop
   return StatusCode::SUCCESS;
 }
@@ -91,13 +126,9 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
   }
 
 
-  std::unique_ptr<std::vector<float> > weight_vector(new std::vector<float>());
-  weight_vector->reserve(theClusters->size());
-  SG::AuxElement::Decorator< float > decorator("HIEtaPhiWeight");
-
-  std::unique_ptr<std::vector<float> > cm_vector(new std::vector<float>());
-  cm_vector->reserve(theClusters->size());
-  SG::AuxElement::Decorator< float > cm_decorator("HIMag");
+  static const SG::AuxElement::Decorator< float > decorator("HIEtaPhiWeight");
+  static const SG::AuxElement::Decorator< float > cm_decorator("HIMag");
+  static const SG::AuxElement::Accessor<float> acc_mcell_sumE("mcell_sumE");
 
   constexpr float area_cluster = HI::TowerBins::getBinArea();
   int runIndex = -1;
@@ -106,9 +137,17 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
     runIndex = m_towerWeightTool->getRunIndex(ctx);
   }
 
-  for (auto cl : *theClusters)
-  {
-    double ET = cl->e() / std::cosh(cl->eta0());
+  for (auto cl : *theClusters) {
+
+    double mcell_sumE = 0;
+    if (acc_mcell_sumE.isAvailable(*cl)) {
+      if(acc_mcell_sumE(*cl) > 1) {
+        mcell_sumE = acc_mcell_sumE(*cl);
+        ATH_MSG_DEBUG("Energy corrected from mirror cell to cluster: " << mcell_sumE);
+      }
+    }
+
+    double ET = (cl->e()+mcell_sumE) / std::cosh(cl->eta0());
     double phi = cl->phi0();
     double eta = cl->eta0();
     unsigned int eb = HI::TowerBins::findBinEta(eta);
@@ -119,7 +158,6 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
       float recip = m_towerWeightTool->getEtaPhiResponse(eta, phi, runIndex);
       if (recip != 0.) weight = 1. / recip;
     }
-    weight_vector->push_back(weight);
     decorator(*cl) = weight;
 
     //HIMag back in rel 22 (removed by mistake in 21)
@@ -140,7 +178,6 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromClusterContainer(std::uniqu
     float cm = 0;
     if (etot2 != 0) cm = er2 / etot2;
     //float cm=er2/etot2;
-    cm_vector->push_back(cm);
     cm_decorator(*cl) = cm;
 
     //update members
@@ -187,7 +224,23 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromCells(std::unique_ptr<xAOD:
 StatusCode HIEventShapeFillerTool::fillCollectionFromCellContainer(std::unique_ptr<xAOD::HIEventShapeContainer>& evtShape, const CaloCellContainer* CellContainer) const
 {
   //loop on Cells
-  for (const auto cellItr : *CellContainer) updateShape(evtShape, m_index, cellItr, 1., cellItr->eta(), cellItr->phi());
+  for (const auto cellItr : *CellContainer) {
+    const CaloCell* cell=cellItr; 
+    std::unique_ptr<const CaloCell> mirroredCell{};
+    bool isDeadFEB = (!cell->caloDDE()->is_tile() && LArProv::test(cell->provenance(),LArProv::DEADFEB));
+    if (isDeadFEB) {
+      mirroredCell=getMirroredCell(cell,CellContainer);
+      if (mirroredCell)
+        cell=mirroredCell.get();
+      else {
+        ATH_MSG_WARNING("Failed to obtain mirrored cell for deadFEB cell with id" << std::hex << cell->ID().get_compact());
+      }
+    }
+
+
+   updateShape(evtShape, m_index, cell, 1., cellItr->eta(), cellItr->phi());
+  } 
+
   return StatusCode::SUCCESS;
 }
 
@@ -198,7 +251,6 @@ void HIEventShapeFillerTool::updateShape(std::unique_ptr<xAOD::HIEventShapeConta
 
   int layer = theCell->caloDDE()->getSampling();
   float cell_et = theCell->et();
-
 
   xAOD::HIEventShape* slice = index->getShape(eta0, layer, shape);
   //update members
@@ -221,4 +273,36 @@ void HIEventShapeFillerTool::updateShape(std::unique_ptr<xAOD::HIEventShapeConta
     float tmp_sin = slice->etSin().at(ih);
     slice->etSin()[ih] = tmp_sin + cell_et * sin(ih_f * phi0) * geoWeight;
   }
+}
+
+std::unique_ptr<const CaloCell> HIEventShapeFillerTool::getMirroredCell(const CaloCell* pCell, const CaloCellContainer* ccc) const {
+
+  const Identifier id = pCell->ID();
+  const int subCalo = m_calo_id->sub_calo(id);
+  const int pos_neg = m_calo_id->pos_neg(id);
+  const int sampling = m_calo_id->sampling(id);
+  const int region = m_calo_id->region(id);
+  const int eta = m_calo_id->eta(id);
+  const int phi = m_calo_id->phi(id);
+
+  ATH_MSG_VERBOSE("DeadFEB cell parameter: (" << subCalo << "," << pos_neg << "," << sampling << "," << region << "," << eta << "," << phi << ")");
+
+  const Identifier mirroredID = m_calo_id->cell_id(subCalo,
+                                                   -pos_neg,  // flip to get cell in oposite eta
+                                                   sampling, region, eta, phi);
+
+  const CaloCell* mirroredCell = ccc->findCell(m_calo_id->calo_cell_hash(mirroredID));
+  if (!mirroredCell) {
+    return nullptr;
+  }
+  ATH_MSG_VERBOSE("DeadFEB cell (et,layer,deta,dphi): (" << pCell->et() << "," << pCell->caloDDE()->getSampling() << "," << pCell->caloDDE()->eta() << ","
+                                                      << pCell->caloDDE()->phi() << ")");
+
+  ATH_MSG_VERBOSE("Mirror cell (et,layer,deta,dphi): " << mirroredCell->et() << "," << mirroredCell->caloDDE()->getSampling() << ","
+                                                    << mirroredCell->caloDDE()->eta() << "," << mirroredCell->caloDDE()->phi() << ")");
+
+  // Build a fake-cell with the DDE of the cell we are replacing and
+  // energy,time,etc from the eta-mirrored cell
+  return std::make_unique<const CaloCell>(pCell->caloDDE(), mirroredCell->energy(), mirroredCell->time(), mirroredCell->quality(), mirroredCell->provenance(),
+                                          mirroredCell->gain());
 }

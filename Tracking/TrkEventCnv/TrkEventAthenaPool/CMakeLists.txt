@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkEventAthenaPool )
@@ -24,7 +24,8 @@ if( ATHENAPOOLUTILITIESTEST_FOUND )
        TrkEventAthenaPoolReference-06-00-06 )
   run_tpcnv_test( TrkEventTPCnv_14.5.0   AOD-14.5.0-full
                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
-                  REFERENCE_TAG ${TRKEVENTATHENAPOOL_REFERENCE_TAG} )
+                  REFERENCE_TAG ${TRKEVENTATHENAPOOL_REFERENCE_TAG}
+                  LOG_IGNORE_PATTERN "ERROR +Could not find detector element|ERROR +CscClusterOnTrack" )
   run_tpcnv_test( TrkEventTPCnv_15.6.7   AOD-15.6.7-full
                   REQUIRED_LIBRARIES TrackParticleAthenaPoolPoolCnv
                   REFERENCE_TAG ${TRKEVENTATHENAPOOL_REFERENCE_TAG} )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ByteStreamMetadata.cxx
@@ -13,6 +13,7 @@
 #include "EventStorage/DataReader.h"
 
 #include <bitset>
+#include <ostream>
 
 /******************************************************************************/
 ByteStreamMetadata::ByteStreamMetadata()

@@ -37,6 +37,7 @@
 #include "xAODBTagging/BTagVertexAuxContainer.h"
 
 #include "xAODTrigCalo/CaloClusterTrigAuxContainer.h"
+#include "xAODPFlow/FlowElementAuxContainer.h"
 
 #include "xAODTrigMinBias/TrigT2MbtsBitsAuxContainer.h"
 
@@ -163,6 +164,7 @@ StatusCode HLTEDMCreator::initialize()
   INIT_XAOD( BTaggingContainer, BTaggingAuxContainer );
   INIT_XAOD( BTagVertexContainer, BTagVertexAuxContainer );
   INIT_XAOD( CaloClusterContainer, CaloClusterTrigAuxContainer ); // NOTE: Difference in interface and aux
+  INIT_XAOD( FlowElementContainer, FlowElementAuxContainer );
   INIT_XAOD( TrigT2MbtsBitsContainer, TrigT2MbtsBitsAuxContainer );
   INIT_XAOD( HIEventShapeContainer, HIEventShapeAuxContainer );
   INIT_XAOD( TrigRNNOutputContainer, TrigRNNOutputAuxContainer );
@@ -501,6 +503,7 @@ StatusCode HLTEDMCreator::createOutput(const EventContext& context) const {
   CREATE_XAOD( DiTauJetContainer, DiTauJetAuxContainer );
   CREATE_XAOD( TauTrackContainer, TauTrackAuxContainer );
   CREATE_XAOD( CaloClusterContainer, CaloClusterTrigAuxContainer ); // NOTE: Difference in interface and aux
+  CREATE_XAOD( FlowElementContainer, FlowElementAuxContainer );
   CREATE_XAOD( JetContainer, JetAuxContainer );
   CREATE_XAOD( VertexContainer,VertexAuxContainer );
   CREATE_XAOD( TrigBphysContainer, TrigBphysAuxContainer );

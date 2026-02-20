@@ -63,7 +63,7 @@ StatusCode LumiBlockMetaDataTool::beginInputFile(const SG::SourceID&)
   if(m_fileCurrentlyOpened) {
     alreadyRecorded=true;
   }
-  m_CurrentFileName = fileName;
+  m_CurrentFileName = std::move(fileName);
   if(alreadyRecorded) return StatusCode::SUCCESS;
   m_fileCurrentlyOpened=true;
   //

@@ -68,7 +68,7 @@ StatusCode TrackIsolationDecorAlg::execute(const EventContext& ctx) const {
     }
     SG::ReadHandle<xAOD::VertexContainer> vertices{m_vtx_key, ctx};
     if (!vertices.isPresent()) {
-        ATH_MSG_FATAL("Failed to retrive vertex collection " << m_vtx_key.fullKey());
+        ATH_MSG_FATAL("Failed to retrieve vertex collection " << m_vtx_key.fullKey());
         return StatusCode::FAILURE;
     }
     using IsoDecorator = SG::WriteDecorHandle<xAOD::TrackParticleContainer, float>;

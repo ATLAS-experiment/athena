@@ -2,9 +2,9 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/PFCellEOverPTool.h"
-#include "eflowRec/eflowCaloRegions.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "PFCellEOverPTool.h"
+#include "eflowCaloRegions.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 

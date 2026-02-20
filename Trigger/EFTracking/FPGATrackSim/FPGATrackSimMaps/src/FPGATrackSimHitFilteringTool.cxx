@@ -36,8 +36,8 @@ StatusCode FPGATrackSimHitFilteringTool::initialize()
   if(m_rndStripHitRmFrac != 0 || m_rndStripClustRmFrac != 0 || m_rndPixelHitRmFrac != 0 || m_rndPixelClustRmFrac != 0)
     m_doRandomRemoval = true;
   if(m_doRandomRemoval) {
-    m_random.SetSeed(1); // for reproducibility
     ANA_MSG_INFO("Doing random removal with pixel hit, cluster = " << m_rndPixelHitRmFrac << ", " << m_rndPixelClustRmFrac << " and strip = " << m_rndStripHitRmFrac << ", " << m_rndStripClustRmFrac);
+    ANA_MSG_INFO("Random seed base value: " << m_randomSeed.value());
   }
 
   // stubs
@@ -123,8 +123,26 @@ StatusCode FPGATrackSimHitFilteringTool::initialize()
   return StatusCode::SUCCESS;
 }
 
+/**
+ * @brief Get thread-local random number generator, seeded per event
+ * 
+ * Returns a thread-specific TRandom3 instance. Re-seeds for each event using event number
+ * to ensure reproducibility: same event always gets same random sequence regardless of which
+ * thread processes it.
+ * 
+ * @param eventNumber Event number used for seeding
+ * @return Pointer to thread-local TRandom3 instance
+ */
+TRandom3* FPGATrackSimHitFilteringTool::getRandomGen(unsigned long eventNumber) const {
+  if (!m_random.get()) {
+    m_random.reset(new TRandom3(0));
+  }
+  // Re-seed for each event to ensure reproducibility
+  m_random->SetSeed(m_randomSeed.value() + eventNumber);
+  return m_random.get();
+}
 
-StatusCode FPGATrackSimHitFilteringTool::DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &header, bool hit_or_cluster)
+StatusCode FPGATrackSimHitFilteringTool::DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &header, bool hit_or_cluster) const
 {
   if(!m_doRandomRemoval)
     return StatusCode::SUCCESS;
@@ -135,6 +153,9 @@ StatusCode FPGATrackSimHitFilteringTool::DoRandomRemoval(FPGATrackSimLogicalEven
   if(pixelFrac==0 && stripFrac==0)
     return StatusCode::SUCCESS;
 
+  unsigned long eventNumber = header.event().eventNumber();
+  TRandom3* rng = getRandomGen(eventNumber);
+
   for (int i = 0; i < header.nTowers(); ++i) {
     FPGATrackSimTowerInputHeader &tower = *header.getTower(i);
     std::vector<FPGATrackSimHit>  hits;
@@ -144,11 +165,11 @@ StatusCode FPGATrackSimHitFilteringTool::DoRandomRemoval(FPGATrackSimLogicalEven
     std::vector<FPGATrackSimHit> filteredHits;
     for(const auto & hit : hits) {
       if(hit.isStrip()) {
-        if(m_random.Rndm() >= stripFrac)
+        if(rng->Rndm() >= stripFrac)
           filteredHits.push_back(hit);
       }
       else {
-        if(m_random.Rndm() >= pixelFrac)
+        if(rng->Rndm() >= pixelFrac)
           filteredHits.push_back(hit);
       }
     }

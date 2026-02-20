@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// UnassociatedHitsDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Olivier Arnaez ( olivier.arnaez@cern.ch )
 
 #include "DerivationFrameworkInDet/UnassociatedHitsDecorator.h"
@@ -16,13 +13,6 @@
 #include <string>
 
 namespace DerivationFramework {
-
-  UnassociatedHitsDecorator::UnassociatedHitsDecorator(const std::string& type,
-      const std::string& name,
-      const IInterface* parent) :
-    base_class(type,name,parent)
-  {
-  }
 
   StatusCode UnassociatedHitsDecorator::initialize()
   {
@@ -39,7 +29,7 @@ namespace DerivationFramework {
     // retrieve PRD association tool
     ATH_CHECK( m_UnassociatedHitsGetterTool.retrieve() );
 
-    {
+    { // FIXME DecorHandleKeys should be properly configured in the python layer
        std::vector<std::string> names;
        names.resize(kNIntDecor);
        names[knPixelUADecor]        ="nPixelUA";
@@ -60,10 +50,6 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode UnassociatedHitsDecorator::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
 
   StatusCode UnassociatedHitsDecorator::addBranches(const EventContext& ctx) const
   {

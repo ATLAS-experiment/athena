@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*EXTERNAL CODE PORTED FROM YARR MINIMALLY ADAPTED FOR ATHENA*/
@@ -13,6 +13,7 @@ Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 #include "ITkPixEncoder.h"
 #include "ITkPixQCoreEncodingLUT.h"
 #include <bitset>
+#include <limits>
 
 //Constructor sets up the geometry for all future loops
 
@@ -180,7 +181,7 @@ void ITkPixEncoder::encodeEvent() const{
         //add the 6-bit (CCol + 1) address
         addBits64(CCol + 1, 6);    
 
-        int previousQRow = -666;
+        unsigned previousQRow = std::numeric_limits<unsigned>::max();
         for (unsigned QRow = 0; QRow < m_nQRow; QRow++){
             //if there's no hit in this row, continue
             if (!m_hitQCores[CCol][QRow]) continue;            
@@ -189,10 +190,9 @@ void ITkPixEncoder::encodeEvent() const{
             QRow + 1 == m_lastQRow[CCol] ? addBits64(0x1, 1) : addBits64(0x0, 1);
 
             //add the isNeighbor bit. If false, add the QRow address as well.
-            if (QRow == (uint)previousQRow + 1){
+            if (previousQRow != std::numeric_limits<unsigned>::max() && QRow == previousQRow + 1) {
                 addBits64(0x1, 1);
-            }
-            else {
+            } else {
                 addBits64(0x0, 1);
                 addBits64(QRow, 8);
             };

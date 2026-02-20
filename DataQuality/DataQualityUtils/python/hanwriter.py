@@ -25,8 +25,8 @@ class HanWritingError(BaseException):
     """
 
     def __init__(self, reason):
-        BaseException.__init__(
-            self, "Cannot create the han file ("+str(reason)+")")
+        super().__init__(
+            "Cannot create the han file ("+str(reason)+")")
 
 # Generic exception
 # Han exception
@@ -38,8 +38,8 @@ class HanCannotCreateConf(BaseException):
     """
 
     def __init__(self, reason):
-        BaseException.__init__(
-            self, "Cannot create configuration ("+str(reason)+")")
+        super().__init__(
+            "Cannot create configuration ("+str(reason)+")")
 
 # Han writer base class
 # Each valid element that can be written in a han file must inherit from this class

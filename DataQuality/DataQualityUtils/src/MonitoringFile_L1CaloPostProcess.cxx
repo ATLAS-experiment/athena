@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -10,13 +10,13 @@
 #include "DataQualityUtils/MonitoringFile.h"
 
 #include <string>
+#include <format>
 
 #include <TDirectory.h>
 #include <TFile.h>
 #include <TH1.h>
 #include <TKey.h>
 #include <TObject.h>
-#include <TString.h>
 
 #ifndef L1CALOPOSTPROCESSDEBUG
 #define L1CALOPOSTPROCESSDEBUG false
@@ -27,9 +27,9 @@ namespace dqutils {
   // main process
   //--------------------------------------------------------------------------------
   void MonitoringFile::L1CaloPostProcess(const std::string& inFilename, bool /* isIncremental */) {
-    bool debug = L1CALOPOSTPROCESSDEBUG;
+    //bool debug = L1CALOPOSTPROCESSDEBUG;
 
-    if (debug) std::cout << "--> L1CaloPostProcess: Begin L1Calo post-processing" << std::endl;
+    //if (debug) std::cout << "--> L1CaloPostProcess: Begin L1Calo post-processing" << std::endl;
 
     //open root file
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
@@ -73,7 +73,7 @@ namespace dqutils {
 
       //check name
       std::string runDirName(tdir_run->GetName());
-      if (debug) std::cout << "Run_directory: " << runDirName << std::endl;
+      //if (debug) std::cout << "Run_directory: " << runDirName << std::endl;
 
       if (runDirName.find("run") == std::string::npos) {
         delete obj_run;
@@ -81,7 +81,7 @@ namespace dqutils {
       }
 
       // Stability RMS histograms
-      TString stabilityDirName = runDirName + "/L1Calo/PPM/Stability";
+      std::string stabilityDirName = runDirName + "/L1Calo/PPM/Stability";
       L1CaloStabilityRMS(f, stabilityDirName + "/FineTime", "fineTime");
       L1CaloStabilityRMS(f, stabilityDirName + "/Pedestal", "pedestal");
       L1CaloStabilityRMS(f, stabilityDirName + "/EtCorrelation", "etCorrelation");
@@ -92,14 +92,14 @@ namespace dqutils {
       double threshold[6] = {
         3., 3., 3., 6., 4., 2.
       };
-      TString energies[6] = {
+      static const std::string energies[6] = {
         "10", "20", "30", "50", "100", "200"
       };
       for (int i = 0; i < 3; ++i) {
-        TString effDir = runDirName + "/L1Calo/Reco/EmEfficiencies/ClusterRaw_"
-                         + energies[i] + "GeV_EtaVsPhi";
-        TString nameDen = "ClusterRaw_" + energies[i] + "GeV_Eta_vs_Phi";
-        TString nameEff = nameDen + "_trig_Eff";
+        std::string effDir = runDirName + "/L1Calo/Reco/EmEfficiencies/ClusterRaw_"
+                             + energies[i] + "GeV_EtaVsPhi";
+        std::string nameDen = "ClusterRaw_" + energies[i] + "GeV_Eta_vs_Phi";
+        std::string nameEff = nameDen + "_trig_Eff";
         L1CaloResetEfficiencies(f, effDir, nameDen, nameEff, items, threshold[i], binSkip);
       }
       items = 8;
@@ -107,11 +107,11 @@ namespace dqutils {
       int itemsF = 4;
       int binSkipF = 0;
       for (int i = 3; i < 6; ++i) {
-        TString effDir = runDirName + "/L1Calo/Reco/JetEfficiencies/JetEmScale_"
+        std::string effDir = runDirName + "/L1Calo/Reco/JetEfficiencies/JetEmScale_"
                          + energies[i] + "GeV_EtaVsPhi";
-        TString nameDen = "JetEmScale_" + energies[i] + "GeV_Eta_vs_Phi";
-        TString nameEff = nameDen + "_J_Eff_item";
-        TString nameEffF = nameDen + "_FJ_J_Eff_item";
+        std::string nameDen = "JetEmScale_" + energies[i] + "GeV_Eta_vs_Phi";
+        std::string nameEff = nameDen + "_J_Eff_item";
+        std::string nameEffF = nameDen + "_FJ_J_Eff_item";
         L1CaloResetEfficiencies(f, effDir, nameDen, nameEff, items, threshold[i], binSkip);
         L1CaloResetEfficiencies(f, effDir, nameDen, nameEffF, itemsF, threshold[i], binSkipF);
       }
@@ -119,16 +119,16 @@ namespace dqutils {
 
     f->Close();
     delete f;
-    if (debug) std::cout << "--> L1CaloPostProcess: finished L1Calo post-processing"
-                         << std::endl;
+    //if (debug) std::cout << "--> L1CaloPostProcess: finished L1Calo post-processing"
+    //                     << std::endl;
   }
 
   // Get RMS from stability profiles
 
-  void MonitoringFile::L1CaloStabilityRMS(TFile* f, const TString& nameDir,
-                                          const TString& nameTag) {
-    TString nameData("ppm_em_2d_profile_etaPhi_adc_" + nameTag);
-    TString nameError("ppm_em_2d_etaPhi_adc_" + nameTag + "RMS");
+  void MonitoringFile::L1CaloStabilityRMS(TFile* f, const std::string& nameDir,
+                                          const std::string& nameTag) {
+    std::string nameData("ppm_em_2d_profile_etaPhi_adc_" + nameTag);
+    std::string nameError("ppm_em_2d_etaPhi_adc_" + nameTag + "RMS");
 
     L1CaloFillWithError(f, nameDir, nameData, nameError);
     nameData = "ppm_had_2d_profile_etaPhi_adc_" + nameTag;
@@ -138,48 +138,48 @@ namespace dqutils {
 
   // Fill second histogram with error from first
 
-  void MonitoringFile::L1CaloFillWithError(TFile* f, const TString& nameDir,
-                                           const TString& nameData, const TString& nameError) {
-    const bool debug = L1CALOPOSTPROCESSDEBUG;
+  void MonitoringFile::L1CaloFillWithError(TFile* f, const std::string& nameDir,
+                                           const std::string& nameData, const std::string& nameError) {
+    //const bool debug = L1CALOPOSTPROCESSDEBUG;
 
     // Check directory
-    if (!(f->GetDirectory(nameDir))) {
-      if (debug) std::cout << "--> L1CaloPostProcess: directory "
-                           << nameDir << " not found." << std::endl;
+    if (!(f->GetDirectory(nameDir.c_str()))) {
+      //if (debug) std::cout << "--> L1CaloPostProcess: directory "
+      //                     << nameDir << " not found." << std::endl;
       return;
     }
-    if (f->cd(nameDir.Data()) == 0) {
-      if (debug) std::cout << "dir " << nameDir << " isn't there!" << std::endl;
+    if (f->cd(nameDir.c_str()) == 0) {
+      //if (debug) std::cout << "dir " << nameDir << " isn't there!" << std::endl;
       return;
     }
 
     // Data histogram
-    TString p1 = nameDir + "/" + nameData;
-    if (!CheckHistogram(f, p1.Data())) {
-      if (debug) std::cout << " histo " << p1.Data() << " is not in file "
-                           << f->GetName() << std::endl;
+    std::string p1 = nameDir + "/" + nameData;
+    if (!CheckHistogram(f, p1.c_str())) {
+      //if (debug) std::cout << " histo " << p1.Data() << " is not in file "
+      //                     << f->GetName() << std::endl;
       return;
     }
-    TH1* h1 = (TH1*) (f->Get(p1.Data()));
+    TH1* h1 = (TH1*) (f->Get(p1.c_str()));
 
     // Error histogram
-    TString p2 = nameDir + "/" + nameError;
-    if (!CheckHistogram(f, p2.Data())) {
-      if (debug) std::cout << " histo " << p2.Data() << " is not in file "
-                           << f->GetName() << std::endl;
+    std::string p2 = nameDir + "/" + nameError;
+    if (!CheckHistogram(f, p2.c_str())) {
+      //if (debug) std::cout << " histo " << p2.Data() << " is not in file "
+      //                     << f->GetName() << std::endl;
       return;
     }
-    TH1* h2 = (TH1*) (f->Get(p2.Data()));
+    TH1* h2 = (TH1*) (f->Get(p2.c_str()));
 
     // Consistency checks
     const int dim = h1->GetDimension();
     if (dim != h2->GetDimension()) {
-      if (debug) std::cout << "Histograms have different dimension" << std::endl;
+      //if (debug) std::cout << "Histograms have different dimension" << std::endl;
       return;
     }
     if (h1->GetNbinsX() != h2->GetNbinsX() ||
         ((dim == 2) && (h1->GetNbinsY() != h2->GetNbinsY()))) {
-      if (debug) std::cout << "Histograms have different number of bins" << std::endl;
+      //if (debug) std::cout << "Histograms have different number of bins" << std::endl;
       return;
     }
 
@@ -199,33 +199,33 @@ namespace dqutils {
 
   // Reset efficiencies to 100% for bins with low stats
 
-  void MonitoringFile::L1CaloResetEfficiencies(TFile* f, const TString& effDir,
-                                               const TString& nameDen, const TString& nameEff,
+  void MonitoringFile::L1CaloResetEfficiencies(TFile* f, const std::string& effDir,
+                                               const std::string& nameDen, const std::string& nameEff,
                                                int items, double threshold, int binSkip) {
-    const bool debug = L1CALOPOSTPROCESSDEBUG;
+    //const bool debug = L1CALOPOSTPROCESSDEBUG;
 
     // Check directory
-    if (!(f->GetDirectory(effDir))) {
-      if (debug) std::cout << "--> L1CaloPostProcess: directory "
-                           << effDir << " not found." << std::endl;
+    if (!(f->GetDirectory(effDir.c_str()))) {
+      //if (debug) std::cout << "--> L1CaloPostProcess: directory "
+      //                     << effDir << " not found." << std::endl;
       return;
     }
-    if (f->cd(effDir.Data()) == 0) {
-      if (debug) std::cout << "dir " << effDir << " isn't there!" << std::endl;
+    if (f->cd(effDir.c_str()) == 0) {
+      //if (debug) std::cout << "dir " << effDir << " isn't there!" << std::endl;
       return;
     }
 
     // Denominator histogram
-    TString denPath = effDir + "/denominator/" + nameDen;
-    TH1* h1 = (TH1*) (f->Get(denPath.Data()));
+    std::string denPath = effDir + "/denominator/" + nameDen;
+    TH1* h1 = (TH1*) (f->Get(denPath.c_str()));
     if (!h1) {
-      if (debug) std::cout << " histo " << denPath << " is not in file "
-                           << f->GetName() << std::endl;
+      //if (debug) std::cout << " histo " << denPath << " is not in file "
+      //                     << f->GetName() << std::endl;
       return;
     }
     if (h1->GetDimension() != 2) {
-      if (debug) std::cout << " histo " << denPath << " has unexpected dimension"
-                           << std::endl;
+      //if (debug) std::cout << " histo " << denPath << " has unexpected dimension"
+      //                     << std::endl;
       return;
     }
 
@@ -233,31 +233,29 @@ namespace dqutils {
     int xbins = h1->GetNbinsX();
     int ybins = h1->GetNbinsY();
     std::vector<TH1*> effVec;
-    TString str;
-    TString effBase = effDir + "/" + nameEff;
+    std::string effBase = effDir + "/" + nameEff;
     for (int i = 0; i < items; ++i) {
-      str.Form("_%i", i);
-      TString effPath = effBase + str;
-      TH1* h2 = (TH1*) (f->Get(effPath.Data()));
+      std::string effPath = effBase + std::format("_{:d}", i);
+      TH1* h2 = (TH1*) (f->Get(effPath.c_str()));
       if (!h2) {
-        if (debug) std::cout << " histo " << effPath << " is not in file "
-                             << f->GetName() << std::endl;
+        //if (debug) std::cout << " histo " << effPath << " is not in file "
+        //                     << f->GetName() << std::endl;
         continue;
       }
       if (h2->GetDimension() != 2) {
-        if (debug) std::cout << " histo " << effPath << " has unexpected dimension"
-                             << std::endl;
+        //if (debug) std::cout << " histo " << effPath << " has unexpected dimension"
+        //                     << std::endl;
         continue;
       }
       if (xbins != h2->GetNbinsX() || ybins != h2->GetNbinsY()) {
-        if (debug) std::cout << " histos " << denPath << " and " << effPath
-                             << " have different number of bins" << std::endl;
+        //if (debug) std::cout << " histos " << denPath << " and " << effPath
+        //                     << " have different number of bins" << std::endl;
         continue;
       }
       effVec.push_back(h2);
     }
     if (effVec.empty()) {
-      if (debug) std::cout << "No valid histograms in " << effDir << std::endl;
+      //if (debug) std::cout << "No valid histograms in " << effDir << std::endl;
       return;
     }
     std::vector<TH1*>::iterator iter;

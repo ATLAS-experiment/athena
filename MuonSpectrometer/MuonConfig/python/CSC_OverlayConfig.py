@@ -1,7 +1,7 @@
 
 """Define methods to construct configured CSC overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -18,12 +18,8 @@ def CSC_OverlayAlgCfg(flags, name="CscOverlay", **kwargs):
 
     kwargs.setdefault("isDataOverlay", not flags.Input.isMC)
 
-    if flags.Overlay.ByteStream:
-        from MuonConfig.MuonBytestreamDecodeConfig import CscBytestreamDecodeCfg
-        acc.merge(CscBytestreamDecodeCfg(flags))
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'CscRawDataContainer#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'CscRawDataContainer#{kwargs["BkgInputKey"]}']))
 
     from MuonConfig.MuonCalibrationConfig import CscCalibToolCfg
     kwargs.setdefault("CalibTool", acc.popToolsAndMerge(CscCalibToolCfg(flags)))

@@ -18,12 +18,12 @@ def L2OverlapRemoverMonConfig(helper):
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
-    monAlg.MonitoredChains = [c for c in Chains if '2mu14' in c]
+    monAlg.MonitoredChains = [c for c in Chains if ('2mu14' in c) or ('2mu4' in c) or ('3mu' in c)]
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(monAlg.MonitoredChains) == 0:
         # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
-        monAlg.MonitoredChains = ['HLT_2mu14_L12MU8F']
+        monAlg.MonitoredChains = ['HLT_2mu14_L12MU8F','HLT_2mu4_L12MU3V']
 
     monAlg.Group = GroupName
 

@@ -102,6 +102,13 @@ namespace FlavorTagDiscriminants {
       {Truth::Type::NonMuonlike, 8}, //Non-muons like muons
       // There are also cases where the muon has the truth particle associated to the ID track that is not a muon. Those muons are labelled as 9 (NotInnerDetector muons)
     };
+
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    Gaudi::Property<bool> m_use_barcode {
+      this, "useBarcode", false, "use barcode rather than UID"
+    };
+    SG::ConstAccessor<int> m_uid{"uid"};
+
   };
 }
 

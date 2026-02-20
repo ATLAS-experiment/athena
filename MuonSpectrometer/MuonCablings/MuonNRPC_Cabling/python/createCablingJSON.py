@@ -20,6 +20,7 @@ idTranslateDict = []
 
 ### Now write the flat cabling
 flatCableBIS78 = [0, 4, 8, 12, 16, 20, 24, 28, 1, 5, 9, 13, 17, 21, 25, 29, 2, 6, 10, 14, 18, 22, 26, 30, 3, 7, 11, 15, 19, 23, 27, 31] 
+flatCableBIS78inv = [31, 27, 23, 19, 15, 11, 7, 3, 30, 26, 22, 18, 14, 10, 6, 2, 29, 25, 21, 17, 13, 9, 5, 1, 28, 24, 20, 16, 12, 8, 4, 0] # Inverted strip numbering
 readoutDict =[
 {
     "flatCableId" : 0,
@@ -33,13 +34,17 @@ readoutDict =[
     "flatCableId" : 1,
     "pinAssignment" : [(s,t) for s,t in enumerate([4,12,20,28,5,13,  21,  29,   6,  14,  22,  30,   7,  15,  23,  31],1)]
 },
+{
+    "flatCableId" : 3,
+    "pinAssignment" :  [(p+1,t) for t, p  in enumerate(flatCableBIS78inv)]
+},
 
 
 
 ]
 
 
-for sector in range(1, 9):
+for sector in range(1, 9):  # Sectors from 1 to 8
     for doubZ in [1, 2]:
         for measPhi in [0,1]:
             for gasGap in [0, 1, 2]:
@@ -55,7 +60,7 @@ for sector in range(1, 9):
                     "gasGap": gasGap + 1,
                     ### Online part
                     "subDetector": sub_detector,
-                    "boardSector" : sector*2+16, # sector A2 -> 0x0012, sector A4 -> 0x0014, ..., sector A12 -> 0x001c, ...,           
+                    "boardSector" : sector+16, # sectors from 0x0011 (17) to 0x0018 (24)
                     "flatCableId" : 0,
                 }
                 ### TDC 
@@ -81,38 +86,42 @@ for sector in range(1, 9):
 
                 if measPhi == 1:   # Phi
                     if doubZ == 1: ## BIS7
-                        cabling_data["firstStrip"] = 1
+                        cabling_data["firstStrip"] = 33
                         """
-                        cabling_data["lastStrip"] = 32  # Total 64 phi strips for BIS7 -> First half
-                        cabling_data["firstTdcChan"] = 1
-                        cabling_data["lastTdcChan"] = 32  # Standard: 32 channels per TDC
+                        cabling_data["lastStrip"] = 64  # Total 64 phi strips for BIS7 -> First half
+                        cabling_data["firstTdcChan"] = 0
+                        cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
                         cabling_data["board"] = gasGap + 3
+                        cabling_data["flatCableId"] = 3
                     elif doubZ == 2: ## BIS8
-                        cabling_data["firstStrip"] = 1
+                        cabling_data["firstStrip"] = 33
                         """
-                        cabling_data["lastStrip"] = 32  # Total 64 phi strips for BIS7 -> First half
+                        cabling_data["lastStrip"] = 64  # Total 64 phi strips for BIS7 -> First half
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
                         cabling_data["board"] = gasGap + 12
+                        cabling_data["flatCableId"] = 3
                     idTranslateDict.append(deepcopy(cabling_data))
                     if doubZ == 1: ## BIS7
-                        cabling_data["firstStrip"] = 33
+                        cabling_data["firstStrip"] = 1
                         """
-                        cabling_data["lastStrip"] = 64  # Total 64 phi strips for BIS7 -> Second half
+                        cabling_data["lastStrip"] = 32  # Total 64 phi strips for BIS7 -> Second half
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
                         cabling_data["board"] = gasGap + 6
+                        cabling_data["flatCableId"] = 3
                     elif doubZ == 2: ## BIS8
-                        cabling_data["firstStrip"] = 33
+                        cabling_data["firstStrip"] = 1
                         """
-                        cabling_data["lastStrip"] = 64  # Total 64 phi strips for BIS7 -> Second half
+                        cabling_data["lastStrip"] = 32  # Total 64 phi strips for BIS7 -> Second half
                         cabling_data["firstTdcChan"] = 0
                         cabling_data["lastTdcChan"] = 31  # Standard: 32 channels per TDC
                         """
                         cabling_data["board"] = gasGap + 15
+                        cabling_data["flatCableId"] = 3
 
                     idTranslateDict.append(deepcopy(cabling_data))
 
@@ -121,15 +130,16 @@ for sector in range(1, 9):
 # MN: For the moment using a different TDC number (WRONG!) to test the code
                 if measPhi == 0:   # Eta
                     if doubZ == 1: ## BIS7
-                        cabling_data["firstStrip"] = 33
-                        """
-                        cabling_data["lastStrip"] = 40  # Special case: BIS7 with 40 eta strips -> Adding the 8 leftover strips
-                        cabling_data["firstTdcChan"] = 0
-                        cabling_data["lastTdcChan"] = 7  # First 8 channels of the TDC used for BIS8 eta strips
-                        """
-                        cabling_data["board"] = gasGap + 9
-                        cabling_data["flatCableId"] = 2
-                        idTranslateDict.append(deepcopy(cabling_data))
+                        if sector == 1 or sector == 2 or sector == 3:
+                            cabling_data["firstStrip"] = 33
+                            """
+                            cabling_data["lastStrip"] = 40  # Special case: BIS7 with 40 eta strips -> Adding the 8 leftover strips
+                            cabling_data["firstTdcChan"] = 0
+                            cabling_data["lastTdcChan"] = 7  # First 8 channels of the TDC used for BIS8 eta strips
+                            """
+                            cabling_data["board"] = gasGap + 9
+                            cabling_data["flatCableId"] = 2
+                            idTranslateDict.append(deepcopy(cabling_data))
 
 
 print (len(idTranslateDict))

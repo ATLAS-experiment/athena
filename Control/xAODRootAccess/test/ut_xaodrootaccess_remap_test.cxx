@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -38,8 +38,7 @@ int main() {
    xAOD::TEvent event;
 
    // Declare some name remappings:
-   ANA_CHECK( event.addNameRemap( "Muons",
-                                               "MyMuons" ) );
+   ANA_CHECK( event.addNameRemap( "Muons", "MyMuons" ) );
    ANA_CHECK( event.addNameRemap( "Taus", "MyTaus" ) );
 
    // Print the definitions:
@@ -83,9 +82,9 @@ int main() {
    ANA_CHECK( event.copy( "MyMuons" ) );
 
    // Write the event:
-   if( event.fill() < 0 ) {
+   if( event.fill() <= 0 ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "There was an error writing the event "
-                                       "to the in-memory file") );
+                                       "to the test output file") );
       return 1;
    }
 

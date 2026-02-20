@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Ntup.cxx 
@@ -12,16 +12,8 @@
 // AthExHistNtup includes
 #include "Ntup.h"
 
-// STL includes
-
-// FrameWork includes
-#include "Gaudi/Property.h"
-
 // ROOT includes
 #include "TTree.h"
-
-// event includes
-#include "xAODEventInfo/EventInfo.h"
 
 using namespace AthEx;
 
@@ -34,21 +26,11 @@ using namespace AthEx;
 Ntup::Ntup( const std::string& name, 
             ISvcLocator* pSvcLocator ) : 
   ::AthAlgorithm( name, pSvcLocator ),
-  m_ntsvc("THistSvc/THistSvc", name),
   m_size(0), 
   m_run(0),
   m_event(0),
   m_ntuple(0)
-{
-  //
-  // Property declaration
-  // 
-
-  declareProperty( "EvtInfo", 
-                   m_evtInfoName = "",
-                   "key to the event-info instance to ntuple-ize.");
-
-}
+{ }
 
 // Destructor
 ///////////////
@@ -60,14 +42,12 @@ Ntup::~Ntup()
 StatusCode Ntup::initialize()
 {
   ATH_MSG_INFO ("Initializing " << name() << "...");
-  if (!m_ntsvc.retrieve().isSuccess()) {
-    ATH_MSG_ERROR("could not retrieve handle to ntuple svc");
-    return StatusCode::FAILURE;
-  }
-
+  ATH_CHECK( m_ntSvc.retrieve() );
+  ATH_CHECK( m_evt.initialize() );
+   
   // register our n-tuple with the svc
   m_ntuple = new TTree("tree1", "tree title");
-  if (!m_ntsvc->regTree("/rec/trees/tree1", m_ntuple).isSuccess()) {
+  if (!m_ntSvc->regTree("/rec/trees/tree1", m_ntuple).isSuccess()) {
     ATH_MSG_ERROR("could not register tree [tree1]");
     delete m_ntuple; m_ntuple = 0;
     return StatusCode::FAILURE;
@@ -98,11 +78,10 @@ StatusCode Ntup::execute()
   m_event = 0;
   m_run = 0;
 
-  // get event data...
-  const xAOD::EventInfo* evt = 0;
-  if (!evtStore()->retrieve(evt, m_evtInfoName).isSuccess() ||
-      0==evt) {
-    ATH_MSG_ERROR("could not get event-info at [" << m_evtInfoName << "]");
+    // get event data...
+  SG::ReadHandle<xAOD::EventInfo> evt( m_evt );
+  if (!evt.isValid()) {
+    ATH_MSG_ERROR ("Could not retrieve EventInfo obj");
     return StatusCode::FAILURE;
   }
 

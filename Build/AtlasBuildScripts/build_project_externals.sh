@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Script that is used by the build_externals.sh scripts of the individual
 # projects.
@@ -107,7 +107,7 @@ ATLAS_BUILD_DIR=$(cd "${ATLAS_BUILD_DIR}" && pwd)
 echo "Building ${ATLAS_EXT_PROJECT_NAME} in: ${ATLAS_BUILD_DIR}"
 
 # Figure out the version of the main project.
-ATLAS_PROJECT_VERSION=$(cat ${ATLAS_PROJECT_DIR}/version.txt)
+ATLAS_PROJECT_VERSION=$(cat ${ATLAS_PROJECT_DIR}/version.txt | tr -d '\n\r')
 # Figure out what tag/branch to use for the "externals project".
 ATLAS_EXT_PROJECT_TAG=$(grep "${ATLAS_EXT_PROJECT_NAME}"                       \
                         ${ATLAS_PROJECT_DIR}/externals.txt                     |

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonitorROS.h"
@@ -29,7 +29,7 @@ StatusCode MonitorROS::newEvent(const CostData& data, const float weight) {
       }
       std::string rosForROB = data.costROSData().getROSForROB(robId);
       if (!rosForROB.empty()){
-        rosPerRequest.insert(rosForROB);
+        rosPerRequest.insert(std::move(rosForROB));
       }
     }
 

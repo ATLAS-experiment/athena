@@ -116,7 +116,7 @@ namespace pool
       IInterface* iface = Gaudi::createApplicationMgr();
       if( !iface ) {
          DbPrint log("APR.initGaudi");
-         log << DbPrintLvl::Warning << "Gaudi framework failed to initialize" << endmsg;
+         log << MSG::WARNING << "Gaudi framework failed to initialize" << endmsg;
          return false;
       }
       SmartIF<IAppMgrUI> appMgr(iface);

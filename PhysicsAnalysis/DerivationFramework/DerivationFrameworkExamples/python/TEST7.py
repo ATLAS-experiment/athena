@@ -7,14 +7,11 @@ from AthenaCommon.CFElements import seqAND
 
 def TEST7SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST7StringSkimmingTool",
-                                                                             expression = "( count(Muons.pt > (6 * GeV)) + count(Electrons.pt > (6 * GeV)) ) >= 3",
-                                                                             TrigDecisionTool=tdt),
-                      primary = True)
-    return(acc)                          
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "TEST7StringSkimmingTool",
+        expression = "( count(Muons.pt > (6 * GeV)) + count(Electrons.pt > (6 * GeV)) ) >= 3")
 
 def TEST7KernelCfg(flags, name='TEST7Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
@@ -52,15 +49,13 @@ def TEST7Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track", 
+
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
                                             "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     TEST7ItemList = TEST7SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "D2AOD_TEST7", ItemList=TEST7ItemList, AcceptAlgs=["TEST7Kernel"]))

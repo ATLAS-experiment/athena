@@ -11,7 +11,7 @@
 #ifndef ITkPixChargeCalibAlg_h
 #define ITkPixChargeCalibAlg_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -22,13 +22,12 @@
 
 class PixelID;
 
-class ITkPixChargeCalibAlg : public AthReentrantAlgorithm {
+class ITkPixChargeCalibAlg : public AthCondAlgorithm {
   public:
     ITkPixChargeCalibAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     const PixelID* m_pixelID{nullptr};

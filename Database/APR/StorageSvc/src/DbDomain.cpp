@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -28,7 +28,7 @@ DbDomain::DbDomain(DbDomainObj* dom)   {
   if ( dom ) setType(dom->type());
 }
 
-DbStatus DbDomain::open(DbSession& sesH,const DbType& typ,DbAccessMode mod)  {
+StatusCode DbDomain::open(DbSession& sesH,const DbType& typ,DbAccessMode mod)  {
   if ( !isValid() )   {
     if ( sesH.isValid() )    {
       DbType db_typ(typ.majorType());
@@ -39,18 +39,19 @@ DbStatus DbDomain::open(DbSession& sesH,const DbType& typ,DbAccessMode mod)  {
       switchPtr(dom);
       return dom->open(mod);
     }
-    close();
-    return Error;
+    close().ignore();
+    return StatusCode::FAILURE;
   }
-  return Success;
+  return StatusCode::SUCCESS;
 }
 
-DbStatus DbDomain::close() {
+StatusCode DbDomain::close() {
+  StatusCode rc = StatusCode::SUCCESS;
   if ( isValid() )    {
-    ptr()->close();
+    rc = ptr()->close();
     switchPtr(0);
   }
-  return Success;
+  return rc;
 }
 
 /// Assign transient object properly (including reference counting)
@@ -72,8 +73,8 @@ void DbDomain::switchPtr(DbDomainObj* obj) {
 }
 
 /// Add domain to session
-DbStatus DbDomain::add(const string& nam, DbDatabaseObj* dbH) {
-  DbStatus sc = Error;
+StatusCode DbDomain::add(const string& nam, DbDatabaseObj* dbH) {
+  StatusCode sc = StatusCode::FAILURE;
   if ( isValid() && dbH )    {
     sc = ptr()->add(nam, dbH);
     if ( sc.isSuccess() )  {
@@ -84,8 +85,8 @@ DbStatus DbDomain::add(const string& nam, DbDatabaseObj* dbH) {
 }
 
 /// Find domain in session
-DbStatus DbDomain::remove(DbDatabaseObj* dbH) {
-  DbStatus sc = Error;
+StatusCode DbDomain::remove(DbDatabaseObj* dbH) {
+  StatusCode sc = StatusCode::FAILURE;
   if ( isValid() && dbH )    {
     sc = ptr()->remove(dbH);
     if ( isValid() && sc.isSuccess() )  {
@@ -143,12 +144,12 @@ const IOODatabase* DbDomain::db()  const
 {  return isValid() ? ptr()->db() : 0;                                  }
 
 /// Increase the age of all open databases
-DbStatus DbDomain::ageOpenDbs()
-{  return isValid() ? ptr()->ageOpenDbs() : Error;                      }
+StatusCode DbDomain::ageOpenDbs()
+{  return isValid() ? ptr()->ageOpenDbs() : StatusCode::FAILURE;                    }
 
 /// Check if databases are present, which aged a lot and need to be closed
-DbStatus DbDomain::closeAgedDbs()
-{  return isValid() ? ptr()->closeAgedDbs() : Error;                    }
+StatusCode DbDomain::closeAgedDbs()
+{  return isValid() ? ptr()->closeAgedDbs() : StatusCode::FAILURE;                  }
 
 /// Set the maximal allowed age limit for files in this domain
 void DbDomain::setAgeLimit(int value)
@@ -159,9 +160,9 @@ int DbDomain::ageLimit()  const
 {  return isValid() ? ptr()->ageLimit() : -1;                           }
 
 /// Set domain specific options
-DbStatus DbDomain::setOption(const DbOption& refOpt)
-{  return isValid() ? ptr()->setOption(refOpt) : Error;                 }
+StatusCode DbDomain::setOption(const DbOption& refOpt)
+{  return isValid() ? ptr()->setOption(refOpt) : StatusCode::FAILURE;               }
 
 /// Access domain specific options
-DbStatus DbDomain::getOption(DbOption& refOpt) const
-{  return isValid() ? ptr()->getOption(refOpt) : Error;                 }
+StatusCode DbDomain::getOption(DbOption& refOpt) const
+{  return isValid() ? ptr()->getOption(refOpt) : StatusCode::FAILURE;               }

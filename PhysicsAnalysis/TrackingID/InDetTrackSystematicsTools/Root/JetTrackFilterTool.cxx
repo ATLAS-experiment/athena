@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
@@ -31,6 +31,8 @@ namespace InDet {
     declareInterface<IJetTrackFilterTool>(this);
 #endif
   }
+
+  JetTrackFilterTool::~JetTrackFilterTool() = default;
 
   StatusCode JetTrackFilterTool::initialize()
   {

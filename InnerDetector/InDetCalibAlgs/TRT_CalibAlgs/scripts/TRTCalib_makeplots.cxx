@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -6883,7 +6883,13 @@ int main (int argc, char *argv[])
     if ((string(argv[1])).find("itersum") != std::string::npos)
     {
         cout << "GENERATING ITERATION SUMMARY PLOTS" << endl;
-        itersum(argc, argv);
+        try {
+          itersum(argc, argv);
+        }
+        catch (const std::string& e) {
+          std::cout << "Error: " << e << "\n";
+          return 1;
+        }
     }
 
     if ((string(argv[1])).find("restore") != std::string::npos)

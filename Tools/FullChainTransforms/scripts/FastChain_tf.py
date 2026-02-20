@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #  FastChain_tf.py
 #  One step transform to run SIM+DIGI as one job, then reco
@@ -46,7 +46,7 @@ def getTransform():
     executorSet.add(athenaExecutor(name = 'EVNTtoRDO',
                                    skeletonCA = 'FullChainTransforms.FastChainSkeleton',
                                    substep = 'simdigi', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
-                                   inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
+                                   inData=['NULL', 'EVNT', 'RDO_BKG'],
                                    outData=['RDO', 'HITS', 'NULL'] ))
 
     # Derivation

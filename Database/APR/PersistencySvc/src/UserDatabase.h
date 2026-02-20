@@ -9,6 +9,7 @@
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/DatabaseSpecification.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "POOLCore/DbPrint.h"
 
 namespace pool {
   // forward declarations
@@ -29,7 +30,8 @@ namespace pool {
      *
      */
     class UserDatabase : virtual public IDatabase,
-                         virtual public ITechnologySpecificAttributes
+                         virtual public ITechnologySpecificAttributes,
+                         public APRMessaging
     {
     public:
       /// Constructor
@@ -49,11 +51,9 @@ namespace pool {
 
       /// Connects explicitly to the database for read operations
       virtual void connectForRead() override;
-      virtual void connectForRead( const DatabaseConnectionPolicy& policy ) override;
 
       /// Connects explicitly to the database for write/update operations
       virtual void connectForWrite() override;
-      virtual void connectForWrite( const DatabaseConnectionPolicy& policy ) override;
 
       /// Disconnects from the database
       virtual void disconnect() override;

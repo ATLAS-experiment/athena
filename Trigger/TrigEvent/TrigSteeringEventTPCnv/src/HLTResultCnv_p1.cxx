@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/HLTResult.h"
@@ -28,7 +28,7 @@ void HLTResultCnv_p1::transToPers(const HLT::HLTResult* trans,
     if (cache->trigNavigationThinningSvc()->doSlimming (ctx, temp).isFailure()) {
       log << MSG::ERROR << "HLTResultCnv_p1::transToPers: doSlimming failed." << endmsg;
     }
-    pers->m_navigationResult = temp;
+    pers->m_navigationResult = std::move(temp);
   }
   else {
     pers->m_navigationResult     = trans->m_navigationResult;

@@ -1,4 +1,8 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "CombinationsIterator.h"
+#include <iostream>
 
 std::ostream& operator << (std::ostream& os, const CombinationsIterator& iter) {
   os << std::boolalpha
@@ -14,7 +18,7 @@ std::ostream& operator << (std::ostream& os, const CombinationsIterator& iter) {
   for(const auto& hj : iter.m_vals) {
     os  << static_cast<const void*>(hj.get()) << '\n';
   }
- 
+  os<<std::noboolalpha; //restore stream state
   return os;
 }
 

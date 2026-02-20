@@ -12,6 +12,11 @@ def DataOverlayConditionsBaseCfg(flags):
     # Used from MC for simplicity
     acc.merge(addOverride(flags, "/LAR/LArCellPositionShift", tag="LArCellPositionShift-IOVDEP-00", db="COOLOFL_LAR/OFLP200"))
 
+    # Use MC alignment for InDet if dynamic alignment is off
+    if not flags.GeoModel.Align.Dynamic:
+        acc.merge(addOverride(flags, "/Indet/Align", tag="InDetAlign_MC15c", db="COOLOFL_INDET/OFLP200"))
+        acc.merge(addOverride(flags, "/TRT/Align", tag="TRTAlign_Nominal2", db="COOLOFL_TRT/OFLP200"))
+
     # Some conditions are split by fast chain (sim+digi+overlay) and reco steps
     if flags.Common.ProductionStep is not ProductionStep.Reconstruction:
         # SCT

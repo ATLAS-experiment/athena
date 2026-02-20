@@ -78,11 +78,19 @@ void CaloRecGPU::CUDA_Helpers::optimize_block_and_grid_size(void * func, int & b
   CUDA_ERRCHECK(cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, func, dynamic_memory, block_size_limit));
 }
 
-void CaloRecGPU::CUDA_Helpers::optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory, const int block_size_limit)
+void CaloRecGPU::CUDA_Helpers::optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory, const int block_size_limit, const bool multiple_blocks_per_SM)
 {
   CUDA_ERRCHECK(cudaOccupancyMaxPotentialBlockSize(&grid_size, &block_size, func, dynamic_memory, block_size_limit));
-  CUDA_ERRCHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&grid_size, func, block_size, dynamic_memory));
-
+  
+  if (multiple_blocks_per_SM)
+    {
+      CUDA_ERRCHECK(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&grid_size, func, block_size, dynamic_memory));
+    }
+  else
+    {
+      grid_size = 1;
+    }
+  
   int multi_processor_count = 1;
 
   CUDA_ERRCHECK(cudaDeviceGetAttribute(&multi_processor_count, cudaDevAttrMultiProcessorCount, 0));

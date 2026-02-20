@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 #include <unordered_map>
 
@@ -97,7 +97,7 @@ namespace ActsTrk{
             Key_t m_writeKey1D;
             Key_t m_writeKey2D;
             Key_t m_writeKey3D;
-            ActsGeometryContext m_gctx{};
+            GeometryContext m_gctx{};
     };
 }
 #include "ActsEvent/AuxiliaryMeasurementHandler.icc"

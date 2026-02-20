@@ -13,10 +13,8 @@
 
 // ACTS EDM
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/EventData/SeedContainer2.hpp"
 #include "Acts/EventData/SpacePointContainer.hpp"
 #include "Acts/EventData/SpacePointContainer2.hpp"
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/SpacePointCollector.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -68,6 +68,8 @@ namespace Simulation
     }
 
     // loop over the event in the mc collection
+    //loop only executes once, there is no iterator increment
+    //coverity[unreachable]
     for (const auto currentGenEvent : *h_inputMcEventCollection) {
       // skip empty events
       if ( !currentGenEvent ) {

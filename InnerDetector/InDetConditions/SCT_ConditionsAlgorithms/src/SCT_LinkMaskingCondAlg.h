@@ -7,14 +7,14 @@
 #ifndef SCT_LINKMASKINGCONDALG
 #define SCT_LINKMASKINGCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "SCT_ConditionsData/SCT_ModuleVetoCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class SCT_LinkMaskingCondAlg : public AthReentrantAlgorithm
+class SCT_LinkMaskingCondAlg : public AthCondAlgorithm
 {  
  public:
   SCT_LinkMaskingCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -22,7 +22,6 @@ class SCT_LinkMaskingCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/purple/pants", "Key of input (raw) bad wafer conditions folder"};

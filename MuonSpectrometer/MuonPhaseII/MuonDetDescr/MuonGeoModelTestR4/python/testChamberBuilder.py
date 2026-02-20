@@ -5,6 +5,7 @@ def MuonChamberToolTestCfg(flags, name="MuonChamberToolTest", **kwargs):
     result = ComponentAccumulator()
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     kwargs.setdefault("TrackingGeometrySvc", result.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags)))
+    kwargs.setdefault("dumpVolumes", flags.Acts.TrackingGeometry.ObjDebugOutput)
     the_alg = CompFactory.MuonGMR4.MuonChamberToolTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)    
     return result
@@ -19,6 +20,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Acts.TrackingGeometry.UseBlueprint=True
+    flags.Acts.TrackingGeometry.ObjDebugOutput = False
     flags, cfg = setupGeoR4TestCfg(args,flags)    
     ###
     cfg.merge(MuonChamberToolTestCfg(flags))

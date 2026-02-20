@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #####################################################################
 # JobOptions for CreateMisalignAlg which creates a misaligned copy
 # of the geometry database to introduce misalignments at reconstruction level
@@ -49,16 +49,6 @@ def getFlags(**kwargs):
         MisalignMode = 11 # Radial
     else:
         MisalignMode=int(kwargs.get('MisalignMode',11))
-    if MisalignMode == 2:
-        translation_scale_str = kwargs.pop('Translation_Scale', '0.1,0.1,0.1')
-        rotation_scale_str = kwargs.pop('Rotation_Scale', '0.1,0.1,0.1')
-        Translation_Scale = [float(x) for x in translation_scale_str.split(',')]
-        Rotation_Scale = [float(x) for x in rotation_scale_str.split(',')]
-    if MisalignMode == 7:
-        local_translation_str = kwargs.pop('Local_Translation', '0.0,0.0,0.0')
-        local_rotation_str = kwargs.pop('Local_Rotation', '0.0,0.0,0.0')
-        Local_Translation = [float(x) for x in local_translation_str.split(',')]
-        Local_Rotation = [float(x) for x in local_rotation_str.split(',')] 
     databaseFilename     = 'MisalignmentSet%s.db' % (MisalignMode)
     flags.IOVDb.DBConnection="sqlite://;schema=%s;dbname=OFLCOND" % (databaseFilename) 
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC

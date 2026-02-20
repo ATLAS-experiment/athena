@@ -100,12 +100,6 @@ if opts.showincludes:
    AthCIncMod.marker = AthCIncMod.__marker__      # reset
 del AthCIncMod
 
-if opts.do_leak_chk:
-   from Hephaestus.Auditor import HephaestusAuditor
-   theApp.AuditAlgorithms = True
-   svcMgr.AuditorSvc += HephaestusAuditor(
-      mode = opts.memchk_mode, auditOn = opts.do_leak_chk )
-
 ## basic job configuration for Hive and AthenaMP
 
 from AthenaCommon.ConcurrencyFlags import jobproperties as jps

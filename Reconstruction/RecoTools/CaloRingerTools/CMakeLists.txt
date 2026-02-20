@@ -13,5 +13,4 @@ atlas_add_library( CaloRingerToolsLib
 atlas_add_component( CaloRingerTools
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloGeoHelpers CaloRingerToolsLib CaloUtilsLib GaudiKernel PATCoreLib StoreGateLib xAODBase xAODCaloEvent xAODCaloRings xAODEgamma )
-
+                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloGeoHelpers CaloRingerToolsLib CaloUtilsLib GaudiKernel PATCoreLib StoreGateLib xAODBase xAODCaloEvent xAODCaloRings xAODEgamma xAODJet )

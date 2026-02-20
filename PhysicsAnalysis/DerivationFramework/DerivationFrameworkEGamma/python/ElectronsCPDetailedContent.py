@@ -15,7 +15,7 @@ ExtraElectronTruthInfo = [
     ".".join(
         [
             "Electrons",
-            "lastEgMotherTruthType.lastEgMotherTruthOrigin",
+            "lastEgMotherTruthClassification.lastEgMotherTruthType.lastEgMotherTruthOrigin",
             "lastEgMotherTruthParticleLink.lastEgMotherPdgId",
         ]
     )

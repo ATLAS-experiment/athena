@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.25 )
@@ -31,6 +31,8 @@ endif()
 # Use C++20 with HIP.
 set( CMAKE_HIP_STANDARD 20 CACHE STRING "HIP C++ standard to use" )
 
+# Use C++20 with SYCL.
+set( CMAKE_SYCL_STANDARD 20 CACHE STRING "SYCL C++ standard to use" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
 if( NOT LCG_NIGHTLY )
@@ -49,9 +51,9 @@ if( LCG_NIGHTLY )
     set( TDAQ_VERSION "99-00-00" CACHE STRING
        "The version of tdaq to use for the build" )
 else()
-    set( TDAQ-COMMON_VERSION "12-02-00" CACHE STRING
+    set( TDAQ-COMMON_VERSION "12-03-00" CACHE STRING
        "The version of tdaq-common to use for the build" )
-    set( TDAQ_VERSION "12-02-00" CACHE STRING
+    set( TDAQ_VERSION "12-03-00" CACHE STRING
        "The version of tdaq to use for the build" )
 endif()
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,10 +12,11 @@
 #include "TrigValTools/TRootCompare.h"
 
 #include "TClass.h"
+#include "TFile.h"
+#include "TCanvas.h"
 #include "TKey.h"
 #include "TH1.h"
 #include "TEfficiency.h"
-#include "TCanvas.h"
 #include "TVirtualPad.h"
 #include "TPaveStats.h"
 #include "TError.h"
@@ -32,21 +33,7 @@
 
 using namespace std;
 
-TRootCompare::TRootCompare() :
-  m_refFile(0),
-  m_outFile(0),
-  m_refRootDir(""),
-  m_psFile(""),
-  m_can(0),
-  m_alg(BIN),
-  m_threshold(1e-6),
-  m_histMatch(0),
-  m_histTotal(0),
-  m_histMissing(0),
-  m_drawNormalized(kFALSE),
-  m_drawDiff(kTRUE)
-{
-}
+
 
 TRootCompare::~TRootCompare()
 {

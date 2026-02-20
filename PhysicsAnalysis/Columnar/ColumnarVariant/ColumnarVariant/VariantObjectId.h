@@ -104,14 +104,14 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept... CIList> class ObjectId<VariantContainerId<CIList...>,ColumnarModeArray> final
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  class ObjectId<VariantContainerId<CIList...>,CM> final
   {
     /// Common Public Members
     /// =====================
   public:
 
     using CI = VariantContainerId<CIList...>;
-    using CM = ColumnarModeArray;
     using xAODObject = typename CI::xAODObjectIdType;
 
     // Whatever you do: Do not remove this function. Yes, it will always
@@ -123,16 +123,15 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");
     }
 
-    ObjectId (const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& that) noexcept = default;
+    ObjectId (const ObjectId<VariantContainerId<CIList...>,CM>& that) noexcept = default;
 
     template<ContainerIdConcept CI2>
       requires (CI2::regularObjectId && CI::template isValidContainer<CI2>())
-    ObjectId (const ObjectId<CI2,ColumnarModeArray>& that) noexcept
-      : m_data (that.getData()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (that.getIndex())
+    ObjectId (const ObjectId<CI2,CM>& that) noexcept
+      : m_dataArea (that.getDataArea()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (that.getIndex())
     {}
 
-    ObjectId& operator = (const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& that) noexcept = default;
-
+    ObjectId& operator = (const ObjectId<VariantContainerId<CIList...>,CM>& that) noexcept = default;
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
     // only do something useful in the xAOD mode specialization. If you
@@ -145,13 +144,13 @@ namespace columnar
     [[nodiscard]] OptObjectId<CI2,CM> tryGetVariant () const
     {
       if (m_variantIndex == CI::template getVariantIndex<CI2>())
-        return OptObjectId<CI2,CM> (m_data, m_objectIndex);
+        return OptObjectId<CI2,CM> (m_dataArea, m_objectIndex);
       else
         return OptObjectId<CI2,CM> ();
     }
 
     template<typename Acc,typename... Args>
-      requires std::invocable<Acc,ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>,Args...>
+      requires std::invocable<Acc,ObjectId<VariantContainerId<CIList...>,CM>,Args...>
     [[nodiscard]] decltype(auto) operator() (Acc& acc, Args&&... args) const {
       return acc (*this, std::forward<Args> (args)...);}
 
@@ -161,8 +160,8 @@ namespace columnar
     /// ============================
   public:
 
-    explicit ObjectId (void **val_data, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
-      : m_data (val_data), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
+    explicit ObjectId (void **val_dataArea, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
+      : m_dataArea (val_dataArea), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
     {}
 
     [[nodiscard]] std::size_t getVariantIndex () const noexcept {
@@ -171,8 +170,8 @@ namespace columnar
     [[nodiscard]] std::size_t getObjectIndex () const noexcept {
       return m_objectIndex;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -180,26 +179,26 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_variantIndex = 0u;
     std::size_t m_objectIndex = 0u;
   };
 
-  template<ContainerIdConcept... CIList>
-  std::ostream& operator<< (std::ostream& str, const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& obj)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  std::ostream& operator<< (std::ostream& str, const ObjectId<VariantContainerId<CIList...>,CM>& obj)
   {
     using CI = VariantContainerId<CIList...>;
     return str << CI::idNameArray.at(obj.getVariantIndex()) << "/" << obj.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList>
-  bool operator== (const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& lhs, const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  bool operator== (const ObjectId<VariantContainerId<CIList...>,CM>& lhs, const ObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() == rhs.getVariantIndex() && lhs.getObjectIndex() == rhs.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList>
-  bool operator!= (const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& lhs, const ObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  bool operator!= (const ObjectId<VariantContainerId<CIList...>,CM>& lhs, const ObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() != rhs.getVariantIndex() || lhs.getObjectIndex() != rhs.getObjectIndex();
   }

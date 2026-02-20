@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Gaudi Includes
@@ -70,9 +70,10 @@ StatusCode TBDetDescrLoader::initialize()
     }
   } else {
 
-    DetDescrAddress * addr = new DetDescrAddress(
-      ClassID_traits<TBDetDescrManager>::ID(),
-      m_TBDetDescrManager, m_TBDetDescrManager);
+    CxxUtils::RefCountedPtr<DetDescrAddress> addr
+      (new DetDescrAddress(
+                           ClassID_traits<TBDetDescrManager>::ID(),
+                           m_TBDetDescrManager, m_TBDetDescrManager));
 
     sc = detStore()->recordAddress(addr);
     if (sc != StatusCode::SUCCESS) {

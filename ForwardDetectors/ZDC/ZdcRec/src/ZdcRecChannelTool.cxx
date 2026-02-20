@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -645,7 +645,7 @@ int ZdcRecChannelTool::getTimingSinc(const Identifier& id,  const std::vector<st
 	int mModule = 0;
 	int mType = 0;
 	int mChannel = 0;
-	int do_tcor = false;
+	const int do_tcor = false;
 
 
 	std::vector<float> vt(7);

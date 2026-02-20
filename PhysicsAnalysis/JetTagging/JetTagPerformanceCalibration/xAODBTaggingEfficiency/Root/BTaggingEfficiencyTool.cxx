@@ -539,6 +539,10 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       for (auto& systematic : systematics) {
         std::replace_if(systematic.begin(), systematic.end(), [] (char c) { return c == ' '; }, '_'); // <--- This just replaces spaces with underscores
         // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
+        // make sure they are prefixed
+        if (!systematic.starts_with("FT_EFF_")) {
+          systematic.insert(0, "FT_EFF_");
+        }
       }
       
       if (!addSystematics(systematics, flavourID, SFNamed)) { // Add the SFNamed to m_systematicsInfo

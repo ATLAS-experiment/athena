@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -776,7 +776,13 @@ int BooleanProcessor::testFaceVsPlane(ExtEdge & edge)
         iedge = m_edges[iedge].inext;
       }
       if (ii[i] == (int)m_nodes.size()) {
-        d3 = d2-d1; d1 = d1/d3; d2 = d2/d3;
+        d3 = d2-d1; 
+        if (d3 == 0){
+          std::cerr<<"d3 is zero in "<<__FILE__<<std::endl;
+          return DEFECTIVE_FACE;
+        }
+        d1 = d1/d3; 
+        d2 = d2/d3;
         m_nodes.push_back(ExtNode(d2*m_nodes[i1].v-d1*m_nodes[i2].v, iedge));
       }
     }
@@ -2002,6 +2008,7 @@ HepPolyhedron BooleanProcessor::createPolyhedron()
     polyhedron.m_pF[m_faces[i].inew] =
       G4Facet(v[0],f[0], v[1],f[1], v[2],f[2], v[3],f[3]);
   }
+  //coverity[copy_constructor_call]
   return polyhedron;
 }
 

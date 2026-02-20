@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATRACKSIMHOUGH1DSHIFTTOOL_H
 #define FPGATRACKSIMHOUGH1DSHIFTTOOL_H
@@ -56,7 +56,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <boost/dynamic_bitset_fwd.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 
 
@@ -93,7 +93,7 @@ class FPGATrackSimHough1DShiftTool : public extends <AthAlgTool, IFPGATrackSimRo
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadFinderToolI
 
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) override;
         virtual int getSubRegion() const override{return m_subRegion;}
     private:
 

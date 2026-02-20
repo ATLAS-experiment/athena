@@ -2,7 +2,7 @@
  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFTauFlowElementAssoc.h"
+#include "PFTauFlowElementAssoc.h"
 #include "xAODTau/TauTrack.h"
 #include "xAODPFlow/FlowElement.h"
 #include <map>

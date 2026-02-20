@@ -31,6 +31,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
 
   // Loop over all particles in the event and build up the grid
   for (const xAOD::TruthParticle* pitr : *xTruthParticleContainer) {
+       if (not pitr) continue;
        if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
          if (pitr->pt() >= m_minPt && std::abs(pitr->eta()) <= m_maxEta) {
            ATH_MSG_DEBUG("Found lepton" << pitr);
@@ -71,7 +72,7 @@ StatusCode xAODMultiElecMuTauFilter::filterEvent() {
                taunu = citr;
            }
          }
-         if (tau) {
+         if (tau and taunu) {
            // Good hadronic decay
            CLHEP::HepLorentzVector tauVisMom = CLHEP::HepLorentzVector(tau->px() - taunu->px(),
                                                          tau->py() - taunu->py(),

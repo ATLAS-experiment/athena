@@ -4,13 +4,14 @@
 
 #include "SCT_Cluster.h"
 
+#include <memory>
+
 class SCT_EndCapCluster : public SCT_Cluster
 {
   public:
-    SCT_EndCapCluster(const Surface*);
-    virtual ~SCT_EndCapCluster(void);
+    SCT_EndCapCluster(std::unique_ptr<const Surface>);
 
-    double m_R;
+    double m_R{};
 
   public:
     virtual void setParameters(float* par);

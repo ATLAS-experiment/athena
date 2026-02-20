@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -140,14 +140,16 @@ void smallUniqueCombination() {
 
 void endCombination() {
   CombinationGenerator g1({ 3, 2, 7, 8});
-  auto c1 = g1();
+  const auto & c1 = g1();
   VALUE( c1.size() ) EXPECTED( 4 );
   
   while ( g1 ) {
-    auto x = g1();
+  //assuming this do-nothing is intended
+  //coverity[AUTO_CAUSES_COPY]
+    auto  x = g1();
     ++g1;
   }
-  auto endCombination = g1();
+  const auto & endCombination = g1();
   VALUE( endCombination.size() ) EXPECTED( 0 ) ;  
 }
 

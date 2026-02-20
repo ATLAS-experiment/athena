@@ -9,7 +9,9 @@
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 
-class ActsGeometryContext;
+namespace ActsTrk {
+    class GeometryContext;
+}
 class Identifier;
 class IdentifierHash;
 namespace MuonGMR4{

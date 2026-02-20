@@ -2,20 +2,23 @@
 #ifndef __SI_CLUSTER_H__
 #define __SI_CLUSTER_H__
 
+#include "Surface.h"
+
+#include <memory>
+
 class TrkBaseNode;
-class Surface;
 
 class SiCluster
 {
   public:
-    SiCluster(const Surface*);
-    virtual ~SiCluster(void);
+    SiCluster(std::unique_ptr<const Surface>);
+    virtual ~SiCluster(void) = default;
 
     virtual void setParameters(float* par) = 0;
     virtual TrkBaseNode* createDkfNode(void) const = 0;
 
   protected:
-    const Surface* m_pSurface;
+    std::unique_ptr<const Surface> m_pSurface;
 };
 
 #endif

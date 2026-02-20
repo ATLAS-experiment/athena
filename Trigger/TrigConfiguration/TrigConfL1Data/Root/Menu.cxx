@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfL1Data/Menu.h"
@@ -44,7 +44,7 @@ TrigConf::Menu::bunchgroupMask() const {
    return bgmask;
 }
 
-#ifndef __COVERITY__
+
 void TrigConf::Menu::addTriggerItem(TriggerItem* ti) {
    // they all work:
    // pair<item_by_ctpid_iterator, bool> ins = item_by_ctpid().insert(ti);
@@ -55,7 +55,7 @@ void TrigConf::Menu::addTriggerItem(TriggerItem* ti) {
       throw runtime_error("Menu insertion of TriggerItem failed");
    }
 }
-#endif
+
 
 void TrigConf::Menu::addThresholdMonitor(ThresholdMonitor* thrm) {
    m_ThresholdMonitorVector.push_back(thrm);
@@ -155,7 +155,7 @@ TrigConf::Menu::compareTo(const Menu* o) const {
 
 
 
-#ifndef __COVERITY__
+
 void
 TrigConf::Menu::clear() {
    m_ThresholdConfig.clear();
@@ -169,7 +169,7 @@ TrigConf::Menu::clear() {
    for( PIT* pit : m_PITs) delete pit;
    m_PITs.clear();
 }
-#endif
+
 
 
 namespace {
@@ -206,7 +206,6 @@ namespace {
 
 
 
-#ifndef __COVERITY__
 void
 TrigConf::Menu::print(const std::string& indent, unsigned int detail) const {
    if(detail>=1) {
@@ -294,7 +293,6 @@ TrigConf::Menu::writeXMLItems(std::ostream & xmlfile, int indentLevel, int inden
       item->writeXML(xmlfile, indentLevel+1, indentWidth);
    indent(xmlfile, indentLevel, indentWidth) << "</TriggerMenu>" << endl;
 }
-#endif
 
 
 void

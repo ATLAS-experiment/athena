@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchLinkAlg.cxx
@@ -34,7 +34,6 @@ namespace ClusterMatching {
 
     ATH_CHECK( m_clusterKey.initialize() );
 
-    m_elementLinkName =  m_clusterKey.key() + ".constituentClusterLinks";
     ATH_CHECK( m_elementLinkName.initialize() );
 
     ATH_CHECK( m_clusterMatch.retrieve() );

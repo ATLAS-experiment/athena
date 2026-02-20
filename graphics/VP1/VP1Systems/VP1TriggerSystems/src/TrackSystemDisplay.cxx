@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -155,7 +155,7 @@ void TrackSystemDisplay::userChangedSelection(SoCooperativeSelection*, const QSe
   Amg::Vector3D total3mom(0.0,0.0,0.0);
   double totalenergy(0);
   
-  foreach (SoNode * node, nodes) {
+  for (SoNode * node : nodes) {
     //Track pointer:
     if (m_nodeToTrack.find(node)==m_nodeToTrack.end()) {
       message("ERROR :: Does not have track information for all nodes");
@@ -215,7 +215,7 @@ QWidget * TrackSystemDisplay::buildController()
 
 //Print track information to trackInfoDisplay
 //_____________________________________________________________________________________________
-void TrackSystemDisplay::printTrackInfo(QString title, QList<QString> paraname, QList<QString> paravalue)
+void TrackSystemDisplay::printTrackInfo(const QString& title, const QList<QString>& paraname, const QList<QString>& paravalue)
 {
   QString header = "<html><head><link rel='stylesheet' type='text/css' href='format.css'></head><body>", footer = "</body></html>";
   QString css = "#design { font-family: Courier New; font-size: 12px; margin: 0px; width: 100%; text-align: left; } #design th { font-size: 13px; font-weight: normal; padding: 2px; background: #ccc; border-top: 4px solid #000; border-bottom: 1px solid #fff; color: #000; } #design td { padding: 2px; background: #000; border-bottom: 1px solid #fff; color: #fff; border-top: 1px solid transparent; }";

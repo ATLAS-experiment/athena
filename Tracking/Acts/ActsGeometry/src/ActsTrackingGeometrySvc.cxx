@@ -48,10 +48,11 @@
 #include <Acts/Surfaces/LineSurface.hpp>
 #include <Acts/Surfaces/RectangleBounds.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
+#include <Acts/Geometry/detail/TrackingGeometryPrintVisitor.hpp>
 
 // PACKAGE
 #include "ActsGeometryInterfaces/IDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
 #include "ActsGeometry/ActsStrawLayerBuilder.h"
 #include "ActsGeometry/ActsHGTDLayerBuilder.h"
@@ -85,8 +86,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
     }
   }
   ATH_CHECK(m_caloVolumeBuilder.retrieve(EnableTool{!m_caloVolumeBuilder.empty()}));
-  ATH_CHECK(m_msVolumeBuilder.retrieve(EnableTool{!m_msVolumeBuilder.empty()}));
-
  
   // FIXME: ActsCaloTrackingVolumeBuilder holds ReadHandle to
   // CaloDetDescrManager. Hopefully this service is never called before that
@@ -157,9 +156,10 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
     ATH_MSG_INFO("Using Blueprint API for geometry construction");
     std::set<std::string> buildSubdet(m_buildSubdetectors.begin(),
-                                    m_buildSubdetectors.end());
+                                     m_buildSubdetectors.end());
 
     ATH_CHECK(m_blueprintNodeBuilders.retrieve());
+    ATH_CHECK(m_refineVisitors.retrieve());
 
     using enum Acts::AxisDirection;
   
@@ -187,27 +187,38 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
 
     root.addChild(std::move(currentTop));
     
-    m_trackingGeometry = blueprint->construct(
+    std::unique_ptr<Acts::TrackingGeometry> trackingGeometry = blueprint->construct(
       {}, getNominalContext().context(), *logger->clone(std::nullopt, Acts::Logging::DEBUG));
 
+    for (auto& refineVisitor : m_refineVisitors) {
+        trackingGeometry->apply(*refineVisitor);
+        ATH_CHECK(refineVisitor->finalize());
+    }
+    m_refineVisitors.clear();
+    
+    m_trackingGeometry = std::move(trackingGeometry);
+
     if (m_objDebugOutput) {
-    Acts::ObjVisualization3D vis;
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = false}, {.visible = true});
-    vis.write("blueprint_sensitive.obj");
-    vis.clear();
+      Acts::ObjVisualization3D vis;
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = false}, {.visible = true});
+      vis.write("blueprint_sensitive.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
-                                {.visible = false}, {.visible = false});
-    vis.write("blueprint_volume.obj");
-    vis.clear();
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = true},
+                                  {.visible = false}, {.visible = false});
+      vis.write("blueprint_volume.obj");
+      vis.clear();
 
-    m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
-                                {.visible = true}, {.visible = false});
-    vis.write("blueprint_portals.obj");
-
-
-  }
+      m_trackingGeometry->visualize(vis, getNominalContext().context(), {.visible = false},
+                                  {.visible = true}, {.visible = false});
+      vis.write("blueprint_portals.obj");
+    }
+    if (m_printGeo) {
+        Acts::detail::TrackingGeometryPrintVisitor printer{m_nominalContext.context()};
+        m_trackingGeometry->apply(printer);
+        ATH_MSG_INFO("Built tracking geometry \n"<<printer.stream().str());
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -480,12 +491,6 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
           });
     }
 
-    if (m_msVolumeBuilder.isEnabled()){
-      tgbConfig.trackingVolumeBuilders.push_back(
-          [&](const auto &gctx, const auto &inner, const auto &) {
-            return m_msVolumeBuilder->trackingVolume(gctx, inner, nullptr);
-          });
-    }
   } catch (const std::exception &e) {
     ATH_MSG_ERROR("Encountered error when building Acts tracking geometry");
     ATH_MSG_ERROR(e.what());
@@ -559,7 +564,7 @@ bool ActsTrackingGeometrySvc::runConsistencyChecks() const {
   m_trackingGeometry->visitSurfaces([&](const Acts::Surface *surface) {
       nTotalSensors++;
 
-      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->associatedDetectorElement());
+      const auto* actsDetElem = dynamic_cast<const ActsDetectorElement*>(surface->surfacePlacement());
       if(actsDetElem == nullptr) {
         ATH_MSG_ERROR("Invalid detector element found");
         result = false;
@@ -827,9 +832,9 @@ ActsLayerBuilder::Config ActsTrackingGeometrySvc::makeLayerBuilderConfig(
                     Acts::AxisDirection aDir, const Acts::Surface *aS,
                     const Acts::Surface *bS) -> bool {
     auto a = dynamic_cast<const ActsDetectorElement *>(
-        aS->associatedDetectorElement());
+        aS->surfacePlacement());
     auto b = dynamic_cast<const ActsDetectorElement *>(
-        bS->associatedDetectorElement());
+        bS->surfacePlacement());
     if ((not a) or (not b)) {
       throw std::runtime_error(
           "Cast of surface associated element to ActsDetectorElement failed "
@@ -1126,7 +1131,7 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populate the alignment store with all detector elements");
     unsigned int nElements = 0;
     m_trackingGeometry->visitSurfaces([&store, &nElements](const Acts::Surface *srf) {
-        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->associatedDetectorElement());
+        const auto *detElem = dynamic_cast<const IDetectorElement *>(srf->surfacePlacement());
         if (!detElem) {
             return;
         }
@@ -1135,7 +1140,7 @@ unsigned int ActsTrackingGeometrySvc::populateAlignmentStore(DetectorAlignStore 
     ATH_MSG_DEBUG("Populated with " << nElements << " elements");
     return nElements;
 }
-const ActsGeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
+const GeometryContext &ActsTrackingGeometrySvc::getNominalContext() const { return m_nominalContext; }
 
 Acts::CylinderVolumeBuilder::Config
 ActsTrackingGeometrySvc::makeBeamPipeConfig(

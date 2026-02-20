@@ -162,7 +162,7 @@ def TileJetMonitoringConfig(flags, **kwargs):
     tileJetMonAlg.CellEnergyUpperLimitsLG = energiesLG
 
     samples_LB = ['A', 'B', 'D', 'B9']
-    samples_EB = ['A', 'B', 'C10', 'D4', 'E1', 'E2', 'E3', 'E4']
+    samples_EB = ['A', 'B', 'D', 'C10', 'D4', 'E1', 'E2', 'E3', 'E4']
 
     # 4) Configure histograms with Tile cell time in energy slices per partition and gain
     cellTimeGroup = helper.addGroup(tileJetMonAlg, 'TileJetCellTime', 'Tile/Jet/CellTime/')

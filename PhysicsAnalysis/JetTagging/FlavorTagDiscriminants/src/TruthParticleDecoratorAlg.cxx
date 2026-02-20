@@ -35,21 +35,17 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_TruthContainerKey.initialize() );
     ATH_CHECK( m_TruthPVsKey.initialize() );
 
-    // Prepare decorators
-    m_dec_origin_label = m_TruthContainerKey.key() + "." + m_dec_origin_label.key();
-    m_dec_type_label = m_TruthContainerKey.key() + "." + m_dec_type_label.key();
-    m_dec_source_label = m_TruthContainerKey.key() + "." + m_dec_source_label.key();
-    m_dec_vertex_index = m_TruthContainerKey.key() + "." + m_dec_vertex_index.key();
-    m_dec_parent_uniqueID = m_TruthContainerKey.key() + "." + m_dec_parent_uniqueID.key();
+    ATH_CHECK( m_dec_origin_label.initialize() );
+    ATH_CHECK( m_dec_type_label.initialize() );
+    ATH_CHECK( m_dec_source_label.initialize() );
+    ATH_CHECK( m_dec_vertex_index.initialize() );
+    ATH_CHECK( m_dec_parent_uniqueID.initialize() );
 
-    CHECK( m_dec_origin_label.initialize() );
-    CHECK( m_dec_type_label.initialize() );
-    CHECK( m_dec_source_label.initialize() );
-    CHECK( m_dec_vertex_index.initialize() );
-    CHECK( m_dec_parent_uniqueID.initialize() );
-    
     // Retrieve tools
     ATH_CHECK( m_truthOriginTool.retrieve() );
+
+    // ATLASRECTS-8290: this should be removed eventually
+    if (m_use_barcode) m_uid = SG::ConstAccessor<int>("barcode");
 
     return StatusCode::SUCCESS;
   }
@@ -105,7 +101,8 @@ namespace FlavorTagDiscriminants {
 
       // get parent hadron and decorate uniqueID
       auto truth_parent = TruthDecoratorHelpers::get_parent_hadron(truth_particle);
-      dec_parent_uniqueID(*truth_particle) = truth_parent ? HepMC::uniqueID(truth_parent) : HepMC::UNDEFINED_ID;
+      // ATLASRECTS-8290: replace m_uid with HepMC::uniqueID
+      dec_parent_uniqueID(*truth_particle) = truth_parent ? m_uid(*truth_parent) : HepMC::UNDEFINED_ID;
 
       // get truth origin and use it for exclusive origin and secondary origin
       int truth_origin = m_truthOriginTool->getTruthOrigin(truth_particle);

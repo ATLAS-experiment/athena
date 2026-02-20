@@ -45,7 +45,7 @@ const ROOT::RNTupleView<void>& RObjectManager::field() const {
 ::Int_t RObjectManager::getEntry(::Int_t) {
 
   // Must be valid entry value
-  if (m_entryToLoad < 0) {
+  if (m_entryToLoad.get() < 0) {
     // Raise error as a negative entry is incorrect
     Error("xAOD::RObjectManager::getEntry",
           XAOD_MESSAGE(

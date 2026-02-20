@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -17,7 +17,7 @@ inline std::vector<HepMC3::GenParticlePtr>::const_iterator  end(HepMC3::GenVerte
 
 /// @brief Print one-line info with idiomatic C++ printing
 /// @note More generic printing methods from HepMC3::Print should be preffered - move to PrintStreams.h?
-inline std::ostream& operator<<(std::ostream& os,  GenVertexPtr v) { ConstGenVertexPtr cv = v; Print::line(os,cv); return os; }
+inline std::ostream& operator<<(std::ostream& os,  GenVertexPtr v) { ConstGenVertexPtr cv = v; Print::line(os,std::move(cv)); return os; }
 }
 namespace HepMC {
 typedef HepMC3::GenVertexPtr GenVertexPtr;

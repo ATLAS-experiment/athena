@@ -268,6 +268,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
     "truthParticleLink");
   static const SG::AuxElement::Accessor<int> accType("truthType");
   static const SG::AuxElement::Accessor<int> accOrigin("truthOrigin");
+  static const SG::AuxElement::Accessor<unsigned int> accClassification("truthClassification");
 
   if (m_matchClusters) {
     accClusLink(*truthParticle) = ClusterLink_t();
@@ -281,6 +282,7 @@ egammaTruthAssociationAlg::getNewTruthParticle(
   auto info = m_mcTruthClassifier->particleTruthClassifier(truth, &mcinfo);
   accType(*truthParticle) = static_cast<int>(info.first);
   accOrigin(*truthParticle) = static_cast<int>(info.second);
+  accClassification(*truthParticle) = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truth)); // See AGENE-2351
 }
 
 //// The templated functions
@@ -298,6 +300,7 @@ egammaTruthAssociationAlg::initializeDecorKeys(
   keys.emplace_back(name + ".truthParticleLink");
   keys.emplace_back(name + ".truthType");
   keys.emplace_back(name + ".truthOrigin");
+  keys.emplace_back(name + ".truthClassification");
   ATH_CHECK(keys.initialize());
   return StatusCode::SUCCESS;
 }
@@ -310,6 +313,7 @@ egammaTruthAssociationAlg::writeDecorHandles<T>::writeDecorHandles(
   : el(hkeys.at(0), ctx)
   , type(hkeys.at(1), ctx)
   , origin(hkeys.at(2), ctx)
+  , classification(hkeys.at(3), ctx)
 {}
 
 template<class T>
@@ -383,6 +387,7 @@ egammaTruthAssociationAlg::match(
                                  << " truthOrigin = " << info.second);
     decoHandles.type(*particle) = static_cast<int>(info.first);
     decoHandles.origin(*particle) = static_cast<int>(info.second);
+    decoHandles.classification(*particle) = (truthParticle) ? std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truthParticle)) : 0; // See AGENE-2351
 
     // Decorate the corresponding truth particle with the link to the reco
     if (m_doEgammaTruthContainer) {

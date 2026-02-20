@@ -22,8 +22,8 @@ atlas_add_component( ITkPixelByteStreamCnv
    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamData AthenaKernel EventContainers
    GaudiKernel InDetRawData AthenaBaseComps AthContainers CxxUtils StoreGateLib
    ByteStreamCnvSvcBaseLib InDetIdentifier ITkPixelCablingLib PixelReadoutGeometryLib IRegionSelector
-   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib )
-   
+   xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib)
+
 
 atlas_add_test(ITkPixQCoreEncodingLUT_test
   SOURCES test/ITkPixQCoreEncodingLUT_test.cxx

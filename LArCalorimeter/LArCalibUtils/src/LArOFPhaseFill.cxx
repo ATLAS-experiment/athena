@@ -11,7 +11,6 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include <fstream>
 #include <map>

@@ -69,7 +69,7 @@ public:
   ConeSurface& operator=(ConeSurface&& sbo) = default;
 
   /**Destructor*/
-  virtual ~ConeSurface() = default ;
+  virtual ~ConeSurface();
 
   /**Constructor form Transform and an opening angle */
   ConeSurface(const Amg::Transform3D& htrans,

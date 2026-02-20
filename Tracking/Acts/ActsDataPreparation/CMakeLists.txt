@@ -36,6 +36,7 @@ atlas_add_component( ActsDataPreparation
    xAODInDetMeasurement
    xAODMeasurementBase
    HGTD_RawData
+   HGTD_CalibrationLib
    ViewAlgsLib InDetIdentifier
 )
 

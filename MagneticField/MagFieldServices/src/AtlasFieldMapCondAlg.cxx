@@ -32,7 +32,7 @@
 
 MagField::AtlasFieldMapCondAlg::AtlasFieldMapCondAlg(const std::string& name,
                                                      ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator)
+  : AthCondAlgorithm(name, pSvcLocator)
 {}
 
 MagField::AtlasFieldMapCondAlg::~AtlasFieldMapCondAlg() = default;

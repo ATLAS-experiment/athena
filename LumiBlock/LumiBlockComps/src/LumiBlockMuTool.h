@@ -50,12 +50,12 @@ class LumiBlockMuTool: public extends<AthAlgTool, ILumiBlockMuTool> {
 
   SG::ReadDecorHandleKey<xAOD::EventInfo>  m_rdhkActMu {this
       ,"actualInteractionsPerCrossingKey"
-      ,"EventInfo.actualInteractionsPerCrossing"
+      ,m_eventInfoKey, "actualInteractionsPerCrossing"
       ,"Decoration for Actual Interaction Per Crossing"};
 
   SG::ReadDecorHandleKey<xAOD::EventInfo>  m_rdhkAveMu {this
       ,"averageInteractionsPerCrossingKey"
-      ,"EventInfo.averageInteractionsPerCrossing"
+      ,m_eventInfoKey, "averageInteractionsPerCrossing"
       ,"Decoration for Average Interaction Per Crossing"};
 };
 

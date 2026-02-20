@@ -142,17 +142,18 @@ namespace JiveXML {
 		       << ", phi=" << (*itr)->phi());
     }
     // Start with mandatory entries
-    DataMap["phi"] = phi;
-    DataMap["eta"] = eta;
-    DataMap["et"] = et;
-    DataMap[tagCells] = cells;
-    DataMap["numCells"] = numCells;
-    DataMap["id"] = idVec;
-    DataMap["emfrac"] = emfracVec; // not in Atlantis yet ! Could be used in legoplot
-    DataMap["label"] = labelVec; // not in Atlantis yet !
+    const auto n = phi.size();
+    DataMap["phi"] = std::move(phi);
+    DataMap["eta"] = std::move(eta);
+    DataMap["et"] = std::move(et);
+    DataMap[tagCells] = std::move(cells);
+    DataMap["numCells"] = std::move(numCells);
+    DataMap["id"] = std::move(idVec);
+    DataMap["emfrac"] = std::move(emfracVec); // not in Atlantis yet ! Could be used in legoplot
+    DataMap["label"] = std::move(labelVec); // not in Atlantis yet !
 
     ATH_MSG_DEBUG(dataTypeName() << " (AOD, no cells), collection: " << dataTypeName()
-		  << " retrieved with " << phi.size() << " entries");
+		  << " retrieved with " << n << " entries");
     return DataMap;
   }
 

@@ -7,7 +7,7 @@
 #include <memory>
 
 SCT_SensorsCondAlg::SCT_SensorsCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

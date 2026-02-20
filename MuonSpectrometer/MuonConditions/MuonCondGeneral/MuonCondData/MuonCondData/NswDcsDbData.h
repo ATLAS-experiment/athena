@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWDCSDBDATA_H
@@ -32,11 +32,13 @@ public:
     struct TDaqConstants{
         uint64_t timeSince{0};
         uint64_t timeUntil{0};
-        unsigned int elink{0};
+        unsigned elink{0};
         bool permanentlyDisabled{false};
         bool operator<(const NswDcsDbData::TDaqConstants& other)const{
-           if(elink != other.elink) return elink < other.elink;
-           return timeUntil < other.timeSince;
+            if(elink != other.elink) {
+                return elink < other.elink;
+            }
+            return timeUntil < other.timeSince;
         }
     };
     
@@ -44,9 +46,17 @@ public:
     virtual ~NswDcsDbData() = default;
 
     // setting functions
-    void setDataHv(const DcsTechType tech, const Identifier& chnlId, DcsConstants constants);
-    void setDataTDaq(const DcsTechType tech, const Identifier& chnlId, uint64_t timeSince, uint64_t timeUntil, unsigned int elink, bool permanentlyDisabled);
-    void setDataEltx(const DcsTechType tech, const Identifier& chnlId);
+    void setDataHv(const DcsTechType tech, 
+                   const Identifier& chnlId, 
+                   DcsConstants constants);
+    void setDataTDaq(const DcsTechType tech, 
+                    const Identifier& chnlId, 
+                    uint64_t timeSince, 
+                    uint64_t timeUntil, 
+                    unsigned int elink, 
+                    bool permanentlyDisabled);
+    void setDataEltx(const DcsTechType tech, 
+                     const Identifier& chnlId);
     
     // retrieval functions
     
@@ -69,7 +79,7 @@ private:
     // containers
     struct DcsModule{
         std::vector<std::unique_ptr<DcsConstants>> channels{};
-        Identifier layer_id{0};
+        Identifier layer_id{};
     };
     using ChannelDcsMap = std::vector<DcsModule>;
     ChannelDcsMap m_data_hv_mmg{};
@@ -78,7 +88,7 @@ private:
     using ChannelTDaqMap = std::vector<std::map<Identifier, std::set<TDaqConstants>>>;
     ChannelTDaqMap m_data_tdaq_mmg{};
     ChannelTDaqMap m_data_tdaq_stg{};
-    using ChannelEltxMap = std::vector<std::set<Identifier>>;
+    using ChannelEltxMap = std::vector<std::unordered_set<Identifier>>;
     ChannelEltxMap m_data_eltx_mmg{};
     ChannelEltxMap m_data_eltx_stg{};
 

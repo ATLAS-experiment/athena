@@ -1,6 +1,6 @@
 // this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -151,8 +151,8 @@ class JetMatcherAlg : public AthReentrantAlgorithm {
   template <typename T>
   StatusCode jetMatching(SG::ReadHandle<DataVector<T>> jets1,
 		   SG::ReadHandle<xAOD::JetContainer> jets2,
-		   SG::WriteDecorHandleKey<DataVector<T>> matchedHandleKey,
-		   std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>> varHandleKeys,
+		   const SG::WriteDecorHandleKey<DataVector<T>>& matchedHandleKey,
+		   const std::vector<std::reference_wrapper<SG::WriteDecorHandleKey<DataVector<T>>>>& varHandleKeys,
 		   const EventContext& ctx) const;
 };
 

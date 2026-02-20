@@ -53,6 +53,6 @@ namespace Rec {
         ToolHandle<Rec::MuSAVtxFitterTool> m_MuSAVtxFitterTool{this, "MuSAVtxToolName", "Rec::MuSAVtxFitterTool"};
         ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool{this, "TrackToVertexTool", "Reco::TrackToVertex"};
 
-    };; // end class MuSAVtxFitter
+    }; // end class MuSAVtxFitter
 }
 #endif // MUSAVTXFITTER_MUSAVTXFITTER_H

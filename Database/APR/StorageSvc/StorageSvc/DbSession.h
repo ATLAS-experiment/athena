@@ -2,7 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: DbSession.h 726071 2016-02-25 09:23:05Z krasznaa $
 //====================================================================
 //  DbSession class definition
 //--------------------------------------------------------------------
@@ -17,8 +16,10 @@
 #define POOL_DBSESSION_H
 
 // Framework include files
-#include "StorageSvc/DbStatus.h"
+#include <GaudiKernel/StatusCode.h>
 #include "StorageSvc/DbHandleBase.h"
+
+class StatusCode;
 
 /*
  *   POOL namespace declaration
@@ -93,13 +94,13 @@ namespace pool  {
     /// Find domain object in session (by technology type)
     DbDomainObj* find(const DbType& type);
     /// Add domain to session
-    DbStatus add(DbDomainObj* dom);
+    StatusCode add(DbDomainObj* dom);
     /// Find domain in session
-    DbStatus remove(const DbDomainObj* dom);
+    StatusCode remove(const DbDomainObj* dom);
     /// Open the session in a given mode
-    DbStatus open();
+    StatusCode open();
     /// Close the session
-    DbStatus close();
+    StatusCode close();
     /// Allow access to the Database implementation
     IOODatabase* db(const DbType& typ);
   };

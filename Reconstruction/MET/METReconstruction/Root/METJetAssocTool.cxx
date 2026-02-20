@@ -51,7 +51,8 @@ namespace met {
     ATH_CHECK( METAssociator::initialize() );
     ATH_MSG_VERBOSE ("Initializing " << name() << "...");
     //Initialise ReadHandles
-    ATH_CHECK( m_jetContKey.initialize());
+    if(!m_jetContKey.empty())
+      ATH_CHECK( m_jetContKey.initialize());
 
 
     return StatusCode::SUCCESS;
@@ -60,6 +61,13 @@ namespace met {
   StatusCode METJetAssocTool::executeTool(xAOD::MissingETContainer* /*metCont*/, xAOD::MissingETAssociationMap* metMap) const
   {
     ATH_MSG_VERBOSE ("In execute: " << name() << "...");
+
+    //empty key -> dont write any jets into map
+    //just add misc assoc and be done with it
+    if(m_jetContKey.empty()){
+      MissingETComposition::addMiscAssociation(metMap);
+      return StatusCode::SUCCESS;
+    }
 
     // Retrieve the jet container
     SG::ReadHandle<xAOD::JetContainer> jetCont(m_jetContKey);

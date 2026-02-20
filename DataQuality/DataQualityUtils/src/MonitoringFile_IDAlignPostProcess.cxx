@@ -661,10 +661,10 @@ namespace dqutils {
     // Ideally we would like to clone the existing histograms from the file instead of recreating them here
     // but there seems to be no way to then persistify the cloned histograms (i.e. write them back to the file)
     const Int_t nx = 21;
-    TString siliconLayersBarrel[12] = {
+    static const std::string siliconLayersBarrel[12] = {
       "Pix L0", "Pix L1", "Pix L2", "Pix L3", "SCT L0 S0", "S1", "SCT L1 S0", "S1", "SCT L2 S0", "S1", "SCT L3 S0", "S1"
     };
-    TString siliconLayers[nx] = {
+    static const std::string siliconLayers[nx] = {
       "Pix L0", "Pix L1", "Pix L2", "SCT L0 S0", "S1", "SCT L1 S0", "S1", "SCT L2 S0", "S1", "SCT L3 S0", "S1",
       "SCT L4 S0", "S1", "SCT L5 S0", "S1", "SCT L6 S0", "S1", "SCT L7 S0", "S1", "SCT L8 S0", "S1"
     };
@@ -672,27 +672,27 @@ namespace dqutils {
     //pull width for each layer in Silicon barrel and endcaps
     TH1F* si_barrel_pullX_width = new TH1F("si_barrel_pullX_width", "Pull X Gaussian Width vs Silicon Barrel Layer", 12,
                                            -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_pullX_width->GetYaxis()->SetTitle("Pull X Gaussian Width");
     TH1F* si_eca_pullX_width = new TH1F("si_eca_pullX_width", "Pull X Gaussian Width vs Silicon ECA Layer", 21, -0.5,
                                         20.5);
-    for (int i = 1; i <= nx; i++) si_eca_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_pullX_width->GetYaxis()->SetTitle("Pull X Gaussian Width");
     TH1F* si_ecc_pullX_width = new TH1F("si_ecc_pullX_width", "Pull X Gaussian Width vs Silicon ECC Layer", 21, -0.5,
                                         20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_pullX_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_pullX_width->GetYaxis()->SetTitle("Pull X Gaussian Width");
     TH1F* si_barrel_pullY_width = new TH1F("si_barrel_pullY_width", "Pull Y Gaussian Width vs Silicon Barrel Layer", 12,
                                            -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_pullY_width->GetYaxis()->SetTitle("Pull Y Gaussian Width");
     TH1F* si_eca_pullY_width = new TH1F("si_eca_pullY_width", "Pull Y Gaussian Width vs Silicon ECA Layer", 21, -0.5,
                                         20.5);
-    for (int i = 1; i <= nx; i++) si_eca_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_pullY_width->GetYaxis()->SetTitle("Pull Y Gaussian Width");
     TH1F* si_ecc_pullY_width = new TH1F("si_ecc_pullY_width", "Pull Y Gaussian Width vs Silicon ECC Layer", 21, -0.5,
                                         20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_pullY_width->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_pullY_width->GetYaxis()->SetTitle("Pull Y Gaussian Width");
     fillGaussianMeanOrWidth(si_barrel_pullX, si_barrel_pullX_width, -6.0, 6.0, 1);
     fillGaussianMeanOrWidth(si_barrel_pullY, si_barrel_pullY_width, -6.0, 6.0, 1);
@@ -704,27 +704,27 @@ namespace dqutils {
     //pull mean for each layer in Silicon barrel and endcaps
     TH1F* si_barrel_pullX_mean = new TH1F("si_barrel_pullX_mean", "Pull X Gaussian Mean vs Silicon Barrel Layer", 12,
                                           -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_pullX_mean->GetYaxis()->SetTitle("Pull X Gaussian Mean");
     TH1F* si_eca_pullX_mean =
       new TH1F("si_eca_pullX_mean", "Pull X Gaussian Mean vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_pullX_mean->GetYaxis()->SetTitle("Pull X Gaussian Mean");
     TH1F* si_ecc_pullX_mean =
       new TH1F("si_ecc_pullX_mean", "Pull X Gaussian Mean vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_pullX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_pullX_mean->GetYaxis()->SetTitle("Pull X Gaussian Mean");
     TH1F* si_barrel_pullY_mean = new TH1F("si_barrel_pullY_mean", "Pull Y Gaussian Mean vs Silicon Barrel Layer", 12,
                                           -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_pullY_mean->GetYaxis()->SetTitle("Pull Y Gaussian Mean");
     TH1F* si_eca_pullY_mean =
       new TH1F("si_eca_pullY_mean", "Pull Y Gaussian Mean vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_pullY_mean->GetYaxis()->SetTitle("Pull Y Gaussian Mean");
     TH1F* si_ecc_pullY_mean =
       new TH1F("si_ecc_pullY_mean", "Pull Y Gaussian Mean vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_pullY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_pullY_mean->GetYaxis()->SetTitle("Pull Y Gaussian Mean");
     fillGaussianMeanOrWidth(si_barrel_pullX, si_barrel_pullX_mean, -6.0, 6.0, 0);
     fillGaussianMeanOrWidth(si_barrel_pullY, si_barrel_pullY_mean, -6.0, 6.0, 0);
@@ -736,23 +736,23 @@ namespace dqutils {
     //residual mean for each layer in Silicon barrel and endcaps
     TH1F* si_barrel_resX_mean = new TH1F("si_barrel_resX_mean", "Residual X Mean vs Silicon Barrel Layer", 12, -0.5,
                                          11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_resX_mean->GetYaxis()->SetTitle("Residual X Mean [mm]");
     TH1F* si_eca_resX_mean = new TH1F("si_eca_resX_mean", "Residual X Mean vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_resX_mean->GetYaxis()->SetTitle("Residual X Mean [mm]");
     TH1F* si_ecc_resX_mean = new TH1F("si_ecc_resX_mean", "Residual X Mean vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_resX_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_resX_mean->GetYaxis()->SetTitle("Residual X Mean [mm]");
     TH1F* si_barrel_resY_mean = new TH1F("si_barrel_resY_mean", "Residual Y Mean vs Silicon Barrel Layer", 12, -0.5,
                                          11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_resY_mean->GetYaxis()->SetTitle("Residual Y Mean [mm]");
     TH1F* si_eca_resY_mean = new TH1F("si_eca_resY_mean", "Residual Y Mean vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_resY_mean->GetYaxis()->SetTitle("Residual Y Mean [mm]");
     TH1F* si_ecc_resY_mean = new TH1F("si_ecc_resY_mean", "Residual Y Mean vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_resY_mean->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_resY_mean->GetYaxis()->SetTitle("Residual Y Mean [mm]");
     meanRMSProjections2D(si_barrel_resX, si_barrel_resX_mean, 2);
     meanRMSProjections2D(si_barrel_resY, si_barrel_resY_mean, 2);
@@ -764,23 +764,23 @@ namespace dqutils {
     //residual width for each layer in Silicon barrel and endcaps
     TH1F* si_barrel_resX_rms =
       new TH1F("si_barrel_resX_rms", "Residual X Width vs Silicon Barrel Layer", 12, -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_resX_rms->GetYaxis()->SetTitle("Residual X Width [mm]");
     TH1F* si_eca_resX_rms = new TH1F("si_eca_resX_rms", "Residual X Width vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_resX_rms->GetYaxis()->SetTitle("Residual X Width [mm]");
     TH1F* si_ecc_resX_rms = new TH1F("si_ecc_resX_rms", "Residual X Width vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_resX_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_resX_rms->GetYaxis()->SetTitle("Residual X Width [mm]");
     TH1F* si_barrel_resY_rms =
       new TH1F("si_barrel_resY_rms", "Residual Y Width vs Silicon Barrel Layer", 12, -0.5, 11.5);
-    for (int i = 1; i <= 12; i++) si_barrel_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1]);
+    for (int i = 1; i <= 12; i++) si_barrel_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayersBarrel[i - 1].c_str());
     si_barrel_resY_rms->GetYaxis()->SetTitle("Residual Y Width [mm]");
     TH1F* si_eca_resY_rms = new TH1F("si_eca_resY_rms", "Residual Y Width vs Silicon ECA Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_eca_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_eca_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_eca_resY_rms->GetYaxis()->SetTitle("Residual Y Width [mm]");
     TH1F* si_ecc_resY_rms = new TH1F("si_ecc_resY_rms", "Residual Y Width vs Silicon ECC Layer", 21, -0.5, 20.5);
-    for (int i = 1; i <= nx; i++) si_ecc_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1]);
+    for (int i = 1; i <= nx; i++) si_ecc_resY_rms->GetXaxis()->SetBinLabel(i, siliconLayers[i - 1].c_str());
     si_ecc_resY_rms->GetYaxis()->SetTitle("Residual Y Width [mm]");
     meanRMSProjections2D(si_barrel_resX, si_barrel_resX_rms, 3);
     meanRMSProjections2D(si_barrel_resY, si_barrel_resY_rms, 3);

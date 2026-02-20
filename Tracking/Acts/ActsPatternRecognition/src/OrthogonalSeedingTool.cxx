@@ -110,23 +110,16 @@ namespace ActsTrk {
     finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x],
                                        beamSpotPos[Amg::y]);
     finderOpts.bFieldInZ = bField[2];
-    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+    finderOpts = finderOpts.calculateDerivedQuantities(m_finderCfg);
 
     // Compute seeds
     auto groupSeeds = m_finder.createSeeds(finderOpts, spContainer);
 
-    // Store seeds
-    seedContainer.reserve(groupSeeds.size());
-    for(const auto& seed: groupSeeds) {
-      const auto [bottom, middle, top] = seed.sp();
+    seedContainer.reserve(seedContainer.size() + groupSeeds.size());
 
-      std::unique_ptr< ActsTrk::Seed > toAdd =
-	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
-					  middle->externalSpacePoint(),
-					  top->externalSpacePoint());
-      toAdd->setVertexZ(seed.z());
-      toAdd->setQuality(seed.seedQuality());
-      seedContainer.push_back(std::move(toAdd)); 
+    // Convert the seeds
+    for (auto seed : groupSeeds) {
+      seedContainer.push_back(seed);
     }
 
     return StatusCode::SUCCESS;
@@ -168,7 +161,7 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
     
     // Configuration Acts::SeedFinderOrthogonal
-    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg.toInternalUnits(), logger().cloneWithSuffix("Filter")); 
+    m_finderCfg.seedFilter = std::make_shared<Acts::SeedFilter<value_type>>(filterCfg, logger().cloneWithSuffix("Filter")); 
     m_finderCfg.cotThetaMax = m_cotThetaMax;
     m_finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
     m_finderCfg.deltaRMaxTopSP = m_deltaRMaxTopSP;
@@ -223,8 +216,6 @@ namespace ActsTrk {
         return true;
     });
     }
-    
-    m_finderCfg = m_finderCfg.toInternalUnits();
 
     m_finder = Acts::SeedFinderOrthogonal<value_type>(m_finderCfg, logger().cloneWithSuffix("Finder"));
 

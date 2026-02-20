@@ -32,10 +32,9 @@ def main(args):
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(MuonSpacePointFormationCfg(flags))
 
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))
 
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
 
     cfg.merge(MuonSPIdDumpCfg(flags))
     #cfg.getService("MessageSvc").setVerbose= [ "MuonSPIdMaker"]

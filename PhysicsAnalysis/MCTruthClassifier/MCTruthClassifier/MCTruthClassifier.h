@@ -97,9 +97,7 @@ public:
     ATH_MSG_INFO(" Initializing MCTruthClassifier");
 #ifndef XAOD_ANALYSIS
     // Only needed for GenParticle interface
-    if (!m_truthLinkVecReadHandleKey.key().empty()) {
-      ATH_CHECK(m_truthLinkVecReadHandleKey.initialize());
-    }
+    ATH_CHECK(m_truthLinkVecReadHandleKey.initialize(!m_truthLinkVecReadHandleKey.key().empty()));
 #endif
     ATH_CHECK(m_truthParticleContainerKey.initialize());
 

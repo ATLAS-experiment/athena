@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,8 +19,6 @@ ALFA_Hit::ALFA_Hit(int hit,
 			int sign, int plate, int fiber, int station
 			):
   m_hitID(hit),
-  //trackID(track), 
-//  m_partLink(track), 
   m_particleEncoding(particle),
   m_kineticEnergy(kinEnergy), 
   m_energyDeposit(eneDeposit), 
@@ -30,22 +28,7 @@ ALFA_Hit::ALFA_Hit(int hit,
   m_sign_fiber(sign), m_n_plate(plate), m_n_fiber(fiber), m_n_station(station) 
   {} 
 
-// Default constructor needed by athenaroot/athenapool
-//
-ALFA_Hit::ALFA_Hit( ) :
-  m_hitID(0xffff),
-  //trackID(0),  
-  m_particleEncoding(0),
-  m_kineticEnergy(0.), 
-  m_energyDeposit(0.), 
-  m_preStepX(0.), m_preStepY(0.), m_preStepZ(0.), 
-  m_postStepX(0.), m_postStepY(0.), m_postStepZ(0.), 
-  m_globalTime(0.),
-  m_sign_fiber(0), m_n_plate(0), m_n_fiber(0), m_n_station(0)  
-{}
 
-// destructor
-ALFA_Hit::~ALFA_Hit() {}
 
 int ALFA_Hit::GetTrackID() const 
 {

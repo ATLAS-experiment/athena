@@ -134,7 +134,6 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
     el->setCaloClusterLinks(links);
     el->setEta(eta);
     el->setPhi(0.0);
-    el->setM(ParticleConstants::electronMassInMeV);
     el->setPt(pt);
   }
   if (!store.record(std::move(electrons), "MyElectrons").isSuccess() ||

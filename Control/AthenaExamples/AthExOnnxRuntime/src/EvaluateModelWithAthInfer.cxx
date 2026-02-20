@@ -40,18 +40,18 @@ StatusCode EvaluateModelWithAthInfer::execute( [[maybe_unused]] const EventConte
    std::vector<int64_t> inputShape = {m_batchSize, 28, 28};
 
    AthInfer::InputDataMap inputData;
-   inputData["flatten_input"] = std::make_pair(
+   inputData["flatten_input:0"] = std::make_pair(
       inputShape, std::move(inputDataVector)
    );
 
    AthInfer::OutputDataMap outputData;
-   outputData["dense_1/Softmax"] = std::make_pair(
+   outputData["dense_1/Softmax:0"] = std::make_pair(
       std::vector<int64_t>{m_batchSize, 10}, std::vector<float>{}
    );
 
    ATH_CHECK(m_onnxTool->inference(inputData, outputData));
 
-   auto& outputScores = std::get<std::vector<float>>(outputData["dense_1/Softmax"].second);
+   auto& outputScores = std::get<std::vector<float>>(outputData["dense_1/Softmax:0"].second);
    auto inRange = [&outputScores](int idx)->bool{return (idx>=0) and (idx<std::ssize(outputScores));};
    ATH_MSG_DEBUG("Label for the input test data: ");
    for(int ibatch = 0; ibatch < m_batchSize; ibatch++){

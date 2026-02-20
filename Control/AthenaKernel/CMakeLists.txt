@@ -13,9 +13,9 @@ find_package( TBB )
 atlas_add_library( AthenaKernel
    AthenaKernel/*.h AthenaKernel/*.icc src/*.cxx
    PUBLIC_HEADERS AthenaKernel
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS} 
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${UUID_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${UUID_LIBRARIES} CxxUtils DataModelRoot GaudiKernel
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${UUID_LIBRARIES} CxxUtils DataModelRoot SGCoreLib GaudiKernel
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${CMAKE_DL_LIBS} RootUtils )
 
 atlas_add_dictionary( AthenaKernelDict
@@ -23,7 +23,7 @@ atlas_add_dictionary( AthenaKernelDict
    AthenaKernel/selection.xml
    LINK_LIBRARIES GaudiKernel AthenaKernel )
 
-atlas_install_python_modules( python/*.py 
+atlas_install_python_modules( python/*.py
                               POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.txt )
 
@@ -96,7 +96,7 @@ atlas_add_test( SlotSpecificObj_test
 atlas_add_test( DataBucket_test
    SOURCES
    test/DataBucket_test.cxx
-   LINK_LIBRARIES AthenaKernel TestTools
+   LINK_LIBRARIES AthenaKernel SGCoreLib TestTools
    LOG_IGNORE_PATTERN "DataObject 0x" )
 
 atlas_add_test( RCUUpdater_test

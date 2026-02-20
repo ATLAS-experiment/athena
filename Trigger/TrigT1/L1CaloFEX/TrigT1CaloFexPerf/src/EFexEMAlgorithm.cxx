@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * Name    : EFexEMAlgorithm.cxx
@@ -13,7 +13,7 @@
 #include "xAODTrigCalo/TrigEMClusterAuxContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 
-#include <math.h>
+#include <cmath>
 #include <string>
 
 namespace
@@ -125,7 +125,10 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
          }
          TTs = triggerTowerHandle.cptr();
       }
-
+      if (!tileIDHelper){
+        ATH_MSG_ERROR("tileIDHelper pointer is null!");
+        return StatusCode::FAILURE;
+      }
       std::vector<LVL1::EFexEMClusterTool::AlgResult> algResults = m_eFexDefaultClusterTool->clusterAlg(m_apply_BaseLineCuts, &scells, TTs, idHelper, tileIDHelper, &tileCellCont);
       for (const auto &algCl : algResults)
       {
@@ -217,8 +220,8 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
             clusterTime += cellAround->time() * cellAround->et();
             clusterTimeWeight += cellAround->et();
          }
-         if (std::abs(clusterTimeWeight) > 0.1)
-         {
+         if (std::abs(clusterTimeWeight) > 0.1){
+            //coverity[DIVIDE_BY_ZERO:FALSE]
             clusterTime /= clusterTimeWeight;
          }
          else
@@ -274,8 +277,10 @@ LVL1::EFexEMAlgorithm::execute(const EventContext& ctx) const
                wstot_nor += (cellAround->et());
             }
          }
-         if (std::abs(wstot_nor) > 0.01)
+         if (std::abs(wstot_nor) > 0.01){
+            //coverity[DIVIDE_BY_ZERO:FALSE]
             wstot = std::sqrt(wstot / wstot_nor);
+          }
          cl->setWstot(wstot);
       }
    }

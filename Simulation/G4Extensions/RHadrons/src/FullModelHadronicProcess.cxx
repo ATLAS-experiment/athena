@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FullModelHadronicProcess.hh"
@@ -76,7 +76,7 @@ G4double FullModelHadronicProcess::GetMeanFreePath(const G4Track& aTrack, G4doub
         GetMicroscopicCrossSection( aParticle, (*aMaterial->GetElementVector())[i], aTemp);
       sigma += theAtomicNumDensityVector[i] * xSection;
     }
-
+  if (sigma == 0.0)[[unlikely]] return 0.;
   return 1.0/sigma;
 
 }

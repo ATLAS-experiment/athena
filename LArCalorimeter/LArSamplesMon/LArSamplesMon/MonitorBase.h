@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -72,15 +72,15 @@ namespace LArSamples {
 #endif
 
       const Interface& interface() const { return *m_interface; }
-      unsigned int nChannels() const;
+      virtual unsigned int nChannels() const override;
 
       static TString str(CombinationType comb);
 
       static const int printPeriodicity = 10000;
 
-      const History* getCellHistory(unsigned int i) const;      
-      const History* getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;
+      virtual std::unique_ptr<const History> getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History> getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
 
     private:
       

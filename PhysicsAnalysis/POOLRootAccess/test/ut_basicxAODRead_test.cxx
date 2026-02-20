@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //example of reading xAOD in fast xAOD mode with POOL::TEvent
@@ -21,6 +21,7 @@
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
 
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
 #ifdef GENERATIONBASE

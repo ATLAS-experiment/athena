@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #
 # @file AthenaPoolUtilities/share/AthenaPoolUtilitiesTestConfig.make
@@ -8,7 +8,11 @@
 #
 # Example:
 #
-#   run_tpcnv_test( TrackParticleTPCnv_17.2.8   AOD-17.2.8-full )
+#   run_tpcnv_test( TrackParticleTPCnv_17.2.8   AOD-17.2.8-full
+#                   [REFERENCE_TAG tag]
+#                   [REQUIRED_LIBRARIES lib...] )
+#
+#   Remaining arguments are forwarded to atlas_add_test.
 #
 function( run_tpcnv_test testName refName )
 
@@ -44,7 +48,10 @@ function( run_tpcnv_test testName refName )
       SCRIPT
       "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/tpcnv_${testName}.sh"
       PROPERTIES TIMEOUT 600
-      POST_EXEC_SCRIPT "post_tpcnvtest.sh ${testName}" ${_env} )
+      PRIVATE_WORKING_DIRECTORY
+      POST_EXEC_SCRIPT noerror.sh
+      ${_env}
+      ${ARG_UNPARSED_ARGUMENTS} )
 
 endfunction( run_tpcnv_test )
 

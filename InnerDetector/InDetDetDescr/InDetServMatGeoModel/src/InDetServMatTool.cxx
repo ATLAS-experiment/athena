@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetServMatTool.h"
@@ -76,14 +76,10 @@ StatusCode InDetServMatTool::create()
     }
     ATH_MSG_INFO("Building Inner Detector Service Material. Version: " << versionName);
     
-    // Retrieve the Geometry DB Interface
-    ATH_CHECK(m_geometryDBSvc.retrieve());
-    
     // Pass athena services to factory, etc
     m_athenaComps.setDetStore(detStore().get());
     m_athenaComps.setGeoDbTagSvc(m_geoDbTagSvc.get());
     m_athenaComps.setRDBAccessSvc(accessSvc.get());
-    m_athenaComps.setGeometryDBSvc(m_geometryDBSvc.get());
     
     // Retrieve builder tool (SLHC only)
     if (versionName == "SLHC") {

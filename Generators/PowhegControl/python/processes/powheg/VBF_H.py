@@ -46,7 +46,7 @@ class VBF_H(PowhegV2):
         self.add_keyword("compress_lhe")
         self.add_keyword("compress_upb")
         self.add_keyword("compute_rwgt")
-        self.add_keyword("doublefsr")
+        self.add_keyword("doublefsr",0)
         self.add_keyword("evenmaxrat")
         self.add_keyword("facscfact", self.default_scales[0])
         self.add_keyword("fastbtlbound")

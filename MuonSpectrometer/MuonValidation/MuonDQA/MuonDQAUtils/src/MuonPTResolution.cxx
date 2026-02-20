@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "MuonDQAUtils/MuonPTResolution.h"
 
 #include "TF1.h"
 #include "TH1F.h"
-#include <string>
-#include <iostream>
-#include <vector>
-#include <map>
-#include <math.h>
-#include "MuonDQAUtils/MuonPTResolution.h"
+
+#include <cmath>
 
 double getContentInRange(TH1F *hist, double centralX, double halfWidth)
 {

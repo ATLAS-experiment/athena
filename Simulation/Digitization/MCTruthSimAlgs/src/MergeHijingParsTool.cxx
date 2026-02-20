@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeHijingParsTool.h"
@@ -100,6 +100,8 @@ StatusCode MergeHijingParsTool::processAllSubEvents(const EventContext& ctx) {
     return StatusCode::SUCCESS;
   }
   ATH_MSG_DEBUG ( " HijingEventParams found from PileUp service " );
+  //loop deliberately only executes once
+  //coverity[unreachable]
   for (const auto& hijingParams: HijingList) {
     hijing_pars = hijingParams.second;
     // create new container for overlayed event

@@ -320,7 +320,10 @@ namespace met {
     std::sort(hardObjs_tmp.begin(),hardObjs_tmp.end(),greaterPt);
 
     for(const auto& obj : hardObjs_tmp) {
-      if(obj->pt()<4e3 && obj->type()!=xAOD::Type::Muon) continue;
+      if(obj->pt()<4e3 && obj->type()!=xAOD::Type::Muon){
+        if (m_pflow && !m_fecollKey.key().empty() && m_useTracks && m_recoil) { dec_UEcorr(*obj) = 0.f; }
+        continue;
+      }
       constlist.clear();
       ATH_MSG_VERBOSE( "Object type, pt, eta, phi = " << obj->type() << ", " << obj->pt() << ", " << obj->eta() << "," << obj->phi() );
       if(m_pflow){

@@ -1,17 +1,6 @@
 Read test starting...
 Creating CollectionService
 Creating Collection Description
-CollectionDescription: name=PFN:test_collection.rntup, type=RNTCollection, connection=
- Event Reference column=Token
-   Attributes: 5
-    Attribute 1, name=attr1, type=int, maxSize=0, isFixed=1, annotation=integer test attribute
-    Attribute 2, name=attr2, type=string, maxSize=0, isFixed=1, annotation=some string
-    Attribute 3, name=attr3, type=double, maxSize=0, isFixed=1, annotation=floating point attribute
-    Attribute 4, name=attr4, type=bool, maxSize=0, isFixed=1, annotation=
-    Attribute 5, name=attr64bit, type=unsigned long long, maxSize=0, isFixed=1, annotation=
-   Tokens: 1
-    Token 1, name=Token, type=Token, annotation=
-
 Creating Collection
 Adding 10 elements to the collection.
 >>  writing uint64: 0  0   0
@@ -31,27 +20,25 @@ Closing the collection.
 
 Creating CollectionService
 Getting handle to existing collection ( opened for read-only transactions by default )
-Executing query that only selects event reference column (the default)
-Iterating over query results...
+Iterating over collection...
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 0], [attr2 (string) : testString_0], [attr3 (double) : 0], [attr4 (bool) : FALSE], [attr64bit (unsigned long long) : 0]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 1], [attr2 (string) : testString_1], [attr3 (double) : 0.333333], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 1]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 2], [attr2 (string) : testString_2], [attr3 (double) : 0.666667], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 65536]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 3], [attr2 (string) : testString_3], [attr3 (double) : 1], [attr4 (bool) : FALSE], [attr64bit (unsigned long long) : 65537]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 4], [attr2 (string) : testString_4], [attr3 (double) : 1.33333], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 8070450532247994369]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 5], [attr2 (string) : testString_5], [attr3 (double) : 1.66667], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 9223372036854775808]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 6], [attr2 (string) : testString_6], [attr3 (double) : 2], [attr4 (bool) : FALSE], [attr64bit (unsigned long long) : 9223372036854775809]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 7], [attr2 (string) : testString_7], [attr3 (double) : 2.33333], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 9223372036854841344]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 8], [attr2 (string) : testString_8], [attr3 (double) : 2.66667], [attr4 (bool) : TRUE], [attr64bit (unsigned long long) : 9223372036854841345]
 Token : [DB=00000000-0000-0000-0000-000000000000][CNT=][CLID=00000000-0000-0000-0000-000000000000][TECH=00000000][OID=FFFFFFFFFFFFFFFF-FFFFFFFFFFFFFFFF]
-Meta data : 
+Meta data : [attr1 (int) : 9], [attr2 (string) : testString_9], [attr3 (double) : 3], [attr4 (bool) : FALSE], [attr64bit (unsigned long long) : 17293822569102770177]
 10 records read back
-

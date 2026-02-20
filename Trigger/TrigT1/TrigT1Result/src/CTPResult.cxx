@@ -95,7 +95,7 @@ namespace ROIB {
       }
 
       // TIP
-      for (size_t i(0), p(((m_useRoIB) ? m_ctpDataformat.getTIPpos():m_l1aBunch*m_ctpDataformat.getDAQwordsPerBunch())+m_ctpDataformat.getTIPpos());
+      for (size_t i(0), p((m_useRoIB) ? m_ctpDataformat.getTIPpos():m_l1aBunch*m_ctpDataformat.getDAQwordsPerBunch()+m_ctpDataformat.getTIPpos());
            (i < ((m_useRoIB) ? m_ctpDataformat.getRoIBTIPwords():m_ctpDataformat.getTIPwords())) && (p < data.size()); 
            ++i, ++p) {
          if (longFormat) s << "\n";
@@ -128,7 +128,7 @@ namespace ROIB {
       }
 
       // TAP
-      for (size_t i(0), p(((m_useRoIB) ? m_ctpDataformat.getTAPpos():m_l1aBunch*m_ctpDataformat.getDAQwordsPerBunch())+m_ctpDataformat.getTAPpos());
+      for (size_t i(0), p((m_useRoIB) ? m_ctpDataformat.getTAPpos():m_l1aBunch*m_ctpDataformat.getDAQwordsPerBunch()+m_ctpDataformat.getTAPpos());
            (i < ((m_useRoIB) ? m_ctpDataformat.getRoIBTAPwords():m_ctpDataformat.getTAPwords())) && (p < data.size()); 
            ++i, ++p) {
          if (longFormat) s << "\n";

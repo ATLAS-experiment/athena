@@ -40,10 +40,10 @@ class MmSensitiveDetector : public MuonSensitiveDetector {
     
     private:
         /// Retrieves the matching readout element to a G4 hit
-        const MuonGMR4::MmReadoutElement* getReadoutElement(const ActsGeometryContext& gctx,
+        const MuonGMR4::MmReadoutElement* getReadoutElement(const ActsTrk::GeometryContext& gctx,
                                                             const G4TouchableHistory* touchHist) const;
         /// Identify the gasGap layer of the hit
-        Identifier getIdentifier(const ActsGeometryContext& gctx,
+        Identifier getIdentifier(const ActsTrk::GeometryContext& gctx,
                                 const MuonGMR4::MmReadoutElement* readOutEle, 
                                 const Amg::Vector3D& hitAtGapPlane) const;
    

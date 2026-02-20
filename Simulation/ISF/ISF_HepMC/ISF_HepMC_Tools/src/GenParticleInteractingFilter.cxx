@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleInteractingFilter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "GenParticleInteractingFilter.h"
@@ -22,8 +18,6 @@ ISF::GenParticleInteractingFilter::GenParticleInteractingFilter( const std::stri
                                                                  const IInterface* p )
   : base_class(t,n,p)
 {
-  declareProperty("AdditionalInteractingParticleTypes", m_additionalInteractingParticleTypes);
-  declareProperty("AdditionalNonInteractingParticleTypes", m_additionalNonInteractingParticleTypes);
 }
 
 StatusCode ISF::GenParticleInteractingFilter::initialize()

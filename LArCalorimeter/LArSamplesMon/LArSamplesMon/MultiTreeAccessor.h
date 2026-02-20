@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,40 +29,39 @@ namespace LArSamples {
     public:
    
       /** @brief Constructor  */
-      MultiTreeAccessor(const std::vector<const TreeAccessor*>& accessors)
-        : m_accessors(accessors) { }
+      MultiTreeAccessor(std::vector<std::unique_ptr<const TreeAccessor> >&& accessors);
       
-      static MultiTreeAccessor* open(const std::vector<TString>& files);
-      static MultiTreeAccessor* openList(const TString& fileList);
-      static MultiTreeAccessor* openWild(const TString& wcName);
+      static std::unique_ptr<MultiTreeAccessor> open(const std::vector<TString>& files);
+      static std::unique_ptr<MultiTreeAccessor> openList(const TString& fileList);
+      static std::unique_ptr<MultiTreeAccessor> openWild(const TString& wcName);
 
       virtual ~MultiTreeAccessor();
 
-      unsigned int nEvents() const;
-      unsigned int nRuns() const;
+      virtual unsigned int nEvents() const override;
+      virtual unsigned int nRuns() const override;
       
-      const EventData* eventData(unsigned int i) const;
-      const RunData* runData(unsigned int i) const;
-      
-      unsigned int historySize(unsigned int i) const;
-      unsigned int historySizeSC(unsigned int i) const;
+      virtual const EventData* eventData(unsigned int i) const override;
+      virtual const RunData* runData(unsigned int i) const override;
+
+      virtual unsigned int historySize(unsigned int i) const override;
+      virtual unsigned int historySizeSC(unsigned int i) const override;
           
-      bool writeToFile(const TString& fileName) const;
+      virtual bool writeToFile(const TString& fileName) const override;
 
       const TreeAccessor& accessor(unsigned int i) const { return *m_accessors[i]; }
       unsigned int nAccessors() const { return m_accessors.size(); }
       
-      std::vector<MultiTreeAccessor*> filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const;
+      std::vector<std::unique_ptr<MultiTreeAccessor> > filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const;
 
     protected:
       
-      const History* getCellHistory(unsigned int i) const;      
-      const History* getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;      
+      virtual std::unique_ptr<const History> getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History> getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
 
     private:
       
-      std::vector<const TreeAccessor*> m_accessors;
+      std::vector<std::unique_ptr<const TreeAccessor> > m_accessors;
   };
 }
   

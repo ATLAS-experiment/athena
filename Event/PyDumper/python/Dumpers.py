@@ -6184,7 +6184,6 @@ def get_dumper_fct(klass, ofile=sys.stdout, nmax = None):
         pass
     else:
         raise TypeError('expected a type or a string')
-    global dumpspecs
 
     klname = typename(klass)
     dumpers = [ i for i in dumpspecs if i[0] == klname ]

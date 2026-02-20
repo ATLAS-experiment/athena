@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DQUtils )
@@ -10,8 +10,6 @@ find_package( Oracle )
 find_package( Python COMPONENTS Development )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( sqlalchemy )
-
-string(REPLACE "-Wl,--as-needed" "" CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}")
 
 # Component(s) in the package:
 atlas_add_library( DQUtils

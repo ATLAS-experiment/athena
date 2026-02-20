@@ -79,9 +79,9 @@ namespace ActsTrk {
 			(const typename ActsTrk::TrackContainer::ConstTrackStateProxy& state)
 			{
 			  auto flags = state.typeFlags();
-			  if (not flags.test(Acts::TrackStateFlag::MeasurementFlag) and
-			      not flags.test(Acts::TrackStateFlag::OutlierFlag) and
-			      not flags.test(Acts::TrackStateFlag::HoleFlag)) return;
+			  if (not flags.isMeasurement() and
+			      not flags.isOutlier() and
+			      not flags.isHole()) return;
 			  tsos.push_back( state );
 			});
 
@@ -130,7 +130,7 @@ namespace ActsTrk {
     static const SG::ConstAccessor< ElementLink< xAOD::TrackMeasurementValidationContainer > > decorator_measurement_link("validationMeasurementLink");
     
     auto flags = state.typeFlags();
-    if (not flags.test(Acts::TrackStateFlag::HoleFlag) ) {
+    if (not flags.isHole() ) {
       auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
       ATH_CHECK( sl != nullptr );
       const xAOD::UncalibratedMeasurement &cluster = getUncalibratedMeasurement(sl);
@@ -148,9 +148,9 @@ namespace ActsTrk {
       msosContainer.back()->setTrackMeasurementValidationLink( std::move(tmvc_el) );
     }
     
-    if (flags.test(Acts::TrackStateFlag::HoleFlag)) {
+    if (flags.isHole()) {
       msosContainer.back()->setType( Trk::TrackStateOnSurface::Hole );
-    } else if (flags.test(Acts::TrackStateFlag::OutlierFlag)) {
+    } else if (flags.isOutlier()) {
       msosContainer.back()->setType( Trk::TrackStateOnSurface::Outlier );
     } else {
       msosContainer.back()->setType( Trk::TrackStateOnSurface::Measurement );

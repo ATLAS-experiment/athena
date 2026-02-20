@@ -36,11 +36,13 @@ namespace ORUtils
     // Initialize the b-jet helper
     if(!m_bJetLabel.empty()) {
       ATH_MSG_DEBUG("Configuring btag-aware OR with btag label: " << m_bJetLabel);
-      m_bJetHelper = std::make_unique<BJetHelper>(m_bJetLabel);
+      resetAccessor (m_accessors->m_bJetAcc, *m_accessors, m_bJetLabel);
     }
 
     // Initialize the dR matcher
     m_dRMatcher = std::make_unique<DeltaRMatcher>(m_dR, m_useRapidity);
+    ATH_CHECK (m_dRMatcher->setObjectTypes (xAODType::ObjectType::Jet, xAODType::ObjectType::Tau));
+    addSubtool(*m_dRMatcher);
 
     return StatusCode::SUCCESS;
   }
@@ -49,22 +51,15 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauJetOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
     // Check the container types
-    if(typeid(cont1) != typeid(xAOD::JetContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::JetContainer>)) {
-      ATH_MSG_ERROR("First container arg is not of type JetContainer!");
-      return StatusCode::FAILURE;
-    }
-    if(typeid(cont2) != typeid(xAOD::TauJetContainer) &&
-       typeid(cont2) != typeid(ConstDataVector<xAOD::TauJetContainer>)) {
-      ATH_MSG_ERROR("Second container arg is not of type TauJetContainer!");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::JetContainer&>(cont1),
-                            static_cast<const xAOD::TauJetContainer&>(cont2)) );
+    ATH_CHECK( checkForXAODContainer<xAOD::JetContainer>(cont1, "First container arg is not of type JetContainer!") );
+    ATH_CHECK( checkForXAODContainer<xAOD::TauJetContainer>(cont2, "Second container arg is not of type TauJetContainer!") );
+
+    ATH_CHECK( internalFindOverlaps(cont1, cont2) );
     return StatusCode::SUCCESS;
   }
 
@@ -72,39 +67,40 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauJetOverlapTool::
-  findOverlaps(const xAOD::JetContainer& jets,
-               const xAOD::TauJetContainer& taus) const
+  internalFindOverlaps(columnar::Particle1Range jets,
+                       columnar::Particle2Range taus) const
   {
     ATH_MSG_DEBUG("Removing overlapping taus and jets");
+    auto& acc = *m_accessors;
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(taus);
-    m_decHelper->initializeDecorations(jets);
+    initializeDecorations(taus);
+    initializeDecorations(jets);
 
     // TODO: add anti-tau support.
 
     // Remove non-btagged jets that overlap with taus.
     for(const auto tau : taus){
-      if(!m_decHelper->isSurvivingObject(*tau)) continue;
+      if(!isSurvivingObject(tau)) continue;
       for(const auto jet : jets){
-        if(!m_decHelper->isSurvivingObject(*jet)) continue;
+        if(!isSurvivingObject(jet)) continue;
 
         // Don't reject user-defined b-tagged jets
-        if(m_bJetHelper && m_bJetHelper->isBJet(*jet)) continue;
+        if(!m_bJetLabel.empty() && acc.m_bJetAcc(jet)) continue;
 
-        if(m_dRMatcher->objectsMatch(*tau, *jet)){
+        if(m_dRMatcher->objectsMatch(tau, jet)){
           ATH_CHECK( handleOverlap(jet, tau) );
         }
       }
     }
 
     // Remove taus that overlap with remaining jets
-    for(const auto jet : jets) {
-      if(!m_decHelper->isSurvivingObject(*jet)) continue;
+    for(const auto jet : jets){
+      if(!isSurvivingObject(jet)) continue;
       for(const auto tau : taus){
-        if(!m_decHelper->isSurvivingObject(*tau)) continue;
+        if(!isSurvivingObject(tau)) continue;
 
-        if(m_dRMatcher->objectsMatch(*jet, *tau)) {
+        if(m_dRMatcher->objectsMatch(jet, tau)) {
           ATH_CHECK( handleOverlap(tau, jet) );
         }
       }

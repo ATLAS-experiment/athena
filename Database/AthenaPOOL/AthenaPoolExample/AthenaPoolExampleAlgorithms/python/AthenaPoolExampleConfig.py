@@ -1,6 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
+# Hide function names in log messages to avoid GCC/Clang formatting differences
+import ROOT
+ROOT.errorcheck.ReportMessage.hideFunctionNames(True)
 
 # additional read catalogs are optional
 def AthenaPoolExampleReadCfg(flags, readCatalogs = [] ):

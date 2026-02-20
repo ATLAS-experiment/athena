@@ -475,7 +475,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	fill(residualGroup, si_residualx_m);
 	
 	if(barrelEC==0){//filling pixel barrel histograms
-	  int ModEtaShift[4] = {0, 30, 53, 76};
+	  int ModEtaShift[4] = {12, 38, 60, 82};
           int ModPhiShift[4] = {0, 24, 56, 104};
 	  
           //common Si plots
@@ -590,7 +590,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         
         if(barrelEC==0){//filling SCT barrel histograms
           int ModPhiShift[4] = {0, 42, 92, 150};
-          int ModEtaShift[4] = {0, 23, 46, 69};
+          int ModEtaShift[4] = {12, 34, 54, 78};
           
           //common Si plots
           si_b_residualx_m = residualX;

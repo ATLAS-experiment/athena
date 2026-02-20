@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloMonitoring )
@@ -24,9 +24,9 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( TileCaloCellMonAlg_test
                 SCRIPT python -m CaloMonitoring.TileCalCellMonAlg
                 PROPERTIES TIMEOUT 300
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test( LArCellMonBinning_test
                 SCRIPT python -m CaloMonitoring.LArCellBinning_test 
                 PROPERTIES TIMEOUT 600
-                POST_EXEC_SCRIPT nopost.sh)
+                POST_EXEC_SCRIPT noerror.sh)

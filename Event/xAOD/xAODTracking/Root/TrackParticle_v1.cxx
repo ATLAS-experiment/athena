@@ -16,6 +16,7 @@
 // Local include(s):
 #include "xAODTracking/versions/TrackParticle_v1.h"
 #include "xAODTracking/TrackSummaryAccessors_v1.h"
+#include "xAODTracking/TrackingDetails.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "TruthUtils/ParticleConstants.h"
 
@@ -115,16 +116,7 @@ namespace xAOD {
   }
 
   TrackParticle_v1::GenVecFourMom_t TrackParticle_v1::genvecP4() const {
-    using namespace std;
-    float p = 10.e6; // 10 TeV (default value for very high pt muons, with qOverP==0)
-    if (fabs(qOverP())>0.) p = 1/fabs(qOverP());
-    float thetaT = theta();
-    float phiT = phi();
-    float sinTheta= sin(thetaT);
-    float px = p*sinTheta*cos(phiT);
-    float py = p*sinTheta*sin(phiT);
-    float pz = p*cos(thetaT);
-    return GenVecFourMom_t(px, py, pz, m());
+    return TrackingDetails::genvecP4(qOverP(), theta(), phi(), m());
   }
 
   TrackParticle_v1::FourMom_t TrackParticle_v1::p4() const {
@@ -149,8 +141,7 @@ namespace xAOD {
   }
 
   float TrackParticle_v1::charge() const {
-    // static Accessor< float > acc( "charge" );
-    return (qOverP() > 0) ? 1 : ((qOverP() < 0) ? -1 : 0);
+    return TrackingDetails::charge (qOverP());
   }
 
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, d0)
@@ -246,79 +237,16 @@ namespace xAOD {
 
   const xAOD::ParametersCovMatrix_t TrackParticle_v1::definingParametersCovMatrix() const {
 
-        // Set up the result matrix.
-    xAOD::ParametersCovMatrix_t cov;
-    cov.setZero();
-
-    // Set the diagonal elements of the matrix.
-    if( accCovMatrixDiag.isAvailable( *this ) &&
-        ( static_cast< int >( accCovMatrixDiag( *this ).size() ) == cov.rows() ) ) {
-
-        // Access the "raw" variable.
-        const std::vector< float >& diagVec = accCovMatrixDiag( *this );
-        // Set the diagonal elements using the raw variable.
-        for( int i = 0; i < cov.rows(); ++i ) {
-          cov( i, i ) = diagVec[ i ];
-        }
-    } else {
-      xAODTrackParticlePrivate::covarianceUnsetHook();
-      // If the variable is not available/set, set the matrix to identity.
-      cov.setIdentity();
-    }
-
-    bool offDiagCompr = definingParametersCovMatrixOffDiagCompr();
-
-    // Set the off-diagonal elements of the matrix.
-    if(!offDiagCompr){
-
-      if( accCovMatrixOffDiag.isAvailable( *this ) &&
-	  ( static_cast< int >( accCovMatrixOffDiag( *this ).size() ) ==
-	    ( ( ( cov.rows() - 1 ) * cov.rows() ) / 2 ) ) ) {
-
-	// Access the "raw" variable.
-	const std::vector< float >& offDiagVec = accCovMatrixOffDiag( *this );
-	// Set the off-diagonal elements using the raw variable.
-	std::size_t vecIndex = 0;
-	for( int i = 1; i < cov.rows(); ++i ) {
-	  for( int j = 0; j < i; ++j, ++vecIndex ) {
-	    float offDiagCoeff = cov(i,i)>0 && cov(j,j)>0 ? offDiagVec[vecIndex]*sqrt(cov(i,i)*cov(j,j)) : 0;
-	    cov.fillSymmetric( i, j, offDiagCoeff );
-	  }
-	}
-      }
-
-      else xAODTrackParticlePrivate::covarianceUnsetHook();
-
-    }
-
-    else{ //Compressed case
-
-      if( accCovMatrixOffDiag.isAvailable( *this ) &&
-	  ( static_cast< int >( accCovMatrixOffDiag( *this ).size() ) == COVMATRIX_OFFDIAG_VEC_COMPR_SIZE ) ) {
-	// Access the "raw" variable.
-	const std::vector< float >& offDiagVec = accCovMatrixOffDiag( *this );
-	// Set the off-diagonal elements using the raw variable.
-
-	const covMatrixIndexPairVec& vecPairIndex = covMatrixComprIndexPairs();
-
-	for(unsigned int k=0; k<COVMATRIX_OFFDIAG_VEC_COMPR_SIZE; ++k){
-	  std::pair<covMatrixIndex,covMatrixIndex> pairIndex = vecPairIndex[k];
-	  covMatrixIndex i = pairIndex.first;
-	  covMatrixIndex j = pairIndex.second;
-	  float offDiagCoeff = cov(i,i)>0 && cov(j,j)>0 ? offDiagVec[k]*sqrt(cov(i,i)*cov(j,j)) : 0;
-	  cov.fillSymmetric( i, j, offDiagCoeff );
-	}
-
-      }
-
-      else xAODTrackParticlePrivate::covarianceUnsetHook();
-
-    }
-
-
-    // Return the filled matrix.
-    return cov;
-
+      std::span<const float> covMatrixDiag;
+      if( accCovMatrixDiag.isAvailable( *this ))
+        covMatrixDiag = std::span<const float>( accCovMatrixDiag( *this ) );
+      std::span<const float> covMatrixOffDiag;
+      if( accCovMatrixOffDiag.isAvailable( *this ))
+        covMatrixOffDiag = std::span<const float>( accCovMatrixOffDiag( *this ) );
+      bool valid = true;
+      auto result = TrackingDetails::definingParametersCovMatrix( covMatrixDiag, covMatrixOffDiag, valid );
+      if( !valid ) xAODTrackParticlePrivate::covarianceUnsetHook();
+      return result;
   }
 
   ParametersCovMatrixFilled_t TrackParticle_v1::definingParametersCovMatrixFilled() const {
@@ -429,9 +357,10 @@ namespace xAOD {
 
   bool TrackParticle_v1::definingParametersCovMatrixOffDiagCompr() const {
 
-    bool flag = false;
-    if(accCovMatrixOffDiag.isAvailable( *this )) flag = (static_cast< int >(accCovMatrixOffDiag( *this ).size())==COVMATRIX_OFFDIAG_VEC_COMPR_SIZE);
-    return flag;
+    std::span<const float> covMatrixOffDiag;
+    if( accCovMatrixOffDiag.isAvailable( *this ))
+      covMatrixOffDiag = std::span<const float>( accCovMatrixOffDiag( *this ) );
+    return TrackingDetails::definingParametersCovMatrixOffDiagCompr(covMatrixOffDiag);
   }
 
   void TrackParticle_v1::compressDefiningParametersCovMatrixOffDiag() {
@@ -763,9 +692,8 @@ namespace xAOD {
   }
 
   const TrackParticle_v1::covMatrixIndexPairVec& TrackParticle_v1::covMatrixComprIndexPairs(){
-    static const covMatrixIndexPairVec result {
-      {d0_index,phi_index}, {z0_index,th_index}, {d0_index,qp_index},
-      {z0_index,qp_index}, {phi_index,qp_index}, {th_index,qp_index} };
+    static const covMatrixIndexPairVec result (TrackingDetails::covMatrixComprIndexPairs.begin(),
+                 TrackingDetails::covMatrixComprIndexPairs.end());
     return result;
   }
 

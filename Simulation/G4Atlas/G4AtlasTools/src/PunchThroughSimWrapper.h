@@ -13,9 +13,6 @@
 #include "G4AtlasInterfaces/IPunchThroughG4Tool.h"
 #include "G4AtlasInterfaces/IPunchThroughG4Classifier.h"
 
-// Random generator includes
-#include "AthenaKernel/RNGWrapper.h"
-
 //Geant4
 #include "G4ParticleTable.hh"
 #include "G4FastStep.hh"
@@ -46,7 +43,7 @@ class PunchThroughSimWrapper : public extends<AthAlgTool, IPunchThroughSimWrappe
     virtual StatusCode finalize();
 
     // public function exposed to interface
-    virtual void DoPunchThroughSim(G4ParticleTable &ptable, ATHRNG::RNGWrapper* rngWrapper, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep);
+    virtual void DoPunchThroughSim(G4ParticleTable &ptable, CLHEP::HepRandomEngine* rng, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep);
 
  private:
     /*---------------------------------------------------------------------

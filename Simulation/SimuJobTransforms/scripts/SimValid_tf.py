@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 """
 Run HITS file and produce histograms.
@@ -44,6 +44,7 @@ def getTransform():
     addSimValidationSubstep(executorSet)
     trf = transform(executor = executorSet, description = 'ATLAS Validation transform. Inputs must be HITS. Outputs must be histogram files.')
     addAthenaArguments(trf.parser)
+    addDetectorArguments(trf.parser)
     addHITSValidArguments(trf.parser)
     return trf
 

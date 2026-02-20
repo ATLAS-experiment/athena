@@ -28,7 +28,6 @@ def TrackParticleCreatorToolCfg(flags,
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
         return ITkTrackParticleCreatorToolCfg(flags, name, **kwargs)
-
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:

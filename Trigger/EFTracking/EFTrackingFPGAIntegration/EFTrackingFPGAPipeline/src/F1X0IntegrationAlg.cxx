@@ -37,6 +37,8 @@ namespace EFTrackingFPGAIntegration
 
         ATH_CHECK(m_FPGAStripOutput.initialize());
         ATH_CHECK(m_FPGAPixelOutput.initialize());
+        ATH_CHECK(m_FPGAPixelRDOSize.initialize());
+        ATH_CHECK(m_FPGAStripRDOSize.initialize());
 
         std::vector<std::string> listofCUs;
 
@@ -74,8 +76,8 @@ namespace EFTrackingFPGAIntegration
             m_stripL2GOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             m_stripL2GEDMOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_BLOCK_BUF_SIZE * sizeof(uint64_t), NULL, &err));
             // EDMPrep
-            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
-            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint64_t), NULL, &err));
+            m_edmPixelOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE * sizeof(uint32_t), NULL, &err));
+            m_edmStripOutputBufferList.push_back(cl::Buffer(m_context, CL_MEM_READ_WRITE, EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE * sizeof(uint32_t), NULL, &err));
         }
 
         // Create kernels for each one of CUs that is inside device
@@ -141,6 +143,9 @@ namespace EFTrackingFPGAIntegration
         ATH_CHECK(SG::get(pixelInput, m_FPGAPixelRDO, ctx));
         ATH_CHECK(SG::get(stripInput, m_FPGAStripRDO, ctx));  
 
+        const int* pixelInputSize{nullptr}, *stripInputSize{nullptr};
+        ATH_CHECK(SG::get(pixelInputSize, m_FPGAPixelRDOSize, ctx));
+        ATH_CHECK(SG::get(stripInputSize, m_FPGAStripRDOSize, ctx));  
     
         // logic
         unsigned int nthreads = m_FPGAThreads.value();
@@ -148,7 +153,7 @@ namespace EFTrackingFPGAIntegration
         if(m_FPGAThreads.value() < 1){
             nthreads = SG::getNSlots();
         }
-
+        
         size_t bufferIndex = ctx.slot() % nthreads;
 
         // Get index for each of the kernels
@@ -191,7 +196,7 @@ namespace EFTrackingFPGAIntegration
         stripClusteringKernel.setArg(0, m_stripClusterInputBufferList[bufferIndex]);
         stripClusteringKernel.setArg(1, m_stripClusterOutputBufferList[bufferIndex]);
         stripClusteringKernel.setArg(2, m_stripClusterEDMOutputBufferList[bufferIndex]);
-        stripClusteringKernel.setArg(3, static_cast<unsigned int>((*stripInput).size()));
+        stripClusteringKernel.setArg(3, static_cast<unsigned int>(*stripInputSize));
 
         if (!m_doF110) {
             pixelL2GKernel->setArg(0, m_pixelClusterOutputBufferList[bufferIndex]);
@@ -264,23 +269,22 @@ namespace EFTrackingFPGAIntegration
 
         // output handles
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
-        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAPixelOutput(m_FPGAPixelOutput, ctx);
+        ATH_CHECK(FPGAPixelOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::PIXEL_CONTAINER_BUF_SIZE, 0)));
 
-        SG::WriteHandle<std::vector<uint64_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
-        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint64_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
+        SG::WriteHandle<std::vector<uint32_t>> FPGAStripOutput(m_FPGAStripOutput, ctx);
+        ATH_CHECK(FPGAStripOutput.record(std::make_unique<std::vector<uint32_t> >(EFTrackingTransient::STRIP_CONTAINER_BUF_SIZE, 0)));
 
-        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
-        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint64_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
+        acc_queue.enqueueReadBuffer(m_edmPixelOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint32_t) * (*FPGAPixelOutput).size(), (*FPGAPixelOutput).data(), &evt_vec_pixel_edm_prep, &evt_pixel_cluster_output);
+        acc_queue.enqueueReadBuffer(m_edmStripOutputBufferList[bufferIndex], CL_FALSE, 0, sizeof(uint32_t) * (*FPGAStripOutput).size(), (*FPGAStripOutput).data(), &evt_vec_strip_edm_prep, &evt_strip_cluster_output);
 
         std::vector<cl::Event> wait_for_reads = { evt_pixel_cluster_output, evt_strip_cluster_output };
         cl::Event::waitForEvents(wait_for_reads);
 
         mnt_timer_Total.stop();
 
-        if(pixelInput->size() == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
-        if(stripInput->size() == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
-
+        if(*pixelInputSize == 6) (*FPGAPixelOutput)[0] = 0; // if no pixel input, set the first element to 0
+        if(*stripInputSize == 6) (*FPGAStripOutput)[0] = 0; // if no strip input, set the first element to 0
 
         // calculate the time for the kernel execution
         // get the time of writing pixel input buffer

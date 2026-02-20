@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelTestDataCommon )
@@ -37,4 +37,4 @@ atlas_add_sercnv_library ( DataModelTestDataCommonSerCnv
                            LINK_LIBRARIES ${ROOT_LIBRARIES} DataModelTestDataCommonLib TrigSerializeCnvSvcLib )
 
 # Install files from the package:
-atlas_install_scripts( scripts/*.py )
+atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

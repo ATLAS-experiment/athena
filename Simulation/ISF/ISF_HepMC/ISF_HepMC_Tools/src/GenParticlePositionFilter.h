@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticlePositionFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_GENPARTICLEPOSITIONFILTER_H
 #define ISF_HEPMC_GENPARTICLEPOSITIONFILTER_H 1
@@ -26,36 +22,35 @@
 namespace ISF {
 
   /** @class GenParticlePositionFilter
-  
+
       Particle filter by position, to be used for initial GenEvent read-in.
-  
+
       @author Andreas.Salzburger -at- cern.ch
-     */
-  class GenParticlePositionFilter : public extends<AthAlgTool, IGenParticleFilter> { 
-      
-    public: 
-      //** Constructor with parameters */
-      GenParticlePositionFilter( const std::string& t, const std::string& n, const IInterface* p );
-      
-      /** Destructor */
-      ~GenParticlePositionFilter(){}
+  */
+  class GenParticlePositionFilter : public extends<AthAlgTool, IGenParticleFilter> {
 
-      /** Athena algtool's Hooks */
-      StatusCode  initialize();
-      StatusCode  finalize();
+  public:
+    //** Constructor with parameters */
+    GenParticlePositionFilter( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** does the given particle pass the filter? */
+    /** Destructor */
+    ~GenParticlePositionFilter() = default;
+
+    /** Athena algtool's Hooks */
+    virtual StatusCode  initialize() override final;
+
+    /** does the given particle pass the filter? */
 #ifdef HEPMC3
-      bool pass(const HepMC::ConstGenParticlePtr& particle) const;
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
 #else
-      bool pass(const HepMC::GenParticle& particle) const;
-#endif 
-	  
-	private:
-      ServiceHandle<IGeoIDSvc>          m_geoIDSvc;
-      std::vector<int>                  m_checkRegion;
-  }; 
-  
+    virtual bool pass(const HepMC::GenParticle& particle) const override final;
+#endif
+
+  private:
+    ServiceHandle<IGeoIDSvc> m_geoIDSvc{this, "GeoIDService", "ISF_GeoIDSvc", "The GeoID Service"};
+    Gaudi::Property<std::vector<int>> m_checkRegion{this, "CheckRegion", {}, "Check if the given particles are within the specified regions"};
+  };
+
 }
 
 

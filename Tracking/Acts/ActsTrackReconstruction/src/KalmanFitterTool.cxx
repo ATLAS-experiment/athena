@@ -40,7 +40,7 @@
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 // PACKAGE
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASSourceLink.h"
 #include "ActsInterop/Logger.h"
 
@@ -193,7 +193,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
-  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix scaledCov = Acts::BoundMatrix::Identity();
   for (int i=0; i<6; ++i) {
     double scale = m_option_seedCovarianceScale;
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);
@@ -500,7 +500,7 @@ KalmanFitterTool::fit(const EventContext& ctx,
 
   // The covariance from already fitted track are too small and would result an incorect smoothing.
   // We scale up the input covaraiance to avoid this.
-  Acts::BoundSquareMatrix scaledCov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix scaledCov = Acts::BoundMatrix::Identity();
   for (int i=0; i<6; ++i) {
     double scale = m_option_seedCovarianceScale;
     (scaledCov)(i,i) = scale * initialParams.covariance().value()(i,i);

@@ -10,7 +10,7 @@ find_package( Boost COMPONENTS timer)
 atlas_add_library( SGTools
                    src/*.cxx
                    PUBLIC_HEADERS SGTools
-                   LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel )
+                   LINK_LIBRARIES AthenaKernel CxxUtils SGCoreLib GaudiKernel )
 
 atlas_add_dictionary( SGToolsDict
                       SGTools/SGToolsDict.h
@@ -37,7 +37,7 @@ atlas_add_test( DataProxy_test
                 SOURCES
                 test/DataProxy_test.cxx
                 INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                LINK_LIBRARIES SGTools  ${Boost_LIBRARIES} )
+                LINK_LIBRARIES SGTools SGCoreLib ${Boost_LIBRARIES} )
 
 atlas_add_test( DataStore_test
                 SOURCES

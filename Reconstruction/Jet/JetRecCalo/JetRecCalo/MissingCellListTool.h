@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMOMENTTOOLS_MISSINGCALOCELLLISTTOOL_H
@@ -78,8 +78,9 @@ namespace jet {
       }
     };
 
-    double m_eta,m_phi;
-    CaloSample m_sampling;
+    double m_eta = 0;
+    double m_phi = 0;
+    CaloSample m_sampling = CaloSampling::Unknown;
     Identifier m_id;
   };
 

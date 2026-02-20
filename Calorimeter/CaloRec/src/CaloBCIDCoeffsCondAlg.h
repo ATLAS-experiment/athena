@@ -20,7 +20,7 @@
 #include "LArElecCalib/ILArMinBiasAverage.h"
 #include "LArRawConditions/LArMCSym.h"
 #include "LArIdentifier/LArOnlineID_Base.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -36,10 +36,10 @@
  * luminosities.  There are two distinct conditions objects because
  * the luminosity changes much faster than then calibrations.
  */
-class CaloBCIDCoeffsCondAlg : public AthReentrantAlgorithm
+class CaloBCIDCoeffsCondAlg : public AthCondAlgorithm
 {
 public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /**
@@ -47,7 +47,6 @@ public:
    */
   virtual StatusCode initialize() override final;
   virtual StatusCode execute (const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 
 private:
   /// Property: Symmetrization helper (conditions input).

@@ -13,10 +13,10 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 // Athena Headers
-#include "eflowRec/eflowCellList.h"
-#include "eflowRec/eflowCaloRegions.h"
-#include "eflowRec/eflowCellPosition.h"
-#include "eflowRec/eflowTrackCaloPoints.h"
+#include "eflowCellList.h"
+#include "eflowCaloRegions.h"
+#include "eflowCellPosition.h"
+#include "eflowTrackCaloPoints.h"
 
 #include "CaloEvent/CaloCell.h"
 

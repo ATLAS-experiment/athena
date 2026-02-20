@@ -5,11 +5,144 @@
 /// @author Nils Krumnack
 
 
+#include <ColumnarCore/VectorConvertView.h>
+#include <AthContainers/DataVector.h>
+
 namespace columnar
 {
+  namespace detail
+  {
+    // the xAOD specialization for native types
+    template<typename CT,ColumnAccessMode CAM>
+      requires (MemoryAccessor<CT,ColumnarModeXAOD>::isDefined)
+    class ContainerFreeAccessor<CT,CAM,ColumnarModeXAOD> final
+    {
+      /// Common Public Members
+      /// =====================
+    public:
+
+      using CM = ColumnarModeXAOD;
+
+      static_assert (CAM == ColumnAccessMode::input || MemoryAccessor<CT,CM>::viewIsReference || MemoryAccessor<CT,CM>::hasSetter, "output access not supported for this type");
+
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = MemoryAccessor<CT,ColumnarModeXAOD>::viewIsReference;
+      static constexpr bool allowRead = true;
+
+      static_assert (!std::is_const_v<CT>, "CT must not be const");
+
+      using ColumnValueType = typename MemoryAccessor<CT,ColumnarModeXAOD>::MemoryType;
+      using ColumnType = std::conditional_t<CAM==ColumnAccessMode::input,const ColumnValueType,ColumnValueType>;
+      using MemoryType = ColumnValueType;
+      using AccessorType = typename ColumnAccessModeTraits<CAM>::template XAODAccessor<ColumnValueType>;
+
+      ContainerFreeAccessor () = default;
+
+      ContainerFreeAccessor (ColumnarTool<CM>& /*columnBase*/, const std::string& name, ColumnAccessorOptions&& options)
+        : m_accessor(name)
+      {
+        if (options.addMTDependency)
+          throw std::runtime_error ("adding MT dependencies not yet supported for individual decorations");
+        if (!options.replacesColumn.empty())
+          m_accessor = options.replacesColumn;
+      }
+
+      ContainerFreeAccessor (ContainerFreeAccessor&& that)
+        : m_accessor (that.m_accessor)
+      {
+        that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (ColumnType).name();
+      }
+
+      ContainerFreeAccessor& operator = (ContainerFreeAccessor&& that)
+      {
+        if (this != &that)
+        {
+          m_accessor = that.m_accessor;
+          that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (ColumnType).name();
+        }
+        return *this;
+      }
+
+      ContainerFreeAccessor (const ContainerFreeAccessor&) = delete;
+      ContainerFreeAccessor& operator = (const ContainerFreeAccessor&) = delete;
+
+      [[nodiscard]] ColumnType& operator () (const SG::AuxElement& element) const
+        requires (viewIsReference && CAM != ColumnAccessMode::update)
+      {
+        return m_accessor(element);
+      }
+
+      [[nodiscard]] ColumnType& operator () (SG::AuxElement& element) const
+        requires (viewIsReference && CAM == ColumnAccessMode::update)
+      {
+        return m_accessor(element);
+      }
+
+      [[nodiscard]] auto operator () (const SG::AuxElement& element) const
+        requires (!viewIsReference && CAM == ColumnAccessMode::input)
+      {
+        void **dataPtr = nullptr;
+        return MemoryAccessor<CT,CM>::makeViewer(dataPtr)(m_accessor(element));
+      }
+
+      [[nodiscard]] static auto& makeView (auto&& value) noexcept
+        requires (viewIsReference)
+      {
+        return value;
+      }
+
+      [[nodiscard]] static auto makeView (auto&& value) noexcept
+        requires (!viewIsReference && CAM == ColumnAccessMode::input)
+      {
+        void **dataPtr = nullptr;
+        return MemoryAccessor<CT,CM>::makeViewer(dataPtr)(value);
+      }
+
+      [[nodiscard]] std::span<ColumnType> operator () (const DataVector<SG::AuxElement>& container) const
+        requires (viewIsReference)
+      {
+        if (container.empty())
+          return std::span<ColumnType> ();
+        return std::span<ColumnType> (&m_accessor (*container[0]), container.size());
+      }
+
+      [[nodiscard]] auto operator () (const DataVector<SG::AuxElement>& container) const
+        requires (!viewIsReference && CAM == ColumnAccessMode::input)
+      {
+        std::span<ColumnType> mySpan;
+        if (!container.empty())
+          mySpan = std::span<ColumnType> (&m_accessor (*container[0]), container.size());
+        void **dataPtr = nullptr;
+        return detail::VectorConvertView (MemoryAccessor<CT,CM>::make_viewer(dataPtr), std::span (mySpan));
+      }
+
+      template<typename T>
+        requires (!viewIsReference && CAM == ColumnAccessMode::output)
+        // requires (!viewIsReference && CAM == ColumnAccessMode::output && requires(MemoryType memory, T value) {MemoryAccessor<CT,CM>::makeSetter(nullptr)(memory, value);})
+      void set (const SG::AuxElement& element, T&& value) const
+      {
+        void **dataPtr = nullptr;
+        MemoryAccessor<CT,CM>::makeSetter(dataPtr)(m_accessor(element), std::forward<T>(value));
+      }
+
+      [[nodiscard]] bool isAvailable (const SG::AuxElement& element) const
+      {
+        return m_accessor.isAvailable (element);
+      }
+
+      /// Private Members
+      /// ===============
+    private:
+
+      AccessorType m_accessor {std::string("UNDEFINED_ACCESSOR_") + typeid (ColumnType).name()};
+    };
+  }
+
+
+
   // the xAOD specialization for native types
   template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM>
-    requires (ColumnTypeTraits<CT,ColumnarModeXAOD>::isNativeType)
+    requires (detail::ContainerFreeAccessor<CT,CAM,ColumnarModeXAOD>::isDefined)
   class AccessorTemplate<CI,CT,CAM,ColumnarModeXAOD> final
   {
     /// Common Public Members
@@ -19,49 +152,34 @@ namespace columnar
     static_assert (!std::is_const_v<CT>, "CT must not be const");
 
     using CM = ColumnarModeXAOD;
-    using ColumnType = typename ColumnAccessModeTraits<CAM>::template ColumnType<typename ColumnTypeTraits<CT,ColumnarModeXAOD>::ColumnType>;
-    using AccessorType = typename ColumnAccessModeTraits<CAM>::template XAODAccessor<typename ColumnTypeTraits<CT,ColumnarModeXAOD>::ColumnType>;
 
     AccessorTemplate () = default;
 
     AccessorTemplate (ColumnarTool<CM>& columnBase,
-                  const std::string& name, ColumnInfo&& info = {})
-      : m_accessor(name)
-    {
-      ColumnTypeTraits<CT,ColumnarModeXAOD>::updateColumnInfo (columnBase, info);
-      if (!info.replacesColumn.empty())
-        m_accessor = info.replacesColumn;
-    }
+                  const std::string& name, ColumnAccessorOptions&& options = {})
+      : m_accessor(columnBase, name, std::move (options))
+    {}
 
-    AccessorTemplate (AccessorTemplate&& that)
-      : m_accessor (that.m_accessor)
-    {
-      that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
-    }
-
-    AccessorTemplate& operator = (AccessorTemplate&& that)
-    {
-      if (this != &that)
-      {
-        m_accessor = that.m_accessor;
-        that.m_accessor = std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name();
-      }
-      return *this;
-    }
-
+    AccessorTemplate (AccessorTemplate&&) = default;
+    AccessorTemplate& operator = (AccessorTemplate&&) = default;
     AccessorTemplate (const AccessorTemplate&) = delete;
     AccessorTemplate& operator = (const AccessorTemplate&) = delete;
 
-    [[nodiscard]] ColumnType& operator () (ObjectId<CI,CM> id) const
+    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const
     {
       return m_accessor(id.getXAODObjectNoexcept());
     }
 
-    [[nodiscard]] std::span<ColumnType> operator () (ObjectRange<CI,CM> range) const
+    [[nodiscard]] decltype(auto) operator () (ObjectRange<CI,CM> range) const
     {
-      if (range.getXAODObjectNoexcept().empty())
-        return std::span<ColumnType> ();
-      return std::span<ColumnType> (&m_accessor (*range.getXAODObjectNoexcept()[0]), range.getXAODObjectNoexcept().size());
+      return m_accessor(range.getXAODObjectNoexcept());
+    }
+
+    template<typename T>
+      requires requires(T value) {std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>().set (std::declval<SG::AuxElement>(), value);}
+    void set (ObjectId<CI,CM> id, T&& value) const noexcept
+    {
+      m_accessor.set (id.getXAODObjectNoexcept(), std::forward<T>(value));
     }
 
     [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
@@ -69,18 +187,18 @@ namespace columnar
       return m_accessor.isAvailable (id.getXAODObjectNoexcept());
     }
 
-    [[nodiscard]] std::optional<ColumnType> getOptional (ObjectId<CI,CM> id) const
+    [[nodiscard]] auto getOptional (ObjectId<CI,CM> id) const
     {
+      std::optional<std::decay_t<decltype(std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>()(std::declval<const SG::AuxElement>()))>> result;
       if (m_accessor.isAvailable (id.getXAODObjectNoexcept()))
-        return m_accessor (id.getXAODObjectNoexcept());
-      else
-        return std::nullopt;
+        result = m_accessor (id.getXAODObjectNoexcept());
+      return result;
     }
 
     /// Private Members
     /// ===============
   private:
 
-    AccessorType m_accessor {std::string("UNDEFINED_ACCESSOR_") + typeid (typename ColumnTypeTraits<CT,CM>::ColumnType).name()};
+    detail::ContainerFreeAccessor<CT,CAM,CM> m_accessor;
   };
 }

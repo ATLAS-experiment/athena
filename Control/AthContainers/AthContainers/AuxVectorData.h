@@ -20,9 +20,8 @@
 #include "AthContainersInterfaces/AuxDataSpan.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "AthLinks/DataLink.h"
-#ifndef XAOD_STANDALONE
-#   include "AthenaKernel/ILockable.h"
-#endif // not XAOD_STANDALONE
+#include "SGCore/ILockable.h"
+
 #include <vector>
 #include <utility>
 #include <cstdlib>
@@ -161,10 +160,7 @@ class AuxDataOption;
  * to be an issue that we'll live with it for now --- though it might
  * be worth having something to validate the generated code.
  */
-class AuxVectorData
-#ifndef XAOD_STANDALONE
-  : public ILockable
-#endif // not XAOD_STANDALONE
+class AuxVectorData : public ILockable
 {
 public:
   /// Constructor.
@@ -778,7 +774,7 @@ public:
      */
     const void* getDataArray (SG::auxid_t auxid, const AuxVectorData& parent);
 
-    
+
     /**
      * @brief Return a const pointer to the start of an aux data vector.
      * @param auxid The desired aux data item.
@@ -791,7 +787,7 @@ public:
     const void* getDataArrayAllowMissing (SG::auxid_t auxid,
                                           const AuxVectorData& parent);
 
-    
+
     /**
      * @brief Return a pointer to the start of an aux decoration vector.
      * @param auxid The desired aux decoration item.
@@ -870,7 +866,7 @@ public:
   };
 
   friend class Cache;
-  
+
 
 private:
   /// Copy not allowed.

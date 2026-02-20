@@ -1,18 +1,28 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_NSWT0DATA_H
 #define MUONCONDDATA_NSWT0DATA_H
 
-// STL includes
-#include <vector>
+
 
 // Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h" 
-#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+// STL includes
+#include <vector>
+#include <optional>
 
+class Identifier;
+
+namespace Muon{
+  class IMuonIdHelperSvc;
+}
+
+
+/** @brief Conditions data object to calibrate the timeoff set of 
+ *         each individual channel in the NSW */
 class NswT0Data {
 
 
@@ -20,19 +30,28 @@ public:
     NswT0Data(const Muon::IMuonIdHelperSvc* idHelperSvc);
      ~NswT0Data() = default;
 
-    // setting functions
+    /** @brief Set the t0 calibration constant for a given nsw channel
+     *  @param channelId: Identifier of the readout channel to calibrate
+     *  @param channelT0: Calibration constantto be applied */
     void setData(const Identifier& channelId, const float channelT0);
-
-    // retrieval functions
-    bool getT0 (const Identifier&  channelId, float& channelT0) const;
+    /** @brief Retrieve the t0 calibration constant for a given NSW channel
+     *  @param channelId: Identifier of the readout channel to calibrate
+     */
+    std::optional<float> getT0 (const Identifier& channelId) const;
  
 private:
-    unsigned int identToModuleIdx(const Identifier& chan_id) const;
+    /** @brief The calibration data is internally stored as
+     *        two jagged vectors, one for MM the other for sTGC.
+     *        The outer vector is sorted by the module index which is
+     *        a composition of the detElementHash && the gasgap.
+     *        Transform the channel identifier to the module Index
+     * @param channelId: Identifier of the channel to transform */
+    std::size_t identToModuleIdx(const Identifier& channelId) const;
 
     // ID helpers
     const Muon::IMuonIdHelperSvc* m_idHelperSvc{};
     // containers
-    using ChannelArray = std::vector<std::vector<float>>;
+    using ChannelArray = std::vector<std::vector<std::optional<float>>>;
     ChannelArray m_data_mmg{};
     ChannelArray m_data_stg{};
 

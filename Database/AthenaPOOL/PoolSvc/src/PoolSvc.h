@@ -73,9 +73,13 @@ public: // Non-static members
    unsigned int getInputContext(const std::string& label,
                                 unsigned int maxFile = 0) override;
 
-   /// @return map of all labelled input contexts.
+   /// @return copy of the map of all labelled input contexts.
    virtual
-   const std::map<std::string, unsigned int>& getInputContextMap() const override;
+   std::map<std::string, unsigned int> getInputContextMap() const override;
+
+   /// @return size of the map of all labelled input contexts.
+   virtual
+   unsigned int getInputContextMapSize() const override;
 
    /// @return the context.
    virtual
@@ -114,9 +118,9 @@ public: // Non-static members
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection(const std::string& collectionType,
-	   const std::string& connection,
+   pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
+           const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
 
    /// @return a token for a container entry.
@@ -154,10 +158,6 @@ public: // Non-static members
    virtual
    StatusCode disconnectDb(const std::string& connection,
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
-
-   /// Get POOL FileSize attribute for database without logging a message
-   virtual
-   long long int getFileSize(const std::string& dbName, long tech, unsigned int contextId) const override;
 
    /// Get POOL attributes - domain
    virtual
@@ -231,37 +231,37 @@ private: // data
 
 private: // properties
    /// FileOpen, the open mode for the file ("append" or "overwrite").
-   StringProperty  m_fileOpen{this,"FileOpen","overwrite"};
+   Gaudi::Property<std::string> m_fileOpen{this,"FileOpen","overwrite"};
    /// MaxFilesOpen, option to have PoolSvc limit the number of open Input Files: default = 0
    ///  (No files are closed automatically)
-   IntegerProperty m_dbAgeLimit{this,"MaxFilesOpen",0};
+   Gaudi::Property<int> m_dbAgeLimit{this,"MaxFilesOpen",0};
    /// WriteCatalog, the file catalog to be used to register output files (also default input catalog):
    ///	default = "" (use POOL default).
-   StringProperty m_writeCatalog{this,"WriteCatalog","xmlcatalog_file:PoolFileCatalog.xml"};
+   Gaudi::Property<std::string> m_writeCatalog{this,"WriteCatalog","xmlcatalog_file:PoolFileCatalog.xml"};
    /// ReadCatalog, the list of additional POOL input file catalogs to consult: default = empty vector.
-   StringArrayProperty m_readCatalog{this,"ReadCatalog",{},"List of catalog files to read from","OrderedSet<std::string>"};
+   Gaudi::Property<std::vector<std::string>> m_readCatalog{this,"ReadCatalog",{},"List of catalog files to read from","OrderedSet<std::string>"};
    /// Use ROOT Implicit MultiThreading, default = true.
-   BooleanProperty m_useROOTIMT{this,"UseROOTImplicitMT",true};
+   Gaudi::Property<bool> m_useROOTIMT{this,"UseROOTImplicitMT",true};
    /// Increase virtual TTree size to avoid backreads in multithreading, default = false.
-   BooleanProperty m_useROOTMaxTree{this,"UseROOTIncreaseVMaxTree",false};
+   Gaudi::Property<bool> m_useROOTMaxTree{this,"UseROOTIncreaseVMaxTree",false};
 
    /// AttemptCatalogPatch, option to create catalog: default = false.
-   BooleanProperty m_attemptCatalogPatch{this,"AttemptCatalogPatch",true};
+   Gaudi::Property<bool> m_attemptCatalogPatch{this,"AttemptCatalogPatch",true};
    /// ConnectionRetrialPeriod, retry period for CORAL Connection Service: default = 30 seconds
-   IntegerProperty m_retrialPeriod{this,"ConnectionRetrialPeriod",300};
+   Gaudi::Property<int> m_retrialPeriod{this,"ConnectionRetrialPeriod",300};
    /// ConnectionRetrialTimeOut, the retrial time out for CORAL Connection Service: default = 300 seconds
-   IntegerProperty m_retrialTimeOut{this,"ConnectionRetrialTimeOut",3600};
+   Gaudi::Property<int> m_retrialTimeOut{this,"ConnectionRetrialTimeOut",3600};
    /// ConnectionTimeOut, the time out for CORAL Connection Service: default = 5 seconds
-   IntegerProperty m_timeOut{this,"ConnectionTimeOut",5};
+   Gaudi::Property<int> m_timeOut{this,"ConnectionTimeOut",5};
    /// ConnectionCleanUp - whether to use CORAL connection management thread: default = false.
-   BooleanProperty m_connClean{this,"ConnectionCleanUp",false};
+   Gaudi::Property<bool> m_connClean{this,"ConnectionCleanUp",false};
    /// Frontier proprties, compression level and list of schemas to be refreshed: default = 5
-   IntegerProperty m_frontierComp{this,"FrontierCompression",5};
-   StringArrayProperty m_frontierRefresh{this,"FrontierRefreshSchema",{}};
+   Gaudi::Property<int> m_frontierComp{this,"FrontierCompression",5};
+   Gaudi::Property<std::vector<std::string>> m_frontierRefresh{this,"FrontierRefreshSchema",{}};
    /// Use DBReplicaSvc to sort database connections, default = true.
-   BooleanProperty m_sortReplicas{this,"SortReplicas",true};
+   Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
    /// Default ROOT container type
-   StringProperty  m_defaultROOTContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
+   Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
    // delete all APR::Persistency Services, Catalog, Mutexes and Indexes

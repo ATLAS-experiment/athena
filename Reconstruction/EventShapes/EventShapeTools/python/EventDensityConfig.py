@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-import logging
-edLogger = logging.getLogger( "EventDensityConfig" )   
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def getEventShapeName( defOrLabel, nameprefix="", suffix=None, radius=0.4):
@@ -73,14 +71,4 @@ def configEventShapeCopierAlg( input ):
         ToolSvc +=t
         return t
     return CompFactory.EventDensityAlg(input+"EventShapeCopierAlg", EventDensityTool = [ buildTool("Kt4"), buildTool("Kt6") ] )
-
-
-
-## EventDensity Alg for Athena
-
-def EventDensityAlg(name, EventDensityTool=None, **args):
-    edLogger.warning("When instantiating %s : call of EventDensityAlg is deprecated", name)
-    edLogger.warning("  please use EventDensityAthAlg (from  EventShapeTools.EventShapeToolsConf import EventDensityAthAlg) ")
-    alg = CompFactory.EventDensityAthAlg(name,EventDensityTool=EventDensityTool, **args)
-    return alg
 

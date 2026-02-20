@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/ConfigData.h"
@@ -119,7 +119,7 @@ namespace ForwardTracker {
 					      side,
 					      magType);
       
-      magnets.push_back(mptr);
+      magnets.push_back(std::move(mptr));
     }
     
     std::sort(magnets.begin(), magnets.end(), absZGreater<Magnet::ConstPtr_t>);

@@ -3,6 +3,9 @@
 #include "../FPGATrackSimDataFlowTool.h"
 #include "../FPGATrackSimDataPrepAlg.h"
 #include "../FPGATrackSimSecondStageAlg.h"
+
+#include "../FPGATrackSimTrackMonitor.h"
+
 #include "../FPGATrackSimLayerStudyAlg.h"
 #include "../FPGATrackSimMergeOutputsAlg.h"
 #include "FPGATrackSimAlgorithms/FPGATrackSimRegionMergingAlg.h"
@@ -20,6 +23,9 @@ DECLARE_COMPONENT( FPGATrackSimTrackFitterTool )
 DECLARE_COMPONENT( FPGATrackSimDataFlowTool )
 DECLARE_COMPONENT( FPGATrackSimDataPrepAlg )
 DECLARE_COMPONENT( FPGATrackSimSecondStageAlg )
+
+DECLARE_COMPONENT( FPGATrackSimTrackMonitor )
+
 DECLARE_COMPONENT( FPGATrackSimWindowExtensionTool )
 DECLARE_COMPONENT( FPGATrackSimNNPathfinderExtensionTool )
 DECLARE_COMPONENT( FPGATrackSimLayerStudyAlg )

@@ -5,13 +5,13 @@
 #ifndef LARRECUTILS_LARXTALKWEIGHTCONDALG_H
 #define LARRECUTILS_LARXTALKWEIGHTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/DataHandle.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "LArRecConditions/LArXTalkWeight.h"
 
-class LArXTalkWeightCondAlg: public AthReentrantAlgorithm {
+class LArXTalkWeightCondAlg: public AthCondAlgorithm {
   public:
     LArXTalkWeightCondAlg(const std::string& name, ISvcLocator* pSvcLocator); 
     virtual ~LArXTalkWeightCondAlg() = default;

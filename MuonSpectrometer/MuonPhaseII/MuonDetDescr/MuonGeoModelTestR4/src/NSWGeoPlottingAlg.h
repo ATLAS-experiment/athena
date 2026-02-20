@@ -35,7 +35,7 @@ class NswGeoPlottingAlg : public AthHistogramAlgorithm {
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                           "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+  SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
   const MuonDetectorManager* m_detMgr{nullptr};
 

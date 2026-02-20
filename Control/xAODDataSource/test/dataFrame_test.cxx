@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -33,7 +33,8 @@ int main() {
    ANA_CHECK( xAOD::Init() );
 
    // Create a data frame object.
-   auto df = xAOD::MakeDataFrame( "${ASG_TEST_FILE_DATA}" );
+   auto df = xAOD::MakeDataFrame( "${ASG_TEST_FILE_DATA}", "CollectionTree",
+      false, xAOD::TEvent::kAthenaAccess );
 
    // Test its histogramming:
    auto elPt = df.Define( "ElectronsPt",

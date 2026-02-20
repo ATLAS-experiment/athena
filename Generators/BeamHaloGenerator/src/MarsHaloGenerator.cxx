@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/MarsHaloGenerator.h"
@@ -36,7 +36,7 @@ int MarsHaloGenerator::genInitialize() {
   // the ASCII file open for the event loop. 
   if(!m_enableSampling) return 0;
 
-  m_beamHaloParticleBuffer = new BeamHaloParticleBuffer(m_bufferFileName);
+  m_beamHaloParticleBuffer = std::make_unique<BeamHaloParticleBuffer>(m_bufferFileName);
   if(m_beamHaloParticleBuffer->openForWriting()) {
     std::cout << "Error: Could not open binary buffer file " << m_bufferFileName << " for writing." << std::endl;
     return 1;

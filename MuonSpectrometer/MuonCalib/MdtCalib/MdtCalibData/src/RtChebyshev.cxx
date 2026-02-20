@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibData/RtChebyshev.h"
-#include "MuonCalibMath/ChebychevPoly.h"
+#include "Acts/Utilities/detail/Polynomials.hpp"
 #include "GeoModelKernel/throwExcept.h"
 using namespace MuonCalib;
 
@@ -38,7 +38,7 @@ double RtChebyshev::radius(double t) const {
     // CALCULATE r(t) //
     ////////////////////
     for (unsigned int k = 0; k < nDoF(); k++) { 
-        rad += par(k+2) * chebyshevPoly1st(k, x); 
+        rad += par(k+2) * Acts::detail::chebychevPolyTn(x, k); 
     }
     return std::max(rad, 0.);
 }
@@ -55,7 +55,7 @@ double RtChebyshev::driftVelocity(double t) const {
     double drdt{0.};
     for (unsigned int k = 1; k < nDoF(); ++k) {
         // Calculate the contribution to dr/dt using k * U_{k-1}(x) * dx/dt
-        drdt += par(k+2) *  chebyshevPoly1stPrime(k, x) * dx_dt;
+        drdt += par(k+2) * Acts::detail::chebychevPolyTn(x, k, 1)  * dx_dt;
     }
     return drdt; 
 }
@@ -65,7 +65,7 @@ double RtChebyshev::driftAcceleration(double t) const {
     const double x = getReducedTime(t);
     const double dx_dt = std::pow(dReducedTimeDt(), 2);
     for (unsigned int k = 2; k < nDoF(); ++k) {
-        acc += par(k+2) *  chebyshevPoly1st2Prime(k, x) * dx_dt;
+        acc += par(k+2) * Acts::detail::chebychevPolyTn(x, k, 2) * dx_dt;
     }
     return acc * t;
 }

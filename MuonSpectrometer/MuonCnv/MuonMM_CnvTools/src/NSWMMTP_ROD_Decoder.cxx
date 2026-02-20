@@ -105,7 +105,7 @@ StatusCode Muon::NSWMMTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAM
 
   for(const auto& baseLink: decoder.get_elinks()){
     const auto l = dynamic_cast<const Muon::nsw::NSWTriggerMML1AElink*>(baseLink.get());
-    
+    if (not l) continue;
     if (l->l1a_timeout()==0) {ATH_MSG_DEBUG("NSW MMTP Common Decoder reporting timeout condition: unclear if current event can be trusted");}
 
     for (const auto& a: l->art_packets()) {

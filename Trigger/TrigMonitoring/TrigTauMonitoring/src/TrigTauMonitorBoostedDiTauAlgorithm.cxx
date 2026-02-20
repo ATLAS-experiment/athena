@@ -3,6 +3,8 @@
 */
 
 #include "TrigTauMonitorBoostedDiTauAlgorithm.h"
+#include "TrigCompositeUtils/TrigCompositeUtils.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 
 TrigTauMonitorBoostedDiTauAlgorithm::TrigTauMonitorBoostedDiTauAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)

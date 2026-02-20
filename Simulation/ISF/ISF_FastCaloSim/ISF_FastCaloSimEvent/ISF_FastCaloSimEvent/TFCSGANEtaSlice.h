@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -33,6 +33,9 @@ public:
   TFCSGANEtaSlice(int pid, int etaMin, int etaMax,
                   const TFCSGANXMLParameters &param);
   virtual ~TFCSGANEtaSlice();
+
+  TFCSGANEtaSlice(const TFCSGANEtaSlice&) = delete;
+  TFCSGANEtaSlice& operator=(const TFCSGANEtaSlice&) = delete;
 
   typedef std::map<int, std::vector<double>> FitResultsPerLayer;
   typedef std::map<int, double> ExtrapolatorWeights;

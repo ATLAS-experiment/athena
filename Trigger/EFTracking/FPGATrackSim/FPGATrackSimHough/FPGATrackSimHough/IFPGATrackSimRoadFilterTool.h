@@ -25,15 +25,14 @@
 /**
  * A road filter returns a vector of roads given a vector of roads.
  *
- * Note that the postfilter_roads are owned by the tool, and are cleared at each successive
- * call of filterRoads().
+ * Note that the postfilter_roads are now owned by the caller for move semantics support.
  */
 
 class IFPGATrackSimRoadFilterTool : virtual public IAlgTool
 {
     public:
-        DeclareInterfaceID(IFPGATrackSimRoadFilterTool, 1, 0);
-        virtual StatusCode filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) = 0;
+        DeclareInterfaceID(IFPGATrackSimRoadFilterTool, 2, 0);
+        virtual StatusCode filterRoads(std::vector<FPGATrackSimRoad> & prefilter_roads, std::vector<FPGATrackSimRoad> & postfilter_roads) = 0;
 };
 
 

@@ -60,10 +60,12 @@ public:
   // Full identifier computation from a G4 step
   virtual LArG4Identifier CalculateIdentifier( const G4Step* ) const = 0;
 
+  // Full identifier for SR computation from a G4 step
+  virtual LArG4Identifier CalculateSuperResolutionIdentifier(const G4Step* a_step) const = 0;
+
   // Given a point compute all quantities (cell number, distance to electrode, etc...)
   virtual void findCell( LArG4::Barrel::CalcData & currentCellData, const double & x, const double & y, const double & z,
                          const double & r, const double & eta, const double & phi, const bool detail) const = 0;
-
 };
 
 #endif // LARG4BARREL_ILARBARRELGEOMETRY_H

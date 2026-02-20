@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TH1D.h>
@@ -32,6 +32,8 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
   std::vector<TMatrixD*> weightMatrices=trainedNetwork->weightMatrices();
 
   //LayersInfo
+  //weak random function, not used for crypto
+  //coverity[dont_call]
   std::string li_string = std::format("LayersInfo_{}", rand());
   TH1D* histoLayersInfo=new TH1D(li_string.c_str(),
                                  "LayersInfo",
@@ -67,7 +69,8 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
    
     Int_t layerSize=(i<nHidden)?nHiddenLayerSize[i]:nOutput;
     Int_t previousLayerSize=(i==0)?nInput:nHiddenLayerSize[i-1];
-
+    //weak random function, not used for crypto
+    //coverity[dont_call]
     std::string th_str = std::format("{}_{}", threName, rand());
 
     TH1D* histoThreshLayer=new TH1D(th_str.c_str(),
@@ -84,7 +87,8 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
     std::string weightsName = std::format("Layer{}_weights", i);
     
     outputHistos[threName] = histoThreshLayer;
-
+    //weak random function, not used for crypto
+    //coverity[dont_call]
     std::string wt_str = std::format("{}_{}", weightsName, rand()); 
     TH2D* histoWeightsLayer=new TH2D(wt_str.c_str(),
                                      weightsName.c_str(),
@@ -114,7 +118,8 @@ NetworkToHistoTool::histsFromNetwork(const TTrainedNetwork* trainedNetwork)
     return outputHistos; 
   }
   assert(inputs.size() == nInput); 
-
+  //weak random function, not used for crypto
+  //coverity[dont_call]
   std::string ii_str = std::format("InputsInfo_{}", rand());
   TH2D* histoInputs = new TH2D(ii_str.c_str(), "InputsInfo",
 			       nInput, 0, 1, 
@@ -237,21 +242,14 @@ for (Int_t i=0;i<nHidden;++i)
   const TH1* histoInputs = getHist ("InputsInfo");
   std::vector<TTrainedNetwork::Input> inputs; 
   if (!histoInputs) { 
-    for (unsigned i = 0 ; i < nInput; i++) { 
-      TTrainedNetwork::Input the_input; 
-      the_input.offset = 0; 
-      // setting all scales to zero disables normalized output
-      the_input.scale = 0; 	
-      inputs.push_back(the_input); 
-    }
+    inputs.resize(nInput);
   }
   else { 
     for (unsigned i = 0 ; i < nInput; i++) { 
-      TTrainedNetwork::Input the_input; 
-      the_input.name = histoInputs->GetXaxis()->GetBinLabel(i + 1); 
-      the_input.offset = histoInputs->GetBinContent(i + 1, 1); 
-      the_input.scale = histoInputs->GetBinContent(i + 1, 2); 
-      inputs.push_back(the_input); 
+      const auto & name = histoInputs->GetXaxis()->GetBinLabel(i + 1); 
+      const auto & offset = histoInputs->GetBinContent(i + 1, 1); 
+      const auto & scale = histoInputs->GetBinContent(i + 1, 2); 
+      inputs.emplace_back(name, offset, scale); 
     }
   }
   TTrainedNetwork* trainedNetwork = 

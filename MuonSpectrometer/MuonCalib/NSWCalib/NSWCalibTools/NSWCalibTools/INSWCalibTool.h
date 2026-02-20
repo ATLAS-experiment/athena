@@ -12,7 +12,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
 #include "xAODMuonPrepData/MMClusterFwd.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 
 
@@ -68,7 +68,7 @@ namespace Muon {
  
     virtual StatusCode calibrateClus(const EventContext& ctx, const Muon::MMPrepData* prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
     
-    virtual StatusCode calibrateClus(const EventContext& ctx, const ActsGeometryContext& gctx, const xAOD::MMCluster& prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
+    virtual StatusCode calibrateClus(const EventContext& ctx, const ActsTrk::GeometryContext& gctx, const xAOD::MMCluster& prepRawData, const Amg::Vector3D& globalPos, std::vector<NSWCalib::CalibratedStrip>& calibClus) const = 0;
 
     virtual StatusCode calibrateStrip(const EventContext& ctx ,const Identifier& id,  const double time, const double charge, const double theta, const double lorentzAngle, NSWCalib::CalibratedStrip&calibStrip) const = 0;
 

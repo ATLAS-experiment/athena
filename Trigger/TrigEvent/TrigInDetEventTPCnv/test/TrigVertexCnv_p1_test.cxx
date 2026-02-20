@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrigInDetEventTPCnv/test/TrigVertexCnv_p1_test.cxx
@@ -185,7 +185,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   tracks->push_back (&track2);
 
   double cov[6] = {101.5, 102.5, 103.5, 104.5, 105.5, 106};
-  TrigVertex trans1 (1.5, 2.5, 3.5, cov, 4.5, 5, tracks.release(),
+  TrigVertex trans1 (1.5, 2.5, 3.5, cov, 4.5, 5, std::move(tracks),
                      6.5, 7.5, 8, 9.5, 10.5,
                      TrigVertex::IDSCANID);
   trans1.setMassVariance (18.5);

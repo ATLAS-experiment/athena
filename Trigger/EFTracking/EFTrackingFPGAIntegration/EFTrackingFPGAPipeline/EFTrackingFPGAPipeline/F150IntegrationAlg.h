@@ -1,0 +1,137 @@
+/*
+    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
+/**
+ * @file src/F150IntegrationAlg.h
+ */
+
+#ifndef EFTRACKING_FPGA_INTEGRATION_F150IntegrationAlg_H
+#define EFTRACKING_FPGA_INTEGRATION_F150IntegrationAlg_H
+
+// EFTracking include
+#include "EFTrackingFPGAPipeline/IntegrationBase.h"
+#include "EFTrackingFPGAUtility/xAODClusterMaker.h"
+#include "EFTrackingFPGAUtility/EFTrackingTransient.h"
+
+// Athena include
+#include "InDetRawData/PixelRDO_Container.h"
+#include "InDetRawData/SCT_RDO_Container.h"
+#include "GaudiKernel/ServiceHandle.h"        
+#include "GaudiKernel/IChronoSvc.h"
+#include <TrigSteeringEvent/TrigRoiDescriptorCollection.h>
+#include <IRegionSelector/IRegSelTool.h>
+
+#include "AthenaMonitoringKernel/Monitored.h"
+
+namespace EFTrackingFPGAIntegration
+{
+    /**
+     * @brief This is the class for the benchmark algorithm specific to the FPGA integration and output conversion.
+     *
+     * This algorithm is used to benchmark and optimize the FPGA output memory migration
+     * and output conversion. It expects the use of FPGA pass-through kernel.
+     */
+    class F150IntegrationAlg : public IntegrationBase
+    {
+    public:
+        using IntegrationBase::IntegrationBase;
+        virtual StatusCode initialize() override final;
+        virtual StatusCode execute(const EventContext &ctx) const override final;
+        virtual StatusCode finalize() override final;
+
+    private:
+        ServiceHandle<IChronoSvc> m_chronoSvc{"ChronoStatSvc", name()}; //!< Service for timing the algorithm
+
+        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelRDO{this, "FPGAEncodedPixelKey", "FPGAEncodedPixelRDOs", "Pixel RDO converted to FPGA format"};
+        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripRDO{this, "FPGAEncodedStripKey", "FPGAEncodedStripRDOs", "Strip RDO converted to FPGA format"};
+
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA format"};
+        SG::WriteHandleKey<std::vector<uint64_t>> m_FPGATrackOutput{this, "FPGAOutputTrackKey", "FPGATrackOutput", "Track output from FPGA format"};
+
+        Gaudi::Property<int> m_FPGAThreads{this, "FPGAThreads", 1, "number of FPGA threads to initialize"}; 
+        Gaudi::Property<bool> m_outputTextFile{this, "outputTextFile", "", "Whether to output text file"}; //!<  Whether to run SE or not
+
+        Gaudi::Property<std::string> m_xclbin{this, "xclbin", "", "xclbin path and name"}; //!< Path and name of the xclbin file
+
+        Gaudi::Property<std::string> m_pixelEdmKernelName{this, "PixelEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
+        Gaudi::Property<std::string> m_stripEdmKernelName{this, "StripEDMPrepKernelName", "", "Name of the FPGA kernel"}; //!< Name of the FPGA kernel
+        Gaudi::Property<std::string> m_pixelClusterKernelName{this, "PixelClusterKernelName", "", "Name of the pixel clustering kernel"}; //!< Name of the pixel clustering kernel
+        Gaudi::Property<std::string> m_stripClusterKernelName{this, "StripClusterKernelName", "", "Name of the strip clustering kernel"}; //!< Name of the strip clustering kerne
+        Gaudi::Property<std::string> m_stripL2GKernelName{this, "StripL2GKernelName", "", "Name of the strip L2G kernel"}; //!< Name of the strip L2G kernelS
+        Gaudi::Property<std::string> m_slicingEngineInputName{this, "SlicingEngineInputName", "", "Name of the slicing engine input kernel"};
+        Gaudi::Property<std::string> m_slicingEngineOutputName{this, "SlicingEngineOutputName", "", "Name of the slicing engine output kernel"};
+        Gaudi::Property<std::string> m_insideOutInputName{this, "InsideOutInputName", "", "Name of the inside out input kernel"};
+        Gaudi::Property<std::string> m_insideOutOutputName{this, "InsideOutOutputName", "", "Name of the inside out output kernel"};
+
+        ToolHandle< GenericMonitoringTool > m_monTool  { this, "MonTool", "", "Monitoring tool" };
+
+        mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
+        mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
+        mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
+        mutable std::atomic<cl_ulong> m_pixelClusteringTime{0}; //!< Time for pixel clustering
+        mutable std::atomic<cl_ulong> m_stripClusteringTime{0}; //!< Time for strip clustering
+        mutable std::atomic<cl_ulong> m_stripL2GTime{0};        //!< Time for strip L2G
+        mutable std::atomic<cl_ulong> m_pixelEdmPrepTime{0};    //!< Time for pixel EDM preparation
+        mutable std::atomic<cl_ulong> m_stripEdmPrepTime{0};    //!< Time for strip EDM preparation
+        mutable std::atomic<cl_ulong> m_pixelOutputTime{0};     //!< Time for pixel output buffer read
+        mutable std::atomic<cl_ulong> m_stripOutputTime{0};     //!< Time for strip output buffer read
+        mutable std::atomic<cl_ulong> m_kernelTime{0};          //!< Time for kernel execution
+
+        // Kernels
+        // Clustering
+        mutable std::vector<cl::Kernel> m_pixelClusteringKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripClusteringKernels ATLAS_THREAD_SAFE;
+
+        // L2G
+        mutable std::vector<cl::Kernel> m_stripL2GKernels ATLAS_THREAD_SAFE;
+
+        // EDM prep
+        mutable std::vector<cl::Kernel> m_pixelEdmPrepKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_stripEdmPrepKernels ATLAS_THREAD_SAFE;
+
+        mutable std::vector<cl::Kernel> m_slicingEngineInputKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_slicingEngineOutputKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_insideOutInputKernels ATLAS_THREAD_SAFE;
+        mutable std::vector<cl::Kernel> m_insideOutOutputKernels ATLAS_THREAD_SAFE;
+
+        // Buffers for input
+        std::vector<cl::Buffer> m_pixelClusterInputBufferList;
+        std::vector<cl::Buffer> m_stripClusterInputBufferList;
+        // Buffers for Clustering
+        std::vector<cl::Buffer> m_pixelClusterOutputBufferList;
+        std::vector<cl::Buffer> m_stripClusterOutputBufferList;
+        std::vector<cl::Buffer> m_pixelClusterEDMOutputBufferList;
+        std::vector<cl::Buffer> m_stripClusterEDMOutputBufferList;
+        // L2G
+        std::vector<cl::Buffer> m_stripL2GInputBufferList;
+        std::vector<cl::Buffer> m_stripL2GEDMInputBufferList;
+        std::vector<cl::Buffer> m_stripL2GOutputBufferList;
+        std::vector<cl::Buffer> m_stripL2GEDMOutputBufferList;
+
+        // EDM prep
+        std::vector<cl::Buffer> m_edmPixelInputBufferList;
+        std::vector<cl::Buffer> m_edmStripInputBufferList;
+        std::vector<cl::Buffer> m_edmPixelOutputBufferList;
+        std::vector<cl::Buffer> m_edmStripOutputBufferList;
+
+        // Slicing
+        std::vector<cl::Buffer> m_slicingEngineInputBufferList;
+        std::vector<cl::Buffer> m_slicingEngineOutputBufferList;
+
+        // insideout
+        std::vector<cl::Buffer> m_insideOutInputBufferList;
+        std::vector<cl::Buffer> m_insideOutOutputBufferList;
+
+        // Command queue
+        std::vector<cl::CommandQueue> m_acc_queues;
+        void getListofCUs(std::vector<std::string>& cuNames);
+
+        void dumpHexData(std::span<const uint64_t> data, const std::string& dataDescriptor, const EventContext &ctx) const;
+
+
+    };
+}
+
+#endif // EFTRACKING_FPGA_INTEGRATION_F150IntegrationAlg_H

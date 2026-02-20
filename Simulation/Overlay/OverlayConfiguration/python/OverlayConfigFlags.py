@@ -1,6 +1,6 @@
 """Construct Overlay configuration flags
 
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -16,8 +16,6 @@ def createOverlayConfigFlags():
     flags.addFlag("Overlay.DataOverlayConditions", "")
     # Overlay skip secondary events
     flags.addFlag("Overlay.SkipSecondaryEvents", -1)
-    # Overlay flag when reading from ByteStream
-    flags.addFlag("Overlay.ByteStream", False)
     # Overlay background StoreGate key prefix
     flags.addFlag("Overlay.BkgPrefix", "Bkg_")
     # Overlay signal StoreGate key prefix

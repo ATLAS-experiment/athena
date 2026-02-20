@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -39,41 +39,43 @@ namespace LArSamples {
 
       TreeAccessor(const TString& fileName) : PersistentAccessor(fileName) { }
       
-      static TreeAccessor* open(const TString& fileName);
+      static std::unique_ptr<TreeAccessor> open(const TString& fileName);
       
       virtual ~TreeAccessor() { resetCache(); }
                 
-      static TreeAccessor* merge(const std::vector<const Accessor*>& accessors,const TString& fileName = "");
-      static TreeAccessor* merge(const std::vector<const Accessor*>& accessors,const TString& fileName,const TString& LBFile);
-      static TreeAccessor* filter(const Accessor& accessor, 
-                                  const FilterParams& filterParams,
-                                  const TString& fileName, const DataTweaker& tweaker);
+      static std::unique_ptr<TreeAccessor> merge(const std::vector<const Accessor*>& accessors,const TString& fileName = "");
+      static std::unique_ptr<TreeAccessor> merge(const std::vector<const Accessor*>& accessors,const TString& fileName,const TString& LBFile);
+      static std::unique_ptr<TreeAccessor>
+        filter(const Accessor& accessor,
+               const FilterParams& filterParams,
+               const TString& fileName, const DataTweaker& tweaker);
       
-      static std::vector<TreeAccessor*> filter(const Accessor& accessor, 
-                                               const FilterList& filterList, const DataTweaker& tweaker);
+      static std::vector<std::unique_ptr<TreeAccessor> >
+        filter(const Accessor& accessor,
+               const FilterList& filterList, const DataTweaker& tweaker);
                                                
       friend class Interface;
 
-      static TreeAccessor* makeTemplate(const Accessor& accessor, const TString& fileName);
+      static std::unique_ptr<TreeAccessor> makeTemplate(const Accessor& accessor, const TString& fileName);
       
-      bool writeToFile(const TString& fileName) const;
+      virtual bool writeToFile(const TString& fileName) const override;
 
-      unsigned int historySize(unsigned int i) const { return PersistentAccessor::historySize(i); }
-      unsigned int historySizeSC(unsigned int i) const { return PersistentAccessor::historySizeSC(i); }
+      virtual unsigned int historySize(unsigned int i) const override { return PersistentAccessor::historySize(i); }
+      virtual unsigned int historySizeSC(unsigned int i) const override { return PersistentAccessor::historySizeSC(i); }
 
-      unsigned int nEvents() const { return PersistentAccessor::nEvents(); }
-      const EventData* eventData(unsigned int i) const { return PersistentAccessor::eventData(i); }
+      virtual unsigned int nEvents() const override { return PersistentAccessor::nEvents(); }
+      virtual const EventData* eventData(unsigned int i) const override { return PersistentAccessor::eventData(i); }
 
-      unsigned int nRuns() const { return PersistentAccessor::nRuns(); }
-      const RunData* runData(unsigned int i) const { return PersistentAccessor::runData(i); }
+      virtual unsigned int nRuns() const override { return PersistentAccessor::nRuns(); }
+      virtual const RunData* runData(unsigned int i) const override { return PersistentAccessor::runData(i); }
 
       void add(HistoryContainer* cont) { PersistentAccessor::add(cont); resetCache(); }
 
       
-      const History* getCellHistory(unsigned int i) const;      
-      const History* getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;      
-      const CellInfo* getSCInfo(unsigned int i) const;      
+      virtual std::unique_ptr<const History> getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History> getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
+      std::unique_ptr<const CellInfo> getSCInfo(unsigned int i) const;
       
   };
 }

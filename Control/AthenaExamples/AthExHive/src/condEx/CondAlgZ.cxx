@@ -3,14 +3,9 @@
 */
 
 #include "CondAlgZ.h"
-#include "AthExHive/IASCIICondDbSvc.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 
-CondAlgZ::CondAlgZ( const std::string& name, 
-		    ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 StatusCode CondAlgZ::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -24,14 +19,13 @@ StatusCode CondAlgZ::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CondAlgZ::execute() {
+StatusCode CondAlgZ::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   EventIDBase now(ctx.eventID());
 
-  SG::ReadCondHandle<CondDataObj>  rch1(m_rchk1);
-  SG::ReadCondHandle<CondDataObjY> rch2(m_rchk2);
-  SG::ReadCondHandle<CondDataObjY> rch3(m_rchk3);
+  SG::ReadCondHandle<CondDataObj>  rch1(m_rchk1, ctx);
+  SG::ReadCondHandle<CondDataObjY> rch2(m_rchk2, ctx);
+  SG::ReadCondHandle<CondDataObjY> rch3(m_rchk3, ctx);
 
   const CondDataObj  *cdo1 = *rch1;
   const CondDataObjY *cdo2 = *rch2;

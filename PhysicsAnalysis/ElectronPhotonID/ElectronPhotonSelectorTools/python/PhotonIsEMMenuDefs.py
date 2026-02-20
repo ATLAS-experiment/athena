@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # default configuration of the PhotonIsEMSelectorCutDefs
 
@@ -26,14 +26,11 @@ def PhotonIsEMMediumSelectorConfig(theTool):
     theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMMediumSelectorCutDefs_pTdep_smooth.conf"
 
 
-# Current cut-based tight menu. When updating tight, simply change the config-file below
-# (and please add a meaningful description of the conf file)
+# Cut-based tight menu for MC20 / Run2
 # Note: keep this conf file up to date with the PhotonCutPointToConfFile map in Root/EGSelectorConfigurationMapping.h
-
-
-def PhotonIsEMTightSelectorConfig(theTool):
+def PhotonIsEMTightSelectorConfigMC20(theTool):
     '''
-    These are the photon isEM definitions for Tight menu
+    These are the photon isEM definitions for Tight menu for MC20 / Run2
     '''
 
     #
@@ -41,36 +38,15 @@ def PhotonIsEMTightSelectorConfig(theTool):
     #
     theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf"
 
-#
-# Pt-inclusive tight ID menu, derived in January 2018.
-# Needs to be kept around until the new menu is fully supported,
-# but can be removed when it becomes obsolete.
-#
 
-
-def PhotonIsEMTightSelectorConfigPtInclJan2018(theTool):
+# Cut-based tight menu for MC21 / MC23 / Run3
+# Note: keep this conf file up to date with the PhotonCutPointToConfFile map in Root/EGSelectorConfigurationMapping.h
+def PhotonIsEMTightSelectorConfigMC21(theTool):
     '''
-    These are the photon isEM definitions for Tight menu
+    These are the photon isEM definitions for Tight menu for MC21 / Run3
     '''
 
     #
-    # PHOTON tight cuts, now with January 2018 re-optimization
+    # Tight (same as Run2, to be updated)
     #
-    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/20180116/PhotonIsEMTightSelectorCutDefs.conf"
-
-#
-# mu-dependend tight ID menu, derived in January 2022 for Run3
-# Needs to be kept around for commissioning until it will replace the Run2
-# tight menu
-#
-
-def PhotonIsEMTightSelectorConfigMuDependent2022(theTool):
-    '''
-    These are the photon isEM definitions for the mu-dependent Tight menu
-    '''
-
-    #
-    # PHOTON tight cuts, with mu-dependent January 2022 re-optimization
-    #
-    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc16_20220621/PhotonIsEMTightSelectorCutDefs.conf"
-
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TruthQGDecorationTool_H
@@ -22,20 +22,21 @@
 namespace DerivationFramework {
 
   class TruthQGDecorationTool : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      TruthQGDecorationTool(const std::string& t, const std::string& n, const IInterface* p);
-      ~TruthQGDecorationTool();
-      StatusCode initialize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+  public:
 
-    private:
-      /// input collection key
-      SG::ReadHandleKey<xAOD::JetContainer> m_jetsKey
-        {this, "JetCollection", "AntiKt4TruthWZJets", "Name of jet collection for decoration"};
-      /// output decoration
-      SG::WriteDecorHandleKey<xAOD::JetContainer> m_decOutput
-        {this, "TrueFlavor", m_jetsKey, "TrueFlavor", "Name of the output decoration on the jet"}; 
-  }; 
+    using base_class::base_class;
+
+    StatusCode initialize();
+    virtual StatusCode addBranches(const EventContext& ctx) const;
+
+  private:
+    /// input collection key
+    SG::ReadHandleKey<xAOD::JetContainer> m_jetsKey
+    {this, "JetCollection", "AntiKt4TruthWZJets", "Name of jet collection for decoration"};
+    /// output decoration
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decOutput
+      {this, "TrueFlavor", m_jetsKey, "TrueFlavor", "Name of the output decoration on the jet"};
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_TRUTHDRESSINGTool_H

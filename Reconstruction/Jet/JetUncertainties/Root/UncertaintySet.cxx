@@ -1,11 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "JetUncertainties/UncertaintySet.h"
+#include "JetUncertainties/UncertaintyGroup.h"
 #include "JetUncertainties/Helpers.h"
 
+#include "PATInterfaces/SystematicSet.h"
+#include "AsgMessaging/StatusCode.h"
 #include <set>
 
 namespace jet
@@ -251,7 +254,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidUn
     // Simple case
     if (m_groups.empty())
     {
-        unc = localUnc;
+        unc = std::move(localUnc);
         return validity;
     }
 
@@ -267,7 +270,7 @@ std::vector< std::pair<CompScaleVar::TypeEnum,bool> > UncertaintySet::getValidUn
     }
 
     // Done, return
-    unc = localUnc;
+    unc = std::move(localUnc);
     return validity;
 }
 

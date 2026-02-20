@@ -16,6 +16,8 @@ class TRTParameters;
 class TRTProcessingOfBarrelHits;
 class TRTProcessingOfEndCapHits;
 
+class AtlasG4EventUserInfo;
+
 class G4HCofThisEvent;
 class G4Step;
 class G4TouchableHistory;
@@ -82,6 +84,7 @@ class TRTSensitiveDetector : public G4VSensitiveDetector
   // The hits collection
   std::string m_HitCollName;
   TRTUncompressedHitCollection* m_HitColl{nullptr}; //pUncompressedHitCollection;
+  AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
 
   const TRTParameters* m_pParameters;
 

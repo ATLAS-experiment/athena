@@ -1,6 +1,6 @@
 """Define methods to construct configured HGTD Digitization tools and algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -9,6 +9,7 @@ from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXin
 from DigitizationConfig.PileUpToolsConfig import PileUpToolsCfg
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TdcCalibrationToolCfg
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the HGTD Digitization code.
@@ -19,13 +20,6 @@ def HGTD_FirstXing():
 def HGTD_LastXing():
     return 0
 # NOTE: related to 3BC mode?
-
-def HGTD_TimingResolutionCfg(flags, name="HGTD_TimingResolution", **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("IntegratedLuminosity", 0.)
-    acc.setPrivateTools(CompFactory.HGTD_TimingResolution(name, **kwargs))
-    return acc
 
 
 def HGTD_FrontEndToolCfg(flags, name="HGTD_FrontEndTool", **kwargs):
@@ -38,9 +32,12 @@ def HGTD_FrontEndToolCfg(flags, name="HGTD_FrontEndTool", **kwargs):
 def HGTD_SurfaceChargesGeneratorCfg(flags, name="HGTD_SurfaceChargesGenerator", **kwargs):
     acc = ComponentAccumulator()
 
+    from HGTD_Calibration.HGTD_CalibrationConfig import HGTD_TimeResolutionToolCfg
+
     kwargs.setdefault("ActiveTimeWindow", 1.25)
     kwargs.setdefault("SmearMeanTime", True)
-    kwargs.setdefault("TimingResolutionTool", acc.popToolsAndMerge(HGTD_TimingResolutionCfg(flags)))
+    kwargs.setdefault("TimeResolutionTool", acc.popToolsAndMerge(
+        HGTD_TimeResolutionToolCfg(flags)))
     acc.setPrivateTools(CompFactory.HGTD_SurfaceChargesGenerator(name, **kwargs))
     return acc
 
@@ -55,6 +52,7 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
     # set up tool handles
     kwargs.setdefault("FrontEnd", acc.popToolsAndMerge(HGTD_FrontEndToolCfg(flags)))
     kwargs.setdefault("SurfaceChargesGenerator", acc.popToolsAndMerge(HGTD_SurfaceChargesGeneratorCfg(flags)))
+    kwargs.setdefault("HGTD_TdcCalibrationTool", acc.popToolsAndMerge(HGTD_TdcCalibrationToolCfg(flags)))
     kwargs.setdefault("InputObjectName", "HGTD_Hits")
     kwargs.setdefault("HGTDDetEleCollKey", "HGTD_DetectorElementCollection")
     if flags.Digitization.DoXingByXingPileUp:
@@ -70,6 +68,7 @@ def HGTD_DigitizationBasicToolCfg(flags, name="HGTD_DigitizationBasicTool", **kw
 def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured HGTD_DigitizationBasicTool"""
     acc = ComponentAccumulator()
+
     if flags.Digitization.PileUp:
         intervals = []
         if not flags.Digitization.DoXingByXingPileUp:
@@ -79,9 +78,13 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
         kwargs.setdefault("MergeSvc", "")
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        if flags.HGTD.outputAltirocRDO:
+            kwargs.setdefault("AltirocOutputObject", f"{flags.Overlay.BkgPrefix}HGTD_ALTIROC_RDOs")
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}HGTD_RDOs")
         kwargs.setdefault("OutputSDOName", f"{flags.Overlay.BkgPrefix}HGTD_SDO_Map")
     else:
+        if flags.HGTD.outputAltirocRDO:
+            kwargs.setdefault("AltirocOutputObject", "HGTD_ALTIROC_RDOs")
         kwargs.setdefault("OutputObjectName", "HGTD_RDOs")
         kwargs.setdefault("OutputSDOName", "HGTD_SDO_Map")
     pileupTool = acc.popToolsAndMerge(HGTD_DigitizationBasicToolCfg(flags, name, **kwargs))
@@ -92,9 +95,11 @@ def HGTD_DigitizationToolCfg(flags, name="HGTD_DigitizationTool", **kwargs):
 def HGTD_OverlayDigitizationToolCfg(flags, name="HGTD_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with HGTD_DigitizationTool configured for overlay"""
     kwargs.setdefault("OnlyUseContainerName", False)
-    kwargs.setdefault("OutputObjectName", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
     kwargs.setdefault("OutputSDOName", f"{flags.Overlay.SigPrefix}HGTD_SDO_Map")
     kwargs.setdefault("MergeSvc", "")
+    kwargs.setdefault("OutputObjectName", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
+    if flags.HGTD.outputAltirocRDO:
+        kwargs.setdefault("AltirocOutputObject", f"{flags.Overlay.SigPrefix}HGTD_ALTIROC_RDOs")
     return HGTD_DigitizationBasicToolCfg(flags, name, **kwargs)
 
 
@@ -112,6 +117,8 @@ def HGTD_OutputCfg(flags):
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
         ItemList = ["HGTD_RDO_Container#*"]
+        if flags.HGTD.outputAltirocRDO:
+            ItemList += ["HGTD_ALTIROC_RDO_Container#*"]
         if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))

@@ -1,51 +1,59 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TokenIterator.h"
-#include "StorageSvc/IStorageExplorer.h"
-#include "StorageSvc/DbSelect.h"
+#include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
+
+#include "GaudiKernel/StatusCode.h"
 
 #include <exception>
 
 pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
-                                                    const std::string& containerName,
-                                                    IStorageExplorer& storageExplorer):
-  m_storageExplorer( storageExplorer ),
-  m_selection( new pool::DbSelect() )
+                                                    const std::string& containerName) :
+  m_container( nullptr ), m_refToken ( nullptr )
 {
-   DbStatus sc = m_storageExplorer.select( fileDescriptor, containerName, *m_selection );
-   if( sc.isError() )
+   pool::DatabaseConnection* connection = fileDescriptor.dbc();
+   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   if ( dbH.isValid() )  {
+      m_refToken = new Token(dbH.cntToken(containerName));
+      m_container = new DbContainer(m_refToken->technology());
+   }
+   if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), pool::READ).isSuccess() ) {
       throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );
+   }
 }
 
 pool::PersistencySvc::TokenIterator::~TokenIterator()
 {
-  delete m_selection;
+  delete m_container;
+  delete m_refToken;
 }
 
 
 Token*
 pool::PersistencySvc::TokenIterator::next()
 {
-  Token* objectToken = 0;
-  if ( ! m_storageExplorer.next( *m_selection, objectToken ).isSuccess() ) return 0;
-  else return objectToken;
+  Token::OID_t linkH(m_refToken->oid());
+  if ( ! m_container->next(linkH).isSuccess() ) return 0;
+  m_refToken->oid() = linkH;
+  return new Token(m_refToken); // FIXME, PvG: Think about a const version keeping ownership
 }
 
 
 std::size_t
 pool::PersistencySvc::TokenIterator::size()
 {
-  return m_selection->container().size();
+  return m_container->size();
 }
 
 
 bool
 pool::PersistencySvc::TokenIterator::seek(std::size_t position)
 {
-  m_selection->link().second = int(position);
+  m_refToken->oid().second = int(position);
   return true;
 }

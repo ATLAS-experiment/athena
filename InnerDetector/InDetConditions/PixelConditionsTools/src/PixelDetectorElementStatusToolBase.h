@@ -16,7 +16,6 @@
 #include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/PixelID.h"
 
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
@@ -39,9 +38,6 @@ class PixelDetectorElementStatusToolBase: public extends<AthAlgTool, IDetectorEl
    const PixelID* m_pixelID {};
 
   private:
-    ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
-       {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
-
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey
        {this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
 

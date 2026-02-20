@@ -13,9 +13,9 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowCellPosition.h"
-#include "eflowRec/eflowAbstractCellList.h"
-#include "eflowRec/eflowDatabase.h"
+#include "eflowCellPosition.h"
+#include "eflowAbstractCellList.h"
+#include "eflowDatabase.h"
 
 #include "CaloEvent/CaloCell.h"
 

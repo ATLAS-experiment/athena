@@ -3,9 +3,11 @@
 #include "../TrigComboHypoTool.h"
 #include "../TrigGenericHypoAlg.h"
 #include "../TrigGenericHypoTool.h"
+#include "../Trig3VarComboHypoTool.h"
 
 DECLARE_COMPONENT(L1InfoHypo)
 DECLARE_COMPONENT(L1InfoHypoTool)
 DECLARE_COMPONENT(TrigComboHypoTool)
 DECLARE_COMPONENT(TrigGenericHypoAlg)
 DECLARE_COMPONENT(TrigGenericHypoTool)
+DECLARE_COMPONENT(Trig3VarComboHypoTool)

@@ -8,7 +8,7 @@
 #define SCT_ReadCalibChipGainCondAlg_h
 
 // Include parent class
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 // Include Gaudi classes
 #include "Gaudi/Property.h"
@@ -22,7 +22,7 @@
 // Forward declarations
 class SCT_ID;
 
-class SCT_ReadCalibChipGainCondAlg : public AthReentrantAlgorithm 
+class SCT_ReadCalibChipGainCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_ReadCalibChipGainCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -30,7 +30,6 @@ class SCT_ReadCalibChipGainCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   static void insertNptGainFolderData(SCT_ModuleGainCalibData& theseCalibData, const coral::AttributeList& folderData) ;

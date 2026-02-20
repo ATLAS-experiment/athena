@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKPERFMON_TruthDECORATORALG_H
@@ -68,7 +68,7 @@ namespace IDTPM {
     };
 
     std::vector< IDTPM::WriteKeyAccessorPair< xAOD::TruthParticleContainer,
-                                              int > > m_decor_truth{};
+                                              int > > m_decor_truth{}; // FIXME Why not use a WriteDecorHandleKeyArray here?
 
 
     PublicToolHandle< IMCTruthClassifier > m_truthClassifier {

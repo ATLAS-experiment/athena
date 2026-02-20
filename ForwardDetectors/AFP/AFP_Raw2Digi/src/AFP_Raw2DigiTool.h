@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_RAW2DIGITOOL_H
@@ -48,13 +48,13 @@ protected:
 
   /// @brief Factor converting signal to time
   ///
-  /// The value of the factor is 25/1024 nanoseconds
-  static constexpr double s_timeConversionFactor = 25./1024.;
+  /// The value of the factor is 25/8192 nanoseconds (3.05 ps)
+  static constexpr double s_timeConversionFactor = 25./8192.;
 
   /// @brief Factor converting pulse length to time
   ///
-  /// The value of the factor is 0.521 nanoseconds
-  static constexpr double s_pulseLengthFactor = 0.521;
+  /// The value of the factor is 0.09765625 nanoseconds, starting with 5th LSB
+  static constexpr double s_pulseLengthFactor = 25./(8192>>5);
 
   /// @brief Function that transforms time-over-threshold to charge
   ///

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_RESOURCE_ID_H_
 #define _MUON_NSW_RESOURCE_ID_H_
@@ -41,21 +41,21 @@ namespace Muon
     class NSWResourceId
     {
      private:
-      uint8_t m_Elink;
-      uint8_t m_Radius;
-      uint8_t m_Layer;
-      uint8_t m_Sector;
-      uint8_t m_ResourceType;
-      uint8_t m_DataType;
-      uint8_t m_Version;
-      uint8_t m_DetId;
+      uint8_t m_Elink{};
+      uint8_t m_Radius{};
+      uint8_t m_Layer{};
+      uint8_t m_Sector{};
+      uint8_t m_ResourceType{};
+      uint8_t m_DataType{};
+      uint8_t m_Version{};
+      uint8_t m_DetId{};
 
       // For obsolete pre-versioned data
 
-      uint8_t m_Eta;
-      uint8_t m_Tech;
+      uint8_t m_Eta{};
+      uint8_t m_Tech{};
 
-      bool m_pre_version;
+      bool m_pre_version{};
 
      public:
       explicit NSWResourceId (uint32_t logical_id);
@@ -98,7 +98,7 @@ inline bool Muon::nsw::NSWResourceId::is_large_station () const
 
 inline int8_t Muon::nsw::NSWResourceId::station_eta () const
 {
-  int8_t mod_eta;
+  int8_t mod_eta{};
   // Odd identifiers are on side A
   int8_t side_sign = (m_DetId % 2) == 0 ? -1 : 1;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionFieldSvc.h"
@@ -375,12 +375,12 @@ G4ThreeVector MagField::ForwardRegionFieldSvc::getMagInd(G4ThreeVector Point, in
       xstep = (maxMQXB - minMQXB)/(s_rowsMQXB-1);
       ystep = (maxMQXB - minMQXB)/(s_colsMQXB-1);
 
-      i2 = ceil(x/xstep)+ceil(s_rowsMQXB/2);
-      j2 = ceil(y/ystep)+ceil(s_colsMQXB/2);
+      i2 = ceil(x/xstep)+ceil(s_rowsMQXB/2.);
+      j2 = ceil(y/ystep)+ceil(s_colsMQXB/2.);
       i1 = i2 - 1;
       j1 = j2 - 1;
-      x2 = (i2-ceil(s_rowsMQXB/2))*xstep;
-      y2 = (j2-ceil(s_colsMQXB/2))*ystep;
+      x2 = (i2-ceil(s_rowsMQXB/2.))*xstep;
+      y2 = (j2-ceil(s_colsMQXB/2.))*ystep;
       x1 = x2 - xstep;
       y1 = y2 - ystep;
 

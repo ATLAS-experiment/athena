@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DECISIONHANDLING_VIEWCREATORMUONSUPERROITOOL_H
@@ -65,6 +65,9 @@ public:
   // Need to get beamspot position from somewhere to recentre?
   Gaudi::Property< double > m_roiZedWidth {this,"RoIZedWidth",50.0,
       "Z Half Width in mm"};
+
+  Gaudi::Property< bool > m_isBhh {this,"isBhh",false,
+      "true for HLT_muX_bBhh chains"};
 
 };
 

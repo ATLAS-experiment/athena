@@ -5,9 +5,8 @@
 #include "ZDC_EscapedEnergyProcessing.h"
 #include "ZDC_G4CalibSD.h"
 
-// From Geant4 10.2
-#include "G4AtlasTools/G4MultiSensitiveDetector.hh"
 
+#include "G4MultiSensitiveDetector.hh"
 #include "G4TouchableHandle.hh"
 #include "G4Step.hh"
 #include "G4StepPoint.hh"

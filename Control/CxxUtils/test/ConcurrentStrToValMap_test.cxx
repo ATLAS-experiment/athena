@@ -12,6 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/ConcurrentStrToValMap.h"
 #include "TestTools/expect_exception.h"
+#include <algorithm>
 #include <shared_mutex>
 #include <thread>
 #include <vector>

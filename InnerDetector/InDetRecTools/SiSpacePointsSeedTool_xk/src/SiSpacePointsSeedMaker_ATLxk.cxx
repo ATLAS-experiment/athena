@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
      
@@ -106,9 +106,9 @@ StatusCode InDet::SiSpacePointsSeedMaker_ATLxk::initialize()
     m_outputTree->Branch("track_pt",       &m_trackPt);
     m_outputTree->Branch("track_eta",      &m_trackEta);
 
-    TString fullTreeName = m_treeFolder + m_treeName;
+    std::string fullTreeName = m_treeFolder + m_treeName;
 
-    ATH_CHECK(  m_thistSvc->regTree( fullTreeName.Data(), m_outputTree )  );
+    ATH_CHECK(  m_thistSvc->regTree( fullTreeName, m_outputTree )  );
 
   }
 

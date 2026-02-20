@@ -1730,7 +1730,7 @@ static void check_lar_neighbour(IdDictMgr& idd)
     IdentifierHash hash_min2 = 999999 ;
     IdentifierHash hash_max2 = 0 ;
     for (unsigned int iCell = 0 ; iCell < hec_id.channel_hash_max(); ++iCell){
-      /*Identifier cellId =*/ hec_id.channel_id(iCell);
+      (void)hec_id.channel_id(iCell);
 
       hec_id.get_neighbours(iCell, LArNeighbours::all3D, neighbourList2);
 

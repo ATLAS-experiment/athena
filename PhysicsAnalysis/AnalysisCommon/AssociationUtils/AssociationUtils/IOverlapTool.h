@@ -7,10 +7,14 @@
 
 // Framework includes
 #include "AsgTools/IAsgTool.h"
+#include "AsgTools/CurrentContext.h"
 
 // EDM includes
 #include "xAODBase/IParticleContainer.h"
 
+// Columnar includes
+#include "ColumnarCore/ObjectRange.h"
+#include "ColumnarCore/ParticleDef.h"
 
 namespace ORUtils
 {
@@ -36,8 +40,17 @@ namespace ORUtils
       /// should be that if only one container is to be marked, it should be the
       /// first argument. Otherwise, both of them can be marked. The decoration
       /// logic may depend on configuration.
-      virtual StatusCode findOverlaps(const xAOD::IParticleContainer& cont1,
-                                      const xAOD::IParticleContainer& cont2) const = 0;
+      virtual StatusCode findOverlaps(columnar::Particle1Range cont1,
+                                      columnar::Particle2Range cont2,
+                                      columnar::EventContextId eventContext) const = 0;
+      StatusCode findOverlaps(const xAOD::IParticleContainer& cont1,
+                              const xAOD::IParticleContainer& cont2,
+                              const EventContext& eventContext = Gaudi::Hive::currentContext()) const {
+        return findOverlaps(
+          columnar::Particle1Range(cont1),
+          columnar::Particle2Range(cont2),
+          eventContext);
+      }
 
   }; // class IOverlapTool
 

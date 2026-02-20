@@ -6,16 +6,6 @@
 #include <iostream>
 
 
-
-FPGATrackSimEventInfo::~FPGATrackSimEventInfo() {
-  reset();
-}
-
-
-void FPGATrackSimEventInfo::reset() {
-  m_level1TriggerInfo.clear();
-}
-
 std::ostream& operator<<(std::ostream& s, const FPGATrackSimEventInfo& h) {
   s << "Event " << h.eventNumber()
     << " \tRun " << h.runNumber();

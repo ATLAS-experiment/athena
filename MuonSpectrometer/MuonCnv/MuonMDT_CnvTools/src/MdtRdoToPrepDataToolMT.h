@@ -81,7 +81,7 @@ namespace Muon {
             /// Detector manger from R4
             const MuonGMR4::MuonDetectorManager* r4DetMgr{nullptr};
             /// Acts Geometry context
-            const ActsGeometryContext* gctx{nullptr};
+            const ActsTrk::GeometryContext* gctx{nullptr};
             /// Pointer to the map having the mapping of twin tube pairs
             const TwinTubeMap* twinTubeMap{nullptr};
 
@@ -123,7 +123,7 @@ namespace Muon {
                                          "Switch between the legacy and the new geometry"};
 
         const MuonGMR4::MuonDetectorManager* m_detMgrR4{nullptr};
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "Stored alignment"};
 
 
         /// MdtPrepRawData containers

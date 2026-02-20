@@ -4,11 +4,7 @@
 #include "TrkBaseNode.h"
 #include "TrkFilteringNodes.h"
 
-PixelCluster::PixelCluster(const Surface* pS) : SiCluster(pS)
-{
-}
-
-PixelCluster::~PixelCluster(void)
+PixelCluster::PixelCluster(std::unique_ptr<const Surface> pS) : SiCluster(std::move(pS))
 {
 }
 

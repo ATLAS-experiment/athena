@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkInDet/PixelNtupleMaker.h"
@@ -15,13 +15,6 @@
 
 #include "TLorentzVector.h"
 
-DerivationFramework::PixelNtupleMaker::PixelNtupleMaker(const std::string& t, const std::string& n, const IInterface* p) : 
-  base_class(t,n,p)
-{
-}
-
-DerivationFramework::PixelNtupleMaker::~PixelNtupleMaker() = default;
-
 StatusCode DerivationFramework::PixelNtupleMaker::initialize() {
   ATH_CHECK(m_selector.retrieve());
   ATH_CHECK(m_containerKey.initialize());
@@ -30,10 +23,6 @@ StatusCode DerivationFramework::PixelNtupleMaker::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::PixelNtupleMaker::finalize()
-{
-  return StatusCode::SUCCESS;
-}
 
 StatusCode DerivationFramework::PixelNtupleMaker::addBranches(const EventContext& ctx) const {
 

@@ -24,6 +24,8 @@ namespace xAOD
 
     /*! @brief Default constructor */
     MissingETAssociationHelper();
+    /*! @brief Copy constructor */
+    MissingETAssociationHelper(const MissingETAssociationHelper& h) = default;
     /*! @brief Construct with a map*/
     MissingETAssociationHelper(const MissingETAssociationMap_v1* map);
     /*! @brief Base class destructor */

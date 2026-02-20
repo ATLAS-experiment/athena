@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
@@ -28,9 +28,11 @@ double TFCS1DFunction::get_maxdev(TH1 *h_input1, TH1 *h_approx1) {
   // normalize the histos to the same area:
   double integral_input = h_input->Integral();
   double integral_approx = 0.0;
-  for (int b = 1; b <= h_input->GetNbinsX(); b++)
+  for (int b = 1; b <= h_input->GetNbinsX(); b++){
     integral_approx +=
         h_approx->GetBinContent(h_approx->FindBin(h_input->GetBinCenter(b)));
+  }
+  if (integral_approx == 0.0)  return 0.;
   h_approx->Scale(integral_input / integral_approx);
 
   double ymax = h_approx->GetBinContent(h_approx->GetNbinsX()) -

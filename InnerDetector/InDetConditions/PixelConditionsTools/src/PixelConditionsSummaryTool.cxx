@@ -1,10 +1,7 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include "PixelConditionsSummaryTool.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelReadoutGeometry/PixelDetectorElementStatus.h"
 #include "PixelReadoutGeometry/PixelFEUtils.h"
 #include "PixelConditionsData/PixelByteStreamErrors.h"
@@ -33,7 +30,6 @@ StatusCode PixelConditionsSummaryTool::initialize(){
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
   ATH_CHECK(m_condTDAQKey.initialize( !m_condTDAQKey.empty() ));
   ATH_CHECK(m_condDeadMapKey.initialize());
-  ATH_CHECK(m_pixelReadout.retrieve());
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   if (!m_pixelDetElStatusEventKey.empty() && !m_pixelDetElStatusCondKey.empty()) {
      ATH_MSG_FATAL("The event data (PixelDetElStatusEventDataBaseKey) and cond data (PixelDetElStatusCondDataBaseKey) keys cannot be set at the same time.");
@@ -120,21 +116,34 @@ uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& module
   return getBSErrorWord(moduleHash, moduleHash, ctx, cacheEntry);
 }
 
-uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash, const int index, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
-
+const InDetDD::SiDetectorElement *PixelConditionsSummaryTool::getDetectorEelement(const IdentifierHash& moduleHash, const EventContext& ctx) const {
   if (moduleHash>=m_pixelID->wafer_hash_max()) {
-    ATH_MSG_WARNING("invalid moduleHash : " << moduleHash << " exceed maximum hash id: " << m_pixelID->wafer_hash_max());
-    return 0;
+    ATH_MSG_ERROR("invalid moduleHash : " << moduleHash << " exceed maximum hash id: " << m_pixelID->wafer_hash_max());
+    return nullptr;
   }
 
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(*pixelDetEleHandle);
   if (not pixelDetEleHandle.isValid() or elements==nullptr) {
-    ATH_MSG_WARNING(m_pixelDetEleCollKey.fullKey() << " is not available.");
-    return 0;
+    ATH_MSG_ERROR(m_pixelDetEleCollKey.fullKey() << " is not available.");
+    return nullptr;
   }
-  const InDetDD::SiDetectorElement *element = elements->getDetectorElement(moduleHash);
-  const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+  return elements->getDetectorElement(moduleHash);
+}
+
+uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& moduleHash,
+                                                    const int index,
+                                                    const EventContext& ctx,
+                                                    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
+   const InDetDD::SiDetectorElement *element = getDetectorEelement(moduleHash,ctx);
+   const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+   return getBSErrorWord(p_design,index,ctx,cacheEntry);
+}
+
+uint64_t PixelConditionsSummaryTool::getBSErrorWord(const InDetDD::PixelModuleDesign *p_design,
+                                                    const int index,
+                                                    const EventContext& ctx,
+                                                    const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
 
   if (!m_useByteStreamFEI4 && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI4) { return 0; }
   if (!m_useByteStreamFEI3 && p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3) { return 0; }
@@ -154,7 +163,16 @@ uint64_t PixelConditionsSummaryTool::getBSErrorWord(const IdentifierHash& module
 }
 
 bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
-  uint64_t word = getBSErrorWord(moduleHash,ctx,cacheEntry);
+  const InDetDD::SiDetectorElement *element = getDetectorEelement(moduleHash,ctx);
+  const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+  return hasBSError(p_design,moduleHash, ctx,cacheEntry);
+}
+
+bool PixelConditionsSummaryTool::hasBSError(const InDetDD::PixelModuleDesign *p_design,
+                                            const IdentifierHash& moduleHash,
+                                            const EventContext& ctx,
+                                            const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
+  uint64_t word = getBSErrorWord(p_design,moduleHash, ctx,cacheEntry);
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TruncatedROB))      { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::MaskedROB))         { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Preamble))          { return true; }
@@ -171,15 +189,21 @@ bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, co
 }
 
 bool PixelConditionsSummaryTool::hasBSError(const IdentifierHash& moduleHash, Identifier pixid, const EventContext& ctx, const IInDetConditionsTool::IDCCacheEntry* cacheEntry) const {
-  if (hasBSError(moduleHash, ctx, cacheEntry)) { return true; }
+  const InDetDD::SiDetectorElement *element = getDetectorEelement(moduleHash,ctx);
+  const InDetDD::PixelModuleDesign *p_design = static_cast<const InDetDD::PixelModuleDesign*>(&element->design());
+
+  if (hasBSError(p_design, moduleHash, ctx, cacheEntry)) { return true; }
 
   int maxHash = m_pixelID->wafer_hash_max();
-  Identifier moduleID = m_pixelID->wafer_id(pixid);
-  int chFE = m_pixelReadout->getFE(pixid, moduleID);
-  if (m_pixelReadout->getModuleType(moduleID)==InDetDD::PixelModuleType::IBL_3D) { chFE=0; }
+
+  std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+     = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(pixid),
+                                              m_pixelID->eta_index(pixid));
+  InDetDD::PixelDiodeTree::DiodeProxy si_param ( p_design->diodeProxyFromIdx(diode_idx));
+  std::uint32_t chFE = p_design->getFE(si_param);
 
   int indexFE = (1+chFE)*maxHash+static_cast<int>(moduleHash);    // (FE_channel+1)*2048 + moduleHash
-  uint64_t word = getBSErrorWord(moduleHash,indexFE,ctx,cacheEntry);
+  uint64_t word = getBSErrorWord(p_design,indexFE,ctx,cacheEntry);
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::Preamble))          { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::TimeOut))           { return true; }
   if (PixelByteStreamErrors::hasError(word,PixelByteStreamErrors::LVL1ID))            { return true; }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/copy_bounded_test.cxx
@@ -13,12 +13,12 @@
 
 #include "CxxUtils/copy_bounded.h"
 #include "CxxUtils/span.h"
-#include "boost/range/iterator_range.hpp"
-#include "boost/range/algorithm/fill.hpp"
 #include <vector>
 #include <list>
 #include <cassert>
 #include <iostream>
+#include <ranges>
+#include <algorithm>
 
 
 struct arange
@@ -41,12 +41,12 @@ struct arange
 template <class InputRange, class OutputRange>
 void test1b (InputRange& input, OutputRange& output)
 {
-  typedef typename boost::range_iterator<InputRange>::type  InputIterator;
-  typedef typename boost::range_iterator<OutputRange>::type OutputIterator;
-  InputIterator begi = boost::begin(input);
-  InputIterator endi = boost::end(input);
-  OutputIterator bego = boost::begin(output);
-  OutputIterator endo = boost::end(output);
+  using InputIterator = std::ranges::iterator_t<InputRange>;
+  using OutputIterator = std::ranges::iterator_t<OutputRange>;
+  InputIterator begi = std::begin(input);
+  InputIterator endi = std::end(input);
+  OutputIterator bego = std::begin(output);
+  OutputIterator endo = std::end(output);
 
   typedef typename std::iterator_traits<InputIterator>::value_type value_type;
 
@@ -56,44 +56,44 @@ void test1b (InputRange& input, OutputRange& output)
   OutputIterator mido = bego;
   std::advance (mido, 5);
 
-  boost::iterator_range<InputIterator> rangei (begi, midi);
-  boost::iterator_range<OutputIterator> rangeo (bego, mido);
+  std::ranges::subrange<InputIterator> rangei (begi, midi);
+  std::ranges::subrange<OutputIterator> rangeo (bego, mido);
 
   int i = 0;
   for (value_type& it : input)
     it = i++;
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (begi, endi, bego, mido);
   i = 0;
   for (value_type& it : output)
     assert (it == (i < 5 ? i++ : 0));
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (input, rangeo);
   i = 0;
   for (value_type& it : output)
     assert (it == (i < 5 ? i++ : 0));
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (begi, midi, bego, endo);
   i = 0;
   for (value_type& it : output)
     assert (it == (i < 5 ? i++ : 0));
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (rangei, output);
   i = 0;
   for (value_type& it : output)
     assert (it == (i < 5 ? i++ : 0));
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (begi, endi, bego, endo);
   i = 0;
   for (value_type& it : output)
     assert (it == i++);
 
-  boost::range::fill (output, 0);
+  std::ranges::fill (output, 0);
   CxxUtils::copy_bounded (input, output);
   i = 0;
   for (value_type& it : output)

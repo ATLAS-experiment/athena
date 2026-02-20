@@ -7,18 +7,21 @@
 #include "G4Trd.hh"
 #include "MuonSimEvent/RpcHitIdHelper.h"
 #include <string>
+#include "G4Exception.hh"
 #include "G4Geantino.hh"
 #include "G4ChargedGeantino.hh"
 
 //#include "SimHelpers/DetectorGeometryHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
+
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
 // construction/destruction
 RPCSensitiveDetectorCosmics::RPCSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName, unsigned int nGasGaps)
   : G4VSensitiveDetector( name )
-  , m_myRPCHitColl( hitCollectionName )
+  , m_hitCollectionName( hitCollectionName )
   , m_globalTime(0.)
   , m_isGeoModel(true)
   , m_momMag(0.)
@@ -28,7 +31,11 @@ RPCSensitiveDetectorCosmics::RPCSensitiveDetectorCosmics(const std::string& name
 
 void RPCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 {
-  if (!m_myRPCHitColl.isValid()) m_myRPCHitColl = std::make_unique<RPCSimHitCollection>();
+  m_myRPCHitColl = nullptr;
+  if (auto* eventInfo = AtlasG4EventUserInfo::GetEventUserInfo()) {
+    m_myRPCHitColl = eventInfo->GetHitCollectionMap()->Find<RPCSimHitCollection>(m_hitCollectionName);
+    m_g4UserEventInfo = eventInfo;
+  }
   if (verboseLevel>1) G4cout << "Initializing SD" << G4endl;
   // FIXME this next bit probebly only needs to be done once pre job
   // rather than once per G4Event?
@@ -45,6 +52,12 @@ void RPCSensitiveDetectorCosmics::Initialize(G4HCofThisEvent*)
 }
 
 G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
+
+  if (!m_myRPCHitColl) {
+    G4Exception("RPCSensitiveDetectorCosmics::ProcessHits", "RPCCosmicHitCollectionMissing", FatalException,
+                "Hit collection not initialized; did SetupEvent run?");
+    return false;
+  }
   G4Track* currentTrack = aStep->GetTrack();
 
   if (currentTrack->GetDefinition()->GetPDGCharge() == 0.0) {
@@ -339,13 +352,17 @@ G4bool RPCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
   (((m_vertex.mag()) < 100) ? (m_globalTime  = globalTime) : (m_globalTime = tof));
 
   m_myRPCHitColl->Emplace(RPCid_eta, m_globalTime,
-                          localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                          localPosition,
+                          trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
+                          localPostPosition,
                           aStep->GetTotalEnergyDeposit(),
                           aStep->GetStepLength(),
                           currentTrack->GetDefinition()->GetPDGEncoding(),
                           aStep->GetPreStepPoint()->GetKineticEnergy());
   m_myRPCHitColl->Emplace(RPCid_phi, m_globalTime,
-                        localPosition, trHelp.GenerateParticleLink(), localPostPosition,
+                        localPosition,
+                        trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
+                        localPostPosition,
                         aStep->GetTotalEnergyDeposit(),
                         aStep->GetStepLength(),
                         currentTrack->GetDefinition()->GetPDGEncoding(),

@@ -6,6 +6,7 @@
 #include "G4AtlasTools/RegionCreator.h"
 #include "G4AtlasTools/AddPhysicsDecayTool.h"
 #include "../SensitiveDetectorMasterTool.h"
+#include "../FastSimulationConstructorTool.h"
 #include "../FastSimulationMasterTool.h"
 #include "G4AtlasTools/GlobalFieldManagerTool.h"
 #include "G4AtlasTools/DetectorFieldManagerTool.h"
@@ -21,6 +22,7 @@ DECLARE_COMPONENT( PolyconicalEnvelope )
 DECLARE_COMPONENT( G4AtlasDetectorConstructionTool )
 DECLARE_COMPONENT( RegionCreator )
 DECLARE_COMPONENT( SensitiveDetectorMasterTool )
+DECLARE_COMPONENT( FastSimulationConstructorTool )
 DECLARE_COMPONENT( FastSimulationMasterTool )
 DECLARE_COMPONENT( AddPhysicsDecayTool )
 DECLARE_COMPONENT( GlobalFieldManagerTool )

@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHV_HECHVMODULE_H
 #define LARHV_HECHVMODULE_H
+
+#include <memory>
 
 class HECHVManager;
 class HECHVSubgap;
@@ -45,7 +47,7 @@ class HECHVModule
   HECHVModule& operator=(const HECHVModule& right);
 
   class Clockwork;
-  Clockwork *m_c;
+  std::unique_ptr<Clockwork> m_c;
 };
 
 #endif

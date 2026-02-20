@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,12 +14,7 @@
 ALFA_SensitiveDetectorTool::ALFA_SensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type,name,parent)
 {
-  // m_volumeNames = { "ALFA::logALFA_FiberU" , "ALFA::logALFA_FiberV" , "ALFA::logOD_FiberActive" ,
-  //                   "ALFA::B7L1_GVS" , "ALFA::A7L1_GVS" , "ALFA::A7R1_GVS" , "ALFA::B7R1_GVS" };
-  // for (unsigned int i=0;i<64;++i){
-  //   m_volumeNames.push_back( "ALFA::logALFA_FiberU["+std::to_string(i)+"]" );
-  //   m_volumeNames.push_back( "ALFA::logALFA_FiberV["+std::to_string(i)+"]" );
-  // }
+  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

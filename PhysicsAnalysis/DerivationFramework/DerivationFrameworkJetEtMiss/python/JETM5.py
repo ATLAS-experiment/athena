@@ -10,15 +10,11 @@ from AthenaConfiguration.Enums import MetadataCategory
 # Main algorithm config
 def JETM5SkimmingToolCfg(flags):
     """Configure the skimming tool"""
-    acc = ComponentAccumulator()
-
     expression = '( HLT_noalg_zb_L1ZB || HLT_noalg_L1ZB )'
-    JETM5SkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "JETM5SkimmingTool1",
-                                                                               expression = expression)
-
-    acc.addPublicTool(JETM5SkimmingTool, primary = True)
-        
-    return(acc)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "JETM5SkimmingTool1",
+                                     expression = expression)
 
 
 # Main algorithm config
@@ -130,7 +126,7 @@ def JETM5Cfg(flags):
                                             "Electrons", "Photons", "Muons", "TauJets",
                                             "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow"]
+]
 
     JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                         "MuonSegments",

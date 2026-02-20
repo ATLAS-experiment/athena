@@ -10,7 +10,7 @@
 #ifndef MUONNRPC_CABLING_MUONNRPC_CABLINGALG_H
 #define MUONNRPC_CABLING_MUONNRPC_CABLINGALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -20,14 +20,13 @@
 #include "nlohmann/json.hpp"
 
 namespace Muon{
-  class NRpcCablingAlg : public AthReentrantAlgorithm {
+  class NRpcCablingAlg : public AthCondAlgorithm {
   public:
-    using AthReentrantAlgorithm::AthReentrantAlgorithm;
+    using AthCondAlgorithm::AthCondAlgorithm;
 
     virtual ~NRpcCablingAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

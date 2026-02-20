@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "DisplacedJetRankComboHypoTool.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/Jet.h"
@@ -71,11 +74,11 @@ StatusCode DisplacedJetRankComboHypoTool::decide(Combo::LegDecisionsMap& passing
 
 	//fill the input_jets vector
 	//filled from the map key which ensures it only gets one entry per jet
-	for(auto pair: jet_decisions){
+	for(const auto & pair: jet_decisions){
 		input_jets.push_back(pair.first);
 	}
 
-	if(input_jets.size() == 0){
+	if(input_jets.empty()){
 		//reject all legs
 		//this should not happen
 		ATH_MSG_DEBUG("No input jets, rejecting all legs");

@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "GeoModelKernel/throwExcept.h"
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/Identifier.h"
 
 using DcsConstants = MdtCondDbData::DcsConstants;
 // --- writing identifiers -------
@@ -17,10 +19,10 @@ void MdtCondDbData::setDeadMultilayer(const Identifier& Id) { m_cachedDeadMultil
 void MdtCondDbData::setDeadChamber(const Identifier& Id) { m_cachedDeadChambers.insert(Id); }
 
 
-const std::set<Identifier>& MdtCondDbData::getDeadTubesId() const{ return m_cachedDeadTubes; }
-const std::set<Identifier>& MdtCondDbData::getDeadLayersId() const{ return m_cachedDeadLayers; }
-const std::set<Identifier>& MdtCondDbData::getDeadMultilayersId() const{ return m_cachedDeadMultilayers; }
-const std::set<Identifier>& MdtCondDbData::getDeadChambersId() const{ return m_cachedDeadChambers; }
+const std::unordered_set<Identifier>& MdtCondDbData::getDeadTubesId() const{ return m_cachedDeadTubes; }
+const std::unordered_set<Identifier>& MdtCondDbData::getDeadLayersId() const{ return m_cachedDeadLayers; }
+const std::unordered_set<Identifier>& MdtCondDbData::getDeadMultilayersId() const{ return m_cachedDeadMultilayers; }
+const std::unordered_set<Identifier>& MdtCondDbData::getDeadChambersId() const{ return m_cachedDeadChambers; }
 
 bool  MdtCondDbData::isGood(const Identifier & Id) const {
     return (isGoodChamber(Id) && isGoodMultilayer(Id) && isGoodLayer(Id) && isGoodTube(Id));

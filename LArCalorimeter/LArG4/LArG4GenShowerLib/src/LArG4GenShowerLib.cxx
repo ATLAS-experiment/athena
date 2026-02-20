@@ -241,7 +241,7 @@ StatusCode LArG4GenShowerLib::execute()
 
   delete eventSteps;
 
-  if ((*m_libraries.find(location.str())).second->storeShower(theParticle, shower)) {
+  if ((*m_libraries.find(location.str())).second->storeShower(std::move(theParticle), shower)) {
     m_stat_lib_saved[(*m_libraries.find(location.str())).second] += 1;
   } else {
     ATH_MSG_WARNING ( "Wasn't able to store shower (" << location.str() << ")" );
@@ -498,7 +498,7 @@ void LArG4GenShowerLib::calculateMoments(const ShowerLib::StepInfoCollection& ev
   }
 
   // Center of gravity:
-  const double inv_escal = 1. / escal;
+  const double inv_escal = escal == 0 ? 1 : 1. / escal;
   xavfra = xav*inv_escal;
   yavfra = yav*inv_escal;
   // Second momentum:

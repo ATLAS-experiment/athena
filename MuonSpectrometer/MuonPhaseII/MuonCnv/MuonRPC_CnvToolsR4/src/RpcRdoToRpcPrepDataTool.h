@@ -16,7 +16,7 @@
 #include <xAODMuonPrepData/RpcStripContainer.h>
 #include <MuonCablingData/RpcCablingMap.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 #include <GaudiKernel/PhysicalConstants.h>
 

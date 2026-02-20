@@ -1,3 +1,6 @@
+/*
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "TrigConfData/ConstIter.h"
 
 #include <vector>
@@ -112,7 +115,7 @@ int main() {
    cout << "In test3" << endl;
    const TestCollection c(v);
    unsigned int idx(0);
-   for( auto x : c ) {
+   for( const auto & x : c ) {
       successTest3 &= inner_loop (0, x, v[idx++]);
    }
 

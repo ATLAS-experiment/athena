@@ -218,7 +218,6 @@ def _to_rootmap_name(typename):
     helper method to massage a typename into something understandable
     by the rootmap files
     """
-    global _aliases
     typename = typename.replace(', ',',')
     # first the easy case: builtins
     if typename in _cpp_builtins:
@@ -254,7 +253,6 @@ def _to_rflx_name (typename):
     """helper method to massage a typename into something understandable
     by reflex (which doesn't understand the same thing than rootmaps).
     """
-    global _aliases,_typedefs
     typename = typename.replace(', ',',')
     # first the easy case: builtins
     if typename in _cpp_builtins:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # HION12.py  
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,7 +10,6 @@ from AthenaCommon.CFElements import seqAND
 #Skiming
 def HION12SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
     acc = ComponentAccumulator()
     
     ExtraData  = []
@@ -36,12 +35,11 @@ def HION12SkimmingToolCfg(flags):
     
     expression = '( (' + ' || '.join(triggers+MB_triggers) + ') && '+objectSelection+ ' && ' + '(' + ' || '.join(nJetCuts) + ')' + ')'
     
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "HION12StringSkimmingTool",
-                                                                             expression = expression,
-                                                                             TrigDecisionTool=tdt), 
-                                                                             primary = True) 
-    return(acc)                    
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "HION12StringSkimmingTool", expression = expression)), primary=True)
+    return(acc)
 
 
 def HION12KernelCfg(flags, name='HION12Kernel', **kwargs):

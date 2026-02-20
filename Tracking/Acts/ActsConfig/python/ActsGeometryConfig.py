@@ -16,6 +16,7 @@ def ActsTrackingGeometrySvcCfg(flags,
  
   subDetectors = []
   blueprintTools = []
+  refineTools = []
 
   if flags.Detector.GeometryBpipe:
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
@@ -41,30 +42,28 @@ def ActsTrackingGeometrySvcCfg(flags,
     acc.merge(TRT_ReadoutGeometryCfg(flags))
 
   if flags.Detector.GeometryCalo:
-    # Commented out because Calo is not production ready yet and we don't 
-    # want to turn it on even if the global flag is set
-    #  subDetectors += ["Calo"]
-    #  kwargs.setdefault("CaloVolumeBuilder", CompFactory.ActsCaloTrackingVolumeBuilder())
-
-    # need to configure calo geometry, otherwise we get a crash
-    # Do this even though it's not production ready yet, so the service can
-    # be forced to build the calorimeter later on anyway
+    #No non-blueprint mode exists for calo, so all we do here is 
+    #to setup both the LAr and Tile geometry to enable access to the 
+    #CaloDetDescrManager geometry information. This is needed
+    #for the Acts calo blueprint builder tool
+    #Note that in blueprint mode the calo geometry is built
+    #in initialize of the TrackingGeometrySvc and so we use
+    #a static calo geometry. To avoid errors the flag Lar.doAlign 
+    #must be set to false (when flag values are set)
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(flags))
     from TileGeoModel.TileGMConfig import TileGMCfg
     acc.merge(TileGMCfg(flags))
 
-  if flags.Muon.usePhaseIIGeoSetup and not flags.Acts.TrackingGeometry.UseBlueprint:
-    subDetectors += ["Muon"]
-    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-    acc.merge(MuonGeoModelCfg(flags))    
-    from ActsMuonDetector.ActsMuonDetectorCfg import  MsTrackingVolumeBuilderCfg
-    kwargs.setdefault("MSVolumeBuilder", acc.popToolsAndMerge(MsTrackingVolumeBuilderCfg(flags)))
-
   #first add the itk builder and then the muon system - this is the correct order
-  if flags.Acts.TrackingGeometry.UseBlueprint:    
+  if flags.Acts.TrackingGeometry.UseBlueprint:
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
+      if False: ### Disable the ITk material allocation until it's finalized
+          refineTools+= [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
+    if flags.Detector.GeometryCalo:
+      subDetectors += ["Calo"]
+      blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryMuon:
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
@@ -95,6 +94,7 @@ def ActsTrackingGeometrySvcCfg(flags,
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 BlueprintNodeBuilders=blueprintTools,
+                                                                RefinementTools=refineTools,
                                                                 **kwargs)
 
   if flags.Acts.TrackingGeometry.MaterialSource == "Default":
@@ -133,6 +133,14 @@ def ActsTrackingGeometrySvcCfg(flags,
   return acc
 
 
+
+def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+
 def ActsPropStepRootWriterSvcCfg(flags,
                                  name: str = "ActsPropStepRootWriterSvc",
                                  **kwargs) -> ComponentAccumulator:
@@ -158,41 +166,6 @@ def ActsExtrapolationToolCfg(flags,
   acc.merge(AtlasFieldCacheCondAlgCfg(flags))
   kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
   acc.setPrivateTools(CompFactory.ActsTrk.ExtrapolationTool(name, **kwargs))
-  return acc
-
-
-def ActsMaterialTrackWriterSvcCfg(flags,
-                                  name: str = "ActsMaterialTrackWriterSvc",
-                                  **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.merge(ActsTrackingGeometrySvcCfg(flags))
-  acc.addService(CompFactory.ActsMaterialTrackWriterSvc(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsMaterialStepConverterToolCfg(flags,
-                                     name: str = "ActsMaterialStepConverterTool",
-                                     **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  acc.addPublicTool(CompFactory.ActsMaterialStepConverterTool(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsSurfaceMappingToolCfg(flags,
-                              name: str = "ActsSurfaceMappingTool",
-                              **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-  acc.addPublicTool(CompFactory.ActsSurfaceMappingTool(name, **kwargs), primary=True)
-  return acc
-
-
-def ActsVolumeMappingToolCfg(flags,
-                             name: str = "ActsVolumeMappingTool",
-                             **kwargs ) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-  kwargs.setdefault("TrackingGeometryTool", acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags))) # PrivateToolHandle
-  acc.addPublicTool(CompFactory.ActsVolumeMappingTool(name, **kwargs), primary=True)
   return acc
 
 
@@ -268,30 +241,6 @@ def ActsWriteTrackingGeometryTransformsAlgCfg(flags,
     acc.addEventAlgo(CompFactory.ActsWriteTrackingGeometryTransforms(name,**kwargs))
     return acc
 
-def ActsMaterialMappingCfg(flags,
-                           name: str = "ActsMaterialMapping",
-                           **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    if 'MaterialStepConverterTool' not in kwargs:
-      kwargs.setdefault("MaterialStepConverterTool", acc.getPrimaryAndMerge(ActsMaterialStepConverterToolCfg(flags)))
-
-    if 'SurfaceMappingTool' not in kwargs:
-      kwargs.setdefault("SurfaceMappingTool", acc.getPrimaryAndMerge(ActsSurfaceMappingToolCfg(flags)))
-
-    if 'VolumeMappingTool' not in kwargs:
-      kwargs.setdefault("VolumeMappingTool", acc.getPrimaryAndMerge(ActsVolumeMappingToolCfg(flags)))
-
-    if 'MaterialJsonWriterTool' not in kwargs:
-      kwargs.setdefault("MaterialJsonWriterTool",
-                        acc.getPrimaryAndMerge( ActsMaterialJsonWriterToolCfg(flags,
-                                                                              OutputFile = "material-maps.json",
-                                                                              processSensitives = False,
-                                                                              processNonMaterial = False) ))
-      
-    acc.addEventAlgo(CompFactory.ActsMaterialMapping(name, **kwargs))
-    return acc
-
 def ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags,
                            name: str = "ActsVolumeIdToDetectorCollectionMappingAlgCfg",
                            **kwargs) -> ComponentAccumulator:
@@ -320,6 +269,14 @@ def ItkBlueprintNodeBuilderCfg(flags,
                                    **kwargs) -> ComponentAccumulator:
     result = ComponentAccumulator()
     the_tool = CompFactory.ActsTrk.ItkBlueprintNodeBuilder(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def caloBlueprintNodeBuilderCfg(flags,
+                                   name: str = "CaloBlueprintNodeBuilder",
+                                   **kwargs) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.CaloBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 

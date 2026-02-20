@@ -4,7 +4,7 @@
 
 #include "LArStripNeighborhood.h"
 
-#include <ostream>
+#include <sstream>
 
 namespace GlobalSim {
   
@@ -21,30 +21,36 @@ namespace GlobalSim {
     m_cellCoords{cell},
     m_max_cell_pos{max_cell_pos}{
   }
+
+  std::string LArStripNeighborhood::to_string() const {
+    std::stringstream ss;
+    ss << "LArStripNeighborhood: roi coords ("
+       << roiCoords().first << ','  << roiCoords().second << ") cell coords ("
+       << cellCoords().first << ','  << cellCoords().second
+       << ") max_cell_pos " << maxCellIndex() << '\n';
+    
+    ss << "phi low: " << " [" << phi_low().size() <<"]\n";
+    for(const auto& sd : phi_low()) { ss << sd << '\n';}
+    
+    ss << '\n';
+    
+    ss << "phi center: " << " [" << phi_center().size() <<"]\n";
+    for(const auto& sd : phi_center()) { ss << sd << '\n';}
+    
+    ss << '\n';
+    
+    ss << "phi high: " << " [" << phi_high().size() <<"]\n";
+    for(const auto& sd : phi_high()) { ss << sd << '\n';}
+    
+    ss << '\n';
+    return ss.str();
+  }
 }
 
 std::ostream&
-operator<< (std::ostream& os, const GlobalSim::LArStripNeighborhood& n) {
-  
-  os << "LArStripNeighborhood: roi coords ("
-     << n.m_roiCoords.first << ','  << n.m_roiCoords.second << ") cell coords ("
-     << n.m_cellCoords.first << ','  << n.m_cellCoords.second
-     << ") max_cell_pos " << n.m_max_cell_pos << '\n';
-  
-  os << "phi low: " << " [" << n.m_phi_low.size() <<"]\n";
-  for(const auto& sd : n.m_phi_low) { os << sd << '\n';}
-  
-  os << '\n';
-  
-  os << "phi center: " << " [" << n.m_phi_center.size() <<"]\n";
-  for(const auto& sd : n.m_phi_center) { os << sd << '\n';}
-
-  os << '\n';
-  
-  os << "phi high: " << " [" << n.m_phi_high.size() <<"]\n";
-  for(const auto& sd : n.m_phi_high) { os << sd << '\n';}
-  
-  os << '\n';
+operator<< (std::ostream& os,
+	    const GlobalSim::LArStripNeighborhood& n) {
+  os << n.to_string();
   return os;
 }
 

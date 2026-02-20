@@ -7,6 +7,7 @@
 
 // Athena headers
 #include "MCTruth/TrackHelper.h"
+#include "TrackRecord/TrackRecordCollection.h"
 
 //G4 headers
 #include "G4PhysicalVolumeStore.hh"
@@ -20,7 +21,7 @@ RecordingEnvelope::RecordingEnvelope(const std::string& envelopeVolumeName, cons
   m_level(-1),
   m_logicalVolume(nullptr),
   m_envelopeVolumeName(envelopeVolumeName),
-  m_trackRecordCollection(trackRecordCollectionName)
+  m_trackRecordCollectionName(trackRecordCollectionName)
 {
 
 }
@@ -60,10 +61,9 @@ bool RecordingEnvelope::Initialize()
   return this->checkDaughters(logicalWorld, thePhysicalVolume,m_level);
 }
 
-void RecordingEnvelope::BeginOfEvent()
+void RecordingEnvelope::BeginOfEvent(TrackRecordCollection* trackRecordCollection)
 {
-  if (!m_trackRecordCollection.isValid()) m_trackRecordCollection = std::make_unique<TrackRecordCollection>(m_trackRecordCollection.name());
-  return;
+  m_trackRecordCollection = trackRecordCollection;
 }
 void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
 {
@@ -84,6 +84,4 @@ void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
   G4VPhysicalVolume *preVol=preStep->GetPhysicalVolume();
 
   m_trackRecordCollection->Emplace(pdgcode,status,ener,mom,pos,time,barcode,id,preVol->GetName());
-
-  return;
 }

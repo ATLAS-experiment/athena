@@ -26,7 +26,6 @@ AthDictLoaderSvc                 INFO acquired Dso-registry
 ClassIDSvc                       INFO  getRegistryEntries: read 3045 CLIDRegistry entries for module ALL
 CoreDumpSvc                      INFO install f-a-t-a-l handler... (flag = -1)
 CoreDumpSvc                      INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 
-AthenaEventLoopMgr               INFO Initializing AthenaEventLoopMgr - package version AthenaServices-00-00-00
 ClassIDSvc                       INFO  getRegistryEntries: read 770 CLIDRegistry entries for module ALL
 xAODMaker::EventInfoCnvAlg       INFO Initializing - Package version: xAODEventInfoCnv-00-00-00
 xAODMaker::EventInfoCnvAlg....   INFO Initializing - Package version: xAODEventInfoCnv-00-00-00
@@ -46,8 +45,6 @@ IOVDbSvc                         INFO Only 5 POOL conditions files will be open 
 IOVDbFolder                      INFO Read from meta data only for folder /TagInfo
 IOVDbSvc                         INFO Initialised with 1 connections and 1 folders
 IOVDbSvc                         INFO Service IOVDbSvc initialised successfully
-MetaDataSvc                      INFO Initializing MetaDataSvc - package version AthenaServices-00-00-00
-AthenaPoolCnvSvc                 INFO Initializing AthenaPoolCnvSvc - package version AthenaPoolCnvSvc-00-00-00
 MetaDataSvc                      INFO Found MetaDataTools = PublicToolHandleArray([])
 IOVDbSvc                         INFO preLoadAddresses: Removing folder /TagInfo. It should only be in the file meta data and was not found.
 xAODMaker::EventInfoCnvAlg....WARNING Beam conditions service not available
@@ -57,7 +54,6 @@ xAODMaker::EventInfoCnvAlg....   INFO Will take information from the EventInfo o
 ClassIDSvc                       INFO  getRegistryEntries: read 1940 CLIDRegistry entries for module ALL
 IOVDbTestAlg                    DEBUG Property update for OutputLevel : new value = 2
 IOVDbTestAlg                    DEBUG in initialize()
-ToolSvc.CondStream2              INFO Initializing ToolSvc.CondStream2 - package version AthenaServices-00-00-00
 IOVDbTestAlg                    DEBUG Found IOVRegistrationSvc 
 IOVDbTestAlg                     INFO Tag to be used: COOL-TEST-001
 IOVDbTestAlg                    DEBUG input handles: 0

@@ -8,7 +8,7 @@
 #define XAODROOTACCESS_TOOLS_UTILS_H
 
 // Framework include(s).
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // ROOT include(s):
 #include <TDataType.h>

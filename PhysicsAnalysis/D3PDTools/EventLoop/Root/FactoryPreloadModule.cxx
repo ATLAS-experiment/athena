@@ -14,7 +14,7 @@
 #include <AsgTools/MessageCheckAsgTools.h>
 #include <TInterpreter.h>
 #include <TSystem.h>
-#include <boost/algorithm/string.hpp>
+#include <ranges>
 
 //
 // method implementations
@@ -27,7 +27,7 @@ namespace EL
     StatusCode FactoryPreloadModule::onInitialize (ModuleData& /*data*/)
     {
       std::vector<std::string> preloaderList;
-      boost::split (preloaderList, preloader.value(), boost::is_any_of (","));
+      for (auto&& part : std::views::split(preloader.value(), ',')) preloaderList.emplace_back(part.begin(), part.end());
 
       if (preloaderList.size() % 2 != 0)
       {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Michael Duehrssen <michael.duehrssen@cern.ch>
@@ -21,7 +21,7 @@ namespace xAODMaker
 
     // Check and initialize keys
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
-    ATH_CHECK(m_beamSpotKey.initialize());
+    ATH_CHECK(m_beamSpotKey.initialize(SG::AllowEmpty));
 #endif
 
     ATH_CHECK( m_signalInputKey.initialize() );
@@ -105,21 +105,23 @@ namespace xAODMaker
 
     // Ensure correct beam spot info
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
-    if (!beamSpotHandle.isValid()) {
-      ATH_MSG_ERROR("Beam spot information not valid");
-      return StatusCode::FAILURE;
+    if (!m_beamSpotKey.key().empty()) {
+      SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
+      if (!beamSpotHandle.isValid()) {
+        ATH_MSG_ERROR("Beam spot information not valid");
+        return StatusCode::FAILURE;
+      }
+      outputEvent->setBeamPos( beamSpotHandle->beamPos()[ Amg::x ],
+                              beamSpotHandle->beamPos()[ Amg::y ],
+                              beamSpotHandle->beamPos()[ Amg::z ] );
+      outputEvent->setBeamPosSigma( beamSpotHandle->beamSigma( 0 ),
+                                    beamSpotHandle->beamSigma( 1 ),
+                                    beamSpotHandle->beamSigma( 2 ) );
+      outputEvent->setBeamPosSigmaXY( beamSpotHandle->beamSigmaXY() );
+      outputEvent->setBeamTiltXZ( beamSpotHandle->beamTilt( 0 ) );
+      outputEvent->setBeamTiltYZ( beamSpotHandle->beamTilt( 1 ) );
+      outputEvent->setBeamStatus( beamSpotHandle->beamStatus() );
     }
-    outputEvent->setBeamPos( beamSpotHandle->beamPos()[ Amg::x ],
-                             beamSpotHandle->beamPos()[ Amg::y ],
-                             beamSpotHandle->beamPos()[ Amg::z ] );
-    outputEvent->setBeamPosSigma( beamSpotHandle->beamSigma( 0 ),
-                                  beamSpotHandle->beamSigma( 1 ),
-                                  beamSpotHandle->beamSigma( 2 ) );
-    outputEvent->setBeamPosSigmaXY( beamSpotHandle->beamSigmaXY() );
-    outputEvent->setBeamTiltXZ( beamSpotHandle->beamTilt( 0 ) );
-    outputEvent->setBeamTiltYZ( beamSpotHandle->beamTilt( 1 ) );
-    outputEvent->setBeamStatus( beamSpotHandle->beamStatus() );
 #endif
 
     ATH_MSG_DEBUG("Output xAOD::EventInfo " << outputEvent.name() << " : " << *outputEvent<<" beamspot size z="<<outputEvent->beamPosSigmaZ());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1RPChardware_RPCRXRODDecode_H
@@ -13,7 +13,6 @@
 class RPCRXRODDecode : public BaseObject {
 public:
     RPCRXRODDecode();
-    ~RPCRXRODDecode();
     sbit32 gimeRODDataAddress() { return m_RODDataAddress; };
     void RODAddresses(const RODword *RODData, const sbit32 numberOfStatusElements, const sbit32 statusBlockPosition);
     void RODHeader(const RODword *ROBData);
@@ -24,8 +23,7 @@ public:
     void gimeCMROData();
     void RODHeaderDisplay();
     //
-    // ROD structure control flags
-    //
+    /// ROD structure control flags
     ubit16 gimeCMFlag() { return m_CMFlag; };
     ubit16 gimePADFlag() { return m_PADFlag; };
     ubit16 gimeRXFlag() { return m_RXFlag; };
@@ -33,76 +31,65 @@ public:
     void disablePrintOut();
     //
     // Special for sector logic
-    //
     void setSLFragmentFound(bool slFound) { m_slFound = slFound; };
 
     //
-    // ROD HEADER
+    /// ROD HEADER
+    // 0xdeadcafe = no record content for 32bit words
+    RODword headerMarker{0xdeadcafe};
+    RODword headerSize{0xdeadcafe};
+    RODword formatVersion{0xdeadcafe};
+    RODword sourceIdentifier{0xdeadcafe};
+    RODword Level1ID{0xdeadcafe};
+    RODword BunchXingID{0xdeadcafe};
+    RODword Level1Type{0xdeadcafe};
+    RODword DetectorEventType{0xdeadcafe};
     //
-    RODword headerMarker;
-    RODword headerSize;
-    RODword formatVersion;
-    RODword sourceIdentifier;
-    RODword Level1ID;
-    RODword BunchXingID;
-    RODword Level1Type;
-    RODword DetectorEventType;
-    ubit16 SourceReserved;
-    ubit16 SourceModuleType;
-    ubit16 SourceSubDetectorID;
-    ubit16 SourceModuleID;
+    // 9999 = no record content for 16bit words
+    ubit16 SourceReserved{9999};
+    ubit16 SourceModuleType{9999};
+    ubit16 SourceSubDetectorID{9999};
+    ubit16 SourceModuleID{9999};
     //
-    // Sector, PAd and Matrix identifiers
+    /// Sector, Pad and Matrix identifiers
+    ubit16 SectorID{9999};
+    ubit16 PadID{9999};
+    ubit16 CMID{9999};
+    ubit16 CMFragCheck{9999};
     //
-    ubit16 SectorID;
-    ubit16 PadID;
-    ubit16 CMID;
-    ubit16 CMFragCheck;
-    //
-    // service objects
-    //
-    RXReadOutStructure RXROS;
-    PadReadOutStructure PDROS;
-    MatrixReadOutStructure CMROS;
-    MatrixReadOut CMRO;
-    SectorLogicRXReadOutStructure SLROS;
-    SectorLogicRXReadOut SLRO;
+    /// service objects
+    RXReadOutStructure RXROS{};
+    PadReadOutStructure PDROS{};
+    MatrixReadOutStructure CMROS{};
+    MatrixReadOut CMRO{};
+    SectorLogicRXReadOutStructure SLROS{};
+    SectorLogicRXReadOut SLRO{};
 
 private:
-    bool m_isSLBody;
+    bool m_isSLBody{};
     //
-    // ROD Data address
+    /// ROD Data address
+    sbit32 m_RODDataAddress{};
     //
-    sbit32 m_RODDataAddress;
-    //
-    // define "previous" type of 16-bit data record
-    //
+    /// define "previous" type of 16-bit data record
     enum recType { Empty, CMHead, CMSub, CMBod, CMFoot, PadHead, PadSub, PadPre, PadFoot, SLHead, SLFoot, RXHead, RXFoot };
-    recType m_previousRecord;
+    recType m_previousRecord{recType::Empty};
     //
-    // RPC data markers
+    /// RPC data markers
+    ubit16 m_field{0xf000}; //!< field map of word identifier
+
+    ubit16 m_reserved4{0xe000};
     //
-    ubit16 m_field;
-    ubit16 m_noRecord16;
-    RODword m_noRecord32;
-    // ubit16 PADSubHeader;
-    // ubit16 PADPreFooter;
-    // ubit16 reserved3;
-    ubit16 m_reserved4;
-    // ubit16 reserved5;
+    /// data structure control flags
+    ubit16 m_CMFlag{};
+    ubit16 m_PADFlag{};
+    ubit16 m_RXFlag{};
     //
-    // data structure control flags
+    /// enable printouts
+    bool m_enablePrintOut{};
     //
-    ubit16 m_CMFlag;
-    ubit16 m_PADFlag;
-    ubit16 m_RXFlag;
-    //
-    // enable printouts
-    //
-    bool m_enablePrintOut;
-    //
-    // the SL fragment was ound
-    bool m_slFound;
+    /// the SL fragment was found
+    bool m_slFound{};
 };
 
 #endif

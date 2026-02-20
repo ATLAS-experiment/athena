@@ -7,7 +7,7 @@
 #include "PathResolver/PathResolver.h"
 
 #include "GeneratorObjects/McEventCollection.h"
-#include <boost/algorithm/string.hpp>
+#include <ranges>
 #include <charconv>
 
 // calls to fortran routines
@@ -105,7 +105,7 @@ StatusCode Pythia8_i::genInitialize() {
   m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
   /// Here one can fill extra information, e.g. the used tools in a format generator name, version string, comment.
   struct HepMC3::GenRunInfo::ToolInfo generator={std::string("Pythia8"),py8version(),std::string("Used generator")};
-  m_runinfo->tools().push_back(generator);   
+  m_runinfo->tools().push_back(std::move(generator));   
 #endif
 
   bool canInit = true;
@@ -253,7 +253,7 @@ StatusCode Pythia8_i::genInitialize() {
 
     std::vector<std::string> resonanceArgs;
 
-    boost::split(resonanceArgs, m_userResonances.value(), boost::is_any_of(":"));
+    for (auto&& part : std::views::split(m_userResonances.value(), ':')) resonanceArgs.emplace_back(part.begin(), part.end());
     if(resonanceArgs.size() != 2){
       ATH_MSG_ERROR("Cannot Understand UserResonance job option!");
       ATH_MSG_ERROR("You should specify it as a 'name:id1,id2,id3...'");
@@ -261,7 +261,7 @@ StatusCode Pythia8_i::genInitialize() {
       canInit = false;
     }
     std::vector<std::string> resonanceIds;
-    boost::split(resonanceIds, resonanceArgs.back(), boost::is_any_of(","));
+    for (auto&& part : std::views::split(resonanceArgs.back(), ',')) resonanceIds.emplace_back(part.begin(), part.end());
     if(resonanceIds.size()==0){
       ATH_MSG_ERROR("You did not specifiy any PDG ids to which your user resonance width should be applied!");
       ATH_MSG_ERROR("You should specify a list as 'name:id1,id2,id3...'");
@@ -628,7 +628,7 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
   evt->weights().resize(fWeights.size(), 1.0);
-  for (auto w: fWeights) {
+  for (const auto & w: fWeights) {
       evt->weight(w.first)=w.second;
   }
 

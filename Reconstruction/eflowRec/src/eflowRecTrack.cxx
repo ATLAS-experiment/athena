@@ -9,9 +9,9 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowDepthCalculator.h"
-#include "eflowRec/eflowTrackExtrapolatorBaseAlgTool.h"
+#include "eflowRecTrack.h"
+#include "eflowDepthCalculator.h"
+#include "eflowTrackExtrapolatorBaseAlgTool.h"
 
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/StatusCode.h"

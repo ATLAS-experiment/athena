@@ -10,10 +10,9 @@ def ITkConstrainedTrackProviderCfg(flags, name="ITkConstrainedTrackProvider", **
     cfg = ComponentAccumulator()
 
     if "TrackFitter" not in kwargs:
-            
         from TrkConfig.CommonTrackFitterConfig import ITkStandaloneTrackFitterCfg
-        kwargs.setdefault("TrackFitter", cfg.addPublicTool(cfg.popToolsAndMerge(
-        ITkStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True))))
+        kwargs.setdefault("TrackFitter", cfg.popToolsAndMerge(
+            ITkStandaloneTrackFitterCfg(flags, FillDerivativeMatrix = True)))
 
     kwargs.setdefault("MinPt", 0.)
 

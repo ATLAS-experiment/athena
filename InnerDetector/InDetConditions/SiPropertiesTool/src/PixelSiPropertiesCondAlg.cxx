@@ -11,7 +11,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
 PixelSiPropertiesCondAlg::PixelSiPropertiesCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator),
+  ::AthCondAlgorithm(name, pSvcLocator),
   m_pixid(nullptr)
 {
 }

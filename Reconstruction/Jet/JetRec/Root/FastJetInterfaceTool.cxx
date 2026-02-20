@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "fastjet/ClusterSequenceArea.hh"
 #include "xAODEventInfo/EventInfo.h"
 
-
-//#include "EventInfo/EventID.h"
 #include "CxxUtils/crc64.h"
 
 #include "JetRec/FastJetInterfaceTool.h"
@@ -594,7 +592,11 @@ StatusCode FastJetInterfaceTool::configJetAreas()
 {
   // check area type
   const areamap_t& map = getKnownAreas();
-  m_areaType = (*(map.find("default"))).second;
+  const auto pPair = map.find("default");
+  if (pPair == map.end()){
+    return StatusCode::FAILURE;
+  }
+  m_areaType = pPair->second;
   if ( !checkConfig(m_jetAreaDefinitionType,m_areaType) )
     { return StatusCode::FAILURE; }
   // area definition according to type

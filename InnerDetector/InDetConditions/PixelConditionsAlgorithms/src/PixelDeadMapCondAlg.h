@@ -11,7 +11,7 @@
 #ifndef PIXELDEADMAPCONDALG_H
 #define PIXELDEADMAPCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -23,13 +23,12 @@
 
 #include "Gaudi/Property.h"
 
-class PixelDeadMapCondAlg : public AthReentrantAlgorithm {
+class PixelDeadMapCondAlg : public AthCondAlgorithm {
   public:
     PixelDeadMapCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
   
   private:
 

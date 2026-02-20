@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/Root/AuxElement.h
@@ -387,19 +387,6 @@ const SG::auxid_set_t& AuxElement::getDecorIDs() const
 #else
   return ConstAuxElement::getDecorIDs();
 #endif
-}
-
-
-/**
- * @brief Return true if this object has an associated store.
- *
- * This will be true for either a private or standalone store.
- */
-bool AuxElement::hasStore() const
-{
-  if (havePrivateData())
-    return m_container->hasStore();
-  return false;
 }
 
 

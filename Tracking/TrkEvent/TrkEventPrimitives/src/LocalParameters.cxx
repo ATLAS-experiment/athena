@@ -1,17 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
 // LocalParameters.cxx, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#include <typeinfo>
+
 // Trk
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkEventPrimitives/DefinedParameter.h"
 //Gaudi
 #include "GaudiKernel/MsgStream.h"
+#include <typeinfo>
+#include <sstream>
+#include <iostream>
 
 namespace {
 const Trk::ProjectionMatricesSet s_projectionMatrices(5);
@@ -97,23 +100,9 @@ namespace Trk {
 /**Overload of << operator for both, MsgStream and std::ostream for debug output*/
 MsgStream& operator << ( MsgStream& sl, const Trk::LocalParameters& lp)
 {
-  std::streamsize ss = sl.precision();
-  sl << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
-  sl << "Trk::LocalParameters " <<": (";
-  for (int ipar=0; ipar<lp.dimension(); ++ipar)
-    { sl << lp(ipar);
-      if (ipar+1 < lp.dimension()) { sl << ", ";
-      } else { sl << ")   - key: "<< lp.m_parameterkey << "(";}
-    }
-
-  for (int itag = 0, ipos=1; itag<5; ++itag, ipos*=2)
-    { bool bit = (lp.m_parameterkey & ipos);
-      if (bit) { sl << "1";
-      } else { sl << "0";}
-    }
-  sl << ")";
-  sl.precision (ss); sl<<std::resetiosflags(std::ios::fixed);
-
+  std::ostringstream os;
+  os << lp;
+  sl << os.str();
   return sl;
 }
 

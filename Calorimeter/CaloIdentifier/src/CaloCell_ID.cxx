@@ -6,8 +6,6 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "Identifier/IdentifierHash.h"
 
-#include "GaudiKernel/MsgStream.h"
-
 #include <set>
 #include <iostream>
 #include <stdexcept>
@@ -29,17 +27,15 @@ CaloCell_ID::~CaloCell_ID() = default;
 int
 CaloCell_ID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 {
-  
-  MsgStream log(m_msgSvc, "CaloCell_ID");
-  if(m_msgSvc)log << MSG::DEBUG << "Initialize" << endmsg;
+  ATH_MSG_DEBUG("Initialize");
   
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    if(m_msgSvc)log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    if(m_msgSvc)log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
   
   // init base object

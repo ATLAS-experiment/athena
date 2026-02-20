@@ -1,14 +1,15 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "RPC_CondCabling/RpcCablingCondAlg.h"
+#include "RPC_CondCabling/RPCofflineId.h"
 
 #include <sstream>
 
 #include "PathResolver/PathResolver.h"
 
-RpcCablingCondAlg::RpcCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {}
+RpcCablingCondAlg::RpcCablingCondAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode RpcCablingCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing" << name());
@@ -21,9 +22,8 @@ StatusCode RpcCablingCondAlg::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode RpcCablingCondAlg::execute() {
+StatusCode RpcCablingCondAlg::execute(const EventContext& ctx) const {
     
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     ATH_MSG_DEBUG("executing" << name());
 
     SG::WriteCondHandle<RpcCablingCondData> writeHandle{m_writeKey, ctx};
@@ -738,7 +738,7 @@ std::list<Identifier> RpcCablingCondAlg::give_strip_id(const unsigned short int 
         rpcId.measuresPhi = static_cast<int>(decode.view());
         rpcId.strip = RPC_strip + 1;
 
-        offlineIdList.push_back(rpcId);
+        offlineIdList.push_back(std::move(rpcId));
 
         ++it;
     }

@@ -10,7 +10,7 @@
 #include <memory>
 
 PixelAlignCondAlg::PixelAlignCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -35,11 +35,10 @@ StatusCode PixelAlignCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelAlignCondAlg::execute()
+StatusCode PixelAlignCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handle and check its validity ____________
   SG::WriteCondHandle<GeoAlignmentStore> writeHandle{m_writeKey, ctx};
 

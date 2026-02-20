@@ -11,8 +11,8 @@
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/MultiRange.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "boost/range/iterator_range.hpp"
 #include <vector>
+#include <ranges>
 
 
 
@@ -102,7 +102,7 @@ class LArOnlineID_Base : public AtlasDetectorID
   /** Type for iterators over identifiers. */
   using id_iterator = std::vector<HWIdentifier>::const_iterator;
   /** Type for range over identifiers. */
-  using id_range = boost::iterator_range<id_iterator>;
+  using id_range = std::ranges::subrange<id_iterator>;
 
   /** 
    * @brief Default constructor

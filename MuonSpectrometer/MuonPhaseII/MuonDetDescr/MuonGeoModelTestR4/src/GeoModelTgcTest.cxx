@@ -3,7 +3,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "GeoModelTgcTest.h"
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/TgcReadoutElement.h>
 #include <EventPrimitives/EventPrimitivesToStringConverter.h>
 #include <fstream>
@@ -84,9 +84,9 @@ StatusCode GeoModelTgcTest::finalize() {
 StatusCode GeoModelTgcTest::execute() {
     const EventContext& ctx{Gaudi::Hive::currentContext()};
 
-    const ActsGeometryContext* geoContextHandle{nullptr};
+    const ActsTrk::GeometryContext* geoContextHandle{nullptr};
     ATH_CHECK(SG::get(geoContextHandle, m_geoCtxKey, ctx));
-    const ActsGeometryContext& gctx{*geoContextHandle};
+    const ActsTrk::GeometryContext& gctx{*geoContextHandle};
 
     for (const Identifier& test_me : m_testStations) {
       ATH_MSG_DEBUG("Test retrieval of Tgc detector element "<<m_idHelperSvc->toStringDetEl(test_me));
@@ -100,8 +100,8 @@ StatusCode GeoModelTgcTest::execute() {
                       <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTrans(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTrans(gctx)};
+      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
+      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
       const Amg::Transform3D transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
@@ -145,7 +145,7 @@ StatusCode GeoModelTgcTest::execute() {
    return StatusCode::SUCCESS;
 }
 StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
-                                       const ActsGeometryContext& gctx, 
+                                       const ActsTrk::GeometryContext& gctx, 
                                        const TgcReadoutElement* reElement) {
    
    m_stIndex    = reElement->stationName();
@@ -153,7 +153,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
    m_stPhi      = reElement->stationPhi();
    m_stLayout   = reElement->chamberDesign();
    m_nGasGaps   = reElement->nGasGaps();
-   m_readoutTransform = reElement->localToGlobalTrans(gctx);
+   m_readoutTransform = reElement->localToGlobalTransform(gctx);
 
    m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
@@ -169,7 +169,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash = reElement->constructHash(strip, gap, true);
             const RadialStripDesign& layout{reElement->stripLayout(measHash)};
 
-            const Amg::Transform3D localToGlobal{reElement->localToGlobalTrans(gctx , 
+            const Amg::Transform3D localToGlobal{reElement->localToGlobalTransform(gctx , 
                                                                                 reElement->layerHash(measHash)) *
                                                 (Amg::getRotateZ3D(-90.*Gaudi::Units::deg))};
             if (strip == 1) {
@@ -201,7 +201,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash = reElement->constructHash(gang, gap, false);
             const WireGroupDesign& layout{reElement->wireGangLayout(measHash)};
             if (gang == 1) {
-                m_layTans.push_back(reElement->localToGlobalTrans(gctx, reElement->layerHash(measHash)));
+                m_layTans.push_back(reElement->localToGlobalTransform(gctx, reElement->layerHash(measHash)));
                 m_layMeasPhi.push_back(false);
                 m_layNumber.push_back(gap);
                 m_layShortWidth.push_back(2.*layout.shortHalfHeight());

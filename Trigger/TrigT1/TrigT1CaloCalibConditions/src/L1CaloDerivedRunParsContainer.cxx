@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigT1CaloCalibConditions/L1CaloDerivedRunParsContainer.h"
 
@@ -59,8 +59,8 @@ void L1CaloDerivedRunParsContainer::makeTransient(const std::map<std::string, co
     auto chanNum = item.first;
     const auto& attrList = item.second;
     
-    auto timingRegime = attrList[specificationName(etimingRegime)].data<std::string>();
-    auto tierZeroTag = attrList[specificationName(etierZeroTag)].data<std::string>();
+    const auto & timingRegime = attrList[specificationName(etimingRegime)].data<std::string>();
+    const auto & tierZeroTag = attrList[specificationName(etierZeroTag)].data<std::string>();
 
     addDerivedRunPars(L1CaloDerivedRunPars(chanNum, timingRegime, tierZeroTag));
   }

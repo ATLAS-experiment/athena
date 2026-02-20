@@ -95,11 +95,12 @@ namespace JiveXML {
     et.emplace_back(DataType( sumet ));
 
     // four-vectors
-    DataMap["et"] = et;
-    DataMap["etx"] = etx;
-    DataMap["ety"] = ety;
+    const auto n = et.size();
+    DataMap["et"] = std::move(et);
+    DataMap["etx"] = std::move(etx);
+    DataMap["ety"] = std::move(ety);
 
-    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << et.size() << " entries" );
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << n << " entries" );
 
     //All collections retrieved okay
     return DataMap;

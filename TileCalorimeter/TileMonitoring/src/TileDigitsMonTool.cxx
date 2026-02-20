@@ -435,7 +435,8 @@ StatusCode TileDigitsMonTool::fillHists()
     //   log << MSG::ERROR << "legth of BCID vector " << headsize << " - greater than 16 !" << endreq;
     //   headsize = 16;
     //}
-    
+
+    //coverity[STACK_USE]
     double mean_tmp[48][2][16];
     memset(mean_tmp, 0, sizeof(mean_tmp));
     
@@ -832,7 +833,9 @@ StatusCode TileDigitsMonTool::finalHists()
 		    m_data->m_meanAmp_ij[ros][drawer][adc][ch_i][ch_j] /= m_data->m_nEvents_ij[ros][drawer][adc][ch_i][ch_j];
               }
 
+              //coverity[STACK_USE]
               double covar[48][48];
+              //coverity[STACK_USE]
               double corr[48][48];
               double mean_rms[48];
               double mean_cov_ii = 0.; // mean values of covar in diag terms

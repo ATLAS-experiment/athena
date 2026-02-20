@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNEvaluator.h"
@@ -11,23 +11,12 @@
 
 
 TauGNNEvaluator::TauGNNEvaluator(const std::string &name): 
-  TauRecToolBase(name),
-  m_net_inclusive(nullptr),
-  m_net_0p(nullptr), m_net_1p(nullptr), m_net_2p(nullptr), m_net_3p(nullptr) {
-}
+  TauRecToolBase(name) {}
 
 TauGNNEvaluator::~TauGNNEvaluator() {}
 
 StatusCode TauGNNEvaluator::initialize() {
-  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks and "<<m_max_clusters<<" clusters...");
-
-  // Set the layer and node names in the weight file
-  TauGNN::Config config;
-  config.input_layer_scalar = m_input_layer_scalar;
-  config.input_layer_tracks = m_input_layer_tracks;
-  config.input_layer_clusters = m_input_layer_clusters;
-  config.output_node_tau = m_outnode_tau;
-  config.output_node_jet = m_outnode_jet;
+  ATH_MSG_INFO("Initializing TauGNNEvaluator with "<<m_max_tracks.value()<<" tracks, "<<m_max_clusters<<" clusters, and "<<m_max_hits<<" hits...");
 
   // We can either use an inclussive GNN (e.g. Offline GNTauv0), or a prong-dependent GNN (e.g. HLT GNTau), not both!
   
@@ -38,7 +27,7 @@ StatusCode TauGNNEvaluator::initialize() {
     }
     
     ATH_MSG_INFO("Loading prong-inclusive TauID GNN");
-    m_net_inclusive = load_network(m_weightfile_inclusive, config);
+    m_net_inclusive = load_network(m_weightfile_inclusive);
     if(!m_net_inclusive) return StatusCode::FAILURE;
 
   } else { // Prong-dependent networks
@@ -46,39 +35,59 @@ StatusCode TauGNNEvaluator::initialize() {
     // 0-prong is optional
     if(!m_weightfile_0p.empty()) {
       ATH_MSG_INFO("Loading 0-prong TauID GNN");
-      m_net_0p = load_network(m_weightfile_0p, config);
+      m_net_0p = load_network(m_weightfile_0p);
       if(!m_net_0p) return StatusCode::FAILURE;
     }
 
     ATH_MSG_INFO("Loading 1-prong TauID GNN");
-    m_net_1p = load_network(m_weightfile_1p, config);
+    m_net_1p = load_network(m_weightfile_1p);
     if(!m_net_1p) return StatusCode::FAILURE;
 
     // 2-prong is optional
     if(!m_weightfile_2p.empty()) {
       ATH_MSG_INFO("Loading 2-prong TauID GNN");
-      m_net_2p = load_network(m_weightfile_2p, config);
+      m_net_2p = load_network(m_weightfile_2p);
       if(!m_net_2p) return StatusCode::FAILURE;
     }
 
     ATH_MSG_INFO("Loading 3-prong TauID GNN");
-    m_net_3p = load_network(m_weightfile_3p, config);
+    m_net_3p = load_network(m_weightfile_3p);
     if(!m_net_3p) return StatusCode::FAILURE;
   }
 
-  if(m_output_discriminant < Discriminant::NegLogPJet || m_output_discriminant > Discriminant::PTau) {
+  if(m_output_discriminant < Discriminant::Disabled || m_output_discriminant > Discriminant::PTau) {
     ATH_MSG_FATAL("Invalid TauGNNEvaluator discriminant setting: " << m_output_discriminant);
   }
 
-  if (!m_tauContainerName.empty()){
-    m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
-    ATH_CHECK(m_scoreHandleKey.initialize());    
+  if(!m_tauContainerName.empty()) {
+    // We should move to using WriteDecorHandles in the future, but for now
+    // we create keys to enforce data-dependencies in the scheduler
+
+    if(m_output_discriminant != Discriminant::Disabled) {
+      m_scoreHandleKey = m_tauContainerName + "." + m_output_varname;
+      ATH_CHECK(m_scoreHandleKey.initialize());
+    }
+
+    m_pTauHandleKey = m_tauContainerName + "." + m_output_ptau;
+    ATH_CHECK(m_pTauHandleKey.initialize());
+
+    m_pJetHandleKey = m_tauContainerName + "." + m_output_pjet;
+    ATH_CHECK(m_pJetHandleKey.initialize());
+  }
+
+  if(!m_tauContainerName.empty() && !m_hitsHandleKey.empty()) {
+    m_hits_decor_name = m_hitsHandleKey.key();
+    m_hitsHandleKey = m_tauContainerName + "." + m_hitsHandleKey.key();
+    ATH_CHECK(m_hitsHandleKey.initialize());
+  } else if (m_max_hits > 0) {
+    ATH_MSG_ERROR("TauContainerName and HitsHandleKey must be provided to read hits for the GNN evaluation");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network_file, const TauGNN::Config& config) const {
+std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network_file) const {
   // Use PathResolver to search for the weight files
   if(network_file.empty()) return nullptr;
 
@@ -91,7 +100,24 @@ std::unique_ptr<TauGNN> TauGNNEvaluator::load_network(const std::string& network
   ATH_MSG_INFO("Using network config: " << pr_network_file);
   
   // Load the weights and create the network
-  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(pr_network_file, config, m_useTRT);
+  TauGNNDataLoader::Config config;
+  config.nnFile               = pr_network_file;
+  config.input_layer_scalar   = m_input_layer_scalar.value();
+  config.input_layer_tracks   = m_input_layer_tracks.value();
+  config.input_layer_clusters = m_input_layer_clusters.value();
+  config.input_layer_hits     = m_input_layer_hits.value();
+  config.output_node_tau      = m_outnode_tau.value();
+  config.output_node_jet      = m_outnode_jet.value();
+  config.n_max_tracks         = m_max_tracks.value();
+  config.n_max_clusters       = m_max_clusters.value();
+  config.max_dr_cluster       = m_max_cluster_dr.value();
+  config.n_max_hits           = m_max_hits.value();
+  config.doVertexCorrection   = m_doVertexCorrection.value();
+  config.trackClassification  = m_doTrackClassification.value();
+  config.useTRT               = m_useTRT.value();
+  config.hits_decor_name      = m_hits_decor_name;
+
+  std::unique_ptr<TauGNN> net = std::make_unique<TauGNN>(config);
   if(!net) ATH_MSG_ERROR("No network configured.");
 
   return net;
@@ -104,7 +130,7 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::Accessor<float> out_pjet(m_output_pjet);
   const SG::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
-  output(tau) = -1111.0f;
+  if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
   out_pjet(tau) = -1111.0f;
 
@@ -123,44 +149,34 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
     if (tau.nTracks()!=1 && tau.nTracks()!=3) return StatusCode::SUCCESS;
   }
 
-  // Get input objects
-  ATH_MSG_DEBUG("Fetching Tracks");
-  std::vector<const xAOD::TauTrack *> tracks;
-  ATH_CHECK(get_tracks(tau, tracks));
-  ATH_MSG_DEBUG("Fetching clusters");
-  std::vector<xAOD::CaloVertexedTopoCluster> clusters;
-  ATH_CHECK(get_clusters(tau, clusters));
-  ATH_MSG_DEBUG("Constituent fetching done...");
-
-  // Truncate tracks
-  int numTracksMax = std::min(m_max_tracks.value(), static_cast<int>(tracks.size()));
-  std::vector<const xAOD::TauTrack *> trackVec(tracks.begin(), tracks.begin()+numTracksMax);
-
   // Network outputs
   std::map<std::string, float> out_f;
   std::map<std::string, std::vector<char>> out_vc;
   std::map<std::string, std::vector<float>> out_vf;
 
   // Evaluate networks
+  ATH_MSG_DEBUG("Evaluating GNN for tau with nTracks = " << tau.nTracksCharged());
   if(m_net_inclusive) {
-    std::tie(out_f, out_vc, out_vf) = m_net_inclusive->compute(tau, trackVec, clusters);
+    std::tie(out_f, out_vc, out_vf) = m_net_inclusive->compute(tau);
   } else {
     // First we calculate the tau prongness
     int n_tracks = tau.nTracksCharged();
-    if(m_min_prong_track_pt) {
-      n_tracks = 0;
-      for(const xAOD::TauTrack* track : tracks) {
-        if(track->pt() > m_min_prong_track_pt) n_tracks++;
-      }
+    // in trigger, we need to apply a min pT cut on the tracks to count the prongs, 
+    // as no track classification is available
+    if (not m_doTrackClassification && m_min_prong_track_pt>0.) {
+      auto trks = tau.allTracks();
+      const float threshold = m_min_prong_track_pt;
+      n_tracks = std::count_if(trks.begin(), trks.end(), 
+        [&threshold](const xAOD::TauTrack* trk) { return trk->pt() > threshold; }
+      );
     }
-    ATH_MSG_DEBUG("Tau prongness: " << n_tracks);
 
-    if(n_tracks == 0 && m_net_0p) std::tie(out_f, out_vc, out_vf) = m_net_0p->compute(tau, trackVec, clusters);
-    else if(n_tracks == 1) std::tie(out_f, out_vc, out_vf) = m_net_1p->compute(tau, trackVec, clusters);
+    if(n_tracks == 0 && m_net_0p) std::tie(out_f, out_vc, out_vf) = m_net_0p->compute(tau);
+    else if(n_tracks == 1) std::tie(out_f, out_vc, out_vf) = m_net_1p->compute(tau);
     else if(n_tracks == 2) {
-      if(m_net_2p) std::tie(out_f, out_vc, out_vf) = m_net_2p->compute(tau, trackVec, clusters);
-      else std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters);
-    } else if(n_tracks == 3) std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau, trackVec, clusters);
+      if(m_net_2p) std::tie(out_f, out_vc, out_vf) = m_net_2p->compute(tau);
+      else std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau);
+    } else if(n_tracks == 3) std::tie(out_f, out_vc, out_vf) = m_net_3p->compute(tau);
   }
 
   // Store scores only if the inferences actually ran
@@ -178,58 +194,3 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode TauGNNEvaluator::get_tracks(const xAOD::TauJet &tau, std::vector<const xAOD::TauTrack *> &out) const {
-  std::vector<const xAOD::TauTrack*> tracks = tau.allTracks();
-
-  // Skip unclassified tracks:
-  // - the track is a LRT and classifyLRT = false
-  // - the track is not among the MaxNtracks highest-pt tracks in the track classifier
-  // - track classification is not run (trigger)
-  if(m_doTrackClassification) {
-    std::vector<const xAOD::TauTrack*>::iterator it = tracks.begin();
-    while(it != tracks.end()) {
-      if((*it)->flag(xAOD::TauJetParameters::unclassified)) {
-	it = tracks.erase(it);
-      }
-      else {
-	++it;
-      }
-    }
-  }
-
-  // Sort by descending pt
-  auto cmp_pt = [](const xAOD::TauTrack *lhs, const xAOD::TauTrack *rhs) {
-    return lhs->pt() > rhs->pt();
-  };
-  std::sort(tracks.begin(), tracks.end(), cmp_pt);
-  out = std::move(tracks);
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TauGNNEvaluator::get_clusters(const xAOD::TauJet &tau, std::vector<xAOD::CaloVertexedTopoCluster> &clusters) const {
-
-  TLorentzVector tauAxis = tauRecTools::getTauAxis(tau, m_doVertexCorrection);
-
-  for (const xAOD::CaloVertexedTopoCluster& vertexedCluster : tau.vertexedClusters()) {
-    TLorentzVector clusterP4 = vertexedCluster.p4();
-    if (clusterP4.DeltaR(tauAxis) > m_max_cluster_dr) continue;
-      
-    clusters.push_back(vertexedCluster);
-  }
-
-  // Sort by descending et
-  auto et_cmp = [](const xAOD::CaloVertexedTopoCluster& lhs,
-		   const xAOD::CaloVertexedTopoCluster& rhs) {
-    return lhs.p4().Et() > rhs.p4().Et();
-  };
-  std::sort(clusters.begin(), clusters.end(), et_cmp);
-
-  // Truncate clusters
-  if (static_cast<int>(clusters.size()) > m_max_clusters) {
-    clusters.resize(m_max_clusters, clusters[0]);
-  }
-
-  return StatusCode::SUCCESS;
-}

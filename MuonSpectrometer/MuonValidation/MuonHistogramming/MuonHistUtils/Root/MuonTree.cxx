@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHistUtils/MuonTree.h"
@@ -12,7 +12,6 @@ namespace Muon{
 
   MuonTree::MuonTree(PlotBase* pParent, const std::string& sDir, bool mcFlag):
   	PlotBase(pParent, sDir),
-    	m_tree(nullptr),
      m_isMC(mcFlag),
      m_runNumber(-999),
      m_lumiBlock(-999),
@@ -24,7 +23,6 @@ namespace Muon{
 
   MuonTree::MuonTree(PlotBase* pParent, const std::string& sDir):
     PlotBase(pParent, sDir),
-    m_tree(nullptr),
     m_isMC(true),
     m_runNumber(-999),
     m_lumiBlock(-999),
@@ -36,12 +34,11 @@ namespace Muon{
  
   MuonTree::~MuonTree()
   {
-  	if(m_tree) delete m_tree;
   }
 
   void MuonTree::initializePlots()
   {
-    m_tree = BookTree("MuonTree");
+    m_tree.reset (BookTree("MuonTree"));
 
     //EventInfo
     m_tree->Branch("runNumber", &m_runNumber, "runNumber/i");
@@ -440,7 +437,7 @@ namespace Muon{
     m_th_ntrigEtaLayers.clear();
   }
 
-  TTree* MuonTree::getTree() {  return m_tree; }
+  TTree* MuonTree::getTree() {  return m_tree.get(); }
 
 } // closing namespace Muon
 

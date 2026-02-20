@@ -4,12 +4,13 @@
 
 #include "SiCluster.h"
 
+#include <memory>
+
 class SCT_Cluster : public SiCluster
 {
   public:
-    SCT_Cluster(const Surface*);
-    virtual ~SCT_Cluster(void);
-
+    SCT_Cluster(std::unique_ptr<const Surface>);
+  
     virtual void setParameters(float* par) = 0;
     virtual TrkBaseNode* createDkfNode(void) const = 0;
 

@@ -618,7 +618,7 @@ bool run_test(const Config& cfg, int toy_to_debug)
 						auto electron = electronContainer->at(electrons.size());
 						particles.push_back(electron);
 						electrons.push_back(electron);
-						electron->setP4(pt, 0.f, 0.f, 0.511f);
+						electron->setPtEtaPhi(pt, 0.f, 0.f);
 						break;
 					}
 					case 1:
@@ -634,7 +634,7 @@ bool run_test(const Config& cfg, int toy_to_debug)
 						auto photon = photonContainer->at(photons.size());
 						particles.push_back(photon);
 						photons.push_back(photon);
-						photon->setP4(pt, 0.f, 0.f, 0.f);
+						photon->setPtEtaPhi(pt, 0.f, 0.f);
 						break;
 					}
 				}

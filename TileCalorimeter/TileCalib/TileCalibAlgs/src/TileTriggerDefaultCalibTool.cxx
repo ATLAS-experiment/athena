@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTriggerDefaultCalibTool.h"
@@ -145,6 +145,7 @@ StatusCode TileTriggerDefaultCalibTool::execute()
 
   ATH_MSG_DEBUG ( "second executeTrigger()" );
   // declare an array of pmt id for the trigger tower loop
+  //coverity[STACK_USE]
   HWIdentifier chanIds[2][16][64][6];
   memset(chanIds, 0, sizeof(chanIds));
 
@@ -337,7 +338,7 @@ StatusCode TileTriggerDefaultCalibTool::execute()
                       << ", phi: " << phi 
                       << ", amplitude : "  << tt_ene 
                       << ", old " << triggerTower->e() 
-                      << ", ratio old/new " << triggerTower->e() / tt_ene );
+                      << ", ratio old/new " << (tt_ene == 0 ? 0 : triggerTower->e() / tt_ene ));
 
     if ((ros==1) || (ros==2)){ 
       if (chan != chan_bar[(ieta*6)-1 + m_ipmt+1]) continue;   		// check if the chan is firing    

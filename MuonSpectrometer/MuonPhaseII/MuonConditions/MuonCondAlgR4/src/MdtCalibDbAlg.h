@@ -9,7 +9,7 @@
 #ifndef MUONCALIBR4_MDTCALIBDBALGR4_H
 #define MUONCALIBR4_MDTCALIBDBALGR4_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MdtCalibData/MdtCalibDataContainer.h"
@@ -25,15 +25,14 @@
 class TTree;
 
 namespace MuonCalibR4 {
-    class MdtCalibDbAlg : public AthReentrantAlgorithm {
+    class MdtCalibDbAlg : public AthCondAlgorithm {
         public:
             
-            using AthReentrantAlgorithm::AthReentrantAlgorithm;
+            using AthCondAlgorithm::AthCondAlgorithm;
             virtual ~MdtCalibDbAlg() = default;
 
             virtual StatusCode initialize() override;
             virtual StatusCode execute(const EventContext& ctx) const override;
-            virtual bool isReEntrant() const override { return false; }
 
         private:
 

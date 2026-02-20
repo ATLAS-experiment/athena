@@ -1,14 +1,12 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @file CaloDetDescrManager.h
  *
  * @brief Definition of CaloDetDescrManager
- *
- * $Id: CaloDetDescrManager.h,v 1.32 2008-07-14 15:37:16 cbourdar Exp $
  */
 
 #ifndef CALODETDESCR_CALODETDESCRMANAGER_H
@@ -18,7 +16,7 @@
 #include "AthenaKernel/CondCont.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloConstIteratorAdaptor.h"
-#include "boost/range/iterator_range.hpp"
+#include <ranges>
 
 class CaloCell_SuperCell_ID;
 class CaloDetDescrElement;
@@ -179,15 +177,14 @@ class CaloDetDescrManager_Base
 
   // Iterator over detector elements.
   // Value type is `const CaloDetDescrElement*'.
-  typedef std::vector <CaloDetDescrElement*> calo_element_vec;
-  typedef calo_element_vec::size_type        calo_element_vec_size;
-  typedef CaloConstIteratorAdaptor<calo_element_vec::const_iterator>
-    calo_element_const_iterator;
-  typedef boost::iterator_range<calo_element_const_iterator> calo_element_range;
+  using calo_element_vec = std::vector<CaloDetDescrElement*>;
+  using calo_element_vec_size = calo_element_vec::size_type;
+  using calo_element_const_iterator = CaloConstIteratorAdaptor<calo_element_vec::const_iterator>;
+  using calo_element_range = std::ranges::subrange<calo_element_const_iterator>;
 
   // Iterator over non-const detector elements.
-  typedef calo_element_vec::const_iterator   calo_nonconst_element_const_iterator;
-  typedef boost::iterator_range<calo_nonconst_element_const_iterator> calo_nonconst_element_range;
+  using calo_nonconst_element_const_iterator = calo_element_vec::const_iterator;
+  using calo_nonconst_element_range = std::ranges::subrange<calo_nonconst_element_const_iterator>;
 
   
   /** @brief total number of elements
@@ -318,16 +315,15 @@ class CaloDetDescrManager_Base
 
   // Iterator over detector descriptors.
   // Value type is `const CaloDetDescriptor*'.
-  typedef std::vector <CaloDetDescriptor*>   calo_descr_vec;
-  typedef calo_descr_vec::size_type	     calo_descr_size;
-  typedef CaloConstIteratorAdaptor<calo_descr_vec::const_iterator>
-    calo_descr_const_iterator;
-  typedef boost::iterator_range<calo_descr_const_iterator> calo_descr_range;
+  using calo_descr_vec = std::vector <CaloDetDescriptor*>;
+  using calo_descr_size = calo_descr_vec::size_type;
+  using calo_descr_const_iterator = CaloConstIteratorAdaptor<calo_descr_vec::const_iterator>;
+  using calo_descr_range = std::ranges::subrange<calo_descr_const_iterator>;
     
 
   // Iterator over non-const detector descriptors.
-  typedef calo_descr_vec::const_iterator   calo_nonconst_descr_const_iterator;
-  typedef boost::iterator_range<calo_nonconst_descr_const_iterator> calo_nonconst_descr_range;
+  using calo_nonconst_descr_const_iterator = calo_descr_vec::const_iterator;
+  using calo_nonconst_descr_range = std::ranges::subrange<calo_nonconst_descr_const_iterator>;
 
 
   /** @brief first descriptor in the vector

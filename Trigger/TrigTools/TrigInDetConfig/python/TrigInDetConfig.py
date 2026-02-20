@@ -159,7 +159,7 @@ def trigInDetVertexingCfg(flags, inputTracks, outputVtx):
   acc.addEventAlgo( CompFactory.AthViews.ViewDataVerifier(
     name = "VtxVDV_" + flags.Tracking.ActiveConfig.input_name,
     DataObjects = {
-      ( 'ActsGeometryContext' , 'StoreGateSvc+ActsAlignment' ) 
+      ('ActsTrk::GeometryContext' , 'StoreGateSvc+ActsAlignment' ) 
     } 
   ))
                 

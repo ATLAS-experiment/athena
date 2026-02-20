@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/VNetworkBase.h"
 #include <iostream>
+#include <format>
 
 // For streamer
 #include "TBuffer.h"
@@ -42,7 +43,7 @@ VNetworkBase::representNetworkInputs(VNetworkBase::NetworkInputs const &inputs,
   for (const auto &outer : inputs) {
     representation += "\n key->" + outer.first + "; ";
     for (const auto &inner : outer.second) {
-      representation += inner.first + "=" + std::to_string(inner.second) + ", ";
+      representation += inner.first + "=" + std::format("{:f}",inner.second) + ", ";
       ++valuesIncluded;
       if (valuesIncluded > maxValues)
         break;
@@ -60,7 +61,7 @@ std::string VNetworkBase::representNetworkOutputs(
       "NetworkOutputs, size " + std::to_string(outputs.size()) + "; \n";
   int valuesIncluded = 0;
   for (const auto &item : outputs) {
-    representation += item.first + "=" + std::to_string(item.second) + ", ";
+    representation += item.first + "=" + std::format("{:f}", item.second) + ", ";
     ++valuesIncluded;
     if (valuesIncluded > maxValues)
       break;

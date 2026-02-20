@@ -4,24 +4,21 @@
 
 #ifndef MUONTGC_CABLING_TGCMODULESROD_HH
 #define MUONTGC_CABLING_TGCMODULESROD_HH
- 
+
 #include "MuonTGC_Cabling/TGCModuleId.h"
- 
-namespace MuonTGC_Cabling
-{
-  
-class TGCModuleSROD : public TGCModuleId
-{
-public:
-  // Constructor & Destructor
-  TGCModuleSROD(TGCId::SideType side,
-	       int readoutSector);
 
-  virtual ~TGCModuleSROD() = default;
+namespace MuonTGC_Cabling {
 
-  virtual bool isValid() const;
+class TGCModuleSROD : public TGCModuleId {
+   public:
+    // Constructor & Destructor
+    TGCModuleSROD(TGCId::SideType side, int readoutSector);
+
+    virtual ~TGCModuleSROD() = default;
+
+    virtual bool isValid() const;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

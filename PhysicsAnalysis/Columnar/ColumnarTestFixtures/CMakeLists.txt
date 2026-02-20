@@ -5,6 +5,7 @@
 atlas_subdir( ColumnarTestFixtures )
 
 find_package( GTest )
+find_package( nlohmann_json )
 
 set (extra_libs)
 if (XAOD_STANDALONE)
@@ -19,4 +20,12 @@ ColumnarTestFixtures/*.h Root/*.cxx
   PUBLIC_HEADERS ColumnarTestFixtures
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET
-  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib xAODCaloEvent xAODTracking)
+  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib nlohmann_json::nlohmann_json xAODCaloEvent xAODTracking xAODMuon xAODEventInfo xAODEgamma xAODRootAccess)
+
+atlas_add_test( gt_MultiToolTest
+                SOURCES test/gt_MultiToolTest.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib
+                               ElectronPhotonFourMomentumCorrectionLib
+                               ElectronEfficiencyCorrectionLib
+                POST_EXEC_SCRIPT nopost.sh )

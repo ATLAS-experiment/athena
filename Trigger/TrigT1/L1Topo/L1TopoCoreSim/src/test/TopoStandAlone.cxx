@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include <vector>
@@ -96,7 +96,7 @@ int run ATLAS_NOT_THREAD_SAFE (int argc, const char* argv[]) {
          }
       }
       if( arg.size()>5 and arg.find(".root", arg.size()-5)!=std::string::npos ) {
-         filename = arg;
+         filename = std::move(arg);
       }
    }
 
@@ -109,22 +109,6 @@ int run ATLAS_NOT_THREAD_SAFE (int argc, const char* argv[]) {
    fileLoader.loadFile(argv[1], l1menu);
 
 
-   //TFile *f = new TFile(argc>=4 ? argv[3] : "L1TopoSimulation.root","RECREATE");
-
-   /* Change once the final number of bits per module is fixed
-   TH1* h[3];
-   h[0] = new TH1F("Decision/DecisionModule1", "L1 Topo Decision (Module 1)", 64, 0, 64);
-   h[1] = new TH1F("Decision/DecisionModule2", "L1 Topo Decision (Module 2)", 64, 0, 64);
-   h[2] = new TH1F("Decision/DecisionModule3", "L1 Topo Decision (Module 3)", 64, 0, 64);
-
-   const std::vector<TXC::TriggerLine> & topoTriggers = XMLParser.menu().getL1TopoConfigOutputList().getTriggerLines();
-   for(const TXC::TriggerLine& tl : topoTriggers) {
-      h[tl.module()]->GetXaxis()->SetBinLabel(1+ tl.counter() % 64, tl.name().c_str());
-   }
-   for(uint i=0; i<3; ++i)
-      h[i]->SetLabelSize(0.025);
-   */
-
    // instantiate steering
    TCS::TopoSteering steering;
    steering.setUseBitwise(false);
@@ -136,60 +120,31 @@ int run ATLAS_NOT_THREAD_SAFE (int argc, const char* argv[]) {
    steering.setAlgMsgLevel( algMsgLvl );
 
    std::shared_ptr<IL1TopoHistSvc> topoHistSvc = std::shared_ptr<IL1TopoHistSvc>( new StandaloneL1TopoHistSvc() );
-   //   topoHistSvc->setBaseDir("L1TopoSimulation.root:");
-   //   for(int i = 0; i < 3; i++ )
-   //      topoHistSvc->registerHist(h[i]);
+   steering.setHistSvc(std::move(topoHistSvc));
 
-   steering.setHistSvc(topoHistSvc);
-
-   //steering.printConfiguration(cout);
-
-   //steering.structure().printParameters(cout);
 
    steering.initializeAlgorithms();
 
    TCS::TopoASCIIReader reader; // instantiate ascii reader
 
    reader.setVerbosity(0); // disable print to screen
-
    // load ascii event file
    reader.loadInput(argv[2]);
    reader.validateInput();
-  
-
    // instantiate input event
    TCS::TopoInputEvent & inputEvent = steering.inputEvent();
    inputEvent.msg().setLevel( msgLvl );
    reader.setInputEvent(&inputEvent);
 
-   //steering.simulationResult().globalDecision().msg().setLevel( TrigConf::MSGTC::INFO );
-
    // loop over the events
    while(nevt-- and reader.getNextEvent()) {
-
       msg << TrigConf::MSGTC::INFO << "=======================================================" << TrigConf::endmsgtc;
-
       steering.executeEvent();
-
-      // const TCS::GlobalDecision & globalDec = 
-      steering.simulationResult().globalOutput();
-      /*
-      for(unsigned int module=0; module<3; ++module)
-         for(unsigned int trigger=0; trigger<64; ++trigger)
-            if( globalDec.passed(module, trigger) ) h[module]->Fill(trigger);
-      */
       steering.reset();
-     
    }
    msg << TrigConf::MSGTC::INFO << "=======================================================" << TrigConf::endmsgtc;
-  
-//    f->Write();
-//    f->Close();
-
    steering.saveHist();
-
    reader.printFileSummary();
-  
    return 0;
 }
 

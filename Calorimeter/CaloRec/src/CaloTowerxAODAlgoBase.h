@@ -8,7 +8,6 @@
 #define CALOREC_CALOTOWERXAODALGOBASE_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include "xAODCaloEvent/CaloTowerContainer.h"
 #include "xAODCaloEvent/CaloTowerAuxContainer.h"

@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_BYTESTREAMLUCRODDATA_H
 #define ZDC_BYTESTREAMLUCRODDATA_H
 
-#include <stdint.h>
-#include <map>
-#include <string>
+
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 
@@ -18,7 +16,9 @@
 #include "ZdcByteStream/ZdcLucrodDecoder.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "ZdcByteStream/ZdcDefs.h"
-
+#include <stdint.h>
+#include <map>
+#include <string>
 class StoreGateSvc;
 class ZdcLucrodDecoder;
 

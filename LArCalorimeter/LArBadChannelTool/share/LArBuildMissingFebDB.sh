@@ -63,6 +63,7 @@ fi
 if echo $1 | grep -q "^[0-9]*$";
 then
   lbnumbere=$1
+  runnumbere=$runnumber
   shift
 else  
   lbnumbere=-1
@@ -171,7 +172,7 @@ fi
 
 
 echo "Running athena to read current database content...",${database}
-python -m LArBadChannelTool.LArMissingFeb2Ascii -r $runnumber -o $oldTextFile -d ${database} -t ${mytag} -f ${Folder} > oracle2ascii_$mytag.log 2>&1 
+python -m LArBadChannelTool.LArMissingFeb2Ascii -r $runnumber -l $lbnumber -o $oldTextFile -d ${database} -t ${mytag} -f ${Folder} > oracle2ascii_$mytag.log 2>&1 
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_${mytag}.log!"
     exit 5
@@ -208,9 +209,9 @@ else
         iovEnd="--runnumber2  $runnumbere"
         if [[ $lbnumbere > 0 ]]
         then
-           iovEnd=${iovEnd}+"  --lbnumber2 $lbnumbere"
+           iovEnd="${iovEnd} --lbnumber2 $lbnumbere"
         else
-           iovEnd=${iovEnd}+"  --lbnumber2 0"
+           iovEnd="${iovEnd} --lbnumber2 0"
         fi
     else   
         iovEnd="--runnumber2  $[ $runnumber + 1] --lbnumber2 0"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_DITAUSELECTIONTOOL_H
@@ -39,6 +39,7 @@ class DiTauSelectionCutAbsEta;
 class DiTauSelectionCutNSubjets;
 class DiTauSelectionCutAbsCharge;
 class DiTauSelectionCutOmniScore;
+class DiTauSelectionCutOmniIDWP;
 
 class DiTauSelectionTool : public virtual IAsgSelectionTool,
   public virtual IDiTauSelectionTool,
@@ -52,6 +53,7 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   friend class DiTauSelectionCutNSubjets;
   friend class DiTauSelectionCutAbsCharge;
   friend class DiTauSelectionCutOmniScore;
+  friend class DiTauSelectionCutOmniIDWP;
 
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
@@ -108,26 +110,24 @@ private:
   std::vector<int> m_vAbsCharges;
   // vector of OmniScore cut regions
   std::vector<float> m_vOmniScoreRegion;
+  // OmniID working point
+  std::string m_sOmniIDWP;
 
   bool m_useOmniScore=false;
 
   Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", ""};
   Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoDiTauCut};
   Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
-  Gaudi::Property<float> m_dPtMax{this, "PtMax", NAN};
   Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
   Gaudi::Property<float> m_dNSubjetsMin{this, "NSubjetsMin", NAN};
-  Gaudi::Property<float> m_dNSubjetsMax{this, "NSubjetsMax", NAN};
   Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN};
   Gaudi::Property<float> m_dOmniScoreMin{this, "OmniScoreMin", NAN};
   Gaudi::Property<float> m_dOmniScoreMax{this, "OmniScoreMax", NAN};
+  Gaudi::Property<int> m_iOmniIDWP{this, "OmniIDWP", 0};
 
-  Gaudi::Property<std::vector<float>> m_vecPtRegion{this, "PtRegion", {}};
   Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
-  Gaudi::Property<std::vector<float>> m_vecNSubjetsRegion{this, "NSubjetsRegion", {}};
   Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
-  Gaudi::Property<std::vector<float>> m_vecOmniScoreRegion{this, "OmniScoreRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!
@@ -138,6 +138,8 @@ private:
   std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
+  int  convertStrToOmniIDWP(const std::string& sOmniIDWP) const;
+  std::string convertOmniIDWPToStr(int iOmniIDWP) const;
 
 protected:
   

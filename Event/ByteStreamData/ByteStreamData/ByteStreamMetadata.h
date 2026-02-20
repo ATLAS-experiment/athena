@@ -14,8 +14,8 @@
 
 #include <vector>
 #include <string>
-#include <stdint.h>
-#include <iostream>
+#include <cstdint>
+#include <iosfwd>
 
 namespace EventStorage { class DataReader; }
 
@@ -30,7 +30,7 @@ public:
 
 
   /**
-   * Constructure for 64 bit det mask constructor
+   * Constructor for 64 bit det mask
    */
   ByteStreamMetadata(
       unsigned int       runNumber,

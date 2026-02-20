@@ -68,6 +68,11 @@ class CaloGPUOutput :
   Gaudi::Property<bool> m_sortedAndCutClusters {this, "UseSortedAndCutClusters", true, "Sort the clusters by transverse energy, apply a cut and ensure contiguous tags"};
 
   /**
+   * @brief Whether to output cell assignment as tags instead of a list of indices per cluster. True by default.
+   */
+  Gaudi::Property<bool> m_outputTags{this, "OutputCellsAsTags", true, "Whether to output cell assignment as tags instead of a list of indices per cluster."};
+  
+  /**
    * @brief If @p true, only output cell info (useful for reducing disk usage when running the full standalone version of the algorithms).
    */
   Gaudi::Property<bool> m_onlyCellInfo {this, "OnlyOutputCellInfo", false, "Only output cell info"};

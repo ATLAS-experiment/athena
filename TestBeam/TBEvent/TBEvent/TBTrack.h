@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBEVENT_TBTrack_H
@@ -33,6 +33,11 @@ class TBTrack
 
   TBTrack(const std::vector<double>& residualU,
           const std::vector<double>& residualV);
+
+  TBTrack(const TBTrack&) = default;
+  TBTrack(TBTrack&&) = default;
+  TBTrack& operator=(const TBTrack&) = default;
+  TBTrack& operator=(TBTrack&&) = default;
 
   ~TBTrack();
   

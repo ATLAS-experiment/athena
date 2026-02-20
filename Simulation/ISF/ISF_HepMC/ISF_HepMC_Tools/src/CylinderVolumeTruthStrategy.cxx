@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// CylinderVolumeTruthStrategy.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "CylinderVolumeTruthStrategy.h"
@@ -17,43 +13,24 @@
 
 /** Constructor **/
 ISF::CylinderVolumeTruthStrategy::CylinderVolumeTruthStrategy(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_ri(0.),
-  m_ro(1148.)
-{
-    // cylinder dimensions
-    declareProperty("InnerRadius"        , m_ri=0.        );
-    declareProperty("OuterRadius"        , m_ro=1148.     );
-    declareProperty("Regions"            , m_regionListProperty );
-}
-
-/** Destructor **/
-ISF::CylinderVolumeTruthStrategy::~CylinderVolumeTruthStrategy()
+  base_class(t,n,p)
 {
 }
 
 // Athena algtool's Hooks
 StatusCode  ISF::CylinderVolumeTruthStrategy::initialize()
 {
-    ATH_MSG_VERBOSE("Initializing ...");
+  ATH_MSG_VERBOSE("Initializing ...");
 
-    for(auto region : m_regionListProperty.value()) {
-      if(region < AtlasDetDescr::fFirstAtlasRegion || region >= AtlasDetDescr::fNumAtlasRegions) {
-        ATH_MSG_ERROR("Unknown Region (" << region << ") specified. Please check your configuration.");
-        return StatusCode::FAILURE;
-      }
+  for(auto region : m_regionListProperty.value()) {
+    if(region < AtlasDetDescr::fFirstAtlasRegion || region >= AtlasDetDescr::fNumAtlasRegions) {
+      ATH_MSG_ERROR("Unknown Region (" << region << ") specified. Please check your configuration.");
+      return StatusCode::FAILURE;
     }
+  }
 
-    ATH_MSG_VERBOSE("Initialize successful");
-    return StatusCode::SUCCESS;
-}
-
-StatusCode  ISF::CylinderVolumeTruthStrategy::finalize()
-{
-    ATH_MSG_VERBOSE("Finalizing ...");
-
-    ATH_MSG_VERBOSE("Finalize successful");
-    return StatusCode::SUCCESS;
+  ATH_MSG_VERBOSE("Initialize successful");
+  return StatusCode::SUCCESS;
 }
 
 bool ISF::CylinderVolumeTruthStrategy::pass( ITruthIncident& ti) const

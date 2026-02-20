@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 #! /usr/bin/env python
 
@@ -13,7 +13,6 @@ from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 from EvgenJobTransforms.evgenTrfArgs import addStdEvgenArgs
-import PyJobTransforms.trfArgClasses as trfArgClasses
 
 
 ## Prodsys1 hack...
@@ -92,7 +91,7 @@ class EvgenExecutor(athenaExecutor):
                 status, output = downloadUsingProxy(url)
                 if status != 0:
                     raise EnvironmentError('Error downloading tarball %s. Downloader reports: %s' % (tarball, output))
-                msg.info('Evgen tarball download success: %s' % output)
+                msg.info('Evgen tarball download success: %s', output)
             ## Expand tarball
             expand_if_archive(tarball)
             mk_jo_proxy(os.getcwd(), "MC14JobOptions", "_joproxy14")
@@ -109,11 +108,11 @@ class EvgenExecutor(athenaExecutor):
                 # TODO: Make the package name configurable
                 mk_jo_proxy("/cvmfs/atlas.cern.ch/repo/sw/Generators/MC14JobOptions/latest/", "MC14JobOptions","_joproxy14")
                 mk_jo_proxy("/cvmfs/atlas.cern.ch/repo/sw/Generators/MC15JobOptions/latest/", "MC15JobOptions","_joproxy15")
-                msg.info("No evgenJobOpts tarball specified, using JOBOPTSEARCHPATH = '%s'" % os.environ["JOBOPTSEARCHPATH"])
+                msg.info("No evgenJobOpts tarball specified, using JOBOPTSEARCHPATH = '%s'", os.environ["JOBOPTSEARCHPATH"])
             elif os.path.exists("/afs/cern.ch/atlas/groups/Generators"):
                 mk_jo_proxy("/afs/cern.ch/atlas/groups/Generators/MC14JobOptions/latest/", "MC14JobOptions","_joproxy14")
                 mk_jo_proxy("/afs/cern.ch/atlas/groups/Generators/MC15JobOptions/latest/", "MC15JobOptions","_joproxy15")
-                msg.info("No evgenJobOpts tarball specified, no cvmfs, using JOBOPTSEARCHPATH = '%s'" % os.environ["JOBOPTSEARCHPATH"])
+                msg.info("No evgenJobOpts tarball specified, no cvmfs, using JOBOPTSEARCHPATH = '%s'", os.environ["JOBOPTSEARCHPATH"])
 
         ## Expand tarball input event and generator conf files, if provided
         if "inputGeneratorFile" in self._trf.argdict:
@@ -136,12 +135,12 @@ def getTransform():
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    msg.info("This is %s" % sys.argv[0])
+    msg.info("This is %s", sys.argv[0])
     trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
-    msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 

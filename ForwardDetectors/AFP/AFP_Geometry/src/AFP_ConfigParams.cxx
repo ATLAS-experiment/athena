@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Geometry/AFP_ConfigParams.h"
@@ -13,14 +13,14 @@ void AFP_CONFIGURATION::clear()
     sidcfg[EAS_AFP00]=defsidcfg;
     sidcfg[EAS_AFP01]=defsidcfg;
     sidcfg[EAS_AFP02]=defsidcfg;
-    sidcfg[EAS_AFP03]=defsidcfg;
+    sidcfg[EAS_AFP03]=std::move(defsidcfg);
 
     AFP_TDCONFIGURATION deftofcfg;
     deftofcfg.setDefault();
     tdcfg[EAS_AFP00]=deftofcfg;
     tdcfg[EAS_AFP01]=deftofcfg; // only stations 0 and 3 have ToF, so these shouldn't be needed
     tdcfg[EAS_AFP02]=deftofcfg; // however, the code crashes without them
-    tdcfg[EAS_AFP03]=deftofcfg;
+    tdcfg[EAS_AFP03]=std::move(deftofcfg);
 
     vecRPotFloorDistance.assign(4,AFP_CONSTANTS::Stat_RPotFloorDistance);
     vecRPotYPos.assign(4,AFP_CONSTANTS::Stat_ShiftInYAxis);

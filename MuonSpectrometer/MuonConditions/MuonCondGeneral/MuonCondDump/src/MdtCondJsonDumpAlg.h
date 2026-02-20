@@ -26,7 +26,7 @@ public:
 
 private:
     /// Dumps all channels into a JSON format
-    void dumpDeadChannels(const std::set<Identifier>& channels, 
+    void dumpDeadChannels(const std::unordered_set<Identifier>& channels, 
                           std::ostream& ostr, 
                           bool dumpMultiLayer = false, 
                           bool dumpLayer = false, 

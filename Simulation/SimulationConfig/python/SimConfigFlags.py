@@ -78,6 +78,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.FlagAbortedEvents", False)
     scf.addFlag("Sim.KillAbortedEvents", True)
     scf.addFlag("Sim.IncludeParentsInG4Event", False)
+    scf.addFlag("Sim.UseG4Workers", False)  # Run Geant4 workers in separate thread pool managed by Geant4
 
     # Do full simulation + digitisation + reconstruction chain
     scf.addFlag("Sim.DoFullChain", False)
@@ -281,6 +282,9 @@ def simulationRunArgsToFlags(runArgs, flags):
 
     if hasattr(runArgs, "truthStrategy"):
         flags.Sim.TruthStrategy = TruthStrategy(runArgs.truthStrategy)
+
+    if hasattr(runArgs, "useG4Workers"):
+        flags.Sim.UseG4Workers = runArgs.useG4Workers
 
     # Not used as deprecated
     # '--enableLooperKiller'

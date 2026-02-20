@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// UnassociatedHitsDecorator.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_UNASSOCIATEDHITSDECORATOR_H
 #define DERIVATIONFRAMEWORK_UNASSOCIATEDHITSDECORATOR_H
@@ -30,41 +26,43 @@
 namespace DerivationFramework {
 
   class UnassociatedHitsDecorator : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      UnassociatedHitsDecorator(const std::string& type, const std::string& name, const IInterface* parent);
+  public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
 
-    private:
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-      Gaudi::Property<std::string>  m_sgName
-         { this, "DecorationPrefix", "", ""};
+  private:
 
-      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
-         { this, "ContainerName", "EventInfo", ""};
+    Gaudi::Property<std::string>  m_sgName
+    { this, "DecorationPrefix", "", ""};
 
-      ToolHandle<IUnassociatedHitsGetterTool> m_UnassociatedHitsGetterTool
-         { this, "UnassociatedHitsGetter", "" , ""};
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+      { this, "ContainerName", "EventInfo", ""};
 
-      enum EIntDecor {knPixelUADecor,
-                      knBlayerUADecor,
-                      knPixelBarrelUADecor,
-                      knPixelEndCapAUADecor,
-                      knPixelEndCapCUADecor,
-                      knSCTUADecor,
-                      knSCTBarrelUADecor,
-                      knSCTEndCapAUADecor,
-                      knSCTEndCapCUADecor,
-                      knTRTUADecor,
-                      knTRTBarrelUADecor,
-                      knTRTEndCapAUADecor,
-                      knTRTEndCapCUADecor,
-                      kNIntDecor};
-      std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_intDecorKeys;
+    ToolHandle<IUnassociatedHitsGetterTool> m_UnassociatedHitsGetterTool
+      { this, "UnassociatedHitsGetter", "" , ""};
 
-  }; 
+    enum EIntDecor {knPixelUADecor,
+      knBlayerUADecor,
+      knPixelBarrelUADecor,
+      knPixelEndCapAUADecor,
+      knPixelEndCapCUADecor,
+      knSCTUADecor,
+      knSCTBarrelUADecor,
+      knSCTEndCapAUADecor,
+      knSCTEndCapCUADecor,
+      knTRTUADecor,
+      knTRTBarrelUADecor,
+      knTRTEndCapAUADecor,
+      knTRTEndCapCUADecor,
+      kNIntDecor};
+    std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_intDecorKeys;
+    // TODO
+    //SG::WriteDecorHandleKeyArray<xAOD::EventInfo> m_intDecorKeys{this, "DecorationKeys", m_eventInfoKey, {} };
+
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_UNASSOCIATEDHITSDECORATOR_H

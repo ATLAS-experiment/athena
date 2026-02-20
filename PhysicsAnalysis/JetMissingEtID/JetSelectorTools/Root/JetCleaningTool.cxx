@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -402,7 +402,7 @@ bool JetCleaningTool::containsHotCells( const xAOD::Jet& jet, const unsigned int
 }
 
 /** Helpers for cut names */
-JetCleaningTool::CleaningLevel JetCleaningTool::getCutLevel( const std::string& s ) const
+JetCleaningTool::CleaningLevel JetCleaningTool::getCutLevel( const std::string& s )
 {
   if (s=="SuperLooseBadLLP") return SuperLooseBadLLP;
   if (s=="VeryLooseBadLLP") return VeryLooseBadLLP;
@@ -410,11 +410,10 @@ JetCleaningTool::CleaningLevel JetCleaningTool::getCutLevel( const std::string& 
   if (s=="LooseBadLLP")     return LooseBadLLP;
   if (s=="LooseBadTrigger")     return LooseBadTrigger;
   if (s=="TightBad")     return TightBad;
-  ATH_MSG_ERROR( "Unknown cut level requested: " << s );
   return UnknownCut;  
 }
 
-std::string JetCleaningTool::getCutName( const CleaningLevel c) const
+std::string JetCleaningTool::getCutName( const CleaningLevel c)
 {
   if (c==SuperLooseBadLLP) return "SuperLooseBadLLP";
   if (c==VeryLooseBadLLP) return "VeryLooseBadLLP";

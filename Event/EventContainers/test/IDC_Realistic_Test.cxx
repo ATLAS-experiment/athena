@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventContainers/IdentifiableContainerMT.h"
 #include <vector>
@@ -216,8 +216,8 @@ public:
             orig++;
         }
         int orig2=0;
-        const auto& directaccess = container.GetAllHashPtrPair();
-        for(const auto &[hashId, ptr] : directaccess){
+        const auto directaccess = container.GetAllHashPtrPair();
+        for(const auto [hashId, ptr] : directaccess){
             int j =0;
             if(hashes[orig2] != hashId){
                 std::cout << "directaccess broke " << std::endl;

@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+"""
+Minimal use case for the TrigBTagCopierAlg for testing
+"""
+
+import sys
+import os
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+from JetTagDerivationUtils.TrigBTagCopierConfig import TrigBTagCopierAlgCfg
+from AthenaConfiguration.TestDefaults import defaultTestFiles
+
+def run():
+    flags = initConfigFlags()
+    flags.Input.Files = [defaultTestFiles.AOD_RUN3_DATA]
+    flags.Exec.EventPrintoutInterval = 0
+    flags.Exec.MaxEvents = 100
+    # flags.Exec.OutputLevel = 2
+
+    ca = MainServicesCfg(flags)
+    ca.merge(PoolReadCfg(flags))
+
+    ca.merge(TrigBTagCopierAlgCfg(flags))
+
+    return ca.run()
+
+if __name__ == '__main__':
+    rc = run()
+    sys.exit(0 if rc.isSuccess() else 1)

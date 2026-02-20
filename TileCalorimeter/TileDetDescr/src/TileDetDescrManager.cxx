@@ -56,7 +56,7 @@
 
 TileDetDescrManager::TileDetDescrManager(TileDddbManager_ptr dbManager)
         : AthMessaging ("TileDetDescrManager")
-        , m_dbManager(dbManager)
+        , m_dbManager(std::move(dbManager))
         , m_elements_created(false)
         , m_tile_id(0)
         , m_cell_id(0)

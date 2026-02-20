@@ -16,7 +16,8 @@ def FPGATrackSimMultiRegionTrackingCfg(flags):
     
 def FPGATrackSimRunFirstStageOnManyRegions(flags):
     acc = ComponentAccumulator()
-    for region in flags.Trigger.FPGATrackSim.regionList:
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
         flags1st = flags.clone()
         flags1st.Trigger.FPGATrackSim.region=region
         flags1st = flags1st.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
@@ -35,7 +36,8 @@ def FPGATrackSimRunFirstStageOnManyRegions(flags):
     
 def FPGATrackSimRunSecondStageOnManyRegions(flags):
     acc = ComponentAccumulator()
-    for region in flags.Trigger.FPGATrackSim.regionList:
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
         flags2nd = flags.clone()
         flags2nd.Trigger.FPGATrackSim.region=region
         flags2nd = flags2nd.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flags.Trigger.FPGATrackSim.algoTag,keepOriginal=True)
@@ -52,13 +54,11 @@ def FPGATrackSimRunSecondStageOnManyRegions(flags):
 
 def FPGATrackSimRunLayerStudyOnManyRegions(flags):
     acc = ComponentAccumulator()
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags 
     from FPGATrackSimConfTools.FPGATrackSimLayerStudyConfig import FPGATrackSimLayerStudyCfg 
-    
-    for region in flags.Trigger.FPGATrackSim.regionList:
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    for region in convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList):
         flagsLS = flags.clone()
         flagsLS.Trigger.FPGATrackSim.region = region
-        ConfigureMultiRegionFlags(flagsLS)
         flagsLS.lock()
         acc.merge(FPGATrackSimLayerStudyCfg(flagsLS))
 
@@ -69,10 +69,11 @@ def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg
     acc = ComponentAccumulator()
     flags = flagsIn.cloneAndReplace("Trigger.FPGATrackSim.ActiveConfig", "Trigger.FPGATrackSim." + flagsIn.Trigger.FPGATrackSim.algoTag,keepOriginal=False)
     stage="2nd" if flags.Trigger.FPGATrackSim.ActiveConfig.secondStage else "1st"
-    
-    TrackCollections = [f"FPGATracks_{stage}_reg{region}" for region in flags.Trigger.FPGATrackSim.regionList]
-    RoadCollections = [f"FPGARoads_{stage}_reg{region}" for region in flags.Trigger.FPGATrackSim.regionList]
-    HitsInRoadsCollections = [f"FPGAHitsInRoads_{stage}_reg{region}" for region in flags.Trigger.FPGATrackSim.regionList]
+    from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+    regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
+    TrackCollections = [f"FPGATracks_{stage}_reg{region}" for region in regionList]
+    RoadCollections = [f"FPGARoads_{stage}_reg{region}" for region in regionList]
+    HitsInRoadsCollections = [f"FPGAHitsInRoads_{stage}_reg{region}" for region in regionList]
     
     kwargs.setdefault('FPGATrackSimTrackCollections',TrackCollections)
     kwargs.setdefault('FPGATrackSimRoadCollections',RoadCollections)

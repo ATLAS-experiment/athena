@@ -1,12 +1,12 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// MbtsToVectorsTool.cxx 
+// MbtsToVectorsTool.cxx
 // Implementation file for class MbtsToVectorsTool
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 // Tile includes
 #include "MbtsToVectorsTool.h"
@@ -22,43 +22,23 @@
 
 namespace DerivationFramework {
 
-  MbtsToVectorsTool::MbtsToVectorsTool( const std::string& type, const std::string& name, const IInterface* parent )
-    : base_class  ( type, name, parent   )
-  {
-  }
-
   StatusCode MbtsToVectorsTool::initialize() {
 
     ATH_CHECK( m_cellContainerKey.initialize() );
-
-    m_energyKey = m_prefix + m_energyKey.key();
     ATH_CHECK( m_energyKey.initialize() );
-
-    m_timeKey = m_prefix + m_timeKey.key();
     ATH_CHECK( m_timeKey.initialize() );
-
-    m_qualityKey = m_prefix + m_qualityKey.key();
     ATH_CHECK( m_qualityKey.initialize() );
-
-    m_typeKey = m_prefix + m_typeKey.key();
     ATH_CHECK( m_typeKey.initialize() );
-
-    m_moduleKey = m_prefix + m_moduleKey.key();
     ATH_CHECK( m_moduleKey.initialize() );
-
-    m_channelKey = m_prefix + m_channelKey.key();
     ATH_CHECK( m_channelKey.initialize() );
-
-    m_etaKey = m_prefix + m_etaKey.key();
     ATH_CHECK( m_etaKey.initialize(m_saveEtaPhi) );
-
-    m_phiKey = m_prefix + m_phiKey.key();
     ATH_CHECK( m_phiKey.initialize(m_saveEtaPhi) );
 
     ATH_CHECK( detStore()->retrieve (m_tileTBID) );
 
     return StatusCode::SUCCESS;
   }
+
 
   StatusCode MbtsToVectorsTool::addBranches(const EventContext& ctx) const {
 
@@ -89,7 +69,7 @@ namespace DerivationFramework {
 
     SG::ReadHandle<TileCellContainer> tileCells(m_cellContainerKey, ctx);
     ATH_CHECK( tileCells.isValid() );
-    
+
     if (m_saveEtaPhi) {
       SG::WriteHandle<std::vector<float> > eta(m_etaKey, ctx);
       ATH_CHECK( eta.record(std::make_unique<std::vector<float> >()) );

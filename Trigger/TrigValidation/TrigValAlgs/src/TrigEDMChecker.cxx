@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
@@ -595,11 +595,8 @@ StatusCode TrigEDMChecker::dumpTrigPassBits(){
             }
             ATH_MSG_DEBUG("Analyzing bits for " << bits->containerClid() << " of size " << bits->size() << " with bit size " << bits->passBits().size());
         }
-        xAOD::TrigPassBitsContainer::const_iterator itr  = xbitscont->begin();
-        xAOD::TrigPassBitsContainer::const_iterator itrE = xbitscont->end();
 
-        for (int j=0; itr != itrE; ++itr, ++j ) {
-            const xAOD::TrigPassBits * bits = (*itr);
+        for(const xAOD::TrigPassBits* bits : *xbitscont){
             if(bits==nullptr){
                 ATH_MSG_INFO("TrigPassBits point nullptr ");
                 continue;
@@ -922,53 +919,50 @@ StatusCode TrigEDMChecker::dumpTrigMissingET ATLAS_NOT_THREAD_SAFE() {
 
     ATH_MSG_INFO("Got TrigMissingETContainer with key \"" << METTags[itag]<< "\"");
 
-    TrigMissingETContainer::const_iterator trigMETfirst  = trigMETcont->begin();
-    TrigMissingETContainer::const_iterator trigMETlast = trigMETcont->end();
-
-    for (int j=0; trigMETfirst !=  trigMETlast;  ++trigMETfirst++, ++j  ) {
+    for (const TrigMissingET* met : *trigMETcont) {
 
       ATH_MSG_INFO("REGTEST ==========START of TrigMissingET DUMP===========");
 
       std::string s;
       char buff[128];
 
-      snprintf(buff, sizeof(buff), "REGTEST %s Ex =         %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->ex() );
+      snprintf(buff, sizeof(buff), "REGTEST %s Ex =         %10.2f CLHEP::MeV", s.c_str(), met->ex() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Ey =         %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->ey() );
+      snprintf(buff, sizeof(buff), "REGTEST %s Ey =         %10.2f CLHEP::MeV", s.c_str(), met->ey() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Ez =         %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->ez() );
+      snprintf(buff, sizeof(buff), "REGTEST %s Ez =         %10.2f CLHEP::MeV", s.c_str(), met->ez() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s Et =         %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->et() );
+      snprintf(buff, sizeof(buff), "REGTEST %s Et =         %10.2f CLHEP::MeV", s.c_str(), met->et() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s SumEt =      %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->sumEt() );
+      snprintf(buff, sizeof(buff), "REGTEST %s SumEt =      %10.2f CLHEP::MeV", s.c_str(), met->sumEt() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s SumE =       %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->sumE() );
+      snprintf(buff, sizeof(buff), "REGTEST %s SumE =       %10.2f CLHEP::MeV", s.c_str(), met->sumE() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s E =          %10.2f CLHEP::MeV", s.c_str(), (*trigMETfirst)->e() );
+      snprintf(buff, sizeof(buff), "REGTEST %s E =          %10.2f CLHEP::MeV", s.c_str(), met->e() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s flag =    %10d",       s.c_str(), (*trigMETfirst)->getFlag() );
+      snprintf(buff, sizeof(buff), "REGTEST %s flag =    %10d",       s.c_str(), met->getFlag() );
       ATH_MSG_INFO(buff);
-      snprintf(buff, sizeof(buff), "REGTEST %s RoIword = %10ld",      s.c_str(), (*trigMETfirst)->RoIword() );
+      snprintf(buff, sizeof(buff), "REGTEST %s RoIword = %10ld",      s.c_str(), met->RoIword() );
       ATH_MSG_INFO(buff);
 
-      unsigned int Nc = (*trigMETfirst)->getNumOfComponents();
+      unsigned int Nc = met->getNumOfComponents();
       if (Nc > 0) {
         s="REGTEST __name____status_usedChannels__sumOfSigns__calib1_calib0";
         s+="/MeV__ex/MeV_____ey/MeV_____ez/MeV___sumE/MeV__sumEt/CLHEP::MeV";
         ATH_MSG_INFO(s);
 
         for (unsigned int i=0; i<Nc; ++i) { // loop over components
-          std::string name =              (*trigMETfirst)->getNameOfComponent(i);
-          const short status =            (*trigMETfirst)->getStatus(i);
-          const unsigned short usedChan = (*trigMETfirst)->getUsedChannels(i);
-          const short sumOfSigns =        (*trigMETfirst)->getSumOfSigns(i);
-          const float calib0 =            (*trigMETfirst)->getComponentCalib0(i);
-          const float calib1 =            (*trigMETfirst)->getComponentCalib1(i);
-          const float ex =                (*trigMETfirst)->getExComponent(i);
-          const float ey =                (*trigMETfirst)->getEyComponent(i);
-          const float ez =                (*trigMETfirst)->getEzComponent(i);
-          const float sumE =              (*trigMETfirst)->getSumEComponent(i);
-          const float sumEt =             (*trigMETfirst)->getSumEtComponent(i);
+          std::string name =              met->getNameOfComponent(i);
+          const short status =            met->getStatus(i);
+          const unsigned short usedChan = met->getUsedChannels(i);
+          const short sumOfSigns =        met->getSumOfSigns(i);
+          const float calib0 =            met->getComponentCalib0(i);
+          const float calib1 =            met->getComponentCalib1(i);
+          const float ex =                met->getExComponent(i);
+          const float ey =                met->getEyComponent(i);
+          const float ez =                met->getEzComponent(i);
+          const float sumE =              met->getSumEComponent(i);
+          const float sumEt =             met->getSumEtComponent(i);
 
           snprintf(buff, sizeof(buff),
                    "REGTEST   %s   %6d %12d %10d   %6.2f  %6.3f %10.2f %10.2f %10.2f %10.2f %10.2f",
@@ -1277,10 +1271,9 @@ StatusCode TrigEDMChecker::dumpTrigPhotonContainer ATLAS_NOT_THREAD_SAFE() {
           // TrigPhotons are different, print out differences
           std::map<std::string, double> v_diff;
           diff(*(*PhotonItr),*(*PhotonItr2), v_diff);
-          std::map<std::string, double>::iterator it=v_diff.begin();
           ATH_MSG_INFO("TrigPhoton " << k << " different form TrigPhoton " << j << " :");
-          for (int m=0;it !=v_diff.end();++it, ++m) {
-            ATH_MSG_INFO("TrigPhoton Delta_" << (*it).first << " = " << (*it).second);
+          for (const auto& p : v_diff) {
+            ATH_MSG_INFO("TrigPhoton Delta_" << p.first << " = " << p.second);
           }
         }
       }
@@ -1648,10 +1641,9 @@ StatusCode TrigEDMChecker::dumpTrigElectronContainer ATLAS_NOT_THREAD_SAFE() {
             // TrigElectrons are different, print out differences
             std::map<std::string, double> v_diff;
             diff(*(*elecItr),*(*elecItr2), v_diff);
-            std::map<std::string, double>::iterator it=v_diff.begin();
             ATH_MSG_INFO("TrigElectron " << k << " different form TrigElectron " << j << " :");
-            for (int m=0;it !=v_diff.end();++it, ++m) {
-              ATH_MSG_INFO("TrigElectron Delta_" << (*it).first << " = " << (*it).second);
+            for (const auto& p : v_diff) {
+              ATH_MSG_INFO("TrigElectron Delta_" << p.first << " = " << p.second);
             }
 	      }
 	    }

@@ -24,16 +24,16 @@ StatusCode LArMCSymCondAlg::initialize() {
 }
 
 
-StatusCode LArMCSymCondAlg::execute() {
+StatusCode LArMCSymCondAlg::execute(const EventContext& ctx) const {
     
-  SG::WriteCondHandle<LArMCSym> writeHandle{m_writeKey};
+  SG::WriteCondHandle<LArMCSym> writeHandle{m_writeKey, ctx};
   
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("Found valid write handle");
     return StatusCode::SUCCESS;
   }  
 
-  SG::ReadCondHandle<LArOnOffIdMapping> readHandle{m_readKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> readHandle{m_readKey, ctx};
   const LArOnOffIdMapping* cabling{*readHandle};
 
   if (cabling==nullptr) {

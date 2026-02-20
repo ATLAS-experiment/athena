@@ -10,8 +10,5 @@ HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 test1
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-00-00
 ClassIDSvc           INFO  getRegistryEntries: read 103 CLIDRegistry entries for module ALL
-StoreGateSvc         INFO Initializing StoreGateSvc - package version StoreGate-00-00-00
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-00-00
 ClassIDSvc           INFO  getRegistryEntries: read 818 CLIDRegistry entries for module ALL

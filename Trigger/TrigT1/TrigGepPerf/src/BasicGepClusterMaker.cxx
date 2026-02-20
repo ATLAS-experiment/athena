@@ -17,10 +17,8 @@ Gep::BasicGepClusterMaker::makeClusters(const pGepCellMap& caloCellsMap) const {
 	if (!isSeedCell(cell_itr.second, seenSeedCells)) continue;
 
 	// Clustering
-        std::vector<Gep::GepCaloCell> cluster_cells = clusterFromCells(cell_itr.second, caloCellsMap, seenSeedCells);
-	
-        Gep::Cluster cluster = getClusterFromListOfCells(cluster_cells);
-        clusters.push_back(cluster);
+        const std::vector<Gep::GepCaloCell> & cluster_cells = clusterFromCells(cell_itr.second, caloCellsMap, seenSeedCells);
+        clusters.push_back(getClusterFromListOfCells(cluster_cells));
   }
 
   // Order topo clusters according to their Et

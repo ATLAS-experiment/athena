@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NSWPADTRIGGERL1A_H_
 #define NSWPADTRIGGERL1A_H_
 
-#include <cstdint>
-#include <vector>
-#include <array>
-#include <bitset>
-#include <numeric>
-#include <algorithm>
 
 #include "eformat/eformat.h"
 #include "MuonNSWCommonDecode/MapperSTG.h"
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
+#include <cstdint>
+#include <vector>
+#include <array>
+#include <numeric> //for std::accumulate
+#include <algorithm> //for std::find
+
 
 namespace Muon
 {

@@ -228,7 +228,7 @@ class ConfigSequence:
             name = opt['name']
             if name in options:
                 self.setOptionValue (f'.{name}', options[name])
-                logCPAlgCfgSeq.info(f"    {name}: {options[name]}")
+                logCPAlgCfgSeq.debug(f"    {name}: {options[name]}")
             else:
                 if opt['required']:
                     raise ValueError(f'{name} is required but not included in config')
@@ -237,7 +237,7 @@ class ConfigSequence:
                 # do not overwright groupName unless set by user
                 if name != 'groupName':
                     options[name] = defaultVal
-                logCPAlgCfgSeq.info(f"    {name}: {defaultVal}")
+                logCPAlgCfgSeq.debug(f"    {name}: {defaultVal}")
         return algOptions
 
 

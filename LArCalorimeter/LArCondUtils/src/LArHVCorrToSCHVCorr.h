@@ -8,7 +8,7 @@
 // STL includes
 #include <string>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
@@ -19,7 +19,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 class LArHVCorrToSCHVCorr
-  : public ::AthAlgorithm
+  : public ::AthCondAlgorithm
 { 
  public: 
 
@@ -31,7 +31,7 @@ class LArHVCorrToSCHVCorr
 
   // Athena algorithm's Hooks
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute() override {return StatusCode::SUCCESS;};
+  virtual StatusCode  execute(const EventContext&) const override {return StatusCode::SUCCESS;};
   virtual StatusCode  stop() override;
 
  private: 

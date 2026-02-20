@@ -13,6 +13,7 @@ struct CookieCutPars {
   double maxDelPhi;
   double maxDelR2;
   bool recomputeMoments = false;
+  bool fixCellWeights = false;
 };
 
 std::unique_ptr<xAOD::CaloCluster> cookieCut(

@@ -1,8 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionParsing_IAccessor_h_
 #define _ExpressionParsing_IAccessor_h_
+
+#include <string>
+#include <vector>
+class EventContext;
 
 namespace ExpressionParsing {
 
@@ -12,12 +16,14 @@ namespace ExpressionParsing {
     */
    class IAccessor {
    public :
+      enum VariableType { VT_UNK, VT_INT, VT_DOUBLE, VT_VECINT, VT_VECDOUBLE, VT_VECEMPTY };
+
       virtual ~IAccessor() {}
-      virtual IProxyLoader::VariableType variableType() const =0;
-      virtual int loadInt(const EventContext& ctx) const = 0;
-      virtual double loadDouble(const EventContext& ctx) const = 0;
-      virtual std::vector<int> loadVecInt(const EventContext& ctx) const = 0;
-      virtual std::vector<double> loadVec(const EventContext& ctx) const = 0;
+      virtual VariableType variableType(const std::string &var_name) const =0;
+      virtual int loadInt(const EventContext& ctx, const std::string &var_name) const = 0;
+      virtual double loadDouble(const EventContext& ctx, const std::string &var_name) const = 0;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx, const std::string &var_name) const = 0;
+      virtual std::vector<double> loadVec(const EventContext& ctx, const std::string &var_name) const = 0;
    };
 
 }

@@ -87,71 +87,71 @@ namespace ActsTrk {
     // bottom  
     auto monitor_x1 = 
       Monitored::Collection("x1", *seed_collection,
-			    [] (const auto* seed) -> double
-			    { return seed->sp()[0]->x(); });
+			    [] (const auto& seed) -> double
+			    { return seed.sp()[0]->x(); });
     auto monitor_y1 = 
       Monitored::Collection("y1", *seed_collection,
-			    [] (const auto* seed) -> double
-			    { return seed->sp()[0]->y(); });
+			    [] (const auto& seed) -> double
+			    { return seed.sp()[0]->y(); });
     auto monitor_z1 = 
       Monitored::Collection("z1", *seed_collection,
-			    [] (const auto* seed) -> double
-			    { return seed->sp()[0]->z(); });
+			    [] (const auto& seed) -> double
+			    { return seed.sp()[0]->z(); });
     auto monitor_r1 =
       Monitored::Collection("r1", *seed_collection,
-			    [] (const auto* seed) -> double
+			    [] (const auto& seed) -> double
 			    {
-			      const auto* sp = seed->sp()[0];
+			      const auto* sp = seed.sp()[0];
 			      return std::sqrt(sp->x()*sp->x() + sp->y()*sp->y());
 			    });
 
     // middle
     auto monitor_x2 =
       Monitored::Collection("x2", *seed_collection,
-			    [] (const auto* seed) -> double
-			    { return seed->sp()[1]->x(); });
+			    [] (const auto& seed) -> double
+			    { return seed.sp()[1]->x(); });
     auto monitor_y2 =
       Monitored::Collection("y2", *seed_collection,
-                            [] (const auto* seed) -> double
-                            { return seed->sp()[1]->y(); });
+                            [] (const auto& seed) -> double
+                            { return seed.sp()[1]->y(); });
     auto monitor_z2 =
       Monitored::Collection("z2", *seed_collection,
-                            [] (const auto* seed) -> double
-                            { return seed->sp()[1]->z(); });
+                            [] (const auto& seed) -> double
+                            { return seed.sp()[1]->z(); });
     auto monitor_r2 =
       Monitored::Collection("r2", *seed_collection,
-                            [] (const auto* seed) -> double
+                            [] (const auto& seed) -> double
                             {
-                              const auto* sp = seed->sp()[1];
+                              const auto* sp = seed.sp()[1];
                               return std::sqrt(sp->x()*sp->x() + sp->y()*sp->y());
                             });
     
     // top
     auto monitor_x3 =
       Monitored::Collection("x3", *seed_collection,
-			    [] (const auto* seed) -> double
-			    { return seed->sp()[2]->x(); });
+			    [] (const auto& seed) -> double
+			    { return seed.sp()[2]->x(); });
     auto monitor_y3 =
       Monitored::Collection("y3", *seed_collection,
-                            [] (const auto* seed) -> double
-                            { return seed->sp()[2]->y(); });
+                            [] (const auto& seed) -> double
+                            { return seed.sp()[2]->y(); });
     auto monitor_z3 =
       Monitored::Collection("z3", *seed_collection,
-                            [] (const auto* seed) -> double
-                            { return seed->sp()[2]->z(); });
+                            [] (const auto& seed) -> double
+                            { return seed.sp()[2]->z(); });
     auto monitor_r3 =
       Monitored::Collection("r3", *seed_collection,
-                            [] (const auto* seed) -> double
+                            [] (const auto& seed) -> double
                             {
-                              const auto* sp = seed->sp()[2];
+                              const auto* sp = seed.sp()[2];
                               return std::sqrt(sp->x()*sp->x() + sp->y()*sp->y());
                             });
 
     std::vector< std::array<float, 7> > parametersCollection;
     parametersCollection.reserve(seed_collection->size());
 
-    for (const auto* seed : *seed_collection) {
-      parametersCollection.push_back( estimateParameters(*seed, 300. * bField[2] / 1000.) );
+    for (auto seed : *seed_collection) {
+      parametersCollection.push_back( estimateParameters(seed, 300. * bField[2] / 1000.) );
     }
     
     auto monitor_param_pt = Monitored::Collection("pt", parametersCollection,
@@ -254,10 +254,10 @@ namespace ActsTrk {
     estimated_pt.reserve(seed_container.size());
     estimated_eta.reserve(seed_container.size());
 
-    for (const auto* seed : seed_container) {
+    for (auto seed : seed_container) {
       std::optional<Acts::BoundTrackParameters> optTrackParams =
         m_paramEstimationTool->estimateTrackParameters(
-						       *seed,
+						       seed,
 						       m_useTopSp,
 						       geo_context.context(),
 						       magFieldContext,
@@ -271,7 +271,7 @@ namespace ActsTrk {
 
       std::map<int, int> truthHits;
       
-      const auto& sps = seed->sp();
+      const auto& sps = seed.sp();
       for (const auto* sp : sps) {
 	int number_of_clusters = m_usePixel ? 1 : 2;
 	for (int cluster_number(0); cluster_number < number_of_clusters; cluster_number++) {

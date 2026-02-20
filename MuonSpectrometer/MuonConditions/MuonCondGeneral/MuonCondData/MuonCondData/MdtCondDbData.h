@@ -1,20 +1,23 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCONDDATA_MDTCONDDBDATA_H
 #define MUONCONDDATA_MDTCONDDBDATA_H
 
-//STL includes
-#include <set>
+
 
 //Athena includes
 #include "AthenaKernel/CondCont.h" 
 #include "AthenaKernel/BaseInfo.h"
 #include "MuonCondData/Defs.h"
+#include "Identifier/Identifier.h"
+
+//STL includes
+#include <unordered_set>
+#include <vector>
 
 //forward declarations
-class Identifier;
 class MdtIdHelper;
 
 
@@ -38,10 +41,10 @@ public:
     void setDeadChamber   (const Identifier& ident);
    
     //// Returns a list of Identifiers of dead tubes / layers / etc.
-    const std::set<Identifier>& getDeadTubesId      () const;
-    const std::set<Identifier>& getDeadLayersId     () const;
-    const std::set<Identifier>& getDeadMultilayersId() const;
-    const std::set<Identifier>& getDeadChambersId   () const;
+    const std::unordered_set<Identifier>& getDeadTubesId      () const;
+    const std::unordered_set<Identifier>& getDeadLayersId     () const;
+    const std::unordered_set<Identifier>& getDeadMultilayersId() const;
+    const std::unordered_set<Identifier>& getDeadChambersId   () const;
    
     /// Returns if the identifier (tube/multiLayer/chamber) is masked
     /// in the conditions database
@@ -75,10 +78,10 @@ public:
 
     const std::vector<DcsConstants>& getAllHvStates() const;
 private:
-    std::set<Identifier> m_cachedDeadTubes{};
-    std::set<Identifier> m_cachedDeadLayers{};
-    std::set<Identifier> m_cachedDeadMultilayers{};
-    std::set<Identifier> m_cachedDeadChambers{};
+    std::unordered_set<Identifier> m_cachedDeadTubes{};
+    std::unordered_set<Identifier> m_cachedDeadLayers{};
+    std::unordered_set<Identifier> m_cachedDeadMultilayers{};
+    std::unordered_set<Identifier> m_cachedDeadChambers{};
 
     std::vector<DcsConstants> m_dcsStates{};
     const MdtIdHelper& m_id_helper;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -126,8 +126,8 @@ CalibrationDataContainer::listUncertainties() const
   std::vector<std::string> uncertainties;
   TIter it(GetTable());
   while (TPair* pair = (TPair*) it()) {
-    std::string spec(pair->Key()->GetName());
-    uncertainties.push_back(spec);
+    
+    uncertainties.emplace_back(pair->Key()->GetName());
   }
   return uncertainties;
 }
@@ -968,6 +968,7 @@ CalibrationDataHistogramContainer::getBinBoundaries(unsigned int vartype)
   // Retrieve the appropriate histogram axis
   if (! m_objResult) m_objResult = GetValue("result");
   const TH1* hobj = dynamic_cast<const TH1*>(m_objResult);
+  if (!hobj) return boundaries;
   const TAxis* axis = 0;
   if (m_variables[0] == vartype) axis = hobj->GetXaxis();
   else if (m_variables[1] == vartype) axis = hobj->GetYaxis();
@@ -1418,7 +1419,11 @@ CalibrationDataMappedHistogramContainer::getBinBoundaries(unsigned int vartype)
     default: axis = hobj->GetZaxis();
     }
     // Retrieve the actual bin boundaries
-    const TArrayD* bins = axis->GetXbins(); int nb = bins->GetSize();
+    const TArrayD* bins = axis->GetXbins();
+    if (!bins){
+      return boundaries;
+    }
+    int nb = bins->GetSize();
     for (int b = 0; b < nb; ++b) boundaries.push_back(bins->At(b));
   }
 

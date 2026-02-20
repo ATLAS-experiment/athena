@@ -68,7 +68,7 @@ def OverviewMonitoringConfig(inputFlags):
             cr -= 12
         if cr >= 8:
             cr -= 8
-        type = "PP " if (crate < 8) else "CP " if (crate < 12) else "JEP "
+        type = f"PP{cr} " if (crate < 8) else f"CP{cr} " if (crate < 12) else f"JEP{cr} "
         globalStatus_ylabels.append(type)
     
     helper.defineHistogram('globalOverviewX,globalOverviewY;l1calo_2d_GlobalOverview',

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_ATLASMEASUREMENTSELECTOR_H
@@ -18,11 +18,14 @@
 
 namespace ActsTrk::detail {
    class IOnBoundStateCalibratorTool;
-   std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *onTrackCalibratorTool,
+   std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const ActsTrk::IOnBoundStateCalibratorTool *pixelOnTrackCalibratorTool,
+                                                                          const ActsTrk::IOnBoundStateCalibratorTool *stripOnTrackCalibratorTool,
+                                                                          const ActsTrk::IOnBoundStateCalibratorTool *hgtdOnTrackCalibratorTool,
                                                                           const ActsTrk::detail::MeasurementRangeList &measurementRanges,
                                                                           const std::vector<float> &etaBinsf,
                                                                           const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
-                                                                          const std::vector<size_t> &numMeasurementsCutOff);
+                                                                          const std::vector<size_t> &numMeasurementsCutOff,
+                                                                          double edge_hole_border_width);
 
 }
 

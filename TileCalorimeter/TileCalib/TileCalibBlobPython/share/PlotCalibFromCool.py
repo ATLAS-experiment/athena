@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # PlotCalibFromCool.py
 # Using Part of ReadCalibfromCool.py to plot constants
@@ -25,7 +25,7 @@ def usage():
     print ("-f, --folder=   specify status folder to use f.i. /TILE/OFL02/CALIB/CIS/LIN ")
     print ("-t, --tag=      specify tag to use, f.i. UPD1 or UPD4 or full suffix like RUN2-HLT-UPD1-00")
     print ("-b, --begin=    specify the starting run number")
-    print ("-e, --end=      sepcify the last run number")
+    print ("-e, --end=      specify the last run number")
     print ("-r, --run=      specify fixed run number, will plot constants as a function of lumi")
     print ("-l, --lumi=     specify lumi block number, default is 0")
     print ("-p, --part=     specify which partition to plot, only for --plotopt=2d")
@@ -398,7 +398,7 @@ print ('-'*20)
 be=iovList[0][0][0]
 en=iovList[-1][0][0]
 
-lastrun=TileCalibTools.getLastRunNumber()
+nextrun=TileCalibTools.getNextRunNumber()
 
 if runNum <= 0:
     runNum = en
@@ -411,9 +411,9 @@ else:
     if begin <= 0:
         begin = be
     if end <= 0:
-        end = lastrun
+        end = nextrun
 
-veryEnd = end if (end<lastrun or begin>lastrun) else lastrun
+veryEnd = end if (end<nextrun or begin>nextrun) else nextrun
 
 if begin != be or end != en:
     ib=0

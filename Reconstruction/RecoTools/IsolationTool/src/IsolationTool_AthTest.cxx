@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // IsolationTool includes
@@ -34,7 +34,7 @@ StatusCode IsolationTool_AthTest::initialize() {
   // load the matching tool
   if( ! m_caloIsolationTool.empty() ) {
      CHECK( m_caloIsolationTool.retrieve() );
-     ATH_MSG_INFO( "Successfully retrived the CaloIsolationTool!" );
+     ATH_MSG_INFO( "Successfully retrieved the CaloIsolationTool!" );
   }
 
   if( ! m_trackIsolationTool.empty() ) {

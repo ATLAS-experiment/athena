@@ -24,7 +24,7 @@ namespace DMTest {
  * @param pSvcLocator The service locator.
  */
 CondAlg1::CondAlg1 (const std::string &name, ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
+  : AthCondAlgorithm (name, pSvcLocator),
     m_attrListKey ("/DMTest/TestAttrList"),
     m_scondKey ("scond", "DMTest")
 {

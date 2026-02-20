@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -76,8 +76,8 @@ int main(int argc, char* argv[]) {
   delete pBG;
 
   std::cout<<"Creating Work item for task "<<TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT<<std::endl;
-
-  pW->createWork(TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT, pDMBuff);
+//coverity[tainted_data]
+  pW->createWork(TrigAccel::InDetJobControlCode::SIL_LAYERS_EXPORT, std::move(pDMBuff));
 
 
   std::string data_path(argv[2]);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 
     std::shared_ptr<TrigAccel::OffloadBuffer> pBuff = std::make_shared<TrigAccel::OffloadBuffer>(pB);
 
-    TrigAccel::Work* pJob = pW->createWork(TrigAccel::InDetJobControlCode::MAKE_SEEDS, pBuff);
+    TrigAccel::Work* pJob = pW->createWork(TrigAccel::InDetJobControlCode::MAKE_SEEDS, std::move(pBuff));
     
     if(!pJob) {
       std::cout<<"ERROR: cannot create work item"<<std::endl;

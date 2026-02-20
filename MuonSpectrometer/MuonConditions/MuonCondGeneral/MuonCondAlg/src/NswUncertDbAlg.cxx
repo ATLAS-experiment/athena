@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonCondAlg/NswUncertDbAlg.h"
+#include "NswUncertDbAlg.h"
 
 #include <StoreGate/WriteCondHandle.h>
 #include <StoreGate/ReadCondHandle.h>
@@ -12,9 +12,7 @@
 #include <fstream>
 
 
-NswUncertDbAlg::NswUncertDbAlg(const std::string& name, ISvcLocator* svc):
-    AthReentrantAlgorithm{name, svc}{}
-
+namespace Muon {
 StatusCode NswUncertDbAlg::initialize() {
     ATH_CHECK(m_readKeysDb.initialize(m_readFromJSON.value().empty()));
     if (m_readFromJSON.value().size()) {
@@ -36,7 +34,7 @@ StatusCode NswUncertDbAlg::initialize() {
 
 StatusCode NswUncertDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
-    SG::WriteCondHandle<NswErrorCalibData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -58,7 +56,7 @@ StatusCode NswUncertDbAlg::execute(const EventContext& ctx) const {
         ATH_CHECK(parseDataFromJSON(lines, *writeCdo));
     } else {
         for (const SG::ReadCondHandleKey<CondAttrListCollection>& key : m_readKeysDb) {
-            SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
+            SG::ReadCondHandle readHandle{key, ctx};
             if (!readHandle.isValid()) {
                 ATH_MSG_FATAL("Failed to load NSW error calibration folder from "<<key.fullKey());
                 return StatusCode::FAILURE;
@@ -144,4 +142,4 @@ StatusCode NswUncertDbAlg::parseDataFromJSON(const nlohmann::json& lines,
     
     return StatusCode::SUCCESS;
 }
- 
+}

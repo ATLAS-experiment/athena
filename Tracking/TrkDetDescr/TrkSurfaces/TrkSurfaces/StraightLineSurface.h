@@ -68,7 +68,7 @@ public:
   StraightLineSurface& operator=(StraightLineSurface&& slsf) noexcept = default;
 
   /**Destructor*/
-  virtual ~StraightLineSurface() = default;
+  virtual ~StraightLineSurface();
 
   /**Constructor from Amg Transform ref (boundless surface)*/
   StraightLineSurface(const Amg::Transform3D& htrans);

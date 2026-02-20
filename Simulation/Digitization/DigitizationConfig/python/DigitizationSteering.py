@@ -43,6 +43,8 @@ def DigitizationMainServicesCfg(flags):
         acc = MainServicesCfg(flags)
 
     acc.merge(PoolReadCfg(flags))
+    evSel = acc.getService("EventSelector")
+    evSel.CollectionType = "RootCollection"
 
     return acc
 
@@ -201,11 +203,6 @@ def DigitizationMainContentCfg(flags):
     if flags.Detector.EnableZDC:
         from ZDC_SimuDigitization.ZDC_SimuDigitizationConfig import ZDC_DigitizationCfg
         acc.merge(ZDC_DigitizationCfg(flags))
-
-    # Add MT-safe PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        acc.merge(PerfMonMTSvcCfg(flags))
 
     # Add in-file MetaData
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg

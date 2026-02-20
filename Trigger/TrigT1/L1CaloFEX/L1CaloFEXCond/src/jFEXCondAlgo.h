@@ -11,7 +11,7 @@
 #ifndef jFEXCondAlgo_H
 #define jFEXCondAlgo_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -21,7 +21,7 @@
 
 namespace LVL1 {
 
-class jFEXCondAlgo : public AthReentrantAlgorithm {
+class jFEXCondAlgo : public AthCondAlgorithm {
 
     public:
         /** Constructors **/
@@ -31,7 +31,6 @@ class jFEXCondAlgo : public AthReentrantAlgorithm {
         virtual StatusCode initialize() override;
         /// Function executing the algorithm
         virtual StatusCode execute( const EventContext& ) const override;
-        virtual bool isReEntrant() const override final { return false; }
 
     private:
 

@@ -61,12 +61,6 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkGNNPass")]
-
-    # Acts Large Radius Pass
-    if flags.Acts.doLargeRadius:
-        flags_set += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsLargeRadiusPass")]
         
     # Acts Conversion Pass
     if flags.Detector.EnableCalo and flags.Acts.doITkConversion and \
@@ -74,6 +68,12 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]
+
+    # Acts Large Radius Pass
+    if flags.Acts.doLargeRadius:
+        flags_set += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
 
     # Acts Low Pt Pass
     if flags.Acts.doLowPt:
@@ -87,6 +87,12 @@ def CombinedTrackingPassFlagSets(flags):
             toAdd = eval(f"flags.cloneAndReplace('Tracking.ActiveConfig', 'Tracking.ITk{key}Pass')")
             flags_set += [toAdd]
 
+    # Photon conversion tracking reco
+    if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
+        flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                          "Tracking.ITkConversionPass")
+        flags_set += [flagsConv]
+    
     # LRT
     if flags.Tracking.doLargeD0:
         if flags.Tracking.useITkFTF:
@@ -105,12 +111,6 @@ def CombinedTrackingPassFlagSets(flags):
         flags_set += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkFPGAPass")]
-        
-    # Photon conversion tracking reco
-    if flags.Detector.EnableCalo and flags.Tracking.doITkConversion:
-        flagsConv = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                          "Tracking.ITkConversionPass")
-        flags_set += [flagsConv]
 
     # LowPt
     if flags.Tracking.doLowPt:
@@ -135,11 +135,7 @@ def ITkStoreTrackSeparateContainerCfg(flags,
                                       ClusterSplitProbContainer: str = "") -> ComponentAccumulator:
     result = ComponentAccumulator()
     extension = flags.Tracking.ActiveConfig.extension
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     if doTrackOverlay:
         # schedule merger to combine signal and background tracks
         InputTracks = [flags.Overlay.SigPrefix+TrackContainer,
@@ -220,13 +216,9 @@ def ITkTrackRecoPassCfg(flags,
     extension = flags.Tracking.ActiveConfig.extension
     
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
     # Define collection name(s)
     # This is the track collection AFTER the ambiguity resolution
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     TrackContainer = "Resolved" + extension + "Tracks"
     # For Acts we have another convention, with the extention as the first element in the name
     if extension in _actsExtensions:
@@ -341,11 +333,7 @@ def ITkTrackFinalCfg(flags,
     if len(InputCombinedITkTracks) == 0:
         return result
     
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
-
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     TrackContainer = "CombinedITkTracks"
     if doTrackOverlay:
         #schedule merge to combine signal and background tracks

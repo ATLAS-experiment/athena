@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/D3PDConverter.h"
@@ -20,6 +20,14 @@ using std::cout;
 using std::endl;
 
 using namespace LArSamples;
+
+D3PDConverter::D3PDConverter(TTree& tree, const TString& templateFile, const TString& translatorFile)
+  : CaloD3PDClass(&tree)
+{
+  initMapping(templateFile, translatorFile);
+}
+
+D3PDConverter::~D3PDConverter() = default;
 
 bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
 {
@@ -63,7 +71,7 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
       HistoryContainer* histCont = samples->hist_cont(hash);
       CellInfo* info = nullptr;
       if (!histCont) {
-        const CellInfo* templateInfo = m_template->cellInfo(hash);
+        std::unique_ptr<const CellInfo> templateInfo = m_template->cellInfo(hash);
         info = new CellInfo(templateInfo->calo(), templateInfo->layer(),
                             templateInfo->iEta(), templateInfo->iPhi(),
                             templateInfo->feedThrough(), templateInfo->slot(), templateInfo->channel(),
@@ -98,23 +106,22 @@ bool D3PDConverter::makeSamplesTuple(const TString& outputFileName)
 
 bool D3PDConverter::initMapping(const TString& templateFile, const TString& translatorFile)
 {
-  LArIdTranslatorHelper* translator = new LArIdTranslatorHelper(translatorFile);
+  LArIdTranslatorHelper translator(translatorFile);
   m_template = Interface::open(templateFile);
 
   cout << "Making online->hash map" << endl;
   std::map<unsigned long long, unsigned int> on2hash;
   for (unsigned int i = 0; i < m_template->nChannels(); i++) {
-    const CellInfo* info = m_template->cellInfo(i);
+    std::unique_ptr<const CellInfo> info = m_template->cellInfo(i);
     if (!info) continue;
     on2hash[info->onlid()] = i;
   }
 
   cout << "Making offlineID->hash map" << endl;
-  for (unsigned int i = 0; i < translator->Tree()->GetEntries(); i++) {
-    translator->Tree()->GetEntry(i);
-    m_id2hash[translator->offlid] = on2hash[translator->onlid] + 1;
+  for (unsigned int i = 0; i < translator.Tree()->GetEntries(); i++) {
+    translator.Tree()->GetEntry(i);
+    m_id2hash[translator.offlid] = on2hash[translator.onlid] + 1;
   }
-  // delete translator; // crashes
   return true;
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
@@ -210,7 +210,7 @@ void TFCSEnergyAndHitGAN::GetBinning(
 
           if (!correctentry)
             continue;
-          AllBinning.push_back(binsInLayer);
+          AllBinning.push_back(std::move(binsInLayer));
           EtaMaxList.push_back(nodeEtaMax);
         }
       }
@@ -599,7 +599,7 @@ TFCSEnergyAndHitGAN::simulate(TFCSSimulationState &simulstate,
   }
 
   ATH_MSG_VERBOSE("Fill Energies");
-  if (!fillEnergy(simulstate, truth, extrapol, inputs)) {
+  if (!fillEnergy(simulstate, truth, extrapol, std::move(inputs))) {
     ATH_MSG_WARNING("Could not fill energies ");
     // bail out but do not stop the job
     return FCSSuccess;
@@ -724,7 +724,7 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState *simulstate,
 
   TFCSEnergyAndHitGAN GAN("GAN", "GAN");
   GAN.setLevel(MSG::VERBOSE);
-  int pid = 211;
+  static constexpr int pid = 211;
   int etaMin = 20;
   int etaMax = etaMin + 5;
   GAN.initializeNetwork(
@@ -740,6 +740,8 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState *simulstate,
       c->setLevel(MSG::VERBOSE);
       c->set_pdgid(pid);
       if (pid == 11)
+        //pid was set to 211
+        //coverity[DEADCODE]
         c->add_pdgid(-pid);
       if (pid == 211)
         c->add_pdgid(-pid);

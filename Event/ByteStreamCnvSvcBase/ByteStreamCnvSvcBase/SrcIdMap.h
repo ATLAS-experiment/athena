@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVC_SRCIDMAP_H
@@ -18,13 +18,13 @@
 */
 
 
-#include <stdint.h>
+#include <cstdint>
 
 class SrcIdMap {
 
 public:
-  /** constrcutor 
-  */ 
+  /** constructor
+  */
   SrcIdMap(); 
 
   /** @brief Make a ROB Source ID from a ROD source ID

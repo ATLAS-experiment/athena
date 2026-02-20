@@ -82,8 +82,8 @@ Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& ha
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
-   return localToGlobalTrans(ctx, layerHash(measHash)) * 
+Amg::Vector3D RpcReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
+   return localToGlobalTransform(ctx, layerHash(measHash)) * 
            sensorLayout(measHash)->localStripPosition(stripNumber(measHash), measuresPhi(measHash));
 }
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -94,8 +94,8 @@ Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, c
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const{
-      return localToGlobalTrans(ctx, layerHash(measHash)) * 
+Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const{
+      return localToGlobalTransform(ctx, layerHash(measHash)) * 
               sensorLayout(measHash)->localStripLeftEdge(stripNumber(measHash), measuresPhi(measHash));
 }
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -106,8 +106,8 @@ Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, 
 // to be inlined here if possible.
 [[gnu::flatten]]
 #endif
-Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const {
-    return localToGlobalTrans(ctx, layerHash(measHash)) * 
+Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const {
+    return localToGlobalTransform(ctx, layerHash(measHash)) * 
            sensorLayout(measHash)->localStripRightEdge(stripNumber(measHash), measuresPhi(measHash));
 }
 

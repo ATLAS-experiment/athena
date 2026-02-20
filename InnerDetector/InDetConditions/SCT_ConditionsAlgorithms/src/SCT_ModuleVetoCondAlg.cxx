@@ -20,7 +20,7 @@ namespace {
 }
 
 SCT_ModuleVetoCondAlg::SCT_ModuleVetoCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

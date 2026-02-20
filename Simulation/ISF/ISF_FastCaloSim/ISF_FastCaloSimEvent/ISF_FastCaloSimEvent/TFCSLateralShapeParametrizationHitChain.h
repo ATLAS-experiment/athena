@@ -91,6 +91,11 @@ public:
 protected:
   void PropagateMSGLevel(MSG::Level level) const;
 
+  virtual bool check_all_hits_simulated(
+      TFCSLateralShapeParametrizationHitBase::Hit &hit,
+      TFCSSimulationState &simulstate, const TFCSTruthState *truth,
+      const TFCSExtrapolationState *extrapol, bool success) const;
+
   Chain_t m_chain;
 
 private:

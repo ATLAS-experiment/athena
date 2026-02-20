@@ -13,7 +13,7 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
@@ -31,7 +31,7 @@
 
 
 
-class RegSelCondAlg_LAr : public AthReentrantAlgorithm {
+class RegSelCondAlg_LAr : public AthCondAlgorithm {
   
 public:
   

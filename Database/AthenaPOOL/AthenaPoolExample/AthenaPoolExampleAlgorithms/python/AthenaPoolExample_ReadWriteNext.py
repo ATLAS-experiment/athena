@@ -46,18 +46,11 @@ acc.merge( AthenaPoolExampleWriteCfg(flags, streamName,
 # Creata and attach the algorithms
 acc.addEventAlgo( CompFactory.AthPoolEx.ReadData("ReadData", OutputLevel = DEBUG) )
 acc.addEventAlgo( CompFactory.AthPoolEx.ReWriteData("ReWriteData", ExampleHitKey="", OutputLevel = DEBUG) )
-acc.addEventAlgo( CompFactory.AthPoolEx.WriteTag("WriteTag", OutputLevel = DEBUG) )
-
-MagicWriteTag = CompFactory.AthPoolEx.WriteTag("MagicWriteTag", OutputLevel = DEBUG)
-MagicWriteTag.Key = "MagicTag"
-MagicWriteTag.Magic = 24
-acc.addEventAlgo( MagicWriteTag )
 
 # ----------------  Output Stream configuration
 streamCA = OutputStreamCfg(flags, streamName, disableEventTag = noTag,
                            ItemList = ["EventInfo#*", "ExampleTrackContainer#MyTracks"] )
 stream = streamCA.getEventAlgo( outputStreamName( streamName ) )
-stream.WritingTool.AttributeListKey = MagicWriteTag.Key
 acc.merge( streamCA )
 
 #--------------------------------------------------------------

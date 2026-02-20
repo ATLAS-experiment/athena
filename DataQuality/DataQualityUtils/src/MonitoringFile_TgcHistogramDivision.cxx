@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,10 +51,10 @@ namespace dqutils {
     }
 
     std::stringstream ss;
-    TString sac[2] = {
+    static const std::string sac[2] = {
       "_A", "_C"
     };
-    TString sws[2] = {
+    static const std::string sws[2] = {
       "Wire_", "Strip_"
     };
 
@@ -63,15 +63,15 @@ namespace dqutils {
 
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
 
-      TString seff;
-      TString snum;
-      TString sden;
+      std::string seff;
+      std::string snum;
+      std::string sden;
 
       TH1F* h1eff(0);
       TH1F* h1num(0);
@@ -81,16 +81,16 @@ namespace dqutils {
       TH2F* h2den(0);
 
       //===TGCRaw
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
 
-      TString tgc_global_dir = tgc_dir + "Global/";
-      TString tgc_sub_dir[2] = {
+      std::string tgc_global_dir = tgc_dir + "Global/";
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
       for (int ac = 0; ac < 2; ac++) {
-        TString eff_dir = tgc_sub_dir[ac] + "Efficiency/";
-        TDirectory* dir = mf.GetDirectory(eff_dir);
+        std::string eff_dir = tgc_sub_dir[ac] + "Efficiency/";
+        TDirectory* dir = mf.GetDirectory(eff_dir.c_str());
         if (!dir) {
           //std::cerr<< "TGCHistogramDivision: directory "<<eff_dir<<" not found"<<std::endl;
           return;
@@ -107,11 +107,11 @@ namespace dqutils {
         sden = eff_dir + "NumDenom/" + ss.str();
 
         h1eff = 0;
-        mf.get(seff, h1eff);
+        mf.get(seff.c_str(), h1eff);
         h1num = 0;
-        mf.get(snum, h1num);
+        mf.get(snum.c_str(), h1num);
         h1den = 0;
-        mf.get(sden, h1den);
+        mf.get(sden.c_str(), h1den);
 
         if (h1eff && h1num && h1den) {
           TGCResetContents(h1eff);
@@ -137,11 +137,11 @@ namespace dqutils {
           sden = eff_dir + "NumDenom/" + ss.str();
 
           h1eff = 0;
-          mf.get(seff, h1eff);
+          mf.get(seff.c_str(), h1eff);
           h1num = 0;
-          mf.get(snum, h1num);
+          mf.get(snum.c_str(), h1num);
           h1den = 0;
-          mf.get(sden, h1den);
+          mf.get(sden.c_str(), h1den);
 
           if (h1eff && h1num && h1den) {
             TGCResetContents(h1eff);
@@ -172,11 +172,11 @@ namespace dqutils {
             sden = eff_dir + "NumDenom/" + ss.str();
 
             h2eff = 0;
-            mf.get(seff, h2eff);
+            mf.get(seff.c_str(), h2eff);
             h2num = 0;
-            mf.get(snum, h2num);
+            mf.get(snum.c_str(), h2num);
             h2den = 0;
-            mf.get(sden, h2den);
+            mf.get(sden.c_str(), h2den);
 
             if (h2eff && h2num && h2den) {
               TGCResetContents(h2eff);
@@ -222,25 +222,25 @@ namespace dqutils {
        ///
      */
     std::stringstream ss;
-    TString sac[2] = {
+    static const std::string sac[2] = {
       "_A", "_C"
     };
-    //TString sws[2]={"Wire_","Strip_"};
+    //std::string sws[2]={"Wire_","Strip_"};
 
     TIter next_run(mf.GetListOfKeys());
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
 
-      TString seff;
-      TString snum;
-      TString sden;
-      TString seffg;
+      std::string seff;
+      std::string snum;
+      std::string sden;
+      std::string seffg;
 
       TH1F* h1eff(0);
       TH1F* h1num(0);
@@ -251,10 +251,10 @@ namespace dqutils {
       TGraphAsymmErrors* geff(0);
 
       //===TGCLV1
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGCLV1/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGCLV1/";
 
-      TString tgc_global_dir = tgc_dir + "Global/";
-      TString tgc_sub_dir[2] = {
+      std::string tgc_global_dir = tgc_dir + "Global/";
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
@@ -270,8 +270,8 @@ namespace dqutils {
       };
 
       for (int ac = 0; ac < 2; ac++) {
-        TString eff_dir = tgc_sub_dir[ac] + "Eff/";
-        TDirectory* dir = mf.GetDirectory(eff_dir);
+        std::string eff_dir = tgc_sub_dir[ac] + "Eff/";
+        TDirectory* dir = mf.GetDirectory(eff_dir.c_str());
         if (!dir) {
           //std::cerr<< "TGCHistogramDivision: directory "<<eff_dir<<" not found"<<std::endl;
           return;
@@ -298,17 +298,17 @@ namespace dqutils {
                 tempden = ss.str();
 
                 h2eff = 0;
-                mf.get(seff, h2eff);
+                mf.get(seff.c_str(), h2eff);
                 h2num = 0;
-                mf.get(snum, h2num);
+                mf.get(snum.c_str(), h2num);
                 h2den = 0;
-                mf.get(sden, h2den);
+                mf.get(sden.c_str(), h2den);
                 if (h2eff && h2num && h2den) {
                   TGCResetContents(h2eff);
                   h2eff->Divide(h2num, h2den, 1., 1., "B");
 
                   // save the summary histogram
-                  dir = mf.GetDirectory(eff_dir);
+                  dir = mf.GetDirectory(eff_dir.c_str());
                   dir->cd();
                   h2eff->Write("", TObject::kOverwrite);
                 } else {
@@ -332,20 +332,20 @@ namespace dqutils {
               sden = eff_dir + "NumDenom/" + ss.str();
 
               h1eff = 0;
-              mf.get(seff, h1eff);
+              mf.get(seff.c_str(), h1eff);
               h1num = 0;
-              mf.get(snum, h1num);
+              mf.get(snum.c_str(), h1num);
               h1den = 0;
-              mf.get(sden, h1den);
+              mf.get(sden.c_str(), h1den);
               geff = 0;
-              mf.get(seffg, geff);
+              mf.get(seffg.c_str(), geff);
 
               if (h1eff && h1num && h1den) {
                 TGCResetContents(h1eff);
                 h1eff->Divide(h1num, h1den, 1., 1., "B");
 
                 // save the summary histogram
-                dir = mf.GetDirectory(eff_dir);
+                dir = mf.GetDirectory(eff_dir.c_str());
                 dir->cd();
                 h1eff->Write("", TObject::kOverwrite);
 
@@ -353,7 +353,7 @@ namespace dqutils {
                   geff->BayesDivide(h1num, h1den);
 
                   // save the summary histogram
-                  dir = mf.GetDirectory(eff_dir);
+                  dir = mf.GetDirectory(eff_dir.c_str());
                   dir->cd();
                   geff->Write("", TObject::kOverwrite);
                 }
@@ -367,10 +367,10 @@ namespace dqutils {
           mf.Write();
 
           //Rate Ratio
-          TString grate_dir = tgc_global_dir + "Rate/";
-          TString rate_dir = tgc_sub_dir[ac] + "Rate/";
-          TString rr_dir = tgc_sub_dir[ac] + "Rate/Ratio/";
-          dir = mf.GetDirectory(rr_dir);
+          std::string grate_dir = tgc_global_dir + "Rate/";
+          std::string rate_dir = tgc_sub_dir[ac] + "Rate/";
+          std::string rr_dir = tgc_sub_dir[ac] + "Rate/Ratio/";
+          dir = mf.GetDirectory(rr_dir.c_str());
           if (!dir) {
             //std::cerr<< "TGCHistogramDivision: directory "<<rr_dir<<" not found"<<std::endl;
             return;
@@ -388,11 +388,11 @@ namespace dqutils {
           sden = grate_dir + ss.str();
 
           h1eff = 0;
-          mf.get(seff, h1eff);
+          mf.get(seff.c_str(), h1eff);
           h1num = 0;
-          mf.get(snum, h1num);
+          mf.get(snum.c_str(), h1num);
           h1den = 0;
-          mf.get(sden, h1den);
+          mf.get(sden.c_str(), h1den);
 
           if (h1eff && h1num && h1den) {
             TGCResetContents(h1eff);
@@ -418,11 +418,11 @@ namespace dqutils {
           sden = grate_dir + ss.str();
 
           h1eff = 0;
-          mf.get(seff, h1eff);
+          mf.get(seff.c_str(), h1eff);
           h1num = 0;
-          mf.get(snum, h1num);
+          mf.get(snum.c_str(), h1num);
           h1den = 0;
-          mf.get(sden, h1den);
+          mf.get(sden.c_str(), h1den);
 
           if (h1eff && h1num && h1den) {
             TGCResetContents(h1eff);
@@ -439,9 +439,9 @@ namespace dqutils {
         }//pt
 
         //Rate Ratio
-        TString grate_dir = tgc_global_dir + "Rate/";
-        TString rate_dir = tgc_sub_dir[ac] + "Rate/";
-        TString rr_dir = tgc_sub_dir[ac] + "Rate/Ratio/";
+        std::string grate_dir = tgc_global_dir + "Rate/";
+        std::string rate_dir = tgc_sub_dir[ac] + "Rate/";
+        std::string rr_dir = tgc_sub_dir[ac] + "Rate/Ratio/";
 
         // trigger/10BCID
         ss.str("");
@@ -455,18 +455,18 @@ namespace dqutils {
         sden = grate_dir + ss.str();
 
         h1eff = 0;
-        mf.get(seff, h1eff);
+        mf.get(seff.c_str(), h1eff);
         h1num = 0;
-        mf.get(snum, h1num);
+        mf.get(snum.c_str(), h1num);
         h1den = 0;
-        mf.get(sden, h1den);
+        mf.get(sden.c_str(), h1den);
 
         if (h1eff && h1num && h1den) {
           TGCResetContents(h1eff);
           h1eff->Divide(h1num, h1den);
 
           // save the summary histogram
-          dir = mf.GetDirectory(rr_dir);
+          dir = mf.GetDirectory(rr_dir.c_str());
           dir->cd();
           h1eff->Write("", TObject::kOverwrite);
         } else {
@@ -486,11 +486,11 @@ namespace dqutils {
         sden = grate_dir + ss.str();
 
         h1eff = 0;
-        mf.get(seff, h1eff);
+        mf.get(seff.c_str(), h1eff);
         h1num = 0;
-        mf.get(snum, h1num);
+        mf.get(snum.c_str(), h1num);
         h1den = 0;
-        mf.get(sden, h1den);
+        mf.get(sden.c_str(), h1den);
 
         if (h1eff && h1num && h1den) {
           TGCResetContents(h1eff);

@@ -4,7 +4,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TrigCompositeAuxContainer_v2.h $
 #ifndef XAODTRIGGER_VERSIONS_TRIGCOMPOSITEAUXCONTAINER_V2_H
 #define XAODTRIGGER_VERSIONS_TRIGCOMPOSITEAUXCONTAINER_V2_H
 
@@ -19,16 +18,14 @@ extern "C" {
 #include "xAODCore/AuxContainerBase.h"
 
 #include "xAODTrigger/TrigComposite.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 namespace xAOD {
 
    /// Auxiliary store for TrigComposite containers
    ///
-   /// This v2 changes the base class from ByteStreamAuxContainer_v1 to AuxContainerBase 
+   /// This v2 changes the base class from ByteStreamAuxContainer_v1 to AuxContainerBase
    /// for Run 3. It additionally adds "decisions" as a static member. Otherwise, it is the same.
-   ///
-   /// $Date: 2019-01-23 $
    ///
    class TrigCompositeAuxContainer_v2 : public AuxContainerBase {
 

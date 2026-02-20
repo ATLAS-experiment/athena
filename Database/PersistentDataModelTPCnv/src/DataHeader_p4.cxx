@@ -4,6 +4,9 @@
 
 #include "PersistentDataModelTPCnv/DataHeader_p4.h"
 
+    static_assert(std::is_nothrow_move_constructible<DataHeaderElement_p4>::value);
+    static_assert(std::is_nothrow_move_constructible<DataHeader_p4>::value);
+
 DataHeaderElement_p4::DataHeaderElement_p4() : m_clids(),
 	m_token(),
 	m_alias(),
@@ -14,36 +17,9 @@ DataHeaderElement_p4::DataHeaderElement_p4() : m_clids(),
 	m_classIdIdx(0U),
 	m_prefixIdx(0U),
 	m_keyPos(0U),
-	m_hashes() {}
-DataHeaderElement_p4::DataHeaderElement_p4(const DataHeaderElement_p4& rhs) : m_clids(rhs.m_clids),
-	m_token(rhs.m_token),
-	m_alias(rhs.m_alias),
-	m_technology(rhs.m_technology),
-	m_oid1(rhs.m_oid1),
-	m_oid2(rhs.m_oid2),
-	m_dbGuidIdx(rhs.m_dbGuidIdx),
-	m_classIdIdx(rhs.m_classIdIdx),
-	m_prefixIdx(rhs.m_prefixIdx),
-	m_keyPos(rhs.m_keyPos),
-	m_hashes(rhs.m_hashes) {}
-DataHeaderElement_p4::~DataHeaderElement_p4() {}
+	m_hashes() {
 
-DataHeaderElement_p4& DataHeaderElement_p4::operator=(const DataHeaderElement_p4& rhs) {
-   if (this != &rhs) {
-      m_clids = rhs.m_clids;
-      m_token = rhs.m_token;
-      m_alias = rhs.m_alias;
-      m_technology  = rhs.m_technology;
-      m_oid1 = rhs.m_oid1;
-      m_oid2 = rhs.m_oid2;
-      m_dbGuidIdx = rhs.m_dbGuidIdx;
-      m_classIdIdx = rhs.m_classIdIdx;
-      m_keyPos = rhs.m_keyPos;
-      m_hashes = rhs.m_hashes;
-      m_prefixIdx = rhs.m_prefixIdx;
    }
-   return(*this);
-}
 
 unsigned int DataHeaderElement_p4::pClid() const {
    return(m_clids.front());
@@ -75,19 +51,6 @@ unsigned int DataHeaderElement_p4::oid2() const {
 
 
 DataHeader_p4::DataHeader_p4() : m_dataHeader(), m_provSize(0U), m_guidMap() {}
-DataHeader_p4::DataHeader_p4(const DataHeader_p4& rhs) : m_dataHeader(rhs.m_dataHeader),
-	m_provSize(rhs.m_provSize),
-	m_guidMap(rhs.m_guidMap) {}
-DataHeader_p4::~DataHeader_p4() {}
-
-DataHeader_p4& DataHeader_p4::operator=(const DataHeader_p4& rhs) {
-   if (this != &rhs) {
-      m_dataHeader = rhs.m_dataHeader;
-      m_provSize = rhs.m_provSize;
-      m_guidMap = rhs.m_guidMap;
-   }
-   return(*this);
-}
 
 const std::vector<DataHeaderElement_p4>& DataHeader_p4::elements() const {
    return(m_dataHeader);

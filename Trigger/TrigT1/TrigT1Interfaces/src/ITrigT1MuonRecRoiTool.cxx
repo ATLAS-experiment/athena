@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
@@ -24,9 +24,9 @@ namespace LVL1{
   {
     unsigned int result = getBitMaskValue(&roiWord,SysIDMask());
     if( result == 0x0 ) return Barrel;
-    else if( result == 0x1 ) return Forward;
-    else if( result>>1 ) return Endcap;
-    else return Undef;
+    if( result == 0x1 ) return Forward;
+    //at this point, result is an unsigned int > 1 
+    return Endcap;
   }
   
   ITrigT1MuonRecRoiTool::ITrigT1MuonRecRoiTool()

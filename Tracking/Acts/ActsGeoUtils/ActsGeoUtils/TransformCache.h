@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsGeoUtils_TransformCache_H
 #define ActsGeoUtils_TransformCache_H
@@ -13,7 +13,7 @@
 
 namespace ActsTrk {
   /*** @brief: The TransformCache holds the local -> global transformations associated with a tracking surface 
-   *           from the Readout geometry. The cache establishes the connection with the ActsGeometryContext or more
+   *           from the Readout geometry. The cache establishes the connection with the GeometryContext or more
    *           precisely with its DetectorAlignStore to provide the transformations of an aligned surface. 
    *           As soon as the alignment store is accessed, the nominal surface is released from memory.
    *           In order to be used for each detector technology, the virtual <fetchTransform> needs to
@@ -45,7 +45,7 @@ namespace ActsTrk {
 
 #ifndef SIMULATIONBASE
           /** @brief returns the cached transform from the Acts Geometry context */
-          const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const;
+          const Amg::Transform3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const;
 #endif
           /** @brief resets the nominal cache associated with the detector element*/
           void releaseNominalCache() const;

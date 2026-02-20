@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -47,7 +47,7 @@ void TestInterface_simple()
   std::string m_TaggerToUse = "SV0";
 
   // btag Calib interface
-  cout << "Initialising btag calib with " << m_TaggerToUse.c_str() << endl;
+  cout << "Initialising btag calib with " << m_TaggerToUse << endl;
   m_btagCalib = new Analysis::CalibrationDataInterfaceROOT(m_TaggerToUse, "BTagCalibration.env");
 
   int m_Debug =  1;

@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "channelMappings/CSVTablesBase.h"
 #ifndef OFFLINE_DECODER
 #include "ersL1Calo/Exceptions.h"
@@ -14,7 +17,7 @@
  *  an individual table is called
  */
 
-CSVTablesBase::CSVTablesBase(std::string subsystem) : m_subsystem(subsystem){
+CSVTablesBase::CSVTablesBase(const std::string & subsystem) : m_subsystem(subsystem){
     //Loop to set all table 'open' flags to false
     for(auto& openbools: m_table_opens){
         openbools = false;

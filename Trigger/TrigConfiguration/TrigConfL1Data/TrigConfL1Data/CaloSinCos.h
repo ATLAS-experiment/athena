@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_CaloSinCos
@@ -53,19 +53,19 @@ namespace TrigConf {
       virtual void print(const std::string& indent="", unsigned int detail=1) const override;
 
    protected:
-      int m_Val[8];
-      int m_Val1;
-      int m_Val2;
-      int m_Val3;
-      int m_Val4;
-      int m_Val5;
-      int m_Val6;
-      int m_Val7;
-      int m_Val8;
-      int m_PhiMin;
-      int m_PhiMax;
-      int m_EtaMin;
-      int m_EtaMax;
+      int m_Val[8]{};
+      int m_Val1{};
+      int m_Val2{};
+      int m_Val3{};
+      int m_Val4{};
+      int m_Val5{};
+      int m_Val6{};
+      int m_Val7{};
+      int m_Val8{};
+      int m_PhiMin{};
+      int m_PhiMax{};
+      int m_EtaMin{};
+      int m_EtaMax{};
       
    };
 

@@ -20,8 +20,8 @@ echo "... analysis on wrapper, this part is done ..."
 echo "... analysis output verification"
 cat << EOF > checkHist.C
 {
-    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34");
-    TH1* h = (TH1*)gDirectory->Get("nroads_1st");
+    _file0->cd("FPGATrackSimLogicalHitsProcessAlg_reg34/road_monitor_first_stage_reg34");
+    TH1* h = (TH1*)gDirectory->Get("nRoads");
     if ( h == nullptr )
         throw std::runtime_error("oh dear, after all of this there are no roads histogram");
     h->Print(); 

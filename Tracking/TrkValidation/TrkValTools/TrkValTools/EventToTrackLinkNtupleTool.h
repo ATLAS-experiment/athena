@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ namespace Trk {
     StatusCode finalize();
 
     //! see interface for documentation
-    virtual void registerTrackCollections( std::vector<std::string>, bool);
+    virtual void registerTrackCollections( const std::vector<std::string>& collections, bool doTruth);
     //! see interface for documentation
     virtual void setTrackTreeIndices( unsigned int, int, int);
     //! see interface for documentation

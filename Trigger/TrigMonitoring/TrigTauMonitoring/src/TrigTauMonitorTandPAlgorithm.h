@@ -6,6 +6,8 @@
 #define TRIGTAUMONITORING_TRIGTAUMONITORTANDPALGORITHM_H
 
 #include "TrigTauMonitorBaseAlgorithm.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODMuon/MuonContainer.h"
 
 class TrigTauMonitorTandPAlgorithm : public TrigTauMonitorBaseAlgorithm {
 public:

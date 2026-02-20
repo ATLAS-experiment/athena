@@ -10,32 +10,37 @@ def LArFillMinBiasCfg(flags):
 
    if flags.LArCalib.isSC:
       ckey="LArOnOffIdMapSC"
+      folder="ElecCalibMCSC"
+      objs=["CondAttrListCollection#/LAR/"+folder+"/"+flags.LArCalib.Input.SubDet,"CondAttrListCollection#/LAR/"+folder+"/"+flags.LArCalib.Input.paramsFile]
+      tags=["LAR"+folder+flags.LArCalib.Input.SubDet+flags.LArCalib.Input.Type, "LAR"+folder+flags.LArCalib.Input.paramsFile+flags.LArCalib.Input.Type]
       result.addCondAlgo(CompFactory.LArMCSymCondAlg("LArMCSymCondAlgSC",SuperCell=flags.LArCalib.isSC,ReadKey=ckey))
       result.addEventAlgo(CompFactory.FixLArElecSCCalib(FixFlag=3,
                                                    SCCablingKey=ckey,
                                                    InputFile=flags.LArCalib.Input.Files[0],
                                                    ))
-      obj="CondAttrListCollection#/LAR/ElecCalibMCSC/MinBias"
    else:   
       ckey="LArOnOffIdMap"
-      obj="CondAttrListCollection#/LAR/ElecCalibMC/MinBias"
-      result.addEventAlgo(CompFactory.FixLArElecCalib(FixFlag=14,
+      folder="ElecCalibMC"
+
+      objs=["LAr"+flags.LArCalib.Input.SubDet+"MC#LAr"+flags.LArCalib.Input.SubDet+"#/LAR/"+folder+"/"+flags.LArCalib.Input.SubDet,"LAr"+flags.LArCalib.Input.paramsFile+"MC#LAr"+flags.LArCalib.Input.paramsFile+"#/LAR/"+folder+"/"+flags.LArCalib.Input.paramsFile]
+      tags=["LAR"+folder+flags.LArCalib.Input.SubDet+flags.LArCalib.Input.Type, "LAR"+folder+flags.LArCalib.Input.paramsFile+flags.LArCalib.Input.Type]
+      result.addEventAlgo(CompFactory.FixLArElecCalib(FixFlag=12,
                                                    CablingKey=ckey,
                                                    InputFile=flags.LArCalib.Input.Files[0],
                                                    ))
 
    from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
    result.merge(OutputConditionsAlgCfg(flags,
-                                       outputFile="dummy.root",
-                                       ObjectList=[obj, ],
-                                       IOVTagList=[flags.LArCalib.Input.Type],
+                                       outputFile="MinBias.pool.root",
+                                       ObjectList=objs,
+                                       IOVTagList=tags,
                                        Run1=flags.LArCalib.IOVStart,
                                        Run2=flags.LArCalib.IOVEnd
                                    ))
 
    #RegistrationSvc
    result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = True, SVFolder=False,
-                                     OverrideNames = [flags.LArCalib.Input.SubDet], OverrideTypes = ["Blob16M"]))
+                                     OverrideNames = [flags.LArCalib.Input.SubDet, flags.LArCalib.Input.paramsFile], OverrideTypes = ["Blob16M","Blob16M"]))
    result.getService("IOVDbSvc").DBInstance=""
 
    #MC Event selector since we have no input data file
@@ -57,7 +62,7 @@ if __name__=="__main__":
     # now process the CL options and assign defaults
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-i','--infile', dest='infile', default="ntuple.root", help='Input file with constants`', type=str)
-    parser.add_argument('-t','--tag', dest='tag', default="LARElecCalibMCSCMinBias-mc16-Epos-A3-s3687", help='Folder tag for constants`', type=str)
+    parser.add_argument('-t','--tag', dest='tag', default="-mc16-Epos-A3-s3687", help='Folder tag for constants`', type=str)
     parser.add_argument('-o','--outfile', dest='outfile', default="MinBias.db", help='Output sqlite file', type=str)
     parser.add_argument('-s','--isSC', dest='supercell', default=False, action='store_true', help='Running for SC')
  
@@ -80,7 +85,7 @@ if __name__=="__main__":
     flags.Input.RunNumbers=flags.LArCalib.Input.RunNumbers
 
     flags.IOVDb.DatabaseInstance="CONDBR2"
-    flags.IOVDb.DBConnection="sqlite://;schema=" + args.outfile +";dbname=CONDBR2"
+    flags.IOVDb.DBConnection="sqlite://;schema=" + args.outfile +";dbname=OFLP200"
 
     flags.LAr.doAlign=False
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -93,6 +98,7 @@ if __name__=="__main__":
     flags.LArCalib.Input.Files=[args.infile]
     flags.LArCalib.Input.Type=args.tag
     flags.LArCalib.Input.SubDet="MinBias"
+    flags.LArCalib.Input.paramsFile="MinBiasAverage"
 
     #Define the global output Level:
     from AthenaCommon.Constants import INFO

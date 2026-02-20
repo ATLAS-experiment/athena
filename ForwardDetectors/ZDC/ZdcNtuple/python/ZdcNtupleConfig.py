@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,7 +13,8 @@ def ZdcNtupleCfg(flags, name="ZdcNtuple", **kwargs):
             TrigDecisionToolCfg(flags)))
 
     if "TrackSelectionTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_LoosePrimary_Cfg
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionTool_LoosePrimary_Cfg)
         kwargs.setdefault("TrackSelectionTool", acc.getPrimaryAndMerge(
             InDetTrackSelectionTool_LoosePrimary_Cfg(flags, maxZ0SinTheta=1.5, maxD0overSigmaD0=3)))
 

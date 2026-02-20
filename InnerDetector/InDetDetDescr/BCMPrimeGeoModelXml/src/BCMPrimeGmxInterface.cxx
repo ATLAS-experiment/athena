@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BCMPrimeGmxInterface.h"
@@ -10,9 +10,8 @@
 namespace InDetDD
 {
 
-BCMPrimeGmxInterface::BCMPrimeGmxInterface(BCMPrimeDetectorManager *detectorManager)
-  : AthMessaging("BCMPrimeGmxInterface"),
-    m_detectorManager(detectorManager)
+  BCMPrimeGmxInterface::BCMPrimeGmxInterface()
+  : AthMessaging("BCMPrimeGmxInterface")
 {}
 
 int BCMPrimeGmxInterface::sensorId(std::map<std::string, int> &index) const
@@ -27,15 +26,5 @@ int BCMPrimeGmxInterface::sensorId(std::map<std::string, int> &index) const
   return hitIdOfModule;
 }
 
-void BCMPrimeGmxInterface::addAlignable(int /*level*/, std::map<std::string, int> &index,
-                                        GeoVFullPhysVol *fpv, GeoAlignableTransform *transform)
-{
-  ATH_MSG_DEBUG("alignable transform added for indices: " << index["diamond_number"] << " " << index["module_number"]);
-
-  // A preliminary id scheme
-  int id = index["diamond_number"] + 8*index["module_number"];
-
-  m_detectorManager->addAlignableTransform(id, transform, fpv);
-}
 
 } // namespace InDetDD

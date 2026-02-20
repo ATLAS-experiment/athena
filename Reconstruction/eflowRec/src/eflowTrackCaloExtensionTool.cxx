@@ -12,10 +12,10 @@
 
  ********************************************************************/
 
-#include <eflowRec/eflowTrackCaloExtensionTool.h>
+#include "eflowTrackCaloExtensionTool.h"
 
-#include "eflowRec/eflowTrackCaloPoints.h"
-#include "eflowRec/eflowDepthCalculator.h"
+#include "eflowTrackCaloPoints.h"
+#include "eflowDepthCalculator.h"
 
 #include "TrkParameters/TrackParameters.h"  // typedef
 #include "TrkCaloExtension/CaloExtension.h"

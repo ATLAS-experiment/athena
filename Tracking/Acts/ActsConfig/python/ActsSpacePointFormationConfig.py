@@ -57,6 +57,8 @@ def ActsStripSpacePointToolCfg(flags,
     acc = ComponentAccumulator()
 
     kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
+
+    kwargs.setdefault("useBeamSpotConstraint", flags.Acts.SpacePoints.useBeamSpotConstraintStrips)
     
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg

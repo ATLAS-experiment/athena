@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include <random>
 
 #include "ActsFatrasSimTool.h"
 #include "Acts/ActsVersion.hpp"
+#include <Acts/Utilities/StringHelpers.hpp>
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandomEngine.h"
@@ -33,11 +34,11 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   // setup logger
   m_logger = makeActsAthenaLogger(this, std::string("ActsFatras"),std::string("ActsFatrasSimTool"));
 
-  // retrive tracking geo tool
+  // retrieve tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
   m_trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   
-  //retrive Magnetfield tool
+  //retrieve Magnetfield tool
   ATH_MSG_VERBOSE("Using ATLAS magnetic field service");
   ATH_CHECK( m_fieldCacheCondObjInputKey.initialize());
 
@@ -114,7 +115,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
   Acts::MagneticFieldContext mctx = getMagneticFieldContext(ctx);
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
   auto anygctx = gctx.context();
   // Loop over ISFParticleVector and process each separately
   ATH_MSG_VERBOSE(name() << " Processing particles in ISFParticleVector.");

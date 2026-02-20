@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include "TestTools/expect.h"
@@ -11,7 +11,7 @@
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 
-
+//coverity[root_function]
 int main() {
   using namespace std;
   using TrigCompositeUtils::DecisionID;
@@ -60,11 +60,11 @@ int main() {
 
   RootType containerRT = RootType::ByNameNoQuiet( "xAOD::TrigCompositeContainer_v1" );  
   log << MSG::INFO << containerRT.Name() << endmsg;
-  BareDataBucket containerDataBucket( rawContainerPtr, ClassID_traits<xAOD::TrigCompositeContainer>::ID(), containerRT ); 
+  BareDataBucket containerDataBucket( rawContainerPtr, ClassID_traits<xAOD::TrigCompositeContainer>::ID(), std::move(containerRT) ); 
   
   RootType storeRT = RootType::ByNameNoQuiet( "xAOD::TrigCompositeAuxContainer_v2" );
   log << MSG::INFO << storeRT.Name() << endmsg;
-  BareDataBucket storeDataBucket( rawStorePtr, ClassID_traits<xAOD::TrigCompositeAuxContainer>::ID(), storeRT ); 
+  BareDataBucket storeDataBucket( rawStorePtr, ClassID_traits<xAOD::TrigCompositeAuxContainer>::ID(), std::move(storeRT) ); 
   log << MSG::INFO << "recordObject done" << endmsg;
 
   pStore->recordObject( SG::DataObjectSharedPtr<BareDataBucket>( &containerDataBucket ), "test", false, false );

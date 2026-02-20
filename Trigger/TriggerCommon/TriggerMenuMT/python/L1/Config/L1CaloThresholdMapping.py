@@ -12,8 +12,9 @@ threshold_mapping = {
     'eEM': { # TODO: Update when eFEX EM calibrations are applied
         # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eEM1 and eEM2
         1:1.4,
-        2:2,
+        2:2.7,
         5:3.5,
+        6:4.5,
         7:5.5,
         9:7,
         10:8,
@@ -26,6 +27,7 @@ threshold_mapping = {
         26:25,
         28:27,
         40:39,
+        50:50
     },
     'jEM': {
         20:14,
@@ -33,10 +35,12 @@ threshold_mapping = {
         35:30, # prospective Run 4 L1 item, ATR-30180
     },
     'eTAU': {
-        # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1
-        1:0.8,
+        # in pp menu (doHeavyIonTobThresholds=False) ptMinToTopo value is assigined to eTAU1 and eTAU2
+        1:0.7,
+        2:2.7,
         12:7.7,
         20:10.1,
+        28:20, # prospective Run 4 L1 item, ATDAQPPES-19
         30:17.7,
         35:23.2,
         40:29,
@@ -45,6 +49,7 @@ threshold_mapping = {
         60:40,
         70:50,
         80:60,
+        120:90, # prospective Run 4 L1 item, ATDAQPPES-19
         140:100,
     },
     'jTAU': {
@@ -71,6 +76,7 @@ threshold_mapping = {
         50:31,
         55:41,
         60:60,
+        70:62, # prospective Run 4 L1 item, ATDAQPPES-19
         80:65,
         90:81,
         125:121,
@@ -169,6 +175,11 @@ threshold_mapping = {
         110:55,
         120:60,
         500:300, 
+    },
+    'cXE':
+    {
+        100:50,
+        110:55,
     },
 }
 

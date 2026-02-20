@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -78,11 +78,14 @@ HepGeom::Transform3D AFP_Geometry::getStationTransform(const char* pszStationNam
     return ReqTransform;
 }
 
-HepGeom::Transform3D AFP_Geometry::getStationElementTransform(const char* pszStationName, eStationElement eElement, const int nPlateID) const
+HepGeom::Transform3D 
+AFP_Geometry::getStationElementTransform(const char* pszStationName, eStationElement eElement, const int nPlateID) const
 {
     HepGeom::Transform3D ReqTransform;
     eAFPStation eStation=parseStationName(pszStationName);
-
+    if (eStation == eAFPStation::EAS_UNKNOWN ){ //EAS_UNKNOWN is -1
+      return ReqTransform;
+    }
     AFP_TDCONFIGURATION tdcfg=m_CfgParams.tdcfg.at(eStation);
     AFP_SIDCONFIGURATION sidcfg=m_CfgParams.sidcfg.at(eStation);
 

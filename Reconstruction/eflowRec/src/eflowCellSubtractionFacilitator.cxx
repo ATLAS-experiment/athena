@@ -3,8 +3,8 @@
 */
 
 // Athena Headers
-#include "eflowRec/eflowCellSubtractionFacilitator.h"
-//#include "eflowRec/eflowCellPosition.h"
+#include "eflowCellSubtractionFacilitator.h"
+//#include "eflowCellPosition.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "CaloEvent/CaloCell.h"

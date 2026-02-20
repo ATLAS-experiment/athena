@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -25,7 +25,7 @@
 
 /// Standard constructor
 McCnvSvc::McCnvSvc(const std::string& name, ISvcLocator* svc)
-    : ConversionSvc( name, svc, repSvcType())
+    : ConversionSvc( name, svc, storageType() )
 { }
 
 /// Standard Destructor

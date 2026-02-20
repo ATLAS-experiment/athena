@@ -972,7 +972,7 @@ class eventMatch(object):
         self._eventCountConf['BS'] = {'ESD': "match", 'DRAW_*':"filter", 'NTUP_*':"filter", "BS_MRG":"match", 'DESD*': "filter", 'AOD':"match", 'DAOD*':"filter", "DAOD_PHYS":"match", "DAOD_PHYSLITE":"match"}
         self._eventCountConf['RDO*'] = {'ESD': "match", 'DRAW_*':"filter", 'NTUP_*':"filter", "RDO_MRG":"match", "RDO_TRIG":"match", 'AOD':"match", 'DAOD*':"filter", "DAOD_PHYS":"match", "DAOD_PHYSLITE":"match", "HIST_DIGI":"match"}
         self._eventCountConf['ESD'] = {'ESD_MRG': "match", 'AOD':"match", 'DESD*':"filter", 'DAOD_*':"filter", 'NTUP_*':"filter", "DAOD_PHYS":"match", "DAOD_PHYSLITE":"match"}
-        self._eventCountConf['AOD'] = {'AOD_MRG' : "match", 'TAG':"match", "NTUP_*":"filter", "DAOD_*":"filter", 'NTUP_*':"filter", "DAOD_PHYS":"match", "DAOD_PHYSLITE":"match"}
+        self._eventCountConf['AOD'] = {'AOD_MRG' : "match", 'TAG':"match", "NTUP_*":"filter", "DAOD_*":"filter", "DAOD_PHYS":"match", "DAOD_PHYSLITE":"match"}
         self._eventCountConf['AOD_MRG'] = {'TAG':"match"}
         self._eventCountConf['DAOD_*'] = {'DAOD_*_MRG' : "match"}
         self._eventCountConf['TAG'] = {'TAG_MRG': "match"}

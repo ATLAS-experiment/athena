@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
 
 # ATTENTION: This is a ComponentAccumulator-based configuration file
 # (not to be confused with ConfigAccumulator). If you are an analysis
@@ -20,17 +21,27 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # best judgement whether to fix this configuration or to change it to
 # wrap the block configuration instead.
 
+
+def McEventWeightCfg(flags, name="MyWeights", **kwargs):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.McEventWeight(name, UseTruthEvents=True))
+    return acc
+
+
 def PileupReweightingToolCfg(flags, name="PileupReweightingTool", commonPRW=True, **kwargs):
     acc = ComponentAccumulator()
-    from Campaigns.Utils import getMCCampaign
-    campaign = getMCCampaign(flags.Input.Files)
+    if "LumiCalcFiles" not in kwargs or "ConfigFiles" not in kwargs:
+        from Campaigns.Utils import getMCCampaign
+        campaign = getMCCampaign(flags.Input.Files)
 
-    from PileupReweighting.AutoconfigurePRW import defaultConfigFiles,getConfigurationFiles,getLumicalcFiles
-    kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
-    if commonPRW:
-        kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
-    else:
-        kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
+        from PileupReweighting.AutoconfigurePRW import defaultConfigFiles, getConfigurationFiles, getLumicalcFiles
+        if "LumiCalcFiles" not in kwargs:
+            kwargs.setdefault("LumiCalcFiles", getLumicalcFiles(campaign))
+        if "ConfigFiles" not in kwargs:
+            if commonPRW:
+                kwargs.setdefault("ConfigFiles", defaultConfigFiles(campaign))
+            else:
+                kwargs.setdefault("ConfigFiles", getConfigurationFiles(files=flags.Input.Files))
 
     acc.setPrivateTools(CompFactory.CP.PileupReweightingTool(**kwargs))
     return acc
@@ -43,3 +54,18 @@ def PileupReweightingAlgCfg(flags, name="PileupReweightingAlg", **kwargs):
     acc.addEventAlgo(CompFactory.CP.PileupReweightingAlg(name, **kwargs))
     return acc
 
+
+def PileupReweightingProviderToolCfg(flags, name="PileupReweightingProviderTool"):
+    acc = ComponentAccumulator()
+    arguments = {
+        "WeightTool": acc.addPublicTool(acc.popToolsAndMerge(McEventWeightCfg(flags))),
+        "ConfigFiles": [],
+        "LumiCalcFiles": [],
+        "DataScaleFactor": 1.0,
+        "DataScaleFactorUP": 0.,
+        "DataScaleFactorDOWN": 0.,
+        "PeriodAssignments": []
+    }
+
+    acc.setPrivateTools(acc.popToolsAndMerge(PileupReweightingToolCfg(flags, name, **arguments)))
+    return acc

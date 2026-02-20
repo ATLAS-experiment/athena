@@ -3,7 +3,7 @@
 This validation framework creates ntuples from AODs of heavy scalar llp samples. It searches for truth particles with configurable pdgID as the llp and stores its properties, including the decay vertex position and its lifetime. Additionally, information related to reconstructed muon spectrometer (MS) displaced vertices, the MS tracklets, and MS segments are saved.
 
 ## Getting the Code
-Following the [ATLAS tutorial](https://atlassoftwaredocs.web.cern.ch/athena/git/env-setup/), setup the ATLAS and Git environment before checking out the package:
+Following the [ATLAS tutorial](https://atlas-software.docs.cern.ch/athena/git/), setup the ATLAS and Git environment before checking out the package:
 ```
 setupATLAS   
 lsetup git

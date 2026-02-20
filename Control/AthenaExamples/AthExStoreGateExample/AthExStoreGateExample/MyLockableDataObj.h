@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,7 +9,7 @@
 #define ATHEXSTOREGATEEXAMPLE_MYLOCKABLEDATAOBJ
 
 
-#include "AthenaKernel/ILockable.h"
+#include "SGCore/ILockable.h"
 
 
 /**
@@ -17,7 +17,7 @@
  */
 class MyLockableDataObj : public ILockable
 {
-public: 
+public:
   MyLockableDataObj() : m_locked (false) {}
   virtual void lock() { m_locked = true; }
 
@@ -29,5 +29,3 @@ CLASS_DEF(MyLockableDataObj, 8009, 1)
 
 
 #endif // not ATHEXSTOREGATEEXAMPLE_MYLOCKABLEDATAOBJ
-
-

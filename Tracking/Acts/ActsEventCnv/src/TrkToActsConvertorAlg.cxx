@@ -30,8 +30,8 @@ StatusCode ActsTrk::TrkToActsConvertorAlg::execute(
   ActsTrk::MutableTrackContainer tc( std::move(trackBackend),
                                      std::move(trackStateBackend) );
 
-  SG::ReadHandle<ActsGeometryContext> gcx = SG::makeHandle(m_geometryContextKey, ctx);
-  ATH_CHECK(gcx.isPresent());
+  const GeometryContext* gcx{};
+  ATH_CHECK(SG::get(gcx, m_geometryContextKey, ctx));
   Acts::GeometryContext tgContext = gcx->context();
 
     

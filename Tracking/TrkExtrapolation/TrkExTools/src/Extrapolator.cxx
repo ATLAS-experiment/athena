@@ -3646,7 +3646,7 @@ Trk::Extrapolator::overlapSearch(const EventContext& ctx,
 
   // search for the overlap -------------------------------------------------
   if (track_parm_for_overlap) {
-    // retrive compatible subsurfaces
+    // retrieve compatible subsurfaces
     std::vector<Trk::SurfaceIntersection> cSurfaces;
     size_t const ncSurfaces =
       lay.compatibleSurfaces(cSurfaces, *track_parm_for_overlap, Trk::anyDirection, bcheck, false);

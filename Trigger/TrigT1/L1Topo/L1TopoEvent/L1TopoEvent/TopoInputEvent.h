@@ -72,6 +72,8 @@ namespace TCS {
       const gXETOB & gxenc() const { return m_gxenc[0]; }
       const gXETOB & gxerho() const { return m_gxerho[0]; }
       const gTETOB & gte() const { return m_gte[0]; }
+      const jXETOB & cxe() const { return m_cxe[0]; }
+      const gTETOB & gespresso() const { return m_gespresso[0]; }
       uint32_t run_number()        const { return m_runNo; }
       uint32_t event_number()      const { return m_evtNo; }
       uint32_t lumi_block()        const { return m_lumiB; }
@@ -105,6 +107,8 @@ namespace TCS {
       bool overflowFromgXERHOInput   () const { return m_overflowFromgXERHOInput   ; }
       bool overflowFromgMHTInput   () const { return m_overflowFromgMHTInput   ; }
       bool overflowFromgTEInput   () const { return m_overflowFromgTEInput   ; }
+      bool overflowFromcXEInput   () const { return m_overflowFromcXEInput   ; }
+      bool overflowFromgESPRESSOInput   () const { return m_overflowFromgESPRESSOInput   ; }
       bool overflowFromMuonInput  () const { return m_overflowFromMuonInput  ; }
       bool overflowFromLateMuonInput  () const { return m_overflowFromLateMuonInput  ; }
       bool overflowFromMuonNextBCInput  () const { return m_overflowFromMuonNextBCInput  ; }
@@ -139,6 +143,8 @@ namespace TCS {
       StatusCode setgXERHO(const gXETOB & gXERHO);
       StatusCode setgMHT(const gXETOB & gMHT);
       StatusCode setgTE(const gTETOB & gTE);
+      StatusCode setcXE(const jXETOB & cXE);
+      StatusCode setgESPRESSO(const gTETOB & gESPRESSO);
       StatusCode setEventInfo(const uint32_t runNo, const uint32_t evtNo, const uint32_t lumiB, const uint32_t BCID);
       /** @defgroup groupOverflowSetters
        *  @brief setter function for overflow bits
@@ -170,6 +176,8 @@ namespace TCS {
       void setOverflowFromgXERHOInput(bool v);
       void setOverflowFromgMHTInput(bool v);
       void setOverflowFromgTEInput(bool v);
+      void setOverflowFromcXEInput(bool v);
+      void setOverflowFromgESPRESSOInput(bool v);
       void setOverflowFromMuonInput  (bool v);
       void setOverflowFromLateMuonInput  (bool v);
       void setOverflowFromMuonNextBCInput  (bool v);
@@ -225,6 +233,8 @@ namespace TCS {
       gXETOBArray       m_gxerho;   // will have size 1
       gXETOBArray       m_gmht;     // will have size 1
       gTETOBArray       m_gte;      // will have size 1
+      jXETOBArray       m_cxe;      // will have size 1
+      gTETOBArray       m_gespresso;// will have size 1
 
       uint32_t m_runNo {0};
       uint32_t m_evtNo {0};
@@ -257,6 +267,8 @@ namespace TCS {
       bool m_overflowFromgXERHOInput { false };
       bool m_overflowFromgMHTInput { false };
       bool m_overflowFromgTEInput { false };
+      bool m_overflowFromcXEInput { false };
+      bool m_overflowFromgESPRESSOInput { false };
       bool m_overflowFromMuonInput { false };
       bool m_overflowFromLateMuonInput { false };
       bool m_overflowFromMuonNextBCInput { false };

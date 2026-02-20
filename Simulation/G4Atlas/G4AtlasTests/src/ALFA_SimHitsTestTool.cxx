@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_SimHitsTestTool.h"
@@ -15,6 +15,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <memory>
+#include <array>
+
+namespace{
+  template <class T, std::size_t N> using A = std::array<T,N>;
+}
 
 
 ALFA_SimHitsTestTool::ALFA_SimHitsTestTool(const std::string& type, const std::string& name, const IInterface* parent)
@@ -54,29 +60,19 @@ StatusCode ALFA_SimHitsTestTool::initialize()
 
 StatusCode ALFA_SimHitsTestTool::processEvent() {
 
-  int fiber, plate, sign, station;
-
-  double E_fiber_sum[8][10][64][2];
-  double E_full_sum[8];
-  double E_layer_sum[8][20];
-
+  int fiber{}, plate{}, sign{}, station{};
+  //
   // cleaning
-  const int station_max{8};
-  const int plate_max{10};
-  const int fiber_max{64};
+  constexpr int station_max{8};
+  constexpr int plate_max{10};
+  constexpr int fiber_max{64};
 
-  for ( int l = 0; l < station_max; l++ ) {
-    E_full_sum[l] = 0.;
-    for ( int i = 0; i < plate_max; i++ ) {
-      E_layer_sum[l][i] = 0.;
-      E_layer_sum[l][i+plate_max] = 0.;
-      for ( int j = 0; j < fiber_max;  j++ ) {
-        for ( int k = 0; k < 2; k++ ) {
-          E_fiber_sum[l][i][j][k] = 0.;
-        }
-      }
-    }
-  }
+  //avoid large stack use; E_fiber_sum would use 81920 bytes
+  using FiberArr = A<A<A<A<double,2>, fiber_max>, plate_max>,station_max>;
+  auto pE_fiber_sum = std::make_unique<FiberArr>();
+  auto & E_fiber_sum = *pE_fiber_sum;
+  double E_full_sum[station_max]{};
+  double E_layer_sum[station_max][20]{};
 
 
   const ALFA_HitCollection* coll_handle = nullptr;

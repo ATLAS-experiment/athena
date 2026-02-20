@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: PackedArray_test.cxx,v 1.2 2008-12-12 04:26:20 ssnyder Exp $
@@ -202,7 +202,7 @@ void test1()
   testit (arr);
 }
 
-
+//coverity[root_function]
 int main()
 {
   test1();

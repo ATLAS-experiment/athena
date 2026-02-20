@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -14,10 +14,13 @@
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
-#include "StorageSvc/DbObjectHandle.h"
+#include "StorageSvc/DbHandleBase.h"
+#include "StorageSvc/pool.h"
 #include "StorageSvc/Transaction.h"
 
 #include <cstdint>
+
+class StatusCode;
 
 /*
  * POOL namespace declaration
@@ -26,11 +29,9 @@ namespace pool  {
 
   // Forward declarations
   class IDbContainer;
-  class DbSelect;
   class DbDatabase;
   class DbTypeInfo;
   class DbContainerObj;
-  class DbTransaction;
   class DbOption;
 
   typedef const class Shape        *ShapeH;
@@ -49,24 +50,10 @@ namespace pool  {
   private:
     /// Assign transient object properly (including reference counting)
     void switchPtr( DbContainerObj* obj);
-    /// Load object in the container identified by its link handle
-    DbStatus _load( DbObjectHandle<DbObject>& objH,
-                    const Token::OID_t& linkH,
-                    const DbTypeInfo* typ,
-                    bool any_next);
-    /// Load next object in the container identified by its link handle
-    DbStatus _loadNext(DbObjectHandle<DbObject>& objH,
-                    Token::OID_t& linkH,
-                    const DbTypeInfo* typ);
-    /// Internal add of an object entry identified by its handle
-    DbStatus _save( DbObjectHandle<DbObject>& objH,
-                    const DbTypeInfo* typ);
-    /// Remove the transient representation of the object from memory
-    DbStatus _remove( DbObjectHandle<DbObject>& objH);
 
   public:
     /// Constructor with initializing arguments
-    DbContainer(const DbType& typ=POOL_StorageType) { m_type=typ;          }
+    explicit DbContainer(const DbType& typ=POOL_StorageType) { m_type=typ;          }
     /// Copy constructor
     DbContainer(const DbContainer& c) : Base()  { switchPtr(c.m_ptr);      }
     /// Constructor taking transient object
@@ -104,7 +91,7 @@ namespace pool  {
     /// Access the token of the container object
     const Token* token() const;
     /// Close the container the handle points to
-    DbStatus close();
+    StatusCode close();
 
     /// Open the container residing in \<file\> with given name and access mode
     /** @param   dbH     [IN]    Valid handle to database object
@@ -116,11 +103,11 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    DbStatus open(DbDatabase&        dbH, 
-                  const std::string&  nam, 
-                  const DbTypeInfo*   typ, 
-                  const DbType&       dbtyp,
-                  DbAccessMode        mod);
+    StatusCode open(DbDatabase&         dbH,
+                    const std::string&  nam,
+                    const DbTypeInfo*   typ,
+                    const DbType&       dbtyp,
+                    DbAccessMode        mod);
 
     /// Check if we can access the residing in \<file\> container for reading with the given type
     /** @param   dbH     [IN]    Valid handle to database object
@@ -129,18 +116,18 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    DbStatus checkAccess(DbDatabase&        dbH,
-                         const std::string& nam,
-                         const DbType&      dbtyp);
+    StatusCode checkAccess(DbDatabase&        dbH,
+                           const std::string& nam,
+                           const DbType&      dbtyp);
 
     /// Check if the container was opened
     bool isOpen() const;
     /// Execute Database Transaction Action
-    DbStatus transAct(Transaction::Action action);
+    StatusCode transAct(Transaction::Action action);
     /// Pass options to the implementation
-    DbStatus setOption(const DbOption& refOpt);
+    StatusCode setOption(const DbOption& refOpt);
     /// Access options
-    DbStatus getOption(DbOption& refOpt);
+    StatusCode getOption(DbOption& refOpt);
 
     /** Access objects through select staements.                            
       * This access type is ideal for relational Databases.
@@ -148,63 +135,27 @@ namespace pool  {
       * interface.
       */
     //@{ 
-    /// Perform selection. The statement belongs to the container afterwards.
-    DbStatus select(DbSelect& sel);
-    /// Fetch next object address of the selection to set token
-    DbStatus fetch(DbSelect& sel);
+    /// Fetch next object address to set token
+    StatusCode next(Token::OID_t& linkH);
     //@}
 
     /** Access objects using pointer and shape
       */
     //@{
     /// In place allocation of object location
-    DbStatus allocate(const void* object, ShapeH shape, Token::OID_t& oid);
-    /// Save new object in the container and return its handle
-    DbStatus save(const void* object, ShapeH shape, Token::OID_t& linkH);
+    StatusCode allocate(const void* object, ShapeH shape, Token::OID_t& oid);
     /// Select object in the container identified by its handle
-    DbStatus load(void** ptr, ShapeH shape, const Token::OID_t& lH);
+    StatusCode load(void** ptr, ShapeH shape, const Token::OID_t& lH);
     //@}
 
-    /** Access objects by handle directly.                                  
+    /** Access objects by handle directly.
         This is the generic "direct" object access.
     */
-    //@{ 
-    /// In place allocation of raw memory
-    void* allocate(unsigned long siz, const DbTypeInfo* typ);
-    /// In place free of raw memory
-    DbStatus free(void* ptr);
-    /// Remove the transient representation of the object from memory
-    template <class T> DbStatus remove( const DbObjectHandle<T>& objH)
-    { DbObjectHandle<DbObject> oH(objH.ptr()); return _remove(oH);           }
-    /// Add an object to the container identified by its handle
-    template <class T> DbStatus save( DbObjectHandle<T>& objH,
-                                      const DbTypeInfo* typ)    
-    { DbObjectHandle<DbObject> oH(objH.ptr()); return _save(oH, typ);        }
-    /// Load object in the container identified by its handle
-    template <class T> DbStatus load( DbObjectHandle<T>& objH,
-                                      const Token::OID_t& linkH,
-                                      const DbTypeInfo* typ)
-    { return _load(objH, linkH, typ, false);                                 }
-    /// Load object in the container identified by its handle
-    template <class T> DbStatus loadNext(DbObjectHandle<T>& objH,
-                                         Token::OID_t& linkH,
-                                         const DbTypeInfo* typ)
-    { return _loadNext(objH, linkH, typ);                                    }
+    //@{
+    /// Store object in location
+    StatusCode store(const void* object, const DbTypeInfo* typ);
     //@}
   };
 }       // End namespace pool
-
-
-// operator new for the creation of objects using clustering hint
-inline
-void* operator new (size_t size, pool::DbContainer& cntH, const pool::DbTypeInfo* typ) { 
-   return cntH.allocate(size, typ);
-}
-
-// C++ exception enabled compilation needs this delete operator
-inline
-void operator delete (void *ptr, pool::DbContainer& cntH) {
-   cntH.free(ptr);
-}
 
 #endif  // POOL_DBCONTAINER_H

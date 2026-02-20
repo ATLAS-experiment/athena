@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoRDO/L1TopoRDO.h"
@@ -36,7 +36,7 @@ std::vector<L1Topo::Error> L1TopoRDO::getErrors() const
 {
   std::vector<L1Topo::Error> errors;
   // bit of a hack: use the map of error enum to string as a way to iterate over all the errors that are defined
-  for (auto it : L1Topo::errorText){
+  for (const auto & it : L1Topo::errorText){
     auto e = it.first;
     if (checkError(e)){
       errors.push_back(e);

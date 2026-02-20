@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 /************************************************************
  * @file FlowSelectorAlg.cxx
  * @brief Make a collection of constituents that aren't charged
@@ -8,6 +11,7 @@
 #include "xAODPFlow/FlowElement.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
+#include <stdexcept>
 
 namespace ftag {
 
@@ -16,7 +20,7 @@ namespace ftag {
     : AthReentrantAlgorithm(name, loc) {}
 
   StatusCode FlowSelectorAlg::initialize() {
-    ATH_MSG_INFO( "Inizializing " << name() << "... " );
+    ATH_MSG_INFO( "Initializing " << name() << "... " );
 
     ATH_CHECK( m_constituentKey.initialize() );
     ATH_CHECK( m_neutralConstituentOutKey.initialize() );
@@ -46,8 +50,8 @@ namespace ftag {
         if (!flow->isCharged()) neutral_flows.push_back(link);
         else charged_flows.push_back(link);
       }
-      neutralConstituentsOut(*obj) = neutral_flows;
-      chargedConstituentsOut(*obj) = charged_flows;
+      neutralConstituentsOut(*obj) = std::move(neutral_flows);
+      chargedConstituentsOut(*obj) = std::move(charged_flows);
     }
 
     return StatusCode::SUCCESS;

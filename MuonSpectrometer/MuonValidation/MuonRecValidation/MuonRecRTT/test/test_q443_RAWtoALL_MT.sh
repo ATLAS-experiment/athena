@@ -145,14 +145,12 @@ fi
 acmd.py diff-root  --nan-equal \
                    --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
                                   RecoTimingObj_p1_HITStoRDO_timings \
@@ -171,14 +169,12 @@ fi
 acmd.py diff-root  --nan-equal \
                    --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
                                   RecoTimingObj_p1_HITStoRDO_timings \
@@ -197,14 +193,12 @@ fi
 acmd.py diff-root  --nan-equal \
                    --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
                                   RecoTimingObj_p1_HITStoRDO_timings \

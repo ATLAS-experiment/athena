@@ -8,6 +8,7 @@ import math
 def FCALCalculatorBaseCfg(name="FCALCalculatorBase", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("OOTcut",2.5*ns)
+    kwargs.setdefault("Birksk",0.0486) # this constant was not tuned for G4 10.6, so resetting back to the MC21 default value
     result.addService(CompFactory.LArFCALCalculatorBase(name, **kwargs), primary = True)
     return result
 

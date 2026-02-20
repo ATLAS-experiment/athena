@@ -10,7 +10,7 @@
 #ifndef SiDetElementsRoadCondAlg_xk_H
 #define SiDetElementsRoadCondAlg_xk_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiDetElementsRoadTool_xk/SiDetElementsLayerVectors_xk.h"
@@ -38,7 +38,7 @@ namespace InDet {
      @author Susumu.Oda@cern.ch
   */
 
-  class SiDetElementsRoadCondAlg_xk final: public AthReentrantAlgorithm
+  class SiDetElementsRoadCondAlg_xk final: public AthCondAlgorithm
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -55,7 +55,6 @@ namespace InDet {
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override final { return false; }
     //@}
 
   private:

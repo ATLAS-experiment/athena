@@ -1,4 +1,4 @@
-#!/usr/bin/env athena.py --CA
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 # Example of configuring full reconstruction from RDO for Run4.

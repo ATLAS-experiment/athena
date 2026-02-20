@@ -32,6 +32,7 @@ namespace CP {
     declareProperty("Correct_etcone",              m_correct_etcone                 = false);
     declareProperty("Trouble_categories",          m_trouble_categories             = true);
     declareProperty("LogLogFitForLeakage",         m_useLogLogFit                   = false);
+    declareProperty("FixTimingIssueInCore",        m_fixCoreTime                    = false);
     declareProperty("ForcePartType",               m_forcePartType                  = false);
     declareProperty("Apply_ddshifts",              m_apply_ddDefault                = false);
     declareProperty("Apply_SC_leakcorr",           m_apply_SC_leak_corr             = false);
@@ -210,6 +211,9 @@ namespace CP {
 
     static const SG::AuxElement::Accessor<float> decDDcor20("topoetcone20_DDcorr");
     static const SG::AuxElement::Accessor<float> decDDcor40("topoetcone40_DDcorr");
+    static const SG::AuxElement::Accessor<float> decEadded_Lr2("Eadded_Lr2");
+    static const SG::AuxElement::Accessor<float> decEadded_Lr3("Eadded_Lr3");
+
 
     float SCsub = 0;
     if(m_apply_SC_leak_corr){
@@ -313,7 +317,11 @@ namespace CP {
         ATH_MSG_VERBOSE("Isolation after old correction for "<<xAOD::Iso::toCString(type)<< ": "<<iso+newpu_corr-oldpu_corr-pu_mc_corr);
         eg.setIsolationCaloCorrection(newpu_corr, type, xAOD::Iso::pileupCorrection);
       }
-
+      if(m_fixCoreTime && eventInfo->runNumber() > m_Run2Run3runNumberTransition ){
+        float coshEta = std::cosh(eg.caloCluster()->etaBE(2)) ;
+	float outTimeCore = (decEadded_Lr2(eg) + decEadded_Lr3(eg))/coshEta ; 
+        iso += outTimeCore ; 
+      }
       if (m_is_mc && m_apply_dd && type != xAOD::Iso::topoetcone30 && eg.type() == xAOD::Type::Photon) {
 	      ddcorr = this->GetDDCorrection(eg,type);
 	      if (type == xAOD::Iso::topoetcone20)

@@ -43,14 +43,14 @@ namespace JetTiledMap {
         
         m_tiles.resize(m_ndivY*m_ndivX);
 
-        for(size_t i=0;i<m_ndivX; i++){
-          for(size_t j=0;j<m_ndivY; j++){
+        for(int i=0;i<static_cast<int>(m_ndivX); i++){
+          for(int  j=0;j<static_cast<int>(m_ndivY); j++){
             tile_t & thisTile = m_tiles[ tileIndex_i(i,j) ];
             thisTile.center = POINT( (i+0.5)*m_sizeX -m_halfetarange , M_PI - (j+0.5)*m_sizeY );
-            size_t jnorth = j-1;
+            int jnorth = j-1;
             if(j==0) jnorth=m_ndivY-1;
-            size_t jsouth = j+1;
-            if(jsouth==m_ndivY) jsouth=0;
+            int jsouth = j+1;
+            if(jsouth==static_cast<int>(m_ndivY)) jsouth=0;
 
 
 
@@ -69,7 +69,7 @@ namespace JetTiledMap {
 
             //std::cout<<" south = "<< thisTile.m_neighbour[S]<< " ind="<< tileIndex_i(i, jsouth) << std::endl;
 
-            if(i< (m_ndivX-1) ){
+            if(i< (static_cast<int>(m_ndivX)-1) ){
               thisTile.m_neighbour[NE] = &m_tiles[tileIndex_i(i+1, jnorth)] ;
               thisTile.m_neighbour[E] =  &m_tiles[tileIndex_i(i+1, j)] ;
               thisTile.m_neighbour[SE] = &m_tiles[tileIndex_i(i+1, jsouth)] ;

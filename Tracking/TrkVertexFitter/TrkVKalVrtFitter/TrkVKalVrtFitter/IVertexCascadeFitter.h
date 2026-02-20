@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IVertexCascadeFitter.h  - 
@@ -11,6 +11,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 //
 #include  "xAODTracking/TrackParticleFwd.h"
+#include  "TrkVKalVrtFitter/IVKalState.h"
 #include <memory>
 #include <vector>
 #include <span>

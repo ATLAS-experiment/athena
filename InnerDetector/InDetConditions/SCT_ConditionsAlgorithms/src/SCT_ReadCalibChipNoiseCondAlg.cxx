@@ -18,7 +18,7 @@ using namespace SCT_ConditionsData;
 using namespace SCT_ReadCalibChipDefs;
 
 SCT_ReadCalibChipNoiseCondAlg::SCT_ReadCalibChipNoiseCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

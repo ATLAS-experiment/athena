@@ -1,20 +1,22 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_G4PROCESSHELPER_HH
 #define RHADRONS_G4PROCESSHELPER_HH 1
 
 #include "CxxUtils/checker_macros.h"
-#include "PhysicsConfigurationHelper.h"
+#include "G4String.hh" //defaulted in argument
+#include "G4Types.hh" //typedefs for G4Int etc
+#include <vector>
+#include <map>
 
-#include"globals.hh"
-#include"G4ParticleDefinition.hh"
-#include"G4DynamicParticle.hh"
-#include"G4Element.hh"
-#include"G4Track.hh"
-#include<vector>
-#include<map>
+class G4String;
+class G4Track;
+class G4Element;
+class G4DynamicParticle;
+class G4ParticleDefinition;
+class PhysicsConfigurationHelper;
 
 //Typedefs just made to make life easier :-)
 typedef std::vector<G4int> ReactionProduct;

@@ -136,7 +136,12 @@ StatusCode AthOnnx::OnnxRuntimeInferenceTool::inference(AthInfer::InputDataMap& 
     // Create output tensors.
     std::vector<Ort::Value> outputTensors;
     outputTensors.reserve(inputData.size());
-    for (auto& [outputName, outputInfo] : outputData) {
+    for (auto& outName : m_outputNodeNames) {
+        if (outputData.find(outName) == outputData.end()) {
+            ATH_MSG_ERROR("Output name " << outName << " not found in output data map");
+            return StatusCode::FAILURE;
+        }
+        auto& outputInfo = outputData.at(outName);
         auto& shape = outputInfo.first;
         auto tensorSize = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<int64_t>());
 

@@ -4,10 +4,14 @@
 
 #include "L1TopoSimulation.h"
 
+// General Athena/Gaudi includes
+#include "AthenaBaseComps/AthAlgTool.h"
+
 // Histogram Service
 #include "AthenaL1TopoHistSvc.h"
 
 // Trigger includes
+#include "TrigConfData/L1ThrExtraInfo.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "TrigT1CaloEvent/EmTauROI_ClassDEF.h"
 
@@ -111,7 +115,24 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    const TrigConf::L1Menu * l1menu = nullptr;
    ATH_CHECK( detStore()->retrieve(l1menu) ); 
    ATH_MSG_INFO( "initialize(): retrieving new-style L1 trigger menu from Detector Store" );
-
+   
+   // retrieve cXE coefficients from menu and pass them to the m_jetInputProvider (if it's a jFEXInputProvider)
+   // Cannot set properties on IInputTOBConverter instances, 
+   // but (relevant) inputProvider also inherits from AthAlgTool
+   AthAlgTool* jetProviderAsAlgTool = dynamic_cast<AthAlgTool*>( m_jetInputProvider.get() ); 
+   // if there is no particular cXE threshold defined the corresponding extraInfo is not populated!
+   if ( jetProviderAsAlgTool && l1menu->thrExtraInfo().hasInfo("cXE") ) {
+      const TrigConf::L1ThrExtraInfo_cXE & cXeExtraInfo = l1menu->thrExtraInfo().cXE();
+      if ( jetProviderAsAlgTool->hasProperty("cXEweight_jFEX") ) {  
+         float jXEweight = cXeExtraInfo.jXeWeight();
+         jetProviderAsAlgTool->setProperty("cXEweight_jFEX", jXEweight).ignore();
+      }
+      if ( jetProviderAsAlgTool->hasProperty("cXEweight_gFEX") ) {  
+         float gXEweight = cXeExtraInfo.gXeWeight();
+         jetProviderAsAlgTool->setProperty("cXEweight_gFEX", gXEweight).ignore();
+      }
+   }
+   
    m_topoSteering->setUseBitwise(m_enableBitwise);
    try {
       m_topoSteering->setupFromConfiguration(*l1menu);

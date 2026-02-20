@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecConditions/LArHVCorr.h"
@@ -7,7 +7,7 @@
 LArHVCorr::LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling, const CaloCell_Base_ID*  caloidhelper): 
    m_larCablingSvc(cabling),
    m_calo_id(caloidhelper),
-   m_hvCorr(vVec),
+   m_hvCorr(std::move(vVec)),
    m_noCorr(1.0) {}
 
 // retrieving HVScaleCorr using offline ID  

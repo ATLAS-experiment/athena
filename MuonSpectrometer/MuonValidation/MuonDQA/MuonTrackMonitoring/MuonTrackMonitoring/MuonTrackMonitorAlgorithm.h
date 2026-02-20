@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  2020 Matthias Schott - Uni Mainz
 */
 
@@ -35,8 +35,8 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
     SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonIsoDecorKey{this, "MuonIsoDecorKey", "Muons.ptcone30" };
     SG::ReadHandleKey<xAOD::VertexContainer> m_VertexContainerKey{this, "PrimaryVerticesKey", "PrimaryVertices", "Key for primary VertexContainers"};
     SG::ReadHandleKey<xAOD::EventInfo> m_derEventInfoKey{this, "EventInfo", "EventInfo", ""};
-    SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotKey{this, "BeamSpotKeys" ,{}, "Add the scheduler dependencies on the beamspot information"};
-    
+    SG::ReadDecorHandleKeyArray<xAOD::EventInfo> m_beamSpotKey{this, "BeamSpotKeys" , m_derEventInfoKey, {"beamPosSigmaX", "beamPosSigmaY", "beamPosSigmaZ", "beamPosSigmaXY"}, "Add the scheduler dependencies on the beamspot information"};
+
     Gaudi::Property<bool> m_useBeamSpot{this, "RequireBeamSpot", true, "Ensure that the dependency on the beamspot variables is established."};
 
     // Tools
@@ -68,7 +68,7 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
     /// Function to create performance plots for all combined muons that lead to a Jpsi Meson Candidate event
     StatusCode plotResonanceCandidates(const std::string& resonanceName, std::vector<const xAOD::Muon*>& muonCandidates, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
 
-    Gaudi::Property< std::vector<std::string> > m_hltchainList{ this, "HLTTriggerList", {"HLT_2mu14_L12MU8F", "HLT_mu24_ivarmedium_L1MU14FCH"}, "High-level triggers used" };
+    Gaudi::Property< std::vector<std::string> > m_hltchainList{ this, "HLTTriggerList", {"HLT_2mu14_L12MU8F", "HLT_mu24_ivarmedium_L1MU14FCH", "HLT_2mu4_L12MU3V", "HLT_2mu4_bDimu_L12MU3V"}, "High-level triggers used" };
 
     Gaudi::Property< float > m_CBmuons_minPt{ this, "CBmuons_minPt", 20000., "Minimal muon pt used for CB muons" };
 

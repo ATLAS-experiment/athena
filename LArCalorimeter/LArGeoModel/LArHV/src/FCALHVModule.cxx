@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/FCALHVModule.h"
@@ -40,14 +40,11 @@ FCALHVModule::FCALHVModule(const FCALHVManager* manager
 			   , unsigned int iSide
 			   , unsigned int iSector
 			   , unsigned int iSampling)
-  :m_c(new Clockwork(manager,this,iSide,iSector,iSampling))
+  : m_c (std::make_unique<Clockwork> (manager,this,iSide,iSector,iSampling))
 {
 }
 
-FCALHVModule::~FCALHVModule()
-{
-  delete m_c;
-}
+FCALHVModule::~FCALHVModule() = default;
 
 unsigned int FCALHVModule::getSideIndex() const
 {

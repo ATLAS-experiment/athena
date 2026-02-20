@@ -106,7 +106,7 @@ StatusCode ComboHypoToolBase::decide(Combo::LegDecisionsMap& passingLegs, const 
     try {
       if (executeAlg(combinationToCheck, ctx)) {
         ATH_MSG_DEBUG("Combination " << (iterations - 1) << " decided to be passing");
-        passingCombinations.push_back(combinationToCheck);
+        passingCombinations.push_back(std::move(combinationToCheck));
         if (m_modeOR == true and m_enableOverride) {
           break;
         }
@@ -245,7 +245,7 @@ void ComboHypoToolBase::updateLegDecisionsMap(const std::vector<std::vector<Comb
     }
     // only update those concerning this tool ID
     if (update){ 
-      it.second = updatedDecisionObjectsOnLeg;
+      it.second = std::move(updatedDecisionObjectsOnLeg);
     }
   }
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -115,7 +115,7 @@ namespace CP
       if (knownSys.find (filtered) == knownSys.end())
       {
         m_systematicsVector.push_back (filtered);
-        knownSys.insert (filtered);
+        knownSys.insert (std::move(filtered));
       }
     }
     return StatusCode::SUCCESS;

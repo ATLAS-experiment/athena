@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -518,11 +518,11 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
   std::string algName[8] = { "Unknown", "OF1", "OF2", "Fit", "ManyAmps", "Flat", "Alg6", "Alg7" };
   boost::io::ios_base_all_saver coutsave(std::cout);
 
-  const T_RodDataFrag* frag[MAX_ROD_FRAG];
-  T_TileRawComp rawcomp[MAX_DIGI_CHAN];
-  T_TileDigiChannel channel[MAX_DIGI_CHAN];
-  T_TileRecoChannel recochan[MAX_DIGI_CHAN];
-  T_TileRecoCalib recocalib[MAX_DIGI_CHAN];
+  std::vector<const T_RodDataFrag*> frag(MAX_ROD_FRAG);
+  std::vector<T_TileRawComp> rawcomp(MAX_DIGI_CHAN);
+  std::vector<T_TileDigiChannel> channel(MAX_DIGI_CHAN);
+  std::vector<T_TileRecoChannel> recochan(MAX_DIGI_CHAN);
+  std::vector<T_TileRecoCalib> recocalib(MAX_DIGI_CHAN);
   T_TileRecoQuality DQword;
 
   bool isFrag5 = false;
@@ -539,7 +539,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
     version &= 0xFFFF; // keep just minor version number
   }
 
-  find_frag(roddata, rodsize, version, verbosity, frag, nfrag);
+  find_frag(roddata, rodsize, version, verbosity, frag.data(), nfrag);
 
   if (verbosity > 9) return;
 
@@ -1464,7 +1464,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
 
         switch (type) {
           case 0: // digitizer fragment
-            tile_unpack_digi(frag[f], channel, MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan, &nsamp);
+            tile_unpack_digi(frag[f], channel.data(), MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan, &nsamp);
             std::cout << "\nDigitizer fragment 0x" << std::hex << id << std::dec << ", " << size << " words found:"
                       << "\t" << nchan / 3 << " chips, " <<  nsamp << "+2 samples" << std::endl;
 
@@ -1616,7 +1616,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             break;
 
           case 1:
-            if (tile_unpack_raw_comp(frag[f], rawcomp, MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan, &nsamp)) {
+            if (tile_unpack_raw_comp(frag[f], rawcomp.data(), MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan, &nsamp)) {
               std::cout << "\nRaw data compressed fragment 0x" << std::hex << id << std::dec << ", " << size << " words found" << std::endl;
               dump_data((uint32_t*) data, size, version, verbosity);
               break;
@@ -1656,7 +1656,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             break;
 
           case 2: // fragment with gain/amp/time/quality in 32 bit words
-            tile_unpack_reco(frag[f], recochan, MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan);
+            tile_unpack_reco(frag[f], recochan.data(), MAX_DIGI_CHAN, version, verbosity, &ngain, &nchan);
 
             std::cout << "\nReco non calibrated energy fragment 0x" << std::hex  << id << std::dec << ", " << size << " words found:"
                       << "\t" << ngain << " gain, " << nchan << " channels in total" << std::endl
@@ -1680,16 +1680,16 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
 
           case 4: // fragment with gain/amp/time/bad/quality in 32 bit words
             m_unit = unit;
-            tile_unpack_reco_calib(frag[f], recocalib, MAX_DIGI_CHAN, version, unit, verbosity, &ngain,
+            tile_unpack_reco_calib(frag[f], recocalib.data(), MAX_DIGI_CHAN, version, unit, verbosity, &ngain,
                 &nchan);
 
             std::cout << "\nReco calibrated energy fragment 0x" << std::hex  << id << std::dec << ", " << size << " words found:"
-                      << "\t" << ((nchan > 48 && nchan < 96) ? 1 : ngain) << " gain, " << unitName[unit].c_str() << " units, " << nchan << " channels in total" << std::endl;
+                      << "\t" << ((nchan > 48 && nchan < 96) ? 1 : ngain) << " gain, " << unitName[unit] << " units, " << nchan << " channels in total" << std::endl;
 
             if (pulse < 3) {
-              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit].c_str() << "  pulse_shape: " << shapeName[pulse].c_str() << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor + 1].c_str() << "  niterations: " << niter << std::endl;
+              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit] << "  pulse_shape: " << shapeName[pulse] << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor + 1] << "  niterations: " << niter << std::endl;
             } else {
-              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit].c_str() << "  pulse_shape: " << shapeName[pulse].c_str() << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor * 4 + niter].c_str() << std::endl;
+              std::cout << "Reco flags: 0x" << std::hex << std::setfill('0') << rflag << setupDec << "  units: " << unitName[unit] << "  pulse_shape: " << shapeName[pulse] << "  nsamples: " << 7 + 2 * nsmpl << "  algorithm: " << algName[algor * 4 + niter] << std::endl;
             }
             
             std::cout << "\nPMT Ch |  full word | G  amp  time b  q    amp        time      qual";
@@ -1723,7 +1723,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             OFC.clear();
 
             std::cout << "\nFrag5 Compressed fragment 0x" << std::hex << id << std::dec << ", " << size << " words found:"
-                      << "\t" << 1 << " gain, " << unitName[unit].c_str() << " units, " << nchan << " channels in total" << std::endl;
+                      << "\t" << 1 << " gain, " << unitName[unit] << " units, " << nchan << " channels in total" << std::endl;
 
             dump_data((uint32_t*) data, size, version, verbosity);
 
@@ -2059,7 +2059,8 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
       std::cout << "Size:         \t"  << std::setw(10) << (frag[nfrag]->size) << "\tMin/Max Size: \t" << std::setw(10) << m_sizeOverhead << "\t" <<  std::setw(10) << size - offset + m_sizeOverhead - 2 << std::endl;
       std::cout << "Id:           \t"  << std::setw(10) << (frag[nfrag]->id) << std::endl;
       std::cout << "Bad data:"  << std::endl;
-      std::cout << "Before:\t"  << offset-1 << "\t" << data[offset-1] << "\t0x" << std::hex << data[offset-1] << std::dec << std::endl;
+      if (offset > 0)
+        std::cout << "Before:\t"  << offset-1 << "\t" << data[offset-1] << "\t0x" << std::hex << data[offset-1] << std::dec << std::endl;
       
       for (; offset < size; ++offset) {
         std::cout << "\t"  << offset << "\t" << data[offset] << "\t0x" << std::hex << data[offset] << std::dec << std::endl;

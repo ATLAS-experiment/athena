@@ -36,7 +36,7 @@ namespace MuonVal{
                                                    const std::string& altPrimName,
                                                    const std::string& altSecName) {
         return primColl->addVariable(std::make_unique<LinkerBranch>(*primColl, secondColl, fromPrimToSec, altPrimName)) &&
-               secondColl->addVariable(std::unique_ptr<IParticleDecorationBranch>{new BilateralLinkerBranch(*secondColl, primColl, fromPrimToSec, altSecName)});
+               secondColl->addVariable(std::unique_ptr<IParticleDecorationBranch>{new BilateralLinkerBranch(*secondColl, std::move(primColl), std::move(fromPrimToSec), altSecName)});
     }
                      
     BilateralLinkerBranch::BilateralLinkerBranch(IParticleFourMomBranch& parent,

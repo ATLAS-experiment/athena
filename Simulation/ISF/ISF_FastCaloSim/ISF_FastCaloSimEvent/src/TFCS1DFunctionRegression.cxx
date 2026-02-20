@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunctionRegression.h"
@@ -23,18 +23,11 @@ double TFCS1DFunctionRegression::regression_value(double uniform) const {
   if (n_neurons > 0) {
 
     int fLayers = 3;
-    vector<int> fLayerSize;
-    fLayerSize.push_back(2);
-    fLayerSize.push_back(n_neurons + 1);
-    fLayerSize.push_back(1);
-
+    vector<int> fLayerSize={2, n_neurons + 1, 1};
+   
     vector<vector<double>> fWeights;
-    for (int l = 0; l < fLayers; l++) {
-      vector<double> thisvector;
-      thisvector.reserve(fLayerSize[l]);
-      for (int i = 0; i < fLayerSize[l]; i++)
-        thisvector.push_back(0); // placeholder
-      fWeights.push_back(thisvector);
+    for (int sz:fLayerSize) { 
+      fWeights.emplace_back(sz,0);// placeholder
     }
 
     for (int l = 0; l < fLayers; l++)

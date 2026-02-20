@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // =================================================================================
 #include "CaloAsymRingsBuilder.h"
-//#include "CaloRingsBuilder.h"
+
 
 #include "AthenaKernel/errorcheck.h"
 
@@ -98,7 +98,7 @@ StatusCode CaloAsymRingsBuilder::initialize()
         );
 
     // Build our raw configuration structure:
-    m_rsRawConfCol.push_back(rawConf);
+    m_rsRawConfCol.push_back(std::move(rawConf));
   }
 
   // We have finished filling the main raw configuration properties, now we add

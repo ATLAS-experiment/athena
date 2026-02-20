@@ -21,7 +21,7 @@
 #include <string>
 
 PixelDistortionAlg::PixelDistortionAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthAlgorithm(name, pSvcLocator)
+  ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -37,10 +37,10 @@ StatusCode PixelDistortionAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PixelDistortionAlg::execute() {
-  ATH_MSG_DEBUG("PixelDistortionAlg::execute()");
+StatusCode PixelDistortionAlg::execute(const EventContext& ctx) const {
+  ATH_MSG_DEBUG("PixelDistortionAlg::execute(const EventContext& ctx) const");
 
-  SG::WriteCondHandle<PixelDistortionData> writeHandle(m_writeKey);
+  SG::WriteCondHandle<PixelDistortionData> writeHandle(m_writeKey, ctx);
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid.. In theory this should not be called, but may happen if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS; 
@@ -107,6 +107,9 @@ StatusCode PixelDistortionAlg::execute() {
         input >> std::hex >> idmod >> std::dec;
         hashID = m_pixelID->wafer_hash((Identifier)idmod); 
       }
+      //Values read in from file should be tested to ensure they are within sensible limits
+      //we assume however that the file is a trusted source.
+      //coverity[TAINTED_SCALAR]
       Identifier modId = m_pixelID->wafer_id((IdentifierHash)hashID);
       ids[hashID] = modId.get_compact();
       ATH_MSG_DEBUG("Identifier = 0x" << std::hex << ids[hashID] << std::dec);
@@ -126,8 +129,7 @@ StatusCode PixelDistortionAlg::execute() {
     writeCdo -> setVersion(m_distortionVersion);
 
     ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
-    rngWrapper->setSeed(name(),Gaudi::Hive::currentContext());
-    CLHEP::HepRandomEngine *rndmEngine = *rngWrapper;
+    CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
     //these numbers could become properties, but seems unnecessary now (they are the same in all cases):
     constexpr double distortionMeanR{0.12/CLHEP::meter};
     constexpr double distortionRMSR{0.08};
@@ -144,7 +146,7 @@ StatusCode PixelDistortionAlg::execute() {
   }
   else if (m_distortionInputSource==4) { // read from database here 
     ATH_MSG_DEBUG("Using pixel distortions from database");
-    SG::ReadCondHandle<DetCondCFloat> readHandle(m_readKey);
+    SG::ReadCondHandle<DetCondCFloat> readHandle(m_readKey, ctx);
     const DetCondCFloat* readCdo = *readHandle; 
     if (readCdo==nullptr) {
       ATH_MSG_FATAL("Null pointer to the read conditions object");

@@ -24,13 +24,19 @@ def activateActsComponents(icf):
     # the flag: Acts.doAmbiguityResolution
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
 
-    
+def setActsDefaultTunings(icf):
+    # Custom values for config flags
+    icf.Xi2max = [25]
+    icf.Xi2maxNoAdd = [25]
+
+
 # Main ACTS Tracking pass    
 def createActsLegacyTrackingPassFlags():
     icf = createITkTrackingPassFlags()
     icf.extension = "ActsLegacy"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
+    setActsDefaultTunings(icf)
     return icf
 
 # Main ACTS Tracking pass with Fast Tracking configuration
@@ -39,6 +45,11 @@ def createActsTrackingPassFlags():
     icf.extension = "Acts"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
+    setActsDefaultTunings(icf)
+    
+    # Override acts default values
+    icf.Xi2max = [50]
+    icf.Xi2maxNoAdd = [100]
     return icf
 
 # Main ACTS Tracking pass with Heavy Ion configuration
@@ -63,6 +74,7 @@ def createActsHeavyIonTrackingPassFlags():
     icf.doActsAmbiguityResolution = lambda pcf : pcf.Acts.doAmbiguityResolution
     icf.doActsToAthenaResolvedTrack = lambda pcf : pcf.Acts.doAmbiguityResolution
 
+    setActsDefaultTunings(icf)
     # Deactivate CTIDE processor fit
     icf.doAmbiguityProcessorTrackFit = False    
     return icf
@@ -73,6 +85,12 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.extension = "ActsLargeRadius"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
+    setActsDefaultTunings(icf)
+
+    # Override acts default values
+    icf.Xi2max = [100]
+    icf.Xi2maxNoAdd = [200]
+    
     # Mark as secondary pass 
     icf.isSecondaryPass = True
     # Store sepate container for LRT
@@ -86,6 +104,7 @@ def createActsConversionTrackingPassFlags():
     icf.extension = "ActsConversion"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
+    setActsDefaultTunings(icf)
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Conversion pass is usually merged with main pass
@@ -98,6 +117,7 @@ def createActsLowPtTrackingPassFlags():
     icf.extension = "ActsLowPt"
     deactivateAthenaComponents(icf)
     activateActsComponents(icf)
+    setActsDefaultTunings(icf)
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # For the time being we do not store sepate containers for this pass (to be revised)
@@ -118,6 +138,7 @@ def createActsValidateClustersTrackingPassFlags():
     icf.doAthenaSeed = True
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
+    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateSpacePointsTrackingPassFlags():
@@ -132,6 +153,7 @@ def createActsValidateSpacePointsTrackingPassFlags():
     icf.doActsToAthenaSeed = True
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
+    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateSeedsTrackingPassFlags():
@@ -157,6 +179,7 @@ def createActsValidateConversionSeedsTrackingPassFlags():
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
     icf.isSecondaryPass = False
+    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
@@ -176,6 +199,7 @@ def createActsValidateLargeRadiusSeedsTrackingPassFlags():
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
     icf.isSecondaryPass = False
+    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateTracksTrackingPassFlags():
@@ -202,6 +226,7 @@ def createActsValidateTracksTrackingPassFlags():
 
     # Deactivate CTIDE processor fit
     icf.doAmbiguityProcessorTrackFit = False
+    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateAmbiguityResolutionTrackingPassFlags():
@@ -219,6 +244,7 @@ def createActsValidateAmbiguityResolutionTrackingPassFlags():
     icf.doAthenaToActsTrack = True
     icf.doActsAmbiguityResolution = True
     icf.doActsToAthenaResolvedTrack = True
+    setActsDefaultTunings(icf)
     return icf
 
 def createEFValidateF100TrackingPassFlags():
@@ -230,6 +256,11 @@ def createEFValidateF100TrackingPassFlags():
     icf.doActsSpacePoint = True
     icf.doActsSeed = True
     icf.doActsTrack = True
+    
+    setActsDefaultTunings(icf)
+    # Override acts default values
+    icf.Xi2max = [50]
+    icf.Xi2maxNoAdd = [100]
     return icf
 
 def createEFValidateF150TrackingPassFlags():
@@ -242,4 +273,9 @@ def createEFValidateF150TrackingPassFlags():
     icf.doActsSpacePoint = False
     icf.doActsSeed = False
     icf.doActsTrack = True
+
+    setActsDefaultTunings(icf)
+    # Override acts default values
+    icf.Xi2max = [50]
+    icf.Xi2maxNoAdd = [100]
     return icf

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -39,14 +39,14 @@ def fromRunArgs(runArgs):
     flags.Sim.ISFRun = True
 
     # Set input files
-    if hasattr(runArgs, 'inputRDO_BKGFile') or hasattr(runArgs, 'inputBS_SKIMFile'):
+    if hasattr(runArgs, 'inputRDO_BKGFile'):
         # Set inputs for Overlay
         from OverlayConfiguration.OverlaySkeleton import setOverlayInputFiles
         setOverlayInputFiles(runArgs, flags, logFastChain)
         flags.Common.isOverlay = True
         flags.Digitization.PileUp = False
 
-        if flags.Overlay.DataOverlay and not flags.Overlay.ByteStream:
+        if flags.Overlay.DataOverlay:
             from SimulationConfig.SimEnums import VertexSource
             flags.Sim.VertexSource = VertexSource.MatchingBkg
     else:

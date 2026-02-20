@@ -28,6 +28,8 @@ private:
   double m_diphoton_deltaRmax;
   double m_diphoton_massmin;
   double m_diphoton_massmax;
+  double m_diphoton_PtMin;
+  double m_diphoton_PtMax;
   bool m_use1st2ndPhotonsforMassAndDeltaRCuts;
 
 };

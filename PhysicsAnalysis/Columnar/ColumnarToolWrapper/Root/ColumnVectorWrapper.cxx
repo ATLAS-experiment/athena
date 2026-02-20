@@ -17,6 +17,7 @@
 
 #include <boost/core/demangle.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 
 //
@@ -46,12 +47,47 @@ namespace columnar
   [[nodiscard]] std::size_t ColumnVectorHeader ::
   addColumn (const ColumnInfo& columnInfo)
   {
+    // Check for existing column with the same name (deduplication for multi-tool support)
+    auto iter = m_nameToIndex.find(columnInfo.name);
+    if (iter != m_nameToIndex.end())
+    {
+      auto& existingHeader = m_elements.at(iter->second);
+
+      // Check that relevant fields match
+      if (existingHeader.type != columnInfo.type)
+        throw std::runtime_error("column " + columnInfo.name + " type mismatch");
+      if (existingHeader.offsetName != columnInfo.offsetName)
+        throw std::runtime_error("column " + columnInfo.name + " offset name mismatch: " + existingHeader.offsetName + " vs " + columnInfo.offsetName);
+      if (existingHeader.isOffset != columnInfo.isOffset)
+        throw std::runtime_error("column " + columnInfo.name + " isOffset mismatch");
+      if (existingHeader.fixedDimensions != columnInfo.fixedDimensions)
+        throw std::runtime_error("column " + columnInfo.name + " fixed dimensions mismatch");
+      if (existingHeader.linkTargetNames != columnInfo.linkTargetNames)
+        throw std::runtime_error("column " + columnInfo.name + " link target names mismatch");
+      if (existingHeader.variantLinkKeyColumn != columnInfo.variantLinkKeyColumn)
+        throw std::runtime_error("column " + columnInfo.name + " variant link key column mismatch");
+
+      // Handle access mode conflicts
+      if (columnInfo.accessMode == ColumnAccessMode::output && existingHeader.readOnly)
+        throw std::runtime_error("column " + columnInfo.name + " already registered as input, cannot register as output");
+      // Promote to read-write if new column needs write access (update mode)
+      if (columnInfo.accessMode == ColumnAccessMode::update)
+        existingHeader.readOnly = false;
+      // If existing is already non-readOnly (output or update), keep it that way
+      return iter->second;
+    }
+
     m_elements.emplace_back();
     m_elements.at(sizeIndex).arraySize = m_elements.size();
 
     auto& header = m_elements.back();
     header.debugName = columnInfo.name;
     header.type = columnInfo.type;
+    header.accessMode = columnInfo.accessMode;
+    header.offsetName = columnInfo.offsetName;
+    header.linkTargetNames = columnInfo.linkTargetNames;
+    header.variantLinkKeyColumn = columnInfo.variantLinkKeyColumn;
+    header.fixedDimensions = columnInfo.fixedDimensions;
 
     switch (columnInfo.accessMode)
     {
@@ -71,7 +107,10 @@ namespace columnar
       header.isOptional = false;
     if (!columnInfo.offsetName.empty())
       header.offsetIndex = unsetIndex;
-    return m_elements.size() - 1;
+
+    const std::size_t newIndex = m_elements.size() - 1;
+    m_nameToIndex.emplace(columnInfo.name, newIndex);
+    return newIndex;
   }
 
 
@@ -261,5 +300,31 @@ namespace columnar
   callNoCheck (const IColumnarTool& tool)
   {
     tool.callVoid (m_data.data());
+  }
+
+
+
+  std::unordered_map<std::string, ColumnInfo> ColumnVectorHeader ::
+  getAllColumnInfo () const
+  {
+    std::unordered_map<std::string, ColumnInfo> result;
+    // Skip the fixed columns (null and size)
+    for (std::size_t i = numFixedColumns; i < m_elements.size(); ++i)
+    {
+      const auto& header = m_elements[i];
+      ColumnInfo info;
+      info.name = header.debugName;
+      info.index = static_cast<unsigned>(i);
+      info.type = header.type;
+      info.accessMode = header.accessMode;
+      info.offsetName = header.offsetName;
+      info.fixedDimensions = header.fixedDimensions;
+      info.isOffset = header.isOffset;
+      info.isOptional = header.isOptional;
+      info.linkTargetNames = header.linkTargetNames;
+      info.variantLinkKeyColumn = header.variantLinkKeyColumn;
+      result.emplace(info.name, std::move(info));
+    }
+    return result;
   }
 }

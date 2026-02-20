@@ -36,6 +36,7 @@ if __name__=="__main__":
     args = parser.parse_args()
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
+    flags.Sim.ReleaseGeoModel = True
 
     from AthenaConfiguration.Enums import ProductionStep
     flags.Common.ProductionStep = ProductionStep.Simulation

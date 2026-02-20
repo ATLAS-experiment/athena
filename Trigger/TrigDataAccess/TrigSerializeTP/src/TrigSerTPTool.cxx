@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -143,7 +143,7 @@ void* TrigSerTPTool::convertTP( const std::string &clname, void *ptr,
    ATH_MSG_DEBUG( "invoking TP for " << clname  << " at " << ptr );
    try {
       cnvtr->transToPersUntyped( ptr, persptr, m_logTP ? *m_logTP : msg() );
-      persName = persname;
+      persName = std::move(persname);
       pers = persptr;
       ATH_MSG_DEBUG( "succeeded at " << persptr  );
    }

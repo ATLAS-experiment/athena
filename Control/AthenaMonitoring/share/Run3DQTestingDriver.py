@@ -74,11 +74,11 @@ if __name__=='__main__':
         log.info('Executing preExec: %s', args.preExec)
         exec(args.preExec)
 
-    if hasattr(flags, "DQ") and hasattr(flags.DQ, "Steering") and hasattr(flags, "Detector"):
-        if hasattr(flags.DQ.Steering, "InDet"):
-            if ((flags.DQ.Steering.InDet, "doAlignMon") and flags.DQ.Steering.InDet.doAlignMon) or \
-               ((flags.DQ.Steering.InDet, "doGlobalMon") and flags.DQ.Steering.InDet.doGlobalMon) or \
-               ((flags.DQ.Steering.InDet, "doPerfMon") and flags.DQ.Steering.InDet.doPerfMon):
+    if flags.hasCategory("DQ.Steering") and flags.hasCategory("Detector"):
+        if flags.hasCategory("DQ.Steering.InDet"):
+            if (flags.hasFlag("DQ.Steering.InDet.doAlignMon") and flags.DQ.Steering.InDet.doAlignMon) or \
+               (flags.hasFlag("DQ.Steering.InDet.doGlobalMon") and flags.DQ.Steering.InDet.doGlobalMon) or \
+               (flags.hasFlag("DQ.Steering.InDet.doPerfMon") and flags.DQ.Steering.InDet.doPerfMon):
                 flags.Detector.GeometryID = True
 
     # Just assume we want the full ID geometry, if we are reading in geometry

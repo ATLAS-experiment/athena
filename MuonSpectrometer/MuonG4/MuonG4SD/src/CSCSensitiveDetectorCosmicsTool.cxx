@@ -5,9 +5,24 @@
 #include "CSCSensitiveDetectorCosmicsTool.h"
 #include "CSCSensitiveDetectorCosmics.h"
 
+#include "HitManagement/HitCollectionMap.h"
+#include "MuonSimEvent/CSCSimHitCollection.h"
+
 CSCSensitiveDetectorCosmicsTool::CSCSensitiveDetectorCosmicsTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase( type , name , parent )
 {
+}
+
+StatusCode CSCSensitiveDetectorCosmicsTool::SetupEvent(HitCollectionMap& hitCollections)
+{
+  hitCollections.Emplace<CSCSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
+}
+
+StatusCode CSCSensitiveDetectorCosmicsTool::Gather(HitCollectionMap& hitCollections)
+{
+  hitCollections.Record<CSCSimHitCollection>(m_outputCollectionNames[0]);
+  return StatusCode::SUCCESS;
 }
 
 G4VSensitiveDetector* CSCSensitiveDetectorCosmicsTool::makeSD() const

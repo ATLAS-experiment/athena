@@ -39,7 +39,7 @@ private:
 
 class ActsAthenaFilterPolicy final : public Acts::Logging::OutputFilterPolicy {
 public:
-  ActsAthenaFilterPolicy(std::shared_ptr<MsgStream> msg) : m_msg(msg) {}
+  ActsAthenaFilterPolicy(std::shared_ptr<MsgStream> msg) : m_msg(std::move(msg)) {}
 
   bool doPrint(const Acts::Logging::Level& lvl) const override;
 

@@ -50,10 +50,12 @@ class IMPIClusterSvc : virtual public IInterface {
   /// Run at start of event to add it to the log
   virtual void log_addEvent(int eventIdx, std::int64_t run_number,
                             std::int64_t event_number,
-                            std::int64_t request_time_ns) = 0;
+                            std::int64_t request_time_ns,
+                            std::size_t slot) = 0;
+
   /// Run at end of event to complete it in the log
   virtual void log_completeEvent(std::int64_t run_number,
-                                 std::int64_t(event_number),
+                                 std::int64_t event_number,
                                  std::int64_t status) = 0;
 };
 

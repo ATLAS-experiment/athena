@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetAnalysisUser )
@@ -124,6 +124,6 @@ atlas_add_executable( TIDAdependence
    LINK_LIBRARIES ${ROOT_LIBRARIES} TrigInDetAnalysis Readcards  )
 
 # Install files from the package:
-atlas_install_runtime( share/TIDA*.dat share/Test*.dat share/TIDA*.py )
+atlas_install_runtime( share/TIDA*.dat share/Test*.dat )
 
 atlas_install_scripts( scripts/TIDA*.sh )

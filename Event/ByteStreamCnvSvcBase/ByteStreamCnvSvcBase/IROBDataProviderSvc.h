@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IROBDATAPROVIDERSVC_H
@@ -23,8 +23,8 @@
 class IROBDataProviderSvc : virtual public IInterface {
 
 public:
-  typedef OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment ROBF;
-  typedef std::vector<const ROBF*> VROBFRAG;
+  using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
+  using VROBFRAG = std::vector<const ROBF*>;
 
    /// Retrieve interface ID
   //   static const InterfaceID& interfaceID() { return IID_IROBDataProviderSvc; }
@@ -54,8 +54,8 @@ public:
    /// This method allows read access to the cache. 
    /// @warning in case the cache is updated in the meantime the iteration is guaranteed to be safe 
    /// but may not give access to all the ROBs available n the very moment
-   /// Example of counting: size_t counter = 0; svc->processCahcedROBs(ctx, [&](const ROBF*){ counter ++; })
-   /// Example of printout: svc->processCahcedROBs(ctx, [&](const ROBF* rob){ log() << MSG::DEBUG << "ROB " << rob->source_id() << endmsg; })
+   /// Example of counting: size_t counter = 0; svc->processCachedROBs(ctx, [&](const ROBF*){ counter ++; })
+   /// Example of printout: svc->processCachedROBs(ctx, [&](const ROBF* rob){ log() << MSG::DEBUG << "ROB " << rob->source_id() << endmsg; })
    virtual void processCachedROBs(const EventContext& context, 
 				  const std::function< void(const ROBF* )>& fn ) const = 0;
   

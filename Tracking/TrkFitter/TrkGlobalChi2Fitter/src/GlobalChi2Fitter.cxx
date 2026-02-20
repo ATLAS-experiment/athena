@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrkGlobalChi2Fitter/GlobalChi2Fitter.h"
 #include "TrkTrack/GXFMaterialEffects.h"
@@ -1826,20 +1826,17 @@ namespace Trk {
     Cache cache(this);
     initFieldCache(ctx, cache);
 
-    delete alignCache.m_derivMatrix;
-    alignCache.m_derivMatrix = nullptr;
-
-    delete alignCache.m_fullCovarianceMatrix;
-    alignCache.m_fullCovarianceMatrix = nullptr;
+    alignCache.m_derivMatrix.reset();
+    alignCache.m_fullCovarianceMatrix.reset();
     alignCache.m_iterationsOfLastFit = 0;
 
     Trk::Track* newTrack =
       fitIm(ctx, cache, inputTrack, runOutlier, matEffects);
     if(newTrack != nullptr){
       if(cache.m_derivmat.size() != 0)
-        alignCache.m_derivMatrix = new Amg::MatrixX(cache.m_derivmat);
+        alignCache.m_derivMatrix = std::make_unique<Amg::MatrixX>(cache.m_derivmat);
       if(cache.m_fullcovmat.size() != 0)
-        alignCache.m_fullCovarianceMatrix = new Amg::MatrixX(cache.m_fullcovmat);
+        alignCache.m_fullCovarianceMatrix = std::make_unique<Amg::MatrixX>(cache.m_fullcovmat);
       alignCache.m_iterationsOfLastFit = cache.m_lastiter;
     }
     return newTrack;

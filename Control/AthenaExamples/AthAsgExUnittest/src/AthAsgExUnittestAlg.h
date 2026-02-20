@@ -1,6 +1,6 @@
 // -*- mode: c++ -*-
 //
-//  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 #ifndef ATHASGEXUNITTEST_ATHASGEXUNITTESTALG_H
@@ -27,8 +27,8 @@ public:
 
 private:
 
-  int m_property;
-  ToolHandle<IAthAsgExUnittestTool> m_tool;
+  Gaudi::Property<int> m_property{this, "MyProperty", 1};
+  ToolHandle<IAthAsgExUnittestTool> m_tool{this, "MyTool", "AthAsgExUnittestTool/MyTool"};
 
 };
 

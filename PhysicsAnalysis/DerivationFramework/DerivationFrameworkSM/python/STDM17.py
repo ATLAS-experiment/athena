@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_STDM17.py
@@ -12,6 +12,8 @@ from AthenaConfiguration.Enums import MetadataCategory
 def STDM17SkimmingToolCfg(flags):
     """Configure the skimming tool"""
     acc = ComponentAccumulator()
+
+    filterList = []
 
     from DerivationFrameworkJetEtMiss import TriggerLists
     elTriggers = TriggerLists.single_el_Trig(flags)
@@ -43,18 +45,23 @@ def STDM17SkimmingToolCfg(flags):
     #String skimming selections
     expression = '( count('+trackRequirements+') >=2 && count('+jetRequirementsTtbar+') >=1 && ( count('+muonsRequirements+') >=1 || count('+electronsRequirements+') >=1 ) )'
 
-    skimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = "skimmingTool", expression = expression)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    skimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "skimmingTool", expression = expression))
     acc.addPublicTool(skimmingTool)
+    filterList += [skimmingTool]
 
     # Trigger skimming tools
-    STDM17TriggerSkimmingTool_lep = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "STDM17TriggerSkimmingTool_lep", TriggerListOR = lepTriggers)
-    acc.addPublicTool(STDM17TriggerSkimmingTool_lep)
-    STDM17SkimmingTool_lep  = CompFactory.DerivationFramework.FilterCombinationAND(name="STDM17SkimmingTool_lep",  FilterList=[skimmingTool,  STDM17TriggerSkimmingTool_lep])
+    if flags.Trigger.EDMVersion >= 0:
+        STDM17TriggerSkimmingTool_lep = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "STDM17TriggerSkimmingTool_lep", TriggerListOR = lepTriggers)
+        acc.addPublicTool(STDM17TriggerSkimmingTool_lep)
+        filterList += [STDM17TriggerSkimmingTool_lep]
+
+    STDM17SkimmingTool_lep  = CompFactory.DerivationFramework.FilterCombinationAND(name="STDM17SkimmingTool_lep",  FilterList=filterList)
     acc.addPublicTool(STDM17SkimmingTool_lep)
 
-    finalSkimmingTools = [STDM17SkimmingTool_lep]
-
-    STDM17SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="STDM17SkimmingTool", FilterList=finalSkimmingTools)
+    STDM17SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="STDM17SkimmingTool", FilterList=[STDM17SkimmingTool_lep])
     acc.addPublicTool(STDM17SkimmingTool, primary = True)
 
     return(acc)
@@ -65,7 +72,8 @@ def STDM17AugmentationToolsForSkimmingCfg(flags):
 
     # Loose tracks with pT > 1000 MeV and Nonprompt_All_MaxWeight TTVA
     toolkwargs = {}
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                               name = "TrackSelectionTool1000_STDM17",
                                                                                               minPt = 1000.))
@@ -98,7 +106,8 @@ def STDM17AugmentationToolsCfg(flags):
 
     toolkwargs = {}
     # Loose tracks with pT > 500 MeV
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     toolkwargs["TrackSelectionTool"] = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                               name = "TrackSelectionTool500_STDM17",
                                                                                               minPt = 500.))
@@ -261,9 +270,7 @@ def STDM17Cfg(flags):
                                              "Electrons", "Photons", "Muons", "TauJets", "TauJets_MuonRM",
                                              "InDetTrackParticles", "PrimaryVertices",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMPFlowJets",
-                                             "BTagging_AntiKt4EMPFlow",
-                                             "AntiKt4EMPFlowJets_FTAG",]
+                                             "AntiKt4EMPFlowJets"]
 
 
     STDM17SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",

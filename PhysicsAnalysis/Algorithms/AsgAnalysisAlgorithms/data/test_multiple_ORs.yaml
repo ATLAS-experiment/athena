@@ -1,0 +1,313 @@
+CommonServices:
+  systematicsHistogram: systematicsList
+  runSystematics: False
+
+PileupReweighting: {}
+
+EventCleaning:
+  runEventCleaning: True
+
+Jets:
+  - containerName: AnaJets
+    jetCollection: AntiKt4EMPFlowJets
+    runJvtUpdate: False
+    runNNJvtUpdate: True
+    recalibratePhyslite: False
+    FTagTriggerMatching:
+      - containerName: AnaJets
+        triggerChainsPerYear:
+          2022:
+            - HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
+          2023:
+            - HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25
+          2024:
+            - HLT_2j45_0eta290_020jvt_bgn260_2j45_pf_ftf_presel2j25XX2j25bgtwo85_L14jJ40p0ETA25
+    FlavourTagging:
+      - selectionName: ftag
+        btagger: GN2v01
+        btagWP: FixedCutBEff_65
+        saveScores: All
+    FlavourTaggingEventSF:
+      - containerName: AnaJets.baselineJvt
+        btagger: GN2v01
+    JVT: {}
+  - containerName: AnaLargeRJets
+    jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
+    recalibratePhyslite: False
+
+Electrons:
+  - containerName: AnaElectrons
+    forceFullSimConfigForIso: True
+    recalibratePhyslite: False
+    decorateTruth: true
+    decorateCaloClusterEta: true
+    writeTrackD0Z0: True
+    minPt: 10000.0
+    WorkingPoint:
+      - selectionName: loose
+        forceFullSimConfig: True
+        identificationWP: LooseBLayerLH
+        isolationWP: Tight_VarRad
+        chargeIDSelectionRun2: True
+    PtEtaSelection:
+      minPt: 10000.0
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
+
+Photons:
+  - containerName: AnaPhotons
+    recomputeIsEM: False
+    forceFullSimConfigForIso: True
+    recalibratePhyslite: False
+    decorateTruth: true
+    WorkingPoint:
+      - selectionName: tight
+        forceFullSimConfigForID: True
+        forceFullSimConfigForIso: True
+        qualityWP: Tight
+        isolationWP: FixedCutTight
+        recomputeIsEM: False
+    PtEtaSelection:
+      minPt: 10000.0
+
+Muons:
+  - containerName: AnaMuons
+    recalibratePhyslite: False
+    decorateTruth: true
+    writeTrackD0Z0: True
+    WorkingPoint:
+      - selectionName: medium
+        quality: Medium
+        isolation: Loose_VarRad
+    IFFClassification: {}
+    MCTCClassification:
+      prefix: truth_
+
+TauJets:
+  - containerName: AnaTauJets
+    decorateTruth: true
+    WorkingPoint:
+      - selectionName: tight
+        quality: Tight
+    TriggerSF:
+      - tauID: Tight
+        triggerChainsPerYear:
+          2015:
+            - HLT_tau25_medium1_tracktwo
+            - HLT_tau35_medium1_tracktwo
+          2016:
+            - HLT_tau25_medium1_tracktwo
+            - HLT_tau35_medium1_tracktwo
+          2017:
+            - HLT_tau25_medium1_tracktwo
+            - HLT_tau35_medium1_tracktwo
+          2018:
+            - HLT_tau25_medium1_tracktwoEF
+            - HLT_tau35_medium1_tracktwoEF
+          2022:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
+          2023:
+            - HLT_tau25_mediumRNN_tracktwoMVA
+            - HLT_tau35_mediumRNN_tracktwoMVA
+    MCTCClassification:
+      prefix: truth_
+
+SystObjectLink:
+  - containerName: AnaJets
+  - containerName: AnaLargeRJets
+  - containerName: AnaElectrons
+  - containerName: AnaPhotons
+  - containerName: AnaMuons
+  - containerName: AnaTauJets
+
+ObjectCutFlow:
+  - containerName: AnaJets
+    selectionName: jvt
+  - containerName: AnaElectrons
+    selectionName: loose
+  - containerName: AnaPhotons
+    selectionName: tight
+  - containerName: AnaMuons
+    selectionName: medium
+  - containerName: AnaTauJets
+    selectionName: tight
+
+GeneratorLevelAnalysis: {}
+
+PL_Electrons:
+  containerName: TruthElectrons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Photons:
+  containerName: TruthPhotons
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Muons:
+  containerName: TruthMuons
+  PtEtaSelection:
+    useDressedProperties: true
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Taus:
+  containerName: TruthTaus
+  PtEtaSelection:
+    minPt: 20000.0
+  MCTCClassification:
+    prefix: ""
+PL_Jets:
+  containerName: AntiKt4TruthDressedWZJets
+  PtEtaSelection:
+    minPt: 20000.0
+PL_Neutrinos: {}
+PL_MissingET: {}
+PL_OverlapRemoval:
+  electrons: TruthElectrons
+  muons: TruthMuons
+  photons: TruthPhotons
+  jets: AntiKt4TruthDressedWZJets
+  useRapidityForDeltaR: False
+
+# containerName and selectionName must be defined in their respective blocks
+MissingET:
+  - containerName: AnaMET
+    # Format should follow Object: <containerName>.<selectionName>
+    jets: AnaJets
+    taus: AnaTauJets.tight
+    electrons: AnaElectrons.loose
+    photons: AnaPhotons.tight
+    muons: AnaMuons.medium
+
+# containerName and selectionName must be defined in their respective blocks
+OverlapRemoval:
+  - inputLabel: preselectOR_preJvt
+    outputLabel: passesOR_preJvt
+    jets: AnaJets
+    taus: AnaTauJets.tight
+    electrons: AnaElectrons.loose
+    photons: AnaPhotons.tight
+    muons: AnaMuons.medium
+    jetsSelectionName: passesOR_preJvt
+    tausSelectionName: passesOR_preJvt
+    electronsSelectionName: passesOR_preJvt
+    photonsSelectionName: passesOR_preJvt
+    muonsSelectionName: passesOR_preJvt
+  - inputLabel: preselectOR_postJvt
+    outputLabel: passesOR_postJvt
+    jets: AnaJets.baselineJvt
+    taus: AnaTauJets.tight
+    electrons: AnaElectrons.loose
+    photons: AnaPhotons.tight
+    muons: AnaMuons.medium
+    jetsSelectionName: passesOR_postJvt
+    tausSelectionName: passesOR_postJvt
+    electronsSelectionName: passesOR_postJvt
+    photonsSelectionName: passesOR_postJvt
+    muonsSelectionName: passesOR_postJvt
+
+
+Thinning:
+  - containerName: AnaElectrons
+    outputName: OutElectrons
+    selectionName: loose
+  - containerName: AnaPhotons
+    outputName: OutPhotons
+    selectionName: tight
+  - containerName: AnaMuons
+    outputName: OutMuons
+    selectionName: medium
+  - containerName: AnaTauJets
+    outputName: OutTauJets
+    selectionName: tight
+  - containerName: AnaJets
+    outputName: OutJets
+  - containerName: AnaLargeRJets
+    outputName: OutLargeRJets
+  - containerName: TruthElectrons
+    outputName: OutTruthElectrons
+    skipOnData: true
+  - containerName: TruthPhotons
+    outputName: OutTruthPhotons
+    skipOnData: true
+  - containerName: TruthMuons
+    outputName: OutTruthMuons
+    skipOnData: true
+  - containerName: TruthTaus
+    outputName: OutTruthTaus
+    skipOnData: true
+  - containerName: AntiKt4TruthDressedWZJets
+    outputName: OutTruthJets
+    skipOnData: true
+
+EventSelection:
+  - electrons: AnaElectrons.loose
+    muons: AnaMuons.medium
+    jets: AnaJets.baselineJvt
+    met: AnaMET
+    btagDecoration: ftag_select_ftag
+    noFilter: True
+    cutFlowHistograms: True
+    selectionCutsDict:
+      SUBcommon: |
+        JET_N_BTAG >= 2
+        JET_N 25000 >= 4
+        MET >= 20000
+        SAVE
+      ejets: |
+        IMPORT SUBcommon
+        EL_N 5000 == 1
+        MU_N 3000 == 0
+        MWT < 170000
+        MET+MWT > 40000
+        SAVE
+      mujets: |
+        IMPORT SUBcommon
+        EL_N 5000 == 0
+        MU_N medium 25000 > 0
+        SAVE
+
+LeptonSF:
+  electrons: AnaElectrons.loose
+  muons: AnaMuons.medium
+  photons: AnaPhotons.tight
+  lepton_postfix: nominal
+
+Bootstraps:
+  nReplicas: 2000
+  skipOnMC: False
+
+# After configuring each container, many variables will be saved automatically.
+Output:
+  treeName: analysis
+  vars:
+    - EventInfo.actualInteractionsPerCrossing -> actualMuScaled
+  metVars:
+    - AnaMET_%SYS%.met -> met_%SYS%
+  truthMetVars:
+    - TruthMET_NOSYS.met -> truth_met
+  commands:
+    - disable actualInteractionsPerCrossing
+  containers:
+    # Format should follow: <prefix>:<output container>
+    mu_: OutMuons
+    el_: OutElectrons
+    ph_: OutPhotons
+    tau_: OutTauJets
+    jet_: OutJets
+    larger_jet_: OutLargeRJets
+    met_: AnaMET
+    "": EventInfo
+  containersOnlyForMC:
+    truth_mu_: OutTruthMuons
+    truth_el_: OutTruthElectrons
+    truth_ph_: OutTruthPhotons
+    truth_tau_: OutTruthTaus
+    truth_jet_: OutTruthJets
+    truth_met_: TruthMET
+
+PrintConfiguration: {}

@@ -566,7 +566,11 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
                 .lambda = 0,
                 .volume = myCDDE->volume(),
                 .sample = myCDDE->getSampling(),
-                .identifier = m_calo_id->calo_cell_hash(myId)});
+                .identifier = cellIter.index()
+                //Using the index instead of the hash ID as disambiguation criterion
+                //is relevant for the GPU now that we no longer assume the two are the same,
+                //and this gives us better performance.
+              });
 
 	    CaloClusterMomentsMaker_detail::cellinfo& ci = cellinfo.back();
 
@@ -623,7 +627,7 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	nBadLArHV=hvFrac.second;
       }
 
-      if ( w > 0 ) {
+      if ( w > 0 || (m_useGPUCriteria && w >= 0) ) {
 	mass = w*w - mx*mx - my*my - mz*mz;
 	if ( mass > 0) {
 	  mass = sqrt(mass);
@@ -632,6 +636,10 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	  // make mass negative if m^2 was negative
 	  mass = -sqrt(-mass);
 	}
+
+  if (w == 0) {
+      w = 1.0;
+  }
 
 	xc/=w;
 	yc/=w;
@@ -669,7 +677,7 @@ CaloClusterMomentsMaker::execute(const EventContext& ctx,
 	    C(2,2) += e2*(ci.z-zc)*(ci.z-zc);
 	    w += e2;
 	  } 
-	  C/=w;
+	  C/=(w != 0 ? w : 1.0);
 	  
 	  Eigen::SelfAdjointEigenSolver<Eigen::Matrix3d> eigensolver(C);
 	  if (eigensolver.info() != Eigen::Success) {

@@ -21,34 +21,38 @@
 
 namespace columnar
 {
-  ColumnarTool<ColumnarModeArray> ::
-  ColumnarTool ()
-    : m_data (std::make_shared<ColumnarToolDataArray> ())
+  ColumnarToolArray ::
+  ColumnarToolArray (ColumnarToolArray* val_parent)
   {
-    m_data->mainTool = this;
-    m_data->sharedTools.push_back (this);
+    if (val_parent == nullptr)
+    {
+      m_data = std::make_shared<ColumnarToolDataArray> ();
+      m_data->mainTool = this;
+      m_data->sharedTools.push_back (this);
 
-    setContainerUserName (ContainerId::eventContext::idName, numberOfEventsName);
+      setContainerUserName (ContainerId::eventContext::idName, numberOfEventsName);
 
-    // this name matches the ContainerId::eventInfo::idName, make sure
-    // to keep them in sync. the reason for hard-coding this in two
-    // places is because ContainerId::eventInfo is defined in a separate
-    // package
-    setContainerUserName ("eventInfo", numberOfEventsName);
-    m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-    addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
+      // this name matches the ContainerId::eventInfo::idName, make sure
+      // to keep them in sync. the reason for hard-coding this in two
+      // places is because ContainerId::eventInfo is defined in a separate
+      // package
+      setContainerUserName ("eventInfo", numberOfEventsName);
+      m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
+      addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
+    } else
+    {
+      m_data = val_parent->m_data;
+      m_data->sharedTools.push_back (this);
+
+      m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
+      addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
+    }
   }
 
-  ColumnarTool<ColumnarModeArray> ::
-  ColumnarTool (ColumnarTool<ColumnarModeArray>* val_parent)
-    : m_data (val_parent->m_data)
-  {
-    m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-    addColumn (numberOfEventsName, m_eventsData.get(), {.isOffset = true});
-  }
 
-  ColumnarTool<ColumnarModeArray> ::
-  ~ColumnarTool ()
+
+  ColumnarToolArray ::
+  ~ColumnarToolArray ()
   {
     if (m_data->mainTool == this)
       m_data->mainTool = nullptr;
@@ -58,8 +62,10 @@ namespace columnar
       m_data->sharedTools.erase (iter);
   }
 
-  void ColumnarTool<ColumnarModeArray> ::
-  addSubtool (ColumnarTool<ColumnarModeArray>& subtool)
+
+
+  void ColumnarToolArray ::
+  addSubtool (ColumnarToolArray& subtool)
   {
     // make a copy of the shared data for the subtool, so that I don't
     // accidentally release it when resetting the shared data pointer on
@@ -103,7 +109,7 @@ namespace columnar
 
 
 
-  StatusCode ColumnarTool<ColumnarModeArray> ::
+  StatusCode ColumnarToolArray ::
   initializeColumns ()
   {
     return StatusCode::SUCCESS;
@@ -111,16 +117,7 @@ namespace columnar
 
 
 
-  void ColumnarTool<ColumnarModeArray> ::
-  callVoid (void **data) const
-  {
-    auto eventsOffset = static_cast<const ColumnarOffsetType*> (data[m_eventsIndex]);
-    callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeArray> (data, eventsOffset[0], eventsOffset[1]));
-  }
-
-
-
-  std::vector<ColumnInfo> ColumnarTool<ColumnarModeArray> ::
+  std::vector<ColumnInfo> ColumnarToolArray ::
   getColumnInfo () const
   {
     std::vector<std::pair<std::string,std::string>> names;
@@ -154,7 +151,7 @@ namespace columnar
 
 
 
-  void ColumnarTool<ColumnarModeArray> ::
+  void ColumnarToolArray ::
   renameColumn (const std::string& from, const std::string& to)
   {
     if (auto iter = m_data->columnUserToInternalNames.find (from);
@@ -176,7 +173,7 @@ namespace columnar
 
 
 
-  void ColumnarTool<ColumnarModeArray> ::
+  void ColumnarToolArray ::
   setColumnIndex (const std::string& name, std::size_t index)
   {
     auto internalNames = m_data->convertUserToInternalNames (name);
@@ -196,15 +193,7 @@ namespace columnar
 
 
 
-  void ColumnarTool<ColumnarModeArray> ::
-  callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeArray> /*events*/) const
-  {
-    throw std::runtime_error ("tool didn't implement callEvents");
-  }
-
-
-
-  void ColumnarTool<ColumnarModeArray> ::
+  void ColumnarToolArray ::
   setContainerUserName (std::string_view container, const std::string& name)
   {
     auto [iter, success] = m_data->containerInternalToUserNames.emplace (container, name);
@@ -215,7 +204,7 @@ namespace columnar
 
 
 
-  void ColumnarTool<ColumnarModeArray> ::
+  void ColumnarToolArray ::
   addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info)
   {
     info.type = accessorData->type;

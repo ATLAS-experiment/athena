@@ -7,9 +7,8 @@
 
 
 
-void FPGATrackSimLogicalEventInputHeader::reset()
+void FPGATrackSimLogicalEventInputHeader::reset() const
 {
-  m_event.reset();
   m_optional.reset();
   m_towers.clear();
 }

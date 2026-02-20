@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def HGTD_GeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
@@ -7,7 +7,6 @@ def HGTD_GeoModelCfg(flags):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     hgtdDetectorTool = CompFactory.HGTD_GMX_DetectorTool()
-    hgtdDetectorTool.Alignable = False
     hgtdDetectorTool.DetectorName = "HGTD"
     if flags.HGTD.Geometry.isLocal:
         hgtdDetectorTool.GmxFilename = flags.HGTD.Geometry.Filename

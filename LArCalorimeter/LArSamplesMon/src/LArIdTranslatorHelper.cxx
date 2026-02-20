@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArIdTranslatorHelper
@@ -29,6 +29,7 @@
 #include "TPad.h"
 #include "TAxis.h"
 #include "TKey.h"
+#include <cmath>
 
 LArIdTranslatorHelper::LArIdTranslatorHelper(const TString& file)
   : bec(0),side(0),ft(0),sl(0),ch(0),sa(0),part(0),
@@ -39,7 +40,6 @@ LArIdTranslatorHelper::LArIdTranslatorHelper(const TString& file)
     binetadqm(0),binphidqm1(0),binphidqm2(0),
     m_kInitialized(false),
     m_tree(nullptr),
-    m_file( nullptr),
     m_ntotal(0),m_extrabins(0),
     m_canvas_counts(0),
     m_clonemap_counts(0),
@@ -84,7 +84,7 @@ LArIdTranslatorHelper::~LArIdTranslatorHelper()
 {
   // class destructor - delete your created objects here
 
-  if(m_kInitialized && m_file && m_file->IsOpen()){ m_file->Close(); delete m_file; }
+  if(m_kInitialized && m_file && m_file->IsOpen()){ m_file->Close(); }
 }
 
 //____________________________________________________________________________________________________
@@ -93,8 +93,7 @@ bool LArIdTranslatorHelper::LoadIdTranslator(const TString& file)
   // Load Translator root file containing channel info and mapping.
 
   // info from single cells
-  delete m_file;//Solve cppcheck warning
-  m_file = new TFile(file);
+  m_file.reset(new TFile(file));
   if(!m_file || !m_file->IsOpen()){
     printf("LArIdTranslatorHelper::LoadIdTranslator : File %s could not be found (see above TFile message).\n",file.Data());
     return false;
@@ -129,7 +128,7 @@ bool LArIdTranslatorHelper::LoadIdTranslator(const TString& file)
   for(i=0;i<m_nPartitionLayers;i++){
     for(j=0;j<m_nHistCategories;j++){
       sprintf(name,"%s_%s",m_PartitionLayers[i].c_str(),m_HistCategories[j].c_str());
-      m_HistCellmaps[i][j] = std::unique_ptr<TH2I> ((TH2I*)m_file->Get(name));
+      m_HistCellmaps[i][j] = static_cast<TH2I*>(m_file->Get(name));
     }
     
     nbins += (m_HistCellmaps[i][0]->GetXaxis()->GetNbins())*(m_HistCellmaps[i][0]->GetYaxis()->GetNbins());
@@ -237,7 +236,7 @@ const Char_t* LArIdTranslatorHelper::GetPartitonLayerName(const int index)
 }
 
 //____________________________________________________________________________________________________
-TH2* LArIdTranslatorHelper::GetCaloPartitionLayerMap(const int index,bool kProfile)
+std::unique_ptr<TH2> LArIdTranslatorHelper::GetCaloPartitionLayerMap(const int index,bool kProfile)
 {
   // Returns a clone of the m_HistCellmaps histograms.
   // The type is TH2F for monitoring purposes.
@@ -249,16 +248,16 @@ TH2* LArIdTranslatorHelper::GetCaloPartitionLayerMap(const int index,bool kProfi
     return nullptr;
   }
 
-  TH2* th2 = nullptr;
+  std::unique_ptr<TH2> th2;
   if(!m_HistCellmaps[index][0]){
     printf("LArIdTranslatorHelper::GetCaloPartitionLayerMap : Could not clone map for index %d. Check that maps were loaded from input rootfile.\n",index);
     return nullptr;
   } else {
     sprintf(m_namebuf,"%s_Cloned_%d",m_PartitionLayers[index].c_str(),m_clonemap_counts);
     if(kProfile){
-      th2 = new TProfile2D(m_namebuf,"",m_HistCellmaps[index][0]->GetXaxis()->GetNbins(),(m_HistCellmaps[index][0]->GetXaxis()->GetXbins())->GetArray(),m_HistCellmaps[index][0]->GetYaxis()->GetNbins(),(m_HistCellmaps[index][0]->GetYaxis()->GetXbins())->GetArray());
+      th2 = std::make_unique<TProfile2D>(m_namebuf,"",m_HistCellmaps[index][0]->GetXaxis()->GetNbins(),(m_HistCellmaps[index][0]->GetXaxis()->GetXbins())->GetArray(),m_HistCellmaps[index][0]->GetYaxis()->GetNbins(),(m_HistCellmaps[index][0]->GetYaxis()->GetXbins())->GetArray());
     } else {
-      th2 = (TH2F*)(m_HistCellmaps[index][0]->Clone(m_namebuf));
+      th2.reset (static_cast<TH2F*>(m_HistCellmaps[index][0]->Clone(m_namebuf)));
       th2->Reset("M"); // reset content and statistics
     }
   }
@@ -268,7 +267,7 @@ TH2* LArIdTranslatorHelper::GetCaloPartitionLayerMap(const int index,bool kProfi
   return th2;
 }
 //____________________________________________________________________________________________________
-TCanvas* LArIdTranslatorHelper::CaloPartitionLayerDisplay(TH2** h,const Char_t* title,bool kLogz)
+std::unique_ptr<TCanvas> LArIdTranslatorHelper::CaloPartitionLayerDisplay(TH2** h,const Char_t* title,bool kLogz)
 {
   // Produces a TCanvas with the partitionlayers arranged.
   // This assumes some hardcoded settings:
@@ -285,7 +284,7 @@ TCanvas* LArIdTranslatorHelper::CaloPartitionLayerDisplay(TH2** h,const Char_t* 
 
   // create new name according to scheme
   sprintf(m_namebuf,"calosnapshot_%d",m_canvas_counts);
-  TCanvas* c = new TCanvas(m_namebuf,title,1000,600);
+  auto c = std::make_unique<TCanvas>(m_namebuf,title,1000,600);
   c->Divide(8,4); // 32 subpads (2 unused)
 
   // ordering:
@@ -354,8 +353,8 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   ULong64_t t_onlid,t_offlid;
   ULong64_t t_ttid;
   std::vector<int>* t_hvid = nullptr;
-  TFile* ifile = new TFile(inputtreefile);
-  TTree* idtree = (TTree*)ifile->Get("LarId");
+  TFile ifile(inputtreefile);
+  TTree* idtree = (TTree*)ifile.Get("LarId");
   idtree->SetBranchAddress("BEC",&t_barrel_ec);
   idtree->SetBranchAddress("Region",&t_pos_neg);
   idtree->SetBranchAddress("EmHad",&t_emhad);
@@ -380,49 +379,46 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
 
   // ------------------------------------------
   // load DQM histogram style (any file)
-  TFile* fdqm = new TFile(inputhistfile);
+  TFile fdqm(inputhistfile);
   const Char_t* Pattern = "run_%d/CaloMonitoring/LArCellMon_NoTrigSel/2d_Occupancy/CellOccupancyVsEtaPhi_%s_4Sigma";
   Char_t name[1024];
-  TH2F** h2 = new TH2F*[m_nPartitionLayers];
+  std::vector<TH2F*> h2 (m_nPartitionLayers);
   for(i=0;i<m_nPartitionLayers;i++){
     sprintf(name,Pattern,run,m_PartitionLayers[i].c_str());
-    h2[i] = (TH2F*)fdqm->Get(name);
+    h2[i] = (TH2F*)fdqm.Get(name);
     if(!h2[i]){ printf("LArIdTranslatorHelper::MakeTranslatorMapping : Could not read input histograms.\n"); exit(-1); }
   }
   // ------------------------------------------
   
   Int_t ix,iy,nbinsx,nbinsy;
-  Double_t* xbins=nullptr,*ybins=nullptr;
-  TH2I*** h2map = new TH2I**[m_nPartitionLayers];
-  TH2I*** h2count = new TH2I**[m_nPartitionLayers];
+  std::vector<std::vector<std::unique_ptr<TH2I> > > h2map (m_nPartitionLayers);
+  std::vector<std::vector<std::unique_ptr<TH2I> > > h2count (m_nPartitionLayers);
   for(i=0;i<m_nPartitionLayers;i++){
     nbinsx = h2[i]->GetXaxis()->GetNbins();
     nbinsy = h2[i]->GetYaxis()->GetNbins();
-    xbins = new Double_t[nbinsx+1];
+    std::vector<double> xbins (nbinsx+1);
     for(ix=0;ix<nbinsx;ix++){
       xbins[ix] = h2[i]->GetXaxis()->GetBinLowEdge(ix+1);
     }
     xbins[nbinsx] = h2[i]->GetXaxis()->GetBinUpEdge(nbinsx);
-    ybins = new Double_t[nbinsy+1];
+    std::vector<double> ybins (nbinsy+1);
     for(iy=0;iy<nbinsy;iy++){
       ybins[iy] = h2[i]->GetYaxis()->GetBinLowEdge(iy+1);
     }
     ybins[nbinsy] = h2[i]->GetYaxis()->GetBinUpEdge(nbinsy);
     
-    h2map[i] = new TH2I*[m_nHistCategories];
-    h2count[i] = new TH2I*[m_nHistCategories];
+    h2map[i].resize (m_nHistCategories);
+    h2count[i].resize (m_nHistCategories);
     for(j=0;j<m_nHistCategories;j++){
       sprintf(name,"%s_%s",m_PartitionLayers[i].c_str(),m_HistCategories[j].c_str());
-      h2map[i][j] = new TH2I(name,"",nbinsx,xbins,nbinsy,ybins);
+      h2map[i][j] = std::make_unique<TH2I>(name,"",nbinsx,xbins.data(),nbinsy,ybins.data());
       sprintf(name,"%s_%s_counts",m_PartitionLayers[i].c_str(),m_HistCategories[j].c_str());
-      h2count[i][j] = (TH2I*)h2map[i][j]->Clone(name);
+      h2count[i][j].reset (static_cast<TH2I*>(h2map[i][j]->Clone(name)));
       // initialize to -1
       for(ix=0;ix<nbinsx;ix++){
         for(iy=0;iy<nbinsy;iy++) h2map[i][j]->SetBinContent(ix+1,iy+1,-1);
       }
     }
-    delete [] xbins;
-    delete [] ybins;
   }
 
   Int_t barrel_ec,region,emhad;
@@ -434,36 +430,36 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   Int_t binetadqm,binphidqm1,binphidqm2;
 
   // new file and TTree with appendices
-  TFile* file = new TFile("LarIdTree_new.root","RECREATE"); // default, different name
-  TTree* tree = new TTree("LarId","Channel IDs");
-  tree->Branch("BEC",&barrel_ec);
-  tree->Branch("Region",&region);
-  tree->Branch("EmHad",&emhad);
-  tree->Branch("FT",&FT);
-  tree->Branch("SL",&SL);
-  tree->Branch("CH",&CH);
-  tree->Branch("Sampling",&Sampling);
-  tree->Branch("Partition",&Partition);
-  tree->Branch("I_Eta",&iEta);
-  tree->Branch("I_Phi",&iPhi);
-  tree->Branch("F_Eta",&Eta);
-  tree->Branch("F_Phi",&Phi);
-  tree->Branch("R_Eta",&Eta_Raw);
-  tree->Branch("R_Phi",&Phi_Raw);
-  tree->Branch("X",&x);
-  tree->Branch("Y",&y);
-  tree->Branch("Z",&z);
-  tree->Branch("onlid",&onlid);
-  tree->Branch("offlid",&offlid);
-  tree->Branch("ttid",&ttid);
-  tree->Branch("hvid",&hvid);
-  tree->Branch("binetadqm",&binetadqm);
-  tree->Branch("binphidqm1",&binphidqm1);
-  tree->Branch("binphidqm2",&binphidqm2);
+  TFile file("LarIdTree_new.root","RECREATE"); // default, different name
+  TTree tree("LarId","Channel IDs");
+  tree.Branch("BEC",&barrel_ec);
+  tree.Branch("Region",&region);
+  tree.Branch("EmHad",&emhad);
+  tree.Branch("FT",&FT);
+  tree.Branch("SL",&SL);
+  tree.Branch("CH",&CH);
+  tree.Branch("Sampling",&Sampling);
+  tree.Branch("Partition",&Partition);
+  tree.Branch("I_Eta",&iEta);
+  tree.Branch("I_Phi",&iPhi);
+  tree.Branch("F_Eta",&Eta);
+  tree.Branch("F_Phi",&Phi);
+  tree.Branch("R_Eta",&Eta_Raw);
+  tree.Branch("R_Phi",&Phi_Raw);
+  tree.Branch("X",&x);
+  tree.Branch("Y",&y);
+  tree.Branch("Z",&z);
+  tree.Branch("onlid",&onlid);
+  tree.Branch("offlid",&offlid);
+  tree.Branch("ttid",&ttid);
+  tree.Branch("hvid",&hvid);
+  tree.Branch("binetadqm",&binetadqm);
+  tree.Branch("binphidqm1",&binphidqm1);
+  tree.Branch("binphidqm2",&binphidqm2);
 
   // counters
   Int_t nchannels = 0;
-  Double_t emb1PhiGran = M_PI/(Double_t)32;
+  Double_t emb1PhiGran = M_PI/32.0;
   Int_t dupl = 0,dupl2 = 0;
   Int_t empt = 0;
   Int_t ntotal = 0;
@@ -515,7 +511,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
       if( ((Eta_Raw > 1.4) && (Eta_Raw < 1.475)) || ((Eta_Raw < -1.4) && (Eta_Raw > -1.475))) {    
           //this is the eta region where we mess around:                                            
           //take phi modulus the phi granularity we have in our histogram, then shift eta accordingly:
-          phiMod = fmod( fabs(Phi_Raw),emb1PhiGran);
+          phiMod = std::fmod( std::fabs(Phi_Raw),emb1PhiGran);
           celleta = Eta_Raw + (phiMod * 0.2551) - 0.0125;
       }
     }
@@ -543,8 +539,8 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
     if(emhad>=1){
       lodiff = cellphi-h2map[j][0]->GetYaxis()->GetBinLowEdge(binphidqm1);
       updiff = cellphi-h2map[j][0]->GetYaxis()->GetBinUpEdge(binphidqm1);
-      Bool_t loedge = (fabs(lodiff) < 1e-5) ? 1 : 0;
-      Bool_t upedge = (fabs(updiff) < 1e-5) ? 1 : 0;
+      Bool_t loedge = (std::fabs(lodiff) < 1e-5) ? 1 : 0;
+      Bool_t upedge = (std::fabs(updiff) < 1e-5) ? 1 : 0;
 
       if(loedge || upedge){ // bin edges are close enough
         if(h2count[j][0]->GetBinContent(binetadqm,binphidqm1)==1){ // nominal bin
@@ -594,7 +590,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
     }
 
     // fill entries
-    tree->Fill();
+    tree.Fill();
     nchannels+=1;
   }
 
@@ -617,11 +613,10 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   }
   
   // write out
-  file->cd();
-  tree->Write();
+  file.cd();
+  tree.Write();
   for(i=0;i<m_nPartitionLayers;i++) for(j=0;j<m_nHistCategories;j++) h2map[i][j]->Write();
-  file->Close(); 
-  delete file; 
+  file.Close();
 
   printf("-------------------------------------------------------------------\n");
   printf("LArIdTranslatorHelper::MakeTranslatorMapping: Summary:\n");
@@ -629,20 +624,7 @@ void LArIdTranslatorHelper::MakeTranslatorMapping(const char* inputtreefile,cons
   printf("There were %d duplicates, %d empty, %d (%d) phi-shifted (HEC-FCAL), %d physical.\n",dupl2,empt,dupl,phishifts,ntotal-empt-dupl);
   printf("-------------------------------------------------------------------\n");
 
-  ifile->Close();
-  for(int i=0;i!=m_nPartitionLayers;++i){
-    for (int j=0;j!=m_nHistCategories;++j){
-      delete h2count[i][j];
-      delete h2map[i][j];
-    }
-    delete[] h2count[i];
-    delete[] h2map[i];
-  }
-  delete[] h2count;
-  delete[] h2map;
-  delete[] h2;
-  delete fdqm;
-  delete ifile;
+  ifile.Close();
   return;
 }
 

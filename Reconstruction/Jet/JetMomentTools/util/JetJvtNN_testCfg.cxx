@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -72,7 +75,7 @@ int main() {
     std::vector<std::string> inputs = {"Rpt","JVFCorr","ptbin","etabin"};
     // Single input block
     node_order.emplace_back(cfg.inputs[0].name,inputs);
-    order.scalar = node_order;
+    order.scalar = std::move(node_order);
 
     std::cout << "Reading JVT likelihood histogram from: " << configPath << std::endl;
     std::cout << "Network NLayers: " << cfg.layers.size() << std::endl;
@@ -84,17 +87,17 @@ int main() {
         for(size_t etabin=0; etabin<5; ++etabin) {
             std::cout << "  pt bin[" << ptbin_edges[ptbin] << "," << ptbin_edges[ptbin+1] << "]: " << ptbin << ", eta bin [" << etabin_edges[etabin] << "," << etabin_edges[etabin+1] << "]: " << etabin <<std::endl;
             lwt::VectorX<double> inputvals_HS = lwt::build_vector({1.0,1.0,static_cast<double>(ptbin),static_cast<double>(etabin)});
-            std::vector<lwt::VectorX<double> > scalars_HS{inputvals_HS};
+            std::vector<lwt::VectorX<double> > scalars_HS{std::move(inputvals_HS)};
             lwt::VectorX<double> output_HS = lwnn.compute(scalars_HS);
             std::cout << "    HS jet --> " << output_HS(0) << std::endl;
 
             lwt::VectorX<double> inputvals_AMB = lwt::build_vector({0.2,0.5,static_cast<double>(ptbin),static_cast<double>(etabin)});
-            std::vector<lwt::VectorX<double> > scalars_AMB{inputvals_AMB};
+            std::vector<lwt::VectorX<double> > scalars_AMB{std::move(inputvals_AMB)};
             lwt::VectorX<double> output_AMB = lwnn.compute(scalars_AMB);
             std::cout << "    Ambiguous jet --> " << output_AMB(0) << std::endl;
 
             lwt::VectorX<double> inputvals_PU = lwt::build_vector({0.0,-1.0,static_cast<double>(ptbin),static_cast<double>(etabin)});
-            std::vector<lwt::VectorX<double> > scalars_PU{inputvals_PU};
+            std::vector<lwt::VectorX<double> > scalars_PU{std::move(inputvals_PU)};
             lwt::VectorX<double> output_PU = lwnn.compute(scalars_PU);
             std::cout << "    PU jet --> " << output_PU(0) << std::endl;
 

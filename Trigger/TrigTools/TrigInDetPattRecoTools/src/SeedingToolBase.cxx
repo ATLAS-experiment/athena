@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/SCT_ID.h"
@@ -15,6 +15,11 @@
 
 #include "SeedingToolBase.h"
 
+#include "GNN_TrackingFilter.h"
+
+#include <cmath>
+
+#include <algorithm> //for std::sort
 
 StatusCode SeedingToolBase::initialize() {
   ATH_CHECK(AthAlgTool::initialize());
@@ -92,6 +97,18 @@ StatusCode SeedingToolBase::finalize() {
 
 std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, const std::unique_ptr<TrigFTF_GNN_DataStorage>& storage, std::vector<TrigFTF_GNN_Edge>& edgeStorage) const {
 
+  
+  struct GBTS_SlidingWindow {
+
+    GBTS_SlidingWindow() : m_first_it(0), m_deltaPhi(0.0), m_has_nodes(false), m_bin(nullptr) {};
+    
+    unsigned int m_first_it;// sliding window position
+    float m_deltaPhi;       // window half-width;
+    bool m_has_nodes;       // active or not
+
+    const TrigFTF_GNN_EtaBin* m_bin;//associated eta bin
+  };
+  
   constexpr float M_2PI = 2.0*M_PI;
   
   const float cut_dphi_max      = m_LRTmode ? 0.07f : 0.012f;
@@ -100,6 +117,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   const float min_z0            = m_LRTmode ? -600.0 : roi.zedMinus();
   const float max_z0            = m_LRTmode ? 600.0 : roi.zedPlus();
   const float min_deltaPhi      = m_LRTmode ? 0.01f : 0.001f;
+  const float tau_ratio_precut  = 0.009f;
   
   const float maxOuterRadius    = m_LRTmode ? 1050.0 : 550.0;
 
@@ -115,7 +133,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
  
   float maxKappa_high_eta          = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.8f)*maxCurv;
   float maxKappa_low_eta           = m_LRTmode ? 1.0f*maxCurv : std::sqrt(0.6f)*maxCurv;
-
+  
   if(!m_useOldTunings && !m_LRTmode) {//new settings for curvature cuts
     maxKappa_high_eta          = 4.75e-4f*pt_scale;
     maxKappa_low_eta           = 3.75e-4f*pt_scale;
@@ -125,13 +143,15 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   
   const float minDeltaRadius = 2.0;
     
-  float deltaPhi = 0.5f*m_phiSliceWidth;//the default sliding window along phi
- 
+  float deltaPhi0 = 0.5f*m_phiSliceWidth;//the default sliding window along phi
+  
   unsigned int nConnections = 0;
   
   edgeStorage.reserve(m_nMaxEdges);
   
   int nEdges = 0;
+
+  float z0_histo_coeff = 16/(max_z0 - min_z0 + 1e-6);//assuming 16-bit z0 bitmask
 
   for(const auto& bg : m_geo->bin_groups()) {//loop over bin groups
     
@@ -140,64 +160,101 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
     if(B1.empty()) continue;
 
     float rb1 = B1.getMinBinRadius();
- 
-    for(const auto& b2_idx : bg.second) {
+    
+    const unsigned int lk1 = B1.m_layerKey;
+
+    //prepare a sliding window for each bin2 in the group 
+
+    std::vector<GBTS_SlidingWindow> vSLW;
+
+    vSLW.resize(bg.second.size());//initialization using default ctor
+
+    int win_idx = 0;
+    
+    for(const auto& b2_idx : bg.second) { //loop over n2 eta-bins in L2 layers
 
       const TrigFTF_GNN_EtaBin& B2 = storage->getEtaBin(b2_idx);
 
-      if(B2.empty()) continue;
+      if(B2.empty()) {
+        win_idx++;
+        continue;
+      }
       
       float rb2 = B2.getMaxBinRadius();
-    
-      if(m_useEtaBinning) {
-	float abs_dr = std::fabs(rb2-rb1);
-	if (m_useOldTunings) {
-	  deltaPhi = min_deltaPhi + dphi_coeff*abs_dr;
-	}
-	else {
-	  if(abs_dr < 60.0) {
-	    deltaPhi = 0.002f + 4.33e-4f*pt_scale*abs_dr;
-	  } else {
-	    deltaPhi = 0.015f + 2.2e-4f*pt_scale*abs_dr;
-	  }
-	}
+
+      float deltaPhi = deltaPhi0;//the default
+      
+      if(m_useEtaBinning) { //override the default window width
+        float abs_dr = std::fabs(rb2-rb1);
+        if (m_useOldTunings) {
+          deltaPhi = min_deltaPhi + dphi_coeff*abs_dr;
+        }
+        else {
+          if(abs_dr < 60.0) {
+            deltaPhi = 0.002f + 4.33e-4f*pt_scale*abs_dr;
+          } else {
+            deltaPhi = 0.015f + 2.2e-4f*pt_scale*abs_dr;
+          }
+        }
       }
 
-      unsigned int first_it = 0;
+      vSLW[win_idx].m_bin = &B2;
+      vSLW[win_idx].m_has_nodes = true;
+      vSLW[win_idx].m_deltaPhi = deltaPhi;
+      win_idx++;
+    }
 
-      for(unsigned int n1Idx = 0;n1Idx<B1.m_vn.size();n1Idx++) {//loop over nodes in Layer 1
+    for(unsigned int n1Idx = 0;n1Idx<B1.m_vn.size();n1Idx++) {//in GBTSv3 the outer loop goes over n1 nodes in the Layer 1 bin
 
-	std::vector<unsigned int>& v1In = B1.m_in[n1Idx];   
+      B1.m_vFirstEdge[n1Idx] = nEdges;//initialization using the top watermark of the edge storage
 
-	if(v1In.size() >= MAX_SEG_PER_NODE) continue;
-      
-	const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
+      unsigned short num_created_edges = 0;//the counter for the incoming graph edges created for n1
 
-	float phi1 = n1pars[2];
-	float r1 = n1pars[3];
-	float z1 = n1pars[4];
+      bool is_connected = false;
+
+      std::array<unsigned char, 16> z0_histo = {};
+  
+      const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
+
+      float phi1 = n1pars[2];
+      float r1 = n1pars[3];
+      float z1 = n1pars[4];
+
+      for(unsigned int winIdx = 0; winIdx < vSLW.size(); winIdx++) {//the intermediate loop over sliding windows
+
+        GBTS_SlidingWindow& slw = vSLW[winIdx];
+ 
+        if (!slw.m_has_nodes) continue;
+
+        const TrigFTF_GNN_EtaBin& B2 = *slw.m_bin;
+
+        float deltaPhi = slw.m_deltaPhi;
       
-	//sliding window phi1 +/- deltaPhi
+        //sliding window phi1 +/- deltaPhi
       
-	float minPhi = phi1 - deltaPhi;
-	float maxPhi = phi1 + deltaPhi;
+        float minPhi = phi1 - deltaPhi;
+        float maxPhi = phi1 + deltaPhi;
       
-	for(unsigned int n2PhiIdx = first_it; n2PhiIdx<B2.m_vPhiNodes.size();n2PhiIdx++) {//sliding window over nodes in Layer 2
+	for(unsigned int n2PhiIdx = slw.m_first_it; n2PhiIdx<B2.m_vPhiNodes.size();n2PhiIdx++) {//the inner loop over n2 nodes using sliding window
 	
 	  float phi2 = B2.m_vPhiNodes[n2PhiIdx].first;
-	
+
 	  if(phi2 < minPhi) {
-	    first_it = n2PhiIdx;
-	    continue;
-	  }
-	  if(phi2 > maxPhi) break;
-	
+            slw.m_first_it = n2PhiIdx; //update the window position
+            continue;
+          }
+          if(phi2 > maxPhi) break; //break and go to the next window
+	  
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
-	
-	  const std::vector<unsigned int>& v2In = B2.m_in[n2Idx];
-        
-	  if(v2In.size() >= MAX_SEG_PER_NODE) continue;
-		
+
+	  unsigned short node_info = B2.m_vIsConnected[n2Idx];
+
+	  if ((lk1 == 80000) && (node_info == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
+ 
+	  unsigned int   n2_first_edge = B2.m_vFirstEdge[n2Idx];
+          unsigned short n2_num_edges  = B2.m_vNumEdges[n2Idx];
+	  unsigned int   n2_last_edge  = n2_first_edge + n2_num_edges;
+	  
 	  const std::array<float, 5>& n2pars = B2.m_params[n2Idx];
 	
 	  float r2 = n2pars[3];
@@ -222,11 +279,21 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
 	  if(ftau < n2pars[0]) continue;
 	  if(ftau > n2pars[1]) continue;
-		
-	  if (m_doubletFilterRZ) {
-		  
-	    float z0 = z1 - r1*tau;
+
+	  float z0 = z1 - r1*tau;
+
+	  if (lk1 == 80000) {//check against non-empty z0 histogram
+	    
+	    if ( !check_z0_bitmask(node_info, z0, min_z0, z0_histo_coeff) ) {
+
+	      continue;
+
+	    }
+	    
+      }
 	  
+	  if (m_doubletFilterRZ) {
+	    
 	    if(z0 < min_z0 || z0 > max_z0) continue;
 	  
 	    float zouter = z0 + maxOuterRadius*tau;
@@ -248,22 +315,22 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    }
 	  }
 
-	  float exp_eta = std::sqrt(1.f+tau*tau)-tau;
-	  
-	  if (m_matchBeforeCreate) {//match edge candidate against edges incoming to n2
+	  float exp_eta = std::sqrt(1.f+tau*tau) - tau;
+        
+	  if (m_matchBeforeCreate && (lk1 == 80000 || lk1 == 81000) ) {//match edge candidate against edges incoming to n2
 
-	    bool isGood = v2In.size() <= 2;//we must have enough incoming edges to decide
-
+	    bool isGood = n2_num_edges <= 2;//we must have enough incoming edges to decide
+	    
 	    if(!isGood) {
 
 	      float uat_1 = 1.0f/exp_eta;
 		    
-	      for(const auto& n2_in_idx : v2In) {
+	      for(unsigned int n2_in_idx = n2_first_edge; n2_in_idx < n2_last_edge; n2_in_idx++) {
 		    
 		float tau2 = edgeStorage.at(n2_in_idx).m_p[0]; 
 		float tau_ratio = tau2*uat_1 - 1.0f;
 		
-		if(std::fabs(tau_ratio) > cut_tau_ratio_max){//bad match
+		if(std::fabs(tau_ratio) > tau_ratio_precut){//bad match
 		  continue;
 		}
 		isGood = true;//good match found
@@ -282,8 +349,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  if(nEdges < m_nMaxEdges) {
 	  
 	    edgeStorage.emplace_back(B1.m_vn[n1Idx], B2.m_vn[n2Idx], exp_eta, curv, phi1 + dPhi1);
-	    
-	    if(v1In.size() < MAX_SEG_PER_NODE) v1In.push_back(nEdges);
+
+	    num_created_edges++;
 		  
 	    int outEdgeIdx = nEdges;
 	  
@@ -291,12 +358,12 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	    float Phi2  = phi2 + dPhi2;
 	    float curv2 = curv;
 	    
-	    for(const auto& inEdgeIdx : v2In) {//looking for neighbours of the new edge
-	    
+	    for(unsigned int inEdgeIdx = n2_first_edge; inEdgeIdx < n2_last_edge; inEdgeIdx++) {//looking for neighbours of the new edge
+	      
 	      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 	      
 	      if(pS->m_nNei >= N_SEG_CONNS) continue;
-	    
+	      
 	      float tau_ratio = pS->m_p[0]*uat_2 - 1.0f;
 	      
 	      if(std::abs(tau_ratio) > cut_tau_ratio_max){//bad match
@@ -308,7 +375,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      if(dPhi<-M_PI) dPhi += M_2PI;
 	      else if(dPhi>M_PI) dPhi -= M_2PI;
 	      
-	      if(dPhi < -cut_dphi_max || dPhi > cut_dphi_max) {
+	      if(std::abs(dPhi) > cut_dphi_max) {
 		continue;
 	      }
             
@@ -319,16 +386,43 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      }
             
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
-	    
+
+	      is_connected = true;//there is at least one good match
+
+	      //edge confirmed - update z0 histogram
+
+          int z0_bin_index = z0_histo_coeff*(z0 - min_z0);
+
+          ++z0_histo[z0_bin_index];
+	      
 	      nConnections++;
 	    
 	    }
 	    nEdges++;		
 	  }
-	} //loop over n2 (outer) nodes
-      } //loop over n1 (inner) nodes
-    } //loop over bins in Layer 2
-  } //loop over bin groups
+	} //loop over n2 (outer) nodes inside a sliding window on n2 bin
+      } //loop over sliding windows associated with n2 bins
+
+      //updating the n1 node attributes
+      
+      B1.m_vNumEdges[n1Idx] = num_created_edges;
+
+      if (is_connected) {
+
+        unsigned short z0_bitmask = 0x0;
+
+        for(unsigned int bIdx = 0; bIdx < 16; bIdx++) {
+
+	      if (z0_histo[bIdx] == 0) continue;
+
+	      z0_bitmask |= (1 << bIdx);
+        }
+
+        B1.m_vIsConnected[n1Idx] = z0_bitmask;//non-zero mask indicates that there is at least one connected edge
+      }
+      
+    } //loop over n1 (inner) nodes
+  } //loop over bin groups: a single n1 bin and multiple n2 bins
 
   if(nEdges >= m_nMaxEdges) {
     ATH_MSG_WARNING("Maximum number of graph edges exceeded - possible efficiency loss "<< nEdges);
@@ -405,3 +499,173 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
   return maxLevel;  
 }
 
+void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHits, std::vector<GNN_Edge>& edgeStorage, std::vector<std::tuple<float, int, std::vector<unsigned int> > >& vSeedCandidates) const {
+
+  const float edge_mask_min_eta = 1.5;
+  const float hit_share_threshold = 0.49;
+  
+  vSeedCandidates.clear();
+
+  int minLevel = 3;//a triplet + 2 confirmation
+
+  if(m_LRTmode) {
+    minLevel = 2;//a triplet + 1 confirmation
+  }
+
+  if(maxLevel < minLevel) return;
+  
+  std::vector<GNN_Edge*> vSeeds;
+
+  vSeeds.reserve(nEdges/2);
+
+  for(int edgeIndex = 0; edgeIndex < nEdges; edgeIndex++) {
+    
+    GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
+    
+    if(pS->m_level < minLevel) continue;
+    
+    vSeeds.push_back(pS);
+  }
+  
+  if(vSeeds.empty()) return;
+  
+  std::sort(vSeeds.begin(), vSeeds.end(), GNN_Edge::CompareLevel());
+    
+  //backtracking
+
+  vSeedCandidates.reserve(vSeeds.size());
+  
+  auto tFilter = std::make_unique<TrigFTF_GNN_TrackingFilter>(m_layerGeometry, edgeStorage);
+
+  for(auto pS : vSeeds) {
+
+    if(pS->m_level == -1) continue;
+
+    TrigFTF_GNN_EdgeState rs(false);
+
+    tFilter->followTrack(pS, rs);
+
+    if(!rs.m_initialized) {
+      continue;
+    }
+
+    if(static_cast<int>(rs.m_vs.size()) < minLevel) continue;
+
+    float seed_eta = std::abs(-std::log(pS->m_p[0]));
+    
+    std::vector<const GNN_Node*> vN;
+
+    for(std::vector<GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
+
+      if (seed_eta > edge_mask_min_eta) {
+	(*sIt)->m_level = -1;//mark as collected
+      }
+      
+      if(sIt == rs.m_vs.rbegin()) {
+	vN.push_back((*sIt)->m_n1);
+      }
+
+      vN.push_back((*sIt)->m_n2);
+	    
+    }
+
+    if(vN.size()<3) continue;
+
+    std::vector<unsigned int> vSpIdx;
+
+    vSpIdx.resize(vN.size());
+
+    for(unsigned int k = 0; k < vN.size(); k++) {
+      vSpIdx[k] = vN[k]->sp_idx();
+    }
+    
+    vSeedCandidates.emplace_back(-rs.m_J/vN.size(), 0, vSpIdx);
+    
+  }
+
+  //clone removal code goes below ...
+
+  std::sort(vSeedCandidates.begin(), vSeedCandidates.end());
+
+  std::vector<int> H2T(nHits + 1, 0);//hit to track associations
+
+  int trackId = 0;
+    
+  for(const auto& seed : vSeedCandidates) {
+
+    trackId++;
+    
+    for(const auto& h : std::get<2>(seed) ) {//loop over spacepoints indices
+	
+      unsigned int hit_id = h + 1;
+      
+      int tid     = H2T[hit_id];
+      
+      if(tid == 0 || tid > trackId) {//unused hit or used by a lesser track
+	
+	H2T[hit_id] = trackId;//overwrite
+	
+      }
+    }      
+  }
+
+  for(unsigned int trackIdx = 0; trackIdx < vSeedCandidates.size(); trackIdx++) {
+
+    int nTotal = std::get<2>(vSeedCandidates[trackIdx]).size();
+    int nOther = 0;
+    
+    int trackId = trackIdx + 1;
+
+    for(const auto& h : std::get<2>(vSeedCandidates[trackIdx]) ) {
+
+      unsigned int hit_id = h + 1;
+      
+      int tid = H2T[hit_id];
+
+	if(tid != trackId) {//taken by a better candidate
+          nOther++;
+	}
+    }
+
+    if (nOther > hit_share_threshold*nTotal) {
+        std::get<1>(vSeedCandidates[trackIdx]) = -1;//reject
+    }
+
+  }
+}
+
+bool SeedingToolBase::check_z0_bitmask(const unsigned short& z0_bitmask, const float& z0, const float& min_z0, const float& z0_histo_coeff) const {
+
+  if (z0_bitmask == 0) return true;
+
+  float dz = z0 - min_z0; 
+  int z0_bin_index = z0_histo_coeff*dz;
+
+  if ((z0_bitmask >> z0_bin_index) & 1) return true;
+
+  //check adjacent bins as well
+            
+  const float z0_resolution = 2.5;
+  
+  float dzm = dz - z0_resolution;
+
+  int next_bin  = z0_histo_coeff*dzm;
+
+  if (next_bin >= 0 && next_bin != z0_bin_index) {
+      
+      if ((z0_bitmask >> next_bin) & 1) return true;
+
+  }				  
+
+  float dzp = dz + z0_resolution;
+
+  next_bin  = z0_histo_coeff*dzp;
+
+  if (next_bin < 16 && next_bin != z0_bin_index) {
+		    
+    if ((z0_bitmask >> next_bin) & 1) return true;
+      
+  }
+    
+  return false;
+}

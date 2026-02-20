@@ -377,7 +377,7 @@ TEST_F( ViewCollectionMerge_test, elementLinkRemapTest ) {
 // Make an element link and remap it in view
 TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
 
-  SG::View * testView = new SG::View( "testView", -1 );
+  SG::View testView ( "testView", -1 );
 
   // Make a data vector
   auto viewData = std::make_unique< DataVector< int > >();
@@ -386,12 +386,12 @@ TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
   // Store the data vector
   SG::WriteHandleKey< DataVector< int > > whk( DATA_NAME );
   ASSERT_TRUE( whk.initialize().isSuccess() );
-  auto outputDataHandle = ViewHelper::makeHandle( testView, whk, ctx );
+  auto outputDataHandle = ViewHelper::makeHandle( &testView, whk, ctx );
   ASSERT_TRUE( outputDataHandle.record( std::move( viewData ) ).isSuccess() );
   ASSERT_TRUE( outputDataHandle.isValid() );
 
   // Make element link and test
-  ElementLink< DataVector< int > > dataLink( DATA_NAME, 0, testView );
+  ElementLink< DataVector< int > > dataLink( DATA_NAME, 0, &testView );
   ASSERT_TRUE( dataLink.isValid() );
   ASSERT_EQ( dataLink.getDataPtr()->size(), 1u );
   ASSERT_EQ( *( dataLink.getDataPtr()->at(0) ), 1 );
@@ -406,7 +406,7 @@ TEST_F( ViewCollectionMerge_test, elementLinkViewRemapTest ) {
   // Store the new data vector
   SG::WriteHandleKey< DataVector< int > > whk2( DATA_NAME + "2" );
   ASSERT_TRUE( whk2.initialize().isSuccess() );
-  auto outputDataHandle2 = ViewHelper::makeHandle( testView, whk2, ctx );
+  auto outputDataHandle2 = ViewHelper::makeHandle( &testView, whk2, ctx );
   ASSERT_TRUE( outputDataHandle2.record( std::move( viewData2 ) ).isSuccess() );
   ASSERT_TRUE( outputDataHandle2.isValid() );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CopyMcEventCollection.h"
@@ -101,7 +101,7 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
       // content.
 #ifdef HEPMC3
       HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
-      copiedEvent->set_heavy_ion(hinew);
+      copiedEvent->set_heavy_ion(std::move(hinew));
 #else
       copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
 #endif
@@ -152,7 +152,7 @@ StatusCode CopyMcEventCollection::execute(const EventContext& ctx) const
         // content.
 #ifdef HEPMC3
         HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*((*it)->heavy_ion()));
-        copiedEvent->set_heavy_ion(hinew);
+        copiedEvent->set_heavy_ion(std::move(hinew));
 #else
         copiedEvent->set_heavy_ion(*((*it)->heavy_ion()));
 #endif

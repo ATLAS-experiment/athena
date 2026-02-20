@@ -14,6 +14,7 @@
 
 #include "AthenaKernel/IEvtIdModifierSvc.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 using namespace std::literals;
 namespace rv = ranges::views;

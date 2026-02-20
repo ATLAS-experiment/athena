@@ -7,7 +7,7 @@
 #ifndef SCT_TDAQENABLEDCONDALG
 #define SCT_TDAQENABLEDCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "SCT_Cabling/ISCT_CablingTool.h"
@@ -16,7 +16,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class SCT_TdaqEnabledCondAlg : public AthReentrantAlgorithm
+class SCT_TdaqEnabledCondAlg : public AthCondAlgorithm
 {  
  public:
   SCT_TdaqEnabledCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -24,7 +24,6 @@ class SCT_TdaqEnabledCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   bool unfilledRun(const EventContext& ctx) const;

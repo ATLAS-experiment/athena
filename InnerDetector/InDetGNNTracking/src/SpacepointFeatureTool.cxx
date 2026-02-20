@@ -62,6 +62,9 @@ std::map<std::string, float> InDet::SpacepointFeatureTool::getFeatures(
     float localDir0_1 = 0, localDir1_1 = 0, localDir2_1 = 0; // clusterShape: [lengthDir0, lengthDir1, lengthDir2]
     float lengthDir0_1 = 0, lengthDir1_1 = 0, lengthDir2_1 = 0; // clusterShape: [lengthDir0, lengthDir1, lengthDir2]
     float eta_angle_1 = 0, phi_angle_1 = 0;
+    // module ID
+    uint64_t module_id = cluster_1->detectorElement()->identify().get_compact();
+    features["module_id"] = static_cast<float>(module_id);
 
     // 1: {hardware: PIXEL, barrel_endcap: -2}
     // 2: {hardware: STRIP, barrel_endcap: -2}

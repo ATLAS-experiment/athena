@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY15.py
@@ -14,7 +14,10 @@ streamName = "StreamDAOD_BPHY15"
 
 def BPHY15Cfg(flags):
    from AthenaServices.PartPropSvcConfig import PartPropSvcCfg
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+      BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
+      BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
+      AugOriginalCountsCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    acc.getPrimaryAndMerge(PartPropSvcCfg(flags))
@@ -29,10 +32,7 @@ def BPHY15Cfg(flags):
    PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
    acc.addPublicTool(PVrefit)
    isSimulation = flags.Input.isMC
-   BPHY15_AugOriginalCounts = CompFactory.DerivationFramework.AugOriginalCounts(
-                                          name = "BPHY15_AugOriginalCounts",
-                                          VertexContainer = "PrimaryVertices",
-                                          TrackContainer = "InDetTrackParticles" )
+
    BPHY15JpsiFinder = CompFactory.Analysis.JpsiFinder(
        name                       = "BPHY15JpsiFinder",
        muAndMu                    = True,
@@ -462,13 +462,19 @@ def BPHY15Cfg(flags):
    
    CascadeCollections += BPHY15JpsiDpst.CascadeVertexCollections
    CascadeCollections += BPHY15JpsiDps1.CascadeVertexCollections
+
+   BPHY15_AugOriginalCounts = acc.popToolsAndMerge(
+      AugOriginalCountsCfg(flags, name = "BPHY15_AugOriginalCounts"))
    
    #--------------------------------------------------------------------
    if not isSimulation: #Only Skim Data
-      BPHY15_SelectBcJpsipiEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-                           name = "BPHY15_SelectBcJpsipiEvent",
-                           expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)")
-      acc.addPublicTool(BPHY15_SelectBcJpsipiEvent)
+      from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+         xAODStringSkimmingToolCfg)
+      BPHY15_SelectBcJpsipiEvent = acc.getPrimaryAndMerge(
+         xAODStringSkimmingToolCfg(
+            flags, name = "BPHY15_SelectBcJpsipiEvent",
+            expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)"))
+
       BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
                                                                         VertexContainerNames =CascadeCollections )
       acc.addPublicTool(BPHY15_AnyVertexSkimmingTool)
@@ -480,19 +486,18 @@ def BPHY15Cfg(flags):
                            "BPHY15SkimmingOR",
                            FilterList = [BPHY15_SelectBcJpsipiEvent, BPHY15_AnyVertexSkimmingTool] )
       acc.addPublicTool(BPHY15SkimmingOR)
-
+      
    augTools = [BPHY15JpsiSelectAndWrite, BPHY15_Select_Jpsi2mumu,
-                         BPHY15BcJpsipiSelectAndWrite, BPHY15_Select_Bc2Jpsipi,
-                         BPHY15JpsipiSelectAndWrite, BPHY15_Select_Jpsipi,
-                         BPHY15DiTrkSelectAndWrite, BPHY15_Select_D0, BPHY15_Select_D0b,
-                         BPHY15Dh3SelectAndWrite, BPHY15_Select_Ds, BPHY15_Select_Dp, BPHY15_Select_Dm,
-                         BPHY15JpsiDs,
-                         BPHY15JpsiDp,
-                         BPHY15JpsiDpst,
-                         BPHY15K0SelectAndWrite, BPHY15_Select_K0,
-                         BPHY15JpsiDps1,
-                         BPHY15_AugOriginalCounts]
+               BPHY15BcJpsipiSelectAndWrite, BPHY15_Select_Bc2Jpsipi,
+               BPHY15JpsipiSelectAndWrite, BPHY15_Select_Jpsipi,
+               BPHY15DiTrkSelectAndWrite, BPHY15_Select_D0, BPHY15_Select_D0b,
+               BPHY15Dh3SelectAndWrite, BPHY15_Select_Ds, BPHY15_Select_Dp, BPHY15_Select_Dm,
+               BPHY15JpsiDs, BPHY15JpsiDp, BPHY15JpsiDpst,
+               BPHY15K0SelectAndWrite, BPHY15_Select_K0,
+               BPHY15JpsiDps1,
+               BPHY15_AugOriginalCounts]
    for t in  augTools : acc.addPublicTool(t)
+
    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY15Kernel",
                                                     AugmentationTools = augTools,
                                                     #Only skim if not MC

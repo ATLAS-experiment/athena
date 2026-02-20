@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaAttributeListCnv.cxx
@@ -20,6 +20,7 @@
 #include "AthenaPoolUtilities/AthenaAttrListAddress.h"
 
 #include "StoreGate/StoreGateSvc.h"
+#include "StorageSvc/DbType.h"
 
 //--------------------------------------------------------------------
 
@@ -82,7 +83,7 @@ StatusCode AthenaAttributeListCnv::createRep(DataObject* pObj, IOpaqueAddress*& 
     AthenaAttributeList* list = 0; //dynamic_cast<AthenaAttributeList*>(pObj);
     SG::fromStorable(pObj, list);
     if ( pAddr != nullptr ) pAddr->release();
-    AthenaAttrListAddress* addr = new AthenaAttrListAddress(POOL_StorageType,
+    AthenaAttrListAddress* addr = new AthenaAttrListAddress(storageType(),
 		    classID(),
 		    "POOLContainer_AthenaAttributeList][CLID=x");
     addr->setAttrList(list);
@@ -93,7 +94,7 @@ StatusCode AthenaAttributeListCnv::createRep(DataObject* pObj, IOpaqueAddress*& 
 }
 //__________________________________________________________________________
 long AthenaAttributeListCnv::storageType() {
-   return(POOL_StorageType);
+   return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
 const CLID& AthenaAttributeListCnv::classID() {
@@ -101,6 +102,6 @@ const CLID& AthenaAttributeListCnv::classID() {
 }
 //__________________________________________________________________________
 AthenaAttributeListCnv::AthenaAttributeListCnv(ISvcLocator* svcloc) :
-	Converter(POOL_StorageType, classID(), svcloc) {
+	Converter(storageType(), classID(), svcloc) {
 }
 //__________________________________________________________________________

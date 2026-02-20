@@ -12,7 +12,7 @@
 
 //
 #include <string>
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -30,7 +30,7 @@
    read calibration constants from text file and publish them in ConditionsStore
 **/
 
-class TRTCondWrite : public AthAlgorithm
+class TRTCondWrite : public AthCondAlgorithm
 {
 public:
     typedef TRTCond::RtRelationMultChanContainer RtRelationContainer;
@@ -42,7 +42,7 @@ public:
     virtual ~TRTCondWrite() override = default;
 
     virtual StatusCode initialize(void) override;
-    virtual StatusCode execute(void) override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize(void) override;
 
     /// create an TRTCond::ExpandedIdentifier from a TRTID identifier
@@ -50,8 +50,8 @@ public:
 
     /// read calibration from text file into TDS
     virtual StatusCode checkTextFile(const std::string &file, int &format);
-    virtual StatusCode readTextFile(const std::string &file, int &format);
-    virtual StatusCode readTextFile_Format1(std::istream &);
+    virtual StatusCode readTextFile(const EventContext& ctx, const std::string &file, int &format) const;
+    virtual StatusCode readTextFile_Format1(const EventContext&, std::istream &) const;
 
     virtual EventIDRange IOVInfRange() const;
 

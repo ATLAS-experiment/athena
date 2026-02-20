@@ -1,19 +1,15 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def TRT_GeoModelCfg(flags):
-    from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
-    db = InDetGeometryDBSvcCfg(flags)
-
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     trtDetectorTool = CompFactory.TRT_DetectorTool()
-    trtDetectorTool.GeometryDBSvc = db.getPrimary()
     trtDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
     # Use default TRT active gas in geo model unless in simulation.
     from AthenaConfiguration.Enums import LHCPeriod
@@ -40,7 +36,6 @@ def TRT_GeoModelCfg(flags):
     # from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     #trtDetectorTool.SummaryTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
     geoModelSvc.DetectorTools += [ trtDetectorTool ]
-    acc.merge(db)
     return acc
 
 

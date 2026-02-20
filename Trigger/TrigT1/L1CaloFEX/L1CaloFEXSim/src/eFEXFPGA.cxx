@@ -265,6 +265,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
       ATH_CHECK( m_eFEXtauBDTAlgoTool->safetyTest() );
       m_eFEXtauAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
+      m_eFEXtauAlgoTool->setAlgoVersion(tauAlgoVersion);
       m_eFEXtauBDTAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       if ( m_eFEXtauAlgoTool->isCentralTowerSeed() != m_eFEXtauBDTAlgoTool->isCentralTowerSeed() )

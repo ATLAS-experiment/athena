@@ -15,16 +15,16 @@ StatusCode LArFlatConditionsAlg<T>::initialize() {
 
 
 template<class T>
-StatusCode LArFlatConditionsAlg<T>::execute() {
+StatusCode LArFlatConditionsAlg<T>::execute(const EventContext& ctx) const {
     
-  SG::WriteCondHandle<T> writeHandle{m_writeKey};
+  SG::WriteCondHandle<T> writeHandle{m_writeKey, ctx};
   
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("Found valid write handle");
     return StatusCode::SUCCESS;
   }  
 
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
   const CondAttrListCollection* attr{*readHandle};
   if (attr==nullptr) {
     msg(MSG::ERROR) << "Failed to retrieve CondAttributeListCollection with key " << m_readKey.key() << endmsg;

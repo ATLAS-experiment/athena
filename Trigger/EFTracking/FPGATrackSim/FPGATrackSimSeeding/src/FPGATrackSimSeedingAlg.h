@@ -9,7 +9,6 @@
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 
 // ACTS
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 
 // Handle keys

@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def getMETMaker(name="METMaker", **kwargs):
+def getMETMaker(jetCollection, name="METMaker", **kwargs):
     kwargs.setdefault("DoPFlow", False)
     kwargs.setdefault("JetSelection", "Tight")
 
@@ -11,12 +11,14 @@ def getMETMaker(name="METMaker", **kwargs):
     elif kwargs["DoPFlow"]:
         kwargs.setdefault("JvtSelTool", CompFactory.CP.NNJvtSelectionTool(
             name="JvtSelTool",
+            JetContainer=jetCollection,
             JvtMomentName="NNJvt",
             WorkingPoint="FixedEffPt",
             MaxPtForJvt=60e3))
     else:
         kwargs.setdefault("JvtSelTool", CompFactory.CP.JvtSelectionTool(
             name="JvtSelTool",
+            JetContainer=jetCollection,
             JvtMomentName="Jvt",
             WorkingPoint=kwargs["JetSelection"],
             MaxPtForJvt=60e3,
@@ -62,7 +64,13 @@ def getMETMakerAlg(suffix,jetSelection="Tier0",jetColl=""):
 
     doPFlow = 'PFlow' in suffix
     doTruth = suffix.startswith('Truth')
-    metMaker = getMETMaker('METMaker_'+suffix,
+    if jetColl=="":
+        jetColl = suffix+'Jets'
+        if doTruth:
+            jetColl = suffix.split('_')[1]+'Jets'
+
+    metMaker = getMETMaker(jetCollection=jetColl,
+                           name='METMaker_'+suffix,
                            DoPFlow=doPFlow,
                            DoSoftTruth=doTruth,
                            JetSelection=jetSelection)
@@ -75,10 +83,6 @@ def getMETMakerAlg(suffix,jetSelection="Tier0",jetColl=""):
 
     tauSel = getTauSelectionTool()
 
-    if jetColl=="":
-        jetColl = suffix+'Jets'
-        if doTruth:
-            jetColl = suffix.split('_')[1]+'Jets'
     makerAlg = CompFactory.getComp("met::METMakerAlg")('METMakerAlg_'+suffix,
                                        METMapName='METAssoc_'+suffix,
                                        METCoreName='MET_Core_'+suffix,

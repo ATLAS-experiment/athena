@@ -60,7 +60,6 @@ StatusCode CaloIDHelper_IDDetDescrCnv::createObj (IOpaqueAddress* pAddr,
   CHECK( createHelper (helperKey, idhelper, pObj) );
 
   // Initialize the helper.
-  idhelper->setMessageSvc (msgSvc());
   if (idDictMgr->initializeHelper(*idhelper)) {
     ATH_MSG_ERROR("Unable to initialize " << type_name);
     return StatusCode::FAILURE;

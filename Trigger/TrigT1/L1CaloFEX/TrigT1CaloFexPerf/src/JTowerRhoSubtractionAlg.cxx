@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JTowerRhoSubtractionAlg.h"
@@ -230,7 +230,7 @@ namespace LVL1
     auto rhoCont = std::make_unique<xAOD::EnergySumRoI>();
     auto rhoContAux = std::make_unique<xAOD::EnergySumRoIAuxInfo>();
     rhoCont->setStore(rhoContAux.get());
-    decRhos(*rhoCont) = rhos;
+    decRhos(*rhoCont) = std::move(rhos);
     auto outputRhoHandle = SG::makeHandle(m_outputRhoKey, ctx);
     ATH_CHECK(outputRhoHandle.record(std::move(rhoCont), std::move(rhoContAux)));
     return StatusCode::SUCCESS;

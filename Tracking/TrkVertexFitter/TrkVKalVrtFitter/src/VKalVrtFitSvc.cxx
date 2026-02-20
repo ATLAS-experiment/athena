@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -352,9 +352,8 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 //
 // ------  Magnetic field in fitted vertex
 //
-    double fx,fy,BMAG_CUR;
-    state.m_fitField.getMagFld(xyzfit[0] ,xyzfit[1] ,xyzfit[2] ,fx,fy,BMAG_CUR);
-    if(fabs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  // Safety
+    double fx,fy,fz;
+    state.m_fitField.getMagFld(xyzfit[0] ,xyzfit[1] ,xyzfit[2] ,fx,fy,fz);
 
     Charge=0; for(i=0; i<ntrk; i++){Charge+=state.m_ich[i];};
     Charge=-Charge; //VK 30.11.2009 Change sign acoording to ATLAS
@@ -363,7 +362,9 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     TrkAtVrt.clear(); TrkAtVrt.reserve(ntrk);
     for(i=0; i<ntrk; i++){
       std::vector<double> TrkPar(3);
-      VKalToTrkTrack(BMAG_CUR,(double)state.m_parfs[i][0],(double)state.m_parfs[i][1],(double) state.m_parfs[i][2],
+      double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, state.m_parfs[i][1], state.m_parfs[i][0]);
+      if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG=0.01;  //safety
+      VKalToTrkTrack(effectiveBMAG,(double)state.m_parfs[i][0],(double)state.m_parfs[i][1],(double)state.m_parfs[i][2],
                       TrkPar[0],TrkPar[1],TrkPar[2]);
       TrkPar[2] = -TrkPar[2];        // Change of sign needed
       TrkAtVrt.push_back( TrkPar );
@@ -374,7 +375,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 
 
 //  Converts Vertex, Mom, CovVrtMom in GLOBAL SYSTEM into perigee
-//
+//  Works correctly only in ID (solenoidal field)!
 //
 
   StatusCode TrkVKalVrtFitter::VKalVrtCvtTool(const Amg::Vector3D& Vertex,
@@ -401,7 +402,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     state.m_refFrameX=state.m_refFrameY=state.m_refFrameZ=0.; //VK Work in ATLAS ref frame ONLY!!!
     long int vkCharge=-Charge; //VK 30.11.2009 Change sign according to ATLAS
 //
-// ------  Magnetic field in vertex
+// ------  Magnetic field in vertex (solenoidal field, ID only)
 //
     double fx,fy,BMAG_CUR;
     state.m_fitField.getMagFld(Vrt[0], Vrt[1], Vrt[2] ,fx,fy,BMAG_CUR);
@@ -419,12 +420,12 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
   }
 
 
-  void TrkVKalVrtFitter::VKalToTrkTrack( double curBMAG, double  vp1, double  vp2, double  vp3,
+  void TrkVKalVrtFitter::VKalToTrkTrack( double effectiveBMAG, double  vp1, double  vp2, double  vp3,
                                          double& tp1, double& tp2, double& tp3) const
 //tp - ATLAS parameters, vp - VKalVrt parameters//
   {   tp1= vp2;   //phi angle
       tp2= vp1;   //theta angle
-      tp3= vp3 * std::sin( vp1 ) /(m_CNVMAG*curBMAG);
+      tp3= vp3 * std::sin( vp1 ) /(m_CNVMAG*effectiveBMAG);
       constexpr double pi = M_PI;
            // -pi < phi < pi  range
       while ( tp1 > pi) tp1 -= 2.*pi;
@@ -460,9 +461,8 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 //
 // ------  Magnetic field access
 //
-    double fx,fy,BMAG_CUR;
-    state.m_fitField.getMagFld(state.m_save_xyzfit[0],state.m_save_xyzfit[1],state.m_save_xyzfit[2],fx,fy,BMAG_CUR);
-    if(fabs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  // Safety
+    double fx,fy,fz;
+    state.m_fitField.getMagFld(state.m_save_xyzfit[0],state.m_save_xyzfit[1],state.m_save_xyzfit[2],fx,fy,fz);
 //
 // ------ Base code
 //
@@ -495,16 +495,19 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
       Theta=state.m_parfs[iTrk][0];
       Phi  =state.m_parfs[iTrk][1];
       invR =state.m_parfs[iTrk][2];
+      double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, Phi, Theta);
+      if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG = 0.01;
+
        /*-----------*/
        /* dNew/dOld */
       iSt = 3 + iTrk*3;
       if( !useMom ){
         Deriv[iSt  ][iSt+1] =   1;                                             //    Phi <-> Theta
         Deriv[iSt+1][iSt  ] =   1;                                             //    Phi <-> Theta
-        Deriv[iSt+2][iSt  ] = -(cos(Theta)/(m_CNVMAG*BMAG_CUR)) * invR ;     //    d1/p  / dTheta
-        Deriv[iSt+2][iSt+2] = -(sin(Theta)/(m_CNVMAG*BMAG_CUR))  ;           //    d1/p  / d1/R
+        Deriv[iSt+2][iSt  ] = -(cos(Theta)/(m_CNVMAG*effectiveBMAG)) * invR ;     //    d1/p  / dTheta
+        Deriv[iSt+2][iSt+2] = -(sin(Theta)/(m_CNVMAG*effectiveBMAG))  ;           //    d1/p  / d1/R
       }else{
-        double pt=(m_CNVMAG*BMAG_CUR)/fabs(invR);
+        double pt=std::abs(m_CNVMAG*effectiveBMAG/invR);
         double px=pt*cos(Phi);
         double py=pt*sin(Phi);
         double pz=pt/tan(Theta);

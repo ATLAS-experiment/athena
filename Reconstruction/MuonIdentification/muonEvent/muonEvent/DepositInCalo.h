@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONEVENT_DEPOSITINCALO_H
@@ -38,11 +38,11 @@ class DepositInCalo  {
       m_etDeposited(etDeposited)
   {}
 
-  /** copy constructor */
+  /** copy, etc */
   DepositInCalo (const DepositInCalo&);
-
-  /** assignment operator */
   DepositInCalo &operator= (const DepositInCalo &);
+  DepositInCalo (DepositInCalo&&);
+  DepositInCalo &operator= (DepositInCalo&&);
 
   /** destructor */
   virtual ~DepositInCalo() {}

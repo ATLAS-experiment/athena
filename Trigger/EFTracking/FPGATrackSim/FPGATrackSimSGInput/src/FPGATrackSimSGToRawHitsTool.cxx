@@ -40,7 +40,6 @@
 
 #include <bitset>
 
-
 namespace {
   // A few constants for truth cuts
   const float FPGATrackSim_PT_TRUTHMIN = 400.;
@@ -92,9 +91,9 @@ StatusCode FPGATrackSimSGToRawHitsTool::finalize() {
 
 /** This function get from the SG the inner detector raw hits
   and prepares them for FPGATrackSim simulation */
-StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* header, const EventContext& eventContext)
+StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* eventHeader, const EventContext& eventContext) const
 {
-  m_eventHeader = header; //take the external pointer
+  
   auto eventInfo = SG::makeHandle(m_eventInfoKey, eventContext);
   //Filled to variable / start event
   FPGATrackSimEventInfo event_info;
@@ -106,14 +105,14 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
   event_info.setactualInteractionsPerCrossing(eventInfo->actualInteractionsPerCrossing());
   event_info.setextendedLevel1ID(eventInfo->extendedLevel1ID());
   event_info.setlevel1TriggerType(eventInfo->level1TriggerType());
-  //  event_info.setlevel1TriggerInfo(eventInfo->level1TriggerInfo ()); // unclear if needed, TODO come back to it
-  m_eventHeader->newEvent(event_info);//this also reset all variables
+  eventHeader->newEvent(event_info);
+  
   HitIndexMap hitIndexMap; // keep running index event-unique to each hit
   HitIndexMap pixelClusterIndexMap;
   // get pixel and sct cluster containers
   // dump raw silicon data
   ATH_MSG_DEBUG("Dump raw silicon data");
-  ATH_CHECK(readRawSilicon(hitIndexMap,  eventContext));
+  ATH_CHECK(readRawSilicon(eventHeader, hitIndexMap, eventContext));
   FPGATrackSimOptionalEventInfo optional;
   if (m_readOfflineClusters) {
     std::vector <FPGATrackSimCluster> clusters;
@@ -134,14 +133,14 @@ StatusCode FPGATrackSimSGToRawHitsTool::readData(FPGATrackSimEventInputHeader* h
     for (const FPGATrackSimOfflineTrack& trk : offline) optional.addOfflineTrack(trk);
     ATH_MSG_DEBUG("Saved " << optional.nOfflineTracks() << " offline tracks");
   }
-  m_eventHeader->setOptional(optional);
-  ATH_MSG_DEBUG(*m_eventHeader);
+  eventHeader->setOptional(optional);
+  ATH_MSG_DEBUG(*eventHeader);
   ATH_MSG_DEBUG("End of execute()");
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackSimOfflineTrack>& offline, const EventContext& eventContext)
+StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackSimOfflineTrack>& offline, const EventContext& eventContext) const
 {
   auto offlineTracksHandle = SG::makeHandle(m_offlineTracksKey, eventContext);
   ATH_MSG_DEBUG("read Offline tracks, size= " << offlineTracksHandle->size());
@@ -208,20 +207,27 @@ StatusCode FPGATrackSimSGToRawHitsTool::readOfflineTracks(std::vector<FPGATrackS
 
 // dump silicon channels with geant matching information.
 StatusCode
-FPGATrackSimSGToRawHitsTool::readRawSilicon(HitIndexMap& hitIndexMap, const EventContext& eventContext) // const cannot make variables push back to DataInput
+FPGATrackSimSGToRawHitsTool::readRawSilicon(
+    FPGATrackSimEventInputHeader* eventHeader,
+    HitIndexMap& hitIndexMap, 
+    const EventContext& eventContext) const
 {
   ATH_MSG_DEBUG("read silicon hits");
   unsigned int hitIndex = 0u;
 
-  ATH_CHECK(readPixelSimulation(hitIndexMap, hitIndex, eventContext));
-  ATH_CHECK(readStripSimulation(hitIndexMap, hitIndex, eventContext));
+  ATH_CHECK(readPixelSimulation(eventHeader, hitIndexMap, hitIndex, eventContext));
+  ATH_CHECK(readStripSimulation(eventHeader, hitIndexMap, hitIndex, eventContext));
 
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode
-FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext) {
+FPGATrackSimSGToRawHitsTool::readPixelSimulation(
+    FPGATrackSimEventInputHeader* eventHeader,
+    HitIndexMap& hitIndexMap, 
+    unsigned int& hitIndex, 
+    const EventContext& eventContext) const {
 
   auto pixelSDOHandle = SG::makeHandle(m_pixelSDOKey, eventContext);
   auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, eventContext);
@@ -272,6 +278,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setDetType(SiliconTech::pixel);
       tmpSGhit.setIdentifierHash(sielement->identifyHash());
       tmpSGhit.setIdentifier(sielement->identify().get_identifier32().get_compact());
+      tmpSGhit.setRdoIdentifier(rdoId.get_compact()); // full 64 bit hit identifier
 
       int barrel_ec = m_pixelId->barrel_ec(rdoId);
       if (barrel_ec == 0)
@@ -308,7 +315,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
 
       tmpSGhit.setBarcodePt(static_cast<unsigned long>(std::ceil(bestParent ? bestParent->momentum().perp() : 0.)));
       tmpSGhit.setParentageMask(parentMask.to_ulong());
-
+      
       if (m_doMultiTruth) {
 	// Add truth
 	FPGATrackSimMultiTruth mt;
@@ -317,7 +324,7 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
 	tmpSGhit.setTruth(mt);
       }
 
-      m_eventHeader->addHit(tmpSGhit);
+      eventHeader->addHit(tmpSGhit);
     } // end for each RDO in the collection
   } // for each pixel RDO collection
 
@@ -325,7 +332,11 @@ FPGATrackSimSGToRawHitsTool::readPixelSimulation(HitIndexMap& hitIndexMap, unsig
 }
 
 StatusCode
-FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsigned int& hitIndex, const EventContext& eventContext) {
+FPGATrackSimSGToRawHitsTool::readStripSimulation(
+    FPGATrackSimEventInputHeader* eventHeader,
+    HitIndexMap& hitIndexMap, 
+    unsigned int& hitIndex, 
+    const EventContext& eventContext) const {
 
   constexpr int MaxChannelinStripRow = 128;
 
@@ -426,7 +437,8 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
       tmpSGhit.setDetType(SiliconTech::strip);
       tmpSGhit.setIdentifierHash(sielement->identifyHash());
       tmpSGhit.setIdentifier(sielement->identify().get_identifier32().get_compact());
-
+      tmpSGhit.setRdoIdentifier(rdoId.get_compact()); // full 64 bit hit identifier
+      
       int barrel_ec = m_sctId->barrel_ec(rdoId);
       if (barrel_ec == 0)
         tmpSGhit.setDetectorZone(DetectorZone::barrel);
@@ -465,8 +477,8 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
         int ITkStripID = stripID % MaxChannelinStripRow;
 
         // for each ABC chip readout, each reads 256 channels actually. 0-127 corresponds to lower row and then 128-255 corresponds to the 
-        // upper. This can be simulated in the code by using the eta module index. Even index are not offest, while odd index, the 
-        // strip id is offest by 128
+        // upper. This can be simulated in the code by using the eta module index. Even index are not offset, while odd index, the 
+        // strip id is offset by 128
         // One point to not is that for barrel, the eta module index start at 1, and not zero. Hence a shift of 1 is needed
         int offset = m_sctId->eta_module(rdoId) % 2;
         if(m_sctId->barrel_ec(rdoId) == 0) offset = (std::abs(m_sctId->eta_module(rdoId)) - 1) % 2;
@@ -493,7 +505,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
        tmpSGhit.setTruth(mt);
       }
 
-      m_eventHeader->addHit(tmpSGhit);
+      eventHeader->addHit(tmpSGhit);
     } // end for each RDO in the strip collection
   } // end for each strip RDO collection
   // dump all RDO's and SDO's for a given event, for debugging purposes
@@ -503,7 +515,7 @@ FPGATrackSimSGToRawHitsTool::readStripSimulation(HitIndexMap& hitIndexMap, unsig
 
 
 StatusCode
-FPGATrackSimSGToRawHitsTool::dumpPixelClusters(HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext) {
+FPGATrackSimSGToRawHitsTool::dumpPixelClusters(HitIndexMap& pixelClusterIndexMap, const EventContext& eventContext) const {
   unsigned int pixelClusterIndex = 0;
   auto pixelSDOHandle = SG::makeHandle(m_pixelSDOKey, eventContext);
   auto pixelClusterContainerHandle = SG::makeHandle(m_pixelClusterContainerKey, eventContext);
@@ -546,7 +558,8 @@ FPGATrackSimSGToRawHitsTool::dumpPixelClusters(HitIndexMap& pixelClusterIndexMap
 }
 
 StatusCode
-FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluster>& clusters, const EventContext& eventContext)
+FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluster>& clusters, const EventContext& eventContext) const
+
 {
 
   //Lets do the Pixel clusters first
@@ -721,7 +734,7 @@ FPGATrackSimSGToRawHitsTool::readOfflineClusters(std::vector <FPGATrackSimCluste
 }
 
 StatusCode
-FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack>& truth, const EventContext& eventContext)
+FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack>& truth, const EventContext& eventContext) const
 {
   auto simTracksHandle = SG::makeHandle(m_mcCollectionKey, eventContext);
   ATH_MSG_DEBUG("Dump truth tracks, size " << simTracksHandle->size());
@@ -837,7 +850,7 @@ FPGATrackSimSGToRawHitsTool::readTruthTracks(std::vector <FPGATrackSimTruthTrack
 
 
 const HepMcParticleLink* FPGATrackSimSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_iterator& iter,
-                                                                          FPGATrackSimInputUtils::ParentBitmask& parentMask) {
+                                                                          FPGATrackSimInputUtils::ParentBitmask& parentMask) const {
   const HepMcParticleLink* bestTruthLink{};
   const InDetSimData& sdo(iter->second);
   const std::vector<InDetSimData::Deposit>& deposits(sdo.getdeposits());

@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 00:02:23 CEST 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -13,7 +13,7 @@
 #define  VTXANALYSIS_H
 
 #include <iostream>
-// #include <map>
+#include <memory>
 #include <vector>
 
 #include "TrigInDetAnalysis/VertexAnalysis.h"
@@ -28,8 +28,6 @@ public:
 
   VtxAnalysis( const std::string& n );
 
-  virtual ~VtxAnalysis() { if ( m_dir ) delete m_dir; }
-
   void initialise();
 
   void execute(const std::vector<TIDA::Vertex*>& vtx0,
@@ -42,7 +40,7 @@ private:
 
   bool m_initialised;
 
-  TIDDirectory* m_dir;
+  std::unique_ptr<TIDDirectory> m_dir;
 
   TH1F*    m_hnvtx = nullptr;
   TH1F*    m_hzed = nullptr;

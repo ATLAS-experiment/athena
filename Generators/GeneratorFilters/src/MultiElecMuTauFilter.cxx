@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MultiElecMuTauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include <cmath>
 
 MultiElecMuTauFilter::MultiElecMuTauFilter(const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter(name,pSvcLocator)
@@ -32,6 +33,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
   for (itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
     for (const auto& pitr: *genEvt) {
+      if (not pitr) continue;
       // Electrons and muons
       if (MC::isStable(pitr) && (MC::isElectron(pitr) || MC::isMuon(pitr))) {
         if (pitr->momentum().perp() >= m_minPt && std::abs(pitr->momentum().pseudoRapidity()) <= m_maxEta) {
@@ -77,7 +79,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
           }
         }
 
-        if (tau) {
+        if (taunu and tau) {
           // Good hadronic decay
           CLHEP::HepLorentzVector tauVisMom = CLHEP::HepLorentzVector(tau->momentum().px() - taunu->momentum().px(),
                                                         tau->momentum().py() - taunu->momentum().py(),

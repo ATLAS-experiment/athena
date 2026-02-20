@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -9,12 +9,11 @@
  **/
 
 #include "IdDict/IdDictFieldImplementation.h"
-#include "IdDict/IdDictDefs.h"
+#include "GaudiKernel/MsgStream.h"
 #include <iostream>
 #include <format>
 #include <string>
 #include <string_view>
-
 
 
 const IdDictRange*
@@ -62,3 +61,17 @@ std::string IdDictFieldImplementation::show_to_string() const {
     return {};
   }
 }
+
+///stream insertion operator uses show_to_string
+std::ostream & operator<<(std::ostream & os, const IdDictFieldImplementation &idfi){
+  os<<idfi.show_to_string();
+  return os;
+}
+
+///MsgStream insertion operator uses show_to_string
+MsgStream & operator<<(MsgStream & ms, const IdDictFieldImplementation &idfi){
+  ms<<idfi.show_to_string();
+  return ms;
+}
+
+

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUMICALC_LUMICALCULATOR_H
@@ -28,6 +28,9 @@ class LumiCalculator{
  public:
   LumiCalculator();
   ~LumiCalculator();
+
+  LumiCalculator(const LumiCalculator&) = delete;
+  LumiCalculator& operator=(const LumiCalculator&) = delete;
 
   void UseMC(bool mc = true); // No longer supported
   void UseLArNoiseDB(bool lar, const std::string& lardb); // Calculate LAr defect fraction 

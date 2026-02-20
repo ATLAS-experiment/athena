@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -84,20 +84,20 @@ namespace dqutils {
       }
 
       //find tauMon dir
-      TString taumonDirName = runDirName + "/HLT/TauMon";
+      std::string taumonDirName = runDirName + "/HLT/TauMon";
       TDirectory* taumonDir(0);
-      if (!(taumonDir = f->GetDirectory(taumonDirName))) {
+      if (!(taumonDir = f->GetDirectory(taumonDirName.c_str()))) {
         //std::cerr << "--> HLTTauPostProcess: directory " << taumonDirName << " not found." << std::endl;
         return;
       }
 
 
-      std::vector<TString> varName;
+      std::vector<std::string> varName;
       varName.push_back("Et");
       varName.push_back("Eta");
       varName.push_back("Phi");
 
-      std::vector<TString> lvlName;
+      std::vector<std::string> lvlName;
       lvlName.push_back("L1");
       lvlName.push_back("L2");
       lvlName.push_back("EF");
@@ -109,13 +109,13 @@ namespace dqutils {
 
 
 
-      std::vector<TString> varName0;
+      std::vector<std::string> varName0;
       varName0.push_back("Pt");
       varName0.push_back("Eta");
       varName0.push_back("Phi");
       varName0.push_back("Nvtx");
 
-      std::vector<TString> lvlNameO;
+      std::vector<std::string> lvlNameO;
       lvlNameO.push_back("L1");
       lvlNameO.push_back("L2");
       lvlNameO.push_back("EF");
@@ -148,49 +148,44 @@ namespace dqutils {
 
     f->Close();
     delete f;
-    //std::cout << "--> HLTTauPostProcess: finished HLT Tau post-processing"<<std::endl;
   }
 
   void MonitoringFile::HLTTauPostProcess(TFile* f, TDirectory* dir,
-                                         TString pathApp, TString pathAppEff,
-                                         const std::vector<TString>& lvlN, const std::vector<TString>& varN,
+                                         const std::string& pathApp,
+                                         const std::string& pathAppEff,
+                                         const std::vector<std::string>& lvlN,
+                                         const std::vector<std::string>& varN,
                                          const std::vector< std::pair< int, int > >& ratioIndex, int nameStyle,
-                                         TString nameApp) {
+                                         const std::string& nameApp) {
     std::string path = getPath(dir);
 
-    //cout<<"HLTTauPostProcess in "<< path
-//         <<" pathApp="<<pathApp
-//         <<" pathAppEff="<<pathAppEff
-//         <<" nameStyle="<<nameStyle<<endl;
 
-    TString basePath = path + pathApp + "/";
-    if (f->cd(basePath.Data()) == 0) {
-      //cout<<"basePath isn't there!"<<endl;
+
+    std::string basePath = path + pathApp + "/";
+    if (f->cd(basePath.c_str()) == 0) {
       return;
     }
 
-    //TH1F* hRoI[lvlN.size()][varN.size()];
+    //coverity[STACK_USE]
     TH1F* hRoI[100][100];
     for (unsigned int iLvl = 0; iLvl < lvlN.size(); iLvl++) {
       for (unsigned int iVar = 0; iVar < varN.size(); iVar++) {
-        TString hName;
+        std::string hName;
         if (nameStyle == 1) hName = basePath + "h" + lvlN[iLvl] + "RoI" + varN[iVar] + (iLvl == 0 ? "Denom" : "Num") + nameApp;
         if (nameStyle == 2) hName = basePath + "hTau" + varN[iVar] + lvlN[iLvl] + nameApp;
-        if (!CheckHistogram(f, hName.Data())) {
-          //cout<<" histo "<<hName<<" is not in f "<<f->GetName()<<endl;
+        if (!CheckHistogram(f, hName.c_str())) {
           return;
         }
-        hRoI[iLvl][iVar] = (TH1F*) (f->Get(hName.Data()))->Clone();
+        hRoI[iLvl][iVar] = (TH1F*) (f->Get(hName.c_str()))->Clone();
       }
     }
 
 
     basePath += path + pathAppEff + "/";
-    f->cd(basePath.Data());
-    TH1F* hEff[100][100];
+    f->cd(basePath.c_str());
     for (unsigned int iVar = 0; iVar < varN.size(); iVar++) {
       for (unsigned int iRatio = 0; iRatio < ratioIndex.size(); iRatio++) {
-        TString hName;
+        std::string hName;
         if (nameStyle == 1)
           hName = basePath + "h" +
                   lvlN[ ratioIndex[ iRatio ].first ] + "vs" + lvlN[ ratioIndex[ iRatio ].second ] +
@@ -201,14 +196,14 @@ namespace dqutils {
                   lvlN[ ratioIndex[ iRatio ].first ] + "OfflineRatio" +
                   varN[iVar] + nameApp;
 
-        if (!CheckHistogram(f, hName.Data())) return;
+        if (!CheckHistogram(f, hName.c_str())) return;
 
-        hEff[iRatio][iVar] = (TH1F*) (f->Get(hName.Data()));
-        hEff[iRatio][iVar]->Divide(hRoI[ ratioIndex[ iRatio ].first  ][iVar],
-                                   hRoI[ ratioIndex[ iRatio ].second ][iVar],
-                                   1.0, 1.0, "b");
+        TH1F* hEff = (TH1F*) (f->Get(hName.c_str()));
+        hEff->Divide(hRoI[ ratioIndex[ iRatio ].first  ][iVar],
+                     hRoI[ ratioIndex[ iRatio ].second ][iVar],
+                     1.0, 1.0, "b");
 
-        hEff[iRatio][iVar]->Write("", TObject::kOverwrite);
+        hEff->Write("", TObject::kOverwrite);
       }
     }
 

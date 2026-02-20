@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using POOL to read an xAOD
@@ -29,7 +29,7 @@
 // For convenience messaging macros
 using namespace asg::msgUserCode;
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main(int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
@@ -48,7 +48,10 @@ int main(int argc, char *argv[])
   // can make the subtool directly or via this cast
   ANA_MSG_INFO("Casting to PMGSherpa22VJetsWeightTool...");
   PMGTools::PMGSherpa22VJetsWeightTool* sherpaTool = dynamic_cast<PMGTools::PMGSherpa22VJetsWeightTool*>(&*pmgTool);
-
+  if (!sherpaTool){
+    ANA_MSG_ERROR("Cast resulted in nullptr, aborting.");
+    return 0;
+  }
   // Create the truth weight tool:
   // ... could create directly with
   // ANA_MSG_INFO("Creating the PMGTruthWeightTool...");
@@ -156,7 +159,7 @@ int main(int argc, char *argv[])
     if (debug) { std::cout << "correction from Interface" << reweight << std::endl; }
 
     // Test the PMGTruthWeightTool interface
-    auto weightNames = truthWeightTool->getWeightNames();
+    const auto & weightNames = truthWeightTool->getWeightNames();
     ANA_MSG_INFO("Event #" << i << ": found " << weightNames.size() << " weights for this event");
 
   }

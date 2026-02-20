@@ -8,7 +8,7 @@ namespace Trk
 {
 
 SolenoidParametrizationCondAlg::SolenoidParametrizationCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
   , m_condSvc{"CondSvc", name}
 {
 }

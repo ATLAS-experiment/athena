@@ -4,7 +4,7 @@
 
 #ifndef STOREGATE_DATASTORE_H
 #define STOREGATE_DATASTORE_H
-/** The Transient Store 
+/** The Transient Store
  *
  * \author ATLAS Collaboration
  **/
@@ -15,7 +15,7 @@
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthenaKernel/IProxyRegistry.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "CxxUtils/sgkey_utilities.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/SmartIF.h"
@@ -91,7 +91,7 @@ namespace SG {
 
     void setStoreID(StoreID::type id) { m_storeID = id;}
     virtual StoreID::type storeID() const override { return m_storeID; }
- 
+
     // If FORCE is true, then force deleting of all proxies,
     // even if they would normally only be reset.
     /// If HARD is true, then the bound objects should also
@@ -107,7 +107,7 @@ namespace SG {
     /// if key is empty returns the default proxy (currently last registered)
     virtual DataProxy* proxy(const TransientAddress* tAddr) const override;
     //@}
-    virtual DataProxy* proxy(const CLID& id, 
+    virtual DataProxy* proxy(const CLID& id,
 			     const std::string& key=SG::DEFAULTKEY) const override;
 
     /// get proxy with given key. Returns 0 to flag failure
@@ -126,7 +126,7 @@ namespace SG {
     virtual SG::DataProxy* proxy_exact(const CLID& id,
                                        const std::string& key) const override;
 
-    /// remove proxy from store, unless proxy is reset only.   
+    /// remove proxy from store, unless proxy is reset only.
     /// @param forceRemove remove the proxy no matter what
     /// If HARD is true, then the bound objects should also
     /// clear any data that depends on the identity
@@ -195,13 +195,13 @@ namespace SG {
 
     void setSGAudSvc();
     SmartIF<ISGAudSvc> m_pSGAudSvc;
-    bool m_noAudSvc;    
+    bool m_noAudSvc;
     inline bool doAudit() {
       if (!m_noAudSvc) setSGAudSvc();
       return (m_pSGAudSvc);
     }
 
-    ISvcLocator* m_pSvcLoc; 
+    ISvcLocator* m_pSvcLoc;
     StatusCode setSvcLoc();
 
 
@@ -255,4 +255,3 @@ namespace SG {
 
 
 #endif  // STOREGATE_DATASTORE
-

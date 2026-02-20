@@ -40,8 +40,8 @@ namespace EFTrackingFPGAIntegration
             "Tool for creating xAOD cluster containers"}; //!< Tool for creating xAOD containers
         
         
-        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA"};
-        SG::ReadHandleKey<std::vector<uint64_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA"};
+        SG::ReadHandleKey<std::vector<uint32_t>> m_FPGAPixelOutput{this, "FPGAOutputPixelKey", "FPGAPixelOutput", "Pixel output from FPGA"};
+        SG::ReadHandleKey<std::vector<uint32_t>> m_FPGAStripOutput{this, "FPGAOutputStripKey", "FPGAStripOutput", "Strip output from FPGA"};
 
 
     };

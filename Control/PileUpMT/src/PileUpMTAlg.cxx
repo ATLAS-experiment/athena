@@ -27,6 +27,7 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventInfoAuxContainer.h"
 #include "xAODEventInfo/EventInfoContainer.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 using SubEvent = xAOD::EventInfo::SubEvent;
 namespace rv = ranges::views;

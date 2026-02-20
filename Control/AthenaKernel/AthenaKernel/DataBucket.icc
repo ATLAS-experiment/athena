@@ -7,8 +7,8 @@
 #include "AthenaKernel/IRegisterTransient.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "AthenaKernel/BaseInfo.h"
-#include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/tools/safe_clid.h"
+#include "SGCore/ILockable.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -219,12 +219,12 @@ void* SG::DataBucket<T>::cast (const std::type_info& tinfo,
  * This allows the callee to choose whether to use clid or tinfo.
  * Here we use clid.
  */
-template <typename T> 
+template <typename T>
 inline
 void* SG::DataBucket<T>::cast (CLID clid,
                                const std::type_info& /*tinfo*/,
                                SG::IRegisterTransient* irt /*= 0*/,
-                               bool isConst /*= true*/) 
+                               bool isConst /*= true*/)
 {
   // Don't use virtual dispatch for this call.
   return DataBucket::cast (clid, irt, isConst);
@@ -285,7 +285,7 @@ void SG::DataBucket<T>::lock()
 }
 
 
-/** 
+/**
  * @brief Try a conversion using static SG_BASES information.
  * @param clid The class ID to which to convert.
  *
@@ -308,7 +308,7 @@ void* SG::DataBucket<T>::tryStaticConversion (CLID clid)
 }
 
 
-/** 
+/**
  * @brief Try a conversion using static SG_BASES information.
  * @param tinfo The @a std::type_info of the type to which to convert.
  *

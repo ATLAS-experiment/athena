@@ -43,6 +43,9 @@ acc.merge(TagInfoMgrCfg(flags))
 
 acc.addEventAlgo(CompFactory.EventInfoReader(),sequenceName = 'AthAlgSeq')
 
+# Make RootCollection
+acc.getService("EventSelector").CollectionType = "RootCollection"
+
 # Change output file catalog to avoid races.
 acc.getService("PoolSvc").WriteCatalog = 'file:EventInfoTests_catalog.xml'
 

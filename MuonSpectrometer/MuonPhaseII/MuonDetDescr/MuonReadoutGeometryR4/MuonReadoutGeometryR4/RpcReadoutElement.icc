@@ -126,13 +126,13 @@ namespace MuonGMR4 {
         return m_idHelper.channelID(identify(), doubletZ(), doubletPhiNumber(measHash) + 1, 
                                     gasGapNumber(measHash) + 1, measuresPhi(measHash), stripNumber(measHash));  
     }
-    inline Amg::Vector3D RpcReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+    inline Amg::Vector3D RpcReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
         return stripPosition(ctx, measurementHash(measId));
     }  
-    inline Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    inline Amg::Vector3D RpcReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
         return rightStripEdge(ctx, measurementHash(measId));
     }
-    inline Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+    inline Amg::Vector3D RpcReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
         return leftStripEdge(ctx, measurementHash(measId));
     }
 }  // namespace MuonGMR4

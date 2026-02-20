@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -13,18 +13,18 @@
 #include "StoreGate/StoreGateSvc.h" // for PyGate
 
 #define INSTAN_CC(T) \
-  namespace LArRawConditionsDict { \
+  struct LArRawConditionsDictCC_##T { \
     LArConditionsContainer<T>::ConstCorrectionIt      ccit_##T; \
     LArConditionsContainer<T>::ConditionsMap          ccmap_##T; \
-  } struct xyzzy
+  }
 #define INSTAN_CS(T) \
-  namespace LArRawConditionsDict { \
+  struct LArRawConditionsDictCS_##T { \
     LArConditionsSubset<T>                          cs_##T;   \
     LArConditionsSubset<T>::CorrectionPair          cscp_##T; \
     LArConditionsSubset<T>::ConstCorrectionVecIt    cscv_##T;  \
     LArConditionsSubset<T>::FebPair                 csfb_##T; \
     CondMultChanCollection<LArConditionsSubset<T> > cscmcc_##T; \
-  } struct xyzzy
+  }
 #define INSTAN_BOTH(T) \
   INSTAN_CC(T); INSTAN_CS(T)
 

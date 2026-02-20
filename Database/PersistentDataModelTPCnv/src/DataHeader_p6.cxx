@@ -9,32 +9,7 @@
 
 #include <uuid/uuid.h>
 
-DataHeaderForm_p6::DataHeaderForm_p6(const DataHeaderForm_p6& rhs) :
-      m_dbRecords(rhs.m_dbRecords), m_objRecords(rhs.m_objRecords),
-      m_objAlias(rhs.m_objAlias), m_objSymLinks(rhs.m_objSymLinks),
-      m_objHashes(rhs.m_objHashes), m_version(rhs.m_version),
-      m_modified(rhs.m_modified), m_token()
-{
-   setToken(rhs.m_token);
-}
-
-DataHeaderForm_p6& DataHeaderForm_p6::operator=(const DataHeaderForm_p6& rhs)
-{
-   if (&rhs != this) {
-      m_dbRecords = rhs.m_dbRecords;
-      m_objRecords = rhs.m_objRecords;
-      m_objAlias = rhs.m_objAlias;
-      m_objSymLinks = rhs.m_objSymLinks;
-      m_objHashes = rhs.m_objHashes;
-      m_version = rhs.m_version;
-      m_modified = rhs.m_modified;
-      setToken(rhs.m_token);
-   }
-   return *this;
-}
-
-DataHeaderForm_p6::~DataHeaderForm_p6()
-{ }
+   static_assert(std::is_nothrow_move_constructible<DataHeaderForm_p6>::value);
 
 
 unsigned int DataHeaderForm_p6::insertDb(const DbRecord& rec) {

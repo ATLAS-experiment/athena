@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/MultiTreeAccessor.h"
@@ -23,24 +23,30 @@ using namespace std;
 using namespace LArSamples;
 
 
-MultiTreeAccessor* MultiTreeAccessor::open(const std::vector<TString>& files) 
+MultiTreeAccessor::MultiTreeAccessor(std::vector<std::unique_ptr<const TreeAccessor> >&& accessors)
+  : m_accessors(std::move(accessors))
 {
-  std::vector<const TreeAccessor*> accessors;
+}
+
+
+std::unique_ptr<MultiTreeAccessor> MultiTreeAccessor::open(const std::vector<TString>& files)
+{
+  std::vector<std::unique_ptr<const TreeAccessor> > accessors;
   for (const TString& fileName : files) {
-    const TreeAccessor* accessor = TreeAccessor::open(fileName);
+    std::unique_ptr<const TreeAccessor> accessor = TreeAccessor::open(fileName);
     if (!accessor) {
       cout << "Skipping invalid file " << fileName << endl;
       continue;
     }
-    accessors.push_back(accessor);
+    accessors.push_back(std::move(accessor));
   }
   
   if (accessors.empty()) return nullptr;
-  return new MultiTreeAccessor(accessors);
+  return std::make_unique<MultiTreeAccessor>(std::move(accessors));
 }
 
 
-MultiTreeAccessor* MultiTreeAccessor::openList(const TString& fileList) 
+std::unique_ptr<MultiTreeAccessor> MultiTreeAccessor::openList(const TString& fileList)
 {
   std::ifstream f(fileList);
   if (!f) {
@@ -51,58 +57,56 @@ MultiTreeAccessor* MultiTreeAccessor::openList(const TString& fileList)
   std::string fileName;  
   unsigned int i = 0;
 
-  std::vector<const TreeAccessor*> accessors;
+  std::vector<std::unique_ptr<const TreeAccessor> > accessors;
   
   while (f >> fileName) {
-    const TreeAccessor* accessor = TreeAccessor::open(fileName.c_str());
+    std::unique_ptr<const TreeAccessor> accessor = TreeAccessor::open(fileName.c_str());
     if (!accessor) {
       cout << "Skipping invalid file " << fileName << endl;
       continue;
     }
     cout << std::setw(2) << ++i << " - " << fileName << endl;
-    accessors.push_back(accessor);
+    accessors.push_back(std::move(accessor));
   }
   
   if (accessors.empty()) return nullptr;
-  return new MultiTreeAccessor(accessors);
+  return std::make_unique<MultiTreeAccessor>(std::move(accessors));
 }
 
 
-MultiTreeAccessor* MultiTreeAccessor::openWild(const TString& wcName) 
+std::unique_ptr<MultiTreeAccessor> MultiTreeAccessor::openWild(const TString& wcName)
 {
   // Piggyback on TChain wildcarding feature...
   TChain chain("");
   chain.Add(wcName);
   
-  std::vector<const TreeAccessor*> accessors;
+  std::vector<std::unique_ptr<const TreeAccessor> > accessors;
   
   for (int i = 0; i < chain.GetListOfFiles()->GetEntries(); i++) {
     std::string fileName = chain.GetListOfFiles()->At(i)->GetTitle();
-    const TreeAccessor* accessor = TreeAccessor::open(fileName.c_str());
+    std::unique_ptr<const TreeAccessor> accessor = TreeAccessor::open(fileName.c_str());
     if (!accessor) {
       cout << "Skipping invalid file " << fileName << endl;
       continue;
     }
     cout << std::setw(2) << i+1 << " - " << fileName <<  " , nEvents = " << accessor->nEvents() << ", nRuns = " << accessor->nRuns() << endl;
-    accessors.push_back(accessor);
+    accessors.push_back(std::move(accessor));
   }
   
   if (accessors.empty()) return nullptr;
-  return new MultiTreeAccessor(accessors);
+  return std::make_unique<MultiTreeAccessor>(std::move(accessors));
 }
 
 
 MultiTreeAccessor::~MultiTreeAccessor()
 {
-  for (const TreeAccessor* accessor : m_accessors)
-    delete accessor;
 }
 
 
 const EventData* MultiTreeAccessor::eventData(unsigned int i) const
 {
   unsigned int nEventsSoFar = 0;
-  for (const TreeAccessor* accessor : m_accessors) {
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     unsigned int n = accessor->nEvents();
     if (i < nEventsSoFar + n) return accessor->eventData(i - nEventsSoFar);
     nEventsSoFar += n;
@@ -114,7 +118,7 @@ const EventData* MultiTreeAccessor::eventData(unsigned int i) const
 const RunData* MultiTreeAccessor::runData(unsigned int i) const 
 { 
   unsigned int nRunsSoFar = 0;
-  for (const TreeAccessor* accessor : m_accessors) {
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     unsigned int n = accessor->nRuns();
     if (i < nRunsSoFar + n) return accessor->runData(i - nRunsSoFar);
     nRunsSoFar += n;
@@ -126,7 +130,7 @@ const RunData* MultiTreeAccessor::runData(unsigned int i) const
 unsigned int MultiTreeAccessor::nEvents() const
 {
   unsigned int n = 0;
-  for (const TreeAccessor* accessor : m_accessors)
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors)
      n += accessor->nEvents();
   return n;
 }
@@ -135,7 +139,7 @@ unsigned int MultiTreeAccessor::nEvents() const
 unsigned int MultiTreeAccessor::nRuns() const
 {
   unsigned int n = 0;
-  for (const TreeAccessor* accessor : m_accessors)
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors)
      n += accessor->nRuns();
   return n;
 }
@@ -145,7 +149,7 @@ unsigned int MultiTreeAccessor::historySize(unsigned int i) const
 {
   resetCache();
   unsigned int size = 0;
-  for (const TreeAccessor* accessor : m_accessors) {
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     const HistoryContainer* cont = accessor->historyContainer(i);
     if (cont) size += cont->nDataContainers();
   }
@@ -156,7 +160,7 @@ unsigned int MultiTreeAccessor::historySizeSC(unsigned int i) const
 {
   resetCache();
   unsigned int size = 0;
-  for (const TreeAccessor* accessor : m_accessors) {
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     const HistoryContainer* cont = accessor->historyContainerSC(i);
     if (cont) size += cont->nDataContainers();
   }
@@ -164,49 +168,48 @@ unsigned int MultiTreeAccessor::historySizeSC(unsigned int i) const
 }
 
 
-const History* MultiTreeAccessor::getCellHistory(unsigned int i) const 
+std::unique_ptr<const History> MultiTreeAccessor::getCellHistory(unsigned int i) const
 { 
-  CellInfo* cellInfo = nullptr;
-  std::vector<const Data*> allData;
-  std::vector<const EventData*> allEventData;
-  for (const TreeAccessor* accessor : m_accessors) {
-    const History* thisHistory = accessor->getCellHistory(i);
+  std::unique_ptr<CellInfo> cellInfo;
+  std::vector<std::unique_ptr<const Data> > allData;
+  std::vector<std::unique_ptr<const EventData> > allEventData;
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
+    std::unique_ptr<const History> thisHistory = accessor->getCellHistory(i);
     if (!thisHistory) continue;
     if (!cellInfo) {
-      cellInfo = new CellInfo(*thisHistory->cellInfo());
+      cellInfo = std::make_unique<CellInfo>(*thisHistory->cellInfo());
     }
-    const std::vector<const EventData*>& thisEventData = thisHistory->eventData();
+    const std::vector<std::unique_ptr<const EventData> >& thisEventData = thisHistory->eventData();
     std::map<const EventData*, const EventData*> eventMap;
-    for (const EventData* event : thisEventData) {
-      if (eventMap.find(event) != eventMap.end()) continue;
-      EventData* newED = new EventData(*event);
-      eventMap[event] = newED;
-      allEventData.push_back(newED);
+    for (const std::unique_ptr<const EventData>& event : thisEventData) {
+      if (eventMap.find(event.get()) != eventMap.end()) continue;
+      auto newED = std::make_unique<EventData>(*event);
+      eventMap[event.get()] = newED.get();
+      allEventData.push_back(std::move(newED));
     }
    
     for (unsigned int j = 0; j < thisHistory->nData(); j++) {
-      allData.push_back(new Data(*thisHistory->data(j), eventMap[thisHistory->data(j)->eventData()], nullptr, -1));
+      allData.push_back(std::make_unique<Data>(*thisHistory->data(j), eventMap[&thisHistory->data(j)->eventData()], nullptr, -1));
       if (!cellInfo->shape(thisHistory->data(j)->gain())) {
         const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(j)->gain());
         cellInfo->setShape(thisHistory->data(j)->gain(), thisShape ? new ShapeInfo(*thisShape) : nullptr);
       }
     }
-    delete thisHistory;
   }
   //data are copied from cellInfo into History member variable
-  auto * h  = cellInfo ? new History(allData, *cellInfo, allEventData, i): nullptr;
-  delete cellInfo;
-  return h; 
+  if (cellInfo)
+    return std::make_unique<History>(std::move(allData), *cellInfo, std::move(allEventData), i);
+  return nullptr;
 }
       
-const History* MultiTreeAccessor::getSCHistory(unsigned int i) const 
+std::unique_ptr<const History> MultiTreeAccessor::getSCHistory(unsigned int i) const
 { 
-  std::unique_ptr<CellInfo> cellInfo{};
-  std::vector<const Data*> allData;
-  std::vector<const EventData*> allEventData;
-  for (const TreeAccessor* accessor : m_accessors) {
+  std::unique_ptr<CellInfo> cellInfo;
+  std::vector<std::unique_ptr<const Data> > allData;
+  std::vector<std::unique_ptr<const EventData> > allEventData;
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     //cout << "---> Getting history for a treeAccessor..." << endl; 
-    const History* thisHistory = accessor->getSCHistory(i);
+    std::unique_ptr<const History> thisHistory (accessor->getSCHistory(i));
     //cout << "---> done Getting history for a treeAccessor..." << endl; 
     if (!thisHistory) continue;
     if (!cellInfo) {
@@ -214,19 +217,19 @@ const History* MultiTreeAccessor::getSCHistory(unsigned int i) const
     //cout << "---> done new cell info" << endl; 
     }
     //cout << "---> Creating new event data N = " << thisHistory->eventData().size() << endl; 
-    const std::vector<const EventData*>& thisEventData = thisHistory->eventData();
+    const std::vector<std::unique_ptr<const EventData> >& thisEventData = thisHistory->eventData();
     std::map<const EventData*, const EventData*> eventMap;
-    for (const EventData* event : thisEventData) {
-      if (eventMap.find(event) != eventMap.end()) continue;
-      EventData* newED = new EventData(*event);
-      eventMap[event] = newED;
-      allEventData.push_back(newED);
+    for (const std::unique_ptr<const EventData>& event : thisEventData) {
+      if (eventMap.find(event.get()) != eventMap.end()) continue;
+      auto newED = std::make_unique<EventData>(*event);
+      eventMap[event.get()] = newED.get();
+      allEventData.push_back(std::move(newED));
     }
     //cout << "---> Creating new data N = " << thisHistory->nData() << endl; 
    
     for (unsigned int ii = 0; ii < thisHistory->nData(); ii++) {
      //cout << "------> Creating new data " << i << endl; 
-      allData.push_back(new Data(*thisHistory->data(ii), eventMap[thisHistory->data(ii)->eventData()], nullptr, -1));
+      allData.push_back(std::make_unique<Data>(*thisHistory->data(ii), eventMap[&thisHistory->data(ii)->eventData()], nullptr, -1));
      //cout << "------> done Creating new data " << i << endl; 
       if (!cellInfo->shape(thisHistory->data(ii)->gain())) {
         const ShapeInfo* thisShape = thisHistory->cellInfo()->shape(thisHistory->data(ii)->gain());
@@ -235,19 +238,20 @@ const History* MultiTreeAccessor::getSCHistory(unsigned int i) const
      //cout << "------> done shape " << i << endl; 
     }
      //cout << "---> done Creating new data, deleting treeAcc history" << endl; 
-    delete thisHistory;
   }
-  //cout << "--->returning new history..." << endl; 
-  return (cellInfo ? new History(allData, *cellInfo, allEventData, i) : nullptr); 
+  //cout << "--->returning new history..." << endl;
+  if (cellInfo)
+    return std::make_unique<History>(std::move(allData), *cellInfo, std::move(allEventData), i);
+  return nullptr;
 }
       
         
-const CellInfo* MultiTreeAccessor::getCellInfo(unsigned int i) const 
+std::unique_ptr<const CellInfo> MultiTreeAccessor::getCellInfo(unsigned int i) const
 {
   resetCache();
-  for (const TreeAccessor* accessor : m_accessors) {
+  for (const std::unique_ptr<const TreeAccessor>& accessor : m_accessors) {
     const HistoryContainer* cont = accessor->historyContainer(i);
-    if (cont && cont->cellInfo()) return new CellInfo(*cont->cellInfo());
+    if (cont && cont->cellInfo()) return std::make_unique<CellInfo>(*cont->cellInfo());
   }
   return nullptr;
 }
@@ -257,19 +261,20 @@ bool MultiTreeAccessor::writeToFile(const TString& fileName) const
 {
   std::vector<const Accessor*> accessors;
   for (unsigned int i = 0; i < m_accessors.size(); i++)
-    accessors.push_back(m_accessors[i]);
+    accessors.push_back(m_accessors[i].get());
   cout << "Merging data..." << endl;
-  TreeAccessor* singleContainer = TreeAccessor::merge(accessors, fileName);
-  if (!singleContainer) return false;
-  delete singleContainer;
-  return true;
+  std::unique_ptr<TreeAccessor> singleContainer = TreeAccessor::merge(accessors, fileName);
+  return !!singleContainer;
 }
 
 
-std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const
+std::vector<std::unique_ptr<MultiTreeAccessor> >
+MultiTreeAccessor::filterComponents(const FilterList& filterList, const DataTweaker& tweaker) const
 {
-  std::vector< std::vector<const TreeAccessor*> > filteredAccessors(filterList.size()); 
+  std::vector< std::vector<std::unique_ptr<const TreeAccessor> > > filteredAccessors(filterList.size());
   
+  std::vector<std::unique_ptr<MultiTreeAccessor> > result;
+
   for (unsigned int i = 0; i < nAccessors(); i++) {
     const TreeAccessor* treeAcc = dynamic_cast<const TreeAccessor*>(&accessor(i));
     cout << "Processing data " << i << " of " << nAccessors();
@@ -292,15 +297,15 @@ std::vector<MultiTreeAccessor*> MultiTreeAccessor::filterComponents(const Filter
       TString thisFN = Form("%s_filter%d.root", pathname.c_str(), i );//filterList.fileName(f).Data(), i);
       thisFilterList.add(filterList.filterParams(f), thisFN);
     }
-    std::vector<TreeAccessor*> filteredTreeAccs = TreeAccessor::filter(accessor(i), thisFilterList, tweaker);
+    std::vector<std::unique_ptr<TreeAccessor> > filteredTreeAccs = TreeAccessor::filter(accessor(i), thisFilterList, tweaker);
     if (filteredTreeAccs.size() != filterList.size()) {
       cout << "Filtering failed, exiting" << endl;
-      return std::vector<MultiTreeAccessor*>();
+      return result;
     }
-    for (unsigned int f = 0; f < filteredTreeAccs.size(); f++) filteredAccessors[f].push_back(filteredTreeAccs[f]);
+    for (unsigned int f = 0; f < filteredTreeAccs.size(); f++) filteredAccessors[f].push_back(std::move(filteredTreeAccs[f]));
   }
 
-  std::vector<MultiTreeAccessor*> result;
-  for (unsigned int f = 0; f < filteredAccessors.size(); f++) result.push_back(new MultiTreeAccessor(filteredAccessors[f]));
+  for (unsigned int f = 0; f < filteredAccessors.size(); f++)
+    result.push_back(std::make_unique<MultiTreeAccessor>(std::move(filteredAccessors[f])));
   return result;
 }

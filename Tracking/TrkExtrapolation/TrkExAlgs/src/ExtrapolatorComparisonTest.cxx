@@ -165,7 +165,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     double qOverP = perigee.m_charge / momentum.norm();
     
     const Trk::PerigeeSurface atlPerigeeSurface;
-    const Trk::Perigee * atlPerigee = new const Trk::Perigee(perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, atlPerigeeSurface);
+    auto atlPerigee = std::make_unique<Trk::Perigee>(perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, atlPerigeeSurface);
     
     for (unsigned int surface = 0; surface < m_atlasReferenceSurfaceTriples.size(); surface++) {
       n_extraps++;
@@ -182,14 +182,14 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
       ATH_MSG_VERBOSE("Starting extrapolation " << n_extraps << " from : "       << *atlPerigee << " to : " << *destinationSurface);
       
       auto start_fwd = xclock::now();
-      const Trk::TrackParameters* destParameters =
+      auto destParameters =
         m_atlasExtrapolator->extrapolate(
           ctx,
           *atlPerigee,
           *destinationSurface,
           Trk::alongMomentum,
           true,
-          static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+          static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
       auto end_fwd = xclock::now();
       float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
       
@@ -201,14 +201,14 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
         
         // now try backward extrapolation
         auto start_bkw = xclock::now();
-        const Trk::TrackParameters* finalperigee =
+        auto finalperigee =
           m_atlasExtrapolator->extrapolate(
             ctx,
             *destParameters,
             atlPerigee->associatedSurface(),
             Trk::oppositeMomentum,
             true,
-            static_cast<Trk::ParticleHypothesis>(m_particleType.value())).release();
+            static_cast<Trk::ParticleHypothesis>(m_particleType.value()));
         auto end_bkw = xclock::now();
         float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
         
@@ -222,15 +222,12 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
            ATH_MSG_DEBUG(" ATLAS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
          }
          
-         m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee, destParameters, ms_fwd, finalperigee, ms_bkw);
-         delete finalperigee;
+         m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee.get(), destParameters.get(), ms_fwd, finalperigee.get(), ms_bkw);
       } else if (!destParameters) {
         ATH_MSG_DEBUG(" ATLAS Extrapolation not successful! " );
-        m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee);
+        m_atlasPropResultWriterSvc->write<Trk::TrackParameters>(atlPerigee.get());
       }
-      delete destParameters;
     }    
-    delete atlPerigee;
   }
   auto end = xclock::now();   
   auto secs = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() / milliseconds_to_seconds;
@@ -250,10 +247,10 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     Acts::BoundVector pars;
     //cppcheck-suppress constStatement
     pars << perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
     
     // Perigee, no alignment -> default geo context
-    ActsGeometryContext gctx = m_trackingGeometryTool->getNominalGeometryContext();
+    const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();
     auto anygctx = gctx.context();
     const auto* startParameters = new const Acts::GenericBoundTrackParameters(std::move(actsPerigeeSurface), pars, std::move(cov), Acts::ParticleHypothesis::pion());
     
@@ -276,7 +273,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
       auto end_fwd = xclock::now();
       float ms_fwd = std::chrono::duration_cast<std::chrono::milliseconds>(end_fwd-start_fwd).count();
       
-      if (destParameters) {
+      if (destParameters.ok()) {
         ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Forward" );           
         ATH_MSG_VERBOSE(" [ intersection ] with surface at (x,y,z) = " << destParameters->position(anygctx).x() << ", " << destParameters->position(anygctx).y() << ", " << destParameters->position(anygctx).z() );   
         ATH_MSG_VERBOSE(" [ intersection ] parameters: " << destParameters->parameters() );   
@@ -288,31 +285,27 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
         auto end_bkw = xclock::now();
         float ms_bkw = std::chrono::duration_cast<std::chrono::milliseconds>(end_bkw-start_bkw).count();
         
-        if (finalperigee) {
+        if (finalperigee.ok()) {
            ATH_MSG_VERBOSE(" ACTS Extrapolator succeded!! --> Backward" );           
            ATH_MSG_VERBOSE(" [extrapolation to perigee]      input: " << startParameters->parameters() );   
            ATH_MSG_VERBOSE(" [extrapolation to perigee]     output: " << finalperigee->parameters() );   
            ATH_MSG_VERBOSE(" [extrapolation to perigee] cov matrix: " << *finalperigee->covariance() );
            
-         } else if (!finalperigee) {
+         } else if (!finalperigee.ok()) {
            ATH_MSG_DEBUG(" ACTS Extrapolation to perigee failed for input parameters: " << destParameters->parameters());
          }
 
          // Construct wrappers for Acts track parameters
-         const ActsTrackWrapper* startWrapper = new ActsTrackWrapper(startParameters, anygctx);
-         const ActsTrackWrapper* destWrapper = new ActsTrackWrapper(&destParameters.value(), anygctx);
-         const ActsTrackWrapper* finalWrapper = new ActsTrackWrapper(&finalperigee.value(), anygctx);
+         auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
+         auto destWrapper  = std::make_unique<ActsTrackWrapper>(&destParameters.value(), anygctx);
+         auto finalWrapper = std::make_unique<ActsTrackWrapper>(&finalperigee.value(), anygctx);
 
-         m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper, destWrapper, ms_fwd, finalWrapper, ms_bkw);
+         m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get(), destWrapper.get(), ms_fwd, finalWrapper.get(), ms_bkw);
 
-         delete startWrapper;
-         delete destWrapper;
-         delete finalWrapper;
-      } else if (!destParameters) {
+      } else if (!destParameters.ok()) {
         ATH_MSG_DEBUG(" ACTS Extrapolation not successful! " );
-        const ActsTrackWrapper* startWrapper = new ActsTrackWrapper(startParameters, anygctx);
-        m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper);
-        delete startWrapper;
+        auto startWrapper = std::make_unique<ActsTrackWrapper>(startParameters, anygctx);
+        m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper.get());
       }
     }
     delete startParameters;

@@ -5,7 +5,7 @@
 #ifndef SiDetElementBoundaryLinksCondAlg_xk_h
 #define SiDetElementBoundaryLinksCondAlg_xk_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "SiSPSeededTrackFinderData/SiDetElementBoundaryLinks_xk.h"
@@ -25,7 +25,7 @@ namespace InDet {
    * this condition algorithm is necessary.
    */
 
-  class SiDetElementBoundaryLinksCondAlg_xk final: public AthReentrantAlgorithm {
+  class SiDetElementBoundaryLinksCondAlg_xk final: public AthCondAlgorithm {
   public:
     SiDetElementBoundaryLinksCondAlg_xk(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~SiDetElementBoundaryLinksCondAlg_xk() override = default;
@@ -33,7 +33,6 @@ namespace InDet {
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     /** Input condition object, detector elements of Pixel or SCT in condition store. */

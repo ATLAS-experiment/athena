@@ -236,6 +236,7 @@ StatusCode L1TopoRatesCalculator::ratesInitialize() {
           m_rates_matrix2.push_back(vector_zeros);
 	  m_rates_matrix_TDT.push_back(vector_zeros);
           m_rates_matrix2_TDT.push_back(vector_zeros);
+	  m_counts_matrix_TDT.push_back(vector_zeros);
 	  m_count_matrix.push_back(vector_zeros);
 	  m_L1TopoScore_matrix.push_back(vector_zeros);
 	  m_L1TopoScore_errors.push_back(vector_zeros);
@@ -572,7 +573,8 @@ StatusCode L1TopoRatesCalculator::ratesExecute() { //EXECUTE
 	    double w_j = getTriggerMap().at(triggerNames[j])->getTotalPrescaleWeight();
 	    double weight_result_tdt = w_i * w_j;
             double weight_TDT = weight_result_tdt*(m_weightingValues.m_enhancedBiasWeight)*(m_weightingValues.m_linearLumiFactor);
-            m_rates_matrix_TDT[i][j] += weight_TDT;
+            m_counts_matrix_TDT[i][j] += weight_result_tdt; 
+	    m_rates_matrix_TDT[i][j] += weight_TDT;
             m_rates_matrix2_TDT[i][j] += weight_TDT*weight_TDT;
         }
   }
@@ -648,6 +650,8 @@ StatusCode L1TopoRatesCalculator::ratesFinalize() {
       			size_t jTDT = std::distance(triggerNames.begin(), jt);
       			m_rates_matrix[i][j] = m_rates_matrix_TDT[idxTDT][jTDT];
       			m_rates_matrix[j][i] = m_rates_matrix_TDT[jTDT][idxTDT];
+			m_count_matrix[i][j] = m_counts_matrix_TDT[idxTDT][jTDT];
+                        m_count_matrix[j][i] = m_counts_matrix_TDT[jTDT][idxTDT];
 			m_rates_matrix2[i][j] = m_rates_matrix2_TDT[idxTDT][jTDT];
                         m_rates_matrix2[j][i] = m_rates_matrix2_TDT[jTDT][idxTDT];
     	
@@ -665,7 +669,6 @@ StatusCode L1TopoRatesCalculator::ratesFinalize() {
             double A  = m_rates_matrix[i][i];
             double B  = m_rates_matrix[j][j];
             double AB = m_rates_matrix[i][j];
-
             double sigma_A  = m_rates_matrix2[i][i];
             double sigma_B  = m_rates_matrix2[j][j];
             double sigma_AB = m_rates_matrix2[i][j];

@@ -2,10 +2,6 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// InvariantMassTool.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_INVARIANTMASSTOOL_H
 #define DERIVATIONFRAMEWORK_INVARIANTMASSTOOL_H
 
@@ -26,26 +22,28 @@ class EventContext;
 
 namespace DerivationFramework {
 
- enum  EInvariantMassToolParser { kInvariantMassToolParser1, kInvariantMassToolParser2, kInvariantMassToolParserNum };
- class InvariantMassTool : public extends<ExpressionParserUser<AthAlgTool,kInvariantMassToolParserNum>, IAugmentationTool> {
-    public: 
-      InvariantMassTool(const std::string& t, const std::string& n, const IInterface* p);
+  enum  EInvariantMassToolParser { kInvariantMassToolParser1, kInvariantMassToolParser2, kInvariantMassToolParserNum };
+  class InvariantMassTool : public extends<ExpressionParserUser<AthAlgTool,kInvariantMassToolParserNum>, IAugmentationTool> {
+  public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
 
-    private:
-      std::string m_expression;
-      std::string m_expression2;
-      SG::WriteHandleKey<std::vector<float> > m_sgName {this,"StoreGateEntryName","","SG key of output object"};
-      float m_massHypothesis,m_massHypothesis2;
-      SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
-      SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of second container"};
-      SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_inputDecorNames {this, "InputDecorNames",{},"SG keys for decorations of first (and second) container(s)"};
-      StatusCode getInvariantMasses(std::vector<float>*, const EventContext& ctx) const;
-      static float calculateInvariantMass(const TVector3& v1, const TVector3&v2,float M1,float M2) ;
-  }; 
+    virtual StatusCode initialize() override final;
+    virtual StatusCode finalize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    Gaudi::Property<std::string> m_expression{this, "ObjectRequirements", "true"};
+    Gaudi::Property<std::string> m_expression2{this, "SecondObjectRequirements", ""};
+    SG::WriteHandleKey<std::vector<float> > m_sgName {this,"StoreGateEntryName","","SG key of output object"};
+    Gaudi::Property<float> m_massHypothesis{this, "MassHypothesis", 0.0};
+    Gaudi::Property<float> m_massHypothesis2{this, "SecondMassHypothesis", 2.0};
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName  {this,"ContainerName","","SG key of first container"};
+    SG::ReadHandleKey<xAOD::IParticleContainer> m_containerName2 {this,"SecondContainerName","","SG key of second container"};
+    SG::ReadDecorHandleKeyArray<xAOD::IParticleContainer> m_inputDecorNames {this, "InputDecorNames",{},"SG keys for decorations of first (and second) container(s)"};
+    StatusCode getInvariantMasses(std::vector<float>*, const EventContext& ctx) const;
+    static float calculateInvariantMass(const TVector3& v1, const TVector3&v2,float M1,float M2) ;
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_INVARIANTMASSTOOL_H

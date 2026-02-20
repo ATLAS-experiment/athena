@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigTauHypo_TrigTauPrecisionIDHypoTool_H
@@ -9,24 +9,25 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
+#include "xAODTau/TauJet.h"
+
 #include "Gaudi/Parsers/Factory.h"
 
-#include "ITrigTauPrecisionHypoTool.h"
+#include "ITrigTauJetHypoTool.h"
 
 
 /**
  * @class TrigTauPrecisionIDHypoTool
  * @brief Precision step hypothesis tool for applying ID cuts (standard chains)
  **/
-class TrigTauPrecisionIDHypoTool : public extends<AthAlgTool, ITrigTauPrecisionHypoTool> {
+class TrigTauPrecisionIDHypoTool : public extends<AthAlgTool, ITrigTauJetHypoTool> {
 public:
     TrigTauPrecisionIDHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
-    virtual ~TrigTauPrecisionIDHypoTool();
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input) const override;
-    virtual bool decide(const ITrigTauPrecisionHypoTool::ToolInfo& i) const override;
+    virtual StatusCode decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const override;
+    virtual bool decide(const ITrigTauJetHypoTool::ToolInfo& i) const override;
 
 private:
     enum IDMethod {
@@ -36,11 +37,9 @@ private:
     };
 
     enum IDWP {
-        None = -1,
-        VeryLoose = 0,
-        Loose = 1,
-        Medium = 2,
-        Tight = 3
+        None = 0,
+        Standard = 1,
+        HighPt = 2
     };
 
     HLT::Identifier m_decisionId;
@@ -53,12 +52,12 @@ private:
     Gaudi::Property<float> m_trackPtCut {this, "TrackPtCut", -1, "Only count tracks above this pT threshold (override the 1 GeV cut in the InDetTrackSelectorTool)"};
 
     Gaudi::Property<int> m_idMethod {this, "IDMethod", IDMethod::Disabled, "ID WP evaluation method (0: Disabled, 1: RNN, 2: Decorator)"};
-    Gaudi::Property<int> m_idWP {this, "IDWP", IDWP::None, "Minimum ID Working Point (-1: None, 0: VeryLoose, 1: Loose, 2: Medium, 3: Tight)"};
-    Gaudi::Property<std::vector<std::string>> m_idWPNames {this, "IDWPNames", {}, "ID WP decorated variable names; use with IDMethod=2"};
+    Gaudi::Property<std::string> m_idWP {this, "IDWP", "", "Minimum ID Working Point decorated flag (e.g. 'GNTau_Medium', or 'medium' for built-in RNN WPs)"};
 
     // High pT Tau selection
     Gaudi::Property<float> m_highPtTrkThr {this, "HighPtSelectionTrkThr", 200000, "Tau pT threshold for disabling the NTrackMin and NIsoTrackMax cuts" };
-    Gaudi::Property<float> m_highPtLooseIDThr {this, "HighPtSelectionLooseIDThr", 280000, "Tau pT threshold for loosening the IDWP cut to Loose (IDWP=1)"};
+    Gaudi::Property<float> m_highPtIdThr {this, "HighPtSelectionIDThr", 280000, "Tau pT threshold for switching to the high-pT ID WP cut"};
+    Gaudi::Property<std::string> m_highPtIdWP {this, "HighPtIDWP", "", "High pT ID Working Point (e.g. 'GNTau_Loose', or 'loose' for built-in RNN WPs)"};
     Gaudi::Property<float> m_highPtJetThr {this, "HighPtSelectionJetThr", 440000, "Tau pT threshold for disabling IDWP and NTrackMax cuts"};
 
     Gaudi::Property<bool> m_acceptAll {this, "AcceptAll", false, "Ignore selection"};
@@ -66,6 +65,14 @@ private:
     ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
     Gaudi::Property<std::map<std::string, std::pair<std::string, std::string>>> m_monitoredIdScores {this, "MonitoredIDScores", {}, "Pairs of the TauID score and signal-transformed scores for each TauID algorithm to be monitored"};
     std::map<std::string, std::pair<SG::ConstAccessor<float>, SG::ConstAccessor<float>>> m_monitoredIdAccessors;
+
+    // WP accessors
+    SG::ConstAccessor<char> m_id_wp_acc {"none"};
+    SG::ConstAccessor<char> m_highpt_id_wp_acc {"none"};
+
+    // Built-in RNN WPs
+    unsigned int m_rnn_id_wp = 0;
+    unsigned int m_rnn_highpt_id_wp = 0;
 };
 
 #endif

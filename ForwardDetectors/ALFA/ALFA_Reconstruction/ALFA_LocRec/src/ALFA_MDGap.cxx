@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_MDGap.h"
@@ -155,7 +155,7 @@ StatusCode ALFA_MDGap::Finalize(Float_t (&fRecXPos)[MAXTRACKNUM], Float_t (&fRec
 /************************************************/
 /*  Making projection and storing in an array   */
 /************************************************/
-void ALFA_MDGap::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag)
+void ALFA_MDGap::Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag)
 {
 	Float_t fSign;
 	Float_t fXInter, fYInter;
@@ -196,7 +196,7 @@ void ALFA_MDGap::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbR
 /************************************************/
 /*   Identifying plateau in projection array	*/
 /************************************************/
-void ALFA_MDGap::Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t&iNum) const
+void ALFA_MDGap::Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t&iNum) const
 {
 	std::vector<int> iSizePlateau;
 	Int_t iNumFib=0;
@@ -245,7 +245,7 @@ void ALFA_MDGap::Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb,
 		if ((p_max-p_min)<m_fOverlapCut)
 		{
 //			Storing the coordinate of the maximum
-			fb = fbRef+(p_min+p_max)/sqrt(2.0);
+			fb = fbRef+(p_min+p_max)/M_SQRT2;
 			fOv = p_max-p_min;
 //			iNum = iNumFib;
 		}
@@ -331,9 +331,9 @@ void ALFA_MDGap::Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n
 								Int_t (&Gaps)[2][2], std::vector<Int_t> &GapsID, Bool_t (&FGaps_p)[ALFAPLATESCNT], Bool_t (&FGaps_n)[ALFAPLATESCNT],
 								Int_t (&Gap_Fib_p)[ALFAPLATESCNT][2], Int_t (&Gap_Fib_n)[ALFAPLATESCNT][2])
 {
-	Int_t Over_p[72000];
-	Int_t Over_n[72000];
-	Int_t Over_copy[72000];
+	std::vector<Int_t> Over_p(72000);
+	std::vector<Int_t> Over_n(72000);
+	std::vector<Int_t> Over_copy(72000);
 	Int_t NumU=5;
 	Int_t NumV=5;
 	Float_t b_ref_p = -127.0;
@@ -429,17 +429,11 @@ void ALFA_MDGap::Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n
 			//Then looking for silent gaps in the plateau
 			//Filling the array with the gap information
 
-			for (Int_t bin=0;bin<72000;bin++)
-			{
-				Over_copy[bin]=Over_p[bin];
-			}
+                        Over_copy = Over_p;
 			Gaps[0][0] = Silent_Gap(Over_copy, b_neg, b_pos, FSel_p, FGaps_p, Gap_Fib_p, OvU, (Int_t)0);
 			Find_Proj(Over_copy, b_neg, b_pos_silent, OvU, NumU);
 
-			for (Int_t bin=0;bin<72000;bin++)
-			{
-				Over_copy[bin]=Over_n[bin];
-			}
+                        Over_copy = Over_n;
 			Gaps[1][0] = Silent_Gap(Over_copy, b_pos, b_neg, FSel_n, FGaps_n, Gap_Fib_n, OvV, 1);
 			Find_Proj(Over_copy, b_pos, b_neg_silent, OvV, NumV);
 
@@ -457,17 +451,11 @@ void ALFA_MDGap::Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n
 			}
 
 			//then looking for active gaps in the plateau
-			for (Int_t bin=0;bin<72000;bin++)
-			{
-				Over_copy[bin]=Over_p[bin];
-			}
+                        Over_copy = Over_p;
 			Gaps[0][1] = Active_Gap(0,Over_copy, b_neg, b_pos, FSel_p, OvU, 0);
 			Find_Proj(Over_copy, b_neg, b_pos_active, OvU, NumU);
 
-			for (Int_t bin=0;bin<72000;bin++)
-			{
-				Over_copy[bin]=Over_n[bin];
-			}
+                        Over_copy = Over_n;
 			Gaps[1][1] = Active_Gap(1,Over_copy, b_pos, b_neg, FSel_n, OvV, 1);
 			Find_Proj(Over_copy, b_pos, b_neg_active, OvV, NumV);
 
@@ -487,18 +475,12 @@ void ALFA_MDGap::Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n
 			//Then looking for both gaps in the plateau
 			if ((Gaps[0][0]>0 || Gaps[1][0]>0) && (Gaps[0][1]>0 || Gaps[1][1]>0))
 			{
-				for (Int_t bin=0;bin<72000;bin++)
-				{
-					Over_copy[bin]=Over_p[bin];
-				}
+        Over_copy = std::move(Over_p);
 				Silent_Gap(Over_copy, b_neg, b_pos, FSel_p, FG_p, G_F_p, OvU, 0);
 				Active_Gap(0,Over_copy, b_neg, b_pos, FSel_p, OvU, 0);
 				Find_Proj(Over_copy, b_neg, b_pos_active, OvU, NumU);
 
-				for (Int_t bin=0;bin<72000;bin++)
-				{
-					Over_copy[bin]=Over_n[bin];
-				}
+        Over_copy = std::move(Over_n);
 				Silent_Gap(Over_copy, b_pos, b_neg, FSel_n, FG_n, G_F_n, OvV, 1);
 				Active_Gap(1,Over_copy, b_pos, b_neg, FSel_n, OvV, 1);
 				Find_Proj(Over_copy, b_pos, b_neg_active, OvV, NumV);
@@ -534,7 +516,7 @@ void ALFA_MDGap::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRACKNUM
 }
 
 
-Int_t ALFA_MDGap::Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag)
+Int_t ALFA_MDGap::Silent_Gap(std::span<Int_t> Over, Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag)
 {
 	Float_t fSign;
 	Float_t fXInter, fYInter;
@@ -594,7 +576,7 @@ Int_t ALFA_MDGap::Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec,
 	return Found_Gap;
 }
 
-Int_t ALFA_MDGap::Active_Gap(Int_t iFiberSide, Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag)
+Int_t ALFA_MDGap::Active_Gap(Int_t iFiberSide, std::span<Int_t> Over, Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag)
 {
 	Float_t fSign;
 	Float_t fXInter, fYInter;

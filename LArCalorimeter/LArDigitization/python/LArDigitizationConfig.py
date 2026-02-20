@@ -1,6 +1,6 @@
 """Define functions for LAr Digitization with ComponentAccumulator
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 # utilities
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -20,10 +20,16 @@ from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXin
 from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
 from LArROD.LArNNChannelBuilder import LArNNRawChannelBuilderCfg
+from LArROD.LArOFFCChannelBuilder import LArOFFCRawChannelBuilderCfg
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 # for Trigger Tower
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
 from SGComps.AddressRemappingConfig import InputOverwriteCfg
+
+# Enum of CaloGains
+from ROOT.CaloGain import CaloGain
+
+
 
 def useLArFloat(flags):
     """Return bool for simplified transient LArHit with float E,time"""
@@ -139,19 +145,13 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
 
     if flags.Common.isOverlay:
         kwargs.setdefault("OnlyUseContainerName", False)
-        if flags.Overlay.ByteStream:
-            from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-            acc.merge(LArRawDataReadingCfg(flags))
-
-            kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}FREE")
+        if flags.Input.isMC:
+            kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_MC")
         else:
-            if flags.Input.isMC:
-                kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_MC")
-            else:
-                kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
+            kwargs.setdefault("InputDigitContainer", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
 
-            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-            acc.merge(SGInputLoaderCfg(flags, [f'LArDigitContainer#{kwargs["InputDigitContainer"]}']))
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'LArDigitContainer#{kwargs["InputDigitContainer"]}']))
     else:
         kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     LArPileUpTool = CompFactory.LArPileUpTool
@@ -193,8 +193,10 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshFCAL", 0)
+        kwargs.setdefault("GainRangeFCAL",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
     if (not flags.Digitization.HighGainEMECIW) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshEMECIW", 0)
+        kwargs.setdefault("GainRangeEMECIW",[int(CaloGain.LARMEDIUMGAIN),int(CaloGain.LARLOWGAIN)])
     kwargs.setdefault("RndmEvtOverlay", flags.Common.isOverlay)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("DigitContainer", flags.Overlay.BkgPrefix + "LArDigitContainer_MC")
@@ -243,6 +245,8 @@ def LArDigitizationBasicCfg(flags, **kwargs):
     acc.merge(LArHitEMapToDigitAlgCfg(flags))
     if flags.LAr.ROD.NNRawChannelBuilding:
         acc.merge(LArNNRawChannelBuilderCfg(flags))
+    elif flags.LAr.ROD.OFFCRawChannelBuilding:
+        acc.merge(LArOFFCRawChannelBuilderCfg(flags))
     else:
         acc.merge(LArRawChannelBuilderAlgCfg(flags))
 

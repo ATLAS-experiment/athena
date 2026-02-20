@@ -109,7 +109,7 @@
   <!-- sTGC -->
   <class name="Muon::MuonPrepDataContainer<Muon::MuonPrepDataCollection<Muon::sTgcPrepData> >" />
   <class name="Muon::MuonPrepDataCollection<Muon::sTgcPrepData>" />
-  <class name="DataVector<Muon::MuonPrepDataCollection<Muon::sTgcPrepData> >" id="CCD4055C-2A39-CAFF-3F82-5A9116AAFCB"/>
+  <class name="DataVector<Muon::MuonPrepDataCollection<Muon::sTgcPrepData> >" id="CCD4055C-2A39-CAFF-3F82-5A9116AAFC0B"/>
   <class name="std::vector<Muon::MuonPrepDataCollection<Muon::sTgcPrepData>*>" />
   <class name="Muon::sTgcPrepData" > 
     <field name="m_detEl" transient="true" />
@@ -134,7 +134,7 @@
   <!-- MM -->
   <class name="Muon::MuonPrepDataContainer<Muon::MuonPrepDataCollection<Muon::MMPrepData> >" />
   <class name="Muon::MuonPrepDataCollection<Muon::MMPrepData>" />
-  <class name="DataVector<Muon::MuonPrepDataCollection<Muon::MMPrepData> >" id="CCD4055C-2A39-CAFF-3F82-5A9116ADFCB"/>
+  <class name="DataVector<Muon::MuonPrepDataCollection<Muon::MMPrepData> >" id="CCD4055C-2A39-CAFF-3F82-5A9116ADFC0B"/>
   <class name="std::vector<Muon::MuonPrepDataCollection<Muon::MMPrepData>*>" />
   <class name="Muon::MMPrepData" > 
     <field name="m_detEl" transient="true" />

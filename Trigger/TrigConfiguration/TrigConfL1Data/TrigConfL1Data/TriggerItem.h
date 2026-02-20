@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_TriggerItem
@@ -13,6 +13,7 @@
 #include <string>
 #include <stdexcept>
 #include <iostream>
+#include <memory>
 
 namespace TrigConf {
 
@@ -33,14 +34,14 @@ namespace TrigConf {
       unsigned int       triggerType()      const { return m_TriggerType; }
       int                ctpId()            const { return m_CtpId; }
       unsigned int       partition()        const { return m_Partition; }
-      const TriggerItemNode* topNode()      const { return m_TopNode; }
+      const TriggerItemNode* topNode()      const { return m_TopNode.get(); }
       unsigned short     monitor()          const { return m_Monitor; }
       uint16_t           bunchgroupMask()   const;
 
       // setters
       void setComplexDeadtime( unsigned int cmpldt ) { m_ComplexDeadtime = cmpldt; }
       void setPartition( unsigned int partition ) { m_Partition = partition; }
-      void setTopNode(TriggerItemNode* ptrnode ) { m_TopNode = ptrnode; }
+      void setTopNode(std::unique_ptr<TriggerItemNode> ptrnode ) { m_TopNode = std::move(ptrnode); }
       void setTriggerType(unsigned int tt) { m_TriggerType = (tt & 0xff); }
       void setCtpId (int id) { m_CtpId = id; }
       void setDefinition(const std::string& def) { m_Definition = def; }
@@ -68,7 +69,7 @@ namespace TrigConf {
    private:
       unsigned int m_ComplexDeadtime;
       std::string m_Definition;
-      TriggerItemNode* m_TopNode;
+      std::unique_ptr<TriggerItemNode> m_TopNode;
       int m_CtpId;
       unsigned int m_TriggerType; // 8 bit word (4 bit for secondary partitions
       unsigned int m_Partition; // 8 bit word

@@ -228,7 +228,7 @@ def get_pad (advance_p = 1, padnum = -1):
     """Advance to the next pad, if requested.
 Allow clicking on the pads (button 2) to change the next pad.
 """
-    global _lastpad, _nextpad, _npads
+    global _lastpad, _nextpad
     
     c1 = get_canvas()
     pad = TVirtualPad.Pad()

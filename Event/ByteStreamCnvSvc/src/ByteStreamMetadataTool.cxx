@@ -39,7 +39,7 @@ ByteStreamMetadataTool::initialize()
   ATH_CHECK(m_metadataStore.retrieve());
   ATH_CHECK(m_inputStore.retrieve());
 
-  return(StatusCode::SUCCESS);
+  return StatusCode::SUCCESS;
 }
 
 
@@ -83,7 +83,7 @@ ByteStreamMetadataTool::beginInputFile(const SG::SourceID&)
 
       transGuids.clear();
       // Check for existing container
-      ByteStreamMetadataContainer* bsmdc = 0;
+      ByteStreamMetadataContainer* bsmdc = nullptr;
 
       if (m_metadataStore->contains<ByteStreamMetadataContainer>(key)) {
 

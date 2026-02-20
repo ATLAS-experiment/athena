@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LUCID_EventTPCnv/test/LUCID_SimHitCnv_p2_test.cxx
@@ -90,7 +90,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   testit (trans1);
 }
 
-
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* pSvcLoc = nullptr;

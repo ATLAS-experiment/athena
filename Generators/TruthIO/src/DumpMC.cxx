@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthIO/DumpMC.h"
@@ -47,7 +47,7 @@ StatusCode DumpMC::execute() {
      lambda_vertices_to_remove.push_back(part->end_vertex());
      part->set_status(1);
     }
-    for (auto v: lambda_vertices_to_remove)  (*evt)->remove_vertex(v);
+    for (auto v: lambda_vertices_to_remove)  (*evt)->remove_vertex(std::move(v));
 #else
       // Loop over the vertices of the event
       std::set<int> Lambdas;

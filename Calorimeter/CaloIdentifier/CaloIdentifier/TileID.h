@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -27,7 +27,6 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/BaseInfo.h"
 
-#include "boost/range/iterator_range.hpp"
 #include <string>
 #include <vector>
 #include <set>

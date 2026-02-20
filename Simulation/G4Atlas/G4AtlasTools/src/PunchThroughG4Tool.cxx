@@ -294,6 +294,15 @@ std::vector<std::map<std::string, double>> PunchThroughG4Tool::computePunchThrou
   // Get Geant4 particle definition
   const G4ParticleDefinition * mainG4Particle = g4PrimaryTrack->GetDefinition();
 
+  // Printing for debugging
+  ATH_MSG_DEBUG("PunchThroughG4Tool::computePunchThroughParticles Debug:"
+                 << " Incoming particle:"
+                 << " E="    << g4PrimaryTrack->GetKineticEnergy()/CLHEP::GeV << " GeV"
+                 << " theta=" << g4PrimaryTrack->GetMomentumDirection().theta()
+                 << " phi="   << g4PrimaryTrack->GetMomentumDirection().phi()
+                 << " PDG="   << (mainG4Particle ? mainG4Particle->GetPDGEncoding() : -999)
+                 << " Name="  << (mainG4Particle ? mainG4Particle->GetParticleName() : "UNKNOWN"));
+
   // Get primary Geant4 particle properties
   int pdgID = mainG4Particle->GetPDGEncoding();
   float mainPartMass = mainG4Particle->GetPDGMass();
@@ -386,8 +395,10 @@ std::vector<std::map<std::string, double>> PunchThroughG4Tool::computePunchThrou
   int nTries = 0;
 
   // loop over all particle pdgs
+  ATH_MSG_DEBUG("[DEBUG] Enter computePunchThroughParticles: starting while (retry) loop");
   while(secKinematicsMapVect.empty() && nTries < maxTries) { //ensure we always create at least one punch through particle, maxTries to catch very rare cases
     // loop over all particle pdgs
+    ATH_MSG_DEBUG("[DEBUG] Retry " << nTries << ", secKinematicsMapVect.size=" << secKinematicsMapVect.size());
     for (const auto& currentParticle : m_particles)
     {
       // the pdg that is currently treated
@@ -440,6 +451,19 @@ std::vector<std::map<std::string, double>> PunchThroughG4Tool::computePunchThrou
         getAllParticles(*g4PrimaryTrack, secKinematicsMapVect, rndmEngine, doPdg, interpEnergy, interpEta);
       } 
     } // for-loop over all particle pdgs
+
+    // Debugging: Stored properties secondary particles to be simulated
+    if (msgLvl(MSG::DEBUG) && !secKinematicsMapVect.empty()) {
+      for (size_t i = 0; i < secKinematicsMapVect.size(); ++i) {
+        ATH_MSG_DEBUG("Secondary[" << i << "] kinematics:");
+        for (const auto& kv : secKinematicsMapVect[i]) {
+          ATH_MSG_DEBUG("   " << kv.first << " = " << kv.second);
+        }
+      }      
+    }
+
+    // increment so that we can escape the while loop at maxTries
+    nTries++;
   }
 
   return secKinematicsMapVect;

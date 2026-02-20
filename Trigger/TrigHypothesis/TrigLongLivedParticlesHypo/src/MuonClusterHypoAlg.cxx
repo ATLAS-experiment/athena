@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -134,7 +134,7 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
     }
    
     // Creating the DecisionInfo struct to pass to the HypoTool
-    MuonClusterHypoTool::DecisionInfo tool_info{d, compCont, prev};
+    MuonClusterHypoTool::DecisionInfo tool_info{d, compCont, std::move(prev)};
 
     t2.start();
     for ( auto& tool: m_hypoTools ){

@@ -37,9 +37,6 @@ public:
   /// Does the work of simulating an ATLAS event
   bool ProcessEvent(G4Event* event);
 
-  /// G4 function called at start of run
-  void RunInitialization() override final;
-
   /// G4 function called at end of run
   void RunTermination() override final;
 
@@ -63,14 +60,6 @@ public:
   /// Configure the QuietMode option
   void SetQuietMode(bool quietMode) {
     m_quietMode = quietMode;
-  }
-
-  /// Bring in all overloads from G4RunManager
-  using G4RunManager::SetUserInitialization;
-
-  /// Allow user worker initialization for single-threaded runmanager
-  void SetUserInitialization(G4UserWorkerInitialization* userInit) override {
-    userWorkerInitialization = userInit;
   }
 
 protected:

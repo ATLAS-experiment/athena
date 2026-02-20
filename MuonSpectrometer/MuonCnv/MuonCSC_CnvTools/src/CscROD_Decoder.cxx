@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscROD_Decoder.h"
@@ -430,13 +430,13 @@ void Muon::CscROD_Decoder::rodVersion2(const ROBFragment& robFrag, CscRawDataCon
         rawCollection->erase(rawCollection->begin(), rawCollection->end());
     }
 
-    if (rawCollection) {
-        StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
-        if (status_lock.isFailure()) {
-            ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
-            return;
-        }
+
+    StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
+    if (status_lock.isFailure()) {
+        ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
+        return;
     }
+
 
     ATH_MSG_DEBUG("end of CscROD_Decode::fillCollection()");
 }
@@ -566,13 +566,13 @@ void Muon::CscROD_Decoder::rodVersion1(const ROBFragment& robFrag, CscRawDataCon
         if (i < (size - rodFooter)) dpuFragment = rodReadOut.isDPU(p[i]);
     }
 
-    if (rawCollection) {
-        StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
-        if (status_lock.isFailure()) {
-            ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
-            return;
-        }
+
+    StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
+    if (status_lock.isFailure()) {
+        ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
+        return;
     }
+
 
     }
 
@@ -611,7 +611,7 @@ void Muon::CscROD_Decoder::rodVersion0(const ROBFragment& robFrag, CscRawDataCon
         ATH_MSG_DEBUG("CSC RDO collection does not exist - creating a new one with hash = " << idColl);
         rawCollection = std::make_unique<CscRawDataCollection>(idColl);
     }
-
+    
     // set the ROD id and the subDector id
     rawCollection->setSubDetectorId(subDetectorId);
     rawCollection->setRodId(rodId);
@@ -644,15 +644,7 @@ void Muon::CscROD_Decoder::rodVersion0(const ROBFragment& robFrag, CscRawDataCon
             i += 1;
         } else
             ATH_MSG_ERROR("expecting an address fragment");
-        /*   MN
-        uint16_t * amplitude = new uint16_t[4];
-        *amplitude           = rodReadOut.getAmp1();
-        *(amplitude+1)       = rodReadOut.getAmp2();
-        *(amplitude+2)       = rodReadOut.getAmp3();
-        *(amplitude+3)       = rodReadOut.getAmp4();
-        uint32_t address     = rodReadOut.address();
-        CscRawData * rawData = new CscRawData(amplitude,address,idColl);
-        */
+        
         std::vector<uint16_t> amplitudes;
         amplitudes.push_back(rodReadOut.getAmp1());
         amplitudes.push_back(rodReadOut.getAmp2());
@@ -666,12 +658,12 @@ void Muon::CscROD_Decoder::rodVersion0(const ROBFragment& robFrag, CscRawDataCon
         bodyFragment = rodReadOut.isBody(p[i]);
     }
 
-    if (rawCollection) {
-        StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
-        if (status_lock.isFailure()) {
-            ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
-            return;
-        }
+
+    StatusCode status_lock = lock.addOrDelete(std::move(rawCollection));
+    if (status_lock.isFailure()) {
+        ATH_MSG_ERROR("Could not insert CscRawDataCollection into CscRawDataContainer...");
+        return;
     }
+    
 
     }

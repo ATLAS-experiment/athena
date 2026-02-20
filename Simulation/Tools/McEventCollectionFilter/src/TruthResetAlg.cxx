@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TruthResetAlg.h"
@@ -20,14 +20,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include <climits>
 
-TruthResetAlg::TruthResetAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator)
-{
- declareProperty("InputMcEventCollection" , m_inputMcEventCollection  = "TruthEvent");
- declareProperty("OutputMcEventCollection" , m_outputMcEventCollection  = "NewTruthEvent");
-}
-
-
 //----------------------------------------------------
 StatusCode TruthResetAlg::initialize() {
 //----------------------------------------------------
@@ -39,11 +31,11 @@ StatusCode TruthResetAlg::initialize() {
 }
 
 //-------------------------------------------------
-StatusCode TruthResetAlg::execute() {
+StatusCode TruthResetAlg::execute(const EventContext& ctx) const {
 //-------------------------------------------------
 
   ATH_MSG_DEBUG( " execute..... " );
-  SG::ReadHandle<McEventCollection> inputMcEventCollection(m_inputMcEventCollection);
+  SG::ReadHandle<McEventCollection> inputMcEventCollection(m_inputMcEventCollection, ctx);
   if (!inputMcEventCollection.isValid()) {
     ATH_MSG_ERROR("Could not find input McEventCollection called " << inputMcEventCollection.name() << " in store " << inputMcEventCollection.store() << ".");
     return StatusCode::FAILURE;
@@ -221,7 +213,7 @@ StatusCode TruthResetAlg::execute() {
     return StatusCode::FAILURE;
   }
 
-  SG::WriteHandle<McEventCollection> outputMcEventCollection(m_outputMcEventCollection);
+  SG::WriteHandle<McEventCollection> outputMcEventCollection(m_outputMcEventCollection, ctx);
   ATH_CHECK(outputMcEventCollection.record(std::make_unique<McEventCollection>()));
   outputMcEventCollection->push_back(outputEvent.release());
   if (!outputMcEventCollection.isValid()) {

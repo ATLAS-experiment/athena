@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloPprConditionsContainerRun2.h"
@@ -156,7 +156,7 @@ std::vector<std::string> L1CaloPprConditionsContainerRun2::coolInputKeys()
       this->coolFolderKey(L1CaloPprConditionsContainerRun2::ePprChanCalib);
 
   if (!calibKey.empty()) {
-    result.push_back(calibKey);
+    result.push_back(std::move(calibKey));
   } else {
     result.push_back(this->coolFolderKey(
         L1CaloPprConditionsContainerRun2::ePprChanCalibCommon));

@@ -34,11 +34,6 @@ public:
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(xAOD::TauJet &tau) const override;
-    // Getter for the underlying RNN implementation
-    const TauJetRNN* get_rnn_0p() const;
-    const TauJetRNN* get_rnn_1p() const;
-    const TauJetRNN* get_rnn_2p() const;
-    const TauJetRNN* get_rnn_3p() const;
 
     // Selects tracks to be used as input to the network
     StatusCode get_tracks(const xAOD::TauJet &tau,

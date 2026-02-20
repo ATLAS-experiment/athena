@@ -49,7 +49,7 @@ namespace RCU
 	if (myname.empty())
 	  RCU_THROW_MSG ("file name " + *file + " should not end with a \"/\"");
 	if (name.empty())
-	  name = myname;
+	  name = std::move(myname);
 	else if (name != myname)
 	  RCU_THROW_MSG ("inconsistent file names " + name + " and " + myname);
       }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # TEST2.py - derivation framework example demonstrating skimming via means of string 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -8,14 +8,11 @@ from AthenaCommon.CFElements import seqAND
 
 def TEST2SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-    acc = ComponentAccumulator()
-    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    acc.addPublicTool(CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "TEST2StringSkimmingTool",
-                                                                             expression = "count(Muons.pt > (1 * GeV)) >= 1",
-                                                                             TrigDecisionTool=tdt), 
-                      primary = True)
-    return(acc)                          
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(
+        flags, name = "TEST2StringSkimmingTool",
+        expression = "count(Muons.pt > (1 * GeV)) >= 1")
 
 def TEST2KernelCfg(flags, name='TEST2Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel)"""
@@ -53,15 +50,13 @@ def TEST2Cfg(flags):
                                             "InDetTrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMPFlow",
-                                            "BTagging_AntiKtVR30Rmax4Rmin02Track", 
+
                                             "MET_Baseline_AntiKt4EMTopo",
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
                                             "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     TEST2ItemList = TEST2SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))

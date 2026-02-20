@@ -623,12 +623,12 @@ bool TrigNavStructure::addOneLevel(std::vector< std::vector<TriggerElement*> >& 
 
       std::vector<TriggerElement*> cbs;
       cbs.push_back(newTEs[j]);
-      newCombs.push_back(cbs);
+      newCombs.push_back(std::move(cbs));
 
       // Do the same for the auxiliary data
       std::vector<std::pair<unsigned int, unsigned int> > ti;
-      ti.push_back(std::pair<unsigned int, unsigned int>(type, j));
-      newIdxs.push_back(ti);
+      ti.emplace_back(type, j);
+      newIdxs.push_back(std::move(ti));
     }
     return 1;
   }

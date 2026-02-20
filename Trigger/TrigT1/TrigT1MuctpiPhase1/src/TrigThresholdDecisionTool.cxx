@@ -443,7 +443,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 	break;
       }
       std::string sub = str.substr(pos, newPos-pos);
-      parsed.push_back(sub);
+      parsed.push_back(std::move(sub));
       pos = newPos+1;
       first = false;
     }
@@ -467,7 +467,7 @@ StatusCode TrigThresholdDecisionTool::configureToolFromMenu(const TrigConf::L1Me
 	aa += "&";
       }
       std::string bb = aa.substr(0,aa.size()-1); // remove the last "&"
-      set_ors.insert(bb);
+      set_ors.insert(std::move(bb));
     }
     std::string aa = "";
     for(const auto& ors : set_ors){

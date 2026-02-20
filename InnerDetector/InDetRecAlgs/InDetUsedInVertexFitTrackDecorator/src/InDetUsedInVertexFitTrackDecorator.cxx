@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
-// InDetUsedInVertexFitTrackDecorator.cxx, (c) ATLAS Detector software
+// InDetUsedInVertexFitTrackDecorator.cxx
 ///////////////////////////////////////////////////////////////////
 // Author: Matthew Basso (matthew.joseph.basso@cern.ch)
 // A very simple tool for decorating tracks with their "used-in-fit" info (AMVF fit vertices and weights)
@@ -38,12 +38,12 @@ StatusCode InDet::InDetUsedInVertexFitTrackDecorator::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDet::InDetUsedInVertexFitTrackDecorator::execute(__attribute__((unused)) const EventContext& ctx) const
+StatusCode InDet::InDetUsedInVertexFitTrackDecorator::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("In addBranches(...) for " << name() <<  "...");
 
   // Decorate our tracks
-  m_decoTool->decorate();
+  m_decoTool->decorate(ctx);
 
   return StatusCode::SUCCESS;
 }

@@ -7,6 +7,7 @@
 #include <FTagAnalysisAlgorithms/BTaggingScoresAlg.h>
 #include <FTagAnalysisAlgorithms/XbbInformationDecoratorAlg.h>
 #include <FTagAnalysisAlgorithms/XbbEfficiencyAlg.h>
+#include <FTagAnalysisAlgorithms/SSVWeightsAlg.h>
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -18,3 +19,4 @@ DECLARE_COMPONENT (CP::BTaggingInformationDecoratorAlg)
 DECLARE_COMPONENT (CP::BTaggingScoresAlg)
 DECLARE_COMPONENT (CP::XbbInformationDecoratorAlg)
 DECLARE_COMPONENT (CP::XbbEfficiencyAlg)
+DECLARE_COMPONENT (CP::SSVWeightsAlg)

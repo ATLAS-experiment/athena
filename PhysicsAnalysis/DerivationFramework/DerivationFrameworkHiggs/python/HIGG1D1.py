@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_HIGG1D1.py
 # This defines DAOD_HIGG1D1, an unskimmed DAOD format for Run 3.
@@ -268,15 +268,13 @@ def HIGG1D1Cfg(flags):
                                               "InDetTrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
-                                              "BTagging_AntiKt4EMPFlow",
-                                              "BTagging_AntiKtVR30Rmax4Rmin02Track",
+
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
                                               "DiTauJets",
                                               "DiTauJetsLowPt",
-                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                              "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
+                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
@@ -364,7 +362,7 @@ def HIGG1D1Cfg(flags):
                                                  "Muons.TruthLink",
                                                  "Photons.TruthLink",
                                                  "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
-                                                 "AntiKt4EMPFlowJets.QGTransformer_ConstScore.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
+                                                 "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt",
                                                  "TruthPrimaryVertices.t.x.y.z",
                                                  "EventInfo.DFCommonJetsCustomVtx_eventClean_LooseBad.DFCommonJetsCustomVtx_eventClean_TightBad.hardScatterVertexLink.timeStampNSOffset",
                                                  "TauJets.dRmax.etOverPtLeadTrk"]
@@ -398,8 +396,6 @@ def HIGG1D1Cfg(flags):
                 "AFPVertexContainerAux":"xAOD::AFPVertexAuxContainer",
                 "AFPToFTrackContainer":"xAOD::AFPToFTrackContainer",
                 "AFPToFTrackContainerAux":"xAOD::AFPToFTrackAuxContainer",
-                "BTagging_AntiKt4EMPFlowCustomVtx":"xAOD::BTaggingContainer",
-                "BTagging_AntiKt4EMPFlowCustomVtxAux":"xAOD::BTaggingAuxContainer"
              })
 
     HIGG1D1SlimmingHelper.AllVariables += [
@@ -419,8 +415,8 @@ def HIGG1D1Cfg(flags):
                                            "AFPToFTrackContainer"]
     # Add Btagging information
     from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets", flags)
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", flags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent(flags, "AntiKt4EMPFlowCustomVtxJets")
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent(flags, "AntiKt4EMPFlowJets")
 
     # is this really needed given Photons are in the AllVariables list ?
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent

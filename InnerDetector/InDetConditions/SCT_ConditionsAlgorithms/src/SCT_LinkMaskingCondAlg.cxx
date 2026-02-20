@@ -7,7 +7,7 @@
 #include <memory>
 
 SCT_LinkMaskingCondAlg::SCT_LinkMaskingCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

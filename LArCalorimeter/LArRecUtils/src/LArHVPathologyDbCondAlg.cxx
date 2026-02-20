@@ -28,7 +28,7 @@
 
 
 LArHVPathologyDbCondAlg::LArHVPathologyDbCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name,pSvcLocator), m_hvmapTool("LArHVMapTool",this)
+  : AthCondAlgorithm(name,pSvcLocator), m_hvmapTool("LArHVMapTool",this)
 { }
 
 LArHVPathologyDbCondAlg::~LArHVPathologyDbCondAlg()

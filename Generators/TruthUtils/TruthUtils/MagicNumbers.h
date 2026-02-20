@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -9,6 +9,7 @@
 #include <limits>
 #include <cstdint>
 #include <memory>
+#include <algorithm>
 #include <deque>
 #include <type_traits>
 #if !defined(XAOD_STANDALONE)

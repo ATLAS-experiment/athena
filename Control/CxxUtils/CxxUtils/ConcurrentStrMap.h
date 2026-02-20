@@ -17,8 +17,8 @@
 #include "CxxUtils/ConcurrentHashmapImpl.h"
 #include "CxxUtils/UIntConv.h"
 #include "CxxUtils/IsUpdater.h"
+#include "CxxUtils/iterator_range.h"
 #include "boost/iterator/iterator_facade.hpp"
-#include "boost/range/iterator_range.hpp"
 #include <type_traits>
 #include <stdexcept>
 
@@ -260,7 +260,7 @@ public:
 
 
   /// A range defined by two iterators.
-  typedef boost::iterator_range<const_iterator> const_iterator_range;
+  using const_iterator_range = CxxUtils::iterator_range<const_iterator>;
 
 
   /**

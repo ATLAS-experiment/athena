@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetForwardJvtTool.cxx
@@ -37,7 +37,7 @@
   ////////////////////////////
   StatusCode JetForwardJvtTool::initialize()
   {
-    ATH_MSG_INFO ("Initializing " << name() << "...");
+    ATH_MSG_DEBUG ("Initializing " << name() << "...");
     if (m_tightOP) m_fjvtThresh = 0.4;
     else m_fjvtThresh = 0.5;
 

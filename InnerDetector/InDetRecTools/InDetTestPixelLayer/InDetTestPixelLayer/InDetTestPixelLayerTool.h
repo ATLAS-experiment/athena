@@ -17,7 +17,6 @@
 
 #include "InDetConditionsSummaryService/IInDetConditionsTool.h"
 
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -136,9 +135,6 @@ private:
    */
   SG::ReadHandleKey<InDet::SiDetectorElementStatus> m_pixelDetElStatus
      {this, "PixelDetElStatus", "", "Key of SiDetectorElementStatus for Pixel"};
-
-  ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
-     {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
   /** detector helper*/
   const AtlasDetectorID* m_idHelper;

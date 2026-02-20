@@ -41,56 +41,112 @@ StatusCode ITkStripsRodDecoder::initialize()
 
 // fillCollection method
 StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-					                                    SCT_RDO_Container& /*rdoIDCont*/,
-                                              IDCInDetBSErrContainer& errorsIDC,
-                                              DataPool<SCT3_RawData>* dataItemsPool,
-                                              const EventContext& /*ctx*/,
-                                              const std::vector<IdentifierHash>* vecHash) const
+					                                    SCT_RDO_Container& rdoIDCont,
+                                                                       IDCInDetBSErrContainer& errorsIDC,
+                                                                       DataPool<SCT3_RawData>* dataItemsPool,
+                                                                           const EventContext& ctx,
+                                                            const std::vector<IdentifierHash>* vecHash) const
 {
-  SCT_RodDecoderErrorsHelper errs{errorsIDC}; // on destruction will fill the IDC
+  SCT_RodDecoderErrorsHelper errs = errorsIDC; // on destruction will fill the IDC
 
-  StatusCode sc{StatusCode::SUCCESS};
+  const uint32_t robID=robFrag.rod_source_id();
+
+  StatusCode sc = StatusCode::SUCCESS;
 
   SharedData data;
   data.reset();
 
   CacheHelper cache; // For the trigger
-  cache.vecHash = vecHash;
+  cache.vecHash = vecHash;  
 
   OFFLINE_FRAGMENTS_NAMESPACE::PointerType vecROBData;
   const unsigned long int vecROBDataSize{robFrag.rod_ndata()};
-
+  if (vecROBDataSize >   robFrag.payload_size_word()) {
+     ATH_MSG_WARNING("The ROB data does not seem to fit in the payload. Rejecting fragment (ndata size  " << vecROBDataSize << " !< payload size " << robFrag.payload_size_word()
+                     << " header size: " <<  robFrag.rod_header_size_word()
+                     << " trailer size: " << robFrag.rod_trailer_size_word()
+                     << " fragment size: " << robFrag.rod_fragment_size_word()
+                     << ")");
+     return StatusCode::RECOVERABLE;
+  }  
   robFrag.rod_data(vecROBData);
+  
+  ATH_MSG_DEBUG("vecROBDataSize: " << vecROBDataSize);
+  
   // Loop over header, hit element, flagged ABCD error, raw data, trailer words
- 
+  for (uint32_t i=0; i<vecROBDataSize; i++) {
+    // The data is 16-bits wide packed to a 32-bit word (rob_it1). So we unpack it here.
+    ATH_MSG_DEBUG("ROB: "<< std::bitset<32>(vecROBData[i]));
+  }
+  
   const uint8_t* vecROBData_8bits = reinterpret_cast<const uint8_t*>(vecROBData);
   const size_t total_bytes = vecROBDataSize * sizeof(uint32_t);
 
-  for (size_t i = 0; i + 9 < total_bytes; i += 10) { // 10 bytes per package
-    //Read Header
-    bool hasError{false};
-    uint16_t header = (vecROBData_8bits[i] << 8) | vecROBData_8bits[i + 1];
+  uint32_t nclusters = 0;
+  uint8_t isHCCHeader   = 0;
+  int nPacket       = 0;
+  uint16_t hccword1 = 0;
+  uint8_t word8     = 0;
+  uint8_t HccHeadFound = 0;
+  uint16_t packetSize = 0;
+  bool noClusterTag = false;
   
-    uint8_t type      = (header >> 11) & 0x1F; 
-
-    // Useful information
-    // uint8_t l0tag     = (header >> 7)  & 0xF;
-    // uint8_t bcid_low  = (header >> 4)  & 0x7;
-    // uint8_t bcid_xor  = header & 0xF;
-
-    if (type == 0x03) {  // PR Header
-      bool breakNow{false};
-      ATH_MSG_DEBUG("PR Packet Found");
-      if (hasError) sc = StatusCode::RECOVERABLE;
-      if (breakNow) break;
-    } else {
-    ATH_MSG_WARNING("Unexpected packet type (not PR): 0x" << std::hex << int(type));
-    continue;
+  for (size_t i=0; i < total_bytes; i+=2) {
+    //Read Header
+    bool hasError   = false;
+    bool breakNow   = false;
+    uint16_t psize=packetSize/4;    
+    uint16_t word16 = (vecROBData_8bits[i] << 8) | vecROBData_8bits[i + 1];
+    ATH_MSG_DEBUG(" 16-bit word: " << std::bitset<16>(word16) << " " << (uint32_t)i << " " << total_bytes );
+    
+    if(i==total_bytes-2) ATH_MSG_DEBUG("nClusters found (this): " << (uint32_t)nclusters);
+    
+    ATH_MSG_DEBUG("Check: " << nPacket << " Packets: " << packetSize/4 << " isHCCHeader: " << (uint32_t)isHCCHeader << " " << nPacket);
+    
+    if(psize != 0 && nPacket != 0){
+      ATH_MSG_DEBUG("check: " << (nPacket+1) % (packetSize/2));
+      if((nPacket+1) % (packetSize/2)==0) nPacket=-1;
     }
-    for (int j = 0; j < 4; ++j) {
-      uint16_t cluster = (vecROBData_8bits[i + 2 + j * 2] << 8) | vecROBData_8bits[i + 3 + j * 2];
-      if (cluster == 0x7FFF){
-        ATH_MSG_DEBUG("Cluster [" << j << "] empty ");
+
+    if(word16 == 0 && noClusterTag){
+      ATH_MSG_DEBUG("Skip empty end of packet 16-bit word: ");
+      nPacket++;
+    }else if((vecROBData_8bits[i] == 0 || isHCCHeader == 1) && HccHeadFound == 0 && nPacket<2){
+      //HCC header found
+      ATH_MSG_DEBUG("HCC header found, will decode the next three 8-bit words: " <<(uint32_t)isHCCHeader);
+      if(isHCCHeader == 0){
+        hccword1 = (vecROBData_8bits[i + 1] << 8) | vecROBData_8bits[i+2];
+        ATH_MSG_DEBUG("HCC header: "<<std::bitset<16>(hccword1));        
+      } else if(isHCCHeader == 1){
+        word8 = vecROBData_8bits[i + 1];
+        ATH_MSG_DEBUG("HCC header: "<<std::bitset<8>(word8));        
+      }      
+      ATH_CHECK(processHccHeader(hccword1, word8, isHCCHeader, robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, breakNow,ctx));
+      if(isHCCHeader==0) HccHeadFound = 1;
+      nPacket++;
+      noClusterTag=false;
+    }else if((HccHeadFound==1 && vecROBData_8bits[i] == 0) || HccHeadFound==2){      
+      if(HccHeadFound==1) HccHeadFound=2;
+      else if(HccHeadFound==2){
+        packetSize = word16;
+        ATH_MSG_DEBUG("Packet size is: " << packetSize );
+        HccHeadFound=0;
+      }
+      nPacket++;
+    }else if(((vecROBData_8bits[i] & 0xF8) == 0x18) && (((nPacket+1) % (packetSize/2)) == 5)){
+      nPacket++;      
+      ATH_MSG_DEBUG("Header found: " << std::bitset<16>(word16));
+      nclusters=0;      
+      ATH_CHECK(processHeader(word16, robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, breakNow,ctx));
+    }else{
+      nPacket++;
+      if(word16 == 0xed6f){
+        ATH_MSG_DEBUG("No more clusters found");
+        noClusterTag=true;
+        continue;
+      }else{
+        nclusters+=1;
+        ATH_CHECK(processHits(word16, robID, data, rdoIDCont, dataItemsPool, cache, errs, hasError, ctx));
       }
     }
   }
@@ -213,21 +269,99 @@ StatusCode ITkStripsRodDecoder::addSingleError(const IdentifierHash& /*hashID*/,
   return StatusCode::SUCCESS;
 }
 
-StatusCode ITkStripsRodDecoder::processHeader(const uint16_t inData,
-                                         const uint32_t robID,
-                                         SharedData& data,
-                                         SCT_RDO_Container& rdoIDCont,
-                                         DataPool<SCT3_RawData>* dataItemsPool,
-                                         CacheHelper& cache,
-                                         SCT_RodDecoderErrorsHelper& errs,
-                                         bool& hasError,
-                                         bool& breakNow,
-                                         const EventContext& ctx) const
+
+StatusCode ITkStripsRodDecoder::processHccHeader(const uint16_t hccword1,
+                                                 const uint8_t word8,
+                                                 uint8_t &isHCCHeader,
+                                                 const uint32_t /*robID*/,
+                                                 SharedData& /*data*/,
+                                                 SCT_RDO_Container& /*rdoIDCont*/,
+                                                 DataPool<SCT3_RawData>* /*dataItemsPool*/,
+                                                 CacheHelper& /*cache*/,
+                                                 SCT_RodDecoderErrorsHelper& /*errs*/,
+                                                 bool& /*hasError*/,
+                                                 bool& /*breakNow*/,
+                                                 const EventContext& /*ctx*/) const
 {
+
   StatusCode sc{StatusCode::SUCCESS};
+  
+  if(isHCCHeader == 1){
+    isHCCHeader = 0;
+    ATH_MSG_DEBUG("Decoding HCC bits");
+    /*24 bits in total
+    bits from 24-8 are in hccword1
+    Last 8bits are in word8
+    */
+    uint8_t barrel = ((hccword1 >> 8) & 0x80);
+    ATH_MSG_DEBUG("is barrel: " << std::bitset<16>(hccword1 >> 8) << " " << std::bitset<8>(barrel));
+    uint8_t side   = ((hccword1 >> 5) & 0x80);
+    ATH_MSG_DEBUG("side     : " << std::bitset<16>(hccword1 >> 5) << " " << std::bitset<8>(side));
+    uint8_t disk   = ((hccword1 >> 9) & 0x7);
+    ATH_MSG_DEBUG("disk     : " << std::bitset<16>((hccword1 >> 9) & 0x7) << " " << std::bitset<8>(disk));
+    uint8_t inout  = ((hccword1 >> 8) & 0x1);
+    ATH_MSG_DEBUG("inout    : " << std::bitset<16>((hccword1 >> 8) & 0x1) << " " << std::bitset<8>(inout));
+    uint8_t petal  = ((hccword1 >> 7) & 0x1);
+    ATH_MSG_DEBUG("petal    : " << std::bitset<16>((hccword1 >> 7) & 0x1) << " " << std::bitset<8>(petal));        
+    uint8_t phimod = hccword1 & 0x7F;
+    ATH_MSG_DEBUG("phimod   : " << std::bitset<16>(hccword1 & 0x7F) << " " << std::bitset<8>(phimod));
+    uint8_t hccnum = word8 & 0x80;
+    ATH_MSG_DEBUG("hccnum   : " << std::bitset<16>(word8 & 0x80) << " " << std::bitset<8>(hccnum));
+    uint8_t etamod = word8 & 0x3F;
+    ATH_MSG_DEBUG("etamod   : " << std::bitset<16>(word8 & 0x3F) << " " << std::bitset<8>(etamod));        
+
+    bool isbarrel = (barrel != 0x0);
+    bool issideA  = (side   != 0x0);
+    bool isinout  = (inout  == 0x1);
+    bool ispetal  = (petal  == 0x1);
+    uint8_t hccN  = (hccnum == 0x80) ? 2 : 1;
+
+
+    ATH_MSG_DEBUG("isBarrel: " << isbarrel << " isSideA: " << issideA << " disk: " << (uint32_t)disk);
+    ATH_MSG_DEBUG("isInOut: " << isinout << " isPetal: " << ispetal << " phimod: " << (uint32_t)phimod);
+    ATH_MSG_DEBUG("HCCNum: " << (uint32_t)hccN << " etamod: " << (uint32_t)etamod);
+
+    ATH_MSG_DEBUG("hccheader " << isbarrel << " " << issideA << " " << (uint32_t)disk << " " << (uint32_t)inout << " " << (uint32_t)phimod << " " << (uint32_t)etamod << " " << (uint32_t)hccN );
+  }  
+  else isHCCHeader++;
+
+  return sc;
+}
+
+
+StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
+                                              const uint32_t robID,
+                                              SharedData& data,
+                                              SCT_RDO_Container& rdoIDCont,
+                                              DataPool<SCT3_RawData>* dataItemsPool,
+                                              CacheHelper& cache,
+                                              SCT_RodDecoderErrorsHelper& errs,
+                                              bool& hasError,
+                                              bool& breakNow,
+                                              const EventContext& ctx) const
+{
+  StatusCode sc = StatusCode::SUCCESS;
 
   data.foundHeader = true;
   m_headNumber++;
+
+  uint8_t type      = (word16 >> 11) & 0x1F;
+  // Useful information
+  uint8_t l0tag     = (word16 >> 7)  & 0xF;
+  uint8_t bcid_low  = (word16 >> 4)  & 0x7;
+  uint8_t bcid_xor  = word16 & 0xF;
+
+  ATH_MSG_DEBUG("l0tag: " << (uint32_t)l0tag << " bcid_low: " << (uint32_t)bcid_low << " bcid_xor: " << (uint32_t)bcid_xor << " type: " << (uint32_t)type << " word16: " << std::bitset<16>(word16));
+  
+  if (type == 0x03) {  // PR Header
+    bool breakNow{false};
+    ATH_MSG_DEBUG("PR Packet Found");
+    if (hasError) sc = StatusCode::RECOVERABLE;
+    if (breakNow) return sc;
+  } else {
+    ATH_MSG_WARNING("Unexpected packet type (not PR): 0x" << std::hex << int(type));
+    return sc;
+  }        
 
   // Create the last RDO of the previous link if any
   if (data.isStripValid()) {
@@ -248,11 +382,12 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t inData,
   data.reset();
 
   // Link Number (or stream) in the ROD fragment
-  const int rodlinkNumber{static_cast<int>(inData & 0x7F)};
+  const int rodlinkNumber{static_cast<int>(word16 & 0x7F)};
 
   // This is the real calculation for the offline
   data.linkNumber = (((rodlinkNumber >>4)&0x7)*12+(rodlinkNumber &0xF));
   const uint32_t onlineID{(robID & 0xFFFFFF) | (data.linkNumber << 24)};
+  ATH_MSG_DEBUG("OnlineID: " << (uint32_t)onlineID << " Link number: " << data.linkNumber);
   IdentifierHash hash;
   if ((onlineID ==0) or (data.linkNumber > 95)) {
     ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
@@ -265,6 +400,7 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t inData,
   else {
     hash = m_cabling->getHashFromOnlineId(onlineID, ctx);
     if (hash.is_valid()) {
+       ATH_MSG_DEBUG("setCollectionCall");
        data.setCollection(m_itkStripsID, hash, rdoIDCont, dataItemsPool, errs);
     }
     else {
@@ -273,46 +409,6 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t inData,
        ATH_MSG_WARNING("Rob fragment (rob=" << robID << ") with invalid onlineID  " << msg.str() << " -> " << hash  << ".");
     }
   }
-  // Look for masked off links - bit 7
-  if ((inData >> 7) & 0x1) {
-    ATH_MSG_DEBUG("Masked link " << onlineID << " " << data.linkIDHash);
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::MaskedLink, errs));
-    hasError = true;
-  }
-  if (inData & 0x800) {
-    ATH_MSG_DEBUG("    Header: xxx TimeOut Error " << data.linkIDHash);
-    m_headErrorTimeout++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::TimeOutError, errs));
-    hasError = true;
-  }
-  
-  if (inData & 0x1000) {
-    ATH_MSG_DEBUG("    Header: xxx Preamble Error " << data.linkIDHash);
-    m_headErrorPreamble++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::PreambleError, errs));
-    hasError = true;
-  }
-
-  if (inData & 0x400) {
-    ATH_MSG_DEBUG("    Header: xxx LVL1 ID Error " << data.linkIDHash);
-    m_headErrorLvl1ID++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::LVL1IDError, errs));
-    hasError = true;
-  }
-  
-  if (inData & 0x200) {
-    ATH_MSG_DEBUG("    Header: xxx BCID Error " << data.linkIDHash);
-    m_headErrorBCID++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::BCIDError, errs));
-    hasError = true;
-  }
-  
-  if ((inData & 0xF) > 11) {
-    ATH_MSG_DEBUG("    Header: xxx Error in formatter " << data.linkIDHash);
-    m_headErrorFormatter++;
-    ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::FormatterError, errs));
-    hasError = true;
-  }
   if (!hasError and not hash.is_valid())  {
     std::stringstream msg;
     msg <<std::hex << onlineID;
@@ -320,33 +416,60 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t inData,
     hasError = true;
   }
 
-  data.condensedMode = static_cast<bool>(inData & 0x100);
+  data.condensedMode = static_cast<bool>(word16 & 0x100);
 
   return sc;
 }
 
-StatusCode ITkStripsRodDecoder::processRawData(const uint16_t inData,
-                                          const uint32_t robID,
-                                          SharedData& data,
-                                          SCT_RodDecoderErrorsHelper& errs,
-                                          bool& hasError) const
+StatusCode ITkStripsRodDecoder::processHits(const uint16_t word16,
+                                            const uint32_t /*robID*/,
+                                            SharedData& /*data*/,
+                                            SCT_RDO_Container& /*rdoIDCont*/,
+                                            DataPool<SCT3_RawData>* /*dataItemsPool*/,
+                                            CacheHelper& /*cache*/,
+                                            SCT_RodDecoderErrorsHelper& /*errs*/,
+                                            bool& /*hasError*/,
+                                            const EventContext& /*ctx*/) const
 {
-  StatusCode sc{StatusCode::SUCCESS};
+  StatusCode sc = StatusCode::SUCCESS;
 
-  if (not data.foundHeader) {
-    ATH_MSG_WARNING(" Missing link header in ROD " << std::hex << robID << std::dec);
-    data.foundMissingLinkHeaderError = true;
-    m_numMissingLinkHeader++;
-    hasError = true;
-    return sc;
+  uint8_t stripNumber = 0;
+  uint8_t address  = (word16 >> 3) & 0xFF;
+
+  ATH_MSG_DEBUG("Cluster address: " << std::bitset<8>(address) << " " << (uint32_t)address);
+
+  stripNumber = (address >= 128) ? 2*(address-128)+1 : 2*address;          
+
+  //Get the next three strips in the cluster
+  uint8_t firsthit = (word16 & 0x4);
+  uint8_t secondhit   = (word16 & 0x2);
+  uint8_t thirdhit   = (word16 & 0x1);        
+  ATH_MSG_DEBUG("First hit: " << std::bitset<16>(firsthit));
+  ATH_MSG_DEBUG("Second hit: " << std::bitset<16>(secondhit));
+  ATH_MSG_DEBUG("Third hit: " << std::bitset<16>(thirdhit));
+  uint8_t stripN1 = 0,stripN2 = 0,stripN3=0;
+  uint8_t addr    = 0;
+  if(firsthit != 0x0) {
+    addr = address+1;
+    stripN1 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;
+    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN1));          
+  }
+  if(secondhit != 0x0) {
+    addr = address+2;
+    stripN2 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;          
+    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN2));
+  }
+  if(thirdhit != 0x0) {
+    addr = address+3;
+    stripN3 = (addr >= 128) ? 2*(addr-128)+1 : 2*addr;          
+    ATH_MSG_DEBUG("Hits: " << (uint32_t)(stripN3));
   }
 
-  ATH_MSG_DEBUG(" xxx Raw Data Mode " << std::hex << inData << std::dec << ": Config Data Mode ");
-  // Too many errors in the BS for the ROD to decode the data
-  m_configDataBit++;
-  ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::RawError, errs));
-  hasError = true;
+  uint8_t nchip    = (word16 >> 11) & 0xF;
 
+  ATH_MSG_DEBUG("Chip number: " << (int)nchip << " Strip Number: " << (uint32_t)stripNumber);
+  ATH_MSG_DEBUG("abcclusters " << (uint32_t)nchip << " " << (uint32_t)stripNumber << " " << (uint32_t)(stripN1) << " " << (uint32_t)(stripN2) << " " << (uint32_t)(stripN3)); 
+  
   return sc;
 }
 

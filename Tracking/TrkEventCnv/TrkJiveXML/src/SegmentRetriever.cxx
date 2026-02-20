@@ -59,7 +59,7 @@ namespace JiveXML {
 	Trk::SegmentCollection::const_iterator SegmentItr;
 	for (SegmentItr=cont.cptr()->begin(); SegmentItr!=cont.cptr()->end(); ++SegmentItr) {
         
-	  //Retrive primite variabels
+	  //Retrieve primitive variables
 	  x.emplace_back((*SegmentItr)->globalPosition().x()/10.);
 	  y.emplace_back((*SegmentItr)->globalPosition().y()/10.);
 	  z.emplace_back((*SegmentItr)->globalPosition().z()/10.);
@@ -125,5 +125,5 @@ namespace JiveXML {
     //All collections retrieved - done
     return StatusCode::SUCCESS;
 
-  } // retrive
+  } // retrieve
 } //namespace

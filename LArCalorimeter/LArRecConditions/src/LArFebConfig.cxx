@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecConditions/LArFebConfig.h"
@@ -67,8 +67,7 @@ LArFebConfig::getThresholdFromAttrList(const std::string& MedLow,
                                        const coral::AttributeList* attrList,
                                        const std::string& chanstr) const
 {
-  std::string channame = MedLow + chanstr;
-  return (short)(*attrList)[channame].data<int32_t>(); //Will throw and exception if channel does not exist
+  return (short)(*attrList)[MedLow + chanstr].data<int32_t>(); //Will throw and exception if channel does not exist
 }
 
 

@@ -58,7 +58,6 @@ def main():
 
     # Sanity checks of the properties - no need to setup since 
     # default values are specified in the c++ constructor
-    missingmass_tool.setProperty(bool)('Decorate', 1).ignore()
     missingmass_tool.setProperty(int)('UseVerbose', 1).ignore()
     missingmass_tool.setProperty('std::string')('CalibSet', '2015').ignore()
     missingmass_tool.setProperty(int)('alg_version', 3).ignore()
@@ -133,9 +132,9 @@ def main():
         
         ei = mgr.eventTree().EventInfo
         missingmass_tool.apply(ei, tau1, tau2, met, njets_25).ignore()
-        logger.info('MMC MAXW = %s GeV' % ei.auxdataConst('double')('mmc_maxw_mass'))
-        logger.info('MMC MLM = %s GeV' % ei.auxdataConst('double')('mmc_mlm_mass'))
-        logger.info('MMC MLNU3P = %s GeV' % ei.auxdataConst('double')('mmc_mlnu3p_mass'))
+        logger.info('MMC MAXW = %s GeV' % missingmass_tool.GetFittedMass(0))
+        logger.info('MMC MLM = %s GeV' % missingmass_tool.GetFittedMass(1))
+        logger.info('MMC MLNU3P = %s GeV' % missingmass_tool.GetFittedMass(2))
 
         reso = missingmass_tool.GetResonanceVec(0)
         logger.info('Resonance 4vec: (%s, %s, %s, %s)' % (reso.Pt(), reso.Eta(), reso.Phi(), reso.M()))

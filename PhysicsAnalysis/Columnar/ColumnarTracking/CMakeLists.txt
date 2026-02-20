@@ -9,4 +9,4 @@ atlas_add_library (ColumnarTrackingLib
 ColumnarTracking/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarTracking
-  LINK_LIBRARIES ColumnarCoreLib xAODTracking)
+  LINK_LIBRARIES ColumnarCoreLib xAODTracking TruthUtils)

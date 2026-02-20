@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -18,7 +18,7 @@ namespace FlavorTagInference {
   }
   void FTagDataDependencyNames::operator+=(FTagDataDependencyNames d) {
     FTagDataDependencyNames tmp = *this + std::move(d);
-    *this = tmp;
+    *this = std::move(tmp);
   }
   bool FTagDataDependencyNames::operator==(
     const FTagDataDependencyNames& d2) const

@@ -2,9 +2,12 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/test/tid.cxx,v 1.3 2005-04-29 16:11:22 schaffer Exp $ 
-  
 #include "IdDictParser/IdDictParser.h"  
+#include "IdDict/IdDictDictionary.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictFieldImplementation.h"
+#include "IdDict/IdDictRange.h"
+#include "IdDict/IdDictRegion.h"
 #include "Identifier/Range.h" 
 #include "Identifier/Identifier.h" 
  
@@ -23,22 +26,17 @@ int main (int argc, char* argv[])
   
   const IdDictMgr& idd = parser.parse (argv[1]);  
  
-  const IdDictMgr::dictionary_map& dm = idd.get_dictionary_map (); 
-  IdDictMgr::dictionary_map::const_iterator it;  
- 
   int n = 0; 
  
-  for (it = dm.begin (); it != dm.end (); ++it, ++n) 
+  for (const IdDictDictionary* dictionary : idd.get_dictionaries())
     { 
-      const IdDictDictionary& dictionary = *((*it).second); 
- 
       std::cout << "---- " << n << " ----------------------------" << std::endl; 
-      std::cout << "Dictionary " << dictionary.name() << std::endl;
+      std::cout << "Dictionary " << dictionary->name() << std::endl;
 
-      size_t nregions = dictionary.n_regions();
+      size_t nregions = dictionary->n_regions();
       for (size_t i = 0; i < nregions; ++i)
         {
-          const IdDictRegion& region = dictionary.region(i);
+          const IdDictRegion& region = dictionary->region(i);
           std::cout << "region #" << region.index() << std::endl;
  
           size_t width = 0; 

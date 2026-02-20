@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTPROCESSINGOFSTRAW_H
@@ -42,7 +42,10 @@ class TRTUncompressedHit;
 class ITRT_PAITool;
 class ITRT_SimDriftTimeTool;
 
-namespace InDetDD { class TRT_DetectorManager; }
+namespace InDetDD {
+  class TRT_DetectorManager;
+  class TRT_DetElementContainer;
+}
 
 class TRTDigSettings;
 
@@ -92,6 +95,7 @@ public:
    * (bits: 8 low + 1 high + 8 low + 1 high + 8 low + 1 high)
    */
   void ProcessStraw (MagField::AtlasFieldCache& fieldCache,
+		     const InDetDD::TRT_DetElementContainer* detElements,
                      hitCollConstIter i,
 		     hitCollConstIter e,
 		     TRTDigit& outdigit,
@@ -227,7 +231,9 @@ private:
 
   bool m_alreadywarnedagainstpdg0;
 
-  Amg::Vector3D getGlobalPosition( int hitID, const TimedHitPtr<TRTUncompressedHit> *theHit );
+  Amg::Vector3D getGlobalPosition( int hitID
+				   , const TimedHitPtr<TRTUncompressedHit> *theHit
+				   , const InDetDD::TRT_DetElementContainer* detElements);
 
   std::unique_ptr<CLHEP::RandBinomialFixedP> m_randBinomialXe{};
   std::unique_ptr<CLHEP::RandBinomialFixedP> m_randBinomialKr{};

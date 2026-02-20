@@ -78,7 +78,7 @@ TrigConfCoolL1PayloadConverters::createLvl1JetWeightPayload( cool::IFolderPtr fl
    std::string thrValDef("");
    for(std::vector<int>::const_iterator wIt = jetweights.begin(); wIt!=jetweights.end(); ++wIt) {
       if(wIt != jetweights.begin()) thrValDef += ",";
-      thrValDef += lexical_cast<std::string,int>(*wIt);
+        thrValDef += std::to_string(*wIt);
    }
    payload["Threshold"].setValue<cool::String255>("JetWeights");
    payload["ThresholdValue"].setValue<cool::String4k>(thrValDef);
@@ -91,12 +91,12 @@ Record
 TrigConfCoolL1PayloadConverters::createLvl1METSigPayload( cool::IFolderPtr fld, const METSigParam& metSigParams ) {
    Record payload(fld->payloadSpecification());
    string thrValDef("");
-   thrValDef += lexical_cast<std::string,int>(metSigParams.xsSigmaScale()) + ",";
-   thrValDef += lexical_cast<std::string,int>(metSigParams.xsSigmaOffset()) + ",";
-   thrValDef += lexical_cast<std::string,int>(metSigParams.xeMin()) + ",";
-   thrValDef += lexical_cast<std::string,int>(metSigParams.xeMax()) + ",";
-   thrValDef += lexical_cast<std::string,int>(metSigParams.teSqrtMin()) + ",";
-   thrValDef += lexical_cast<std::string,int>(metSigParams.teSqrtMax());
+   thrValDef += std::to_string(metSigParams.xsSigmaScale())  + ",";
+   thrValDef += std::to_string(metSigParams.xsSigmaOffset()) + ",";
+   thrValDef += std::to_string(metSigParams.xeMin())         + ",";
+   thrValDef += std::to_string(metSigParams.xeMax())         + ",";
+   thrValDef += std::to_string(metSigParams.teSqrtMin())     + ",";
+   thrValDef += std::to_string(metSigParams.teSqrtMax());
    payload["Threshold"].setValue<cool::String255>("METSigParams");
    payload["ThresholdValue"].setValue<cool::String4k>(thrValDef);
    payload["Cable"].setValue<cool::String255>("");
@@ -110,9 +110,9 @@ TrigConfCoolL1PayloadConverters::createLvl1ThresholdPayload( cool::IFolderPtr fl
    // TriggerThreshold
    string thrDef("");
    thrDef += thr.name(); thrDef += ",";
-   thrDef += lexical_cast<std::string,int>(thr.version()); thrDef += ",";
+   thrDef += std::to_string(thr.version()); thrDef += ",";
    thrDef += thr.type(); thrDef += ",";
-   thrDef += lexical_cast<std::string,int>(thr.mapping()); thrDef += ",";
+   thrDef += std::to_string(thr.mapping()); thrDef += ",";
    thrDef += lexical_cast<std::string,bool>(thr.active());
 
 
@@ -125,24 +125,24 @@ TrigConfCoolL1PayloadConverters::createLvl1ThresholdPayload( cool::IFolderPtr fl
       
       string valName          = thrVal->name();
       string valType          = thrVal->type();
-      string valThresholdval  = lexical_cast<string,float> (thrVal->ptcut());
-      string valEtamin        = lexical_cast<string,int>   (thrVal->etamin());
-      string valEtamax        = lexical_cast<string,int>   (thrVal->etamax());
-      string valPhimin        = lexical_cast<string,int>   (thrVal->phimin());
-      string valPhimax        = lexical_cast<string,int>   (thrVal->phimax());
-      string valWindow        = lexical_cast<string,int>   (thrVal->window());
+      string valThresholdval  = std::to_string(thrVal->ptcut());
+      string valEtamin        = std::to_string(thrVal->etamin());
+      string valEtamax        = std::to_string(thrVal->etamax());
+      string valPhimin        = std::to_string(thrVal->phimin());
+      string valPhimax        = std::to_string(thrVal->phimax());
+      string valWindow        = std::to_string(thrVal->window());
       string valEm_isolation  = "63";
       string valHad_isolation = "63";
       string valHad_veto      = "63";
-      string valPriority      = lexical_cast<string,float>(thrVal->priority());
+      string valPriority      = std::to_string(thrVal->priority());
 
       if ( thr.type()==L1DataDef::typeAsString(L1DataDef::EM) ||
            thr.type()==L1DataDef::typeAsString(L1DataDef::TAU) ) {
          ClusterThresholdValue* cluThrVal = dynamic_cast<ClusterThresholdValue*>(thrVal);
          if(cluThrVal) {
-            valEm_isolation  = lexical_cast<string,float>(cluThrVal->emIsolation());  
-            valHad_isolation = lexical_cast<string,float>(cluThrVal->hadIsolation());
-            valHad_veto      = lexical_cast<string,float>(cluThrVal->hadVeto());
+            valEm_isolation  = std::to_string(cluThrVal->emIsolation());  
+            valHad_isolation = std::to_string(cluThrVal->hadIsolation());
+            valHad_veto      = std::to_string(cluThrVal->hadVeto());
          }
       } // for the other types nothing needs to be done
 
@@ -167,8 +167,8 @@ TrigConfCoolL1PayloadConverters::createLvl1ThresholdPayload( cool::IFolderPtr fl
    cableDef += thr.cableName(); cableDef += ",";
    cableDef += thr.cableCtpin(); cableDef += ",";
    cableDef += thr.cableConnector(); cableDef += ",";
-   cableDef += lexical_cast<std::string,int>(thr.cableStart()); cableDef += ",";
-   cableDef += lexical_cast<std::string,int>(thr.cableEnd());
+   cableDef += std::to_string(thr.cableStart()); cableDef += ",";
+   cableDef += std::to_string(thr.cableEnd());
 
    // fill the payload
    payload["Threshold"].setValue<cool::String255>(thrDef);
@@ -293,7 +293,7 @@ TrigConfCoolL1PayloadConverters::createLvl1BGDescPayload( cool::IFolderPtr fld, 
 
       const string bgname = bunchgroup.name();
 
-      std::string payloadKey = "BunchGroup" + boost::lexical_cast<std::string,int>(internalNumber);
+      std::string payloadKey = "BunchGroup" + std::to_string(internalNumber);
 
       if(payload.specification().exists(payloadKey)) {
          std::cout << "Write bunch group  " << payloadKey << ": '"<< bgname <<"'" << std::endl;
@@ -432,9 +432,9 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
       return thr;
    }
 
-   thr->setVersion(lexical_cast<int, string>(thrDefV[1]));
+   thr->setVersion(std::stoi(thrDefV[1]));
    thr->setType(thrDefV[2]);
-   thr->setMapping(lexical_cast<int, string>(thrDefV[3]));
+   thr->setMapping(std::stoi(thrDefV[3]));
    thr->setActive(lexical_cast<bool, string>(thrDefV[4]));
 
    // internal triggers have no mapping (and are usually not stored in COOL, except by the online L1)
@@ -444,7 +444,7 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
    // PCLK0,...
    if(thr->isInternal()) {
       string::size_type pos = thr->name().find_first_of("0123456789");
-      int mapping = boost::lexical_cast<int,string>(thr->name().substr(pos));
+      int mapping = std::stoi(thr->name().substr(pos));
       thr->setMapping( mapping );
    }
 
@@ -456,16 +456,16 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
 
       string valName         = thrValDefV[0];
       string valType         = thrValDefV[1];
-      float valThresholdval  = lexical_cast<float, string>(thrValDefV[2]);
-      int   valEtamin        = lexical_cast<int,   string>(thrValDefV[3]);
-      int   valEtamax        = lexical_cast<int,   string>(thrValDefV[4]);
-      int   valPhimin        = lexical_cast<int,   string>(thrValDefV[5]);
-      int   valPhimax        = lexical_cast<int,   string>(thrValDefV[6]);
-      float valEm_isolation  = lexical_cast<float, string>(thrValDefV[7]);
-      float valHad_isolation = lexical_cast<float, string>(thrValDefV[8]);
-      float valHad_veto      = lexical_cast<float, string>(thrValDefV[9]);
-      int   valWindow        = lexical_cast<int,   string>(thrValDefV[10]);
-      float valPriority      = lexical_cast<float, string>(thrValDefV[11]);
+      float valThresholdval  = std::stof(thrValDefV[2]);
+      int   valEtamin        = std::stoi(thrValDefV[3]);
+      int   valEtamax        = std::stoi(thrValDefV[4]);
+      int   valPhimin        = std::stoi(thrValDefV[5]);
+      int   valPhimax        = std::stoi(thrValDefV[6]);
+      float valEm_isolation  = std::stof(thrValDefV[7]);
+      float valHad_isolation = std::stof(thrValDefV[8]);
+      float valHad_veto      = std::stof(thrValDefV[9]);
+      int   valWindow        = std::stoi(thrValDefV[10]);
+      float valPriority      = std::stof(thrValDefV[11]);
 
       TriggerThresholdValue* thrv = TriggerThreshold::createThresholdValue( thr->type() );
       if(thrv) {
@@ -495,11 +495,11 @@ TrigConfCoolL1PayloadConverters::createLvl1Threshold( const coral::AttributeList
    string cableName      = cableDefV[0];
    string cableCtpin     = cableDefV[1];
    string cableConnector = cableDefV[2];
-   int    cableStart     = lexical_cast<int,std::string>(cableDefV[3]);
-   int    cableEnd       = lexical_cast<int,std::string>(cableDefV[4]);
+   int    cableStart     = std::stoi(cableDefV[3]);
+   int    cableEnd       = std::stoi(cableDefV[4]);
    thr->setCableName     ( cableName );
    thr->setCableCtpin    ( cableCtpin);
-   string ctpin(cableCtpin);
+   string ctpin(std::move(cableCtpin));
    boost::to_lower(ctpin);
    if( ctpin == "ctpcore" ) {
       thr->setInput( "ctpcore" );
@@ -692,11 +692,11 @@ TrigConfCoolL1PayloadConverters::readLvl1MonMap( const cool::IRecord & payload)
       mon->setCounterType(type);
 
       mon->setThresholdName(names[i]);
-      mon->setCtpinSlot(         lexical_cast<uint16_t,std::string>(slots[i]) );
-      mon->setCtpinConnector(    lexical_cast<uint16_t,std::string>(cons[i]) );      
-      mon->setThresholdStartBit( lexical_cast<int,std::string>(starts[i]) );
-      mon->setThresholdEndBit(   lexical_cast<int,std::string>(ends[i]) );
-      mon->setMultiplicity(      lexical_cast<int,std::string>(mults[i]) );
+      mon->setCtpinSlot(         static_cast<uint16_t>(std::stoul(slots[i])) );
+      mon->setCtpinConnector(    static_cast<uint16_t>(std::stoul(cons[i])) );      
+      mon->setThresholdStartBit( std::stoi(starts[i]) );
+      mon->setThresholdEndBit(   std::stoi(ends[i]) );
+      mon->setMultiplicity(      std::stoi(mults[i]) );
       bool active = (actives[i]=="ENABLED");
       mon->setThresholdActive( active );
       vec.push_back(mon);

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import BeamType, ProductionStep
@@ -16,13 +16,15 @@ def createInDetConfigFlags():
     # Turn on running of PRD MultiTruthMaker
     icf.addFlag("InDet.doTruth", lambda prevFlags: 
         prevFlags.Input.isMC or
-        (prevFlags.Overlay.DataOverlay and prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing))
+        (prevFlags.Common.ProductionStep is not ProductionStep.MinbiasPreprocessing and prevFlags.Overlay.DataOverlay))
 
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
         not(prevFlags.Beam.Type is BeamType.Cosmics or
             prevFlags.Tracking.PrimaryPassConfig is PrimaryPassConfig.VtxBeamSpot)))
     icf.addFlag("InDet.useDCS", True)
+    # InDet.useHVActiveStates = True, This allows the pixel reconstruction if the DCS state is also UNDEFINED
+    icf.addFlag("InDet.useHVActiveStates", False)
     icf.addFlag("InDet.usePixelDCS", lambda prevFlags: (
         prevFlags.InDet.useDCS and prevFlags.Detector.EnablePixel))
     icf.addFlag("InDet.useSctDCS", lambda prevFlags: (

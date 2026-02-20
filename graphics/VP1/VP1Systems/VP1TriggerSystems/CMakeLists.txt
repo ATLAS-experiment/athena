@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1TriggerSystems )
@@ -6,7 +6,7 @@ atlas_subdir( VP1TriggerSystems )
 # External dependencies:
 find_package( Coin3D )
 find_package( Eigen )
-find_package( Qt5 COMPONENTS Core Gui  )
+find_package( Qt5 COMPONENTS Core Gui Widgets )
 
 
 
@@ -14,12 +14,6 @@ find_package( Qt5 COMPONENTS Core Gui  )
 set( CMAKE_AUTOUIC TRUE )
 # Generate MOC files automatically:
 set( CMAKE_AUTOMOC TRUE )
-set( CMAKE_AUTOMOC_MOC_OPTIONS "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED") 
-# ### NOTE! ###
-# "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED" is needed when using Qt < 5.0 together with BOOST > 1.52. 
-# Details: 
-# - https://its.cern.ch/jira/browse/ATLASRECTS-3097
-# - https://its.cern.ch/jira/browse/ATLASVPONE-184
 
 
 # Generate resource files automatically:
@@ -35,4 +29,11 @@ atlas_add_library( VP1TriggerSystems VP1TriggerSystems/*.h src/*.h src/*.cxx src
                    Qt5::Gui Qt5::Core
                    PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${EIGEN_LIBRARIES} GeoPrimitives GaudiKernel TrkParameters TrkTrack 
                  )
+
+
+# Enable Qt support for cppcheck:
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1TriggerSystems
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
 

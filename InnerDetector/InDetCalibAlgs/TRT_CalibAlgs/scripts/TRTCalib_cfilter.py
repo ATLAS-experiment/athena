@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
-import os,sys, math
+import sys, math
 
 def tshift_poly(dt,p0,p1,p2,p3):
     p0n = p0 + p1*dt + p2*dt*dt + p3*dt*dt*dt
@@ -207,14 +207,14 @@ dbt0outs.sort()
 dbfile=open("dbconst.txt","w")
 # In case there are not errors:
 if len (newerrors)==0:
-	dbfile.write("# Fileformat=1\n")
-	dbfile.write("# RtRelation\n")
-	for dbrtout in dbrtouts:
-	    dbfile.write(dbrtout + '\n')
-	dbfile.write("# StrawT0\n")
-	for dbt0out in dbt0outs:
-	    dbfile.write(dbt0out + '\n')
-	dbfile.write("#GLOBALOFFSET 0.0000\n")
+        dbfile.write("# Fileformat=1\n")
+        dbfile.write("# RtRelation\n")
+        for dbrtout in dbrtouts:
+            dbfile.write(dbrtout + '\n')
+        dbfile.write("# StrawT0\n")
+        for dbt0out in dbt0outs:
+            dbfile.write(dbt0out + '\n')
+        dbfile.write("#GLOBALOFFSET 0.0000\n")
 elif len (newerrors)>1:
         dbfile.write("# Fileformat=2\n")
         dbfile.write("# RtRelation\n")

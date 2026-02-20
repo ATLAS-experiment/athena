@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -64,7 +64,7 @@ TruthParticle::TruthParticle( HepMC::ConstGenParticlePtr particle,
   m_children       ( 0 ),
   m_nGenEventIdx   ( 0 )
 {
-  setGenParticle( particle );
+  setGenParticle( std::move(particle) );
   m_nGenEventIdx = container ? container->genEventIdx() : 0;
 }
 

@@ -18,11 +18,12 @@ namespace {
 
 namespace MuonR4{
     StatusCode TrackToTruthPartAssocAlg::initialize() {
-        
-        
+
+
         ATH_CHECK(m_trkKey.initialize());
         ATH_CHECK(m_originWriteKey.initialize());
         ATH_CHECK(m_typeWriteKey.initialize());
+        ATH_CHECK(m_classificationWriteKey.initialize());
         ATH_CHECK(m_linkWriteKey.initialize());
         ATH_CHECK(m_truthMuonKey.initialize());
 
@@ -35,38 +36,41 @@ namespace MuonR4{
         ATH_CHECK(m_simHitKeys.initialize());
         ATH_CHECK(m_truMuOriginKey.initialize());
         ATH_CHECK(m_truMuTypeKey.initialize());
+        ATH_CHECK(m_truMuClassificationKey.initialize());
         return StatusCode::SUCCESS;
     }
     StatusCode TrackToTruthPartAssocAlg::execute(const EventContext& ctx) const {
-        
+
         const xAOD::TrackParticleContainer* tracks{nullptr};
         ATH_CHECK(SG::get(tracks, m_trkKey, ctx));
 
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthOrigin{m_originWriteKey, ctx};
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> acc_truthType{m_typeWriteKey, ctx};
         SG::WriteDecorHandle<xAOD::TrackParticleContainer, TruthLink_t> acc_truthLink{m_linkWriteKey, ctx};
+        SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned int> acc_truthClassification{m_classificationWriteKey, ctx};
         ///
         /// Initialize the Identifier decorators
         std::vector<IdDecorHandle_t> idDecorHandles{};
         for (const SG::ReadDecorHandleKey<xAOD::TruthParticleContainer>& hitKey : m_simHitKeys) {
             idDecorHandles.emplace_back(hitKey, ctx);
         }
-        
+
         std::vector<TruthPartWithIds_t> truthWithIds{};
         ///
-        const xAOD::TruthParticleContainer* truthMuonCont{nullptr};
+        const xAOD::TruthParticleContainer* truthMuonCont{};
         ATH_CHECK(SG::get(truthMuonCont, m_truthMuonKey, ctx));
         for (const xAOD::TruthParticle* truthMuon : *truthMuonCont) {
             IdSet_t assocIds{};
             ATH_MSG_DEBUG("Truth muon: pT:"<<truthMuon->pt()<<" [GeV], eta: "<<truthMuon->eta()<<", phi: "
                         <<truthMuon->phi()<<", q: "<<truthMuon->charge()<<", truthType: "<<xAOD::TruthHelpers::getParticleTruthType(*truthMuon)
-                        <<", origin: "<<xAOD::TruthHelpers::getParticleTruthOrigin(*truthMuon));
+                          <<", origin: "<<xAOD::TruthHelpers::getParticleTruthOrigin(*truthMuon)
+                          <<", classification: " <<xAOD::TruthHelpers::getParticleTruthClassification(*truthMuon));
             for (const IdDecorHandle_t& hitDecor : idDecorHandles) {
                 std::ranges::transform(hitDecor(*truthMuon), std::inserter(assocIds, assocIds.begin()),
                                 [this](unsigned long long rawId) {
                                     const Identifier id{rawId};
                                     ATH_MSG_VERBOSE(" --- associated hit id: "<<m_idHelperSvc->toString(id));
-                                    return id; 
+                                    return id;
                                 });
             }
             truthWithIds.emplace_back(std::make_tuple(truthMuon, std::move(assocIds)));
@@ -114,6 +118,7 @@ namespace MuonR4{
             acc_truthOrigin(*trackPart) = xAOD::TruthHelpers::getParticleTruthOrigin(*bestMatch);
             acc_truthType(*trackPart) = xAOD::TruthHelpers::getParticleTruthType(*bestMatch);
             acc_truthLink(*trackPart) = TruthLink_t{truthMuonCont, bestMatch->index()};
+            acc_truthClassification(*trackPart) = xAOD::TruthHelpers::getParticleTruthClassification(*bestMatch);
         }
         return StatusCode::SUCCESS;
     }

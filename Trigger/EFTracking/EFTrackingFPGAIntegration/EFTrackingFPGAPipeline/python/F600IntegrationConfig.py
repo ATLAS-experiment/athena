@@ -44,7 +44,7 @@ def F600IntegrationCfg(flags, name = 'BenckmarkAlg', **kwarg):
     kwarg.setdefault('RunnerKernelName', 'runner')
 
     # Set up Cluster maker tool
-    from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
+    from EFTrackingFPGAPipeline.FPGAToolsConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
     kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
     
@@ -111,10 +111,6 @@ if __name__ == "__main__":
     flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
     
     flags.fillFromArgs()
-    
-    # Additional (necessary) flag re-configuration for mutliregion tracking
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
-    ConfigureMultiRegionFlags(flags)
     
     if (flags.Trigger.FPGATrackSim.pipeline.startswith('F-6')):
         print("You are trying to run an F-6* pipeline! I am auto-configuring the Inside-Out for you. Whether you wanted to or not")

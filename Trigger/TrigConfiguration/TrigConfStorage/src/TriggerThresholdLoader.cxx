@@ -17,8 +17,6 @@
 #include "TrigConfL1Data/TriggerThresholdValue.h"
 #include "TrigConfL1Data/L1DataDef.h"
 
-#include "boost/lexical_cast.hpp"
-
 #include <sstream>
 #include <iostream>
 #include <stdexcept>
@@ -104,7 +102,7 @@ TrigConf::TriggerThresholdLoader::load( TriggerThreshold& ttTarget ) {
 
          if(ttTarget.isInternal()) {
             string::size_type pos = name.find_first_of("0123456789");
-            mapping = boost::lexical_cast<int,string>(name.substr(pos));
+            mapping = std::stoi(name.substr(pos));
          }
          ttTarget.setMapping( mapping );
       }

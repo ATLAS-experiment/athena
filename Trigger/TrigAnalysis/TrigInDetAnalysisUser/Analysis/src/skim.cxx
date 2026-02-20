@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -97,7 +97,7 @@ void copyReleaseInfo( TFile* finput, TFile* foutdir ) {
 
 
 
-
+//coverity[root_function]
 int main(int argc, char** argv) { 
   
   if ( argc<1 ) return usage(-1);
@@ -134,11 +134,11 @@ int main(int argc, char** argv) {
 	continue;
       }
       else { 
-	if ( infile=="" ) infile = arg;
+	if ( infile=="" ) infile = std::move(arg);
 	else { 
 	  std::cerr << "more than one file specified: " << arg << std::endl;
 	  return usage(-2);
-	  infile=arg;
+	  infile=std::move(arg);
 	}
       }
     }
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
       else if ( arg=="-v" || arg=="--verbose" ) verbose = true;
       else if ( arg=="-f" || arg=="--force" )   force = true;
       else if (              arg=="--roi" )     { force=true; roi_filter = true; }
-      else if ( infile=="" ) infile = arg;
+      else if ( infile=="" ) infile = std::move(arg);
       else { 
 	std::cerr << "more than one file specified: " << arg << std::endl;
 	return usage(-2);

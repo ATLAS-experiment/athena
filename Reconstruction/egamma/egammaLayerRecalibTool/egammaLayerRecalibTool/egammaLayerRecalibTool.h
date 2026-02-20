@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -186,19 +186,6 @@ public:
 private:
   float m_amount;
 };
-
-class GetAmountDecoratorBase : public GetAmountBase
-{
-public:
-  GetAmountDecoratorBase(GetAmountBase* getter) : m_getter(getter) { };
-  virtual ~GetAmountDecoratorBase() { delete m_getter; }
-  virtual float operator()(const StdCalibrationInputs & input) const {
-    return (*m_getter)(input);
-  }
-private:
-  GetAmountBase* m_getter;
-};
-
 
 struct InputModifier
 {

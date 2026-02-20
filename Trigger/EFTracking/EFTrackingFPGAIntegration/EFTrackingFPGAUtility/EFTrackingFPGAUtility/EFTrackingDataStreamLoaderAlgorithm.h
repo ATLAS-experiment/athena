@@ -8,49 +8,173 @@
 #include <mutex>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/WriteHandleKey.h"
-#include "TestVectorTool.h"
+#include "StoreGate/ReadHandleKeyArray.h"
+#include "StoreGate/WriteHandleKeyArray.h"
+
+namespace {
+struct FileState {
+  int32_t countDown{0};
+  enum DataFormatState {
+    HEADER = 0,
+    HITS = 1,
+    FOOTER = 2,
+  } dataFormatState{FOOTER};
+};
+
+enum DataFormatAction {
+  NEW_EVENT = 0,
+  KEEP = 1,
+  DISCARD = 2,
+  ERROR = 3,
+};
+}
 
 class EFTrackingDataStreamLoaderAlgorithm : public AthReentrantAlgorithm
 {
-  Gaudi::Property<std::string> m_inputCsvPath{
-    this,
-    "inputCsvPath", 
-    "", 
-    "Path to input csv container."
-  };
-
-  SG::WriteHandleKey<std::vector<unsigned long>> m_inputDataStreamKey{
-    this,
-    "inputDataStream",
-    "",
-    "Key to access encoded 64bit words following the EFTracking specification, read as input."
-  };
-
   Gaudi::Property<std::size_t> m_bufferSize {
     this,
     "bufferSize",
     8192,
-    "Capacity of std::vector."
   };
 
-  ToolHandle<TestVectorTool> m_testVectorTool{
-    this, 
-    "TestVectorTool", 
-    "TestVectorTool", 
-    "Tool to prepare test vector"
-  };  
+  Gaudi::Property<std::vector<std::string>> m_GHITZTxtInputPaths{
+    this,
+    "GHITZTxtInputPaths", 
+    {},
+  };
 
-  // Hack to track progress through the test vector across multiple calls to 
-  // execute. The performance impact is not important as this algorithm is only 
-  // used in small tests.
-  mutable std::size_t m_eventNumber ATLAS_THREAD_SAFE {0};
+  SG::WriteHandleKeyArray<std::vector<uint64_t>> m_GHITZTxtInputKeys{
+    this, 
+    "GHITZTxtInputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_GHITZTxtOutputPaths{
+    this,
+    "GHITZTxtOutputPaths", 
+    {},
+  };
+
+  SG::ReadHandleKeyArray<std::vector<uint64_t>> m_GHITZTxtOutputKeys{
+    this, 
+    "GHITZTxtOutputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_GHITZBinInputPaths{
+    this,
+    "GHITZBinInputPaths", 
+    {},
+  };
+
+  SG::WriteHandleKeyArray<std::vector<uint64_t>> m_GHITZBinInputKeys{
+    this, 
+    "GHITZBinInputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_GHITZBinOutputPaths{
+    this,
+    "GHITZBinOutputPaths", 
+    {},
+  };
+
+  SG::ReadHandleKeyArray<std::vector<uint64_t>> m_GHITZBinOutputKeys{
+    this, 
+    "GHITZBinOutputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_CLUSTERTxtInputPaths{
+    this,
+    "CLUSTERTxtInputPaths", 
+    {},
+  };
+
+  SG::WriteHandleKeyArray<std::vector<uint64_t>> m_CLUSTERTxtInputKeys{
+    this, 
+    "CLUSTERTxtInputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_CLUSTERTxtOutputPaths{
+    this,
+    "CLUSTERTxtOutputPaths", 
+    {},
+  };
+
+  SG::ReadHandleKeyArray<std::vector<uint64_t>> m_CLUSTERTxtOutputKeys{
+    this, 
+    "CLUSTERTxtOutputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_CLUSTERBinInputPaths{
+    this,
+    "CLUSTERBinInputPaths", 
+    {},
+  };
+
+  SG::WriteHandleKeyArray<std::vector<uint64_t>> m_CLUSTERBinInputKeys{
+    this, 
+    "CLUSTERBinInputKeys", 
+    {},
+  };
+
+  Gaudi::Property<std::vector<std::string>> m_CLUSTERBinOutputPaths{
+    this,
+    "CLUSTERBinOutputPaths", 
+    {},
+  };
+
+  SG::ReadHandleKeyArray<std::vector<uint64_t>> m_CLUSTERBinOutputKeys{
+    this, 
+    "CLUSTERBinOutputKeys", 
+    {},
+  };
+
+  std::vector<std::vector<std::vector<uint64_t>>> m_GHITZTxtInputEvents{};
+  mutable std::vector<std::vector<std::vector<uint64_t>>> m_GHITZTxtOutputEvents ATLAS_THREAD_SAFE {};
+
+  std::vector<std::vector<std::vector<uint64_t>>> m_GHITZBinInputEvents{};
+  mutable std::vector<std::vector<std::vector<uint64_t>>> m_GHITZBinOutputEvents ATLAS_THREAD_SAFE {};
+
+  std::vector<std::vector<std::vector<uint64_t>>> m_CLUSTERTxtInputEvents{};
+  mutable std::vector<std::vector<std::vector<uint64_t>>> m_CLUSTERTxtOutputEvents ATLAS_THREAD_SAFE {};
+
+  std::vector<std::vector<std::vector<uint64_t>>> m_CLUSTERBinInputEvents{};
+  mutable std::vector<std::vector<std::vector<uint64_t>>> m_CLUSTERBinOutputEvents ATLAS_THREAD_SAFE {};
+
   mutable std::mutex m_mutex ATLAS_THREAD_SAFE;
+
+  StatusCode readFile(
+    const std::string& path,
+    const auto& fileReadFunction,  
+    const auto& endOfBlockCondition,
+    const int32_t hitCountDown,
+    std::vector<std::vector<uint64_t>>& events
+  );
+
+  StatusCode writeFile(
+    const std::string& path,
+    const auto& fileWriteFunction,
+    const auto& endOfBlockCondition,
+    const int32_t hitCountDown,
+    const std::vector<std::vector<uint64_t>>& events
+  );
+
+  DataFormatAction dataFormatStateMachine(
+    const uint64_t word,
+    const auto& endOfBlockCondition,
+    const int32_t hitCountDown,
+    FileState& fileState
+  );
 
  public:
   EFTrackingDataStreamLoaderAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize() override final;
-  StatusCode execute(const EventContext& ctx) const override final;
+  virtual StatusCode initialize() override final;
+  virtual StatusCode execute(const EventContext& ctx) const override final;
+  virtual StatusCode finalize() override final;
 };
 
 #endif

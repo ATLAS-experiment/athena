@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  *   */
@@ -7,7 +7,7 @@
 #include "TTrainedNetworkCondAlg.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "TFile.h"
 #include "TH1.h"
@@ -20,7 +20,7 @@
 namespace InDet {
 
   TTrainedNetworkCondAlg::TTrainedNetworkCondAlg (const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthReentrantAlgorithm( name, pSvcLocator )
+    : ::AthCondAlgorithm( name, pSvcLocator )
   {}
 
   StatusCode TTrainedNetworkCondAlg::initialize() {
@@ -72,7 +72,7 @@ namespace InDet {
     // retrieve the number of hidden layers from the LayerInfo histogram
     unsigned int  n_hidden = ownedRetrievedHistos.at(layer_info)->GetNbinsX()-2;
     ATH_MSG_VERBOSE(" Retrieving calibration: " << folder  << " for NN with: " << n_hidden << " hidden layers.");
-
+    //coverity[INEFFICIENT_RESERVE:FALSE]
     ownedRetrievedHistos.reserve( ownedRetrievedHistos.size() + n_hidden*2 );
     for (unsigned int  i=0; i<=n_hidden; ++i) {
       std::stringstream folder_name; 

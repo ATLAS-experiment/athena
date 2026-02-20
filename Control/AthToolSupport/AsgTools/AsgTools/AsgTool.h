@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ASGTOOL_H
 #define ASGTOOLS_ASGTOOL_H
 
 // Athena include(s).
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // Local include(s):
 #include "AsgTools/IAsgTool.h"
@@ -54,7 +54,7 @@ namespace asg {
 
       AsgTool (const AsgTool&) = delete;
       AsgTool& operator= (const AsgTool&) = delete;
-     
+
 
 #ifdef XAOD_STANDALONE
 

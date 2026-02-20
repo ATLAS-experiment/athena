@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_FASTREDUCTIONMATCHER_H
@@ -23,8 +23,8 @@ using  ConditionFilterInds = std::vector<int>;
 class FastReductionMatcher: public IJetsMatcher {
  public:
 
-  FastReductionMatcher(ConditionPtrs&,
-		       ConditionFilters&,
+  FastReductionMatcher(ConditionPtrs&&,
+		       ConditionFilters&&,
 		       const ConditionFilterInds&,
 		       const Tree&);
 

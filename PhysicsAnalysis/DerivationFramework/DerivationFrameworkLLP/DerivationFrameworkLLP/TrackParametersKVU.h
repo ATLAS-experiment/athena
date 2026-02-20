@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////
-// TrackParametersKVU.h  (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 /*
   Decorates the vertex constrained track parameters to the track container.
@@ -19,7 +15,7 @@
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H
-#define DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H 
+#define DERIVATIONFRAMEWORK_TRACKPARAMETERSATPV_H
 
 #include<string>
 
@@ -48,24 +44,21 @@ namespace DerivationFramework {
 
 
   /** @class TrackParametersKVU
- 
+
       the code used in this implementation is kindly stolen from:
       atlasoff:: ISF/ISF_Core/ISF_Tools
 
       @author James Catmore -at- cern.ch
   */
   class TrackParametersKVU : public extends<AthAlgTool, IAugmentationTool> {
-   
-  public: 
-    /** Constructor with parameters */
-    TrackParametersKVU( const std::string& t, const std::string& n, const IInterface* p );
-   
-    /** Destructor */
-    virtual ~TrackParametersKVU() = default;
-   
+
+  public:
+
+    using base_class::base_class;
+
     // Athena algtool's Hooks
     virtual StatusCode initialize() override;
- 
+
     /** Check that the current event passes this filter */
     virtual StatusCode addBranches(const EventContext& ctx) const override;
 
@@ -73,23 +66,23 @@ namespace DerivationFramework {
     SG::ReadHandleKey< xAOD::TrackParticleContainer > m_trackContainerKey{
       this, "TrackParticleContainerName", "InDetDisappearingTrackParticles"};
     SG::ReadHandleKey< xAOD::VertexContainer > m_vertexContainerKey{
-      this, "VertexContainerName", "PrimaryVertices"}; 
+      this, "VertexContainerName", "PrimaryVertices"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUphiKey{
-      this, "KVUphiKey", ".KVUphi"};
+      this, "KVUphiKey", m_trackContainerKey, "KVUphi"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUthetaKey{
-      this, "KVUthetaKey", ".KVUtheta"};
+      this, "KVUthetaKey", m_trackContainerKey, "KVUtheta"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUd0Key{
-      this, "KVUd0Key", ".KVUd0"};
+      this, "KVUd0Key", m_trackContainerKey, "KVUd0"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUz0Key{
-      this, "KVUz0Key", ".KVUz0"};
+      this, "KVUz0Key", m_trackContainerKey, "KVUz0"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUqOverPKey{
-      this, "KVUqOverPKey", ".KVUqOverP"};
+      this, "KVUqOverPKey", m_trackContainerKey, "KVUqOverP"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUChi2Key{
-      this, "KVUChi2Key", ".KVUChi2"};
+      this, "KVUChi2Key", m_trackContainerKey, "KVUChi2"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUusedPVKey{
-      this, "KVUusedPVKey", ".KVUusedPV"};
+      this, "KVUusedPVKey", m_trackContainerKey, "KVUusedPV"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_KVUCovMatKey{
-      this, "KVUCovMatKey", ".KVUCovMat"};
+      this, "KVUCovMatKey", m_trackContainerKey, "KVUCovMat"};
 
     ToolHandle< Trk::IVertexTrackUpdator > m_vertexTrackUpdator {
       this, "VertexTrackUpdator", "Trk::KalmanVertexTrackUpdator"};
@@ -99,11 +92,8 @@ namespace DerivationFramework {
       this, "LinearizedTrackFactory", "Trk::FullLinearizedTrackFactory/FullLinearizedTrackFactory"};
     ToolHandle< Trk::ITrackToVertexIPEstimator> m_IPEstimator {
       this, "IPEstimator", "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator"};
+  };
 
-    StringProperty m_sgName {this, "DecorationPrefix", "", "decoration prefix"};
-
-  }; 
- 
 }
 
 #endif

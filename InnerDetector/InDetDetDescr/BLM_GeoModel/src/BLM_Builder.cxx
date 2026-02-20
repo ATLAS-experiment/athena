@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BLM_GeoModel/BLM_Builder.h"
@@ -242,21 +242,6 @@ StatusCode InDetDD::BLM_Builder::build(GeoVPhysVol* pv)
   ATH_CHECK(detStore()->record(std::move(manager), "BLMParameters"));
 
   return StatusCode::SUCCESS;
-}
-
-// Register callback function on ConDB object
-// Empty for now
-StatusCode InDetDD::BLM_Builder::registerCallback( StoreGateSvc*)
-{
-  return StatusCode::SUCCESS;
-}
-
-// Callback function itself
-// Empty for now
-StatusCode InDetDD::BLM_Builder::align(IOVSVC_CALLBACK_ARGS)
-{
-  // Return Failure since no function has been registered
-  return StatusCode::FAILURE;
 }
 
 //============================================================================================

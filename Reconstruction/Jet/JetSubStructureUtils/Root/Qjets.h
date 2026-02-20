@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructureutils_qjets_header
@@ -12,6 +12,7 @@
 #include "fastjet/JetDefinition.hh"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#include "TRandom3.h"
 
 
 namespace JetSubStructureUtils {
@@ -29,8 +30,7 @@ namespace JetSubStructureUtils {
 
   class Qjets {
     private:
-      bool m_rand_seed_set;
-      unsigned int m_seed = 0U;
+      TRandom3 m_rand;
       double m_zcut, m_dcut, m_dcut_fctr, m_exp_min, m_exp_max, m_rigidity, m_truncation_fctr;
       std::map<int,bool> m_merged_jets;
       std::priority_queue <jet_distance, std::vector<jet_distance>, JetDistanceCompare> m_distances;

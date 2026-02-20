@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,11 +12,7 @@
 
 namespace Trk {
 
-void cfmasserr(VKVertex *vk, const int *list, double BMAG, double *MASS,
-               double *sigM);
-void cfmasserrold_(const long int ntrk, long int *list, double *parfs,
-                   double *ams, double *deriv, double BMAG, double *dm,
-                   double *sigm);
+void cfmasserr(VKVertex *vk, const int *list, double *MASS, double *sigM);
 
 }  // namespace Trk
 

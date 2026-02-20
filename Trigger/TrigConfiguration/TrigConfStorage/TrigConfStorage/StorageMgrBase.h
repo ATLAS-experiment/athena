@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_StorageMgrBase
 #define TrigConf_StorageMgrBase
 
 #include <string>
+#include <memory>
 #include "TrigConfBase/MsgStream.h"
 #include "TrigConfStorage/IStorageMgr.h"
 
@@ -50,30 +51,30 @@ namespace TrigConf {
 
    protected:
 
-      IMasterTableLoader *              m_masterTableLoader { nullptr };
-      IMenuLoader *                     m_menuLoader { nullptr };
-      IMuctpiLoader *                   m_muctpiLoader { nullptr };
-      IDeadTimeLoader *                 m_deadTimeLoader { nullptr };
-      IPrescaledClockLoader *           m_prescaledClockLoader { nullptr };
-      IRandomLoader *                   m_randomLoader { nullptr };
-      IThresholdConfigLoader *          m_thresholdConfigLoader { nullptr };
-      ITriggerThresholdLoader *         m_triggerThresholdLoader { nullptr };
-      ITriggerThresholdValueLoader *    m_triggerThresholdValueLoader { nullptr };
-      IThresholdMonitorLoader *         m_thresholdMonitorLoader { nullptr }; 	 
-      ICTPFilesLoader *                 m_ctpFilesLoader { nullptr };
-      ICaloJetInputLoader *             m_caloJetInputLoader { nullptr };
-      ICaloSinCosLoader *               m_caloSinCosLoader { nullptr };
-      ICaloInfoLoader *                 m_caloInfoLoader { nullptr };
-      ILutCamLoader *                   m_lutCamLoader { nullptr };
-      IPrescaleSetLoader *              m_prescaleSetLoader { nullptr };
-      IPrioritySetLoader *              m_prioritySetLoader { nullptr };
-      IBunchGroupLoader *               m_bunchGroupLoader { nullptr };
-      IBunchGroupSetLoader *            m_bunchGroupSetLoader { nullptr };
-      ICTPConfigLoader *                m_ctpConfigLoader { nullptr };
-      IMuonThresholdSetLoader *         m_muonThresholdSetLoader { nullptr };
-      IHLTFrameLoader *                 m_HLTFrameLoader { nullptr };    
-      IJobOptionTableLoader *           m_jobOptionTableLoader { nullptr };
-      IL1TopoMenuLoader *               m_l1topoMenuLoader { nullptr };
+      std::unique_ptr<IMasterTableLoader>           m_masterTableLoader;
+      std::unique_ptr<IMenuLoader>                  m_menuLoader;
+      std::unique_ptr<IMuctpiLoader>                m_muctpiLoader;
+      std::unique_ptr<IDeadTimeLoader>              m_deadTimeLoader;
+      std::unique_ptr<IPrescaledClockLoader>        m_prescaledClockLoader;
+      std::unique_ptr<IRandomLoader>                m_randomLoader;
+      std::unique_ptr<IThresholdConfigLoader>       m_thresholdConfigLoader;
+      std::unique_ptr<ITriggerThresholdLoader>      m_triggerThresholdLoader;
+      std::unique_ptr<ITriggerThresholdValueLoader> m_triggerThresholdValueLoader;
+      std::unique_ptr<IThresholdMonitorLoader>      m_thresholdMonitorLoader;
+      std::unique_ptr<ICTPFilesLoader>              m_ctpFilesLoader;
+      std::unique_ptr<ICaloJetInputLoader>          m_caloJetInputLoader;
+      std::unique_ptr<ICaloSinCosLoader>            m_caloSinCosLoader;
+      std::unique_ptr<ICaloInfoLoader>              m_caloInfoLoader;
+      std::unique_ptr<ILutCamLoader>                m_lutCamLoader;
+      std::unique_ptr<IPrescaleSetLoader>           m_prescaleSetLoader;
+      std::unique_ptr<IPrioritySetLoader>           m_prioritySetLoader;
+      std::unique_ptr<IBunchGroupLoader>            m_bunchGroupLoader;
+      std::unique_ptr<IBunchGroupSetLoader>         m_bunchGroupSetLoader;
+      std::unique_ptr<ICTPConfigLoader>             m_ctpConfigLoader;
+      std::unique_ptr<IMuonThresholdSetLoader>      m_muonThresholdSetLoader;
+      std::unique_ptr<IHLTFrameLoader>              m_HLTFrameLoader;
+      std::unique_ptr<IJobOptionTableLoader>        m_jobOptionTableLoader;
+      std::unique_ptr<IL1TopoMenuLoader>            m_l1topoMenuLoader;
 
       unsigned int   m_ctpVersion { 0 };
       unsigned int   m_l1Version { 0 };

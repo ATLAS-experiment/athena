@@ -64,9 +64,9 @@ StatusCode ParticleJetGhostLabelTool::decorate(const JetContainer& jets) const
     // set truth label for jets above pt threshold
     // hierarchy: b > c > tau > light
     ParticleJetTools::Particles particles {
-      .b = jetlabelpartsb,
-      .c = jetlabelpartsc,
-      .tau = jetlabelpartstau,
+      .b = std::move(jetlabelpartsb),
+      .c = std::move(jetlabelpartsc),
+      .tau = std::move(jetlabelpartstau),
       .origin = origin
     };
     ParticleJetTools::setJetLabels(jet, particles, m_labelnames);

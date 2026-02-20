@@ -17,8 +17,9 @@
 namespace MuonGMR4 {
    class MuonDetectorManager;
 }
-
-class ActsGeometryContext;
+namespace ActsTrk {
+  class GeometryContext;
+}
 namespace MuonR4{
     class CalibratedSpacePoint;
     class Segment;
@@ -50,7 +51,7 @@ namespace MuonR4{
         /** @brief Returns the local segment parameters from a segment object
          *  @param gctx: Geometry context storing the local -> global transformation
          *  @param segment: Reference to the segment */
-        Parameters localSegmentPars(const ActsGeometryContext& gctx,
+        Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment);
         /** @brief Returns the segment parameters as boundTrackParameters. The
          *         position is expressed locally on the sector surface & the direction in
@@ -66,7 +67,7 @@ namespace MuonR4{
         /** @brief Returns the segment parameters as boundTrackParameters. The
          *         position is expressed locally on the sector surface & the direction in
          *         the global frame */
-        Acts::BoundTrackParameters boundSegmentPars(const ActsGeometryContext& gctx,
+        Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
                                                    const Segment& segment,
                                                    const Acts::ParticleHypothesis hypot = Acts::ParticleHypothesis::muon());
     }

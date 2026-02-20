@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHVScaleCorrTool.h"
@@ -217,15 +217,20 @@ float LArHVScaleCorrTool::Respo(float e, float e_nominal,float tempe) const
   if (e < -999.) return 1.;
   if (e < 0.01) return 0;
   if ( e > e_nominal ) return 1;
-  float resp = (InvCharge(e_nominal)*vdrift(e,tempe))/(InvCharge(e)*vdrift(e_nominal,tempe));
+  float den = InvCharge(e)*vdrift(e_nominal,tempe);
+  float resp = den==0 ? 0 : (InvCharge(e_nominal)*vdrift(e,tempe))/den;
   return resp;
 }
 
 float LArHVScaleCorrTool::t_drift(float e, float e_nominal, float d, float tempe) const
 {
-  if ( e < -999.) return (d*1e4)/vdrift(e_nominal, tempe) ;
+  if ( e < -999.) {
+    float den = vdrift(e_nominal, tempe);
+    return den==0 ? 0 : (d*1e4)/den;
+  }
   if (e > e_nominal ) e = e_nominal;
-  return (d*1e4)/vdrift(e, tempe); // ns
+  float den = vdrift(e, tempe);
+  return den==0 ? 0 : (d*1e4)/den; // ns
 }
 
 float LArHVScaleCorrTool::EMEC_nominal(const float aeta) const

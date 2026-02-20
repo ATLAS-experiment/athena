@@ -14,10 +14,13 @@
 
 namespace
 {
-    constexpr double percentage(unsigned int numerator, unsigned int denom)
-    {
+    constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
+
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
     // thresholds for the shortest and longest strips
     // values from https://indico.cern.ch/event/1131762/contributions/4749097/attachments/2431773/4164431/MMGcoord2022.04.26.pdf
     constexpr double maxNoiseSmall_eta1 = 2100;
@@ -32,10 +35,6 @@ namespace
 }
 
 namespace MuonR4 {
-
-    MM_DigitizationTool::MM_DigitizationTool(const std::string &type, const std::string &name, const IInterface *pIID) : 
-            MuonDigitizationTool{type, name, pIID} {}
-
     StatusCode MM_DigitizationTool::initialize() {
         ATH_MSG_DEBUG("MM_DigitizationTool:: in initialize()");
 
@@ -82,7 +81,7 @@ namespace MuonR4 {
         //
         std::string vmmReadoutMode = m_vmmReadoutMode;
         // convert vmmReadoutMode to lower case
-        std::for_each(vmmReadoutMode.begin(), vmmReadoutMode.end(), [](char &c){ c = ::tolower(c); });
+        std::ranges::for_each(vmmReadoutMode, [](char &c){ c = ::tolower(c); });
         if (vmmReadoutMode.find("peak") != std::string::npos) {
             m_vmmReadoutMode = "peak";
         } else if (vmmReadoutMode.find("threshold") != std::string::npos){
@@ -94,7 +93,7 @@ namespace MuonR4 {
         }
         std::string vmmARTMode = m_vmmARTMode;
         // convert vmmARTMode to lower case
-        std::for_each(vmmARTMode.begin(), vmmARTMode.end(), [](char &c){ c = ::tolower(c); });
+        std::ranges::for_each(vmmARTMode, [](char &c){ c = ::tolower(c); });
         if (vmmARTMode.find("peak") != std::string::npos) {
             m_vmmARTMode = "peak";
         }
@@ -200,7 +199,7 @@ namespace MuonR4 {
 
         const MmIdHelper &idHelper{m_idHelperSvc->mmIdHelper()};
         CLHEP::HepRandomEngine *rndEngine = getRandomEngine(ctx);
-        const ActsGeometryContext &gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext &gctx{getGeoCtx(ctx)};
 
         // Prepare the temporary cache
         DigiCache digitCache{};
@@ -245,7 +244,7 @@ namespace MuonR4 {
                 const Amg::Vector3D locPos{xAOD::toEigen(simHit->localPosition())};
                 const Amg::Vector3D locDir{xAOD::toEigen(simHit->localDirection())};
 
-                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTrans(gctx, readOutEle->layerHash(hitId))};
+                const Amg::Transform3D &locToGlobal{readOutEle->localToGlobalTransform(gctx, readOutEle->layerHash(hitId))};
                 const Amg::Vector3D globalHitPosition{locToGlobal * locPos};
 
                 // We could use the MuonDigitizationTool::hitTime which returns the global time
@@ -374,6 +373,13 @@ namespace MuonR4 {
                 v_stripDigitOutput[hitGapInNsw].push_back(std::move(stripDigitOutput));
 
                 addSDO(simHit, sdoContainer)->setIdentifier(clusId);
+                // lets decorate all the channels that could potentially be fired by this hit. This does not take into account the electronics simulation, e..g the charge merging on strips from different hits, and the electronics threshold.
+                ChVec_t& etaChannels = dec_etaChannel(*sdoContainer->back());
+                etaChannels.clear();
+                for (int stripNum : tmpStripOutput.NumberOfStripsPos()) {
+                        etaChannels.push_back(stripNum);
+                }
+                
                 ++m_acceptedHits[hitGapInNsw];
             } // end of loop over hits
 
@@ -476,11 +482,11 @@ namespace MuonR4 {
                     const Identifier id = idHelper.channelID(digitID,
                                                                 idHelper.multilayer(digitID),
                                                                 idHelper.gasGap(digitID), strip_id);
-                    float threshold = 0;
-                    if (!thresholdData->getThreshold(id, threshold)) {
+                    std::optional<float> threshold = thresholdData->getThreshold(id);
+                    if (!threshold) {
                         THROW_EXCEPTION("Cannot find retrieve VMM threshold from conditions data base!");
                     }
-                    v_stripThresholdResponseAllHits.push_back(threshold);
+                    v_stripThresholdResponseAllHits.push_back(*threshold);
                 } else if (m_useThresholdScaling) {
                     Identifier id = idHelper.channelID(digitID,
                                                         idHelper.multilayer(digitID),

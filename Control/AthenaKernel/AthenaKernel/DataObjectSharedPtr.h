@@ -1,7 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/DataObjectSharedPtr.h
@@ -17,48 +16,15 @@
 
 #include "AthenaKernel/StorableConversions.h"
 #include "GaudiKernel/DataObject.h"
-#include "boost/intrusive_ptr.hpp"
+#include "CxxUtils/RefCountedPtr.h"
 #include <memory>
-
-
-inline void intrusive_ptr_add_ref (DataObject* o)
-{
-  o->addRef();
-}
-
-
-inline void intrusive_ptr_release (DataObject* o)
-{
-  o->release();
-}
 
 
 namespace SG {
 
 
-/**
- * @brief Smart pointer to manage @c DataObject reference counts.
- */
-template <class T>
-class DataObjectSharedPtr
-  : public boost::intrusive_ptr<T>
-{
-public:
-  typedef boost::intrusive_ptr<T> Base;
-  DataObjectSharedPtr() {}
-  explicit DataObjectSharedPtr (T* p, bool add_ref = true)
-    : Base (p, add_ref) {}
-  explicit DataObjectSharedPtr (std::unique_ptr<T> p, bool add_ref = true)
-    : Base (p.release(), add_ref) {}
-  DataObjectSharedPtr (const DataObjectSharedPtr& rhs)
-    : Base (rhs) {}
-  template <class U>
-  DataObjectSharedPtr (const DataObjectSharedPtr<U>& rhs)
-    : Base (rhs) {}
-
-  // Avoid coverity warning.
-  DataObjectSharedPtr& operator= (const DataObjectSharedPtr& rhs) = default;
-};
+template <CxxUtils::detail::RefCounted T>
+using DataObjectSharedPtr = CxxUtils::RefCountedPtr<T>;
 
 
 template <typename T>

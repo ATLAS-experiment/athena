@@ -144,6 +144,10 @@ G4bool LArFCALH62004CalibCalculatorBase::Process(const G4Step* a_step, LArG4Iden
   // Find a transformation to a module coordinate system
   const G4TouchableHistory* theTouchable =
     dynamic_cast<const G4TouchableHistory*>(pre_step_point->GetTouchable());
+  if (!theTouchable) {
+    std::cout<<"dynamic_cast to G4TouchableHistory fails!" << std::endl;
+    return false;
+  }
 
   G4String volumeName = theTouchable->GetVolume()->GetName() ;
   int modVol=theTouchable->GetHistoryDepth();

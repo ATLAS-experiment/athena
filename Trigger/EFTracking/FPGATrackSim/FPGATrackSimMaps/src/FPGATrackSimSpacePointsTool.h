@@ -10,7 +10,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimCluster.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimMaps/FPGATrackSimSpacePointsToolI.h"
-#include <array>
+
 #include <vector>
 #include <map>
 

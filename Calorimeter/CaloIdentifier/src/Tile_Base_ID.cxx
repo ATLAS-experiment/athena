@@ -19,8 +19,6 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CxxUtils/StrFormat.h"
 
-#include "GaudiKernel/MsgStream.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -1096,54 +1094,48 @@ Tile_Base_ID::get_id     (const IdentifierHash& hash_id,
 	id = m_adcs.id (hash_id);
 	result = 0;
       } else {
-	MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: adc hash_id is out of range " << hash_id
-            << " > " << m_adcs.hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: adc hash_id is out of range " << hash_id
+                      << " > " << m_adcs.hash_max());
       }
     } else if ( m_PMT_INDEX == end ) {
       if (hash_id < m_pmts.hash_max()) {
 	id = m_pmts.id (hash_id);
 	result = 0;
       } else {
-	MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: pmt hash_id is out of range " << hash_id
-            << " >= " << m_pmts.hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: pmt hash_id is out of range " << hash_id
+                      << " >= " << m_pmts.hash_max());
       }
     } else if ( m_SAMPLE_INDEX == end ) {
       if (hash_id < channels().hash_max()) {
 	id = channels().id (hash_id);
 	result = 0;
       } else {
-        MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: cell hash_id is out of range " << hash_id 
-            << " >= " << channels().hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: cell hash_id is out of range " << hash_id
+                      << " >= " << channels().hash_max());
       }
     } else if ( m_TOWER_INDEX == end ) {
       if (hash_id < m_towers.hash_max()) {
 	id = m_towers.id (hash_id);
 	result = 0;
       } else {
-	MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: tower hash_id is out of range " << hash_id
-            << " >= " << m_towers.hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: tower hash_id is out of range " << hash_id
+                      << " >= " << m_towers.hash_max());
       }
     } else if ( m_MODULE_INDEX == end ) {
       if (hash_id < m_modules.hash_max()) {
 	id = m_modules.id (hash_id);
 	result = 0;
       } else {
-	MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: module hash_id is out of range " << hash_id
-            << " >= " << m_modules.hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: module hash_id is out of range " << hash_id
+                      << " >= " << m_modules.hash_max());
       }
     } else if ( m_SIDE_INDEX == end ) {
       if (hash_id < regions().hash_max()) {
         id = regions().id (hash_id);
 	result = 0;
       } else {
-        MsgStream log(m_msgSvc, "Tile_Base_ID" );
-	log << MSG::ERROR << "get_id: region hash_id is out of range " << hash_id
-            << " >= " << regions().hash_max() << endmsg;
+        ATH_MSG_ERROR("get_id: region hash_id is out of range " << hash_id
+                      << " >= " << regions().hash_max());
       }
     }
   }
@@ -1185,19 +1177,18 @@ int
 Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
                                                const std::string& group_name)
 {
-  MsgStream log(m_msgSvc, "Tile_Base_ID" );
-  log << MSG::DEBUG << "initialize_base_from_dictionary " << endmsg;
+  ATH_MSG_DEBUG("initialize_base_from_dictionary ");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    if(m_msgSvc)log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    if(m_msgSvc)log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
-  log << MSG::DEBUG << "calling base initialize_base_from_dictionary" << endmsg;
+  ATH_MSG_DEBUG("calling base initialize_base_from_dictionary");
 
   // init base object
   if(CaloIDHelper::initialize_base_from_dictionary(dict_mgr,
@@ -1212,9 +1203,8 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
-    log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->name()
-        << endmsg;
+    ATH_MSG_ERROR("Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary "
+                  << atlasDict->name());
     return (1);
   }
 
@@ -1234,9 +1224,8 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   // Find value for the field Tile Online
   int tilehwField   = -1;
   if (dict()->get_label_value("section", "Online", tilehwField)) {
-    log << MSG::ERROR << "Could not get value for label 'Online' of field 'section' in dictionary " 
-        << dict()->name()
-        << endmsg;
+    ATH_MSG_ERROR("Could not get value for label 'Online' of field 'section' in dictionary "
+                  << dict()->name());
   } else {
     // remove online ID from all ranges
     reg_id = tile_id;
@@ -1252,9 +1241,8 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
   // Find value for the field Tile Testbeam
   int tiletbField = -1;
   if (dict()->get_label_value("section", "Testbeam", tiletbField)) {
-    log << MSG::ERROR << "Could not get value for label 'Testbeam' of field 'section' in dictionary " 
-        << dict()->name()
-        << endmsg;
+    ATH_MSG_ERROR("Could not get value for label 'Testbeam' of field 'section' in dictionary "
+                  << dict()->name());
   } else {
     // remove testbeam ID from all ranges
     reg_id = std::move(tile_id);
@@ -1267,16 +1255,14 @@ Tile_Base_ID::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
     m_full_region_range.remove_range(reg_id);
   }
 
-  if (!m_quiet) {
-    log << MSG::DEBUG << "initialize_from_dict : "                                << endmsg;
-    log << MSG::DEBUG << " region range -> "  << (std::string)m_full_region_range << endmsg;
-    log << MSG::DEBUG << " module range -> "  << (std::string)m_full_module_range << endmsg;
-    log << MSG::DEBUG << " tower range ->  "  << (std::string)m_full_tower_range  << endmsg;
-    log << MSG::DEBUG << " cell range ->   "  << (std::string)m_full_cell_range   << endmsg;
-    log << MSG::DEBUG << " pmt range ->    "  << (std::string)m_full_pmt_range    << endmsg;
-    log << MSG::DEBUG << " adc range ->    "  << (std::string)m_full_adc_range    << endmsg;
-  }
-    
+  ATH_MSG_DEBUG("initialize_from_dict :");
+  ATH_MSG_DEBUG(" region range -> "  << (std::string)m_full_region_range);
+  ATH_MSG_DEBUG(" module range -> "  << (std::string)m_full_module_range);
+  ATH_MSG_DEBUG(" tower range ->  "  << (std::string)m_full_tower_range );
+  ATH_MSG_DEBUG(" cell range ->   "  << (std::string)m_full_cell_range  );
+  ATH_MSG_DEBUG(" pmt range ->    "  << (std::string)m_full_pmt_range   );
+  ATH_MSG_DEBUG(" adc range ->    "  << (std::string)m_full_adc_range   );
+
   // Setup the hash tables
   if(init_hashes()) return (1);
 
@@ -1616,11 +1602,8 @@ int Tile_Base_ID::get_expanded_id  (const Identifier& id,
 
 int Tile_Base_ID::initLevelsFromDict (const std::string& group_name) 
 {
-  MsgStream log(m_msgSvc, "Tile_Base_ID" );
-
   if(!dict()) {
-    log << MSG::ERROR << "initLevelsFromDict - dictionary NOT initialized "
-        << endmsg;
+    ATH_MSG_ERROR("initLevelsFromDict - dictionary NOT initialized ");
     return (1);
   }
 
@@ -1635,23 +1618,22 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_PMT_INDEX           = 999;
   m_ADC_INDEX           = 999;
 
-  IdDictGroup* group = dict()->find_group(group_name);
+  const IdDictGroup* group = dict()->find_group(group_name);
   if ( !group ){
-    log << MSG::ERROR << "initLevelsFromDict - cannot find " << group_name
-        << " group' field " << endmsg;
+    ATH_MSG_ERROR("initLevelsFromDict - cannot find " << group_name
+                  << " group' field ");
   }
   else {
-	m_tile_region_index = group->regions()[0]->index();
+	m_tile_region_index = group->region(0).index();
   }
 
   // Fing a Tile region
-  IdDictField* field = dict()->find_field("subdet") ;
+  const IdDictField* field = dict()->find_field("subdet") ;
   if (field) {
     m_SYSTEM_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR << "initLevelsFromDict - unable to find 'subdet' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
     return (1);
   }
 
@@ -1660,8 +1642,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_SECTION_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'section' field ");
     return (1);
   }
 
@@ -1670,8 +1651,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_SIDE_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'side' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'side' field ");
     return (1);
   }
 
@@ -1680,8 +1660,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_MODULE_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'module' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'module' field ");
     return (1);
   }
 
@@ -1690,8 +1669,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_TOWER_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'tower' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'tower' field ");
     return (1);
   }
 
@@ -1700,8 +1678,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_SAMPLE_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'sampling' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'sampling' field ");
     return (1);
   }
 
@@ -1710,8 +1687,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_PMT_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'pmt' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'pmt' field ");
     return (1);
   }
 
@@ -1720,8 +1696,7 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
     m_ADC_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'adc' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'adc' field ");
     return (1);
   }
 
@@ -1736,18 +1711,16 @@ int Tile_Base_ID::initLevelsFromDict (const std::string& group_name)
   m_pmt_impl     = region.implementation(m_PMT_INDEX);
   m_adc_impl     = region.implementation(m_ADC_INDEX);
 
-  if (!m_quiet) {
-    log << MSG::DEBUG << "initLevelsFromDict decode index and bit fields for each level: "              << endmsg ;
-    log << MSG::DEBUG << " system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()   << endmsg ;
-    log << MSG::DEBUG << " section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string()  << endmsg ;
-    log << MSG::DEBUG << " side     [" << m_SIDE_INDEX     << "]  " << m_side_impl.show_to_string()     << endmsg ;
-    log << MSG::DEBUG << " module   [" << m_MODULE_INDEX   << "]  " << m_module_impl.show_to_string()   << endmsg ;
-    log << MSG::DEBUG << " tower    [" << m_TOWER_INDEX    << "]  " << m_tower_impl.show_to_string()    << endmsg ;
-    log << MSG::DEBUG << " sampling [" << m_SAMPLE_INDEX   << "]  " << m_sample_impl.show_to_string()   << endmsg ;
-    log << MSG::DEBUG << " pmt      [" << m_PMT_INDEX      << "]  " << m_pmt_impl.show_to_string()      << endmsg ;
-    log << MSG::DEBUG << " adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl.show_to_string()      << endmsg ;
-  }
-  
+  ATH_MSG_DEBUG("initLevelsFromDict decode index and bit fields for each level: "             );
+  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()  );
+  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string() );
+  ATH_MSG_DEBUG(" side     [" << m_SIDE_INDEX     << "]  " << m_side_impl.show_to_string()    );
+  ATH_MSG_DEBUG(" module   [" << m_MODULE_INDEX   << "]  " << m_module_impl.show_to_string()  );
+  ATH_MSG_DEBUG(" tower    [" << m_TOWER_INDEX    << "]  " << m_tower_impl.show_to_string()   );
+  ATH_MSG_DEBUG(" sampling [" << m_SAMPLE_INDEX   << "]  " << m_sample_impl.show_to_string()  );
+  ATH_MSG_DEBUG(" pmt      [" << m_PMT_INDEX      << "]  " << m_pmt_impl.show_to_string()     );
+  ATH_MSG_DEBUG(" adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl.show_to_string()     );
+
   return(0) ;
 }
 
@@ -1793,10 +1766,7 @@ int Tile_Base_ID::get_neighbours(const IdentifierHash& id_orig, const LArNeighbo
   int result = 1; 
 
   if(!m_do_neighbours) {
-
-    MsgStream log(m_msgSvc, "TileID" );
-    log << MSG::WARNING << "get_neighbours: neighbours not initialized !!! returning empty list" << endmsg;
-
+    ATH_MSG_WARNING("get_neighbours: neighbours not initialized !!! returning empty list");
     neighbourList.resize(0);
     return result;
   }

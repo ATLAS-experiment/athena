@@ -24,17 +24,17 @@ StatusCode LArLATOMEMappingAlg::initialize() {
 }
 
 
-StatusCode LArLATOMEMappingAlg::execute() {
+StatusCode LArLATOMEMappingAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("executing");
 
-  SG::WriteCondHandle<LArLATOMEMapping> writeHandle{m_writeKey};
+  SG::WriteCondHandle<LArLATOMEMapping> writeHandle{m_writeKey, ctx};
   
   if (writeHandle.isValid()) {
     ATH_MSG_DEBUG("Found valid write handle");
     return StatusCode::SUCCESS;
   }  
 
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
   const CondAttrListCollection * catr{*readHandle};
 
   if (catr==nullptr) {

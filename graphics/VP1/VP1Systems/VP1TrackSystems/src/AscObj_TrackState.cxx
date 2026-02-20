@@ -73,27 +73,27 @@ AscObj_TrackState::AscObj_TrackState(
 {
   SoTransparency::initClass();
   if (m_trackstate.hasReferenceSurface()) {
-    if (surface().associatedDetectorElement())
+    if (surface().isSensitive())
       m_parts |= TrackCommonFlags::TSOS_SurfacesDetElem;
     else
       m_parts |= TrackCommonFlags::TSOS_SurfacesCustom;
   }
 
-  if (m_trackstate.typeFlags().test(Acts::TrackStateFlag::ParameterFlag ))
+  if (m_trackstate.typeFlags().hasParameters())
     m_parts |= TrackCommonFlags::TSOS_TrackPars;
  
-  if (m_trackstate.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)){
+  if (m_trackstate.typeFlags().hasMeasurement()){
     m_parts |= TrackCommonFlags::TSOS_AnyMeasurement;
-    if (m_trackstate.typeFlags().test(Acts::TrackStateFlag::OutlierFlag ))
+    if (m_trackstate.typeFlags().isOutlier())
       m_parts |= TrackCommonFlags::TSOS_MeasRioOnTrackOutlier;
     else
       m_parts |= TrackCommonFlags::TSOS_MeasRioOnTrackNotOutlier;
   }
 
-  if (m_trackstate.typeFlags().test(Acts::TrackStateFlag::HoleFlag))
+  if (m_trackstate.typeFlags().isHole())
     m_parts |= TrackCommonFlags::TSOS_Hole;
   
-  if (m_trackstate.typeFlags().test(Acts::TrackStateFlag::MaterialFlag ))
+  if (m_trackstate.typeFlags().hasMaterial())
     m_parts |= TrackCommonFlags::TSOS_MaterialEffects;
 }
 
@@ -210,7 +210,7 @@ void AscObj_TrackState::addSurfaceToShapes(SoSeparator*& shape_simple,
   if (surface.type()==Acts::Surface::SurfaceType::Straw && common()->controller()->hideTubeSurfaces())
     return;
   
-  SoTransform* sotra = VP1LinAlgUtils::toSoTransform(surface.transform(common()->geometryContext().context()));
+  SoTransform* sotra = VP1LinAlgUtils::toSoTransform(surface.localToGlobalTransform(common()->geometryContext().context()));
   shape_detailed->addChild(sotra);
 
   // 
@@ -382,8 +382,8 @@ void AscObj_TrackState::addMeasurementToShapes(SoSeparator*& shape_simple,
 
   // Check if the TrackStateProxy has a measurement
   if (!m_trackstate.hasReferenceSurface() ||
-      !flag.test(Acts::TrackStateFlag::MeasurementFlag ||
-                 !(m_trackstate.hasUncalibratedSourceLink())))
+      !flag.hasMeasurement() ||
+      !m_trackstate.hasUncalibratedSourceLink())
     return;
 
   ensureInitSeps(shape_simple, shape_detailed);

@@ -190,46 +190,46 @@ namespace TrackingUtilities {
     
     const std::vector<Identifier>& rod_list_cluster = xaodCluster.rdoList();
     const std::vector<float>& charge_list_cluster = xaodCluster.chargeList();
-    if (rod_list_cluster.size() != charge_list_cluster.size()) {
-      return StatusCode::FAILURE;
-    }
-    
-    for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
-      const Identifier& this_rdo = rod_list_cluster.at(i);
-      const float this_charge = charge_list_cluster.at(i);
-
-      const int row = pixelID.phi_index(this_rdo);
-      if (row > rowmax) {
-	rowmax = row;
-	qRowMax = this_charge;
-      } else if (row == rowmax) {
-	qRowMax += this_charge; 
-      }
-
-      if (row < rowmin) {  
-	rowmin = row;
-	qRowMin = this_charge;
-      } else if (row == rowmin) {
-	qRowMin += this_charge;
-      } 
-
-      const int col = pixelID.eta_index(this_rdo);
-      if (col > colmax) {
-	colmax = col;
-	qColMax = this_charge;
-      } else if (col == colmax) {
-	qColMax += this_charge;
-      }     
+        
+    if (rod_list_cluster.size() == charge_list_cluster.size()) {
       
-      if (col < colmin) {
-	colmin = col;
-	qColMin = this_charge;
-      } else if (col == colmin) {
-	qColMin += this_charge;
-      } 
-
-    }
-
+      for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
+        const Identifier& this_rdo = rod_list_cluster[i];
+        const float this_charge = charge_list_cluster[i];
+        
+        const int row = pixelID.phi_index(this_rdo);
+        if (row > rowmax) {
+          rowmax = row;
+          qRowMax = this_charge;
+        } else if (row == rowmax) {
+          qRowMax += this_charge; 
+          }
+        
+        if (row < rowmin) {  
+          rowmin = row;
+          qRowMin = this_charge;
+        } else if (row == rowmin) {
+          qRowMin += this_charge;
+        } 
+        
+        const int col = pixelID.eta_index(this_rdo);
+        if (col > colmax) {
+          colmax = col;
+          qColMax = this_charge;
+        } else if (col == colmax) {
+          qColMax += this_charge;
+        }     
+        
+        if (col < colmin) {
+          colmin = col;
+          qColMin = this_charge;
+        } else if (col == colmin) {
+          qColMin += this_charge;
+        }
+        
+      }//loop on rdo list
+    } // check that rdo list has the same size of charge list
+    
     // Compute omega for charge interpolation correction (if required)
     // Two pixels may have charge=0 (very rarely, hopefully)
     float omegax = -1.f;

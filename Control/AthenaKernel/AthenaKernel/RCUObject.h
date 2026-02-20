@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/RCUObject.h
@@ -121,7 +121,6 @@
 
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "GaudiKernel/EventContext.h"
-#include "boost/dynamic_bitset.hpp"
 #include <atomic>
 #include <deque>
 #include <vector>
@@ -137,6 +136,8 @@ template <class T> class RCURead;
 template <class T> class RCUReadQuiesce;
 template <class T> class RCUUpdate;
 
+
+struct RCUObjectGraceSets;
 
 
 /**
@@ -275,18 +276,9 @@ protected:
 
 private:
   /**
-   * @brief Declare that the grace period for a slot is ending.
-   * @param Lock object (external locking).
-   * @param ctx Event context for the slot.
-   * @param grace Bitmask tracking grace periods.
-   * @returns true if any slot is still in a grace period.
-   *          false if no slots are in a grace period.
-   *
-   * The caller must be holding the mutex for this object.
+   * @brief Out-of-line part of quiescent().
    */
-  bool endGrace (lock_t& /*lock*/,
-                 const EventContext& ctx,
-                 boost::dynamic_bitset<>& grace) const;
+  void quiescentOol (const EventContext& ctx);
 
 
   /// The mutex for this object.
@@ -295,11 +287,9 @@ private:
   /// The service with which we're registered, or null.
   IRCUSvc* m_svc;
 
-  /// Bit[i] set means that slot i is in a grace period.
-  boost::dynamic_bitset<> m_grace;
-
-  /// Same thing, for the objects marked as old.
-  boost::dynamic_bitset<> m_oldGrace;
+  /// Holds the current and old grace period bitmasks.
+  /// Split off into a separate object to reduce header dependencies.
+  std::unique_ptr<RCUObjectGraceSets> m_graceSets;
 
   /// Number of old objects.
   /// The objects at the end of the garbage list are old.

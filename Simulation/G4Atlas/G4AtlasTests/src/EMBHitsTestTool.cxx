@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMBHitsTestTool.h"
@@ -28,7 +28,7 @@ StatusCode EMBHitsTestTool::initialize()
   _TH1D_WEIGHTED(m_edep_r,"EMB_edep_r",100,1300.,2000.);
   _TPROFILE(m_etot_eta,"EMB_etot_eta",25,-2.,2.); 
 
-  m_path = origpath;
+  m_path = std::move(origpath);
 
   return LArHitsTestTool::initialize();
 }

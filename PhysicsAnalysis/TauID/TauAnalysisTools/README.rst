@@ -27,8 +27,8 @@ analysis. Currently following tools are available:
 * **TauTruthTrackMatchingTool:** performs matching of tracks to truth taus and tracks to truth charged particles
     
 All relevant information about the actual measurement of uncertainties
-can be found here: `TauRecommendationsR22
-<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_.
+can be found in the twiki here: `TauRecommendationsR22-twiki
+<https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TauRecommendationsR22>`_ or in the mkdoc here: `TauRecommendationsR22-mkdoc <https://atlas-taucp.docs.cern.ch/Pre-recommendations-2025/>`_  .
 
 In case of any problems, issues or suggestions don't hesitate to contact the
 authorsi or the TauCP conveners.
@@ -40,13 +40,13 @@ Setup
 AnalysisBase (AthAnalysisBase)
 ---------------
 
-First start with a clean shell and setup athena using sparse checkout, following the instructions from `Setup Sparse Checkout <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/#sparse-checkout>`_.
+First start with a clean shell and setup athena using sparse checkout, following the instructions from `Setup Sparse Checkout <://atlas-software.docs.cern.ch/athena/git/clone/#sparse-checkout>`_.
 
 Then checkout the TauAnalysisTools package::
 
   git atlas addpkg TauAnalysisTools
 
-Compile the package following the instructions from `Setting up to compile and test code <https://atlassoftwaredocs.web.cern.ch/gittutorial/git-develop/>`_.
+Compile the package following the instructions from `Setting up to compile and test code <https://atlas-software.docs.cern.ch/athena/git/develop/>`_.
 Please make sure to setup AnalysisBase (or AthAnalysisBase), for example typing::
 
   asetup AnalysisBase,25.2.12,here

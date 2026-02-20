@@ -28,9 +28,11 @@ namespace {
     using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     const SG::ConstAccessor<int> acc_origin("truthOrigin");
     const SG::ConstAccessor<int> acc_type("truthType");
+    const SG::ConstAccessor<unsigned int> acc_classification("truthClassification");
     const SG::ConstAccessor<TruthLink_t> acc_link("truthParticleLink");
     //
     const SG::Decorator<int> dec_origin("truthOrigin");
+    const SG::Decorator<unsigned int> dec_classification("truthClassification");
     const SG::Decorator<int> dec_type ("truthType");
     const SG::Decorator<TruthLink_t> dec_link("truthParticleLink");
 
@@ -59,6 +61,7 @@ StatusCode RecoToTruthAssociationAlg::initialize() {
     ATH_CHECK(m_muonTruthParticleLink.initialize());
     ATH_CHECK(m_muonTruthParticleOrigin.initialize());
     ATH_CHECK(m_muonTruthParticleType.initialize());
+    ATH_CHECK(m_muonTruthParticleClassification.initialize());
     ATH_CHECK(m_muonTruthParticleNPrecMatched.initialize());
     ATH_CHECK(m_muonTruthParticleNPhiMatched.initialize());
     ATH_CHECK(m_muonTruthParticleNTrigEtaMatched.initialize());
@@ -68,7 +71,18 @@ StatusCode RecoToTruthAssociationAlg::initialize() {
 
     m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_origin.auxid()));
     m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(acc_type.auxid()));
-    m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthMdtHitsAcc.auxid()));
+    if (m_idHelperSvc->hasMDT()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthMdtHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasRPC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthRpcHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasTGC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthTgcHitsAcc.auxid()));
+    }
+    if (m_idHelperSvc->hasCSC()) {
+        m_inputDecorKey.emplace_back(m_truthMuKey, SG::AuxTypeRegistry::instance().getName(truthCscHitsAcc.auxid()));
+    }
 
     ATH_CHECK(m_inputDecorKey.initialize());
     return StatusCode::SUCCESS;
@@ -91,6 +105,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
     }
     SG::WriteDecorHandle<xAOD::MuonContainer, int> muonTruthParticleType(m_muonTruthParticleType, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, int> muonTruthParticleOrigin(m_muonTruthParticleOrigin, ctx);
+    SG::WriteDecorHandle<xAOD::MuonContainer, unsigned int> muonTruthParticleClassification(m_muonTruthParticleClassification, ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNPrecMatched(m_muonTruthParticleNPrecMatched,
                                                                                                         ctx);
     SG::WriteDecorHandle<xAOD::MuonContainer, std::vector<unsigned int> > muonTruthParticleNPhiMatched(m_muonTruthParticleNPhiMatched, ctx);
@@ -121,6 +136,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
             if (acc_origin.isAvailable(*tp) && acc_origin(*tp) != 0) {
                 muonTruthParticleOrigin(*muon) = acc_origin(*tp);
                 muonTruthParticleType(*muon) = acc_type(*tp);
+                muonTruthParticleClassification(*muon) = acc_classification(*tp);
                 setOrigin = true;
             }
 
@@ -153,6 +169,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
                     if (!setOrigin) {
                         muonTruthParticleOrigin(*muon) = acc_origin(*tp);
                         muonTruthParticleType(*muon) = acc_type(*tp);
+                        muonTruthParticleClassification(*muon) = acc_classification(*tp);
                         setOrigin = true;
                     }
                     /// Check first if the truth link already exists
@@ -211,6 +228,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
         if (!setOrigin) {
             muonTruthParticleOrigin(*muon) = 0;
             muonTruthParticleType(*muon) = 0;
+            muonTruthParticleClassification(*muon) = 0;
         }
         if (!foundTruth) {
             muonTruthParticleLink(*muon) = ElementLink<xAOD::TruthParticleContainer>();
@@ -233,6 +251,7 @@ StatusCode RecoToTruthAssociationAlg::execute(const EventContext& ctx) const {
               }
               if (decor_staco) {
                 dec_origin(*cmb_trk) = acc_origin(*muon);
+                dec_classification(*cmb_trk) = acc_classification(*muon);
                 dec_type(*cmb_trk) = acc_type(*muon);
                 dec_link(*cmb_trk) = acc_link(*muon);
               }

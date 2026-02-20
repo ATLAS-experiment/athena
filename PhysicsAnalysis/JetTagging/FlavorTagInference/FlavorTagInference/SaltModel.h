@@ -12,22 +12,9 @@
 
 #include <onnxruntime_cxx_api.h>
 
-#include "nlohmann/json.hpp"
 #include "FlavorTagInference/ISaltModel.h"
 
-#include <map> //also has std::pair
-#include <vector>
-#include <string>
-#include <memory>
-
 namespace FlavorTagInference {
-
-  NLOHMANN_JSON_SERIALIZE_ENUM( SaltModelVersion , {
-    { SaltModelVersion::UNKNOWN, "" },
-    { SaltModelVersion::V0, "v0" },
-    { SaltModelVersion::V1, "v1" },
-    { SaltModelVersion::V2, "v2" },
-  })
 
   //
   // Utility class that loads the onnx model from the given path
@@ -46,12 +33,10 @@ namespace FlavorTagInference {
       virtual const std::string& getModelName() const override;
 
     private:
-      const nlohmann::json& getMetadata() const;
       const nlohmann::json loadMetadata(const std::string& key) const;
       const std::string determineModelName() const;
 
       nlohmann::json m_metadata;
-      std::string m_path_to_onnx;
 
       std::unique_ptr< Ort::Session > m_session;
       std::unique_ptr< Ort::Env > m_env;

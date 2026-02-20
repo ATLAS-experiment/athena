@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -108,8 +108,7 @@ StatusCode testAthenaEgammaCalibTool::execute()
   }
   
   //test the correctedCopy method
-  unsigned int j = 0; 
-  for (; el_it != el_it_last; ++el_it, ++j) { 
+  for (; el_it != el_it_last; ++el_it) { 
     xAOD::Electron *copy_el = nullptr; // new object 
     if (m_EgammaCalibrationAndSmearingTool->correctedCopy( **el_it, copy_el) != CP::CorrectionCode::Ok){ 
       ATH_MSG_WARNING("Could not apply correction to new electron object"); 

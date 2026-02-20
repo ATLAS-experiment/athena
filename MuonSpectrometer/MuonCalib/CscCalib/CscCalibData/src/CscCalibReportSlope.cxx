@@ -1,109 +1,76 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibData/CscCalibReportSlope.h"
-#include "AthContainers/DataVector.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 
 #include "TGraphErrors.h"
 #include "TH1I.h"
 #include "TProfile.h"
-#include <map>
-#include <set>
-#include <string>
 #include <utility>
 
 /* default constructor */
-CscCalibReportSlope::CscCalibReportSlope() : 
-  m_calGraphs(nullptr),
-  m_bitHists(nullptr),
-  m_ampProfs(nullptr),
-  m_pulsedChambers(nullptr),
-  m_fitResults(nullptr)
+CscCalibReportSlope::CscCalibReportSlope()
 { }
 
 /* full constructor */
 CscCalibReportSlope::CscCalibReportSlope(std::string label) :  
-  CscCalibReportBase::CscCalibReportBase(std::move(label)),
-  m_calGraphs(nullptr),
-  m_bitHists(nullptr),
-  m_ampProfs(nullptr),
-  m_pulsedChambers(nullptr),
-  m_fitResults(nullptr)
+  CscCalibReportBase::CscCalibReportBase(std::move(label))
 { }
 
 CscCalibReportSlope::~CscCalibReportSlope()
 {
-  //Datavector, so it will delete its own contents
-  delete m_calGraphs;
-  delete m_bitHists;
-  delete m_ampProfs;
-  delete m_pulsedChambers;
-  delete m_fitResults;
 }
 
 
-void CscCalibReportSlope::setBitHists(DataVector<TH1I> * someBitHists)
+void CscCalibReportSlope::setBitHists(std::vector<TH1I*>&& someBitHists)
 {
-    m_bitHists = someBitHists;
+    m_bitHists = std::move(someBitHists);
 }
 
-const DataVector<TH1I> * CscCalibReportSlope::getBitHists() const
+const std::vector<TH1I*>& CscCalibReportSlope::getBitHists() const
 {
     return m_bitHists;
 }
 
-void CscCalibReportSlope::setCalGraphs(DataVector<TGraphErrors> * someCalGraphs)
+void CscCalibReportSlope::setCalGraphs(std::vector<TGraphErrors*>&& someCalGraphs)
 {
-  if(m_calGraphs) {
-    MsgStream log(Athena::getMessageSvc(),"CscCalibReportSlope");
-    log<<MSG::WARNING<<"Writing over already existing calGraphs in report!"<<endmsg;
-  }
-    
-  m_calGraphs = someCalGraphs;
+  m_calGraphs = std::move(someCalGraphs);
 }
 
-const DataVector<TGraphErrors> * CscCalibReportSlope::getCalGraphs() const
+const std::vector<TGraphErrors*>& CscCalibReportSlope::getCalGraphs() const
 {
   return m_calGraphs;
 }
 
-void CscCalibReportSlope::setAmpProfs( std::map<int,TProfile *> * someAmpProfs )
+void CscCalibReportSlope::setAmpProfs( std::map<int,TProfile *>&& someAmpProfs )
 {
-  if(m_ampProfs) {
-    MsgStream log(Athena::getMessageSvc(),"CscCalibReportSlope");
-    log<<MSG::WARNING<<"writing over already existing dead changes in report!"<<endmsg;
-  }
-  m_ampProfs = someAmpProfs;
+  m_ampProfs = std::move(someAmpProfs);
 }
 
-void CscCalibReportSlope::setFitResults( std::vector<float> * someFitResults){
-  m_fitResults = someFitResults;
+void CscCalibReportSlope::setFitResults( std::vector<float>&& someFitResults){
+  m_fitResults = std::move(someFitResults);
 }
 
-const std::map<int,TProfile*> * CscCalibReportSlope::getAmpProfs() const
+const std::map<int,TProfile*>& CscCalibReportSlope::getAmpProfs() const
 {
   return m_ampProfs;
 }
 
-void CscCalibReportSlope::setPulsedChambers( std::set<int> * somePulsedChambers)
+void CscCalibReportSlope::setPulsedChambers( std::set<int>&& somePulsedChambers)
 {
-  if(m_pulsedChambers) {
-    MsgStream log(Athena::getMessageSvc(),"CscCalibReportSlope");
-    log<<MSG::WARNING<<"Writing over previously existing pulsed chambers!"<<endmsg;
-  }
-  m_pulsedChambers = somePulsedChambers;
+  m_pulsedChambers = std::move(somePulsedChambers);
 }
     
 
-const std::set<int> * CscCalibReportSlope::getPulsedChambers() const
+const std::set<int>& CscCalibReportSlope::getPulsedChambers() const
 {
   return m_pulsedChambers;
 }
 
-const std::vector<float> * CscCalibReportSlope::getFitResults() const{
+const std::vector<float>& CscCalibReportSlope::getFitResults() const{
   return m_fitResults;
 }
 

@@ -79,9 +79,9 @@ StatusCode egammaMonToolBase::initialize()
   return sc;
 }
 
-unsigned int egammaMonToolBase::getCurrentLB()
+unsigned int egammaMonToolBase::getCurrentLB(const EventContext& ctx)
 {
-  SG::ReadHandle<xAOD::EventInfo> evtInfo{m_EventInfoKey};
+  SG::ReadHandle<xAOD::EventInfo> evtInfo{m_EventInfoKey, ctx};
   if (evtInfo.isValid()) {
     return evtInfo->lumiBlock();
   } 
@@ -219,15 +219,15 @@ StatusCode egammaMonToolBase::fillHistograms()
 }
 
 //GYS. In the case the event is flagged bad due to LAr noise or LAr data error this is true
-bool egammaMonToolBase::hasBadLar()
+bool egammaMonToolBase::hasBadLar(const EventContext& ctx)
 {
-  const xAOD::EventInfo* event_info = nullptr;
-  StatusCode sc = evtStore()->retrieve( event_info );
-  if (sc.isFailure()) {
-    ATH_MSG_WARNING("Could not get LAr event info!");
+  SG::ReadHandle<xAOD::EventInfo> eventInfo{m_EventInfoKey, ctx};
+  if (!eventInfo.isValid()) {
+    ATH_MSG_ERROR("Could not get LAr event info!");
+    return false;
   }
 
-  xAOD::EventInfo::EventFlagErrorState error_state = event_info->errorState(xAOD::EventInfo::LAr);
+  xAOD::EventInfo::EventFlagErrorState error_state = eventInfo->errorState(xAOD::EventInfo::LAr);
 
   // Only removing events with Error not with Warning
   //if (error_state==xAOD::EventInfo::Warning)

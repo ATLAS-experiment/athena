@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -29,7 +29,7 @@
 
 /// Function testing the copying of a few objects
 StatusCode copyObjects( xAOD::TEvent::EAuxMode mode );
-
+//coverity[root_function]
 int main() {
 
    // The name of the application
@@ -117,6 +117,7 @@ StatusCode copyObjects( xAOD::TEvent::EAuxMode mode ) {
    }
 
    // Let the user know what happened:
+   RETURN_CHECK( "copyObjects", event.finishWritingTo( ofile.get() ) );
    Info( "copyObjects", "Copying objects from %i events in mode %s succeeded",
          static_cast< int >( entries ), modeName.Data() );
 

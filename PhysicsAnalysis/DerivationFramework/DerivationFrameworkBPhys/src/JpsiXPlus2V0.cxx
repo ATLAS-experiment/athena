@@ -33,6 +33,7 @@ namespace DerivationFramework {
     m_v0VtxOutputKey(""),
     m_TrkParticleCollection("InDetTrackParticles"),
     m_VxPrimaryCandidateName("PrimaryVertices"),
+    m_pvContainerName("PrimaryVertices"),
     m_refPVContainerName("RefittedPrimaryVertices"),
     m_eventInfo_key("EventInfo"),
     m_RelinkContainers({"InDetTrackParticles","InDetLargeD0TrackParticles"}),
@@ -76,6 +77,8 @@ namespace DerivationFramework {
     m_constrV02(false),
     m_constrJXV02(false),
     m_constrMainV(false),
+    m_cascadeFitWithPV(0),
+    m_firstDecayAtPV(false),
     m_JXSubVtx(false),
     m_JXV02SubVtx(false),
     m_chi2cut_JX(-1.0),
@@ -105,6 +108,7 @@ namespace DerivationFramework {
     declareProperty("OutoutV0VtxCollection",    m_v0VtxOutputKey);
     declareProperty("TrackParticleCollection",  m_TrkParticleCollection);
     declareProperty("VxPrimaryCandidateName",   m_VxPrimaryCandidateName);
+    declareProperty("PVContainerName",          m_pvContainerName);
     declareProperty("RefPVContainerName",       m_refPVContainerName);
     declareProperty("EventInfoKey",             m_eventInfo_key);
     declareProperty("RelinkTracks",             m_RelinkContainers);
@@ -149,6 +153,8 @@ namespace DerivationFramework {
     declareProperty("ApplyV02MassConstraint",   m_constrV02); // second V0
     declareProperty("ApplyJXV02MassConstraint", m_constrJXV02); // constrain JX + 2nd V0
     declareProperty("ApplyMainVMassConstraint", m_constrMainV);
+    declareProperty("DoCascadeFitWithPV",       m_cascadeFitWithPV);
+    declareProperty("FirstDecayAtPV",           m_firstDecayAtPV);
     declareProperty("HasJXSubVertex",           m_JXSubVtx);
     declareProperty("HasJXV02SubVertex",        m_JXV02SubVtx); // only effective when m_JXSubVtx=true
     declareProperty("Chi2CutJX",                m_chi2cut_JX);
@@ -227,6 +233,7 @@ namespace DerivationFramework {
     ATH_CHECK( m_vertexV0ContainerKey.initialize(SG::AllowEmpty) );
     ATH_CHECK( m_VxPrimaryCandidateName.initialize() );
     ATH_CHECK( m_TrkParticleCollection.initialize() );
+    ATH_CHECK( m_pvContainerName.initialize() );
     ATH_CHECK( m_refPVContainerName.initialize() );
     ATH_CHECK( m_cascadeOutputKeys.initialize() );
     ATH_CHECK( m_eventInfo_key.initialize() );
@@ -243,6 +250,7 @@ namespace DerivationFramework {
     m_mass_proton = BPhysPVCascadeTools::getParticleMass(pdt, MC::PROTON);
     m_mass_Lambda = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDA0);
     m_mass_Lambdab = BPhysPVCascadeTools::getParticleMass(pdt, MC::LAMBDAB0);
+    m_mass_BCPLUS = BPhysPVCascadeTools::getParticleMass(pdt, MC::BCPLUS);
     m_mass_Ks = BPhysPVCascadeTools::getParticleMass(pdt, MC::K0S);
     m_mass_Bpm = BPhysPVCascadeTools::getParticleMass(pdt, 521);
     m_mass_phi = BPhysPVCascadeTools::getParticleMass(pdt, 333);
@@ -263,7 +271,7 @@ namespace DerivationFramework {
       if(m_massKs<0) m_massKs = m_mass_Ks;
     }
     if(m_constrJXV02 && m_massJXV02<0) m_massJXV02 = m_mass_Lambdab;
-    if(m_constrMainV && m_massMainV<0) m_massMainV = m_mass_Bpm;
+    if(m_constrMainV && m_massMainV<0) m_massMainV = m_mass_BCPLUS;
 
     if(m_jxDaug1MassHypo < 0.) m_jxDaug1MassHypo = m_mass_mu;
     if(m_jxDaug2MassHypo < 0.) m_jxDaug2MassHypo = m_mass_mu;
@@ -284,6 +292,14 @@ namespace DerivationFramework {
       ATH_CHECK( handle.isValid() );
       trackCols.push_back(handle.cptr());
     }
+
+    // Get default PV container
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_VxPrimaryCandidateName, ctx);
+    ATH_CHECK( defaultPVContainer.isValid() );
+
+    // Get PV container
+    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_pvContainerName,ctx);
+    ATH_CHECK( pvContainer.isValid() );
 
     // Get Jpsi+X container
     SG::ReadHandle<xAOD::VertexContainer> jxContainer(m_vertexJXContainerKey, ctx);
@@ -401,17 +417,17 @@ namespace DerivationFramework {
 	  }
 
 	  if(numberOfVertices==2) {
-	    Trk::VxCascadeInfo* result1 = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols);
+	    Trk::VxCascadeInfo* result1 = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result1) cascadeinfoContainer.push_back(result1);
-	    Trk::VxCascadeInfo* result2 = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols);
+	    Trk::VxCascadeInfo* result2 = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result2) cascadeinfoContainer.push_back(result2);
 	  }
 	  else if(numberOfVertices==1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols);
+	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr1->first, V0Itr1->second, V0Itr2->first, V0Itr2->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	  else if(numberOfVertices==-1) {
-	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols);
+	    Trk::VxCascadeInfo* result = fitMainVtx(*jxItr, massesJX, V0Itr2->first, V0Itr2->second, V0Itr1->first, V0Itr1->second, trackCols, defaultPVContainer.cptr(), pvContainer.cptr());
 	    if(result) cascadeinfoContainer.push_back(result);
 	  }
 	}
@@ -441,13 +457,13 @@ namespace DerivationFramework {
     // retrieve primary vertices
     //----------------------------------------------------
     const xAOD::Vertex* primaryVertex(nullptr);
-    SG::ReadHandle<xAOD::VertexContainer> pvContainer(m_VxPrimaryCandidateName, ctx);
-    ATH_CHECK( pvContainer.isValid() );
-    if (pvContainer.cptr()->size()==0) {
-      ATH_MSG_WARNING("You have no primary vertices: " << pvContainer.cptr()->size());
+    SG::ReadHandle<xAOD::VertexContainer> defaultPVContainer(m_VxPrimaryCandidateName, ctx);
+    ATH_CHECK( defaultPVContainer.isValid() );
+    if (defaultPVContainer.cptr()->size()==0) {
+      ATH_MSG_WARNING("You have no primary vertices: " << defaultPVContainer.cptr()->size());
       return StatusCode::RECOVERABLE;
     }
-    else primaryVertex = (*pvContainer.cptr())[0];
+    else primaryVertex = (*defaultPVContainer.cptr())[0];
 
     //----------------------------------------------------
     // Record refitted primary vertices
@@ -731,8 +747,9 @@ namespace DerivationFramework {
       chi2_V3_decor(*cascadeVertices[2])     = m_V0Tools->chisq(jxVtx);
       ndof_V3_decor(*cascadeVertices[2])     = m_V0Tools->ndof(jxVtx);
 
-      double Mass_Moth = m_CascadeTools->invariantMass(moms[topoN-1]);
-      ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, topoN-1, Mass_Moth, vtx));
+      if(m_cascadeFitWithPV==0) {
+	ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, defaultPVContainer.cptr(), m_refitPV ? refPvContainer.ptr() : 0, &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, topoN-1, m_massMainV, vtx));
+      }
 
       for(size_t i=0; i<topoN; i++) {
         VtxWriteHandles[i].ptr()->push_back(cascadeVertices[i]);
@@ -776,7 +793,7 @@ namespace DerivationFramework {
     return pass;
   }
 
-  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const {
+  Trk::VxCascadeInfo* JpsiXPlus2V0::fitMainVtx(const xAOD::Vertex* JXvtx, std::vector<double>& massesJX, const xAOD::Vertex* V01vtx, const V0Enum V01, const xAOD::Vertex* V02vtx, const V0Enum V02, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const {
     Trk::VxCascadeInfo* result(nullptr);
 
     std::vector<const xAOD::TrackParticle*> tracksJX;
@@ -840,6 +857,17 @@ namespace DerivationFramework {
       }
       if (JXV02_mass < m_JXV02MassLower || JXV02_mass > m_JXV02MassUpper) return result;
     }
+
+    xAOD::BPhysHelper::pv_type pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    if(m_cascadeFitWithPV==1)      pvtype = xAOD::BPhysHelper::PV_MAX_SUM_PT2;
+    else if(m_cascadeFitWithPV==2) pvtype = xAOD::BPhysHelper::PV_MIN_A0;
+    else if(m_cascadeFitWithPV==3) pvtype = xAOD::BPhysHelper::PV_MIN_Z0;
+    else if(m_cascadeFitWithPV==4) pvtype = xAOD::BPhysHelper::PV_MIN_Z0_BA;
+    xAOD::BPhysHelper JX_helper(JXvtx);
+    const xAOD::Vertex* origPv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.origPv(pvtype) : nullptr;
+    const xAOD::Vertex* pv_xAOD = (m_cascadeFitWithPV>=1 && m_cascadeFitWithPV<=4) ? JX_helper.pv(pvtype) : nullptr;
+    std::unique_ptr<Trk::RecVertex> pv_AOD;
+    if(pv_xAOD) pv_AOD = std::make_unique<Trk::RecVertex>(pv_xAOD->position(),pv_xAOD->covariancePosition(),pv_xAOD->numberDoF(),pv_xAOD->chiSquared());
 
     SG::AuxElement::Decorator<float>       chi2_V1_decor("ChiSquared_V1");
     SG::AuxElement::Decorator<int>         ndof_V1_decor("nDoF_V1");
@@ -967,7 +995,7 @@ namespace DerivationFramework {
       }
     }
     // Do the work
-    std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state) );
+    std::unique_ptr<Trk::VxCascadeInfo> fit_result = std::unique_ptr<Trk::VxCascadeInfo>( m_iVertexFitter->fitCascade(*state, pv_AOD.get(), pv_AOD.get() && m_firstDecayAtPV ? true : false) );
 
     if (fit_result != nullptr) {
       for(auto v : fit_result->vertices()) {
@@ -1036,6 +1064,35 @@ namespace DerivationFramework {
 
 	result = fit_result.release();
       }
+    }
+
+    if(pv_xAOD && result && result->getParticleMoms().size()>0) {
+      size_t index = result->getParticleMoms().size() - 1;
+      const std::vector<TLorentzVector> &mom = result->getParticleMoms()[index];
+      const Amg::MatrixX &cov = result->getCovariance()[index];
+      const xAOD::Vertex* mainVertex = result->vertices()[index];
+      xAOD::BPhysHypoHelper vtx(m_hypoName, mainVertex);
+      bool isInDefaultPVCont = false;
+      for(const xAOD::Vertex* pvVtx : *defaultPVContainer) {
+	if(pv_xAOD == pvVtx) { isInDefaultPVCont = true; break; }
+      }
+      if(isInDefaultPVCont) vtx.setPv( pv_xAOD, defaultPVContainer, pvtype );
+      else vtx.setPv( pv_xAOD, pvContainer, pvtype );
+      if(origPv_xAOD) vtx.setOrigPv( origPv_xAOD, defaultPVContainer, pvtype );
+      vtx.setLxy    ( m_CascadeTools->lxy      (mom, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setLxyErr ( m_CascadeTools->lxyError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setA0     ( m_CascadeTools->a0       (mom, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setA0Err  ( m_CascadeTools->a0Error  (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setA0xy   ( m_CascadeTools->a0xy     (mom, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setA0xyErr( m_CascadeTools->a0xyError(mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setZ0     ( m_CascadeTools->a0z      (mom, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setZ0Err  ( m_CascadeTools->a0zError (mom, cov, vtx.vtx(), pv_xAOD), pvtype );
+      vtx.setRefitPVStatus( 0, pvtype );
+      // Proper decay times
+      vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+      vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD), pvtype, xAOD::BPhysHypoHelper::TAU_INV_MASS );
+      vtx.setTau( m_CascadeTools->tau(mom, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
+      vtx.setTauErr( m_CascadeTools->tauError(mom, cov, vtx.vtx(), pv_xAOD, m_massMainV), pvtype, xAOD::BPhysHypoHelper::TAU_CONST_MASS );
     }
 
     return result;

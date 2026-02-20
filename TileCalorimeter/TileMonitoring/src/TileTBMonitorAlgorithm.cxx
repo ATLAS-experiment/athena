@@ -260,7 +260,7 @@ StatusCode TileTBMonitorAlgorithm::fillHistograms( const EventContext& ctx ) con
       if (onlyLBC04 && chan1 > 0 && drawerIdx1 != 87) onlyLBC04 = false;
 
       if (hash2 == TileHWID::NOT_VALID_HASH) {
-        if (!((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
+        if (gain1 >= 0 && !((m_maskedChannels[drawerIdx1][chan1] >> gain1) & 1U)) {
           energy = cell->energy();
         }
       } else {

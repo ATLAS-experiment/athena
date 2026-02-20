@@ -31,7 +31,10 @@ flags = initConfigFlags()
 ## Inputs
 flags.Input.Files = []
 for path in MyArgs.inputFileNames.split( ',' ):
-    flags.Input.Files += glob( path )
+    fileList = glob( path )
+    if not fileList:
+        raise RuntimeError( f"Input file {path} not found" )
+    flags.Input.Files += fileList
 
 ## Set output log level
 if MyArgs.debug:

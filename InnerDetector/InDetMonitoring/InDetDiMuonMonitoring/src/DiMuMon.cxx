@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -156,9 +156,9 @@ StatusCode DiMuMon::bookHistograms()
 
      const int nCuts = 8;
      m_stat = new TH1F("statistics","Statistics",nCuts, 0., double(nCuts));
-     TString binLabels[] ={"MuonIdTrk","TrkIsoPt40/Pt<.2","CombMuon","MCPgoodTrk","MuPtOK","eta<2.5","OppChargePair","InvMassOK"};
+     static const std::string binLabels[] ={"MuonIdTrk","TrkIsoPt40/Pt<.2","CombMuon","MCPgoodTrk","MuPtOK","eta<2.5","OppChargePair","InvMassOK"};
      for(int ilabel=0;ilabel<nCuts;ilabel++){
-       m_stat->GetXaxis()->SetBinLabel(ilabel+1,binLabels[ilabel]);
+       m_stat->GetXaxis()->SetBinLabel(ilabel+1,binLabels[ilabel].c_str());
      }
      RegisterHisto(dimuMonObj_expert,m_stat);
 
@@ -185,21 +185,21 @@ StatusCode DiMuMon::bookHistograms()
        }
 
        //mass plots
-       TString hname = m_resonName + "_invmass_" + reg;
-       TString htitle = hname + "; Invmass[GeV/c^{2}]";
-       m_invmass[reg] = new TH1F(hname, htitle, m_nMassBins, m_minInvmass, m_maxInvmass);
+       std::string hname = m_resonName + "_invmass_" + reg;
+       std::string htitle = hname + "; Invmass[GeV/c^{2}]";
+       m_invmass[reg] = new TH1F(hname.c_str(), htitle.c_str(), m_nMassBins, m_minInvmass, m_maxInvmass);
        RegisterHisto(dimuMonObj_shift,m_invmass[reg]);
 
        //for each var vs mass plot
        for (const std::string& varM : m_varsVSmean) {
 	 hname = m_resonName + "_2DinvmassVS" + varM + "_" + reg;
 	 htitle = hname + ";" + m_varLabels[varM] + ";Invmass[GeV/c^{2}]";
-	 m_2DinvmassVSx[reg][varM] = new TH2F(hname, htitle ,m_nVarBins,m_varRanges[varM].first, m_varRanges[varM].second, m_nMassBins, m_minInvmass, m_maxInvmass);
+	 m_2DinvmassVSx[reg][varM] = new TH2F(hname.c_str(), htitle.c_str() ,m_nVarBins,m_varRanges[varM].first, m_varRanges[varM].second, m_nMassBins, m_minInvmass, m_maxInvmass);
 	 RegisterHisto(dimuMonObj_shift,m_2DinvmassVSx[reg][varM]);
 
 	 hname = m_resonName + "_invmassVS" + varM + "_" + reg;
 	 htitle = hname + ";" + m_varLabels[varM] + ";Invmass[GeV/c^{2}]";
-	 m_invmassVSx[reg][varM] = new TH1F(hname, htitle, m_nVarBins,m_varRanges[varM].first, m_varRanges[varM].second);
+	 m_invmassVSx[reg][varM] = new TH1F(hname.c_str(), htitle.c_str(), m_nVarBins,m_varRanges[varM].first, m_varRanges[varM].second);
 	 RegisterHisto(dimuMonObj_shift,m_invmassVSx[reg][varM]);
        }
 
@@ -209,13 +209,13 @@ StatusCode DiMuMon::bookHistograms()
 	 if (m_2DinvmassVSx[reg].find(varW)==m_2DinvmassVSx[reg].end()){
 	   hname = m_resonName + "_2DinvmassVS" + varW + "_" + reg;
 	   htitle = hname + ";" + m_varLabels[varW] + ";Invmass[GeV/c^{2}]";
-	   m_2DinvmassVSx[reg][varW] = new TH2F(hname, htitle ,m_nVarBins, m_varRanges[varW].first, m_varRanges[varW].second, m_nMassBins, m_minInvmass, m_maxInvmass);
+	   m_2DinvmassVSx[reg][varW] = new TH2F(hname.c_str(), htitle.c_str() ,m_nVarBins, m_varRanges[varW].first, m_varRanges[varW].second, m_nMassBins, m_minInvmass, m_maxInvmass);
 	   RegisterHisto(dimuMonObj_shift,m_2DinvmassVSx[reg][varW]);
 	 }
 
 	 hname = m_resonName + "_widthVS" + varW + "_" + reg;
 	 htitle = hname + ";" + m_varLabels[varW] + ";Width[GeV/c^{2}]";
-	 m_widthVSx[reg][varW] = new TH1F(hname,htitle ,m_nVarBins,m_varRanges[varW].first, m_varRanges[varW].second);
+	 m_widthVSx[reg][varW] = new TH1F(hname.c_str(),htitle.c_str() ,m_nVarBins,m_varRanges[varW].first, m_varRanges[varW].second);
 	 RegisterHisto(dimuMonObj_expert,m_widthVSx[reg][varW]);
 
        }
@@ -225,13 +225,13 @@ StatusCode DiMuMon::bookHistograms()
 	 hname = m_resonName + "_" + varD + "_" + reg;
 	 htitle = hname + ";" + m_varLabels[varD];
 	 if (varD == "eta" || varD == "etaAll" || varD == "etaPos" || varD == "etaNeg" ){
-	   m_xDistr[reg][varD] = new TH1F(hname, htitle, m_nEtaBins, m_varRanges[varD].first, m_varRanges[varD].second);
+	   m_xDistr[reg][varD] = new TH1F(hname.c_str(), htitle.c_str(), m_nEtaBins, m_varRanges[varD].first, m_varRanges[varD].second);
 	 } else if (varD == "pt" || varD == "ptAll" || varD == "ptPos" || varD == "ptNeg" ){
-	   m_xDistr[reg][varD] = new TH1F(hname, htitle, m_nPtBins, m_varRanges[varD].first, m_varRanges[varD].second);
+	   m_xDistr[reg][varD] = new TH1F(hname.c_str(), htitle.c_str(), m_nPtBins, m_varRanges[varD].first, m_varRanges[varD].second);
 	 } else if (varD == "phi" || varD == "phiAll" || varD == "phiPos" || varD == "phiNeg" ){
-	   m_xDistr[reg][varD] = new TH1F(hname, htitle, m_nPhiBins, m_varRanges[varD].first, m_varRanges[varD].second);
+	   m_xDistr[reg][varD] = new TH1F(hname.c_str(), htitle.c_str(), m_nPhiBins, m_varRanges[varD].first, m_varRanges[varD].second);
 	 } else {
-	   m_xDistr[reg][varD] = new TH1F(hname, htitle, m_nVarBins, m_varRanges[varD].first, m_varRanges[varD].second);
+	   m_xDistr[reg][varD] = new TH1F(hname.c_str(), htitle.c_str(), m_nVarBins, m_varRanges[varD].first, m_varRanges[varD].second);
 	 }
 	 RegisterHisto(dimuMonObj_expert,m_xDistr[reg][varD]);
        }
@@ -480,19 +480,19 @@ StatusCode DiMuMon::procHistograms()
 
 void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int mode){
   // a canvas may be needed when implmenting this into the post-processing file
-  TString hname =  hin->GetName();
-  TString psName = hname + m_triggerChainName + ".ps";
+  std::string hname =  hin->GetName();
+  std::string psName = hname + m_triggerChainName + ".ps";
   TCanvas* ctemp = new TCanvas("ctemp","ctemp",500,500);
-  if (m_doSaveFits) ctemp->Print(psName+"[");
+  if (m_doSaveFits) ctemp->Print((psName+"[").c_str());
   hin->SetMarkerSize(1.2);
   hin->Draw();
-  if (m_doSaveFits) ctemp->Print(psName);
+  if (m_doSaveFits) ctemp->Print(psName.c_str());
   int nbins=hin->GetNbinsX();
   for (int i=0; i<nbins;i++){
     std::ostringstream o; o<<i;
-    TString projName = hname + o.str();
-    TH1D* htemp = (TH1D*) (hin->ProjectionY(projName,i+1,i+1)->Clone());
-    htemp->SetTitle(projName);
+    std::string projName = hname + o.str();
+    TH1D* htemp = (TH1D*) (hin->ProjectionY(projName.c_str(),i+1,i+1)->Clone());
+    htemp->SetTitle(projName.c_str());
     htemp->Sumw2();
     if (htemp->GetEntries()>50){
       double mean = 999., meanErr = 999., sigma = 999., sigmaErr = 999., chi2=0;
@@ -509,7 +509,7 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
 	//gStyle->SetOptStat(1); // not thread-safe
 	if (m_doSaveFits) {
 	  htemp->Fit("fn","RML");
-	  ctemp->Print(psName);
+	  ctemp->Print(psName.c_str());
 	} else htemp->Fit("fn","RMLQN");
 	double frange = 2.4*sigma;
 	double hrange = htemp->GetXaxis()->GetXmax()-htemp->GetXaxis()->GetXmin();
@@ -546,7 +546,7 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
 	bxc.plotOn (frame,  RooFit::LineColor(kBlue));
 	if (m_doSaveFits) {
 	  frame->Draw();
-	  ctemp->Print(psName);
+	  ctemp->Print(psName.c_str());
 	}
 	mean = bwm0.getVal();
 	meanErr = bwm0.getError();
@@ -576,7 +576,7 @@ void DiMuMon::iterativeGausFit (TH2F* hin, const std::vector<TH1F*>& hout, int m
   }
   hout.at(0)->Sumw2();
   if (hout.size()==2) hout.at(1)->Sumw2();
-  if (m_doSaveFits) ctemp->Print(psName+"]");
+  if (m_doSaveFits) ctemp->Print((psName+"]").c_str());
   delete ctemp;
 }
 

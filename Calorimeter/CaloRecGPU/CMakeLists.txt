@@ -10,7 +10,7 @@ if( NOT CMAKE_CUDA_COMPILER )
   return()
 endif()
 
-find_package( Boost COMPONENTS chrono )
+find_package( Boost COMPONENTS chrono unit_test_framework)
 
 # Add a component library that has some CUDA code in it.
 atlas_add_library( CaloRecGPULib
@@ -27,6 +27,14 @@ set_target_properties( CaloRecGPULib
 atlas_add_component( CaloRecGPU
    src/components/*.cxx
    LINK_LIBRARIES CaloRecGPULib )
+   
+atlas_add_test( CaloRecUtilities_test
+   SOURCES
+   test/CaloRecUtilities_test.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   LINK_LIBRARIES CaloRecGPULib ${Boost_LIBRARIES}
+   POST_EXEC_SCRIPT nopost.sh
+)
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

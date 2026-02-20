@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_PHOTONVERTEXSELECTIONWRAPPER_H
@@ -27,64 +27,60 @@
 
 namespace DerivationFramework {
 
-class PhotonVertexSelectionWrapper : public extends<AthAlgTool, IAugmentationTool>
-{
-public:
-  PhotonVertexSelectionWrapper(const std::string& t,
-                               const std::string& n,
-                               const IInterface* p);
+  class PhotonVertexSelectionWrapper : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
 
-  StatusCode initialize() override final;
-  virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    using base_class::base_class;
 
-private:
-  /** @brief PhotonPointingTool **/
-  ToolHandle<CP::IPhotonPointingTool> m_photonPointingTool{
-    this,
-    "PhotonPointingTool",
-    "",
-    "Handle to the photon pointing tool"
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    /** @brief PhotonPointingTool **/
+    ToolHandle<CP::IPhotonPointingTool> m_photonPointingTool{
+      this,
+        "PhotonPointingTool",
+        "",
+        "Handle to the photon pointing tool"
+        };
+
+    /** @brief Input photon container **/
+    SG::ReadHandleKey<xAOD::PhotonContainer> m_photonContainer{
+      this,
+      "PhotonContainer",
+      "Photons",
+      "SG key of input photon container"
+    };
+
+    /** @brief Input primary vertex container **/
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer{
+      this,
+      "VertexContainer",
+      "PrimaryVertices",
+      "SG key of input vertex container"
+    };
+
+    // Write decoration handle keys
+    // these are not really configurable
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxPt{ this, "pt", m_vertexContainer, "", "" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxEta{ this,
+      "eta",
+      m_vertexContainer, "",
+      "" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxPhi{ this,
+      "phi",
+      m_vertexContainer, "",
+      "" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxSumPt{ this,
+      "sumPt",
+      m_vertexContainer,  "",
+      "" };
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxSumPt2{ this,
+      "sumPt2",
+      m_vertexContainer, "",
+      "" };
   };
-
-  /** @brief Prefix for the decorations **/
-  std::string m_decPrefix;
-
-  /** @brief Input photon container **/
-  SG::ReadHandleKey<xAOD::PhotonContainer> m_photonContainer{
-    this,
-    "PhotonContainer",
-    "Photons",
-    "SG key of input photon container"
-  };
-
-  /** @brief Input primary vertex container **/
-  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer{
-    this,
-    "VertexContainer",
-    "PrimaryVertices",
-    "SG key of input vertex container"
-  };
-
-  // Write decoration handle keys
-  // these are not really configurable
-  SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxPt{ this, "pt", "", "" };
-  SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxEta{ this,
-                                                           "eta",
-                                                           "",
-                                                           "" };
-  SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxPhi{ this,
-                                                           "phi",
-                                                           "",
-                                                           "" };
-  SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxSumPt{ this,
-                                                             "sumPt",
-                                                             "",
-                                                             "" };
-  SG::WriteDecorHandleKey<xAOD::VertexContainer> m_vtxSumPt2{ this,
-                                                              "sumPt2",
-                                                              "",
-                                                              "" };
-};
 }
 
 #endif // DERIVATIONFRAMEWORK_PHOTONVERTEXSELECTIONWRAPPER_H

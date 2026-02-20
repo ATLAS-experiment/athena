@@ -11,9 +11,9 @@
 #include "ActsInterop/Logger.h"
 
 // PACKAGE
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IActsMaterialJsonWriterTool.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 // STL
 #include <string>
@@ -38,7 +38,7 @@ StatusCode ActsWriteTrackingGeometry::execute(const EventContext& ctx) const {
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
 
   // Use the geometry context
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
 
   m_materialJsonWriterTool->write(gctx, *trackingGeometry);
   return StatusCode::SUCCESS;

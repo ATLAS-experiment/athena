@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigEgammaFastPhotonHypoAlg.h"
@@ -82,6 +82,7 @@ StatusCode TrigEgammaFastPhotonHypoAlg::execute( const EventContext& context ) c
       // since we have a map made in advance we can make use of the index lookup w/o the need for additional loop
       auto origCluster = clusterToIndexMap.find( clusterPtr );
       ATH_CHECK( origCluster != clusterToIndexMap.end() );
+      //coverity[deref_iterator:FALSE]
       TCU::linkToPrevious( d, decisionInput().key(), origCluster->second );
 
       // now we have DecisionObject ready to be passed to hypo tool. it has link to photon,
@@ -90,7 +91,7 @@ StatusCode TrigEgammaFastPhotonHypoAlg::execute( const EventContext& context ) c
       TCU::DecisionIDContainer clusterDecisionIDs;
       TCU::decisionIDs( previousDecisionsHandle->at( origCluster->second ), clusterDecisionIDs );
       
-      hypoToolInput.emplace_back( TrigEgammaFastPhotonHypoTool::PhotonInfo{ d, *photonIter,  origCluster->first, clusterDecisionIDs } );
+      hypoToolInput.emplace_back(  d, *photonIter,  origCluster->first, std::move(clusterDecisionIDs) );
     }
   }
 

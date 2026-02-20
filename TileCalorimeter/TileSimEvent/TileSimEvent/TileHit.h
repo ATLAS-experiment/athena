@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //********************************************************************
@@ -41,6 +41,11 @@ public:
 
     /** @brief Constructor with time rounding to the center of nearest deltaT bin */
     TileHit(const Identifier & id, float energy, float time, float deltaT); 
+
+    TileHit(const TileHit&) = default;
+    TileHit& operator=(const TileHit&) = default;
+    TileHit(TileHit&&) = default;
+    TileHit& operator=(TileHit&&) = default;
 
     /** @brief Default destructor */
     ~TileHit() { }

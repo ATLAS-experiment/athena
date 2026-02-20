@@ -11,7 +11,7 @@
 #include <cassert>
 #include <iostream>
 #include <string>
-
+#include <unordered_set>
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Guid.h"
 
@@ -111,6 +111,11 @@ void test_oid_format_detection() {
 
 // coverity[root_function]
 int main() {
+    static_assert(std::is_trivially_destructible<Guid>::value);
+    static_assert(std::is_trivially_copyable<Guid>::value);
+    //Check hash function compiles
+    std::unordered_set<Guid> dfgfg;
+
     std::cout << "Running Token legacy OID format tests...\n\n";
 
     test_legacy_oid_format_ffffffff();

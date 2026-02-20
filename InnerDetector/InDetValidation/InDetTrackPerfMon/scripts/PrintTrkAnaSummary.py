@@ -6,6 +6,16 @@ import pandas as pd
 import math
 from uncertainties import ufloat as rd
 
+
+sampleDict = {
+    'TruthHighPtMuons': 'Muons with $p_{\\mathrm{T}}>10\\ \\mathrm{GeV}$',
+    'TruthLowPtMuons': 'Muons with $1\\ \\mathrm{GeV} < p_{\\mathrm{T}} < 10\\ \\mathrm{GeV}$',
+    'TruthHighPtPions': 'Pions with $p_{\\mathrm{T}}>10\\ \\mathrm{GeV}$',
+    'TruthLowPtPions': 'Pions with $1\\ \\mathrm{GeV} < p_{\\mathrm{T}} < 10\\ \\mathrm{GeV}$',
+    'TruthHighPtElectrons': 'Electrons with $p_{\\mathrm{T}}>20\\ \\mathrm{GeV}$',
+    'TruthLowPtElectrons': 'Electrons with $2\\ \\mathrm{GeV} < p_{\\mathrm{T}} < 20\\ \\mathrm{GeV}$',
+}
+
 # Parsing arguments
 commandName = os.path.basename( sys.argv[0] )
 summaryDirDefault="InDetTrackPerfMonPlots/&TrkAnaName&/Offline/Tracks/"
@@ -16,7 +26,9 @@ parser.add_argument( "-T", "--testLabel", default="TEST", help="Label for TEST" 
 parser.add_argument( "-R", "--refLabel", default="REF", help="Label for REFERENCE" )
 parser.add_argument( "-d", "--dirName", default=summaryDirDefault, help="Name of the TDirectory path with plots" )
 parser.add_argument( "-a", "--analyses", default="TrkAnaEF", help="Comma-separeted list of track analyses to process" )
-parser.add_argument( "-o", "--outName", default="TrkAnaSummary_&TrkAnaName&.html", help="Name of the output html files" )
+parser.add_argument( "-o", "--outName", default="TrkAnaSummary.html", help="Name of the output html files" )
+parser.add_argument( "-O", "--outNameLatex", default="TrkAnaSummary.tex", help="Name of the output latex file" )
+parser.add_argument( "-l", "--printLatex", action="store_true", help="Print latex table" )
 MyArgs = parser.parse_args()
 anaList = MyArgs.analyses.strip().split(',')
 
@@ -246,10 +258,31 @@ def computeRatios( ltest, lref, data, dataDict, printMultiplicity=True ):
     ## updating data
     data.update( { ltest + " / " + lref  : sList } )
 
+def initializeLatexTable():
+
+    lines = []
+    lines.append('\\begin{tabular}{lccc}')
+    lines.append('\\hline')
+    lines.append(f' & {MyArgs.testLabel} & {MyArgs.refLabel} & {MyArgs.testLabel} / {MyArgs.refLabel} \\\\')
+    lines.append('\\hline')
+    lines.append('\\hline')
+    lines.append("\\end{tabular}")
+
+    return lines
 ## Remove final .html if it exists
-outFile = MyArgs.outName.replace( "_&TrkAnaName&", "" )
+outFile = MyArgs.outName.replace( "&TrkAnaName&", "" ) if "&TrkAnaName&" in MyArgs.outName else MyArgs.outName
+
 if os.path.isfile( outFile ) :
     os.remove( outFile ) 
+
+## Remove final .tex if it exists
+outFileLatex = MyArgs.outNameLatex
+if os.path.isfile( outFileLatex ) and MyArgs.printLatex :
+    os.remove( outFileLatex ) 
+
+## Prepare latex table
+latex_table_lines = initializeLatexTable()
+
 
 ## Looping over all the track analyses
 for anaName in anaList :
@@ -258,7 +291,7 @@ for anaName in anaList :
     dataDict = {}
     index = []
     anaDirName = MyArgs.dirName.replace( "&TrkAnaName&", anaName )
-    anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName )
+    anaOutName = MyArgs.outName.replace( "&TrkAnaName&", anaName ) if "&TrkAnaName&" in MyArgs.outName else MyArgs.outName.replace( ".html", "_"+anaName+".html" )
 
     testFile = ROOT.TFile.Open( MyArgs.testFile, "READ" )
     testMultiplicity = testFile.Get( anaDirName+"Multiplicities/summary" )
@@ -303,13 +336,13 @@ for anaName in anaList :
             printMultiplicity = printMultiplicity
         )
 
-    ## printing table to screen
+    ## Printing table to screen
     df = pd.DataFrame( data, index=index )
     titleStr = f"Summary for TrackAnalysis = {anaName}:"
     print( f"\n\n---------------\n{titleStr}" )
     print( df )
 
-    ## printing table to html output file
+    ## Printing table to html output file
     with open( anaOutName, 'w' ) as f :
         print( df.to_html(), file=f )
 
@@ -317,5 +350,23 @@ for anaName in anaList :
     os.system( f"echo \"<br><b>{titleStr}</b><br>\" >> {outFile}" )
     os.system( f"cat {anaOutName} >> {outFile}" )
     os.remove( f"{anaOutName}" ) 
+
+    ## Appending latex line to latex table
+    if MyArgs.printLatex: 
+        row = df.loc[['Eff_vs_truth']]
+        latex_table_line = (
+            sampleDict[anaName.split('_')[0]] + " & "
+            + " & ".join(" $ " + row.iloc[0].values + " $ ")
+            + " \\\\")
+
+        latex_table_lines.insert(-2,latex_table_line.replace("%","\\%").replace("\u00b1","\\pm"))
+
+
+## Printing final latex table to .tex output file
+
+if MyArgs.printLatex:
+    with open( outFileLatex, 'w' ) as f :
+        for l in latex_table_lines:
+            print( l, file=f )
 
 sys.exit(0)

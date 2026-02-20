@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -234,9 +234,7 @@ Root::TGoodRun::Compress()
     if (cbegin!=cend) {
       // first lumiblock of merge
       fbegin = cbegin->Begin();
-      //fend = cbegin->End();
       // last lumiblock of merge
-      lbegin = cend->Begin();
       lend = cend->End();
       // remove [cbegin,itr)
       itr = this->erase(cbegin,itr); 

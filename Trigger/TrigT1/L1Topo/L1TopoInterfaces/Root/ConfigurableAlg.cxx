@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  BaseTOBoAlg.cpp
 //  TopoCore
@@ -38,7 +38,7 @@ public:
    }
    
    void setL1TopoHistSvc(std::shared_ptr<IL1TopoHistSvc> histSvc) {
-      m_histSvc = histSvc;
+      m_histSvc = std::move(histSvc);
    }
 
    void registerHist(TH1 * h) {
@@ -256,7 +256,7 @@ ConfigurableAlg::parameter(const std::string & parameterName, unsigned int selec
  **/
 
 void ConfigurableAlg::setL1TopoHistSvc(std::shared_ptr<IL1TopoHistSvc> histSvc) {
-   m_impl->setL1TopoHistSvc(histSvc);
+   m_impl->setL1TopoHistSvc(std::move(histSvc));
 }
 
 void ConfigurableAlg::registerHist(TH1 * h) {

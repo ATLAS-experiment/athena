@@ -36,6 +36,9 @@ namespace columnar
     if (target.name != source.name)
       throw std::runtime_error ("mismatched column names in mergeColumnInfo: " + target.name + " and " + source.name);
 
+    if (target.index != source.index)
+      throw std::runtime_error ("mismatched column index in mergeColumnInfo: " + std::to_string(target.index) + " and " + std::to_string(source.index));
+
     if (target.type == nullptr || source.type == nullptr)
       throw std::runtime_error ("missing type information in mergeColumnInfo for column: " + target.name);
     if (*target.type != *source.type)

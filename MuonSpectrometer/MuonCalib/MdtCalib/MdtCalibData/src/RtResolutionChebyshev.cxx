@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibData/RtResolutionChebyshev.h"
-#include "MuonCalibMath/ChebychevPoly.h"
+#include "Acts/Utilities/detail/Polynomials.hpp"
 #include "MuonCalibMath/UtilFunc.h"
 #include "GeoModelKernel/throwExcept.h"
 
@@ -37,7 +37,7 @@ double RtResolutionChebyshev::resolution(double t, double /*bgRate*/) const {
     // CALCULATE r(t) //
     ////////////////////
     for (unsigned int k = 0; k < nDoF(); k++) { 
-        resol = resol + parameters()[k + 2]  * chebyshevPoly1st(k, x); 
+        resol = resol + parameters()[k + 2]  * Acts::detail::chebychevPolyTn(x, k); 
     }
 
     return resol;

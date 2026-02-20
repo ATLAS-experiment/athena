@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/collSet.h"
@@ -7,7 +7,6 @@
 #include "FPTracker/CollimatorData.h"
 #include "FPTracker/STLHelpers.h"
 #include <algorithm>
-#include <iostream>
 namespace FPTracker{
 
   Collimator::Container_t collSet(const CollimatorData& cData, Side side){
@@ -19,8 +18,7 @@ namespace FPTracker{
 
       double zpos = zsign*cData.coll_z[side][i];
       Collimator::Ptr_t col(new Collimator(zpos,  cData.coll_xap[side][i], side));
-      // std::cout<<*col<<std::endl;
-      collimators.push_back(col);
+      collimators.push_back(std::move(col));
       
     }
 

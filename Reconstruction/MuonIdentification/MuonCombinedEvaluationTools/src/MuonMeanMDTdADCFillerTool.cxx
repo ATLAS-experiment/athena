@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonMeanMDTdADCFillerTool.cxx, Implementation file for class MuonMeanMDTdADCFillerTool
@@ -90,9 +90,6 @@ namespace Rec {
             return -9999.;
         }
 
-        Trk::TrackStates::const_iterator tsit = states->begin();
-        Trk::TrackStates::const_iterator tsit_end = states->end();
-
         int nhitsadc = 0;
         double absR = 0;
         double datfit = 0;
@@ -110,11 +107,11 @@ namespace Rec {
         testEta = asinh(1. / tan(track.perigeeParameters()->parameters()[Trk::theta]));
         double track_phi = track.perigeeParameters()->parameters()[Trk::phi];
 
-        for (int nhits = 0; tsit != tsit_end; ++tsit, ++nhits) {
+        for (const Trk::TrackStateOnSurface* ts : *states) {
             // outliers can have type measurement, in Muid
-            if (!(*tsit)->type(Trk::TrackStateOnSurface::Measurement) || (*tsit)->type(Trk::TrackStateOnSurface::Outlier)) { continue; }
+            if (!ts->type(Trk::TrackStateOnSurface::Measurement) || ts->type(Trk::TrackStateOnSurface::Outlier)) { continue; }
 
-            const Trk::MeasurementBase* measurement = (*tsit)->measurementOnTrack();
+            const Trk::MeasurementBase* measurement = ts->measurementOnTrack();
             if (!measurement) { continue; }
             Identifier id = m_edmHelperSvc->getIdentifier(*measurement);
             if (!(m_idHelperSvc->isMuon(id))) {

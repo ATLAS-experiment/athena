@@ -3,7 +3,7 @@
 */
 #include "MdtCalibData/RadiusResolutionChebyshev.h"
 #include "MuonCalibMath/UtilFunc.h"
-#include "MuonCalibMath/ChebychevPoly.h"
+#include "Acts/Utilities/detail/Polynomials.hpp"
 
 namespace MuonCalib{
     RadiusResolutionChebyshev::RadiusResolutionChebyshev(const ParVec& vec, const IRtRelationPtr& rtRel):
@@ -17,7 +17,7 @@ namespace MuonCalib{
         const double r = m_rtRel->radius(t);
         const double x = mapToUnitInterval(r, m_r_min, m_r_max);
         for (unsigned int k = 0; k < nDoF(); ++k) {
-            reso += par(k) * chebyshevPoly1st(k, x);
+            reso += par(k) * Acts::detail::chebychevPolyTn(x, k);
         }
         return reso;
     }

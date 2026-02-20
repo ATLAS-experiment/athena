@@ -24,7 +24,7 @@ public:
     FPGATrackSimLogicalEventInputHeader() = default;
     virtual ~FPGATrackSimLogicalEventInputHeader() = default;
 
-    void reset(); //reset per event variables
+    void reset() const; //reset per event variables
 
     void newEvent(FPGATrackSimEventInfo& event) { reset(); m_event = event; }
     FPGATrackSimEventInfo const& event() const { return m_event; }
@@ -43,7 +43,11 @@ public:
 private:
     FPGATrackSimEventInfo                      m_event;
     FPGATrackSimOptionalEventInfo              m_optional; // This is only available for 1st stage
-    std::vector<FPGATrackSimTowerInputHeader>  m_towers;
+
+    // ROOT I/O object modified in const reset().
+    // - Called from FPGATrackSimOutputHeaderTool::writeData()
+    //   - thread-safety is ensured by FPGATrackSimOutputHeaderTool::m_writeMutex
+    mutable std::vector<FPGATrackSimTowerInputHeader>  m_towers ATLAS_THREAD_SAFE; 
 
     ClassDefNV(FPGATrackSimLogicalEventInputHeader, 2)
 };

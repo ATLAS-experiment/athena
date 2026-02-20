@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCalibData/RtLegendre.h"
-#include "MuonCalibMath/LegendrePoly.h"
+#include "Acts/Utilities/detail/Polynomials.hpp"
 #include "GeoModelKernel/throwExcept.h"
+#include <cmath>
 using namespace MuonCalib;
 
 RtLegendre::RtLegendre(const ParVec& vec) : 
@@ -38,7 +39,7 @@ double RtLegendre::radius(double t) const {
     // CALCULATE r(t) //
     ////////////////////
     for (unsigned int k = 0; k < nDoF(); k++) { 
-        rad += par(k+2) * legendrePoly(k, x); 
+        rad += par(k+2) * Acts::detail::legendrePoly(x,k); 
     }
     return std::max(rad, 0.);
 }
@@ -46,18 +47,7 @@ double RtLegendre::radius(double t) const {
 //*****************************************************************************
 double RtLegendre::driftVelocity(double t) const { 
     return (radius(t + 1.0) - radius(t));
-    // Set derivative to 0 outside of the bounds
-    if (t < tLower() || t > tUpper()) return 0.0;
-
-    // Argument of the Legendre polynomials
-    const double x = getReducedTime(t);
-    // Chain rule
-    const double dx_dt = dReducedTimeDt();
-    double drdt{0.};
-    for (unsigned int k = 0; k < nDoF(); ++k) {
-        drdt += par(k+2) *  legendreDeriv(k, 1, x) * dx_dt;
-    }
-    return drdt; 
+    
 }
 double RtLegendre::driftAcceleration(double t) const {
     double acc{0.};
@@ -65,7 +55,7 @@ double RtLegendre::driftAcceleration(double t) const {
     const double x = getReducedTime(t);
     const double dx_dt = std::pow(dReducedTimeDt(), 2);
     for (unsigned int k = 0; k < nDoF(); ++k) {
-        acc += par(k+2) *  legendreDeriv(k, 2, x) * dx_dt;
+        acc += par(k+2) * Acts::detail::legendrePoly(x,k, 2) * dx_dt;
     }
     return acc * t;
 }

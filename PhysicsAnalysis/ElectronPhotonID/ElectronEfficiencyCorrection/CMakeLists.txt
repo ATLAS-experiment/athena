@@ -43,7 +43,7 @@ atlas_add_executable( EgEfficiencyCorr_mem_check
 #Test
 atlas_add_test(ut_SimpleInitTest
    SCRIPT EgEfficiencyCorr_mem_check
-   LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|MessageSvc not found")
+   LOG_IGNORE_PATTERN "Package.AsgTool...\\s+DEBUG|MessageSvc not found")
 
 # AnalysisBase-only utilities:
 if ( NOT XAOD_STANDALONE )

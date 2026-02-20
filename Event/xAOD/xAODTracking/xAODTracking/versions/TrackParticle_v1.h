@@ -20,6 +20,7 @@ extern "C" {
 
 // xAOD include(s):
 #include "xAODBase/IParticle.h"
+#include "xAODTracking/TrackingDetails.h"
 #include "xAODTracking/TrackingPrimitives.h"
 
 #ifndef XAOD_ANALYSIS
@@ -345,8 +346,8 @@ namespace xAOD {
 
 private:
 
-      enum covMatrixIndex{d0_index=0, z0_index=1, phi_index=2, th_index=3, qp_index=4};
-      static const std::size_t COVMATRIX_OFFDIAG_VEC_COMPR_SIZE = 6;
+      using covMatrixIndex = TrackingDetails::covMatrixIndex;
+      static const std::size_t COVMATRIX_OFFDIAG_VEC_COMPR_SIZE = TrackingDetails::COVMATRIX_OFFDIAG_VEC_COMPR_SIZE;
       typedef std::vector< std::pair<covMatrixIndex,covMatrixIndex> > covMatrixIndexPairVec;
       static const covMatrixIndexPairVec& covMatrixComprIndexPairs();
 

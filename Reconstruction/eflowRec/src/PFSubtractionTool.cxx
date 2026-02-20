@@ -2,17 +2,17 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFSubtractionTool.h"
+#include "PFSubtractionTool.h"
 
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowCaloObjectMaker.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowLayerIntegrator.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/IEFlowCellEOverPTool.h"
-#include "eflowRec/PFClusterFiller.h"
-#include "eflowRec/PFTrackFiller.h"
+#include "eflowCaloObject.h"
+#include "eflowCaloObjectMaker.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowLayerIntegrator.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
+#include "IEFlowCellEOverPTool.h"
+#include "PFClusterFiller.h"
+#include "PFTrackFiller.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
@@ -50,7 +50,6 @@ StatusCode PFSubtractionTool::initialize()
   if (!m_NNEnergyPredictorTool.empty()) ATH_CHECK(m_NNEnergyPredictorTool.retrieve());
 
   //Set the level of the helpers to the same as the tool here
-  m_pfCalc.msg().setLevel(this->msg().level());
   m_pfSubtractionStatusSetter.msg().setLevel(this->msg().level());
   m_pfSubtractionEnergyRatioCalculator.msg().setLevel(this->msg().level());
   m_subtractor.m_facilitator.msg().setLevel(this->msg().level());
@@ -92,9 +91,7 @@ void PFSubtractionTool::execute(eflowCaloObjectContainer *theEflowCaloObjectCont
     }
     else performTruthSubtraction(data);
   }
-  else{
-    m_pfCalc.calculate(data);
-  }
+  //eoverp mode calculation has been moved to a dedicated PFBaseTool.
 
 }
 

@@ -7,12 +7,13 @@ atlas_subdir( LumiBlockComps )
 find_package( COOL COMPONENTS CoolKernel )
 find_package( CORAL COMPONENTS CoralBase )
 find_package( ROOT COMPONENTS Core Tree RIO )
+find_package( nlohmann_json )
 
 # Component(s) in the package:
 set( extra_libs )
 set( extra_srcs )
 if( NOT XAOD_ANALYSIS )
-   set( extra_libs CoolLumiUtilitiesLib TrigConfInterfaces TrigConfData LumiBlockData )
+   set( extra_libs CoolLumiUtilitiesLib TrigConfInterfaces TrigConfData LumiBlockData ByteStreamData nlohmann_json::nlohmann_json )
    set( extra_srcs src/*.cxx )
 endif()
 atlas_add_library( LumiBlockCompsLib

@@ -2,20 +2,17 @@ TileROD_Decoder_test
 
 
 ApplicationMgr       INFO Application Manager Configured successfully
-ClassIDSvc           INFO getRegistryEntries: read 11455 CLIDRegistry entries for module ALL
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 TileHWID             INFO initialize_from_dictionary 
 TileTBID             INFO initialize_from_dictionary 
-ClassIDSvc           INFO getRegistryEntries: read 568 CLIDRegistry entries for module ALL
-DetDescrCnvSvc       INFO  initializing
+DetDescrCnvSvc       INFO  initializing 
 DetDescrCnvSvc       INFO Found DetectorStore service
-DetDescrCnvSvc       INFO  filling proxies for detector managers
+DetDescrCnvSvc       INFO  filling proxies for detector managers 
+TileCablingSvc       INFO RUN2 ATLAS geometry flag detected for geometry: ATLAS-R2-2016-01-00-01
 TileCablingSvc       INFO Setting RUN2 (2014-2017) cabling
 TileCablingSvc       INFO Setting Cabling type to 4
-DetectorStore     WARNING retrieve(default): No valid proxy for default object
+DetectorStore     WARNING retrieve(default): No valid proxy for default object 
  of type TileDetDescrManager(CLID 2941)
 TileCablingSvc    WARNING Unable to retrieve TileDetDescrManager from DetectorStore
 TileCablingSvc    WARNING Will not set Tile online hash ID in CaloDetDescrElements

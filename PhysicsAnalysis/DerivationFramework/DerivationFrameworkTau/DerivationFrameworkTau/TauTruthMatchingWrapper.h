@@ -20,18 +20,18 @@
 #include "xAODTau/TauJetContainer.h"
 
 /**
- * wrapper tool for tau truth matching 
+ * wrapper tool for tau truth matching
 */
 
 namespace DerivationFramework {
 
   class TauTruthMatchingWrapper : public extends<AthAlgTool, IAugmentationTool> {
-    public: 
-      TauTruthMatchingWrapper(const std::string& t, const std::string& n, const IInterface* p);
+    public:
 
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
+
+      virtual StatusCode initialize() override final;
+      virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
     private:
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey
@@ -39,7 +39,7 @@ namespace DerivationFramework {
 
       ToolHandle < TauAnalysisTools::ITauTruthMatchingTool > m_tTauTruthMatchingTool{this, "TauTruthMatchingTool", "TauAnalysisTools::TauTruthMatchingTool"};
 
-  }; 
+  };
 }
 
-#endif 
+#endif

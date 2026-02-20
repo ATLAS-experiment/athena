@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1CONNECTOR_H
@@ -10,6 +10,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 
 namespace TrigConf {
 
@@ -45,7 +46,7 @@ namespace TrigConf {
    class L1Connector final : public DataStructure {
    public:
 
-      enum class ConnectorType { ELECTRICAL, OPTICAL, CTPIN };
+      enum class ConnectorType { ELECTRICAL, OPTICAL, CTPIN, UNKNOWN };
 
       /** Constructor */
       L1Connector();
@@ -104,13 +105,13 @@ namespace TrigConf {
       /** Update the internal members */
       virtual void update() override;
 
-      ConnectorType m_type;
+      ConnectorType m_type{ConnectorType::UNKNOWN};
       std::vector<TrigConf::TriggerLine> m_triggerLines[2][2];
       std::map<std::string, TrigConf::TriggerLine*> m_lineByName;
       std::size_t m_maxFpga{1};
       std::size_t m_maxClock{1};
 
-      bool m_isLegacy;
+      bool m_isLegacy{};
    };
 
 }

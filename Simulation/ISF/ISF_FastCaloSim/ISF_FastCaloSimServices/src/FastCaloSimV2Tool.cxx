@@ -61,6 +61,8 @@ StatusCode ISF::FastCaloSimV2Tool::initialize()
 
   ATH_CHECK(m_paramSvc.retrieve());
 
+  // m_paramSvc->setLevel(MSG::VERBOSE);
+
   m_doPunchThrough = not m_punchThroughTool.empty();
   if (m_doPunchThrough) {
     ATH_CHECK(m_punchThroughTool.retrieve());
@@ -198,6 +200,9 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const EventContext& ctx, ISF::ISFPar
     CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
     TFCSSimulationState simulstate(rndmEngine);
 
+    // ATH_MSG_WARNING("Event number for this event: " << ctx.evt());
+    simulstate.setAuxInfo<int>("EventNr"_FCShash, ctx.evt() );
+    
     ATH_CHECK(m_paramSvc->simulate(simulstate, &truth, &extrapol));
 
     ATH_MSG_DEBUG("Energy returned: " << simulstate.E());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARROD_LARFEBERRORSUMMARYMAKER
@@ -86,7 +86,7 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
   SG::ReadCondHandleKey<LArBadFebCont> m_bfKey{this,"BFKey","LArBadFeb","Key of the BadFebContainer in the conditions store"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_readKey{this,"ReadKey","LArFebHeader"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this,"EventInfoDecorKey","EventInfo.larFlags"};
+  SG::WriteDecorHandleKey<xAOD::EventInfo> m_eventInfoDecorKey{this, "EventInfoDecorKey", m_eventInfoKey, "larFlags"};
   SG::WriteHandleKey<LArFebErrorSummary> m_writeKey{this,"WriteKey","LArFebErrorSummary"};
 
   // methods:

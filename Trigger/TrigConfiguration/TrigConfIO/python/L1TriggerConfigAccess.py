@@ -11,7 +11,8 @@ class L1MenuAccess(TriggerConfigAccess):
     this class provides access to the L1Menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", smkey: int = 0, 
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
@@ -29,7 +30,7 @@ class L1MenuAccess(TriggerConfigAccess):
             log.info(f"Loaded L1 menu {self.name()} with {len(self)} chains from file {filename}")
 
     def itemNames(self):
-        return self._config["items"].keys()
+        return self["items"].keys()
 
     def itemsWithCtpid(self ):
         return self.items( includeKeys = ['ctpid'] )
@@ -37,16 +38,16 @@ class L1MenuAccess(TriggerConfigAccess):
     def items(self, includeKeys = [] ):
         if includeKeys:
             """ reduce returned dictionary """
-            items = self._config["items"]
+            items = self["items"]
             return { x : {k : items[x][k] for k in includeKeys if k in items[x]} for x in items }
         else:
-            return self._config["items"]
+            return self["items"]
 
     def thresholdTypes(self):
-        thrTypes = list(self._config["thresholds"].keys())
+        thrTypes = list(self["thresholds"].keys())
         if "legacyCalo" in thrTypes:
             thrTypes.remove("legacyCalo")
-            thrTypes += list(self._config["thresholds"]["legacyCalo"].keys())
+            thrTypes += list(self["thresholds"]["legacyCalo"].keys())
         return thrTypes
 
     def thresholds(self, thresholdType = None, fulldict = False):
@@ -159,13 +160,13 @@ class L1PrescalesSetAccess(TriggerConfigAccess):
         """
         return 0xFFFFFF / ( 0x1000000 - cut )
 
-    def __init__(self, filename = None, jsonString = None, dbalias = None, l1pskey = None, useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", l1pskey: int = 0, 
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and l1pskey
         """
-        super().__init__(ConfigType.L1PS, mainkey = "cutValues",
-                         jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = l1pskey,
-                         useCrest=useCrest, crestServer=crestServer)
+        super().__init__(ConfigType.L1PS, mainkey = "cutValues", jsonString = jsonString, filename = filename, 
+                         dbalias = dbalias, dbkey = l1pskey, useCrest=useCrest, crestServer=crestServer)
         self.loader.setQuery({
             1: "SELECT L1PS_DATA FROM {schema}.L1_PRESCALE_SET L1PS WHERE L1PS_ID=:dbkey" # for current and new db schema
         })
@@ -199,7 +200,8 @@ class BunchGroupSetAccess(TriggerConfigAccess):
     this class provides access to the L1 bunchgroup set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, bgskey = None, useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", bgskey: int = 0, 
+                 useCrest: bool = False, crestServer: str = ""):
         super().__init__(ConfigType.BGS, mainkey = "bunchGroups",
                          jsonString = jsonString, filename = filename, dbalias = dbalias, dbkey = bgskey,
                          useCrest=useCrest, crestServer=crestServer)

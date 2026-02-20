@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/ExternalONCRPCServerSvc.h"
 #include "JiveXML/ONCRPCServer.h"
 #include "JiveXML/ONCRPCXDRProcs.h"
-
 #include <rpc/rpc.h>
 
 namespace JiveXML {
@@ -188,6 +187,12 @@ namespace JiveXML {
       ATH_MSG_WARNING( " while updating stream " << evtStreamID.StreamName()
                        << " with event " << evtStreamID.EventNumber() 
                        << " from run " << evtStreamID.RunNumber()  );
+      //delete char * strings malloc'ed by strdup
+      //are checkers enabled here?
+      auto *p1 = const_cast<char*>(event.StreamName);
+      auto *p2 = const_cast<char*>(event.EventData);
+      free(p1);
+      free(p2);
       return StatusCode::FAILURE;
     }
 

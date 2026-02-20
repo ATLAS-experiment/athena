@@ -52,31 +52,31 @@ def MuonHitAnalysis(flags):
     if flags.Muon.usePhaseIIGeoSetup:
         from HitAnalysis.HitAnalysisConfig import xMuonHitAnalysisCfg
         from ROOT.Muon.MuonStationIndex import TechnologyIndex
-        if flags.Detector.GeometryMDT:
+        if flags.Detector.EnableMDT:
             result.merge(xMuonHitAnalysisCfg(flags,
                                              name="MdtSimHitTester",
                                              InputKey="xMdtSimHits",
                                              HistPath="xMuonSimHit/histos/MDT/Hits",
                                              techIndex=TechnologyIndex.MDT))
-        if flags.Detector.GeometryRPC:
+        if flags.Detector.EnableRPC:
             result.merge(xMuonHitAnalysisCfg(flags,
                                              name="RpcSimHitTester",
                                              InputKey="xRpcSimHits",
                                              HistPath="xMuonSimHit/histos/RPC/Hits",
                                              techIndex=TechnologyIndex.RPC))
-        if flags.Detector.GeometryTGC:
+        if flags.Detector.EnableTGC:
             result.merge(xMuonHitAnalysisCfg(flags,
                                              name="TgcSimHitTester",
                                              InputKey="xTgcSimHits",
                                              HistPath="xMuonSimHit/histos/TGC/Hits",
                                              techIndex=TechnologyIndex.TGC))
-        if flags.Detector.GeometrysTGC:
+        if flags.Detector.EnablesTGC:
             result.merge(xMuonHitAnalysisCfg(flags,
                                              name="sTgcSimHitTester",
                                              InputKey="xStgcSimHits",
                                              HistPath="xMuonSimHit/histos/sTGC/Hits",
                                              techIndex=TechnologyIndex.STGC))
-        if flags.Detector.GeometryMM:
+        if flags.Detector.EnableMM:
             result.merge(xMuonHitAnalysisCfg(flags,
                                              name="MmSimHitTester",
                                              InputKey="xMmSimHits",
@@ -85,26 +85,27 @@ def MuonHitAnalysis(flags):
         from MuonPRDTestR4.MuonHitTestConfig import MuonHitTesterCfg
         result.merge(MuonHitTesterCfg(flags, outFile=flags.Output.HISTFileName))
     else:
-        if flags.Detector.GeometryMDT:
+        if flags.Detector.EnableMDT:
             from HitAnalysis.HitAnalysisConfig import MDTHitAnalysisCfg
             result.merge(MDTHitAnalysisCfg(flags))
-        if flags.Detector.GeometryRPC:
+        if flags.Detector.EnableRPC:
             from HitAnalysis.HitAnalysisConfig import RPCHitAnalysisCfg
             result.merge(RPCHitAnalysisCfg(flags))
-        if flags.Detector.GeometryTGC:
+        if flags.Detector.EnableTGC:
             from HitAnalysis.HitAnalysisConfig import TGCHitAnalysisCfg
             result.merge(TGCHitAnalysisCfg(flags))
-        if flags.Detector.GeometrysTGC:
+        if flags.Detector.EnablesTGC:
             from HitAnalysis.HitAnalysisConfig import sTGCHitAnalysisCfg
             result.merge(sTGCHitAnalysisCfg(flags))
-        if flags.Detector.GeometryMM:
+        if flags.Detector.EnableMM:
             from HitAnalysis.HitAnalysisConfig import MMHitAnalysisCfg
             result.merge(MMHitAnalysisCfg(flags)) 
-        if flags.Detector.GeometryCSC:
+        if flags.Detector.EnableCSC:
             from HitAnalysis.HitAnalysisConfig import CSCHitAnalysisCfg
             result.merge(CSCHitAnalysisCfg(flags))
-        from MuonPRDTest.HitValAlgSim import HitValAlgSimCfg
-        result.merge(HitValAlgSimCfg(flags, outFile=flags.Output.HISTFileName))
+        if flags.Detector.EnableMuon:
+            from MuonPRDTest.HitValAlgSim import HitValAlgSimCfg
+            result.merge(HitValAlgSimCfg(flags, outFile=flags.Output.HISTFileName))
  
  
     return result
@@ -118,6 +119,7 @@ def SimHitAnalysis(flags):
     result.merge(MuonHitAnalysis(flags))
     from HitAnalysis.HitAnalysisConfig import CaloHitAnalysisCfg, TrackRecordAnalysisCfg, TruthHitAnalysisCfg
     result.merge(CaloHitAnalysisCfg(flags))
-    result.merge(TrackRecordAnalysisCfg(flags))
+    if flags.Detector.EnableMuon:
+        result.merge(TrackRecordAnalysisCfg(flags))
     result.merge(TruthHitAnalysisCfg(flags))
     return result

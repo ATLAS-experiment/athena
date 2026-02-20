@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXJwoJAlgo - Jets without jets algorithm for gFEX
@@ -12,13 +12,17 @@
 #define gFEXJwoJAlgo_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h"
-#include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/gFEXJwoJTOB.h"
-#include "L1CaloFEXSim/gTowerContainer.h"
-#include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+#include "L1CaloFEXToolInterfaces/IgFEXJwoJAlgo.h" //also has gTowersType typedef
+#include "L1CaloFEXCond/gFEXDBCondData.h"
 
 
+#include <vector>
+#include <memory>
+#include <cstdint>
+#include <string>
+#include <array>
+
+class gFEXJwoJTOB;
 
 namespace LVL1 {
 
@@ -37,12 +41,15 @@ namespace LVL1 {
                                  int aFPGA_C, int bFPGA_C,
                                  int gXE_seedThrA, int gXE_seedThrB, int gXE_seedThrC) override;
 
-    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr,const gTowersType& Btwr, const gTowersType& Ctwr,
-                                                                 std::array<uint32_t, 4> & outTOB) const override;
+    virtual std::vector<std::unique_ptr<gFEXJwoJTOB>> jwojAlgo(const gTowersType& Atwr, int pucA_JWJ,
+                                                               const gTowersType& Btwr, int pucB_JWJ,
+                                                               const gTowersType& Ctwr, int pucC_JWJ,
+                                                               std::array<int32_t, 4> & outTOB) const override;
 
 
 
   private:
+    SG::ReadCondHandleKey<gFEXDBCondData> m_DBToolKey{this, "DBToolKey", "gFEXDBParams", "Database tool key"};
 
     float m_aFPGA_A{};
     float m_bFPGA_A{};
@@ -53,9 +60,17 @@ namespace LVL1 {
     float m_gBlockthresholdA{};
     float m_gBlockthresholdB{};
     float m_gBlockthresholdC{};
+    std::string m_fwVersion;
  
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
+
+    void metFPGA_rho(int FPGAnum, const gTowersType& twrs, int puc_jwj, 
+                 const gTowersType & gBlkSum, int gBlockthreshold,
+                 int aFPGA, int bFPGA,
+                 int & MHT_x, int & MHT_y,
+                 int & MST_x, int & MST_y,
+                 int & MET_x, int & MET_y) const;
 
     void metFPGA(int FPGAnum,const gTowersType& twrs, 
                  const gTowersType & gBlkSum, int gBlockthreshold,
@@ -67,6 +82,9 @@ namespace LVL1 {
     void etFPGA(int FPGAnum,const gTowersType& twrs, gTowersType &gBlkSum,
                 int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
 
+    void etFastFPGA(int FPGAnum,const gTowersType& twrs, gTowersType &gBlkSum,
+                int gBlockthreshold, int A, int B, int &eth, int &ets, int &etw) const;
+
     void metTotal(int A_MET_x, int A_MET_y,
                   int B_MET_x, int B_MET_y,
                   int C_MET_x, int C_MET_y,
@@ -76,7 +94,6 @@ namespace LVL1 {
                  int B_ET, 
                  int C_ET, 
                  int & ET ) const;  
-
 
     float sinLUT(unsigned int phiIDX, unsigned int aw) const;
 

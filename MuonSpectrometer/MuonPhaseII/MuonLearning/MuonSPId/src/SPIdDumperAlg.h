@@ -15,7 +15,7 @@
 
 #include <MuonPatternEvent/MuonPatternContainer.h>
 #include <MuonSpacePoint/SpacePointContainer.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonReadoutGeometryR4/MuonDetectorManager.h>
 
 #include "MuonTesterTree/MuonTesterTree.h"

@@ -227,11 +227,11 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     
     # Skimming based on number of vertex candidates
     SelectExpression = "count(STDM16_D0Candidates.passed_Dstar) > 0"
-    
-    STDM16_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name = "STDM16_SelectEvent",
-        expression = SelectExpression)
-    acc.addPublicTool(STDM16_SelectEvent)
+
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    STDM16_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "STDM16_SelectEvent", expression = SelectExpression))
     STDM16_SkimmingTools += [STDM16_SelectEvent]
     
     #====================================================================

@@ -2,40 +2,38 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "AthenaPoolCnvSvc/T_AthenaPoolCnv.h"
-//#include "GaudiKernel/DeclareFactoryEntries.h"
+/// @file StlAthenaPoolCnv.cxx
+/// @brief Template-based AthenaPool converters for STL containers and built-in types
+///
+/// This file provides explicit instantiations of T_AthenaPoolCnv for:
+/// - Built-in types (int, unsigned int, float, double, string)
+/// - STL vectors of built-in types
+/// - STL maps with built-in key/value types
 
-// explicit instantiations
+#include "AthenaPoolCnvSvc/T_AthenaPoolCnv.h"
 
 template <class T>
-class StlAthenaPoolCnv : public T_AthenaPoolCnv<T> 
+class StlAthenaPoolCnv : public T_AthenaPoolCnv<T>
 {
   friend class CnvFactory< StlAthenaPoolCnv<T> >;
-  typedef T_AthenaPoolCnv<T> BaseCnv_t;
-  typedef StlAthenaPoolCnv<T> Self_t;
+  using BaseCnv_t = T_AthenaPoolCnv<T>;
+  using Self_t = StlAthenaPoolCnv<T>;
 public:
-  /// Constructor
-  StlAthenaPoolCnv(ISvcLocator* svcloc) : BaseCnv_t(svcloc) {}
+  /// Standard constructor
+  /// @param svcloc Pointer to the service locator
+  explicit StlAthenaPoolCnv(ISvcLocator* svcloc) : BaseCnv_t(svcloc) {}
 
   /// Gaudi Service Interface method implementations:
-  virtual StatusCode initialize()
+  virtual StatusCode initialize() override
   {
-    MsgStream msg( this->msgSvc(), ClassName<Self_t>::name());
-    if ( !this->BaseCnv_t::initialize().isSuccess() ) {
-      msg << MSG::ERROR << "Could not initialize base class' converter ["
-	  << ClassName<BaseCnv_t>::name() << "] !"
-	  << endmsg;
-      return StatusCode::FAILURE;
-    }
-    const std::type_info& ti = typeid(T);
-    RootType rflx_type = RootType(ti);
+    ATH_CHECK( this->BaseCnv_t::initialize() );
+
+    RootType rflx_type{typeid(T)};
     if (!rflx_type) {
-      msg << MSG::ERROR
-	  << "could not get Reflex::Type from type_info ["
-	  << ti.name() 
-	  << "] for class ["
-	  << ClassName<T>::name() << "] !"
-	  << endmsg;
+      ATH_MSG_ERROR("Could not get RootType from type_info ["
+                    << typeid(T).name()
+                    << "] for class ["
+                    << ClassName<T>::name() << "]!");
       return StatusCode::FAILURE;
     }
     this->BaseCnv_t::m_classDesc = std::move(rflx_type);
@@ -49,7 +47,7 @@ public:
   template class StlAthenaPoolCnv< NAME >; \
   DECLARE_CONVERTER(TDEF)
 
-#define DECL2_CNV(N1, N2, TDEF)	\
+#define DECL2_CNV(N1, N2, TDEF) \
   typedef StlAthenaPoolCnv< N1, N2 > TDEF; \
   template class StlAthenaPoolCnv< N1, N2 >; \
   DECLARE_CONVERTER(TDEF)

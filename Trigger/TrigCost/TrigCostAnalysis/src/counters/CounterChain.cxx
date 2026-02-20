@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -120,7 +120,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
             nRobsPerRosPerEvent[rosForROB] += 1;
 
             if (robs_history[i] == robmonitor::RETRIEVED) {
-              requestedNetworkROSes.insert(rosForROB);
+              requestedNetworkROSes.insert(std::move(rosForROB));
             }
           }
         }

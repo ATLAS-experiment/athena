@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // EMECConstruction
@@ -52,6 +52,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <format>
 
 #include "GeoModelKernel/GeoElement.h"
 #include "GeoModelKernel/GeoMaterial.h"
@@ -345,15 +346,10 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             electrodes.push_back(innerName + "::Electrode");
         } else if(m_innerWheelVariant == "Slices"){
             innerName += "Slice";
-            uint8_t slice = 0; // To silence Wformat-truncation use datatype with 3-digit range
+            uint8_t slice = 0;
             do {
-                char buf[4];
-                snprintf(buf, 4, "%02d", slice);
-
-		std::string a = innerName + buf + "::Absorber";
-		std::string e = innerName + buf + "::Electrode";
-                absorbers.push_back(a);
-                electrodes.push_back(e);
+                absorbers.push_back(std::format("{}{:02d}::Absorber", innerName, slice));
+                absorbers.push_back(std::format("{}{:02d}::Electrode", innerName, slice));
                 slice ++;
             } while(
                 numberOfHalfWavesInner > slice
@@ -426,14 +422,10 @@ GeoIntrusivePtr<GeoFullPhysVol> LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             outerName += "Cones";
         } else if(m_outerWheelVariant == "Slices"){
             outerName += "Slice";
-            uint8_t slice = 0; // To silence Wformat-truncation use datatype with 3-digit range
+            uint8_t slice = 0;
             do {
-                char buf[4];
-                snprintf(buf, 4, "%02d", slice);
-		std::string a = outerName + buf + "::Absorber";
-		std::string e = outerName + buf + "::Electrode";
-                absorbers.push_back(a);
-                electrodes.push_back(e);
+                absorbers.push_back(std::format("{}{:02d}::Absorber", outerName, slice));
+                absorbers.push_back(std::format("{}{:02d}::Electrode", outerName, slice));
                 slice ++;
             } while( // outer wheel has an extra slice
                 numberOfHalfWavesOuter > slice

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgM.h"
@@ -23,24 +23,19 @@ StatusCode HiveAlgM::initialize() {
   return HiveAlgBase::initialize ();
 }
 
-StatusCode HiveAlgM::finalize() {
-  ATH_MSG_DEBUG("finalize " << name());
-  return StatusCode::SUCCESS;
-}
-
-StatusCode HiveAlgM::execute() {
+StatusCode HiveAlgM::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
  
   sleep();
 
-  SG::ReadHandle<HiveDataObj> rdh1( m_rdh1 );
+  SG::ReadHandle<HiveDataObj> rdh1{m_rdh1, ctx};
   if (!rdh1.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << rdh1.key());
     return StatusCode::FAILURE;
   }
 
-  SG::ReadHandle<HiveDataObj> rdh2( m_rdh2 );
+  SG::ReadHandle<HiveDataObj> rdh2{m_rdh2, ctx};
   if (!rdh2.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << rdh2.key());
     return StatusCode::FAILURE;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HIEVENTSHAPESUMMARYTOOL_H
@@ -29,18 +29,18 @@ class HIEventShapeSummaryTool : virtual public asg::AsgTool, virtual public IHIE
     struct summary_info_t
     {
       std::string name;
-      float eta_min;
-      float eta_max;
-      int layer;
+      float eta_min{};
+      float eta_max{};
+      int layer{};
       function_t func;
 
-      summary_info_t(const std::string& n, float emin, float emax, int ll, function_t ff) : name(n), eta_min(emin), eta_max(emax), layer(ll), func(ff) {};
+      summary_info_t(const std::string& n, float emin, float emax, int ll, function_t ff) : name(n), eta_min(emin), eta_max(emax), layer(ll), func(std::move(ff)) {};
     };
 
 
     std::vector<std::string> m_samp_names;
     std::vector<std::string> m_subcalo_names;
-    bool m_do_sides;
+    bool m_do_sides{};
 
     //using map instead of unordered version, really do want entries sorted by key
     std::map<std::string,summary_info_t> m_summary_list;

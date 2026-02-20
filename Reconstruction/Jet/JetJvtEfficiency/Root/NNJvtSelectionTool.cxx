@@ -16,17 +16,8 @@ namespace {
 
 namespace CP {
     StatusCode NNJvtSelectionTool::initialize() {
+        
         ATH_CHECK(JvtSelectionToolBase::initialize());
-
-        m_jvtAcc = SG::ConstAccessor<float> (m_jvtMoment.key());
-        if (m_jetContainer.empty()) {
-            ATH_MSG_WARNING("No JetContainer set. This behaviour is deprecated");
-            ATH_CHECK(m_jvtMoment.initialize(false));
-        }
-        else {
-            m_jvtMoment = m_jetContainer + "." + m_jvtMoment.key();
-            ATH_CHECK(m_jvtMoment.initialize());
-        }
 
         if (m_configFile.empty()) {
             auto itr = workingPoints.find(m_wp);
@@ -55,6 +46,8 @@ namespace CP {
     }
 
     bool NNJvtSelectionTool::select(const xAOD::IParticle *jet) const {
-        return m_jvtAcc(*jet) > m_cutMap(jet->pt(), m_etaAcc(*jet));
+        if(!isInRange(jet)) return true;
+        SG::ReadDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtMomentKey);
+        return jvtHandle(*jet) > m_cutMap(jet->pt(), m_etaAcc(*jet));
     }
 } // namespace CP

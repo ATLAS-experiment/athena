@@ -72,6 +72,10 @@ namespace G4UA
       G4StepPoint* tackab=theStep->GetPostStepPoint();
       const G4TouchableHistory* theTouchable =
         dynamic_cast<const G4TouchableHistory*>(tacka->GetTouchable());
+      if (!theTouchable) {
+        std::cerr << "LArGeoH62004SteppingAction::UserSteppingAction: dynamic_cast fails" << std::endl;
+        std::abort();
+      }
       G4ThreeVector xyz = tacka->GetPosition();
 
       std::cout<<"----------------------------------------------------"<<std::endl;

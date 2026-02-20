@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,11 +32,11 @@ class RpcCoinData : public RpcPrepData
     friend class ::RpcCoinDataContainerCnv;
     
     /** Public, Copy, operator=, constructor*/
-    RpcCoinData();
-    RpcCoinData(const RpcCoinData &);
-    RpcCoinData(RpcCoinData &&) noexcept;
-    RpcCoinData &operator=(const RpcCoinData &);
-    RpcCoinData &operator=(RpcCoinData &&) noexcept;
+    RpcCoinData() = default;
+    RpcCoinData(const RpcCoinData &) noexcept = default;
+    RpcCoinData(RpcCoinData &&) noexcept = default;
+    RpcCoinData &operator=(const RpcCoinData &) noexcept = default;
+    RpcCoinData &operator=(RpcCoinData &&) noexcept = default;
 
     /** @brief Dumps information about the RpcCoinData*/
     virtual MsgStream&    dump( MsgStream&    stream) const;
@@ -88,13 +88,13 @@ class RpcCoinData : public RpcPrepData
 
   private:
 
-      unsigned short m_ijk;
-      unsigned short m_threshold;
-      unsigned short m_overlap;
-      unsigned short m_parentCmId;
-      unsigned short m_parentPadId;
-      unsigned short m_parentSectorId;
-      bool m_lowPtCm;
+      unsigned short m_ijk{0};
+      unsigned short m_threshold{99};
+      unsigned short m_overlap{99};
+      unsigned short m_parentCmId{0};
+      unsigned short m_parentPadId{0};
+      unsigned short m_parentSectorId{0};
+      bool m_lowPtCm{false};
 
   };
   ////////////////////////////////////////////////

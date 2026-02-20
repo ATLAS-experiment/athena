@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloClusterMatchingTool.cxx
@@ -218,7 +218,7 @@ namespace ClusterMatching {
       }
     }
     // apply the decoration to the reference cluster -- no exceptions
-    elementLinkDec(refCluster) = tcLinks;
+    elementLinkDec(refCluster) = std::move(tcLinks);
     ATH_MSG_VERBOSE("Decorate cluster " << refCluster.index() << " with " << elementLinkDec(refCluster).size() << " tc links");
 
     return StatusCode::SUCCESS;
@@ -248,7 +248,7 @@ namespace ClusterMatching {
       }
     }
     // apply the decoration to the reference cluster -- no exceptions
-    elementLinkDec(refCluster) = tcLinks;
+    elementLinkDec(refCluster) = std::move(tcLinks);
     ATH_MSG_VERBOSE("Decorate cluster " << refCluster.index() << " with " << elementLinkDec(refCluster).size() << " tc links");
 
     return StatusCode::SUCCESS;

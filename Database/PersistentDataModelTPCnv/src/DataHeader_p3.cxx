@@ -15,35 +15,7 @@ DataHeaderElement_p3::DataHeaderElement_p3() : m_clids(),
 	m_prefixIdx(0U),
 	m_keyPos(0U),
 	m_hashes() {}
-DataHeaderElement_p3::DataHeaderElement_p3(const DataHeaderElement_p3& rhs) : m_clids(rhs.m_clids),
-	m_token(rhs.m_token),
-	m_alias(rhs.m_alias),
-	m_technology(rhs.m_technology),
-	m_oid1(rhs.m_oid1),
-	m_oid2(rhs.m_oid2),
-	m_dbGuidIdx(rhs.m_dbGuidIdx),
-	m_classIdIdx(rhs.m_classIdIdx),
-	m_prefixIdx(rhs.m_prefixIdx),
-	m_keyPos(rhs.m_keyPos),
-	m_hashes(rhs.m_hashes) {}
-DataHeaderElement_p3::~DataHeaderElement_p3() {}
 
-DataHeaderElement_p3& DataHeaderElement_p3::operator=(const DataHeaderElement_p3& rhs) {
-   if (this != &rhs) {
-      m_clids = rhs.m_clids;
-      m_token = rhs.m_token;
-      m_alias = rhs.m_alias;
-      m_technology  = rhs.m_technology;
-      m_oid1 = rhs.m_oid1;
-      m_oid2 = rhs.m_oid2;
-      m_dbGuidIdx = rhs.m_dbGuidIdx;
-      m_classIdIdx = rhs.m_classIdIdx;
-      m_keyPos = rhs.m_keyPos;
-      m_hashes = rhs.m_hashes;
-      m_prefixIdx = rhs.m_prefixIdx;
-   }
-   return(*this);
-}
 
 const std::vector<unsigned int>& DataHeaderElement_p3::clids() const {
    return(m_clids);
@@ -76,19 +48,6 @@ unsigned int DataHeaderElement_p3::oid2() const {
 
 DataHeader_p3::DataHeader_p3()
 	: m_DataHeader(), m_InputDataHeader(), m_GuidMap() {}
-DataHeader_p3::DataHeader_p3(const DataHeader_p3& rhs) : m_DataHeader(rhs.m_DataHeader),
-	m_InputDataHeader(rhs.m_InputDataHeader),
-	m_GuidMap(rhs.m_GuidMap) {}
-DataHeader_p3::~DataHeader_p3() {}
-
-DataHeader_p3& DataHeader_p3::operator=(const DataHeader_p3& rhs) {
-   if (this != &rhs) {
-      m_DataHeader = rhs.m_DataHeader;
-      m_InputDataHeader = rhs.m_InputDataHeader;
-      m_GuidMap = rhs.m_GuidMap;
-   }
-   return(*this);
-}
 
 const std::vector<DataHeaderElement_p3>& DataHeader_p3::elements() const {
    return(m_DataHeader);

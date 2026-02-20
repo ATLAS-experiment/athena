@@ -1,43 +1,104 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 
 #include "../src/T2TrackBSLLPoly.h"
-#include <stdexcept>
+#include "../src/idx.h"
+#include <array>
+
 using namespace std;
 using namespace PESA;
 
 
-namespace {
+template<unsigned Bx, unsigned By, unsigned tx, unsigned ty, unsigned ox, unsigned oy>
+consteval int idx_or_neg1()
+{   
+  if constexpr(Bx<=2 and By<=2 and tx<=2 and ty<=2 and ox<=2 and oy<=2){
+    if constexpr(g_order[Bx][By][tx][ty]>=0 and g_order2[ox][oy]>=0){
+      return idx<Bx, By, tx, ty, ox, oy>();
+    } else return -1;
+  } else return -1;
+}
 
-void test_idx()
-{
-    constexpr int maxPower=2;
-    cout << "=== Testing T2TrackBSLLPoly::idx method ===\n";
-    for (unsigned power_Bx = 0; power_Bx < maxPower; ++ power_Bx) {
-        for (unsigned power_By = 0; power_By < maxPower; ++ power_By) {
-            for (unsigned power_tx = 0; power_tx < maxPower; ++ power_tx) {
-                for (unsigned power_ty = 0; power_ty < maxPower; ++ power_ty) {
-                    for (unsigned power_omegax = 0; power_omegax < maxPower; ++ power_omegax) {
-                        for (unsigned power_omegay = 0; power_omegay < maxPower; ++ power_omegay) {
-                            int idx=-1;
-                            try{
-                                idx = T2TrackBSLLPoly::idx(power_Bx, power_By, power_tx, power_ty, power_omegax, power_omegay);
-                            } catch (std::out_of_range & e){
-                                std::cout<<"index out of range for ";
-                            }
-                            cout << power_Bx << " " << power_By << " "
-                                 << power_tx << " " << power_ty << " "
-                                 << power_omegax << " " << power_omegay
-                                 << " : " << idx << "\n";
-                        }
-                    }
-                }
-            }
-        }
+// Build a compile-time array over all combinations
+template<unsigned PBx, unsigned PBy, unsigned Ptx, unsigned Pty, unsigned Pox, unsigned Poy>
+struct idx_table6 {
+    static constexpr std::size_t total = 1ull * PBx * PBy * Ptx * Pty * Pox * Poy;
+  template<std::size_t K>
+  static consteval int value() {
+      // decode K in mixed radix, least-significant axis first
+      constexpr std::size_t k0 = K;
+      constexpr unsigned oy = static_cast<unsigned>(k0 % Poy);
+      constexpr std::size_t k1 = k0 / Poy;
+
+      constexpr unsigned ox = static_cast<unsigned>(k1 % Pox);
+      constexpr std::size_t k2 = k1 / Pox;
+
+      constexpr unsigned ty = static_cast<unsigned>(k2 % Pty);
+      constexpr std::size_t k3 = k2 / Pty;
+
+      constexpr unsigned tx = static_cast<unsigned>(k3 % Ptx);
+      constexpr std::size_t k4 = k3 / Ptx;
+
+      constexpr unsigned By = static_cast<unsigned>(k4 % PBy);
+      constexpr std::size_t k5 = k4 / PBy;
+
+      constexpr unsigned Bx = static_cast<unsigned>(k5 % PBx);
+
+      return idx_or_neg1<Bx, By, tx, ty, ox, oy>();
+  }
+
+    template<std::size_t... Is>
+    static consteval auto make_impl(std::index_sequence<Is...>) {
+        return std::array<int, total>{ value<Is>()... };
     }
+
+    static consteval auto make() {
+        return make_impl(std::make_index_sequence<total>{});
+    }
+};
+
+inline int 
+idx_runtime(unsigned power_Bx, unsigned power_By, unsigned power_tx, unsigned power_ty,
+    unsigned power_omegax, unsigned power_omegay){
+    if (power_Bx > 2 or power_By > 2
+            or power_tx > 2 or power_ty > 2
+            or power_omegax > 2 or power_omegay > 2) {
+        return -1;
+    }
+    int idx = g_order[power_Bx][power_By][power_tx][power_ty];
+    if (idx < 0) return -1;
+    int idx2 = g_order2[power_omegax][power_omegay];
+    if (idx2 < 0) return -1;
+    return idx*g_size2 + idx2;
+}
+
+
+
+bool test_idx(){
+  bool result(true);
+  constexpr auto all = idx_table6<3,3,3,3,3,3>::make();
+  cout << "=== Testing T2TrackBSLLPoly::idx method ===\n";
+  cout << "=== Size  = " <<all.size()<<" ===\n";
+  for (std::size_t k = 0; k < all.size(); ++k) {
+    std::size_t t = k;
+    auto step = [](std::size_t& x, unsigned base){ unsigned d = x % base; x /= base; return d; };
+    unsigned oy = step(t, 3), ox = step(t, 3), ty = step(t, 3),
+             tx = step(t, 3), By = step(t, 3), Bx = step(t, 3);
+
+    int v = all[k];
+    int v2 = idx_runtime(Bx, By, tx, ty, ox, oy);
+    std::cout << Bx << ' ' << By << ' ' << tx << ' ' << ty << ' '
+              << ox << ' ' << oy << " : ";
+    std::cout << v << '\n';
+    if (v2 != v){
+      result = false;
+      break;
+    }
+  }
+  return result;
 }
 
 void test_update()
@@ -75,10 +136,12 @@ void test_update()
     }
 }
 
-}
+
 
 int main()
 {
-  test_idx();
+  bool ok = test_idx();
   test_update();
+  if (not ok) return 1;
+  return 0;
 }

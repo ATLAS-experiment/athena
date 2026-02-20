@@ -11,7 +11,7 @@
 #include "TileConditions/ITileCondProxy.h"
 #include "TileConditions/TileCablingSvc.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -22,14 +22,14 @@
  * @brief Condition algorithm to produce TileEMScale and put it into condition store
  */
 
-class TileEMScaleCondAlg: public AthAlgorithm {
+class TileEMScaleCondAlg: public AthCondAlgorithm {
   public:
 
     TileEMScaleCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~TileEMScaleCondAlg() = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
     virtual StatusCode finalize() override;
 
   private:

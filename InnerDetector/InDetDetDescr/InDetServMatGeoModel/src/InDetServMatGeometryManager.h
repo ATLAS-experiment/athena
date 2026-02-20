@@ -1,19 +1,18 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetServMatGeometryManager_H
 #define InDetServMatGeometryManager_H
 
-#include "CxxUtils/checker_macros.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include <utility>
 
-class IGeometryDBSvc;
 class InDetMaterialManager;
 
-class InDetServMatGeometryManager
+class InDetServMatGeometryManager : public AthMessaging
 {
 public:
   InDetServMatGeometryManager(InDetDD::AthenaComps * athenaComps);
@@ -26,19 +25,8 @@ public:
   ///Delete copy c'tor
   InDetServMatGeometryManager(const InDetServMatGeometryManager &) = delete;
   
-  // Access to geometry database
-  const IGeometryDBSvc * db() const {return std::as_const(*m_athenaComps).geomDB();}
-
   // Access to material manager 
   InDetMaterialManager * matMgr() {return m_matMgr;}
-  
-  
-  // Access to message stream
-  MsgStream& msg (MSG::Level lvl) const { return m_athenaComps->msg(lvl); }
-
-  // Message stream verbosity level
-  bool msgLvl (MSG::Level lvl) const { return m_athenaComps->msgLvl(lvl); }
-
 
   ////////////////////////////////////////////////////////////////////////////
   // General parameters
@@ -183,10 +171,10 @@ private:
   IRDBRecordset_ptr m_scalingTable;
 
   // Access to athena components
-  InDetDD::AthenaComps * m_athenaComps;
+  InDetDD::AthenaComps * m_athenaComps{};
 
   // Material Manager
-  InDetMaterialManager * m_matMgr;
+  InDetMaterialManager * m_matMgr{};
 
   // index of named support tube in  m_InDetSimpleServices table, -1 if not found. Could be cached for speed.
   int SupportTubeIndex(const std::string& name) const;

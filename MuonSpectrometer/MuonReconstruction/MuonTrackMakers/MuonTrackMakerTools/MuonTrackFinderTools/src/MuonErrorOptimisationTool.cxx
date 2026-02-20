@@ -217,22 +217,20 @@ namespace Muon {
 
             if (doSelection) {
                 // check whether the chi2 after refit is smaller than original even if above threshold. If so use refit
-                bool firstIsBest = true;
-                if (!fq1 && fq2) firstIsBest = false;
-                if (fq1 && fq2) firstIsBest = fq1->chiSquared() < fq2->chiSquared();
+                std::array<std::tuple<std::unique_ptr<Trk::Track> ,double,std::string>,3 > fitName {{
+                        {nullptr, fq0->chiSquared(),"original fit"},
+                        {std::move(result1),fq1 ? fq1->chiSquared() : std::numeric_limits<double>::max(),"precise refit"},
+                        {std::move(result2),fq2 ? fq2->chiSquared() : std::numeric_limits<double>::max(),"loose refit"} 
+                }};
 
-                double chi2Refit = firstIsBest ? fq1->chiSquared() : fq2->chiSquared();
-                if (chi2Refit < fq0->chiSquared()) {
-                    if (firstIsBest) {
-                        ATH_MSG_DEBUG("Keeping precise refit");
-                        ++m_nbetterPreciseFit;
-                        return result1;
-                    } else {
-                        ATH_MSG_DEBUG("Keeping loose refit");
-                        ++m_nbetterFit;
-                        return result2;
-                    }
-                }
+
+                auto best=std::min_element(fitName.begin(),fitName.end(),[](const auto& a, const auto& b){
+                 return std::get<1>(a) < std::get<1>(b);
+                });
+	      
+                ATH_MSG_DEBUG("Keeping " << std::get<2>(*best));
+                std::unique_ptr<Trk::Track> bestTrack=std::move(std::get<0>(*best));
+                return bestTrack;
             }
             return nullptr;
         }

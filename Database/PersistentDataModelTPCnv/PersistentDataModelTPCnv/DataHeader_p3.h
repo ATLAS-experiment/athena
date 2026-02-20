@@ -21,10 +21,6 @@
 class DataHeaderElement_p3 {
 public: // Constructor and Destructor
    DataHeaderElement_p3();
-   DataHeaderElement_p3(const DataHeaderElement_p3& rhs);
-   virtual ~DataHeaderElement_p3();
-
-   DataHeaderElement_p3& operator=(const DataHeaderElement_p3& rhs);
 
 friend class DataHeaderCnv_p3;
 friend class DataHeaderElementCnv_p3;
@@ -53,10 +49,6 @@ private:
 class  DataHeader_p3 {
 public: // Constructor and Destructor
    DataHeader_p3();
-   DataHeader_p3(const DataHeader_p3& rhs);
-   virtual ~DataHeader_p3();
-
-   DataHeader_p3& operator=(const DataHeader_p3& rhs);
 
 friend class DataHeaderCnv_p3;
 

@@ -10,10 +10,10 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "Identifier/IdentifierHash.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "boost/range/iterator_range.hpp"
 #include <vector>
 #include <algorithm>
 #include <set>
+#include <ranges>
 class IdDictMgr;
 
 
@@ -103,9 +103,9 @@ public:
   size_type     module_hash_max () const;
 
   /** Type for iterators over identifiers. */
-  typedef std::vector<Identifier>::const_iterator id_iterator;
+  using id_iterator = std::vector<Identifier>::const_iterator;
   /** Type for range over identifiers. */
-  typedef boost::iterator_range<id_iterator> id_range;
+  using id_range = std::ranges::subrange<id_iterator>;
 
   /** begin iterator over set of module Identifiers */
   id_iterator mod_begin    () const;

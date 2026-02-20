@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "L1TopoCoreSim/StandaloneL1TopoHistSvc.h"
 #include "TFile.h"
 #include "TH1.h"
 #include "TH2.h"
 
-#include <iostream>
+#include <ostream>
 #include <map>
 
 #include "TrigConfBase/TrigConfMessaging.h"
@@ -21,10 +21,10 @@ public:
    {}
 
    ~StandaloneL1TopoHistSvcImpl() {
-      for( auto h : m_hists1D ) {
+      for( const auto & h : m_hists1D ) {
          delete h.second;
       }
-      for( auto h : m_hists2D ) {
+      for( const auto & h : m_hists2D ) {
          delete h.second;
       }
    }
@@ -103,7 +103,7 @@ public:
 
 
       TFile * f = TFile::Open(filename.c_str(),opt.c_str());
-      for( auto h : m_hists1D ) {
+      for( const auto & h : m_hists1D ) {
 
          std::string fullName(h.second->GetName());
          std::string path(basepath);
@@ -124,7 +124,7 @@ public:
          f->cd(dir);
          h.second->Write();
       }
-      for( auto h : m_hists2D ) {
+      for( const auto & h : m_hists2D ) {
 
          std::string fullName(h.second->GetName());
          std::string path(basepath);

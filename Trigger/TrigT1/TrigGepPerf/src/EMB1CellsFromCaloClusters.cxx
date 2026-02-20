@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EMB1CellsFromCaloClusters.h"
 #include "CxxUtils/prefetch.h"
-
+#include <algorithm> //copy_if
 EMB1CellsFromCaloClusters::EMB1CellsFromCaloClusters(const std::string& type,
 					       const std::string& name,
 					       const IInterface* parent):
@@ -64,7 +64,7 @@ EMB1CellsFromCaloClusters::cells(std::vector<std::vector<const CaloCell*>>& cell
     // will mess up the simple seed selection procedure, so
     // add a requirement on the number of selected cells.
     if (cluster_cells.size() > 1) {
-      cells.push_back(cluster_cells);
+      cells.push_back(std::move(cluster_cells));
     }
   }
 

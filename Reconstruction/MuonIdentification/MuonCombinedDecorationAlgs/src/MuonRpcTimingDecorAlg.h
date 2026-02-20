@@ -31,13 +31,13 @@ class MuonRpcTimingDecorAlg: public AthReentrantAlgorithm {
                                                               "Handle to the service providing the IMuonEDMHelperSvc interface"};
 
       SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainer{this, "MuonContainer", "Muons" ,"Muon container"};
-   
-      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_idKey{this, "IdKey", "", "rpcHitIdentifier decoration key"};
-      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posXKey{this, "PosXkey", "", "rpcHitPositionX decoration key"};
-      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posYKey{this, "PosYkey", "", "rpcHitPositionY decoration key"};
-      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posZKey{this, "PosZkey", "", "rpcHitPositionZ decoration key"};
-      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_timeKey{this, "TimeKey", "", "rpcHitTime decoration key"};
-      
+
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_idKey{this, "IdKey", m_MuonContainer, "rpcHitIdentifier", "rpcHitIdentifier decoration key"};
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posXKey{this, "PosXkey", m_MuonContainer, "rpcHitPositionX", "rpcHitPositionX decoration key"};
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posYKey{this, "PosYkey", m_MuonContainer, "rpcHitPositionY", "rpcHitPositionY decoration key"};
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_posZKey{this, "PosZkey", m_MuonContainer, "rpcHitPositionZ", "rpcHitPositionZ decoration key"};
+      SG::WriteDecorHandleKey<xAOD::MuonContainer> m_timeKey{this, "TimeKey", m_MuonContainer, "rpcHitTime", "rpcHitTime decoration key"};
+
       struct RpcInfo{
         RpcInfo(const Amg::Vector3D& pos_,
                 const float time_,

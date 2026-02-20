@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
@@ -14,16 +14,18 @@ except ImportError:
     import logging
 
 class SystematicsCategories(Enum):
-    JETS = ['JET_']
-    JER = ['JET_JER']
-    ELECTRONS = ['EG_', 'EL_']
-    MUONS = ['MUON_']
-    PHOTONS = ['EG_', 'PH_']
-    TAUS = ['TAUS_']
-    MET = ['MET_']
-    TRACKS = ['TRK_']
-    EVENT = ['GEN_', 'PRW_']
-    FTAG = ['FT_']
+    JETS = {'JET_'}
+    JER = {'JET_JER'}
+    FTAG = {'FT_'}
+    ELECTRONS = {'EG_', 'EL_'}
+    MUONS = {'MUON_'}
+    PHOTONS = {'EG_', 'PH_'}
+    TAUS = {'TAUS_'}
+    MET = {'MET_'}
+    TRACKS = {'TRK_'}
+    GENERATOR = {'GEN_'}
+    PRW = {'PRW_'}
+    EVENT = {'GEN_', 'PRW_'}
 
 class CommonServicesConfig (ConfigBlock) :
     """the ConfigBlock for common services
@@ -45,20 +47,26 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('onlySystematicsCategories', None, type=list,
             info="a list of strings defining categories of systematics to enable "
             "(only recommended for studies / partial ntuple productions). Choose amongst: "
-            "jets, electrons, muons, photons, taus, met, tracks, ftag, event. This option is overridden "
-            "by 'filterSystematics'.")
+            "`jets`, `JER`, `FTag`, `electrons`, `muons`, `photons`, `taus`, `met`, `tracks`, `generator`, `PRW`, `event`. "
+            "This option is overridden by `filterSystematics`.")
         self.addOption ('systematicsHistogram', None , type=str,
-            info="the name (string) of the histogram to which a list of executed "
-            "systematics will be printed. The default is None (don't write out "
-            "the histogram).")
+            info="the name of the histogram to which a list of executed "
+            "systematics will be printed. If left empty, the histogram is not written at all.")
         self.addOption ('separateWeightSystematics', False, type=bool,
-            info="if 'systematicsHistogram' is enabled, whether to create a separate "
+            info="if `systematicsHistogram` is enabled, whether to create a separate "
             "histogram holding only the names of weight-based systematics. This is useful "
             "to help make histogramming frameworks more efficient by knowing in advance which "
             "systematics need to recompute the observable and which don't.")
+        self.addOption ('metadataHistogram', 'metadata' , type=str,
+            info="the name of the metadata histogram which contains information about "
+            "data type, campaign, etc. If left empty, the histogram is not written at all.")
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save metadata histograms in.")
+        self.addOption ('setupONNX', False, type=bool,
+            info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -68,28 +76,35 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is False :
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
+
+        # Handle all possible configuration options for systematics
+        if self.runSystematics is False:
             runSystematics = self.runSystematics
-        elif config.noSystematics() is not None :
+        elif config.noSystematics() is not None:
             # if option not set:
             # check to see if set in config accumulator
             self.runSystematics = not config.noSystematics()
             runSystematics = self.runSystematics
-        else :
+        else:
             runSystematics = True
 
-        if runSystematics :
+        # Now update the global configuration
+        config._noSystematics = not runSystematics
+
+        if runSystematics:
             sysService.sigmaRecommended = 1
             if config.dataType() is DataType.Data:
                 # Only one type of allowed systematics on data: the JER variations!
                 self.onlySystematicsCategories = ['JER']
             if self.onlySystematicsCategories is not None:
                 # Convert strings to enums and validate
-                requested_categories = []
+                requested_categories = set()
                 for category_str in self.onlySystematicsCategories:
                     try:
                         category_enum = SystematicsCategories[category_str.upper()]
-                        requested_categories += category_enum.value
+                        requested_categories |= category_enum.value
                     except KeyError:
                         raise ValueError(f"Invalid systematics category passed to option 'onlySystematicsCategories': {category_str}. Must be one of {', '.join(category.name for category in SystematicsCategories)}")
                 # Construct regex pattern as logical-OR of category names
@@ -103,12 +118,32 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
+            allSysDumper.RootStreamName = streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
                 weightSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'OnlyWeightSystematicsPrinter' )
                 weightSysDumper.histogramName = f"{self.systematicsHistogram}OnlyWeights"
-                weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|extrapolation_pt_|JET_.*JvtEfficiency_|PRW_).*"
+                weightSysDumper.systematicsRegex = "^(GEN_|EL_EFF_|MUON_EFF_|PH_EFF_|TAUS_TRUEHADTAU_EFF_|FT_EFF_|JET_.*JvtEfficiency_|PRW_).*"
+
+        if self.metadataHistogram:
+            # add histogram with metadata
+            if not config.flags:
+                raise ValueError ("Writing out the metadata histogram requires to pass config flags")
+            metadataHistAlg = config.createAlgorithm( 'CP::MetadataHistAlg', 'MetadataHistAlg' )
+            metadataHistAlg.histogramName = self.metadataHistogram
+            metadataHistAlg.dataType = str(config.dataType().value)
+            metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
+            metadataHistAlg.mcChannelNumber = str(config.dsid())
+            metadataHistAlg.RootStreamName = streamName
+            if config.dataType() is DataType.Data:
+                etag = "unavailable"
+            else:
+                from AthenaConfiguration.AutoConfigFlags import GetFileMD
+                metadata = GetFileMD(config.flags.Input.Files)
+                amiTags = metadata.get("AMITag", "not found!")
+                etag = str(amiTags.split("_")[0])
+            metadataHistAlg.etag = etag
 
         if self.enableExpertMode and config._pass == 0:
             # set any expert-mode errors to be ignored instead
@@ -131,9 +166,8 @@ class CommonServicesConfig (ConfigBlock) :
                         +reset)
             log.warning(f"{bold}{yellow}These settings are not recommended for analysis. Make sure you know what you're doing, or disable them with `enableExpertMode: False` in `CommonServices`.{reset}")
 
-            import time
-            time.sleep(2)
-
+        if self.setupONNX:
+            config.createService('AthOnnx::OnnxRuntimeSvc', 'OnnxRuntimeSvc')
 
 @groupBlocks
 def CommonServices(seq):
@@ -147,7 +181,7 @@ class IOStatsBlock(ConfigBlock):
     def __init__(self):
         super(IOStatsBlock, self).__init__()
         self.addOption("printOption", "Summary", type=str,
-                       info='option to pass the standard ROOT printing function. Can be "Summary", "ByEntries" or "ByBytes".')
+                       info='option to pass the standard ROOT printing function. Can be `Summary`, `ByEntries` or `ByBytes`.')
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -165,31 +199,31 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
-        self.addOption ('files', None, type=None,
+        self.addOption ('files', None, type=list,
             info="the input files being processed (list of strings). "
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
-            info="whether to use the central PRW files. The default is True.")
-        self.addOption ('userLumicalcFiles', None, type=None,
+            info="whether to use the central PRW files.")
+        self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=dict,
             info="user-provided lumicalc files (dictionary of list of strings, "
             "with MC campaigns as the keys). Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigs', None, type=None,
+        self.addOption ('userPileupConfigs', None, type=list,
             info="user-provided PRW files (list of strings). Alternative to "
-            "auto-configuration. Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+            "auto-configuration.")
+        self.addOption ('userPileupConfigsPerCampaign', None, type=dict,
             info="user-provided PRW files (dictionary of list of strings, with "
-            "MC campaigns as the keys)")
+            "MC campaigns as the keys).")
         self.addOption ('postfix', '', type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed unless several instances of PileupReweighting are scheduled.")
+            "Typically not needed unless several instances of `PileupReweighting` are scheduled.")
         self.addOption ('alternativeConfig', False, type=bool,
-            info="whether this is used as an additional alternative config for PileupReweighting. "
-            "Will only store the alternative pile up weight in that case.")
+            info="whether this is used as an additional alternative config for `PileupReweighting`. "
+            "Will only store the alternative pileup weight in that case.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
-            info="whether to add EventInfo variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL)",
+            info="whether to add `EventInfo` variables needed for running the columnar tool(s) on the output n-tuple. (EXPERIMENTAL).",
             expertMode=True)
 
     def instanceName (self) :
@@ -218,7 +252,7 @@ class PileupReweightingBlock (ConfigBlock):
                 config.addOutputVar ('EventInfo', var, var, noSys=True)
 
             if config.dataType() is not DataType.Data:
-                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup')
+                config.addOutputVar ('EventInfo', 'PileupWeight_%SYS%', 'weight_pileup', auxType='float')
                 if config.geometry() is LHCPeriod.Run2:
                     config.addOutputVar ('EventInfo', 'beamSpotWeight', 'weight_beamspot', noSys=True)
             return
@@ -352,31 +386,35 @@ class GeneratorAnalysisBlock (ConfigBlock):
         super (GeneratorAnalysisBlock, self).__init__ ()
         self.addOption ('saveCutBookkeepers', True, type=bool,
             info="whether to save the cut bookkeepers information into the "
-            "output file. The default is True.")
+            "output file.")
         self.addOption ('runNumber', None, type=int,
-            info="the MC runNumber (int). The default is None (autoconfigure "
-            "from metadata).")
+            info="the MC `runNumber`. If left empty, autoconfigure from the sample metadata.")
         self.addOption ('cutBookkeepersSystematics', None, type=bool,
             info="whether to also save the cut bookkeepers systematics. The "
-            "default is None (follows the global systematics flag). Set to "
-            "False or True to override.")
+            "default is `None` (follows the global systematics flag). Set to "
+            "`False` or `True` to override.")
         self.addOption ('histPattern', None, type=str,
-            info="the histogram name pattern for the cut-bookkeeper histogram names")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
-            info="name of the output stream to save the cut bookkeeper in. "
-            "The default is ANALYSIS.")
+            info="the histogram name pattern for the cut-bookkeeper histogram names.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cut bookkeeper in.")
         self.addOption ('detailedPDFinfo', False, type=bool,
-            info="save the necessary information to run the LHAPDF tool offline. "
-                 "The default is False.")
+            info="save the necessary information to run the LHAPDF tool offline.")
+        self.addOption ('doPDFReweighting', False, type=bool,
+            info="perform the PDF reweighting to do the PDF sensitivity studies with the existing sample, intrinsic charm PDFs as the default here. WARNING: the reweighting closure should be validated within analysis (it has been proved to be good for Madgraph, aMC@NLO, Pythia8, Herwig, and Alpgen, but not good for Sherpa and Powheg).")
+        self.addOption ('outPDFName', [
+            "CT14nnloIC/0", "CT14nnloIC/1", "CT14nnloIC/2", 
+            "CT18FC/0", "CT18FC/3", "CT18FC/6", "CT18FC/9", 
+            "CT18NNLO/0", "CT18XNNLO/0", 
+            "NNPDF40_nnlo_pch_as_01180/0", "NNPDF40_nnlo_as_01180/0"
+        ], type=list, info="list of PDF sets to use for PDF reweighting.")
         self.addOption ('doHFProdFracReweighting', False, type=bool,
-            info="whether to apply HF production fraction reweighting. "
-                 "The default is False.")
+            info="whether to apply HF production fraction reweighting.")
         self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
-            info="the name of the truth particle container to use for HF production fraction reweighting. "
-                 "The default is 'TruthParticles'. ")
+            info="the name of the truth particle container to use for HF production fraction reweighting.")       
+
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.streamName
+        return self.streamName or "DEFAULT"
 
     def makeAlgs (self, config) :
 
@@ -384,6 +422,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             # there are no generator weights in data!
             return
         log = logging.getLogger('makeGeneratorAnalysisSequence')
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -394,7 +435,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
-            alg.RootStreamName = self.streamName
+            alg.RootStreamName = streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
@@ -414,13 +455,21 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
                 config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
+
+        if self.doPDFReweighting:
+            alg = config.createAlgorithm( 'CP::PDFReweightAlg', 'PDFReweightAlg', reentrant=True )
+        
+            for pdf_set in self.outPDFName:
+                config.addOutputVar('EventInfo', f'PDFReweightSF_{pdf_set.replace("/", "_")}', 
+                                    f'PDFReweightSF_{pdf_set.replace("/", "_")}', noSys=True) 
+
         
         if self.doHFProdFracReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
             log.info(f"Loaded generator info: {generatorInfo}")
 
             DSID = "000000"
-            
+
             if not generatorInfo:
                 log.warning("No generator info found.")
                 DSID = "000000"
@@ -462,7 +511,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             if DSID == "000000":
                 log.warning("HF production fraction reweighting will return dummy weights of 1.0")
 
-            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
             alg.decoration = 'prodFracWeight_%SYS%'
             alg.TruthParticleContainer = self.truthParticleContainer
@@ -479,33 +528,33 @@ class PtEtaSelectionBlock (ConfigBlock):
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the selection to append this to. The default is "
-            "'' (empty string), meaning that the cuts are applied to every "
-            "object within the container. Specifying a name (e.g. loose) "
+            info="the name of the selection to append this to. If left empty, "
+            "the cuts are applied to every "
+            "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('minPt', None, type=float,
-            info="minimum pT value to cut on, in MeV. No default value.")
+            info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
-            info="maximum pT value to cut on, in MeV. No default value.")
+            info=r"maximum  $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('minEta', None, type=float,
-            info="minimum |eta| value to cut on. No default value.")
+            info=r"minimum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxEta', None, type=float,
-            info="maximum |eta| value to cut on. No default value.")
+            info=r"maximum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxRapidity', None, type=float,
-            info="maximum rapidity value to cut on. No default value.")
+            info="maximum rapidity value to cut on.")
         self.addOption ('etaGapLow', None, type=float,
-            info="low end of the |eta| gap. No default value.")
+            info=r"low end of the $\vert\eta\vert$ gap.")
         self.addOption ('etaGapHigh', None, type=float,
-            info="high end of the |eta| gap. No default value.")
+            info=r"high end of the $\vert\eta\vert$ gap.")
         self.addOption ('selectionDecoration', None, type=str,
-            info="the name of the decoration to set. If 'None', will be set "
-            "to 'selectPtEta' followed by the selection name.")
+            info="the name of the decoration to set. If `None`, will be set "
+            "to `selectPtEta` followed by the selection name.")
         self.addOption ('useClusterEta', False, type=bool,
-            info="whether to use the cluster eta (etaBE(2)) instead of the object "
-            "eta (for electrons and photons). The default is False.")
+            info=r"whether to use the cluster $\eta$ (`etaBE(2)`) instead of the object "
+            r"$\eta$ (for electrons and photons).")
         self.addOption ('useDressedProperties', False, type=bool,
             info="whether to use the dressed kinematic properties "
-            "(for truth particles only). The default is False.")
+            "(for truth particles only).")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -550,22 +599,26 @@ class ObjectCutFlowBlock (ConfigBlock):
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
-            info="the name of the selection to perform the cutflow for. The "
-            "default is '' (empty string), meaning that the cutflow is "
+            info="the name of the selection to perform the cutflow for. If left empty, "
+            "the cutflow is "
             "performed for every object within the container. Specifying a "
-            "name (e.g. loose) generates the cutflow only for those object "
+            "name (e.g. `loose`) generates the cutflow only for those objects "
             "that also pass that selection.")
         self.addOption ('forceCutSequence', False, type=bool,
             info="whether to force the cut sequence and not accept objects "
-            "if previous cuts failed. The default is False.")
+            "if previous cuts failed.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cutflow histogram in.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
+        streamName = self.streamName or config.defaultHistogramStream()
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
@@ -580,7 +633,7 @@ class EventCutFlowBlock (ConfigBlock):
         super (EventCutFlowBlock, self).__init__ ()
         self.addOption ('containerName', '', type=str,
             noneAction='error',
-            info="the name of the input container, typically EventInfo.")
+            info="the name of the input container, typically `EventInfo`.")
         self.addOption ('selectionName', '', type=str,
             noneAction='error',
             info="the name of an optional selection decoration to use.")
@@ -628,6 +681,7 @@ class OutputThinningBlock (ConfigBlock):
 
     def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
+        self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -637,20 +691,18 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('selection', '', type=str,
             info="the name of an optional selection decoration to use.")
         self.addOption ('selectionName', '', type=str,
-            info="the name of the selection to append this to. The default is "
-            "'' (empty string), meaning that the cuts are applied to every "
-            "object within the container. Specifying a name (e.g. loose) "
+            info="the name of the selection to append this to. If left empty, "
+            "the cuts are applied to every "
+            "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('outputName', None, type=str,
             info="an optional name for the output container.")
-        # TODO: add info string
         self.addOption ('deepCopy', False, type=bool,
-            info="")
+            info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
-            info="whether to sort objects in pt")
-        # TODO: add info string
+            info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
-            info="")
+            info="do not run the union over all selections.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -702,11 +754,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
             noneAction='error',
             info="the name of the input electron or muon container.")
         self.addOption ('separateChargeFlipElectrons', True, type=bool,
-            info="whether to consider charged-flip electrons as a separate class. "
-            "The default is True (recommended).")
+            info="whether to consider charged-flip electrons as a separate class.")
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
-            info="the name (str) of the decoration set by the IFF "
-            "TruthClassificationTool. The default is 'IFFClass_%SYS%'.")
+            info="the name of the decoration set by the IFF "
+            "`TruthClassificationTool`.")
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
@@ -737,10 +788,10 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
         self.addOption ("containerName", '', type=str,
                         noneAction='error',
                         info="the input lepton container, with a possible selection, "
-                        "in the format container or container.selection.")
+                        "in the format `container` or `container.selection`.")
         self.addOption ("prefix", 'MCTC_', type=str,
-                        info="the prefix (str) of the decorations based on the MCTC "
-                        "classification. The default is 'MCTC_'.")
+                        info="the prefix of the decorations based on the MCTC "
+                        "classification.")
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
@@ -768,10 +819,10 @@ class PerEventSFBlock (ConfigBlock):
         super(PerEventSFBlock, self).__init__()
         self.addOption('algoName', None, type=str,
             info="unique name given to the underlying algorithm computing the "
-            "per-event scale factors")
+            "per-event scale factors.")
         self.addOption('particles', '', type=str,
             info="the input object container, with a possible selection, in the "
-            "format container or container.selection.")
+            "format `container` or `container.selection`.")
         self.addOption('objectSF', '', type=str,
             info="the name of the per-object SF decoration to be used.")
         self.addOption('eventSF', '', type=str,

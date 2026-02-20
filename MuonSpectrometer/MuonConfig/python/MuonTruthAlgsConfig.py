@@ -5,6 +5,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def MuonDetailedTrackTruthMakerCfg(flags, name="MuonDetailedTrackTruthMaker", **kwargs):
     result = ComponentAccumulator()
+    if flags.Muon.usePhaseIIGeoSetup:
+        return result
     
     PRD_TruthNames = []
     if flags.Detector.EnableRPC:
@@ -94,4 +96,20 @@ def MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlg", **kwargs):
 def MuonSegmentTruthAssociationAlgCfg(flags, name="MuonSegmentTruthAssociationAlg", **kwargs):
     result = ComponentAccumulator()
     result.addEventAlgo(CompFactory.Muon.MuonSegmentTruthAssociationAlg(name, **kwargs))
+    return result
+
+def MuonTruthAlgsCfg(flags):
+    result = ComponentAccumulator()
+    if not(flags.Input.isMC or flags.Overlay.DataOverlay) or flags.Muon.usePhaseIIGeoSetup:
+        return result
+    from MuonConfig.MuonRdoDecodeConfig import MuonPRD_MultiTruthMakerCfg
+    result.merge(MuonPRD_MultiTruthMakerCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import TruthMuonMakerAlgCfg
+    result.merge(TruthMuonMakerAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
+    result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthHitCountsAlgCfg
+    result.merge(MuonTruthHitCountsAlgCfg(flags))
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthSegmentCreationAlgCfg
+    result.merge(MuonTruthSegmentCreationAlgCfg(flags))
     return result

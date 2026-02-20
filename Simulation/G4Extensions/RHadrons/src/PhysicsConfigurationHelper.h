@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHADRONS_PHYSICSCONFIGURATIONHELPER_H
 #define RHADRONS_PHYSICSCONFIGURATIONHELPER_H 1
 
 #include "CxxUtils/checker_macros.h"
-#include"globals.hh"
+#include "G4String.hh"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include <vector>
+#include <map>
 
 class PhysicsConfigurationHelper {
 

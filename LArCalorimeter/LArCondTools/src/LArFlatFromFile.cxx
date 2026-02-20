@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArFlatFromFile.h"
@@ -46,7 +46,7 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
   std::string line;
   std::vector< std::vector<float> >  values(nGain, std::vector<float>(m_hashMax,1.0f));
   unsigned id;
-  unsigned hash;
+  int hash;
   float value;
   while (std::getline(myfile, line)) {
       std::stringstream st(line);
@@ -62,7 +62,11 @@ void LArFlatFromFile::singleFloatFlat(const char* blobName, const std::string& i
         value=1.0; //Default vaue is 1.0, since these are multiplicative constants
         ++nDefault;
       } 
-      if (hash >= nGain) {
+      if (hash < 0) {
+        errIfConnected(chid,hash,blobName," Wrong hash !!!");
+        hash=0;
+      }
+      else if (hash >= static_cast<int>(nGain)) {
         errIfConnected(chid,hash,blobName," Wrong Gain !!!");
         hash=0; 
       }

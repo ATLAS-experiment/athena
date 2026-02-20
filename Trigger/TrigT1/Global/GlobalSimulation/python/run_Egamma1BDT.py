@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 if __name__ == '__main__':
     
@@ -75,24 +75,29 @@ if __name__ == '__main__':
         from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg
         acc.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))
 
+    # Add TopoClusterConfig to build calo conditions correctly
+    from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
+    caloconditions = CaloTopoClusterCfg(flags)
+    acc.merge(caloconditions)
+        
     # add in the Algortihm to build a  LArStrip Neighborhood container
-    from  GlobalSimulation.Egamma1_LArStrip_FexCfg import (
-        Egamma1_LArStrip_FexCfg,
+    from  GlobalSimulation.Egamma1_LArStrip_Fex_RowAwareCfg import (
+        Egamma1_LArStrip_Fex_RowAwareCfg,
         )
-    acc.merge(Egamma1_LArStrip_FexCfg(flags,
-                                      OutputLevel=DEBUG,
-                                      makeCaloCellContainerChecks=False,
-                                      dump=True,
-                                      dumpTerse=True))
+    acc.merge(Egamma1_LArStrip_Fex_RowAwareCfg(flags,
+                                               OutputLevel=DEBUG,
+                                               makeCaloCellContainerChecks=False,
+                                               dump=False,
+                                               dumpTerse=False))
 
     # add in the EgammaBDT Algorithm to be run
     from GlobalSimulation.GlobalSimAlgCfg_Egamma1BDT  import GlobalSimulationAlgCfg
     acc.merge(GlobalSimulationAlgCfg(flags,
                                      OutputLevel=DEBUG,
-                                     dump=True))
+                                     dump=False))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    acc.merge(OutputStreamCfg(flags, 'AOD', ["IOBitwise::IeEmEg1BDTTOBContainer#BDTResult"]))
+    acc.merge(OutputStreamCfg(flags, 'AOD', ["std::vector<float>#eGamma1BDT"]))
     
     if acc.run().isFailure():
         import sys

@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,9 +74,9 @@ protected:  // member functions
   		    std::vector<double>& phi, std::vector<double>& rho, std::vector<double>& zed, 
   		    std::vector<long>&   lyr, std::vector<long>&   filledLayers);
   
-  const std::string& getType() const { return m_Type; }
-  const std::string& getName() const { return m_Name; }
-  const std::string& getVersion() const { return mZFIVER; }
+  const std::string & getType() const { return m_Type; }
+  const std::string & getName() const { return m_Name; }
+  const std::string & getVersion() const { return mZFIVER; }
   
   int GetInternalStatus() const { return m_Status; }
   int SetInternalStatus(int s)  { m_Status = s; return m_Status; }

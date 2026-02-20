@@ -1,15 +1,15 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef FLOW_SELECTOR_ALG_HH
 #define FLOW_SELECTOR_ALG_HH
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "GaudiKernel/ToolHandle.h"
-#include "AthContainers/AuxElement.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODBase/IParticleContainer.h"
-#include "AthLinks/ElementLink.h"
 
 namespace ftag {
 

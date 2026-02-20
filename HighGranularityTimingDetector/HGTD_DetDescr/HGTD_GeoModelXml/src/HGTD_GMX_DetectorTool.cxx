@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_GMX_DetectorTool.h"
@@ -7,7 +7,6 @@
 
 #include <HGTD_ReadoutGeometry/HGTD_DetectorManager.h>
 
-#include <DetDescrConditions/AlignableTransformContainer.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelUtilities/GeoModelExperiment.h>
 #include <SGTools/DataProxy.h>
@@ -101,45 +100,6 @@ StatusCode HGTD_GMX_DetectorTool::clear()
         proxy->reset();
         m_detManager = nullptr;
     }
-
-    return StatusCode::SUCCESS;
-}
-
-
-StatusCode HGTD_GMX_DetectorTool::registerCallback ATLAS_NOT_THREAD_SAFE () // Thread unsafe detStore()->regFcn (callback) is used.
-{
-    // Register call-back for software alignment
-    if (m_alignable) {
-        if (detStore()->contains<AlignableTransformContainer>(m_alignmentFolderName)) {
-            ATH_MSG_DEBUG("Registering callback on AlignableTransformContainer with folder " << m_alignmentFolderName);
-            const DataHandle<AlignableTransformContainer> atc;
-            StatusCode sc = detStore()->regFcn(&IGeoModelTool::align, dynamic_cast<IGeoModelTool *>(this), atc, m_alignmentFolderName);
-            if (sc.isFailure()) {
-                ATH_MSG_ERROR("Could not register callback on AlignableTransformContainer with folder "
-                              << m_alignmentFolderName);
-                return StatusCode::FAILURE;
-            }
-        } else {
-            ATH_MSG_WARNING("Unable to register callback on AlignableTransformContainer with folder "
-                            << m_alignmentFolderName << ", Alignment disabled!");
-        }
-    } else {
-        ATH_MSG_INFO("Alignment disabled. No callback registered");
-        // We return failure otherwise it will try and register a GeoModelSvc callback associated with this callback.
-    }
-    return StatusCode::SUCCESS;
-}
-
-
-StatusCode HGTD_GMX_DetectorTool::align(IOVSVC_CALLBACK_ARGS_P( I, keys ))
-{
-    // The call-back routine, which just calls the real call-back routine from the manager.
-    if (!m_detManager) {
-        ATH_MSG_WARNING( "Manager does not exist for " << I <<" "<< keys );
-        return StatusCode::FAILURE;
-    }
-
-    ATH_MSG_INFO( "No align method yet implemented for HGTD_DetectorManager. Nothing to do." );
 
     return StatusCode::SUCCESS;
 }

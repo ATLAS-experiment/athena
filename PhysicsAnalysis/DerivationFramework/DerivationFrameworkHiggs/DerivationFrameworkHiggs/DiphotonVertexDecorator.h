@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
-// DiphotonVertexDecorator.h, (c) ATLAS Detector software
+// DiphotonVertexDecorator.h
 ///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_DiphotonVertexDecorator_H
 #define DERIVATIONFRAMEWORK_DiphotonVertexDecorator_H
- 
+
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -16,6 +16,7 @@
 // Gaudi & Athena basics
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 // DerivationFramework includes
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
@@ -33,52 +34,47 @@ namespace DerivationFramework {
       @author Bruno Lenzi
       @author Leo Cerda
       @author magdac@cern.ch
-     */
+  */
   class DiphotonVertexDecorator : public extends<AthAlgTool, IAugmentationTool> {
 
-    public: 
-      /** Constructor with parameters */
-      DiphotonVertexDecorator( const std::string& t, const std::string& n, const IInterface* p );
+  public:
 
-      /** Destructor */
-      ~DiphotonVertexDecorator();
+    using base_class::base_class;
 
-      // Athena algtool's Hooks
-      StatusCode  initialize();
-      StatusCode  finalize();
+    // Athena algtool's Hooks
+    virtual StatusCode  initialize() override final;
 
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
-    private:
+  private:
 
-      ///////////////
-      ///// TOOLS 
-      ToolHandle<CP::IPhotonVertexSelectionTool> m_photonVertexSelectionTool{this,  "PhotonVertexSelectionTool", "", ""};
-      
-      SG::ReadHandleKey<xAOD::VertexContainer> m_primaryVertexKey{this, "PrimaryVertexName", "PrimaryVertices", "" };
-      SG::ReadHandleKey<xAOD::PhotonContainer> m_photonKey { this, "PhotonKey", "Photons", "" };
-      SG::WriteHandleKey<xAOD::VertexContainer> m_diphotonVertexKey{this, "DiphotonVertexName", "HggPrimaryVertices", "" };
-      SG::ReadHandleKey<xAOD::FlowElementContainer> m_FEContainerHandleKey{this,"PFOContainerName","JetETMissChargedParticleFlowObjects","ReadHandleKey for the PFO container"};
-      ///////////////
-      ///// SETTINGS
+    ///////////////
+    ///// TOOLS
+    ToolHandle<CP::IPhotonVertexSelectionTool> m_photonVertexSelectionTool{this,  "PhotonVertexSelectionTool", "", ""};
 
-      double m_minPhotonPt;
-      bool   m_removeCrack;
-      double m_maxEta;
-      bool   m_ignoreConv;
-      std::string m_pfoToolName;
-      double m_tcMatch_dR;
-      double m_tcMatch_maxRat;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_primaryVertexKey{this, "PrimaryVertexName", "PrimaryVertices", "" };
+    SG::ReadHandleKey<xAOD::PhotonContainer> m_photonKey{this, "PhotonKey", "Photons", "" };
+    SG::WriteHandleKey<xAOD::VertexContainer> m_diphotonVertexKey{this, "DiphotonVertexName", "HggPrimaryVertices", "" };
+    SG::ReadHandleKey<xAOD::FlowElementContainer> m_FEContainerHandleKey{this,"PFOContainerName","JetETMissChargedParticleFlowObjects","ReadHandleKey for the PFO container"};
+    ///////////////
+    ///// SETTINGS
 
-      bool  PhotonPreselect(const xAOD::Photon *ph) const;
-      StatusCode matchFlowElement(const xAOD::Photon* eg,const xAOD::FlowElementContainer *pfoCont) const;
-      static inline bool greaterPtFlowElement(const xAOD::FlowElement* part1, const xAOD::FlowElement* part2) {
-        if (part1->charge()==0 && part2->charge()!=0) return false;
-        if (part1->charge()!=0 && part2->charge()==0) return true;
-        return part1->pt()>part2->pt();
+    Gaudi::Property<double> m_minPhotonPt{this, "MinimumPhotonPt",  20.*Gaudi::Units::GeV};
+    Gaudi::Property<bool> m_removeCrack{this, "RemoveCrack", true};
+    Gaudi::Property<double> m_maxEta{this, "MaxEta", 2.37};
+    Gaudi::Property<bool> m_ignoreConv{this, "IgnoreConvPointing", false};
+    Gaudi::Property<double> m_tcMatch_dR{this, "TCMatchDeltaR", 0.1};
+    Gaudi::Property<double> m_tcMatch_maxRat{this, "TCMatchMaxRat", 1.5};
+
+    bool  PhotonPreselect(const xAOD::Photon *ph) const;
+    StatusCode matchFlowElement(const xAOD::Photon* eg,const xAOD::FlowElementContainer *pfoCont) const;
+    static inline bool greaterPtFlowElement(const xAOD::FlowElement* part1, const xAOD::FlowElement* part2) {
+      if (part1->charge()==0 && part2->charge()!=0) return false;
+      if (part1->charge()!=0 && part2->charge()==0) return true;
+      return part1->pt()>part2->pt();
     }
 
-  }; 
+  };
 
 }
 

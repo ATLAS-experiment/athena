@@ -37,6 +37,25 @@ namespace Muon {
         ATH_CHECK(decodeLegacyRdo(ctx, tempOut));
         ATH_CHECK(decodeNRpc(ctx, tempOut));
 
+        if (msgLvl(MSG::VERBOSE)) {
+            for (const std::unique_ptr<RpcDigitCollection>& digitCollPtr : tempOut) {
+                if (!digitCollPtr) {
+                    continue;
+                }
+                std::sort(digitCollPtr->begin(), digitCollPtr->end(), [](const RpcDigit* a,
+                                                  const RpcDigit* b) {
+                    return a->identify() < b->identify();
+                });
+
+                for (const RpcDigit* digitPtr : *digitCollPtr) {
+                    ATH_MSG_VERBOSE(" Digit id: " << m_idHelperSvc->toString(digitPtr->identify())
+                                    << " time: " << digitPtr->time()
+                                    << " ToT: " << digitPtr->ToT()
+                                    << " stripSide: " << digitPtr->stripSide());
+                }
+            }
+        }
+
         SG::WriteHandle writeHandle{m_rpcDigitKey, ctx};
         ATH_CHECK(writeHandle.record(std::make_unique<RpcDigitContainer>(modHashMax)));
 
@@ -103,6 +122,7 @@ namespace Muon {
     
         SG::ReadHandle rdoContainer{m_nRpcRdoKey, ctx};
         ATH_CHECK(rdoContainer.isPresent());
+        ATH_MSG_DEBUG("Retrieved " << rdoContainer->size() << " NRPC RDOs.");
         SG::ReadCondHandle cabling{m_nRpcCablingKey, ctx};
         if (!cabling.isValid()) {
             ATH_MSG_FATAL("Failed to retrieve "<<m_nRpcCablingKey.fullKey());
@@ -145,10 +165,9 @@ namespace Muon {
             }
             /// We can fill the digit
             /// Need to add the correction
-            const float digit_time = rdo->time();
-            const float ToT = m_patch_for_rpc_time ? rdo->timeoverthr() 
-                            + inverseSpeedOfLight * (muonDetMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag() : rdo->timeoverthr() ;
-        
+            const double timeOfFlight = inverseSpeedOfLight * (muonDetMgr->getRpcReadoutElement(chanId)->stripPos(chanId)).mag();
+            const float digit_time = rdo->time() - timeOfFlight;
+            const float ToT = m_patch_for_rpc_time ? rdo->timeoverthr() + timeOfFlight : rdo->timeoverthr() ;
             std::unique_ptr<RpcDigit> digit = std::make_unique<RpcDigit>(chanId, digit_time, ToT, convObj.stripSide());
             coll->push_back(std::move(digit));
         }

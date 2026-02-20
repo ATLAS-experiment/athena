@@ -1290,7 +1290,7 @@ namespace Muon {
                 } else if (!accept) return std::nullopt;
             }
             if (!accept) return std::nullopt;
-            return std::make_optional<std::array<double,2>>({lengths[0], lengths[1]});
+            return std::optional<std::array<double,2>>({lengths[0], lengths[1]});
         };
 
         /// Reserve space for 200 seeds

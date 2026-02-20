@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetClusterSubtractorTool.h"
@@ -85,7 +85,7 @@ void HIJetClusterSubtractorTool::subtract(xAOD::IParticle::FourMom_t& subtr_mom,
       eta=eta_unsubtr+(eta_unsubtr*E_subtr-E_eta_subtr)/energy;
       phi=phi_unsubtr+(phi_unsubtr*E_subtr-E_phi_subtr)/energy;
     }
-    setSubtractedEtaPhi(energy,eta,phi,eta0,phi0,energy/E_subtr);
+    setSubtractedEtaPhi(energy,eta,phi,eta0,phi0,E_subtr==0 ? energy : energy/E_subtr);
   }
   else
   {

@@ -58,8 +58,20 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  ReadDecorHandleKey (const std::string& key = "");
+  explicit ReadDecorHandleKey (const std::string& key = "");
                       // const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
+
+
+  /**
+   * @brief Constructor with associated container.
+   * @param contKey VarHandleKey of the associated container
+   * @param decorKey The decoration name.
+   *
+   * The decoration @decorKey will be read from the container referenced
+   * by @contKey.
+   */
+  ReadDecorHandleKey (const VarHandleKey& contKey,
+                      const std::string& decorKey = "");
 
 
   /**
@@ -69,16 +81,34 @@ public:
    * @param key  default StoreGate key for the object.
    * @param doc Documentation string.
    *
-   * will associate the named Property with this RHK via declareProperty
+   * will associate the named Property with this RDHK via declareProperty
    *
    * The provided key may actually start with the name of the store,
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER, class K>
+  template <class OWNER>
   ReadDecorHandleKey( OWNER* owner,
                       const std::string& name,
-                      const K& key = {},
+                      const std::string& key = {},
+                      const std::string& doc = "");
+
+
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param contKey VarHandleKey of the associated container
+   * @param decorKey name The decoration name.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this RDHK via declareProperty
+   */
+  template <class OWNER>
+  ReadDecorHandleKey( OWNER* owner,
+                      const std::string& name,
+                      const VarHandleKey& contKey,
+                      const std::string& decorKey = {},
                       const std::string& doc = "");
 
 
@@ -125,6 +155,18 @@ public:
   StatusCode initialize (bool used = true);
 
 
+/**
+   * @brief If this object is used as a property, then this should be called
+   *        during the initialize phase.  This variant will allow the key
+   *        to be blank.
+   * @param Flag to select this variant.  Call like
+   *@code
+   *  ATH_CHECK( key.initialize (SG::AllowEmpty) );
+   @endcode
+   */
+  StatusCode initialize (AllowEmptyEnum);
+
+
   /**
    * @brief Return the handle key for the container.
    */
@@ -134,6 +176,15 @@ public:
 private:
   /// The container handle.
   ReadHandleKey<T> m_contHandleKey;
+
+  /**
+   * @brief Optional container from which decorations are read.
+   *
+   * If used, this is really the same as our own m_contHandleKey. So we
+   * could just keep it in a (non-)owning pointer depending on the use-case.
+   * But that would require a dedicated copy constructor for this class, etc.
+   */
+  const VarHandleKey* m_contBaseKey{nullptr};
 };
 
 

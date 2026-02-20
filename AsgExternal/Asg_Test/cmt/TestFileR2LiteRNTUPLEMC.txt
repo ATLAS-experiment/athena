@@ -1,0 +1,1 @@
+/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ASG/DAOD_PHYSLITE/p6898/mc20_13TeV.OpenDataRNTuples.DAOD_PHYSLITE.p6026_p6898/DAOD_PHYSLITE.45469905._000004.pool.root.1

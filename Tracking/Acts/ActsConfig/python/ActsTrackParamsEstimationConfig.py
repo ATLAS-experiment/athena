@@ -13,5 +13,7 @@ def ActsTrackParamsEstimationToolCfg(ConfigFlags,
     # eBoundLoc0, eBoundLoc1, eBoundPhi, eBoundTheta, eBoundQOverP, eBoundTime
     kwargs.setdefault('initialVarInflation', [1., 1., 1., 1., 1., 1.])
 
+    kwargs.setdefault('allowPropagatorFailure', False)
+
     acc.setPrivateTools(CompFactory.ActsTrk.TrackParamsEstimationTool(name=name, **kwargs))
     return acc

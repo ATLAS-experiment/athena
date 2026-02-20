@@ -1,3 +1,5 @@
 #include "../TrigT1Run3ZDC.h"
+#include "../TrigT1Run2ZDC.h"
 
 DECLARE_COMPONENT( LVL1::TrigT1Run3ZDC )
+DECLARE_COMPONENT( LVL1::TrigT1Run2ZDC )

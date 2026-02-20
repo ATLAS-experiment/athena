@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/Track.h"
@@ -317,19 +317,15 @@ namespace Trk {
   {
     msg<<"dumping AlignTrack"<<endmsg;
     double chi2=0.;
-    int imeas(1);
     if (m_alignTSOSCollection) {
       int natsos = m_alignTSOSCollection->size();
       for (int iatsos=0;iatsos<natsos;iatsos++) {
         const AlignTSOS* atsos=(*m_alignTSOSCollection)[iatsos];
         std::vector<Residual>::const_iterator itRes     = atsos->firstResidual();
         std::vector<Residual>::const_iterator itRes_end = atsos->lastResidual();
-        for ( ; itRes != itRes_end; ++itRes,++imeas) {
+        for ( ; itRes != itRes_end; ++itRes) {
           double resNorm = itRes->residualNorm();
           chi2 += resNorm*resNorm;
-          //msg<<"resNorm="<<resNorm
-          //   <<", errorMat("<<imeas<<")="<<(*m_localErrorMat)(imeas,imeas)
-          //   <<endmsg;
         }
         msg<<"iatsos "<<iatsos<<", chi2="<<chi2<<*atsos<<endmsg;
       }

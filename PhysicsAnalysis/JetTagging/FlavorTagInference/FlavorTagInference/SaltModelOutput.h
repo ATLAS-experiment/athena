@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 This class is used to store the configuration for a ONNX output node.
 */
@@ -34,7 +34,7 @@ class SaltModelOutput {
 
   private:
     OutputType getOutputType(ONNXTensorElementDataType type, int rank) const;
-    const std::string getName(const std::string& name, const std::string& model_name) const;
+    static const std::string getName(const std::string& name, const std::string& model_name);
 
 }; // class SaltModelOutput
 

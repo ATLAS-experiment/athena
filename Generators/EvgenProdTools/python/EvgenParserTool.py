@@ -26,6 +26,7 @@ class evgenParserTool:
                              'sumOfPosWeightsNoFilter':0.,'sumOfNegWeightsNoFilter':0.,'sumOfSqrWeightsNoFilter':0.,
                              'xsec_holder':0.,'xsec_weight':0.,'xsec_sum':0.}
         self.isMP = -1
+        self.isSherpa = False
 
     def processLine( self, line ):
         ''' Function to process a log line and keep what's needed for final reporting'''
@@ -101,6 +102,9 @@ class evgenParserTool:
             field = line.split('MetaData:')[1].split('=')[0].strip()
             if field in self.MetadataDict:
                 self.MetadataDict[field] += float( line.split('=')[1] )
+            # Check if we're dealing with Sherpa, in which case our cross section calculation has to change
+            if field == 'generatorName' and 'Sherpa' in line:
+                self.isSherpa = True
             # Cross section requires special attention
             # The cross section field itself comes first, so we have to just stash it
             if field == 'cross-section (nb)':
@@ -112,8 +116,15 @@ class evgenParserTool:
             # Sum of negative weights is last, and now we have all the info we need
             elif field == 'sumOfNegWeightsNoFilter':
                 my_negw = float( line.split('=')[1] )
-                self.MetadataDict['xsec_sum'] += self.MetadataDict['xsec_holder']*(self.MetadataDict['xsec_weight']-my_negw)
+                # Get the more complicated item for the cross-section calculation later
+                if self.isSherpa:
+                    if self.MetadataDict['xsec_holder'] != 0:
+                        # Use the cross section in pb in this calculation
+                        self.MetadataDict['xsec_sum'] += (self.MetadataDict['xsec_weight']-my_negw)/(self.MetadataDict['xsec_holder']*1000.)
+                else:
+                    self.MetadataDict['xsec_sum'] += self.MetadataDict['xsec_holder']*(self.MetadataDict['xsec_weight']-my_negw)
                 # We don't need to keep the sum of weights here, because we have it elsewhere
+
 
     def report(self):
         ''' Function to print final statistics grabbed from the logs'''
@@ -158,10 +169,17 @@ class evgenParserTool:
             return metadata
         # Print the updated metadata as we go, as well as updating the dictionary
         # First by convention is the cross-section, which we have to calculate
-        denom = self.MetadataDict['sumOfPosWeightsNoFilter']-self.MetadataDict['sumOfNegWeightsNoFilter']
         my_xsec = 0.
-        if denom > 0.:
-            my_xsec = self.MetadataDict['xsec_sum'] / denom
+        # Special calculation for Sherpa; see also AGENE-2385
+        if self.isSherpa:
+            numer = self.MetadataDict['sumOfPosWeightsNoFilter']-self.MetadataDict['sumOfNegWeightsNoFilter']
+            if self.MetadataDict['xsec_sum'] > 0:
+                # Convert back to nb
+                my_xsec = numer / self.MetadataDict['xsec_sum'] / 1000.
+        else:
+            denom = self.MetadataDict['sumOfPosWeightsNoFilter']-self.MetadataDict['sumOfNegWeightsNoFilter']
+            if denom > 0.:
+                my_xsec = self.MetadataDict['xsec_sum'] / denom
         self.msg.info(f'cross-section (nb)= {my_xsec:e}')
         metadata['cross-section (nb)'] = f'{my_xsec:e}'
         # Now come all the fields that we had saved
@@ -173,8 +191,8 @@ class evgenParserTool:
                 metadata[field] = f'{self.MetadataDict[field]:e}'
         # Generator filter efficiency needs some special handling
         geneff = 1.
-        if denom>0:
-            geneff = (self.MetadataDict['sumOfPosWeights']-self.MetadataDict['sumOfNegWeights'])/denom
+        if self.MetadataDict['sumOfPosWeightsNoFilter']-self.MetadataDict['sumOfNegWeightsNoFilter']>0:
+            geneff = (self.MetadataDict['sumOfPosWeights']-self.MetadataDict['sumOfNegWeights'])/(self.MetadataDict['sumOfPosWeightsNoFilter']-self.MetadataDict['sumOfNegWeightsNoFilter'])
         self.msg.info(f'GenFiltEff = {geneff:e}')
         if 'GenFiltEff' in metadata:
             metadata['GenFiltEff'] = f'{geneff:e}'

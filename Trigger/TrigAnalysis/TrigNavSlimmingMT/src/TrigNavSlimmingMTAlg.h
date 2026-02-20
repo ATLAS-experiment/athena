@@ -26,10 +26,10 @@
  *
  * Operations include:
  * - Keeping graph nodes which correspond to a particular set of chains. Good for small dAOD sizes.
- * - Keeping only the bottom of the graph, from the final "feature" onwards. Good for physics analysis / trigger matching.
+ * - Keeping only the bottom of the graph, from the final "feature" onward. Good for physics analysis / trigger matching.
  * - Keeping failed branches. Used for trigger performance studies / T0 monitoring.
  * - Removing named nodes from the graph, ("F"ilter nodes are only used online).
- * - Removing namded edges from the graph, ("view" edges are only used online).
+ * - Removing named edges from the graph, ("view" edges are only used online).
  **/
 class TrigNavSlimmingMTAlg : public AthReentrantAlgorithm {
 public:
@@ -80,6 +80,14 @@ private:
     this, "RemoveEmptySteps", false,
     "Slim away ComboHypo->InputMaker empty step pairs which come from parallel chain alignment (special case: keep if C.H. adds a feature, e.g. BLS). Fine for analysis-use."};
 
+  Gaudi::Property<bool> m_propagatePrescaledNode{
+    this, "PropagatePrescaledNode", false,
+    "Copies the 'HLTPrescaled' node (if it exists) from the input to output navigation collection. If it does not exist, it can be re-created from the xAOD::TriggerDecision"};
+
+  Gaudi::Property<bool> m_propagateL1Nodes{
+    this, "PropagateL1Nodes", false,
+    "Copies the 'L1TAP' and 'L1TAV' nodes (if they exists) from the input to output navigation collection. If they do not exist, they can be re-created from the xAOD::TriggerDecision"};
+
   Gaudi::Property<bool> m_repackROIs{
     this, "RepackROIs", false,
     "Re-pack the target of all 'roi' and 'initialRoI' edges into a single container (WriteHandle defined above)"};
@@ -109,6 +117,11 @@ private:
     this, "AllOutputContainers", {},
     "List of SG keys of all possible output containers at differing verbosity. Used to stop different instances of the alg interfering with each other."};
 
+  Gaudi::Property<bool> m_applyChainsFilterToSummaryNodes{
+    this, "ApplyChainsFilterToSummaryNodes", true,
+    "If the ChainsFilter (if supplied) should be applied to the terminus, express terminus and prescaled nodes. "
+    "If set to false, the trigger decision for any chain may be obtained from the navigation at the expense of additional file size."};
+
   Gaudi::Property<std::vector<std::string>> m_chainsFilter{
     this, "ChainsFilter", {},
     "Optional list of HLT chains. If provided, only navigation data corresponding to these chains will be kept. "
@@ -127,9 +140,27 @@ private:
   /**
    * @brief Convert the ChainsFilter into the set of chain-IDd and chain-leg-IDs which comprises 
    * all of the DecisionIDs used by the members of the ChainsFilter.
-   * @param[out] chainIDs The set to be populated from m_chainsFilter
+   * @param[out] chainIDs The set to be populated from m_chainsFilter and, optionally, the navigation terminus node
+   * @param[in] applyPassingChainsFilter Set to the terminus node to additionally filter on per-event passing chains. Or set to nullptr to skip this filter.
    **/
-  StatusCode fillChainIDs(TrigCompositeUtils::DecisionIDContainer& chainIDs) const;
+  StatusCode fillChainIDs(TrigCompositeUtils::DecisionIDContainer& chainIDs, const TrigCompositeUtils::Decision* applyPassingChainsFilter) const;
+
+  /**
+   * @brief Creates a new graph node from scratch, populates it with the Chain IDs of all HLT chains which
+   * were not run in this event due to application of HLT prescales. The data are read from the trigger bits using the TrigDecisionTool.
+   * This re-creates a node which is available at P1 in Run 3, but which was never persisted into the online slimmed navigation.
+   * @param[out] output Pointer to the Decision object ptr in the output collection.
+   * @param[in] chainIDs DecisionIDs are used to filter the output DecisionObjects.
+   **/
+  StatusCode createPresaledGraphNode(Outputs& outputContainers, const TrigCompositeUtils::DecisionIDContainer& chainIDs) const;
+
+  /**
+   * @brief Creates two new graph node from scratch, populates it using the TriggerDecisionTool with the hash of the item names L1 items which
+   * passed before prescale and after veto. This makes available L1 trigger is-passed data in the same format as used for HLT navigation.
+   * This creates two nodes which were never made at P1 during Run 3.
+   * @param[out] output Pointer to the Decision object ptr in the output collection.
+   **/
+  StatusCode createL1GraphNodes(Outputs& outputContainers) const;
 
   /**
    * @brief Map a const Decision object from an input collection to its equivalent in the output collection

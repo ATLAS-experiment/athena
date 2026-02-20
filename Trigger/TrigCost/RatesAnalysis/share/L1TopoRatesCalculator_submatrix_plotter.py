@@ -66,15 +66,16 @@ if __name__ == '__main__':
 
     file = ROOT.TFile.Open(args.file_name)
 
-    # Plot rates_matrix
-    rates, rates_err = load_selected_matrix(file, "rates_matrix", args.selected_vars, with_errors=True)
+    # Plot rates_matrix 
+    # Note: change the matrix name with the name of the matrix from the .root file, if ran on the grid your matrix might end with a "_combined"
+    rates, rates_err = load_selected_matrix(file, "rates_matrix_combined", args.selected_vars, with_errors=True)
     plot_matrix(rates, rates_err, args.selected_vars, "Rates Matrix", "rates_matrix_selected.png", "Hz")
 
     # Plot counts_matrix (no errors used)
-    counts, _ = load_selected_matrix(file, "counts_matrix", args.selected_vars, with_errors=False)
+    counts, _ = load_selected_matrix(file, "counts_matrix_combined", args.selected_vars, with_errors=False)
     plot_matrix(counts, None, args.selected_vars, "Counts Matrix", "counts_matrix_selected.png", "# Events")
 
     # Plot L1TopoScore_matrix
-    topo, topo_err = load_selected_matrix(file, "L1TopoScore_matrix", args.selected_vars, with_errors=True)
+    topo, topo_err = load_selected_matrix(file, "L1TopoScore_matrix_combined", args.selected_vars, with_errors=True)
     plot_matrix(topo, topo_err, args.selected_vars, "L1Topo Score Matrix", "toposcore_matrix_selected.png", "Topo Score")
 

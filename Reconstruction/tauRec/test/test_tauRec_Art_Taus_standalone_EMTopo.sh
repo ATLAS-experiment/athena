@@ -4,7 +4,6 @@
 # art-type: grid
 # art-athena-mt: 8
 # art-include: main/Athena
-# art-include: 23.0/Athena
 # art-output: *.log   
 
 python -m tauRec.runTauOnly_EMTopo | tee temp.log

@@ -9,7 +9,7 @@
 
 #include "ReadMeta.h"
 
-// the user data-class defintions
+// the user data-class definitions
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -20,13 +20,10 @@
 using namespace AthPoolEx;
 
 //___________________________________________________________________________
-ReadMeta::ReadMeta(const std::string& type, const std::string& name, const IInterface* parent) : 
+ReadMeta::ReadMeta(const std::string& type, const std::string& name, const IInterface* parent) :
    base_class(type, name, parent),
-   m_pMetaDataStore ("StoreGateSvc/MetaDataStore",      name), 
+   m_pMetaDataStore ("StoreGateSvc/MetaDataStore",      name),
    m_pInputStore    ("StoreGateSvc/InputMetaDataStore", name) {
-}
-//___________________________________________________________________________
-ReadMeta::~ReadMeta() {
 }
 //___________________________________________________________________________
 StatusCode ReadMeta::initialize() {
@@ -47,7 +44,7 @@ StatusCode ReadMeta::initialize() {
 void ReadMeta::handle(const Incident& inc) {
    ATH_MSG_DEBUG("handle() " << inc.type());
    const FileIncident* fileInc  = dynamic_cast<const FileIncident*>(&inc);
-   if (fileInc == 0) {
+   if (fileInc == nullptr) {
       ATH_MSG_ERROR(" Unable to get FileName from BeginInputFile/EndInputFile incident");
       return;
    }
@@ -59,32 +56,24 @@ StatusCode ReadMeta::beginInputFile(const SG::SourceID&)
    ATH_MSG_DEBUG("saw BeginInputFile incident.");
    if (m_pInputStore->contains<ExampleHitContainer>("PedestalWriteData")) {
       std::list<SG::ObjectWithVersion<ExampleHitContainer> > allVersions;
-      if (m_pInputStore->retrieveAllVersions(allVersions, "PedestalWriteData").isFailure()) {
-         ATH_MSG_ERROR("Could not retrieve all versions for PedestalWriteData");
-         return StatusCode::FAILURE;
-      }
+      ATH_CHECK( m_pInputStore->retrieveAllVersions(allVersions, "PedestalWriteData") );
       //const ExampleHitContainer* ep;
-      ExampleHitContainer* ep_out = 0;
+      ExampleHitContainer* ep_out = nullptr;
       for (SG::ObjectWithVersion<ExampleHitContainer>& obj : allVersions) {
          const ExampleHitContainer* ep = obj.dataObject.cptr();
          if (!m_pMetaDataStore->contains<ExampleHitContainer>("PedestalWriteData")) {
-            ep_out = new ExampleHitContainer();
+            auto ep_out_unique = std::make_unique<ExampleHitContainer>();
             const ExampleHit* entry = *ep->begin();
-            ExampleHit* entry_out = new ExampleHit();
+            auto entry_out = std::make_unique<ExampleHit>();
             entry_out->setX(entry->getX());
             entry_out->setY(entry->getY());
             entry_out->setZ(entry->getZ());
             entry_out->setDetector(entry->getDetector());
-            ep_out->push_back(entry_out);
-            if (m_pMetaDataStore->record(ep_out, "PedestalWriteData").isFailure()) {
-               ATH_MSG_ERROR("Could not record DataObject: PedestalWriteData");
-               return StatusCode::FAILURE;
-            }
+            ep_out_unique->push_back(std::move(entry_out));
+            ep_out = ep_out_unique.get();
+            ATH_CHECK( m_pMetaDataStore->record(std::move(ep_out_unique), "PedestalWriteData") );
          } else {
-            if (m_pMetaDataStore->retrieve(ep_out, "PedestalWriteData").isFailure()) {
-               ATH_MSG_ERROR("Could not find DataObject in output: PedestalWriteData");
-               return StatusCode::FAILURE;
-            }
+            ATH_CHECK( m_pMetaDataStore->retrieve(ep_out, "PedestalWriteData") );
             const ExampleHit* entry = *ep->begin();
             ExampleHit* entry_out = *ep_out->begin();
             int weight = entry->getDetector().size() - 2;
@@ -95,7 +84,7 @@ StatusCode ReadMeta::beginInputFile(const SG::SourceID&)
             entry_out->setDetector(entry->getDetector().substr(0, entry->getDetector().size() - 1) + entry_out->getDetector().substr(1));
          }
       }
-      if (ep_out != 0) {
+      if (ep_out != nullptr) {
          for (const ExampleHit* obj : *ep_out) {
             ATH_MSG_INFO("Pedestal x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
          }

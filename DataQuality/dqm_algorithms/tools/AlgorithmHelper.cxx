@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cxx does basic functions to get dqm_core::Results from algorithms 
@@ -1154,8 +1154,13 @@ dqm_algorithms::tools::buildCluster( binContainer& seed, const std::vector<std::
     //Perpare to check the cluster's new neighbors:
     binsToCheck = std::move(newNeighbors);
 
-    cluster.x = pvpX / cluster.value;
-    cluster.y = pvpY / cluster.value;
+    if (cluster.value != 0) {
+      cluster.x = pvpX / cluster.value;
+      cluster.y = pvpY / cluster.value;
+    }
+    else {
+      cluster.x = cluster.y = 0;
+    }
   }//Finished finding bins in cluster
 
   //Assume that the input errors are uncorrelated (or that the caller will deal with this)
@@ -1175,7 +1180,7 @@ dqm_algorithms::tools::buildCluster( binContainer& seed, const std::vector<std::
 
     dvpSum += (*bin)->value * sqrt( pow( xValues[(*bin)->ix] - cluster.x,2) + pow(yValues[(*bin)->iy] - cluster.y,2) );
   }
-  cluster.radius = dvpSum / cluster.value;
+  cluster.radius = cluster.value != 0 ? dvpSum / cluster.value : 0;
 
   //Check that positions are within the bounds of the histogram and correct
   while( cluster.ixmin < 1 ){

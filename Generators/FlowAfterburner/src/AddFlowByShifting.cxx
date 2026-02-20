@@ -326,7 +326,7 @@ StatusCode AddFlowByShifting::execute() {
 
         // Add flow to particles from main vertex
         double phishift = AddFlowToParent(parent, hijing_pars);
-        MoveDescendantsToParent(parent, phishift);// adjust descendants to parent position
+        MoveDescendantsToParent(std::move(parent), phishift);// adjust descendants to parent position
       }
 
     // correct for double counting

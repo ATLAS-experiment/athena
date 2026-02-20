@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2025, 2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Unit tests for SQLiteDBSvc
-#include "CxxUtils/FastReseededPRNG.h"
+#include "TestTools/random.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/SmartIF.h"
 #include "SQLiteDBSvc/ISQLiteDBSvc.h"
@@ -13,7 +13,6 @@
 // STL includes
 #include <cassert>
 #include <iostream>
-#include <random>
 
 int main() {
   std::cout << "Starting SQLiteDBSvc unit tests\n";
@@ -46,16 +45,14 @@ int main() {
       "INSERT INTO test (col1, col2, col3, timestamp) "
       "VALUES (?, ?, ?, datetime(\"now\"))");
 
-  FastReseededPRNG prng(12);
-  std::uniform_int_distribution<int> intDist(0, 1200);
-  std::uniform_real_distribution<float> floatDist(0, 1200);
+  uint32_t seed = 12;
 
   for (int i = 1; i <= 250; ++i) {
     // Precompute random numbers because order of function
     // argument evaluation is undefined, and gcc and clang
     // do it in opposite orders.
-    int randInt = intDist(prng);
-    float randFloat = floatDist(prng);
+    int randInt = Athena_test::randi_seed (seed, 1200);
+    float randFloat = Athena_test::randf_seed (seed, 1200);
     insertStatement.run(i, randFloat, randInt);
   }
 

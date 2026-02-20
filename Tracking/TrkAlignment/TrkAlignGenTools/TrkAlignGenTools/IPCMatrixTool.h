@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNGENTOOLS_IPCMATRIXTOOL_H
@@ -76,13 +76,15 @@ namespace Trk {
   private:
     
     /** Pointer to IPCMat, used for parallel processing */
-    IPCMat* m_ipcmat; 
+    IPCMat* m_ipcmat = nullptr;
     
-    std::string m_ipcmatMatName;      //!< IPC binary matrix filename
-    std::string m_ipcmatVecName;      //!< IPC binary vector filename
+    Gaudi::Property<std::string> m_ipcmatMatName
+      {this, "IPCMatrixName", "/tmp/ipcmat.dat", "IPC binary matrix filename"};
+    Gaudi::Property<std::string> m_ipcmatVecName
+      {this, "IPCVectorName", "/tmp/ipcvec.dat", "IPC binary vector filename"};
 
     /** remove spurious + align. pars from IPC matrix before writing */
-    bool m_IPCremoval;
+    Gaudi::Property<bool> m_IPCremoval{this, "IPCRemoval", false};
 
   }; // end of class
 

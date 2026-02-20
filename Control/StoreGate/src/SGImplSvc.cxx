@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef DEBUG_SGIMPL
@@ -334,7 +334,7 @@ StatusCode SGImplSvc::reinitialize()    {
 // add proxy (with IOpaqueAddress that will later be retrieved from P)
 //////////////////////////////////////////////////////////////////////
 StatusCode SGImplSvc::recordAddress(const std::string& skey,
-                                    IOpaqueAddress* pAddress, 
+                                    CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
                                     bool clearAddressFlag)
 {
   lock_t lock (m_mutex);
@@ -344,7 +344,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
   if (dataID == 0)
     {
       warning() << "recordAddress: Invalid Class ID found in IOpaqueAddress @" 
-                << pAddress << ". IOA will not be recorded"
+                << pAddress.get() << ". IOA will not be recorded"
                 << endmsg;
       return StatusCode::FAILURE;
     }
@@ -378,7 +378,8 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
     {
       // create the proxy object and register it
       dp = new DataProxy (TransientAddress (dataID, skey,
-                                            pAddress, clearAddressFlag),
+                                            std::move(pAddress),
+                                            clearAddressFlag),
                           m_pDataLoader.get(), true, true);
       m_pStore->addToStore(dataID, dp).ignore();
 
@@ -388,7 +389,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
     // Note: intentionally not checking dp->isValidAddress()
     {
       // Update proxy with IOpaqueAddress
-      dp->setAddress(pAddress);
+      dp->setAddress(std::move(pAddress));
     }
   else
     {
@@ -397,7 +398,7 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
       warning() << "recordAddress: preexisting proxy @" << dp
                 << " with non-NULL IOA found for key " 
                 << skey << " type " << errType << " (" << dataID << "). \n"
-                << "Cannot record IOpaqueAddress @" << pAddress
+                << "Cannot record IOpaqueAddress @" << pAddress.get()
                 << endmsg;
       return StatusCode::FAILURE;
     }
@@ -410,7 +411,8 @@ StatusCode SGImplSvc::recordAddress(const std::string& skey,
 //////////////////////////////////////////////////////////////////////
 // add proxy (with IOpaqueAddress that will later be retrieved from P)
 //////////////////////////////////////////////////////////////////////
-StatusCode SGImplSvc::recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag)
+StatusCode SGImplSvc::recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                                    bool clearAddressFlag)
 {
   lock_t lock (m_mutex);
   assert(0 != pAddress);
@@ -421,7 +423,7 @@ StatusCode SGImplSvc::recordAddress(IOpaqueAddress* pAddress, bool clearAddressF
   if (gK.empty()) gK = (pAddress->par())[0];   // FIXME backward compatibility
   if (gK.empty()) gK = createKey(dataID);
 
-  return this->recordAddress(gK, pAddress, clearAddressFlag);
+  return this->recordAddress(gK, std::move(pAddress), clearAddressFlag);
 }    
 
 DataProxy* SGImplSvc::setupProxy(const CLID& dataID, 
@@ -493,29 +495,6 @@ bool SGImplSvc::isSymLinked(const CLID& linkID, DataProxy* dp)
 {        
   return (0 != dp) ? dp->transientID(linkID) : false;        
 }
-
-
-StatusCode 
-SGImplSvc::regFcn( const CallBackID& c1,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(c1,c2,fcn,trigger) );
-}
-
-
-StatusCode 
-SGImplSvc::regFcn( const std::string& toolName,
-                   const CallBackID& c2,
-                   const IOVSvcCallBackFcn& fcn,
-                   bool trigger)
-{
-  lock_t lock (m_mutex);
-  return ( m_pIOVSvc->regFcn(toolName,c2,fcn,trigger) );
-}
-
 
 //////////////////////////////////////////////////////////////////
 // Dump Contents in store:
@@ -1400,16 +1379,14 @@ bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string&
 
 bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
                                               IResetable* ir, SG::DataProxy *&dp,
-                                              const CallBackID& c,
-                                              const IOVSvcCallBackFcn& fcn,
-                                              bool trigger)
+                                              const CallBackID& /*c*/,
+                                              const IOVSvcCallBackFcn& /*fcn*/,
+                                              bool /*trigger*/)
 {
   lock_t lock (m_mutex);
   bool ret = bindHandleToProxy (id, key, ir, dp);
   if (ret) {
     StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-    sc = m_pIOVSvc->regFcn(dp,c,fcn,trigger);
     if (sc.isFailure()) return false;
   }
   return true;

@@ -14,6 +14,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 topoLegIndices = "ABCDEF"
 anomdetWPIndices = "LMT"
+topo3VarLegIndices = "ABC"
 
 #the list of the variables reported below must match the one specified                                
 # here: Trigger/TrigHypothesis/TrigHypoCommonTools/src/TrigComboHypoTool.cxx::fillVarMap()
@@ -50,6 +51,16 @@ allowed_obs = {
         'hist_max'   : 1000.
     }
 }
+
+allowed_3var_obs = {
+    'masswiso' : {
+        'n_MET_legs' : [0],
+        'hist_nbins' : 100,
+        'hist_min'   : 0.,
+        'hist_max'   : 500.
+    }
+}
+
 
 from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import TrigAFPDijetComboHypoToolCfg
 from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
@@ -201,6 +212,131 @@ def TrigComboHypoToolFromDict(flags, chainDict):
 
     return tool
 
+def Trig3VarComboHypoToolFromDict(flags, chainDict):
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+
+    chainName = chainDict['chainName']
+    log.debug("[Trig3VarComboHypoToolFromDict] chain %s, combo hypos to be processed: %s, t", chainName, chainDict['extraComboHypos'])
+    #define the list for housing all the info needed to initialize the TrigComboHypoTool module in the form of a dict
+    topoDefs = []
+
+    # Define regex for parsing the topoInfo
+    # Pattern is: min cut, var, legA, legB, max cut
+    # Min and max are both optional, check afterwards that at least one is filled
+    # Only the allowed 3var vars and legs will be recognised, anything else fails to match
+    theregex = fr"(\d*)({'|'.join(allowed_3var_obs.keys())})([{topo3VarLegIndices}])([{topo3VarLegIndices}])([{topo3VarLegIndices}])(\d*)"
+    matcher = re.compile(theregex)
+
+    for iTopo, topoInfo in enumerate(chainDict['extraComboHypos']):
+        log.debug("[Trig3VarComboHypoToolFromDict] new combo hypo for chain: %s, topoInfo = %s", chainName, topoInfo)
+        # Attempt to regex-match the topo specification
+        result = matcher.match(topoInfo)
+        if not result:
+            log.error("[Trig3VarComboHypoToolFromDict] Topo expression %s does not conform to format (min?)(var)(legA)(legB)(legC)(max?).",topoInfo)
+            log.error("[Trig3VarComboHypoToolFromDict] Must use leg IDs in %s, vars in {allowed_3var_obs.keys()}",topo3VarLegIndices)
+            raise ValueError(f"[Trig3VarComboHypoToolFromDict] Invalid topo expression {topoInfo} received in 'extraComboHypos'!")
+
+        # Extract the matched info and validate
+        str_min, var, char_legA, char_legB, char_legC, str_max = result.groups()
+        # Manipulation of the cuts
+        # At least one must be filled
+        use_min = bool(str_min)
+        use_max = bool(str_max)
+        if not (use_min or use_max):
+            log.error("[Trig3VarComboHypoToolFromDict] Topo expression %s does not specify a min or max cut value.",topoInfo)
+            raise ValueError(f"[Trig3VarComboHypoToolFromDict] Invalid topo expression {topoInfo} received in 'extraComboHypos'!")
+        # Convert into float values
+        cut_min = float(str_min) if use_min else float('nan')
+        cut_max = float(str_max) if use_max else float('nan')
+
+        # Convert char leg representation to int
+        i_legA = topo3VarLegIndices.find(char_legA)
+        i_legB = topo3VarLegIndices.find(char_legB)
+        i_legC = topo3VarLegIndices.find(char_legC)
+
+        # Fill info for each leg, looking up in chainParts
+        # Convert leg name into HLT identifier for matching in the tool
+        legInfo = []
+        for ileg in [i_legA,i_legB,i_legC]:
+            cpart = chainDict['chainParts'][ileg]
+            legname = f"leg{ileg:03d}_{chainName}"
+            legInfo.append({
+                'index'       : ileg,
+                'legname'     : legname,
+                'HLTId'       : string2hash(legname),
+                'isMET'       : cpart['signature']=='MET',
+                'multiplicity': int(cpart['multiplicity'])
+            })
+
+        # Count how many input legs are MET, for consistency checks
+        n_MET_legs = legInfo[0]['isMET'] + legInfo[1]['isMET'] + legInfo[2]['isMET']
+
+        #now check that the variable we plan to use allows the use of the MET
+        if n_MET_legs not in allowed_3var_obs[var]['n_MET_legs']:
+            log.error("[Trig3VarComboHypoToolFromDict] Attempting var %s with %d MET legs, %s allowed", var, n_MET_legs, allowed_3var_obs[var]['n_MET_legs'])
+            raise Exception("[Trig3VarComboHypoToolFromDict] Attempting to use the MET leg in var")
+
+        if len(chainDict['extraComboHypos'])==1:#to avoid breaking changes in the ref files
+            monToolName = "MonTool_"+chainName
+        else:
+            monToolName = f"MonTool_{chainName}_{chainDict['extraComboHypos'][iTopo]}"
+        histNameTag = var
+        monTool = GenericMonitoringTool(flags, monToolName)
+        monTool.defineHistogram(histNameTag+'OfAccepted', type='TH1F', path='EXPERT',
+                                title=var+" in accepted combinations; {}".format(var),
+                                xbins=allowed_3var_obs[var]['hist_nbins'],
+                                xmin=allowed_3var_obs[var]['hist_min'],
+                                xmax=allowed_3var_obs[var]['hist_max'])
+        monTool.defineHistogram(histNameTag+'OfProcessed', type='TH1F', path='EXPERT',
+                                title=var+" in processed combinations; {}".format(var),
+                                xbins=allowed_3var_obs[var]['hist_nbins'],
+                                xmin=allowed_3var_obs[var]['hist_min'],
+                                xmax=allowed_3var_obs[var]['hist_max'])
+        log.debug("[Trig3VarComboHypoToolFromDict] tool configured for hypo name: %s, topoInfo = %s", chainName, topoInfo)
+        log.debug("[Trig3VarComboHypoToolFromDict] histName = %s", histNameTag)
+
+        if len(chainDict['extraComboHypos'])==1:#to avoid breaking changes in the ref files
+            monTool.HistPath = f'ComboHypo/{chainName}'
+        else:
+            subDirNameTag    = f"{var}leg{i_legA:03d}leg{i_legB:03d}leg{i_legC:03d}"
+            monTool.HistPath = f'ComboHypo/{chainName}/detail_{subDirNameTag}'
+
+        # Set keys of dict to match tool config properties
+        singleTopoDef = {
+            "Variables"    : var,
+            "UseMinVec"    : use_min,
+            "UseMaxVec"    : use_max,
+            "LowerCutVec"  : cut_min,
+            "UpperCutVec"  : cut_max,
+            "LegAVec"      : legInfo[0]["HLTId"],
+            "LegBVec"      : legInfo[1]["HLTId"],
+            "LegCVec"      : legInfo[2]["HLTId"],
+            "IsLegA_METVec": legInfo[0]["isMET"],
+            "IsLegB_METVec": legInfo[1]["isMET"],
+            "IsLegC_METVec": legInfo[2]["isMET"],
+            "MonTools"     : monTool,
+        }
+        topoDefs.append(singleTopoDef)
+
+        #some debug info
+        log.debug("[Trig3VarComboHypoToolFromDict] tool configured for hypo name: %s, topoInfo = %s", chainName, topoInfo)
+        log.debug("[Trig3VarComboHypoToolFromDict] var  = %s", singleTopoDef['Variables'])
+        log.debug("[Trig3VarComboHypoToolFromDict] legA = %s", singleTopoDef['LegAVec'])
+        log.debug("[Trig3VarComboHypoToolFromDict] legB = %s", singleTopoDef['LegBVec'])
+        log.debug("[Trig3VarComboHypoToolFromDict] legC = %s", singleTopoDef['LegCVec'])
+        if use_min:
+            log.debug("[Trig3VarComboHypoToolFromDict] min  = %10.3f", singleTopoDef['LowerCutVec'])
+        if use_max:
+            log.debug("[Trig3VarComboHypoToolFromDict] max  = %10.3f", singleTopoDef['UpperCutVec'])
+
+        #end of the loop over the hypos
+
+    # convert list of dicts into dict of lists
+    toolProps = {k:[thedef[k] for thedef in topoDefs] for k in topoDefs[0]}
+    tool = CompFactory.Trig3VarComboHypoTool(chainName, **toolProps)
+
+    return tool
+
 comboConfigurator = {
     'dR':TrigComboHypoToolFromDict,
     'dphi':TrigComboHypoToolFromDict,
@@ -209,6 +345,7 @@ comboConfigurator = {
     'mT':TrigComboHypoToolFromDict,
     'afpdijet':TrigAFPDijetComboHypoToolCfg,
     'anomdet':TrigADComboHypoToolCfg,
+    'masswiso':Trig3VarComboHypoToolFromDict,
     'idZmumu':TrigMuonEFIdtpInvMassHypoToolCfg,
     'idJpsimumu':TrigMuonEFIdtpInvMassHypoToolCfg,
 }

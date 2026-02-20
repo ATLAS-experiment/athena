@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigZVertexHypoAlg.h"
@@ -65,7 +65,7 @@ StatusCode TrigZVertexHypoAlg::execute(const EventContext& context) const
   TrigCompositeUtils::DecisionIDContainer prev;
   TrigCompositeUtils::decisionIDs(previousDecisionsHandle->at(0), prev);
 
-  TrigZVertexHypoTool::ZVertexInfo info{ d, zVertexHandle.cptr(), prev };
+  TrigZVertexHypoTool::ZVertexInfo info{ d, zVertexHandle.cptr(), std::move(prev) };
 
   for (const auto& tool : m_hypoTools) {
     ATH_CHECK(tool->decide(info));

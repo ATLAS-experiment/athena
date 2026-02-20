@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """Utilities to get and set the AMITag in the metadata
 
 The input AMITag is contained in the AMITag attribute of the /TagInfo in-file
@@ -42,7 +42,7 @@ def inputAMITags(flags, fixBroken=False, silent=False):
     metadta. If nothing can be retrieved from the in-file metadata return empty
     list, otherwise return value from metadata. Inform about differences.
     """
-    if flags.Input.SecondaryFiles and not flags.Overlay.ByteStream:
+    if flags.Input.SecondaryFiles:
         files = flags.Input.SecondaryFiles
     else:
         files = flags.Input.Files

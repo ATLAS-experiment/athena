@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONPERFORMANCEALG_H
@@ -65,9 +65,14 @@ private:
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfo", "EventInfo", "event info"};
     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthMuons{this, "TruthMuons", "MuonTruthParticles", "truth muons"};
+    /// FIXME ReadDecorHandle should not be used to access
+    /// dynamic variables applied by the algorithm which
+    /// created the container, instead a
+    /// SG::AuxElement::ConstAccessor should be used.
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonRecoMuonLinkKey {this,"truthMuonRecoMuonLinkKey",m_truthMuons, "recoMuonLink"};
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonTruthType {this,"truthMuonTruthType",m_truthMuons, "truthType"};
     SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonTruthOrigin {this,"truthMuonTruthOrigin",m_truthMuons, "truthOrigin"};
+    SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthMuonTruthClassification {this,"truthMuonTruthClassification",m_truthMuons, "truthClassification"};
 
     int m_runNumber;
     int m_eventNumber;

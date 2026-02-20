@@ -50,7 +50,7 @@ namespace ActsTrk {
     const InDetDD::SiDetectorElementCollection &detElements = *detEleHandle.cptr();
 
     for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed) {
-      const ActsTrk::Seed& seed = *seeds[iseed];
+      ActsTrk::Seed seed = seeds[iseed];
 
       const bool useTopSp = m_autoReverseSearch && shouldReverseSearch(seed);
 
@@ -84,7 +84,7 @@ namespace ActsTrk {
   }
 
   bool SeedsToTrackParamsAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const auto& bottom_sp = seed.sp().front();
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
 
     const double r = bottom_sp->radius();
     const double z = std::abs(bottom_sp->z());

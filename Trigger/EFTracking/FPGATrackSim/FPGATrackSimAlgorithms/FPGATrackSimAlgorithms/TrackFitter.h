@@ -29,7 +29,7 @@ class TrackFitter
         ///////////////////////////////////////////////////////////////////////
         // Main interface functions
 
-        int fitTracks(const std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads, std::vector<FPGATrackSimTrack>& tracks);
+        int fitTracks(const std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSimTrack>& tracks);
   
         const std::vector<FPGATrackSimTrack>& getMissingHitsCheckTracks() {return m_tracks_missinghits_track;}
 
@@ -152,7 +152,7 @@ class TrackFitter
         // Helper Functions
 
         void resetCounters();
-        int fitTracks(const std::shared_ptr<const FPGATrackSimRoad> &road, std::vector<FPGATrackSimTrack> &tracks);
+        int fitTracks(const FPGATrackSimRoad &road, std::vector<FPGATrackSimTrack> &tracks);
         void getMissingInfo(const FPGATrackSimRoad & road, int & nMissing, bool & missPixel, bool & missStrip,
                             layer_bitmask_t & missing_mask, layer_bitmask_t & norecovery_mask);
         void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack & temp, std::vector<FPGATrackSimTrack> &track_cands);

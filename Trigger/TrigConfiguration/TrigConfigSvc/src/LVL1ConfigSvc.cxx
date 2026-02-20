@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "LVL1ConfigSvc.h"
+#include "TrigConfMD5.h"
+#include "TrigConfSvcHelper.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -9,9 +13,6 @@
 #include "TrigConfIO/TrigDBL1BunchGroupSetLoader.h"
 #include "TrigConfIO/TrigDBMenuLoader.h"
 #include "TrigConfInterfaces/IJobOptionsSvc.h"
-
-#include "LVL1ConfigSvc.h"
-#include "TrigConfMD5.h"
 
 #include <memory>
 
@@ -26,6 +27,13 @@ StatusCode TrigConf::LVL1ConfigSvc::loadRun3StyleMenu()
   if (m_inputType == "DB") {
     // load l1menu
     TrigConf::TrigDBMenuLoader dbmenuloader(m_dbConnection);
+    std::string crest_server("");
+    std::string crest_api("");
+    std::string dbname("");
+    if(isCrestConnection(m_dbConnection, crest_server, crest_api, dbname)) {
+      dbmenuloader.setCrestTrigDB(dbname);
+      dbmenuloader.setCrestConnection(crest_server, crest_api);
+    }
     dbmenuloader.setLevel(TrigConf::MSGTC::WARNING);
     ATH_CHECK( dbmenuloader.loadL1Menu(m_smk, *l1menu) );
 

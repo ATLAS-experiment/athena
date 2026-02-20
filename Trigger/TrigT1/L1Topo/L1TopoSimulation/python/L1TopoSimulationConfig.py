@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -128,6 +128,7 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
             jetProvider.jFexTauRoIKey = ""
             jetProvider.jFexMETRoIKey = ""
             jetProvider.jFexSumETRoIKey = ""
+            jetProvider.gMETComponentsJwojKey = "" #used for cXE, would not be valid without both, jFEX+gFEX inputs
         if (energyProvider != ""):
             energyProvider.gFexSRJetRoIKey = ""
             energyProvider.gFexLRJetRoIKey = ""
@@ -136,6 +137,11 @@ def L1TopoSimulationCfg(flags, doMonitoring=True, readMuCTPI=False, name="L1Topo
             energyProvider.gMETComponentsNoiseCutKey = ""
             energyProvider.gMETComponentsRmsKey = ""
             energyProvider.gScalarEJwojKey = ""
+            energyProvider.gEspressoKey = ""
+            
+    if (jetProvider != "") and (energyProvider != ""): 
+        #both, j+gFEX are available, ensure they use consistent keys for gFEX JwoJ MET
+        jetProvider.gMETComponentsJwojKey = energyProvider.gMETComponentsJwojKey
 
     topoSimAlg = CompFactory.LVL1.L1TopoSimulation(name,
                                                     MuonInputProvider = muProvider,
@@ -171,8 +177,8 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False, doMonito
     acc = ComponentAccumulator()
 
     efex_provider_attr = ['eFexEMRoI','eFexTauRoI']
-    jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexFwdElRoI','jFexTauRoI','jFexMETRoI','jFexSumETRoI']
-    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI', 'gScalarEJwoj','gMETComponentsJwoj','gMHTComponentsJwoj', 'gMETComponentsNoiseCut', 'gMETComponentsRms']
+    jfex_provider_attr = ['jFexSRJetRoI','jFexLRJetRoI','jFexFwdElRoI','jFexTauRoI','jFexMETRoI','jFexSumETRoI', 'gMETComponentsJwoj']
+    gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI', 'gScalarEJwoj','gMETComponentsJwoj','gMHTComponentsJwoj', 'gMETComponentsNoiseCut', 'gMETComponentsRms', 'gEspresso']
     #Note: Unused container outputs from gFEX are:
     #'gFexRhoRoI', 'gMSTComponentsJwoj', 'gScalarENoiseCut', 'gScalarERms'
     #as compared with: https://gitlab.cern.ch/atlas/athena/-/blob/main/Trigger/TrigT1/L1CaloFEX/L1CaloFEXSim/L1CaloFEXSim/gFEXSysSim.h#L128-136
@@ -314,6 +320,7 @@ if __name__ == '__main__':
   flags.Concurrency.NumConcurrentEvents = 1
   flags.Exec.SkipEvents = args.skipEvents
   flags.Output.AODFileName = 'AOD.pool.root'
+  flags.Trigger.doLVL1 = True
   flags.Trigger.L1.doMuon = True
   flags.Trigger.enableL1MuonPhase1 = True
   flags.Trigger.L1.doMuonTopoInputs = True
@@ -321,8 +328,6 @@ if __name__ == '__main__':
   flags.PerfMon.doFullMonMT = args.perfmon
   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
   flags.Trigger.enableL1TopoDump = args.enableL1TopoDump
-  from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag
-  flags.IOVDb.GlobalTag = getLastGlobalTag(flags)
 
   if not flags.Input.isMC:
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
@@ -432,6 +437,8 @@ if __name__ == '__main__':
       outputEDM += addEDM('xAOD::gFexJetRoIContainer', gFexTool.gFexSRJetOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexJetRoIContainer', gFexTool.gFexLRJetOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarEJwojOutputContainerWriteKey.Path)
+      outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gEspressoOutputContainerWriteKey.Path)
+      print("Espresso Path: ", gFexTool.gEspressoOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsJwojOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMHTComponentsJwojOutputContainerWriteKey.Path)
       outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMSTComponentsJwojOutputContainerWriteKey.Path)
@@ -480,7 +487,6 @@ if __name__ == '__main__':
       sequenceName="AthAlgSeq"
   )
 
-  from GaudiSvc.GaudiSvcConf import THistSvc # noqa: F401
   histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='expert-monitoring-l1topo.root', OPT='RECREATE'"])
   acc.addService(histSvc)
 

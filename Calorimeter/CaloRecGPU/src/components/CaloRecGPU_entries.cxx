@@ -23,6 +23,8 @@
 #include "../CaloMomentsDumper.h"
 #include "../GPUKernelSizeOptimizerSvc.h"
 #include "../CaloClusterStoreRawProperties.h"
+#include "../CaloPerformancePropertiesOutput.h"
+#include "../GPUClusterSorter.h"
 
 // Declare the "components".
 DECLARE_COMPONENT( CaloGPUHybridClusterProcessor )
@@ -43,4 +45,6 @@ DECLARE_COMPONENT( GPUToAthenaImporterWithMoments )
 DECLARE_COMPONENT( CaloMomentsDumper )
 DECLARE_COMPONENT( GPUKernelSizeOptimizerSvc )
 DECLARE_COMPONENT( CaloClusterStoreRawProperties )
+DECLARE_COMPONENT( CaloPerformancePropertiesOutput )
+DECLARE_COMPONENT( GPUClusterSorter )
 

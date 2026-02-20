@@ -32,27 +32,34 @@ public:
     IdDictGroup (const std::string& name); 
     ~IdDictGroup (); 
 
+    IdDictGroup (const IdDictGroup&) = delete;
+    IdDictGroup& operator= (const IdDictGroup&) = delete;
+
 
     //@}
     // ==================================
     //** @name Simple accessors.
     // @{
 
-    const std::string&  name();
-    const std::vector<IdDictDictEntry*>& entries();
-    const std::vector<IdDictRegion*>&    regions();
+    const std::string&  name() const;
+    size_t n_regions() const;
+    const IdDictRegion&  region(size_t index) const;
 
 
     //@}
     // ==================================
     //** @name Methods used to initialize the object.
     // @{
+
+    /// Non-const access to regions.
+    const std::vector<IdDictRegion*>&    regions();
+
     ///  Get MultiRange for this group
-
     MultiRange build_multirange () const; 
-    void add_dictentry (IdDictDictEntry* entry);
 
-    void resolve_references (const IdDictMgr& idd,  
+    void add_dictentry (std::unique_ptr<IdDictDictEntry> entry);
+
+    void resolve_references (IdDictMgr& idd,
                              IdDictDictionary& dictionary,
                              size_t& index);  
     void generate_implementation (const IdDictMgr& idd,  
@@ -113,7 +120,7 @@ private:
     void add_tree_field (const IdDictRegion& re, unsigned ifield, unsigned inode);
 
     std::string                   m_name;  
-    std::vector<IdDictDictEntry*> m_entries;  // just the RegionEntries
+    std::vector<std::unique_ptr<IdDictDictEntry> > m_entries;  // just the RegionEntries
     std::vector<IdDictRegion*>    m_regions;  // regions derived from entries
     bool m_generated_implementation;
 
@@ -212,5 +219,26 @@ private:
     /// The list of region nodes.
     std::vector<IdDictRegionTreeNode> m_region_tree;
 }; 
+
+
+inline
+const std::string& IdDictGroup::name() const {
+    return m_name;
+}
+
+
+inline
+size_t IdDictGroup::n_regions() const
+{
+    return m_regions.size();
+}
+
+
+inline
+const IdDictRegion& IdDictGroup::region(size_t index) const
+{
+    return *m_regions.at(index);
+}
+
 
 #endif

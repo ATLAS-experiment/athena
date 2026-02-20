@@ -1,33 +1,130 @@
-decode index and bit fields for each level: 
- LArEM_Base_ID::initialize_from_dict : 
- region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/1 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/2/0
- channel range -> 4/1/-1,1/0/0/0:60/0:63/0 | 4/1/-1,1/1/0/1:447/0:63/0 | 4/1/-1,1/1/1/0:2/0:255/0 | 4/1/-1,1/2/0/0:55/0:255/0 | 4/1/-1,1/2/1/0/0:255/0 | 4/1/-1,1/3/0/0:26/0:255/0 | 4/1/-2,2/0/0/0:11/0:63/0 | 4/1/-2,2/1/0/0/0:63/0 | 4/1/-2,2/1/1/0:2/0:63/0 | 4/1/-2,2/1/2/0:95/0:63/0 | 4/1/-2,2/1/3/0:47/0:63/0 | 4/1/-2,2/1/4/0:63/0:63/0 | 4/1/-2,2/1/5/0:3/0:63/0 | 4/1/-2,2/2/0/0/0:255/0 | 4/1/-2,2/2/1/0:42/0:255/0 | 4/1/-2,2/3/0/0:19/0:255/0 | 4/1/-3,3/1/0/0:6/0:63/0 | 4/1/-3,3/2/0/0:6/0:63/0
-decode index and bit fields for each level: 
-initialize_from_dict : 
- channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
- region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
-decode index and bit fields for each level: 
- initialize_from_dict : 
- channel range -> 4/3/-2,2/1/0:62/0:15/0 | 4/3/-2,2/2/0:29/0,7,8,15/0 | 4/3/-2,2/2/0:30/3,4,11,12/0 | 4/3/-2,2/2/0:31/1,2,5,6,9,10,13,14/0 | 4/3/-2,2/3/0:14/2,10/0 | 4/3/-2,2/3/0:14/0,1,3,4,5,6,7,8,9,11,12,13,14,15/0 | 4/3/-2,2/3/15/0,1,2,3,4,6,7,8,9,10,11,12,14,15/0
- module range -> 4/3/-2,2/1 | 4/3/-2,2/2 | 4/3/-2,2/3
-LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
-decode index and bit fields for each level: 
- LArEM_Base_ID::initialize_from_dict : 
- region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/1 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/2/0
- channel range -> 4/1/-1,1/0/0/0:60/0:63/0 | 4/1/-1,1/1/0/1:447/0:63/0 | 4/1/-1,1/1/1/0:2/0:255/0 | 4/1/-1,1/2/0/0:55/0:255/0 | 4/1/-1,1/2/1/0/0:255/0 | 4/1/-1,1/3/0/0:26/0:255/0 | 4/1/-2,2/0/0/0:11/0:63/0 | 4/1/-2,2/1/0/0/0:63/0 | 4/1/-2,2/1/1/0:2/0:63/0 | 4/1/-2,2/1/2/0:95/0:63/0 | 4/1/-2,2/1/3/0:47/0:63/0 | 4/1/-2,2/1/4/0:63/0:63/0 | 4/1/-2,2/1/5/0:3/0:63/0 | 4/1/-2,2/2/0/0/0:255/0 | 4/1/-2,2/2/1/0:42/0:255/0 | 4/1/-2,2/3/0/0:19/0:255/0 | 4/1/-3,3/1/0/0:6/0:63/0 | 4/1/-3,3/2/0/0:6/0:63/0
- LArEM_Base_ID::init_neighbors 
-decode index and bit fields for each level: 
-initialize_from_dict : 
- channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
- region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
- LArHEC_Base_ID::init_neighbors 
-decode index and bit fields for each level: 
- initialize_from_dict : 
- channel range -> 4/3/-2,2/1/0:62/0:15/0 | 4/3/-2,2/2/0:29/0,7,8,15/0 | 4/3/-2,2/2/0:30/3,4,11,12/0 | 4/3/-2,2/2/0:31/1,2,5,6,9,10,13,14/0 | 4/3/-2,2/3/0:14/2,10/0 | 4/3/-2,2/3/0:14/0,1,3,4,5,6,7,8,9,11,12,13,14,15/0 | 4/3/-2,2/3/15/0,1,2,3,4,6,7,8,9,10,11,12,14,15/0
- module range -> 4/3/-2,2/1 | 4/3/-2,2/2 | 4/3/-2,2/3
-LarFCal_Base_ID::init_neighbours 
-LarFCal_Base_ID::init_neighbours status: 0
-LArMiniFCAL_ID       INFO  initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+LArEM_ID            DEBUG initialize_from_dictionary
+LArEM_ID            DEBUG (Re)initialize
+LArEM_ID            DEBUG initialize_base_from_dictionary
+LArEM_ID            DEBUG (Re)initialize
+LArEM_ID            DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArEM_ID            DEBUG initLevelsFromDict - unable to find 'MM' label
+LArEM_ID            DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArEM_ID            DEBUG initialize_from_dictionary - OK
+LArEM_ID            DEBUG decode index and bit fields for each level: 
+LArEM_ID            DEBUG  initialize_from_dict : 
+LArEM_ID            DEBUG  region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/1 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/2/0
+LArEM_ID            DEBUG  channel range -> 4/1/-1,1/0/0/0:60/0:63/0 | 4/1/-1,1/1/0/1:447/0:63/0 | 4/1/-1,1/1/1/0:2/0:255/0 | 4/1/-1,1/2/0/0:55/0:255/0 | 4/1/-1,1/2/1/0/0:255/0 | 4/1/-1,1/3/0/0:26/0:255/0 | 4/1/-2,2/0/0/0:11/0:63/0 | 4/1/-2,2/1/0/0/0:63/0 | 4/1/-2,2/1/1/0:2/0:63/0 | 4/1/-2,2/1/2/0:95/0:63/0 | 4/1/-2,2/1/3/0:47/0:63/0 | 4/1/-2,2/1/4/0:63/0:63/0 | 4/1/-2,2/1/5/0:3/0:63/0 | 4/1/-2,2/2/0/0/0:255/0 | 4/1/-2,2/2/1/0:42/0:255/0 | 4/1/-2,2/3/0/0:19/0:255/0 | 4/1/-3,3/1/0/0:6/0:63/0 | 4/1/-3,3/2/0/0:6/0:63/0
+LArHEC_ID           DEBUG initialize_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initialize_base_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'MM' label
+LArHEC_ID           DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArHEC_ID           DEBUG initialize_from_dictionary - OK
+LArHEC_ID           DEBUG decode index and bit fields for each level: 
+LArHEC_ID           DEBUG initialize_from_dict : 
+LArHEC_ID           DEBUG  channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
+LArHEC_ID           DEBUG  region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
+LArFCAL_ID          DEBUG initialize_from_dictionary
+LArFCAL_ID          DEBUG (Re)initialize
+LArFCAL_ID          DEBUG initialize_from_dictionary
+LArFCAL_ID          DEBUG (Re)initialize
+LArFCAL_ID          DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArFCAL_ID          DEBUG initLevelsFromDict - unable to find 'MM' label
+LArFCAL_ID          DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArFCAL_ID          DEBUG initialize_from_dictionary - OK
+LArFCAL_ID          DEBUG decode index and bit fields for each level:
+LArFCAL_ID          DEBUG  initialize_from_dict : 
+LArFCAL_ID          DEBUG  channel range -> 4/3/-2,2/1/0:62/0:15/0 | 4/3/-2,2/2/0:29/0,7,8,15/0 | 4/3/-2,2/2/0:30/3,4,11,12/0 | 4/3/-2,2/2/0:31/1,2,5,6,9,10,13,14/0 | 4/3/-2,2/3/0:14/2,10/0 | 4/3/-2,2/3/0:14/0,1,3,4,5,6,7,8,9,11,12,13,14,15/0 | 4/3/-2,2/3/15/0,1,2,3,4,6,7,8,9,10,11,12,14,15/0
+LArFCAL_ID          DEBUG  module range -> 4/3/-2,2/1 | 4/3/-2,2/2 | 4/3/-2,2/3
+LArMiniFCAL_ID      DEBUG initialize_from_dictionary
+LArMiniFCAL_ID      DEBUG (Re)initialize
+LArMiniFCAL_ID      DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArMiniFCAL_ID      DEBUG initLevelsFromDict - unable to find 'MM' label
+LArMiniFCAL_ID      DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArMiniFCAL_ID      DEBUG initialize_from_dictionary - OK
+LArMiniFCAL_ID       INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+TileID              DEBUG initialize_from_dictionary
+TileID              DEBUG (Re)initialize
+TileID              DEBUG initialize_base_from_dictionary 
+TileID              DEBUG (Re)initialize
+TileID              DEBUG calling base initialize_base_from_dictionary
+TileID              DEBUG initLevelsFromDict - unable to find 'STGC' label
+TileID              DEBUG initLevelsFromDict - unable to find 'MM' label
+TileID              DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+TileID              DEBUG initialize_from_dictionary - OK
+TileID              DEBUG initLevelsFromDict decode index and bit fields for each level: 
+TileID              DEBUG initialize_from_dict :
+TileID              DEBUG  region range -> 5/1/-1 | 5/1/1 | 5/2/-1,1 | 5/3/-1,1
+TileID              DEBUG  module range -> 5/1/-1/0:63 | 5/1/1/0:63 | 5/2/-1,1/0:63 | 5/3/-1,1/0:63
+TileID              DEBUG  tower range ->  5/1/-1/0:63/0 | 5/1/1/0:63/0 | 5/1/-1/0:63/1 | 5/1/1/0:63/1 | 5/1/-1/0:63/2 | 5/1/1/0:63/2 | 5/1/-1/0:63/3 | 5/1/1/0:63/3 | 5/1/-1/0:63/4 | 5/1/1/0:63/4 | 5/1/-1/0:63/5 | 5/1/1/0:63/5 | 5/1/-1/0:63/6 | 5/1/1/0:63/6 | 5/1/-1/0:63/7 | 5/1/1/0:63/7 | 5/1/-1/0:63/8 | 5/1/1/0:63/8 | 5/1/-1/0:63/9 | 5/1/1/0:63/9 | 5/2/-1,1/0:63/10 | 5/2/-1,1/0:63/11 | 5/2/-1,1/0:63/12 | 5/2/-1,1/0:63/13 | 5/2/-1,1/0:63/14 | 5/2/-1,1/0:63/15 | 5/3/-1,1/0:63/8 | 5/3/-1,1/0:63/9 | 5/3/-1,1/0:63/10 | 5/3/-1,1/0:63/11 | 5/3/-1,1/0:63/13 | 5/3/-1,1/0:63/15
+TileID              DEBUG  cell range ->   5/1/-1/0:63/0/0:1 | 5/1/1/0:63/0/0:2 | 5/1/-1/0:63/1/0:1 | 5/1/1/0:63/1/0:1 | 5/1/-1/0:63/2/0:2 | 5/1/1/0:63/2/0:2 | 5/1/-1/0:63/3/0:1 | 5/1/1/0:63/3/0:1 | 5/1/-1/0:63/4/0:2 | 5/1/1/0:63/4/0:2 | 5/1/-1/0:63/5/0:1 | 5/1/1/0:63/5/0:1 | 5/1/-1/0:63/6/0:2 | 5/1/1/0:63/6/0:2 | 5/1/-1/0:63/7/0:1 | 5/1/1/0:63/7/0:1 | 5/1/-1/0:63/8/0:1 | 5/1/1/0:63/8/0:1 | 5/1/-1/0:63/9/0 | 5/1/1/0:63/9/0 | 5/2/-1,1/0:63/10/1:2 | 5/2/-1,1/0:63/11/0:1 | 5/2/-1,1/0:63/12/0:2 | 5/2/-1,1/0:63/13/0:1 | 5/2/-1,1/0:63/14/0:1 | 5/2/-1,1/0:63/15/0 | 5/3/-1,1/0:63/8/2 | 5/3/-1,1/0:63/9/1 | 5/3/-1,1/0:63/10/3 | 5/3/-1,1/0:63/11/3 | 5/3/-1,1/0:63/13/3 | 5/3/-1,1/0:63/15/3
+TileID              DEBUG  pmt range ->    5/1/-1/0:63/0/0:1/0:1 | 5/1/1/0:63/0/0:2/0:1 | 5/1/-1/0:63/1/0:1/0:1 | 5/1/1/0:63/1/0:1/0:1 | 5/1/-1/0:63/2/0:2/0:1 | 5/1/1/0:63/2/0:2/0:1 | 5/1/-1/0:63/3/0:1/0:1 | 5/1/1/0:63/3/0:1/0:1 | 5/1/-1/0:63/4/0:2/0:1 | 5/1/1/0:63/4/0:2/0:1 | 5/1/-1/0:63/5/0:1/0:1 | 5/1/1/0:63/5/0:1/0:1 | 5/1/-1/0:63/6/0:2/0:1 | 5/1/1/0:63/6/0:2/0:1 | 5/1/-1/0:63/7/0:1/0:1 | 5/1/1/0:63/7/0:1/0:1 | 5/1/-1/0:63/8/0:1/0:1 | 5/1/1/0:63/8/0:1/0:1 | 5/1/-1/0:63/9/0/0:1 | 5/1/1/0:63/9/0/0:1 | 5/2/-1,1/0:63/10/1:2/0:1 | 5/2/-1,1/0:63/11/0:1/0:1 | 5/2/-1,1/0:63/12/0:2/0:1 | 5/2/-1,1/0:63/13/0:1/0:1 | 5/2/-1,1/0:63/14/0:1/0:1 | 5/2/-1,1/0:63/15/0/0:1 | 5/3/-1,1/0:63/8/2/0:1 | 5/3/-1,1/0:63/9/1/0:1 | 5/3/-1,1/0:63/10/3/0 | 5/3/-1,1/0:63/11/3/0 | 5/3/-1,1/0:63/13/3/0 | 5/3/-1,1/0:63/15/3/0
+TileID              DEBUG  adc range ->    5/1/-1/0:63/0/0:1/0:1/0:1 | 5/1/1/0:63/0/0:2/0:1/0:1 | 5/1/-1/0:63/1/0:1/0:1/0:1 | 5/1/1/0:63/1/0:1/0:1/0:1 | 5/1/-1/0:63/2/0:2/0:1/0:1 | 5/1/1/0:63/2/0:2/0:1/0:1 | 5/1/-1/0:63/3/0:1/0:1/0:1 | 5/1/1/0:63/3/0:1/0:1/0:1 | 5/1/-1/0:63/4/0:2/0:1/0:1 | 5/1/1/0:63/4/0:2/0:1/0:1 | 5/1/-1/0:63/5/0:1/0:1/0:1 | 5/1/1/0:63/5/0:1/0:1/0:1 | 5/1/-1/0:63/6/0:2/0:1/0:1 | 5/1/1/0:63/6/0:2/0:1/0:1 | 5/1/-1/0:63/7/0:1/0:1/0:1 | 5/1/1/0:63/7/0:1/0:1/0:1 | 5/1/-1/0:63/8/0:1/0:1/0:1 | 5/1/1/0:63/8/0:1/0:1/0:1 | 5/1/-1/0:63/9/0/0:1/0:1 | 5/1/1/0:63/9/0/0:1/0:1 | 5/2/-1,1/0:63/10/1:2/0:1/0:1 | 5/2/-1,1/0:63/11/0:1/0:1/0:1 | 5/2/-1,1/0:63/12/0:2/0:1/0:1 | 5/2/-1,1/0:63/13/0:1/0:1/0:1 | 5/2/-1,1/0:63/14/0:1/0:1/0:1 | 5/2/-1,1/0:63/15/0/0:1/0:1 | 5/3/-1,1/0:63/8/2/0:1/0:1 | 5/3/-1,1/0:63/9/1/0:1/0:1 | 5/3/-1,1/0:63/10/3/0/0:1 | 5/3/-1,1/0:63/11/3/0/0:1 | 5/3/-1,1/0:63/13/3/0/0:1 | 5/3/-1,1/0:63/15/3/0/0:1
+LArEM_ID            DEBUG initialize_from_dictionary
+LArEM_ID            DEBUG (Re)initialize
+LArEM_ID            DEBUG initialize_base_from_dictionary
+LArEM_ID            DEBUG (Re)initialize
+LArEM_ID            DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArEM_ID            DEBUG initLevelsFromDict - unable to find 'MM' label
+LArEM_ID            DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArEM_ID            DEBUG initialize_from_dictionary - OK
+LArEM_ID            DEBUG decode index and bit fields for each level: 
+LArEM_ID            DEBUG  initialize_from_dict : 
+LArEM_ID            DEBUG  region range -> 4/1/-1,1/0/0 | 4/1/-1,1/1/0 | 4/1/-1,1/1/1 | 4/1/-1,1/2/0 | 4/1/-1,1/2/1 | 4/1/-1,1/3/0 | 4/1/-2,2/0/0 | 4/1/-2,2/1/0 | 4/1/-2,2/1/1 | 4/1/-2,2/1/2 | 4/1/-2,2/1/3 | 4/1/-2,2/1/4 | 4/1/-2,2/1/5 | 4/1/-2,2/2/0 | 4/1/-2,2/2/1 | 4/1/-2,2/3/0 | 4/1/-3,3/1/0 | 4/1/-3,3/2/0
+LArEM_ID            DEBUG  channel range -> 4/1/-1,1/0/0/0:60/0:63/0 | 4/1/-1,1/1/0/1:447/0:63/0 | 4/1/-1,1/1/1/0:2/0:255/0 | 4/1/-1,1/2/0/0:55/0:255/0 | 4/1/-1,1/2/1/0/0:255/0 | 4/1/-1,1/3/0/0:26/0:255/0 | 4/1/-2,2/0/0/0:11/0:63/0 | 4/1/-2,2/1/0/0/0:63/0 | 4/1/-2,2/1/1/0:2/0:63/0 | 4/1/-2,2/1/2/0:95/0:63/0 | 4/1/-2,2/1/3/0:47/0:63/0 | 4/1/-2,2/1/4/0:63/0:63/0 | 4/1/-2,2/1/5/0:3/0:63/0 | 4/1/-2,2/2/0/0/0:255/0 | 4/1/-2,2/2/1/0:42/0:255/0 | 4/1/-2,2/3/0/0:19/0:255/0 | 4/1/-3,3/1/0/0:6/0:63/0 | 4/1/-3,3/2/0/0:6/0:63/0
+LArEM_ID            DEBUG init_neighbors
+LArHEC_ID           DEBUG initialize_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initialize_base_from_dictionary
+LArHEC_ID           DEBUG (Re)initialize
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArHEC_ID           DEBUG initLevelsFromDict - unable to find 'MM' label
+LArHEC_ID           DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArHEC_ID           DEBUG initialize_from_dictionary - OK
+LArHEC_ID           DEBUG decode index and bit fields for each level: 
+LArHEC_ID           DEBUG initialize_from_dict : 
+LArHEC_ID           DEBUG  channel range -> 4/2/-2,2/0/0/0:9/0:63/0 | 4/2/-2,2/1/0/0:9/0:63/0 | 4/2/-2,2/2/0/1:9/0:63/0 | 4/2/-2,2/3/0/2:9/0:63/0 | 4/2/-2,2/0/1/0:3/0:31/0 | 4/2/-2,2/1/1/0:2/0:31/0 | 4/2/-2,2/2/1/0:2/0:31/0 | 4/2/-2,2/3/1/0:3/0:31/0
+LArHEC_ID           DEBUG  region range -> 4/2/-2,2/0/0 | 4/2/-2,2/1/0 | 4/2/-2,2/2/0 | 4/2/-2,2/3/0 | 4/2/-2,2/0/1 | 4/2/-2,2/1/1 | 4/2/-2,2/2/1 | 4/2/-2,2/3/1
+LArHEC_ID           DEBUG init_neighbors
+LArFCAL_ID          DEBUG initialize_from_dictionary
+LArFCAL_ID          DEBUG (Re)initialize
+LArFCAL_ID          DEBUG initialize_from_dictionary
+LArFCAL_ID          DEBUG (Re)initialize
+LArFCAL_ID          DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArFCAL_ID          DEBUG initLevelsFromDict - unable to find 'MM' label
+LArFCAL_ID          DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArFCAL_ID          DEBUG initialize_from_dictionary - OK
+LArFCAL_ID          DEBUG decode index and bit fields for each level:
+LArFCAL_ID          DEBUG  initialize_from_dict : 
+LArFCAL_ID          DEBUG  channel range -> 4/3/-2,2/1/0:62/0:15/0 | 4/3/-2,2/2/0:29/0,7,8,15/0 | 4/3/-2,2/2/0:30/3,4,11,12/0 | 4/3/-2,2/2/0:31/1,2,5,6,9,10,13,14/0 | 4/3/-2,2/3/0:14/2,10/0 | 4/3/-2,2/3/0:14/0,1,3,4,5,6,7,8,9,11,12,13,14,15/0 | 4/3/-2,2/3/15/0,1,2,3,4,6,7,8,9,10,11,12,14,15/0
+LArFCAL_ID          DEBUG  module range -> 4/3/-2,2/1 | 4/3/-2,2/2 | 4/3/-2,2/3
+LArFCAL_ID          DEBUG init_neighbours
+LArFCAL_ID          DEBUG init_neighbours_from_file
+LArFCAL_ID          DEBUG init_neighbours_from_file
+LArFCAL_ID          DEBUG init_neighbours_from_file
+LArFCAL_ID          DEBUG init_neighbours status: 0
+LArMiniFCAL_ID      DEBUG initialize_from_dictionary
+LArMiniFCAL_ID      DEBUG (Re)initialize
+LArMiniFCAL_ID      DEBUG initLevelsFromDict - unable to find 'STGC' label
+LArMiniFCAL_ID      DEBUG initLevelsFromDict - unable to find 'MM' label
+LArMiniFCAL_ID      DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+LArMiniFCAL_ID      DEBUG initialize_from_dictionary - OK
+LArMiniFCAL_ID       INFO initialize_from_dict - LArCalorimeter dictionary does NOT contain miniFCAL description. Unable to initialize LArMiniFCAL_ID.
+TileID              DEBUG initialize_from_dictionary
+TileID              DEBUG (Re)initialize
+TileID              DEBUG initialize_base_from_dictionary 
+TileID              DEBUG (Re)initialize
+TileID              DEBUG calling base initialize_base_from_dictionary
+TileID              DEBUG initLevelsFromDict - unable to find 'STGC' label
+TileID              DEBUG initLevelsFromDict - unable to find 'MM' label
+TileID              DEBUG initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
+TileID              DEBUG initialize_from_dictionary - OK
+TileID              DEBUG initLevelsFromDict decode index and bit fields for each level: 
+TileID              DEBUG initialize_from_dict :
+TileID              DEBUG  region range -> 5/1/-1 | 5/1/1 | 5/2/-1,1 | 5/3/-1,1
+TileID              DEBUG  module range -> 5/1/-1/0:63 | 5/1/1/0:63 | 5/2/-1,1/0:63 | 5/3/-1,1/0:63
+TileID              DEBUG  tower range ->  5/1/-1/0:63/0 | 5/1/1/0:63/0 | 5/1/-1/0:63/1 | 5/1/1/0:63/1 | 5/1/-1/0:63/2 | 5/1/1/0:63/2 | 5/1/-1/0:63/3 | 5/1/1/0:63/3 | 5/1/-1/0:63/4 | 5/1/1/0:63/4 | 5/1/-1/0:63/5 | 5/1/1/0:63/5 | 5/1/-1/0:63/6 | 5/1/1/0:63/6 | 5/1/-1/0:63/7 | 5/1/1/0:63/7 | 5/1/-1/0:63/8 | 5/1/1/0:63/8 | 5/1/-1/0:63/9 | 5/1/1/0:63/9 | 5/2/-1,1/0:63/10 | 5/2/-1,1/0:63/11 | 5/2/-1,1/0:63/12 | 5/2/-1,1/0:63/13 | 5/2/-1,1/0:63/14 | 5/2/-1,1/0:63/15 | 5/3/-1,1/0:63/8 | 5/3/-1,1/0:63/9 | 5/3/-1,1/0:63/10 | 5/3/-1,1/0:63/11 | 5/3/-1,1/0:63/13 | 5/3/-1,1/0:63/15
+TileID              DEBUG  cell range ->   5/1/-1/0:63/0/0:1 | 5/1/1/0:63/0/0:2 | 5/1/-1/0:63/1/0:1 | 5/1/1/0:63/1/0:1 | 5/1/-1/0:63/2/0:2 | 5/1/1/0:63/2/0:2 | 5/1/-1/0:63/3/0:1 | 5/1/1/0:63/3/0:1 | 5/1/-1/0:63/4/0:2 | 5/1/1/0:63/4/0:2 | 5/1/-1/0:63/5/0:1 | 5/1/1/0:63/5/0:1 | 5/1/-1/0:63/6/0:2 | 5/1/1/0:63/6/0:2 | 5/1/-1/0:63/7/0:1 | 5/1/1/0:63/7/0:1 | 5/1/-1/0:63/8/0:1 | 5/1/1/0:63/8/0:1 | 5/1/-1/0:63/9/0 | 5/1/1/0:63/9/0 | 5/2/-1,1/0:63/10/1:2 | 5/2/-1,1/0:63/11/0:1 | 5/2/-1,1/0:63/12/0:2 | 5/2/-1,1/0:63/13/0:1 | 5/2/-1,1/0:63/14/0:1 | 5/2/-1,1/0:63/15/0 | 5/3/-1,1/0:63/8/2 | 5/3/-1,1/0:63/9/1 | 5/3/-1,1/0:63/10/3 | 5/3/-1,1/0:63/11/3 | 5/3/-1,1/0:63/13/3 | 5/3/-1,1/0:63/15/3
+TileID              DEBUG  pmt range ->    5/1/-1/0:63/0/0:1/0:1 | 5/1/1/0:63/0/0:2/0:1 | 5/1/-1/0:63/1/0:1/0:1 | 5/1/1/0:63/1/0:1/0:1 | 5/1/-1/0:63/2/0:2/0:1 | 5/1/1/0:63/2/0:2/0:1 | 5/1/-1/0:63/3/0:1/0:1 | 5/1/1/0:63/3/0:1/0:1 | 5/1/-1/0:63/4/0:2/0:1 | 5/1/1/0:63/4/0:2/0:1 | 5/1/-1/0:63/5/0:1/0:1 | 5/1/1/0:63/5/0:1/0:1 | 5/1/-1/0:63/6/0:2/0:1 | 5/1/1/0:63/6/0:2/0:1 | 5/1/-1/0:63/7/0:1/0:1 | 5/1/1/0:63/7/0:1/0:1 | 5/1/-1/0:63/8/0:1/0:1 | 5/1/1/0:63/8/0:1/0:1 | 5/1/-1/0:63/9/0/0:1 | 5/1/1/0:63/9/0/0:1 | 5/2/-1,1/0:63/10/1:2/0:1 | 5/2/-1,1/0:63/11/0:1/0:1 | 5/2/-1,1/0:63/12/0:2/0:1 | 5/2/-1,1/0:63/13/0:1/0:1 | 5/2/-1,1/0:63/14/0:1/0:1 | 5/2/-1,1/0:63/15/0/0:1 | 5/3/-1,1/0:63/8/2/0:1 | 5/3/-1,1/0:63/9/1/0:1 | 5/3/-1,1/0:63/10/3/0 | 5/3/-1,1/0:63/11/3/0 | 5/3/-1,1/0:63/13/3/0 | 5/3/-1,1/0:63/15/3/0
+TileID              DEBUG  adc range ->    5/1/-1/0:63/0/0:1/0:1/0:1 | 5/1/1/0:63/0/0:2/0:1/0:1 | 5/1/-1/0:63/1/0:1/0:1/0:1 | 5/1/1/0:63/1/0:1/0:1/0:1 | 5/1/-1/0:63/2/0:2/0:1/0:1 | 5/1/1/0:63/2/0:2/0:1/0:1 | 5/1/-1/0:63/3/0:1/0:1/0:1 | 5/1/1/0:63/3/0:1/0:1/0:1 | 5/1/-1/0:63/4/0:2/0:1/0:1 | 5/1/1/0:63/4/0:2/0:1/0:1 | 5/1/-1/0:63/5/0:1/0:1/0:1 | 5/1/1/0:63/5/0:1/0:1/0:1 | 5/1/-1/0:63/6/0:2/0:1/0:1 | 5/1/1/0:63/6/0:2/0:1/0:1 | 5/1/-1/0:63/7/0:1/0:1/0:1 | 5/1/1/0:63/7/0:1/0:1/0:1 | 5/1/-1/0:63/8/0:1/0:1/0:1 | 5/1/1/0:63/8/0:1/0:1/0:1 | 5/1/-1/0:63/9/0/0:1/0:1 | 5/1/1/0:63/9/0/0:1/0:1 | 5/2/-1,1/0:63/10/1:2/0:1/0:1 | 5/2/-1,1/0:63/11/0:1/0:1/0:1 | 5/2/-1,1/0:63/12/0:2/0:1/0:1 | 5/2/-1,1/0:63/13/0:1/0:1/0:1 | 5/2/-1,1/0:63/14/0:1/0:1/0:1 | 5/2/-1,1/0:63/15/0/0:1/0:1 | 5/3/-1,1/0:63/8/2/0:1/0:1 | 5/3/-1,1/0:63/9/1/0:1/0:1 | 5/3/-1,1/0:63/10/3/0/0:1 | 5/3/-1,1/0:63/11/3/0/0:1 | 5/3/-1,1/0:63/13/3/0/0:1 | 5/3/-1,1/0:63/15/3/0/0:1
 test_cells
 [4.1.-3.1.0.0.0.0]
 EM

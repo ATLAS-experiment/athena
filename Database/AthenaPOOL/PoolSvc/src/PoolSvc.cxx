@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PoolSvc.cxx
@@ -19,10 +19,8 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionBase/CollectionFactory.h"
-#include "CollectionBase/CollectionDescription.h"
+#include "CollectionSvc/CollectionService.h"
 
-#include "FileCatalog/IFileCatalog.h"
 #include "POOLCore/DbPrint.h"
 #include "PersistencySvc/IPersistencySvc.h"
 #include "PersistencySvc/ISession.h"
@@ -31,6 +29,7 @@
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "PersistencySvc/ITokenIterator.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
 
 #include "RelationalAccess/ConnectionService.h"
@@ -204,7 +203,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
    m_persistencySvcVec[IPoolSvc::kOutputStream]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[IPoolSvc::kOutputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultROOTContainerType).type())) {
+   if (!m_persistencySvcVec[IPoolSvc::kOutputStream]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_FATAL("Failed to set ROOT default container type via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -349,7 +348,7 @@ unsigned int PoolSvc::getOutputContext(const std::string& label) {
       policy.setWriteModeForExisting(pool::DatabaseConnectionPolicy::UPDATE);
    }
    m_persistencySvcVec[id]->session().setDefaultConnectionPolicy(policy);
-   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultROOTContainerType).type())) {
+   if (!m_persistencySvcVec[id]->session().technologySpecificAttributes(pool::ROOT_StorageType.type()).setAttribute<int>("DEFAULT_CONTAINER_TYPE", pool::DbType::getType(m_defaultContainerType).type())) {
       ATH_MSG_WARNING("Failed to set ROOT default container type via PersistencySvc for id " << id);
       return(IPoolSvc::kOutputStream);
    }
@@ -382,8 +381,14 @@ unsigned int PoolSvc::getInputContext(const std::string& label, unsigned int max
    return(id);
 }
 //__________________________________________________________________________
-const std::map<std::string, unsigned int>& PoolSvc::getInputContextMap() const {
+std::map<std::string, unsigned int> PoolSvc::getInputContextMap() const {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
    return(m_inputContextLabel);
+}
+//__________________________________________________________________________
+unsigned int PoolSvc::getInputContextMapSize() const {
+   std::lock_guard<CallMutex> lock(m_pool_mut);
+   return(m_inputContextLabel.size());
 }
 //__________________________________________________________________________
 const coral::Context* PoolSvc::context() const {
@@ -410,7 +415,7 @@ void PoolSvc::lookupBestPfn(const std::string& token, std::string& pfn, std::str
       m_catalog->lookupFileByLFN(token.substr(4), dbID); // LFN -> FID
    } else if (token.compare(0, 4, "FID:") == 0) {
       dbID = token.substr(4);
-   } else if (token.size() > Guid::null().toString().size()) { // full token
+   } else if (token.size() > Guid::stringSize()) { // full token
       Token tok;
       tok.fromString(token);
       dbID = tok.dbID().toString();
@@ -435,20 +440,12 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
    m_catalog->renamePFN(pf, newpf);
 }
 //__________________________________________________________________________
-pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
-		const std::string& connection,
+pool::ICollection* PoolSvc::createCollection(const std::string& connection,
 		const std::string& collectionName,
+		const pool::DbType& collectionType,
 		unsigned int contextId) const {
-   ATH_MSG_DEBUG("createCollection() type="<< collectionType << ", connection=" << connection
+   ATH_MSG_DEBUG("createCollection() type=" << collectionType.storageName() << ", connection=" << connection
                  << ", name=" << collectionName << ", contextID=" << contextId);
-   std::string collection(collectionName);
-   if (collectionType == "RootCollection") {
-      if (collectionName.find("PFN:") == std::string::npos
-	      && collectionName.find("LFN:") == std::string::npos
-	      && collectionName.find("FID:") == std::string::npos) {
-	 collection = "PFN:" + collectionName;
-      }
-   }
    if (contextId >= m_persistencySvcVec.size()) {
       ATH_MSG_WARNING("createCollection: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -464,8 +461,8 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
          ATH_MSG_INFO("File is not in Catalog! Attempt to open it anyway.");
       }
    }
-   // Check whether Collection Container exists.
-   if (collectionType == "ImplicitCollection") {
+   if (collectionType.majorType() == pool::POOL_StorageType.type()) {
+      // Check whether Collection Container exists.
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
       if (dbH == nullptr) {
          ATH_MSG_INFO("Failed to get Session/DatabaseHandle to create POOL collection.");
@@ -484,54 +481,30 @@ pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
                this->disconnectDb("FID:" + m_guidLists[contextId].begin()->toString(), contextId).ignore();
             }
          }
-         std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collection);
-         if (contH == nullptr) {
-            ATH_MSG_INFO("Failed to find container " << collection << " to create POOL collection.");
-            if (insertFile && m_attemptCatalogPatch.value()) {
-               patchCatalog(connection.substr(4), *dbH);
-             }
-            return(nullptr); // no events
-         }
-      } catch(std::exception& e) {
+      } catch (std::exception& e) {
          ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
    }
 
    // access to these variables is locked below:
-   pool::CollectionFactory* collFac ATLAS_THREAD_SAFE = pool::CollectionFactory::get();
+   pool::CollectionService collSvc ATLAS_THREAD_SAFE = pool::CollectionService();
    pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
 
-   pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
-   if (collectionType == "RootCollection" &&
-	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-      ATH_MSG_INFO("Writing RootCollection - do not pass session pointer");
-      std::scoped_lock lock(m_pool_mut);
-      collPtr = collFac->create(collDes,  pool::ICollection::READ);
-   } else {
-      // Try to open APR EventTags Collection in the input file - first as RootCollection, then as RNTCollection
-      std::scoped_lock lock(m_pool_mut);
-      std::string       tree_error, rntuple_error;
-      try {
-         collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
-      } catch (std::exception &e) {
-         tree_error = e.what();
+   // Try to open APR EventTags Collection in the input file
+   std::scoped_lock sc_lock(m_pool_mut);
+   std::string error_text;
+   try {
+      collPtr = collSvc.open(collectionName, collectionType, connection, &m_persistencySvcVec[contextId]->session());
+   } catch (std::exception &e) {
+      collPtr = nullptr;
+      error_text = e.what();
+   }
+   if( !collPtr ) {
+      std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+      if (dbH != nullptr && !dbH->fid().empty()) {
+         return(nullptr); // no events
       }
-      if( !collPtr ) try {
-         collDes.setType("RNTCollection");
-         collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
-      } catch (std::exception &e) {
-         if (insertFile) {
-            std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
-            if (dbH != nullptr) {
-               if (!dbH->fid().empty()) {
-                  return(nullptr); // no events
-               }
-            }
-         }
-         rntuple_error = e.what();
-      }
-      if( !collPtr ) throw std::runtime_error( "Failed to open APR Collection as RootCollection or RNTCollection: "
-                                            + tree_error + " | " + rntuple_error + "PoolSvc::createCollection" );
+      throw std::runtime_error( "Failed to open APR Collection: " + error_text  + ", PoolSvc::createCollection");
    }
    if (insertFile && m_attemptCatalogPatch.value()) {
       std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
@@ -690,24 +663,6 @@ StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int con
    }
    dbH->disconnect();
    return(StatusCode::SUCCESS);
-}
-//_______________________________________________________________________
-long long int PoolSvc::getFileSize(const std::string& dbName, long tech, unsigned int contextId) const {
-   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
-   if (dbH == nullptr) {
-      ATH_MSG_DEBUG("getFileSize: Failed to get Session/DatabaseHandle to get POOL FileSize property.");
-      return 0; // failure
-   }
-   if (dbH->openMode() == pool::IDatabase::CLOSED) {
-      if (m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
-         dbH->setTechnology(tech);
-         dbH->connectForWrite();
-      } else {
-         dbH->connectForRead();
-      }
-   }
-   return(dbH->technologySpecificAttributes().attribute<long long int>("FILE_SIZE"));
 }
 //_______________________________________________________________________
 StatusCode PoolSvc::getAttribute(const std::string& optName,
@@ -970,7 +925,6 @@ pool::IFileCatalog* PoolSvc::createCatalog() {
    try {
       ATH_MSG_INFO("POOL WriteCatalog is " << m_writeCatalog.value());
       ctlg->setWriteCatalog(m_writeCatalog.value());
-      ctlg->connect();
    } catch(std::exception& e) {
       ATH_MSG_ERROR("setWriteCatalog - caught exception: " << e.what());
       return(nullptr); // This catalog is not setup properly!

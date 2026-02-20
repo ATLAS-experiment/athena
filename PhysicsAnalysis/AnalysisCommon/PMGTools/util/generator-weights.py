@@ -3,7 +3,6 @@
 
 from argparse import ArgumentParser
 from PMGTools.WeightHelpers import weightNameCleanup, weightNameWithPrefix
-print(dir(PMGTools.WeightHelpers))
 parser = ArgumentParser(prog='generator-weights')
 parser.add_argument('weights', metavar='weights', type=str, nargs="+",
                     help="specify the list of weights")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIB_MDTCALIBDATACONTAINER_H
 #define MUONCALIB_MDTCALIBDATACONTAINER_H
@@ -9,11 +9,18 @@
 #include <AthenaKernel/CondCont.h>
 #include <GaudiKernel/MsgStream.h>
 
-#include <MuonIdHelpers/IMuonIdHelperSvc.h>
+
 #include <MdtCalibData/MdtFullCalibData.h>
 
 #include <memory>
 #include <optional>
+#include <vector>
+
+namespace Muon{
+  class IMuonIdHelperSvc;
+}
+class Identifier;
+
 
 namespace MuonCalib{
     

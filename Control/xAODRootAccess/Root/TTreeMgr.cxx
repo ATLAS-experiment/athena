@@ -226,7 +226,8 @@ namespace xAOD {
          }
 
          // Check if the object is actually available on the input:
-         if( ! m_event.contains( efe.branchName(), *ti ) ) {
+         static constexpr bool METADATA = false;
+         if( ! m_event.contains( efe.branchName(), *ti, METADATA ) ) {
             continue;
          }
 

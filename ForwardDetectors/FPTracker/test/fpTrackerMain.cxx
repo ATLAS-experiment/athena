@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/setupBeamline.h"
@@ -18,6 +18,7 @@
 #include <vector>
 #include <stdexcept>
 
+//coverity[root_function]
 int main(int argc, char** argv) {
 
   namespace po = boost::program_options;
@@ -75,8 +76,8 @@ int main(int argc, char** argv) {
   std::shared_ptr< std::ifstream > magfile1 = getAlfaMagnetConfigFiles(confDir, beam1);
   std::shared_ptr< std::ifstream > magfile2 = getAlfaMagnetConfigFiles(confDir, beam2);
   
-  Beamline fBeamline1 = setupBeamline(configData, beam1, magver, magfile1); std::cout << fBeamline1;
-  Beamline fBeamline2 = setupBeamline(configData, beam2, magver, magfile2); std::cout << fBeamline2;
+  Beamline fBeamline1 = setupBeamline(configData, beam1, magver, std::move(magfile1)); std::cout << fBeamline1;
+  Beamline fBeamline2 = setupBeamline(configData, beam2, magver, std::move(magfile2)); std::cout << fBeamline2;
   
   std::shared_ptr<IParticle> iParticle(new Particle(particleX, particleY, particleZ, particlePX, particlePY, particlePZ));
 

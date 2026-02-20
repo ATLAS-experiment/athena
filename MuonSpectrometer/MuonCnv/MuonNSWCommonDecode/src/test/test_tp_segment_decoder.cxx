@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -30,14 +30,19 @@ int main (int , char **) {
     const uint32_t phiID_word{23};
     const uint32_t rIndex_word{52};
     /// Test first the backforth conversion
-    TEST_BACKFORTH(monitor_word, MergedSegmentProperty::Monitor);
-    TEST_BACKFORTH(spare_word, MergedSegmentProperty::Spare);
-    TEST_BACKFORTH(lowres_word, MergedSegmentProperty::lowRes);
-    TEST_BACKFORTH(phires_word, MergedSegmentProperty::phiRes);
-    TEST_BACKFORTH(dTheta_word, MergedSegmentProperty::dTheta);
-    TEST_BACKFORTH(phiID_word, MergedSegmentProperty::phiID);
-    TEST_BACKFORTH(rIndex_word, MergedSegmentProperty::rIndex);
-    
+    try {
+      TEST_BACKFORTH(monitor_word, MergedSegmentProperty::Monitor);
+      TEST_BACKFORTH(spare_word, MergedSegmentProperty::Spare);
+      TEST_BACKFORTH(lowres_word, MergedSegmentProperty::lowRes);
+      TEST_BACKFORTH(phires_word, MergedSegmentProperty::phiRes);
+      TEST_BACKFORTH(dTheta_word, MergedSegmentProperty::dTheta);
+      TEST_BACKFORTH(phiID_word, MergedSegmentProperty::phiID);
+      TEST_BACKFORTH(rIndex_word, MergedSegmentProperty::rIndex);
+    }
+    catch (const std::exception& e) {
+      std::cerr << e.what() << "\n";
+      return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 

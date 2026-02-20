@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/span_test.cxx
@@ -96,7 +96,7 @@ void test1()
   test1a<float> (s5);
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "CxxUtils/span_test.cxx\n";

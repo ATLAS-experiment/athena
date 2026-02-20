@@ -107,7 +107,7 @@ namespace JiveXML{
 
   /**
    * Execute - called for every event
-   * - retrive general event information
+   * - retrieve general event information
    * - call data retrievers
    * - pass formatted events to streamers
    */

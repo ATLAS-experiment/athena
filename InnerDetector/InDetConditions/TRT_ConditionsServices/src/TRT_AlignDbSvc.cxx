@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file TRT_AlignDbSvc.cxx
@@ -21,7 +21,6 @@
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 
 #include "TRT_ConditionsData/FloatArrayStore.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 // Amg
 #include "EventPrimitives/EventPrimitives.h"
@@ -141,7 +140,7 @@ StatusCode TRT_AlignDbSvc::initialize()
   if( alignFolderExists ) {    
     
     /** register the callback */
-    ATH_CHECK( m_detStore->regFcn(&TRT_AlignDbSvc::IOVCallBack,this,m_aligncontainerhandle,m_alignroot) );
+//    ATH_CHECK( m_detStore->regFcn(&TRT_AlignDbSvc::IOVCallBack,this,m_aligncontainerhandle,m_alignroot) );
     
     /** Reminder that the constants will be read from text file. */
     if( alignTextFileExists ) 
@@ -179,7 +178,7 @@ StatusCode TRT_AlignDbSvc::finalize()
 }
 
 /** Call back function for alignment folders */
-StatusCode TRT_AlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
+StatusCode TRT_AlignDbSvc::IOVCallBack()
 {
   ATH_MSG_DEBUG( "In IOVCallBack"  );
   
@@ -194,8 +193,8 @@ StatusCode TRT_AlignDbSvc::IOVCallBack(IOVSVC_CALLBACK_ARGS_P(I,keys))
   
   /** Print the keys were setting 
    */
-  for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr)
-    ATH_MSG_INFO( "IOVCALLBACK for key " << *itr<< " number " << I  );
+//  for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr)
+//    ATH_MSG_INFO( "IOVCALLBACK for key " << *itr<< " number " << I  );
   
   
   if(!m_par_alitextfile.empty()){
@@ -476,9 +475,7 @@ StatusCode TRT_AlignDbSvc::readAlignTextFile(const std::string & file) {
                 << " Now forcing callback in detector manager."  );
 
   /** force a call back */
-  int i(0);
-  std::list<std::string> keys;
-  if((const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align(i,keys).isFailure()){
+  if((const_cast<InDetDD::TRT_DetectorManager*>(m_trtman))->align().isFailure()){
     ATH_MSG_ERROR("Failed to force the alignment callback!" );
   }
   

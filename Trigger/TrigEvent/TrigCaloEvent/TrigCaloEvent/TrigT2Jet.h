@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -56,8 +56,8 @@ class TrigT2Jet : public P4EEtaPhiMBase,  public NavigableTerminalNode ,
 
   /** Trig3Momentum entities making part of Jet are
 	stored in a grid */
-        std::vector<Trig3Momentum>* grid()        {  return m_grid; }
-  const std::vector<Trig3Momentum>* grid()  const {  return m_grid; }
+        std::vector<Trig3Momentum>* grid()        {  return &m_grid; }
+  const std::vector<Trig3Momentum>* grid()  const {  return &m_grid; }
   
   // Cleaning:
   /** Return nLeadingCells (e.g. n90) */
@@ -85,7 +85,7 @@ class TrigT2Jet : public P4EEtaPhiMBase,  public NavigableTerminalNode ,
   //void setConeRadius(double R)   {m_coneRadius = R;  }
 
   /** set Jet grid vector */
-  void setGrid(std::vector<Trig3Momentum>* grid)  { m_grid = grid; }
+  void setGrid(std::vector<Trig3Momentum>&& grid)  { m_grid = std::move(grid); }
 
   /** set RoI Word */
   void set_RoIword( unsigned int word ) {m_roiWord=word;};
@@ -118,7 +118,7 @@ class TrigT2Jet : public P4EEtaPhiMBase,  public NavigableTerminalNode ,
   //double m_coneRadius  ;
 
   /** vector of Trig3Momentum elements that compose Jet */
-  std::vector<Trig3Momentum>* m_grid;
+  std::vector<Trig3Momentum> m_grid;
   
   /** RoI Word */
   unsigned int m_roiWord;

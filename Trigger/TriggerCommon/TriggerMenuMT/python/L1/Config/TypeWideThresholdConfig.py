@@ -128,6 +128,8 @@ def getTypeWideThresholdConfig(ttype, do_HI_tob_thresholds=False, do_eFex_BDT_Ta
         return getConfig_gXE(do_HI_tob_thresholds)
     if ttype == ThrType.gTE:
         return getConfig_gTE()
+    if ttype == ThrType.cXE:
+        return getConfig_cXE()
     if ttype == ThrType.EM:
         return getConfig_EM(do_HI_tob_thresholds)
     if ttype == ThrType.TAU:
@@ -439,7 +441,7 @@ class L1Config_eTAU:
                     }
                 ],
             },
-            "ptMinToTopo": 0.6 if do_HI_tob_thresholds else 5,
+            "ptMinToTopo": 0.7 if do_HI_tob_thresholds else 5,
             "resolutionMeV": 100,
             "minIsoEt": 12,  # Minimum Et for the BDT cut, in units of GeV (internally with 16-bit resolution, in units of 100 MeV)
             "maxEt": 50,     # Maximum Et for the RCore/BDT/RHad cuts, in units of GeV
@@ -740,7 +742,18 @@ def getConfig_gTE():
     }
     return confObj
 
-
+def getConfig_cXE():
+    confObj = {
+        "jXeWeight": 0.55,
+        "gXeWeight": 0.45
+    }
+    for param, value in confObj.items():
+         # in L1Topo FW/ Sim weights become 10 bit unsigned values, 2 integer, 8 fractional bits
+        if value < 0 or value > 3.99 :
+            raise RuntimeError("xCE parameter %s = %.4f is out of range (min: 0.0, max: 3.99)", param, value)
+            
+    return confObj
+    
 # LEGACY
 
 def getConfig_EM(do_HI_tob_thresholds):

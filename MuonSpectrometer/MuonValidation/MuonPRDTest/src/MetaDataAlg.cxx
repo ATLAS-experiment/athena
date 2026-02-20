@@ -17,7 +17,7 @@ namespace {
         size_t ExpPos = str.find(exp);
         if (ExpPos == std::string::npos) return str;
         str.replace(ExpPos,exp.size(),rep);
-        if (str.find(exp) != std::string::npos) return ReplaceExpInString(str, exp, rep);
+        if (str.find(exp) != std::string::npos) return ReplaceExpInString(std::move(str), exp, rep);
         return str;
     }
     
@@ -250,9 +250,10 @@ StatusCode MetaDataAlg::beginInputFile() {
                 }
             }
 
-            itr->has_book_keeper = mc_keeper != nullptr;
+            itr->has_book_keeper = (mc_keeper != nullptr);
 
             if (itr->has_book_keeper) {
+                //coverity[FORWARD_NULL:FALSE]
                 itr->tot_events += mc_keeper->nAcceptedEvents();
                 itr->sum_w += mc_keeper->sumOfEventWeights();
                 itr->sum_w_squared += mc_keeper->sumOfEventWeightsSquared();

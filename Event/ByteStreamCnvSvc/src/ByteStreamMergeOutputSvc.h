@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTREAMMERGEOUTPUTSVC_H
-#define BYTESTREAMMERGEOUTPUTSVC_H
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMMERGEOUTPUTSVC_H
+#define BYTESTREAMCNVSVC_BYTESTREAMMERGEOUTPUTSVC_H
 
 /** @file ByteStreamMergeOutputSvc.h
  *  @brief This file contains the class definition for the ByteStreamMergeOutputSvc class.
@@ -25,7 +25,7 @@ public:
    ByteStreamMergeOutputSvc(const std::string& name, ISvcLocator* svcloc);
 
    /// Destructor.
-   virtual ~ByteStreamMergeOutputSvc();
+   virtual ~ByteStreamMergeOutputSvc() = default;
 
    virtual StatusCode initialize() override;
    /// Implementation of the IByteStreamOutputSvc interface methods.
@@ -42,4 +42,4 @@ private:
    Gaudi::Property<bool> m_overwriteHeader{this, "overWriteHeader", false};
 };
 
-#endif
+#endif // BYTESTREAMCNVSVC_BYTESTREAMMERGEOUTPUTSVC_H

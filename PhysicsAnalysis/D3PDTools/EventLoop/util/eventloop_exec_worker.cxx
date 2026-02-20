@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgMessaging/MessageCheck.h>
@@ -28,10 +28,12 @@ int main (int argc, char **argv)
 
   std::ostringstream basedirName;
   basedirName << submitDir << "/tmp";
-  {
-    if (gSystem->MakeDirectory (basedirName.str().c_str()) != 0)
-      RCU_THROW_MSG ("failed to create directory " + basedirName.str());
+  
+  if (gSystem->MakeDirectory (basedirName.str().c_str()) != 0){
+    ANA_MSG_ERROR ("failed to create directory " + basedirName.str());
+    return -1;
   }
+
   auto submitSingle = [&] (std::size_t index) noexcept -> StatusCode
   {
     try

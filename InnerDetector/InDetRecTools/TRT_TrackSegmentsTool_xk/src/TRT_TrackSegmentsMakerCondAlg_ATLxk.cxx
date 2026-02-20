@@ -28,7 +28,7 @@
 ///////////////////////////////////////////////////////////////////
 
 InDet::TRT_TrackSegmentsMakerCondAlg_ATLxk::TRT_TrackSegmentsMakerCondAlg_ATLxk(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator) { }
+  : ::AthCondAlgorithm(name, pSvcLocator) { }
 
 ///////////////////////////////////////////////////////////////////
 // Initialisation

@@ -11,11 +11,13 @@
 // EDM includes
 #include "xAODTau/TauJetContainer.h"
 #include "xAODJet/JetContainer.h"
+#include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarTau/TauJetDef.h"
+#include "ColumnarJet/JetDef.h"
 
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
-#include "AssociationUtils/BJetHelper.h"
 #include "AssociationUtils/IObjectAssociator.h"
 
 namespace ORUtils
@@ -49,14 +51,15 @@ namespace ORUtils
 
       /// @brief Identify overlapping taus and jets.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping taus and jets.
       /// The above method calls this one.
       virtual StatusCode
-      findOverlaps(const xAOD::JetContainer& jets,
-                   const xAOD::TauJetContainer& taus) const;
+      internalFindOverlaps(columnar::Particle1Range jets,
+                           columnar::Particle2Range taus) const;
 
     protected:
 
@@ -81,8 +84,14 @@ namespace ORUtils
       /// @name Utilities
       /// @{
 
-      /// BJet helper
-      std::unique_ptr<BJetHelper> m_bJetHelper;
+      /// Columnar accessors
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        /// BJet helper
+        columnar::Particle1Accessor<char> m_bJetAcc;
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
       /// Delta-R matcher
       std::unique_ptr<IParticleAssociator> m_dRMatcher;

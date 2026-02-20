@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // this :
@@ -16,40 +16,26 @@
 #define SbMinimum(a,b) ((a)<(b)?(a):(b))
 
 static SbString* SbStringCreateV(int,const char*,va_list);
-//static SbString* SbStringCreateF(int,const char*,...);
 
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-char* SbSTRDUP(
- const char* aString
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+char* 
+SbSTRDUP(const char* aString){
   char* p = (char*)::malloc((unsigned)::strlen(aString)+1);
   if(p==NULL) return 0;
   //cppcheck-suppress returnDanglingLifetime
   return ::strcpy(p,aString);
 }
 //////////////////////////////////////////////////////////////////////////////
-void SbSTRDEL(
- char*& aString
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+void 
+SbSTRDEL(char*& aString){
   ::free(aString);
   aString = NULL;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbPList SbStringGetWords (
- const SbString& aString 
-,const char* aLimiter 
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbPList 
+SbStringGetWords (const SbString& aString ,const char* aLimiter ){
   SbPList list(16);
 
   if(aString.getLength()<=0) return list;
@@ -84,40 +70,7 @@ SbPList SbStringGetWords (
   
   return list;
 }
-//////////////////////////////////////////////////////////////////////////////////
-////SbPList SbStringGetLines(
-//// const SbString& aString
-////)
-//////////////////////////////////////////////////////////////////////////////////
-////// Items separated by "\n" or "\\n"
-//////!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-////{
-////  SbPList list(16);
-////  list.numitems=0;//hack to work around numitems not initialised in coin 
-////  int length = aString.getLength();
-////  if(length<=0) return list;
-////  char* string = SbSTRDUP(aString.getString());
-////  int pos = 0;
-////  length++;
-////  int count;
-////  for(count=0;count<length;count++) {
-////    if( (string[count]=='\n') || 
-////        (string[count]=='\0') || 
-////        ( (string[count]=='\\') && (string[count+1]=='n') ) ) { 
-////      char shift_one = (string[count]=='\n' ? 1 : 0);
-////      string[count] = '\0';
-////      list.append(new SbString(string+pos));
-////      if(shift_one==1) {
-////        pos = count+1;
-////      } else {
-////        pos = count+2;
-////        count++;
-////      }
-////    }
-////  }
-////  SbSTRDEL(string);
-////  return list;
-////}
+
 //////////////////////////////////////////////////////////////////////////////
 void SbStringDelete(
  SbPList& aList
@@ -151,13 +104,8 @@ SbBool SbStringConvertToBool (
   }
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringConvertToInt (
- const SbString& aString
-,int& aValue
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringConvertToInt (const SbString& aString,int& aValue){
   const char* string = aString.getString();
   char* s;
   long value = ::strtol(string,&s,10);
@@ -169,13 +117,8 @@ SbBool SbStringConvertToInt (
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringConvertToFloat (
- const SbString& aString
-,float& aValue
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringConvertToFloat (const SbString& aString,float& aValue){
   const char* string = aString.getString();
   char* s;
   double value = ::strtod(string,&s);
@@ -187,13 +130,9 @@ SbBool SbStringConvertToFloat (
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringConvertToUnsignedLong(
- const SbString& aString
-,unsigned long& aValue
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringConvertToUnsignedLong(const SbString& aString,unsigned long& aValue
+){
   aValue = 0L;
   if(::sscanf(aString.getString(),"%lx",&aValue)!=1) {
     if(::sscanf(aString.getString(),"%lu",&aValue)!=1) {
@@ -204,15 +143,8 @@ SbBool SbStringConvertToUnsignedLong(
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringPrintF (
- SbString& aString
-,int   aNumber
-,const char* aFormat
-,...
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringPrintF (SbString& aString,int   aNumber,const char* aFormat,...){
   va_list args;
   va_start(args,aFormat);
   SbString* sbString = SbStringCreateV(aNumber,aFormat,args);
@@ -226,14 +158,8 @@ SbBool SbStringPrintF (
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbString SbStringPrintF (
- int   aNumber
-,const char* aFormat
-,...
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbString 
+SbStringPrintF (int   aNumber,const char* aFormat,...){
   va_list args;
   va_start(args,aFormat);
   SbString* sbString = SbStringCreateV(aNumber,aFormat,args);
@@ -244,13 +170,8 @@ SbString SbStringPrintF (
   return s;
 }
 //////////////////////////////////////////////////////////////////////////////
-int SbStringFind (
- const SbString& aString
-,const SbString& aSearch
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+int 
+SbStringFind (const SbString& aString,const SbString& aSearch){
   int lsearch = aSearch.getLength();
   if(lsearch<=0) return SbStringNotFound;
   int number = aString.getLength();
@@ -260,13 +181,8 @@ int SbStringFind (
   return SbStringNotFound;
 }
 //////////////////////////////////////////////////////////////////////////////
-int SbStringReverseFind (
- const SbString& aString
-,const SbString& aSearch
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+int 
+SbStringReverseFind (const SbString& aString,const SbString& aSearch){
   int lsearch = aSearch.getLength();
   if(lsearch<=0) return SbStringNotFound;
   int number = aString.getLength();
@@ -276,12 +192,8 @@ int SbStringReverseFind (
   return SbStringNotFound;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbString SbStringSuffix (
- const SbString& aString
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbString 
+SbStringSuffix (const SbString& aString){
   int index = SbStringReverseFind(aString,".");
   if(index==SbStringNotFound) return SbString("");
   return aString.getSubString(index+1);
@@ -289,12 +201,8 @@ SbString SbStringSuffix (
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-SbString* SbStringCreateEmpty (
- int aLength
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbString* 
+SbStringCreateEmpty (int aLength){
   if(aLength<=0) aLength = 0;
   char* string = (char*)::malloc((aLength+1)*sizeof(char));
   if(string==NULL) return NULL;
@@ -304,32 +212,10 @@ SbString* SbStringCreateEmpty (
   free(string);
   return sbString;
 }
-/*
+
 //////////////////////////////////////////////////////////////////////////////
-SbString* SbStringCreateF (
- int   aNumber
-,const char* aFormat
-,...
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
-  va_list args;
-  va_start(args,aFormat);
-  SbString* sbString = SbStringCreateV(aNumber,aFormat,args);
-  va_end(args);
-  return sbString;
-}
-*/
-//////////////////////////////////////////////////////////////////////////////
-SbString* SbStringCreateV (
- int     aNumber
-,const char*   aFormat
-,va_list aArgs
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbString* 
+SbStringCreateV (int aNumber,const char*   aFormat,va_list aArgs){
   if(aNumber<0) return NULL;
   SbString* sbString = SbStringCreateEmpty(aNumber);
   if(sbString==NULL) return NULL;
@@ -343,25 +229,16 @@ SbString* SbStringCreateV (
   return sbString;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringIsTTF(
- const SbString& aString
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringIsTTF(const SbString& aString){
   if(aString.getLength()<4) return FALSE;
   if(aString.getSubString(0,3)!="TTF/") return FALSE;
   return TRUE;
 }
 #include <string>
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringGetenv(
- SbString& aString
-)
-//////////////////////////////////////////////////////////////////////////////
-// From Lib::smanip::getenv.
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringGetenv(SbString& aString){
   std::string a_String(aString.getString());
   std::string::size_type dollar;
   while((dollar=a_String.find('$'))!=std::string::npos){
@@ -395,7 +272,7 @@ SbBool SbStringGetenv(
       value += val;
       if(pos!=std::string::npos)
         value += a_String.substr(pos,a_String.length()-pos);
-      a_String = value;
+      a_String = std::move(value);
     }
     if(!val) {
       aString = SbString(a_String.c_str());
@@ -406,24 +283,16 @@ SbBool SbStringGetenv(
   return TRUE;
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbString_isenv(
- const SbString& aString
-)
-//////////////////////////////////////////////////////////////////////////////
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbString_isenv(const SbString& aString){
   const char* env = ::getenv(aString.getString());
   return (env?TRUE:FALSE);
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbString_getenv(
- const SbString& aString
-,SbString& aValue
-)
-//////////////////////////////////////////////////////////////////////////////
 // From bool Lib::System::getenv(
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+
+SbBool 
+SbString_getenv(const SbString& aString,SbString& aValue){
   const char* env = ::getenv(aString.getString());
   if(env) {
     aValue = SbString(env);
@@ -434,17 +303,8 @@ SbBool SbString_getenv(
   }
 }
 //////////////////////////////////////////////////////////////////////////////
-SbBool SbStringReplace(
- SbString& aString
-,const SbString& aOld     
-,const SbString& aNew     
-)
-//////////////////////////////////////////////////////////////////////////////
-// Lib::smanip::replace.
-// return true : some replacement done.
-// return false : nothing replaced.
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
-{
+SbBool 
+SbStringReplace(SbString& aString,const SbString& aOld ,const SbString& aNew ){
   std::string a_Old(aOld.getString());
   std::string a_New(aNew.getString());
   if(a_Old=="") return FALSE;

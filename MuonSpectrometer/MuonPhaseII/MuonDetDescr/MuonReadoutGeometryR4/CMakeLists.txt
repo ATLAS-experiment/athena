@@ -33,6 +33,7 @@ if ( "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   set_source_files_properties(
      ${CMAKE_CURRENT_SOURCE_DIR}/src/RpcReadoutElement.cxx
      ${CMAKE_CURRENT_SOURCE_DIR}/src/MmReadoutElement.cxx
+     ${CMAKE_CURRENT_SOURCE_DIR}/src/MdtReadoutElement.cxx
      PROPERTIES
      COMPILE_FLAGS "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}"
      COMPILE_DEFINITIONS "FLATTEN" )

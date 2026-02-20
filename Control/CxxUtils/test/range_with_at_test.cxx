@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/range_with_at_test.cxx
@@ -45,7 +45,7 @@ void test1()
   EXPECT_EXCEPTION (std::out_of_range, cr.at(20));
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "CxxUtils/range_with_at_test\n";

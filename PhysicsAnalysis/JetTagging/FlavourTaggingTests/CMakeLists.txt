@@ -46,3 +46,10 @@ atlas_add_executable(
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODTracking xAODRootAccess
   )
+
+atlas_add_executable(
+  test-jet-constituents
+  util/test-jet-constituents.cxx
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} xAODJet xAODPFlow xAODBase xAODRootAccess AthContainers
+  )

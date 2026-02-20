@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -20,6 +20,7 @@
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileConditions/TileInfo.h"
 #include "StoreGate/ReadHandle.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include "TH1S.h"
 #include "TH2S.h"
@@ -306,14 +307,14 @@ void TileRawChannelMonTool::bookHists(int ros, int drawer)
                 const Int_t nlg1 = 49;
                 const Int_t nlg2 = 500;
                 const Int_t nlg3 = 1027;
-                Double_t xlgbin[nlg1 + nlg2 + nlg3 + 1];
+                std::vector<Double_t> xlgbin(nlg1 + nlg2 + nlg3 + 1);
                 for(Int_t i = 0; i <= nlg1; ++i)
                   xlgbin[i] = -50.5+1.0*i;
                 for(Int_t i = 1; i <= nlg2; ++i)
                   xlgbin[i + nlg1] = -1.5 + 0.05 * i;
                 for(Int_t i = 1; i <= nlg3; ++i)
                   xlgbin[i + nlg1 + nlg2] = 23.5 + 1.0 * i;
-                m_data->m_hist1[ros][drawer][ch][gn].push_back(book1Sx(subDir, histName, histTitle, nlg1 + nlg2 + nlg3, xlgbin));
+                m_data->m_hist1[ros][drawer][ch][gn].push_back(book1Sx(subDir, histName, histTitle, nlg1 + nlg2 + nlg3, xlgbin.data()));
               } else {
                 m_data->m_hist1[ros][drawer][ch][gn].push_back(book1S(subDir, histName, histTitle, 1101, -50.5, 1050.5));
               }
@@ -526,6 +527,12 @@ StatusCode TileRawChannelMonTool::fillHists()
   m_cispar = dqStatus->cispar();
   ++m_nEventsTileMon;
 
+  uint32_t runNum = 0;
+  const xAOD::EventInfo* eventInfo = nullptr;
+  if (evtStore()->retrieve(eventInfo).isSuccess()) {
+    runNum = eventInfo->runNumber();
+  }
+
   m_efitMap.clear();
   m_tfitMap.clear();
 
@@ -608,8 +615,10 @@ StatusCode TileRawChannelMonTool::fillHists()
       int fragId = (*collItr)->identify();
       bool demonstrator = (std::binary_search(m_fragIDsDemonstrators.begin(), m_fragIDsDemonstrators.end(), fragId));
       if (demonstrator) {
-        hg_small_charge *= 2.;
-        hg_charge_cut *= 2;
+        if (runNum <= 494800 || runNum >= 555555) {
+          hg_small_charge *= 2.;
+          hg_charge_cut *= 2;
+        }
         cap_index *= 2;
       }
       double charge = (m_cispar[6] < 1024) ? m_cispar[6] * m_dac2Charge[cap_index] : 0;
@@ -881,14 +890,16 @@ StatusCode TileRawChannelMonTool::fillDsp(std::map<int, std::vector<double> > &e
           if (it != efitMap.end()) {
             double efit = (*it).second.at(chan + gain * 48);
             it = tfitMap.find(ros * 100 + drawer);
-            double tfit = (*it).second.at(chan + gain * 48);
-            //convert from pC to ADC counts
-            if (TMath::Abs(efit) > m_efitThresh) { // fill the histogram only if the efit is above threshold
-              m_data->m_histDsp1[ros][drawer][chan][gain][Edsp_fit]->Fill((amp - efit) / efit, 1.0);
-            }
+            if (it != tfitMap.end()) {
+              double tfit = (*it).second.at(chan + gain * 48);
+              //convert from pC to ADC counts
+              if (TMath::Abs(efit) > m_efitThresh) { // fill the histogram only if the efit is above threshold
+                m_data->m_histDsp1[ros][drawer][chan][gain][Edsp_fit]->Fill((amp - efit) / efit, 1.0);
+              }
 
-            if (tfit != 0.) {
-              m_data->m_histDsp1[ros][drawer][chan][gain][Tdsp_fit]->Fill((time - tfit), 1.0);
+              if (tfit != 0.) {
+                m_data->m_histDsp1[ros][drawer][chan][gain][Tdsp_fit]->Fill((time - tfit), 1.0);
+              }
             }
 
           }

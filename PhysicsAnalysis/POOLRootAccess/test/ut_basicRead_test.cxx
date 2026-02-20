@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,6 +18,7 @@
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
 
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
    xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest 

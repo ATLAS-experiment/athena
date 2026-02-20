@@ -6,12 +6,12 @@
 #define LARCONDUTILS_LARFEBTEMPALG_H
 
 #include "LArRecConditions/LArFEBTempData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
-class LArFEBTempAlg:public AthReentrantAlgorithm {
+class LArFEBTempAlg:public AthCondAlgorithm {
  
  public: 
    LArFEBTempAlg(const std::string& name, ISvcLocator* pSvcLocator);

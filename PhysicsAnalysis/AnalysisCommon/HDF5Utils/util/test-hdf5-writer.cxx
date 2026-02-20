@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HDF5Utils/Writer.h"
@@ -98,7 +98,7 @@ void fill(H5::Group& out_file, size_t iterations) {
 
   // scalar output
   using scalar_writer_t = H5Utils::Writer<0, consumer_t::input_type>;
-  scalar_writer_t::configuration_type scalar_config;
+  scalar_writer_t::configuration_type scalar_config{};
   scalar_config.name = "scalar";
   scalar_config.deflate = deflate;
   consumer_t consumers = getConsumers();
@@ -109,7 +109,7 @@ void fill(H5::Group& out_file, size_t iterations) {
 
   // 1d output
   using d1_t = H5Utils::Writer<1, consumer_t::input_type>;
-  d1_t::configuration_type d1_config;
+  d1_t::configuration_type d1_config{};
   d1_config.name = "1d";
   d1_config.extent = {10};
   d1_config.chunks = {5};
@@ -135,7 +135,7 @@ void fill(H5::Group& out_file, size_t iterations) {
     d4.fill(std::move(vals));
   }
 }
-
+//coverity[root_function]
 int main(int nargs, char* argv[]) {
   H5::H5File out_file("output.h5", H5F_ACC_TRUNC);
   size_t iterations = 1;
@@ -143,6 +143,7 @@ int main(int nargs, char* argv[]) {
     return 1;
   }
   if (nargs > 1) iterations = std::atoi(argv[1]);
+  //coverity[TAINTED_SCALAR]
   fill(out_file, iterations);
   return 0;
 }

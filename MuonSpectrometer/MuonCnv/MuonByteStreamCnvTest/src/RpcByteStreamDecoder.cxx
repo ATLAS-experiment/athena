@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcByteStreamDecoder.h"
@@ -78,7 +78,9 @@ RpcPad* RpcByteStreamDecoder::decodePad(PADreadout& pad) {
 
     // Retrieve the identifier elements from the map
     const RpcCablingCondData::RDOmap& pad_map = m_cabling->give_RDOs();
-    RDOindex index = (*pad_map.find(key)).second;
+    auto foundPair = pad_map.find(key);
+    if (foundPair == pad_map.end()) return nullptr;
+    RDOindex index = foundPair->second;
 
     index.offline_indexes(name, eta, phi, doublet_r, doublet_z, doublet_phi, gas_gap, measures_phi, strip);
 

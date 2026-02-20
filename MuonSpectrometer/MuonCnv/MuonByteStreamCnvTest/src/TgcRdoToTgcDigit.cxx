@@ -10,38 +10,46 @@ StatusCode TgcRdoToTgcDigit::initialize() {
     ATH_CHECK(m_tgcRdoDecoderTool.retrieve());
     ATH_CHECK(m_tgcRdoKey.initialize());
     ATH_CHECK(m_tgcDigitKey.initialize());
-    ATH_CHECK(m_tgcCabling.retrieve());
+    ATH_CHECK(m_cablingKey.initialize());
     return StatusCode::SUCCESS;
 }
 
 StatusCode TgcRdoToTgcDigit::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("in execute()");
     // retrieve the collection of RDO
-    SG::ReadHandle rdoContainer{m_tgcRdoKey, ctx};
-    ATH_CHECK(rdoContainer.isPresent());
+    const TgcRdoContainer* rdoContainer{};
+    ATH_CHECK(SG::get(rdoContainer, m_tgcRdoKey, ctx));
     ATH_MSG_DEBUG("Retrieved " << rdoContainer->size() << " TGC RDOs.");
 
-    SG::WriteHandle<TgcDigitContainer> wh_tgcDigit(m_tgcDigitKey, ctx);
+    SG::WriteHandle wh_tgcDigit(m_tgcDigitKey, ctx);
     ATH_CHECK(wh_tgcDigit.record(std::make_unique<TgcDigitContainer>(m_idHelperSvc->tgcIdHelper().module_hash_max())));
     ATH_MSG_DEBUG("Decoding TGC RDO into TGC Digit");
 
-    Identifier oldElementId;
-
-    TgcRdoContainer::const_iterator tgcRDO = rdoContainer->begin();
-
-    for (; tgcRDO != rdoContainer->end(); ++tgcRDO) {
-        if (!(*tgcRDO)->empty()) { ATH_CHECK(this->decodeTgc(*tgcRDO, wh_tgcDigit.ptr(), oldElementId)); }
+  
+    TmpDigitContainer_t outDigitContainer{};
+    for (const TgcRdo* rdoColl : *rdoContainer) {
+        if (!rdoColl->empty()) { 
+            ATH_CHECK(decodeTgc(ctx, *rdoColl, outDigitContainer)); 
+        }
+    }
+    for (auto& coll : outDigitContainer){
+        if (!coll) {
+            continue;
+        }
+        const IdentifierHash hash = coll->identifierHash();
+        ATH_CHECK(wh_tgcDigit->addCollection(coll.release(), hash));
     }
 
     return StatusCode::SUCCESS;
 }
 
-StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer* tgcContainer, Identifier& oldElementId) const {
-    TgcDigitCollection* collection = nullptr;
-
-    const IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
-
-    ATH_MSG_DEBUG("Number of RawData in this rdo " << rdoColl->size());
+StatusCode TgcRdoToTgcDigit::decodeTgc(const EventContext& ctx,
+                                       const TgcRdo& rdoColl, 
+                                       TmpDigitContainer_t& outDigitContainer) const {
+   
+    const Muon::TgcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling,  m_cablingKey, ctx));
+    ATH_MSG_DEBUG("Number of RawData in this rdo " << rdoColl.size());
     // for each Rdo, loop over RawData, converter RawData to digit
     // retrieve/create digit collection, and insert digit into collection
 
@@ -58,7 +66,7 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
     // |stationEta|=2, T6, E4 - slbId=19, bit3 of stripSlbBits in this code
     //                        /
     // |stationEta|=1, T4, E5 - slbId=20, bit4 of stripSlbBits in this code
-    for (const TgcRawData* rawData : *rdoColl) {
+    for (const TgcRawData* rawData : rdoColl) {
         if (rawData->isCoincidence()) continue;                                  // Require hits
         if (rawData->slbType() != TgcRawData::SLB_TYPE_DOUBLET_STRIP) continue;  // Require TGC2 or TGC3
         if (rawData->sswId() == 7) continue;                                     // Exclude Forward
@@ -84,7 +92,7 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
             // x    : 5-bit variable
             // f(x) : OR function above, Digit->RDO conversion
             // g(x) : originalHitBits which satisfies f(g(f(x))) = f(x), RDO->Digit conversion
-            static const uint16_t originalHitBits[32] = {//  0   1   2   3   4   5   6   7
+            static constexpr std::array<uint16_t, 32> originalHitBits{//  0   1   2   3   4   5   6   7
                                                          0, 1, 0, 3, 0, 0, 4, 7,
                                                          //  8   9  10  11  12  13  14  15
                                                          0, 0, 0, 0, 8, 9, 12, 15,
@@ -99,7 +107,7 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
     }
     // TGC2 Endcap Strip OR channel treatement preparation end
 
-    for (const TgcRawData* rawData : *rdoColl) {
+    for (const TgcRawData* rawData : rdoColl) {
         // check Hit or Coincidence
         if (rawData->isCoincidence()) continue;
 
@@ -131,8 +139,11 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
 
             // check if this channel has ORed partner only when 2nd time
             if (iOr != 0) {
-                const bool o_found = m_tgcCabling->isOredChannel(rawData->subDetectorId(), rawData->rodId(), rawData->sswId(),
-                                                                 rawData->slbId(), rawData->bitpos());
+                const bool o_found = cabling->isOredChannel(rawData->subDetectorId(), 
+                                                            rawData->rodId(), 
+                                                            rawData->sswId(),
+                                                            rawData->slbId(), 
+                                                            rawData->bitpos());
                 // set OR flag
                 if (o_found)
                     orFlag = true;
@@ -142,8 +153,9 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
 
             // get element ID
             Identifier elementId;
-            const bool e_found = m_tgcCabling->getElementIDfromReadoutID(elementId, rawData->subDetectorId(), rawData->rodId(),
-                                                                         rawData->sswId(), rawData->slbId(), rawData->bitpos(), orFlag);
+            const bool e_found = cabling->getElementIDfromReadoutID(elementId, rawData->subDetectorId(), rawData->rodId(),
+                                                                    rawData->sswId(), rawData->slbId(), rawData->bitpos(), 
+                                                                    orFlag);
 
             if (!e_found) {
                 bool show_warning_level = true;
@@ -166,53 +178,28 @@ StatusCode TgcRdoToTgcDigit::decodeTgc(const TgcRdo* rdoColl, TgcDigitContainer*
             }
 
             // convert RawData to Digit
-            std::unique_ptr<TgcDigit> newDigit(m_tgcRdoDecoderTool->getDigit(rawData, orFlag));
+            std::unique_ptr<TgcDigit> newDigit(m_tgcRdoDecoderTool->getDigit(ctx, *rawData, orFlag));
 
             // check if converted correctly
             if (!newDigit) continue;
 
             // check new element or not
-            IdentifierHash coll_hash;
-            if (m_idHelperSvc->tgcIdHelper().get_hash(elementId, coll_hash, &tgcContext)) {
-                ATH_MSG_WARNING("Unable to get TGC digit collection hash "
-                                << "context begin_index = " << tgcContext.begin_index()
-                                << " context end_index  = " << tgcContext.end_index() << " the identifier is ");
-                elementId.show();
+            
+            const IdentifierHash coll_hash = m_idHelperSvc->moduleHash(elementId);
+            if (coll_hash >= outDigitContainer.size()) {
+                outDigitContainer.resize(coll_hash +1u);
             }
-
-            if (elementId != oldElementId) {
-                // get collection
-                const auto *coll = tgcContainer->indexFindPtr(coll_hash);
-                if (nullptr != coll) {
-                    TgcDigitCollection* aCollection ATLAS_THREAD_SAFE = const_cast<TgcDigitCollection*>(coll);  // FIXME
-                    collection = aCollection;
-                } else {
-                    // create new collection
-                    ATH_MSG_DEBUG("Created a new digit collection : " << coll_hash);
-                    collection = new TgcDigitCollection(elementId, coll_hash);
-                    ATH_CHECK(tgcContainer->addCollection(collection, coll_hash));
-                }
-
-                oldElementId = elementId;
-            }
-
+            std::unique_ptr<TgcDigitCollection>& collection = outDigitContainer[coll_hash];
             if (!collection) {
-                ATH_MSG_WARNING("TgcRdoToTgcDigit::decodeTgc TgcDigitCollection* collection is null.");
-                return StatusCode::SUCCESS;
+                collection = std::make_unique<TgcDigitCollection>(m_idHelperSvc->chamberId(elementId),
+                                                                  coll_hash);
             }
-
+            
             // check duplicate digits
-            bool duplicate = false;
-            for (const TgcDigit* digit : *collection) {
-                if ((newDigit->identify() == digit->identify()) && (newDigit->bcTag() == digit->bcTag())) {
-                    duplicate = true;
-                    ATH_MSG_DEBUG("Duplicate TGC Digit removed");
-                    break;
-                }
-            }
-            if (!duplicate) {
-                // add the digit to the collection
-                collection->push_back(newDigit.release());
+            if (!std::ranges::any_of(*collection, [&newDigit](const TgcDigit* digit){
+                return newDigit->identify() == digit->identify() && newDigit->bcTag() == digit->bcTag();
+            })) {
+                collection->push_back(std::move(newDigit));
             }
         }
     }

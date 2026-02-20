@@ -13,7 +13,7 @@
 #ifndef CXXUTILS_SGKEY_UTILITIES_H
 #define CXXUTILS_SGKEY_UTILITIES_H
 
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "CxxUtils/ConcurrentMap.h"
 #include "CxxUtils/SimpleUpdater.h"
 

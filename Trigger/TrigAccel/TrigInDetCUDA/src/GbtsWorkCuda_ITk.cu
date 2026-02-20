@@ -26,7 +26,7 @@ GbtsWorkCudaITk::GbtsWorkCudaITk(unsigned int id, GbtsDeviceContext* ctx, std::s
 	WorkTimeStampQueue* TL) : 
 	m_workId(id),
 	m_context(ctx), 
-	m_input(data),
+	m_input(std::move(data)),
 	m_timeLine(TL)
  {
 	m_output = std::make_shared<TrigAccel::OffloadBuffer>(sizeof(TrigAccel::ITk::GRAPH_AND_SEEDS_OUTPUT));//output data
@@ -235,6 +235,7 @@ bool GbtsWorkCudaITk::run() {
 
 	if(error != cudaSuccess) {
 		printf("node sorting: CUDA error: %s\n", cudaGetErrorString(error));
+		delete[]  eta_bin_views;
 		return false;
 	}
 
@@ -258,6 +259,7 @@ bool GbtsWorkCudaITk::run() {
 
 	if(error != cudaSuccess) {
 		printf("node sorting: CUDA error: %s\n", cudaGetErrorString(error));
+		delete[]  eta_bin_views;
 		return false;
 	}
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY4.py
 #====================================================================
@@ -55,8 +55,11 @@ def BPHY4Cfg(flags):
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles")
 
     # Skim events accepted by the muon selection
-    BPHY4_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = 'BPHY4_SelectEvent',
-                      expression = '(count(Muons.BPHY4MuonIndex>=0)>0)')
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    BPHY4_SelectEvent = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = 'BPHY4_SelectEvent',
+        expression = '(count(Muons.BPHY4MuonIndex>=0)>0)'))
 
     BPHY4ThinningTools = [BPHY4MuonTPThinningTool, BPHY4ElectronTPThinningTool]
     BPHY4SlimTools     = [BPHY4_SelectEvent]

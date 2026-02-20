@@ -16,7 +16,7 @@
  */
 
 //Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "SCT_Cabling/SCT_CablingData.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -35,7 +35,7 @@ class SCT_ID;
  *
  */
 
-class SCT_CablingCondAlgFromText: public AthReentrantAlgorithm {
+class SCT_CablingCondAlgFromText: public AthCondAlgorithm {
  public:
 
   SCT_CablingCondAlgFromText(const std::string& name, ISvcLocator* svc);

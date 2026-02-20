@@ -1,19 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include <vector>
-#include <exception>
-#include <sstream>
-#include <string>
+
+
+#include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
-
-#include "MuonNSWCommonDecode/NSWTriggerElink.h"
-#include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 #include "MuonNSWCommonDecode/MMARTPacket.h"
 #include "MuonNSWCommonDecode/MMTrigPacket.h"
 #include "ers/ers.h"
+#include <exception>
+#include <sstream>
 
 Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const uint32_t remaining):
   NSWTriggerElink (bs, remaining)
@@ -100,9 +98,9 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
       for (int j = 0; j < current_stream_head_n32b_per_word; j++){
 	current_stream_word.push_back( Muon::nsw::decode_and_advance<uint64_t>(data, readPointer, size_word) );
       }
-      current_stream_data.push_back(current_stream_word);
+      current_stream_data.push_back(std::move(current_stream_word));
     }
-    m_stream_data.push_back(current_stream_data);
+    m_stream_data.push_back(std::move(current_stream_data));
 
   }
 

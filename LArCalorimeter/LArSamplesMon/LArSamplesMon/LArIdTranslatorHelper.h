@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -31,6 +31,8 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
   public:
 
     LArIdTranslatorHelper(const TString& inputfile);
+    LArIdTranslatorHelper(const LArIdTranslatorHelper&) = delete;
+    LArIdTranslatorHelper& operator = (const LArIdTranslatorHelper&) = delete;
     ~LArIdTranslatorHelper();
     
     // variables
@@ -47,8 +49,8 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
     bool LoadIdTranslator(const TString& file);
 
     bool IsInitialized(){ return m_kInitialized; }
-    TCanvas* CaloPartitionLayerDisplay(TH2** h,const Char_t* title="",bool kLogz=true);
-    TH2* GetCaloPartitionLayerMap(const int index,bool kProfile=false);
+    std::unique_ptr<TCanvas> CaloPartitionLayerDisplay(TH2** h,const Char_t* title="",bool kLogz=true);
+    std::unique_ptr<TH2> GetCaloPartitionLayerMap(const int index,bool kProfile=false);
     const Char_t* GetPartitonLayerName(const int index);
     void MakeTranslatorMapping(const char* inputtreefile,const char* inputhistfile,const int run);
     bool IsHVLine(const int hvline) const;
@@ -61,7 +63,7 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
 
     bool m_kInitialized;
     TTree* m_tree;
-    TFile* m_file;
+    std::unique_ptr<TFile> m_file;
     Int_t m_ntotal,m_extrabins;
 
     Int_t m_canvas_counts,m_clonemap_counts;
@@ -71,7 +73,7 @@ class ATLAS_NOT_THREAD_SAFE LArIdTranslatorHelper
     std::vector<std::string> m_PartitionLayers;
     Int_t m_nHistCategories; // categories used for mapping performances
     std::vector<std::string> m_HistCategories;
-    std::vector<std::vector<std::unique_ptr<TH2I> > > m_HistCellmaps;  // mapping histograms loaded from input rootfile
+    std::vector<std::vector<TH2I*> > m_HistCellmaps;  // mapping histograms loaded from input rootfile
 };
 
 #endif

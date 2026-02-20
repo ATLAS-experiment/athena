@@ -16,7 +16,6 @@ ApplicationMgr Ready
 ClassIDSvc           INFO  getRegistryEntries: read 1600 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO  getRegistryEntries: read 372 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO  getRegistryEntries: read 2170 CLIDRegistry entries for module ALL
-ToolSvc.Trk::So...   INFO SolenoidalIntersector::initialize() - package version TrkExSolenoidalIntersector-00-00-00
 ClassIDSvc           INFO  getRegistryEntries: read 163 CLIDRegistry entries for module ALL
 test_plane
 test_line

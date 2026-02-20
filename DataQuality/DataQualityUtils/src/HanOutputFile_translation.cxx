@@ -60,9 +60,9 @@ int convert_file(TObject* obj_in, TObject* obj_to);
 int main(int argc, char* argv[]) {
   using namespace std;
   // ATLAS Data Quality space
-  TString input_file_path = "/eos/atlas/atlascerngroupdisk/data-dqm/examples/han_output_translation_example/";
-  TString input_file_name = "run_364030_lowStat_LB121-140_han.root";  // Example file
-  TString output_file_path = "./";
+  std::string input_file_path = "/eos/atlas/atlascerngroupdisk/data-dqm/examples/han_output_translation_example/";
+  std::string input_file_name = "run_364030_lowStat_LB121-140_han.root";  // Example file
+  std::string output_file_path = "./";
 
   if (argc == 2) {
     input_file_name = argv[1];
@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
 
 //---------Functions description--------------
 int convert_file(TObject* obj_input, TObject* obj_outout) {
-  TString obj_input_type = obj_input->ClassName();
+  std::string obj_input_type = obj_input->ClassName();
   bool is_file;
 
   if (obj_input_type == "TFile") {
@@ -143,10 +143,10 @@ int convert_file(TObject* obj_input, TObject* obj_outout) {
 
   TDirectory* dir;
   TDirectory* save_to = dynamic_cast<TDirectory*>(obj_outout);
-  TString name = obj_input->GetName();
+  std::string name = obj_input->GetName();
 
   if (dir = dynamic_cast<TDirectory*>(obj_input)) { // obj_input is a TDirectory
-    TString name = dir->GetName();
+    std::string name = dir->GetName();
     if (name == "Results") { // From Results folder should be extracted Reference histogrma (in an upper level), and
                              // Results --> JSON
       work_with_results_dir(dir, save_to);
@@ -169,7 +169,7 @@ int convert_file(TObject* obj_input, TObject* obj_outout) {
       // 3-rd, Analyse, from which elements this dir consists of
       while ((key = (TKey*) next())) {
         TObject* next_level_obj;
-        TString key_name = key->GetName();
+        std::string key_name = key->GetName();
         next_level_obj = dir->GetKey(key_name)->ReadObj();
         convert_file(next_level_obj, copy_dir);
       }
@@ -188,8 +188,8 @@ int work_with_results_dir(TObject* obj_input, TObject* obj_outout) {
 
   if (include_hist(dir)) {
     TKey* key;
-    TString key_type;
-    TString key_name;
+    std::string key_type;
+    std::string key_name;
     TIter next(dir->GetListOfKeys());
     while ((key = (TKey*) next())) {
       TObject* obj_inside;
@@ -233,7 +233,7 @@ int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save) {
   } else {
     string_to_tfile.SetString(string.data());  // Content of a JSON string
   }
-  TString key_name = obj->GetName();
+  std::string key_name = obj->GetName();
   string_to_tfile.Write(key_name);
   return 0;
 }
@@ -243,8 +243,8 @@ int include_hist(TObject* obj) {
 
   TDirectory* dir = static_cast<TDirectory*> (obj);
   TKey* key;
-  TString key_type;
-  TString key_name;
+  std::string key_type;
+  std::string key_name;
   // Look, what the directory stores
   dir->cd();
   TIter next(dir->GetListOfKeys());
@@ -280,7 +280,7 @@ int number_of_objects_in_dir(TIter next) {
 
 nlohmann::ordered_json to_JSON(TObject* obj) {
   using json = nlohmann::ordered_json;
-  TString obj_type = obj->ClassName();
+  std::string obj_type = obj->ClassName();
   json j;
 
   if (obj_type == "TObjString") { // If the object type, that were passed to this function is TObjString (should be
@@ -294,10 +294,10 @@ nlohmann::ordered_json to_JSON(TObject* obj) {
   }
 
   TDirectory* dir = static_cast<TDirectory*> (obj);
-  TString dir_name = dir->GetName();
+  std::string dir_name = dir->GetName();
   TIter next(dir->GetListOfKeys());
   TKey* key;
-  TString key_name;
+  std::string key_name;
 
   int size_next = number_of_objects_in_dir(next);
 
@@ -308,7 +308,7 @@ nlohmann::ordered_json to_JSON(TObject* obj) {
     next_level_obj =
       dir->GetKey(key_name)->ReadObj();  // Get object. This procedure is better, since it is able to read
     //  names with "/"
-    TString key_type = next_level_obj->ClassName();
+    std::string key_type = next_level_obj->ClassName();
 
     if (size_next == 1 && key_type == "TObjString") { // If this is a directory just before the leaf (the TObjString
                                                       //  file)
@@ -327,10 +327,8 @@ nlohmann::ordered_json to_JSON(TObject* obj) {
     }
     // If inside this directory other subdirrectory
     else { // Write Directory_names as keys and content of the dirrectories as a values
-           // Convert TString to string
-      std::string key_name_string(key_name.Data());
       // Write JSON to rootFile
-      j.emplace(key_name_string, to_JSON(next_level_obj));
+      j.emplace(key_name, to_JSON(next_level_obj));
     }
   }
   return j;

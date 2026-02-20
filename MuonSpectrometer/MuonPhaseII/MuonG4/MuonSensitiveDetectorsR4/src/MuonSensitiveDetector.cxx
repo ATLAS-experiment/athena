@@ -45,8 +45,8 @@ namespace MuonG4R4 {
         }
         ATH_MSG_DEBUG("Output container "<<m_writeHandle.fullKey()<<" has been successfully created");
     }
-    ActsGeometryContext MuonSensitiveDetector::getGeoContext() const {
-        ActsGeometryContext gctx{};
+    ActsTrk::GeometryContext MuonSensitiveDetector::getGeoContext() const {
+        ActsTrk::GeometryContext gctx{};
         SG::ReadHandle trfStoreHandle{m_trfCacheKey};
         if (!trfStoreHandle.isValid()) {
             THROW_EXCEPTION("Failed to retrieve "<<m_trfCacheKey.fullKey()<<".");

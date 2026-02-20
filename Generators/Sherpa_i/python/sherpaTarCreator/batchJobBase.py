@@ -39,9 +39,15 @@ class batchJobBase:
       executable += 'fi\n'
       executable += "shift;\n\n"
       executable += "export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase\n"
-      executable += "source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh\n"
+      executable += "source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh\n\n"
+      executable += "ulimit -f 1000000;\n"
+      executable += "cd "+self.basedir+"\n\n"
+      executable += "echo 'ncores="+str(self.nCores)+" nhours="+str(self.hours)+" "+self.basedir+"/"+self.name+".sh';\n"
+      for cmd in self.cmds:
+        executable += cmd+"\n"
+      executable += "exit 0\n"
 
-    if useApptainer:
+    elif useApptainer:
       wrapper = ''
       wrapperfilename = self.basedir+"/"+self.name+"_wrapper.sh"
       platform = str(os.environ['COMPILER_PATH']).split('/')[-1].replace('el9', 'almalinux9')
@@ -67,6 +73,8 @@ class batchJobBase:
       executable += "exit $?\n"
       
     else:
+      executable += "export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase\n"
+      executable += "source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh\n"
       executable += "ulimit -f 1000000;\n"
       executable += "cd "+self.basedir+"\n\n"
       executable += "echo 'ncores="+str(self.nCores)+" nhours="+str(self.hours)+" "+self.basedir+"/"+self.name+".sh';\n"

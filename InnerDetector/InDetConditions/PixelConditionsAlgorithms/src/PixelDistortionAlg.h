@@ -11,7 +11,7 @@
 #ifndef PIXELDISTORTIONALG_H
 #define PIXELDISTORTIONALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "DetDescrConditions/DetCondCFloat.h"
@@ -24,13 +24,13 @@
 
 class PixelID;
 
-class PixelDistortionAlg : public AthAlgorithm {  
+class PixelDistortionAlg : public AthCondAlgorithm {  
   public:
     PixelDistortionAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelDistortionAlg() = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     const PixelID* m_pixelID{nullptr};

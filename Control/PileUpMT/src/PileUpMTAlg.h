@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2022, 2023, 2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPMT_PILEUPMTALG_H
@@ -37,6 +37,9 @@ class atomic_output {
 
  public:
   atomic_output() = default;
+  atomic_output(const atomic_output&) = delete;
+  atomic_output& operator=(const atomic_output&) = delete;
+
   bool init(const std::string& filename) {
     using namespace std::chrono;
     std::lock_guard lck{m_mtx};

@@ -25,7 +25,7 @@ namespace LArG4
   //---------------------------------------------------------------------------
   // Create one SD
   //---------------------------------------------------------------------------
-  std::unique_ptr<LArG4CalibSD>
+  LArG4CalibSD*
   H62004CalibSDTool::makeOneSD(const std::string& sdName, ILArCalibCalculatorSvc* calc,
                                 const std::vector<std::string>& volumes) const
   {
@@ -36,14 +36,15 @@ namespace LArG4
 
     // Create the simple SD
     auto sd = std::make_unique<LArG4H62004CalibSD>(sdName, calc, m_doPID);
+    auto* sdPtr = sd.get();
     sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_caloDmID);
 
     // Assign the volumes to the SD
-    if( assignSD( sd.get(), parsedVolumes ).isFailure() ) {
+    if( assignSD( std::move(sd), parsedVolumes ).isFailure() ) {
       throw GaudiException("Failed to assign sd: " + sdName,
                            name(), StatusCode::FAILURE);
     }
-    return sd;
+    return sdPtr;
   }
 
 } // namespace LArG4

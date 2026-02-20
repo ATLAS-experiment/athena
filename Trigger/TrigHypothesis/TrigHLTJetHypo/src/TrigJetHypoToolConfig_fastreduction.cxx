@@ -130,8 +130,8 @@ TrigJetHypoToolConfig_fastreduction::getMatcher () const {
   auto conditions = std::move(repeatedConds);
   auto filters = getFilters();
 
-  auto fpm = new FastReductionMatcher(conditions,
-				      filters,
+  auto fpm = new FastReductionMatcher(std::move(conditions),
+				      std::move(filters),
 				      m_filterMakerInds,
 				      Tree(m_treeVec));
   matcher.reset(fpm);

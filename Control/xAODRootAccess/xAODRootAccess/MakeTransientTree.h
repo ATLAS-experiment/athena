@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_MAKETRANSIENTTREE_H
 #define XAODROOTACCESS_MAKETRANSIENTTREE_H
@@ -32,11 +32,11 @@ namespace xAOD {
    /// @param ifile    Pointer to an xAOD file opened by the user
    /// @param treeName Optional name of the event tree in the input file
    /// @param mode     Access mode of the internal TEvent object
-   /// @returns 
+   /// @returns
    TTransTrees MakeTransientTrees ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* treeName = "CollectionTree",
                                    TEvent::EAuxMode mode =
-                                      TEvent::kUndefinedAccess );
+                                      TEvent::kClassAccess );
 
    /// Function cleaning up the managed memory
    ///
@@ -67,7 +67,7 @@ namespace xAOD {
    ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                const char* treeName = "CollectionTree",
                                TEvent::EAuxMode mode =
-                                  TEvent::kUndefinedAccess );
+                                  TEvent::kClassAccess );
 
    /// Function creating a transient TTree object from a TChain pointing to the
    /// persistent trees
@@ -104,7 +104,7 @@ namespace xAOD {
    ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* eventTreeName = "CollectionTree",
                                    TEvent::EAuxMode mode =
-                                      TEvent::kUndefinedAccess );
+                                      TEvent::kClassAccess );
 
    /// Function creating a transient TTree object representing the input files's
    /// metadata
@@ -128,7 +128,7 @@ namespace xAOD {
                                    const char* eventTreeName =
                                       "CollectionTree",
                                    TEvent::EAuxMode mode =
-                                      TEvent::kUndefinedAccess );
+                                      TEvent::kClassAccess );
 
 } // namespace xAOD
 

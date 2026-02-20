@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetEfficiencyMonitorAlgorithm.h"
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "FourMomUtils/P4Helpers.h"
 

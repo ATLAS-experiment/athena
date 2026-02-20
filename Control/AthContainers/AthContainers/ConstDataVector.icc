@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/ConstDataVector.icc
@@ -11,6 +11,7 @@
 
 
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/throw_out_of_range.h"
 #include <boost/iterator/transform_iterator.hpp>
 #include <functional>
 
@@ -321,7 +322,7 @@ typename ConstDataVector<DV>::ElementProxy
 ConstDataVector<DV>::at (size_type n)
 {
   if (n >= this->size())
-    throw std::out_of_range ("DataVector::at range check");
+    CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, n, this->size(), this);
   return to_element_proxy (this->m_pCont.begin() + n);
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -24,6 +24,7 @@
 #include <time.h>
 #include <string.h>
 #include <chrono>
+#include <memory>
 
 #include <cuda_runtime.h>
 
@@ -70,21 +71,17 @@ CudaFitter::~CudaFitter(void) {
 
 void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
 
-  DETECTOR_SURFACE_TYPE* pGeo = new DETECTOR_SURFACE_TYPE;
-  DETECTOR_SURFACE_TYPE& geometry = *pGeo;
-  OUTPUT_TRACK_INFO_TYPE* pOutput = new OUTPUT_TRACK_INFO_TYPE;
-  OUTPUT_TRACK_INFO_TYPE& outputTracks = *pOutput;
-  INPUT_TRACK_INFO_TYPE* pTracks = new INPUT_TRACK_INFO_TYPE;
-  INPUT_TRACK_INFO_TYPE& inputTracks = *pTracks;
-  HIT_INFO_TYPE* pHits = new HIT_INFO_TYPE;
-  HIT_INFO_TYPE& hits=*pHits;
+  auto pGeo    = std::make_unique<DETECTOR_SURFACE_TYPE>();
+  auto pOutput = std::make_unique<OUTPUT_TRACK_INFO_TYPE>();
+  auto pTracks = std::make_unique<INPUT_TRACK_INFO_TYPE>();
+  auto pHits   = std::make_unique<HIT_INFO_TYPE>();
+  
+  auto& geometry     = *pGeo;
+  auto& outputTracks = *pOutput;
+  auto& inputTracks  = *pTracks;
+  auto& hits         = *pHits;
 
-  auto cleanUpOnExit = [=]()->void{
-    delete pGeo;
-    delete pOutput;
-    delete pTracks;
-    delete pHits;
-  };
+ 
   INPUT_TRACK_INFO_TYPE* d_In{};
   DETECTOR_SURFACE_TYPE* d_Geo{};
   OUTPUT_TRACK_INFO_TYPE* d_Out{};
@@ -107,10 +104,10 @@ void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
   int nFittedTracksCPU=0;
   bool doCPU_Fitting=true;
   
-  if (not cudaMallocWrapper(d_In, __func__))  { cleanUpOnExit(); return; }
-  if (not cudaMallocWrapper(d_Geo, __func__)) { cleanUpOnExit(); return; }
-  if (not cudaMallocWrapper(d_Hit, __func__)) { cleanUpOnExit(); return; }
-  if (not cudaMallocWrapper(d_Out, __func__)) { cleanUpOnExit(); return; }
+  if (not cudaMallocWrapper(d_In, __func__))  { return; }
+  if (not cudaMallocWrapper(d_Geo, __func__)) { return; }
+  if (not cudaMallocWrapper(d_Hit, __func__)) { return; }
+  if (not cudaMallocWrapper(d_Out, __func__)) { return; }
 
   int nFittedTracksGPU=0;
   float kernelTotal=0.0;
@@ -291,7 +288,6 @@ void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
     //    break;
   }
 
-  cleanUpOnExit();
   CUDA_CHECK(cudaFree(d_In));
   CUDA_CHECK(cudaFree(d_Out));
   CUDA_CHECK(cudaFree(d_Geo));

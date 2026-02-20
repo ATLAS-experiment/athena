@@ -1,6 +1,13 @@
+/*
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef CONIFER_CPP_H__
 #define CONIFER_CPP_H__
 #include "nlohmann/json.hpp"
+#include <vector>
+#include <algorithm>
+#include <numeric> //std::accumulate
 #include <cassert>
 #include <fstream>
 
@@ -34,7 +41,7 @@ template <class T, class Op> T reduce(std::vector<T> x, Op op) {
   } else {
     std::vector<T> left(x.begin(), x.begin() + leftN);
     std::vector<T> right(x.begin() + leftN, x.end());
-    return op(reduce<T, Op>(left, op), reduce<T, Op>(right, op));
+    return op(reduce<T, Op>(std::move(left), op), reduce<T, Op>(std::move(right), op));
   }
 }
 

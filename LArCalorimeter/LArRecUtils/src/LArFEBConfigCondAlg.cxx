@@ -7,7 +7,7 @@
 
 
 LArFEBConfigCondAlg::LArFEBConfigCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthReentrantAlgorithm(name,pSvcLocator),m_onlineID(nullptr) {}
+  AthCondAlgorithm(name,pSvcLocator),m_onlineID(nullptr) {}
 
 
 LArFEBConfigCondAlg::~LArFEBConfigCondAlg() {}

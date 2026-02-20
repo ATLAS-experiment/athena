@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_CONFIGPARAMS_H
 #define AFP_CONFIGPARAMS_H
 
-#include <list>
-#include <map>
-#include <vector>
-#include <string>
+
 
 #include "CLHEP/Geometry/Transform3D.h"
 #include "AFP_Geometry/AFP_constants.h"
+#include <map>
+#include <vector>
 
 enum eStationElement { ESE_RPOT, ESE_SID, ESE_TOF};
 enum eSIDTransformType { ESTT_SUPPORT, ESTT_PLATE, ESTT_SENSOR, ESTT_FEI4CHIP, ESTT_VACUUMSENSOR, ESTT_SENSORLOCAL, ESTT_SENSORGLOBAL };

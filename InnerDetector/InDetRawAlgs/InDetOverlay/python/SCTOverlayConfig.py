@@ -1,6 +1,6 @@
 """Define methods to construct configured SCT overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -16,13 +16,8 @@ def SCTOverlayAlgCfg(flags, name="SCTOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "SCT_RDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        from SCT_RawDataByteStreamCnv.SCT_RawDataByteStreamCnvConfig import SCTRawDataProviderCfg, SCTEventFlagWriterCfg
-        acc.merge(SCTRawDataProviderCfg(flags))
-        acc.merge(SCTEventFlagWriterCfg(flags))
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'SCT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do SCT overlay
     acc.addEventAlgo(CompFactory.SCTOverlay(name, **kwargs))

@@ -20,7 +20,7 @@
 
 ActsAthenaPrintPolicy::ActsAthenaPrintPolicy(std::shared_ptr<MsgStream> msg, const std::string& name):
   m_svc{Athena::getMessageSvc()},
-  m_msg{msg},
+  m_msg{std::move(msg)},
   m_name{name} {}
 void
 ActsAthenaPrintPolicy::flush(const Acts::Logging::Level& lvl, const std::string& input)
@@ -95,7 +95,7 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name)
     throw std::invalid_argument("parent needs to be INamedInterface");
   }
   parent_name = inamed->name();
-  return makeActsAthenaLogger(parent, name, parent_name);
+  return makeActsAthenaLogger(parent, name, std::move(parent_name));
 }
 
 std::unique_ptr<const Acts::Logger>
@@ -106,7 +106,7 @@ makeActsAthenaLogger(const CommonMessagingBase* parent, const std::string& name,
   if (inamed != nullptr) {
     level = parent->msg().level();
   }
-  return makeActsAthenaLogger(parent->msgSvc().get(), name, level, parent_name);
+  return makeActsAthenaLogger(parent->msgSvc().get(), name, level, std::move(parent_name));
 }
 
 std::unique_ptr<const Acts::Logger>

@@ -1,17 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MmDigitEffiCondAlg.h"
+#include "MmDigitEffiCondAlg.h"
 
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <fstream>
 
-MmDigitEffiCondAlg::MmDigitEffiCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
-
+namespace Muon{
 // Initialize
 StatusCode MmDigitEffiCondAlg::initialize() {
     ATH_MSG_DEBUG("initializing " << name());
@@ -32,7 +30,7 @@ StatusCode MmDigitEffiCondAlg::initialize() {
 StatusCode MmDigitEffiCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
     // launching Write Cond Handle
-    SG::WriteCondHandle<Muon::DigitEffiData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << " In theory this should not be called, but may happen"
@@ -40,9 +38,9 @@ StatusCode MmDigitEffiCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS;
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<Muon::DigitEffiData> writeCdo{std::make_unique<Muon::DigitEffiData>(m_idHelperSvc.get(), m_defaultEffi)};
+    auto writeCdo{std::make_unique<Muon::DigitEffiData>(m_idHelperSvc.get(), m_defaultEffi)};
     if (!m_readKeyDb.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKeyDb, ctx};
+        SG::ReadCondHandle readHandle{m_readKeyDb, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to initialize the COOL folder "<<m_readKeyDb.fullKey());
             return StatusCode::FAILURE;
@@ -91,4 +89,5 @@ StatusCode MmDigitEffiCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         ATH_CHECK(effiData.setEfficiency(id, efficiency));
     }
     return StatusCode::SUCCESS;
+}
 }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,7 +10,7 @@ def DumpCfg (flags, ofile, items='*', exclude=''):
     from AthenaCommon.Constants import INFO
 
     # Don't set up geomodel for evgen files.
-    if flags.GeoModel.AtlasVersion != 0:
+    if flags.GeoModel.AtlasVersion:
         from AtlasGeoModel.GeoModelConfig import GeoModelCfg
         acc.merge (GeoModelCfg (flags))
 

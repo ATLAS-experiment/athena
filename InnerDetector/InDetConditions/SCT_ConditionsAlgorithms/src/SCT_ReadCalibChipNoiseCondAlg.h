@@ -8,7 +8,7 @@
 #define SCT_ReadCalibChipNoiseCondAlg_h
 
 // Include parent class
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 // Include Athena classes
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -22,7 +22,7 @@
 // Forward declarations
 class SCT_ID;
 
-class SCT_ReadCalibChipNoiseCondAlg : public AthReentrantAlgorithm 
+class SCT_ReadCalibChipNoiseCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_ReadCalibChipNoiseCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -30,7 +30,6 @@ class SCT_ReadCalibChipNoiseCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   static void insertNoiseOccFolderData(SCT_ModuleNoiseCalibData& theseCalibData, const coral::AttributeList& folderData) ;

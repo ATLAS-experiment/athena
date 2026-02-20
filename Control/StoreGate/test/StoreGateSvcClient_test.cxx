@@ -18,7 +18,7 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/SGtests.h"
-#include "AthenaKernel/ILockable.h"
+#include "SGCore/ILockable.h"
 
 #include "AthenaKernel/BaseInfo.h"
 #include "AthContainers/DataVector.h"
@@ -83,7 +83,7 @@ CLASS_DEF(DataVector<B>, 82734621, 1)
 CLASS_DEF(DataVector<C>, 82734623, 1)
 CLASS_DEF(CV, 82734625, 1)
 
-struct Lockable 
+struct Lockable
   : public ILockable
 {
   Lockable() : m_locked (false) {}
@@ -274,7 +274,7 @@ int main ATLAS_NOT_THREAD_SAFE () {
   if (!initGaudi("StoreGate/StoreGate_jobOptions.txt", pSvcLoc)) {
     cerr << "This test can not be run" << endl;
     return 0;
-  }  
+  }
   assert(pSvcLoc);
 
   SmartIF<StoreGateSvc> pStore(pSvcLoc->service("StoreGateSvc"));
@@ -288,17 +288,17 @@ int main ATLAS_NOT_THREAD_SAFE () {
   testRetrievePrivateCopy(*pStore);
   testRemove(*pStore);
   testCreate(*pStore);
-  testBind(*pStore); 
+  testBind(*pStore);
 #ifdef FOLDERS_ASDOBJ
   testFolders(*pStore);
 #endif
 
-  cout << "Testing dump: \n -------->>\n" 
-       << pStore->dump() 
+  cout << "Testing dump: \n -------->>\n"
+       << pStore->dump()
        << "\n<<--------" << endl;
-  
+
   pStore->clearStore(/*force=*/true).ignore();
-   
+
   test_symlink2 (*pStore);
   test_symlink3 (*pStore);
   pStore->clearStore(/*force=*/true).ignore();

@@ -12,7 +12,7 @@ def setupHistSvcCfg(flags, outFile: str, outStream: str):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     histSvc = CompFactory.THistSvc(Output=[f"{outStream} DATAFILE='{outFile}', OPT='RECREATE'"])
-    print(f"Regiter new stream {outStream} piped to {outFile}")
+    print(f"Register new stream {outStream} piped to {outFile}")
     result.addService(histSvc, primary=True)
     return result
 

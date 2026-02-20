@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
-
-// Framework includes
 
 // Geant4 includes
 #include "G4RunManager.hh"
@@ -26,6 +24,12 @@ namespace G4UA
     , m_userActionTools(this)
   {
     declareProperty("UserActionTools", m_userActionTools);
+  }
+
+  void UserActionSvc::G4RunTool(IG4RunTool* g4RunTool) {
+    for (auto& tool : m_userActionTools) {
+      tool->G4RunTool(g4RunTool);
+    }
   }
 
   //---------------------------------------------------------------------------
@@ -213,6 +217,28 @@ namespace G4UA
     // Only stepping actions can return secondaries? Maybe turn this into a templated method
     actions = m_steppingActions.get()->getActions();
 
+    return StatusCode::SUCCESS;
+  }
+  /// Calls BeginOfAthenaEvent on each UserAction tool
+  StatusCode UserActionSvc::BeginOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(auto& actionTool : m_userActionTools) {
+      if(actionTool->BeginOfAthenaEvent(hitCollections).isFailure()) {
+        ATH_MSG_ERROR("BeginOfAthenaEvent failed for " << actionTool->name());
+        return StatusCode::FAILURE;
+      }
+    }
+    return StatusCode::SUCCESS;
+  }
+  /// Calls EndOfAthenaEvent on each UserAction tool
+  StatusCode UserActionSvc::EndOfAthenaEvent(HitCollectionMap& hitCollections)
+  {
+    for(auto& actionTool : m_userActionTools) {
+      if(actionTool->EndOfAthenaEvent(hitCollections).isFailure()) {
+        ATH_MSG_ERROR("EndOfAthenaEvent failed for " << actionTool->name());
+        return StatusCode::FAILURE;
+      }
+    }
     return StatusCode::SUCCESS;
   }
 } // namespace G4UA

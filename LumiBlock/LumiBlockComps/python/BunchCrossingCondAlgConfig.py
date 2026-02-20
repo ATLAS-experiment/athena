@@ -14,9 +14,17 @@ def BunchCrossingCondAlgCfg(flags):
     bgkey = ''
 
     if flags.Beam.BunchStructureSource == BunchStructureSource.MC:
-        folder = '/Digitization/Parameters'
-        from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
-        result.merge(readDigitizationParameters(flags))
+        # Only read digitization parameters from conditions DB if NOT ByteStream input
+        # For ByteStream input, the metadata will be read from BS metadata instead
+        from AthenaConfiguration.Enums import Format
+        # Special case: if no input files, treat as non-BS even if format defaults to BS
+        if flags.Input.Format != Format.BS or not flags.Input.Files:
+            folder = '/Digitization/Parameters'
+            from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
+            result.merge(readDigitizationParameters(flags))
+        else:
+            # For ByteStream input, don't set folder key - will read from BS metadata
+            folder = ''
     elif flags.Beam.BunchStructureSource == BunchStructureSource.FILLPARAMS:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'
         from IOVDbSvc.IOVDbSvcConfig import addFolders

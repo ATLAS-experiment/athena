@@ -1,15 +1,18 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRACKER_COLLIMATOR_H
 #define FORWARDTRACKER_COLLIMATOR_H
 
 #include "IBeamElement.h"
+#include "ForwardTracker/ForwardTrackerConstants.h" //'Side' enum
 #include "Point.h"
 
-#include <limits>
-#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
+#include <iosfwd>
 
 namespace ForwardTracker {
   

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                            JetElementKeyBase.cpp  -  description
@@ -67,10 +67,10 @@ JetElementKeyBase::~JetElementKeyBase(){
 /** converts integer phi, eta
 coordinates to phi, eta trigger bins.
 Returns coordinates of centre of JEs*/
-BinAndCoord* JetElementKeyBase::calculateTriggerBin(ICoordinate* iCoord){
+BinAndCoord JetElementKeyBase::calculateTriggerBin(const ICoordinate& iCoord){
 
-  int iphi=iCoord->phi();
-  int ieta=iCoord->eta();
+  int iphi=iCoord.phi();
+  int ieta=iCoord.eta();
   double centralPhi=0.0;
   double centralEta=0.0;
   int phiBin=0; int etaBin=0;
@@ -138,9 +138,7 @@ BinAndCoord* JetElementKeyBase::calculateTriggerBin(ICoordinate* iCoord){
   
   if (m_debugKeyBase) std::cout << "central : ("<<centralPhi<<", "<<centralEta<<")"
                       << " bin : ("<<phiBin<<","<<etaBin<<")"<<std::endl;
-  Coordinate* centralCoords = new Coordinate(centralPhi, centralEta);
-  BinAndCoord* bandc = new BinAndCoord(phiBin,etaBin,centralCoords);
-  return bandc;
+  return BinAndCoord(phiBin,etaBin,Coordinate(centralPhi, centralEta));
 }
 
 #ifndef  TRIGGERSPACE
@@ -480,11 +478,9 @@ void JetElementKeyBase::setupJetRegionData(){
 
 /** returns the central coordinate of the JE which contains the passed coord*/
 Coordinate JetElementKeyBase::getCentre(const double phi, const double eta){
-  ICoordinate* iCoord = convertCoordsToIntegers(phi, eta);
-  BinAndCoord* bandc  = calculateTriggerBin(iCoord);
-  Coordinate yuck=*(bandc->coords() ); // this is horrible, but easier than changing other stuff
-  delete iCoord; delete bandc ;
-  return yuck;
+  ICoordinate iCoord = convertCoordsToIntegers(phi, eta);
+  BinAndCoord bandc  = calculateTriggerBin(iCoord);
+  return bandc.coords();
 }
 
 /** returns the central coordinate of the JE which contains the passed coord*/

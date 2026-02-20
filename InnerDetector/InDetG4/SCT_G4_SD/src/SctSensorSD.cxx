@@ -42,6 +42,7 @@ void SctSensorSD::Initialize(G4HCofThisEvent *)
   if(auto* eventManger = G4EventManager::GetEventManager()){
     if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManger->GetUserInformation())){
       m_HitColl = eventInfo->GetHitCollectionMap()->Find<SiHitCollection>(m_HitCollName);
+      m_g4UserEventInfo = eventInfo;
     }
   }
 }
@@ -110,7 +111,7 @@ G4bool SctSensorSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*ROhist*/)
                      lP2,
                      edep,
                      aStep->GetPreStepPoint()->GetGlobalTime(),//use the global time. i.e. the time from the beginning of the event
-                     trHelp.GenerateParticleLink(),
+                     trHelp.GenerateParticleLink(m_g4UserEventInfo ? m_g4UserEventInfo->GetEventStore() : nullptr),
                      1,brlEcap,layerDisk,etaMod,phiMod,side);
   return true;
 }

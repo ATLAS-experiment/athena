@@ -5,7 +5,7 @@
 #ifndef RNTUPLEWRITERHELPER_H
 #define RNTUPLEWRITERHELPER_H
 
-#include "AthenaBaseComps/AthMessaging.h"
+#include "POOLCore/DbPrint.h"
 
 #include "ROOT/REntry.hxx"
 #include "ROOT/RField.hxx"
@@ -17,7 +17,7 @@
 
 namespace RootStorageSvc {
 
-class RNTupleWriterHelper : public AthMessaging {
+class RNTupleWriterHelper : public pool::APRMessaging {
  public:
   /// Constructor
   RNTupleWriterHelper(TFile* file, const std::string& ntupleName,
@@ -61,9 +61,15 @@ class RNTupleWriterHelper : public AthMessaging {
   /// Close the writer
   void close();
 
+  /// Set comma-separated list of field names to unsplit
+  void setUnsplitFieldsList(std::string_view unsplitFieldsList);
+
  private:
   /// Store data ptr for the first row, when only creating the model
   std::map<std::string, void*> m_attrDataMap;
+
+  /// Set of field names that should be unsplit
+  std::set<std::string> m_unsplitFields;
 
   /// Internal cache for the RNTuple model
   /// Before first commit the fields are added to the model

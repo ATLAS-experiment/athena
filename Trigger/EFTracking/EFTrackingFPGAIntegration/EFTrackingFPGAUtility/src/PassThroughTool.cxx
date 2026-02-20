@@ -569,45 +569,46 @@ StatusCode PassThroughTool::getInputSpacePointData(
     for (unsigned long i = 0; i < N; i++)
     {
         EFTrackingTransient::SpacePoint cache;
+        const auto * thisSp = sp->at(i);
         // Get the data from the input xAOD::SpacePointContainer and set it to the
         // cache
-        cache.idHash[0] = sp->at(i)->elementIdList()[0];
-        cache.globalPosition[0] = sp->at(i)->x();
-        cache.globalPosition[1] = sp->at(i)->y();
-        cache.globalPosition[2] = sp->at(i)->z();
-        cache.radius = sp->at(i)->radius();
-        cache.cov_r = sp->at(i)->varianceR();
-        cache.cov_z = sp->at(i)->varianceZ();
+        cache.idHash[0] = thisSp->elementIdList()[0];
+        cache.globalPosition[0] = thisSp->x();
+        cache.globalPosition[1] = thisSp->y();
+        cache.globalPosition[2] = thisSp->z();
+        cache.radius = thisSp->radius();
+        cache.cov_r = thisSp->varianceR();
+        cache.cov_z = thisSp->varianceZ();
 
         // Pass the uncalibrated measurement for later stage of xAOD container
         // creation for spacepoint
         std::vector<const xAOD::UncalibratedMeasurement *> temp_vec(
-            sp->at(i)->measurements().size());
-        std::copy(sp->at(i)->measurements().begin(),
-                  sp->at(i)->measurements().end(), temp_vec.begin());
+            thisSp->measurements().size());
+        std::copy(thisSp->measurements().begin(),
+                  thisSp->measurements().end(), temp_vec.begin());
 
-        sp_meas.push_back(temp_vec);
+        sp_meas.push_back(std::move(temp_vec));
 
         if (isStrip)
         {
-            cache.idHash[1] = sp->at(i)->elementIdList()[1];
-            cache.topHalfStripLength = sp->at(i)->topHalfStripLength();
-            cache.bottomHalfStripLength = sp->at(i)->bottomHalfStripLength();
-            std::copy(sp->at(i)->topStripDirection().data(),
-                      sp->at(i)->topStripDirection().data() +
-                          sp->at(i)->topStripDirection().size(),
+            cache.idHash[1] = thisSp->elementIdList()[1];
+            cache.topHalfStripLength = thisSp->topHalfStripLength();
+            cache.bottomHalfStripLength = thisSp->bottomHalfStripLength();
+            std::copy(thisSp->topStripDirection().data(),
+                      thisSp->topStripDirection().data() +
+                          thisSp->topStripDirection().size(),
                       cache.topStripDirection);
-            std::copy(sp->at(i)->bottomStripDirection().data(),
-                      sp->at(i)->bottomStripDirection().data() +
-                          sp->at(i)->bottomStripDirection().size(),
+            std::copy(thisSp->bottomStripDirection().data(),
+                      thisSp->bottomStripDirection().data() +
+                          thisSp->bottomStripDirection().size(),
                       cache.bottomStripDirection);
-            std::copy(sp->at(i)->stripCenterDistance().data(),
-                      sp->at(i)->stripCenterDistance().data() +
-                          sp->at(i)->stripCenterDistance().size(),
+            std::copy(thisSp->stripCenterDistance().data(),
+                      thisSp->stripCenterDistance().data() +
+                          thisSp->stripCenterDistance().size(),
                       cache.stripCenterDistance);
-            std::copy(sp->at(i)->topStripCenter().data(),
-                      sp->at(i)->topStripCenter().data() +
-                          sp->at(i)->topStripCenter().size(),
+            std::copy(thisSp->topStripCenter().data(),
+                      thisSp->topStripCenter().data() +
+                          thisSp->topStripCenter().size(),
                       cache.topStripCenter);
         }
         ef_sp.push_back(cache);

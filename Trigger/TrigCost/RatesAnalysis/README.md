@@ -15,6 +15,7 @@ November 2024
     - [Running the Tool](#running-the-tool)  
     - [Outputs](#outputs)  
     - [Post-processing Tools](#post-processing-tools)  
+    - [Setup for grid submission](#setup-for-grid-submission)  
   - [Code Structure](#code-structure)  
   - [Internals of HLTRatesCalculator](#internals-of-hltratescalculator)  
     - [Workflow Overview](#workflow-overview)  
@@ -91,6 +92,42 @@ python L1TopoRatesCalculator_submatrix_plotter.py run/RatesHistograms.root rates
 ```
 See Section Directory Layout to find the path of the L1TopoRatesCalculator_submatrix_plotter. An example of a submatrix produced by the L1TopoRatesCalculator_submatrix_plotter is shown in Figure 2.3.
 
+#### Setup for grid submission
+
+If you have already setup your environment, just setup panda and then run the submission script (currently at):
+
+```bash
+Trigger/TrigCost/RatesAnalysis/share/submit_to_grid_L1TopoRates.sh
+```
+
+After submitting the jobs, you can download the following files:
+
+```bash
+user.$user.$.l1topoRates.byFile.v2_RatesHistograms_XYZ.root.tgz
+```
+For histograms containing the matrices:
+and for logs:
+```bash
+user.$user.$.l1topoRates.byFile.v2_logs_XYZ.root.tgz
+```
+To extract them:
+```bash
+for t in *.tgz; do tar -xzf "$t"; done
+```
+After extraction, process the files to get the final combined matrices.
+Run the following ROOT script:
+
+```bash
+root -l -b -q 'Trigger/TrigCost/RatesAnalysis/share/combine_L1TopoRates_grid_matrices.cxx'
+```
+where you will have to set the inputDir and might need to change the pattern of your RatesHistograms files, the default is "RatesHistograms_data24_13p6TeV.".
+The output will be a single file "CombinedMatrices.root" containing the combination of the matrices: counts_matrix_combined, rates_matrix_combined and L1TopoScore_matrix_combined.
+Finally, you can run:
+
+```bash
+python Trigger/TrigCost/RatesAnalysis/share/L1TopoRatesCalculator_submatrix_plotter.py CombinedMatrices.root L1_10DR-MU14FCH-MU5VF L1_13DR25-25M70-2eEM12L
+```
+to plot the matrices and triggers you decide.
 #### Code structure
 
 The L1TopoRatesCalculator source code is organized in the following directory structure.
@@ -107,6 +144,9 @@ Directory Layout:
     L1TopoRatesCalculator.py
     L1TopoRatesCalculator_submatrix_plotter.py # Post-processing tool to plot submatrices
     runL1TopoRates.py # Execution of L1TopoRatesCalculator
+    triggers.json # Example of the input json file
+    combine_L1TopoRates_grid_matrices.cxx # Combines the output matrices from the grid submission and creates the final matrices
+    submit_to_grid_L1TopoRates.sh # Grid submission script
 ```
 #### Internals of L1TopoRatesCalculator
 

@@ -195,8 +195,8 @@
   <!-- JGTower -->
   <class name="xAOD::JGTower_v1" />
   <class name="xAOD::JGTowerContainer_v1"
-         id="d8759707-7ad9-4567-af03-753b7eed4521" />
-  <class name="xAOD::JGTowerAuxContainer_v1" id="b12228ce-de5c-49dd-82ba-d2d5436f42c1" />
+         id="D8759707-7AD9-4567-AF03-753B7EED4521" />
+  <class name="xAOD::JGTowerAuxContainer_v1" id="B12228CE-DE5C-49DD-82BA-D2D5436F42C1" />
 
   <!-- GBlock -->
   <class name="xAOD::GBlock_v1" />

@@ -10,7 +10,6 @@ HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 ClassIDSvc           INFO  getRegistryEntries: read 1684 CLIDRegistry entries for module ALL
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-00-00
 test1
 ClassIDSvc           INFO  getRegistryEntries: read 359 CLIDRegistry entries for module ALL
 HepMcParticleLink    INFO find_proxy: Using TruthEvent as McEventCollection key for this job 

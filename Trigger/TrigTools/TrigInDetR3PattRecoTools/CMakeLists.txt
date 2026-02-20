@@ -3,13 +3,6 @@
 # Declare the package name:
 atlas_subdir( TrigInDetR3PattRecoTools )
 
-# library in the package:
-atlas_add_library( TrigInDetR3PattRecoToolsLib
-                   src/TrigInDetR3Utils.cxx
-                   PUBLIC_HEADERS TrigInDetR3PattRecoTools
-                   LINK_LIBRARIES TrigInDetPattRecoEvent
-                   PRIVATE_LINK_LIBRARIES IRegionSelector TrigInDetEvent InDetPrepRawData BeamSpotConditionsData)
-
 # Component(s) in the package:
 atlas_add_component( TrigInDetR3PattRecoToolsComp
                      src/SeedingToolBase.cxx

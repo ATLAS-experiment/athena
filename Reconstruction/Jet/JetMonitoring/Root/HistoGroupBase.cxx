@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMonitoring/HistoGroupBase.h"
@@ -61,5 +61,5 @@ void HistoGroupBase::renameAndRegister(TH1* h, const std::string & subD, Interva
   }
   h->SetName( (prefix+h->GetName()).c_str() );
 
-  m_vBookedHistograms.push_back( {h, path, ityp} );
+  m_vBookedHistograms.push_back( {h, std::move(path), ityp} );
 }

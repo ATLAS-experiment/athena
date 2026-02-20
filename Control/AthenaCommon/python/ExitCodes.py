@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/ExitCodes.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -71,7 +71,6 @@ codes = {
 }
 
 def what( code ):
-   global codes
    try:
       return codes[ code ]
    except KeyError:

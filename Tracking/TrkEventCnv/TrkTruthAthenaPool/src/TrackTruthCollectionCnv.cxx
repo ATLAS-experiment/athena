@@ -21,10 +21,10 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // This is release 12 guid for TrackTruthVector.
-const pool::Guid TrackTruthCollectionCnv::s_p0_guid("8BC86D69-DBC4-4B34-8273-513D9BE771D5");
-const pool::Guid TrackTruthCollectionCnv::s_p1_guid("ED2B4B64-7CF6-48B3-8C40-29F8501A6090");
-const pool::Guid TrackTruthCollectionCnv::s_p2_guid("44F35B21-838A-4C4E-B09B-971CEA0EB70A");
-const pool::Guid TrackTruthCollectionCnv::s_p3_guid("018E41F8-0857-7D8C-A062-A3947683EB99");
+constexpr pool::Guid s_p0_guid("8BC86D69-DBC4-4B34-8273-513D9BE771D5");
+constexpr pool::Guid s_p1_guid("ED2B4B64-7CF6-48B3-8C40-29F8501A6090");
+constexpr pool::Guid s_p2_guid("44F35B21-838A-4C4E-B09B-971CEA0EB70A");
+constexpr pool::Guid s_p3_guid("018E41F8-0857-7D8C-A062-A3947683EB99");
 
 
 //================================================================

@@ -1,28 +1,32 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_UNCERTAINTYSET_H
 #define JETUNCERTAINTIES_UNCERTAINTYSET_H
 
-#include "JetUncertainties/UncertaintyGroup.h"
+#include "JetUncertainties/UncertaintyEnum.h" //CompScaleVar
+#include "xAODJet/Jet.h" //typedef
+#include "xAODEventInfo/EventInfo.h" //typedef
 
-#include "xAODJet/Jet.h"
-#include "xAODEventInfo/EventInfo.h"
-
-#include "PATInterfaces/SystematicSet.h"
 #include "AsgMessaging/AsgMessaging.h"
-#include "AsgTools/IAsgTool.h"
+#include "AsgTools/AsgToolMacros.h" //ASG_TOOL_CLASS0
 
 #include <string>
 #include <vector>
 #include <utility>
+class StatusCode;
+
+namespace CP{
+  class SystematicSet;
+}
+
 
 namespace jet
 {
-
-class UncertaintySet : virtual public asg::AsgMessaging
-{
+  class UncertaintyGroup;
+  class UncertaintySet : virtual public asg::AsgMessaging
+  {
     ASG_TOOL_CLASS0(UncertaintySet)
 
     public:
@@ -59,7 +63,7 @@ class UncertaintySet : virtual public asg::AsgMessaging
         // Helper methods
         CompScaleVar::TypeEnum getSingleVar() const;
 
-};
+  };
 
 } // end jet namespace
 

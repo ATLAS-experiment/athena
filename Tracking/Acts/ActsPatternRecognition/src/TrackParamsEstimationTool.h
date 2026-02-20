@@ -73,6 +73,8 @@ namespace ActsTrk {
         "B-field mode: 0=B-field at first SP in search order; 1=z-component of B-field; 2=B-field at innermost SP, regardless of search direction"};
     Gaudi::Property<std::size_t> m_firstSp{this, "firstSp", 0ul,
         "Index of first SP to use"};
+    Gaudi::Property<bool> m_allowPropagatorFailure{this, "allowPropagatorFailure", false,
+        "Use curvilinear parameters when propagation fails instead of returning null"};
 
     using Stepper = Acts::SympyStepper;
     using Navigator = Acts::VoidNavigator;

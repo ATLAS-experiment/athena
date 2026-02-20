@@ -5,24 +5,29 @@
  **     @author  mark sutton
  **     @date    Mon  5 Nov 2012 00:07:15 GMT 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **/
 
 
 #ifndef  TRACKTRIGOBJECT_H
 #define  TRACKTRIGOBJECT_H
 
-#include <iostream>
-
-#include "TrigInDetAnalysis/Track.h"
-
 #include "TObject.h"
+#include <vector>
+#include <ostream>
+#include <string>
+#include <ios> //for std::hex
+
+namespace TIDA{
+  class Track;
+}
+  
 
 class TrackTrigObject : public TObject {
 
 public:
 
-  TrackTrigObject() { } /// just for root, don't want this really
+  TrackTrigObject();/// just for root, don't want this really
   TrackTrigObject(double eta, double phi, double pt, double z0, 
 		  int type, unsigned long id=0);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Convert TrackParameters and NeutralParameters to internal VKalVrt parameters
@@ -93,10 +93,7 @@ namespace Trk {
     tmp_refFrameZ /= counter;
     Amg::Vector3D refGVertex(tmp_refFrameX, tmp_refFrameY, tmp_refFrameZ);
 
-    //Rotation parameters in case of rotation use
-    double fx, fy, fz, BMAG_FIXED;
-    state.m_fitField.getMagFld(tmp_refFrameX, tmp_refFrameY, tmp_refFrameZ,
-			       fx, fy, fz);
+    double fx, fy, fz;
 
     //
     //  Common reference frame is ready. Start extraction of parameters for fit.
@@ -139,10 +136,11 @@ namespace Trk {
        state.m_fitField.setAtlasMagRefFrame(0., 0., 0.);
        // Magnetic field at perigee point
        state.m_fitField.getMagFld(perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),
-				  fx, fy, BMAG_FIXED);
-       if(std::abs(BMAG_FIXED) < 0.01) BMAG_FIXED = 0.01;
+				  fx, fy, fz);
+       double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+       if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG = 0.01;
 
-       VKalTransform(BMAG_FIXED,
+       VKalTransform(effectiveBMAG,
 		     (double)VectPerig[0], (double)VectPerig[1],
 		     (double)VectPerig[2], (double)VectPerig[3],
 		     (double)VectPerig[4], CovVertTrk,
@@ -247,11 +245,7 @@ namespace Trk {
     tmp_refFrameZ /= counter;
     Amg::Vector3D refGVertex (tmp_refFrameX, tmp_refFrameY, tmp_refFrameZ);
 
-    // Rotation parameters in case of rotation use
-    double fx,fy,fz,BMAG_FIXED;
-    state.m_fitField.getMagFld(tmp_refFrameX, tmp_refFrameY, tmp_refFrameZ,
-			       fx, fy, fz);
-
+    double fx,fy,fz;
     //
     //  Common reference frame is ready. Start extraction of parameters for fit.
     //  TracksParameters are extrapolated to common point and converted to Perigee
@@ -282,10 +276,11 @@ namespace Trk {
       state.m_fitField.setAtlasMagRefFrame( 0., 0., 0.);
       // Magnetic field at perigee point
       state.m_fitField.getMagFld(perGlobalPos.x(), perGlobalPos.y(), perGlobalPos.z(),
-                                 fx, fy, BMAG_FIXED);
-      if(std::abs(BMAG_FIXED) < 0.01) BMAG_FIXED = 0.01;
+                                 fx, fy, fz);
+      double effectiveBMAG=state.m_fitField.getEffField(fx, fy, fz, VectPerig[2], VectPerig[3]);
+      if(std::abs(effectiveBMAG) < 0.01) effectiveBMAG = 0.01;
 
-      VKalTransform(BMAG_FIXED,
+      VKalTransform(effectiveBMAG,
                     (double)VectPerig[0], (double)VectPerig[1],
                     (double)VectPerig[2], (double)VectPerig[3],
                     (double)VectPerig[4], CovVertTrk,

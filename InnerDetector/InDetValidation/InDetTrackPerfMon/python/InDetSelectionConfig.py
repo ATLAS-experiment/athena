@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file InDetSelectionConfig.py
@@ -137,7 +137,8 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
         kwargs_InDetTrackSelectionTool.setdefault( "minProb", flags.PhysVal.IDTPM.currentTrkAna.offlMinProb )
     kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionToolCfg)
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
@@ -204,6 +205,9 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     truthMaxAbsEta  = flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsEta
     truthPdgId      = flags.PhysVal.IDTPM.currentTrkAna.truthPdgId
 
+    truthMinParentPt = flags.PhysVal.IDTPM.currentTrkAna.truthMinParentPt
+    truthMaxParentPt = flags.PhysVal.IDTPM.currentTrkAna.truthMaxParentPt
+
     ## SelectTruthObject: customised Pt range selection
     if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
         truthMinPt = 10000  # 10 GeV
@@ -235,6 +239,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     truthIsFromC = ( "FromC" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
     truthIsFromHeavyFlav = ( "FromHeavyFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
     truthIsFromLightFlav = ( "FromLightFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+    truthIsFromTau = ( "FromTau" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject)
 
     # TruthSelectionBaseTool properties
     # ---------------------------------
@@ -243,6 +248,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     if truthMaxPt!=-9999.       : kwargs_base.setdefault( "maxPt",  truthMaxPt )
     if truthMaxAbsEta!=-9999.   : kwargs_base.setdefault( "maxEta", truthMaxAbsEta )
     if truthPdgId!=-9999.       : kwargs_base.setdefault( "pdgId",  truthPdgId )
+
     ## remove only primary requirements for Heavy Flavour truth selection - removed for now
     #doHF = truthIsFromB or truthIsFromC or truthIsFromHeavyFlav
     #if doHF                         : kwargs_base.setdefault( "requireOnlyPrimary", False )
@@ -278,6 +284,9 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     kwargs.setdefault( "isFromC", truthIsFromC )
     kwargs.setdefault( "isFromHeavyFlav", truthIsFromHeavyFlav )
     kwargs.setdefault( "isFromLightFlav", truthIsFromLightFlav )
+    kwargs.setdefault( "isFromTau", truthIsFromTau )
+    if truthMinParentPt!=-9999.    :kwargs.setdefault( "minParentPt", truthMinParentPt)
+    if truthMaxParentPt!=-9999.    :kwargs.setdefault( "maxParentPt", truthMaxParentPt)
 
     acc.setPrivateTools( CompFactory.IDTPM.TruthQualitySelectionTool( name, **kwargs ) )
 

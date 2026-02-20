@@ -57,7 +57,7 @@ namespace ORUtils
 
     // Initialize the decoration helper
     m_decHelper =
-      std::make_unique<OverlapDecorationHelper>
+      std::make_unique<OverlapDecorationHelper<columnar::ContainerId::particle1>>
         (m_inputLabel, m_outputLabel, m_outputPassValue);
 
     // Retrieve the configured tools

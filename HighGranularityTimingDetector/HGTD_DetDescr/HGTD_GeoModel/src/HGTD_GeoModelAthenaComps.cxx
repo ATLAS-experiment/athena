@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HGTD_GeoModel/HGTD_GeoModelAthenaComps.h"
+#include "HGTD_GeoModelAthenaComps.h"
 
 HGTD_GeoModelAthenaComps::HGTD_GeoModelAthenaComps()
   : InDetDD::AthenaComps("HGTD_GeoModel"),

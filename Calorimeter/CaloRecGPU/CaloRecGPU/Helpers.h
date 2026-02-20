@@ -32,6 +32,10 @@
 //but we wanted to ensure the type matched
 //to prevent any GPU-based casting shenanigans.
 
+#if __cpp_lib_bitops
+  #include <bit>
+#endif
+
 namespace CaloRecGPU
 {
 
@@ -198,7 +202,7 @@ namespace CaloRecGPU
     /*!
       \brief Optimizes block and grid size for a cooperative launch.
     */
-    void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0);
+    void optimize_block_and_grid_size_for_cooperative_launch(void * func, int & block_size, int & grid_size, const int dynamic_memory = 0, const int block_size_limit = 0, const bool multiple_blocks_per_SM = true);
 
     bool supports_cooperative_launches();
 
@@ -248,7 +252,29 @@ namespace CaloRecGPU
     //Though we could possibly bit-hack stuff due to IEEE-754 reliance elsewhere,
     //it's not valid and type-safe C++...
     //Since it's compile-time, this being a trifle slower is meaningless.
+    
+    /// \brief Returns the ceiling of the base-2 logarithm of a number
+    /// (i. e. the minimum number of bits to represent this number).
+    template <class T>
+    inline constexpr unsigned int int_ceil_log_2(T num)
+    {
+#if __cpp_lib_bitops
+      return sizeof(T) * CHAR_BIT - std::countl_zero(num);
+#else
+      unsigned int ret = 64;
+    
+      for (unsigned long long int mask = 0x8000000000000000U; mask > 0; mask >>= 1U)
+        {
+          if (num & mask)
+            {
+              return ret;
+            }
+          --ret;
+        }
 
+      return ret;
+#endif
+    }
 
     /*! Calculates a Pearson hash from @ number.
     */
@@ -459,6 +485,144 @@ namespace CaloRecGPU
           constexpr double s_etaMax = 22756.0;
           return z + ((z > 0) - (z < 0)) * s_etaMax;
         }
+    }
+
+    ///Implements one step of a Kahan-Babushka-Neumaier sum
+    ///by adding @p to_add to @p sum with the correction term @p corr.
+    CUDA_HOS_DEV static inline
+    void partial_kahan_babushka_neumaier_sum(const float & to_add, float & sum, float & corr)
+    {
+      const float t = sum + to_add;
+
+      const bool test = fabsf(sum) >= fabsf(to_add);
+
+      const float opt_1 = (sum - t) + to_add;
+      const float opt_2 = (to_add - t) + sum;
+
+      corr += (test) * opt_1 + (!test) * opt_2;
+
+      sum = t;
+    }
+
+    ///Adds a list of floats using the Kahan-Babushka-Neumaier algorithm
+    ///for greater precision (at the cost of additional operations).
+    template < class ... Floats, class disabler = std::enable_if_t < (std::is_same_v<std::decay_t<Floats>, float> && ...) > >
+    CUDA_HOS_DEV inline
+    float sum_kahan_babushka_neumaier(const Floats & ... fs)
+    {
+      float ret = 0.f;
+      float corr = 0.f;
+
+      (partial_kahan_babushka_neumaier_sum(fs, ret, corr), ...);
+
+      return ret + corr;
+    }
+    
+    
+#if CUDA_AVAILABLE
+    ///Adds the contribution of a number @p v to the
+    ///Kahan-Babushka-Neumaier summation that uses
+    ///the pointed-to @p sum_arr and @p corr_arr
+    ///as the accumulator and correction term, respectively.
+    ///Can optionally treat these two pointers as pointers to an array
+    ///and @p as the index into that array, for convenience.
+    __device__ static inline
+    void device_kahan_babushka_neumaier(float * sum_arr, float * corr_arr, const float v, const int idx = 0)
+    {
+      const float old_sum = atomicAdd(sum_arr + idx, v);
+      const float new_sum = old_sum + v;
+      if (fabsf(old_sum) >= fabsf(v))
+        {
+          atomicAdd(corr_arr + idx, (old_sum - new_sum) + v);
+        }
+      else
+        {
+          atomicAdd(corr_arr + idx, (v - new_sum) + old_sum);
+        }
+    }
+#endif
+
+    //Algorithm that calculates a * b + c * d with better precision using FMA,
+    //following "Error bounds on complex floating-point multiplication with an FMA"
+    //by Jeannerod et. al.
+    CUDA_HOS_DEV static inline
+    float product_sum_cornea_harrison_tang(const float a, const float b, const float c, const float d)
+    {
+      using namespace std;
+
+      const float w_1 = a * b;
+      const float w_2 = c * d;
+
+      const float e_1 = fmaf(a, b, -w_1);
+      const float e_2 = fmaf(c, d, -w_2);
+
+      return sum_kahan_babushka_neumaier(w_1, w_2, e_1, e_2);
+    }
+
+    //Generalization of the Cornea-Harrison-Tang algorithm for dot products.
+    CUDA_HOS_DEV inline static
+    float corrected_dot_product(const float a_1, const float a_2, const float a_3,
+                                const float b_1, const float b_2, const float b_3)
+    {
+      using namespace std;
+
+      const float w_1 = a_1 * b_1;
+      const float w_2 = a_2 * b_2;
+      const float w_3 = a_3 * b_3;
+
+      const float e_1 = fmaf(a_1, b_1, -w_1);
+      const float e_2 = fmaf(a_2, b_2, -w_2);
+      const float e_3 = fmaf(a_3, b_3, -w_3);
+
+      return sum_kahan_babushka_neumaier(w_1, w_2, w_3, e_1, e_2, e_3);
+    }
+
+    //Generalization of the Cornea-Harrison-Tang algorithm for dot products.
+    inline CUDA_HOS_DEV
+    float corrected_dot_product(const float (&a)[3], const float (&b)[3])
+    {
+      return corrected_dot_product(a[0], a[1], a[2], b[0], b[1], b[2]);
+    }
+
+    //Cross product using the Cornea-Harrison-Tang algorithm.
+    CUDA_HOS_DEV inline static
+    void corrected_cross_product(float (&res)[3], const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
+    {
+      res[0] = product_sum_cornea_harrison_tang(a2, b3, -a3, b2);
+      res[1] = product_sum_cornea_harrison_tang(a3, b1, -a1, b3);
+      res[2] = product_sum_cornea_harrison_tang(a1, b2, -a2, b1);
+    }
+
+    //Cross product using the Cornea-Harrison-Tang algorithm.
+    CUDA_HOS_DEV inline static
+    void corrected_cross_product(float (&res)[3], const float (&x)[3], const float (&y)[3])
+    {
+      corrected_cross_product(res, x[0], x[1], x[2], y[0], y[1], y[2]);
+    }
+
+    //Magnitude of a cross product using the generalization of the Cornea-Harrison-Tang algorithm.
+    CUDA_HOS_DEV inline static
+    float corrected_magn_cross_product(const float a1, const float a2, const float a3, const float b1, const float b2, const float b3)
+    {
+      using namespace std;
+
+      const float r_1 = product_sum_cornea_harrison_tang(a2, b3, -a3, b2);
+      const float r_2 = product_sum_cornea_harrison_tang(a3, b1, -a1, b3);
+      const float r_3 = product_sum_cornea_harrison_tang(a1, b2, -a2, b1);
+
+#ifdef __CUDA_ARCH__
+      return norm3df(r_1, r_2, r_3);
+#else
+      return hypot(r_1, r_2, r_3);
+#endif
+
+    }
+
+    //Magnitude of a cross product using the generalization of the Cornea-Harrison-Tang algorithm.
+    CUDA_HOS_DEV inline static
+    float corrected_magn_cross_product(const float (&x)[3], const float (&y)[3])
+    {
+      return corrected_magn_cross_product(x[0], x[1], x[2], y[0], y[1], y[2]);
     }
 
     ///! Holds dummy classes just to identify the place in which memory lives.
@@ -867,6 +1031,16 @@ namespace CaloRecGPU
       {
         return m_array;
       }
+      
+      CUDA_HOS_DEV operator const void * () const
+      {
+        return m_array;
+      }
+      
+      CUDA_HOS_DEV operator void * ()
+      {
+        return m_array;
+      }
 
       template <class stream, class str = std::basic_string<typename stream::char_type> >
       void textual_output(stream & s, const str & separator = " ") const
@@ -921,10 +1095,10 @@ namespace CaloRecGPU
       {
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
-            s.write((char *) &m_size, sizeof(indexer));
+            s.write(reinterpret_cast<const char *>(&m_size), sizeof(indexer));
             for (indexer i = 0; i < m_size; ++i)
               {
-                s.write((char *) (m_array + i), sizeof(T));
+                s.write(reinterpret_cast<const char *>(m_array + i), sizeof(T));
               }
           }
         else
@@ -940,7 +1114,7 @@ namespace CaloRecGPU
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
             indexer new_size;
-            s.read((char *) &new_size, sizeof(indexer));
+            s.read(reinterpret_cast<char *>(&new_size), sizeof(indexer));
             if (s.fail())
               {
                 //Throw errors, perhaps? Don't know if we can/should use exceptions...
@@ -950,7 +1124,7 @@ namespace CaloRecGPU
             resize(new_size);
             for (indexer i = 0; i < m_size; ++i)
               {
-                s.read((char *) (m_array + i), sizeof(T));
+                s.read(reinterpret_cast<char *>(m_array + i), sizeof(T));
               }
           }
         else
@@ -1047,6 +1221,16 @@ namespace CaloRecGPU
       }
 
       CUDA_HOS_DEV operator T * ()
+      {
+        return m_array;
+      }
+      
+      CUDA_HOS_DEV operator const void * () const
+      {
+        return m_array;
+      }
+      
+      CUDA_HOS_DEV operator void * ()
       {
         return m_array;
       }
@@ -1272,6 +1456,16 @@ namespace CaloRecGPU
       {
         return m_object;
       }
+      
+      CUDA_HOS_DEV operator const void * () const
+      {
+        return m_object;
+      }
+      
+      CUDA_HOS_DEV operator void * ()
+      {
+        return m_object;
+      }
 
       template <class stream, class str = std::basic_string<typename stream::char_type> >
       void textual_output(stream & s, const str & separator = " ") const
@@ -1334,7 +1528,7 @@ namespace CaloRecGPU
           }
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
-            s.write(reinterpret_cast<char *>( m_object), sizeof(T));
+            s.write(reinterpret_cast<const char *>(m_object), sizeof(T));
           }
         else
           {
@@ -1349,7 +1543,7 @@ namespace CaloRecGPU
         if (std::is_same<Context, MemoryContext::CPU>::value)
           {
             allocate();
-            s.read(reinterpret_cast<char *> (m_object), sizeof(T));
+            s.read(reinterpret_cast<char *>(m_object), sizeof(T));
           }
         else
           {
@@ -1448,6 +1642,16 @@ namespace CaloRecGPU
       {
         return m_object;
       }
+
+      CUDA_HOS_DEV operator const void * () const
+      {
+        return m_object;
+      }
+      
+      CUDA_HOS_DEV operator void * ()
+      {
+        return m_object;
+      }
     };
 
     /// \brief Holds an object of type \p T in CPU memory.
@@ -1494,12 +1698,58 @@ namespace CaloRecGPU
 
       mutable std::shared_mutex m_mutex;
 
+      //Assumes a (read) lock is taken!
+      //Returns nullptr if the current thread
+      //has no objects associated with it.
+      T * get_pointer_if_available() const
+      {
+        const std::thread::id this_id = std::this_thread::get_id();
+        
+        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+          {
+            if (m_thread_equivs[i] == this_id)
+              {
+                return m_held[i].get();
+              }
+          }
+        return nullptr;
+      }
+
       T & add_one_and_return()
       {
         std::unique_lock<std::shared_mutex> lock(m_mutex);
-        m_held.emplace_back(std::make_unique<T>());
-        m_thread_equivs.emplace_back(std::this_thread::get_id());
-        return *(m_held.back());
+        
+        const std::thread::id this_id = std::this_thread::get_id();
+        const std::thread::id invalid_id{};
+
+        bool empty_found = false;
+        
+        size_t first_empty;
+        
+        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+          {
+            if (m_thread_equivs[i] == this_id)
+              {
+                return *(m_held[i]);
+              }
+            else if (!empty_found && m_thread_equivs[i] == invalid_id)
+              {
+                empty_found = true;
+                first_empty = i;
+              }
+          }
+
+        if (empty_found)
+          {
+            m_thread_equivs[first_empty] = this_id;
+            return *(m_held[first_empty]);
+          }
+        else
+          {
+            m_held.emplace_back(std::make_unique<T>());
+            m_thread_equivs.emplace_back(std::this_thread::get_id());
+            return *(m_held.back());
+          }
       }
 
      public:
@@ -1507,15 +1757,12 @@ namespace CaloRecGPU
       {
         {
           std::shared_lock<std::shared_mutex> lock(m_mutex);
-          std::thread::id this_id = std::this_thread::get_id();
-          const std::thread::id invalid_id{};
-          for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+
+          T * to_return = get_pointer_if_available();
+
+          if (to_return != nullptr)
             {
-              if (m_thread_equivs[i] == invalid_id)
-                {
-                  m_thread_equivs[i] = this_id;
-                  return *(m_held[i]);
-                }
+              return *to_return;
             }
         }
         return add_one_and_return();
@@ -1525,17 +1772,19 @@ namespace CaloRecGPU
       T & get_for_thread() const
       {
         std::shared_lock<std::shared_mutex> lock(m_mutex);
-        std::thread::id this_id = std::this_thread::get_id();
-        for (size_t i = 0; i < m_thread_equivs.size(); ++i)
+
+        T * to_return = get_pointer_if_available();
+
+        if (to_return != nullptr)
           {
-            if (m_thread_equivs[i] == this_id)
-              {
-                return *(m_held[i]);
-              }
+            return *to_return;
           }
-        //Here would be a good place for an unreachable.
-        //C++23?
-        return *(m_held.back());
+        else
+          {
+            //Here would be a good place for an unreachable.
+            //C++23?
+            return *(m_held.back());
+          }
       }
 
       void release_one()

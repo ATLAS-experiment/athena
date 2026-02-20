@@ -26,7 +26,6 @@
   <enum name="CaloGain::CaloGain"/>
 
   <!-- should really be in DetDescrDictionary. -->
-  <class name="boost::iterator_range<std::vector<Identifier>::const_iterator>"/>
   <class name="std::vector<Identifier>::const_iterator"/>
   <function proto_pattern="*operator==*Identifier*"/>
   <function proto_pattern="*operator!=*Identifier*"/>

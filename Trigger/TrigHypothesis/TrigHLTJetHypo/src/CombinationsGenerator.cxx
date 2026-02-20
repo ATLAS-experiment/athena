@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CombinationsGenerator.h"
+#include <iostream>
 
 std::ostream& operator << (std::ostream& os, const CombinationsGenerator& cg){
   os << "CombinationsGenerator m_invalid " <<std::boolalpha << cg.m_invalid
@@ -19,6 +20,6 @@ std::ostream& operator << (std::ostream& os, const CombinationsGenerator& cg){
   }
   os << " m_N " << cg.m_N << " m_K " << cg.m_K;
 
-  os << '\n';
+  os << '\n' << std::noboolalpha; //restore default
   return os;
 }

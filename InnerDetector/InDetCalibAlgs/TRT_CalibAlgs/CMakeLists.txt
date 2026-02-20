@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TRT_CalibAlgs )
@@ -52,5 +52,5 @@ atlas_add_executable( TRTCalib_StrawStatusPlots
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.sh )
-atlas_install_runtime( scripts/*.py)
+atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/*.txt scripts/*.C)

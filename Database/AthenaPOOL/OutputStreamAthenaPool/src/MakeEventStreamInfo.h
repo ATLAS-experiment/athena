@@ -48,12 +48,12 @@ public:
 
 private:
    /// Name of DataHeader key
-   StringProperty m_dataHeaderKey{this, "DataHeaderKey", "", "name of the data header key"};
+   Gaudi::Property<std::string> m_dataHeaderKey{this, "DataHeaderKey", "", "name of the data header key"};
    /// Key, the StoreGate key for the EventStreamInfo object.
-   StringProperty m_key{this, "Key", "", "name of the EventStreamInfo object"};
+   Gaudi::Property<std::string> m_key{this, "Key", "", "name of the EventStreamInfo object"};
 
    /// Key, the StoreGate key for the xAOD::EventInfo object.
-   StringProperty m_eventInfoKey{this, "EventInfoKey", "EventInfo", "name of the xAOD::EventInfo"};
+   Gaudi::Property<std::string> m_eventInfoKey{this, "EventInfoKey", "EventInfo", "name of the xAOD::EventInfo"};
 
    /// Pointer to the data stores
    ServiceHandle<IAthMetaDataSvc> m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};

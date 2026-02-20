@@ -59,9 +59,9 @@ public:
 
 private:
    Gaudi::Property<std::string> m_sharedMemory{this, "SharedMemoryName", {}};
+   Gaudi::Property<size_t> m_maxSize{this, "SharedMemoryObjectSize", 64 * 1024 * 1024, "Maximum shared memory object size in B (default = 64 MB)"};
+   Gaudi::Property<int> m_maxDataClients{this, "SharedMemoryClientSize", 256, "Maximum number of clients (default = 256)"};
 
-   const size_t m_maxSize{64 * 1024 * 1024};
-   const int m_maxDataClients{256};
    int m_num{-1};
    int m_lastClient{-1};
    std::set<int> m_dataClients;

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -83,25 +83,25 @@ namespace dqutils {
       }
 
       // ----- find egamma monitoring directory (EgammaSigTE) ------
-      TString egammamonDirName = runDirName + "/HLT/EgammaSigTE";
+      std::string egammamonDirName = runDirName + "/HLT/EgammaSigTE";
       TDirectory* egammamonDir(0);
-      if (!(egammamonDir = f->GetDirectory(egammamonDirName))) {
+      if (!(egammamonDir = f->GetDirectory(egammamonDirName.c_str()))) {
         std::cout << "--> HLTEgammaPostProcess: directory " << egammamonDirName << " not found." << std::endl;
         delete obj_run;
         return;
       }
 
       // ----- get handles for offline egamma object directories -----
-      TString offgammaDirName = egammamonDirName + "/OfflinePhoton";
-      TString offeleDirName = egammamonDirName + "/OfflineElectron";
+      std::string offgammaDirName = egammamonDirName + "/OfflinePhoton";
+      std::string offeleDirName = egammamonDirName + "/OfflineElectron";
       TDirectory* offgammaDir(0);
       TDirectory* offeleDir(0);
-      if (!(offgammaDir = f->GetDirectory(offgammaDirName))) {
+      if (!(offgammaDir = f->GetDirectory(offgammaDirName.c_str()))) {
         std::cout << "--> HLTEgammaPostProcess: offline directory " << offgammaDirName << " not found, will abort.\n";
         delete obj_run;
         return;
       }
-      if (!(offeleDir = f->GetDirectory(offeleDirName))) {
+      if (!(offeleDir = f->GetDirectory(offeleDirName.c_str()))) {
         std::cout << "--> HLTEgammaPostProcess: offline directory " << offeleDirName << " not found, will abort.\n";
         delete obj_run;
         return;
@@ -113,35 +113,38 @@ namespace dqutils {
       //                  or histo_tensor respectively!
       // note: offline effs use "egEt", "egEta" etc., this is hardcoded in the
       //       variable name formation in the offl. eff function.
-      // finally: use std::vector<TString> varname = {"Et", "Eta", "Phi"}
+      // finally: use std::vector<std::string> varname = {"Et", "Eta", "Phi"}
       //          if we're ever going to use C++11 around this place...
 
-      std::vector<TString> varName;
-      varName.push_back("Et");
-      varName.push_back("Eta");
-      varName.push_back("Phi");
+      static const std::vector<std::string> varName = {
+        "Et",
+        "Eta",
+        "Phi",
+      };
 
       // ----- chain stages for relative effs -----
       // word of warning: hardcoded maximum of 5 in the efficiency functions
       //                  if you add stages, increase the size of histo_matrix
       //                  or histo_tensor respectively!
-      // finally: use std::vector<TString> phoStage = {"L1", "L2Calo", "EFCalo"}
-      //          and std::vector<TString> phoStage = {"L1", "L2Calo", "L2ID", "EFCalo", "EFID"}
+      // finally: use std::vector<std::string> phoStage = {"L1", "L2Calo", "EFCalo"}
+      //          and std::vector<std::string> phoStage = {"L1", "L2Calo", "L2ID", "EFCalo", "EFID"}
       //          if we're ever going to use C++11 around this place...
 
       //photons
-      std::vector<TString> phoStage;
-      phoStage.push_back("L1");
-      phoStage.push_back("L2Calo");
-      phoStage.push_back("EFCalo");
+      static const std::vector<std::string> phoStage = {
+        "L1",
+        "L2Calo",
+        "EFCalo",
+      };
 
       //electrons
-      std::vector<TString> eleStage;
-      eleStage.push_back("L1");
-      eleStage.push_back("L2Calo");
-      eleStage.push_back("L2ID");
-      eleStage.push_back("EFCalo");
-      eleStage.push_back("EFID");
+      static const std::vector<std::string> eleStage = {
+        "L1",
+        "L2Calo",
+        "L2ID",
+        "EFCalo",
+        "EFID",
+      };
 
       // ----- loop over directories (i.e. trigger chains) ------
       TIter next_trig(egammamonDir->GetListOfKeys());
@@ -160,17 +163,17 @@ namespace dqutils {
         }
 
         //get name of the current trigger chain
-        TString trigger_name = dir_trig->GetName();
+        std::string trigger_name = dir_trig->GetName();
 
         //bow out of offline containers here (we don't monitor them, they're for bootstrapping)
-        if (trigger_name.Contains("Offline")) {
+        if (trigger_name.find("Offline") != std::string::npos) {
           delete obj_trig;
           continue;
         }
 
         //detect photon/electron chains (checks chain name, skips unrecognised chains)
-        if (trigger_name.BeginsWith("g") || trigger_name.BeginsWith("2g")) photon_chain = true;
-        else if (trigger_name.BeginsWith("e") || trigger_name.BeginsWith("2e")) electron_chain = true;
+        if (trigger_name.starts_with("g") || trigger_name.starts_with("2g")) photon_chain = true;
+        else if (trigger_name.starts_with("e") || trigger_name.starts_with("2e")) electron_chain = true;
         else {
           std::cout << "--> HLTEgammaPostProcess: Non-electron/photon chain detected, will be skipped!\n";
           delete obj_trig;

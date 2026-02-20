@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/ThinningDecision.h
@@ -19,7 +19,7 @@
 #include "AthLinks/DataLink.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "AthenaKernel/ILockable.h"
+#include "SGCore/ILockable.h"
 #include <vector>
 #include <string>
 

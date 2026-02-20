@@ -12,26 +12,11 @@
 # pragma GCC diagnostic ignored "-Wstringop-overread"
 #endif
 
-// Super-nasty hack to work round explicit uses of Acts::Seed in Acts Core Seeding.
-// A better fix would be to change Acts::Seed to the templates that are used elsewhere in Acts Core.
-// The even better fix would be to change Acts::Seed to support more than 3 SPs/seed.
-#include "Acts/EventData/Seed.hpp"
-#include "ActsEvent/Seed.h"
-namespace Acts {
-  template <typename external_spacepoint_t, std::size_t N = 3ul>
-  using AthenaSeed = typename ActsTrk::ActsSeed<external_spacepoint_t, N>;
-}
-
-#define Seed AthenaSeed
-#include "Acts/Seeding/SeedFinder.hpp"
-#include "Acts/Seeding/SeedFilter.hpp"
-#undef Seed
 
 // ATHENA
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ActsInterop/Logger.h"
-#include "ActsEvent/SeedContainer.h"
 
 // ACTS CORE
 #include "Acts/Definitions/Units.hpp"
@@ -42,6 +27,8 @@ namespace Acts {
 #include "Acts/Seeding/BinnedGroup.hpp"
 #include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
+#include "Acts/Seeding/SeedFilter.hpp"
+#include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/EventData/Seed.hpp"
 
 #include "InDetIdentifier/PixelID.h"
@@ -54,7 +41,7 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
   public:
     using value_type = typename Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>::SpacePointProxyType;
-    using seed_type = ActsTrk::ActsSeed< value_type, 3ul >;
+    using seed_type = Acts::Seed< value_type, 3ul >;
     using external_type = typename std::conditional< 
       std::is_const< typename value_type::ValueType >::value,
       typename std::remove_const< typename value_type::ValueType >::type,
@@ -93,7 +80,7 @@ namespace ActsTrk {
 		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-		   DataVector< ActsTrk::ActsSeed< external_type, 3ul > >& seeds ) const;
+		   ActsTrk::SeedContainer& seeds ) const;
     
     StatusCode prepareConfiguration();
 

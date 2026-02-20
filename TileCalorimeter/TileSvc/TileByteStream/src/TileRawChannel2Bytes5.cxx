@@ -169,14 +169,12 @@ uint32_t _deal(uint32_t u) {
   u1 = 0; u0 = 0;
   k = 1; k0 = 1; k1 = 1 << 16;
 
-  for (int i = 0; i < 16; ++i) {
+  for (int i = 0; i < 16; ++i, (k1 <<= 1), (k <<= 1)) {
     if (u & k) u0 |= k0;
     k0 = k0 << 1;
     k  = k  << 1;
 
     if (u & k) u1 |= k1;
-    k1 = k1 << 1;
-    k  = k  << 1;
   }
   return u1 | u0;
 }
@@ -358,7 +356,8 @@ void calc_amp(const UINT32* ofw, int unit, int chan, int gain, int ene, int time
 {
   int s2, s3, s4, s5, s6, s7;
   INT16 amp2, ampcorr, a_scale;
-  int amptime, amp_reco;
+  UINT32 amptime;
+  int amp_reco;
   UINT32 wamptime;
 
   const UINT32* ofc = (ofw + chan*NOFWORDS_WEIGHTS_7S + 
@@ -371,7 +370,7 @@ void calc_amp(const UINT32* ofw, int unit, int chan, int gain, int ene, int time
   ampcorr = ampcorr_lookup[time + 32];
   amp2 = _mpy(amp2, ampcorr) >> 14;
   amptime  = _sshl(_round(_mpy(amp2, time), 3), 16);
-  wamptime = _packhl2(-amptime, amp2);
+  wamptime = _packhl2((~amptime) + 1, amp2);
   {
     // g_scale, h_scale
     UINT16 g_scale = _extu(ofc[13], 16, 16);

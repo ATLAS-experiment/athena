@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGCALIBRATION_JETTAGCALIBCONDALG_H
 #define JETTAGCALIBRATION_JETTAGCALIBCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -46,7 +46,7 @@ namespace Analysis {
   @author emmanuel.le.guirriec@cern.ch
   */
 
-class JetTagCalibCondAlg : public AthAlgorithm {
+class JetTagCalibCondAlg : public AthCondAlgorithm {
 
  public:
 
@@ -54,17 +54,17 @@ class JetTagCalibCondAlg : public AthAlgorithm {
   ~JetTagCalibCondAlg();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
  private:
   void registerHistogram(const std::string& tagger, const std::string& histoname);
   void registerHistogram(const std::string& tagger, const std::string& directory, const std::string& histoname);
-  StatusCode createHistoMap(TFile* file, JetTagCalibCondData * histos);
+  std::vector<std::string> createHistoMap(TFile* file, JetTagCalibCondData * histos) const;
   StatusCode objectTDirExists(const std::string& histname, TFile* file) const;
   std::vector<std::string> tokenize(const std::string& str, const std::string& delim);
-  void smoothAndNormalizeHistogram(TH1* h, const std::string& hname);
-  void smoothASH2D(TH2* input2D, int m1, int m2); 
+  void smoothAndNormalizeHistogram(TH1* h, const std::string& hname) const;
+  void smoothASH2D(TH2* input2D, int m1, int m2) const;
   void initializeIPTag();
   void initializeIP2D();
   void initializeIP3D();
@@ -87,7 +87,6 @@ class JetTagCalibCondAlg : public AthAlgorithm {
   std::vector< std::string > m_taggers;
   std::unordered_map<std::string,std::string> m_directoryMap;
   std::vector<std::vector<std::string> > m_taggersHists;
-  std::vector< std::string > m_mappedAlias;
   std::vector< std::string > m_originalChannels;
   /* aliases for channels: 
   * to specifiy an alias, enter a string "channelA->channelAA" (or a list of strings)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -36,6 +36,8 @@ public :
    TBranch        *b_rho;   //!
 
    SurfaceValidationTree(TTree *tree=0);
+   SurfaceValidationTree(const SurfaceValidationTree &) = delete;
+   SurfaceValidationTree & operator = (const SurfaceValidationTree &) = delete;
    virtual ~SurfaceValidationTree();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);

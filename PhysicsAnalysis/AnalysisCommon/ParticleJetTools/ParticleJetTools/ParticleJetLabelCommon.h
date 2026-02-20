@@ -34,6 +34,8 @@ namespace ParticleJetTools {
     std::string childPdgId;
     std::string childPositionDPhi;
     std::string childPositionDEta;
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    bool useBarcode;
     void check();
   };
 
@@ -53,6 +55,8 @@ namespace ParticleJetTools {
     SG::AuxElement::Decorator<int> childPdgId;
     SG::AuxElement::Decorator<float> childPositionDPhi;
     SG::AuxElement::Decorator<float> childPositionDEta;
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    SG::ConstAccessor<int> acc_uid;
   };
 
   class IParticleLinker {
@@ -117,6 +121,8 @@ namespace ParticleJetTools {
     tool.declareProperty("ChildPdgIdName", n->childPdgId="", "Attribute for the labeling particle child pdg ID");
     tool.declareProperty("ChildPositionDPhiName", n->childPositionDPhi="", "Attribute for the position dPhi of the labeling particle child");
     tool.declareProperty("ChildPositionDEtaName", n->childPositionDEta="", "Attribute for the position dEta of the labeling particle child");
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    tool.declareProperty("useBarcode", n->useBarcode=false, "use barcode instead of uid");
   }
 
 }

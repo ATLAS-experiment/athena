@@ -20,6 +20,7 @@ namespace Muon {
         ATH_CHECK(m_outTruthMuonKey.initialize());
         ATH_CHECK(m_truthOriginKey.initialize());
         ATH_CHECK(m_truthTypeKey.initialize());
+        ATH_CHECK(m_truthClassificationKey.initialize());
         ATH_CHECK(m_truthLinkKey.initialize());
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_truthClassifier.retrieve());
@@ -39,11 +40,12 @@ namespace Muon {
 
         SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthOrigin{m_truthOriginKey, ctx};
         SG::WriteDecorHandle<xAOD::TruthParticleContainer, int> truthType{m_truthTypeKey, ctx};
+        SG::WriteDecorHandle<xAOD::TruthParticleContainer, unsigned int> truthClassification{m_truthClassificationKey, ctx};
         SG::WriteDecorHandle<xAOD::TruthParticleContainer, TruthLink_t> truthLink{m_truthLinkKey, ctx};
 
         // loop over truth coll
         for (const xAOD::TruthParticle* truth : *truthContainer) {
-            if (!MC::isStable(truth)	 || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
+            if (!MC::isStable(truth) || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
             xAOD::TruthParticle* truthParticle = muonTruthContainer->push_back(std::make_unique<xAOD::TruthParticle>());
             truthParticle->setPdgId(truth->pdgId());
             truthParticle->setUid(HepMC::uniqueID(truth));
@@ -54,7 +56,7 @@ namespace Muon {
             truthParticle->setE(truth->e());
             truthParticle->setM(truth->m());
             if (truth->hasProdVtx()) truthParticle->setProdVtxLink(truth->prodVtxLink());
-            
+
             TruthLink_t itruthLink(*truthContainer, truth->index());
             itruthLink.toPersistent();
             truthLink(*truthParticle) = itruthLink;
@@ -63,6 +65,7 @@ namespace Muon {
                           << HepMC::uniqueID(truthParticle) << " HepMC::uniqueID(*itruthLink) " << HepMC::uniqueID(*itruthLink) << " "
                           << itruthLink);
             int iType{0}, iOrigin{0};
+            unsigned int iClassification{0};
 
             // if configured look up truth classification
             if (!m_truthClassifier.empty()) {
@@ -71,12 +74,14 @@ namespace Muon {
                     m_truthClassifier->particleTruthClassifier(truth);
                 iType = truthClass.first;
                 iOrigin = truthClass.second;
-                ATH_MSG_VERBOSE("Got truth type  " << iType << "  origin " << iOrigin);
+                iClassification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truth)); // See AGENE-2351
+                ATH_MSG_VERBOSE("Got truth type  " << iType << "  origin " << iOrigin << " classification " << iClassification);
             }
             truthOrigin(*truthParticle) = iOrigin;
             truthType(*truthParticle) = iType;
+            truthClassification(*truthParticle) = iClassification;
 
-            ATH_MSG_DEBUG("good muon with type " << iType << " and origin" << iOrigin);
+            ATH_MSG_DEBUG("good muon with type " << iType << " origin" << iOrigin << " and classification " << iClassification);
         }
 
         ATH_MSG_DEBUG("Registered " << muonTruthContainer->size() << " truth muons ");
@@ -85,4 +90,3 @@ namespace Muon {
     }
 
 }  // namespace Muon
-

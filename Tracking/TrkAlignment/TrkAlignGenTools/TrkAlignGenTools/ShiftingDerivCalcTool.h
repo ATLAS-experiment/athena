@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_SHIFTINGDERIVCALCTOOL_H
@@ -11,7 +11,10 @@
 #include "TrkEventPrimitives/ParamDefs.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
+#include "TrkFitterInterfaces/IGlobalTrackFitter.h"
 #include "TrkAlignInterfaces/IDerivCalcTool.h"
+#include "TrkAlignInterfaces/IAlignResidualCalculator.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 
 #include <vector>
@@ -35,14 +38,10 @@ namespace Trk {
 
   class TrackStateOnSurface;
   class Track;
-  class IGlobalTrackFitter;
-  //class ITrackFitter;
-  class IAlignResidualCalculator;
   class AlignModule;
   class AlignTSOS;
   class AlignTrack;
   class AlignPar;
-  class IAlignModuleTool;
 
   class ShiftingDerivCalcTool : virtual public IDerivCalcTool, public AthAlgTool {
 
@@ -96,74 +95,82 @@ namespace Trk {
                            bool& resetIPar);
 
     // private variables
-    ToolHandle<IGlobalTrackFitter> m_trackFitterTool;
-    ToolHandle<IGlobalTrackFitter> m_SLTrackFitterTool;
+    ToolHandle<IGlobalTrackFitter> m_trackFitterTool
+      {this, "TrackFitterTool", "Trk::GlobalChi2Fitter/MCTBFitter"};
+    ToolHandle<IGlobalTrackFitter> m_SLTrackFitterTool
+      {this, "SLTrackFitterTool", "Trk::GlobalChi2Fitter/MCTBSLFitter"};
     ToolHandle<IGlobalTrackFitter> m_fitter;
-    //ToolHandle<ITrackFitter> m_trackFitterTool;
-    //ToolHandle<ITrackFitter> m_SLTrackFitterTool;
-    //ToolHandle<ITrackFitter> m_fitter;
     
-    ToolHandle<IAlignResidualCalculator> m_residualCalculator;
-    ToolHandle<IAlignModuleTool> m_alignModuleTool;
+    ToolHandle<IAlignResidualCalculator> m_residualCalculator
+      {this, "ResidualCalculator", "Trk::AlignResidualCalculator/ResidualCalculator"};
+    ToolHandle<IAlignModuleTool> m_alignModuleTool
+      {this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool"};
 
-    double m_traSize;
-    double m_rotSize;
+    Gaudi::Property<double> m_traSize{this, "TranslationSize", .1};
+    Gaudi::Property<double> m_rotSize{this, "RotationSize", .1};
 
-    bool m_runOutlierRemoval; 
-    ParticleHypothesis m_particleHypothesis;
+    Gaudi::Property<bool> m_runOutlierRemoval
+      {this, "RunOutlierRemoval", false};
+    ParticleHypothesis m_particleHypothesis = Trk::muon;
 
-    int m_particleNumber;
+    Gaudi::Property<int> m_particleNumber{this, "ParticleNumber", 2};
 
     DerivativeMap m_derivative_map;
   
-    bool   m_doFits;
-    int    m_nFits;
-    bool   m_doChi2VAlignParamMeasType;
-    int    m_nChamberShifts;
-    bool   m_doResidualPlots;
-    int    m_nIterations;
+    Gaudi::Property<bool> m_doFits{this, "doResidualFits", true};
+    Gaudi::Property<int> m_nFits{this, "NumberOfShifts", 5};
+    Gaudi::Property<bool> m_doChi2VAlignParamMeasType
+      {this, "doChi2VChamberShiftsMeasType", false};
+    Gaudi::Property<bool> m_doResidualPlots{this, "doResidualPlots", false};
+    int m_nIterations = 0;
 
-    Amg::VectorX* m_unshiftedResiduals;
-    Amg::VectorX* m_unshiftedResErrors;
+    Amg::VectorX* m_unshiftedResiduals = nullptr;
+    Amg::VectorX* m_unshiftedResErrors = nullptr;
 
     // stores double** for each module that track passes through
     std::vector<double**> m_chi2VAlignParamVec;  //!< track chi2[idof][ichambershift]
     std::vector<double**> m_chi2VAlignParamXVec; //!< chamber shift[idof][ichambershift]
 
-    double** m_tmpChi2VAlignParam;           
-    double** m_tmpChi2VAlignParamX;
-    double*** m_tmpChi2VAlignParamMeasType;
+    double** m_tmpChi2VAlignParam = nullptr;
+    double** m_tmpChi2VAlignParamX = nullptr;
+    double*** m_tmpChi2VAlignParamMeasType = nullptr;
 
     // stores double*** for each module that track passes through 
     // (one double** for each TrackState::MeasurementType)
     std::vector<double***> m_chi2VAlignParamVecMeasType;  //!< track chi2[idof][imeastype][ichambershift]
 
-    double  m_unshiftedTrackChi2; 
-    double* m_unshiftedTrackChi2MeasType;
+    double  m_unshiftedTrackChi2{};
+    std::unique_ptr<double[]> m_unshiftedTrackChi2MeasType;
 
-    double m_trackAlignParamCut; //!< cut on value of track alignment parameter, determined from fit of chi2 vs. align parameters to a quadratic
+    //!< cut on value of track alignment parameter, determined from fit of chi2 vs. align parameters to a quadratic
+    Gaudi::Property<double> m_trackAlignParamCut{this, "TrackAlignParamCut", 1e6};
 
-    bool m_setMinIterations; //!< fit track with AlignModules shifted up and down in each extreme, find the number of iterations fitter uses to converge.  Set this number for all subsequent track refits. 
+    //!< fit track with AlignModules shifted up and down in each extreme, find the number of iterations fitter uses to converge.  Set this number for all subsequent track refits.
+    Gaudi::Property<bool> m_setMinIterations{this, "SetMinIterations", false};
 
-    int m_maxIter; //!< reject track if exceed maximum number of iterations
+    //!< reject track if exceed maximum number of iterations
+    Gaudi::Property<int> m_maxIter{this, "MaxIterations", 50};
 
-    int m_minIter; //!< set minimum number of iterations for first track fits
+    //!< set minimum number of iterations for first track fits
+    Gaudi::Property<int> m_minIter{this, "MinIterations", 10};
 
-    bool m_removeScatteringBeforeRefit; //!< flag to remove scattering before refitting track
+    //!< flag to remove scattering before refitting track
+    Gaudi::Property<bool> m_removeScatteringBeforeRefit
+      {this, "RemoveScatteringBeforeRefit", false};
 
-    int m_ntracksProcessed;           //!< number tracks processed
-    int m_ntracksPassInitScan;        //!< number tracks pass initial scan
-    int m_ntracksPassSetUnshiftedRes; //!< number tracks pass setting unshifted residuals
-    int m_ntracksPassDerivatives;     //!< number tracks pass setting derivatives
-    int m_ntracksPassGetDeriv;        //!< number tracks pass getting derivatives
-    int m_ntracksPassGetDerivSecPass; //!< number tracks pass 2nd pass of getting derivatives
-    int m_ntracksPassGetDerivLastPass; //!< number tracks pass 2nd pass of getting derivatives
-    int m_ntracksFailMaxIter;
-    int m_ntracksFailTrackRefit;
-    int m_ntracksFailAlignParamCut;
-    int m_ntracksFailFinalAttempt;
+    int m_ntracksProcessed = 0;           //!< number tracks processed
+    int m_ntracksPassInitScan = 0;        //!< number tracks pass initial scan
+    int m_ntracksPassSetUnshiftedRes = 0; //!< number tracks pass setting unshifted residuals
+    int m_ntracksPassDerivatives = 0;     //!< number tracks pass setting derivatives
+    int m_ntracksPassGetDeriv = 0;        //!< number tracks pass getting derivatives
+    int m_ntracksPassGetDerivSecPass = 0; //!< number tracks pass 2nd pass of getting derivatives
+    int m_ntracksPassGetDerivLastPass = 0; //!< number tracks pass 2nd pass of getting derivatives
+    int m_ntracksFailMaxIter = 0;
+    int m_ntracksFailTrackRefit = 0;
+    int m_ntracksFailAlignParamCut = 0;
+    int m_ntracksFailFinalAttempt = 0;
 
-    bool m_secPass;
+    bool m_secPass{};
 
   }; // end class
 

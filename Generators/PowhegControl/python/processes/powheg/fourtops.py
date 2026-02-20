@@ -165,7 +165,7 @@ class fourtops(PowhegV2):
         self.add_keyword("tdec/wwidth")
         self.add_keyword("testplots")
         self.add_keyword("testsuda")
-        self.add_keyword("topdecaymode", "t t~ > all [MadSpin]", name="decay_mode")
+        self.add_keyword("topdecaymode", "t t~ t t~ > all", name="decay_mode")
         self.add_keyword("ubexcess_correct")
         self.add_keyword("ubsigmadetails")
         self.add_keyword("use-old-grid")

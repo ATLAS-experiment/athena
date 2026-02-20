@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/setupBeamline.h"
@@ -17,9 +17,7 @@
 #include "FPTracker/beamlineXPosition.h"
 #include "FPTracker/IBeamElement.h"
 #include "FPTracker/Particle.h"
-#include <memory>
-#include <algorithm>
-//#include <cassert>
+#include <fstream>
 #include <iostream>
 
 namespace FPTracker{
@@ -32,7 +30,7 @@ namespace FPTracker{
 			 )
   {
     
-    Magnet::Container_t   magnets    = magnetSet(configData, side, magver, magfile);
+    Magnet::Container_t   magnets    = magnetSet(configData, side, magver, std::move(magfile));
     Plane::Ptr_t          endPlane( new Plane(configData.endMarker, side) );
     CollimatorData  collimatorData(configData);
     Collimator::Container_t collimators = collSet(collimatorData, side);
@@ -40,9 +38,8 @@ namespace FPTracker{
     IBeamElement::List_t elements;
     //elements.reserve( 2*(magnets.size()+collimators.size()+planes.size()) );
     elements.assign(magnets.begin(), magnets.end());
-    elements.push_back(endPlane);
+    elements.push_back(std::move(endPlane));
     elements.insert(elements.end(), collimators.begin(), collimators.end());
-    //std::sort(elements.begin(), elements.end(), absZGreater<IBeamElement>);
     elements.sort(absZGreater< IBeamElement::ConstPtr_t >);
 
 

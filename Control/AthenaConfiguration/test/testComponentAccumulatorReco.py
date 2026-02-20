@@ -8,7 +8,7 @@ import unittest
 class TestDataDependenciesCollection( unittest.TestCase ):
     def setUp(self):
         ca = ComponentAccumulator()
-        alg = CompFactory.TauProcessorAlg("Algo") # use this one as example because it has rich I/O
+        alg = CompFactory.TauBuilderAlg("Algo") # use this one as example because it has rich I/O
         alg.Key_jetInputContainer = "TestJets"
         alg.CellMakerTool = CompFactory.CaloCellTimeCorrTool("TestPrivateTool", Folder="TestFolderA")
         alg.ExtraInputs.add(("ImaginedExtraType","ExInput"))

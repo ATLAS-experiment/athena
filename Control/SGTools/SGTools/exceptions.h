@@ -15,7 +15,7 @@
 #define SGTOOLS_EXCEPTIONS_H
 
 
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "GaudiKernel/ClassID.h"
 #include <typeinfo>
 #include <stdexcept>
@@ -29,7 +29,7 @@ class DataProxy;
 
 
 /**
- * @brief Exception --- Bad cast of DataProxy with CLID 
+ * @brief Exception --- Bad cast of DataProxy with CLID
  *
  * You tried to retrieve an object in StoreGate as an incompatible type.
  */

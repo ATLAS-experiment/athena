@@ -4,8 +4,9 @@
 
 #include "TrigConfData/L1ThrExtraInfo.h"
 
-#include <boost/lexical_cast.hpp>
 #include <stdexcept>
+#include <cmath>
+
 
 using namespace std;
 
@@ -66,7 +67,10 @@ TrigConf::L1ThrExtraInfo::createExtraInfo(const std::string & thrTypeName, const
 
    if( thrTypeName == "gTE" )
       return std::make_unique<L1ThrExtraInfo_gTE>(thrTypeName, data);
-
+   
+   if( thrTypeName == "cXE" )
+      return std::make_unique<L1ThrExtraInfo_cXE>(thrTypeName, data);
+   
    // if no special extra information is supplied for the threshold type return base class
    return std::make_unique<L1ThrExtraInfoBase>(thrTypeName, data);
 }
@@ -182,6 +186,11 @@ TrigConf::L1ThrExtraInfo::gXE() const {
 const TrigConf::L1ThrExtraInfo_gTE &
 TrigConf::L1ThrExtraInfo::gTE() const {
    return dynamic_cast<const TrigConf::L1ThrExtraInfo_gTE&>( * m_thrExtraInfo.at("gTE") );
+}
+
+const TrigConf::L1ThrExtraInfo_cXE &
+TrigConf::L1ThrExtraInfo::cXE() const {
+   return dynamic_cast<const TrigConf::L1ThrExtraInfo_cXE&>( * m_thrExtraInfo.at("cXE") );
 }
 
 const TrigConf::L1ThrExtraInfo_MU &
@@ -712,6 +721,21 @@ TrigConf::L1ThrExtraInfo_gTE::load()
 }
 
 /*******
+ * cXE
+ *******/
+void
+TrigConf::L1ThrExtraInfo_cXE::load()
+{
+   for( auto & x : m_extraInfo ) {
+      if( x.first == "jXeWeight" ){
+         m_jXeWeight = x.second.getValue<float>();
+      } else if( x.first == "gXeWeight" ){
+         m_gXeWeight = x.second.getValue<float>();
+      }
+   }
+}
+
+/*******
  * MU
  *******/
 unsigned int
@@ -819,15 +843,15 @@ TrigConf::L1ThrExtraInfo_MU::load()
    {
       DataStructure ds = m_extraInfo["roads"].getObject("rpc");
       for( const auto & x : ds.data() ) {
-         m_rpcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+        m_rpcPtMap.emplace( static_cast<unsigned int>(std::stoul(x.first)),
+                            static_cast<unsigned int>(std::stoul(x.second.data())));
      }
    }
    {
       DataStructure ds = m_extraInfo["roads"].getObject("tgc");
       for( auto & x : ds.data() ) {
-         m_tgcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+         m_tgcPtMap.emplace( static_cast<unsigned int>(std::stoul(x.first)),
+                             static_cast<unsigned int>(std::stoul(x.second.data())));
       }
    }
    for( auto & x : m_extraInfo["exclusionLists"].data() ) {
@@ -837,7 +861,7 @@ TrigConf::L1ThrExtraInfo_MU::load()
          const std::string & sectorName = list.second.get_child("sectorName").get_value<std::string>();
          std::vector<unsigned int> rois;
          for( auto & roi : list.second.get_child("rois") ) {
-            rois.push_back( boost::lexical_cast<unsigned int, std::string>( roi.second.data() ) );
+            rois.push_back( static_cast<unsigned int>(std::stoul( roi.second.data() )) );
          }
          roisBySector.emplace(sectorName, std::move(rois));
       }

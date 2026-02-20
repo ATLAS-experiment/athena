@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEVENT_JETMAPBASE_H
@@ -160,8 +160,6 @@ protected:
   mutable map_t  m_store;
   /*! @brief Null data reference */
   static const data_t m_nullData;
-
-  typename map_t::iterator m_end;
 #endif
 
   

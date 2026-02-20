@@ -13,7 +13,7 @@
 #include <map>
 
 HGTD_DetectorElementCondAlg::HGTD_DetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

@@ -17,9 +17,9 @@
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IProxyDict.h"
-#include "AthenaKernel/ILockable.h"
 #include "AthenaKernel/IResetable.h"
 #include "AthenaKernel/BaseInfo.h"
+#include "SGCore/ILockable.h"
 #include "CxxUtils/StrFormat.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
@@ -535,5 +535,3 @@ int main (int argc, char** argv)
 
   return 0;
 }
-
-

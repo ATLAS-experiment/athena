@@ -50,7 +50,7 @@ endif()
 atlas_install_python_modules( python/*.py )
 
 # Install helper utility
-atlas_install_runtime( util/generator-weights.py )
+atlas_install_scripts( util/generator-weights.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Test(s) in the package:
 #

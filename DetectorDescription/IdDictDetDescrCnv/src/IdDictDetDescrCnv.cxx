@@ -210,12 +210,12 @@ StatusCode IdDictDetDescrCnv::parseXMLDescription() {
                       << (m_doNeighbours ? "true" : "false"));
 
         // Do some checks
-        const IdDictMgr::dictionary_map &dm = mgr.get_dictionary_map();
-        if (dm.empty()) {
+        size_t ndict = mgr.get_dictionaries().size();
+        if (ndict == 0) {
             ATH_MSG_ERROR("No dictionaries found!");
             return StatusCode::FAILURE;
         }
-        ATH_MSG_DEBUG("Found " << dm.size() << " dictionaries.");
+        ATH_MSG_DEBUG("Found " << ndict << " dictionaries.");
 
         // Register the requested files and tags with the id dicts
         ATH_CHECK(registerInfoWithDicts());
@@ -273,19 +273,12 @@ void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
     std::string tag = dictMgr->manager()->tag();
     ATH_MSG_INFO("Using dictionary tag: " << (tag.empty() ? "<no tag>" : tag));
 
-    const IdDictMgr::dictionary_map &dm =
-        dictMgr->manager()->get_dictionary_map();
-    IdDictMgr::dictionary_map::const_iterator it;
-
-    int n = 0;
-
-    for (it = dm.begin(); it != dm.end(); ++it, ++n) {
-        const IdDictDictionary &dictionary = *((*it).second);
+    for (const IdDictDictionary* dictionary : dictMgr->manager()->get_dictionaries()) {
         std::string version =
-          ("" != dictionary.version()) ? dictionary.version() : "default";
-        msg(MSG::INFO) << "Dictionary " << dictionary.name();
-        if (dictionary.name().size() < 20) {
-            std::string space(20 - dictionary.name().size(), ' ');
+          ("" != dictionary->version()) ? dictionary->version() : "default";
+        msg(MSG::INFO) << "Dictionary " << dictionary->name();
+        if (dictionary->name().size() < 20) {
+            std::string space(20 - dictionary->name().size(), ' ');
             msg(MSG::INFO) << space;
         }
         msg(MSG::INFO) << " version " << version;
@@ -293,16 +286,16 @@ void IdDictDetDescrCnv::printDicts(const IdDictManager *dictMgr) {
             std::string space(20 - version.size(), ' ');
             msg(MSG::INFO) << space;
         }
-        if (dictionary.dict_tag().size()) {
-            msg(MSG::INFO) << " DetDescr tag " << dictionary.dict_tag();
-            if (dictionary.dict_tag().size() < 20) {
-                std::string space(25 - dictionary.dict_tag().size(), ' ');
+        if (dictionary->dict_tag().size()) {
+            msg(MSG::INFO) << " DetDescr tag " << dictionary->dict_tag();
+            if (dictionary->dict_tag().size() < 20) {
+                std::string space(25 - dictionary->dict_tag().size(), ' ');
                 msg(MSG::INFO) << space;
             }
         } else {
             msg(MSG::INFO) << " DetDescr tag (using default)";
         }
-        ATH_MSG_INFO(" file " << dictionary.file_name());
+        ATH_MSG_INFO(" file " << dictionary->file_name());
     }
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1BOARD_H
@@ -8,8 +8,8 @@
 #include "TrigConfData/ConstIter.h"
 #include "TrigConfData/DataStructure.h"
 
-#include <map>
 #include <vector>
+#include <string>
 
 namespace TrigConf {
 
@@ -23,7 +23,7 @@ namespace TrigConf {
    class L1Board final : public DataStructure {
    public:
 
-      enum class BoardType { CTPIN, TOPO, MUCTPI, MERGER };
+      enum class BoardType { CTPIN, TOPO, MUCTPI, MERGER, UNKNOWN };
 
       /** Constructor */
       L1Board();
@@ -60,8 +60,8 @@ namespace TrigConf {
       /** Update the internal members */
       virtual void update() override;
 
-      BoardType m_boardType;
-      bool m_legacy;
+      BoardType m_boardType{BoardType::UNKNOWN};
+      bool m_legacy{};
       std::vector<std::string> m_connectorNames;     
    };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -14,6 +14,13 @@
 #include "TrkVKalVrtCore/ForCFT.h"
 
 namespace Trk {
+
+  CascadeEvent::CascadeEvent():
+    cascadeNV(0), nearPrmVertex(0), fullCovMatrix(0), cascadeVertexList(0),
+    matrixPnt(0), m_SCALE(1.), m_accuracyConstraint(1.e-4)
+  {
+  }
+  CascadeEvent::~CascadeEvent() = default;
 
   VKalVrtControlBase::VKalVrtControlBase(baseMagFld* baseFld,   const addrMagHandler addrFld,
                                          const basePropagator* baseP, const addrPropagator addrP,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARHITEMPATTODIGITALG_H
@@ -54,13 +54,12 @@ class LArHEC_ID;
 class LArFCAL_ID;
 class CaloCell_ID;
 
-#define MAXADC 4096       // Maximal Adc count + 1 ( used for the overflows)
 
 class LArHitEMapToDigitAlg : public AthReentrantAlgorithm
 {
 public:
-  // Constructor
-  LArHitEMapToDigitAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  // delegate Constructor
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
   // initialize all condition keys
   virtual StatusCode initialize();
@@ -69,6 +68,7 @@ public:
 
 protected:
   static constexpr int s_MaxNSamples = 32;
+  enum CaloNum{EM=0,HEC,FCAL,EMIW};
   using staticVecDouble_t = boost::container::static_vector<double,s_MaxNSamples> ;
   using staticVecFloat_t = boost::container::static_vector<float,s_MaxNSamples> ;
 
@@ -89,6 +89,9 @@ protected:
   StatusCode ConvertHits2Samples(const EventContext& ctx, const Identifier & cellId, HWIdentifier ch_id,
                    CaloGain::CaloGain igain,
                    const std::vector<std::pair<float,float> >  *TimeE,  staticVecDouble_t& sampleList) const;
+
+
+  CaloGain::CaloGain chooseGain(const staticVecDouble_t& samples,const HWIdentifier id, const CaloNum iCalo, const ILArPedestal* ped, const LArADC2MeV* ramp, const float SF) const;
 
   // Keys to many conditions
   SG::ReadCondHandleKey<ILArNoise>    m_noiseKey{this,"NoiseKey","LArNoiseSym","SG Key of ILArNoise object"};
@@ -127,12 +130,34 @@ protected:
   Gaudi::Property<bool> m_useLegacyRandomSeeds{this, "UseLegacyRandomSeeds", false,
        "Use MC16-style random number seeding"};
 
-  enum CaloNum{EM,HEC,FCAL,EMIW};
-  double m_LowGainThresh[4]{};
-  double m_HighGainThresh[4]{};
+  
+  std::array<Gaudi::Property<double>,4> m_LowGainThresh {{
+        {this,"LowGainThreshEM",3900,"ADC counts in medium gain"},
+        {this,"LowGainThreshHEC",2500,"ADC counts in medium gain"},
+        {this,"LowGainThreshFCAL",2000,"ADC counts in medium gain"},
+        {this,"LowGainThreshEMECIW",3900,"ADC counts in medium gain"}
+  }};
+
+
+  std::array<Gaudi::Property<double>,4> m_HighGainThresh {{
+        {this,"HighGainThreshEM",1300,"ADC counts in medium gain"},
+        {this,"HighGainThreshHEC",0,"ADC counts in medium gain"},
+        {this,"HighGainThreshFCAL",1100,"ADC counts in medium gain"},
+        {this,"HighGainThreshEMECIW",1300,"ADC counts in medium gain"}
+  }};
+
+
+  //std::array<Gaudi::Property<std::pair<CaloGain::CaloGain, CaloGain::CaloGain> >,4>  m_gainRange {{
+   std::array<Gaudi::Property<std::pair<int,int> >,4>  m_gainRange {{   
+      {this,"GainRangeEM",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeHEC",{CaloGain::LARMEDIUMGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeFCAL",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+      {this,"GainRangeEMECIW",{CaloGain::LARHIGHGAIN,CaloGain::LARLOWGAIN},"Range of gains"},
+    }};
+  
+  Gaudi::Property<unsigned> m_maxADC{this,"maxADC",4096,"Maxium ADC value +1 (for overflow)"};
+
   // Some properties for digits production
-  Gaudi::Property<double> m_EnergyThresh{this, "EnergyThresh", -99.,
-       "Hit energy threshold (default=-99)"};           // Zero suppression energy threshold
   Gaudi::Property<int>    m_NSamples{this, "Nsamples", 5,
        "Number of ADC samples (default=5)"};               // number of samples in Digit
   Gaudi::Property<bool> m_NoiseOnOff{this, "NoiseOnOff", true,

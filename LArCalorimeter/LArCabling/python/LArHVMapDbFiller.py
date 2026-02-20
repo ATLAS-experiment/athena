@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # @author: G.Unal
 # @date:   July 2008
@@ -15,6 +15,7 @@ from PyCool import cool
 class LArHVMapDbFillerError(Exception):
     def __init__(self, value):
         self.value = value
+        super().__init__(value)
     def __str__(self):
         return repr(self.value)
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,6 +15,8 @@
 
 // Framework include files
 #include "StorageSvc/pool.h"
+
+class StatusCode;
 
 /*
  *  POOL namespace declaration
@@ -51,16 +53,16 @@ namespace pool    {
     /// Set domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& refOpt) = 0;
+    virtual StatusCode setOption(const DbOption& refOpt) = 0;
 
     /// Access domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& refOpt) const = 0;
+    virtual StatusCode getOption(DbOption& refOpt) const = 0;
   };
 }      // End namespace pool
 #endif // POOL_IDBDOMAIN_H

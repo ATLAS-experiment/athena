@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DistanceCalculatorSaggingOff.h"
 #include "GeoSpecialShapes/LArWheelCalculator.h"
-
-#include<cassert>
 
 //#define LWC_PARAM_ANGLE
 
@@ -13,8 +11,9 @@
 #include <CxxUtils/sincos.h>
 #endif
 
-#include<signal.h>
-
+#include <signal.h>
+#include <cassert>
+#include <cmath>
 
 namespace LArWheelCalculator_Impl
 {
@@ -25,11 +24,7 @@ namespace LArWheelCalculator_Impl
     m_EndQuarterWave = lwc()->m_ActiveLength - lwc()->m_QuarterWaveLength;
   }
 
-#ifndef LARWC_DTNF_NEW
-  double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#else
   double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre_ref(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#endif
   {
     assert(P.y() > 0.);
     double distance = 0.;
@@ -129,7 +124,7 @@ namespace LArWheelCalculator_Impl
     }
 #ifdef HARDDEBUG
     double dd = DistanceToTheNeutralFibre_ref(P);
-    if(fabs(dd - distance) > 0.000001){
+    if(std::abs(dd - distance) > 0.000001){
       //static int cnt = 0;
       std::cout << "DTNF MISMATCH " << this << " " << P << " "
                 << dd << " vs " << distance << std::endl;
@@ -141,11 +136,7 @@ namespace LArWheelCalculator_Impl
   }
 
   // IMPROVED PERFORMANCE
-#ifdef LARWC_DTNF_NEW
   double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#else
-  double DistanceCalculatorSaggingOff::DistanceToTheNeutralFibre_ref(const CLHEP::Hep3Vector& P, int /*fan_number*/) const
-#endif
   {
     double z = P.z() - lwc()->m_StraightStartSection;
     double x = P.x();
@@ -230,8 +221,6 @@ namespace LArWheelCalculator_Impl
         }
       }
     }
-    // ???
-    std::abort();
   }
 
   CLHEP::Hep3Vector DistanceCalculatorSaggingOff::NearestPointOnNeutralFibre(const CLHEP::Hep3Vector &P, int /*fan_number*/) const
@@ -272,10 +261,10 @@ namespace LArWheelCalculator_Impl
       const double dz = straight_part - z_prime;
       if (dz > 0) result.set(0., y, z_prime);
       else {
-        double a = atan(fabs(dz / (x_prime + lwc()->m_FanFoldRadius)));
-        result.set(lwc()->m_FanFoldRadius * (cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * sin(a));
+        double a = std::atan(std::abs(dz / (x_prime + lwc()->m_FanFoldRadius)));
+        result.set(lwc()->m_FanFoldRadius * (std::cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * std::sin(a));
       }
-      result.rotateY(asin(sin_a));
+      result.rotateY(std::asin(sin_a));
       if(begin_qw){
         result.setX(-result.x());
         result.setZ(-result.z());
@@ -297,19 +286,19 @@ namespace LArWheelCalculator_Impl
         const double z_prime = z * cos_a + x * sin_a;
         const double x_prime = x * cos_a - z * sin_a;
         if(z_prime < local_straight_section) {
-          double a = fabs(atan((local_straight_section - z_prime) / (x_prime - lwc()->m_FanFoldRadius)));
+          double a = std::abs(std::atan((local_straight_section - z_prime) / (x_prime - lwc()->m_FanFoldRadius)));
 
-          result.set(lwc()->m_FanFoldRadius * (1 - cos(a)), y, local_straight_section - lwc()->m_FanFoldRadius * sin(a));
+          result.set(lwc()->m_FanFoldRadius * (1 - std::cos(a)), y, local_straight_section - lwc()->m_FanFoldRadius * std::sin(a));
         } else {
           double straight_part = (lwc()->m_QuarterWaveLength - lwc()->m_FanFoldRadius * sin_a) / cos_a;
           if(z_prime <= straight_part) {
             result.set(0., y, z_prime);
           } else {
-            double a = fabs(atan((straight_part - z_prime) /  (x_prime + lwc()->m_FanFoldRadius)) );
-            result.set(lwc()->m_FanFoldRadius * (cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * sin(a));
+            double a = std::abs(std::atan((straight_part - z_prime) /  (x_prime + lwc()->m_FanFoldRadius)) );
+            result.set(lwc()->m_FanFoldRadius * (std::cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * std::sin(a));
           }
         }
-        result.rotateY(asin(sin_a));
+        result.rotateY(std::asin(sin_a));
       }
       if(nqwave != 0){
         result.setZ(lwc()->m_ActiveLength - result.z());
@@ -352,9 +341,9 @@ namespace LArWheelCalculator_Impl
         if(z_prime > straight_part){ // up fold
           const double x_prime = x * cos_a - z * sin_a;
           const double dz = straight_part - z_prime;
-          double a1 = atan(fabs(dz / (x_prime + lwc()->m_FanFoldRadius)));
-          const double x1 = lwc()->m_FanFoldRadius * (cos(a1) - 1.);
-          const double z1 = straight_part + lwc()->m_FanFoldRadius * sin(a1);
+          double a1 = std::atan(std::abs(dz / (x_prime + lwc()->m_FanFoldRadius)));
+          const double x1 = lwc()->m_FanFoldRadius * (std::cos(a1) - 1.);
+          const double z1 = straight_part + lwc()->m_FanFoldRadius * std::sin(a1);
           result.set(x1*cos_a - z1*sin_a, y, z1*cos_a + z1*sin_a);
           return result;
         } else if(z_prime > -straight_part){ // straight part
@@ -363,9 +352,9 @@ namespace LArWheelCalculator_Impl
         } else { // low fold
           const double x_prime = x * cos_a - z * sin_a;
           const double dz = straight_part + z_prime;
-          double a1 = atan(fabs(dz / (x_prime + lwc()->m_FanFoldRadius)));
-          const double x1 = lwc()->m_FanFoldRadius * (cos(a1) - 1.);
-          const double z1 = straight_part + lwc()->m_FanFoldRadius * sin(a1);
+          double a1 = std::atan(std::abs(dz / (x_prime + lwc()->m_FanFoldRadius)));
+          const double x1 = lwc()->m_FanFoldRadius * (std::cos(a1) - 1.);
+          const double z1 = straight_part + lwc()->m_FanFoldRadius * std::sin(a1);
           result.set(x1*cos_a - z1*sin_a, y, z1*cos_a + z1*sin_a);
           return result;
         }
@@ -390,18 +379,18 @@ namespace LArWheelCalculator_Impl
       const double z_prime = z * cos_a + x * sin_a;
       const double x_prime = x * cos_a - z * sin_a;
       if(z_prime < local_straight_section) {
-        double a = fabs(atan((local_straight_section - z_prime) / (x_prime - lwc()->m_FanFoldRadius)));
-        result.set(lwc()->m_FanFoldRadius * (1 - cos(a)), y, local_straight_section - lwc()->m_FanFoldRadius * sin(a));
+        double a = std::abs(std::atan((local_straight_section - z_prime) / (x_prime - lwc()->m_FanFoldRadius)));
+        result.set(lwc()->m_FanFoldRadius * (1 - std::cos(a)), y, local_straight_section - lwc()->m_FanFoldRadius * std::sin(a));
       } else {
         double straight_part = (lwc()->m_QuarterWaveLength - lwc()->m_FanFoldRadius * sin_a) / cos_a;
         if(z_prime <= straight_part) {
           result.set(0., y, z_prime);
         } else {
-          double a = fabs(atan((straight_part - z_prime) /  (x_prime + lwc()->m_FanFoldRadius)) );
-          result.set(lwc()->m_FanFoldRadius * (cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * sin(a));
+          double a = std::abs(std::atan((straight_part - z_prime) /  (x_prime + lwc()->m_FanFoldRadius)) );
+          result.set(lwc()->m_FanFoldRadius * (std::cos(a) - 1), y, straight_part + lwc()->m_FanFoldRadius * std::sin(a));
         }
       }
-      result.rotateY(asin(sin_a));
+      result.rotateY(std::asin(sin_a));
     }
     if(sqw) result.setX(-result.x());
     else result.setZ(lwc()->m_ActiveLength - result.z());

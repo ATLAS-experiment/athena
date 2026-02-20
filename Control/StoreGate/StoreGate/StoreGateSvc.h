@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_STOREGATESVC_H
@@ -18,6 +18,7 @@
 
 #include "AthenaKernel/IHiveStore.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
+#include "CxxUtils/RefCountedPtr.h"
 #include "StoreGate/tools/SGImplSvc.h"
 #include "StoreGate/SGHiveEventSlot.h"
 
@@ -295,9 +296,11 @@ public:
 
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
-                           IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+                           CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
   /// Create a proxy object using an IOpaqueAddress
-  StatusCode recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+  StatusCode recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
 
   /// make a soft link to the object T* already registered (non-const)
   template <typename T, typename TLINK> 
@@ -518,19 +521,6 @@ public:
   StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
                                            const T* obj, DataHandle<H>& handle, 
                                            const TKEY& key, bool trigger=false);
-
-  /// register a callback function(2) with an already registered function(1)
-  template <typename T1, typename T2>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T1::*fcn1)(IOVSVC_CALLBACK_ARGS), 
-                                           const T1* obj1,
-                                           StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                           const T2* obj2, bool trigger=false);
-
-  /// register a callback function(2) with an already registered AlgTool
-  template <typename T2>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (const std::string& toolName,
-                                           StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                           const T2* obj2, bool trigger=false);
 
   //@}
   /////////////////////////////////////////////////////////////////////////

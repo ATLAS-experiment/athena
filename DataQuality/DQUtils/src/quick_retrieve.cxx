@@ -263,7 +263,7 @@ PyObject* quick_retrieve(const IObjectIteratorPtr& objects,
                 auto pff = pf.target<PyObject* (*)(const IObject&)>();
                 if ( pff && *pff == &no_conversion_available)
                     return NULL;
-                payload_fetchers.push_back(pf);
+                payload_fetchers.push_back(std::move(pf));
                 Py_DECREF(py_name);
             }
             

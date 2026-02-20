@@ -941,7 +941,8 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
     ATH_MSG_ERROR("Conversion of HLT result object to the output format failed while handling a failed event. "
                   << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
                   << "The event loop will exit after all ongoing processing is finished.");
-    delete addr;
+    delete addr; 
+    addr = nullptr;
     return returnFailureAndStopEventLoop();
   }
 
@@ -950,11 +951,13 @@ StatusCode HltEventLoopMgr::failedEvent(HLT::OnlineErrorCode errorCode, const Ev
                   << "Cannot force-accept this event from HLT side, will rely on data collector to do this. "
                   << "The event loop will exit after all ongoing processing is finished.");
     delete addr;
+    addr = nullptr;
     return returnFailureAndStopEventLoop();
   }
 
   // The output has been sent out, the ByteStreamAddress can be deleted
   delete addr;
+  addr = nullptr;
 
   //------------------------------------------------------------------------
   // Reset the timeout flag and the timer, and mark the slot as idle
@@ -1157,6 +1160,7 @@ void HltEventLoopMgr::outputThreadCallback() {
   if (m_schedulerSvc->popFinishedEvent(finishedEvtContext).isFailure()) {
     failedEvent(HLT::OnlineErrorCode::SCHEDULER_POP_FAILURE, EventContext()).ignore();
     delete finishedEvtContext;
+    finishedEvtContext = nullptr;
     return;
   }
   ATH_MSG_DEBUG("Scheduler returned a finished event: " << finishedEvtContext);
@@ -1468,6 +1472,7 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
     sc = failedEvent(errcode, eventContextRef);
     Gaudi::Hive::setCurrentContext(EventContext());
     delete eventContext;
+    eventContext = nullptr;
     return true;
   };
 
@@ -1536,7 +1541,7 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
   // Convert the HLT result to the output data format
   IOpaqueAddress* addr = nullptr;
   sc = m_outputCnvSvc->createRep(hltResultDO,addr);
-  if (sc.isFailure()) {delete addr;}
+  if (sc.isFailure()) {delete addr; addr= nullptr;}
   if (check("Conversion service failed to convert HLTResult", HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {return sc;}
 
   // Retrieve and convert the L1 result to the output data format
@@ -1560,7 +1565,7 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
       }
 
       sc = m_outputCnvSvc->createRep(l1TriggerResultDO,l1addr);
-      if (sc.isFailure()) {delete l1addr;}
+      if (sc.isFailure()) {delete l1addr; l1addr = nullptr;}
       if (check("Conversion service failed to convert L1 Trigger Result for RewriteLVL1",
                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
         return sc;
@@ -1583,7 +1588,7 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
       }
 
       sc = m_outputCnvSvc->createRep(roibResultDO,l1addrLegacy);
-      if (sc.isFailure()) {delete l1addrLegacy;}
+      if (sc.isFailure()) {delete l1addrLegacy; l1addrLegacy = nullptr;}
       if (check("Conversion service failed to convert RoIBResult for RewriteLVL1",
                 HLT::OnlineErrorCode::OUTPUT_BUILD_FAILURE)) {
         return sc;
@@ -1598,13 +1603,13 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
 
   // Commit output (write/send the output data) - the arguments are currently not used
   sc = m_outputCnvSvc->commitOutput("",true);
-  if (sc.isFailure()) {delete addr;}
+  if (sc.isFailure()) {delete addr; addr=nullptr;}
   if (check("Conversion service failed to commitOutput", HLT::OnlineErrorCode::OUTPUT_SEND_FAILURE)) {return sc;}
 
   // The output has been sent out, the ByteStreamAddress can be deleted
-  delete addr;
-  delete l1addr;
-  delete l1addrLegacy;
+  delete addr; addr = nullptr;
+  delete l1addr; l1addr =  nullptr;
+  delete l1addrLegacy; l1addrLegacy = nullptr;
 
   //------------------------------------------------------------------------
   // Reset the timeout flag and the timer, and mark the slot as idle
@@ -1643,7 +1648,8 @@ StatusCode HltEventLoopMgr::processFinishedEvent()
   Gaudi::Hive::setCurrentContext( EventContext() );
 
   // Delete the EventContext which was created when calling executeEvent( EventContext(*eventContext) )
-  delete eventContext;
+  delete eventContext; 
+  eventContext = nullptr;
 
   return StatusCode::SUCCESS;
 }

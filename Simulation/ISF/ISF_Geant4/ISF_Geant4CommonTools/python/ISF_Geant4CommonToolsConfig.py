@@ -26,7 +26,7 @@ def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
         if flags.Digitization.PileUp:
             OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
             result.addService(OEsvc)
-            kwargs.setdefault("EvtStore", OEsvc.name)
+            kwargs.setdefault("EvtStore", OEsvc)
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result
@@ -64,7 +64,7 @@ def ATLFAST_EntryLayerToolCfg(flags, name="ISF_ATLFAST_EntryLayerTool", **kwargs
         if flags.Digitization.PileUp:
             OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
             result.addService(OEsvc)
-            kwargs.setdefault("EvtStore", OEsvc.name)
+            kwargs.setdefault("EvtStore", OEsvc)
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result

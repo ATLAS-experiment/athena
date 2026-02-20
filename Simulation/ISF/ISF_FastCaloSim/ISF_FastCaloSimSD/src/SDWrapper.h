@@ -48,13 +48,13 @@ class SDWrapper : public G4VSensitiveDetector {
 
  public:
   /// Alias to the SD list type
-  using SDList_t = std::vector<std::unique_ptr<SDType> >;
+  using SDList_t = std::vector<SDType*>;
 
   /// Construct the wrapper from the output collection name
   SDWrapper(const std::string& name, const std::string& hitCollectionName);
 
   /// Add an SD to this wrapper
-  void addSD(std::unique_ptr<SDType> sd);
+  void addSD(SDType* sd);
 
   /// Beginning of G4 event; initialize the hit collection.
   virtual void Initialize(G4HCofThisEvent*) override final;

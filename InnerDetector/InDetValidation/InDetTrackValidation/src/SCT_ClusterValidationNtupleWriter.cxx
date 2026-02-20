@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -103,7 +103,7 @@ StatusCode InDet::SCT_ClusterValidationNtupleWriter::initialize() {
 
 
   // ---------------------------
-  // retrive pointer to THistSvc
+  // retrieve pointer to THistSvc
   SmartIF<ITHistSvc> tHistSvc{Gaudi::svcLocator()->service("THistSvc")};
   ATH_CHECK(tHistSvc.isValid());
 

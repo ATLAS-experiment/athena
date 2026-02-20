@@ -66,12 +66,21 @@ uint8_t HGTD_TdcCalibrationTool::Time2TOA(const InDetDD::SolidStateDetectorEleme
   //TOA time will be the distance between hit_time and upper bound of active window 
   float tdc_time =  window_upper_bound - hit_time;
 
+  // Check if hit is within the measurement window, if not return overflow flag
+  if( tdc_time < 0 || tdc_time > 2.5){
+    ATH_MSG_DEBUG("charge at " << hit_time
+                                << " outside of TOA TDC range ["
+                                << window_upper_bound - 2.5 << ", " 
+                                << window_upper_bound << "]" );
+   return HGTD::TOA_OVERLFLOW_MASK;
+  }
+
   //TOOD: Include TOA TDC bin size smearing here, for now only using nominal value
   uint8_t toa = tdc_time/m_toa_bin_size;
 
   ATH_MSG_DEBUG("hit time: "<< hit_time << 
     " hit time digitized: " << TOA2Time(element, toa) << 
-    " TOA: " << (int) toa);
+    " TOA: " <<  static_cast<unsigned int>(toa));
   
   return toa; 
 

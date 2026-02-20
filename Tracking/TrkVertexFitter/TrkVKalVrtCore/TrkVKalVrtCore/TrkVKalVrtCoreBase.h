@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef _TrkVKalVrtCoreBase_VKalVrtCore_H
-#define _TrkVKalVrtCoreBase_VKalVrtCore_H
+#ifndef TrkVKalVrtCoreBase_VKalVrtCore_H
+#define TrkVKalVrtCoreBase_VKalVrtCore_H
 
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "TrkVKalVrtCore/ForVrtClose.h"
@@ -29,9 +29,8 @@ namespace Trk {
        std::unique_ptr<double[]> fullCovMatrix;
        std::vector< std::unique_ptr<VKVertex> > cascadeVertexList;
        std::vector<int> matrixPnt;
-       CascadeEvent():cascadeNV(0), nearPrmVertex(0), fullCovMatrix(0), cascadeVertexList(0),
-                      matrixPnt(0), m_SCALE(1.), m_accuracyConstraint(1.e-4) {};
-      ~CascadeEvent() = default;
+       CascadeEvent();
+      ~CascadeEvent();
 
      private:
        double m_SCALE;

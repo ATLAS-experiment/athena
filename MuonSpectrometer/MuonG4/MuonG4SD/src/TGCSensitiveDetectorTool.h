@@ -10,9 +10,10 @@
 class TGCSensitiveDetectorTool : public SensitiveDetectorBase {
 
  public:
-  /** construction/destruction */
+  /** constructor */
   TGCSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
-  ~TGCSensitiveDetectorTool() {}
+  virtual StatusCode SetupEvent(HitCollectionMap& hitCollections) override;
+  virtual StatusCode Gather(HitCollectionMap& hitCollections) override;
 protected:
   G4VSensitiveDetector* makeSD() const override final;
 };

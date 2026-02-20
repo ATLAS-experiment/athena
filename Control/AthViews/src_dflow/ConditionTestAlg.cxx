@@ -26,7 +26,7 @@ namespace AthViews {
 ////////////////
 ConditionTestAlg::ConditionTestAlg( const std::string& name, 
                       ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
+  ::AthCondAlgorithm( name, pSvcLocator )
 {
   //
   // Property declaration
@@ -57,15 +57,9 @@ StatusCode ConditionTestAlg::finalize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ConditionTestAlg::execute()
+StatusCode ConditionTestAlg::execute(const EventContext& ctx) const
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
-#ifdef GAUDI_SYSEXECUTE_WITHCONTEXT 
-  const EventContext& ctx = getContext();
-#else
-  const EventContext& ctx = *getContext();
-#endif
 
   ATH_MSG_INFO( name() << " running with store " << Atlas::getExtendedEventContext(ctx).proxy()->name() );
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLenNtuple.h"
@@ -106,6 +106,10 @@ namespace G4UA
 
     G4StepPoint *preStep=aStep->GetPreStepPoint();
     const G4TouchableHistory* touchHist = dynamic_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
+    if (!touchHist) {
+      std::cerr << "RadLenNtuple::UserSteppingAction: dynamic_cast fails" << std::endl;
+      std::abort();
+    }
     G4LogicalVolume *lv=touchHist->GetVolume()->GetLogicalVolume();
     std::string volName=lv->GetName();
     G4Material *mat=lv->GetMaterial();

@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_NSW_TRIGGER_MML1A_ELINK_H_
 #define _MUON_NSW_TRIGGER_MML1A_ELINK_H_
 
+#include "MuonNSWCommonDecode/NSWTriggerElink.h"
 #include <stdint.h>
 #include <vector>
-#include <exception>
-
-#include "MuonNSWCommonDecode/NSWTriggerElink.h"
-#include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
+#include <memory>
 
 namespace Muon
 {

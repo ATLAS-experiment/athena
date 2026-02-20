@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /* HLTCalo Post Processing on run_nnnn/HLT/HLTcalo histogram
@@ -10,7 +10,6 @@
 #include "DataQualityUtils/MonitoringFile.h"
 #include <iostream>
 #include "TFile.h"
-#include "TString.h"
 
 namespace dqutils {
   void MonitoringFile::HLTCaloPostProcess(const std::string& inFilename, bool isIncremental) {
@@ -45,7 +44,7 @@ namespace dqutils {
     }
 
     //start postprocessing
-    TString run_dir;
+    std::string run_dir;
     HLTCaloAveragePtPhiEtaMaps(f, run_dir);
     //close root file
     f->Close();

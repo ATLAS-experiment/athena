@@ -41,6 +41,8 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--requiredSiHits", help='Number of truth silicon hits', type=int, default=0)
     IDPVMparser.add_argument("--selectedCharge", help='Charge of selected truth particles (0=inclusive)', type=int, default=0)
     IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
+    IDPVMparser.add_argument("--minProdVertRadius", help='Minimum production radius for truth particles', type=float, default=0)
+    IDPVMparser.add_argument("--minAbsD0", help='Minimum |d0| for truth particles', type=float, default=0)
     IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022', '2023', '2024'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
     IDPVMparser.add_argument("--doIDTIDE", help='run the output from IDTIDE derivation', action='store_true', default=False)
@@ -107,6 +109,8 @@ flags.PhysVal.IDPVM.runDecoration = not MyArgs.disableDecoration
 flags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
 flags.PhysVal.IDPVM.selectedCharge = MyArgs.selectedCharge
 flags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
+flags.PhysVal.IDPVM.minProdVertRadius = MyArgs.minProdVertRadius
+flags.PhysVal.IDPVM.minAbsD0 = MyArgs.minAbsD0
 flags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
 flags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
 flags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter

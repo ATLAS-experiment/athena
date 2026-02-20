@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalcSlope.h"
@@ -32,13 +32,8 @@ namespace MuonCalib {
     m_lastPulserLevel(-999),
     m_fracProfs(nullptr),
     m_fracGraphs(nullptr),
-    m_bitHists(nullptr),
-    m_fitReturns(nullptr),
     m_resGraph(nullptr),
-    m_calGraphs(nullptr),
     m_currentAmpProf(nullptr),
-    m_ampProfs(nullptr),
-    m_pulsedChambers(nullptr),
     m_eventCnt(0),
     m_slopes(nullptr),
     m_intercepts(nullptr),
@@ -129,7 +124,7 @@ namespace MuonCalib {
 
     ATH_MSG_INFO("Finished initializing services. "); 
     //*****Initialize internal variables and histograms*******/	
-    m_ampProfs = new std::map<int, TProfile* >();
+    m_ampProfs.clear();
     //Setup lookup table for pulser levels
     m_dbLevels.resize(64);
     for(unsigned int pulserLevel=0; pulserLevel < 64; pulserLevel++)
@@ -137,7 +132,7 @@ namespace MuonCalib {
 
     IdContext channelContext = m_idHelperSvc->cscIdHelper().channel_context();
 
-    if(m_doBitHists) m_bitHists = new DataVector<TH1I>(SG::VIEW_ELEMENTS);
+    if(m_doBitHists) m_bitHists.clear();
     //Loop through ids to find out what hash range we're working on, and to 
     //initialize histograms.
     const std::vector<Identifier> & ids = m_idHelperSvc->cscIdHelper().idVector();
@@ -159,7 +154,7 @@ namespace MuonCalib {
         if(m_maxStripHash < (unsigned int)stripHash)
           m_maxStripHash = (unsigned int)stripHash; 
 
-        if(m_bitHists)
+        if(m_doBitHists)
         {
           Identifier id;
           m_idHelperSvc->cscIdHelper().get_id((IdentifierHash)stripHash,id,&channelContext);
@@ -181,18 +176,18 @@ namespace MuonCalib {
           TH1I* hist = new TH1I(bitName, title.c_str(), m_numBits, 0, m_numBits); //12 bits
           hist->GetXaxis()->SetTitle("Bit");
           hist->GetYaxis()->SetTitle("Counts");
-          m_bitHists->push_back(hist);
+          m_bitHists.push_back(hist);
         }
       }
     }//end chamber loop
 
-    m_fitReturns = new std::vector<float>;
-    m_fitReturns->resize(m_maxStripHash+1,0);
+    m_fitReturns.clear();
+    m_fitReturns.resize(m_maxStripHash+1,0);
 
-    m_calGraphs = new DataVector<TGraphErrors>(SG::VIEW_ELEMENTS);
+    m_calGraphs.clear();
     for(unsigned int chanItr =0; chanItr <= m_maxStripHash; chanItr++)
     {
-      m_calGraphs->push_back(nullptr);
+      m_calGraphs.push_back(nullptr);
     }
 
 
@@ -237,7 +232,7 @@ namespace MuonCalib {
       m_peakTimes = new CscCalibResultCollection("peakt");
     }
 
-    m_pulsedChambers = new std::set<int>;
+    m_pulsedChambers.clear();
 
 
     ATH_MSG_DEBUG("End initialize");
@@ -342,9 +337,9 @@ namespace MuonCalib {
         {
           ATH_MSG_INFO("New pulser level found. (" << pulserLevel <<").");
 
-          std::map<int,TProfile*>::iterator alreadyExistingProfile = m_ampProfs->find(pulserLevel);
+          std::map<int,TProfile*>::iterator alreadyExistingProfile = m_ampProfs.find(pulserLevel);
 
-          if(alreadyExistingProfile == m_ampProfs->end())
+          if(alreadyExistingProfile == m_ampProfs.end())
           {//No previous profile for this amplitude exists
 
             ATH_MSG_DEBUG(" creating new amplitude profile");
@@ -356,7 +351,7 @@ namespace MuonCalib {
             m_currentAmpProf->GetXaxis()->SetTitle("Channel (Hash Id)");
             m_currentAmpProf->GetYaxis()->SetTitle("Amplitude (ADC value)");
             ATH_MSG_DEBUG("Adding new amplitude profile");
-            m_ampProfs->insert(std::pair<int, TProfile*>( pulserLevel, m_currentAmpProf));
+            m_ampProfs.insert(std::pair<int, TProfile*>( pulserLevel, m_currentAmpProf));
           }
           else
           {
@@ -454,8 +449,8 @@ namespace MuonCalib {
                 for(const auto & thisSample:samples){
 
                   floatSamples.push_back(thisSample-ped);
-                  if(m_bitHists){
-                    if(!fillBitHist((*m_bitHists)[stripHash],thisSample)){
+                  if(m_doBitHists){
+                    if(!fillBitHist(m_bitHists[stripHash],thisSample)){
                       ATH_MSG_WARNING("Failed recording bits for strip " << stripHash);
                     }
 
@@ -523,11 +518,7 @@ namespace MuonCalib {
     StatusCode sc; 
     ATH_MSG_INFO("Calculating calibration constants.");
 
-    if(!m_ampProfs){
-      ATH_MSG_FATAL("m_ampProfs empty!");
-      return StatusCode::FAILURE;
-    }
-    unsigned int numCalibPoints = m_ampProfs->size();	
+    unsigned int numCalibPoints = m_ampProfs.size();
     ATH_MSG_INFO("There are " << numCalibPoints << " pulser levels to evaluate.");
 
     IdContext channelContext = m_idHelperSvc->cscIdHelper().channel_context();	
@@ -606,9 +597,9 @@ namespace MuonCalib {
 
       //Loop over all attenuation levels, filling the calGraph with the amplitudes
       //for this strip 
-      ATH_MSG_DEBUG("Number of ampProfs " << m_ampProfs->size());
+      ATH_MSG_DEBUG("Number of ampProfs " << m_ampProfs.size());
       int calPointItr = 0;
-      for(const auto & [pulserLevel, pAmplitudeProfile] : *m_ampProfs)
+      for(const auto & [pulserLevel, pAmplitudeProfile] : m_ampProfs)
       {
         if(!pAmplitudeProfile){
           ATH_MSG_FATAL("Failed at accessing ampProf!");
@@ -688,7 +679,7 @@ namespace MuonCalib {
       {
         ATH_MSG_INFO("we have a good stripHash at " << stripHash); 
 
-        m_pulsedChambers->insert(chamHash); //Programer note: Only gets filled on x-axis. Probably OK.
+        m_pulsedChambers.insert(chamHash); //Programer note: Only gets filled on x-axis. Probably OK.
 
         float slope, slopeError, intercept, interceptError, chiSquared;
         int ndf;
@@ -731,7 +722,7 @@ namespace MuonCalib {
         invertedSlope = 1/slope;
 
         ATH_MSG_ERROR("Inserting calgraph in for hash " << stripHash);
-        (*m_calGraphs)[stripHash] = calGraph;
+        m_calGraphs[stripHash] = calGraph;
 
         ATH_MSG_DEBUG("StripHash: " << stripHash << "; slope: " <<slope  
           << "; intercept: " << intercept
@@ -741,7 +732,7 @@ namespace MuonCalib {
 
         m_slopes->push_back(slopeResult);
         m_intercepts->push_back(interceptResult);
-        (*m_fitReturns)[stripHash] = fitRet;
+        m_fitReturns[stripHash] = fitRet;
 
       }//end if(isGoodStrip)
 
@@ -863,11 +854,11 @@ namespace MuonCalib {
 
     CscCalibReportSlope * report = new CscCalibReportSlope("calGraphs");
 
-    report->setCalGraphs(m_calGraphs);
-    report->setAmpProfs(m_ampProfs);
-    report->setPulsedChambers(m_pulsedChambers);
-    report->setBitHists(m_bitHists);
-    report->setFitResults(m_fitReturns);
+    report->setCalGraphs(std::move(m_calGraphs));
+    report->setAmpProfs(std::move(m_ampProfs));
+    report->setPulsedChambers(std::move(m_pulsedChambers));
+    report->setBitHists(std::move(m_bitHists));
+    report->setFitResults(std::move(m_fitReturns));
 
     CscCalibReportContainer * repCont = new CscCalibReportContainer(histKey);
     repCont->push_back(report);

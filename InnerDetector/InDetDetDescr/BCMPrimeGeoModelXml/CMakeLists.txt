@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( BCMPrimeGeoModelXml )
@@ -12,7 +12,7 @@ atlas_add_component( BCMPrimeGeoModelXml
                      src/*.cxx
                      src/components/*.cxx
                      PRIVATE_INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS}
-                     PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEOMODEL_LIBRARIES} CxxUtils
+                     PRIVATE_LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEOMODEL_LIBRARIES}
                      GaudiKernel DetDescrConditions InDetGeoModelUtils InDetSimEvent BCMPrimeReadoutGeometry )
 
 # Install files from the package:

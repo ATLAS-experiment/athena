@@ -40,44 +40,30 @@ StatusCode DetectorFieldManagerTool::initializeField()
 
     // If field manager already exists for current thread, error.
     // There is no foreseen use-case for this situation.
-    if(m_fieldMgrHolder.get()) {
-      ATH_MSG_ERROR("DetectorFieldManagerTool::initializeField() - " <<
-                    "Field manager already exists!");
-      return StatusCode::FAILURE;
-    }
 
     // Retrieve the G4MagneticField
     G4MagneticField* field = m_fieldSvc->getField();
 
     // Create a new field manager
-    G4FieldManager * fieldMgr = nullptr;
-    if (m_muonOnlyField){
-      // fieldMgr = new TightMuonElseNoFieldManager();
-      fieldMgr = new SwitchingFieldManager(field);
-    } else {
-      fieldMgr = new G4FieldManager();
-    }
-
-    // Save it in the TL holder
-    m_fieldMgrHolder.set(fieldMgr);
+    G4FieldManager* field_manager = m_muonOnlyField ? new SwitchingFieldManager(field) : new G4FieldManager();
 
     // Configure the field manager
-    fieldMgr->SetDetectorField(field);
-    fieldMgr->CreateChordFinder(field);
-    ATH_CHECK( setFieldParameters(fieldMgr) );
+    field_manager->SetDetectorField(field);
+    field_manager->CreateChordFinder(field);
+    ATH_CHECK( setFieldParameters(field_manager) );
 
     // Create and configure the ChordFinder
-    fieldMgr->CreateChordFinder(field);
+    field_manager->CreateChordFinder(field);
 
 #if G4VERSION_NUMBER < 1040
     ATH_MSG_DEBUG("Old style stepper setting");
     G4MagIntegratorStepper* stepper = getStepper(m_integratorStepper, field);
-    G4MagInt_Driver* magDriver = fieldMgr->GetChordFinder()->GetIntegrationDriver();
+    G4MagInt_Driver* magDriver = field_manager->GetChordFinder()->GetIntegrationDriver();
     magDriver->RenewStepperAndAdjust(stepper);
 #else
     ATH_MSG_DEBUG("New style stepper setting");
     G4VIntegrationDriver* driver = createDriverAndStepper(m_integratorStepper, field);
-    G4ChordFinder* chordFinder = fieldMgr->GetChordFinder();
+    G4ChordFinder* chordFinder = field_manager->GetChordFinder();
     chordFinder->SetIntegrationDriver(driver);
 #endif
 
@@ -86,7 +72,7 @@ StatusCode DetectorFieldManagerTool::initializeField()
       auto logVolStore = G4LogicalVolumeStore::GetInstance();
       for (const auto& volume: m_logVolumeList) {
         G4LogicalVolume* logicalVolume = logVolStore->GetVolume(volume);
-        if (logicalVolume != nullptr) logicalVolume->SetFieldManager(fieldMgr, true);
+        if (logicalVolume != nullptr) logicalVolume->SetFieldManager(field_manager, true);
         else
           ATH_MSG_WARNING("No volume called " << volume << " was found in the G4LogicalVolumeStore! Skipping this volume.");
       }
@@ -95,14 +81,13 @@ StatusCode DetectorFieldManagerTool::initializeField()
       auto physVolStore = G4PhysicalVolumeStore::GetInstance();
       for (const auto& volume: m_physVolumeList) {
         G4VPhysicalVolume* physicalVolume = physVolStore->GetVolume(volume);
-        if (physicalVolume != nullptr) physicalVolume->GetLogicalVolume()->SetFieldManager(fieldMgr, true);
+        if (physicalVolume != nullptr) physicalVolume->GetLogicalVolume()->SetFieldManager(field_manager, true);
         else
           ATH_MSG_WARNING("No volume called " << volume << " was found in the G4PhysicalVolumeStore! Skipping this volume.");
       }
     }
     else
       ATH_MSG_WARNING("No volumes are provided. Field manager is NOT assigned.");
-
   }
 
   return StatusCode::SUCCESS;

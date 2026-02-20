@@ -21,7 +21,7 @@ The following Hypothesis algorithms and associated tools are available:
     <tbody>
         <tr>
             <td><code>CaloMVA</code></td>
-            <td><code>TrigTauCaloHypoAlg</code></td>
+            <td><code>TrigTauJetHypoAlg</code></td>
             <td><code>TrigTauCaloHypoTool</code></td>
             <td><ul>
                 <li><code>TauJet</code> p<sub>T</sub></li>
@@ -30,21 +30,21 @@ The following Hypothesis algorithms and associated tools are available:
         </tr>
         <tr>
             <td><code>FTFCore</code>/<code>Iso</code>/<code>LRT</code></td>
-            <td><code>TrigTauFastTrackHypoAlg</code></td>
-            <td><code>TrigTauFastTrackHypoTool</code></td>
+            <td><code>TrigTauTrackingHypoAlg</code></td>
+            <td><code>TrigTauTrackingHypoTool</code></td>
             <td>-</td>
             <td>:white_large_square:</td>
         </tr>
         <tr>
             <td><code>PrecTrackIso</code>/<code>LRT</code></td>
-            <td><code>TrigTauPrecTrackHypoAlg</code></td>
-            <td><code>TrigTauPrecTrackHypoTool</code></td>
+            <td><code>TrigTauTrackingHypoAlg</code></td>
+            <td><code>TrigTauTrackingHypoTool</code></td>
             <td>-</td>
             <td>:white_large_square:</td>
         </tr>
         <tr>
             <td rowspan="2"><code>Precision</code>/<code>LRT</code></td>
-            <td rowspan="2"><code>TrigTauPrecisionHypoAlg</code></td>
+            <td rowspan="2"><code>TrigTauJetHypoAlg</code></td>
             <td><code>TrigTauPrecisionIDHypoTool</code></td>
             <td><ul>
                 <li><code>TauJet</code> p<sub>T</sub></li>

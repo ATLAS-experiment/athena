@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
@@ -46,6 +46,8 @@ namespace InDet {
 #endif
 
   }
+
+  InDetTrackTruthFilterTool::~InDetTrackTruthFilterTool() = default;
 
   StatusCode InDetTrackTruthFilterTool::initialize() {
 
@@ -129,6 +131,10 @@ namespace InDet {
     float eta = track->eta();
 
     int origin = m_trackOriginTool->getTrackOrigin(track);
+    const static SG::ConstAccessor<int> acc_ftagTruthOrigin("ftagTruthOriginLabel");
+    if (acc_ftagTruthOrigin.isAvailable(*track)) {
+      origin = acc_ftagTruthOrigin(*track);
+    }
 
     if ( InDet::TrkOrigin::isFake(origin) ) {
       bool isActiveLoose = isActive( TRK_FAKE_RATE_LOOSE );

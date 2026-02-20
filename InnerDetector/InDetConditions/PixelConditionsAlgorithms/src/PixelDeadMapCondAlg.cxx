@@ -16,7 +16,7 @@ using PixelConditionsAlgorithms::parseDeadMapString;
 using json = nlohmann::json;
 
 PixelDeadMapCondAlg::PixelDeadMapCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator)
+  ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

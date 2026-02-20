@@ -53,12 +53,11 @@ def MCTruthClassifierCaloTruthMatchCfg(flags, name="MCTruthClassifier", **kwargs
     return acc
 
 
-def DFCommonMCTruthClassifierCfg(flags):
+def DFCommonMCTruthClassifierCfg(flags, name = "DFCommonMCTruthClassifier", **kwargs):
     """Configure the MCTruthClassifier tool"""
-    acc = ComponentAccumulator()
-    acc.addPublicTool(acc.popToolsAndMerge(MCTruthClassifierCfg(flags, name = "DFCommonTruthClassifier")),
-                      primary = True)
-    return acc
+    if "xAODTruthParticleLinkVector#xAODTruthLinks" not in flags.Input.TypedCollections:
+        kwargs.setdefault("xAODTruthLinkVector", "") # FIXME Make this conditional?
+    return MCTruthClassifierCfg(flags, name, **kwargs)
 
 
 if __name__ == "__main__":

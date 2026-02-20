@@ -1,62 +1,26 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_LOCREC_h
 #define ALFA_LOCREC_h
 
-#include <iostream>
+#include "AthenaBaseComps/AthAlgorithm.h"
+#include "ALFA_LocRec/ALFA_UserObjects.h" //for MDHIT etc
+#include "ALFA_Geometry/ALFA_GeometryReader.h" //for GEOMETRYCONFIGURATION
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "CLHEP/Vector/ThreeVector.h"
+#include "RtypesCore.h"
+
 #include <string>
 #include <list>
-#include <map>
 #include <vector>
-#include <fstream>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-
-#include "GaudiKernel/ObjectVector.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "GaudiKernel/IToolSvc.h"
-
-#include "AthenaKernel/getMessageSvc.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
-#include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
-
-#include "xAODEventInfo/EventInfo.h"
-#include "StoreGate/ReadHandleKey.h"
-
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-
-#include "ALFA_RawEv/ALFA_RawData.h"
-#include "ALFA_RawEv/ALFA_RawDataContainer.h"
-#include "ALFA_RawEv/ALFA_RawDataCollection.h"
-#include "ALFA_RawEv/ALFA_DigitCollection.h"
-#include "ALFA_RawEv/ALFA_ODDigitCollection.h"
-#include "ALFA_Geometry/ALFA_GeometryReader.h"
-#include "ALFA_Geometry/ALFA_constants.h"
-#include "ALFA_LocRecEv/ALFA_LocRecEvCollection.h"
-#include "ALFA_LocRecEv/ALFA_LocRecODEvCollection.h"
-
-#include "ALFA_LocRec/ALFA_UserObjects.h"
-#include "ALFA_LocRec/ALFA_CenterGravity.h"
-#include "ALFA_LocRec/ALFA_MDOverlap.h"
-#include "ALFA_LocRec/ALFA_MDTracking.h"
-#include "ALFA_LocRec/ALFA_MDMultiple.h"
-#include "ALFA_LocRec/ALFA_MDGap.h"
-#include "ALFA_LocRec/ALFA_HalfReco.h"
-#include "ALFA_LocRec/ALFA_ODTracking.h"
-#include "ALFA_LocRec/ALFA_EdgeMethod.h"
-
-#include "TROOT.h"
-
-//for truth particles
-#include "GeneratorObjects/McEventCollection.h"
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/GenParticle.h"
+class ALFA_LocRecEvCollection;
+class ALFA_LocRecODEvCollection;
+class ALFA_LocRecEvent;
+class ALFA_LocRecODEvent;
 
 typedef struct _USERTRANSFORM
 {
@@ -85,9 +49,6 @@ class ALFA_LocRec : public AthAlgorithm
 	private:
 		GEOMETRYCONFIGURATION m_Config;
 		ALFA_GeometryReader* m_pGeometryReader;
-		// a handle on Store Gate
-		//StoreGateSvc* m_storeGate;
-		//StoreGateSvc* m_pDetStore;
 
 		ALFA_LocRecEvCollection*	m_pLocRecEvCollection;
 		ALFA_LocRecEvent*			m_pLocRecEvent;

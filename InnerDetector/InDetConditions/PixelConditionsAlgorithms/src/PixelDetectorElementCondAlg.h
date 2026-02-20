@@ -7,7 +7,7 @@
 #ifndef PIXELCONDITIONSALGORITHMS_PIXELDETECTORELEMENTCONDALG_H
 #define PIXELCONDITIONSALGORITHMS_PIXELDETECTORELEMENTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoModelUtilities/GeoAlignmentStore.h"
@@ -24,7 +24,7 @@ namespace InDetDD {
   class PixelDetectorManager;
 }
 
-class PixelDetectorElementCondAlg : public AthReentrantAlgorithm
+class PixelDetectorElementCondAlg : public AthCondAlgorithm
 {
  public:
   PixelDetectorElementCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -32,7 +32,6 @@ class PixelDetectorElementCondAlg : public AthReentrantAlgorithm
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<GeoAlignmentStore> m_readKey

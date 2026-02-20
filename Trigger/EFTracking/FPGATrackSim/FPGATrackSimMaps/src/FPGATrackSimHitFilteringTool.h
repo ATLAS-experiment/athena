@@ -35,7 +35,7 @@ class FPGATrackSimHitFilteringTool : public extends<AthAlgTool, IFPGATrackSimHit
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &, bool) override;
+    virtual StatusCode DoRandomRemoval(FPGATrackSimLogicalEventInputHeader &, bool) const override;
     virtual StatusCode GetPairedStripPhysLayers(const FPGATrackSimPlaneMap*, std::vector<int> &) override;
     virtual StatusCode DoHitFiltering(FPGATrackSimLogicalEventInputHeader &,
                                       std::vector<int>, std::vector<int>,
@@ -46,6 +46,8 @@ class FPGATrackSimHitFilteringTool : public extends<AthAlgTool, IFPGATrackSimHit
 
     bool check_hit_stub(const FPGATrackSimHit&, const FPGATrackSimHit&, float, float);
     void fill_cut_values(const FPGATrackSimHit&, float &, float &);
+    
+    TRandom3* getRandomGen(unsigned long eventNumber) const;
 
     // configuration
     Gaudi::Property<bool> m_digitalClustering {this, "DigitalClustering", true, "flag to enable digital clustering instead of ToT weighted position calculation" };
@@ -59,9 +61,9 @@ class FPGATrackSimHitFilteringTool : public extends<AthAlgTool, IFPGATrackSimHit
     Gaudi::Property<float> m_barrelStubDphiCut {this, "barrelStubDphiCut", 0.0, "barrel stub dPhi cut. Overridden by stubCutsFile"};
     Gaudi::Property<float> m_endcapStubDphiCut {this, "endcapStubDphiCut", 0.0, "endcap stub dPhi cut. Overridden by stubCutsFile"};
     Gaudi::Property<bool> m_useNstrips {this, "useNstrips", false, "use nStrips instead of dPhi for stub filtering"};
+    Gaudi::Property<unsigned int> m_randomSeed {this, "RandomSeed", 1, "Seed for random number generator"}; // for reproducibility
 
-
-    TRandom3 m_random;
+    mutable boost::thread_specific_ptr<TRandom3> m_random; // thread-specific random number generator (same approach as in METSystematicsTool class)
     std::unordered_map<std::string, std::unordered_map<int, std::unordered_map<int, std::pair<float,float>>>> m_stubCutMap;
 
 };

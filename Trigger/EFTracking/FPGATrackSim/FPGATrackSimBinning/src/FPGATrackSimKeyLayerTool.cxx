@@ -105,6 +105,7 @@ FPGATrackSimTrackPars FPGATrackSimKeyLayerTool::keyParsToTrackPars(const KeyLyrP
 
         pars[FPGATrackSimTrackPars::IHIP] = -1 * Rinv / (2.0 * FPGATrackSimBinUtil::GeomHelpers::CurvatureConstant);
 
+        
         std::pair<double, double> xycp(-d + xy1p.first, y / 2.0 + xy1p.second);
 
         pars[FPGATrackSimTrackPars::ID0] = -1 * sign * (std::abs(1 / Rinv) - std::hypot(xycp.first, xycp.second));

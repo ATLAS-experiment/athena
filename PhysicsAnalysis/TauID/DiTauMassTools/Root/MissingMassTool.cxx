@@ -99,23 +99,5 @@ CP::CorrectionCode MissingMassTool::apply(const xAOD::EventInfo& ei,
   m_MMC->SetEventNumber(ei.eventNumber());
   m_MMC->RunMissingMassCalculator(part1, part2, met, njets);
 
-  // Very dry decoration - MET and resonance vectors are retrieved
-  // in dedicated method (see MissingMassTool.h)
-
-  if (m_decorate) {
-    int aFitStatus = m_MMC->OutputInfo.GetFitStatus();
-    static const SG::Decorator<int> dec_mmc_fit_status ("mmc_fit_status");
-    static const SG::Decorator<double> dec_mmc_maxw_mass ("mmc_maxw_mass");
-    static const SG::Decorator<double> dec_mmc_mlm_mass ("mmc_mlm_mass");
-    static const SG::Decorator<double> dec_mmc_mlnu3p_mass ("mmc_mlnu3p_mass");
-    static const SG::Decorator<PtEtaPhiMVector> dec_mmc_mlnu3p_4vect ("mmc_mlnu3p_4vect");
-    dec_mmc_fit_status(ei) = aFitStatus;
-    dec_mmc_maxw_mass(ei)  = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MAXW) : -1;
-    dec_mmc_mlm_mass(ei)   = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MLM) : -1;
-    dec_mmc_mlnu3p_mass(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetFittedMass(MMCFitMethod::MLNU3P) : -1;
-    PtEtaPhiMVector null4V(0.,0.,0.,0.);
-    dec_mmc_mlnu3p_4vect(ei) = aFitStatus==1 ? m_MMC->OutputInfo.GetResonanceVec(MMCFitMethod::MLNU3P) : null4V;
-  }
-
   return CP::CorrectionCode::Ok;
 }

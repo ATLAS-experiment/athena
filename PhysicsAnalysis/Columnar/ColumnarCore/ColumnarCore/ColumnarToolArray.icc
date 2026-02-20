@@ -17,19 +17,28 @@ namespace columnar
   struct ColumnAccessorDataArray;
   struct ColumnarToolDataArray;
 
-  template<> class ColumnarTool<ColumnarModeArray> : public IColumnarTool
+  /// @brief a common base class for all columnar tools using an array mode
+  ///
+  /// Essentially the idea is that there are multiple columnar modes
+  /// that have the same basic structure of having an underlying array
+  /// with one entry per column, pointing to the column data. So this
+  /// class contains all the common functionality for such modes, and
+  /// the actual `ColumnarTool` specializations inherit from this class
+  /// and then do the mode-specific wrapping (to avoid mixing modes
+  /// within a tool).
+
+  class ColumnarToolArray : public IColumnarTool
   {
     /// Common Public Members
     /// =====================
   public:
 
+    /// @brief whether this tool can only be called for a single event
     static constexpr bool singleEvent = false;
 
-    ColumnarTool ();
-    explicit ColumnarTool (ColumnarTool<ColumnarModeArray>* val_parent);
-    ColumnarTool (const ColumnarTool<ColumnarModeArray>&) = delete;
-    ColumnarTool& operator = (const ColumnarTool<ColumnarModeArray>&) = delete;
-    virtual ~ColumnarTool ();
+
+    /// @brief standard (virtual) destructor
+    virtual ~ColumnarToolArray ();
 
 
     /// @brief initialize the columns/column handles
@@ -39,20 +48,11 @@ namespace columnar
     StatusCode initializeColumns ();
 
 
-    /// @brief add the given sub-tool
-    void addSubtool (ColumnarTool<ColumnarModeArray>& subtool);
-
-
-    /// @brief call the tool for the given event range
-    virtual void callEvents (ObjectRange<ContainerId::eventContext,ColumnarModeArray> events) const;
-
-
 
     /// Inherited Members from IColumnarTool
     /// ====================================
   public:
 
-    void callVoid (void **data) const final;
     std::vector<ColumnInfo> getColumnInfo () const final;
     void renameColumn (const std::string& from, const std::string& to) final;
     void setColumnIndex (const std::string& name, std::size_t index) final;
@@ -68,20 +68,15 @@ namespace columnar
   public:
 
     void setContainerUserName (std::string_view ciName, const std::string& name);
-
     void addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info);
 
 
+    /// Protected Members
+    /// =================
+  protected:
 
-    /// Mode-Specific Public Members
-    /// ============================
-  public:
+    friend struct ColumnarToolDataArray;
 
-
-
-    /// Private Members
-    /// ===============
-  private:
 
     // most of our data is stored in a pimpl structure
     std::shared_ptr<ColumnarToolDataArray> m_data;
@@ -90,5 +85,47 @@ namespace columnar
     // that here
     unsigned m_eventsIndex = 0u;
     std::unique_ptr<ColumnAccessorDataArray> m_eventsData;
+
+
+    /// standard constructors
+    ColumnarToolArray (ColumnarToolArray* val_parent);
+    ColumnarToolArray (const ColumnarToolArray&) = delete;
+    ColumnarToolArray& operator = (const ColumnarToolArray&) = delete;
+
+    /// @brief add the given sub-tool
+    void addSubtool (ColumnarToolArray& subtool);
+  };
+    
+
+
+  template<ColumnarArrayMode CM>
+  class ColumnarTool<CM> : public ColumnarToolArray
+  {
+    /// Common Public Members
+    /// =====================
+  public:
+
+    ColumnarTool () : ColumnarToolArray (nullptr) {};
+    explicit ColumnarTool (ColumnarTool<CM>* val_parent) : ColumnarToolArray (val_parent) {};
+
+
+    /// @brief add the given sub-tool
+    void addSubtool (ColumnarTool<CM>& subtool) {
+      ColumnarToolArray::addSubtool (subtool); }
+
+
+    /// @brief call the tool for the given event range
+    virtual void callEvents (ObjectRange<ContainerId::eventContext,CM> /*events*/) const {
+      throw std::runtime_error ("tool didn't implement callEvents");}
+
+
+
+    /// Inherited Members from IColumnarTool
+    /// ====================================
+  public:
+
+    void callVoid (void **data) const final {
+      auto eventsOffset = static_cast<const ColumnarOffsetType*> (data[m_eventsIndex]);
+      callEvents (ObjectRange<ContainerId::eventContext,CM> (data, eventsOffset[0], eventsOffset[1])); }
   };
 }

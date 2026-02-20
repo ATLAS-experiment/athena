@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEALGORITHMS_READDATA_H
@@ -11,14 +11,13 @@
  *  $Id: ReadData.h,v 1.2 2009-03-11 20:08:50 gemmeren Exp $
  **/
 
-#include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "PersistentDataModel/DataHeader.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "AthenaPoolExampleData/ExampleTrackContainer.h"
 #include "AthenaPoolExampleData/ExampleHitContainer.h"
-#include "StoreGate/ReadHandleKey.h"
 
-class DataHeader;
 class StoreGateSvc;
 
 namespace AthPoolEx {
@@ -27,17 +26,15 @@ namespace AthPoolEx {
  *  @brief This class provides an example for reading event data objects from Pool.
  **/
 class ReadData : public AthReentrantAlgorithm {
-public: // Constructor and Destructor
-   /// Standard Service Constructor
+public:
    ReadData(const std::string& name, ISvcLocator* pSvcLocator);
-   /// Destructor
-   virtual ~ReadData();
+   virtual ~ReadData() = default;
 
 public:
-/// Gaudi Service Interface method implementations:
-   virtual StatusCode initialize() override;
-   virtual StatusCode execute (const EventContext& ctx) const override;
-   virtual StatusCode finalize() override;
+   /// Gaudi Service Interface method implementations:
+   virtual StatusCode initialize() override final;
+   virtual StatusCode execute (const EventContext& ctx) const override final;
+   virtual StatusCode finalize() override final;
 
 private:
    ServiceHandle<StoreGateSvc> p_SGinMeta;

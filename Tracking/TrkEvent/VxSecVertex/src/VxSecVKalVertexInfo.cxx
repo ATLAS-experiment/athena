@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /****************************************
@@ -109,7 +109,7 @@ namespace Trk {
   VxSecVKalVertexInfo & VxSecVKalVertexInfo::operator= (const VxSecVKalVertexInfo & rhs) {
     
     if (this!=&rhs) {
-      this->operator=(rhs);
+      VxSecVertexInfo::operator=(rhs);
       m_mass=rhs.m_mass;
       m_energyFraction=rhs.m_energyFraction;
       m_energyTrkInJet=rhs.m_energyTrkInJet;
@@ -122,7 +122,9 @@ namespace Trk {
     }
     return *this;
   }
-  
+
+  // Would be nicer to use a unique_ptr here... but the ownership is too convoluted.
+  // cppcheck-suppress noCopyConstructor
   VxSecVKalVertexInfo::~VxSecVKalVertexInfo() { if(m_pseudoVertex && m_SVOwnership) {delete m_pseudoVertex;
 }}
 

@@ -60,7 +60,7 @@
   <class name="ParticleEventDict::temp::PImpl_t_3" />
 
 <!-- example of what is needed for each Selector inheriting SelectorBase -->
- <class name="ParticleLinks<ParticleBaseContainer>" id="FADB743B-90F9-487F-81f2-FDEA5A509945"  />
+ <class name="ParticleLinks<ParticleBaseContainer>" id="FADB743B-90F9-487F-81F2-FDEA5A509945"  />
  <class name="ParticleLinks<IParticleContainer>"    id="91504058-57C5-4FFE-B4B8-019F9096E838"  />
 
 <!-- Stuff for the TrackParticleAssocs -->

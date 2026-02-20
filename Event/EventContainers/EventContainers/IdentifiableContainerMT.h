@@ -9,7 +9,7 @@
  *
  * @brief This class is a general container which can hold objects of
  * accessed by an IdentifierHash
- * For more information for the use of this class see https://atlassoftwaredocs.web.cern.ch/guides/trigger/idc/
+ * For more information for the use of this class see https://atlas-software.docs.cern.ch/athena/trigger/developers/idc
  *
  * @author A E Barton <abarton@cern.ch>
  *
@@ -24,6 +24,9 @@
 #include "EventContainers/IDC_WriteHandleBase.h"
 #include "CxxUtils/AthUnlikelyMacros.h"
 #include "EventContainers/IdentifiableCache.h"
+#include <bit>
+#include <span>
+#include <ranges>
 
 template < class T>
 class IdentifiableContainerMT : public DataObject, public EventContainers::IdentifiableContainerBase, public EventContainers::IIdentifiableCont<T>
@@ -103,11 +106,11 @@ public:
         }
 
         const T* cptr () const {
-            return reinterpret_cast<const T*>( m_itr->second );
+            return std::bit_cast<const T*>( m_itr->second );
         }
 
         const T* operator * () const {
-            return reinterpret_cast<const T*>( m_itr->second );
+            return std::bit_cast<const T*>( m_itr->second );
         }
 
         const T* operator ->() const { return (operator*()); }
@@ -214,11 +217,17 @@ public:
         return IdentifiableContainerBase::numberOfCollections();
     }
 
-    const std::vector < EventContainers::hashPair<T> >& GetAllHashPtrPair() const{
+    auto GetAllHashPtrPair() const{
         static_assert(sizeof(const T*) == sizeof(const void*) && std::is_pointer<const T*>::value);
         static_assert(sizeof(EventContainers::hashPair<T>) == sizeof(EventContainers::hashPair<void>));
-        return reinterpret_cast<const std::vector < EventContainers::hashPair<T> >&>
-                (m_link->getAllHashPtrPair());
+        const auto& void_vec = m_link->getAllHashPtrPair();  // std::vector<hashPair<void>>
+        return void_vec | std::views::transform([](const auto& item) {
+        // We construct a temporary hashPair<T> for each element
+        return EventContainers::hashPair<T>{
+            item.first,
+            static_cast<const T*>(item.second)
+        };
+    });
     }
     
     ///Returns a collection of all hashes availiable in this IDC.
@@ -258,7 +267,7 @@ template < class T>
 T*  //Please don't do this we want to get rid of this
 IdentifiableContainerMT<T>::removeCollection( IdentifierHash hashId )
 {
-    return reinterpret_cast<T*>(m_link->removeCollection(hashId));
+    return std::bit_cast<T*>(m_link->removeCollection(hashId));
 }
 
 
@@ -288,7 +297,7 @@ template < class T>
 const T*
 IdentifiableContainerMT<T>::indexFindPtr( IdentifierHash hashId ) const
 {
-    return reinterpret_cast<const T* > (IdentifiableContainerBase::indexFindPtr(hashId));
+    return std::bit_cast<const T* > (IdentifiableContainerBase::indexFindPtr(hashId));
 }
 
 // insert collection into container with id hash
@@ -339,7 +348,7 @@ IdentifiableContainerMT<T>::naughtyRetrieve(IdentifierHash hashId, T* &collToRet
 {
    if(ATH_UNLIKELY(m_OnlineMode)) return StatusCode::FAILURE;//NEVER ALLOW FOR EXTERNAL CACHE
    else {
-      auto p = reinterpret_cast<const T* > (m_link->findIndexPtr(hashId));//collToRetrieve can be null on success
+      auto p = std::bit_cast<const T* > (m_link->findIndexPtr(hashId));//collToRetrieve can be null on success
       collToRetrieve = const_cast<T*>(p);
       return StatusCode::SUCCESS;
    }

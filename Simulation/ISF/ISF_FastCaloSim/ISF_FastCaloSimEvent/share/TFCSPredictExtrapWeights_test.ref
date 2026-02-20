@@ -1,18 +1,18 @@
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-ISF_FastCaloSim...SUCCESS Running TFCSPredictExtrapWeights
+ISF_FastCaloSim... SUCCESS Running TFCSPredictExtrapWeights
 
-ISF_FastCaloSim...SUCCESS Testing net path ...TNNPredExtrapSample/ and norm path ...ormPredExtrapSample/
+ISF_FastCaloSim... SUCCESS Testing net path ...TNNPredExtrapSample/ and norm path ...ormPredExtrapSample/
 
-ISF_FastCaloSim...SUCCESS True energy 5.24288e+08 pdgId 22 eta -0
+ISF_FastCaloSim... SUCCESS True energy 5.24288e+08 pdgId 22 eta -0
 
-ISF_FastCaloSim...SUCCESS etaBin = 0_5
+ISF_FastCaloSim... SUCCESS etaBin = 0_5
 
-ISF_FastCaloSim...   INFO Using FastCaloNNInputFolderName: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNPredExtrapSample/
-ISF_FastCaloSim...   INFO For pid: 22 and etaBin0_5, loading json file /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNPredExtrapSample/NN_0_5.json
-ISF_FastCaloSim...SUCCESS computing with m_nn
+ISF_FastCaloSim...    INFO Using FastCaloNNInputFolderName: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNPredExtrapSample/
+ISF_FastCaloSim...    INFO For pid: 22 and etaBin0_5, loading json file /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNPredExtrapSample/NN_0_5.json
+ISF_FastCaloSim... SUCCESS computing with m_nn
 
 TFile**		FCSNNtest.root	
  TFile*		FCSNNtest.root	
   KEY: TFCSPredictExtrapWeights	NN;1	NN
-ISF_FastCaloSim...SUCCESS Program ends
+ISF_FastCaloSim... SUCCESS Program ends
 

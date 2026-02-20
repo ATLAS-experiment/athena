@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -39,6 +39,7 @@ StatusCode IDC_OverlayBase::overlayContainerImpl(
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)signalCollection.release();
       }
     }
@@ -72,6 +73,7 @@ StatusCode IDC_OverlayBase::overlayContainerImpl(
         ATH_MSG_ERROR("Adding background Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)bkgCollection.release();
       }
     } else {
@@ -124,13 +126,15 @@ StatusCode IDC_OverlayBase::overlayContainerImpl(
         ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
-        outputCollection.release();
+        //coverity[RESOURCE_LEAK]
+        std::ignore = outputCollection.release();
       }
     } else { // Only write signal out
       if (outputContainer->addCollection(signalCollection.get(), hashId).isFailure()) {
         ATH_MSG_ERROR("Adding signal Collection with hashId " << hashId << " failed");
         return StatusCode::FAILURE;
       } else {
+        //coverity[RESOURCE_LEAK]
         (void)signalCollection.release();
       }
     }

@@ -213,23 +213,30 @@ bool NswDcsDbData::isGoodTDaq(const EventContext& ctx, const Identifier& channel
     const unsigned int array_idx = identToModuleIdx(channelId);
     if(data.size()<=array_idx || data[array_idx].empty()) return true; // for this ro element no bad elink have been recorded 
     const std::map<Identifier, std::set<TDaqConstants>>& dataInRoElement = data[array_idx];
-    Identifier mapIdentifier{0};
+    Identifier mapIdentifier{};
     uint elink{0};
 
     if(m_idHelperSvc->issTgc(channelId)){
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
         mapIdentifier = idHelper.febID(channelId);
-        auto mapper = Muon::nsw::MapperSTG();
-        mapper.elink_info(idHelper.channelType(channelId), !idHelper.isSmall(channelId), std::abs(idHelper.stationEta(channelId))-1, 4*(idHelper.multilayer(channelId)-1) + idHelper.gasGap(channelId) -1, idHelper.channel(channelId), elink);
+        Muon::nsw::MapperSTG mapper{};
+        mapper.elink_info(idHelper.channelType(channelId), 
+                          !idHelper.isSmall(channelId), 
+                          std::abs(idHelper.stationEta(channelId))-1, 
+                          4*(idHelper.multilayer(channelId)-1) + idHelper.gasGap(channelId) -1, 
+                          idHelper.channel(channelId), 
+                          elink);
     } else {
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
         mapIdentifier = idHelper.febID(channelId);
-        auto mapper = Muon::nsw::MapperMMG();
+        Muon::nsw::MapperMMG mapper{};
         mapper.elink_info(std::abs(idHelper.stationEta(channelId))-1, idHelper.channel(channelId), elink); 
     }
     
     auto elm = dataInRoElement.find(mapIdentifier);
-    if(elm == dataInRoElement.end()) return true; // channel in question was not deactivated at all
+    if(elm == dataInRoElement.end()) {
+        return true; // channel in question was not deactivated at all
+    }
     TDaqConstants x;
     uint64_t evtTime = ctx.eventID().time_stamp()*1e9; // go from seconds to nanoseconds
     evtTime += ctx.eventID().time_stamp_ns_offset();

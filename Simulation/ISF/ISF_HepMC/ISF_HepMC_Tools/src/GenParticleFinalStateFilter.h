@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenParticleFinalStateFilter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_GENPARTICLEFINALSTATEFILER_H
 #define ISF_HEPMC_GENPARTICLEFINALSTATEFILER_H 1
@@ -20,7 +16,7 @@
 
 namespace ISF {
 
-    class ISFParticle;
+  class ISFParticle;
 
   /** @class GenParticleFinalStateFilter
 
@@ -28,30 +24,29 @@ namespace ISF {
       stack filling process.
 
       @author Andreas.Salzburger -at- cern.ch
-     */
+  */
   class GenParticleFinalStateFilter : public extends<AthAlgTool, IGenParticleFilter> {
 
-    public:
-      //** Constructor with parameters */
-      GenParticleFinalStateFilter( const std::string& t, const std::string& n, const IInterface* p );
+  public:
+    //** Constructor with parameters */
+    GenParticleFinalStateFilter( const std::string& t, const std::string& n, const IInterface* p );
 
-      /** Destructor */
-      ~GenParticleFinalStateFilter(){}
+    /** Destructor */
+    ~GenParticleFinalStateFilter() = default;
 
-      /** Athena algtool's Hooks */
-      StatusCode  initialize();
-      StatusCode  finalize();
+    /** Athena algtool's Hooks */
+    virtual StatusCode  initialize() override final;
 
 #ifdef HEPMC3
-      /** Returns the Particle Stack, should register truth */
-      bool pass(const HepMC::ConstGenParticlePtr& particle) const;
+    /** Returns the Particle Stack, should register truth */
+    virtual bool pass(const HepMC::ConstGenParticlePtr& particle) const override final;
 #else
-      /** Returns the Particle Stack, should register truth */
-      bool pass(const HepMC::GenParticle& particle) const;
+    /** Returns the Particle Stack, should register truth */
+    virtual bool pass(const HepMC::GenParticle& particle) const override final;
 #endif
 
-      bool                              m_checkGenSimStable;    //!< boolean switch to check on sim stable
-      bool                              m_checkGenInteracting;  //!< boolean switch to check on gen interacting
+    Gaudi::Property<double> m_checkGenSimStable{this, "CheckGenSimStable", true};    //!< boolean switch to check on sim stable
+    Gaudi::Property<double> m_checkGenInteracting{this, "CheckGenInteracting", true};  //!< boolean switch to check on gen interacting
 
   };
 

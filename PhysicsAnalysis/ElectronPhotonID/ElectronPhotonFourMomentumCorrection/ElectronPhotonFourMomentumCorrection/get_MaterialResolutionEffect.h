@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef get_MaterialResolutionEffect_H
@@ -31,7 +31,7 @@ class get_MaterialResolutionEffect : public asg::AsgMessaging {
   /** @brief constructor (initialization done there reading root files with
    * resolution fit parameters */
   get_MaterialResolutionEffect();
-  ~get_MaterialResolutionEffect(){};
+  ~get_MaterialResolutionEffect();
 
   /** @brief get material effect on resolution from distorted geometry as
      difference to 40 GeV Et electrons smearing

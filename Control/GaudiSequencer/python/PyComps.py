@@ -72,6 +72,7 @@ class PyEvtFilter (PyAthena.Alg):
         
         # location of EventInfo
         self.evt_info = kw.get('evt_info', None)
+        self.is_mc  = kw.get('is_mc', False) # default value
         
         return
 
@@ -144,16 +145,33 @@ class PyEvtFilter (PyAthena.Alg):
         _info = self.msg.info
         _error= self.msg.error
 
-        evtinfo = self.sg.retrieve ('EventInfo', self.evt_info)
-        if evtinfo is None:
-            _error ('could not retrieve EventInfo at [%s]', self.evt_info)
+        for evtinfocls in ('xAOD::EventInfo', 'EventInfo'):
+            try:
+                 evtinfo = self.sg.retrieve (evtinfocls, self.evt_info)
+            except Exception as e:
+                _info ('could not retrieve %r at [%s]\n    caught exception:\n%r', evtinfocls, self.evt_info, e)
+            else:
+                if evtinfo is None:
+                    _info ('retrieved \'None\' for %r at [%s]', evtinfocls, self.evt_info)
+                    continue
+                break
+        else:
+            _error ("could not retrieve 'EventInfo' or 'xAOD::EventInfo' at [%s]", self.evt_info)
             return StatusCode.Failure
 
         filter_passed = None
         
-        evtid = evtinfo.event_ID()
-        runnbr = evtid.run_number()
-        evtnbr = evtid.event_number()
+        if evtinfocls == 'EventInfo':
+            evtid = evtinfo.event_ID()
+            runnbr = evtid.run_number()
+            evtnbr = evtid.event_number()
+        elif evtinfocls == 'xAOD::EventInfo':
+            if not self.is_mc:
+                runnbr = evtinfo.runNumber()
+            else:
+                runnbr = evtinfo.mcChannelNumber()
+            evtnbr = evtinfo.eventNumber()
+
         if self.filter_fct:
             filter_passed = self.filter_fct (runnbr, evtnbr)
         else:

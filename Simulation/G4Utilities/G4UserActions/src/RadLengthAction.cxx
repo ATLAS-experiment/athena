@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLengthAction.h"
@@ -104,7 +104,7 @@ namespace G4UA
 
       // logical vector is put to the tmplogvec (with daughters) for next stage
       // to physvec all not gas daughters of this level where already added
-      logvec=tmplogvec;
+      logvec=std::move(tmplogvec);
 
     }
 
@@ -117,7 +117,7 @@ namespace G4UA
       npos=fulldaughtername.find("::");
       // nicer naming for depth level =1
       if(npos!=std::string::npos && m_config.VolumeDepthLevel==1) daughtername = fulldaughtername.substr(0,npos);
-      else daughtername = fulldaughtername;
+      else daughtername = std::move(fulldaughtername);
       topvolmap[daughtername]=physvol;
     }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TopoInterfaces/AlgFactory.h" 
@@ -45,6 +45,7 @@ TopoSteering::setupFromConfiguration ATLAS_NOT_THREAD_SAFE (const TrigConf::L1Me
   TCS::StatusCode sc = m_structure.setupFromMenu( l1menu, m_isLegacyTopo );
   
   // configure layout of the simulation result
+  //coverity[USELESS_CALL:FALSE]
   sc &= m_simulationResult.setupFromMenu( m_structure.outputConnectors(), m_structure.countConnectors() );
 
   return sc;
@@ -90,7 +91,7 @@ TCS::StatusCode
 TopoSteering::initializeAlgorithms() {
    TRG_MSG_INFO("initializing algorithms");
    if( ! structure().isConfigured() ) {
-      TCS_EXCEPTION("L1Topo Steering has not been configured, can't run")
+      TCS_EXCEPTION("L1Topo Steering has not been configured, can't run");
    }
 
    for(auto conn: m_structure.connectors()) {
@@ -156,7 +157,7 @@ TopoSteering::executeEvent() {
       TRG_MSG_INFO("executing trigger line " << name);
       sc |= executeConnector(pConnector);
    } 
-
+   //coverity[USELESS_CALL:FALSE]
    sc |= m_simulationResult.collectResult(); 
 
    m_simulationResult.globalOutput().print();
@@ -261,7 +262,7 @@ TopoSteering::executeSortingConnector(TCS::SortingConnector *conn) {
    TCS::SortingAlg* alg = conn->sortingAlgorithm();
 
    TOBArray * sortedOutput = new TOBArray(conn->outputName());
-
+   //coverity[USELESS_CALL:FALSE]
    sc &= executeSortingAlgorithm(alg, conn->inputConnector(), sortedOutput);
 
    conn->toggleAmbiguity(sortedOutput->ambiguityFlag());
@@ -304,7 +305,7 @@ TopoSteering::executeDecisionConnector(TCS::DecisionConnector *conn) {
       output[i] = new TOBArray(conn->triggers()[i].name());
       output[i]->setAmbiguityFlag(conn->hasAmbiguity());
    }
-
+   //coverity[USELESS_CALL:FALSE]
    sc &= executeDecisionAlgorithm(alg, conn->inputConnectors(), output, conn->m_decision);
 
    TRG_MSG_DEBUG("  ... executing decision connector '" << conn->name() << "' -> attaching output data:");
@@ -353,6 +354,7 @@ TopoSteering::executeCountingConnector(TCS::CountingConnector *conn) {
    TCS::CountingAlg* alg = conn->countingAlgorithm();
    
    // Execute algorithm with no output data - not needed for now
+   //coverity[USELESS_CALL:FALSE]
    sc &= executeCountingAlgorithm(alg, conn->inputConnector(), conn->m_count);
 
    conn->setIsExecuted(true);

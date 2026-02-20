@@ -21,10 +21,9 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "FileCatalog/IFileCatalog.h"
 
 #include "AuxDiscoverySvc.h"
 
@@ -250,7 +249,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                         auto placementWithSwn = [&] { return std::format("{}[SWN={}]",  placementStr, num); };
                         if( className == "DataHeaderForm_p6" ) {
                            // Pass DHForms to the converter for later writing in the correct order - do not write it now
-                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                           GenericAddress address(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(),
                                                   "", placementWithSwn());
                            DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).ignore();
                            tokenStr = "";
@@ -266,7 +265,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                         }
                         if( className == "DataHeader_p6" ) {
                            // Found DataHeader - call the converter to update DHForm Ref
-                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                           GenericAddress address(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(),
                                                   tokenStr, placementWithSwn());
                            if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
                               ATH_MSG_ERROR("Failed updateRep for obj = " << tokenStr);
@@ -289,7 +288,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                         tokenStr = token->toString();
                         if (className == "DataHeader_p6") {
                            // Found DataHeader
-                           GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                           GenericAddress address(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(),
                                                   tokenStr, placement.auxString());
                            // call DH converter to add the ref to DHForm (stored earlier) and to itself
                            if (!DHcnv->updateRep(&address, static_cast<DataObject*>(obj)).isSuccess()) {
@@ -310,7 +309,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
                            // in any case we need to call the DH converter to update the DHForm Ref
                            if (className == "DataHeaderForm_p6") {
                               // Tell DataHeaderCnv that it should use a new DHForm
-                              GenericAddress address(POOL_StorageType, ClassID_traits<DataHeader>::ID(),
+                              GenericAddress address(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(),
                                                      tokenStr, dataHeaderID);
                               if (!DHcnv->updateRepRefs(&address, static_cast<DataObject*>(obj)).isSuccess()) {
                                  ATH_MSG_ERROR("Failed updateRepRefs for obj = " << tokenStr);
@@ -369,7 +368,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
          std::string memName = std::format("SHM[NUM={}]", m_metadataClient);
          FileIncident beginInputIncident(name(), "BeginInputMemFile", memName);
          incSvc->fireIncident(beginInputIncident);
-         FileIncident endInputIncident(name(), "EndInputMemFile", memName);
+         FileIncident endInputIncident(name(), "EndInputMemFile", std::move(memName));
          incSvc->fireIncident(endInputIncident);
          if (sc.isFailure()) {
             ATH_MSG_INFO("All SharedWriter clients stopped - exiting");
@@ -390,6 +389,16 @@ StatusCode AthenaPoolSharedIOCnvSvc::commitOutput(const std::string& outputConne
       if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient() && m_parallelCompression) {
          outputConnection += m_streamPortString.value();
       }
+   }
+   std::size_t merge = outputConnection.find("?pmerge="); // Used to remove trailing TMemFile
+   const std::string baseOutputConnection = outputConnection.substr(0, merge);
+   m_fileCommitCounter[baseOutputConnection]++;
+   if (m_parallelCompression &&
+      m_fileFlushSetting.value().contains(baseOutputConnection) &&
+      m_fileFlushSetting[baseOutputConnection] > 0 &&
+      m_fileCommitCounter[baseOutputConnection] % m_fileFlushSetting[baseOutputConnection] == 0) {
+      doCommit = true;
+      ATH_MSG_DEBUG("commitOutput sending data.");
    }
    StatusCode status = AthenaPoolCnvSvc::commitOutput(outputConnection, doCommit);
    for (auto& [ptr, rootType] : commitCache) {
@@ -636,7 +645,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
       }
       m_inputStreamingTool->getObject(&buffer, nbytes).ignore();
       if (token) {
-         refpAddress = new TokenAddress(POOL_StorageType, clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
+         refpAddress = new TokenAddress(pool::POOL_StorageType.type(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
          return(StatusCode::SUCCESS);
       }
       else {
@@ -652,6 +661,12 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
    return AthenaPoolCnvSvc::createAddress(svcType, clid, refAddress, refpAddress);
+}
+//______________________________________________________________________________
+StatusCode AthenaPoolSharedIOCnvSvc::cleanUp(const std::string& connection) {
+   auto pos = connection.find("?pmerge=");
+   std::string conn = (pos == std::string::npos) ? connection : connection.substr(0, pos);
+   return AthenaPoolCnvSvc::cleanUp(conn);
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::makeServer(int num) {

@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELINTERFACES_IGEOMODELTOOL_H
 #define GEOMODELINTERFACES_IGEOMODELTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "CxxUtils/checker_macros.h"
 
 class IGeoModelTool : public virtual IAlgTool {
 public:
@@ -22,12 +20,8 @@ public:
     //    2. Do any extra clean up tasks if necessary
     virtual StatusCode clear() = 0;
 
-    // Register callback function on ConDB object
-    virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () = 0;
-
-    // Callback function itself
-    virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) = 0;
-
+    // Function to apply alignments in Simulation jobs
+    virtual StatusCode align() = 0;
 };
 
 #endif // GEOMODELINTERFACES_IGEOMODELTOOL_H

@@ -197,7 +197,7 @@ namespace Rivet {
             if (!PID::isHiggs(ptcl->pdg_id())) {
               uncatV_decays += Particle(ptcl);
               uncatV_p4 += Particle(ptcl).momentum();
-              uncatV_v4 += Particle(ptcl).origin();
+              uncatV_v4 += Particle(std::move(ptcl)).origin();
             }
           }
           is_uncatdV = true; cat.V = Particle(24,uncatV_p4,uncatV_v4);

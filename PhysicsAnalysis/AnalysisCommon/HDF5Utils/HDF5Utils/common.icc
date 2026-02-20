@@ -22,6 +22,7 @@ namespace H5Utils {
       }
       params.setChunk(chunk_size.size(), chunk_size.data());
       if (cfg.deflate) params.setDeflate(*cfg.deflate);
+      for (const auto& cb: cfg.plist_callbacks) cb(params);
       return params;
     }
   }

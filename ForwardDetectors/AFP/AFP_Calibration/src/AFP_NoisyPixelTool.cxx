@@ -1,8 +1,9 @@
 /*
-	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Calibration/AFP_NoisyPixelTool.h"
+#include <iostream>
 
 int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<TH2F>& output) const
 {
@@ -11,29 +12,23 @@ int AFP_NoisyPixelTool::Identify(std::shared_ptr<const TH2F> input, std::vector<
 		return 0;
 	}
 	
-	output.reserve(4);
+	output[0].Reset();
+	output.resize(4, output[0]);//container now has 4 copies of the 0'th element
+	auto name = [&output](const char * n)->TString{
+	  return Form(n,output[0].GetName());
+	};
+	auto title = [&output](const char * t)->TString{
+	  return Form(t,output[0].GetTitle());
+	};
+	output[1].SetNameTitle(name("leffpixels_found_%s"), title("low efficiency pixels, found, %s"));
+	output[2].SetNameTitle(name("noisypixels_eff_%s"), title("noisy pixels, efficiency, %s"));
+	output[3].SetNameTitle(name("leffpixels_eff_%s"), title("low efficiency pixels, efficiency, %s"));
+	output[0].SetNameTitle(name("noisypixels_found_%s"), title("noisy pixels, found, %s"));
 	
-	TH2F& template_output = output.at(0);
-	template_output.Reset();
-	
-	TH2F tmp_output1(template_output);
-	tmp_output1.SetNameTitle(Form("leffpixels_found_%s",template_output.GetName()), Form("low efficiency pixels, found, %s", template_output.GetTitle()));
-
-	TH2F tmp_output2(template_output);
-	tmp_output2.SetNameTitle(Form("noisypixels_eff_%s",template_output.GetName()), Form("noisy pixels, efficiency, %s", template_output.GetTitle()));
-
-	TH2F tmp_output3(template_output);
-	tmp_output3.SetNameTitle(Form("leffpixels_eff_%s",template_output.GetName()), Form("low efficiency pixels, efficiency, %s", template_output.GetTitle()));
-	TH2F& noisypixels_found_output = output.at(0);
-	noisypixels_found_output.SetNameTitle(Form("noisypixels_found_%s",template_output.GetName()), Form("noisy pixels, found, %s", template_output.GetTitle()));
-
-	output.push_back(tmp_output1);
-	output.push_back(tmp_output2);
-	output.push_back(tmp_output3);
-
-	TH2F& leffpixels_found_output = output.at(1);
-	TH2F& noisypixels_eff_output = output.at(2);
-	TH2F& leffpixels_eff_output = output.at(3);
+  TH2F& noisypixels_found_output = output[0];
+	TH2F& leffpixels_found_output = output[1];
+	TH2F& noisypixels_eff_output = output[2];
+	TH2F& leffpixels_eff_output = output[3];
 		
 	
 	if(input->GetMaximum()<0.5) return 0;
@@ -272,7 +267,10 @@ std::tuple<TH2F,TH2F,TH2F,TH2F> AFP_NoisyPixelTool::findLEffAndNoisyPixels(std::
 					av_leff=sum/8.;
 				}
 				
-				
+				if ((av_leff == 0) or (av_noisy == 0))[[unlikely]]{
+				  std::cerr<< "AFP_NoisyPixelTool::findLEffAndNoisyPixels: denominator is zero\n";
+				  continue;
+				} 
 				double ratio_leff  = input->GetBinContent(row_ID,col_ID)/av_leff;
 				double ratio_noisy = input->GetBinContent(row_ID,col_ID)/av_noisy;
 				tmp_eff_leff.SetBinContent(row_ID,col_ID,100.*ratio_leff);
@@ -323,7 +321,7 @@ void AFP_NoisyPixelTool::filterLEffPixelsAroundNoisy(std::shared_ptr<const TH2F>
 				if(npix==0)
 				{
 					re_av=0;
-					for(auto legpix : legit_pixels)
+					for(const auto & legpix : legit_pixels)
 					{
 						re_av+=input->GetBinContent(legpix.first,legpix.second);
 					}
@@ -334,7 +332,10 @@ void AFP_NoisyPixelTool::filterLEffPixelsAroundNoisy(std::shared_ptr<const TH2F>
 				{
 					re_av/=npix;
 				}
-						
+				if (re_av == 0)[[unlikely]]{
+				  std::cerr<< "AFP_NoisyPixelTool::findLEffAndNoisyPixels: re_av denominator is zero\n";
+				  continue;
+				} 
 				double ratio_noisy = m_sensitivity+input->GetBinContent(row_ID,col_ID)/re_av;
 				double ratio_leff  = input->GetBinContent(row_ID,col_ID)/re_av; 
 				if(re_av==1)

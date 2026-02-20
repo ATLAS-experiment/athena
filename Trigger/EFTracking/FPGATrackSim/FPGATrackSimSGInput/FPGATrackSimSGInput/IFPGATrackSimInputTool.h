@@ -26,7 +26,7 @@ class IFPGATrackSimInputTool : virtual public ::IAlgTool {
    * @return StatusCode
    */
   virtual StatusCode readData(FPGATrackSimEventInputHeader* header,
-                              const EventContext& eventContext) = 0;
+                              const EventContext& eventContext) const = 0;
 };
 
 #endif  // FPGATrackSimSGInput_IFPGATrackSimInputTool_h

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
@@ -34,7 +34,7 @@ void TrigRoiDescriptorCnv_p3::persToTrans(const TrigRoiDescriptor_p3* persObj,
    /// would actually be a good thing, but it would not be obvious why, if the user hadm't 
    /// spotted these warnings - we at least it is not correcting these silently
  
-   /// NB: here we se the log << MSG::WARNING since this code si old, and the rest is done 
+   /// NB: here we see the log << MSG::WARNING since this code is old, and the rest is done 
    ///     this way and I dont want to touch the log output in the bits I am not modifying, 
    ///     so done like this for consistency  
 
@@ -136,7 +136,7 @@ void TrigRoiDescriptorCnv_p3::transToPers(const TrigRoiDescriptor* transObj,
        roi[ZEDMINUS] = iroi->zedMinus();
        roi[ZEDPLUS]  = iroi->zedPlus();
 
-       persObj->rois.push_back( roi );
+       persObj->rois.push_back( std::move(roi) );
      } 
    } 
 

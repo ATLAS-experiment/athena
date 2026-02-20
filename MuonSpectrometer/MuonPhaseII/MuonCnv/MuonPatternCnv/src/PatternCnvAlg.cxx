@@ -68,13 +68,13 @@ namespace MuonR4{
         ATH_CHECK(SG::get(stgcPrds, m_keysTgc, ctx));
         ATH_CHECK(SG::get(mmPrds, m_keyMM, ctx));
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
        
     
         for (const SegmentSeed* seed: seedContainer) {
-            const Amg::Transform3D& localToGlobal = seed->msSector()->localToGlobalTrans(*gctx);
+            const Amg::Transform3D& localToGlobal = seed->msSector()->localToGlobalTransform(*gctx);
                 
             std::unordered_set<Identifier> channelsInMax{};
             for (const HoughHitType& hit : seed->getHitsInMax()) {

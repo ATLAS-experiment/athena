@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -70,8 +70,8 @@ bool EvenPhiCMA::cable_CMA_channels(void) {
     if (pivot_station())  // Check and connect strips with Pivot matrix channels
     {
         WORlink::iterator found = m_pivot_WORs.find(pivot_start_ch());
+        if (found == m_pivot_WORs.end()) return false;
         WiredOR* wor = (*found).second;
-
         m_pivot_rpc_read = wor->RPCacquired();
         create_pivot_map(m_pivot_rpc_read);
 
@@ -153,6 +153,7 @@ bool EvenPhiCMA::cable_CMA_channels(void) {
     if (lowPt_station() && lowPt_start_ch() != -1) {  // Check and connect strips with Low Pt matrix channels
         for (int i = lowPt_start_ch(); i <= lowPt_stop_ch(); ++i) {
             WORlink::iterator found = m_lowPt_WORs.find(i);
+            if (found == m_lowPt_WORs.end()) continue;
             m_lowPt_rpc_read += (*found).second->RPCacquired();
         }
 
@@ -169,6 +170,7 @@ bool EvenPhiCMA::cable_CMA_channels(void) {
 
         for (int w = lowPt_start_ch(); w <= lowPt_stop_ch(); ++w) {
             WORlink::iterator found = m_lowPt_WORs.find(w);
+            if (found == m_lowPt_WORs.end()) continue;
             WiredOR* wor = (*found).second;
             std::vector<int> multiplicity(wor->give_max_phi_strips(),0);
             
@@ -269,6 +271,7 @@ bool EvenPhiCMA::cable_CMA_channels(void) {
     if (highPt_station() && highPt_start_ch() != -1) {  // Check and connect strips with High Pt matrix channels
         for (int i = highPt_start_ch(); i <= highPt_stop_ch(); ++i) {
             WORlink::iterator found = m_highPt_WORs.find(i);
+            if (found == m_highPt_WORs.end()) continue;
             m_highPt_rpc_read += (*found).second->RPCacquired();
         }
 
@@ -285,6 +288,7 @@ bool EvenPhiCMA::cable_CMA_channels(void) {
 
         for (int w = highPt_start_ch(); w <= highPt_stop_ch(); ++w) {
             WORlink::iterator found = m_highPt_WORs.find(w);
+            if (found == m_highPt_WORs.end()) continue;
             WiredOR* wor = (*found).second;
             std::vector<int> multiplicity(wor->give_max_phi_strips(),0);
             

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -206,28 +206,6 @@ namespace TAGrowing
     {
       return tag.clear_no_merge_flag();
     }
-  };
-
-  struct TopoAutomatonGrowingTemporaries
-  {
-    CaloRecGPU::tag_type secondary_array[CaloRecGPU::NCaloCells];
-
-    int cell_to_cluster_map[CaloRecGPU::NCaloCells];
-
-    unsigned long long int seed_cell_table[CaloRecGPU::NMaxClusters];
-
-
-    struct PairsArr
-    {
-      int cellID[CaloRecGPU::NMaxPairs];
-      int neighbourID[CaloRecGPU::NMaxPairs];
-      int number;
-    };
-
-    PairsArr seedgrow_pairs, term_pairs;
-
-    int continue_flag;
-    int stop_flag;
   };
 
   struct TopoAutomatonOptions

@@ -1,37 +1,28 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELPPIN_HH
 #define MUONTGC_CABLING_TGCCHANNELPPIN_HH
- 
+
 #include "MuonTGC_Cabling/TGCChannelId.h"
- 
-namespace MuonTGC_Cabling
-{
- 
-class TGCChannelPPIn : public TGCChannelId
-{
-public:
-  // Constructor & Destructor
-  TGCChannelPPIn(TGCId::SideType side,
-		 TGCId::ModuleType module,
-		 TGCId::RegionType region,
-		 int sector,
-		 int id,
-		 int block,
-		 int channel);
 
-  virtual ~TGCChannelPPIn(void) {}
-  
-  virtual TGCModuleId* getModule(void) const;
+namespace MuonTGC_Cabling {
 
-  virtual bool isValid(void) const;
+class TGCChannelPPIn : public TGCChannelId {
+   public:
+    // Constructor & Destructor
+    TGCChannelPPIn(TGCId::SideType side, TGCId::ModuleType module,
+                   TGCId::RegionType region, int sector, int id, int block,
+                   int channel);
 
-private:
-  TGCChannelPPIn(void) {}
+    virtual ~TGCChannelPPIn() = default;
+
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
+
+    virtual bool isValid() const override;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

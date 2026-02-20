@@ -50,7 +50,7 @@ namespace MuonG4R4 {
              *  @param step: G4 step to consider */
             bool processStep(const G4Step* step) const;
             /** @brief Returns the current geometry context in the event */
-            ActsGeometryContext getGeoContext() const;
+            ActsTrk::GeometryContext getGeoContext() const;
             
             
             /** @brief Returns the last snap shot of the traversing particle. The G4 track

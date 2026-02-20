@@ -9,6 +9,9 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
 
+// Columnar includes
+#include "ColumnarCore/ParticleDef.h"
+
 // Local includes
 #include "AssociationUtils/IOverlapRemovalTool.h"
 #include "AssociationUtils/IOverlapTool.h"
@@ -84,7 +87,7 @@ namespace ORUtils
       //
 
       /// Helper used to reset decorations
-      std::unique_ptr<OverlapDecorationHelper> m_decHelper;
+      std::unique_ptr<OverlapDecorationHelper<columnar::ContainerId::particle1>> m_decHelper;
 
       //
       // Overlap tool handles

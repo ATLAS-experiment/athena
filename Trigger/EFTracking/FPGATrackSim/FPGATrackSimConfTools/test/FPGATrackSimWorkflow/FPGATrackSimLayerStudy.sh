@@ -22,7 +22,7 @@ run_LayerStudyFirst(){
         --filesInput=${RDO_ANALYSIS} \
         Trigger.FPGATrackSim.mapsDir=${MAPS_5L} \
         Trigger.FPGATrackSim.bankDir=${BANKS_5L} \
-        Trigger.FPGATrackSim.region="34" \
+        Trigger.FPGATrackSim.regionList="34" \
         Trigger.FPGATrackSim.sampleType=singleMuons \
         Trigger.FPGATrackSim.Hough.genScan=True \
         Trigger.FPGATrackSim.Hough.threshold=[4] \

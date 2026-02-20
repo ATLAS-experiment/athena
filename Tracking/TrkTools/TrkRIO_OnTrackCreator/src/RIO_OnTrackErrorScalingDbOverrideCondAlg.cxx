@@ -8,7 +8,7 @@
 #include "CxxUtils/checker_macros.h"
 
 RIO_OnTrackErrorScalingDbOverrideCondAlg::RIO_OnTrackErrorScalingDbOverrideCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
   , m_condSvc{"CondSvc", name}
 {
 }
@@ -90,8 +90,8 @@ namespace {
 }
 
 
-StatusCode RIO_OnTrackErrorScalingDbOverrideCondAlg::execute() {
-  SG::WriteCondHandle<RIO_OnTrackErrorScaling> write_handle(m_writeKey);
+StatusCode RIO_OnTrackErrorScalingDbOverrideCondAlg::execute(const EventContext& ctx) const {
+  SG::WriteCondHandle<RIO_OnTrackErrorScaling> write_handle(m_writeKey, ctx);
   if (!write_handle.isValid()) {
     EventIDRange range(timestamp(0),infiniteIOVEend());
     std::unique_ptr<RIO_OnTrackErrorScaling> error_scaling( m_errorScalingDataKit->create() );

@@ -21,6 +21,7 @@
 // FrameWork includes
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 
 // METInterface includes
 #include "METInterface/IMETSignificance.h"
@@ -90,11 +91,22 @@ namespace met {
     ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_egammaCalibTool {this, "egammaCalibTool", "", "the IEgammaCalibrationAndSmearingTool we use"};
     ToolHandle<ITauToolBase>                          m_tauCombinedTES {this, "tauCombinedTES", "", "the TauCombinedTES tool we use"};
 
+    Gaudi::Property<std::string> m_jetCalibConfig{this, "JetCalibConfig", "", "Config file for jet calibration/resolution"};
+    Gaudi::Property<std::string> m_jetCalibSeq{this, "JetCalibSequence", "", "Calibration sequence used for input jets"};
+    Gaudi::Property<std::string> m_jetCalibArea{this, "JetCalibArea", "", "CalibArea for input jet calibration"};
+    Gaudi::Property<int> m_muonCalibMode{this, "MuonCalibMode", -1, "CalibMode for muon momentum calibration"};
+    Gaudi::Property<std::string> m_egESModel{this, "EgammaESModel", "", "ESModel for egamma calibration"};
+    Gaudi::Property<std::string> m_egDecorrModel{this, "EgammaDecorrelationModel", "", "Decorrelation model for egamma calibration"};
+    Gaudi::Property<bool> m_egUseFastsim{this, "EgammaUseFastsim", false, "Use fastsim resolutions for egamma?"};
+    Gaudi::Property<std::string> m_tauTESConfig{this, "TauTESConfig", "CombinedTES_R22_Round2.5_v2.root", "Config file for tau energy scale calibration"};
+    Gaudi::Property<bool> m_tauUseMVARes{this, "TauUseMVAResolution", true, "Use MVA resolution for taus?"};
+
+
     StatusCode AddMuon    (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
     StatusCode AddElectron(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
     StatusCode AddPhoton  (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso);
     StatusCode AddJet     (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float &avgmu);
-    void       AddTau     (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso);
+    StatusCode AddTau     (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso);
     void       AddSoftTerm(const xAOD::MissingET* soft,  const TVector3 &met_vect, double (&particle_sum)[2][2]);
 
     double GetPUProb(double jet_eta, double jet_phi,double jet_pt,  double jet_jvt, double jet_fjvt, float avgmu);
@@ -122,6 +134,11 @@ namespace met {
 
     double m_GeV;
 
+    bool m_jetOK;
+    bool m_muonOK;
+    bool m_egammaOK;
+    bool m_tauOK;
+
     TVector3 m_met_vect;
     TVector3 m_soft_vect;
     TVector3 m_pthard_vect;
@@ -136,7 +153,6 @@ namespace met {
 
     bool m_isDataJet;
     bool m_isDataMuon;
-    bool m_isAFII;
 
     // set limits
     float m_jetPtThr;

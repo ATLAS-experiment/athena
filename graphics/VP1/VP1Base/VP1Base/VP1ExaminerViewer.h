@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -127,7 +127,7 @@ protected:
 private:
 
 	class Imp;
-	Imp * m_d;
+	Imp * m_d{};
 	friend class VP1ExaminerViewer_SignalCatcher;
 
 };
@@ -137,7 +137,7 @@ class VP1ExaminerViewer_SignalCatcher : public QObject {
 	private Q_SLOTS:
 	void catchSignal();
 	private:
-	VP1ExaminerViewer::Imp * m_d;
+	VP1ExaminerViewer::Imp * m_d{};
 	friend class VP1ExaminerViewer::Imp;
 };
 

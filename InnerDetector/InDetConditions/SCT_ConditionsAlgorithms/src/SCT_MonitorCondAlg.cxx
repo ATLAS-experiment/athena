@@ -9,7 +9,7 @@
 #include <memory>
 
 SCT_MonitorCondAlg::SCT_MonitorCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

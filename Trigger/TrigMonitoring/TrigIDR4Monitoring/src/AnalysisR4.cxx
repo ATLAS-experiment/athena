@@ -1,10 +1,10 @@
 /**
- **     @file    AnalysisR3_Tier0.cxx
+ **     @file    AnalysisR4.cxx
  **
  **     @author  mark sutton
- **     @date    $Id: AnalysisR3_Tier0.cxx   Thu 28 Sep 2025 15:35:34 CEST 
+ **     @date    $Id: AnalysisR4.cxx   Thu 28 Sep 2025 15:35:34 CEST 
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -59,11 +59,8 @@ void AnalysisR4::initialise() {
   m_htrkpT  = TIDA::Histogram<float>( monTool(), "reftrk_pT" );
   m_htrkphi = TIDA::Histogram<float>( monTool(), "reftrk_phi" );
   m_htrketa = TIDA::Histogram<float>( monTool(), "reftrk_eta" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
-  } else { 
-    m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
-  }      
+  m_htrkd0  = TIDA::Histogram<float>( monTool(), "reftrk_d0" );
+      
   m_htrkz0  = TIDA::Histogram<float>( monTool(), "reftrk_z0" );
 
   /// the error estimates are always positive ...
@@ -85,11 +82,8 @@ void AnalysisR4::initialise() {
   m_htrkpT_rec  = TIDA::Histogram<float>( monTool(), "testtrk_pT" );
   m_htrkphi_rec = TIDA::Histogram<float>( monTool(), "testtrk_phi" );
   m_htrketa_rec = TIDA::Histogram<float>( monTool(), "testtrk_eta" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
-  } else { 
-    m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
-  }  
+  m_htrkd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_d0" );
+   
   m_htrkz0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_z0" );
 
   m_htrkdd0_rec  = TIDA::Histogram<float>( monTool(), "testtrk_dd0" );
@@ -107,11 +101,8 @@ void AnalysisR4::initialise() {
   m_hpTeff    = TIDA::Histogram<float>( monTool(),  "Eff_pT" );
   m_hetaeff   = TIDA::Histogram<float>( monTool(),  "Eff_Eta" );
   m_hphieff   = TIDA::Histogram<float>( monTool(),  "Eff_Phi" );
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } else { 
-    m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
-  } 
+  m_hd0eff    = TIDA::Histogram<float>( monTool(),  "Eff_d0" );
+  
   m_hz0eff    = TIDA::Histogram<float>( monTool(),  "Eff_z0" );
   m_hnVtxeff  = TIDA::Histogram<float>( monTool(),  "Eff_nVtx" );
   
@@ -149,19 +140,12 @@ void AnalysisR4::initialise() {
   m_hntrtvsphi     = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi" );
   m_hntrtvsphi_rec = TIDA::Histogram<float>( monTool(), "ntrt_vs_phi_rec" );
   
-  if (name().find("LRT")!=std::string::npos || name().find("lrt")!=std::string::npos) {
-    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
-    
-    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
-  } else {
-    m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
-    m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
-    
-    m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
-    m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
-  }  
+  m_hnpixvsd0     = TIDA::Histogram<float>( monTool(), "npix_vs_d0" );
+  m_hnpixvsd0_rec = TIDA::Histogram<float>( monTool(), "npix_vs_d0_rec" );
+  
+  m_hnsctvsd0     = TIDA::Histogram<float>( monTool(), "nsct_vs_d0" );
+  m_hnsctvsd0_rec = TIDA::Histogram<float>( monTool(), "nsct_vs_d0_rec" );
+  
   
   m_hnpixvspT     = TIDA::Histogram<float>( monTool(), "npix_vs_pT" );
   m_hnpixvspT_rec = TIDA::Histogram<float>( monTool(), "npix_vs_pT_rec" );

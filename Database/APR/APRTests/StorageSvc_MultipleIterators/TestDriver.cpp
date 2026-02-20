@@ -1,31 +1,32 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
 #include "SimpleTestClass.h"
-#include "TestClassPrimitives.h"
 
 #include "libname.h"
 
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
-
+#include "GaudiKernel/StatusCode.h"
 
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IStorageExplorer.h"
-#include "StorageSvc/DbSelect.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/DbDatabase.h"
+#include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
+#include "StorageSvc/pool.h"
 
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <memory>
 
+using namespace pool;
 
 static const std::string file = "MI.test.pool.root";
 static const std::string container = "container";
@@ -66,27 +67,9 @@ TestDriver::testWriting()
   if ( ! class_SimpleTestClass ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class SimpleTestClass" );
   }
-  //std::string guid_nam_SimpleTestClass = class_SimpleTestClass->propertyList()->getProperty( "ClassID" );
-  //if ( guid_nam_SimpleTestClass.empty() ) {
-  //  std::ostringstream error;
-  //  error << "There is no ClassID property for class \"SimpleTestClass\"" << std::ends;
-  //  throw std::runtime_error( error.str() );
-  //}
-  //pool::Guid guid_SimpleTestClass(guid_nam_SimpleTestClass);
-  const RootType class_TestClassPrimitives  ( "TestClassPrimitives" );
-  if ( ! class_TestClassPrimitives ) {
-    throw std::runtime_error( "Could not retrieve the dictionary for class TestClassPrimitives" );
-  }
-  //std::string guid_nam_TestClassPrimitives = class_TestClassPrimitives->propertyList()->getProperty( "ClassID" );
-  //if ( guid_nam_TestClassPrimitives.empty() ) {
-  //  std::ostringstream error;
-  //  error << "There is no ClassID property for class \"TestClassPrimitives\"" << std::ends;
-  //  throw std::runtime_error( error.str() );
-  //}
-  //pool::Guid guid_TestClassPrimitives(guid_nam_TestClassPrimitives);
 
   std::vector< SimpleTestClass* > myObjects_SimpleTestClass;
-  std::vector< TestClassPrimitives* > myObjects_TestClassPrimitives;
+  std::vector< SimpleTestClass* > myObjects_SimpleTestClass2;
   for ( int i = 0; i < nObjects; ++i ) {
     myObjects_SimpleTestClass.push_back( new SimpleTestClass() );
     SimpleTestClass* myObject_SimpleTestClass = myObjects_SimpleTestClass.back();
@@ -94,12 +77,9 @@ TestDriver::testWriting()
 
     // Creating the persistent shape.
     Guid guid = pool::DbReflex::guid(class_SimpleTestClass);
-    const pool::Shape* shape_SimpleTestClass = 0;
-    if ( storSvc->getShape( fd, guid, shape_SimpleTestClass ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-      storSvc->createShape( fd, container, guid, shape_SimpleTestClass );
-    }
-    if ( ! shape_SimpleTestClass ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
+    const pool::Shape* shape_SimpleTestClass = storSvc->createShape(guid);
+    if( !shape_SimpleTestClass ) {
+        throw std::runtime_error( "Could not create a persistent shape." );
     }
   
     // Writing the object.
@@ -112,32 +92,26 @@ TestDriver::testWriting()
     //token_SimpleTestClass->setClassID( guid_SimpleTestClass );
     delete token_SimpleTestClass;
 
-
     // The second class
-    myObjects_TestClassPrimitives.push_back( new TestClassPrimitives() );
-    TestClassPrimitives* myObject_TestClassPrimitives = myObjects_TestClassPrimitives.back();
-    myObject_TestClassPrimitives->setNonZero();
+    myObjects_SimpleTestClass2.push_back( new SimpleTestClass() );
+    SimpleTestClass* myObject_SimpleTestClass2 = myObjects_SimpleTestClass2.back();
+    myObject_SimpleTestClass2->setNonZero();
 
     // Creating the persistent shape.
-    Guid guidp = pool::DbReflex::guid(class_TestClassPrimitives);
-    const pool::Shape* shape_TestClassPrimitives = 0;
-    if ( storSvc->getShape( fd, guidp, shape_TestClassPrimitives ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-      storSvc->createShape( fd, container, guidp, shape_TestClassPrimitives );
-    }
-    if ( ! shape_TestClassPrimitives ) {
+    const pool::Shape* shape_SimpleTestClass2 = storSvc->createShape(guid);
+    if( !shape_SimpleTestClass2 ) {
       throw std::runtime_error( "Could not create a persistent shape." );
     }
   
     // Writing the object.
-    Token* token_TestClassPrimitives;
+    Token* token_SimpleTestClass2;
     if ( ! ( storSvc->allocate( fd,
 				container, pool::ROOTKEY_StorageType.type(),
-				myObject_TestClassPrimitives, shape_TestClassPrimitives, token_TestClassPrimitives ).isSuccess() ) ) {
+				myObject_SimpleTestClass2, shape_SimpleTestClass2, token_SimpleTestClass2 ).isSuccess() ) ) {
       throw std::runtime_error( "Could not write an object" );
     }
-    //token_TestClassPrimitives->setClassID( guid_TestClassPrimitives );
-    delete token_TestClassPrimitives;
-
+    //token_SimpleTestClass2->setClassID( guid_SimpleTestClass2 );
+    delete token_SimpleTestClass2;
   }
 
   // Closing the transaction.
@@ -150,9 +124,9 @@ TestDriver::testWriting()
 	iObject_SimpleTestClass != myObjects_SimpleTestClass.end(); ++iObject_SimpleTestClass ) delete *iObject_SimpleTestClass;
   myObjects_SimpleTestClass.clear();
 
-  for ( std::vector< TestClassPrimitives* >::iterator iObject_TestClassPrimitives = myObjects_TestClassPrimitives.begin();
-	iObject_TestClassPrimitives != myObjects_TestClassPrimitives.end(); ++iObject_TestClassPrimitives ) delete *iObject_TestClassPrimitives;
-  myObjects_TestClassPrimitives.clear();
+  for ( std::vector< SimpleTestClass* >::iterator iObject_SimpleTestClass2 = myObjects_SimpleTestClass2.begin();
+	iObject_SimpleTestClass2 != myObjects_SimpleTestClass2.end(); ++iObject_SimpleTestClass2 ) delete *iObject_SimpleTestClass2;
+  myObjects_SimpleTestClass2.clear();
 
   // Disconnecting
   if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
@@ -173,31 +147,25 @@ TestDriver::testReadingParallelSameContainer()
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
   storSvc->addRef();
-  void* pVoid = 0;
-  pool::DbStatus sc = storSvc->queryInterface( pool::IStorageExplorer::interfaceID(), &pVoid );
-  pool::IStorageExplorer* storageExplorer = (pool::IStorageExplorer*)pVoid;
-  if ( !( sc == pool::DbStatus::Success && storageExplorer ) ) {
-    storSvc->release();
-    throw std::runtime_error( "Could not retrieve a IStorageExplorer interface" );
-  }
 
   pool::Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( pool::READ, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+  if ( ! storSvc->startSession( pool::READ, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( file, file );
-  sc = storSvc->connect( sessionHandle, pool::READ, *fd );
-  if ( sc != pool::DbStatus::Success ) {
+  if ( !storSvc->connect( sessionHandle, pool::READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
   pool::DatabaseConnection* connection = fd->dbc();
-
+  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  if ( !dbH.isValid() )  {
+    throw std::runtime_error( "Database is not valid" );
+  }
   // Fetch the containers
   std::vector<const Token*> containerTokens;
-  storageExplorer->containers( *fd, containerTokens );
-  if ( containerTokens.size() != 1 ) {
+  if ( !dbH.containers( containerTokens, false).isSuccess() || containerTokens.size() != 1 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
   const Token* containerToken = containerTokens.front();
@@ -207,14 +175,14 @@ TestDriver::testReadingParallelSameContainer()
   }
 
   // Fetch the objects in the container (Initialize the iterators)
-  pool::DbSelect selectionObject_SimpleTestClass;
-  sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject_SimpleTestClass );
-  if ( ! sc.isSuccess() ) {
+  DbContainer cnt1H(containerToken->technology());
+  Token::OID_t link1H(containerToken->oid());
+  if ( ! cnt1H.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ).isSuccess() && cnt1H.isValid() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );
   }
-  pool::DbSelect selectionObject_TestClassPrimitives;
-  sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject_TestClassPrimitives );
-  if ( ! sc.isSuccess() ) {
+  DbContainer cnt2H(containerToken->technology());
+  Token::OID_t link2H(containerToken->oid());
+  if ( ! cnt2H.open(dbH, containerToken->contID(), 0, containerToken->technology(), pool::READ).isSuccess() && cnt2H.isValid() ) {
     throw std::runtime_error( "Could not start an implicit collection iteration" );
   }
 
@@ -223,75 +191,75 @@ TestDriver::testReadingParallelSameContainer()
   while ( iObject < nObjects ) {
 
     // First iterator
-    Token* objectToken_SimpleTestClass = 0;
-    if ( ! ( storageExplorer->next( selectionObject_SimpleTestClass, objectToken_SimpleTestClass ).isSuccess() ) ) {
+    Token* objectToken_SimpleTestClass1 = new Token(cnt1H.token());
+    if ( ! ( cnt1H.next( link1H ).isSuccess() ) ) {
       throw std::runtime_error( "Could not retrieve the object token" );
     }
+    objectToken_SimpleTestClass1->oid() = link1H;
 
-    const pool::Shape* shape_SimpleTestClass = 0;
-    if ( storSvc->getShape( *fd, objectToken_SimpleTestClass->classID(), shape_SimpleTestClass ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
-      throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass" );
+
+    const pool::Shape* shape_SimpleTestClass1 = 0;
+    if ( !storSvc->getShape( *fd, objectToken_SimpleTestClass1->classID(), shape_SimpleTestClass1 ).isSuccess() ) {
+      throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass1" );
     }
-    void* ptr_SimpleTestClass = 0;
-    if ( ! ( storSvc->read( *fd, *objectToken_SimpleTestClass, shape_SimpleTestClass, &ptr_SimpleTestClass ) ).isSuccess() ) {
-      throw std::runtime_error( "failed to read a SimpleTestClass object back from the persistency" );
+    void* ptr_SimpleTestClass1 = 0;
+    if ( !storSvc->read( *fd, *objectToken_SimpleTestClass1, shape_SimpleTestClass1, &ptr_SimpleTestClass1 ).isSuccess() ) {
+      throw std::runtime_error( "failed to read a SimpleTestClass1 object back from the persistency" );
     }
     
-    if ( shape_SimpleTestClass->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-      throw std::runtime_error( std::string("read wrong class type: ") + shape_SimpleTestClass->shapeID().toString());
+    if ( shape_SimpleTestClass1->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
+      throw std::runtime_error( std::string("read wrong class type: ") + shape_SimpleTestClass1->shapeID().toString());
     }
 
-    SimpleTestClass* object_SimpleTestClass = reinterpret_cast< SimpleTestClass* >(ptr_SimpleTestClass);
-    if ( object_SimpleTestClass->data != iObject ) {
+    SimpleTestClass* object_SimpleTestClass1 = reinterpret_cast< SimpleTestClass* >(ptr_SimpleTestClass1);
+    if ( object_SimpleTestClass1->data != iObject ) {
       throw std::runtime_error( "Object read different from object written" );
     }
-    delete object_SimpleTestClass;
-    objectToken_SimpleTestClass->release();
+    delete object_SimpleTestClass1;
 
     // Skip the next object for this iterator
-    objectToken_SimpleTestClass = 0;
-    if ( ! ( storageExplorer->next( selectionObject_SimpleTestClass, objectToken_SimpleTestClass ).isSuccess() ) ) {
+    if ( ! ( cnt1H.next( link1H ).isSuccess() ) ) {
       throw std::runtime_error( "Could not retrieve the object token" );
     }
-    objectToken_SimpleTestClass->release();
+    objectToken_SimpleTestClass1->release();
 
 
     // Second iterator
     // Skip the next object for this iterator
-    Token* objectToken_TestClassPrimitives = 0;
-    if ( ! ( storageExplorer->next( selectionObject_TestClassPrimitives, objectToken_TestClassPrimitives ).isSuccess() ) ) {
+    Token* objectToken_SimpleTestClass2 = new Token(cnt2H.token());
+    if ( ! ( cnt2H.next( link2H ).isSuccess() ) ) {
       throw std::runtime_error( "Could not retrieve the object token" );
     }
-    objectToken_TestClassPrimitives->release();
+    objectToken_SimpleTestClass2->oid() = link2H;
 
     // Read the next object for this iterator
-    objectToken_TestClassPrimitives = 0;
-    if ( ! ( storageExplorer->next( selectionObject_TestClassPrimitives, objectToken_TestClassPrimitives ).isSuccess() ) ) {
+    if ( ! ( cnt2H.next( link2H ).isSuccess() ) ) {
       throw std::runtime_error( "Could not retrieve the object token" );
     }
+    objectToken_SimpleTestClass2->oid() = link2H;
 
-    const pool::Shape* shape_TestClassPrimitives = 0;
-    if ( storSvc->getShape( *fd, objectToken_TestClassPrimitives->classID(), shape_TestClassPrimitives ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
-      throw std::runtime_error( "Could not fetch the persistent shape for TestClassPrimitives" );
+    const pool::Shape* shape_SimpleTestClass2 = 0;
+    if(! storSvc->getShape( *fd, objectToken_SimpleTestClass2->classID(), shape_SimpleTestClass2 ).isSuccess() ) {
+      throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass2" );
     }
-    void* ptr_TestClassPrimitives = 0;
-    if ( ! ( storSvc->read( *fd, *objectToken_TestClassPrimitives, shape_TestClassPrimitives, &ptr_TestClassPrimitives ) ).isSuccess() ) {
-      throw std::runtime_error( "failed to read a TestClassPrimitives object back from the persistency" );
+    void* ptr_SimpleTestClass2 = 0;
+    if ( ! ( storSvc->read( *fd, *objectToken_SimpleTestClass2, shape_SimpleTestClass2, &ptr_SimpleTestClass2 ) ).isSuccess() ) {
+      throw std::runtime_error( "failed to read a SimpleTestClass2 object back from the persistency" );
     }
     
-    if ( shape_TestClassPrimitives->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A00" ) {
-      throw std::runtime_error( std::string("read wrong class type: ") + shape_TestClassPrimitives->shapeID().toString());
+    if ( shape_SimpleTestClass2->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
+      throw std::runtime_error( std::string("read wrong class type: ") + shape_SimpleTestClass2->shapeID().toString());
     }
 
-    TestClassPrimitives referenceObject;
+    SimpleTestClass referenceObject;
     referenceObject.setNonZero();
 
-    TestClassPrimitives* object_TestClassPrimitives = reinterpret_cast< TestClassPrimitives* >(ptr_TestClassPrimitives);
-    if ( *object_TestClassPrimitives != referenceObject ) {
+    SimpleTestClass* object_SimpleTestClass2 = reinterpret_cast< SimpleTestClass* >(ptr_SimpleTestClass2);
+    if ( *object_SimpleTestClass2 != referenceObject ) {
       throw std::runtime_error( "Object read different from object written" );
     }
-    delete object_TestClassPrimitives;
-    objectToken_TestClassPrimitives->release();
+    delete object_SimpleTestClass2;
+    objectToken_SimpleTestClass2->release();
 
     // Continue the iteration
     ++iObject;
@@ -316,6 +284,5 @@ TestDriver::testReadingParallelSameContainer()
   if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
-  storageExplorer->release();
   storSvc->release();
 }

@@ -177,6 +177,7 @@ namespace met {
     if (m_JvtWP != "None"){
       if (m_JvtTool.empty()) {
         asg::AsgToolConfig config_jvt ("CP::NNJvtSelectionTool/JvtSelTool");
+        ATH_CHECK(config_jvt.setProperty("JetContainer", m_jetContainer.key()));
         ATH_CHECK(config_jvt.setProperty("WorkingPoint", m_JvtWP));
         ATH_CHECK(config_jvt.setProperty("JvtMomentName", "NNJvt"));
         ATH_CHECK(config_jvt.setProperty("MaxPtForJvt", m_JvtPtMax));

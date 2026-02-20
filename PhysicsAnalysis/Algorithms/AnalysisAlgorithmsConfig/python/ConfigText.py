@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Joseph Lambert
 
@@ -7,13 +7,14 @@ import json
 import os
 import sys
 import importlib
-import pathlib
 import warnings
+from pathlib import Path
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 from AnalysisAlgorithmsConfig.ConfigFactory import ConfigFactory
 from AnalysisAlgorithmsConfig.ConfigAccumulator import deprecationWarningCategory
 
+from AnaAlgorithm.DualUseConfig import isAthena
 from AnaAlgorithm.Logging import logging
 logCPAlgTextCfg = logging.getLogger('CPAlgTextCfg')
 
@@ -133,7 +134,7 @@ class TextConfig(ConfigFactory):
                     merge(subBlock, algs[subName].subAlgs, newPath)
             return
 
-        logCPAlgTextCfg.info(f'loading {yamlPath}')
+        logCPAlgTextCfg.debug(f'loading {yamlPath}')
         if configDict is not None:
             # if configDict is provided, use it directly
             config = configDict
@@ -259,7 +260,13 @@ class TextConfig(ConfigFactory):
 
     def _configureAlg(self, block, blockConfig, configSeq=None, containerName=None,
                       extraOptions=None):
-        if not isinstance(blockConfig, list):
+        # 'AddConfigBlocks' blocks can be passed as either a list or a dictionary.
+        # Dictionaries are allowed so that when merging YAML files duplicate entries get automatically removed.
+        # This turns the dictionary into a list for downstream use.
+        if block.algName == "AddConfigBlocks" and isinstance(blockConfig, dict):
+            blockConfig = [options | {'algName': algName} for algName, options in blockConfig.items()]
+
+        elif not isinstance(blockConfig, list):
             blockConfig = [blockConfig]
 
         for options in blockConfig:
@@ -269,7 +276,7 @@ class TextConfig(ConfigFactory):
             elif containerName is not None and 'containerName' not in options:
                 options['containerName'] = containerName
             # will check which options are associated alg and not options
-            logCPAlgTextCfg.info(f"Configuring {block.algName}")
+            logCPAlgTextCfg.debug(f"Configuring {block.algName}")
             seq, funcOpts = block.makeConfig(options)
             if not seq._blocks:
                 continue
@@ -293,6 +300,11 @@ class TextConfig(ConfigFactory):
                         if extraOptions is None:
                             extraOptions = {}
                         extraOptions[i['name']] = i['value']
+                    # TODO: figure out why onlyForDSIDs is not properly updated in algOpts
+                    if i['name'] == "onlyForDSIDs" and "onlyForDSIDs" in options and options["onlyForDSIDs"]:
+                        if extraOptions is None:
+                            extraOptions = {}
+                        extraOptions[i['name']] = options["onlyForDSIDs"]
             else:
                 algOpts = seq.setOptions(extraOptions.copy())
 
@@ -359,11 +371,7 @@ def makeSequence(configPath, *, flags=None, algSeq=None, noSystematics=None, dat
     logCPAlgTextCfg.info("ConfigBlocks and their configuration:")
     configSeq.printOptions()
 
-    from AnaAlgorithm.DualUseConfig import isAthena, useComponentAccumulator
-    if isAthena and useComponentAccumulator:
-        return configAccumulator.CA
-    else:
-        return None
+    return configAccumulator.CA if isAthena else None
 
 
 # Combine configuration files
@@ -382,6 +390,18 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
 
     Returns True if any merging happened below this node.
     """
+    if not isinstance(config_path, (list, Path, str)):
+        raise ValueError("Please specify the path or a list of paths where configuration is expected to reside")
+    if isinstance(config_path, list):
+        config_paths = [Path(path) for path in config_path]
+    else:
+        warnings.warn(
+            "Passing a single path to combineConfigFiles is deprecated, please pass a list of paths instead",
+            TextConfigWarning,
+            stacklevel=2,
+        )
+        config_paths = [Path(config_path)]
+
     combined = False
 
     # If this isn't an iterable there's nothing to combine
@@ -394,7 +414,7 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
 
     # Recurse first so that nested nodes are resolved
     for sub in to_combine:
-        combined = combineConfigFiles(sub, config_path, fragment_key=fragment_key) or combined
+        combined = combineConfigFiles(sub, config_paths, fragment_key=fragment_key) or combined
 
     # if there are no fragments to include we're done
     if fragment_key not in local:
@@ -406,7 +426,7 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
 
     # Normalize to a list of paths
     value = local[fragment_key]
-    if isinstance(value, (str, pathlib.Path)):
+    if isinstance(value, (str, Path)):
         warnings.warn(
             f"{fragment_key} should be followed with a list of files", 
             TextConfigWarning,
@@ -421,11 +441,11 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
     # Build an accumulator of all fragments, earlier paths win on conflicts
     fragments_acc = {}
     for entry in paths:
-        fragment_path = _find_fragment(pathlib.Path(entry), config_path)
+        fragment_path = _find_fragment(Path(entry), config_paths)
         fragment = _load_fragment(fragment_path)
 
         # Allow recursion inside each fragment, using the fragment's directory as base
-        combineConfigFiles(fragment, fragment_path.parent, fragment_key=fragment_key)
+        combineConfigFiles(fragment, [fragment_path.parent, *config_paths], fragment_key=fragment_key)
 
         # Merge this fragment into the accumulator; earlier entries win
         _merge_dicts(fragments_acc, fragment)
@@ -439,7 +459,7 @@ def combineConfigFiles(local, config_path, fragment_key="include"):
     return True
 
 
-def _load_fragment(fragment_path: pathlib.Path):
+def _load_fragment(fragment_path: Path):
     """Load a YAML or JSON fragment
 
     This function is superfluous as of the yaml 1.2 spec (which
@@ -456,10 +476,10 @@ def _load_fragment(fragment_path: pathlib.Path):
         else:
             return yaml.safe_load(fragment_file)
 
-def _find_fragment(fragment_path, config_path):
+def _find_fragment(fragment_path: Path, config_paths: list[Path]):
     paths_to_check = [
         fragment_path,
-        config_path / fragment_path,
+        *[path / fragment_path for path in config_paths],
         *[x / fragment_path for x in os.environ["DATAPATH"].split(":")]
     ]
     for path in paths_to_check:

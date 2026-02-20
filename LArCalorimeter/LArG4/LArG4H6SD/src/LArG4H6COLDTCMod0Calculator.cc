@@ -141,7 +141,7 @@ G4bool LArG4H6COLDTCMod0Calculator::Process(const G4Step* a_step, std::vector<LA
 	      << sampling   // FCal Module #   (3 for cold TC)
 	      << etaIndex   //                   (see above)
 	      << phiIndex;  //                   (see above)
-    hdata.push_back(larhit);
+    hdata.push_back(std::move(larhit));
     return true;
   }
 }

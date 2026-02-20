@@ -52,7 +52,9 @@ public:
   
   const TrigFTF_GNN_Layer* getTrigFTF_GNN_LayerByKey(unsigned int) const;
   const TrigFTF_GNN_Layer* getTrigFTF_GNN_LayerByIndex(int) const;
-
+  inline unsigned int getTrigFTF_GNN_LayerKeyByIndex(int idx) const {
+    return m_layerKeys[idx];
+  }
   int num_bins() const {return m_nEtaBins;}
   unsigned int num_layers() const {return m_layArray.size();}
   const std::vector<std::pair<int, std::vector<int> > >& bin_groups() const {return m_binGroups;}
@@ -65,7 +67,7 @@ protected:
 
   std::map<unsigned int, TrigFTF_GNN_Layer*> m_layMap;
   std::vector<TrigFTF_GNN_Layer*> m_layArray;
-  
+  std::vector<unsigned int> m_layerKeys;
   int m_nEtaBins;
 
   std::vector<std::pair<int, std::vector<int> > > m_binGroups;

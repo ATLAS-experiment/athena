@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //$Id: PersistencySvc.cpp 739662 2016-04-12 11:55:10Z krasznaa $
@@ -12,7 +12,7 @@
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/DatabaseSpecification.h"
 #include "PersistencySvc/ITransaction.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Placement.h"
@@ -25,20 +25,6 @@ pool::PersistencySvc::PersistencySvc::~PersistencySvc()
 {
   delete m_session; m_session = 0;
 }
-
-/*
-void
-pool::PersistencySvc::PersistencySvc::setFileCatalog( pool::IFileCatalog& catalog )
-{
-  m_session->setFileCatalog( catalog );
-}
-
-pool::IFileCatalog&
-pool::PersistencySvc::PersistencySvc::fileCatalog()
-{
-  return m_session->fileCatalog();
-}
-*/
 
 void*
 pool::PersistencySvc::PersistencySvc::readObject( const Token& token, void* object )

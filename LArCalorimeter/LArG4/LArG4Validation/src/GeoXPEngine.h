@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //---------------------------------------------------------------------------//
@@ -14,6 +14,7 @@
 #define LARG4VALIDATION_GEOXPENGINE_H
 #include <CLHEP/Geometry/Point3D.h>
 #include <CLHEP/Vector/LorentzVector.h>
+#include <memory>
 
 namespace Genfun {
   class AbsFunction;
@@ -52,12 +53,12 @@ class GeoXPEngine {
  private:
 
   // Outputs:
-  const Genfun::AbsFunction       *m_x;
-  const Genfun::AbsFunction       *m_y;
-  const Genfun::AbsFunction       *m_z;
-  const Genfun::AbsFunction       *m_px;
-  const Genfun::AbsFunction       *m_py;
-  const Genfun::AbsFunction       *m_pz;
+  std::unique_ptr<const Genfun::AbsFunction> m_x;
+  std::unique_ptr<const Genfun::AbsFunction> m_y;
+  std::unique_ptr<const Genfun::AbsFunction> m_z;
+  std::unique_ptr<const Genfun::AbsFunction> m_px;
+  std::unique_ptr<const Genfun::AbsFunction> m_py;
+  std::unique_ptr<const Genfun::AbsFunction> m_pz;
 
 };
 

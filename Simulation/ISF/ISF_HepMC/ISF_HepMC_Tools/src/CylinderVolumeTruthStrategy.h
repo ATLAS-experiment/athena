@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// CylinderVolumeTruthStrategy.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_HEPMC_TOOLS_CYLINDERVOLUMETRUTHSTRATEGY_H
 #define ISF_HEPMC_TOOLS_CYLINDERVOLUMETRUTHSTRATEGY_H 1
@@ -23,37 +19,36 @@
 namespace ISF {
 
   /** @class CylinderVolumeTruthStrategy
-  
+
       This ITruthStrategy implementation provides checks on the given ITruthIncident, whether
       it lies on a defined surface or not. The surfaces currently supported are of cylindrical
       shape only.
-  
+
       @author Elmar.Ritsch -at- cern.ch
-     */
+  */
   class CylinderVolumeTruthStrategy final : public extends<AthAlgTool, ITruthStrategy> {
-      
-    public: 
-     /** Constructor with parameters */
-     CylinderVolumeTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-     /** Destructor */
-     ~CylinderVolumeTruthStrategy();
+  public:
+    /** Constructor with parameters */
+    CylinderVolumeTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-     // Athena algtool's Hooks
-     virtual StatusCode  initialize() override;
-     virtual StatusCode  finalize() override;
+    /** Destructor */
+    ~CylinderVolumeTruthStrategy() = default;
 
-     /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
-     virtual bool pass( ITruthIncident& incident) const override;
+    // Athena algtool's Hooks
+    virtual StatusCode  initialize() override final;
 
-     virtual bool appliesToRegion(unsigned short geoID) const override;
-	  private:
-     double                 m_ri;    //!< inner cylinder radius
-     double                 m_ro;    //!< outer cylinder radius
+    /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
+    virtual bool pass( ITruthIncident& incident) const override final;
 
-     IntegerArrayProperty            m_regionListProperty;
-   }; 
-  
+    virtual bool appliesToRegion(unsigned short geoID) const override final;
+  private:
+    Gaudi::Property<double> m_ri{this, "InnerRadius", 0.0}; //!< inner cylinder radius
+    Gaudi::Property<double> m_ro{this, "OuterRadius", 1148.0}; //!< outer cylinder radius
+
+    IntegerArrayProperty m_regionListProperty{this, "Regions", {}};
+  };
+
 }
 
 

@@ -5,20 +5,20 @@
 #ifndef MUONTGC_CNVTOOL_ITGCPREPDATAREPLICATIONTOOL_H
 #define MUONTGC_CNVTOOL_ITGCPREPDATAREPLICATIONTOOL_H
 
-#include "GaudiKernel/IAlgTool.h"
-#include "GaudiKernel/EventContext.h"
 #include "CxxUtils/checker_macros.h"
+#include "GaudiKernel/EventContext.h"
+#include "GaudiKernel/IAlgTool.h"
 
 namespace Muon {
 
-  class ITgcPrepDataReplicationTool : virtual public IAlgTool  {
+class ITgcPrepDataReplicationTool : virtual public IAlgTool {
 
-  public:
-    DeclareInterfaceID( ITgcPrepDataReplicationTool, 1, 0 );
+   public:
+    DeclareInterfaceID(ITgcPrepDataReplicationTool, 1, 0);
 
     virtual StatusCode replicate(const EventContext& ctx) const = 0;
-  }; 
+};
 
-} // end of namespace
+}  // namespace Muon
 
-#endif // MUONTGC_CNVTOOL_ITGCPREPDATAREPLICATIONTOOL_H 
+#endif  // MUONTGC_CNVTOOL_ITGCPREPDATAREPLICATIONTOOL_H

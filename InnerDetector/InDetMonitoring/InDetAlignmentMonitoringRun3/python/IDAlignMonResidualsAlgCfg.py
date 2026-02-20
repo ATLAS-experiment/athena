@@ -30,7 +30,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_EtaModulesMaxPix = [9.5, 6.5, 6.5, 6.5]
     m_PhiModules = [14, 22, 38, 52]
     m_PhiModulesShift_barrel = 158
-    m_EtaModulesShift_barrel = 92
+    m_EtaModulesShift_barrel = 96
     m_PhiModulesPerRing = 48
     m_PhiModulesShift_ec = 152
     m_EtaModulesSCT = 13
@@ -40,7 +40,7 @@ def IDAlignMonResidualsAlgCfg(helper, alg, **kwargs):
     m_PhiModulesSCT = [32, 40, 48, 56]
     m_PhiModulesPerRingSCT = 52
     m_PhiModulesShift_sct_barrel = 208
-    m_EtaModulesShift_sct_barrel = 84
+    m_EtaModulesShift_sct_barrel = 90
     m_PhiModulesShift_sct_ec = 548 #52 mod/disk x 9 disk + 10*8 gaps
     m_minTRTResWindow = -0.6
     m_maxTRTResWindow = 0.6

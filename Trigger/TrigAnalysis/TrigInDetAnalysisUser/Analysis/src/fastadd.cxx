@@ -7,7 +7,7 @@
  **     @author  mark sutton
  **     @date    Thu  5 Sep 2013 20:32:47 CEST 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -202,7 +202,7 @@ void search(TDirectory* td=0, const std::string& s="") {
   std::cout << "\tprocessed directory in " << t*0.001 << " s  from " << global_time*0.001 << " s";
 
 
-  depth = savedepth;
+  depth = std::move(savedepth);
 
   ir--;
 
@@ -262,7 +262,7 @@ void cost( const std::string& outputfile ) {
   fptr[0] = new TFile( outputfile.c_str(), "update" );
 
   if ( fptr[0]==0 ) { 
-    std::cerr << "cannot open " << outputfile.c_str() << std::endl;
+    std::cerr << "cannot open " << outputfile << std::endl;
     return;
   }
 

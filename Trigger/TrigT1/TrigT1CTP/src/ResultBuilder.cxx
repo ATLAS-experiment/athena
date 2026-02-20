@@ -371,6 +371,8 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
 
    std::vector<uint32_t> data(static_cast<size_t>(m_ctpDataFormat->getNumberTimeWords()), uint32_t{0});
    data.reserve(m_ctpDataFormat->getNumberTimeWords() + m_ctpDataFormat->getDAQwordsPerBunch() + extra.size());
+   data[m_ctpDataFormat->getTimeSecondsPos()] = eventID.time_stamp(); // Time stamp in seconds
+   data[m_ctpDataFormat->getTimeNanosecondsPos()] = eventID.time_stamp_ns_offset(); // Time stamp in nanoseconds
    data.insert(data.end(),tip.begin(),tip.end());
    data.insert(data.end(),tbp.begin(),tbp.end());
    data.insert(data.end(),tap.begin(),tap.end());
@@ -391,17 +393,11 @@ LVL1CTP::ResultBuilder::constructCTPResult( const EventIDBase & eventID,
    auto result = std::make_unique<xAOD::CTPResult>();
    auto resultAux = std::make_unique<xAOD::CTPResultAuxInfo>();
    result->setStore(resultAux.get());
-   CTPResultUtils::initialize(*result, m_ctpVersionNumber, data, extra.size());
-   result->setHeaderMarker(eformat::ROD);
-   result->setHeaderFormatVersion(version_word);
-   result->setSourceID(source_id);
-   result->setRunNumber(eventID.run_number());
-   result->setBCID(eventID.bunch_crossing_id());
-   result->setTriggerType(triggerType);
-   result->setTimeSec(eventID.time_stamp());
-   result->setTimeNanoSec(eventID.time_stamp_ns_offset());
-   result->setNumDataWords(data.size());
-   result->setL1AcceptBunchPosition(l1a_pos);
+   CTPResultUtils::initialize(*result, m_ctpVersionNumber, data, extra.size()); // Payload words
+   result->setHeader(eformat::ROD, version_word, source_id, 0, eventID.run_number(), eventID.bunch_crossing_id(), triggerType, 0); // Header words
+   result->setTrailer(data.size());                         // Trailer words
+   result->setL1AcceptBunchPosition(l1a_pos);               // L1A bunch position
+   CTPResultUtils::dumpData(*result);
    ATH_MSG_DEBUG( "Created CTPResult object" );
    return std::make_pair(std::move(result), std::move(resultAux));
 }

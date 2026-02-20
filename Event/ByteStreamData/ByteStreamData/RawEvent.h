@@ -1,18 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
 
-#ifndef BYTESTREAMCNVSVC_RAWEVENT_H
-#define BYTESTREAMCNVSVC_RAWEVENT_H
+#ifndef BYTESTREAMDATA_RAWEVENT_H
+#define BYTESTREAMDATA_RAWEVENT_H
 
 //
 //  Initial version:  July 10, 2002
 //        typedef for RawEvent from eformat.
 //---------------------------------------------------------------------
 
-#include <inttypes.h>
+#include <cstdint>
 
 #include "eformat/FullEventFragment.h"
 #include "eformat/ROBFragment.h"
@@ -20,23 +20,23 @@
 #include "eformat/write/ROBFragment.h"
 
 namespace OFFLINE_FRAGMENTS_NAMESPACE {
-  /*@name typedefs to read fragments */
-  typedef uint32_t DataType;
-  typedef const DataType * PointerType;
-  typedef eformat::FullEventFragment<PointerType>   FullEventFragment;
-  typedef eformat::ROBFragment<PointerType>         ROBFragment;
+  /*@name type aliases to read fragments */
+  using DataType = uint32_t;
+  using PointerType = const DataType*;
+  using FullEventFragment = eformat::FullEventFragment<PointerType>;
+  using ROBFragment = eformat::ROBFragment<PointerType>;
 }
 
 namespace OFFLINE_FRAGMENTS_NAMESPACE_WRITE {
-  /*@name typedefs to write fragments */
-  typedef eformat::write::FullEventFragment   FullEventFragment;
-  typedef eformat::write::ROBFragment         ROBFragment;
+  /*@name type aliases to write fragments */
+  using FullEventFragment = eformat::write::FullEventFragment;
+  using ROBFragment = eformat::write::ROBFragment;
 }
 
 /// data type for reading raw event
-typedef OFFLINE_FRAGMENTS_NAMESPACE::FullEventFragment       RawEvent;
+using RawEvent = OFFLINE_FRAGMENTS_NAMESPACE::FullEventFragment;
 /// data type for writing raw event
-typedef OFFLINE_FRAGMENTS_NAMESPACE_WRITE::FullEventFragment RawEventWrite;
+using RawEventWrite = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::FullEventFragment;
 
 #endif
 

@@ -60,7 +60,7 @@ namespace MuonValR4{
         if (!insertItr.second) {
             return insertItr.first->second;
         }
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         const MuonGMR4::MuonDetectorManager* detMgr = getDetMgr();
 
@@ -75,7 +75,7 @@ namespace MuonValR4{
         const Amg::Vector3D locPos{xAOD::toEigen(simHit.localPosition())};
         const Amg::Vector3D locDir{xAOD::toEigen(simHit.localDirection())};
 
-        const Amg::Transform3D& locToGlobal{re->localToGlobalTrans(gctx, trfHash)};
+        const Amg::Transform3D& locToGlobal{re->localToGlobalTransform(gctx, trfHash)};
         m_globPos.push_back(locToGlobal*locPos);
         m_globDir.push_back(Amg::Vector3D(locToGlobal.linear()* locDir));
         m_locPos.push_back(locPos);

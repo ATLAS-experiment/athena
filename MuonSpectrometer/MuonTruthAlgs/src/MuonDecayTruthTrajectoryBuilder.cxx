@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Niels van Eldik 2010
 
 #include "MuonDecayTruthTrajectoryBuilder.h"
 
-#include <stack>
+
 
 #include "AthContainers/DataVector.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -14,7 +14,7 @@
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "TrkTruthData/TruthTrajectory.h"
 #include "TruthUtils/HepMCHelpers.h"
-
+#include <stack>
 namespace Muon {
 
     //================================================================
@@ -128,10 +128,9 @@ namespace Muon {
                 }
 
                 if (nDecayMuons > 0) {
-                    daughter = passed_cuts;
+                    daughter = std::move(passed_cuts);
                     if (nDecayMuons == 2) {
                         ATH_MSG_DEBUG(" decay into two muons ");
-                        // m_isDecayIntoTwoMuons = true;
                     }
                 }
             }  

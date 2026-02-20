@@ -1,0 +1,2 @@
+MessageSvc.OutputLevel = 2;
+MessageSvc.Format = "% F%30W%S %7W%R%T %0W%M";

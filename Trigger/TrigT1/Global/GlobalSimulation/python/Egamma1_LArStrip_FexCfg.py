@@ -15,7 +15,7 @@ def Egamma1_LArStrip_FexCfg(
         dump=False,
         dumpTerse=False,
         makeCaloCellContainerChecks=True,
-        OutputLevel=None):
+        OutputLevel=DEBUG):
     
     cfg = ComponentAccumulator()
 
@@ -25,6 +25,10 @@ def Egamma1_LArStrip_FexCfg(
     if caloCellProducer == "EMB1CellsFromCaloCells":
         caloCellProducer = CompFactory.GlobalSim.EMB1CellsFromCaloCells()
         caloCellProducer.makeCaloCellContainerChecks = makeCaloCellContainerChecks
+        if flags.Input.isMC:
+            caloCellProducer.caloCells = "AllCalo"
+        else:
+            caloCellProducer.caloCells = "SeedLessFS"
     else:
         logger.debug("Cell fetcher " + caloCellProducer + " not supported")
         return cfg

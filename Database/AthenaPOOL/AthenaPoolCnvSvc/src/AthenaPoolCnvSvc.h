@@ -130,10 +130,6 @@ public:
    /// @param refAddress [OUT] converted string form.
    virtual StatusCode convertAddress(const IOpaqueAddress* pAddress, std::string& refAddress) override;
 
-   /// Extract/deduce the DB technology from the connection
-   /// string/file specification
-   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const override;
-
    /// Implement registerCleanUp to register a IAthenaPoolCleanUp to be called during cleanUp.
    virtual StatusCode registerCleanUp(IAthenaPoolCleanUp* cnv) override;
 
@@ -157,7 +153,7 @@ public:
 
 private: // member functions
    /// Extract POOL ItechnologySpecificAttributes for Domain, Database and Container from property.
-   void extractPoolAttributes(const StringArrayProperty& property,
+   void extractPoolAttributes(const Gaudi::Property<std::vector<std::string>>& property,
 	   std::vector<std::vector<std::string> >* contAttr,
 	   std::vector<std::vector<std::string> >* dbAttr,
 	   std::vector<std::vector<std::string> >* domAttr = 0) const;
@@ -183,61 +179,47 @@ protected: // shared with derived services
 private: // properties
    /// UseDetailChronoStat, enable detailed output for time and size statistics for AthenaPOOL:
    /// default = false.
-   BooleanProperty m_useDetailChronoStat{this,"UseDetailChronoStat",false};
+   Gaudi::Property<bool> m_useDetailChronoStat{this,"UseDetailChronoStat",false};
 
-   /// Default Storage Tech for containers (ROOTTREE, ROOTTREEINDEX, ROOTRNTUPLE)
-   Gaudi::Property<std::map<std::string, std::string>> m_storageTechProp{this, "StorageTechnology", {{"*","ROOTTREEINDEX"}}};
-   std::map<std::string, int> m_storageTechMap;
-   /// POOL Container name prefix - will be part of or whole TTree/RNTuple name
-   /// 'Default' takes the prefix from APRDefaults according to StorageTech
-   StringProperty  m_containerPrefixProp{this,"PoolContainerPrefix","Default"};
-   /// TopLevelContainerName, naming hint policy for top level POOL container: default = "<type>"
-   StringProperty  m_containerNameHintProp{this,"TopLevelContainerName",""};
-   /// SubLevelBranchName, naming hint policy for POOL branching: ("" = no branching)
-   StringProperty  m_branchNameHintProp{this,"SubLevelBranchName", "<type>/<key>"};
+   /// POOL container naming scheme selection
+   Gaudi::Property<std::string> m_containerNamingSchemeProp{this, "PoolContainerNamingScheme", "Historical"};
 
    /// Output PoolAttributes, vector with names and values of technology specific attributes for POOL
-   StringArrayProperty m_poolAttr{this,"PoolAttributes",{},"Pool Attributes","OrderedSet<std::string>"};
+   Gaudi::Property<std::vector<std::string>> m_poolAttr{this,"PoolAttributes",{},"Pool Attributes","OrderedSet<std::string>"};
    std::vector<std::vector<std::string> > m_domainAttr;
    std::vector<std::vector<std::string> > m_databaseAttr;
    std::vector<std::vector<std::string> > m_containerAttr;
-   std::vector<unsigned int> m_contextAttr;
-   std::map<std::string, int> m_fileCommitCounter;
-   std::map<std::string, int> m_fileFlushSetting;
+
    /// Input PoolAttributes, vector with names and values of technology specific attributes for POOL
-   StringArrayProperty m_inputPoolAttr{this,"InputPoolAttributes",{}};
+   Gaudi::Property<std::vector<std::string>> m_inputPoolAttr{this,"InputPoolAttributes",{}};
    std::vector<std::vector<std::string> > m_inputAttr;
    /// Print input PoolAttributes per event, vector with names of technology specific attributes for POOL
    /// to be printed each event
-   StringArrayProperty m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
+   Gaudi::Property<std::vector<std::string>> m_inputPoolAttrPerEvent{this,"PrintInputAttrPerEvt",{}};
    std::vector<std::vector<std::string> > m_inputAttrPerEvent;
-
-   /// MaxFileSizes, vector with maximum file sizes for Athena POOL output files
-   StringArrayProperty m_maxFileSizes{this,"MaxFileSizes",{}};
-   long long m_domainMaxFileSize=std::numeric_limits<long long>::max();
-   std::map<std::string, long long> m_databaseMaxFileSize;
 
 protected: // properties
    /// PersSvcPerOutput, boolean property to use multiple persistency services, one per output stream.
    /// default = true.
-   BooleanProperty m_persSvcPerOutput{this,"PersSvcPerOutput",true};
+   Gaudi::Property<bool> m_persSvcPerOutput{this,"PersSvcPerOutput",true};
    unsigned outputContextId(const std::string& outputConnection);
 
    /// PersSvcPerInputType, string property, tree name to use multiple persistency services, one per input type.
    /// default = "", no tree name results in a single persistency service.
-   StringProperty m_persSvcPerInputType{this,"PersSvcPerInputType",""};
+   Gaudi::Property<std::string> m_persSvcPerInputType{this,"PersSvcPerInputType",""};
    std::mutex  m_mutex;
 
-   /// To use MetadataSvc to merge data placed in a certain container
-   /// When using TMemFile call Write on number of Events, respecting CollectionTree auto_flush
-   IntegerProperty m_numberEventsPerWrite{this,"NumberEventsPerWrite",-1};
+   /// Track context IDs for which extractPoolAttributes has been called
+   std::set<unsigned int> m_processedContextIds;
 
    /// If true, use only one DataHeaderForm per Stream
-   BooleanProperty m_oneDataHeaderForm { this, "OneDataHeaderForm", false };
+   Gaudi::Property<bool> m_oneDataHeaderForm { this, "OneDataHeaderForm", false };
+
    /// Property for DataHeaderCnv input DHForm cache size
-   IntegerProperty m_DHFormCacheSize { this, "maxDHFormCacheSize", 100 };
+   Gaudi::Property<int> m_DHFormCacheSize { this, "maxDHFormCacheSize", 100 };
+
    /// Flag to control SG alias filtering when writing out DataHeader (see DataHeaderCnv_p6)
-   BooleanProperty m_DHFilterAliases { this, "doFilterDHAliases", true };
+   Gaudi::Property<bool> m_DHFilterAliases { this, "doFilterDHAliases", true };
 
 };
 

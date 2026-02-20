@@ -58,12 +58,12 @@ class FCS_StepInfoSDTool : public SensitiveDetectorBase {
   virtual StatusCode initializeCalculators();
 
   /// Helper method to create one SD
-  std::unique_ptr<FCS_StepInfoSD> makeOneLArSD(
+  FCS_StepInfoSD* makeOneLArSD(
       const std::string& name, ILArCalculatorSvc* calc,
       const std::vector<std::string>& volumes) const;
 
   /// Helper method to create one SD
-  std::unique_ptr<FCS_StepInfoSD> makeOneTileSD(
+  FCS_StepInfoSD* makeOneTileSD(
       const std::string& name, ITileCalculator* calc,
       const std::vector<std::string>& volumes) const;
 

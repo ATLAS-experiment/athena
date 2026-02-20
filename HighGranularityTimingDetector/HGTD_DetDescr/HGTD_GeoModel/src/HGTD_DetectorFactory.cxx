@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /*  Three-ring detector layout, created by Christian and David
@@ -9,9 +9,8 @@
  *  Dec 2020 Lianyou SHAN integrate 2-ring layout
  */
 
-#include "HGTD_GeoModel/HGTD_DetectorFactory.h"
-
-
+#include "HGTD_DetectorFactory.h"
+#include "HGTD_GeoModelAthenaComps.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
@@ -19,7 +18,6 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "DetDescrConditions/AlignableTransformContainer.h"
 
-#include "HGTD_GeoModel/HGTD_GeoModelAthenaComps.h"
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoMaterial.h"

@@ -49,7 +49,7 @@ class FPGATrackSimHoughTransform_d0phi0_Tool : public extends <AthAlgTool, IFPGA
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFinderTool
 
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) override;
         virtual int getSubRegion() const override{return m_subRegion;}
 
     private:

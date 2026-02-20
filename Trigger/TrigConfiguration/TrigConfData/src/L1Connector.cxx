@@ -129,8 +129,9 @@ TrigConf::L1Connector::type() const
       return "optical";
    case ConnectorType::CTPIN:
       return "ctpin";
+   default:
+     return "";
    }
-   return "";
 }
 
 TrigConf::L1Connector::ConnectorType

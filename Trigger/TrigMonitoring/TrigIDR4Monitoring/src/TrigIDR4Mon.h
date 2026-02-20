@@ -30,6 +30,9 @@
 #include "TrigInDetAnalysisUtils/TrackMatchDeltaR.h"
 #include "TrigInDetAnalysisUtils/TrackMatchDeltaRCosmic.h"
 
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
+
 
 class TrigIDR4Mon : public AthMonitorAlgorithm {
 

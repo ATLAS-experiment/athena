@@ -5,7 +5,6 @@
 #define PIXELFEUTILS_H
 
 #include "InDetReadoutGeometry/SiDetectorElementStatus.h"
-#include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "InDetIdentifier/PixelID.h"
 #include <algorithm>
@@ -31,10 +30,9 @@ namespace Pixel {
     * @param endId the identifier of the opposing corner of the pixel array which must be on the same pixel module.
     */
    inline double getGoodFraction(const InDet::SiDetectorElementStatus &pixelDetElStatus,
-                                 const InDetDD::IPixelReadoutManager &pixelReadout,
+                                 const InDetDD::PixelModuleDesign &design,
                                  const PixelID &pixelID,
-                                 const Identifier &moduleId,
-                                 const IdentifierHash &moudlIdHash,
+                                 const IdentifierHash &modulIdHash,
                                  const Identifier &startId,
                                  const Identifier &endId) {
       auto [phiStart,phiEnd] = sorted_tuple( pixelID.phi_index(startId), pixelID.phi_index(endId) );
@@ -45,8 +43,13 @@ namespace Pixel {
       unsigned int nGood=0;
       for (int i=phiStart; i<=phiEnd; i++) {
          for (int j=etaStart; j<=etaEnd; j++) {
-            int chFE = pixelReadout.getFE(pixelID.pixel_id(moduleId,i,j), moduleId);
-            if (pixelDetElStatus.isChipGood(moudlIdHash,chFE)) {++nGood;}
+
+            std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+               = InDetDD::PixelDiodeTree::makeCellIndex(i,j);
+            InDetDD::PixelDiodeTree::DiodeProxy si_param ( design.diodeProxyFromIdx(diode_idx));
+            std::uint32_t feValue = design.getFE(si_param);
+
+            if (pixelDetElStatus.isChipGood(modulIdHash,feValue)) {++nGood;}
          }
       }
       return nGood/nTotal;

@@ -65,6 +65,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("eventindex",&m_eventindex);
   m_tree->Branch("isRealHit",&m_realHit);
   m_tree->Branch("isPixel",&m_isPixel);
+  m_tree->Branch("isSP",&m_isSP);
   m_tree->Branch("layer",&m_layer);
   m_tree->Branch("isBarrel",&m_isBarrel);
   m_tree->Branch("etawidth",&m_etawidth);
@@ -82,6 +83,8 @@ StatusCode FPGATrackSimHoughRootOutputTool::bookTree()
   m_tree->Branch("fakelabel",&m_fakelabel);
   m_tree->Branch("passesOR",&m_passesOR);
   m_tree->Branch("roadChi2",&m_roadChi2);
+  m_tree->Branch("roadChi2ndof",&m_roadChi2ndof);
+  m_tree->Branch("roadNCoords",&m_roadNCoords);
   m_tree->Branch("nMissingHits",&m_nMissingHits);
   m_tree->Branch("NTracksORMinusRoads",&m_NTracksORMinusRoads);
 
@@ -246,7 +249,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
     FPGATrackSimMultiTruth::Weight tfrac;
 
     // Collect truth tracks' 2nd stage hits
-    for (auto hit : hits_2nd) {
+    for (const auto &hit : hits_2nd) {
       // Only write out hits belonging to the truth track
       if (hit->getBarcode() == track.getBarcode()) {
 
@@ -420,7 +423,9 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       mtv.reserve( m_FPGATrackSimMapping->PlaneMap_1st(road.getSubRegion())->getNLogiLayers());
     }
 
-    m_roadChi2.push_back(track_cands[iroad].getChi2ndof());
+    m_roadChi2ndof.push_back(track_cands[iroad].getChi2ndof());
+    m_roadChi2.push_back(track_cands[iroad].getChi2());
+    m_roadNCoords.push_back(track_cands[iroad].getNCoords());
 
     m_nMissingHits.push_back(track_cands[iroad].getNMissing());
 
@@ -429,13 +434,20 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
     m_phi = road.getHoughX();
     m_invpt = road.getHoughY();
     m_subregion = road.getRegion();
-    std::vector<FPGATrackSimHit> hits = road.getFPGATrackSimHits();
+    std::vector<std::shared_ptr<const FPGATrackSimHit>> hits = road.getFPGATrackSimHitPtrs();
 
 
     // Add the hits from each combination to the tree
-    for (FPGATrackSimHit hit : hits) {
-
+    for (const auto& hitPtr : hits) {
+      const FPGATrackSimHit& hit = *hitPtr;
+      
       m_realHit.push_back(hit.isReal());
+      if (hit.getHitType() == HitType::spacepoint) {
+        m_isSP.push_back(true);
+      }
+      else {
+        m_isSP.push_back(false);
+      }
       FPGATrackSimMultiTruth truth = hit.getTruth();
 
       truth.assign_equal_normalization();
@@ -456,14 +468,13 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
       }
 
       target_r = m_SUBREGIONMAP->getAvgRadius(0, hit.getLayer());
-      std::shared_ptr<const FPGATrackSimHit> hit_ptr = std::make_shared<const FPGATrackSimHit>(hit);
       std::vector<float> idealized_coords = computeIdealCoords(hit, m_invpt, hit.getGPhi(), target_r, true, TrackCorrType::None);
 
       m_x.push_back(hit.getX());
       m_y.push_back(hit.getY());
       m_z.push_back(hit.getZ());
-      m_volumeID.push_back(getVolumeID(*hit_ptr));
-      m_custom_layerID.push_back(getFineID(*hit_ptr));
+      m_volumeID.push_back(getVolumeID(hit));
+      m_custom_layerID.push_back(getFineID(hit));
       m_layerID.push_back(hit.getLayerDisk(true));
       m_etaID.push_back(hit.getEtaModule(true));
 
@@ -528,7 +539,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrack
 
 
 
-StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage)
+StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<FPGATrackSimRoad> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage)
 {
   ATH_MSG_DEBUG("Running HoughOutputTool!!");
 
@@ -538,19 +549,18 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
 
   for (size_t iroad = 0; iroad < roads.size(); iroad++) {
     m_roadnumber = iroad;
-    std::shared_ptr<const FPGATrackSimRoad> road = roads[iroad];
+    const FPGATrackSimRoad& road = roads[iroad];
     std::vector<FPGATrackSimTrack> track_cand;
-    if (road == nullptr) continue; // Not Hough roads
 
-    auto pmap = m_FPGATrackSimMapping->PlaneMap_1st(road->getSubRegion());
+    auto pmap = m_FPGATrackSimMapping->PlaneMap_1st(road.getSubRegion());
 
     if (roadsAreSecondStage) {
-      pmap = m_FPGATrackSimMapping->PlaneMap_2nd(road->getSubRegion());
+      pmap = m_FPGATrackSimMapping->PlaneMap_2nd(road.getSubRegion());
     }
 
-    std::vector<std::vector<int>> combs = ::getComboIndices(road->getNHits_layer());
-    m_phi = road->getX();
-    m_invpt = road->getY();
+    std::vector<std::vector<int>> combs = ::getComboIndices(road.getNHits_layer());
+    m_phi = road.getX();
+    m_invpt = road.getY();
 
     // Build track candidate for OR tool
     int nMissing;
@@ -558,7 +568,7 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     bool missStrip;
     layer_bitmask_t missing_mask;
     layer_bitmask_t norecovery_mask; // mask to prevent majority in planes with multiple hits
-    getMissingInfo(*road, nMissing, missPixel, missStrip, missing_mask, norecovery_mask, m_FPGATrackSimMapping, m_idealCoordFitType);
+    getMissingInfo(road, nMissing, missPixel, missStrip, missing_mask, norecovery_mask, m_FPGATrackSimMapping, m_idealCoordFitType);
     // Create a template track with common parameters filled already for initializing below
     FPGATrackSimTrack temp;
 
@@ -568,20 +578,20 @@ StatusCode FPGATrackSimHoughRootOutputTool::fillTree(const std::vector<std::shar
     else {
       temp.setTrackStage(TrackStage::FIRST);
     }
-    temp.setSecondSectorID(road->getSector());
+    temp.setSecondSectorID(road.getSector());
     temp.setNLayers(pmap->getNLogiLayers());
     temp.setBankID(-1); // TODO
-    temp.setPatternID(road->getPID());
+    temp.setPatternID(road.getPID());
     temp.setHitMap(missing_mask);
     temp.setNMissing(nMissing);
-    temp.setHoughX(road->getX());
-    temp.setHoughY(road->getY());
-    temp.setQOverPt(road->getY());
+    temp.setHoughX(road.getX());
+    temp.setHoughY(road.getY());
+    temp.setQOverPt(road.getY());
     temp.setTrackCorrType(m_IdealCoordFitType);
     temp.setDoDeltaGPhis(true);
     temp.setPassedOR(1);
 
-    makeTrackCandidates(*road, temp, track_cand, m_FPGATrackSimMapping);
+    makeTrackCandidates(road, temp, track_cand, m_FPGATrackSimMapping);
     for (auto const &tr : track_cand) {
       track_cands.push_back(tr);
     }
@@ -614,6 +624,7 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_barcodefrac.clear();
   m_eventindex.clear();
   m_realHit.clear();
+  m_isSP.clear();
   m_isPixel.clear();
   m_layer.clear();
   m_isBarrel.clear();
@@ -625,6 +636,8 @@ void FPGATrackSimHoughRootOutputTool::ResetVectors() {
   m_diskLayer.clear();
   m_passesOR.clear();
   m_roadChi2.clear();
+  m_roadChi2ndof.clear();
+  m_roadNCoords.clear();
   m_nMissingHits.clear();
   m_truth_d0.clear();
   m_truth_z0.clear();

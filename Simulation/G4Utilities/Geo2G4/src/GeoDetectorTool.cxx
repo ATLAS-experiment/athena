@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Base class
@@ -16,13 +16,10 @@
 // Geant4 includes used in functions
 
 GeoDetectorTool::GeoDetectorTool(const std::string& type, const std::string& name, const IInterface* parent)
-  : DetectorGeometryBase(type,name,parent),m_blParamOn(false),m_blGetTopTransform(true),m_geoDetectorName("")
+  : DetectorGeometryBase(type,name,parent)
 {
   m_topTransform.setIdentity();
   ATH_MSG_DEBUG( "GeoDetectorTool constructor for " << name );
-  declareProperty("GeoDetectorName",m_geoDetectorName, "Name of the detector in GeoModel, if different from G4.");
-  declareProperty("GDMLFileOut",m_dumpGDMLFile,"File name where the GDML description for the detector will be dumped.");
-
 }
 
 StatusCode GeoDetectorTool::initialize()
@@ -76,7 +73,7 @@ void GeoDetectorTool::PositionInParent()
   DetectorGeometryBase::PositionInParent();
   if (!m_dumpGDMLFile.empty()) {
     G4GDMLParser parser;
-    parser.Write(m_dumpGDMLFile,m_envelope.thePositionedVolume);
+    parser.Write(m_dumpGDMLFile.value(),m_envelope.thePositionedVolume);
   }
 }
 

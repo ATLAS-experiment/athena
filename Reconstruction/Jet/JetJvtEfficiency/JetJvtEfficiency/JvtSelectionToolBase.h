@@ -6,13 +6,15 @@
 #define JETJVTEFFICIENCY_JVTSELECTIONTOOLBASE_H
 
 #include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
 #include "PATCore/IAsgSelectionTool.h"
 #include "xAODJet/JetContainer.h"
+#include "JetInterface/IJetDecorator.h"
 
 namespace CP {
-    class JvtSelectionToolBase : public asg::AsgTool, virtual public IAsgSelectionTool {
+    class JvtSelectionToolBase : public asg::AsgTool, virtual public IAsgSelectionTool, virtual public IJetDecorator {
     public:
         using asg::AsgTool::AsgTool;
         virtual ~JvtSelectionToolBase() = default;
@@ -22,6 +24,8 @@ namespace CP {
         virtual const asg::AcceptInfo &getAcceptInfo() const override;
 
         virtual asg::AcceptData accept(const xAOD::IParticle *jet) const override;
+
+        virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
     protected:
         Gaudi::Property<float> m_minPtForJvt{
@@ -36,6 +40,14 @@ namespace CP {
         Gaudi::Property<std::string> m_jetEtaName{
                 this, "JetEtaName", "eta", "The name of the jet eta to use."};
 
+        SG::ReadHandleKey<xAOD::JetContainer> m_jetContainer{
+                this, "JetContainer", "", "The name of the jet container"};
+        SG::ReadDecorHandleKey<xAOD::JetContainer> m_jvtMomentKey{
+                this, "JvtMomentName", m_jetContainer, "", "The name of the Jvt moment to use"};
+        SG::WriteDecorHandleKey<xAOD::JetContainer> m_passJvtKey{
+                this, "PassFlagName", m_jetContainer, "", "SG key for output pass-JVT decoration"};
+
+
         // The template AcceptInfo object
         asg::AcceptInfo m_info;
         // The index to set in the info. I suspect that this is always 0 but better to be safe
@@ -46,6 +58,7 @@ namespace CP {
         virtual bool isInRange(const xAOD::IParticle *jet) const;
         // Check the score
         virtual bool select(const xAOD::IParticle *jet) const = 0;
+
     };
 } // namespace CP
 

@@ -165,6 +165,9 @@ StatusCode TileGeoG4SDCalc::initialize() {
   }
   ATH_MSG_DEBUG("Using timeCut = " << m_options.timeCut / CLHEP::ns << " ns. ");
   ATH_MSG_DEBUG("Using doBirk = " << (m_options.doBirk ? "true" : "false"));
+  if(m_options.doBirk) {
+    ATH_MSG_INFO("Using Birksk1="<<m_birk1.value()<<", Birksk2="<<m_birk2.value());
+  }
   ATH_MSG_DEBUG("Using doTOFCorr = " << (m_options.doTOFCorrection ? "true" : "false"));
   ATH_MSG_DEBUG("Using doTileRow = " << (m_options.doTileRow ? "true" : "false"));
   ATH_MSG_DEBUG("Using doCalibHitParticleID = " << (m_options.doCalibHitParticleID ? "true" : "false"));

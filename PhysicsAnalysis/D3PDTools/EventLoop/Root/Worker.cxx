@@ -397,6 +397,7 @@ namespace EL
     {
       m_moduleConfig.emplace_back ("EL::Detail::TEventModule/TEventModule");
       ANA_CHECK (m_moduleConfig.back().setProperty ("accessMode", metaData()->castString (Job::optXaodAccessMode)));
+      ANA_CHECK (m_moduleConfig.back().setProperty ("otherMetaDataTreeNamePattern", metaData()->castString (Job::optOtherMetaDataTreeNamePattern)));
       if (metaData()->castDouble (Job::optXAODSummaryReport, 1) == 0)
         ANA_CHECK (m_moduleConfig.back().setProperty ("summaryReport", false));
       ANA_CHECK (m_moduleConfig.back().setProperty ("useStats", metaData()->castBool (Job::optXAODPerfStats, false)));

@@ -86,6 +86,22 @@ def ClusterInfoCalcToolCfg(flags, name = "GPUClusterInfoCalculator", do_cut = Tr
     result.setPrivateTools(CalcTool)
     return result
 
+def ClusterSorterToolCfg(flags, name = "GPUClusterSorter", do_cut = False, **kwargs):
+    result=ComponentAccumulator()
+    kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
+    kwargs.setdefault("TimeFileOutput", name + "Times.txt")
+    if do_cut:
+        kwargs.setdefault("ClusterCutsInAbsEt", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterCutClustersInAbsEt)
+        kwargs.setdefault("ClusterEtorAbsEtCut", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterEnergyCut)
+    else:
+        kwargs.setdefault("ClusterCutsInAbsEt", True)
+        kwargs.setdefault("ClusterEtorAbsEtCut", -1)
+        #Cutting on absolute value with a negative value => not cutting at all.
+
+    SorTool = CompFactory.GPUClusterSorter(name, **kwargs)
+    result.setPrivateTools(SorTool)
+    return result
+
 def TopoAutomatonClusteringToolCfg(flags, name = "TopoAutomatonClustering", **kwargs):
     result=ComponentAccumulator()
 
@@ -339,6 +355,32 @@ def CellsCounterGPUToolCfg(flags, name = "GPUCounts", **kwargs):
     result.setPrivateTools(GPUCount)
     return result
 
+def PerformanceInformationOutputToolCfg(flags, cellsname, name = "PerfInfoTool", **kwargs):
+    result=ComponentAccumulator()
+    kwargs.setdefault("FileName", "event_info.txt")
+    kwargs.setdefault("CellsName", cellsname)
+
+    kwargs.setdefault("SeedThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.SeedThreshold)
+    kwargs.setdefault("NeighborThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.GrowThreshold)
+    kwargs.setdefault("CellThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.TermThreshold)
+
+    kwargs.setdefault("GrowingNeighborOption", flags.CaloRecGPU.ActiveConfig.GrowingNeighborOption)
+    kwargs.setdefault("GrowingRestrictHECIWandFCalNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictHECIWandFCalNeighbors)
+    kwargs.setdefault("GrowingRestrictPSNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictPSNeighbors)
+
+
+    kwargs.setdefault("SplittingNeighborOption", flags.CaloRecGPU.ActiveConfig.SplittingNeighborOption)
+    kwargs.setdefault("SplittingRestrictHECIWandFCalNeighbors", flags.CaloRecGPU.ActiveConfig.SplittingRestrictHECIWandFCalNeighbors)
+    kwargs.setdefault("SplittingRestrictPSNeighbors", flags.CaloRecGPU.ActiveConfig.GPUSplittingRestrictPSNeighbors)
+
+    kwargs.setdefault("SeedCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsSeedThreshold)
+    kwargs.setdefault("NeighborCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsGrowThreshold)
+    kwargs.setdefault("CellCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsTermThreshold)
+    
+    GPUCount = CompFactory.CaloPerformancePropertiesOutput(name, **kwargs)
+    result.setPrivateTools(GPUCount)
+    return result
+    
 def MomentsDumperToolCfg(flags, name = "MomentsDumper", **kwargs):
     result=ComponentAccumulator()
     kwargs.setdefault("SavePath", "moments")
@@ -358,6 +400,9 @@ def PlotterToolCfg(flags, cellsname, name = "PlotterMonitoring", **kwargs):
 
     kwargs.setdefault("ClusterMatchingParameters", MatchingOptions())
 
+    if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
+        kwargs.setdefault("MissingCellsToFill", flags.CaloRecGPU.ActiveConfig.MissingCellsToFill)
+        
     #Tools and Combinations to plot
     #should be set by the end user.
 
@@ -540,6 +585,8 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
       HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( ClusterInfoCalcToolCfg(flags,"PostGPUGrowingClusterPropertiesCalculator", True))]
 
       HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( TopoAutomatonSplitterToolCfg(flags,"GPUSplitting") )]
+
+      HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( ClusterSorterToolCfg(flags, "GPUClusterSorting", False) )]
 
       HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( GPUClusterMomentsCalculatorToolCfg(flags,"GPUTopoMoments") )]
       

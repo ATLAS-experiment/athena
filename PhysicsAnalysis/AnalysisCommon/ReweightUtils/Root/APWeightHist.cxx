@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APReweight_cxx
@@ -58,9 +58,11 @@ int APWeightHist::Fill(const double value, APWeightEntry* weight) {
   fTsumw2 += z*z;
   fTsumwx += z*value;
   fTsumwx2 += z * value*value;
-  (m_binned_weights[bin - 1]).push_back(weight);
+  if (bin > 0) {
+    m_binned_weights[bin - 1].push_back(weight);
+    m_SumSys2[bin - 1] += weight->GetSysUncert2();
+  }
   fSumw2.fArray[bin] += weight->GetVariance() + z*z;
-  m_SumSys2[bin - 1] += weight->GetSysUncert2();
   return bin;
 }
 

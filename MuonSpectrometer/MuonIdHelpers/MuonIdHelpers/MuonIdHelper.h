@@ -88,17 +88,6 @@ public:
 
     Identifier muon() const;
 
-    // Test for technology type
-
-    bool is_muon(const Identifier& id) const;
-    bool is_mdt(const Identifier& id) const;
-    bool is_csc(const Identifier& id) const;
-    bool is_rpc(const Identifier& id) const;
-    bool is_tgc(const Identifier& id) const;
-
-    // for nSW
-    bool is_stgc(const Identifier& id) const;
-    bool is_mm(const Identifier& id) const;
 
     // Extract station parts
 
@@ -115,17 +104,18 @@ public:
     bool isEndcap(const Identifier& id) const;
     bool isForward(const Identifier& id) const;
     bool isSmall(const Identifier& id) const;
-    bool isBarrel(const int& stationNameIndex) const;
-    bool isEndcap(const int& stationNameIndex) const;
-    bool isForward(const int& stationNameIndex) const;
-    bool isSmall(const int& stationNameIndex) const;
+    bool isBarrel(const int stationNameIndex) const;
+    bool isEndcap(const int stationNameIndex) const;
+    bool isForward(const int stationNameIndex) const;
+    bool isSmall(const int stationNameIndex) const;
 
     // Access to name and technology maps
 
     int stationNameIndex(const std::string& name) const;
     int technologyIndex(const std::string& name) const;
-    const std::string& stationNameString(const int& index) const;
-    const std::string& technologyString(const int& index) const;
+    const std::string& stationNameString(const Identifier& id) const;
+    const std::string& stationNameString(const int index) const;
+    const std::string& technologyString(const int index) const;
     int nStationNames() const;
 
 

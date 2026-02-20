@@ -33,7 +33,6 @@
 #include "EvtGenBase/EvtReport.hh"
 #include "EvtGenBase/EvtVector4C.hh"
 #include "EvtGen_i/EvtGenExternal/Belle2//EvtPHSPBMix.h"
-//#include <generators/evtgen/EvtGenModelRegister.h>
 #include "EvtGenBase/EvtId.hh"
 #include <string>
 #include <sstream>
@@ -229,10 +228,8 @@ void EvtPHSPBBMix::prlp(int i) const
 
 void EvtPHSPBBMix::decay(EvtParticle* p)
 {
-  //p->initializePhaseSpace(getNDaug(),getDaugs());
-  //return;
 
-  bool pr(false);
+  constexpr bool pr(false);
   if (pr) prlp(1);
 
   static const EvtId B0(EvtPDL::getId("B0"));
@@ -352,6 +349,7 @@ EvtComplex EvtPHSPBBMix::Amplitude(const double& t1, const double& t2, bool B1_i
       return EvtComplex(0., -sin(f * (t2 + m_C * t1) / 2.) * m_C / sqrt(2.));
   }
   // no way to reach this but compiler complains without a return statement
+  //coverity[DEADCODE]
   return EvtComplex(0., 0.);
 }
 
@@ -457,7 +455,7 @@ void EvtPHSPBMix::initProbMax()
 void EvtPHSPBMix::decay(EvtParticle* p)
 {
 
-  bool pr(false);//prompt
+  constexpr bool pr(false);//prompt
   // generate a final state according to phase space
 
   //  const bool BBpipi(getNDaug()!=4);//true if BBpipi, if not BBpi

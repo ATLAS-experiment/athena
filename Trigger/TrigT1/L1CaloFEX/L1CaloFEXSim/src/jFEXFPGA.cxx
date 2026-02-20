@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -441,7 +441,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection, const 
     
           
 	  std::vector<uint32_t> FwdEltob_aux{FwdEl_tobword,TTID};
-	  if ( FwdEl_tobword != 0  && etEM>minEtThreshold) m_FwdEl_tobwords.push_back(FwdEltob_aux);
+	  if ( FwdEl_tobword != 0  && etEM>minEtThreshold) m_FwdEl_tobwords.push_back(std::move(FwdEltob_aux));
 	}
     
         //******************************** TAU **********************************************

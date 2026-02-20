@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDetectorFactory.h"
@@ -174,7 +174,7 @@ void LArGeo::LArDetectorFactory::create(GeoPhysVol* a_container )
 	  }
 	  
 	  // --- Endcap Neg
-	  const IRDBRecord *negRec = GeoDBUtils::getTransformRecord(larPosition, "LARCRYO_EC_NEG");
+	  const IRDBRecord *negRec = GeoDBUtils::getTransformRecord(std::move(larPosition), "LARCRYO_EC_NEG");
 	  if (!negRec) throw std::runtime_error("Error, no lar position record in the database") ;
 	  GeoTrf::Transform3D xfNeg = GeoDBUtils::getTransform(negRec);
 	  GeoAlignableTransform *xfEndcapNeg = new GeoAlignableTransform(xfNeg);
@@ -199,7 +199,7 @@ void LArGeo::LArDetectorFactory::create(GeoPhysVol* a_container )
 	}
 	else if(!m_buildEndcap) {
 	  // -- Build the Barrel only
-	  const IRDBRecord *barrelRec = GeoDBUtils::getTransformRecord(larPosition,"LARCRYO_B");
+	  const IRDBRecord *barrelRec = GeoDBUtils::getTransformRecord(std::move(larPosition),"LARCRYO_B");
 	  if(!barrelRec) throw std::runtime_error("Error, no lar position record in the database");
 	  GeoTrf::Transform3D xfBarrel = GeoDBUtils::getTransform(barrelRec);
 	  GeoAlignableTransform* barrelAlXf = new GeoAlignableTransform(xfBarrel);
@@ -237,7 +237,7 @@ void LArGeo::LArDetectorFactory::create(GeoPhysVol* a_container )
 	  }
 
 	  // --- Endcap Neg
-	  const IRDBRecord *negRec = GeoDBUtils::getTransformRecord(larPosition, "LARCRYO_EC_NEG");
+	  const IRDBRecord *negRec = GeoDBUtils::getTransformRecord(std::move(larPosition), "LARCRYO_EC_NEG");
 	  if (!negRec) throw std::runtime_error("Error, no lar position record in the database") ;
 	  GeoTrf::Transform3D xfNeg = GeoDBUtils::getTransform(negRec);
 	  GeoAlignableTransform *xfEndcapNeg = new GeoAlignableTransform(xfNeg);

@@ -13,6 +13,8 @@
 
 #include "StorageSvc/IDbDomain.h"
 
+class StatusCode;
+
 /*
  *  namespace declaration
  */
@@ -67,17 +69,17 @@ namespace pool  {
     /** @param type     [IN]  Specific database type (Including minor type)
       * @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus setOption(const DbOption& refOpt);
+    virtual StatusCode setOption(const DbOption& refOpt);
 
     /// Access domain specific options
     /** @param type     [IN]  Specific database type (Including minor type)
       * @param refOpt   [IN]  Reference to option object
       *
-      * @return DbStatus code indicating success or failure.  
+      * @return StatusCode code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& refOpt) const;
+    virtual StatusCode getOption(DbOption& refOpt) const;
   };
 }
 #endif // POOL_ROOTDOMAIN_H

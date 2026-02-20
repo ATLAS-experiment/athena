@@ -145,7 +145,7 @@ def jFexRoiByteStreamToolCfg(flags, name, *, writeBS=False, xTOBs=False):
   return acc
 
  
-def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
+def gFexByteStreamToolCfg(flags, name, *, writeBS=False, multiSlice=False):
   acc = ComponentAccumulator()
   tool = CompFactory.gFexByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
@@ -156,6 +156,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gFexSRJetOutputContainerReadKey                ="L1_gFexSRJetRoI"
     tool.gFexLRJetOutputContainerReadKey                ="L1_gFexLRJetRoI"
     tool.gScalarEJwojOutputContainerReadKey             ="L1_gScalarEJwoj"
+    tool.gEspressoOutputContainerReadKey                ="L1_gEspresso"
     tool.gMETComponentsJwojOutputContainerReadKey       ="L1_gMETComponentsJwoj"
     tool.gMHTComponentsJwojOutputContainerReadKey       ="L1_gMHTComponentsJwoj"
     tool.gMSTComponentsJwojOutputContainerReadKey       ="L1_gMSTComponentsJwoj"
@@ -169,6 +170,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gFexSRJetOutputContainerWriteKey               =""
     tool.gFexLRJetOutputContainerWriteKey               =""
     tool.gScalarEJwojOutputContainerWriteKey            =""
+    tool.gEspressoOutputContainerWriteKey               =""
     tool.gMETComponentsJwojOutputContainerWriteKey      =""
     tool.gMHTComponentsJwojOutputContainerWriteKey      =""
     tool.gMSTComponentsJwojOutputContainerWriteKey      =""
@@ -182,6 +184,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gFexSRJetOutputContainerReadKey                =""
     tool.gFexLRJetOutputContainerReadKey                =""
     tool.gScalarEJwojOutputContainerReadKey             =""
+    tool.gEspressoOutputContainerReadKey                =""
     tool.gMETComponentsJwojOutputContainerReadKey       =""
     tool.gMHTComponentsJwojOutputContainerReadKey       =""
     tool.gMSTComponentsJwojOutputContainerReadKey       =""
@@ -195,6 +198,7 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gFexSRJetOutputContainerWriteKey               ="L1_gFexSRJetRoI"
     tool.gFexLRJetOutputContainerWriteKey               ="L1_gFexLRJetRoI"
     tool.gScalarEJwojOutputContainerWriteKey            ="L1_gScalarEJwoj"
+    tool.gEspressoOutputContainerWriteKey               ="L1_gEspresso"
     tool.gMETComponentsJwojOutputContainerWriteKey      ="L1_gMETComponentsJwoj"
     tool.gMHTComponentsJwojOutputContainerWriteKey      ="L1_gMHTComponentsJwoj"
     tool.gMSTComponentsJwojOutputContainerWriteKey      ="L1_gMSTComponentsJwoj"
@@ -202,6 +206,28 @@ def gFexByteStreamToolCfg(flags, name, *, writeBS=False):
     tool.gMETComponentsRmsOutputContainerWriteKey       ="L1_gMETComponentsRms"
     tool.gScalarENoiseCutOutputContainerWriteKey        ="L1_gScalarENoiseCut"
     tool.gScalarERmsOutputContainerWriteKey             ="L1_gScalarERms"
+
+    # Multi-slice containers (out-of-time TOBs from slices 1,2)
+    if multiSlice:
+      # Jet TOBs
+      tool.gFexRhoSliceContainerWriteKey               ="L1_gFexRhoRoIOutOfTime"
+      tool.gFexSRJetSliceContainerWriteKey             ="L1_gFexSRJetRoIOutOfTime"
+      tool.gFexLRJetSliceContainerWriteKey             ="L1_gFexLRJetRoIOutOfTime"
+      # Global TOBs - JwoJ
+      tool.gScalarEJwojSliceContainerWriteKey          ="L1_gScalarEJwojOutOfTime"
+      tool.gMETComponentsJwojSliceContainerWriteKey    ="L1_gMETComponentsJwojOutOfTime"
+      tool.gMHTComponentsJwojSliceContainerWriteKey    ="L1_gMHTComponentsJwojOutOfTime"
+      tool.gMSTComponentsJwojSliceContainerWriteKey    ="L1_gMSTComponentsJwojOutOfTime"
+      # Global TOBs - gEspresso
+      tool.gEspressoSliceContainerWriteKey             ="L1_gEspressoOutOfTime"
+      # Global TOBs - NoiseCut
+      tool.gMETComponentsNoiseCutSliceContainerWriteKey="L1_gMETComponentsNoiseCutOutOfTime"
+      tool.gScalarENoiseCutSliceContainerWriteKey      ="L1_gScalarENoiseCutOutOfTime"
+      # Global TOBs - Rms
+      tool.gMETComponentsRmsSliceContainerWriteKey     ="L1_gMETComponentsRmsOutOfTime"
+      tool.gScalarERmsSliceContainerWriteKey           ="L1_gScalarERmsOutOfTime"
+      # Note: Slice number decoration keys are automatically derived from the
+      # parent WriteHandleKeys above with decoration name "sliceNumber"
 
 
   if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:

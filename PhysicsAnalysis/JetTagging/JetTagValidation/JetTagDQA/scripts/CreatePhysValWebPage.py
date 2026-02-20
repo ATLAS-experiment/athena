@@ -1,6 +1,4 @@
-###
-# Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
-###
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Create Physics Validation Web page
 # Author: Arnaud Duperrin <duperrin@cppm.in2p3.fr> - March 2021
@@ -9,7 +7,7 @@
 # python CreatePhysValWebPage.py -i ROC
 
 # Import os module to read directory
-import getopt,os,glob,argparse,sys
+import os,glob,argparse,sys
 
 parser = argparse.ArgumentParser(description='Create the Physics Validation web page:', usage='%(prog)s -i ROC/ ')
 parser.add_argument("-i", "--input_dir", help="path to the folder holding the plots (default: ./)", default=os.getcwd())
@@ -45,7 +43,6 @@ def html_table(lol):
      print("Histo: " + sublist[idx])
      list_end = list_len - idx
      if list_end != 1:
-         next_idx = idx + 1
          string += '<p style=\"color:#0000FF\";>'+ str(file)+ '<p> </th><th>'
      else:
          #print("End Of List!")
@@ -57,7 +54,6 @@ def html_table(lol):
      idx = sublist.index(file)   
      list_end = list_len - idx
      if list_end != 1:
-         next_idx = idx + 1
          string += '<a href="'+str(file)+'"> <img alt="'+str(file)+'" src="'+str(file)+'" width="400" height="300"></a> </td><th>'
      else:
          string += '<a href="'+str(file)+'"> <img alt="'+str(file)+'" src="'+str(file)+'" width="400" height="300"></a> </td><tr>'

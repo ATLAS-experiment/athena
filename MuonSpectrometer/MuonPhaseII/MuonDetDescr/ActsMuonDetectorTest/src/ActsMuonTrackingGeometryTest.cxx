@@ -62,18 +62,18 @@ struct PropagatorRecorder{
 namespace ActsTrk {
 
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
+    Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);    
         const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);        
-        return reElement->globalToLocalTrans(gctx, trfHash);
+        return reElement->globalToLocalTransform(gctx, trfHash);
     }
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsGeometryContext& gctx, const Identifier& hitId) const {
+    Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
     const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);
     const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
-    return reElement->localToGlobalTrans(gctx, trfHash);
+    return reElement->localToGlobalTransform(gctx, trfHash);
     }
 
 
@@ -108,7 +108,7 @@ namespace ActsTrk {
 
         const EventContext& ctx = Gaudi::Hive::currentContext();
 
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         const AtlasFieldCacheCondObj* fieldCondObj{nullptr};
         const MuonGM::MuonDetectorManager* detMgr{nullptr};
         const xAOD::TruthParticleContainer* truthParticles{nullptr};
@@ -282,7 +282,7 @@ namespace ActsTrk {
                     continue;
                 }
 
-                const SurfaceCache* sCache = dynamic_cast<const SurfaceCache *>(step.surface->associatedDetectorElement());
+                const SurfaceCache* sCache = dynamic_cast<const SurfaceCache *>(step.surface->surfacePlacement());
                 if(!sCache) {
                     ATH_MSG_VERBOSE("Surface found but it's a portal, continuing..");
                     continue;

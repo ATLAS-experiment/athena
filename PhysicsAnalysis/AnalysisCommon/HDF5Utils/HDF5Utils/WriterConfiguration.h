@@ -7,8 +7,14 @@
 #include <optional>
 #include <array>
 #include <string>
+#include <vector>
+#include <functional>
 
 #include "H5public.h"
+
+namespace H5 {
+  class DSetCreatPropList;
+}
 
 namespace H5Utils {
   template <size_t N>
@@ -19,6 +25,7 @@ namespace H5Utils {
     std::optional<hsize_t> batch_size{std::nullopt};
     std::optional<std::array<hsize_t,N>> chunks{std::nullopt};
     std::optional<int> deflate{std::nullopt};
+    std::vector<std::function<void(H5::DSetCreatPropList&)>> plist_callbacks;
   };
 }
 #endif

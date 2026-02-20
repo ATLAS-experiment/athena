@@ -58,7 +58,7 @@ private: // data
 
 private: // properties
    /// InputCollections, vector with names of the input collections.
-   StringArrayProperty m_inputCollectionsProp
+   Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
    std::vector<std::string>::const_iterator m_inputCollectionsIterator{};
 

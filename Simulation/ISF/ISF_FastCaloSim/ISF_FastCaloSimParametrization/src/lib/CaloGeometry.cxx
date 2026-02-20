@@ -463,20 +463,20 @@ TCanvas* CaloGeometry::DrawGeoForPhi0()
   return c;
 }
 
-const CaloDetDescrElement* CaloGeometry::getDDE(Identifier identify) 
+const CaloDetDescrElement* CaloGeometry::getDDE(Identifier identify) const
 {
-  return m_cells[identify];
+  return m_cells.at(identify);
 }
-const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,Identifier identify) 
+const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,Identifier identify) const
 {
-  return m_cells_in_sampling[sampling][identify];
+  return m_cells_in_sampling.at(sampling).at(identify);
 }
 
-const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,float eta,float phi,float* distance,int* steps) 
+const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,float eta,float phi,float* distance,int* steps) const
 {
   if(sampling<0) return nullptr;
   if(sampling>=MAX_SAMPLING) return nullptr;
-  if(m_cells_in_regions[sampling].empty()) return nullptr;
+  if(m_cells_in_regions.at(sampling).empty()) return nullptr;
   
   float dist = 0;
   const CaloDetDescrElement* bestDDE=nullptr;
@@ -489,10 +489,10 @@ const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,float eta,float phi
   
   if(sampling<21) {
     for(int skip_range_check=0;skip_range_check<=1;++skip_range_check) {
-      for(unsigned int j=0;j<m_cells_in_regions[sampling].size();++j) {
+      for(unsigned int j=0;j<m_cells_in_regions.at(sampling).size();++j) {
         if(!skip_range_check) {
-          if(eta<m_cells_in_regions[sampling][j]->mineta()) continue;
-          if(eta>m_cells_in_regions[sampling][j]->maxeta()) continue;
+          if(eta<m_cells_in_regions.at(sampling).at(j)->mineta()) continue;
+          if(eta>m_cells_in_regions.at(sampling).at(j)->maxeta()) continue;
         }  
         if(steps) intsteps=(*steps);
          else intsteps=0;
@@ -500,7 +500,7 @@ const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,float eta,float phi
           cout<<"CaloGeometry::getDDE : check map"<<j<<" skip_range_check="<<skip_range_check<<endl;
         }
         float newdist;
-        const CaloDetDescrElement* newDDE=m_cells_in_regions[sampling][j]->getDDE(eta,phi,&newdist,&intsteps);
+        const CaloDetDescrElement* newDDE=m_cells_in_regions.at(sampling).at(j)->getDDE(eta,phi,&newdist,&intsteps);
         if(m_debug) {
           cout<<"CaloGeometry::getDDE : map"<<j<<" dist="<<newdist<<" best dist="<<*distance<<" steps="<<intsteps<<endl;
         }
@@ -547,7 +547,7 @@ const CaloDetDescrElement* CaloGeometry::getDDE(int sampling,float eta,float phi
   return bestDDE;
 }
 
-const CaloDetDescrElement* CaloGeometry::getFCalDDE(int sampling,float x,float y,float z,float* distance,int* steps){
+const CaloDetDescrElement* CaloGeometry::getFCalDDE(int sampling,float x,float y,float z,float* distance,int* steps) const{
   int isam = sampling - 20;
   int iphi(-100000),ieta(-100000);
   Long64_t mask1[]{0x34,0x34,0x35};
@@ -575,7 +575,7 @@ const CaloDetDescrElement* CaloGeometry::getFCalDDE(int sampling,float x,float y
   
   id = id << 44; 
   Identifier identify((unsigned long long)id);
-  const CaloDetDescrElement* foundcell=m_cells[identify];
+  const CaloDetDescrElement* foundcell=m_cells.at(identify);
 
   // Report the shortest distance in x or y to the face of the cell if outside the cell.
   // If inside the cell this will be negative and be the shortest distance to a cell face.
@@ -589,10 +589,10 @@ const CaloDetDescrElement* CaloGeometry::getFCalDDE(int sampling,float x,float y
 }
 
 
-bool CaloGeometry::getClosestFCalCellIndex(int sampling,float x,float y,int& ieta, int& iphi,int* steps){
+bool CaloGeometry::getClosestFCalCellIndex(int sampling,float x,float y,int& ieta, int& iphi,int* steps) const {
   
-  double rmin = m_FCal_rmin[sampling-21];
-  double rmax = m_FCal_rmax[sampling-21];
+  double rmin = m_FCal_rmin.at(sampling-21);
+  double rmax = m_FCal_rmax.at(sampling-21);
   int isam=sampling-20;
   double a=1.;
   const double b=0.01;

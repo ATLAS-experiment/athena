@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_PARAMETERS_p2_TRK_H
@@ -11,8 +11,10 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <vector>
+
 #include "Identifier/Identifier.h"
+#include <vector>
+#include <cstdint>
 
 namespace Trk
 {

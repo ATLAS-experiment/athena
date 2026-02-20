@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,7 +21,7 @@ These are dual-use tools so that reconstruction can be run in either Athena or R
   - IJetFromPseudojet : Interface for constructing a jet from a pseudojet.
   - IJetModifier : Interface for modifying a jet collection.
   - IJetDecorator : Interface for decorating a (const) jet collection.
-  - IPseudoJetGetter : Interface for retriving a vector of pseudojets.
+  - IPseudoJetGetter : Interface for retrieving a vector of pseudojets.
   - IFastJetInterfaceTool: Interface to fastjet wrapper.
 
 

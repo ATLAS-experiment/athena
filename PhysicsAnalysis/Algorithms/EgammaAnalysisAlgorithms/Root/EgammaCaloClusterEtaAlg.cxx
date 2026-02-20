@@ -23,6 +23,9 @@ namespace CP {
     ANA_CHECK(m_particlesKey.initialize());
     ANA_CHECK(m_caloEta2Key.initialize());
 
+    // create an accessor to register the type for output algorithms
+    SG::ConstAccessor<float> (m_caloEta2Key.key().substr (m_caloEta2Key.key().find_last_of(".") + 1));
+
     return StatusCode::SUCCESS;
   }
 

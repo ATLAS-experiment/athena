@@ -25,6 +25,11 @@ namespace columnar
     {
       static constexpr std::string_view idName = "particle1";
     };
+
+    struct particle2 : particle
+    {
+      static constexpr std::string_view idName = "particle2";
+    };
   }
 
   using ParticleRange = ObjectRange<ContainerId::particle>;
@@ -44,6 +49,12 @@ namespace columnar
   using OptParticle1Id = OptObjectId<ContainerId::particle1>;
   template<typename CT,typename CM=ColumnarModeDefault> using Particle1Accessor  = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::input,CM>;
   template<typename CT,typename CM=ColumnarModeDefault> using Particle1Decorator = AccessorTemplate<ContainerId::particle1,CT,ColumnAccessMode::output,CM>;
+
+  using Particle2Range = ObjectRange<ContainerId::particle2>;
+  using Particle2Id = ObjectId<ContainerId::particle2>;
+  using OptParticle2Id = OptObjectId<ContainerId::particle2>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Accessor  = AccessorTemplate<ContainerId::particle2,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,typename CM=ColumnarModeDefault> using Particle2Decorator = AccessorTemplate<ContainerId::particle2,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

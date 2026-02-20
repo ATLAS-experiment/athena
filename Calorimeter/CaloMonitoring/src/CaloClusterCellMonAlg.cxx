@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloClusterCellMonAlg.h"
@@ -9,6 +9,8 @@
 #include "Identifier/Identifier.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "TrigDecisionTool/ChainGroup.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include <algorithm>
 

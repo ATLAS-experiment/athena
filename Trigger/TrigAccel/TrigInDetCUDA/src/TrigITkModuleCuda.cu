@@ -98,7 +98,7 @@ SeedMakingDeviceContext* TrigITkModuleCuda::createSeedMakingContext(int id) cons
   
   cudaMalloc((void **)&p->d_settings,    sizeof(TrigAccel::ITk::SEED_FINDER_SETTINGS));
   cudaMalloc((void **)&p->d_spacepoints, sizeof(TrigAccel::ITk::SPACEPOINT_STORAGE));
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::ITk::DETECTOR_MODEL));
+
   checkError();
   cudaMalloc((void **)&p->d_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE_ITk));
@@ -154,7 +154,7 @@ SeedMakingManagedDeviceContext* TrigITkModuleCuda::createManagedSeedMakingContex
   cudaMallocManaged((void **)&p->m_outputseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
   cudaMallocManaged((void **)&p->m_confirmedseeds, sizeof(TrigAccel::ITk::OUTPUT_SEED_STORAGE));
 
-  cudaMalloc((void **)&p->d_detmodel,    sizeof(TrigAccel::ITk::DETECTOR_MODEL));
+
   checkError();
   cudaMalloc((void **)&p->d_doubletstorage, sizeof(DOUBLET_STORAGE_ITk));
   cudaMalloc((void **)&p->d_doubletinfo, sizeof(DOUBLET_INFO_ITk));
@@ -391,7 +391,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCudaITk* w = new SeedMakingWorkCudaITk(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCudaITk* w = new SeedMakingWorkCudaITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
@@ -420,7 +420,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCudaManagedITk* w = new SeedMakingWorkCudaManagedITk(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCudaManagedITk* w = new SeedMakingWorkCudaManagedITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
@@ -440,7 +440,7 @@ TrigAccel::Work* TrigITkModuleCuda::createWork(int workType, std::shared_ptr<Tri
     
     unsigned int workId = workNum*100;
     
-    GbtsWorkCudaITk* w = new GbtsWorkCudaITk(workId, ctx, data, &m_timeLine);
+    GbtsWorkCudaITk* w = new GbtsWorkCudaITk(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }

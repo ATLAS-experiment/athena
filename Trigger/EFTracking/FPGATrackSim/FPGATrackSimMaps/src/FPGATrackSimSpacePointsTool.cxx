@@ -9,8 +9,9 @@
 #include "FPGATrackSimObjects/FPGATrackSimLogicalEventInputHeader.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "TH1.h"
+
+#include <cmath>
 #include <array>
-#include <vector>
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -149,6 +150,11 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 if (m_filter) m_filteredhits++;
                 else {
                     tower.addHit(hit_in); // add unpaired hit_in
+                    // Also add unpaired hit as single-hit cluster for downstream propagation
+                    FPGATrackSimCluster unpairedCluster;
+                    unpairedCluster.setClusterEquiv(hit_in);
+                    unpairedCluster.push_backHitList(hit_in);
+                    spacepoints.push_back(std::move(unpairedCluster));
                     ATH_MSG_DEBUG("Unpaired hit z = " << hit_in.getZ() << ", r = " << hit_in.getR() << ", phi = " << hit_in.getGPhi() << ", phi module = " << hit_in.getPhiModule() << ", eta module = " << hit_in.getEtaModule());
                 }
             }
@@ -160,7 +166,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
         for (const FPGATrackSimHit& hit_out : hits_outer) {
             bool foundPair=false;
             for (const FPGATrackSimHit& hit_in : hits_inner) {
-                if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                     foundPair=true;
                     break;
                 }
@@ -171,8 +177,8 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
             nextmod[3]-=1; // increment eta module counter
             auto entry2 = m_map.find(nextmod);
             if (entry2!=m_map.end()) {
-                for (auto hit_in : entry2->second.first) {
-                    if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                for (const auto & hit_in : entry2->second.first) {
+                    if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                         foundPair=true;
                         m_adjacent_eta_sp++;
                         break;
@@ -188,7 +194,7 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 auto entry3 = m_map.find(nextphimod);
                 if (entry3!=m_map.end()) {
                     for (const auto & hit_in : entry3->second.first) {
-                        if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                        if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                             foundPair=true;
                             m_adjacent_phi_sp++;
                             break;
@@ -205,8 +211,8 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 next2mod[2]-=1; // increment phi module counter
                 auto entry4 = m_map.find(next2mod);
                 if (entry4!=m_map.end()) {
-                    for (auto hit_in : entry4->second.first) {
-                        if (abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
+                    for (const auto & hit_in : entry4->second.first) {
+                        if (std::abs(hit_in.getGPhi()-hit_out.getGPhi()) < m_phiwindow) {
                             foundPair=true;
                             m_diagonal_sp++;
                             break;
@@ -219,6 +225,11 @@ StatusCode FPGATrackSimSpacePointsTool::makeSpacePoints(FPGATrackSimTowerInputHe
                 if (m_filter) m_filteredhits++;
                 else {
                     tower.addHit(hit_out);
+                    // Also add unpaired hit as single-hit cluster for downstream propagation
+                    FPGATrackSimCluster unpairedCluster;
+                    unpairedCluster.setClusterEquiv(hit_out);
+                    unpairedCluster.push_backHitList(hit_out);
+                    spacepoints.push_back(std::move(unpairedCluster));
                     ATH_MSG_DEBUG("Unpaired hit z = " << hit_out.getZ() << ", r = " << hit_out.getR() << ", phi = " << hit_out.getGPhi() << ", phi module = " << hit_out.getPhiModule() << ", eta module = " << hit_out.getEtaModule());
                 }
             }
@@ -314,8 +325,8 @@ void FPGATrackSimSpacePointsTool::addSpacePoints(FPGATrackSimHit hit_in, FPGATra
     FPGATrackSimCluster sp;
     sp.setClusterEquiv(hit_in);
     sp.push_backHitList(hit_in);
-    sp.push_backHitList(hit_out);
-    spacepoints.push_back(sp);
+    if (m_duplicate) sp.push_backHitList(hit_out);
+    spacepoints.push_back(std::move(sp));
 
 }
 

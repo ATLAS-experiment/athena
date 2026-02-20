@@ -83,10 +83,6 @@ public:
    /// @param refAddress [OUT] converted string form.
    virtual StatusCode convertAddress(const IOpaqueAddress* pAddress, std::string& refAddress) = 0;
 
-   /// Extract/deduce the DB technology from the connection
-   /// string/file specification
-   virtual StatusCode decodeOutputSpec(std::string& connectionSpec, int& outputTech) const = 0;
-
    /// Implement registerCleanUp to register a IAthenaPoolCleanUp to be called during cleanUp.
    virtual StatusCode registerCleanUp(IAthenaPoolCleanUp* cnv) = 0;
 

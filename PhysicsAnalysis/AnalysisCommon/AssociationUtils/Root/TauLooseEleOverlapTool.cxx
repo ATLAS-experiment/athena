@@ -37,6 +37,12 @@ namespace ORUtils
   {
     // Initialize the dR matcher
     m_dRMatcher = std::make_unique<DeltaRMatcher>(m_maxDR, m_useRapidity);
+    ATH_CHECK (m_dRMatcher->setObjectTypes (xAODType::ObjectType::Tau, xAODType::ObjectType::Electron));
+    addSubtool(*m_dRMatcher);
+
+    resetAccessor(m_accessors->m_eleIDAcc, *m_accessors, m_eleID, {.isOptional = !m_eleID.empty()});
+    if (!m_altEleID.empty())
+      resetAccessor(m_accessors->m_altEleIDAcc, *m_accessors, m_altEleID, {.isOptional = true});
 
     return StatusCode::SUCCESS;
   }
@@ -45,22 +51,15 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
     // Check the container types
-    if(typeid(cont1) != typeid(xAOD::TauJetContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::TauJetContainer>)) {
-      ATH_MSG_ERROR("First container arg is not of type TauJetContainer!");
-      return StatusCode::FAILURE;
-    }
-    if(typeid(cont2) != typeid(xAOD::ElectronContainer) &&
-       typeid(cont2) != typeid(ConstDataVector<xAOD::ElectronContainer>)) {
-      ATH_MSG_ERROR("Second container arg is not of type ElectronContainer!");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::TauJetContainer&>(cont1),
-                            static_cast<const xAOD::ElectronContainer&>(cont2)) );
+    ATH_CHECK( checkForXAODContainer<xAOD::TauJetContainer>(cont1, "First container arg is not of type TauJetContainer!") );
+    ATH_CHECK( checkForXAODContainer<xAOD::ElectronContainer>(cont2, "Second container arg is not of type ElectronContainer!") );
+
+    ATH_CHECK( internalFindOverlaps(cont1, cont2) );
     return StatusCode::SUCCESS;
   }
 
@@ -68,30 +67,30 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  findOverlaps(const xAOD::TauJetContainer& taus,
-               const xAOD::ElectronContainer& electrons) const
+  internalFindOverlaps(columnar::Particle1Range taus,
+                       columnar::Particle2Range electrons) const
   {
     ATH_MSG_DEBUG("Removing taus from loose electrons");
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(taus);
-    m_decHelper->initializeDecorations(electrons);
+    initializeDecorations(taus);
+    initializeDecorations(electrons);
 
     // Loop over loose surviving electrons
     for(auto electron : electrons){
-      if(m_decHelper->isRejectedObject(*electron)) continue;
+      if(isRejectedObject(electron)) continue;
 
       // Check the electron ID
       bool passID = false;
-      ATH_CHECK( checkElectronID(*electron, passID) );
+      ATH_CHECK( checkElectronID(electron, passID) );
       if(!passID) continue;
 
       // Loop over surviving taus
       for(auto tau : taus){
-        if(!m_decHelper->isSurvivingObject(*tau)) continue;
+        if(!isSurvivingObject(tau)) continue;
 
         // Test for overlap
-        if(m_dRMatcher->objectsMatch(*electron, *tau)){
+        if(m_dRMatcher->objectsMatch(electron, tau)){
           ATH_CHECK( handleOverlap(tau, electron) );
         }
       }
@@ -104,33 +103,25 @@ namespace ORUtils
   // Loose electron criteria
   //---------------------------------------------------------------------------
   StatusCode TauLooseEleOverlapTool::
-  checkElectronID(const xAOD::Electron& electron, bool& pass) const
+  checkElectronID(columnar::Particle2Id electron, bool& pass) const
   {
-    try {
-      // Try the configured ID string.
-      if(!electron.passSelection(pass, m_eleID)) {
-        // If the ID wasn't found, try the fallback ID if provided.
-        if(!m_altEleID.empty()) {
-          if(!electron.passSelection(pass, m_altEleID)) {
-            ATH_MSG_ERROR("Electron IDs unavailable: " <<
-                          m_eleID << ", " << m_altEleID);
-            return StatusCode::FAILURE;
-          }
-        }
-        else {
-          ATH_MSG_ERROR("Electron ID unavailable: " << m_eleID);
+    auto& acc = *m_accessors;
+    // Try the configured ID string.
+    if (acc.m_eleIDAcc.isAvailable(electron)) {
+      pass = acc.m_eleIDAcc(electron);
+    } else {
+      // If the ID wasn't found, try the fallback ID if provided.
+      if(!m_altEleID.empty()) {
+        if (acc.m_altEleIDAcc.isAvailable(electron)) {
+          pass = acc.m_altEleIDAcc(electron);
+        } else {
+          ATH_MSG_ERROR("Electron IDs unavailable: " <<
+                        m_eleID << ", " << m_altEleID);
           return StatusCode::FAILURE;
         }
-      }
-    }
-    // Workaround for derivations with "int" type ID flags.
-    catch(const SG::ExcAuxTypeMismatch& e) {
-      SG::ConstAccessor<int> acc(m_eleID);
-      if(acc.isAvailable(electron)) {
-        pass = acc(electron);
-      }
-      else {
-        throw;
+      } else {
+        ATH_MSG_ERROR("Electron ID unavailable: " << m_eleID);
+        return StatusCode::FAILURE;
       }
     }
 

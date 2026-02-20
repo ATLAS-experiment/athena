@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -10,7 +10,8 @@
 #include "SimpleTestClass.h"
 #include "TestClassPrimitives.h"
 #include "TestClassVectors.h"
-#include "TestClassSimpleContainers.h"
+#include "TestClassSTLContainers.h"
+#include "TestClassSTLContainersExt.h"
 
 class Token;
 
@@ -28,8 +29,6 @@ namespace pool {
     void write( pool::DbType storageType );
     void read();
     void readCollections();
-    void updateObjects();
-    void readBackUpdatedObjects();
     void clearCache();
     void readFileSizes();
 
@@ -39,11 +38,11 @@ namespace pool {
     std::string           m_fileName2;
     int                   m_events;
     int                   m_eventsToCommitAndHold;
-    std::vector< Token* > m_tokens;
-    std::vector< SimpleTestClass > m_simpleTestClass;
-    std::vector< TestClassPrimitives > m_testClassPrimitives;
-    std::vector< TestClassVectors > m_testClassVectors;
-    std::vector< TestClassSimpleContainers > m_testClassSimpleContainers;
+    std::vector< Token* >                     m_tokens;
+    std::vector< SimpleTestClass >            m_simpleTestClass;
+    std::vector< TestClassPrimitives >        m_testClassPrimitives;
+    std::vector< TestClassVectors >           m_testClassVectors;
+    std::vector< TestClassSTLContainers >     m_testClassSTLContainers;
   };
 
 }

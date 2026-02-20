@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -13,17 +13,9 @@
 
 /** Constructor **/
 ISF::LLPTruthStrategy::LLPTruthStrategy(const std::string& t, const std::string& n, const IInterface* p) :
-  base_class(t,n,p),
-  m_passProcessCodeRangeLow(0),
-  m_passProcessCodeRangeHigh(0),
-  m_passProcessCategory(0)
+  base_class(t,n,p)
 {
-  declareProperty("PassProcessCodeRangeLow" , m_passProcessCodeRangeLow=200);
-  declareProperty("PassProcessCodeRangeHigh", m_passProcessCodeRangeHigh=299);
-  declareProperty("PassProcessCategory"     , m_passProcessCategory=9);
-  declareProperty("Regions"                 , m_regionListProperty );
 }
-
 
 // Athena algtool's Hooks
 StatusCode  ISF::LLPTruthStrategy::initialize()

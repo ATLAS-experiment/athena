@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -39,9 +39,9 @@ private:
     QString m_fileSelectDir;
     QString m_screenshotDir;
     QString m_authLog;
-    QDialogButtonBox* m_buttonBox;
-    QTabWidget*       m_tabWidget;
-    QPushButton*      m_okButton;
+    QDialogButtonBox* m_buttonBox{};
+    QTabWidget*       m_tabWidget{};
+    QPushButton*      m_okButton{};
 
     bool checkBoxState();
     void closeEvent(QCloseEvent *event);

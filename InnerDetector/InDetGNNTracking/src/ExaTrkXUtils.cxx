@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ExaTrkXUtils.hpp"
@@ -148,7 +148,7 @@ void CCandWalk(
                 used_hits[hit_id] = true;
                 track.push_back(hit_id);
             }
-            sub_graphs.push_back(track);
+            sub_graphs.push_back(std::move(track));
         }
     }
 
@@ -156,7 +156,7 @@ void CCandWalk(
     tracks.clear();
     for (const auto& track : sub_graphs) {
         std::vector<uint32_t> this_track{track.begin(), track.end()};
-        tracks.push_back(this_track);
+        tracks.push_back(std::move(this_track));
     }
 }
 
@@ -193,7 +193,7 @@ std::vector<std::vector<vertex_t>> getSimplePath(const UndirectedGraph& G) {
                 vertex_t hit_id = boost::get(boost::vertex_name, G, node);
                 track.push_back(hit_id);
             }
-            final_tracks.push_back(track);
+            final_tracks.push_back(std::move(track));
         }
     }
     return final_tracks;
@@ -275,12 +275,12 @@ std::vector<std::vector<vertex_t>> buildRoads(
                 for (int nh : next_hits) {
                     std::vector<int> pp_extended = pp;
                     pp_extended.push_back(nh);
-                    new_path.push_back(pp_extended);
+                    new_path.push_back(std::move(pp_extended));
                 }
             }
         }
 
-        path = new_path;
+        path = std::move(new_path);
         if (is_all_done) break;
     }
     return path;

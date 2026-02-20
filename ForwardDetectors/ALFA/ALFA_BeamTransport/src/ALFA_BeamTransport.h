@@ -57,10 +57,6 @@ public:
   /** standard Athena-Algorithm method */
   StatusCode finalize();
 
-  /**convert unit MeV to GeV for energy and momenta*/
-  void MeVToGeV(HepMC::GenEvent& evt);
-  /**convert GeV to MeV for HepMC event record*/
-  void GeVToMeV(HepMC::GenEvent& evt);
   /**Selects particles for beam transported
   Sets event status code of outgoing particles from generator to status != 1*/
   int SelectParticles(HepMC::GenEvent* evt);

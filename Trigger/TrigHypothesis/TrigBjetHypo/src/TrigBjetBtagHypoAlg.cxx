@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigBjetBtagHypoAlg.h"
@@ -44,7 +44,7 @@ StatusCode TrigBjetBtagHypoAlg::execute( const EventContext& context ) const {
   CHECK( retrievePreviousDecisionContainer( context,prevDecisionContainer ) );
   ATH_MSG_DEBUG( "Running with "<< prevDecisionContainer->size() <<" previous decisions");
 
-  // Retrive Precision tracks from Event Views. We get them all in this way!
+  // Retrieve Precision tracks from Event Views. We get them all in this way!
   ElementLinkVector< xAOD::TrackParticleContainer > trackELs;
   CHECK( retrieveObjectFromEventView( context,trackELs,m_trackKey,prevDecisionContainer ) );
   ATH_MSG_DEBUG( "Retrieved " << trackELs.size() << " precision tracks..." );

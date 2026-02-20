@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H6COLDTCMod0ChannelMap.h"
@@ -61,7 +61,7 @@ G4int LArG4H6COLDTCMod0ChannelMap::getRBin(const G4ThreeVector& aPoint) const
   std::cout<<"LArG4H6COLDTCMod0ChannelMap::getRBin: "<<radius<<" / "<<index-1<<std::endl;
 #endif
   return index < m_rBins.size()
-    ? static_cast<G4int> (index-1)
+    ? static_cast<G4int> (index)-1
     : -1;
 }
 

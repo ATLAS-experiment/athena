@@ -56,7 +56,7 @@ void encodeSurface(xAOD::SurfaceType& surfaceType,
   }
 
   Acts::RotationMatrix3 lRotation =
-      surface->transform(geoContext).rotation();
+      surface->localToGlobalTransform(geoContext).rotation();
   Acts::Vector3 eulerAngles = lRotation.eulerAngles(2, 1, 0);
   Acts::Vector3 lTranslation = surface->center(geoContext);
 

@@ -21,6 +21,7 @@
 #include "../TruthTrackMatchingTool.h"
 #include "../EFTrackMatchingTool.h"
 #include "../DeltaRMatchingTool.h"
+#include "../StableDeltaRMatchingTool.h"
 #include "../PlotsDefinitionSvc.h"
 #include "../JsonPlotsDefReadTool.h"
 #include "../TrackAnalysisInfoWriteTool.h"
@@ -46,6 +47,9 @@ DECLARE_COMPONENT( IDTPM::TrackTruthMatchingTool )
 DECLARE_COMPONENT( IDTPM::TruthTrackMatchingTool )
 DECLARE_COMPONENT( IDTPM::EFTrackMatchingTool )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trk )
+DECLARE_COMPONENT( IDTPM::StableDeltaRMatchingTool_trk )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_trkTruth )
+DECLARE_COMPONENT( IDTPM::StableDeltaRMatchingTool_trkTruth )
 DECLARE_COMPONENT( IDTPM::DeltaRMatchingTool_truthTrk )
+DECLARE_COMPONENT( IDTPM::StableDeltaRMatchingTool_truthTrk )
 DECLARE_COMPONENT( IDTPM::TrackAnalysisInfoWriteTool )

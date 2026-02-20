@@ -127,6 +127,9 @@ Trk::PlaneSurface::PlaneSurface(
     std::shared_ptr<const Trk::SurfaceBounds> tbounds)
     : Trk::Surface(htrans), m_bounds(std::move(tbounds)) {}
 
+// Out-of-line dtor.
+Trk::PlaneSurface::~PlaneSurface() = default;
+
 bool
 Trk::PlaneSurface::operator==(const Trk::Surface& sf) const
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -229,7 +229,7 @@ namespace ShowerLib {
 		  return nullptr;
 	  }
 
-	  newlib->m_detector = det;
+	  newlib->m_detector = std::move(det);
 	  newlib->m_particle = part;
 	  
 	  newlib->m_xrodcent = xrodcent;
@@ -239,7 +239,7 @@ namespace ShowerLib {
 	  newlib->m_filled = false;
 
 	  std::getline(filestr,instr);
-	  newlib->m_comment = instr;
+	  newlib->m_comment = std::move(instr);
 
 	  return newlib;
   }

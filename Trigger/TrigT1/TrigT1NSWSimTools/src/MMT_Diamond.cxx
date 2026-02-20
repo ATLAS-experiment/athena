@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigT1NSWSimTools/MMT_Diamond.h"
+#include "MMT_Diamond.h"
 
 
 namespace {
@@ -27,17 +27,19 @@ MMT_Diamond::MMT_Diamond(const int diamXthreshold, const bool uv, const int diam
     m_roadSizeDownUV = olapStereoDown;
 }
 
-void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge) const {
+void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge, const bool isEta1) const {
   const char sec = (isLarge) ? 'L' : 'S';
   /*
-   * This computation is done as follows: 1024 X roads
+   * This computation is done as follows: 1024 X roads, from 8192 strips in total (5120 for |eta|==1 and 3072 for |eta|==2)
    * MML: for i in [0,8] -> i*6 UV roads. Then: (1024-9)*6*9 UV roads
    * MMS: for i in [0,6] -> i*6 UV roads. Then: (1024-7)*6*7 UV roads
    */
-  const unsigned int vecRoads = (isLarge) ? 56050 : 43864;
+  const unsigned int vecRoads = 35000;
   roads.reserve(vecRoads);
-  int nroad = 8192/this->getRoadSize();
+  const int nroad = 8192/m_roadSize;
   for (int i = 0; i < nroad; ++i) {
+    const int div = 5120/m_roadSize;
+    if((isEta1 && i>div) || (!isEta1 && i<=div)) continue;
     roads.emplace_back(sec, m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV, m_xthr, m_uvthr, i);
 
     /*
@@ -64,7 +66,7 @@ void MMT_Diamond::createRoads(std::vector<MMT_Road>& roads, const bool isLarge) 
 void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std::vector<MMT_Road>& roads, std::vector<slope_t>& diamondSlopes, const int sectorPhi) const {
 
   // Comparison with lambda function (easier to implement)
-  std::sort(hits.begin(), hits.end(), [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
+  std::ranges::sort(hits, [](const auto &h1, const auto &h2){ return h1->getBC() < h2->getBC(); });
   const int bc_start = hits.front()->getBC();
   const int bc_end = hits.front()->getBC() + 16;
   ATH_MSG_DEBUG("Window Start: " << bc_start << " - Window End: " << bc_end);
@@ -103,7 +105,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         }
         if (vmm_same.size() > 1) {
           to_erase.clear();
-          std::sort(vmm_same.begin(), vmm_same.end(), [](const std::pair<int, float>& p1, const std::pair<int, float>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(vmm_same, {}, &std::pair<int, float>::second);
           for (auto pair: vmm_same) to_erase.push_back(pair.first);
           // reverse and erase
           std::sort(to_erase.rbegin(), to_erase.rend());
@@ -126,7 +128,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
           // priority encode the hits by channel number; remember hits 8+
           to_erase.clear();
 
-          std::sort(addc_same.begin(), addc_same.end(), [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) { return p1.second < p2.second; });
+          std::ranges::sort(addc_same, {}, &std::pair<int, int>::second);
           for (unsigned int it = 8; it < addc_same.size(); it++) to_erase.push_back(addc_same[it].first);
 
           // reverse and erase
@@ -154,7 +156,7 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         for (const auto &hit: road.getHitVector()) {
           bcidVec.push_back(hit.getBC());
         }
-        std::sort(bcidVec.begin(), bcidVec.end());
+        std::ranges::sort(bcidVec);
 
         // evaluating mode of the BCID of the hits in the diamond
         // default setting in the firmware is the mode of the hits's bcid in the diamond
@@ -175,19 +177,16 @@ void MMT_Diamond::findDiamonds(std::vector<std::shared_ptr<MMT_Hit> >& hits, std
         slope_t slope;
         slope.BC = bcidMode;
         slope.totalCount = road.countHits();
-        slope.realCount = road.countRealHits();
         slope.iRoad = road.iRoadx();
         slope.iRoadu = road.iRoadu();
         slope.iRoadv = road.iRoadv();
-        slope.uvbkg = road.countUVHits(true); // the bool in the following 4 functions refers to background/noise hits
-        slope.xbkg = road.countXHits(true);
-        slope.uvmuon = road.countUVHits(false);
-        slope.xmuon = road.countXHits(false);
+        slope.xCount = road.countXHits();
+        slope.uCount = road.countUHits();
         slope.age = slope.BC - bc_start;
         slope.mxl = road.mxl();
-        slope.my = road.avgSofX(); // defined as my in ATL-COM-UPGRADE-2015-033
-        slope.uavg = road.avgSofUV(2,4);
-        slope.vavg = road.avgSofUV(3,5);
+        slope.my = road.avgSofXUV('X'); // defined as my in ATL-COM-UPGRADE-2015-033
+        slope.uavg = road.avgSofXUV('U');
+        slope.vavg = road.avgSofXUV('V');
         slope.mx = (slope.uavg-slope.vavg)/(2.*tan_stereo_angle);
         const double theta = std::atan(std::sqrt(std::pow(slope.mx,2) + std::pow(slope.my,2)));
         slope.theta = (slope.my > 0.) ? theta : M_PI - theta;

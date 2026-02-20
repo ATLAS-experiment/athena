@@ -26,18 +26,6 @@
 // For a find in the vector
 #include <algorithm>
 
-// Constructor
-DerivationFramework::TruthDecayCollectionMaker::TruthDecayCollectionMaker(const std::string& t,
-                                                                          const std::string& n,
-                                                                          const IInterface* p)
-  : base_class(t,n,p)
-{
-}
-
-// Destructor
-DerivationFramework::TruthDecayCollectionMaker::~TruthDecayCollectionMaker() {
-}
-
 // Athena initialize
 StatusCode DerivationFramework::TruthDecayCollectionMaker::initialize()
 {

@@ -3,12 +3,10 @@
 */
 
 #include "G4CosmicFilter/G4CosmicAndFilter.h"
-#include "MCTruth/TrackHelper.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "TrackRecord/TrackRecordCollection.h"
 #include "G4RunManager.hh"
 #include "G4Event.hh"
-
-#include "StoreGate/ReadHandle.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -23,13 +21,20 @@ namespace G4UA
   {
   }
 
-  void G4CosmicAndFilter::EndOfEventAction(const G4Event*)
+  void G4CosmicAndFilter::EndOfEventAction(const G4Event* event)
   {
 
     m_report.ntot++;
     int counter(0);
-    SG::ReadHandle <TrackRecordCollection> coll(m_config.collectionName);
-    if (! coll.isValid())
+    auto find_coll = [&] (const std::string& name) -> TrackRecordCollection* {
+      auto* eventInfo = static_cast<AtlasG4EventUserInfo*>( event->GetUserInformation());
+      return eventInfo ?
+        eventInfo->GetHitCollectionMap()->Find<TrackRecordCollection>(name) :
+        nullptr;
+    };
+
+    auto* coll = find_coll(m_config.collectionName);
+    if (!coll)
       {
         ATH_MSG_WARNING( "Cannot retrieve TrackRecordCollection " << m_config.collectionName);
       }
@@ -45,8 +50,9 @@ namespace G4UA
         return;
       }
 
-    SG::ReadHandle <TrackRecordCollection> coll2(m_config.collectionName2);
-    if (! coll2.isValid())
+    auto* coll2 = find_coll(m_config.collectionName2);
+
+    if (!coll2)
       {
         ATH_MSG_INFO( "Cannot retrieve TrackRecordCollection " << m_config.collectionName2 );
       }

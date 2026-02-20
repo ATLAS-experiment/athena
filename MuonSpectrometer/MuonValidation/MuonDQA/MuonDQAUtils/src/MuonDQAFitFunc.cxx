@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -9,9 +9,11 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
 #include "MuonDQAUtils/MuonDQAFitFunc.h"
-
 #include "TF1.h"
-#include "TH1.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TProfile.h"
+#include "TProfile2D.h"
 
 namespace {
   constexpr double Zmass = 91.1876;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_CPMSIMMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_CPMSIMMONITORALGORITHM_H
@@ -10,7 +10,7 @@
 #include "TrigT1CaloToolInterfaces/IL1CPMTools.h"
 #include "TrigT1CaloToolInterfaces/IL1CPCMXTools.h"
 #include "TrigT1CaloMonitoringTools/ITrigT1CaloMonErrorTool.h"
-#include "xAODTrigL1Calo/TriggerTower.h"
+#include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODTrigL1Calo/CPMTowerContainer.h" 
 #include "xAODTrigL1Calo/CMXCPTobContainer.h"
 #include "xAODTrigL1Calo/CMXCPHitsContainer.h"
@@ -27,6 +27,7 @@
 #include "TrigT1Interfaces/CoordinateRange.h"
 #include "TrigT1Interfaces/CPRoIDecoder.h"
 #include "TrigT1CaloUtils/TriggerTowerKey.h"
+#include "TrigConfInterfaces/ITrigConfigSvc.h"
 
 #include "TrigConfData/L1Menu.h"
 

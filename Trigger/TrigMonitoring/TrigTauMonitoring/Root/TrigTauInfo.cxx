@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauMonitoring/TrigTauInfo.h"
-#include <ranges>
+#include <regex>
+#include <ranges> //std::views::split
 #include <cstdint>
 
 TrigTauInfo::TrigTauInfo(const std::string& trigger)
@@ -57,7 +58,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
     std::vector<std::regex*> all_regexes = {&tau_rgx, &elec_rgx, &muon_rgx, &gamma_rgx, &jet_rgx, &met_rgx, &l1_rgx, &ditauomni_rgx};
 
     std::regex tau_type_rgx("^(ptonly|tracktwoMVA|tracktwoMVABDT|tracktwoLLP|trackLRT)$");
-    std::regex tau_ID_rgx("^(perf|idperf|veryloose.*|loose.*|medium.*|tight.*)$");
+    std::regex tau_ID_rgx("^(idperf|noperf|perfcore|perfiso|perf|veryloose.*|loose.*|medium.*|tight.*)$");
 
     std::smatch match;
     std::regex_token_iterator<std::string::iterator> rend;
@@ -80,10 +81,25 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 // HLT Tau ID
                 itr = find_if(leg.begin(), leg.end(), [tau_ID_rgx](const std::string& s) { return std::regex_match(s, tau_ID_rgx); });
                 std::string tau_id = itr != leg.end() ? *itr : "";
-                if(tau_id.starts_with( "veryloose")) tau_id = tau_id.substr(9);
-                else if(tau_id.starts_with( "loose")) tau_id = tau_id.substr(5);
-                else if(tau_id.starts_with( "medium")) tau_id = tau_id.substr(6);
-                else if(tau_id.starts_with( "tight")) tau_id = tau_id.substr(5);
+                if(tau_id.starts_with("veryloose")) tau_id = tau_id.substr(9);
+                else if(tau_id.starts_with("loose")) tau_id = tau_id.substr(5);
+                else if(tau_id.starts_with("medium")) tau_id = tau_id.substr(6);
+                else if(tau_id.starts_with("tight")) tau_id = tau_id.substr(5);
+            
+                // The WP is a variation (e.g. "mediumvar2GNTauDev1")
+                if(tau_id.starts_with("var")) {
+                    std::size_t i = 3; // Take out the "var" prefix
+                    
+                    // Now find the variation number
+                    while(i < tau_id.size() && std::isdigit(static_cast<unsigned char>(tau_id[i]))) i++;
+
+                    tau_id = tau_id.substr(i);
+                }
+
+                // Get the perf-selection suffix
+                if(tau_id.starts_with("pc")) tau_id = tau_id.substr(2);
+                else if(tau_id.starts_with("pi")) tau_id = tau_id.substr(2);
+                else if(tau_id.starts_with("np")) tau_id = tau_id.substr(2);
 
                 // Override for the old trigger names
                 if(tau_id == "RNN") {
@@ -91,7 +107,7 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                     if(type == "tracktwoLLP" || type == "trackLRT") tau_id = "RNNLLP";
                 }
 
-                // Replacements (this is temprary, the entire TrigTauInfo class will be removed soon, and all this will be handled centrally in Python using the already available infrastructure)
+                // Replacements (this is temporary, the entire TrigTauInfo class will be removed soon, and all this will be handled centrally in Python using the already available infrastructure)
                 if(tau_id == "DS") tau_id = "DeepSet";
                 else if(tau_id == "GNT") tau_id = "GNTau";
 
@@ -158,22 +174,23 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
         // Get all individual L1 TAU items
         std::regex_token_iterator<std::string::iterator> rgx_iter(m_L1Item.begin(), m_L1Item.end(), l1_tau_rgx);
         while(rgx_iter != rend) {
-            std::string s = *rgx_iter;
-            std::regex_match(s, match, l1_tau_rgx);
-            size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
-            std::string item_type = match[2].str(); // e, j, c, or ""
-            int threshold = std::stoi(match[3].str());
-            std::string item_isolation = match[4].str(); // "", L, M, T, HL, HM, HT, IM, H
-            
-            // Set the Phase 1 thresholds to -1
-            if(remove_L1_phase1_thresholds && (item_type == "e" || item_type == "j" || item_type == "c")) threshold = -1;
-
-            for(size_t j = 0; j < multiplicity; j++) {
-                m_tauL1Items.push_back(s.substr(match[1].str().size()));
-                m_tauL1Thr.push_back(threshold);
-                m_tauL1Type.push_back(item_type + "TAU");
-                m_tauL1Iso.push_back(item_isolation);
-                m_tauL1ThresholdPattern.push_back(-1);
+            const std::string & s = *rgx_iter;
+            if (std::regex_match(s, match, l1_tau_rgx)){
+              size_t multiplicity = match[1].str() == "" ? 1 : std::stoi(match[1].str());
+              std::string item_type = match[2].str(); // e, j, c, or ""
+              int threshold = std::stoi(match[3].str());
+              std::string item_isolation = match[4].str(); // "", L, M, T, HL, HM, HT, IM, H
+              
+              // Set the Phase 1 thresholds to -1
+              if(remove_L1_phase1_thresholds && (item_type == "e" || item_type == "j" || item_type == "c")) threshold = -1;
+  
+              for(size_t j = 0; j < multiplicity; j++) {
+                  m_tauL1Items.push_back(s.substr(match[1].str().size()));
+                  m_tauL1Thr.push_back(threshold);
+                  m_tauL1Type.push_back(item_type + "TAU");
+                  m_tauL1Iso.push_back(item_isolation);
+                  m_tauL1ThresholdPattern.push_back(-1);
+              }
             }
             rgx_iter++;
         }

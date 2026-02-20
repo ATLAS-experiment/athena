@@ -126,8 +126,8 @@ StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, He
       {
          HepMC::GenVertexPtr end_vtx = HepMC::newGenVertexPtr();
          end_vtx->set_position(vtxp->position());
-         end_vtx->add_particle_in(genpart);
-         event->add_vertex(end_vtx);
+         end_vtx->add_particle_in(std::move(genpart));
+         event->add_vertex(std::move(end_vtx));
          return StatusCode::SUCCESS;
       }
 

@@ -94,8 +94,13 @@ const SG::IAuxTypeVector* AuxStoreBase::getVector(SG::auxid_t auxid) const {
     return nullptr;
   }
 
+  // Let the AuxTypeVector object know that the std::vector that it manages
+  // has changed.   (This updates the cached span.)
+  SG::IAuxTypeVector* vec = m_data.m_vecs[auxid].get();
+  vec->resize (vec->size());
+
   // Return the pointer to the object:
-  return m_data.m_vecs[auxid].get();
+  return vec;
 }
 
 const SG::auxid_set_t& AuxStoreBase::getAuxIDs() const {

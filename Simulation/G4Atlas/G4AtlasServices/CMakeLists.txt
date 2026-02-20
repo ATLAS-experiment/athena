@@ -20,7 +20,7 @@ atlas_add_library( G4AtlasServices
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}  ${ROOT_INCLUDE_DIRS} 
                    PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} ${ROOT_LIBRARIES}
 		     GaudiKernel AthenaBaseComps 
-		     G4AtlasInterfaces G4AtlasToolsLib G4PhysicsLists PathResolver MagFieldElements)
+		     G4AtlasInterfaces G4AtlasToolsLib G4RunManagement G4PhysicsLists PathResolver MagFieldElements)
 set_target_properties( G4AtlasServices PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )
 
 #test G4AtlasFieldServices

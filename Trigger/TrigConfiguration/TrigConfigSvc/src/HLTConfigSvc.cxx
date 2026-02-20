@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "HLTConfigSvc.h"
+#include "TrigConfMD5.h"
+#include "TrigConfSvcHelper.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -10,9 +14,6 @@
 #include "TrigConfIO/JsonFileLoader.h"
 #include "TrigConfIO/TrigDBMenuLoader.h"
 #include "TrigConfInterfaces/IJobOptionsSvc.h"
-
-#include "HLTConfigSvc.h"
-#include "TrigConfMD5.h"
 
 #include <memory>
 
@@ -28,8 +29,14 @@ StatusCode TrigConf::HLTConfigSvc::writeConfigToDetectorStore()
   if (m_inputType == "DB") {
     // db menu loader
     TrigConf::TrigDBMenuLoader dbloader(m_dbConnection);
+    std::string crest_server("");
+    std::string crest_api("");
+    std::string dbname("");
+    if(isCrestConnection(m_dbConnection, crest_server, crest_api, dbname)) {
+      dbloader.setCrestTrigDB(dbname);
+      dbloader.setCrestConnection(crest_server, crest_api);
+    }
     dbloader.setLevel(TrigConf::MSGTC::WARNING);
-
     ATH_CHECK( dbloader.loadHLTMenu(m_smk, *hltmenu) );
   }
   else if (m_inputType == "FILE") {

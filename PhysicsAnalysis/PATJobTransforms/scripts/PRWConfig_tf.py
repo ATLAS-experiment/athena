@@ -1,47 +1,40 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## Transform for making PRW Config files
-# @version $Id: PRWConfig_tf.py  ... author: will $ 
+# @version $Id: PRWConfig_tf.py  ... author: will $
 
-import argparse
-import os.path
 import sys
 import time
-import traceback
-
-import logging
 
 # Setup core logging here
 from PyJobTransforms.trfLogger import msg
-msg.info('logging set in %s' % sys.argv[0])
+msg.info('logging set in %s', sys.argv[0])
 
-from PyJobTransforms.trfExitCodes import trfExit
 from PyJobTransforms.transform import transform
 from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
-import PyJobTransforms.trfExceptions as trfExceptions
 import PyJobTransforms.trfArgClasses as trfArgClasses
 
 @stdTrfExceptionHandler
 @sigUsrStackTrace
 def main():
-    
-    msg.info('This is %s' % sys.argv[0])
-    
-    trf = getTransform()    
+
+    msg.info('This is %s' , sys.argv[0])
+
+    trf = getTransform()
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()
 
-    msg.info("%s stopped at %s, trf exit code %d" % (sys.argv[0], time.asctime(), trf.exitCode))
+    msg.info("%s stopped at %s, trf exit code %d", sys.argv[0], time.asctime(), trf.exitCode)
     sys.exit(trf.exitCode)
 
 ## Get the base transform with all arguments added
 def getTransform():
-    trf = transform(executor = athenaExecutor(name = 'athena', 
-                                              skeletonFile='PATJobTransforms/skeleton.AODtoNTUP_PILEUP.py'))
+    trf = transform(executor = athenaExecutor(name = 'athena',
+                                              skeletonCA='PATJobTransforms.AODtoNTUP_PILEUP_Skeleton'))
 
     trf.parser.defineArgGroup("PRWConfig_tf","PRWConfig_tf options")
 
@@ -51,7 +44,7 @@ def getTransform():
     trf.parser.add_argument("--outputNTUP_PILEUPFile",type=trfArgClasses.argFactory(trfArgClasses.argNTUPFile,io='output',type='hist',multipleOK=False),help="The output filename",group="PRWConfig_tf")
 
     return trf
-    
+
 
 if __name__ == '__main__':
     main()

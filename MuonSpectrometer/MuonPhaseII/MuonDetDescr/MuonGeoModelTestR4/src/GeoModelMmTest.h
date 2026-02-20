@@ -7,7 +7,7 @@
 #include <AthenaBaseComps/AthHistogramAlgorithm.h>
 #include <set>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
-#include <ActsGeometryInterfaces/ActsGeometryContext.h>
+#include <ActsGeometryInterfaces/GeometryContext.h>
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/IdentifierBranch.h>
 #include <MuonTesterTree/ThreeVectorBranch.h>
@@ -32,7 +32,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-      SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+      SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
       /// Set of stations to be tested
       std::set<Identifier> m_testStations{};
@@ -45,7 +45,7 @@ class GeoModelMmTest : public AthHistogramAlgorithm{
       const MuonDetectorManager* m_detMgr{nullptr};
      
       StatusCode dumpToTree(const EventContext& ctx,
-                            const ActsGeometryContext& gctx, 
+                            const ActsTrk::GeometryContext& gctx, 
                             const MmReadoutElement* readoutEle);
      
       MuonVal::MuonTesterTree m_tree{"MmGeoModelTree", "GEOMODELTESTER"};

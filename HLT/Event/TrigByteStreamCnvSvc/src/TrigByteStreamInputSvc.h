@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBYTESTREAMINPUTSVC_H
@@ -11,6 +11,7 @@
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "EFInterfaceSvc.h"
 #include <memory.h>
 
 // Forward declarations
@@ -28,6 +29,9 @@ public:
   /// Standard destructor
   virtual ~TrigByteStreamInputSvc();
 
+  // Helper for swapping between the 2 interfaces enum 
+  enum class NextEventStatus { OK, NO_EVENT, STOP, ERROR };
+  
   // ------------------------- Service methods --------------------------------
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
@@ -40,6 +44,7 @@ public:
 private:
   // ------------------------- Service handles ---------------------------------
   ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc {this, "ROBDataProvider", "ROBDataProviderSvc"};
+  ServiceHandle<EFInterfaceSvc> m_efInterfaceSvc {this, "EFInterfaceSvc", "", "Online service managing EF interface with Dataflow"};
   ServiceHandle<StoreGateSvc> m_evtStore {this, "EventStore", "StoreGateSvc"};
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "" , "Monitoring tool"};
 
@@ -58,6 +63,7 @@ private:
 
   SG::SlotSpecificObj<EventCache> m_eventsCache; //!< Cache of RawEvent pointer per event slot
   uint16_t m_maxLB{0}; //!< Maximum lumi block number seen so far, used for monitoring
+  bool m_hasEFInterface{false}; //! Flag to select use of legacy or EF interface
 };
 
 #endif // TRIGBYTESTREAMINPUTSVC_H

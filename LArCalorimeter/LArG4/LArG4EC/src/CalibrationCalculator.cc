@@ -101,10 +101,8 @@ namespace LArG4 {
 
       if ( a_process == kEnergyAndID  ||  a_process == kOnlyID ) {
         // Calculate the identifier.
-        //(void)m_geometryCalculator->Process( a_step );
-        // identifier =  m_geometryCalculator->identifier();
         std::vector<LArHitData> hdata;
-        m_geometryCalculator->Process( a_step, hdata );
+        (void)m_geometryCalculator->Process( a_step, hdata );
         identifier =  hdata[0].id;
       } else
         identifier = LArG4Identifier();

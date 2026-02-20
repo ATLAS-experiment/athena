@@ -31,6 +31,9 @@
 #include "InDetSimEvent/SiHit.h"
 #include "SiDigitization/SiSurfaceCharge.h"
 
+namespace HGTD {
+  constexpr unsigned int TOA_OVERLFLOW_MASK = 0x80; 
+}
 
 class HGTD_ID;
 
@@ -67,7 +70,7 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
    * @param [in] element  Detector element (module) of the activated sensor.
    * @param [in] hit_time Time as measured by the LGAD sensor
    *
-   * @return 7-bit TOA ALTIROC code which is stored in the ALTIROC RDO.
+   * @return 8-bit TOA ALTIROC code which is stored in the ALTIROC RDO.
    */
    uint8_t Time2TOA(const InDetDD::SolidStateDetectorElementBase* element, float   hit_time) const;
 
@@ -81,22 +84,34 @@ HGTD_TdcCalibrationTool(const std::string& type, const std::string& name,
    */
   float   TOA2Time(const InDetDD::SolidStateDetectorElementBase* element, uint8_t toa) const;
 
+  /**
+  * @brief Check for the overflow flag within TOA code, which indicates an out of range measurement.
+  *
+  * @param [in] toa     8-bit TOA code as produced by ALTIROC
+  *
+  * @return True if overflow bit is set, false otherwise.
+  */
+  bool   checkTOAoverflow(uint8_t toa) const {
+    return toa & HGTD::TOA_OVERLFLOW_MASK;
+  }
+
+
   private:
 
-  FloatProperty m_active_window{this, "PS_ActiveRange", 2.5 * Athena::Units::ns,
-    "ALTIROC PS active range (ns)" };
+  FloatProperty m_active_window{this, "PS_ActiveRange", 2.5 * Athena::Units::nanosecond,
+    "ALTIROC PS active range" };
 
-  FloatProperty m_lhc_rise_edge{this, "LHC_RiseEdge",12.5 * Athena::Units::ns,
-    "LHC clock rise edge time (ns)" };
+  FloatProperty m_lhc_rise_edge{this, "LHC_RiseEdge",12.5 * Athena::Units::nanosecond,
+    "LHC clock rise edge time" };
     
-  FloatProperty m_ps_large_step{this, "PS_LargeStep", 1.562 * Athena::Units::ns,
-    "ALTIROC PS large step (ns)"};
+  FloatProperty m_ps_large_step{this, "PS_LargeStep", 1.562 * Athena::Units::nanosecond,
+    "ALTIROC PS large step"};
     
-  FloatProperty m_ps_small_step{this, "PS_SmallStep", 0.097 * Athena::Units::ns,
-    "ALTIROC PS small step (ns)"};
+  FloatProperty m_ps_small_step{this, "PS_SmallStep", 9.7 * Athena::Units::picosecond,
+    "ALTIROC PS small step"};
 
-  FloatProperty m_toa_bin_size {this, "TOABinSize", 0.02 * Athena::Units::ns, 
-    "Nominal TDC TOA bin size (ns)"};
+  FloatProperty m_toa_bin_size {this, "TOABinSize", 20 * Athena::Units::picosecond, 
+    "Nominal TDC TOA bin size"};
 
 };
 

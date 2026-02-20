@@ -31,20 +31,20 @@ class FPGATrackSimHit;
 /**
  * A road finder returns a vector of roads given a vector of hits.
  *
- * Note that the roads are owned by the tool, and are cleared at each successive
- * call of getRoads().
+ * Note that the roads are owned by the caller after getRoads() completes.
+ * This allows for move semantics when recording to StoreGate.
  */
 
 
 class IFPGATrackSimRoadFinderTool : virtual public IAlgTool
 {
     public:
-        DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 2, 0);
-        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) = 0;
+        DeclareInterfaceID(IFPGATrackSimRoadFinderTool, 3, 0);
+        virtual StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads) = 0;
         virtual int getSubRegion() const = 0;
 
         StatusCode getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits,
-                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads,
+                        std::vector<FPGATrackSimRoad> &roads,
                         std::vector<FPGATrackSimTruthTrack> const &truthtracks)
         {
             m_truthtracks = truthtracks;

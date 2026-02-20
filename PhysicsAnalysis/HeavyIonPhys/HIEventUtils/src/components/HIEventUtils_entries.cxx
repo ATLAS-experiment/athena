@@ -4,6 +4,8 @@
 #include "HIEventUtils/HITowerWeightTool.h"
 #include "HIEventUtils/HIEventShapeMapTool.h"
 #include "HIEventUtils/ZdcRecTool.h"
+#include "HIEventUtils/HIEventSelectionToolRun3.h"
+#include "HIEventUtils/HIEventFilterAlgRun3.h"
 
 DECLARE_COMPONENT( HIEventShapeSummaryTool )
 DECLARE_COMPONENT( HITowerWeightTool )
@@ -11,3 +13,5 @@ DECLARE_COMPONENT( HIEventShapeMapTool )
 DECLARE_COMPONENT( HI::HIVertexSelectionTool )
 DECLARE_COMPONENT( HI::HIEventSelectionTool )
 DECLARE_COMPONENT( ZDC::ZdcRecTool )
+DECLARE_COMPONENT( HI::HIEventSelectionToolRun3 )
+DECLARE_COMPONENT( HI::HIEventFilterAlgRun3 )

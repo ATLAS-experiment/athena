@@ -280,10 +280,10 @@ int main( int argc, char* argv[] ) {
 
   static const SG::ConstAccessor<float> acc_massDecor(massDecor);
   static const SG::ConstAccessor<float> acc_sphericityDecor(sphericityDecor);
-  static const SG::ConstAccessor<bool> acc_sphericityPassDecor(sphericityPassDecor);
-  static const SG::ConstAccessor<bool> acc_massPassDecor(massPassDecor);
-  static const SG::ConstAccessor<bool> acc_validJetDecor(validJetDecor);
-  static const SG::ConstAccessor<bool> acc_validKinRangeDecor(validKinRangeDecor);
+  static const SG::ConstAccessor<char> acc_sphericityPassDecor(sphericityPassDecor);
+  static const SG::ConstAccessor<char> acc_massPassDecor(massPassDecor);
+  static const SG::ConstAccessor<char> acc_validJetDecor(validJetDecor);
+  static const SG::ConstAccessor<char> acc_validKinRangeDecor(validKinRangeDecor);
 
   for( Long64_t entry = 0; entry < entries; ++entry ) {
 

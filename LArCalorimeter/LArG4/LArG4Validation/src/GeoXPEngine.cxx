@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoXPEngine.h"
@@ -30,12 +30,12 @@ GeoXPEngine::GeoXPEngine (const Genfun::AbsFunction & Bx,
 
 
   if (m<100*CLHEP::keV) { 
-    m_x= (Genfun::FixedConstant(x0.x()) + (CLHEP::c_light*p0.x()/p0.vect().mag())*t).clone();
-    m_y= (Genfun::FixedConstant(x0.y()) + (CLHEP::c_light*p0.y()/p0.vect().mag())*t).clone();
-    m_z= (Genfun::FixedConstant(x0.z()) + (CLHEP::c_light*p0.z()/p0.vect().mag())*t).clone();
-    m_px  = Genfun::FixedConstant(p0.x()).clone();
-    m_py  = Genfun::FixedConstant(p0.y()).clone();
-    m_pz  = Genfun::FixedConstant(p0.z()).clone();
+    m_x.reset ( (Genfun::FixedConstant(x0.x()) + (CLHEP::c_light*p0.x()/p0.vect().mag())*t).clone() );
+    m_y.reset ( (Genfun::FixedConstant(x0.y()) + (CLHEP::c_light*p0.y()/p0.vect().mag())*t).clone() );
+    m_z.reset ( (Genfun::FixedConstant(x0.z()) + (CLHEP::c_light*p0.z()/p0.vect().mag())*t).clone() );
+    m_px.reset ( Genfun::FixedConstant(p0.x()).clone() );
+    m_py.reset ( Genfun::FixedConstant(p0.y()).clone() );
+    m_pz.reset ( Genfun::FixedConstant(p0.z()).clone() );
     
 
   }
@@ -62,22 +62,16 @@ GeoXPEngine::GeoXPEngine (const Genfun::AbsFunction & Bx,
     
    
 
-    m_px = (*rkIntegrator.getFunction(0))(CLHEP::c_light*t).clone();
-    m_py = (*rkIntegrator.getFunction(1))(CLHEP::c_light*t).clone();
-    m_pz = (*rkIntegrator.getFunction(2))(CLHEP::c_light*t).clone();
-    m_x  = (*rkIntegrator.getFunction(3))(CLHEP::c_light*t).clone();
-    m_y  = (*rkIntegrator.getFunction(4))(CLHEP::c_light*t).clone();
-    m_z  = (*rkIntegrator.getFunction(5))(CLHEP::c_light*t).clone();
+    m_px.reset ( (*rkIntegrator.getFunction(0))(CLHEP::c_light*t).clone() );
+    m_py.reset ( (*rkIntegrator.getFunction(1))(CLHEP::c_light*t).clone() );
+    m_pz.reset ( (*rkIntegrator.getFunction(2))(CLHEP::c_light*t).clone() );
+    m_x.reset ( (*rkIntegrator.getFunction(3))(CLHEP::c_light*t).clone() );
+    m_y.reset ( (*rkIntegrator.getFunction(4))(CLHEP::c_light*t).clone() );
+    m_z.reset ( (*rkIntegrator.getFunction(5))(CLHEP::c_light*t).clone() );
   }
 }
 
 GeoXPEngine::~GeoXPEngine() {
-  delete m_x;
-  delete m_y;
-  delete m_z;
-  delete m_px;
-  delete m_py;
-  delete m_pz;
 }
 
 const Genfun::AbsFunction &  GeoXPEngine::x() const {

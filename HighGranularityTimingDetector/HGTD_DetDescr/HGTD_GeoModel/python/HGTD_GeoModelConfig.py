@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def HGTD_GeoModelCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
@@ -7,7 +7,6 @@ def HGTD_GeoModelCfg(flags):
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     hgtdDetectorTool = CompFactory.HGTD_DetectorTool("HGTD_DetectorTool")
-    hgtdDetectorTool.Alignable = False
     hgtdDetectorTool.DetectorName = "HGTD"
     hgtdDetectorTool.PrintModuleNumberPerRow = False
     geoModelSvc.DetectorTools += [ hgtdDetectorTool ]

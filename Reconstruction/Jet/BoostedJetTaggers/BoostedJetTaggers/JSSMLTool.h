@@ -25,7 +25,7 @@ class TH2D;
 namespace AthONNX {
 
    /// Tool using the ONNX Runtime C++ API 
-   /// to retrive constituents based model for boson jet tagging
+   /// to retrieve constituents based model for boson jet tagging
    ///
    /// this is inspired from the general athena example here:
    /// https://gitlab.cern.ch/atlas/athena/-/blob/21.2/Control/AthenaExamples/AthExOnnxRuntime/AthExOnnxRuntime/CxxApiAlgorithm.h

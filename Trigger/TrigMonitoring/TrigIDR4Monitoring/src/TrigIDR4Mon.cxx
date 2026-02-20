@@ -17,6 +17,8 @@
 
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisExample/TIDAHistogram.h"
+#include "TrigDecisionTool/ChainGroup.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "TrigIDR4Mon.h"
 

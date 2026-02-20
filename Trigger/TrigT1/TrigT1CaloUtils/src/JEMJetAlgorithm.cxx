@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JEMJetAlgorithm.cxx  -  description
@@ -214,23 +214,22 @@ void LVL1::JEMJetAlgorithm::passesTrigger() {
   if (!m_EtMax) return;
   
   // Does this pass min TOB pT cut?
-  unsigned int sizeSmall{4}; // the size of the small jets (by default 4)
-  unsigned int sizeLarge{8}; // the size of the large jets (by default 8)
+  constexpr unsigned int sizeSmall{4}; // the size of the small jets (by default 4)
+  constexpr unsigned int sizeLarge{8}; // the size of the large jets (by default 8)
   int threshSmall{0}; // the minimum pT of small jet objects sent to TOPO (in counts, not in GeV)
   int threshLarge{0}; // the minimum pT of large jet objects sent to TOPO (in counts, not in GeV)
 
-  sizeSmall = 4; // not part of the new menu
-  sizeLarge = 8; // not part of the new menu
+ 
   float scale = m_l1menu->thrExtraInfo().JET().jetScale();
   threshSmall = m_l1menu->thrExtraInfo().JET().ptMinToTopoSmallWindowCounts()*scale;
   threshLarge = m_l1menu->thrExtraInfo().JET().ptMinToTopoLargeWindowCounts()*scale;
 
   int etLarge = m_ET8x8;
-  if (sizeLarge == 6)      etLarge = m_ET6x6;
+  if constexpr (sizeLarge == 6)      etLarge = m_ET6x6;
   else if (sizeLarge == 4) etLarge = m_ET4x4;
 
-  int etSmall = m_ET4x4;
-  if (sizeSmall == 6)      etLarge = m_ET6x6;
+  const int etSmall = m_ET4x4;
+  if constexpr (sizeSmall == 6)      etLarge = m_ET6x6;
   else if (sizeSmall == 8) etLarge = m_ET8x8;
 
   if (etLarge <= threshLarge && etSmall <= threshSmall) return;

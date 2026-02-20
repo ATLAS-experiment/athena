@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// GenericTruthStrategy.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_TOOLS_GENERICTRUTHSTRATEGY_H
 #define ISF_TOOLS_GENERICTRUTHSTRATEGY_H 1
@@ -29,55 +25,62 @@ namespace ISF {
   /** @class GenericTruthStrategy
 
       A multi-purpose implementation of an ISF TruthStrategy.
-  
+
       @author Elmar.Ritsch -at- cern.ch
-     */
+  */
   class GenericTruthStrategy final : public extends<AthAlgTool, ITruthStrategy> {
-      
-    public: 
-     /** Constructor with parameters */
-     GenericTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-     /** Destructor */
-     ~GenericTruthStrategy();
+  public:
+    /** Constructor with parameters */
+    GenericTruthStrategy( const std::string& t, const std::string& n, const IInterface* p );
 
-     // Athena algtool's Hooks
-     virtual StatusCode  initialize() override;
-     virtual StatusCode  finalize() override;
+    /** Destructor */
+    ~GenericTruthStrategy() = default;
 
-     /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
-     virtual bool pass( ITruthIncident& incident) const override;
+    // Athena algtool's Hooks
+    virtual StatusCode  initialize() override final;
 
-     virtual bool appliesToRegion(unsigned short geoID) const override;
-	  private:
-     /** parent kinetic energy / transverse momentum cuts
-         (pT is stored as pT^2 which allows for faster comparisons) */
-     bool                                   m_useParentPt;         //!< use pT or Ekin cuts?
-     double                                 m_parentPt2;           //!< parent particle
-     double                                 m_parentEkin;          //!< parent particle
+    /** true if the ITruthStrategy implementation applies to the given ITruthIncident */
+    virtual bool pass( ITruthIncident& incident) const override final;
 
-     /** child particle kinetic energy / transverse momentum cuts
-         (pT is stored as pT^2 which allows for faster comparisons) */
-     bool                                   m_useChildPt;          //!< use pT or Ekin cuts?
-     double                                 m_childPt2;            //!< pT momentum cut
-     double                                 m_childEkin;           //!< Ekin cut
-     bool                                   m_allowChildrenOrParentPass; //!< pass cuts if parent did not
+    virtual bool appliesToRegion(unsigned short geoID) const override final;
+  private:
+    // provide either a pT or Ekin cut for the parent and child particles respectively.
+    // if none are given for either type, it will not use pT or Ekin cuts
+    // (the Pt2 variables get squared in the initialize() method)
 
-     /** vertex type (physics code) checks */
-     VertexTypesVector                      m_vertexTypesVector;  //!< Python property
-     VertexTypesSet                         m_vertexTypes;        //!< optimized for search
-     bool                                   m_doVertexRangeCheck;
-     int                                    m_vertexTypeRangeLow;
-     int                                    m_vertexTypeRangeHigh;
-     unsigned                               m_vertexTypeRangeLength;
+    /** parent kinetic energy / transverse momentum cuts
+        (pT is stored as pT^2 which allows for faster comparisons) */
+    bool m_useParentPt{true};         //!< use pT or Ekin cuts?
+    double m_parentPt2{-1.};
+    Gaudi::Property<double> m_parentPt{this, "ParentMinPt", -1.};           //!< parent particle
+    Gaudi::Property<double> m_parentEkin{this, "ParentMinEkin", -1.};          //!< parent particle
 
-     /** PDG code checks */
-     PDGCodesVector                         m_parentPdgCodesVector;  //!< Python property
-     PDGCodesSet                            m_parentPdgCodes;        //!< optimized for search
+    /** child particle kinetic energy / transverse momentum cuts
+        (pT is stored as pT^2 which allows for faster comparisons) */
+    bool m_useChildPt{true};          //!< use pT or Ekin cuts?
+    double m_childPt2{-1.};
+    Gaudi::Property<double> m_childPt{this, "ChildMinPt", -1.};            //!< pT momentum cut
+    Gaudi::Property<double> m_childEkin{this, "ChildMinEkin", -1.};           //!< Ekin cut
+    Gaudi::Property<bool> m_allowChildrenOrParentPass{this, "AllowChildrenOrParentPassKineticCuts", false}; //!< pass cuts if parent did not
+    // if set to true, kinetic cuts are passed even if only child particles pass them
+    // (used for special cases such as de-excitation)
 
-    IntegerArrayProperty            m_regionListProperty;
-   }; 
-  
+    /** vertex type (physics code) checks */
+    Gaudi::Property<VertexTypesVector> m_vertexTypesVector{this, "VertexTypes", 0};  //!< Python property
+    VertexTypesSet m_vertexTypes{};        //!< optimized for search
+    bool m_doVertexRangeCheck{false};
+    Gaudi::Property<int> m_vertexTypeRangeLow{this, "VertexTypeRangeLow", 0};
+    Gaudi::Property<int> m_vertexTypeRangeHigh{this, "VertexTypeRangeHigh", 0};
+    unsigned m_vertexTypeRangeLength{0};
+
+    /** PDG code checks */
+    Gaudi::Property<PDGCodesVector> m_parentPdgCodesVector{this, "ParentPDGCodes", 0};  //!< Python property
+    PDGCodesSet m_parentPdgCodes{};        //!< optimized for search
+
+    IntegerArrayProperty            m_regionListProperty{this, "Regions", {}};
+  };
+
 }
 
 

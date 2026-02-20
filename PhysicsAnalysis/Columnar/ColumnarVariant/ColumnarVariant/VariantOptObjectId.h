@@ -113,14 +113,14 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept... CIList> class OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray> final
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  class OptObjectId<VariantContainerId<CIList...>,CM> final
   {
     /// Common Public Members
     /// =====================
   public:
 
     using CI = VariantContainerId<CIList...>;
-    using CM = ColumnarModeArray;
     using xAODObject = typename CI::xAODObjectIdType;
     static constexpr std::size_t invalidVariantIndex = CI::numVariants;
 
@@ -128,20 +128,20 @@ namespace columnar
 
     OptObjectId (std::nullopt_t) noexcept {}
 
-    OptObjectId (ObjectId<CI,ColumnarModeArray> val_object) noexcept
-      : m_data (val_object.getData()), m_variantIndex (val_object.getVariantIndex()), m_objectIndex (val_object.getObjectIndex())
+    OptObjectId (ObjectId<CI,CM> val_object) noexcept
+      : m_dataArea (val_object.getDataArea()), m_variantIndex (val_object.getVariantIndex()), m_objectIndex (val_object.getObjectIndex())
     {}
 
     template<ContainerIdConcept CI2>
       requires (CI::template isValidContainer<CI2>())
-    OptObjectId (ObjectId<CI2,ColumnarModeArray> val_object) noexcept
-      : m_data (val_object.getData()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (val_object.getIndex())
+    OptObjectId (ObjectId<CI2,CM> val_object) noexcept
+      : m_dataArea (val_object.getDataArea()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (val_object.getIndex())
     {}
 
     template<ContainerIdConcept CI2>
       requires (CI::template isValidContainer<CI2>())
-    OptObjectId (OptObjectId<CI2,ColumnarModeArray> val_object) noexcept
-      : m_data (val_object.getData())
+    OptObjectId (OptObjectId<CI2,CM> val_object) noexcept
+      : m_dataArea (val_object.getDataArea())
     {
       if (val_object.has_value())
       {
@@ -163,9 +163,9 @@ namespace columnar
       throw std::logic_error ("can't call xAOD function in columnar mode");
     }
 
-    OptObjectId (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    OptObjectId (const OptObjectId<CI,CM>& that) noexcept = default;
 
-    OptObjectId& operator = (const OptObjectId<CI,ColumnarModeArray>& that) noexcept = default;
+    OptObjectId& operator = (const OptObjectId<CI,CM>& that) noexcept = default;
 
     // Whatever you do: Do not remove this function. Yes, it will always
     // throw. It is meant to throw in this template specialization, and
@@ -180,18 +180,18 @@ namespace columnar
     [[nodiscard]] bool has_value () const noexcept {
       return m_variantIndex != invalidVariantIndex;}
 
-    [[nodiscard]] ObjectId<CI,ColumnarModeArray> value () const {
+    [[nodiscard]] ObjectId<CI,CM> value () const {
       if (m_variantIndex == invalidVariantIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeArray> (m_data, m_variantIndex, m_objectIndex);}
+      return ObjectId<CI,CM> (m_dataArea, m_variantIndex, m_objectIndex);}
 
-    [[nodiscard]] ObjectId<CI,ColumnarModeArray> operator * () const {
+    [[nodiscard]] ObjectId<CI,CM> operator * () const {
       if (m_variantIndex == invalidVariantIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,ColumnarModeArray> (m_data, m_variantIndex, m_objectIndex);
+      return ObjectId<CI,CM> (m_dataArea, m_variantIndex, m_objectIndex);
     }
 
-    [[nodiscard]] bool operator == (const OptObjectId<CI,ColumnarModeArray>& that) const noexcept {
+    [[nodiscard]] bool operator == (const OptObjectId<CI,CM>& that) const noexcept {
       return m_variantIndex == that.m_variantIndex && m_objectIndex == that.m_objectIndex;
     }
 
@@ -201,8 +201,8 @@ namespace columnar
     /// ============================
   public:
 
-    explicit OptObjectId (void **val_data, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
-      : m_data (val_data), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
+    explicit OptObjectId (void **val_dataArea, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
+      : m_dataArea (val_dataArea), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
     {}
 
     [[nodiscard]] std::size_t getVariantIndex () const noexcept {
@@ -211,8 +211,8 @@ namespace columnar
     [[nodiscard]] std::size_t getObjectIndex () const noexcept {
       return m_objectIndex;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -220,26 +220,26 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_variantIndex = invalidVariantIndex;
     std::size_t m_objectIndex = invalidObjectIndex;
   };
 
-  template<ContainerIdConcept... CIList>
-  std::ostream& operator<< (std::ostream& str, const OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& obj)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  std::ostream& operator<< (std::ostream& str, const OptObjectId<VariantContainerId<CIList...>,CM>& obj)
   {
     using CI = VariantContainerId<CIList...>;
     return str << CI::idNameArray.at(obj.getVariantIndex()) << "/" << obj.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList>
-  bool operator== (const OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& lhs, const OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  bool operator== (const OptObjectId<VariantContainerId<CIList...>,CM>& lhs, const OptObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() == rhs.getVariantIndex() && lhs.getObjectIndex() == rhs.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList>
-  bool operator!= (const OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& lhs, const OptObjectId<VariantContainerId<CIList...>,ColumnarModeArray>& rhs)
+  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  bool operator!= (const OptObjectId<VariantContainerId<CIList...>,CM>& lhs, const OptObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() != rhs.getVariantIndex() || lhs.getObjectIndex() != rhs.getObjectIndex();
   }

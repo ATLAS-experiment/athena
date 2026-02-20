@@ -11,7 +11,7 @@
 #ifndef PIXELDCSCONDHVALG
 #define PIXELDCSCONDHVALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -24,14 +24,13 @@
 
 #include "Gaudi/Property.h"
 
-class PixelDCSCondHVAlg : public AthReentrantAlgorithm {
+class PixelDCSCondHVAlg : public AthCondAlgorithm {
   public:
     PixelDCSCondHVAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelDCSCondHVAlg() = default;
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     const PixelID* m_pixelID{nullptr};

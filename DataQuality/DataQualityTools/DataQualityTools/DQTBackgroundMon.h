@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -19,7 +19,8 @@
 #include "TileEvent/TileContainer.h"
 #include "LUCID_RawEvent/LUCID_RawDataContainer.h"
 #include "RecBackgroundEvent/BeamBackgroundData.h"
-#include "TrkSpacePoint/SpacePointContainer.h" 
+#include "TrkSpacePoint/SpacePointContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 class DQTBackgroundMon : public AthMonitorAlgorithm {
 public:

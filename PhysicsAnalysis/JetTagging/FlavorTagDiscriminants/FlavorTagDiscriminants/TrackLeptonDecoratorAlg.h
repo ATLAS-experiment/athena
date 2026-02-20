@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACK_LEPTON_DECORATOR_ALG_HH
@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthContainers/AuxElement.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "StoreGate/ReadDecorHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
@@ -36,7 +36,7 @@ namespace FlavorTagDiscriminants {
 
     // electron ID tool
     ToolHandle<IAsgElectronLikelihoodTool> m_electronID_tool{this, "electronSelectionTool", "", "Applying preselection on electrons"};
-    
+
     // muon ID tool
     ToolHandle<CP::IMuonSelectionTool> m_muonID_tool{this, "muonSelectionTool", "", "Applying preselection on muons"};
 
@@ -53,15 +53,15 @@ namespace FlavorTagDiscriminants {
 
     // Decorators for tracks
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_lepton_id {
-      this, "leptonID", "leptonID", "pdgID of reconstruction lepton "};
+      this, "leptonID", m_TrackContainerKey, "leptonID", "pdgID of reconstruction lepton "};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_quality {
-      this, "muon_quality", "muon_quality", "Quality of the reconstructed muon: (0=Tight, 1=Medium, 2=Loose, 3=Veryloose, 4=HighPt, 5=LowPtEfficiency)"};
+      this, "muon_quality", m_TrackContainerKey, "muon_quality", "Quality of the reconstructed muon: (0=Tight, 1=Medium, 2=Loose, 3=Veryloose, 4=HighPt, 5=LowPtEfficiency)"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_qOverPratio {
-      this, "muon_qOverPratio", "muon_qOverPratio", "Ratio between q/p reconstructed by the ID and the MS"};
+      this, "muon_qOverPratio", m_TrackContainerKey, "muon_qOverPratio", "Ratio between q/p reconstructed by the ID and the MS"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_momentumBalanceSignificance {
-      this, "muon_momentumBalanceSignificance", "muon_momentumBalanceSignificance", "Significance of the momentum balance between ID and MS"};
+      this, "muon_momentumBalanceSignificance", m_TrackContainerKey, "muon_momentumBalanceSignificance", "Significance of the momentum balance between ID and MS"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_muon_scatteringNeighbourSignificance {
-      this, "muon_scatteringNeighbourSignificance", "muon_scatteringNeighbourSignificance", "Significance of the azimuthal angular difference between the two half tracks ending/starting at each of adjacent hist along the track"};
+      this, "muon_scatteringNeighbourSignificance", m_TrackContainerKey, "muon_scatteringNeighbourSignificance", "Significance of the azimuthal angular difference between the two half tracks ending/starting at each of adjacent hist along the track"};
 
   };
 

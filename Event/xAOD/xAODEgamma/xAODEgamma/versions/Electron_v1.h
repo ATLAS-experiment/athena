@@ -73,6 +73,15 @@ namespace xAOD {
 
     /// @}
 
+    /// @name xAOD::IParticle functions
+    /// These are already virtual due to IParticle
+    /// @{
+
+    /// @brief The invariant mass of the particle
+    virtual double           m() const override final;
+
+    /// @}
+
     /// @name xAOD::Electron Pointers to  TrackParticles
     /// @{
 

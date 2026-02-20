@@ -45,7 +45,6 @@
 
 
 
-#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
 
@@ -340,7 +339,7 @@ namespace InDetAlignment
 			// check the validity
 			if (Pixel_ModuleID.is_valid()) {
 				if (m_ModuleList.find(Pixel_ModuleID) == m_ModuleList.end()) {
-                                        const InDetDD::SiDetectorElement *module = elements->getDetectorElement(Pixel_ModuleHash);
+				        const InDetDD::SiDetectorElement *module = elements->getDetectorElement(Pixel_ModuleHash);
 					m_ModuleList[Pixel_ModuleID][0] = module->center()[0];
 					m_ModuleList[Pixel_ModuleID][1] = module->center()[1];
 					m_ModuleList[Pixel_ModuleID][2] = module->center()[2];
@@ -564,6 +563,7 @@ namespace InDetAlignment
 
       if (m_idHelper->is_pixel(ModuleID))
         {
+	  ATH_MSG_INFO(  "ID Module " << i << " with ID " << m_pixelIdHelper->show_to_string(ModuleID,nullptr,'/') );
           if (m_pixelIdHelper->is_barrel(ModuleID))   {
             ScaleFactor=m_ScalePixelBarrel;
           }
@@ -579,6 +579,7 @@ namespace InDetAlignment
 
         } else if (m_idHelper->is_sct(ModuleID))
         {
+	  ATH_MSG_INFO(  "ID Module " << i << " with ID " << m_sctIdHelper->show_to_string(ModuleID,nullptr,'/') );
           if (m_sctIdHelper->is_barrel(ModuleID)) {
             ScaleFactor=m_ScaleSCTBarrel;
           }
@@ -588,7 +589,8 @@ namespace InDetAlignment
 
         } else if (m_idHelper->is_trt(ModuleID))
         {
-          if (m_trtIdHelper->is_barrel(ModuleID)) {
+	  ATH_MSG_INFO(  "ID Module " << i << " with ID " << m_trtIdHelper->show_to_string(ModuleID,nullptr,'/') );
+	  if (m_trtIdHelper->is_barrel(ModuleID)) {
             ScaleFactor=m_ScaleTRTBarrel;
           }
           else {
@@ -598,9 +600,6 @@ namespace InDetAlignment
         ATH_MSG_WARNING( "Something fishy, identifier is neither Pixel, nor SCT or TRT!" );
       }
 
-
-
-			ATH_MSG_INFO(  "ID Module " << i << " with ID " << m_idHelper->show_to_string(ModuleID,nullptr,'/') );
 			if (msgLvl(MSG::DEBUG)) {
 				msg() << "radius "  << r / CLHEP::cm << " centimeter" << endmsg;
 				msg() << "phi "  << phi << endmsg;
@@ -691,8 +690,9 @@ namespace InDetAlignment
 
  		else if (m_MisalignmentMode == 7) {
                  
-
-                 std::string module_str = m_idHelper->show_to_string(ModuleID, nullptr, '/');
+		  std::string module_str;
+		  if(m_idHelper->is_pixel(ModuleID)) module_str = m_pixelIdHelper->show_to_string(ModuleID,nullptr,'/');
+		  if(m_idHelper->is_sct(ModuleID)) module_str = m_sctIdHelper->show_to_string(ModuleID,nullptr,'/');
 
                  if (module_str.substr(0, m_index.size()) == m_index) {
 
@@ -911,22 +911,27 @@ namespace InDetAlignment
 			
 			Amg::Transform3D alignmentTrafoAmg = Amg::CLHEPTransformToEigen(alignmentTrafo);
 			
-			if (m_idHelper->is_sct(ModuleID) || m_idHelper->is_pixel(ModuleID)) {
+			if (m_idHelper->is_pixel(ModuleID)) {
 				if (m_IDAlignDBTool->tweakTrans(ModuleID,3, alignmentTrafoAmg)) {
-					ATH_MSG_INFO( "Update of alignment constants for module " << m_idHelper->show_to_string(ModuleID,nullptr,'/') << " successful" );
+					ATH_MSG_INFO( "Update of alignment constants for module " << m_pixelIdHelper->show_to_string(ModuleID,nullptr,'/') << " successful" );
 				} else {
-					ATH_MSG_ERROR( "Update of alignment constants for module " << m_idHelper->show_to_string(ModuleID,nullptr,'/') << " not successful" );
+					ATH_MSG_ERROR( "Update of alignment constants for module " << m_pixelIdHelper->show_to_string(ModuleID,nullptr,'/') << " not successful" );
 				}
+			} else if (m_idHelper->is_sct(ModuleID)) {
+                                if (m_IDAlignDBTool->tweakTrans(ModuleID,3, alignmentTrafoAmg)) {
+                                        ATH_MSG_INFO( "Update of alignment constants for module " << m_sctIdHelper->show_to_string(ModuleID,nullptr,'/') << " successful" );
+                                } else {
+                                        ATH_MSG_ERROR( "Update of alignment constants for module " << m_sctIdHelper->show_to_string(ModuleID,nullptr,'/') << " not successful" );
+                                }
 			} else if (m_idHelper->is_trt(ModuleID)) {
 				if (!m_trtIdHelper->is_barrel(ModuleID) && m_trtIdHelper->phi_module(ModuleID)!=0) {
 					//don't align - there's no trans in the DB for phi sectors other than 0
 					ATH_MSG_DEBUG( "TRT endcap phi sector " << m_trtIdHelper->phi_module(ModuleID) << " not aligned" );
 				} else {
-					//if (m_trtaligndbservice->tweakTrans(ModuleID,alignmentTrafo).isFailure()) {
 					if (m_trtaligndbservice->tweakAlignTransform(ModuleID,alignmentTrafoAmg,2).isFailure()) { 
-						ATH_MSG_ERROR( "Update of alignment constants for module " << m_idHelper->show_to_string(ModuleID,nullptr,'/') << " not successful" );
+						ATH_MSG_ERROR( "Update of alignment constants for module " << m_trtIdHelper->show_to_string(ModuleID,nullptr,'/') << " not successful" );
 					} else {
-						ATH_MSG_INFO( "Update of alignment constants for module " << m_idHelper->show_to_string(ModuleID,nullptr,'/') << " successful" );
+						ATH_MSG_INFO( "Update of alignment constants for module " << m_trtIdHelper->show_to_string(ModuleID,nullptr,'/') << " successful" );
 					}
 				}
 			} else {

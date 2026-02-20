@@ -15,10 +15,8 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
-#include "GaudiKernel/MsgStream.h"
 
 #include <algorithm>
-#include <iostream>
 #include <stdio.h>
 #include <assert.h>
 
@@ -503,39 +501,35 @@ int  TileHWID::get_id     (const IdentifierHash& hash_id, HWIdentifier& id, cons
 
     if ( m_ADC_INDEX == end ) {
       if (hash_id < (unsigned int)(m_adc_vec.end() - m_adc_vec.begin())) {
-	id = m_adc_vec[hash_id];
-	result = 0;
+        id = m_adc_vec[hash_id];
+        result = 0;
       } else {
-	MsgStream log(m_msgSvc, "TileHWID" );
-	log << MSG::ERROR << "get_id: hwadc hash_id out of range " << hash_id
-            << " => " << m_adc_vec.size() << endmsg;
+        ATH_MSG_ERROR("get_id: hwadc hash_id out of range " << hash_id
+                      << " => " << m_adc_vec.size());
       }
     } else if ( m_CHANNEL_INDEX == end ) {
       if (hash_id < (unsigned int)(m_channel_vec.end() - m_channel_vec.begin())) {
-	id = m_channel_vec[hash_id];
-	result = 0;
+        id = m_channel_vec[hash_id];
+        result = 0;
       } else {
-	MsgStream log(m_msgSvc, "TileHWID" );
-	log << MSG::ERROR << "get_id: channel hash_id is out of range "
-            << hash_id << " => " << m_channel_vec.size() << endmsg;
+        ATH_MSG_ERROR("get_id: channel hash_id is out of range "
+                      << hash_id << " => " << m_channel_vec.size());
       }
     } else if ( m_DRAWER_INDEX == end ) {
       if (hash_id < (unsigned int)(m_drawer_vec.end() - m_drawer_vec.begin())) {
-	id = m_drawer_vec[hash_id];
-	result = 0;
+        id = m_drawer_vec[hash_id];
+        result = 0;
       } else {
-        MsgStream log(m_msgSvc, "TileHWID" );
-	log << MSG::ERROR << "get_id: drawer hash_id is out of range " << hash_id
-            << " => " << m_drawer_vec.size() << endmsg;
+        ATH_MSG_ERROR("get_id: drawer hash_id is out of range " << hash_id
+                      << " => " << m_drawer_vec.size());
       }
     } else if ( m_ROS_INDEX == end ) {
       if (hash_id < (unsigned int)(m_ros_vec.end() - m_ros_vec.begin())) {
-	id = m_ros_vec[hash_id];
-	result = 0;
+        id = m_ros_vec[hash_id];
+        result = 0;
       } else {
-	MsgStream log(m_msgSvc, "TileHWID" );
-	log << MSG::ERROR << "get_id: ROS hash_id is out of range " << hash_id
-            << " => " << m_ros_vec.size() << endmsg;
+        ATH_MSG_ERROR("get_id: ROS hash_id is out of range " << hash_id
+                      << " => " << m_ros_vec.size());
       }
     }
   }
@@ -602,19 +596,18 @@ IdentifierHash  TileHWID::get_channel_hash(const HWIdentifier& id) const
 
 int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 {
-  MsgStream log(m_msgSvc, "TileHWID" );
-  log << MSG::INFO << "initialize_from_dictionary " << endmsg;
+  ATH_MSG_INFO("initialize_from_dictionary ");
 
   // Check whether this helper should be reinitialized
   if (!reinitialize(dict_mgr)) {
-    log << MSG::DEBUG << "Request to reinitialize not satisfied - tags have not changed" << endmsg;
+    ATH_MSG_DEBUG("Request to reinitialize not satisfied - tags have not changed");
     return (0);
   }
   else {
-    log << MSG::DEBUG << "(Re)initialize" << endmsg;
+    ATH_MSG_DEBUG("(Re)initialize");
   }
 
-  log << MSG::DEBUG << "calling base initialize_from_dictionary" << endmsg;
+  ATH_MSG_DEBUG("calling base initialize_from_dictionary");
 
   // init base object
   if(AtlasDetectorID::initialize_from_dictionary(dict_mgr)) return (1);
@@ -624,7 +617,7 @@ int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
 
   m_dict = dict_mgr.find_dictionary ("TileCalorimeter"); 
   if(!m_dict) {
-    log << MSG::ERROR << "cannot access TileCalorimeter dictionary" << endmsg;
+    ATH_MSG_ERROR("cannot access TileCalorimeter dictionary");
     return 1;
   }
   
@@ -636,26 +629,18 @@ int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   const IdDictDictionary* atlasDict = dict_mgr.find_dictionary ("ATLAS"); 
   int tileField   = -1;
   if (atlasDict->get_label_value("subdet", "TileCalorimeter", tileField)) {
-    log << MSG::ERROR << "Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
-        << atlasDict->name()
-        << endmsg;
+    ATH_MSG_ERROR("Could not get value for label 'TileCalorimeter' of field 'subdet' in dictionary " 
+                  << atlasDict->name());
     return (1);
   }
 
   // Find value for the field Tile Online
   int tilehwField   = -1;
   if (m_dict->get_label_value("section", "Online", tilehwField)) {
-    log << MSG::ERROR << "Could not get value for label 'Online' of field 'section' in dictionary " 
-        << m_dict->name()
-        << endmsg;
+    ATH_MSG_ERROR("Could not get value for label 'Online' of field 'section' in dictionary " 
+                  << m_dict->name());
     return (1);
   }
-
-  /*
-  log << MSG::DEBUG << "initialize_from_dict - found field values: TileHW " 
-      << TileHWField
-      << endmsg;
-  */
 
   // Set up id for region and range prefix
   ExpandedIdentifier reg_id;
@@ -668,11 +653,11 @@ int  TileHWID::initialize_from_dictionary (const IdDictMgr& dict_mgr)
   m_full_drawer_range = m_dict->build_multirange(reg_id, prefix, "drawer");
   m_full_ros_range    = m_dict->build_multirange(reg_id, prefix, "ros");
 
-  log << MSG::DEBUG << "initialize_from_dict : "                                 << endmsg;
-  log << MSG::DEBUG << " ros range -> "     << (std::string)m_full_ros_range     << endmsg;
-  log << MSG::DEBUG << " drawer range -> "  << (std::string)m_full_drawer_range  << endmsg;
-  log << MSG::DEBUG << " channel range -> " << (std::string)m_full_channel_range << endmsg;
-  log << MSG::DEBUG << " adc range -> "     << (std::string)m_full_adc_range     << endmsg;
+  ATH_MSG_DEBUG("initialize_from_dict : "                                );
+  ATH_MSG_DEBUG(" ros range -> "     << (std::string)m_full_ros_range    );
+  ATH_MSG_DEBUG(" drawer range -> "  << (std::string)m_full_drawer_range );
+  ATH_MSG_DEBUG(" channel range -> " << (std::string)m_full_channel_range);
+  ATH_MSG_DEBUG(" adc range -> "     << (std::string)m_full_adc_range    );
 
   // Setup the hash tables
   if(init_hashes()) return (1);
@@ -704,11 +689,8 @@ int TileHWID::get_expanded_id  (const HWIdentifier& id, ExpandedIdentifier& exp_
 
 int TileHWID::initLevelsFromDict()
 {
-  MsgStream log(m_msgSvc, "TileHWID" );
-
   if(!m_dict) {
-    log << MSG::ERROR << "initLevelsFromDict - dictionary NOT initialized "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - dictionary NOT initialized ");
     return (1);
   }
 
@@ -724,20 +706,18 @@ int TileHWID::initLevelsFromDict()
   // Save index to a Tile region for unpacking
   ExpandedIdentifier expId(tile_exp());
   if (m_dict->find_region(expId,m_tile_region_index)){
-    log << MSG::ERROR << "initLevelsFromDict - unable to find tile region index: expId, reg "  
-        << (std::string)expId << " " << m_tile_region_index
-        << endmsg;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find tile region index: expId, reg "  
+                  << (std::string)expId << " " << m_tile_region_index);
     return (1);
   }
 
   // Fing a Tile region
-  IdDictField* field = m_dict->find_field("subdet") ;
+  const IdDictField* field = m_dict->find_field("subdet") ;
   if (field) {
     m_SYSTEM_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'subdet' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'subdet' field ");
     return (1);
   }
 
@@ -746,8 +726,7 @@ int TileHWID::initLevelsFromDict()
     m_SECTION_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'section' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'section' field ");
     return (1);
   }
 
@@ -756,8 +735,7 @@ int TileHWID::initLevelsFromDict()
     m_ROS_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'ros' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'ros' field ");
     return (1);
   }
 
@@ -766,8 +744,7 @@ int TileHWID::initLevelsFromDict()
     m_DRAWER_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'drawer' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'drawer' field ");
     return (1);
   }
 
@@ -776,8 +753,7 @@ int TileHWID::initLevelsFromDict()
     m_CHANNEL_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'channel' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'channel' field ");
     return (1);
   }
 
@@ -786,8 +762,7 @@ int TileHWID::initLevelsFromDict()
     m_ADC_INDEX = field->index();
   }
   else {
-    log << MSG::ERROR <<  "initLevelsFromDict - unable to find 'gain' field "
-        << endmsg ;
+    ATH_MSG_ERROR("initLevelsFromDict - unable to find 'gain' field ");
     return (1);
   }
 
@@ -805,21 +780,19 @@ int TileHWID::initLevelsFromDict()
   m_system_impl.pack  (tile_field_value(),m_base_tile_ros);
   m_section_impl.pack (TileHWID::TILE_ONLINE,m_base_tile_ros);
 
-  log << MSG::DEBUG << "initLevelsFromDict decode index and bit fields for each level: "              << endmsg ;
-  log << MSG::DEBUG << " system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()   << endmsg ;
-  log << MSG::DEBUG << " section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string()  << endmsg ;
-  log << MSG::DEBUG << " ros      [" << m_ROS_INDEX      << "]  " << m_ros_impl.show_to_string()      << endmsg ;
-  log << MSG::DEBUG << " drawer   [" << m_DRAWER_INDEX   << "]  " << m_drawer_impl.show_to_string()   << endmsg ;
-  log << MSG::DEBUG << " channel  [" << m_CHANNEL_INDEX  << "]  " << m_channel_impl.show_to_string()  << endmsg ;
-  log << MSG::DEBUG << " adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl.show_to_string()      << endmsg ;
+  ATH_MSG_DEBUG("initLevelsFromDict decode index and bit fields for each level: "             );
+  ATH_MSG_DEBUG(" system   [" << m_SYSTEM_INDEX   << "]  " << m_system_impl.show_to_string()  );
+  ATH_MSG_DEBUG(" section  [" << m_SECTION_INDEX  << "]  " << m_section_impl.show_to_string() );
+  ATH_MSG_DEBUG(" ros      [" << m_ROS_INDEX      << "]  " << m_ros_impl.show_to_string()     );
+  ATH_MSG_DEBUG(" drawer   [" << m_DRAWER_INDEX   << "]  " << m_drawer_impl.show_to_string()  );
+  ATH_MSG_DEBUG(" channel  [" << m_CHANNEL_INDEX  << "]  " << m_channel_impl.show_to_string() );
+  ATH_MSG_DEBUG(" adc      [" << m_ADC_INDEX      << "]  " << m_adc_impl.show_to_string()     );
 
   return(0) ;
 }
 
 int TileHWID::init_hashes()
 {
-  MsgStream log(m_msgSvc, "TileHWID" );
-
   // ros hash
   unsigned int nids = 0;
   std::set<HWIdentifier> ids;
@@ -829,10 +802,9 @@ int TileHWID::init_hashes()
     for (const auto & exp_id : rit) {
       HWIdentifier id = ros_id (exp_id[m_ROS_INDEX]);
       if(!(ids.insert(id)).second){
-	log << MSG::ERROR << "init_hashes "
-            << " Error: duplicated id for ros id. nids= " << nids
-            << " compact Id  " << show_to_string(id)
-            << endmsg;
+        ATH_MSG_ERROR("init_hashes "
+                      << " Error: duplicated id for ros id. nids= " << nids
+                      << " compact Id  " << show_to_string(id));
       }
       nids++;
     }
@@ -850,10 +822,9 @@ int TileHWID::init_hashes()
       HWIdentifier id = drawer_id (exp_id[m_ROS_INDEX], 
                                  exp_id[m_DRAWER_INDEX]);
       if(!(ids.insert(id)).second){
-	log << MSG::ERROR << "init_hashes "
-            << " Error: duplicated id for drawer id. nids= " << nids
-            << " compact Id  " << show_to_string(id)
-            << endmsg;
+        ATH_MSG_ERROR("init_hashes "
+                      << " Error: duplicated id for drawer id. nids= " << nids
+                      << " compact Id  " << show_to_string(id));
       }
       nids++;
     }
@@ -872,10 +843,9 @@ int TileHWID::init_hashes()
                                  exp_id[m_DRAWER_INDEX], 
                                  exp_id[m_CHANNEL_INDEX]);
       if(!(ids.insert(id)).second){
-	log << MSG::ERROR << "init_hashes "
-            << " Error: duplicated id for channel id. nids= " << nids
-            << " compact Id  " << show_to_string(id)
-            << endmsg;
+        ATH_MSG_ERROR("init_hashes "
+                      << " Error: duplicated id for channel id. nids= " << nids
+                      << " compact Id  " << show_to_string(id));
       }
       nids++;
     }
@@ -895,10 +865,9 @@ int TileHWID::init_hashes()
                                  exp_id[m_CHANNEL_INDEX],
                                  exp_id[m_ADC_INDEX]);
       if(!(ids.insert(id)).second){
-	log << MSG::ERROR << "init_hashes "
-            << " Error: duplicated id for adc id. nids= " << nids
-            << " compact Id  " << show_to_string(id)
-            << endmsg;
+        ATH_MSG_ERROR("init_hashes "
+                      << " Error: duplicated id for adc id. nids= " << nids
+                      << " compact Id  " << show_to_string(id));
       }
       nids++;
     }
@@ -924,11 +893,9 @@ int TileHWID::fill_vec  (std::set<HWIdentifier> & ids,
 
   if(ids.size() != hash_max) {
 
-    MsgStream log(m_msgSvc, "TileHWID" );
-    log << MSG::ERROR << "fill_vec "
-        << " Error: set size NOT EQUAL to hash max. size " << ids.size()
-        << " hash max " << hash_max
-        << endmsg;
+    ATH_MSG_ERROR("fill_vec "
+                  << " Error: set size NOT EQUAL to hash max. size " << ids.size()
+                  << " hash max " << hash_max);
 
     return (1);
   }

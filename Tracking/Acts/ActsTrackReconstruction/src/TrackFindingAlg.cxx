@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingAlg.h"
@@ -22,7 +22,7 @@
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "src/detail/ExpectedHitUtils.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
@@ -55,8 +55,8 @@ namespace {
       // We are excluding non measurement states and outlier here. Those can
       // decrease resolution because only the smoothing corrected the very
       // first prediction as filtering is not possible.
-      if (not st.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag)) continue;
-      if (st.typeFlags().test(Acts::TrackStateFlag::OutlierFlag)) continue;
+      if (not st.typeFlags().hasMeasurement()) continue;
+      if (st.typeFlags().isOutlier()) continue;
       firstMeasurement = st;
     }
     return firstMeasurement;
@@ -408,7 +408,7 @@ namespace ActsTrk
   }
 
   bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const auto& bottom_sp = seed.sp().front();
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
 
     const double r = bottom_sp->radius();
     const double z = std::abs(bottom_sp->z());
@@ -488,7 +488,7 @@ namespace ActsTrk
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
         // Get the seed
-        const ActsTrk::Seed& seed = *seeds[iseed];
+        const ActsTrk::Seed seed = seeds[iseed];
 
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
@@ -567,8 +567,8 @@ namespace ActsTrk
           event_stat[category_i][kNForcedSeedMeasurements] += measurementRangesForced->size();
 
         // Get the Acts tracks, given this seed
-        // Result here contains a vector of TrackProxy objects
-        auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
+        Acts::Result<std::vector<TrkProxy> > result =
+          trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
         // The result for this seed
         if (not result.ok()) {
@@ -770,7 +770,7 @@ namespace ActsTrk
         volume_ptr->visitSurfaces([&counter, det_el_status, &measurements,this](const Acts::Surface *surface_ptr) {
           if (!surface_ptr) return;
           const Acts::Surface &surface = *surface_ptr;
-          const Acts::DetectorElementBase*detector_element = surface.associatedDetectorElement();
+          const Acts::SurfacePlacementBase* detector_element = surface.surfacePlacement();
           if (detector_element) {
             ++counter.n_detector_elements;
             const ActsDetectorElement *acts_detector_element = static_cast<const ActsDetectorElement*>(detector_element);
@@ -828,33 +828,34 @@ namespace ActsTrk
       ATH_MSG_INFO("CKF results for " << seeds.size() << ' ' << seedType << " seeds:");
     }
     ++nPrinted;
-    m_trackStatePrinter->printSeed(detContext.geometry, *seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
+    m_trackStatePrinter->printSeed(detContext.geometry, seeds[iseed], seedParameters, measurementIndex, iseed, isKF);
   }
 
 namespace {
 struct Collector {
-
   using result_type = TrackFindingAlg::ExpectedLayerPattern*;
 
   template <typename propagator_state_t, typename stepper_t,
   typename navigator_t>
-  void act(propagator_state_t& state, const stepper_t& /*stepper*/,
+  Acts::Result<void> act(propagator_state_t& state, const stepper_t& /*stepper*/,
            const navigator_t& navigator, result_type& result,
            const Acts::Logger& /*logger*/) const {
-    const auto* currentSurface = navigator.currentSurface(state.navigation);
+    const Acts::Surface* currentSurface = navigator.currentSurface(state.navigation);
     if (currentSurface == nullptr) {
-      return;
+      return Acts::Result<void>::success();
     }
 
     assert(result != nullptr && "Result type is nullptr");
 
-    if (currentSurface->associatedDetectorElement() != nullptr) {
-      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->associatedDetectorElement());
+    if (currentSurface->surfacePlacement() != nullptr) {
+      const auto* detElem = dynamic_cast<const ActsDetectorElement*>(currentSurface->surfacePlacement());
       if(detElem != nullptr) {
         detail::addToExpectedLayerPattern(*result, *detElem);
       }
     }
-  };
+
+    return Acts::Result<void>::success();
+  }
 };
 }
 
@@ -874,7 +875,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         options.geoContext, track, referenceSurface, strategy, logger());
 
     if (!findResult.ok()) {
-      ACTS_ERROR("failed to find track state for extrapolation");
+      ATH_MSG_WARNING("Failed to find track state for extrapolation");
       return findResult.error();
     }
 
@@ -883,7 +884,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     options.direction = Acts::Direction::fromScalarZeroAsPositive(distance);
 
     Acts::BoundTrackParameters parameters = track.createParametersFromState(trackState);
-    ACTS_VERBOSE("extrapolating track to reference surface at distance "
+    ATH_MSG_VERBOSE("Extrapolating track to reference surface at distance "
                 << distance << " with direction " << options.direction
                 << " with starting parameters " << parameters);
 
@@ -893,7 +894,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     auto initRes = propagator.initialize(state, parameters);
     if(!initRes.ok()) {
-      ACTS_ERROR("Failed to initialize propgation state: " << initRes.error().message());
+      ATH_MSG_WARNING("Failed to initialize propagation state: " << initRes.error().message());
       return initRes.error();
     }
 
@@ -902,7 +903,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         propagator.propagate(state);
 
     if (!propagateOnlyResult.ok()) {
-      ACTS_ERROR("failed to extrapolate track: " << propagateOnlyResult.error().message());
+      ATH_MSG_WARNING("Failed to extrapolate track: " << propagateOnlyResult.error().message());
       return propagateOnlyResult.error();
     }
 
@@ -910,7 +911,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         std::move(state), propagateOnlyResult, referenceSurface, options);
 
     if (!propagateResult.ok()) {
-      ACTS_ERROR("failed to extrapolate track: " << propagateResult.error().message());
+      ATH_MSG_WARNING("Failed to extrapolate track: " << propagateResult.error().message());
       return propagateResult.error();
     }
 
@@ -965,8 +966,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     // Before trimming, inspect encountered surfaces from all track states
     for(const auto ts : track.trackStatesReversed()) {
       const auto& surface = ts.referenceSurface();
-      if(surface.associatedDetectorElement() != nullptr) {
-        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.associatedDetectorElement());
+      if(surface.surfacePlacement() != nullptr) {
+        const auto* detElem = dynamic_cast<const ActsDetectorElement*>(surface.surfacePlacement());
         if(detElem != nullptr) {
           detail::addToExpectedLayerPattern(expectedLayerPattern, *detElem);
         }

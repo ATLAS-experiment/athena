@@ -14,7 +14,6 @@ namespace pool {
 
   // forward declarations
   class IStorageSvc;
-  class IStorageExplorer;
   class Session;
   class ITransaction;
 
@@ -75,7 +74,6 @@ namespace pool {
       DatabaseRegistry&          m_registry;
       ITransaction&              m_transaction;
       IStorageSvc*               m_storageSvc;
-      IStorageExplorer*          m_storageExplorer;
       Session*                   m_session;
       long                       m_technology;
       std::set<DatabaseHandler*> m_databaseHandlers;

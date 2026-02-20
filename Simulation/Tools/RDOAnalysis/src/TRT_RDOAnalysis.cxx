@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,10 +9,7 @@
 #include "TTree.h"
 #include "TString.h"
 
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
+#include <cmath>
 
 TRT_RDOAnalysis::TRT_RDOAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
@@ -371,9 +368,9 @@ StatusCode TRT_RDOAnalysis::execute() {
         const bool trtHL((*rdo_itr)->highLevel());
         const double trtToT((*rdo_itr)->timeOverThreshold());
         const int trtDriftTimeBin((*rdo_itr)->driftTimeBin());
-        const int trtTrailEdge = dynamic_cast<const TRT_LoLumRawData*>(*rdo_itr)->trailingEdge();
-        const bool trtFirstBin = dynamic_cast<const TRT_LoLumRawData*>(*rdo_itr)->firstBinHigh();
-        const bool trtLastBin = dynamic_cast<const TRT_LoLumRawData*>(*rdo_itr)->lastBinHigh();
+        const int trtTrailEdge = static_cast<const TRT_LoLumRawData*>(*rdo_itr)->trailingEdge();
+        const bool trtFirstBin = static_cast<const TRT_LoLumRawData*>(*rdo_itr)->firstBinHigh();
+        const bool trtLastBin = static_cast<const TRT_LoLumRawData*>(*rdo_itr)->lastBinHigh();
 
         const unsigned long long rdoID_int = rdoID.get_compact();
         m_rdoID->push_back(rdoID_int);
@@ -404,7 +401,7 @@ StatusCode TRT_RDOAnalysis::execute() {
         m_h_driftTimeBin->Fill(trtDriftTimeBin);
         m_h_trailEdge->Fill(trtTrailEdge);
 
-        if (abs(trtBrlEc) == 1) {
+        if (std::abs(trtBrlEc) == 1) {
           m_h_brlPhiMod->Fill(trtPhiMod);
           m_h_brlLayer->Fill(trtLayerWheel);
           m_h_brlStrawLayer->Fill(trtStrawLayer);
@@ -416,7 +413,7 @@ StatusCode TRT_RDOAnalysis::execute() {
           m_h_brlDriftTimeBin->Fill(trtDriftTimeBin);
           m_h_brlTrailEdge->Fill(trtTrailEdge);
         }
-        else if (abs(trtBrlEc) == 2) {
+        else if (std::abs(trtBrlEc) == 2) {
           m_h_ecPhiMod->Fill(trtPhiMod);
           m_h_ecWheel->Fill(trtLayerWheel);
           m_h_ecStrawLayer->Fill(trtStrawLayer);

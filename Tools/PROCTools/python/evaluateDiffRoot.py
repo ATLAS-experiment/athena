@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 from optparse import OptionParser    
@@ -11,7 +11,6 @@ from optparse import OptionParser
   add differences to the dicts
 """
 def getResults(infile, test_dict):
-    global debugmode
     for test in test_dict.keys():
         for ftype in ['ESD','AOD']:
             linenr = 0

@@ -13,7 +13,7 @@ atlas_add_library( JetUncertaintiesLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AsgTools xAODEventInfo xAODJet PATInterfaces
    JetCPInterfaces
-   PRIVATE_LINK_LIBRARIES xAODCore xAODTracking PathResolver ParticleJetToolsLib )
+   PRIVATE_LINK_LIBRARIES xAODCore xAODTracking PathResolver ParticleJetToolsLib)
 
 atlas_add_component( JetUncertainties
    src/components/*.cxx

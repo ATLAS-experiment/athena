@@ -79,8 +79,10 @@ namespace CP {
          }
 
          // Record it to the output for the current event.
+         static constexpr bool OVERWRITE = false;
+         static constexpr bool IS_OWNER = true;
          ANA_CHECK( m_event.record( const_cast< void* >( obj ), item.typeName,
-                                    item.name, m_basketSize, m_splitLevel ) );
+                                    item.name, OVERWRITE, METADATA, IS_OWNER ) );
       }
 
       // Write the event.

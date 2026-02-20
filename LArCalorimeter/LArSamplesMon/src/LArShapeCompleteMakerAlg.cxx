@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/LArShapeCompleteMakerAlg.h"
@@ -62,6 +62,7 @@ StatusCode LArShapeCompleteMakerAlg::execute()
 
   if (lsc->setGroupingType(m_groupingType, msg()).isFailure() || lsc->initialize().isFailure()) {
     ATH_MSG_ERROR("Unable to initialize LArShapeComplete");
+    delete lsc;
     return StatusCode::FAILURE;    
   };
 
@@ -81,21 +82,22 @@ StatusCode LArShapeCompleteMakerAlg::execute()
     CellInfo* info = m_dumperTool->makeCellInfo(channelID, id);
     if (!info) {
       ATH_MSG_ERROR("Problem making cell info for hash = " << k << ", terminating...");
+      delete errorGetter;
       return StatusCode::FAILURE;
     }
     
     HistoryContainer* histCont = m_template->makeNewHistory(k, info);
-    std::vector<const EventData*> events;
+    std::vector<std::unique_ptr<const EventData> > events;
     for (unsigned int g = 0; g < 3; g++) {
       DataContainer* data = new DataContainer((CaloGain::CaloGain)g, std::vector<short>(), 0, 0, 0, -1, std::vector<float>());
-      events.push_back(new EventData(-1,-1,-1,-1));
+      events.push_back(std::make_unique<EventData>(-1,-1,-1,-1));
       histCont->add(data);
     }
-    History* history = new History(*histCont, events, k, errorGetter);
+    History* history = new History(*histCont, std::move(events), k, errorGetter);
     
     for (unsigned int g = 0; g < 3; g++) {
       CaloGain::CaloGain gain = (CaloGain::CaloGain)g;
-      const LArSamples::ShapeErrorData* sed = nullptr;
+      std::unique_ptr<const LArSamples::ShapeErrorData> sed;
       if (history) sed = history->shapeErrorData(gain, LArSamples::BestShapeError);
       
       // The containers

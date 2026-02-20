@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import time, math
 
@@ -53,7 +53,6 @@ def MapToSystem(defect):
 
 def ComputeRunLumi(dic,run,lumiperlb):
     # consider ATLAS ready only
-    global readylb
     total = 0.
     for lbl in lumiperlb:
         if lbl not in readylb:
@@ -64,7 +63,6 @@ def ComputeRunLumi(dic,run,lumiperlb):
 
 def GetLBLumi(dic,run):
     global lumifolder
-    global usenb
     
     lumifolder = ''
     lumiperlb = {}
@@ -94,7 +92,6 @@ def GetLBLumi(dic,run):
     return lumiperlb
 
 def GetLBLiveFraction(dic,run):
-    global livetrigger
     livefraction = {}
     #trigrate = dic[DataKey('TriggerRates')][run][0].value['L1_EM5']
     triggerRates = dic[DataKey('TriggerRates')][run][0].value
@@ -121,9 +118,6 @@ def GetLBReady(dic,run):
 
 ########################################################################
 def MakePlot_SummaryLumiLoss(loss,colors,dicsum,name):
-
-    global usenb
-    global unit
 
     SetStyle()
     gStyle.SetTitleX(0.5)
@@ -226,9 +220,6 @@ def MakePlot_SummaryLumiLoss(loss,colors,dicsum,name):
     return pname
 
 def MakePlot_PerRunLumiLoss(loss,colors,dicsum,name):
-
-    global usenb
-    global unit
 
     ## get runs list - remove runs with no defect
     runs = []
@@ -365,8 +356,6 @@ def MakePlot_PerRunLumiLoss(loss,colors,dicsum,name):
     return pname
 
 def MakePlot_DefectsPerSystem(sys,intolerable,tolerable,ignored,dic,run):
-
-    global readylb
 
     from CoolRunQuery.AtlRunQueryQueryConfig import QC
     
@@ -1168,8 +1157,6 @@ class DQSummary:
         print ('  Total Global Not Ready (Stable Beams): %.2f %s-1'%(dicsum[DataKey('TotalNotReady')],unit))
         print ('  Total Global Busy (Stable Beams): %.2f %s-1'%(dicsum[DataKey('TotalBusy')],unit))
         print ('+++++++++++++++++++++++++++++++++++++++++++++++++++++')
-
-        global lumifolder
 
         if totalNumberOfReadyLB>0:
             summaryinfo =  '<table align="center" style="font-size:80%;"><tr>'

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -61,15 +61,19 @@ def LArBadFebCfg(configFlags, tag=None, dbname=None):
     return result
 
 def LArMaskedSCCfg(configFlags):
+     
+    reloadEveryEvent = (configFlags.Common.isOnline and configFlags.DQ.doMonitoring)
+
     result=ComponentAccumulator()
     result.merge(LArOnOffIdMappingSCCfg(configFlags))
     from IOVDbSvc.IOVDbSvcConfig import addFolders
     result.merge(addFolders(configFlags,"/LAR/BadChannels/MaskedSC","LAR_ONL",
                             tag="LARBadChannelsMaskedSC-RUN3-UPD1-00",
                             className="CondAttrListCollection",
-                            extensible=configFlags.Common.isOnline )) # when run online, need folder to be extensible to force reload each event         
+                            extensible=reloadEveryEvent))
     condAlgo = CompFactory.LArBadChannelCondAlg(name="MaskedSCCondAlg",ReadKey="/LAR/BadChannels/MaskedSC",isSC=True,
-                                                CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC")         
+                                                CablingKey="LArOnOffIdMapSC",WriteKey="LArMaskedSC",
+                                                ReloadEveryEvent=reloadEveryEvent)
     result.addCondAlgo(condAlgo)
     return result
 

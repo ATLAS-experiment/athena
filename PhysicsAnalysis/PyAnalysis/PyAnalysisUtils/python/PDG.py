@@ -603,7 +603,7 @@ W = W_plus                            !            !
 def _fill_dicts():
     pdgid_names.clear()
     root_names.clear()
-    global _pdgtable
+    global _pdgtable # noqa: F824
     for line in _pdgtable.split ('\n'):
         line = line.strip()
         if len(line) == 0 or line[0] == '#':

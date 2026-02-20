@@ -389,17 +389,13 @@ def getMCSignatures():
         ChainProp(name='HLT_g35_medium_g25_medium_noringer_L12eEM24L', groups=PrimaryPhIGroup+SinglePhotonGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_e26_dnntight_ivarloose_e30_dnnloose_nopix_lrtmedium_probe_L1eEM26M',l1SeedThresholds=['eEM26M','PROBEeEM26M'],groups=TagAndProbePhIGroup+SingleElectronGroup),
        
-
-        #ATR-29567
-        ChainProp(name='HLT_e24_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM24VM', groups=PrimaryPhIGroup+SingleElectronGroup),
         
         
         
         ChainProp(name='HLT_e26_lhtight_L1eEM26', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26L', groups=SingleElectronGroup),
         ChainProp(name='HLT_e26_lhtight_L1eEM26T', groups=SingleElectronGroup),
-        #------------ dnn chains
+        
         
         
         
@@ -418,7 +414,6 @@ def getMCSignatures():
         ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L14jJ40', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=BphysElectronGroup),
         ChainProp(name='HLT_e5_lhvloose_bBeeM6000_L14jJ40', l1SeedThresholds=['eEM5'], stream=['BphysDelayed'], groups=BphysElectronGroup),
         
-        
         #
         ChainProp(name='HLT_2e5_lhvloose_bBeeM6000_L1BPH-0M9-eEM9-eEM7_MU5VF', l1SeedThresholds=['eEM5'], stream=['BphysDelayed'], groups=BphysElectronGroup),
         ChainProp(name='HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BPH-0M9-eEM9-eEM7_MU5VF', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=BphysElectronGroup),
@@ -426,31 +421,13 @@ def getMCSignatures():
         # ATR-27438
         ChainProp(name='HLT_e5_nopid_lrtloose_L1eEM5', l1SeedThresholds=['eEM5'], groups=SingleElectronGroup+['PS:NoBulkMCProd']),
 
-        # ATR-27780
-        
-
-        #ATR-25764 - adding Photon chains with different isolation WPs
-        ChainProp(name='HLT_g25_tight_icaloloose_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
-        ChainProp(name='HLT_g25_tight_icalotight_L1eEM26M', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
-
-        #  ATR-26311
-        #  Validating/checking eFEX and primary electron trigger
-        ChainProp(name='HLT_e26_etcut_L1eEM26M', groups=SingleElectronGroup),
-
-        # Ringer development / validation also ATR-24384
-        ChainProp(name='HLT_g20_loose_ringer_L1eEM18M', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
-        ChainProp(name='HLT_g20_medium_ringer_L1eEM18M', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
-        ChainProp(name='HLT_g120_loose_ringer_L1eEM26M', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
-        ChainProp(name='HLT_g20_loose_L1eEM18M',  groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
-
-        ChainProp(name='HLT_g20_medium_L1eEM18M', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
         
         #  ATR-27156
         #  Migration of legacy EM seeded items to Phase 1 eEM seeded - EGamma chains
         ChainProp(name='HLT_e26_lhtight_ivarloose_nogsf_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup), #Phase-1
         ChainProp(name='HLT_e60_lhmedium_nogsf_L1eEM26M', groups=SupportPhIGroup+SingleElectronGroup), #Phase-1
         ChainProp(name='HLT_g25_tight_icalotight_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup), #Phase-1
-        ChainProp(name='HLT_g25_tight_icalomedium_L1eEM24L', groups=SupportPhIGroup+SinglePhotonGroup),#Phase-1
+        
        
         # ATR-27940
         ChainProp(name='HLT_g35_medium_g25_medium_L12eEM9_EMPTY', l1SeedThresholds=['eEM9']*2, stream=['Late'], groups=PrimaryPhIGroup+MultiPhotonGroup),

@@ -4,7 +4,6 @@
 
 #include "DiTauRecTools/DiTauIDVarCalculator.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
 
 using namespace DiTauRecTools;
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfUtils
 # @brief Transform utility functions
@@ -1009,7 +1009,7 @@ class ParallelJobProcessor(object):
         # While the number of jobs remaining is greater than zero, cycle over
         # all jobs in the JobGroup object submission submission, watching for a
         # timeout of the JobGroup object submission. If a result has not been
-        # retrived for a job (i.e. the Job object does not have a result data
+        # retrieved for a job (i.e. the Job object does not have a result data
         # attribute), then check if a result is available for the job (using the
         # method multiprocessing.pool.AsyncResult.ready()). If a result is
         # available for the job, then check if the job has run successfully

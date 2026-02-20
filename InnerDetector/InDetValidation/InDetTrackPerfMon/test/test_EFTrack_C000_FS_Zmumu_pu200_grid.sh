@@ -145,7 +145,7 @@ run "dcube_last_skipRC" \
 run "PrintSummaryTable_last_skipRC" \
   PrintTrkAnaSummary.py \
     -t IDTPM.${OutSampleName}.HIST.root \
-    -r ${referenceName_absPath} \
+    -r ${lastref_dir}/IDTPM.${OutSampleName}.HIST.root \
     -R "last_nightly" -T "new_nightly" \
-    -o "TrkAnaSummary_last_&TrkAnaName&.html" \
+    -o "TrkAnaSummary_last_\&TrkAnaName\&.html" \
     -a "${allTrkAna}"

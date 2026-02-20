@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITCONATINER_MDTCSMIDHASH_H
 #define MUONDIGITCONATINER_MDTCSMIDHASH_H
 
-
-#include "MuonIdHelpers/MdtIdHelper.h" 
+#include "Identifier/Identifier.h"
 #include <map>
+#include <vector>
+
 
 /** Hash function for Mdt module Identifier
     to be used in MdtDigitContainer (IdentifiableContainer) 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -164,10 +164,15 @@ void Root::TMsgLogger::WriteMsg( TMsgLevel mlevel, const std::string& line ) con
    if ((slevel = m_levelMap.find( mlevel )) == m_levelMap.end()) return;
 #ifdef USE_COLORED_CONSOLE
    // no text for INFO
+   std::string col;
+   auto it = m_colorMap.find( mlevel );
+   if (it != m_colorMap.end()) {
+     col = it->second;
+   }
    if (mlevel == kINFO) 
-      cout << m_colorMap.find( mlevel )->second << m_prefix << line << "\033[0m" << endl;
+      cout << col << m_prefix << line << "\033[0m" << endl;
    else
-      cout << m_colorMap.find( mlevel )->second << m_prefix 
+      cout << col << m_prefix
            << "<" << slevel->second << "> " << line  << "\033[0m" << endl;
 #else
    if (mlevel == kINFO) 
@@ -198,7 +203,12 @@ Root::TMsgLevel Root::TMsgLogger::MapLevel( const TString& instr ) const
 
    // not found --> fatal error
    TString line( Form( "fatal error in <TMsgLogger::MapLevel> unknown output level: %s ==> abort", ins.Data() ) );
-   cout << m_colorMap.find( kFATAL )->second << m_prefix << line << "\033[0m" << endl;
+   std::string col;
+   auto colit = m_colorMap.find( kFATAL );
+   if (colit != m_colorMap.end()) {
+     col = colit->second;
+   }
+   cout << col << m_prefix << line << "\033[0m" << endl;
    abort();
 
    return kFATAL;

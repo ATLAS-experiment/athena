@@ -142,7 +142,7 @@ TEST_F (ColumnarPhysLiteTest, AsgPhotonEfficiencyCorrectionTool)
 
   XAODTestToolCaller callXAOD (*tool, "AnalysisPhotons");
 
-  doCall (*tool, "AsgPhotonEfficiencyCorrectionTool", "AnalysisPhotons", callXAOD, {{"Photons", "AnalysisPhotons"}});
+  doCall ({.tool = tool.get(), .name = "AsgPhotonEfficiencyCorrectionTool", .xAODToolCaller = &callXAOD, .containerRenames = {{"Photons", "AnalysisPhotons"}}});
 }
 
 ATLAS_GOOGLE_TEST_MAIN

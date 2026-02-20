@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]){
     std::cout << "Output not specified, exiting" << std::endl;
     return 1;
   }
-  std::cout << sample.c_str() << truth_jetColl.c_str() << reco_jetColl.c_str() << output.c_str() << string_debugtool.c_str() << std::endl;
+  std::cout << sample << truth_jetColl << reco_jetColl << output << string_debugtool << std::endl;
 
   TString kindofmass = string_kindofmass;
   TString kindofmc   = string_kindofmc;

@@ -10,7 +10,7 @@
 #include <memory>
 
 SCT_DCSConditionsHVCondAlg::SCT_DCSConditionsHVCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

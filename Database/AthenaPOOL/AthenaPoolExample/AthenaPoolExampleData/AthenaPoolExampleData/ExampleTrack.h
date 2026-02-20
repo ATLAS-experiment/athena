@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLETRACK_H
@@ -25,9 +25,9 @@ class ExampleTrack {
 
 public: // Constructor and Destructor
    /// Default Constructor
-   ExampleTrack() : m_pt(0.0), m_eta(0.0), m_phi(0.0), m_detector(""), m_elementlink1(), m_elementlink2(), m_elementlinkvector(), m_navigable(), m_weightednavigable() {}
+   ExampleTrack() = default;
    /// Destructor
-   virtual ~ExampleTrack() {}
+   virtual ~ExampleTrack() = default;
 
 public: // Non-static members
    /// @return the transverse momentum value.
@@ -85,9 +85,9 @@ public: // Non-static members
    const Navigable<ExampleHitContainer, double>* getWeightedNavigable() const { return(&m_weightednavigable); }
 
 private:
-   double m_pt;
-   double m_eta;
-   double m_phi;
+   double m_pt{0.0};
+   double m_eta{0.0};
+   double m_phi{0.0};
    std::string m_detector;
 
    ElementLink<ExampleHitContainer> m_elementlink1, m_elementlink2;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/LArCalorimeter/LArIdentifier/test/test_larhvid.cxx,v 1.6 2008-05-30 14:46:45 lucotte Exp $ 
@@ -11,7 +11,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include <iostream> 
 #include <fstream> 
- 
+
 static void check_lar_highvoltage_id_decoding(IdDictMgr& idd)
 /*========================================================*/
 {    
@@ -289,20 +289,25 @@ int main (int argc, char* argv[])
 /*============================= */
 {// start of main 
     if (argc < 2) return (1);  
-    IdDictParser parser;  
 
     // Test of LArElectrode
-    std::string lArIDFileName = "IdDictLArElectrode.xml";
-    parser.register_external_entity("LArElectrode",lArIDFileName);
-    IdDictMgr& idd = parser.parse (argv[1]);  
-    std::cout << "[MAIN] --> got dict mgr idd=" << lArIDFileName << std::endl;
-    check_larElectrode_decoding(idd);
+    {
+      IdDictParser parser;
+      std::string lArIDFileName = "IdDictLArElectrode.xml";
+      parser.register_external_entity("LArElectrode",lArIDFileName);
+      IdDictMgr& idd = parser.parse (argv[1]);
+      std::cout << "[MAIN] --> got dict mgr idd=" << lArIDFileName << std::endl;
+      check_larElectrode_decoding(idd);
+    }
 
     // Test of LArHVLine
-    lArIDFileName = "IdDictLArHighVoltage.xml";
-    parser.register_external_entity("LArHighVoltage",lArIDFileName);
-    idd = parser.parse (argv[1]);  
-    check_lar_highvoltage_id_decoding(idd);     
+    {
+      IdDictParser parser;
+      std::string lArIDFileName = "IdDictLArHighVoltage.xml";
+      parser.register_external_entity("LArHighVoltage",lArIDFileName);
+      IdDictMgr& idd = parser.parse (argv[1]);
+      check_lar_highvoltage_id_decoding(idd);
+    }
 
     return 0;  
 }  

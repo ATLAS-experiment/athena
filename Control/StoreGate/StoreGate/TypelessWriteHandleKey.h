@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/TypelessWriteHandleKey.h
@@ -15,6 +15,7 @@
 
 
 #include "StoreGate/VarHandleKey.h"
+#include <concepts>
 
 
 namespace SG {
@@ -63,8 +64,7 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER,
-            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+  template <std::derived_from<IProperty> OWNER>
   inline
   TypelessWriteHandleKey( OWNER* owner,
                           const std::string& name,

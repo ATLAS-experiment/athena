@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/CombinationsGrouper.h"
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/CombinationsGen.h"
 
-#include <sstream>
 
 CombinationsGrouper::CombinationsGrouper(){}
 
@@ -41,7 +40,7 @@ HypoJetVector CombinationsGrouper::next() {
   HypoJetVector v;
   for(auto i : combs.first){ v.push_back(*(m_jets.begin() + i));}
   
-  return HypoJetVector(v);
+  return HypoJetVector(std::move(v));
 }
 
 std::string CombinationsGrouper::getName() const {
@@ -50,13 +49,10 @@ std::string CombinationsGrouper::getName() const {
 
 std::string CombinationsGrouper::toString() const {
 
-  std::stringstream ss;
+  std::string s= "CombinationsGrouper - create all combinations of jets of length ";
+  s+= std::to_string(m_groupSize) + '\n';
 
-  ss << "CombinationsGrouper - create all combinations of ";
-  ss << "jets of length " ;
-  ss << m_groupSize << '\n';
-
-  return ss.str();
+  return s;
 }
 
 

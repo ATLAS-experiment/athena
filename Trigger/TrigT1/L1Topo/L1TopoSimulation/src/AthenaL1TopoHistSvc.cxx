@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./AthenaL1TopoHistSvc.h"
@@ -24,7 +24,7 @@ class AthenaL1TopoHistSvc::AthenaL1TopoHistSvcImpl : public TrigConf::TrigConfMe
 {
 public:
    
-   AthenaL1TopoHistSvcImpl(ServiceHandle<ITHistSvc> histSvc) :
+   AthenaL1TopoHistSvcImpl(const ServiceHandle<ITHistSvc> & histSvc) :
       TrigConfMessaging("AthenaL1TopoHistSvc"),
       m_histSvc(histSvc)
    {
@@ -126,7 +126,7 @@ private:
 };
 
 
-AthenaL1TopoHistSvc::AthenaL1TopoHistSvc(ServiceHandle<ITHistSvc> histSvc) :
+AthenaL1TopoHistSvc::AthenaL1TopoHistSvc(const ServiceHandle<ITHistSvc> & histSvc) :
    m_impl(new AthenaL1TopoHistSvc::AthenaL1TopoHistSvcImpl(histSvc))
 {}
 

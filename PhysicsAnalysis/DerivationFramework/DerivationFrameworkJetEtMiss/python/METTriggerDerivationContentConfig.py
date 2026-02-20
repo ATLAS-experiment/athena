@@ -120,7 +120,7 @@ def AugmentationToolsCfg(ConfigFlags, **kwargs):
 def addMETTriggerDerivationContent(slimmingHelper, isLoose=True):
    
    slimmingHelper.SmartCollections = ["Electrons", "Muons", "Photons", "TauJets", "PrimaryVertices", "InDetTrackParticles", "EventInfo",
-                                      "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets", "BTagging_AntiKt4EMPFlow",
+                                      "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets",
                                       "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow"]
 
 

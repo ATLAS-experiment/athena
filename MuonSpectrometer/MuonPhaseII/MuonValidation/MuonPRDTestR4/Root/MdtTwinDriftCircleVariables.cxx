@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool MdtTwinDriftCircleVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void MdtTwinDriftCircleVariables::dump(const ActsGeometryContext& gctx,
+    void MdtTwinDriftCircleVariables::dump(const ActsTrk::GeometryContext& gctx,
                                            const xAOD::MdtTwinDriftCircle& dc) {
         const MuonGMR4::MdtReadoutElement* re = dc.readoutElement();
         const Identifier id{re->measurementId(dc.measurementHash())};

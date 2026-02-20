@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file   GsfMeasurementUpdator.cxx
@@ -7,6 +7,11 @@
  * @author Tom Athkinson, Anthony Morley, Christos Anastopoulos
  * @brief  Implementation code for Gsf Measurement Update
  */
+
+// Suppress a bogus warning.
+#if __GNUC__ >= 14 && defined(__aarch64__)
+# pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
 
 #include "EventPrimitives/EventPrimitivesCovarianceHelpers.h"
 //

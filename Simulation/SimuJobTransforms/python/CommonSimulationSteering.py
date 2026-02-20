@@ -90,6 +90,8 @@ def CommonSimulationCfg(flags, log):
         cfg.merge(SimEventFilterCfg(flags, sequenceName='SimSequence'))
         cfg.merge(InvertedSimEventFilterCfg(flags, sequenceName='CopyHitSequence'))
         cfg.merge(RenameHitCollectionsCfg(flags, sequenceName='CopyHitSequence'))
+        evSel = cfg.getService("EventSelector")
+        evSel.CollectionType = "RootCollection"
     else:
         #Cases 1, 2, 3
         # add BeamEffectsAlg
@@ -119,10 +121,16 @@ def CommonSimulationCfg(flags, log):
         if flags.Sim.ISF.ReSimulation:
             AcceptAlgNames += ['RenameHitCollections']
     else:
-        AcceptAlgNames = ['G4AtlasAlg']
-        #add the G4AtlasAlg
-        from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
-        cfg.merge(G4AtlasAlgCfg(flags))
+        if not flags.Sim.UseG4Workers:
+            AcceptAlgNames = ['G4AtlasAlg']
+            #add the G4AtlasAlg
+            from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
+            cfg.merge(G4AtlasAlgCfg(flags))
+        else:
+            AcceptAlgNames = ['G4RunAlg']
+            #add the G4AtlasAlg
+            from G4AtlasAlg.G4RunAlgConfig import G4RunAlgCfg
+            cfg.merge(G4RunAlgCfg(flags))
         from SimulationConfig.SimEnums import LArParameterization
         if flags.Sim.LArParameterization is LArParameterization.FastCaloSim:
             cfg.getEventAlgo("ISF_CollectionMerger").InputLArEMBHits.data.sort() # temporary workaround
@@ -151,10 +159,5 @@ def CommonSimulationCfg(flags, log):
         from SimuJobTransforms.SimOutputConfig import getStreamEVNT_TR_ItemList
         cfg.merge( OutputStreamCfg(flags,"EVNT_TR", ItemList=getStreamEVNT_TR_ItemList(flags), disableEventTag=True, AcceptAlgs=AcceptAlgNames) )
         cfg.merge(SetupMetaDataForStreamCfg(flags, "EVNT_TR", AcceptAlgs=AcceptAlgNames, createMetadata=[MetadataCategory.IOVMetaData]))
-
-    # Add MT-safe PerfMon
-    if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
-        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-        cfg.merge(PerfMonMTSvcCfg(flags))
 
     return cfg

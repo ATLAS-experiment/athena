@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorPhysValMonitoringTool.h"
@@ -18,19 +18,18 @@ namespace GeneratorPhysVal
 {
 
   GeneratorPhysValMonitoringTool::GeneratorPhysValMonitoringTool(const std::string &type,
-                                                                 const std::string &name,                                             
-                                                                 const IInterface *parent) : ManagedMonitorToolBase(type, name, parent),
-                                                                                             m_testPlots(0, "test/", "test"),                                     // for testing 
-                                                                                             m_ChargedParticlePlots(0,"ChargedParticle/","ChargedParticle"),     // save charged particles
-                                                                                             m_GeneratorLevelPlots(0,"GeneratorLevel/","GeneratorLevel"),        // save generator level particle 
-                                                                                             m_SimulationLevelPlots(0,"SimulationLevel/","SimulationLevel"),     // save simulation level particle 
-                                                                                             m_ProductionVertexPlots(0,"ProductionVertex/","ProductionVertex"),  // save production vertex 
-                                                                                             m_EventInfoPlots(0,"EventInfo/","EventInfo"),                       // save EventInfo
-                                                                                             m_number(nullptr),
-                                                                                             m_number_GeneratorLevel(nullptr),
-                                                                                             m_number_SimulationLevel(nullptr),
-                                                                                             m_GeneratorSelector(new GeneratorSelector)
-
+   const std::string &name, const IInterface *parent) : 
+    ManagedMonitorToolBase(type, name, parent),
+    m_testPlots(0, "test/", "test"),                                     // for testing 
+    m_ChargedParticlePlots(0,"ChargedParticle/","ChargedParticle"),     // save charged particles
+    m_GeneratorLevelPlots(0,"GeneratorLevel/","GeneratorLevel"),        // save generator level particle 
+    m_SimulationLevelPlots(0,"SimulationLevel/","SimulationLevel"),     // save simulation level particle 
+    m_ProductionVertexPlots(0,"ProductionVertex/","ProductionVertex"),  // save production vertex 
+    m_EventInfoPlots(0,"EventInfo/","EventInfo"),                       // save EventInfo
+    m_number(nullptr),
+    m_number_GeneratorLevel(nullptr),
+    m_number_SimulationLevel(nullptr),
+    m_GeneratorSelector(new GeneratorSelector)
   {
     
   }
@@ -82,7 +81,7 @@ StatusCode GeneratorPhysValMonitoringTool::book(PlotBase& plots)
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey, ctx);
 
     m_EventInfoPlots.check_eventNumber(eventInfo);
-    m_ref_mcChannelNumber = m_EventInfoPlots.check_mcChannelNumber(eventInfo,m_ref_mcChannelNumber);
+    m_ref_mcChannelNumber = m_EventInfoPlots.check_mcChannelNumber(std::move(eventInfo),m_ref_mcChannelNumber);
 
     const xAOD::TruthParticleContainer *TruthParticles(nullptr);
     if (!TruthParticles)

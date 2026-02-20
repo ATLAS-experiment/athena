@@ -268,7 +268,7 @@ cd testarea
 mkdir build run source
 ```
 
-Then, you need to checkout `Athena`. This can be done via a full or a sparse checkout. For the purpose of adapting this tool, I recommend a sparse checkout, but this is entirely up to you. Detailed instructions can be found [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/).
+Then, you need to checkout `Athena`. This can be done via a full or a sparse checkout. For the purpose of adapting this tool, I recommend a sparse checkout, but this is entirely up to you. Detailed instructions can be found [here](https://atlas-software.docs.cern.ch/athena/git/).
 
 Assuming you have completed a sparse checkout of `Athena` as explained in the linked tutorial, you need to then add the `EGammaVariableCorrection` to your sparse checkout. For this, do
 
@@ -281,7 +281,7 @@ You can use `addpkg` to add as many packages as you like, `rmpkg` to remove them
 
 ### Setup and Compile
 
-**WARNING:** The following instructions assume a sparse checkout of Athena. If you made a full checkout, please refer [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/branch-and-change/#setting-up-to-compile-and-test-code-for-the-tutorial) on how to properly compile without fully building Athena.
+**WARNING:** The following instructions assume a sparse checkout of Athena. If you made a full checkout, please refer [here](https://atlas-software.docs.cern.ch/athena/git/develop/) on how to properly compile without fully building Athena.
 
 The tool is developed on the athena `main`. To set up the according environment, do
 

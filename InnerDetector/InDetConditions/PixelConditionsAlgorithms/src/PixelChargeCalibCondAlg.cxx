@@ -34,7 +34,7 @@ using InDetDD::enum2uint;
 
 
 PixelChargeCalibCondAlg::PixelChargeCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  ::AthReentrantAlgorithm(name, pSvcLocator){
+  ::AthCondAlgorithm(name, pSvcLocator){
    
 }
 

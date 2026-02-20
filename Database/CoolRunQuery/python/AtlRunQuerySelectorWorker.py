@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #import the selectors
@@ -49,7 +49,6 @@ class SelectorWorker:
         'olclumi'         : 'OLCLumiSelector',
         'olcfillparams'   : 'OLCFillParamsCondition',
         'olclbdata'       : 'OLCLBDataCondition',
-        'datasets'        : 'DatasetsSelector',
         'partition'       : 'PartitionSelector',
         'readyforphysics' : 'ReadyForPhysicsSelector',
         'larcond'         : 'LArcondSelector',

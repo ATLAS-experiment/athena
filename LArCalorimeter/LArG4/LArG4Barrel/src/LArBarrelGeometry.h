@@ -50,6 +50,10 @@ namespace LArG4 {
       // Full identifier computation from a G4 step
       virtual LArG4Identifier CalculateIdentifier( const G4Step* ) const override final;
 
+      // Super resolution identifier computation from a G4 step
+      virtual LArG4Identifier CalculateSuperResolutionIdentifier(const G4Step* a_step) const override final;
+
+
       // Given a point compute all quantities (cell number, distance to electrode, etc...)
       virtual void findCell( CalcData & currentCellData, const double & x, const double & y, const double & z,
                              const double & r, const double & eta, const double & phi, const bool detail) const override final;

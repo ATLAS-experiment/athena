@@ -29,6 +29,7 @@ namespace TrigConf {
    class L1ThrExtraInfo_gLJ;
    class L1ThrExtraInfo_gXE;
    class L1ThrExtraInfo_jXE;
+   class L1ThrExtraInfo_cXE;
    class L1ThrExtraInfo_gTE;
    class L1ThrExtraInfo_jTE;
    class L1ThrExtraInfo_MU;
@@ -55,6 +56,7 @@ namespace TrigConf {
       const L1ThrExtraInfo_gXE & gXE() const;
       const L1ThrExtraInfo_jXE & jXE() const;
       const L1ThrExtraInfo_gTE & gTE() const;
+      const L1ThrExtraInfo_cXE & cXE() const;
       const L1ThrExtraInfo_jTE & jTE() const;
       const L1ThrExtraInfo_MU & MU() const;
 
@@ -653,7 +655,24 @@ namespace TrigConf {
       void load();
       /** gTE specific data */
    };
-
+   
+   class L1ThrExtraInfo_cXE final : public L1ThrExtraInfoBase {
+   public:
+      L1ThrExtraInfo_cXE(const std::string & thrTypeName, const ptree & data) :
+         L1ThrExtraInfoBase(thrTypeName, data) { load(); }
+      virtual ~L1ThrExtraInfo_cXE() override = default;
+      virtual std::string className() const override { return "L1ThrExtraInfo_cXE"; }
+      float jXeWeight() const { return m_jXeWeight; }
+      float gXeWeight() const { return m_gXeWeight; }
+   private:
+      /** Update the internal members */
+      void load();
+      /** cXE specific data */
+      // weights/coefficients for jXE and gXE contributions to cXE
+      float m_jXeWeight{0.}; 
+      float m_gXeWeight{0.};
+   };
+   
    class L1ThrExtraInfo_MU final : public L1ThrExtraInfoBase {
    public:
       L1ThrExtraInfo_MU(const std::string & thrTypeName, const ptree & data) :

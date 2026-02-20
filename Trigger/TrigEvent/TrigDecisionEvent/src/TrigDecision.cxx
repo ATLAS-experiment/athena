@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -29,10 +29,7 @@ using namespace TrigDec;
 
 TrigDecision::TrigDecision()
   : m_configMasterKey(0),
-    m_bgCode(0),
-    m_l2_result_ptr(0),
-    m_ef_result_ptr(0),
-    m_hlt_result_ptr(0)    
+    m_bgCode(0)
 {
   //  m_detailLevel = NONE;
   //  m_status = true;
@@ -46,10 +43,7 @@ TrigDecision::TrigDecision( const LVL1CTP::Lvl1Result& l1Result,
   m_bgCode(0),
   m_l1_result(l1Result),
   m_l2_result(l2Result),
-  m_ef_result(efResult),
-  m_l2_result_ptr(0),
-  m_ef_result_ptr(0),
-  m_hlt_result_ptr(0)
+  m_ef_result(efResult)
 { }
 
 
@@ -61,10 +55,8 @@ TrigDecision::TrigDecision( const LVL1CTP::Lvl1Result& l1Result,
   m_l1_result(l1Result),
   //  m_l2_result(0),
   //  m_ef_result(0),
-  m_hlt_result(hltResult),
-  m_l2_result_ptr(0),
-  m_ef_result_ptr(0),
-  m_hlt_result_ptr(0) { }
+  m_hlt_result(hltResult)
+{ }
 
 
 TrigDecision::TrigDecision( const LVL1CTP::Lvl1Result& l1Result,
@@ -76,28 +68,16 @@ TrigDecision::TrigDecision( const LVL1CTP::Lvl1Result& l1Result,
     m_bgCode(bgCode),
     m_l1_result (l1Result),
     m_l2_result (l2Result),
-    m_ef_result (efResult),
-    m_l2_result_ptr(nullptr),
-    m_ef_result_ptr(nullptr),
-    m_hlt_result_ptr(nullptr)
+    m_ef_result (efResult)
 {
 }
 
 
+TrigDecision& TrigDecision::operator= (TrigDecision&&) = default;
+
+
 TrigDecision::~TrigDecision()
 {
-  //  resetCache();
-  // if pointers to HLT results pointers are set we own them (we need to handle od version)
-  if (m_l2_result_ptr)
-    delete m_l2_result_ptr;
-  
-  if (m_ef_result_ptr)
-    delete m_ef_result_ptr;
-
-  
-  if (m_hlt_result_ptr)
-    delete m_hlt_result_ptr;
-
 }
 
 namespace {
@@ -127,8 +107,6 @@ const HLT::HLTResult&      TrigDecision::getEFResult() const {
 
 
 const HLT::HLTResult&      TrigDecision::getHLTResult() const {
-  if (m_hlt_result_ptr)        // if we have ptr we should use it (old data 13.0.X and 14.0.0)
-    return *m_hlt_result_ptr;  
   if (m_hlt_result.isValid()) {  // add protection against invalid DataLinks
     return *m_hlt_result;        // this is data link, derefencing it means whole lot different thing
   } else {

@@ -143,13 +143,10 @@ private:
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
   Gaudi::Property<float> m_iAbsCharge{this, "AbsCharge", NAN}; 
   Gaudi::Property<float> m_dJetRNNSigTransMin{this, "JetRNNSigTransMin", NAN};
-  Gaudi::Property<float> m_dJetRNNSigTransMax{this, "JetRNNSigTransMax", NAN}; 
   Gaudi::Property<float> m_dGNTauSigTransMin{this, "GNTauSigTransMin", NAN};
-  Gaudi::Property<float> m_dGNTauSigTransMax{this, "GNTauSigTransMax", NAN};
   Gaudi::Property<float> m_iNTrack{this, "NTrack", NAN};
   Gaudi::Property<float> m_dEleRNNSigTransMin{this, "EleRNNSigTransMin", NAN};
-  Gaudi::Property<float> m_dEleRNNSigTransMax{this, "EleRNNSigTransMax", NAN};
-  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 0};
+  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 1}; // this corresponds to JETIDNONE
   Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
   Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};
@@ -158,9 +155,6 @@ private:
   Gaudi::Property<std::vector<float>> m_vecAbsEtaRegion{this, "AbsEtaRegion",{}};
   Gaudi::Property<std::vector<int>> m_vecAbsCharges{this, "AbsCharges", {}};
   Gaudi::Property<std::vector<unsigned>> m_vecNTracks{this, "NTracks", {}};
-  Gaudi::Property<std::vector<float>> m_vecJetRNNSigTransRegion{this, "JetRNNSigTransRegion", {}};
-  Gaudi::Property<std::vector<float>> m_vecGNTauSigTransRegion{this, "GNTauSigTransRegion", {}};
-  Gaudi::Property<std::vector<float>> m_vecEleRNNSigTransRegion{this, "EleRNNSigTransRegion", {}};
 
 protected:
   TFile* m_fOutFile;//!

@@ -291,6 +291,31 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
                            const EventContext& ctx) const;
 
   /**
+   * @brief Process header word
+   *
+   * @param inData input 16 bit data word for header
+   * @param robID ROB ID
+   * @param data Struct to hold data shared in methods used in fillCollection method
+   * @param rdoIDCont RDO ID Container to be filled.
+   * @param cache Cache.
+   * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
+   * @param hasError false means no error, true means at least one error
+   * @param breakNow to tell if need to break after this method execution.
+   */
+  StatusCode processHccHeader(const uint16_t inData,
+                              const uint8_t data8,
+                              uint8_t& isHCCHeader,
+                              const uint32_t robID,
+                              SharedData& data,
+                              SCT_RDO_Container& rdoIDCont,
+                              DataPool<SCT3_RawData>* dataItemsPool,
+                              CacheHelper& cache,
+                              SCT_RodDecoderErrorsHelper& errs,
+                              bool& hasError,
+                              bool& breakNow,
+                              const EventContext& ctx) const;  
+
+  /**
    * @brief Process raw data word
    *
    * @param inData input 16 bit data word for header
@@ -299,11 +324,15 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
    * @param errs SCT_RodDecoderErrorsHelper to fill IDCInDetBSErrContainer
    * @param hasError false means no error, true means at least one error
    */
-  StatusCode processRawData(const uint16_t inData,
-                            const uint32_t robID,
-                            SharedData& data,
-                            SCT_RodDecoderErrorsHelper& errs,
-                            bool& hasError) const;
+  StatusCode processHits(const uint16_t inData,
+                         const uint32_t robID,
+                         SharedData& data,
+                         SCT_RDO_Container& rdoIDCont,
+                         DataPool<SCT3_RawData>* dataItemsPool,
+                         CacheHelper& cache,
+                         SCT_RodDecoderErrorsHelper& errs,
+                         bool& hasError,
+                         const EventContext& ctx) const;
 
   /** Identifier helper class for the SCT subdetector that creates compact Identifier objects and 
       IdentifierHash or hash IDs. Also allows decoding of these IDs. */

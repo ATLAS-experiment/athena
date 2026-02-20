@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "ActsInterop/TableUtils.h"
+#include "AthAllocators/DataPool.h"
 
 namespace ActsTrk {
 
@@ -57,12 +58,16 @@ template <typename IClusteringTool, bool useCache>
 StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventContext& ctx) const
 {
   auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
-  auto mon_nclusters = Monitored::Scalar<int>("NClustersCreated");
-  auto mon = Monitored::Group( m_monTool, timer, mon_nclusters );
+  auto timer_rdoReading = Monitored::Timer<std::chrono::milliseconds>( "TIME_readingRDOs" );
+  auto timer_processing = Monitored::Timer<std::chrono::milliseconds>( "TIME_clusterization" );
+  auto mon_nclusters = Monitored::Scalar<int>( "NClustersCreated" );
+  auto mon = Monitored::Group( m_monTool, timer, timer_rdoReading, timer_processing, mon_nclusters );
     
+  timer_rdoReading.start();
   SG::ReadHandle<RDOContainer> rdoContainerHandle = SG::makeHandle(m_rdoContainerKey, ctx);
   ATH_CHECK(rdoContainerHandle.isValid());
   const RDOContainer* rdoContainer = rdoContainerHandle.cptr();
+  timer_rdoReading.stop();
 
   SG::ReadHandle<TrigRoiDescriptorCollection> roiCollectionHandle = SG::makeHandle( m_roiCollectionKey, ctx );
   ATH_CHECK(roiCollectionHandle.isValid());
@@ -75,6 +80,8 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   SG::ReadHandle< InDet::SiDetectorElementStatus > detEleStatusHandle = SG::makeHandle(m_detElStatus, ctx);
   ATH_CHECK(detEleStatusHandle.isValid());
   const InDet::SiDetectorElementStatus* detEleStatus = detEleStatusHandle.cptr();
+
+  timer_processing.start();
 
   Cache_WriteHandle cacheHandle;
   if constexpr (useCache) {
@@ -159,12 +166,13 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   mon_nclusters = nClusters;
   
   SG::WriteHandle<ClusterContainer> clusterHandle = SG::makeHandle(m_clusterContainerKey, ctx);
-  ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(),
+  ATH_CHECK(clusterHandle.record( std::make_unique<ClusterContainer>(SG::VIEW_ELEMENTS, SG::ALWAYS_TRACK_INDICES),
 				  std::make_unique<ClusterAuxContainer>() ));
   ClusterContainer *clusterContainer = clusterHandle.ptr();
 
   using xAODCluster_t = typename ClusterContainer::base_value_type;
-  clusterContainer->push_new(nClusters, [] () {return new xAODCluster_t();});
+  DataPool<xAODCluster_t> pool (nClusters);
+  clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
 
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;
@@ -197,6 +205,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
 
   m_stat[kNClusters] += clusterContainer->size();
   ATH_MSG_DEBUG("Clusters produced size: "<<clusterContainer->size());
+  timer_processing.stop();
   return StatusCode::SUCCESS;
 }
   

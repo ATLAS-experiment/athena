@@ -151,7 +151,7 @@ private:
 
     /// Extra tags/values pairs added in my jobOptions
     Gaudi::Property<std::map<std::string,std::string> >
-        m_extraTagValuePairs { this, "ExtraTagValuePairs", {}, "key/value pairs to be added", "mapMergeNoReplace<T,T>" };
+        m_extraTagValuePairs { this, "ExtraTagValuePairs", {}, "key/value pairs to be added" };
 
     /// Extra tags/values pairs added in via interface
     std::map<std::string,std::string> m_extraTagValuePairsViaInterface;

@@ -5,7 +5,7 @@
 #ifndef ITKPIXELOFFLINECALIBCONDALG
 #define ITKPIXELOFFLINECALIBCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -21,7 +21,7 @@
 namespace ITk
 {
 
-class PixelOfflineCalibCondAlg : public AthReentrantAlgorithm
+class PixelOfflineCalibCondAlg : public AthCondAlgorithm
 {
   public:
     PixelOfflineCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -29,7 +29,6 @@ class PixelOfflineCalibCondAlg : public AthReentrantAlgorithm
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
   private:
     Gaudi::Property<int> m_inputSource
     {this, "InputSource",2,"Source of data: 0 (none), 1 (text file), 2 (database)"};

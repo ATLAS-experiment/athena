@@ -16,7 +16,6 @@
 #include <algorithm>
 
 DataHeaderElementCnv_p4::DataHeaderElementCnv_p4() {}
-DataHeaderElementCnv_p4::~DataHeaderElementCnv_p4() {}
 
 //______________________________________________________________________________
 void DataHeaderElementCnv_p4::persToTrans(const DataHeaderElement_p4* pers,
@@ -91,7 +90,6 @@ void DataHeaderElementCnv_p4::transToPers(const DataHeaderElement* /*trans*/,
 //______________________________________________________________________________
 //______________________________________________________________________________
 DataHeaderCnv_p4::DataHeaderCnv_p4() {}
-DataHeaderCnv_p4::~DataHeaderCnv_p4() {}
 //______________________________________________________________________________
 void DataHeaderCnv_p4::persToTrans(const DataHeader_p4* pers, DataHeader* trans) {
    trans->m_inputDataHeader.resize(pers->m_provSize);

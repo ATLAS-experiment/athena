@@ -14,7 +14,8 @@ TauVertexedClusterDecorator::TauVertexedClusterDecorator(const std::string& name
 
 StatusCode TauVertexedClusterDecorator::initialize() {  
   
-  if (std::string(m_seedJet).find("LC") != std::string::npos) {
+  if (std::string(m_seedJet).find("LC") != std::string::npos ||
+      std::string(m_seedJet).find("MLTopo") != std::string::npos) {
     ATH_MSG_INFO("Set the cluster state to CALIBRATED");
     m_clusterState = xAOD::CaloCluster::State::CALIBRATED; 
   }

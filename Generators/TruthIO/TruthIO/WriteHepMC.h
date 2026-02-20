@@ -9,14 +9,13 @@
 #include "AtlasHepMC/IO_GenEvent.h"
 #include <memory>
 
-
 /// Write the MC event record to file in IO_GenEvent text format
 class WriteHepMC : public GenBase {
 public:
 
   WriteHepMC(const std::string& name, ISvcLocator* pSvcLocator);
-  StatusCode initialize();
-  StatusCode execute();
+  StatusCode initialize() override;
+  StatusCode execute() override;
 
   std::string m_outfile;
   int m_precision{8};

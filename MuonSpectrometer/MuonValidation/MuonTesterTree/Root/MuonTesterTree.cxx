@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include <MuonTesterTree/MuonTesterTree.h>
 #include <MuonTesterTree/EventHashBranch.h>
@@ -10,7 +10,7 @@ namespace {
     // Erase all objects from the branch vector
     void Remove(std::vector<MuonVal::IMuonTesterBranch*>& vec, std::function<bool(const MuonVal::IMuonTesterBranch*)> remove_func) {
         // Could use std::erase_if with C++20...
-        std::vector<MuonVal::IMuonTesterBranch*>::iterator itr = std::remove_if(vec.begin(), vec.end(), remove_func);
+        std::vector<MuonVal::IMuonTesterBranch*>::iterator itr = std::remove_if(vec.begin(), vec.end(), std::move(remove_func));
         vec.erase (itr, vec.end());
     }
 
@@ -34,7 +34,7 @@ bool MuonTesterTree::registerBranch(std::shared_ptr<IMuonTesterBranch> branch) {
     if (branch->tree() != tree()) {
         for (const FriendTreePtr& friend_tree : getFriends()){
             if (friend_tree->registerBranch(branch)) {
-                m_branches.push_back(branch);
+                m_branches.push_back(std::move(branch));
                 return true;
             }
         }
@@ -55,7 +55,7 @@ bool MuonTesterTree::registerBranch(std::shared_ptr<IMuonTesterBranch> branch) {
         ATH_MSG_FATAL("Tree structure is already finalized");
         return false;
     }
-    m_branches.push_back(branch);
+    m_branches.push_back(std::move(branch));
     return true;
 }
 bool MuonTesterTree::addBranch(std::shared_ptr<IMuonTesterBranch> branch) { return registerBranch(branch) && addBranch(branch.get()); }
@@ -117,7 +117,7 @@ bool MuonTesterTree::fill(const EventContext& ctx) {
     m_filled = true;
     return true;
 }
-StatusCode MuonTesterTree::init(ServiceHandle<ITHistSvc> hist_svc) {
+StatusCode MuonTesterTree::init(const ServiceHandle<ITHistSvc> & hist_svc) {
     if (fileStream().empty()) {
         ATH_MSG_ERROR("The file stream of " << name() << " has not been set yet" );
         return StatusCode::FAILURE;

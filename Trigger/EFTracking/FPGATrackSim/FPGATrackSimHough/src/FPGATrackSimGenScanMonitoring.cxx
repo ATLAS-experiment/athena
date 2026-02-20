@@ -413,7 +413,7 @@ void FPGATrackSimGenScanMonitoring::parseTruthInfo(
   // print if there are multiple tracks for debugging single track MC
   if (m_truthtracks->size() > 1) {
     for (unsigned i = 0; i < m_truthtracks->size(); i++) {
-      ATH_MSG_INFO("Multiple truth" << i << " of " << m_truthtracks->size()
+      ATH_MSG_DEBUG("Multiple truth" << i << " of " << m_truthtracks->size()
                                     << " " << (*m_truthtracks)[i].getPars());
     }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef InDetGeoModelUtils_SubDetectorFactoryBase_H
@@ -7,6 +7,7 @@
 
 #include "CxxUtils/checker_macros.h"
 #include "InDetGeoModelUtils/InDetDDAthenaComps.h"
+#include "InDetGeoModelUtils/InDetMaterialManager.h"
 
 #include <memory>
 
@@ -42,8 +43,6 @@ public:
 
   IRDBAccessSvc * rdbAccessSvc() {return m_athenaComps->rdbAccessSvc();}
   
-  const IGeometryDBSvc * geomDB() const {return m_athenaComps->geomDB();}
-
   InDetMaterialManager * materialManager() {return m_materialManager;}
 
  //Declaring the Message method for further use

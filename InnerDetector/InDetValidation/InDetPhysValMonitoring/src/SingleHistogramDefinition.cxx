@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //  SingleHistogramDefinition.cpp
@@ -11,6 +11,7 @@
 #include "InDetPhysValMonitoring/SingleHistogramDefinition.h"
 #include <utility>
 #include <limits>
+#include <format>
 SingleHistogramDefinition::SingleHistogramDefinition() :
   name{},
   histoType{},
@@ -84,13 +85,12 @@ SingleHistogramDefinition::empty() const {
 
 std::string
 SingleHistogramDefinition::str() const {
-  const std::string s(" ");
-
-  return name + s + histoType + s + title + s + std::to_string(nBinsX) + s + std::to_string(nBinsY) + s + std::to_string(nBinsZ) +
-         s + std::to_string(xAxis.first) + s + std::to_string(xAxis.second) + s +
-         std::to_string(yAxis.first) + s + std::to_string(yAxis.second) + s +
-         std::to_string(zAxis.first) + s + std::to_string(zAxis.second) + s + 
-         xTitle + s + yTitle + s + zTitle;
+  return std::format("{} {} {} {} {} {} {:f} {:f} {:f} {:f} {:f} {:f} {} {} {}",
+                     name, histoType, title, nBinsX, nBinsY, nBinsZ,
+                     xAxis.first, xAxis.second,
+                     yAxis.first, yAxis.second,
+                     zAxis.first, zAxis.second,
+                     xTitle, yTitle, zTitle);
 }
 
 bool

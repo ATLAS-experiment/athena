@@ -89,7 +89,7 @@ StatusCode VP1Alg::initialize()
     if (file=="")
       file = PathResolver::find_file (*it+".vp1", "DATAPATH");
     if (file!="")
-      *it = file;
+      *it = std::move(file);
   }
 
   // use the incident service to register a handler

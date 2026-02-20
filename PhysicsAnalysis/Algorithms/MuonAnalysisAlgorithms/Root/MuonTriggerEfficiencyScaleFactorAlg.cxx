@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tadej Novak
@@ -22,12 +22,25 @@
 namespace CP
 {
 
+  MuonTriggerEfficiencyScaleFactorAlg::MuonTriggerEfficiencyScaleFactorAlg(const std::string& name,
+                                         ISvcLocator* svcLoc)
+    : AnaAlgorithm(name, svcLoc)
+  {
+    declareProperty("efficiencyScaleFactorTool", m_efficiencyScaleFactorTool, "trigger efficiency scale factor tool");
+  }
+
   StatusCode MuonTriggerEfficiencyScaleFactorAlg ::
   initialize ()
   {
     if (m_trigger.empty())
     {
       ANA_MSG_ERROR ("trigger name needs to be set");
+      return StatusCode::FAILURE;
+    }
+
+    if (m_efficiencyScaleFactorTool.empty())
+    {
+      ANA_MSG_ERROR ("efficiency scale factor tool needs to be set");
       return StatusCode::FAILURE;
     }
 

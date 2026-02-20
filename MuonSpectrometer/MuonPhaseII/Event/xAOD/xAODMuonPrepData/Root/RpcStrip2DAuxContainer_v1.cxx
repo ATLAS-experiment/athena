@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -27,7 +27,7 @@ RpcStrip2DAuxContainer_v1::RpcStrip2DAuxContainer_v1()
     PRD_AUXVARIABLE(ambiguityFlag);
     PRD_AUXVARIABLE(timeOverThreshold);
 
-    PRD_AUXVARIABLE(stripNumber);
+    PRD_AUXVARIABLE(channelNumber);
     PRD_AUXVARIABLE(gasGap);
     PRD_AUXVARIABLE(doubletPhi);
 }

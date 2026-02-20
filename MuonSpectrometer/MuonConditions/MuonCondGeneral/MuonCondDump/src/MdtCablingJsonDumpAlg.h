@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -15,12 +15,13 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonRecToolInterfacesR4/IRootVisualizationService.h"
 
 
 
 class MdtCablingJsonDumpAlg : public AthAlgorithm {
 public:
-    MdtCablingJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthAlgorithm::AthAlgorithm;
     virtual ~MdtCablingJsonDumpAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
@@ -39,6 +40,7 @@ private:
     Gaudi::Property<std::string> m_summaryTxt{this, "SummaryFile", "SummaryFile.txt", "Summary of the extracted mapping"};
     Gaudi::Property<std::string> m_mezzJSON{this, "OutMezzanineJSON", "MezzMapping.json", "Mezzanine JSON"};
     Gaudi::Property<std::string> m_cablingJSON{this, "OutCablingJSON", "MdtCabling.json", "Cabling JSON"};
+    Gaudi::Property<bool> m_insertBISCabling{this, "insertBISCabling", false, "override the BIS cabling in the JSON file"};
     
 };
 

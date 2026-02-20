@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_MDGap_H
@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <span>
 
 #include "AthenaBaseComps/AthMessaging.h"
 
@@ -62,8 +63,8 @@ class ALFA_MDGap : public AthMessaging
 		void GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRACKNUM], Float_t (&fOvU)[MAXTRACKNUM], Float_t (&fOvV)[MAXTRACKNUM], Int_t (&iFibSel)[ALFALAYERSCNT*ALFAPLATESCNT]);
 
 	private:
-		void Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag);
-		void Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum) const;
+		void Proj_Store(Int_t iFiberSide, std::span<Int_t> iOver, Float_t fbRef, Int_t iSideFlag);
+		void Find_Proj(const std::span<const Int_t>& iOver, Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum) const;
 		void Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int_t (&iFSel)[ALFAPLATESCNT], Int_t iSideFlag);
 		void Reco_Track(std::vector<Float_t> &b_p, std::vector<Float_t> &b_n,
 						std::vector<Float_t> &Ov_p, std::vector<Float_t> &Ov_n,
@@ -71,8 +72,8 @@ class ALFA_MDGap : public AthMessaging
 						Int_t (&FSel_n)[ALFAPLATESCNT], Int_t (&FSel_p)[ALFAPLATESCNT],
 						Int_t (&Gaps)[2][2], std::vector<Int_t> &GapsID, Bool_t (&FGaps_p)[ALFAPLATESCNT], Bool_t (&FGaps_n)[ALFAPLATESCNT],
 						Int_t (&Gap_Fib_p)[ALFAPLATESCNT][2], Int_t (&Gap_Fib_n)[ALFAPLATESCNT][2]);
-		Int_t Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag);
-		Int_t Active_Gap(Int_t iFiberSide, Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag);
+		Int_t Silent_Gap(std::span<Int_t> Over, Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag);
+		Int_t Active_Gap(Int_t iFiberSide, std::span<Int_t> Over, Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag);
 
 };
 #endif // ALFA_MDGap_H

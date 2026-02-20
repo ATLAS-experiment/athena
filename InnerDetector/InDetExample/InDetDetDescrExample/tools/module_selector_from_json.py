@@ -129,7 +129,7 @@ def generate_uncorr(fractions = [], input_data = "Geometry.json", prefix = "Geom
     '''
     
     if output_dir is None:
-        raise ValueError(f"No output_dir was provided.")
+        raise ValueError("No output_dir was provided.")
 
     IDs = []
     for frac in sorted(fractions):
@@ -156,7 +156,7 @@ def generate_corr(fractions = [], input_data = "geometry.json", prefix = "Geomet
     '''
     
     if output_dir is None:
-        raise ValueError(f"No output_dir was provided.")
+        raise ValueError("No output_dir was provided.")
     
     not_selected_yet_file=f"{output_dir}/{prefix}_not_selected.json"
 
@@ -176,15 +176,14 @@ def generate_corr(fractions = [], input_data = "geometry.json", prefix = "Geomet
         else:
             new_frac = frac_convertor(frac, input_data, output_files[i-1], not_selected_yet_file)
 
-            data_temp = select_random(new_frac, not_selected_yet_file, output_file_temp, seed)
+            select_random(new_frac, not_selected_yet_file, output_file_temp, seed)
             data_not_masked = difference(not_selected_yet_file, output_file_temp, not_selected_yet_file)
 
             data = merge(output_files[i-1], output_file_temp, output_file)
             output_files.append(output_file)
 
             os.remove(output_file_temp)
-            del data_temp
-            
+
         IDs.append(data)
 
         if i == len(fractions) - 1:

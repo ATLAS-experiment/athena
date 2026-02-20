@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaAuditors )
@@ -13,3 +13,7 @@ atlas_add_component( AthenaAuditors
    DEFINITIONS PACKAGE=AthenaAuditors  # needed by bfd.h
    INCLUDE_DIRS ${GDB_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS}
    LINK_LIBRARIES ${GDB_LIBRARIES} ${ZLIB_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel )
+
+# Tests in the package:
+atlas_add_test( testFPE
+   SCRIPT test/testFPEHandling.py )

@@ -29,7 +29,7 @@ asetup "AthAnalysis,25.2.23"
 ```
   
 For working with code, a sparse checkout is pretty straightforward.  
-(In order for this to work, you need your own fork of the athena project, see the [ATLAS git tutorial](https://atlassoftwaredocs.web.cern.ch/gittutorial/gitlab-fork/))  
+(In order for this to work, you need your own fork of the athena project, see the [ATLAS git tutorial](https://atlas-software.docs.cern.ch/athena/git/))  
 
 ```bash
 git atlas init-workdir https://:@gitlab.cern.ch:8443/atlas/athena.git

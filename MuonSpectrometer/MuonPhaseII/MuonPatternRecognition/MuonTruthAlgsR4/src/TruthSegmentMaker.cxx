@@ -98,13 +98,13 @@ namespace MuonR4{
         const float e{hit.kineticEnergy()},m{hit.mass()};
         return std::sqrt(std::max(e*e - m*m, 0.f)) * std::sin(globDir.theta());
     }
-    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsGeometryContext& gctx,
+    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsTrk::GeometryContext& gctx,
                                                   const Identifier& chanId) const {
         const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(chanId);
         const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
                                                     reEle->measurementHash(chanId) :
                                                     reEle->layerHash(chanId)};
-        return reEle->msSector()->globalToLocalTrans(gctx) * reEle->localToGlobalTrans(gctx, trfHash);
+        return reEle->msSector()->globalToLocalTransform(gctx) * reEle->localToGlobalTransform(gctx, trfHash);
 
     }
 
@@ -279,7 +279,7 @@ namespace MuonR4{
     }
                                         
     StatusCode TruthSegmentMaker::execute(const EventContext& ctx) const {
-        const ActsGeometryContext* gctx{nullptr};
+        const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
         
         using HitsPerParticle = std::unordered_map<HepMC::ConstGenParticlePtr, SimHitVec_t>;
@@ -318,7 +318,7 @@ namespace MuonR4{
         WriteDecorHolder writerHolder{*writeHandle,*this, ctx};
 
         for (auto& [chamber, collectedParts] : hitCollector) {
-            const Amg::Transform3D& locToGlob{chamber->localToGlobalTrans(*gctx)};
+            const Amg::Transform3D& locToGlob{chamber->localToGlobalTransform(*gctx)};
             for (auto& [particle, simHits]: collectedParts) {                
                 /* Sort hits by local z */
                 std::ranges::stable_sort(simHits,[](const HitPosTuple_t& a, const HitPosTuple_t& b){

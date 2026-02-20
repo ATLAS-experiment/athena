@@ -140,17 +140,14 @@ fi
 acmd.py diff-root  --nan-equal \
                     --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMPFlowAuxDyn \
                                   index_ref \
                     --order-trees \
                     OUT_ESD_1thread.root OUT_ESD.root &> diff_1_vs_serial.txt
@@ -165,17 +162,14 @@ fi
 acmd.py diff-root  --nan-equal \
                     --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMPFlowAuxDyn \
                                   index_ref \
                      --order-trees \
                     OUT_ESD_5thread.root OUT_ESD_1thread.root &> diff_5_vs_1.txt
@@ -190,17 +184,14 @@ fi
 acmd.py diff-root  --nan-equal \
                    --ignore-leaves InDet::PixelClusterContainer_p3_PixelClusters \
                                   HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult  \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
                                   xAOD::TrigDecisionAuxInfo_v1_xTrigDecisionAux \
                                   xAOD::TrigPassBitsAuxContainer_v1_HLT_xAOD__TrigPassBitsContainer_passbitsAux \
                                   xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux \
                                   InDet::SCT_ClusterContainer_p3_SCT_Clusters \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
-                                  xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMPFlowAuxDyn \
                                   index_ref \
                     --order-trees \
                     OUT_ESD_8thread.root OUT_ESD_1thread.root &> diff_8_vs_1.txt

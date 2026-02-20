@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -115,7 +115,6 @@ namespace xAODMaker {
 
       // Copy the LVL1 information:
       xaod->setBGCode( aod->BGCode() );
-      ATH_MSG_DEBUG( "converting BGCode " << std::hex << (unsigned int) aod->BGCode() << "  (size " << sizeof(aod->BGCode()) << "|" << sizeof(xaod->bgCode()) << ")" );
 
       if( aod->getL1Result().isConfigured() ) {
          ATH_MSG_DEBUG( "setting L1 info from old TrigDecision");

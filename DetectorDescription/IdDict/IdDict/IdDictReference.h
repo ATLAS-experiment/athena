@@ -30,7 +30,7 @@ public:
     //** @name Methods used to initialize the object.
     // @{
 
-    virtual void resolve_references (const IdDictMgr& idd,
+    virtual void resolve_references (IdDictMgr& idd,
                                      IdDictDictionary& dictionary,
                                      IdDictRegion& region) override;
     virtual void generate_implementation (const IdDictMgr& idd,

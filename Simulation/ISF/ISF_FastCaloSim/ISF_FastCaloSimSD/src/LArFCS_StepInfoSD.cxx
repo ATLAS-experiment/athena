@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -234,13 +234,6 @@ G4bool LArFCS_StepInfoSD::ProcessHits(G4Step* a_step, G4TouchableHistory*) {
           } else {
             if (m_config.shift_lar_subhit) {
               // find subhit with largest energy
-              if (maxSubHitEnergyindex == -1) {
-                G4cout
-                    << this->GetName()
-                    << " WARNING ProcessHits: no subhit index with e>-999??? "
-                    << G4endl;
-                continue;
-              }
               if (m_config.verboseLevel > 9) {
                 G4cout << this->GetName()
                        << " VERBOSE ProcessHits: shifting subhits: largest "
@@ -288,23 +281,25 @@ G4bool LArFCS_StepInfoSD::ProcessHits(G4Step* a_step, G4TouchableHistory*) {
                           m_calo_dd_man.get()->get_element(id)->getSampling(),
                           originalStepPosition.eta(),
                           originalStepPosition.phi());
-                  G4cout << this->GetName()
-                         << " VERBOSE ProcessHits: Original step position: "
-                         << originalStepPosition.x() << " "
-                         << originalStepPosition.y() << " "
-                         << originalStepPosition.z() << G4endl << "          "
-                         << "This cell: " << thiscell->x() << " "
-                         << thiscell->y() << " " << thiscell->z() << G4endl
-                         << "          "
-                         << "Highest E cell: " << maxEnergyCell->x() << " "
-                         << maxEnergyCell->y() << " " << maxEnergyCell->z()
-                         << G4endl << "          "
-                         << "(Best cell: " << bestcell->x() << " "
-                         << bestcell->y() << " " << bestcell->z() << ")"
-                         << G4endl << "          "
-                         << "Shifted step position: " << stepPosition.x() << " "
-                         << stepPosition.y() << " " << stepPosition.z()
-                         << G4endl;
+                  if (bestcell) [[likely]] {
+                    G4cout << this->GetName()
+                           << " VERBOSE ProcessHits: Original step position: "
+                           << originalStepPosition.x() << " "
+                           << originalStepPosition.y() << " "
+                           << originalStepPosition.z() << G4endl << "          "
+                           << "This cell: " << thiscell->x() << " "
+                           << thiscell->y() << " " << thiscell->z() << G4endl
+                           << "          "
+                           << "Highest E cell: " << maxEnergyCell->x() << " "
+                           << maxEnergyCell->y() << " " << maxEnergyCell->z()
+                           << G4endl << "          "
+                           << "(Best cell: " << bestcell->x() << " "
+                           << bestcell->y() << " " << bestcell->z() << ")"
+                           << G4endl << "          "
+                           << "Shifted step position: " << stepPosition.x() << " "
+                           << stepPosition.y() << " " << stepPosition.z()
+                           << G4endl;
+                  }
                 }
               }
             }

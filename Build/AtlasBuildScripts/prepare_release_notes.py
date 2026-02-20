@@ -334,6 +334,7 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
 
         # Add/remove some labels
         labels.discard('full-unit-tests')
+        labels.discard('menu-review-required')
         labels.add('frozen-tier0-violating')
         labels.add('sweep:ignore')
         return labels

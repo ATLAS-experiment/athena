@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configure the WritexAOD algorithm
 # For guidelines on writing configuration scripts see the following pages:
-# https://atlassoftwaredocs.web.cern.ch/guides/ca_configuration/
+# https://atlas-software.docs.cern.ch/athena/configuration/
 
 # Imports of the configuration machinery
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -14,7 +14,8 @@ def WritexAODCfg(flags):
 
     # Track selection tool configuration
     # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/InDetTrackSelectionTool
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionToolCfg)
     trackSelectionTool = acc.popToolsAndMerge(InDetTrackSelectionToolCfg(
         flags,
         name="TestTrackSelectorTool",

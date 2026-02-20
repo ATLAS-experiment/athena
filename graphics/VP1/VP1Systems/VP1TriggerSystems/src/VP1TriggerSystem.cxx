@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -49,10 +49,6 @@
 #include <map>
 #include <stdio.h>
 
-//DEFs
-const float ZERO_LIMIT = 0.00001;
-
-
 //Trigger System Constructor
 //_____________________________________________________________________________________________
 VP1Trig::VP1TriggerSystem::VP1TriggerSystem()
@@ -68,10 +64,10 @@ VP1Trig::VP1TriggerSystem::~VP1TriggerSystem() {log_verbose("destructor");}
 
 //Load Trigger Data from StoreGate (once new event loaded)
 //_____________________________________________________________________________________________
-bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QString triglvl)
+bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, const QString& triglvl)
 {
   log_verbose("loadTriggerHandles()");
-  
+
   //Safety handle check
   if(m_handleL1.size()!=0 || m_handleL2.size()!=0 || m_handleEF.size()!=0)
     clearTriggerHandles();
@@ -83,7 +79,7 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QStr
     
     //VARs
     std::string trigID;
-    int trigcount=0;
+    //int trigcount=0;
     
     //Try to retrieve the TrigDecisionTool
     if(m_trigDec.retrieve().isFailure()) {
@@ -115,7 +111,7 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QStr
       
       //Process passed triggers
       if(m_trigDec->isPassed((*trigItr))) {
-	++trigcount;
+	//++trigcount;
 	trigID = std::string((*trigItr).c_str());
 	//std::cout << "INFO :: Processing trigger chain: " << trigger << "[" << trigcount << "] ";
 	
@@ -140,25 +136,20 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QStr
        Kunihiro Nagano (nagano@mail.cern.ch) */
     log_verbose("Retrieving L2 data: start");
     
-    const DataHandle<MuonFeatureDetailsContainer> mfdContainer;
-    const DataHandle<MuonFeatureDetailsContainer> lastmfdContainer;
+    SG::ConstIterator<MuonFeatureDetailsContainer> mfdContainer;
+    SG::ConstIterator<MuonFeatureDetailsContainer> lastmfdContainer;
     bool runL2=false;
 
     while(runL2==false) {
       if(storeGate->retrieve(mfdContainer,lastmfdContainer).isSuccess())
 	log_verbose("MuonFeatureDetailsContainer retrieved");
       
-      if(!mfdContainer) {
-	log_fatal("MuonFeatureDetailsContainer not retrieved!");
-        return false; //ref: daqstatus
-      }
-      
       // -----------------------------
       // Dump muonFeatureDetails info
       // -----------------------------
       std::vector<const MuonFeatureDetails*> vec_muonFeatureDetails;
       
-      for(; mfdContainer!=lastmfdContainer; mfdContainer++) {
+      for(; mfdContainer!=lastmfdContainer; ++mfdContainer) {
 	MuonFeatureDetailsContainer::const_iterator mfd     = mfdContainer->begin();
 	MuonFeatureDetailsContainer::const_iterator lastmfd = mfdContainer->end();
         for(; mfd != lastmfd; ++mfd) {
@@ -182,18 +173,22 @@ bool VP1Trig::VP1TriggerSystem::loadTriggerHandles(StoreGateSvc* storeGate, QStr
     //--- "Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07" ---
     log_verbose("Retrieving EF data: start");
     
-    const DataHandle<TrigMuonEFInfoContainer> trigMuon;
-    const DataHandle<TrigMuonEFInfoContainer> lastTrigMuon;
+    SG::ConstIterator<TrigMuonEFInfoContainer> trigMuon;
+    SG::ConstIterator<TrigMuonEFInfoContainer> lastTrigMuon;
     unsigned int muonCounter=0;
     
     if(storeGate->retrieve(trigMuon,lastTrigMuon).isSuccess()) {
-      for(int i=0; trigMuon!=lastTrigMuon; ++trigMuon, ++i) {
-	TrigMuonEFInfoContainer::const_iterator MuonItr  = trigMuon->begin(); //Iterators over top-level EDM
-	TrigMuonEFInfoContainer::const_iterator MuonItrE = trigMuon->end();   //objects (TrigMuonEFInfoContainer)
+      for(; trigMuon!=lastTrigMuon; ++trigMuon) {
 	
-	for(int j=0; MuonItr!=MuonItrE; ++MuonItr, ++j ) { //looping over TrigMuonEFInfo objects
-	  const TrigMuonEFInfo* muonInfo = (*MuonItr);
-      std::vector<std::string> chains = m_trigMatch->chainsPassedByObject<TrigMuonEFInfo>(muonInfo);
+	for(const TrigMuonEFInfo* muonInfo : *trigMuon) {
+          std::vector<std::string> chains
+            // chainsPassedByObject() doesn't compile because
+            // TrigMuonEFInfo does not provide eta()/phi().
+            // But this is in fact the only place in the repository
+            // where chainsPassedByObject is used --- so maybe it's
+            // not really the correct way to go.  Just disable it for now.
+            { "CHAIN_INFO_NOT_AVAILABLE_FOR_TrigMuonEFInfo" };
+            // = m_trigMatch->chainsPassedByObject<TrigMuonEFInfo>(muonInfo);
 	  std::vector<std::string>::iterator itChain; //iterator over chains
 	  QList<QString> chainIDs;
 	  

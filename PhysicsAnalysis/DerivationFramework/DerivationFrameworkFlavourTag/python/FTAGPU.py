@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_FTAGPU.py
 # This defines DAOD_FTAGPU, an unskimmed DAOD format for Run 3.
@@ -16,16 +16,11 @@ from DerivationFrameworkFlavourTag.FtagBaseContent import (
 #skimming tool
 def FTAGPUSkimmingToolCfg(flags):
     """Configure the skimming tool"""
-    acc = ComponentAccumulator()
-
-
     jetSelection = '(count(AntiKt4EMPFlowJets.pt > 10.*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.5) >= 1)'
-    FTAGPUOfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(name       = "FTAGPUOfflineSkimmingTool1",
-                                                                                        expression = jetSelection)
-
-    acc.addPublicTool(FTAGPUOfflineSkimmingTool, primary=True)
-
-    return(acc)
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    return xAODStringSkimmingToolCfg(flags, name = "FTAGPUOfflineSkimmingTool1",
+                                     expression = jetSelection)
 
 # Main algorithm config
 def FTAGPUKernelCfg(flags, name='FTAGPUKernel', **kwargs):

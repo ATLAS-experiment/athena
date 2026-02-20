@@ -18,7 +18,7 @@ atlas_add_library( RatesAnalysisLib
 # Suppress spurious warnings seen in the LTO build originating 
 # in the boost parser code.
 set_target_properties( RatesAnalysisLib
-                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
+                       PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized -Wno-uninitialized "  )
 
 # Component(s) in the package:
 atlas_add_component( RatesAnalysis

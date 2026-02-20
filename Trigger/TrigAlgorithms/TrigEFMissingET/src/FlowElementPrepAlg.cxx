@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FlowElementPrepAlg.h"
@@ -8,6 +8,7 @@
 #include "StoreGate/DecorKeyHelpers.h"
 #include "TrigEFMissingET/PUClassification.h"
 #include "AthContainers/ConstDataVector.h"
+#include "xAODTracking/TrackParticle.h"
 
 /// Anonymous namespace
 namespace

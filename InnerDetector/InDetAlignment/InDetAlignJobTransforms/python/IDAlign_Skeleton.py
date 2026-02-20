@@ -18,25 +18,49 @@ import AthenaCommon.Constants
 JobProperties.jobPropertiesDisallowed = True
 
 def getT0SolveDB(runArgs):
+    # Check which file to use to extract metadata
+    if runArgs.solve and runArgs.iteration > 0:
+        outputFile = runArgs.outputConditionFile
+        iteration = runArgs.iteration - 1
+    
+    elif hasattr(runArgs, "outputTFile") and "Block" in runArgs.outputTFile:
+        outputFile = runArgs.outputTFile
+        iteration = runArgs.iteration - 1
+
+    elif hasattr(runArgs, "outputMonitorFile") and "Block" in runArgs.outputMonitorFile:
+        # For monitoring, the iteration DB file to use is the one from the current iteration
+        outputFile = runArgs.outputMonitorFile
+        iteration = runArgs.iteration
+        
+    else:
+        return ""
+
     # Extract data taking period, stream, ect from output file name
     try:
-        meta_data = re.search(r"^(data.*?_.*?)\.(\d+)\.(\w+).*?(c\d+.*?).*?(Block\d+)", runArgs.outputTFile if runArgs.accumulate else runArgs.outputConditionFile)
+        meta_data = re.search(r"^(data.*?_.*?)\.(\d+)\.(\w+).*?(c\d+.*?).*?(Block\d+)", outputFile)
         data_period, run, data_stream, AMI_tag, block = meta_data.groups()
     
     except Exception:
-        raise Exception(f"Can not extract metadata from: {runArgs.outputTFile}")
+        raise Exception(f"Can not extract metadata from: {outputFile}")
         
     # Try to find local database file
-    localDatabaseWildcard = f"{runArgs.eosT0Dir}/{data_period}/{data_stream}/{run}/{data_period}.{run}.{data_stream}.idalignsolve.ROOT_DB.Iter{runArgs.iteration - 1}*/*{block}*"
+    localDatabaseWildcard = f"{runArgs.eosT0Dir}/{data_period}/{data_stream}/{run}/{data_period}.{run}.{data_stream}.idalignsolve.ROOT_DB.Iter{iteration}*/*{block}*"
     
     try:
         from glob import glob
-        localDataBase = glob(localDatabaseWildcard)[0]
+
+        # Get always latest DB files, in case a job restarted with a new AMI tag
+        def get_AMI_Tag(file_name):
+            m = re.search(r'c\d+', file_name)
+            return m.group(0) if m else "c0000"
+
+        localDataBases = sorted(glob(localDatabaseWildcard), key = get_AMI_Tag, reverse = True)
+        latestLocalDataBase = localDataBases[0]
     
     except Exception:
         raise Exception(f"Could not find local database from wildcard: {localDatabaseWildcard}")
     
-    return localDataBase
+    return latestLocalDataBase
 
 def configureFlags(runArgs):
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -50,7 +74,7 @@ def configureFlags(runArgs):
     if hasattr(runArgs, "localDatabase"): 
         flags.InDet.Align.localDataBase = os.path.abspath(runArgs.localDatabase)
     
-    elif runArgs.eosT0Dir != "" and runArgs.iteration > 0:
+    if runArgs.eosT0Dir != "":
         flags.InDet.Align.localDataBase = getT0SolveDB(runArgs)
         
     else:
@@ -89,7 +113,8 @@ def configureFlags(runArgs):
     flags.Input.Files = [os.path.abspath(inputFile) for inputFile in runArgs.inputRAWFile]
     
     if runArgs.accumulate:
-        flags.InDet.Align.outputTFile = runArgs.outputTFile
+        if hasattr(runArgs, "outputTFile"):
+            flags.InDet.Align.outputTFile = runArgs.outputTFile
     
         if hasattr(runArgs, "outputMonitorFile"):
             flags.InDet.Align.doMonitoring = True
@@ -101,6 +126,7 @@ def configureFlags(runArgs):
         flags.IOVDb.DBConnection = f"sqlite://;schema={flags.InDet.Align.baseDir}/Solve/{runArgs.outputDBFile};dbname=CONDBR2"
 
     flags.Exec.MaxEvents = runArgs.maxEvents if not runArgs.solve else 1
+    flags.Exec.SkipEvents = runArgs.skipEvents if hasattr(runArgs, "skipEvents") else 0   
     flags.Exec.OutputLevel = getattr(AthenaCommon.Constants, runArgs.logLevel)
     flags.Exec.FPE = -2
     flags.IOVDb.GlobalTag = runArgs.globalTag

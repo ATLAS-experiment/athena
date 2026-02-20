@@ -88,8 +88,8 @@ class TgcReadoutElement : public MuonReadoutElement {
     /// Returns the center of the measurement channel
     ///  eta measurement:  wire gang center
     ///  phi measurement:  strip center
-    Amg::Vector3D channelPosition(const ActsGeometryContext& ctx, const Identifier& measId) const;
-    Amg::Vector3D channelPosition(const ActsGeometryContext& ctx, const IdentifierHash& measHash) const;
+    Amg::Vector3D channelPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const;
+    Amg::Vector3D channelPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const;
 
     /// Returns the pointer to the strip layer associated with the gas gap.
     const StripLayerPtr& sensorLayout(const IdentifierHash& hash) const;

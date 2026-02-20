@@ -16,6 +16,7 @@
 #include "InDetSimEvent/SiHitCollection.h"
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
 // G4 needed classes
 class G4Step;
 class G4HCofThisEvent;
@@ -47,6 +48,7 @@ class PixelSensorGmxSD : public G4VSensitiveDetector
   // The hits collection
   std::string m_HitCollName;
   SiHitCollection* m_HitColl{nullptr};
+  AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
   GeoModelIO::ReadGeoModel * m_sqlreader{nullptr};
 
 };

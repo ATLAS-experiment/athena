@@ -25,36 +25,6 @@
             "type": "TH1D",
             "forData": "true"
         }
-    },
-
-    "TAGGER": {
-       "IP3D_gradeOfTracks": {
-            "_comment": "",
-            "title": "IP3D grade of tracks",
-            "xtitle": "grade of tracks",
-            "ytitle": "Tracks",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
-            "xbins": 14,
-            "xmin": -0.5,
-            "xmax": 13.5,
-            "forEachTruthType": ["U","B","C","DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
-        "IP2D_gradeOfTracks": {
-            "_comment": "",
-            "title": "IP2D grade of tracks",
-            "xtitle": "grade of tracks",
-            "ytitle": "Tracks",
-            "path":  {"ART": "bTagging"},
-            "xbins": 14,
-            "xmin": -0.5,
-            "xmax": 13.5,
-            "forEachTruthType": ["U","B","C","DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        }
     }
 
 }

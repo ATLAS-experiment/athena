@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -78,8 +78,7 @@ TrigConf::DataStructure::isValue() const {
 
 std::string
 TrigConf::DataStructure::getValue() const {
-   const std::string value = data().get_value<std::string>();
-   return value;
+   return data().get_value<std::string>();
 }
 
 bool

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_BYTESTREAMADDRESS_H
@@ -9,7 +9,7 @@
 #include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/EventContext.h"
 
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 
 /**

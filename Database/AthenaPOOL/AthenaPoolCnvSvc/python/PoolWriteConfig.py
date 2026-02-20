@@ -84,6 +84,7 @@ def PoolWriteCfg(flags):
     OutputMetadataContainers = []
 
     # Loop over all streams and set the appropriate attributes
+    fileFlushSetting = {}
     maxAutoFlush = -1
     for stream in _getStreamsFromFlags(flags):
 
@@ -113,7 +114,7 @@ def PoolWriteCfg(flags):
             # E.g., temporary RDO files that are used in Run-2 simulation.
             # For those, we have to use ZLIB
             from AthenaConfiguration.Enums import LHCPeriod
-            if "RDO" in stream and hasattr(flags, "GeoModel") and flags.GeoModel.Run < LHCPeriod.Run3:
+            if "RDO" in stream and flags.hasCategory("GeoModel") and flags.GeoModel.Run < LHCPeriod.Run3:
                 tempFileCompressionSetting = (1,1) # ZLIB at level 1
             logger.info(f"Stream {stream} is marked as temporary, overwriting the compression settings to {tempFileCompressionSetting}")
         compAlg, compLvl = tempFileCompressionSetting if isTemporaryStream else (compAlg, compLvl)
@@ -150,10 +151,14 @@ def PoolWriteCfg(flags):
             poolContainerPrefix += f"_{stream}"
             OutputMetadataContainers += [f"MetaData_{stream}"]
 
-        # Set the AutoFlush attributes
+        # Set the AutoFlush & Maximum Size attributes
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, poolContainerPrefix, autoFlush ) ]
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, outputCollection, autoFlush ) ]
         PoolAttributes += [ pah.setTreeAutoFlush( fileName, "POOLContainerForm", autoFlush ) ]
+        PoolAttributes += [ pah.setTreeMaxSize( fileName, "*", "1099511627776L" ) ] # 1 TB
+        if flags.MP.UseSharedWriter and flags.MP.UseParallelCompression:
+            fileFlushSetting[fileName] = ( flags.MP.SharedWriter.FileFlushSetting.get(fileName, autoFlush) )
+            logger.info(f"Setting auto write for {fileName} to {fileFlushSetting[fileName]} events")
 
         # Set the Spit Level attributes
         PoolAttributes += [ pah.setContainerSplitLevel( fileName, poolContainerPrefix, splitLvl ) ]
@@ -190,12 +195,13 @@ def PoolWriteCfg(flags):
         return AthenaPoolSharedIOCnvSvcCfg(flags,
                                            PoolAttributes=PoolAttributes,
                                            ParallelCompression=useParallelCompression,
-                                           StorageTechnology=flags.Output.StorageTechnology.EventData,
                                            OutputMetadataContainers=OutputMetadataContainers,
-                                           OneDataHeaderForm = oneDHForm)
+                                           OneDataHeaderForm=oneDHForm,
+                                           FileFlushSetting=fileFlushSetting,
+                                           PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))
     else:
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         return AthenaPoolCnvSvcCfg(flags,
                                    PoolAttributes=PoolAttributes,
-                                   StorageTechnology=flags.Output.StorageTechnology.EventData,
-                                   OneDataHeaderForm = oneDHForm)
+                                   OneDataHeaderForm=oneDHForm,
+                                   PoolContainerNamingScheme=("Canonical" if "RNTUPLE" in flags.PoolSvc.DefaultContainerType else "Historical"))

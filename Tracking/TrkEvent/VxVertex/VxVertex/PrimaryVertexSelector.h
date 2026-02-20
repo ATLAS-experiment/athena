@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,12 +21,10 @@ inline const Trk::VxCandidate* PrimaryVertexSelector(const VxContainer& vxContai
 	// the return vertex
 	const Trk::VxCandidate* primaryVxCandidate = 0;
 	// simple loop through and get the primary vertex
-	VxContainer::const_iterator vxIter    = vxContainer.begin();
-	VxContainer::const_iterator vxIterEnd = vxContainer.end();
-	for ( size_t ivtx = 0; vxIter != vxIterEnd; ++vxIter, ++ivtx ){
+        for (const Trk::VxCandidate* vtx : vxContainer) {
        // the first and only primary vertex candidate is picked
-	   if ( (*vxIter)->vertexType() ==  Trk::PriVtx){
-			primaryVxCandidate = (*vxIter);
+	   if ( vtx->vertexType() ==  Trk::PriVtx){
+			primaryVxCandidate = vtx;
 			break;
 		}
 	}

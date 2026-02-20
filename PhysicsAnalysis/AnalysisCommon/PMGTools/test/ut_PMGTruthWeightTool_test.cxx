@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using TEvent (from POOL or xAODRootAccess) to read an xAOD
@@ -55,7 +55,7 @@ using namespace asg::msgUserCode;  // messaging
   } else { ANA_MSG_FATAL("Expected " << #x << " to return false"); return -1; } \
 }
 
-
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
@@ -125,7 +125,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
       // Print out all weights and names
       ANA_MSG_INFO("Printing all " << weightNames.size() << " weights for this event...");
       unsigned int idx(0);
-      for (auto weight : weightNames) {
+      for (const auto & weight : weightNames) {
         ANA_MSG_INFO("... weight " << idx++ << " has name \"" << weight << "\" and value " << weightTool->getWeight(evtInfo,weight));
       }
 

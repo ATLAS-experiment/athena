@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           KeyUtilities.cpp  -  description
@@ -77,15 +77,13 @@ coordinates */
 unsigned int KeyUtilities::key( double phi, double eta) {
   m_eta=eta;
   m_phi=phi;
-  ICoordinate* iCoord = convertCoordsToIntegers(m_phi, m_eta);
-  BinAndCoord* bandc  = calculateTriggerBin(iCoord);
+  ICoordinate iCoord = convertCoordsToIntegers(m_phi, m_eta);
+  BinAndCoord bandc  = calculateTriggerBin(iCoord);
   if (m_debug) std::cout << "KU : key: got bandc "<<std::endl;
-  m_phiBin=bandc->phiBin();
-  m_etaBin=bandc->etaBin();
-  m_centralPhi=bandc->coords()->phi();
-  m_centralEta=bandc->coords()->eta();
-  delete bandc;
-  delete iCoord;
+  m_phiBin=bandc.phiBin();
+  m_etaBin=bandc.etaBin();
+  m_centralPhi=bandc.coords().phi();
+  m_centralEta=bandc.coords().eta();
   int temp=((m_etaBin+50)<<6) + m_phiBin;
 
   if (m_debug) std::cout << "KU : key: returning - "<<temp<<std::endl;
@@ -102,7 +100,7 @@ For instance, if phi is negative this routine converts to the
 equivalent positive position.
 \*todo tidy up a bit.
 */
-ICoordinate* KeyUtilities::convertCoordsToIntegers(double phi, double eta){
+ICoordinate KeyUtilities::convertCoordsToIntegers(double phi, double eta){
 
 	double phiBinWidth=((2*M_PI)/64.0);
 	// there are a maximum of 64 cells in the phi direction
@@ -135,8 +133,7 @@ ICoordinate* KeyUtilities::convertCoordsToIntegers(double phi, double eta){
 
 	ieta=static_cast<int>(temp_double);
 	if (m_debug) std::cout << "KU : (iphi, ieta) ("<<iphi<<","<<ieta<<")"<<std::endl;
-	ICoordinate* iCoord=new ICoordinate(iphi, ieta, eta);
-	return iCoord;
+	return ICoordinate(iphi, ieta, eta);
 }
 
 
@@ -166,14 +163,12 @@ int LVL1::KeyUtilities::sign(double temp) const{
 }
 
 void LVL1::KeyUtilities::setupThisKeyValues(){
-  ICoordinate* iCoord = convertCoordsToIntegers(m_phi, m_eta);
-  BinAndCoord* bandc  = calculateTriggerBin(iCoord);
-  m_phiBin=bandc->phiBin();
-  m_etaBin=bandc->etaBin();
-  m_centralPhi=bandc->coords()->phi();
-  m_centralEta=bandc->coords()->eta();
-  delete bandc;
-  delete iCoord;
+  ICoordinate iCoord = convertCoordsToIntegers(m_phi, m_eta);
+  BinAndCoord bandc  = calculateTriggerBin(iCoord);
+  m_phiBin=bandc.phiBin();
+  m_etaBin=bandc.etaBin();
+  m_centralPhi=bandc.coords().phi();
+  m_centralEta=bandc.coords().eta();
 }
 
 /** rounds number to nearest whole number */

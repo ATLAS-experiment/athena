@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPHYSVALMONITORINGTOOL_H
@@ -211,7 +211,7 @@ private:
     ToolHandle<InDet::IInDetHardScatterSelectionTool> m_hardScatterSelectionTool{this, "hardScatterSelectionTool", "InDet::InDetHardScatterSelectionTool","tool to select the hard scatter reco vertex"};
     ToolHandle<IGoodRunsListSelectionTool> m_grlTool{this, "GoodRunsListSelectionTool", "GoodRunsListSelectionTool/GoodRunsListSelectionTool", "GRL selection tool"};
 
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_weight_pileup_key{this, "PileupWeight_NOSYS", "EventInfo.PileupWeight_NOSYS"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_weight_pileup_key{this, "PileupWeight_NOSYS", m_eventInfoContainerName, "PileupWeight_NOSYS"};
 
     mutable std::mutex  m_mutex;
     mutable CutFlow     m_truthCutFlow ATLAS_THREAD_SAFE; // Guarded by m_mutex

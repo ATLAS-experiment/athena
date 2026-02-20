@@ -12,7 +12,7 @@
 # RUN2 setup
 geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN2)")
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
-ignore_pattern="ActsFatras.+ERROR.+No.+start.+volume.+resolved.+Nothing.+left.+to.+do.,Propagation.+reached.+the.+step.+count.+limit.+of"
+ignore_pattern=""
 Sim_tf.py \
     --CA \
     --conditionsTag "default:${conditions}" \

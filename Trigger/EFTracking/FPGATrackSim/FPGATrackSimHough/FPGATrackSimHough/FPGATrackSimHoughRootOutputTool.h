@@ -48,7 +48,7 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         FPGATrackSimHoughRootOutputTool(const std::string&, const std::string&, const IInterface*);
 
         virtual StatusCode initialize() override;
-        StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimRoad>> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage);
+        StatusCode fillTree(const std::vector<FPGATrackSimRoad> &roads, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const float minChi2, const int maxOverlappingHits, const bool roadsAreSecondStage);
         StatusCode fillTree(const std::vector<FPGATrackSimTrack> &track_cands, const std::vector<FPGATrackSimTruthTrack> &truthTracks, const std::vector<FPGATrackSimOfflineTrack> &offlineTracks, const std::vector<std::shared_ptr<const FPGATrackSimHit>> &hits_2nd, const bool writeOutNonSPStripHits, const bool roadsAreSecondStage);
 
 
@@ -97,9 +97,12 @@ class FPGATrackSimHoughRootOutputTool : public AthAlgTool
         std::vector<unsigned int> m_diskLayer;
         std::vector<unsigned int> m_passesOR;
         std::vector<float> m_roadChi2;
+        std::vector<float> m_roadChi2ndof;
+        std::vector<float> m_roadNCoords;
         std::vector<float> m_nMissingHits;
         std::vector<bool> m_mapped;
         std::vector<bool> m_realHit;
+        std::vector<bool> m_isSP;
 
         TrackCorrType m_idealCoordFitType = TrackCorrType::None;
 

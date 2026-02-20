@@ -12,6 +12,7 @@ from G4UserActions.G4UserActionsConfig import (
     G4SimTimerToolCfg, G4TrackCounterToolCfg, HitWrapperToolCfg,
     LooperKillerToolCfg, StoppedParticleActionToolCfg
 )
+from G4RunManagement.G4RunManagementUAConfig import SyncPrimaryGeneratorActionToolCfg, SyncRunActionToolCfg, SyncEventActionToolCfg
 from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import EntryLayerToolCfg, EntryLayerToolMTCfg
 from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg, GeoIDSvcCfg
 from ISF_Services.ISF_ServicesConfig import (
@@ -106,6 +107,13 @@ def getDefaultActions(flags):
     result = ComponentAccumulator()
 
     actions = []
+
+    # Sync actions should be added first
+    # TODO: have dedicated array/handle for sync actions instead of relying on order
+    if flags.Sim.UseG4Workers:
+         actions += [result.popToolsAndMerge(SyncPrimaryGeneratorActionToolCfg(flags)),
+                     result.popToolsAndMerge(SyncRunActionToolCfg(flags)),
+                     result.popToolsAndMerge(SyncEventActionToolCfg(flags))]
 
     # System stacking action
     actions += [result.popToolsAndMerge(AthenaStackingActionToolCfg(flags))]

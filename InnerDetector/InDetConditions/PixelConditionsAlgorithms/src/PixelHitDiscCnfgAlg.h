@@ -11,7 +11,7 @@
 #ifndef PIXELHITDISCCNFGALG_H
 #define PIXELHITDISCCNFGALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 
@@ -21,7 +21,7 @@
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 
-class PixelHitDiscCnfgAlg : public AthReentrantAlgorithm {
+class PixelHitDiscCnfgAlg : public AthCondAlgorithm {
   public:
     PixelHitDiscCnfgAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelHitDiscCnfgAlg() = default;

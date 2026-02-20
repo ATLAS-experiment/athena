@@ -47,10 +47,10 @@ namespace MuonR4{
             }
             return segPars;
         }
-        Parameters localSegmentPars(const ActsGeometryContext& gctx,
+        Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment) {
             Parameters pars{};
-            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTrans(gctx);
+            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTransform(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
             pars[toUnderlying(ParamDefs::x0)] = locPos.x();
@@ -109,12 +109,12 @@ namespace MuonR4{
             return Acts::BoundTrackParameters{surface.getSharedPtr(), std::move(boundPars),
                                               cov, hypot};
         }
-        Acts::BoundTrackParameters boundSegmentPars(const ActsGeometryContext& gctx,
+        Acts::BoundTrackParameters boundSegmentPars(const ActsTrk::GeometryContext& gctx,
                                                     const Segment& segment,
                                                     const Acts::ParticleHypothesis hypot) {
             const auto& surface = segment.msSector()->surface();
 
-            const Amg::Vector3D locPos = surface.transform(gctx.context()).inverse() * 
+            const Amg::Vector3D locPos = surface.localToGlobalTransform(gctx.context()).inverse() * 
                                          segment.position();
              Acts::BoundVector boundPars{};
             boundPars[Acts::eBoundLoc0] = locPos.x();

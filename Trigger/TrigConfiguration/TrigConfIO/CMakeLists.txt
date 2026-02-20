@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigConfIO )
@@ -8,6 +8,7 @@ find_package( Boost )
 find_package( Oracle )     # Oracle client libraries for DB access
 find_package( cx_Oracle )  # Oracle python client
 find_package( nlohmann_json )
+find_package( requests )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( CrestApi COMPONENTS CrestApi )
 
@@ -16,19 +17,18 @@ atlas_add_library( TrigConfIO
   TrigConfIO/*.h src/*.cxx
   PUBLIC_HEADERS TrigConfIO
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${CrestApiLib_INCLUDE_DIRS}
-  LINK_LIBRARIES TrigConfData TrigConfBase
-  PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json ${CrestApi_LIBRARIES} -lstdc++fs
+  PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${CrestApi_INCLUDE_DIRS}
+  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfData TrigConfBase
+  PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${CrestApi_LIBRARIES} nlohmann_json::nlohmann_json -lstdc++fs
   )
 
 atlas_add_executable( TestTriggerMenuAccess utils/TestTriggerMenuAccess.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfData TrigConfIO ${CrestApi_LIBRARIES}
+  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfData TrigConfIO
   )
 
 atlas_add_executable( TriggerMenuRW utils/TriggerMenuRW.cxx 
-  INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} TrigConfIO ${CrestApi_LIBRARIES}
+  LINK_LIBRARIES TrigConfData TrigConfIO
   )
 
 # Install files from the package.

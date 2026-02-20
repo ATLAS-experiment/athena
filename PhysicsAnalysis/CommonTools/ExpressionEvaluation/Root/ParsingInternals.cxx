@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -31,7 +31,7 @@ namespace ExpressionParsing {
       stack.pop_back();
    }
 
-  StackElement VirtualMachine::execute(std::vector<StackElement> const& code) const
+  StackElement VirtualMachine::execute(const EventContext& ctx, std::vector<StackElement> const& code) const
   {
     std::vector<StackElement> stack;
     stack.reserve(m_stackSize);
@@ -42,8 +42,8 @@ namespace ExpressionParsing {
     while (pc != code.end())
     {
        if (stack.size() > max_stack_size) max_stack_size = stack.size();
-      ++pc;
-      switch (pc[-1].asInt())
+      
+      switch ((pc++)->asInt())
       {
         case op_neg: {
           stack.back() = -std::move(stack.back());
@@ -92,7 +92,7 @@ namespace ExpressionParsing {
 
         case op_val:
           if (pc->isProxy()) {
-             stack.emplace_back(pc->valueFromProxy());
+             stack.emplace_back(pc->valueFromProxy(ctx));
           }
           else {
              stack.emplace_back(*pc);

@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "RPC_CondCabling/RpcCablingCondData.h"
-
+#include "RPC_CondCabling/RPCofflineId.h"
+#include "MuonIdHelpers/RpcIdHelper.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -295,7 +296,7 @@ std::list<Identifier> RpcCablingCondData::give_strip_id(unsigned short int Subsy
     std::list<unsigned int>::const_iterator it = CodeList.begin();
     while (it != CodeList.end()) {
         RPCdecoder decode(*it);
-        RPCofflineId rpcId;
+        RPCofflineId thisRpcId;
 
         int RPC_strip = decode.strip_number();
         int RPC_chamber = decode.rpc_z_index();
@@ -305,17 +306,17 @@ std::list<Identifier> RpcCablingCondData::give_strip_id(unsigned short int Subsy
 
         const RPC_CondCabling::RPCchamber* rpc = s.find_chamber(RPC_station, RPC_chamber);
 
-        rpcId.stationName = rpc->stationName();
-        rpcId.stationEta = (decode.half_barrel() == Positive) ? rpc->stationEta() : -rpc->stationEta();
-        rpcId.stationPhi = (sector == 31) ? 1 : (sector + 1) / 4 + 1;
-        rpcId.doubletR = rpc->doubletR();
-        rpcId.doubletZ = rpc->doubletZ();
-        rpcId.doubletPhi = (rpc->phiReadoutPannels() == 2) ? (sector + 1) % 2 + 1 : 1;
-        rpcId.gasGap = RPC_layer + 1;
-        rpcId.measuresPhi = static_cast<int>(decode.view());
-        rpcId.strip = RPC_strip + 1;
+        thisRpcId.stationName = rpc->stationName();
+        thisRpcId.stationEta = (decode.half_barrel() == Positive) ? rpc->stationEta() : -rpc->stationEta();
+        thisRpcId.stationPhi = (sector == 31) ? 1 : (sector + 1) / 4 + 1;
+        thisRpcId.doubletR = rpc->doubletR();
+        thisRpcId.doubletZ = rpc->doubletZ();
+        thisRpcId.doubletPhi = (rpc->phiReadoutPannels() == 2) ? (sector + 1) % 2 + 1 : 1;
+        thisRpcId.gasGap = RPC_layer + 1;
+        thisRpcId.measuresPhi = static_cast<int>(decode.view());
+        thisRpcId.strip = RPC_strip + 1;
 
-        offlineIdList.push_back(rpcId);
+        offlineIdList.push_back(std::move(thisRpcId));
 
         ++it;
     }

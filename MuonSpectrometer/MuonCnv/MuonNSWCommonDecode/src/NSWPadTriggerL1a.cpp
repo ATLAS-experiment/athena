@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ers/ers.h"
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
-#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -655,7 +654,7 @@ Muon::nsw::NSWPadTriggerL1a::getHits(const std::vector< std::vector<uint8_t> >& 
         thesehits.push_back(it);
       }
     }
-    hits.push_back(thesehits);
+    hits.push_back(std::move(thesehits));
   }
   return hits;
 }
@@ -670,7 +669,7 @@ Muon::nsw::NSWPadTriggerL1a::getTdsChannels(const std::vector< std::vector<uint8
     for (const auto& hit: hits.at(pfeb)) {
       tdschans.push_back(mapPadTriggerToTds.at(pfeb).at(hit));
     }
-    tdschannels.push_back(tdschans);
+    tdschannels.push_back(std::move(tdschans));
   }
   return tdschannels;
 }

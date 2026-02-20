@@ -6,23 +6,37 @@
 
 namespace DerivationFramework {
 
-HITrackQualityAugmentationTool::HITrackQualityAugmentationTool(const std::string& t,
-      const std::string& n,
-      const IInterface* p) :
-    base_class(t,n,p)
-  {
-  }
-
 StatusCode HITrackQualityAugmentationTool::initialize()
 {
   ATH_CHECK(m_trackParticlesName.initialize());
   ATH_CHECK(m_vertexContainerName.initialize());
+  ATH_CHECK(m_eventInfoKey.initialize());
+  
   m_decorator = m_trackParticlesName.key() + "." + m_decorator.key();
   ATH_CHECK(m_decorator.initialize());
+  
+  m_chi2Decorator = m_trackParticlesName.key() + "." + m_chi2Decorator.key();
+  ATH_CHECK(m_chi2Decorator.initialize());
+  
+  m_vertexIndexDecorator = m_trackParticlesName.key() + "." + m_vertexIndexDecorator.key();
+  ATH_CHECK(m_vertexIndexDecorator.initialize());
+  
+  m_covD0Decorator = m_trackParticlesName.key() + "." + m_covD0Decorator.key();
+  ATH_CHECK(m_covD0Decorator.initialize());
+  
+  m_covZ0Decorator = m_trackParticlesName.key() + "." + m_covZ0Decorator.key();
+  ATH_CHECK(m_covZ0Decorator.initialize());
+  
+  m_covThetaDecorator = m_trackParticlesName.key() + "." + m_covThetaDecorator.key();
+  ATH_CHECK(m_covThetaDecorator.initialize());
 
   CHECK(m_trkSelTool_pp.retrieve());
   CHECK(m_trkSelTool_hi_loose.retrieve());
   CHECK(m_trkSelTool_hi_tight.retrieve());
+  
+  if (!m_trkToLeptonPVTool.empty()) {
+    CHECK(m_trkToLeptonPVTool.retrieve());
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -44,6 +58,13 @@ StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) 
         }
       }
  
+      // Get EventInfo
+      SG::ReadHandle<xAOD::EventInfo> eventInfo{m_eventInfoKey, ctx};
+      if(!eventInfo.isValid()) {
+        ATH_MSG_ERROR ("Couldn't retrieve EventInfo with key " << m_eventInfoKey.key());
+        return StatusCode::FAILURE;
+      }
+ 
       // Get the track container
       SG::ReadHandle<xAOD::TrackParticleContainer> tracks{m_trackParticlesName, ctx};
       if(!tracks.isValid()) {
@@ -51,13 +72,78 @@ StatusCode HITrackQualityAugmentationTool::addBranches(const EventContext& ctx) 
         return StatusCode::FAILURE;
       }
      
-      // Decorator
+      // Decorators
       SG::WriteDecorHandle<xAOD::TrackParticleContainer, unsigned short> decorator{m_decorator, ctx };
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> chi2Decorator{m_chi2Decorator, ctx };
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, int> vertexIndexDecorator{m_vertexIndexDecorator, ctx };
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> covD0Decorator{m_covD0Decorator, ctx };
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> covZ0Decorator{m_covZ0Decorator, ctx };
+      SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> covThetaDecorator{m_covThetaDecorator, ctx };
  
-      // Get track quality this is what we're adding
+      // Get track quality and chi2 to PV
       for(const auto* track:*tracks) {
-        if(pv) decorator(*track) =GetTrackQualityNew(track,pv);
-        else   decorator(*track) = 0;
+        if(pv) {
+          decorator(*track) = GetTrackQualityNew(track,pv);
+          
+          // Check if track is associated with the primary vertex
+          bool isFromPV = false;
+          int vertexIndex = -1;
+          
+          // Find which vertex this track is associated with
+          for (size_t ivx = 0; ivx < vertices->size(); ++ivx) {
+            const xAOD::Vertex* vx = (*vertices)[ivx];
+            const std::vector<ElementLink<xAOD::TrackParticleContainer>>& trkLinks = vx->trackParticleLinks();
+            
+            for (const auto& trkLink : trkLinks) {
+              if (trkLink.isValid() && *trkLink == track) {
+                vertexIndex = static_cast<int>(ivx);
+                if (vx->vertexType() == xAOD::VxType::PriVtx) {
+                  isFromPV = true;
+                }
+                break;
+              }
+            }
+            if (vertexIndex >= 0) break;
+          }
+          
+          vertexIndexDecorator(*track) = vertexIndex;
+          
+          // Calculate chi2 to PV only for non-PV tracks
+          float chi2ToPV = -999.0;  // Default for PV tracks
+          if (!isFromPV && !m_trkToLeptonPVTool.empty()) {
+            std::unique_ptr<xAOD::Vertex> fittedVertex = m_trkToLeptonPVTool->matchTrkToPV(track, pv, eventInfo.cptr());
+            if (fittedVertex) {
+              chi2ToPV = fittedVertex->chiSquared();
+            } else {
+              chi2ToPV = -1.0;  // Fit failed for non-PV track
+            }
+          }
+          chi2Decorator(*track) = chi2ToPV;
+          
+          // Extract covariance matrix diagonal elements
+          float covD0 = -999.0;
+          float covZ0 = -999.0;
+          float covTheta = -999.0;
+          try {
+            auto covMatrix = track->definingParametersCovMatrix();
+            covD0 = covMatrix(0, 0);      // d0 variance
+            covZ0 = covMatrix(1, 1);      // z0 variance
+            covTheta = covMatrix(3, 3);   // theta variance
+          } catch (...) {
+            // Covariance matrix not available - keep default -999.0
+          }
+          covD0Decorator(*track) = covD0;
+          covZ0Decorator(*track) = covZ0;
+          covThetaDecorator(*track) = covTheta;
+        }
+        else {
+          decorator(*track) = 0;
+          chi2Decorator(*track) = -1.0;
+          vertexIndexDecorator(*track) = -1;
+          covD0Decorator(*track) = -999.0;
+          covZ0Decorator(*track) = -999.0;
+          covThetaDecorator(*track) = -999.0;
+        }
       }
  
       return StatusCode::SUCCESS;

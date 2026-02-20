@@ -5,7 +5,7 @@
 #ifndef SiElementPropertiesTableCondAlg_h
 #define SiElementPropertiesTableCondAlg_h
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -18,7 +18,7 @@ namespace InDet {
 
   /**
    * @class SiElementPropertiesTableCondAlg
-   * This class is a condition algorithm and inherits AthReentrantAlgorithm.
+   * This class is a condition algorithm and inherits AthCondAlgorithm.
    * This class reads SCT_DetectorElementCollection from condition store,
    * prepares SCT "neighbours" using SCT_ElementPropertiesTable class,
    * register it in condition store.
@@ -26,10 +26,10 @@ namespace InDet {
    * is used by SiTrackerSpacePointFinder.
    */
 
-  class SiElementPropertiesTableCondAlg : public AthReentrantAlgorithm {
+  class SiElementPropertiesTableCondAlg : public AthCondAlgorithm {
   public:
     /**
-     * @name Methods of AthReentrantAlgorithm
+     * @name Methods of AthCondAlgorithm
      */
     //@{
     SiElementPropertiesTableCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -38,7 +38,6 @@ namespace InDet {
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
     virtual StatusCode finalize() override final;
-    virtual bool isReEntrant() const override final { return false; }
     //@}
 
   private:

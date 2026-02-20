@@ -50,6 +50,10 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True)
 
+    # Setup perfmon flags from runargs
+    from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
+
     # Pre-include
     processPreInclude(runArgs, flags)
 

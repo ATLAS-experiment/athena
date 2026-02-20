@@ -8,7 +8,7 @@ There are two ways to get the codes
 1. Sparse checkout
 2. Full checkout
 
-Considering that the integration might modify more than one package, a full checkout is recommended to ease the setup. If you prefer to perform a sparse checkout, you can follow the ATLAS git tutorial [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/git-clone/). Only the full checkout instructions are provided here.
+Considering that the integration might modify more than one package, a full checkout is recommended to ease the setup. If you prefer to perform a sparse checkout, you can follow the ATLAS git tutorial [here](https://atlas-software.docs.cern.ch/athena/git/). Only the full checkout instructions are provided here.
 
 ### Full checkout
 If you are familiar with `Athena` and `git`, you don't have to follow this checkout instructions. Otherwise, you can follow the instructions below
@@ -174,7 +174,7 @@ Reco_tf.py \
   --inputRDOFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/*' \
   --outputAODFile 'myAOD.pool.root' \
   --jobNumber '1' \
-  --ignorePatterns 'ActsTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+CombinatorialKalmanFilter.+failed:.+CombinatorialKalmanFilterError:5.+Propagation.+reaches.+max.+steps.+before.+track.+finding.+is.+finished.+with.+the.+initial.+parameters,ActsTrackFindingAlg.Acts.+ERROR.+SurfaceError:1'
+  --ignorePatterns ''
 ```
 </details>
 

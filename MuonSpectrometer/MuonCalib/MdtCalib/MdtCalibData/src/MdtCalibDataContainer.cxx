@@ -3,6 +3,11 @@
 */
 
 #include <MdtCalibData/MdtCalibDataContainer.h>
+#include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/Identifier.h"
+
+
 namespace MuonCalib{
 
 MdtCalibDataContainer::MdtCalibDataContainer(const Muon::IMuonIdHelperSvc* idHelperSvc,

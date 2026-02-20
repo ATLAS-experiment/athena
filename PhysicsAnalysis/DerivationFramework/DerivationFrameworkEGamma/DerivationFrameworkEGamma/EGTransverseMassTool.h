@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// EGTransverseMassTool.h, (c) ATLAS Detector software
+// EGTransverseMassTool.h
 // author: giovanni.marchiori@cern.ch
 ///////////////////////////////////////////////////////////////////
 
@@ -27,10 +27,7 @@ namespace DerivationFramework {
 class EGTransverseMassTool : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool>
 {
 public:
-  EGTransverseMassTool(
-    const std::string& t,
-    const std::string& n,
-    const IInterface* p);
+  using base_class::base_class;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode addBranches(const EventContext& ctx) const override final;
@@ -39,9 +36,9 @@ private:
   StatusCode getTransverseMasses(const EventContext& ctx, std::vector<float>&)
     const;
 
-  std::string m_expression1;
-  float m_METmin;
-  float m_mass1Hypothesis;
+  Gaudi::Property<std::string> m_expression1{this, "ObjectRequirements", "true"};
+  Gaudi::Property<float> m_METmin{this, "METmin", -999.f};
+  Gaudi::Property<float> m_mass1Hypothesis{this, "ObjectMassHypothesis", 0.f};
 
   SG::WriteHandleKey<std::vector<float>> m_sgName{ this,
                                                    "StoreGateEntryName",

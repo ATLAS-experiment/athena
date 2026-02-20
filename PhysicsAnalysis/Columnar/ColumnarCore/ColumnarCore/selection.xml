@@ -4,5 +4,6 @@
 
   <class name="columnar::ColumnarTool<ColumnarModeXAOD>" />
   <class name="columnar::ColumnarTool<ColumnarModeArray>" />
+  <class name="columnar::ColumnarTool<ColumnarModeXAODArray>" />
 
 </lcgdict>

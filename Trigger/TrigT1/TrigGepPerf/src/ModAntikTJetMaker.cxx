@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "./ModAntikTJetMaker.h"
@@ -84,7 +84,7 @@ Gep::ModAntikTJetMaker::makeJets(const std::vector<Gep::Cluster> &clusters) cons
 				       v_constitutents_in_jet_indices.at( minInvPt2DeltaR2_index).begin(), 
 				       v_constitutents_in_jet_indices.at( minInvPt2DeltaR2_index).end());
 
-      v_jets.push_back(jet);
+      v_jets.push_back(std::move(jet));
 
       constituents.erase(constituents.begin() + minInvPt2DeltaR2_index);
       v_constitutents_in_jet_indices.erase(v_constitutents_in_jet_indices.begin() + minDeltaR2_indices[minInvPt2DeltaR2_index]);

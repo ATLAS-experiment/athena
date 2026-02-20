@@ -604,10 +604,10 @@ namespace SH
     } else
     {
       RCU_READ_INVARIANT (this);
-      ULong_t count = m_samples.size(), count2 = 0;
+      ULong_t count = m_samples.size();
       b.WriteULong (count);
       for (SamplesIter iter = m_samples.begin(),
-	     end = m_samples.end(); iter != end; ++ iter, ++ count2)
+	     end = m_samples.end(); iter != end; ++ iter)
       {
 	Sample *sample = *iter;
 	b << sample;

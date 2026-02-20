@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -1123,8 +1123,10 @@ LArRecoMaterialTool::averageFraction (std::vector<double>& volumeFractions,
     childAverageA  += massfrac * averageAFractions[ivolfrac];
     childAverageZ  += massfrac * averageZFractions[ivolfrac];
   }  
-    
-  childRho = childMass/(GeoModelKernelUnits::gram*childVolume);
+
+  if (childVolume != 0) {
+    childRho = childMass/(GeoModelKernelUnits::gram*childVolume);
+  }
   
   ATH_MSG_DEBUG ("");
   ATH_MSG_DEBUG ("  + averaged over " << parsedVolumes << " volumes ");

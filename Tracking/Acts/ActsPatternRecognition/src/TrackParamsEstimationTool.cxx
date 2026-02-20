@@ -3,6 +3,7 @@
 */
 
 #include "src/TrackParamsEstimationTool.h"
+#include "xAODInDetMeasurement/SpacePoint.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
 #include "Acts/EventData/TransformationHelpers.hpp"
@@ -47,11 +48,11 @@ namespace ActsTrk {
 						     bool useTopSp,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
-						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const 
+						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const
   {
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return std::nullopt;
-    const auto& bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
+    const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
@@ -127,14 +128,24 @@ namespace ActsTrk {
           freeParams.segment<3>(Acts::eFreePos0),
           freeParams.segment<3>(Acts::eFreeDir0)
         ).closest().pathLength());
-    auto boundParamsResult = m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
+
+    std::optional<Acts::BoundTrackParameters> boundParams;
+    auto boundParamsResult =
+        m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
+
     if (!boundParamsResult.ok()) {
       ATH_MSG_DEBUG("Extrapolation failed");
-      return std::nullopt;
+      if (m_allowPropagatorFailure) {
+        // Fallback: use curvilinear parameters instead of failing
+        ATH_MSG_DEBUG("Using curvilinear parameters due to propagation failure");
+        boundParams = curvilinearParams;
+      } else {
+        return std::nullopt;
+      }
+    } else {
+      boundParams = *boundParamsResult;
     }
 
-    // Get extrapolated parameters
-    Acts::BoundTrackParameters boundParams = *boundParamsResult;
 
     // Estimate covariance
     Acts::EstimateTrackParamCovarianceConfig covarianceEstimationConfig = {
@@ -143,9 +154,9 @@ namespace ActsTrk {
       .initialVarInflation = Eigen::Map<const Acts::BoundVector>(m_initialVarInflation.value().data()),
       .noTimeVarInflation = 1.0,
     };
-    boundParams.covariance() = Acts::estimateTrackParamCovariance(
+    boundParams->covariance() = Acts::estimateTrackParamCovariance(
       covarianceEstimationConfig,
-      boundParams.parameters(),
+      boundParams->parameters(),
       false);
 
     return boundParams;

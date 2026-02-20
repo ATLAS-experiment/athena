@@ -16,8 +16,9 @@
 
 #include "Identifier/Identifier.h" 
 #include "Identifier/Range.h" 
-
-class IdDictRange; 
+#include <iosfwd>
+class IdDictRange;
+class MsgStream;
 
 /**   IdDictFieldImplementation is used to capture the specification
  **   of a single field of an Identifier. This class is primarily used
@@ -116,7 +117,11 @@ private:
     bool                m_decode_index;
     
 }; 
- 
+
+///stream insertion operator uses show_to_string
+std::ostream & operator<<(std::ostream & os, const IdDictFieldImplementation &);
+///MsgStream insertion operator uses show_to_string
+MsgStream & operator<<(MsgStream & ms, const IdDictFieldImplementation &);
 
 //<<<<<< INLINE MEMBER FUNCTIONS                                        >>>>>>
 

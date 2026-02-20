@@ -1,10 +1,10 @@
 ////////////////////-*- C++ -*-////////////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-// PFlowAugmentationTool.h, (c) ATLAS Detector software
+// PFlowAugmentationTool.h
 ///////////////////////////////////////////////////////////////////
 
 #ifndef DERIVATIONFRAMEWORK_PFLOWAUGMENTATIONTOOL_H
@@ -27,28 +27,28 @@
 namespace DerivationFramework {
 
   class PFlowAugmentationTool : public extends<AthAlgTool, IAugmentationTool> {
-  public: 
-    PFlowAugmentationTool(const std::string& t, const std::string& n, const IInterface* p);
+  public:
 
-    StatusCode initialize();
-    StatusCode finalize();
-    virtual StatusCode addBranches(const EventContext& ctx) const;
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
 
   private:
 
-    ToolHandle<CP::IWeightPFOTool> m_weightPFOTool;    /// Retrieval tool
+    PublicToolHandle<CP::IWeightPFOTool> m_weightPFOTool{this, "WeightPFOTool", "CP::WeightPFOTool/WeightPFOTool"};
 
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{this, "VertexContainer", "PrimaryVertices", "Input vertex container"};
     SG::ReadHandleKey<xAOD::FlowElementContainer> m_pfoContainer_key{this, "GlobalChargedParticleFlowObjects", "GlobalChargedParticleFlowObjects", "Input charged PFO"};
 
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_corrP4_ptKey {this, "m_corrP4_ptKey", "GlobalChargedParticleFlowObjects.DFCommonPFlow_CaloCorrectedPt", "Decoration for weighted charged PFO pt"};
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_z0Key {this, "m_z0Key", "GlobalChargedParticleFlowObjects.DFCommonPFlow_z0", "Decoration for track z0"};
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_vzKey{this, "m_vzKey","GlobalChargedParticleFlowObjects.DFCommonPFlow_vz", "Decoration for track vz"};
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_d0Key{this, "m_d0Key","GlobalChargedParticleFlowObjects.DFCommonPFlow_d0", "Decoration for track d0"};
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_thetaKey{this, "m_thetaKey","GlobalChargedParticleFlowObjects.DFCommonPFlow_theta", "Decoration for track theta"};
-    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_envWeightKey{this, "m_envWeightKey","GlobalChargedParticleFlowObjects.DFCommonPFlow_envWeight", "Decoration for weight for dense environments"};
-    
-  }; 
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_corrP4_ptKey {this, "m_corrP4_ptKey", m_pfoContainer_key, "DFCommonPFlow_CaloCorrectedPt", "Decoration for weighted charged PFO pt"};
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_z0Key {this, "m_z0Key", m_pfoContainer_key, "DFCommonPFlow_z0", "Decoration for track z0"};
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_vzKey{this, "m_vzKey", m_pfoContainer_key, "DFCommonPFlow_vz", "Decoration for track vz"};
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_d0Key{this, "m_d0Key", m_pfoContainer_key, "DFCommonPFlow_d0", "Decoration for track d0"};
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_thetaKey{this, "m_thetaKey", m_pfoContainer_key, "DFCommonPFlow_theta", "Decoration for track theta"};
+    SG::WriteDecorHandleKey<xAOD::FlowElementContainer> m_envWeightKey{this, "m_envWeightKey", m_pfoContainer_key, "DFCommonPFlow_envWeight", "Decoration for weight for dense environments"};
+
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_PFLOWAUGMENTATIONTOOL_H

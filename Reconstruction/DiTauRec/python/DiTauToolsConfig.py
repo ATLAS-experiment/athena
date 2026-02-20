@@ -104,3 +104,14 @@ def DiTauOnnxScoreCalculatorCfg(flags, name="DiTauRec_OnnxScoreCalculator", **kw
     kwargs.setdefault("maxTracks", 10)
     acc.setPrivateTools(CompFactory.DiTauOnnxDiscriminantTool(name, **kwargs))
     return acc
+
+def DiTauWPDecoratorCfg(flags, name="DiTauRec_WPDecorator", **kwargs):
+    """Configure the WPDecorator"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("ScoreName", "omni_score")
+    kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    kwargs.setdefault("DecorWPNames", ["omni_score_VL", "omni_score_L", "omni_score_M", "omni_score_T"])
+    kwargs.setdefault("DecorWPCuts", [0.40, 0.60, 0.80, 0.9]) #NOTE: these are dummy values for testing, to be updated when WPs values will be offficially decided 
+    acc.setPrivateTools(CompFactory.DiTauWPDecorator(name, **kwargs))
+    return acc
+

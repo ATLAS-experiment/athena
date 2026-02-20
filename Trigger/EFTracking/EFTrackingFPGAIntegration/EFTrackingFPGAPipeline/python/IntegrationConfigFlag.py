@@ -24,12 +24,13 @@ def addFPGADataPrepFlags():
     flags.addFlag("FPGADataPrep.PassThrough.MaxSpacePointNum", 500000)
     flags.addFlag("FPGADataPrep.DoEmulation", False)
     flags.addFlag("FPGADataPrep.ForTiming", False)
+    flags.addFlag("FPGADataPrep.DoClusterSorting", False)
     flags.addFlag("FPGADataPrep.doF110", False)
     flags.addFlag("FPGADataPrep.doCodeType", "F1X0")
     
     return flags
 
 def addClusterMakerFlags(flags):
-    flags.addFlag("ClusterMaker.DoBulkCopy", False)
+    flags.addFlag("ClusterMaker.DoBulkCopy", True)
     
     return flags

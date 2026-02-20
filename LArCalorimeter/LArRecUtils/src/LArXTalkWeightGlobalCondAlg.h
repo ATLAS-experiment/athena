@@ -5,7 +5,7 @@
 #ifndef LARRECUTILS_LARXTALKWEIGHTGLOBALCONDALG_H
 #define LARRECUTILS_LARXTALKWEIGHTGLOBALCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -13,7 +13,7 @@
 #include "LArRecConditions/LArXTalkWeightGlobal.h"
 #include "LArRecConditions/LArXTalkWeight.h"
 
-class LArXTalkWeightGlobalCondAlg: public AthReentrantAlgorithm {
+class LArXTalkWeightGlobalCondAlg: public AthCondAlgorithm {
   public:
     LArXTalkWeightGlobalCondAlg(const std::string& name, ISvcLocator* pSvcLocator); 
     virtual ~LArXTalkWeightGlobalCondAlg() = default;

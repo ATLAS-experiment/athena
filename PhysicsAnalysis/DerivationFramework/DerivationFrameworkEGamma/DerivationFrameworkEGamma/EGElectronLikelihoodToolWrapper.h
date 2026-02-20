@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// EGLikelihoodToolWrapper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
 // Note: while EGSelectionToolWrapper permits to only store the boolean
 // accept and the isEM-like mask (works for both isEM and likelihood selectors),
@@ -33,46 +30,43 @@
 
 namespace DerivationFramework {
 
-class EGElectronLikelihoodToolWrapper : public extends<AthAlgTool, IAugmentationTool> 
-{
-public:
-  EGElectronLikelihoodToolWrapper(const std::string& t,
-                                  const std::string& n,
-                                  const IInterface* p);
+  class EGElectronLikelihoodToolWrapper : public extends<AthAlgTool, IAugmentationTool>
+  {
+  public:
 
-  virtual StatusCode initialize() override final;
-  virtual StatusCode addBranches(const EventContext& ctx) const override final;
+    using base_class::base_class;
 
-private:
-  ToolHandle<IAsgElectronLikelihoodTool> m_tool{
-    this,
-    "EGammaElectronLikelihoodTool",
-    "",
-    "Electron  Likelihood Selector"
-  };
-  ToolHandle<IElectronPhotonShowerShapeFudgeTool>
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
+  private:
+    ToolHandle<IAsgElectronLikelihoodTool> m_tool{
+      this,
+        "EGammaElectronLikelihoodTool",
+        "",
+        "Electron  Likelihood Selector"
+        };
+    ToolHandle<IElectronPhotonShowerShapeFudgeTool>
     m_fudgeMCTool{ this, "EGammaFudgeMCTool", "", "Fudging tool" };
 
-  SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
-                                                            "ContainerName",
-                                                            "",
-                                                            "Input" };
+    SG::ReadHandleKey<xAOD::EgammaContainer> m_ContainerName{ this,
+      "ContainerName",
+      "",
+      "Input" };
 
-  // Write decoration handle keys
-  SG::WriteDecorHandleKey<xAOD::EgammaContainer>
-    m_decoratorPass{ this, "decoratorPass", "", "" };
-  SG::WriteDecorHandleKey<xAOD::EgammaContainer>
-    m_decoratorIsEM{ this, "decoratorIsEM", "", "" };
-  SG::WriteDecorHandleKey<xAOD::EgammaContainer>
-    m_decoratorResult{ this, "decoratorResult", "", "" };
-  SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer, float>
-    m_decoratorMultipleOutputs{this, "decoratorMultipleOutputs", {}, ""};
-  std::string m_cut;
-  std::string m_sgName;
-  bool m_storeTResult;
-  std::vector<std::string> m_sgMultipleNames;
-  bool m_storeMultipleOutputs;
-};
+    // Write decoration handle keys
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer>
+    m_decoratorPass{ this, "decoratorPass", m_ContainerName, "", "" };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer>
+    m_decoratorIsEM{ this, "decoratorIsEM", m_ContainerName, "", "" };
+    SG::WriteDecorHandleKey<xAOD::EgammaContainer>
+    m_decoratorResult{ this, "decoratorResult", m_ContainerName, "", "" };
+    SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer, float>
+    m_decoratorMultipleOutputs{this, "decoratorMultipleOutputs", m_ContainerName, {}, ""};
+    Gaudi::Property<std::string> m_cut{this, "CutType", ""};
+    Gaudi::Property<bool> m_storeTResult{this, "StoreTResult", false};
+    Gaudi::Property<bool> m_storeMultipleOutputs{this, "StoreMultipleOutputs", false};
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_EGELECTRONLIKELIHOODTOOLWRAPPER_H

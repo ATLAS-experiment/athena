@@ -16,4 +16,5 @@ atlas_add_component( JetTagDQA
 
 atlas_install_data( data/*.json )
 atlas_install_python_modules( python/*.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+

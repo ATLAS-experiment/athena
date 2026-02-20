@@ -9,7 +9,7 @@
 #include <xAODTracking/TrackSurface.h>
 #include <xAODTracking/TrackSurfaceAuxContainer.h>
 
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "Acts/Surfaces/Surface.hpp"
 
 namespace ActsTrk {

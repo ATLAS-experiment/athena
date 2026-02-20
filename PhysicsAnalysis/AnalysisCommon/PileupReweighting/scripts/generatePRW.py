@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 __author__ = "Will Buttinger"
 __doc__ = """
@@ -11,7 +12,6 @@ Example: generatePRW.py --outDS=user.will.myPRW  --inDsTxt=datasets.txt
 
 import os
 import argparse
-import ROOT
 
 def main():
     from argparse import RawTextHelpFormatter
@@ -94,7 +94,7 @@ def main():
       #check input prw files, if we specified
       isIncomplete=False
       if len(args.prwFiles):
-        total=0;
+        total=0
         dsid = theParent.split(".")[1]
         for p in periodNumbers:
           if p==-1: continue
@@ -139,7 +139,7 @@ def main():
           ntupDatasets += [r[u'ldn']]
           foundNTUP=True
           break
-        if foundNTUP==True: continue
+        if foundNTUP is True: continue
         
       aodDatasets += [theParent]
     

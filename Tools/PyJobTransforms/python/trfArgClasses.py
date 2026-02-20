@@ -529,7 +529,7 @@ class argFile(argList):
     #  argument name, e.g., outputDESD_SGLMUFile -> DESD_SGLMU 
     #  @param guid This is a non-standard option and allows the GUID for files without an intrinsic GUID
     #  to be set explicitly at initialisation. The parameter should be a dictionary, keyed by filename,
-    #  which contains the GUID string, e.g., <tt>{'file1' : '930de3de-de8d-4819-9129-beef3bb4fadb', 'file2' : ... }</tt>
+    #  which contains the GUID string, e.g., <tt>{'file1' : '930DE3DE-DE8D-4819-9129-BEEF3BB4FADB', 'file2' : ... }</tt>
     #  @param multipleOK Explicit declaration of whether multiple arguments are allowed; default is @c True for @c input,
     #  @c False for @c output and @c temporary
     #  @param name The corresponding key for this argument in the argdict of the transform (e.g., @c inputESDFile)
@@ -1860,14 +1860,28 @@ class argHepEvtAsciiFile(argFile):
         for fname in files:
             try:
                 eventCount = 0
-                import tarfile
-                tar = tarfile.open(fname, "r:gz")
-                for untar in tar.getmembers():
-                    fileTXT = tar.extractfile(untar)
-                    if fileTXT is not None:
-                        # Iterate line-by-line to avoid memory explosion
-                        for aline in fileTXT:
+
+                if '.tar.gz' in fname or '.tgz' in fname:
+                    import tarfile
+                    with tarfile.open(fname, "r:gz") as tar:
+                        for untar in tar.getmembers():
+                            fileTXT = tar.extractfile(untar)
+                            if fileTXT is not None:
+                                # Iterate line-by-line to avoid memory explosion
+                                for aline in fileTXT:
+                                    if aline.startswith(b'E '):
+                                        eventCount += 1
+                elif '.gz' in fname:
+                    import gzip
+                    with gzip.open(fname,'rb') as gzin:
+                        for aline in gzin:
                             if aline.startswith(b'E '):
+                                eventCount += 1
+                else:
+                    # Assume uncompressed
+                    with open(fname,'r') as infile:
+                        for aline in infile:
+                            if aline.startswith('E '):
                                 eventCount += 1
                 self._fileMetadata[fname]['nentries'] = eventCount
             except OSError as e:

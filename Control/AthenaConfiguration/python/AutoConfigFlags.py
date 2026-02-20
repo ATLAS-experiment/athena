@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from PyUtils.MetaReader import read_metadata, lite_primary_keys_to_keep, lite_TagInfo_keys_to_keep
 from AthenaCommon.Logging import logging
@@ -225,8 +225,8 @@ def getGeneratorsInfo(flags):
     """
     from AthenaConfiguration.Enums import ProductionStep
     inputFiles = flags.Input.Files
-    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and flags.Input.SecondaryFiles and not flags.Overlay.ByteStream:
-        # Do something special for MC Overlay
+    if flags.Common.ProductionStep in [ProductionStep.Overlay, ProductionStep.FastChain] and flags.Input.SecondaryFiles:
+        # Do something special for Overlay
         inputFiles = flags.Input.SecondaryFiles
     generatorsString = ""
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -248,7 +248,8 @@ def getSpecialConfigurationMetadata(flags):
                                         'SimulationJobOptions/preInclude.GMSB.py' : 'Sleptons.SleptonsConfig.GMSB_Cfg',
                                         'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballCfg',
                                         'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsCfg',
-                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpCfg' }
+                                        'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpCfg',
+                                        'SimulationJobOptions/preInclude.Dyon.py' : 'Monopole.MonopoleConfig.DyonCfg' }
     legacyPreIncludeToCAPreInclude = { 'SimulationJobOptions/preInclude.AMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Monopole.py' :  'Monopole.MonopoleConfig.MonopolePreInclude',
                                        'SimulationJobOptions/preInclude.Quirks.py' : None,
@@ -256,7 +257,8 @@ def getSpecialConfigurationMetadata(flags):
                                        'SimulationJobOptions/preInclude.GMSB.py' : None,
                                        'SimulationJobOptions/preInclude.Qball.py' : 'Monopole.MonopoleConfig.QballPreInclude',
                                        'SimulationJobOptions/preInclude.RHadronsPythia8.py' : 'RHadrons.RHadronsConfig.RHadronsPreInclude',
-                                       'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude' }
+                                       'SimulationJobOptions/preInclude.fcp.py' : 'Monopole.MonopoleConfig.fcpPreInclude',
+                                       'SimulationJobOptions/preInclude.Dyon.py' : 'Monopole.MonopoleConfig.DyonPreInclude' }
     specialConfigString = ''
     from AthenaConfiguration.Enums import ProductionStep
     inputFiles = flags.Input.Files

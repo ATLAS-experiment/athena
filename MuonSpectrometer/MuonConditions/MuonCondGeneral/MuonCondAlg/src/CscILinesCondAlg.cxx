@@ -1,20 +1,18 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "CscILinesCondAlg.h"
+
 #include <fstream>
 #include <memory>
-#include <MuonCondAlg/CscILinesCondAlg.h>
 #include <StoreGate/ReadCondHandle.h>
 #include <StoreGate/WriteCondHandle.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <PathResolver/PathResolver.h>
 #include <CxxUtils/StringUtils.h>
 
-
- CscILinesCondAlg::CscILinesCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
-        AthReentrantAlgorithm{name,pSvcLocator}{}
-
-
+namespace Muon{
 StatusCode CscILinesCondAlg::initialize() {
     ATH_CHECK(m_readKey.initialize(m_readFromJSON.value().empty()));
     ATH_CHECK(m_writeKey.initialize());
@@ -28,7 +26,7 @@ StatusCode CscILinesCondAlg::initialize() {
 
 }
 StatusCode CscILinesCondAlg::execute(const EventContext& ctx) const {
-    SG::WriteCondHandle<ALineContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
          ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -36,9 +34,9 @@ StatusCode CscILinesCondAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS; 
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<ALineContainer> writeCdo{std::make_unique<ALineContainer>()};
+    auto writeCdo{std::make_unique<ALineContainer>()};
     if (!m_readKey.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
+        SG::ReadCondHandle readHandle{m_readKey, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to load I lines from COOL "<<m_readKey.fullKey());
             return StatusCode::FAILURE;
@@ -197,4 +195,5 @@ StatusCode CscILinesCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         }
     }    
     return StatusCode::SUCCESS;
+}
 }

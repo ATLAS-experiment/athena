@@ -19,11 +19,14 @@ def L2muCombMonConfig(helper):
     moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     monAlg.MonitoredChains = [c for c in Chains if ('mu24_ivarmedium' in c) or ('2mu14' in c)]
-  
+    # adding lower pt chains, useful if menu is not pp collisions
+    if len(monAlg.MonitoredChains) == 0:
+        monAlg.MonitoredChains = [c for c in Chains if ('mu6' in c) or ('mu8' in c) or ('2mu4' in c)]
+   
     # if mon groups not found fall back to hard-coded trigger monitoring list
     if len(monAlg.MonitoredChains) == 0:
-        # HLT_mu6_L1MU6 is test chain for small statistics, so it will be removed.
-        monAlg.MonitoredChains =  ['HLT_mu6_L1MU5VF', 'HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_2mu14_L12MU8F']
+        # if mon groups not found fall back to hard-coded trigger monitoring list for pp and HI
+        monAlg.MonitoredChains = ['HLT_mu6_L1MU3V', 'HLT_mu8_L1MU8F', 'HLT_2m4_L12MU3V','HLT_mu6_L1MU5VF','HLT_mu24_ivarmedium_L1MU14FCH', 'HLT_2mu14_L12MU8F']
 
     monAlg.Group = GroupName
 

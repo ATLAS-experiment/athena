@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # ====================================================================
 # EGAM5.py
 # This defines DAOD_EGAM5, a skimmed DAOD format for Run 3.
@@ -28,65 +28,67 @@ def EGAM5SkimmingToolCfg(flags):
     """Configure the EGAM5 skimming tool"""
     acc = ComponentAccumulator()
 
+    skimmingTools = []
+
     # 1st selection: trigger-based (WTP triggers)
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    triggers = WTnPTriggers[MenuType]
-    print("EGAM5 trigger skimming list (OR): ", triggers)
 
-    EGAM5_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name="EGAM5_TriggerSkimmingTool", TriggerListOR=triggers
-    )
+    if MenuType:
+        triggers = WTnPTriggers[MenuType]
+        print("EGAM5 trigger skimming list (OR): ", triggers)
+
+        EGAM5_TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name="EGAM5_TriggerSkimmingTool", TriggerListOR=triggers
+        )
+
+        acc.addPublicTool(EGAM5_TriggerSkimmingTool)
+        skimmingTools += [EGAM5_TriggerSkimmingTool]
 
     # 2nd selection: off-line, based on mT(enu)
     expression2 = "count(EGAM5_ENuTransverseMass > 40*GeV)>=1"
     print("EGAM5 offline skimming expression: ", expression2)
-    EGAM5_OfflineSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name="EGAM5_OfflineSkimmingTool", expression=expression2
-    )
+
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    EGAM5_OfflineSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name = "EGAM5_OfflineSkimmingTool", expression = expression2))
+    skimmingTools += [EGAM5_OfflineSkimmingTool]
 
     # 3rd selection: mix of off-line and on-line criteria
-    expression3a = " || ".join(
-        [
-            "HLT_e60_lhloose_xe60noL1",
-            "HLT_e120_lhloose",
-            "HLT_j80_xe80",
-            "HLT_xe70",
-            "HLT_xe80_tc_lcw_L1XE50",
-            "HLT_xe90_mht_L1XE50",
-            "HLT_xe90_tc_lcw_wEFMu_L1XE50",
-            "HLT_xe90_mht_wEFMu_L1XE50",
-        ]
-    )
-    expression3b = "count(Electrons.pt > 14.5*GeV) >= 1"
-    expression3 = "( " + expression3a + " ) && ( " + expression3b + " )"
-    print("EGAM5 mixed offline-online skimming expression: ", expression3)
-
-    EGAM5_OnlineOfflineSkimmingTool = (
-        CompFactory.DerivationFramework.xAODStringSkimmingTool(
-            name="EGAM5_OnlineOfflineSkimmingTool", expression=expression3
+    if flags.Trigger.EDMVersion >=0:
+        expression3a = " || ".join(
+            [
+                "HLT_e60_lhloose_xe60noL1",
+                "HLT_e120_lhloose",
+                "HLT_j80_xe80",
+                "HLT_xe70",
+                "HLT_xe80_tc_lcw_L1XE50",
+                "HLT_xe90_mht_L1XE50",
+                "HLT_xe90_tc_lcw_wEFMu_L1XE50",
+                "HLT_xe90_mht_wEFMu_L1XE50",
+            ]
         )
-    )
+        expression3b = "count(Electrons.pt > 14.5*GeV) >= 1"
+        expression3 = "( " + expression3a + " ) && ( " + expression3b + " )"
+        print("EGAM5 mixed offline-online skimming expression: ", expression3)
+
+        EGAM5_OnlineOfflineSkimmingTool = acc.getPrimaryAndMerge(
+            xAODStringSkimmingToolCfg(
+                flags, name = "EGAM5_OnlineOfflineSkimmingTool",
+                expression = expression3))
+        skimmingTools += [EGAM5_OnlineOfflineSkimmingTool]
 
     # do the OR of previous selections
     print("EGAM5 skimming is logical OR of previous selections")
     EGAM5_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
         name="EGAM5_SkimmingTool",
-        FilterList=[
-            EGAM5_OfflineSkimmingTool,
-            EGAM5_TriggerSkimmingTool,
-            EGAM5_OnlineOfflineSkimmingTool,
-        ],
+        FilterList=skimmingTools
     )
 
-    acc.addPublicTool(EGAM5_OfflineSkimmingTool)
-    acc.addPublicTool(EGAM5_TriggerSkimmingTool)
-    acc.addPublicTool(EGAM5_OnlineOfflineSkimmingTool)
     acc.addPublicTool(EGAM5_SkimmingTool, primary=True)
 
     return acc
@@ -353,17 +355,17 @@ def EGAM5Cfg(flags):
     ]
 
     # for trigger studies we also add:
-    MenuType = None
+    MenuType = ""
     if flags.Trigger.EDMVersion == 2:
         MenuType = "Run2"
     elif flags.Trigger.EDMVersion == 3:
         MenuType = "Run3"
-    else:
-        MenuType = ""
-    EGAM5SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
-    EGAM5SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
-    if not flags.Input.isMC:
-        EGAM5SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
+
+    if MenuType:
+        EGAM5SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+        EGAM5SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+        if not flags.Input.isMC:
+            EGAM5SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if flags.Input.isMC:
@@ -391,7 +393,7 @@ def EGAM5Cfg(flags):
         "PrimaryVertices",
         "AntiKt4EMPFlowJets",
         "MET_Baseline_AntiKt4EMPFlow",
-        "BTagging_AntiKt4EMPFlow",
+
     ]
     # muons, tau, MET, b-tagging could be switched off if not needed
     # and use too much space
@@ -444,11 +446,11 @@ def EGAM5Cfg(flags):
     # truth
     if flags.Input.isMC:
         EGAM5SlimmingHelper.ExtraVariables += [
-            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthOrigin.truthType"
+            "MuonTruthParticles.e.px.py.pz.status.pdgId.truthClassification.truthOrigin.truthType"
         ]
 
         EGAM5SlimmingHelper.ExtraVariables += [
-            "Photons.truthOrigin.truthType.truthParticleLink"
+            "Photons.truthClassification.truthOrigin.truthType.truthParticleLink"
         ]
 
     # Add event info

@@ -7,7 +7,7 @@
 #ifndef LARRECCONDITIONS_LARFEBRODMAPPINGALG_H
 #define LARRECCONDITIONS_LARFEBRODMAPPINGALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -15,16 +15,16 @@
 #include "LArRecConditions/LArFebRodMapping.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 
-class LArFebRodMappingAlg: public AthAlgorithm {
+class LArFebRodMappingAlg: public AthCondAlgorithm {
 
 public:
 
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   virtual ~LArFebRodMappingAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 
  private:

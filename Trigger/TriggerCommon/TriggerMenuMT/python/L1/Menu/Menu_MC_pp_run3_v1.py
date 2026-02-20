@@ -188,7 +188,6 @@ def defineMenu():
 
         #ATR-29330
         'L1_4J15',
-
     ]
 
     # To replace thresholds in the physics menu
@@ -368,8 +367,6 @@ def defineMenu():
         'L1_BCM_Wide_CALIB':'',
         'L1_BCM_Wide_UNPAIREDB1':'', 
         'L1_BCM_Wide_UNPAIREDB2':'',
-        'L1_J12_UNPAIREDB1':'', 
-        'L1_J12_UNPAIREDB2':'',
         'L1_BCM_2A_EMPTY':'',
         'L1_BCM_2C_EMPTY':'',
         'L1_BCM_2A_UNPAIREDB1':'',

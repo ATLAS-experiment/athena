@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  Decision.cxx
 //  TopoCore
@@ -11,7 +11,7 @@
 void
 TCS::Decision::setBit(unsigned int index, bool set) {
    if(index>=m_nBits) {
-      TCS_EXCEPTION("Trying to set bit " << index << ", while max index allowed is " << m_nBits-1)
+      TCS_EXCEPTION("Trying to set bit " << index << ", while max index allowed is " << m_nBits-1);
    }
 	 if(set) { 
       m_decision |= (0x1<<index);

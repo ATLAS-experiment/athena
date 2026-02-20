@@ -7,24 +7,23 @@
 #ifndef LARBADCHANNELCONDALG_H
 #define LARBADCHANNELCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
-class LArBadChannelCondAlg: public AthReentrantAlgorithm {
+class LArBadChannelCondAlg: public AthCondAlgorithm {
  public:
   //Delegate to base-class ctor
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   virtual ~LArBadChannelCondAlg()=default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final {return StatusCode::SUCCESS;}
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_BCInputKey{this,"ReadKey","/LAR/BadChannelsOfl/BadChannels",

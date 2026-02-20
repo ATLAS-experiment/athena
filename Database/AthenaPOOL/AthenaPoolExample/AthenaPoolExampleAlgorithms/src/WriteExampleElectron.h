@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEALGORITHMS_WRITEEXAMPLEELECTRON_H
@@ -24,10 +24,8 @@ namespace AthPoolEx {
  *Pool.
  **/
 class WriteExampleElectron : public AthReentrantAlgorithm {
- public:  // Constructor and Destructor
-  /// Standard Service Constructor
+ public:
   WriteExampleElectron(const std::string& name, ISvcLocator* pSvcLocator);
-  /// Destructor
   virtual ~WriteExampleElectron() = default;
 
  public:

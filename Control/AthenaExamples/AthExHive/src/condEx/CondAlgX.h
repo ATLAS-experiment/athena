@@ -5,8 +5,8 @@
 #ifndef ATHEXHIVE_CONDEX_CONDALGX_H
 #define ATHEXHIVE_CONDEX_CONDALGX_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/ReadHandle.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 #include "AthExHive/CondDataObj.h"
@@ -15,15 +15,13 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/ICondSvc.h"
 
-class CondAlgX  :  public AthAlgorithm {
+class CondAlgX  :  public AthCondAlgorithm {
   
 public:
-    
-  CondAlgX (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CondAlgX() = default;
-  
+  using AthCondAlgorithm::AthCondAlgorithm;
+
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   

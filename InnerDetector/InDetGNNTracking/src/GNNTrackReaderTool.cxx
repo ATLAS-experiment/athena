@@ -125,8 +125,8 @@ void InDet::GNNTrackReaderTool::getTracks(
         sps.push_back(std::stoi(number));
       }
 
-      trackCandidates.push_back(cls);
-      seeds.push_back(sps);
+      trackCandidates.push_back(std::move(cls));
+      seeds.push_back(std::move(sps));
     }
   }
   csvFile.close();

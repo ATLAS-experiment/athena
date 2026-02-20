@@ -14,7 +14,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "ActsEvent/TrackContainer.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsInterop/Logger.h"
 #include "src/detail/AtlasMeasurementSelector.h"
@@ -430,15 +430,15 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
       trackProxy.tipIndex(),
         [&](const auto& state) {
             auto flags = state.typeFlags();
-            if (flags.test(Acts::TrackStateFlag::HoleFlag)) {
+            if (flags.isHole()) {
                 nHoles++;
-            } else if (flags.test(Acts::TrackStateFlag::OutlierFlag)) {
+            } else if (flags.isOutlier()) {
                 nOutliers++;
-            } else if (flags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+            } else if (flags.isMeasurement()) {
                 nMeasurements++;
                 
                 // Check if this is an HGTD hit
-                if (state.hasReferenceSurface() && flags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+                
                     const auto& surface = state.referenceSurface();
                     Acts::GeometryIdentifier geoID = surface.geometryId();
                     
@@ -574,7 +574,6 @@ HGTDTrackExtensionAlg::TrackExtensionData HGTDTrackExtensionAlg::processTrackExt
                         
                     
           }
-        }
     }
       
     });

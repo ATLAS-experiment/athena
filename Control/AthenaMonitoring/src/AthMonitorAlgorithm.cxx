@@ -3,9 +3,13 @@
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
 
 AthMonitorAlgorithm::AthMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthReentrantAlgorithm(name,pSvcLocator)
+ // Put this here rather than in the header to allow forward-declaring
+ // TrigDecisionTool.
+,m_trigDecTool{this, "TrigDecisionTool",""}
 ,m_environment(Environment_t::user)
 ,m_dataType(DataType_t::userDefined)
 ,m_vTrigChainNames({})

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_ODTracking.h"
@@ -88,7 +88,12 @@ void ALFA_ODTracking::FiberProjection(Int_t iRPot, std::map<int, FIBERS> &MapLay
 {
 	const Int_t NBINTOT = 17000;
 	Int_t iSign;
-	Int_t iHitLayer[ODSIDESCNT][NBINTOT];
+
+	std::vector<Int_t> iHitLayer[ODSIDESCNT];
+        for (size_t i = 0; i < ODSIDESCNT; ++i) {
+          iHitLayer[i].resize (NBINTOT);
+        }
+
 	Float_t fPosition;
 	Float_t fFiberXPos = 23;
 

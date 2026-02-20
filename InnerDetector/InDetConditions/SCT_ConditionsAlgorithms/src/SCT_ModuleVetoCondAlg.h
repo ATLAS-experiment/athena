@@ -7,7 +7,7 @@
 #ifndef SCT_MODULEVETOCONDALG
 #define SCT_MODULEVETOCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "SCT_ConditionsData/SCT_ModuleVetoCondData.h"
@@ -16,7 +16,7 @@
 
 #include "Gaudi/Property.h"
 
-class SCT_ModuleVetoCondAlg : public AthReentrantAlgorithm 
+class SCT_ModuleVetoCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_ModuleVetoCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -24,7 +24,6 @@ class SCT_ModuleVetoCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_readKey{this, "ReadKey", "/ITk/Manual/BadModules", "Key of input (raw) bad module conditions folder"};

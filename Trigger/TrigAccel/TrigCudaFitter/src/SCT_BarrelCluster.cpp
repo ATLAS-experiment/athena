@@ -4,12 +4,7 @@
 #include "TrkBaseNode.h"
 #include "TrkFilteringNodes.h"
 
-SCT_BarrelCluster::SCT_BarrelCluster(const Surface* pS) : SCT_Cluster(pS)
-{
-	m_m=0.0;m_cov=0.0;
-}
-
-SCT_BarrelCluster::~SCT_BarrelCluster(void)
+SCT_BarrelCluster::SCT_BarrelCluster(std::unique_ptr<const Surface> pS) : SCT_Cluster(std::move(pS))
 {
 }
 

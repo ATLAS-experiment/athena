@@ -56,20 +56,20 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
   std::size_t nShared = 0;
   std::size_t nBadTrackMeasurements = 0;
   for (auto state : track.trackStatesReversed()) {
-    if (!state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag))
+    if (!state.typeFlags().hasMeasurement())
       continue;
 
     if (!state.hasUncalibratedSourceLink())
       continue;
     
-    if (removeSharedHits and !state.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag))
+    if (removeSharedHits and !state.typeFlags().isSharedHit())
       continue;
     
     auto sl = state.getUncalibratedSourceLink().template get<ATLASUncalibSourceLink>();
     const xAOD::UncalibratedMeasurement& hit = getUncalibratedMeasurement(sl);
     std::size_t hitIndex = indexFun(hit);
     if (!(hitIndex < m_firstTrackStateOnTheHit.size())) {
-      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit(false);
       // Save ATH_MSG_ERROR() for the caller, since for simplicity and efficiency this class doesn't have access to AthMsgStream.
       //std::cout << "ERROR hit index " << hitIndex << " past end of " << m_firstTrackStateOnTheHit.size() << " hit indices\n";
       ++nBadTrackMeasurements;
@@ -78,7 +78,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
 
     // Check if hit not already used
     if (m_firstTrackStateOnTheHit[hitIndex].trackIndex == s_noTrackState.trackIndex) {
-      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit(false);
       m_firstTrackStateOnTheHit[hitIndex] = {track.index(), state.index()};
       continue;
     }
@@ -86,7 +86,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
     // if already used, control if first track state has been marked as shared
     const TrackStateIndex& indexFirstTrackState = m_firstTrackStateOnTheHit[hitIndex];
     if (!(indexFirstTrackState.trackIndex < tracks.size())) {
-      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit(false);
       //std::cout << "ERROR track index " << indexFirstTrackState.trackIndex << " past end of " << tracks.size() << " tracks in container\n";
       ++nBadTrackMeasurements;
       continue;
@@ -96,7 +96,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
     auto& firstStateContainer = firstTrack.container().trackStateContainer();
     
     if (!(indexFirstTrackState.stateIndex < firstStateContainer.size())) {
-      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit(false);
       //std::cout << "ERROR track state index " << indexFirstTrackState.stateIndex << " past end of " << firstStateContainer.size() << " track states in container\n";
       ++nBadTrackMeasurements;
       continue;
@@ -106,19 +106,19 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
 
     // if removeSharedHits is false, this is the nominal behaviour
     if (!removeSharedHits) {
-      if (!firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
-        firstState.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+      if (!firstState.typeFlags().isSharedHit()) {
+        firstState.typeFlags().setIsSharedHit();
         firstTrack.nSharedHits()++;
         ++nShared;
       }
       // Decorate this track state
-      state.typeFlags().set(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit();
       track.nSharedHits()++;
       ++nShared;
 
     } else { // remove shared hits mode
-      if (firstState.typeFlags().test(Acts::TrackStateFlag::SharedHitFlag)) {
-        firstState.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      if (firstState.typeFlags().isSharedHit()) {
+        firstState.typeFlags().setIsSharedHit(false);
         
         //We should not find more shared measurements than initially attached to the track
         if (firstTrack.nSharedHits() == 0) {
@@ -131,7 +131,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
         }
       }
       // reset the flag for this track state
-      state.typeFlags().reset(Acts::TrackStateFlag::SharedHitFlag);
+      state.typeFlags().setIsSharedHit(false);
       track.nSharedHits()--;
       ++nShared;
 

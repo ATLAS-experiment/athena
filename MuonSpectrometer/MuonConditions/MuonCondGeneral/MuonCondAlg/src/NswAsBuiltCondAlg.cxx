@@ -1,7 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "MuonCondAlg/NswAsBuiltCondAlg.h"
+#include "NswAsBuiltCondAlg.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/WriteCondHandle.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -9,9 +9,7 @@
 #include <iostream>
 #include <fstream>
 
- NswAsBuiltCondAlg::NswAsBuiltCondAlg(const std::string& algName, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{algName, pSvcLocator} {
-}
+namespace Muon{
 StatusCode NswAsBuiltCondAlg::initialize() {
     ATH_CHECK(m_readMmAsBuiltParamsKey.initialize(m_MmJsonPath.value().empty() && !m_readMmAsBuiltParamsKey.empty()));
     ATH_CHECK(m_writeNswAsBuiltKey.initialize());
@@ -22,7 +20,7 @@ StatusCode NswAsBuiltCondAlg::initialize() {
 }
 
 StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
-    SG::WriteCondHandle<NswAsBuiltDbData> writeHandle{m_writeNswAsBuiltKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeNswAsBuiltKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -31,10 +29,10 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteRunLB()));
 
-    std::unique_ptr<NswAsBuiltDbData> writeCdo{std::make_unique<NswAsBuiltDbData>()};
+    auto writeCdo{std::make_unique<NswAsBuiltDbData>()};
 
     if (!m_readMmAsBuiltParamsKey.empty()) {
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readMmAsBuiltParamsKey, ctx};
+        SG::ReadCondHandle readHandle{m_readMmAsBuiltParamsKey, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_ERROR("Null pointer to the read MM/ASBUILTPARAMS conditions object");
             return StatusCode::FAILURE;
@@ -75,4 +73,5 @@ StatusCode NswAsBuiltCondAlg::execute(const EventContext& ctx) const {
     }
     ATH_CHECK(writeHandle.record(std::move(writeCdo)));
     return StatusCode::SUCCESS;
+}
 }

@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHV_EMECHVMODULE_H
 #define LARHV_EMECHVMODULE_H
+
+#include <memory>
 
 class EMECHVManager;
 class EMECHVElectrode;
@@ -58,7 +60,7 @@ class EMECHVModule
   EMECHVModule& operator=(const EMECHVModule& right);
   
   class Clockwork;
-  Clockwork *m_c;
+  std::unique_ptr<Clockwork> m_c;
 };
 
 #endif

@@ -45,7 +45,7 @@ namespace MuonR4{
             /// @param spacePoints point list from store gate 
             /// @param data: event data object
             void preProcess(const EventContext& ctx,
-                            const ActsGeometryContext& gctx,
+                            const ActsTrk::GeometryContext& gctx,
                             const SpacePointContainer & spacePoints,
                             HoughEventData & data) const; 
 
@@ -122,7 +122,7 @@ namespace MuonR4{
             // output maxima for downstram processing
             SG::WriteHandleKey<EtaHoughMaxContainer> m_maxima{this, "EtaHoughMaxContainer", "MuonHoughStationMaxima"};
             // ACTS geometry context
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
             /// Pattern visualization tool
             ToolHandle<MuonValR4::IPatternVisualizationTool> m_visionTool{this, "VisualizationTool", ""};
 

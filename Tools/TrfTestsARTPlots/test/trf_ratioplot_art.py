@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
-from ROOT import TCanvas, TColor, TGaxis, TH1F, TH1D, TPad, TLegend
+from ROOT import TCanvas, TPad, TLegend
 from ROOT import kBlack, kBlue, kRed
 from ROOT import TFile 
 import argparse, sys
@@ -81,7 +81,7 @@ def findallhistos(filename):
     if k.GetClassName() == "TDirectoryFile":
       dirname = k.GetName()
       f1.cd(dirname)
-      subdir = ROOT.gDirectory;
+      subdir = ROOT.gDirectory
       for j in subdir.GetListOfKeys():
         if j.GetClassName() == "TH1F":
           allhistos.append(dirname+"/"+j.GetName())

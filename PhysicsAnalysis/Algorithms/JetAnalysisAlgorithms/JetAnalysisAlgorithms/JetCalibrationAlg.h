@@ -12,6 +12,7 @@
 #include <JetCalibTools/IJetCalibrationTool.h>
 #include <SystematicsHandles/SysCopyHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 
 namespace CP
 {
@@ -39,7 +40,12 @@ namespace CP
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};
+
+    /// \brief whether we run on the HIJets collection
+  private:
+    Gaudi::Property<bool> m_HIsetup {this, "HIsetup", false, "do full Heavy Ion treatment"};
   };
 }
 
 #endif
+

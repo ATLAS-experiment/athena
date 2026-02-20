@@ -13,18 +13,16 @@
 #ifndef CALOREC_CALONOISESIGMADIFFCONDALG_H
 #define CALOREC_CALONOISESIGMADIFFCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "CaloConditions/CaloNoiseSigmaDiff.h"
 #include "CaloConditions/CaloNoise.h"
 
-class CaloNoiseSigmaDiffCondAlg : public AthReentrantAlgorithm
+class CaloNoiseSigmaDiffCondAlg : public AthCondAlgorithm
 {
 public:
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
-  CaloNoiseSigmaDiffCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CaloNoiseSigmaDiffCondAlg() {};
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   /**
    * @brief Gaudi initialize method.
@@ -35,7 +33,6 @@ public:
    * @param ctx Event context.
    */
   virtual StatusCode execute (const EventContext& ctx) const override;
-  virtual bool isReEntrant() const override final { return false; }
 private:
   /// Property: CaloNoise (conditions input).
   SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this,"CaloNoiseKey","electronicNoise","SG Key of CaloNoise data object"};

@@ -49,6 +49,9 @@ namespace MuonR4 {
             }
         } else if (acc_prdLink.isAvailable(segment)){
             for (const PrdLink_t& link : acc_prdLink(segment)) {
+                if(!link.isValid()){
+                    continue;
+                };
                 const xAOD::MuonSimHit* hit = getTruthMatchedHit(**link);
                 if (hit){
                     hits.insert(hit);

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODEVENTINFOCNV_EVENTINFOBEAMSPOTDECORATORALG_H
 #define XAODEVENTINFOCNV_EVENTINFOBEAMSPOTDECORATORALG_H
@@ -12,6 +12,7 @@
 // Gaudi/Athena include(s).
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
 namespace xAODMaker {
@@ -47,48 +48,52 @@ namespace xAODMaker {
       SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{ this,
          "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
-      /// Decorator handle for @c beamPosX
+     /// Read handle for EventInfo object to be decorated
+      SG::ReadHandleKey< xAOD::EventInfo > m_eventInfoKey{ this,
+         "EventInfoKey", "EventInfo" };
+
+     /// Decorator handle for @c beamPosX
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosXKey{ this,
-         "beamPosXKey", "EventInfo.beamPosX",
+         "beamPosXKey", m_eventInfoKey, "beamPosX",
          "Key for the beamPosX decoration" };
       /// Decorator handle for @c beamPosY
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosYKey{ this,
-         "beamPosYKey", "EventInfo.beamPosY",
+         "beamPosYKey", m_eventInfoKey, "beamPosY",
          "Key for the beamPosY decoration" };
       /// Decorator handle for @c beamPosZ
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosZKey{ this,
-         "beamPosZKey", "EventInfo.beamPosZ",
+         "beamPosZKey", m_eventInfoKey, "beamPosZ",
          "Key for the beamPosZ decoration" };
 
       /// Decorator handle for @c beamPosSigmaX
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosSigmaXKey{ this,
-         "beamPosSigmaXKey", "EventInfo.beamPosSigmaX",
+         "beamPosSigmaXKey", m_eventInfoKey, "beamPosSigmaX",
          "Key for the beamPosSigmaX decoration" };
       /// Decorator handle for @c beamPosSigmaY
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosSigmaYKey{ this,
-         "beamPosSigmaYKey", "EventInfo.beamPosSigmaY",
+         "beamPosSigmaYKey", m_eventInfoKey, "beamPosSigmaY",
          "Key for the beamPosSigmaY decoration" };
       /// Decorator handle for @c beamPosSigmaZ
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosSigmaZKey{ this,
-         "beamPosSigmaZKey", "EventInfo.beamPosSigmaZ",
+         "beamPosSigmaZKey", m_eventInfoKey, "beamPosSigmaZ",
          "Key for the beamPosSigmaZ decoration" };
       /// Decorator handle for @c beamPosSigmaXY
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamPosSigmaXYKey{ this,
-         "beamPosSigmaXYKey", "EventInfo.beamPosSigmaXY",
+         "beamPosSigmaXYKey", m_eventInfoKey, "beamPosSigmaXY",
          "Key for the beamPosSigmaXY decoration" };
 
       /// Decorator handle for @c beamTiltXZ
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamTiltXZKey{ this,
-         "beamTiltXZKey", "EventInfo.beamTiltXZ",
+         "beamTiltXZKey", m_eventInfoKey, "beamTiltXZ",
          "Key for the beamTiltXZ decoration" };
       /// Decorator handle for @c beamTiltYZ
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamTiltYZKey{ this,
-         "beamTiltYZKey", "EventInfo.beamTiltYZ",
+         "beamTiltYZKey", m_eventInfoKey, "beamTiltYZ",
          "Key for the beamTiltYZ decoration" };
 
       /// Decorator handle for @c beamStatus
       SG::WriteDecorHandleKey< xAOD::EventInfo > m_beamStatusKey{ this,
-         "beamStatusKey", "EventInfo.beamStatus",
+         "beamStatusKey", m_eventInfoKey, "beamStatus",
          "Key for the beamStatus decoration" };
 
       /// @}

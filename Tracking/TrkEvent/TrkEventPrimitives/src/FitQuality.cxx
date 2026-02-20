@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,27 +10,27 @@
 #include "GaudiKernel/MsgStream.h"
 #include <string>
 #include <ostream>
+#include <sstream>
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
-MsgStream& Trk::operator << ( MsgStream& sl, const Trk::FitQualityImpl& fq)
-{ 
-  std::streamsize ss = sl.precision();
-  sl << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
-  sl << "FitQuality: \t"
-     << "("<<fq.chiSquared()<<", \t"<<fq.numberDoF()<<")\t"
-     << "(chi^2, ndf)";
-  sl.precision (ss); sl<<std::resetiosflags(std::ios::fixed);
-  return sl; 
+MsgStream& Trk::operator<<(MsgStream& sl, const Trk::FitQualityImpl& fq)
+{
+  std::ostringstream os;
+  os<<fq;
+  sl<<os.str();
+  return sl;
 }
 
 std::ostream& Trk::operator << ( std::ostream& sl, const Trk::FitQualityImpl& fq)
 { 
-  std::streamsize ss = sl.precision();
+  const std::streamsize old_prec = sl.precision();
+  const auto old_flags = sl.flags();
   sl << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
   sl <<"FitQuality: \t"
      << "("<<fq.chiSquared()<<", \t"<<fq.numberDoF()<<")\t"
      << "(chi^2, ndf)";
-  sl.precision (ss); sl<<std::resetiosflags(std::ios::fixed);
-  return sl; 
+  sl.flags(old_flags);
+  sl.precision(old_prec);
+  return sl;
 }
 

@@ -22,6 +22,15 @@ namespace { // Anonymous namespace
     static constexpr unsigned int shift{n * 64};
     return ((b >>shift) & mask64).to_ullong();
   }
+  std::vector<uint8_t>
+  split32bitWord(uint32_t word){
+    std::vector<uint8_t> out;
+    out.push_back(word>>24);
+    out.push_back(word>>16);
+    out.push_back(word>>8);
+    out.push_back(word);
+    return out;
+  }
   int
   rodLinkFromOnlineID(const ITkStripOnlineId onlineID){
     const uint32_t fibre{onlineID.fibre()};
@@ -30,12 +39,53 @@ namespace { // Anonymous namespace
     const int rodLink{(formatter << 4) | linkNum};
     return rodLink;
   }
-  uint64_t
-  geometryKey(int barrel, int disk, int phi_mod, int eta_group){
-    return (static_cast<uint64_t>(barrel) << 48) |
-           (static_cast<uint64_t>(disk) << 32) |
-           (static_cast<uint64_t>(phi_mod) << 16) |
-           static_cast<uint64_t>(eta_group);
+  uint32_t
+  hccKey(int barrelEC, uint8_t side, uint8_t disk, uint8_t phi_mod, int eta_mod, uint8_t eta_group){
+    
+    uint32_t hcckey = 0, mask = 1;
+    uint8_t  sideAC = 0;
+    bool hasTwoHccs = false;
+    
+    //Set barrel/endcap/side bit
+    if(barrelEC == 0){
+      hcckey = mask << 23;
+      if(eta_mod>0) sideAC=1;
+    } else if(barrelEC > 0) sideAC=1;
+
+    //Set Side-A/C bit
+    if(sideAC==1) hcckey = hcckey | (mask << 20);
+    
+    //Set the layer/disk bits
+    hcckey = hcckey | (disk<<17);
+    
+    //Set the inner/outer side bit
+    if(side==1) hcckey = hcckey | (mask << 16);
+
+    //Set the petal bit (0 for barrel)
+    if(barrelEC!=0) hcckey = hcckey | (mask << 15);
+    
+    //Set the phi module number
+    hcckey = hcckey | (phi_mod<<8);
+
+    //Set the HCC number    
+    if(disk<2 && barrelEC==0) {
+      hasTwoHccs = true;
+    }else if(eta_group!=2 && barrelEC!=0){
+      hasTwoHccs = true;
+    }
+        
+    eta_mod = std::abs(eta_mod);
+    //This is to get the right Hcc number (1 or 2) per module algorithmically could try to improve this in the future
+    if ( hasTwoHccs && ( ((eta_mod-1)/2.0 >= 2*eta_group+1  && barrelEC==0) || ((((eta_mod/2.0 >= 2*eta_group+1) && eta_mod<=7) || ((eta_mod/2.0 >= 2*eta_group) && (eta_mod>=10 && eta_mod<=13))) && barrelEC!=0))){
+       hcckey = hcckey | (mask << 7);
+    }
+    
+    barrelEC = (barrelEC == 0) ? 1 : 0;
+      
+    //Set the eta group number    
+    hcckey = hcckey | (eta_group);
+    
+    return hcckey << 8;
   }
 
 } // End of anonymous namespace
@@ -68,28 +118,47 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
                              const std::vector<const SCT_RDORawData*>& vecRDOs) const {
   //code to be filled here
 
-  std::unordered_map<uint64_t, std::vector<std::bitset<256>>> allStripData;
+  std::unordered_map<uint32_t, std::vector<std::bitset<256>>> allStripData;
   
   for (const auto& rdo : vecRDOs) {
-    int barrel = getBarrelEC(rdo);
-    int disk = getDiskLayer(rdo);
-    int phi_mod = getPhiModule(rdo);
-    int eta_mod = getEtaModule(rdo);
-    int strip_max = getStripMax(rdo);
+    int barrelEC = getBarrelEC(rdo);
+    int eta_mod = getEtaModule(rdo);    
+    uint8_t side = getSide(rdo);    
+    uint8_t disk = getDiskLayer(rdo);
+    uint8_t phi_mod = getPhiModule(rdo);
+    uint16_t strip_max = getStripMax(rdo);
     
-    if (strip_max < 0){
+    if (strip_max == 0xFFFF){
+      //To do: Implement workaround
+      const Identifier rdoID{rdo->identify()};
+      ATH_MSG_WARNING("Negative maximum number of strips found " << m_itkStripsID->strip_max(rdoID));
       continue; 
     }
-    int eta_group;
 
-    if (barrel == 0) {
-      eta_group = static_cast<int>(std::floor((eta_mod+1) / 2)); //To work with barrel
+    uint8_t sideAC = 0;
+    if((barrelEC == 0 && eta_mod > 0) || barrelEC > 0) sideAC = 1;
+
+    uint8_t eta_group=0;
+
+    if (barrelEC == 0) {      
+      if(disk < 2){
+        eta_group = static_cast<uint8_t>(std::floor((std::abs(eta_mod)-1) / 4));
+      }else{
+        eta_group = static_cast<uint8_t>(std::floor((std::abs(eta_mod)-1) / 2));     
+      }
     }else {
-      eta_group = static_cast<int>(std::floor(eta_mod / 2)); //To work with endcap
+      if(eta_mod>=0 && eta_mod<=9) eta_group = static_cast<uint8_t>(std::floor(eta_mod / 4));
+      else if(eta_mod>=10 && eta_mod<=13) eta_group = static_cast<uint8_t>(std::floor((eta_mod+2)/4));
+      else if(eta_mod>13) eta_group = static_cast<uint8_t>(std::floor((eta_mod-6)/2));      
     }
+    
 
-    int chips_per_module = (strip_max + 1) / 128;
-    uint64_t key = geometryKey(barrel, disk, phi_mod, eta_group);
+    uint8_t chips_per_module = (strip_max + 1) / 128;
+    uint32_t key = hccKey(barrelEC, side, disk, phi_mod, eta_mod, eta_group);
+    
+    ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module);
+    
+    ATH_MSG_DEBUG("key: " << std::bitset<32>(key));
     auto& StripData = allStripData[key];
 
     if (StripData.empty()) {
@@ -101,59 +170,120 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& /
     int chip = static_cast<int>(std::floor(strip / 128));
     int strip_position = strip % 128;
     int strip_logical_channel = 2*strip_position + (eta_mod & 1);
+
+    ATH_MSG_DEBUG("strip N: "<< strip << " chip n: " << chip << " Strip position: " << strip_position << " Strip position logical: " << strip_logical_channel);
     StripData[chip].set(strip_logical_channel);
   }
 
   std::vector<uint8_t> vec8Data;
-  uint16_t ichannel = 0;
+  uint32_t vectorSize = 0;
+  std::vector<uint16_t> clusters;
+  
+  ATH_MSG_DEBUG("All strip data size: " << allStripData.size());
+
   //Iterate over processed strip data and find clusters
   for (const auto& [key, StripData] : allStripData) {
+    
+    uint16_t ichannel = 0;
+    uint16_t size = 1;
     int ptype = 1;
+    bool keyRecorded = false;
+    clusters.clear();
+    
+    ATH_MSG_DEBUG("key is: " << std::bitset<32>(key) << " StripData size: " << StripData.size());
+    
     for (size_t i = 0; i < StripData.size(); ++i) {
+      
       std::bitset<256> hits = StripData[i];
+      
+      if(hits==0){
+        ++ichannel;
+        continue;
+      }
+
       //Use clusterFinder to extract clusters from the bitset
-      std::vector<uint16_t> clusters = clusterFinder(hits);
-      encodeData(clusters, ichannel, vec8Data, ptype, m_l0tag , m_bcid);
-      ++ichannel;
+      clusters = clusterFinder(hits);
+      
+      if(clusters.empty()){
+        ++ichannel;
+        continue;
+      } 
+      uint32_t hccKey = (keyRecorded) ? 0 : key;        
+      encodeData(clusters, ichannel, vec8Data, ptype, m_l0tag , m_bcid, hccKey, size);
+      keyRecorded = true;      
+      ++ichannel;++size;
     }
+    vec8Data.push_back(0xed);
+    vec8Data.push_back(0x6f);
+    ATH_MSG_DEBUG("Add 16-0s: " << size % 2 << " " << vec8Data.size());
+
+    if(size % 2 == 0){
+      vec8Data.push_back(0);
+      vec8Data.push_back(0);
+    }
+    uint32_t packetLenght = (vec8Data.size()-vectorSize)+4;
+    ATH_MSG_DEBUG("Packet Lenght: " << (uint32_t)packetLenght << " " << std::bitset<32>(packetLenght));
+
+    std::vector<uint8_t> pktlenght = split32bitWord(packetLenght);
+
+    ATH_MSG_DEBUG("PktLenght: " << pktlenght.size() << " vec8Data size: " << vec8Data.size());
+
+    uint32_t offset = vectorSize + 4;
+    vec8Data.insert(vec8Data.begin()+offset, pktlenght.begin(), pktlenght.end());
+    vectorSize   = vec8Data.size();
+    
+    ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size() << " size: " << size-1);
   }
+
   //Update BCID and L0Tag counters
   m_bcid = (m_bcid + 1) & 0x7F;
   m_l0tag = (m_l0tag + 1) & 0x7F;
+
+  ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size());
+
   packFragments(vec8Data,vec32Data);
+  for(auto &word: vec32Data){
+    ATH_MSG_DEBUG("32-bit word: " << std::bitset<32>(word));
+  }
   return;
 }
 
 void
 ITkStripsRodEncoder::encodeData(const std::vector<uint16_t>& clusters, const uint16_t ichannel,std::vector<uint8_t>& data_encode,
-                                int ptyp, uint8_t l0tag, uint8_t bc_count) const {
+                                int ptyp, uint8_t l0tag, uint8_t bc_count, uint32_t hccKey, uint16_t& size) const {
 
-  size_t total_clusters = clusters.size();
-  size_t cluster_pos = 0;
 
-  while (cluster_pos < total_clusters) {
-    // Header + 4 clusters
+  if(hccKey!=0){
+    ATH_MSG_DEBUG("hccKey: " << std::bitset<32>(hccKey));
+    ATH_MSG_DEBUG("hccKey 8-bit word-4: "<<std::bitset<8>(hccKey));        
+    ATH_MSG_DEBUG("hccKey 8-bit word-3: "<<std::bitset<8>(hccKey>>24));
+    ATH_MSG_DEBUG("hccKey 8-bit word-2: "<<std::bitset<8>(hccKey>>16));    
+    ATH_MSG_DEBUG("hccKey 8-bit word-1: "<<std::bitset<8>(hccKey>>8));
+
+    data_encode.push_back(hccKey);    
+    data_encode.push_back(hccKey>>24);
+    data_encode.push_back(hccKey>>16);
+    data_encode.push_back(hccKey>>8);
+
     uint16_t header = getHeaderPhysicsPacket(ptyp, l0tag, bc_count);
+    ATH_MSG_DEBUG("header: " << std::bitset<16>(header));
     data_encode.push_back((header>>8) & 0xff);
     data_encode.push_back(header & 0xff);
+  }  
 
-    size_t max_cluster_pp = 0; //Max clusters per packet
-    for (; max_cluster_pp < 4 && cluster_pos < total_clusters; ++max_cluster_pp, ++cluster_pos) {
-      uint16_t cluster = clusters[cluster_pos];
-      // cluster bits:
-      // "0" + 4-bit channel number + 11-bit cluster dropping the last cluster bit
-      uint16_t clusterbits = ((ichannel & 0xf) << 11) | (cluster & 0x7ff);
-      data_encode.push_back((clusterbits>>8) & 0xff);
-      data_encode.push_back(clusterbits & 0xff);
-    }
-
-    while (max_cluster_pp < 4) {
-      data_encode.push_back(0x7F); // Cluster empty (0x7FF in 12 bits)
-      data_encode.push_back(0xFF);
-      ++max_cluster_pp;
-    }
+  for(size_t idx=0;auto &cluster : clusters){
+    if(cluster == 0x3fe) continue;
+    if(idx!=0) size++;
+    
+    // cluster bits:
+    // "0" + 4-bit channel number + 11-bit cluster dropping the last cluster bit    
+    uint16_t clusterbits = ((ichannel & 0xf) << 11) | (cluster & 0x7ff);
+    ATH_MSG_DEBUG("Clusters: " << idx << ": " << std::bitset<16>(clusterbits) << " size: " << size << " ichannel: " << ichannel);    
+    data_encode.push_back((clusterbits>>8) & 0xff);
+    data_encode.push_back(clusterbits & 0xff);
+    idx++;    
   }
-
+  
   return;
 }
 
@@ -222,7 +352,7 @@ ITkStripsRodEncoder::setBit_128b(uint8_t bit_addr, bool value,  uint64_t& data_h
 uint16_t
 ITkStripsRodEncoder::clusterFinder_sub(uint64_t& hits_high64, uint64_t& hits_low64, bool isSecondRow) const {
   uint8_t hit_addr = 128;
-  uint8_t hitpat_next3 = 0;
+  uint8_t hit_mask = 0;
 
   if (hits_low64){
     hit_addr = __builtin_ctzll(hits_low64);
@@ -230,7 +360,7 @@ ITkStripsRodEncoder::clusterFinder_sub(uint64_t& hits_high64, uint64_t& hits_low
     hit_addr = __builtin_ctzll(hits_high64) + 64;
   }
 
-  hitpat_next3 = getBit_128b(hit_addr+1, hits_high64, hits_low64) << 2
+  hit_mask = getBit_128b(hit_addr+1, hits_high64, hits_low64) << 2
     | getBit_128b(hit_addr+2, hits_high64, hits_low64) << 1
     | getBit_128b(hit_addr+3, hits_high64, hits_low64);
 
@@ -241,7 +371,7 @@ ITkStripsRodEncoder::clusterFinder_sub(uint64_t& hits_high64, uint64_t& hits_low
     return 0x3ff;
   } else {
     hit_addr += isSecondRow<<7;
-    return hit_addr << 3 | hitpat_next3;
+    return hit_addr << 3 | hit_mask;
   }
 }
 
@@ -312,7 +442,7 @@ ITkStripsRodEncoder::getRODLink(const SCT_RDORawData* rdo) const {
 }
 
 int
-ITkStripsRodEncoder::side(const SCT_RDORawData* rdo) const {
+ITkStripsRodEncoder::getSide(const SCT_RDORawData* rdo) const {
   const Identifier rdoID{rdo->identify()};
   int itkSide{m_itkStripsID->side(rdoID)};
   return itkSide;
@@ -321,36 +451,32 @@ ITkStripsRodEncoder::side(const SCT_RDORawData* rdo) const {
 int
 ITkStripsRodEncoder::getBarrelEC(const SCT_RDORawData* rdo) const{
   const Identifier rdoID{rdo->identify()};
-  int itkBarrel{m_itkStripsID->barrel_ec(rdoID)};
-  return itkBarrel;
+  return m_itkStripsID->barrel_ec(rdoID);
 }
 
-int
+uint8_t
 ITkStripsRodEncoder::getDiskLayer(const SCT_RDORawData* rdo) const{
   const Identifier rdoID{rdo->identify()};
-  int itkDiskLayer{m_itkStripsID->layer_disk(rdoID)};
-  return itkDiskLayer;
+  return m_itkStripsID->layer_disk(rdoID);
 }
 
-int
+uint8_t
 ITkStripsRodEncoder::getPhiModule(const SCT_RDORawData* rdo) const{
   const Identifier rdoID{rdo->identify()};
-  int itkPhiModule{m_itkStripsID->phi_module(rdoID)};
-  return itkPhiModule;
+  return m_itkStripsID->phi_module(rdoID);
 }
 
 int
 ITkStripsRodEncoder::getEtaModule(const SCT_RDORawData* rdo) const{
   const Identifier rdoID{rdo->identify()};
-  int itkEtaModule{m_itkStripsID->eta_module(rdoID)};
-  return itkEtaModule;
+  return m_itkStripsID->eta_module(rdoID);
 }
 
-int
+uint16_t
 ITkStripsRodEncoder::getStripMax(const SCT_RDORawData* rdo) const{
   const Identifier rdoID{rdo->identify()};
-  int itkStripMax{m_itkStripsID->strip_max(rdoID)};
-  return itkStripMax;
+  if(m_itkStripsID->strip_max(rdoID)<0) return 0xFFFF;
+  return m_itkStripsID->strip_max(rdoID);
 }
 
 bool

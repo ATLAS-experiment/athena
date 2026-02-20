@@ -34,30 +34,35 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode ObjLinkOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
     ATH_MSG_DEBUG("Removing overlaps");
 
     // Initialize output decoration if necessary
-    m_decHelper->initializeDecorations(cont1);
-    m_decHelper->initializeDecorations(cont2);
+    initializeDecorations(cont1);
+    initializeDecorations(cont2);
 
     // Loop over surviving input objects in cont1
     for(const auto p1 : cont1){
-      if(m_decHelper->isSurvivingObject(*p1)){
+      if(isSurvivingObject(p1)){
 
         // Check for existence of an object link
-        auto linkParticle = m_objLinkHelper->getObjectLink(*p1);
+        auto linkParticle = m_objLinkHelper1->getObjectLink(p1, cont2);
         if(linkParticle){
 
-          // See if the link matches an input in cont2
-          if(linkParticle->container() == &cont2 &&
-             m_decHelper->isSurvivingObject(*linkParticle)){
-
-            ATH_MSG_DEBUG("  Found overlap " << p1->type() <<
-                          " pt " << p1->pt()*invGeV);
-            m_decHelper->setObjectFail(*p1);
+          // See if the link matches a surviving input in cont2. the
+          // above call will have already checked that it is in the
+          // right container
+          if(isSurvivingObject(*linkParticle)){
+            if constexpr (columnar::ColumnarModeDefault::isXAOD) {
+              ATH_MSG_DEBUG("  Found overlap " << p1.getXAODObject().type() <<
+                          " pt " << p1.getXAODObject().pt()*invGeV);
+            } else {
+              ATH_MSG_DEBUG("  Found overlap " << p1);
+            }
+            setObjectFail(p1);
           }
         }
       }

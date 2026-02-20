@@ -25,14 +25,14 @@ namespace MuonR4{
             virtual StatusCode finalize() override final;
         private:
 
-            std::size_t fillSpacePoint(const ActsGeometryContext& gctx, const SpacePoint& sp);
+            std::size_t fillSpacePoint(const ActsTrk::GeometryContext& gctx, const SpacePoint& sp);
             SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
                                                      "Key to the space point container"};
 
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegmentKey", "TruthSegmentsR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_truthSegKey{this, "TruthSegmentKey", "MuonTruthSegments"};
             
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthLinkKey{this, "TruthLinkKey", m_truthSegKey, "truthParticleLink"};
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             MuonVal::MuonTesterTree m_tree{"MuonHitDump","MuonHitDump"};
 

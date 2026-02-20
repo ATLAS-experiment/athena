@@ -14,7 +14,7 @@
 #define ATHENAPOOLCNVSVC_TESTCONVERTERBASE_H
 
 
-#include "AthenaPoolCnvSvc/ITPConverter.h"
+#include "TPTools/ITPConverter.h"
 
 
 class TestConverterBase

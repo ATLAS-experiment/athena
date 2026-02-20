@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauClusterContainerCnv.h"
@@ -33,7 +33,6 @@ TrigTauClusterContainer* TrigTauClusterContainerCnv::createTransient()
     static const pool::Guid p4_guid("D41E29BA-0FE8-4319-85F4-93EA68AD9195");
     static const pool::Guid p3_guid("3BB1A500-2188-47D4-9352-6638DEA3FC7D");
     static const pool::Guid tlp1_guid("E1FC5307-A747-42D7-9542-998A9AACB445");
-    static const pool::Guid tlp2_guid("07437EBD-7637-4C3F-B177-6D640AE36FAD");
 
     if(compareClassGuid(p5_guid))
     {

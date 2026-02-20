@@ -686,15 +686,15 @@ namespace Muon {
                 // fix for M3
                 if ((rodId == 3 || rodId == 1) && (m_specialROBNumber > 0)) {
                     sector = 39;
-                    sectorForCabling = 7;
+                    //for info: sectorForCabling = 7;
                     // fix for M3 with runnumber up to 11533 (SFI)
                     if (m_specialROBNumber == 0x650001) {
                         sector = 40;
-                        sectorForCabling = 8;
+                        //for info: sectorForCabling = 8;
                     }
                 } else if ((rodId == 4 || rodId == 2) && (m_specialROBNumber > 0)) {
                     sector = 40;
-                    sectorForCabling = 8;
+                    //for info: sectorForCabling = 8;
                 }
 
             } else if (isRXFooter) {

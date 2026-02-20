@@ -223,6 +223,16 @@ def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
     return result
 
+def ToroidGeoDetectorToolCfg(flags, name="Toroid", **kwargs):
+    kwargs.setdefault("DetectorName", "Toroid")
+    result = ComponentAccumulator()
+    if not flags.Detector.SpecialGeometryToroid:
+        return result
+    from MuonGeoModelR4.MuonGeoModelConfig import ToroidGeoModelToolCfg
+    result.merge(ToroidGeoModelToolCfg(flags))
+    result.setPrivateTools(result.popToolsAndMerge(GeoDetectorToolCfg(flags, name, **kwargs)))
+    return result
+
 
 def ITKEnvelopeCfg(flags, name="ITK", **kwargs):
     result = ComponentAccumulator()
@@ -344,18 +354,14 @@ def ForwardRegionEnvelopeCfg(flags, name='ForwardRegion', **kwargs):
 
 def MUONEnvelopeCfg(flags, name="MUONQ02", **kwargs): #FIXME rename to MUON when safe (IS IT SAFE?))
     result = ComponentAccumulator()
-
+    if not flags.Detector.GeometryMuon:
+        return result
     kwargs.setdefault("DetectorName", "MUONQ02") #FIXME rename to MUON when safe
     kwargs.setdefault("NSurfaces", 34)
     kwargs.setdefault("InnerRadii", [1050.,1050.,1050.,1050.,436.7,436.7,279.,279.,70.,70.,420.,420.,3800.,3800.,4255.,4255.,4255.,4255.,4255.,4255.,3800.,3800.,420.,420.,70.,70.,279.,279.,436.7,436.7,1050.,1050.,1050.,1050.]) #FIXME Units?
     kwargs.setdefault("OuterRadii", [1500.,1500.,2750.,2750.,12650.,12650.,13400.,13400.,14200.,14200.,14200.,14200.,14200.,14200.,14200.,14200.,13000.,13000.,14200.,14200.,14200.,14200.,14200.,14200.,14200.,14200.,13400.,13400.,12650.,12650.,2750.,2750.,1500.,1500.]) #FIXME Units?
     kwargs.setdefault("ZSurfaces", [-26046.,-23001.,-23001.,-22030.,-22030.,-18650.,-18650.,-12900.,-12900.,-6783.,-6783.,-6748.,-6748.,-6550.,-6550.,-4000.,-4000.,4000.,4000.,6550.,6550.,6748.,6748.,6783.,6783.,12900.,12900.,18650.,18650.,22030.,22030.,23001.,23001.,26046.]) #FIXME Units?
-    SubDetectorList=[]
-    if flags.Detector.GeometryMuon:
-        toolMuon = result.popToolsAndMerge(MuonGeoDetectorToolCfg(flags))
-        SubDetectorList += [ toolMuon ]
-
-    kwargs.setdefault("SubDetectors", SubDetectorList)
+    kwargs.setdefault("SubDetectors", [result.popToolsAndMerge(MuonGeoDetectorToolCfg(flags))])
     result.setPrivateTools(PolyconicalEnvelope(name, **kwargs))
     return result
 
@@ -376,13 +382,13 @@ def generateSubDetectorList(flags):
     SubDetectorList=[]
 
     if flags.Beam.Type is BeamType.Cosmics or flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]:
-        if flags.Beam.Type is BeamType.Cosmics and hasattr(flags, "Sim.ReadTR"):
+        if flags.Beam.Type is BeamType.Cosmics and flags.hasFlag("Sim.ReadTR"):
             SubDetectorList += [ CosmicShortCutCfg(flags) ]
 
     if flags.Detector.GeometryMuon:
-        accMuon = MUONEnvelopeCfg(flags)
-        toolMuon = accMuon.popPrivateTools()
-        SubDetectorList += [ toolMuon ] #FIXME rename to MUON when safe
+        SubDetectorList += [ result.popToolsAndMerge(MUONEnvelopeCfg(flags)) ] #FIXME rename to MUON when safe
+    if flags.Detector.SpecialGeometryToroid:
+        SubDetectorList+=[result.popToolsAndMerge(ToroidGeoDetectorToolCfg(flags))]
     if flags.Detector.GeometryID:
         toolIDET = result.popToolsAndMerge(IDETEnvelopeCfg(flags))
         SubDetectorList += [ toolIDET ]
@@ -392,8 +398,6 @@ def generateSubDetectorList(flags):
     if flags.Detector.GeometryCalo:
         toolCALO = result.popToolsAndMerge(CALOEnvelopeCfg(flags))
         SubDetectorList += [ toolCALO ]
-    if flags.Detector.GeometryMuon:
-        result.merge(accMuon) #add the acc later to match the old style config
     if flags.Detector.GeometryBpipe:
         toolBpipe = result.popToolsAndMerge(BeamPipeGeoDetectorToolCfg(flags))
         SubDetectorList += [ toolBpipe ]

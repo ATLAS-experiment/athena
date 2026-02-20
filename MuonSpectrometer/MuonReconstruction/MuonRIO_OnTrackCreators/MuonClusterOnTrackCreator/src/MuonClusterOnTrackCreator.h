@@ -27,13 +27,13 @@
 
 namespace Muon {
 
-    class MuonClusterOnTrackCreator : public AthAlgTool, virtual public IMuonClusterOnTrackCreator {
+    class MuonClusterOnTrackCreator : public extends<AthAlgTool, IMuonClusterOnTrackCreator> {
         // /////////////////////////////////////////////////////////////////
         // Public methods:
         // /////////////////////////////////////////////////////////////////
 
     public:
-        MuonClusterOnTrackCreator(const std::string&, const std::string&, const IInterface*);
+        using base_class::base_class;
         virtual ~MuonClusterOnTrackCreator() = default;
         virtual StatusCode initialize() override;
 

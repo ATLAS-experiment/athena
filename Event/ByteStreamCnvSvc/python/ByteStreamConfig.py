@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """Set up to read and/or write bytestream files.
 
 This module configures the Athena components required to read from
@@ -17,6 +17,7 @@ file.
 """
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import ProductionStep
 from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
 from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
 from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
@@ -46,7 +47,7 @@ def ByteStreamReadCfg(flags, type_names=None):
     if flags.Common.isOnline and not any(flags.Input.Files) and not (flags.Trigger.doHLT or flags.Trigger.doLVL1):
         bytestream_input = CompFactory.ByteStreamEmonInputSvc("ByteStreamInputSvc")
     else:
-        eiName = "{}EventInfo".format(flags.Overlay.BkgPrefix if flags.Overlay.ByteStream else "")
+        eiName = "{}EventInfo".format(flags.Overlay.BkgPrefix if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "")
         bytestream_input = CompFactory.ByteStreamEventStorageInputSvc(
             name="ByteStreamInputSvc",
             EventInfoKey=eiName)
@@ -124,6 +125,7 @@ def ByteStreamWriteCfg(flags, type_names=None):
         MaxFileMB=15000,
         MaxFileNE=15000000,  # event (beyond which it creates a new file)
         OutputDirectory="./",
+        SimpleFileName=flags.Output.BSFileName,
         AppName="Athena",
         RunNumber=all_runs.pop(),
     )

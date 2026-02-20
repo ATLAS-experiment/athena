@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/VRJetOverlapDecoratorTool.h"
@@ -13,7 +13,7 @@
 #include "FlavorTagDiscriminants/SoftElectronTruthDecoratorAlg.h"
 #include "FlavorTagDiscriminants/GNNAuxTaskDecoratorAlg.h"
 #include "FlavorTagDiscriminants/TrackClassifier.h"
-#include "FlavorTagDiscriminants/FTagGhostElectronAssociationAlg.h"
+#include "FlavorTagDiscriminants/FTagGhostLeptonAssociationAlg.h"
 #include "FlavorTagDiscriminants/HitDecoratorAlg.h"
 #include "FlavorTagDiscriminants/JetHitAssociationAlg.h"
 
@@ -39,5 +39,11 @@ DECLARE_COMPONENT(GNNAuxTaskDecoratorAlg)
 DECLARE_COMPONENT(CountIParticleAlg)
 DECLARE_COMPONENT(CountTrackParticleAlg)
 DECLARE_COMPONENT(FTagGhostElectronAssociationAlg)
+DECLARE_COMPONENT(FTagGhostMuonAssociationAlg)
 DECLARE_COMPONENT(HitDecoratorAlg)
 DECLARE_COMPONENT(JetHitAssociationAlg)
+
+#ifndef XAOD_ANALYSIS
+#include "FlavorTagDiscriminants/HitBeamSpotDataDecoratorAlg.h"
+DECLARE_COMPONENT(HitBeamSpotDataDecoratorAlg)
+#endif

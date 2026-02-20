@@ -44,24 +44,28 @@ def LuminosityCondAlgCfg (flags, useOnlineLumi=None, suffix=None):
   
     if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
          kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
-         kwargs.setdefault("actualMuKey", flags.Overlay.BkgPrefix + "EventInfo.actualInteractionsPerCrossing")
-         kwargs.setdefault("averageMuKey", flags.Overlay.BkgPrefix + "EventInfo.averageInteractionsPerCrossing")
 
-    LuminosityCondAlg=CompFactory.LuminosityCondAlg
+    kwargs.setdefault("LuminosityOutputKey", "LuminosityCondData" + suffix)
 
-    alg = LuminosityCondAlg (name,
-                             LuminosityOutputKey = 'LuminosityCondData' + suffix,
-                             **kwargs)
-
-    result.addCondAlgo (alg)
+    result.addCondAlgo(CompFactory.LuminosityCondAlg(name, **kwargs))
     return result
 
 
 def luminosityCondAlgMCCfg (flags, name, result):
-    from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
-    result.merge(readDigitizationParameters(flags))
+    from AthenaConfiguration.Enums import Format
+
+    # Only read digitization parameters from conditions DB if NOT ByteStream input
+    # For ByteStream input, the metadata will be read from BS metadata instead
+    if flags.Input.Format != Format.BS:
+        from DigitizationConfig.DigitizationParametersConfig import readDigitizationParameters
+        result.merge(readDigitizationParameters(flags))
+        digitizationFolderKey = '/Digitization/Parameters'
+    else:
+        # For ByteStream input, don't use conditions folder - will read from BS metadata
+        digitizationFolderKey = ''
+
     return { 'LuminosityFolderInputKey' : '',
-             'DigitizationFolderInputKey' : '/Digitization/Parameters',
+             'DigitizationFolderInputKey' : digitizationFolderKey,
              'OnlineLumiCalibrationInputKey' : '',
              'BunchLumisInputKey' : '',
              'BunchGroupInputKey' : '',

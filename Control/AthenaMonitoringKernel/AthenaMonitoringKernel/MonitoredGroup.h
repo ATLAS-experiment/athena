@@ -145,7 +145,7 @@ namespace Monitored {
 
   /** Builds an array of indices (base case) */
   template<typename V,typename std::enable_if_t<std::is_integral_v<V>>* =nullptr>
-  std::vector<V> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, int nHist) {
+  std::vector<V> buildToolMap(const ToolHandleArray<GenericMonitoringTool> & tools, const std::string& baseName, int nHist) {
     std::vector<int> indexArray;
     for ( int iHist=0; iHist<nHist; iHist++ ) {
       std::string groupName = baseName + "_" + std::to_string(iHist);
@@ -156,7 +156,7 @@ namespace Monitored {
 
   /** Builds an N-dimensional array of indices (recursive) */
   template<typename V,typename std::enable_if_t<!std::is_integral_v<V>>* =nullptr,typename...T>
-  std::vector<V> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, int nHist, T... dimensions) {
+  std::vector<V> buildToolMap(const ToolHandleArray<GenericMonitoringTool> & tools, const std::string& baseName, int nHist, T... dimensions) {
     std::vector<V> indexArray;
     for ( int iHist=0; iHist<nHist; iHist++ ) {
       std::string groupName = baseName + "_" + std::to_string(iHist);
@@ -167,7 +167,7 @@ namespace Monitored {
 
   /** Builds a map of indices (base case) */
   template<typename V,typename std::enable_if_t<std::is_integral_v<V>>* =nullptr>
-  std::map<std::string,int> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, const std::vector<std::string>& labels) {
+  std::map<std::string,int> buildToolMap(const ToolHandleArray<GenericMonitoringTool> & tools, const std::string& baseName, const std::vector<std::string>& labels) {
     std::map<std::string,int> indexMap;
     for ( const std::string& label : labels ) {
       std::string groupName = baseName + "_" + label;
@@ -178,7 +178,7 @@ namespace Monitored {
 
   /** Builds an N-dimensional map of indices (recursive) */
   template<typename V,typename std::enable_if_t<!std::is_integral_v<V>>* =nullptr,typename...T>
-  std::map<std::string,V> buildToolMap(ToolHandleArray<GenericMonitoringTool> tools, const std::string& baseName, const std::vector<std::string>& labels, T... dimensions) {
+  std::map<std::string,V> buildToolMap(const ToolHandleArray<GenericMonitoringTool> & tools, const std::string& baseName, const std::vector<std::string>& labels, T... dimensions) {
     std::map<std::string,V> indexMap;
     for ( const std::string& label : labels ) {
       std::string groupName = baseName + "_" + label;

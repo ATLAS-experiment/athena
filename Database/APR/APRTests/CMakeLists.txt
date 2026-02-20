@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( APRTests )
@@ -31,8 +31,7 @@ function( _add_test name )
    atlas_add_test( "${name}_test"
       SOURCES ${name}/*.cpp
       INCLUDE_DIRS ${CPPUNIT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PersistencySvc TestTools
-      StorageSvc AthContainers  FileCatalog
+      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PersistencySvc TestTools StorageSvc AthContainers
       PersistentDataModel TestTools AthenaKernel
       # Need to explicitly link against ROOT libraries to suppress
       # spurious ubsan warnings.
@@ -52,6 +51,7 @@ _add_test( StorageSvc_MultipleIterators )
 _add_test( StorageSvc_ParallelReadWrite )
 _add_test( StorageSvc_TransientMembers DICTHEADER StorageSvc_TransientMembers/TestClassWithTransients.h )
 _add_test( PersistencySvc_Functionality )
+_add_test( PersistencySvc_ExtraFunctionality )
 _add_test( PersistencySvc_FileCatalogOperations )
 _add_test( PersistencySvc_FileOpenWithoutCatalog )
 _add_test( PersistencySvc_Parameters )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -360,8 +360,8 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
     xaxis = "Channel";
 
     ATH_MSG_DEBUG( "Registering set with prefix"  << namePrefix  );
-    histCollection->layHistVect = new std::vector<TH1F*>();
-    if (!bookLayHists("LayerView", parDir, *histCollection->layHistVect,namePrefix, titlePrefix, "Channel", xaxis
+    histCollection->layHistVect.clear();
+    if (!bookLayHists("LayerView", parDir, histCollection->layHistVect,namePrefix, titlePrefix, "Channel", xaxis
                       ,true, histCollection->ignoreY).isSuccess())
     {
       ATH_MSG_ERROR( "failed to register " << namePrefix << " (layer histograms) " );
@@ -377,8 +377,8 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
     xaxis = axisLabel;
 
     ATH_MSG_DEBUG( "Registering set with prefix"  << namePrefix  );
-    histCollection->chamSummVect = new std::vector<TH1F*>();
-    if (!bookChamHists("SecSpectrum", parDir,*histCollection->chamSummVect,namePrefix, titlePrefix, xaxis,yaxis,
+    histCollection->chamSummVect.clear();
+    if (!bookChamHists("SecSpectrum", parDir,histCollection->chamSummVect,namePrefix, titlePrefix, xaxis,yaxis,
                        false,histCollection->ignoreY,numBins,lowBound,highBound).isSuccess())
     {
       ATH_MSG_ERROR( "failed to register " << namePrefix 
@@ -395,8 +395,8 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
     xaxis = axisLabel;
 
     ATH_MSG_DEBUG( "Registering set with prefix"  << namePrefix  );
-    histCollection->chamHistVect = new std::vector<TH1F*>();
-    if (!bookChamHists("SectorView", parDir,*histCollection->chamHistVect,namePrefix, titlePrefix, xaxis,yaxis,
+    histCollection->chamHistVect.clear();
+    if (!bookChamHists("SectorView", parDir,histCollection->chamHistVect,namePrefix, titlePrefix, xaxis,yaxis,
                        true,histCollection->ignoreY).isSuccess())
     {
       ATH_MSG_ERROR( "failed to register " << namePrefix 
@@ -413,8 +413,8 @@ StatusCode CscCalibMonToolBase::bookHistCollection(HistCollection * histCollecti
     xaxis = axisLabel;
 
     ATH_MSG_DEBUG( "Registering set with prefix" << namePrefix  );
-    histCollection->laySummVect = new std::vector<TH1F*>();
-    if (!bookLayHists("LaySpectrum", parDir, *histCollection->laySummVect,
+    histCollection->laySummVect.clear();
+    if (!bookLayHists("LaySpectrum", parDir, histCollection->laySummVect,
                       namePrefix, titlePrefix, xaxis,yaxis,
                       false,histCollection->ignoreY,numBins,lowBound,highBound).isSuccess())
     {
@@ -896,11 +896,11 @@ StatusCode CscCalibMonToolBase::copyDataToHists(HistCollection * histCollection)
   bool doHash         = (histCollection->hashHist != nullptr         && m_makeHashHists);
   bool doAllChan1d    = (histCollection->allChan1dHistX != nullptr  && histCollection->allChan1dHistY != nullptr   && m_makeAllChan1dHists);
   bool doAllChan2d    = (histCollection->allChan2dHist != nullptr    && m_makeAllChan2dHists);
-  bool doLayChan      = (histCollection->layHistVect != nullptr      && m_makeLayHists);
-  bool doLaySummary   = (histCollection->laySummVect != nullptr      && m_makeLaySummHists);
+  bool doLayChan      = (!histCollection->layHistVect.empty()        && m_makeLayHists);
+  bool doLaySummary   = (!histCollection->laySummVect.empty()        && m_makeLaySummHists);
   bool doChamAvg      = (histCollection->chamProf != nullptr         && m_makeChamProfs);
-  bool doChamChan     = (histCollection->chamSummVect != nullptr     && m_makeChamHists);
-  bool doChamSummary  = (histCollection->chamSummVect != nullptr     && m_makeChamSummHists);
+  bool doChamChan     = (!histCollection->chamSummVect.empty()       && m_makeChamHists);
+  bool doChamSummary  = (!histCollection->chamSummVect.empty()       && m_makeChamSummHists);
   bool doErrors       = (histCollection->errors.size() != 0);    //Changed to a vector, so this
   //                                                                is best way to check at moment
 
@@ -1018,14 +1018,14 @@ StatusCode CscCalibMonToolBase::copyDataToHists(HistCollection * histCollection)
       if(doLayChan) 
       {
         //Copy values from data array for this layer to layer histogram
-        (*(histCollection->layHistVect))[layIndex]->SetBinContent(strip,datum);
+        histCollection->layHistVect[layIndex]->SetBinContent(strip,datum);
         if(doErrors)
-          (*(histCollection->layHistVect))[layIndex]->SetBinError(strip,errors.at(stripHash));
+          histCollection->layHistVect[layIndex]->SetBinError(strip,errors.at(stripHash));
       }
       if(doLaySummary)
       {
         //Histogram values for this layer
-        (*(histCollection->laySummVect))[layIndex]->Fill(datum);
+        histCollection->laySummVect[layIndex]->Fill(datum);
 
       } 
       if(doChamAvg)
@@ -1036,15 +1036,15 @@ StatusCode CscCalibMonToolBase::copyDataToHists(HistCollection * histCollection)
       if(doChamSummary)
       {
         //histogram values for this chamber
-        (*(histCollection->chamSummVect))[chamIndex]->Fill(datum);
+        histCollection->chamSummVect[chamIndex]->Fill(datum);
       }
       if(doChamChan)
       {
         int shiftedStrip = strip + (layer-1)*( measuresPhi ? 50 : 200);
         //Copy values from data array for this chamber to chamber histogram
-        (*(histCollection->chamHistVect))[chamIndex]->SetBinContent(shiftedStrip,datum);
+        histCollection->chamHistVect[chamIndex]->SetBinContent(shiftedStrip,datum);
         if(doErrors)
-          (*(histCollection->chamHistVect))[chamIndex]->SetBinError(shiftedStrip,errors.at(stripHash));
+          histCollection->chamHistVect[chamIndex]->SetBinError(shiftedStrip,errors.at(stripHash));
       }
     }//end strip loop        
   }//end chamber loop

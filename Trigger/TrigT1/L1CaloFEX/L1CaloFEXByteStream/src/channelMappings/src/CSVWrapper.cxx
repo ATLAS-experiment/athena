@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "channelMappings/CSVWrapper.h"
 #include <iostream>
 #include <sstream>
@@ -30,7 +33,7 @@ CSVWrapper::CSVWrapper(std::ifstream& inputfile):
 
         while(std::getline(lineStream,cell, ','))
             table_entry.push_back(cell);                          
-        m_table.push_back(table_entry);
+        m_table.push_back(std::move(table_entry));
     }
     m_columnwidth = m_table.at(10).size();
     //Intialise prev results vector
@@ -46,17 +49,17 @@ std::shared_ptr<CSVWrapper::tableline> CSVWrapper::FindLine(
     const std::vector<std::pair<int,std::string>>& argumentpairs){
     std::vector<CSVWrapper::tableline> result = QueryTable(argumentpairs);
     //Check for unique result, if not throw exception
-    if ( result.size() == 0 )
+    if ( result.empty())
     {
       CSVWrapper::tableline returnval;
       std::shared_ptr<CSVWrapper::tableline> return_ptr (
-            new CSVWrapper::tableline (returnval));
+            new CSVWrapper::tableline (std::move(returnval)));
       return return_ptr;
     }
     if(result.size() != 1) {
         std::cout << "Duplicate found!" << std::endl;
-        for (auto res: result) {
-            for (auto r: res) {
+        for (const auto & res: result) {
+            for (const auto & r: res) {
                 std::cout << r << ", ";
             }
             std::cout << std::endl;
@@ -66,7 +69,7 @@ std::shared_ptr<CSVWrapper::tableline> CSVWrapper::FindLine(
     
     CSVWrapper::tableline returnval = result.at(0);
     std::shared_ptr<CSVWrapper::tableline> return_ptr (
-            new CSVWrapper::tableline (returnval));
+            new CSVWrapper::tableline (std::move(returnval)));
     return return_ptr;
 }
 
@@ -80,18 +83,18 @@ std::vector<std::shared_ptr<CSVWrapper::tableline>> CSVWrapper::FindLines(
     std::vector<CSVWrapper::tableline> result = QueryTable(argumentpairs);
 
     std::vector<std::shared_ptr<CSVWrapper::tableline>> return_vec;
-    if ( result.size() == 0 )
+    if ( result.empty())
     {
       CSVWrapper::tableline returnval;
       std::shared_ptr<CSVWrapper::tableline> return_ptr (
-            new CSVWrapper::tableline (returnval));
-      return_vec.push_back(return_ptr);
+            new CSVWrapper::tableline (std::move(returnval)));
+      return_vec.push_back(std::move(return_ptr));
     }
     else {
         for (CSVWrapper::tableline returnval: result) {        
             std::shared_ptr<CSVWrapper::tableline> return_ptr (
-                new CSVWrapper::tableline (returnval));
-            return_vec.push_back(return_ptr);
+                new CSVWrapper::tableline (std::move(returnval)));
+            return_vec.push_back(std::move(return_ptr));
         }
     }
     return return_vec;

@@ -17,7 +17,9 @@ using namespace nsw::STGTPSegments;
 using STGTPSegmentPacket = nsw::STGTPSegmentPacket;
 using STGTPPadPacket = nsw::STGTPPadPacket;
 using STGTPMMPacket = nsw::STGTPMMPacket;
+using STGTPStripPacket = nsw::STGTPStripPacket;
 using namespace nsw::STGTPMMData;
+using namespace nsw::STGTPStrips;
 //=====================================================================
 NSWTP_ROD_Decoder::NSWTP_ROD_Decoder(const std::string& type, const std::string& name, const IInterface* parent)
 : AthAlgTool(type, name, parent)
@@ -180,6 +182,37 @@ StatusCode NSWTP_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::
       }
       // the first 12 bit are used for the bcid and the last 4 for sector ID
       rdo->NSWTP_mm_BCID().push_back(mm_packet.BCID());
+    }
+
+    // Process strip packets (v3+ only)
+    const std::vector<STGTPStripPacket>& strip_packets = link->strip_packet();
+    for(uint i_packetIndex = 0; i_packetIndex < strip_packets.size(); i_packetIndex++){
+      const STGTPStripPacket& strip_packet = strip_packets.at(i_packetIndex);
+      
+      // Store all 112 strip ADC values as bands_charge
+      for(std::size_t i_strip = 0; i_strip < num_strips; ++i_strip) {
+        rdo->NSWTP_strip_bands_charge().push_back(static_cast<uint8_t>(strip_packet.Strip(i_strip)));
+        // Calculate layer: each 14 strips come from a layer in order
+        rdo->NSWTP_strip_bands_layer().push_back(static_cast<uint8_t>(i_strip / 14));
+        rdo->NSWTP_strip_bands_phiID().push_back(static_cast<uint8_t>(strip_packet.PhiIdValue()));
+        rdo->NSWTP_strip_bands_bandID().push_back(static_cast<uint8_t>(strip_packet.BandId()));
+        rdo->NSWTP_strip_bands_BCID().push_back(static_cast<uint16_t>(strip_packet.BCID()));
+        // HLbit not available yet - leave empty or set to 0
+        rdo->NSWTP_strip_bands_HLbit().push_back(0);
+      }
+      
+      // Store all 8 offset values as centroids_offset
+      for(std::size_t i_offset = 0; i_offset < num_offsets; ++i_offset) {
+        rdo->NSWTP_strip_centroids_offset().push_back(strip_packet.Offset(i_offset));
+        // Set corresponding layer info for offsets
+        rdo->NSWTP_strip_centroids_layer().push_back(static_cast<uint32_t>(i_offset));
+        rdo->NSWTP_strip_centroids_phiID().push_back(strip_packet.PhiIdValue());
+        rdo->NSWTP_strip_centroids_bandID().push_back(strip_packet.BandId());
+        // loc not available yet - leave empty or set to 0
+        rdo->NSWTP_strip_centroids_loc().push_back(0);
+      }
+      
+      // BBbit not available yet - leave empty for now
     }
 
   }

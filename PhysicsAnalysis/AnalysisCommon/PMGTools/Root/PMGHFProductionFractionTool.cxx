@@ -447,6 +447,10 @@ StatusCode PMGHFProductionFractionTool::setSystematicVariation(const CP::Systema
 
 CP::SystematicSet PMGHFProductionFractionTool::affectingSystematics() const
 {
+  if (m_showerGenerator == "000000") {
+    ATH_MSG_WARNING("The property `ShowerGenerator' was set to 000000. The tool will now return an empty SystematicsSet and dummy weights of 1.0");
+    return CP::SystematicSet();
+  }
   if (m_charmProdFractionWeights.empty() || m_bottomProdFractionWeights.empty()) {
     ATH_MSG_ERROR("The production fraction weights were not properly initialized!");
     throw std::runtime_error("Charm or bottom production fraction weight map is empty!");

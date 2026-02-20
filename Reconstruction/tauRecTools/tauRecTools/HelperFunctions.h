@@ -55,7 +55,6 @@ namespace tauRecTools
   std::unique_ptr<MVAUtils::BDT> configureMVABDT(std::vector<TString>& variableNames, const TString& weightFile);
 
   std::vector<TString> parseString(const TString& str, const TString& delim=",");
-  std::vector<TString> parseStringMVAUtilsBDT(const TString& str, const TString& delim=",");
 }
 
 #endif // TAURECTOOLS_HELPERFUNCTIONS_H

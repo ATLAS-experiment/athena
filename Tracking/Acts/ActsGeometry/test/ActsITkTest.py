@@ -30,7 +30,7 @@ flags.Detector.GeometryMuon = False
 flags.Concurrency.NumThreads = 64
 flags.Concurrency.NumConcurrentEvents = 64
 
-flags.Exec.MaxEvents = 200
+flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = args.gen3
 

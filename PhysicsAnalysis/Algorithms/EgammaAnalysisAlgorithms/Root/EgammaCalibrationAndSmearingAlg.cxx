@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -25,6 +25,7 @@ namespace CP
     ANA_CHECK (m_calibrationAndSmearingTool.retrieve());
     ANA_CHECK (m_egammaHandle.initialize (m_systematicsList));
     ANA_CHECK (m_preselection.initialize (m_systematicsList, m_egammaHandle, SG::AllowEmpty));
+    ANA_CHECK (m_caloClusterEnergyResoHandle.initialize (m_systematicsList, m_egammaHandle));
     if (!m_noToolSystematics.value())
       ANA_CHECK (m_systematicsList.addSystematics (*m_calibrationAndSmearingTool));
     ANA_CHECK (m_systematicsList.initialize());
@@ -54,6 +55,8 @@ namespace CP
         if (m_preselection.getBool (*egamma, sys))
         {
           ANA_CHECK_CORRECTION (m_outOfValidity, *egamma, m_calibrationAndSmearingTool->applyCorrection (*egamma));
+          float caloClusterEnergyReso = m_calibrationAndSmearingTool->getResolution (*egamma);
+          m_caloClusterEnergyResoHandle.set(*egamma, caloClusterEnergyReso, sys);
         }
       }
     }

@@ -44,13 +44,16 @@ static const std::array<int,TABLESIZE> triple_charge = {
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0
 };
+
+//Note: The PDG rules assign the range 51-60 for generic DM, with explicit spins defined for 51-55.
+// To keep the rest of this range consistent within ATLAS, 56, 57 and 58 are assigned spins 0, +1/2, +1 (respectively) as seen in arXiv:2504.10597v2
 static const std::array<int,TABLESIZE> double_spin = {
   +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
   +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
   +2, +2, +2, +2, +2, +0, +0, +0, +0, +0,
   +0, +0, +2, +2, +2, +0, +0, +0, +0, +4,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
-  +0, +0, +1, +2, +0, +2, +0, +0, +0, +0,
+  +0, +0, +1, +2, +0, +2, +0, +1, +2, +0, 
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
@@ -630,7 +633,7 @@ template<> inline bool isSUSY(const int& p){ auto value_digits = DecodedPID(p); 
 /// Should some colored states be long-lived enough that hadrons would form around them, the coding strategy of 11g applies, with the initial
 /// two nnr digits preserved in the combined code.
 template<class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
-template<> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) );}
+template<> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) && (p(1) != 9) );}
 template<> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isKK(value_digits);}
 
 /// PDG rule 11i
@@ -652,9 +655,11 @@ template<> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(
 /// Generic mediators of s-channel DM pair creation of annihilation can be given
 /// codes 54 and 55 for spin 0 or 1 ones. Separate antiparticles, with negativecodes,
 /// may or may not exist. More elaborate new scenarios should be constructed with n= 5 and nr = 9.
-/// APID: Only the 51-60 range is considered DM. The antiparticles are assumed to exist.
 template<class T> inline bool isDM(const T& p){return isDM(p->pdg_id());}
-template<> inline bool isDM(const int& p){ auto sp = std::abs(p); return (sp >= 51 && sp <= 60) || sp == DARKPHOTON; }
+template<> inline bool isDM(const int& p){
+  auto sp = std::abs(p);
+  auto value_digits = DecodedPID(p);
+  return (sp >= 51 && sp <= 60) || (value_digits.ndigits() == 7 && value_digits(0) == 5 && value_digits(1) == 9) || sp == DARKPHOTON; }
 
 /// PDG rule 11k
 /// Hidden Valley particles have n = 4 and n_r = 9, and trailing numbers in agreement with their nearest-analog standard particles,
@@ -853,6 +858,7 @@ template<> inline bool isBSM(const DecodedPID& p){
   if (isKK(p)) return true;
   if (isHiddenValley(p)) return true;
   if (isMonopole(p)) return true;
+  if (isDM(p.pid())) return true;
   return false;
 }
 template<> inline bool isBSM(const int& p){
@@ -1042,6 +1048,13 @@ template<> inline int charge3(const DecodedPID& p) {
     if (ap < TABLESIZE ) return pp.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
 
   }
+  if (!classified && isDM(p.pid())) { //Dark Matter Particles
+    if (p.ndigits() == 7){ // Determining the charges for the more elaborate, 7-digit DM codes
+      auto pp = p.shift(3); // The first two digits indicate the particle is DM, the third indicates left/right-handedness (see 11(j))
+      auto ap = std::abs(pp.pid());
+      if (ap < TABLESIZE ) return pp.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);
+    }else if (std::abs(p.pid()) < TABLESIZE) return p.pid() > 0 ? triple_charge.at(ap) : -triple_charge.at(ap);  // Just to make sure the correct charge is returned for DM 51-60
+  }
   if (!classified && isMonopole(p)) {
     ///Codes 411nq1nq2 nq3 0  are then used when the magnetic and electrical charge sign agree and 412nq1nq2 nq3 0
     /// when they disagree, with the overall sign of the particle set by the magnetic charge.
@@ -1107,6 +1120,15 @@ template<> inline int spin2(const DecodedPID& p) {
     auto pp = p.shift(2);
     auto ap = std::abs(pp.pid());
     if (ap < TABLESIZE ) { return double_spin.at(ap); } // fundamental particles
+  }
+  if (isDM(std::abs(p.pid()))) { //DM spins
+    if (p.ndigits() == 7) { // Determining the spins for the more elaborate, 7-digit DM codes
+      auto pp = p.shift(3); // The first two digits indicate the particle is DM, the third indicates left/right-handedness (see 11(j))
+      auto ap = std::abs(pp.pid());
+      if (ap < TABLESIZE) { return double_spin.at(ap); } // fundamental particles
+    }else if (std::abs(p.pid()) < TABLESIZE) { // Just to make sure the correct spin is returned for DM 51-60
+      return std::abs(double_spin.at(std::abs(p.pid())));
+    }
   }
   auto ap = std::abs(p.pid());
   if (ap == K0S) { return 0; }

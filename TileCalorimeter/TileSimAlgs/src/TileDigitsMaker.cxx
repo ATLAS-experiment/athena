@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -1336,6 +1336,9 @@ StatusCode TileDigitsMaker::overlayBackgroundDigits(const TileDigitsCollection *
           msg(MSG::VERBOSE) << " " << buffer[js];
         if (!good_ch)
           msg(MSG::VERBOSE) << " BCH";
+        // good_dq should always be true here, but leave in place in case
+        // things change.
+        //coverity[DEADCODE]
         if (!good_dq) {
           msg(MSG::VERBOSE) << " BDQ";
         } else if (isFilledLG) {

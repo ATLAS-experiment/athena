@@ -13,22 +13,10 @@ namespace CP {
     }
 
     StatusCode FJvtSelectionTool::initialize() {
+
         ATH_CHECK(JvtSelectionToolBase::initialize());
 
-        
-        m_jvtAcc = SG::ConstAccessor<float>(m_jvtMoment.key());
-        m_timingAcc = SG::ConstAccessor<float>(m_timingMoment.key());
-        if (m_jetContainer.empty()) {
-            ATH_MSG_WARNING("No JetContainer set. This behaviour is deprecated");
-            ATH_CHECK(m_jvtMoment.initialize(false));
-            ATH_CHECK(m_timingMoment.initialize(false));
-        }
-        else {
-            m_jvtMoment = m_jetContainer + "." + m_jvtMoment.key();
-            ATH_CHECK(m_jvtMoment.initialize());
-            m_timingMoment = m_jetContainer + "." + m_timingMoment.key();
-            ATH_CHECK(m_timingMoment.initialize());
-        }
+        ATH_CHECK(m_timingKey.initialize());
 
         if (m_wp != "Custom") {
             auto itr = workingPoints.find(m_wp);
@@ -43,8 +31,11 @@ namespace CP {
     }
 
     bool FJvtSelectionTool::select(const xAOD::IParticle *jet) const {
+        if(!isInRange(jet)) return true;
         // select jet if it passes fJvt requirement and timing cut (if configured)
-        return m_jvtAcc(*jet) <= m_jvtCut && ( m_timingCut > 0 ? std::abs( m_timingAcc(*jet) ) <= m_timingCut : true );
+        SG::ReadDecorHandle<xAOD::JetContainer, float> jvtHandle(m_jvtMomentKey);
+        SG::ReadDecorHandle<xAOD::JetContainer, float> timingHandle(m_timingKey);
+        return jvtHandle(*jet) <= m_jvtCut && ( m_timingCut > 0 ? std::abs( timingHandle(*jet) ) <= m_timingCut : true );
     }
 
 } // namespace CP

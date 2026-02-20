@@ -23,7 +23,7 @@ void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_sa
 // Function, that converts back ATLAS file from new vesrion to old version
 void conversion_back(TObject* obj_in, TObject* obj_to);
 // Function, that checks, if "dirname" TDirectory exists inside obj_in or not
-int dir_exists(TString dirname, TObject* obj_in);
+int dir_exists(const std::string& dirname, TObject* obj_in);
 
 int main() {
   TFile* f = new TFile("run_364030_lowStat_LB121-140_han_converted.root");
@@ -45,7 +45,7 @@ void conversion_back(TObject* obj_in, TObject* obj_to) {
   TObjString* TOS_w_JSON;  // JSON string
 
   std::string content;
-  TString obj_input_type = obj_in->ClassName();
+  std::string obj_input_type = obj_in->ClassName();
   bool is_file;
   if (obj_input_type == "TFile") {
     is_file = true;
@@ -54,7 +54,7 @@ void conversion_back(TObject* obj_in, TObject* obj_to) {
   }
   TDirectory* obj_in_dir = static_cast<TDirectory*> (obj_in);
   TDirectory* obj_to_dir = static_cast<TDirectory*> (obj_to);
-  TString name = obj_in->GetName();
+  std::string name = obj_in->GetName();
   TDirectory* copy_dir;
   if (is_file == false) {
     copy_dir = obj_to_dir->mkdir(name);
@@ -67,8 +67,8 @@ void conversion_back(TObject* obj_in, TObject* obj_to) {
   TKey* key;
   while ((key = (TKey*) next())) {
     TObject* obj_inside;
-    TString key_name = key->GetName();
-    TString key_type = key->GetClassName();
+    std::string key_name = key->GetName();
+    std::string key_type = key->GetClassName();
     if (key_type == "TObjString") {
       if (key_name == "File_version") { // File version is a flag of new version of files
         continue;
@@ -139,7 +139,7 @@ void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_sa
     if (strncmp(valuestring.type_name(), "string", 6) == 0) {
       TObjString leaf;
       nextLevelDirs[num_of_key]->cd();
-      TString string_name = valuestring.dump();
+      std::string string_name = valuestring.dump();
       leaf.SetString(string_name);
       nextLevelDirs[num_of_key]->WriteTObject(&leaf, string_name);
       // leaf.Write();
@@ -151,7 +151,7 @@ void from_JSON_to_TDirectory(nlohmann::json str_content, TDirectory* place_to_sa
   return;
 }
 
-int dir_exists(TString dirname, TObject* obj_in) {
+int dir_exists(const std::string& dirname, TObject* obj_in) {
   TDirectory* obj_in_dir = static_cast<TDirectory*> (obj_in);
   TList* keys = obj_in_dir->GetListOfKeys();
   TKey* k = (TKey*) keys->FindObject(dirname);

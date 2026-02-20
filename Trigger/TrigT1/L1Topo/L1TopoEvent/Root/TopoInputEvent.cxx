@@ -37,7 +37,9 @@ TopoInputEvent::TopoInputEvent() :
   m_gxenc("InputgXENC",1),
   m_gxerho("InputgXERHO",1),
   m_gmht("InputgMHT",1),
-  m_gte("InputgTE",1)
+  m_gte("InputgTE",1),
+  m_cxe("InputcXE",1),
+  m_gespresso("InputgESPRESSO",1)
 {
 }
 
@@ -212,6 +214,18 @@ StatusCode TopoInputEvent::setgTE(const TCS::gTETOB & gte) {
    return StatusCode::SUCCESS;
 }
 
+StatusCode TopoInputEvent::setcXE(const TCS::jXETOB & cxe) {
+   m_cxe.clear();
+   m_cxe.push_back(cxe);
+   return StatusCode::SUCCESS;
+}
+
+StatusCode TopoInputEvent::setgESPRESSO(const TCS::gTETOB & gespresso) {
+   m_gespresso.clear();
+   m_gespresso.push_back(gespresso);
+   return StatusCode::SUCCESS;
+}
+
 StatusCode TopoInputEvent::setEventInfo(const uint32_t runNo, const uint32_t evtNo, const uint32_t lumiB, const uint32_t BCID) {
    m_runNo = runNo;
    m_evtNo = evtNo;
@@ -335,6 +349,16 @@ void TopoInputEvent::setOverflowFromgTEInput   (bool v)
     m_overflowFromgTEInput = v;
 }
 
+void TopoInputEvent::setOverflowFromcXEInput   (bool v)
+{
+    m_overflowFromcXEInput = v;
+}
+
+void TopoInputEvent::setOverflowFromgESPRESSOInput   (bool v)
+{
+    m_overflowFromgESPRESSOInput = v;
+}
+
 void TopoInputEvent::setOverflowFromMuonInput  (bool v)
 {
     m_overflowFromMuonInput = v;
@@ -383,6 +407,8 @@ TopoInputEvent::inputTOBs(inputTOBType_t tobType) const {
    case GXERHO: return &m_gxerho;
    case GMHT: return &m_gmht;
    case GTE: return &m_gte;
+   case CXE: return &m_cxe;
+   case GESPRESSO: return &m_gespresso;
    }
    return 0;
 }
@@ -421,6 +447,8 @@ bool TopoInputEvent::hasInputOverflow(TCS::inputTOBType_t tobType) const
     case GXERHO:     inputOverflow = overflowFromgXEJWOJInput();    break;
     case GMHT:       inputOverflow = overflowFromgMHTInput();       break;
     case GTE:        inputOverflow = overflowFromgTEInput();        break;
+    case CXE:        inputOverflow = overflowFromcXEInput();        break;
+    case GESPRESSO:  inputOverflow = overflowFromgESPRESSOInput();  break;
     default:         inputOverflow = false;
     }
    return inputOverflow;
@@ -460,6 +488,8 @@ TCS::TopoInputEvent::clear() {
    m_gxerho.clear();
    m_gmht.clear();
    m_gte.clear();
+   m_cxe.clear();
+   m_gespresso.clear();
    m_runNo = 0;
    m_evtNo = 0;
    m_lumiB = 0;
@@ -477,7 +507,8 @@ TCS::TopoInputEvent::clear() {
    setgXERHO(gXETOB(0,0,0));   // default gXERHO
    setgMHT(gXETOB(0,0,0)); // default gMHT
    setgTE(gTETOB(0));       // default gTE
-
+   setcXE(jXETOB(0,0,0));       // default cXE
+   setgESPRESSO(gTETOB(0)); // default gESPRESSO
    m_overflowFromMuonInput = false;
 
    return StatusCode::SUCCESS;
@@ -648,6 +679,20 @@ TopoInputEvent::dump() {
    }
    file << "</gte>" << std::endl;
 
+   file << "<cxe>" << std::endl;
+   for(const jXETOB* cxe : m_cxe) {
+      file << cxe->Ex() << "  " << cxe->Ey() << "  " << cxe->Et() << std::endl;
+   }
+   file << "</cxe>" << std::endl;
+   
+   file << "<gespresso>" << std::endl;
+   for(const gTETOB* gespresso : m_gespresso) {
+      file << gespresso->sumEt() << std::endl;
+   }
+   file << "</gespresso>" << std::endl;
+
+
+
    file << "<met>" << std::endl;
    for(MetTOB* met : m_met) {
       file << met->Ex() << "  " << met->Ey() << "  " << met->Et() << std::endl;
@@ -703,6 +748,8 @@ std::ostream & operator<<(std::ostream &o, const TCS::TopoInputEvent &evt) {
    o << "  #gxenc   : " << evt.m_gxenc.size() << " (capacity: " << evt.m_gxenc.capacity() << ")" << std::endl;
    o << "  #gxerho  : " << evt.m_gxerho.size() << " (capacity: " << evt.m_gxerho.capacity() << ")" << std::endl;
    o << "  #gte     : " << evt.m_gte.size() << " (capacity: " << evt.m_gte.capacity() << ")" << std::endl;
+   o << "  #cxe     : " << evt.m_cxe.size() << " (capacity: " << evt.m_cxe.capacity() << ")" << std::endl;
+   o << "  #gespresso   : " << evt.m_gespresso.size() << " (capacity: " << evt.m_gespresso.capacity() << ")" << std::endl;
    o << "  #met     : " << evt.m_met.size() << " (capacity: " << evt.m_met.capacity() << ")" << std::endl;
    o << "  #info    : runNo, evtNo, lumiBlock and BCID" << std::endl;
    
@@ -727,6 +774,8 @@ std::ostream & operator<<(std::ostream &o, const TCS::TopoInputEvent &evt) {
    o << "gXENC input (" << evt.m_gxenc.name() << "):" << std::endl << evt.m_gxenc;
    o << "gXERHO input (" << evt.m_gxerho.name() << "):" << std::endl << evt.m_gxerho;
    o << "gTE input (" << evt.m_gte.name() << "):" << std::endl << evt.m_gte;
+   o << "cXE input (" << evt.m_cxe.name() << "):" << std::endl << evt.m_cxe;
+   o << "gESPRESSO input (" << evt.m_gespresso.name() << "):" << std::endl << evt.m_gespresso;
    o << "MET input (" << evt.m_met.name() << "):" << std::endl << evt.m_met;
    o << "Overflow from:"
      <<" EmtauInput "<<evt.overflowFromEmtauInput()
@@ -765,6 +814,8 @@ TopoInputEvent::print() const {
    TRG_MSG_INFO("  #gxenc    : " << m_gxenc.size() << " (capacity: " << m_gxenc.capacity() << ")");
    TRG_MSG_INFO("  #gxerho   : " << m_gxerho.size() << " (capacity: " << m_gxerho.capacity() << ")");
    TRG_MSG_INFO("  #gte     : " << m_gte.size() << " (capacity: " << m_gte.capacity() << ")");
+   TRG_MSG_INFO("  #cxe     : " << m_cxe.size() << " (capacity: " << m_cxe.capacity() << ")");
+   TRG_MSG_INFO("  #gespresso  : " << m_gespresso.size() << " (capacity: " << m_gespresso.capacity() << ")");
    TRG_MSG_INFO("  #met     : " << m_met.size() << " (capacity: " << m_met.capacity() << ")");
    
    TRG_MSG_DEBUG("Details:");
@@ -808,6 +859,10 @@ TopoInputEvent::print() const {
    for(auto * x : m_gxerho) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("gTE input (" << m_gte.name() << "):");
    for(auto * x : m_gte) TRG_MSG_DEBUG("      " << *x);
+   TRG_MSG_DEBUG("cXE input (" << m_cxe.name() << "):");
+   for(auto * x : m_cxe) TRG_MSG_DEBUG("      " << *x);
+   TRG_MSG_DEBUG("gESPRESSO input (" << m_gespresso.name() << "):");
+   for(auto * x : m_gespresso) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("MET input (" << m_met.name() << "):");// << std::endl << m_met;
    for(auto * x : m_met) TRG_MSG_DEBUG("      " << *x);
    TRG_MSG_DEBUG("Overflow bits from:"

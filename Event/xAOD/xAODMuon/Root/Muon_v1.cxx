@@ -15,19 +15,13 @@
 // Local include(s):
 #include "xAODMuon/versions/Muon_v1.h"
 #include "MuonAccessors_v1.h"
-#include "MuonTrackSummaryAccessors_v1.h"
+#include "xAODMuon/versions/MuonTrackSummaryAccessors_v1.h"
 // Athena-only includes
-#ifndef XAOD_ANALYSIS
-// #include "TrkParameters/MeasuredPerigee.h"
-#endif
+
 #include "TruthUtils/ParticleConstants.h"
 
 namespace xAOD {
 
-  Muon_v1::Muon_v1()
-  : IParticle() {
-  }
-  
   Muon_v1::Muon_v1(const Muon_v1& rhs)
     : IParticle(rhs) //IParticle does not have a copy constructor. AuxElement has one with same behavior as default ctor
   {
@@ -45,9 +39,6 @@ namespace xAOD {
     return *this;
   }
   
-  Muon_v1::~Muon_v1(){
-  }
-
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( Muon_v1, float, double, pt)
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( Muon_v1, float, double, eta)
   AUXSTORE_PRIMITIVE_GETTER_WITH_CAST( Muon_v1, float, double, phi)
@@ -88,12 +79,6 @@ namespace xAOD {
     return GenVecFourMom_t(pt(), eta(), phi(), m());
   }
 
-//  float Muon_v1::charge() const {
-//    if (primaryTrackParticle()) return primaryTrackParticle()->charge();
-//    // something has gone wrong!
-//    throw std::runtime_error("No link to primary TrackParticle!");
-//  }
-
   Type::ObjectType Muon_v1::type() const {
     return Type::Muon;
   }  
@@ -118,19 +103,17 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_SETTER_WITH_CAST( Muon_v1, uint16_t, Muon_v1::MuonType, muonType, setMuonType)
 
   bool Muon_v1::summaryValue(uint8_t& value, const SummaryType information)  const {
-    // Here we want to check if this information has been added to the Muon, and use this first if so.
-    // @todo ?Could further optimise the below, to see first if the SummaryType value is one of the ones we write to Muons?
-    // @todo ?Is there a better way than catching the exception?
-    try {
-      const Muon_v1::Accessor< uint8_t >* acc = trackSummaryAccessorV1<uint8_t>( information ); 
-      value = ( *acc )( *this );
-      return true;
-    } catch ( SG::ExcBadAuxVar& ) {}
-    
+    const auto* acc = trackSummaryAccessorV1<uint8_t>( information );
+    if (acc->isAvailable(*this))  {
+        value = (*acc)( *this );
+        return true;
+    }
     // Okay - fallback: try to get from TrackParticle.
-    const ElementLink< TrackParticleContainer >& el= primaryTrackParticleLink();
-    if (!el.isValid()) return false;
-    return (*el)->summaryValue(value,information);
+    const xAOD::TrackParticle* primTrk = primaryTrackParticle();
+    if (primTrk) {
+        return primTrk->summaryValue(value, information);
+    } 
+    return false;
   }  
 
   void Muon_v1::setSummaryValue( uint8_t  value, const SummaryType 	information ) {
@@ -158,69 +141,78 @@ namespace xAOD {
   }
   
   bool Muon_v1::summaryValue(uint8_t& value, const MuonSummaryType information)  const {
-    const Muon_v1::Accessor< uint8_t >* acc = muonTrackSummaryAccessorV1( information );
-    if( ! acc ) return false;
-    if( ! acc->isAvailable( *this ) ) return false;
-    
-  // Retrieve the value:
-    value = ( *acc )( *this );
+    const auto& acc = muonTrackSummaryAccessorV1( information );
+    if( !acc.isAvailable( *this ) ) {
+      value = 0;
+      return false;
+    }
+    // Retrieve the value:
+    value = acc( *this );
     return true;
   }
   
   float Muon_v1::uint8MuonSummaryValue(const MuonSummaryType information) const{
-	  const Muon_v1::Accessor< uint8_t >* acc = muonTrackSummaryAccessorV1( information );
-	  return ( *acc )( *this );
+    uint8_t sumVal{0};
+    summaryValue(sumVal, information);
+    return sumVal;
   }
   
 
   void Muon_v1::setSummaryValue(uint8_t value, const MuonSummaryType information) {
-    const Muon_v1::Accessor< uint8_t >* acc = muonTrackSummaryAccessorV1( information );
+    const auto& acc = muonTrackSummaryAccessorV1( information );
     // Set the value:
-    ( *acc )( *this ) =  value;
+    acc(*this) =  value;
   }
   
   bool Muon_v1::parameter(float& value, const Muon_v1::ParamDef information)  const {
     const xAOD::Muon_v1::Accessor< float >* acc = parameterAccessorV1<float>( information );
-    if( ! acc ) return false;
-    if( ! acc->isAvailable( *this ) ) return false;
-    
+    if( ! acc || ! acc->isAvailable( *this ) ) {
+      value = 0.;
+      return false;
+    }
     // Retrieve the value:
     value = ( *acc )( *this );
     return true;
   }
-	
+
   float xAOD::Muon_v1::floatParameter(xAOD::Muon_v1::ParamDef information) const{
-    const xAOD::Muon_v1::Accessor< float >* acc = parameterAccessorV1<float>( information );
-    return ( *acc )( *this );
+    float sumVal{0.f};
+    parameter(sumVal, information);
+    return sumVal;
   }
 
   void Muon_v1::setParameter(float value, const Muon_v1::ParamDef information){
     const xAOD::Muon_v1::Accessor< float >* acc = parameterAccessorV1<float>( information );
-    if( ! acc ) throw std::runtime_error("Muon_v1::setParameter - no float accessor for paramdef number: "+std::to_string(information));
-    
+    if( ! acc ) {
+      throw std::runtime_error("Muon_v1::setParameter - no float accessor for paramdef number: "
+                              +std::to_string(information));
+    }
     // Set the value:
     ( *acc )( *this ) = value;
   }
   
   bool Muon_v1::parameter(int& value, const Muon_v1::ParamDef information)  const {
     const xAOD::Muon_v1::Accessor< int >* acc = parameterAccessorV1<int>( information );
-    if( ! acc ) return false;
-    if( ! acc->isAvailable( *this ) ) return false;
-    
+    if( ! acc || ! acc->isAvailable( *this ) ) {
+      value = 0; 
+      return false;
+    }
     // Retrieve the value:
     value = ( *acc )( *this );
     return true;
   }
 	
   int xAOD::Muon_v1::intParameter(xAOD::Muon_v1::ParamDef information) const{
-    const xAOD::Muon_v1::Accessor< int >* acc = parameterAccessorV1<int>( information );
-    return ( *acc )( *this );
+      int sumValue{0};
+      parameter(sumValue, information);
+      return sumValue;
   }
 
   void Muon_v1::setParameter(int value, const Muon_v1::ParamDef information){
     const xAOD::Muon_v1::Accessor< int >* acc = parameterAccessorV1<int>( information );
-    if( ! acc ) throw std::runtime_error("Muon_v1::setParameter - no int accessor for paramdef number: "+std::to_string(information));
-    
+    if( ! acc ) {
+      throw std::runtime_error("Muon_v1::setParameter - no int accessor for paramdef number: "+std::to_string(information));
+    }
     // Set the value:
     ( *acc )( *this ) = value;
   }
@@ -262,23 +254,26 @@ namespace xAOD {
   bool Muon_v1::isolation(float& value, const Iso::IsolationType information)  const {
     const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );
     
-    if( ! acc ) return false;
-    if( !acc->isAvailable( *this) ) return  false;
-    
+    if( ! acc || !acc->isAvailable( *this) ){
+       value =0.;
+       return  false;
+    }
     // Retrieve the value:
     value = ( *acc )( *this );
     return true;
   }
   
   float Muon_v1::isolation( const Iso::IsolationType information)  const {
-    const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );
-    if( !acc ) throw std::runtime_error( "Unknown/Unavailable Isolation type requested" );
-    return  ( *acc )( *this );
+    float isoVal{0.f};
+    isolation(isoVal, information);
+    return isoVal;
   }
   
   void Muon_v1::setIsolation(float value, const Iso::IsolationType information){
     const SG::AuxElement::Accessor< float >* acc = getIsolationAccessor( information );
-    if( !acc ) throw std::runtime_error( "Unknown/Unavailable Isolation type requested" );
+    if( !acc ) {
+      throw std::runtime_error( "Unknown/Unavailable Isolation type requested" );
+    }
     // Set the value:
     ( *acc )( *this ) = value;
   }

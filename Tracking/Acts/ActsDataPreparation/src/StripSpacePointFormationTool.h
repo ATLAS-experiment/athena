@@ -125,6 +125,8 @@ namespace ActsTrk {
         Gaudi::Property< float > m_stripLengthTolerance{this, "StripLengthTolerance", 0.01};
         Gaudi::Property< float > m_stripGapParameter{this, "StripGapParameter", 0.0015, "Recommend 0.001 - 0.0015 for ITK geometry"};
         Gaudi::Property< bool > m_useSCTLayerDep_OverlapCuts{this,"useSCTLayerDep_OverlapCuts", true};
+        /// For applying geometric cuts on SPs using beamspot constraint
+        Gaudi::Property< bool > m_useBeamSpotConstraint{this, "useBeamSpotConstraint", true, "Reject space points which are not compatible with a particle originating from the beamspot"};
       //@}
 
   };

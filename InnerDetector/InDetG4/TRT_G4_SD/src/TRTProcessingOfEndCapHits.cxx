@@ -9,6 +9,7 @@
 #include "TRTSensitiveDetector.h"
 
 // Athena headers
+#include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackHelper.h"
 #include "TRT_G4Utilities/TRTParameters.hh"
 
@@ -245,7 +246,8 @@ bool TRTProcessingOfEndCapHits::ProcessHit(G4Step* pStep)
   hitID += strawID;
 
   m_pSensitiveDetector->m_hitID = hitID;
-  m_pSensitiveDetector->m_partLink = trHelp.GenerateParticleLink();
+  auto* eventInfo = m_pSensitiveDetector->m_g4UserEventInfo;
+  m_pSensitiveDetector->m_partLink =  trHelp.GenerateParticleLink(eventInfo ? eventInfo->GetEventStore() : nullptr);
   m_pSensitiveDetector->m_preStepX = preStepX;
   m_pSensitiveDetector->m_preStepY = preStepY;
   m_pSensitiveDetector->m_preStepZ = preStepZ;

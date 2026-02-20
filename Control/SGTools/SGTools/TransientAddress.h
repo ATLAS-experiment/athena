@@ -16,9 +16,11 @@
 ///< Gaudi includes:
 #include "AthenaKernel/IStringPool.h"
 #include "AthenaKernel/StoreID.h"
-#include "GaudiKernel/ClassID.h"
+#include "CxxUtils/RefCountedPtr.h"
 #include "CxxUtils/CachedValue.h"
 #include "CxxUtils/checker_macros.h"
+#include "GaudiKernel/ClassID.h"
+#include "GaudiKernel/IOpaqueAddress.h"
 
 ///< forward declarations:
 class IOpaqueAddress;
@@ -48,12 +50,13 @@ namespace SG {
 
     ///< Construct from clid, key and IOpaqueAddress
     TransientAddress(CLID id, const std::string& key, 
-		     IOpaqueAddress* addr, bool clearAddress = true);
+		     CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
+                     bool clearAddress = true);
 
     ///< Constructor giving full list of symlinked IDs --- used
     ///  from DataHeaderElement::getAddress().
     TransientAddress(CLID id, const std::string& key, 
-		     IOpaqueAddress* addr,
+		     CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
                      const std::vector<CLID>& clids);
 
     TransientAddress (const TransientAddress&);
@@ -78,7 +81,7 @@ namespace SG {
     IOpaqueAddress* address ATLAS_NOT_CONST_THREAD_SAFE () const; 
 
     ///< set IOpaqueAddress
-    void setAddress(IOpaqueAddress* pAddress);
+    void setAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress);
 
     ///< Retrieve primary clid
     CLID clID() const;
@@ -143,7 +146,7 @@ namespace SG {
 
   private:
     TransientAddress(CLID id, const std::string& key, 
-		     IOpaqueAddress* addr,
+		     CxxUtils::RefCountedPtr<IOpaqueAddress> addr,
                      bool clearAddress,
                      bool consultProvider);
 
@@ -171,7 +174,7 @@ namespace SG {
     bool m_consultProvider;
 
     ///< IOpaqueAddress:
-    IOpaqueAddress* m_address;
+    CxxUtils::RefCountedPtr<IOpaqueAddress> m_address;
 
     ///< AddressProvider
     IAddressProvider* m_pAddressProvider;
@@ -191,18 +194,12 @@ namespace SG {
   // inlined code:
   /////////////////////////////////////////////////////////////////////
 
-  // Reset the TransientAddress
-  inline
-  void TransientAddress::reset()
-  {
-    if (m_clearAddress) setAddress(0);
-  }
-
   /// Retrieve IOpaqueAddress
   inline
   IOpaqueAddress* TransientAddress::address ATLAS_NOT_CONST_THREAD_SAFE () const 
-  { 
-    return m_address; 
+  {
+    IOpaqueAddress* addr ATLAS_THREAD_SAFE = const_cast<IOpaqueAddress*> (m_address.get());
+    return addr;
   }
 
   /// Retrieve clid

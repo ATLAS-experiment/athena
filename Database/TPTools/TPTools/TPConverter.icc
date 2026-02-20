@@ -54,7 +54,7 @@ toPersistentWithKey_impl( const TRANS *trans,
    if( m_recursive ) {
       // for recursive calls use temporary persistent object
       // as the vector storage may be reallocated in a recursive invocation
-      PERS	tmp_pers;
+      PERS	tmp_pers{};
       transToPersWithKey( trans, &tmp_pers, key, log);
       // do NOT use back() here (the vector has already grown)
       m_pStorage->operator[]( size ) = std::move(tmp_pers);

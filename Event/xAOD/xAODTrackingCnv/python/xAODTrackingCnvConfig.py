@@ -106,7 +106,6 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
                                          **kwargs)
 
     result = ComponentAccumulator()
-
     kwargs.setdefault("ConvertTracks", True)
     kwargs.setdefault("ConvertTrackParticles", False)
     kwargs.setdefault("TrackContainerName", "CombinedInDetTracks")

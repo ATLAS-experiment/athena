@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDER_H
@@ -43,7 +43,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "Identifier/HWIdentifier.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 
@@ -160,7 +159,7 @@ private:
                                                              "Output Tile E4 prime container key"};
 
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_EventInfoTileStatusKey{this, "EventInfoTileStatus",
-                                                                      "EventInfo.TileStatus",
+                                                                      m_eventInfoKey, "TileStatus",
                                                                       "Dummy decoration key to aid scheduling"};
 
 

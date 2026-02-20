@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRACKRECONSTRUCTION_TRACKFINDINGBASEALG_H
@@ -13,7 +13,7 @@
 
 // Tools
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
@@ -85,7 +85,7 @@ namespace ActsTrk {
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle<ActsTrk::TrackStatePrinterTool> m_trackStatePrinter{this, "TrackStatePrinter", "", "optional track state printer"};
     ToolHandle<ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
@@ -104,6 +104,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
     Gaudi::Property<std::vector<double>> m_chi2OutlierCutOff{this, "chi2OutlierCutOff", {}, "MeasurementSelector: maximum local chi2 contribution for outlier"};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
+    Gaudi::Property<double> m_edgeHoleBorderWidth{this,"EdgeHoleBorderWidth", 0. ,"Width of the border of surfaces (mm) within which holes are not counted as holes."};
     Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
@@ -244,7 +245,7 @@ namespace ActsTrk {
         const DetectorContextHolder &detContext,
         const bool paramsAtOutermostSurface) const;
 
-    using TrkProxy = Acts::TrackProxy<Acts::VectorTrackContainer, Acts::VectorMultiTrajectory, Acts::detail::RefHolder, false>;
+    using TrkProxy = detail::RecoTrackContainer::TrackProxy;
 
     /**
      * @brief Perform two-way track finding
@@ -308,7 +309,7 @@ namespace ActsTrk {
     static void addCounts(detail::RecoTrackContainer &tracksContainer);
     static void initCounts(const detail::RecoTrackContainer::TrackProxy &track);
     static void updateCounts(const detail::RecoTrackContainer::TrackProxy &track,
-                             Acts::ConstTrackStateType typeFlags,
+                             Acts::ConstTrackStateTypeMap typeFlags,
                              xAOD::UncalibMeasType detType);
     void checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const;
     std::array<bool, 3> selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const;

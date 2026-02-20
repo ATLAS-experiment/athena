@@ -67,9 +67,6 @@ namespace InDet {
     float GetSmearD0Sigma(const xAOD::TrackParticle&) const;
     float GetSmearZ0Sigma(const xAOD::TrackParticle&) const;
 
-    Gaudi::Property<int> m_seed{this, "Seed", 0};
-    std::unique_ptr<TRandom3> m_rnd; //!
-
     // StatusCode initHistogram(TH1*& histogram, std::string rootFileName, std::string histogramName) const;
     // StatusCode initFunction(TF2*& function, std::string rootFileName, std::string functionName) const;
     float readHistogram( const TH2*, float pt, float eta ) const;

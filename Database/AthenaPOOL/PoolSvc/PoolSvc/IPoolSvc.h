@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_IPOOLSVC_H
@@ -11,8 +11,9 @@
  **/
 
 #include "GaudiKernel/IService.h"
-#include "CollectionBase/ICollection.h"
+#include "CollectionSvc/ICollection.h"
 #include "PersistencySvc/ITransaction.h"
+#include "StorageSvc/DbType.h"
 #include "DataModelRoot/RootType.h"
 
 #include <string>
@@ -64,8 +65,11 @@ public: // Non-static members
    /// @param maxFile [IN] maximum number of open input files.
    virtual unsigned int getInputContext(const std::string& label, unsigned int maxFile = 0) = 0;
 
-   /// @return map of all labelled input contexts.
-   virtual const std::map<std::string, unsigned int>& getInputContextMap() const  = 0;
+   /// @return copy of the map of all labelled input contexts.
+   virtual std::map<std::string, unsigned int> getInputContextMap() const  = 0;
+
+   /// @return size of the map of all labelled input contexts.
+   virtual unsigned int getInputContextMapSize() const = 0;
 
    /// @return the context.
    virtual const coral::Context* context() const = 0;
@@ -97,9 +101,9 @@ public: // Non-static members
    /// @param connection [IN] string containing the connection.
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
-   virtual pool::ICollection* createCollection(const std::string& collectionType,
-	   const std::string& connection,
+   virtual pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
+	   const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
    /// @return a token for a container entry.
@@ -131,9 +135,6 @@ public: // Non-static members
    /// @param contextId [IN] context id of database to be disconnected.
    virtual StatusCode disconnectDb(const std::string& connection,
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
-
-   /// Get POOL FileSize attribute for database without logging a message
-   virtual long long int getFileSize(const std::string& dbName, long tech, unsigned int contextId) const = 0;
 
    /// Get POOL attributes - domain
    virtual StatusCode getAttribute(const std::string& optName,

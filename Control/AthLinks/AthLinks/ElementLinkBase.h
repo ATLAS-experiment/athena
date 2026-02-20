@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLinkBase.h
@@ -19,7 +19,7 @@
 #include "AthLinks/tools/ForwardIndexingPolicy.h"
 #include "AthLinks/DataLinkBase.h"
 #include "AthenaKernel/getThinningCache.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 #include "CxxUtils/CachedPointer.h"
 #include <cstdlib>
 #include <stdint.h>
@@ -269,7 +269,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param elt Pointer to the element.
    * @param sg Associated store.
-   * 
+   *
    * USE CAREFULLY: no coherency checks, we just trust you!
    *
    * If @c sg is 0, we take the global default.
@@ -288,7 +288,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param elt Pointer to the element.
    * @param sg Associated store.
-   * 
+   *
    * USE CAREFULLY: no coherency checks, we just trust you!
    *
    * If @c sg is 0, we take the global default.
@@ -306,7 +306,7 @@ protected:
    * @param link_clid CLID of the link being set.
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
-   * 
+   *
    * If @c sg is 0, we take the global default.
    */
   ElementLinkBase (const_pointer_t obj,
@@ -420,7 +420,7 @@ protected:
    */
   void resetWithKeyAndIndex (const ID_type& dataID,
                              CLID link_clid,
-                             index_type elemID, 
+                             index_type elemID,
                              IProxyDict* sg);
 
 
@@ -437,7 +437,7 @@ protected:
    */
   void resetWithKeyAndIndex (sgkey_t key,
                              CLID link_clid,
-                             index_type elemID, 
+                             index_type elemID,
                              IProxyDict* sg);
 
 

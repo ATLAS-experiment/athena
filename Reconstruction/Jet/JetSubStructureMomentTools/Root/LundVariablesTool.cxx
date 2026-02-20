@@ -179,7 +179,7 @@ std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std:
 
 
     declust.varphi = atan2(pJLeft.rap() - pJRight.rap(), pJLeft.delta_phi_to(pJRight));
-    result.push_back(declust);
+    result.push_back(std::move(declust));
   }
 
 

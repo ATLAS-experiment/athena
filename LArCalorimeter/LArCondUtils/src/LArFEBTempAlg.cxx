@@ -5,7 +5,7 @@
 #include "LArFEBTempAlg.h" 
 #include "LArIdentifier/LArOnlineID.h"
 
-LArFEBTempAlg::LArFEBTempAlg(const std::string& name, ISvcLocator* pSvcLocator):AthReentrantAlgorithm(name,pSvcLocator){}
+LArFEBTempAlg::LArFEBTempAlg(const std::string& name, ISvcLocator* pSvcLocator):AthCondAlgorithm(name,pSvcLocator){}
 
 // intialize 
 StatusCode LArFEBTempAlg::initialize()

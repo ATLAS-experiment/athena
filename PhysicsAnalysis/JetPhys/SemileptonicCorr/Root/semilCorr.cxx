@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SemileptonicCorr/semilCorr.h"
@@ -8,7 +8,7 @@ using namespace std;
 
 semilCorr::semilCorr(const TString& fIn, const string& /*suffix*/, bool DebugIn){
   m_Debug = DebugIn;
-  m_f = TFile::Open(fIn);
+  m_f.reset (TFile::Open(fIn));
   m_etas.push_back(0);
   m_etas.push_back(0.8);
   m_etas.push_back(1.2);
@@ -35,23 +35,16 @@ semilCorr::semilCorr(const TString& fIn, const string& /*suffix*/, bool DebugIn)
   prefix.push_back("corrIncl");
 
   for(unsigned int j = 0; j<prefix.size(); j++){
-    vector<TH1F*> corr;
+    vector<std::unique_ptr<TH1F> > corr;
     for(unsigned int i = 0; i<etastr.size(); i++){
-      corr.push_back((TH1F*) m_f->Get((prefix[j]+etastr[i]).c_str())); 
+      corr.emplace_back((TH1F*) m_f->Get((prefix[j]+etastr[i]).c_str()));
     }
-    m_histos.push_back(corr);
+    m_histos.push_back(std::move(corr));
   }
 }
 
 
 semilCorr::~semilCorr(){
-  for(unsigned int i = 0; i<m_histos.size();i++){
-    for(unsigned int j = 0; j<m_histos[i].size();j++){
-      delete m_histos[i][j]; // TH2F's that store response info
-    }
-  }
-  m_f->Close();
-  delete m_f;
 }
 
 float semilCorr::getSemilCorrToIncl(const TLorentzVector& jet,
@@ -68,7 +61,7 @@ float semilCorr::getBjetCorrToIncl(const TLorentzVector& jet,
 
 float semilCorr::getSemilCorrToIncl(const TLorentzVector& jet,
                                     const TLorentzVector& mu,
-				    const vector<TH1F*>& histos)
+				    const vector<std::unique_ptr<TH1F> >& histos)
 {
   TLorentzVector jetmu = jet+mu;
   //correction to get things to 1 (or to pttruth), not to reference
@@ -105,7 +98,7 @@ float semilCorr::getSemilCorrToInclSyst(const TLorentzVector& jet,
   return sqrt(systr);
 }
 
-float semilCorr::getResponse(float pt, float eta, const vector<TH1F*>& h)
+float semilCorr::getResponse(float pt, float eta, const vector<std::unique_ptr<TH1F> >& h)
 {
   float usePt = pt;
   int histbin = -1;

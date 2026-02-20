@@ -33,16 +33,16 @@ def StandardJetsInDerivCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
-        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation","QGTagging")
+        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation","QGTagging","numConstit")
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
         ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer","numConstit")
     )
 
     AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(
-        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer","wtransformer","wtransformer_massdec")
+        modifiers = AntiKt10UFOCSSKSoftDrop.modifiers+("toptransformer","wtransformer","wtransformer_massdec","numConstit")
     )
 
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
@@ -103,14 +103,13 @@ def AddSidebandEventShapeCfg(ConfigFlags):
 
     return acc
 
-def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContainer='AntiKt4EMTopo', **kwargs):
+def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow', **kwargs):
     acc = ComponentAccumulator()
     # Decorate if jet passed JVT criteria
-    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtEffToolCfg
+    from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtSelToolCfg
 
-    passJvtTool = acc.popToolsAndMerge(getJvtEffToolCfg(ConfigFlags, jetContainer))
-    passJvtTool.PassJVTKey = "{}Jets.DFCommonJets_passJvt".format(jetContainer)
-    passJvtTool.SuppressOutputDependence = False
+    passJvtTool = acc.popToolsAndMerge(getJvtSelToolCfg(ConfigFlags, "{}Jets".format(jetContainer)))
+    passJvtTool.PassFlagName = "DFCommonJets_passJvt"
     kwargs.setdefault("Decorators", [passJvtTool])
     kwargs.setdefault("JetContainer", "{}Jets".format(jetContainer))
     acc.addEventAlgo(CompFactory.JetDecorationAlg(algName, **kwargs), primary = True)
@@ -124,7 +123,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, prefix="JetCommon", doRNNLoose=True))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="RNNLoose"))
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
 
     # Overlap for EMTopo
@@ -191,7 +190,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         if doEvent_EMTopo:
             jetCleaningTool_legacy = acc.popToolsAndMerge(JetCleaningToolCfg(
                     ConfigFlags, 'JetCleaningTool_'+cleaningLevel+'_EMTopo',
-                    'AntiKt4EMTopo', cleaningLevel, False))
+                    'AntiKt4EMTopoJets', cleaningLevel, False))
             acc.addPublicTool(jetCleaningTool_legacy)
             ecTool_legacy = acc.popToolsAndMerge(EventCleaningToolCfg(
                     ConfigFlags,'EventCleaningTool_'+wp+'_EMTopo', cleaningLevel))

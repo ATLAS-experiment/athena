@@ -4,65 +4,13 @@
 
 #include "TrigT1RPChardware/RPCRXRODDecode.h"
 
-#include <math.h>
 
 #include <iostream>
-
+#include <ios> // for std::hex 
 //----------------------------------------------------------------------------//
 RPCRXRODDecode::RPCRXRODDecode() : BaseObject(Hardware, "RPCRXRODDecode") {
-    // std::cout<<" This is the constructor of RPCRXRODDecode "<<std::endl;
-    //
-    // define RPC data word indentifiers
-    //
-    m_field = 0xf000;  // field map of word identifier
-    // reserved3  = 0xd000; // reserved
-    m_reserved4 = 0xe000;  // reserved
-    // reserved5  = 0xf000; // reserved
-    //
-    // ROD Data Address
-    //
-    m_RODDataAddress = m_noRecord32;
-    //
-    m_noRecord16 = 9999;        // no record content for 16bit words
-    m_noRecord32 = 0xdeadcafe;  // no record content for 32bit words
-    //
-    // the ROD header
-    //
-    headerMarker = m_noRecord32;
-    headerSize = m_noRecord32;
-    formatVersion = m_noRecord32;
-    sourceIdentifier = m_noRecord32;
-    Level1ID = m_noRecord32;
-    BunchXingID = m_noRecord32;
-    Level1Type = m_noRecord32;
-    DetectorEventType = m_noRecord32;
-    SourceReserved = m_noRecord16;
-    SourceModuleType = m_noRecord16;
-    SourceSubDetectorID = m_noRecord16;
-    SourceModuleID = m_noRecord16;
-    //
-    // the RPC identifiers
-    //
-    SectorID = m_noRecord16;
-    PadID = m_noRecord16;
-    CMID = m_noRecord16;
-    //
-    // m_previousRecord initialization
-    //
-    m_previousRecord = Empty;
-    //
-    // the structure control flags
-    //
-    CMFragCheck = m_noRecord16;
-    m_CMFlag = 0;
-    m_PADFlag = 0;
-    m_RXFlag = 0;
-    m_isSLBody = false;
-    m_enablePrintOut = false;
-    m_slFound = false;
-}  // end-of-RPCRXRODDecode::RPCRXRODDecode
-//----------------------------------------------------------------------------//
-RPCRXRODDecode::~RPCRXRODDecode() {}  // distructor
+}  
+
 //----------------------------------------------------------------------------//
 void RPCRXRODDecode::enablePrintOut() { m_enablePrintOut = true; }  // RPCRXRODDecode::enablePrintOut
 //----------------------------------------------------------------------------//

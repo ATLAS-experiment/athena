@@ -10,6 +10,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "PersistentDataModel/AthenaAttributeList.h"
 
 #include "LArRecConditions/LArHVPathology.h"
 #include "LArRecConditions/LArHVPathologiesDb.h"

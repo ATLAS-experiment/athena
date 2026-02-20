@@ -4,8 +4,8 @@
 atlas_subdir( InDetDefectsEmulation )
 
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Hist ROOTNTuple)
 find_package( Acts COMPONENTS Core )
+find_package( ROOT COMPONENTS Hist ROOTNTuple)
 find_package( nlohmann_json )
 find_package( VDT )
 

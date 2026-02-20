@@ -32,7 +32,7 @@ namespace LArProv {
     MASKED        = 0x0800, //Known noisy cell, E set to zero
     DSPCALC       = 0x1000, //Energy from online calculation
     QTPRESENT     = 0x2000, //Quality and time values are valid
-    
+    DEADFEB       = 0x4000, //Front-End board broken or inactive
   };
 
   inline bool test(const uint16_t prov, const LArProvenance check) {

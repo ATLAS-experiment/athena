@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "L1TopoAlgorithms/GenericArrayCreator.h"
 #include "L1TopoEvent/ClusterTOBArray.h"
@@ -38,7 +38,7 @@ TCS::GenericArrayCreator::sort(const InputTOBArray & input, TOBArray & output) {
          return StatusCode::SUCCESS;
       }
       catch(const std::bad_cast& bc) {
-         TCS_EXCEPTION("GenericArrayCreator: neither ClusterArray nor JetArray")
+         TCS_EXCEPTION("GenericArrayCreator: neither ClusterArray nor JetArray");
       }
    }
    return StatusCode::SUCCESS;

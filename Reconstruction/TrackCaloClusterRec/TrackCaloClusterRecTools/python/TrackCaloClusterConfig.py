@@ -31,7 +31,7 @@ def getDecorationKeyFunc(trackParticleName, assocPostfix):
     return lambda d : trackParticleName+'.'+d+assocPostfix
 
 def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEtaName="default",trackParticleName="InDetTrackParticles", assocPostfix = "TCC", onlyPV0Tracks=False):
-    """ Schedule a TrackParticleClusterAssociationAlg in the top sequence, taking as input clusters and tracks defined 
+    """ Schedule a TrackParticleClusterAssociationAlg in the top sequence, taking as input clusters and tracks defined
     by the keys caloClusterName and trackParticleName.
 
     onlyPV0Tracks : calculate associated clusters only for PV0 tracks. Avoids unnecessary calculation (used in the UFO case).
@@ -40,11 +40,9 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
     ###################################
 
 
-    decorKey = getDecorationKeyFunc(trackParticleName,assocPostfix)
-
     components = ComponentAccumulator()
 
-    from TrackToCalo.CaloExtensionBuilderAlgCfg import CaloExtensionBuilderAlgCfg 
+    from TrackToCalo.CaloExtensionBuilderAlgCfg import CaloExtensionBuilderAlgCfg
     caloExtAlg =CaloExtensionBuilderAlgCfg( flags )
     caloExtAlg.TrkPartContainerName = trackParticleName
 
@@ -65,7 +63,7 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
         TrackVertexAssoTool=TrackVertexAssoTool, # will associate trks from PV0 only
         VertexContainerName = "PrimaryVertices" if onlyPV0Tracks else "",
         #VertexContainerName = "PrimaryVertices" if onlyPV0Tracks else "TTVA_AMVFVertices",
-        AssociatedClusterDecorKey = decorKey("AssoClusters"),
+        AssociatedClusterDecorKey = "AssoClusters"+assocPostfix,
         UseCovariance = flags.UFO.UseCov,
         DeltaR = flags.UFO.dR,
 #        OutputLevel=2
@@ -75,7 +73,7 @@ def setupTrackCaloAssoc(flags, caloClusterName="CaloCalTopoClusters",detectorEta
     components.addEventAlgo( trackParticleClusterAssociation )
     return components
 
-    
+
 
 def runTCCReconstruction(flags, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", trackParticleName="InDetTrackParticles",
                          assocPostfix="TCC", doCombined=False, doCharged=False, doNeutral=True, outputTCCName="TrackCaloClusters"):

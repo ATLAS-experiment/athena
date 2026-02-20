@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/SlotSpecificObj.h"
@@ -182,11 +182,12 @@ StatusCode TrigCostSvc::monitorROS(const EventContext& context, robmonitor::ROBD
   {
     tbb::concurrent_hash_map<std::thread::id, AlgorithmIdentifier, ThreadHashCompare>::const_accessor acc;
     bool result = m_threadToAlgMap.find(acc, std::this_thread::get_id());
+    //checking the return type 'result' is sufficient to know whether acc is bound
     if (!result){
       ATH_MSG_WARNING( "Cannot find algorithm on this thread (id=" << std::this_thread::get_id() << "). Request "<< payload <<" won't be monitored");
       return StatusCode::SUCCESS;
     }
-
+    //coverity[FORWARD_NULL:FALSE]
     theAlg = acc->second;
   }
 
@@ -236,6 +237,7 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
     if (m_algStopTime.retrieve(myAi, stopTimeAcessor, msg()).isFailure()) {
       ATH_MSG_ERROR("No end time for '" << myAi.m_caller << "', '" << myAi.m_store << "'"); // Error as we JUST entered this info!
     } else { // retrieve was a success
+      //coverity[FORWARD_NULL:FALSE]
       eventStopTime = stopTimeAcessor->second.microsecondsSinceEpoch();
     }
   }
@@ -249,6 +251,7 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
     if (m_algStartInfo.retrieve(hltSeedingAi, startAcessor, msg()).isFailure()) {
       ATH_MSG_ERROR("No alg info for '" << hltSeedingAi.m_caller << "', '" << hltSeedingAi.m_store << "'"); // Error as we know this info must be present
     } else { // retrieve was a success
+      //coverity[FORWARD_NULL:FALSE]
       eventStartTime = startAcessor->second.m_algStartTime.microsecondsSinceEpoch();
     }
   }
@@ -453,6 +456,7 @@ StatusCode TrigCostSvc::generateTimeoutReport(const EventContext& context, std::
       if (m_algStopTime.retrieve(ai, stopTimeAcessor, msg()).isFailure()) {
         ATH_MSG_DEBUG("No end time for '" << ai.m_caller << "', '" << ai.m_store << "'");
       } else { // retrieve was a success
+        //coverity[FORWARD_NULL:FALSE]
         stopTime = stopTimeAcessor->second.microsecondsSinceEpoch();
       }
       // stopTimeAcessor goes out of scope - lock released

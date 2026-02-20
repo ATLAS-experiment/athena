@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/ConfigurableDb.py
 # Author: Sebastien Binet (binet@cern.ch)
@@ -23,8 +23,6 @@ _transtable = str.maketrans('<>&*,: ().', '__rp__s___')
 
 ### helpers ------------------------------------------------------------------
 def _fillConfDict():
-   global cfgDb
-
    nFiles = loadConfigurableDb()
    cfgDb.msg.info( "Read module info for %d configurables from %d genConfDb files",
              len(cfgDb), nFiles )
@@ -141,8 +139,6 @@ def loadConfigurableDb():
    import os
    from os.path import join as path_join
 
-   global cfgDb
-
    cfgDb.msg.debug( "loading confDb files..." )
    nFiles = 0
    pathlist = os.getenv("LD_LIBRARY_PATH", "").split(os.pathsep)
@@ -185,8 +181,6 @@ def unloadConfigurableDb():
     - clear the configurable Db
    """
 
-   global cfgDb
-
    confModules = set( [ cfgDb.get(k).get('module')  for k in cfgDb ] +
                        [ cfgDb.get(k).get('package') for k in cfgDb ] )
    cfgDb.clear()
@@ -208,8 +202,6 @@ def unloadConfigurableDb():
 def getConfigurable( className, requester = '', assumeCxxClass = True ):
    """Localize and load a Configurable class based on the (C++) class name.
    """
-
-   global cfgDb
 
  # fill the configurable dict, first time only
    try:

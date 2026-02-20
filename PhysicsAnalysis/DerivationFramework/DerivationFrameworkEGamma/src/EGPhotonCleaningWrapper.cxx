@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// EGPhotonCleaningWrapper.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
-//
 
 #include "DerivationFrameworkEGamma/EGPhotonCleaningWrapper.h"
 #include "xAODEgamma/Photon.h"
@@ -14,29 +10,13 @@
 
 namespace DerivationFramework {
 
-EGPhotonCleaningWrapper::EGPhotonCleaningWrapper(const std::string& t,
-                                                 const std::string& n,
-                                                 const IInterface* p)
-  : base_class(t, n, p)
-  , m_sgName("DFCommonPhotonsCleaning")
-{
-  declareProperty("StoreGateEntryName", m_sgName);
-}
-
 StatusCode
 EGPhotonCleaningWrapper::initialize()
 {
-  if (m_sgName.empty()) {
-    ATH_MSG_ERROR(
-      "No SG name provided for the output of EGPhotonCleaningWrapper");
-    return StatusCode::FAILURE;
-  }
   if (!m_fudgeMCTool.name().empty()) {
     CHECK(m_fudgeMCTool.retrieve());
   }
   ATH_CHECK(m_containerName.initialize());
-  m_decoratorPass = m_containerName.key() + "." + m_sgName;
-  m_decoratorPassDelayed = m_containerName.key() + "." + m_sgName + "NoTime";
   ATH_CHECK(m_decoratorPass.initialize());
   ATH_CHECK(m_decoratorPassDelayed.initialize());
 

@@ -188,9 +188,12 @@ std::string OnlineEventDisplaysSvc::getStreamName(){
 void OnlineEventDisplaysSvc::createWriteableDir(const std::string& directory, gid_t zpgid){
 
   const char* char_dir = directory.c_str();
-
+  //Time of Check, Time of Use
+  //coverity[TOCTOU]
   if (access(char_dir, F_OK) == 0) {
     struct stat directoryStat;
+    //Time of Check, Time of Use
+    //coverity[TOCTOU]
     if (stat(char_dir, &directoryStat) == 0 && S_ISDIR(directoryStat.st_mode) &&
 	access(char_dir, W_OK) == 0) {
       ATH_MSG_DEBUG("Going to write file to existing directory: " << directory);
@@ -246,7 +249,7 @@ StatusCode OnlineEventDisplaysSvc::initialize(){
     m_CheckPair = false;
   }
   incSvc->addListener( this, "BeginEvent");
-  incSvc->addListener( this, "StoreCleared");
+  incSvc->addListener( this, "EndEvent");
 
   ATH_CHECK( m_evt.initialize() );
 
@@ -264,7 +267,7 @@ void OnlineEventDisplaysSvc::handle( const Incident& incident ){
   if ( incident.type() == IncidentType::BeginEvent && incident.source() == "BeginIncFiringAlg" ){
     beginEvent();
   }
-  if ( incident.type() == "StoreCleared" && incident.source() == "StoreGateSvc" ){
+  if (incident.type() == "EndEvent" && incident.source() == "EndIncFiringAlg"){
     endEvent();
   }
 }

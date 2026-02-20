@@ -184,6 +184,7 @@ def addCommonSimTrfArgs(parser):
                         type=argFactory(argString), help='Physics List to be used within Geant4', group='CommonSim')
     parser.add_argument('--useISF',
                         type=argFactory(argBool), help='Use ISF (only will only work from 17.6.0 onwards)', group='CommonSim')
+    parser.add_argument('--useG4Workers', type=argFactory(argBool), help='Run Geant4 workers in separate thread pool managed by Geant4', group='CommonSim')
     parser.add_argument('--randomSeed', nargs='+', metavar='substep:seed',
                         type=argFactory(argSubstepInt), help='Random seed offset', group='CommonSim')
     parser.add_argument('--enableLooperKiller', nargs='+', metavar='substep:LooperKiller',

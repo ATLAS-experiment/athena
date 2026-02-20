@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -7,6 +7,7 @@
 #include "RVersion.h"
 
 #include "TestDriver.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
 #include "PersistentDataModel/Token.h"
 
@@ -29,6 +30,7 @@ void testTechnology( TestDriver& driver, const pool::DbType& tech, bool commit_e
 
 int main( int, char** )
 {
+   Athena::getMessageSvcQuiet = true;
    try {
       std::cout << "[OVAL] Creating the test driver." << std::endl;
       TestDriver driver;

@@ -120,6 +120,15 @@ def GfexInputMonitoringConfig(flags):
                            fillGroup = "SatgTowers",
                            type='TProfile2D',
                            xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+    helper.defineHistogram('TowerEta,TowerPhi;h_EtMismatchSCell', title='gFEX tower Et mismatch - SCells;#eta;#phi',
+                           fillGroup = "errorsSCell",
+                           type='TH2D',
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+    helper.defineHistogram('TowerEta,TowerPhi;h_EtMismatchTile', title='gFEX tower Et mismatch - Tile;#eta;#phi',
+                           fillGroup = "errorsTile",
+                           type='TH2D',
+                           xbins=eta_bins, ybins=32,ymin=-3.2,ymax=3.2)
+   
 
 
 

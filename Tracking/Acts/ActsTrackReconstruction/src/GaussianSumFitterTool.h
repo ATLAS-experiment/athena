@@ -26,7 +26,7 @@
 
 // PACKAGE
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/IFitterTool.h"
@@ -159,7 +159,7 @@ private:
   const Acts::Logger& logger() const;
 
  private:
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
   ToolHandle<ActsTrk::IActsToTrkConverterTool> m_ATLASConverterTool{this, "ATLASConverterTool", ""};
   ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool {this, "SummaryTool", "", "ToolHandle for track summary tool"};
@@ -193,14 +193,12 @@ private:
 
   /// Type erased track fitter function.
   using Fitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::Navigator>,
-                                                        Acts::AtlasBetheHeitlerApprox<6, 5>,
                                                         ActsTrk::MutableTrackStateBackend >;
 
   std::unique_ptr<ActsTrk::detail::TrkMeasurementCalibrator> m_calibrator {nullptr};
   std::unique_ptr<Fitter> m_fitter {nullptr};
 
   using DirectFitter = Acts::GaussianSumFitter< Acts::Propagator<Acts::MultiEigenStepperLoop<>, Acts::DirectNavigator>,
-            Acts::AtlasBetheHeitlerApprox<6, 5>,
             ActsTrk::MutableTrackStateBackend >;
   std::unique_ptr<DirectFitter> m_directFitter {nullptr};
 

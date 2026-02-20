@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
@@ -218,27 +218,6 @@ namespace InDetDD {
         m_gasType = activeGasType;
     }
 
-    // Register the call back for this key and the corresponding level in
-    // in the hierarchy.
-    // DEPRECATED
-    void TRT_DetectorManager::addKey ATLAS_NOT_THREAD_SAFE (const std::string & key, int level) // Thread unsafe m_detStore->regFcn (callback) is used.
-    {
-        if(msgLvl(MSG::DEBUG))
-            msg(MSG::DEBUG) << "Registering alignmentCallback with key " << key << ", at level " << level
-            << endmsg;
-
-        const DataHandle<AlignableTransform> transformCollection;
-        if (m_detStore->regFcn(&TRT_DetectorManager::alignmentCallback, this, transformCollection, key).isFailure()) {
-          ATH_MSG_ERROR("Cannot register callback with DetectorStore");
-        }
-        addKey(key, level, InDetDD::other);
-    }
-
-    void TRT_DetectorManager::addKey(const std::string & key, int level, FrameType frame)
-    {
-        addChannel(key, level, frame);
-    }
-
     void TRT_DetectorManager::addAlignableTransform (int level,
                                                      const Identifier &id,
                                                      GeoAlignableTransform *transform,
@@ -417,9 +396,9 @@ namespace InDetDD {
     }
 
 
-    StatusCode TRT_DetectorManager::alignmentCallback( IOVSVC_CALLBACK_ARGS_P(I,keys) )
+  StatusCode TRT_DetectorManager::alignmentCallback()
     {
-        return align(I, keys);
+        return align();
     }
 
 

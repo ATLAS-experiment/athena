@@ -7,6 +7,8 @@
 
 // System include(s):
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 // xAOD include(s):
 #ifdef XAOD_STANDALONE
@@ -160,7 +162,13 @@ namespace asg {
          initialize().ignore();
       }
       if (m_event && m_event.load()) {
-         m_event.load()->keys<T>(vkeys, true); // true tells TEvent to scan metadata
+         if (m_event.load()->metaKeys<T>(vkeys).isFailure()) {
+            std::ostringstream msg;
+            msg << META_ERROR_SOURCE
+                << "Failed to retrieve metadata keys for type "
+                << SG::normalizedTypeinfoName(typeid(T));
+            throw std::runtime_error(msg.str());
+         }
       }
    }
 

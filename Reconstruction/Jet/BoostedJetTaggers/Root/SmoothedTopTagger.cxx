@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
@@ -8,8 +8,8 @@ SmoothedTopTagger::SmoothedTopTagger( const std::string& name ) :
   JSSTaggerBase( name )
 {
   // minimum and maximum pT of jets to tag
-  declareProperty( "JetPtMin",              m_jetPtMin = 350.0e3);
-  declareProperty( "JetPtMax",              m_jetPtMax = 3000.0e3);
+  declareProperty( "JetPtMin", m_jetPtMin = 350.0e3);
+  declareProperty( "JetPtMax", m_jetPtMax = 3000.0e3);
 
   // cut functions that describe the tagger cuts that will be made
   declareProperty( "VarCutFuncs", m_varCutExprs={}, "") ;
@@ -28,18 +28,18 @@ StatusCode SmoothedTopTagger::initialize() {
     /// Get configReader
     ATH_CHECK( getConfigReader() );
 
-    TString prefix = "";
+    std::string prefix = "";
     if ( ! m_wkpt.empty() ) prefix = m_wkpt+".";
 
     // read the number of variables for tagger from file
-    m_numTaggerVars = std::stoi(m_configReader.GetValue( prefix+"NumVars", ""));
+    m_numTaggerVars = std::stoi(m_configReader.GetValue( (prefix+"NumVars").c_str(), ""));
 
     ATH_MSG_DEBUG("Number of variables used by tagger is " << std::to_string(m_numTaggerVars));
 
     std::string varName, varCutExpr;
     for (int i = 1; i <= m_numTaggerVars; i++) {
       // read the cut name corresponding to this variable
-      varName = m_configReader.GetValue( prefix+"Var"+std::to_string(i), "");
+      varName = m_configReader.GetValue( (prefix+"Var"+std::to_string(i)).c_str(), "");
 
       if (varName.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << "!") ; 
@@ -54,7 +54,7 @@ StatusCode SmoothedTopTagger::initialize() {
       m_varCutNames.push_back(varName);
 
       // read cut expression
-      varCutExpr = m_configReader.GetValue( prefix+m_varCutNames.back()+"Cut", "");
+      varCutExpr = m_configReader.GetValue( (prefix+m_varCutNames.back()+"Cut").c_str(), "");
 
       if (varCutExpr.empty()) {
         ATH_MSG_ERROR("Config file does not specify Var" << std::to_string(i) << " cut!") ; 
@@ -120,27 +120,30 @@ StatusCode SmoothedTopTagger::initialize() {
   // initialize decorators as decorationName+_decorator
   ATH_MSG_INFO( "Additional decorators that will be attached to jet :" );
   
-  if (std::find(m_varCutNames.begin(), m_varCutNames.end(), "Mass") != m_varCutNames.end() || std::find(m_varCutNames.begin(), m_varCutNames.end(), "mass") != m_varCutNames.end()) {
-    m_acceptInfo.addCut( "PassMass"       , "mJet > mCut"  );
-    // initialize decorators for passing cuts
-    // this uses m_decPassMassKey inherited from JSSTaggerBase
-    m_decPassMassKey = m_containerName + "." + m_decorationName + "_" + m_decPassMassKey.key();
-    ATH_CHECK( m_decPassMassKey.initialize() );
-    m_dec_mcut = m_containerName + "." + m_decorationName + "_" + m_dec_mcut.key();
-    ATH_CHECK( m_dec_mcut.initialize() );
-    ATH_MSG_INFO( "  " << m_dec_mcut.key() << " : mass cut" );
-    ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut");
-  }
+  m_acceptInfo.addCut( "PassMass"       , "mJet > mCut"  );
+  // initialize decorators for passing cuts
+  // this uses m_decPassMassKey inherited from JSSTaggerBase
+  ATH_CHECK( m_decPassMassKey.initialize() );
+  m_dec_mcut = m_containerName + "." + m_decorationName + "_" + m_dec_mcut.key();
+  ATH_CHECK( m_dec_mcut.initialize() );
+  ATH_MSG_INFO( "  " << m_dec_mcut.key() << " : mass cut" );
+  ATH_MSG_INFO( "  " << m_decPassMassKey.key() << " : pass mass cut");
 
-  if (std::find(m_varCutNames.begin(), m_varCutNames.end(), "Sphericity") != m_varCutNames.end() || std::find(m_varCutNames.begin(), m_varCutNames.end(), "sphericity") != m_varCutNames.end()) {
-    m_acceptInfo.addCut( "PassSphericity" , "SphericityJet > SphericityCut"   );
-    m_decPassSphericityKey = m_containerName + "." + m_decorationName + "_" + m_decPassSphericityKey.key();
-    ATH_CHECK( m_decPassSphericityKey.initialize() );
-    m_dec_sphericitycut = m_containerName + "." + m_decorationName + "_" + m_dec_sphericitycut.key();
-    ATH_CHECK( m_dec_sphericitycut.initialize() );
-    ATH_MSG_INFO( "  " << m_dec_sphericitycut.key() << " : Sphericity cut" );
-    ATH_MSG_INFO( "  " << m_decPassSphericityKey.key() << " : pass Sphericity cut" );
-  }
+  m_acceptInfo.addCut( "PassSphericity" , "SphericityJet > SphericityCut"   );
+  m_decPassSphericityKey = m_containerName + "." + m_decorationName + "_" + m_decPassSphericityKey.key();
+  ATH_CHECK( m_decPassSphericityKey.initialize() );
+  m_dec_sphericitycut = m_containerName + "." + m_decorationName + "_" + m_dec_sphericitycut.key();
+  ATH_CHECK( m_dec_sphericitycut.initialize() );
+  ATH_MSG_INFO( "  " << m_dec_sphericitycut.key() << " : Sphericity cut" );
+  ATH_MSG_INFO( "  " << m_decPassSphericityKey.key() << " : pass Sphericity cut" );
+
+  m_acceptInfo.addCut( "PassScore"       , "jet score > ScoreCut"  );
+  m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
+  ATH_CHECK( m_decPassScoreKey.initialize() );
+  m_dec_scorecut = m_containerName + "." + m_decorationName + "_" + m_dec_scorecut.key();
+  ATH_CHECK( m_dec_scorecut.initialize() );
+  ATH_MSG_INFO( "  " << m_dec_scorecut.key() << " : score cut" );
+  ATH_MSG_INFO( "  " << m_decPassScoreKey.key() << " : pass score cut");
 
   /// Call base class initialize
   ATH_CHECK( JSSTaggerBase::initialize() );
@@ -151,9 +154,22 @@ StatusCode SmoothedTopTagger::initialize() {
   return StatusCode::SUCCESS;
 } // end initialize()
 
-StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
+StatusCode SmoothedTopTagger::decorate( const xAOD::JetContainer& jets ) const {
 
   ATH_MSG_DEBUG( "Obtaining smoothed top result" );
+
+  // creat decorators handlers for tagger decision
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidKinRange(m_decValidKinRangeKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decValidJetContent(m_decValidJetContentKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
+
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decMCut(m_dec_mcut);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassMass(m_decPassMassKey);
+  SG::ReadDecorHandle<xAOD::JetContainer, float> readSphericity(m_readSphericityKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decSphericityCut(m_dec_sphericitycut);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassSphericity(m_decPassSphericityKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> decScoreCut(m_dec_scorecut);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> decPassScore(m_decPassScoreKey);
 
   /// Create asg::AcceptData object
   asg::AcceptData acceptData( &m_acceptInfo );
@@ -161,82 +177,102 @@ StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
   /// Reset the AcceptData cut results
   ATH_CHECK( resetCuts( acceptData ) );
 
-  /// Check basic kinematic selection
-  ATH_CHECK( checkKinRange( jet, acceptData ) );
-
-  // get the relevant attributes of the jet
-  // mass and pt - note that this will depend on the configuration of the calibration used
-  float jet_pt   = jet.pt()/1000.0;
-  float jet_mass = jet.m()/1000.0;
-
   /// Calculate NSubjettiness and ECF ratios
-  calculateJSSRatios(jet);
+  decorateJSSRatios(jets);
 
-  // configure decorators from JSSTaggerBase class
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decValidJetContent(m_decValidJetContentKey);
-  SG::WriteDecorHandle<xAOD::JetContainer, bool> decTagged(m_decTaggedKey);
+  // loop over jets
+  for(const xAOD::Jet* jet : jets){
 
-  // initialize for use in other statements
-  bool passCuts = true;
-  float cut_var;
-  for (int i = 0; i < m_numTaggerVars; i++) {
-    // evaluate the cut value on this variable
-    cut_var = m_varCutFuncs[i]->Eval(jet_pt);
+    /// Check basic kinematic selection
+    bool pass_kin_range = passKinRange(*jet);
+    decValidKinRange(*jet) = pass_kin_range;
 
-    // check which variable this cut corresponds to and make the 
-    // selection
-    // when more taggers are implemented add the variables required
-    // into this if-else ladder
-    if (m_varCutNames[i] == "Mass" || m_varCutNames[i] == "mass") {
-      // decorators for jet after applying cuts
-      SG::WriteDecorHandle<xAOD::JetContainer, float> decMCut(m_dec_mcut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassMass(m_decPassMassKey);
+    // get the relevant attributes of the jet
+    // mass and pt - note that this will depend on the configuration of the calibration used
+    float jet_pt   = jet -> pt()/1000.0;
+    float jet_mass = jet -> m()/1000.0;
 
-      // decorate cut
-      decMCut(jet) = cut_var;
+    // initialize for use in other statements
+    bool passCuts = true;
+    float cut_var;
+    for (int i = 0; i < m_numTaggerVars; i++) {
+      // evaluate the cut value on this variable
+      cut_var = m_varCutFuncs[i]->Eval(jet_pt);
 
-      // make cut and decorate on jet
-      if(jet_mass > cut_var) {
-        acceptData.setCutResult("PassMass",true);
+      // check which variable this cut corresponds to and make the 
+      // selection
+      // when more taggers are implemented add the variables required
+      // into this if-else ladder
+      if (m_varCutNames[i] == "Mass" || m_varCutNames[i] == "mass") {
+        // decorate cut
+        decMCut(*jet) = cut_var;
+
+        // make cut and decorate on jet
+        if(jet_mass > cut_var) {
+          acceptData.setCutResult("PassMass",true);
+        }
+        decPassMass(*jet) = acceptData.getCutResult("PassMass");
+        passCuts = passCuts && acceptData.getCutResult("PassMass");
       }
-      decPassMass(jet) = acceptData.getCutResult("PassMass");
-      passCuts = passCuts && acceptData.getCutResult("PassMass");
+      else if (m_varCutNames[i] == "Sphericity" || m_varCutNames[i] == "sphericity") {
+        float sphericity = 0;
+
+        // decorate cut
+        decSphericityCut(*jet) = cut_var;
+
+        // read sphericity variable
+        if ( !readSphericity.isAvailable() ) {
+          ATH_MSG_VERBOSE( "The Sphericity variable is not available in your file" );
+          acceptData.setCutResult("ValidJetContent", false);
+          decValidJetContent(*jet) = false;
+        } else {
+          // get sphericity only if it is decorated
+          sphericity = readSphericity(*jet);  
+        }
+
+        // make cut and decorate results
+        if (sphericity > cut_var) {
+          acceptData.setCutResult("PassSphericity", true);
+        }
+        decPassSphericity(*jet) = acceptData.getCutResult("PassSphericity");
+        // incorporate cut into complete set of selections
+        passCuts = passCuts && acceptData.getCutResult("PassSphericity");
+      }
+      else if (m_varCutNames[i] == "Score" || m_varCutNames[i] == "score") {
+        // get score value
+        static const SG::AuxElement::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
+        float jet_score = Score(*jet);
+
+        // decorate cut
+        decScoreCut(*jet) = cut_var;
+
+        // print out
+        ATH_MSG_DEBUG( "Variable value: score = " << jet_score);
+        ATH_MSG_DEBUG( "Variable cut: score = " << cut_var);
+
+        // make cut and decorate on jet
+        if(jet_score > cut_var) {
+          acceptData.setCutResult("PassScore",true);
+        }
+        decPassScore(*jet) = acceptData.getCutResult("PassScore");
+        passCuts = passCuts && acceptData.getCutResult("PassScore");
+      }
+
     }
-    else if (m_varCutNames[i] == "Sphericity" || m_varCutNames[i] == "sphericity") {
-      float sphericity = 0;
 
-      // setup read/write handles for sphericity cut decorations & reading variables
-      SG::ReadDecorHandle<xAOD::JetContainer, float> readSphericity(m_readSphericityKey);
-      SG::WriteDecorHandle<xAOD::JetContainer, float> decSphericityCut(m_dec_sphericitycut);
-      SG::WriteDecorHandle<xAOD::JetContainer, bool> decPassSphericity(m_decPassSphericityKey);
+    // decorate jets with tagging information and whether content is valid
+    decValidJetContent(*jet) = acceptData.getCutResult("ValidJetContent");
+    decTagged(*jet) = passCuts;
 
-      // decorate cut
-      decSphericityCut(jet) = cut_var;
-
-      // read sphericity variable
-      if ( !readSphericity.isAvailable() ) {
-        ATH_MSG_VERBOSE( "The Sphericity variable is not available in your file" );
-        acceptData.setCutResult("ValidJetContent", false);
-        decValidJetContent(jet) = false;
-      } else {
-        // get sphericity only if it is decorated
-        sphericity = readSphericity(jet);  
-      }
-
-      // make cut and decorate results
-      if (sphericity > cut_var) {
-        acceptData.setCutResult("PassSphericity", true);
-      }
-      decPassSphericity(jet) = acceptData.getCutResult("PassSphericity");
-      // incorporate cut into complete set of selections
-      passCuts = passCuts && acceptData.getCutResult("PassSphericity");
-    }
   }
-
-  // decorate jets with tagging information and whether content is valid
-  decValidJetContent(jet) = acceptData.getCutResult("ValidJetContent");
-  decTagged(jet) = passCuts;
 
   return StatusCode::SUCCESS;
 }
 
+StatusCode SmoothedTopTagger::tag( const xAOD::Jet& jet ) const {
+
+    ATH_MSG_DEBUG("Obtaining tag result   " << jet.pt() << "   " << jet.m());
+
+  return StatusCode::SUCCESS;
+
+}

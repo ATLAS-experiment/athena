@@ -68,10 +68,10 @@ namespace ActsTrk::detail::FitterHelperFunctions {
       auto subspaceHelper = state.template projectorSubspaceHelper<kMeasurementSize>();
 
       typename Acts::TrackStateTraits<kMeasurementSize, true>::Calibrated calibrated{
-        state.template calibrated<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
+        state.template calibrated<Acts::kMeasurementSizeMax>().data()};
       
       typename Acts::TrackStateTraits<kMeasurementSize, true>::CalibratedCovariance
-        calibratedCovariance{state.template calibratedCovariance<Acts::MultiTrajectoryTraits::MeasurementSizeMax>().data()};
+        calibratedCovariance{state.template calibratedCovariance<Acts::kMeasurementSizeMax>().data()};
       
       // Take the projector (measurement mapping function)
       // TODO use the subspace helper directly

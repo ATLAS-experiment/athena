@@ -4,6 +4,7 @@ from AthenaCommon import Logging
 from ..powheg_V2 import PowhegV2
 from ..external import ExternalMadSpin
 import os
+import glob
 
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("PowhegControl")
@@ -49,7 +50,7 @@ class ttj_MiNNLO(PowhegV2):
 
         # defining ttjMiNNLOPATH environment variable to bypass file path problems in fortran code
         # this is definitly a hack, see discussion in AGENE-2055
-        os.environ['ttjMiNNLOPATH'] = os.path.dirname(self.executable)
+        os.environ['ttjMiNNLOPATH'] = os.path.dirname(os.path.dirname(self.executable))
         logger.info("ttjMiNNLOPATH defined as = {0}".format(os.getenv('ttjMiNNLOPATH')))
 
         # Add algorithms to the sequence
@@ -70,7 +71,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("bornonly")
         self.add_keyword("bornsuppfact", -1)
         self.add_keyword("bornzerodamp")
-        self.add_keyword("bottommass")
+        self.add_keyword("bottommass",0)
         self.add_keyword("bottomthr")
         self.add_keyword("bottomthrpdf")
         self.add_keyword("charmthr")
@@ -136,6 +137,7 @@ class ttj_MiNNLO(PowhegV2):
         self.add_keyword("ncall2", 20000000)
         self.add_keyword("ncall2rm")
         self.add_keyword("nubound", 5000000)
+        self.add_keyword("bwcutoff",50)
         self.add_keyword("par_2gsupp")
         self.add_keyword("par_diexp")
         self.add_keyword("par_dijexp")
@@ -201,7 +203,6 @@ class ttj_MiNNLO(PowhegV2):
         # Accordingly, MadSpin will run or not run.
         if "MadSpin" in self.decay_mode:
             self.externals["MadSpin"].parameters_by_keyword("powheg_top_decays_enabled")[0].value = False
-            self.externals["MadSpin"].parameters_by_keyword("MadSpin_model")[0].value = "loop_sm-no_b_mass"
             self.externals["MadSpin"].parameters_by_keyword("MadSpin_nFlavours")[0].value = 5
 
         # Calculate appropriate decay mode numbers
@@ -209,3 +210,20 @@ class ttj_MiNNLO(PowhegV2):
         if self.decay_mode == "t t~ > semileptonic":
             # Parameter semileptonic must be set to 1 to actually get semileptonic decays, because the topdecaymode=11111 also allows fully hadronic decays (with one up and one charm quark)
             self.parameters_by_keyword("semileptonic")[0].value = 1
+
+    def stage_is_completed(self, stage):
+        """! Specialised version for this process, which has different grids file patterns than other V2 processes."""
+        if stage == 1:
+            required_files = ["pwg*xg*.dat"]
+        elif stage == 2:
+            required_files = ["pwg-????-stat.dat", "pwg-st2-????-stat.dat", "pwggrid*.dat"]
+        elif stage == 3:
+            required_files = ["pwg-st3-????-stat.dat", "pwgubound*.dat"]
+        else:
+            return False
+
+        # Check that required files have been found
+        for required_file in required_files:
+            if not glob.glob(required_file):
+                return False
+        return True

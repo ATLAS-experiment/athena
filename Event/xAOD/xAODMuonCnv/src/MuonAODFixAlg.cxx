@@ -90,10 +90,12 @@ namespace xAOD {
     static const SG::Accessor<ElementLink<xAOD::TruthParticleContainer> > truthParticleLinkAcc ("truthParticleLink");
     static const SG::Accessor<int> truthTypeAcc ("truthType");
     static const SG::Accessor<int> truthOriginAcc ("truthOrigin");
+    static const SG::Accessor<unsigned int> truthClassificationAcc ("truthClassification");
     if (truthParticleLinkAcc.isAvailable (*tp)) {
       truthParticleLinkAcc (muon) = truthParticleLinkAcc (*tp);
       truthTypeAcc (muon) = truthTypeAcc (*tp);
       truthOriginAcc (muon) = truthOriginAcc (*tp);
+      truthClassificationAcc (muon) = truthClassificationAcc (*tp);
     }
   }
   

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/MdtCalibDbAlg.h"
+#include "MdtCalibDbAlg.h"
 
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "AthenaKernel/IIOVDbSvc.h"
@@ -46,8 +46,7 @@ using CorrectionPtr = MdtFullCalibData::CorrectionPtr;
 using TubeContainerPtr = MdtFullCalibData::TubeContainerPtr;
 using RegionGranularity = MdtCalibDataContainer::RegionGranularity;
 
-MdtCalibDbAlg::MdtCalibDbAlg(const std::string &name, ISvcLocator *pSvcLocator) :
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+namespace Muon {
 
 StatusCode MdtCalibDbAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());
@@ -89,8 +88,11 @@ StatusCode MdtCalibDbAlg::initialize() {
     ATH_CHECK(m_writeKey.initialize());
     ATH_CHECK(m_readKeyDCS.initialize(m_create_b_field_function && !m_readKeyDCS.empty()));
     
-    if (m_useNewGeo) ATH_CHECK(detStore()->retrieve(m_r4detMgr));
-    else ATH_CHECK(detStore()->retrieve(m_detMgr));
+    if (m_useNewGeo) {
+        ATH_CHECK(detStore()->retrieve(m_r4detMgr));
+    } else {
+        ATH_CHECK(detStore()->retrieve(m_detMgr));
+    }
     return StatusCode::SUCCESS;
 }
  StatusCode MdtCalibDbAlg::declareDependency(const EventContext& ctx, 
@@ -99,7 +101,7 @@ StatusCode MdtCalibDbAlg::initialize() {
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
     for (const SG::ReadCondHandleKey<CondAttrListCollection>& key : {m_readKeyTube, m_readKeyRt}) {
         if (key.empty()) continue;
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{key, ctx};
+        SG::ReadCondHandle readHandle{key, ctx};
         if (!readHandle.isValid()) {
             ATH_MSG_FATAL("Failed to retrieve conditions object "<<readHandle.fullKey());
             return StatusCode::FAILURE;
@@ -108,8 +110,10 @@ StatusCode MdtCalibDbAlg::initialize() {
         ATH_MSG_INFO("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdoRt->size()= " << readHandle->size());
         ATH_MSG_INFO("Range of input is " << readHandle.getRange());
     }
-    if (m_readKeyDCS.empty()) return StatusCode::SUCCESS;
-    SG::ReadCondHandle<MdtCondDbData> readHandle{m_readKeyDCS, ctx};
+    if (m_readKeyDCS.empty()) {
+        return StatusCode::SUCCESS;
+    }
+    SG::ReadCondHandle readHandle{m_readKeyDCS, ctx};
     if (!readHandle.isValid()) {
         ATH_MSG_FATAL("Failed to retrieve conditions object "<<m_readKeyDCS.fullKey());
         return StatusCode::FAILURE;
@@ -121,7 +125,7 @@ StatusCode MdtCalibDbAlg::initialize() {
 }
 StatusCode MdtCalibDbAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG("execute " << name());
-    SG::WriteCondHandle<MuonCalib::MdtCalibDataContainer> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
                                     << ". In theory this should not be called, but may happen"
@@ -386,7 +390,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
     ATH_MSG_DEBUG("loadRt " << name());
 
     // Read Cond Handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandleRt{m_readKeyRt, ctx};
+    SG::ReadCondHandle readHandleRt{m_readKeyRt, ctx};
     if (!readHandleRt.isValid()) {
         ATH_MSG_ERROR("readCdoRt==nullptr");
         return StatusCode::FAILURE;
@@ -551,7 +555,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
     ATH_MSG_DEBUG("Initializing " << loadedRtRel.size()<< " b-field functions");
     const MdtCondDbData* condDbData{nullptr};
     if (!m_readKeyDCS.empty()) {
-        SG::ReadCondHandle<MdtCondDbData> readCondHandleDb{m_readKeyDCS, ctx};
+        SG::ReadCondHandle readCondHandleDb{m_readKeyDCS, ctx};
         /// The Mdt conditions data is only of value if it's also DCS constants
         if (readCondHandleDb->hasDCS()) {
             condDbData = readCondHandleDb.cptr();
@@ -762,7 +766,7 @@ StatusCode MdtCalibDbAlg::loadTube(const EventContext& ctx, MuonCalib::MdtCalibD
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
 
     // Read Cond Handle
-    SG::ReadCondHandle<CondAttrListCollection> readHandleTube{m_readKeyTube, ctx};
+    SG::ReadCondHandle readHandleTube{m_readKeyTube, ctx};
     // read new-style format 2020
     nlohmann::json t0CalibJson = nlohmann::json::array();
     if (m_newFormat2020) {
@@ -904,4 +908,5 @@ std::unique_ptr<MuonCalib::RtResolutionLookUp> MdtCalibDbAlg::getRtResolutionInt
       }
     }
     return std::make_unique<MuonCalib::RtResolutionLookUp>(std::move(res_param));
+}
 }

@@ -21,7 +21,6 @@
 class DataHeaderElementCnv_p4 {
 public:
    DataHeaderElementCnv_p4();
-   virtual ~DataHeaderElementCnv_p4();
 
    void persToTrans(const DataHeaderElement_p4* pers, DataHeaderElement* trans, const std::vector<std::string>& map);
    void transToPers(const DataHeaderElement* trans, DataHeaderElement_p4* pers, std::vector<std::string>& map);
@@ -35,7 +34,6 @@ friend class DataHeaderCnv_p4;
 class DataHeaderCnv_p4 {
 public:
    DataHeaderCnv_p4();
-   virtual ~DataHeaderCnv_p4();
 
    DataHeader* createTransient(const DataHeader_p4* persObj);
    void persToTrans(const DataHeader_p4* pers, DataHeader* trans);

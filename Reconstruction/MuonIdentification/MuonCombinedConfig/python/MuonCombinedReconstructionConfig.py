@@ -523,10 +523,11 @@ def CombinedMuonTrackTruthAlgsCfg(flags):
     result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
                                                 TrackCollectionNames=trk_cols))
 
-    for i in range(len(trk_cols)):
-        from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
-        result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i]))
-        result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
+    if(not flags.Muon.scheduleActsReco):
+        for i in range(len(trk_cols)):
+            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+            result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i])) 
+            result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
                                               TrackParticleName=particle_cols[i]))
 
     return result
@@ -780,7 +781,8 @@ def MuonCombinedReconstructionCfg(flags):
     if flags.Input.isMC:
         result.merge(CombinedMuonTrackTruthAlgsCfg(flags))
         result.merge(CombinedMuonTruthAssociationAlgsCfg(flags))
-        if 'MuonSegments' not in flags.Input.Collections:
+        if not flags.Muon.usePhaseIIGeoSetup and  \
+           "MuonSegments" not in flags.Input.Collections:
             # Segment truth association decorations, but only if they are not already there (e.g. when running on ESDs)
             from MuonConfig.MuonTruthAlgsConfig import MuonSegmentTruthAssociationAlgCfg
             result.merge(MuonSegmentTruthAssociationAlgCfg(flags))
@@ -802,7 +804,7 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Input.Files = [
-        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q445_unslimmedTracks.pool.root']
+        '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonCombinedConfig/myESD_q454_unslimmedTracks.pool.root']
     from MuonConfig.MuonConfigUtils import configureCondTag
     configureCondTag(flags)
    

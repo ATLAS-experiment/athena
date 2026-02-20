@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include <utility>
-#include "eflowRec/PFLeptonSelector.h"
+#include "PFLeptonSelector.h"
 
 PFLeptonSelector::PFLeptonSelector(const std::string& name, ISvcLocator* pSvcLocator):
   AthReentrantAlgorithm(name, pSvcLocator)

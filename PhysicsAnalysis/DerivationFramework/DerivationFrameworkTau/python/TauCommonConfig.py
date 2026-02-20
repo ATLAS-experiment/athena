@@ -1,21 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def AddTauAugmentationCfg(flags, **kwargs):
-
-    prefix = kwargs["prefix"]
+def AddTauAugmentationCfg(flags, wp="RNNVeryLoose", **kwargs):
     kwargs.setdefault("TauContainerName", "TauJets")
-    kwargs.setdefault("doRNNVeryLoose", False)
-    kwargs.setdefault("doRNNLoose",     False)
-    kwargs.setdefault("doRNNMedium",    False)
-    kwargs.setdefault("doRNNTight",     False)
-    kwargs.setdefault("doGNTauVeryLoose", False)
-    kwargs.setdefault("doGNTauLoose",     False)
-    kwargs.setdefault("doGNTauMedium",    False)
-    kwargs.setdefault("doGNTauTight",     False)
-
+ 
     acc = ComponentAccumulator()
 
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
@@ -26,224 +16,109 @@ def AddTauAugmentationCfg(flags, **kwargs):
 
     TauAugmentationTools = []
 
-    # RNN TauID WPs
-    if kwargs["doRNNVeryLoose"]:
-        TauSelectorRNNVeryLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                           name = 'TauSelectorRNNVeryLoose',
-                                                                           ConfigPath = 'TauAnalysisAlgorithms/tau_selection_veryloose_noeleid.conf'))
-        acc.addPublicTool(TauSelectorRNNVeryLoose)
+    config = {
+      "RNNVeryLoose" : "TauAnalysisAlgorithms/tau_selection_veryloose_noeleid.conf",
+      "RNNLoose"     : "TauAnalysisAlgorithms/tau_selection_loose_noeleid.conf",
+      "RNNMedium"    : "TauAnalysisAlgorithms/tau_selection_medium_noeleid.conf",
+      "RNNTight"     : "TauAnalysisAlgorithms/tau_selection_tight_noeleid.conf",
+      
+      "GNTauVeryLoose" : "TauAnalysisAlgorithms/tau_selection_gntau_veryloose_noeleid.conf",
+      "GNTauLoose"     : "TauAnalysisAlgorithms/tau_selection_gntau_loose_noeleid.conf",
+      "GNTauMedium"    : "TauAnalysisAlgorithms/tau_selection_gntau_medium_noeleid.conf",
+      "GNTauTight"     : "TauAnalysisAlgorithms/tau_selection_gntau_tight_noeleid.conf",
+    }
 
-        TauRNNVeryLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                   name               = "TauRNNVeryLooseWrapper",
-                                                                                   AsgSelectionTool   = TauSelectorRNNVeryLoose,
-                                                                                   StoreGateEntryName = "DFTauRNNVeryLoose",
-                                                                                   ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauRNNVeryLooseWrapper)
+    TauSelector = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
+                                                           name = f'TauSelector{wp}',
+                                                           ConfigPath = config[wp]))
+    acc.addPublicTool(TauSelector)
 
-    if kwargs["doRNNLoose"]:
-        TauSelectorRNNLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                       name = 'TauSelectorRNNLoose',
-                                                                       ConfigPath = 'TauAnalysisAlgorithms/tau_selection_loose_noeleid.conf'))
-        acc.addPublicTool(TauSelectorRNNLoose)
+    TauWrapper  = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
+                                                                    name               = f"Tau{wp}Wrapper",
+                                                                    AsgSelectionTool   = TauSelector,
+                                                                    StoreGateEntryName = f"DFTau{wp}",
+                                                                    ContainerName      = kwargs["TauContainerName"]))
+    TauAugmentationTools.append(TauWrapper)
 
-        TauRNNLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                               name               = "TauRNNLooseWrapper",
-                                                                               AsgSelectionTool   = TauSelectorRNNLoose,
-                                                                               StoreGateEntryName = "DFTauRNNLoose",
-                                                                               ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauRNNLooseWrapper)
-
-    if kwargs["doRNNMedium"]:
-        TauSelectorRNNMedium = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                        name = 'TauSelectorRNNMedium',
-                                                                        ConfigPath = 'TauAnalysisAlgorithms/tau_selection_medium_noeleid.conf'))
-        acc.addPublicTool(TauSelectorRNNMedium)
-
-        TauRNNMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                name               = "TauRNNMediumWrapper",
-                                                                                AsgSelectionTool   = TauSelectorRNNMedium,
-                                                                                StoreGateEntryName = "DFTauRNNMedium",
-                                                                                ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauRNNMediumWrapper)
-
-    if kwargs["doRNNTight"]:
-        TauSelectorRNNTight = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                    name = 'TauSelectorRNNTight',
-                                                                    ConfigPath = 'TauAnalysisAlgorithms/tau_selection_tight_noeleid.conf'))
-        acc.addPublicTool(TauSelectorRNNTight)
-
-        TauRNNTightWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                               name               = "TauRNNTightWrapper",
-                                                                               AsgSelectionTool   = TauSelectorRNNTight,
-                                                                               StoreGateEntryName = "DFTauRNNTight",
-                                                                               ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauRNNTightWrapper)
-
-    # GNTau TauID WPs
-    if kwargs["doGNTauVeryLoose"]:
-        TauSelectorGNTauVeryLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                             name = 'TauSelectorGNTauVeryLoose',
-                                                                             ConfigPath = 'TauAnalysisAlgorithms/tau_selection_gntau_veryloose_noeleid.conf'))
-        acc.addPublicTool(TauSelectorGNTauVeryLoose)
-
-        TauGNTauVeryLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                     name               = "TauGNTauVeryLooseWrapper",
-                                                                                     AsgSelectionTool   = TauSelectorGNTauVeryLoose,
-                                                                                     StoreGateEntryName = "DFTauGNTauVeryLoose",
-                                                                                     ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauGNTauVeryLooseWrapper)
- 
-    
-    if kwargs["doGNTauLoose"]:
-        TauSelectorGNTauLoose = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                         name = 'TauSelectorGNTauLoose',
-                                                                         ConfigPath = 'TauAnalysisAlgorithms/tau_selection_gntau_loose_noeleid.conf'))
-        acc.addPublicTool(TauSelectorGNTauLoose)
-
-        TauGNTauLooseWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                 name               = "TauGNTauLooseWrapper",
-                                                                                 AsgSelectionTool   = TauSelectorGNTauLoose,
-                                                                                 StoreGateEntryName = "DFTauGNTauLoose",
-                                                                                 ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauGNTauLooseWrapper)
-
-    if kwargs["doGNTauMedium"]:
-        TauSelectorGNTauMedium = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                          name = 'TauSelectorGNTauMedium',
-                                                                          ConfigPath = 'TauAnalysisAlgorithms/tau_selection_gntau_medium_noeleid.conf'))
-        acc.addPublicTool(TauSelectorGNTauMedium)
-
-        TauGNTauMediumWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                  name               = "TauGNTauMediumWrapper",
-                                                                                  AsgSelectionTool   = TauSelectorGNTauMedium,
-                                                                                  StoreGateEntryName = "DFTauGNTauMedium",
-                                                                                  ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauGNTauMediumWrapper)
-
-    if kwargs["doGNTauTight"]:
-        TauSelectorGNTauTight = acc.popToolsAndMerge(TauSelectionToolCfg(flags,
-                                                                         name = 'TauSelectorGNTauTight',
-                                                                         ConfigPath = 'TauAnalysisAlgorithms/tau_selection_gntau_tight_noeleid.conf'))
-        acc.addPublicTool(TauSelectorGNTauTight)
-
-        TauGNTauTightWrapper = acc.getPrimaryAndMerge(AsgSelectionToolWrapperCfg(flags,
-                                                                                 name               = "TauGNTauTightWrapper",
-                                                                                 AsgSelectionTool   = TauSelectorGNTauTight,
-                                                                                 StoreGateEntryName = "DFTauGNTauTight",
-                                                                                 ContainerName      = kwargs["TauContainerName"]))
-        TauAugmentationTools.append(TauGNTauTightWrapper)
-
-
-    if TauAugmentationTools:
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation(f"{prefix}_TauAugmentationKernel", AugmentationTools = TauAugmentationTools))
-
+    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+    acc.addEventAlgo(CommonAugmentation(f"Tau{wp}AugmentationKernel", AugmentationTools = TauAugmentationTools))
     return acc
-
-
-# Low pT di-taus
-def AddDiTauLowPtCfg(flags, **kwargs):
-    """Configure the low-pt di-tau building"""
-
-    acc = ComponentAccumulator()
-
-    from JetRecConfig.JetRecConfig import JetRecCfg
-    from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo
-    acc.merge(JetRecCfg(flags,AntiKt10LCTopo))
-
-    from DiTauRec.DiTauBuilderConfig import DiTauBuilderCfg
-    acc.merge(DiTauBuilderCfg(flags, name="DiTauLowPtBuilder", doLowPt=True))
-
-    return acc
-
-def AddDiTauIDDecorationCfg(flags, **kwargs):
-    """Decorate ditau ID scores """
-
-    acc = ComponentAccumulator()
-
-    import DiTauRec.DiTauToolsConfig as DiTauTools
-
-    diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
-            flags, 
-            onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
-        ))
-
-    acc.addPublicTool(diTauOnnxScoreCalculator)
-
-    DiTauIDDecoratorWrapper = CompFactory.DerivationFramework.DiTauIDDecoratorWrapper
-    DiTauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-
-    DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
-                                                      DiTauContainerName = kwargs['DiTauContainerName'],
-                                                      DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator)
-
-    acc.addPublicTool(DiTauIDDecoratorWrapper)
-    acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
-                                            AugmentationTools = [DiTauIDDecoratorWrapper]))
-    return acc
-    
 
 def AddTauIDDecorationCfg(flags, **kwargs):
     """Decorate tau ID scores and working points"""
 
-    kwargs.setdefault("evetoFix",         True)
-    kwargs.setdefault("GNNTauID",         True)
-    kwargs.setdefault("TauContainerName", "TauJets")
-    kwargs.setdefault("prefix",           kwargs['TauContainerName'])
+    #kwargs.setdefault("evetoFix",         True)
+    #kwargs.setdefault("GNNTauID",         True)
+    tauContainerKey = kwargs.setdefault("TauContainerName", "TauJets")
+    #kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
     acc = ComponentAccumulator()
 
     import tauRec.TauToolHolder as tauTools
     tools = []
+    doEvetoWP = False
+    scoreNames = []
+    WPNames = []
 
-    if kwargs['evetoFix']:
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNFixCfg(flags)) )
+    #def cacheToolProperties(tool):
+    #    doEvetoWP = tool.UseAbsEta
+    #    scoreName = [tool.ScoreName] if tools[-1].ScoreName != "RNNEleScore" else []
+    #    wpName = tool.DecorWPNames
 
-    if kwargs['GNNTauID']:    
+    if kwargs.pop('evetoFix', True):
+        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
+
+    if kwargs.pop('GNNTauID', True):
         # vertex-corrected clusters must be rebuilt for tau ID
         tools.append( acc.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )
         # Add in GNTau!
+        # evaluate GNTau score for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True)) )
+        # evaluate GNTau score for v1trunc model
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1,applyLooseTrackSel=True)) )
+        # set WPs decision for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,0)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
+
+        # set WPs decision for v1trunc model
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,1)) )
+        # Cache tool properties
+        doEvetoWP |= tools[-1].UseAbsEta
+        # The original RNNEleScore should not be overriden
+        if tools[-1].ScoreName != "RNNEleScore": scoreNames.append(tools[-1].ScoreName)
+        scoreNames.append(tools[-1].NewScoreName)
+        WPNames += tools[-1].DecorWPNames
 
     if tools:
+        kwargs.setdefault("DoEvetoWP", doEvetoWP)
+        kwargs.setdefault("ScoreDecorationKeys", scoreNames)
+        kwargs.setdefault("WPDecorationKeys", WPNames)
+
         for tool in tools:
             acc.addPublicTool(tool)
+        kwargs.setdefault("TauIDTools", tools)
 
         TauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper
         TauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 
-        prefix = kwargs['prefix']
-        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name             = f"{prefix}_TauIDDecoratorWrapper",
-                                                      TauContainerName = kwargs['TauContainerName'],
-                                                      TauIDTools       = tools)
-
+        prefix = kwargs.pop('prefix', tauContainerKey)
+        tauIDDecoratorWrapper = TauIDDecoratorWrapper(name = f"{prefix}_TauIDDecoratorWrapper",
+                                                      **kwargs)
+        print("PXQW TauIDDecoratorsWrapper: " + str(tauIDDecoratorWrapper))
         acc.addPublicTool(tauIDDecoratorWrapper)
-        acc.addEventAlgo(TauIDDecoratorKernel(name              = f"{prefix}_TauIDDecorKernel",
+        acc.addEventAlgo(TauIDDecoratorKernel(name = f"{prefix}_TauIDDecorKernel",
                                               AugmentationTools = [tauIDDecoratorWrapper]))
-
-    return acc
-
-
-def AddDiTauChargeDecoratorCfg(flags, **kwargs):
-    """Decorate DiTau charge"""
-
-    kwargs.setdefault("DiTauContainerName", "DiTauJets")
-    kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
-
-    acc = ComponentAccumulator()
-   
-    DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
-    DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-
-    prefix = kwargs['prefix']
-    diTauChargeDecorator = DiTauChargeDecorator(name               = f"{prefix}_DiTauChargeDecorator",
-                                                DiTauContainerName = kwargs['DiTauContainerName'])
-    acc.addPublicTool(diTauChargeDecorator)
-    acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
-                                                AugmentationTools = [diTauChargeDecorator]))
 
     return acc
 

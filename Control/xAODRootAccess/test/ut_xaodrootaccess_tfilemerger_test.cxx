@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,6 +44,7 @@ StatusCode checkMergedFile( const std::string& fileName,
 /// Function checking just one auxiliary branch in the merged file
 StatusCode checkMergedBranch( ::TTree& tree, const std::string& name );
 
+//coverity[root_function]
 int main() {
 
    // The name of the application:

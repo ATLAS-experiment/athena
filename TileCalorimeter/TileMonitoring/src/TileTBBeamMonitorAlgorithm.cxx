@@ -491,7 +491,7 @@ StatusCode TileTBBeamMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
           if (hash2 == TileHWID::NOT_VALID_HASH) {
             if (m_monitoredDrawerIdx[drawerIdx1]) {
-              if (!((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U)) {
+              if (gain1 >= 0 && !((m_maskedChannels[drawerIdx1][channel1] >> gain1) & 1U)) {
                 energy = cell->energy();
               }
             }

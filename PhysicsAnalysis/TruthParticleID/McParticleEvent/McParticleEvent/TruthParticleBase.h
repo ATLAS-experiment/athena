@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthParticleBase.h 
@@ -191,7 +191,7 @@ void TruthParticleBase::setCharge( const ChargeType charge )
 inline 
 void TruthParticleBase::setGenParticle(  HepMC::ConstGenParticlePtr mc )
 {
-  m_genParticle = mc;
+  m_genParticle = std::move(mc);
 }
 
 #endif //> MCPARTICLEEVENT_TRUTHPARTICLEBASE_H

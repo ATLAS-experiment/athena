@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Pythia8B_i/CheckCloningFactor.h"
@@ -48,7 +48,7 @@ StatusCode CheckCloningFactor::execute() {
         for (auto pitr: *genEvt) {
 	    int p_id = pitr->pdg_id();
             if ( (std::abs(p_id)==5) && (pitr->status() == 62 || pitr->status() == 63) ) {
-                bQuarks.push_back(pitr);
+                bQuarks.push_back(std::move(pitr));
             }
         }
     }

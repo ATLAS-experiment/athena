@@ -2,6 +2,7 @@
 #ifndef __EVENTDATA_H__
 #define __EVENTDATA_H__
 
+#include <memory>
 #include <vector>
 
 class RecTrack;
@@ -10,16 +11,16 @@ class McTrack;
 class EventData
 {
   public:
-    EventData();
+    EventData() = default;
     ~EventData();
 
     void setEventNumber(int n);
-    void setMcTrack(const McTrack* ptrack);
+    void setMcTrack(std::unique_ptr<const McTrack> ptrack);
     void addRecTrack(const RecTrack* ptrack);
 
     std::vector<const RecTrack*> m_tracks;
-    const McTrack* m_mcTrack;
-    int m_eventNumber;
+    std::unique_ptr<const McTrack> m_mcTrack;
+    int m_eventNumber{0};
 };
 
 #endif

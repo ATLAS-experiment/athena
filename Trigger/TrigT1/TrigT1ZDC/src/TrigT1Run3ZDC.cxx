@@ -7,6 +7,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "ZdcConditions/ZdcLucrodMapRun3.h"
 #include "ZdcIdentifier/ZdcID.h"
 
@@ -125,7 +126,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
 
   // access LUCROD data
 
-  // use readhandle to retrive lucrodCollection
+  // use readhandle to retrieve lucrodCollection
   SG::ReadHandle<ZdcLucrodDataContainer> lucrodCollection(m_zldContainerName,ctx);
   
   for (const ZdcLucrodData *zld : *lucrodCollection) {
@@ -153,14 +154,13 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
         continue;
       }
 
-      // retrive what side, module, and gain we are reading out
+      // retrieve what side, module, and gain we are reading out
       int side = ZdcLucrodMapRun3::getInstance()->getLucrod(
           lucrod_id)["side"][lucrod_channel];
       int module = ZdcLucrodMapRun3::getInstance()->getLucrod(
           lucrod_id)["module"][lucrod_channel];
       int gain = ZdcLucrodMapRun3::getInstance()->getLucrod(
           lucrod_id)["gain"][lucrod_channel];
-
       // Fill different flash ADC vectors for Low and High
       // gain samples
       if (gain == 0) {
@@ -178,7 +178,7 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
           counter++;
         }
       }
-      // retrive Trig Avg amp for debugging
+      // retrieve Trig Avg amp for debugging
       // from both LG and HG modules
       if (side * gain * module == 3) {
         trigAvgAHG = zld->GetTrigAvgA();
@@ -257,7 +257,6 @@ StatusCode TrigT1Run3ZDC::execute(const EventContext& ctx) const {
       << " AvgAmpA: " << trigAvgAHG << " C: " << trigAvgCHG << std::endl
       << std::hex << word1 << " from lgLUTOutput: " << std::dec << wordOutLG
       << " AvgAmpA: " << trigAvgALG << " C: " << trigAvgCLG);
-
   return StatusCode::SUCCESS;
 }
 } // namespace LVL1

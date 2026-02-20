@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ StatusCode Trk::LayerMaterialInspector::processNode(const Trk::Layer& lay, size_
 {
     
     const Trk::TrackingVolume* tvol = lay.enclosingTrackingVolume();
-    TString folderId   = tvol ? tvol->volumeName() : std::string("Unknown");
+    std::string folderId   = tvol ? tvol->volumeName() : std::string("Unknown");
     TString folderName = m_treeFolder+folderId;
     folderName.ReplaceAll("::","_");
     

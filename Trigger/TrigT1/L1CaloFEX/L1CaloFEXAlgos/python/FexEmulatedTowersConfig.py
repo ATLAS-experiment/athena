@@ -21,16 +21,24 @@ def gFexEmulatedTowersCfg(flags, name="L1_gFexEmulatedTowers", writeKey="L1_gFex
                                                              gFexFiberTowerMapping = "Run3L1CaloSimulation/L1CaloFEXAlgos/gFEX/gFex_gCaloTowerMap_weighted_v1.txt") )
     return acc
 
-def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker",writeKey="L1_jFexEmulatedTowers"):
+def jFexEmulatedTowersCfg(flags, name="jFexEmulatedTowerMaker", writeKey="L1_jFexEmulatedTowers", SCin="", OfflineCaloCell=""):
     """
     Config for emulating jFex input data from LATOME readout
+    Supply SCin to build from non-standard SCell container
+    Supply OfflineCaloCell e.g. AllCalo to add offline cell energy decoration
     """
     acc=ComponentAccumulator()
     
     emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
-    emulator.SCell = flags.Trigger.L1.L1CaloSuperCellContainerName 
+    emulator.SCell = flags.Trigger.L1.L1CaloSuperCellContainerName if not SCin else SCin
     emulator.jTowersWriteKey = writeKey
-    emulator.isDATA = not flags.Input.isMC 
+    emulator.isDATA = not flags.Input.isMC
+    # only set the necessary containers, tools, decorations for non empty OfflineCaloCell
+    emulator.CaloCell = OfflineCaloCell
+    emulator.CaloSuperCellIDTool = "CaloSuperCellIDTool" if OfflineCaloCell else ""
+    emulator.TileOfflineETKey = "CaloCellETByLayer" if (OfflineCaloCell and not flags.Input.isMC) else ""
+    emulator.CaloCellSumEtdecorKey = "CaloCellSumEt" if OfflineCaloCell else ""
+
     acc.addEventAlgo(emulator)
 
     return acc

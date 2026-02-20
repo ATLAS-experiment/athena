@@ -33,11 +33,17 @@ namespace Muon {
         virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
-        // ReadHandleKey for the truth particles'container and WriteHandleKeys for the truth muons'container and muon origin decorator 
+        // ReadHandleKey for the truth particles'container and WriteHandleKeys for the truth muons'container and muon origin decorators
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthRecordKey{this, "TruthParticleContainerName", "TruthParticles"};
+
         SG::WriteHandleKey<xAOD::TruthParticleContainer> m_outTruthMuonKey{this, "MuonTruthParticleContainerName","MuonTruthParticles"};
+        /// FIXME WriteDecorHandle should not be used for additional
+        /// dynamic variables applied by the same algorithm which
+        /// created the container, instead SG::AuxElement::Accessor
+        /// should be used.
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthOriginKey{this, "truthOriginKey", m_outTruthMuonKey, "truthOrigin"};
         SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthTypeKey{this, "truthTypeKey", m_outTruthMuonKey, "truthType"};
+        SG::WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthClassificationKey{this, "truthClassificationKey", m_outTruthMuonKey, "truthClassification"};
         SG:: WriteDecorHandleKey<xAOD::TruthParticleContainer> m_truthLinkKey{this, "truthLinkKey", m_outTruthMuonKey, "truthParticleLink"};
         Gaudi::Property<float> m_pt{this, "ptCut", 1000.};
 

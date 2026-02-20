@@ -35,6 +35,8 @@
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
 #include "AsgTools/AnaToolHandle.h"
+#include <AsgTools/PropertyWrapper.h>
+
 
 // calibration data variable
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
@@ -206,76 +208,82 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   //*********************************//
 
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
-  std::string m_SFFile;
+  Gaudi::Property<std::string> m_SFFile {this, "ScaleFactorFileName", "xAODBTaggingEfficiency/13TeV/2016-20_7-13TeV-MC15-CDI-July12_v1.root", "name of the official scale factor calibration CDI file (uses PathResolver)"};
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
-  std::string m_EffFile;
+  Gaudi::Property<std::string> m_EffFile {this, "EfficiencyFileName", "", "name of optional user-provided MC efficiency CDI file"};
   /// name of the data/MC scale factor calibration for b jets
-  std::string m_SFBName;
+  Gaudi::Property<std::string> m_SFBName {this, "ScaleFactorBCalibration", "default", "name of b-jet scale factor calibration object"};
   /// name of the data/MC scale factor calibration for charm jets
-  std::string m_SFCName;
+  Gaudi::Property<std::string> m_SFCName {this, "ScaleFactorCCalibration", "default", "name of c-jet scale factor calibration object"};
   /// name of the data/MC scale factor calibration for tau jets
-  std::string m_SFTName;
+  Gaudi::Property<std::string> m_SFTName {this, "ScaleFactorTCalibration", "default", "name of tau-jet scale factor calibration object"};
   /// name of the data/MC scale factor calibration for light-flavour jets
-  std::string m_SFLightName;
+  Gaudi::Property<std::string> m_SFLightName {this, "ScaleFactorLightCalibration", "default",  "name of light-flavour jet scale factor calibration object"};
   /// specification of the eigenvector reduction strategy for b jets (if eigenvectors are used)
-  std::string m_EVReductionB;
+  Gaudi::Property<std::string> m_EVReductionB {this, "EigenvectorReductionB", "Loose", "b-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
   /// specification of the eigenvector reduction strategy for c jets (if eigenvectors are used)
-  std::string m_EVReductionC;
+  Gaudi::Property<std::string> m_EVReductionC {this, "EigenvectorReductionC", "Loose", "c-jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
   /// specification of the eigenvector reduction strategy for light-flavour jets (if eigenvectors are used)
-  std::string m_EVReductionLight;
+  Gaudi::Property<std::string> m_EVReductionLight {this, "EigenvectorReductionLight", "Loose","light-flavour jet scale factor Eigenvector reduction strategy; choose between 'Loose', 'Medium', 'Tight'"};
   /// semicolon-separated list of MC efficiency parametrisation names for b jets
-  std::string m_EffBName;
+  Gaudi::Property<std::string> m_EffBName {this, "EfficiencyBCalibrations", "default", "(semicolon-separated) name(s) of b-jet efficiency object(s)"};
   /// semicolon-separated list of MC efficiency parametrisation names for charm jets
-  std::string m_EffCName;
+  Gaudi::Property<std::string> m_EffCName {this, "EfficiencyCCalibrations", "default", "(semicolon-separated) name(s) of c-jet efficiency object(s)"};
   /// semicolon-separated list of MC efficiency parametrisation names for tau jets
-  std::string m_EffTName;
+  Gaudi::Property<std::string> m_EffTName {this, "EfficiencyTCalibrations", "default", "(semicolon-separated) name(s) of tau-jet efficiency object(s)"};
   /// semicolon-separated list of MC efficiency parametrisation names for light-flavour jets
-  std::string m_EffLightName;
+  Gaudi::Property<std::string> m_EffLightName {this, "EfficiencyLightCalibrations", "default", "(semicolon-separated) name(s) of light-flavour-jet efficiency object(s)"};
   /// semicolon-separated list of uncertainties to be excluded from the eigenvector variation procedure
-  std::string m_excludeFromEV;
+  Gaudi::Property<std::string> m_excludeFromEV {this, "ExcludeFromEigenVectorTreatment", "", "(semicolon-separated) names of uncertainties to be excluded from eigenvector decomposition (if used)"};
   /// tagger name
-  std::string m_taggerName;
+  Gaudi::Property<std::string> m_taggerName {this, "TaggerName", "MV2c10", "tagging algorithm name as specified in CDI file"};
   /// operating point
-  std::string m_OP;
+  Gaudi::Property<std::string> m_OP {this, "OperatingPoint", "FixedCutBEff_77", "operating point as specified in CDI file"};
   /// operating point when running in Continuous
-  std::string m_cutBenchmark;
+  Gaudi::Property<std::string> m_cutBenchmark {this, "CutBenchmark", "1,2", "if you want to run in continuous you need to fix a benchmark - it does something only if running in Continuous OP"};
   ///  jet collection name
-  std::string m_jetAuthor;
+  Gaudi::Property<std::string> m_jetAuthor {this, "JetAuthor", "AntiKt4EMTopoJets", "jet collection & JVF/JVT specification in CDI file"};
   /// systematics model to be used (current choices are "SFEigen" and "Envelope")
-  std::string m_systStrategy;
+  Gaudi::Property<std::string> m_systStrategy {this, "SystematicsStrategy", "SFEigen", "name of systematics model; presently choose between 'SFEigen' and 'Envelope'"};
   /// if true, attempt to retrieve the data/MC efficiency scale factor calibration files from the @PathResolver development area
-  bool m_useDevFile{};
+  Gaudi::Property<bool> m_useDevFile {this, "UseDevelopmentFile", false, "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files"};
   /// if true, use cone-based labelling (as opposed to ghost association)
-  bool m_coneFlavourLabel{true};
+  Gaudi::Property<bool> m_coneFlavourLabel{this, "ConeFlavourLabel", true, "specify whether or not to use the cone-based flavour labelling instead of the default ghost association based labelling"};
+
   /// in case of continuous WP you can choose to ignore some of the eigenvectors
-  std::string m_excludeEV;
+  Gaudi::Property<std::string> m_excludeEV {this, "ExcludeSpecificEigens", "" , "(semicolon-separated) names of Eigens you want to exclude. in case of continuous some eigenvectors can be ignored to make the computation faster"};
   ///possibility to compute the direct tagging SFs map directly from the TruthTaggingTool
-  bool m_doDirectTag{};
+  Gaudi::Property<bool> m_doDirectTag {this, "doDirectTagging", false , "If set to true it also computes and stores the direct tagging choice and the related SFs for each jet"};
   /// if this string is empty, the onnx tool won't be used
-  std::string m_pathToONNX;
+  Gaudi::Property<std::string> m_pathToONNX {this, "pathToONNX", "", "path to the onnx file that will be used for inference"};
   /// tagging strategy is required to do TT with GNN, when we don't want to truth tag all the jets (eg. 'leading2SignalJets')          
-  std::string m_taggingStrategy;            
+  Gaudi::Property<std::string> m_taggingStrategy {this, "TaggingStrategy", "AllJets", "tagging strategy in the Analysis (eg. 'leading2SignalJets' in boosted VHbb). Required to do TT with GNN"};
   /// will be set according to m_taggingStrategy
   enum NjetsTagStrategy {AllJets=-1, Leading2SignalJets=2, Leading3SignalJets=3};
   NjetsTagStrategy m_njetsTagStrategy{AllJets};
-
+  
   //*********************************//
   // Prop. of BTaggingSelectionTool  //
   //*********************************//
-
-  float m_maxEta{2.5f};
-  float m_minPt{20000.f};
-  float m_maxRangePt{1000000.f};
-
+  Gaudi::Property<float> m_minPt {this, "MinPt", 20000 /*MeV*/, "Minimum jet pT cut (in MeV)"};
+  Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
+  Gaudi::Property<float> m_maxRangePt {this, "MaxRangePt", 1000000 /*MeV*/, "Max pT range (in MeV)"};
+  
   // properties of truth tagging
-  bool m_doOnlyUpVariations{};
-  bool m_ignoreSF{true};
-  bool m_usePerm{true};
-  bool m_useQuantile{true};
+  Gaudi::Property<bool> m_doOnlyUpVariations {this, "StoreOnlyUpVariations", false , "If set to true it processes only the __1up b-tagging variations. It speeds up the computation in case of symmetric variations."};
+  
   bool m_continuous{};
   bool m_continuous2D{};
-  bool m_useSys{};
-  int m_nbtag{2};
+
+  // properties of BTaggingTruthTaggingTool
+  Gaudi::Property<bool> m_ignoreSF {this, "IgnoreScaleFactors", true, "ignore scale factors in computation of TRF weight"};
+  Gaudi::Property<bool> m_usePerm {this, "UsePermutations", true, "if the chosen permutation is used, a reweighting is applied to the TRF weight for systematics"};
+  Gaudi::Property<bool> m_useQuantile {this, "UseQuantile", true, "if the chosen quantile is used, a reweighting is applied to the TRF weight for systematics"};
+  Gaudi::Property<bool> m_useSys {this, "UseSystematics", false, "will the results contain all systematic variations, or just the nominal"};
+
+
+  Gaudi::Property<int> m_nbtag {this, "MaxNtagged", 2, "what is the maximal possible number of tagged jets"};
+
   int m_nbins{};
   std::vector<int> m_OperatingBins;
   unsigned int m_OP_index_for_GNN{};

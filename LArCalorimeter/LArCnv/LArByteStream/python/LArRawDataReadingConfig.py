@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -16,9 +16,6 @@ def LArRawDataReadingCfg(flags, **kwargs):
 
     if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}LArDigitContainer_data")
-        kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
-    elif flags.Overlay.ByteStream:
-        kwargs.setdefault("LArDigitKey", f"{flags.Overlay.BkgPrefix}FREE")
         kwargs.setdefault("LArFebHeaderKey", "LArFebHeader")
     if flags.LAr.RawChannelSource is RawChannelSource.Calculated or flags.Overlay.DataOverlay:
         kwargs.setdefault("LArRawChannelKey", "")

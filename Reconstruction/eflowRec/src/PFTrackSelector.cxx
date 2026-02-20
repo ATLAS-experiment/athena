@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#include "eflowRec/eflowTrackExtrapolatorBaseAlgTool.h"
-#include "eflowRec/PFTrackSelector.h"
+#include "eflowTrackExtrapolatorBaseAlgTool.h"
+#include "PFTrackSelector.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -57,7 +57,7 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
   }
 
   /* Do the track selection for tracks to be used in all of the following steps: */
-  int trackIndex = 0;
+
   for (const auto *thisTrack : *tracksReadHandle){
 
     if (!thisTrack){
@@ -68,6 +68,7 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
     ATH_MSG_DEBUG("Have track with E, pt, eta and phi of " << thisTrack->e() << ", " << thisTrack->pt() << ", "
                                                            << thisTrack->eta() << " and " << thisTrack->phi());
 
+
     bool rejectTrack(!selectTrack(*thisTrack));
 
     bool isElectron = this->isElectron(thisTrack);
@@ -77,21 +78,25 @@ StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
 
     ATH_MSG_DEBUG("rejectTrack is " << rejectTrack);
     
+    const xAOD::TrackParticleContainer* trkcont{nullptr};
     if (!rejectTrack) {
       // Monitor the time per selected track
       auto t_track = Monitored::Timer<std::chrono::microseconds>( "TIME_track" );
       eta_track = thisTrack->eta();
       pt_track = thisTrack->pt() * invGeV;
+      if(trkcont==nullptr) {
+        trkcont = static_cast<const xAOD::TrackParticleContainer*>(thisTrack->container());
+      }
 
       /* Create the eflowRecCluster and put it in the container */
-      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(*tracksReadHandle, trackIndex), m_theTrackExtrapolatorTool);
+      unsigned int trackIndex  = thisTrack->index();
+      std::unique_ptr<eflowRecTrack> thisEFRecTrack  = std::make_unique<eflowRecTrack>(ElementLink<xAOD::TrackParticleContainer>(trkcont, trackIndex), m_theTrackExtrapolatorTool);
       thisEFRecTrack->setTrackId(trackIndex);
       eflowRecTracksWriteHandle->push_back(std::move(thisEFRecTrack));
 
       // Fill histogram
       auto mon_trk = Monitored::Group(m_monTool, t_track, eta_track, pt_track);
     }
-    trackIndex++;
   }
 
   std::sort(eflowRecTracksWriteHandle->begin(), eflowRecTracksWriteHandle->end(), eflowRecTrack::SortDescendingPt());

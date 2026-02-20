@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -17,49 +17,12 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/SimpleVector.h"
 
-// STL includes
-#include <limits>
-#include <algorithm>
-
 /** Constructor **/
 ISF::GenParticleGenericFilter::GenParticleGenericFilter( const std::string& t,
                                                          const std::string& n,
                                                          const IInterface* p )
-  : base_class(t,n,p),
-    m_minEta(std::numeric_limits<decltype(m_minEta)>::lowest()),
-    m_maxEta(std::numeric_limits<decltype(m_maxEta)>::max()),
-    m_minPhi(-M_PI),
-    m_maxPhi(M_PI),
-    m_minMom(std::numeric_limits<decltype(m_minMom)>::lowest()),
-    m_maxMom(std::numeric_limits<decltype(m_maxMom)>::max()),
-    m_pdgs(),
-    m_maxApplicableRadius(std::numeric_limits<decltype(m_maxApplicableRadius)>::max())
+  : base_class(t,n,p)
 {
-    // different cut parameters
-    declareProperty("MinEta",
-                    m_minEta,
-                    "Minimum Particle Pseudorapidity");
-    declareProperty("MaxEta",
-                    m_maxEta,
-                    "Maximum Particle Pseudorapidity");
-    declareProperty("MinPhi",
-                    m_minPhi,
-                    "Minimum Particle Phi");
-    declareProperty("MaxPhi",
-                    m_maxPhi,
-                    "Maximum Particle Phi");
-    declareProperty("MinMom",
-                    m_minMom,
-                    "Minimum Particle Momentum");
-    declareProperty("MaxMom",
-                    m_maxMom,
-                    "Maximum Particle Momentum");
-    declareProperty("ParticlePDG",
-                    m_pdgs,
-                    "List of accepted particle PDG IDs (any accepted if empty)");
-    declareProperty("MaxApplicableRadius",
-                    m_maxApplicableRadius,
-                    "Only particles with ProductionVertexRadius<MaxApplicableRadius may get filtered out");
 }
 
 
@@ -68,15 +31,6 @@ StatusCode  ISF::GenParticleGenericFilter::initialize()
 {
     ATH_MSG_VERBOSE("initialize() ...");
     ATH_MSG_VERBOSE("initialize() successful");
-    return StatusCode::SUCCESS;
-}
-
-
-/** Athena algtool's Hooks */
-StatusCode  ISF::GenParticleGenericFilter::finalize()
-{
-    ATH_MSG_VERBOSE("finalize() ...");
-    ATH_MSG_VERBOSE("finalize() successful");
     return StatusCode::SUCCESS;
 }
 

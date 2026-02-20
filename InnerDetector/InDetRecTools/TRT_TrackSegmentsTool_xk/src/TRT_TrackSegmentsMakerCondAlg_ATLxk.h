@@ -10,7 +10,7 @@
 #ifndef TRT_TrackSegmentsMakerCondAlg_ATLxk_H
 #define TRT_TrackSegmentsMakerCondAlg_ATLxk_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 #include "TRT_TrackSegmentsTool_xk/TRT_TrackSegmentsToolCondData_xk.h"
@@ -27,7 +27,7 @@ namespace InDet {
      @author Edson.Carquin.Lopez@cern.ch
   */
 
-  class TRT_TrackSegmentsMakerCondAlg_ATLxk : public AthReentrantAlgorithm
+  class TRT_TrackSegmentsMakerCondAlg_ATLxk : public AthCondAlgorithm
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -43,7 +43,6 @@ namespace InDet {
     virtual ~TRT_TrackSegmentsMakerCondAlg_ATLxk() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override final { return false; }
 
     void printStraw(const InDetDD::TRT_BaseElement * elementCS, unsigned int strawNum) const;
 

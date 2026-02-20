@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/ShapeErrorData.h"
@@ -55,7 +55,7 @@ const CovMatrix ShapeErrorData::xipErr(int first, int last) const
 }
 
 
-ShapeErrorData* ShapeErrorData::add(const ShapeErrorData& other) const
+std::unique_ptr<ShapeErrorData> ShapeErrorData::add(const ShapeErrorData& other) const
 {
   int newLwb = commonLwb(other);
   int newUpb = commonUpb(other);
@@ -65,5 +65,5 @@ ShapeErrorData* ShapeErrorData::add(const ShapeErrorData& other) const
   CovMatrix newXiErr = xiErr(newLwb, newUpb)  + other.xiErr(newLwb, newUpb);
   CovMatrix newXipErr = xipErr(newLwb, newUpb)  + other.xipErr(newLwb, newUpb);
   int newN = n() + other.n();
-  return new ShapeErrorData(newXi, newXip, newXiErr, newXipErr, newN);
+  return std::make_unique<ShapeErrorData>(newXi, newXip, newXiErr, newXipErr, newN);
 }

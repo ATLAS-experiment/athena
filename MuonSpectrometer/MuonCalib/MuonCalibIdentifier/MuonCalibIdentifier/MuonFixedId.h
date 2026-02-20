@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -789,6 +789,7 @@ inline int MuonFixedId::mdtMezzanine() const {
    if(Ichamber==2 && std::abs(Ieta)==8) ImezzTubes=8;
    int Imezz = ((Itube-1)/ImezzTubes)*2+(Iml-1) ;
    Imezz = 9*100000000 + Ichamber*1000000 + Ieta*10000 + Iphi*100 + Imezz ;
+   //coverity[INTEGER_OVERFLOW:FALSE]
    return Imezz ;
 }
 

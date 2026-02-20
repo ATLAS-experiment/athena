@@ -6,13 +6,6 @@
 #include "AthExHive/IASCIICondDbSvc.h"
 #include "StoreGate/WriteCondHandle.h"
 
-#include "GaudiKernel/ServiceHandle.h"
-
-CondAlgY::CondAlgY( const std::string& name, 
-		    ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
-{
-}
 
 StatusCode CondAlgY::initialize() {
   ATH_MSG_DEBUG("initialize " << name());
@@ -28,9 +21,8 @@ StatusCode CondAlgY::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CondAlgY::execute() {
+StatusCode CondAlgY::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("execute " << name());
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   EventIDBase now(ctx.eventID());
 
   SG::WriteCondHandle<CondDataObjY> wch1(m_wch1,ctx);
@@ -48,7 +40,7 @@ StatusCode CondAlgY::execute() {
 
     EventIDRange r;
     IASCIICondDbSvc::dbData_t val;
-    if (m_cds->getRange(wch1.dbKey(), getContext(), r, val).isFailure()) {
+    if (m_cds->getRange(wch1.dbKey(), ctx, r, val).isFailure()) {
       ATH_MSG_ERROR("  could not find dbKey \"" << wch1.dbKey() 
 		    << "\" in CondSvc registry");
       return StatusCode::FAILURE;
@@ -77,7 +69,7 @@ StatusCode CondAlgY::execute() {
 
     EventIDRange r;
     IASCIICondDbSvc::dbData_t val;
-    if (m_cds->getRange(wch2.dbKey(), getContext(), r, val).isFailure()) {
+    if (m_cds->getRange(wch2.dbKey(), ctx, r, val).isFailure()) {
       ATH_MSG_ERROR("  could not find dbKey \"" << wch2.dbKey() 
 		    << "\" in CondSvc registry");
       return StatusCode::FAILURE;

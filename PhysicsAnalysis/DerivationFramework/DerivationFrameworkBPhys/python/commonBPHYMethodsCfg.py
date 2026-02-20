@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -27,7 +27,39 @@ def Thin_vtxTrkCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
     acc.addPublicTool(CompFactory.DerivationFramework.Thin_vtxTrk(name, **kwargs),
                       primary = True)
-    return acc 
+    return acc
+
+def AugOriginalCountsCfg(flags, name="AugOriginalCounts", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TrackLRTContainer",
+                      "InDetLargeD0TrackParticles"
+                      if flags.Tracking.doLargeD0 else "")
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.AugOriginalCounts(name, **kwargs))
+    return acc
 
 def getDefaultAllVariables():
     return ["EventInfo"]
+
+def BPhysBGammaFinderCfg(flags, name="BPhysBGammaFinder", **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.BPhysBGammaFinder(name, **kwargs))
+    return acc
+
+def BPhysMetadataBaseCfg(flags, name="BPhysMetadataBase", **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.BPhysMetadataBase(name, **kwargs))
+    return acc
+
+def Bmumu_metadataCfg(flags, BPHYDerivationName, **kwargs):
+    #Perhaps flesh out in future see ATLASG-2977
+    acc = ComponentAccumulator()
+    name = BPHYDerivationName + "_Bmumu_metadata"
+    kwargs.setdefault("DerivationName",BPHYDerivationName)
+    acc.setPrivateTools(
+    CompFactory.DerivationFramework.Bmumu_metadata(name, **kwargs))
+    return acc

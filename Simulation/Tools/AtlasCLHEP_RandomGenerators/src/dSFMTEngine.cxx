@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/Random.h"
@@ -10,6 +10,11 @@
 #include <sstream>
 #include <cmath>	// for ldexp()
 #include <stdlib.h>	// for abs(int)
+
+#if __GNUC__ >= 16
+// dSFMT.h defines inline as a macro
+# pragma GCC diagnostic ignored "-Wkeyword-macro"
+#endif
 
 extern "C" {
 #include "dSFMT.h"

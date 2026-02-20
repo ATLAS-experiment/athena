@@ -21,7 +21,6 @@ StatusCode PFTrackPreselAlg::initialize()
   ATH_CHECK( m_inputTracksKey.initialize() );
   ATH_CHECK( m_outputTracksKey.initialize() );
 
-  m_outputDecorKey = m_inputTracksKey.key()+"."+m_outputDecorKey.key();
   ATH_CHECK( m_outputDecorKey.initialize() );
 
   ATH_CHECK( m_trackSelTool.retrieve() );

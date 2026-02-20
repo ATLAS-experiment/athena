@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMMC_CALIBRATEDMUONSPROVIDER_H
@@ -40,7 +40,7 @@ namespace CP {
         /// Muon calibration tool
         ToolHandle<IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", ""};
         Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber", false};
-        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", "EventInfo.RandomRunNumber",
+        SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", m_eventInfo, "RandomRunNumber",
                                                             "Dependency on the random run number"};
 
     };  // class

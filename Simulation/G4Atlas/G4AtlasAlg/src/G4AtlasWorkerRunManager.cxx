@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Hide multi-threading classes from builds without G4MT
@@ -78,7 +78,7 @@ void G4AtlasWorkerRunManager::Initialize()
     if(retVal!=fCommandSucceeded) {
        std::string errMsg{"Failed to apply command <"};
        errMsg += (it + ">. Return value " + std::to_string(retVal));
-       throw GaudiException(errMsg,methodName,StatusCode::FAILURE);
+       throw GaudiException(std::move(errMsg),std::move(methodName),StatusCode::FAILURE);
     }
   }
 

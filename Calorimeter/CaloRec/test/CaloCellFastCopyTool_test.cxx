@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -119,7 +119,6 @@ public:
 
   ~CaloCellFastCopyToolTest()
   {
-    if (m_alg) delete m_alg;
   }
 
   
@@ -128,7 +127,7 @@ public:
     ISvcLocator* svcloc = Gaudi::svcLocator();
     assert(m_evtStore.retrieve());
     assert(m_detStore.retrieve());
-    m_alg = new DummyAlgorithm("DummyAlgorithm", svcloc);
+    m_alg = std::make_unique<DummyAlgorithm>("DummyAlgorithm", svcloc);
     m_alg->addRef();
     m_caloID = m_caloHelper.GetCaloID();
 
@@ -751,7 +750,7 @@ private:
                      bool isFindCellFast = false,
                      const std::string& caloCellName = "AllCalo")
   {
-    CaloCellFastCopyTool* tool = new CaloCellFastCopyTool("CaloCellFastCopyTool", name, m_alg);
+    CaloCellFastCopyTool* tool = new CaloCellFastCopyTool("CaloCellFastCopyTool", name, m_alg.get());
     tool->addRef();
     assert(tool->setProperty("OutputLevel", "1").isSuccess());
     assert(tool->setProperty("AvoidDuplicates",avoidDuplicates).isSuccess());
@@ -765,7 +764,7 @@ private:
 
   ServiceHandle<StoreGateSvc> m_evtStore;
   ServiceHandle<StoreGateSvc> m_detStore;
-  DummyAlgorithm* m_alg{nullptr};
+  std::unique_ptr<DummyAlgorithm> m_alg;
   CaloHelper& m_caloHelper;
   const CaloCell_ID* m_caloID{nullptr};
 

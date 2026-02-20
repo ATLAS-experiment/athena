@@ -63,7 +63,7 @@ def Kernel_GenericSimulatorMTCfg(flags, name="ISF_Kernel_GenericSimulatorMT", **
         if flags.Digitization.PileUp:
             OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
             acc.addService(OEsvc)
-            kwargs.setdefault("EvtStore", OEsvc.name) # TODO check this is correct
+            kwargs.setdefault("EvtStore", OEsvc) # TODO check this is correct
 
     kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     kwargs.setdefault("InputEvgenCollection", "BeamTruthEvent")

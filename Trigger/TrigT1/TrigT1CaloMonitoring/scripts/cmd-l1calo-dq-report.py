@@ -148,7 +148,7 @@ def runDQ(args):
         ROOT.gStyle.SetOptStat(False) # no stats boxes
         ROOT.gStyle.SetPadRightMargin(0.15)
         ROOT.gErrorIgnoreLevel = ROOT.kWarning
-        def findHists(d,firstDraw):
+        def findHists(d,firstDraw,runNum):
             for k in d.GetListOfKeys():
                 if k.IsFolder():
                     if k.GetName().endswith("_"): continue # don't navigate into folders of results of hists
@@ -264,7 +264,7 @@ def runDQ(args):
                         os.remove(tmpFileName)
                         histResults[histPath][runNum]["imageCode"] = pltCode
 
-        findHists(f,firstDraw)
+        findHists(f,firstDraw,runNum)
 
     allRuns.sort()
 

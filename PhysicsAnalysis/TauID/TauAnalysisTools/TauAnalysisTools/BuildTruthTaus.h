@@ -71,7 +71,7 @@ public:
 
 
 protected:
-  StatusCode retrieveTruthTaus(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
+  StatusCode retrieveTruthTausImpl(TruthTausEvent& truthTausEvent, const EventContext& ctx) const;
 
 
 private:

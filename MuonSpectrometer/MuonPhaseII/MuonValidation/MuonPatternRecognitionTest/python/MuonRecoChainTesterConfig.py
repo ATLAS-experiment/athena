@@ -22,6 +22,7 @@ if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = not args.noPerfMon
+    flags.Muon.useMdtDcsData = lambda prevFlags: prevFlags.Input.isMC
     flags.PerfMon.OutputJSON="perfmonmt_MuonR4Reco.json"
 
     flags, cfg = setupGeoR4TestCfg(args,flags)
@@ -40,9 +41,8 @@ if __name__=="__main__":
     from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
     cfg.merge(LegacyMuonRecoChainCfg(flags))
     ### Setup the new chain
-    from MuonPatternRecognitionAlgs.MuonHoughTransformAlgConfig import MuonPatternRecognitionCfg, MuonSegmentFittingAlgCfg
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
     cfg.merge(MuonPatternRecognitionCfg(flags))    
-    cfg.merge(MuonSegmentFittingAlgCfg(flags))
     from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg
     cfg.merge(MSTrackFinderAlgCfg(flags))
    

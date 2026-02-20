@@ -10,8 +10,8 @@
    class.
 */
 
-#ifndef STGCDIGITMAKER_H
-#define STGCDIGITMAKER_H
+#ifndef sTGCDigitizationR4_STGCDIGITMAKER_H
+#define sTGCDigitizationR4_STGCDIGITMAKER_H
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "MuonCondData/DigitEffiData.h"
@@ -32,17 +32,18 @@ namespace CLHEP {
  * @brief Handles the digitization of sTGC hits, converting simulated hits into sTGC digits.
  */
 
+namespace MuonR4{
 class sTgcDigitMaker : public AthMessaging {
  public:
   /**
    * @brief Constructor initializing digitization parameters.
    */
-  enum digitMode {
+  enum class digitMode: std::uint8_t  {
     StripsOnly = 1,
     StripsAndPads = 2,
     AllChType = 3,
   };
-  sTgcDigitMaker(const Muon::IMuonIdHelperSvc* idHelperSvc,
+  sTgcDigitMaker(const MuonGMR4::MuonDetectorManager* detMgr,
                  digitMode mode,
                  double meanGasGain, 
                  bool doPadChargeSharing);
@@ -62,7 +63,6 @@ class sTgcDigitMaker : public AthMessaging {
    * @brief Holds necessary conditions and data for digitization.
    */
   struct DigiConditions {
-     const MuonGMR4::MuonDetectorManager* detMgr{nullptr};
      const Muon::DigitEffiData* efficiencies{nullptr};
      const NswCalibDbThresholdData* thresholdData{nullptr};
      CLHEP::HepRandomEngine* rndEngine{nullptr};
@@ -96,16 +96,71 @@ using ReadoutChannelType = sTgcIdHelper::sTgcChannelTypes;
    */
   struct Ionization {
     double distance{-9.99}; //smallest distance bet the wire and particle trajectory
+    double time{0.};        // time of arrival
     Amg::Vector3D posOnSegment{Amg::Vector3D::Zero()}; // Point of closest approach
     Amg::Vector3D posOnWire{Amg::Vector3D::Zero()}; // Position on the wire
   };
+
+  /** @brief Helper struct to carry the digit information around */
+  struct DigiInput {
+      /** @brief Identifier of the simulated hit to digitize */
+      Identifier hitId{};
+      /** @brief Position of the hit on the surface */
+      Amg::Vector3D posOnSurf{Amg::Vector3D::Zero()};
+      /** @brief Direction of the propagating particle */
+      Amg::Vector3D hitDir{Amg::Vector3D::Zero()};
+      /** @brief Total deposited charge in the gasGap */
+      double totalCharge{0.};
+      /** @brief Time of arrival on the sensor */
+      double time{0.};
+      /** @brief Readout element associated */
+      const MuonGMR4::sTgcReadoutElement* reEle{nullptr};
+  };
+  /**
+   * @brief Computes the ionization point for a hit
+   */
+  bool getIonizationPoint(const TimedHit& hit, const DigiConditions& condContainers, Ionization& ionization) const;
+
+  /**
+   * @brief Calculates total charge from energy deposit, including gas gain
+   */
+  double calculateTotalCharge(double energyDeposit, CLHEP::HepRandomEngine* rndEngine) const;
+
+  /**
+   * @brief Processes strip digitization for a given hit
+   */
+  sTgcDigitVec processStripDigitization(const DigiConditions& condContainers,
+                                        const DigiInput& digiInput) const;
+
+  /**
+   * @brief Processes pad digitization for a given hit
+   */
+  sTgcDigitVec processPadDigitization(const DigiInput& digiInput) const;
+
+  /**
+   * @brief Processes wire digitization for a given hit
+   */
+  sTgcDigitVec processWireDigitization(const DigiInput& digiInput) const;
+
+  /**
+   * @brief Handles charge sharing for strip clusters
+   */
+  sTgcDigitVec processStripChargeSharing(const DigiInput& digiInput,
+                                         const double peak_position,
+                                         const int stripNumber) const;
+
+  /**
+   * @brief Handles charge sharing for pad clusters
+   */
+  sTgcDigitVec processPadChargeSharing(const DigiInput& digiInput,
+                                       const int padEta,
+                                       const int padPhi) const;
 
   /**
    * @brief Adds a digit to the appropriate cache.
    */
   static void addDigit(sTgcDigitVec& digits, 
                        const Identifier& id, 
-                       uint16_t bctag, 
                        double digittime, 
                        double charge);
 
@@ -129,7 +184,7 @@ using ReadoutChannelType = sTgcIdHelper::sTgcChannelTypes;
    *  Positions returned are in the local coordinate frame of the wire plane.
    *  Returns an object with distance of -9.99 in case of error.
    */
-  Ionization pointClosestApproach(const MuonGMR4::WireGroupDesign& wireDesign,
+  Ionization pointClosestApproach(const MuonGMR4::StripLayer& stripLayer,
                                   int wireNumber, 
                                   const Amg::Vector3D& locHitPos,
                                   const Amg::Vector3D& locHitDir,
@@ -164,8 +219,9 @@ using ReadoutChannelType = sTgcIdHelper::sTgcChannelTypes;
   std::array<double, 5> m_mostProbableArrivalTime{make_array<double, 5>(0.)};
   std::array<double, 6> m_timeOffsetStrip{make_array<double, 6>(0.)};
 
-  const Muon::IMuonIdHelperSvc* m_idHelperSvc{nullptr};
-
+  const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+  const Muon::IMuonIdHelperSvc* m_idHelperSvc{m_detMgr->idHelperSvc()};
+  const sTgcIdHelper& m_idHelper{m_idHelperSvc->stgcIdHelper()};
   // Computes the charge on a strip given the limits of integral using the error function
   // In R3, strip cluster charge profile was defined by a double gaussian for every digit
   // which is computationally inefficient, here we use result of double gaussian integral
@@ -182,7 +238,7 @@ using ReadoutChannelType = sTgcIdHelper::sTgcChannelTypes;
     length corrections. Bunch crossing time is specified.
   */
   // Digitization parameters
-  digitMode m_digitMode = AllChType;
+  digitMode m_digitMode{digitMode::AllChType};
   double m_theta{10}; // theta=10 value best matches the PDF
   double m_meanGasGain{5.e4};  // mean gain estimated from ATLAS note "ATL-MUON-PUB-2014-001"
   bool m_doPadSharing{false};
@@ -197,5 +253,5 @@ using ReadoutChannelType = sTgcIdHelper::sTgcChannelTypes;
   // Dependence of energy deposited on incident angle
   double m_chargeAngularFactor{4.0};
 };
-
+}
 #endif

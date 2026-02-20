@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcMonitoring/ZdcLEDMonitorAlgorithm.h"
@@ -39,8 +39,8 @@ StatusCode ZdcLEDMonitorAlgorithm::initialize() {
     std::vector<std::string> modules = {"0","1","2","3"};
     std::vector<std::string> channels = {"0","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15"};
 
-    if (m_enableZDC)    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,modules);
-    if (m_enableRPD)    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,sides,channels);
+    if (m_enableZDC)    m_ZDCModuleLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"ZdcModLEDMonitor",m_LEDNames,sides,std::move(modules));
+    if (m_enableRPD)    m_RPDChannelLEDToolIndices = buildToolMap<std::map<std::string,std::map<std::string,int>>>(m_tools,"RPDChanLEDMonitor",m_LEDNames,std::move(sides),std::move(channels));
 
     //---------------------------------------------------
     // initialize superclass
@@ -172,6 +172,8 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
     auto rpdLEDMaxSample = Monitored::Scalar<unsigned int>("rpdLEDMaxSample",1000);
     auto rpdLEDAvgTime = Monitored::Scalar<float>("rpdLEDAvgTime",-1000);
 
+    auto rpdLEDPassFireCriteria = Monitored::Scalar<bool>("rpdLEDPassFireCriteria",false);
+
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, int> LEDADCSumHandle(m_LEDADCSumKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, int> LEDMaxADCHandle(m_LEDMaxADCKey, ctx);
     SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> LEDMaxSampleHandle(m_LEDMaxSampleKey, ctx);
@@ -188,6 +190,34 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
        return StatusCode::SUCCESS;
     }
 
+    // first loop over RPD LED to impose RPD-LED-firing criteria against missing-pulse events
+    // either all RPD channels have pulse or none has pulse
+    // look at a "good" channel with large amplitude (clear signal/background separation)
+    // pulse in all channels if the good channel satisfies maxADC and sumADC criteria
+    for (const auto zdcMod : *zdcModules){
+        if (zdcMod->zdcType() == 0) continue; // only look at RPD: skip ZDC
+        
+        int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
+        std::string side_str = (iside == 0)? "C" : "A";
+        
+        int ichannel = zdcMod->zdcChannel();
+        std::string channel_str = std::to_string(ichannel);
+
+        bool isGoodChannel = (iside == 0)? (ichannel == m_rpdSideCgoodChannelNum) : (ichannel == m_rpdSideAgoodChannelNum);
+        if (isGoodChannel){
+            if (iside == 0){
+                rpdLEDPassFireCriteria =  (LEDMaxADCHandle(*zdcMod) > m_rpdSideAgoodChannelMaxADCFireThrsh);
+                rpdLEDPassFireCriteria &= (LEDADCSumHandle(*zdcMod) > m_rpdSideAgoodChannelSumADCFireThrsh);
+            }
+            else{
+                rpdLEDPassFireCriteria =  (LEDMaxADCHandle(*zdcMod) > m_rpdSideCgoodChannelMaxADCFireThrsh);
+                rpdLEDPassFireCriteria &= (LEDADCSumHandle(*zdcMod) > m_rpdSideCgoodChannelSumADCFireThrsh);
+            }
+            break;
+        }
+    }
+
+    // second loop over ZDC & RPD LED
     for (const auto zdcMod : *zdcModules){
         int iside = (zdcMod->zdcSide() > 0)? 1 : 0;
         std::string side_str = (iside == 0)? "C" : "A";
@@ -220,7 +250,7 @@ StatusCode ZdcLEDMonitorAlgorithm::fillLEDHistograms(unsigned int DAQMode, const
 
             rpdLEDMaxADCtoADCSumRatio = (rpdLEDADCSum == 0)? -1000. : rpdLEDMaxADC * 1. / rpdLEDADCSum;
 
-            fill(m_tools[m_RPDChannelLEDToolIndices.at(led_type_str).at(side_str).at(channel_str)], lumiBlock, bcid, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime, rpdLEDMaxADCtoADCSumRatio);
+            fill(m_tools[m_RPDChannelLEDToolIndices.at(led_type_str).at(side_str).at(channel_str)], lumiBlock, bcid, rpdLEDPassFireCriteria, rpdLEDADCSum, rpdLEDMaxADC, rpdLEDMaxSample, rpdLEDAvgTime, rpdLEDMaxADCtoADCSumRatio);
         }
     }
     

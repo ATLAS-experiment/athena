@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import argparse
 import os
@@ -26,10 +26,11 @@ if __name__== '__main__':
             sys.exit(1)
 
     RunDMC_testing_configuration = True
+    JobMaker = None  # will be set by the profileFile "include"
     def include(s) : return
     exec(open(args.profileFile).read())
 
-    if "JobMaker" not in dir():
+    if JobMaker is None:
         print("Could not find mu profile in",args.profileFile)
         sys.exit(1)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the Athena project
 # --> README.md before you modify this file
@@ -97,14 +97,15 @@ atlas_add_citest( RecoRun3Data_Express
 atlas_add_citest( ZdcRec_ZDCCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
+  
+atlas_add_citest( ZdcRec_ZDCCalib24
+  SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+)
 
-  atlas_add_citest( ZdcRec_ZDCCalib24
-    SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
-  )
+atlas_add_citest( ZdcRec_ZDCLEDCalib 
+  SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
+)
 
-  atlas_add_citest( ZdcRec_ZDCLEDCalib 
-    SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
-  )
 atlas_add_citest( ZdcRec_ZDCInjCalib 
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hicomm.00488824.calibration_ZDCInjCalib.daq.RAW._lb0000._SFO-11._0001.data --evtMax=10
   )
@@ -116,10 +117,10 @@ atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --no-output-checks)
 
 atlas_add_citest( RecoRun3MC
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-08' )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--maxEvents 25 --conditionsTag OFLCOND-MC23-SDR-RUN3-11-02' )
 
 atlas_add_citest( RecoRun3MC_PileUp
-   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --conditionsTag OFLCOND-MC23-SDR-RUN3-08 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
+   SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --conditionsTag OFLCOND-MC23-SDR-RUN3-11-02 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1919/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
 atlas_add_citest( RecoRun3Data_Overlay
@@ -143,6 +144,11 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun2Data_PHYS )
+
 atlas_add_citest( DerivationRun2MC_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
@@ -150,6 +156,11 @@ atlas_add_citest( DerivationRun2MC_PHYS
 atlas_add_citest( DerivationRun2MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun2MC_PHYS/run_mc_PHYS_Run2/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun2MC_PHYS )
 
 atlas_add_citest( DerivationRun2MCAF3_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag af3_PHYS --threads 4
@@ -163,22 +174,21 @@ atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
-atlas_add_citest( DerivationRun3MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e 'mtDerivation' --tag mc_PHYS --threads 1
-   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
-   PROPERTIES PROCESSORS 1 )
-
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3Data_PHYS/run_data_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun3Data_PHYS )
 
 atlas_add_citest( DerivationRun3Data_Train
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
 atlas_add_citest( DerivationRun3Data_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag data_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3Data_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -190,13 +200,22 @@ atlas_add_citest( DerivationRun3MC_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun3MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --no-output-checks
+   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
-# Explicitly set maxEvents so that the preExec doesn't get overwritten
+atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun3MC_PHYS/run_mc_PHYS_Run3/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
+   PROPERTIES PROCESSORS 4
+   DEPENDS_SUCCESS DerivationRun3MC_PHYS )
+
 atlas_add_citest( DerivationRun3MC_Train_RNTuple
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation -e '--maxEvents=500 --preExec="flags.Output.StorageTechnology.EventData={\\"*\\":\\"ROOTRNTUPLE\\"}" --parallelCompression="False"' --tag mc_PHYS_PHYSLITE --threads 4 --no-output-checks
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DerivationRun3MC_Train_RNTuple.sh
    PROPERTIES PROCESSORS 4 )
 
 # Explicitly set maxEvents so that the preExec doesn't get overwritten
@@ -319,6 +338,12 @@ atlas_add_citest( ACTS_Propagation_ITk
 atlas_add_citest( ACTS_Propagation_ITk_Gen3
    SCRIPT ActsITkTest.py --gen3)
 
+atlas_add_citest( ACTS_Propagation_ITk_Calo_Gen3
+   SCRIPT ActsITkCaloTest.py --gen3)
+
+atlas_add_citest( ACTS_Propagation_ITk_Muon_Calo_Gen3
+   SCRIPT ActsITkMuonCaloTest.py --gen3)
+
 atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
    SCRIPT ActsItkMuonTest.py --gen3)
 
@@ -329,8 +354,7 @@ atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
 atlas_add_citest( ACTS_Workflow_Legacy
-   SCRIPT ActsWorkflowLegacy.sh
-   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+   SCRIPT ActsWorkflowLegacy.sh )
 
 atlas_add_citest( ACTS_Workflow_Cached_Legacy
    SCRIPT ActsWorkflowCachedLegacy.sh )
@@ -366,8 +390,7 @@ atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
    SCRIPT ActsWorkflowWithScoreBasedAmbiguity.sh )
 
 atlas_add_citest( ACTS_ActsGx2fRefitting
-   SCRIPT ActsGx2fRefitting.sh
-   LOG_IGNORE_PATTERN "Gx2fRefitNavigator.*ERROR No Volume | No start volume resolved. Nothing left to do.|Acts.*ERROR Propagation reached the step count limit|Acts.*ERROR Propagation failed" )
+   SCRIPT ActsGx2fRefitting.sh )
    
 atlas_add_citest( ACTS_ActsKfRefitting
    SCRIPT ActsKfRefitting.sh )
@@ -376,8 +399,7 @@ atlas_add_citest( ACTS_ActsEFTrackFit
    SCRIPT ActsEFTrackFit.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefitting
-   SCRIPT ActsGSFRefitting.sh
-   LOG_IGNORE_PATTERN "ActsReFitterAlg.*ERROR Propagation reached the step count limit" )
+   SCRIPT ActsGSFRefitting.sh )
 
 atlas_add_citest( ACTS_ActsGSFRefitLegacy
    SCRIPT ActsGSFRefitLegacy.sh )
@@ -393,13 +415,11 @@ atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
  
 atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot
    SCRIPT ActsBenchmarkLegacyWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLegacyTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLegacyTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+   PROPERTIES PROCESSOR 8 )
 
 atlas_add_citest( ACTS_ActsBenchmarkLegacyWithSpot_Cached
    SCRIPT ActsBenchmarkLegacyWithSpotCached.sh 8 100
-   PROPERTIES PROCESSOR 8
-   LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters|ActsLegacyTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLegacyTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+   PROPERTIES PROCESSOR 8 )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
    SCRIPT ActsBenchmarkWithSpot.sh 8 100
@@ -417,23 +437,28 @@ atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsLegacy )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowCached_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsCachedLegacy )
 
 atlas_add_citest( ACTS_CheckObjectCounts_WorkflowHgtd_Legacy
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsHgtdLegacy )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
-  SCRIPT CheckCountTest.sh ActsCheckObjectCounts
-  LOG_IGNORE_PATTERN "ActsLowPtTrackFindingAlg.*ERROR Propagation reached the step count limit|ActsLowPtTrackFindingAlg.*ERROR Propagation failed: PropagatorError:. Propagation reached the configured maximum number of steps with the initial parameters" )
+  SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
 
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow_Gbts
   SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbts )
+
+atlas_add_citest( ACTS_CheckObjectCounts_Workflow_ActsGbts
+  SCRIPT CheckCountTest.sh ActsCheckObjectCountsActsGbts )
+
+atlas_add_citest( ACTS_TriggerC100
+  SCRIPT test_trigAna_ActsTriggerC100_build.py )
+
+atlas_add_citest( ACTS_TriggerC230
+  SCRIPT test_trigAna_ActsTriggerC230_build.py )
 
 #################################################################################
 #                 Muon Phase II CI tests
@@ -468,6 +493,9 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
+
+atlas_add_citest( Trigger_athenaHLT_v1PhysP1_HI
+   SCRIPT test_trigP1_v1PhysP1_HI_run3_build.py )
 
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose

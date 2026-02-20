@@ -6,13 +6,13 @@
 #include <boost/test/unit_test.hpp>
 namespace utf = boost::unit_test;
 
-#include "IdDict/IdDictDefs.h"
+#include "IdDict/IdDictField.h"
+#include "IdDict/IdDictLabel.h"
 
 BOOST_AUTO_TEST_SUITE(IdDictFieldTest)
 BOOST_AUTO_TEST_CASE(IdDictFieldConstructors){
   BOOST_CHECK_NO_THROW(IdDictField(""));
   IdDictField f("");
-  BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictField f2(f));
   BOOST_CHECK_NO_THROW([[maybe_unused]] IdDictField f3(std::move(f)));
 }
 BOOST_AUTO_TEST_CASE(EmptyIdDictFieldAccessors){
@@ -37,14 +37,13 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
 **/
   IdDictField f("");
   //the bool is "has value"
-  auto lbl1 = new IdDictLabel ("label1", 2);
-  BOOST_CHECK_NO_THROW(f.add_label(lbl1));
+  auto lbl1_p = std::make_unique<IdDictLabel> ("label1", 2);
+  IdDictLabel* lbl1 = lbl1_p.get();
+  BOOST_CHECK_NO_THROW(f.add_label(std::move(lbl1_p)));
   //
-  auto lbl2 = new IdDictLabel("label2");
-  f.add_label(lbl2);
+  f.add_label(std::make_unique<IdDictLabel>("label2"));
   //special treatment for names which are numbers
-  auto lbl3 = new IdDictLabel("+1000", 10);
-  f.add_label(lbl3);
+  f.add_label(std::make_unique<IdDictLabel>("+1000", 10));
   //Now we've added three labels.
   BOOST_TEST(f.get_label_number() == 3);
   BOOST_TEST(f.get_label(1) == "label2");
@@ -57,16 +56,6 @@ BOOST_AUTO_TEST_CASE(IdDictSetAndGet){
   BOOST_TEST(f.get_label_value("nonsense") == 0);
   BOOST_TEST(f.find_label("label1") == lbl1);
   BOOST_TEST(f.verify() == true);
-  //f2 holds the same pointers as f1
-  IdDictField f2(f);
-  BOOST_TEST(f2.get_label(1) == "label2");
-  // clear() deletes the label pointers
-  // ... but the destructor doesn't (seems dangerous)
-  BOOST_CHECK_NO_THROW(f.clear());
-  //f2 holds invalid pointers now, but doesn't know
-  BOOST_TEST(f2.get_label_number() == 3);
-  //f knows the originals were deleted, and the vector emptied
-  BOOST_TEST(f.get_label_number() == 0);
 }
 
 

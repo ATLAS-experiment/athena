@@ -44,7 +44,7 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
         ///////////////////////////////////////////////////////////////////////
         // FPGATrackSimRoadFilterToolI
 
-        virtual StatusCode filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) override;
+        virtual StatusCode filterRoads(std::vector<FPGATrackSimRoad> & prefilter_roads, std::vector<FPGATrackSimRoad> & postfilter_roads) override;
 
     private:
 
@@ -125,9 +125,9 @@ class FPGATrackSimEtaPatternFilterTool : public extends<AthAlgTool, IFPGATrackSi
         void readPatterns(std::string const & filepath);
         void buildMap();
         void resetCounters();
-        void addHitsToMap(const std::shared_ptr<const FPGATrackSimRoad> &r);
+        void addHitsToMap(const FPGATrackSimRoad &r);
         void addRedundantPatterns(std::set<EtaPattern> & usedPatterns, EtaPattern const & currPatt, unsigned nExtra);
-        FPGATrackSimRoad buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, std::shared_ptr<const FPGATrackSimRoad> origr, int etaPatternID) const;
+        FPGATrackSimRoad buildRoad(std::pair<EtaPattern, layer_bitmask_t> const & patt, const FPGATrackSimRoad & origr, int etaPatternID) const;
         std::string to_string(const EtaPattern & patt) const;
         std::string to_string(const FPGATrackSimRoad & road) const;
         std::string to_string(const std::vector<unsigned> &v) const;

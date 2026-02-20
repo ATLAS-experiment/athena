@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 def EfexSimMonitoringConfig(flags):
     '''Function to configure LVL1 Efex simulation comparison algorithm in the monitoring system.'''

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/VNetworkLWTNN.h"
@@ -57,7 +57,7 @@ void VNetworkLWTNN::fillJson(std::string const &tree_name) {
     TTree *tree = (TTree *)tfile.Get(tree_name.c_str());
     std::string found = this->readStringFromTTree(*tree);
     ATH_MSG_DEBUG("Read json from root file, length " << found.length());
-    m_json = found;
+    m_json = std::move(found);
   } else {
     ATH_MSG_VERBOSE("Treating input file as a text json file");
     // The input file is read into a stringstream

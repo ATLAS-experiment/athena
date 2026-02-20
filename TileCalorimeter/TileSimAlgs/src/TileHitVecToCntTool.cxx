@@ -54,8 +54,6 @@ StatusCode TileHitVecToCntTool::initialize() {
 
   ATH_MSG_DEBUG("TileHitVecToCntTool initialization started");
 
-  bool error = false;
-
   ATH_CHECK(m_rndmSvc.retrieve());
 
   // retrieve TileID helper from det store
@@ -176,10 +174,7 @@ StatusCode TileHitVecToCntTool::initialize() {
 
   ATH_MSG_DEBUG("TileHitVecToCntTool initialization completed");
 
-  if (error)
-    return StatusCode::RECOVERABLE;
-  else
-    return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TileHitVecToCntTool::createContainers() {
@@ -706,7 +701,7 @@ StatusCode TileHitVecToCntTool::processAllSubEvents(const EventContext& ctx) con
 
     if (m_pileUp || m_rndmEvtOverlay) {
       TimedHitContList hitContList;
-      // retrive list of pairs (time,container) from PileUp service
+      // retrieve list of pairs (time,container) from PileUp service
       if (!(m_mergeSvc->retrieveSubEvtsData(hitVectorName, hitContList).isSuccess()) || hitContList.size() == 0) {
         ATH_MSG_WARNING("Could not fill TimedHitContList for hit vector " << hitVectorName);
         continue; // continue to the next hit vector

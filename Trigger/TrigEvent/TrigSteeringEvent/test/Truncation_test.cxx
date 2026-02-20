@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifdef XAOD_STANDALON
-int main(){return 0;}E
+#ifdef XAOD_STANDALONE
+int main(){return 0;}
 #endif
 
 #ifndef XAOD_STANDALONE
@@ -126,7 +126,7 @@ int main() {
     return -1;
   }
 
-  res.getNavigationResult() = nav;
+  res.getNavigationResult() = std::move(nav);
 
   log << MSG::INFO << "payload enough for  all  "  << endmsg;
   if ( test_Truncation(res, 5000, 4857, 800, 4000, 40) != 0 ) {

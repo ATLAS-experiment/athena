@@ -18,7 +18,7 @@ namespace MuonValR4{
         return declare_dependency(m_key);
     }
     bool MmClusterVariables::fill(const EventContext& ctx){
-        const ActsGeometryContext& gctx{getGeoCtx(ctx)};
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(ctx)};
 
         SG::ReadHandle inContainer{m_key, ctx};
         if (!inContainer.isPresent()) {
@@ -64,7 +64,7 @@ namespace MuonValR4{
         }
         return insert_itr.first->second; 
     }
-    void MmClusterVariables::dump(const ActsGeometryContext& gctx,
+    void MmClusterVariables::dump(const ActsTrk::GeometryContext& gctx,
                                  const xAOD::MMCluster& strip) {
         const MuonGMR4::MmReadoutElement* re = strip.readoutElement();
         const Identifier id{re->measurementId(strip.layerHash())};
@@ -76,7 +76,7 @@ namespace MuonValR4{
         Amg::Vector3D locPos{Amg::Vector3D::Zero()};
         locPos = strip.localPosition<1>()[0] * Amg::Vector3D::UnitX();
 
-        const Amg::Vector3D globPos{re->localToGlobalTrans(gctx, strip.layerHash()) *locPos};
+        const Amg::Vector3D globPos{re->localToGlobalTransform(gctx, strip.layerHash()) *locPos};
         m_globPos.push_back(globPos);
         m_locPos.push_back(strip.localPosition<1>()[0]);
         m_locCov.push_back(strip.localCovariance<1>()(0,0));

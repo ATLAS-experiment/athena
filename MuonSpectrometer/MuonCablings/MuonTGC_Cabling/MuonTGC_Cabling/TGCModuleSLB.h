@@ -4,41 +4,31 @@
 
 #ifndef MUONTGC_CABLING_TGCMODULESLB_HH
 #define MUONTGC_CABLING_TGCMODULESLB_HH
- 
+
 #include "MuonTGC_Cabling/TGCModuleId.h"
- 
-namespace MuonTGC_Cabling
-{
-  
-class TGCModuleSLB : public TGCModuleId
-{
-public:
-  // Constructor & Destructor
-  TGCModuleSLB(TGCId::SideType side,
-	       TGCId::ModuleType module,
-	       TGCId::RegionType region,
-	       int sector,
-	       int id,
-	       int sbLoc = -1,
-	       int slbAddr = -1);
-  
-  virtual ~TGCModuleSLB(void) {}
 
-  virtual bool isValid(void) const;
+namespace MuonTGC_Cabling {
 
-  // special method for SLB
-  int  getSBLoc(void) const { return m_sbLoc; }   
-  int  getSlbAddr(void) const { return m_slbAddr; }   
+class TGCModuleSLB : public TGCModuleId {
+   public:
+    // Constructor & Destructor
+    TGCModuleSLB(TGCId::SideType side, TGCId::ModuleType module,
+                 TGCId::RegionType region, int sector, int id, int sbLoc = -1,
+                 int slbAddr = -1);
 
-private:
-  TGCModuleSLB(void) {}
+    virtual ~TGCModuleSLB() = default;
 
-private:
-  int m_sbLoc;
-  int m_slbAddr;
+    virtual bool isValid() const;
 
+    // special method for SLB
+    int getSBLoc() const { return m_sbLoc; }
+    int getSlbAddr() const { return m_slbAddr; }
+
+   private:
+    int m_sbLoc{0};
+    int m_slbAddr{0};
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

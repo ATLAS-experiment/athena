@@ -96,8 +96,7 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   bool m_useRPDSumAdc{};
   bool m_useCalibDecorations{};
 
-  StatusCode initializeReadKey(std::string const& containerName, SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> & readHandleKey, std::string const& key, bool addSuffix);
-  StatusCode initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
+  StatusCode initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key);
   static bool nonNegative(float const x) { return x >= 0; }
   static bool anyNonNegative(std::vector<float> const& v) { return std::any_of(v.begin(), v.end(), nonNegative); }
 
@@ -186,74 +185,11 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
   // by this tool's initialize(); this is because container names (and suffix) are taken as tool properties
   // and cannot be used in an in-class initializer (before constructor, where properties are declared)
 
-  // read handle keys
-  //
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
     this, "EventInfoKey", "EventInfo",
     "Location of the event info"
   };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_xposRelKey {
-    this, "xposRelKey", "",
-    "X position of RPD tile center relative to center of RPD active area"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_yposRelKey {
-    this, "yposRelKey", "",
-    "Y position of RPD tile center relative to center of RPD active area"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_rowKey {
-    this, "rowKey", "",
-    "Row index of RPD channel"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_colKey {
-    this, "colKey", "",
-    "Column index of RPD channel"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCModuleCalibEnergyKey {
-    this, "CalibEnergyKey", "",
-    "ZDC module amplitude"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCModuleStatusKey {
-    this, "ZDCModuleStatusKey", "",
-    "ZDC module status word"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeKey {
-    this, "RPDChannelAmplitudeKey", "",
-    "RPD channel amplitude"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelAmplitudeCalibKey {
-    this, "RPDChannelAmplitudeCalibKey", "",
-    "Calibrated RPD channel amplitude"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCKey {
-    this, "RPDChannelMaxADCKey", "",
-    "RPD channel max ADC"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelMaxADCCalibKey {
-    this, "RPDChannelMaxADCCalibKey", "",
-    "Calibrated RPD channel max ADC"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelPileupFracKey {
-    this, "RPDChannelPileupFracKey", "",
-    "RPD channel (out of time) pileup as a fraction of non-pileup sum"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDChannelStatusKey {
-    this, "RPDChannelStatusKey", "",
-    "RPD channel status word"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_RPDSideStatusKey {
-    this, "RPDStatusKey", "",
-    "RPD side status word"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCFinalEnergyKey {
-    this, "FinalEnergyKey", "",
-    "ZDC final energy"
-  };
-  SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_ZDCStatusKey {
-    this, "ZDCStatusKey", "",
-    "ZDC sum status word"
-  };
 
-  // write handle keys
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_centroidEventValidKey {
     this, "centroidEventValidKey", "",
     "Event status: true if both centroids are valid, else false"
@@ -310,8 +246,8 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
     this, "cosDeltaReactionPlaneAngleKey", "",
     "Cosine of the difference between the reaction plane angles of the two sides"
   };
-
 };
+
 } // namespace ZDC
 
 #endif

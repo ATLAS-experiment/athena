@@ -15,7 +15,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def AsgPhotonIsEMSelectorCfg(flags,
                              name,
                              quality,
-                             menu=photonPIDmenu.menuCurrentCuts,
+                             menu=photonPIDmenu.offlineMC20,
                              trigger = False):
 
     mlog = logging.getLogger('AsgPhotonIsEMSelector')

@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // METRegionsTool.cxx 
@@ -94,8 +94,10 @@ namespace met {
 
       // A few nice formatting
       std::string lowerName = std::to_string(eta_min), higherName = std::to_string(eta_max);
-      lowerName.erase(lowerName.find_last_not_of('0') + 1, std::string::npos);
-      higherName.erase(higherName.find_last_not_of('0') + 1, std::string::npos);
+      if (lowerName != "0")
+        lowerName.erase(lowerName.find_last_not_of('0') + 1, std::string::npos);
+      if (higherName != "0")
+        higherName.erase(higherName.find_last_not_of('0') + 1, std::string::npos);
       if(lowerName[lowerName.size()-1] == '.') lowerName.append("0");
       if(higherName[higherName.size()-1] == '.') higherName.append("0");
       std::replace(lowerName.begin(),lowerName.end(),'.','p'); 

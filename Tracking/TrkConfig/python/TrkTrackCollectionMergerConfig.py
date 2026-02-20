@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkTrackCollectionMerger package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -9,10 +9,7 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 OutputCombinedTracks="",
                                 **kwargs):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     prefix = 'Sig_' if doTrackOverlay else ''
 
     kwargs.setdefault("TracksLocation", InputCombinedTracks)
@@ -33,10 +30,7 @@ def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
                                    OutputCombinedTracks="CombinedITkTracks",
                                    **kwargs):
     result = ComponentAccumulator()
-    if hasattr(flags.TrackOverlay, "ActiveConfig"):
-       doTrackOverlay = getattr(flags.TrackOverlay.ActiveConfig, "doTrackOverlay", None)
-    else:
-       doTrackOverlay = flags.Overlay.doTrackOverlay
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
     prefix = flags.Overlay.SigPrefix if doTrackOverlay else ''
 
     kwargs.setdefault("TracksLocation", InputCombinedTracks)

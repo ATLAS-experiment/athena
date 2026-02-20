@@ -11,11 +11,13 @@
 #include <AsgTools/AsgTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <ColumnarTestFixtures/Configuration.h>
 #include <ColumnarTestFixtures/IXAODToolCaller.h>
 
 #include <gtest/gtest.h>
 
 #include <functional>
+#include <span>
 #include <string>
 #include <vector>
 
@@ -24,6 +26,7 @@ class TTree;
 
 namespace columnar
 {
+  class ColumnVectorHeader;
   class ToolColumnVectorMap;
 
   namespace TestUtils
@@ -50,11 +53,13 @@ namespace columnar
     /// @brief check whether we have the right mode
     static bool checkMode ();
 
-    void setupKnownColumns ();
+    void setupKnownColumns (std::span<const TestUtils::TestDefinition> testDefinitions);
 
-    void setupColumns (ToolColumnVectorMap& toolWrapper);
+    void setupColumns (const ColumnVectorHeader& columnHeader);
 
-    void doCall (asg::AsgTool& tool, const std::string& name, const std::string& container, TestUtils::IXAODToolCaller& xAODToolCaller, const std::vector<std::pair<std::string,std::string>>& containerRenames, const std::string& sysName = "");
+    void doCall (const TestUtils::TestDefinition& testDefinition);
+
+    void doCallMulti (const std::vector<TestUtils::TestDefinition>& testDefinitions);
   };
 }
 

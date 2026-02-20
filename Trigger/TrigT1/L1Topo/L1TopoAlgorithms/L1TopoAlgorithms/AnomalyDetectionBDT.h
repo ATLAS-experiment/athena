@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // AnomalyDetectionBDT.h
 // Created by Santiago Cané on 4/15/2025
@@ -8,10 +8,12 @@ Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #ifndef __TopoCore__AnomalyDetectionBDT__
 #define __TopoCore__AnomalyDetectionBDT__
 
-#include <iostream>
-#include <vector>
 #include "L1TopoInterfaces/DecisionAlg.h"
 #include "nlohmann/json.hpp"
+#include <iosfwd>
+#include <vector>
+#include <cstdint>
+
 
 namespace TCS {
    class Bin {

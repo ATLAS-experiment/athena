@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,7 +17,6 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1D.h"
-#include "TMath.h"
 
 #include <iostream>
 #include <fstream>
@@ -82,7 +81,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_All.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else if (m_pid == 2212) {
@@ -90,7 +89,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_High10.*";
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
-    m_net_all = TFCSNetworkFactory::create(inputFileName);
+    m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else {
@@ -105,7 +104,7 @@ bool TFCSGANEtaSlice::LoadGAN() {
     inputFileName = m_param.GetInputFolder() + "/neural_net_" +
                     std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
                     "_" + std::to_string(m_etaMax) + "_UltraLow12.*";
-    m_net_low = TFCSNetworkFactory::create(inputFileName);
+    m_net_low = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_low == nullptr)
       success = false;
   }
@@ -126,7 +125,7 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
 
     std::string histoName = "r" + std::to_string(layer) + "w";
     TH1D *h1 = (TH1D *)file->Get(histoName.c_str());
-    if (TMath::IsNaN(h1->Integral())) {
+    if (std::isnan(h1->Integral())) {
       histoName = "r" + std::to_string(layer);
       h1 = (TH1D *)file->Get(histoName.c_str());
     }

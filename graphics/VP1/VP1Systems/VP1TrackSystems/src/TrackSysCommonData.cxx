@@ -209,7 +209,7 @@ const TrackHandleBase* TrackSysCommonData::getHandle(const Trk::Track* trk)
   return nullptr;  
 }
 
-const ActsGeometryContext& TrackSysCommonData::geometryContext() const {
+const ActsTrk::GeometryContext& TrackSysCommonData::geometryContext() const {
   return *m_geometryContext;
 }
 

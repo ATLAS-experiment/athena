@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/PFClusterSelectorTool.h"
+#include "eflowRecCluster.h"
+#include "PFClusterSelectorTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include <exception>
 

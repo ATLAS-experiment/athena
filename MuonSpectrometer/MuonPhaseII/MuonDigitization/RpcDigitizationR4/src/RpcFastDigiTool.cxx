@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "RpcFastDigiTool.h"
 
@@ -12,6 +12,10 @@ namespace {
     constexpr double percentage(unsigned int numerator, unsigned int denom) {
         return 100. * numerator / std::max(denom, 1u);
     }
+    using ChVec_t = std::vector<std::uint16_t>;
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_phiChannel{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_etaChannel{"SDO_etaChannels"};
 }
 namespace MuonR4 {
     
@@ -19,8 +23,6 @@ namespace MuonR4 {
         ATH_CHECK(MuonDigitizationTool::initialize());
         ATH_CHECK(m_writeKey.initialize());
         ATH_CHECK(m_effiDataKey.initialize(!m_effiDataKey.empty()));
-        m_stIdxBIL = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
-        m_stIdxBIS = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
         return StatusCode::SUCCESS;
     }
     StatusCode RpcFastDigiTool::finalize() {
@@ -48,23 +50,29 @@ namespace MuonR4 {
                     continue;
                 }
                 const Identifier hitId{simHit->identify()};
-                const int stName = m_idHelperSvc->stationName(hitId);
                 RpcDigitCollection* digiColl = fetchCollection(hitId, digitCache);
-                bool run4_BI = (stName== m_stIdxBIS &&  std::abs(m_idHelperSvc->stationEta(hitId)) < 7) ||
-                                stName == m_stIdxBIL;
+                //The new BI chambers only have eta strips
+                bool run4_BI =  m_detMgr->getRpcReadoutElement(hitId)->nPhiStrips() == 0;
                 if (!run4_BI) {
                     /// Standard digitization path
-                    const bool digitizedEta = digitizeHit(simHit, false, efficiencyMap, *digiColl, rndEngine, deadTimes);
-
                     const bool digitizedPhi = digitizeHit(simHit, true,  efficiencyMap, *digiColl, rndEngine, deadTimes);
-                  
+                    std::int16_t phiChannel = digitizedPhi ? idHelper.channel(digiColl->back()->identify()) : -1;
+                    const bool digitizedEta = digitizeHit(simHit, false, efficiencyMap, *digiColl, rndEngine, deadTimes);
+                   
                     if (digitizedEta || digitizedPhi) {
                         xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                        sdo->setIdentifier(digiColl->at(digiColl->size() -1)->identify());
+                        sdo->setIdentifier(digiColl->back()->identify());
+                        ChVec_t& phiChs{dec_phiChannel(*sdo)}; 
+                        if (digitizedPhi) {
+                            phiChs.push_back(phiChannel);
+                        }
+                        dec_etaChannel(*sdo).clear(); 
                     }
                 } else if (digitizeHitBI(simHit, efficiencyMap, *digiColl, rndEngine, deadTimes)) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    sdo->setIdentifier(digiColl->at(digiColl->size() -1)->identify());
+                    sdo->setIdentifier(digiColl->back()->identify());
+                    dec_etaChannel(*sdo).clear(); 
+                    dec_phiChannel(*sdo).clear(); 
                 }
             }
         } while (viewer.next());

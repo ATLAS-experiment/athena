@@ -7,23 +7,23 @@
 #ifndef LARSYMCONDITIONSALG_H
 #define LARSYMCONDITIONSALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "LArRawConditions/LArMCSym.h"
 
 
 template<class MC_t, class SYM_t>
-class LArSymConditionsAlg: public AthAlgorithm {
+class LArSymConditionsAlg: public AthCondAlgorithm {
  public:
   
   //delegate to base-class ctor
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
   virtual ~LArSymConditionsAlg()=default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
 
  private:

@@ -23,40 +23,42 @@ namespace MuonR4{
                 Barrel,
                 Endcap
             };
-            /** @brief Constructor with location defintion */
-            MsTrackSeed(const Location loc);
+            /** @brief Constructor with location defintion
+             *  @param loc: Localtion definition whether the seed is constructed 
+             *              on the barrel or on the endcap surface
+             *  @param sector: In which tree sector is the seed constructed:
+             *                    sector: 2*MS-sector +- Overlap */
+            MsTrackSeed(const Location loc,
+                        const int sector);
             /** @brief Returns the vector of associated segments */
             const std::vector<const xAOD::MuonSegment*>& segments() const;
             /** @brief Returns the list of detailed segments */
-            const std::vector<const Segment*>& detailedSegments() const;
+            std::vector<const Segment*> detailedSegments() const;
+            /** @brief Returns the list of associated buckets */
+            std::vector<const SpacePointBucket*> buckets() const;
             /** @brief Append a segment to the seed */
             void addSegment(const xAOD::MuonSegment* seg);
-            /** @brief Returns the list of associated buckets */
-            const std::unordered_set<const SpacePointBucket*>& buckets() const;
+            /** @brief Replaces an already added segment in the seed with a better suited one
+             *  @param exist: Pointer to the segment that is already part of the seed 
+             *                (Exception is thrown if not)
+             *  @param updated: Pointer to the segment with which the segment is replaced with */
+            void replaceSegment(const xAOD::MuonSegment* exist,
+                                const xAOD::MuonSegment* updated);
+
             /** @brief Returns the seed's position */
             const Amg::Vector3D& position() const;
             /** @brief set the seed's position */
             void setPosition(Amg::Vector3D&& pos);
-            /** @brief Returns the associated MS sector */
-            const MuonGMR4::SpectrometerSector* msSector() const;
             /** @brief Returns the location of the seed */
             Location location() const;
-            /** @brief Equality operator */
-            bool operator==(const MsTrackSeed& other) const;
-            /** @brief Returns if all segments of this seed are also in the seed as well */
-            bool operator<(const MsTrackSeed& other) const;
+            /** @brief Returns the seed's sector*/
+            int sector() const { return m_sector; }
         private:
-            /** @brief Returns whether two spectrometer sectors may be compatbile 
-             *  @param secA: First sector to compare
-             *  @param secB: Second sector to compare */
-            static bool compatibleSectors(const MuonGMR4::SpectrometerSector* secA,
-                                          const MuonGMR4::SpectrometerSector* secB);
-
+            /** @brief Location variable */
             Location m_loc{Location::Undefined};
+            int m_sector{0};
             Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
-            std::vector<const xAOD::MuonSegment*> m_segments{};
-            std::vector<const Segment*> m_detSegments{};
-            std::unordered_set<const SpacePointBucket*> m_buckets{};
+            std::vector<const xAOD::MuonSegment*> m_segments{};          
     };
     using MsTrackSeedContainer = std::vector<MsTrackSeed>;
     std::ostream& operator<<(std::ostream& ostr, const MuonR4::MsTrackSeed& seed);

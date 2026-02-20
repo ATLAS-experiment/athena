@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -8,6 +8,8 @@
 
 // Framework includes
 #include "AthContainers/ConstDataVector.h"
+#include "AsgTools/CurrentContext.h"
+#include "AsgDataHandles/ReadHandle.h"
 
 // Local includes
 #include "AssociationUtils/AltMuJetOverlapTool.h"
@@ -16,7 +18,7 @@
 namespace
 {
   /// Unit conversion constants
-  const double GeV = 1e3;
+  const double GeV = 1e3; // FIXME local unit definition!!
 }
 
 namespace ORUtils
@@ -47,6 +49,8 @@ namespace ORUtils
                     "Maximum allowed size of sliding dR cone");
     declareProperty("UseRapidity", m_useRapidity = true,
                     "Calculate delta-R using rapidity");
+    declareProperty("PVContainerName", m_PVContName = "PrimaryVertices",
+                    "PV Container to use");
   }
 
   //---------------------------------------------------------------------------
@@ -56,15 +60,21 @@ namespace ORUtils
   {
     // Initialize the b-jet helper
     if(!m_bJetLabel.empty())
-      m_bJetHelper = std::make_unique<BJetHelper> (m_bJetLabel);
+      resetAccessor (m_accessors->m_bJetAcc, *m_accessors, m_bJetLabel);
 
     // Initialize the inner cone dR matcher
     m_dRMatchCone1 =
       std::make_unique<DeltaRMatcher> (m_innerDR, m_useRapidity);
+    ATH_CHECK (m_dRMatchCone1->setObjectTypes (xAODType::ObjectType::Muon, xAODType::ObjectType::Jet));
+    addSubtool(*m_dRMatchCone1);
     // Initialize the sliding dR matcher
     m_dRMatchCone2 =
       std::make_unique<SlidingDeltaRMatcher>
         (m_slidingDRC1, m_slidingDRC2, m_slidingDRMaxCone, m_useRapidity);
+    ATH_CHECK (m_dRMatchCone2->setObjectTypes (xAODType::ObjectType::Muon, xAODType::ObjectType::Jet));
+    addSubtool(*m_dRMatchCone2);
+
+    resetAccessor (m_accessors->m_vtxContainerAcc, *m_accessors, m_PVContName, {.addMTDependency = true});
 
     return StatusCode::SUCCESS;
   }
@@ -73,22 +83,15 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode AltMuJetOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId eventContext) const
   {
     // Check the container types
-    if(typeid(cont1) != typeid(xAOD::MuonContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::MuonContainer>)) {
-      ATH_MSG_ERROR("First container arg is not of type MuonContainer!");
-      return StatusCode::FAILURE;
-    }
-    if(typeid(cont2) != typeid(xAOD::JetContainer) &&
-       typeid(cont2) != typeid(ConstDataVector<xAOD::JetContainer>)) {
-      ATH_MSG_ERROR("Second container arg is not of type JetContainer!");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::MuonContainer&>(cont1),
-                            static_cast<const xAOD::JetContainer&>(cont2)) );
+    ATH_CHECK (checkForXAODContainer<xAOD::MuonContainer>(cont1, "First container arg is not of type MuonContainer!"));
+    ATH_CHECK (checkForXAODContainer<xAOD::JetContainer>(cont2, "Second container arg is not of type JetContainer!"));
+
+    ATH_CHECK( internalFindOverlaps(cont1, cont2, eventContext));
     return StatusCode::SUCCESS;
   }
 
@@ -96,29 +99,31 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode AltMuJetOverlapTool::
-  findOverlaps(const xAOD::MuonContainer& muons,
-               const xAOD::JetContainer& jets) const
+  internalFindOverlaps(columnar::Particle1Range muons,
+                       columnar::Particle2Range jets,
+                       columnar::EventContextId eventContext) const
   {
     ATH_MSG_DEBUG("Removing overlapping muons and jets");
+    auto& acc = *m_accessors;
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(muons);
-    m_decHelper->initializeDecorations(jets);
+    initializeDecorations(muons);
+    initializeDecorations(jets);
 
     // Remove jets that overlap with muons in first cone.
     for(const auto muon : muons){
-      if(!m_decHelper->isSurvivingObject(*muon)) continue;
+      if(!isSurvivingObject(muon)) continue;
 
       for(const auto jet : jets){
-        if(!m_decHelper->isSurvivingObject(*jet)) continue;
+        if(!isSurvivingObject(jet)) continue;
         // User-defined jet criteria include b-tagging,
         // numTrack, and the mu/jet PT ratio
-        if(m_bJetHelper && m_bJetHelper->isBJet(*jet)) continue;
-        if(getNumTracks(jet) >= m_numJetTrk) continue;
-        float ptRatio = muon->pt() / jet->pt();
+        if(!m_bJetLabel.empty() && acc.m_bJetAcc(jet)) continue;
+        if(getNumTracks(jet, eventContext) >= m_numJetTrk) continue;
+        float ptRatio = muon(acc.m_muonPtAcc) / jet(acc.m_jetPtAcc);
         if(ptRatio < m_muJetPtRatio) continue;
 
-        if(m_dRMatchCone1->objectsMatch(*jet, *muon)){
+        if(m_dRMatchCone1->objectsMatch(jet, muon)){
           ATH_CHECK( handleOverlap(jet, muon) );
         }
       }
@@ -126,12 +131,12 @@ namespace ORUtils
 
     // Remove muons from remaining overlapping jets
     for(const auto jet : jets){
-      if(!m_decHelper->isSurvivingObject(*jet)) continue;
+      if(!isSurvivingObject(jet)) continue;
 
       for(const auto muon : muons){
-        if(!m_decHelper->isSurvivingObject(*muon)) continue;
+        if(!isSurvivingObject(muon)) continue;
 
-        if(m_dRMatchCone2->objectsMatch(*muon, *jet)){
+        if(m_dRMatchCone2->objectsMatch(muon, jet)){
           ATH_CHECK( handleOverlap(muon, jet) );
         }
       }
@@ -143,32 +148,32 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Retrieve the primary vertex
   //---------------------------------------------------------------------------
-  const xAOD::Vertex* AltMuJetOverlapTool::getPrimVtx() const
+  int AltMuJetOverlapTool::getPrimVtxIndex(columnar::EventContextId eventContext) const
   {
-    const char* contName = "PrimaryVertices";
-    const xAOD::VertexContainer* vertices = nullptr;
-    if(evtStore()->retrieve(vertices, contName).isSuccess()) {
-      for(auto vtx : *vertices) {
-        if(vtx->vertexType() == xAOD::VxType::PriVtx)
-          return vtx;
-      }
+    auto& acc = *m_accessors;
+    if (!acc.m_vtxContainerAcc.isAvailable(eventContext)) {
+      ATH_MSG_WARNING("Primary vertex container is not available");
+      return -1;
     }
-    else {
-      ATH_MSG_WARNING("Failed to retrieve " << contName);
+    auto vertices = acc.m_vtxContainerAcc(eventContext);
+    for(auto vtx : vertices) {
+      if(vtx(acc.m_vertexTypeAcc) == xAOD::VxType::PriVtx)
+        return vertices.getIndexInRange(vtx);
     }
-    return nullptr;
+    ATH_MSG_WARNING("No primary vertex found");
+    return -1;
   }
 
   //---------------------------------------------------------------------------
   // Retrieve the primary vertex
   //---------------------------------------------------------------------------
-  int AltMuJetOverlapTool::getNumTracks(const xAOD::Jet* jet) const
+  int AltMuJetOverlapTool::getNumTracks(columnar::Particle2Id jet, columnar::EventContextId eventContext) const
   {
     // Find the primary vertex
-    auto vtx = getPrimVtx();
-    if(!vtx) return -1;
-    static const SG::AuxElement::ConstAccessor< std::vector<int> > acc("NumTrkPt500");
-    return acc(*jet)[vtx->index()];
+    auto& acc = *m_accessors;
+    auto vtx = getPrimVtxIndex(eventContext);
+    if(vtx == -1) return -1;
+    return acc.m_numTrkPt500Acc(jet)[vtx];
   }
 
 } // namespace ORUtils

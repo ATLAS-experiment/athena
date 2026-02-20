@@ -109,7 +109,14 @@ namespace ISF {
     ServiceHandle<ITruthSvc>             m_truthRecordSvc;
 
     /** The Simulation Selector Chains */
-    ToolHandleArray<ISimulationSelector> m_simSelectors[AtlasDetDescr::fNumAtlasRegions];
+    std::array<PublicToolHandleArray<ISimulationSelector>, AtlasDetDescr::fNumAtlasRegions> m_simSelectors{{ // TODO make private
+      {}, // fUndefinedAtlasRegion
+      {this, "IDSimulationSelectors", {} }, // fAtlasID
+      {this, "BeamPipeSimulationSelectors", {} }, // fAtlasFoward
+      {this, "CaloSimulationSelectors", {} }, // fAtlasCalo
+      {this, "MSSimulationSelectors", {} }, // fAtlasMS
+      {this, "CavernSimulationSelectors", {} } // fAtlasCavern
+      }};
 
     /** Quasi-Stable Particle Simulation Patcher */
     ServiceHandle<Simulation::IZeroLifetimePatcher> m_qspatcher;

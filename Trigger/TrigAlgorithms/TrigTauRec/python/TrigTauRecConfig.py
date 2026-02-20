@@ -201,8 +201,7 @@ def trigTauRecMergedCaloMVACfg(flags):
     tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet=''))
 
     # Calculate cell-based quantities: strip variables, EM and Had energies/radii, centFrac, isolFrac and ring energies
-    from AthenaCommon.SystemOfUnits import GeV
-    tools.append(CompFactory.TauCellVariables(StripEthreshold=0.2*GeV, CellCone=0.2, VertexCorrection = False))
+    tools.append(CompFactory.TauCellVariables(CellCone=0.2, VertexCorrection = False))
 
     # Compute MVA TES (ATR-17649), stores MVA TES as the default tau pt
     tools.append(CompFactory.MvaTESVariableDecorator(Key_vertexInputContainer='', EventShapeKey='', VertexCorrection=False))

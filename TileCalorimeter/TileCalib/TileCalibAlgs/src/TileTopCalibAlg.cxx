@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTopCalibAlg.h"
@@ -42,7 +42,7 @@ StatusCode TileTopCalibAlg::initialize()
   ATH_MSG_DEBUG ( "Run number set to " << m_runNumber );
   ATH_MSG_DEBUG ( "Run type set to " << m_runType );
   ATH_MSG_DEBUG ( "Output file set to " << m_fileName );
-  ATH_MSG_DEBUG (  "starting to retrive list " << m_tileCalibToolList );
+  ATH_MSG_DEBUG (  "starting to retrieve list " << m_tileCalibToolList );
   ATH_CHECK( m_tileCalibToolList.retrieve() );
   ATH_MSG_DEBUG (  m_tileCalibToolList << "retrieved");
   

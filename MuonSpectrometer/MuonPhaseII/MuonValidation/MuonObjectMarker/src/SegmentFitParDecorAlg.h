@@ -10,7 +10,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 namespace MuonR4{
@@ -50,7 +50,7 @@ namespace MuonR4{
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", 
                                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             
-            SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+            SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
 
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
 

@@ -78,6 +78,10 @@ def Pythia8BaseCfg(flags, name="Pythia8_i", **kwargs):
         CompFactory.Pythia8_i("Pythia8_i", **kwargs)
     )
 
+    # Announce generator to service
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Generators=["Pythia8"]), sequenceName=EvgenSequence.Generator.value)
+
     return ca
 
 
@@ -126,11 +130,15 @@ def Pythia8_A2_MSTW2008LO_Common_Cfg(flags, **kwargs):
     # Update kwargs
     kwargs["Commands"] = list(dict.fromkeys(cmds))
 
+    # Now get the base config
+    ca = Pythia8BaseCfg(flags, **kwargs)
+
     # Broadcast tune to service
-    #tune = "A2 MSTW2008LO"
+    from GeneratorConfig.GeneratorInfoSvcConfig import GeneratorInfoSvcCfg
+    ca.merge(GeneratorInfoSvcCfg(flags, Tune="A2 MSTW2008LO"), sequenceName=EvgenSequence.Generator.value)
 
     # Call the base config
-    return Pythia8BaseCfg(flags, **kwargs)
+    return ca
 
 
 def Pythia8_A2_MSTW2008LO_EvtGen_Common_Cfg(flags, **kwargs):

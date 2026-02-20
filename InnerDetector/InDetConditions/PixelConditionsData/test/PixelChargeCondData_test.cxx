@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_SUITE(PixelChargeCalibCondDataTest)
     PixelChargeCalibCondData::IBLModule charges{x,x};
     BOOST_CHECK_NO_THROW(calib.setTot2Charges(moduleHash, charges));
     //this should throw, but does not:
-    BOOST_CHECK_THROW(calib.setTot2Charges(hashTooBig, charges), std::out_of_range);
+    BOOST_CHECK_THROW(calib.setTot2Charges(hashTooBig, std::move(charges)), std::out_of_range);
     //
     BOOST_TEST((calib.getCalibrationStrategy(moduleHash) == PixelChargeCalibCondData::CalibrationStrategy::RUN3PIX));
     BOOST_CHECK_THROW(calib.getCalibrationStrategy(hashTooBig), std::out_of_range); //should throw; does not

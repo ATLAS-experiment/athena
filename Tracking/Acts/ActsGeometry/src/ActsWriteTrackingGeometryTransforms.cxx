@@ -5,8 +5,8 @@
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
-#include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 
 
 // ATHENA
@@ -52,7 +52,7 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   
   auto trackingGeometry = m_trackingGeometryTool->trackingGeometry();
   ATH_MSG_DEBUG("Retrieved tracking Geometry");
-  const ActsGeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
+  const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getGeometryContext(ctx);
   ATH_MSG_DEBUG("Retrieved geometry context");
 
   std::stringstream ss;
@@ -61,10 +61,9 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
   std::ofstream os(m_outputName, std::ios_base::app);
 
   trackingGeometry->visitSurfaces([&] (const Acts::Surface* srf) {
-    const Acts::DetectorElementBase *detElem = srf->associatedDetectorElement();
+    const Acts::SurfacePlacementBase *detElem = srf->surfacePlacement();
     const auto *gmde = static_cast<const ActsDetectorElement *>(detElem);
 
-    Identifier ath_geoid = gmde->identify(); 
 
     if(dynamic_cast<const InDetDD::TRT_BaseElement*>(gmde->upstreamDetectorElement()) != nullptr) { 
       return;
@@ -90,6 +89,8 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
 
     int bec,ld,etam,phim, side;
 
+    Identifier ath_geoid = gmde->identify(); 
+
     if(sil_de->isPixel()) {
       bec  =  m_pixelID->barrel_ec(ath_geoid);
       ld   =  m_pixelID->layer_disk(ath_geoid);
@@ -97,17 +98,14 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
       phim =  m_pixelID->phi_module(ath_geoid);
       side = 0;
       os << 0;
-    }
-    else if(sil_de->isSCT()) {
-      
+    } else if(sil_de->isSCT()) {
       bec =  m_SCT_ID->barrel_ec(ath_geoid);
       ld =   m_SCT_ID->layer_disk(ath_geoid);
       etam = m_SCT_ID->eta_module(ath_geoid);
       phim = m_SCT_ID->phi_module(ath_geoid);
       side = m_SCT_ID->side(ath_geoid);
       os << 1;
-    }
-    else {
+    } else {
       throw std::runtime_error{"The Detector Element is neither Pixel nor SCT"}; // this shouldn't happen
     }
     // Write the type of silicon first (0=PIX, 1=SCT)
@@ -118,10 +116,10 @@ StatusCode ActsWriteTrackingGeometryTransforms::execute() {
     
     ATH_MSG_DEBUG(geoID<<" "<<ath_geoid<<" "<<bec<<" "<<ld<<" "<<etam<<" "<<phim<<" "<<side);
     
-    const ActsGeometryContext void_gctx;
+    const ActsTrk::GeometryContext& void_gctx = m_trackingGeometryTool->getNominalGeometryContext();
     if (m_writeFullTransform) {
       // iterate over components of transform
-      const auto* p = srf->transform(gctx.context()).data();
+      const auto* p = srf->localToGlobalTransform(gctx.context()).data();
       for(size_t i=0;i<16;i++) {
         if(i>0) {
           os << ",";

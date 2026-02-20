@@ -8,6 +8,7 @@
 #include <set>
 #include <memory>
 #include <functional>
+#include <regex>
 
 #include "AthLinks/ElementLink.h"
 #include "AsgDataHandles/WriteHandle.h"
@@ -35,7 +36,7 @@
 #include "TrigCompositeUtils/IPartCombItr.h"
 #include "TrigCompositeUtils/Combinations.h"
 #include "TrigConfHLTData/HLTChain.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 #define TRIGCOMPUTILS_ENABLE_EARLY_EXIT 1
 
@@ -50,7 +51,7 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Creates and right away records the Container CONT with the key.
-   * Returns the WriteHandle. 
+   * Returns the WriteHandle.
    * No Aux store.
    **/
   template<class CONT>
@@ -58,7 +59,7 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Creates and right away records the Container CONT with the key.
-   * Returns the WriteHandle. 
+   * Returns the WriteHandle.
    * With Aux store.
    **/
   template<class CONT, class AUX>
@@ -66,7 +67,7 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Creates and right away records the DecisionContainer with the key.
-   * Returns the WriteHandle. 
+   * Returns the WriteHandle.
    **/
   SG::WriteHandle<DecisionContainer> createAndStore( const SG::WriteHandleKey<DecisionContainer>& key, const EventContext& ctx );
 
@@ -80,8 +81,8 @@ namespace TrigCompositeUtils {
    * This is to make this:
    * auto d = newDecisionIn(output);
    * instead of:
-   * auto d = new Decision; 
-   * output->push_back(d);    
+   * auto d = new Decision;
+   * output->push_back(d);
    * If provided, the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
    **/
@@ -93,7 +94,7 @@ namespace TrigCompositeUtils {
    * @arg the previous decision to which the new one should be connected
    * @arg the name is assigned to the TC object
    * Note that the supplied DecisionContainer must have been recorded in the event store.
-   **/ 
+   **/
   Decision* newDecisionIn( DecisionContainer* dc, const Decision* dOld, const std::string& name, const EventContext& ctx );
 
   /**
@@ -123,9 +124,9 @@ namespace TrigCompositeUtils {
    **/
   void uniqueDecisionIDs( Decision* dest);
 
-      
+
   /**
-   * @brief Extracts DecisionIDs stored in the Decision object 
+   * @brief Extracts DecisionIDs stored in the Decision object
    **/
   void decisionIDs( const Decision* d, DecisionIDContainer& id );
 
@@ -134,16 +135,16 @@ namespace TrigCompositeUtils {
    * the Decision object, returns const accessor
    * @warning Operates on the underlying xAOD vector form rather than the DecisionContainer set form
    **/
-  const std::vector<DecisionID>& decisionIDs( const Decision* d ); 
+  const std::vector<DecisionID>& decisionIDs( const Decision* d );
 
   /**
-   * @brief Another variant of the above method to access DecisionIDs stored in 
+   * @brief Another variant of the above method to access DecisionIDs stored in
    * the Decision object, returns read/write accessor
    * @warning Operates on the underlying xAOD vector form rather than the DecisionContainer set form
-   **/ 
+   **/
   std::vector<DecisionID>& decisionIDs( Decision* d );
 
-  
+
   /**
    * @brief return true if there is no positive decision stored
    **/
@@ -170,7 +171,7 @@ namespace TrigCompositeUtils {
    * @brief Takes a raw pointer to a Decision and returns an ElementLink to the Decision. The Decision must already be in a container in SG.
    **/
   ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx);
-  
+
   /**
    * @brief Links to the previous object, location of previous 'seed' decision supplied by hand
    **/
@@ -226,7 +227,7 @@ namespace TrigCompositeUtils {
    * @param legIdentifier The HLT::Identifier corresponding to the specific leg.
    * @return Index of the leg, e.g. leg002_HLT_mu50_L1MU20 would return 2. Returns -1 if not a leg identifier or 0 if a chain identifier.
    **/
-  int32_t getIndexFromLeg(const HLT::Identifier& legIdentifier); 
+  int32_t getIndexFromLeg(const HLT::Identifier& legIdentifier);
 
  /**
    * @brief Extract the numeric index of a leg identifier.
@@ -270,7 +271,7 @@ namespace TrigCompositeUtils {
    * @return True if chain-ID, else false
    **/
   bool isChainId(const std::string& name);
-    
+
   /**
    * @brief traverses Decision object links for another Decision object fulfilling the prerequisite specified by the filter
    * @return matching Decision object or nullptr
@@ -287,8 +288,8 @@ namespace TrigCompositeUtils {
      **/
     HasObject(const std::string& name): m_name(name) {}
     /**
-     * @brief checks if the arg TC has link of name specified at construction 
-     * @warning method for internal consumption within @see find function 
+     * @brief checks if the arg TC has link of name specified at construction
+     * @warning method for internal consumption within @see find function
      **/
     bool operator()(const Decision* ) const;
   private:
@@ -305,8 +306,8 @@ namespace TrigCompositeUtils {
      **/
     HasObjectCollection(const std::string& name): m_name(name) {}
     /**
-     * @brief checks if the arg Decision object has link collection of name specified at construction 
-     * @warning method for internal consumption within @see find function 
+     * @brief checks if the arg Decision object has link collection of name specified at construction
+     * @warning method for internal consumption within @see find function
      **/
     bool operator()(const Decision* ) const;
   private:
@@ -338,7 +339,7 @@ namespace TrigCompositeUtils {
    * @return The terminus node, or a nullptr if the node is not found
    **/
   const Decision* getNodeByName(const DecisionContainer& container, const std::string& nodeName);
-  
+
 
   /**
    * @brief Query all DecisionCollections in the event store, locate all Decision nodes in the graph where an object failed selection for a given chain.
@@ -365,8 +366,8 @@ namespace TrigCompositeUtils {
    * enforceDecisionOnStartNode should be true if navigating for a trigger which passed (e.g. starting from HLTPassRaw)
    * enforceDecisionOnStartNode should be false if navigating for a trigger which failed but whose failing start node(s) were recovered via getRejectedDecisionNodes
    **/
-  void recursiveGetDecisions(const Decision* node, 
-    NavGraph& navGraph, 
+  void recursiveGetDecisions(const Decision* node,
+    NavGraph& navGraph,
     const DecisionIDContainer& ids = {},
     const bool enforceDecisionOnStartNode = true);
 
@@ -377,7 +378,7 @@ namespace TrigCompositeUtils {
    * @param comingFrom The parent node which has a link in the navigation to this "node"
    * @paramp[inout] fullyExploredFrom Cache to avoid exploring graph branches more than once
    **/
-  void recursiveGetDecisionsInternal(const Decision* node, 
+  void recursiveGetDecisionsInternal(const Decision* node,
     const Decision* comingFrom,
     NavGraph& navGraph,
     std::set<const Decision*>& fullyExploredFrom,
@@ -392,7 +393,7 @@ namespace TrigCompositeUtils {
    * @param[in] keepOnlyFinalFeatures Set this to true for analysis-level slimming, when only trigger-matching is needed downstream.
    * @param[in] nodesToDrop Optional list of node names. Nodes whose name matches an entry in this list will never be flagged as "keep".
    **/
-  void recursiveFlagForThinning(NavGraph& node, 
+  void recursiveFlagForThinning(NavGraph& node,
     const bool keepOnlyFinalFeatures,
     const bool removeEmptySteps,
     const std::vector<std::string>& nodesToDrop);
@@ -403,7 +404,7 @@ namespace TrigCompositeUtils {
    * @see recursiveFlagForThinning
    * @paramp[inout] fullyExploredFrom Cache to avoid exploring graph branches more than once
    **/
-  void recursiveFlagForThinningInternal(NavGraphNode* node, 
+  void recursiveFlagForThinningInternal(NavGraphNode* node,
     bool modeKeep,
     std::set<NavGraphNode*>& fullyExploredFrom,
     const bool keepOnlyFinalFeatures,
@@ -432,86 +433,90 @@ namespace TrigCompositeUtils {
   /// @}
 
   /**
-   * @brief Removes ElementLinks from the supplied vector if they do not come from the specified collection (sub-string match).
-   * @param[in] containerSGKey The StoreGate key of the collection to match against. Performs sub-string matching. Passing "" performs no filtering.
+   * DEPRECATED
+   * @brief Removes ElementLinks from the supplied vector if they do not come from the specified collection (regex match).
+   * @param[in] containerSGKey The StoreGate key of the collection to match against. Passing "" performs no filtering.
    * @param[in,out] vector Mutable vector of ElementLinks on which to filter.
    **/
   template<class CONTAINER>
   void filterLinkVectorByContainerKey(const std::string& containerSGKey, std::vector<ElementLink<CONTAINER>>& vector);
 
+
   /**
-   * @brief Extract features from the supplied linkVector (obtained through recursiveGetDecisions).
-   * @param[in] navPaths Sub-graph of the trigger navigation which is to be considered.
-   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+   * DEPRECATED
+   * @brief Extract features from the supplied navGraph (obtained through recursiveGetDecisions).
+   * @param[in] navGraph Sub-graph of the trigger navigation which is to be considered.
+   * @param[in] behavior  TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
                           branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
                           to fill the decisions storage in LinkInfo.
-   * @param[in] featureName Optional name of feature link as saved online. The "feature" link is enforced, others may have been added. 
+   * @param[in] featureName Optional name of feature link as saved online. The "feature" link is enforced, others may have been added.
    * @param[in] chains Optional set of Chain IDs which features are being requested for. Used to set the ActiveState of returned LinkInfo objects.
    * @return Typed vector of LinkInfo. Each LinkInfo wraps an ElementLink to a feature and a pointer to the feature's Decision object in the navigation.
    **/
   template<class CONTAINER>
-  const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType( 
-    const NavGraph& navGraph, 
+  const std::vector< LinkInfo<CONTAINER> > recursiveGetFeaturesOfType(
+    const NavGraph& navGraph,
     const std::string& containerSGKey = "",
     const unsigned int behaviour = TrigDefs::lastFeatureOfType,
     const std::string& navElementLinkKey = featureString(),
     const DecisionIDContainer& chainIDs = DecisionIDContainer());
 
   /**
+   * DEPRECATED
    * @see recursiveGetFeaturesOfType
-   * @brief Internal implimentation called by recursiveGetFeaturesOfType, and by itself
-   * @param[inout] features The untimate return vector. New links are to be appended.
+   * @brief Internal implementation called by recursiveGetFeaturesOfType, and by itself
+   * @param[inout] features The ultimate return vector. New links are to be appended.
    * @param[inout] fullyExploredFrom Cache of graph nodes which have been fully explored, and hence don't need exploring again should they show up.
    * @param[in] navGraphNode The current node in the navGraph which is being explored.
    **/
   template<class CONTAINER>
   void recursiveGetFeaturesOfTypeInternal(
-    std::vector< LinkInfo<CONTAINER> >& features, 
+    std::vector< LinkInfo<CONTAINER> >& features,
     std::set<const NavGraphNode*>& fullyExploredFrom,
-    const NavGraphNode* navGraphNode, 
+    const NavGraphNode* navGraphNode,
     const std::string& containerSGKey,
     const unsigned int behaviour,
     const std::string& navElementLinkKey,
     const DecisionIDContainer& chainIDs);
 
   /**
-   * @brief Perform a recursive search for ElementLinks of type T and name 'linkName', starting from Decision object 'start' 
+   * @brief Perform a recursive search for ElementLinks of type T and name 'linkName', starting from Decision object 'start'
    * For the case of multiple links, this function only returns the first one found. @see findLinks
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[in] suppressMultipleLinksWarning findLink will print a warning if more than one ElementLink is found, this can be silenced here.
-   * @return LinkInfo A wrapper around an ElementLink and the location in the graph 
+   * @return LinkInfo A wrapper around an ElementLink and the location in the graph
    */
   template<typename T>
   LinkInfo<T>
-  findLink(const Decision* start, 
-    const std::string& linkName, 
+  findLink(const Decision* start,
+    const std::string& linkName,
     const bool suppressMultipleLinksWarning = false);
 
   /**
    * @brief search back the TC links for the object of type T linked to the one of TC (recursively)
-   * Populates provided vector with all located links to T of the corresponding linkName. 
+   * Populates provided vector with all located links to T of the corresponding linkName.
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[inout] links Reference to vector, this will be populated with the found links.
-   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+   * @param[in] behavior  TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
                           branch once a link has been located and collected. Optional OR with TrigDefs::fillDecisions
                           to fill the decisions storage in LinkInfo.
-   * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times. 
+   * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times.
    */
   template<typename T>
   void
-  findLinks(const Decision* start, 
+  findLinks(const Decision* start,
     const std::string& linkName,
-    std::vector<LinkInfo<T>>& links, 
-    unsigned int behaviour = TrigDefs::allFeaturesOfType, 
+    std::vector<LinkInfo<T>>& links,
+    unsigned int behaviour = TrigDefs::allFeaturesOfType,
     std::set<const xAOD::TrigComposite*>* fullyExploredFrom = nullptr);
 
   /**
    * @brief search back the TC links for the object of type T linked to the one of TC (recursively)
-   * This version returns a vector rather than requiring that one be passed to it. 
+   * This version returns a vector rather than requiring that one be passed to it.
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
@@ -539,10 +544,10 @@ namespace TrigCompositeUtils {
    * @param[in] suppressMultipleLinksWarning findLink will print a warning if more than one ElementLink is found, this can be silenced here.
    * @return True if a link was located
    */
-  bool typelessFindLink(const Decision* start, 
+  bool typelessFindLink(const Decision* start,
     const std::string& linkName,
     sgkey_t& key,
-    uint32_t& clid,
+    CLID& clid,
     Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning = false);
@@ -551,10 +556,10 @@ namespace TrigCompositeUtils {
    * @brief Version of typelessFindLink which operates on a sub-graph (described by the NavGraph), rather than the whole navigation graph.
    * If the supplied NavGraph has more than one entry point, then all will be explored.
    */
-  bool typelessFindLink(const NavGraph& subGraph, 
+  bool typelessFindLink(const NavGraph& subGraph,
     const std::string& linkName,
     sgkey_t& key,
-    uint32_t& clid,
+    CLID& clid,
     Decision::index_type& index,
     const Decision*& source,
     const bool suppressMultipleLinksWarning = false);
@@ -562,37 +567,37 @@ namespace TrigCompositeUtils {
   /**
    * @brief search back the TC links for the object of type T linked to the one of TC (recursively)
    * Returns the link data in a typeless way, as raw key, index and CLID values. These may be reconstituted into a typed ElementLink.
-   * Populates provided vectors with all located links of the corresponding linkName. 
+   * Populates provided vectors with all located links of the corresponding linkName.
    * @param[in] start the Decision Object from where recursive search should begin
    * @param[in] linkName the name of the ElementLink stored inside one or more DecisionObjects.
    * @param[inout] keyVec The return vector of the storegate key (hash) of the located link's collection
    * @param[inout] clidVec The return vector of the class ID of the link's collection
    * @param[inout] indexVec The return vector of the link's index inside its collection.
    * @param[inout] sourceVec The return vector of the link's originating Decision object.
-   * @param[in] behaviour TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
+   * @param[in] behavior  TrigDefs::allFeaturesOfType to explore all branches of the navigation graph all the
                           way back to the HLTSeeding, or TrigDefs::lastFeatureOfType to exit early from each
-                          branch once a link has been located and collected. 
-   * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times. 
+                          branch once a link has been located and collected.
+   * @param[inout] fullyExploredFrom Optional cache used by the recursive algorithm to avoid exploring each node multiple times.
    */
-  bool typelessFindLinks(const Decision* start, 
+  bool typelessFindLinks(const Decision* start,
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec,
-    std::vector<uint32_t>& clidVec,
+    std::vector<CLID>& clidVec,
     std::vector<Decision::index_type>& indexVec,
     std::vector<const Decision*>& sourceVec,
-    const unsigned int behaviour = TrigDefs::allFeaturesOfType, 
+    const unsigned int behaviour = TrigDefs::allFeaturesOfType,
     std::set<const Decision*>* fullyExploredFrom = nullptr);
 
   /**
    * @brief Version of typelessFindLinks which operates on a sub-graph (entered via the supplied NavGraphNode), rather than the whole navigation graph.
    */
-  bool typelessFindLinks(const NavGraphNode* start, 
+  bool typelessFindLinks(const NavGraphNode* start,
     const std::string& linkName,
     std::vector<sgkey_t>& key,
-    std::vector<uint32_t>& clid,
+    std::vector<CLID>& clid,
     std::vector<Decision::index_type>& index,
     std::vector<const Decision*>& sourceVec,
-    const unsigned int behaviour = TrigDefs::allFeaturesOfType, 
+    const unsigned int behaviour = TrigDefs::allFeaturesOfType,
     std::set<const Decision*>* fullyExploredFrom = nullptr);
 
   /**
@@ -602,17 +607,17 @@ namespace TrigCompositeUtils {
   bool typelessFindLinksCommonLinkCollection(const Decision* start,
     const std::string& linkName,
     std::vector<sgkey_t>& keyVec, 
-    std::vector<uint32_t>& clidVec,
+    std::vector<CLID>& clidVec,
     std::vector<Decision::index_type>& indexVec, 
     std::vector<const Decision*>& sourceVec);
 
   /**
    * @brief Produce the combinations for a set of features
-   * 
+   *
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
-   * 
+   *
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
    * @param[in] legMultiplicities The multiplicity of each chain leg. If a leg will not produce
@@ -627,11 +632,11 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Produce the combinations for a set of features
-   * 
+   *
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
-   * 
+   *
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
    * @param[in] legMultiplicities The multiplicity of each chain leg. If a leg will not produce
@@ -646,14 +651,14 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Produce the combinations for a set of features
-   * 
+   *
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
    *
    * Note that if any legs of this chain do not have IParticle features this will not generate any
    * combinations.
-   * 
+   *
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
    * @param[in] chainInfo The chain info object read from the configuration
@@ -667,14 +672,14 @@ namespace TrigCompositeUtils {
 
   /**
    * @brief Produce the combinations for a set of features
-   * 
+   *
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
    *
    * Note that if any legs of this chain do not have IParticle features this will not generate any
    * combinations.
-   * 
+   *
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
    * @param[in] chainInfo The chain info object read from the configuration
@@ -685,11 +690,11 @@ namespace TrigCompositeUtils {
     const std::vector<LinkInfo<xAOD::IParticleContainer>>& features,
     const TrigConf::HLTChain *chainInfo,
     FilterType filter = FilterType::UniqueObjects);
-    
+
   /**
    * Prints the Decision object including the linked seeds
    * @warnign expensive call
-   **/  
+   **/
   std::string dump( const Decision*  tc, const std::function< std::string( const Decision* )>& printerFnc );
 
 }

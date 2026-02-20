@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
 #define MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
@@ -9,6 +9,9 @@
 #include <GeoPrimitives/GeoPrimitives.h>
 #include <MuonPatternEvent/MuonHoughDefs.h>
 #include <xAODMuon/MuonSegment.h>
+#include <MuonPatternEvent/Segment.h>
+#include <Acts/Visualization/ObjVisualization3D.hpp>
+
 #include <memory>
 
 class EventContext;

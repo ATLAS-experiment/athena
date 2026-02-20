@@ -34,7 +34,17 @@ It needs to run over both CC and PC streams, so the input will represent the min
 ### makeHIResponse
 
 After the data-taking period, when the final GRL is available, this macro combines the histograms created by `HIClusterGeoFiller` from the good lumiblocks in runs passing GRL, and creates `h3_eta_phi_response`, `h3_eta_phi_offset`, and `h1_run_index` histograms.
-Ensure that you combine outputs from CC and PC streams beforehand. There shall be one input file per run with the run number in its name.
+
+The first argument has to be the GRL. 
+The other arguments are parts of the path and file name; 
+the blanks between the parts will be filled by the run number. 
+It's possible to use a wildcard `*` as well as `[...]` (e.g. `[PC]` will match both "P" and "C"). 
+It's not possible to use a wildcard `?` &ndash; ROOT will misinterpret it. 
+Example of a command:
+```
+makeHIResponse GoodRunList.xml /eos/atlas/atlascerngroupdisk/phys-hi/HIClusterGeoWeights/data24_hi/physics_[PC]C/00 /data25_hi.00 .physics_[PC]C.merge.HIST.f*_m*_c*_m*
+```
+
 Creates `cluster.geo.RESPONSE_OFFSET_RUNINDEX.root`.
 
 ## Final `cluster.geo.XXX.root` file

@@ -2,19 +2,66 @@
 
 // Local include(s).
 #include "xAODRootAccess/Event.h"
+#include "xAODRootAccess/REvent.h"
 #include "xAODRootAccess/TActiveStore.h"
+#include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/TStore.h"
 #include "xAODRootAccess/tools/IObjectManager.h"
 
 // Project include(s).
+#include "AsgMessaging/MessageCheck.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+
+// ROOT include(s).
+#include <TFile.h>
+#include <TKey.h>
 
 // System include(s).
 #include <regex>
 #include <string>
 #include <vector>
 
+// Set up message printing functions for the static function(s).
+ANA_MSG_SOURCE(xAODEvent, "xAOD::Event")
+
 namespace xAOD {
+
+// Initialise some static data.
+/// Name of the event RNTuple
+const char* const Event::EVENT_RNTUPLE_NAME = "EventData";
+/// Name of the event TTree
+const char* const Event::EVENT_TREE_NAME = "CollectionTree";
+/// Name of the metadata tree or RNTuple
+const char* const Event::METADATA_OBJECT_NAME = "MetaData";
+
+/// static method to get Event object for reading either TTree (TEvent)
+/// or RNTuple (REvent). Here we access by TFile object
+std::unique_ptr<Event> Event::createAndReadFrom(TFile& inFile) {
+
+  // Make use of the messaging function(s) from the xAODEvent namespace.
+  using xAODEvent::msg;
+
+  if (inFile.FindKey(EVENT_RNTUPLE_NAME) != nullptr) {
+    // Create and set up an REvent object
+    auto event = std::make_unique<Experimental::REvent>();
+    if (event->readFrom(inFile).isFailure()) {
+      ANA_MSG_ERROR("Could not read RNTuple from: " << inFile.GetName());
+      return {};
+    }
+    return event;
+  } else if (inFile.FindKey(EVENT_TREE_NAME) != nullptr) {
+    // Create and set up a TEvent object
+    auto event = std::make_unique<TEvent>();
+    if (event->readFrom(inFile).isFailure()) {
+      ANA_MSG_ERROR("Could not read TTree from: " << inFile.GetName());
+      return {};
+    }
+    return event;
+  } else {
+    ANA_MSG_ERROR("Could not recognize file: " << inFile.GetName());
+    return {};
+  }
+}
 
 /// This function can be used to easily copy a given (set of)
 /// object/container(s) to the output, without modifying the contents of
@@ -27,22 +74,24 @@ namespace xAOD {
 ///
 StatusCode Event::copy(const std::string& pattern) {
 
+  // Tell the user what's happening.
+  ATH_MSG_DEBUG("Copying objects matching pattern \"" << pattern
+                                                      << "\" to the output");
+
   // Collect a list of keys to copy.
-  std::vector<std::string> keys;
+  std::set<std::string> keys;
 
   // The regular expression to use.
   std::regex re{pattern};
 
   // Loop over the known input containers.
-  for (auto& [key, efe] : m_inputEventFormat) {
+  for (const auto& [key, efe] : m_inputEventFormat) {
+
+    // Tell the user what's happening.
+    ATH_MSG_VERBOSE("Considering input object with key \"" << key << "\"");
 
     // Check if the class in question matches the requested pattern.
     if (std::regex_match(key, re) == false) {
-      continue;
-    }
-    // Ignore objects that don't exist on the input.
-    static const bool SILENT = true;
-    if (connectObject(key, SILENT).isSuccess() == false) {
       continue;
     }
     // Skip all branches ending in "Aux.":
@@ -53,8 +102,34 @@ StatusCode Event::copy(const std::string& pattern) {
     if (efe.parentName() != "") {
       continue;
     }
+    // Ignore objects that don't exist on the input.
+    static const bool SILENT = true;
+    if (connectObject(key, SILENT).isSuccess() == false) {
+      continue;
+    }
     // Add the key to the list.
-    keys.push_back(key);
+    ATH_MSG_VERBOSE("Matched key \"" << key << "\"");
+    keys.insert(key);
+  }
+
+  // Check if the pattern matches any of the name remapping rules.
+  for (const auto& [newname, onfile] : m_nameRemapping) {
+
+    // Tell the user what's happening.
+    ATH_MSG_VERBOSE("Considering remapped key \"" << newname << "\"");
+
+    // Check if the remapped name matches the pattern.
+    if (std::regex_match(newname, re) == false) {
+      continue;
+    }
+    // Ignore objects that don't exist on the input.
+    static const bool SILENT = true;
+    if (connectObject(onfile, SILENT).isSuccess() == false) {
+      continue;
+    }
+    // Add the remapped name to the list.
+    ATH_MSG_VERBOSE("Matched remapped key \"" << newname << "\"");
+    keys.insert(newname);
   }
 
   // Now loop over all of the found keys.
@@ -93,26 +168,18 @@ StatusCode Event::copy(const std::string& pattern) {
     }
 
     // Put the interface object into the output.
-    static const bool OVERWRITE = false;
+    static const bool OVERWRITE = true;
     static const bool IS_OWNER = true;
     ATH_CHECK(record(objMgr->object(), objMgr->holder()->getClass()->GetName(),
-                     keyToUse, OVERWRITE, METADATA, IS_OWNER));
+                     key, OVERWRITE, METADATA, IS_OWNER));
 
-    // If there is no auxiliary store for this object/container, we're done
-    // already.
-    Object_t::const_iterator vauxMgr = m_inputObjects.find(keyToUse + "Aux.");
-    if (vauxMgr == m_inputObjects.end()) {
-      continue;
+    // If there is also an auxiliary store for this object/container, copy that
+    // as well.
+    const std::string auxKey = keyToUse + "Aux.";
+    if (m_inputObjects.contains(auxKey)) {
+      ATH_CHECK(
+          recordAux(*(m_inputObjects.at(auxKey)), key + "Aux.", METADATA));
     }
-    // Put the auxiliary store object into the output.
-    Details::IObjectManager* auxMgr =
-        dynamic_cast<Details::IObjectManager*>(vauxMgr->second.get());
-    if (!auxMgr) {
-      ATH_MSG_FATAL("Internal logic error detected");
-      return StatusCode::FAILURE;
-    }
-    ATH_CHECK(record(auxMgr->object(), auxMgr->holder()->getClass()->GetName(),
-                     keyToUse + "Aux.", OVERWRITE, METADATA, IS_OWNER));
   }
 
   // Return gracefully:
@@ -254,9 +321,10 @@ const void* Event::getInputObject(const std::string& key,
     return nullptr;
   }
 
-  // Make sure that the current entry is loaded for event data objects:
-  if (!metadata) {
-    if (mgr->getEntry()) {
+  // Make sure that the current entry is loaded for event data objects.
+  if (metadata == false) {
+    const Int_t readBytes = mgr->getEntry();
+    if (readBytes > 0) {
       // Connect the auxiliary store to objects needing it. This call also
       // takes care of updating the dynamic store of auxiliary containers,
       // when they are getting accessed directly.
@@ -265,8 +333,12 @@ const void* Event::getInputObject(const std::string& key,
         ATH_MSG_ERROR("Failed to set the auxiliary store for "
                       << mgr->holder()->getClass()->GetName() << "/"
                       << keyToUse);
-        return 0;
+        return nullptr;
       }
+    } else if (readBytes < 0) {
+      ATH_MSG_ERROR("Failed to load current entry for object "
+                    << mgr->holder()->getClass()->GetName() << "/" << keyToUse);
+      return nullptr;
     }
   }
 

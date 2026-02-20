@@ -9,7 +9,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "Acts/Surfaces/CylinderSurface.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include <Acts/EventData/ProxyAccessor.hpp>
 #include <array>
 
@@ -87,7 +87,7 @@ namespace ActsTrk::detail {
    * which hits are expected.
    */
   std::array<unsigned int,4> expectedLayerPattern(const EventContext& ctx,
-                                                  const IActsExtrapolationTool &extrapolator,
+                                                  const ActsTrk::IExtrapolationTool &extrapolator,
                                                   const Acts::BoundTrackParameters& perigee_parameters,
                                                   double pathLimit);
 

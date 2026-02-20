@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ================================================
@@ -27,17 +27,20 @@
 #ifndef TRIGT1CALOSIM_TILETTL1OVERLAY_H
 #define TRIGT1CALOSIM_TILETTL1OVERLAY_H
 
+// Athena/Gaudi
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+
+// Calorimeter tower includes
+#include "TileEvent/TileTTL1Container.h"
+
 // STL
 #include <map>
 #include <string>
 #include <vector>
 
-// Athena/Gaudi
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "Identifier/Identifier.h"
-
-// Calorimeter tower includes
-#include "TileEvent/TileTTL1Container.h"
+class TileTTL1;
+class Identifier;
+class EventContext;
 
 namespace LVL1
 {

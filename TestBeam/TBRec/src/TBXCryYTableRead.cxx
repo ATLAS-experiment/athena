@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // class TBXCryYTableRead 
@@ -7,6 +7,7 @@
 #include "TBXCryYTableRead.h"
 #include "PathResolver/PathResolver.h"
 #include "TBEvent/TBEventInfo.h"
+#include "CxxUtils/checker_macros.h"
 #include <fstream>
 
 TBXCryYTableRead::TBXCryYTableRead(const std::string& name, 
@@ -82,7 +83,8 @@ StatusCode TBXCryYTableRead::execute()
 //                                m_yTable);
   ATH_MSG_DEBUG ( "Filling TBEvent info with cryoX,tableY: "<<m_xCryo<<","<<m_yTable);
   // FIXME: const violation!
-  *const_cast<TBEventInfo*>(theEventInfo) =
+  TBEventInfo* ei_nc ATLAS_THREAD_SAFE = const_cast<TBEventInfo*>(theEventInfo);
+  *ei_nc  =
     TBEventInfo (theEventInfo->getEventNum(),
                  theEventInfo->getEventClock(),
                  theEventInfo->getEventType(),

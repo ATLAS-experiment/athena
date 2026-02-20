@@ -46,7 +46,7 @@ template<class T> class ITkPixLayout{
 
     private:
 
-        //All chips will allways have 400*384 pixels
+        //All chips will always have 400*384 pixels
         std::array<T, 153600> m_pixels = {};
 
 };

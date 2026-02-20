@@ -5,22 +5,21 @@
 #ifndef ATHEXHIVE_CONDEX_CONDALGY_H
 #define ATHEXHIVE_CONDEX_CONDALGY_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "StoreGate/ReadHandle.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 #include "AthExHive/CondDataObjY.h"
 #include "AthExHive/IASCIICondDbSvc.h"
 
-class CondAlgY  :  public AthAlgorithm {
+
+class CondAlgY  :  public AthCondAlgorithm {
 
 public:
-    
-  CondAlgY (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CondAlgY() = default;
-  
+  using AthCondAlgorithm::AthCondAlgorithm;
+
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   

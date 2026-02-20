@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -595,6 +595,10 @@ namespace MuonGM {
         m_nswAsBuilt = nswAsBuiltData;
     }
 
+    void MuonDetectorManager::setMmAsBuilt2(const sTGCAsBuiltData* mmAsBuilt2) {
+        m_mmAsBuilt2 = mmAsBuilt2;
+    }
+
     void MuonDetectorManager::setsTGCAsBuilt(const sTGCAsBuiltData* stgcAsBuilt) {
         m_stgcAsBuildData = stgcAsBuilt;
     }
@@ -689,6 +693,14 @@ namespace MuonGM {
     void MuonDetectorManager::setMinimalGeoFlag(int flag) { m_minimalgeo = flag; }
     void MuonDetectorManager::setCutoutsFlag(int flag) { m_includeCutouts = flag; }
     void MuonDetectorManager::setCutoutsBogFlag(int flag) { m_includeCutoutsBog = flag; }
+
+    std::vector<const MuonStation*> MuonDetectorManager::getMuonStations() const {
+        std::vector<const MuonStation*> stations{};
+        for (const auto & [_, ptr]: m_MuonStationMap){
+            stations.push_back(ptr.get());
+        }
+        return stations;
+    }
 
 
 }  // namespace MuonGM

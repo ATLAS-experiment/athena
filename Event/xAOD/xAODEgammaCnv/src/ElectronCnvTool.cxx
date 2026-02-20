@@ -73,7 +73,7 @@ namespace xAODMaker {
 	  xAOD::Electron* electron = new xAOD::Electron();
 	  xaodFrwd->push_back( electron );
 	  // p4
-	  electron->setP4(eg->pt(),eg->eta(),eg->phi(), eg->m());
+	  electron->setPtEtaPhi(eg->pt(),eg->eta(),eg->phi());
 	  // author(s)
 	  electron->setAuthor( eg->author() );
 	  //OQ
@@ -95,10 +95,10 @@ namespace xAODMaker {
             double pt  =  sqrt(clE*clE - ParticleConstants::electronMassInMeV*ParticleConstants::electronMassInMeV)/cosh(eg->trackParticle()->eta());
             double eta = eg->trackParticle()->eta();
             double phi = eg->trackParticle()->phi();
-            electron->setP4(pt, eta, phi, ParticleConstants::electronMassInMeV);
+            electron->setPtEtaPhi(pt, eta, phi);
           }
           else
-            electron->setP4(eg->pt(),eg->eta(),eg->phi(), eg->m());
+            electron->setPtEtaPhi(eg->pt(),eg->eta(),eg->phi());
 
 	  // author(s)
 	  electron->setAuthor( eg->author() );

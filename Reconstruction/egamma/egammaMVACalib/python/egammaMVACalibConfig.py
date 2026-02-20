@@ -27,6 +27,16 @@ def egammaMVASvcCfg(flags, name="egammaMVASvc", **kwargs):
                 folder=kwargs['folder'])
         )
 
+    if flags.Egamma.doForwardCalib and "FwdElectronTool" not in kwargs:
+        kwargs["FwdElectronTool"] = acc.popToolsAndMerge(
+            egammaMVAToolCfg(
+                flags,
+                name="fwdelectronMVATool",
+                ParticleType=xAOD.EgammaParameters.forwardelectron,
+                ShiftType=0,
+                folder=kwargs['folder'])
+        )
+
     if "UnconvertedPhotonTool" not in kwargs:
         kwargs["UnconvertedPhotonTool"] = acc.popToolsAndMerge(
             egammaMVAToolCfg(

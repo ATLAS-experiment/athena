@@ -23,7 +23,7 @@
 using DataSource = MuonMDT_CablingMap::DataSource;
 
 MuonMDT_CablingAlg::MuonMDT_CablingAlg(const std::string& name, ISvcLocator* pSvcLocator) : 
-    AthReentrantAlgorithm(name, pSvcLocator) {}
+    AthCondAlgorithm(name, pSvcLocator) {}
 
 StatusCode MuonMDT_CablingAlg::initialize() {
     ATH_MSG_DEBUG("initialize " << name());

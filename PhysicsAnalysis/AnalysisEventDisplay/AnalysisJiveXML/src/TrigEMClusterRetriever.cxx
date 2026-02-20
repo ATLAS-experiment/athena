@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisJiveXML/TrigEMClusterRetriever.h"
-
-#include <string>
-
 #include "CLHEP/Units/SystemOfUnits.h"
-
 #include "TrigCaloEvent/TrigEMClusterContainer.h"
+#include <string>
 
 namespace JiveXML {
 
@@ -65,14 +62,15 @@ namespace JiveXML {
     }
 
     DataMap myDataMap;
-    myDataMap["et"] = et;
-    myDataMap["phi"] = phi;
-    myDataMap["eta"] = eta;
-    myDataMap["id"] = idVec;
-    myDataMap[tagCells] = cells;
-    myDataMap["numCells"] = numCells;
+    const auto n = phi.size();
+    myDataMap["et"] = std::move(et);
+    myDataMap["phi"] = std::move(phi);
+    myDataMap["eta"] = std::move(eta);
+    myDataMap["id"] = std::move(idVec);
+    myDataMap[tagCells] = std::move(cells);
+    myDataMap["numCells"] = std::move(numCells);
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< phi.size() << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< n << endmsg;
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey, &myDataMap);

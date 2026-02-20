@@ -68,6 +68,8 @@ namespace TrigConf
       // HLT JSON object - contains HLT menus
       std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer> aux_hlt = std::make_unique<xAOD::TriggerMenuJsonAuxContainer>();
       std::unique_ptr<xAOD::TriggerMenuJsonContainer> hlt = std::make_unique<xAOD::TriggerMenuJsonContainer>();
+      //all the static checkers are trying to tell us something...
+      //coverity[WRAPPER_ESCAPE]
       // cppcheck-suppress danglingLifetime; false positive
       m_menuJSON_hlt = hlt.get(); // Keep a cached pointer from which we can add to the output metastore
       // cppcheck-suppress danglingLifetime; false positive

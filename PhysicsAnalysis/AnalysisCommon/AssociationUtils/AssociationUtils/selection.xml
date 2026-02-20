@@ -19,7 +19,6 @@
   <class name="ORUtils::TauAntiTauJetOverlapTool" />
   <class name="ORUtils::ObjLinkOverlapTool" />
   <class name="ORUtils::ToolBox" />
-  <class name="ORUtils::BJetHelper" />
   <class name="ORUtils::DeltaRMatcher" />
   <class name="ORUtils::SlidingDeltaRMatcher" />
   <class name="ORUtils::MuJetGhostDRMatcher" />

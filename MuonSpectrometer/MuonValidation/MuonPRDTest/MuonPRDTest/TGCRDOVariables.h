@@ -12,7 +12,10 @@
 namespace MuonPRDTest{
     class TGCRDOVariables : public PrdTesterModule {
     public:
-        TGCRDOVariables(MuonTesterTree& tree, const std::string& container_name, MSG::Level msglvl, ServiceHandle<MuonTGC_CablingSvc> cabling_svc);
+        TGCRDOVariables(MuonTesterTree& tree, 
+                        const std::string& container_name, 
+                        const std::string& cabling,
+                        MSG::Level msglvl);
     
         ~TGCRDOVariables() = default;
     
@@ -22,7 +25,7 @@ namespace MuonPRDTest{
     
     private:
         SG::ReadHandleKey<TgcRdoContainer> m_key{};
-        ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling;
+        SG::ReadCondHandleKey<Muon::TgcCablingMap> m_tgcCablingKey;
         ScalarBranch<unsigned int>& m_TGC_nRDO{parent().newScalar<unsigned int>("N_RDO_TGC")};
         VectorBranch<float>& m_TGC_rdo_localPosX{parent().newVector<float>("RDO_TGC_localPosX")};
         VectorBranch<float>& m_TGC_rdo_localPosY{parent().newVector<float>("RDO_TGC_localPosY")};

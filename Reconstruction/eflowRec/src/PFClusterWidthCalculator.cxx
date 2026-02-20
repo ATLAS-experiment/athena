@@ -1,6 +1,6 @@
-#include "eflowRec/PFClusterWidthCalculator.h"
+#include "PFClusterWidthCalculator.h"
 
-#include "eflowRec/eflowUtil.h"
+#include "eflowUtil.h"
 
 #include <cmath>
 

@@ -159,8 +159,10 @@ StatusCode ZeeTaPMonTool::fillHistograms()
 
   if (!hasGoodTrigger("Zee T&P electron")) return StatusCode::SUCCESS; 
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   //check whether Lar signaled event bad
-  if(hasBadLar()) {
+  if(hasBadLar(ctx)) {
     ATH_MSG_DEBUG("ZeeTaPMonTool::hasBadLar()");
     return StatusCode::RECOVERABLE;
   }
@@ -169,7 +171,7 @@ StatusCode ZeeTaPMonTool::fillHistograms()
   //figure out current LB
   //--------------------
   unsigned int previousLB = m_currentLB;
-  m_currentLB = getCurrentLB();
+  m_currentLB = getCurrentLB(ctx);
   
   //deal with the change of LB
   if (m_currentLB>previousLB) {

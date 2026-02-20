@@ -90,6 +90,7 @@ namespace DerivationFramework {
     SG::WriteHandleKey<xAOD::VertexContainer> m_v0VtxOutputKey;
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection;
     SG::ReadHandleKey<xAOD::VertexContainer> m_VxPrimaryCandidateName;
+    SG::ReadHandleKey<xAOD::VertexContainer> m_pvContainerName;
     SG::WriteHandleKey<xAOD::VertexContainer> m_refPVContainerName;
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key;
     SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_RelinkContainers;
@@ -159,6 +160,8 @@ namespace DerivationFramework {
     bool   m_constrD0{};
     bool   m_constrJXV0{};
     bool   m_constrMainV{};
+    int    m_cascadeFitWithPV{};
+    bool   m_firstDecayAtPV{};
     bool   m_doPostMainVContrFit{};
     bool   m_JXSubVtx{};
     bool   m_JXV0SubVtx{};
@@ -218,8 +221,8 @@ namespace DerivationFramework {
     std::unique_ptr<xAOD::Vertex> fitTracks(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::TrackParticle* track3 = nullptr) const;
     MesonCandidate getDpmCandidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2, const xAOD::TrackParticle* extraTrk3) const;
     MesonCandidate getD0Candidate(const xAOD::Vertex* JXvtx, const xAOD::TrackParticle* extraTrk1, const xAOD::TrackParticle* extraTrk2) const;
-    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
-    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
+    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const xAOD::Vertex* V0vtx, const V0Enum V0, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
+    std::vector<std::pair<Trk::VxCascadeInfo*,Trk::VxCascadeInfo*> > fitMainVtx(const xAOD::Vertex* JXvtx, const std::vector<double>& massesJX, const XiCandidate& disVtx, const xAOD::TrackParticleContainer* trackContainer, const std::vector<const xAOD::TrackParticleContainer*>& trackCols, const xAOD::VertexContainer* defaultPVContainer, const xAOD::VertexContainer* pvContainer) const;
     void fitV0Container(xAOD::VertexContainer* V0ContainerNew, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const std::vector<const xAOD::TrackParticleContainer*>& trackCols) const;
     template<size_t NTracks> const xAOD::Vertex* FindVertex(const xAOD::VertexContainer* cont, const xAOD::Vertex* v) const;
   };

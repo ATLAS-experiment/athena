@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file PixelConditionsAlgorithms/PixelChargeCalibCondAlg.h
@@ -11,7 +11,7 @@
 #ifndef PIXELCHARGECALIBCONDALG
 #define PIXELCHARGECALIBCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -26,13 +26,12 @@ class PixelID;
 
 
 
-class PixelChargeCalibCondAlg : public AthReentrantAlgorithm {
+class PixelChargeCalibCondAlg : public AthCondAlgorithm {
   public:
     PixelChargeCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     const PixelID* m_pixelID{nullptr};
@@ -44,7 +43,7 @@ class PixelChargeCalibCondAlg : public AthReentrantAlgorithm {
     {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
 
     SG::ReadCondHandleKey<CondAttrListCollection> m_readKey
-    {this, "ReadKey", "/PIXEL/PixCalib", "Iput charge calibration folder"};
+    {this, "ReadKey", "/PIXEL/PixCalib", "Input charge calibration folder"};
 
     SG::WriteCondHandleKey<PixelChargeCalibCondData> m_writeKey
     {this, "WriteKey", "PixelChargeCalibCondData", "Output charge caliblation data"};

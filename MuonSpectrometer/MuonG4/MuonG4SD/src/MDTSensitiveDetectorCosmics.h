@@ -78,10 +78,11 @@ We describe in the following, how each field of the identifier is retrieved.
 #define MDTSensitiveDetectorCosmics_H
 
 #include "G4VSensitiveDetector.hh"
-#include "StoreGate/WriteHandle.h"
 #include "MuonSimEvent/MDTSimHitCollection.h"
+#include <string>
 #include <gtest/gtest_prod.h>
 
+class AtlasG4EventUserInfo;
 class G4TouchableHistory;
 class MdtHitIdHelper;
 class MDTSimHit;
@@ -94,7 +95,6 @@ FRIEND_TEST( MDTSensitiveDetectorCosmicstest, GetIdentifier );
 public:
     /** construction/destruction */
     MDTSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName, const unsigned int nTubesMax);
-    ~MDTSensitiveDetectorCosmics()=default;
     
     /** member functions */
     void   Initialize(G4HCofThisEvent* HCE) override final;
@@ -109,7 +109,9 @@ private:
     Amg::Vector3D m_globH;
 
     /** member data */
-    SG::WriteHandle<MDTSimHitCollection> m_MDTHitColl;
+    std::string m_hitCollectionName;
+    MDTSimHitCollection* m_MDTHitColl{nullptr};
+    AtlasG4EventUserInfo* m_g4UserEventInfo{nullptr};
     const MdtHitIdHelper*      m_muonHelper;
 
     double                     m_driftRadius;

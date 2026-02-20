@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
@@ -13,6 +13,7 @@
 #include "TKey.h"
 #include "TClass.h"
 #include "TFile.h"
+#include <stdexcept>
 
 ParticleScaleFactorTool::ParticleScaleFactorTool( const std::string& name ) : asg::AsgTool( name ){
 
@@ -157,7 +158,7 @@ StatusCode ParticleScaleFactorTool::initialize() {
           } else {
             bfunc = std::bind(part_decor, std::placeholders::_1, axisTitle);
           }
-          m_hists[type].axisFuncs.push_back(bfunc);
+          m_hists[type].axisFuncs.push_back(std::move(bfunc));
         }
       }
     }
@@ -207,7 +208,7 @@ double ParticleScaleFactorTool::evaluate( const xAOD::IParticle* particle ) cons
      case 3: bin = hist->FindFixBin(histItr->second.axisFuncs[0](*particle),histItr->second.axisFuncs[1](*particle),histItr->second.axisFuncs[2](*particle)); break;
    }
 
-   if(!res.first.parameter()) return hist->GetBinContent(bin); //must have been nominal;
+   if(res.first.parameter() == 0.) return hist->GetBinContent(bin); //must have been nominal;
 
    double nom = histItr->second.getHist(CP::SystematicVariation("")).second->GetBinContent(bin);
    //got here so get nominal hist and do difference ...
@@ -219,7 +220,8 @@ double ParticleScaleFactorTool::evaluate( const xAOD::IParticle* particle ) cons
    
 }
 
-const std::pair<CP::SystematicVariation,TH1*> ParticleScaleFactorTool::Hists::getHist(const CP::SystematicVariation& set) const { 
+const std::pair<CP::SystematicVariation,TH1*> 
+ParticleScaleFactorTool::Hists::getHist(const CP::SystematicVariation& set) const { 
     //find hist that matches basename and take the one that has the closest parameter value
     std::pair<CP::SystematicVariation,TH1*> result(CP::SystematicVariation(""),0);
     for(auto& s : hists) {
@@ -231,9 +233,13 @@ const std::pair<CP::SystematicVariation,TH1*> ParticleScaleFactorTool::Hists::ge
     }
     if(result.second) return result;
     //return nominal
-    auto it = hists.find(CP::SystematicVariation("")); 
-    result = *it; return result;
-    //return it->second;
+    auto it = hists.find(CP::SystematicVariation(""));
+    if (it != hists.end()){ 
+      result = *it; 
+    } else {
+      throw std::runtime_error("ParticleScaleFactorTool::Hists::getHist: hist not found!");
+    }
+    return result;
 }
 
 

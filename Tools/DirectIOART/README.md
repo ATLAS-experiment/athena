@@ -78,7 +78,7 @@ Afterwards, go to the `build/` directory and set up the *ATLAS* software release
 cd build/
 acmSetup 21.2,AthAnalysis,latest
 ```
-For getting the DirectIOART git repository in there, do a "sparse checkout" of the athena repository with `acm` (requires forking the atlas/athena repository first, as described [here](https://atlassoftwaredocs.web.cern.ch/gittutorial/gitlab-fork)):
+For getting the DirectIOART git repository in there, do a "sparse checkout" of the athena repository with `acm` (requires forking the atlas/athena repository first, as described [here](https://atlas-software.docs.cern.ch/athena/git/):
 ```
 acm sparse_clone_project athena
 ```

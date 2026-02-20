@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This module contains postExec commands that can be used with the CA-based
 # runHLT in athena(HLT).
@@ -28,8 +28,8 @@ if __postExec_frame is not None:
 # PostExec functions
 #
 
-def forceConditions(run, lb, iovDbSvc=None):
-   """Force all conditions (except prescales) to match the given run and LB number"""
+def forceConditions(run, lb, timestamp=None, iovDbSvc=None):
+   """Force all conditions (except prescales) to match the given run and LB number, a timestamp can also be provided for MC"""
 
    log.info(forceConditions.__doc__)
 
@@ -59,11 +59,13 @@ def forceConditions(run, lb, iovDbSvc=None):
                 '/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib',
                 '/TRIGGER/L1Calo/V1/Calibration/JfexModuleSettings',
                 '/TRIGGER/L1Calo/V1/Calibration/JfexNoiseCuts',
-                '/TRIGGER/L1Calo/V1/Calibration/JfexSystemSettings']
+                '/TRIGGER/L1Calo/V1/Calibration/JfexSystemSettings',
+                '/TRIGGER/L1Calo/V1/Calibration/GfexModuleSettings']
 
-   from TrigCommon.AthHLT import get_sor_params
-   sor = get_sor_params(run)
-   timestamp = sor['SORTime'] // int(1e9)
+   if timestamp is None:
+      from TrigCommon.AthHLT import get_sor_params
+      sor = get_sor_params(run)
+      timestamp = sor['SORTime'] // int(1e9)
 
    for i,f in enumerate(iovDbSvc.Folders):
       if any(name in f for name in ignore):

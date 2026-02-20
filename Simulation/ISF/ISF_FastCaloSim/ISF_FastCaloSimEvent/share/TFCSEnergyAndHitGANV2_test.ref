@@ -1,90 +1,90 @@
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
-ISF_FastCaloSim...SUCCESS Running TFCSEnergyAndHitGANV2 on LWTNN
+ISF_FastCaloSim... SUCCESS Running TFCSEnergyAndHitGANV2 on LWTNN
 
-ISF_FastCaloSim...SUCCESS Running test on /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNsample
+ISF_FastCaloSim... SUCCESS Running test on /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNsample
 
 
-ISF_FastCaloSim...SUCCESS New particle
+ISF_FastCaloSim... SUCCESS New particle
 
-ISF_FastCaloSim...SUCCESS Initialize Networks
+ISF_FastCaloSim... SUCCESS Initialize Networks
 
-ISF_FastCaloSim...   INFO Using FastCaloGANInputFolderName: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNsample
-ISF_FastCaloSim...   INFO Parameters taken from XML
-ISF_FastCaloSim...   INFO   symmetrisedAlpha: 0
-ISF_FastCaloSim...   INFO   ganVersion:2
-ISF_FastCaloSim...   INFO   latentDim: 100
-ISF_FastCaloSim...   INFO   relevantlayers: 0 1 2 3 12 13 14 
-ISF_FastCaloSim...   INFO Binning along r for layer 0
-ISF_FastCaloSim...   INFO 0,5,10,30,50,100,200,400,600,
-ISF_FastCaloSim...   INFO Binning along r for layer 1
-ISF_FastCaloSim...   INFO 0,1,4,7,10,15,30,50,90,150,200,
-ISF_FastCaloSim...   INFO Binning along r for layer 2
-ISF_FastCaloSim...   INFO 0,5,10,20,30,50,80,130,200,300,400,
-ISF_FastCaloSim...   INFO Binning along r for layer 3
-ISF_FastCaloSim...   INFO 0,50,100,200,400,600,
-ISF_FastCaloSim...   INFO layer 4 not used
-ISF_FastCaloSim...   INFO layer 5 not used
-ISF_FastCaloSim...   INFO layer 6 not used
-ISF_FastCaloSim...   INFO layer 7 not used
-ISF_FastCaloSim...   INFO layer 8 not used
-ISF_FastCaloSim...   INFO layer 9 not used
-ISF_FastCaloSim...   INFO layer 10 not used
-ISF_FastCaloSim...   INFO layer 11 not used
-ISF_FastCaloSim...   INFO Binning along r for layer 12
-ISF_FastCaloSim...   INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,1000,2000,
-ISF_FastCaloSim...   INFO Binning along r for layer 13
-ISF_FastCaloSim...   INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,600,1000,2000,
-ISF_FastCaloSim...   INFO Binning along r for layer 14
-ISF_FastCaloSim...   INFO 0,50,100,150,200,250,300,400,600,1000,2000,
-ISF_FastCaloSim...   INFO layer 15 not used
-ISF_FastCaloSim...   INFO layer 16 not used
-ISF_FastCaloSim...   INFO layer 17 not used
-ISF_FastCaloSim...   INFO layer 18 not used
-ISF_FastCaloSim...   INFO layer 19 not used
-ISF_FastCaloSim...   INFO layer 20 not used
-ISF_FastCaloSim...   INFO layer 21 not used
-ISF_FastCaloSim...   INFO layer 22 not used
-ISF_FastCaloSim...   INFO layer 23 not used
-ISF_FastCaloSim...   INFO LWTNN Handler parameters
-ISF_FastCaloSim...   INFO   pid: 211
-ISF_FastCaloSim...   INFO   etaMin:20
-ISF_FastCaloSim...   INFO   etaMax: 25
-ISF_FastCaloSim...   INFO Parameters taken from XML
-ISF_FastCaloSim...   INFO   symmetrisedAlpha: 0
-ISF_FastCaloSim...   INFO   ganVersion:2
-ISF_FastCaloSim...   INFO   latentDim: 100
-ISF_FastCaloSim...   INFO   relevantlayers: 0 1 2 3 12 13 14 
-ISF_FastCaloSim...   INFO Binning along r for layer 0
-ISF_FastCaloSim...   INFO 0,5,10,30,50,100,200,400,600,
-ISF_FastCaloSim...   INFO Binning along r for layer 1
-ISF_FastCaloSim...   INFO 0,1,4,7,10,15,30,50,90,150,200,
-ISF_FastCaloSim...   INFO Binning along r for layer 2
-ISF_FastCaloSim...   INFO 0,5,10,20,30,50,80,130,200,300,400,
-ISF_FastCaloSim...   INFO Binning along r for layer 3
-ISF_FastCaloSim...   INFO 0,50,100,200,400,600,
-ISF_FastCaloSim...   INFO layer 4 not used
-ISF_FastCaloSim...   INFO layer 5 not used
-ISF_FastCaloSim...   INFO layer 6 not used
-ISF_FastCaloSim...   INFO layer 7 not used
-ISF_FastCaloSim...   INFO layer 8 not used
-ISF_FastCaloSim...   INFO layer 9 not used
-ISF_FastCaloSim...   INFO layer 10 not used
-ISF_FastCaloSim...   INFO layer 11 not used
-ISF_FastCaloSim...   INFO Binning along r for layer 12
-ISF_FastCaloSim...   INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,1000,2000,
-ISF_FastCaloSim...   INFO Binning along r for layer 13
-ISF_FastCaloSim...   INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,600,1000,2000,
-ISF_FastCaloSim...   INFO Binning along r for layer 14
-ISF_FastCaloSim...   INFO 0,50,100,150,200,250,300,400,600,1000,2000,
-ISF_FastCaloSim...   INFO layer 15 not used
-ISF_FastCaloSim...   INFO layer 16 not used
-ISF_FastCaloSim...   INFO layer 17 not used
-ISF_FastCaloSim...   INFO layer 18 not used
-ISF_FastCaloSim...   INFO layer 19 not used
-ISF_FastCaloSim...   INFO layer 20 not used
-ISF_FastCaloSim...   INFO layer 21 not used
-ISF_FastCaloSim...   INFO layer 22 not used
-ISF_FastCaloSim...   INFO layer 23 not used
+ISF_FastCaloSim...    INFO Using FastCaloGANInputFolderName: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastCaloSim/LWTNNsample
+ISF_FastCaloSim...    INFO Parameters taken from XML
+ISF_FastCaloSim...    INFO   symmetrisedAlpha: 0
+ISF_FastCaloSim...    INFO   ganVersion:2
+ISF_FastCaloSim...    INFO   latentDim: 100
+ISF_FastCaloSim...    INFO   relevantlayers: 0 1 2 3 12 13 14 
+ISF_FastCaloSim...    INFO Binning along r for layer 0
+ISF_FastCaloSim...    INFO 0,5,10,30,50,100,200,400,600,
+ISF_FastCaloSim...    INFO Binning along r for layer 1
+ISF_FastCaloSim...    INFO 0,1,4,7,10,15,30,50,90,150,200,
+ISF_FastCaloSim...    INFO Binning along r for layer 2
+ISF_FastCaloSim...    INFO 0,5,10,20,30,50,80,130,200,300,400,
+ISF_FastCaloSim...    INFO Binning along r for layer 3
+ISF_FastCaloSim...    INFO 0,50,100,200,400,600,
+ISF_FastCaloSim...    INFO layer 4 not used
+ISF_FastCaloSim...    INFO layer 5 not used
+ISF_FastCaloSim...    INFO layer 6 not used
+ISF_FastCaloSim...    INFO layer 7 not used
+ISF_FastCaloSim...    INFO layer 8 not used
+ISF_FastCaloSim...    INFO layer 9 not used
+ISF_FastCaloSim...    INFO layer 10 not used
+ISF_FastCaloSim...    INFO layer 11 not used
+ISF_FastCaloSim...    INFO Binning along r for layer 12
+ISF_FastCaloSim...    INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,1000,2000,
+ISF_FastCaloSim...    INFO Binning along r for layer 13
+ISF_FastCaloSim...    INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,600,1000,2000,
+ISF_FastCaloSim...    INFO Binning along r for layer 14
+ISF_FastCaloSim...    INFO 0,50,100,150,200,250,300,400,600,1000,2000,
+ISF_FastCaloSim...    INFO layer 15 not used
+ISF_FastCaloSim...    INFO layer 16 not used
+ISF_FastCaloSim...    INFO layer 17 not used
+ISF_FastCaloSim...    INFO layer 18 not used
+ISF_FastCaloSim...    INFO layer 19 not used
+ISF_FastCaloSim...    INFO layer 20 not used
+ISF_FastCaloSim...    INFO layer 21 not used
+ISF_FastCaloSim...    INFO layer 22 not used
+ISF_FastCaloSim...    INFO layer 23 not used
+ISF_FastCaloSim...    INFO LWTNN Handler parameters
+ISF_FastCaloSim...    INFO   pid: 211
+ISF_FastCaloSim...    INFO   etaMin:20
+ISF_FastCaloSim...    INFO   etaMax: 25
+ISF_FastCaloSim...    INFO Parameters taken from XML
+ISF_FastCaloSim...    INFO   symmetrisedAlpha: 0
+ISF_FastCaloSim...    INFO   ganVersion:2
+ISF_FastCaloSim...    INFO   latentDim: 100
+ISF_FastCaloSim...    INFO   relevantlayers: 0 1 2 3 12 13 14 
+ISF_FastCaloSim...    INFO Binning along r for layer 0
+ISF_FastCaloSim...    INFO 0,5,10,30,50,100,200,400,600,
+ISF_FastCaloSim...    INFO Binning along r for layer 1
+ISF_FastCaloSim...    INFO 0,1,4,7,10,15,30,50,90,150,200,
+ISF_FastCaloSim...    INFO Binning along r for layer 2
+ISF_FastCaloSim...    INFO 0,5,10,20,30,50,80,130,200,300,400,
+ISF_FastCaloSim...    INFO Binning along r for layer 3
+ISF_FastCaloSim...    INFO 0,50,100,200,400,600,
+ISF_FastCaloSim...    INFO layer 4 not used
+ISF_FastCaloSim...    INFO layer 5 not used
+ISF_FastCaloSim...    INFO layer 6 not used
+ISF_FastCaloSim...    INFO layer 7 not used
+ISF_FastCaloSim...    INFO layer 8 not used
+ISF_FastCaloSim...    INFO layer 9 not used
+ISF_FastCaloSim...    INFO layer 10 not used
+ISF_FastCaloSim...    INFO layer 11 not used
+ISF_FastCaloSim...    INFO Binning along r for layer 12
+ISF_FastCaloSim...    INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,1000,2000,
+ISF_FastCaloSim...    INFO Binning along r for layer 13
+ISF_FastCaloSim...    INFO 0,10,20,30,50,80,100,130,160,200,250,300,350,400,600,1000,2000,
+ISF_FastCaloSim...    INFO Binning along r for layer 14
+ISF_FastCaloSim...    INFO 0,50,100,150,200,250,300,400,600,1000,2000,
+ISF_FastCaloSim...    INFO layer 15 not used
+ISF_FastCaloSim...    INFO layer 16 not used
+ISF_FastCaloSim...    INFO layer 17 not used
+ISF_FastCaloSim...    INFO layer 18 not used
+ISF_FastCaloSim...    INFO layer 19 not used
+ISF_FastCaloSim...    INFO layer 20 not used
+ISF_FastCaloSim...    INFO layer 21 not used
+ISF_FastCaloSim...    INFO layer 22 not used
+ISF_FastCaloSim...    INFO layer 23 not used
 Info in <TCanvas::MakeDefCanvas>:  created default TCanvas with name c1
 Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
 Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
@@ -92,102 +92,101 @@ Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
 Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
 Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
 Warning in <TFile::Append>: Replacing existing TH1: h (Potential memory leak).
-ISF_FastCaloSim...SUCCESS Filename ends in glob.
+ISF_FastCaloSim... SUCCESS Filename ends in glob.
 
-ISF_FastCaloSim...SUCCESS Succedeed in creating LWTNN graph from string
+ISF_FastCaloSim... SUCCESS Succedeed in creating LWTNN graph from string
 
-ISF_FastCaloSim...   INFO GAN TFCSEnergyAndHitGANV2
-ISF_FastCaloSim...   INFO   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 0 Run for bin 0
-ISF_FastCaloSim...   INFO 0 center layer 0 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 0   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 0   Ekin_bin=all ; calosample=0
-ISF_FastCaloSim...   INFO 0   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 1 Run for bin 1
-ISF_FastCaloSim...   INFO 1 center layer 1 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 1   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 1   Ekin_bin=all ; calosample=1
-ISF_FastCaloSim...   INFO 1   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 2 Run for bin 2
-ISF_FastCaloSim...   INFO 2 center layer 2 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 2   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 2   Ekin_bin=all ; calosample=2
-ISF_FastCaloSim...   INFO 2   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 3 Run for bin 3
-ISF_FastCaloSim...   INFO 3 center layer 3 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 3   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 3   Ekin_bin=all ; calosample=3
-ISF_FastCaloSim...   INFO 3   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 12Run for bin 12
-ISF_FastCaloSim...   INFO 12center layer 12 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 12  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 12  Ekin_bin=all ; calosample=12
-ISF_FastCaloSim...   INFO 12  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 13Run for bin 13
-ISF_FastCaloSim...   INFO 13center layer 13 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 13  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 13  Ekin_bin=all ; calosample=13
-ISF_FastCaloSim...   INFO 13  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 14Run for bin 14
-ISF_FastCaloSim...   INFO 14center layer 14 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 14  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 14  Ekin_bin=all ; calosample=14
-ISF_FastCaloSim...   INFO 14  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...SUCCESS Writing GAN to unnamed
+ISF_FastCaloSim...    INFO GAN TFCSEnergyAndHitGANV2
+ISF_FastCaloSim...    INFO   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 0 Run for bin 0
+ISF_FastCaloSim...    INFO 0 center layer 0 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 0   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 0   Ekin_bin=all ; calosample=0
+ISF_FastCaloSim...    INFO 0   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 1 Run for bin 1
+ISF_FastCaloSim...    INFO 1 center layer 1 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 1   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 1   Ekin_bin=all ; calosample=1
+ISF_FastCaloSim...    INFO 1   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 2 Run for bin 2
+ISF_FastCaloSim...    INFO 2 center layer 2 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 2   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 2   Ekin_bin=all ; calosample=2
+ISF_FastCaloSim...    INFO 2   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 3 Run for bin 3
+ISF_FastCaloSim...    INFO 3 center layer 3 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 3   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 3   Ekin_bin=all ; calosample=3
+ISF_FastCaloSim...    INFO 3   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 12Run for bin 12
+ISF_FastCaloSim...    INFO 12center layer 12 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 12  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 12  Ekin_bin=all ; calosample=12
+ISF_FastCaloSim...    INFO 12  Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 13Run for bin 13
+ISF_FastCaloSim...    INFO 13center layer 13 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 13  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 13  Ekin_bin=all ; calosample=13
+ISF_FastCaloSim...    INFO 13  Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 14Run for bin 14
+ISF_FastCaloSim...    INFO 14center layer 14 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 14  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 14  Ekin_bin=all ; calosample=14
+ISF_FastCaloSim...    INFO 14  Weight for extrapolated position: 0.5
+ISF_FastCaloSim... SUCCESS Writing GAN to unnamed
 
 TFile**		FCSGANtest_unnamed.root	
  TFile*		FCSGANtest_unnamed.root	
-  KEY: TFCSEnergyAndHitGANV2	GAN;1	object title
-ISF_FastCaloSim...SUCCESS Open FCSGANtest_unnamed.root
+ISF_FastCaloSim... SUCCESS Open FCSGANtest_unnamed.root
 
-ISF_FastCaloSim...   INFO GAN TFCSEnergyAndHitGANV2
-ISF_FastCaloSim...   INFO   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 0 Run for bin 0
-ISF_FastCaloSim...   INFO 0 center layer 0 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 0   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 0   Ekin_bin=all ; calosample=0
-ISF_FastCaloSim...   INFO 0   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 1 Run for bin 1
-ISF_FastCaloSim...   INFO 1 center layer 1 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 1   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 1   Ekin_bin=all ; calosample=1
-ISF_FastCaloSim...   INFO 1   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 2 Run for bin 2
-ISF_FastCaloSim...   INFO 2 center layer 2 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 2   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 2   Ekin_bin=all ; calosample=2
-ISF_FastCaloSim...   INFO 2   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 3 Run for bin 3
-ISF_FastCaloSim...   INFO 3 center layer 3 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 3   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 3   Ekin_bin=all ; calosample=3
-ISF_FastCaloSim...   INFO 3   Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 12Run for bin 12
-ISF_FastCaloSim...   INFO 12center layer 12 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 12  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 12  Ekin_bin=all ; calosample=12
-ISF_FastCaloSim...   INFO 12  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 13Run for bin 13
-ISF_FastCaloSim...   INFO 13center layer 13 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 13  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 13  Ekin_bin=all ; calosample=13
-ISF_FastCaloSim...   INFO 13  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...   INFO 14Run for bin 14
-ISF_FastCaloSim...   INFO 14center layer 14 TFCSCenterPositionCalculation
-ISF_FastCaloSim...   INFO 14  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
-ISF_FastCaloSim...   INFO 14  Ekin_bin=all ; calosample=14
-ISF_FastCaloSim...   INFO 14  Weight for extrapolated position: 0.5
-ISF_FastCaloSim...SUCCESS Before running GAN2->simulate()
+ISF_FastCaloSim...    INFO GAN TFCSEnergyAndHitGANV2
+ISF_FastCaloSim...    INFO   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 0 Run for bin 0
+ISF_FastCaloSim...    INFO 0 center layer 0 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 0   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 0   Ekin_bin=all ; calosample=0
+ISF_FastCaloSim...    INFO 0   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 1 Run for bin 1
+ISF_FastCaloSim...    INFO 1 center layer 1 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 1   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 1   Ekin_bin=all ; calosample=1
+ISF_FastCaloSim...    INFO 1   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 2 Run for bin 2
+ISF_FastCaloSim...    INFO 2 center layer 2 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 2   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 2   Ekin_bin=all ; calosample=2
+ISF_FastCaloSim...    INFO 2   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 3 Run for bin 3
+ISF_FastCaloSim...    INFO 3 center layer 3 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 3   PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 3   Ekin_bin=all ; calosample=3
+ISF_FastCaloSim...    INFO 3   Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 12Run for bin 12
+ISF_FastCaloSim...    INFO 12center layer 12 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 12  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 12  Ekin_bin=all ; calosample=12
+ISF_FastCaloSim...    INFO 12  Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 13Run for bin 13
+ISF_FastCaloSim...    INFO 13center layer 13 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 13  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 13  Ekin_bin=all ; calosample=13
+ISF_FastCaloSim...    INFO 13  Weight for extrapolated position: 0.5
+ISF_FastCaloSim...    INFO 14Run for bin 14
+ISF_FastCaloSim...    INFO 14center layer 14 TFCSCenterPositionCalculation
+ISF_FastCaloSim...    INFO 14  PDGID: -211, 211 ; Ekin=all ; eta=0.225 [0.2 , 0.25)
+ISF_FastCaloSim...    INFO 14  Ekin_bin=all ; calosample=14
+ISF_FastCaloSim...    INFO 14  Weight for extrapolated position: 0.5
+ISF_FastCaloSim... SUCCESS Before running GAN2->simulate()
 
-ISF_FastCaloSim...   INFO Ebin=-1 E=49599.8 #cells=0
-ISF_FastCaloSim...   INFO   E0(PreSamplerB)=12.5851 E0/E=0.000253732
-ISF_FastCaloSim...   INFO   E2(EMB2)=16662.8 E2/E=0.335945
-ISF_FastCaloSim...   INFO   E3(EMB3)=3954.2 E3/E=0.0797221
-ISF_FastCaloSim...   INFO   E12(TileBar0)=12609.4 E12/E=0.254222
-ISF_FastCaloSim...   INFO   E13(TileBar1)=13976.3 E13/E=0.281781
-ISF_FastCaloSim...   INFO   E14(TileBar2)=2384.57 E14/E=0.0480761
-ISF_FastCaloSim...   INFO   AuxInfo has 2 elements
-ISF_FastCaloSim...   INFO     776773022 :  int=23 float=3.22299e-44 double=1.13635e-322 void*=0x17
-ISF_FastCaloSim...   INFO     2331614212 :  int=0 float=0 double=1 void*=0x3ff0000000000000
-ISF_FastCaloSim...SUCCESS Program ends
+ISF_FastCaloSim...    INFO Ebin=-1 E=49599.8 #cells=0
+ISF_FastCaloSim...    INFO   E0(PreSamplerB)=12.5851 E0/E=0.000253732
+ISF_FastCaloSim...    INFO   E2(EMB2)=16662.8 E2/E=0.335945
+ISF_FastCaloSim...    INFO   E3(EMB3)=3954.2 E3/E=0.0797221
+ISF_FastCaloSim...    INFO   E12(TileBar0)=12609.4 E12/E=0.254222
+ISF_FastCaloSim...    INFO   E13(TileBar1)=13976.3 E13/E=0.281781
+ISF_FastCaloSim...    INFO   E14(TileBar2)=2384.57 E14/E=0.0480761
+ISF_FastCaloSim...    INFO   AuxInfo has 2 elements
+ISF_FastCaloSim...    INFO     776773022 :  int=23 float=3.22299e-44 double=1.13635e-322 void*=0x17
+ISF_FastCaloSim...    INFO     2331614212 :  int=0 float=0 double=1 void*=0x3ff0000000000000
+ISF_FastCaloSim... SUCCESS Program ends
 

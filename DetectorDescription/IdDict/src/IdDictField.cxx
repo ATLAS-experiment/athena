@@ -14,24 +14,27 @@ IdDictField::IdDictField (const std::string& name)
 {
 }
 
+// Define these out-of-line so header doesn't need to include IdDictLabel.h.
+IdDictField::IdDictField(IdDictField&&) = default;
+IdDictField::~IdDictField() = default;
+IdDictField& IdDictField::operator= (IdDictField&&) = default;
+
 
 
 bool IdDictField::verify() const {
   return(true);
 }
 
-IdDictLabel* IdDictField::find_label(const std::string& name) const {
-  for (size_t i = 0; i < m_labels.size(); ++i) {
-    IdDictLabel* label = m_labels[i];
-    if ((label != 0) && (label->name() == name)) return(label);
+const IdDictLabel* IdDictField::find_label(const std::string& name) const {
+  for (const auto& p : m_labels) {
+    if (p && p->name() == name) return p.get();
   }
-
-  return(0);
+  return nullptr;
 }
 
 void
-IdDictField::add_label(IdDictLabel* label) {
-  m_labels.push_back(label);
+IdDictField::add_label(std::unique_ptr<const IdDictLabel> label) {
+  m_labels.push_back(std::move(label));
 }
 
 void
@@ -58,8 +61,8 @@ ExpandedIdentifier::element_type
 IdDictField::get_label_value(const std::string& name) const {
   ExpandedIdentifier::element_type value{0};
   if (std::ranges::find_if(name,[](const char c){ return !std::isdigit(c); }) != name.end()) {
-    for (const auto* label: m_labels) {
-      if (label == nullptr) continue;
+    for (const auto& label: m_labels) {
+      if (!label) continue;
       if (label->valued()) value = label->value();
       if (label->name() == name) {
         return(value);
@@ -78,9 +81,5 @@ IdDictField::get_label_value(const std::string& name) const {
 }
 
 void IdDictField::clear() {
-  for (size_t i = 0; i < m_labels.size(); ++i) {
-    IdDictLabel* label = m_labels[i];
-    delete label;
-  }
   m_labels.clear();
 }

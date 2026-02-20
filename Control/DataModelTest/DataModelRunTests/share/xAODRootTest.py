@@ -37,7 +37,10 @@ def _typename(t):
 def xAODInit():
     ROOT.xAOD.TEvent
     CHECK(ROOT.xAOD.Init())
-    return
+    import sys
+    if len(sys.argv) >= 2 and sys.argv[1] == '--rntuple':
+        return True
+    return False
 
 
 
@@ -181,8 +184,9 @@ def copy_view (event, obj, key):
 
 
 class xAODTestRead:
-    def __init__ (self, readPrefix = ''):
+    def __init__ (self, is_rntuple, readPrefix = ''):
         self.readPrefix = readPrefix
+        self.is_rntuple = is_rntuple
         return
 
 
@@ -206,15 +210,16 @@ class xAODTestRead:
         for c in vec:
             dump_c (c)
 
-        vec = event[self.readPrefix + 'cview']
-        print (self.readPrefix + 'cview')
-        for c in vec:
-            dump_c (c)
+        if not self.is_rntuple:
+            vec = event[self.readPrefix + 'cview']
+            print (self.readPrefix + 'cview')
+            for c in vec:
+                dump_c (c)
 
-        print (self.readPrefix + 'pvec')
-        vec = event[self.readPrefix + 'pvec']
-        for p in vec:
-            dump_xaodobj (p)
+            print (self.readPrefix + 'pvec')
+            vec = event[self.readPrefix + 'pvec']
+            for p in vec:
+                dump_xaodobj (p)
 
         print (self.readPrefix + 'hvec')
         vec = event[self.readPrefix + 'hvec']
@@ -376,12 +381,17 @@ class AllocTestRead:
     
 
 class Analysis:
-    def __init__ (self, ifname, ofname = None):
+    def __init__ (self, ifname, ofname = None, is_rntuple = False):
         self.algs = []
-        self.f = ROOT.TFile (ifname)
-        from xAODRootAccess.TPyEvent import TPyEvent
-        self.event = TPyEvent (ROOT.xAOD.TEvent.kAthenaAccess)
-        CHECK (self.event.readFrom (self.f, True, 'CollectionTree'))
+        if is_rntuple:
+            from xAODRootAccess.RPyEvent import RPyEvent
+            self.event = RPyEvent()
+            CHECK (self.event.readFrom (ifname))
+        else:
+            from xAODRootAccess.TPyEvent import TPyEvent
+            self.f = ROOT.TFile (ifname)
+            self.event = TPyEvent (TPyEvent.kAthenaAccess)
+            CHECK (self.event.readFrom (self.f, True, 'CollectionTree'))
         self.fout = None
         if ofname:
             self.fout = ROOT.TFile.Open (ofname, 'recreate')

@@ -10,7 +10,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Tools
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // ACTS
@@ -74,7 +74,7 @@ class TrackExtensionAlg : public AthReentrantAlgorithm {
   
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{
       this, "TrackingGeometryTool", ""};
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{
       this, "ExtrapolationTool", ""};
   ToolHandle<ActsTrk::IOnTrackCalibratorTool<detail::RecoTrackStateContainer>>
       m_pixelCalibTool{this, "PixelCalibrator", "",

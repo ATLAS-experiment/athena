@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGBYTESTREAMCNVSVC_H
@@ -9,6 +9,7 @@
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "EFInterfaceSvc.h"
 
 // Forward declarations
 class StoreGateSvc;
@@ -71,10 +72,12 @@ private:
   // ------------------------- Service / Tool handles --------------------------
   ServiceHandle<StoreGateSvc> m_evtStore {this, "EventStore", "StoreGateSvc"};
   ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc {this, "ROBDataProvider", "ROBDataProviderSvc"};
+  ServiceHandle<EFInterfaceSvc> m_efInterfaceSvc {this, "EFInterfaceSvc", "", "Online service managing EF interface with Dataflow"};
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "" , "Monitoring tool"};
 
   // ------------------------- Other private members ---------------------------
   SG::SlotSpecificObj<std::unique_ptr<RawEventWrite>> m_rawEventWriteCache;
+  bool m_hasEFInterface{false}; //! Flag to select use of legacy or EF interface
 };
 
 #endif // TRIGBYTESTREAMCNVSVC_H

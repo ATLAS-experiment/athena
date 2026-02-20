@@ -1,17 +1,15 @@
 
 
 ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
+StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 EventPersistenc...   INFO Added successfully Conversion service ToyConversionSvc
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 1 proxy for ClassID 8107 (Bar): 
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 1 proxy for ClassID 8107 (Bar): 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 StoreGateSvc        DEBUG Retrieved const pointer to object aFoo  of type Foo(CLID 8101)
 Now we expect to see an error message:
@@ -22,8 +20,8 @@ DataProxy         WARNING accessData: conversion failed for data object 8109/aFo
 <<---Error Message Ends-------
 *** ProxyProviderSvc_test OK ***
 *** ProxyProviderSvc_test RecordBeforeRead BEGINS ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
-StoreGateSvc WARNING record_impl: you are recording an object with key existingFoo, type Foo (CLID 8101)
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl WARNING record_impl: you are recording an object with key existingFoo, type Foo (CLID 8101)
  There is already a persistent version of this object. Recording a duplicate may lead to unreproducible results and it is deprecated.
  object modifiable when retrieved
 StoreGateSvc        DEBUG Retrieved const pointer to object existingFoo  of type Foo(CLID 8101)
@@ -32,31 +30,31 @@ StoreGateSvc        DEBUG Retrieved const pointer to object existingFoo  of type
 
 
 *** ProxyProviderSvc_test HLTAutoKeyReset BEGINS ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 *** ProxyProviderSvc_test HLTAutoKeyReset OK ***
 
 
 *** ProxyProviderSvc_test Overwrite starts ***
 
 
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 =============Event #0 starts
  object modifiable when retrieved
 Overwritten FooBar i=0
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 FooBar i=0 deleted
 =============Event #1 starts
  object modifiable when retrieved
 Overwritten FooBar i=1
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 FooBar i=1 deleted
 =============Event #2 starts
  object modifiable when retrieved
 Overwritten FooBar i=2
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 FooBar i=2 deleted
 *** ProxyProviderSvc_test Overwrite OK ***
 
 
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1

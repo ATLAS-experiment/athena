@@ -6,19 +6,19 @@
   <class name="LVL1::TriggerTower" ></class>
 
 
-  <class name="DataVector<LVL1::CPMTower>" id="b606a8f0-3dcc-11e4-916c-0800200c9a66"/> 
+  <class name="DataVector<LVL1::CPMTower>" id="B606A8F0-3DCC-11E4-916C-0800200C9A66"/> 
   <class name="std::vector<LVL1::CPMTower*>" />
   <class name="LVL1::CPMTower" ></class>
 
-  <class name="DataVector<LVL1::CMXCPTob>" id="37586b10-a89b-436d-8c72-98150a7465f8"/> 
+  <class name="DataVector<LVL1::CMXCPTob>" id="37586B10-A89B-436D-8C72-98150A7465F8"/> 
   <class name="std::vector<LVL1::CMXCPTob*>" />
   <class name="LVL1::CMXCPTob" ></class>
 
-  <class name="DataVector<LVL1::CMXCPHits>" id="2b292e65-2c39-421d-b256-608f164dcfa6"/> 
+  <class name="DataVector<LVL1::CMXCPHits>" id="2B292E65-2C39-421D-B256-608F164DCFA6"/> 
   <class name="std::vector<LVL1::CMXCPHits*>" />
   <class name="LVL1::CMXCPHits" ></class>
 
-  <class name="DataVector<LVL1::CPMTobRoI>" id="256347a2-373f-47c5-8136-b67b18c51ea4"/> 
+  <class name="DataVector<LVL1::CPMTobRoI>" id="256347A2-373F-47C5-8136-B67B18C51EA4"/> 
   <class name="std::vector<LVL1::CPMTobRoI*>" />
   <class name="LVL1::CPMTobRoI" ></class>
 

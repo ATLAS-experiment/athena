@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_effectiveGas_h
@@ -57,13 +57,13 @@ private:
   std::vector<float> m_lnIntegratedSigmas;
   std::vector<float> m_lnEpsR;
   std::vector<float> m_lnEpsI;
-  const double m_lnEmin;
-  const double m_lnEmax;
-  const double m_eps;        // epsilon for numerical integration.
-  double m_S1 ;              // x-section to F.osc
-  double m_Wp2;              // plasma freq**2 {ev}
-  double m_S2 ;              // dN/dx scale
-  double m_ne ;              // Electron density
+  const double m_lnEmin{};
+  const double m_lnEmax{};
+  const double m_eps{};        // epsilon for numerical integration.
+  double m_S1{} ;              // x-section to F.osc
+  double m_Wp2{};              // plasma freq**2 {ev}
+  double m_S2{} ;              // dN/dx scale
+  double m_ne{} ;              // Electron density
 };
 
 #endif

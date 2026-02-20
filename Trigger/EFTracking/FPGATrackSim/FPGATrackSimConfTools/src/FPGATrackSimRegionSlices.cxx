@@ -98,10 +98,10 @@ FPGATrackSimRegionSlices::FPGATrackSimRegionSlices(float mind0, float minz0, flo
     max.phi = phibinSize*(phibin+1);
 
     // Force these to fall within [-pi, pi].
-    while (min.phi < M_PI) min.phi += 2*M_PI;
+    while (min.phi < -M_PI) min.phi += 2*M_PI;
     while (min.phi >= M_PI) min.phi -= 2*M_PI;
-    while (max.phi < M_PI) max.phi += 2*M_PI;
-    while (max.phi >= M_PI) max.phi -= 2*M_PI;
+    while (max.phi <= -M_PI) max.phi += 2*M_PI;
+    while (max.phi > M_PI) max.phi -= 2*M_PI;
 
     if (etaside > 0) {
       min.eta = etabinSize * etabin;

@@ -253,7 +253,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   //       "QuirkTransportation: currentMinimumStep <= 0"
   //   );
   //}
-  G4bool dbg = false; //(track.GetCurrentStepNumber() % 1000000 == 0);
+  constexpr G4bool dbg = false; //(track.GetCurrentStepNumber() % 1000000 == 0);
   quirkStepper.SetDebug(dbg);
   if (dbg) G4cout << "QuirkTransportation: start = " << aFieldTrack.GetPosition() << G4endl;
   if (dbg) G4cout << "QuirkTransportation: currentMinimumStep = " << currentMinimumStep << G4endl;
@@ -269,17 +269,12 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
                                                                 track.GetVolume() ) ;
      if (dbg) G4cout << "QuirkTransportation: moved " << lengthAlongCurve << G4endl;
      m_geometryLimitedStep = lengthAlongCurve < currentMinimumStep;
-     if( m_geometryLimitedStep ) {
-        geometryStepLength   = lengthAlongCurve ;
-     } else {
-        geometryStepLength   = currentMinimumStep ;
-     }
+     
      // Update stepper, string vectors with step length from field propagator
      quirkStepper.Update(aFieldTrack, aFieldTrack.GetCurveLength() == 0 && !m_geometryLimitedStep);
   }
   else
   {
-     geometryStepLength   = 0.0 ;
      m_geometryLimitedStep = false ;
   }
   if (dbg) G4cout << "QuirkTransportation: moved " << aFieldTrack.GetCurveLength() << G4endl;
@@ -292,6 +287,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   // m_safetyHelper->SetCurrentSafety( newSafety, startPosition);
 
   // Get end-of-step quantities
+  //geometryStepLength is set here, overwriting any previous setting
   geometryStepLength = aFieldTrack.GetCurveLength();
   m_transportEndPosition = aFieldTrack.GetPosition() ;
   m_momentumChanged         = true ; 

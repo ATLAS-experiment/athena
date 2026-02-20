@@ -84,26 +84,10 @@ def setupSample(runArgs, flags):
 
     # Check if sample attributes have been properly set
     for var, value in vars(sample).items():
-       if not value:
-           raise RuntimeError("self.{} should be set in Sample(EvgenConfig)".format(var))
-       else:
-           if var == "generators":
-               from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
-               from GeneratorConfig.GenConfigHelpers import gen_sortkey
-               gennames = sorted(sample.generators, key=gen_sortkey)
-               gendict = generatorsGetInitialVersionedDictionary(gennames)
-               gennamesvers = generatorsVersionedStringList(gendict)
-               evgenLog.info("MetaData: generatorName = {}".format(gennamesvers))
-           else:
-               evgenLog.info("MetaData: {} = {}".format(var, value))
-
-    # Check for other inconsistencies in jO
-    if len(sample.generators) > len(set(sample.generators)):
-        raise RuntimeError("Duplicate entries in generators: invalid configuration, please check your JO")
-    from GeneratorConfig.GenConfigHelpers import gen_require_steering
-    if gen_require_steering(sample.generators):
-        if hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
-            raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
+        if not value:
+            raise RuntimeError("self.{} should be set in Sample(EvgenConfig)".format(var))
+        else:
+            evgenLog.info("MetaData: {} = {}".format(var, value))
 
     # Keywords check
     if hasattr(sample, "keywords"):
@@ -172,20 +156,6 @@ def fromRunArgs(runArgs):
     # Create an instance of the Sample(EvgenCAConfig) and update global flags accordingly
     sample = setupSample(runArgs, flags)
 
-    # Sort the list of generator names into standard form
-    from GeneratorConfig.GenConfigHelpers import gen_sortkey, gen_lhef
-    generatorNames = sorted(sample.generators, key=gen_sortkey)
-
-    # Check black-list and purple-list
-    blError = checkBlackList(athenaRel,generatorNames, "black")
-    plError = checkBlackList(athenaRel,generatorNames, "purple")
-    if blError is not None:
-        raise RuntimeError(blError)
-    if plError is not None:
-        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        evgenLog.warning(f"!!! WARNING {plError} !!!")
-        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
     # Setup the main flags
     flags.Exec.FirstEvent = runArgs.firstEvent
     # Max events should be not set, job stopping is handled by CountHepMC
@@ -245,11 +215,34 @@ def fromRunArgs(runArgs):
     # Set up the process
     cfg.merge(sample.setupProcess(flags))
 
+    # Sort the list of generator names into standard form
+    from GeneratorConfig.GenConfigHelpers import gen_sortkey
+    from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
+    generators = sorted(cfg.getService("GeneratorInfoSvc").Generators, key=gen_sortkey)
+    gendict = generatorsGetInitialVersionedDictionary(generators)
+    generatorsWithVersion = generatorsVersionedStringList(gendict)
+
+    # Check if the setup requires steering
+    from GeneratorConfig.GenConfigHelpers import gen_require_steering
+    if gen_require_steering(generators):
+        if hasattr(runArgs, "outputEVNTFile") and not hasattr(runArgs, "outputEVNT_PreFile"):
+            raise RuntimeError("'EvtGen' found in job options name, please set '--steering=afterburn'")
+
+    # Check black-list and purple-list
+    blError = checkBlackList(athenaRel, generators, "black")
+    plError = checkBlackList(athenaRel, generators, "purple")
+    if blError is not None:
+        raise RuntimeError(blError)
+    if plError is not None:
+        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        evgenLog.warning(f"!!! WARNING {plError} !!!")
+        evgenLog.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     # Fix non-standard event features
     if not flags.Input.Files:
         from EvgenProdTools.EvgenProdToolsConfig import FixHepMCCfg
         from GeneratorConfig.GenConfigHelpers import gens_purgenoendvtx
-        generatorsList = sample.generators.copy()
+        generatorsList = generators.copy()
         if "Pythia8" in generatorsList:
             pythia8Alg = cfg.getEventAlgo("Pythia8_i")
             if pythia8Alg.Beam1 != "PROTON" or pythia8Alg.Beam2 != "PROTON":
@@ -260,7 +253,7 @@ def fromRunArgs(runArgs):
 
     ## Sanity check the event record (not appropriate for all generators)
     from GeneratorConfig.GenConfigHelpers import gens_testhepmc
-    if gens_testhepmc(sample.generators):
+    if gens_testhepmc(generators):
         from EvgenProdTools.EvgenProdToolsConfig import TestHepMCCfg
         cfg.merge(TestHepMCCfg(flags))
 
@@ -294,35 +287,32 @@ def fromRunArgs(runArgs):
 
     # TODO: Rivet
 
-    # Include information about generators in metadata
-    from GeneratorConfig.Versioning import generatorsGetInitialVersionedDictionary, generatorsVersionedStringList
-    generatorDictionary = generatorsGetInitialVersionedDictionary(generatorNames)
-    generatorList = generatorsVersionedStringList(generatorDictionary)
-
     # Extra metadata
-    # TODO: to be optimised
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    from GeneratorConfig.GenConfigHelpers import gen_lhef
     metadata = {
         "project_name": "IS_SIMULATION",
         f"AtlasRelease_{runArgs.trfSubstepName}": flags.Input.Release or "n/a",
         "beam_energy": str(int(flags.Beam.Energy)),
         "beam_type": flags.Beam.Type.value,
-        "generators": '+'.join(generatorList),
+        "generators": '+'.join(generatorsWithVersion),
+        "tune":  cfg.getService("GeneratorInfoSvc").Tune,
         "hepmc_version": f"HepMC{os.environ['HEPMCVER']}",
         "keywords": ", ".join(sample.keywords).lower(),
-        "lhefGenerator": '+'.join(filter(gen_lhef, generatorNames)),
+        "lhefGenerator": '+'.join(filter(gen_lhef, generators)),
         "mc_channel_number": str(flags.Generator.DSID),
     }
     if hasattr(sample, "process"): metadata.update({"evgenProcess": sample.process})
-    if hasattr(sample, "tune"): metadata.update({"evgenTune": sample.tune})
     if hasattr(sample, "specialConfig"): metadata.update({"specialConfiguration": sample.specialConfig})
     if hasattr(sample, "hardPDF"): metadata.update({"hardPDF": sample.hardPDF})
     if hasattr(sample, "softPDF"): metadata.update({"softPDF": sample.softPDF})
     if hasattr(sample, "randomSeed"): metadata.update({"randomSeed": str(runArgs.randomSeed)})
     cfg.merge(TagInfoMgrCfg(flags, tagValuePairs=metadata))
 
-    # Print version of HepMC to the log
-    evgenLog.info("HepMC version %s", os.environ["HEPMCVER"])
+    # Print metadata in the log
+    evgenLog.info(f"HepMC version {os.environ["HEPMCVER"]}")
+    evgenLog.info(f"MetaData: generatorTune = {cfg.getService("GeneratorInfoSvc").Tune}")
+    evgenLog.info("MetaData: generatorName = {}".format(generatorsWithVersion))
 
     # Configure output stream
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

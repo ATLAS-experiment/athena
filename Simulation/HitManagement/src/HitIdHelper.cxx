@@ -4,16 +4,15 @@
 
 #include "HitManagement/HitIdHelper.h"
 #include <cassert>
-#include <cmath>
+#include <bit>
 #include <iostream>
 
 void HitIdHelper::InitializeField(const std::string& n, int vmn, int vmx)
 {
-  int field = vmx -vmn+1;
-  int nb=1;
-  while (field>pow(2,nb)) nb++;
+  int field = vmx - vmn + 1;
+  int nb = std::bit_width(static_cast<unsigned>(field - 1));
   IdField id={n,vmn,vmx,nb,m_currentStorage+1};
-  m_IDs.push_back(id);
+  m_IDs.push_back(std::move(id));
   m_currentStorage+=nb;
   assert (m_currentStorage<33);
 }
@@ -21,9 +20,9 @@ void HitIdHelper::InitializeField(const std::string& n, int vmn, int vmx)
 void HitIdHelper::InitializeField(const std::string& n,int nb)
 {
   int vmn=0;
-  int vmx=int(pow(2,nb))-1;
+  int vmx = (1 << nb) - 1;
   IdField id={n,vmn,vmx,nb,m_currentStorage+1};
-  m_IDs.push_back(id);
+  m_IDs.push_back(std::move(id));
   m_currentStorage+=nb;
   assert (m_currentStorage<33);
 }

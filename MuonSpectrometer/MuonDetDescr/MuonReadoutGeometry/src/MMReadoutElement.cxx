@@ -473,6 +473,20 @@ namespace MuonGM {
 
         bool conditionsApplied{false};
         Amg::Transform3D trfToML{Amg::Transform3D::Identity()};
+        
+        // this block is used for dedicated studies of alignemnt and allows to inject as built corrections before the actual as built and B-Line corrections are applied
+        if(manager()->getMmAsBuilt2()){
+#if __GNUC__ >= 14
+// Avoid a warning seen with -march=x86-64-v3.
+// This has been cleaned up in eigen after 3.4.0.
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Warray-bounds"
+#endif
+            pos.head(2) = manager()->getMmAsBuilt2()->correctPosition(layerId, pos.head(2));
+#if __GNUC__ >= 14
+# pragma GCC diagnostic pop
+#endif
+        }
 
 #ifndef SIMULATIONBASE
         //*********************

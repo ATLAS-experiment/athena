@@ -186,7 +186,7 @@ newPulse.push_back(vecHi)
 #=== write pulse shapes to COOL DB
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobObjs.Classes import TileCalibUtils
-from TileCalibBlobPython.TileCalibTools import MINRUN, MINLBK, MAXRUN, MAXLBK
+from TileCalibBlobPython.TileCalibTools import MAXRUN, MAXLBK
 
 #=== open the database
 db = TileCalibTools.openDbConn(schema,('UPDATE' if update else 'RECREATE'))

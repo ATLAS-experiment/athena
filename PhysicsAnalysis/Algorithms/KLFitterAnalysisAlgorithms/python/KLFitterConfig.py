@@ -16,61 +16,61 @@ class KLFitterBlock(ConfigBlock):
             "electrons",
             "",
             type=str,
-            info="the input electron container, with a possible selection, in the format container or container.selection. The default is '' (empty string).",
+            info="the input electron container, with a possible selection, in the format `container` or `container.selection`.",
         )
         self.addOption(
             "muons",
             "",
             type=str,
-            info="the input muon container, with a possible selection, in the format container or container.selection. The default is '' (empty string).",
+            info="the input muon container, with a possible selection, in the format `container` or `container.selection`.",
         )
         self.addOption(
             "jets",
             "",
             type=str,
-            info="the input jet container, with a possible selection, in the format container or container.selection. The default is '' (empty string).",
+            info="the input jet container, with a possible selection, in the format `container` or `container.selection`.",
         )
         self.addOption(
             "met",
             "",
             type=str,
-            info="the input MET container. The default is '' (empty string).",
+            info="the input MET container.",
         )
         self.addOption(
             "likelihoodType",
             "",
             type=str,
-            info="KLFitter likelihood, if only one is needed. See KLFitterEnums.h for possible values. The default is '' (empty string).",
+            info="KLFitter likelihood, if only one is needed. See `KLFitterEnums.h` for possible values.",
         )
         self.addOption(
             "leptonType",
             "",
             type=str,
-            info="type of lepton to use (only relevant to certain likelihood types), if only one is needed. See KLFitterEnums.h for possible values. The default is '' (empty string).",
+            info="type of lepton to use (only relevant to certain likelihood types), if only one is needed. See `KLFitterEnums.h` for possible values.",
         )
         self.addOption(
             "jetSelectionMode",
             "",
             type=str,
-            info="jet selection mode to use, if only one is needed. See KLFitterEnums.h for possible values. The default is '' (empty string).",
+            info="jet selection mode to use, if only one is needed. See `KLFitterEnums.h` for possible values.",
         )
         self.addOption(
             "btaggingMethod",
             "kNoTag",
             type=str,
-            info="strategy to handle b-jets, if only one is needed. See KLFitterEnums.h for possible values. The default is '' (empty string).",
+            info="strategy to handle b-jets, if only one is needed. See `KLFitterEnums.h` for possible values.",
         )
         self.addOption(
             "bTagCDIFile",
             None,
             type=str,
-            info="CDI file to pass to the b-tagging efficiency tool",
+            info="CDI file to pass to the b-tagging efficiency tool.",
         )
         self.addOption(
             "btagger",
             "GN2v01",
             type=str,
-            info="b-tagging algorithm to use, if only one is needed. The default is 'GN2v01'.",
+            info="b-tagging algorithm to use, if only one is needed.",
         )
         self.addOption(
             "btagWP",
@@ -82,19 +82,19 @@ class KLFitterBlock(ConfigBlock):
             "btagIgnoreOutOfValidityRange",
             False,
             type=bool,
-            info="whether or not the b-tagger should ignore (and not fail) when a jet is outside the calibration range. The default is False.",
+            info="whether or not the b-tagger should ignore (and not fail) when a jet is outside the calibration range.",
         )
         self.addOption(
             "selectionRegionsConfig",
             "",
             type=str,
-            info="string of the form 'selectionName: sel1, optionA: opA, optionB: opB; selectionName: sel2, ...' where options can be likelihoodType, leptonType, jetSelectionMode, btaggingMethod, btagger or btagWP. The default is '' (empty string).",
+            info="string of the form `selectionName: sel1, optionA: opA, optionB: opB; selectionName: sel2, ...` where options can be `likelihoodType`, `leptonType`, `jetSelectionMode`, `btaggingMethod`, `btagger` or `btagWP`.",
         )
         self.addOption(
             "saveAllPermutations",
             False,
             type=bool,
-            info="whether to save all permutations, or just the best one. The default is False (only save the best one).",
+            info="whether to save all permutations, or just the best one.",
         )
         # list of dictionaries for the per-region config options
         self.perRegionConfiguration = list()

@@ -24,25 +24,6 @@
 
 #undef ISFDEBUG
 
-ISF::SimKernelMT::SimKernelMT( const std::string& name, ISvcLocator* pSvcLocator ) :
-    ::AthAlgorithm( name, pSvcLocator ),
-    m_simSelectors() //FIXME make private
-{
-    // routing tools
-    declareProperty("BeamPipeSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasForward] );
-    declareProperty("IDSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasID] );
-    declareProperty("CaloSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasCalo] );
-    declareProperty("MSSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasMS] );
-    declareProperty("CavernSimulationSelectors", m_simSelectors[AtlasDetDescr::fAtlasCavern] );
-    // tuning parameters
-    declareProperty("MaximumParticleVectorSize"  , m_maxParticleVectorSize             );
-}
-
-
-ISF::SimKernelMT::~SimKernelMT() {
-}
-
-
 StatusCode ISF::SimKernelMT::initialize() {
 
   ATH_CHECK( m_simulationTools.retrieve() );
@@ -248,7 +229,7 @@ StatusCode ISF::SimKernelMT::execute() {
         particles.push_back(particlePtr);
         lastSimulator=&simTool;
       }
-      else if (&simTool!=lastSimulator || particles.size() >= m_maxParticleVectorSize ) {
+      else if (&simTool!=lastSimulator || particles.size() >= m_maxParticleVectorSize.value() ) {
         // Change of simulator, end the current vector
         tempQueue.push(particlePtr);
       }

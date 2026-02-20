@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigNavigationThinningSvc.h"
@@ -80,10 +80,10 @@ StatusCode TrigNavigationThinningSvc::initialize() {
       ATH_MSG_FATAL ( "Please check your job options file" );
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO ( "Successfully retrived the TrigDecisionTool!" );
+    ATH_MSG_INFO ( "Successfully retrieved the TrigDecisionTool!" );
   }
   else {
-    ATH_MSG_FATAL ( "Could not retrive the TrigDecisionTool as it was not specified!" );
+    ATH_MSG_FATAL ( "Could not retrieve the TrigDecisionTool as it was not specified!" );
     return StatusCode::FAILURE;
   }
 

@@ -8,12 +8,11 @@
 namespace pool {
    namespace RootCollection {
 
-    // MN: recreate option is replaced by update to not overwrite the file
-    constexpr const char* const poolOptToRootOpt[] = {"CREATE", "UPDATE", "UPDATE", "READ"};
+    // Create and Overwrite is only option, we'll never update
+    constexpr const char* const poolOptToRootOpt[] = {"UPDATE", "READ"};
 
     // Io flags are not constexpr 
-    inline const Io::IoFlags poolOptToFileMgrOpt[] = { 
-      Io::WRITE|Io::CREATE, Io::WRITE|Io::APPEND, Io::WRITE|Io::APPEND, Io::READ };
+    inline const Io::IoFlags poolOptToFileMgrOpt[] = { Io::WRITE|Io::APPEND, Io::READ };
 
    }
 }

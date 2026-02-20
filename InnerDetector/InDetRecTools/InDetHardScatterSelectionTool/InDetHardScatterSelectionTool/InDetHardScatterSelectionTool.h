@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETHARDSCATTERSELECTIONTOOL_INDETHARDSCATTERSELECTIONTOOL_H
@@ -139,16 +139,13 @@ namespace InDet {
     IntegerProperty m_mode{ this, "SelectionMode", InDet::InDetHardScatterSelectionTool::Mode::SumPt2, "Mode for selecting the hardscatter: sumpt2[0] or sumpt[1] or sumptw[2]"};
     ToolHandle<InDet::IInDetTrackSelectionTool> m_trkSelectTool{this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool", "Track selection tool to use"};
     BooleanProperty m_returnDeco{ this, "ReturnDeco", false,  "If true, return the hardscatter as the vertex decorated with some boolean"};
-    StringProperty m_hardScatterDeco{this, "HardScatterLinkDeco", "hardScatterVertexLink", "The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "HardScatterLinkDeco", m_evtInfoKey, "hardScatterVertexLink", "The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)"};
     FloatProperty m_jetMinPt{this, "jetMinPt", 15000.0, "minimum jet pt"};
     FloatProperty m_jetTrkMaxDr{this, "jetTrkMaxDr", 0.8, "max dR between jet & Trk"};
     FloatProperty m_trkMaxPt{this, "trkMaxPt", 10045000, "max track pt"};
  
-    /// The decoration name of the ElementLink to the hardscatter vertex (applied to xAOD::EventInfo)
-    SG::ReadDecorHandleKey<xAOD::EventInfo> m_hardScatterDecoKey{this, "VertexScatterKey", "" , "Overwrriten in the configuration step by the <HardScatterLinkDeco> property"};
-
     /// xAOD::EventInfo ReadDecorHandleKey
-    SG::ReadDecorHandleKey<xAOD::VertexContainer> m_gnnScoreKey {this, "GNNKey", "PrimaryVertices.HSGN2_phsvertex", "Name of the hard-scatter GNN decoration"};
+    SG::ReadDecorHandleKey<xAOD::VertexContainer> m_gnnScoreKey {this, "GNNKey", m_vtxContKey, "HSGN2_phsvertex", "Name of the hard-scatter GNN decoration"};
 
     /// @}
 

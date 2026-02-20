@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import os,time
 import stat as statconsts
@@ -9,7 +9,7 @@ __doc__ = """Module with utilities for rfio files"""
 
 class RFIOError(IOError):
     def __init__(self,*vargs):
-        IOError.__init__(self,*vargs)
+        super().__init__(*vargs)
 
 def _remove_prefix(filename,prefix):
     if filename.startswith(prefix): filename = filename[len(prefix):]

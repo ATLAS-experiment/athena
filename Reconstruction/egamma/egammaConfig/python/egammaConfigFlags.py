@@ -14,6 +14,9 @@ def createEgammaConfigFlags():
                  lambda prevFlags: prevFlags.Detector.EnableCalo
                  and prevFlags.Reco.HIMode is not HIMode.HI)
 
+    # Run MVA calibration for fwd electron
+    egcf.addFlag("Egamma.doForwardCalib",False)
+
     # Run the GSF refitting/egamma Tracking it is calo seeded.
     egcf.addFlag("Egamma.doTracking",
                  lambda prevFlags: (

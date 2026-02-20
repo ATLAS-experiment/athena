@@ -210,6 +210,7 @@ void TRTSensitiveDetector::Initialize(G4HCofThisEvent* /*pHCofThisEvent*/)
   {
     if(auto* eventInfo = static_cast<AtlasG4EventUserInfo*>(eventManager->GetUserInformation())) {
       m_HitColl = eventInfo->GetHitCollectionMap()->Find<TRTUncompressedHitCollection>(m_HitCollName);
+      m_g4UserEventInfo = eventInfo;
     }
   }
 

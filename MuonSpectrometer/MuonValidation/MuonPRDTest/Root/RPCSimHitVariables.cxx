@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonPRDTest/RPCSimHitVariables.h"
 
@@ -17,7 +17,7 @@ namespace MuonPRDTest {
         ATH_MSG_DEBUG("do fill RpcSDOVariable()");
         SG::ReadHandle<RPCSimHitCollection> rpcContainer{m_key, ctx};
         if (!rpcContainer.isValid()) {
-            ATH_MSG_FATAL("Failed to retrive digit container " << m_key.fullKey());
+            ATH_MSG_FATAL("Failed to retrieve digit container " << m_key.fullKey());
             return false;
         }
         const MuonGM::MuonDetectorManager* MuonDetMgr = getDetMgr(ctx);

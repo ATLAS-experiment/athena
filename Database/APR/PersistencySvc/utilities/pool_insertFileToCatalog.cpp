@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 
 #include "CxxUtils/checker_macros.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
-#include "FileCatalog/URIParser.h"
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "POOLCore/SystemTools.h"
-#include "POOLCore/DbPrint.h"
 
 using namespace pool;
 
@@ -22,7 +20,7 @@ public:
   void printSyntax();
 
 private:
-  std::string 		m_URL; 
+  std::string 		m_catalogFN;
 };
 
 
@@ -44,7 +42,7 @@ InsertFileToCatalogApplication::parseArguments()
 	unsigned int nextArgumentIndex = iArg + 1;
 	if( nextArgumentIndex < args.size() ) {
 	   excludedArgument = nextArgumentIndex;
-	   m_URL = args[nextArgumentIndex];
+	   m_catalogFN = args[nextArgumentIndex];
 	}
      }
      else if( arg == "-t" ) {
@@ -67,15 +65,11 @@ InsertFileToCatalogApplication::execute()
    startSession();
    readFileGUIDs();
   
-  // Open the file catalog and insert the pfn/fid/technology
-   pool::URIParser p( m_URL );
-   p.parse();
+   // Open the file catalog and insert the pfn/fid/technology
    pool::IFileCatalog   catalog;
-   catalog.setWriteCatalog( p.contactstring() );
-
-   catalog.connect();
+   catalog.setWriteCatalog( m_catalogFN );
    catalog.start();
-   
+
    for( const auto& fp : fidAndPfn ) {
       std::string fid = fp.first; // can't be const
       catalog.registerPFN(fp.second, technologyName, fid);
@@ -89,7 +83,6 @@ InsertFileToCatalogApplication::printSyntax()
 {
   std::cout << "Syntax : " << executableName << " [-u fileCatalog] [-t technologyType] files" << std::endl;
 }
-
 
 
 

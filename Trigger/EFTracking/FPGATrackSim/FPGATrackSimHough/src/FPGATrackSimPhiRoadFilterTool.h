@@ -49,7 +49,7 @@ class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimR
         ///////////////////////////////////////////////////////////////////////
         // IFPGATrackSimRoadFilterTool
 
-        virtual StatusCode filterRoads(std::vector<std::shared_ptr<const FPGATrackSimRoad>> & prefilter_roads, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & postfilter_roads) override;
+        virtual StatusCode filterRoads(std::vector<FPGATrackSimRoad> & prefilter_roads, std::vector<FPGATrackSimRoad> & postfilter_roads) override;
 
     private:
 
@@ -82,7 +82,7 @@ class FPGATrackSimPhiRoadFilterTool : public extends <AthAlgTool, IFPGATrackSimR
 
         ///////////////////////////////////////////////////////////////////////
         // Helpers
-        FPGATrackSimRoad buildRoad(std::shared_ptr<const FPGATrackSimRoad> origr) const;
+        FPGATrackSimRoad buildRoad(const FPGATrackSimRoad & origr) const;
 };
 
 

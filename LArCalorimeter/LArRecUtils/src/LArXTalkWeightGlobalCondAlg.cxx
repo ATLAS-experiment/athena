@@ -6,7 +6,7 @@
 #include "AthenaKernel/IOVInfiniteRange.h"
 
 LArXTalkWeightGlobalCondAlg::LArXTalkWeightGlobalCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-	AthReentrantAlgorithm(name,pSvcLocator){}
+	AthCondAlgorithm(name,pSvcLocator){}
 
 
 StatusCode LArXTalkWeightGlobalCondAlg::initialize(){

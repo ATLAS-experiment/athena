@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // InSituCalibStep.h 
@@ -47,6 +47,7 @@ private:
  
   Gaudi::Property<bool> m_CalibrateMC {this, "CalibrateMC", false, "force Insitu step for MC sample"};
   Gaudi::Property<bool> m_isMC {this, "isMC", false, "isMC"};
+  Gaudi::Property<bool> m_useOriginalHistCombination {this, "useOriginalHistCombination",false,"Use original method to combine histograms."};
  
   Gaudi::Property<std::string> m_jetInScale {this, "InScale", "JetGSCScaleMomentum", "Starting jet scale"};
   Gaudi::Property<std::string> m_jetOutScale {this, "OutScale", "JetInsituScaleMomentum", "Ending jet scale"};

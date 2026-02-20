@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODCore )
@@ -25,7 +25,7 @@ atlas_add_library( xAODCore
    PUBLIC_HEADERS xAODCore
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks CxxUtils RootUtils
-   ${extra_libs} )
+   SGCoreLib ${extra_libs} )
 
 atlas_add_dictionary( xAODCoreDict
    xAODCore/xAODCoreDict.h
@@ -36,7 +36,6 @@ atlas_add_dictionary( xAODCoreDict2
    xAODCore/xAODCoreDict2.h
    xAODCore/selection2.xml
    LINK_LIBRARIES xAODCore )
-
 
 set( _stlDictXml "xAODCore/selectionSTL.xml" )
 if( APPLE )

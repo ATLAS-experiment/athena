@@ -21,11 +21,11 @@ class BJetCalibAnalysisConfig (ConfigBlock) :
             noneAction='error',
             info="the name of the input muon container.")
         self.addOption ('jetPreselection', "", type=str,
-            info="the jet preselection")
+            info="the jet preselection.")
         self.addOption ('muonPreselection', "", type=str,
-            info="the muon preselection")
+            info="the muon preselection.")
         self.addOption ('doPtCorr', True, type=bool,
-            info="whether to run the b-jet pT correction on top of the muon-in-jet one")
+            info=r"whether to run the b-jet $p_\mathrm{T}$ correction on top of the muon-in-jet one.")
 
     def instanceName (self) :
         """Return the instance name for this block"""

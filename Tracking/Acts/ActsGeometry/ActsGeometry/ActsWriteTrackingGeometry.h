@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSWRITETRACKINGGEOMETRY_H
@@ -13,7 +13,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 // PACKAGE
-#include "ActsGeometry/ActsTrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 
 // STL
 #include <fstream>
@@ -24,7 +24,6 @@ namespace Acts {
   class TrackingGeometry;
 }
 
-class IActsTrackingGeometrySvc;
 class IActsMaterialJsonWriterTool;
 
 class ActsWriteTrackingGeometry : public AthReentrantAlgorithm {
@@ -36,7 +35,7 @@ public:
 
 private:
 
-  ToolHandle<ActsTrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
+  PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
   ToolHandle<IActsMaterialJsonWriterTool> m_materialJsonWriterTool{this, "MaterialJsonWriterTool", "ActsMaterialJsonWriterTool"};
 

@@ -167,7 +167,7 @@ namespace {
 
 // Constructor
 SCT_CablingCondAlgFromCoraCool::SCT_CablingCondAlgFromCoraCool(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator)
+  AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

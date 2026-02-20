@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <boost/functional/hash.hpp>
@@ -237,6 +237,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::initialize()
   ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::CaloClusterContainer", m_CaloClusterContainerCLID));
   ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::TrackParticleContainer", m_TrackParticleContainerCLID));
   ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::TauTrackContainer", m_TauTrackContainerCLID));
+  ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::ElectronContainer", m_ElectronContainerCLID));
+  ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::PhotonContainer", m_PhotonContainerCLID));
+  ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::MuonContainer", m_MuonContainerCLID));
+  ATH_CHECK(m_clidSvc->getIDOfTypeName("xAOD::TauJetContainer", m_TauJetContainerCLID));
 
   return StatusCode::SUCCESS;
 }
@@ -403,7 +407,6 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
   for (auto ptrChain : m_configSvc->chains())
   {
     std::string chainName = ptrChain->name();
-
 
     if (not m_chainsToSave.empty())
     {
@@ -947,6 +950,12 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &co
   {
     if (proxy->te != nullptr)
     {
+      // Determine which particle type is expected based on TE name
+      // This ensures Run3 retrieves the same object types as Run2
+      std::string teName = TrigConf::HLTUtils::hash2string(proxy->te->getId());
+      CLID expectedCLID = getExpectedParticleCLID(teName);
+
+      ATH_MSG_VERBOSE("TE " << teName << " expects CLID " << expectedCLID);
 
       for (const HLT::TriggerElement::FeatureAccessHelper& helper : proxy->te->getFeatureAccessHelpers())
       {
@@ -955,7 +964,15 @@ StatusCode Run2ToRun3TrigNavConverterV2::fillRelevantFeatures(ConvProxySet_t &co
         {
           if (feaToSave(helper, sgName))
           {
+            // If we have a specific expected CLID, only save features matching that type
+            if (expectedCLID != 0 && sgCLID != expectedCLID)
+            {
+              ATH_MSG_VERBOSE("Skipping feature with CLID " << sgCLID << " (name: " << sgName
+                              << ") for TE " << teName << " because expected CLID is " << expectedCLID);
+              continue;
+            }
             proxy->features.push_back(helper);
+            ATH_MSG_VERBOSE("Added feature with CLID " << sgCLID << " (name: " << sgName << ") for TE " << teName);
           }
         }
       }
@@ -1337,7 +1354,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkTrkNode(ConvProxySet_t &convProxies
           ElementLink<TrigRoiDescriptorCollection> ROIElementLink = proxy->imNode->objectLink<TrigRoiDescriptorCollection>(TrigCompositeUtils::roiString());
           if (ROIElementLink.isValid())
           {
-            SG::AuxElement::Decorator<ElementLink<TrigRoiDescriptorCollection>> viewBookkeeper("viewIndex");
+            static const SG::Decorator<ElementLink<TrigRoiDescriptorCollection>> viewBookkeeper("viewIndex");
             auto [sgKey, sgCLID, sgName] = getSgKey(run2Nav, trk);
             if (sgCLID == m_TrackParticleContainerCLID || sgCLID == m_TauTrackContainerCLID)
             {
@@ -1413,10 +1430,24 @@ std::vector<HLT::TriggerElement::FeatureAccessHelper> Run2ToRun3TrigNavConverter
 uint64_t Run2ToRun3TrigNavConverterV2::feaToHash(const std::vector<HLT::TriggerElement::FeatureAccessHelper> &feaVector, const HLT::TriggerElement *te_ptr, const HLT::TrigNavStructure &navigationDecoder) const
 {
   // FEA vectors hashing
-  ATH_MSG_VERBOSE("Calculating FEA hash");
+  // Filter by expected particle type based on TE name to ensure correct feature type
+  std::string teName = TrigConf::HLTUtils::hash2string(te_ptr->getId());
+  CLID expectedCLID = getExpectedParticleCLID(teName);
+
+  ATH_MSG_VERBOSE("Calculating FEA hash for TE " << teName << " expecting CLID " << expectedCLID);
   uint64_t hash = 0;
   for (auto fea : filterFEAs(feaVector, navigationDecoder))
   {
+    const auto & [sgKey, sgCLID, sgName] = getSgKey(navigationDecoder, fea);
+
+    // Apply TE-based filtering during hash calculation to prevent wrong merges
+    if (expectedCLID != 0 && sgCLID != expectedCLID)
+    {
+      ATH_MSG_VERBOSE("Skipping FEA with CLID " << sgCLID << " for TE " << teName
+                      << " (expected " << expectedCLID << ")");
+      continue;
+    }
+
     ATH_MSG_VERBOSE("Including FEA in hash CLID: " << fea.getCLID() << " te Id: " << te_ptr->getId());
     boost::hash_combine(hash, fea.getCLID());
     boost::hash_combine(hash, fea.getIndex().subTypeIndex());
@@ -1596,4 +1627,38 @@ std::pair<std::size_t, std::size_t> Run2ToRun3TrigNavConverterV2::getHighestPtOb
     }
   }
   return {bestFea, bestObj};
+}
+
+CLID Run2ToRun3TrigNavConverterV2::getExpectedParticleCLID(const std::string& teName) const
+{
+  // Determine which particle type is expected based on TE name
+  // This mimics the logic from IParticleRetrievalTool::getEGammaTEType()
+  // to ensure Run3 retrieves the same object types as Run2
+
+  // For egamma TEs, check for specific patterns
+  if (teName.find("etcut") != std::string::npos &&
+      teName.find("trkcut") == std::string::npos) {
+    // etcut chains (without trkcut) use CaloCluster
+    return m_CaloClusterContainerCLID;
+  }
+  else if (teName.rfind("EF_e", 0) == 0) {
+    // TE name starts with "EF_e" -> Electron
+    return m_ElectronContainerCLID;
+  }
+  else if (teName.rfind("EF_g", 0) == 0) {
+    // TE name starts with "EF_g" -> Photon
+    return m_PhotonContainerCLID;
+  }
+  else if (teName.rfind("EF_mu", 0) == 0 || teName.find("_mu") != std::string::npos) {
+    // Muon TEs
+    return m_MuonContainerCLID;
+  }
+  else if (teName.rfind("EF_tau", 0) == 0 || teName.find("_tau") != std::string::npos) {
+    // Tau TEs
+    return m_TauJetContainerCLID;
+  }
+
+  // For non-physics TEs or TEs where we don't have a specific expectation,
+  // return 0 to indicate all features should be saved
+  return 0;
 }

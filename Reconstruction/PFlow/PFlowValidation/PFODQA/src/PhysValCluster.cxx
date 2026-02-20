@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhysValCluster.h"
@@ -26,7 +26,7 @@ StatusCode PhysValCluster::bookHistograms(){
   m_clusterValidationPlots->initialize();
   std::vector<HistData> hists = m_clusterValidationPlots->retrieveBookedHistograms();
 
-  for (auto hist : hists) {
+  for (const HistData& hist : hists) {
     ATH_CHECK(regHist(hist.first,hist.second,all));
   }
   

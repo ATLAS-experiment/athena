@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -29,7 +29,7 @@ class G4String;
 
 class TileGeoG4SD: public G4VSensitiveDetector {
 public:
-  TileGeoG4SD(G4String name, const std::string& hitCollectionName, ITileCalculator* tileCalculator);
+  TileGeoG4SD(const G4String& name, const std::string& hitCollectionName, ITileCalculator* tileCalculator);
   ~TileGeoG4SD() override = default;
 
   G4bool ProcessHits(G4Step*, G4TouchableHistory*) override final;

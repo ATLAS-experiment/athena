@@ -35,7 +35,6 @@
 + Control/AthenaCommon
 + Control/AthenaExamples/AthExHelloWorld
 + Control/AthenaExamples/AthExHive
-+ Control/AthenaExamples/AthExUnittest
 + Control/AthenaInterprocess
 + Control/AthenaKernel
 + Control/AthenaMP
@@ -51,19 +50,16 @@
 + Control/Navigation
 + Control/PerformanceMonitoring/PerfMonComps
 + Control/PerformanceMonitoring/PerfMonKernel
-+ Control/PyKernel
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
++ Control/SGCore
 + Control/SGTools
 + Control/StoreGate
 + Control/StoreGateBindings
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
-+ Database/APR/CollectionBase
-+ Database/APR/CollectionUtilities
-+ Database/APR/FileCatalog
-+ Database/APR/ImplicitCollection
++ Database/APR/CollectionSvc
 + Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection
@@ -116,7 +112,6 @@
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoModel/GeoSpecialShapes
 + DetectorDescription/GeoPrimitives
-+ DetectorDescription/GeometryDBSvc
 + DetectorDescription/IdDict
 + DetectorDescription/IdDictDetDescr
 + DetectorDescription/IdDictDetDescrCnv
@@ -257,7 +252,6 @@
 + MuonSpectrometer/MuonCnv/MuonSimEventAthenaPool
 + MuonSpectrometer/MuonCnv/MuonSimEventTPCnv
 + MuonSpectrometer/MuonConfig
-+ MuonSpectrometer/MuonConditions/MuonCondGeneral/MuonCondInterface
 + MuonSpectrometer/MuonDetDescr/MuonAGDD
 + MuonSpectrometer/MuonDetDescr/MuonAGDDBase
 + MuonSpectrometer/MuonDetDescr/MuonAGDDDescription
@@ -305,6 +299,7 @@
 + Simulation/G4Utilities/G4FastSimulation
 + Simulation/G4Utilities/G4PhysicsLists
 + Simulation/G4Utilities/G4ProfilingTools
++ Simulation/G4Utilities/G4RunManagement
 + Simulation/G4Utilities/G4StepLimitation
 + Simulation/G4Utilities/G4UserActions
 + Simulation/G4Utilities/Geo2G4

@@ -226,7 +226,7 @@ StatusCode TgcReadoutGeomTool::writeSectorMapping(const MuonDetectorManager& mgr
     std::unique_ptr<std::vector<int>> tgcSectorMapping = std::make_unique<std::vector<int>>();
     tgcSectorMapping->resize(m_idHelperSvc->tgcIdHelper().module_hash_max());
     Muon::MuonSectorMapping sectorMapping{};
-    const ActsGeometryContext gctx{};
+    const ActsTrk::GeometryContext gctx{};
     for (const TgcReadoutElement* readoutEle : tgcReadOutEles) {
         int& sectNumb = (*tgcSectorMapping)[m_idHelperSvc->moduleHash(readoutEle->identify())];
         sectNumb = sectorMapping.getSector(readoutEle->center(gctx).phi());

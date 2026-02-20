@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cuda.h>
@@ -205,7 +205,7 @@ TrigAccel::Work* TrigInDetModuleCuda::createWork(int workType, std::shared_ptr<T
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCuda* w = new SeedMakingWorkCuda(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCuda* w = new SeedMakingWorkCuda(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }
@@ -234,7 +234,7 @@ TrigAccel::Work* TrigInDetModuleCuda::createWork(int workType, std::shared_ptr<T
     
     unsigned int workId = workNum*100;
     
-    SeedMakingWorkCudaManaged* w = new SeedMakingWorkCudaManaged(workId, ctx, data, &m_timeLine);
+    SeedMakingWorkCudaManaged* w = new SeedMakingWorkCudaManaged(workId, ctx, std::move(data), &m_timeLine);
     
     return w;
   }

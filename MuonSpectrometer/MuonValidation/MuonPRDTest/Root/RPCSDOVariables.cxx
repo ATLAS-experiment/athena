@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPRDTest/RPCSDOVariables.h"
@@ -19,7 +19,7 @@ namespace MuonPRDTest {
         if (!MuonDetMgr) { return false; }
 
         if (!rpcSdoContainer.isValid()) {
-            ATH_MSG_FATAL("Failed to retrive digit container " << m_key.fullKey());
+            ATH_MSG_FATAL("Failed to retrieve digit container " << m_key.fullKey());
             return false;
         }
         unsigned int n_sdo{0};

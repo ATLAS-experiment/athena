@@ -52,6 +52,7 @@ from .VBF_osWW import VBF_osWW
 from .VBF_ssWW import VBF_ssWW
 from .VBF_W import VBF_W
 from .VBF_Z import VBF_Z
+from .VV_pol import VV_pol
 from .W import W
 from .Wbb import Wbb
 from .Wbbj import Wbbj
@@ -59,6 +60,7 @@ from .W_EW import W_EW
 from .W_SMEFT import W_SMEFT
 from .Wbb import Wbb
 from .Wbbj import Wbbj
+from .Wc import Wc
 from .Wj import Wj
 from .Wj_MiNNLO import Wj_MiNNLO
 from .Wjj import Wjj

@@ -38,6 +38,7 @@
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
 #include "GeneratorFilters/xAODSplitPhotonFilter.h"
+#include "GeneratorFilters/xAODDiPhotonFilter.h"
 
 // slimmers for 22.6
 #include "GeneratorFilters/PileupTruthParticleSlimmer.h"
@@ -146,6 +147,7 @@ DECLARE_COMPONENT( xAODVBFForwardJetsFilter )
 DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
 DECLARE_COMPONENT( xAODSplitPhotonFilter )
+DECLARE_COMPONENT( xAODDiPhotonFilter )
 //slimmers accepted for 22.6
 DECLARE_COMPONENT( PileupTruthParticleSlimmer )
 DECLARE_COMPONENT( xAODTruthParticleSlimmerElectron )

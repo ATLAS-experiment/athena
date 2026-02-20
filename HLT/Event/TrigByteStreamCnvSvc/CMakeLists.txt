@@ -15,7 +15,7 @@ atlas_add_component(
   LINK_LIBRARIES
     ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps AthenaKernel ByteStreamData
     AthenaMonitoringKernelLib ByteStreamCnvSvcBaseLib
-    CxxUtils GaudiKernel xAODEventInfo StoreGateLib TrigKernel TrigSteeringEvent )
+    CxxUtils GaudiKernel xAODEventInfo StoreGateLib TrigKernel TrigSteeringEvent AthenaInterprocess)
 
 # Install files from the package
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

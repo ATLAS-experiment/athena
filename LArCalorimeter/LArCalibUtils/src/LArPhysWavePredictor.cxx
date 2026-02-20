@@ -129,7 +129,7 @@ StatusCode LArPhysWavePredictor::initialize()
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
     m_onlineHelper = static_cast<const LArOnlineID_Base*>(ll);
     ATH_MSG_DEBUG("Found the LArOnlineID helper");
-    const CaloCell_SuperCell_ID* scid;
+    const CaloCell_SuperCell_ID* scid = nullptr;
     ATH_CHECK(detStore()->retrieve(scid, "CaloCell_SuperCell_ID" ));
     m_caloCellId= static_cast<const CaloCell_Base_ID*>(scid);
 

@@ -4,13 +4,7 @@
 #include "TrkBaseNode.h"
 #include "TrkFilteringNodes.h"
 
-SCT_EndCapCluster::SCT_EndCapCluster(const Surface* pS) : SCT_Cluster(pS)
-  , m_R(0)
-{
-	m_m=0.0;m_cov=0.0;
-}
-
-SCT_EndCapCluster::~SCT_EndCapCluster(void)
+SCT_EndCapCluster::SCT_EndCapCluster(std::unique_ptr<const Surface> pS) : SCT_Cluster(std::move(pS))
 {
 }
 

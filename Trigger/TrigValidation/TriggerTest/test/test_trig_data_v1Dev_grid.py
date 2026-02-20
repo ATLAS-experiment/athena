@@ -5,6 +5,7 @@
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc14-opt
 # art-include: 24.0/Athena
+# art-architecture: '#x86_64-intel'
 # art-input: group.trig-hlt.data25_13p6TeV.00500306.physics_EnhancedBias.merge.RAW
 # art-input-nfiles: 2
 # art-athena-mt: 8

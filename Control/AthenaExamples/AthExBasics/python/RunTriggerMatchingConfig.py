@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 # Configure the RunTriggerMatching algorithm
 # For guidelines on writing configuration scripts see the following pages:
-# https://atlassoftwaredocs.web.cern.ch/guides/ca_configuration/
+# https://atlas-software.docs.cern.ch/athena/configuration/
 
 # Imports of the configuration machinery
 from AthenaConfiguration.ComponentFactory import CompFactory

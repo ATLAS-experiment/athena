@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL includes
@@ -20,7 +20,7 @@ namespace SG {
  */
   VarHandleKeyArrayProperty::VarHandleKeyArrayProperty( const std::string& name, 
                                                         SG::VarHandleKeyArray& ref )
-    : PropertyWithHandlers( name, typeid( SG::VarHandleKeyArray ) ), 
+    : PropertyWithHandlers( name, typeid( ref ) ),
       m_pValue( &ref ) 
   {
 }

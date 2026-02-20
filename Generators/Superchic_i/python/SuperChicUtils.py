@@ -2,6 +2,7 @@
 
 
 import subprocess, os, shlex, re, shutil
+from packaging.version import Version
 
 from AthenaCommon import Logging
 
@@ -38,6 +39,13 @@ class SuperChicConfig:
         self.ionbreakup = True
         self.fAA = '00'
         self.fracsigX = 1
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.5.1")):
+            self.wrho = False
+            self.yrho = 2.5
+            self.accrho = 1.0
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.6.1")):
+            self.ion_incoh = False
+            self.ion_incoh_type = 'inel'
         self.ncall = 10000
         self.itmx = 10
         self.prec = 0.5
@@ -150,6 +158,13 @@ class SuperChicConfig:
         conf+=fortBool(self.ionbreakup) + "                            ! [ionbreakup] \n"
         conf+=fortStr(self.fAA) + "                                    ! [fAA] \n"
         conf+=fortDouble(self.fracsigX) + "                            ! [fracsigX] : multiply sig_(gamA) by this factor (1d0 - default) \n"
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.5.1")):
+            conf+=fortBool(self.wrho) + "                            ! [wrho] : generate concident rho production in AA collisions \n"
+            conf+=fortDouble(self.yrho) + "                          ! [yrho] : maximum rho |y| \n"
+            conf+=fortDouble(self.accrho) + "                        ! [accrho] : additional correction factor to account for rho->pipi acceptance, non-resonant dipions and different beams \n"
+        if (Version(os.environ['SUPERCHICVER']) >= Version("5.6.1")):
+            conf+=fortBool(self.ion_incoh) + "                            ! [ion_incoh] \n"
+            conf+=fortStr(self.ion_incoh_type) + "                        ! [ion_incoh_type]   \n"
         conf+="***********************************************************************************\n"
         conf+="*************Integration parameters************************************************\n"
         conf+="***********************************************************************************\n"

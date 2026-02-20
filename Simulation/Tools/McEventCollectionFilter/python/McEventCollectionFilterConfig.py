@@ -197,7 +197,7 @@ def DecorateTruthPileupParticlesCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputParticleContainer", "TruthPileupParticles")
-    kwargs.setdefault("OutputDecoration", "TruthPileupParticles.PVz")
+    kwargs.setdefault("OutputDecoration", "PVz")
 
     acc.addEventAlgo(CompFactory.PileUpTruthDecoration(name="DecorateTruthPileupParticles", **kwargs))
     return acc
@@ -207,7 +207,7 @@ def DecoratePileupAntiKt4TruthJetsCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputParticleContainer", "AntiKt4TruthJets")
-    kwargs.setdefault("OutputDecoration", "AntiKt4TruthJets.PVz")
+    kwargs.setdefault("OutputDecoration", "PVz")
 
     acc.addEventAlgo(CompFactory.PileUpTruthDecoration(name="DecoratePileupAntiKt4TruthJets", **kwargs))
     return acc
@@ -217,7 +217,7 @@ def DecoratePileupAntiKt6TruthJetsCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("InputParticleContainer", "AntiKt6TruthJets")
-    kwargs.setdefault("OutputDecoration", "AntiKt6TruthJets.PVz")
+    kwargs.setdefault("OutputDecoration", "PVz")
 
     acc.addEventAlgo(CompFactory.PileUpTruthDecoration(name="DecoratePileupAntiKt6TruthJets", **kwargs))
     return acc

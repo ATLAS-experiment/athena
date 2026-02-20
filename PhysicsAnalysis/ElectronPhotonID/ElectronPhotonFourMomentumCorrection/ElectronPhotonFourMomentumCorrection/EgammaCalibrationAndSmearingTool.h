@@ -21,6 +21,7 @@
 #include "ColumnarCore/ColumnAccessor.h"
 #include "ColumnarCluster/ClusterHelpers.h"
 #include "ColumnarCore/LinkColumn.h"
+#include "ColumnarCore/MomentumAccessors.h"
 #include "ColumnarCore/VectorColumn.h"
 #include "ColumnarEgamma/EgammaHelpers.h"
 #include "ColumnarEventInfo/EventInfoHelpers.h"
@@ -211,6 +212,7 @@ class EgammaCalibrationAndSmearingTool
   // Apply the correction on a modifyable egamma object
   virtual CP::CorrectionCode applyCorrection(xAOD::Egamma&) const override;
   CP::CorrectionCode applyCorrection(columnar::MutableEgammaId input, columnar::EventInfoId event_info) const;
+  void setPt(columnar::MutableEgammaId input, double energy) const;
 
   // Create a corrected copy from a constant egamma object
   //  virtual CP::CorrectionCode correctedCopy(const xAOD::Egamma&,
@@ -289,8 +291,16 @@ class EgammaCalibrationAndSmearingTool
   std::unique_ptr<TH2> m_caloDistPhiUnifCorr;
 
   Gaudi::Property<bool> m_fixForMissingCells{
-      this, "FixForMissingCells", true,
+    this, "FixForMissingCells", true,
       "AOD fix for cell recovery in core egamma cluster"};
+
+  Gaudi::Property<bool> m_doFwdCalib{
+    this, "DoFwdElectronCalibration", false,
+      "MVA calibration of the forward electron"};
+
+  Gaudi::Property<std::string> m_pVtxKey{
+    this, "PrimaryVerticesKey", "PrimaryVertices",
+      "Name of the primary vertex container"};
 
   void setupSystematics();
 
@@ -446,13 +456,12 @@ public:
     Accessors(columnar::ColumnarTool<>& tool) : columnar::ColumnarTool<>(&tool) {}
 
     columnar::MutableEgammaAccessor<columnar::ObjectColumn> m_egammaHandle {*this, "EGamma"};
-    columnar::EgammaHelpers::EnergyAccessor<> eAcc {*this};
+    columnar::MomentumAccessors<columnar::ContainerId::egamma> momAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
-    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> mAcc {*this, "m"};
     columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
     columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
@@ -468,11 +477,12 @@ public:
     columnar::ClusterHelpers::EtaBEAccessor<> clusterEtaBEAcc {*this};
     columnar::ClusterHelpers::EtaCaloAccessor<> etaCaloAcc {*this};
     columnar::ClusterHelpers::PhiCaloAccessor<> phiCaloAcc {*this};
-    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo"};
+    columnar::EventInfoAccessor<columnar::ObjectColumn> m_eventHandle {*this, "EventInfo", {.addMTDependency=true}};
     columnar::EventInfoHelpers::EventTypeAccessor<> eventTypeAcc {*this};
     columnar::EventInfoAccessor<uint32_t> runNumberAcc {*this, "runNumber"};
     columnar::EventInfoAccessor<uint64_t> eventNumberAcc {*this, "eventNumber"};
     columnar::EventInfoAccessor<unsigned int> randomrunnumber_getter {*this, "RandomRunNumber"};
+    columnar::EventInfoAccessor<float> actIntPerXingAcc {*this, "actualInteractionsPerCrossing"};
   };
   std::unique_ptr<Accessors> m_accessors;
 

@@ -134,10 +134,10 @@ namespace PixelCallbacks{
             PixelRDO_Container* m_rdoContainer;
             uint32_t m_offlineID = 0;
             uint8_t m_chipID = 0;
-            Identifier m_identifier;
-            ITkPixelCabling::TransformType m_transform;
+            Identifier m_identifier{};
+            ITkPixelCabling::TransformType m_transform{ITkPixelCabling::TransformType::UndefinedTransform};
             std::unique_ptr<PixelRDO_Collection> m_rdoCollection;
-            const PixelID* m_idHelper;
+            const PixelID* m_idHelper{};
     };
 
     //This prints the decoded hits on the screen,

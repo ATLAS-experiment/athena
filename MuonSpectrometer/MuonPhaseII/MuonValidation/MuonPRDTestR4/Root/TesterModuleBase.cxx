@@ -19,7 +19,7 @@ namespace MuonValR4 {
     const MuonGMR4::MuonDetectorManager* TesterModuleBase::getDetMgr() const {
         return m_detMgr;
     }
-    const ActsGeometryContext& TesterModuleBase::getGeoCtx(const EventContext& ctx) const {
+    const ActsTrk::GeometryContext& TesterModuleBase::getGeoCtx(const EventContext& ctx) const {
         SG::ReadHandle handle{m_geoCtxKey, ctx};
         if (!handle.isValid()) {
             THROW_EXCEPTION("Failed to retrieve "<<m_geoCtxKey.fullKey());

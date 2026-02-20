@@ -21,6 +21,7 @@
 #ifndef PERSISTENTDATAMODEL_ATHENAATTRIBUTELIST_H
 #define PERSISTENTDATAMODEL_ATHENAATTRIBUTELIST_H 
 
+//coverity[VIRTUAL_DTOR]
 #include "CoralBase/Attribute.h"
 #include "CoralBase/AttributeList.h"
 #include "CoralBase/AttributeListSpecification.h"

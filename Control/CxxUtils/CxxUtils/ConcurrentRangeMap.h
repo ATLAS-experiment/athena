@@ -16,7 +16,6 @@
 
 #include "CxxUtils/stall.h"
 #include "CxxUtils/IsUpdater.h"
-#include "boost/range/iterator_range.hpp"
 #include <atomic>
 #include <mutex>
 #include <utility>
@@ -24,6 +23,7 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
+#include <ranges>
 
 
 namespace CxxUtils {
@@ -283,10 +283,10 @@ public:
    *   payload_unique_ptr p (tp, delfcn);
    @endcode
    */
-  typedef std::unique_ptr<T, DeletePayload> payload_unique_ptr;
+  using payload_unique_ptr = std::unique_ptr<T, DeletePayload>;
 
-  typedef const value_type* const_iterator;
-  typedef boost::iterator_range<const_iterator> const_iterator_range;
+  using const_iterator = const value_type*;
+  using const_iterator_range = std::ranges::subrange<const_iterator>;
 
 
   /**

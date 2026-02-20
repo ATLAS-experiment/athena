@@ -216,6 +216,7 @@ void HVHelper::GetMapFromDB(void)
     for(unsigned int iSide = hvManager.beginSideIndex();
         iSide < hvManager.endSideIndex(); ++ iSide
     ){
+      // coverity[integer_overflow]  // false positive
       unsigned short jSide = 1 - iSide; // local numbering is inverse
       for(unsigned int iEta = hvManager.beginEtaIndex();
           iEta < hvManager.endEtaIndex(); ++ iEta

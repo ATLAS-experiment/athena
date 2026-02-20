@@ -22,7 +22,7 @@ menu.input = ''
 topocnvclone = ExecStep.ExecStep('CloneTopoConverter')
 topocnvclone.type = 'other'
 # On updates to the topoconverterph1 package, update the branch here
-topocnvclone.executable = 'git clone --depth 1 --branch art-2025-00-00 https://:@gitlab.cern.ch:8443/atlas-l1calo/l1topo/topoconverterph1.git'
+topocnvclone.executable = 'git clone --depth 1 --branch art-2025-00-02 https://:@gitlab.cern.ch:8443/atlas-l1calo/l1topo/topoconverterph1.git'
 topocnvclone.input = ''
 
 #====================================================================================================

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCTriggerCondSvc/TGCTriggerBWCWReader.h"
@@ -34,8 +34,8 @@ bool TGCTriggerBWCWReader::loadParameters(TGCTriggerLUTs* writeCdo,
     writeCdo->m_datamap[m_lutType][file] = data;
     writeCdo->m_data[m_lutType].push_back(data);
     writeCdo->m_file[m_lutType].push_back(file);
-    writeCdo->m_version[m_lutType].push_back(version);
-    writeCdo->m_type[m_lutType].push_back(type);
+    writeCdo->m_version[m_lutType].push_back(std::move(version));
+    writeCdo->m_type[m_lutType].push_back(std::move(type));
 
     ATH_MSG_INFO("file: " <<file);
     ATH_MSG_DEBUG("data: " << data);
@@ -98,7 +98,7 @@ bool TGCTriggerBWCWReader::readLUT(TGCTriggerLUTs* writeCdo){
           int type = -1;
           int lDR, hDR, lDPhi, hDPhi;
 
-          std::string data = writeCdo->getData(TGCTriggerLUTs::CW_BW, fn);
+          std::string data = writeCdo->getData(TGCTriggerLUTs::CW_BW, std::move(fn));
           std::istringstream stream(data);
 
           std::string buf,tag;

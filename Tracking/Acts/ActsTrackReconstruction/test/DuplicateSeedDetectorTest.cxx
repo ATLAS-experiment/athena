@@ -10,11 +10,12 @@
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "src/detail/MeasurementIndex.h"
 #include "src/detail/DuplicateSeedDetector.h"
 #include <vector>
 #include <ranges>
+#include <array>
 
 #include "../src/detail/DuplicateSeedDetector.cxx"
 
@@ -24,10 +25,8 @@ namespace ActsTrk::detail {
 
     static ActsTrk::SeedContainer createSeeds(const xAOD::SpacePointContainer& spacePoints) {
       ActsTrk::SeedContainer seedContainer;
-      for (std::size_t i(0ul); i+2ul<spacePoints.size(); i+=3ul) {
-        seedContainer.push_back( new ActsTrk::Seed(*spacePoints.at(i),
-                                                   *spacePoints.at(i+1),
-                                                   *spacePoints.at(i+2)) );
+      for (unsigned int i(0u); i+2u<spacePoints.size(); i+=3u) {
+        seedContainer.push_back(std::array{spacePoints.at(i), spacePoints.at(i+1), spacePoints.at(i+2)}, 0.f, 0.f);
       }
       return seedContainer;
     }

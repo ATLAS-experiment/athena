@@ -1,10 +1,7 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// EGammaClusterCoreCellRecovery.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Decorate egamma objects with the energies in L2 and L3 that are in cells
 // not included in the original supercluser due to the timing cut in topocluster
 // building. This is an AOD fix for data (and mc, but effect is small for mc)
@@ -28,18 +25,16 @@ namespace DerivationFramework {
   class EGammaClusterCoreCellRecovery : public extends<AthAlgTool, IAugmentationTool>
   {
   public:
-    EGammaClusterCoreCellRecovery(const std::string& t,
-				  const std::string& n,
-				  const IInterface* p);
-    ~EGammaClusterCoreCellRecovery() = default;
-    StatusCode initialize();
-    StatusCode finalize() { return StatusCode::SUCCESS; }
-    virtual StatusCode addBranches(const EventContext& ctx) const;
-    
+
+    using base_class::base_class;
+
+    virtual StatusCode initialize() override final;
+    virtual StatusCode addBranches(const EventContext& ctx) const override final;
+
   private:
     SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_photons
-      { this, "SGKey_photons", "Photons", "SG key of photon container" };
-    
+    { this, "SGKey_photons", "Photons", "SG key of photon container" };
+
     SG::ReadHandleKey<xAOD::EgammaContainer> m_SGKey_electrons
       { this, "SGKey_electrons", "Electrons", "SG key of electron container" };
 
@@ -47,32 +42,32 @@ namespace DerivationFramework {
       { this, "SGKey_CaloCells", "AllCalo", "SG key of calo cell container" };
 
     SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
-      m_SGKey_photons_decorations{
+    m_SGKey_photons_decorations{
       this,
-	"SGKey_photons_decorations_noConf",
-	  {},
-	"SG keys for photon decorations not really configurable"
-	  };
-    
+      "SGKey_photons_decorations",
+      m_SGKey_photons, {"nadded_Lr2", "Eadded_Lr2", "nadded_Lr3", "Eadded_Lr3"},
+      "SG keys for photon decorations"
+    };
+
     SG::WriteDecorHandleKeyArray<xAOD::EgammaContainer>
-      m_SGKey_electrons_decorations{
+    m_SGKey_electrons_decorations{
       this,
-	"SGKey_electrons_decorations_noConf",
-	  {},
-	"SG keys for electrons decorations not really configurable"
-	  };
+      "SGKey_electrons_decorations",
+      m_SGKey_electrons, {"nadded_Lr2", "Eadded_Lr2", "nadded_Lr3", "Eadded_Lr3"},
+      "SG keys for electrons"
+    };
 
     Gaudi::Property<bool> m_UseWeightForMaxCell{
       this,
-	"UseWeightForMaxCell",
-	false,
-	"Use the cell weights when finding the L2 max energy cell"
-	};
+      "UseWeightForMaxCell",
+      false,
+      "Use the cell weights when finding the L2 max energy cell"
+    };
 
 
     IegammaCellRecoveryTool::Info decorateObject(const xAOD::Egamma*& egamma) const;
     StatusCode findMaxECell(const xAOD::CaloCluster *clus,
-			    double &etamax, double &phimax) const;
+                            double &etamax, double &phimax) const;
 
     /** @brief Pointer to the egammaCellRecoveryTool*/
     ToolHandle<IegammaCellRecoveryTool> m_egammaCellRecoveryTool{
@@ -84,7 +79,7 @@ namespace DerivationFramework {
     };
 
   };
-  
+
 }
 
 #endif // DERIVATIONFRAMEWORK_EGammaClusterCoreCellRecovery_H

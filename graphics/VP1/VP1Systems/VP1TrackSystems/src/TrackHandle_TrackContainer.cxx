@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -373,16 +373,16 @@ void TrackHandle_TrackContainer::ensureInitTrackStateCache()
 
 
 void TrackHandle_TrackContainer::ensureInitTSOSs(
-    std::vector<AssociatedObjectHandleBase*>*& ascobjs) {
+    std::unique_ptr<std::vector<AssociatedObjectHandleBase*>>& ascobjs) {
   if (ascobjs)
     return;
   ensureInitTrackStateCache();
 
-  ascobjs = new std::vector<AssociatedObjectHandleBase*>;
+  ascobjs = std::make_unique<std::vector<AssociatedObjectHandleBase*>>();
   unsigned int index =0;
 
   for (const auto trackState : m_trackStates) {
-    addTrackState(trackState, ascobjs, index++);
+    addTrackState(trackState, ascobjs.get(), index++);
   }
 }
 
@@ -405,7 +405,7 @@ TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
   TrkObjToString::MeasurementType type = TrkObjToString::Unknown;
   if (state.hasReferenceSurface()) {
       const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
-          state.referenceSurface().associatedDetectorElement());
+          state.referenceSurface().surfacePlacement());
       if (actsElement && common()->muonIdHelperSvc().get()) {
         auto& idhelper = common()->muonIdHelperSvc()->mdtIdHelper(); // This is a lazy way to get an AtlasID helper. Not ideal if muon geometry is off.
         if (idhelper.is_mdt(actsElement->identify())) {
@@ -432,7 +432,7 @@ QString TrackHandle_TrackContainer::measurementText(
   QString text("Unknown Measurement");
   if (state.hasReferenceSurface()) {
     const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(
-        state.referenceSurface().associatedDetectorElement());
+        state.referenceSurface().surfacePlacement());
     if (actsElement) {
       auto& helperSvc = common()->muonIdHelperSvc();
       if (helperSvc->isMuon(actsElement->identify()))

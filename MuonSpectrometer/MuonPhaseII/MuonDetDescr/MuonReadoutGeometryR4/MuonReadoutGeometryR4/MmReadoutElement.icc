@@ -101,15 +101,15 @@ inline const StripLayer& MmReadoutElement::stripLayer(const Identifier& measId) 
 
 
 
-inline Amg::Vector3D MmReadoutElement::stripPosition(const ActsGeometryContext& ctx, const Identifier& measId) const {
+inline Amg::Vector3D MmReadoutElement::stripPosition(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const {
     return stripPosition(ctx, measurementHash(measId));
 } 
 
-inline Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+inline Amg::Vector3D MmReadoutElement::leftStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
     return leftStripEdge(ctx, measurementHash(measId));
 }
 
-inline Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsGeometryContext& ctx, const Identifier& measId) const{
+inline Amg::Vector3D MmReadoutElement::rightStripEdge(const ActsTrk::GeometryContext& ctx, const Identifier& measId) const{
     return rightStripEdge(ctx, measurementHash(measId));
 }
 

@@ -13,7 +13,6 @@
 #include <ColumnarJet/JetDef.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarVariant/VariantLinkColumn.h>
-#include <ColumnarCore/VectorVectorColumn.h>
 #include <ColumnarMet/MetInput.h>
 #include <METUtilities/METHelpers.h>
 #include <xAODBase/IParticleContainer.h>

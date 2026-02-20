@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-// EGTransverseMassTool.cxx, (c) ATLAS Detector software
+// EGTransverseMassTool.cxx
 // Author: Giovanni Marchiori (giovanni.marchiori@cern.ch)
 //
 // The tool computes the transverse mass between the MET and the
@@ -31,19 +31,6 @@ using std::sqrt;
 #include "TLorentzVector.h"
 
 namespace DerivationFramework {
-
-EGTransverseMassTool::EGTransverseMassTool(const std::string& t,
-                                           const std::string& n,
-                                           const IInterface* p)
-  : base_class(t, n, p)
-  , m_expression1("true")
-  , m_METmin(-999.)
-  , m_mass1Hypothesis(0.0)
-{
-  declareProperty("ObjectRequirements", m_expression1);
-  declareProperty("METmin", m_METmin);
-  declareProperty("ObjectMassHypothesis", m_mass1Hypothesis);
-}
 
 StatusCode
 EGTransverseMassTool::initialize()

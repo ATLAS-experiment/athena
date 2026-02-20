@@ -31,14 +31,8 @@
 
 // FrameWork includes
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
-
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenParticle.h"
-#include "AtlasHepMC/GenVertex.h"
-
-// fwd declares
-class IMcVtxFilterTool;
+#include "AtlasHepMC/GenVertex_fwd.h" //HepMC::ConstGenVertexPtr
+#include "AtlasHepMC/SimpleVector.h" //HepMC::FourVector typedef
 
 
 namespace DerivationFramework {
@@ -51,8 +45,6 @@ class CompactHardTruth
   // Public methods: 
   /////////////////////////////////////////////////////////////////// 
  public: 
-
-  // Copy constructor: 
 
   /// Constructor with parameters: 
   CompactHardTruth( const std::string& name, ISvcLocator* pSvcLocator );
@@ -81,15 +73,15 @@ class CompactHardTruth
   // Variables
   int m_evtCount = 0;
   int m_missCount = 0;
-  float m_partonCut;
-  float m_hardCut;
+  float m_partonCut{};
+  float m_hardCut{};
 
   int m_dangleFound = 0;
   int m_dangleRemoved = 0;
   float m_danglePtMax = 0.0F;
-  float m_danglePtCut;
+  float m_danglePtCut{};
 
-  int m_maxCount;
+  int m_maxCount{};
 
   int m_thinParticles = 0;
   int m_thinVertices = 0;

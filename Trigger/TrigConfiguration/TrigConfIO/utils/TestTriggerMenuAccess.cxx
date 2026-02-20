@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -178,7 +178,7 @@ testL1Menu_Topo(const TrigConf::L1Menu & l1menu, bool printdetail)
       cout << "Number of topo algorithms: " << l1menu.topoAlgorithmNames("TOPO").size() << endl;
       cout << "Number of topo algorithm outputs: " << l1menu.topoAlgorithmOutputNames("TOPO").size() << endl;
 
-      auto tl = l1menu.connector("LegacyTopo1").triggerLines(0,0)[0];
+      const auto & tl = l1menu.connector("LegacyTopo1").triggerLines(0,0)[0];
       auto & topoAlg = l1menu.algorithmFromTriggerline(tl.name());
       topoAlg.print();
 
@@ -697,7 +697,7 @@ void usage() {
   cout << "\n";
   cout << "If no input is specified, the default Dev_pp_run3_v1 menu file will be taken from the release\n\n";
 }
-
+//coverity[root_function]
 int main(int argc, char** argv) {
    bool help { false };
    string filename{""};
@@ -733,7 +733,7 @@ int main(int argc, char** argv) {
 
       // inputs
       if(currentParameter == "file" || currentParameter == "f") {
-         filename = currentWord;
+         filename = std::move(currentWord);
          continue;
       }
       if(currentParameter == "smk") {
@@ -741,7 +741,7 @@ int main(int argc, char** argv) {
          continue;
       }
       if(currentParameter == "db") {
-         dbalias = currentWord;
+         dbalias = std::move(currentWord);
          continue;
       }
       listofUnknownArguments += " " + currentWord;
@@ -799,7 +799,13 @@ int main(int argc, char** argv) {
         std::cout<<"ios_base exception "<<e.what()<<" caught in TestTriggerMenuAccess.\n";
         return 1;
       }
-      success = testL1Menu(l1menu);
+      try {
+        success = testL1Menu(l1menu);
+      }
+      catch (const std::exception& e) {
+        std::cerr << e.what() << "\n";
+        return 1;
+      }
    } else {
       // load from file
       TrigConf::JsonFileLoader fileLoader;
@@ -807,7 +813,13 @@ int main(int argc, char** argv) {
       if(filetype == "l1menu") {
          TrigConf::L1Menu l1menu;
          fileLoader.loadFile( filename, l1menu);
-         success = testL1Menu(l1menu);
+         try {
+           success = testL1Menu(l1menu);
+         }
+         catch (const std::exception& e) {
+           std::cerr << e.what() << "\n";
+           return 1;
+         }
       } else if(filetype == "hltmenu") {
          TrigConf::HLTMenu hltmenu;
          fileLoader.loadFile( filename, hltmenu);

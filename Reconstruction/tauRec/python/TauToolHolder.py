@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -32,7 +32,8 @@ def TauVertexFinderCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        Tau_InDetTrackSelectionToolForTJVACfg)
     from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TauTTVAToolCfg
 
     # Algorithm that overwrites numTrack() and charge() of tauJets in container
@@ -42,7 +43,6 @@ def TauVertexFinderCfg(flags):
                                       UseTJVA                 = flags.Tau.doTJVA,
                                       AssociatedTracks="GhostTrack", # OK??
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
-                                      Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
                                       TVATool = result.popToolsAndMerge(TauTTVAToolCfg(flags)),
                                       inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
@@ -170,7 +170,8 @@ def TauTrackRNNClassifierCfg(flags):
 
     myTauTrackClassifier = TauTrackRNNClassifier( name = _name,
                                                   Classifiers = [ result.popToolsAndMerge(TauTrackRNNCfg(flags)) ],
-                                                  classifyLRT = _classifyLRT )
+                                                  classifyLRT = _classifyLRT,
+                                                  classifyLRTWithDedicated = flags.Tau.classifyLRTWithDedicated)
 
     result.setPrivateTools(myTauTrackClassifier)
     return result
@@ -588,9 +589,9 @@ def Pi0SelectorCfg(flags):
 
     TauPi0Selector = CompFactory.getComp("TauPi0Selector")
     TauPi0Selector = TauPi0Selector(name = _name,
-                                    ClusterEtCut         = flags.Tau.pi0EtCuts,
-                                    ClusterBDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
-                                    ClusterBDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
+                                    Pi0EtCut         = flags.Tau.pi0EtCuts,
+                                    Pi0BDTCut_1prong = flags.Tau.pi0MVACuts_1prong,
+                                    Pi0BDTCut_mprong = flags.Tau.pi0MVACuts_mprong)
 
     result.setPrivateTools(TauPi0Selector)
     return result
@@ -757,12 +758,13 @@ def TauGNNEvaluatorCfg(flags, version=0, applyLooseTrackSel=False, applyTightTra
                                               ApplyLooseTrackSel = applyLooseTrackSel,
                                               ApplyTightTrackSel = applyTightTrackSel,
                                               VertexCorrection = flags.Tau.doVertexCorrection,
-                                              InputLayerScalar = "tau_vars",
-                                              InputLayerTracks = "track_vars",
-                                              InputLayerClusters = "cluster_vars",
+                                              InputLayerScalar = 'tau_vars',
+                                              InputLayerTracks = 'track_vars',
+                                              InputLayerClusters = 'cluster_vars',
                                               NodeNameTau=flags.Tau.GNTauNodeNameTau,
                                               NodeNameJet=flags.Tau.GNTauNodeNameJet,
-                                              TauContainerName = tauContainerName,)
+                                              TauContainerName = tauContainerName,
+                                        )
 
     result.setPrivateTools(myTauGNNEvaluator)
     return result
@@ -814,49 +816,54 @@ def TauEleRNNEvaluatorCfg(flags, applyLooseTrackSel=False):
     return result
 
 def TauWPDecoratorEleRNNCfg(flags):
-    import PyUtils.RootUtils as ru
-    ROOT = ru.import_root()
-    import cppyy
-    cppyy.load_library('libxAODTau_cDict')
 
     result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
+
+    WPConf = flags.Tau.TauEleRNNWPConfig
+
+    from AthenaConfiguration.Enums import ProductionStep
+    # set the instance to run at derivation level
+    if flags.Common.ProductionStep is ProductionStep.Derivation:
+        _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
+        NewScoreName = "RNNEleScoreSigTrans_v1"
+        CutEnumVals = []
+        SigEff1P = []
+        SigEff3P = []
+        DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ]
+        DecorWPCutEffs1P = [0.95, 0.90, 0.85]
+        DecorWPCutEffs3P = [0.98, 0.95, 0.90]
+    else:
+        #this is the instance running in reconstruction level
+        import PyUtils.RootUtils as ru
+        ROOT = ru.import_root()
+        import cppyy
+        cppyy.load_library('libxAODTau_cDict')
+
+        _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNN'
+        NewScoreName = "RNNEleScoreSigTrans"
+        SigEff1P = [0.95, 0.90, 0.85]
+        SigEff3P = [0.98, 0.95, 0.90]
+        CutEnumVals = [ ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNLoose,
+                        ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNMedium,
+                        ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNTight ]
+        DecorWPNames = []
+        DecorWPCutEffs1P = []
+        DecorWPCutEffs3P = []
 
     TauWPDecorator = CompFactory.getComp("TauWPDecorator")
-    WPConf = flags.Tau.TauEleRNNWPConfig
     myTauEleWPDecorator = TauWPDecorator( name=_name,
                                        flatteningFile1Prong = WPConf[0],
                                        flatteningFile3Prong = WPConf[1],
-                                       CutEnumVals =
-                                       [ ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNLoose,
-                                         ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNMedium,
-                                         ROOT.xAOD.TauJetParameters.IsTauFlag.EleRNNTight ],
-                                       SigEff1P = [0.95, 0.90, 0.85],
-                                       SigEff3P = [0.98, 0.95, 0.90],
+                                       CutEnumVals = CutEnumVals,
+                                       DecorWPNames = DecorWPNames,
+                                       SigEff1P = SigEff1P,
+                                       SigEff3P = SigEff3P,
+                                       DecorWPCutEffs1P = DecorWPCutEffs1P,
+                                       DecorWPCutEffs3P = DecorWPCutEffs3P,
                                        UseAbsEta = True ,
                                        ScoreName = "RNNEleScore",
-                                       NewScoreName = "RNNEleScoreSigTrans",
+                                       NewScoreName = NewScoreName,
                                        DefineWPs = True)
-
-    result.setPrivateTools(myTauEleWPDecorator)
-    return result
-
-def TauWPDecoratorEleRNNFixCfg(flags):
-    result = ComponentAccumulator()
-    _name = flags.Tau.ActiveConfig.prefix + 'TauWPDecoratorEleRNNFix_v1'
-
-    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
-    WPConf = flags.Tau.TauEleRNNWPfix
-    myTauEleWPDecorator = TauWPDecorator(name = _name,
-                                         flatteningFile1Prong = WPConf[0],
-                                         flatteningFile3Prong = WPConf[1],
-                                         DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ],
-                                         DecorWPCutEffs1P = [0.95, 0.90, 0.85],
-                                         DecorWPCutEffs3P = [0.98, 0.95, 0.90],
-                                         UseAbsEta = True,
-                                         ScoreName = "RNNEleScore",
-                                         NewScoreName = "RNNEleScoreSigTrans_v1",
-                                         DefineWPs = True)
 
     result.setPrivateTools(myTauEleWPDecorator)
     return result

@@ -145,7 +145,7 @@ theApp.EvtMax = -1
 if not hasattr(postSeq, "CountHepMC"):
     postSeq += CountHepMC(InputEventInfo="TMPEvtInfo",
                           OutputEventInfo="EventInfo",
-                          mcEventWeightsKey="TMPEvtInfo.mcEventWeights")
+                          mcEventWeightsKey="mcEventWeights")
 #postSeq.CountHepMC.RequestedOutput = evgenConfig.nEventsPerJob if runArgs.maxEvents == -1 else runArgs.maxEvents
 
 postSeq.CountHepMC.FirstEvent = runArgs.firstEvent
@@ -749,6 +749,10 @@ if eventsFile or datFile:
     if datFile:
       if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+      elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+      elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+        inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
       else:  
         inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -762,6 +766,10 @@ if eventsFile or datFile:
         if(numberOfFiles<2):
            if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+           elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+           elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+             inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
            else:  
              inputroot = os.path.basename(runArgs.inputGeneratorFile).split("._")[0]
 
@@ -776,6 +784,10 @@ if eventsFile or datFile:
 #             to make it unique
               if ".tar" in os.path.basename(runArgs.inputGeneratorFile):
                 inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tar.")[0]
+              elif ".tgz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".tgz")[0]
+              elif ".gz" in os.path.basename(runArgs.inputGeneratorFile):
+                inputroot = os.path.basename(runArgs.inputGeneratorFile).split(".gz")[0]
               else:  
                 input0 = os.path.basename(file).split("._")[0]
                 input1 = (os.path.basename(file).split("._")[1]).split(".")[0]

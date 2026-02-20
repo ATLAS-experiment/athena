@@ -19,16 +19,14 @@ if __name__=="__main__":
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
 
-   # make logging more verbose
+   #make logging more verbose
    from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import DEBUG
-   log.setLevel(DEBUG)
+   from AthenaCommon.Constants import INFO #DEBUG
+   log.setLevel(INFO)
    
    # --- set flags
    # the input file
-   #flags.Input.Files = ['/eos/user/s/sroygara/ITk/BytestreamDev/run/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33675668._000028.pool.root.1']
-   #flags.Input.Files = ['/eos/user/o/okovanda/data/ITk/DAQ/RDO/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4149_r14697/RDO.33628990._000069.pool.root.1']
-   flags.Input.Files = ['/eos/user/o/okovanda/data/ITk/DAQ/RDO/mc21_14TeV.601230.PhPy8EG_A14_ttbar_hdamp258p75_dil.recon.RDO.e8557_s4422_r16130/RDO.41929907._001786.pool.root.1']
+   flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1']
    #from AthenaConfiguration.TestDefaults import defaultTestFiles
    #flags.Input.Files = defaultTestFiles.RDO_RUN4
    
@@ -51,9 +49,7 @@ if __name__=="__main__":
    from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
    cfg.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
-
-   # example runs pixel clusterization
-   from ITkPixelByteStreamCnv.ITkPixelEncodingAlgConfig import ITkPixelEncodingAlgCfg
+   from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelEncodingAlgCfg
    cfg.merge( ITkPixelEncodingAlgCfg(flags) )
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
@@ -64,9 +60,9 @@ if __name__=="__main__":
 
  
    #dump what's in SG
-   #sg = cfg.getService("StoreGateSvc")
-   #sg.Dump = True
+   sg = cfg.getService("StoreGateSvc")
+   sg.Dump = True
 
-   # loop over 10 events
+   # loop over 1 events
    cfg.run(1)
 

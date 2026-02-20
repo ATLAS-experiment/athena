@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -16,6 +16,7 @@
 #include <map>
 #include <set>
 #include <iomanip>
+#include <sstream>
 
 #include <filesystem>
 
@@ -120,19 +121,67 @@ struct StandaloneDataIO
 
       std::ifstream in(file.native(), std::ios_base::binary);
 
-      in.read((char *) & (clusters->number), sizeof(int));
+      auto reader = [&](auto * ptr, const auto & size)
+      {
+        in.read(reinterpret_cast<char *>(ptr), sizeof(*ptr) * size);
+      };
+
+      reader(static_cast<CaloRecGPU::ClusterBaseInfo *>(clusters), 1);
 
       if (in.fail() || clusters->number < 0 || clusters->number > CaloRecGPU::NMaxClusters)
         {
           report_error(file, "reading clusters", report);
           return ErrorState::ReadError;
         }
+      
+      if (clusters->has_basic_info())
+        {
+          reader(clusters->clusterEnergy, clusters->number);
+          reader(clusters->clusterEt,     clusters->number);
+          reader(clusters->clusterEta,    clusters->number);
+          reader(clusters->clusterPhi,    clusters->number);
+          reader(clusters->seedCellIndex, clusters->number);
+        }
 
-      in.read((char *) clusters->clusterEnergy, sizeof(float) * clusters->number);
-      in.read((char *) clusters->clusterEt, sizeof(float) * clusters->number);
-      in.read((char *) clusters->clusterEta, sizeof(float) * clusters->number);
-      in.read((char *) clusters->clusterPhi, sizeof(float) * clusters->number);
-      in.read((char *) clusters->seedCellID, sizeof(int) * clusters->number);
+      switch (clusters->state)
+        {
+          case CaloRecGPU::ClusterInformationState::Tags:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::TagsWithBasicInfo:
+            reader(clusters->cells.tags, CaloRecGPU::NCaloCells);
+            break;
+          case CaloRecGPU::ClusterInformationState::Full:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithBasicInfo:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithMoments:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithExtraMoments:
+            reader(clusters->cellsPrefixSum, clusters->number + 1);
+            reader(clusters->cells.indices,  clusters->number_cells);
+            reader(clusters->cellWeights,    clusters->number_cells);
+            reader(clusters->clusterIndices, clusters->number_cells);
+            break;
+          default:
+            break;
+        }
+
+      if (clusters->has_moments())
+        {
+          clusters->for_all_moments([&](auto & arr)
+          {
+            unsigned long long base_size;
+            if constexpr (std::is_pointer_v<std::decay_t<decltype(*arr)>>)
+              {
+                base_size = sizeof(**arr) * sizeof(arr)/sizeof(*arr);
+              }
+            else
+              {
+                base_size = sizeof(*arr);
+              }
+            in.read(reinterpret_cast<char *>(arr), base_size * clusters->number);
+          });
+        }
 
       if (in.fail())
         {
@@ -146,6 +195,8 @@ struct StandaloneDataIO
 
     }
 
+    //Let's assume we're dealing with a full cell collection,
+    //as that is going to be the most common case anyway.
     inline static ErrorState read_cell_info(const std::filesystem::path & file,
                                             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                             const bool report = false)
@@ -161,21 +212,6 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
-    inline static ErrorState read_cell_state(const std::filesystem::path & file,
-                                             CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                             const bool report = false)
-    {
-      std::ifstream in(file.native(), std::ios_base::binary);
-      cell_state.binary_input(in);
-      if (in.fail())
-        {
-          report_error(file, "reading cell state", report);
-          return ErrorState::ReadError;
-        }
-      in.close();
-      return ErrorState::OK;
-    }
-
     inline static ErrorState write_cluster_info(std::filesystem::path file,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
                                                 const bool report = false)
@@ -183,12 +219,62 @@ struct StandaloneDataIO
       file.replace_extension(".clusterinfo");
       std::ofstream out(file, std::ios_base::binary);
 
-      out.write((char *) & (clusters->number), sizeof(int));
-      out.write((char *) clusters->clusterEnergy, sizeof(float) * clusters->number);
-      out.write((char *) clusters->clusterEt, sizeof(float) * clusters->number);
-      out.write((char *) clusters->clusterEta, sizeof(float) * clusters->number);
-      out.write((char *) clusters->clusterPhi, sizeof(float) * clusters->number);
-      out.write((char *) clusters->seedCellID, sizeof(int) * clusters->number);
+      auto writer = [&](const auto * ptr, const auto & size)
+      {
+        out.write(reinterpret_cast<const char *>(ptr), sizeof(*ptr) * size);
+      };
+
+
+      out.write(reinterpret_cast<const char *>(static_cast<const CaloRecGPU::ClusterBaseInfo *>(clusters)), sizeof(CaloRecGPU::ClusterBaseInfo));
+
+      if (clusters->has_basic_info())
+        {
+          writer(clusters->clusterEnergy, clusters->number);
+          writer(clusters->clusterEt,     clusters->number);
+          writer(clusters->clusterEta,    clusters->number);
+          writer(clusters->clusterPhi,    clusters->number);
+          writer(clusters->seedCellIndex, clusters->number);
+        }
+      
+      switch (clusters->state)
+        {
+          case CaloRecGPU::ClusterInformationState::Tags:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::TagsWithBasicInfo:
+            writer(clusters->cells.tags, CaloRecGPU::NCaloCells);
+            break;
+          case CaloRecGPU::ClusterInformationState::Full:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithBasicInfo:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithMoments:
+            [[fallthrough]];
+          case CaloRecGPU::ClusterInformationState::WithExtraMoments:
+            writer(clusters->cellsPrefixSum, clusters->number + 1);
+            writer(clusters->cells.indices,  clusters->number_cells);
+            writer(clusters->cellWeights,    clusters->number_cells);
+            writer(clusters->clusterIndices, clusters->number_cells);
+            break;
+          default:
+            break;
+        }
+
+      if (clusters->has_moments())
+        {
+          clusters->for_all_moments([&](const auto & arr)
+          {
+            unsigned long long base_size;
+            if constexpr (std::is_pointer_v<std::decay_t<decltype(*arr)>>)
+              {
+                base_size = sizeof(**arr) * sizeof(arr)/sizeof(*arr);
+              }
+            else
+              {
+                base_size = sizeof(*arr);
+              }
+            out.write(reinterpret_cast<const char *>(arr), base_size * clusters->number);
+          });
+        }
 
       if (out.fail())
         {
@@ -199,6 +285,8 @@ struct StandaloneDataIO
       return ErrorState::OK;
     }
 
+    //Let's assume we're dealing with a full cell collection,
+    //as that is going to be the most common case anyway.
     inline static ErrorState write_cell_info(std::filesystem::path file,
                                              const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
                                              const bool report = false)
@@ -209,22 +297,6 @@ struct StandaloneDataIO
       if (out.fail())
         {
           report_error(file, "writing cell info", report);
-          return ErrorState::WriteError;
-        }
-      out.close();
-      return ErrorState::OK;
-    }
-
-    inline static ErrorState write_cell_state(std::filesystem::path file,
-                                              const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                           const bool report = false)
-    {
-      file.replace_extension(".cellstate");
-      std::ofstream out(file, std::ios_base::binary);
-      cell_state.binary_output(out);
-      if (out.fail())
-        {
-          report_error(file, "writing cell state", report);
           return ErrorState::WriteError;
         }
       out.close();
@@ -323,7 +395,6 @@ struct StandaloneDataIO
   inline static ErrorState save_event_to_folder(const size_t event_number,
                                                 const std::filesystem::path & folder,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr> & cell_info,
-                                                const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
                                                 const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr> & clusters,
                                                 const std::string & prefix = "",
                                                 const std::string & suffix = "",
@@ -348,40 +419,7 @@ struct StandaloneDataIO
       {
         return ErrorState::WriteError;
       }
-    if (EventInformation::write_cell_state(filename("cellstate"), cell_state) != ErrorState::OK)
-      {
-        return ErrorState::WriteError;
-      }
     if (EventInformation::write_cluster_info(filename("clusterinfo"), clusters) != ErrorState::OK)
-      {
-        return ErrorState::WriteError;
-      }
-    return ErrorState::OK;
-  }
-
-  inline static ErrorState save_cell_state_to_folder(const size_t event_number,
-                                                     const std::filesystem::path & folder,
-                                                     const CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> & cell_state,
-                                                     const std::string & prefix = "",
-                                                     const std::string & suffix = "",
-                                                     const unsigned int num_width = 9,
-                                                     const bool output_errors = true)
-  {
-    if (!create_or_check_folder(folder, output_errors))
-      {
-        return ErrorState::WriteError;
-      }
-
-    std::ostringstream event_ID_format;
-    event_ID_format << std::setfill('0') << std::setw(num_width) << event_number;
-    const std::string event_ID = event_ID_format.str();
-
-    auto filename = [&] (const std::string & ext)
-    {
-      return folder / build_filename(prefix, event_ID, suffix, ext);
-    };
-
-    if (EventInformation::write_cell_state(filename("cellstate"), cell_state) != ErrorState::OK)
       {
         return ErrorState::WriteError;
       }
@@ -452,7 +490,6 @@ struct StandaloneDataIO
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellNoiseArr>> noise;
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::ClusterInfoArr>> cluster_info;
     std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellInfoArr>> cell_info;
-    std::map<std::string, CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr>> cell_state;
   };
 
   /*! @class FolderLoadOptions
@@ -463,7 +500,6 @@ struct StandaloneDataIO
   struct FolderLoadOptions
   {
     bool load_cluster_info = false,
-         load_cell_state = false,
          load_cell_info = false,
          load_geometry = false,
          load_noise = false;
@@ -476,7 +512,7 @@ struct StandaloneDataIO
     }
     static constexpr FolderLoadOptions All()
     {
-      FolderLoadOptions ret{true, true, true, true, true};
+      FolderLoadOptions ret{true, true, true, true};
       return ret;
     }
   };
@@ -556,25 +592,6 @@ struct StandaloneDataIO
             ret.geometry[filename] = std::move(tempgeo);
             output_loading_message("geometry");
           }
-        else if (file.extension() == ".cellstate")
-          {
-            if (!flo.load_cell_state || !can_load_events)
-              {
-                continue;
-              }
-            CaloRecGPU::Helpers::CPU_object<CaloRecGPU::CellStateArr> tempcellstate(true);
-            if (check_error(EventInformation::read_cell_state(file, tempcellstate), "cell state"))
-              {
-                continue;
-              }
-            ret.cell_state[filename] = std::move(tempcellstate);
-            output_loading_message("cell state");
-            if ((ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info) &&
-                (ret.cell_info.count(filename) > 0 || !flo.load_cell_info))
-              {
-                ++event_count;
-              }
-          }
         else if (file.extension() == ".cellinfo")
           {
             if (!flo.load_cell_info || !can_load_events)
@@ -588,8 +605,7 @@ struct StandaloneDataIO
               }
             ret.cell_info[filename] = std::move(tempcellinfo);
             output_loading_message("cell info");
-            if ((ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info) &&
-                (ret.cell_state.count(filename) > 0 || !flo.load_cell_state))
+            if (ret.cluster_info.count(filename) > 0 || !flo.load_cluster_info)
               {
                 ++event_count;
               }
@@ -607,8 +623,7 @@ struct StandaloneDataIO
               }
             ret.cluster_info[filename] = std::move(tempclu);
             output_loading_message("cluster info");
-            if ((ret.cell_state.count(filename) > 0 || !flo.load_cell_state) &&
-                (ret.cell_info.count(filename) > 0 || !flo.load_cell_info))
+            if (ret.cell_info.count(filename) > 0 || !flo.load_cell_info)
               {
                 ++event_count;
               }
@@ -644,6 +659,5 @@ struct StandaloneDataIO
   }
 
 };
-
 
 #endif //CALORECGPU_STANDALONEDATAIO_H

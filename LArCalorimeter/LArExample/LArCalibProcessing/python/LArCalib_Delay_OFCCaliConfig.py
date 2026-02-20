@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python3
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -204,15 +205,6 @@ def LArDelay_OFCCaliCfg(flags):
                                                             SaveJitter=True if flags.LArCalib.CaliWave.Nsteps >= 24 else False
                                                         ))
 
-        if rootfile2 == "" and flags.LArCalib.OFCCali:
-           result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
-                                                      AddFEBTempInfo  = False,
-                                                      BadChanKey = bcKey,
-                                                      isSC = flags.LArCalib.isSC,
-                                                      OffId=True,
-                                                      AddCalib=True
-                                                  ))
-
         import os
         if os.path.exists(rootfile):
             os.remove(rootfile)
@@ -373,6 +365,7 @@ if __name__ == "__main__":
     ConfigFlags.lock()
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArDelay_OFCCaliCfg(ConfigFlags))
+    cfg.getService("IOVDbSvc").DBInstance=""
     print("Start running...")
     sys.exit(cfg.run().isFailure())
 

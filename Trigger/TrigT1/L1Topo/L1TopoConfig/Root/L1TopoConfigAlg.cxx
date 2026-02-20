@@ -12,6 +12,25 @@
 using namespace std;
 using namespace TXC;
 
+namespace {
+  struct ios_state_guard {
+    std::ostream& os;
+    std::ios::fmtflags flags;
+    char fill;
+    std::streamsize width;
+
+    explicit ios_state_guard(std::ostream& o)
+      : os(o), flags(o.flags()), fill(o.fill()), width(o.width()) {}
+
+    ~ios_state_guard() {
+      os.flags(flags);
+      os.fill(fill);
+      os.width(width);
+    }
+  };
+}
+
+
 namespace TXC {
 
 ostream&
@@ -102,7 +121,7 @@ void TXC::L1TopoConfigAlg::addParameter(const std::string &name, const std::stri
 namespace TXC {
 
 std::ostream & operator<<(std::ostream &o, const L1TopoConfigAlg &alg) {
-
+  ios_state_guard guard{o};
   if(alg.isSortAlg()) {
      o << "Sorting algorithm " << alg.algoID() << " : " << alg.type() << "/" << alg.name() << endl;
      o << "  Input  : " << alg.m_inputElements[0].value << endl;

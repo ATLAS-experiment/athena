@@ -34,7 +34,7 @@ namespace MuonR4{
     }
     StatusCode MlHitDumperAlg::execute() {
         const EventContext& ctx{Gaudi::Hive::currentContext()};
-        const ActsGeometryContext* gctx{};
+        const ActsTrk::GeometryContext* gctx{};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
         std::unordered_map<const xAOD::MuonSimHit*, const xAOD::TruthParticle*> hitPartMap{};
@@ -63,8 +63,8 @@ namespace MuonR4{
 
         return StatusCode::SUCCESS;
     }
-    std::size_t MlHitDumperAlg::fillSpacePoint(const ActsGeometryContext& gctx, const SpacePoint& sp){
-        const Amg::Transform3D& lToGlob = sp.msSector()->localToGlobalTrans(gctx);
+    std::size_t MlHitDumperAlg::fillSpacePoint(const ActsTrk::GeometryContext& gctx, const SpacePoint& sp){
+        const Amg::Transform3D& lToGlob = sp.msSector()->localToGlobalTransform(gctx);
         std::size_t idx = m_spCollection->push_back(sp);
         m_spGlobPos.set(lToGlob * sp.localPosition(), idx);
 
@@ -126,7 +126,7 @@ namespace MuonR4{
                             xHigh = std::max(xHigh, corner.x());
                             yHigh = std::max(yHigh, corner.y());  
                         }
-                        const Amg::Transform3D& padTrf{re->localToGlobalTrans(gctx, prd->layerHash())};
+                        const Amg::Transform3D& padTrf{re->localToGlobalTransform(gctx, prd->layerHash())};
                         m_spGlobEdgeLow.set(padTrf * Amg::Vector3D{xLow,yLow, 0.}, idx);
                         m_spGlobEdgeHigh.set(padTrf * Amg::Vector3D{xHigh,yHigh, 0.}, idx);
                         break;

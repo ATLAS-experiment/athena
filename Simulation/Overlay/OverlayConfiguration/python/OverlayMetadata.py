@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import re
 
@@ -175,15 +175,8 @@ def tagInfoMetadataCheck(sigdict, pudict):
 
 def overlayMetadataCheck(flags):
     """Check overlay metadata"""
-    if flags.Overlay.ByteStream:
-        files = flags.Input.Files
-        filesPileup = flags.Input.SecondaryFiles
-    else:
-        files = flags.Input.SecondaryFiles
-        filesPileup = flags.Input.Files
-
-    if files:
-        signalMetadata = GetFileMD(files, maxLevel="full")
+    if flags.Input.SecondaryFiles:
+        signalMetadata = GetFileMD(flags.Input.SecondaryFiles, maxLevel="full")
         signalSimulationMetadata = signalMetadata.get("/Simulation/Parameters", {})
         signalTagInfoMetadata = signalMetadata.get("/TagInfo", {})
         # signal check
@@ -194,8 +187,8 @@ def overlayMetadataCheck(flags):
         logger.info("Simulation metadata check not done due to no inputs")
 
     # pile-up check
-    if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+    if not flags.Overlay.DataOverlay and flags.Input.Files:
+        pileupMetaDataCheck = GetFileMD(flags.Input.Files, maxLevel="full")
         pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
         pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
         pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})
@@ -206,19 +199,15 @@ def overlayMetadataCheck(flags):
         logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
 
         if pileupDigitizationMetadata:
-            writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+            # Store metadata for later writing in OverlayMainContentCfg
+            flags._Overlay_pileupDigitizationMetadata = pileupDigitizationMetadata
 
 
 def fastChainOverlayMetadataCheck(flags):
     """Check fastchain overlay metadata"""
-    if flags.Overlay.ByteStream:
-        filesPileup = flags.Input.SecondaryFiles
-    else:
-        filesPileup = flags.Input.Files
-
     # pile-up check
-    if not flags.Overlay.DataOverlay and filesPileup:
-        pileupMetaDataCheck = GetFileMD(filesPileup, maxLevel="full")
+    if not flags.Overlay.DataOverlay and flags.Input.Files:
+        pileupMetaDataCheck = GetFileMD(flags.Input.Files, maxLevel="full")
         pileupDigitizationMetadata = pileupMetaDataCheck.get("/Digitization/Parameters", {})
         pileupSimulationMetadata = pileupMetaDataCheck.get("/Simulation/Parameters", {})
         pileupTagInfoMetadata = pileupMetaDataCheck.get("/TagInfo", {})
@@ -228,22 +217,27 @@ def fastChainOverlayMetadataCheck(flags):
         logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
 
         if pileupDigitizationMetadata:
-            writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+            # Store metadata for later writing in OverlayMainContentCfg
+            flags._Overlay_pileupDigitizationMetadata = pileupDigitizationMetadata
 
 
 def writeOverlayDigitizationMetadata(flags,pileupDict):
-    from IOVDbMetaDataTools import ParameterDbFiller
-    dbFiller = ParameterDbFiller.ParameterDbFiller()
+    """Write overlay digitization metadata to intermediate sqlite file (DigitParams.db)"""
     runNumber = flags.Input.RunNumbers[0]
     runNumberEnd = flags.Input.RunNumbers[-1]
     if runNumberEnd == runNumber:
         runNumberEnd += 1
-    logger.debug('ParameterDbFiller BeginRun = %s', str(runNumber) )
-    dbFiller.setBeginRun(runNumber)
-    logger.debug('ParameterDbFiller EndRun   = %s', str(runNumberEnd) )
-    dbFiller.setEndRun(runNumberEnd)
+    logger.debug('Overlay BeginRun = %s', str(runNumber) )
+    logger.debug('Overlay EndRun   = %s', str(runNumberEnd) )
 
     logger.info('Filling Digitization MetaData')
+    logger.info('Writing overlay digitization parameters to intermediate sqlite file (DigitParams.db)')
+
+    # Write to DigitParams.db intermediate file
+    from IOVDbMetaDataTools import ParameterDbFiller
+    dbFiller = ParameterDbFiller.ParameterDbFiller()
+    dbFiller.setBeginRun(runNumber)
+    dbFiller.setEndRun(runNumberEnd)
 
     # Copy over pileup dictionary
     for key in pileupDict:

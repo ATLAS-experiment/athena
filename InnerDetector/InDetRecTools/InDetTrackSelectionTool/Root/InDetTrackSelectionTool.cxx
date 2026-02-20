@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
@@ -697,7 +697,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
 
     std::stringstream pTRangeBuffer;
-    std::copy(m_vecPtCutoffsForZ0SinThetaCut.begin(), m_vecPtCutoffsForZ0SinThetaCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
+    std::copy(m_vecPtCutoffsForZ0SinThetaCut.begin(), m_vecPtCutoffsForZ0SinThetaCut.end(), std::ostream_iterator<double>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
     if constexpr(VERBOSE>0) ATH_MSG_INFO("Z0SinTheta cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
@@ -708,7 +708,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxZ0SinThetaAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<double>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
@@ -753,7 +753,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
 
     std::stringstream pTRangeBuffer;
-    std::copy(m_vecPtCutoffsForD0Cut.begin(), m_vecPtCutoffsForD0Cut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
+    std::copy(m_vecPtCutoffsForD0Cut.begin(), m_vecPtCutoffsForD0Cut.end(), std::ostream_iterator<double>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
     if constexpr(VERBOSE>0) ATH_MSG_INFO("D0 cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
@@ -764,7 +764,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxD0AboveEtaPt[i_cut_eta].begin(), m_vecvecMaxD0AboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxD0AboveEtaPt[i_cut_eta].begin(), m_vecvecMaxD0AboveEtaPt[i_cut_eta].end(), std::ostream_iterator<double>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
@@ -809,7 +809,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
 
     std::stringstream pTRangeBuffer;
-    std::copy(m_vecPtCutoffsForSctHolesCut.begin(), m_vecPtCutoffsForSctHolesCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
+    std::copy(m_vecPtCutoffsForSctHolesCut.begin(), m_vecPtCutoffsForSctHolesCut.end(), std::ostream_iterator<double>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
     if constexpr(VERBOSE>0) ATH_MSG_INFO("SctHoles cuts (<=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
@@ -820,7 +820,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].begin(), m_vecvecMaxSctHolesAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<double>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
@@ -865,7 +865,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
     }
 
     std::stringstream pTRangeBuffer;
-    std::copy(m_vecPtCutoffsForSctHitsPlusDeadCut.begin(), m_vecPtCutoffsForSctHitsPlusDeadCut.end(), std::ostream_iterator<Double_t>(pTRangeBuffer, ", "));
+    std::copy(m_vecPtCutoffsForSctHitsPlusDeadCut.begin(), m_vecPtCutoffsForSctHitsPlusDeadCut.end(), std::ostream_iterator<double>(pTRangeBuffer, ", "));
     std::string pTString=pTRangeBuffer.str();
     if constexpr(VERBOSE>0) ATH_MSG_INFO("SctHitsPlusDead cuts (>=) for pT above "<<pTString.substr(0, pTString.size()-2)<<"MeV, respectively:");
     for (size_t i_cut_eta=0; i_cut_eta<etaSize; ++i_cut_eta) 
@@ -876,7 +876,7 @@ StatusCode InDet::InDetTrackSelectionTool::setupCuts(std::map< std::string, std:
       else                     etaRangeBuffer << std::setprecision(2) << std::fixed <<m_maxAbsEta;
 
       std::stringstream cutBuffer;
-      std::copy(m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].begin(), m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<Double_t>(cutBuffer, ", "));
+      std::copy(m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].begin(), m_vecvecMinSctHitsPlusDeadAboveEtaPt[i_cut_eta].end(), std::ostream_iterator<double>(cutBuffer, ", "));
       std::string cutString=cutBuffer.str();
 
       if constexpr(VERBOSE>0) ATH_MSG_INFO(" for "<<etaRangeBuffer.str()<<": "<<cutString.substr(0, cutString.size()-2));
@@ -972,7 +972,7 @@ StatusCode InDet::InDetTrackSelectionTool::finalize()
 		<< m_numTracksPassed*100./m_numTracksProcessed << "% passed all cuts." );
   for (const auto& cutFamily : m_trackParticleCuts) {
     // lock(m_mutex) is not needed because this is inside of non-const finalize method.
-    ULong64_t numPassed = m_numTracksPassedCuts.at(m_acceptInfo.getCutPosition(cutFamily.first));
+    uint64_t numPassed = m_numTracksPassedCuts.at(m_acceptInfo.getCutPosition(cutFamily.first));
     ATH_MSG_INFO( numPassed << " = " << numPassed*100./m_numTracksProcessed << "% passed "
 		  << cutFamily.first << " cut." );
   }
@@ -1148,7 +1148,7 @@ InDet::InDetTrackSelectionTool::accept( const Trk::Track& track,
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-void InDet::InDetTrackSelectionTool::setCutLevel(InDet::CutLevel level, Bool_t overwrite )
+void InDet::InDetTrackSelectionTool::setCutLevel(InDet::CutLevel level, bool overwrite )
 {
 #ifndef XAOD_STANDALONE
   ATH_MSG_WARNING( "InDetTrackSelectionTool::setCutLevel() is not designed to be called manually in Athena." );
@@ -1163,7 +1163,7 @@ void InDet::InDetTrackSelectionTool::setCutLevel(InDet::CutLevel level, Bool_t o
 #pragma GCC diagnostic pop
 #endif
 
-void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, Bool_t overwrite)
+void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, bool overwrite)
 {
   switch (level) {
   case CutLevel::NoCut :

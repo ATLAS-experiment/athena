@@ -18,25 +18,6 @@
 // For accessing the tagInfo
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
-// Service for the weights
-#include "GenInterfaces/IHepMCWeightSvc.h"
-
-// Constructor
-DerivationFramework::TruthMetaDataWriter::TruthMetaDataWriter(const std::string& t,
-                                                              const std::string& n,
-                                                              const IInterface* p)
-  : base_class(t,n,p)
-  , m_metaStore( "MetaDataStore", n )
-  , m_weightSvc( "HepMCWeightSvc/HepMCWeightSvc" , n )
-{
-    declareProperty( "MetaObjectName", m_metaName = "TruthMetaData" );
-    declareProperty( "MetaDataStore", m_metaStore );
-}
-
-// Destructor
-DerivationFramework::TruthMetaDataWriter::~TruthMetaDataWriter() {
-}
-
 // Athena initialize and finalize
 StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
 {

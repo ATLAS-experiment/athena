@@ -13,9 +13,9 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowFirstIntParameters.h"
-#include "eflowRec/eflowRingSubtractionManager.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowFirstIntParameters.h"
+#include "eflowRingSubtractionManager.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
 

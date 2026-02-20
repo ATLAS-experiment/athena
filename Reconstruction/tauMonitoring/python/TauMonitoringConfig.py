@@ -16,7 +16,7 @@ def TauMonitoringConfig(flags):
 
         # Schedule the offline GNTau inference when running from AOD (GNTau is now transiently available in RAWtoALL)
         if flags.DQ.Environment == 'AOD':
-            TauContainerCopy = 'TMTauJets'
+            TauContainerCopy = 'TauMonTauJets'
 
             from tauRec.TauToolHolder import TauVertexedClusterDecoratorCfg, TauGNNEvaluatorCfg, TauWPDecoratorGNNCfg
             tool_accs = [
@@ -50,7 +50,7 @@ def TauMonitoringConfig(flags):
         from .tauMonitorAlgorithm import tauMonitoringConfig
 
         if flags.DQ.Environment == 'AOD':
-            offline_taujets = 'TMTauJets'
+            offline_taujets = 'TauMonTauJets'
         else:
             offline_taujets = 'TauJets'
 

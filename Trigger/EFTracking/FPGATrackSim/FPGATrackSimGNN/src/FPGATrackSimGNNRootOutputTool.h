@@ -47,7 +47,7 @@ class FPGATrackSimGNNRootOutputTool : public AthAlgTool
         StatusCode fillTree(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
                             const std::vector<std::shared_ptr<FPGATrackSimGNNHit>> & gnn_hits,
                             const std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> & edges,
-                            const std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads);
+                            const std::vector<FPGATrackSimRoad> & roads);
 
     private:
 

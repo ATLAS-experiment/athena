@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
@@ -66,12 +66,13 @@ class OutputConfig :
     """all the data for a given variables in the output that has been registered"""
 
     def __init__ (self, origContainerName, variableName,
-                  *, noSys, enabled) :
+                  *, noSys, enabled, auxType) :
         self.origContainerName = origContainerName
         self.outputContainerName = None
         self.variableName = variableName
         self.noSys = noSys
         self.enabled = enabled
+        self.auxType = auxType
 
     def __repr__ (self):
         return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
@@ -139,6 +140,11 @@ class ConfigAccumulator :
     step before the algorithms are created, as the naming of
     containers will depend on where in the chain the container is
     used.
+
+    All arguments passed to the ConfigAccumulator constructor are used
+    as they are. The only exception is the systematics flag:
+    If not explicitly set the decision to run systematics or not
+    will be taken depending on the CommonServicesConfig setup.
     """
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
@@ -240,6 +246,7 @@ class ConfigAccumulator :
         self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
         self._algPostfix = ''
+        self._defaultHistogramStream = 'ANALYSIS'
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -248,22 +255,16 @@ class ConfigAccumulator :
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
         self.setSourceName ('EventInfo', 'EventInfo')
         self._eventcutflow = {}
-
-        # If we are in an Athena environment with ComponentAccumulator configuration
-        # then the AlgSequence, which is Gaudi.AthSequencer, does not support '+=',
-        # and we in any case want to produce an output ComponentAccumulator
         self.CA = None
-        if DualUseConfig.useComponentAccumulator:
+
+        if DualUseConfig.isAthena:
             from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
             self.CA = ComponentAccumulator()
-            # if we have a component accumulator the user is not required to pass
-            # in a sequence, but if they do let's add it
-            if algSeq :
+            if algSeq is not None:
                 self.CA.addSequence(algSeq)
-        else :
+        else:
             if algSeq is None :
                 raise ValueError ("need to pass algSeq if not using ComponentAccumulator")
-
 
     def noSystematics (self) :
         """noSystematics flag used by CommonServices block"""
@@ -317,6 +318,17 @@ class ConfigAccumulator :
     def hltSummary(self) :
         """the HLTSummary configuration to be used for the trigger decision tool"""
         return self._hltSummary
+
+    def defaultHistogramStream(self):
+        """the default histogram stream to be used for output histograms"""
+        return self._defaultHistogramStream
+
+    def setDefaultHistogramStream(self, streamName: str):
+        """set the default histogram stream to be used for output histograms
+        
+        As an advanced option this is not directly exposed by the constructor,
+        but can be set by the user if needed before configuring the job."""
+        self._defaultHistogramStream = streamName
     
     def algPostfix (self) :
         """the current postfix to be appended to algorithm names
@@ -364,13 +376,14 @@ class ConfigAccumulator :
             else:
                 alg = DualUseConfig.createAlgorithm (type, name)
 
-            if DualUseConfig.useComponentAccumulator:
-                if self._algSeq :
+            if DualUseConfig.isAthena:
+                if self._algSeq is not None:
                     self.CA.addEventAlgo(alg,self._algSeq.name)
                 else :
                     self.CA.addEventAlgo(alg)
             else:
                 self._algSeq += alg
+
             self._algorithms[name] = alg
             self._currentAlg = alg
             return alg
@@ -385,7 +398,6 @@ class ConfigAccumulator :
 
     def createService (self, type, name) :
         '''create a new service and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate service: ' + name)
@@ -393,8 +405,7 @@ class ConfigAccumulator :
             # Avoid importing AthenaCommon.AppMgr in a CA Athena job
             # as it modifies Gaudi behaviour
             if DualUseConfig.isAthena:
-                if DualUseConfig.useComponentAccumulator:
-                    self.CA.addService(service)
+                self.CA.addService(service)
             else:
                 # We're not, so let's remember this as a "normal" algorithm:
                 self._algSeq += service
@@ -410,7 +421,6 @@ class ConfigAccumulator :
 
     def createPublicTool (self, type, name) :
         '''create a new public tool and register it as the "current algorithm"'''
-        name = name + self._algPostfix
         if self._pass == 0 :
             if name in self._algorithms :
                 raise Exception ('duplicate public tool: ' + name)
@@ -418,8 +428,7 @@ class ConfigAccumulator :
             # Avoid importing AthenaCommon.AppMgr in a CA Athena job
             # as it modifies Gaudi behaviour
             if DualUseConfig.isAthena:
-                if DualUseConfig.useComponentAccumulator:
-                    self.CA.addPublicTool(tool)
+                self.CA.addPublicTool(tool)
             else:
                 # We're not, so let's remember this as a "normal" algorithm:
                 self._algSeq += tool
@@ -769,7 +778,7 @@ class ConfigAccumulator :
 
 
     def addOutputVar (self, containerName, variableName, outputName,
-                      *, noSys=False, enabled=True) :
+                      *, noSys=False, enabled=True, auxType=None) :
         """add an output variable for the given container to the output
         """
 
@@ -778,7 +787,7 @@ class ConfigAccumulator :
         baseConfig = self._containerConfig[containerName].outputs
         if outputName in baseConfig :
             raise KeyError ("duplicate output variable name: " + outputName)
-        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled)
+        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled, auxType=auxType)
         baseConfig[outputName] = config
 
 

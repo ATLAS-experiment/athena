@@ -24,7 +24,6 @@ CREATED:  August 2003
 
 #include "CaloIdentifier/LArID.h"
 #include "CaloUtils/CaloCellCorrection.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class CaloCell;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -76,7 +76,7 @@ namespace FSR {
             ATH_MSG_INFO("initialize - found  IEgammaCalibrationAndSmearingTool with name: " << m_energyRescalerName);
         }
         else {
-            ATH_MSG_ERROR("initialize - CANNOT retrive IEgammaCalibrationAndSmearingTool. Please set the property 'egCalibToolName' to be able to recalibrate fsr photon found as an electron ");
+            ATH_MSG_ERROR("initialize - CANNOT retrieve IEgammaCalibrationAndSmearingTool. Please set the property 'egCalibToolName' to be able to recalibrate fsr photon found as an electron ");
             return StatusCode::FAILURE;
         }
         

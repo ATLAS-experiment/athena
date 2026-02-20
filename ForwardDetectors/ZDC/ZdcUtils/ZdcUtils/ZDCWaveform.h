@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCUTILS_ZDCWAVEFORM_H
@@ -139,8 +139,7 @@ TF1* makeWaveformTF1(ZDCWaveformBase* ptr, double xmin, double xmax, bool useTF1
   if (useTF1Params) {
     unsigned int numPar = 2 + ptr->getNumAddtlShapeValues();
 
-    newTF1= new TF1(name.c_str(), ptr, &ZDCWaveformBase::evaluateRoot, xmin, xmax, numPar,
-		    "ZDCWaveformBase", "evaluateRoot");
+    newTF1= new TF1(name.c_str(), ptr, &ZDCWaveformBase::evaluateRoot, xmin, xmax, numPar);
 
     newTF1->SetParameter(0, ptr->getTauRise());
     newTF1->SetParameter(1, ptr->getTauFall());
@@ -152,8 +151,7 @@ TF1* makeWaveformTF1(ZDCWaveformBase* ptr, double xmin, double xmax, bool useTF1
     }
   }
   else {
-    newTF1= new TF1(name.c_str(), ptr, &ZDCWaveformBase::evaluateRootNoTF1Par, xmin, xmax, 0,
-		    "ZDCWaveformBase", "evaluateRoot");
+    newTF1= new TF1(name.c_str(), ptr, &ZDCWaveformBase::evaluateRootNoTF1Par, xmin, xmax, 0);
   }
   
   newTF1->SetNpx(1000);

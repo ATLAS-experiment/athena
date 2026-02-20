@@ -3,7 +3,6 @@
 
 # For the exit code at the end
 import sys
-import re
 
 # For translating the run arguments into flags
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -47,26 +46,35 @@ def fromRunArgs(runArgs):
         McEventKey = 'TruthEvent'
     else:
         log.error('Input EVNT, HITS, or RDO file required for POOLtoHEPMC')
+
     # Set the output file
     if hasattr(runArgs, 'outputHEPMCFile'):
-       if ('.tar' in runArgs.outputHEPMCFile):
-          index = re.search(".tar",runArgs.outputHEPMCFile).span()[0]
-          if hasattr(runArgs, 'extension') and ('events' in runArgs.extension):
-               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.events'
-          else:
-               my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
-       else:
-          log.error('Output should be a tar.gz file but it is '+runArgs.outputHEPMCFile)
+        if '.tar' in runArgs.outputHEPMCFile or '.tgz' in runArgs.outputHEPMCFile or '.gz' in runArgs.outputHEPMCFile:
+            log.info('Output will be compressed')
+            if '.tar' in runArgs.outputHEPMCFile:
+                index = runArgs.outputHEPMCFile.find('.tar')
+            elif '.tgz' in runArgs.outputHEPMCFile:
+                index = runArgs.outputHEPMCFile.find('.tgz')
+            elif '.gz' in runArgs.outputHEPMCFile:
+                index = runArgs.outputHEPMCFile.find('.gz')
+            if hasattr(runArgs, 'extension') and 'events' in runArgs.extension:
+                my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.events'
+            else:
+                my_output_HepMCFile = runArgs.outputHEPMCFile[:index]+'.hepmc'
+        else:
+            log.info('Output will not be compressed')
+            my_output_HepMCFile = runArgs.outputHEPMCFile
     else:
         log.error('OutputHEPMCFile required for POOLtoHEPMC')
+        raise RuntimeError('OutputHEPMCFile required for POOLtoHEPMC')
 
     hepMCFormat = 'hepmc2'
     if hasattr(runArgs, 'hepmcFormat'):
-       hepMCFormat = runArgs.hepmcFormat
+        hepMCFormat = runArgs.hepmcFormat
 
     hepMCUnits = 'GEVMM'
     if hasattr(runArgs, 'hepmcUnits'):
-       hepMCUnits = runArgs.hepmcUnits
+        hepMCUnits = runArgs.hepmcUnits
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
@@ -118,16 +126,26 @@ def fromRunArgs(runArgs):
     # Run the final accumulator
     sc = cfg.run()
 
-    # Compress the output file
-    log.info('Compressing HEPMC output (may take a moment)')
-    import tarfile
-    with tarfile.open(runArgs.outputHEPMCFile,'w:gz') as out_tar:
-        out_tar.add( my_output_HepMCFile )
-
-    # And remove the uncompressed version
-    log.debug('Deleting original (uncompressed) file')
-    import os
-    os.remove( my_output_HepMCFile )
+    # Check based on the file name if we need to compress the output
+    if '.tgz' in runArgs.outputHEPMCFile or '.tar.gz' in runArgs.outputHEPMCFile:
+        log.info('Compressing output into tar+gz format (this may take a moment)')
+        import tarfile
+        with tarfile.open(runArgs.outputHEPMCFile,'w:gz') as out_tar:
+            out_tar.add(my_output_HepMCFile)
+        # Remove the original uncompressed file
+        log.debug(f'Deleting original (uncompressed) file {my_output_HepMCFile}')
+        import os
+        os.remove(my_output_HepMCFile)
+    elif '.gz' in runArgs.outputHEPMCFile:
+        log.info('Compressing output into gz format (this may take a moment)')
+        import gzip
+        import shutil
+        with open(my_output_HepMCFile,'rb') as in_file, gzip.open(runArgs.outputHEPMCFile,'wb') as out_file:
+            shutil.copyfileobj(in_file,out_file)
+        # Remove the original uncompressed file
+        log.debug(f'Deleting original (uncompressed) file {my_output_HepMCFile}')
+        import os
+        os.remove(my_output_HepMCFile)
 
     # All done, now just report back
     log.info("Ran POOLtoHEPMC in " + str(time.time()-tic) + " seconds")

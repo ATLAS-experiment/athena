@@ -1,15 +1,20 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef EFEX_HARDWARE_INFO_H
 #define EFEX_HARDWARE_INFO_H
+
+#include <string>
 
 class EfexHardwareInfo {
     public:
         //Blank Invalid Constructor
-        EfexHardwareInfo();
+        EfexHardwareInfo() = default;
         //Constructor
-        EfexHardwareInfo(std::string efexlabel,
+        EfexHardwareInfo(const std::string & efexlabel,
                         int fibre,
                         int inputconnector,
-                        std::string mpod
+                        const std::string & mpod
                         );
         // Get methods
         std::string     getEFEXLabel() const;
@@ -24,12 +29,12 @@ class EfexHardwareInfo {
         //Prints
         void            printInfo() const;
     private:
-        bool m_valid;
-        std::string m_efexlabel; 
-        int m_fibre;
-        int m_inputconnector;
-        std::string m_mpodlabel;
-        int m_overlap;
+        bool m_valid{};
+        std::string m_efexlabel{"invalid"}; 
+        int m_fibre{-1};
+        int m_inputconnector{-1};
+        std::string m_mpodlabel{"invalid"};
+        int m_overlap{};
 
 };
 #endif

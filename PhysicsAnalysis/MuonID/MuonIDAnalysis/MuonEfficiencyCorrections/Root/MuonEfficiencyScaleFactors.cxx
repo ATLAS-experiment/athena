@@ -46,7 +46,7 @@ namespace CP {
                 m_efficiency_decoration_name_data(),
                 m_efficiency_decoration_name_mc(),
                 m_sf_decoration_name(),
-                m_calibration_version("230213_Preliminary_r22run2"),
+                m_calibration_version("251211_Preliminary_r24run3"),
                 m_lowpt_threshold(-1.),
                 m_iso_jet_dR("dRJet"),
                 m_use2DIsoCorr(false),

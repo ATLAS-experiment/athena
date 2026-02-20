@@ -21,7 +21,7 @@ namespace IdDict {
       const IdDictFieldImplementation& f = region->implementation(level);
       const Range::field thisField = f.field();
       //on first time, set the original field
-      if (k == 0) ored_field = thisField;
+      if (k == 0) ored_field = std::move(thisField);
       //on subsequent iterations, 'or' the new fields with the original
       else ored_field |= thisField;
     }

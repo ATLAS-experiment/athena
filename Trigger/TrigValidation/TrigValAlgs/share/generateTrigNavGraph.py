@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -37,7 +37,7 @@ if __name__=='__main__':
 
   flags.lock()
 
-  if flags.Trigger.EDMVersion != 3:
+  if flags.Trigger.EDMVersion < 3:
     log.error("Can only run over a Run 3 AOD or ESD file")
     sys.exit(1)
 
@@ -77,7 +77,7 @@ if __name__=='__main__':
   import os
   from subprocess import check_call
   for f in os.listdir('.'):
-    if "NavGraph_" in f and not ".dot.pdf" in f:
+    if "NavGraph_" in f and ".dot.pdf" not in f:
       check_call(['dot','-Tpdf',f,'-o',f+'.pdf'])
 
   sys.exit(0 if sc.isSuccess() else 1)

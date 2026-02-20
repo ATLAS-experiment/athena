@@ -18,7 +18,7 @@ if __name__=="__main__":
     cfgFlags.PF.useTruthForChargedShowerSubtraction=True
     cfgFlags.PF.useTruthCheating=True
     cfgFlags.PF.useTrackClusterTruthMatching=True
-    cfgFlags.Tau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
+    cfgFlags.DiTau.doDiTauRec = False #does not run from ESD - tries to use aux variables which do not exist
     cfgFlags.fillFromArgs()
     cfgFlags.lock()
 

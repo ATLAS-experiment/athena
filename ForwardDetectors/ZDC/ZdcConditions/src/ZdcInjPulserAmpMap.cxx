@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcConditions/ZdcInjPulserAmpMap.h"
@@ -39,7 +39,7 @@ ZdcInjPulserAmpMap::ZdcInjPulserAmpMap() : asg::AsgMessaging("ZdcInjPulserAmpMap
     ATH_MSG_FATAL("ZdcInjPulserAmpMap constructor, JSON file cannot be opened!" ) ;
   }
 
-  m_filePath = filePath;
+  m_filePath = std::move(filePath);
   if (parseJsonFile(ifs)) m_validJSon = true;;
 }
 

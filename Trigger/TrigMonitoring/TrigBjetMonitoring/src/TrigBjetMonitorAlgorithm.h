@@ -9,6 +9,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 
 #include "xAODMuon/MuonContainer.h"
+#include "xAODJet/JetContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 

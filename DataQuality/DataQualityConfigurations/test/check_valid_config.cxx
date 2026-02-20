@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -60,7 +60,7 @@ int main ATLAS_NOT_THREAD_SAFE ( )
   dqi::HanConfig config;
   std::cout << "Attempting to build configuration...\n" << std::flush;
   try {
-    config.BuildMonitors( configName, input, output );
+    config.BuildMonitors( std::move(configName), input, output );
   } catch (const std::exception& e) {
     std::cerr << "Exception caught, test has failed:\n" << e.what() << std::endl;
     return 1;

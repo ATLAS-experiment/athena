@@ -10,6 +10,9 @@
 #include "CxxUtils/checker_macros.h"
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsEvent/RecordedMaterialTrackCollection.h"
+
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
@@ -29,11 +32,8 @@ namespace Acts {
 }
 
 
-class IActsMaterialTrackWriterSvc;
-
 class EventContext;
 class IAthRNGSvc;
-class IActsExtrapolationTool;
 class IActsPropStepRootWriterSvc;
 
 class ActsExtrapolationAlg : public AthReentrantAlgorithm {
@@ -47,7 +47,7 @@ private:
   ServiceHandle<IActsPropStepRootWriterSvc> m_propStepWriterSvc{this, "PropStepRootWriterSvc", "ActsPropStepRootWriterSvc"};
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "AthRNGSvc", "AthRNGSvc"};
 
-  ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", "ActsExtrapolationTool"};
 
   PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
 
@@ -60,13 +60,15 @@ private:
   // material track writer for the material map validation
   Gaudi::Property<bool> m_writeMaterialTracks{this, "WriteMaterialTracks", false, "Write material track"};
   Gaudi::Property<bool> m_writePropStep{this, "WritePropStep", false, "Write propagation step"};
-  ServiceHandle<IActsMaterialTrackWriterSvc> m_materialTrackWriterSvc{this, "MaterialTrackWriterSvc", "ActsMaterialTrackWriterSvc"};
 
   // Mutex and members for optional debugging output
   mutable std::mutex m_writeMutex;
   mutable size_t m_objVtxCount ATLAS_THREAD_SAFE {0};
 
   void writeStepsObj(const std::vector<Acts::detail::Step>& steps) const;
+
+  /// The RecordedMaterialTrackCollection to write
+  SG::WriteHandleKey<ActsTrk::RecordedMaterialTrackCollection> m_materialTrackCollectionKey {this, "MaterialTrackCollectionKey", "MaterialTracks", "Name of the RecordedMaterialTrackCollection"};
 
 };
 

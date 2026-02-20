@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_MonitoredScalar_h
@@ -97,6 +97,15 @@ namespace Monitored {
 
     operator const T&() const { return m_value; }
     operator T&() { return m_value; }
+
+    // string concatenation
+    friend std::string operator+(const Scalar& lhs, const std::string& rhs) {
+      return lhs.m_value + rhs;
+    }
+
+    friend std::string operator+(const std::string& lhs, const Scalar& rhs) {
+      return lhs + rhs.m_value;
+    }
 
     virtual double get(size_t) const override {
       if constexpr (std::is_convertible_v<double, T>) {

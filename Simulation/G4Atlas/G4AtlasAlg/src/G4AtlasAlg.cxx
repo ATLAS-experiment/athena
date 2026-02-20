@@ -6,7 +6,6 @@
 #include "G4AtlasAlg.h"
 #include "G4AtlasFluxRecorder.h"
 #include "G4AtlasTools/G4AtlasActionInitialization.h"
-#include "G4AtlasTools/G4AtlasUserWorkerInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CxxUtils/checker_macros.h"
@@ -168,7 +167,6 @@ void G4AtlasAlg::initializeOnce()
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
-    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
 #else
     throw std::runtime_error("Trying to use multi-threading in non-MT build!");
 #endif
@@ -186,7 +184,6 @@ void G4AtlasAlg::initializeOnce()
     std::unique_ptr<G4AtlasActionInitialization> actionInitialization =
       std::make_unique<G4AtlasActionInitialization>(m_userActionSvc.get());
     runMgr->SetUserInitialization(actionInitialization.release());
-    runMgr->SetUserInitialization(new G4AtlasUserWorkerInitialization({.m_activateFastSimulation = m_fastSimTool->HasFastSimulationModels()}));
   }
 
   // G4 user interface commands
@@ -349,11 +346,12 @@ StatusCode G4AtlasAlg::execute()
 
   ATH_MSG_DEBUG("Calling SimulateG4Event");
 
-  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>();
+  auto eventInfo = std::make_unique<AtlasG4EventUserInfo>(ctx);
   // get a shared pointer to the hit collection map because we will need it after the G4Event is destroyed
   std::shared_ptr<HitCollectionMap> hitCollections = eventInfo->GetHitCollectionMap();
 
   ATH_CHECK(m_senDetTool->BeginOfAthenaEvent(*hitCollections));
+  ATH_CHECK(m_userActionSvc->BeginOfAthenaEvent(*hitCollections));
   ATH_CHECK(m_fastSimTool->BeginOfAthenaEvent());
 
   SG::ReadHandle<McEventCollection> inputTruthCollection(m_inputTruthCollectionKey);
@@ -451,6 +449,7 @@ StatusCode G4AtlasAlg::execute()
     }
 
     ATH_CHECK(m_senDetTool->EndOfAthenaEvent(*hitCollections));
+    ATH_CHECK(m_userActionSvc->EndOfAthenaEvent(*hitCollections));
     ATH_CHECK(m_fastSimTool->EndOfAthenaEvent());
 
     ATH_CHECK(m_truthRecordSvc->releaseEvent());

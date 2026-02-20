@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -20,12 +20,6 @@ TrigTauPrecisionIDHypoTool::TrigTauPrecisionIDHypoTool(const std::string& type, 
 }
 
 
-TrigTauPrecisionIDHypoTool::~TrigTauPrecisionIDHypoTool()
-{  
-
-}
-
-
 StatusCode TrigTauPrecisionIDHypoTool::initialize()
 {
     ATH_MSG_DEBUG(name() << ": in initialize()");
@@ -38,12 +32,12 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
     if(m_trackPtCut >= 0) ATH_MSG_DEBUG(" - trackPtCut: " << m_trackPtCut.value());
     ATH_MSG_DEBUG(" - IDMethod: " << m_idMethod.value());
     ATH_MSG_DEBUG(" - IDWP: " << m_idWP.value());
-    if(m_idMethod == IDMethod::Decorator) ATH_MSG_DEBUG("   - IDWPNames: " << m_idWPNames.value());
-    ATH_MSG_DEBUG("   - HighPtSelectionTrkThr: " << m_highPtTrkThr.value());
-    ATH_MSG_DEBUG("   - HighPtSelectionLooseIDThr: " << m_highPtLooseIDThr.value());
-    ATH_MSG_DEBUG("   - HighPtSelectionJetThr: " << m_highPtJetThr.value());
+    ATH_MSG_DEBUG(" - HighPtSelectionTrkThr: " << m_highPtTrkThr.value());
+    ATH_MSG_DEBUG(" - HighPtSelectionIDThr: " << m_highPtIdThr.value());
+    ATH_MSG_DEBUG(" - HighPtIDWP: " << m_highPtIdWP.value());
+    ATH_MSG_DEBUG(" - HighPtSelectionJetThr: " << m_highPtJetThr.value());
 
-    if((m_numTrackMin > m_numTrackMax) || (m_highPtLooseIDThr > m_highPtJetThr)) {
+    if((m_numTrackMin > m_numTrackMax) || (m_highPtIdThr > m_highPtJetThr)) {
         ATH_MSG_ERROR("Invalid tool configuration!");
         return StatusCode::FAILURE;
     }
@@ -51,15 +45,42 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
     if(!(m_idMethod == IDMethod::Disabled || m_idMethod == IDMethod::RNN || m_idMethod == IDMethod::Decorator)) {
         ATH_MSG_ERROR("Invalid IDMethod value, " << m_idMethod.value());
         return StatusCode::FAILURE;
-    } else if(m_idWP < IDWP::None || m_idWP > IDWP::Tight) {
-        ATH_MSG_ERROR("Invalid IDWP value, " << m_idWP.value());
+    } else if(m_idMethod == IDMethod::Disabled && (!m_idWP.empty() || !m_highPtIdWP.empty())) {
+        ATH_MSG_ERROR("Must not set IDWP or HighPtIDWP if using IDMethod=0");
         return StatusCode::FAILURE;
-    } else if(m_idMethod == IDMethod::Disabled && m_idWP != IDWP::None) {
-        ATH_MSG_ERROR("IDMethod=0 must be set together with IDWP=-1");
-        return StatusCode::FAILURE;
-    } else if(m_idMethod == IDMethod::Decorator && m_idWPNames.size() != 4) {
-        ATH_MSG_ERROR("There need to be 4 TauID WPs passed to IDWPNames if using IDMethod=2 (Decorator)");
-        return StatusCode::FAILURE;
+    } else if(m_idMethod != IDMethod::Disabled) {
+        if(m_idWP.empty()) {
+            ATH_MSG_ERROR("Must provide an ID WP");
+            return StatusCode::FAILURE;
+        }
+        
+        // Fallback to default ID WP
+        if(m_highPtIdWP.empty()) m_highPtIdWP = m_idWP;
+
+        // Initialize WP accessors
+        m_id_wp_acc = SG::ConstAccessor<char>(m_idWP);
+        m_highpt_id_wp_acc = SG::ConstAccessor<char>(m_highPtIdWP);
+    }
+
+    // Parse RNN ID WPs
+    if(m_idMethod == IDMethod::RNN) {
+        if(m_idWP == "veryloose") m_rnn_id_wp = xAOD::TauJetParameters::JetRNNSigVeryLoose;
+        else if(m_idWP == "loose") m_rnn_id_wp = xAOD::TauJetParameters::JetRNNSigLoose;
+        else if(m_idWP == "medium") m_rnn_id_wp = xAOD::TauJetParameters::JetRNNSigMedium;
+        else if(m_idWP == "tight") m_rnn_id_wp = xAOD::TauJetParameters::JetRNNSigTight;
+        else {
+            ATH_MSG_ERROR("Invalid RNN ID WP: " << m_idWP.value());
+            return StatusCode::FAILURE;
+        }
+
+        if(m_highPtIdWP == "veryloose") m_rnn_highpt_id_wp = xAOD::TauJetParameters::JetRNNSigVeryLoose;
+        else if(m_highPtIdWP == "loose") m_rnn_highpt_id_wp = xAOD::TauJetParameters::JetRNNSigLoose;
+        else if(m_highPtIdWP == "medium") m_rnn_highpt_id_wp = xAOD::TauJetParameters::JetRNNSigMedium;
+        else if(m_highPtIdWP == "tight") m_rnn_highpt_id_wp = xAOD::TauJetParameters::JetRNNSigTight;
+        else {
+            ATH_MSG_ERROR("Invalid High-pT RNN ID WP: " << m_highPtIdWP.value());
+            return StatusCode::FAILURE;
+        }
     }
 
     // Now create the "cache" of TauID score accessors for the Monitoring...
@@ -80,7 +101,7 @@ StatusCode TrigTauPrecisionIDHypoTool::initialize()
 }
 
 
-bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInfo& input) const
+bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauJetHypoTool::ToolInfo& input) const
 {
     ATH_MSG_DEBUG(name() << ": in execute()");
 
@@ -140,14 +161,14 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         // Track counting ('perf' step)
         //---------------------------------------------------------
         int numTrack = 0, numIsoTrack = 0;
-        if(m_trackPtCut > 0.) {
+        if(m_trackPtCut > 0) {
             // Raise the track pT threshold when counting tracks in the 'perf' step, to reduce sensitivity to pileup tracks
             // Overrides the default 1 GeV cut by the InDetTrackSelectorTool used during the TauJet construction
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedCharged)) {
-	      if(track->pt() > m_trackPtCut) numTrack++;
+                if(track->pt() > m_trackPtCut) numTrack++;
             }
             for(const auto* track : Tau->tracks(xAOD::TauJetParameters::TauTrackFlag::classifiedIsolation)) {
-	      if(track->pt() > m_trackPtCut) numIsoTrack++;
+                if(track->pt() > m_trackPtCut) numIsoTrack++;
             }
         } else {
             // Use the default 1 GeV selection in the InDetTrackSelectorTool, executed during the TauJet construction
@@ -160,16 +181,16 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
 
         // Apply track multiplicity cuts, except for idperf
         if(!m_acceptAll) {
-	  // NTrackMin and NIsoTracksMax
-	  if(pT < m_highPtTrkThr) {
-	    if(numTrack < m_numTrackMin) continue;
-            if(numIsoTrack > m_numIsoTrackMax) continue;
-	  }
-	  // NTrackMax
-	  if(pT < m_highPtJetThr) {
-            if(numTrack > m_numTrackMax) continue;
-	  }
-	}
+            // NTrackMin and NIsoTracksMax
+            if(pT < m_highPtTrkThr) {
+                if(numTrack < m_numTrackMin) continue;
+                if(numIsoTrack > m_numIsoTrackMax) continue;
+            }
+            // NTrackMax
+            if(pT < m_highPtJetThr) {
+                if(numTrack > m_numTrackMax) continue;
+            }
+        }
         // Note: we disabled the track selection for high pT taus
 
         passedCuts++;
@@ -180,62 +201,37 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
         //---------------------------------------------------------
         // ID WP selection (ID step)
         //---------------------------------------------------------
-        int local_idWP = m_idWP;
-        
-        // Loosen/disable the ID WP cut for high pT taus
-        if(pT > m_highPtLooseIDThr && m_idWP > IDWP::Loose) local_idWP = IDWP::Loose; // Set ID WP to Loose
-        if(pT > m_highPtJetThr) local_idWP = IDWP::None; // Disable the ID WP cut
+        int local_id_wp = IDWP::Standard;
+        if(pT > m_highPtIdThr) local_id_wp = IDWP::HighPt; // Set ID to HighPt WP
+        if(pT > m_highPtJetThr) local_id_wp = IDWP::None; // Disable the ID WP cut
 
-        ATH_MSG_DEBUG(" Local Tau ID WP: " << local_idWP);
-
-        if(m_idMethod == IDMethod::RNN) { // RNN/DeepSet scores
-            if(!Tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)) {
-                ATH_MSG_WARNING(" RNNJetScoreSigTrans not available. Make sure the TauWPDecorator is run for the RNN Tau ID!");
-            }
-
-            if(!m_acceptAll && local_idWP != IDWP::None) {
-                if(local_idWP == IDWP::VeryLoose && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigVeryLoose)) {
-                    continue;
-                } else if(local_idWP == IDWP::Loose && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigLoose)) {
-                    continue;
-                } else if(local_idWP == IDWP::Medium && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) {
-                    continue;
-                } else if(local_idWP == IDWP::Tight && !Tau->isTau(xAOD::TauJetParameters::JetRNNSigTight)) {
-                    continue;
+        if(!m_acceptAll && m_idMethod != IDMethod::Disabled && local_id_wp != IDWP::None) {
+            if(m_idMethod == IDMethod::Decorator) { // Decorated scores (e.g. for GNTau)
+                if(local_id_wp == IDWP::Standard) {
+                    if(!m_id_wp_acc.isAvailable(*Tau)) ATH_MSG_ERROR("The TauID '" << m_idWP << "' variable is not available!");
+                    if(!m_id_wp_acc(*Tau)) continue;
+                } else if(local_id_wp == IDWP::HighPt) {
+                    if(!m_highpt_id_wp_acc.isAvailable(*Tau)) ATH_MSG_ERROR("The HighPt TauID '" << m_highPtIdWP << "' variable is not available!");
+                    if(!m_highpt_id_wp_acc(*Tau)) continue;
                 }
-            }
 
-        } else if(m_idMethod == IDMethod::Decorator) { // Decorated scores (e.g. for GNTau)
-            const static SG::ConstAccessor<char> tauid_veryloose(m_idWPNames[0]);
-            const static SG::ConstAccessor<char> tauid_loose(m_idWPNames[1]);
-            const static SG::ConstAccessor<char> tauid_medium(m_idWPNames[2]);
-            const static SG::ConstAccessor<char> tauid_tight(m_idWPNames[3]);
-
-            if(!tauid_veryloose.isAvailable(*Tau) || !tauid_loose.isAvailable(*Tau) || !tauid_medium.isAvailable(*Tau) || !tauid_tight.isAvailable(*Tau))
-            ATH_MSG_WARNING("The TauID WP variables for the current configuration are missing! Make sure the correct inferences are included in the chain reconstruction sequence!");
-
-            if(!m_acceptAll && local_idWP != IDWP::None) {
-                if(local_idWP == IDWP::VeryLoose && !tauid_veryloose(*Tau)) {
-                    continue;
-                } else if(local_idWP == IDWP::Loose && !tauid_loose(*Tau)) {
-                    continue;
-                } else if(local_idWP == IDWP::Medium && !tauid_medium(*Tau)) {
-                    continue;
-                } else if(local_idWP == IDWP::Tight && !tauid_tight(*Tau)) {
-                    continue;
+            } else if(m_idMethod == IDMethod::RNN) { // Legacy RNN/DeepSet scores
+                if(!Tau->hasDiscriminant(xAOD::TauJetParameters::RNNJetScoreSigTrans)) {
+                    ATH_MSG_ERROR(" RNNJetScoreSigTrans not available. Make sure the TauWPDecorator is run for the RNN Tau ID!");
                 }
+                
+                if(local_id_wp == IDWP::Standard && !Tau->isTau(static_cast<xAOD::TauJetParameters::IsTauFlag>(m_rnn_id_wp))) continue;
+                else if(local_id_wp == IDWP::HighPt && !Tau->isTau(static_cast<xAOD::TauJetParameters::IsTauFlag>(m_rnn_highpt_id_wp))) continue;
             }
-
-
         }
 
         // TauID Score monitoring
         for(const auto& [key, p] : m_monitoredIdAccessors) {
             if(!p.first.isAvailable(*Tau))
-	      ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+                ATH_MSG_WARNING("TauID Score " << m_monitoredIdScores.value().at(key).first << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             if(!p.second.isAvailable(*Tau))
-	      ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
+                ATH_MSG_WARNING("TauID ScoreSigTrans " << m_monitoredIdScores.value().at(key).second << " is not available. Make sure the correct inferences are included in the chain reconstruction sequence!");
 
             ATH_MSG_DEBUG(" TauID \"" << key << "\" ScoreSigTrans: " << p.second(*Tau));
 
@@ -267,8 +263,8 @@ bool TrigTauPrecisionIDHypoTool::decide(const ITrigTauPrecisionHypoTool::ToolInf
 }
 
 
-StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauPrecisionHypoTool::ToolInfo>& input) const {
-    for(auto& i : input) {
+StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const {
+    for(ITrigTauJetHypoTool::ToolInfo& i : input) {
         if(passed(m_decisionId.numeric(), i.previousDecisionIDs)) {
             if(decide(i)) {
 	            addDecisionID(m_decisionId, i.decision);
@@ -278,4 +274,3 @@ StatusCode TrigTauPrecisionIDHypoTool::decide(std::vector<ITrigTauPrecisionHypoT
 
     return StatusCode::SUCCESS;
 }
-

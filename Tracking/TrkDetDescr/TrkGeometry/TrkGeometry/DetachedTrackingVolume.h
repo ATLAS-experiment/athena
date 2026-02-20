@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -95,8 +95,8 @@ class DetachedTrackingVolume final{
  private:
   /** Compactify -- set TG as owner to surfaces */
    void compactify(size_t& cSurfaces, size_t& tSurfaces);
-   std::unique_ptr<TrackingVolume> m_trkVolume = nullptr;
-   std::unique_ptr<Layer> m_layerRepresentation = nullptr;
+   std::unique_ptr<TrackingVolume> m_trkVolume;
+   std::unique_ptr<Layer> m_layerRepresentation;
    //We own also the elements in the vector
    std::unique_ptr<const std::vector<Layer*>> m_multilayerRepresentation = nullptr;
    const std::string m_name{"undefined"};

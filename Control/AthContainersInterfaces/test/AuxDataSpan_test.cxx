@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/test/AuxDataSpan_test.cxx
@@ -71,7 +71,7 @@ void test1()
   assert (cs2.size() == 5);
 }
 
-
+//coverity[root_function]
 int main()
 {
   std::cout << "AthContainersInterfaces/AuxDataSpan_test\n";

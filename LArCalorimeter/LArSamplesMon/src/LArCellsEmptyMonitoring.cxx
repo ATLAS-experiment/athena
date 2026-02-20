@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArCellsEmptyMonitoring
@@ -245,7 +245,7 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
 
  
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple ((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple (Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); 
   unsigned int nchannels = tuple->nChannels();
 
@@ -287,9 +287,8 @@ void LArCellsEmptyMonitoring::TestRun(const TString& inputfile)
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
       double noise = data->noise()*GeV;
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata){ noEvdata++; continue; }// avoid crash
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       double energy = data->energy()*GeV; 
 
       if (energy > nsigmaHits*noise){ // E>10sigma
@@ -650,7 +649,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
 
   if(m_SaveRootFile){
     for (int ii=0;ii<npl;ii++){
-      Cellmaps[ii].reset(m_LarIdTranslator->GetCaloPartitionLayerMap(ii));
+      Cellmaps[ii] = m_LarIdTranslator->GetCaloPartitionLayerMap(ii);
       Cellmaps[ii]->GetXaxis()->SetTitle("#eta"); Cellmaps[ii]->GetYaxis()->SetTitle("#Phi"); 
       hname.Form("%s_PulseShape_%dsigma",m_LarIdTranslator->GetPartitonLayerName(ii),(int)nsigmaHits);
       Pulsemaps[ii].reset((TH2D*)NormPulse.Clone(hname));
@@ -713,7 +712,7 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
   printf("Done.\n");
  
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); //tuple->ShowEvents("energy>0.");
   unsigned int nchannels = tuple->nChannels();
 
@@ -775,9 +774,8 @@ printf("Set threshold at %4.3f counts per cell for LB range. \n",(MeanHits+(nsig
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
       noise = data->noise()*GeV;
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata){ noEvdata++; continue; }// avoid crash
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       double energy = data->energy()*GeV; 
 
       // checks whether or not an event is in a bad LB when the bad LB list is read in manually
@@ -1018,7 +1016,7 @@ void LArCellsEmptyMonitoring::GetLimits_EqLB(const char* inputfile, int& lbmin, 
   int lb=0.;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   
   unsigned int nchannels = tuple->nChannels();
   
@@ -1040,9 +1038,8 @@ void LArCellsEmptyMonitoring::GetLimits_EqLB(const char* inputfile, int& lbmin, 
     // loop on the events for each cells
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
 
       
       if (data->energy() != 0. && data->noise() != 0.){    // record only events with real energy/noise values 
@@ -1076,7 +1073,7 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
   double NSIG = nsigma;
 
   // Opening file:
-  LArSamples::Interface* tuple = (LArSamples::Interface*)Interface::open(inputfile);
+  std::unique_ptr<LArSamples::Interface> tuple = Interface::open(inputfile);
   unsigned int nchannels = tuple->nChannels();
 
   // -------------------------------------------------------------------------
@@ -1104,9 +1101,8 @@ std::vector<int, std::allocator<int> >  LArCellsEmptyMonitoring::GetBadLBList(co
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
 
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      int lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      int lumiBlock = Evdata.lumiBlock();
       //int lumiBlock = data->lumiBlock();
       
       lb = (int)lumiBlock;
@@ -1237,10 +1233,9 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
 
   int  nHits = 0., lumiBlock = 0.,nCells = 0.;
   double energy = 0, noise = 0;
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
   
-  //TH1F* h1_hits = new TH1F("","",nlb,lbmin,lbmax); // temp histo filled with every event in cell with E>4sig
   double TotalRecordedHits=0;
   std::vector<int, std::allocator<int> > HitsPerLB;
   double var=0;
@@ -1261,9 +1256,8 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
     // loop on the events for each cells
     for(unsigned int idigit = 0; idigit < ndigits; idigit++){
       const LArSamples::Data* data = hist->data(idigit);
-      const LArSamples::EventData* Evdata = data->eventData();
-      if(!Evdata) continue;
-      lumiBlock = Evdata->lumiBlock();
+      const LArSamples::EventData& Evdata = data->eventData();
+      lumiBlock = Evdata.lumiBlock();
 
       energy = data->energy();
       noise = data->noise();
@@ -1294,28 +1288,30 @@ void LArCellsEmptyMonitoring::GetMeanCellHits(const char* inputfile, int nlb, in
 
   TH1Fp tp_ev = std::make_unique<TH1F>("","",th1_Hits->GetBinContent(th1_Hits->GetMaximumBin())*100,0,th1_Hits->GetBinContent(th1_Hits->GetMaximumBin()));
 
-   for (int i=1;i<=nlb;i++){
-     if(hNLB->GetBinContent(i)>0){
-       nlb_corr++;
-       tp_ev->Fill(th1_Hits->GetBinContent(i));
-       TotalRecordedHits+=th1_Hits->GetBinContent(i);
-       HitsPerLB.push_back(th1_Hits->GetBinContent(i));
-     }
+  for (int i=1;i<=nlb;i++){
+   if(hNLB->GetBinContent(i)>0){
+     nlb_corr++;
+     tp_ev->Fill(th1_Hits->GetBinContent(i));
+     TotalRecordedHits+=th1_Hits->GetBinContent(i);
+     HitsPerLB.push_back(th1_Hits->GetBinContent(i));
    }
-
-   MeanHits = ((double)TotalRecordedHits/(double)nlb_corr)/(double)nCells;
-   // MeanHits = tp_ev->GetMean()/(double)nCells;
-   // rmsHits = tp_ev->GetRMS()/(double)nCells;
-
+  }
+  
+  MeanHits = (nCells==0||nlb_corr==0) ? 0 : static_cast<double>(TotalRecordedHits)/(nlb_corr*nCells);
+  if (nCells > 0){
    for (unsigned int j=0;j<HitsPerLB.size();j++){
      var += (((double)HitsPerLB[j]/(double)nCells) - MeanHits)*(((double)HitsPerLB[j]/(double)nCells) - MeanHits);
    }
-
-   rmsHits = var/nlb_corr;
-   
-   printf("Mean number of hits/cell for 1 LB = %4.3f, RMS = %4.3f\n",MeanHits,rmsHits);
-   printf("Number of cells firing at E > %d sigma = %d\n",nsigma,nCells);
-   printf("Total number of LBs included = %d\n",nlb_corr);
+  } else {
+   std::cout<<"nCells is " << nCells << " in LArCellsEmptyMonitoring::GetMeanCellHits"<<std::endl;
+   return;
+  }
+  if (nlb_corr > 0){
+    rmsHits = var/nlb_corr;
+  }
+  printf("Mean number of hits/cell for 1 LB = %4.3f, RMS = %4.3f\n",MeanHits,rmsHits);
+  printf("Number of cells firing at E > %d sigma = %d\n",nsigma,nCells);
+  printf("Total number of LBs included = %d\n",nlb_corr);
 
 
 }
@@ -1513,7 +1509,7 @@ void LArCellsEmptyMonitoring::ScanOnlids(const TString& inputfile)
   int nskipped=0,nrepeated=0;
 
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels()); //tuple->ShowEvents("energy>0.");
   unsigned int nchannels = tuple->nChannels();
 
@@ -1591,7 +1587,7 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   ULong64_t onlid = 0;
 
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   printf("Number of events: %u %u\n",tuple->nEvents(),tuple->nChannels());
   unsigned int nchannels = tuple->nChannels();
 
@@ -1601,15 +1597,15 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   std::vector<TH2*> hmap_energy_cut (nhists);
   std::vector<TH2*> hmap_quality_cut (nhists);
   for(int j=0;j<nhists;j++){
-    hmap_counts_all[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_counts_all[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"counst_all_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_counts_all[j]->SetName(hname);
     //
-    hmap_energy_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_energy_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"energy_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_energy_cut[j]->SetName(hname);
     //
-    hmap_quality_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j);
+    hmap_quality_cut[j] = m_LarIdTranslator->GetCaloPartitionLayerMap(j).release();
     sprintf(hname,"quality_cut_%s_%d",m_LarIdTranslator->GetPartitonLayerName(j),j);
     hmap_quality_cut[j]->SetName(hname);
   }
@@ -1663,11 +1659,10 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
   }
 
   std::unique_ptr<TFile> tout;
-  TCanvas* c0 = nullptr, *c1 = nullptr;
 
   if(!strcmp(optionsave,"root")){
     tout.reset(new TFile("EtaPhiMonitoring.root","recreate"));
-    c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
+    std::unique_ptr<TCanvas> c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
     c0->SetName("Normalization");
     c0->Write();
     for(int j=0;j<nhists;j++) hmap_counts_all[j]->Write();
@@ -1685,21 +1680,21 @@ void LArCellsEmptyMonitoring::DoEtaPhiMonitoring(const char* inputfile,const cha
     }
     tout->Close(); 
   } else {
-    c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
+    std::unique_ptr<TCanvas> c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_counts_all.data(),"Counts",1);
     c0->SaveAs("Normalization.png");
-    c1 = new TCanvas("c1","");
-    for(int j=0;j<nhists;j++){ hmap_counts_all[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_counts_all[j]->GetName()); c1->SaveAs(hname); }
+    TCanvas c1("c1","");
+    for(int j=0;j<nhists;j++){ hmap_counts_all[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_counts_all[j]->GetName()); c1.SaveAs(hname); }
     if(kcuttype==1){
       c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_energy_cut.data(),"EnergyCut",1);
       c0->SaveAs("EnergyCut.png");
-      c1->cd();
-      for(int j=0;j<nhists;j++){ hmap_energy_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_energy_cut[j]->GetName()); c1->SaveAs(hname); }
+      c1.cd();
+      for(int j=0;j<nhists;j++){ hmap_energy_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_energy_cut[j]->GetName()); c1.SaveAs(hname); }
     }
     if(kcuttype==2){
       c0 = m_LarIdTranslator->CaloPartitionLayerDisplay(hmap_quality_cut.data(),"QualityCut",1);
       c0->SaveAs("QualityCut.png");
-      c1->cd();
-      for(int j=0;j<nhists;j++){ hmap_quality_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_quality_cut[j]->GetName()); c1->SaveAs(hname); }
+      c1.cd();
+      for(int j=0;j<nhists;j++){ hmap_quality_cut[j]->Draw("colz"); sprintf(hname,"%s.png",hmap_quality_cut[j]->GetName()); c1.SaveAs(hname); }
     }
   }
   return;
@@ -1726,7 +1721,7 @@ void LArCellsEmptyMonitoring::TriggerEfficiency(const char* inputfile,float frac
   std::map< std::pair<unsigned int, unsigned int>, unsigned int > eventLayer;
   int run=0;
   // Opening file:
-  std::unique_ptr<LArSamples::Interface> tuple((LArSamples::Interface*)Interface::open(inputfile));
+  std::unique_ptr<LArSamples::Interface> tuple(Interface::open(inputfile));
   unsigned int nchannels = tuple->nChannels();
 
   // -------------------------------------------------------------------------

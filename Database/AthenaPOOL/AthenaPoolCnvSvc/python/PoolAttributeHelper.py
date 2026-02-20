@@ -65,6 +65,14 @@ def setTreeAutoFlush( fileName = None, treeName = None, autoFlush = None ):
                              attrName  = "TREE_AUTO_FLUSH",
                              attrValue = autoFlush )
 
+def setTreeMaxSize( fileName = None, treeName = None, maxSize = None ):
+    """ Convenience method for setting the maximum size for a tree in a given file. """
+
+    return setPoolAttribute( fileName  = fileName,
+                             contName  = f"TTree={treeName}",
+                             attrName  = "TREE_MAX_SIZE",
+                             attrValue = maxSize )
+
 def setContainerSplitLevel( fileName = None, treeName = None, splitLvl = None ):
     """ Convenience method for setting the split level for a tree in a given file. """
 
@@ -80,6 +88,13 @@ def setBranchBasketSize( fileName = None, treeName = None, basketSize = None ):
                              contName  = f"TTree={treeName}",
                              attrName  = "BRANCH_BASKET_SIZE",
                              attrValue = basketSize )
+
+def setUnsplitFieldList( fileName = None, unsplitFieldList = None ):
+    """ Convenience method for setting the unsplit field list for RNTuples in a given file. """
+
+    return setPoolAttribute( fileName  = fileName,
+                             attrName  = "RNTUPLE_UNSPLIT_FIELD_LIST",
+                             attrValue = unsplitFieldList )
 
 # Main Function: Only to check the basic functionality
 # Can be run via python PoolAttributeHelper.py

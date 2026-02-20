@@ -6,7 +6,6 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 def createDiTauConfigFlags():
     ditau_cfg = AthConfigFlags()
     
-    ditau_cfg.addFlag("DiTau.Enabled", True)
     ditau_cfg.addFlag("DiTau.doDiTauRec", True)
     ditau_cfg.addFlag("DiTau.DiTauContainer", ["DiTauJets","DiTauJetsLowPt"]) 
     ditau_cfg.addFlag("DiTau.JetSeedPt", [300000,50000])

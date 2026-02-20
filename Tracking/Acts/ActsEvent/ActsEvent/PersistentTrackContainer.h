@@ -18,11 +18,16 @@ namespace ActsTrk {
 
   template <typename T>
   struct DataLinkHolder {
+    using element_type = T;
     DataLink<T> m_link;
     DataLinkHolder(const DataLink<T>& link) : m_link{link} {}
     
     const T& operator*() const { return *(m_link.cptr()); }
     const T* operator->() const { return m_link.cptr(); }
+    T& operator*() { return *(m_link.ptr()); }
+    T* operator->() { return m_link.ptr(); }
+
+    operator bool() const { return m_link.isValid(); }
   };
 
   using PersistentTrackContainerBase = Acts::TrackContainer<ActsTrk::PersistentTrackBackend,

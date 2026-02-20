@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfStorage/StorageMgr.h"
@@ -65,9 +65,6 @@ TrigConf::StorageMgr::StorageMgr( const std::string& type,
 
 
 StorageMgr::~StorageMgr() {
-   delete m_hltPrescaleSetLoader;
-   delete m_hltPrescaleSetCollectionLoader;
-   delete m_sessionMgr;
 }
 
 
@@ -87,7 +84,7 @@ StorageMgr::closeSession() {
 SessionMgr&
 StorageMgr::sessionMgr() {
    if( m_sessionMgr == 0 ) {
-      m_sessionMgr = new SessionMgr();
+      m_sessionMgr = std::make_unique<SessionMgr>();
       if( m_cs != "" ) {
          m_sessionMgr->setConnectionString(m_cs);
       } else {

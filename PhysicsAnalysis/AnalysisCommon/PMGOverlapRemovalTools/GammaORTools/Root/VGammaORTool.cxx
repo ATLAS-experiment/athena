@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GammaORTools/VGammaORTool.h"
@@ -321,6 +321,12 @@ bool VGammaORTool::isFromTau(const xAOD::TruthParticle& lepton, int nRecursions)
   }
   for(uint i=0; i<lepton.nParents(); i++){
     const xAOD::TruthParticle* parent=lepton.parent(i);
+    // Can not rely on parents being available in TRUTH3, in stead use the decorations
+    if(!parent){
+      static const SG::ConstAccessor<unsigned int> classifierParticleOriginAcc("classifierParticleOrigin");
+      auto origin = classifierParticleOriginAcc.isAvailable(lepton) ? classifierParticleOriginAcc(lepton) : 0;
+      return origin == MCTruthPartClassifier::TauLep;
+    }
     if (MC::isTau(parent)) return true;
     if(parent->pdgId()==lepton.pdgId()){
       return isFromTau(lepton, nRecursions+1);

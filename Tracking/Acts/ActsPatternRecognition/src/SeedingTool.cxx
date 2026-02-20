@@ -238,7 +238,7 @@ ATH_FLATTEN
 			   external_iterator_t spEnd,
 			   const Acts::Vector3& beamSpotPos,
 			   const Acts::Vector3& bField,
-			   DataVector< ActsTrk::ActsSeed< typename SeedingTool::external_type, 3ul > >& seedContainer) const
+			   ActsTrk::SeedContainer& seedContainer) const
   {
     static_assert(std::is_same<typename external_spacepoint< external_iterator_t >::type, const value_type&>::value,
 		  "Inconsistent type");
@@ -251,14 +251,13 @@ ATH_FLATTEN
     // Space Point Grid Options
     Acts::CylindricalSpacePointGridOptions gridOpts;
     gridOpts.bFieldInZ = bField[2];
-    gridOpts = gridOpts.toInternalUnits();
     
     // Seed Finder Options
     Acts::SeedFinderOptions finderOpts;
     finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x], 
     		       	               beamSpotPos[Amg::y]);
     finderOpts.bFieldInZ = bField[2];
-    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+    finderOpts = finderOpts.calculateDerivedQuantities(m_finderCfg);
 
 
 
@@ -349,22 +348,9 @@ ATH_FLATTEN
       seeds.erase(seeds.begin() + acceptedSeeds, seeds.end());     
     }
 
-
-    // Store seeds
-    seedContainer.reserve(seeds.size());
-    for(const auto& seed: seeds) {
-      assert(seed.sp().size() == 3ul);
-      const auto bottom = seed.sp().at(0);
-      const auto middle = seed.sp().at(1);
-      const auto top = seed.sp().at(2);
-
-      std::unique_ptr< ActsTrk::Seed > toAdd =
-	std::make_unique< ActsTrk::Seed >(bottom->externalSpacePoint(),
-					  middle->externalSpacePoint(),
-					  top->externalSpacePoint());
-      toAdd->setVertexZ(seed.z());
-      toAdd->setQuality(seed.seedQuality());
-      seedContainer.push_back(std::move(toAdd)); 
+    // Convert the seeds
+    for (auto seed : seeds) {
+      seedContainer.push_back(seed);
     }
 
     return StatusCode::SUCCESS;
@@ -473,9 +459,9 @@ ATH_FLATTEN
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg.toInternalUnits(), logger().cloneWithSuffix("Filter"));    
+    m_finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< value_type > >(filterCfg, logger().cloneWithSuffix("Filter"));    
 
-    m_finderCfg = m_finderCfg.toInternalUnits().calculateDerivedQuantities();
+    m_finderCfg = m_finderCfg.calculateDerivedQuantities();
 
     // Grid Configuration
     m_gridCfg.minPt = m_minPt;
@@ -491,7 +477,6 @@ ATH_FLATTEN
     m_gridCfg.rMax = m_gridRMax;
     m_gridCfg.phiBinDeflectionCoverage = m_phiBinDeflectionCoverage;
     m_gridCfg.maxPhiBins = m_maxPhiBins;
-    m_gridCfg = m_gridCfg.toInternalUnits();
 
     // Seed Finder
     m_finder = decltype(m_finder){m_finderCfg, logger().cloneWithSuffix("Finder")};

@@ -276,7 +276,7 @@ class TH2D;
     StatusCode makeAndRegHist(HistType *&ptr, const HistDef & ... histargs)
     {   
         ptr = new HistType(histargs...);
-        ATH_MSG_INFO("Booking Hist: " << ptr->GetName() << " min=" << ptr->GetXaxis()->GetXmin() << " max=" << ptr->GetXaxis()->GetXmax());
+        ATH_MSG_DEBUG("Booking Hist: " << ptr->GetName() << " min=" << ptr->GetXaxis()->GetXmin() << " max=" << ptr->GetXaxis()->GetXmax());
         ATH_CHECK(m_tHistSvc->regHist(m_dir + ptr->GetName(), ptr));
         return StatusCode::SUCCESS;
     }

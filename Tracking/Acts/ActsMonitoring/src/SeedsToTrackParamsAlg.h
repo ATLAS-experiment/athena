@@ -9,12 +9,11 @@
 
 #include "StoreGate/ReadHandleKey.h"
 
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsToolInterfaces/IActsToTrkConverterTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 
-#include "ActsEvent/Seed.h"
 #include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackParameters.h"
 #include "ActsEvent/TrackParametersContainer.h"
@@ -32,7 +31,7 @@ namespace ActsTrk {
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
-    ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
+    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool", ""};
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", ""};
     ToolHandle< ActsTrk::IActsToTrkConverterTool > m_ATLASConverterTool{this, "ATLASConverterTool", ""};
     ToolHandle<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", "", "Track Param Estimation from Seeds"};

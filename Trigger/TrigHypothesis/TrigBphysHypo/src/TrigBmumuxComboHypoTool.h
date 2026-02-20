@@ -36,6 +36,7 @@ class TrigBmumuxComboHypoTool: public ComboHypoToolBase {
 
   Gaudi::Property<int> m_decay {this, "Decay", 9999, "decay as enumerated in xAOD::TrigBphys::pType"};
   Gaudi::Property<bool> m_isBmux {this, "isBmux", false, "B+ -> mu+ nu_mu X decay (bBmux)"};
+  Gaudi::Property<bool> m_isBhh {this, "isBhh", false, "B0/B_s0 -> h+ h-, h = pi/K decay (bBhh)"};
 
   ToolHandle<GenericMonitoringTool> m_monTool {this, "MonTool", "", "Monitoring tool"};
 };

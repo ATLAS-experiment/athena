@@ -41,6 +41,11 @@ namespace G4UA
       virtual std::unique_ptr<MCTruthSteppingAction>
       makeAndFillAction(G4AtlasUserActions&) override final;
 
+    /// Calls BeginOfAthenaEvent
+    StatusCode BeginOfAthenaEvent(HitCollectionMap&) override;
+    /// Calls EndOfAthenaEvent
+    StatusCode EndOfAthenaEvent(HitCollectionMap&) override;
+
     private:
 
       /// Map of volume name to output collection name

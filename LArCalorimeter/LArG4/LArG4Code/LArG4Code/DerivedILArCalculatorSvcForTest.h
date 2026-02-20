@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // defining this class is just used for testing since class ILArCalculatorSvc is a abstract class which needs to be instatiated in my test code
@@ -151,11 +151,7 @@ public:
     a_ident.add(4);
     a_ident.add(5);
     a_ident.add(6);
-    LArHitData hit = {};//define LArHitData object hit
-    hit.id = a_ident;//set hit, the same below
-    hit.time = 1.0;
-    hit.energy = 1.0;
-    hits.push_back(hit);//insert hit into the container hits
+    hits.emplace_back(LArHitData{std::move(a_ident), 1, 1});
 
     return true;
   }

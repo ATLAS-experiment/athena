@@ -45,7 +45,7 @@
   <class name="std::vector<TgcRawData_p4>" />
   <class name="TgcRdo_p4" />
   <class name="std::vector<TgcRdo_p4>" />
-  <class name="TgcRdoContainer_p4" id="176667f0-DEC8-42A4-94AF-B4750829671A" />
+  <class name="TgcRdoContainer_p4" id="176667F0-DEC8-42A4-94AF-B4750829671A" />
 
   <class name="TgcL1RawData_p1" />
   <class name="std::vector<TgcL1RawData_p1>" />

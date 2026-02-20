@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawConditions/LArMCSym.h"
@@ -24,7 +24,7 @@ LArMCSym::LArMCSym(const LArOnlineID_Base* onlId,
   m_caloCellID(caloId),
   m_oflHashtoSymOnl (initIndices (oflHashtoSymOnl, symIds)),
   m_onlHashtoSymOnl (initIndices (onlHashtoSymOnl, symIds)),
-  m_symIds(symIds)
+  m_symIds(std::move(symIds))
 {
 }
 

@@ -6,6 +6,7 @@
 
 // EDM include(s):
 #include "xAODCore/AuxStoreAccessorMacros.h"
+#include "TruthUtils/ParticleConstants.h"
 // Local include(s):
 #include "xAODEgamma/versions/Electron_v1.h"
 #include "ElectronAccessors_v1.h"
@@ -34,6 +35,10 @@ namespace xAOD {
 
   Type::ObjectType Electron_v1::type() const {
     return Type::Electron;
+  }
+
+  double Electron_v1::m() const {
+    return ParticleConstants::electronMassInMeV;
   }
 
   /////////////////////////////////////////////////////////////////////////////

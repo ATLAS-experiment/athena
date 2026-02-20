@@ -5,7 +5,7 @@
 #ifndef MUONSTATIONINTERSECTCONDALG_H
 #define MUONSTATIONINTERSECTCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "MuonCondData/MdtCondDbData.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -13,7 +13,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
-class MuonStationIntersectCondAlg : public AthReentrantAlgorithm {
+class MuonStationIntersectCondAlg : public AthCondAlgorithm {
 public:
     MuonStationIntersectCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~MuonStationIntersectCondAlg() = default;

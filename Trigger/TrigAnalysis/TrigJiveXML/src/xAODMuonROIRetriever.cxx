@@ -80,7 +80,7 @@ namespace JiveXML {
     myDataMap["thrNumber"] = std::move(thrNumber);
     myDataMap["thrName"] = std::move(thrName);
     myDataMap["thrValue"] = std::move(thrValue);
-    myDataMap["energy"] = energy;
+    myDataMap["energy"] = std::move(energy);
 
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< nPhi
 					    << " from: " << m_sgKey << endmsg;

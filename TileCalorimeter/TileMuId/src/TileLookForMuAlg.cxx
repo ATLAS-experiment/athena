@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -104,8 +104,11 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("TileLookForMuAlg execution  started");
 
+  //coverity[STACK_USE]
   double eneA[N_CELLS_A][N_MODULES]; // calorimeter cell matrices  
+  //coverity[STACK_USE]
   double eneBC[N_CELLS_BC][N_MODULES];
+  //coverity[STACK_USE]
   double eneD[N_CELLS_D][N_MODULES];
 
   memset(eneA, 0, sizeof(eneA));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -83,11 +83,9 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       found[channel][gain] |= 1;
       amplitude[channel][gain] = rawChannel->amplitude();
 
-      std::string channelName = moduleName[gain] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
+      auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", channel);
 
-      std::string amplitudeName = moduleName[gain] + "_amplitude";
-      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, rawChannel->amplitude());
+      auto monitoredAmplitude = Monitored::Scalar<float>(moduleName[gain] + "_amplitude", rawChannel->amplitude());
       fill("TileRawChannelAmpLegacy", monitoredChannel, monitoredAmplitude);
     }
 
@@ -102,24 +100,18 @@ StatusCode TileRawChannelFlxMonitorAlgorithm::fillHistograms( const EventContext
       found[channel][gain] |= 2;
       amplitudeFlx[channel][gain] = rawChannel->amplitude();
 
-      std::string channelName = moduleName[gain] + "_channel";
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
+      auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", channel);
 
-      std::string amplitudeName = moduleName[gain] + "_amplitude";
-      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, rawChannel->amplitude());
+      auto monitoredAmplitude = Monitored::Scalar<float>(moduleName[gain] + "_amplitude", rawChannel->amplitude());
       fill("TileRawChannelAmpFlx", monitoredChannel, monitoredAmplitude);
     }
 
     // Compare amplitude and amplitudeFlx arrays and put results into histograms
     for(unsigned int gain = 0; gain<TileCalibUtils::MAX_GAIN; ++gain) {
 
-      std::string channelName = moduleName[gain] + "_channel";
-      std::string amplitudeName  = moduleName[gain] + "_amplitude";
-      std::string amplitudeDiffName = moduleName[gain] + "_amplitude_diff";
-
-      auto monitoredChannel = Monitored::Scalar<float>(channelName, 0.0F);
-      auto monitoredAmplitude = Monitored::Scalar<float>(amplitudeName, 0.0F);
-      auto monitoredAmplitudeDiff = Monitored::Scalar<float>(amplitudeDiffName, 0.0F);
+      auto monitoredChannel = Monitored::Scalar<float>(moduleName[gain] + "_channel", 0.0F);
+      auto monitoredAmplitude = Monitored::Scalar<float>(moduleName[gain] + "_amplitude", 0.0F);
+      auto monitoredAmplitudeDiff = Monitored::Scalar<float>(moduleName[gain] + "_amplitude_diff", 0.0F);
 
       for(unsigned int channel = 0; channel<TileCalibUtils::MAX_CHAN; ++channel) {
 

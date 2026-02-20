@@ -1,60 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "GoodRunsLists/GoodRunsListSelectorTool.h"
-#include "GoodRunsLists/TGRLCollection.h"
-#include "GoodRunsLists/TGoodRunsListReader.h"
 #include "GoodRunsLists/TMsgLogger.h"
 #include "GoodRunsLists/StrUtil.h"
-
 #include "PathResolver/PathResolver.h"
-
 #include "GaudiKernel/MsgStream.h"
 
-#include "TFormula.h"
-#include "TSystem.h"
 
+#include "TSystem.h"
 #include <sys/stat.h>
 
 using namespace std;
-
-GoodRunsListSelectorTool::GoodRunsListSelectorTool( const std::string& type, const std::string& name, const IInterface* parent )
- : base_class( type, name, parent )
- , m_reader(0)
- , m_boolop(0)
- , m_passthrough(true)
- , m_rejectanybrl(false)
- , m_eventselectormode(false)
-{
-  declareProperty( "GoodRunsListVec", m_goodrunslistVec, "list of input xml files" );
-  declareProperty( "BlackRunsListVec", m_blackrunslistVec, "list of input xml files" );
-  declareProperty( "BoolOperation", m_boolop );
-  declareProperty( "PassThrough", m_passthrough = true);
-  declareProperty( "RejectBlackRunsInEventSelector", m_rejectanybrl = false );
-  declareProperty( "EventSelectorMode", m_eventselectormode = false );
-
-  m_grlcollection = new Root::TGRLCollection();
-  m_brlcollection = new Root::TGRLCollection();
-  m_reader = new Root::TGoodRunsListReader();
-}
-
-
-GoodRunsListSelectorTool::~GoodRunsListSelectorTool()
-{
-  if (m_grlcollection!=0) delete m_grlcollection;
-  if (m_brlcollection!=0) delete m_brlcollection;
-  if (m_reader!=0) delete m_reader;
-
-  // delete all the formula pntrs in the map
-  while ( ! m_dqformula.empty() ) {
-    std::map< std::string,TFormula* >::iterator itr= m_dqformula.begin();
-    TFormula* form = (*itr).second;
-    m_dqformula.erase(itr);
-    delete form;
-  }
-}
 
 
 StatusCode
@@ -74,7 +33,6 @@ GoodRunsListSelectorTool::initialize()
   /// checking existence of goodrunslists / blocklists
   std::vector<std::string>::iterator itr;
   for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr)  {
-    //const char* fname;
     std::string fname;
     if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
       fname = gSystem->ExpandPathName( itr->c_str() );
@@ -88,7 +46,6 @@ GoodRunsListSelectorTool::initialize()
     }
   }
   for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr)  {
-    //const char* fname;
     std::string fname;
     if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
       fname = gSystem->ExpandPathName( itr->c_str() );
@@ -105,7 +62,6 @@ GoodRunsListSelectorTool::initialize()
   if ( !m_goodrunslistVec.empty() ) {
     m_reader->Reset();
     for (itr=m_goodrunslistVec.begin(); itr!=m_goodrunslistVec.end(); ++itr) {
-      //const char* fname;
       std::string fname;
       if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
         fname = gSystem->ExpandPathName( itr->c_str() );
@@ -117,12 +73,11 @@ GoodRunsListSelectorTool::initialize()
     }
     m_reader->Interpret();
     /// this merge accounts for same identical metadata, version, name, etc.
-    *m_grlcollection = m_reader->GetMergedGRLCollection(static_cast<Root::BoolOperation>(m_boolop));
+    *m_grlcollection = m_reader->GetMergedGRLCollection(static_cast<Root::BoolOperation>(m_boolop.value()));
   }
   if ( !m_blackrunslistVec.empty() ) {
     m_reader->Reset();
     for (itr=m_blackrunslistVec.begin(); itr!=m_blackrunslistVec.end(); ++itr) {
-      //const char* fname;
       std::string fname;
       if ( itr->find('/')==0 || itr->find('$')==0 || itr->find('.')==0 || itr->find(':')!=string::npos )  {
         fname = gSystem->ExpandPathName( itr->c_str() );
@@ -134,7 +89,7 @@ GoodRunsListSelectorTool::initialize()
     }
     m_reader->Interpret();
     /// this merge accounts for same identical metadata, version, name, etc.
-    *m_brlcollection = m_reader->GetMergedGRLCollection(static_cast<Root::BoolOperation>(m_boolop));
+    *m_brlcollection = m_reader->GetMergedGRLCollection(static_cast<Root::BoolOperation>(m_boolop.value()));
   }
 
   return StatusCode::SUCCESS;

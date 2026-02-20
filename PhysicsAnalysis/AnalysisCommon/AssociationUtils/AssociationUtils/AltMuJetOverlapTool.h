@@ -1,19 +1,29 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_ALTMUJETOVERLAPTOOL_H
 #define ASSOCIATIONUTILS_ALTMUJETOVERLAPTOOL_H
+
+// Framework includes
+#include "AsgDataHandles/ReadHandleKey.h"
 
 // EDM includes
 #include "xAODMuon/MuonContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
+// Columnar includes
+#include "ColumnarCore/ObjectColumn.h"
+#include "ColumnarCore/OptObjectId.h"
+#include "ColumnarCore/VectorColumn.h"
+#include "ColumnarMuon/MuonDef.h"
+#include "ColumnarJet/JetDef.h"
+#include "ColumnarTracking/TrackDef.h"
+
 // Local includes
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
-#include "AssociationUtils/BJetHelper.h"
 #include "AssociationUtils/IObjectAssociator.h"
 
 namespace ORUtils
@@ -59,14 +69,16 @@ namespace ORUtils
       /// muons. Second, muons are flagged if they overlap with the remaining
       /// jets.
       virtual StatusCode
-      findOverlaps(const xAOD::IParticleContainer& cont1,
-                   const xAOD::IParticleContainer& cont2) const override;
+      findOverlaps(columnar::Particle1Range cont1,
+                   columnar::Particle2Range cont2,
+                   columnar::EventContextId eventContext) const override;
 
       /// @brief Identify overlapping muons and jets.
       /// The above method calls this one.
       virtual StatusCode
-      findOverlaps(const xAOD::MuonContainer& muons,
-                   const xAOD::JetContainer& jets) const;
+      internalFindOverlaps(columnar::Particle1Range muons,
+                           columnar::Particle2Range jets,
+                           columnar::EventContextId eventContext) const;
 
     protected:
 
@@ -75,12 +87,12 @@ namespace ORUtils
 
       /// Retrieve the primary vertex used to count jet tracks.
       /// TODO: reduce duplication with MuJetOverlapTool.
-      const xAOD::Vertex* getPrimVtx() const;
+      int getPrimVtxIndex(columnar::EventContextId eventContext) const;
 
       /// Helper method to get the number of tracks in a jet w.r.t.
       /// the primary vertex. Returns -1 if no primary vertex is found.
       /// TODO: reduce duplication with MuJetOverlapTool.
-      int getNumTracks(const xAOD::Jet* jet) const;
+      int getNumTracks(columnar::Particle2Id jet, columnar::EventContextId eventContext) const;
 
     private:
 
@@ -106,13 +118,28 @@ namespace ORUtils
       double m_slidingDRMaxCone;
       /// Calculate deltaR using rapidity
       bool m_useRapidity;
+      /// PV Container to use
+      std::string m_PVContName;
+
+      /// Columnar accessors
+      struct Accessors final : columnar::ColumnarTool<>
+      {
+        columnar::Track0Accessor<columnar::ObjectColumn> m_track0Acc {*this, "InDetTrackParticles"};
+        columnar::Track1Accessor<columnar::ObjectColumn> m_track1Acc {*this, "InDetForwardTrackParticles"};
+        columnar::VertexAccessor<columnar::ObjectColumn> m_vtxContainerAcc;
+        columnar::VertexAccessor<columnar::RetypeColumn<xAOD::VxType::VertexType,short>> m_vertexTypeAcc {*this, "vertexType"};
+        columnar::Particle1Accessor<float> m_muonPtAcc {*this, "pt"};
+        columnar::Particle2Accessor<float> m_jetPtAcc {*this, "pt"};
+        columnar::Particle2Accessor< std::vector<int> > m_numTrkPt500Acc {*this, "NumTrkPt500"};
+        /// BJet helper
+        columnar::Particle2Accessor<char> m_bJetAcc;
+        using ColumnarTool::ColumnarTool;
+      };
+      std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
       //
       // Utilities
       //
-
-      /// BJet helper
-      std::unique_ptr<BJetHelper> m_bJetHelper;
 
       /// Delta-R matcher for the inner cone
       std::unique_ptr<IParticleAssociator> m_dRMatchCone1;

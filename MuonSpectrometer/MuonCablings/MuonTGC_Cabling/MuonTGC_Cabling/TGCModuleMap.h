@@ -1,44 +1,57 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCMODULEMAP_HH
 #define MUONTGC_CABLING_TGCMODULEMAP_HH
 
 #include <map>
+#include <memory>
 
 #include "MuonTGC_Cabling/TGCModuleId.h"
 
-namespace MuonTGC_Cabling
-{
- 
-class TGCModuleMap
-{
-public:
-  // Constructor & Destructor
-  TGCModuleMap(void)
-  {}
+namespace MuonTGC_Cabling {
 
-  virtual ~TGCModuleMap(void);
-  
-  int connector(int entry);
+class TGCModuleMap {
+   public:
+    using Store_t = std::map<int, std::unique_ptr<TGCModuleId>>;
+    // Constructor & Destructor
+    TGCModuleMap() = default;
+    /** @brief Move constructor */
+    TGCModuleMap(TGCModuleMap&& other) = default;
+    /** @brief Copy constructor */
+    TGCModuleMap(const TGCModuleMap&) = delete;
+    /** @brief Move assignment operator */
+    TGCModuleMap& operator=(TGCModuleMap&& other) = default;
+    /** @brief Copy assignment operator */
+    TGCModuleMap& operator=(const TGCModuleMap& other) = delete;
+    /** @brief Returns the begin iterator of the underlying map */
+    Store_t::const_iterator begin() const;
+    /** @brief Returns the end iterator of the underlying map */
+    Store_t::const_iterator end() const;
 
-  TGCModuleId* moduleId(int entry);
+    Store_t::iterator begin();
 
-  TGCModuleId* popModuleId(int entry);
+    Store_t::iterator end();
 
-  void insert(int connector, TGCModuleId* moduleId);
+    virtual ~TGCModuleMap();
+    /** @brief Return a certain module and remove it from the
+     *         map
+     * @param port: Connector port of the module */
+    std::unique_ptr<TGCModuleId> popModule(const int connector);
 
-  int find(int connector);
-  
-  int size(void);
+    void insert(int connector, std::unique_ptr<TGCModuleId> moduleId);
 
-  void clear(void);
+    std::size_t size() const;
 
-private:
-  std::map<int,TGCModuleId*> m_moduleMap;
+    bool empty() const;
+
+    void clear();
+
+   private:
+    Store_t m_moduleMap;
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

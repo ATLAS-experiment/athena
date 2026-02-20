@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATAMODELATHENAPOOL_ELEMENTLINK_P1_H
@@ -13,12 +13,12 @@
 #include <string>
 #include <inttypes.h>
 
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 /** @class ElementLink_p1<INDEX>
  *  @brief Persistent representation of ElementLink - constains StoreGate key (name) of the container it is pointing to, and an index to the container element. The C++ type of index can be integer for sequences or a "key" type for sets (like std::map). (std::string is supported, define more types if necessary)
  **/
- 
+
 template <class INDEXTYPE>
 class ElementLink_p1 {
 public:
@@ -81,8 +81,5 @@ template <class LINK>
 struct GeneratePersELinkType_p1 {
   typedef  ElementLink_p1<typename GenerateELinkIndexType_p1<typename LINK::index_type>::type >	type;
 };
-				 
+
 #endif // DATAMODELATHENAPOOL_ELEMENTLINK_P1_H
-
-
-

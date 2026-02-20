@@ -10,6 +10,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "HGTD_Identifier/HGTD_ID.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"
+#include "HGTD_RawData/HGTD_ALTIROC_RDO_Container.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -33,7 +34,10 @@ private:
   ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
 
   SG::ReadHandleKey<HGTD_RDO_Container> m_rdoContainerKey{this, "RDOContainerName", "", "Name of the HGTD_RDO container"};
+  SG::ReadHandleKey<HGTD_ALTIROC_RDO_Container> m_altiroc_rdo_rh_key{this, "AltirocRDOContainerName", "", "Name of the HGTD_ALTIROC_RDO container"};
   SG::WriteHandleKey<xAOD::HGTDClusterContainer> m_clusterContainerKey{this, "ClusterContainerName", "", "Name of the HGTD cluster container"}; 
+
+  BooleanProperty m_use_altiroc_rdo{this, "useALTIROC_RDO", false, "Use Altiroc RDO instead of standard"};
 
 private:
   enum EStat {

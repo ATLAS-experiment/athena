@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 ## **************************************************** 
@@ -17,7 +17,7 @@
 
 import os, os.path
 import sys
-import shlex, subprocess
+import subprocess
 import argparse
 
 parser = argparse.ArgumentParser(description='''
@@ -63,7 +63,6 @@ logFile="output.log"
 #    http://www-f9.ijs.si/atlpy/atlprod/prodrequest/?q=mc12_8TeV.117050.PowhegPythia_P2011C_ttbar
 #    http://panda.cern.ch/server/pandamon/query/?reqid=1162571&mode=showtask0
 #    https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CoolProdTags
-specifyCondAndGeo= False # true to use the tags below, false to autoconfigure everything
 geometryVersion="ATLAS-GEO-20-00-01"
 conditionsTagMC="OFLCOND-MC12-SDR-06"
 conditionsTagData="COMCOND-BLKPA-RUN1-01"
@@ -141,18 +140,13 @@ def runStep(inputFile):
         
     outputLog = runDir+'log'
     
-    if specifyCondAndGeo:
-        # from older sh script
-        fullComand="${transform} preExec=${preExec} input${inputDataType}File=${inputDir}/${inputFile} output${outputType}File=${outputFile} maxEvents=${maxEvents} skipEvents=${skipEvents} geometryVersion=$geometryVersion conditionsTag=$conditionsTag autoConfiguration=everything" 
-    else:
-        comandArgs = [ '--preExec='+preExec,
-                       '--input%sFile=%s'%(inputDataType, inputFile),
-                       '--output%sFile=%s'%(outputType, outputFile),
-                       '--maxEvents='+str(maxEvents),
-                       '--skipEvents='+str(skipEvents),
-                       '--autoConfiguration=everything',
-                       #'--postExec=saxasxa'
-                       ]
+    comandArgs = [ '--preExec='+preExec,
+                   '--input%sFile=%s'%(inputDataType, inputFile),
+                   '--output%sFile=%s'%(outputType, outputFile),
+                   '--maxEvents='+str(maxEvents),
+                   '--skipEvents='+str(skipEvents),
+                   '--autoConfiguration=everything',
+                   ]
 
     print ('Running : ')
     print (transform, ' '.join(comandArgs))

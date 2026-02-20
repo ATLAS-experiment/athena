@@ -21,6 +21,10 @@
 
 namespace CP
 {
+  // accessors and decorators
+  // these are done at file-level to register types with output algorithms
+  const static SG::Decorator<float> met_met_dec("met");
+  const static SG::Decorator<float> met_phi_dec("phi");
 
   StatusCode MetBuilderAlg ::
   initialize ()
@@ -48,8 +52,6 @@ namespace CP
       }
       ANA_CHECK (met::buildMETSum (m_finalKey, met, softTerm->source()));
 
-      const static SG::Decorator<float> met_met_dec("met");
-      const static SG::Decorator<float> met_phi_dec("phi");
       for (const xAOD::MissingET *metTerm : (*met))
       {
         if (!metTerm)

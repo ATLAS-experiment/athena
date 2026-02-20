@@ -68,7 +68,7 @@ namespace JiveXML {
 
     DataMap myDataMap;
     const auto nPhi = phi.size();
-    myDataMap["phi"] = phi;
+    myDataMap["phi"] = std::move(phi);
     myDataMap["eta"] = std::move(eta);
     myDataMap["roiWord"] = std::move(roiWord);
     myDataMap["thrNumber"] = std::move(thrNumber);

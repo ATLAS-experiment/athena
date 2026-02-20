@@ -5,7 +5,7 @@
 #ifndef _SolenoidParametrizationCondAlg_H_
 #define _SolenoidParametrizationCondAlg_H_
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -18,7 +18,7 @@
 namespace Trk
 {
 
-class SolenoidParametrizationCondAlg : public AthReentrantAlgorithm
+class SolenoidParametrizationCondAlg : public AthCondAlgorithm
 {
  public:
   SolenoidParametrizationCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -26,7 +26,6 @@ class SolenoidParametrizationCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext &ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey

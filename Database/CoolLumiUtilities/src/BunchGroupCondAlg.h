@@ -15,7 +15,7 @@
 
 
 #include "CoolLumiUtilities/BunchGroupCondData.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -25,11 +25,11 @@
  * @brief Conditions algorithm to unpack bunch group data from COOL.
  */
 class BunchGroupCondAlg
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /// Forward base class ctor.
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
 
 
   /// Gaudi initialize method.

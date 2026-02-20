@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file InDetSimEventTPCnv/test/SiHitCollectionCnv_p3_test.cxx
@@ -275,7 +275,7 @@ void persistentTest()
   cnv.persToTrans (&pers2, &trans2, log);
   compareWithoutPos (trans1, trans2);
 }
-
+//coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* pSvcLoc = nullptr;

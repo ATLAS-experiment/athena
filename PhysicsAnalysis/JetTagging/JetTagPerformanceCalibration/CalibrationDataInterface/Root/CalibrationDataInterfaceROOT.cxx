@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -488,7 +488,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 								     bool useEV, Uncertainty strat, bool useMCMCSF, bool useTopologyRescaling,
 								     bool useRecommendedEEVExclusions, bool verbose,
                      std::vector<std::string> flavours) :
-  m_filenameSF(fileSF), m_filenameEff(""), m_flavours(flavours),
+  m_filenameSF(fileSF), m_filenameEff(""), m_flavours(std::move(flavours)),
   m_runEigenVectorMethod(useEV), m_EVStrategy(strat), m_EVReductions(EVReductions),
   m_useRecommendedEVExclusions(useRecommendedEEVExclusions), m_verbose(verbose),
   m_useMCMCSF(useMCMCSF), m_useTopologyRescaling(useTopologyRescaling),
@@ -527,7 +527,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 
   if (m_verbose) {
     cout << "=== CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===" << endl;
-    cout << " taggerName           : " << taggerName.c_str() << endl;
+    cout << " taggerName           : " << taggerName << endl;
     cout << " Systematic strategy : ";
     if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
       cout << "SFEigen" << endl;
@@ -1871,12 +1871,9 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
   } else {
     // Make sure that (possibly) dummy vectors exist for _all_ known variables
     // (this is a mere technicality allowing to loop over all variables explicitly).
-    if (mergedBoundaries.find(CalibrationDataContainer::kPt) == mergedBoundaries.end()) {
-      std::vector<double> v; v.push_back(20.); v.push_back(300.); mergedBoundaries[CalibrationDataContainer::kPt] = v;
-    }
-    if (mergedBoundaries.find(CalibrationDataContainer::kEta) == mergedBoundaries.end()) {
-      std::vector<double> v; v.push_back(-2.5); v.push_back(2.5); mergedBoundaries[CalibrationDataContainer::kEta] = v;
-    }
+    mergedBoundaries.try_emplace(CalibrationDataContainer::kPt, std::vector<double>{20.,300.});
+    mergedBoundaries.try_emplace(CalibrationDataContainer::kEta, std::vector<double>{-2.5, 2.5});
+   
     // Finally, carry out the cross-check that all this is about: recompute the scale factor
     // in each pseudo-bin
     if (m_verbose){
@@ -2259,7 +2256,7 @@ Analysis::CalibrationDataInterfaceROOT::runEigenVectorRecomposition (const std::
   if(!eigenVariation->EigenVectorRecomposition(label, coefficientMap))
     return Analysis::kError;
 
-  m_coefficientMap = coefficientMap;
+  m_coefficientMap = std::move(coefficientMap);
   return Analysis::kSuccess;
 }
 
@@ -2553,7 +2550,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
   if (!isSF && !cnt && m_fileSF != m_fileEff) m_fileSF->GetObject(name.c_str(), cnt);
   m_objects.push_back(cnt);
   if (!cnt) {
-    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name.c_str() << " from file" << endl;
+    cerr << "btag Calib: retrieveContainer: failed to retrieve container named " << name << " from file" << endl;
     return 0;
   }
 
@@ -2641,7 +2638,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
       // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
       string flavour = dir.substr(dir.find_last_of("/")+1);
 
-      for (auto entry : m_excludeFromCovMatrix[flavour]) {
+      for (const auto & entry : m_excludeFromCovMatrix[flavour]) {
         newEigenVariation->excludeNamedUncertainty(entry, cnt);
       }
       newEigenVariation->initialize();
@@ -2653,7 +2650,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
       } else if (m_EVReductions[flavour] != Loose) {
         cerr << "btag Calib: unable to retrieve eigenvector reduction information for flavour " << flavour << " and scheme " << m_EVReductions[flavour] << "; not applying any reduction" << endl;
       }
-      m_eigenVariationsMap[cnt]=newEigenVariation;
+      m_eigenVariationsMap[cnt]=std::move(newEigenVariation);
 
       ///////////////////////////////////////////////////////////////
     } else if (m_EVStrategy == Analysis::Uncertainty::SFGlobalEigen) {
@@ -2668,7 +2665,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
         // now to see if it's completely empty or not
         if (m_eigenVariationsMap.empty()){
           std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, m_flavours, histoContainer, m_useRecommendedEVExclusions));
-          for (auto entry : m_excludeFromCovMatrix[label]) {
+          for (const auto & entry : m_excludeFromCovMatrix[label]) {
             newEigenVariation->excludeNamedUncertainty(entry, label); // <---- custom exclude named uncertainties method for global variations
           }
 

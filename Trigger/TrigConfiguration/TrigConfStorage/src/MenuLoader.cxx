@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./MenuLoader.h"
@@ -20,7 +20,6 @@
 #include "TrigConfL1Data/TIP.h"
 #include "TrigConfL1Data/L1DataDef.h"
 
-#include "boost/lexical_cast.hpp"
 #include "boost/algorithm/string.hpp"
 
 #include <iostream>
@@ -218,7 +217,8 @@ TrigConf::MenuLoader::loadItems(TrigConf::Menu& menu) {
       // construct the tree of TriggerItemNodes according to
       // definition and set the thresholds and multiplicities in each
       // leaf node
-      titem->setTopNode( constructTree(titem->definition(), item_thrInfo[ctpid]) );
+      std::unique_ptr<TriggerItemNode> topNode (constructTree(titem->definition(), item_thrInfo[ctpid]));
+      titem->setTopNode( std::move(topNode)  );
    }
 }
 
@@ -251,7 +251,7 @@ TrigConf::MenuLoader::constructTree(const LogicExpression& def, const std::vecto
    switch (def.state()) {
    case LogicExpression::kELEMENT: {
       top_node = new TriggerItemNode(TriggerItemNode::OBJ);
-      unsigned int pos = boost::lexical_cast<unsigned int,std::string>(def.element());
+      unsigned int pos = static_cast<unsigned int>(std::stoul(def.element()));
       // find all related information
       for(ThrInfo ti : thr_infos) {
          if(ti.thrPos==pos) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventPrimitives/EventPrimitives.h"
@@ -8,19 +8,16 @@
 #include "ActsGeometry/ActsExtrapolationAlg.h"
 #include "ActsGeometry/ExtrapolationTool.h"
 #include "ActsGeometry/ActsMaterialJsonWriterTool.h"
-#include "ActsGeometry/ActsMaterialMapping.h"
-#include "ActsGeometry/ActsMaterialStepConverterTool.h"
-#include "ActsGeometry/ActsMaterialTrackWriterSvc.h"
 #include "ActsGeometry/ActsPropStepRootWriterSvc.h"
-#include "ActsGeometry/ActsSurfaceMappingTool.h"
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
-#include "ActsGeometry/ActsVolumeMappingTool.h"
 #include "ActsGeometry/ActsWriteTrackingGeometry.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "ActsGeometry/ActsWriteTrackingGeometryTransforms.h"
 #include "../ActsVolumeIdToDetectorElementCollectionMappingAlg.h"
 #include "../ItkBlueprintNodeBuilder.h"
+#include "../CaloBlueprintNodeBuilder.h"
+#include "../ITkMaterialDecoratorTool.h"
 
 
 DECLARE_COMPONENT(ActsExtrapolationAlg)
@@ -28,12 +25,6 @@ DECLARE_COMPONENT(ActsWriteTrackingGeometry)
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
 DECLARE_COMPONENT(ActsTrackingGeometrySvc)
 
-
-DECLARE_COMPONENT(ActsMaterialMapping)
-DECLARE_COMPONENT(ActsSurfaceMappingTool)
-DECLARE_COMPONENT(ActsVolumeMappingTool)
-DECLARE_COMPONENT(ActsMaterialTrackWriterSvc)
-DECLARE_COMPONENT(ActsMaterialStepConverterTool)
 DECLARE_COMPONENT(ActsMaterialJsonWriterTool)
 
 DECLARE_COMPONENT(ActsTrackingGeometryTool)
@@ -44,4 +35,5 @@ DECLARE_COMPONENT(ActsTrk::ActsVolumeIdToDetectorElementCollectionMappingAlg)
 
 DECLARE_COMPONENT(ActsTrk::ItkBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ExtrapolationTool)
-
+DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
+DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)

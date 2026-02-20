@@ -12,6 +12,7 @@
 // this :
 #include <VP1HEPVis/SbPolyhedron.h>
 #include <cassert>
+#include <memory>
 
 #define perMillion 0.000001
 #define deg (M_PI/180.0)
@@ -1911,10 +1912,9 @@ public:
   typedef PolygonTriangulator::Triangles Triangles;
 
   // Methods:
-  Internals(SbPolyhedronPolygonXSect* sbp) :dz(0),x(0),y(0),n(0),ntriangles(0),sbpolyhedron(sbp),poly(0),
+  Internals(SbPolyhedronPolygonXSect* sbp) :dz(0),x(0),y(0),n(0),ntriangles(0),sbpolyhedron(sbp),
 					    nextraexternalvertices(0),
 					    nextrainternalvertices(0){};
-  ~Internals() { delete poly; }
 
   void setData(const std::vector<double> * xx,const std::vector<double>* yy, const double& dz);
   void triangulate();
@@ -1931,7 +1931,7 @@ public:
   SbPolyhedronPolygonXSect* sbpolyhedron;
 
   //The triangulation:
-  PolygonTriangulator * poly;
+  std::unique_ptr<PolygonTriangulator> poly;
   //Various helper maps, sets, ...:
   std::set<Edge> edges_internal;
   std::set<Edge> edges_external;
@@ -1993,7 +1993,7 @@ void SbPolyhedronPolygonXSect::Internals::setData(const std::vector<double> * xx
 //_______________________________________________________________________________________________________________________
 void SbPolyhedronPolygonXSect::Internals::triangulate()
 {
-  poly = new PolygonTriangulator(*x,*y);
+  poly = std::make_unique<PolygonTriangulator>(*x,*y);
 }
 
 //_______________________________________________________________________________________________________________________

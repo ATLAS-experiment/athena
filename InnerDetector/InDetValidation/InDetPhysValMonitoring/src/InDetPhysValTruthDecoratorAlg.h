@@ -80,7 +80,7 @@ private:
     {this, "SCTClusterContainerName",  "SCT_Clusters", ""};
 
   SG::ReadDecorHandleKey<xAOD::TruthParticleContainer> m_truthParticleIndexDecor
-    {this, "TruthParticleIndexDecoration", "origTruthIndex", "decoration name for the original truth particle index."};
+    {this, "TruthParticleIndexDecoration", m_truthParticleName, "origTruthIndex", "decoration name for the original truth particle index."};
    
   // decoration helper
   enum EDecorations {

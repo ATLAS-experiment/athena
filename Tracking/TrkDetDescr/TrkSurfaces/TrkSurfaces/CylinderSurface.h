@@ -74,7 +74,7 @@ public:
   CylinderSurface& operator=(CylinderSurface&& csf) noexcept = default;
 
   /**Destructor*/
-  virtual ~CylinderSurface() = default;
+  virtual ~CylinderSurface();
 
   /**Constructor from EigenTransform, radius and halflength*/
   CylinderSurface(const Amg::Transform3D& htrans,

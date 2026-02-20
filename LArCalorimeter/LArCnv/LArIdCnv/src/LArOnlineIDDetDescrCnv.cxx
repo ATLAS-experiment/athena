@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArIdCnv/LArOnlineIDDetDescrCnv.h"
@@ -40,8 +40,6 @@ LArOnlineIDDetDescrCnv::createObj(IOpaqueAddress* /*pAddr*/, DataObject*& pObj)
 
     // create the helper
     LArOnlineID* online_id = new LArOnlineID;
-    // pass a pointer to IMessageSvc to the helper
-    online_id->setMessageSvc(msgSvc());
 
     ATH_CHECK( idDictMgr->initializeHelper(*online_id) == 0 );
 

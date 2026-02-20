@@ -42,13 +42,16 @@ namespace FlavorTagInference {
         DIPS_LOOSE_202102,
         LOOSE_202102_NOIP,
         R22_DEFAULT,
-        R22_LOOSE
+        R22_LOOSE,
+        TAUTRACK_CLASSIFIED
     };
     enum class ConstituentsType {
         FLOW_ELEMENT,
         TRACK,
         HIT,
         ELECTRON,
+        TAUTRACK,
+        TAUCLUSTER,
         UNKNOWN
     };
 
@@ -63,6 +66,7 @@ namespace FlavorTagInference {
         std::string output_name;
         ConstituentsType type{ConstituentsType::UNKNOWN};
         ConstituentsSortOrder order{ConstituentsSortOrder::UNDEFINED};
+        size_t max_n_constituents = std::numeric_limits<size_t>::max();
         ConstituentsSelection selection = ConstituentsSelection::ALL;
         std::vector<InputVariableConfig> inputs;
     };

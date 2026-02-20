@@ -6,57 +6,50 @@
 
 #include "TgcROD_Encoder.h"
 
-#include "MuonRDO/TgcRdo.h"
-#include "TgcByteStream.h"
+#include <iostream>
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-
-#include <iostream>
+#include "MuonRDO/TgcRdo.h"
+#include "TgcByteStream.h"
 
 // constructor
-Muon::TgcROD_Encoder::TgcROD_Encoder() : m_tgcRdo(nullptr)
-{}
-
+Muon::TgcROD_Encoder::TgcROD_Encoder() : m_tgcRdo(nullptr) {}
 
 // destructor
 Muon::TgcROD_Encoder::~TgcROD_Encoder() = default;
 
-
 // Set TgcRdo
 void Muon::TgcROD_Encoder::setRdo(const TgcRdo* rdo) {
-  m_tgcRdo = rdo;
+    m_tgcRdo = rdo;
 }
 
 // convert TGC RDO to a vector of 32bit words
-void Muon::TgcROD_Encoder::fillROD(std::vector<uint32_t>& v)
-{
-  MsgStream log(Athena::getMessageSvc(), "TgcROD_Encoder::fillROD");
-  bool debug = (log.level() <= MSG::DEBUG);
+void Muon::TgcROD_Encoder::fillROD(std::vector<uint32_t>& v) {
+    MsgStream log(Athena::getMessageSvc(), "TgcROD_Encoder::fillROD");
+    bool debug = (log.level() <= MSG::DEBUG);
 
-  // ROD encoder
-  //   // set RDO and encode to ROD data
-  std::vector<uint32_t> t_vData;
+    // ROD encoder
+    //   // set RDO and encode to ROD data
+    std::vector<uint32_t> t_vData;
 
-  TgcByteStream bs;
-  bs.rdo2ByteStream(m_tgcRdo, t_vData, log);
+    TgcByteStream bs;
+    bs.rdo2ByteStream(m_tgcRdo, t_vData, log);
 
-  // append to vector and dump
-  std::vector<uint32_t>::const_iterator it   = t_vData.begin();
-  std::vector<uint32_t>::const_iterator it_e = t_vData.end();
-  uint32_t iWord=0;
-  if(debug) {
-    log << MSG::DEBUG << "************** dumping the words ************" << endmsg;
-  }
-  for(; it!=it_e; ++it) {
-    v.push_back(*it);
-    if(debug) {
-      log << MSG::DEBUG << "word " 
-	  << MSG::dec << std::setw(3) << iWord << " = " 
-	  << MSG::hex << std::setw(8) << *it 
-	  << endmsg;
+    // append to vector and dump
+    std::vector<uint32_t>::const_iterator it = t_vData.begin();
+    std::vector<uint32_t>::const_iterator it_e = t_vData.end();
+    uint32_t iWord = 0;
+    if (debug) {
+        log << MSG::DEBUG << "************** dumping the words ************"
+            << endmsg;
     }
-    ++iWord;
-  }
-
-  }
+    for (; it != it_e; ++it) {
+        v.push_back(*it);
+        if (debug) {
+            log << MSG::DEBUG << "word " << MSG::dec << std::setw(3) << iWord
+                << " = " << MSG::hex << std::setw(8) << *it << endmsg;
+        }
+        ++iWord;
+    }
+}

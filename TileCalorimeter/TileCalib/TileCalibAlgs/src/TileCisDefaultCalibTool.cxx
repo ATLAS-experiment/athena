@@ -1,6 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+
+
+// Tile includes
+#include "TileCisDefaultCalibTool.h"
+#include "TileIdentifier/TileHWID.h"
+#include "TileConditions/TileCablingSvc.h"
+#include "TileConditions/TileInfo.h"
 
 // Gaudi includes
 #include "GaudiKernel/IToolSvc.h"
@@ -8,20 +16,10 @@
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 
-#include "Identifier/HWIdentifier.h"
 
 // Athena includes
 #include "AthenaKernel/errorcheck.h"
 #include "StoreGate/ReadHandle.h"
-
-// Tile includes
-#include "TileCisDefaultCalibTool.h"
-#include "TileEvent/TileRawChannelContainer.h"
-#include "TileEvent/TileDigitsContainer.h"
-#include "TileIdentifier/TileHWID.h"
-#include "TileConditions/TileCablingSvc.h"
-#include "TileConditions/TileInfo.h"
-
 
 #include "TFile.h"
 #include "TTree.h"
@@ -117,14 +115,12 @@ StatusCode TileCisDefaultCalibTool::initialize() {
   int runPeriod = m_cabling->runPeriod();
 
   if (runPeriod==3) {
-    std::vector<int> v = { 0x10d }; // LBA14 is demonstrator in RUN3
-
-    if ( m_fragIDsDemonstrators.size() == 0) {
-      m_fragIDsDemonstrators = v;
+    if ( m_fragIDsDemonstrators.empty()) {
+      m_fragIDsDemonstrators.push_back (0x10d);  // LBA14 is demonstrator in RUN3
     }
   }
 
-  if ( m_fragIDsDemonstrators.size() != 0) {
+  if ( not m_fragIDsDemonstrators.empty() ) {
 
     std::sort(m_fragIDsDemonstrators.begin(),m_fragIDsDemonstrators.end());
 

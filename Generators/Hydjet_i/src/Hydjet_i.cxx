@@ -21,11 +21,13 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include <stdlib.h>
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
+
 
 // calls to fortran routines
 extern "C"
@@ -238,9 +240,7 @@ Hydjet::fillEvt(HepMC::GenEvent* evt)
   // Set the generator id
   HepMC::set_signal_process_id(evt,100000000 + int(m_a));
 
-  // Convert cm->mm and GeV->MeV
-  //
-  GeVToMeV(evt);
+  MC::GeVToMeV(evt); //Only scales momenta and masses
 
   return StatusCode::SUCCESS;
 }

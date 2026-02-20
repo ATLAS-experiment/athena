@@ -930,7 +930,7 @@ if(name_flag==1) {
       result->status_ = dqm_core::Result::Red;
     }
     else if ( ((nBinsRed + nBinsYellow) >= nYellowBinsToYellowStatus) 
-	      || (((nBinsRed + nBinsYellow) / nActiveBins) > yellowFracToYellowStatus) ) {
+	      || ((static_cast<double>(nBinsRed + nBinsYellow) / nActiveBins) > yellowFracToYellowStatus) ) {
       result->status_ = dqm_core::Result::Yellow;
     }
     else if ( (nBinsGreen * 1.0 / nActiveBins ) >= greenFracToGreenStatus ) {

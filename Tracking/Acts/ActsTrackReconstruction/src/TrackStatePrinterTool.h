@@ -23,9 +23,9 @@
 // PACKAGE
 #include "src/detail/MeasurementIndex.h"
 #include "ActsGeometry/ATLASSourceLink.h"
-#include "ActsEvent/Seed.h"
+#include "ActsEvent/SeedContainer.h"
 #include "ActsEvent/TrackContainer.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
@@ -116,7 +116,7 @@ namespace ActsTrk
     // static member functions used by TrackStatePrinter.icc
     static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound);
     static std::string actsSurfaceName(const Acts::Surface &surface);
-    static std::string trackStateName(Acts::ConstTrackStateType trackStateType);
+    static std::string trackStateName(Acts::ConstTrackStateTypeMap trackStateType);
 
   };
 

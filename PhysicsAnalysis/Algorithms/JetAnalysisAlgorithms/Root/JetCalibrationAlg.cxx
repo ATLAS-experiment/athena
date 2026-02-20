@@ -36,6 +36,17 @@ namespace CP
     {
       xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.getCopy (jets, sys));
+
+      if (m_HIsetup.value())
+      {
+        for(auto jet : *jets )
+	{
+          xAOD::JetFourMom_t jet_4mom_subtracted = (*jet).jetP4("JetSubtractedScaleMomentum");
+	  (*jet).setJetP4("JetConstitScaleMomentum",jet_4mom_subtracted);
+	  (*jet).setJetP4("JetEMScaleMomentum",jet_4mom_subtracted);
+	}
+      }
+
       ANA_CHECK (m_calibrationTool->applyCalibration(*jets));
     }
 

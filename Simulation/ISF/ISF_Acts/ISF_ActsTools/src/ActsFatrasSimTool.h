@@ -74,8 +74,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   struct HitSurfaceSelector {
     /// Check if the surface should be used.
     bool operator()(const Acts::Surface &surface) const {
-      bool isSensitive = surface.associatedDetectorElement() != nullptr;
-      return isSensitive;
+      return surface.isSensitive();
     }
   };
   // SingleParticleSimulation

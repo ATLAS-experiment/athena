@@ -53,7 +53,7 @@ namespace MuonR4 {
           /// Get the sTGC digit
           const sTgcDigit& getDigit() const { return *m_sTGCDigit; }
           sTgcDigit& getDigit() { return *m_sTGCDigit; }
-
+          std::unique_ptr<sTgcDigit> releaseDigit() { return std::move(m_sTGCDigit); }
           Identifier identify() const { return getDigit().identify(); }
           double time() const {return getDigit().time(); } 
 
@@ -63,8 +63,8 @@ namespace MuonR4 {
       };
       using sTgcSimDigitVec = std::vector<sTgcSimDigitHit>; //vector of custom class defined above
       StatusCode digitize(const EventContext& ctx,
-                        const TimedHits& hitsToDigit,
-                        xAOD::MuonSimHitContainer* sdoContainer) const override final;
+                          const TimedHits& hitsToDigit,
+                          xAOD::MuonSimHitContainer* sdoContainer) const override final;
 
     private:
 
@@ -76,7 +76,7 @@ namespace MuonR4 {
       ToolHandle<Muon::INSWCalibSmearingTool> m_smearingTool{this, "SmearingTool", "Muon::NSWCalibSmearingTool/STGCCalibSmearingTool"};
       ToolHandle<Muon::INSWCalibTool> m_calibrationTool{this, "CalibrationTool", "Muon::NSWCalibTool/STGCCalibTool"};
 
-      Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", true};
+      Gaudi::Property<bool> m_digitizeMuonOnly{this, "ProcessTrueMuonsOnly", false};
       Gaudi::Property<bool> m_useTimeWindow{this, "UseTimeWindow", true};
       Gaudi::Property<bool> m_doSmearing{this, "doSmearing", false};
       Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection", true};
@@ -96,23 +96,32 @@ namespace MuonR4 {
 
       Gaudi::Property<double> m_chargeThreshold{this,"chargeThreshold", 0.030};
 
-      const double m_timeJitterElectronicsStrip{2.f};
-      const double m_timeJitterElectronicsPad{2.f};
-      const double m_hitTimeMergeThreshold{30.f};
+      static constexpr double m_timeJitterElectronicsStrip{2.f};
+      static constexpr double m_timeJitterElectronicsPad{2.f};
+      static constexpr double m_hitTimeMergeThreshold{30.f};
+
+      /** @brief Data type to deduplicate the SDOs && associate them with the digit
+       *         produced by them */
+      struct SimHitSorter{
+          bool operator()(const TimedHit&a, const TimedHit& b) const {
+              return a.get() < b.get();
+          }
+      };
+      using SdoIdMap_t = std::map<const TimedHit, std::vector<Identifier>, SimHitSorter>; 
 
       StatusCode processDigitsWithVMM(const EventContext& ctx,
                                       const DigiConditions& digiCond,
-                                      sTgcSimDigitVec& digitsInChamber,
+                                      sTgcSimDigitVec&& digitsInChamber,
                                       const double vmmDeadTime,
                                       const bool isNeighbourOn,
-                                      DigiCache& cache,
-                                      xAOD::MuonSimHitContainer& outSdoContainer) const;
+                                      sTgcDigitCollection& outColl,
+                                      SdoIdMap_t& sdoIdMap) const;
       
-      sTgcSimDigitVec processDigitsWithVMM(const EventContext& ctx,
-                                        const DigiConditions& digiCond, 
-                                        const double vmmDeadTime, 
-                                        sTgcSimDigitVec& unmergedDigits, 
-                                        const bool isNeighbourOn) const;
+      sTgcSimDigitVec mergeDigitsVMM(const EventContext& ctx,
+                                     const DigiConditions& digiCond, 
+                                     const double vmmDeadTime, 
+                                     const bool isNeighbourOn,
+                                     sTgcSimDigitVec&& unmergedDigits) const;
 
                                           
       uint16_t bcTagging(const double digitTime) const;

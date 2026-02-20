@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def getTrigTauPrecisionIDHypoToolMonitoring(flags, name: str, tau_ids: list[str]):
+def getTrigTauPrecisionIDHypoToolMonitoring(flags: AthConfigFlags, name: str, tau_ids: list[str]):
     monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
     monTool.HistPath = f'TrigTauRecMerged_TrigTauPrecisionIDHypo/{name}'
 
@@ -17,22 +18,23 @@ def getTrigTauPrecisionIDHypoToolMonitoring(flags, name: str, tau_ids: list[str]
     monTool.defineHistogram('NIsoTracksAccepted', path='EXPERT', type='TH1F', title='Accepted Tau Isolation Tracks; N Isolation Tracks; Entries', xbins=10, xmin=0, xmax=10)
 
     for tau_id in tau_ids:
-        if tau_id in ['DeepSet', 'RNNLLP']: xbins, xmax = 40, 1
-        else: xbins, xmax = 100, 5
+        tau_id_flags = getattr(flags.Trigger.Offline.Tau, tau_id)
+        if hasattr(tau_id_flags, 'NetworkConfig') or tau_id_flags.OutputDiscriminant == 1: xmax = 1
+        else: xmax = 5
 
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_0p', path='EXPERT', type='TH1F', title=f'Accepted 0-prong {tau_id} Tau ID score; Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_0p', path='EXPERT', type='TH1F', title=f'Accepted 0-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_0p', path='EXPERT', type='TH1F', title=f'Accepted 0-prong {tau_id} Tau ID score; Score; Entries', xbins=100, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_0p', path='EXPERT', type='TH1F', title=f'Accepted 0-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=100, xmin=0, xmax=1)
 
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_1p', path='EXPERT', type='TH1F', title=f'Accepted 1-prong {tau_id} Tau ID score; Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_1p', path='EXPERT', type='TH1F', title=f'Accepted 1-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_1p', path='EXPERT', type='TH1F', title=f'Accepted 1-prong {tau_id} Tau ID score; Score; Entries', xbins=100, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_1p', path='EXPERT', type='TH1F', title=f'Accepted 1-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=100, xmin=0, xmax=1)
 
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_mp', path='EXPERT', type='TH1F', title=f'Accepted multi-prong {tau_id} Tau ID score; Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
-        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_mp', path='EXPERT', type='TH1F', title=f'Accepted multi-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=xbins, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_mp', path='EXPERT', type='TH1F', title=f'Accepted multi-prong {tau_id} Tau ID score; Score; Entries', xbins=100, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_mp', path='EXPERT', type='TH1F', title=f'Accepted multi-prong {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=100, xmin=0, xmax=1)
 
     return monTool
 
 
-def getTrigTauPrecisionDiKaonHypoToolMonitoring(flags, name: str):
+def getTrigTauPrecisionDiKaonHypoToolMonitoring(flags: AthConfigFlags, name: str):
     monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
     monTool.HistPath = 'ComboHypo/' + name.replace('leg001_', '')
 

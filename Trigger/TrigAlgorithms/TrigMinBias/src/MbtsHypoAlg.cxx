@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MbtsHypoAlg.h"
@@ -42,7 +42,7 @@ StatusCode MbtsHypoAlg::execute(const EventContext &context) const
   auto d = newDecisionIn(decisions, hypoAlgNodeName());
   linkToPrevious(d, decisionInput().key(), 0);
   d->setObjectLink(featureString(), ElementLink<xAOD::TrigT2MbtsBitsContainer>(*bitsHandle, 0, context));
-  MbtsHypoTool::MbtsHypoInfo info = {prev, bitsHandle.cptr()->at(0), d};
+  MbtsHypoTool::MbtsHypoInfo info = {std::move(prev), bitsHandle.cptr()->at(0), d};
 
   for (const auto &tool : m_hypoTools)
   {

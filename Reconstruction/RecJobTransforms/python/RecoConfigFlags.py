@@ -229,7 +229,6 @@ def _recoZDC(prevFlags):
 
 
 def _hiModeChoice(prevFlags):
-
     if ("_hip" in prevFlags.Input.ProjectName):
         return HIMode.HIP
     elif ("_hi" in prevFlags.Input.ProjectName):
@@ -237,4 +236,11 @@ def _hiModeChoice(prevFlags):
             return HIMode.UPC
         else:
             return HIMode.HI
+    elif prevFlags.Input.isMC or prevFlags.Overlay.DataOverlay:
+        # it misses the run numbers for 2025, 2026
+        if prevFlags.Input.RunNumbers[0] in [460000, 488600]:
+            return HIMode.HI
+        # this is pO, OO, NeNe 2025
+        elif prevFlags.Input.RunNumbers[0] == 500700:
+            return HIMode.HIP
     return HIMode.pp

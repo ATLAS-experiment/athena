@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ StatusCode TBTrackToCaloAlg::initialize()
   ATH_CHECK( toolSvc()->retrieveTool("TBCaloCoordinate", tool) );
   m_calo_tb_coord = dynamic_cast<ICaloCoordinateTool*>(tool);
 
-  // retrived via the Extrapolator to make sure that jobOpt setting is consistent.
+  // retrieved via the Extrapolator to make sure that jobOpt setting is consistent.
   m_calodepth = m_toCalo->getCaloDepth();
   if (!m_calodepth) {
     ATH_MSG_ERROR ( "Cannot get CaloDepthTool" );

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaPoolUtilities )
@@ -12,7 +12,7 @@ atlas_add_library( AthenaPoolUtilities
    INTERFACE
    PUBLIC_HEADERS AthenaPoolUtilities
    INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CORAL_LIBRARIES} AthContainers AthenaKernel CollectionBase CxxUtils GaudiKernel PersistentDataModel )
+   LINK_LIBRARIES ${CORAL_LIBRARIES} AthContainers AthenaKernel CollectionSvc CxxUtils GaudiKernel PersistentDataModel )
 
 atlas_add_dictionary( AthenaPoolUtilitiesCoralDict
    AthenaPoolUtilities/AthenaPoolUtilitiesCoralDict.h
@@ -26,7 +26,7 @@ atlas_add_dictionary( AthenaPoolUtilitiesDict
    LINK_LIBRARIES AthenaPoolUtilities )
 
 # Install files from the package:
-atlas_install_scripts( share/post_tpcnvtest.sh python/checkMetadata.py )
+atlas_install_scripts( python/checkMetadata.py )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Install the CMake code from the package:

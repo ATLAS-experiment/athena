@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackPATHFINDEREXTENSION_H
 #define FPGATrackPATHFINDEREXTENSION_H
@@ -20,7 +20,7 @@
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
 #include "FPGATrackSimObjects/FPGATrackSimHit.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
 #include "FPGATrackSimBanks/IFPGATrackSimBankSvc.h"
 #include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
@@ -29,7 +29,10 @@
 #include "FPGATrackSimNNTrackTool.h"
 #include "GaudiKernel/ITHistSvc.h"
 
+#include "GaudiKernel/IChronoStatSvc.h"
+
 #include <vector>
+#include <memory>
 
   // internal object for book-keeping during the tree branching, basically just a vector of hits with helper functions - NOTHING else
   struct miniRoad {
@@ -131,8 +134,8 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         virtual StatusCode initialize() override;
 
         virtual StatusCode extendTracks(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits,
-                                        const std::vector<std::shared_ptr<const FPGATrackSimTrack>> & tracks,
-                                        std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads) override;
+                                        const FPGATrackSimTrackCollection & tracks,
+                                        std::vector<FPGATrackSimRoad> & roads) override;
 
         // We don't have a "union" tool that sits in front of the extension tool, so this is needed here.
         virtual StatusCode setupSlices(FPGATrackSimLogicalEventInputHeader *slicedHitHeader) override {
@@ -144,6 +147,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
     private:
         ServiceHandle<IFPGATrackSimMappingSvc> m_FPGATrackSimMapping {this, "FPGATrackSimMappingSvc", "FPGATrackSimMappingSvc"};
         ServiceHandle<ITHistSvc> m_tHistSvc {this, "THistSvc", "THistSvc"};
+        ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc", "ChronoStatSvc"};
 
         Gaudi::Property<unsigned> m_maxMiss { this, "threshold", 2, "Maximum number of missing hits to reject a road"};
         Gaudi::Property <std::string> m_region { this, "OutputRegion", "", "region ID"};
@@ -170,6 +174,7 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
         Gaudi::Property <bool> m_doOutsideIn { this, "doOutsideIn", true, "Setup the tool so it's doing outside in extrap"};
         Gaudi::Property <int> m_predictionWindowLength { this, "predictionWindowLength", 3, "Length of hits needed for prediction"};
         Gaudi::Property <bool> m_useCartesian { this, "useCartesian", true, "If true, NNs use Cartestian coordinates. If false,they use cylindrical coordiantes"};
+        Gaudi::Property <unsigned int> m_batchSize { this, "batchSize", 1, "Batch size for NN inference (1 = sequential, >1 for true batching on GPU)"};
 
 
         std::vector<FPGATrackSimRoad> m_roads;
@@ -193,6 +198,9 @@ class FPGATrackSimNNPathfinderExtensionTool   : public extends <AthAlgTool, IFPG
 
         StatusCode fillInputTensorForNN(miniRoad& thisRoad, std::vector<float>& inputTensorValues);
         StatusCode getPredictedHit(std::vector<float>& inputTensorValues, std::vector<float>& outputTensorValues, long& fineID);
+        StatusCode getPredictedHitBatched(const std::vector<std::vector<float>>& batchInputTensors, 
+                                          std::vector<std::vector<float>>& batchOutputTensors, 
+                                          std::vector<long>& batchFineIDs);
         StatusCode addHitToRoad(miniRoad& newroad, miniRoad& currentRoad, const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
         StatusCode getFakeHit(miniRoad& currentRoad, std::vector<float>& predhit, const long& fineID, std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits);
         StatusCode getLastLayer(miniRoad& currentRoad, unsigned& lastHitLayer, std::shared_ptr<const FPGATrackSimHit>& lastHit);

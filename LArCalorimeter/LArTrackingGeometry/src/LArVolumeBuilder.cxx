@@ -168,7 +168,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
   double lArBarrelHalflength              = 0.;
   std::vector<double> zBoundaries;
 
-  // retrival worked out
+  // retrieval worked out
   if (lArBarrelPosLogVol && lArBarrelNegLogVol){
 
     int poschilds = lArBarrelPosPhysVol->getNChildVols();
@@ -331,7 +331,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
 
   const GeoLogVol* solenoidLogVol = solenoidPhysVol ? solenoidPhysVol->getLogVol() : nullptr;
 
-  // retrival worked out
+  // retrieval worked out
   if (solenoidLogVol){
     int childs = solenoidPhysVol->getNChildVols();
 
@@ -395,7 +395,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
   const GeoLogVol* lArBarrelPresamplerPosLogVol = lArBarrelPresamplerPosPhysVol ? lArBarrelPresamplerPosPhysVol->getLogVol() : nullptr;
   const GeoLogVol* lArBarrelPresamplerNegLogVol = lArBarrelPresamplerNegPhysVol ? lArBarrelPresamplerNegPhysVol->getLogVol() : nullptr;
 
-  // retrival worked out
+  // retrieval worked out
   if (lArBarrelPresamplerPosLogVol && lArBarrelPresamplerNegLogVol){
 
     int poschilds = lArBarrelPresamplerPosPhysVol->getNChildVols();
@@ -565,7 +565,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
 
   double lArEndcapZpos      = 0.;
 
-  // retrival worked out
+  // retrieval worked out
   if (lArPositiveEndcapLogVol && lArNegativeEndcapLogVol){
 
     int poschilds = lArPositiveEndcapPhysVol->getNChildVols();
@@ -965,7 +965,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
   std::vector<double> negativeEndcapZboundariesHec2;
   double hecEnd = 0;
 
-  // retrival worked out
+  // retrieval worked out
   if (lArPositiveHec1LogVol && lArPositiveHec2LogVol && lArNegativeHec1LogVol && lArNegativeHec2LogVol){
 
     int poschildsHec1 = lArPositiveHec1PhysVol->getNChildVols();
@@ -1136,7 +1136,7 @@ std::vector<Trk::TrackingVolume*> LAr::LArVolumeBuilder::trackingVolumes(
    double lArFcalZmin       = 0.;
    double lArFcalZmax       = 0.;
 
-   // retrival worked out
+   // retrieval worked out
    if (lArPositiveFcal1LogVol &&
        lArPositiveFcal2LogVol &&
        lArPositiveFcal3LogVol &&

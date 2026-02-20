@@ -1,6 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
+
+
+#include "MuonRDO/MdtCsmIdHash.h"
+
+#include "MuonIdHelpers/MdtIdHelper.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/GaudiException.h"
@@ -8,7 +13,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "StoreGate/StoreGateSvc.h"
 
-#include "MuonRDO/MdtCsmIdHash.h"
+#include "Identifier/IdentifierHash.h"
 
 #include <cassert> 
 #include <iostream> 

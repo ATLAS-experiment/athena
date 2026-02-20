@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetVoronoiDiagramHelpers.h"
@@ -195,7 +195,9 @@ namespace JetVoronoiDiagramHelpers{
 
 
     bool Diagram::checkSameNumber(double in, double out, const std::string & description){
-        if ( fabs(in-out)/in > 1e4) {
+        double den = std::abs(in)+std::abs(out);
+        if (den < std::numeric_limits<double>::epsilon()) return true;
+        if ( fabs(in-out)/den > 1e4) {
             ATH_MSG_WARNING("Difference in " << description.c_str() << ": " << in << " (should be " << out << ")");
             return false;
         };

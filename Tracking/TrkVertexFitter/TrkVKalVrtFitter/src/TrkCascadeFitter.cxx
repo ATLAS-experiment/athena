@@ -636,7 +636,7 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
          tmpDeriv(2+2,3*it+3+1) = -Py/(mom*mom) * invP;  //dInvP/dPy
          tmpDeriv(2+2,3*it+3+2) = -Pz/(mom*mom) * invP;  //dInvP/dPz
 //----------  Here for Eigen block(startrow,startcol,sizerow,sizecol)
-         if( m_makeExtendedVertex )fullDeriv.block(3*it+3+0,3*it+3+0,3,3) = tmpDeriv.block(2,3*it+3+0,3,3);
+         if( m_makeExtendedVertex )fullDeriv.block<3,3>(3*it+3+0,3*it+3+0) = tmpDeriv.block<3,3>(2,3*it+3+0);
 //----------
 	 AmgSymMatrix(5) tmpCovMtx ;                      // New Eigen based EDM
 	 tmpCovMtx = genCOV.similarity(tmpDeriv);                            // New Eigen based EDM

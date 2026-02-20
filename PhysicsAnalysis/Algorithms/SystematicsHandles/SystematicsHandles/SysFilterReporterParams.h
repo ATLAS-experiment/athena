@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -116,7 +116,7 @@ namespace CP
 
     /// \brief the \ref CutIdentifier for this filter algorithm
   private:
-    CutIdentifier m_cutID;
+    CutIdentifier m_cutID{};
 
     /// \brief the handle to the service holding tables of cut-flows
     /// for filtering algs.

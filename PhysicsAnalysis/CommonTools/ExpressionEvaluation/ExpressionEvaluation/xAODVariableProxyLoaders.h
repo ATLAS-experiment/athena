@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,7 +12,7 @@
 #ifndef XAOD_VARIABLE_PROXY_LOADERS_H
 #define XAOD_VARIABLE_PROXY_LOADERS_H
 
-#include "ExpressionEvaluation/IProxyLoader.h"
+#include "ExpressionEvaluation/RelayProxyLoader.h"
 
 #include "AthContainers/AuxElement.h"
 #include "RootUtils/TSMethodCall.h"
@@ -106,7 +106,7 @@ namespace ExpressionParsing {
       TMethodWrapper(const TMethodWrapper&) = delete;
       TMethodWrapper& operator= (const TMethodWrapper&) = delete;
       virtual ~TMethodWrapper();
-      IProxyLoader::VariableType variableType();
+      IAccessor::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
@@ -127,7 +127,7 @@ namespace ExpressionParsing {
       TMethodCollectionWrapper(const TMethodCollectionWrapper&) = delete;
       TMethodCollectionWrapper& operator= (const TMethodCollectionWrapper&) = delete;
       virtual ~TMethodCollectionWrapper();
-      IProxyLoader::VariableType variableType();
+      IAccessor::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
@@ -143,7 +143,7 @@ namespace ExpressionParsing {
   };
 
 
-  class xAODProxyLoader : public IProxyLoader {
+  class xAODProxyLoader : public RelayProxyLoader {
   public:
     xAODProxyLoader();
     virtual ~xAODProxyLoader();
@@ -159,7 +159,7 @@ namespace ExpressionParsing {
     bool try_type(const std::string& varname, const std::type_info* ti, const AUX* data) const;
 
     template<class AUX>
-    IProxyLoader::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector) const;
+    IAccessor::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector) const;
 
     using accessorCache_t = CxxUtils::ConcurrentStrMap<BaseAccessorWrapper*, CxxUtils::SimpleUpdater>;
     mutable accessorCache_t m_accessorCache ATLAS_THREAD_SAFE;
@@ -173,11 +173,12 @@ namespace ExpressionParsing {
 
       void setData(const SG::AuxElement *auxElement);
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
-      virtual int loadIntVariableFromString(const std::string &varname) const;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+      virtual IAccessor::VariableType variableTypeFromString(const std::string &varname) const override;
+
+      virtual int loadInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual double loadDouble(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<double> loadVec(const EventContext& ctx,const std::string &varname) const override;
 
     private:
       const SG::AuxElement *m_auxElement{nullptr};
@@ -191,11 +192,12 @@ namespace ExpressionParsing {
 
       void setData(const SG::AuxVectorData *auxElement);
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
-      virtual int loadIntVariableFromString(const std::string &varname) const;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+      virtual IAccessor::VariableType variableTypeFromString(const std::string &varname) const override;
+
+      virtual int loadInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual double loadDouble(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<double> loadVec(const EventContext& ctx,const std::string &varname) const override;
 
     private:
       const SG::AuxVectorData *m_auxVectorData{nullptr};

@@ -27,17 +27,19 @@ class IFPGATrackSimEventInputHeaderTool : virtual public ::IAlgTool
   DeclareInterfaceID( IFPGATrackSimEventInputHeaderTool, 1, 0);
 
    
-  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, bool &last) = 0;
-  virtual StatusCode writeData(FPGATrackSimEventInputHeader* header) = 0;
+  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, bool &last) const = 0;
+  virtual StatusCode writeData(FPGATrackSimEventInputHeader* header) const = 0;
   virtual FPGATrackSimEventInputHeader*  getEventInputHeader()   {return m_eventHeader; };
   virtual TTree* getEventTree() {return m_EventTree;};
 
  protected:
-
-  FPGATrackSimEventInputHeader *       m_eventHeader;
-  TFile *                     m_infile = nullptr;
-  TTree *                     m_EventTree = nullptr;
-  
+ 
+  // ROOT I/O objects modified in const readData()/writeData() methods.
+  // - Modified in const methods: openFile() and readData()
+  // - Thread-safety: Protected by m_fileMutex (or m_readMutex) in derived classes (FPGATrackSimInputHeaderTool, FPGATrackSimReadRawRandomHitsTool)
+  mutable FPGATrackSimEventInputHeader* m_eventHeader ATLAS_THREAD_SAFE = nullptr;
+  mutable TFile* m_infile ATLAS_THREAD_SAFE = nullptr;
+  mutable TTree* m_EventTree ATLAS_THREAD_SAFE = nullptr;
 };
 
 

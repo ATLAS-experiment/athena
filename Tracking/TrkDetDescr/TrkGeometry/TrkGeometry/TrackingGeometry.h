@@ -1,5 +1,5 @@
-/*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ /*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 //boost
 #include <ranges>
+#include <memory>
 
 #include "CxxUtils/checker_macros.h"
 
@@ -183,7 +184,7 @@ public:
                         const Layer* layer);
 
   /** The known world - and the beam */
-  TrackingVolume* m_world{};
+  std::unique_ptr<TrackingVolume> m_world;
 
   /** The unique boundary Layers */
   std::map<Layer*, int> m_boundaryLayers;

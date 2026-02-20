@@ -2,6 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <memory>
 #if defined(FLATTEN) && defined(__GNUC__)
 // Avoid warning in dbg build
 #pragma GCC optimize "-fno-var-tracking-assignments"
@@ -9,6 +10,7 @@
 
 #include "src/GbtsSeedingTool.h"
 #include "CxxUtils/inline_hints.h"
+
 
 namespace ActsTrk {
 
@@ -19,36 +21,54 @@ namespace ActsTrk {
   {}
 
   StatusCode GbtsSeedingTool::initialize() {
+
+   
+    ATH_CHECK(m_layerNumberTool.retrieve());
     ATH_MSG_DEBUG("Initializing " << name() << "...");
-
-    ATH_CHECK( detStore()->retrieve(m_pixelId, "PixelID") );
-    ATH_CHECK( detStore()->retrieve(m_pixelManager, "ITkPixel") );    
-
-    ATH_CHECK( m_pixelDetEleCollKey.initialize() );
-
-    ATH_MSG_DEBUG("Properties Summary:");
-    ATH_MSG_DEBUG(" *  Used by SeedFinderGbtsConfig");
 
     // Make the logger And Propagate to ACTS routines
     m_logger = makeActsAthenaLogger(this, "Acts");
 
-    ATH_CHECK( prepareConfiguration() );
+    ATH_CHECK( prepareConfiguration() ); 
+    printGbtsConfig(m_cfg);
 
-     // input trig vector
-    m_finderCfg.m_layerGeometry = LayerNumbering();
+     // layer geometry creation 
+    const std::vector<TrigInDetSiLayer>* pVL = m_layerNumberTool->layerGeometry(); 
+    
+    m_layerGeometry.clear();
+    m_layerGeometry.reserve(pVL->size());
 
-    std::ifstream input_ifstream(
-         m_finderCfg.ConnectorInputFile.c_str(), std::ifstream::in); //change to connector input file 
-    // connector
-    std::unique_ptr<Acts::Experimental::GbtsConnector> inputConnector =  
-        std::make_unique<Acts::Experimental::GbtsConnector>(input_ifstream);
-        
-    m_gbtsGeo = std::make_unique<Acts::Experimental::GbtsGeometry<xAOD::SpacePoint>>( 
-      m_finderCfg.m_layerGeometry, inputConnector);
+    //convert from trigindetsilayer to acts::experimental::trigindetsilayer
+    
+    for (const TrigInDetSiLayer& s : *pVL) {
+      m_layerGeometry.emplace_back(s.m_subdet, s.m_type, s.m_refCoord, s.m_minBound, s.m_maxBound);
+    }
+    
+    //fill which has id for each module belongs to what layer
+    m_sct_h2l = m_layerNumberTool->sctLayers();
+    m_pix_h2l = m_layerNumberTool->pixelLayers();
+    m_are_pixels.resize(m_layerNumberTool->maxNumberOfUniqueLayers(), true);
+    for(const auto& l : *m_sct_h2l) m_are_pixels[l] = false;
+    
+    //parse connection 
 
+    m_connector =  std::make_unique<Acts::Experimental::GbtsConnector>(m_cfg.connectorInputFile, m_cfg.lrtMode);
+
+    // option that allows for adding custom eta binning (default is at 0.2)
+    if (m_cfg.etaBinOverride != 0.0f) {
+
+      m_connector->etaBin = m_cfg.etaBinOverride;
+    }
+  
+    //create geoemtry object that holds allowed pairing of allowed eta regions in each layer 
+    m_gbtsGeo = std::make_unique<Acts::Experimental::GbtsGeometry>( m_layerGeometry, m_connector);
+
+    m_finder = std::make_unique<Acts::Experimental::SeedFinderGbts>(m_cfg, std::move(m_gbtsGeo), m_layerGeometry, logger().cloneWithSuffix("gbtsFinder"));
+    
     return StatusCode::SUCCESS;
-  }
+}
 
+  //create seeds
   ATH_FLATTEN
   StatusCode
   GbtsSeedingTool::createSeeds(const EventContext& ctx,
@@ -57,201 +77,181 @@ namespace ActsTrk {
 			       const Acts::Vector3& bField,
 			       ActsTrk::SeedContainer& seedContainer ) const
   {
-    // Seed Finder Options
-    Acts::SeedFinderOptions finderOpts;
-    finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x],
-                                       beamSpotPos[Amg::y]);
-    finderOpts.bFieldInZ = bField[2];
-    finderOpts = finderOpts.toInternalUnits().calculateDerivedQuantities(m_finderCfg);
+  //to avoid compile issues with unused veriables 
+  (void) ctx;
+  (void) bField;
+    //define new custom spacepoint container
+    Acts::SpacePointContainer2 coreSpacePoints(
+      Acts::SpacePointColumns::CopyFromIndex |
+      Acts::SpacePointColumns::SourceLinks |
+      Acts::SpacePointColumns::X |
+      Acts::SpacePointColumns::Y |
+      Acts::SpacePointColumns::Z |
+      Acts::SpacePointColumns::R |
+      Acts::SpacePointColumns::Phi
+    );
+
+    //add new column for layer ID and clusterwidth
+    auto layerColumn = coreSpacePoints.createColumn<std::uint32_t>("LayerID");
+    auto clusterWidthColumn = coreSpacePoints.createColumn<float>("Cluster_Width");
+    auto localPositionColumn = coreSpacePoints.createColumn<float>("LocalPositionY");
+    coreSpacePoints.reserve(spContainer.size());
+
+    //add spacepoints to new container
+    for(size_t idx=0; idx<spContainer.size(); idx++){
+      //obtain module hash for spacepoint
+      const auto & sp = spContainer.at(idx);
+      const auto & extSP = sp.externalSpacePoint();
+      const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
+
+      bool isPixel(elementlist.size() == 1);
+      if(isPixel == false) continue; //as currently strip hits are not used for seeding
     
-    // // // Compute seeds
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle = SG::makeHandle(m_pixelDetEleCollKey, ctx);
-    ATH_CHECK(pixelDetEleHandle.isValid()) ;
-    const InDetDD::SiDetectorElementCollection* pixelElements = pixelDetEleHandle.cptr();
-  
+	    short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->at(static_cast<int>(elementlist[0]));
+      //obtain coordinates	
 
-    std::vector<Acts::Experimental::GbtsSP<xAOD::SpacePoint>> GbtsSpacePoints;
-    GbtsSpacePoints.reserve(
-        spContainer.size()); 
+      auto newSp = coreSpacePoints.createSpacePoint();
+      newSp.copyFromIndex() = idx;
 
-    // for loop filling space
-    for (const auto& spacePoint : spContainer) { //xaod space points
-        // loop over space points, get necessary info from athena: 
-      const std::vector<xAOD::DetectorIDHashType>& elementlist = spacePoint.externalSpacePoint().elementIdList() ;
-
-        for (const xAOD::DetectorIDHashType element : elementlist) { 
-
-          const InDetDD::SiDetectorElement* pixelElement = pixelElements->getDetectorElement(element);
-
-          Identifier Identifier = pixelElement->identify() ; 
-
-          int eta_mod = m_pixelId->eta_module(Identifier); 
-          short barrel_ec = m_pixelId->barrel_ec(Identifier); 
-          int lay_id = m_pixelId->layer_disk(Identifier);
-          int combined_id = getCombinedID(eta_mod,barrel_ec,lay_id).first ; 
-          int Gbts_id = getCombinedID(eta_mod,barrel_ec,lay_id).second ; 
+      //apply beamspot corrections if needed
+      if(m_cfg.beamSpotCorrection){
         
-          // fill Gbts vector with current sapce point and ID
-          float ClusterWidth = 0; //for now trying to fill this  
+        float new_x = static_cast<float>(extSP.x() - beamSpotPos[0]);
+        float new_y = static_cast<float>(extSP.y() - beamSpotPos[1]);
+        newSp.x() = new_x;
+        newSp.y() = new_y;
+        newSp.z() = static_cast<float>(extSP.z());
+        newSp.r() = std::hypot(new_x, new_y);
+        newSp.phi() = std::atan2(new_y, new_x);
         
-          // fill Gbts vector with current sapce point and ID
-          GbtsSpacePoints.emplace_back(&spacePoint.externalSpacePoint(), Gbts_id, combined_id, ClusterWidth); 
-          //constructor takes (const space_point_t *sp, 
-
-        }
+      }else{
+        float new_x = static_cast<float>(extSP.x());
+        float new_y = static_cast<float>(extSP.y());
+        newSp.x() = static_cast<float>(extSP.x());
+        newSp.y() = static_cast<float>(extSP.y());
+        newSp.z() = static_cast<float>(extSP.z());
+        newSp.r() = std::hypot(new_x, new_y);
+        newSp.phi() = std::atan2(extSP.y(), extSP.x());
+      }
       
-    }
+      newSp.extra(layerColumn) = layer;
+      
+      if(m_cfg.useMl){
+          
+          assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
+          const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
+          newSp.extra(clusterWidthColumn) = pCL->widthInEta();
+          newSp.extra(localPositionColumn) = pCL->localPosition<2>().y();
+          
+        }else{
+          newSp.extra(clusterWidthColumn) = 0;
+          newSp.extra(localPositionColumn) = 0;
+          
+        }
+    }    
+    ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
+    
+    //collect all spacepoint containers objects so they can be passed into the seedfinder
+    auto sPContainerComponents = std::make_tuple(std::move(coreSpacePoints), layerColumn.asConst(), clusterWidthColumn.asConst(), localPositionColumn.asConst());
 
-    ATH_MSG_VERBOSE("Space points successfully assigned Gbts ID");
-
-    Acts::Experimental::SeedFinderGbts<xAOD::SpacePoint> finder = Acts::Experimental::SeedFinderGbts<xAOD::SpacePoint>(m_finderCfg,*m_gbtsGeo);  
-
-    finder.loadSpacePoints(GbtsSpacePoints);
-    //temporary solution until trigger ROIs implemented 
+    //compute seeds
+    int max_layers = m_are_pixels.size(); 
     Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
+    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, sPContainerComponents, max_layers); 
 
-    std::vector<Acts::Seed<xAOD::SpacePoint, 3ul>> groupSeeds = finder.createSeeds(internalRoi, *m_gbtsGeo);
-
-    // Store seeds
-
-    seedContainer.reserve(groupSeeds.size());
-    for( Acts::Seed<xAOD::SpacePoint, 3ul>& seed: groupSeeds) {
-      //turn interim into group seeds 
-
-      const auto& spacepoints = seed.sp() ; 
-      assert(spacepoints.size()==3) ;  
-      const xAOD::SpacePoint* sp1 = spacepoints[0] ; 
-      const xAOD::SpacePoint* sp2 = spacepoints[1] ; 
-      const xAOD::SpacePoint* sp3 = spacepoints[2] ; 
-
-      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(*sp1, *sp2, *sp3);
-      to_add->setVertexZ(seed.z());
-      to_add->setQuality(seed.seedQuality());
-      seedContainer.push_back(std::move(to_add));  
-
+    //add seeds to the output container
+    seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
+    for (Acts::MutableSeedProxy2 seed : seeds) {
+      seedContainer.push_back(
+        Acts::ConstSeedProxy2(seed),
+        [&](const Acts::SpacePointIndex2 spIndex) {
+          return &spContainer.at(spIndex).externalSpacePoint();
+        });
     }
 
+    ATH_MSG_VERBOSE("Number of seeds created is " << seedContainer.size());
     return StatusCode::SUCCESS;
   }
 
-  // own class functions
-  std::vector<Acts::Experimental::TrigInDetSiLayer>
-  GbtsSeedingTool::LayerNumbering() const {
-    std::vector<std::size_t> count_vector;
-    std::vector<Acts::Experimental::TrigInDetSiLayer> input_vector;
-
-    for(int hash = 0; hash<static_cast<int>(m_pixelId->wafer_hash_max()); hash++) {
-      const Identifier offlineId = m_pixelId->wafer_id(hash); 
-      const int eta_mod = m_pixelId->eta_module(offlineId); 
-      const short barrel_ec = m_pixelId->barrel_ec(offlineId); 
-      const int lay_id = m_pixelId->layer_disk(offlineId);     
-
-      const int combined_id = getCombinedID(eta_mod,barrel_ec,lay_id).first ; 
-
-      float rc = 0.0;
-      float minBound = std::numeric_limits<float>::max(); 
-      float maxBound = -std::numeric_limits<float>::max(); 
-
-      //want center and bounds! 
-      const InDetDD::SiDetectorElement *p = m_pixelManager->getDetectorElement(offlineId);
-      const Amg::Vector3D C = p->center() ;
-
-      if(barrel_ec == 0) {
-        rc += std::sqrt(C(0)*C(0)+C(1)*C(1));
-        if(p->zMin() < minBound) minBound = p->zMin();
-        if(p->zMax() > maxBound) maxBound = p->zMax();
-      }
-      else {
-        rc += C(2);
-        if(p->rMin() < minBound) minBound = p->rMin();
-        if(p->rMax() > maxBound) maxBound = p->rMax();	
-      }
-
-    
-      auto current_index =
-          find_if(input_vector.begin(), input_vector.end(),
-                  [combined_id](auto n) { return n.m_subdet == combined_id; });
-      if (current_index != input_vector.end()) {  // not end so does exist
-        std::size_t index = std::distance(input_vector.begin(), current_index);
-        input_vector[index].m_refCoord += rc;
-        input_vector[index].m_minBound += minBound;
-        input_vector[index].m_maxBound += maxBound;
-        count_vector[index] += 1;  // increase count at the index
-
-      } else {  // end so doesn't exists
-        // make new if one with Gbts ID doesn't exist:
-        Acts::Experimental::TrigInDetSiLayer new_Gbts_ID(combined_id, barrel_ec, rc, minBound,
-                                          maxBound);
-        input_vector.push_back(new_Gbts_ID);
-        count_vector.push_back(
-            1);  // so the element exists and not divinding by 0
-      }
-
-    }
-    for (std::size_t i = 0; i < input_vector.size(); ++i) {
-      assert(count_vector[i] != 0);
-      input_vector[i].m_refCoord = input_vector[i].m_refCoord / count_vector[i];
-    }
-
-    return input_vector;
-  }
   
-  //this is called in initialise 
+  //this is called in initialise
+  //adds all veriables that may have been changed in the gaudi properties defined in headerfile 
+  //TO DO: ADD NEW VERIABLES, DELETE OLD ONES AND CHANGE CURRENT ONES TO NEW VALUES 
   StatusCode
   GbtsSeedingTool::prepareConfiguration()
   {
-    // Configuration Acts::SeedFinderGbts
 
-    m_finderCfg.minPt = m_minPt;
-    m_finderCfg.sigmaScattering = m_sigmaScattering;
-    m_finderCfg.highland = m_highland;
-    m_finderCfg.maxScatteringAngle2 = m_maxScatteringAngle2;
-    m_finderCfg.helixCutTolerance = m_helixCutTolerance ;
-    m_finderCfg.m_phiSliceWidth = m_phiSliceWidth ;
-    m_finderCfg.m_nMaxPhiSlice = m_nMaxPhiSlice;
-    m_finderCfg.m_useClusterWidth = m_useClusterWidth;
-    m_finderCfg.ConnectorInputFile = m_ConnectorInputFile;
-    m_finderCfg.m_useEtaBinning = m_useEtaBinning;
-    m_finderCfg.m_doubletFilterRZ = m_doubletFilterRZ ;
-    m_finderCfg.m_minDeltaRadius = m_minDeltaRadius;
-    m_finderCfg.m_tripletD0Max = m_tripletD0Max;
-    m_finderCfg.m_maxTripletBufferLength = m_maxTripletBufferLength;
-    m_finderCfg.MaxEdges = m_MaxEdges;
-    m_finderCfg.cut_dphi_max = m_cut_dphi_max;
-    m_finderCfg.cut_dcurv_max = m_cut_dcurv_max;
-    m_finderCfg.cut_tau_ratio_max = m_cut_tau_ratio_max;
-    m_finderCfg.maxOuterRadius = m_maxOuterRadius;
-    m_finderCfg.m_PtMin = m_PtMin;
-    m_finderCfg.m_tripletPtMinFrac = m_tripletPtMinFrac;
-    m_finderCfg.m_tripletPtMin = m_tripletPtMin;
-    m_finderCfg.ptCoeff = m_ptCoeff;
-
-    m_finderCfg = m_finderCfg.toInternalUnits();
-
+    m_cfg.lrtMode = m_LRTmode;
+    m_cfg.useMl = m_useML;
+    m_cfg.matchBeforeCreate = m_matchBeforeCreate;
+    m_cfg.useOldTunings = m_useOldTunings;
+    m_cfg.etaBinOverride = m_etaBinOverride;
+    m_cfg.beamSpotCorrection = m_BeamSpotCorrection;
+    m_cfg.sigmaMS = m_sigmaMS;
+    m_cfg.radLen = m_radLen;
+    m_cfg.sigmaX = m_sigma_x;
+    m_cfg.sigmaY = m_sigma_y;
+    m_cfg.weightX = m_weight_x;
+    m_cfg.weightY = m_weight_y;
+    m_cfg.maxDChi2X = m_maxDChi2_x;
+    m_cfg.maxDChi2Y = m_maxDChi2_y;
+    m_cfg.addHit = m_add_hit;
+    m_cfg.minPt = m_minPt;
+    m_cfg.phiSliceWidth = m_phiSliceWidth ;
+    m_cfg.nMaxPhiSlice = m_nMaxPhiSlice;
+    m_cfg.connectorInputFile = m_connectorInputFile;
+    m_cfg.lutInputFile = m_lutFile;
+    m_cfg.useEtaBinning = m_useEtaBinning;
+    m_cfg.doubletFilterRZ = m_doubletFilterRZ ;
+    m_cfg.minDeltaRadius = m_minDeltaRadius;
+    m_cfg.nMaxEdges = m_nMaxEdges;
+    m_cfg.tauRatioCut = m_tau_ratio_cut; 
+    m_cfg.tauRatioPrecut = m_tau_ratio_precut;
+    m_cfg.ptCoeff = m_ptCoeff;
+    m_cfg.maxCurvature = m_max_curvature;
+    m_cfg.maxZ0 = m_max_z0;
+    m_cfg.edgeMaskMinEta = m_edge_mask_min_eta;
+    m_cfg.hitShareThreshold = m_hit_share_threshold;
+    m_cfg.maxEndcapClusterWidth = m_max_endcap_clusterwidth;
 
     return StatusCode::SUCCESS;
   }
+  //called in initialise, used to make sure all config settings look sensible
+  void GbtsSeedingTool::printGbtsConfig(const Acts::Experimental::GbtsConfig& cfg) {
+  ATH_MSG_DEBUG("===== GbtsConfig =====");
+  ATH_MSG_DEBUG( "beamSpotCorrection: " << cfg.beamSpotCorrection << " (default: false)");
+  ATH_MSG_DEBUG( "connectorInputFile: " << cfg.connectorInputFile << " (default: empty string)");
+  ATH_MSG_DEBUG( "lutInputFile: " << cfg.lutInputFile << " (default: empty string)");
+  ATH_MSG_DEBUG( "lrtMode: " << cfg.lrtMode << " (default: false)");
+  ATH_MSG_DEBUG( "useMl: " << cfg.useMl << " (default: false)");
+  ATH_MSG_DEBUG( "matchBeforeCreate: " << cfg.matchBeforeCreate << " (default: false)");
+  ATH_MSG_DEBUG( "useOldTunings: " << cfg.useOldTunings << " (default: false)");
+  ATH_MSG_DEBUG( "tauRatioPrecut: " << cfg.tauRatioPrecut << " (default: 0.009f)");
+  ATH_MSG_DEBUG( "tauRatioCut: " << cfg.tauRatioCut << " (default: 0.007)");
+  ATH_MSG_DEBUG( "etaBinOverride: " << cfg.etaBinOverride << " (default: 0.0)");
+  ATH_MSG_DEBUG( "nMaxPhiSlice: " << cfg.nMaxPhiSlice << " (default: 53)");
+  ATH_MSG_DEBUG( "minPt: " << cfg.minPt << " (default: 1000. MeV)");
+  ATH_MSG_DEBUG( "phiSliceWidth: " << cfg.phiSliceWidth << " (default: null)");
+  ATH_MSG_DEBUG( "ptCoeff: " << cfg.ptCoeff << " (default: 0.29955)");
+  ATH_MSG_DEBUG( "useEtaBinning: " << cfg.useEtaBinning << " (default: true)");
+  ATH_MSG_DEBUG( "doubletFilterRZ: " << cfg.doubletFilterRZ << " (default: true)");
+  ATH_MSG_DEBUG( "nMaxEdges: " << cfg.nMaxEdges << " (default: 2000000)");
+  ATH_MSG_DEBUG( "minDeltaRadius: " << cfg.minDeltaRadius << " (default: 2.0)");
+  ATH_MSG_DEBUG( "sigmaMS: " << cfg.sigmaMS << " (default: 0.016)");
+  ATH_MSG_DEBUG( "radLen: " << cfg.radLen << " (default: 0.025)");
+  ATH_MSG_DEBUG( "sigmaX: " << cfg.sigmaX << " (default: 0.08)");
+  ATH_MSG_DEBUG( "sigmaY: " << cfg.sigmaY << " (default: 0.25)");
+  ATH_MSG_DEBUG( "weightX: " << cfg.weightX << " (default: 0.5)");
+  ATH_MSG_DEBUG( "weightY: " << cfg.weightY << " (default: 0.5)");
+  ATH_MSG_DEBUG( "maxDChi2X: " << cfg.maxDChi2X << " (default: 5.0)");
+  ATH_MSG_DEBUG( "maxDChi2Y: " << cfg.maxDChi2Y << " (default: 6.0)");
+  ATH_MSG_DEBUG( "addHit: " << cfg.addHit << " (default: 14.0)");
+  ATH_MSG_DEBUG( "maxCurvature: " << cfg.maxCurvature << " (default: 1e-3f)");
+  ATH_MSG_DEBUG( "maxZ0: " << cfg.maxZ0 << " (default: 170.0)");
+  ATH_MSG_DEBUG( "edgeMaskMinEta: " << cfg.edgeMaskMinEta << " (default: 1.5)");
+  ATH_MSG_DEBUG( "hitShareThreshold: " << cfg.hitShareThreshold << " (default: 0.49)");
+  ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << cfg.maxEndcapClusterWidth << " (default: 0.35)");
 
-  std::pair<int,int> GbtsSeedingTool::getCombinedID(const int eta_mod, const short barrel_ec, const int lay_id) const { 
-    int vol_id = -1 ;         
-    if(barrel_ec== 0) vol_id = 8;
-    if(barrel_ec==-2) vol_id = 7;
-    if(barrel_ec== 2) vol_id = 9;
-        
-    int new_vol=0, new_lay=0;
-    if(vol_id == 7 || vol_id == 9) {
-      new_vol = 10*vol_id + lay_id;
-      new_lay = eta_mod;
-    }
-    else if(vol_id == 8) {
-      new_lay = 0;
-      new_vol = 10*vol_id + lay_id;
-    }
-    //make into the form needed for acts 
-    int Gbts_id = new_vol ; 
-    int combined_id = new_vol * 1000 + new_lay;
-
-    return std::make_pair(combined_id,Gbts_id) ; 
-  }
+}
 
 } // namespace ActsTrk

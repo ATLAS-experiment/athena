@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/OccupancyMonitor.h"
@@ -101,6 +101,10 @@ TH1I* OccupancyMonitor::eventOccupancy() const
     if (event->second < oMin) oMin = event->second;
     if (event->second > oMax) oMax = event->second;
   }
+  if (oMin > oMax) {
+    oMin = 0;
+    oMax = 1;
+  }
   
   TH1I* h = new TH1I("occ", "Event occupancies", oMax - oMin + 1, oMin - 0.5, oMax + 0.5);
   h->GetXaxis()->SetTitle("Occupancy");
@@ -130,6 +134,10 @@ TH1I* OccupancyMonitor::cellOccupancy(int minForPrintout) const
   {
     if (*cell < oMin) oMin = *cell;
     if (*cell > oMax) oMax = *cell;
+  }
+  if (oMin > oMax) {
+    oMin = 0;
+    oMax = 1;
   }
   
   //std::map<std::pair<unsigned int, std::string>, unsigned int> names;
@@ -190,6 +198,10 @@ TH1I* OccupancyMonitor::febOccupancy(CaloId calo) const
     if (feb->second < oMin) oMin = feb->second;
     if (feb->second > oMax) oMax = feb->second;
   }
+  if (oMin > oMax) {
+    oMin = 0;
+    oMax = 1;
+  }
   
   TH1I* h = new TH1I("occ", "FEB occupancies", oMax - oMin + 1, oMin - 0.5, oMax + 0.5);
   h->GetXaxis()->SetTitle("Occupancy");
@@ -246,8 +258,9 @@ void OccupancyMonitor::dump(short verbosity) const
 void OccupancyMonitor::cellAndRingOccupancy(CaloId calo, unsigned int nMin) const
 {
   const unsigned int nPhiRings = 5516; // == Geo::nPhiRings()
-  unsigned int nCells[4][3], nRings[4][3];
-  unsigned int ringOccupancy[nPhiRings][4][3];
+  using block_t = unsigned int[4][3];
+  block_t nCells, nRings;
+  std::vector<block_t> ringOccupancy (nPhiRings);
   
   for (unsigned int i = 0; i < 4; i++)
     for (unsigned int j = 0; j < 3; j++) {

@@ -7,7 +7,7 @@
 #ifndef INDET_EMULATEDDEFECTSTODETECTORELEMENTSTATUSCONDALGBASE_H
 #define INDET_EMULATEDDEFECTSTODETECTORELEMENTSTATUSCONDALGBASE_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/WriteHandleKey.h"
 
@@ -16,7 +16,7 @@
 
 
 namespace InDet {
-   class EmulatedDefectsToDetectorElementStatusCondAlgBase : public AthReentrantAlgorithm
+   class EmulatedDefectsToDetectorElementStatusCondAlgBase : public AthCondAlgorithm
    {
    public:
       EmulatedDefectsToDetectorElementStatusCondAlgBase(const std::string& name, ISvcLocator* pSvcLocator);

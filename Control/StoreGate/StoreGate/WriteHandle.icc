@@ -342,9 +342,11 @@ WriteHandle<T>::WriteHandle::recordNonConst (std::unique_ptr<T> data,
  * The event store takes shared ownership of the object.
  */
 template <class T>
+template <std::derived_from<DataObject> DOBJ>
+requires std::convertible_to<DOBJ*, T*>
 inline
 StatusCode
-WriteHandle<T>::record (SG::DataObjectSharedPtr<T> data)
+WriteHandle<T>::record (SG::DataObjectSharedPtr<DOBJ> data)
 {
   return this->doRecord (std::move(data), true, false);
 }
@@ -357,9 +359,11 @@ WriteHandle<T>::record (SG::DataObjectSharedPtr<T> data)
  * The event store takes shared ownership of the object.
  */
 template <class T>
+template <std::derived_from<DataObject> DOBJ>
+requires std::convertible_to<DOBJ*, T*>
 inline
 StatusCode
-WriteHandle<T>::recordNonConst (SG::DataObjectSharedPtr<T> data)
+WriteHandle<T>::recordNonConst (SG::DataObjectSharedPtr<DOBJ> data)
 {
   return this->doRecord (std::move(data), false, false);
 }
@@ -536,9 +540,11 @@ WriteHandle<T>::put (const EventContext& ctx,
  * The event store takes shared ownership of the object.
  */
 template <class T>
+template <std::derived_from<DataObject> DOBJ>
+requires std::convertible_to<DOBJ*, T*>
 inline
 typename WriteHandle<T>::const_pointer_type
-WriteHandle<T>::put (SG::DataObjectSharedPtr<T> data) const
+WriteHandle<T>::put (SG::DataObjectSharedPtr<DOBJ> data) const
 {
   IProxyDict* store = nullptr;
   return doPut (nullptr, std::move(data), false, store);
@@ -559,10 +565,12 @@ WriteHandle<T>::put (SG::DataObjectSharedPtr<T> data) const
  * The event store takes shared ownership of the object.
  */
 template <class T>
+template <std::derived_from<DataObject> DOBJ>
+requires std::convertible_to<DOBJ*, T*>
 inline
 typename WriteHandle<T>::const_pointer_type
 WriteHandle<T>::put (const EventContext& ctx,
-                     SG::DataObjectSharedPtr<T> data) const
+                     SG::DataObjectSharedPtr<DOBJ> data) const
 {
   IProxyDict* store = nullptr;
   return doPut (&ctx, std::move(data), false, store);

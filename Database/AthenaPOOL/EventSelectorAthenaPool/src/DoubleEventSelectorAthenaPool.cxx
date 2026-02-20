@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,17 +12,10 @@
  **/
 
 #include "DoubleEventSelectorAthenaPool.h"
-#include "PoolCollectionConverter.h"
-
-// Framework
-#include "GaudiKernel/FileIncident.h"
 
 // Pool
-#include "CollectionBase/ICollectionCursor.h"
-#include "CollectionBase/CollectionRowBuffer.h"
-#include "CollectionBase/TokenList.h"
-#include "PersistentDataModel/DataHeader.h"
-#include "PersistentDataModel/Token.h"
+#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionSvc/CollectionRowBuffer.h"
 #include "PersistentDataModel/AthenaAttributeList.h"
 
 
@@ -187,7 +180,7 @@ StatusCode DoubleEventSelectorAthenaPool::recordAttributeList() const
   athAttrList->extend("hasSecondaryInput", "bool");
   (*athAttrList)["hasSecondaryInput"].data<bool>() = true;
 
-  SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey.value(), eventStore()->name());
+  SG::WriteHandle<AthenaAttributeList> wh(m_attrListKey, eventStore()->name());
   ATH_CHECK(wh.record(std::move(athAttrList)));
 
   return StatusCode::SUCCESS;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimpleMergeMcEventCollTool.h"
@@ -141,7 +141,7 @@ StatusCode SimpleMergeMcEventCollTool::saveHeavyIonInfo(const McEventCollection 
 //It should be clarified if we want to get a copy or the content
 #ifdef HEPMC3
      HepMC::GenHeavyIonPtr hinew=std::make_shared<HepMC::GenHeavyIon>(*(pMcEvtColl->at(0)->heavy_ion()));
-     outputMcEventCollection->at(0)->set_heavy_ion(hinew);
+     outputMcEventCollection->at(0)->set_heavy_ion(std::move(hinew));
 #else
       outputMcEventCollection->at(0)->set_heavy_ion(*(pMcEvtColl->at(0)->heavy_ion()));
 #endif

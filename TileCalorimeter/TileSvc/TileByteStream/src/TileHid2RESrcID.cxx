@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -46,8 +46,7 @@ void TileHid2RESrcID::initialize(const std::vector<std::vector<uint32_t> > & all
     if (v.size()>0) {
       int id = v[0];
       if (v.size()>1) {
-        std::vector<uint32_t> data(v.begin()+1,v.end());
-        m_frag2ROD[id] = data;
+        m_frag2ROD[id].assign(v.begin()+1,v.end());
       } else if ( m_frag2ROD.find(id) != m_frag2ROD.end() ) {
         m_frag2ROD.erase(id);
       }

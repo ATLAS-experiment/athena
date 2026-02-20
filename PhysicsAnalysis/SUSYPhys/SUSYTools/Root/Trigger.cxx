@@ -335,20 +335,18 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
     return trigchains;
   }
 
-  void SUSYObjDef_xAOD::GetTriggerTokens(std::string trigExpr, std::vector<std::string>& v_trigs15_cache, std::vector<std::string>& v_trigs16_cache, std::vector<std::string>& v_trigs17_cache, std::vector<std::string>& v_trigs18_cache, std::vector<std::string>& v_trigs22_cache) const {
+  void SUSYObjDef_xAOD::GetTriggerTokens(std::string trigExpr, std::vector<std::string>& v_trigs15_cache, std::vector<std::string>& v_trigs16_cache, std::vector<std::string>& v_trigs17_cache, std::vector<std::string>& v_trigs18_cache, std::vector<std::string>& v_trigs22_cache, std::vector<std::string>& v_trigs23_cache, std::vector<std::string>& v_trigs24_cache) const {
 
     // e.g. SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0
 
     static const std::string del15 = "_2015_";
     static const std::string del16 = "_2016_";
     static const std::string del17 = "_2017_";
-    static const std::string del18 = "_2018_";
-    static const std::string del22 = "_2022_";
 
     size_t pos = 0;
-    std::string token15, token16, token17, token18, token22;
+    std::string token15, token16, token17, token18, token22, token23, token24;
 
-    //get trigger tokens for 2015, 2016, 2017, 2018 and 2022 
+    //get trigger tokens for 2015, 2016, 2017, 2018 and 2022, 2023, 2024
     if ( (pos = trigExpr.find(del15)) != std::string::npos) {
       trigExpr.erase(0, pos + del15.length()); 
 
@@ -362,11 +360,42 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
       }
     }
 
-    if ( (pos = trigExpr.find(del22)) != std::string::npos) {
-      trigExpr.erase(0, pos + del22.length()); 
+    // Find year positions (or npos if not present)
+    size_t p22 = trigExpr.find("2022");
+    size_t p23 = trigExpr.find("2023");
+    size_t p24 = trigExpr.find("2024");
+
+    auto next_pos = [&](size_t self) {
+        size_t next = std::string::npos;
+
+        if (self == p22) {
+            if (p23 > self && p23 < next) next = p23;
+            if (p24 > self && p24 < next) next = p24;
+        }
+        else if (self == p23) {
+            if (p22 > self && p22 < next) next = p22;
+            if (p24 > self && p24 < next) next = p24;
+        }
+        else if (self == p24) {
+            if (p22 > self && p22 < next) next = p22;
+            if (p23 > self && p23 < next) next = p23;
+        }
+
+        return next;
+    };
+
+    // Extract 2022,2023,2024 block
+    if (p22 != std::string::npos) {size_t end = next_pos(p22); token22 = trigExpr.substr(p22, end - p22);}
+    if (p23 != std::string::npos) {size_t end = next_pos(p23); token23 = trigExpr.substr(p23, end - p23);}
+    if (p24 != std::string::npos) {size_t end = next_pos(p24); token24 = trigExpr.substr(p24, end - p24);}
+
+    // Remove trailing underscores from tokens if present
+    std::string* toks[] = { &token22, &token23, &token24 };
+    for (auto t : toks) {
+      while (!t->empty() && t->back() == '_') t->pop_back();
     }
 
-    //redefine in case of custom user input
+    //Redefine in case of custom user input
     if(!m_isRun3){
       if(token15.empty()) token15 = trigExpr;
       if(token16.empty()) token16 = trigExpr;
@@ -375,6 +404,8 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
     }
     else{
       if(token22.empty()) token22 = trigExpr;
+      if(token23.empty()) token23 = trigExpr;
+      if(token24.empty()) token24 = trigExpr;
     }
 
   //get trigger chains for matching in 2015 and 2018
@@ -387,6 +418,8 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
     //get trigger chains for matching in 2022
     else{
       v_trigs22_cache = GetTriggerOR(token22);
+      v_trigs23_cache = GetTriggerOR(token23);
+      v_trigs24_cache = GetTriggerOR(token24);
     }
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureUtils/Thrust.h"
@@ -18,7 +18,7 @@ map<string, double> Thrust::result(const fastjet::PseudoJet &jet) const
   vector<fastjet::PseudoJet> clusters = boostToCenterOfMass(jet, jet.constituents());
   if(clusters.size() < 2) return Variables;
 
-  bool useThreeD = true;
+  const bool useThreeD = true;
 
   /*
      This code is recopied from Atlas Code (Rolf Seuster)

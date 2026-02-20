@@ -22,6 +22,7 @@ using namespace TauAnalysisTools;
 //______________________________________________________________________________
 DiTauSelectionTool::DiTauSelectionTool( const std::string& name )
   : asg::AsgMetadataTool( name )
+  , m_sOmniIDWP("OMNIIDNONE")	
   , m_fOutFile(nullptr)
   , m_aAccept( "DiTauSelection" )
 {}
@@ -36,36 +37,27 @@ DiTauSelectionTool::~DiTauSelectionTool()
 StatusCode DiTauSelectionTool::initialize()
 {
  
-  m_vPtRegion = m_vecPtRegion.value();	
   m_vAbsEtaRegion = m_vecAbsEtaRegion.value();
-  m_vNSubjetsRegion = m_vecNSubjetsRegion.value(); 
   m_vAbsCharges = m_vecAbsCharges.value();
-  m_vOmniScoreRegion = m_vecOmniScoreRegion.value();
 
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
   if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))             bConfigViaProperties = true;
-  if (!bConfigViaProperties and !std::isnan(m_dPtMax.value()))             bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value()))     bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMax.value()))     bConfigViaProperties = true;
-  if (!bConfigViaProperties and !m_vNSubjetsRegion.empty())       bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMin.value())) bConfigViaProperties = true;
-  if (!bConfigViaProperties and !std::isnan(m_dNSubjetsMax.value())) bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsCharges.empty())       bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_iAbsCharge.value())) bConfigViaProperties = true;
-  if (!bConfigViaProperties and !m_vOmniScoreRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMin.value())) bConfigViaProperties = true;
-  if (!bConfigViaProperties and !std::isnan(m_dOmniScoreMax.value())) bConfigViaProperties = true;
-
+  if (!bConfigViaProperties and m_iOmniIDWP != 0)              bConfigViaProperties = true;
 
   if (bConfigViaConfigFile and bConfigViaProperties)
   {
-    ATH_MSG_WARNING("Configured tool via setProperty and configuration file, which may lead to unexpected configuration.");
-    ATH_MSG_WARNING("In doubt check the configuration that is printed when the tool is initialized and the message level is set to debug");
-    ATH_MSG_WARNING("For further details please refer to the documentation:");
-    ATH_MSG_WARNING("https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-DiTauSelectionTool.rst");
+    ATH_MSG_ERROR("Configured tool via setProperty and configuration file, which may lead to unexpected configuration. Please setup the DiTauSelectionTool using only one of the two methods. For further details please refer to the documentation https://gitlab.cern.ch/atlas/athena/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/doc/README-DiTauSelectionTool.rst or contact the TauCP group.");
+    return StatusCode::FAILURE;
+
   }
   if (!bConfigViaConfigFile and !bConfigViaProperties)
   {
@@ -102,23 +94,11 @@ StatusCode DiTauSelectionTool::initialize()
 
     for (const std::string& sCut : vCuts)
     {
-      if (sCut == "PtRegion")
-      {
-        iSelectionCuts = iSelectionCuts | DiTauCutPt;
-        if (m_vPtRegion.empty())
-          TauAnalysisTools::split(rEnv,"PtRegion", ';', m_vPtRegion);
-      }
-      else if (sCut == "PtMin")
+      if (sCut == "PtMin")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutPt;
         if (std::isnan(m_dPtMin.value()))
           m_dPtMin = rEnv.GetValue("PtMin",NAN);
-      }
-      else if (sCut == "PtMax")
-      {
-        iSelectionCuts = iSelectionCuts | DiTauCutPt;
-        if (std::isnan(m_dPtMax.value()))
-          m_dPtMax = rEnv.GetValue("PtMax",NAN);
       }
       else if (sCut == "AbsEtaRegion")
       {
@@ -138,23 +118,11 @@ StatusCode DiTauSelectionTool::initialize()
         if (std::isnan(m_dAbsEtaMax.value()))
           m_dAbsEtaMax = rEnv.GetValue("AbsEtaMax",NAN);
       }
-      else if (sCut == "NSubjetsRegion")
-      {
-        iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
-        if (m_vNSubjetsRegion.empty())
-          TauAnalysisTools::split(rEnv,"NSubjetsRegion", ';', m_vNSubjetsRegion);
-      }
       else if (sCut == "NSubjetsMin")
       {
         iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
         if (std::isnan(m_dNSubjetsMin.value()))
           m_dNSubjetsMin = rEnv.GetValue("NSubjetsMin",NAN);
-      }
-      else if (sCut == "NSubjetsMax")
-      {
-        iSelectionCuts = iSelectionCuts | DiTauCutNSubjets;
-        if (std::isnan(m_dNSubjetsMax.value()))
-          m_dNSubjetsMax = rEnv.GetValue("NSubjetsMax",NAN);
       }
       else if (sCut == "AbsCharges")
       {
@@ -167,15 +135,6 @@ StatusCode DiTauSelectionTool::initialize()
         iSelectionCuts = iSelectionCuts | DiTauCutAbsCharge;
         if (std::isnan(m_iAbsCharge.value()))
           m_iAbsCharge = rEnv.GetValue("AbsCharge",NAN);
-      }
-      else if (sCut == "OmniScoreRegion")
-      {
-        iSelectionCuts = iSelectionCuts | DiTauCutOmniScore;
-        if (m_vOmniScoreRegion.empty())
-          TauAnalysisTools::split(rEnv,"OmniScoreRegion", ';', m_vOmniScoreRegion);
-
-	// check if using OmniScore
-        m_useOmniScore = true;
       }
       else if (sCut == "OmniScoreMin")
       {
@@ -194,22 +153,19 @@ StatusCode DiTauSelectionTool::initialize()
 	// check if using OmniScore
 	m_useOmniScore = true;
       }
-      else if (sCut == "OmniScoreMax")
+      else if (sCut == "OmniIDWP")
       {
-        iSelectionCuts = iSelectionCuts | DiTauCutOmniScore;
-        if (std::isnan(m_dOmniScoreMax.value()))
-          m_dOmniScoreMax = rEnv.GetValue("OmniScoreMax",NAN);
-
-        // check for possible mis-config in DiTau selection
+        iSelectionCuts = iSelectionCuts | DiTauCutOmniIDWP;
+        if (m_iOmniIDWP == OMNIIDNONE){
+          m_iOmniIDWP = convertStrToOmniIDWP(rEnv.GetValue("OmniIDWP","OMNIIDNONE"));
+        }	  
+	// check for possible mis-config in Tau selection
         for (const std::string& checkCut : vCuts){
-           if (checkCut.find("OmniScoreRegion") != std::string::npos) {
-              ATH_MSG_ERROR("Misconfig due to OmniScoreRegion and OmniScoreMax cuts both present in the config file. Please CHECK carefully config file again and choose of the two");
+	   if (checkCut.find("OmniScore") != std::string::npos) {
+              ATH_MSG_ERROR("Misconfig due to OmniIDWP and OmniScore cuts both present in the config file. Please CHECK carefully config file again");
               return StatusCode::FAILURE;
-           }
-        }
-
-	// check if using OmniScore
-	m_useOmniScore = true;
+	   }   
+	}
       }
       else ATH_MSG_WARNING("Cut " << sCut << " is not available");
     }
@@ -226,6 +182,8 @@ StatusCode DiTauSelectionTool::initialize()
   }
   ATH_CHECK( m_OmniScoreDecorKey.initialize( m_useOmniScore ) );
 
+  m_sOmniIDWP = convertOmniIDWPToStr(m_iOmniIDWP);
+
   // specify all available cut descriptions
   using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>>;
   using pair_type = map_type::value_type;
@@ -237,22 +195,24 @@ StatusCode DiTauSelectionTool::initialize()
    {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
    {DiTauCutAbsCharge, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsCharge>(this)},
    {DiTauCutOmniScore, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniScore>(this)}, 
+   {DiTauCutOmniIDWP, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniIDWP>(this)},
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };
   
   ATH_MSG_INFO( "Initializing DiTauSelectionTool" );
-  FillRegionVector(m_vPtRegion, m_dPtMin.value(), m_dPtMax.value());
+  FillRegionVector(m_vPtRegion, m_dPtMin.value(), NAN);
   FillRegionVector(m_vAbsEtaRegion, m_dAbsEtaMin.value(), m_dAbsEtaMax.value());
-  FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), m_dNSubjetsMax.value());
+  FillRegionVector(m_vNSubjetsRegion, m_dNSubjetsMin.value(), NAN);
   FillValueVector(m_vAbsCharges, m_iAbsCharge.value());
-  FillRegionVector(m_vOmniScoreRegion, m_dOmniScoreMin.value(), m_dOmniScoreMax.value() );
+  FillRegionVector(m_vOmniScoreRegion, m_dOmniScoreMin.value(), NAN );
 
   PrintConfigRegion ("Pt",          m_vPtRegion);
   PrintConfigRegion ("AbsEta",      m_vAbsEtaRegion);
   PrintConfigRegion ("NSubjets",    m_vNSubjetsRegion);
   PrintConfigValue  ("AbsCharge",   m_vAbsCharges);
   PrintConfigRegion ("OmniScore",   m_vOmniScoreRegion);
+  PrintConfigValue  ("OmniIDWP",    m_sOmniIDWP);
 
   std::string sCuts = "";
   if (m_iSelectionCuts & DiTauCutPt) sCuts += "Pt ";
@@ -260,6 +220,7 @@ StatusCode DiTauSelectionTool::initialize()
   if (m_iSelectionCuts & DiTauCutNSubjets) sCuts += "NSubjets ";
   if (m_iSelectionCuts & DiTauCutAbsCharge) sCuts += "AbsCharge ";
   if (m_iSelectionCuts & DiTauCutOmniScore) sCuts += "OmniScore ";
+  if (m_iSelectionCuts & DiTauCutOmniIDWP) sCuts += "OmniIDWP "; 
 
   ATH_MSG_DEBUG( "cuts: " << sCuts);
 
@@ -473,4 +434,42 @@ void DiTauSelectionTool::PrintConfigValue(const std::string& sCutName, T& tVal) 
 {
   ATH_MSG_DEBUG( sCutName<<": " << tVal );
 }
+
+//______________________________________________________________________________
+int DiTauSelectionTool::convertStrToOmniIDWP(const std::string& sOmniIDWP) const
+{
+  if      (sOmniIDWP == "OMNIIDNONE")      return int(OMNIIDNONE);
+  else if (sOmniIDWP == "OMNIIDVERYLOOSE") return int(OMNIIDVERYLOOSE);
+  else if (sOmniIDWP == "OMNIIDLOOSE")     return int(OMNIIDLOOSE);
+  else if (sOmniIDWP == "OMNIIDMEDIUM")    return int(OMNIIDMEDIUM);
+  else if (sOmniIDWP == "OMNIIDTIGHT")     return int(OMNIIDTIGHT);
+
+  ATH_MSG_ERROR( "omni ID working point "<<sOmniIDWP<<" is unknown, the OmniIDWP cut will not accept any ditau!" );
+  return -1;
+}
+
+//______________________________________________________________________________
+std::string DiTauSelectionTool::convertOmniIDWPToStr(int iOmniIDWP) const
+{
+  switch (iOmniIDWP)
+  {
+  case OMNIIDNONE:
+    return "OMNIIDNONE";
+  case OMNIIDVERYLOOSE:
+    return "OMNIIDVERYLOOSE";
+  case OMNIIDLOOSE:
+    return "OMNIIDLOOSE";
+  case OMNIIDMEDIUM:
+    return "OMNIIDMEDIUM";
+  case OMNIIDTIGHT:
+    return "OMNIIDTIGHT";
+
+  default:
+    ATH_MSG_WARNING( "OmniID working point with enum " << iOmniIDWP << " is unknown, the OmniIDWP cut will not accept any ditau!" );
+    return "";
+  }
+}
+
+
+
 

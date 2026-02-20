@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Logging import logging
@@ -22,6 +22,7 @@ except ImportError:
 class NotHashable(Exception):
     """Exception thrown when AccumulatorCache is applied to non-hashable function call"""
     def __init__(self, value):
+        super().__init__ (self)
         self.value = value
 
 

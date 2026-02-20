@@ -7,7 +7,7 @@
 
 TRTPIDNNCondAlg::TRTPIDNNCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
-  : ::AthAlgorithm(name,pSvcLocator)
+  : ::AthCondAlgorithm(name,pSvcLocator)
 {}
 TRTPIDNNCondAlg::~TRTPIDNNCondAlg()= default;
 
@@ -22,13 +22,13 @@ StatusCode TRTPIDNNCondAlg::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode TRTPIDNNCondAlg::execute()
+StatusCode TRTPIDNNCondAlg::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("execute " << name());
 
   // Construct Write Cond Handle and check its validity
 
-  SG::WriteCondHandle<InDet::TRTPIDNN> writeHandle{m_writeKey};
+  SG::WriteCondHandle<InDet::TRTPIDNN> writeHandle{m_writeKey, ctx};
 
   // Do we have a valid Write Cond Handle for current time?
   if(writeHandle.isValid()) {
@@ -42,7 +42,7 @@ StatusCode TRTPIDNNCondAlg::execute()
   std::unique_ptr<InDet::TRTPIDNN> writeCdo{std::make_unique<InDet::TRTPIDNN>()};
   
   // Read the NN configuration from the ReadHandle
-  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey};
+  SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey, ctx};
   const CondAttrListCollection* attrListColl{*readHandle};
   if (attrListColl==nullptr or attrListColl->size() != 1) {
     ATH_MSG_ERROR(" Problem reading /TRT/Calib/PID_NN cond object");

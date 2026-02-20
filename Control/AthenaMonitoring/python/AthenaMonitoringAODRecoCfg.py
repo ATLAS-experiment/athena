@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -29,6 +29,14 @@ def AthenaMonitoringAODRecoCfg(flags):
             
             for container in jets_to_schedule:
                 result.merge(JetRecCfg(flags, container))
+
+            # Schedule specific event shape for Run 3 PFlow jet calibration
+            if flags.Beam.Type is not BeamType.Cosmics:
+                from JetRecConfig.JetRecConfig import getConstitPJGAlg
+                from JetRecConfig.StandardJetConstits import stdConstitDic as cst
+                from JetRecConfig.JetInputConfig import buildEventShapeAlg
+                result.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
+                result.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))
 
         jet_collections = set([_.fullname().replace('Jets','') for _ in jets_to_schedule])
         btag_jet_collections = set(['AntiKt4EMTopo', 'AntiKt4EMPFlow'])

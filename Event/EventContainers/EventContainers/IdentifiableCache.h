@@ -18,7 +18,7 @@
 
 
 #include "EventContainers/IdentifiableCacheBase.h"
-
+#include <bit>
 
 namespace EventContainers {
 
@@ -58,17 +58,17 @@ public:
   // Return payload if there, null if not there.
   const T* find (IdentifierHash hash)
   {
-    return reinterpret_cast<const T*> (IdentifiableCacheBase::find (hash));
+    return std::bit_cast<const T*> (IdentifiableCacheBase::find (hash));
   }
 
   const T* findWait (IdentifierHash hash)
   {
-    return reinterpret_cast<const T*> (IdentifiableCacheBase::findWait (hash));
+    return std::bit_cast<const T*> (IdentifiableCacheBase::findWait (hash));
   }
 
   const T* get (IdentifierHash hash)
   {
-    return reinterpret_cast<const T*> (IdentifiableCacheBase::get (hash));
+    return std::bit_cast<const T*> (IdentifiableCacheBase::get (hash));
   }
 
   std::pair<bool, const void*> add (IdentifierHash hash, const T* p)

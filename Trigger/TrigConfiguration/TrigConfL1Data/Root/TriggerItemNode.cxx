@@ -13,8 +13,6 @@
 #include <stdexcept>
 #include <sys/types.h>
 
-#include <boost/lexical_cast.hpp>
-
 using namespace std;
 using namespace TrigConf;
 
@@ -104,7 +102,7 @@ TrigConf::TriggerItemNode::setInternalTrigger(const string& name) {
       throw runtime_error("TriggerItemNode::setInternalTrigger: type is not an internal trigger");
    }
    m_InternalTrigger.first = tt;
-   m_InternalTrigger.second = boost::lexical_cast<unsigned int,string>(name.substr(pos));
+   m_InternalTrigger.second = static_cast<unsigned int>(std::stoul(name.substr(pos)));
    m_ThresholdName = name;
    m_Threshold = 0;
 }
@@ -257,7 +255,7 @@ TrigConf::TriggerItemNode::buildLogic(std::vector<std::string> & conditionList,
       uint32_t pos = conditionList.size()+1;
       if(pos>9) logic += '0'+pos/10;
       logic += '0'+pos%10;
-      conditionList.push_back(condition);
+      conditionList.push_back(std::move(condition));
    } else if (m_NodeType == AND || m_NodeType == OR) {
       logic += "(";
       bool first = true;

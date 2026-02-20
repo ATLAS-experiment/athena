@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ATHENAKERNEL_CLUSTERMESSAGE_H
 #define ATHENAKERNEL_CLUSTERMESSAGE_H
@@ -62,6 +62,9 @@ struct ClusterMessage {
         : ptr((void*)ptr), len(count * sizeof(T)), align(alignof(T)) {}
 
     DataDescr(DataDescr&& rhs) noexcept;
+    
+    DataDescr(const DataDescr&) = delete;
+    DataDescr& operator=(const DataDescr&) = delete;
 
     DataDescr(const WireMsgBody& body);
 

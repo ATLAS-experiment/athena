@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,9 +13,6 @@
 #define LARGEOALGSNV_LARDETECTORTOOLNV_H
 
 #include "GeoModelUtilities/GeoModelTool.h"
-#include "AthenaKernel/IOVSvcDefs.h"
-#include "CxxUtils/checker_macros.h"
-
 #include "LArGeoCode/LArAlignHelper.h"
 
 class LArDetectorManager;
@@ -44,27 +41,28 @@ class LArDetectorToolNV final : public GeoModelTool {
   virtual StatusCode clear() override;
 
   // Apply alignments (for simulation only)
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align() override;
 
  private:
-  bool m_barrelSaggingOn;
-  int  m_barrelVisLimit;
-  int  m_fcalVisLimit;
 
-  bool m_buildBarrel;
-  bool m_buildEndcap;
+  Gaudi::Property<bool> m_barrelSaggingOn{this,"SaggingBarrelAccordeon",false};
+  Gaudi::Property<int>  m_barrelVisLimit{this,"BarrelCellVisLimit",-1};
+  Gaudi::Property<int>  m_fcalVisLimit{this,"FCALVisLimit",-1};
 
-  bool m_applyAlignments;
+  Gaudi::Property<bool> m_buildBarrel{this,"BuildBarrel",true};
+  Gaudi::Property<bool> m_buildEndcap{this,"BuildEndcap",true};
 
-  const LArDetectorManager *m_manager;
+  Gaudi::Property<bool> m_applyAlignments{this,"ApplyAlignments",false};
 
-  std::string m_geometryConfig; // FULL, SIMU, RECO
+  const LArDetectorManager *m_manager{};
 
-  std::string m_EMECVariantInner;
-  std::string m_EMECVariantOuter;
+  Gaudi::Property<std::string> m_geometryConfig{this,"GeometryConfig","FULL"}; // FULL, SIMU, RECO
 
-  bool m_activateFT;
-  bool m_enableMBTS;
+  Gaudi::Property<std::string> m_EMECVariantInner{this,"EMECVariantInner","Wheel"};
+  Gaudi::Property<std::string> m_EMECVariantOuter{this,"EMECVariantOuter","Wheel"};
+
+  Gaudi::Property<bool> m_activateFT{this,"ActivateFeedThrougs",true};
+  Gaudi::Property<bool> m_enableMBTS{this,"EnableMBTS",true};
 
   LArAlignHelper m_alignHelper;
 };

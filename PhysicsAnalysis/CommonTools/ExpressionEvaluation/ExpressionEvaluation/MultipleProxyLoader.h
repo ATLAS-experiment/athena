@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 
 #include <vector>
 #include <map>
+#include <utility>
 
 namespace ExpressionParsing {
   class MultipleProxyLoader : public IProxyLoader {
@@ -28,19 +29,21 @@ namespace ExpressionParsing {
 
       IProxyLoader* push_back(std::unique_ptr<IProxyLoader> proxyLoader);
 
-      virtual void reset();
+      virtual void reset() override;
+      virtual IAccessor::VariableType variableType(const std::string &var_name) const override;
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
+      virtual std::pair< IAccessor::VariableType, const IAccessor &>
+              getAccessorFromString(const EventContext &ctx, const std::string &varname) const override;
 
-      virtual int loadIntVariableFromString(const std::string &varname) const;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
+      virtual int loadInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual double loadDouble(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<int> loadVecInt(const EventContext& ctx,const std::string &varname) const override;
+      virtual std::vector<double> loadVec(const EventContext& ctx,const std::string &varname) const override;
 
     private:
       std::vector<std::unique_ptr<IProxyLoader> > m_proxyLoaders;
 
-      using proxyCache_t = CxxUtils::ConcurrentStrMap<IProxyLoader*, CxxUtils::SimpleUpdater>;
+     using proxyCache_t = CxxUtils::ConcurrentStrMap<const IAccessor *, CxxUtils::SimpleUpdater>;
       mutable proxyCache_t m_varnameToProxyLoader ATLAS_THREAD_SAFE;
   };
 }

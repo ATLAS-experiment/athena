@@ -27,7 +27,7 @@ namespace {
 }
 
 SCT_ReadCalibDataCondAlg::SCT_ReadCalibDataCondAlg(const std::string& name, ISvcLocator* pSvcLocator)
-  : ::AthReentrantAlgorithm(name, pSvcLocator)
+  : ::AthCondAlgorithm(name, pSvcLocator)
 {
   m_ignoreDefects.value().push_back("NOISE_SLOPE");
   m_ignoreDefectParameters.value().push_back(-1000.);

@@ -48,30 +48,46 @@ namespace Prompt {
 
     StatusCode initializeAccessors();
 
-    StatusCode predictElec(const xAOD::Electron &electron,
+    StatusCode predictElec(SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+		           SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+                           SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+			   SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track, 
+		           const xAOD::Electron &electron,
                            const xAOD::TrackParticleContainer &tracks,
                            const xAOD::CaloClusterContainer &caloclusters,
                            std::vector<SG::WriteDecorHandle<xAOD::ElectronContainer, float>> &dec_el_plit_output,
                            const EventContext& ctx) const;
 
-    StatusCode predictMuon(const xAOD::Muon &muon,
+    StatusCode predictMuon(SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+                           SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+                           SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+                           SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
+		           const xAOD::Muon &muon,
                            const xAOD::TrackParticleContainer &tracks,
                            std::vector<SG::WriteDecorHandle<xAOD::MuonContainer, float>> &dec_mu_plit_output,
                            const EventContext& ctx) const;
 
     bool passed_r22tracking_cuts(const xAOD::TrackParticle &tp, const EventContext& ctx) const;
   
-    StatusCode decorateTrack(const xAOD::TrackParticle& track,
-                           float dr_lepton,
-                           bool isUsedForElectron,
-                           bool isUsedForMuon,
-                           const xAOD::TrackParticle* trackLep) const;
+    StatusCode decorateTrack(SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
+			     const xAOD::TrackParticle& track,
+                             float dr_lepton,
+                             bool isUsedForElectron,
+                             bool isUsedForMuon,
+                             const xAOD::TrackParticle* trackLep) const;
 
-    StatusCode fillParticles(std::vector<const xAOD::IParticle *> &parts,
-                           const xAOD::IParticle &lepton,
-                           const xAOD::TrackParticle *trackLep,
-                           const xAOD::TrackParticleContainer &trackContainer,
-                           const EventContext& ctx) const;
+    StatusCode fillParticles(SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_lepton,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> &dec_trk_dr_leptontrack,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_electron_track,
+                             SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> &dec_trk_muon_track,
+	                     std::vector<const xAOD::IParticle *> &parts,
+                             const xAOD::IParticle &lepton,
+                             const xAOD::TrackParticle *trackLep,
+                             const xAOD::TrackParticleContainer &trackContainer,
+                             const EventContext& ctx) const;
 
     // Properties:
     Gaudi::Property<std::string> m_leptonsName {
@@ -130,10 +146,11 @@ namespace Prompt {
     SG::WriteDecorHandleKeyArray<xAOD::ElectronContainer>  m_dec_el_plit_output{this, "PLITelOutput", {}};
     SG::WriteDecorHandleKeyArray<xAOD::MuonContainer> m_dec_mu_plit_output{this, "PLITmuOutput", {}};
 
-    const SG::Decorator<float> m_dec_trk_dr_lepton{"dr_lepton"};
-    const SG::Decorator<char> m_dec_trk_electron_track{"electron_track"};
-    const SG::Decorator<char> m_dec_trk_muon_track{"muon_track"};
-    const SG::Decorator<float> m_dec_trk_dr_leptontrack{"dr_leptontrack"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dec_trk_dr_lepton{this, "dec_trk_dr_lepton", m_tracksKey, "dr_lepton"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dec_trk_electron_track{this, "dec_trk_electron_track", m_tracksKey, "electron_track"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dec_trk_muon_track{this, "dec_trk_muon_track", m_tracksKey, "muon_track"};
+    SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_dec_trk_dr_leptontrack{this, "dec_trk_dr_leptontrack", m_tracksKey, "dr_leptontrack"}; 
+
   };
 }
 

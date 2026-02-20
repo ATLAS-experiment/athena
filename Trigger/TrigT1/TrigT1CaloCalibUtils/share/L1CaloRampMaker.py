@@ -113,8 +113,8 @@ def main():
     
     decorator = CompFactory.LVL1.L1CaloTriggerTowerDecoratorAlg()
     decorator.TriggerTowerTools = CompFactory.LVL1.L1CaloxAODOfflineTriggerTowerTools()
-    decorator.DecorName_caloCellEnergy = "CaloCellEnergy"
-    decorator.DecorName_caloCellET = "CaloCellET"
+    decorator.caloCellEnergyKey = "CaloCellEnergy"
+    decorator.caloCellETKey = "CaloCellET"
     acc.addEventAlgo(decorator, 'AthAlgSeq')
     
     from AthenaCommon.Constants import DEBUG, INFO     

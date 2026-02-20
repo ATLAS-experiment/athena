@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelAthenaPool )
@@ -13,7 +13,7 @@ atlas_add_library( DataModelAthenaPoolLib
                    PUBLIC_HEADERS DataModelAthenaPool
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthLinks AthenaBaseComps AthenaKernel AthenaPoolCnvSvcLib GaudiKernel Navigation RootUtils CxxUtils
+                   LINK_LIBRARIES AthLinks AthenaBaseComps AthenaKernel AthenaPoolCnvSvcLib GaudiKernel Navigation RootUtils CxxUtils SGCoreLib
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers RootConversions )
 
 atlas_add_component( DataModelAthenaPool
@@ -41,4 +41,3 @@ _add_test( NavigableCnv_p1_test )
 _add_test( NavigableCnv_p2_test )
 _add_test( ElementLinkVectorCnv_p1_test )
 _add_test( VectorElementLinkCnv_p1_test )
-

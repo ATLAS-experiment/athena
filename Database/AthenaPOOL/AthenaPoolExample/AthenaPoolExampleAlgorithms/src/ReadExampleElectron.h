@@ -7,13 +7,8 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaPoolExampleData/ExampleElectronContainer.h"
-#include "AthenaPoolExampleData/ExampleHitContainer.h"
-#include "AthenaPoolExampleData/ExampleTrackContainer.h"
-#include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
-
-class StoreGateSvc;
 
 namespace AthPoolEx {
 
@@ -22,10 +17,8 @@ namespace AthPoolEx {
  *Pool.
  **/
 class ReadExampleElectron : public AthReentrantAlgorithm {
- public:  // Constructor and Destructor
-  /// Standard Service Constructor
+ public:
   ReadExampleElectron(const std::string& name, ISvcLocator* pSvcLocator);
-  /// Destructor
   virtual ~ReadExampleElectron() = default;
 
  public:

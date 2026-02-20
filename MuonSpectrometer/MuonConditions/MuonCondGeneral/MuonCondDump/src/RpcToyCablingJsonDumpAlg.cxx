@@ -19,8 +19,6 @@ namespace Muon {
             return StatusCode::FAILURE;
         }
 
-        m_BIL_stIdx = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIL");
-        m_BIS_stIdx = m_idHelperSvc->rpcIdHelper().stationNameIndex("BIS");
         return StatusCode::SUCCESS;
     }
     StatusCode RpcToyCablingJsonDumpAlg::execute() {
@@ -82,8 +80,7 @@ namespace Muon {
                                                        (nStrips - (nStrips % nStripsPerBoard)) / nStripsPerBoard;
 
                         for (bool side : {false, true}) {
-                            bool run4_BIS = ((reEle->stationName() == m_BIS_stIdx) && (std::abs(reEle->stationEta()) < 7));
-                            if (side && reEle->stationName() != m_BIL_stIdx && !(run4_BIS)) {
+                            if (side && reEle->nPhiStrips()!= 0) {
                                 /// Do not create side cablings for non BIL and non BIS 1-6 stations
                                 continue;
                             }

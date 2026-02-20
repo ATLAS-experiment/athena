@@ -13,14 +13,10 @@ def ActsIDPixelClusteringToolCfg(flags,
 
     kwargs.setdefault("isITk", False)
 
-    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelChargeCalibCondAlgCfg, PixelOfflineCalibCondAlgCfg
-    acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    from PixelConditionsAlgorithms.PixelConditionsConfig import PixelChargeCalibCondCfg, PixelOfflineCalibCondAlgCfg
+    acc.merge(PixelChargeCalibCondCfg(flags))
     acc.merge(PixelOfflineCalibCondAlgCfg(flags))
     kwargs.setdefault("PixelChargeCalibCondData", "PixelChargeCalibCondData")
-
-    from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
-    acc.merge(PixelReadoutManagerCfg(flags))
-    kwargs.setdefault("PixelReadoutManager", "InDetDD::PixelReadoutManager")
 
     if "PixelLorentzAngleTool" not in kwargs:
         from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
@@ -56,7 +52,7 @@ def ActsIDStripClusteringToolCfg(flags,
         kwargs.setdefault("StripDetElStatus", "SCTDetectorElementStatusWithoutFlagged")
 
     # Disable noisy modules suppression
-    kwargs.setdefault("maxFiredStrips", 0)
+    kwargs.setdefault("maxFiredStrips", 384)
     
     if flags.InDet.selectSCTIntimeHits:
         coll_25ns = (flags.Beam.BunchSpacing <= 25 and

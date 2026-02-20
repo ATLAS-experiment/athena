@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/range_with_at.h
@@ -14,6 +14,7 @@
 #define CXXUTILS_RANGE_WITH_AT_H
 
 
+#include "CxxUtils/throw_out_of_range.h"
 #include <ranges>
 #include <stdexcept>
 
@@ -38,7 +39,7 @@ public:
   decltype(auto) at (size_t i)
   {
     if (i >= std::size(*this))
-      throw std::out_of_range ("CxxUtils::range_with_at");
+      throw_out_of_range (__PRETTY_FUNCTION__, i, std::size(*this), this);
     return this->operator[] (i);
   }
 
@@ -46,7 +47,7 @@ public:
   decltype(auto) at (size_t i) const
   {
     if (i >= std::size(*this))
-      throw std::out_of_range ("CxxUtils::range_with_at");
+      throw_out_of_range (__PRETTY_FUNCTION__, i, std::size(*this), this);
     return this->operator[] (i);
   }
 };

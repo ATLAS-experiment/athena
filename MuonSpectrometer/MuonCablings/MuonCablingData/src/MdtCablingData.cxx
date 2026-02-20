@@ -26,7 +26,6 @@ std::ostream& operator<<(std::ostream& ostr, const MdtCablingData& obj) {
     ostr << "tube: " << static_cast<int>(obj.tube) << "  ---- ";
     ostr << static_cast<const MdtCablingOnData&>(obj) << ", ";
     ostr << "tdc: " << static_cast<int>(obj.tdcId) << ", ";
-    ostr << "mezzType: " << static_cast<int>(obj.mezzanine_type) << ", ";
     ostr << "tdcChannel: " << static_cast<int>(obj.channelId);
     return ostr;
 }

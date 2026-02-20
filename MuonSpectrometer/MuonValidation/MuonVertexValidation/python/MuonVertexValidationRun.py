@@ -51,7 +51,7 @@ def execute(cfg):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
-    from MuonCondTest.MdtCablingTester import setupServicesCfg
+    from MuonConfig.MuonConfigUtils import SetupMuonStandaloneCA
 
     args = GetArgsFromParser()
     flags = initConfigFlags()
@@ -63,6 +63,6 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataDeps = True 
     flags.Scheduler.ShowDataFlow = True
     flags.lock()
-    cfg = setupServicesCfg(flags)
+    cfg = SetupMuonStandaloneCA(flags)
     cfg.merge(MSVtxValidationCfg(flags, outFile=args.outputFile, readTriggers=args.triggers, isMC=not args.data))
     execute(cfg)

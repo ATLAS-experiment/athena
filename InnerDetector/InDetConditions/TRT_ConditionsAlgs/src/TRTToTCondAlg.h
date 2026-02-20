@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTTOTCONDALG_H
@@ -9,25 +9,25 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/CondAttrListVec.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "Gaudi/Property.h"
 #include "TRT_ConditionsData/TRTDedxcorrection.h"
 
-class TRTToTCondAlg : public AthAlgorithm
+class TRTToTCondAlg : public AthCondAlgorithm
 {
  public:
   TRTToTCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TRTToTCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
   enum EDataBaseType {kOldDB,kNewDB,kNewDBOccCorr};
-  StatusCode update1(TRTDedxcorrection& Dedxcorrection, const CondAttrListVec* channel_values);
-  StatusCode update2(TRTDedxcorrection& Dedxcorrection, const CondAttrListCollection* attrListColl );
+  StatusCode update1(TRTDedxcorrection& Dedxcorrection, const CondAttrListVec* channel_values) const;
+  StatusCode update2(TRTDedxcorrection& Dedxcorrection, const CondAttrListCollection* attrListColl ) const;
  
  protected:
   static void updateOldDBParameters(TRTDedxcorrection& Dedxcollection, std::map<std::string,std::vector<float> > &result_dict) ;

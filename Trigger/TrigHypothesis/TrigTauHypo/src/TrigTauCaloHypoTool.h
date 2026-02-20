@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigTauHypo_TrigTauCaloHypoTool_H
@@ -23,21 +23,21 @@
 #include "TrigCompositeUtils/HLTIdentifier.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
-#include "ITrigTauCaloHypoTool.h"
+#include "ITrigTauJetHypoTool.h"
 
 
 /**
  * @class TrigTauCaloHypoTool
  * @brief HLT CaloMVA step TauJet selection hypothesis tools
  **/
-class TrigTauCaloHypoTool : public extends<AthAlgTool, ITrigTauCaloHypoTool> {
+class TrigTauCaloHypoTool : public extends<AthAlgTool, ITrigTauJetHypoTool> {
 public:
     TrigTauCaloHypoTool(const std::string& type, const std::string& name, const IInterface* parent);
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode decide(std::vector<ITrigTauCaloHypoTool::ToolInfo>& input) const override;
-    virtual bool decide(const ITrigTauCaloHypoTool::ToolInfo& i) const override;
+    virtual StatusCode decide(std::vector<ITrigTauJetHypoTool::ToolInfo>& input) const override;
+    virtual bool decide(const ITrigTauJetHypoTool::ToolInfo& i) const override;
 
 private:
     HLT::Identifier m_decisionId;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELUTILITIES_GEOALIGNMENTSTORE_H
@@ -72,7 +72,11 @@ public:
     void lockDelta();
     /// @brief: Locks the position cache
     void lockPosCache();
-
+    /** @brief Returns whether the position cache is locked */
+    bool posCacheLocked() const;
+    /** @brief Returns whether the delta transform cache is locked */
+    bool deltaCacheLocked() const;
+    
     using DeltaMap = TransformMap<GeoAlignableTransform, GeoTrf::Transform3D>;
     using DeltaMapPtr = GeoModel::TransientConstSharedPtr<DeltaMap>;
 

@@ -190,13 +190,14 @@ def mergeOutputs():
         from glob import glob
 
         # Merge log databases
-        tables = ["ranks", "event_log"]
         conn = sq3.connect("mpilog.db")
         cur = conn.cursor()
+        tables = ["ranks", "files", "event_log"]
         for db in glob("../rank-[1-9]*/mpilog.db"):
             cur.execute("ATTACH DATABASE ? as db", (db,))
             for table in tables:
-                cur.execute(f"INSERT INTO {table} SELECT * from db.{table}")
+                upsert = "INSERT OR IGNORE" if table == "files" else "INSERT"
+                cur.execute(f"{upsert} INTO {table} SELECT * from db.{table}")
             conn.commit()
             cur.execute("DETACH DATABASE db")
         conn.close()

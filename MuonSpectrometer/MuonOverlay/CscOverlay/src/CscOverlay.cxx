@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscOverlay.h"
@@ -97,12 +97,12 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
   // Thus we firstly iterate over signal hashes and store them in a map.
   std::vector < std::pair<IdentifierHash, bool> > overlapMap;
   overlapMap.reserve(signalContainer->numberOfCollections());
-  for (const auto &[hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
+  for (const auto [hashId, ptr] : signalContainer->GetAllHashPtrPair()) {
     overlapMap.emplace_back(hashId, false);
   }
 
   // Now loop through the background hashes and copy unique ones over
-  for (const auto &[hashId, ptr] : bkgContainer->GetAllHashPtrPair()) {
+  for (const auto [hashId, ptr] : bkgContainer->GetAllHashPtrPair()) {
     auto search = std::lower_bound( overlapMap.begin(), overlapMap.end(), hashId,
      [](const std::pair<IdentifierHash, bool> &lhs,  IdentifierHash rhs) -> bool { return lhs.first < rhs; } );
     if (search == overlapMap.end() || search->first != hashId) {
@@ -213,6 +213,8 @@ StatusCode CscOverlay::overlayContainer(const CscRawDataContainer *bkgContainer,
       ATH_MSG_ERROR("Adding overlaid Collection with hashId " << hashId << " failed");
       return StatusCode::FAILURE;
     } else {
+      //intentional release, the outputContainer owns it now.
+      //coverity[RESOURCE_LEAK]
       (void)outputCollection.release();
     }
   }

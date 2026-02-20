@@ -24,7 +24,7 @@
 // PACKAGE
 #include "ActsCalibBase/CalibrationContext.h"
 #include "ActsGeometry/ActsDetectorElement.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ActsTrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeoUtils/SurfaceCache.h"
@@ -69,8 +69,8 @@ static void ActsMeasurementCheck(const Acts::GeometryContext &gctx,
 
 static void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface);
 
 
@@ -86,7 +86,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
       if (!surface)
         return;
       const auto *actsElement = dynamic_cast<const IDetectorElementBase*>(
-          surface->associatedDetectorElement());
+          surface->surfacePlacement());
       if (!actsElement) {
         return;
       }
@@ -119,7 +119,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
     for (auto readoutElement : muonMgr->getAllReadoutElements()) {
       std::vector<std::shared_ptr<Acts::Surface>> reSurfaces = readoutElement->getSurfaces();
       for ( const auto& surf : reSurfaces) {
-        const Identifier id = static_cast<const SurfaceCache*>(surf->associatedDetectorElement())->identify();
+        const Identifier id = static_cast<const SurfaceCache*>(surf->surfacePlacement())->identify();
         m_actsSurfaceMap.insert(std::make_pair(id, surf.get()));
       }
     }
@@ -131,7 +131,7 @@ StatusCode ActsToTrkConverterTool::initialize() {
 const Trk::Surface &ActsToTrkConverterTool::actsSurfaceToTrkSurface(
     const Acts::Surface &actsSurface) const {
 
-  const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.associatedDetectorElement());
+  const auto *detEleBase= dynamic_cast<const IDetectorElementBase*>(actsSurface.surfacePlacement());
   if (!detEleBase) {
     ATH_MSG_ERROR(actsSurface.toString(m_trackingGeometryTool->getNominalGeometryContext().context()));
     throw std::domain_error("ActsToTrkConverterTool() - Surface does not have an associated detector element. ");
@@ -276,7 +276,7 @@ ActsToTrkConverterTool::trkTrackParametersToActsParameters(const Trk::TrackParam
              atlasParameter.charge() / (atlasParameter.momentum().mag() * 1_MeV), 0.;
   }
 
-  Acts::BoundSquareMatrix cov = Acts::BoundSquareMatrix::Identity();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   if (atlasParameter.covariance()) {
     cov.topLeftCorner(5, 5) = *atlasParameter.covariance();
 
@@ -458,7 +458,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
       }
 
       // Setup the index of the trackstate
-      auto index = Acts::MultiTrajectoryTraits::kInvalid;
+      auto index = Acts::kTrackIndexInvalid;
       if (!first_tsos) {
         index = actsTrack.tipIndex();
       }
@@ -492,7 +492,7 @@ void ActsToTrkConverterTool::trkTrackCollectionToActsTrackContainer(MutableTrack
             actsTSOS.smoothed() = parameters.parameters();
             actsTSOS.smoothedCovariance() = *parameters.covariance();
             // Not yet implemented in MultiTrajectory.icc
-            // actsTSOS.typeFlags() |= Acts::TrackStateFlag::ParameterFlag;
+            // actsTSOS.typeFlags().setHasParameters();
             if (!(actsTSOS.hasSmoothed() && actsTSOS.hasReferenceSurface())) {
               ATH_MSG_WARNING("TrackState does not have smoothed state ["
                               << actsTSOS.hasSmoothed()
@@ -589,7 +589,7 @@ static void ActsMeasurementCheck(
 
   Amg::Vector2D locxy = loc.head<2>();
 
-  Acts::ActsMatrix<2, 2> covxy = measurement.localCovariance();
+  Acts::Matrix<2, 2> covxy = measurement.localCovariance();
 
   Amg::Vector3D global = surf.localToGlobal(locxy, Amg::Vector3D{});
   Acts::Vector2 locpc;
@@ -615,7 +615,7 @@ static void ActsMeasurementCheck(
   auto boundToFree = planeSurface->boundToFreeJacobian(
         gctx, globalxypar.segment<3>(Acts::eFreePos0),
         globalxypar.segment<3>(Acts::eFreeDir0));
-  Acts::ActsSquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::SquareMatrix<2> xyToXyzJac = boundToFree.topLeftCorner<2, 2>();
 
   Acts::BoundVector locpcpar;
   locpcpar.head<2>() = locpc;
@@ -629,11 +629,11 @@ static void ActsMeasurementCheck(
   boundToFree = surface.boundToFreeJacobian(
         gctx, globalpcpar.segment<3>(Acts::eFreePos0),
   globalpcpar.segment<3>(Acts::eFreeDir0));
-  Acts::ActsSquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
-  Acts::ActsSquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
+  Acts::SquareMatrix<2> pcToXyzJac = boundToFree.topLeftCorner<2, 2>();
+  Acts::SquareMatrix<2> xyzToPcJac = pcToXyzJac.inverse();
 
   // convert cluster covariance
-  Acts::ActsMatrix<2, 2> covpc = covxy;
+  Acts::SquareMatrix<2> covpc = covxy;
   covpc = xyToXyzJac * covpc * xyToXyzJac.transpose();
   covpc = xyzToPcJac * covpc * xyzToPcJac.transpose();
 
@@ -641,8 +641,8 @@ static void ActsMeasurementCheck(
   std::normal_distribution<double> normal{0, 1};
   std::uniform_real_distribution<double> uniform{-1, 1};
 
-  Acts::ActsMatrix<2, 2> lltxy = covxy.llt().matrixL();
-  Acts::ActsMatrix<2, 2> lltpc = covpc.llt().matrixL();
+  Acts::SquareMatrix<2> lltxy = covxy.llt().matrixL();
+  Acts::SquareMatrix<2> lltpc = covpc.llt().matrixL();
 
   for (size_t i = 0; i < 1e4; i++) {
     std::cout << "ANNULUS COV: ";
@@ -676,8 +676,8 @@ static void ActsMeasurementCheck(
 
 void ActsTrackParameterCheck(
     const Acts::BoundTrackParameters &actsParameter,
-    const Acts::GeometryContext &gctx, const Acts::BoundSquareMatrix &covpc,
-    const Acts::BoundVector &targetPars, const Acts::BoundSquareMatrix &targetCov,
+    const Acts::GeometryContext &gctx, const Acts::BoundMatrix &covpc,
+    const Acts::BoundVector &targetPars, const Acts::BoundMatrix &targetCov,
     const Trk::PlaneSurface *planeSurface) {
 
   std::cout << "ANNULUS PAR COV: ";
@@ -698,20 +698,20 @@ void ActsTrackParameterCheck(
                    actsParameter.referenceSurface().geometryId().value()};
   std::normal_distribution<double> normal{0, 1};
 
-  Acts::ActsMatrix<2, 2> lltxy =
+  Acts::SquareMatrix<2> lltxy =
       targetCov.topLeftCorner<2, 2>().llt().matrixL();
-  Acts::ActsMatrix<2, 2> lltpc = covpc.topLeftCorner<2, 2>().llt().matrixL();
+  Acts::SquareMatrix<2> lltpc = covpc.topLeftCorner<2, 2>().llt().matrixL();
 
   for (size_t i = 0; i < 1e4; i++) {
     std::cout << "ANNULUS PAR: ";
     std::cout << actsParameter.referenceSurface().geometryId();
 
-    Acts::ActsVector<2> rnd;
+    Acts::Vector<2> rnd;
     rnd << normal(gen), normal(gen);
 
     // XY
     {
-      Acts::ActsVector<2> xy =
+      Acts::Vector<2> xy =
           lltxy.topLeftCorner<2, 2>() * rnd + targetPars.head<2>();
       Amg::Vector3D xyz;
       planeSurface->localToGlobal(Amg::Vector2D{xy.head<2>()}, Amg::Vector3D{},
@@ -723,7 +723,7 @@ void ActsTrackParameterCheck(
     }
     // PC
     {
-      Acts::ActsVector<2> rt = lltpc.topLeftCorner<2, 2>() * rnd +
+      Acts::Vector<2> rt = lltpc.topLeftCorner<2, 2>() * rnd +
                                actsParameter.parameters().head<2>();
       Amg::Vector3D xyz = actsParameter.referenceSurface().localToGlobal(
           gctx, Acts::Vector2{rt.head<2>()}, Acts::Vector3{});
@@ -769,7 +769,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
       [&] (const auto &state) -> void {
         // First only consider state with an associated detector element
         const auto* associatedDetEl = dynamic_cast<const IDetectorElementBase*>(
-                                        state.referenceSurface().associatedDetectorElement());
+                                        state.referenceSurface().surfacePlacement());
        
         if (not associatedDetEl) {
             ATH_MSG_VERBOSE("State is not associated with a measurement sruface");
@@ -784,7 +784,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
         std::unique_ptr<Trk::MeasurementBase> measState{};
     
         // State is a hole (no associated measurement), use predicted parameters   
-        if (flag.test(Acts::TrackStateFlag::HoleFlag)){
+        if (flag.isHole()){
           const Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                      state.parameters(),
                                                      state.covariance(),
@@ -807,7 +807,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
           typePattern.set(Trk::TrackStateOnSurface::Hole);
         }
         // The state is a measurement state, use smoothed parameters 
-        else if (flag.test(Acts::TrackStateFlag::MeasurementFlag)) {
+        else if (flag.hasMeasurement()) {
           Acts::BoundTrackParameters actsParam(state.referenceSurface().getSharedPtr(),
                                                state.parameters(),
                                                state.covariance(),

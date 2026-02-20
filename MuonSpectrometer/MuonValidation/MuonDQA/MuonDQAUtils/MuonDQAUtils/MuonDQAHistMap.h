@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -14,15 +14,12 @@
 #ifndef MuonDQAHistMap_H
 #define MuonDQAHistMap_H
 
-#include <sstream>
-#include <string.h>
-#include <vector>
-#include <map>
- 
+
 #include "TH1.h"
 #include "TH2.h"
-#include "TProfile.h"
 
+#include <vector>
+#include <map>
   
 /////////////////////////////////////////////////////////////////////////////
 

@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -21,6 +21,7 @@ namespace xAODMaker {
 
       // Initialise all of the keys.
       ATH_CHECK( m_beamSpotKey.initialize() );
+      ATH_CHECK( m_eventInfoKey.initialize() );
 
       ATH_CHECK( m_beamPosXKey.initialize() );
       ATH_CHECK( m_beamPosYKey.initialize() );

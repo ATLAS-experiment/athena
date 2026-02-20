@@ -272,7 +272,7 @@ TrigDec::TrigDecisionMakerMT::getL1Result(const LVL1CTP::Lvl1Result *&result, co
     }
 
     ATH_CHECK(SG::makeHandle(m_l1ResultKeyOut, context).record( std::move(lvl1Result)), {});
-    ATH_MSG_INFO ( "Built LVL1CTP::Lvl1Result from valid xAOD::CTPResult.");
+    ATH_MSG_DEBUG ( "Built LVL1CTP::Lvl1Result from valid xAOD::CTPResult.");
 
   } else {
 

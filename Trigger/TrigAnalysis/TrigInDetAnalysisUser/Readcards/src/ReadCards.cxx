@@ -9,7 +9,7 @@
  **
  **   @date         Tue Apr 26 13:44:42 CEST 2005
  **
- **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -65,7 +65,7 @@ void ReadCards::Construct(const std::string& filename) {
   for ( unsigned i=0 ; i<m_Path.size() ; i++ ) {
     std::string tmp_filename = m_Path[i]+filename;
     if ( canopen(tmp_filename) ) { 
-      m_FileName = tmp_filename;
+      m_FileName = std::move(tmp_filename);
       break;
     } 
   }
@@ -386,7 +386,7 @@ void ReadCards::parse()
 	pos = token.find("####");
       }
 
-      values.push_back(token);
+      values.push_back(std::move(token));
     }
 
     if ( !empty ) {
@@ -461,7 +461,7 @@ vector<string> ReadCards::parseright(std::string& s) {
 
     if ( token.empty() ) error("missing token : " + input);
     
-    sv.push_back(token);
+    sv.push_back(std::move(token));
   }
   
   if ( sv.empty() ) error("tag with no value " + input);

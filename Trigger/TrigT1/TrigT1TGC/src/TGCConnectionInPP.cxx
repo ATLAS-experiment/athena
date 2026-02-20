@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionInPP.h"
@@ -56,7 +56,9 @@ void TGCConnectionInPP::readConnectionTable(TGCPatchPanel* PP)
       // create arrays store entries in database.
       for( int i=0; i<NumberOfPPOutputConnector; i+=1){
         line>>m_nCh[i];
+        //coverity[TAINTED_SCALAR]
         m_patchPanelIn[i] = new TGCPatchPanel* [m_nCh[i]];
+        //coverity[TAINTED_SCALAR]
         for( int j=0; j<m_nCh[i]; j+=1) m_patchPanelIn[i][j]=0;
         m_connectorIn[i] = new int [m_nCh[i]];
         m_channelIn[i] = new int [m_nCh[i]];
@@ -71,15 +73,18 @@ void TGCConnectionInPP::readConnectionTable(TGCPatchPanel* PP)
         if((i1PP!=-1)&&(PP->getId()==oPP)){
           if(PP->getId()==i1PP){
             // Channel correspond to this output channel is in same board.
+            //coverity[TAINTED_SCALAR]
             m_patchPanelIn[oCon][oCh]=PP;
           }else{
             // Channel correspond to this output channel is in adjacent boards.
             if(PP->getAdjacentPP(0)!=0){
               if(PP->getAdjacentPP(0)->getId()==i1PP){
+                //coverity[TAINTED_SCALAR]
                 m_patchPanelIn[oCon][oCh]=PP->getAdjacentPP(0);
               }
             }
             if(PP->getAdjacentPP(1)!=0){
+              //coverity[TAINTED_SCALAR]
               if(PP->getAdjacentPP(1)->getId()==i1PP){
                 m_patchPanelIn[oCon][oCh]=PP->getAdjacentPP(1);
               }

@@ -8,7 +8,7 @@
  * @brief Base class to factor out code common among Calo ID helpers.
  */
 
-
+#include "AthenaKernel/getMessageSvc.h"
 #include "CaloIdentifier/CaloIDHelper.h"
 #include "IdDict/IdDictDictionary.h"
 #include "IdDict/IdDictMgr.h"
@@ -33,8 +33,6 @@ CaloIDHelper::HashGroup::HashGroup ()
  * @param name Name of this group (only for error reporting).
  * @param ids Set of Identifiers comprising this group.
  * @param end_index The ending index for the context for this group.
- * @parma msgSvc The global message service
- *               (may be 0, only for error reporting).
  * @param full_range The @c MultiRange corresponding to this group.
  *                   If supplied, the side of the @c ids set is checked
  *                   against the range's cardinality.
@@ -43,13 +41,12 @@ CaloIDHelper::HashGroup::HashGroup ()
 int CaloIDHelper::HashGroup::init (const std::string& name,
                                    const std::set<Identifier>& ids,
                                    size_type end_index,
-                                   IMessageSvc* msgSvc,
                                    const MultiRange* full_range)
 {
   m_end_index = end_index;
   if (full_range && full_range->cardinality() != ids.size()) {
-    MsgStream log (msgSvc, "CaloIDHelper");
-    log << MSG::ERROR  << name << " set size " << ids.size()
+    MsgStream log(Athena::getMessageSvc(), name);
+    log << MSG::ERROR << "set size " << ids.size()
         << " not equal to hash max " << full_range->cardinality() << endmsg;
     return 1;
   }
@@ -187,7 +184,7 @@ int CaloIDHelper::get_hash  (const Identifier& id, IdentifierHash& hash_id, cons
 float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return m_vecOfDictRegions[regHash]->deta();
+  return m_vecOfDictRegions.at(regHash)->deta();
 }
 
 
@@ -198,7 +195,7 @@ float CaloIDHelper::etaGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return  2. * M_PI / m_vecOfDictRegions[regHash]->dphi();
+  return  2. * M_PI / m_vecOfDictRegions.at(regHash)->dphi();
 }
 
 
@@ -209,7 +206,7 @@ float CaloIDHelper::phiGranularity(const IdentifierHash regHash) const
 float CaloIDHelper::eta0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->eta0());
+  return (m_vecOfDictRegions.at(regHash)->eta0());
 }
 
 
@@ -220,7 +217,7 @@ float CaloIDHelper::eta0(const IdentifierHash regHash) const
 float CaloIDHelper::phi0(const IdentifierHash regHash) const
 {
   if (regHash >= m_vecOfDictRegions.size()) return NOT_VALID;
-  return (m_vecOfDictRegions[regHash]->phi0());
+  return (m_vecOfDictRegions.at(regHash)->phi0());
 }
 
 
@@ -242,9 +239,7 @@ CaloIDHelper::initialize_base_from_dictionary (const IdDictMgr& dict_mgr,
 
   m_dict = dict_mgr.find_dictionary (dict_name);
   if(!m_dict) {
-    MsgStream log(m_msgSvc, "CaloIDHelper" );
-    log << MSG::ERROR << " cannot access " << dict_name <<  "dictionary"
-        << endmsg;
+    ATH_MSG_ERROR("cannot access " << dict_name <<  "dictionary");
     return 1;
   }
   return 0;

@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCONDITIONS_CALONOISE_H
@@ -11,6 +11,7 @@
 #include "CaloCondBlobObjs/CaloCondUtils.h" 
 #include "CaloCondBlobObjs/CaloCondBlobFlt.h"
 #include "Identifier/HWIdentifier.h"
+#include <memory>
 
           
 class CaloNoise {
@@ -76,11 +77,11 @@ class CaloNoise {
   const boost::multi_array<float, 2>& tileStorage() const {return m_tileNoise;}
 
   
-  void setTileBlob(const CaloCondBlobFlt* flt, const float lumi);
+  void setTileBlob(std::unique_ptr<const CaloCondBlobFlt> flt, const float lumi);
 
   //Those are needed for the GPU data conversions.
   
-  const CaloCondBlobFlt * getTileBlob() const { return m_tileBlob; }
+  const CaloCondBlobFlt * getTileBlob() const { return m_tileBlob.get(); }
 
   float getLumi() const { return m_lumi; }
 
@@ -99,7 +100,7 @@ class CaloNoise {
 
 
   //For double-gaussian noise:
-  const CaloCondBlobFlt* m_tileBlob=nullptr; 
+  std::unique_ptr<const CaloCondBlobFlt> m_tileBlob; 
   float m_lumi=0;
   NOISETYPE m_noiseType=TOTAL;
 };

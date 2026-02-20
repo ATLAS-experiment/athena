@@ -36,7 +36,7 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return false;
   }
 
-  const ActsGeometryContext gctx{getGeoContext()};
+  const ActsTrk::GeometryContext gctx{getGeoContext()};
 
   const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
   ATH_MSG_VERBOSE(" Track is inside volume "
@@ -56,12 +56,12 @@ G4bool RpcSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   /// Fetch the local -> global transformation  
-  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTrans(gctx, etaHitID)};
+  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTransform(gctx, etaHitID)};
   propagateAndSaveStrip(etaHitID, toGasGap, aStep);
   return true;
 }
 
-Identifier RpcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
+Identifier RpcSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::RpcReadoutElement* readOutEle, 
                                                const Amg::Vector3D& hitAtGapPlane, bool phiGap) const {
   const RpcIdHelper& idHelper{m_detMgr->idHelperSvc()->rpcIdHelper()};
@@ -70,7 +70,7 @@ Identifier RpcSensitiveDetector::getIdentifier(const ActsGeometryContext& gctx,
                                                   readOutEle->doubletZ(),
                                                   readOutEle->doubletPhi(), 1, phiGap, 1);
   
-  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTrans(gctx, firstChan) * 
+  const Amg::Vector3D locHitPos{readOutEle->globalToLocalTransform(gctx, firstChan) * 
                                 hitAtGapPlane};
   const double gapHalfWidth = readOutEle->stripEtaLength() / 2;
   const double gapHalfLength = readOutEle->stripPhiLength()/ 2;

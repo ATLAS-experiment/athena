@@ -11,13 +11,13 @@
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
 
-// Random generator includes
-#include "AthenaKernel/RNGWrapper.h"
-
 // forward declarations
 class G4FastTrack;
 class G4FastStep;
 class G4ParticleTable;
+namespace CLHEP{
+  class HepRandomEngine;
+}
 
 /**
   @class IPunchThroughSimWrapper
@@ -35,7 +35,7 @@ class IPunchThroughSimWrapper : virtual public IAlgTool
     DeclareInterfaceID(IPunchThroughSimWrapper, 1, 0);
 
     /** Runs both PunchThroughG4Classifier and PunchThroughG4Tool for PunchThrough simulation */
-    virtual void DoPunchThroughSim(G4ParticleTable &ptable, ATHRNG::RNGWrapper* rngWrapper, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep) = 0;
+    virtual void DoPunchThroughSim(G4ParticleTable &ptable, CLHEP::HepRandomEngine* rng, const double simE, std::vector<double> simEfrac, const G4FastTrack& fastTrack, G4FastStep& fastStep) = 0;
 };
 
 #endif // IPunchThroughSimWrapper_H

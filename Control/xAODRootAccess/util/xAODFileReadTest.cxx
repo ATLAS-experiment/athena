@@ -74,11 +74,13 @@ public:
             continue;
          }
          // Check if the branch exists in the file:
-         if( ! this->contains( efe.branchName(), *ti ) ) {
+         static constexpr bool METADATA = false;
+         if( ! this->contains( efe.branchName(), *ti, METADATA ) ) {
             continue;
          }
          // Try to load the object/container:
-         if( ! this->getInputObject( efe.branchName(), *ti ) ) {
+         static constexpr bool SILENT = false;
+         if( ! this->getInputObject( efe.branchName(), *ti, SILENT, METADATA ) ) {
             Error( "TEventClass::loadInputObjects",
                    XAOD_MESSAGE( "Couldn't load object: %s" ),
                    efe.branchName().c_str() );
@@ -89,7 +91,7 @@ public:
       return StatusCode::SUCCESS;
    }
 }; // class TEventClass
-
+//coverity[root_function]
 int main( int argc, char* argv[] ) {
 
    // Initialise the environment:

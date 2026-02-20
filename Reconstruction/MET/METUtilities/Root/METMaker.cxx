@@ -95,7 +95,6 @@ namespace met {
     //
     // Property declaration
     //
-    declareProperty("JetJvtMomentName",   m_jetJvtMomentName   = "Jvt"               );
     declareProperty("JetRejectionDec",    m_jetRejectionDec    = ""                  );
     declareProperty("JetMinEFrac",        m_jetMinEfrac        = 0.0                 );
     declareProperty("JetMinWeightedPt",   m_jetMinWeightedPt   = 20.0e3              );
@@ -184,9 +183,12 @@ namespace met {
 
     if (!m_trkseltool.empty()) ATH_CHECK( m_trkseltool.retrieve() );
 
+    ATH_CHECK( m_jetContainer.initialize(m_JvtWP != "None" && m_JvtTool.empty()) );
+
     if (m_JvtWP != "None"){
       if (m_JvtTool.empty()) {
-        asg::AsgToolConfig config_jvt ("CP::NNJvtSelectionTool/JvtSelTool");
+        asg::AsgToolConfig config_jvt ("CP::NNJvtSelectionTool/JvtSelTool_METMaker_" + m_jetSelection);
+        ATH_CHECK(config_jvt.setProperty("JetContainer", m_jetContainer.key()));
         ATH_CHECK(config_jvt.setProperty("WorkingPoint", m_JvtWP));
         ATH_CHECK(config_jvt.setProperty("JvtMomentName", "NNJvt"));
         ATH_CHECK(config_jvt.setProperty("MaxPtForJvt", m_JvtPtMax));

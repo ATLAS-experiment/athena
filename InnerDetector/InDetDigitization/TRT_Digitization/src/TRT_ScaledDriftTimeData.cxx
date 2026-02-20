@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -15,13 +15,12 @@
 #include "TRT_ScaledDriftTimeData.h"
 
 //______________________________________________________________________________
-TRT_ScaledDriftTimeData::TRT_ScaledDriftTimeData(ITRT_DriftTimeData* pOriginalData,//Assumes ownership of pOriginalData!!
+TRT_ScaledDriftTimeData::TRT_ScaledDriftTimeData(std::unique_ptr<ITRT_DriftTimeData> pOriginalData,//Assumes ownership of pOriginalData!!
                                                  const double& scaleFactor)
-  : m_pOriginalData(pOriginalData), m_scaleFactor(scaleFactor) {}
+  : m_pOriginalData(std::move(pOriginalData)), m_scaleFactor(scaleFactor) {}
 
 //______________________________________________________________________________
 TRT_ScaledDriftTimeData::~TRT_ScaledDriftTimeData() {
-  delete m_pOriginalData;
 }
 
 //______________________________________________________________________________

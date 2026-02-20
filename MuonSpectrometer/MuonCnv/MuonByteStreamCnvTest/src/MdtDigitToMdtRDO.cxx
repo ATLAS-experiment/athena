@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtDigitToMdtRDO.h"
@@ -159,7 +159,7 @@ StatusCode MdtDigitToMdtRDO::execute(const EventContext& ctx) const {
                 wrongCsm.channelId =0;
                 wrongCsm.tdcId =0;
 
-                cabling_ptr->getOfflineId(wrongCsm, msgStream());
+                std::ignore = cabling_ptr->getOfflineId(wrongCsm, msgStream());
                 Identifier wrongId{};
                 cabling_ptr->convert(wrongCsm,wrongId);
 

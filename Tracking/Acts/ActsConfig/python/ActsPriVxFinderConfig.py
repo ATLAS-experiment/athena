@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -7,10 +7,11 @@ from AthenaConfiguration.Enums import LHCPeriod
 def ActsGaussAdaptiveMultiFindingCfg(flags,
                                      name="ActsAdaptiveMultiPriVtxFinderTool",
                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc = BeamSpotCondAlgCfg(flags)
 
     if "TrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             VtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             VtxInDetTrackSelectionCfg(flags)))
@@ -46,7 +47,7 @@ def TrigActsGaussAdaptiveMultiFindingCfg(flags,
     acc = ComponentAccumulator()
 
     if "TrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             TrigVtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             TrigVtxInDetTrackSelectionCfg(flags)))
@@ -64,10 +65,11 @@ def TrigActsGaussAdaptiveMultiFindingCfg(flags,
 def ActsIterativeFindingCfg(flags,
                             name="ActsIterativePriVtxFinderTool",
                             **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    acc = BeamSpotCondAlgCfg(flags)
 
     if "TrackSelector" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             VtxInDetTrackSelectionCfg)
         kwargs.setdefault("TrackSelector", acc.popToolsAndMerge(
             VtxInDetTrackSelectionCfg(flags)))

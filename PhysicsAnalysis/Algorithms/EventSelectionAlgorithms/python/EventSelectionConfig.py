@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeEventCutFlowConfig
@@ -10,13 +10,13 @@ class EventSelectionMergerConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionMergerConfig, self).__init__()
+        self.setBlockName('EventSelectionMerger')
         self.addOption('selections', [], type=list,
-            info="the selection decisions (list of strings) to unify into a "
-            "final decision (internally: selection_1 || selection_2 || ...). "
-            "The default is [] (empty list).")
+            info="the selection decisions to unify into a "
+            "final decision (internally: `selection_1 || selection_2 || ...`). ")
         self.addOption('noFilter', False, type=bool,
-            info="do not apply an event filter. The default is False, i.e. "
-            "remove events not passing the full list of selection cuts.")
+            info="do not apply an event filter, i.e. setting it to `False` "
+            "removes events not passing the full list of selection cuts.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -40,58 +40,52 @@ class EventSelectionConfig(ConfigBlock):
 
     def __init__(self):
         super(EventSelectionConfig, self).__init__()
+        self.setBlockName('EventSelection')
         self.addOption('name', '', type=str,
             noneAction='error',
             info="the name of the event selection, used to uniquely identify "
-            "the EventSelectionConfig block.")
+            "the `EventSelectionConfig` block.")
         self.addOption('electrons', "", type=str,
             info="the input electron container, with a possible selection, in "
-            "the format container or container.selection. The default is '' "
-            "(empty string).")
+            "the format `container` or `container.selection`.")
         self.addOption('muons', "", type=str,
             info="the input muon container, with a possible selection, in the "
-            "format container or container.selection. The default is '' "
-            "(empty string).")
+            "format `container` or `container.selection`.")
         self.addOption('jets', "", type=str,
             info="the input jet container, with a possible selection, in the "
-            "format container or container.selection. The default is '' "
-            "(empty string).")
+            "format `container` or `container.selection`.")
         self.addOption('largeRjets', "", type=str,
             info="the large-R jet container, with a possible selection, in "
-            "the format container or container.selection. The default is '' "
-            "(empty string).")
+            "the format `container` or `container.selection`.")
         self.addOption('photons', "", type=str,
             info="the input photon container, with a possible selection, in "
-            "the format container or container.selection. The default is '' "
-            "(empty string).")
+            "the format `container` or `container.selection`.")
         self.addOption('taus', "", type=str,
             info="the input tau-jet container, with a possible selection, in "
-            "the format container or container.selection. The default is '' "
-            "(empty string).")
+            "the format `container` or `container.selection`.")
         self.addOption('met', "", type=str,
-            info="he input MET container. The default is '' (empty string).")
-        #TODO: add info string
+            info="the input MET container.")
         self.addOption('metTerm', "Final", type=str,
-            info="")
+            info="the MET term to use when computing MET-based quantities.")
         self.addOption('btagDecoration', "", type=str,
-            info="the b-tagging decoration to use when defining b-jets. "
-            "The default is '' (empty string).")
+            info="the b-tagging decoration to use when defining b-jets.")
         self.addOption('preselection', "", type=str,
             info="the event-wise selection flag to start this event selection "
-            "from. The default is '' (empty string).")
+            "from.")
         self.addOption('selectionCuts', "", type=str,
             noneAction='error',
-            info="a single string listing one selection cut per line.")
+            info="a single string listing one selection cut per line. "
+            "See [available keywords](https://topcptoolkit.docs.cern.ch/latest/settings/eventselection/#available-keywords).")
         self.addOption('noFilter', False, type=bool,
-            info="do not apply an event filter. The default is False, i.e. "
-            "remove events not passing the full list of selection cuts.")
+            info="do not apply an event filter, i.e. setting it to `False` "
+            "removes events not passing the full list of selection cuts.")
         self.addOption('debugMode', False, type=bool,
             info="whether to create an output branch for every single line "
-            "of the selection cuts. The default is False (only saves the"
-            " final decision).")
+            "of the selection cuts. Setting it to `False` only saves the"
+            " final decision.")
         self.addOption('useDressedProperties', True, type=bool,
             info="whether to use dressed truth electron and truth muon "
-            "kinematics rather than simple P4 kinematics.")
+            "kinematics rather than simple 4-vector kinematics.")
         self.step = 0
         self.currentDecoration = ''
         self.cutflow = []
@@ -1005,12 +999,6 @@ def makeMultipleEventSelectionConfigs(seq,
         debugMode -- enables saving all intermediate decorations
         cutFlowHistograms -- whether to toggle event cutflow histograms per region and per systematic
     """
-
-    # handle the case where a user is only providing one selection
-    if len(list(selectionCutsDict.keys())) == 1:
-        name, selectionCuts = list(selectionCutsDict.items())[0]
-        makeEventSelectionConfig(seq, name, electrons, muons, jets, largeRjets, photons, taus, met, metTerm, btagDecoration, preselection, selectionCuts, noFilter=noFilter, debugMode=debugMode, cutFlowHistograms=cutFlowHistograms)
-        return
 
     # first, we generate all the individual event selections
     # !!! it's important to pass noFilter=True, to avoid applying the individual filters in series

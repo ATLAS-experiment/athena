@@ -1,5 +1,5 @@
 
-#Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -10,7 +10,6 @@ def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorCondAlg", **kwargs):
     result = ComponentAccumulator()
     result.merge(MuonAlignStoreCfg(flags))
     alignStores = []
-
     if flags.Detector.GeometryMDT:  
         alignStores+=["MdtActsAlignContainer"]
     if flags.Detector.GeometryRPC:  
@@ -22,6 +21,8 @@ def MuonReadoutGeometryCnvAlgCfg(flags,name="MuonDetectorCondAlg", **kwargs):
     if flags.Detector.GeometryMM:
         alignStores+=["MmActsAlignContainer"]
     kwargs.setdefault("AlignmentKeys", alignStores)
+    from MuonConfig.MuonConfigFlags import GeoTrfCacheMode
+    kwargs.setdefault("splitTrfCache", flags.Muon.AlignedGeoTrfCacheMode != GeoTrfCacheMode.FullCacheCond)
     the_alg = CompFactory.MuonGMR4.ReadoutGeomCnvAlg(name=name, **kwargs)
     result.addCondAlgo(the_alg, primary = True)
     return result

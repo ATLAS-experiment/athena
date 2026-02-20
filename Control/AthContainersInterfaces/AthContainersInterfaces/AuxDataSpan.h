@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersInterfaces/AuxDataSpan.h
@@ -25,6 +25,7 @@
 #define ATHCONTAINERSINTERFACES_AUXDATASPAN_H
 
 
+#include "CxxUtils/throw_out_of_range.h"
 #include <cstddef>
 #include <stdexcept>
 
@@ -128,7 +129,9 @@ public:
    */
   T& at (size_t index)
   {
-    if (index >= m_span.size) throw std::out_of_range ("AuxDataSpan");
+    if (index >= m_span.size) {
+      CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, index, m_span.size, this);
+    }
     return data()[index];
   }
 
@@ -139,7 +142,9 @@ public:
    */
   const T& at (size_t index) const
   {
-    if (index >= m_span.size) throw std::out_of_range ("AuxDataSpan");
+    if (index >= m_span.size) {
+      CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, index, m_span.size, this);
+    }
     return data()[index];
   }
 
@@ -227,7 +232,9 @@ public:
    */
   const T& at (size_t index) const
   {
-    if (index >= m_span.size) throw std::out_of_range ("AuxDataSpan");
+    if (index >= m_span.size) {
+      CxxUtils::throw_out_of_range (__PRETTY_FUNCTION__, index, m_span.size, this);
+    }
     return data()[index];
   }
 

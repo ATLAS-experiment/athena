@@ -14,7 +14,8 @@ class RPCSensitiveDetectorTool : public SensitiveDetectorBase {
 public:
     /** construction/destruction */
     RPCSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~RPCSensitiveDetectorTool()=default;
+    virtual StatusCode SetupEvent(HitCollectionMap& hitCollections) override;
+    virtual StatusCode Gather(HitCollectionMap& hitCollections) override;
 protected:
     G4VSensitiveDetector* makeSD() const override final;
 private:

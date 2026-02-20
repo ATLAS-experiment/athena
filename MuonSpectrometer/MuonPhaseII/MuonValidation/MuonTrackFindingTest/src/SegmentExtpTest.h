@@ -8,7 +8,7 @@
 #include "StoreGate/ReadHandleKey.h"
 
 #include "xAODMuon/MuonSegmentContainer.h"
-#include "ActsGeometryInterfaces/IActsExtrapolationTool.h"
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
@@ -29,11 +29,13 @@ namespace MuonValR4{
         /** @brief IdHelperSvc to decode the Identifiers */
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         /** @brief Track extrapolation tool */
-        ToolHandle<IActsExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+        ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
         /** @brief Dependency on the geometry alignment */
-        SG::ReadHandleKey<ActsGeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
+        SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
         /** @brief Detector manager to fetch the sector surfaces */
         const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
+        /** @brief Option to draw every extrapolation asan obj file*/
+        Gaudi::Property<bool> m_drawEvent{this , "drawEvent", false };
     };
 }
 

@@ -179,10 +179,7 @@ class TopoAutomatonClustering :
   Gaudi::Property<bool> m_keepSignificantCells {this, "UseTimeCutUpperLimit", false, "Do not apply time cut on cells of large significance"};
 
   /**
-   * @brief if set to true use 2-gaussian noise description for
-   * TileCal
-   *
-   * @warning Currently unsupported on the GPU side!
+   * @brief if set to true use 2-gaussian noise description for TileCal
    */
   Gaudi::Property<bool> m_twoGaussianNoise{this, "TwoGaussianNoise", false, "Use 2-gaussian noise description for TileCal"};
 

@@ -1,10 +1,21 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+## *********************************************
+from AnaAlgorithm.DualUseConfig import isAthena
+if not isAthena:
+    ## If in AnalysisBase and not in Athena, import JetAnalysisCommon
+    ## which will set-up replacement for some Athena modules and allow standard jet config to be invoked.
+    ## IMPORTANT:  1st import (and define) AlgSequence
+    import AnaAlgorithm.AlgSequence # noqa: F401
+    import JetRecConfig.JetAnalysisCommon # noqa: F401
+## *********************************************
 from AthenaCommon import Logging
 jcslog = Logging.logging.getLogger('JetCalibStepsConfig')
 
 from JetToolHelpers.HelperConfig import VarToolCfg, HistoInputCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from PathResolver import PathResolver
+import json
 
 def smearingStep(flags, **configDict):
     """ Configuration of the Smearing step. """
@@ -37,13 +48,13 @@ def smearingStep(flags, **configDict):
 
     smearStep = CompFactory.SmearingCalibStep("SmearingCalibStep", **configDict)
 
-    return smearStep
+    return [smearStep]
 
 def puresidualStep(flags, **configDict):
 
     configDict.setdefault('IsData', not flags.Input.isMC)
-
-    return CompFactory.Pileup1DResidualCalibStep("PUResid", **configDict)
+    PU_step = CompFactory.Pileup1DResidualCalibStep("PUResid", **configDict)
+    return [PU_step]
 
 
 def gscStep(flags, **configDict):
@@ -57,11 +68,15 @@ def gscStep(flags, **configDict):
         histTool_Tile0 = [dict(varX = "pt", varY = "Tile0", histName=f"AntiKt4EMPFlow_Tile0_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(18)],
         histTool_nTrk=[dict(varX = "pt", varY = dict(Name="nTrk", Type="int",), histName=f"AntiKt4EMPFlow_nTrk_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(25)],
         histTool_trackWIDTH=[dict(varX = "pt", varY = "trackWIDTH", histName=f"AntiKt4EMPFlow_trackWIDTH_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(25)],
+        histTool_PunchThrough=[dict(varX = "e", varY = dict(Name="Nsegments", Type="int",), histName=f"AntiKt4EMPFlow_PunchThrough_interpolation_resp_eta_{j}", inputFile=defaultFileGSC) for j in range(2)],
     )
 
+    gsc_steps = ['histTool_EM3', 'histTool_CharFrac', 'histTool_Tile0', 'histTool_nTrk', 'histTool_trackWIDTH']
+    if configDict.get('applyPunchThrough',False):
+        gsc_steps.append('histTool_PunchThrough')
+        
     # Build the hist tools
-    for key in ['histTool_EM3', 'histTool_CharFrac', 'histTool_Tile0', 'histTool_nTrk', 'histTool_trackWIDTH']:
-
+    for key in gsc_steps:
         # Use defaultHistTools by default
         if key not in configDict:
             toolArray = defaultHistTools[key]
@@ -89,29 +104,46 @@ def gscStep(flags, **configDict):
 
     GSCstep = CompFactory.GSCCalibStep("gsccalibstep", **configDict)
 
-    return GSCstep
+    return [GSCstep]
 
 def etajesStep(flags, **configDic):
 
     pVars = configDic.pop("ParametrizedVars")
 
-    jesstep = CompFactory.EtaMassJESCalibStep("EtaMassJESCalib",
+    jesstep = CompFactory.EtaJESCalibStep("EtaJESCalib",
                                               VarToolE= VarToolCfg(flags,  var=pVars['varE']),
                                               VarToolEta= VarToolCfg(flags, var=pVars["varEta"]),
                                               **configDic
                                               )
-    return jesstep
+    return [jesstep]
+
+def jmsStep(flags, **configDic):
+
+    histoParams = configDic.pop('histoParams')
+    histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('HistoFile'))
+
+    configDic["histoReaderJMS"] = HistoInputCfg(flags, "HistToolJMS", **histoParams)
+    configDic['varToolX'] = VarToolCfg(flags, var=histoParams['varX'], Tname="VarToolX_JMS")
+    configDic['varToolZ'] = VarToolCfg(flags, var=histoParams['varZ'], Tname="VarToolZ_JMS")
+
+    jmsstep = CompFactory.JMSCalibStep("JMSCalib",
+                                       **configDic
+                                       )
+    return [jmsstep]
 
 def insituStep(flags, **configDic):
 
     histEtaInterCalib = configDic.pop('histEtaInterCalib')
     histAbsCalib = configDic.pop('histAbsCalib')
 
+    histAbsJMSCalib = configDic.pop('JMS',None)
+
     histoReaderEta_vec, histoReaderAbs_vec = [], []
 
     for infile in configDic.pop('fileInsitu'):
         histoReaderEta_vec.append(dict(inputFile = PathResolver.FindCalibFile(infile), **histEtaInterCalib))
         histoReaderAbs_vec.append(dict(inputFile = PathResolver.FindCalibFile(infile), **histAbsCalib))
+
     configDic['HistoReaderEtaInter'] = [HistoInputCfg(flags, "HistToolEtaInter"+str(j), **etaDic) for j, etaDic in enumerate(histoReaderEta_vec)]
     configDic['HistoReaderAbs'] = [HistoInputCfg(flags, "HistToolAbs"+str(j), **absDic) for j, absDic in enumerate(histoReaderAbs_vec)]
 
@@ -119,9 +151,105 @@ def insituStep(flags, **configDic):
     configDic['vartool2'] = VarToolCfg(flags, var=histEtaInterCalib['varY'], Tname="VarTool")
     configDic['isMC'] = flags.Input.isMC
 
-    insituStep = CompFactory.InSituCalibStep("insitucalibstep", **configDic)
+    insituSteps = [CompFactory.InSituCalibStep("insitucalibstep", **configDic)]
 
-    return insituStep
+    # JMS
+    if histAbsJMSCalib:
+        histAbsJMSCalib['inputFile'] = PathResolver.FindCalibFile(histAbsJMSCalib['inputFile'])
+        insituSteps.append(
+            CompFactory.InSituJMSCalibStep("insitujmscalibstep", 
+                CalibrateMC = configDic.get("CalibrateMC",False),
+                isMC = flags.Input.isMC,
+                # modifying insitu scale rather than defining a new scale
+                InScale = "JetInsituScaleMomentum",
+                OutScale = "JetInsituScaleMomentum",
+                HistoReaderAbsJMS = HistoInputCfg(flags, "HistoToolAbsJMS", **histAbsJMSCalib),
+                ))
+
+    return insituSteps
+
+def af3Step(flags, **configDic):
+
+    # Get the settings for the histograms:
+    histoParams = configDic.pop('histoParams')
+    histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('CalibConstantFile'))
+    configDic["histoTool"] = HistoInputCfg(flags, "histoTool", **histoParams)
+
+    return [CompFactory.Generic4VecCorrectionStep("AF3", **configDic)]
+
+def ptResidualStep(flags, **configDic):
+
+    # Get the settings for the histograms:
+    histoParams = configDic.pop('histoParams')
+
+    # Define varTool to switch to bin centers
+    if configDic['useBinCenter']:
+        varYHisto = histoParams.pop('varYHisto')
+        configDic['varTool'] = VarToolCfg(flags, var=varYHisto, Tname="VarTool_for_binCenter")
+
+    histoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('CalibConstantFile'))
+    # 2D histogram with correction factors
+    configDic["histoTool"] = HistoInputCfg(flags, "histoTool", **histoParams)
+
+    return [CompFactory.Generic4VecCorrectionStep("PtResidual", **configDic)]
+
+def mc2mcStep(flags, **configDic):
+
+    # Generator and version are the first item
+    for key, value in flags.Input.GeneratorsInfo.items():
+        generator = key
+        generator_version = value
+        break
+
+    # Get the shower model:
+    showerModel = ''
+    # Check first if the DSID is on the exceptions list
+    mcDSID = flags.Input.MCChannelNumber
+    with open(PathResolver.FindCalibFile("JetCalibTools/MC2MC_exceptions_DSID.json")) as read_file:
+        data = json.load(read_file)
+        for key, value in data.items():
+            if key == mcDSID:
+                showerModel = value
+
+    if showerModel == '':
+        genType, psType, hadType = generatorDic[generator]
+        version = generator_version.replace('.','')[:3]
+        if (generator == 'Pythia8' or generator == 'Pythia8B') and not version.startswith('8'):
+            version = '8'+version
+        showerModel = genType+"-"+version+"-"+psType+"-"+hadType
+
+        with open(PathResolver.FindCalibFile("JetCalibTools/MC2MC_showerRemap.json")) as read_file:
+            data = json.load(read_file)
+            foundMatch = False
+            for key, value in data.items():
+                if key == showerModel:
+                    showerModel = value
+                    foundMatch = True
+                    break
+            if not foundMatch:
+                for key, value in data.items():
+                    if key == genType+"-"+version:
+                        showerModel = value+"-"+psType+"-"+hadType
+                        break
+
+    # Get the settings for the histograms:
+    baseHistoParams = configDic.pop('histoParams')
+    baseHistoParams['inputFile'] = PathResolver.FindCalibFile(configDic.pop('CalibConstantFileName')+'_'+showerModel+'.root')
+
+    histNameBase = baseHistoParams.pop('histNameBase')
+    for flav in configDic.pop('flavours'):
+        if flav == 'c':
+            configDic['doCjetCorrection'] = True
+        elif flav == 'b':
+            configDic['doBjetCorrection'] = True
+        histoParams = dict(varX = baseHistoParams['varX'],varY = baseHistoParams['varY'],
+                           histName=f'{histNameBase}_{flav}',
+                           inputFile=baseHistoParams['inputFile'])
+        configDic['mc2mcHist_'+flav] = HistoInputCfg(flags,Tname='HistoTool_MC2MC_'+flav,**histoParams)
+
+    configDic['isMC2MCCorr'] = True
+
+    return [CompFactory.Generic4VecCorrectionStep("MC2MC", **configDic)]
 
 #####################
     
@@ -129,10 +257,24 @@ calibStepDic = dict(
     JetArea = None,
     Residual = puresidualStep,
     EtaJES = etajesStep,
+    JMS = jmsStep,
     GSC = gscStep,
     Insitu = insituStep,
     Smear = smearingStep,
+    AF3 = af3Step,
+    PtResidual = ptResidualStep,
+    MC2MC = mc2mcStep,
+
 )
+
+#####################
+generatorDic = {
+    "Herwigpp": ["Herwigpp", "angular", "cluster"],
+    "Herwig7": ["Herwig", "angular", "cluster"],
+    "Sherpa": ["Sherpa", "dipole", "cluster"],
+    "Pythia8B": ["PythiaB", "dipole", "cluster"],
+    "Pythia8": ["Pythia", "dipole", "cluster"]
+}
 
 def calibConfigToToolList(flags, **configDict):
     """
@@ -140,6 +282,21 @@ def calibConfigToToolList(flags, **configDict):
     The order of the steps is determined by the InScale and OutScale properties given in the config.
     Tools are instantiated by calling functions declared in the calibStepDic dictionary.
     """
+
+    isFullSim = True
+    if flags.Input.isMC:
+        metaData = GetFileMD(flags.Input.Files[0])
+        simFlavour = metaData.get('Simulator','') # ATLFAST3 or FullG4
+        if 'ATLFAST3' in simFlavour:
+            isFullSim = False
+
+    # For fast simulation, we want to implement an additional calibration right after the GSC
+    if flags.Input.isMC and not isFullSim and 'AF3' in configDict:
+        # Change the input scale of the next calibration step to the output scale of the AF3 calibration:
+        for step in configDict:
+            if configDict.get(step)['InScale'] == 'JetGSCScaleMomentum' and step != 'Insitu' and step != 'AF3':
+                configDict.get(step)['InScale'] = 'JetFastSimScaleMomentum'
+                break
 
     toolDic = {}
     foundCS = False # check at least one of the steps starts from constituent scale
@@ -156,33 +313,56 @@ def calibConfigToToolList(flags, **configDict):
             jcslog.info('Skipping Insitu for MC')
             continue
 
+        # Skip MC to MC calibration factors for data or Pythia8
+        if step=="MC2MC":
+            if not flags.Input.isMC:
+                jcslog.info('Skipping MC2MC calibration for data')
+                continue
+
+            for key, value in flags.Input.GeneratorsInfo.items():
+                generator = key
+                break
+            if 'Pythia' in generator:
+                jcslog.info('Skipping MC2MC calibration for Pythia8')
+                continue
+
+        # Skip additional fast simulation calibration steps for data or full simulation
+        if step=="AF3":
+            if not flags.Input.isMC:
+                jcslog.info('Skipping additional FastSimulation calibration for data')
+                continue
+            # Check if full simulation
+            if isFullSim:
+                jcslog.info('Skipping additional FastSimulation calibration for full sim')
+                continue
+
         calibFunc = calibStepDic.get(step,None)
         if calibFunc is None:
             raise NotImplementedError(f'Calibration step {step} is not found in calibStepDic')
 
         calibConfig = configDict.get(step)
 
-        tool = calibFunc(flags, **calibConfig)
+        # each func returns a list (to allow one YAML block to configure multiple steps run in order)
+        toolList = calibFunc(flags, **calibConfig)
 
-        toolDic[step] = tool
-        if tool.InScale == "JetConstitScaleMomentum":
+        toolDic[step] = toolList
+        if toolList[0].InScale == "JetConstitScaleMomentum":
             foundCS = True
     
     if not foundCS:
         raise JetCalibConfigError('At least one step must have InScale = JetConstitScaleMomentum')
 
-    ordered_tools = []
-    ordered_step_names = []
-
-    def findNextSteps(startScale = "JetConstitScaleMomentum"):
+    def findNextSteps(ordered_tools=[], ordered_step_names=[], startScale = "JetConstitScaleMomentum"):
         ''' Recursively add tools to ordered_tools based on in/out scale '''
         for step in toolDic:
-            if toolDic[step].InScale == startScale:
-                ordered_tools.append(toolDic[step])
+            if toolDic[step][0].InScale == startScale:
+                ordered_tools += toolDic[step]
                 ordered_step_names.append(step)
-                findNextSteps(toolDic[step].OutScale)
+                ordered_tools, ordered_step_names = findNextSteps(ordered_tools, ordered_step_names, toolDic[step][-1].OutScale)
 
-    findNextSteps()
+        return ordered_tools, ordered_step_names
+
+    ordered_tools, ordered_step_names = findNextSteps([], [])
 
     # Check we've got all the steps
     for step in toolDic:

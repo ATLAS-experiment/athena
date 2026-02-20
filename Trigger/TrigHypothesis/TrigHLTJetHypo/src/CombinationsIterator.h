@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_HLTJETHYPO_COMBINATIONSITERATOR_H
@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <iterator>
+#include <iosfwd>
 
 /*
  * CombinatonsIterator is a forward iterator. It iterates over

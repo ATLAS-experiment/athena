@@ -10,7 +10,7 @@ FPGATrackSimInputHeaderTool::FPGATrackSimInputHeaderTool(const std::string& algn
   base_class(algname,name,ifc)
 {}
 
-StatusCode FPGATrackSimInputHeaderTool::openFile(std::string const & path)
+StatusCode FPGATrackSimInputHeaderTool::openFile(std::string const & path) const
 {
     // close old file
     if (m_infile && m_infile->IsOpen())
@@ -104,7 +104,7 @@ StatusCode FPGATrackSimInputHeaderTool::finalize(){
 }
 
 
-StatusCode FPGATrackSimInputHeaderTool::writeData(FPGATrackSimEventInputHeader* header)  {
+StatusCode FPGATrackSimInputHeaderTool::writeData(FPGATrackSimEventInputHeader* header) const {
   if (m_rwoption.value()==std::string("READ") ){
    ATH_MSG_WARNING ("Asked to write file in READ  mode");
    return StatusCode::SUCCESS;
@@ -123,7 +123,7 @@ StatusCode FPGATrackSimInputHeaderTool::writeData(FPGATrackSimEventInputHeader* 
   return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimInputHeaderTool::readData(FPGATrackSimEventInputHeader* header, bool &last)
+StatusCode FPGATrackSimInputHeaderTool::readData(FPGATrackSimEventInputHeader* header, bool &last) const
 {
   if (m_rwoption.value()!=std::string("READ") ){
     ATH_MSG_WARNING ("Asked to read file that is not in READ mode");
@@ -133,23 +133,33 @@ StatusCode FPGATrackSimInputHeaderTool::readData(FPGATrackSimEventInputHeader* h
   last=false;
 
   ATH_MSG_DEBUG ("Asked Event "<<m_event <<" in this file; current total is "<<m_totevent);
-  if (m_event >= m_EventTree->GetEntries())
+  if (m_event >= static_cast<unsigned>(m_EventTree->GetEntries()))
+  {
+    std::lock_guard<std::mutex> lock(m_fileMutex);
+    if (m_event >= static_cast<unsigned>(m_EventTree->GetEntries()))
     {
-        if (++m_file < m_inpath.value().size())
-            ATH_CHECK(openFile(m_inpath.value().at(m_file)));
+        unsigned current_file = m_file++;
+        if (current_file < m_inpath.value().size())
+            ATH_CHECK(openFile(m_inpath.value().at(current_file)));
         else {
-          last=true;
-          return StatusCode::SUCCESS;
+            last=true;
+            return StatusCode::SUCCESS;
         }
     }
+  }
 
+  // Protect ROOT I/O with mutex
+  {
+    std::lock_guard<std::mutex> lock(m_fileMutex);
+    m_EventTree->GetEntry(m_event);
+  }
 
   // increase counters
-  m_EventTree->GetEntry(m_event++);
+  m_event++;
+  m_totevent++;
+
   ATH_MSG_DEBUG("Reading event  "<<m_eventHeader->event() );
   *header= *m_eventHeader; //copy object to the external pointer
-
-  m_totevent++;
 
   return StatusCode::SUCCESS;
 

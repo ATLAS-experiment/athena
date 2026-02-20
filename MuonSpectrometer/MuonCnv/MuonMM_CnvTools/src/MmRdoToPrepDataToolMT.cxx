@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MmRdoToPrepDataToolMT.h"
@@ -33,6 +33,9 @@ StatusCode MmRdoToPrepDataToolMT::initialize() {
   ATH_CHECK(m_calibTool.retrieve());
   ATH_CHECK(m_updateKey.initialize(!m_updateKey.key().empty()));
   ATH_CHECK(m_xAODKey.initialize(!m_xAODKey.empty()));
+  if (m_useNewGeo) {
+      ATH_CHECK(detStore()->retrieve(m_detMgrR4));
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -83,12 +86,8 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
     prdColl->setIdentifier(moduleId);
   }
 
-  // MuonDetectorManager from the conditions store
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> MuonDetMgr{m_muDetMgrKey, ctx};
-  if (!MuonDetMgr.isValid()) {
-    ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
-    return StatusCode::FAILURE;
-  }
+  const MuonGM::MuonDetectorManager* MuonDetMgr{};
+  ATH_CHECK(SG::get(MuonDetMgr, m_muDetMgrKey, ctx));
 
   std::vector<MMPrepData> MMprds;
   // convert the RDO collection to a PRD collection  
@@ -216,6 +215,9 @@ StatusCode MmRdoToPrepDataToolMT::processCollection(const EventContext& ctx,
           cluster->setStripCharges(prd->stripCharges());
           cluster->setStripDriftDist(prd->stripDriftDist());
           cluster->setStripDriftErrors(prd->stripDriftErrors());
+          if (m_detMgrR4) {
+            cluster->setReadoutElement(m_detMgrR4->getMmReadoutElement(prd->identify()));
+          }
       }
   }
   // now write the collection

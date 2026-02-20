@@ -7,8 +7,8 @@
    @brief      Dump eformat fragments from FullEventFragment
 */
 
-#ifndef BYTESTREAMCNVSVC_DUMPFRAGS
-#define BYTESTREAMCNVSVC_DUMPFRAGS
+#ifndef BYTESTREAMCNVSVC_DUMPFRAGS_H
+#define BYTESTREAMCNVSVC_DUMPFRAGS_H
 
 
 #include <iostream> 
@@ -17,8 +17,6 @@
 class DumpFrags
 {
 public:
-  DumpFrags() {} 
-
   /// dump fragments from FullEventFragment
   static void dump(const RawEvent* re)
   {
@@ -114,5 +112,5 @@ public:
   }
 };
   
-#endif 
+#endif // BYTESTREAMCNVSVC_DUMPFRAGS_H
 

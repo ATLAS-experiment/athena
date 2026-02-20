@@ -1,10 +1,13 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#include "TH1.h"
-#include "TLorentzVector.h" // needed for Warning()
+#include "MuonEfficiencyCorrections/UtilFunctions.h"
+#include "TError.h" // needed for Warning()
 #include <locale>
+#include <cstdlib> //std::rand
+#include <algorithm> //std::generate_n
+#include <cctype> //std::to_lower
 
 namespace CP{
 
@@ -25,7 +28,7 @@ namespace CP{
         size_t ExpPos = str.find(exp);
         if (ExpPos == std::string::npos) return str;
         str.replace(ExpPos,exp.size(),rep);
-        if (str.find(exp) != std::string::npos) return ReplaceExpInString(str, exp, rep);
+        if (str.find(exp) != std::string::npos) return ReplaceExpInString(std::move(str), exp, rep);
         return str;
     }
    std::string EraseWhiteSpaces(std::string str) {
@@ -48,7 +51,9 @@ namespace CP{
         // We do not really care about the name of the histogram at this stage... At only needs 
         // to be cloned
         std::unique_ptr<TH1> ptr ( dynamic_cast<TH1*>(H->Clone(RandomString(10).c_str())));
-        ptr->SetDirectory(0);
+        if (ptr) {
+          ptr->SetDirectory(0);
+        }
         return ptr;
     }
     bool isOverflowBin(const TH1 *Histo, int bin) {

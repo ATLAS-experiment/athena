@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingBaseAlg.h"
@@ -183,14 +183,16 @@ namespace ActsTrk {
   std::unique_ptr<ActsTrk::IMeasurementSelector> TrackFindingBaseAlg::setMeasurementSelector(
       const detail::TrackFindingMeasurements &measurements,
       TrackFinderOptions &options) const {
-    ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
     std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = ActsTrk::detail::getMeasurementSelector(
         m_pixelCalibTool.isEnabled() ? &(*m_pixelCalibTool) : nullptr,
+        m_stripCalibTool.isEnabled() ? &(*m_stripCalibTool) : nullptr,
+        m_hgtdCalibTool.isEnabled() ? &(*m_hgtdCalibTool) : nullptr,
         measurements.measurementRanges(),
         m_measurementSelectorConfig.m_etaBins,
         m_measurementSelectorConfig.m_chi2CutOffOutlier,
-        m_numMeasurementsCutOff.value());
+        m_numMeasurementsCutOff.value(),
+        m_edgeHoleBorderWidth.value());
 
     measurementSelector->connect(&options.extensions.createTrackStates);
 
@@ -259,7 +261,7 @@ namespace ActsTrk {
 
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
-      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().associatedDetectorElement())) {
+      if (const auto *actsDetElem = dynamic_cast<const IDetectorElementBase *>(trackState.referenceSurface().surfacePlacement())) {
         switch (actsDetElem->detectorType()) {
         case DetectorType::Pixel:
           return xAOD::UncalibMeasType::PixelClusterType;
@@ -408,29 +410,29 @@ namespace ActsTrk {
 
   void TrackFindingBaseAlg::updateCounts(
       const detail::RecoTrackContainer::TrackProxy &track,
-      Acts::ConstTrackStateType typeFlags, xAOD::UncalibMeasType detType) {
+      Acts::ConstTrackStateTypeMap typeFlags, xAOD::UncalibMeasType detType) {
     if (detType == xAOD::UncalibMeasType::PixelClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nPixelHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nPixelOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nPixelHits(track)++;
       }
     } else if (detType == xAOD::UncalibMeasType::StripClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nStripHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nStripOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nStripHits(track)++;
       }
     } else if (detType == xAOD::UncalibMeasType::HGTDClusterType) {
-      if (typeFlags.test(Acts::TrackStateFlag::HoleFlag)) {
+      if (typeFlags.isHole()) {
         s_branchState.nHgtdHoles(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::OutlierFlag)) {
+      } else if (typeFlags.isOutlier()) {
         s_branchState.nHgtdOutliers(track)++;
-      } else if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      } else if (typeFlags.isMeasurement()) {
         s_branchState.nHgtdHits(track)++;
       }
     }

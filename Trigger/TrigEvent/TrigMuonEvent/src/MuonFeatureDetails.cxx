@@ -347,7 +347,7 @@ void MuonFeatureDetails::init_vectors() {
   
   m_chamber_type_1 = vec_int;
   m_chamber_type_2 = vec_int;
-  m_pos            = vec_int;
+  m_pos            = std::move(vec_int);
   m_aw             = vec_float;
   m_bw             = vec_float;
   m_zetaMin        = vec_float;
@@ -357,7 +357,7 @@ void MuonFeatureDetails::init_vectors() {
   m_etaMin         = vec_float;
   m_etaMax         = vec_float;
   m_st_phi         = vec_float;
-  m_st_roads       = vec_float;
+  m_st_roads       = std::move(vec_float);
   
   if(m_extension_capacity>0) {
     m_extension0.reserve( (unsigned int)m_extension_capacity);

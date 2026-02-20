@@ -38,7 +38,7 @@ public:
    /// Constructor with data assignment
    explicit Token(const Token* source);
    /// Allow move.
-   explicit Token(Token&& source);
+   explicit Token(Token&& source) noexcept;
    /// Standard destructor: release all allocated resources.
    virtual ~Token();
    /// Operator < to allow ordering
@@ -97,7 +97,7 @@ public:
    /// Retrieve token key
    virtual const std::string key() const;
    /// Build from the string representation of a token.
-   Token& fromString(const std::string& from);
+   Token& fromString(const std::string_view from);
    /// Set token information
    const Token& set(Token* pToken) const;
    /// Set all the data part of the token

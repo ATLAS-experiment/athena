@@ -11,7 +11,7 @@
 #include "GaudiKernel/FileIncident.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include "H5Cpp.h"
 #include "H5File.h"
@@ -191,8 +191,8 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
       H5::DataSpace filespace(1, ds_size, maxdim);
       H5::DSetCreatPropList ds_prop;
       hsize_t chunkdim[1] = {nbytes};
-      if( ds_name.starts_with(APRDefaults::TTreeNames::EventData) ||
-          ds_name.starts_with(APRDefaults::TTreeNames::EventTag) ) {
+      if( ds_name.starts_with(APRDefaults::getEventDataName()) ||
+          ds_name.starts_with(APRDefaults::getEventTagName()) ) {
          if (nbytes < 512) {
             chunkdim[0] = 4096;
          } else if (nbytes < 16 * 512) {

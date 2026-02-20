@@ -3,5 +3,11 @@
 */
 #include "../BucketDumperAlg.h"
 #include "../MlHitDumperAlg.h"
+#include "../SegmentDumperAlg.h"
+#include "../CaloCellsDumperAlg.h"
+#include "../TruthMuonVertexDumper.h"
 DECLARE_COMPONENT(MuonR4::BucketDumperAlg)
 DECLARE_COMPONENT(MuonR4::MlHitDumperAlg)
+DECLARE_COMPONENT(MuonR4::SegmentDumperAlg)
+DECLARE_COMPONENT(MuonR4::CaloCellsDumperAlg)
+DECLARE_COMPONENT(MuonR4::TruthMuonVertexDumperAlg)

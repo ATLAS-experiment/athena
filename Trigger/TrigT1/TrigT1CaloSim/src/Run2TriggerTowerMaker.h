@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ================================================
@@ -262,8 +262,8 @@ private:
   // --------------------------------------------------------------------------
   // Read and Write Handlers
   // --------------------------------------------------------------------------
-  SG::ReadHandleKey<xAOD::EventInfo> m_xaodevtKey;
-  SG::ReadDecorHandleKey<xAOD::EventInfo> m_actMuKey { this, "actualInteractionsPerCrossingKey", "EventInfo.actualInteractionsPerCrossing", "Decoration for actual interactions per crossing" };
+  SG::ReadHandleKey<xAOD::EventInfo> m_xaodevtKey{this, "xAODEventInfoKey", "EventInfo"};
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_actMuKey { this, "actualInteractionsPerCrossingKey", m_xaodevtKey, "actualInteractionsPerCrossing", "Decoration for actual interactions per crossing" };
 
   //  location of input TriggerTowers (for reprocessing)
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_inputTTLocation;

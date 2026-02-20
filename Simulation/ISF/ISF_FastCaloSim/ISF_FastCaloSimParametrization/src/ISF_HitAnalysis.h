@@ -6,7 +6,6 @@
 #define ISF_FASTCALOSIMPARAMETRIZATION_ISF_HIT_ANALYSIS_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"

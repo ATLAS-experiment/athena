@@ -22,6 +22,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   ATH_CHECK(m_outputDataStreamKeys.initialize());
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_inputInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to read " << 
+      storeGateKey << 
+      " into argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -37,12 +46,34 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
     }
 
     ATH_CHECK(m_kernels[kernelName].get() != nullptr);
-    m_inputBuffers.emplace_back(
-      *(devices[0]), 
-      sizeof(unsigned long) * m_bufferSize, 
-      xrt::bo::flags::normal, 
-      m_kernels[kernelName]->group_id(argumentIndex)
-    );
+
+    const std::optional<xrt::bo::flags> mem_flags = 
+      determine_mem_flags(m_kernels[kernelName], argumentIndex);
+
+    if (!mem_flags.has_value()) {
+      ATH_MSG_WARNING(
+          "Unable to determine mem_flags for argument with index " << 
+          argumentIndex <<
+          " in kernel named " <<
+          kernelName << 
+          ". Defaulting to xrt::bo::normal. Good luck!"
+      );
+
+      m_inputBuffers.emplace_back(
+        *(devices[0]), 
+        sizeof(unsigned long) * m_bufferSize, 
+        xrt::bo::flags::normal, 
+        m_kernels[kernelName]->group_id(argumentIndex)
+      );
+    }
+    else {
+      m_inputBuffers.emplace_back(
+        *(devices[0]), 
+        sizeof(unsigned long) * m_bufferSize, 
+        mem_flags.value(), 
+        m_kernels[kernelName]->group_id(argumentIndex)
+      );
+    }
 
     if (!m_runs.contains(kernelName)) {
       m_runs[kernelName] = std::make_unique<xrt::run>(*m_kernels[kernelName]);
@@ -53,6 +84,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_vSizeInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to get input size from " << 
+      storeGateKey << 
+      " for argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -77,6 +117,15 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, storeGateKey, argumentIndex] : m_outputInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up " << 
+      kernelName << 
+      " to write " << 
+      storeGateKey << 
+      " from argument " << 
+      argumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -91,12 +140,33 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
       );
     }
 
-    m_outputBuffers.emplace_back(
-      *(devices[0]), 
-      sizeof(unsigned long) * m_bufferSize, 
-      xrt::bo::flags::normal, 
-      m_kernels[kernelName]->group_id(argumentIndex)
-    );
+    const std::optional<xrt::bo::flags> mem_flags = 
+      determine_mem_flags(m_kernels[kernelName], argumentIndex);
+
+    if (!mem_flags.has_value()) {
+      ATH_MSG_WARNING(
+          "Unable to determine mem_flags for argument with index " << 
+          argumentIndex <<
+          " in kernel named " <<
+          kernelName << 
+          ". Defaulting to xrt::bo::normal. Good luck!"
+      );
+
+      m_outputBuffers.emplace_back(
+        *(devices[0]), 
+        sizeof(unsigned long) * m_bufferSize, 
+        xrt::bo::flags::normal, 
+        m_kernels[kernelName]->group_id(argumentIndex)
+      );
+    }
+    else {
+      m_outputBuffers.emplace_back(
+        *(devices[0]), 
+        sizeof(unsigned long) * m_bufferSize, 
+        mem_flags.value(), 
+        m_kernels[kernelName]->group_id(argumentIndex)
+      );
+    }
 
     if (!m_runs.contains(kernelName)) {
       m_runs[kernelName] = std::make_unique<xrt::run>(*m_kernels[kernelName]);
@@ -107,6 +177,17 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
   }
 
   for (const auto& [kernelName, argumentIndex, sourceKernelName, sourceArgumentIndex] : m_sharedInterfaces) {
+    ATH_MSG_DEBUG(
+      "Setting up shared buffer between " << 
+      kernelName << 
+      " argument " << 
+      argumentIndex << 
+      " and " << 
+      sourceKernelName <<
+      " argument " <<
+      sourceArgumentIndex
+    );
+
     const std::vector<std::shared_ptr<xrt::device>> devices = 
       m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
 
@@ -139,6 +220,32 @@ StatusCode EFTrackingXrtAlgorithm::initialize() {
       }
 
       index++;
+    }
+  }
+
+  for (const auto& kernelNames : m_kernelOrder) {
+    for (const auto& kernelName : kernelNames) {
+      const std::vector<std::shared_ptr<xrt::device>> devices = 
+        m_DeviceMgmtSvc->get_xrt_devices_by_kernel_name(kernelName);
+
+      ATH_CHECK(devices.size() != 0);
+
+      if (!m_kernels.contains(kernelName)) {
+        ATH_MSG_DEBUG("Creating kernel: " << kernelName);
+
+        m_kernels[kernelName] = std::make_unique<xrt::kernel>(
+          *(devices[0]),
+          devices[0]->get_xclbin_uuid(),
+          kernelName,
+          xrt::kernel::cu_access_mode::exclusive
+        );
+
+        if (!m_runs.contains(kernelName)) {
+          m_runs[kernelName] = std::make_unique<xrt::run>(*m_kernels[kernelName]);
+        }
+
+        ATH_CHECK(m_runs[kernelName].get() != nullptr);
+      }
     }
   }
 
@@ -191,10 +298,11 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
     m_vSizeDataStreamKeys
   ) {
     SG::ReadHandle<std::vector<unsigned long>> vSizeDataStream(vSizeDataStreamKey, ctx);
-    ATH_MSG_DEBUG("Setting VSize: " << vSizeDataStream.name() << ", " << vSizeDataStream->size());
     const auto& [kernelName, storeGateKey, argumentIndex] = m_vSizeInterfaces[vSizeHandleIndex];
+    ATH_MSG_DEBUG("Setting VSize: " << kernelName << ", " << vSizeDataStream.name() << ", " << vSizeDataStream->size());
 
     m_runs.at(kernelName)->set_arg(argumentIndex, vSizeDataStream->size());
+    vSizeHandleIndex++;
   }
 
   ATH_MSG_DEBUG("Run kernels");
@@ -249,5 +357,45 @@ StatusCode EFTrackingXrtAlgorithm::execute(const EventContext& ctx) const
   }
 
   return StatusCode::SUCCESS;
+}
+
+std::optional<xrt::bo::flags> EFTrackingXrtAlgorithm::determine_mem_flags(
+  const std::unique_ptr<xrt::kernel>& kernel,
+  const std::size_t index
+) const {
+  for (
+    const xrt::xclbin::kernel& kernelMetaData : 
+    kernel->get_xclbin().get_kernels()
+  ) {
+    if (kernel->get_name() != kernelMetaData.get_name()) {
+      continue;
+    }
+
+    for (const xrt::xclbin::arg& arg : kernelMetaData.get_args()) {
+      if (arg.get_index() != index) {
+        continue;
+      }
+
+      if (arg.get_mems().size() == 0) {
+        ATH_MSG_WARNING(
+          "No mems associated with argument " << 
+          index <<
+          " of " <<
+          kernel->get_name() <<
+          ". Expect more warnings."
+        );
+
+        return std::nullopt;
+      }
+      
+      if (arg.get_mems()[0].get_tag().find("HOST") != std::string::npos) {
+        return xrt::bo::flags::host_only;
+      }
+
+      return xrt::bo::flags::normal;
+    }
+  }
+
+  return std::nullopt;
 }
 

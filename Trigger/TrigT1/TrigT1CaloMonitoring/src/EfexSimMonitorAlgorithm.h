@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALOMONITORING_EFEXSIMMONITORALGORITHM_H
 #define TRIGT1CALOMONITORING_EFEXSIMMONITORALGORITHM_H
@@ -49,7 +49,6 @@ private:
     // need to check how many supercells there are, as expect mismatches when any are missing:
     SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
 
-    // SG::ReadDecorHandleKey<xAOD::EventInfo> m_decorKey;
   SG::ReadHandleKey<xAOD::eFexTowerContainer> m_eFexTowerContainerKey{this,"eFexTowerContainer","L1_eFexDataTowers","SG key of the primary eFex tower container, which should be populated if fex readout occurring"};
 
   SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey{this, "LArMaskedChannelKey", "LArMaskedSC", "Key of the OTF-Masked SC" };

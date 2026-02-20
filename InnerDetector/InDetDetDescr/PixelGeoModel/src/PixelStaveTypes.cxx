@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelStaveTypes.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
-
 #include "RDBAccessSvc/IRDBRecordset.h"
 
 #include <iostream>
@@ -34,13 +32,13 @@ PixelStaveTypes::Key::operator<(const PixelStaveTypes::Key &rhs) const
 }
 
 
-PixelStaveTypes::PixelStaveTypes(const IGeometryDBSvc * db, const IRDBRecordset_ptr& table)
+PixelStaveTypes::PixelStaveTypes(const IRDBRecordset_ptr& table)
 {
-  for (unsigned int i = 0; i < db->getTableSize(table); i++) {
-    int layer = db->getInt(table,"LAYER",i);
-    int phiModule = db->getInt(table,"SECTOR",i);
-    int fluidType = db->getInt(table,"FLUIDTYPE",i);
-    int biStaveType = db->getInt(table,"BISTAVETYPE",i);
+  for(const auto& rec : *table) {
+    int layer = rec->getInt("LAYER");
+    int phiModule = rec->getInt("SECTOR");
+    int fluidType = rec->getInt("FLUIDTYPE");
+    int biStaveType = rec->getInt("BISTAVETYPE");
     
     m_dataLookup[Key(layer,phiModule)] = Datum(fluidType,biStaveType);
     m_maxSector[layer] = std::max(phiModule, m_maxSector[layer]); // Store the max sector for each layer. 

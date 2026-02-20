@@ -12,8 +12,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 
-TRIG8MergedElectronContainer = "StdWithLRTElectrons"
-TRIG8MergedMuonContainer = "StdWithLRTMuons"
 
 # Main algorithm config
 def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
@@ -22,26 +20,31 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 
     # Augmentations
 
-    # LRT track merge
-    from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
-    acc.merge(InDetLRTMergeCfg(flags))
+    TRIG8MergedElectronContainer = "Electrons"
+    TRIG8MergedMuonContainer = "Muons"
+    if flags.Tracking.doLargeD0:
+        # LRT track merge
+        from DerivationFrameworkInDet.InDetToolsConfig import InDetLRTMergeCfg
+        acc.merge(InDetLRTMergeCfg(flags))
 
-    # LRT muons merge
-    from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-    acc.merge(LRTMuonMergerAlg( flags,
-                                PromptMuonLocation    = "Muons",
-                                LRTMuonLocation       = "MuonsLRT",
-                                OutputMuonLocation    = TRIG8MergedMuonContainer,
-                                CreateViewCollection  = True))
+        # LRT muons merge
+        TRIG8MergedMuonContainer = "StdWithLRTMuons"
+        from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+        acc.merge(LRTMuonMergerAlg( flags,
+                                    PromptMuonLocation    = "Muons",
+                                    LRTMuonLocation       = "MuonsLRT",
+                                    OutputMuonLocation    = TRIG8MergedMuonContainer,
+                                    CreateViewCollection  = True))
 
-    # LRT electrons merge
-    from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
-    acc.merge(LRTElectronMergerAlg( flags,
-                                    PromptElectronLocation = "Electrons",
-                                    LRTElectronLocation    = "LRTElectrons",
-                                    OutputCollectionName   = TRIG8MergedElectronContainer,
-                                    isDAOD                 = False,
-                                    CreateViewCollection   = True))
+        # LRT electrons merge
+        TRIG8MergedElectronContainer = "StdWithLRTElectrons"
+        from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
+        acc.merge(LRTElectronMergerAlg( flags,
+                                        PromptElectronLocation = "Electrons",
+                                        LRTElectronLocation    = "LRTElectrons",
+                                        OutputCollectionName   = TRIG8MergedElectronContainer,
+                                        isDAOD                 = False,
+                                        CreateViewCollection   = True))
 
 
     augmentationTools = [ ]
@@ -50,17 +53,17 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # LRT Egamma
-    from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
-    acc.merge(EGammaLRTCfg(flags))
+    if flags.Tracking.doLargeD0:
+        # LRT Egamma
+        from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
+        acc.merge(EGammaLRTCfg(flags))
 
-    from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
-    acc.merge(LRTElectronLHSelectorsCfg(flags))
+        from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
+        acc.merge(LRTElectronLHSelectorsCfg(flags))
 
-    # LRT Muons
-    from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
-    acc.merge(MuonsCommonCfg(flags,
-                             suff="LRT"))
+        # LRT Muons
+        from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
+        acc.merge(MuonsCommonCfg(flags, suff="LRT"))
     
     from TriggerMenuMT.TriggerAPI.TriggerAPI import TriggerAPI
     from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod
@@ -100,17 +103,19 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
         SelectionString         = "InDetTrackParticles.pt > 1*GeV",
         InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    TRIG8LRTTrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        flags,
-        name                    = "TRIG8LRTTrackParticleThinningTool",
-        StreamName              = kwargs['StreamName'],
-        SelectionString         = "InDetLargeD0TrackParticles.pt > 1*GeV",
-        InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
+    if flags.Tracking.doLargeD0:
+        TRIG8LRTTrackParticleThinningTool = acc.getPrimaryAndMerge(
+            TrackParticleThinningCfg(
+                flags, name = "TRIG8LRTTrackParticleThinningTool",
+                StreamName              = kwargs['StreamName'],
+                SelectionString         = "InDetLargeD0TrackParticles.pt > 1*GeV",
+                InDetTrackParticlesKey  = "InDetLargeD0TrackParticles"))
 
     # Finally the kernel itself
     thinningTools = [TRIG8PhotonsThinningTool,
-                     TRIG8TrackParticleThinningTool,
-                     TRIG8LRTTrackParticleThinningTool]
+                     TRIG8TrackParticleThinningTool]
+    if flags.Tracking.doLargeD0:
+        thinningTools += [TRIG8LRTTrackParticleThinningTool]
     
     if((not flags.Input.isMC) or "HLT_AntiKt4EMTopoJets_subjesIS" in flags.Input.Collections):
         TRIG8JETThinningTool = acc.getPrimaryAndMerge(TriggerGenericThinningCfg(
@@ -126,43 +131,44 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
     # Skimming
     skimmingTools = []
 
-    # Pieces of trigger names to keep
-    idtrig_keys = ['idperf', 'boffperf', 'ivarperf', 'idtp'] 
-    # Triggers to veto
-    idtrig_veto = ['HLT_e26_lhtight_ivarloose_2j20_0eta290_020jvt_boffperf_pf_ftf_L1EM22VHI']
-    # Add specific triggers
-    additional_triggers = [
-        "HLT_mu20_msonly",
-        "HLT_j45_pf_ftf_preselj20_L1J15",
-        "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE55",
-        "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE55",
-        "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50",
-        "HLT_xe80_tcpufit_distrk20_medium_L1XE50",
-        "HLT_xe80_tcpufit_distrk20_tight_L1XE50",
-        "HLT_mu60_L1MU14FCH"
-    ]
-    idtrig_keys += additional_triggers
-    idtrig_keys += displaced_jet_triggers
+    if flags.Trigger.EDMVersion >= 0:
+        # Pieces of trigger names to keep
+        idtrig_keys = ['idperf', 'boffperf', 'ivarperf', 'idtp']
+        # Triggers to veto
+        idtrig_veto = ['HLT_e26_lhtight_ivarloose_2j20_0eta290_020jvt_boffperf_pf_ftf_L1EM22VHI']
+        # Add specific triggers
+        additional_triggers = [
+            "HLT_mu20_msonly",
+            "HLT_j45_pf_ftf_preselj20_L1J15",
+            "HLT_xe80_tcpufit_isotrk120_medium_iaggrmedium_L1XE55",
+            "HLT_xe80_tcpufit_isotrk140_medium_iaggrmedium_L1XE55",
+            "HLT_xe80_tcpufit_dedxtrk50_medium_L1XE50",
+            "HLT_xe80_tcpufit_distrk20_medium_L1XE50",
+            "HLT_xe80_tcpufit_distrk20_tight_L1XE50",
+            "HLT_mu60_L1MU14FCH"
+        ]
+        idtrig_keys += additional_triggers
+        idtrig_keys += displaced_jet_triggers
 
-    triggers = [t for t in trig_all for k in idtrig_keys if k in t]
-    for veto in idtrig_veto:
-        try:
-            triggers.remove(veto)
-        except ValueError:
-            print(f"Warning, {veto} already removed from trigger list.")
+        triggers = [t for t in trig_all for k in idtrig_keys if k in t]
+        for veto in idtrig_veto:
+            try:
+                triggers.remove(veto)
+            except ValueError:
+                print(f"Warning, {veto} already removed from trigger list.")
 
-    #remove duplicates
-    triggers = sorted(list(set(triggers)))
-    print('TRIG8 list of triggers used for skimming:')
-    for trig in triggers: print(trig)
+        #remove duplicates
+        triggers = sorted(list(set(triggers)))
+        print('TRIG8 list of triggers used for skimming:')
+        for trig in triggers: print(trig)
 
-    TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
-    TRIG8TriggerSkimmingTool = TriggerSkimmingTool(name = "TRIG8TriggerPreSkimmingTool", 
-                                                   TriggerListAND = [],
-                                                   TriggerListOR  = triggers)
-    acc.addPublicTool(TRIG8TriggerSkimmingTool)
+        TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool
+        TRIG8TriggerSkimmingTool = TriggerSkimmingTool(name = "TRIG8TriggerPreSkimmingTool",
+                                                       TriggerListAND = [],
+                                                       TriggerListOR  = triggers)
+        acc.addPublicTool(TRIG8TriggerSkimmingTool)
 
-    skimmingTools.append(TRIG8TriggerSkimmingTool)
+        skimmingTools.append(TRIG8TriggerSkimmingTool)
 
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name,
@@ -176,6 +182,11 @@ def TRIG8KernelCfg(flags, name='TRIG8Kernel', **kwargs):
 def TRIG8Cfg(flags):
 
     acc = ComponentAccumulator()
+
+    TRIG8MergedElectronContainer = (
+        "StdWithLRTElectrons" if flags.Tracking.doLargeD0 else "Electrons")
+    TRIG8MergedMuonContainer = (
+        "StdWithLRTMuons" if flags.Tracking.doLargeD0 else "Muons")
 
     # Get the lists of triggers needed for trigger matching.
     # This is needed at this scope (for the slimming) and further down in the config chain
@@ -199,19 +210,17 @@ def TRIG8Cfg(flags):
 
     TRIG8SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
-                                            "LRTElectrons",
                                             "Photons",
                                             "Muons",
-                                            "MuonsLRT",
                                             "PrimaryVertices",
                                             "InDetTrackParticles",
-                                            "InDetLargeD0TrackParticles",
                                             "AntiKt4EMTopoJets",
                                             "AntiKt4EMPFlowJets",
-                                            "BTagging_AntiKt4EMTopo",
-                                            "BTagging_AntiKt4EMPFlow",
                                             "TauJets"
                                             ]
+    if flags.Tracking.doLargeD0:
+        TRIG8SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
+                                                 "InDetLargeD0TrackParticles"]
 
     TRIG8SlimmingHelper.AllVariables = ["HLT_IDTrack_Electron_FTF", 
                                         "HLT_IDTrack_ElecLRT_FTF", 
@@ -244,16 +253,14 @@ def TRIG8Cfg(flags):
                                         "HLT_IDTrack_Cosmic_FTF", 
                                         "HLT_IDTrack_Cosmic_IDTrig", 
                                         "HLT_IDTrack_DJLRT_FTF",
-                                        "BTagging_AntiKt4EMPFlowSecVtx",
                                         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTaggingSecVtx",
                                         "HLT_IDVertex_FS",
                                         "HLT_IDVertex_JetSuper",
                                         "HLT_IDVertex_Tau",
                                         "HLT_MET_tcpufit",
-                                        "HLT_DisTrkBDTSel",
-                                        "InDetDisappearingTrackParticles" ]
-                                        
-
+                                        "HLT_DisTrkBDTSel" ]
+    if flags.Tracking.doTrackSegmentsDisappearing:
+        TRIG8SlimmingHelper.AllVariables += ["InDetDisappearingTrackParticles"]
 
     TRIG8SlimmingHelper.StaticContent = [ 
                             "TrigRoiDescriptorCollection#HLT_FSRoI",
@@ -309,19 +316,20 @@ def TRIG8Cfg(flags):
 
     TRIG8SlimmingHelper.ExtraVariables += [ 
                         "Electrons.Tight.Medium.Loose.LHTight.LHMedium.LHLoose",
-                        "LRTElectrons.Tight.Medium.Loose.LHTight.LHMedium.LHLoose",
                         "egammaClusters.phi_sampl.eta0.phi0",
-                        "LRTegammaClusters.phi_sampl.eta0.phi0",
                         "TruthPrimaryVertices.t.x.y.z",
                         "PrimaryVertices.t.x.y.z.numberDoF.chiSquared.covariance.trackParticleLinks",
                         "InDetTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.trackFitter.patternRecoInfo.numberDoF.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
-                        "InDetLargeD0TrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.trackFitter.patternRecoInfo.numberDoF.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
                         "GSFTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.trackFitter.patternRecoInfo.hitPattern.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
-                        "LRTGSFTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.trackFitter.patternRecoInfo.hitPattern.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
                         "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                         "TauJets.dRmax.etOverPtLeadTrk",
                         "HLT_AntiKt4EMTopoJets_subjesIS.m.pt.eta.phi"]
-
+    if flags.Tracking.doLargeD0:
+        TRIG8SlimmingHelper.ExtraVariables += [
+            "LRTElectrons.Tight.Medium.Loose.LHTight.LHMedium.LHLoose",
+            "LRTegammaClusters.phi_sampl.eta0.phi0",
+            "InDetLargeD0TrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern.trackFitter.patternRecoInfo.numberDoF.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit",
+            "LRTGSFTrackParticles.d0.z0.vz.vx.vy.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared.trackFitter.patternRecoInfo.hitPattern.numberOfTRTHits.numberOfTRTOutliers.numberOfBLayerHits.expectBLayerHit.numberOfPixelDeadSensors.numberOfSCTDeadSensors.numberOfTRTHighThresholdHits.expectInnermostPixelLayerHit"]
 
     # Truth containers
     if flags.Input.isMC:
@@ -329,12 +337,11 @@ def TRIG8Cfg(flags):
         addTruth3ContentToSlimmerTool(TRIG8SlimmingHelper)
         TRIG8SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         TRIG8SlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
-                                              "LRTElectrons.TruthLink",
-                                              "Muons.TruthLink",
-                                              "MuonsLRT.TruthLink",
-                                              "Photons.TruthLink"]
-
-
+                                               "Muons.TruthLink",
+                                               "Photons.TruthLink"]
+        if flags.Tracking.doLargeD0:
+            TRIG8SlimmingHelper.ExtraVariables += ["LRTElectrons.TruthLink",
+                                                   "MuonsLRT.TruthLink"]
 
     # Trigger content
     TRIG8SlimmingHelper.IncludeTriggerNavigation = True
@@ -359,21 +366,24 @@ def TRIG8Cfg(flags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG8SlimmingHelper, 
                                                OutputContainerPrefix = "TrigMatch_",
                                                TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau)
-        # Schedule additional pre-matching against LLP offline muons and electrons
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(flags,
-                                              name = "LRTTriggerMatchingTool",
-                                              OutputContainerPrefix = "LRTTrigMatch_",
-                                              TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau,
-                                              InputElectrons=TRIG8MergedElectronContainer,
-                                              InputMuons=TRIG8MergedMuonContainer
-                                              ))
-        # And add the additional LLP trigger matching branches to the slimming helper 
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TRIG8SlimmingHelper,
-                                               OutputContainerPrefix = "LRTTrigMatch_",
-                                               TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau,
-                                               InputElectrons=TRIG8MergedElectronContainer,
-                                               InputMuons=TRIG8MergedMuonContainer
-                                               )
+
+        if flags.Tracking.doLargeD0:
+            # Schedule additional pre-matching against LLP offline muons and electrons
+            acc.merge(LLP1TriggerMatchingToolRun2Cfg(
+                flags,
+                name = "LRTTriggerMatchingTool",
+                OutputContainerPrefix = "LRTTrigMatch_",
+                TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau,
+                InputElectrons=TRIG8MergedElectronContainer,
+                InputMuons=TRIG8MergedMuonContainer))
+            # And add the additional LLP trigger matching branches to the slimming helper
+            AddRun2TriggerMatchingToSlimmingHelper(
+                SlimmingHelper = TRIG8SlimmingHelper,
+                OutputContainerPrefix = "LRTTrigMatch_",
+                TriggerList = TRIG8TriggerListsHelper.Run2TriggerNamesNoTau,
+                InputElectrons=TRIG8MergedElectronContainer,
+                InputMuons=TRIG8MergedMuonContainer)
+
     # Run 3, or Run 2 with navigation conversion
     if flags.Trigger.EDMVersion == 3 or (flags.Trigger.EDMVersion == 2 and flags.Trigger.doEDMVersionConversion):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper

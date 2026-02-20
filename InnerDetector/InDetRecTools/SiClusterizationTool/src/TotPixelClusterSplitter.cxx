@@ -11,6 +11,7 @@
 #include "InDetPrepRawData/PixelCluster.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
+#include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include <algorithm> //minmax_element
 #include <tuple> //std::tuple
 
@@ -23,7 +24,6 @@ InDet::TotPixelClusterSplitter::TotPixelClusterSplitter(const std::string & type
 
 StatusCode InDet::TotPixelClusterSplitter::initialize() {
 
-  ATH_CHECK(m_pixelReadout.retrieve());
   ATH_CHECK(m_chargeDataKey.initialize());
 
   return StatusCode::SUCCESS;
@@ -41,6 +41,7 @@ InDet::TotPixelClusterSplitter::splitCluster( const InDet::PixelCluster & OrigCl
   const std::vector<Identifier> & Rdos = OrigCluster.rdoList();
   const unsigned int NumPixels = static_cast<unsigned int>(Rdos.size());
   const InDetDD::SiDetectorElement * Element = OrigCluster.detectorElement();
+  const InDetDD::PixelModuleDesign& design = dynamic_cast<const InDetDD::PixelModuleDesign&>(Element->design());
 
   // Check cluster-size bounds.
   if (NumPixels < m_minPixels || NumPixels > m_maxPixels) return Parts;
@@ -183,8 +184,8 @@ InDet::TotPixelClusterSplitter::splitCluster( const InDet::PixelCluster & OrigCl
   } 
   const PixelID* pixelIDp=static_cast<const PixelID*>(aid);
   const PixelID& pixelID = *pixelIDp;
+  IdentifierHash moduleHash = Element->identifyHash(); // wafer hash
 
-  
   for (unsigned int i = 0; i < NumPixels; i++)
   {
     Idx = (CellIds[i].*IndexFunc)() - LowIdx;
@@ -206,13 +207,20 @@ InDet::TotPixelClusterSplitter::splitCluster( const InDet::PixelCluster & OrigCl
       {
 
         Identifier pixid = Rdos[i];
-        Identifier moduleID = pixelID.wafer_id(pixid);
-        IdentifierHash moduleHash = pixelID.wafer_hash(moduleID); // wafer hash
-        unsigned int FE = m_pixelReadout->getFE(pixid, moduleID);
-        InDetDD::PixelDiodeType type = m_pixelReadout->getDiodeType(pixid);
+        assert( Element->identifyHash() == pixelID.wafer_hash(pixelID.wafer_id(pixid)));
+        std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
+           = InDetDD::PixelDiodeTree::makeCellIndex(pixelID.phi_index(pixid),
+                                                    pixelID.eta_index(pixid));
+        InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
+        std::uint32_t feValue = design.getFE(si_param);
+        auto diode_type = design.getDiodeType(si_param);
+        if (   design.getReadoutTechnology() == InDetDD::PixelReadoutTechnology::FEI3
+               && design.numberOfConnectedCells(  design.readoutIdOfCell(InDetDD::SiCellId(diode_idx[0],diode_idx[1])))>1) {
+           diode_type = InDetDD::PixelDiodeType::GANGED;
+        }
 
         SplitRdos[j].push_back(Rdos[i]);
-        Totgroups[j].push_back(calibData->getToT(type, moduleHash, FE, Charges[i] / 2.0));
+        Totgroups[j].push_back(calibData->getToT(diode_type, moduleHash, feValue, Charges[i] / 2.0));
         Lvl1groups[j].push_back(Lvl1a);
       }
     }

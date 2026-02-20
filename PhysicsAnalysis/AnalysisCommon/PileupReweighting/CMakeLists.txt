@@ -79,4 +79,4 @@ atlas_add_test( ut_PRWDataWeightExample_test
    
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

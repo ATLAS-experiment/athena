@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Raw2DigiTool.h"
@@ -94,8 +94,8 @@ StatusCode AFP_Raw2DigiTool::recoToFHits(const EventContext &ctx) const
     ATH_MSG_DEBUG("AFP_Raw2DigiTool: Raw data container retrieved");
   
   for (const AFP_ToFRawCollection& collection: container->collectionsToF())
-    for (const AFP_ToFRawData& data : collection.dataRecords())
-      if (data.hitDiscConfig() == 3 && (data.header() == 2 || (data.header() == 1 && !data.isTrigger()))) 
+    for (const AFP_ToFRawData& data : collection.dataRecords()) 
+      if (data.hitDiscConfig() == 3 && (data.header() == 2 || (data.header() == 10 && !data.isTrigger()))) 
 	newXAODHitToF (tofHitContainer.get(), collection, data, ctx); // is_ToF && (is_HPTDC || (is_picoTDC && !is_trigger_word))
 
   SG::WriteHandle<xAOD::AFPToFHitContainer> writeHandle{m_AFPHitsContainerNameToF, ctx};
@@ -141,7 +141,14 @@ void AFP_Raw2DigiTool::newXAODHitToF (xAOD::AFPToFHitContainer* tofHitContainer,
     xAODToFHit->setHptdcID(-1);
 
   // set barID
-  setBarAndTrainID(xAODToFHit, ctx);
+  if (data.header()==0b1010) {
+    // PicoTDC
+    xAODToFHit->setTrainID(data.channel()/4);
+    xAODToFHit->setBarInTrainID(data.channel()%4);
+  } else {
+    // HPTDC
+    setBarAndTrainID(xAODToFHit, ctx);
+  }
 }
 
 void AFP_Raw2DigiTool::newXAODHitSi (xAOD::AFPSiHitContainer* siHitContainer, const AFP_SiRawCollection& collection, const AFP_SiRawData& data) const

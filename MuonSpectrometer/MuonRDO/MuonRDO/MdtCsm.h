@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_MDTCSM_H
@@ -11,10 +11,13 @@
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
 
-#include<stdint.h>
+#include <cstdint>
+#include <iosfwd>
 
 /** MDT RDOs : Chamber Service Module, container of AmtHits of a single Mdt chamber
   @author Stefano Rosati Feb 2003*/
+//DataVector is not move-assignable, so neither is this
+//coverity[MISSING_MOVE_ASSIGNMENT]
 class MdtCsm : public DataVector<MdtAmtHit>
 {
 
@@ -22,9 +25,9 @@ class MdtCsm : public DataVector<MdtAmtHit>
 
   Identifier m_Id;
   IdentifierHash m_idHash; //!< Offline idenfifier hash corresponding to this collection.
-  uint16_t m_SubDetId;   //!< Sub-detector identifier
-  uint16_t m_MrodId;     //!< Mrod number
-  uint16_t m_CsmId;      //!< Csm link number
+  uint16_t m_SubDetId{};   //!< Sub-detector identifier
+  uint16_t m_MrodId{};     //!< Mrod number
+  uint16_t m_CsmId{};      //!< Csm link number
   
  public:
   //typedef 
@@ -34,7 +37,7 @@ class MdtCsm : public DataVector<MdtAmtHit>
   friend class MdtCsmCnv_p1;
   
   /** Default constructor*/
-  MdtCsm();
+  MdtCsm() = default;
 
   /** Constructor of an empty container, with an identifier & hash to identify 
   the collection*/
@@ -43,8 +46,9 @@ class MdtCsm : public DataVector<MdtAmtHit>
   /** Full constructor*/
   MdtCsm(const Identifier  id, const IdentifierHash idHash, uint16_t SubDetId, uint16_t MrodId, uint16_t CsmId);
 
-  virtual ~MdtCsm() { };
+  virtual ~MdtCsm() = default;
 
+  //
   void set_values(const Identifier id, const IdentifierHash idHash, uint16_t SubDetId, uint16_t MrodId, uint16_t CsmId); 
 
   /** Returns the CSM offline identifier (chamber offline id) */

@@ -45,7 +45,7 @@ def mkGetOpenLoopsJob(options):
     job.cmds += ["mv OpenLoops/proclib OpenLoops/lib Process/OpenLoops/"]
     job.cmds += ["rm -rf OpenLoops"]
 
-    job.write()
+    job.write(useSingularity=(options.batchSystem != "htcondor_baf"))
     job.submit(dryRun=options.dryRun)
     return job
 
@@ -100,7 +100,7 @@ def mkCreateLibsJob(options, prevJob):
 
     job.cmds += ["rm -rf ${outputEVNTFile} _joproxy* AtRndmGenSvc.out AthenaSummary_Generate.txt Generate_messageSvc_jobOptions.py Generate_runathena PoolFileCatalog.xml PoolFileCatalog.xml.BAK TransformTimer_Generate.pickle config.pickle dmesg_trf.txt hostnamelookup.tmp inputDictionary.pickle jobInfo.xml jobInfo_Generate.xml jobReport* last.Generate last.runargs.gpickle runargs.Generate.gpickle runargs.Generate.py metadata_Generate.xml metadata.xml Sherpa_References.tex ntuple.pmon.stream setupevprod.sh share ntuple.pmon.gz testHepMC.root events.py Bdecays0.dat Bs2Jpsiphi.DEC DECAY.DEC G4particle_acceptlist.txt PDGTABLE.MeV pdt.table runargs.generate.py runwrapper.generate.sh eventLoopHeartBeat.txt susyParticlePdgid.txt TestHepMC.root log.generate mem.full.generate mem.summary.generate.json env.txt Run.dat Sherpa.yaml"]
 
-    job.write()
+    job.write(useSingularity=(options.batchSystem != "htcondor_baf"))
     job.submit(dryRun=options.dryRun)
     return job
 
@@ -133,7 +133,7 @@ def mkMakelibsJob(options, prevJob):
 
     job.cmds += ["rm -rf scons*"]
 
-    job.write()
+    job.write(useSingularity=(options.batchSystem != "htcondor_baf"))
     job.submit(dryRun=options.dryRun)
     return job
 
@@ -232,7 +232,7 @@ def mkIntegrateJob(options, ecm, prevJob):
         cmdLineOpts += " \"RUNDATA: [Base.yaml, Sherpa.yaml]\" BEAM_ENERGIES="+str(ecm/2.*1000)
     job.cmds += ["mpirun -n {0} ".format(str(targetCores))+options.sherpaInstallPath+"/bin/Sherpa "+cmdLineOpts]
 
-    job.write(extraDirs=[options.jobOptionDir[0]])
+    job.write(useSingularity=(options.batchSystem != "htcondor_baf"), extraDirs=[options.jobOptionDir[0]])
     job.submit(dryRun=options.dryRun)
     return job
 
@@ -292,11 +292,10 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
       job.cmds += ["Gen_tf.py --ecmEnergy="+str(ecm*1000.)+" --maxEvents=1 --firstEvent=1 --randomSeed=10 --jobConfig="+jodir+" --outputEVNTFile=${outputEVNTFile} --maxEvents="+str(options.nEvts)]
     job.cmds += ["cat log.generate"]
 
-    ## set min events
-    job.cmds += ["post_ini_time=$(grep snapshot_post_ini log.generate | awk '{ print $5}')"]
-    job.cmds += ["post_lastevt_time=$(grep snapshot_post_lastevt log.generate | awk '{ print $5}')"]
-    job.cmds += ["nPer12h=$(awk -v a=\"$post_lastevt_time\" -v b=\"$post_ini_time\" 'BEGIN { printf \"%.0f\", "
-                  +str(options.nEvts)+"*12*60*60*1000/(a-b) }' </dev/null)"]
+    ## set min events based on the Wall Time [s] of the first event as reported by PerfMonMTSvc in log.generate
+    job.cmds += ["first_event_time=$(grep FirstEvent log.generate | awk '{ print $6}')"]
+    job.cmds += ["nPer12h=$(awk -v a=\"$first_event_time\" 'BEGIN { printf \"%.0f\", "
+                  +str(options.nEvts)+"*12*60*60/a }' </dev/null)"]
     job.cmds += ["finalEventsPerJob=0"]
     job.cmds += ["for i in 1 2 5 10 20 50 100 200 500 1000 2000 5000 10000; do if test $nPer12h -gt $i; then finalEventsPerJob=$i; fi; done"]
     job.cmds += ["echo \"Possible number of events per 12h: ${nPer12h} -> ${finalEventsPerJob} \""]
@@ -312,6 +311,6 @@ def mkEvntGenTestJob(options, ecm, jodir, prevJob):
     job.cmds += ["cd .."]
     job.cmds += ["rm -rf 5.EvntGenTest"]
 
-    job.write(extraDirs=[jodir])
+    job.write(useSingularity=(options.batchSystem != "htcondor_baf"), extraDirs=[jodir])
     job.submit(dryRun=options.dryRun)
     return job

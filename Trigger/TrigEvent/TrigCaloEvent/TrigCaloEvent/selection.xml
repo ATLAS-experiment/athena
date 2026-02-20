@@ -57,8 +57,8 @@
 	<class name="std::vector<TrigTauClusterContainer*>" />
 	<class name="std::vector<const TrigTauClusterContainer*>" />
 
-	<class name="TrigTauClusterDetailsContainer" id="81962c22-4199-4730-bdb0-2c3d887efb20"/>
-	<class name="DataVector<TrigTauClusterDetailsContainer>" id="36c1385e-34f1-4863-8392-15a809feb02c" />
+	<class name="TrigTauClusterDetailsContainer" id="81962C22-4199-4730-BDB0-2C3D887EFB20"/>
+	<class name="DataVector<TrigTauClusterDetailsContainer>" id="36C1385E-34F1-4863-8392-15A809FEB02C" />
 	<class name="std::vector<TrigTauClusterDetailsContainer*>" />
 	<class name="std::vector<const TrigTauClusterDetailsContainer*>" />
 

@@ -61,54 +61,13 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    from HitAnalysis.HitAnalysisConfig import PixelHitAnalysisCfg, SCTHitAnalysisCfg, TRTHitAnalysisCfg, ITkPixelHitAnalysisCfg, ITkStripHitAnalysisCfg, HGTD_HitAnalysisCfg, PLR_HitAnalysisCfg, CaloHitAnalysisCfg, RPCHitAnalysisCfg, MDTHitAnalysisCfg, CSCHitAnalysisCfg, TGCHitAnalysisCfg, MMHitAnalysisCfg, sTGCHitAnalysisCfg, ALFAHitAnalysisCfg, AFPHitAnalysisCfg, LucidHitAnalysisCfg, ZDCHitAnalysisCfg, TrackRecordAnalysisCfg, TruthHitAnalysisCfg
+    from HitAnalysis.HitAnalysisConfig import HGTD_HitAnalysisCfg,  ALFAHitAnalysisCfg, AFPHitAnalysisCfg, LucidHitAnalysisCfg, ZDCHitAnalysisCfg
 
-    # InnerDetector
-    if flags.Detector.EnablePixel:
-        cfg.merge(PixelHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableSCT:
-        cfg.merge(SCTHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableTRT:
-        cfg.merge(TRTHitAnalysisCfg(flags))
-
-    # ITk
-    if flags.Detector.EnableITkPixel:
-        cfg.merge(ITkPixelHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableITkStrip:
-        cfg.merge(ITkStripHitAnalysisCfg(flags))
+    from HitAnalysis.PostIncludes import SimHitAnalysis
+    cfg.merge(SimHitAnalysis(flags))
 
     if flags.Detector.EnableHGTD:
         cfg.merge(HGTD_HitAnalysisCfg(flags))
-
-    if flags.Detector.EnablePLR:
-        cfg.merge(PLR_HitAnalysisCfg(flags))
-
-    # Calorimeter
-    if flags.Detector.EnableCalo:
-        cfg.merge(CaloHitAnalysisCfg(flags))
-
-    # Muon System
-    if flags.Detector.EnableRPC:
-        cfg.merge(RPCHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableMDT:
-        cfg.merge(MDTHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableCSC:
-        cfg.merge(CSCHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableTGC:
-        cfg.merge(TGCHitAnalysisCfg(flags))
-
-    if flags.Detector.EnableMM:
-        cfg.merge(MMHitAnalysisCfg(flags))
-
-    if flags.Detector.EnablesTGC:
-        cfg.merge(sTGCHitAnalysisCfg(flags))
-
     # Forward
     if flags.Detector.EnableALFA:
         cfg.merge(ALFAHitAnalysisCfg(flags))
@@ -121,12 +80,6 @@ def fromRunArgs(runArgs):
 
     if flags.Detector.EnableZDC:
         cfg.merge(ZDCHitAnalysisCfg(flags))
-
-    # Truth
-    if 'MuonEntryLayer' in flags.Input.Collections:
-        cfg.merge(TrackRecordAnalysisCfg(flags))
-    if 'TruthEvent' in flags.Input.Collections:
-        cfg.merge(TruthHitAnalysisCfg(flags))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)

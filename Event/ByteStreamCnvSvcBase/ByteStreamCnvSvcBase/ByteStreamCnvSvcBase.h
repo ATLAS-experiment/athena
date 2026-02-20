@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_BYTESTREAMCNVSVCBASE_H
@@ -31,9 +31,9 @@ public:
    virtual void handle(const Incident&) override;
 
 protected: // data
-   std::vector<std::string> m_initCnvs;
+   Gaudi::Property<std::vector<std::string>> m_initCnvs{this, "InitCnvs", {}, "Converters to initialize"};
    // This property is used by Tile BS converter, not by this class.
-   Gaudi::Property<std::vector<std::string> > m_ROD2ROBmap{this,"ROD2ROBmap",{},"","OrderedSet<std::string>"};
+   Gaudi::Property<std::vector<std::string>> m_ROD2ROBmap{this, "ROD2ROBmap", {}, "", "OrderedSet<std::string>"};
 
 private:
    /** @name Flags which are not used by this service.

@@ -10,12 +10,8 @@
 #include "ToolTester.h"
 
 BTagToolTester::BTagToolTester( const std::string & name, ISvcLocator * svcLoc) 
-  : AthAlgorithm( name, svcLoc ),
-    m_effTool( "BTaggingEfficiencyTool/BTaggingEfficiencyTool", this ) 
-{
-  declareProperty( "SGKey", m_sgKey = "AntiKt4LCTopoJets" );
-  declareProperty( "BTaggingEfficiencyTool", m_effTool);
-}
+  : AthAlgorithm( name, svcLoc )
+{}
 
 StatusCode BTagToolTester::initialize() {
   ATH_MSG_INFO( "Initialising" );

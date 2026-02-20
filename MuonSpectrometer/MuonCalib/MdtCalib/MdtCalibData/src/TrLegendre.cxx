@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <MdtCalibData/TrLegendre.h>
-#include "MuonCalibMath/LegendrePoly.h"
 #include "GeoModelKernel/throwExcept.h"
-
+#include "Acts/Utilities/detail/Polynomials.hpp"
 namespace MuonCalib{
     TrLegendre::TrLegendre(const ParVec& vec) : ITrRelation{vec} {
         if (minRadius() >= maxRadius()) {
@@ -19,7 +18,7 @@ namespace MuonCalib{
         const double reducedR = getReducedR(r);
         double time{0.};
         for (unsigned int k = 0; k < nDoF(); ++k) {
-            time += par(k+2) * legendrePoly(k, reducedR);
+            time += par(k+2) * Acts::detail::legendrePoly(reducedR, k);
         }
         return std::make_optional(time);
 
@@ -31,7 +30,7 @@ namespace MuonCalib{
         const double dt_dr = getReducedRPrime();
         double dtdr{0.};
         for (unsigned int k = 1; k < nDoF(); ++k) {
-            dtdr += par(k+2) * legendreDeriv(k, 1, reducedR) * dt_dr;
+            dtdr += par(k+2) * Acts::detail::legendrePoly(reducedR,  k, 1) * dt_dr;
         }
         return std::make_optional(dtdr);
         
@@ -42,7 +41,7 @@ namespace MuonCalib{
         const double dt_dr = std::pow(getReducedRPrime(), 2);
         double d2tdr2{0.};
         for (unsigned int k = 2; k < nDoF(); ++k) {
-            d2tdr2 += par(k+2) * legendreDeriv(k, 2, reducedR) * dt_dr;
+            d2tdr2 += par(k+2) * Acts::detail::legendrePoly(reducedR,  k, 2) * dt_dr;
         }
         return std::make_optional(d2tdr2);
     }

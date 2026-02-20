@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import logging
 msg = logging.getLogger(__name__)
@@ -130,11 +130,11 @@ def SortInput(flags, cfg):
     inputs = cfg.getService("EventSelector").InputCollections
 
     # set default sort parameters, read overrides from locals()
-    tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) )
+    tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) + ".root")
     sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
     sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-    from CollectionUtilities.SortedCollectionCreator import SortedCollectionCreator
+    from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
     sorter = SortedCollectionCreator(name="SortEvents")
     # Sort Inputs based on one of the EventInfoTag attributes
     # Store sorted event collection in a temporary file
@@ -142,7 +142,8 @@ def SortInput(flags, cfg):
 
     # moved execution to a subprocess, because Gaudi messaging created by collections causes
     # AppManager errors
-    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+    from PyUtils import PoolFile
+    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootTTreeCollection, sortAttribute=sortTag, sortOrder=sortOrd)
     if rc != 0:
        msg.error(f"Sorting failed with exit code: {rc}")
 
@@ -150,7 +151,9 @@ def SortInput(flags, cfg):
     for inpfile in inputs:
         os.system('pool_insertFileToCatalog {}'.format(inpfile))
 
+    cfg.getService("PoolSvc").AttemptCatalogPatch = False
+
     # Tell Athena to use the sorted collection instead of the original inputs
-    cfg.getService("EventSelector").InputCollections = [tmpCollFile + ".root"]
+    cfg.getService("EventSelector").InputCollections = [tmpCollFile]
     cfg.getService("EventSelector").CollectionType = "RootCollection"
     return cfg

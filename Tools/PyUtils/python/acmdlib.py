@@ -34,6 +34,7 @@ ACMD_SUBPARSERS = ACMD_PARSER.add_subparsers(
     dest='command',
     title='commands',
     metavar='COMMAND',
+    required=True,
     )
 
 ### classes -------------------------------------------------------------------
@@ -91,9 +92,10 @@ class Command(object):
                 raise RuntimeError('could not find adequate subparser')
             return a.add_subparsers(dest='command',
                                     title='commands',
-                                    metavar='COMMAND')
-        def _get_parser(node, idx, names):
-            name = names[idx]
+                                    metavar='COMMAND',
+                                    required=True,
+                                    )
+        def _get_parser(node, name):
             if name in node.choices:
                 return node.choices[name]
             args = {
@@ -103,11 +105,9 @@ class Command(object):
             return node.add_parser(**args)
         
         parser = ACMD_PARSER
-        node   = _get_subparser(parser)
-
-        for i,n in enumerate(names[:-1]):
+        for name in names[:-1]:
             node = _get_subparser(parser)
-            parser = _get_parser(node, i, names)
+            parser = _get_parser(node, name)
                 
         node = _get_subparser(parser)
         kwargs['name'] = names[-1]

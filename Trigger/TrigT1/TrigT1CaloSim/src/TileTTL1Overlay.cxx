@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTTL1Overlay.h"
-
+#include "Identifier/Identifier.h"
 // Atlas includes
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -51,27 +51,9 @@ void TileTTL1Overlay::groupTowers(const TileTTL1Container *towers,
                                   std::map<Identifier, std::vector<const TileTTL1*>> &towerMap) const
 {
   // Step over all towers
-  for (const TileTTL1 *tower : *towers) {
-
-    // Obtain identifier
-    Identifier id = tower->TTL1_ID();
-
-    // Is this one already in the map
-    std::map<Identifier, std::vector<const TileTTL1*>>::iterator test = towerMap.find( id );
-    // If already exists, add tower to location
-    if (test != towerMap.end()) {
-      // Add this pointer to the vector
-      test->second.push_back(tower);
-    }
-    // Otherwise create new entry in the map
-    else {
-      std::vector<const TileTTL1*> towers;
-      towers.push_back(tower);
-      towerMap.emplace(id, towers);
-    }
-
-  } // end for loop
-
+  for (const TileTTL1* tower : *towers) {
+    towerMap[tower->TTL1_ID()].push_back(tower);
+  }
   return;
 }
 

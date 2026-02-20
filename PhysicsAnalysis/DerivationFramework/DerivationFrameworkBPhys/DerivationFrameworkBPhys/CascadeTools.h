@@ -55,9 +55,6 @@ namespace DerivationFramework {
     double massProbability(double V0Mass, double mass, double massErr) const;
     double vertexProbability(int ndf, double chi2) const;
 
-    Amg::MatrixX * convertCovMatrix(const xAOD::Vertex * vxCandidate) const;
-    Amg::MatrixX SetFullMatrix(int NTrk, const std::vector<float> & Matrix) const;
-
   }; //end of class definitions
 
 } //end of namespace definitions

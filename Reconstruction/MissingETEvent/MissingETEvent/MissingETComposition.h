@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MISSINGETEVENT_MISSINGETCOMPOSITION_H
@@ -197,13 +197,15 @@ namespace MissingETHandlers {
       abort();
     }
 
-    Weight() : struct_t() { }
+    Weight() = default;
     Weight(float wpx,float wpy,float wet) : struct_t(wpx,wpy,wet,0) { }
     Weight(float wpx,float wpy,float wet, unsigned short int status) : struct_t(wpx,wpy,wet,status) { }
-    virtual ~Weight() { }
+    virtual ~Weight() = default;
     
-    Weight(const Weight& w) : struct_t(w.wpx(),w.wpy(),w.wet(),w.statusWord()) { }
-    Weight(Weight& w) : struct_t(w.wpx(),w.wpy(),w.wet(),w.statusWord()) { }
+    Weight(const Weight& w) = default;
+    Weight& operator=(const Weight& w) = default;
+    Weight(Weight&& w) = default;
+    Weight& operator=(Weight&& w) = default;
 
     float wpx() const { return (float)std::get<0>(*this); }
     float wpy() const { return (float)std::get<1>(*this); }
@@ -257,15 +259,6 @@ namespace MissingETHandlers {
 
     bool operator!=(const Weight& w) const
     { return !(this->operator==)(w); }
-
-    Weight& operator=(const Weight& w)
-    {
-      this->setWpx(w.wpx());
-      this->setWpy(w.wpy());
-      this->setWet(w.wet());
-      this->setStatusWord(w.statusWord());
-      return *this;
-    }
 
     static float divide(float x,float y)
     { return y != 0. ? x /y : 0.; }

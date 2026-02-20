@@ -3,6 +3,7 @@
 */
 
 #include "AtlasHepMC/GenEvent.h"
+#include "TruthUtils/HepMCHelpers.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "AthenaKernel/RNGWrapper.h"
@@ -26,6 +27,7 @@
 #include "ATOOLS/Org/Exception.H"
 #include "ATOOLS/Org/Run_Parameter.H"
 
+#include <utility> //std::ignore
 #include <cstdio>
 #include <cstring>
 #include <mutex>
@@ -175,7 +177,7 @@ StatusCode Sherpa_i::genInitialize(){
     std::string(SHERPA_VERSION)+ "." + std::string(SHERPA_SUBVERSION), 
     std::string("Used generator")
   };
-  m_runinfo->tools().push_back(generator);
+  m_runinfo->tools().push_back(std::move(generator));
   #endif
   return StatusCode::SUCCESS;
 }
@@ -243,7 +245,7 @@ StatusCode Sherpa_i::fillEvt(HepMC::GenEvent* event) {
 #ifdef HEPMC3
   event->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 #else
-  GeVToMeV(event); //unit check
+  MC::GeVToMeV(event); //Only scales momenta and masses
 #endif
 
 
@@ -374,7 +376,7 @@ Atlas_RNG::Atlas_RNG(CLHEP::HepRandomEngine* engine) :
 {
 }
 
-Atlas_RNG::~Atlas_RNG() { std::remove(m_filename.c_str()); }
+Atlas_RNG::~Atlas_RNG() { std::ignore = std::remove(m_filename.c_str()); }
 
 double Atlas_RNG::Get(){
 

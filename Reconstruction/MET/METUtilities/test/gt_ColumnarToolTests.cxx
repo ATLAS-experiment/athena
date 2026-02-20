@@ -20,7 +20,10 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 
 #include <METUtilities/ColumnarMETMaker.h>
+#include <xAODMissingET/MissingETAssociationHelper.h>
 #include <xAODMissingET/MissingETAuxContainer.h>
+
+#include <optional>
 
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
@@ -38,6 +41,7 @@ TEST_F (ColumnarMemoryTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -204,6 +208,7 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -380,44 +385,88 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
 
 
 
+struct XAODToolData
+{
+  std::optional<xAOD::MissingETAssociationHelper> helper;
+  const xAOD::MissingETAssociationMap* metAssoc = nullptr;
+  xAOD::MissingETContainer* metOutput = nullptr;
+
+  StatusCode retrieveMetAssoc (IXAODToolCaller::EventStoreType& evtStore, const std::string& name)
+  {
+    if (!metAssoc)
+      return evtStore.retrieve (metAssoc, name);
+    return StatusCode::SUCCESS;
+  }
+
+  StatusCode ensureMetOutput (IXAODToolCaller::EventStoreType& evtStore, const std::string& name)
+  {
+    using namespace asg::msgUserCode;
+    if (!metOutput)
+    {
+      auto met = std::make_unique<xAOD::MissingETContainer>();
+      auto metAux = std::make_unique<xAOD::MissingETAuxContainer>();
+      met->setStore (metAux.get());
+      metOutput = met.get();
+      ANA_CHECK (evtStore.record (std::move (met), name));
+      ANA_CHECK (evtStore.record (std::move (metAux), name + "Aux."));
+    }
+    return StatusCode::SUCCESS;
+  }
+
+  xAOD::MissingETAssociationHelper& ensureHelper ()
+  {
+    if (!helper.has_value())
+      helper.emplace (metAssoc);
+    return helper.value();
+  }
+
+  void clear ()
+  {
+    helper.reset();
+    metAssoc = nullptr;
+    metOutput = nullptr;
+  }
+};
+
+
+
 class XAODToolCallerMuon final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODToolCallerMuon (const met::ColumnarMETMaker& tool, std::string inputContainer)
-    : AsgMessaging ("XAODToolCallerMuon"), m_tool (tool), m_inputContainer (std::move (inputContainer)) {}
+  XAODToolCallerMuon (const met::ColumnarMETMaker& tool, std::string inputContainer, XAODToolData* data)
+    : AsgMessaging ("XAODToolCallerMuon"), m_tool (tool), m_inputContainer (std::move (inputContainer)), m_data (data) {}
 
   virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
     ANA_CHECK (evtStore.retrieve (m_particles, m_inputContainer));
-    ANA_CHECK (evtStore.retrieve (m_metAssoc, "METAssoc_AnalysisMET"));
+    ANA_CHECK (m_data->retrieveMetAssoc (evtStore, "METAssoc_AnalysisMET"));
     return StatusCode::SUCCESS;
   }
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto met = std::make_unique<xAOD::MissingETContainer>();
-    auto metAux = std::make_unique<xAOD::MissingETAuxContainer>();
-    met->setStore (metAux.get());
-    m_met = met.get();
-    ANA_CHECK (evtStore.record (std::move (met), "AnaMET" + postfix));
-    ANA_CHECK (evtStore.record (std::move (metAux), "AnaMET" + postfix + "Aux."));
+    ANA_CHECK (m_data->ensureMetOutput (evtStore, "AnaMET" + postfix));
     return StatusCode::SUCCESS;
   }
 
   virtual StatusCode call () override
   {
-    xAOD::MissingETAssociationHelper helper (m_metAssoc);
-    ANA_CHECK_THROW (m_tool.rebuildMET ("Muons", xAOD::Type::Muon, m_met, m_particles, helper, MissingETBase::UsageHandler::PhysicsObject));
+    auto& helper = m_data->ensureHelper();
+    ANA_CHECK_THROW (m_tool.rebuildMET ("Muons", xAOD::Type::Muon, m_data->metOutput, m_particles, helper, MissingETBase::UsageHandler::PhysicsObject));
     return StatusCode::SUCCESS;
+  }
+
+  virtual void clear () override
+  {
+    m_data->clear();
   }
 
 private:
   const met::ColumnarMETMaker& m_tool;
   std::string m_inputContainer;
+  XAODToolData* m_data = nullptr;
 
   const xAOD::IParticleContainer *m_particles = nullptr;
-  xAOD::MissingETContainer *m_met = nullptr;
-  const xAOD::MissingETAssociationMap *m_metAssoc = nullptr;
 };
 
 
@@ -428,6 +477,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -438,51 +488,52 @@ TEST_F (ColumnarPhysLiteTest, METMaker_muon)
   columnar::PhotonAccessor<float> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
   ASSERT_SUCCESS (tool->initialize ());
 
-  XAODToolCallerMuon callXAODMuon (*tool, "AnalysisMuons");
+  XAODToolData toolData;
+  XAODToolCallerMuon callXAODMuon (*tool, "AnalysisMuons", &toolData);
 
-  doCall (*tool, "ColumnarMETMaker", "AnalysisMuons", callXAODMuon, {{"Particles", "AnalysisMuons"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}});
+  doCall ({.tool = tool.get(), .name = "METMaker_muon", .xAODToolCaller = &callXAODMuon, .containerRenames = {{"Particles", "AnalysisMuons"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}}, .metTermNames = {"Muons", "MuonEloss"}, .noRepeatCall = true});
 }
 
 class XAODToolCallerJet final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODToolCallerJet (const met::ColumnarMETMaker& tool, std::string inputContainer)
-    : AsgMessaging ("XAODToolCallerJet"), m_tool (tool), m_inputContainer (std::move (inputContainer)) {}
+  XAODToolCallerJet (const met::ColumnarMETMaker& tool, std::string inputContainer, XAODToolData* data)
+    : AsgMessaging ("XAODToolCallerJet"), m_tool (tool), m_inputContainer (std::move (inputContainer)), m_data (data) {}
 
   virtual StatusCode retrieve (EventStoreType& evtStore) override
   {
     ANA_CHECK (evtStore.retrieve (m_particles, m_inputContainer));
     ANA_CHECK (evtStore.retrieve (m_metCore, "MET_Core_AnalysisMET"));
-    ANA_CHECK (evtStore.retrieve (m_metAssoc, "METAssoc_AnalysisMET"));
+    ANA_CHECK (m_data->retrieveMetAssoc (evtStore, "METAssoc_AnalysisMET"));
     return StatusCode::SUCCESS;
   }
 
   virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
   {
-    auto met = std::make_unique<xAOD::MissingETContainer>();
-    auto metAux = std::make_unique<xAOD::MissingETAuxContainer>();
-    met->setStore (metAux.get());
-    m_met = met.get();
-    ANA_CHECK (evtStore.record (std::move (met), "AnaMET" + postfix));
-    ANA_CHECK (evtStore.record (std::move (metAux), "AnaMET" + postfix + "Aux."));
+    ANA_CHECK (m_data->ensureMetOutput (evtStore, "AnaMET" + postfix));
     return StatusCode::SUCCESS;
   }
 
   virtual StatusCode call () override
   {
-    xAOD::MissingETAssociationHelper helper (m_metAssoc);
-    ANA_CHECK_THROW (m_tool.rebuildJetMET ("Jets", "SoftClus", "PVSoftTrk", m_met, m_particles, m_metCore, helper, false));
+    auto& helper = m_data->ensureHelper();
+    ANA_CHECK_THROW (m_tool.rebuildJetMET ("Jets", "SoftClus", "PVSoftTrk", m_data->metOutput, m_particles, m_metCore, helper, false));
     return StatusCode::SUCCESS;
+  }
+
+  virtual void clear () override
+  {
+    m_data->clear();
+    m_metCore = nullptr;
   }
 
 private:
   const met::ColumnarMETMaker& m_tool;
   std::string m_inputContainer;
+  XAODToolData* m_data = nullptr;
 
   const xAOD::JetContainer *m_particles = nullptr;
-  xAOD::MissingETContainer *m_met = nullptr;
   const xAOD::MissingETContainer *m_metCore = nullptr;
-  const xAOD::MissingETAssociationMap *m_metAssoc = nullptr;
 };
 
 TEST_F (ColumnarPhysLiteTest, METMaker_jet)
@@ -491,6 +542,7 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
     return;
 
   auto tool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (tool->setProperty ("JetContainer", "dummyjets"));
   ASSERT_SUCCESS (tool->setProperty ("skipSystematicJetSelection", false));
   ASSERT_SUCCESS (tool->setProperty ("JetSelection", "Tight"));
   ASSERT_SUCCESS (tool->setProperty ("DoPFlow", true));
@@ -503,9 +555,68 @@ TEST_F (ColumnarPhysLiteTest, METMaker_jet)
   columnar::PhotonAccessor<float> photonPtAcc (*tool, "pt"); // this works around a limitation in the test fixture
   ASSERT_SUCCESS (tool->initialize ());
 
-  XAODToolCallerJet callXAODJet (*tool, "AnalysisJets");
+  XAODToolData toolData;
+  XAODToolCallerJet callXAODJet (*tool, "AnalysisJets", &toolData);
 
-  doCall (*tool, "ColumnarMETMaker", "AnalysisJets", callXAODJet, {{"Particles", "AnalysisJets"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}});
+  doCall ({.tool = tool.get(), .name = "METMaker_jet", .xAODToolCaller = &callXAODJet, .containerRenames = {{"Particles", "AnalysisJets"}, {"Photons", "AnalysisPhotons"}, {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"}, {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"}, {"METCore", "MET_Core_AnalysisMET"}}, .metTermNames = {"RefJet", "MuonEloss", "PVSoftTrk"}, .noRepeatCall = true});
+}
+
+TEST_F (ColumnarPhysLiteTest, METMaker_combined)
+{
+  if (!checkMode())
+    return;
+
+  // FIX ME: currently the combined test only works in xAOD mode
+  if (columnar::columnarAccessMode != 0)
+    return;
+
+  // Create muon tool
+  auto muonTool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (muonTool->setProperty ("JetContainer", "dummyjets"));
+  ASSERT_SUCCESS (muonTool->setProperty ("skipSystematicJetSelection", false));
+  ASSERT_SUCCESS (muonTool->setProperty ("JetSelection", "Tight"));
+  ASSERT_SUCCESS (muonTool->setProperty ("DoPFlow", true));
+  ASSERT_SUCCESS (muonTool->setProperty ("DoSetMuonJetEMScale", true));
+  ASSERT_SUCCESS (muonTool->setProperty ("JetConstitScaleMom", ""));
+  ASSERT_SUCCESS (muonTool->setProperty ("columnarTermName", "Muons"));
+  ASSERT_SUCCESS (muonTool->setProperty ("columnarParticleType", unsigned(xAOD::Type::Muon)));
+  columnar::PhotonAccessor<float> photonPtAcc1 (*muonTool, "pt");
+  ASSERT_SUCCESS (muonTool->initialize ());
+
+  // Create jet tool
+  auto jetTool = std::make_unique<met::ColumnarMETMaker> (makeUniqueName());
+  ASSERT_SUCCESS (jetTool->setProperty ("JetContainer", "dummyjets"));
+  ASSERT_SUCCESS (jetTool->setProperty ("skipSystematicJetSelection", false));
+  ASSERT_SUCCESS (jetTool->setProperty ("JetSelection", "Tight"));
+  ASSERT_SUCCESS (jetTool->setProperty ("DoPFlow", true));
+  ASSERT_SUCCESS (jetTool->setProperty ("DoSetMuonJetEMScale", true));
+  ASSERT_SUCCESS (jetTool->setProperty ("columnarOperation", 1));
+  ASSERT_SUCCESS (jetTool->setProperty ("columnarJetKey", "RefJet"));
+  ASSERT_SUCCESS (jetTool->setProperty ("columnarSoftClusKey", "PVSoftTrk"));
+  ASSERT_SUCCESS (jetTool->setProperty ("columnarTermName", "RefJet"));
+  columnar::MuonAccessor<float> muonPtAcc (*jetTool, "pt");
+  columnar::PhotonAccessor<float> photonPtAcc2 (*jetTool, "pt");
+  ASSERT_SUCCESS (jetTool->initialize ());
+
+  // Create shared tool data and callers
+  XAODToolData toolData;
+  XAODToolCallerMuon callXAODMuon (*muonTool, "AnalysisMuons", &toolData);
+  XAODToolCallerJet callXAODJet (*jetTool, "AnalysisJets", &toolData);
+
+  doCallMulti ({
+    {.tool = muonTool.get(), .name = "METMaker_muon", .xAODToolCaller = &callXAODMuon,
+     .containerRenames = {{"Particles", "AnalysisMuons"}, {"Photons", "AnalysisPhotons"},
+                          {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"},
+                          {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"},
+                          {"METCore", "MET_Core_AnalysisMET"}},
+     .metTermNames = {"Muons", "MuonEloss"}, .noRepeatCall = true},
+    {.tool = jetTool.get(), .name = "METMaker_jet", .xAODToolCaller = &callXAODJet,
+     .containerRenames = {{"Particles", "AnalysisJets"}, {"Photons", "AnalysisPhotons"},
+                          {"Electrons", "AnalysisElectrons"}, {"Muons", "AnalysisMuons"},
+                          {"MetAssoc", "METAssoc_AnalysisMET"}, {"Jets", "AnalysisJets"},
+                          {"METCore", "MET_Core_AnalysisMET"}},
+     .metTermNames = {"RefJet", "MuonEloss", "PVSoftTrk"}, .noRepeatCall = true}
+  });
 }
 
 ATLAS_GOOGLE_TEST_MAIN

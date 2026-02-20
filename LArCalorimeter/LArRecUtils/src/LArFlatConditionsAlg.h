@@ -7,20 +7,20 @@
 #ifndef LARFLATCONDITIONSALG_H
 #define LARFLATCONDITIONSALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
 template<class T>
-class LArFlatConditionsAlg: public AthAlgorithm {
+class LArFlatConditionsAlg: public AthCondAlgorithm {
  public:
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   ~LArFlatConditionsAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this,"ReadKey","","Key of the input CDO (AttrListCollection)"};

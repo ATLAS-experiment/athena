@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -136,7 +136,7 @@ namespace G4UA
           int thRep = currentTree.GetCopyNumber();
 
           // construct keyname & directory title
-          string v_name = (thRep == 16969 ? thPV : thPV+"_"+stringify(thRep));
+          string v_name = (thRep == 16969 ? std::move(thPV) : thPV+"_"+stringify(thRep));
           string p_name = m_p_tag + ( currentTree.GetStepNumber() != 1 ? "_entred" : "_madein" );
           string title = thNoDau+" daughters, "+stringify(currentTree.GetCurrentDepth())+" from base";
 

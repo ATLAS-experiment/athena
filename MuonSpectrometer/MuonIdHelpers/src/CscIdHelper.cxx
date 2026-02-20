@@ -49,12 +49,12 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         return 0;
     }
 
-    IdDictField* field = m_dict->find_field("chamberLayer");
+    const IdDictField* field = m_dict->find_field("chamberLayer");
     if (field) {
         m_CHAMBERLAYER_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'chamberLayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("wireLayer");
@@ -62,7 +62,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_WIRELAYER_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'wireLayer' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("cscMeasuresPhi");
@@ -70,7 +70,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_MEASURESPHI_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'cscMeasuresPhi' field ");
-        status = 1;
+        return 1;
     }
 
     field = m_dict->find_field("cscStrip");
@@ -78,7 +78,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find 'cscStrip' field ");
-        status = 1;
+        return 1;
     }
 
     // initialize the multilayer index
@@ -86,11 +86,11 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     /// save an index to the first region of csc
 
-    IdDictGroup* cscGroup = m_dict->find_group("csc");
+    const IdDictGroup* cscGroup = m_dict->find_group("csc");
     if (!cscGroup) {
         ATH_MSG_ERROR("Cannot find csc group");
     } else {
-        m_GROUP_INDEX = cscGroup->regions()[0]->index();
+        m_GROUP_INDEX = cscGroup->region(0).index();
     }
 
     const IdDictRegion& region = m_dict->region(m_GROUP_INDEX);
@@ -138,6 +138,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty for modules");
+        return 1;
     }
 
     // Build MultiRange down to "detector element" for all mdt regions
@@ -151,6 +152,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "Multilayer MultiRange size is " << muon_detectorElement_range.size());
     } else {
         ATH_MSG_ERROR("Muon CSC detector element MultiRange is empty");
+        return 1;
     }
 
     /// Build MultiRange down to "cscStrip" for all CSC regions
@@ -164,6 +166,7 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
                      << "MultiRange size is " << muon_channel_range.size());
     } else {
         ATH_MSG_ERROR("Muon MultiRange is empty for channels");
+        return 1;
     }
 
     /**
@@ -213,36 +216,36 @@ int CscIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
 
     if (m_full_module_range.size() == 0) {
         ATH_MSG_ERROR("CSC MultiRange ID is empty for modules");
-        status = 1;
+        return 1;
     }
 
     /// test to see that the detector element multi range is not empty
 
     if (m_full_detectorElement_range.size() == 0) {
         ATH_MSG_ERROR("CSC MultiRange ID is empty for detector elements");
-        status = 1;
+        return 1;
     }
 
     /// test to see that the multi range is not empty
 
     if (m_full_channel_range.size() == 0) {
         ATH_MSG_ERROR("CSC MultiRange ID is empty for channels");
-        status = 1;
+        return 1;
     }
 
     /// Setup the hash tables for CSC
 
     ATH_MSG_INFO("Initializing CSC hash indices ... ");
-    status = init_hashes();
-    status = init_detectorElement_hashes();  // for chamber layer - a chamber
-    status = init_channel_hashes();
-    status = strip_hash_offsets();
-    status = init_id_to_hashes();
+    status += init_hashes();
+    status += init_detectorElement_hashes();  // for chamber layer - a chamber
+    status += init_channel_hashes();
+    status += strip_hash_offsets();
+    status += init_id_to_hashes();
 
     /// Setup hash tables for finding neighbors
 
     ATH_MSG_INFO("Initializing CSC hash indices for finding neighbors ... ");
-    status = init_neighbors();
+    status += init_neighbors();
 
     // now we have to set the stripMax values (for the stripMax(id) function)
     // this could be also done on an event-by-event basis as for stripMin(id)

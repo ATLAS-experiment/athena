@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # TriggerMatchingCommonConfig.py
@@ -10,7 +10,6 @@
 #====================================================================
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from Campaigns.Utils import getMCCampaign, Campaign
 from PathResolver import PathResolver
 
 def read_trig_list_file(fname):
@@ -26,25 +25,6 @@ def read_trig_list_file(fname):
             continue
          triggers.append(line)
    return triggers
-
-def getDataYear(flags):
-    dataYear = 0
-    if flags.Input.isMC:
-        campaign = getMCCampaign(flags.Input.Files)
-        dataYear = {
-            Campaign.MC20a: 2016, # prefer over 2015
-            Campaign.MC20d: 2017,
-            Campaign.MC20e: 2018,
-            Campaign.MC21a: 2022,
-            Campaign.MC23a: 2022, 
-            Campaign.MC23c: 2023,
-            Campaign.MC23d: 2023,
-            Campaign.MC23e: 2024,
-            Campaign.PhaseII: 2030,
-        }[campaign]
-    else:
-        dataYear = flags.Input.DataYear
-    return dataYear
 
 def AddRun2TriggerMatchingToSlimmingHelper(**kwargs):
     """Adds the trigger matching info to the slimming helper"""

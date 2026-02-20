@@ -474,7 +474,7 @@ StatusCode TileDigitsFromPulse::execute() {
 					//Pileup samples
 					//m_PUAmp.clear();
 					//m_PUAmp.resize(nPul);
-					float my_PUAmp[7]; //I use an array to store the energies/charges of the out-of-time pulses
+					float my_PUAmp[7] = {0}; //I use an array to store the energies/charges of the out-of-time pulses
 
 					for (int i = 0; i < 7; i++)
 						if ((((i - 3) * 25) % (int) m_BunchSpacing) == 0) {

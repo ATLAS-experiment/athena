@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -82,6 +82,9 @@ Trk::StraightLineSurface::operator=(const Trk::StraightLineSurface& slsf)
   }
   return *this;
 }
+
+// Out-of-line destructor.
+Trk::StraightLineSurface::~StraightLineSurface() = default;
 
 bool
 Trk::StraightLineSurface::operator==(const Trk::Surface& sf) const

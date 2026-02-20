@@ -18,7 +18,8 @@ enum EgammaType
   electron = 0,
   unconvertedPhoton = 1,
   convertedPhoton = 2,
-  NumberOfEgammaTypes = 3
+  forwardelectron = 3,
+  NumberOfEgammaTypes = 4
 };
 
 /// @name Shower shape types

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HLTCaloCellCorrector.h"
@@ -7,6 +7,7 @@
 #include <xAODHIEvent/HIEventShape.h>
 
 #include <memory>
+#include <cmath>
 
 namespace {
   double get_average_energy(xAOD::HIEventShapeContainer const& eventShape,
@@ -48,8 +49,7 @@ StatusCode HLTCaloCellCorrector::execute(EventContext const& context) const {
 
   SG::WriteHandle<CaloConstCellContainer> outputCellHandle(m_outputCellContainerKey, context);
 
-  auto eventShape = *eventShapeHandle;
-  //auto outputCells = std::make_unique<CaloConstCellContainer>(SG::VIEW_ELEMENTS);
+  const auto & eventShape = *eventShapeHandle;
   auto outputCells = std::make_unique<CaloConstCellContainer>();
 
   for (auto const* cell : *inputCellHandle) {

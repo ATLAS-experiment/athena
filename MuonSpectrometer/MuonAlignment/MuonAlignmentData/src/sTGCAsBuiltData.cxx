@@ -29,7 +29,7 @@ Amg::Vector2D sTGCAsBuiltData::correctPosition(const Identifier& channelId, cons
     // For the QL3 modules described by the legacy (Run 3) geometry EDM the origin of the local frame is shifted with respect to the actual center of the gap.
     // Therefore a shift is introduced which stabilizes the as built fit which must also be applied here since the parameters are expressed using the actual center of the gap.
     float shift = (std::fabs(m_idHelperSvc->stationEta(channelId)) == 3 && m_idHelperSvc->stationNameString(channelId) == "STL" ?  24.74 : 0.0);
-    ATH_MSG_VERBOSE("applying as built parameters " << pars);
+    ATH_MSG_VERBOSE("applying as built parameters for gas gap " << m_idHelperSvc->toString(m_idHelperSvc->gasGapId(channelId)) << " parameters " << pars);
 
     correctedPos.x() = pos.x() +  (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*(pos.x() + shift ) + pars.nonPara * convScale * convScale * (pos.x() + shift  )*pos.y()); 
     return correctedPos;

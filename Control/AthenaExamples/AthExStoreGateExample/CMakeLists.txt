@@ -7,7 +7,7 @@ atlas_subdir( AthExStoreGateExample )
 atlas_add_library( AthExStoreGateExampleLib
                    INTERFACE
                    PUBLIC_HEADERS AthExStoreGateExample
-                   LINK_LIBRARIES AthenaKernel GaudiKernel StoreGateLib )
+                   LINK_LIBRARIES AthenaKernel GaudiKernel SGCoreLib StoreGateLib )
 
 atlas_add_component( AthExStoreGateExample
                      src/*.cxx

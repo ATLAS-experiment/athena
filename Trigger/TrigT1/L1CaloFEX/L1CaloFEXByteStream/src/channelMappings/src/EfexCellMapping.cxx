@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #include "channelMappings/EfexCellMapping.h"
 /*!
  *  \class EfexCellMapping
@@ -136,7 +139,7 @@ void EfexCellMapping::init(int crate, int efexnumber,
 
     //Generate a valid HW info object
     m_hwinfo = EfexHardwareInfo(efexcords,m_fibrenumber,
-        m_inputconnector,mpod);
+        m_inputconnector,std::move(mpod));
 
     auto tab2search  = searchpairs();
     tab2search.push_back(genintstr(0,efexcords));
@@ -240,12 +243,10 @@ std::string EfexCellMapping::findModuleCords(int crate, int efexnumber) const {
     // Set of sensible range checks, if out of range return so blank
     // declaration of L1CaloDetector Region
     if ( (crate<0 || crate>1) ){ 
-        throw "Invalid Crate # created within eFEX mapping";
-        return "Err";
+        throw std::out_of_range("Invalid Crate # created within eFEX mapping");
     }
     if ( efexnumber<0 || efexnumber>11 ){
-        throw "Invalid Module # created within eFEX mapping";
-        return "Err";
+        throw std::out_of_range("Invalid Module # created within eFEX mapping");
     }
     // For input crate and efexnumber (assuming 'eFEX number' for 
     // efexnumber label)
@@ -253,19 +254,8 @@ std::string EfexCellMapping::findModuleCords(int crate, int efexnumber) const {
     // Find old eFEX labels in mapping csvs
     // with octant [1:8] and eta slice [A,B,C]:
     int octant = 4*crate + efexnumber/3 + 1; //Note int div  
-
     int etaslicenum = 3 - efexnumber%3; //obvious A=1 etc mapping
-    std::string etaslice;
-    switch(etaslicenum){
-        case 1:
-            etaslice = 'A';
-            break;
-        case 2:
-            etaslice = 'B';
-            break;
-        case 3:
-            etaslice = 'C';
-            break;
-    }
-    return etaslice + std::to_string(octant);  
+    static constexpr const char* letters = "ABC";
+    char etaslice = letters[etaslicenum - 1];
+    return std::string(1, etaslice) + std::to_string(octant);  
 }

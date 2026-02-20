@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Daniel Werner
@@ -48,7 +48,6 @@ namespace CP
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_TIGHT_IBL),
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_TIGHT_PP0),
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_TIGHT_PHYSMODEL),
-          InDet::TrackSystematicMap.at(InDet::TRK_EFF_TIGHT_COMBINED)
         };
       }
       else if ( m_filterWP=="LOOSE" )
@@ -62,7 +61,6 @@ namespace CP
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_LOOSE_IBL),
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_LOOSE_PP0),
           InDet::TrackSystematicMap.at(InDet::TRK_EFF_LOOSE_PHYSMODEL),
-          InDet::TrackSystematicMap.at(InDet::TRK_EFF_LOOSE_COMBINED)
         };
       }
       else

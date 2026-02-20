@@ -22,6 +22,7 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/test_menu_dump.py
                        scripts/test_HLTmenu.py
                        python/HLT/Config/Utility/DictFromChainName.py
+                       python/TriggerAPI/TriggerAPISession.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Shell scripts without flake8 checking:
@@ -29,6 +30,9 @@ atlas_install_scripts( scripts/test_manual_menu_cf.sh
                        scripts/test_emu_step_processing_cf.sh
                        scripts/test_emu_step_menu_processing_cf.sh
                      )
+
+atlas_add_alias( tapis "TriggerAPISession.py" )
+atlas_add_alias( trig_tapis "TriggerAPISession.py" ) # second alias, for consistency with other trig tools
 
 # Unit tests:
 foreach(test emu_step_processing_cf emu_step_menu_processing_cf)
@@ -102,9 +106,8 @@ atlas_add_test( test_menu_dump
   SCRIPT test_menu_dump.py -p
   POST_EXEC_SCRIPT noerror.sh )
 
-atlas_install_scripts( python/TriggerAPI/TriggerAPISession.py )
-atlas_add_alias( tapis "TriggerAPISession.py" )
-atlas_add_alias( trig_tapis "TriggerAPISession.py" ) # second alias, for consistency with other trig tools
-
 # TriggerAPI tests
-atlas_add_test( TriggerAPISessionTest SCRIPT test/testTriggerAPISession.py POST_EXEC_SCRIPT noerror.sh PROPERTIES TIMEOUT 600 )
+atlas_add_test( TriggerAPISessionTest
+                SCRIPT test/testTriggerAPISession.py
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT noerror.sh )

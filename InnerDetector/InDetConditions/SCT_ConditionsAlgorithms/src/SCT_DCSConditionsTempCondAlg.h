@@ -7,7 +7,7 @@
 #ifndef SCT_DCSCONDITIONSTEMPCONDALG
 #define SCT_DCSCONDITIONSTEMPCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "SCT_ConditionsData/SCT_DCSFloatCondData.h"
@@ -16,7 +16,7 @@
 
 #include "Gaudi/Property.h"
 
-class SCT_DCSConditionsTempCondAlg : public AthReentrantAlgorithm 
+class SCT_DCSConditionsTempCondAlg : public AthCondAlgorithm 
 {  
  public:
   SCT_DCSConditionsTempCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -24,7 +24,6 @@ class SCT_DCSConditionsTempCondAlg : public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this, "ReadKey", "/SCT/DCS/MODTEMP", "Key of input (raw) temperature conditions folder"};

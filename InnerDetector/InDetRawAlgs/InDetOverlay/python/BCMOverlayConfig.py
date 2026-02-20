@@ -1,6 +1,6 @@
 """Define methods to construct configured BCM overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -30,11 +30,8 @@ def BCMOverlayAlgCfg(flags, name="BCMOverlay", **kwargs):
     kwargs.setdefault("isDataOverlay", not flags.Input.isMC)
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        acc.merge(BCMRawDataProviderAlgCfg(flags))
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'BCM_RDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'BCM_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do BCM overlay
     acc.addEventAlgo(CompFactory.BCMOverlay(name, **kwargs))

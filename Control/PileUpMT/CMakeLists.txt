@@ -39,4 +39,5 @@ atlas_add_component(
   StoreGateLib
   GaudiKernel
   BeamSpotConditionsData
+  PersistentDataModel
   CxxUtils)

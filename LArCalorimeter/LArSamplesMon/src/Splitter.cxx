@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Splitter.h"
@@ -43,9 +43,8 @@ bool Splitter::splitEvents(const TString& name, unsigned int max) const
     cout << "Processing event " << event->first << " (" << i << " of " << events.size() << ")" << endl;
     FilterParams f;
     f.addEvent(event->first);
-    auto pInterface = m_interface->filter(f, DataTweaker(), Form("%s_%d.root", name.Data(), event->first));
+    std::unique_ptr<Interface> pInterface = m_interface->filter(f, DataTweaker(), Form("%s_%d.root", name.Data(), event->first));
     //nothing is ever done with this (unfinished code?), so simply delete it.
-    delete (pInterface);
   }
 
   return true;

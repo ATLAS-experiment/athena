@@ -80,7 +80,7 @@ std::unique_ptr<SegmentSeed>
         return std::make_unique<SegmentSeed>(etaMax.tanBeta(), etaMax.interceptY(), phiMax.x, phiMax.y, hitsOnMax.size(), std::move(hitsOnMax), etaMax.parentBucket());         
 }
 
-void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
+void PhiHoughTransformAlg::preProcessMaximum(const ActsTrk::GeometryContext& gctx,
                                              const HoughMaximum & maximum,
                                              HoughEventData& eventData) const{
     // reset the event data 
@@ -94,7 +94,7 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsGeometryContext& gctx,
             continue;
         }
         // find the direction of the IP viewed from the sector frame 
-        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTrans(gctx).translation()).unit();
+        const Amg::Vector3D extrapDir = (hit->localPosition() - hit->msSector()->globalToLocalTransform(gctx).translation()).unit();
         ATH_MSG_VERBOSE("Direction "<<Amg::toString(extrapDir));
         // express the x location of our phi hits on the chamber plane (z = 0) when projecting from the beam spot
         std::optional<double> dummyIntercept = Amg::intersect<3>(hit->localPosition(), extrapDir, Amg::Vector3D::UnitZ(),0); 
@@ -194,7 +194,7 @@ StatusCode PhiHoughTransformAlg::execute(const EventContext& ctx) const {
     const EtaHoughMaxContainer* maxima{nullptr};
     ATH_CHECK(SG::get(maxima, m_maxima, ctx));
 
-    const ActsGeometryContext* gctx{nullptr};
+    const ActsTrk::GeometryContext* gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
 
     // book the event data object

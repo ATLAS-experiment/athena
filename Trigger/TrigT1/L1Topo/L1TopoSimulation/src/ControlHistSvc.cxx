@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  *   */
 
 
@@ -42,7 +42,7 @@ StatusCode ControlHistSvc::SetHistSvc(const std::unique_ptr<TCS::TopoSteering> &
   std::shared_ptr<IL1TopoHistSvc> topoHistSvc = std::shared_ptr<IL1TopoHistSvc>( new AthenaL1TopoHistSvc(m_histSvc) );
     
   topoHistSvc->setBaseDir("/EXPERT/"+ histBaseDir);
-  topoSteering->setHistSvc(topoHistSvc);
+  topoSteering->setHistSvc(std::move(topoHistSvc));
 
   return StatusCode::SUCCESS;
 }

@@ -1,14 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <MdtCalibData/MdtTubeCalibContainer.h>
+#include <algorithm> //std::max
+#include <utility> //std::in_range
+
 namespace MuonCalib {
     MdtTubeCalibContainer::MdtTubeCalibContainer(const Muon::IMuonIdHelperSvc* idHelperSvc,
                                                  const Identifier& moduleID):
         m_moduleID{idHelperSvc->chamberId(moduleID)},
         m_idHelperSvc{idHelperSvc}{
-
-    m_nMl = m_idHelper.numberOfMultilayers(moduleID);
+    m_nMl = static_cast<std::uint8_t>(m_idHelper.numberOfMultilayers(moduleID));
+    
     const Identifier secondMl = m_idHelper.multilayerID(m_moduleID, m_nMl);
     m_nLayers = std::max(m_idHelper.tubeLayerMax(m_moduleID),
                          m_idHelper.tubeLayerMax(secondMl));

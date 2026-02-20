@@ -67,7 +67,6 @@ then
       --conditionsTag "default:${conditions}" \
       --geometryVersion "default:${geometry}" \
       --preExec="all:flags.Reco.EnableTrackOverlay=True; flags.Overlay.doTrackOverlay=True;" \
-      --postExec 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
       --imf False
      rec=$?
 fi

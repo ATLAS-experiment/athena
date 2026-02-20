@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 from MuonConfig.MuonConfigUtils import SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFindingCfg
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -20,6 +20,12 @@ flags.Muon.writexAODPRD = True # This is the flag that tells the convertors to p
 flags.Input.Files = defaultTestFiles.RDO_RUN4
 flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 flags.Output.ESDFileName='newESD.pool.root'
+
+# If we're running in a debug build, limit to 10 events to reduce the
+# time required.
+import os
+if os.environ.get('Athena_PLATFORM', '').find ('dbg') >= 0:
+    flags.Exec.MaxEvents = 10
 
 setupDetectorFlags(flags)
 flags.lock()

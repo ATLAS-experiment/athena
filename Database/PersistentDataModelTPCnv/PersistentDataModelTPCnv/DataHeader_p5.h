@@ -21,10 +21,6 @@
 class DataHeaderElement_p5 {
 public: // Constructor and Destructor
    DataHeaderElement_p5();
-   DataHeaderElement_p5(const DataHeaderElement_p5& rhs);
-   ~DataHeaderElement_p5();
-
-   DataHeaderElement_p5& operator=(const DataHeaderElement_p5& rhs);
 
    friend class DataHeaderElementCnv_p5;
 
@@ -42,10 +38,6 @@ private:
 class  DataHeaderForm_p5 {
 public: // Constructor and Destructor
    DataHeaderForm_p5();
-   DataHeaderForm_p5(const DataHeaderForm_p5& rhs);
-   ~DataHeaderForm_p5();
-
-   DataHeaderForm_p5& operator=(const DataHeaderForm_p5& rhs);
 
    const std::vector<std::string>& map() const;
    void insertMap(const std::string& element);
@@ -67,10 +59,6 @@ private:
 class  DataHeader_p5 {
 public: // Constructor and Destructor
    DataHeader_p5();
-   DataHeader_p5(const DataHeader_p5& rhs);
-   ~DataHeader_p5();
-
-   DataHeader_p5& operator=(const DataHeader_p5& rhs);
 
    friend class DataHeaderCnv_p5;
 

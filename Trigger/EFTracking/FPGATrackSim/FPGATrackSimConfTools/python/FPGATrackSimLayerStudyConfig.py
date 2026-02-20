@@ -7,7 +7,6 @@ from AthenaCommon.Logging import logging
 import AthenaCommon.Utils.unixtools as unixtools
 import importlib
 import os
-from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
 from FPGATrackSimConfTools.FPGATrackSimSecondStageConfig import getPadding
 
 log = logging.getLogger ('FPGATrackSim')
@@ -73,19 +72,9 @@ def FPGATrackSimBinnedHitsToolCfg(flags):
         phirange = FPGATrackSimDataPrepConfig.getPhiRange(flags)
         if flags.Trigger.FPGATrackSim.GenScan.useLayerRadiiFile:
             phicenter = (phirange[0]+phirange[1])/2.0
-            BinDesc.PhiOffset = phicenter
             BinDesc.PhiOffset = -1.0*phicenter
 
-        BinDesc.region = flags.Trigger.FPGATrackSim.region
-
-        #resolution padding
-        BinDesc.D0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["d0"]
-        BinDesc.EtaPad=getPadding(flags.Trigger.FPGATrackSim.region)["eta"]
-        BinDesc.QPtPad=getPadding(flags.Trigger.FPGATrackSim.region)["qpt"]
-        BinDesc.PhiPad=getPadding(flags.Trigger.FPGATrackSim.region)["phi"]
-        BinDesc.Z0Pad=getPadding(flags.Trigger.FPGATrackSim.region)["z0"]
-        BinDesc.fieldCorrection=True
-        BinDesc.fieldCorRegion=flags.Trigger.FPGATrackSim.region
+        BinDesc.region = flags.Trigger.FPGATrackSim.region        
 
         # parameters for key layer bindesc are :"zR1", "zR2", "phiR1", "phiR2", "xm"
         step1 = CompFactory.FPGATrackSimBinStep("PhiBinning")
@@ -194,16 +183,12 @@ if __name__ == "__main__":
 
     # flags.Exec.DebugStage="exec" # useful option to debug the execution of the job - we want it commented out for production
     flags.fillFromArgs()
-    ConfigureMultiRegionFlags(flags)
 
 
     if isinstance(flags.Trigger.FPGATrackSim.wrapperFileName, str):
         log.info("wrapperFile is string, converting to list")
         flags.Trigger.FPGATrackSim.wrapperFileName = [flags.Trigger.FPGATrackSim.wrapperFileName]
         flags.Input.Files = lambda f: [f.Trigger.FPGATrackSim.wrapperFileName]
-
-    from FPGATrackSimConfTools.FPGATrackSimAnalysisConfig import ConfigureMultiRegionFlags
-    ConfigureMultiRegionFlags(flags)
 
     # The region map needs to not be loaded when running layer study; we set this here to
     # guarantee it propagates consistently to all code that tries to set up the mapping service.

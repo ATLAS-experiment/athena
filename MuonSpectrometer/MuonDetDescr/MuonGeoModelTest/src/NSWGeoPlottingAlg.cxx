@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "NSWGeoPlottingAlg.h"
 
@@ -105,6 +105,7 @@ StatusCode NSWGeoPlottingAlg::execute() {
         is_mm ? nullptr : detMgr->getsTgcReadoutElement(id);
 
     const MuonGM::MuonChannelDesign* design =
+        // cppcheck-suppress nullPointer; https://trac.cppcheck.net/ticket/14369
         is_mm ? mm_roe->getDesign(id) : st_roe->getDesign(id);
 
     const Trk::TrkDetElementBase* roe =
@@ -151,6 +152,7 @@ StatusCode NSWGeoPlottingAlg::execute() {
     };
 
     const int n_strips =
+        // cppcheck-suppress nullPointer; https://trac.cppcheck.net/ticket/14369
         (is_mm ? mm_roe->numberOfStrips(id) : st_roe->numberOfStrips(id));
     for (int strip = design->numberOfMissingBottomStrips() + 1;
          strip <= n_strips; strip += 1) {

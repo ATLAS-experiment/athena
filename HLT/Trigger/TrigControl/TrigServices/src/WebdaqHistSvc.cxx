@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "WebdaqHistSvc.h"
@@ -179,7 +179,7 @@ StatusCode WebdaqHistSvc::regHist_i(std::unique_ptr<T> hist_unique, const std::s
     m_histoMapUpdatedFast = true;
     accessor->second = THistID(id, hist);
     //finished
-    if (shared) accessor->second.mutex = new std::mutex;
+    if (shared) accessor->second.mutex = std::make_unique<std::mutex>();
     phid = &accessor->second;
     ATH_MSG_DEBUG((shared ? "Shared histogram " : "Histogram ")
           << hist->GetName() << " registered under " << id << " " << name());
@@ -205,7 +205,7 @@ LockedHandle<T> WebdaqHistSvc::regShared_i(const std::string& id, std::unique_pt
     T* phist = hist.get();
     THistID* phid = nullptr;
     if (regHist_i(std::move(hist), id, true, phid).isSuccess()) {
-      if (phid) lh.set(phist, phid->mutex);
+      if (phid) lh.set(phist, phid->mutex.get());
     }
   }
   else 
@@ -222,7 +222,7 @@ LockedHandle<T> WebdaqHistSvc::regShared_i(const std::string& id, std::unique_pt
                     << " to requested type " << System::typeinfoName(typeid(T)));
     }
     else {
-      lh.set(phist, accessor->second.mutex);
+      lh.set(phist, accessor->second.mutex.get());
       //hist is automatically deleted at end of method
     }
   }
@@ -286,7 +286,7 @@ LockedHandle<T> WebdaqHistSvc::getShared_i(const std::string& id) const
                     << " to requested type " << System::typeinfoName(typeid(T)));
       return {};
     }
-    return LockedHandle<T>(phist, accessor->second.mutex);
+    return LockedHandle<T>(phist, accessor->second.mutex.get());
   }
   ATH_MSG_ERROR("getShared: cannot find histogram with id \"" << id << "\"");
   return {};

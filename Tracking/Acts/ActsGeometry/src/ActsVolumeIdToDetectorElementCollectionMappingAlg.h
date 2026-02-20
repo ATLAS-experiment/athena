@@ -5,7 +5,7 @@
 #ifndef ACTSTRK_ACTSGEOMETRYIDTODETECTORELEMENTMAPPINGALG_H
 #define ACTSTRK_ACTSGEOMETRYIDTODETECTORELEMENTMAPPINGALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "StoreGate/CondHandleKeyArray.h"
 
@@ -14,7 +14,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
 namespace ActsTrk {
-  class ActsVolumeIdToDetectorElementCollectionMappingAlg : public AthReentrantAlgorithm {
+  class ActsVolumeIdToDetectorElementCollectionMappingAlg : public AthCondAlgorithm {
     public:
       ActsVolumeIdToDetectorElementCollectionMappingAlg(const std::string &name, ISvcLocator *pSvcLocator);
       virtual ~ActsVolumeIdToDetectorElementCollectionMappingAlg();

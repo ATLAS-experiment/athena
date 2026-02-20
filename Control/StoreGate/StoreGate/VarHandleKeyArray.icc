@@ -42,7 +42,7 @@ namespace SG {
     StatusCode sc(StatusCode::SUCCESS);
     this->clear();
     for (auto & s : vs) {
-      Base b;
+      Base b = this->keyFromString (s);
       if (!b.assign(s)) {
         sc = StatusCode::FAILURE;
       } else {
@@ -100,5 +100,40 @@ namespace SG {
       owner->declare ( *k );
       k->setOwner( owner );
     }
+  }
+
+
+  /**
+   * Create a HandleKey from a string.
+   * @param s String from which to create the HandleKey.
+   *
+   * This is for decoration handle keys.  If this array was initialized
+   * with a container key, then that will be used to for the handle keys.
+   */
+  template <class Base>
+  template <class T /*= Base*/>
+  requires T::isDecorHandleKey
+  inline
+  Base VarHandleKeyArrayCommon<Base>::keyFromString (const std::string& s) const
+  {
+    if (m_contKey)
+      return Base (*m_contKey, s);
+    return Base (s);
+  }
+
+
+  /**
+   * Create a HandleKey from a string.
+   * @param s String from which to create the HandleKey.
+   *
+   * This is for non-decoration handle keys.
+   */
+  template <class Base>
+  template <class T /*= Base*/>
+  requires (!T::isDecorHandleKey)
+  inline
+  Base VarHandleKeyArrayCommon<Base>::keyFromString (const std::string& s) const
+  {
+    return Base (s);
   }
 }

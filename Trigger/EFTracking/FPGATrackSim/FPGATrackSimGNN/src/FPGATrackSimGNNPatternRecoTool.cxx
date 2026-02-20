@@ -26,7 +26,7 @@ StatusCode FPGATrackSimGNNPatternRecoTool::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode FPGATrackSimGNNPatternRecoTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<std::shared_ptr<const FPGATrackSimRoad>> & roads)
+StatusCode FPGATrackSimGNNPatternRecoTool::getRoads(const std::vector<std::shared_ptr<const FPGATrackSimHit>> & hits, std::vector<FPGATrackSimRoad> & roads)
 {
     std::vector<std::shared_ptr<FPGATrackSimGNNHit>> graph_hits;
     std::vector<std::shared_ptr<FPGATrackSimGNNEdge>> graph_edges;

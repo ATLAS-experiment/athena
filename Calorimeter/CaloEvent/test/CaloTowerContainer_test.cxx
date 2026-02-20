@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloTowerContainer_test.cxx
@@ -347,7 +347,7 @@ void test5()
   assert (comp (tc.getTower ((index_t)1, (index_t)7)->phi() + M_PI, 0.3));
 }
 
-
+//coverity[root_function]
 int main()
 {
   test1();

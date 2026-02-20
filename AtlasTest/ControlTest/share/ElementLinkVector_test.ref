@@ -15,11 +15,7 @@ ApplicationMgr    SUCCESS
                                           running on lxplus0006.cern.ch on Tue Mar 10 18:59:08 2015
 ====================================================================================================================================[m
 ApplicationMgr       INFO Application Manager Configured successfully[m
-DetectorStore        INFO Initializing DetectorStore - package version StoreGate-03-01-06[m
-ClassIDSvc           INFO Initializing ClassIDSvc - package version CLIDComps-00-06-18[m
 ClassIDSvc           INFO  getRegistryEntries: read 175 CLIDRegistry entries for module ALL[m
-ProxyProviderSvc     INFO Initializing ProxyProviderSvc - package version SGComps-00-01-10[m
-HistoryStore         INFO Initializing HistoryStore - package version StoreGate-03-01-06[m
 [93;1mEventLoopMgr      WARNING Unable to locate service "EventSelector" [m
 [93;1mEventLoopMgr      WARNING No events will be processed from external input.[m
 [93;1mHistogramPersis...WARNING Histograms saving not required.[m

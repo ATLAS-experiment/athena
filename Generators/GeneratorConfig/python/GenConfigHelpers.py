@@ -22,6 +22,7 @@ MainGenerators += ["Pythia8", "Pythia8B"]
 MainGenerators += ["Sherpa"]
 # Soft QCD generators
 MainGenerators += ["Epos"]
+MainGenerators += ["Epos4"]
 # ATLAS-specific generators
 MainGenerators += ["ParticleGun"]
 MainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]

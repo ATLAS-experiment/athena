@@ -1,4 +1,5 @@
 <lcgdict>
-    <class name="HistoInput1D" />
-    <class name="HistoInput2D" />
+    <class name="JetHelper::HistoInput1D" />
+    <class name="JetHelper::HistoInput2D" />
+    <class name="JetHelper::VarTool" />
 </lcgdict>

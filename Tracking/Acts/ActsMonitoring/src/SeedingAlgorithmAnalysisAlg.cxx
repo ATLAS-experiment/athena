@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SeedingAlgorithmAnalysisAlg.h"
@@ -94,7 +94,7 @@ StatusCode ActsTrk::SeedingAlgorithmAnalysisAlg::fillHistograms(const EventConte
 
 
 
-        auto monGroup = getGroup(m_monitoringGroupNames[index]);
+        const auto & monGroup = getGroup(m_monitoringGroupNames[index]);
         fill(monGroup,
              eventNumber,
              stripSeedInitialisationTime,

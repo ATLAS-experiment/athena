@@ -1,11 +1,13 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "TrigT1MBTS.h"
+#include "TileIdentifier/TileTBID.h"
 #include "TrigT1Interfaces/MbtsCTP.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigConfData/L1Menu.h"
 
+#include "TileEvent/TileContainer.h"
 
 
 LVL1::TrigT1MBTS::TrigT1MBTS(const std::string& name, ISvcLocator* pSvcLocator)
@@ -55,16 +57,16 @@ LVL1::TrigT1MBTS::initialize()
       if(thr->name() == "MBTS_A") {
          m_cablestart_a = startbit;
          if(m_ThrVecSize12) {
-            m_thresholds_short_a = hwThrValues;
+            m_thresholds_short_a = std::move(hwThrValues);
          } else {
-            m_thresholds_a = hwThrValues;
+            m_thresholds_a = std::move(hwThrValues);
          }
       } else {
          m_cablestart_c = startbit;
          if(m_ThrVecSize12) {
-            m_thresholds_short_c = hwThrValues;
+            m_thresholds_short_c = std::move(hwThrValues);
          } else {
-            m_thresholds_c = hwThrValues;
+            m_thresholds_c = std::move(hwThrValues);
          }
       }
    }
@@ -88,7 +90,7 @@ LVL1::TrigT1MBTS::initialize()
             m_thresholds_c[module] = hwValue;
             m_cablestarts_c[module] = startbit;
          }
-      } else if(thrname.starts_with( "MBTS_A") && thrname.size()>6) {
+      } else if(thrname.starts_with("MBTS_A") && thrname.size()>6) {
          // Get the discriminator threshold settings (single inputs) for the A side.
          // figure out module number from threshold name
          if(module >= m_thresholds_a.size()) {
@@ -301,18 +303,18 @@ LVL1::TrigT1MBTS::execute()
    unsigned int cableWordC = single_triggers_C + (triggersEBC<<m_cablestart_c);
 
    // Record the CTP trigger word in StoreGate.
-   MbtsCTP *mbtsACTP = new MbtsCTP(cableWordA);
-   MbtsCTP *mbtsCCTP = new MbtsCTP(cableWordC);
+   auto mbtsACTP = std::make_unique<MbtsCTP>(cableWordA);
+   auto mbtsCCTP = std::make_unique<MbtsCTP>(cableWordC);
 
    // Methods used in CTPsimulation are added for testing
    ATH_MSG_DEBUG( " (in CTPSimulation) mbtsA cable word 0 is: 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << mbtsACTP->cableWord0()  );
-   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsA is: "<< static_cast<int>( (mbtsACTP->cableWord0() >> m_cablestart_a) & static_cast<unsigned int>( pow( 2, 3 ) - 1 ) )  );
+   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsA is: "<< static_cast<int>( (mbtsACTP->cableWord0() >> m_cablestart_a) & static_cast<unsigned int>( std::pow( 2, 3 ) - 1 ) )  );
    ATH_MSG_DEBUG( " mbtsC cable " << mbtsCCTP->print()  );
    ATH_MSG_DEBUG( " (in CTPSimulation) mbtsC cable word 0 is: 0x" << std::hex << std::setw( 8 ) << std::setfill( '0' ) << mbtsCCTP->cableWord0()  );
-   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsC is: "<< static_cast<int>( (mbtsCCTP->cableWord0() >> m_cablestart_c) & static_cast<unsigned int>( pow( 2, 3 ) - 1 ) )  );
+   ATH_MSG_DEBUG( " (in CTPSimulation) Mult of mbtsC is: "<< static_cast<int>( (mbtsCCTP->cableWord0() >> m_cablestart_c) & static_cast<unsigned int>( std::pow( 2, 3 ) - 1 ) )  );
 
-   ATH_CHECK(evtStore()->record(mbtsACTP, DEFAULT_MbtsACTPLocation, false));
-   ATH_CHECK(evtStore()->record(mbtsCCTP, DEFAULT_MbtsCCTPLocation, false));
+   ATH_CHECK(evtStore()->record(std::move(mbtsACTP), DEFAULT_MbtsACTPLocation, false));
+   ATH_CHECK(evtStore()->record(std::move(mbtsCCTP), DEFAULT_MbtsCCTPLocation, false));
    
    return StatusCode::SUCCESS;
 }

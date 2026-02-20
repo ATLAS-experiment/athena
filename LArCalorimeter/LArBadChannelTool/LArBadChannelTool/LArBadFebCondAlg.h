@@ -7,22 +7,21 @@
 #ifndef LARBADFEBCONDALG_H
 #define LARBADFEBCONDALG_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 
-class LArBadFebCondAlg: public AthReentrantAlgorithm {
+class LArBadFebCondAlg: public AthCondAlgorithm {
  public:
   //Delegate to base-class ctor
-  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~LArBadFebCondAlg()=default;
 
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final{return StatusCode::SUCCESS;}
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<AthenaAttributeList> m_BCInputKey{this,"ReadKey","/LAR/BadFebsOfl/BadFebs",

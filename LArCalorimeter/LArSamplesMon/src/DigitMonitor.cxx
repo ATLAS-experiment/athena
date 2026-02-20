@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DigitMonitor.h"
@@ -306,18 +306,14 @@ bool DigitMonitor::residualPlotsRingComp(CaloId calo, unsigned int layer, CaloGa
     const History* history = pass(i, f);
     if (!history || history->nData() == 0) continue;
     for (unsigned short k = 0; k < 5; k++) {
-      const ShapeErrorData* cellSED = history->shapeErrorData(gain, CellShapeError);
-      const ShapeErrorData* ringSED = history->shapeErrorData(gain, RingShapeError);
+      std::unique_ptr<const ShapeErrorData> cellSED = history->shapeErrorData(gain, CellShapeError);
+      std::unique_ptr<const ShapeErrorData> ringSED = history->shapeErrorData(gain, RingShapeError);
       if (!cellSED || !ringSED) {
-        if (cellSED) delete cellSED;
-        if (ringSED) delete ringSED;
         continue;
       }
       double cellVal = (xip ? cellSED->xi()(k) : cellSED->xip()(k));
       double ringVal = (xip ? ringSED->xi()(k) : ringSED->xip()(k));
       double cellErr = TMath::Sqrt(xip ? cellSED->xiErr()(k,k) : cellSED->xipErr()(k,k));
-      delete cellSED;
-      delete ringSED;
       h[0][k]->Fill(cellVal/cellErr);
       h[1][k]->Fill((cellVal - ringVal)/cellErr);
       h[2][k]->Fill(cellVal);
@@ -385,19 +381,15 @@ bool DigitMonitor::residualPlotsGainComp(CaloId calo, unsigned int layer, bool r
     const History* history = pass(i, f);
     if (!history || history->nData() == 0) continue;
     for (unsigned short k = 0; k < 5; k++) {
-      const ShapeErrorData* hgSED = history->shapeErrorData(hiGain, ring ? RingShapeError : CellShapeError);
-      const ShapeErrorData* lgSED = history->shapeErrorData(loGain, ring ? RingShapeError : CellShapeError);
+      std::unique_ptr<const ShapeErrorData> hgSED = history->shapeErrorData(hiGain, ring ? RingShapeError : CellShapeError);
+      std::unique_ptr<const ShapeErrorData> lgSED = history->shapeErrorData(loGain, ring ? RingShapeError : CellShapeError);
       if (!hgSED || !lgSED) {
-        if (hgSED) delete hgSED;
-        if (lgSED) delete lgSED;
         continue;
       }
       double hgVal = (xip ? hgSED->xi()(k) : hgSED->xip()(k));
       double lgVal = (xip ? lgSED->xi()(k) : lgSED->xip()(k));
       double hgErr = TMath::Sqrt(xip ? hgSED->xiErr()(k,k) : hgSED->xipErr()(k,k));
       double error = TMath::Sqrt(xip ? hgSED->xiErr()(k,k) + lgSED->xiErr()(k,k) : hgSED->xipErr()(k,k) + lgSED->xipErr()(k,k));
-      delete hgSED;
-      delete lgSED;
       h[0][k]->Fill(hgVal/hgErr);
       h[1][k]->Fill((hgVal - lgVal)/error);
       h[2][k]->Fill(hgVal);
@@ -440,7 +432,7 @@ TH1D* DigitMonitor::shapeErrorDist(unsigned int k, const TString& name, int nBin
     const History* history = cellHistory(i);
     if (!history) continue;
     for (unsigned int j = 0; j < history->nData(); j++) { 
-      OFC* ofc = history->ofc(j);
+      std::unique_ptr<OFC> ofc = history->ofc(j);
       double delta = history->data(j)->delta(k) - mean;
       double adcMax = history->data(j)->adcMax();
       h->Fill((delta*delta - ofc->Gamma()(k, k))/(adcMax*adcMax));
@@ -467,7 +459,7 @@ double DigitMonitor::residualCorr(unsigned int k1, unsigned int k2) const
     }  
   }
   
-  return sum/n;
+  return n==0 ? 0 : sum/n;
 }
 
 
@@ -481,7 +473,7 @@ bool DigitMonitor::residualParams(int lwb, int upb, CovMatrix& k, TVectorD& mean
     if (!history) continue;
     for (unsigned int j = 0; j < history->nData(); j++) {
       if (history->data(j)->adcMax() < 0) continue;
-      OFC* ofc = history->ofc(j);
+      std::unique_ptr<OFC> ofc = history->ofc(j);
       if (!ofc || ofc->hasSameRange(lwb, upb)) { cout << "Invalid index bounds!" << endl; return false; }
       for (int i1 = lwb; i1 <= upb; i1++) {
         sum(i1)   = sum(i1)  + history->data(j)->delta(i1);
@@ -496,20 +488,26 @@ bool DigitMonitor::residualParams(int lwb, int upb, CovMatrix& k, TVectorD& mean
     }
   }
 
-  sumA /= n;
+  if (n > 0) {
+    sumA /= n;
+  }
   k.ResizeTo(lwb, upb);
   means.ResizeTo(lwb, upb);
   
   for (int i1 = lwb; i1 <= upb; i1++) {
-    sum(i1)   = sum(i1)/n;    
-    sumN(i1)  = sumN(i1)/n;
+    if (n > 0) {
+      sum(i1)   = sum(i1)/n;
+      sumN(i1)  = sumN(i1)/n;
+    }
     means(i1) = sum(i1);
   }
 
   for (int i1 = lwb; i1 <= upb; i1++) {
     for (int i2 = lwb; i2 <= upb; i2++) {
-      sumCN(i1, i2) = sumCN(i1, i2)/n;
-      sum2N(i1, i2) = sum2N(i1, i2)/n;
+      if (n != 0) {
+        sumCN(i1, i2) = sumCN(i1, i2)/n;
+        sum2N(i1, i2) = sum2N(i1, i2)/n;
+      }
       k(i1, i2) = sum2N(i1, i2) - sumN(i1)*sum(i2) - sum(i1)*sumN(i2)
                 + sum(i1)*sum(i2)*sumA - sumCN(i1,i2);
       k(i1, i2) = (k(i1, i2) >= 0 ? sqrt(k(i1, i2)) : -sqrt(-k(i1, i2)));
@@ -540,7 +538,7 @@ int DigitMonitor::combine(SimpleShape*& pshape, SimpleShape*& pref, const TStrin
       cout << "Adding pulse (" << n+1 << ") at hash " << i << ", index " << j << ", max = " << maxSum/(n+1) << endl;
       //cout << i << " " << j << endl;
       auto thisData = std::make_unique<SimpleShape>(*history->data(j));
-      auto thisRef =  std::unique_ptr<SimpleShape>(history->referenceShape(j));
+      auto thisRef =  history->referenceShape(j);
       if (timeAligned) {
         if (!SimpleShape::scaleAndShift(thisData, 1, -history->data(j)->ofcTime())) return -1;
         if (!SimpleShape::scaleAndShift(thisRef,  1, -history->data(j)->ofcTime())) return -1;
@@ -560,14 +558,16 @@ int DigitMonitor::combine(SimpleShape*& pshape, SimpleShape*& pref, const TStrin
   return n;
 }
 
-Residuals* DigitMonitor::getResiduals(unsigned int hash, CaloGain::CaloGain gain, double absResTrunc, bool adjust, bool zeroTime) const
+std::unique_ptr<Residuals> DigitMonitor::getResiduals(unsigned int hash, CaloGain::CaloGain gain, double absResTrunc, bool adjust, bool zeroTime) const
 {
   const History* history = cellHistory(hash);
   if (!history) return nullptr;
-  if (adjust) history = history->adjust();
-  Residuals* residuals = history->residuals(gain, absResTrunc, false, zeroTime);
-  if (adjust) delete history;
-  return residuals;
+  std::unique_ptr<const History> historyptr;
+  if (adjust) {
+    historyptr = history->adjust();
+    history = historyptr.get();
+  }
+  return history->residuals(gain, absResTrunc, false, zeroTime);
 }
 
 
@@ -584,22 +584,18 @@ bool DigitMonitor::makeResidualCorrections(const TString& outputFile, short resT
   for (unsigned int i = 0; i < nChannels(); i++) {
     if ((i+1) % 10000 == 0) cout << "Processing hash = " << (i+1) << endl;
     for (unsigned int g = 0; g < CaloGain::LARNGAIN; g++) {
-      Residuals* residuals = getResiduals(i, (CaloGain::CaloGain)g, absResTrunc, adjust, zeroTime);
+      std::unique_ptr<Residuals> residuals = getResiduals(i, (CaloGain::CaloGain)g, absResTrunc, adjust, zeroTime);
       if (residuals && (resTrunc > 0 || timeTrunc > 0)) {
-        Residuals* truncated = residuals->truncate(resTrunc, timeTrunc);
-        delete residuals;
-        residuals = truncated;
+        residuals = residuals->truncate(resTrunc, timeTrunc);
       }
 
       if (residuals && residuals->size() < minSize) {
-        delete residuals;
         residuals = nullptr;
       }
 
       ResidualCalculator* resCalc = nullptr;
       if (residuals) {
         resCalc = residuals->calculator(weigh);
-        delete residuals;
       }     
 
       if (!resCalc) {
@@ -609,8 +605,11 @@ bool DigitMonitor::makeResidualCorrections(const TString& outputFile, short resT
 
       cout << i << " : Phi ring " << cellHistory(i)->cellInfo()->globalPhiRing() << " : adding " << resCalc->size() << endl;
       shapeError->addCell(*resCalc, (CaloGain::CaloGain)g);
-      ringCalcs[g][cellHistory(i)->cellInfo()->globalPhiRing()].append(*resCalc);
-      if (cellHistory(i)->cellInfo()->globalPhiRing() == 1142) cout << ringCalcs[g][cellHistory(i)->cellInfo()->globalPhiRing()].regresser()->mean(0) << endl;
+      short iring = cellHistory(i)->cellInfo()->globalPhiRing();
+      if (iring >= 0) {
+        ringCalcs[g][iring].append(*resCalc);
+        if (iring == 1142) cout << ringCalcs[g][iring].regresser()->mean(0) << endl;
+      }
       delete resCalc;
     }
   }

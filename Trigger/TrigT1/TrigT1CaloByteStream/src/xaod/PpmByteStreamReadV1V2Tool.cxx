@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -117,8 +117,7 @@ StatusCode PpmByteStreamReadV1V2Tool::convert(
   ROBIterator rob = robFrags.begin();
   ROBIterator robEnd = robFrags.end();
 
-  int robCounter = 1;
-  for (; rob != robEnd; ++rob, ++robCounter) {
+  for (; rob != robEnd; ++rob) {
 
     StatusCode sc = processRobFragment_(state, rob, RequestType::PPM);
     if (!sc.isSuccess()) {
@@ -690,6 +689,7 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmCompressedR4V1_(State& state) co
 
       }
        // Next get the ADC related quantities (all encodings).
+      if (minIndex <0) return StatusCode::FAILURE;
       adcVal = getPpmAdcSamplesR4_(state, br, encoding, minIndex);
       // Finally get the pedestal correction.
       if ((encoding < 3) || (encoding == 6)) {
@@ -896,7 +896,7 @@ StatusCode PpmByteStreamReadV1V2Tool::processPpmStandardR4V1_(State& state) cons
 
 StatusCode PpmByteStreamReadV1V2Tool::processPpmStandardR3V1_(State& state) const
 {
-    for(auto lut : state.m_ppLuts) {
+    for(const auto & lut : state.m_ppLuts) {
       CHECK(addTriggerTowerV1_(
         state,
         state.m_subBlockHeader.crate(),

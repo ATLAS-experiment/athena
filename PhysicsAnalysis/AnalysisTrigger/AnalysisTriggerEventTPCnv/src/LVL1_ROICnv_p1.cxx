@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -115,7 +115,7 @@ void LVL1_ROICnv_p1::transToPers( const LVL1_ROI* transObj, LVL1_ROI_p1* persObj
     roi.m_phi      = it->getPhi();
     roi.m_thrName  = it->getThrName();
     roi.m_thrValue = it->getThrValue();
-    persObj->m_muonROIs.push_back( roi );
+    persObj->m_muonROIs.push_back( std::move(roi) );
   }
   //
   // Translate the jet RoIs:
@@ -134,7 +134,7 @@ void LVL1_ROICnv_p1::transToPers( const LVL1_ROI* transObj, LVL1_ROI_p1* persObj
     for( std::vector< float >::const_iterator it2 = it->getThresholdValues().begin(); it2 != it->getThresholdValues().end(); ++it2 ) {
       roi.m_thresholdValues.push_back( *it2 );
     }
-    persObj->m_jetROIs.push_back( roi );
+    persObj->m_jetROIs.push_back( std::move(roi) );
   }
   //
   // Translate the jetET RoI(s):
@@ -145,7 +145,7 @@ void LVL1_ROICnv_p1::transToPers( const LVL1_ROI* transObj, LVL1_ROI_p1* persObj
     for( std::vector< std::string >::const_iterator it2 = it->getThresholds().begin(); it2 != it->getThresholds().end(); ++it2 ) {
       roi.m_thresholds.push_back( *it2 );
     }
-    persObj->m_jetetROIs.push_back( roi );
+    persObj->m_jetetROIs.push_back( std::move(roi) );
   }
   //
   // Translate em/tau RoI(s):
@@ -167,7 +167,7 @@ void LVL1_ROICnv_p1::transToPers( const LVL1_ROI* transObj, LVL1_ROI_p1* persObj
     for( std::vector< float >::const_iterator it2 = it->getThresholdValues().begin(); it2 != it->getThresholdValues().end(); ++it2 ) {
       roi.m_thresholdValues.push_back( *it2 );
     }
-    persObj->m_emtauROIs.push_back( roi );
+    persObj->m_emtauROIs.push_back( std::move(roi) );
   }
   //
   // Translate energy sum RoI(s):
@@ -183,7 +183,7 @@ void LVL1_ROICnv_p1::transToPers( const LVL1_ROI* transObj, LVL1_ROI_p1* persObj
     for( std::vector< std::string >::const_iterator it2 = it->getThresholds().begin(); it2 != it->getThresholds().end(); ++it2 ) {
       roi.m_thresholds.push_back( *it2 );
     }
-    persObj->m_energysumROIs.push_back( roi );
+    persObj->m_energysumROIs.push_back( std::move(roi) );
   }
 
   log << MSG::DEBUG << "Creating persistent state of LVL1_ROI [OK]" << endmsg;

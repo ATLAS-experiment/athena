@@ -4,7 +4,7 @@
 #ifndef MUONCONDTEST_ALINEINJECTTESTALG_H
 #define MUONCONDTEST_ALINEINJECTTESTALG_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <MuonAlignmentData/CorrContainer.h>
 #include <StoreGate/WriteCondHandleKey.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
@@ -14,7 +14,7 @@
  *  increasing counter in mm or degrees
 */
 
-class ALineInjectTestAlg : public AthReentrantAlgorithm{
+class ALineInjectTestAlg : public AthCondAlgorithm{
     public:
        
         ALineInjectTestAlg(const std::string& name, ISvcLocator* pSvcLocator);

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef BYTESTREAMEVENTSTORAGEINPUTSVC_H
-#define BYTESTREAMEVENTSTORAGEINPUTSVC_H
+#ifndef BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEINPUTSVC_H
+#define BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEINPUTSVC_H
 
 /** @file ByteStreamEventStorageInputSvc.h
  *  @brief This file contains the class definition for the ByteStreamEventStorageInputSvc class.
@@ -92,8 +92,8 @@ private: // data
 
 private: // properties
   /// Pointer to StoreGate
-  ServiceHandle<StoreGateSvc>                m_storeGate;     //!< StoreGateSvc
-  ServiceHandle<StoreGateSvc>                m_inputMetadata; //!< StoreGateSvc
+  ServiceHandle<StoreGateSvc>                m_storeGate{this, "EventStore", "StoreGateSvc"};
+  ServiceHandle<StoreGateSvc>                m_inputMetadata{this, "MetaDataStore", "StoreGateSvc/InputMetaDataStore"};
   ServiceHandle<IROBDataProviderSvc>         m_robProvider;
   Gaudi::Property<bool>                      m_sequential{this, "EnableSequential", false, "enable sequential reading"};
   Gaudi::Property<bool>                      m_dump{this, "DumpFlag", false, "Dump fragments"};
@@ -126,4 +126,4 @@ private: // internal helper functions
 
 };
 
-#endif // BYTESTREAMEVENTSTORAGEINPUTSVC_H
+#endif // BYTESTREAMCNVSVC_BYTESTREAMEVENTSTORAGEINPUTSVC_H

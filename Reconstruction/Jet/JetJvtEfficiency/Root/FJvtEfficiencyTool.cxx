@@ -3,8 +3,6 @@
 */
 
 #include "JetJvtEfficiency/FJvtEfficiencyTool.h"
-// Get the systematic definitions from here
-#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"

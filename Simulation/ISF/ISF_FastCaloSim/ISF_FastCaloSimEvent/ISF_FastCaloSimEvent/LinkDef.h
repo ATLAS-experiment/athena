@@ -43,6 +43,11 @@
 #include "ISF_FastCaloSimEvent/TFCSEnergyParametrization.h"
 #include "ISF_FastCaloSimEvent/TFCSPCAEnergyParametrization.h"
 #include "ISF_FastCaloSimEvent/TFCSEnergyBinParametrization.h"
+#include "ISF_FastCaloSimEvent/TFCSPhiModulationCorrection.h"
+#include "ISF_FastCaloSimEvent/TFCSBinnedShowerBase.h"
+#include "ISF_FastCaloSimEvent/TFCSBinnedShower.h"
+#include "ISF_FastCaloSimEvent/TFCSBinnedShowerONNX.h"
+#include "ISF_FastCaloSimEvent/TFCSMLCalorimeterSimulator.h"
 #ifndef __FastCaloSimNoLWTNN__
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
 #include "ISF_FastCaloSimEvent/TFCSGANLWTNNHandler.h"
@@ -63,6 +68,7 @@
 
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitBase.h"
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationHitChain.h"
+#include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationFixedHitChain.h"
 #include "ISF_FastCaloSimEvent/TFCSLateralShapeParametrizationFluctChain.h"
 #include "ISF_FastCaloSimEvent/TFCSCenterPositionCalculation.h"
 #include "ISF_FastCaloSimEvent/TFCSFlatLateralShapeParametrization.h"
@@ -604,6 +610,11 @@
 #pragma link C++ class TFCSEnergyParametrization + ;
 #pragma link C++ class TFCSPCAEnergyParametrization - ;
 #pragma link C++ class TFCSEnergyBinParametrization + ;
+#pragma link C++ class TFCSPhiModulationCorrection + ;
+#pragma link C++ class TFCSBinnedShowerBase + ;
+#pragma link C++ class TFCSBinnedShower - ;
+#pragma link C++ class TFCSBinnedShowerONNX - ;
+#pragma link C++ class TFCSMLCalorimeterSimulator + ;
 #ifndef __FastCaloSimNoLWTNN__
 #pragma link C++ class TFCSGANXMLParameters + ;
 #pragma link C++ class TFCSGANLWTNNHandler - ;
@@ -621,6 +632,7 @@
 #pragma link C++ class TFCSLateralShapeParametrization + ;
 #pragma link C++ class TFCSLateralShapeParametrizationHitBase + ;
 #pragma link C++ class TFCSLateralShapeParametrizationHitChain + ;
+#pragma link C++ class TFCSLateralShapeParametrizationFixedHitChain + ;
 #pragma link C++ class TFCSLateralShapeParametrizationFluctChain + ;
 #pragma link C++ class TFCSCenterPositionCalculation + ;
 #pragma link C++ class TFCSFlatLateralShapeParametrization + ;

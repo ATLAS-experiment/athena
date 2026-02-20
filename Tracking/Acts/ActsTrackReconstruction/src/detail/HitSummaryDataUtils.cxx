@@ -42,12 +42,12 @@ namespace ActsTrk::detail {
           {
 
              auto flag = state.typeFlags();
-             if (flag.test(Acts::TrackStateFlag::HoleFlag)) {
+             if (flag.isHole()) {
                 xAOD::UncalibMeasType det_type = xAOD::UncalibMeasType::Other;
                 if (state.hasReferenceSurface()) {
-                   if (state.referenceSurface().associatedDetectorElement()) {
+                   if (state.referenceSurface().surfacePlacement()) {
                       const ActsDetectorElement *
-                         actsDetEl = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().associatedDetectorElement());
+                         actsDetEl = dynamic_cast<const ActsDetectorElement *>(state.referenceSurface().surfacePlacement());
                       if (actsDetEl) {
                          const InDetDD::SiDetectorElement *
                             detEl = dynamic_cast<const InDetDD::SiDetectorElement *>(actsDetEl->upstreamDetectorElement());
@@ -73,7 +73,7 @@ namespace ActsTrk::detail {
                 }
 
              }
-             else if (flag.test(Acts::TrackStateFlag::MeasurementFlag)) {
+             else if (flag.hasMeasurement()) {
                 // do not consider material states
                 param_state_idx_out.push_back(state.index());
              }
@@ -85,10 +85,10 @@ namespace ActsTrk::detail {
                 const xAOD::UncalibratedMeasurement &uncalibMeas = getUncalibratedMeasurement(sl);
                 if (measurement_to_summary_type.at(to_underlying(uncalibMeas.type())) <  xAOD::numberOfTrackSummaryTypes ) {
                    if (static_cast<unsigned int>(to_underlying(uncalibMeas.type())) < siDetEleColl.size()) {
-                     HitSummaryData::EHitSelection hit_selection = (flag.test(Acts::TrackStateFlag::OutlierFlag)
+                     HitSummaryData::EHitSelection hit_selection = (flag.isOutlier()
                                                                         ? HitSummaryData::Outlier
                                                                         : HitSummaryData::Hit);
-                     if (flag.test(Acts::TrackStateFlag::SharedHitFlag)) {
+                     if (flag.isSharedHit()) {
                         hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHit);
                      }
                      hit_info_out.addHit(siDetEleColl[to_underlying(uncalibMeas.type())],
@@ -96,7 +96,7 @@ namespace ActsTrk::detail {
                                          hit_selection);
                    }
                 }
-                if (state.calibratedSize()>0 && !flag.test(Acts::TrackStateFlag::OutlierFlag)) {
+                if (state.calibratedSize()>0 && !flag.isOutlier()) {
                    // from Tracking/TrkTools/TrkTrackSummaryTool/src/TrackSummaryTool.cxx
                    //       processTrackState
                    double chi2add = std::min(state.chi2(),1e5f) / state.calibratedSize();

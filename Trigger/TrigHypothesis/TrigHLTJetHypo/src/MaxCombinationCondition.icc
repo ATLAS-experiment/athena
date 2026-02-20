@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef MAXCOMBINATIONCONDITION_ICC
 #define MAXCOMBINATIONCONDITION_ICC
 
@@ -20,8 +23,8 @@ MaxCombinationCondition<T>::isSatisfied(const HypoJetVector& hjv,
   auto end = begin.endIter();
   
   
-  return m_acceptingCondition->isSatisfied(*std::max_element(begin,
-							     end,
+  return m_acceptingCondition->isSatisfied(*std::max_element(std::move(begin),
+							     std::move(end),
                    m_cmp), c);
 }
 

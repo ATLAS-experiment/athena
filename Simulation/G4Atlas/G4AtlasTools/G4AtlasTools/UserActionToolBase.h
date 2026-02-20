@@ -10,9 +10,11 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include <GaudiKernel/StatusCode.h>
 
 // G4Atlas includes
 #include "G4AtlasInterfaces/IUserActionTool.h"
+#include "HitManagement/HitCollectionMap.h"
 
 // Local includes
 #include "ThreadSpecificUserAction.h"
@@ -52,6 +54,11 @@ namespace G4UA
         m_actions.set( std::move(myAction) );
         return StatusCode::SUCCESS;
       }
+
+    /// Calls BeginOfAthenaEvent
+    StatusCode BeginOfAthenaEvent(HitCollectionMap&) override {return StatusCode::SUCCESS;};
+    /// Calls EndOfAthenaEvent
+    StatusCode EndOfAthenaEvent(HitCollectionMap&) override {return StatusCode::SUCCESS;};
 
     protected:
 

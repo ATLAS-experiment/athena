@@ -7,20 +7,15 @@
 #include "CxxUtils/MD5.h"
 
 #include <uuid/uuid.h>
+#include<type_traits>
 #include <sstream>
 
-DataHeaderElement_p5::DataHeaderElement_p5() : m_token(), m_oid2(0U) {}
-DataHeaderElement_p5::DataHeaderElement_p5(const DataHeaderElement_p5& rhs) : m_token(rhs.m_token),
-	m_oid2(rhs.m_oid2) {}
-DataHeaderElement_p5::~DataHeaderElement_p5() {}
 
-DataHeaderElement_p5& DataHeaderElement_p5::operator=(const DataHeaderElement_p5& rhs) {
-   if (this != &rhs) {
-      m_token = rhs.m_token;
-      m_oid2 = rhs.m_oid2;
-   }
-   return(*this);
-}
+static_assert(std::is_nothrow_move_constructible<DataHeaderElement_p5>::value);
+static_assert(std::is_nothrow_move_constructible<DataHeaderForm_p5>::value);
+static_assert(std::is_nothrow_move_constructible<DataHeader_p5>::value);
+
+DataHeaderElement_p5::DataHeaderElement_p5() : m_token(), m_oid2(0U) {}
 
 const std::string& DataHeaderElement_p5::token() const {
    return(m_token);
@@ -32,15 +27,6 @@ long long int DataHeaderElement_p5::oid2() const {
 
 
 DataHeaderForm_p5::DataHeaderForm_p5() : m_map(), m_uints() {}
-DataHeaderForm_p5::DataHeaderForm_p5(const DataHeaderForm_p5& rhs) : m_map(rhs.m_map), m_uints(rhs.m_uints) {}
-DataHeaderForm_p5::~DataHeaderForm_p5() {}
-DataHeaderForm_p5& DataHeaderForm_p5::operator=(const DataHeaderForm_p5& rhs) {
-   if (&rhs != this) {
-      m_map = rhs.m_map;
-      m_uints = rhs.m_uints;
-   }
-   return(*this);
-}
 
 const std::vector<std::string>& DataHeaderForm_p5::map() const {
    return(m_map);
@@ -68,20 +54,6 @@ void DataHeaderForm_p5::resize(unsigned int size) {
 
 
 DataHeader_p5::DataHeader_p5() : m_dataHeader(), m_dhFormToken(), m_dhFormMdx() {}
-DataHeader_p5::DataHeader_p5(const DataHeader_p5& rhs) : m_dataHeader(rhs.m_dataHeader),
-	m_dhFormToken(rhs.m_dhFormToken),
-	m_dhFormMdx(rhs.m_dhFormMdx) {}
-DataHeader_p5::~DataHeader_p5() {
-}
-
-DataHeader_p5& DataHeader_p5::operator=(const DataHeader_p5& rhs) {
-   if (this != &rhs) {
-      m_dataHeader = rhs.m_dataHeader;
-      m_dhFormToken = rhs.m_dhFormToken;
-      m_dhFormMdx = rhs.m_dhFormMdx;
-   }
-   return(*this);
-}
 
 const std::vector<DataHeaderElement_p5>& DataHeader_p5::elements() const {
    return(m_dataHeader);

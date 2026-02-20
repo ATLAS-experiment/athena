@@ -40,7 +40,7 @@ public:
 
   StatusCode initialize() override;
 
-  StatusCode runOverlapRemoval(std::vector<std::shared_ptr<const FPGATrackSimRoad>>& roads);
+  StatusCode runOverlapRemoval(std::vector<FPGATrackSimRoad>& roads);
 
   // Original Overlap Removal function
   // Compare chi2 and common number of hits
@@ -67,12 +67,25 @@ private:
   Gaudi::Property <std::string> m_algorithm { this, "ORAlgo", "Normal", "Overlap removal algorithm"};
   Gaudi::Property <bool> m_doFastOR { this, "doFastOR", false, "Use fast overlap removal algorithm instead of default"};
   Gaudi::Property <bool> m_compareAllHits {this, "compareAllHits", true, "Compare all hits to all other hits when comparing two tracks"};
+  Gaudi::Property <bool> m_useV2OR {this, "useV2OR", true, "Use v2 overlap removal algorithm (worst-to-best sorting)"};
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool", "", "Monitoring tool"};
 
   ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 
 
   StatusCode runOverlapRemoval_fast(std::vector<FPGATrackSimTrack>& tracks);
+  
+  // V2 overlap removal algorithm with sorted worst-to-best approach
+  StatusCode runOverlapRemoval_v2(std::vector<FPGATrackSimTrack>& tracks);
+  
+  // Compare track quality for v2 algorithm (sorts worst-to-best)
+  static bool compareTrackQuality_v2(const FPGATrackSimTrack& track1, const FPGATrackSimTrack& track2);
+  
+  // Helper for v2: count real hits in a track
+  static int countRealHits_v2(const FPGATrackSimTrack& track);
+  
+  // Helper for v2: count overlapping hits between two tracks
+  int countOverlappingHits_v2(const FPGATrackSimTrack& track1, const FPGATrackSimTrack& track2) const;
 
 };
 

@@ -1,6 +1,5 @@
-"""
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-"""
 from AthenaConfiguration.Enums import ProductionStep, BeamType
 from TileConfiguration.TileConfigFlags import TileRunType
 import sys

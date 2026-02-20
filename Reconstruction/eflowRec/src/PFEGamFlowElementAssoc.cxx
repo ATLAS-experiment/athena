@@ -13,7 +13,7 @@
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "xAODEgamma/EgammaxAODHelpers.h" 
 
-#include "eflowRec/PFEGamFlowElementAssoc.h" 
+#include "PFEGamFlowElementAssoc.h" 
 
 
 using ElectronLink_t = ElementLink<xAOD::ElectronContainer>; 

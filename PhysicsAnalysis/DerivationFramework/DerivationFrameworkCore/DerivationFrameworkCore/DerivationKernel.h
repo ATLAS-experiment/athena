@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_DERIVATIONKERNEL_H
@@ -18,30 +18,29 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 
 namespace DerivationFramework {
-    
-    /////////////////////////////////////////////////////////////////////////////
-    class DerivationKernel : public AthFilterAlgorithm {
-        
-    public:
-        DerivationKernel (const std::string& name, ISvcLocator* pSvcLocator);
-        StatusCode initialize();
-        StatusCode execute();
-        StatusCode finalize();
-    private:
-        // Tools etc
-        ToolHandleArray<ISkimmingTool>     m_skimmingTools;
-        ToolHandleArray<IThinningTool>     m_thinningTools;
-        ToolHandleArray<IAugmentationTool> m_augmentationTools;
-        ServiceHandle<IChronoStatSvc>      m_chronoSvc;
 
-        // Some counters
-        int m_eventCounter;
-        int m_acceptCntr;        
-	bool m_runSkimmingFirst;
- 
-        Gaudi::Property<bool> m_doChronoStat{this,"doChronoStat",true,"use ChronoStatSvc (only in serial jobs)"};
-    };
-    
+  /////////////////////////////////////////////////////////////////////////////
+  class DerivationKernel : public AthFilterAlgorithm {
+
+  public:
+    DerivationKernel (const std::string& name, ISvcLocator* pSvcLocator);
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual StatusCode finalize() override;
+  private:
+    // Tools etc
+    PublicToolHandleArray<ISkimmingTool> m_skimmingTools{this, "SkimmingTools", {} };
+    PublicToolHandleArray<IThinningTool> m_thinningTools{this, "ThinningTools", {} };
+    PublicToolHandleArray<IAugmentationTool> m_augmentationTools{this, "AugmentationTools", {} };
+    ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoStatSvc",  "ChronoStatSvc"};
+
+    Gaudi::Property<bool> m_runSkimmingFirst{this, "RunSkimmingFirst", false};
+    Gaudi::Property<bool> m_doChronoStat{this,"doChronoStat",true,"use ChronoStatSvc (only in serial jobs)"};
+    // Some counters
+    int m_eventCounter{};
+    int m_acceptCntr{};
+
+  };
+
 } // end of namespace
-#endif 
-
+#endif

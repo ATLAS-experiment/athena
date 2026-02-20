@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 //  ***************************************************************************
 //  *   Author: John Morris (john.morris@cern.ch)                             *
@@ -514,8 +514,8 @@ namespace LVL1{
       }
     }
 
-    output.push_back(emec);
-    output.push_back(emb);
+    output.push_back(std::move(emec));
+    output.push_back(std::move(emb));
     return output;
   }
 
@@ -538,8 +538,8 @@ namespace LVL1{
       if(someRxId == rxidA){cellsA.push_back(i);}
       if(someRxId == rxidB){cellsB.push_back(i);}
     }
-    output.push_back(cellsA);
-    output.push_back(cellsB);
+    output.push_back(std::move(cellsA));
+    output.push_back(std::move(cellsB));
     return output;
   }
 

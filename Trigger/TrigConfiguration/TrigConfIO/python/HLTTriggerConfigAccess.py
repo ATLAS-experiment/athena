@@ -11,8 +11,8 @@ class HLTMenuAccess(TriggerConfigAccess):
     this class provides access to the HLT menu
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None,
-                 useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", smkey: int = 0,
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
@@ -61,8 +61,8 @@ class HLTPrescalesSetAccess(TriggerConfigAccess):
     this class provides access to the HLT prescales set
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, hltpskey = None,
-                 useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", hltpskey: int = 0,
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """
@@ -102,14 +102,14 @@ class HLTJobOptionsAccess(TriggerConfigAccess):
     this class provides access to the HLT algorithm configuration
     the methods are self-explanatory for people with knowledge of the configuration
     """
-    def __init__(self, filename = None, dbalias = None, smkey = None,
-                 useCrest = False, crestServer = ""):
+    def __init__(self, filename: str = "", dbalias: str = "", smkey: int = 0,
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and smkey
         """
         super().__init__(ConfigType.HLTJO, mainkey = "properties",
                          filename = filename, dbalias = dbalias, dbkey = smkey,
-                         useCrest=useCrest, crestServer=crestServer)
+                         useCrest = useCrest, crestServer = crestServer)
         self.loader.setQuery({
             2: "SELECT JO.HJO_DATA FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.HLT_JOBOPTIONS JO WHERE JO.HJO_ID=SMT.SMT_HLT_JOBOPTIONS_ID AND SMT.SMT_ID=:dbkey", # for new db schema
             1: "SELECT JO.JO_CONTENT FROM {schema}.SUPER_MASTER_TABLE SMT, {schema}.JO_MASTER_TABLE JO WHERE JO.JO_ID=SMT.SMT_JO_MASTER_TABLE_ID AND SMT.SMT_ID=:dbkey"  # for current db schema
@@ -144,8 +144,8 @@ class HLTMonitoringAccess(TriggerConfigAccess):
     """
     this class provides access to the HLT monitoring json
     """
-    def __init__(self, filename = None, jsonString = None, dbalias = None, smkey = None, monikey = None,
-                 useCrest=False, crestServer=""):
+    def __init__(self, filename: str = "", jsonString: str = "", dbalias: str = "", smkey: int = 0, monikey: int = 0,
+                 useCrest: bool = False, crestServer: str = ""):
         """
         accessor needs to be initialized with either a filename or the dbalias and hlpskey
         """

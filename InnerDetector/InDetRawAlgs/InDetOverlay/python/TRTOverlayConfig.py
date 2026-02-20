@@ -1,6 +1,6 @@
 """Define methods to construct configured TRT overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -18,12 +18,8 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     kwargs.setdefault("OutputKey", "TRT_RDOs")
 
     # Input setup
-    if flags.Overlay.ByteStream:
-        from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConfig import TRTRawDataProviderCfg
-        acc.merge(TRTRawDataProviderCfg(flags))
-    else:
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'TRT_RDO_Container#{kwargs["BkgInputKey"]}']))
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, [f'TRT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
     acc.merge(TRT_ReadoutGeometryCfg(flags))
@@ -62,12 +58,6 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
-            f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
-        ]))
-
-    # for track overlay, write out the signal RDOs because reco tracking will only run on them
-    if flags.Overlay.doTrackOverlay:
-        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
             f"TRT_RDO_Container#{flags.Overlay.SigPrefix}TRT_RDOs"
         ]))
 

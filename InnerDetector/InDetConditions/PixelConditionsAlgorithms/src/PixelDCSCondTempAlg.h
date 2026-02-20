@@ -11,7 +11,7 @@
 #ifndef PIXELDCSCONDTEMPALG
 #define PIXELDCSCONDTEMPALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h" //base class
+#include "AthenaBaseComps/AthCondAlgorithm.h" //base class
 
 #include "StoreGate/ReadCondHandleKey.h" //templated member
 #include "AthenaPoolUtilities/CondAttrListCollection.h" //template argument
@@ -22,14 +22,13 @@
 
 class PixelID;
 
-class PixelDCSCondTempAlg : public AthReentrantAlgorithm {
+class PixelDCSCondTempAlg : public AthCondAlgorithm {
   public:
     PixelDCSCondTempAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelDCSCondTempAlg() = default;
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     const PixelID* m_pixelID{nullptr};

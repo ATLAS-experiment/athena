@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // ******************************************************************************
@@ -165,6 +165,17 @@ private:
     static int getFirstRadiusChnl(int stationEta, int pcb) ;
     bool isStNameInTech(const std::string& stationName) const override;
 
+    int stationEtaMin(const ExpandedIdentifier& expId) const;
+    int stationEtaMax(const ExpandedIdentifier& expId) const;
+    int stationPhiMin(const ExpandedIdentifier& expId) const;
+    int stationPhiMax(const ExpandedIdentifier& expId) const;
+    int multilayerMin(const ExpandedIdentifier& expId) const;
+    int multilayerMax(const ExpandedIdentifier& expId) const;
+    int gasGapMin(const ExpandedIdentifier& expId) const;
+    int gasGapMax(const ExpandedIdentifier& expId) const;
+    int channelMin(const ExpandedIdentifier& expId) const;
+    int channelMax(const ExpandedIdentifier& expId) const;
+
     int init_id_to_hashes();
     /// Small and big wedges
     static constexpr unsigned int s_stDim = 2;
@@ -194,7 +205,7 @@ private:
     IdDictFieldImplementation m_cha_impl;
 
     // Check level values
-    bool validElement(const Identifier& id, int stationName, int stationEta, int stationPhi) const;
+    bool validElement(const ExpandedIdentifier& expId, int stationName, int stationEta, int stationPhi) const;
     bool validChannel(const Identifier& id, int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channel) const;
 
     // Utility methods

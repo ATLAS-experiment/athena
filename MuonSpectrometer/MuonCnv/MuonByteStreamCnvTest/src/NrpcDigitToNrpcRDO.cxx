@@ -81,7 +81,7 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
                 const Identifier channelId = rpcDigit->identify();
 
                 ATH_MSG_DEBUG("Convert RPC digit "<<m_idHelperSvc->toString(channelId));
-            
+                      
                 RpcCablingData translateCache{};
                 /// Load the identifier into the cabling data
                 if (!cabling->convert(channelId, translateCache, rpcDigit->stripSide())) {
@@ -90,7 +90,8 @@ StatusCode NrpcDigitToNrpcRDO::execute(const EventContext& ctx) const {
                 }
             
                 if (!cabling->getOnlineId(translateCache, msgStream())) {
-                    ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber.");
+                    ATH_MSG_ERROR("Offline to Online Id conversion for NRPC chamber." 
+                                  << m_idHelperSvc->toString(channelId) << " failed.");
                     return StatusCode::FAILURE;
                 }
                  /// Correct for the time of flight

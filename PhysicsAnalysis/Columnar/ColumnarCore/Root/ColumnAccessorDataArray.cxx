@@ -30,7 +30,7 @@ namespace columnar
   void moveAccessor (unsigned& dataIndex, std::unique_ptr<ColumnAccessorDataArray>& accessorData, unsigned& sourceIndex, std::unique_ptr<ColumnAccessorDataArray>& sourceData)
   {
     if (accessorData != nullptr)
-      throw std::runtime_error ("data already set, overwriting not yet supported");
+      throw std::runtime_error ("trying to set a columnar accessor that has already been set, overwriting not yet supported");
 
     dataIndex = sourceIndex;
     sourceIndex = 0;

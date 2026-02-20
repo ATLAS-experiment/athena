@@ -10,7 +10,7 @@
 #define SCTSiLorentzAngleCondAlg_h
 
 // Athena includes
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -33,7 +33,7 @@
  * This class prepares SiLorentAngleCondData using SCT_SiliconConditionsTool
  **/
 
-class SCTSiLorentzAngleCondAlg: public AthReentrantAlgorithm
+class SCTSiLorentzAngleCondAlg: public AthCondAlgorithm
 {
  public:
   SCTSiLorentzAngleCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
@@ -41,7 +41,6 @@ class SCTSiLorentzAngleCondAlg: public AthReentrantAlgorithm
   virtual StatusCode initialize() override final;
   virtual StatusCode execute(const EventContext& ctx) const override final;
   virtual StatusCode finalize() override final;
-  virtual bool isReEntrant() const override final { return false; }
 
  private:
   SG::ReadCondHandleKey<SCT_DCSFloatCondData> m_readKeyTemp{this, "ReadKeyTemp", "SCT_SiliconTempCondData", "Key of input SCT temperature"};

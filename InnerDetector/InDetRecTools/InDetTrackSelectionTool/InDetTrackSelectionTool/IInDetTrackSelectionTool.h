@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSELECTIONTOOL_IINDETTRACKSELECTIONTOOL_H
@@ -9,18 +9,16 @@
 
 // Framework include(s):
 #include "PATCore/IAsgSelectionTool.h"
-#include "PATCore/AcceptData.h"
-#include "PATCore/AcceptInfo.h"
 
 // EDM include(s):
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
-
-#ifndef XAOD_ANALYSIS
-#include "TrkParameters/TrackParameters.h"
-#endif
+#include "xAODTracking/TrackParticleFwd.h"
+#include "xAODTracking/VertexFwd.h"
 
 // forward declarations
+namespace asg {
+  class AcceptInfo;
+  class AcceptData;
+}
 #ifndef XAOD_ANALYSIS
 namespace Trk {
   class Track;
@@ -68,17 +66,17 @@ namespace InDet {
 
     /// Decide whether the track in question is a "good track" or not
     virtual  asg::AcceptData accept( const xAOD::TrackParticle& track,
-					 const xAOD::Vertex* vertex = 0 ) const = 0;
+                                     const xAOD::Vertex* vertex = 0 ) const = 0;
 
 #ifndef XAOD_ANALYSIS
     virtual  asg::AcceptData accept( const Trk::Track& track,
-					 const Trk::Vertex* vertex = 0 ) const = 0;
+                                     const Trk::Vertex* vertex = 0 ) const = 0;
 #endif
 
     /// Set the selection to a pre-defined standard set of cuts
     // This function should not be public in Athena, as the cut level should be 
     //   set in the job options. Allow it for now, so as to not break compatibility
-    virtual void setCutLevel( InDet::CutLevel level, Bool_t overwrite = true )
+    virtual void setCutLevel( InDet::CutLevel level, bool overwrite = true )
       __attribute__ ((deprecated("The cut level should be set in the job options through the \"CutLevel\" property.")))
       = 0;
 

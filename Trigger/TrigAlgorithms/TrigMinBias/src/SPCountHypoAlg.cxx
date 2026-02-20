@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SPCountHypoAlg.h"
@@ -62,7 +62,7 @@ StatusCode SPCountHypoAlg::execute(const EventContext &context) const
   TrigCompositeUtils::DecisionIDContainer prev;
   TrigCompositeUtils::decisionIDs(previousDecisionsHandle->at(0), prev);
 
-  SPCountHypoTool::SPCountsInfo spinfo({d, spacepointsHandle->at(0), prev});
+  SPCountHypoTool::SPCountsInfo spinfo({d, spacepointsHandle->at(0), std::move(prev)});
 
   for (auto &tool : m_hypoTools)
   {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscRODReadOutV0.h"
@@ -83,7 +83,12 @@ double CscRODReadOutV0::findCharge() {
     double adcCount = 0.0;
     int n = 0;
     for (int i = 0; i < N_SAMPLE; i++) {
-        adcCount = adcCount + amp[i] / signal_amplitude(time[i]);
+        if (auto amplitude = signal_amplitude(time[i]); amplitude !=0){
+           //coverity[DIVIDE_BY_ZERO:FALSE]
+           adcCount = adcCount + amp[i] / amplitude;
+        } else {
+          continue;
+        }
         if (amp[i] > 0) n++;
     }
     adcCount = adcCount / n;

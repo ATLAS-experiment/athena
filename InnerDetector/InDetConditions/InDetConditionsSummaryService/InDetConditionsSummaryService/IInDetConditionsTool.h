@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,7 +11,6 @@
 #define IInDetConditionsTool_h
 //Gaudi Includes
 #include "GaudiKernel/IInterface.h"
-#include "Identifier/IdContext.h"
 
 //Local includes
 #include "InDetConditionsSummaryService/InDetHierarchy.h"

@@ -59,7 +59,7 @@ namespace LVL1 {
 
     virtual std::vector<uint32_t> getgJetTOBs() const override;
 
-    virtual std::vector<uint32_t> getgScalarEJwojTOBs() const override;
+    virtual std::vector<int32_t> getgScalarEJwojTOBs() const override;
  
     virtual std::vector<uint32_t> getgMETComponentsJwojTOBs() const override;
 
@@ -90,7 +90,7 @@ namespace LVL1 {
 
     std::vector<uint32_t>  m_gJetTobWords;
 
-    std::vector<uint32_t>  m_gScalarEJwojTobWords;
+    std::vector<int32_t>  m_gScalarEJwojTobWords;
 
     std::vector<uint32_t>  m_gMETComponentsJwojTobWords;
 

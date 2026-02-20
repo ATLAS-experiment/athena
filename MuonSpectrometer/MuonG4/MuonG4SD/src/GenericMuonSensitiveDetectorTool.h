@@ -11,7 +11,8 @@ class GenericMuonSensitiveDetectorTool : public SensitiveDetectorBase {
 
 public:
     GenericMuonSensitiveDetectorTool(const std::string& type, const std::string& name, const IInterface *parent);
-    ~GenericMuonSensitiveDetectorTool() {}
+    virtual StatusCode SetupEvent(HitCollectionMap& hitCollections) override;
+    virtual StatusCode Gather(HitCollectionMap& hitCollections) override;
 protected:
     G4VSensitiveDetector* makeSD() const override final;
 };

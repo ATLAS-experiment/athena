@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaServices )
@@ -21,7 +21,7 @@ atlas_add_component( AthenaServices
    LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES}
    AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
-   AthContainers AthContainersInterfaces DataModelRoot SGTools
+   AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
 
@@ -68,9 +68,9 @@ atlas_add_test( DelayedConditionsCleanerSvc_test
 atlas_add_test( ThinningCacheTool_test
    SOURCES test/ThinningCacheTool_test.cxx
    LINK_LIBRARIES TestTools AthContainers AthenaKernel GaudiKernel AthenaBaseComps StoreGateLib )
-   
+
 atlas_add_test( MetaDataSvc_test
-   SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx 
+   SOURCES test/MetaDataSvc_test.cxx src/MetaDataSvc.cxx src/OutputStreamSequencerSvc.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
                   StoreGateLib PersistencySvc AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
@@ -82,7 +82,8 @@ atlas_add_test( AthTPCnvSvc
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( AthDictLoaderSvc
-   SCRIPT athena.py --evtMax 1 AthenaServices/AthDictLoaderSvc_test.py
+   SCRIPT test/AthDictLoaderSvc_test.py
+   LOG_SELECT_PATTERN "AthDictLoaderTestAlg"
    PROPERTIES TIMEOUT 300 )
 
 atlas_add_test( ItemListSemanticsTest
@@ -100,8 +101,6 @@ atlas_install_python_modules( python/*.py
    POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 atlas_install_joboptions(
-   share/AthDictLoaderSvc_test.py
-   share/ReadAthenaPoolSeek_jobOptions.py
    share/AthenaOutputStream_test.txt
    share/FPEControlSvc_test.txt
    share/AthenaEventLoopMgr_test.txt

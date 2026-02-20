@@ -64,12 +64,6 @@ def extractTrackingPasses(flags) -> list:
         "Tracking.ActiveConfig",
         f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")]
 
-    # Large Radius pass
-    if flags.Acts.doLargeRadius:
-        trackingPasses += [flags.cloneAndReplace(
-            "Tracking.ActiveConfig",
-            "Tracking.ITkActsLargeRadiusPass")]
-
     # Conversion pass
     if flags.Acts.doITkConversion:
         # Check that we can schedule the conversion
@@ -78,6 +72,13 @@ def extractTrackingPasses(flags) -> list:
         trackingPasses += [flags.cloneAndReplace(
             "Tracking.ActiveConfig",
             "Tracking.ITkActsConversionPass")]
+
+    # Large Radius pass
+    if flags.Acts.doLargeRadius:
+        trackingPasses += [flags.cloneAndReplace(
+            "Tracking.ActiveConfig",
+            "Tracking.ITkActsLargeRadiusPass")]
+
         
     # Low pT pass
     if flags.Acts.doLowPt:

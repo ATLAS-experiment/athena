@@ -83,7 +83,7 @@ def TrigNavSlimmingMTDerivationCfg(flags, chainsFilter = []):
   daodSlim.RepackFeaturesExclusionList = ["HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets"]
   daodSlim.RepackFeaturesOutputCollection_Particle = "HLTNav_RepackedFeatures_Particle"
   daodSlim.RepackFeaturesOutputCollection_MET = "HLTNav_RepackedFeatures_MET"
-  daodSlim.EdgesToDrop = ["view"] # "view" element links, only useful online.
+  daodSlim.EdgesToDrop = ["view", "btag"] # "view" element links, only useful online; "btag" edges, and in general xAOD::BTagging has been deprecated, see https://gitlab.cern.ch/atlas/athena/-/merge_requests/83984
   daodSlim.NodesToDrop = ["F", "CH"] # Filter nodes, only useful online. CH=ComboHypo nodes, not useful given we run here with KeepFailedBranched=False 
   daodSlim.ChainsFilter = chainsFilter
   ca.addEventAlgo(daodSlim)

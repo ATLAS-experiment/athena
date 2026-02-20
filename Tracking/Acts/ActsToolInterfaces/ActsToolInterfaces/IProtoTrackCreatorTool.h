@@ -16,7 +16,6 @@
 #include "xAODInDetMeasurement/StripClusterContainer.h"
 #include "xAODInDetMeasurement/SpacePointAuxContainer.h"
 #include "ActsEvent/ProtoTrack.h"
-#include "ActsEvent/Seed.h"
 
 #include "Acts/Definitions/Algebra.hpp"
 

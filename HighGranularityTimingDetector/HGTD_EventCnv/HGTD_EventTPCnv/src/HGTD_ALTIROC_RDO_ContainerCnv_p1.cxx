@@ -85,9 +85,10 @@ void HGTD_ALTIROC_RDO_ContainerCnv_p1::transToPers(
           &((persistent_container->m_rdo_list)
                 .at(rdo_i + collection_separator_index_begin));
 
-      const HGTD_ALTIROC_RDO* trans_rdo =
-          dynamic_cast<const HGTD_ALTIROC_RDO*>(collection.at(rdo_i));
-
+      const HGTD_ALTIROC_RDO* trans_rdo = dynamic_cast<const HGTD_ALTIROC_RDO*>(collection.at(rdo_i));
+      if (not trans_rdo){
+        continue;
+      }
       rdo_converter.transToPers(trans_rdo, pers_rdo, log);
     }
     // start next collection at end of previous

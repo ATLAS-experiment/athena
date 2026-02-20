@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // File based on Acts:
@@ -42,6 +42,7 @@ inline auto generateParametersCovariance(generator_t& rng)
     corr(i, i) = 1;
     // only need generate the sub-diagonal elements
     for (auto j = 0u; j < i; ++j) {
+      //coverity[dead_error_line]
       corr(i, j) = corr(j, i) = distCorr(rng);
     }
   }

@@ -2,37 +2,35 @@
 
 
 ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
 StoreGateSvc      VERBOSE Initializing StoreGateSvc
-StoreGateSvc      VERBOSE Initializing StoreGateSvc
+StoreGateSvc_Impl VERBOSE Initializing StoreGateSvc_Impl
 *** ClearStore_test run standard testRecord a first time ***
 *** StoreGateSvcClient_test record BEGINS ***
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+StoreGateSvc_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
@@ -44,7 +42,7 @@ StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object modifiable when retrieved
@@ -56,23 +54,23 @@ StoreGateSvc WARNING  setupProxy:: error setting up proxy for key Const and clid
 
 
 *** ClearStore_test clear the store ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 Testing dump: store should contain no data now 
  -------->>
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 10 proxies for ClassID 8101 (Foo): 
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const2
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Locked
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: LockedReset
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLocked
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLockedReset
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: cpFoo
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo1
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo2
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 10 proxies for ClassID 8101 (Foo): 
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const2
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Locked
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: LockedReset
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLocked
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLockedReset
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: cpFoo
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo1
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo2
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 <<--------
 
@@ -83,26 +81,26 @@ StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
+StoreGateSvc_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object not modifiable when retrieved
@@ -114,7 +112,7 @@ StoreGateSvc WARNING  setupProxy:: error setting up proxy for key silly and clid
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
-StoreGateSvc WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
+StoreGateSvc_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
 <<---Error Message Ends-------
  object modifiable when retrieved
  object modifiable when retrieved
@@ -126,33 +124,33 @@ StoreGateSvc WARNING  setupProxy:: error setting up proxy for key Const and clid
 
 
 *** ClearStore_test clear the store again ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=0
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=0
 Testing dump: store should contain no data now 
  -------->>
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 10 proxies for ClassID 8101 (Foo): 
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const2
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Locked
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: LockedReset
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLocked
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLockedReset
-StoreGateSvc: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: cpFoo
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo1
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo2
-StoreGateSvc: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 10 proxies for ClassID 8101 (Foo): 
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Const2
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: Locked
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: LockedReset
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLocked
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: UnLockedReset
+StoreGateSvc_Impl: flags: (INVALID, locked  , reset ) --- data:        0x0 --- key: cpFoo
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo1
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: pFoo2
+StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 <<--------
 *** ClearStore_test clear the store one last time forcing proxy removal (the way we do in finalize()) ***
-StoreGateSvc        DEBUG Clearing store with forceRemove=1
+StoreGateSvc_Impl   DEBUG Clearing store with forceRemove=1
 Testing dump: store should contain no proxy now 
  -------->>
-StoreGateSvc: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
-StoreGateSvc: StoreGateSvc()::dump() which is NOT LOADED 
-StoreGateSvc: Found 0 proxies for ClassID 8101 (Foo): 
-StoreGateSvc: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
+StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
+StoreGateSvc_Impl: Found 0 proxies for ClassID 8101 (Foo): 
+StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 <<--------
 *** ClearStore_test OK ***

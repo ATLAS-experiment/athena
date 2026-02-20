@@ -1,8 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4ProcessHelper.hh"
+#include "G4Track.hh"
+#include "G4Element.hh"
+#include "G4DynamicParticle.hh"
+#include "G4ParticleDefinition.hh"
+#include "G4Exception.hh"
+#include "PhysicsConfigurationHelper.h"
+
 #include "CustomParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "G4ParticleTable.hh"
@@ -58,9 +65,9 @@ G4ProcessHelper::G4ProcessHelper()
       }
     }
     if (target == "proton"){
-      pReactionMap[incidentPDG].push_back(prod);
+      pReactionMap[incidentPDG].push_back(std::move(prod));
     } else if (target == "neutron") {
-      nReactionMap[incidentPDG].push_back(prod);
+      nReactionMap[incidentPDG].push_back(std::move(prod));
     } else {
       G4Exception("G4ProcessHelper", "IllegalTarget", FatalException,
                   "Initialization: The reaction product list contained an illegal target particle");
@@ -453,7 +460,7 @@ void G4ProcessHelper::ReadAndParse(const G4String& str,
       while(temp[temp.size()-1] == ' ') temp.erase(temp.size()-1,1);
 
       // Found a token, add it to the vector.
-      tokens.push_back(temp);
+      tokens.push_back(std::move(temp));
 
       // Skip delimiters.  Note the "not_of"
       lastPos = str.find_first_not_of(delimiters, pos);

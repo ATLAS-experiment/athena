@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitThinner.h"
@@ -139,12 +139,12 @@ StatusCode LArDigitThinner::execute(const EventContext& ctx) const {
   ATH_CHECK(outputContainer.record(std::make_unique<ConstDigitCont_t>(SG::VIEW_ELEMENTS)));
 
   
-  std::bitset<200000> keepSet;
+  auto keepSet = std::make_unique<std::bitset<200000> >();
 
   for(const LArRawChannel& chan : *larRawChannelContainer) {
     const IdentifierHash onlHash=m_onlineID->channel_Hash(chan.hardwareID());
     if (abs(chan.energy())>=energyCuts[onlHash]) {
-      keepSet.set(onlHash);
+      keepSet->set(onlHash);
     }
   }//end loop over raw channels
 
@@ -152,7 +152,7 @@ StatusCode LArDigitThinner::execute(const EventContext& ctx) const {
   //start loop over digits
   for (const LArDigit* dig : *inputContainer) {
     const IdentifierHash onlHash=m_onlineID->channel_Hash(dig->hardwareID());
-    if (keepSet.test(onlHash)) {
+    if (keepSet->test(onlHash)) {
       outputContainer->push_back(dig);
     }
   }//end loop over input container

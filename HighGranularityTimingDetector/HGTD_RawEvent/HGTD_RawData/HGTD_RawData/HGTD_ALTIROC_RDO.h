@@ -39,6 +39,13 @@ public:
    * @param [in] word ALTIROC output word
    */
   HGTD_ALTIROC_RDO(const Identifier rdo_id, const uint64_t word);
+  
+  HGTD_ALTIROC_RDO(const Identifier rdo_id, 
+                   const uint8_t crc,
+                   const uint8_t toa,
+                   const uint16_t tot,
+                   const uint8_t l1id,
+                   const uint16_t bcid);
 
   virtual Identifier identify() const;
   virtual uint16_t getToT() const;
@@ -78,4 +85,4 @@ inline uint8_t HGTD_ALTIROC_RDO::getCRC() const { return ((m_word) & 0xFF); }
 // Return raw altiroc word
 inline uint64_t HGTD_ALTIROC_RDO::getWord() const { return m_word; }
 
-#endif // HGTD_RAWDATA_HGTD_ALTIROC_RDORAWDATA_H
+#endif // HGTD_RAWDATA_HGTD_ALTIROC_RDO_H

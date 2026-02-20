@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetTrackPerfMon )
@@ -33,11 +33,6 @@ atlas_add_test ( validateJson_test
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
-atlas_install_data( data/* )
-atlas_install_data( test/hdef.xml )
-atlas_install_data( test/ref.json )
-atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_scripts( test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_data( scripts/hdefXmlToJson.xsl )
-atlas_install_scripts( scripts/*.sh )
-atlas_install_scripts( test/test*.sh )
+atlas_install_data( data/* test/hdef.xml test/ref.json scripts/hdefXmlToJson.xsl )
+atlas_install_scripts( scripts/*.py test/test*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( scripts/*.sh test/test*.sh )

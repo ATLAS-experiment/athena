@@ -5,7 +5,7 @@
 #ifndef LARAUTOCORRNOISECONDALG_H
 #define LARAUTOCORRNOISECONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
@@ -18,14 +18,14 @@
 
 class LArAutoCorrNoise;
 
-class LArAutoCorrNoiseCondAlg : public AthAlgorithm
+class LArAutoCorrNoiseCondAlg : public AthCondAlgorithm
 {
 public:
   LArAutoCorrNoiseCondAlg( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~LArAutoCorrNoiseCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_LArOnOffIdMappingObjKey;

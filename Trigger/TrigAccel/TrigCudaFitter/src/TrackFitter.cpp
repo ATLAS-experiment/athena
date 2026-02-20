@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "TrkPlanarSurface.h"
 #include "TrkTrackState.h"
 #include "TrkBaseNode.h"
@@ -33,7 +33,7 @@ DkfTrack* TrackFitter::fit(const RecTrack* inputTrack)
   DkfTrack* pT = createDkfTrack(inputTrack);
   if(pT==NULL) return pT;
 
-  TrkTrackState* pTS = new TrkTrackState(pT->m_pTrackState);
+  TrkTrackState* pTS = new TrkTrackState(pT->m_pTrackState.get());
   double Gk[5][5];
   memset(&Gk[0][0],0,sizeof(Gk));
   Gk[0][0]=(double)100.0;Gk[1][1]=(double)100.0;Gk[2][2]=(double)0.01;Gk[3][3]=(double)0.01;Gk[4][4]=(double)1e-6;
@@ -478,8 +478,8 @@ DkfTrack* TrackFitter::createDkfTrack(const RecTrack* inputTrack)
 
   m_reMapVector.clear();
 
-  TrkTrackState* pTS = new TrkTrackState(inputTrack->getParameters());
-  DkfTrack* pT = new DkfTrack(pTS,inputTrack);
+  auto pTS = std::make_unique<TrkTrackState>(inputTrack->getParameters());
+  DkfTrack* pT = new DkfTrack(std::move(pTS),inputTrack);
   m_reMapVector.push_back(0);
   const std::vector<const SpacePoint*> spv = inputTrack->getSpacePoints();
   for(std::vector<const SpacePoint*>::const_iterator spIt=spv.begin();spIt!=spv.end();++spIt)

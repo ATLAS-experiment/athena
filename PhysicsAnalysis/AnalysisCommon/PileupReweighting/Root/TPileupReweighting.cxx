@@ -2097,7 +2097,7 @@ void CP::TPileupReweighting::CalculatePrescaledLuminosityHistograms(const TStrin
 
    t->getTriggers(subTriggers); //fills the vector
 
-   t->subTriggers = subTriggers; //cache the vector of triggers
+   t->subTriggers = std::move(subTriggers); //cache the vector of triggers
 
    calculateHistograms(t.get(),runDependentRun);
 

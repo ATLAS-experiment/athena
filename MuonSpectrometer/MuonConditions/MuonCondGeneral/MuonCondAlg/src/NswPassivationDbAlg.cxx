@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "MuonCondAlg/NswPassivationDbAlg.h"
+#include "NswPassivationDbAlg.h"
 
 #include "CoralBase/Blob.h"
 #include "CoralUtilities/blobaccess.h"
@@ -10,9 +10,8 @@
 #include "PathResolver/PathResolver.h"
 
 #include <fstream>
-NswPassivationDbAlg::NswPassivationDbAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
 
+namespace Muon{
 StatusCode NswPassivationDbAlg::initialize() {
     ATH_MSG_DEBUG( "initializing " << name() );                
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -24,7 +23,7 @@ StatusCode NswPassivationDbAlg::initialize() {
 StatusCode NswPassivationDbAlg::execute(const EventContext& ctx) const {
 
     // set up write handle
-    SG::WriteCondHandle<NswPassivationDbData> writeHandle{m_writeKey, ctx};
+    SG::WriteCondHandle writeHandle{m_writeKey, ctx};
     if (writeHandle.isValid()) {
         ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
               << " In theory this should not be called, but may happen"
@@ -32,7 +31,7 @@ StatusCode NswPassivationDbAlg::execute(const EventContext& ctx) const {
         return StatusCode::SUCCESS; 
     }
     writeHandle.addDependency(EventIDRange(IOVInfiniteRange::infiniteTime()));
-    std::unique_ptr<NswPassivationDbData> writeCdo{std::make_unique<NswPassivationDbData>(m_idHelperSvc->mmIdHelper())};
+    auto writeCdo{std::make_unique<NswPassivationDbData>(m_idHelperSvc->mmIdHelper())};
     if (!m_readFromJSON.empty()) {
         std::ifstream inStream{PathResolverFindCalibFile(m_readFromJSON)};
         if (!inStream.good()) {
@@ -44,7 +43,7 @@ StatusCode NswPassivationDbAlg::execute(const EventContext& ctx) const {
         ATH_CHECK(parseData(lines, *writeCdo));
     } else {
         // set up read handle
-        SG::ReadCondHandle<CondAttrListCollection> readHandle{m_readKey_data_mm, ctx};
+        SG::ReadCondHandle readHandle{m_readKey_data_mm, ctx};
         if(!readHandle.isValid()){
           ATH_MSG_ERROR("Null pointer to the read conditions object");
           return StatusCode::FAILURE; 
@@ -94,4 +93,5 @@ StatusCode NswPassivationDbAlg::parseData(const nlohmann::json & json,
     }
     ATH_MSG_VERBOSE("Retrieved data for "<<nChns<<" channels.");
     return StatusCode::SUCCESS;
+}
 }

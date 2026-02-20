@@ -16,7 +16,6 @@
 class IPoolSvc;
 namespace pool {
    class ICollection;
-   class ICollectionQuery;
    class ICollectionCursor;
 }
 class StatusCode;
@@ -30,7 +29,6 @@ public:
    /// Constructor
    /// @param collectionType [IN] type of the collection
    /// ("RootCollection", or "ImplicitCollection").
-   /// @param inputCollection [IN] name of the collection.
    /// @param svc [IN] pointer to the PoolSvc.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    PoolCollectionConverter(const std::string& collectionType,
@@ -55,13 +53,11 @@ public:
 
 private: // data
    std::string m_collectionType;
-   std::string m_connection;
    std::string m_inputCollection;
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;
    pool::ICollection* m_poolCollection;
-   pool::ICollectionQuery* m_collectionQuery;
-   std::string m_inputContainer;
+   pool::ICollectionCursor* m_collectionCursor;
 
 private: // hide copy and assignment
    PoolCollectionConverter(const PoolCollectionConverter& rhs);

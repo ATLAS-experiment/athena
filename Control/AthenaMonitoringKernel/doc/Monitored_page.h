@@ -11,7 +11,7 @@
    quantitities within an athena component. It is used in the HLT for online monitoring
    and the offline DQ framework. The core framework is documented here while more specific
    instructions can be found here:
-   - <a href="https://atlassoftwaredocs.web.cern.ch/guides/trigger/monitoring">Online HLT monitoring</a>
+   - <a href="https://atlas-software.docs.cern.ch/athena/trigger/developers/monitoring">Online HLT monitoring</a>
    - <a href="https://twiki.cern.ch/twiki/bin/view/Atlas/DQRun3FrameworkTutorial">Offline DQ monitoring</a>
 
    The core framework consists of the following classes:

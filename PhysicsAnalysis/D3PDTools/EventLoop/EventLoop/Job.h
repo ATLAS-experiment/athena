@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENT_LOOP_JOB_HH
@@ -402,6 +402,12 @@ namespace EL
     static const std::string optXaodAccessMode_class;
     static const std::string optXaodAccessMode_athena;
 
+  public:
+    /// Pattern for other MetaData tree name in input xAODs 
+    /// Can be useful for augmented file reading or excluding non real MetaData trees 
+    /// i.e. trees not containing a branch called EventFormat*
+    static const std::string optOtherMetaDataTreeNamePattern;
+
 
     /// \brief the option to turn on/off the xAOD summary reporting at
     /// the end of the job
@@ -486,6 +492,13 @@ namespace EL
     /// Beware for root or heavy files you should also add their name (not their full path) to EL::Job::optUserFiles
     /// Otherwise prun ignore those files
     static const std::string optGridPrunShipAdditionalFilesOrDirs; 
+
+    /// Will retry N-times submission of job to the grid in case of failure to submit job
+    /// Sometimes submitting jobs to the grid can fail due to transient server issue 
+    /// This flag allows to retry submitting after waiting few seconds 
+    // (see EventLoopGrid/data/ELG_prun.py script)
+    static const std::string optGridPrunNRetrySubmitToGrid;
+
     static const std::string optTmpDir;
     static const std::string optRootVer;
     static const std::string optCmtConfig;

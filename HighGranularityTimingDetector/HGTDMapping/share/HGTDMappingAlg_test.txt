@@ -1,0 +1,3 @@
+ApplicationMgr.ExtSvc += { "StoreGateSvc", "StoreGateSvc/ConditionStore" };
+MessageSvc.OutputLevel = 3;
+SCT_CablingCondAlgFromText.OutputLevel = 1;

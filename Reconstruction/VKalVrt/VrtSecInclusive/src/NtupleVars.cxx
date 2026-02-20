@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VrtSecInclusive/NtupleVars.h"
@@ -27,7 +27,7 @@ namespace VKalVrtAthena {
   //____________________________________________________________________________________________________
   void NtupleVars::branchNtuple( TTree *tree ) {
     
-    for( auto pair : m_varHolder ) {
+    for( const auto& pair : m_varHolder ) {
       pair.second->branch_tree( pair.first, tree );
     }
       

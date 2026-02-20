@@ -54,6 +54,10 @@ namespace met {
   METSignificance::METSignificance(const std::string& name) :
     AsgTool(name),
     m_GeV(1.0e3),
+    m_jetOK(true),
+    m_muonOK(true),
+    m_egammaOK(true),
+    m_tauOK(true),
     m_softTermParam(met::Random),
     m_jerForEMu(false),
     m_jetPtThr(-1.0),
@@ -97,7 +101,6 @@ namespace met {
     // properties to delete eventually
     declareProperty("IsDataJet",   m_isDataJet     = false   );
     declareProperty("IsDataMuon",  m_isDataMuon    = false   );
-    declareProperty("IsAFII",      m_isAFII        = false   );
 
     m_file = nullptr;
   }
@@ -127,62 +130,61 @@ namespace met {
       return StatusCode::FAILURE;
     }
 
-    std::string toolName;
-    std::string jetcoll = "AntiKt4EMTopoJets";
-    toolName = "JetCalibrationTool/jetCalibTool_"+m_JetCollection;
-    ATH_MSG_INFO("Set up jet resolution tool");
     if (m_jetCalibTool.empty()){
-
-      asg::AsgToolConfig toolConfig (toolName);
-      // FIXME: it would be better to configure this via properties
-      std::string config = "JES_data2017_2016_2015_Recommendation_Aug2018_rel21.config";
-      std::string calibSeq = "JetArea_Residual_EtaJES_GSC_Smear";
-      std::string calibArea = "00-04-81";
-      if(m_JetCollection=="AntiKt4EMPFlow"){
-        config = "JES_data2017_2016_2015_Recommendation_PFlow_Aug2018_rel21.config";
-        calibSeq = "JetArea_Residual_EtaJES_GSC_Smear";
-        calibArea = "00-04-81";
+      if(m_jetCalibConfig.empty() || m_jetCalibSeq.empty())
+        m_jetOK = false;
+      else{
+        asg::AsgToolConfig toolConfig ("JetCalibrationTool/MetSigAutoConf_JetCalibTool_"+m_JetCollection);
+        ATH_CHECK( toolConfig.setProperty("JetCollection",m_JetCollection) );
+        ATH_CHECK( toolConfig.setProperty("ConfigFile",m_jetCalibConfig) );
+        ATH_CHECK( toolConfig.setProperty("CalibSequence",m_jetCalibSeq) );
+        if(!m_jetCalibArea.empty()) ATH_CHECK( toolConfig.setProperty("CalibArea",m_jetCalibArea) );
+        ATH_CHECK( toolConfig.setProperty("IsData",false) ); // configure for MC due to technical reasons. Both data and MC smearing are available with this setting.
+        ATH_CHECK( toolConfig.makePrivateTool (m_jetCalibTool) );
       }
-
-      ANA_CHECK( toolConfig.setProperty("JetCollection",m_JetCollection) );
-      ANA_CHECK( toolConfig.setProperty("ConfigFile",config) );
-      ANA_CHECK( toolConfig.setProperty("CalibSequence",calibSeq) );
-      ANA_CHECK( toolConfig.setProperty("CalibArea",calibArea) );
-      ANA_CHECK( toolConfig.setProperty("IsData",false) ); // configure for MC due to technical reasons. Both data and MC smearing are available with this setting.
-      ANA_CHECK( toolConfig.makePrivateTool (m_jetCalibTool) );
     }
-    ANA_CHECK( m_jetCalibTool.retrieve() );
+    if(m_jetOK) ATH_CHECK( m_jetCalibTool.retrieve() );
+    else ATH_MSG_WARNING("No jet calibration tool or config provided for MET Significance");
 
-    ATH_MSG_INFO("Set up MuonCalibrationAndSmearing tools");
-    toolName = "MuonCalibrationAndSmearingTool";
     if (m_muonCalibrationAndSmearingTool.empty()) {
-        ATH_MSG_WARNING("Setup the muon calibration tool with calib mode 1. Please consider to configure the tool via the 'MuonCalibTool' property.");
-        asg::AsgToolConfig toolConfig ("CP::MuonCalibTool/METSigAutoConf_"+toolName);
-        ATH_CHECK(toolConfig.setProperty("calibMode", 1));
+      if(m_muonCalibMode == -1)
+        m_muonOK = false;
+      else{
+        asg::AsgToolConfig toolConfig ("CP::MuonCalibTool/METSigAutoConf_MuonCalibrationAndSmearingTool");
+        ATH_CHECK(toolConfig.setProperty("calibMode", m_muonCalibMode));
         ATH_CHECK(toolConfig.makePrivateTool(m_muonCalibrationAndSmearingTool));
+      }
     }
-    ATH_CHECK(m_muonCalibrationAndSmearingTool.retrieve());
+    if(m_muonOK) ATH_CHECK(m_muonCalibrationAndSmearingTool.retrieve());
+    else ATH_MSG_WARNING("No muon calibration tool or config provided for MET Significance");
 
-    ATH_MSG_DEBUG( "Initialising EgcalibTool " );
-    toolName = "EgammaCalibrationAndSmearingTool";
     if (m_egammaCalibTool.empty()){
-      asg::AsgToolConfig toolConfig ("CP::EgammaCalibrationAndSmearingTool/METSigAutoConf_" + toolName);
-      ATH_CHECK(toolConfig.setProperty("ESModel", "es2017_R21_v0"));
-      ATH_CHECK(toolConfig.setProperty("decorrelationModel", "1NP_v1"));
-      if(m_isAFII) ATH_CHECK(toolConfig.setProperty("useFastSim", 1));
-      else ATH_CHECK(toolConfig.setProperty("useFastSim", 0));
-      ATH_CHECK (toolConfig.makePrivateTool (m_egammaCalibTool));
+      if(m_egESModel.empty() || m_egDecorrModel.empty())
+        m_egammaOK = false;
+      else{
+        asg::AsgToolConfig toolConfig ("CP::EgammaCalibrationAndSmearingTool/METSigAutoConf_EgammaCalibrationAndSmearingTool");
+        ATH_CHECK(toolConfig.setProperty("ESModel", m_egESModel));
+        ATH_CHECK(toolConfig.setProperty("decorrelationModel", m_egDecorrModel));
+        ATH_CHECK(toolConfig.setProperty("useFastSim", m_egUseFastsim ? 1 : 0));
+        ATH_CHECK(toolConfig.makePrivateTool (m_egammaCalibTool));
+      }
     }
-    ATH_CHECK( m_egammaCalibTool.retrieve() );
+    if(m_egammaOK) ATH_CHECK( m_egammaCalibTool.retrieve() );
+    else ATH_MSG_WARNING("No egamma calibration tool or config provided for MET Significance");
 
-    toolName = "TauPerfTool";
     if (m_tauCombinedTES.empty()){
-      asg::AsgToolConfig toolConfig ("TauCombinedTES/METSigAutoConf_" + toolName);
-      ATH_CHECK( toolConfig.setProperty("WeightFileName", "CombinedTES_R22_Round2.5_v2.root") );
-      ATH_CHECK( toolConfig.setProperty("useMvaResolution", true) );
-      ATH_CHECK( toolConfig.makePrivateTool(m_tauCombinedTES) );
+      if(m_tauTESConfig.empty())
+        m_tauOK = false;
+      else{
+        asg::AsgToolConfig toolConfig ("TauCombinedTES/METSigAutoConf_TauPerfTool");
+        ATH_CHECK( toolConfig.setProperty("WeightFileName", m_tauTESConfig) );
+        ATH_CHECK( toolConfig.setProperty("useMvaResolution", m_tauUseMVARes) );
+        ATH_CHECK( toolConfig.makePrivateTool(m_tauCombinedTES) );
+      }
     }
-    ATH_CHECK( m_tauCombinedTES.retrieve() );
+    if(m_tauOK) ATH_CHECK( m_tauCombinedTES.retrieve() );
+    else ATH_MSG_WARNING("No tau calibration tool or config provided for MET Significance");
+
 
     return StatusCode::SUCCESS;
   }
@@ -299,7 +301,7 @@ namespace met {
           metTerm=5;
         }
         else if(obj->type()==xAOD::Type::Tau || (obj->type()==xAOD::Type::TruthParticle && std::abs(static_cast<const xAOD::TruthParticle*>(obj)->pdgId())==15)){
-          AddTau(obj, pt_reso, phi_reso);
+          ATH_CHECK(AddTau(obj, pt_reso, phi_reso));
           metTerm=6;
         }
 
@@ -433,6 +435,10 @@ namespace met {
       if(obj->pt()>1.0e6) pt_reso=0.1;// this is just a rough estimate for the time being until the interface can handle truth muons
     }
     else{
+      if(!m_muonOK){
+        ATH_MSG_ERROR("MET Significance received a muon but was not configured for muons!");
+        return StatusCode::FAILURE;
+      }
       const xAOD::Muon* muon(static_cast<const xAOD::Muon*>(obj));
       if(muon->muonType()==0){//Combined
         dettype=3;//CB
@@ -475,6 +481,11 @@ namespace met {
   // Electron propagation of resolution
   StatusCode METSignificance::AddElectron(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu){
 
+    if(!m_egammaOK){
+      ATH_MSG_ERROR("MET Significance received an electron but was not configured for egamma!");
+      return StatusCode::FAILURE;
+    }
+
     bool DoEMuReso = false;
     if(obj->type()==xAOD::Type::TruthParticle){
       pt_reso=m_egammaCalibTool->resolution(obj->e(),obj->eta(),obj->eta(),PATCore::ParticleType::Electron);
@@ -506,6 +517,11 @@ namespace met {
   // Photon propagation of resolution
   StatusCode METSignificance::AddPhoton(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso){
 
+    if(!m_egammaOK){
+      ATH_MSG_ERROR("MET Significance received a photon but was not configured for egamma!");
+      return StatusCode::FAILURE;
+    }
+
     if(obj->type()==xAOD::Type::TruthParticle){
       pt_reso=m_egammaCalibTool->resolution(obj->e(),obj->eta(),obj->eta(),PATCore::ParticleType::Electron); // leaving as an electron for the truth implementation rather than declaring a reco photon
       if(m_doPhiReso) phi_reso = obj->pt()*0.004;
@@ -528,6 +544,11 @@ namespace met {
     // setting limits on jets if requested
     if(m_jetPtThr>0.0 && m_jetPtThr>jet->pt())          return StatusCode::SUCCESS;
     if(m_jetEtaThr>0.0 && m_jetEtaThr<std::abs(jet->eta())) return StatusCode::SUCCESS;
+
+    if(!m_jetOK){
+      ATH_MSG_ERROR("MET Significance received a jet but was not configured for jets!");
+      return StatusCode::FAILURE;
+    }
 
     ATH_CHECK(m_jetCalibTool->getNominalResolutionData(*jet, pt_reso_dbl_data));
     ATH_CHECK(m_jetCalibTool->getNominalResolutionMC(*jet, pt_reso_dbl_mc));
@@ -571,7 +592,7 @@ namespace met {
   }
 
   // Tau propagation of resolution
-  void METSignificance::AddTau(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso){
+  StatusCode METSignificance::AddTau(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso){
 
     // tau objects
     if(obj->type()==xAOD::Type::TruthParticle){
@@ -579,6 +600,10 @@ namespace met {
       if(m_doPhiReso) phi_reso = obj->pt()*0.01;
     }
     else{
+      if(!m_tauOK){
+        ATH_MSG_ERROR("MET Significance received a tau but was not configured for taus!");
+        return StatusCode::FAILURE;
+      }
       const xAOD::TauJet* tau(static_cast<const xAOD::TauJet*>(obj));
       if (auto *combp4 = dynamic_cast<TauCombinedTES*>(&*m_tauCombinedTES)) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
@@ -587,6 +612,7 @@ namespace met {
       if(m_doPhiReso) phi_reso = tau->pt()*0.01;
       ATH_MSG_VERBOSE("tau: " << pt_reso << " " << tau->pt() << " " << tau->p4().Eta() << " " << tau->p4().Phi() << " phi reso: " << phi_reso);
     }
+    return StatusCode::SUCCESS;
   }
 
   //

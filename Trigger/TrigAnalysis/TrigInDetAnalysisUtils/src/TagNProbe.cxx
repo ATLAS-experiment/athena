@@ -9,7 +9,12 @@
 
 
 #include "TrigInDetAnalysisUtils/TagNProbe.h"
+
+#if __has_include( "TruthUtils/ParticleConstants.h" )
 #include "TruthUtils/ParticleConstants.h"
+#endif
+
+
 
 
 TagNProbe::TagNProbe( const std::string& refName0, 
@@ -40,11 +45,19 @@ TagNProbe::TagNProbe( const std::string& refName,
 }
 
 
-void TagNProbe::construct() { 
+void TagNProbe::construct() {
+
+
+#ifdef TRUTHUTILS_PARTICLECONSTANTS_H  
   const double muonMass     = ParticleConstants::muonMassInMeV/1000.; // Convert MeV to GeV
   const double electronMass = ParticleConstants::electronMassInMeV/1000.; // Convert MeV to GeV
-  const double tauMass      = ParticleConstants::tauMassInMeV/1000.; // Convert MeV to GeV
-
+  const double tauMass      = ParticleConstants::tauMassInMeV/1000.; // Convert MeV to GeV  NB: mass in ParticleConstants is wrong
+#else
+  const double muonMass     = 0.10565;  // GeV
+  const double electronMass = 0.000511; // GeV
+  const double tauMass      = 1.77686;  // GeV
+#endif
+  
   if      ( m_particleType0.find("Muon")!=std::string::npos )      m_mass0 = muonMass;
   else if ( m_particleType0.find("Electron")!=std::string::npos )  m_mass0 = electronMass;
   else if ( m_particleType0.find("Tau")!=std::string::npos )       m_mass0 = tauMass;

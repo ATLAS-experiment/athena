@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetTagCalibration )
@@ -13,7 +13,7 @@ atlas_add_library( JetTagCalibrationLib
                    PUBLIC_HEADERS JetTagCalibration
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
                    LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaPoolUtilities GaudiKernel MVAUtils StoreGateLib
-                   PRIVATE_LINK_LIBRARIES FileCatalog PoolSvcLib )
+                   PRIVATE_LINK_LIBRARIES PoolSvcLib )
 
 atlas_add_component( JetTagCalibration
                      src/components/*.cxx

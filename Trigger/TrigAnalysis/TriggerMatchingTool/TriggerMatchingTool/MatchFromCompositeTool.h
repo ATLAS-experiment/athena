@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2015 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TriggerMatchingTool_MatchFromCompositeTool_H
@@ -11,7 +11,7 @@
 #include "AthLinks/ElementLink.h"
 #include "xAODBase/IParticleContainer.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
-#include "CxxUtils/sgkey_t.h"
+#include "SGCore/sgkey_t.h"
 
 // Package includes
 #include "TriggerMatchingTool/IMatchingTool.h"
@@ -81,7 +81,7 @@ namespace Trig {
       bool m_matchShallow = true;
 
       /// If greater than 0 then will skip the above check and just check that
-      /// DR between the two particles is less than this value. 
+      /// DR between the two particles is less than this value.
       float m_drThreshold = -1;
 
       /// The prefix to expect at the front of the trig composite container name

@@ -40,6 +40,8 @@ private:
   /// This command prints a message about a G4Command depending on its returnCode
   void CommandLog(int returnCode, const std::string& commandString) const;
 
+  ToolHandle<IPhysicsOptionTool> m_fastSimulationConstructor{this, "FastSimConstructor", "", "Physics Constructor for fast simulation physics"};
+
   ToolHandleArray<IPhysicsOptionTool> m_phys_option{this, "PhysOption", {}, "Tool handle array of physics options" };
   ToolHandleArray<IPhysicsOptionTool> m_phys_decay{this, "PhysicsDecay", {}, "Tool handle array of physics decays"};
   G4VModularPhysicsList* m_physicsList{}; ///!< Handle on the physics list

@@ -10,11 +10,10 @@ class BootstrapGeneratorConfig(ConfigBlock):
     def __init__(self):
         super(BootstrapGeneratorConfig, self).__init__()
         self.addOption ('nReplicas', 1000, type=int,
-            info="the number (int) of bootstrap replicas to generate. "
-            "The default is 1000.")
+            info="the number of bootstrap replicas to generate.")
         self.addOption ('decoration', None, type=str,
             info="the name of the output vector branch containing the "
-            "bootstrapped weights. The default is bootstrapWeights.")
+            "bootstrapped weights.")
         self.setOptionValue('skipOnMC', True)
 
     def instanceName (self) :

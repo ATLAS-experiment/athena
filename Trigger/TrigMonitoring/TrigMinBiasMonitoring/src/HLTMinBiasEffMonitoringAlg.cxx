@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/TrackingPrimitives.h"
 #include "Utils.h"
@@ -95,8 +95,8 @@ StatusCode HLTMinBiasEffMonitoringAlg::fillHistograms(const EventContext& contex
 
   for (size_t index = 0; index < m_refTriggerList.size(); ++index)
   {
-    auto trig = m_triggerList[index];
-    auto ref = m_refTriggerList[index];
+    const auto& trig = m_triggerList[index];
+    const auto& ref = m_refTriggerList[index];
 
     ATH_MSG_DEBUG("checking " << trig << " vs " << ref);
 
@@ -117,7 +117,7 @@ StatusCode HLTMinBiasEffMonitoringAlg::fillHistograms(const EventContext& contex
     }
   }
 
-  for (auto& trig : m_uniqueTriggerList)
+  for (const auto& trig : m_uniqueTriggerList)
   {
     if (trigDecTool->isPassed(trig, TrigDefs::requireDecision))
     {

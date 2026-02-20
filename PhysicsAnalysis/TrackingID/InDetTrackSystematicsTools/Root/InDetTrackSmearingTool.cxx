@@ -3,15 +3,16 @@
 */
 
 // ROOT include(s):
-#include <TRandom.h>
 #include <TH2F.h>
 #include <TFile.h>
 
 // std includes
+#include <random>
 #include <utility>
 
 // EDM include(s):
 #include "xAODEventInfo/EventInfo.h"
+#include "CxxUtils/FastReseededPRNG.h"
 //#include "AthenaBaseComps/AthCheckMacros.h"
 
 #include "PathResolver/PathResolver.h"
@@ -46,9 +47,6 @@ namespace InDet {
 
     // Greet the user:
     ATH_MSG_INFO( "Initializing..." );
-
-    ATH_MSG_INFO( "Using seed of " << m_seed << " to initialize RNG" );
-    m_rnd = std::make_unique<TRandom3>(m_seed);
 
     ATH_MSG_INFO( "Using dedicated CTIDE smearing maps for tracks in jets" );
     ATH_MSG_INFO( "Using for the full pT range the CTIDE calibration file " << PathResolverFindCalibFile(m_calibFileIP_CTIDE) );
@@ -126,6 +124,15 @@ namespace InDet {
 
 CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle& track ) {
 
+    const xAOD::EventInfo* event_info {nullptr};
+    if (evtStore()->retrieve(event_info, "EventInfo").isFailure()) {
+      ATH_MSG_ERROR("No EventInfo object could be retrieved");
+      return CP::CorrectionCode::Error;
+    }
+
+    int seed = std::abs(track.phi()) * 1e6 + std::abs(track.eta()) * 1e3 + event_info->eventNumber();
+    FastReseededPRNG prng = FastReseededPRNG(seed);
+
     float sigmaD0 = GetSmearD0Sigma( track );
     float sigmaZ0 = GetSmearZ0Sigma( track );
 
@@ -133,8 +140,8 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     static const SG::AuxElement::Accessor< float > accZ0( "z0" );
 
     //NB: only call the RNG if the widths are greater than 0
-    if ( sigmaD0 > 0. ) accD0( track ) = m_rnd->Gaus( track.d0(), sigmaD0 );
-    if ( sigmaZ0 > 0. ) accZ0( track ) = m_rnd->Gaus( track.z0(), sigmaZ0 );
+    if ( sigmaD0 > 0. ) accD0( track ) = std::normal_distribution<double>( track.d0(), sigmaD0 )(prng);
+    if ( sigmaZ0 > 0. ) accZ0( track ) = std::normal_distribution<double>( track.z0(), sigmaZ0 )(prng);
 
     return CP::CorrectionCode::Ok;
   }

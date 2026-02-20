@@ -83,10 +83,17 @@ namespace FlavorTagDiscriminants {
     // PhysicsAnalysis/MCTruthClassifier/MCTruthClassifier/MCTruthClassifierDefs.h#L28
     const std::set<int> m_valid_types{1, 2, 3, 4};
 
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    Gaudi::Property<bool> m_use_barcode {
+      this, "useBarcode", false, "use barcode rather than UID"
+    };
+
     // Accessors
     template <typename T> using Acc = SG::AuxElement::ConstAccessor<T>;
     Acc<unsigned int> m_classifierParticleType{"classifierParticleType"};
     Acc<ElementLink<xAOD::TruthParticleContainer>> m_truthParticleLink{"truthParticleLink"};
+    // ATLASRECTS-8290: this is for backward compatability, remove eventually
+    Acc<int> m_uid{"uid"};
   };
 }
 

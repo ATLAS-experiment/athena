@@ -41,13 +41,13 @@ namespace xAOD {
     /// inject the enums
     #include "xAODMuon/versions/MuonEnums.def"
     /// Default constructor
-    Muon_v1();
+    Muon_v1() = default;
 
     /// Copy constructor
     Muon_v1(const Muon_v1& rhs);
 
     /// Destructor
-    virtual ~Muon_v1();
+    virtual ~Muon_v1() = default;
 
     /// Assignment operator
     Muon_v1& operator=(const Muon_v1& rhs);

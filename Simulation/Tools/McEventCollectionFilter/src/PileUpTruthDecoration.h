@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PILEUPTRUTHDECORATION_H
@@ -24,7 +24,7 @@ private:
 
   SG::ReadHandleKey<McEventCollection> m_inputTruthCollectionKey {this, "InputTruthCollection", "TruthEventOLD", "Input truth collection name"};
   SG::ReadHandleKey<xAOD::IParticleContainer> m_particleKey{this, "InputParticleContainer", "", "Input particle collection name"};
-  SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decKey{this, "OutputDecoration", "", "Output decoration name"};
+  SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_decKey{this, "OutputDecoration", m_particleKey, "", "Output decoration name"};
 };
 
 #endif

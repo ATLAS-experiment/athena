@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileConditions/TilePulseShapes.h"
@@ -10,13 +10,11 @@
 
 TilePulseShapes::TilePulseShapes()
   : m_loaded(false)
-  , m_shapes(nullptr)
 {
 }
 
 TilePulseShapes::~TilePulseShapes()
 {
-  if (m_shapes) delete m_shapes;
 }
 
 void 
@@ -25,7 +23,7 @@ TilePulseShapes::load(MsgStream &log) {
   bool debug = (log.level() <= MSG::DEBUG);
   if(debug) log<<MSG::DEBUG<<"TilePulseShapes::load"<<endmsg;
 
-  m_shapes = new TilePulseShapesStruct;
+  m_shapes = std::make_unique<TilePulseShapesStruct>();
 
   // Read in CIS Low gain pulse shape, big cap 100 pF
   ReadFile(log,m_filenameLoCIS, "tlcis", "ylcis", m_shapes->m_tlcis, m_shapes->m_ylcis);

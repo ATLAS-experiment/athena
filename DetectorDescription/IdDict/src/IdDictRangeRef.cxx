@@ -14,7 +14,7 @@ IdDictRangeRef::IdDictRangeRef (IdDictRange& range)
 
 
 void
-IdDictRangeRef::resolve_references(const IdDictMgr& idd,
+IdDictRangeRef::resolve_references(IdDictMgr& idd,
                                    IdDictDictionary& dictionary,
                                    IdDictRegion& region) {
   m_range.resolve_references(idd, dictionary, region);

@@ -20,6 +20,8 @@
 
 #include "StorageSvc/DbOption.h"
 
+#include "GaudiKernel/StatusCode.h"
+
 // declare the types provided by this Storage plugin
 DECLARE_COMPONENT_WITH_ID(pool::RootOODb, "ROOT_All")
 DECLARE_COMPONENT_WITH_ID(pool::RootOOKey, "ROOT_Key")
@@ -57,26 +59,27 @@ IDbDatabase* RootOODb::createDatabase()  {
 }
 
 /// Create Root Container object
-IDbContainer* RootOODb::createContainer(const DbType& inType) {
+IDbContainer* RootOODb::createContainer(const std::string& name, const DbType& inType) {
   // Read the default container type from the current domain
   int optValue;
   DbOption opt("DEFAULT_CONTAINER_TYPE","");
-  m_domainCache->getOption(opt);
-  opt._getValue(optValue);
+  if( !m_domainCache->getOption(opt).isSuccess() || !opt._getValue(optValue).isSuccess() ) {
+    return nullptr;
+  }
   const DbType defaultContainerType = DbType(optValue);
   // If no minor type is specified, use the default one from the domain
   const DbType type = inType.match(ROOT_StorageType) ?  defaultContainerType : inType;
   if ( type.match(ROOTKEY_StorageType) )  {
-    return new RootKeyContainer();
+    return new RootKeyContainer(name);
   }
   else if ( type.match(ROOTTREE_StorageType) )    {
-    return new RootTreeContainer();
+    return new RootTreeContainer(name);
   }
   else if ( type.match(ROOTTREEINDEX_StorageType) )    {
-    return new RootTreeIndexContainer();
+    return new RootTreeIndexContainer(name);
   }
   else if ( type.match(ROOTRNTUPLE_StorageType) )    {
-    return new RNTupleContainer();
+    return new RNTupleContainer(name);
   }
   return 0;
 }

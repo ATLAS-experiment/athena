@@ -11,4 +11,4 @@ atlas_add_component( MuonCalibMonitoring
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib CxxUtils StoreGateLib GaudiKernel CscCalibData MuonCondData MuonCondInterface MuonIdHelpersLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib CxxUtils StoreGateLib GaudiKernel CscCalibData MuonCondData  MuonIdHelpersLib )

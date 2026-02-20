@@ -26,13 +26,22 @@ namespace Gep{
 	  return m_cellMap.size();
   }
 
-  pGepCellMap getCellMap() {
+  pGepCellMap getCellMap() const {
 	return std::make_unique<std::map<unsigned int,Gep::GepCaloCell>>(m_cellMap);
   }
+
+  const std::map<unsigned int, Gep::GepCaloCell>* getCellMapPtr() const {
+	  return &m_cellMap;
+  }
+
+  void setNumberOfOverflowingFEB2s(int n) { m_nFeb2sInOverflow = n; }
+
+  int getNumberOfOverflowingFEB2s() { return m_nFeb2sInOverflow; }
   
   private:  
 
     std::map<unsigned int,Gep::GepCaloCell> m_cellMap;
+    int m_nFeb2sInOverflow = -1;
 
   };
 }

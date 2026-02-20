@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Categories currently used by offline Egamma TO monitoringMT tool
 # Mechanism to read mongroups directly from trigger menu
@@ -15,8 +15,8 @@ def mongroupsCfg(moniAccess, data_type):
         monitoring_tags = []
         monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
         
-        monitoring_ph = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
-        monitoring_photon = monitoring_ph + ['HLT_g140_loose_L1eEM26M']
+        monitoring_photon = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
+
         monitoring_bootstrap = {
                 'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
                 'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
@@ -37,7 +37,7 @@ def mongroupsCfg(moniAccess, data_type):
                 'monitoring_electron'           : monitoring_electron,
                 'monitoring_photon'             : monitoring_photon ,
                 'monitoring_bootstrap'          : monitoring_bootstrap,
-                'monitoringTP_electron'         : monitoringTP_electron + ['HLT_e26_lhtight_L1eEM26M'] + validationTP_electron_DNN,
+                'monitoringTP_electron'         : monitoringTP_electron + validationTP_electron_DNN,
                 'monitoring_tags'               : monitoring_tags,
                 'monitoring_topo'               : monitoring_topo,
         }
@@ -69,7 +69,7 @@ topo_config = {
               }
 
 ######  For Offine EGamma DQ purposes: Offline EGamma Trigger aware implementation ######
-# Chains retrived in the egammaPerformance/SetupEgammaMonitoring
+# Chains retrieved in the egammaPerformance/SetupEgammaMonitoring
 # Chains inside the ​Physics_pp_run3_v1.py menu:
 ######  
 

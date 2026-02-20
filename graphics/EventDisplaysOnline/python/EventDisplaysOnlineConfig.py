@@ -37,6 +37,9 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     ##----------------------------------------------------------------------##
     flags.OnlineEventDisplays.PartitionName='ATLAS' # 'ATLAS', 'GMTestPartition' or 'GMTestPartitionT9'
 
+    flags.OnlineEventDisplays.MaxEvents=50
+    flags.OnlineEventDisplays.ProjectTag='data25_13p6TeV'
+    flags.OnlineEventDisplays.PublicStreams=['Main']
     if flags.OnlineEventDisplays.HIMode:
         flags.OnlineEventDisplays.MaxEvents=200
         flags.OnlineEventDisplays.ProjectTag='data25_hi'
@@ -53,10 +56,6 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
         flags.OnlineEventDisplays.MaxEvents=-1 # keep all the events
         flags.OnlineEventDisplays.ProjectTag='data25_comm'
         flags.OnlineEventDisplays.PublicStreams=['']
-    else:
-        flags.OnlineEventDisplays.MaxEvents=50
-        flags.OnlineEventDisplays.ProjectTag='data25_13p6TeV'
-        flags.OnlineEventDisplays.PublicStreams=['Main']
 
     # Pause this thread until the partition is up
     if not flags.OnlineEventDisplays.OfflineTest:
@@ -103,6 +102,7 @@ def EventDisplaysOnlineCfg(flags, **kwargs):
     flags.Reco.EnableTrigger = False # TODO test True
     flags.Detector.GeometryForward = False
     flags.Detector.EnableFwdRegion = False
+    flags.Reco.EnableZDC = False
     flags.LAr.doHVCorr = False # ATLASRECTS-6823
     flags.DQ.doMonitoring = False
     flags.DQ.doPostProcessing = False
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     flags = initConfigFlags()
 
     flags.OnlineEventDisplays.HorizontalMuonsMode = False
-    flags.OnlineEventDisplays.MakeVP1File = True
+    flags.OnlineEventDisplays.MakeVP1File = False
     flags.OnlineEventDisplays.CosmicMode = False
     flags.OnlineEventDisplays.HIMode = False
     flags.OnlineEventDisplays.HIPMode = False

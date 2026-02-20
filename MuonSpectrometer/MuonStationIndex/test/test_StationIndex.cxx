@@ -158,7 +158,7 @@ int main (){
     /// Test translation of the StationIndex -> chamber index using the is large flag
     for (StIndex st : {StIndex::BI, StIndex::BM, StIndex::BO, StIndex::BE, 
                      StIndex::EI, StIndex::EM, StIndex::EO, StIndex::EE}) {
-        const auto name = stName(st);
+        const auto & name = stName(st);
         PRINT_INFO("Test station index: "<<toInt(st)<<" ("<<name<<").");
         if (name.size() != 2 || !seenNames.insert(name).second) {
             PRINT_ERROR("Station name "<<name<<" does not have 2 characters or is already inserted");

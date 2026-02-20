@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARHV_EMBHVMODULE_H
 #define LARHV_EMBHVMODULE_H
+
+#include <memory>
 
 class EMBHVManager;
 class EMBHVElectrode;
@@ -52,7 +54,7 @@ class EMBHVModule
   EMBHVModule(const EMBHVModule& right);
   
   class Clockwork;
-  Clockwork *m_c;
+  std::unique_ptr<Clockwork> m_c;
   
   friend class ImaginaryFriend;
 };

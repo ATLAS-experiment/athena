@@ -1,4 +1,5 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+
 #!/usr/bin/env python
 # ====================================================================
 # DRAW_TAULH.py
@@ -23,16 +24,17 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
 
     # trigger-based skimming
     # unprescaled - single electron and muon triggers
-    triggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
-        name = "TAULH_TriggerSkimmingTool",
-        TriggerListOR = ["HLT_e26_lhtight_ivarloose_L1eEM26M",
-                         "HLT_e60_lhmedium_L1eEM26M",
-                         "HLT_e140_lhloose_L1eEM26M",
-                         "HLT_mu24_ivarmedium_L1MU14FCH",
-                         "HLT_mu50_L1MU14FCH"] )
-
-    acc.addPublicTool(triggerSkimmingTool)
-    skimTool1 = triggerSkimmingTool 
+    filterList = []
+    if flags.Trigger.EDMVersion >=0:
+        triggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(
+            name = "TAULH_TriggerSkimmingTool",
+            TriggerListOR = ["HLT_e26_lhtight_ivarloose_L1eEM26M",
+                             "HLT_e60_lhmedium_L1eEM26M",
+                             "HLT_e140_lhloose_L1eEM26M",
+                             "HLT_mu24_ivarmedium_L1MU14FCH",
+                             "HLT_mu50_L1MU14FCH"] )
+        acc.addPublicTool(triggerSkimmingTool)
+        filterList += [triggerSkimmingTool]
 
     # tau selection tool
     from TauAnalysisTools.TauAnalysisToolsConfig import TauSelectionToolCfg
@@ -86,15 +88,15 @@ def DRAW_TAULHKernelCfg(flags, name='DRAW_TAULHKernel', **kwargs):
 
     # additional delta-R requirement for electrons to avoid double counting object
     expression = "( ("+ elRequirement + " && (count (TAUEH_DeltaR > 0.1) >=1) ) || " + muRequirement + ") && " + tauRequirement
-
-    stringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-        name='TAULH_stringSkimmingTool',
-        expression = expression)
-    acc.addPublicTool(stringSkimmingTool)
-    skimTool2 = stringSkimmingTool
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
+        xAODStringSkimmingToolCfg)
+    stringSkimmingTool = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+        flags, name='TAULH_stringSkimmingTool', expression = expression))
+    filterList += [stringSkimmingTool]
 
     # require trigger AND rec. selection requirements
-    combTool = CompFactory.DerivationFramework.FilterCombinationAND(name="tauSkim", FilterList=[skimTool1,skimTool2])
+    combTool = CompFactory.DerivationFramework.FilterCombinationAND(
+        name="tauSkim", FilterList=filterList)
     acc.addPublicTool(combTool,primary = True)
 
     # The kernel for delta-R tool

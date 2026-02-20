@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////
@@ -60,6 +60,9 @@ public :
    TBranch        *b_LayerReferenceZARho;   //!
 
    DiscLayerMaterial(TTree *tree=0);
+   DiscLayerMaterial(const DiscLayerMaterial &) = delete;
+   DiscLayerMaterial& operator =(const DiscLayerMaterial &) = delete;
+
    virtual ~DiscLayerMaterial();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);

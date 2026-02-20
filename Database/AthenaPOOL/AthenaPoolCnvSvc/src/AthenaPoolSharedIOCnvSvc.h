@@ -84,6 +84,9 @@ public:
 		   const std::string& refAddress,
 		   IOpaqueAddress*& refpAddress) override;
 
+   /// Implement cleanUp to call all registered IAthenaPoolCleanUp cleanUp() function.
+   virtual StatusCode cleanUp(const std::string& connection) override;
+
    /// Make this a server.
    virtual StatusCode makeServer(int num) override;
 
@@ -118,17 +121,20 @@ private: // data
 private: // properties
    /// For SharedWriter:
    /// To use MetadataSvc to merge data placed in a certain container
-   StringProperty  m_metadataContainerProp{this,"OutputMetadataContainer","MetaData"};
-   StringArrayProperty m_metadataContainersAug{this, "OutputMetadataContainers", {}, "Metadata containers used for augmentations"};
+   Gaudi::Property<std::string> m_metadataContainerProp{this,"OutputMetadataContainer","MetaData"};
+   Gaudi::Property<std::vector<std::string>> m_metadataContainersAug{this, "OutputMetadataContainers", {}, "Metadata containers used for augmentations"};
 
    /// Make this instance a Streaming Client during first connect/write automatically
-   IntegerProperty m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
+   Gaudi::Property<int> m_makeStreamingToolClient{this,"MakeStreamingToolClient",0};
    /// Use Streaming for selected technologies only
-   IntegerProperty m_streamingTechnology{this,"StreamingTechnology",-1};
+   Gaudi::Property<int> m_streamingTechnology{this,"StreamingTechnology",-1};
    /// Use Athena Object sharing for metadata only, event data is collected and send via ROOT TMemFile
-   BooleanProperty m_parallelCompression{this,"ParallelCompression",true};
+   Gaudi::Property<bool> m_parallelCompression{this,"ParallelCompression",true};
    /// Extension to use ROOT TMemFile for event data, "?pmerge=<host>:<port>"
-   StringProperty  m_streamPortString{this,"StreamPortString","?pmerge=localhost:0"};
+   Gaudi::Property<std::string> m_streamPortString{this,"StreamPortString","?pmerge=localhost:0"};
+   /// Force SharedWriter to flush data to output file at given intervals, needed by parallel compression
+   std::map<std::string, int> m_fileCommitCounter;
+   Gaudi::Property<std::map<std::string, int>> m_fileFlushSetting{this,"FileFlushSetting",{}};
 };
 
 #endif

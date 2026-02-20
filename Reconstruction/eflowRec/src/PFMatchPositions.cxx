@@ -12,8 +12,8 @@
 #include <cassert>
 #include <iostream>
 
-#include "eflowRec/PFMatchPositions.h"
-#include "eflowRec/PFClusterWidthCalculator.h"
+#include "PFMatchPositions.h"
+#include "PFClusterWidthCalculator.h"
 
 namespace PFMatch {
 

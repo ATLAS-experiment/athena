@@ -12,8 +12,6 @@
 #include "PathResolver/PathResolver.h"
 
 namespace {
-  const std::string jetLinkName = "jetLink";
-
   auto getSaltModel(const std::string& nn_file) {
     using namespace FlavorTagInference;
     std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_file);
@@ -49,7 +47,6 @@ namespace FlavorTagInference {
 
   GNN::GNN(ISaltModelPtr util, const GNNOptions& o):
     m_saltModel(util),
-    m_jetLink(jetLinkName),
     m_dataLoader(util, o)
   {
     // Retrieve the configuration for the model outputs.

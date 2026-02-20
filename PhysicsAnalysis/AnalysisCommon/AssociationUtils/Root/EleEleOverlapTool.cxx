@@ -72,6 +72,20 @@ namespace ORUtils
       ATH_MSG_ERROR("You must enable at least one: UseTrackMatch or UseClusterMatch");
       return StatusCode::FAILURE;
     }
+    if (m_useClusterMatch)
+    {
+      // Initialize the cluster accessors
+      resetAccessor (m_accessors->m_clusterContainerAcc, *m_accessors, "egammaClusters");
+      resetAccessor (m_accessors->m_caloClusterAcc, *m_accessors, "caloClusterLinks");
+      m_accessors->m_etaBEAcc.emplace (*m_accessors);
+      m_accessors->m_phiBEAcc.emplace (*m_accessors);
+    }
+    if (m_useTrackMatch)
+    {
+      // Initialize the track accessor
+      resetAccessor (m_accessors->m_track0Acc, *m_accessors, "GSFTrackParticles");
+      resetAccessor (m_accessors->m_trackAcc, *m_accessors, "trackParticleLinks");
+    }
 
     return StatusCode::SUCCESS;
   }
@@ -80,24 +94,24 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleEleOverlapTool::
-  findOverlaps(const xAOD::IParticleContainer& cont1,
-               const xAOD::IParticleContainer& cont2) const
+  findOverlaps(columnar::Particle1Range cont1,
+               columnar::Particle2Range cont2,
+               columnar::EventContextId /*eventContext*/) const
   {
-    // I require that the two containers are the same so that I can
-    // arbitrarily pick one of them to use.
-    if(&cont1 != &cont2) {
-      ATH_MSG_ERROR("This tool expects both electron containers to be the " <<
-                    "same for now");
-      return StatusCode::FAILURE;
+    if constexpr (columnar::ColumnarModeDefault::isXAOD)
+    {
+      // I require that the two containers are the same so that I can
+      // arbitrarily pick one of them to use.
+      if(&cont1.getXAODObject() != &cont2.getXAODObject()) {
+        ATH_MSG_ERROR("This tool expects both electron containers to be the " <<
+                      "same for now");
+        return StatusCode::FAILURE;
+      }
     }
     // Check the container type
-    if(typeid(cont1) != typeid(xAOD::ElectronContainer) &&
-       typeid(cont1) != typeid(ConstDataVector<xAOD::ElectronContainer>)) {
-      ATH_MSG_ERROR("Container is not an ElectronContainer!");
-      return StatusCode::FAILURE;
-    }
+    ATH_CHECK( checkForXAODContainer<xAOD::ElectronContainer>(cont1, "Container is not of type ElectronContainer!") );
     // Call the type-specific method
-    ATH_CHECK( findOverlaps(static_cast<const xAOD::ElectronContainer&>(cont1)) );
+    ATH_CHECK( internalFindOverlaps(cont1) );
     return StatusCode::SUCCESS;
   }
 
@@ -105,25 +119,25 @@ namespace ORUtils
   // Identify overlaps
   //---------------------------------------------------------------------------
   StatusCode EleEleOverlapTool::
-  findOverlaps(const xAOD::ElectronContainer& electrons) const
+  internalFindOverlaps(columnar::Particle1Range electrons) const
   {
     ATH_MSG_DEBUG("Removing overlapping electrons");
 
     // Initialize output decorations if necessary
-    m_decHelper->initializeDecorations(electrons);
+    initializeDecorations(electrons);
 
     // TODO: consider adding cluster-based matching also
 
     // Loop over surviving electron pairs
     for(const auto el1 : electrons) {
-      if(!m_decHelper->isSurvivingObject(*el1)) continue;
+      if(!isSurvivingObject(el1)) continue;
       for(const auto el2 : electrons) {
         if(el1 == el2) continue;
-        if(!m_decHelper->isSurvivingObject(*el2)) continue;
+        if(!isSurvivingObject(el2)) continue;
 
         // Perform the match and decide whether to reject el1
         try {
-          if(electronsMatch(*el1, *el2) && rejectFirst(*el1, *el2)) {
+          if(electronsMatch(el1, el2) && rejectFirst(el1, el2)) {
             ATH_CHECK( handleOverlap(el1, el2) );
           }
         }
@@ -143,24 +157,30 @@ namespace ORUtils
   // Apply the ele-ele matching criteria
   //---------------------------------------------------------------------------
   bool EleEleOverlapTool::
-  electronsMatch(const xAOD::Electron& el1, const xAOD::Electron& el2) const
+  electronsMatch(columnar::Particle1Id el1, columnar::Particle1Id el2) const
   {
+    auto& acc = *m_accessors;
     // Look for a shared track
-    if(m_useTrackMatch && el1.trackParticleLink() == el2.trackParticleLink())
-      return true;
+    if(m_useTrackMatch)
+    {
+      auto trk1 = el1(acc.m_trackAcc);
+      auto trk2 = el2(acc.m_trackAcc);
+      if(trk1.size() > 0 && trk2.size() > 0 && trk1[0] == trk2[0])
+        return true;
+    }
 
     // Look for overlapping clusters
     if(m_useClusterMatch) {
-      const auto& clus1 = *el1.caloCluster();
-      const auto& clus2 = *el2.caloCluster();
+      auto clus1 = el1(acc.m_caloClusterAcc)[0].value();
+      auto clus2 = el2(acc.m_caloClusterAcc)[0].value();
       using xAOD::P4Helpers::deltaPhi;
 
       // We use coordinates from 2nd sampling
       const unsigned layer = 2;
-      const float eta1 = clus1.etaBE(layer);
-      const float eta2 = clus2.etaBE(layer);
-      const float phi1 = clus1.phiBE(layer);
-      const float phi2 = clus2.phiBE(layer);
+      const float eta1 = clus1(acc.m_etaBEAcc.value(), layer);
+      const float eta2 = clus2(acc.m_etaBEAcc.value(), layer);
+      const float phi1 = clus1(acc.m_phiBEAcc.value(), layer);
+      const float phi2 = clus2(acc.m_phiBEAcc.value(), layer);
 
       // Check validity of the eta/phi (no dummy -999 values)
       if(isDummyVal(eta1) || isDummyVal(eta2) ||
@@ -168,8 +188,8 @@ namespace ORUtils
         throw DummyValError();
       }
 
-      const float dEta = clus1.etaBE(layer) - clus2.etaBE(layer);
-      const float dPhi = deltaPhi(clus1.phiBE(layer), clus2.phiBE(layer));
+      const float dEta = eta1 - eta2;
+      const float dPhi = deltaPhi(phi1, phi2);
 
       if( std::abs(dEta) < m_clusterDeltaEta &&
           std::abs(dPhi) < m_clusterDeltaPhi )
@@ -186,22 +206,22 @@ namespace ORUtils
   // This function assumes a matching criteria has already been applied.
   //---------------------------------------------------------------------------
   bool EleEleOverlapTool::
-  rejectFirst(const xAOD::Electron& el1, const xAOD::Electron& el2) const
+  rejectFirst(columnar::Particle1Id el1, columnar::Particle1Id el2) const
   {
+    auto& acc = *m_accessors;
     // TODO: consider incorporating track-match information in the priority
     // selection.
 
     // Always reject author "Ambiguous" when compared to author "Electron"
-    if(el1.author() == xAOD::EgammaParameters::AuthorAmbiguous &&
-       el2.author() == xAOD::EgammaParameters::AuthorElectron)
+    if(el1(acc.m_authorAcc) == xAOD::EgammaParameters::AuthorAmbiguous &&
+       el2(acc.m_authorAcc) == xAOD::EgammaParameters::AuthorElectron)
       return true;
-    if(el1.author() == xAOD::EgammaParameters::AuthorElectron &&
-       el2.author() == xAOD::EgammaParameters::AuthorAmbiguous)
+    if(el1(acc.m_authorAcc) == xAOD::EgammaParameters::AuthorElectron &&
+       el2(acc.m_authorAcc) == xAOD::EgammaParameters::AuthorAmbiguous)
       return false;
 
     // Reject the softer electron
-    if(el1.pt() < el2.pt()) return true;
-
+    if(el1(acc.m_ptAcc) < el2(acc.m_ptAcc)) return true;
     return false;
   }
 

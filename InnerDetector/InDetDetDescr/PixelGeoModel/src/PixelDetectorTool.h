@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_PIXELDETECTORTOOL_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "GeoModelInterfaces/IGeoSubDetTool.h"
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "PixelGeoModel/IIBLParameterSvc.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
@@ -36,7 +35,7 @@ class PixelDetectorTool final : public GeoModelTool {
   virtual StatusCode clear() override final;
 
   // Callback function itself
-  virtual StatusCode align ATLAS_NOT_THREAD_SAFE (IOVSVC_CALLBACK_ARGS) override;
+  virtual StatusCode align() override;
 
 private:
   //
@@ -54,7 +53,6 @@ private:
   ToolHandle< IGeoSubDetTool > m_bcmTool{this,"BCM_Tool","",""};
   ToolHandle< IGeoSubDetTool > m_blmTool{this,"BLM_Tool","",""};
   PublicToolHandle< IInDetServMatBuilderTool > m_serviceBuilderTool{this,"ServiceBuilderTool","",""};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
   const InDetDD::PixelDetectorManager * m_manager{nullptr};
   std::string m_overrideVersionName;
 

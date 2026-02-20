@@ -106,7 +106,7 @@ namespace {
         unsigned int nValues = randomInteger<unsigned int>(0, maxElements);
         std::vector<float> values;
         for (unsigned int iValue=0; iValue<nValues; ++iValue) values.push_back( randomRealNumber<float>(0,1) );
-        floatVec(*object) = values;
+        floatVec(*object) = std::move(values);
       }
     }
   }

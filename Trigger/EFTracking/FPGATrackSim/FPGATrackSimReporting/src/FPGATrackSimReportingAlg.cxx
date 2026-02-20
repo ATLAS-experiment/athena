@@ -95,15 +95,14 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
         m_allActsTracks[actsTrackContainer.key()].push_back(m_ActsInspectionTool->getActsTracks(*(actsTrackContainer.cptr())));
 
         // initialize ReadHandle stats map for all tracks if necessary
-        m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<uint32_t, std::vector<uint32_t>>{});
+        m_actsTrackStats.try_emplace(actsTrackContainer.key(), std::map<Acts::TrackStateFlag, std::vector<uint32_t>>{});
 
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::OutlierFlag, std::vector<uint32_t>{});
+            Acts::TrackStateFlag::IsOutlier, std::vector<uint32_t>{});
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::HoleFlag, std::vector<uint32_t>{});
+            Acts::TrackStateFlag::IsHole, std::vector<uint32_t>{});
         m_actsTrackStats[actsTrackContainer.key()].emplace(
-            Acts::TrackStateFlag::MeasurementFlag, std::vector<uint32_t>{});
-
+            Acts::TrackStateFlag::HasMeasurement, std::vector<uint32_t>{});
         for (const auto& track : m_allActsTracks[actsTrackContainer.key()].back()) {
             uint32_t t_nOutliers = 0, t_nMeasurements = 0, t_nHoles = 0;
             for (const auto& measurement : track->trackMeasurements)
@@ -112,9 +111,9 @@ StatusCode FPGATrackSim::FPGATrackSimReportingAlg::execute(const EventContext& c
                 if (measurement->measurementFlag) ++t_nMeasurements;
                 if (measurement->holeFlag) ++t_nHoles;
             }
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::OutlierFlag].push_back(t_nOutliers);
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HoleFlag].push_back(t_nHoles);
-            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::MeasurementFlag].push_back(t_nMeasurements);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::IsOutlier].push_back(t_nOutliers);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::IsHole].push_back(t_nHoles);
+            m_actsTrackStats[actsTrackContainer.key()][Acts::TrackStateFlag::HasMeasurement].push_back(t_nMeasurements);
         }
         if (m_printoutForEveryEvent) ATH_MSG_INFO("ACTS tracks in " << actsTrackContainer.key() << m_ActsInspectionTool->getPrintoutActsEventTracks(m_allActsTracks[actsTrackContainer.key()].back()));
     }
@@ -238,6 +237,73 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<Da
     ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
 }
 
+template <>
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<DataVector< xAOD::PixelCluster >>& clusterContainer) const
+{
+    std::string mainTable = "\n"
+        "|===================================================================================================================================================================================|\n"
+        "|      # |             Global coordinates             |      Local coordinates      |      Local Covariance       |             Size            |     Hash ID  |      Identifier    |\n"
+        "|        |       x      |       y      |       z      |       0      |       1      |      0,0     |     1,1      |      phi     |     eta      |              |                    |\n"
+        "|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    std::map<int, int> counterMap;
+    for (const xAOD::PixelCluster* cluster : *clusterContainer)
+    {
+        ++counter;
+
+            mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:#018x} |\n",
+            counter,
+            cluster->globalPosition().x(),
+            cluster->globalPosition().y(),
+            cluster->globalPosition().z(),
+            cluster->localPosition<2>()[0],
+            cluster->localPosition<2>()[1],
+            cluster->localCovariance<2>()(0, 0),
+            cluster->localCovariance<2>()(1, 1),
+            cluster->channelsInPhi(),
+            cluster->channelsInEta(),
+            cluster->identifierHash(),
+            cluster->identifier());
+            
+            counterMap[cluster->identifierHash()]++;
+        }
+    mainTable += "|=========================================================================================|";
+
+    ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
+}
+
+template <>
+void FPGATrackSim::FPGATrackSimReportingAlg::printxAODClusters(SG::ReadHandle<DataVector< xAOD::StripCluster >>& clusterContainer) const
+{
+    std::string mainTable = "\n"
+        "|======================================================================================================================================|\n"
+        "|      # |             Global coordinates             |     Local    |    Local     |     Size     |     Hash ID  |      Identifier    |\n"
+        "|        |       x      |       y      |       z      |     Pos      |     Cov      |              |              |                    |\n"
+        "|--------------------------------------------------------------------------------------------------------------------------------------|\n";
+    unsigned int counter = 0;
+    std::map<int, int> counterMap;
+    for (const xAOD::StripCluster* cluster : *clusterContainer)
+    {
+        ++counter;
+
+        mainTable += std::format("| {:>6} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:>12} | {:#018x} |\n",
+        counter,
+        cluster->globalPosition().x(),
+        cluster->globalPosition().y(),
+        cluster->globalPosition().z(),
+        cluster->localPosition<1>()[0],
+        cluster->localCovariance<1>()(0, 0),
+        cluster->channelsInPhi(),
+        cluster->identifierHash(),
+        cluster->identifier());
+
+        counterMap[cluster->identifierHash()]++;
+    }
+    mainTable += "|=========================================================================================|";
+
+    ATH_MSG_INFO("Printout of xAOD clusters coming from " << clusterContainer.key() << mainTable );
+}
+
 
 void FPGATrackSim::FPGATrackSimReportingAlg::processxAODSpacePoints(SG::ReadHandle<DataVector< xAOD::SpacePoint >>& spContainer) const
 {
@@ -283,7 +349,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGASeeds(SG::ReadHandle<ActsT
     unsigned int counter = 0;
     for (const auto thisTrack : *seedContainer)
     {
-        auto spList = thisTrack->sp();
+        auto spList = thisTrack.sp();
         ++counter;
         for(int i = 0; i < 3; i++)
         {
@@ -369,7 +435,7 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGARoads(SG::ReadHandle<FPGAT
         for (unsigned int i = 0; i < road.getNLayers(); ++i)
         {
             hitCounter = 0;
-            const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHits(i);
+            const std::vector<std::shared_ptr<const FPGATrackSimHit>>& hits = road.getHitPtrs(i);
             for (auto const& hit : hits)
             {
                 if (!hit) {
@@ -402,12 +468,15 @@ void FPGATrackSim::FPGATrackSimReportingAlg::processFPGATracks(SG::ReadHandle<FP
 {
     for (auto const& track : *FPGATracks)
     {
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+        const auto& hits = track.getFPGATrackSimHitPtrs();
         uint32_t pixelHits = 0, stripHits = 0;
-        for (const FPGATrackSimHit& hit : hits)
+        for (const auto& hit_ptr : hits)
         {
-            if (hit.isPixel()) ++pixelHits;
-            if (hit.isStrip()) ++stripHits;
+            if (!hit_ptr) {
+                throw std::runtime_error("Null hit pointer in track");
+            }
+            if (hit_ptr->isPixel()) ++pixelHits;
+            if (hit_ptr->isStrip()) ++stripHits;
         }
         m_pixelClustersPerFPGATrack.push_back(pixelHits);
         m_stripClustersPerFPGATrack.push_back(stripHits);
@@ -446,21 +515,24 @@ void FPGATrackSim::FPGATrackSimReportingAlg::printFPGATracks(SG::ReadHandle<FPGA
                      "|        |    ##  |   type   | layer |             Global coordinates    | isReal |     HashID     |\n"
                      "|        |        |          |       |      x    |      y    |      z    |        |                |\n"
                      "|        |.........................................................................................|\n";
-        const std::vector <FPGATrackSimHit>& hits = track.getFPGATrackSimHits();
+        const auto& hits = track.getFPGATrackSimHitPtrs();
         unsigned int hitCounter = 0;
-        for (auto const& hit : hits)
+        for (const auto& hit_ptr : hits)
         {
+            if (!hit_ptr) {
+                throw std::runtime_error("Null hit pointer in track");
+            }
             try {
                 ++hitCounter;
                 maintable += std::format("|        | {:>6} | {:>8} | {:>5} | {:>9.3f} | {:>9.3f} | {:>9.3f} | {:>6} | {:>14} |\n",
                 hitCounter,
-                (hit.isPixel() ? "Pixel" : hit.isStrip() ? "Strip" : "FAILED"),
-                hit.getLayer(),
-                hit.getX(),
-                hit.getY(),
-                hit.getZ(),
-                hit.isReal(),
-                hit.getIdentifierHash());
+                (hit_ptr->isPixel() ? "Pixel" : hit_ptr->isStrip() ? "Strip" : "FAILED"),
+                hit_ptr->getLayer(),
+                hit_ptr->getX(),
+                hit_ptr->getY(),
+                hit_ptr->getZ(),
+                hit_ptr->isReal(),
+                hit_ptr->getIdentifierHash());
             } catch (const std::exception& e) {
                 ATH_MSG_ERROR("Exception while processing FPGATrackSimHits: " << e.what());
             }

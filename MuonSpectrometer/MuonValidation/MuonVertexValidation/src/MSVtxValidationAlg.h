@@ -28,6 +28,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/MuonSegmentContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODJet/JetContainer.h"
@@ -65,6 +66,7 @@ class MSVtxValidationAlg: public ::AthHistogramAlgorithm {
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackParticleKey{this, "TrackParticleKey", "InDetTrackParticles"};
       SG::ReadHandleKey<xAOD::JetContainer> m_JetKey{this, "JetKey", "HLT_AntiKt4EMTopoJets_nojcalib"};
       SG::ReadHandleKey<xAOD::MissingETContainer> m_MetKey{this, "MetKey", "STCalibMET"};
+      SG::ReadHandleKey<xAOD::MuonContainer> m_MuonKey{this, "MuonKey", "Muons"};
       SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_MuonSegKey{this, "MuonSegmentsKey", "MuonSegments"};
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrackletKey{this, "TrackletKey", "MSonlyTracklets"};
       SG::ReadHandleKey<xAOD::VertexContainer> m_MSVtxKey{this, "MSVertexKey", "MSDisplacedVertex"};
@@ -114,6 +116,7 @@ class MSVtxValidationAlg: public ::AthHistogramAlgorithm {
       StatusCode fillTruthParticle(const EventContext& ctx);
       StatusCode fillJet(const EventContext& ctx);
       StatusCode fillMet(const EventContext& ctx);
+      StatusCode fillMuons(const EventContext& ctx);
       StatusCode fillTracklets(const EventContext& ctx);
       StatusCode fillMSVtx(const EventContext& ctx);
       // filling helpers
@@ -218,6 +221,9 @@ class MSVtxValidationAlg: public ::AthHistogramAlgorithm {
 
       // muon segments
       std::shared_ptr<MuonPRDTest::SegmentVariables> m_muonSeg{nullptr};
+
+      // muons
+      ParticleBranchPtr_t m_muon{nullptr};
 
       // jet
       ParticleBranchPtr_t m_jet{nullptr};

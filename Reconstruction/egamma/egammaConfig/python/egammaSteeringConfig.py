@@ -91,7 +91,7 @@ def egammaSteeringConfigTest(flags=None):
     with open("egammasteeringconfig.pkl", "wb") as f:
         acc.store(f)
 
-    if hasattr(flags, 'egamma') and flags.egamma.configOnly:
+    if flags.hasCategory('egamma') and flags.egamma.configOnly:
         return None  # returns statusCode of None
     else:
         statusCode = acc.run()

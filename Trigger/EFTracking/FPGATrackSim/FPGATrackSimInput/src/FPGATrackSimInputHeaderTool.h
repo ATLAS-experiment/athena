@@ -26,8 +26,8 @@ class FPGATrackSimInputHeaderTool : public extends<AthAlgTool, IFPGATrackSimEven
   virtual ~FPGATrackSimInputHeaderTool() = default;    
   virtual StatusCode initialize() override; 
   virtual StatusCode finalize()   override;
-  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, bool &last)  override;
-  virtual StatusCode writeData(FPGATrackSimEventInputHeader* header)  override; 
+  virtual StatusCode readData(FPGATrackSimEventInputHeader* header, bool &last) const override;
+  virtual StatusCode writeData(FPGATrackSimEventInputHeader* header) const override; 
   
   
  private:
@@ -36,12 +36,13 @@ class FPGATrackSimInputHeaderTool : public extends<AthAlgTool, IFPGATrackSimEven
 
 
   //internal counters  
-  std::atomic<unsigned> m_event = 0;
-  std::atomic<unsigned> m_totevent = 0;
-  std::atomic<unsigned> m_file = 0;
- 
+  mutable std::atomic<unsigned> m_event = 0;
+  mutable std::atomic<unsigned> m_totevent = 0;
+  mutable std::atomic<unsigned> m_file = 0;
+  mutable std::mutex m_fileMutex; // Protect file operations in const methods
+
   std::string m_branchName;
-  StatusCode openFile(std::string const & path);
+  StatusCode openFile(std::string const & path) const;
 
 };
 

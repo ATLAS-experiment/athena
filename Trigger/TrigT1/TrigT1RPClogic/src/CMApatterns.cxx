@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <math.h>
+
 #include "TrigT1RPClogic/CMApatterns.h"
 #include "TrigT1RPClogic/windows.h"
 
 #include "RPC_CondCabling/CMAprogram.h"
+#include <cmath>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -140,6 +141,7 @@ CMApatterns::decluster( const bitPATTERN& data) const
                     pattern.unset(i - 1 + decl_upper);
                     --decl_upper;
 		}
+		break;
  	        case 1:
                 for( ;decl_lower+1 < decl_upper && decl_lower<=3; ++decl_lower)
                 { 
@@ -189,7 +191,7 @@ CMApatterns::majority(bitPATTERN& layer0,bitPATTERN& layer1) const
 void 
 CMApatterns::update_distance(const TRIGdistance& NEW,TRIGdistance& OLD) const
 {
-    if(fabsf(NEW.first) < fabsf(OLD.first)) OLD = NEW;
+    if(std::fabs(NEW.first) < std::fabs(OLD.first)) OLD = NEW;
 } 
 
 void 
@@ -277,8 +279,8 @@ CMApatterns::distance(const RPCdigit* pivot,const RPCdigit* confirm) const
                 pivot->station_phi(staphi) &&
                 pivot->station_eta(value.second) )
             {
-                float Sprime = tan(pivphi-staphi)*conrad;
-                value.first  = tan(conphi-staphi)*conrad - Sprime;
+                float Sprime = std::tan(pivphi-staphi)*conrad;
+                value.first  = std::tan(conphi-staphi)*conrad - Sprime;
             } 
         }
     }
@@ -354,7 +356,7 @@ CMApatterns::search_for_highPt(Lvl1RPCalgo type,TrigSigns& signatures) const
 	}
     }
     
-    signatures = tmp;
+    signatures = std::move(tmp);
 }
 
 

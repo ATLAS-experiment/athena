@@ -14,7 +14,7 @@
 #define DATAMODELTESTDATACOMMON_CONDALG1_H
 
 #include "DataModelTestDataCommon/S2Cond.h"
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
@@ -24,7 +24,7 @@ namespace DMTest {
 
 
 class CondAlg1
-  : public AthReentrantAlgorithm
+  : public AthCondAlgorithm
 {
 public:
   /**

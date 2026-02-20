@@ -21,7 +21,7 @@
 #include "VP1Base/VP1HelperClassBase.h"
 #include "VP1Base/VisibleObjectToMaterialHelper.h"
 #include "VP1Utils/HitsSoNodeManager.h"
-#include "ActsGeometryInterfaces/ActsGeometryContext.h"
+#include "ActsGeometryInterfaces/GeometryContext.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
@@ -92,7 +92,7 @@ public:
 
   const TrackHandleBase* getHandle(const Trk::Track* trk);
 
-  const ActsGeometryContext& geometryContext() const;
+  const ActsTrk::GeometryContext& geometryContext() const;
   ServiceHandle<Muon::IMuonIdHelperSvc>& muonIdHelperSvc();
   
 private:
@@ -115,7 +115,7 @@ private:
   SoPointSet * m_singlePoint;
   TrackHandleBase* m_lastSelectedTrack;
   HitsSoNodeManager m_nodeManager;
-  const ActsGeometryContext* m_geometryContext;
+  const ActsTrk::GeometryContext* m_geometryContext;
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{"MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 };
 

@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBTaggingEfficiency/SaltModel.h"
@@ -153,7 +153,7 @@ void SaltModel::runInference(
         for (int j=0; j<m_num_wp; j++){
             eff_one_jet_tmp.push_back(float_ptr[i*m_num_wp+j]);
         }
-        effAllJetAllWp.push_back(eff_one_jet_tmp);
+        effAllJetAllWp.push_back(std::move(eff_one_jet_tmp));
     }
 }
 

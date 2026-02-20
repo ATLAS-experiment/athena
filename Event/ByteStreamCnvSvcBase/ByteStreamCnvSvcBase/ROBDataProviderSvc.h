@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BYTESTREAMCNVSVCBASE_ROBDATAPROVIDERSVC_H
@@ -30,6 +30,7 @@
 #include "eformat/SourceIdentifier.h"
 #include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "Gaudi/Property.h"
 #include <vector>
 #include <map>
 #include <memory>
@@ -38,7 +39,7 @@ class ROBDataProviderSvc :  public extends<AthService, IROBDataProviderSvc> {
 
 public:
    /// ROB Fragment class
-   typedef OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment ROBF;
+   using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
    /// Constructor
    ROBDataProviderSvc(const std::string& name, ISvcLocator* svcloc);
@@ -79,11 +80,11 @@ protected:
    //typedef std::vector<ROBF*> VROBF;
 
    /// map for all the ROB fragments
-   typedef std::map<uint32_t, std::unique_ptr<const ROBF>, std::less<uint32_t> > ROBMAP;
+   using ROBMAP = std::map<uint32_t, std::unique_ptr<const ROBF>, std::less<uint32_t>>;
 
   struct EventCache {
-    const RawEvent* event = 0;
-    uint32_t eventStatus = 0;    
+    const RawEvent* event = nullptr;
+    uint32_t eventStatus = 0;
     uint32_t currentLvl1ID = 0;    
     ROBMAP robmap;
  
@@ -92,21 +93,23 @@ protected:
 
    /// Remaining attributes are for configuration
    /// vector of Source ids and status words to be ignored for the ROB map
-   typedef SimpleProperty< std::vector< std::pair<int, int> > > ArrayPairIntProperty;
-   ArrayPairIntProperty  m_filterRobWithStatus; // filter with full ROB SourceID
-   ArrayPairIntProperty  m_filterSubDetWithStatus;  // filter with Sub Det ID
+   using ArrayPairIntType = std::vector<std::pair<int, int>>;
+   Gaudi::Property<ArrayPairIntType> m_filterRobWithStatus{
+      this, "filterRobWithStatus", {}, "ROB IDs and status words to filter (full ROB SourceID)"};
+   Gaudi::Property<ArrayPairIntType> m_filterSubDetWithStatus{
+      this, "filterSubDetWithStatus", {}, "Sub-detector IDs and status words to filter"};
 
    /// map of full ROB Source ids and status words to be ignored for the ROB map
-   typedef std::map<uint32_t, std::vector<uint32_t> > FilterRobMap;
+   using FilterRobMap = std::map<uint32_t, std::vector<uint32_t>>;
    FilterRobMap          m_filterRobMap;
    /// map of Sub Det Source ids and status words to be ignored for the ROB map
-   typedef std::map<eformat::SubDetector, std::vector<uint32_t> > FilterSubDetMap;
+   using FilterSubDetMap = std::map<eformat::SubDetector, std::vector<uint32_t>>;
    FilterSubDetMap       m_filterSubDetMap;
    /// method to filter ROBs with given Status code
    bool filterRobWithStatus(const ROBF* rob);
 
    /// Filter out empty ROB fragments which are send by the ROS
-   BooleanProperty m_filterEmptyROB;
+   Gaudi::Property<bool> m_filterEmptyROB{this, "filterEmptyROB", false, "Filter out empty ROB fragments"};
    bool m_maskL2EFModuleID = false;    
 
 private:

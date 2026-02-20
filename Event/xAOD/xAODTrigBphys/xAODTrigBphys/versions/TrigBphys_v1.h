@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrigBphys_v1.h 696633 2015-09-24 14:59:50Z jwalder $
@@ -75,6 +75,7 @@ namespace xAOD {
            BD2DSTMUX = 25, // B0 -> mu+ nu_mu D*-(->anti-D0(->K+ pi-) pi-)
            BS2DSMUX  = 26, // B_s0 -> mu+ nu_mu D_s-(->phi(->K+ K-) pi-)
            LB2LCMUX  = 27, // anti-Lambda_b0 -> mu+ nu_mu anti-Lambda_c-(-> anti-p K+ pi-)
+           BHH       = 28, // B0 or B_s0 -> h+ h-, h = pi, K
            UNKNOWNPTYPE = 9999
         };
 

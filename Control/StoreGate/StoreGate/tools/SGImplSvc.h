@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGIMPLSVC_H
@@ -41,6 +41,7 @@
 #include "AthenaKernel/IHiveStoreMgr.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
+#include "CxxUtils/RefCountedPtr.h"
 
 #include <SGTools/StringPool.h> 
 #include "SGTools/ProxyMap.h" /* for SG::ConstProxyIterator */
@@ -131,9 +132,11 @@ public:
 
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
-                           IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+                           CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
   /// Create a proxy object using an IOpaqueAddress
-  StatusCode recordAddress(IOpaqueAddress* pAddress, bool clearAddressFlag=true);
+  StatusCode recordAddress(CxxUtils::RefCountedPtr<IOpaqueAddress> pAddress,
+                           bool clearAddressFlag=true);
 
   /// make a soft link to the object T* already registered
   StatusCode symLink (const void* p2BRegistered, CLID linkID );
@@ -227,25 +230,6 @@ public:
   }
 
   //@}
-
-  /////////////////////////////////////////////////////////////////////////
-  /// \name IOVSvc interface
-  //@{
-
-  /// register a callback function(2) with an already registered function(1)
-  StatusCode regFcn (const CallBackID& c1,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-
-  /// register a callback function(2) with an already registered AlgTool
-  StatusCode regFcn (const std::string& toolName,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-  
-  //@}
-  /////////////////////////////////////////////////////////////////////////
 
   /// get proxy for a given data object address in memory
   virtual SG::DataProxy* proxy(const void* const pTransient) const override final;

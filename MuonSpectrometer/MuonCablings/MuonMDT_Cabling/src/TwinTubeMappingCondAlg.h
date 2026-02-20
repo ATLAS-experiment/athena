@@ -4,7 +4,7 @@
 #ifndef MUONMDT_CABLING_TWINTUBEMAPPINGALG_H
 #define MUONMDT_CABLING_TWINTUBEMAPPINGALG_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <AthenaPoolUtilities/CondAttrListCollection.h>
 #include <GaudiKernel/SystemOfUnits.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
@@ -17,14 +17,12 @@
 
 
 namespace Muon{
-    class TwinTubeMappingCondAlg : public AthReentrantAlgorithm {
+    class TwinTubeMappingCondAlg : public AthCondAlgorithm {
         public:
-            using AthReentrantAlgorithm::AthReentrantAlgorithm;
+            using AthCondAlgorithm::AthCondAlgorithm;
             ~TwinTubeMappingCondAlg() = default;
             StatusCode initialize() override final;
             StatusCode execute(const EventContext& ctx) const override final;
-
-            bool isReEntrant() const override final { return false; }
 
         private:
             ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

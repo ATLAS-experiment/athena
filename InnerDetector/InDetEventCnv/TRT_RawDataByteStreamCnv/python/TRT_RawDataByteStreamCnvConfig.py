@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import ProductionStep
 
 
 def TRT_CablingSvcCfg(flags):
@@ -18,7 +19,7 @@ def TRT_CablingSvcCfg(flags):
 def TRT_RodDecoderCfg(flags, name="TRT_RodDecoder", **kwargs):
     """Return a ComponentAccumulator for TRT ROD decoder"""
     acc = ComponentAccumulator()
-    kwargs.setdefault("SortCollections", flags.Overlay.ByteStream)
+    kwargs.setdefault("SortCollections", flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing)
     acc.setPrivateTools(CompFactory.TRT_RodDecoder(name, **kwargs))
     return acc
 
@@ -50,7 +51,7 @@ def TRTRawDataProviderCfg(flags, name="TRTRawDataProvider", **kwargs):
     from RegionSelector.RegSelToolConfig import regSelTool_TRT_Cfg
     kwargs.setdefault("RegSelTool", acc.popToolsAndMerge(regSelTool_TRT_Cfg(flags)))
 
-    if flags.Overlay.ByteStream:
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
         kwargs.setdefault("RDOKey", f"{flags.Overlay.BkgPrefix}TRT_RDOs")
 
     acc.addEventAlgo(CompFactory.TRTRawDataProvider(name, **kwargs))

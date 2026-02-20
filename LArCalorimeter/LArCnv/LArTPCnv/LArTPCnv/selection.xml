@@ -5,7 +5,7 @@
   <class name="LArRawChannelContainer_p4" id="E3B70B7A-0D69-429A-AD43-B68941E879FB" />
   <class name="std::vector<LArRawChannelCollection_p2>" />
   <class name="LArDigitContainer_p1" id="F1876026-CDFE-4110-AA59-E441BAA5DE44" />
-  <class name="LArDigitContainer_p2" id="66F5B7Af-595C-4F79-A2B7-56590777C313" />
+  <class name="LArDigitContainer_p2" id="66F5B7AF-595C-4F79-A2B7-56590777C313" />
   <class name="LArDigitContainer_p3" id="24480EBA-1AF1-4646-95A7-11285F09717C" />
   <class name="LArFebErrorSummary_p1" id="9448FB64-AB7E-4995-A5FC-23E9A6C1AF80" />
   <class name="LArNoisyROSummary_p1" id="4681BC21-3C00-4540-BED6-58E37700D9B9"/>
@@ -20,7 +20,7 @@
   <class pattern="std::*pair*<unsigned int*std::vector<int*> >" />
   <class name="LArTTL1_p1" />
   <class name="std::vector<LArTTL1_p1>" />
-  <class name="LArTTL1Container_p1" id="b859a463-2ea4-4902-b46a-89e5fbc20132" />
+  <class name="LArTTL1Container_p1" id="B859A463-2EA4-4902-B46A-89E5FBC20132" />
 
   <exclusion>
     <!-- Exclude internal traits classes using pair that could be

@@ -143,7 +143,7 @@ TRT_EndcapElement::calculateStrawTransform(int straw, GeoAlignmentStore* alignSt
 HepGeom::Transform3D
 TRT_EndcapElement::calculateLocalStrawTransform(int straw) const
 {
-  const TRTCond::StrawDxContainer* container = conditions()->dxContainer();
+  const TRTCond::StrawDxContainer* container = m_dxContainer ? m_dxContainer : conditions()->dxContainer();
   HepGeom::Transform3D rc;
   if (container) {
 

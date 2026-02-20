@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -10,8 +10,8 @@
  *      Max Baak <mbaak@cern.ch> - CERN, Switzerland                              *
  **********************************************************************************/
 
-#ifndef __TGoodRunsList__
-#define __TGoodRunsList__
+#ifndef GOODRUNSLISTS_TGOODRUNSLIST_H
+#define GOODRUNSLISTS_TGOODRUNSLIST_H
 
 #include "GoodRunsLists/TGoodRun.h"
 #include "CxxUtils/checker_macros.h"
@@ -30,6 +30,11 @@ namespace Root {
       TGoodRunsList();
       TGoodRunsList(const char* name);      
       virtual ~TGoodRunsList();
+
+      TGoodRunsList(const TGoodRunsList&) = default;
+      TGoodRunsList(TGoodRunsList&&) = default;
+      TGoodRunsList& operator=(const TGoodRunsList&) = default;
+      TGoodRunsList& operator=(TGoodRunsList&&) = default;
 
       void AddGRL(const TGoodRunsList& other);
       const Root::TGoodRunsList GetOverlapWith(const TGoodRunsList& other) const ;

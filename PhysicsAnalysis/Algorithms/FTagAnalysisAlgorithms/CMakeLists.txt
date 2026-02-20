@@ -6,12 +6,16 @@
 # The name of the package:
 atlas_subdir( FTagAnalysisAlgorithms )
 
+find_package( Boost )
+
 atlas_add_library( FTagAnalysisAlgorithmsLib
    FTagAnalysisAlgorithms/*.h FTagAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS FTagAnalysisAlgorithms
-   LINK_LIBRARIES xAODJet xAODBTagging SelectionHelpersLib SystematicsHandlesLib
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} 
+   LINK_LIBRARIES ${Boost_LIBRARIES} PathResolver xAODMuon xAODEgamma xAODTruth xAODJet xAODBTagging SelectionHelpersLib SystematicsHandlesLib
    TrigCompositeUtilsLib TrigDecisionToolLib
    AnaAlgorithmLib FTagAnalysisInterfacesLib )
+
 
 atlas_add_component( FTagAnalysisAlgorithms
    src/*.h src/*.cxx src/components/*.cxx

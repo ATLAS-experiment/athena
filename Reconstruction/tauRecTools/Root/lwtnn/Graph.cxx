@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/Graph.h"
@@ -395,12 +395,11 @@ namespace lwtDev {
       m_seq_nodes[iii] = get_time_distributed_node(node, layers,
                                                    m_seq_nodes, m_stacks);
     } else if (node.type == NodeConfig::Type::SEQUENCE) {
-      std::unique_ptr<SequenceNode> seq_node(
-        get_sequence_node(node, layers, m_seq_nodes, m_seq_stacks));
+      SequenceNode* seq_node =
+        get_sequence_node(node, layers, m_seq_nodes, m_seq_stacks);
       // entering in m_nodes means that m_nodes will delete this one
-      m_nodes[iii] = nullptr;
-      m_seq_nodes[iii] = seq_node.get();
-      m_nodes[iii] = seq_node.release();
+      m_nodes[iii] = seq_node;
+      m_seq_nodes[iii] = seq_node;
     } else if (node.type == NodeConfig::Type::CONCATENATE) {
       // build concatenate layer
       std::vector<const INode*> in_nodes;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4H6BeamSD.h"
@@ -47,6 +47,10 @@ G4bool LArG4H6BeamSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*Touchable
 
   G4StepPoint* preStep = aStep->GetPreStepPoint();
   const G4TouchableHistory* theTouchable = dynamic_cast<const G4TouchableHistory*>(preStep->GetTouchable());
+  if (!theTouchable) {
+    std::cerr << "dynamic_cast fails in LArG4H6BeamSD::ProcessHits." << std::endl;
+    std::abort();
+  }
   G4ThreeVector xyz = preStep->GetPosition();
   G4VPhysicalVolume* physVol1 = theTouchable->GetVolume();
 //
@@ -94,9 +98,13 @@ G4bool LArG4H6BeamSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*Touchable
       } else theFrontHit = new LArG4H6FrontHit(h_num,-1,num);
     }
 #ifdef DEBUG_HITS
-        std::cout<<"**** LArG4H6BeamSD::ProcessHits:  num: "<<num<<" edep: "<<edep<<std::endl;
-        std::cout<<"**** LArG4H6BeamSD::ProcessHits: h_num: "<<h_num<<std::endl;
+    std::cout<<"**** LArG4H6BeamSD::ProcessHits:  num: "<<num<<" edep: "<<edep<<std::endl;
+    std::cout<<"**** LArG4H6BeamSD::ProcessHits: h_num: "<<h_num<<std::endl;
 #endif
+    if (!theFrontHit) {
+      std::cerr << "Logic problem in LArG4H6BeamSD::ProcessHits; theFrontHit not created." << std::endl;
+      std::abort();
+    }
     theFrontHit->SetEdep(edep);
     theFrontHit->SetPos(xyz);
     theFrontHit->SetTrackID(aStep->GetTrack()->GetTrackID());

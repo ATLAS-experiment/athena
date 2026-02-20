@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
 #ifndef ATLASHEPMC_GENEVENT_H
 #define ATLASHEPMC_GENEVENT_H
 #ifdef HEPMC3
-#undef private
-#undef protected
 #include "HepMC3/GenEvent.h"
 #include "HepMC3/GenHeavyIon.h"
 #include "HepMC3/GenPdfInfo.h"
@@ -80,7 +78,9 @@ public:
       iss >> XWGTUP;
       iss >> SCALUP;
       iss >> AQEDUP;
-      iss >> AQCDUP; 
+      iss >> AQCDUP;
+      //assume input is a trusted source
+      //coverity[tainted_data] 
       resize();
       for ( int i = 0; i < NUP; ++i ){
         iss >>  IDUP[i];
@@ -187,7 +187,7 @@ public:
     if (!p) return;
     auto barcode = p->attribute<HepMC3::IntAttribute>("barcode");
     if (barcode) {
-      m_vertexBC[barcode->value()] = p;
+      m_vertexBC[barcode->value()] = std::move(p);
     }
   }
 
@@ -206,7 +206,7 @@ public:
     if (!p) return;
     auto barcode = p->attribute<HepMC3::IntAttribute>("barcode");
     if (barcode) {
-      m_particleBC[barcode->value()] = p;
+      m_particleBC[barcode->value()] = std::move(p);
     }
   }
 
@@ -595,7 +595,7 @@ template <class T> bool suggest_barcode(T& p, int i) {
   }
   barcodes->remove(p);
   bool ret = p->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(i));
-  if (barcodes && ret) barcodes->add(p);
+  if (ret) barcodes->add(p);
   return ret;
 }
 

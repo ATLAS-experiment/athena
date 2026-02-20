@@ -365,40 +365,40 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
   **/ 
   if(not m_SpacePointsPixelKey.empty()) {
     m_seedsmaker->newEvent(ctx, seedEventData, 1);
+
+    /// perform vertex Z estimation and run second seeding pass
+    std::pair<double,double> zBoundaries;
+    if (not m_ITKGeometry) {
+      /// Estimate a Z vertex interval and, if running the new strategy, also a list of the HS candidates 
+      findZvertex(vertexList, zBoundaries, numberHistogram, zWeightedHistogram, ptWeightedHistogram);
+      /// pass the Z boundary pair c-array-style to satisfy existing interfaces of the seeds maker family. 
+      /// Trigger second seed finding pass (PPP) 
+      m_seedsmaker->find3Sp(ctx, seedEventData, vertexList, &(zBoundaries.first));
+    } else {
+      m_seedsmaker->find3Sp(ctx, seedEventData, vertexList);
+    }
+
+    /// Again, loop over the newly found seeds and attempt to form track candidates
+    while ((seed = m_seedsmaker->next(ctx, seedEventData))) {
+
+      ++counter[kNSeeds];
+
+      std::list<Trk::Track*> trackList = m_trackmaker->getTracks(ctx, trackEventData, seed->spacePoints());
+
+      for (Trk::Track* t: trackList) {
+        qualitySortedTrackCandidates.insert(std::make_pair(-trackQuality(t), t));
+      }
+
+      if(doWriteNtuple) { m_seedsmaker->writeNtuple(seed, !trackList.empty() ? trackList.front() : nullptr, ISiSpacePointsSeedMaker::PixelSeed, EvNumber); }
+
+      if (counter[kNSeeds] >= m_maxNumberSeeds) {
+        ERR = true;
+        ++m_problemsTotal;
+        break;
+      }
+    }
   } else {
     ATH_MSG_WARNING("SpacePointsPixelKey is empty. Skipping the second seeding pass that uses pixel seeds.");
-  }
-
-  /// perform vertex Z estimation and run second seeding pass
-  std::pair<double,double> zBoundaries;
-  if (not m_ITKGeometry) {
-    /// Estimate a Z vertex interval and, if running the new strategy, also a list of the HS candidates 
-    findZvertex(vertexList, zBoundaries, numberHistogram, zWeightedHistogram, ptWeightedHistogram);
-    /// pass the Z boundary pair c-array-style to satisfy existing interfaces of the seeds maker family. 
-    /// Trigger second seed finding pass (PPP) 
-    m_seedsmaker->find3Sp(ctx, seedEventData, vertexList, &(zBoundaries.first));
-  } else {
-    m_seedsmaker->find3Sp(ctx, seedEventData, vertexList);
-  }
-
-  /// Again, loop over the newly found seeds and attempt to form track candidates
-  while ((seed = m_seedsmaker->next(ctx, seedEventData))) {
-
-    ++counter[kNSeeds];
-
-    std::list<Trk::Track*> trackList = m_trackmaker->getTracks(ctx, trackEventData, seed->spacePoints());
-
-    for (Trk::Track* t: trackList) {
-      qualitySortedTrackCandidates.insert(std::make_pair(-trackQuality(t), t));
-    }
-
-    if(doWriteNtuple) { m_seedsmaker->writeNtuple(seed, !trackList.empty() ? trackList.front() : nullptr, ISiSpacePointsSeedMaker::PixelSeed, EvNumber); }
-
-    if (counter[kNSeeds] >= m_maxNumberSeeds) {
-      ERR = true;
-      ++m_problemsTotal;
-      break;
-    }
   }
 
   m_trackmaker->endEvent(trackEventData);

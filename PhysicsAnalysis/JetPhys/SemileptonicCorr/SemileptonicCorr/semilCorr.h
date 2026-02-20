@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SEMILEPTONICCORR_SEMILCORR_H
@@ -10,6 +10,7 @@
 #include <iostream>
 #include "TLorentzVector.h"
 #include <vector>
+#include <memory>
 
 
 class semilCorr{
@@ -27,16 +28,16 @@ public:
   };
   
 private:
-  std::vector<std::vector<TH1F*> > m_histos; 
+  std::vector<std::vector<std::unique_ptr<TH1F> > > m_histos;
   std::vector<float> m_etas;
 
-  TFile* m_f;
+  std::unique_ptr<TFile> m_f;
 
   bool m_Debug;
 
-  float getResponse(float pt, float eta, const std::vector<TH1F*>& h);  
+  float getResponse(float pt, float eta, const std::vector<std::unique_ptr<TH1F> >& h);
   float getSemilCorrToIncl(const TLorentzVector& jet, const TLorentzVector& mu,
-			   const std::vector<TH1F*>& histos);
+			   const std::vector<std::unique_ptr<TH1F> >& histos);
   std::vector<int> getHistoIndices(semilCorr::Systematics syst);
 
 

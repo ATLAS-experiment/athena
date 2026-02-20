@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -349,13 +349,12 @@ void RegSelectorMap::regionSelector( long layNumber,
   itEnd = m_barreldataList.end();
 
    while(it != itEnd) {
-     if( (*it).layerDiskNumber() == layNumber )
+     if( (*it).layerDiskNumber() == layNumber ) {
+       (*it).selection( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
        break;
+     }
      ++it;
    }
-   // cppcheck-suppress derefInvalidIteratorRedundantCheck; we assume the above loop
-   // always succeeds finding the layer, see also the comment in ::findPosition().
-   (*it).selection( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
 	
   for(itset = outset.begin(); itset != outset.end(); ++itset){
     outList.push_back(*itset);
@@ -614,13 +613,12 @@ void RegSelectorMap::regionSelectorRobIdUint( long layNumber,
   itEnd = m_barreldataList.end();
 
    while(it != itEnd) {
-     if( (*it).layerDiskNumber() == layNumber )
+     if( (*it).layerDiskNumber() == layNumber ) {
+       (*it).selectionRobIdUint( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
        break;
+     }
      ++it;
    }
-   // cppcheck-suppress derefInvalidIteratorRedundantCheck; we assume the above loop
-   // always succeeds finding the layer, see also the comment in ::findPosition().
-   (*it).selectionRobIdUint( etaminIn, etamaxIn, phiminIn, phimaxIn, outset);
 	
   for(itset = outset.begin(); itset != outset.end(); ++itset){
     outList.push_back(*itset);
@@ -743,7 +741,7 @@ void RegSelectorMap::insertList(std::list<RegSelectorMapElement> &dataList, int 
 				 etaminIn,etamaxIn,
 				 phiminIn, phimaxIn,
 				 hashIdIn, robIdIn);
-    dataList.push_back( newElement );
+    dataList.push_back( std::move(newElement) );
   }
 }
 

@@ -5,7 +5,7 @@
 #ifndef CALOALIGNMENTALGS_CALOSUPERCELLALIGNCONDALG_H
 #define CALOALIGNMENTALGS_CALOSUPERCELLALIGNCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -20,14 +20,14 @@
  *
  **/
 
-class CaloSuperCellAlignCondAlg final : public AthAlgorithm
+class CaloSuperCellAlignCondAlg final : public AthCondAlgorithm
 {
  public:
-  using AthAlgorithm::AthAlgorithm;
+  using AthCondAlgorithm::AthCondAlgorithm;
   virtual ~CaloSuperCellAlignCondAlg() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
   SG::ReadCondHandleKey<CaloDetDescrManager>  m_readCaloMgrKey {this

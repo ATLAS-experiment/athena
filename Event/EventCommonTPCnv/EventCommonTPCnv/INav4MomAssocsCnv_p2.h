@@ -25,7 +25,6 @@
 
 // AthenaPoolCnvSvc includes
 #include "AthenaPoolCnvSvc/T_AthenaPoolTPConverter.h"
-#include "AthenaPoolCnvSvc/ITPConverter.h"
 
 // NavFourMom includes
 #include "NavFourMom/INavigable4MomentumCollection.h"

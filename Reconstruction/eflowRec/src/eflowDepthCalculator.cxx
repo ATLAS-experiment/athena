@@ -13,8 +13,8 @@ CREATED:  18th Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowDepthCalculator.h"
-#include "eflowRec/eflowCaloRegions.h"
+#include "eflowDepthCalculator.h"
+#include "eflowCaloRegions.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 //C++ Headers

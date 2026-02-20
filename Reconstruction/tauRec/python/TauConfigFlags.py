@@ -15,7 +15,6 @@ def createTauConfigFlags():
     # Switches for enabling/disabling some tools
     tau_cfg.addFlag("Tau.doVertexCorrection", True)
     tau_cfg.addFlag("Tau.doTJVA", True)
-    tau_cfg.addFlag("Tau.doPi0Clus", True)
     tau_cfg.addFlag("Tau.doPanTau", True)
     tau_cfg.addFlag("Tau.doRNNTrackClass", True)
     tau_cfg.addFlag("Tau.doTauDiscriminant", True)
@@ -23,6 +22,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.isStandalone", False)
     # Classify Large Radius Tracks in tau track classifier
     tau_cfg.addFlag("Tau.classifyLRT", False)
+    tau_cfg.addFlag("Tau.classifyLRTWithDedicated", False)
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
@@ -52,9 +52,8 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauJetRNNConfig", ["tauid_rnn_1p_R22_v1.json", "tauid_rnn_2p_R22_v1.json", "tauid_rnn_3p_R22_v1.json"])
     tau_cfg.addFlag("Tau.TauJetRNNWPConfig", ["tauid_rnnWP_1p_R22_v0.root", "tauid_rnnWP_2p_R22_v0.root", "tauid_rnnWP_3p_R22_v0.root"])
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
-    tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["taueveto_rnn_flat_1P_r22.root", "taueveto_rnn_flat_3P_r22.root"])
+    tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
-    tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     # GNTau ID tune file (need to add another version for noAux)
     tau_cfg.addFlag("Tau.TauGNNConfig", ["GNTau_pruned_MC23.onnx","GNTau_trunc_MC23.onnx"])
     tau_cfg.addFlag("Tau.TauGNNWP",
@@ -74,7 +73,6 @@ def createTauConfigFlags():
                         ["GNTauVL_v1trunc", "GNTauL_v1trunc", "GNTauM_v1trunc", "GNTauT_v1trunc"]
                     ])
 
-
     # PanTau config flags
     from PanTauAlgs.PanTauConfigFlags import createPanTauConfigFlags
     tau_cfg.addFlagsCategory("Tau.PanTau", createPanTauConfigFlags, prefix=True)
@@ -92,8 +90,6 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # helper for derivations, used in PHYSVAL monitoring
     tau_cfg.addFlag("Tau.TauMuonRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_MuonRM" in prevFlags.Input.TypedCollections)
-    # had-had boosted ditaus
-    tau_cfg.addFlag("Tau.doDiTauRec", True)
 
     return tau_cfg
 

@@ -15,6 +15,8 @@
 
 using FullElement  = DataHeader_p6::FullElement;
 
+static_assert(std::is_nothrow_move_constructible<DataHeaderCnv_p6>::value);
+
 //______________________________________________________________________________
 bool DataHeaderCnv_p6::persToElem( const DataHeader_p6* pers, unsigned p_idx,
                                     DataHeaderElement* trans, const DataHeaderForm_p6& form,

@@ -5,7 +5,7 @@
 #ifndef TRTPIDNNCONDALG_H
 #define TRTPIDNNCONDALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
 #include "TRT_ConditionsNN/TRTPIDNN.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
@@ -19,14 +19,14 @@
 
 \****************************************************************************************/
 
-class TRTPIDNNCondAlg : public AthAlgorithm
+class TRTPIDNNCondAlg : public AthCondAlgorithm
 {
  public:
   TRTPIDNNCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual ~TRTPIDNNCondAlg() override;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKey{this,"TRTPIDNNReadKey","/TRT/Calib/PID_NN","TRTPIDNN in-key"};

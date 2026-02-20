@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -212,6 +212,10 @@ int dsvd(double **a, int m, int n, double *w, double **v)
                     {
                         g = (double)w[i];
                         h = PYTHAG(f, g);
+                        if (h ==0)[[unlikely]]{
+                          fprintf(stderr, "Numerator h is zero! \n");
+                          return 0;
+                        }
                         w[i] = (double)h;
                         h = 1.0 / h;
                         c = g * h;
@@ -262,6 +266,10 @@ int dsvd(double **a, int m, int n, double *w, double **v)
                 h = s * g;
                 g = c * g;
                 z = PYTHAG(f, h);
+                if (z == 0)[[unlikely]]{
+                  fprintf(stderr, "Numerator z is zero! \n");
+                  return(0);
+                }
                 rv1[j] = z;
                 c = f / z;
                 s = h / z;

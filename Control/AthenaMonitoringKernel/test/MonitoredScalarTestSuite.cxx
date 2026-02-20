@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( valueOperator ) {
   BOOST_TEST(v[0] == "foo");
 }
 
-BOOST_AUTO_TEST_CASE( operators ) {
+BOOST_AUTO_TEST_CASE( operator_int ) {
   auto i = Monitored::Scalar<int>("int", 0);
   i++;
   ++i;
@@ -80,4 +80,25 @@ BOOST_AUTO_TEST_CASE( operators ) {
   i--;
   --i;
   BOOST_TEST(i == 0);
+
+  int j = i + 2;
+  BOOST_TEST(j == 2);
+
+  j = 2 + j;
+  BOOST_TEST(j == 4);
+}
+
+BOOST_AUTO_TEST_CASE( operator_string ) {
+  auto name = Monitored::Scalar<std::string>("name", "y");
+  std::string s = std::string("x") + name;
+  BOOST_TEST(s == "xy");
+
+  s = name + std::string("z");
+  BOOST_TEST(s == "yz");
+
+  s = "x" + name;
+  BOOST_TEST(s == "xy");
+
+  s = name + "z";
+  BOOST_TEST(s == "yz");
 }

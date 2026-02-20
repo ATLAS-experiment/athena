@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackParticleClusterAssociationAlg.h"
@@ -15,13 +15,7 @@
 StatusCode TrackParticleClusterAssociationAlg::initialize()
 {
 
-  if (m_detectorEtaDecor.key().empty())
-      m_doDetEta = false;
-  else
-  {
-      m_doDetEta = true;
-      m_detectorEtaDecor = m_caloClusters.key() + "." + m_detectorEtaDecor.key();
-  }
+  m_doDetEta = !m_detectorEtaDecor.key().empty();
 
   ATH_CHECK( m_caloExtKey.initialize() );
   ATH_CHECK( m_trackParticleCollectionHandle.initialize() );
@@ -38,7 +32,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
   }
 
   ATH_MSG_DEBUG(" cluster decoration = "<< m_assocClustersDecor.key() );
-  return StatusCode::SUCCESS; 
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TrackParticleClusterAssociationAlg::execute(const EventContext& ctx) const

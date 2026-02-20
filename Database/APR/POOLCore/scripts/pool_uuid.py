@@ -89,9 +89,9 @@ def usage():
 def example():
     # [avalassi@lxplus248 tcsh] ~ > date ; pool_gen_uuid ; uuidgen -t
     # A2E338DD-2265-DF11-AFE1-001E4F3E5C33
-    # dd3a5aac-6522-11df-82eb-001e4f3e5c33
+    # DD3A5AAC-6522-11DF-82EB-001E4F3E5C33
     
-    guid1='dd3a5aac-6522-11df-82eb-001e4f3e5c33' # from uuidgen
+    guid1='DD3A5AAC-6522-11DF-82EB-001E4F3E5C33' # from uuidgen
     guid2='A2E338DD-2265-DF11-AFE1-001E4F3E5C33' # from POOL
     guid3='A2E338DD-2265-D011-AFE1-001E4F3E5C33' # POOL token for the year 1997
     printuuid( guid1 )

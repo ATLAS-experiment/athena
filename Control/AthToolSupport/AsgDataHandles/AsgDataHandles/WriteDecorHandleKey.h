@@ -53,7 +53,7 @@ class WriteDecorHandleKey
 public:
   typedef WriteHandleKey<T> Base;
 
-  
+
   /**
    * @brief Constructor.
    * @param key The StoreGate key for the object.
@@ -67,14 +67,26 @@ public:
                                                     const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE)*/);
 
 
-  /**
+ /**
+   * @brief Constructor with associated container.
+   * @param contKey VarHandleKey of the associated container
+   * @param decorKey The decoration name.
+   *
+   * The decoration @decorKey will be applied on the container referenced
+   * by @contKey.
+   */
+  WriteDecorHandleKey (const VarHandleKey& contKey,
+                       const std::string& decorKey = "");
+
+
+ /**
    * @brief auto-declaring Property Constructor.
    * @param owner Owning component.
    * @param name name of the Property
    * @param key  default StoreGate key for the object.
    * @param doc Documentation string.
    *
-   * will associate the named Property with this RHK via declareProperty
+   * will associate the named Property with this WDHK via declareProperty
    *
    * The provided key may actually start with the name of the store,
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
@@ -87,7 +99,7 @@ public:
                        const std::string& doc = "");
 
 
-  /**
+   /**
    * @brief auto-declaring Property Constructor.
    * @param owner Owning component.
    * @param name name of the Property

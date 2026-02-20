@@ -1,7 +1,7 @@
 //////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetCalibrationTool.cxx 
@@ -22,8 +22,16 @@ StatusCode BJetCorrectionTool::initialize() {
   }
 
   m_Semi_Histo.reset(dynamic_cast<TH1F*>(calibFile->Get("Correction_SemiLeptonic_ttbar_mean")));
+  if (!m_Semi_Histo) {
+    ATH_MSG_FATAL("Cannot get Correction_SemiLeptonic_ttbar_mean from calib file");
+    return StatusCode::FAILURE;
+  }
   m_Semi_Histo->SetDirectory(nullptr);
   m_Had_Histo.reset(dynamic_cast<TH1F*>(calibFile->Get("Correction_Hadronic_ttbar_mean")));
+  if (!m_Had_Histo) {
+    ATH_MSG_FATAL("Cannot get Correction_Hadronic_ttbar_mean from calib file");
+    return StatusCode::FAILURE;
+  }
   m_Had_Histo->SetDirectory(nullptr);
   calibFile->Close();
 

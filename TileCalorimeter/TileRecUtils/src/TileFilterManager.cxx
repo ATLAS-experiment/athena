@@ -451,6 +451,7 @@ void TileFilterManager::makeFitterOffsetTables() {
         if (index <= ipile) {
           Offset[index] = 0;
         } else {
+          //coverity[UNINIT]  -- false positive
           Offset[index] = Offset[index - 1] + vlast[index - 1];
         }
       }
@@ -550,7 +551,7 @@ int TileFilterManager::makeFitterArrays() {
       vFitter[index] = *tileFitter;
       delete tileFitter;
     }
-    m_vNpFitter.push_back(vFitter);
+    m_vNpFitter.push_back(std::move(vFitter));
   }
   return 0;
 }

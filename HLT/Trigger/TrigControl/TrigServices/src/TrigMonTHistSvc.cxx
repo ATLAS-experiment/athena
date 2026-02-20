@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMonTHistSvc.h"
@@ -85,7 +85,7 @@ StatusCode TrigMonTHistSvc::regHist_i(std::unique_ptr<T> hist_unique, const std:
         ATH_MSG_ERROR("Histogram with name " << id << " already registered");
         return StatusCode::FAILURE;
       }
-      if (shared) iter->second.mutex = new std::mutex;
+      if (shared) iter->second.mutex = std::make_unique<std::mutex>();
       phid = &iter->second;
       ATH_MSG_DEBUG((shared ? "Shared histogram " : "Histogram ")
                     << hist->GetName() << " registered under " << id << " " << name());
@@ -117,7 +117,7 @@ LockedHandle<T> TrigMonTHistSvc::regShared_i(const std::string& id, std::unique_
     T* phist = hist.get();
     THistID* phid = nullptr;
     if (regHist_i(std::move(hist), id, true, phid).isSuccess()) {
-      lh.set(phist, phid->mutex);
+      lh.set(phist, phid->mutex.get());
     }
   }
   // Histogram already registered under that id
@@ -133,7 +133,7 @@ LockedHandle<T> TrigMonTHistSvc::regShared_i(const std::string& id, std::unique_
                     << " to requested type " << System::typeinfoName(typeid(T)));
     }
     else {
-      lh.set(phist, h->second.mutex);
+      lh.set(phist, h->second.mutex.get());
       //hist is automatically deleted at end of method
     }
   }
@@ -190,7 +190,7 @@ LockedHandle<T> TrigMonTHistSvc::getShared_i(const std::string& id) const
                     << " to requested type " << System::typeinfoName(typeid(T)));
       return {};
     }
-    return LockedHandle<T>(phist, h->second.mutex);
+    return LockedHandle<T>(phist, h->second.mutex.get());
   }
   ATH_MSG_ERROR("getShared: cannot find histogram with id \"" << id << "\"");
   return {};

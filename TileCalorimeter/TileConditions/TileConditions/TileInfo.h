@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEINFO_H
@@ -33,6 +33,7 @@
 
 #include <vector>
 #include <map>
+#include <memory>
 #include <stdint.h>
 #include "TMatrixD.h"
 
@@ -42,7 +43,6 @@ class TileHWID;
 class HWIdentifier;
 class TileInfoLoader;
 class TileCablingService;
-class IdContext;
 class TileCalibDrawerFlt;
 
 
@@ -292,8 +292,6 @@ class TileInfo {
   const TileHWID*           m_tileHWID;
   const TileTBID*           m_tileTBID;
   const TileCablingService* m_cabling;
-  const IdContext*          m_channel_context;
-  const IdContext*          m_drawer_context;
 
   int    m_ADCmax;
   int    m_ADCmaskValue;

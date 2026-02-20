@@ -11,7 +11,7 @@
 #ifndef PIXELOFFLINECALIBCONDALG
 #define PIXELOFFLINECALIBCONDALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "DetDescrConditions/DetCondCFloat.h"
@@ -21,14 +21,13 @@
 
 #include "Gaudi/Property.h"
 
-class PixelOfflineCalibCondAlg : public AthReentrantAlgorithm {
+class PixelOfflineCalibCondAlg : public AthCondAlgorithm {
   public:
     PixelOfflineCalibCondAlg(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~PixelOfflineCalibCondAlg() = default;
 
     virtual StatusCode initialize() override final;
     virtual StatusCode execute(const EventContext& ctx) const override final;
-    virtual bool isReEntrant() const override final { return false; }
 
   private:
     Gaudi::Property<int> m_inputSource

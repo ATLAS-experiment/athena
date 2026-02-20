@@ -10,7 +10,7 @@
 #ifndef TRT_DetElementsRoadCondAlg_xk_H
 #define TRT_DetElementsRoadCondAlg_xk_H
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 #include "TRT_DetElementsRoadTool_xk/TRT_DetElementsRoadData_xk.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -24,7 +24,7 @@ namespace InDet {
      @author Edson.Carquin.Lopez@cern.ch
   */
 
-  class TRT_DetElementsRoadCondAlg_xk : public AthReentrantAlgorithm
+  class TRT_DetElementsRoadCondAlg_xk : public AthCondAlgorithm
   {
     ///////////////////////////////////////////////////////////////////
     // Public methods:
@@ -40,7 +40,6 @@ namespace InDet {
     virtual ~TRT_DetElementsRoadCondAlg_xk() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
-    virtual bool isReEntrant() const override final { return false; }
 
     void printStraw(const InDetDD::TRT_BaseElement * elementCS, unsigned int strawNum) const;
 

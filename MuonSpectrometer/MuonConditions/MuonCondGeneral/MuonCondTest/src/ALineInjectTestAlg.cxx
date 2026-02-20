@@ -3,11 +3,11 @@
 */
 #include "ALineInjectTestAlg.h"
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <AthenaBaseComps/AthCondAlgorithm.h>
 #include <AthenaKernel/IOVInfiniteRange.h>
 #include <GaudiKernel/SystemOfUnits.h>
 ALineInjectTestAlg::ALineInjectTestAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm{name, pSvcLocator} {}
+    AthCondAlgorithm{name, pSvcLocator} {}
 
 StatusCode ALineInjectTestAlg::initialize() {
     ATH_CHECK(m_writeKey.initialize());

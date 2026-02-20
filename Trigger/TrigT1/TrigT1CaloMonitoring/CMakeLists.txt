@@ -15,9 +15,9 @@ atlas_add_component( TrigT1CaloMonitoring
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py share/L1CaloPhase1Monitoring.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_joboptions( share/*.py )
 atlas_install_data( share/hanConfig_header.txt )
-atlas_install_scripts( scripts/cmd-l1calo-dq-*.py scripts/l1calo-ath-mon )
+atlas_install_scripts( scripts/cmd-l1calo-dq-*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_scripts( scripts/l1calo-ath-mon )
 atlas_add_alias( l1calo-dq-report "cmd-l1calo-dq-report.py" )
 atlas_add_alias( l1calo-dq-web "cmd-l1calo-dq-web.py" )
 atlas_add_alias( l1calo-dq-file "cmd-l1calo-dq-file.py" )

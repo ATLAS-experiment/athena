@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 // MissingCellListTool.cxx 
@@ -125,7 +125,11 @@ int MissingCellListTool::execute() const {
 
   if(m_addCellFromTool){
     const CaloCell_ID*  calo_id = caloDDM->getCaloCell_ID();    
-    const TileBadChanTool* tileTool = dynamic_cast<const TileBadChanTool*>(m_tileTool.operator->()); 
+    const TileBadChanTool* tileTool = dynamic_cast<const TileBadChanTool*>(m_tileTool.get());
+    if (!tileTool) {
+      ATH_MSG_ERROR( "Bad TileBadChanTool !!!" );
+      return 1;
+    }
     SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
     const LArBadChannelCont *bcCont {*readHandle};
     if(!bcCont) {

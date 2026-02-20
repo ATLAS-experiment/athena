@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRec/ALFA_EdgeMethod.h"
@@ -146,20 +146,25 @@ void ALFA_EdgeMethod::findCorridors(std::vector< Edge > &edges, std::vector< Cor
 		}
 	}
 
-	if( !corridors.empty() ){
-		for(UInt_t i = 0; i < corridors.size()-1; i++){
-			if( std::abs( corridors.at(i).first.first - corridors.at(i+1).first.first ) < 0.480){
-				if( corridors.at(i).second > corridors.at(i+1).second ){
-					corridors.erase(corridors.begin()+i+1);
-					i--;
-				} else if ( corridors.at(i).second < corridors.at(i+1).second ){
-					corridors.erase(corridors.begin()+i);
-					i--;
-				}
-			}
-		}
-	}
-
+	if (corridors.size() >= 2) {
+    for (std::size_t i = 0; i + 1 < corridors.size(); /* no increment*/) {
+        auto& a = corridors[i];
+        auto& b = corridors[i + 1];
+        if (std::abs(a.first.first - b.first.first) < 0.480) {
+            if (a.second > b.second) {
+                corridors.erase(corridors.begin() + (i + 1)); // drop b
+            } else if (a.second < b.second) {
+                corridors.erase(corridors.begin() + i);       // drop a
+            } else {
+                // equal "score": pick a rule; for example drop the later one
+                corridors.erase(corridors.begin() + (i + 1));
+            }
+            // no increment: re-check at same i with the new neighbor
+        } else {
+            ++i; // only advance when we kept both
+        }
+    }
+}
 }
 
 Bool_t ALFA_EdgeMethod::testTrack(/*Corridor corr_U, Corridor corr_V*/)
@@ -256,18 +261,21 @@ Bool_t ALFA_EdgeMethod::iterationNext(UInt_t no_Detector, std::vector<Track> &tr
 
 	Corridor corr_U;
 	Corridor corr_V;
-	Bool_t rem;
 
-	for(UInt_t i = 0; i < tracks.size(); i++){
-		readUVONE(no_Detector, tracks.at(i).first.first.first, tracks.at(i).second.first.first );
-		rem = iterNext(no_Detector, 0, tracks.at(i).first.first.first, tracks.at(i).first.second, corr_U) && iterNext(no_Detector, 1, tracks.at(i).second.first.first, tracks.at(i).second.second, corr_V);
-		if( rem && testTrack(/*corr_U, corr_V*/) ){
-			tracks.at(i) = make_pair( corr_U, corr_V );
-		} else {
-			tracks.erase(tracks.begin()+i);
-			i--;
-		}
-	}
+	for (std::size_t i = 0; i < tracks.size(); /* no increment*/) {
+    auto& tr = tracks[i];
+    readUVONE(no_Detector, tr.first.first.first, tr.second.first.first);
+    bool rem =
+        iterNext(no_Detector, 0, tr.first.first.first,  tr.first.second,  corr_U) &&
+        iterNext(no_Detector, 1, tr.second.first.first, tr.second.second, corr_V);
+    //
+    if (rem && testTrack(/*corr_U, corr_V*/)) {
+        tr = std::make_pair(corr_U, corr_V);
+        ++i; // advance only when we keep the element
+    } else {
+        tracks.erase(tracks.begin() + i);  // don’t advance; next element overwrites
+    }
+}
 
 	if( tracks.empty() ) return kFALSE;
 	return kTRUE;

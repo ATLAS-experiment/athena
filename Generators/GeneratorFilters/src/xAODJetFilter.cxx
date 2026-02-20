@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/xAODJetFilter.h"
@@ -49,7 +49,9 @@ StatusCode xAODJetFilter::filterInitialize() {
 
 StatusCode xAODJetFilter::filterEvent() {
   // Init grid
+  //coverity[STACK_USE]
   double etgrid[m_grphi][m_greta];    // clean it out before we start
+  //coverity[STACK_USE]
   bool etgridused[m_grphi][m_greta];  // will use this to mark off cells after
                                       // they are added to jets
   for (int ie = 0; ie < m_greta; ++ie) {  // initialise everything to be safe

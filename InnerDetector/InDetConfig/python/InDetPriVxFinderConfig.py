@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPriVxFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,8 +38,8 @@ def InDetPriVxFinderCfg(flags,
             ClusterSplitProbabilityContainerName(flags),
             AssociationMapName = associationMapName,
             xAODTrackParticlesFromTracksContainerName = \
-            "InDetTrackParticlesTemporary"))
-        kwargs["TracksName"]="InDetTrackParticlesTemporary"
+            "InDetBeamLineTrackParticles"))
+        kwargs["TracksName"]="InDetBeamLineTrackParticles"
 
     acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
     return acc

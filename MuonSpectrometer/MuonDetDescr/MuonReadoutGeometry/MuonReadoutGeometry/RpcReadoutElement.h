@@ -195,6 +195,8 @@ namespace MuonGM {
         // we want to have the distance from the side of the eta readout (length travelled along a eta strip) from a signal produced at P)
         double distanceToEtaReadout(const Amg::Vector3D& P) const;
 
+        /** returns the MuonStripDesign class for the given identifier */
+        const MuonStripDesign* getDesign(const Identifier& id) const;
     
         inline bool isMirrored() const { return m_mirrored; }       
         inline bool isDescrAtNegZ() const { return m_descratzneg; }
@@ -204,8 +206,6 @@ namespace MuonGM {
         const RpcIdHelper& m_idHelper{idHelperSvc()->rpcIdHelper()};
         bool m_mirrored{false};
         bool m_descratzneg{false};
-        /** returns the MuonStripDesign class for the given identifier */
-        const MuonStripDesign* getDesign(const Identifier& id) const;
 
         int m_dbR{0};
         int m_dbZ{0};

@@ -149,4 +149,52 @@ namespace xAOD {
   std::vector<uint32_t> CTPResult_v1::getTAVWords(const int bunch) const {
     return getBC(bunch).tavWords;
   }
+
+  // Get a vector of header words
+  const std::vector<uint32_t> CTPResult_v1::header() const {
+    return {
+      headerMarker(),
+      headerSize(),
+      headerFormatVersion(),
+      sourceID(),
+      runNumber(),
+      L1ID(),
+      BCID(),
+      triggerType(),
+      eventType()
+    };
+  }
+
+  // Get the header words
+  void CTPResult_v1::setHeader(const uint32_t marker, const uint32_t version, const uint32_t sourceid, const uint32_t l1id, const uint32_t runNum, const uint32_t bcid, const uint32_t trigType, const uint32_t evtType) {
+    setHeaderMarker(marker);
+    setHeaderSize(8);
+    setHeaderFormatVersion(version);
+    setSourceID(sourceid);
+    setRunNumber(runNum);
+    setL1ID(l1id);
+    setBCID(bcid);
+    setTriggerType(trigType);
+    setEventType(evtType);
+  }
+
+  // Get a vector of trailer words
+  const std::vector<uint32_t> CTPResult_v1::trailer() const {
+    return {
+      errorStatus(),
+      infoStatus(),
+      numStatusWords(),
+      numDataWords(),
+      statusPosition()
+    };
+  }
+
+  // Set the trailer words
+  void CTPResult_v1::setTrailer(const uint32_t numData, const uint32_t errStat, const uint32_t infoStat, const uint32_t numStat, const uint32_t statPos) {
+    setErrorStatus(errStat);
+    setInfoStatus(infoStat);
+    setNumStatusWords(numStat);
+    setNumDataWords(numData);
+    setStatusPosition(statPos);
+  }
 }
