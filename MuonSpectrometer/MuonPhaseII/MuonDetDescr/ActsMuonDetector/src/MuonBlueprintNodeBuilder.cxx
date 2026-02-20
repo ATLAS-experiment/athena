@@ -54,8 +54,9 @@ namespace ActsTrk {
 
 std::shared_ptr<Acts::Experimental::BlueprintNode> MuonBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& gctx, std::shared_ptr<Acts::Experimental::BlueprintNode>&& childNode) {
 
-std::variant<MuonChamberSet, MuonSectorSet> elements;
-std::variant<MuonChamberSet, MuonSectorSet> barrelStations, endcapAStations, endcapCStations, endcapMiddleAStations, endcapMiddleCStations;
+EnvelopeSet_t elements;
+EnvelopeSet_t barrelStations, endcapOuterAStations, endcapOuterCStations, 
+              endcapMiddleAStations, endcapMiddleCStations;
 
 if (m_useSectors) {
   elements = m_detMgr->getAllSectors();
@@ -90,11 +91,10 @@ std::visit([&](auto& elems) {
 
   // Assign back into the outer variants
   barrelStations       = std::move(barrel);
-  endcapAStations      = std::move(endcapA);
-  endcapCStations      = std::move(endcapC);
+  endcapOuterAStations = std::move(endcapA);
+  endcapOuterCStations = std::move(endcapC);
   endcapMiddleAStations = std::move(endcapMiddleA);
   endcapMiddleCStations = std::move(endcapMiddleC);
-
 }, elements);
 
   // Top level node for the Muon system
@@ -102,8 +102,8 @@ auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintN
 
 Acts::VolumeBoundFactory boundsFactory{};
 auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI", Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory, {StIdx::BI, StIdx::BM, StIdx::BO});
-auto endcapANode = buildMuonNode(gctx, endcapAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory, {StIdx::EO});
-auto endcapCNode = buildMuonNode(gctx, endcapCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory, {StIdx::EO});
+auto endcapANode = buildMuonNode(gctx, endcapOuterAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory, {StIdx::EO});
+auto endcapCNode = buildMuonNode(gctx, endcapOuterCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory, {StIdx::EO});
 auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleAId), boundsFactory, {StIdx::EM});
 auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory, {StIdx::EM});
 
@@ -121,15 +121,13 @@ return muonNode;
 
 }
 
-template<typename MuonElementsSet>
 std::shared_ptr<Acts::Experimental::StaticBlueprintNode>
-MuonBlueprintNodeBuilder::buildMuonNode(
-    const Acts::GeometryContext& gctx,
-    const MuonElementsSet& elements,
-    const std::string& name,
-    const Acts::GeometryIdentifier& id,
-    Acts::VolumeBoundFactory& boundsFactory,
-    const std::vector<StIdx>& passiveStationIds) const {
+MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx, 
+                                        const EnvelopeSet_t& elements, 
+                                        const std::string& name, 
+                                        const Acts::GeometryIdentifier& id,
+                                        Acts::VolumeBoundFactory& boundsFactory, 
+                                        const std::vector<StIdx>& passiveStationIds) const {
 
     const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
     std::vector<std::string> stationNames;
@@ -208,7 +206,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(
       elementsPerStation[toStationIndex(element->chamberIndex())].push_back(element);
     }
     //construct the surfaces we want to map passive material on
-    passiveSurfaces = getPassiveMaterialSurfaces(gctx, elementsPerStation);
+    passiveSurfaces = getPassiveMaterialSurfaces(gctx, std::move(elementsPerStation));
 
     }, elements);
 
@@ -239,13 +237,13 @@ MuonBlueprintNodeBuilder::buildMuonNode(
   }
 
 template<typename T>
-std::pair<std::vector<staticNodePtr>, std::vector<surfacePtr>>
-MuonBlueprintNodeBuilder::getSensitiveElements(
-    const ActsTrk::GeometryContext& gctx,
-    const T& element,
-    const Acts::GeometryIdentifier& chId,
-    Acts::VolumeBoundFactory& boundsFactory) const {
-
+MuonBlueprintNodeBuilder::BluePrintSurfPairs_t  
+  MuonBlueprintNodeBuilder::getSensitiveElements(const ActsTrk::GeometryContext& gctx,
+                                                 const T& element, 
+                                                 const Acts::GeometryIdentifier& chId,
+                                                 Acts::VolumeBoundFactory& boundsFactory) const 
+      requires(std::is_same_v<T, MuonGMR4::Chamber> || std::is_same_v<T, MuonGMR4::SpectrometerSector>){
+  
   std::vector<staticNodePtr> readoutVolumes;
   std::vector<surfacePtr> readoutSurfaces;
   Acts::GeometryIdentifier::Value mdtId{1};
@@ -358,20 +356,21 @@ MuonBlueprintNodeBuilder::getSensitiveElements(
   return std::make_pair(std::move(readoutVolumes), std::move(readoutSurfaces));
 }
 
-template<typename MuonElementsSet>
+template<typename ElementSet_t>
 std::vector<std::shared_ptr<Acts::Surface>> 
 MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   const Acts::GeometryContext& gctx,
-  const std::unordered_map<StIdx,MuonElementsSet>& elementsPerStation) const {
+  const std::unordered_map<StIdx, ElementSet_t>& elementsPerStation) const {
 
-  const double margin{5.*1_mm};
+  constexpr double margin{5._mm};
 
   const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
 
   std::vector<std::shared_ptr<Acts::Surface>> surfaces;
   surfaces.reserve(elementsPerStation.size());
   //temporary build barrel passive material surfaces - we will think for the endcap
-  if(elementsPerStation.contains(StIdx::EO) || elementsPerStation.contains(StIdx::EM)){
+  if(elementsPerStation.contains(StIdx::EO) || 
+     elementsPerStation.contains(StIdx::EM)){
     ATH_MSG_WARNING("Do not assign passive material surfaes for the endcaps for now - will do later !");
     return surfaces;
   }
@@ -414,15 +413,16 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
 }
 
 template<typename T>
-bool MuonBlueprintNodeBuilder::isElementInTheStation(const T& element, const std::vector<StIdx>& stationIndex, const EndcapSide& side) const {
-  StIdx stationIdx = toStationIndex(element.chamberIndex());
-  auto stationSide = element.side(); 
-  bool matchesName = std::ranges::any_of(stationIndex.begin(), stationIndex.end(), [&](const auto& n){
-        return stationIdx == n;
-      });
-
-  bool etaSignCorrect = ((stationSide > 0 && side == EndcapSide::A) || (stationSide < 0 && side == EndcapSide::C) || (side == EndcapSide::Both));
-  return matchesName && etaSignCorrect;
+bool MuonBlueprintNodeBuilder::isElementInTheStation(const T& element, 
+                                                     const std::vector<StIdx>& stationIndex, 
+                                                     const EndcapSide side) const
+  requires(std::is_same_v<T, MuonGMR4::Chamber> ||
+           std::is_same_v<T, MuonGMR4::SpectrometerSector>) {
+  bool etaSignCorrect = (side == EndcapSide::Both) ||
+                        (side == EndcapSide::A && element.side() > 0) || 
+                        (side == EndcapSide::C && element.side() < 0);
+  return etaSignCorrect && 
+         Acts::rangeContainsValue(stationIndex, toStationIndex(element.chamberIndex()));
 }
 
 
