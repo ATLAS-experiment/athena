@@ -152,11 +152,11 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         m_evt++;
     }
 
-    // If we get here, FPGAHits_2nd is valid, copy it over.
+    // If we get here, FPGAHits_2nd is valid, create non-owning pointers.
     std::vector<std::shared_ptr<const FPGATrackSimHit>> phits_2nd;
     phits_2nd.reserve(FPGAHits->size());
     for (const FPGATrackSimHit* hit : *FPGAHits) {
-        phits_2nd.push_back(std::make_shared<const FPGATrackSimHit>(*hit));
+        phits_2nd.emplace_back(hit, [](const FPGATrackSimHit*) {});
     }
 
     ATH_MSG_DEBUG("Retrieved " << phits_2nd.size() << " hits and " << FPGAInputTracks->size() << " tracks from storegate");
