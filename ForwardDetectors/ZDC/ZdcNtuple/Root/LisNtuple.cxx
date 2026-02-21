@@ -4,20 +4,19 @@
 
 #include <TSystem.h>
 #include <TFile.h>
-#include "xAODRootAccess/tools/Message.h"
-#include "xAODRootAccess/Init.h"
+#include "AthContainers/ConstAccessor.h"
 #include "xAODRootAccess/TEvent.h"
-#include "xAODCore/ShallowCopy.h"
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
 #include <ZdcNtuple/LisNtuple.h>
+
 
 LisNtuple::LisNtuple(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator)
 {
-  declareProperty("enableOutputTree", enableOutputTree = true, "Enable output tree");
-  declareProperty("auxSuffix", auxSuffix = "", "Suffix for aux data names");
-  declareProperty("lisInj", lisInj = false, "LIS injected-pulse run");
-  declareProperty("lisLED", lisLED = false, "LIS LED run");
+  declareProperty("enableOutputTree", m_enableOutputTree = true, "Enable output tree");
+  declareProperty("auxSuffix", m_auxSuffix = "", "Suffix for aux data names");
+  declareProperty("lisInj", m_lisInj = false, "LIS injected-pulse run");
+  declareProperty("lisLED", m_lisLED = false, "LIS LED run");
 
   m_eventCounter = 0;
 }
@@ -29,7 +28,7 @@ StatusCode LisNtuple::initialize()
   ANA_CHECK(m_zdcModuleContainerName.initialize());
   ANA_CHECK(m_zdcSumContainerName.initialize());
 
-  if (enableOutputTree)
+  if (m_enableOutputTree)
   {
     ANA_CHECK(book(TTree("lisTree", "LIS Tree")));
     m_outputTree = tree("lisTree");
@@ -47,9 +46,9 @@ StatusCode LisNtuple::initialize()
     m_outputTree->Branch("avgIntPerCrossing", &t_avgIntPerCrossing, "avgIntPerCrossing/F");
     m_outputTree->Branch("actIntPerCrossing", &t_actIntPerCrossing, "actIntPerCrossing/F");
 
-    if (lisLED)
+    if (m_lisLED)
       {m_outputTree->Branch("LEDType", &t_LEDType, "LEDType/i");}
-    if (lisInj)
+    if (m_lisInj)
       {m_outputTree->Branch("vInj",&t_vInj,"vInj/F");}
 
     // LIS processed data branches
@@ -62,9 +61,9 @@ StatusCode LisNtuple::initialize()
     m_outputTree->Branch("LISRawdata", &t_LISRawdata, Form("LISRawdata[%d][%d]/s", nLISChannels, nSamples));
 
     
-  if (lisInj)
+  if (m_lisInj)
     {
-      m_zdcInjPulserAmpMap = std::make_shared<ZdcInjPulserAmpMap>();
+      m_zdcInjPulserAmpMap = std::make_unique<ZdcInjPulserAmpMap>();
       ATH_MSG_INFO( "Using JSON file for injector-pulse voltage at path " << m_zdcInjPulserAmpMap->getFilePath() );
     }
   
@@ -84,13 +83,13 @@ StatusCode LisNtuple::execute()
   ANA_CHECK(evtStore()->retrieve(m_eventInfo, "EventInfo"));
   processEventInfo();
 
-  if (lisInj){
+  if (m_lisInj){
   	processVInjInfo();
   }
 
   processLisNtupleFromModules();
 
-  if (enableOutputTree)
+  if (m_enableOutputTree)
   {
     tree("lisTree")->Fill();
   }
@@ -128,6 +127,16 @@ void LisNtuple::processLisNtupleFromModules()
 
   ANA_MSG_DEBUG("Accessing ZdcModules for LIS data");
 
+  static const SG::ConstAccessor<unsigned int> ZdcLEDTypeAccessor("ZdcLEDType" + m_auxSuffix);
+  static const SG::ConstAccessor<unsigned int> LEDTypeAccessor("LEDType" + m_auxSuffix);
+  static const SG::ConstAccessor<float> LISPresampleAccessor("LISPresample" + m_auxSuffix);
+  static const SG::ConstAccessor<int> LISADCSumAccessor("LISADCSum" + m_auxSuffix);
+  static const SG::ConstAccessor<int> LISMaxADCAccessor("LISMaxADC" + m_auxSuffix);
+  static const SG::ConstAccessor<unsigned int> LISMaxSampleAccessor("LISMaxSample" + m_auxSuffix);
+  static const SG::ConstAccessor<float> LISAvgTimeAccessor("LISAvgTime" + m_auxSuffix);
+  static const SG::ConstAccessor<std::vector<uint16_t>> g0dataAccessor("g0data" + m_auxSuffix);
+  static const SG::ConstAccessor<std::vector<uint16_t>> g1dataAccessor("g1data" + m_auxSuffix);
+
   if (zdcModules.ptr())
   {
     for (const auto zdcMod : *zdcModules)
@@ -139,15 +148,15 @@ void LisNtuple::processLisNtupleFromModules()
         {
           if (zdcSum->zdcSide() == infoSumInd)
           {
-            if (zdcSum->isAvailable<unsigned int>("ZdcLEDType" + auxSuffix))
+            if (ZdcLEDTypeAccessor.isAvailable(*zdcSum))
             {
-              t_LEDType = zdcSum->auxdataConst<unsigned int>("ZdcLEDType" + auxSuffix);
+              t_LEDType = ZdcLEDTypeAccessor(*zdcSum);
               break;
             }
             // Fallback to LEDType if ZdcLEDType not available
-            else if (zdcSum->isAvailable<unsigned int>("LEDType" + auxSuffix))
+            else if (LEDTypeAccessor.isAvailable(*zdcSum))
             {
-              t_LEDType = zdcSum->auxdataConst<unsigned int>("LEDType" + auxSuffix);
+              t_LEDType = LEDTypeAccessor(*zdcSum);
               break;
             }
           }
@@ -178,24 +187,24 @@ void LisNtuple::processLisNtupleFromModules()
         ANA_MSG_VERBOSE("LIS Module side " << zdcMod->zdcSide() << " channel " << ichan);
 
         // Check for LIS aux data availability
-        if (!zdcMod->isAvailable<float>("LISPresample" + auxSuffix))
+        if (!LISPresampleAccessor.isAvailable(*zdcMod))
         {
           ANA_MSG_WARNING("Missing LIS aux data for side " << zdcMod->zdcSide() << " channel " << ichan);
           continue;
         }
 
         // Read processed LIS data
-        t_LISPresample[ichan] = zdcMod->auxdataConst<float>("LISPresample" + auxSuffix);
-        t_LISADCSum[ichan] = zdcMod->auxdataConst<int>("LISADCSum" + auxSuffix);
-        t_LISMaxADC[ichan] = zdcMod->auxdataConst<int>("LISMaxADC" + auxSuffix);
-        t_LISMaxSample[ichan] = zdcMod->auxdataConst<unsigned int>("LISMaxSample" + auxSuffix);
-        t_LISAvgTime[ichan] = zdcMod->auxdataConst<float>("LISAvgTime" + auxSuffix);
+        t_LISPresample[ichan] = LISPresampleAccessor(*zdcMod);
+        t_LISADCSum[ichan] = LISADCSumAccessor(*zdcMod);
+        t_LISMaxADC[ichan] = LISMaxADCAccessor(*zdcMod);
+        t_LISMaxSample[ichan] = LISMaxSampleAccessor(*zdcMod);
+        t_LISAvgTime[ichan] = LISAvgTimeAccessor(*zdcMod);
 
         // Read raw waveform data
         if(ichan > 3){
-        if (zdcMod->isAvailable<std::vector<uint16_t>>("g1data" + auxSuffix))
+        if (g1dataAccessor.isAvailable(*zdcMod))
         {
-          g1dataVec = zdcMod->auxdataConst<std::vector<uint16_t>>("g1data" + auxSuffix);
+          const std::vector<uint16_t> &g1dataVec = g1dataAccessor(*zdcMod);
           for (int isam = 0; isam < nSamples && isam < static_cast<int>(g1dataVec.size()); isam++)
           {
             t_LISRawdata[ichan][isam] = g1dataVec.at(isam);
@@ -203,9 +212,9 @@ void LisNtuple::processLisNtupleFromModules()
         }
         }
         else{
-        if (zdcMod->isAvailable<std::vector<uint16_t>>("g0data" + auxSuffix))
+        if (g0dataAccessor.isAvailable(*zdcMod))
         {
-          g0dataVec = zdcMod->auxdataConst<std::vector<uint16_t>>("g0data" + auxSuffix);
+          const std::vector<uint16_t> &g0dataVec = g0dataAccessor(*zdcMod);
           for (int isam = 0; isam < nSamples && isam < static_cast<int>(g0dataVec.size()); isam++)
           {
             t_LISRawdata[ichan][isam] = g0dataVec.at(isam);
