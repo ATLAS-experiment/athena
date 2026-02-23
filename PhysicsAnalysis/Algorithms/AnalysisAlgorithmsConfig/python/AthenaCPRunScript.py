@@ -23,6 +23,8 @@ class AthenaCPRunScript(CPBaseRunner):
         derivedGroup = self.parser.add_argument_group('Athena specific arguments')
         derivedGroup.add_argument('--config-only', dest='config_only',
                                  action='store_true', help='Only generate the configuration and save it to a pickle file')
+        derivedGroup.add_argument('--perfmon', dest='perfmon', default='none',
+                                  help='Run PerfMon to measure the job performance')
         derivedGroup.add_argument('--pool-file-reading', dest='pool_file_reading',
                                  action='store_true', help='Run the job with the POOL-based file reading')
         return
@@ -53,6 +55,11 @@ class AthenaCPRunScript(CPBaseRunner):
 
     def run(self):
         self.setup()
+
+        # PerfMon
+        from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+        setPerfmonFlagsFromRunArgs(self.flags, self.args)
+
         self.flags.lock()
         self.printFlags()
 
@@ -74,7 +81,14 @@ class AthenaCPRunScript(CPBaseRunner):
             from AthenaConfiguration.ComponentFactory import CompFactory
             self.cfg.addService(CompFactory.THistSvc(Output=[outputFileHist]))
 
+        # Make the main analysis configuration
         self.cfg.merge(self.makeAlgSequence())
+
+        # Performance monitoring and profiling:
+        if self.flags.PerfMon.doFastMonMT or self.flags.PerfMon.doFullMonMT:
+            from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+            self.cfg.merge(PerfMonMTSvcCfg(self.flags))
+
         self.cfg.printConfig()
 
         # dump pickle if requested
