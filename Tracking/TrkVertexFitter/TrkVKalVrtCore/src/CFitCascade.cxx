@@ -121,6 +121,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
    applyConstraints(vk);                                         //apply all constraints in vertex
    int IERR = vtcfit( vk );
    if(IERR) return IERR;
+   if(vk->Chi2 > 1.e4) return -1;  //Protection against bad input vertex candididate
 //
 //fit vertex once more with resolved constraints to prevent oscillations
 //   if(Pointing){
