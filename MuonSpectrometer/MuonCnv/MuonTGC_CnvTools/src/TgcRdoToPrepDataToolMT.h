@@ -19,7 +19,7 @@
 #include "MuonRDO/TgcRdo.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonTrigCoinData/MuonTrigCoinData_Cache.h"
 #include "MuonTrigCoinData/TgcCoinDataContainer.h"
 #include "StoreGate/HandleKeyArray.h"
@@ -113,6 +113,8 @@ class TgcRdoToPrepDataToolMT
         SG::WriteHandle<xAOD::TgcStripContainer> m_xaodHandle{};
 
         const MuonGM::MuonDetectorManager* muDetMgr{nullptr};
+
+        const TgcCablingMap* cabling{nullptr};
     };
     template <class ContType, class CollType>
     StatusCode transferData(
@@ -120,15 +122,6 @@ class TgcRdoToPrepDataToolMT
         std::vector<std::unique_ptr<CollType>>&& coll) const;
 
     StatusCode setupState(const EventContext& ctx, State& state) const;
-
-    struct CablingInfo {
-        ServiceHandle<MuonTGC_CablingSvc> m_tgcCabling{
-            "MuonTGC_CablingSvc", "TgcRdoToPrepDataToolMT"};
-        /** Conversion from hash to onlineId */
-        std::vector<uint16_t> m_hashToOnlineId;
-        int m_MAX_N_ROD = 0;
-    };
-    CxxUtils::CachedValue<CablingInfo> m_cablingInfo;
 
     /** Sub detector IDs are 103 and 104 for TGC A side and C side, respectively
      */
@@ -364,11 +357,11 @@ class TgcRdoToPrepDataToolMT
         const bool isAside) const;
 
     /** Get ReadoutID of HiPt from RDOHighPtID */
-    bool getHiPtIds(const TgcRawData& rd, int& sswId_o, int& sbLoc_o,
-                    int& slbId_o) const;
+    bool getHiPtIds(const State& state, const TgcRawData& rd, int& sswId_o,
+                    int& sbLoc_o, int& slbId_o) const;
 
     /** Get ReadoutID of SL from RDO */
-    bool getSLIds(const bool isStrip, const TgcRawData& rd,
+    bool getSLIds(const State& state, const bool isStrip, const TgcRawData& rd,
                   std::array<Identifier, 3>& channelId, int& index, int& chip,
                   int& hitId, int& sub, int& sswId, int& sbLoc, int& subMatrix,
                   std::array<int, 3>& bitpos, const bool isBoundary = false,
@@ -376,17 +369,15 @@ class TgcRdoToPrepDataToolMT
                   const int chip_w = -1, const int hitId_w = -1,
                   const int sub_w = -1) const;
     /** Get strip sbLoc of Endcap chamber boundary from HiPt Strip */
-    bool getSbLocOfEndcapStripBoundaryFromHiPt(const TgcRawData& rd, int& sbLoc,
-                                               const TgcRdo* rdoColl,
-                                               const int index_w,
-                                               const int chip_w,
-                                               const int hitId_w,
-                                               const int sub_w) const;
+    bool getSbLocOfEndcapStripBoundaryFromHiPt(
+        const State& state, const TgcRawData& rd, int& sbLoc,
+        const TgcRdo* rdoColl, const int index_w, const int chip_w,
+        const int hitId_w, const int sub_w) const;
     /** Get strip sbLoc of Endcap chamber boundary from Tracklet Strip */
     bool getSbLocOfEndcapStripBoundaryFromTracklet(
-        const TgcRawData& rd, int& sbLoc, const TgcRdo* rdoColl,
-        const int index_w, const int chip_w, const int hitId_w,
-        const int sub_w) const;
+        const State& state, const TgcRawData& rd, int& sbLoc,
+        const TgcRdo* rdoColl, const int index_w, const int chip_w,
+        const int hitId_w, const int sub_w) const;
     /** Get trackletIds of three Tracklet Strip candidates in the Endcap boudary
      */
     static void getEndcapStripCandidateTrackletIds(const int roi,
@@ -394,16 +385,17 @@ class TgcRdoToPrepDataToolMT
                                                    int& trackletIdStripSecond,
                                                    int& trackletIdStripThird);
 
-    const CablingInfo* getCabling() const;
-
     /** Get SL local position */
-    static const Amg::Vector2D* getSLLocalPosition(
+    static Amg::Vector2D getSLLocalPosition(
         const MuonGM::TgcReadoutElement* readout, const Identifier,
         const double eta, const double phi);
 
     SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_muDetMgrKey{
         this, "DetectorManagerKey", "MuonDetectorManager",
         "Key of input MuonDetectorManager condition data"};
+
+    SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{
+        this, "CablingKey", "MuonTgc_CablingMap"};
 
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
         this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
