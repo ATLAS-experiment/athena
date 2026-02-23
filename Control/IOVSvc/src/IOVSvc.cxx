@@ -510,25 +510,6 @@ IOVSvc::setRangeInDB(const CLID& clid, const std::string& key,
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-StatusCode
-IOVSvc::getTriggeredTools(const std::string& key, 
-                          std::set<std::string>& tools, 
-                          const std::string& storeName) {
-
-  IIOVSvcTool *ist = getTool( storeName, false );
-  if (ist == 0) {
-    ATH_MSG_ERROR( "getTriggeredTools: no store \"" << storeName
-                   << "\" associated with any IOVSvcTool" );
-    return StatusCode::FAILURE;
-  } else {
-    return ist->getTriggeredTools(key, tools);
-  }
-
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 StatusCode 
 IOVSvc::reinitialize()
 {
@@ -647,41 +628,6 @@ IOVSvc::getTool( const CLID& clid, const std::string& key ) const {
   toolMap::const_iterator itr = m_toolMap.begin();
   for (; itr != m_toolMap.end(); ++itr) {
     if (itr->second->holdsProxy( clid, key )) {
-      ist = itr->second;
-      return ist;
-    }
-  }
-
-  return ist;
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-IIOVSvcTool* 
-IOVSvc::getTool( const CallBackID& c1 ) const {
-
-  IIOVSvcTool *ist(0);
-  toolMap::const_iterator itr = m_toolMap.begin();
-  for (; itr != m_toolMap.end(); ++itr) {
-    if (itr->second->holdsCallback( c1 )) {
-      ist = itr->second;
-      return ist;
-    }
-  }
-
-  return ist;
-
-}
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-IIOVSvcTool* 
-IOVSvc::getTool( const IAlgTool* ia ) const {
-
-  IIOVSvcTool *ist(0);
-  toolMap::const_iterator itr = m_toolMap.begin();
-  for (; itr != m_toolMap.end(); ++itr) {
-    if (itr->second->holdsAlgTool( ia )) {
       ist = itr->second;
       return ist;
     }

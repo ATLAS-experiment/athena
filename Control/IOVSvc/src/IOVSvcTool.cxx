@@ -125,18 +125,6 @@ IOVSvcTool::~IOVSvcTool() {
     delete (ent);
   }
 
-  ObjMap::iterator oitr;
-  for (oitr = m_objMap.begin(); oitr != m_objMap.end(); ++oitr) {
-    delete ( oitr->second );
-  }
-
-  for (std::map<CallBackID, BFCN*>::iterator i = m_cbidMap.begin();
-       i != m_cbidMap.end();
-       ++i)
-    {
-      delete i->second;
-    }
-
   std::set< const TransientAddress*, SortTADptr >::const_iterator titr;
   for (titr = m_preLoad.begin(); titr != m_preLoad.end(); ++titr)
     {
@@ -370,8 +358,6 @@ IOVSvcTool::handle(const Incident &inc) {
       msg() << endmsg;
     }
     
-    std::map<BFCN*, std::list<std::string> > resetKeys;
-
     //
     ////// Scan start and stop Sets for validity
     ////// We need to check both R/E and Clocktime sets
@@ -390,7 +376,6 @@ IOVSvcTool::handle(const Incident &inc) {
         msg() << endmsg;
       }
       proxiesToReset = m_proxies;
-      m_triggered = false;
     } else {
       scanStartSet(m_startSet_Clock,"(ClockTime)",proxiesToReset,curTime);
       scanStartSet(m_startSet_RE,"(R/E)",proxiesToReset,curTime);
@@ -424,9 +409,9 @@ IOVSvcTool::handle(const Incident &inc) {
     for (DataProxy* prx : proxiesToReset) {
       ATH_MSG_VERBOSE("clearing proxy payload for " << m_names.at(prx));
 
-      // Reset proxy except when one wants to reset callbacks
+      // Reset proxy
       
-      if (!m_resetAllCallbacks) p_cndSvc->clearProxyPayload( prx );
+      p_cndSvc->clearProxyPayload( prx );
 
       m_trigTree->cascadeTrigger(true, prx);
 
@@ -444,63 +429,11 @@ IOVSvcTool::handle(const Incident &inc) {
         }
       }
 
-      std::list<std::string> keys;
-      pair<pmITR,pmITR> fitr = m_proxyMap.equal_range( prx );
-      for (pmITR p=fitr.first; p!=fitr.second; ++p) {
-        BFCN *f = p->second;
-        std::string key = prx->name();
-        resetKeys[f].emplace_back(prx->name());
-      }
     }
-
-    /// Trigger Callback functions
-
-    // Check to see if it's first event, and if preLoadProxies has already
-    // called the functions
-
-    IOVCallbackError* perr(0);
-    
-    if (! (first && m_triggered) ) {
-      for (int i=2; i<= m_trigTree->maxLevel(); ++i) {
-        CBTree::nodeSet::const_iterator itt, itt_s, itt_e;
-        m_trigTree->listNodes( i, itt_s, itt_e );
-        for (itt = itt_s; itt != itt_e; ++itt) {
-          CBNode* node = *itt;
-
-          if (node->trigger()) {
-            BFCN *ff = node->fcn();
-            auditorSvc()->before("Callback",m_fcnMap.at(ff).name(),inc.context());
-            if ((*ff)(i,resetKeys[ff]).isFailure()) {
-              auditorSvc()->after("Callback",m_fcnMap.at(ff).name(),inc.context());
-              ATH_MSG_ERROR("Problems calling " << m_fcnMap.at(ff).name()
-                            << std::endl << "Skipping all subsequent callbacks.");
-              // this will cause a mem leak, but I don't care
-              perr = new IOVCallbackError(m_fcnMap.at(ff).name());
-              break;            
-            }
-            auditorSvc()->after("Callback",m_fcnMap.at(ff).name(),inc.context());
-          }
-        }
-        if (perr != nullptr) break;
-      }
-    }
-
 
     /// Clear trigger tree
     m_trigTree->clearTrigger();
 
-    ///
-    /// On reinitialize, one sets a flag to force reset of all
-    /// callbacks. After executing the callbacks, reset flag and
-    /// return - no proxies reset and don't need to read in new ranges 
-    ///
-    if (m_resetAllCallbacks) {
-      m_resetAllCallbacks = false;
-      if (perr != nullptr) throw (*perr);
-      return;
-    }
-    
-    
     /// Read in the next set of IOVRanges
     std::map<const DataProxy*, IOVEntry*>::iterator pitr;
     for (DataProxy* prx : proxiesToReset) {
@@ -511,7 +444,6 @@ IOVSvcTool::handle(const Incident &inc) {
         ATH_MSG_DEBUG("calling provider()->udpateAddress(TAD) for " << m_names.at(prx)   );
         if (!prx->updateAddress()) {
           ATH_MSG_ERROR("handle: Could not update address");
-          if (perr != nullptr) throw (*perr);
           return;
         }
       }
@@ -527,8 +459,6 @@ IOVSvcTool::handle(const Incident &inc) {
       }
 
     }
-
-    if (perr != nullptr) throw (*perr);
 
   }  // end if(inc.type() == m_checkTrigger)
 
@@ -956,7 +886,7 @@ IOVSvcTool::setRangeInDB(const CLID& clid, const std::string& key,
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode 
-IOVSvcTool::preLoadProxies(const EventContext& ctx) {
+IOVSvcTool::preLoadProxies(const EventContext& /*ctx*/) {
  
   ATH_MSG_DEBUG("preLoadProxies()");
 
@@ -964,7 +894,6 @@ IOVSvcTool::preLoadProxies(const EventContext& ctx) {
 
   SmartIF<IIOVDbSvc> iovDB{service("IOVDbSvc", false)};
 
-  std::map<BFCN*, std::list<std::string> > resetKeys;
   for (DataProxy* dp : m_proxies) {
     Gaudi::Guards::AuditorGuard auditor(m_names[dp], auditorSvc(), "preLoadProxy");
     
@@ -986,10 +915,9 @@ IOVSvcTool::preLoadProxies(const EventContext& ctx) {
 
 
     StatusCode sc;
-    // preload IOVRanges for callback functions or if jobOption set
+    // preload IOVRanges if jobOption set
     // This gets us to an IAddressProvider (eg IOVDbSvc)
-    pair<pmITR,pmITR> pi = m_proxyMap.equal_range(dp);
-    if (pi.first != pi.second || m_preLoadRanges) {
+    if (m_preLoadRanges) {
       ATH_MSG_VERBOSE("updating Range");
       if (!dp->updateAddress())
         sc = StatusCode::FAILURE;
@@ -1020,14 +948,6 @@ IOVSvcTool::preLoadProxies(const EventContext& ctx) {
 
     if (sc.isFailure()) scr=sc;
 
-
-    // accumulate callBacks
-    pmITR pitr;
-    for (pitr=pi.first; pitr!=pi.second; ++pitr) {
-      BFCN *f = pitr->second;
-      resetKeys[f].emplace_back(dp->name());
-    }
-    
     CBNode* cn = m_trigTree->findNode( dp );
     if (cn != nullptr) {
       m_trigTree->cascadeTrigger(1, cn);
@@ -1036,74 +956,14 @@ IOVSvcTool::preLoadProxies(const EventContext& ctx) {
   }
 
   if (scr.isFailure()) {
-    ATH_MSG_ERROR("Problems preLoading proxies. No callbacks triggered.");
+    ATH_MSG_ERROR("Problems preLoading proxies");
     return scr;
   }
 
-  /// Trigger Callback functions
-  for (int i=2; i<= m_trigTree->maxLevel(); ++i) {
-    CBTree::nodeSet::const_iterator itt, itt_s, itt_e;
-    m_trigTree->listNodes( i, itt_s, itt_e );
-    for (itt = itt_s; itt != itt_e; ++itt) {
-      CBNode* node = *itt;
-      
-      if (node->trigger()) {
-        BFCN *ff = node->fcn();
-        if (m_sortKeys) { resetKeys[ff].sort(); }
-        auditorSvc()->before("Callback",m_fcnMap[ff].name(),ctx);
-        if ((*ff)(i,resetKeys[ff]).isFailure()) {
-          auditorSvc()->after("Callback",m_fcnMap[ff].name(),ctx);
-          ATH_MSG_ERROR("Problems calling ");
-          return StatusCode::FAILURE;
-        }
-        auditorSvc()->after("Callback",m_fcnMap[ff].name(),ctx);
-      }
-    }
-  }
 
   m_trigTree->clearTrigger();
 
-  m_triggered = true;
-
   return scr;
-}
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvcTool::triggerCallback(IOVSvcCallBackFcn* fcn, const std::string& key ) {
- 
-  ATH_MSG_VERBOSE("triggerCallback(BFCN*)");
-
-  int I {}; // initialize to something
-  std::list<std::string> klist;
-  klist.push_back(key);
-  if ( (*fcn)(I,klist).isFailure() ) {
-    ATH_MSG_ERROR("calling ");
-    return StatusCode::FAILURE;
-  }
-
-  return StatusCode::SUCCESS;
-
-}
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvcTool::triggerCallback( const SG::DataProxy *dp, 
-                             const std::string& key ) {
- 
-  ATH_MSG_VERBOSE("triggerCallback(DataProxy*)");
-
-  std::map<const SG::DataProxy*, BFCN*>::const_iterator pitr =
-    m_proxyMap.find(dp);
-  if (pitr == m_proxyMap.end()) {
-    ATH_MSG_ERROR("no callback associated with DataProxy " << m_names[dp]);
-    return StatusCode::FAILURE;
-  }
-
-  BFCN* fcn = pitr->second;
-
-  return ( triggerCallback(fcn,key) );
-
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1184,47 +1044,8 @@ IOVSvcTool::PrintProxyMap(const SG::DataProxy* dp) const {
   auto it = m_names.find(dp);
   msg() << "  " << dp << "  " << dp->clID() << "  "
         << (it == m_names.end() ? "???" : it->second) << endl;
-  auto pi = m_proxyMap.equal_range(dp);
-  if (pi.first == pi.second) {
-    msg() << "         ->  no callback associated" << endl;
-  } else {
-    for (auto pitr=pi.first; pitr!=pi.second; ++pitr) {
-      BFCN* fcn = pitr->second;
-      map<BFCN*,CallBackID>::const_iterator fitr = m_fcnMap.find(fcn);
-      if (fitr != m_fcnMap.end()) {
-        CallBackID cbid = fitr->second;
-        msg() << "         ->  " << fcn << "  " << cbid.name() << endl;
-      }
-    }
-  }
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode
-IOVSvcTool::getTriggeredTools(const std::string& key, 
-                              std::set<std::string>& tools) {
-
-  bool match = false;
-  for (pmITR pitr=m_proxyMap.begin(); pitr != m_proxyMap.end(); ++pitr) {
-    if (key == pitr->first->name()) {
-      tools.insert( m_fcnMap[pitr->second].objName() );
-      match = true;
-    }
-  }
-
-  return ( (match) ? StatusCode::SUCCESS : StatusCode::FAILURE );
-}
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvcTool::reinitialize(){
-  // Set flag to reset all proxies 
-  m_resetAllCallbacks = true;
-  return (StatusCode::SUCCESS);
-}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
@@ -1242,7 +1063,7 @@ IOVSvcTool::scanStartSet(startSet &pSet, const std::string &type,
   startITR start_itr( pSet.begin() );
   while ( start_itr != pSet.end() ) {
     
-    if (m_resetAllCallbacks || (*start_itr)->range()->start() > curTime) {
+    if ((*start_itr)->range()->start() > curTime) {
       if (msgLvl(MSG::DEBUG)) {
         msg() << "\t" << m_names.at((*start_itr)->proxy()) << ": "
               << (*start_itr)->range()->start()<<"   <- removed"<<endl;
@@ -1278,7 +1099,7 @@ IOVSvcTool::scanStopSet(stopSet &pSet, const std::string &type,
   stopITR  stop_itr(pSet.begin());
   while ( stop_itr != pSet.end() ) {
     
-    if (m_resetAllCallbacks || (*stop_itr)->range()->stop() <= curTime) {
+    if ((*stop_itr)->range()->stop() <= curTime) {
       if (msgLvl(MSG::DEBUG)) {
         msg() << "   " << m_names.at((*stop_itr)->proxy()) << ": "
               << (*stop_itr)->range()->stop()<< "  -> removed"<<endl;
@@ -1321,26 +1142,6 @@ IOVSvcTool::holdsProxy( const CLID& clid, const std::string& key ) const {
   }
 
   return ( holdsProxy(proxy) );
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool 
-IOVSvcTool::holdsCallback( const CallBackID& cb ) const { 
-
-  return ! (m_cbidMap.find(cb) == m_cbidMap.end());
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-bool 
-IOVSvcTool::holdsAlgTool( const IAlgTool* ia ) const {
-
-  ObjMap::const_iterator oitr = m_objMap.find( ia );
-
-  return !(oitr == m_objMap.end());
 
 }
 

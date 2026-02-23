@@ -12,7 +12,6 @@
 #include <memory>
 #include <set>
 #include "GaudiKernel/ClassID.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "SGTools/CallBackID.h"
 
 class IOVRange;
@@ -76,15 +75,8 @@ public:
   // supply a list of TADs whose data will be preloaded
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress * ) = 0;
 
-  // return list of tools (or functions) that have been triggered by key
-  // will return FAILURE if no tools found, or no key found
-  virtual StatusCode getTriggeredTools(const std::string& key,
-                                       std::set<std::string>& tools) = 0;
-
   virtual bool holdsProxy( SG::DataProxy* proxy ) const = 0;
   virtual bool holdsProxy( const CLID& clid, const std::string& key ) const = 0;
-  virtual bool holdsCallback( const CallBackID& ) const = 0;
-  virtual bool holdsAlgTool( const IAlgTool* ia ) const = 0;
 
   virtual void resetAllProxies() = 0;
 

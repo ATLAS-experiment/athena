@@ -69,6 +69,7 @@ namespace SG {
   class DataStore;
 }
 
+class CallBackID;
 class DataObject;
 class IConversionSvc;
 class Incident;
