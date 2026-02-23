@@ -696,7 +696,7 @@ void IOVSvcTool::setRange_impl (SG::DataProxy* proxy, IOVRange& iovr)
     p_stopSet  = &m_stopSet_RE;
   }
 
-  IOVRange *range = new IOVRange(iovr);
+  auto range = std::make_unique<IOVRange>(iovr);
 
   map<const DataProxy*, IOVEntry*>::iterator itr = m_entries.find(proxy);
   if ( itr != m_entries.end() ) {
@@ -706,7 +706,6 @@ void IOVSvcTool::setRange_impl (SG::DataProxy* proxy, IOVRange& iovr)
 
     if (*irn == iovr) {
       ATH_MSG_DEBUG("Range has not changed. Returning");
-      delete range;
       return;
       // is this true? still in the start and stop sets? FIXME
     }
@@ -728,7 +727,7 @@ void IOVSvcTool::setRange_impl (SG::DataProxy* proxy, IOVRange& iovr)
   }
 
   ATH_MSG_DEBUG("adding to start and stop sets");
-  IOVEntry *ent = new IOVEntry(proxy,range);
+  IOVEntry *ent = new IOVEntry(proxy, std::move(range));
   
   m_entries[ proxy ] = ent;
 
