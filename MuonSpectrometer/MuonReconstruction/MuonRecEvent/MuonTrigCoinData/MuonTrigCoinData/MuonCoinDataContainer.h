@@ -31,22 +31,20 @@ namespace Muon{
 template<class CollectionT>
 class MuonCoinDataContainer : public IdentifiableContainer<CollectionT> {
 
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
 public:
-
-    //default for POOL
-//      MuonCoinDataContainer();
     
   // Constructor with parameters:
   MuonCoinDataContainer(unsigned int max);
 
   // Constructor with cache
   MuonCoinDataContainer(EventContainers::IdentifiableCache<CollectionT> * cache);
+
+  MuonCoinDataContainer(const MuonCoinDataContainer&) = delete;
+  MuonCoinDataContainer &operator=(const MuonCoinDataContainer&) = delete;
+
   
   // Destructor:
-  virtual ~MuonCoinDataContainer();
+  virtual ~MuonCoinDataContainer() = default;
 
    /** return class ID */
    static const CLID& classID() 
@@ -62,28 +60,10 @@ public:
       return classID();
     }
 
-  ///////////////////////////////////////////////////////////////////
-  // Private methods:
-  ///////////////////////////////////////////////////////////////////
-private:
-
-
-  MuonCoinDataContainer(const MuonCoinDataContainer&);
-  MuonCoinDataContainer &operator=(const MuonCoinDataContainer&);
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
-private:
+ 
 
 };
 
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-/////////////////////////////////////////////////////////////////// 
- 
-typedef MuonCoinDataCollection< TgcCoinData > TgcCoinDataCollection;
-
-// member functions that use Collection T
 #include "MuonTrigCoinData/MuonCoinDataContainer.icc"
 
  

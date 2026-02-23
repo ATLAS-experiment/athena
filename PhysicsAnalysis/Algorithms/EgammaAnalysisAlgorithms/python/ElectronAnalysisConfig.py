@@ -780,11 +780,10 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
                                      'ecids_effSF' + postfix)
             sfList += [alg.scaleFactorDecoration]
 
-        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF:
-            if config.geometry() >= LHCPeriod.Run3:
-                raise ValueError('Run 3 does not yet have charge mis-ID correction, '
-                                 'please disable it by setting `noEffSF` to False.')
+        if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() >= LHCPeriod.Run3:
+            log.warning("Charge mis-ID SFs are only available for Run 2 and will not have any effect in Run 3.")
 
+        elif self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() < LHCPeriod.Run3:
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgMisid' )
             config.addPrivateTool( 'efficiencyCorrectionTool',

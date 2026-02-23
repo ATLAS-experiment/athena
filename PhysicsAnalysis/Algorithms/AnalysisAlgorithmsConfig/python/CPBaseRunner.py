@@ -77,6 +77,7 @@ class CPBaseRunner(ABC):
         flags.Input.Files = self.inputList
         flags.Exec.MaxEvents = self.args.max_events
         flags.Exec.SkipEvents = self.args.skip_n_events
+        flags.Exec.EventPrintoutInterval = 10000
         return flags
 
     def _defaultParseArguments(self):

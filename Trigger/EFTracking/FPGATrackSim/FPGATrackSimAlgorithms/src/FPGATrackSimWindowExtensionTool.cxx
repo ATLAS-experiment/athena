@@ -159,7 +159,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         if (nhit >= m_threshold) {
             m_roads.emplace_back();
             FPGATrackSimRoad & road = m_roads.back();
-            road.setRoadID(roads.size() - 1);
+            road.setRoadID(m_roads.size() - 1);
 
             // Set the "Hough x" and "Hough y" using the track parameters.
             road.setX(trackphi);

@@ -392,14 +392,14 @@ def mul2mtCBOvlpRmSequenceGenCfg(flags, is_probe_leg=False, trackingMode = "FTF"
 ###  EFSA step ###
 ######################
 
-def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
-
-    selAccMS = SelectionCA('EFMuMSSel_RoI', isProbe=is_probe_leg)
+def muEFSAAlgSequenceCfg(flags, is_probe_leg=False, useBucketFilter=False):
+    suffix = "_mlbkt" if useBucketFilter else ""
+    selAccMS = SelectionCA(f'EFMuMSSel_RoI{suffix}', isProbe=is_probe_leg)
     
-    viewName="EFMuMSReco_RoI"
+    viewName=f"EFMuMSReco_RoI{suffix}"
     ViewCreatorFetchFromViewROITool=CompFactory.ViewCreatorFetchFromViewROITool
     #temporarily using different view names until L2 SA sequence is migrated to CA
-    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey="HLT_Roi_L2SAMuonForEF", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
+    roiTool         = ViewCreatorFetchFromViewROITool(RoisWriteHandleKey=f"HLT_Roi_L2SAMuonForEF{suffix}", InViewRoIs = "forMS", ViewToFetchFrom = "L2MuFastRecoViews")
     requireParentView = True
 
     recoMS = InViewRecoCA(name=viewName, RoITool = roiTool, RequireParentView = requireParentView, isProbe=is_probe_leg)
@@ -411,7 +411,7 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
     #Run decoding again since we are using updated RoIs
     recoMS.mergeReco(muonDecodeCfg(muonflags,RoIs=viewName+"RoIs"))
     ### get EF reco sequence ###    
-    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, viewName+'RoIs', 'RoI' )
+    muEFSARecoSequenceAcc, sequenceOut = muEFSARecoSequenceCfg(muonflags, viewName+'RoIs', f'RoI{suffix}', useBucketFilter=useBucketFilter)
     recoMS.mergeReco(muEFSARecoSequenceAcc)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
@@ -422,13 +422,14 @@ def muEFSAAlgSequenceCfg(flags, is_probe_leg=False):
 
 
 @AccumulatorCache
-def muEFSASequenceGenCfg(flags, is_probe_leg=False):
+def muEFSASequenceGenCfg(flags, is_probe_leg=False, useBucketFilter=False):
 
-    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg)
+    (selAcc, sequenceOut) = muEFSAAlgSequenceCfg(flags, is_probe_leg, useBucketFilter=useBucketFilter)
 
     from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFHypoAlgCfg, TrigMuonEFMSonlyHypoToolFromDict
+    suffix = "_mlbkt" if useBucketFilter else ""
     efmuMSHypo = TrigMuonEFHypoAlgCfg( flags,
-                              name = 'TrigMuonEFMSonlyHypo_RoI',
+                              name = f'TrigMuonEFMSonlyHypo_RoI{suffix}',
                               MuonDecisions = sequenceOut,
                               IncludeSAmuons=True)
 

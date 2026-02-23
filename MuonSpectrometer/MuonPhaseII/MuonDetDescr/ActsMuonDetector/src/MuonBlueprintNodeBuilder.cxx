@@ -149,14 +149,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     passiveSurfaces.reserve(passiveStationIds.size());
   
     for(const auto& element : elems){
-      const Amg::Transform3D& transform = element->localToGlobalTransform(*context);
-      std::string volName = element->identString();
-
-      auto vol = std::make_unique<Acts::TrackingVolume>(
-                                            transform,
-                                            element->bounds(),
-                                            volName);
-     
+      auto vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(*context),
+                                                        element->identString());     
       // //the chamber geometry id
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
@@ -165,8 +159,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
         vol->addSurface(surface);
       }
       //calculate the bounds of the cylinder container
-      for(const auto& surface: vol->boundarySurfaces()){
-        const auto& surfaceRepr = surface->surfaceRepresentation();
+      for(const auto& surface: vol->volumeBounds().orientedSurfaces(vol->localToGlobalTransform(gctx))) {
+        const auto& surfaceRepr = (*surface.surface);
         const Acts::Polyhedron& polyhedron = surfaceRepr.polyhedronRepresentation(gctx);
         const Amg::Vector3D& center = surfaceRepr.center(gctx);
 
@@ -211,11 +205,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     }, elements);
 
     double halfLengthZ = 0.5 * std::abs(maxZ - minZ);
-    ATH_MSG_DEBUG("Inner radius: " << innerRadius);
-    ATH_MSG_DEBUG("Outer radius: " << outerRadius);
-    ATH_MSG_DEBUG("Max Z: " << maxZ);
-    ATH_MSG_DEBUG("Min Z: " << minZ);
-    ATH_MSG_DEBUG("Half length Z: " << halfLengthZ);
+    ATH_MSG_DEBUG("Inner radius: " << innerRadius<<", outer radius: " << outerRadius
+                 <<", max Z: " << maxZ<<", min Z: " << minZ<<", half length Z: " << halfLengthZ);
 
     Amg::Transform3D trf = Amg::getTranslateZ3D(halfLengthZ + minZ);
 
@@ -249,18 +240,10 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
   Acts::GeometryIdentifier::Value mdtId{1};
 
   //lamda function for BIS78 MDT case
-  auto isBIS78 = [this](const MuonGMR4::MuonReadoutElement* rElem) {
-
-    if(rElem->detectorType() != DetectorType::Mdt){
-      return false;
-    }
-    
-    auto& mdtIdHelper = m_detMgr->idHelperSvc()->mdtIdHelper();
-    const int BIS = mdtIdHelper.stationNameIndex("BIS");
-    int stEta = rElem->stationEta();
-
-    return rElem->stationName() == BIS && std::abs(stEta) >= 7;
-
+  auto isBIS78 = [](const MuonGMR4::MuonReadoutElement* rElem) {
+    return rElem->detectorType() == DetectorType::Mdt &&
+           rElem->chamberIndex() == Muon::MuonStationIndex::ChIndex::BIS && 
+           std::abs(rElem->stationEta()) >= 7;
   };
 
   for (const MuonGMR4::MuonReadoutElement* readoutEle : element.readoutEles()) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRIGCOINDATA_RPCCOINDATACOLLECTION_H
@@ -10,7 +10,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace Muon {
-typedef MuonCoinDataCollection< RpcCoinData > RpcCoinDataCollection;
+using RpcCoinDataCollection =  MuonCoinDataCollection< RpcCoinData >;
 }
     /**Overload of << operator for MsgStream for debug output*/
     MsgStream& operator << ( MsgStream& sl, const Muon::RpcCoinDataCollection & coll);

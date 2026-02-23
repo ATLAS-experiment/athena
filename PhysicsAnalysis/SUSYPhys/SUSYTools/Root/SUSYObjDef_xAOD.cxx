@@ -254,7 +254,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_tauDoTTM(false),
     m_tauSmearingToolRecommendationTag(""),
     m_tauEffToolRecommendationTag(""),
-    m_tauSmearingToolGenerator(""),
     m_ApplyMVATESQualityCheck(true),
     //
     m_jetPt(-99.),
@@ -613,7 +612,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "TauIdConfigPath", m_tauConfigPath);
   declareProperty( "TauDoTruthMatching", m_tauDoTTM);
   declareProperty( "TauSmearingToolRecommendationTag", m_tauSmearingToolRecommendationTag);
-  declareProperty( "TauSmearingToolGenerator", m_tauSmearingToolGenerator);
   declareProperty( "TauEffToolRecommendationTag", m_tauEffToolRecommendationTag);
   declareProperty( "TauMVATESQualityCheck", m_ApplyMVATESQualityCheck);
 
@@ -1555,7 +1553,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_tauDoTTM, "Tau.DoTruthMatching", rEnv, false);
   //
   configFromFile(m_tauSmearingToolRecommendationTag,"Tau.SmearingToolRecommendationTag", rEnv, "2025-prerec");
-  configFromFile(m_tauSmearingToolGenerator,"Tau.SmearingToolGenerator", rEnv, "PoPy");
   configFromFile(m_tauEffToolRecommendationTag,"Tau.EffToolRecommendationTag", rEnv, "2025-prerec");
   configFromFile(m_ApplyMVATESQualityCheck, "Tau.MVATESQualityCheck", rEnv, true);
   //

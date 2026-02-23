@@ -319,10 +319,6 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             "Experimental! Only useful to test a new WP for which scale "
             "factors are not available.",
             expertMode=True)
-        self.addOption ('onlyRecoEffSF', False, type=bool,
-            info="same as `noEffSF`, but retains the ID scale factor. "
-            "Experimental! Only useful for CI tests.",
-            expertMode=True)
         self.addOption ('saveDetailedSF', True, type=bool,
             info="save all the independent detailed object scale factors.")
         self.addOption ('saveCombinedSF', False, type=bool,
@@ -348,7 +344,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
         sfList = []
         # Set up the reco/ID efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and (not self.noEffSF or self.onlyRecoEffSF):
+        if config.dataType() is not DataType.Data and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgReco' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -370,7 +366,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the HighPt-specific BadMuonVeto efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.quality == 'HighPt' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgBMVHighPt' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -392,7 +388,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the isolation efficiency scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.isolation != 'NonIso' and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgIsol' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -414,7 +410,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the TTVA scale factor calculation algorithm:
-        if config.dataType() is not DataType.Data and self.trackSelection and not self.onlyRecoEffSF and not self.noEffSF:
+        if config.dataType() is not DataType.Data and self.trackSelection and not self.noEffSF:
             alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlgTTVA' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
@@ -474,6 +470,12 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('containerName', '', type=str,
                         info="the input muon container, with a possible selection, in "
                         "the format `container` or `container.selection`.")
+        self.addOption ('customToolSuffix', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom suffix for the public tool name")
+        self.addOption ('customInputFolder', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input folder")
+        self.addOption ('customInputFilePerYear', {}, type=dict,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input file per year")
 
     def instanceName (self) :
         return self.containerName + '_' + self.muonID
@@ -536,11 +538,17 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                                 else:
                                     triggerConfigYears[leg_out] = [year]
 
+            if not triggerConfigs:
+                return
+
             # Make the public tool for this configuration
-            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool")
+            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool{self.customToolSuffix}")
             # Reproduce config from TrigGlobalEfficiencyAlg
             sfTool.MuonQuality = self.muonID
             sfTool.AllowZeroSF = True
+            sfTool.CustomInputFolder = self.customInputFolder
+            sfTool.CustomInputFilePerYear = self.customInputFilePerYear
+            sfTool.Campaign = config.campaign().value
 
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonPRDTEST_TGCRDOVARIABLES_H
@@ -7,7 +7,7 @@
 
 #include "MuonPRDTest/PrdTesterModule.h"
 #include "MuonRDO/TgcRdoContainer.h"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 namespace MuonPRDTest{
     class TGCRDOVariables : public PrdTesterModule {

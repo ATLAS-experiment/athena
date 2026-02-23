@@ -115,6 +115,14 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu20_idperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
         ChainProp(name='HLT_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
 
+        # ML bucket filter test chains
+        ChainProp(name='HLT_mu20_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online']),
+
         # HL-LHC TDR inspired chains
         ChainProp(name="HLT_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
     ]

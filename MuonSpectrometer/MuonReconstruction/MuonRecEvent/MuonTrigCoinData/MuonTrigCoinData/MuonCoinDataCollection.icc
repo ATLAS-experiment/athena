@@ -1,33 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// MuonCoinDataCollection.icc
-//   Implementation file for class MuonCoinDataCollection
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 
 template< class CoinDataT >
 // Constructor with parameters:
 MuonCoinDataCollection< CoinDataT >::MuonCoinDataCollection(const IdentifierHash idHash) :
-  m_idHash(idHash),
-  m_id()
-{}
+  m_idHash{idHash}{}
 
-template< class CoinDataT >
-// Default Constructor :
-MuonCoinDataCollection< CoinDataT >::MuonCoinDataCollection() :
-  m_idHash(),
-  m_id()
-{}
-
-// Destructor:
-template< class CoinDataT >
-MuonCoinDataCollection< CoinDataT >::~MuonCoinDataCollection()
-{ }
 
 template< class CoinDataT >
 Identifier MuonCoinDataCollection< CoinDataT >::identify() const

@@ -1,12 +1,23 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "FPGATrackSimHough/FPGATrackSimHoughFunctions.h"
+
+#include "FPGATrackSimObjects/FPGATrackSimRoad.h"
+#include "FPGATrackSimObjects/FPGATrackSimHit.h"
+#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
 #include "FPGATrackSimObjects/FPGATrackSimFunctions.h"
-#include <stdexcept>
+
+#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
+#include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
+
+#include "AthenaMonitoringKernel/Monitored.h"
 
 #include <AsgMessaging/MessageCheck.h>
+
+#include <stdexcept>
+
 using namespace asg::msgUserCode;
 
 // EPSILON for hit position float comparisons
@@ -545,7 +556,7 @@ void makeTrackCandidates(const FPGATrackSimRoad & road, const FPGATrackSimTrack 
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, hit);
+                track_cands[icomb].setFPGATrackSimHit(layer, std::move(hit));
             }
         }
     }
@@ -762,7 +773,7 @@ void roadsToTrack(std::vector<FPGATrackSimRoad>& roads, std::vector<FPGATrackSim
                         track_cands[existing_size + icomb].setValidCand(false);
                     }
                 }
-                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, hit);
+                track_cands[existing_size + icomb].setFPGATrackSimHit(layer, std::move(hit));
             }
         }
       }

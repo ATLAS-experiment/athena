@@ -59,21 +59,10 @@ def RPCLegacyCablingConfigCfg(flags):
     return acc
 
 
-def MuonTGC_CablingSvcCfg(flags):
-    acc = ComponentAccumulator()
-
-    svc = CompFactory.MuonTGC_CablingSvc()
-    svc.databaseASDtoPPdiff = 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db'
-    acc.addService(svc, primary = True)
-
-    return acc
-
-
 def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
 
-    acc.merge(MuonTGC_CablingSvcCfg(flags))
     kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
     the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
     acc.addCondAlgo(the_alg, primary = True)
