@@ -34,7 +34,7 @@ namespace MuonValR4 {
     } // anonymous namespace
 
     bool RpcDigitVariablesR4::fill(const EventContext& ctx) {
-        ATH_MSG_DEBUG("do fillMDTSimHitVariables()");
+        ATH_MSG_DEBUG("do RpcDigitVariablesR4::fill()");
         const MuonGMR4::MuonDetectorManager* MuonDetMgr = getDetMgr();
         if (!MuonDetMgr) { return false; }
         SG::ReadHandle<RpcDigitContainer> RpcDigitContainer{m_key, ctx};
@@ -57,12 +57,12 @@ namespace MuonValR4 {
 
                 const MuonGMR4::RpcReadoutElement* rdoEl = MuonDetMgr->getRpcReadoutElement(Id);
                 if (!rdoEl) {
-                    ATH_MSG_ERROR("RPCDigitVariablesR4::fillVariables() - Failed to retrieve RPCReadoutElement for "<<idHelperSvc()->rpcIdHelper().print_to_string(Id).c_str());
+                    ATH_MSG_ERROR("RpcDigitVariablesR4::fill() - Failed to retrieve RPCReadoutElement for "<<idHelperSvc()->rpcIdHelper().print_to_string(Id).c_str());
                     return false;
                 }
 
                 const int RPClayer = int(idHelperSvc()->stationIndex(Id)); // RPC[0-3] --> 0:BI, 1:BM, 2:BO, 3:BE 
-                const bool isBI = RPClayer == 0;
+                const bool isBI = rdoEl->nPhiStrips() == 0;
 		
 		const ActsTrk::GeometryContext& geoCtx = getGeoCtx(ctx);
                 const Amg::Vector3D gpos{rdoEl->stripPosition(geoCtx, Id)};
@@ -141,13 +141,13 @@ namespace MuonValR4 {
 
 		m_RPC_dig_globalPos.push_back(gpos);
 		m_RPC_dig_localPos3D.push_back(lpos3D);
-                // m_RPC_dig_localPos.push_back(lpos);
                 m_RPC_dig_time.push_back(digit->time());
                 m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
 		m_RPC_secIndex.push_back(idHelperSvc()->sector(Id));
 		m_RPC_stationName.push_back(idHelperSvc()->stationNameString(Id));
 		m_RPC_layerIndex.push_back(RPClayer);
+		m_RPC_isBI.push_back(int(isBI));
 		// debug branches
 		m_RPC_groupIndex0.push_back(idx0);
     		m_RPC_groupIndex1.push_back(idx1);
@@ -156,7 +156,7 @@ namespace MuonValR4 {
             }
         }
         m_RPC_nDigits = n_digits;
-        ATH_MSG_DEBUG(" finished fillRpcDigitVariablesR4()");
+        ATH_MSG_DEBUG(" finished RpcDigitVariablesR4::fill()");
         return true;
     }
 }  // namespace MuonValR4

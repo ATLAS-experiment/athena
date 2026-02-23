@@ -30,12 +30,12 @@ namespace MuonValR4 {
         ThreeVectorBranch m_RPC_dig_globalPos{parent(), "Digits_RPC_globalPosCenter"};
 	ThreeVectorBranch m_RPC_dig_localPos3D{parent(), "Digits_RPC_localPos3DCenter"};
 	ThreeVectorBranch m_RPC_dig_globalPosFix{parent(), "Digits_RPC_globalPos"};
-        ThreeVectorBranch m_RPC_dig_localPos3DFix{parent(), "Digits_RPC_localPos3D"};
-        // TwoVectorBranch m_RPC_dig_localPos{parent(), "Digits_RPC_localPos"};
+        ThreeVectorBranch m_RPC_dig_localPos3DFix{parent(), "Digits_RPC_localPos3D"};        
         RpcIdentifierBranch m_RPC_dig_id{parent(), "Digits_RPC"};	
 	VectorBranch<int>& m_RPC_secIndex{parent().newVector<int>("Digits_RPC_sectorIndex")};
 	VectorBranch<std::string>& m_RPC_stationName{parent().newVector<std::string>("Digits_RPC_stationName")};
 	VectorBranch<int>& m_RPC_layerIndex{parent().newVector<int>("Digits_RPC_layerIndex")};
+	VectorBranch<int>& m_RPC_isBI{parent().newVector<int>("Digits_RPC_isBI")};
 	// debug branches
 	VectorBranch<float>& m_RPC_dig_stripHalfLength{parent().newVector<float>("Digits_RPC_BIHalfLength")};
 	VectorBranch<int>& m_RPC_groupIndex0{parent().newVector<int>("Digits_RPC_groupIndex0")};
