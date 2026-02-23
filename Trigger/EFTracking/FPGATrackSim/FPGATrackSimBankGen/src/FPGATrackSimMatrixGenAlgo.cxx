@@ -279,7 +279,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
           ATH_MSG_DEBUG("We found " << tracks_1st.size() << " combinations");
         }
         for (const auto& track_comb : tracks_1st) {
-          auto track_hits_ptrs = track_comb.getFPGATrackSimHitPtrs();
+          auto & track_hits_ptrs = track_comb.getFPGATrackSimHitPtrs();
 
           if (m_doSecondStage) { // if doing 2nd stage, we want to get tracks from the road and then do tracking and overlap removal
 
@@ -301,7 +301,7 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
             std::vector<FPGATrackSimTrack> tracks_2nd;
             roadsToTrack(roads_2nd, tracks_2nd, m_pmap_2nd);
             for (const FPGATrackSimTrack& track_2nd : tracks_2nd) {
-              auto track_hits_2nd_ptrs = track_2nd.getFPGATrackSimHitPtrs();
+              auto & track_hits_2nd_ptrs = track_2nd.getFPGATrackSimHitPtrs();
               std::vector<module_t> modules(m_nLayers_2nd);
               FPGATrackSimMatrixAccumulator acc(m_nLayers_2nd, m_nDim_2nd);
               acc.pars.qOverPt = track_2nd.getHoughY();

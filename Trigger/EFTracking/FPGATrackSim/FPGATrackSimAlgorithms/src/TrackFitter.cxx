@@ -1,18 +1,15 @@
 
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <cmath>
+#include "FPGATrackSimAlgorithms/TrackFitter.h"
 
 #include "FPGATrackSimObjects/FPGATrackSimMultiTruth.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 
-
-#include "FPGATrackSimAlgorithms/TrackFitter.h"
-
+#include <numeric> //std::accumulate
+#include <memory>
+#include <stdexcept>
 
 std::vector<FPGATrackSimTrack>::const_iterator getBestChi2(std::vector<FPGATrackSimTrack> const & tracks);
 bool hasGoodFit(std::vector<FPGATrackSimTrack> const & track_cands, float minchi2);
@@ -377,7 +374,7 @@ void TrackFitter::makeTrackCandidates(const FPGATrackSimRoad & road, const FPGAT
                         track_cands[icomb].setValidCand(false);
                     }
                 }
-                track_cands[icomb].setFPGATrackSimHit(layer, hit);
+                track_cands[icomb].setFPGATrackSimHit(layer, std::move(hit));
             }
         }
     }
@@ -435,7 +432,7 @@ FPGATrackSimTrack TrackFitter::makeTrackCandidate(const FPGATrackSimRoad & road,
                     break;
                 }
             }
-            track_cand.setFPGATrackSimHit(layer, hit);
+            track_cand.setFPGATrackSimHit(layer, std::move(hit));
         }
     }
 
