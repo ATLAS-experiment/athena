@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTJETHYPO_MAKE_JETSTREAM_H
@@ -46,10 +46,10 @@ make_jetstream(std::vector<std::vector<std::size_t>> indices,
 		    
   }
 
-  const auto  inds = indices.back();
+  const auto  inds = std::move(indices.back());
   indices.pop_back();
 
-  auto repeat = repeats.back();
+  const auto repeat = std::move(repeats.back());
   repeats.pop_back();
   
   auto n_sid = sid;
