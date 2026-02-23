@@ -1,6 +1,6 @@
 // this is a -*- C++ -*- file
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////
@@ -13,7 +13,6 @@
 #define JetPFlowSelectionAlg_H
 
 #include "AnaAlgorithm/AnaReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadDecorHandleKey.h"
 
 #include "xAODPFlow/FlowElementContainer.h"
