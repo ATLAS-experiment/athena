@@ -3,7 +3,7 @@
 
 NTHREADS=${1}
 NEVENTS=${2}
-DATAFILE='/eos/atlas/atlascerngroupdisk/data-art/grid-input/PhaseIIUpgrade/EVNT/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8481/'
+DATAFILE='/eos/atlas/atlascerngroupdisk/data-art/grid-input/PhaseIIUpgrade/EVNT/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8481/EVNT.33964680._002197.pool.root.1'
 
 # Run the job
 export TRF_ECHO=1;
