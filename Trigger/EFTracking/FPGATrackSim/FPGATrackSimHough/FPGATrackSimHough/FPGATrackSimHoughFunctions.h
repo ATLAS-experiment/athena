@@ -4,18 +4,23 @@
 #ifndef FPGATrackSimHoughFUNCTIONS_H
 #define FPGATrackSimHoughFUNCTIONS_H
 
-#include "FPGATrackSimObjects/FPGATrackSimRoad.h"
-#include "FPGATrackSimObjects/FPGATrackSimHit.h"
-#include "FPGATrackSimObjects/FPGATrackSimTrack.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaBaseComps/AthAlgTool.h"
+
+
+
+#include "FPGATrackSimObjects/FPGATrackSimTypes.h" //layer_bitmask_t etc
 
 #include "FPGATrackSimMaps/IFPGATrackSimMappingSvc.h"
-#include "FPGATrackSimMaps/FPGATrackSimPlaneMap.h"
-#include "FPGATrackSimMaps/FPGATrackSimRegionMap.h"
 
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "AthenaMonitoringKernel/Monitored.h"
+
+#include <vector>
+
+class FPGATrackSimRoad;
+class FPGATrackSimHit;
+class FPGATrackSimTrack;
+class FPGATrackSimPlaneMap;
 
 enum class ORAlgo {Normal, InvertGrouping};
 

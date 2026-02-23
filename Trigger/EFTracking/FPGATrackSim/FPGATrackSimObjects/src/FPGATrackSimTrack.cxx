@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -123,7 +123,7 @@ int FPGATrackSimTrack::getNCoords() const {
 void FPGATrackSimTrack::setFPGATrackSimHit(unsigned i, std::shared_ptr<const FPGATrackSimHit> hit)
 {
   if (m_hit_ptrs.size() <= i) m_hit_ptrs.resize(i+1);
-  m_hit_ptrs[i] = hit;
+  m_hit_ptrs[i] = std::move(hit);
 }
 
 /** set the number of layers in the track. =0 is used to clear the track */
