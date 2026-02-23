@@ -346,8 +346,15 @@ StatusCode FPGATrackSimMatrixGenAlgo::execute()
         // Convert sector_hits to non-owning shared_ptr vector for the non-Hough-constants path
         std::vector<std::shared_ptr<const FPGATrackSimHit>> sector_hits_ptrs;
         sector_hits_ptrs.reserve(sector_hits.size());
+        // Single control block representing "the lifetime of sector_hits" (non-owning)
+        auto owner = std::shared_ptr<const std::vector<FPGATrackSimHit>>(
+          &sector_hits,
+          [](const std::vector<FPGATrackSimHit>*) {} // no-op deleter
+        );
+        
         for (const auto& hit : sector_hits) {
-          sector_hits_ptrs.push_back(std::shared_ptr<const FPGATrackSimHit>(&hit, [](const FPGATrackSimHit*) {}));
+          // Aliasing ctor: shares owner's control block, but points to this element
+          sector_hits_ptrs.emplace_back(owner, &hit);
         }
 
         // Prepare the accumulator struct
