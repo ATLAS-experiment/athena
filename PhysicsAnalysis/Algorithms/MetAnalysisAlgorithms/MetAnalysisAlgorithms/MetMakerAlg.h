@@ -157,6 +157,10 @@ namespace CP
   private:
     SysWriteHandle<xAOD::MissingETContainer,xAOD::MissingETAuxContainer> m_metHandle {
       this, "met", "MissingET_%SYS%", "the met collection we produce"};
+
+    /// \brief whether to switch order of taus and muons 
+  private:
+    Gaudi::Property<bool> m_switchTauMuonOrder {this, "switchTauMu", false, "whether to switch order of taus and muons"};
   };
 }
 
