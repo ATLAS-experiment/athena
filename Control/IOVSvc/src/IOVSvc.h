@@ -23,7 +23,6 @@
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "IOVEntry.h"
-#include "SGTools/CallBackID.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "IOVSvc/IIOVSvcTool.h"
@@ -42,8 +41,6 @@ class StoreGateSvc;
 class IClassIDSvc;
 class IProxyDict;
 class IToolSvc;
-class CallBackID;
-class CBTree;
 
 namespace SG {
   class TransientAddress;
@@ -124,12 +121,6 @@ public:
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress *,
                                      const std::string& storeName ) override;
 
-  /// return list of tools (or functions) that have been triggered by key
-  /// will return FAILURE if no tools found, or no key found
-  virtual StatusCode getTriggeredTools(const std::string& key,
-                                       std::set<std::string>& tools,
-                                       const std::string& storeName) override;
-
   virtual void resetAllProxies() override;
 
   virtual void ignoreProxy(const CLID& clid, const std::string& key,
@@ -146,8 +137,6 @@ private:
                         bool createIF=true );
   IIOVSvcTool* getTool( const CLID& clid, const std::string& key) const;
   IIOVSvcTool* getTool( SG::DataProxy* proxy ) const;
-  IIOVSvcTool* getTool( const CallBackID& c1 ) const;
-  IIOVSvcTool* getTool( const IAlgTool* ia ) const;
   std::string fullProxyName( const SG::DataProxy* proxy ) const;
   std::string fullProxyName( const CLID& clid, const std::string& key ) const;
   
