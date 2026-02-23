@@ -1,16 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PrimaryDPDMaker_CollisionFilterAlg_H
 #define PrimaryDPDMaker_CollisionFilterAlg_H
 
-
 #include "PrimaryDPDMaker/ICaloTimeFilterTool.h"
 #include "PrimaryDPDMaker/IMBTSTimeFilterTool.h"
 
-
-#include "AthenaBaseComps/AthFilterAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
