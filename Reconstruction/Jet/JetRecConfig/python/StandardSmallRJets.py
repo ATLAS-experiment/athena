@@ -192,10 +192,18 @@ AntiKt4EMPFlowByVertex = JetDefinition("AntiKt", 0.4, cst.GPFlowByVtx,
                                         byVertex = True
 )
 
+# AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
+#                                      infix = "NoPtCut",
+#                                      ghostdefs = standardghosts+flavourghosts,
+#                                      modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+#                                      ptmin = 1,
+#                                      lock = True
+# )
+
 AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                                      infix = "NoPtCut",
                                      ghostdefs = standardghosts+flavourghosts,
-                                     modifiers = calibmods_lowCut+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+                                     modifiers = ("CaloEnergies", "Sort")+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
                                      ptmin = 1,
                                      lock = True
 )
