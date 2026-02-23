@@ -192,6 +192,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         alg.matchingTool = '%s/%s' % ( matchingTool.getType(), matchingTool.getName() )
         alg.isRun3Geo = config.geometry() is LHCPeriod.Run3
+        alg.campaign = config.campaign().value
         alg.numberOfToys = self.numberOfToys
         alg.scaleFactorDecoration = 'globalTriggerEffSF' + triggerSuffix + self.postfix + '_%SYS%'
         alg.matchingDecoration = 'globalTriggerMatch' + triggerSuffix + self.postfix + '_%SYS%'

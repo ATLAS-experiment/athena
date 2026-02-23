@@ -474,6 +474,12 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('containerName', '', type=str,
                         info="the input muon container, with a possible selection, in "
                         "the format `container` or `container.selection`.")
+        self.addOption ('customToolSuffix', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom suffix for the public tool name")
+        self.addOption ('customInputFolder', '', type=str,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input folder")
+        self.addOption ('customInputFilePerYear', {}, type=dict,
+                        expertMode=True, info="EXPERIMENTAL: specify custom input file per year")
 
     def instanceName (self) :
         return self.containerName + '_' + self.muonID
@@ -536,11 +542,17 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                                 else:
                                     triggerConfigYears[leg_out] = [year]
 
+            if not triggerConfigs:
+                return
+
             # Make the public tool for this configuration
-            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool")
+            sfTool = config.createPublicTool("CP::MuonTriggerScaleFactors", f"{self.instanceName()}_SFTool{self.customToolSuffix}")
             # Reproduce config from TrigGlobalEfficiencyAlg
             sfTool.MuonQuality = self.muonID
             sfTool.AllowZeroSF = True
+            sfTool.CustomInputFolder = self.customInputFolder
+            sfTool.CustomInputFilePerYear = self.customInputFilePerYear
+            sfTool.Campaign = config.campaign().value
 
             for trig_short, trig in triggerConfigs.items():
                 alg = config.createAlgorithm('CP::MuonTriggerEfficiencyScaleFactorAlg',

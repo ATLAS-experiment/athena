@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // Script for testing MuonTriggerScaleFactors. For example run with following command: MuonTriggerSFRootCoreTest -x AOD.11499205._000007.pool.root.1 -y 2015 -mc mc15a -t HLT_mu24 -r 278727
@@ -27,12 +27,8 @@
 
 // Local include(s):
 #include "MuonEfficiencyCorrections/MuonTriggerScaleFactors.h"
-#include "PATInterfaces/ISystematicsTool.h"
+#include "PATInterfaces/SystematicRegistry.h"
 #include "PATInterfaces/SystematicsUtil.h"
-
-
-
-
 
 
 #define CHECK_CPSys(Arg) \
