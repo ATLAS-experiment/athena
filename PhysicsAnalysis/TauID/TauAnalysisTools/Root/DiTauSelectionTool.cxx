@@ -42,7 +42,6 @@ StatusCode DiTauSelectionTool::initialize()
 
   bool bConfigViaConfigFile = !m_sConfigPath.empty();
   bool bConfigViaProperties = false;
-  if (!bConfigViaProperties and !m_vPtRegion.empty())             bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dPtMin.value()))             bConfigViaProperties = true;
   if (!bConfigViaProperties and !m_vAbsEtaRegion.empty())         bConfigViaProperties = true;
   if (!bConfigViaProperties and !std::isnan(m_dAbsEtaMin.value()))     bConfigViaProperties = true;
