@@ -44,8 +44,6 @@ class IProxyProviderSvc;
 class IClassIDSvc;
 class IProxyDict;
 class IToolSvc;
-class CallBackID;
-class CBTree;
 
 namespace SG {
   class TransientAddress;
@@ -192,8 +190,6 @@ private:
 
   startSet m_startSet_Clock, m_startSet_RE;
   stopSet  m_stopSet_Clock, m_stopSet_RE;
-
-  CBTree* m_trigTree{nullptr};
 
   std::set< const SG::TransientAddress*, SortTADptr > m_preLoad;
 

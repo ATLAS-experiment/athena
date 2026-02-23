@@ -23,7 +23,6 @@
 #include "SGTools/DataProxy.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "IOVEntry.h"
-#include "SGTools/CallBackID.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "IOVSvc/IIOVSvcTool.h"
@@ -42,8 +41,6 @@ class StoreGateSvc;
 class IClassIDSvc;
 class IProxyDict;
 class IToolSvc;
-class CallBackID;
-class CBTree;
 
 namespace SG {
   class TransientAddress;

@@ -35,7 +35,6 @@
 
 #include "IOVEntry.h"
 #include "IOVSvc/IOVAddress.h"
-#include "CBTree.h"
 #include "IOVSvc/IOVCallbackError.h"
 
 #include <stdint.h>
@@ -110,7 +109,6 @@ IOVSvcTool::IOVSvcTool(const std::string& type, const std::string& name,
   p_startSet(nullptr),
   p_stopSet(nullptr)
 {
-  m_trigTree = new CBTree();
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -130,8 +128,6 @@ IOVSvcTool::~IOVSvcTool() {
     {
       delete *titr;
     }
-  
-  delete m_trigTree;
 
 }
 
@@ -325,11 +321,6 @@ IOVSvcTool::handle(const Incident &inc) {
         msg() << endmsg;
       }
 
-      if (msgLvl(MSG::DEBUG)) {
-        msg() << "Callback Tree:" << endmsg;
-        m_trigTree->printTree();
-      }
-
       // preLoad the ranges and data if requested.
       if (preLoadProxies(inc.context()).isFailure()) {
         ATH_MSG_ERROR("Problems preloading IOVRanges");
@@ -413,8 +404,6 @@ IOVSvcTool::handle(const Incident &inc) {
       
       p_cndSvc->clearProxyPayload( prx );
 
-      m_trigTree->cascadeTrigger(true, prx);
-
       // Load data if preload requested.
 
       if ( (m_partialPreLoadData && 
@@ -430,9 +419,6 @@ IOVSvcTool::handle(const Incident &inc) {
       }
 
     }
-
-    /// Clear trigger tree
-    m_trigTree->clearTrigger();
 
     /// Read in the next set of IOVRanges
     std::map<const DataProxy*, IOVEntry*>::iterator pitr;
@@ -498,8 +484,6 @@ IOVSvcTool::regProxy( DataProxy *proxy, const std::string& key) {
   m_proxies.insert( proxy );
   m_names[ proxy ] = fullname;
 
-  m_trigTree->addNode(proxy,fullname);
-
   return StatusCode::SUCCESS;
 
 }
@@ -529,8 +513,6 @@ IOVSvcTool::deregProxy( DataProxy *proxy) {
   }
 
   m_proxies.erase( itr );
-
-  m_trigTree->delNode(proxy);
 
   return StatusCode::SUCCESS;
 
@@ -600,9 +582,7 @@ IOVSvcTool::replaceProxy( SG::DataProxy *pOld,
     }
   }
 
-  return (m_trigTree->replaceProxy(pOld, pNew) ?
-          StatusCode::SUCCESS :
-          StatusCode::FAILURE );
+  return StatusCode::SUCCESS;
 
 }
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -948,20 +928,12 @@ IOVSvcTool::preLoadProxies(const EventContext& /*ctx*/) {
 
     if (sc.isFailure()) scr=sc;
 
-    CBNode* cn = m_trigTree->findNode( dp );
-    if (cn != nullptr) {
-      m_trigTree->cascadeTrigger(1, cn);
-    }
-
   }
 
   if (scr.isFailure()) {
     ATH_MSG_ERROR("Problems preLoading proxies");
     return scr;
   }
-
-
-  m_trigTree->clearTrigger();
 
   return scr;
 }
@@ -1154,9 +1126,6 @@ IOVSvcTool::resetAllProxies() {
     ATH_MSG_VERBOSE("clearing proxy payload for " << m_names[prx]);
     
     p_cndSvc->clearProxyPayload(prx);
-    
-    m_trigTree->cascadeTrigger(true, prx);
-
   }
 
 }

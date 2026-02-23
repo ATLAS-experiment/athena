@@ -12,7 +12,6 @@
 #include <memory>
 #include <set>
 #include "GaudiKernel/ClassID.h"
-#include "SGTools/CallBackID.h"
 
 class IOVRange;
 class IOVTime;

@@ -12,16 +12,10 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <memory>
-
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class IOVRange;
 class IOVTime;
-class IIOVSvcTool;
-class CallBackID;
-class IOpaqueAddress;
 class CondContBase;
 class DataObjID;
 class EventIDBase;
