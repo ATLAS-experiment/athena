@@ -1339,18 +1339,6 @@ bool xAOD::BPhysHelper::decorateElTrackInfo()
   }
  }
  assert(m_cachedElectrons.size()==m_cachedElTrackIndices.size());
- //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
- //" , Found GSFCaloRefit Tracks: " << nElGSFCaloRefitTrackFound
- //);
- //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
- //" , Found GSF Tracks: " << nElGSFTrackFound
- //);
- //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
- //" , Found InDet Tracks: " << nElInDetTrackFound
- //);
- //ATH_MSG_DEBUG( "BPhysHelper: nElectrons: " << m_cachedElectrons.size() <<
- //" , Successfully Processed: " << nElProcessed
- //);
  m_electronTracksDecorated=true;
  return true;
 }

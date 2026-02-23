@@ -423,7 +423,7 @@ StatusCode BKllIsoMultiplicityTool::addBranches() const {
         auto legMomentumOrigInDet = TLorentzVector();
         auto origInDetLeg =  xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( vertexTrack ); 
         if ( origInDetLeg == NULL ){
-          origInDetLeg    = vertexTrack; // TODO: Check if not InDetTrackParticle for Muon! Usually, should be since vertexing is done w/ InDetTrackParticles for Muons.
+          origInDetLeg    = vertexTrack; 
         }
         legMomentumOrigInDet      = origInDetLeg->p4();
         std::vector<float> isolationsOrig      (m_cones.size(), 0.);

@@ -303,8 +303,9 @@ namespace DerivationFramework {
       
 	// make sure there was an ID track for the muon
 	// if ( *muTrkItr != NULL ) {
-	if ( candLegsMomenta[id].Mag() > 0. ) { // TODO: NEED TO THINK IF OK!!!
-  //if ( candLegsMomenta[id] != NULL ) {
+        // Zero-magnitude vectors signal an invalid/missing track in functions
+        // populating candLegsMomenta (a std::vector of TVectors). 
+        if ( candLegsMomenta[id].Mag() > 0. ) { 
 	
 	  const double& coneSize   = m_isoConeSizes[ic];
 	  const double& logChi2Max = m_isoTrkImpLogChi2Max[ic];
