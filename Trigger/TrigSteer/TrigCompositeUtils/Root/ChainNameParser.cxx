@@ -194,7 +194,7 @@ namespace ChainNameParser {
             "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp", "distrk", 
             "hitdvjet", "isotrk", "dedxtrk", "l1topoPh1debug", "caloclustermon", "fslrt",
             "beamspot", "cosmic", "timeburner", "mistimemonj400", "larsupercellmon", "larnoiseburst",
-            "acceptedevts", "larpsall", "larpsallem", "idcalib", "metcalo", "mettrk", 
+            "acceptedevts", "larpsall", "larpsallem", "idcalib", "metcalo", "mettrk", "TestChain",
         };
         return signatures;
     }
