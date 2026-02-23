@@ -9,7 +9,6 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
-#include <vector>
 #include <string>
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
 
@@ -27,19 +26,19 @@ public:
   int m_eventCounter{};
 
   // flags
-  bool enableOutputTree{}; // enable output TTree
-  bool lisInj; // LIS injected-pulse run
-  bool lisLED; // LIS LED run
-  std::string auxSuffix; // suffix for aux data names when reprocessing
+  bool m_enableOutputTree{}; // enable output TTree
+  bool m_lisInj{}; // LIS injected-pulse run
+  bool m_lisLED{}; // LIS LED run
+  std::string m_auxSuffix{}; // suffix for aux data names when reprocessing
 
   // output tree
   TTree *m_outputTree{};
 
   // inj map
-  std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
+  std::unique_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
 
   // evt info
-  float t_vInj;
+  float t_vInj{};
   uint32_t t_runNumber{};
   uint32_t t_eventNumber{};
   uint32_t t_lumiBlock{};
@@ -71,10 +70,6 @@ public:
 
   // LIS raw waveform data
   uint16_t t_LISRawdata[nLISChannels][nSamples]{};
-
-  // temporary vector for reading waveform data
-  std::vector<uint16_t> g0dataVec;
-  std::vector<uint16_t> g1dataVec;
 
   LisNtuple(const std::string &name, ISvcLocator *pSvcLocator);
 

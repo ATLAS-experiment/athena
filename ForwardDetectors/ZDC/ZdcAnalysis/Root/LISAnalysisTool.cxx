@@ -2,13 +2,12 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <sstream>
-
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/ReadDecorHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
 #include <AsgDataHandles/WriteDecorHandle.h>
 #include "ZdcAnalysis/LISAnalysisTool.h"
+#include "AthContainers/ConstAccessor.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "ZdcUtils/ZdcEventInfo.h"
 
@@ -169,23 +168,24 @@ LISModuleResults LISAnalysisTool::processLISModule(const xAOD::ZdcModule& module
    ATH_MSG_DEBUG("LIS module gain: " << LISModuleGain);
 
   // Determine which gain data to use
-  std::string gainDataName = (LISModuleGain == 0) ? "g0data" : "g1data";
+  static SG::ConstAccessor<std::vector<uint16_t>> g0dataAccessor("g0data");
+  static SG::ConstAccessor<std::vector<uint16_t>> g1dataAccessor("g1data");
+  const SG::ConstAccessor<std::vector<uint16_t>> &gainDataAccessor = (LISModuleGain == 0) ? g0dataAccessor : g1dataAccessor;
 
   // Get waveform data
-  if (!module.isAvailable<std::vector<uint16_t>>(gainDataName)) {
-    ATH_MSG_DEBUG("No " << gainDataName << " available for this module");
+  if (!gainDataAccessor.isAvailable(module)) {
+    ATH_MSG_DEBUG("No gain data available for this module");
     return LISModuleResults();
   }
   
-  const std::vector<uint16_t>* waveform = &module.auxdataConst<std::vector<uint16_t>>(gainDataName);
-  
-  if (waveform->empty()) {
+  const std::vector<uint16_t> &waveform = gainDataAccessor(module);
+  if (waveform.empty()) {
     ATH_MSG_DEBUG("Empty waveform");
     return LISModuleResults();
   }
 
   return processModuleData(module.zdcSide(), module.zdcChannel(), 
-                          *waveform, m_sampleAnaStart, m_sampleAnaEnd);
+                          waveform, m_sampleAnaStart, m_sampleAnaEnd);
 }
 
 StatusCode LISAnalysisTool::recoZdcModules(
