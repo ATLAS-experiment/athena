@@ -126,10 +126,20 @@ namespace CP
                                    xAOD::Type::Electron, m_electronsKey));
       ANA_CHECK (processParticles (m_photonsHandle, m_photonsSelection,
                                    xAOD::Type::Photon, m_photonsKey));
+      // a muon overlapping with tau is not removed. So if a true muon passes an (extremely loose) tau ID selection, it is double-counted. # https://its.cern.ch/jira/browse/ATLHMBS-651 
+      if(!m_switchTauMuonOrder)
+      {
       ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
                                    xAOD::Type::Tau, m_tausKey));
+      }
       ANA_CHECK (processParticles (m_muonsHandle, m_muonsSelection,
                                    xAOD::Type::Muon, m_muonsKey));
+      if(m_switchTauMuonOrder)
+      {
+      ANA_CHECK (processParticles (m_tausHandle, m_tausSelection,
+                                   xAOD::Type::Tau, m_tausKey));
+      }
+
 
       const xAOD::JetContainer *jets {nullptr};
       ANA_CHECK (m_jetsHandle.retrieve (jets, sys));

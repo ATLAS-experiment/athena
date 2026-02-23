@@ -76,6 +76,9 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('softTermResolution', -1.0, type=float,
             info="override the default soft term resolution in METSignificance.",
             expertMode=True)
+        self.addOption ('switchTauMuOrder', False, type=bool,
+            info="whether to switch order of taus and muons",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -112,6 +115,7 @@ class MetAnalysisConfig (ConfigBlock):
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
+        alg.switchTauMu = self.switchTauMuOrder
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )
