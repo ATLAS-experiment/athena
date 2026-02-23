@@ -50,7 +50,7 @@ flags.Concurrency.NumConcurrentEvents = 1
 log.debug('Lock config flags now.')
 flags.lock()
 
-make logging more verbose
+# make logging more verbose
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import INFO #DEBUG
 log.setLevel(INFO)
