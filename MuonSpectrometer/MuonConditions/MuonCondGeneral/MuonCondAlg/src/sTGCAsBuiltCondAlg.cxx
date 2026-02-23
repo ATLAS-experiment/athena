@@ -83,8 +83,9 @@ StatusCode sTGCAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
         id  = m_idHelperSvc->stgcIdHelper().channelID(stationType, stationEta, stationPhi, 
                                                                       multiLayer, gasGap, sTgcIdHelper::Strip, 1, is_valid);
         } else if(stationType.substr(0,2)=="MM"){
-        id  = m_idHelperSvc->mmIdHelper().channelID(stationType, stationEta, stationPhi, 
-                                                                      multiLayer, gasGap, 1, is_valid);
+            const int pcb = line["pcb"];
+            id  = m_idHelperSvc->mmIdHelper().pcbID(stationType, stationEta, stationPhi, 
+                                                                      multiLayer, gasGap, pcb, is_valid);
         } else {
             ATH_MSG_FATAL("Unknown station type "<<stationType);
             return StatusCode::FAILURE;
