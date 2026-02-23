@@ -2,7 +2,7 @@
 #define PFCLUSTERWIDTHDECORATOR_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "eflowRec/PFClusterWidthCalculator.h"
+#include "PFClusterWidthCalculator.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 

@@ -33,7 +33,6 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
 
-  seedContainer.spacePoints().reserve(spContainer.size());
   std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
@@ -54,7 +53,6 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     for(size_t idx=0; idx<spContainer.size(); idx++){
         const auto & sp = spContainer.at(idx);
         const auto & extSP = sp.externalSpacePoint();
-        seedContainer.spacePoints().push_back(&extSP);
         const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
 
         bool isPixel(elementlist.size() == 1);
@@ -128,12 +126,16 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     for (const auto& seed : vSeedCandidates) {
 
       if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
-      
-      //add seed to output
-	
-      auto newseed = seedContainer.push_back(std::get<2>(seed));
-      newseed.quality() = std::get<0>(seed);
-      
+
+      // convert space points and add seed to output
+      const float quality = std::get<0>(seed);
+      const float vertexZ = 0.0f;  // not used in GBTS seeding, set to 0
+      seedContainer.push_back(
+          std::get<2>(seed),
+          [&](const unsigned int spIndex) {
+            return &spContainer.at(spIndex).externalSpacePoint();
+          },
+          quality, vertexZ);
     }
 
     ATH_MSG_DEBUG("GBTS created "<<seedContainer.size()<<" seeds");

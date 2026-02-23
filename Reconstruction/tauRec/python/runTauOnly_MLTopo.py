@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
@@ -6,7 +7,7 @@
 # Usefull for quick testing using MLTopo jets for tau seeding 
 # run with
 #
-# athena --CA runTauOnly_MLTopo.py 
+# athena runTauOnly_MLTopo.py 
 # or
 # python runTauOnly_MLTopo.py
 

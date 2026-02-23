@@ -105,11 +105,6 @@ namespace ActsTrk {
 				     const Acts::Vector3& bField,
 				     ActsTrk::SeedContainer& seedContainer ) const
   {
-    seedContainer.spacePoints().reserve(spContainer.size());
-    for (auto sp : spContainer) {
-      seedContainer.spacePoints().push_back(&sp.externalSpacePoint());
-    }
-
     // Seed Finder Options
     Acts::SeedFinderOptions finderOpts;
     finderOpts.beamPos = Acts::Vector2(beamSpotPos[Amg::x],
@@ -120,10 +115,11 @@ namespace ActsTrk {
     // Compute seeds
     auto groupSeeds = m_finder.createSeeds(finderOpts, spContainer);
 
-    // Store seeds
-    seedContainer.reserve(groupSeeds.size());
-    for(const auto& seed: groupSeeds) {
-      seedContainer.push_back(&seed);
+    seedContainer.reserve(seedContainer.size() + groupSeeds.size());
+
+    // Convert the seeds
+    for (auto seed : groupSeeds) {
+      seedContainer.push_back(seed);
     }
 
     return StatusCode::SUCCESS;

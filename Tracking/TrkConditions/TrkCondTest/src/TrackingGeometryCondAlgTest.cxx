@@ -4,7 +4,6 @@
 
 #include "GaudiKernel/ISvcLocator.h"
 
-#include "AthenaKernel/IOVSvcDefs.h"
 
 // Trk includes
 #include "TrkCondTest/TrackingGeometryCondAlgTest.h"

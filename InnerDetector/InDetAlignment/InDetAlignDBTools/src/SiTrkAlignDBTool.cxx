@@ -4,7 +4,6 @@
 
 
 #include "CLHEP/Geometry/Transform3D.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/IOVTime.h"
 
 #include "InDetIdentifier/PixelID.h"

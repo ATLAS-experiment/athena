@@ -31,7 +31,6 @@ class FPGATrackSimRawToLogicalHitsTool : public AthAlgTool
 
   StatusCode convert(unsigned stage, const FPGATrackSimEventInputHeader& header, 
                                       FPGATrackSimLogicalEventInputHeader& logicheader);
-  StatusCode getUnmapped(std::vector<FPGATrackSimHit>& missing_hits);
   const FPGATrackSimPlaneMap* getPlaneMap_1st(int sliceNum);
 
 
@@ -45,9 +44,6 @@ private:
 
   // internal members
   std::vector<int> m_towers;
-  std::vector<FPGATrackSimHit> m_missing_hits;// vector to save hits not mapped, debugging only
-  std::vector<int> m_missing_hit_codes; // for histograms used in debugging
-  const FPGATrackSimPlaneMap* m_pmap = nullptr;
 
 };
 

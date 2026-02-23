@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -42,7 +42,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType SGNTUPProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType SGNTUPProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     if      (m_evtStore->contains<int>(varname))                        return VT_INT;
     else if (m_evtStore->contains<bool>(varname))                       return VT_INT;
@@ -57,7 +57,7 @@ namespace ExpressionParsing {
     else return VT_UNK;
   }
 
-  int SGNTUPProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int SGNTUPProxyLoader::loadInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     SG_GET_SCALAR(int, int);
     SG_GET_SCALAR(int, bool);
@@ -65,14 +65,14 @@ namespace ExpressionParsing {
     throw std::runtime_error("Unknown int-like proxy: " + varname);
   }
 
-  double SGNTUPProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double SGNTUPProxyLoader::loadDouble([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     SG_GET_SCALAR(double, float);
     SG_GET_SCALAR(double, double);
     throw std::runtime_error("Unknown double-like proxy: " + varname);
   }
 
-  std::vector<int> SGNTUPProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> SGNTUPProxyLoader::loadVecInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     SG_GET_VECTOR(int, int);
     SG_GET_VECTOR(int, bool);
@@ -80,7 +80,7 @@ namespace ExpressionParsing {
     throw std::runtime_error("Unknown vector<int>-like proxy: " + varname);
   }
 
-  std::vector<double> SGNTUPProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> SGNTUPProxyLoader::loadVec([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     SG_GET_VECTOR(double, float);
     SG_GET_VECTOR(double, double);

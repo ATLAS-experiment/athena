@@ -1,18 +1,20 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_IDENTIFIERFIELD_H
 #define IDENTIFIER_IDENTIFIERFIELD_H
+
 #include <Identifier/ExpandedIdentifier.h>
 #include <vector>
 #include <string>
 #include <stdexcept>
-#include <iosfwd>
+#include <iostream>
 #include <limits>
 #include <utility>
 #include <variant>
 
+class MsgStream;
 
 /** 
  *   This is the individual specification for the range of one ExpandedIdentifier IdentifierField.
@@ -168,7 +170,8 @@ class IdentifierField
   operator std::string () const; 
   bool operator == (const IdentifierField& other) const; 
 
-  void show() const;
+  void show(std::ostream & out = std::cout) const;
+  void show(MsgStream & out) const;
   
   /// Check mode - switch from enumerated to both_bounded if possible
   bool check_for_both_bounded();

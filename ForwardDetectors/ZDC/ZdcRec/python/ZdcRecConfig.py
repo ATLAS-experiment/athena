@@ -35,9 +35,9 @@ def zdcGeometry(flags):
             return defaultGeometryTags.RUN2_ZDC
         case "data18_hi":
             return defaultGeometryTags.RUN2_ZDC
-        case "data16_hi":
+        case "data16_hip5TeV":
             return defaultGeometryTags.RUN2_ZDC
-        case "data16_hip":
+        case "data16_hip8TeV":
             return defaultGeometryTags.RUN2_ZDC
         case "data23_hi":
             return defaultGeometryTags.RUN3_ZDC23
@@ -64,7 +64,8 @@ def zdcGeometry(flags):
 def GenerateConfigTagDict():
 
     zdcConfigMap['data15_hi'] = {}
-    zdcConfigMap['data16_hip'] = {}
+    zdcConfigMap['data16_hip5TeV'] = {}
+    zdcConfigMap['data16_hip8TeV'] = {}
     zdcConfigMap['data17_13TeV'] = {}
     zdcConfigMap['data18_hi'] = {}
     zdcConfigMap['data22_13p6TeV'] = {}
@@ -99,7 +100,6 @@ def SetConfigTag(flags):
         if aa is not None:
             aa_type = aa.getBeam1Type()
     print('ZdcRecConfig::SetConfigTag(): Getting config for type %d' % (aa_type))    
-    
     # terrible kludge for early 2025
     if flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib":
         config = "InjectorPbPb2024"
@@ -142,13 +142,21 @@ def SetConfigTag(flags):
                     config = "OONeNe2025"
                 if (aa_type == 82):
                     config = "configZDC_PbPb2025.v1.json"
+            elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data26_900GeV", "data26_13p6TeV"]:
+                config = "configZDC_PbPb2025.v1.json" # assume same config for 2026 pp as for PbPb for 2025 run
+            
         elif run == LHCPeriod.Run2:
             if flags.Input.ProjectName == "data15_hi":
                 config = "PbPb2015"
             elif flags.Input.ProjectName == "data17_13TeV":
                 config = "PbPb2015"
-            elif flags.Input.ProjectName == "data16_hip":
+            elif flags.Input.ProjectName == "data16_hip5TeV":
                 config = "pPb2016"
+            elif flags.Input.ProjectName == "data16_hip8TeV":
+                if(aa_type == 1):
+                    config = "configZDC_pPb2016.v1.json"
+                if(aa_type == 82):
+                    config = "configZDC_Pbp2016.v1.json"
             elif flags.Input.ProjectName == "data18_hi":
                 config = "PbPb2018"
 
@@ -201,7 +209,7 @@ def ZdcStreamDependentFlagSetting(flags):
     isComm = (flags.Input.ProjectName == "data25_comm" and flags.Input.TriggerStream == "calibration_ZDCCalib")
     isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
     isInj = (flags.Input.TriggerStream == "calibration_ZDCInjCalib" or isComm)
-    isCalib = (flags.Input.TriggerStream == "calibration_ZDCCalib" or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
+    isCalib = (flags.Input.TriggerStream in ["calibration_ZDCCalib","calibration_zdcCalib"] or "physics_" in flags.Input.TriggerStream or flags.Input.TriggerStream == "express_express" and not isComm)
     
     if flags.Input.TriggerStream == "calibration_DcmDummyProcessor": # standalone data: do we want to run calibration or LED?
         runInjForStandaloneDataArgValid = False
@@ -315,7 +323,8 @@ def ZdcAnalysisToolCfg(flags, run, config="PbPb2023", DoCalib=False, DoFADCCorr=
         ForceCalibLB = ForceCalibLB,
         AuxSuffix = AuxSuffix,
         JSONConfigurationFile=jsonFile,
-        LHCRun = run ))
+        LHCRun = run,
+        CombineDelay = True if flags.Input.ProjectName == "data16_hip8TeV" else False))
     return acc
 
 def ZdcLEDAnalysisToolCfg(flags, config = 'ppPbPb2023', DoFADCCorr = True):  
@@ -369,6 +378,28 @@ def RpdSubtractCentroidToolCfg(flags, config: str, AuxSuffix=""):
     )
     return acc
 
+def LISAnalysisToolCfg(flags, config: str):
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(
+        CompFactory.ZDC.LISAnalysisTool(
+            name="LISAnalysisTool",
+            Configuration=config,
+            BaselineStart=0,
+            BaselineEnd=5
+        )
+    )
+    return acc
+
+def ZdcLisNtupleCfg(flags, lisInj=False, lisLED=False):
+    acc = ComponentAccumulator()
+    LisNtuple = CompFactory.LisNtuple("LisNtuple")
+    LisNtuple.enableOutputTree = True
+    LisNtuple.lisInj = lisInj
+    LisNtuple.lisLED = lisLED
+    acc.addEventAlgo(LisNtuple)
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))    
+    return acc
+
 def ZdcRecRun2Cfg(flags):        
     acc = ComponentAccumulator()
     config = SetConfigTag(flags)
@@ -388,9 +419,13 @@ def ZdcRecRun2Cfg(flags):
         doCalib = False
         doTimeCalib = False
         doTrigEff = False
-    elif flags.Input.ProjectName == "data16_hip":
+    elif flags.Input.ProjectName == "data16_hip5TeV":
         doCalib = True
         doTimeCalib = False
+        doTrigEff = False
+    elif flags.Input.ProjectName == "data16_hip8TeV":
+        doCalib = True
+        doTimeCalib = True
         doTrigEff = False
     elif flags.Input.ProjectName == "data18_hi":
         doCalib = True
@@ -506,10 +541,11 @@ def ZdcRecRun3Cfg(flags):
         zdcTools = [anaTool,trigTool] # expand list as needed
         if doRPD:
             zdcTools += [rpdAnaTool,centroidTool]
-    
+
     if flags.Input.Format is Format.BS:
-        acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
-        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+       acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
+       acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+
     if flags.Input.isMC:
         from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         acc.merge(PoolReadCfg(flags))
@@ -549,7 +585,7 @@ def ZdcNtupleRun2Cfg(flags,**kwargs):
                            nsamplesZdc = 7,
                            **kwargs))
 
-    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='zdctree.root' OPT='RECREATE'"]))
+    acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))
     return acc
 
 def ZdcNtupleRun3Cfg(flags,**kwargs):
@@ -624,7 +660,7 @@ def ZdcLEDRecCfg(flags):
             doFADCCorr = True
     
         acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
-        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode())
+        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode()) 
 
         anaTool = acc.popToolsAndMerge(ZdcLEDAnalysisToolCfg(flags, config, DoFADCCorr = doFADCCorr)) #anatool for zdcLED calibration  
     
@@ -651,6 +687,46 @@ def ZdcLEDTrigCfg(flags):
     tdmv.NavigationKey = getRun3NavigationContainerFromInput(flags)
     acc.addEventAlgo( tdmv )
     # end of Tim's suggestions
+    return acc
+
+def LisRecCfg(flags):
+
+    acc = ComponentAccumulator()
+ 
+    run = flags.GeoModel.Run
+
+    # debugging message since the metadata isn't working for calibration files yet
+    log.info ("LisRecConfig.py: run = "+run.name)
+    config = SetConfigTag(flags)
+
+    DecodeRunMode = 1 # LIS run mode
+
+    if flags.Input.ProjectName in ["data26_900GeV", "data26_13p6TeV"]:
+        DecodeRunMode = 1 # LIS run mode
+    elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data_test"]:
+        DecodeRunMode = 2 # 7 lucrod run mode, 2026 jan M week
+
+    # LIS processing
+    
+    isLED = (flags.Input.TriggerStream == "calibration_ZDCLEDCalib")
+
+    anaTool = acc.popToolsAndMerge(LISAnalysisToolCfg(flags,config)) 
+    zdcTools = [anaTool]
+
+    if flags.Input.Format is Format.BS:
+        acc.merge(ByteStreamReadCfg(flags))
+        acc.addEventAlgo(CompFactory.ZdcByteStreamLucrodData())
+        acc.addEventAlgo(CompFactory.ZdcRecRun3Decode( DecodeRunMode = DecodeRunMode ))
+
+    evtType = 2 if isLED else 1 # event type set to ZdcEventLED for LED, otherwise default to normal data/MC event type
+    DAQMode = 2 if isLED else 3 # DAQMode set to PhysicsPEB for LED, otherwise default to normal data/MC run mode
+
+    zdcAlg = CompFactory.ZdcRecRun3("ZdcRecRun3",DAQMode=DAQMode, ForcedEventType=evtType, ZdcAnalysisTools=zdcTools) # DAQMode set to PhysicsPEB, event type set to ZdcEventLED
+    acc.addEventAlgo(zdcAlg, primary=True)
+
+    if flags.Output.doWriteESD or flags.Output.doWriteAOD:
+        acc.merge(ZdcRecOutputCfg(flags))
+
     return acc
 
 def ZdcRecCfg(flags):    
@@ -694,6 +770,8 @@ if __name__ == '__main__':
     flags = initConfigFlags()
 
     #flags.Exec.FPE = 3
+
+    ProjectNamesLIS = ["data26_cos", "data26_900GeV", "data26_13p6TeV","data26_comm", "data_test"]
     
     ZdcGenericFlagSetting(flags) # set generic (stream-independent) ZDC flags
 
@@ -703,6 +781,7 @@ if __name__ == '__main__':
 
     isLED, isInj, isCalib, pn = ZdcStreamDependentFlagSetting(flags) # set stream-dependent ZDC flags & get return values
 
+    log.debug('ZdcRecConfig: Running on project name '+pn + ' with trigger stream '+flags.Input.TriggerStream + ' isLED: ' + str(isLED) + ' isInj: ' + str(isInj) + ' isCalib: ' + str(isCalib))
     flags.lock()
     # flags.dump(evaluate=True) # uncomment this line if needed for testing
 
@@ -715,36 +794,43 @@ if __name__ == '__main__':
         from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfgData
         acc.merge(TriggerRecoCfgData(flags))
 
-    if isLED:
-        acc.merge(ZdcLEDRecCfg(flags))
-    if isCalib: # should be able to run both if in standalone data
-        acc.merge(ZdcRecCfg(flags))
-    if isInj: # should be able to run both if in standalone data
-        acc.merge(ZdcRecCfg(flags))
-
-    if not flags.Input.isMC:
+    if pn not in ProjectNamesLIS:
         if isLED:
-            from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
-            acc.merge(ZdcLEDMonitoringConfig(flags,'ppPbPb2023'))
-            acc.merge(ZdcLEDNtupleCfg(flags))
-            
-        if isCalib:
-            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
-            zdcMonitorAcc = ZdcMonitoringConfig(flags)
-            acc.merge(zdcMonitorAcc)
-            if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
-                acc.merge(ZdcNtupleLocalCfg(flags))
-        if isInj:
-            from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
-            zdcMonitorAcc = ZdcMonitoringConfig(flags)
-            acc.merge(zdcMonitorAcc)
-            acc.merge(ZdcInjNtupleCfg(flags))            
+            acc.merge(ZdcLEDRecCfg(flags))
+        if isCalib: # should be able to run both if in standalone data
+            acc.merge(ZdcRecCfg(flags))
+        if isInj: # should be able to run both if in standalone data
+            acc.merge(ZdcRecCfg(flags))
+
+        if not flags.Input.isMC:
+            if isLED:
+                from ZdcMonitoring.ZdcLEDMonitorAlgorithm import ZdcLEDMonitoringConfig
+                acc.merge(ZdcLEDMonitoringConfig(flags,'ppPbPb2023'))
+                acc.merge(ZdcLEDNtupleCfg(flags))
+
+            if isCalib:
+                if (flags.GeoModel.Run==LHCPeriod.Run3):
+                    from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig
+                    acc.merge(ZdcMonitoringConfig(flags))
+
+                if flags.Input.TriggerStream != "calibration_DcmDummyProcessor": #after ntuple works for standalone data, take this line out
+                    acc.merge(ZdcNtupleLocalCfg(flags))
+
+            if isInj:
+                from ZdcMonitoring.ZdcMonitorAlgorithm import ZdcMonitoringConfig            
+                zdcMonitorAcc = ZdcMonitoringConfig(flags)
+                acc.merge(zdcMonitorAcc)
+                acc.merge(ZdcInjNtupleCfg(flags))
+        else:
+            acc.merge(ZdcRecCfg(flags))
+            acc.merge(ZdcNtupleLocalCfg(flags))
     else:
-        acc.merge(ZdcRecCfg(flags))
-        acc.merge(ZdcNtupleLocalCfg(flags))
+        acc.merge(LisRecCfg(flags))
+        acc.merge(ZdcLisNtupleCfg(flags, lisInj=isInj, lisLED=isLED))
+        #LIS monitoring be here later
 
     acc.printConfig(withDetails=True)
-    # acc.foreach_component("*Zdc*").OutputLevel=DEBUG #uncomment to turn on DEBUG messages for ZDC applications
+    #acc.foreach_component("*Zdc*").OutputLevel=DEBUG #uncomment to turn on DEBUG messages for ZDC applications
 
     with open("config.pkl", "wb") as f:
         acc.store(f)

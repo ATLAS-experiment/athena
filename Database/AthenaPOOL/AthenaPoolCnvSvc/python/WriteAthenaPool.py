@@ -44,9 +44,6 @@ def _configureWriteAthenaPool():
     # Set POOLContainerForm(DataHeaderForm) split level to 0
     svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "ContainerName = 'TTree=POOLContainerForm(DataHeaderForm)'; CONTAINER_SPLITLEVEL = '0'" ]
 
-    svcMgr.AthenaPoolCnvSvc.TopLevelContainerName = ""
-    svcMgr.AthenaPoolCnvSvc.SubLevelBranchName = "<type>/<key>"
-
     msg.debug( "Configuring Athena for writing POOL files... [DONE]" )
     return
 

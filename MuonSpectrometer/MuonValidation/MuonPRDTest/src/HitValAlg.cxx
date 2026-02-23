@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // NSWValAlg inlcudes
@@ -95,8 +95,7 @@ StatusCode HitValAlg::setupRDOs(){
         m_tree.addBranch(std::make_unique<CSCRDOVariables>(m_tree, m_CSC_RDOContainerName, msgLevel(), &m_idHelperSvc->cscIdHelper(), m_csc_decoder.get())); 
     }
     if (m_doTGCRDO) {
-        ATH_CHECK(m_tgcCabling.retrieve());
-        m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TgcRdoKey, msgLevel(), m_tgcCabling));
+        m_tree.addBranch(std::make_unique<TGCRDOVariables>(m_tree, m_TgcRdoKey, m_tgcCablingKey, msgLevel()));
     }
     return StatusCode::SUCCESS;
 }

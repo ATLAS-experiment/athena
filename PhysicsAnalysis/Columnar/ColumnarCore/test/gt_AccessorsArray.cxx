@@ -17,7 +17,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
-#include <ColumnarCore/VectorVectorColumn.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ParticleDef.h>
 

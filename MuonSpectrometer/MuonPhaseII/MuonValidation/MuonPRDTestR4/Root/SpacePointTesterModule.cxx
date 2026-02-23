@@ -25,9 +25,10 @@ namespace MuonValR4{
             return insert_itr.first->second;
         }
         
-        m_spPos.push_back(spacePoint.localPosition());
+        m_spLocPos.push_back(spacePoint.localPosition());
         m_driftR.push_back(spacePoint.driftRadius());
-
+        const ActsTrk::GeometryContext& gctx{getGeoCtx(Gaudi::Hive::currentContext())};
+        m_spGlobPos.push_back(spacePoint.msSector()->localToGlobalTransform(gctx)*spacePoint.localPosition());
 
         const auto& cov{spacePoint.covariance()};
         using CovIdx = MuonR4::SpacePoint::CovIdx;

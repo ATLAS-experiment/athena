@@ -53,8 +53,8 @@ namespace GlobalSim {
 
     CHECK(m_cellProducer.retrieve());
     CHECK(m_roiAlgTool.retrieve());
+    CHECK(m_totalNoiseKey.initialize());
     CHECK(m_neighKey.initialize());
-    CHECK(m_phimaxKey.initialize());
     CHECK(m_eventInfoKey.initialize());
   
     return StatusCode::SUCCESS;
@@ -72,6 +72,10 @@ namespace GlobalSim {
       ATH_MSG_ERROR ("Error obtaining EventInfo object");
       return StatusCode::FAILURE;
     }
+
+    SG::ReadCondHandle<CaloNoise> totalNoiseHdl{m_totalNoiseKey, ctx};
+    if (!totalNoiseHdl.isValid()) {return StatusCode::FAILURE;}
+    const CaloNoise* totalNoiseCDO = *totalNoiseHdl;
     
     std::vector<const CaloCell*> cells;
     CHECK(m_cellProducer->cells(cells, ctx));
@@ -86,12 +90,10 @@ namespace GlobalSim {
     // contain cell eta, phi and Et.
     
     auto neighborhoodTOBs = std::make_unique<IOBitwise::eEmNbhoodTOBContainer>();
-    auto phimax = std::make_unique<std::vector<int>>();
-    
-    CHECK(findNeighborhoods_RowAware(rois, cells, *neighborhoodTOBs, *phimax));
+
+    CHECK(findNeighborhoods_RowAware(rois, cells, *neighborhoodTOBs, *totalNoiseCDO));
     
     SG::WriteHandle<GlobalSim::IOBitwise::eEmNbhoodTOBContainer> h_neighborhoodTOBs(m_neighKey, ctx);
-    SG::WriteHandle<std::vector<int> > h_phimax(m_phimaxKey, ctx);
 
     auto dumper = GlobalSim::LArStripNeighborhoodDumper();
     if(m_dump || m_dumpTerse){
@@ -105,7 +107,6 @@ namespace GlobalSim {
     }
     
     CHECK(h_neighborhoodTOBs.record(std::move(neighborhoodTOBs)));
-    CHECK(h_phimax.record(std::move(phimax)));
     
     return StatusCode::SUCCESS;
   }
@@ -114,10 +115,13 @@ namespace GlobalSim {
   Egamma1_LArStrip_Fex_RowAware::findNeighborhoods_RowAware(const std::vector<const xAOD::eFexEMRoI*>& rois,
 							    const std::vector<const CaloCell*>& cells,
 							    IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs,
-							    std::vector<int>& phimax) const{
+							    const CaloNoise& noise) const{
     
     for (const auto& roi : rois) {
-      CHECK(findNeighborhood_RowAware(roi, cells, neighborhoodTOBs, phimax));
+      //kill low energy RoIs
+      if(roi->et() > 5000){ // MeV
+	CHECK(findNeighborhood_RowAware(roi, cells, neighborhoodTOBs, noise));
+      }
     }
     
     return StatusCode::SUCCESS;
@@ -128,7 +132,7 @@ namespace GlobalSim {
   Egamma1_LArStrip_Fex_RowAware::findNeighborhood_RowAware(const xAOD::eFexEMRoI* roi,
 							   const std::vector<const CaloCell*>& cells,
 							   IOBitwise::eEmNbhoodTOBContainer& neighborhoodTOBs,
-							   std::vector<int>& phimax) const {
+							   const CaloNoise& noise) const {
     
     // this member function constructs an LArStripNeighborhood.
     // 
@@ -201,7 +205,14 @@ namespace GlobalSim {
       for(const auto& iroi : roi_phi_indices) {
 	auto c_eta = cell->eta();
 	if (iroi == icell and c_eta >= etalim_low and c_eta < etalim_high) {
-	  close[pos].push_back(cell);
+	  float totalNoise = noise.getNoise(cell->ID(), cell->gain());
+	  if(totalNoise <= 0.0) totalNoise = 0.001;
+	  float sigma = cell->energy() / totalNoise;
+	  if(sigma >= 2){
+	    close[pos].push_back(cell);
+	  } else {
+	    close[pos].push_back(new CaloCell(cell->caloDDE(), 0.0, cell->time(), cell->quality(), cell->provenance(), cell->gain()));
+	  }
 	  break;
 	}
 	++pos;
@@ -243,8 +254,6 @@ namespace GlobalSim {
 				    });
 
     int max_row_pos = std::distance( roi_max_it.begin(), max_row );
-
-    phimax.push_back(max_row_pos);
     
     ATH_MSG_DEBUG("max cell row "
 		  << ' ' << std::distance( roi_max_it.begin(), max_row )+1);

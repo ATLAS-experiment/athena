@@ -195,7 +195,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   if (m_keepHitsStrategy > 0) {
     for (auto & r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHits();
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHitPtrs();
       layer_bitmask_t hitmask = r.getHitLayers();
       std::vector<unsigned> toUse = PickHitsToUse(hitmask);
 

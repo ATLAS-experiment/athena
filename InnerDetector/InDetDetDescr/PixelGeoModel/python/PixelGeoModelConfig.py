@@ -1,23 +1,18 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 def PixelGeoModelCfg(flags):
-    from AtlasGeoModel.GeometryDBConfig import InDetGeometryDBSvcCfg
-    db = InDetGeometryDBSvcCfg(flags)
-
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     pixelDetectorTool = CompFactory.PixelDetectorTool("PixelDetectorTool")
-    pixelDetectorTool.GeometryDBSvc = db.getPrimary()
     pixelDetectorTool.BCM_Tool = CompFactory.InDetDD.BCM_Builder()
     pixelDetectorTool.BLM_Tool = CompFactory.InDetDD.BLM_Builder()
     pixelDetectorTool.useDynamicAlignFolders = flags.GeoModel.Align.Dynamic
     geoModelSvc.DetectorTools += [ pixelDetectorTool ]
-    acc.merge(db)
     return acc
 
 

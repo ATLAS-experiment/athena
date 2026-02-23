@@ -9,7 +9,6 @@
 #include <string>
 
 // FrameWork includes
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include <GaudiKernel/StatusCode.h>
 #include "GaudiKernel/ToolHandle.h"

@@ -1,20 +1,19 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PixelStaveTypes_H
-#define PixelStaveTypes_H
+#ifndef PIXELGEOMODEL_PIXELSTAVETYPES_H
+#define PIXELGEOMODEL_PIXELSTAVETYPES_H
 
 // Class to interpret and query PixelStaveType table
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
-class IGeometryDBSvc;
 #include <map>
 
 class PixelStaveTypes {
 
 public :
-  PixelStaveTypes(const IGeometryDBSvc * db, const IRDBRecordset_ptr& table);
+  PixelStaveTypes(const IRDBRecordset_ptr& table);
   int getFluidType(int layer, int phiModule) const;
   int getBiStaveType(int layer, int phiModule) const;
 

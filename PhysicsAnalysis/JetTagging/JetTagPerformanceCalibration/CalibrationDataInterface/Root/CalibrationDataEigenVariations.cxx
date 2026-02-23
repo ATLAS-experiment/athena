@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -477,6 +477,10 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations()
 
   // retrieve the central calibration
   TH1        *result = dynamic_cast<TH1*>(m_cnt->GetValue("result")); 
+  if (!result){
+    std::cerr<<"CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations(): dynamic cast failed\n";
+    return TMatrixDSym();
+  }
   TMatrixD    jac = getJacobianReductionMatrix();
   int         nbins = jac.GetNcols();
   TMatrixDSym cov(nbins);

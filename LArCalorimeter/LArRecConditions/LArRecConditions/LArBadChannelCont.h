@@ -1,17 +1,18 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRECCONDITIONS_LARBADCHANNELCONT_H
 #define LARRECCONDITIONS_LARBADCHANNELCONT_H
 
-#include <vector>
-#include <algorithm>
+
 #include "LArRecConditions/LArBadChannel.h"
 #include "LArRecConditions/LArBadFeb.h"
 #include "Identifier/HWIdentifier.h"
-
+#include <vector>
+#include <algorithm>
+#include <cstdint> //for uint32_t
 /**
  * @brief Conditions-Data class holding LAr Bad Channel or Bad Feb information
  *

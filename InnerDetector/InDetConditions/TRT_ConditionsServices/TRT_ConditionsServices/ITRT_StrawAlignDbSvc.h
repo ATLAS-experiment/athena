@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRT_STRAWALIGNDBSVC_H
@@ -11,7 +11,6 @@
 
 #include <string>
 #include "GaudiKernel/IService.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class Identifier;
 namespace TRTCond {
@@ -37,7 +36,7 @@ class ITRT_StrawAlignDbSvc: virtual public IService
   virtual StatusCode streamOutObjects () const =0;
   virtual StatusCode registerObjects (std::string, int, int, int, int) const=0;
   virtual StrawDxContainer* getDxContainer() const =0;
-  virtual StatusCode IOVCallBack(IOVSVC_CALLBACK_ARGS) =0;
+  virtual StatusCode IOVCallBack() =0;
   virtual float getDx1( const Identifier&) const =0;
   virtual float getDx2( const Identifier&) const =0;
   virtual float getDxErr( const Identifier& ) const =0 ;

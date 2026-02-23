@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/IToolSvc.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "LArRawUtils/LArRawOrdering.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"

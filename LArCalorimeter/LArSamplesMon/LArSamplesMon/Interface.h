@@ -50,14 +50,14 @@ namespace LArSamples {
 
       virtual ~Interface();
 
-      unsigned int nEvents() const { return accessor().nEvents(); }
-      unsigned int nRuns() const { return accessor().nRuns(); }
+      virtual unsigned int nEvents() const override { return accessor().nEvents(); }
+      virtual unsigned int nRuns() const override { return accessor().nRuns(); }
 
-      const EventData* eventData(unsigned int i) const { return accessor().eventData(i); }
-      const RunData* runData(unsigned int i) const { return accessor().runData(i); }
+      virtual const EventData* eventData(unsigned int i) const override { return accessor().eventData(i); }
+      virtual const RunData* runData(unsigned int i) const override { return accessor().runData(i); }
       
-      unsigned int historySize(unsigned int i) const { return accessor().historySize(i); }
-      unsigned int historySizeSC(unsigned int i) const { return accessor().historySizeSC(i); }
+      virtual unsigned int historySize(unsigned int i) const override { return accessor().historySize(i); }
+      virtual unsigned int historySizeSC(unsigned int i) const override { return accessor().historySizeSC(i); }
 
       HistoryIterator begin(unsigned int pos = 0, double eMin = -1, double adcMaxMin = -1) const;
       unsigned int end() const { return nChannels(); }
@@ -74,7 +74,7 @@ namespace LArSamples {
 
       bool neighbors(const CellInfo& cell, double dRCut, std::vector<unsigned int>& hashes) const;
       bool firstNeighbors(unsigned int hash, std::vector<unsigned int>& hashes, short layer = -2) const;
-      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<const Data*>& data) const;
+      bool data(const std::vector<unsigned int>& hashes,const EventData& event, std::vector<std::unique_ptr<const Data> >& data) const;
     
       std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName) const;
       std::unique_ptr<Interface> merge(const Interface& other, const TString& fileName, const TString& LBFile) const;
@@ -124,14 +124,14 @@ namespace LArSamples {
       void setShapeError(const TString& fileName);
       const AbsShapeErrorGetter* shapeErrorGetter() const { return m_shapeErrorGetter; }
 
-      bool writeToFile(const TString& fileName) const { return accessor().writeToFile(fileName); }
+      virtual bool writeToFile(const TString& fileName) const override { return accessor().writeToFile(fileName); }
       
       static TString addSuffix(const TString& fileName, const TString& suffix);
       
-      const History*  cellHistory(unsigned int i) const;      
-      const History*  getCellHistory(unsigned int i) const;      
-      const History*  getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;
+      virtual const History*  cellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History>  getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History>  getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
       
     private:
       

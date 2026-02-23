@@ -584,15 +584,23 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
 
   int64_t ethard = 0.0;
   int64_t etsoft = 0.0; 
+ 
+  int multiplicitiveFactor = 0;
+
+  if(FPGAnum < 2 ) {
+   multiplicitiveFactor = cosLUT(0, 5);
+  } else{
+    multiplicitiveFactor = cosLUT(1, 5);
+  }
 
 // firmware treats upper and lower columns differnetly 
 
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int jcolumn = 0; jcolumn<6; jcolumn++){
       	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-	  ethard_lo = ethard_lo + twrs[irow][jcolumn]; 
+	  ethard_lo = ethard_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
 	} else {
-	  etsoft_lo = etsoft_lo + twrs[irow][jcolumn]; 
+	  etsoft_lo = etsoft_lo + twrs[irow][jcolumn]*multiplicitiveFactor; 
 	}
     }
   }
@@ -600,9 +608,9 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
   for( int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
     for(int jcolumn = 6; jcolumn<12; jcolumn++){
       	if(gBlkSum[irow][jcolumn] > gBlockthreshold){
-	  ethard_hi = ethard_hi + twrs[irow][jcolumn]; 
+	  ethard_hi = ethard_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
 	} else {
-	  etsoft_hi = etsoft_hi + twrs[irow][jcolumn]; 
+	  etsoft_hi = etsoft_hi + twrs[irow][jcolumn]*multiplicitiveFactor; 
 	}
     }
   }
@@ -610,14 +618,24 @@ void gFEXJwoJAlgo::etFPGA(int FPGAnum, const gTowersType& twrs, gTowersType &gBl
   ethard = ethard_hi + ethard_lo;
   etsoft = etsoft_hi + etsoft_lo;
 
-  int64_t etsum = ethard*A  + etsoft*B;
-  if ( etsum < 0 ) etsum = 0;
-  if( etsum >= 268435455 )  etsum  = 0X0FFFFFFF;
+
+  int64_t etsum_hi = ethard_hi*A  + etsoft_hi*B  ;
+  if ( etsum_hi < 0 ) etsum_hi = 0; 
+
+  int64_t etsum_lo = ethard_lo*A  + etsoft_lo*B  ;
+  if ( etsum_lo < 0 ) etsum_lo = 0; 
+  
+  int64_t etsum = etsum_hi + etsum_lo; 
+
 
   // convert 200 MeV LSB here 
   eth  = ethard>>3;
   ets  = etsoft>>3;
-  etw  = (etsum  >>13 );
+  etw  = (etsum  >>13 ) ;
+
+  if( etw < 0 )  etw  = 0;
+  // max value is 15 bits with 800 MeV LSB -- so 17 bits here 
+  if( etw > 0X001FFFF ) etw  =  0X001FFFF ; 
 
 
   if(msgLvl(MSG::DEBUG)) { 

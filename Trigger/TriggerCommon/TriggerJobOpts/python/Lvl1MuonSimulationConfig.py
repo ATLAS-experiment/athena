@@ -65,7 +65,7 @@ def MuonBytestream2RdoConfig(flags):
     acc.addEventAlgo(RpcRawDataProvider)
     # for TGC
     TGCRodDecoder = CompFactory.Muon.TGC_RodDecoderReadout(name = "TGC_RodDecoderReadout" + postFix)
-    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderToolMT(name = "TGC_RawDataProviderToolMT" + postFix,
+    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderTool(name = "TGC_RawDataProviderToolMT" + postFix,
                                                                              TgcContainerCacheKey = MuonCacheNames.TgcCache,
                                                                              Decoder = TGCRodDecoder,
                                                                              RdoLocation = "TGCRDO_L1")

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,8 +21,8 @@ namespace LArSamples {
       UniformShapeErrorGetter(double k) : m_k(k) { }
       virtual ~UniformShapeErrorGetter() { }
 
-      ShapeErrorData* shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const;
-      ShapeErrorData* phiSymShapeErrorData(short /*ring*/, CaloGain::CaloGain /*gain*/, const Residual* /*toExclude*/) const { return 0; }
+      virtual std::unique_ptr<ShapeErrorData> shapeErrorData(unsigned int hash, CaloGain::CaloGain gain, const Residual* toExclude = 0) const override;
+      virtual std::unique_ptr<ShapeErrorData> phiSymShapeErrorData(short /*ring*/, CaloGain::CaloGain /*gain*/, const Residual* /*toExclude*/) const override { return nullptr; }
 
     private:
       

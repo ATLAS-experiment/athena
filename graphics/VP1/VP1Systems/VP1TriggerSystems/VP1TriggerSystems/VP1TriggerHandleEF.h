@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERHANDLEEF_H
@@ -58,8 +58,8 @@ namespace VP1Trig {
     
     //**** Run by: Class Internal ****
     bool loadTrackContainer();
-    void loadMuonTrack(int trackNo, QString type);
-    double muonTrackData(QString type, int id);
+    void loadMuonTrack(int trackNo, const QString& type);
+    double muonTrackData(const QString& type, int id);
     
     //**** Data: QTree format ****
     QTreeWidgetItem* m_qtrigData;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -12,24 +12,23 @@
 #ifndef IPROXY_LOADER_H
 #define IPROXY_LOADER_H
 
+#include "IAccessor.h"
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace ExpressionParsing {
-  class IProxyLoader {
+  class IProxyLoader : public IAccessor {
     public:
-      enum VariableType { VT_UNK, VT_INT, VT_DOUBLE, VT_VECINT, VT_VECDOUBLE, VT_VECEMPTY };
+      using VariableType = IAccessor::VariableType;
 
       virtual ~IProxyLoader() { }
 
       virtual void reset() = 0;
 
-      virtual VariableType variableTypeFromString(const std::string &varname) const = 0;
+      virtual std::pair< IAccessor::VariableType, const IAccessor &>
+              getAccessorFromString(const EventContext &ctx, const std::string &varname) const = 0;
 
-      virtual int loadIntVariableFromString(const std::string &varname) const = 0;
-      virtual double loadDoubleVariableFromString(const std::string &varname) const = 0;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const = 0;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const = 0;
   };
 }
 

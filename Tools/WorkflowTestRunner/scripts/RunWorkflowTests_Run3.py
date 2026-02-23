@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import DataOverlayPreparationTest, DerivationTest, DerivationTestMT, GenerationTest, OverlayTest, DataOverlayTest, PileUpTest, QTest, SimulationTest
+from WorkflowTestRunner.StandardTests import DataOverlayPreparationTest, DerivationTest, GenerationTest, OverlayTest, DataOverlayTest, PileUpTest, QTest, SimulationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -62,10 +62,7 @@ def main():
     elif options.derivation:
         test_id = "MC_PHYS" if not options.ami_tag else options.ami_tag
         test_id = f"{test_id}_{run.value}"
-        if 'mtDerivation' in options.extra_args:
-            tests_to_run.append(DerivationTestMT(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
-        else:
-            tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
+        tests_to_run.append(DerivationTest(test_id, run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
         if not options.workflow or options.workflow is WorkflowType.MCReco:
             ami_tag = "q454" if not options.ami_tag else options.ami_tag

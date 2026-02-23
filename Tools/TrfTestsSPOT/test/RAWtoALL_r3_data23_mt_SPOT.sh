@@ -13,7 +13,6 @@ GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometry
 export TRF_ECHO=1;
 ATHENA_CORE_NUMBER=${NTHREADS} \
 Reco_tf.py \
-      --athenaopts='--config-only'\
       --CA  'True' \
       --perfmon 'fullmonmt' \
       --inputBSFile ${DATAFILE} \

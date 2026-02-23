@@ -1,12 +1,9 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-#include <iostream>
-#include <ostream>
-#include <iomanip>
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
@@ -74,7 +71,7 @@ namespace dqutils {
         if (tdir_run != 0) {
           std::string tdir_run_name(tdir_run->GetName());
           if (tdir_run_name.find("run") != std::string::npos) {
-            run_dir = tdir_run_name;
+            run_dir = std::move(tdir_run_name);
             out_EOS = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/perf-idtracking/VertexMonitoring/VxMon_" +
                       run_dir + "_" + AthenaTAG + ".root";
             out_LOCAL = "VxMon_" + run_dir + "_" + AthenaTAG + ".root";
@@ -83,12 +80,10 @@ namespace dqutils {
             while ((key_lb = dynamic_cast<TKey*>(lb_keys())) != 0) {
               TObject* obj_lb = key_lb->ReadObj();
               TDirectory* tdir_lb = dynamic_cast<TDirectory*>(obj_lb);
-              //cout << "tdir_lb " << tdir_lb << endl;
               if (tdir_lb != 0) {
                 std::string tdir_lb_name(tdir_lb->GetName());
-                //cout << "tdir_lb_name " << tdir_lb_name << endl;
                 if (tdir_lb_name.find("lb") != std::string::npos) {
-                  lb_dir = tdir_lb_name;
+                  lb_dir = std::move(tdir_lb_name);
 
                   dirExists = f->GetDirectory((run_dir + "/" + lb_dir + "/InDetGlobal/PrimaryVertexMultiplicity").c_str());
                   if (dirExists) {

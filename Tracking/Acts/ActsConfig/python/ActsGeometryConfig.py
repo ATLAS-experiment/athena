@@ -16,6 +16,7 @@ def ActsTrackingGeometrySvcCfg(flags,
  
   subDetectors = []
   blueprintTools = []
+  refineTools = []
 
   if flags.Detector.GeometryBpipe:
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
@@ -55,8 +56,10 @@ def ActsTrackingGeometrySvcCfg(flags,
     acc.merge(TileGMCfg(flags))
 
   #first add the itk builder and then the muon system - this is the correct order
-  if flags.Acts.TrackingGeometry.UseBlueprint:    
+  if flags.Acts.TrackingGeometry.UseBlueprint:
     if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
+      if False: ### Disable the ITk material allocation until it's finalized
+          refineTools+= [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
     if flags.Detector.GeometryCalo:
       subDetectors += ["Calo"]
@@ -91,6 +94,7 @@ def ActsTrackingGeometrySvcCfg(flags,
   actsTrackingGeometrySvc = CompFactory.ActsTrackingGeometrySvc(name,
                                                                 BuildSubDetectors=subDetectors,
                                                                 BlueprintNodeBuilders=blueprintTools,
+                                                                RefinementTools=refineTools,
                                                                 **kwargs)
 
   if flags.Acts.TrackingGeometry.MaterialSource == "Default":
@@ -127,6 +131,14 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   acc.addService(actsTrackingGeometrySvc, primary = True)
   return acc
+
+
+
+def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) -> ComponentAccumulator:
+    result = ComponentAccumulator()
+    the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
 
 
 def ActsPropStepRootWriterSvcCfg(flags,

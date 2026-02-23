@@ -17,7 +17,7 @@ namespace MuonR4{
      */
     class MmFastDigiTool final: public MuonDigitizationTool {
         public:
-            MmFastDigiTool(const std::string& type, const std::string& name, const IInterface* pIID);
+            using MuonDigitizationTool::MuonDigitizationTool;
 
             StatusCode initialize() override final;
             StatusCode finalize() override final;

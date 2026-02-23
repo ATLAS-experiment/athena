@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgB.h"
@@ -49,19 +49,18 @@ StatusCode HiveAlgB::finalize() {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-StatusCode HiveAlgB::execute() {
+StatusCode HiveAlgB::execute(const EventContext& ctx) const {
 
   ATH_MSG_DEBUG("execute " << name());
 
-  ATH_MSG_INFO("context: " << Gaudi::Hive::currentContext() << " for "
-	       << this);
+  ATH_MSG_INFO("context: " << ctx << " for " << this);
 
   int s = sleep();
 
   ATH_MSG_INFO("m_di was: " << m_di << " setting to " << s);
   m_di = s;
 
-  SG::WriteHandle<HiveDataObj> wrh1( m_wrh1 );
+  SG::WriteHandle<HiveDataObj> wrh1{m_wrh1, ctx} ;
   ATH_CHECK(wrh1.record(std::make_unique< HiveDataObj >(20000)));
 
   ATH_MSG_INFO("  write: " << wrh1.key() << " = " << wrh1->val() );

@@ -70,3 +70,20 @@ With the
 [C\+\+ Extension Pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools-extension-pack)
 installed, you can now build the project using your freshly made
 `package_filters.txt` file, with the click of a button.
+
+Building with a custom ACTS clone
+---------------------------------
+
+In various circumstances, you may want to compile a custom version of ACTS
+alongside Athena, so that you can make changes to ACTS source code and compile
+them together. To do this, clone the [ACTS
+repository](https://github.com/acts-project/acts) somewhere convenient, and
+then add `-DATLAS_ACTS_SOURCE_DIR=/path/to/acts` to your CMake configuration
+command.
+
+You can build the project as usual, where ACTS will be built in the process.
+The regular setup script in the build directory will also correctly set up the
+ACTS environment for running.
+
+Note: Depending on the changes you're making, you will have to adjust the
+Athena packages included in the build, to avoid linker errors.

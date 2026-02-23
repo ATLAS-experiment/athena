@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCCabling.h"
 
-#include "GaudiKernel/StatusCode.h"
 #include "MuonTGC_Cabling/TGCCableASDToPP.h"
 #include "MuonTGC_Cabling/TGCCableHPBToSL.h"
 #include "MuonTGC_Cabling/TGCCableInASD.h"
@@ -24,47 +23,27 @@
 namespace MuonTGC_Cabling {
 
 // Constructor & Destructor
-TGCCabling::TGCCabling(const std::string& filenameASDToPP,
-                       const std::string& filenameInPP,
-                       const std::string& filenamePPToSL,
-                       const std::string& filenameSLBToROD) {
-    m_cableInASD = new TGCCableInASD(filenameASDToPP);
-    m_cableASDToPP = new TGCCableASDToPP(filenameASDToPP);
-    m_cableInPP = new TGCCableInPP(filenameInPP);
-    m_cablePPToSLB = new TGCCablePPToSLB(filenamePPToSL);
-    m_cableInSLB = new TGCCableInSLB();
-    m_cableSLBToHPB = new TGCCableSLBToHPB(filenamePPToSL);
-    m_cableHPBToSL = new TGCCableHPBToSL(filenamePPToSL);
-    m_cableSLBToSSW = new TGCCableSLBToSSW(filenameSLBToROD);
-    m_cableSSWToROD = new TGCCableSSWToROD(filenameSLBToROD);
-}
+TGCCabling::TGCCabling(const Config& cfg)
+    : m_cableInASD{std::make_unique<TGCCableInASD>(cfg.fileNameASDtoPP)},
+      m_cableASDToPP{std::make_unique<TGCCableASDToPP>(
+          cfg.fileNameASDtoPP, cfg.fileNameASDtoPPdiff)},
+      m_cableInPP{std::make_unique<TGCCableInPP>(cfg.fileNameInPP)},
+      m_cablePPToSLB{std::make_unique<TGCCablePPToSLB>(cfg.fileNamePPtoSL)},
+      m_cableInSLB{std::make_unique<TGCCableInSLB>()},
+      m_cableSLBToHPB{std::make_unique<TGCCableSLBToHPB>(cfg.fileNamePPtoSL)},
+      m_cableHPBToSL{std::make_unique<TGCCableHPBToSL>(cfg.fileNamePPtoSL)},
+      m_cableSLBToSSW{std::make_unique<TGCCableSLBToSSW>(cfg.fileNameSLBtoROD)},
+      m_cableSSWToROD{
+          std::make_unique<TGCCableSSWToROD>(cfg.fileNameSLBtoROD)} {}
 
-TGCCabling::~TGCCabling(void) {
-    delete m_cableInASD;
-    delete m_cableASDToPP;
-    delete m_cableInPP;
-    delete m_cablePPToSLB;
-    delete m_cableInSLB;
-    delete m_cableSLBToHPB;
-    delete m_cableHPBToSL;
-    delete m_cableSLBToSSW;
-    delete m_cableSSWToROD;
-
-    for (auto& p : m_slbModuleIdMap) {
-        delete p.second;
-    }
-}
-
-StatusCode TGCCabling::updateCableASDToPP() {
-    return m_cableASDToPP->updateDatabase();
-}
-
+TGCCabling::~TGCCabling() = default;
 // slbIn --> AsdOut
-TGCChannelId* TGCCabling::getASDOutChannel(const TGCChannelId* in) const {
-    TGCChannelSLBIn slb_in(in->getSideType(), in->getModuleType(),
-                           in->getRegionType(), in->getSector(), in->getId(),
-                           in->getChannel());
-    return getChannel(&slb_in, TGCChannelId::ChannelIdType::ASDOut);
+std::unique_ptr<TGCChannelId> TGCCabling::getASDOutChannel(
+    const TGCChannelId& in) const {
+    TGCChannelSLBIn slb_in(in.getSideType(), in.getModuleType(),
+                           in.getRegionType(), in.getSector(), in.getId(),
+                           in.getChannel());
+    return getChannel(slb_in, TGCChannelId::ChannelIdType::ASDOut);
 }
 
 // readout ID -> SLB Module
@@ -75,12 +54,11 @@ const TGCModuleId* TGCCabling::getSLBFromReadout(TGCId::SideType side,
 
     int indexFromReadoutWithoutChannel =
         getIndexFromReadoutWithoutChannel(side, rodId, sswId, sbLoc);
-    std::map<int, TGCModuleId*>::iterator it =
-        m_slbModuleIdMap.find(indexFromReadoutWithoutChannel);
+    const auto it = m_slbModuleIdMap.find(indexFromReadoutWithoutChannel);
     if (it != m_slbModuleIdMap.end()) {
         // Already seen this ReadoutID without channel.
         // Stored pointer is returned.
-        return (*it).second;
+        return it->second.get();
     }
 
     // ROD Module
@@ -88,62 +66,48 @@ const TGCModuleId* TGCCabling::getSLBFromReadout(TGCId::SideType side,
     TGCModuleROD rod(side, readoutSector);
 
     // SSW Module
-    TGCModuleMap* sswMap = getModule(&rod, TGCModuleId::SSW);
-    if (!sswMap) {
+    TGCModuleMap sswMap = getModule(rod, TGCModuleId::SSW);
+    if (sswMap.empty()) {
         m_slbModuleIdMap.insert(
-            std::pair<int, TGCModuleId*>(indexFromReadoutWithoutChannel, 0));
+            std::make_pair(indexFromReadoutWithoutChannel, nullptr));
         return nullptr;
     }
 
-    TGCModuleId* ssw = nullptr;
-    bool found = false;
-    const int sswMapsize = sswMap->size();
-    for (int i = 0; i < sswMapsize; i++) {
-        if ((sswMap->moduleId(i))->getId() == sswId) {
-            ssw = sswMap->popModuleId(i);
-            found = true;
-            break;
-        }
-    }
-    delete sswMap;
-    if (!found || !ssw) {
+    std::unique_ptr<TGCModuleId> ssw = sswMap.popModule(sswId);
+    if (!ssw) {
         m_slbModuleIdMap.insert(
-            std::pair<int, TGCModuleId*>(indexFromReadoutWithoutChannel, 0));
+            std::make_pair(indexFromReadoutWithoutChannel, nullptr));
         return nullptr;  // Do not need to delete ssw here.
                          // We can delete ssw but nothing will be done.
     }
 
     // SLB Module
-    TGCModuleMap* slbMap = getModule(ssw, TGCModuleId::SLB);
-    delete ssw;
-    if (!slbMap) {
+    TGCModuleMap slbMap = getModule(*ssw, TGCModuleId::SLB);
+
+    if (slbMap.empty()) {
         m_slbModuleIdMap.insert(
-            std::pair<int, TGCModuleId*>(indexFromReadoutWithoutChannel, 0));
+            std::make_pair(indexFromReadoutWithoutChannel, nullptr));
         return nullptr;
     }
 
-    TGCModuleSLB* slb = nullptr;
-    found = false;
-    const int slbMapsize = slbMap->size();
-    for (int i = 0; i < slbMapsize; i++) {
-        slb = dynamic_cast<TGCModuleSLB*>(slbMap->moduleId(i));
-        if (slb && slb->getSBLoc() == sbLoc) {
-            found = true;
-            slb = dynamic_cast<TGCModuleSLB*>(slbMap->popModuleId(i));
+    std::unique_ptr<TGCModuleId> slb{};
+    for (auto& [id, module] : slbMap) {
+        const auto* SLB = dynamic_cast<TGCModuleSLB*>(module.get());
+        if (SLB && SLB->getSBLoc() == sbLoc) {
+            slb = std::move(module);
             break;
         }
     }
-    delete slbMap;
 
-    if (!found || !slb) {
+    if (!slb) {
         m_slbModuleIdMap.insert(
-            std::pair<int, TGCModuleId*>(indexFromReadoutWithoutChannel, 0));
+            std::make_pair(indexFromReadoutWithoutChannel, nullptr));
         return nullptr;  // Do not delete slb here.
     }
 
-    m_slbModuleIdMap.insert(
-        std::pair<int, TGCModuleId*>(indexFromReadoutWithoutChannel, slb));
-    return slb;
+    return m_slbModuleIdMap
+        .insert(std::make_pair(indexFromReadoutWithoutChannel, std::move(slb)))
+        .first->second.get();
 }
 
 // readout ID -> RxID
@@ -156,106 +120,67 @@ int TGCCabling::getRxIdFromReadout(TGCId::SideType side, int rodId, int sswId,
     TGCModuleROD rod(side, readoutSector);
 
     // SSW Module
-    TGCModuleMap* sswMap = getModule(&rod, TGCModuleId::SSW);
-    if (!sswMap) {
+    TGCModuleMap sswMap = getModule(rod, TGCModuleId::SSW);
+    if (sswMap.empty()) {
         return rxId;
     }
 
-    TGCModuleId* ssw = nullptr;
-    bool found = false;
-    const int sswMapsize = sswMap->size();
-    for (int i = 0; i < sswMapsize; i++) {
-        if ((sswMap->moduleId(i))->getId() == sswId) {
-            ssw = sswMap->popModuleId(i);
-            found = true;
-            break;
-        }
-    }
-    delete sswMap;
-    if (!found || !ssw) {
+    std::unique_ptr<TGCModuleId> ssw = sswMap.popModule(sswId);
+    if (!ssw) {
         return rxId;  // Do not need to delete ssw here.
                       // We can delete ssw but nothing will be done.
     }
 
     // SLB Module
-    TGCModuleMap* slbMap = getModule(ssw, TGCModuleId::SLB);
-    delete ssw;
-    if (!slbMap) {
+    TGCModuleMap slbMap = getModule(*ssw, TGCModuleId::SLB);
+
+    if (slbMap.empty()) {
         return rxId;
     }
 
-    TGCModuleSLB* slb = nullptr;
-    found = false;
-    const int slbMapsize = slbMap->size();
-    for (int i = 0; i < slbMapsize; i++) {
-        slb = dynamic_cast<TGCModuleSLB*>(slbMap->moduleId(i));
+    for (auto& [id, module] : slbMap) {
+        auto slb = dynamic_cast<TGCModuleSLB*>(module.get());
         if (slb && slb->getSBLoc() == sbLoc) {
-            rxId = slbMap->connector(i);
+            rxId = id;
             break;
         }
     }
-    delete slbMap;
-
     return rxId;
 }
 
 // SSW ID/Rx ID -> SLB Module
-TGCModuleId* TGCCabling::getSLBFromRxId(TGCId::SideType side, int rodId,
-                                        int sswId, int rxId) const {
-    bool found;
+std::unique_ptr<TGCModuleId> TGCCabling::getSLBFromRxId(TGCId::SideType side,
+                                                        int rodId, int sswId,
+                                                        int rxId) const {
 
     // ROD Module
     int readoutSector = rodId - 1;  // rodID = 1..12
     TGCModuleROD rod(side, readoutSector);
 
     // SSW Module
-    TGCModuleMap* sswMap = getModule(&rod, TGCModuleId::SSW);
-    if (!sswMap) {
+    TGCModuleMap sswMap = getModule(rod, TGCModuleId::SSW);
+    if (sswMap.empty()) {
         return nullptr;
     }
 
-    TGCModuleId* ssw = nullptr;
-    found = false;
-    const int size = sswMap->size();
-    for (int i = 0; i < size; i++) {
-        if ((sswMap->moduleId(i))->getId() == sswId) {
-            ssw = sswMap->popModuleId(i);
-            found = true;
-            break;
-        }
-    }
-    delete sswMap;
-    if (!found || !ssw) {
+    std::unique_ptr<TGCModuleId> ssw = sswMap.popModule(sswId);
+
+    if (!ssw) {
         return nullptr;  // Do not need to delete ssw here.
                          // We can delete ssw but nothing will be done.
     }
 
     // SLB Module
-    TGCModuleMap* slbMap = getModule(ssw, TGCModuleId::SLB);
-    delete ssw;
-    if (!slbMap) {
+    TGCModuleMap slbMap = getModule(*ssw, TGCModuleId::SLB);
+    if (slbMap.empty()) {
         return nullptr;
     }
 
-    TGCModuleSLB* slb = nullptr;
-    int ip = slbMap->find(rxId);
-    if (ip < 0 || ip >= slbMap->size()) {
-        delete slbMap;
-        slbMap = nullptr;
-        return nullptr;
-    }
-    slb = dynamic_cast<TGCModuleSLB*>(slbMap->popModuleId(ip));
-    delete slbMap;
-
-    if (!slb) {
-        return nullptr;
-    }
-
-    return slb;
+    return slbMap.popModule(rxId);
 }
 
 // SLB Module -> readout ID
-bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
+bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB& slb,
                                    TGCId::SideType& side, int& rodId,
                                    int& sswId, int& sbLoc) const {
     // initialize
@@ -264,22 +189,17 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
     sswId = -1;
     sbLoc = -1;
 
-    if (!slb) {
-        return false;
-    }
-
     // Fill side
-    side = slb->getSideType();
+    side = slb.getSideType();
 
-    TGCModuleMap* sswMap = getModule(slb, TGCModuleId::SSW);
+    TGCModuleMap sswMap = getModule(slb, TGCModuleId::SSW);
 
-    if (!sswMap) {
+    if (sswMap.empty()) {
         return false;
     }
 
     // SSW Module
-    TGCModuleId* ssw = sswMap->popModuleId(0);
-    delete sswMap;
+    std::unique_ptr<TGCModuleId>& ssw = sswMap.begin()->second;
     if (!ssw) {
         return false;
     }
@@ -288,63 +208,50 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
     sswId = ssw->getId();
 
     // Fill SBLoc
-    sbLoc = slb->getSBLoc();
+    sbLoc = slb.getSBLoc();
 
     if (sbLoc < 0) {
-        TGCModuleMap* slbMap = getModule(ssw, TGCModuleId::SLB);
-        if (!slbMap) {
-            delete ssw;
-            ssw = nullptr;
+        TGCModuleMap slbMap = getModule(*ssw, TGCModuleId::SLB);
+        if (slbMap.empty()) {
             return false;
         }
 
         TGCModuleSLB* pSlb = nullptr;
-        // bool found = false;
-        const int size = slbMap->size();
-        for (int i = 0; i < size; i++) {
-            pSlb = dynamic_cast<TGCModuleSLB*>(slbMap->moduleId(i));
 
-            if (pSlb && slb->getRegionType() == pSlb->getRegionType() &&
-                slb->getSector() == pSlb->getSector() &&
-                slb->getId() == pSlb->getId()) {
-                if (slb->getModuleType() == pSlb->getModuleType()) {
+        for (auto& [id, module] : slbMap) {
+            pSlb = dynamic_cast<TGCModuleSLB*>(module.get());
+
+            if (pSlb && slb.getRegionType() == pSlb->getRegionType() &&
+                slb.getSector() == pSlb->getSector() &&
+                slb.getId() == pSlb->getId()) {
+                if (slb.getModuleType() == pSlb->getModuleType()) {
                     sbLoc = pSlb->getSBLoc();
-                    // found = true;
                     break;
                 }
                 // SI is connected to the SLB corrsponding WI
-                if ((slb->getModuleType() == TGCId::SI) &&
-                    (pSlb->getModuleType() == TGCId::WI)) {
+                if (slb.getModuleType() == TGCId::SI &&
+                    pSlb->getModuleType() == TGCId::WI) {
                     sbLoc = pSlb->getSBLoc();
-                    // found = true;
+
                     break;
                 }
             }
         }
-        delete slbMap;
         if (sbLoc < 0) {
-            delete ssw;
             return false;
         }
     }
 
-    TGCModuleMap* rodMap = getModule(ssw, TGCModuleId::ROD);
-    delete ssw;
-    if (!rodMap) {
+    TGCModuleMap rodMap = getModule(*ssw, TGCModuleId::ROD);
+    if (rodMap.empty()) {
         return false;
     }
 
     // ROD Module
-    TGCModuleId* rod = rodMap->popModuleId(0);
-    delete rodMap;
-    if (!rod) {
-        return false;
-    }
+    std::unique_ptr<TGCModuleId>& rod = rodMap.begin()->second;
 
     // Fill ROD ID
     rodId = rod->getId();
-    delete rod;
-
     return true;
 }
 
@@ -388,25 +295,20 @@ bool TGCCabling::getReadoutFromHighPtID(
         return false;
     }
 
-    TGCChannelId* slbout =
-        m_cableSLBToHPB->getChannelInforHPB(&hpbin, moduleType, false);
-    if (!slbout) {
+    std::unique_ptr<TGCChannelId> slbout =
+        m_cableSLBToHPB->getChannelInforHPB(hpbin, moduleType, false);
+    if (!slbout || !slbout->isValid()) {
         return 0;
     }
-    if (!slbout->isValid()) {
-        delete slbout;
-        return 0;
-    }
-    TGCChannelId* slbin = m_cableInSLB->getChannel(slbout, orChannel);
-    delete slbout;
+    std::unique_ptr<TGCChannelId> slbin =
+        m_cableInSLB->getChannel(*slbout, orChannel);
 
     if (!slbin) {
         return false;
     }
     channel = slbin->getChannel();
 
-    TGCModuleSLB* slb = dynamic_cast<TGCModuleSLB*>(slbin->getModule());
-    delete slbin;
+    auto slb = slbin->getModule();
     if (!slb) {
         return false;
     }
@@ -414,9 +316,8 @@ bool TGCCabling::getReadoutFromHighPtID(
     // SLB Module -> readout ID
     TGCId::SideType sideType;
     int rodid;  // dummy
-    bool status = getReadoutFromSLB(slb, sideType, rodid, sswId, sbLoc);
-
-    delete slb;
+    bool status = getReadoutFromSLB(*dynamic_cast<TGCModuleSLB*>(slb.get()),
+                                    sideType, rodid, sswId, sbLoc);
 
     return status;
 }
@@ -443,14 +344,10 @@ bool TGCCabling::getHighPtIDFromReadout(
                           slb->getRegionType(), slb->getSector(), slb->getId(),
                           channel);
 
-    TGCChannelId* hpbin =
-        getChannel(&slbin, TGCChannelId::ChannelIdType::HPBIn, false);
-    if (!hpbin) {
-        return 0;
-    }
-    if (!hpbin->isValid()) {
-        delete hpbin;
-        return 0;
+    std::unique_ptr<TGCChannelId> hpbin =
+        getChannel(slbin, TGCChannelId::ChannelIdType::HPBIn, false);
+    if (!hpbin || !hpbin->isValid()) {
+        return false;
     }
     signal = hpbin->getSignalType();
     region = hpbin->getRegionType();
@@ -460,7 +357,6 @@ bool TGCCabling::getHighPtIDFromReadout(
     pos = hpbin->getChannel() % 2;
     hitId = (hpbin->getChannel() - pos) / 2;
 
-    delete hpbin;
     return true;
 }
 
@@ -480,16 +376,14 @@ bool TGCCabling::getReadoutFromLowPtCoincidence(TGCId::SideType side, int rodId,
                             slb->getRegionType(), slb->getSector(),
                             slb->getId(), block, pos);
 
-    TGCChannelId* slbin =
-        getChannel(&slbout, TGCChannelId::ChannelIdType::SLBIn, orChannel);
+    std::unique_ptr<TGCChannelId> slbin =
+        getChannel(slbout, TGCChannelId::ChannelIdType::SLBIn, orChannel);
 
     if (!slbin) {
         return false;
     }
 
     channel = slbin->getChannel();
-
-    delete slbin;
 
     return true;
 }
@@ -512,24 +406,22 @@ bool TGCCabling::getLowPtCoincidenceFromReadout(TGCId::SideType side, int rodId,
         return false;
     }
 
-    TGCChannelId* slbout =
-        getChannel(&slbin, TGCChannelId::ChannelIdType::SLBOut, middle);
+    std::unique_ptr<TGCChannelId> slbout =
+        getChannel(slbin, TGCChannelId::ChannelIdType::SLBOut, middle);
     if (!slbout) {
         return false;
     }
 
     block = slbout->getBlock();
     pos = slbout->getChannel();
-    delete slbout;
 
     return true;
 }
 
 // readout channel -> chamber channel
-TGCChannelId* TGCCabling::getASDOutFromReadout(TGCId::SideType side, int rodId,
-                                               int sswId, int sbLoc,
-                                               int channel,
-                                               bool orChannel) const {
+std::unique_ptr<TGCChannelId> TGCCabling::getASDOutFromReadout(
+    TGCId::SideType side, int rodId, int sswId, int sbLoc, int channel,
+    bool orChannel) const {
     const TGCModuleId* slb = getSLBFromReadout(side, rodId, sswId, sbLoc);
     if (!slb) {
         return nullptr;
@@ -542,11 +434,11 @@ TGCChannelId* TGCCabling::getASDOutFromReadout(TGCId::SideType side, int rodId,
         return nullptr;
     }
 
-    return getChannel(&slbin, TGCChannelId::ChannelIdType::ASDOut, orChannel);
+    return getChannel(slbin, TGCChannelId::ChannelIdType::ASDOut, orChannel);
 }
 
 // chamber channel -> readout channel
-bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut* asdout,
+bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut& asdout,
                                       TGCId::SideType& side, int& rodId,
                                       int& sswId, int& sbLoc, int& channel,
                                       bool orChannel) const {
@@ -558,66 +450,51 @@ bool TGCCabling::getReadoutFromASDOut(const TGCChannelASDOut* asdout,
     channel = -1;
 
     // SLBIn channel
-    TGCChannelId* slbin =
-        getChannel(asdout, TGCChannelId::ChannelIdType::SLBIn, orChannel);
+    std::unique_ptr<TGCChannelId> slbin{
+        getChannel(asdout, TGCChannelId::ChannelIdType::SLBIn, orChannel)};
 
     if (!slbin) {
         return false;
     }
     channel = slbin->getChannel();
 
-    TGCModuleSLB* slb = dynamic_cast<TGCModuleSLB*>(slbin->getModule());
-    delete slbin;
+    auto slb = slbin->getModule();
     if (!slb) {
         return false;
     }
 
     // SLB Module -> readout ID
-    bool status = getReadoutFromSLB(slb, side, rodId, sswId, sbLoc);
-    delete slb;
-
-    return status;
+    return getReadoutFromSLB(*static_cast<TGCModuleSLB*>(slb.get()), side,
+                             rodId, sswId, sbLoc);
 }
 
-TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
-                                     TGCChannelId::ChannelIdType type,
-                                     bool orChannel) const {
-    switch (channelId->getChannelIdType()) {
+std::unique_ptr<TGCChannelId> TGCCabling::getChannel(
+    const TGCChannelId& channelId, TGCChannelId::ChannelIdType type,
+    bool orChannel) const {
+    switch (channelId.getChannelIdType()) {
         case TGCChannelId::ChannelIdType::ASDIn:
             if (type == TGCChannelId::ChannelIdType::ASDOut) {
                 return m_cableInASD->getChannel(channelId, orChannel);
             }
             if (type == TGCChannelId::ChannelIdType::SLBIn) {
-                TGCChannelId* asdout =
+                std::unique_ptr<TGCChannelId> asdout =
                     m_cableInASD->getChannel(channelId, false);
-                if (!asdout) {
+                if (!asdout || !asdout->isValid()) {
+
                     return nullptr;
                 }
-                if (!asdout->isValid()) {
-                    delete asdout;
+                std::unique_ptr<TGCChannelId> ppin =
+                    m_cableASDToPP->getChannel(*asdout, false);
+                if (!ppin || !ppin->isValid()) {
                     return nullptr;
                 }
-                TGCChannelId* ppin = m_cableASDToPP->getChannel(asdout, false);
-                delete asdout;
-                if (!ppin) {
+                std::unique_ptr<TGCChannelId> ppout =
+                    m_cableInPP->getChannel(*ppin, orChannel);
+                if (!ppout || !ppout->isValid()) {
+
                     return nullptr;
                 }
-                if (!ppin->isValid()) {
-                    delete ppin;
-                    return nullptr;
-                }
-                TGCChannelId* ppout = m_cableInPP->getChannel(ppin, orChannel);
-                delete ppin;
-                if (!ppout) {
-                    return nullptr;
-                }
-                if (!ppout->isValid()) {
-                    delete ppout;
-                    return nullptr;
-                }
-                TGCChannelId* slbin = m_cablePPToSLB->getChannel(ppout, false);
-                delete ppout;
-                return slbin;
+                return m_cablePPToSLB->getChannel(*ppout, false);
             }
             break;
         case TGCChannelId::ChannelIdType::ASDOut:
@@ -628,27 +505,19 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
                 return m_cableASDToPP->getChannel(channelId, orChannel);
             }
             if (type == TGCChannelId::ChannelIdType::SLBIn) {
-                TGCChannelId* ppin =
+                std::unique_ptr<TGCChannelId> ppin =
                     m_cableASDToPP->getChannel(channelId, false);
-                if (!ppin) {
+                if (!ppin || !ppin->isValid()) {
+
                     return nullptr;
                 }
-                if (!ppin->isValid()) {
-                    delete ppin;
+                std::unique_ptr<TGCChannelId> ppout =
+                    m_cableInPP->getChannel(*ppin, orChannel);
+                if (!ppout || !ppout->isValid()) {
+
                     return nullptr;
                 }
-                TGCChannelId* ppout = m_cableInPP->getChannel(ppin, orChannel);
-                delete ppin;
-                if (!ppout) {
-                    return nullptr;
-                }
-                if (!ppout->isValid()) {
-                    delete ppout;
-                    return nullptr;
-                }
-                TGCChannelId* slbin = m_cablePPToSLB->getChannel(ppout, false);
-                delete ppout;
-                return slbin;
+                return m_cablePPToSLB->getChannel(*ppout, false);
             }
             break;
         case TGCChannelId::ChannelIdType::PPIn:
@@ -672,77 +541,48 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
                 return m_cableInSLB->getChannel(channelId, orChannel);
             }
             if (type == TGCChannelId::ChannelIdType::HPBIn) {
-                TGCChannelId* slbout =
+                std::unique_ptr<TGCChannelId> slbout =
                     m_cableInSLB->getChannel(channelId, orChannel);
-                if (!slbout) {
+                if (!slbout || !slbout->isValid()) {
+
                     return nullptr;
                 }
-                if (!slbout->isValid()) {
-                    delete slbout;
-                    return nullptr;
-                }
-                TGCChannelId* hpbin =
-                    m_cableSLBToHPB->getChannel(slbout, false);
-                delete slbout;
-                return hpbin;
+                return m_cableSLBToHPB->getChannel(*slbout, false);
             }
             if (type == TGCChannelId::ChannelIdType::PPOut) {
                 return m_cablePPToSLB->getChannel(channelId, orChannel);
             }
             if (type == TGCChannelId::ChannelIdType::ASDOut) {
-                TGCChannelId* ppout =
+                std::unique_ptr<TGCChannelId> ppout =
                     m_cablePPToSLB->getChannel(channelId, false);
-                if (!ppout) {
+                if (!ppout || !ppout->isValid()) {
+
                     return nullptr;
                 }
-                if (!ppout->isValid()) {
-                    delete ppout;
+                std::unique_ptr<TGCChannelId> ppin =
+                    m_cableInPP->getChannel(*ppout, orChannel);
+                if (!ppin || !ppin->isValid()) {
                     return nullptr;
                 }
-                TGCChannelId* ppin = m_cableInPP->getChannel(ppout, orChannel);
-                delete ppout;
-                if (!ppin) {
-                    return nullptr;
-                }
-                if (!ppin->isValid()) {
-                    delete ppin;
-                    return nullptr;
-                }
-                TGCChannelId* asdout = m_cableASDToPP->getChannel(ppin, false);
-                delete ppin;
-                return asdout;
+                return m_cableASDToPP->getChannel(*ppin, false);
             }
             if (type == TGCChannelId::ChannelIdType::ASDIn) {
-                TGCChannelId* ppout =
+                std::unique_ptr<TGCChannelId> ppout =
                     m_cablePPToSLB->getChannel(channelId, false);
-                if (!ppout) {
+                if (!ppout || !ppout->isValid()) {
                     return nullptr;
                 }
-                if (!ppout->isValid()) {
-                    delete ppout;
+                std::unique_ptr<TGCChannelId> ppin =
+                    m_cableInPP->getChannel(*ppout, orChannel);
+                if (!ppin || !ppin->isValid()) {
                     return nullptr;
                 }
-                TGCChannelId* ppin = m_cableInPP->getChannel(ppout, orChannel);
-                delete ppout;
-                if (!ppin) {
+                std::unique_ptr<TGCChannelId> asdout =
+                    m_cableASDToPP->getChannel(*ppin, false);
+                if (!asdout || !asdout->isValid()) {
                     return nullptr;
                 }
-                if (!ppin->isValid()) {
-                    delete ppin;
-                    return nullptr;
-                }
-                TGCChannelId* asdout = m_cableASDToPP->getChannel(ppin, false);
-                delete ppin;
-                if (!asdout) {
-                    return nullptr;
-                }
-                if (!asdout->isValid()) {
-                    delete asdout;
-                    return nullptr;
-                }
-                TGCChannelId* asdin = m_cableInASD->getChannel(asdout, false);
-                delete asdout;
-                return asdin;
+                return m_cableInASD->getChannel(*asdout, false);
             }
             break;
         case TGCChannelId::ChannelIdType::SLBOut:
@@ -755,19 +595,12 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
             break;
         case TGCChannelId::ChannelIdType::HPBIn:
             if (type == TGCChannelId::ChannelIdType::SLBIn) {
-                TGCChannelId* slbout =
+                std::unique_ptr<TGCChannelId> slbout =
                     m_cableSLBToHPB->getChannel(channelId, false);
-                if (!slbout) {
+                if (!slbout || !slbout->isValid()) {
                     return nullptr;
                 }
-                if (!slbout->isValid()) {
-                    delete slbout;
-                    return nullptr;
-                }
-                TGCChannelId* slbin =
-                    m_cableInSLB->getChannel(slbout, orChannel);
-                delete slbout;
-                return slbin;
+                return m_cableInSLB->getChannel(*slbout, orChannel);
             }
             if (type == TGCChannelId::ChannelIdType::SLBOut) {
                 return m_cableSLBToHPB->getChannel(channelId, orChannel);
@@ -779,9 +612,9 @@ TGCChannelId* TGCCabling::getChannel(const TGCChannelId* channelId,
     return nullptr;
 }
 
-TGCModuleMap* TGCCabling::getModule(const TGCModuleId* moduleId,
-                                    TGCModuleId::ModuleIdType type) const {
-    switch (moduleId->getModuleIdType()) {
+TGCModuleMap TGCCabling::getModule(const TGCModuleId& moduleId,
+                                   TGCModuleId::ModuleIdType type) const {
+    switch (moduleId.getModuleIdType()) {
         case TGCModuleId::PP:
             if (type == TGCModuleId::SLB) {
                 return m_cablePPToSLB->getModule(moduleId);
@@ -827,7 +660,7 @@ TGCModuleMap* TGCCabling::getModule(const TGCModuleId* moduleId,
         default:
             break;
     }
-    return nullptr;
+    return TGCModuleMap{};
 }
 
 int TGCCabling::getIndexFromReadoutWithoutChannel(const TGCId::SideType side,

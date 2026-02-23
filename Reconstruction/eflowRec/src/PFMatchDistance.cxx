@@ -9,8 +9,8 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/PFMatchDistance.h"
-#include "eflowRec/PFMatchPositions.h"
+#include "PFMatchDistance.h"
+#include "PFMatchPositions.h"
 
 namespace PFMatch {
 

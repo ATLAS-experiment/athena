@@ -32,7 +32,7 @@ def KernelTesterCfg(flags, name = 'F150BenchmarkAlg', **kwarg):
     kwarg.setdefault('FPGATrackSimTrack1stKey', 'FPGATracks_1st_reg' + str(convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)[0]))
 
     # Set up Cluster maker tool
-    from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
+    from EFTrackingFPGAPipeline.FPGAToolsConfig import xAODClusterMakerCfg
     clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags))
     kwarg.setdefault('xAODClusterMaker', clusterMakerTool)
     

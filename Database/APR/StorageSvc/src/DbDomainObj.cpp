@@ -46,7 +46,7 @@ DbDomainObj::DbDomainObj(DbSession& sessionH,
   if ( 0 == db() )    {
     ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
         << " " << name() << " (UNKNOWN) impossible." << " [" << typ.storageName() << "]" );
-    type().missingDriver(msg());
+    throw std::runtime_error("POOL::DbDomain: Unknown storage type requested: " + typ.storageName());
     return;
   }
   m_info = db()->createDomain();

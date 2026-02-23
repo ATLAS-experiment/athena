@@ -6,8 +6,7 @@
 #define JET_HIT_ASSOCIATION_ALG_HH
 
 
-// STL includes
-#include <string>
+
 
 // FrameWork includes
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -23,6 +22,10 @@
 
 // Element links
 #include "AthLinks/ElementLink.h"
+// STL includes
+#include <string>
+#include <utility> //std::pair
+#include <vector>
 
 
 namespace FlavorTagDiscriminants {

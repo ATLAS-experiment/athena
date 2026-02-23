@@ -167,7 +167,7 @@ if __name__ == "__main__":
     digitizationFlags = '; '.join([f'flags.TestBeam.Layout="{layout}"'])
 
     # =======>>> Set up the Tile TB digitization command
-    digitizationCmd = ['athena', '--CA', 'TileSimEx/TileDigiRec.py',
+    digitizationCmd = ['athena', 'TileSimEx/TileDigiRec.py',
                        '--filesInput', f'{hitsFile}',
                        '--preExec', f'{digitizationFlags}',
                        '--file-prefix', f'{filePrefix}',

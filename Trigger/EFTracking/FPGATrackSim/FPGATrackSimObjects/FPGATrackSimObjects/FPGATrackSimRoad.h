@@ -67,7 +67,8 @@ public:
     void setHits(std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &&hits);
     void setHits(unsigned layer, std::vector<std::shared_ptr<const FPGATrackSimHit>> && hits);
 
-    void repopulateTransHits();
+    // Copy transient hits into persistent storage (for output writing)
+    void persistifyHits();
 
     void setEtaPatternID(int patternID) { m_etaPatternID = patternID; }
 
@@ -100,9 +101,15 @@ public:
 
     int getEtaPatternID() const { return m_etaPatternID; }
 
-    const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHits(size_t layer) const { return m_hits_trans.at(layer); }
-    const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &getAllHits() const { return m_hits_trans; }
-    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHits_flat() const;
+    // Persistent getters: return stored hits (valid immediately after deserialization)
+    const std::vector<FPGATrackSimHit> &getHits(size_t layer) const { return m_hits.at(layer); }
+    const std::vector<std::vector<FPGATrackSimHit>> &getAllHits() const { return m_hits; }
+    std::unordered_set<const FPGATrackSimHit*> getHits_flat() const;
+
+    // Transient getters: return shared_ptr to runtime hits (only populated during execution)
+    const std::vector<std::shared_ptr<const FPGATrackSimHit>> &getHitPtrs(size_t layer) const { return m_hits_trans.at(layer); }
+    const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> &getAllHitPtrs() const { return m_hits_trans; }
+    std::unordered_set<std::shared_ptr<const FPGATrackSimHit>> getHitPtrs_flat() const;
 
     const FPGATrackSimTrackPars& getFitParams() const { return m_fitTrackPars; }
     double getFitChi2() const { return m_fitChi2; }

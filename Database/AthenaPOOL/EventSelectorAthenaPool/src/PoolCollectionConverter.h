@@ -53,7 +53,6 @@ public:
 
 private: // data
    std::string m_collectionType;
-   std::string m_connection;
    std::string m_inputCollection;
    unsigned int m_contextId;
    const IPoolSvc* m_poolSvc;

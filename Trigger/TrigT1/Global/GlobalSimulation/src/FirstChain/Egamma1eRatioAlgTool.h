@@ -54,14 +54,8 @@ namespace GlobalSim {
       "LArNeighborhoodTOBContainerReadKey",
       "stripNeighborhoodTOBContainer",
       "key to read inLArNeighborhoodTOBsReadKeys"};
-
-    SG::WriteHandleKey<IOBitwise::eEmEg1eRatioTOBContainer>
-    m_eRatioResultKey {
-      this,
-      "eRatioResultKey",
-      "eRatioResult"};
     
-    SG::WriteHandleKey<std::vector<int>>
+    SG::WriteHandleKey<std::vector<float>>
     m_eRatioKey {
       this,
       "eRatioKey",

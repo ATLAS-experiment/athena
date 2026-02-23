@@ -15,7 +15,7 @@ TGCModuleSL::TGCModuleSL(TGCId::SideType vside, TGCId::RegionType vregion,
     setSector(vsector);
 }
 
-bool TGCModuleSL::isValid(void) const {
+bool TGCModuleSL::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getRegionType() > TGCId::NoRegionType) &&

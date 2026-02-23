@@ -9,6 +9,7 @@
 #include "TVirtualFitter.h"
 #include "TList.h"
 #include "TMinuit.h"
+#include "ZdcAnalysis/ZDCMsg.h"
 
 #include <algorithm>
 #include <sstream>
@@ -26,59 +27,64 @@ using JSON = ZDCJSONConfig::JSON;
 //  if the type is -1, then there's no value, the presence of the parameter itself is a boolean -- i.e. enabling  
 //
 const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
-  {"tag", {JSON::value_t::string, 1, true, true}},
-  {"enabled", {JSON::value_t::boolean, 1, true, true}},
-  {"LGMode", {JSON::value_t::number_unsigned, 1, false, true}},
-  {"Nsample", {JSON::value_t::number_integer, 1, false, true}},
-  {"FADCFreqMHz", {JSON::value_t::number_integer, 1, false, true}},
-  {"preSampleIdx", {JSON::value_t::number_integer, 1, true, true}},
-  {"nominalPedestal", {JSON::value_t::number_integer, 1, false, true}},
-  {"fitFunction", {JSON::value_t::string, 1, true, true}}, 
-  {"peakSample", {JSON::value_t::number_integer, 1, true, true}}, 
-  {"peakTolerance", {JSON::value_t::number_integer, 1, true, false}}, 
-  {"2ndDerivThreshHG", {JSON::value_t::number_integer, 1, true, true}},
-  {"2ndDerivThreshLG", {JSON::value_t::number_integer, 1, true, true}},
-  {"2ndDerivStep", {JSON::value_t::number_integer, 1, false, false}},
-  {"HGOverflowADC", {JSON::value_t::number_integer, 1, true, true}}, 
-  {"HGUnderflowADC", {JSON::value_t::number_integer, 1, true, true}}, 
-  {"LGOverflowADC", {JSON::value_t::number_integer, 1, true, true}}, 
-  {"nominalT0HG", {JSON::value_t::number_float, 1, true, true}},
-  {"nominalT0LG", {JSON::value_t::number_float, 1, true, true}},
-  {"nominalTau1", {JSON::value_t::number_float, 1, true, false}},
-  {"nominalTau2", {JSON::value_t::number_float, 1, true, false}},
-  {"fixTau1", {JSON::value_t::boolean, 1, true, false}},
-  {"fixTau2", {JSON::value_t::boolean, 1, true, false}},
-  {"T0CutsHG", {JSON::value_t::array, 2, true, true}},
-  {"T0CutsLG", {JSON::value_t::array, 2, true, true}},
-  {"chisqDivAmpCutHG", {JSON::value_t::number_float, 1, true, true}},
-  {"chisqDivAmpCutLG", {JSON::value_t::number_float, 1, true, true}},
-  {"chisqDivAmpOffsetHG", {JSON::value_t::number_float, 1, true, true}},
-  {"chisqDivAmpOffsetLG", {JSON::value_t::number_float, 1, true, true}},
-  {"chisqDivAmpPowerHG", {JSON::value_t::number_float, 1, true, true}},
-  {"chisqDivAmpPowerLG", {JSON::value_t::number_float, 1, true, true}},
-  {"gainFactorHG", {JSON::value_t::number_float, 1, true, true}},
-  {"gainFactorLG", {JSON::value_t::number_float, 1, true, true}},
-  {"noiseSigmaHG", {JSON::value_t::number_float, 1, true, true}},
-  {"noiseSigmaLG", {JSON::value_t::number_float, 1, true, true}},
-  {"enableRepass", {JSON::value_t::boolean, 1, false, false}},
-  {"Repass2ndDerivThreshHG", {JSON::value_t::number_integer, 1, true, true}},
-  {"Repass2ndDerivThreshLG", {JSON::value_t::number_integer, 1, true, true}},
-  {"fitAmpMinMaxHG", {JSON::value_t::array, 2, true, false}},
-  {"fitAmpMinMaxLG", {JSON::value_t::array, 2, true, false}},
-  {"ampMinSignifHGLG", {JSON::value_t::array, 2, true, false}},
-  {"enablePreExclusion", {JSON::value_t::array, 3, false, false}},
-  {"enablePostExclusion", {JSON::value_t::array, 3, false, false}},
-  {"enableUnderflowExclusionHG", {JSON::value_t::array, 2, true, false}},
-  {"enableUnderflowExclusionLG", {JSON::value_t::array, 2, true, false}},
-  {"enableTimingCorrection", {JSON::value_t::array, 2, false, false}},
-  {"timeCorrCoeffHG", {JSON::value_t::array, 0, true, false}},
-  {"timeCorrCoeffLG", {JSON::value_t::array, 0, true, false}},
-  {"enableADCNLCorrection", {JSON::value_t::array, 3, false, false}},
-  {"ADCNLCorrCoeffs", {JSON::value_t::array, 0, true, false}},
-  {"useDelayed", {JSON::value_t::boolean, 1, false, false}},
-  {"delayDeltaT", {JSON::value_t::number_float, 1, true, false}}
-};
-  
+    {"tag", {JSON::value_t::string, 1, true, true}},
+    {"enabled", {JSON::value_t::boolean, 1, true, true}},
+    {"LGMode", {JSON::value_t::number_unsigned, 1, false, true}},
+    {"Nsample", {JSON::value_t::number_integer, 1, false, true}},
+    {"FADCFreqMHz", {JSON::value_t::number_integer, 1, false, true}},
+    {"preSampleIdx", {JSON::value_t::number_integer, 1, true, true}},
+    {"nominalPedestal", {JSON::value_t::number_integer, 1, false, true}},
+    {"fitFunction", {JSON::value_t::string, 1, true, true}},
+    {"peakSample", {JSON::value_t::number_integer, 1, true, true}},
+    {"peakTolerance", {JSON::value_t::number_integer, 1, true, false}},
+    {"quietFits", {JSON::value_t::boolean, 1, false, false}},
+    {"2ndDerivThreshHG", {JSON::value_t::number_integer, 1, true, true}},
+    {"2ndDerivThreshLG", {JSON::value_t::number_integer, 1, true, true}},
+    {"2ndDerivStep", {JSON::value_t::number_integer, 1, false, false}},
+    {"HGOverflowADC", {JSON::value_t::number_integer, 1, true, true}},
+    {"HGUnderflowADC", {JSON::value_t::number_integer, 1, true, true}},
+    {"LGOverflowADC", {JSON::value_t::number_integer, 1, true, true}},
+    {"nominalT0HG", {JSON::value_t::number_float, 1, true, true}},
+    {"nominalT0LG", {JSON::value_t::number_float, 1, true, true}},
+    {"nominalTau1", {JSON::value_t::number_float, 1, true, false}},
+    {"nominalTau2", {JSON::value_t::number_float, 1, true, false}},
+    {"fixTau1", {JSON::value_t::boolean, 1, true, false}},
+    {"fixTau2", {JSON::value_t::boolean, 1, true, false}},
+    {"T0CutsHG", {JSON::value_t::array, 2, true, true}},
+    {"T0CutsLG", {JSON::value_t::array, 2, true, true}},
+    {"chisqDivAmpCutHG", {JSON::value_t::number_float, 1, true, true}},
+    {"chisqDivAmpCutLG", {JSON::value_t::number_float, 1, true, true}},
+    {"chisqDivAmpOffsetHG", {JSON::value_t::number_float, 1, true, true}},
+    {"chisqDivAmpOffsetLG", {JSON::value_t::number_float, 1, true, true}},
+    {"chisqDivAmpPowerHG", {JSON::value_t::number_float, 1, true, true}},
+    {"chisqDivAmpPowerLG", {JSON::value_t::number_float, 1, true, true}},
+    {"gainFactorHG", {JSON::value_t::number_float, 1, true, true}},
+    {"gainFactorLG", {JSON::value_t::number_float, 1, true, true}},
+    {"noiseSigmaHG", {JSON::value_t::number_float, 1, true, true}},
+    {"noiseSigmaLG", {JSON::value_t::number_float, 1, true, true}},
+    {"enableRepass", {JSON::value_t::boolean, 1, false, false}},
+    {"Repass2ndDerivThreshHG", {JSON::value_t::number_integer, 1, true, true}},
+    {"Repass2ndDerivThreshLG", {JSON::value_t::number_integer, 1, true, true}},
+    {"fitAmpMinMaxHG", {JSON::value_t::array, 2, true, false}},
+    {"fitAmpMinMaxLG", {JSON::value_t::array, 2, true, false}},
+    {"ampMinSignifHGLG", {JSON::value_t::array, 2, true, false}},
+    {"enablePreExclusion", {JSON::value_t::array, 3, false, false}},
+    {"enablePostExclusion", {JSON::value_t::array, 3, false, false}},
+    {"enableUnderflowExclusionHG", {JSON::value_t::array, 2, true, false}},
+    {"enableUnderflowExclusionLG", {JSON::value_t::array, 2, true, false}},
+    {"enableTimingCorrection", {JSON::value_t::array, 3, false, false}},
+    {"timeCorrCoeffHG", {JSON::value_t::array, 6, true, false}},
+    {"timeCorrCoeffLG", {JSON::value_t::array, 6, true, false}},
+    {"enableADCNLCorrection", {JSON::value_t::array, 3, false, false}},
+    {"ADCNLCorrCoeffs", {JSON::value_t::array, 0, true, false}},
+    {"enableNLCorrection", {JSON::value_t::array, 2, false, false}},
+    {"HGNLCorrCoeffs", {JSON::value_t::array, 5, true, false}},
+    {"LGNLCorrCoeffs", {JSON::value_t::array, 5, true, false}},
+    {"useDelayed", {JSON::value_t::boolean, 1, false, false}},
+    {"delayDeltaT", {JSON::value_t::number_float, 1, true, false}},
+    {"delayDefaultPedestalShift", {JSON::value_t::number_float, 1, true, false}},
+    {"fitTimeMax", {JSON::value_t::number_float, 1, true, false}}
+  };
 
 TH1* ZDCPulseAnalyzer::s_undelayedFitHist  = nullptr;
 TH1* ZDCPulseAnalyzer::s_delayedFitHist    = nullptr;
@@ -203,6 +209,10 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const J
 
   m_fitHist->SetDirectory(0);
   m_fitHistLGRefit->SetDirectory(0);
+  
+  if(m_useDelayed) {
+    enableDelayed(m_delayedDeltaT, m_delayedPedestalDiff, false);
+  }
 
   Reset();
 }
@@ -274,8 +284,8 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_chisqDivAmpPowerLG = 1.2;
   m_chisqDivAmpPowerHG = 1.2;
 
-  m_LGT0CorrParams.assign(4, 0);
-  m_HGT0CorrParams.assign(4, 0);
+  m_LGT0CorrParams.assign(6, 0);
+  m_HGT0CorrParams.assign(6, 0);
 
   // m_defaultFitTMax = m_tmax;
   // m_defaultFitTMin = m_tmin;
@@ -2058,7 +2068,6 @@ void ZDCPulseAnalyzer::checkTF1Limits(TF1* func)
 				  )
     		   );
     
-    //if (std::abs(parLimitHigh / parLimitLow - 1) > 1e-6) {
     if (std::abs(parLimitHigh - parLimitLow) > (1e-6)*std::abs(parLimitLow)) {
       double value = func->GetParameter(ipar);
       if (value >= parLimitHigh) {
@@ -2086,7 +2095,7 @@ std::unique_ptr<TFitter> ZDCPulseAnalyzer::MakeCombinedFitter(TF1* func)
     double parLimitLow, parLimitHigh;
 
     func->GetParLimits(ipar, parLimitLow, parLimitHigh);
-    if (std::abs(parLimitHigh / parLimitLow - 1) < 1e-6) {
+    if (std::abs(parLimitHigh - parLimitLow) < (1e-6)*std::abs(parLimitLow)) {
       double value   = func->GetParameter(ipar);
       double lowLim  = std::min(value * 0.99, value * 1.01);
       double highLim = std::max(value * 0.99, value * 1.01);
@@ -2559,6 +2568,7 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "T0CutsLG") {
       m_T0CutLowLG = value[0];
       m_T0CutHighLG = value[1];
+      m_initializedFits = false;
     }
     else if (key == "chisqDivAmpCutHG") m_chisqDivAmpCutHG = value;
     else if (key == "chisqDivAmpCutLG") m_chisqDivAmpCutLG = value;
@@ -2570,6 +2580,9 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "gainFactorLG") m_gainFactorLG = value;
     else if (key == "noiseSigmaHG") m_noiseSigHG = value;
     else if (key == "noiseSigmaLG") m_noiseSigLG = value;
+    else if (key == "fitTimeMax") {
+      SetFitTimeMax(static_cast<float>(value));
+    }
     else if (key == "enableRepass") m_enableRepass = value;
     else if (key == "Repass2ndDerivThreshHG")  m_peak2ndDerivMinRepassHG = value;
     else if (key == "Repass2ndDerivThreshLG")  m_peak2ndDerivMinRepassLG = value;
@@ -2582,7 +2595,7 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       m_fitAmpMaxLG = value[1];
     }
     else if (key == "quietFits") {
-      m_quietFits = value[0];
+      m_quietFits = value;
     }
     else if (key == "enablePreExclusion") {
       m_enablePreExcl = true;
@@ -2616,18 +2629,67 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       auto doPerSampleCorrJson = value["doPerSampleCorr"];
       
       if (fileNameJson.is_null() || doPerSampleCorrJson.is_null()) {
-	result = false;
-	std::string resultString = "failure processing enableFADCCorrections object";
-	break;
+	      result = false;
+	      resultString = "failure processing enableFADCCorrections object";
+	      break;
       }
       
       m_haveFADCCorrections = true;
       m_FADCCorrPerSample = doPerSampleCorrJson;
       m_fadcCorrFileName = fileNameJson;
     }
+    else if(key =="useDelayed"){
+      if(value){
+        m_useDelayed = true;
+      }
+    } 
+    else if (key == "delayDeltaT") m_delayedDeltaT = value;
+    else if (key == "delayDefaultPedestalShift") m_delayedPedestalDiff = value;
+    else if (key == "enableTimingCorrection") {
+      m_timingCorrMode = value[0];
+      m_timingCorrRefADC = value[1];
+      m_timingCorrScale = value[2];
+    }
+    else if(key == "timeCorrCoeffHG"){
+      for(int i = 0;auto coeff:value){
+        m_HGT0CorrParams.at(i) = coeff;
+        i++;
+      }
+    }
+    else if(key == "timeCorrCoeffLG"){
+      for(int i = 0;auto coeff:value){
+        m_LGT0CorrParams.at(i) = coeff;
+        i++;
+      }
+    }
+    else if(key == "enableNLCorrection"){
+      m_haveNonlinCorr = true;
+      m_nonLinCorrRefADC = value[0];
+      m_nonLinCorrRefScale = value[1];
+      (*m_msgFunc_p)(
+          ZDCMsg::Debug, ("Setting non-linear parameters" 
+                         ", reference ADC = " + std::to_string(m_nonLinCorrRefADC) +
+                         ", reference scale = " + std::to_string(m_nonLinCorrRefScale)));
+    }
+    else if(key == "HGNLCorrCoeffs"){
+      std::string HGParamsStr = "HG coefficients = ";
+       for (auto coeff : value) {
+        m_nonLinCorrParamsHG.push_back(coeff);
+        HGParamsStr += std::to_string(m_nonLinCorrParamsHG.back()) + " ";
+      }
+      (*m_msgFunc_p)(ZDCMsg::Debug, HGParamsStr);
+    }
+    else if(key == "LGNLCorrCoeffs"){
+      std::string LGParamsStr = "LG coefficients = ";
+      for(auto coeff:value){
+        m_nonLinCorrParamsLG.push_back(coeff);
+        LGParamsStr += std::to_string(m_nonLinCorrParamsLG.back()) + " ";
+      }
+      (*m_msgFunc_p)(ZDCMsg::Debug, LGParamsStr);
+    }
     else {
       result = false;
-      std::string resultString = "unprocessed parameter";
+      resultString = "unprocessed parameter";
       break;
     }
   }

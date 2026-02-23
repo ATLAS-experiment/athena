@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import uproot
 import pandas as pd
@@ -45,7 +46,7 @@ def main():
 
     # Open the log file in append mode
     with open(log_file, "a") as logfile:
-        message = f"Getting list of variables from AuxDyn branches into csv files"
+        message = "Getting list of variables from AuxDyn branches into csv files"
         print(message)
         logfile.write(message + "\n")
 
@@ -87,7 +88,7 @@ def main():
            logfile.write(f"{output_filename}\n")
            group_df.to_csv(output_filename, index=False)    
 
-        message = f"csv files generated from AuxDyn branches successfully"
+        message = "csv files generated from AuxDyn branches successfully"
         logfile.write(message + "\n")
 
     print(message)

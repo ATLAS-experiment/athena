@@ -16,6 +16,7 @@
 #include "xAODTruth/TruthVertexContainer.h"
 #include "InDetSecVtxTruthMatchTool/IInDetSecVtxTruthMatchTool.h"
 #include "InDetTrackSystematicsTools/IInDetTrackTruthOriginTool.h"
+#include "xAODMuon/MuonContainer.h"
 
 
 // standard includes
@@ -150,15 +151,18 @@ class InDetSecVtxTruthMatchTool : public virtual IInDetSecVtxTruthMatchTool,
   Gaudi::Property<bool> m_doSMOrigin{this, "doSMOrigin", false, "Enable decoration of SM origin types"};
 
   ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "TrackTruthOriginTool", "InDet::InDetTrackTruthOriginTool/TrackTruthOriginTool"};
+  Gaudi::Property<std::string> m_muonContainerName{this, "MuonContainer", "StdWithLRTMuons", "Primary muon container name used in MuSA mode"};
+  Gaudi::Property<std::string> m_muonFallbackContainerName{this, "FallbackMuonContainer", "Muons", "Fallback muon container if primary is unavailable"};
 
   //private methods to check if particles are good to use
   //returns barcode of LLP production truth vertex
   int checkProduction( const xAOD::TruthParticle& truthPart, std::vector<const xAOD::TruthVertex*> truthVerticesToMatch ) const;
   void countReconstructibleDescendentParticles(const xAOD::TruthVertex& signalTruthVertex,
                                                std::vector<const xAOD::TruthParticle*>& set, int counter) const;
-  std::vector<int> checkParticle( const xAOD::TruthParticle& part, const xAOD::TrackParticleContainer* tkCont ) const;
+  std::vector<int> checkParticle( const xAOD::TruthParticle& part, const xAOD::TrackParticleContainer* tkCont, const xAOD::MuonContainer* muonCont ) const;
   bool isFrom(const xAOD::TruthParticle& truth, int flav) const;
   int checkSMProduction( const xAOD::TruthParticle& truthPart) const;
+  const xAOD::Muon* findStandAloneMuon(const xAOD::TrackParticle& mstp, const xAOD::MuonContainer* muonContainer) const;
 };
 
 #endif

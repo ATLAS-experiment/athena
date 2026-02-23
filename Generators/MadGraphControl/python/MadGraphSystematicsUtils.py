@@ -104,19 +104,19 @@ def get_pdf_and_systematic_settings(the_base_fragment,isNLO,useNLOotf=False):
     if useNLOotf:
         # pdf weights with NLO syntax
         if basefragment_settings['pdf_variations'] is not None and basefragment_settings['central_pdf'] in basefragment_settings['pdf_variations']:
-            runcard_settings['reweight_pdf']='True'
+            runcard_settings['reweight_PDF']='True'
         else:
-            runcard_settings['reweight_pdf']='False'
+            runcard_settings['reweight_PDF']='False'
         if basefragment_settings['pdf_variations'] is not None:
             for v in basefragment_settings['pdf_variations']:
                 if v==basefragment_settings['central_pdf']:
                     continue
                 runcard_settings['lhaid']+=' '+str(v)
-                runcard_settings['reweight_pdf']+=' True'
+                runcard_settings['reweight_PDF']+=' True'
         if basefragment_settings['alternative_pdfs'] is not None:
             for a in basefragment_settings['alternative_pdfs']:
                 runcard_settings['lhaid']+=' '+str(a)
-                runcard_settings['reweight_pdf']+=' False'           
+                runcard_settings['reweight_PDF']+=' False'
             
     else: #use the new python systematics module
         sys_pdfs=[]
@@ -129,7 +129,7 @@ def get_pdf_and_systematic_settings(the_base_fragment,isNLO,useNLOotf=False):
         if len(sys_pdfs)>0:
             runcard_systematics_arguments['pdf']=','.join(sys_pdfs)
         if isNLO:
-            runcard_settings['reweight_pdf']='False'
+            runcard_settings['reweight_PDF']='False'
             
 
     ### Set scale variations to be included as weights
@@ -308,6 +308,6 @@ def parse_systematics_argument(sys_arg):
 # these arguments steer systematics
 def systematics_run_card_options(isNLO):
     if isNLO:
-        return ['pdlabel','lhaid','reweight_pdf','reweight_scale','rw_rscale','rw_fscale','store_rwgt_info','systematics_arguments' ]
+        return ['pdlabel','lhaid','reweight_PDF','reweight_scale','rw_rscale','rw_fscale','store_rwgt_info','systematics_arguments' ]
     else:
         return  ['pdlabel','lhaid','use_syst','sys_scalefact','sys_pdf','systematics_arguments']

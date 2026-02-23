@@ -255,7 +255,7 @@ for ros in range(1,5):
 
 #=== commit changes
 if len(comment):
-    mgr2.commitToDb(output, folder2, tag2, (TileBchDecoder.BitPat_onl01 if online else TileBchDecoder.BitPat_ofl01), author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
+    mgr2.commitToDb(output, folder2, tag2, (TileBchDecoder.BitPat_onl01 if online else TileBchDecoder.BitPat_ofl01), author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0), "ALL")
 else:
     log.warning("Folders are in sync, nothing to update")
 

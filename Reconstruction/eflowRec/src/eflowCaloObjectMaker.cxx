@@ -9,16 +9,13 @@
  *      Author: zhangrui
  */
 
-#include "eflowRec/eflowCaloObjectMaker.h"
+#include "eflowCaloObjectMaker.h"
 
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/eflowCaloObject.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
+#include "eflowCaloObject.h"
 
-#include <algorithm>
-#include <iostream>
-#include <cmath>
 #include <vector>
 
 

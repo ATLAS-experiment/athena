@@ -25,12 +25,8 @@ namespace ActsTrk::detail {
 
     static ActsTrk::SeedContainer createSeeds(const xAOD::SpacePointContainer& spacePoints) {
       ActsTrk::SeedContainer seedContainer;
-      seedContainer.spacePoints().reserve(spacePoints.size());
-      for (const auto* sp : spacePoints) {
-        seedContainer.spacePoints().push_back(sp);
-      }
       for (unsigned int i(0u); i+2u<spacePoints.size(); i+=3u) {
-        seedContainer.push_back(std::array{i, i+1, i+2});
+        seedContainer.push_back(std::array{spacePoints.at(i), spacePoints.at(i+1), spacePoints.at(i+2)}, 0.f, 0.f);
       }
       return seedContainer;
     }

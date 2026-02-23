@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,11 +20,11 @@ JetTrackMomentsTool::JetTrackMomentsTool(const std::string& name)
 
 StatusCode JetTrackMomentsTool::initialize() {
 
-  ATH_MSG_INFO("Initializing JetTrackMomentsTool " << name());
+  ATH_MSG_DEBUG("Initializing JetTrackMomentsTool " << name());
   if ( m_htsel.empty() ) {
-    ATH_MSG_INFO("  No track selector.");
+    ATH_MSG_DEBUG("  No track selector.");
   } else {
-    ATH_MSG_INFO("  Track selector: " << m_htsel->name());
+    ATH_MSG_DEBUG("  Track selector: " << m_htsel->name());
   }
 
   if(m_jetContainerName.empty()){

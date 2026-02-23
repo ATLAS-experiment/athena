@@ -131,8 +131,10 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         layer_bitmask_t hitLayers = 0;
         unsigned nhit = 0;
         // We can't just use the the iterator since hit.getLayer() isn't guaranteed to be right.
-        for (unsigned layer = 0; layer < track.getFPGATrackSimHits().size(); layer++) {
-            const FPGATrackSimHit& hit = track.getFPGATrackSimHits().at(layer);
+        const auto& track_hits = track.getFPGATrackSimHitPtrs();
+        for (unsigned layer = 0; layer < track_hits.size(); layer++) {
+            if (!track_hits[layer]) continue;
+            const FPGATrackSimHit& hit = *track_hits[layer];
             road_hits[layer].push_back(std::make_shared<FPGATrackSimHit>(hit));
             if (hit.isReal()) {
                 hitLayers |= 1 << layer;
@@ -157,7 +159,7 @@ StatusCode FPGATrackSimWindowExtensionTool::extendTracks(const std::vector<std::
         if (nhit >= m_threshold) {
             m_roads.emplace_back();
             FPGATrackSimRoad & road = m_roads.back();
-            road.setRoadID(roads.size() - 1);
+            road.setRoadID(m_roads.size() - 1);
 
             // Set the "Hough x" and "Hough y" using the track parameters.
             road.setX(trackphi);

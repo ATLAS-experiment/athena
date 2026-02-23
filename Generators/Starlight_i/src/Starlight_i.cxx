@@ -21,6 +21,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
@@ -228,9 +229,7 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
       }
     ATH_MSG_DEBUG( "Saved " << ipart << " tracks "  );
 
-    // Convert cm->mm and GeV->MeV
-    //
-    GeVToMeV(evt);
+    MC::GeVToMeV(evt); //Only scales momenta and masses
 
     return StatusCode::SUCCESS;
 }

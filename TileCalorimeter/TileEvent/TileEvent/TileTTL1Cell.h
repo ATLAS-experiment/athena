@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -33,6 +33,7 @@
 #include "Identifier/Identifier.h"
 
 #include <string>
+#include <cstdint> //for uint16_t
 
 class TileTTL1Cell {
 

@@ -70,7 +70,7 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
       << "  " << name()
       << " impossible."
       << " [" << type().storageName() << "] " );
-  type().missingDriver(msg());
+  throw std::runtime_error("POOL::DbContainer: Unknown storage type requested: " + type().storageName());
 }
 
 // Destructor

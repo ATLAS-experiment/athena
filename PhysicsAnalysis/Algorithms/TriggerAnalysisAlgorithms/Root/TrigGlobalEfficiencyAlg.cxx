@@ -184,6 +184,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
     m_muonTool = asg::AnaToolHandle<CP::IMuonTriggerScaleFactors>("CP::MuonTriggerScaleFactors/MuonTrigEff_" + m_muonID.value());
     ANA_CHECK(m_muonTool.setProperty("MuonQuality", m_muonID.value()));
     ANA_CHECK(m_muonTool.setProperty("AllowZeroSF", true));
+    ANA_CHECK(m_muonTool.setProperty("Campaign", m_campaign.value()));
     ANA_CHECK(m_muonTool.initialize());
     // now record the handle
     muonTools.push_back(m_muonTool.getHandle());

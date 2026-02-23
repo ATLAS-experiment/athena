@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- //////////////////////////////////////////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header file for class ICutFlowSvc                                                                  //
@@ -13,7 +13,6 @@
 //<<<<<< INCLUDES                                                       >>>>>>
 #include <vector>
 #include <string>
-#include <map>
 #include <stdint.h> // for uint32_t
 
 #include "CxxUtils/checker_macros.h"
@@ -22,7 +21,7 @@
 class INamedInterface;
 
 
-/// InstanceIdentifier is a unique identifer used for every AthFilterAlgorithm instance
+/// InstanceIdentifier is a unique identifer used for every filter
 typedef uint32_t CutIdentifier;
 
 

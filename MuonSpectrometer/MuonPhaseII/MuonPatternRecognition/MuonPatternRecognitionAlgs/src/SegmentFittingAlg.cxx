@@ -41,6 +41,7 @@ namespace MuonR4 {
         fitCfg.recalibrate = m_recalibInFit;
         fitCfg.useFastFitter = m_useFastFitter;
         fitCfg.fastPreFitter = m_fastPreFitter;
+        //fitCfg.ignoreFailedPreFit = m_ignoreFailedPreFit;
         fitCfg.useHessian = m_hessianResidual;
 
         fitCfg.doBeamSpot = m_doBeamspotConstraint;
@@ -51,6 +52,19 @@ namespace MuonR4 {
         fitCfg.recoveryPull = m_recoveryPull;
         fitCfg.nPrecHitCut = m_precHitCut;
         fitCfg.maxIter = m_maxIter;
+        ATH_MSG_DEBUG("Fitter configuration: \n - fitT0: "<<m_doT0Fit
+                    <<"\n - recalibInFit: "<<m_recalibInFit
+                    <<"\n - useFastFitter: "<<m_useFastFitter
+                    <<"\n - fastPreFitter: "<<m_fastPreFitter
+                    <<"\n - ignoreFailedPreFit: "<<m_ignoreFailedPreFit
+                    <<"\n - hessianResidual: "<<m_hessianResidual
+                    <<"\n - doBeamSpotConstraint: "<<m_doBeamspotConstraint
+                    <<"\n - beamSpotR: "<<m_beamSpotR
+                    <<"\n - beamSpotL: "<<m_beamSpotL
+                    <<"\n - outlierRemovalCut: "<<m_outlierRemovalCut
+                    <<"\n - recoveryPull: "<<m_recoveryPull
+                    <<"\n - precHitCut: "<<m_precHitCut
+                    <<"\n - maxIter: "<<m_maxIter);
 
         m_fitter = std::make_unique<SegmentFit::SegmentLineFitter>(name(), std::move(fitCfg));
 
@@ -76,6 +90,7 @@ namespace MuonR4 {
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
         SegmentVec_t allSegments{};
+        ATH_MSG_VERBOSE("execute() - Start processing " << segmentSeeds->size() << " pattern seeds.");
         for (const SegmentSeed* seed : *segmentSeeds) {
             SegmentVec_t segments = fitSegmentSeed(ctx, *gctx, seed);
              if (m_visionTool.isEnabled() && segments.size() > 1) {
@@ -137,6 +152,7 @@ namespace MuonR4 {
         Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
 
         using State_t = MdtSegmentSeedGenerator::State_t;
+        // Make sure patternSeed->parameters() are in ACTS units!
         State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed};
 
         const auto* seeder = patternSeed->parameters()[toUnderlying(ParamDefs::theta)] > 50 * Gaudi::Units::deg ?
@@ -155,6 +171,9 @@ namespace MuonR4 {
 
         ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
         while (auto seed = seeder->nextSeed(cctx, seedState)) {
+            ATH_MSG_VERBOSE("fitSegmentHits() - Found a seed. Try to fit the segment...");
+            // Back convert the seed parameters to athena units
+            seed->parameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToAthena(seed->parameters[toUnderlying(ParamDefs::t0)]);
             auto segment = m_fitter->fitSegment(ctx, patternSeed, seed->parameters,
                                                 locToGlob, std::move(seed->hits));
             if (segment) {

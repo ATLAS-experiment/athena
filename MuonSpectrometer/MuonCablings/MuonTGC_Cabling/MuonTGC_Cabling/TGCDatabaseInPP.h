@@ -33,7 +33,7 @@ class TGCDatabaseInPP : public TGCDatabase {
     /** Copy constructor */
     TGCDatabaseInPP(const TGCDatabaseInPP&);
     /** Destructor */
-    virtual ~TGCDatabaseInPP(void);
+    virtual ~TGCDatabaseInPP();
 
     virtual bool update(const std::vector<int>&) override;
 
@@ -53,11 +53,11 @@ class TGCDatabaseInPP : public TGCDatabase {
     virtual void getminIndexIn(int* tmpminIndexIn) const;
 
    private:
-    virtual void readDB(void) override;
-    TGCDatabaseInPP(void) {}
+    virtual void readDB() override;
+    TGCDatabaseInPP() {}
 
     /** Make the IndexDBIn table */
-    virtual void makeIndexDBIn(void);
+    virtual void makeIndexDBIn();
     /** Get the internal number, which is between 0 and NIndexDBIn-1 */
     virtual int convertIndexDBIn(int* indexIn) const;
 

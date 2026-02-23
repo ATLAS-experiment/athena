@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "gtest/gtest.h"
@@ -121,7 +121,6 @@ TEST(JetGroupProductTester, twocond) {
   EXPECT_EQ(jgp.next(collector), exp);
 
   EXPECT_TRUE(jgp.next(collector).empty());
-  if(collector) {collector->write();}
 
 }
 

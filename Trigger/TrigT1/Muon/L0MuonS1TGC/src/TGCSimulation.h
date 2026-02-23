@@ -11,7 +11,7 @@
 
 #include "xAODTrigger/MuonRoIContainer.h"
 
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"   // TODO: to be updated for phase-II
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 namespace L0Muon {
 
@@ -30,7 +30,7 @@ class TGCSimulation : public ::AthReentrantAlgorithm {
   SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "L0MuonEndcapKey", "L0MuonEndcapRoI", "key for LVL0 Muon RoIs in the barrel" };
 
   /// TGC cabling map
-  ServiceHandle<MuonTGC_CablingSvc> m_cabling{this, "TGCCablingSvc", "MuonTGC_CablingSvc","Key of MuonTGC_CablingSvc"};
+  SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{this, "CablingKey", "MuonTgc_CablingMap"};
 
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
   

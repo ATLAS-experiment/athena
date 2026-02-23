@@ -2,9 +2,9 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFLCCalibTool.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowRecCluster.h"
+#include "PFLCCalibTool.h"
+#include "eflowCaloObject.h"
+#include "eflowRecCluster.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"

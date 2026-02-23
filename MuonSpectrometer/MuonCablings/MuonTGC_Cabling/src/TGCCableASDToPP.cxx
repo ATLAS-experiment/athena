@@ -14,14 +14,16 @@
 
 namespace MuonTGC_Cabling {
 
-TGCCableASDToPP::TGCCableASDToPP(const std::string& filename)
-    : TGCCable(TGCCable::ASDToPP), m_tgcCablingDbTool("TGCCablingDbTool") {
-    initialize(filename);
+TGCCableASDToPP::TGCCableASDToPP(const std::string& filename,
+                                 const std::string& diffFile)
+    : TGCCable{TGCCable::ASDToPP} {
+    initialize(filename, diffFile);
 }
 
-TGCCableASDToPP::~TGCCableASDToPP() {}
+TGCCableASDToPP::~TGCCableASDToPP() = default;
 
-void TGCCableASDToPP::initialize(const std::string& filename) {
+void TGCCableASDToPP::initialize(const std::string& filename,
+                                 const std::string& diffFile) {
     m_commonDb[TGCId::Forward][TGCId::WD] =
         std::make_shared<TGCDatabaseASDToPP>(filename, "FWD");
     m_commonDb[TGCId::Forward][TGCId::SD] =
@@ -69,117 +71,74 @@ void TGCCableASDToPP::initialize(const std::string& filename) {
             m_ESIdb[side][sector] = m_commonDb[TGCId::Endcap][TGCId::SI];
         }
     }
+    updateDatabase(diffFile);
 }
 
-StatusCode TGCCableASDToPP::updateDatabase() {
-    if (m_tgcCablingDbTool.retrieve().isFailure()) {
-        return StatusCode::FAILURE;
+void TGCCableASDToPP::updateDatabase(const std::string& diffFile) {
+
+    std::vector<std::string> fileContent{};
+    std::ifstream inASDToPP;
+    inASDToPP.open(diffFile);
+    if (inASDToPP.bad()) {
+        throw std::runtime_error("Failed to open " + diffFile);
+        return;
     }
 
-    StatusCode sc = m_tgcCablingDbTool->readASD2PP_DIFF_12FromText();
-    if (!sc.isSuccess()) {
-        return StatusCode::SUCCESS;
-    }
-
-    std::vector<std::string>* tmp_ASD2PP_DIFF_12 =
-        m_tgcCablingDbTool->giveASD2PP_DIFF_12();
-    if (!tmp_ASD2PP_DIFF_12) {
-        return StatusCode::FAILURE;
-    }
-
-    m_ASD2PP_DIFF_12.clear();
-    // Truncation saves initialization CPU time of about 30 ms.
-    for (const std::string& s : *tmp_ASD2PP_DIFF_12) {
-        char letter = s.at(0);
+    std::string buf{};
+    // Copy database into m_ASD2PP_DIFF_12
+    while (getline(inASDToPP, buf)) {
+        char letter = buf.at(0);
+        // Truncation saves initialization CPU time of about 30 ms.
         if (letter == '/' || letter == '*') {
             continue;
         }
-        m_ASD2PP_DIFF_12.push_back(s);
+
+        fileContent.push_back(buf);
     }
-    delete tmp_ASD2PP_DIFF_12;
-    tmp_ASD2PP_DIFF_12 = nullptr;
 
     for (int side = 0; side < TGCId::MaxSideType; side++) {
         for (int sector = 0; sector < TGCId::NUM_FORWARD_SECTOR; sector++) {
-            StatusCode sc = updateIndividualDatabase(side, sector, "FWD",
-                                                     m_FWDdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-
-            sc = updateIndividualDatabase(side, sector, "FSD",
-                                          m_FSDdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "FWT",
-                                          m_FWTdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "FST",
-                                          m_FSTdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
+            updateIndividualDatabase(side, sector, fileContent, "FWD",
+                                     m_FWDdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "FSD",
+                                     m_FSDdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "FWT",
+                                     m_FWTdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "FST",
+                                     m_FSTdb[side][sector]);
         }
         for (int sector = 0; sector < TGCId::NUM_ENDCAP_SECTOR; sector++) {
-            StatusCode sc = updateIndividualDatabase(side, sector, "EWD",
-                                                     m_EWDdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "ESD",
-                                          m_ESDdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "EWT",
-                                          m_EWTdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "EST",
-                                          m_ESTdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
+            updateIndividualDatabase(side, sector, fileContent, "EWD",
+                                     m_EWDdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "ESD",
+                                     m_ESDdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "EWT",
+                                     m_EWTdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "EST",
+                                     m_ESTdb[side][sector]);
         }
         for (int sector = 0; sector < TGCId::NUM_INNER_SECTOR; sector++) {
-            StatusCode sc = updateIndividualDatabase(side, sector, "EWI",
-                                                     m_EWIdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "ESI",
-                                          m_ESIdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "FWI",
-                                          m_FWIdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
-            sc = updateIndividualDatabase(side, sector, "FSI",
-                                          m_FSIdb[side][sector]);
-            if (!sc.isSuccess()) {
-                return sc;
-            }
+            updateIndividualDatabase(side, sector, fileContent, "EWI",
+                                     m_EWIdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "ESI",
+                                     m_ESIdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "FWI",
+                                     m_FWIdb[side][sector]);
+            updateIndividualDatabase(side, sector, fileContent, "FSI",
+                                     m_FSIdb[side][sector]);
         }
     }
-
-    return StatusCode::SUCCESS;
 }
 
-StatusCode TGCCableASDToPP::getUpdateInfo(const int side, const int sector,
-                                          const std::string& blockname,
-                                          std::vector<std::vector<int>>& info) {
-    // clear info
-    info.clear();
+std::vector<std::vector<int>> TGCCableASDToPP::getUpdateInfo(
+    const int side, const int sector, const std::vector<std::string>& diffFile,
 
-    std::vector<std::string>::const_iterator it = m_ASD2PP_DIFF_12.begin();
-    std::vector<std::string>::const_iterator it_e = m_ASD2PP_DIFF_12.end();
+    const std::string& blockname) {
+    // clear info
+    std::vector<std::vector<int>> info{};
+
+    std::vector<std::string>::const_iterator it = diffFile.begin();
+    std::vector<std::string>::const_iterator it_e = diffFile.end();
     int size = 0;
 
     // search block name
@@ -230,8 +189,7 @@ StatusCode TGCCableASDToPP::getUpdateInfo(const int side, const int sector,
             }
         }
     }
-
-    return StatusCode::SUCCESS;
+    return info;
 }
 
 TGCDatabaseASDToPP* TGCCableASDToPP::getDatabase(const int side,
@@ -320,43 +278,34 @@ TGCDatabaseASDToPP* TGCCableASDToPP::getDatabase(const int side,
     return db;
 }
 
-// reverse layers in Forward sector
-const int TGCCableASDToPP::s_stripForward[] = {2, 1, 0, 4, 3, 6, 5, 8, 7};
-
-TGCChannelId* TGCCableASDToPP::getChannel(const TGCChannelId* channelId,
-                                          bool orChannel) const {
-    if (channelId) {
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::ASDOut) {
-            return getChannelOut(channelId, orChannel);
-        }
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::PPIn) {
-            return getChannelIn(channelId, orChannel);
-        }
+std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannel(
+    const TGCChannelId& channelId, bool orChannel) const {
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::ASDOut) {
+        return getChannelOut(channelId, orChannel);
     }
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::PPIn) {
+        return getChannelIn(channelId, orChannel);
+    }
+
     return nullptr;
 }
 
-TGCChannelId* TGCCableASDToPP::getChannelIn(const TGCChannelId* ppin,
-                                            bool orChannel) const {
-    if (orChannel) {
-        return nullptr;
-    }
-    if (ppin->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelIn(
+    const TGCChannelId& ppin, bool orChannel) const {
+    if (orChannel || !ppin.isValid()) {
         return nullptr;
     }
 
     TGCDatabaseASDToPP* databaseP =
-        getDatabase(ppin->getSideType(), ppin->getRegionType(),
-                    ppin->getSector(), ppin->getModuleType());
+        getDatabase(ppin.getSideType(), ppin.getRegionType(), ppin.getSector(),
+                    ppin.getModuleType());
 
     if (databaseP == nullptr) {
         return nullptr;
     }
 
     int indexOut[TGCDatabaseASDToPP::NIndexOut] = {
-        ppin->getId(), ppin->getBlock(), ppin->getChannel()};
+        ppin.getId(), ppin.getBlock(), ppin.getChannel()};
     int i = databaseP->getIndexDBOut(indexOut);
     if (i < 0) {
         return nullptr;
@@ -364,60 +313,52 @@ TGCChannelId* TGCCableASDToPP::getChannelIn(const TGCChannelId* ppin,
 
     // ASD2PP.db is Backward connection
     int layer = databaseP->getEntry(i, 0);
-    if (ppin->isStrip()) {
-        if (!(ppin->isBackward())) {
+    if (ppin.isStrip()) {
+        if (!ppin.isBackward()) {
             layer = s_stripForward[layer];
         }
     }
-    int offset = (ppin->isWire()) ? 4 : 0;
+    int offset = (ppin.isWire()) ? 4 : 0;
     int channel = databaseP->getEntry(i, 2 + offset);
 
     // Endcap Triplet chamberId start from 1 in ASDOut
     int chamber = databaseP->getEntry(i, 1);
-    if (ppin->isEndcap() && ppin->isTriplet()) {
+    if (ppin.isEndcap() && ppin.isTriplet()) {
         chamber = chamber + 1;
     }
-    TGCChannelASDOut* asdout = new TGCChannelASDOut(
-        ppin->getSideType(), ppin->getSignalType(), ppin->getRegionType(),
-        ppin->getSector(), layer, chamber, channel);
-
-    return asdout;
+    return std::make_unique<TGCChannelASDOut>(
+        ppin.getSideType(), ppin.getSignalType(), ppin.getRegionType(),
+        ppin.getSector(), layer, chamber, channel);
 }
 
-TGCChannelId* TGCCableASDToPP::getChannelOut(const TGCChannelId* asdout,
-                                             bool orChannel) const {
-    if (orChannel) {
-        return nullptr;
-    }
-    if (asdout->isValid() == false) {
+std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelOut(
+    const TGCChannelId& asdout, bool orChannel) const {
+    if (orChannel || !asdout.isValid()) {
         return nullptr;
     }
 
-    const bool asdoutisStrip = asdout->isStrip();
-    const bool asdoutisBackward = asdout->isBackward();
-    const bool asdoutisEndcap = asdout->isEndcap();
-    const bool asdoutisTriplet = asdout->isTriplet();
-    const int asdoutLayer = asdout->getLayer();
-    const int asdoutChamber = asdout->getChamber();
-    const int asdoutChannel = asdout->getChannel();
+    const bool asdoutisStrip = asdout.isStrip();
+    const bool asdoutisBackward = asdout.isBackward();
+    const bool asdoutisEndcap = asdout.isEndcap();
+    const bool asdoutisTriplet = asdout.isTriplet();
+    const int asdoutLayer = asdout.getLayer();
+    const int asdoutChamber = asdout.getChamber();
+    const int asdoutChannel = asdout.getChannel();
 
     TGCDatabaseASDToPP* databaseP =
-        getDatabase(asdout->getSideType(), asdout->getRegionType(),
-                    asdout->getSector(), asdout->getModuleType());
+        getDatabase(asdout.getSideType(), asdout.getRegionType(),
+                    asdout.getSector(), asdout.getModuleType());
 
     if (databaseP == nullptr) {
         return nullptr;
     }
 
-    TGCChannelPPIn* ppin = nullptr;
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         // ASD2PP.db is Backward connection
         int layer = asdoutLayer;
-        if (asdoutisStrip) {
-            if (!asdoutisBackward) {
-                layer = s_stripForward[layer];
-            }
+        if (asdoutisStrip && !asdoutisBackward) {
+            layer = s_stripForward[layer];
         }
 
         int elecChannel = asdoutChannel;
@@ -427,7 +368,7 @@ TGCChannelId* TGCCableASDToPP::getChannelOut(const TGCChannelId* asdout,
         if (asdoutisEndcap && asdoutisTriplet) {
             chamber = chamber - 1;
         }
-        int offset = (asdout->isWire()) ? 4 : 0;
+        int offset = (asdout.isWire()) ? 4 : 0;
         if (databaseP->getEntry(i, 0) == layer &&
             databaseP->getEntry(i, 1) == chamber &&
             databaseP->getEntry(i, 2 + offset) == elecChannel) {
@@ -435,47 +376,37 @@ TGCChannelId* TGCCableASDToPP::getChannelOut(const TGCChannelId* asdout,
             int block = databaseP->getEntry(i, 4);
             int channel = databaseP->getEntry(i, 5);
 
-            ppin = new TGCChannelPPIn(asdout->getSideType(),
-                                      asdout->getModuleType(),
-                                      asdout->getRegionType(),
-                                      asdout->getSector(), id, block, channel);
-            break;
+            return std::make_unique<TGCChannelPPIn>(
+                asdout.getSideType(), asdout.getModuleType(),
+                asdout.getRegionType(), asdout.getSector(), id, block, channel);
         }
     }
-    return ppin;
+    return nullptr;
 }
 
-StatusCode TGCCableASDToPP::updateIndividualDatabase(
-    const int side, const int sector, const std::string& blockname,
+void TGCCableASDToPP::updateIndividualDatabase(
+    const int side, const int sector, const std::vector<std::string>& diffFile,
+    const std::string& blockname,
     std::shared_ptr<TGCDatabaseASDToPP>& database) {
     if (!database) {
-        return StatusCode::FAILURE;
+        return;
     }
-    std::vector<std::vector<int>> info;
-    StatusCode sc = getUpdateInfo(side, sector, blockname, info);
-    if (!sc.isSuccess()) {
-        return sc;
-    }
+    std::vector<std::vector<int>> info =
+        getUpdateInfo(side, sector, diffFile, blockname);
 
-    size_t info_size = info.size();
-    if (!info_size) {
-        return StatusCode::SUCCESS;
+    if (info.empty()) {
+        return;
     }
 
     if (database->isCommon()) {
-        database.reset(new TGCDatabaseASDToPP(
+        database = std::make_unique<TGCDatabaseASDToPP>(
             *database,
-            false));  // false means this database is not commonly used.
-        if (!database) {
-            return StatusCode::FAILURE;
-        }
+            false);  // false means this database is not commonly used.
     }
 
-    for (size_t i = 0; i < info_size; i++) {
-        database->update(info[i]);
+    for (auto& i : info) {
+        database->update(i);
     }
-
-    return StatusCode::SUCCESS;
 }
 
 }  // namespace MuonTGC_Cabling

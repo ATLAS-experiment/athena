@@ -110,9 +110,24 @@ def EGAM10KernelCfg(flags, name="EGAM10Kernel", **kwargs):
     # Common calo decoration tools
     # ====================================================================
     from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
-        CaloDecoratorKernelCfg, CaloCellDecoratorKernelCfg)
+        CaloDecoratorKernelCfg, CaloCellDecoratorCfg)
     acc.merge(CaloDecoratorKernelCfg(flags))
-    acc.merge(CaloCellDecoratorKernelCfg(flags))
+
+    if decorateCells:
+        # For EGAM10, we want the to decorate only the photons
+        EGAM10CaloCellDecoratorTool = (
+            acc.popToolsAndMerge(
+                CaloCellDecoratorCfg(
+                    flags,
+                    name="EGAM10CaloCellDecoratorTool",
+                    SGKey_photons="Photons",
+                    SGKey_electrons="", # do not decorate electrons
+                    SGKey_CaloCells="AllCalo",
+                )
+            )
+        )
+        acc.addPublicTool(EGAM10CaloCellDecoratorTool)
+        augmentationTools.append(EGAM10CaloCellDecoratorTool)
 
     # thinning tools
     thinningTools = []
@@ -346,7 +361,7 @@ def EGAM10Cfg(flags):
             "Photons.cells_x.cells_y.cells_z",
             "Photons.cells_gain",
             "Photons.cells_quality",
-            "Photons.ncells",
+            "Photons.cells_clusterOriginInfo",
         ] 
 
     # energy density

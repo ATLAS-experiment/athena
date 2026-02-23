@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBIN_HH
@@ -15,11 +15,11 @@ class TGCChannelSLBIn : public TGCChannelId {
     TGCChannelSLBIn(TGCId::SideType side, TGCId::ModuleType module,
                     TGCId::RegionType region, int sector, int id, int channel);
 
-    virtual ~TGCChannelSLBIn(void) {}
+    virtual ~TGCChannelSLBIn() = default;
 
-    virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-    virtual bool isValid(void) const;
+    virtual bool isValid() const override;
 
     // internal structure in 200 channel of SLBIn
    public:
@@ -46,13 +46,13 @@ class TGCChannelSLBIn : public TGCChannelId {
     static int getAdjacentOfSLB(TGCId::ModuleType moduleType,
                                 CellType cellType);
 
-    virtual CellType getCellType(void) const { return m_cellType; }
+    virtual CellType getCellType() const { return m_cellType; }
 
-    virtual int getChannelInCell(void) const;
+    virtual int getChannelInCell() const;
 
-    virtual int getChannelInSLB(void) const;
+    virtual int getChannelInSLB() const;
 
-    virtual void setChannel(int channel);
+    virtual void setChannel(int channel) override;
 
    private:
     CellType m_cellType;
@@ -71,7 +71,7 @@ class TGCChannelSLBIn : public TGCChannelId {
     static const int s_adjacentWT[];
     static const int s_adjacentST[];
 
-    TGCChannelSLBIn(void) {}
+    TGCChannelSLBIn() {}
 };
 
 }  // namespace MuonTGC_Cabling

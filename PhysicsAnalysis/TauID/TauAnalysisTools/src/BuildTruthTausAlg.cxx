@@ -15,8 +15,6 @@ namespace TauAnalysisTools {
 
   StatusCode BuildTruthTausAlg::execute(const EventContext& ctx) const
   {
-    using ITaus = TauAnalysisTools::IBuildTruthTaus::ITruthTausEvent;
-
     TauAnalysisTools::BuildTruthTaus::TruthTausEvent taus;
 
     ATH_CHECK(m_buildTruthTaus->retrieveTruthTaus(taus, ctx));

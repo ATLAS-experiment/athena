@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -21,8 +21,7 @@ namespace ExpressionParsing {
         m_vecDoubleVal(a.m_vecDoubleVal),
         m_varName(a.m_varName),
         m_proxyLoader(a.m_proxyLoader),
-        m_variableType(static_cast<IProxyLoader::VariableType>(a.m_variableType)),
-        m_determinedVariableType(a.m_determinedVariableType ? true : false)
+        m_variableType(IAccessor::VT_UNK) // cannot copy the accessor cache, so have to recet variable type
    {
       if (a.m_moved) throw std::logic_error("Content already moved"); \
    }
@@ -34,8 +33,7 @@ namespace ExpressionParsing {
         m_vecDoubleVal(std::move(a.m_vecDoubleVal)),
         m_varName(std::move(a.m_varName)),
         m_proxyLoader(a.m_proxyLoader),
-        m_variableType(static_cast<IProxyLoader::VariableType>(a.m_variableType)),
-        m_determinedVariableType(a.m_determinedVariableType ? true : false)
+        m_variableType(IAccessor::VT_UNK) // cannot copy the accessor cache, so have to recet variable type
    {
       if (a.m_moved) throw std::logic_error("Content already moved");
    }
@@ -50,8 +48,7 @@ namespace ExpressionParsing {
          m_vecDoubleVal           = std::move(a.m_vecDoubleVal);
          m_varName                = std::move(a.m_varName);
          m_proxyLoader            = a.m_proxyLoader;
-         m_variableType           = static_cast<IProxyLoader::VariableType>(a.m_variableType);
-         m_determinedVariableType = a.m_determinedVariableType ? true : false;
+         m_variableType           = IAccessor::VT_UNK;
          m_moved                  = false;
       }
       return *this;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -81,25 +81,6 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
   while (std::getline(sSS, sItem, cDelim))
     vOut.push_back(stod(sItem));
 }
-//______________________________________________________________________________
-double TauAnalysisTools::tauPt(const xAOD::TauJet& xTau)
-{
-  // return tau pt in GeV
-  return xTau.pt()/1000.;
-}
-//______________________________________________________________________________
-double TauAnalysisTools::tauEta(const xAOD::TauJet& xTau)
-{
-  // return tau eta
-  return xTau.eta();
-}
-
-//______________________________________________________________________________
-double TauAnalysisTools::tauAbsEta(const xAOD::TauJet& xTau)
-{
-  // return absolute tau eta
-  return std::abs(xTau.eta());
-}
 
 //______________________________________________________________________________
 double TauAnalysisTools::finalTauPt(const xAOD::TauJet& xTau)
@@ -122,19 +103,6 @@ double TauAnalysisTools::finalTauAbsEta(const xAOD::TauJet& xTau)
   return std::abs(xTau.etaFinalCalib());
 }
 
-//______________________________________________________________________________
-double TauAnalysisTools::truthTauPt(const xAOD::TauJet& xTau)
-{
-  // return truth tau Pt in GeV
-  const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
-
-  // if there is a truth tau return pT, otherwise return 0 (getTruth will print an error)
-  static const SG::ConstAccessor<char> accIsHadronicTau ("IsHadronicTau");
-  if (xTruthTau!=nullptr && accIsHadronicTau (*xTruthTau))
-    return xTruthTau->pt()/GeV;
-  else
-    return 0.;
-}
 //______________________________________________________________________________
 double TauAnalysisTools::truthVisTauPt(const xAOD::TauJet& xTau)
 {

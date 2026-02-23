@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetGeoModelUtils )
@@ -15,4 +15,4 @@ atlas_add_library( InDetGeoModelUtils
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} ${XERCESC_LIBRARIES}
                    AthenaKernel AthenaBaseComps CxxUtils GaudiKernel
                    GeoModelInterfaces GeoModelUtilities GeoPrimitives RDBAccessSvcLib
-                   PRIVATE_LINK_LIBRARIES GeometryDBSvcLib PathResolver StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES PathResolver StoreGateLib )

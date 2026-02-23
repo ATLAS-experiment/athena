@@ -46,6 +46,9 @@ def defineMenu():
         # ATR-32259: L1 items for L1BKeePrimary
         'L1_MU18VFCH', 'L1_MU8VF_2MU5VF', 
 
+        # L1 items to seed low-mu calratio ATR-32297
+        'L1_eTAU40HT','L1_eTAU60HM',
+
         ##
         # combined lepton (e and mu)
         # new calo
@@ -127,14 +130,22 @@ def defineMenu():
         'L1_jTE50_VjTE600',
         'L1_jTE50_VjTE200',
 
-        # jTEFWD UCC seeds: ATR-30726
-        'L1_jTEFWD2600',
-        'L1_jTEFWD5600',
-        'L1_jTEFWD6300',
-        'L1_jTEFWD6600',
-        'L1_ZDC_PU_jTEFWD5600',
-        'L1_ZDC_PU_jTEFWD6300',
-        'L1_ZDC_PU_jTEFWD6600',
+        # CALMTEA version of some items needed for lowMu HLT menu and L1_ARTEMIS, will need to be removed to make room for jTEFWD items for HI menu below
+        'L1_CALMTEA_jJ10',
+        'L1_CALMTEA_jTE5',
+        'L1_CALMTEA_jTE10',
+        'L1_ARTEMISL',
+        'L1_ARTEMIST',
+        
+        # temporarily commented out to make room for items needed for lowMu HLT menu added above
+        # # jTEFWD UCC seeds: ATR-30726
+        # 'L1_jTEFWD2600',
+        # 'L1_jTEFWD5600',
+        # 'L1_jTEFWD6300',
+        # 'L1_jTEFWD6600',
+        # 'L1_ZDC_PU_jTEFWD5600',
+        # 'L1_ZDC_PU_jTEFWD6300',
+        # 'L1_ZDC_PU_jTEFWD6600',
 
         #Overlay items
         'L1_ZDC_A_C_VjTE50_OVERLAY', 'L1_jTE50_OVERLAY', 'L1_jTE1500_OVERLAY', 'L1_jTE4000_OVERLAY',
@@ -157,6 +168,9 @@ def defineMenu():
 
         'L1_eTAU1',
         'L1_eTAU2', 'L1_eTAU2_VjTE200', 'L1_2eTAU2_VjTE200',
+
+        # Combined em - TE
+        'L1_2eEM5_jTE200',
         
         #UPC - TRT,  phase-1 calo
         'L1_TRT_VjTE20', 'L1_TRT_VjTE50', 'L1_TRT_VjTE200', 'L1_TRT_ZDC_XOR_VjTE200', 'L1_TRT_1ZDC_NZDC_VjTE200',

@@ -17,7 +17,7 @@ TGCModuleHPB::TGCModuleHPB(TGCId::SideType side, TGCId::SignalType signal,
     setId(id);
 }
 
-bool TGCModuleHPB::isValid(void) const {
+bool TGCModuleHPB::isValid() const {
     if ((getSideType() > TGCId::NoSideType) &&
         (getSideType() < TGCId::MaxSideType) &&
         (getSignalType() > TGCId::NoSignalType) &&

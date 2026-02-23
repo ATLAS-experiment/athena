@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////
@@ -65,41 +65,41 @@ namespace dqutils {
 
     dir0->cd();
 
-    TString run_dir;
+    std::string run_dir;
     int times = 1;
     while (times--) {  // just once
       run_dir = dir0->GetName();
 
-      TString rno_dir = run_dir + "/Pixel/Hits/";
-      TDirectory* dir = infile->GetDirectory(rno_dir);
+      std::string rno_dir = run_dir + "/Pixel/Hits/";
+      TDirectory* dir = infile->GetDirectory(rno_dir.c_str());
       if (!dir) {
         std::cerr << "--> PixelPostProcess: directory " << rno_dir << " not found " << std::endl;
         return;
       }
 
-      TString clus_dir = run_dir + "/Pixel/Clusters/";
-      TDirectory* clusdir = infile->GetDirectory(clus_dir);
+      std::string clus_dir = run_dir + "/Pixel/Clusters/";
+      TDirectory* clusdir = infile->GetDirectory(clus_dir.c_str());
       if (!clusdir) {
         std::cerr << "--> PixelPostProcess: directory " << clus_dir << " not found " << std::endl;
         return;
       }
 
-      TString err_dir = run_dir + "/Pixel/Errors/";
-      TDirectory* errdir = infile->GetDirectory(err_dir);
+      std::string err_dir = run_dir + "/Pixel/Errors/";
+      TDirectory* errdir = infile->GetDirectory(err_dir.c_str());
       if (!errdir) {
         std::cerr << "--> PixelPostProcess: directory " << err_dir << " not found " << std::endl;
         return;
       }
 
-      TString status_dir = run_dir + "/Pixel/Status/";
-      TDirectory* statusdir = infile->GetDirectory(status_dir);
+      std::string status_dir = run_dir + "/Pixel/Status/";
+      TDirectory* statusdir = infile->GetDirectory(status_dir.c_str());
       if (!statusdir) {
         std::cerr << "--> PixelPostProcess: directory " << status_dir << " not found " << std::endl;
         return;
       }
 
-      TString norm_histName = rno_dir + "num_hits";
-      TH1F* h_norm = (TH1F*) infile->Get(norm_histName);
+      std::string norm_histName = rno_dir + "num_hits";
+      TH1F* h_norm = (TH1F*) infile->Get(norm_histName.c_str());
       if (!h_norm) {
         std::cerr << "--> PixelPostProcess: could not find normalisation histogram " << norm_histName << std::endl;
         return;
@@ -107,7 +107,7 @@ namespace dqutils {
 
       const static int nlayer = 8;
       float nevents = h_norm->Integral(0, h_norm->GetNbinsX() + 1);
-      TString layerName[nlayer] = {
+      std::string layerName[nlayer] = {
         "IBL", "B0", "B1", "B2", "ECA", "ECC", "IBL2D", "IBL3D"
       };
       float npixel[nlayer] = {
@@ -118,8 +118,8 @@ namespace dqutils {
       };
 
       const static int nerror = 5;
-      //TString errorName[nerror] = {"OpticalErrors_", "SEUErrors_", "SyncErrors_", "TimeoutErrors_", "TruncErrors_"};
-      TString errorName[nerror] = {
+      //std::string errorName[nerror] = {"OpticalErrors_", "SEUErrors_", "SyncErrors_", "TimeoutErrors_", "TruncErrors_"};
+      std::string errorName[nerror] = {
         "OpticalErrors_", "SEUErrors_", "SyncErrors_", "TimeoutErrors_", "TruncErrors_"
       };
 
@@ -146,13 +146,13 @@ namespace dqutils {
         /// for hit occupancy
 
         /// get histo
-        TString keyname = "Occupancy_";
-        TString histName = rno_dir + keyname + layerName[i];
-        h_occ[i] = (TH2F*) infile->Get(histName);
+        std::string keyname = "Occupancy_";
+        std::string histName = rno_dir + keyname + layerName[i];
+        h_occ[i] = (TH2F*) infile->Get(histName.c_str());
         /// normalize
         if (h_occ[i]) {
-          TString tmpname = keyname + layerName[i] + "_byPostProcess";
-          h_occ_new[i] = (TH2F*) h_occ[i]->Clone(tmpname);
+          std::string tmpname = keyname + layerName[i] + "_byPostProcess";
+          h_occ_new[i] = (TH2F*) h_occ[i]->Clone(tmpname.c_str());
           h_occ_new[i]->Scale(1.0 / (nevents * npixel[i]));
         }
         /// Write
@@ -164,11 +164,11 @@ namespace dqutils {
         /// get histo
         keyname = "Cluster_Occupancy_";
         histName = clus_dir + keyname + layerName[i];
-        h_clus[i] = (TH2F*) infile->Get(histName);
+        h_clus[i] = (TH2F*) infile->Get(histName.c_str());
         /// normalize
         if (h_clus[i]) {
-          TString tmpname = keyname + layerName[i] + "_byPostProcess";
-          h_clus_new[i] = (TH2F*) h_clus[i]->Clone(tmpname);
+          std::string tmpname = keyname + layerName[i] + "_byPostProcess";
+          h_clus_new[i] = (TH2F*) h_clus[i]->Clone(tmpname.c_str());
           h_clus_new[i]->Scale(1.0 / nevents);
         }
         clusdir->cd();
@@ -183,11 +183,11 @@ namespace dqutils {
           /// get histo
           keyname = errorName[j];
           histName = err_dir + keyname + layerName[i];
-          h_err[i][j] = (TH2F*) infile->Get(histName);
+          h_err[i][j] = (TH2F*) infile->Get(histName.c_str());
           /// normalize
           if (h_err[i][j]) {
-            TString tmpname = keyname + layerName[i] + "_byPostProcess";
-            h_err_new[i][j] = (TH2F*) h_err[i][j]->Clone(tmpname);
+            std::string tmpname = keyname + layerName[i] + "_byPostProcess";
+            h_err_new[i][j] = (TH2F*) h_err[i][j]->Clone(tmpname.c_str());
             h_err_new[i][j]->Scale(1.0 / nevents);
           }
           /// write
@@ -198,15 +198,15 @@ namespace dqutils {
         /// for disabled + sync errors module
         keyname = "SyncErrorsFrac_per_event_";
         histName = err_dir + keyname + layerName[i];
-        h_syncerr_per_lumi[i] = (TH1F*) infile->Get(histName);
+        h_syncerr_per_lumi[i] = (TH1F*) infile->Get(histName.c_str());
         keyname = "DisabledModules_per_lumi_";
         histName = status_dir + keyname + layerName[i];
-        h_disabled_per_lumi[i] = (TH1F*) infile->Get(histName);
+        h_disabled_per_lumi[i] = (TH1F*) infile->Get(histName.c_str());
         /// normalize
         if (h_disabled_per_lumi[i] && h_syncerr_per_lumi[i]) {
           keyname = "DisabledAndSyncErrorsModules_per_lumi_";
-          TString tmpname = keyname + layerName[i] + "_byPostProcess";
-          h_disabled_syncerr_per_lumi[i] = new TH1F(tmpname,
+          std::string tmpname = keyname + layerName[i] + "_byPostProcess";
+          h_disabled_syncerr_per_lumi[i] = new TH1F(tmpname.c_str(),
                                                     "Disable and Sync error per module per event;Lumi block;Avg. fraction per event", 2500, 0,
                                                     2500);
           //h_disabled_syncerr_per_lumi[i]->Scale( 1.0/nmodule[i] );

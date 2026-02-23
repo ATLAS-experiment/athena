@@ -1,3 +1,7 @@
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 
-DECLARE_COMPONENT(MuonTGC_CablingSvc)
+#include "../TgcCablingCondAlg.h"
+
+DECLARE_COMPONENT(Muon::TgcCablingCondAlg)

@@ -13,8 +13,8 @@ CREATED:  23rd Aug, 2005
 ********************************************************************/
 
 //Athena Headers
-#include "eflowRec/eflowDatabase.h"
-#include "eflowRec/eflowCaloRegions.h"
+#include "eflowDatabase.h"
+#include "eflowCaloRegions.h"
 
 //CLHEP Headers
 #include "GaudiKernel/SystemOfUnits.h"

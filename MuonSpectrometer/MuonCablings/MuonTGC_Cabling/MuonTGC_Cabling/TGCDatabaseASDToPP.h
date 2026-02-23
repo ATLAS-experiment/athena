@@ -39,7 +39,7 @@ class TGCDatabaseASDToPP : public TGCDatabase {
     /** Copy constructor */
     TGCDatabaseASDToPP(const TGCDatabaseASDToPP&, bool v_isCommon = true);
     /** Destructor */
-    virtual ~TGCDatabaseASDToPP(void);
+    virtual ~TGCDatabaseASDToPP();
 
     virtual bool update(const std::vector<int>&) override;
 
@@ -74,11 +74,11 @@ class TGCDatabaseASDToPP : public TGCDatabase {
     bool isCommon() const;
 
    private:
-    virtual void readDB(void) override;
-    TGCDatabaseASDToPP(void) {}
+    virtual void readDB() override;
+    TGCDatabaseASDToPP() {}
 
     /** Make the IndexDBIn table */
-    virtual void makeIndexDBIn(void);
+    virtual void makeIndexDBIn();
     /** Get the interal number, which is between 0 and NIndexDBIn-1 */
     virtual int convertIndexDBIn(int* indexIn) const;
 
@@ -88,7 +88,7 @@ class TGCDatabaseASDToPP : public TGCDatabase {
     int m_minIndexIn[NIndexIn]{};
 
     /** Make the IndexDBOut table */
-    virtual void makeIndexDBOut(void);
+    virtual void makeIndexDBOut();
     /** Get the interal number, which is between 0 and NIndexDBOut-1 */
     virtual int convertIndexDBOut(int* indexOut) const;
 

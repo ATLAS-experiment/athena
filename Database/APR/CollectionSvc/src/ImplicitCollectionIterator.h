@@ -32,8 +32,7 @@ namespace pool {
    {
   public:
      /// Constructor
-     ImplicitCollectionIterator(IContainer& container,
-                                const pool::CollectionDescription& description );
+     ImplicitCollectionIterator(IContainer& container);
 
      // ------------------- Cursor interface 
 

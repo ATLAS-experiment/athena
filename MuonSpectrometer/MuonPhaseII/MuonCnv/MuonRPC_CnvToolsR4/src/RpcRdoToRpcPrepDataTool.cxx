@@ -86,7 +86,7 @@ namespace MuonR4{
             outputMeas->setIdentifier(offId.get_compact());
             outputMeas->setDoubletPhi(idHelper.doubletPhi(offId));
             outputMeas->setGasGap(idHelper.gasGap(offId));
-            outputMeas->setStripNumber(idHelper.channel(offId));
+            outputMeas->setChannelNumber(idHelper.channel(offId));
             outputMeas->setTimeOverThreshold(rdo->timeoverthr());
             /** TODO: Do we need to apply a time of flight correction here? */
             outputMeas->setTime(rdo->time());

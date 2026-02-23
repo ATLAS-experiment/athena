@@ -74,19 +74,6 @@ pool::PersistencySvc::UserSession::transaction() const
   return static_cast<const pool::ITransaction&>( *m_transaction );
 }
 
-std::vector< std::string >
-pool::PersistencySvc::UserSession::connectedDatabases() const
-{
-  std::vector< std::string > result;
-  // Make sure we call const methods.
-  const DatabaseRegistry* registry = m_registry;
-  for ( pool::PersistencySvc::DatabaseRegistry::const_iterator iDb = registry->begin();
-        iDb != registry->end(); ++iDb ) {
-    result.push_back( (*iDb)->fid() );
-  }
-  return result;
-}
-
 std::unique_ptr<pool::IDatabase>
 pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
                                                    DatabaseSpecification::NameType dbNameType )

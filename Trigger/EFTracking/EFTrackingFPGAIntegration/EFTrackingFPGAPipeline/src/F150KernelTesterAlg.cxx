@@ -5,7 +5,6 @@
 #include "EFTrackingFPGAPipeline/F150KernelTesterAlg.h"
 #include "EFTrackingFPGAUtility/EFTrackingTransient.h"
 #include "AthenaKernel/Chrono.h"
-#include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
 
 #include <iostream>
 #include <fstream> // Required for std::ofstream
@@ -572,4 +571,3 @@ namespace EFTrackingFPGAIntegration
         return StatusCode::SUCCESS;
     }
 }
-

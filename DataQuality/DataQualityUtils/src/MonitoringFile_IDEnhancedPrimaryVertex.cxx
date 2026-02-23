@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -8,7 +8,6 @@
 
 #include "DataQualityUtils/MonitoringFile.h"
 
-// #include <cmath>
 #include <vector>
 
 #include <TGraph.h>
@@ -33,21 +32,17 @@ namespace dqutils {
 
   void MonitoringFile::pv_PrimaryVertexMonitoring_calcResoAndEfficiency(const std::string& inFilename,
                                                                         bool /* isIncremental */) {
-//  std::cout << "\n";
-//  std::cout << "Running Inner-Detector primary vertexing monitoring analysis\n";
-//   std::cout << "\nWarning messages from fitting and histogram updating follow:\n\n";
+
 
     TFile* f = TFile::Open(inFilename.c_str(), "UPDATE");
 
     if (f == 0 || !f->IsOpen()) {
-      //std::cerr << "MonitoringFile::PrimaryVertexMonitoring_calcResoAndEfficiency(): "
-//	      << "Input file not opened\n";
+
       delete f;
       return;
     }
     if (f->GetSize() < 1000.) {
-//    std::cerr << "MonitoringFile::PrimaryVertexMonitoring_calcResoAndEfficiency(): "
-//	      << "MonitoringFile empty\n";
+
       delete f;
       return;
     }
@@ -62,11 +57,10 @@ namespace dqutils {
       if (tdir_run != 0) {
         std::string tdir_run_name(tdir_run->GetName());
         if (tdir_run_name.find("run") != std::string::npos) {
-          run_dir = tdir_run_name;
+          run_dir = std::move(tdir_run_name);
 
           dirExists = f->GetDirectory((run_dir + "/InDetGlobal/PrimaryVertex").c_str());
           if (dirExists) {
-//          std::cout << run_dir << "/InDetGlobal/PrimaryVertex exists. Creating and saving plots:" << std::endl;
             f->cd((run_dir + "/InDetGlobal/PrimaryVertex").c_str());
           }
         }
@@ -76,8 +70,7 @@ namespace dqutils {
     }
 
     if (!dirExists) {
-      //std::cerr << "Either enhanced vertex info is not there or monitoring file was produced outside T0 context.
-      // Trying dir: InDetGlobal/PrimaryVertex\n";
+
       dirExists = f->GetDirectory("InDetGlobal/PrimaryVertex");
       if (dirExists) f->cd("InDetGlobal/PrimaryVertex");
     }

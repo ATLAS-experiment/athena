@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -110,12 +110,12 @@ StatusCode JMSCorrection::initialize() {
 	ATH_MSG_FATAL("3D mass correction histogram may be missing.  Please check your mass calibration file: " << JMSFile);
 	return StatusCode::FAILURE;
       }
-    else ATH_MSG_INFO("JMS Tool has been initialized with binning and eta fit factors from: " << fileName);
+    else ATH_MSG_DEBUG("JMS Tool has been initialized with binning and eta fit factors from: " << fileName);
     
     // Track-Assisted Jet Mass correction
     m_trackAssistedJetMassCorr = m_config->GetValue("TrackAssistedJetMassCorr",false);
     if(m_trackAssistedJetMassCorr){
-      ATH_MSG_INFO("Track Assisted Jet Mass will be calibrated");
+      ATH_MSG_DEBUG("Track Assisted Jet Mass will be calibrated");
       TString JMS_TrackAssisted_File(m_config->GetValue("TrackAssistedMassCalibrationFile","empty"));
       if ( JMS_TrackAssisted_File.EqualTo("empty") ) { 
         ATH_MSG_FATAL("NO Track Assisted Mass Factors File specified. Aborting.");
@@ -159,13 +159,13 @@ StatusCode JMSCorrection::initialize() {
 	  ATH_MSG_FATAL("3D track assisted mass correction histogram may be missing.  Please check your mass calibration file: " << JMSFile);
 	  return StatusCode::FAILURE;
 	}
-      else ATH_MSG_INFO("JMS Tool has been initialized with binning and eta fit factors from: " << file_trkAssisted_Name);
+      else ATH_MSG_DEBUG("JMS Tool has been initialized with binning and eta fit factors from: " << file_trkAssisted_Name);
     }
   } //!m_onlyCombination
 
   // Combination
   if(m_combination){
-    ATH_MSG_INFO("Mass Combination: ON");
+    ATH_MSG_DEBUG("Mass Combination: ON");
     TString Combination_File(m_config->GetValue("CombinationFile","empty"));
     if ( Combination_File.EqualTo("empty") ) { 
       ATH_MSG_FATAL("NO Combination File specified. Aborting.");
@@ -255,7 +255,7 @@ StatusCode JMSCorrection::initialize() {
 	}
     } //m_onlyCombination   
    
-    ATH_MSG_INFO("JMS Tool has been initialized with mass combination weights from: " << file_combination_Name);
+    ATH_MSG_DEBUG("JMS Tool has been initialized with mass combination weights from: " << file_combination_Name);
 
   }//m_combination
 
@@ -268,7 +268,7 @@ StatusCode JMSCorrection::initialize() {
   if (binParamString == "")
   {
     m_binParam = BinningParam::pt_mass_eta;
-    ATH_MSG_INFO("JMS Tool will use the implied pt_mass_eta binning strategy");
+    ATH_MSG_DEBUG("JMS Tool will use the implied pt_mass_eta binning strategy");
   }
   else
   {
@@ -289,7 +289,7 @@ StatusCode JMSCorrection::initialize() {
       ATH_MSG_FATAL("JMSBinningParam was specified, but input was not understood: " << binParamString);
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("JMS Tool will use the " << binParamString << " binning strategy");
+    ATH_MSG_DEBUG("JMS Tool will use the " << binParamString << " binning strategy");
   }
 
 

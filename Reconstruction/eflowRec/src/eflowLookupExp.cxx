@@ -9,7 +9,7 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/eflowLookupExp.h"
+#include "eflowLookupExp.h"
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/checker_macros.h"
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/FitMonitor.h"
@@ -49,7 +49,7 @@ bool FitMonitor::makeSummary(const char* fileName) const
     if (!history || !history->isValid()) continue;
     
     if (i%1000 == 0) cout << "-> History hash = " << i << endl;
-    History* refitHistory = history->refit();
+    std::unique_ptr<History> refitHistory = history->refit();
     
     tree_hash = i;
     tree_calo = history->cellInfo()->calo();
@@ -70,7 +70,6 @@ bool FitMonitor::makeSummary(const char* fileName) const
       tree_refitADCMax = refitHistory->data(j)->adcMax();
       summary->Fill();
     }    
-    delete refitHistory;
   }
     
   summary->Write();

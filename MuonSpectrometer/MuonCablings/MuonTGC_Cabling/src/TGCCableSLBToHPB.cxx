@@ -34,60 +34,52 @@ TGCCableSLBToHPB::TGCCableSLBToHPB(const std::string& filename)
 
 TGCCableSLBToHPB::~TGCCableSLBToHPB() = default;
 
-TGCChannelId* TGCCableSLBToHPB::getChannel(const TGCChannelId* channelId,
-                                           bool orChannel) const {
-    if (channelId) {
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::SLBOut) {
-            return getChannelOut(channelId, orChannel);
-        }
-        if (channelId->getChannelIdType() ==
-            TGCChannelId::ChannelIdType::HPBIn) {
-            return getChannelIn(channelId, orChannel);
-        }
+std::unique_ptr<TGCChannelId> TGCCableSLBToHPB::getChannel(
+    const TGCChannelId& channelId, bool orChannel) const {
+
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::SLBOut) {
+        return getChannelOut(channelId, orChannel);
     }
+    if (channelId.getChannelIdType() == TGCChannelId::ChannelIdType::HPBIn) {
+        return getChannelIn(channelId, orChannel);
+    }
+
     return nullptr;
 }
 
-TGCModuleMap* TGCCableSLBToHPB::getModule(const TGCModuleId* moduleId) const {
-    if (moduleId) {
-        if (moduleId->getModuleIdType() == TGCModuleId::SLB) {
-            return getModuleOut(moduleId);
-        }
-        if (moduleId->getModuleIdType() == TGCModuleId::HPB) {
-            return getModuleIn(moduleId);
-        }
+TGCModuleMap TGCCableSLBToHPB::getModule(const TGCModuleId& moduleId) const {
+
+    if (moduleId.getModuleIdType() == TGCModuleId::SLB) {
+        return getModuleOut(moduleId);
     }
-    return nullptr;
+    if (moduleId.getModuleIdType() == TGCModuleId::HPB) {
+        return getModuleIn(moduleId);
+    }
+
+    return TGCModuleMap{};
 }
 
-TGCChannelId* TGCCableSLBToHPB::getChannelIn(const TGCChannelId* hpbin,
-                                             bool orChannel) const {
-    if (orChannel) {
+std::unique_ptr<TGCChannelId> TGCCableSLBToHPB::getChannelIn(
+    const TGCChannelId& hpbin, bool orChannel) const {
+    if (orChannel || hpbin.isValid() == false) {
         return nullptr;
     }
-    if (hpbin->isValid() == false) {
-        return nullptr;
-    }
-    TGCChannelSLBOut* slbout = nullptr;
 
     // HPB module
-    TGCModuleId* hpb = hpbin->getModule();
+    std::unique_ptr<TGCModuleId> hpb{hpbin.getModule()};
     if (!hpb) {
         return nullptr;
     }
 
     // HPB -> SLB module connection
-    TGCModuleMap* mapId = getModule(hpb);
-    delete hpb;
-    if (!mapId) {
+    TGCModuleMap mapId = getModule(*hpb);
+
+    if (!mapId.size()) {
         return nullptr;
     }
 
     int numOfBlock = TGCChannelSLBOut::getNumberOfBlock(TGCId::WD);  // SD
     if (numOfBlock == 0) {
-        delete mapId;
-        mapId = nullptr;
         return nullptr;
     }
 
@@ -95,52 +87,36 @@ TGCChannelId* TGCCableSLBToHPB::getChannelIn(const TGCChannelId* hpbin,
     int slbInBlock = TGCChannelHPBIn::getSlbInBlock();
 
     // SLB module
-    TGCModuleId* slb = nullptr;
-    int blockInHPB = hpbin->getBlock();
-    int nSlb = hpbin->getChannel() / (numOfBlock * 2);  // half block
-    int port = blockInHPB * slbInBlock + nSlb;
-    const int size = mapId->size();
-    for (int i = 0; i < size; i++) {
-        if (mapId->connector(i) == port) {
-            slb = mapId->popModuleId(i);
-            break;
-        }
-    }
 
-    delete mapId;
+    int blockInHPB = hpbin.getBlock();
+    int nSlb = hpbin.getChannel() / (numOfBlock * 2);  // half block
+    int port = blockInHPB * slbInBlock + nSlb;
+    auto slb = mapId.popModule(port);
+
     if (!slb) {
         return nullptr;
     }
 
     // HPB ->SLB channel connection
-    int nInSlb = hpbin->getChannel() / (numOfBlock * 2);  // half block
+    int nInSlb = hpbin.getChannel() / (numOfBlock * 2);  // half block
     int blockInSlb = nInSlb / 2;
     int nInBlock = nInSlb % 2;
     int channel = (chInBlock / 2) * nInBlock;
 
-    slbout = new TGCChannelSLBOut(slb->getSideType(), slb->getModuleType(),
-                                  slb->getRegionType(), slb->getSector(),
-                                  slb->getId(), blockInSlb, channel);
-
-    delete slb;
-    return slbout;
+    return std::make_unique<TGCChannelSLBOut>(
+        slb->getSideType(), slb->getModuleType(), slb->getRegionType(),
+        slb->getSector(), slb->getId(), blockInSlb, channel);
 }
 
-TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
-                                                   TGCId::ModuleType moduleType,
-                                                   bool orChannel) const {
-    if (orChannel) {
+std::unique_ptr<TGCChannelId> TGCCableSLBToHPB::getChannelInforHPB(
+    const TGCChannelId& hpbin, TGCId::ModuleType moduleType,
+    bool orChannel) const {
+    if (orChannel || hpbin.isValid() == false) {
         return nullptr;
     }
-    if (hpbin->isValid() == false) {
-        return nullptr;
-    }
-
-    TGCChannelSLBOut* slbout = nullptr;
-
     // HPB module
-    TGCModuleId* hpb =
-        hpbin->getModule();  // This function is defined in TGCChannelHPBIn
+    std::unique_ptr<TGCModuleId> hpb{
+        hpbin.getModule()};  // This function is defined in TGCChannelHPBIn
                              // set current SideType,SignalType...
                              // ChannelID(HPBIn) is set in HPBIn constructor
     if (!hpb) {
@@ -148,17 +124,14 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
     }
 
     // HPB -> SLB module connection
-    TGCModuleMap* mapId = getModuleInforHPB(hpb, moduleType);
-    delete hpb;
-    if (!mapId) {
+    TGCModuleMap mapId = getModuleInforHPB(*hpb, moduleType);
+    if (!mapId.size()) {
         return nullptr;
     }
 
     // need to check
     int numOfBlock = TGCChannelSLBOut::getNumberOfBlock(moduleType);
     if (numOfBlock == 0) {
-        delete mapId;
-        mapId = nullptr;
         return nullptr;
     }
 
@@ -166,7 +139,7 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
     int slbInBlock = 0;
 
     // SLB module
-    TGCModuleId* slb = nullptr;
+    std::unique_ptr<TGCModuleId> slb{};
     int blockInHPB = 0;
     int nSlb = 0;  // half block
     int port = 0;  // input position for HPT
@@ -175,60 +148,42 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
     int blockInSlb = 0;
     int posInHpb = 0;
     int channel = 0;
-    int size = 0;
     switch (moduleType) {
-
         case TGCId::WD:
         case TGCId::SD:
             slbInBlock = 3;
-            blockInHPB = hpbin->getBlock();
-            nSlb = hpbin->getChannel() / (numOfBlock * 2);
+            blockInHPB = hpbin.getBlock();
+            nSlb = hpbin.getChannel() / (numOfBlock * 2);
             port = blockInHPB * slbInBlock + nSlb;
-            size = mapId->size();
-            for (int i = 0; i < size; i++) {
-                if (mapId->connector(i) == port) {
-                    slb = mapId->popModuleId(i);
-                    break;
-                }
-            }
-            blockInSlb = (hpbin->getChannel() - nSlb * (numOfBlock * 2)) / 2;
-            posInHpb = (hpbin->getChannel() - (numOfBlock * 2) * nSlb) % 2;
+            slb = mapId.popModule(port);
+            blockInSlb = (hpbin.getChannel() - nSlb * (numOfBlock * 2)) / 2;
+            posInHpb = (hpbin.getChannel() - (numOfBlock * 2) * nSlb) % 2;
             channel = (chInBlock / 2) * posInHpb;
             break;
 
         case TGCId::WT:
             slbInBlock = 2;
-            blockInHPB = hpbin->getBlock();
-            nSlb = hpbin->getChannel() / (numOfBlock * 2);
+            blockInHPB = hpbin.getBlock();
+            nSlb = hpbin.getChannel() / (numOfBlock * 2);
             port = blockInHPB * slbInBlock + nSlb;
-            size = mapId->size();
-            for (int i = 0; i < size; i++) {
-                if (mapId->connector(i) == -1 * port) {  // triplet: - sign
-                    slb = mapId->popModuleId(i);
-                    break;
-                }
-            }
-            blockInSlb = (hpbin->getChannel() - nSlb * (numOfBlock * 2)) / 2;
-            posInHpb = (hpbin->getChannel() - (numOfBlock * 2) * nSlb) % 2;
+            slb = mapId.popModule(-port);
+
+            blockInSlb = (hpbin.getChannel() - nSlb * (numOfBlock * 2)) / 2;
+            posInHpb = (hpbin.getChannel() - (numOfBlock * 2) * nSlb) % 2;
             channel = (chInBlock / 2) * posInHpb;
             break;
 
         case TGCId::ST:
-            blockInHPB = hpbin->getBlock();
-            if (blockInHPB == 0 && hpbin->getChannel() < numOfBlock) {
+            blockInHPB = hpbin.getBlock();
+            if (blockInHPB == 0 && hpbin.getChannel() < numOfBlock) {
                 port = 1;
             } else {
                 port = 2;
             }
-            size = mapId->size();
-            for (int i = 0; i < size; i++) {
-                if (mapId->connector(i) == -1 * port) {  // triplet: - sign
-                    slb = mapId->popModuleId(i);
-                    break;
-                }
-            }
-            blockInSlb = (hpbin->getChannel()) % numOfBlock;
-            if (blockInHPB == 1 && hpbin->getChannel() >= numOfBlock) {
+            slb = mapId.popModule(-port);
+
+            blockInSlb = (hpbin.getChannel()) % numOfBlock;
+            if (blockInHPB == 1 && hpbin.getChannel() >= numOfBlock) {
                 blockInSlb = blockInSlb + numOfBlock / 2;
             }
             channel = 0;
@@ -238,8 +193,6 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
             break;
     }
 
-    delete mapId;
-    mapId = nullptr;
     if (!slb) {
         return nullptr;
     }
@@ -257,108 +210,90 @@ TGCChannelId* TGCCableSLBToHPB::getChannelInforHPB(const TGCChannelId* hpbin,
         blockInSlb++;
     }
 
-    slbout = new TGCChannelSLBOut(slb->getSideType(), moduleType,
-                                  slb->getRegionType(), slb->getSector(), SLBID,
-                                  blockInSlb, channel);
-
-    delete slb;
-    return slbout;
+    return std::make_unique<TGCChannelSLBOut>(
+        slb->getSideType(), moduleType, slb->getRegionType(), slb->getSector(),
+        SLBID, blockInSlb, channel);
 }
 
-TGCChannelId* TGCCableSLBToHPB::getChannelOut(const TGCChannelId* slbout,
-                                              bool orChannel) const {
-    if (orChannel) {
+std::unique_ptr<TGCChannelId> TGCCableSLBToHPB::getChannelOut(
+    const TGCChannelId& slbout, bool orChannel) const {
+    if (orChannel || slbout.isValid() == false ||
+        slbout.getMultipletType() == TGCId::Triplet) {
         return nullptr;
     }
-    if (slbout->isValid() == false) {
-        return nullptr;
-    }
-    if (slbout->getMultipletType() == TGCId::Triplet) {
-        return nullptr;
-    }
-    TGCChannelHPBIn* hpbin = nullptr;
 
     // SLB module
-    TGCModuleId* slb = slbout->getModule();
+    std::unique_ptr<TGCModuleId> slb{slbout.getModule()};
     if (!slb) {
         return nullptr;
     }
 
     // SLB -> HPB module connection
-    TGCModuleMap* mapId = getModule(slb);
-    delete slb;
-    if (!mapId) {
+    TGCModuleMap mapId = getModule(*slb);
+
+    if (mapId.empty()) {
         return nullptr;
     }
 
     // HPB module
-    int port = mapId->connector(0);
-    TGCModuleId* hpb = mapId->popModuleId(0);
-    delete mapId;
+    int port = mapId.begin()->first;
+    std::unique_ptr<TGCModuleId> hpb = mapId.popModule(port);
     if (!hpb) {
         return nullptr;
     }
 
-    int chInBlock =
-        TGCChannelSLBOut::getChannelInBlock(slbout->getModuleType());
+    int chInBlock = TGCChannelSLBOut::getChannelInBlock(slbout.getModuleType());
     if (chInBlock <= 1) {
-        delete hpb;
-        hpb = nullptr;
         return nullptr;
     }
     int slbInBlock = TGCChannelHPBIn::getSlbInBlock();
 
     // SLB ->HPB channel connection
     int block = port / slbInBlock;
-    int hitId = (port % slbInBlock) * 2 + slbout->getBlock();
-    int pos = slbout->getChannel() / (chInBlock / 2);
+    int hitId = (port % slbInBlock) * 2 + slbout.getBlock();
+    int pos = slbout.getChannel() / (chInBlock / 2);
     int channel = hitId * 2 + pos;
 
-    hpbin = new TGCChannelHPBIn(hpb->getSideType(), hpb->getSignalType(),
-                                hpb->getRegionType(), hpb->getSector(),
-                                hpb->getId(), block, channel);
-    delete hpb;
-
-    return hpbin;
+    return std::make_unique<TGCChannelHPBIn>(
+        hpb->getSideType(), hpb->getSignalType(), hpb->getRegionType(),
+        hpb->getSector(), hpb->getId(), block, channel);
 }
 
-TGCModuleMap* TGCCableSLBToHPB::getModuleIn(const TGCModuleId* hpb) const {
-    if (hpb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableSLBToHPB::getModuleIn(const TGCModuleId& hpbin) const {
+    if (hpbin.isValid() == false) {
+        return TGCModuleMap{};
     }
-    const int hpbId = hpb->getId();
+    const int hpbId = hpbin.getId();
 
     TGCId::ModuleType doublet = TGCId::NoModuleType;
     TGCId::ModuleType triplet = TGCId::NoModuleType;
-    if (hpb->getSignalType() == TGCId::Wire) {
+    if (hpbin.getSignalType() == TGCId::Wire) {
         doublet = TGCId::WD;
         triplet = TGCId::WT;
     }
-    if (hpb->getSignalType() == TGCId::Strip) {
+    if (hpbin.getSignalType() == TGCId::Strip) {
         doublet = TGCId::SD;
         triplet = TGCId::ST;
     }
 
     if (doublet == TGCId::NoModuleType || triplet == TGCId::NoModuleType) {
-        return nullptr;
+        return TGCModuleMap{};
     }
 
-    TGCDatabase* doubletP = m_database[hpb->getRegionType()][doublet].get();
-    TGCDatabase* tripletP = m_database[hpb->getRegionType()][triplet].get();
+    TGCDatabase* doubletP = m_database[hpbin.getRegionType()][doublet].get();
+    TGCDatabase* tripletP = m_database[hpbin.getRegionType()][triplet].get();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int doubletMaxEntry = doubletP->getMaxEntry();
     for (int i = 0; i < doubletMaxEntry; i++) {
         if (doubletP->getEntry(i, 1) == hpbId) {
             int id = doubletP->getEntry(i, 0);
             int block = doubletP->getEntry(i, 2);
-            TGCModuleSLB* slb =
-                new TGCModuleSLB(hpb->getSideType(), doublet,
-                                 hpb->getRegionType(), hpb->getSector(), id);
-            if (mapId == nullptr) {
-                mapId = new TGCModuleMap();
-            }
-            mapId->insert(block, slb);
+            auto slb = std::make_unique<TGCModuleSLB>(
+                hpbin.getSideType(), doublet, hpbin.getRegionType(),
+                hpbin.getSector(), id);
+
+            mapId.insert(block, std::move(slb));
         }
     }
     const int tripletMaxEntry = tripletP->getMaxEntry();
@@ -366,30 +301,29 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleIn(const TGCModuleId* hpb) const {
         if (tripletP->getEntry(i, 1) == hpbId) {
             int id = tripletP->getEntry(i, 0);
             int block = -tripletP->getEntry(i, 2);
-            TGCModuleSLB* slb =
-                new TGCModuleSLB(hpb->getSideType(), triplet,
-                                 hpb->getRegionType(), hpb->getSector(), id);
-            if (mapId == nullptr) {
-                mapId = new TGCModuleMap();
-            }
-            mapId->insert(block, slb);
+            auto slb = std::make_unique<TGCModuleSLB>(
+                hpbin.getSideType(), triplet, hpbin.getRegionType(),
+                hpbin.getSector(), id);
+
+            mapId.insert(block, std::move(slb));
         }
     }
 
     return mapId;
 }
 
-TGCModuleMap* TGCCableSLBToHPB::getModuleInforHPB(
-    const TGCModuleId* hpb, TGCId::ModuleType moduleType) const {
-    if (hpb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableSLBToHPB::getModuleInforHPB(
+    const TGCModuleId& hpbin, TGCId::ModuleType moduleType) const {
+    if (hpbin.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int hpbId = hpb->getId();
+    const int hpbId = hpbin.getId();
 
-    TGCDatabase* databaseP = m_database[hpb->getRegionType()][moduleType].get();
+    TGCDatabase* databaseP =
+        m_database[hpbin.getRegionType()][moduleType].get();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 1) == hpbId) {
@@ -409,45 +343,42 @@ TGCModuleMap* TGCCableSLBToHPB::getModuleInforHPB(
                 default:
                     break;
             }
-            TGCModuleSLB* slb =
-                new TGCModuleSLB(hpb->getSideType(), moduleType,
-                                 hpb->getRegionType(), hpb->getSector(), id);
-            if (mapId == nullptr) {
-                mapId = new TGCModuleMap();
-            }
-            mapId->insert(block, slb);
+            auto slb = std::make_unique<TGCModuleSLB>(
+                hpbin.getSideType(), moduleType, hpbin.getRegionType(),
+                hpbin.getSector(), id);
+
+            mapId.insert(block, std::move(slb));
         }
     }
 
     return mapId;
 }
 
-TGCModuleMap* TGCCableSLBToHPB::getModuleOut(const TGCModuleId* slb) const {
-    if (slb->isValid() == false) {
-        return nullptr;
+TGCModuleMap TGCCableSLBToHPB::getModuleOut(const TGCModuleId& slb) const {
+    if (slb.isValid() == false) {
+        return TGCModuleMap{};
     }
 
-    const int slbId = slb->getId();
+    const int slbId = slb.getId();
 
     TGCDatabase* databaseP =
-        m_database[slb->getRegionType()][slb->getModuleType()].get();
+        m_database[slb.getRegionType()][slb.getModuleType()].get();
 
-    TGCModuleMap* mapId = nullptr;
+    TGCModuleMap mapId{};
     const int MaxEntry = databaseP->getMaxEntry();
     for (int i = 0; i < MaxEntry; i++) {
         if (databaseP->getEntry(i, 0) == slbId) {
             int id = databaseP->getEntry(i, 1);
             int block = databaseP->getEntry(i, 2);
-            if (slb->getMultipletType() == TGCId::Triplet) {
+            if (slb.getMultipletType() == TGCId::Triplet) {
                 block *= -1;
             }
 
-            TGCModuleHPB* hpb =
-                new TGCModuleHPB(slb->getSideType(), slb->getSignalType(),
-                                 slb->getRegionType(), slb->getSector(), id);
+            auto hpb = std::make_unique<TGCModuleHPB>(
+                slb.getSideType(), slb.getSignalType(), slb.getRegionType(),
+                slb.getSector(), id);
 
-            mapId = new TGCModuleMap();
-            mapId->insert(block, hpb);
+            mapId.insert(block, std::move(hpb));
             break;
         }
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -504,76 +504,6 @@ IOVSvc::setRangeInDB(const CLID& clid, const std::string& key,
     return StatusCode::FAILURE;
   } else {
     return ist->setRangeInDB( clid, key, range, tag );
-  }
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvc::regFcn(SG::DataProxy* dp, 
-               const CallBackID& c, 
-               const IOVSvcCallBackFcn& fcn,
-               bool trigger) {
-
-  IIOVSvcTool *ist = getTool( dp );
-  if (ist == 0) {
-    ATH_MSG_ERROR( "regFcn: no IOVSvcTool found containing DataProxy "
-                   << fullProxyName( dp )
-                   << "-> Need to bind DataHandle first"  );
-    return StatusCode::FAILURE;
-  } else {
-    return ist->regFcn( dp, c, fcn, trigger );
-  }
-
-}
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvc::regFcn(const CallBackID& c1,
-               const CallBackID& c2, const IOVSvcCallBackFcn& fcn2, 
-               bool trigger) {
-
-
-  if (c1 == c2) {
-    ATH_MSG_ERROR( "Cannot register 2nd callback function and assocaited"
-                   << " object with itself"  );
-    return StatusCode::FAILURE;
-  }
-
-
-  IIOVSvcTool *ist = getTool( c1 );
-  if (ist == 0) {
-    ATH_MSG_ERROR( "CallBack function \"" << c2.name()
-                   << "\" cannot be registered since function \"" << c1.name()
-                   << "\" has not been registered first"  );
-    return StatusCode::FAILURE;
-  } else {
-    return ist->regFcn(c1, c2, fcn2, trigger);
-  }
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvc::regFcn(const std::string& toolName,
-               const CallBackID& c2, const IOVSvcCallBackFcn& fcn2, 
-               bool trigger) {
-
-  IAlgTool *ia;
-  if ( p_toolSvc->retrieveTool(toolName, ia, 0, false).isFailure() ) {
-    ATH_MSG_ERROR( "AlgTool " << toolName << " has not yet been created"
-                   << " and thus cannot be registered" );
-    return StatusCode::FAILURE;
-  }
-
-  IIOVSvcTool *ist = getTool( ia );
-  if (ist == 0) {
-    ATH_MSG_ERROR( "No callback registered with AlgTool " << toolName );
-    return StatusCode::FAILURE;
-  } else {
-    return ist->regFcn(ia, c2, fcn2, trigger);
   }
 
 }

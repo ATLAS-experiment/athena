@@ -247,7 +247,7 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
     Acts::BoundVector pars;
     //cppcheck-suppress constStatement
     pars << perigee.m_d0, perigee.m_z0, perigee.m_phi, theta, qOverP, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
     
     // Perigee, no alignment -> default geo context
     const ActsTrk::GeometryContext& gctx = m_trackingGeometryTool->getNominalGeometryContext();

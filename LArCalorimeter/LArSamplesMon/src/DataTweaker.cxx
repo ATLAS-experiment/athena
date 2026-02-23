@@ -44,7 +44,7 @@ bool DataTweaker::findOption(TString& tweaks, const TString& option) const
 }
 
 
-Data* DataTweaker::tweak(const Data& data, int evtIndex) const
+std::unique_ptr<Data> DataTweaker::tweak(const Data& data, int evtIndex) const
 {
   std::vector<short> samples = data.container().samples();
   std::vector<float> corrs = data.container().corrs();
@@ -80,22 +80,20 @@ Data* DataTweaker::tweak(const Data& data, int evtIndex) const
   }
 
   if (m_refit) {
-    SimpleShape* reference = data.referenceShape();
-    const ScaledErrorData* sed = data.scaledErrorData();
+    std::unique_ptr<SimpleShape> reference = data.referenceShape();
+    std::unique_ptr<const ScaledErrorData> sed = data.scaledErrorData();
     ShapeFitter fitter(m_fitParams);
     double chi2{};
     if (!reference){
-      delete sed;
       return nullptr;
     } 
-    bool result = fitter.fit(data, *reference, k, deltaT, chi2, sed);
-    delete sed;
+    bool result = fitter.fit(data, *reference, k, deltaT, chi2, sed.get());
     if (!result) return nullptr;
   }
 
   if (m_adjust) {
     if (!data.history() || data.adcMax() == 0) return nullptr;
-    OFC* ofc = data.history()->ofc(data.index());
+    std::unique_ptr<OFC> ofc = data.history()->ofc(data.index());
     if (!ofc) return nullptr;
     k = ofc->A(data)/data.adcMax();
     deltaT = ofc->time(data);
@@ -108,13 +106,13 @@ Data* DataTweaker::tweak(const Data& data, int evtIndex) const
                 data.container().energy(), time + deltaT, data.container().quality(),
                 data.container().pedestal(), data.container().pedestalRMS(),
                 data.container().status(), k*data.container().adcMax());
-  return new Data(std::move(newContainer), data.eventData(), data.history(), data.index());
+  return std::make_unique<Data>(std::move(newContainer), data.eventData(), data.history(), data.index());
 }
 
 
-EventData* DataTweaker::tweak(const EventData& eventData, int runIndex) const
+std::unique_ptr<EventData> DataTweaker::tweak(const EventData& eventData, int runIndex) const
 {
-  EventData* newEventData = new EventData(eventData, runIndex);
+  auto newEventData = std::make_unique<EventData>(eventData, runIndex);
   if (m_removeRoIs) newEventData->removeRoIs();
   return newEventData;
 }

@@ -58,24 +58,24 @@ namespace LArSamples {
 
       static std::unique_ptr<TreeAccessor> makeTemplate(const Accessor& accessor, const TString& fileName);
       
-      bool writeToFile(const TString& fileName) const;
+      virtual bool writeToFile(const TString& fileName) const override;
 
-      unsigned int historySize(unsigned int i) const { return PersistentAccessor::historySize(i); }
-      unsigned int historySizeSC(unsigned int i) const { return PersistentAccessor::historySizeSC(i); }
+      virtual unsigned int historySize(unsigned int i) const override { return PersistentAccessor::historySize(i); }
+      virtual unsigned int historySizeSC(unsigned int i) const override { return PersistentAccessor::historySizeSC(i); }
 
-      unsigned int nEvents() const { return PersistentAccessor::nEvents(); }
-      const EventData* eventData(unsigned int i) const { return PersistentAccessor::eventData(i); }
+      virtual unsigned int nEvents() const override { return PersistentAccessor::nEvents(); }
+      virtual const EventData* eventData(unsigned int i) const override { return PersistentAccessor::eventData(i); }
 
-      unsigned int nRuns() const { return PersistentAccessor::nRuns(); }
-      const RunData* runData(unsigned int i) const { return PersistentAccessor::runData(i); }
+      virtual unsigned int nRuns() const override { return PersistentAccessor::nRuns(); }
+      virtual const RunData* runData(unsigned int i) const override { return PersistentAccessor::runData(i); }
 
       void add(HistoryContainer* cont) { PersistentAccessor::add(cont); resetCache(); }
 
       
-      const History* getCellHistory(unsigned int i) const;      
-      const History* getSCHistory(unsigned int i) const;      
-      const CellInfo* getCellInfo(unsigned int i) const;      
-      const CellInfo* getSCInfo(unsigned int i) const;      
+      virtual std::unique_ptr<const History> getCellHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const History> getSCHistory(unsigned int i) const override;
+      virtual std::unique_ptr<const CellInfo> getCellInfo(unsigned int i) const override;
+      std::unique_ptr<const CellInfo> getSCInfo(unsigned int i) const;
       
   };
 }

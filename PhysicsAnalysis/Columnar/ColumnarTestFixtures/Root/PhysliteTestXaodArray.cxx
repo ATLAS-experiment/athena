@@ -460,7 +460,7 @@ namespace columnar
       }
       std::cout << "Total entries read: " << entry << std::endl;
       const float emptyTime = benchmarkEmpty.getEntryTime(0).value();
-      std::cout << "Empty benchmark time: " << emptyTime << "ns" << std::endl;
+      std::cout << "Empty benchmark time: " << emptyTime << "ns (tick=" << Benchmark::getTickDuration() << "ns)" << std::endl;
       benchmarkEmpty.setSilence();
       std::cout << "Average getEntry time: " << benchmarkGetEntry.getEntryTime(emptyTime).value() << "ns" << std::endl;
       benchmarkGetEntry.setSilence();

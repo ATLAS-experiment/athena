@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ConditionsData/FloatArrayStore.h"
+#include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include <iostream>
 

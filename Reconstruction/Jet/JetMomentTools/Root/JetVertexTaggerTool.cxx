@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexTaggerTool.cxx
@@ -35,8 +35,8 @@ JetVertexTaggerTool::~JetVertexTaggerTool(){
 //**********************************************************************
 
 StatusCode JetVertexTaggerTool::initialize() {
-  ATH_MSG_INFO("Initializing JetVertexTaggerTool " << name());
-  ATH_MSG_INFO("Using origin vertex: " << m_useOriginVertex);
+  ATH_MSG_DEBUG("Initializing JetVertexTaggerTool " << name());
+  ATH_MSG_DEBUG("Using origin vertex: " << m_useOriginVertex);
 
   if(m_jetContainerName.empty()){
     ATH_MSG_ERROR("JetVertexTaggerTool needs to have its input jet container configured!");
@@ -45,8 +45,8 @@ StatusCode JetVertexTaggerTool::initialize() {
 
   // Use the Path Resolver to find the jvt file and retrieve the likelihood histogram
   m_fn =  PathResolverFindCalibFile(m_jvtfileName);
-  ATH_MSG_INFO("  Reading JVT file from:\n    " << m_jvtfileName << "\n");
-  ATH_MSG_INFO("                     resolved in  :\n    " << m_fn << "\n\n");
+  ATH_MSG_INFO("Reading JVT file from: " << m_jvtfileName);
+  ATH_MSG_DEBUG("                     resolved in  :\n    " << m_fn << "\n\n");
 
   std::unique_ptr<TFile> jvtfile {TFile::Open(m_fn)};
   if(!jvtfile){

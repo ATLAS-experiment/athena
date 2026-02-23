@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/TrackFindingAlg.h"
@@ -408,7 +408,7 @@ namespace ActsTrk
   }
 
   bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const auto& bottom_sp = seed.sp().front();
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
 
     const double r = bottom_sp->radius();
     const double z = std::abs(bottom_sp->z());
@@ -567,8 +567,8 @@ namespace ActsTrk
           event_stat[category_i][kNForcedSeedMeasurements] += measurementRangesForced->size();
 
         // Get the Acts tracks, given this seed
-        // Result here contains a vector of TrackProxy objects
-        auto result = trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
+        Acts::Result<std::vector<TrkProxy> > result =
+          trackFinder().ckf.findTracks(*initialParameters, options, tracksContainerTemp);
 
         // The result for this seed
         if (not result.ok()) {

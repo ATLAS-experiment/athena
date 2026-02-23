@@ -113,8 +113,7 @@ def TgcBytestreamDecodeCfg(flags, name="MuonTgcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}TGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "TGCRDO"
-    Muon__TGC_RawDataProviderToolMT=CompFactory.Muon.TGC_RawDataProviderToolMT
-    MuonTgcRawDataProviderTool = Muon__TGC_RawDataProviderToolMT(name    = "TGC_RawDataProviderToolMT",
+    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderTool(name    = "TGC_RawDataProviderTool",
                                                                  Decoder = TGCRodDecoder,
                                                                  RdoLocation = keyName )
 
@@ -256,8 +255,7 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonStgcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "sTGCRDO"
-    Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
-    MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
+    MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
                                                                    RdoLocation = keyName,
                                                                    SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )

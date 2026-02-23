@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonDetectorManager_H
@@ -131,6 +131,8 @@ namespace MuonGM {
         void setCutoutsBogFlag(int flag);
         inline int  IncludeCutoutsBogFlag() const;
 
+        // Retrieve all muon stations
+        std::vector<const MuonStation*> getMuonStations() const;
         // Add a MuonStation to the list
         void addMuonStation(std::unique_ptr<MuonStation>&& mst);
         const MuonStation* getMuonStation(const std::string& stName, int eta, int phi) const;

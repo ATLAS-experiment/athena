@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/IdentifierField.h"
+#include "GaudiKernel/MsgStream.h"
 #include "src/IdentifierFieldParser.h"
 #include <algorithm>
-#include <iostream>
+#include <sstream> //ostringstream
 #include <bit> //std::bit_width
 #include <array>
 #include <cctype> //std::isspace
@@ -379,46 +380,53 @@ IdentifierField::operator == (const IdentifierField& other) const {
 
 //----------------------------------------------- 
 void 
-IdentifierField::show() const {
-  std::cout << "min/max " << m_minimum << " " << m_maximum << " "; 
-  std::cout << "values  ";
+IdentifierField::show(std::ostream & out) const {
+  out << "min/max " << m_minimum << " " << m_maximum << " "; 
+  out << "values  ";
   for (const auto& v: get_values()) {
-      std::cout << v << " ";
+      out << v << " ";
   }
-  std::cout << "indexes  ";
+  out << "indexes  ";
   for (const auto & idx: m_indexes) {
-      std::cout << idx << " ";
+      out << idx << " ";
   }
-  std::cout << "indices  " << m_size << " ";
-  std::cout << "prev  " << m_previous << " ";
-  std::cout << "next  " << m_next << " ";
-  std::cout << "mode  ";
+  out << "indices  " << m_size << " ";
+  out << "prev  " << m_previous << " ";
+  out << "next  " << m_next << " ";
+  out << "mode  ";
   if (m_empty){
-      std::cout << "unbounded  ";
+      out << "unbounded  ";
   }else if (isBounded()){
-      std::cout << "both_bounded  ";
+      out << "both_bounded  ";
   }else if (isEnumerated()) {
-      std::cout << "enumerated  ";
+      out << "enumerated  ";
   }
-  std::cout << "cont mode  ";
+  out << "cont mode  ";
   switch (m_continuation_mode) { 
   case IdentifierField::none: 
-      std::cout << "none  ";
+      out << "none  ";
       break; 
   case IdentifierField::has_next: 
-      std::cout << "has_next  ";
+      out << "has_next  ";
       break; 
   case IdentifierField::has_previous: 
-      std::cout << "has_previous  ";
+      out << "has_previous  ";
       break; 
   case IdentifierField::has_both:
-      std::cout << "has_both  ";
+      out << "has_both  ";
       break; 
   case IdentifierField::has_wrap_around:
-      std::cout << "has_wrap_around  ";
+      out << "has_wrap_around  ";
       break; 
   }
-  std::cout << std::endl;
+  out << std::endl;
+}
+
+void 
+IdentifierField::show(MsgStream & out) const{
+  std::ostringstream os;
+  show(os);
+  out << os.str();
 }
 
 

@@ -9,9 +9,9 @@
  *      Author: tlodd
  */
 
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 
 eflowRecCluster::eflowRecCluster(const ElementLink<xAOD::CaloClusterContainer>& clusElementLink, xAOD::CaloClusterContainer& newClusContainer) :

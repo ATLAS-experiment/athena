@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETSERVMATGEOMODEL_INDETSERVMATTOOL_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
@@ -33,7 +32,6 @@ class InDetServMatTool final : public GeoModelTool {
 
  private:
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc"};
-  ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc"};
   ToolHandle<IInDetServMatBuilderTool> m_builderTool{this,"ServiceBuilderTool",""};
   StringProperty m_overrideVersionName{this,"OverrideVersionName",""};
 

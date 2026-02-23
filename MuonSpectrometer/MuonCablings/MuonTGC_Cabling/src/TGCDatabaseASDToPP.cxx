@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCDatabaseASDToPP.h"
@@ -50,7 +50,7 @@ TGCDatabaseASDToPP::TGCDatabaseASDToPP(const TGCDatabaseASDToPP& right,
     right.getminIndexOut(m_minIndexOut);
 }
 
-TGCDatabaseASDToPP::~TGCDatabaseASDToPP(void) {}
+TGCDatabaseASDToPP::~TGCDatabaseASDToPP() {}
 
 bool TGCDatabaseASDToPP::update(const std::vector<int>& input) {
     int ip = find(input);
@@ -179,7 +179,7 @@ bool TGCDatabaseASDToPP::isCommon() const {
     return m_isCommon;
 }
 
-void TGCDatabaseASDToPP::readDB(void) {
+void TGCDatabaseASDToPP::readDB() {
     std::ifstream file(m_filename.c_str());
     std::string buf;
 
@@ -228,6 +228,7 @@ void TGCDatabaseASDToPP::readDB(void) {
             m_database[i].at(1) != m_database[i + 1].at(1)) {
             // increase with R in chamber    [0..n]
             int totline = m_database[i].at(2) + 1;
+            //coverity[TAINTED_SCALAR]
             for (int j = 0; j < totline; j++) {
                 m_database[i - j].push_back(j);
             }
@@ -263,7 +264,7 @@ void TGCDatabaseASDToPP::readDB(void) {
     makeIndexDBOut();
 }
 
-void TGCDatabaseASDToPP::makeIndexDBIn(void) {
+void TGCDatabaseASDToPP::makeIndexDBIn() {
     m_NIndexDBIn = 1;
     for (int iIndexIn = 0; iIndexIn < NIndexIn; iIndexIn++) {
         m_NIndexDBIn *= (m_maxIndexIn[iIndexIn] - m_minIndexIn[iIndexIn] + 1);
@@ -291,7 +292,7 @@ int TGCDatabaseASDToPP::convertIndexDBIn(int* indexIn) const {
     return converted;
 }
 
-void TGCDatabaseASDToPP::makeIndexDBOut(void) {
+void TGCDatabaseASDToPP::makeIndexDBOut() {
     m_NIndexDBOut = 1;
     for (int iIndexOut = 0; iIndexOut < NIndexOut; iIndexOut++) {
         m_NIndexDBOut *=

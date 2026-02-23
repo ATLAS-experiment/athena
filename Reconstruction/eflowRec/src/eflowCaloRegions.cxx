@@ -12,7 +12,7 @@ CREATED:  03 May, 2006
 
 ********************************************************************/
 
-#include "eflowRec/eflowCaloRegions.h"
+#include "eflowCaloRegions.h"
 
 
 

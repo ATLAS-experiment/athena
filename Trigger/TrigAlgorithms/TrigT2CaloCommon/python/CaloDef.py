@@ -11,7 +11,7 @@ from TrigT2CaloCommon.TrigCaloDataAccessConfig import trigCaloDataAccessSvcCfg, 
 # fast calo algorithm (central or forward regions)
 #
 @AccumulatorCache
-def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
+def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClusters", doRingerCalib=False,RingerKey="HLT_FastCaloRinger", doForward=False, doAllEm=False, doAll=False):
 
     acc = ComponentAccumulator()
     acc.merge(trigCaloDataAccessSvcCfg(flags))
@@ -22,7 +22,7 @@ def fastCaloRecoSequenceCfg(flags, inputEDM="", ClustersName="HLT_FastCaloEMClus
 
     from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastAlgoCfg
     if (not doForward) and (not doAll) and (not doAllEm ) :
-       acc.merge(t2CaloEgamma_ReFastAlgoCfg(flags, "FastCaloL2EgammaAlg", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=CaloDataAccessSvcDependencies, ClustersName = ClustersName))
+       acc.merge(t2CaloEgamma_ReFastAlgoCfg(flags, "FastCaloL2EgammaAlg", doRinger=True, doRingerCalib = doRingerCalib, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=CaloDataAccessSvcDependencies, ClustersName = ClustersName))
     if doForward:
         from TrigT2CaloEgamma.TrigT2CaloEgammaConfig import t2CaloEgamma_ReFastFWDAlgoCfg
         acc.merge(t2CaloEgamma_ReFastFWDAlgoCfg(flags, "FastCaloL2EgammaAlg_FWD", doRinger=True, RingerKey=RingerKey,RoIs=inputEDM,ExtraInputs=CaloDataAccessSvcDependencies, ClustersName = ClustersName))

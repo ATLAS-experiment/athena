@@ -31,6 +31,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # Add FixHepMC to remove loops here
 # This is a work-around for AGENE-2342, which needs a HepMC patch to fix
 cfg.addEventAlgo(CompFactory.FixHepMC("FixHepMC"))
+# For events with loops, you may still need to add the option SetHasCycles=True
 
 # Get the name of the uncompressed events file that we will write
 events_filename = flags.Output.HepMCFileName.replace('.tgz','').replace('.tar','').replace('.gz','')

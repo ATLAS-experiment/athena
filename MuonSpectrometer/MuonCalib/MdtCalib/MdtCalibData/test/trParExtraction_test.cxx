@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <stdlib.h>
-#include <limits>
-#include <format>
+
 #include <MuonCalibMath/BaseFunctionFitter.h>
 #include <MuonCalibMath/ChebyshevPolynomial.h>
 #include <MuonCalibMath/LegendrePolynomial.h>
@@ -12,11 +10,19 @@
 #include <MdtCalibData/RtChebyshev.h>
 #include <MdtCalibData/RtLegendre.h>
 
-
 #include <TGraph.h>
 #include <TMultiGraph.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+
+#include <cmath>
+#include <cstdlib>
+#include <limits>
+#include <format>
+#include <vector>
+#include <iostream>
+#include <memory>
+
 using namespace MuonCalib;
 
 inline double resolution(const double r) {
@@ -34,7 +40,7 @@ inline std::ostream& operator<<(std::ostream& ostr, const std::vector<double>& v
 }
 
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main (){
     /// Interval & step size
     constexpr double tMin = 10.;

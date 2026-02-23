@@ -12,7 +12,7 @@ atlas_add_library( MuonSelectorToolsLib
    MuonSelectorTools/*.h Root/*.cxx
    PUBLIC_HEADERS MuonSelectorTools
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib AthOnnxInterfaces AthOnnxUtilsLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools AsgServicesLib xAODEventInfo PATCoreLib MuonAnalysisInterfacesLib AsgDataHandlesLib AthOnnxInterfaces AthOnnxUtilsLib MVAUtils
    PRIVATE_LINK_LIBRARIES xAODTracking PathResolver )
 
 if( NOT XAOD_STANDALONE )

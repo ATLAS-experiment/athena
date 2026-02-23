@@ -131,15 +131,13 @@ class MGControl:
         if process_dir=='':
             raise RuntimeError('No diagrams for this process from list: '+str(sorted(glob.glob(os.getcwd()+'/*PROC*'),reverse=True)))
 
-        
-
         self.process_dir = process_dir
         self.get_config_cardloc()
         self.getConfigFromPath(self.config_path)
-        
+
         #load up the run card dictionary
         self.getRunCardDict()
-        
+
         # If requested, apply PMG default settings
         if usePMGSettings:
             do_PMG_updates(self.process_dir)
@@ -273,7 +271,6 @@ class MGControl:
         Before writing the dictionary to the run card, we require to check a few things first
         """
 
-
         # Get info from runArgs
         self.add_runArgs(runArgs)
 
@@ -290,29 +287,58 @@ class MGControl:
                 # Build full path and make absolute
                 full_path = os.path.join(cfgdir, raw_name)
                 self.runCardDict['custom_fcts'] = os.path.abspath(full_path)
-                print(f"Using custom function(s), specified in custom_fcts with path: {self.runCardDict['custom_fcts']}")
+                mglog.info(f"Using custom function(s), specified in custom_fcts with path: {self.runCardDict['custom_fcts']}")
             else:
                 # For internal tests, where jobConfig is not set
                 self.runCardDict['custom_fcts'] = os.path.abspath(raw_name)
-                
+
         # to avoid writing over the old run card, we rename the old card
         runCard_old = self.process_dir+'/Cards/run_card.dat.old_to_be_deleted'
         os.rename(self.process_dir+'/Cards/run_card.dat', runCard_old)
 
-        #create anew run card in the same location as the old card
-        newCard = open(self.process_dir+'/Cards/run_card.dat', 'w')
-        
-        #write out each line of self.runCardDict to the newCard
-        for setting in self.runCardDict:
-            newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+'\n')
-            
+        listSettings = []
+
+        # Read in old run card, we want to copy over the comments
+        # Then create a new run card in the same location as the old card
+        with open(runCard_old) as oldCard, open(self.process_dir+'/Cards/run_card.dat', 'w') as newCard:
+            for line in iter(oldCard):
+                #if the line starts with a '#' (ie. is a comment) copy it straight over
+                if line.strip().startswith('#'):
+                    newCard.write(line)
+                else: #if not we want to grab the comment after the '!' as well as the associated command (before '!')
+                    command= line.split('!',1)[0]
+                    if len(line.split('!',1)) > 1:
+                        comment= line.split('!',1)[1]
+                    else:
+                        comment = '\n'
+                    if '=' in command:
+                        setting = command.split('=')[-1].strip()
+                        # Check if the setting is in the dictionary and then print with the comment and the updated value
+                        if setting in self.runCardDict:
+                            newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+' ! '+ comment)
+                            listSettings.append(str(setting))
+                        else:
+                            raise RuntimeError('Could not find '+str(setting)+' in the Run Card Dictionary!')
+                    else:
+                        newCard.write(line)
+            # Add a commented region
+            newCard.write("""#***********************************************************************
+# Any Additional settings can be added here                            *
+#***********************************************************************
+""")
+
+            #check that all settings have been writen
+            for setting in self.runCardDict:
+                if setting not in listSettings:
+                    newCard.write( ' '+str(self.runCardDict[setting])+'   = '+str(setting)+'\n')
+
         # Check whether mcatnlo_delta is applied to setup pythia8 path
         if 'mcatnlo_delta' in self.runCardDict:	    
             if self.runCardDict['mcatnlo_delta'] == 'True':
                 self.configCardDict['pythia8_path'] = os.getenv("PY8PATH")
-                    
-        # close files
-        newCard.close()
+                # TODO: this will require our writing out the config card again
+
+        # Tidy up after ourselves
         mglog.info('Finished writing to run card.')
         os.unlink(runCard_old) # delete old backup
             

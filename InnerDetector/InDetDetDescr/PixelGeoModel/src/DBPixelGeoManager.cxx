@@ -13,7 +13,6 @@
 // to permit access to StoreGate
 #include "StoreGate/StoreGateSvc.h"
 
-#include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
 #include "GeoModelKernel/GeoMaterial.h"
@@ -197,11 +196,11 @@ DBPixelGeoManager::init()
   m_pMatMgr->addWeightTable(m_dbmWeightTable, "pix");
 
   // Create material map
-  m_materialMap = std::make_unique<PixelMaterialMap>(db(), m_materialTable);
+  m_materialMap = std::make_unique<PixelMaterialMap>(m_materialTable);
   if (m_materialTable->size() == 0) addDefaultMaterials();
 
   // Create stave type map
-  m_pixelStaveTypes = std::make_unique<PixelStaveTypes>(db(), m_staveTypeTable);
+  m_pixelStaveTypes = std::make_unique<PixelStaveTypes>(m_staveTypeTable);
  
   
   //
@@ -266,16 +265,6 @@ DBPixelGeoManager::partTransform(const std::string & partName) const
 bool 
 DBPixelGeoManager::partPresent(const std::string & partName) const
 {
-  // First check if overridden from text file.
-  if (partName == "Barrel") {
-    if (db()->testField("PixelCommon","DOBARREL")) {
-      return db()->getInt("PixelCommon","DOBARREL");
-    }
-  } else if (partName == "EndcapA" || partName == "EndcapC") {
-    if (db()->testField("PixelCommon","DOENDCAPS")) {
-      return db()->getInt("PixelCommon","DOENDCAPS");
-    }
-  }
   // otherwise check database.
   return (m_allPartsPresent || m_placements->present(partName));
 }
@@ -317,16 +306,13 @@ void DBPixelGeoManager::SetCurrentLD(int i)
 }
 
 void DBPixelGeoManager::SetBarrel() {
-  //msg(MSG::DEBUG) << "Setting Barrel" << endmsg;
   m_BarrelEndcap = 0;
 }
 void DBPixelGeoManager::SetEndcap() {
   m_BarrelEndcap = 1;
-  //msg(MSG::DEBUG) << "Setting Endcap" << endmsg;
 }
 void DBPixelGeoManager::SetPartsDBM() {
   m_BarrelEndcap = 2;
-  //msg(MSG::DEBUG) << "Setting DBM" << endmsg;
 }
 /////////////////////////////////////////////////////////
 //
@@ -343,7 +329,7 @@ bool DBPixelGeoManager::isLDPresent() {
     A << "_" << m_currentLD;
     // More than 3 layers not yet supported in database so
     // if not present in text file assume using this layer
-    return db()->getInt(m_PixelBarrelGeneral,"USELAYER"+A.str());
+    return (*m_PixelBarrelGeneral)[0]->getInt("USELAYER"+A.str());
   }
   if(isEndcap() ) {
     if (m_initialLayout && m_currentLD == 1) return false;
@@ -351,7 +337,7 @@ bool DBPixelGeoManager::isLDPresent() {
     A << "_" << m_currentLD;
     // More than 3 disks not yet supported in database so
     // if not present in text file assume using this disks
-    return db()->getInt(m_PixelEndcapGeneral,"USEDISK"+A.str());
+    return (*m_PixelEndcapGeneral)[0]->getInt("USEDISK"+A.str());
   }
   return false;
 }
@@ -430,7 +416,7 @@ int DBPixelGeoManager::moduleType()
   int type = 0;
   if (ibl()) {
     if (isBarrel()) {
-      type = db()->getInt(m_PixelLayer,"MODULETYPE",m_currentLD);
+      type = (*m_PixelLayer)[m_currentLD]->getInt("MODULETYPE");
     }
   } else {
     if(isBarrel()) type = m_currentLD;
@@ -446,7 +432,7 @@ int DBPixelGeoManager::moduleType3D()
 
   if (ibl()) {
     try {
-      type = db()->getInt(m_PixelLayer,"MODULETYPE3D",m_currentLD);
+      type = (*m_PixelLayer)[m_currentLD]->getInt("MODULETYPE3D");
       return type;
     }
     catch(...)
@@ -468,18 +454,18 @@ int DBPixelGeoManager::moduleType3D()
 double DBPixelGeoManager::PixelBoardWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D){
-    return db()->getDouble(m_PixelModule,"BOARDWIDTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("BOARDWIDTH")*mmcm();
   }
 
-  return db()->getDouble(m_PixelModule,"BOARDWIDTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("BOARDWIDTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelBoardLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"BOARDLENGTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("BOARDLENGTH")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"BOARDLENGTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("BOARDLENGTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelBoardThickness(bool isModule3D) 
@@ -489,8 +475,8 @@ double DBPixelGeoManager::PixelBoardThickness(bool isModule3D)
   }
 
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"BOARDTHICK",moduleType3D())*mmcm();
-  return db()->getDouble(m_PixelModule,"BOARDTHICK",moduleType())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("BOARDTHICK")*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("BOARDTHICK")*mmcm();
 }
 
 double  DBPixelGeoManager::PixelBoardActiveLength(bool isModule3D) 
@@ -507,25 +493,25 @@ double  DBPixelGeoManager::PixelBoardActiveLength(bool isModule3D)
 double DBPixelGeoManager::PixelHybridWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"HYBRIDWIDTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("HYBRIDWIDTH")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"HYBRIDWIDTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("HYBRIDWIDTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelHybridLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"HYBRIDLENGTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("HYBRIDLENGTH")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"HYBRIDLENGTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("HYBRIDLENGTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelHybridThickness(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"HYBRIDTHICK",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("HYBRIDTHICK")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"HYBRIDTHICK",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("HYBRIDTHICK")*mmcm();
 }
  
 /////////////////////////////////////////////////////////
@@ -537,44 +523,44 @@ double DBPixelGeoManager::PixelHybridThickness(bool isModule3D)
 double DBPixelGeoManager::PixelChipWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"CHIPWIDTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("CHIPWIDTH")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"CHIPWIDTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("CHIPWIDTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelChipLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"CHIPLENGTH",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("CHIPLENGTH")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"CHIPLENGTH",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("CHIPLENGTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelChipGap(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"CHIPGAP",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("CHIPGAP")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"CHIPGAP",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("CHIPGAP")*mmcm();
 }
 
 double DBPixelGeoManager::PixelChipOffset(bool isModule3D) 
 {
-   if(!ibl()||GetLD()!=0||!isBarrel()||!(db()->testField(m_PixelModule,"CHIPOFFSET"))){
+   if(!ibl()||GetLD()!=0||!isBarrel()||(*m_PixelModule)[moduleType3D()]->isFieldNull("CHIPOFFSET")){
      return 0.;
    }
 
   if(isModule3D)
-    return db()->getDouble(m_PixelModule,"CHIPOFFSET",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("CHIPOFFSET")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"CHIPOFFSET",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("CHIPOFFSET")*mmcm();
 }
 
 double DBPixelGeoManager::PixelChipThickness(bool isModule3D)  {
   if(ibl()&&isModule3D)
-    return db()->getDouble(m_PixelModule,"CHIPTHICK",moduleType3D())*mmcm();
+    return (*m_PixelModule)[moduleType3D()]->getDouble("CHIPTHICK")*mmcm();
 
-  return db()->getDouble(m_PixelModule,"CHIPTHICK",moduleType())*mmcm();
+  return (*m_PixelModule)[moduleType()]->getDouble("CHIPTHICK")*mmcm();
 }
 
 
@@ -589,62 +575,58 @@ int DBPixelGeoManager::PixelModuleServiceNumber()
 {
   if(!ibl()||GetLD()>0||!isBarrel()) return 0;
 
-  if (db()->getTableSize(m_PixelModuleSvc)) 
-    return db()->getTableSize(m_PixelModuleSvc);
-  return 0;
+  return m_PixelModuleSvc->size();
 }
 
 double DBPixelGeoManager::PixelModuleServiceLength(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"LENGTH",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("LENGTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleServiceWidth(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"WIDTH",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("WIDTH")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleServiceThick(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"THICK",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("THICK")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleServiceOffsetX(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"XOFFSET",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("XOFFSET")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleServiceOffsetY(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"YOFFSET",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("YOFFSET")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleServiceOffsetZ(int svc)
 {
-  return db()->getDouble(m_PixelModuleSvc,"ZOFFSET",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getDouble("ZOFFSET")*mmcm();
 }
 
 int DBPixelGeoManager::PixelModuleServiceFullSize(int svc)
 {
-  return db()->getInt(m_PixelModuleSvc,"FULLSIZE",svc);
+  return (*m_PixelModuleSvc)[svc]->getInt("FULLSIZE");
 }
 
 int DBPixelGeoManager::PixelModuleServiceModuleType(int svc)
 {
-  return db()->getInt(m_PixelModuleSvc,"MODULE3D",svc)*mmcm();
+  return (*m_PixelModuleSvc)[svc]->getInt("MODULE3D")*mmcm();
 }
 
 std::string DBPixelGeoManager::PixelModuleServiceName(int svc)
 {
-  return db()->getString(m_PixelModuleSvc,"NAME",svc);
+  return (*m_PixelModuleSvc)[svc]->getString("NAME");
 }
 
 std::string DBPixelGeoManager::PixelModuleServiceMaterial(int svc)
 {
-  return db()->getString(m_PixelModuleSvc,"MATERIAL",svc);
+  return (*m_PixelModuleSvc)[svc]->getString("MATERIAL");
 }
-
-
 
 /////////////////////////////////////////////////////////
 //
@@ -739,10 +721,10 @@ int DBPixelGeoManager::PixelServiceElements(const std::string & type) {
   } else {
   */
     // a is ignored. Use frame num to distinguish between inside (<1000) and ouside (>=1000). 
-  if(type == "simple") return db()->getTableSize(m_PixelSimpleService);
-  if(type == "barrel") return db()->getTableSize(m_PixelBarrelService);
-  if(type == "endcap") return db()->getTableSize(m_PixelEndcapService);
-  if(type == "envelope") return db()->getTableSize(m_PixelEnvelopeService);
+  if(type == "simple") return m_PixelSimpleService->size();
+  if(type == "barrel") return m_PixelBarrelService->size();
+  if(type == "endcap") return m_PixelEndcapService->size();
+  if(type == "envelope") return m_PixelEnvelopeService->size();
   return 0;
   //}
 }
@@ -983,24 +965,24 @@ int DBPixelGeoManager::PixelServiceParentEnvelopeNum(const std::string & type, i
 
 std::string DBPixelGeoManager::getPixelServiceRecordString(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
-  return db()->getString(recordSet, name, index);
+  return (*recordSet)[index]->getString(name);
 }
 
 int DBPixelGeoManager::getPixelServiceRecordInt(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
-  return db()->getInt(recordSet, name, index);
+  return (*recordSet)[index]->getInt(name);
 }
 
 
 double DBPixelGeoManager::getPixelServiceRecordDouble(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
-  return db()->getDouble(recordSet, name, index);
+  return (*recordSet)[index]->getDouble(name);
 }
 
 bool DBPixelGeoManager::getPixelServiceRecordTestField(const std::string & name, const std::string & type, int index) {
   try {
     IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
-    return db()->testField(recordSet, name, index);
+    return !((*recordSet)[index]->isFieldNull(name));
   }
   catch(...){}
   return false;
@@ -1030,7 +1012,7 @@ IRDBRecordset_ptr  DBPixelGeoManager::getPixelServiceRecordset(const std::string
 
 double DBPixelGeoManager::PixelECCablesThickness() 
 {
-  double tck = db()->getDouble(m_PixelDisk,"CABLETHICK",m_currentLD);
+  double tck = (*m_PixelDisk)[m_currentLD]->getDouble("CABLETHICK");
   if( tck > 0.) {
     return tck*mmcm();
   } else {    
@@ -1043,21 +1025,21 @@ int
 DBPixelGeoManager::PixelCableElements()
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableElements();
-  return db()->getTableSize(m_PixelBarrelCable);
+  return m_PixelBarrelCable->size();
 }
 
 int 
 DBPixelGeoManager::PixelCableLayerNum(int index)
 {
   if (dbVersion() < 3) return 0;
-  return db()->getInt(m_PixelBarrelCable,"LAYER",index);
+  return (*m_PixelBarrelCable)[index]->getInt("LAYER");
 }
 
 int 
 DBPixelGeoManager::PixelCableBiStaveNum(int index)
 {
   if (dbVersion() < 3) return 0;
-  return db()->getInt(m_PixelBarrelCable,"BISTAVE",index);
+  return (*m_PixelBarrelCable)[index]->getInt("BISTAVE");
 }
 
 
@@ -1065,49 +1047,49 @@ double
 DBPixelGeoManager::PixelCableZStart(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableZStart(index);
-  return db()->getDouble(m_PixelBarrelCable,"ZSTART",index) * Gaudi::Units::mm;
+  return (*m_PixelBarrelCable)[index]->getDouble("ZSTART") * Gaudi::Units::mm;
 }
 
 double 
 DBPixelGeoManager::PixelCableZEnd(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableZEnd(index);
-  return db()->getDouble(m_PixelBarrelCable,"ZEND",index) * Gaudi::Units::mm;
+  return (*m_PixelBarrelCable)[index]->getDouble("ZEND") * Gaudi::Units::mm;
 }
 
 double 
 DBPixelGeoManager::PixelCableWidth(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableWidth(index);
-  return db()->getDouble(m_PixelBarrelCable,"WIDTH",index) * Gaudi::Units::mm;
+  return (*m_PixelBarrelCable)[index]->getDouble("WIDTH") * Gaudi::Units::mm;
 }
 
 double 
 DBPixelGeoManager::PixelCableThickness(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableThickness(index);
-  return db()->getDouble(m_PixelBarrelCable,"THICK",index) * Gaudi::Units::mm;
+  return (*m_PixelBarrelCable)[index]->getDouble("THICK") * Gaudi::Units::mm;
 }
 
 double 
 DBPixelGeoManager::PixelCableStackOffset(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableStackOffset(index);
-  return db()->getDouble(m_PixelBarrelCable,"STACKPOS",index) * Gaudi::Units::mm;
+  return (*m_PixelBarrelCable)[index]->getDouble("STACKPOS") * Gaudi::Units::mm;
 }
 
 double 
 DBPixelGeoManager::PixelCableWeight(int index)
 {
   if (dbVersion() < 3) return 0;
-  return db()->getDouble(m_PixelBarrelCable,"WEIGHT",index) * GeoModelKernelUnits::g;
+  return (*m_PixelBarrelCable)[index]->getDouble("WEIGHT") * GeoModelKernelUnits::g;
 }
 
 std::string
 DBPixelGeoManager::PixelCableLabel(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableLabel(index);
-  return db()->getString(m_PixelBarrelCable,"LABEL",index);
+  return (*m_PixelBarrelCable)[index]->getString("LABEL");
 }
 
 
@@ -1197,8 +1179,12 @@ int DBPixelGeoManager::PixelEndcapMinorVersion()
 std::string DBPixelGeoManager::versionDescription() const
 {
   std::string description;
-  if (db()->testField(m_PixelSwitches,"DESCRIPTION")) {
-    description = db()->getString(m_PixelSwitches,"DESCRIPTION");
+  try {
+    if(!(*m_PixelSwitches)[0]->isFieldNull("DESCRIPTION")) {
+      description = (*m_PixelSwitches)[0]->getString("DESCRIPTION");
+    }
+  }
+  catch(std::runtime_error&) {
   }
   return description;
 }
@@ -1206,8 +1192,12 @@ std::string DBPixelGeoManager::versionDescription() const
 std::string DBPixelGeoManager::versionName() const
 {
   std::string name;
-  if (db()->testField(m_PixelSwitches,"VERSIONNAME")) {
-    name = db()->getString(m_PixelSwitches,"VERSIONNAME");
+  try {
+    if(!(*m_PixelSwitches)[0]->isFieldNull("VERSIONNAME")) {
+      name = (*m_PixelSwitches)[0]->getString("VERSIONNAME");
+    }
+  }
+  catch(std::runtime_error&) {
   }
   return name;
 }
@@ -1215,8 +1205,12 @@ std::string DBPixelGeoManager::versionName() const
 std::string DBPixelGeoManager::versionLayout() const
 {
   std::string layout;
-  if (db()->testField(m_PixelSwitches,"LAYOUT")) {
-    layout = db()->getString(m_PixelSwitches,"LAYOUT");
+  try {
+    if(!(*m_PixelSwitches)[0]->isFieldNull("LAYOUT")) {
+      layout = (*m_PixelSwitches)[0]->getString("LAYOUT");
+    }
+  }
+  catch(std::runtime_error&) {
   }
   return layout;
 }
@@ -1224,38 +1218,38 @@ std::string DBPixelGeoManager::versionLayout() const
 
 double DBPixelGeoManager::PixelRMin() 
 {
-  if (db()->getTableSize(m_PixelEnvelope)) {
+  if (m_PixelEnvelope->size()) {
     double rmin = PixelEnvelopeRMin(0);  
-    for (unsigned int i = 1; i < db()->getTableSize(m_PixelEnvelope); i++) {
+    for (unsigned int i = 1; i < m_PixelEnvelope->size(); i++) {
       rmin = std::min(rmin, PixelEnvelopeRMin(i));
     } 
     return rmin;
-  } else {      
-    return db()->getDouble(m_PixelCommon,"RMIN")*mmcm();
+  } else {
+    return (*m_PixelCommon)[0]->getDouble("RMIN")*mmcm();
   }
 }
 
 double DBPixelGeoManager::PixelRMax() 
 {
-  if (db()->getTableSize(m_PixelEnvelope)) {
+  if (m_PixelEnvelope->size()) {
     double  rmax = PixelEnvelopeRMax(0);  
-    for (unsigned int i = 1; i < db()->getTableSize(m_PixelEnvelope); i++) {
+    for (unsigned int i = 1; i < m_PixelEnvelope->size(); i++) {
       rmax = std::max(rmax, PixelEnvelopeRMax(i));
     } 
     return rmax;
   } else {      
-    return db()->getDouble(m_PixelCommon,"RMAX")*mmcm();
+    return (*m_PixelCommon)[0]->getDouble("RMAX")*mmcm();
   }
 }
 
 double DBPixelGeoManager::PixelHalfLength() 
 {
 
-  if (db()->getTableSize(m_PixelEnvelope)) {
+  if (m_PixelEnvelope->size()) {
     // The table should contain only +ve z values.
-    return PixelEnvelopeZ(db()->getTableSize(m_PixelEnvelope) - 1);
+    return PixelEnvelopeZ(m_PixelEnvelope->size() - 1);
   } else {
-    return db()->getDouble(m_PixelCommon,"HALFLENGTH")*mmcm();
+    return (*m_PixelCommon)[0]->getDouble("HALFLENGTH")*mmcm();
   }
 }
 
@@ -1264,51 +1258,51 @@ bool DBPixelGeoManager::PixelSimpleEnvelope()
   // Return true if the envelope can be built as a simple tube.
   // otherwise it will be built as a PCON.
   // True if size is 0 or 1.
-  return (!(db()->getTableSize(m_PixelEnvelope) > 1));
+  return (!(m_PixelEnvelope->size() > 1));
 }
 
 unsigned int DBPixelGeoManager::PixelEnvelopeNumPlanes() 
 {
-  return db()->getTableSize(m_PixelEnvelope);
+  return m_PixelEnvelope->size();
 }
 
 double DBPixelGeoManager::PixelEnvelopeZ(int i) 
 {
-  double zmin =  db()->getDouble(m_PixelEnvelope,"Z",i) * Gaudi::Units::mm;
+  double zmin =  (*m_PixelEnvelope)[i]->getDouble("Z") * Gaudi::Units::mm;
   if (zmin < 0) msg(MSG::ERROR) << "PixelEnvelope table should only contain +ve z values" << endmsg;
   return std::abs(zmin);
 }
 
 double DBPixelGeoManager::PixelEnvelopeRMin(int i) 
 {
-  return db()->getDouble(m_PixelEnvelope,"RMIN",i) * Gaudi::Units::mm;
+  return (*m_PixelEnvelope)[i]->getDouble("RMIN") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelEnvelopeRMax(int i) 
 {
-  return db()->getDouble(m_PixelEnvelope,"RMAX",i) * Gaudi::Units::mm;
+  return (*m_PixelEnvelope)[i]->getDouble("RMAX") * Gaudi::Units::mm;
 }
 
 
 int DBPixelGeoManager::PixelBarrelNLayer() 
 {
-  return db()->getInt(m_PixelBarrelGeneral,"NLAYER");
+  return (*m_PixelBarrelGeneral)[0]->getInt("NLAYER");
 }
 
 // m_PixelBarrelGeneral
 double DBPixelGeoManager::PixelBarrelRMin() 
 {
-  return db()->getDouble(m_PixelBarrelGeneral,"RMIN")*mmcm();
+  return (*m_PixelBarrelGeneral)[0]->getDouble("RMIN")*mmcm();
 }
 
 double DBPixelGeoManager::PixelBarrelRMax() 
 {
-  return db()->getDouble(m_PixelBarrelGeneral,"RMAX")*mmcm();
+  return (*m_PixelBarrelGeneral)[0]->getDouble("RMAX")*mmcm();
 }
 
 double DBPixelGeoManager::PixelBarrelHalfLength() 
 {
-  return db()->getDouble(m_PixelBarrelGeneral,"HALFLENGTH")*mmcm();
+  return (*m_PixelBarrelGeneral)[0]->getDouble("HALFLENGTH")*mmcm();
 }
 
 // Described in general services for later geometries.
@@ -1321,67 +1315,67 @@ bool DBPixelGeoManager::oldFrame()
 // For new geometry a detailed frame is built.
 bool DBPixelGeoManager::detailedFrame()
 {
-  return db()->getTableSize(m_PixelFrame);
+  return m_PixelFrame->size();
 }
   
 int DBPixelGeoManager::PixelFrameSections()
 {
-  return db()->getTableSize(m_PixelFrame);
+  return m_PixelFrame->size();
 }
 
 double DBPixelGeoManager::PixelFrameRMinSide(int sectionIndex)
 {
-  return db()->getDouble(m_PixelFrame, "RMINSIDE", sectionIndex) * Gaudi::Units::mm;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("RMINSIDE") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameRMaxSide(int sectionIndex)
 {
-  return db()->getDouble(m_PixelFrame, "RMAXSIDE", sectionIndex) * Gaudi::Units::mm;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("RMAXSIDE") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameSideWidth(int sectionIndex)
 {
-  return db()->getDouble(m_PixelFrame, "SIDEWIDTH", sectionIndex) * Gaudi::Units::mm;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("SIDEWIDTH") * Gaudi::Units::mm;
 } 
  
 double DBPixelGeoManager::PixelFrameZMin(int sectionIndex)
 { 
-  return db()->getDouble(m_PixelFrame, "ZMIN", sectionIndex) * Gaudi::Units::mm;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("ZMIN") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameZMax(int sectionIndex)
 { 
-  return db()->getDouble(m_PixelFrame, "ZMAX", sectionIndex) * Gaudi::Units::mm;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("ZMAX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFramePhiStart(int sectionIndex)
 {
-  return db()->getDouble(m_PixelFrame, "PHISTART", sectionIndex) * Gaudi::Units::deg;
+  return (*m_PixelFrame)[sectionIndex]->getDouble("PHISTART") * Gaudi::Units::deg;
 }
  
 int DBPixelGeoManager::PixelFrameNumSides(int sectionIndex)
 {
-  return db()->getInt(m_PixelFrame, "NUMSIDES", sectionIndex);
+  return (*m_PixelFrame)[sectionIndex]->getInt("NUMSIDES");
 }
 
 bool DBPixelGeoManager::PixelFrameMirrorSides(int sectionIndex)
 {
-  return db()->getInt(m_PixelFrame, "MIRRORSIDES", sectionIndex);
+  return (*m_PixelFrame)[sectionIndex]->getInt("MIRRORSIDES");
 }
 									
 std::string DBPixelGeoManager::PixelFrameSideMaterial(int sectionIndex)
 {
-  return db()->getString(m_PixelFrame, "SIDEMATERIAL", sectionIndex);
+  return (*m_PixelFrame)[sectionIndex]->getString("SIDEMATERIAL");
 }
 
 std::string DBPixelGeoManager::PixelFrameCornerMaterial(int sectionIndex)
 {
-  return db()->getString(m_PixelFrame, "CORNERMATERIAL", sectionIndex);
+  return (*m_PixelFrame)[sectionIndex]->getString("CORNERMATERIAL");
 } 
 
 int DBPixelGeoManager::PixelFrameSectionFromIndex(int sectionIndex)
 {
-  return db()->getInt(m_PixelFrame,"SECTION",sectionIndex);
+  return (*m_PixelFrame)[sectionIndex]->getInt("SECTION");
 }
   
 void 
@@ -1389,8 +1383,8 @@ DBPixelGeoManager::makeFrameIndexMap()
 {
   if (!m_frameElementMap) {
     m_frameElementMap = std::make_unique<std::map<int,std::vector<int> > >();
-    for (unsigned int i = 0; i < db()->getTableSize(m_PixelFrameSect); ++i) {
-      int section = db()->getInt(m_PixelFrameSect,"SECTION",i);
+    for (unsigned int i = 0; i < m_PixelFrameSect->size(); ++i) {
+      int section = (*m_PixelFrameSect)[i]->getInt("SECTION");
       (*m_frameElementMap)[section].push_back(i);
     }
   }
@@ -1441,35 +1435,40 @@ double DBPixelGeoManager::PixelFrameElementZMin1(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
-  return db()->getDouble(m_PixelFrameSect, "ZMIN1", index) * Gaudi::Units::mm;
+  return (*m_PixelFrameSect)[index]->getDouble("ZMIN1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameElementZMin2(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
-  return db()->getDouble(m_PixelFrameSect, "ZMIN2", index) * Gaudi::Units::mm;
+  return (*m_PixelFrameSect)[index]->getDouble("ZMIN2") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameElementZMax1(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
-  return db()->getDouble(m_PixelFrameSect, "ZMAX1", index) * Gaudi::Units::mm;
+  return (*m_PixelFrameSect)[index]->getDouble("ZMAX1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFrameElementZMax2(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
-  return db()->getDouble(m_PixelFrameSect, "ZMAX2", index) * Gaudi::Units::mm;
+  return (*m_PixelFrameSect)[index]->getDouble("ZMAX2") * Gaudi::Units::mm;
 }
 
 int DBPixelGeoManager::PixelStaveIndex(int layer)
 {
   if (!ibl()) return 0;
-  if (!db()->testField(m_PixelLayer,"STAVEINDEX",layer)) return 0;
-  return db()->getInt(m_PixelLayer,"STAVEINDEX",layer);
+  try {
+    if((*m_PixelLayer)[layer]->isFieldNull("STAVEINDEX")) return 0;
+  }
+  catch(std::runtime_error&) {
+    return 0;
+  }
+  return (*m_PixelLayer)[layer]->getInt("STAVEINDEX");
 }
 
 int DBPixelGeoManager::PixelStaveLayout()
@@ -1478,23 +1477,32 @@ int DBPixelGeoManager::PixelStaveLayout()
   int defaultLayout = 0;
   int index = PixelStaveIndex(m_currentLD);
 
-  if (!db()->testField(m_PixelStave,"LAYOUT",index)) return defaultLayout;
-  return db()->getInt(m_PixelStave,"LAYOUT",index);
+  try {
+    if((*m_PixelStave)[index]->isFieldNull("LAYOUT")) return defaultLayout;
+  }
+  catch(std::runtime_error&) {
+    return defaultLayout;
+  }
+  return (*m_PixelStave)[index]->getInt("LAYOUT");
 }
 
 int DBPixelGeoManager::PixelStaveAxe()
 {
   if (!ibl()) return 0;
   int index = PixelStaveIndex(m_currentLD);
-
-  if (db()->testField(m_PixelStave,"STAVEAXE",index))
-    return db()->getInt(m_PixelStave,"STAVEAXE",index);
+  try {
+    if(!(*m_PixelStave)[index]->isFieldNull("STAVEAXE")) {
+      return (*m_PixelStave)[index]->getInt("STAVEAXE");
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0;
 }
 
 double DBPixelGeoManager::PixelLayerRadius() 
 {
-  double radius = db()->getDouble(m_PixelLayer,"RLAYER",m_currentLD)*mmcm();
+  double radius = (*m_PixelLayer)[m_currentLD]->getDouble("RLAYER")*mmcm();
   if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "PixelLayerRadius for layer " << m_currentLD
       << " is " << radius
       << endmsg;
@@ -1503,8 +1511,13 @@ double DBPixelGeoManager::PixelLayerRadius()
 
 double DBPixelGeoManager::PixelLayerGlobalShift() 
 {
-  if (db()->testField(m_PixelLayer,"GBLSHIFT",m_currentLD))
-    return db()->getDouble(m_PixelLayer,"GBLSHIFT",m_currentLD);
+  try {
+    if (!(*m_PixelLayer)[m_currentLD]->isFieldNull("GBLSHIFT")) {
+      return (*m_PixelLayer)[m_currentLD]->getDouble("GBLSHIFT");
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
@@ -1512,14 +1525,14 @@ double DBPixelGeoManager::PixelLadderLength()
 {
   if (useLegacy()) return m_legacyManager->PixelLadderLength(); 
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"ENVLENGTH",index)*Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("ENVLENGTH")*Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelLadderWidthClearance() 
 {
-  if (useLegacy()) return 0.9*Gaudi::Units::mm; 
+  if (useLegacy()) return 0.9*Gaudi::Units::mm;
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"CLEARANCEY",index)*Gaudi::Units::mm;  
+  return (*m_PixelStave)[index]->getDouble("CLEARANCEY")*Gaudi::Units::mm;  
 }
 
 // Only used if ladder thickness is automatically calculated it, ie ENVTHICK = 0
@@ -1527,8 +1540,12 @@ double DBPixelGeoManager::PixelLadderWidthClearance()
 double DBPixelGeoManager::PixelLadderThicknessClearance() 
 {
   int index = PixelStaveIndex(m_currentLD);
-  if (db()->testField(m_PixelStave,"CLEARANCEX",index)) {
-    return db()->getDouble(m_PixelStave,"CLEARANCEX",index)*Gaudi::Units::mm;  
+  try {
+    if (!(*m_PixelStave)[index]->isFieldNull("CLEARANCEX")) {
+      return (*m_PixelStave)[index]->getDouble("CLEARANCEX")*Gaudi::Units::mm;  
+    }
+  }
+  catch(std::runtime_error&) {
   }
   return 0.1*Gaudi::Units::mm;
 }
@@ -1537,90 +1554,102 @@ double DBPixelGeoManager::PixelLadderThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelLadderThickness();  // 2*1.48972 mm
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"ENVTHICK",index)*Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("ENVTHICK")*Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelLadderTilt() 
 {
-  return db()->getDouble(m_PixelLayer,"STAVETILT",m_currentLD)*Gaudi::Units::deg;
+  return (*m_PixelLayer)[m_currentLD]->getDouble("STAVETILT")*Gaudi::Units::deg;
 }
 
 double DBPixelGeoManager::PixelLadderServicesX() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderServicesX(); // 1.48972 mm
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"SERVICEOFFSETX",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("SERVICEOFFSETX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelLadderServicesY() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderServicesY();  // 3mm
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"SERVICEOFFSETY",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("SERVICEOFFSETY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelLadderCableOffsetX() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderCableOffsetX(); // 0
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"CABLEOFFSETX",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("CABLEOFFSETX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelLadderCableOffsetY() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderCableOffsetY();  // 4mm
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"CABLEOFFSETY",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("CABLEOFFSETY") * Gaudi::Units::mm;
 }
 
 // IBL only
 double DBPixelGeoManager::PixelLadderSupportThickness() 
 {
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"SUPPORTTHICK",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("SUPPORTTHICK") * Gaudi::Units::mm;
 }
 
 // IBL only
 double DBPixelGeoManager::PixelLadderSupportWidth() 
 {
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"SUPPORTWIDTH",index) * Gaudi::Units::mm;
+  return (*m_PixelStave)[index]->getDouble("SUPPORTWIDTH") * Gaudi::Units::mm;
 }
-
-
-
-
 
 // IBL only
 double DBPixelGeoManager::PixelLadderBentStaveAngle() 
 {
-  if (!db()->testFieldTxt(m_PixelConicalStave,"BENTSTAVEANGLE")) return 0;
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelConicalStave,"BENTSTAVEANGLE",index);
+  if(std::cmp_greater_equal(index,m_PixelConicalStave->size())) return 0;
+  try{
+    if((*m_PixelConicalStave)[index]->isFieldNull("BENTSTAVEANGLE")) return 0;
+  }
+  catch(std::runtime_error&) {
+    return 0;
+  }
+  return (*m_PixelConicalStave)[index]->getDouble("BENTSTAVEANGLE");
 }
 
 // IBL only
 int DBPixelGeoManager::PixelBentStaveNModule() 
 {
-  if (!db()->testFieldTxt(m_PixelConicalStave,"BENTSTAVENMODULE")) return 0;
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getInt(m_PixelConicalStave,"BENTSTAVENMODULE",index);
+  if(std::cmp_greater_equal(index,m_PixelConicalStave->size())) return 0;
+  try {
+    if((*m_PixelConicalStave)[index]->isFieldNull("BENTSTAVENMODULE")) return 0;
+  }
+  catch(std::runtime_error&) {
+    return 0;
+  }
+  return (*m_PixelConicalStave)[index]->getInt("BENTSTAVENMODULE");
 }
 
 double DBPixelGeoManager::PixelLadderModuleDeltaZ()
 {
   int index = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"MODULEDZ",index);
+  return (*m_PixelStave)[index]->getDouble("MODULEDZ");
 }
 
 // IBL only
 double DBPixelGeoManager::PixelLadderSupportLength() 
 {
   int index = PixelStaveIndex(m_currentLD);
-  if (db()->testField(m_PixelStave,"SUPPORTHLENGTH",index)) {
-    double halflength = db()->getDouble(m_PixelStave,"SUPPORTHLENGTH",index) * Gaudi::Units::mm;
-    if (halflength > 0)  return 2 * halflength;
-  } 
+  try {
+    if (!(*m_PixelStave)[index]->isFieldNull("SUPPORTHLENGTH")) {
+      double halflength = (*m_PixelStave)[index]->getDouble("SUPPORTHLENGTH") * Gaudi::Units::mm;
+      if (halflength > 0)  return 2 * halflength;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   double safety = 0.01*Gaudi::Units::mm;
   return PixelLadderLength() - safety;
 }
@@ -1676,45 +1705,57 @@ double DBPixelGeoManager::IBLStaveRadius()
 
 double DBPixelGeoManager::IBLStaveFacePlateThickness() 
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"FACEPLATETHICK",index)) {
-    double thickness = db()->getDouble(m_PixelIBLStave,"FACEPLATETHICK",index) * Gaudi::Units::mm;
-    if (thickness > 0)  return thickness ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("FACEPLATETHICK")) {
+      double thickness = (*m_PixelIBLStave)[index]->getDouble("FACEPLATETHICK") * Gaudi::Units::mm;
+      if (thickness > 0)  return thickness ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveMechanicalStaveWidth()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"STAVEWIDTH",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"STAVEWIDTH",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("STAVEWIDTH")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("STAVEWIDTH") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockLength()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"ENDBLOCKLENGTH",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"ENDBLOCKLENGTH",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("ENDBLOCKLENGTH")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("ENDBLOCKLENGTH") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockFixPoint()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"ENDBLOCKFIXINGPOS",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"ENDBLOCKFIXINGPOS",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("ENDBLOCKFIXINGPOS")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("ENDBLOCKFIXINGPOS") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
@@ -1723,531 +1764,629 @@ double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockOmegaOverlap()
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
     int index=0;
-    if (db()->testField(m_PixelIBLStave,"ENDBLOCKOMEGAOVERLAP",index)) {
-      double value = db()->getDouble(m_PixelIBLStave,"ENDBLOCKOMEGAOVERLAP",index) * Gaudi::Units::mm;
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("ENDBLOCKOMEGAOVERLAP")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("ENDBLOCKOMEGAOVERLAP") * Gaudi::Units::mm;
       return value ;
     } 
-    return 0.0;
   }
-  catch(...){}
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
 double DBPixelGeoManager::IBLStaveLength()
 {
- // try and catch (param availbale only if db tag > IBL-03-00-00)
-  try
-    {
-      int index=0;
-      if (db()->testField(m_PixelIBLStave,"STAVELENGTH",index)) {
-	double value = db()->getDouble(m_PixelIBLStave,"STAVELENGTH",index) * Gaudi::Units::mm;
-	return value ;
-      } 
-    }
-  catch(...)
-    {
-      // FIXME : patch for initial IBL geometry (SES)
-      //           IBL stave length not eqal to other stave length 
-    }  
-  
+  // try and catch (param availbale only if db tag > IBL-03-00-00)
+  try {
+    int index=0;
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("STAVELENGTH")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("STAVELENGTH") * Gaudi::Units::mm;
+      return value ;
+    } 
+  }
+  catch(std::runtime_error&) {
+  }
   return 748.0 * Gaudi::Units::mm;  
 }
 
 double DBPixelGeoManager:: IBLStaveMechanicalStaveOffset(bool isModule3D)
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (!isModule3D&&db()->testField(m_PixelIBLStave,"MODULELATERALOFFSET",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"MODULELATERALOFFSET",index) * Gaudi::Units::mm;
-    return value ;
-  } 
-  if (isModule3D&&db()->testField(m_PixelIBLStave,"MODULELATERALOFFSET3D",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"MODULELATERALOFFSET3D",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!isModule3D&&!(*m_PixelIBLStave)[index]->isFieldNull("MODULELATERALOFFSET")) {
+      return (*m_PixelIBLStave)[index]->getDouble("MODULELATERALOFFSET") * Gaudi::Units::mm;
+    }
+    if (isModule3D&&!(*m_PixelIBLStave)[index]->isFieldNull("MODULELATERALOFFSET3D")) {
+      return (*m_PixelIBLStave)[index]->getDouble("MODULELATERALOFFSET3D") * Gaudi::Units::mm;
+    }
+  }
+  catch(std::runtime_error&) {
+  }  
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveMechanicalStaveModuleOffset()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"STAVETOMODULEGAP",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"STAVETOMODULEGAP",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("STAVETOMODULEGAP")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("STAVETOMODULEGAP") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }  
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveTubeOuterDiameter()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"TUBEOUTERDIAM",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"TUBEOUTERDIAM",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("TUBEOUTERDIAM")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("TUBEOUTERDIAM") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }  
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveTubeInnerDiameter()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"TUBEINNERDIAM",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"TUBEINNERDIAM",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("TUBEINNERDIAM")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("TUBEINNERDIAM") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveTubeMiddlePos()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"TUBEMIDDLEPOS",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"TUBEMIDDLEPOS",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("TUBEMIDDLEPOS")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("TUBEMIDDLEPOS") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveFlexLayerThickness()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"FLEXLAYERTHICK",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"FLEXLAYERTHICK",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("FLEXLAYERTHICK")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("FLEXLAYERTHICK") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveFlexBaseThickness()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"FLEXBASETHICK",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"FLEXBASETHICK",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("FLEXBASETHICK")) {  
+      double value = (*m_PixelIBLStave)[index]->getDouble("FLEXBASETHICK") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveFlexWidth()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"FLEXWIDTH",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"FLEXWIDTH",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("FLEXWIDTH")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("FLEXWIDTH") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLStaveFlexOffset()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"FLEXOFFSET",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"FLEXOFFSET",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("FLEXOFFSET")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("FLEXOFFSET") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 
 double DBPixelGeoManager::IBLStaveOmegaThickness()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGATHICK",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGATHICK",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGATHICK")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGATHICK") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLStaveOmegaEndCenterX()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAENDCENTERX",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAENDCENTERX",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAENDCENTERX")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAENDCENTERX") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 double DBPixelGeoManager::IBLStaveOmegaEndCenterY()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAENDCENTERY",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAENDCENTERY",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAENDCENTERY")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAENDCENTERY") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 double DBPixelGeoManager::IBLStaveOmegaEndRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAENDRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAENDRADIUS",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAENDRADIUS")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAENDRADIUS") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 double DBPixelGeoManager::IBLStaveOmegaEndAngle()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAENDANGLE",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAENDANGLE",index) * Gaudi::Units::deg;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAENDANGLE")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAENDANGLE") * Gaudi::Units::deg;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLStaveOmegaMidCenterX()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAMIDCENTERX",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAMIDCENTERX",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAMIDCENTERX")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAMIDCENTERX") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLStaveOmegaMidRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAMIDRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAMIDRADIUS",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAMIDRADIUS")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAMIDRADIUS") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 double DBPixelGeoManager::IBLStaveOmegaMidAngle()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"OMEGAOPENINGANGLE",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"OMEGAOPENINGANGLE",index) * Gaudi::Units::deg;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("OMEGAOPENINGANGLE")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("OMEGAOPENINGANGLE") * Gaudi::Units::deg;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 int DBPixelGeoManager::IBLStaveModuleNumber_AllPlanar()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"NMODULE",index)) {
-    int value = db()->getInt(m_PixelIBLStave,"NMODULE",index);
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("NMODULE")) {
+      int value = (*m_PixelIBLStave)[index]->getInt("NMODULE");
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0;
 }
 
 int DBPixelGeoManager::IBLStaveModuleNumber()
 {
   return m_PlanarModuleNumber+m_3DModuleNumber;
-
 }
 
 double DBPixelGeoManager::IBLStaveModuleGap()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"MODULEGAP",index)) {
-    double value = db()->getDouble(m_PixelIBLStave,"MODULEGAP",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (m_PixelIBLStave->size()>0
+	&& !(*m_PixelIBLStave)[index]->isFieldNull("MODULEGAP")) {
+      double value = (*m_PixelIBLStave)[index]->getDouble("MODULEGAP") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 int DBPixelGeoManager::IBLStaveModuleType() 
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLStave,"MODULETYPE",index)) {
-    int value = db()->getInt(m_PixelIBLStave,"MODULETYPE",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLStave)[index]->isFieldNull("MODULETYPE")) {
+      int value = (*m_PixelIBLStave)[index]->getInt("MODULETYPE") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0;
 }
 
 double DBPixelGeoManager::IBLStaveFacePlateGreaseThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
-  try{
-    int index=0;
-    if (db()->testField(m_PixelIBLGlueGrease,"FACEPLATEGREASETHICK",index)) {
-      double value = db()->getDouble(m_PixelIBLGlueGrease,"FACEPLATEGREASETHICK",index) * Gaudi::Units::mm;
+  int index=0;
+  try {
+    if(!(*m_PixelIBLGlueGrease)[index]->isFieldNull("FACEPLATEGREASETHICK")) {
+      double value = (*m_PixelIBLGlueGrease)[index]->getDouble("FACEPLATEGREASETHICK") * Gaudi::Units::mm;
       return value ;
     }
-    return 0.;
   }
-  catch(...){}
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
 double DBPixelGeoManager::IBLStaveFacePlateGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
-  try{
-    int index=0;
-    if (db()->testField(m_PixelIBLGlueGrease,"FACEPLATEGLUETHICK",index)) {
-      double value = db()->getDouble(m_PixelIBLGlueGrease,"FACEPLATEGLUETHICK",index) * Gaudi::Units::mm;
+  int index=0;
+  try {
+    if(!(*m_PixelIBLGlueGrease)[index]->isFieldNull("FACEPLATEGLUETHICK")) {
+      double value = (*m_PixelIBLGlueGrease)[index]->getDouble("FACEPLATEGLUETHICK") * Gaudi::Units::mm;
       return value ;
     }
-    return 0.;
   }
-  catch(...) {}
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
 double DBPixelGeoManager::IBLStaveTubeGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
-  try{
-    int index=0;
-    if (db()->testField(m_PixelIBLGlueGrease,"TUBEGLUETHICK",index)) {
-      double value = db()->getDouble(m_PixelIBLGlueGrease,"TUBEGLUETHICK",index) * Gaudi::Units::mm;
+  int index=0;
+  try {
+    if(!(*m_PixelIBLGlueGrease)[index]->isFieldNull("TUBEGLUETHICK")) {
+      double value = (*m_PixelIBLGlueGrease)[index]->getDouble("TUBEGLUETHICK") * Gaudi::Units::mm;
       return value ;
     }
-    return 0.;
   }
-  catch(...) {}
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
 double DBPixelGeoManager::IBLStaveOmegaGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
-  try{
-    int index=0;
-    if (db()->testField(m_PixelIBLGlueGrease,"OMEGAGLUETHICK",index)) {
-      double value = db()->getDouble(m_PixelIBLGlueGrease,"OMEGAGLUETHICK",index) * Gaudi::Units::mm;
+  int index=0;
+  try {
+    if(!(*m_PixelIBLGlueGrease)[index]->isFieldNull("OMEGAGLUETHICK")) {
+      double value = (*m_PixelIBLGlueGrease)[index]->getDouble("OMEGAGLUETHICK") * Gaudi::Units::mm;
       return value ;
     }
-    return 0.;
   }
-  catch(...){}
+  catch(std::runtime_error&) {
+  }
   return 0.;
 }
 
-
 double DBPixelGeoManager:: IBLSupportRingWidth()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVERINGWIDTH",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVERINGWIDTH",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVERINGWIDTH")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVERINGWIDTH") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLSupportRingInnerRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVERINGINNERRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVERINGINNERRADIUS",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVERINGINNERRADIUS")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVERINGINNERRADIUS") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }   
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLSupportRingOuterRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVERINGOUTERRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVERINGOUTERRADIUS",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVERINGOUTERRADIUS")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVERINGOUTERRADIUS") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 
 double DBPixelGeoManager:: IBLSupportMechanicalStaveRingFixPoint()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVERINGFIXINGPOS",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVERINGFIXINGPOS",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVERINGFIXINGPOS")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVERINGFIXINGPOS") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLSupportMidRingWidth()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVEMIDRINGWIDTH",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVEMIDRINGWIDTH",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVEMIDRINGWIDTH")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVEMIDRINGWIDTH") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLSupportMidRingInnerRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVEMIDRINGINNERRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVEMIDRINGINNERRADIUS",index) * Gaudi::Units::mm;
-    if (value > 0)  return value;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVEMIDRINGINNERRADIUS")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVEMIDRINGINNERRADIUS") * Gaudi::Units::mm;
+      if (value > 0)  return value;
+    }
+  }
+  catch(std::runtime_error&) {
+  }    
   return 0.0;
 }
 
 double DBPixelGeoManager:: IBLSupportMidRingOuterRadius()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLSupport,"STAVEMIDRINGOUTERRADIUS",index)) {
-    double value = db()->getDouble(m_PixelIBLSupport,"STAVEMIDRINGOUTERRADIUS",index) * Gaudi::Units::mm;
-    if (value > 0)  return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLSupport)[index]->isFieldNull("STAVEMIDRINGOUTERRADIUS")) {
+      double value = (*m_PixelIBLSupport)[index]->getDouble("STAVEMIDRINGOUTERRADIUS") * Gaudi::Units::mm;
+      if (value > 0)  return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }    
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexMiddleGap()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXMIDGAP",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXMIDGAP",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXMIDGAP")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXMIDGAP") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }  
   return 0.0;
 }
 
 bool DBPixelGeoManager::IBLFlexAndWingDefined()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  return db()->testField(m_PixelIBLFlex,"FLEXMIDGAP",index);
+  try {
+    return !(*m_PixelIBLFlex)[index]->isFieldNull("FLEXMIDGAP");
+  }
+  catch(std::runtime_error&) {
+  }
+  return false;
 }
 
 
 double DBPixelGeoManager::IBLFlexDoglegLength()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXDOGLEGLENGTH",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXDOGLEGLENGTH",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXDOGLEGLENGTH")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXDOGLEGLENGTH") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
-
 double DBPixelGeoManager::IBLStaveFlexWingWidth()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXWINGWIDTH",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXWINGWIDTH",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXWINGWIDTH")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXWINGWIDTH") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLStaveFlexWingThick()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXWINGTHICK",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXWINGTHICK",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXWINGTHICK")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXWINGTHICK") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexDoglegRatio()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXDOGLEGRATIO",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXDOGLEGRATIO",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXDOGLEGRATIO")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXDOGLEGRATIO") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexDoglegHeight(int iHeight)
 {
-  std::ostringstream lname;
-  lname << "FLEXDOGLEGHEIGHT"<<iHeight;
-
-  //  int index = PixelStaveIndex(m_currentLD);
+  std::string lname = "FLEXDOGLEGHEIGHT" + std::to_string(iHeight);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,lname.str(),index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,lname.str(),index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull(lname)) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble(lname) * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexDoglegDY()
 {
-  //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,"FLEXDOGLEGDY",index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,"FLEXDOGLEGDY",index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull("FLEXDOGLEGDY")) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble("FLEXDOGLEGDY") * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexPP0Z(int iPos)
 {
-  std::ostringstream lname;
-  lname << "FLEXPP0_Z"<<iPos;
-
-  //  int index = PixelStaveIndex(m_currentLD);
+  std::string lname ="FLEXPP0_Z" + std::to_string(iPos);
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,lname.str(),index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,lname.str(),index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull(lname)) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble(lname) * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 
 double DBPixelGeoManager::IBLFlexPP0Rmin(int iPos)
 {
-  std::ostringstream lname;
-  lname << "FLEXPP0_S"<<iPos<<"RMIN";
-
-  //  int index = PixelStaveIndex(m_currentLD);
+  std::string lname = "FLEXPP0_S"+std::to_string(iPos)+"RMIN";
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,lname.str(),index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,lname.str(),index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull(lname)) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble(lname) * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
 double DBPixelGeoManager::IBLFlexPP0Rmax(int iPos)
 {
-  std::ostringstream lname;
-  lname << "FLEXPP0_S"<<iPos<<"RMAX";
-
-  //  int index = PixelStaveIndex(m_currentLD);
+  std::string lname = "FLEXPP0_S"+std::to_string(iPos)+"RMAX";
   int index=0;
-  if (db()->testField(m_PixelIBLFlex,lname.str(),index)) {
-    double value = db()->getDouble(m_PixelIBLFlex,lname.str(),index) * Gaudi::Units::mm;
-    return value ;
-  } 
+  try {
+    if (!(*m_PixelIBLFlex)[index]->isFieldNull(lname)) {
+      double value = (*m_PixelIBLFlex)[index]->getDouble(lname) * Gaudi::Units::mm;
+      return value ;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   return 0.0;
 }
 
@@ -2255,17 +2394,17 @@ double DBPixelGeoManager::IBLFlexPP0Rmax(int iPos)
 std::string DBPixelGeoManager::IBLFlexMaterial(int iPos, const std::string& flexType)
 {
 
-  int nbMaterial=db()->getTableSize(m_PixelIBLFlexMaterial);
+  int nbMaterial=m_PixelIBLFlexMaterial->size();
   int cmptType=0;
 
   for(int index=0; index<nbMaterial; index++)
     {
-      std::string flexTypeIdx = db()->getString(m_PixelIBLFlexMaterial,"TYPE",index);
+      std::string flexTypeIdx = (*m_PixelIBLFlexMaterial)[index]->getString("TYPE");
       if(flexTypeIdx.compare(flexType)==0)
 	{
 	  cmptType++;
 	  if(iPos==cmptType){
-	    std::string matTypeIdx = db()->getString(m_PixelIBLFlexMaterial,"MATERIALNAME",index);
+	    std::string matTypeIdx = (*m_PixelIBLFlexMaterial)[index]->getString("MATERIALNAME");
 	    return matTypeIdx;
 	  }
 	}
@@ -2288,7 +2427,7 @@ double DBPixelGeoManager:: IBLServiceGetMinRadialPosition(const std::string& srv
     //
     std::string name;
     if(srvType=="simple")
-      name=db()->getString(m_PixelSimpleService,"NAME",ii);
+      name=(*m_PixelSimpleService)[ii]->getString("NAME");
     else
       name=PixelServiceName(srvType,ii);
 
@@ -2296,10 +2435,10 @@ double DBPixelGeoManager:: IBLServiceGetMinRadialPosition(const std::string& srv
       double zmin, zmax, r;
       int symm;
       if(srvType=="simple"){
-	zmin=db()->getDouble(m_PixelSimpleService,"ZMIN",ii)*Gaudi::Units::mm;
-	zmax=db()->getDouble(m_PixelSimpleService,"ZMAX",ii)*Gaudi::Units::mm;
-	symm=db()->getInt(m_PixelSimpleService,"ZSYMM",ii);
-	r=db()->getDouble(m_PixelSimpleService,"RMAX",ii)*Gaudi::Units::mm;
+	zmin=(*m_PixelSimpleService)[ii]->getDouble("ZMIN")*Gaudi::Units::mm;
+	zmax=(*m_PixelSimpleService)[ii]->getDouble("ZMAX")*Gaudi::Units::mm;
+	symm=(*m_PixelSimpleService)[ii]->getInt("ZSYMM");
+	r=(*m_PixelSimpleService)[ii]->getDouble("RMAX")*Gaudi::Units::mm;
       }
       else {
 	zmin=PixelServiceZMin(srvType, ii);
@@ -2337,7 +2476,7 @@ double DBPixelGeoManager:: IBLServiceGetMaxRadialPosition(const std::string& srv
     //
     std::string name;
     if(srvType=="simple")
-      name=db()->getString(m_PixelSimpleService,"NAME",ii);
+      name=(*m_PixelSimpleService)[ii]->getString("NAME");
     else
       name=PixelServiceName(srvType,ii);
 
@@ -2346,10 +2485,10 @@ double DBPixelGeoManager:: IBLServiceGetMaxRadialPosition(const std::string& srv
       double zmin, zmax, r;
       int symm;
       if(srvType=="simple"){
-	zmin=db()->getDouble(m_PixelSimpleService,"ZMIN",ii)*Gaudi::Units::mm;
-	zmax=db()->getDouble(m_PixelSimpleService,"ZMAX",ii)*Gaudi::Units::mm;
-	symm=db()->getInt(m_PixelSimpleService,"ZSYMM",ii);
-	r=db()->getDouble(m_PixelSimpleService,"RMAX",ii)*Gaudi::Units::mm;
+	zmin=(*m_PixelSimpleService)[ii]->getDouble("ZMIN")*Gaudi::Units::mm;
+	zmax=(*m_PixelSimpleService)[ii]->getDouble("ZMAX")*Gaudi::Units::mm;
+	symm=(*m_PixelSimpleService)[ii]->getInt("ZSYMM");
+	r=(*m_PixelSimpleService)[ii]->getDouble("RMAX")*Gaudi::Units::mm;
       }
       else {
 	zmin=PixelServiceZMin(srvType, ii);
@@ -2382,18 +2521,21 @@ int DBPixelGeoManager::PixelBiStaveType(int layer, int phi)
 
 int DBPixelGeoManager::NPixelSectors() 
 {
-  return db()->getInt(m_PixelLayer,"NSECTORS",m_currentLD);
+  return (*m_PixelLayer)[m_currentLD]->getInt("NSECTORS");
 }
 
 double DBPixelGeoManager::PhiOfModuleZero()
 {
   // For backward compatibilty first module is at 1/2 a module division
-  if (!db()->testField(m_PixelLayer,"PHIOFMODULEZERO",m_currentLD)){
-    if(NPixelSectors()>0) return 180.0*Gaudi::Units::degree/NPixelSectors();
-    return 0.;
-  } else { 
-    return db()->getDouble(m_PixelLayer,"PHIOFMODULEZERO",m_currentLD) * Gaudi::Units::degree;
+  try {
+    if(!(*m_PixelLayer)[m_currentLD]->isFieldNull("PHIOFMODULEZERO")) {
+      return (*m_PixelLayer)[m_currentLD]->getDouble("PHIOFMODULEZERO")*Gaudi::Units::degree;
+    }
   }
+  catch(std::runtime_error&){
+  }
+  if(NPixelSectors()>0) return 180.0*Gaudi::Units::degree/NPixelSectors();
+  return 0.;
 }
 
 
@@ -2403,20 +2545,20 @@ int DBPixelGeoManager::PixelNModule()
   if(ibl() && PixelStaveLayout()>3 && PixelStaveLayout()<7 && m_currentLD==0)
     return IBLStaveModuleNumber();
   else
-    return db()->getInt(m_PixelStave,"NMODULE",staveIndex);
+    return (*m_PixelStave)[staveIndex]->getInt("NMODULE");
 
 }
 
 double DBPixelGeoManager::PixelModuleAngle() 
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"MODULETILT",staveIndex)*Gaudi::Units::deg;
+  return (*m_PixelStave)[staveIndex]->getDouble("MODULETILT")*Gaudi::Units::deg;
 }
 
 double DBPixelGeoManager::PixelModuleDrDistance() 
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
-  return db()->getDouble(m_PixelStave,"CENTRMODULESHIFT",staveIndex)*mmcm();
+  return (*m_PixelStave)[staveIndex]->getDouble("CENTRMODULESHIFT")*mmcm();
 }
 
 double DBPixelGeoManager::PixelModuleZPosition(int etaModule) 
@@ -2425,8 +2567,12 @@ double DBPixelGeoManager::PixelModuleZPosition(int etaModule)
   // ZPOSTYPE != 0. Means tabulated z positions.
   int staveIndex = PixelStaveIndex(m_currentLD);
   int zPosType = 0;
-  if (ibl() && db()->testField(m_PixelStave,"ZPOSTYPE",staveIndex)) {
-    zPosType = db()->getInt(m_PixelStave,"ZPOSTYPE",staveIndex);
+  try {
+    if (ibl() && !(*m_PixelStave)[staveIndex]->isFieldNull("ZPOSTYPE")) {
+      zPosType = (*m_PixelStave)[staveIndex]->getInt("ZPOSTYPE");
+    }
+  }
+  catch(std::runtime_error&){
   }
   if (zPosType) {
     // Z positions from table
@@ -2434,7 +2580,7 @@ double DBPixelGeoManager::PixelModuleZPosition(int etaModule)
   } else {
    // Equi-distant modules
     int moduleIndex =  PixelModuleIndexFromEta(etaModule);  
-    return db()->getDouble(m_PixelStave,"MODULEDZ",staveIndex)*mmcm() * (moduleIndex - 0.5*(PixelNModule()-1));
+    return (*m_PixelStave)[staveIndex]->getDouble("MODULEDZ")*mmcm() * (moduleIndex - 0.5*(PixelNModule()-1));
   }
 }
 
@@ -2442,9 +2588,9 @@ double DBPixelGeoManager::PixelModuleZPositionTabulated(int etaModule, int type)
 { 
   if (!m_zPositionMap) {
     m_zPositionMap = std::make_unique<InDetDD::PairIndexMap>();
-    for (unsigned int indexTmp = 0; indexTmp < db()->getTableSize(m_PixelStaveZ); ++indexTmp) {
-      int eta_module = db()->getInt(m_PixelStaveZ,"ETAMODULE",indexTmp);
-      int type_tmp       = db()->getInt(m_PixelStaveZ,"TYPE",indexTmp);
+    for (unsigned int indexTmp = 0; indexTmp < m_PixelStaveZ->size(); ++indexTmp) {
+      int eta_module = (*m_PixelStaveZ)[indexTmp]->getInt("ETAMODULE");
+      int type_tmp       = (*m_PixelStaveZ)[indexTmp]->getInt("TYPE");
       m_zPositionMap->add(type_tmp,eta_module,indexTmp);
     }
   }
@@ -2453,7 +2599,7 @@ double DBPixelGeoManager::PixelModuleZPositionTabulated(int etaModule, int type)
     msg(MSG::ERROR) << "Z position not found for etaModule,type =  " << etaModule << ", " << type << endmsg;
     return 0;
   }
-  return db()->getDouble(m_PixelStaveZ,"ZPOS",index) * Gaudi::Units::mm;
+  return (*m_PixelStaveZ)[index]->getDouble("ZPOS") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelModuleShiftFlag(int etaModule) 
@@ -2465,16 +2611,26 @@ double DBPixelGeoManager::PixelModuleShiftFlag(int etaModule)
 double DBPixelGeoManager::PixelModuleStaggerDistance()
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
-  if (!ibl() || !db()->testField(m_PixelStave,"STAGGERDIST",staveIndex)) return 0; 
-  return db()->getDouble(m_PixelStave,"STAGGERDIST",staveIndex) * Gaudi::Units::mm;
+  try {
+    if (!ibl() || (*m_PixelStave)[staveIndex]->isFieldNull("STAGGERDIST")) return 0;
+  }
+  catch(std::runtime_error&) {
+    return 0;
+  }
+  return (*m_PixelStave)[staveIndex]->getDouble("STAGGERDIST") * Gaudi::Units::mm;
 }
 
 int DBPixelGeoManager::PixelModuleStaggerSign(int etaModule)
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
-  if (!ibl() || !db()->testField(m_PixelStave,"FIRSTSTAGGER",staveIndex)) return 0;  
+  try {
+    if (!ibl() || (*m_PixelStave)[staveIndex]->isFieldNull("FIRSTSTAGGER")) return 0;
+  }
+  catch(std::runtime_error&) {
+    return 0;
+  }
   // FIRSTSTAGGER refers to whether the first module (lowest etavalue) is staggered up (+1) or down(-1)
-  int firstStagger =  db()->getInt(m_PixelStave,"FIRSTSTAGGER",staveIndex);
+  int firstStagger =  (*m_PixelStave)[staveIndex]->getInt("FIRSTSTAGGER");
   int moduleIndex = PixelModuleIndexFromEta(etaModule);
   return firstStagger * (moduleIndex%2 ? -1 : 1);
 }
@@ -2484,8 +2640,12 @@ bool DBPixelGeoManager::allowSkipEtaZero()
   bool allowSkip = true;
   if (ibl()){
     int staveIndex = PixelStaveIndex(m_currentLD);
-    if (db()->testField(m_PixelStave,"NOSKIPZERO",staveIndex)) {
-      if (db()->getInt(m_PixelStave,"NOSKIPZERO",staveIndex)) allowSkip = false;
+    try {
+      if (!(*m_PixelStave)[staveIndex]->isFieldNull("NOSKIPZERO")) {
+	if ((*m_PixelStave)[staveIndex]->getInt("NOSKIPZERO")) allowSkip = false;
+      }
+    }
+    catch(std::runtime_error&){
     }
   }
   return allowSkip;
@@ -2528,45 +2688,45 @@ double DBPixelGeoManager::PixelModuleAngleSign(int etaModule)
 
 int DBPixelGeoManager::PixelEndcapNDisk() 
 {
-  return db()->getInt(m_PixelEndcapGeneral,"NDISK");
+  return (*m_PixelEndcapGeneral)[0]->getInt("NDISK");
 }
 
 // Endcap container
 double  DBPixelGeoManager::PixelEndcapRMin()
 {
-  return db()->getDouble(m_PixelEndcapGeneral,"RMIN")*mmcm();
+  return (*m_PixelEndcapGeneral)[0]->getDouble("RMIN")*mmcm();
 }
 
 double  DBPixelGeoManager::PixelEndcapRMax() 
 {
-  return db()->getDouble(m_PixelEndcapGeneral,"RMAX")*mmcm();
+  return (*m_PixelEndcapGeneral)[0]->getDouble("RMAX")*mmcm();
 }
 
 double  DBPixelGeoManager::PixelEndcapZMin() 
 {
-  return db()->getDouble(m_PixelEndcapGeneral,"ZMIN")*mmcm();
+  return (*m_PixelEndcapGeneral)[0]->getDouble("ZMIN")*mmcm();
 }
 
 double  DBPixelGeoManager::PixelEndcapZMax()
 {
-  return db()->getDouble(m_PixelEndcapGeneral,"ZMAX")*mmcm();
+  return (*m_PixelEndcapGeneral)[0]->getDouble("ZMAX")*mmcm();
 }
 
 int DBPixelGeoManager::PixelEndcapNSupportFrames()
 {
    // Obsolete - retus 0 in recent versions
- return (int) db()->getDouble(m_PixelEndcapGeneral,"NFRAME");
+ return (int) (*m_PixelEndcapGeneral)[0]->getDouble("NFRAME");
 }
 
 // Endcap Inner 
 double  DBPixelGeoManager::PixelDiskZPosition() 
 {
-  return db()->getDouble(m_PixelDisk,"ZDISK",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("ZDISK")*mmcm();
 }
 
 double DBPixelGeoManager::PixelECSiDz1() 
 {
-  return db()->getDouble(m_PixelDisk,"DZCOUNTER",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("DZCOUNTER")*mmcm();
 }
 
 double DBPixelGeoManager::PixelECSiDz2() 
@@ -2576,7 +2736,7 @@ double DBPixelGeoManager::PixelECSiDz2()
 
 int DBPixelGeoManager::PixelECNSectors1()
 {
-  return db()->getInt(m_PixelDisk,"NMODULE",m_currentLD);
+  return (*m_PixelDisk)[m_currentLD]->getInt("NMODULE");
 }
 
 int DBPixelGeoManager::PixelECNSectors2() 
@@ -2587,18 +2747,18 @@ int DBPixelGeoManager::PixelECNSectors2()
 // Endcap Cables
 double DBPixelGeoManager::PixelECCablesRMin()
 {
-  return db()->getDouble(m_PixelDisk,"RMINCABLE",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("RMINCABLE")*mmcm();
 }
 
 double DBPixelGeoManager::PixelECCablesRMax()
 {
-  return db()->getDouble(m_PixelDisk,"RMAXCABLE",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("RMAXCABLE")*mmcm();
 }
 
 
 double DBPixelGeoManager::PixelECCablesDistance()
 {
-  return db()->getDouble(m_PixelDisk,"ZCABLE",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("ZCABLE")*mmcm();
 }
 
 //
@@ -2607,61 +2767,61 @@ double DBPixelGeoManager::PixelECCablesDistance()
 int DBPixelGeoManager::PixelTMTNumParts()
 {
   if (useLegacy()) return m_legacyManager->PixelTMTNumParts();
-  return db()->getTableSize(m_PixelTMT);
+  return m_PixelTMT->size();
 }
 
 double DBPixelGeoManager::PixelTMTWidthX1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthX1(iPart);
-  return db()->getDouble(m_PixelTMT,"WIDTHX1",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("WIDTHX1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTWidthX2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthX2(iPart);
-  return db()->getDouble(m_PixelTMT,"WIDTHX2",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("WIDTHX2") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTWidthY(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthY(iPart);
-  return db()->getDouble(m_PixelTMT,"WIDTHY",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("WIDTHY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTBaseX1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTBaseX1(iPart);
-  return db()->getDouble(m_PixelTMT,"BASEX1",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("BASEX1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTBaseX2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTBaseX2(iPart);
-  return db()->getDouble(m_PixelTMT,"BASEX2",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("BASEX2") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTPosY(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosY(iPart);
-  return db()->getDouble(m_PixelTMT,"Y",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("Y") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTPosZ1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosZ1(iPart);
-  return db()->getDouble(m_PixelTMT,"Z1",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("Z1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelTMTPosZ2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosZ2(iPart);
-  return db()->getDouble(m_PixelTMT,"Z2",iPart) * Gaudi::Units::mm;
+  return (*m_PixelTMT)[iPart]->getDouble("Z2") * Gaudi::Units::mm;
 }
 
 bool DBPixelGeoManager::PixelTMTPerModule(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPerModule(iPart);
-  return db()->getInt(m_PixelTMT,"PERMODULE",iPart);
+  return (*m_PixelTMT)[iPart]->getInt("PERMODULE");
 }
 
 //
@@ -2670,61 +2830,61 @@ bool DBPixelGeoManager::PixelTMTPerModule(int iPart)
 double DBPixelGeoManager::PixelOmegaUpperBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendX();
-  return db()->getDouble(m_PixelOmega,"UPPERBENDX") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("UPPERBENDX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaUpperBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendY();
-  return db()->getDouble(m_PixelOmega,"UPPERBENDY") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("UPPERBENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaUpperBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendRadius();
-  return db()->getDouble(m_PixelOmega,"UPPERBENDR") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("UPPERBENDR") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaLowerBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendX();
-  return db()->getDouble(m_PixelOmega,"LOWERBENDX") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("LOWERBENDX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaLowerBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendY();
-  return db()->getDouble(m_PixelOmega,"LOWERBENDY") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("LOWERBENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaLowerBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendRadius();
-  return db()->getDouble(m_PixelOmega,"LOWERBENDR") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("LOWERBENDR") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaWallThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaWallThickness();
-  return db()->getDouble(m_PixelOmega,"THICK") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("THICK") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaLength()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLength();
-  return db()->getDouble(m_PixelOmega,"LENGTH") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("LENGTH") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaStartY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaStartY();
-  return db()->getDouble(m_PixelOmega,"STARTY") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("STARTY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaEndY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaEndY();
-  return db()->getDouble(m_PixelOmega,"ENDY") * Gaudi::Units::mm;
+  return (*m_PixelOmega)[0]->getDouble("ENDY") * Gaudi::Units::mm;
 }
 
 //
@@ -2734,49 +2894,49 @@ double DBPixelGeoManager::PixelOmegaEndY()
 double DBPixelGeoManager::PixelAlTubeUpperBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendX();
-  return db()->getDouble(m_PixelAlTube,"UPPERBENDX") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("UPPERBENDX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeUpperBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendY();
-  return db()->getDouble(m_PixelAlTube,"UPPERBENDY") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("UPPERBENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeUpperBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendRadius();
-  return db()->getDouble(m_PixelAlTube,"UPPERBENDR") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("UPPERBENDR") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeLowerBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendX();
-  return db()->getDouble(m_PixelAlTube,"LOWERBENDX") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("LOWERBENDX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeLowerBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendY();
-  return db()->getDouble(m_PixelAlTube,"LOWERBENDY") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("LOWERBENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeLowerBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendRadius();
-  return db()->getDouble(m_PixelAlTube,"LOWERBENDR") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("LOWERBENDR") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeWallThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeWallThickness();
-  return db()->getDouble(m_PixelAlTube,"THICK") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("THICK") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelAlTubeLength()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLength();
-  return db()->getDouble(m_PixelAlTube,"LENGTH") * Gaudi::Units::mm;
+  return (*m_PixelAlTube)[0]->getDouble("LENGTH") * Gaudi::Units::mm;
 }
 
 //
@@ -2786,49 +2946,49 @@ double DBPixelGeoManager::PixelAlTubeLength()
 int DBPixelGeoManager::PixelNumOmegaGlueElements()
 {
   if (useLegacy()) return m_legacyManager->PixelNumOmegaGlueElements();
-  return db()->getTableSize(m_PixelOmegaGlue);
+  return m_PixelOmegaGlue->size();
 }
 
 double DBPixelGeoManager::PixelOmegaGlueStartX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueStartX(index);
-  return db()->getDouble(m_PixelOmegaGlue,"STARTX",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("STARTX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaGlueThickness(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueThickness(index);
-  return db()->getDouble(m_PixelOmegaGlue,"THICK",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("THICK") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaGlueStartY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueStartY(index);
-  return db()->getDouble(m_PixelOmegaGlue,"STARTY",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("STARTY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaGlueEndY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueEndY(index);
-  return db()->getDouble(m_PixelOmegaGlue,"ENDY",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("ENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaGlueLength(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueLength(index);
-  return db()->getDouble(m_PixelOmegaGlue,"LENGTH",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("LENGTH") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelOmegaGluePosZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGluePosZ(index);
-  return db()->getDouble(m_PixelOmegaGlue,"Z",index) * Gaudi::Units::mm;
+  return (*m_PixelOmegaGlue)[index]->getDouble("Z") * Gaudi::Units::mm;
 }
 
 int DBPixelGeoManager::PixelOmegaGlueTypeNum(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueTypeNum(index);
-  return db()->getInt(m_PixelOmegaGlue,"TYPENUM",index);
+  return (*m_PixelOmegaGlue)[index]->getInt("TYPENUM");
 }
 
 
@@ -2838,57 +2998,57 @@ int DBPixelGeoManager::PixelOmegaGlueTypeNum(int index)
 double DBPixelGeoManager::PixelFluidZ1(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidZ1(index);
-  return db()->getDouble(m_PixelFluid,"Z1",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("Z1") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFluidZ2(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidZ2(index);
-  return db()->getDouble(m_PixelFluid,"Z2",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("Z2") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFluidThick1(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidThick1(index);
-  return db()->getDouble(m_PixelFluid,"THICK1",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("THICK1") * Gaudi::Units::mm;
 }
 
 
 double DBPixelGeoManager::PixelFluidThick2(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidThick2(index);
-  return db()->getDouble(m_PixelFluid,"THICK2",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("THICK2") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFluidWidth(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidWidth(index);
-  return db()->getDouble(m_PixelFluid,"WIDTH",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("WIDTH") * Gaudi::Units::mm;
 }
 
 
 double DBPixelGeoManager::PixelFluidX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidX(index);
-  return db()->getDouble(m_PixelFluid,"X",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("X") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelFluidY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidY(index);
-  return db()->getDouble(m_PixelFluid,"Y",index) * Gaudi::Units::mm;
+  return (*m_PixelFluid)[index]->getDouble("Y") * Gaudi::Units::mm;
 }
 
 int DBPixelGeoManager::PixelFluidType(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidType(index);
-  return db()->getInt(m_PixelFluid,"TYPE",index);
+  return (*m_PixelFluid)[index]->getInt("TYPE");
 }
 
 int DBPixelGeoManager::PixelFluidNumTypes()
 {
   if (useLegacy()) return m_legacyManager->PixelFluidNumTypes();
-  return db()->getTableSize(m_PixelFluid);
+  return m_PixelFluid->size();
 }
 
 int DBPixelGeoManager::PixelFluidIndex(int type)
@@ -2905,7 +3065,7 @@ std::string DBPixelGeoManager::PixelFluidMat(int index) {
   if (useLegacy()) {
     matType = m_legacyManager->PixelFluidMatType(index);
   } else {
-    matType = db()->getInt(m_PixelFluid,"MATTYPE",index);
+    matType = (*m_PixelFluid)[index]->getInt("MATTYPE");
   }
   return getMaterialName("Fluid", 0, matType);
 }
@@ -2922,25 +3082,25 @@ int DBPixelGeoManager::PixelFluidOrient(int layer, int phi)
 double DBPixelGeoManager::PixelPigtailThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailThickness();
-  return db()->getDouble(m_PixelPigtail,"THICK") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("THICK") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailStartY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailStartY();
-  return db()->getDouble(m_PixelPigtail,"STARTY") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("STARTY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailEndY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailEndY();
-  return db()->getDouble(m_PixelPigtail,"ENDY") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("ENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailWidthZ()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailWidthZ();
-  return db()->getDouble(m_PixelPigtail,"WIDTHZ") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("WIDTHZ") * Gaudi::Units::mm;
 }
 
 // Different width from the curved section in old geometry
@@ -2953,31 +3113,31 @@ double DBPixelGeoManager::PixelPigtailFlatWidthZ()
 double DBPixelGeoManager::PixelPigtailPosX()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailPosX();
-  return db()->getDouble(m_PixelPigtail,"X") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("X") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailPosZ()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailPosZ();
-  return db()->getDouble(m_PixelPigtail,"Z") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("Z") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendX();
-  return db()->getDouble(m_PixelPigtail,"BENDX") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("BENDX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendY();
-  return db()->getDouble(m_PixelPigtail,"BENDY") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("BENDY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailBendRMin()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendRMin();
-  return db()->getDouble(m_PixelPigtail,"BENDRMIN") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("BENDRMIN") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelPigtailBendRMax()
@@ -2989,19 +3149,19 @@ double DBPixelGeoManager::PixelPigtailBendRMax()
 double DBPixelGeoManager::PixelPigtailBendPhiMin()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendPhiMin();
-  return db()->getDouble(m_PixelPigtail,"BENDPHIMIN") * Gaudi::Units::deg;
+  return (*m_PixelPigtail)[0]->getDouble("BENDPHIMIN") * Gaudi::Units::deg;
 }
 
 double DBPixelGeoManager::PixelPigtailBendPhiMax()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendPhiMax();
-  return db()->getDouble(m_PixelPigtail,"BENDPHIMAX") * Gaudi::Units::deg;
+  return (*m_PixelPigtail)[0]->getDouble("BENDPHIMAX") * Gaudi::Units::deg;
 }
 
 double DBPixelGeoManager::PixelPigtailEnvelopeLength()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailEnvelopeLength();
-  return db()->getDouble(m_PixelPigtail,"ENVLENGTH") * Gaudi::Units::mm;
+  return (*m_PixelPigtail)[0]->getDouble("ENVLENGTH") * Gaudi::Units::mm;
 }
 
 //
@@ -3010,43 +3170,43 @@ double DBPixelGeoManager::PixelPigtailEnvelopeLength()
 int DBPixelGeoManager::PixelNumConnectorElements()
 {
   if (useLegacy()) return m_legacyManager->PixelNumConnectorElements();
-  return db()->getTableSize(m_PixelConnector);
+  return m_PixelConnector->size();
 }
 
 double DBPixelGeoManager::PixelConnectorWidthX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthX(index);
-  return db()->getDouble(m_PixelConnector,"WIDTHX",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("WIDTHX") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelConnectorWidthY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthY(index);
-  return db()->getDouble(m_PixelConnector,"WIDTHY",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("WIDTHY") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelConnectorWidthZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthZ(index);
-  return db()->getDouble(m_PixelConnector,"WIDTHZ",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("WIDTHZ") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelConnectorPosX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosX(index);
-  return db()->getDouble(m_PixelConnector,"X",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("X") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelConnectorPosY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosY(index);
-  return db()->getDouble(m_PixelConnector,"Y",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("Y") * Gaudi::Units::mm;
 }
 
 double DBPixelGeoManager::PixelConnectorPosZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosZ(index);
-  return db()->getDouble(m_PixelConnector,"Z",index) * Gaudi::Units::mm;
+  return (*m_PixelConnector)[index]->getDouble("Z") * Gaudi::Units::mm;
 }
 
 //
@@ -3068,7 +3228,7 @@ int  DBPixelGeoManager::designType(bool isModule3D)
     } else if (m_PixelReadout->size() == 1 && !ibl()) {
       return 0;
     } else { // Only in IBL
-      return db()->getInt(m_PixelModule,"DESIGNTYPE",moduleType());
+      return (*m_PixelModule)[moduleType()]->getInt("DESIGNTYPE");
     }
   }
 }
@@ -3087,7 +3247,7 @@ int  DBPixelGeoManager::designType3D()
     } else if (m_PixelReadout->size() == 1 && !ibl()) {
       return 0;
     } else { // Only in IBL
-      int type = db()->getInt(m_PixelModule,"DESIGNTYPE",moduleType3D());
+      int type = (*m_PixelModule)[moduleType3D()]->getInt("DESIGNTYPE");
       return type;
     }
   }
@@ -3100,7 +3260,7 @@ int DBPixelGeoManager::DesignReadoutSide(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"READOUTSIDE",type);
+    return (*m_PixelReadout)[type]->getInt("READOUTSIDE");
   }
 }
 
@@ -3111,7 +3271,7 @@ int DBPixelGeoManager::DesignNumChipsPhi(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"NCHIPSPHI",type);
+    return (*m_PixelReadout)[type]->getInt("NCHIPSPHI");
   } 
 }    
 
@@ -3123,7 +3283,7 @@ int DBPixelGeoManager::DesignNumChipsEta(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"NCHIPSETA",type);
+    return (*m_PixelReadout)[type]->getInt("NCHIPSETA");
   }
 }
 
@@ -3134,7 +3294,7 @@ int DBPixelGeoManager::DesignNumRowsPerChip(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"ROWSPERCHIP",type);
+    return (*m_PixelReadout)[type]->getInt("ROWSPERCHIP");
   }
 }
 
@@ -3145,7 +3305,7 @@ int DBPixelGeoManager::DesignNumColsPerChip(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"COLSPERCHIP",type);
+    return (*m_PixelReadout)[type]->getInt("COLSPERCHIP");
   }
 }
 
@@ -3197,7 +3357,7 @@ int  DBPixelGeoManager::DesignNumEmptyRowsInGap(bool isModule3D)
   } else {
     int type=designType((ibl()&&isModule3D));
 
-    return db()->getInt(m_PixelReadout,"EMPTYROWS",type);
+    return (*m_PixelReadout)[type]->getInt("EMPTYROWS");
   } 
 }
 
@@ -3207,11 +3367,15 @@ int DBPixelGeoManager::GangedType()
   // type 0 means no ganged pixels
   if (!ibl()) return 1;
   if (ibl()) {
-    return db()->getInt(m_PixelReadout,"GANGEDTYPE",designType());
+    return (*m_PixelReadout)[designType()]->getInt("GANGEDTYPE");
   } else {
     int type = 1;
-    if (db()->testField(m_PixelReadout,"GANGEDTYPE",designType())) {
-      type = db()->getInt(m_PixelReadout,"GANGEDTYPE",designType());
+    try {
+      if (!(*m_PixelReadout)[designType()]->isFieldNull("GANGEDTYPE")) {
+	type = (*m_PixelReadout)[designType()]->getInt("GANGEDTYPE");
+      }
+    }
+    catch(std::runtime_error&) {
     }
     return type;
   }
@@ -3226,10 +3390,14 @@ int DBPixelGeoManager::GangedTableIndex(int index, int type)
   if (!m_gangedIndexMap) {
     // First time we create the map
     m_gangedIndexMap = std::make_unique<std::map<int,std::vector<int> > >();
-    for (unsigned int i = 0; i < db()->getTableSize(m_PixelGangedPixels); i++){
+    for (unsigned int i = 0; i < m_PixelGangedPixels->size(); i++){
       int testType = 1;
-      if (db()->testField(m_PixelGangedPixels,"TYPE",i)) {
-	testType = db()->getInt(m_PixelGangedPixels,"TYPE",i);
+      try {
+	if (!(*m_PixelGangedPixels)[i]->isFieldNull("TYPE")) {
+	  testType = (*m_PixelGangedPixels)[i]->getInt("TYPE");
+	}
+      }
+      catch(std::runtime_error&){
       }
       (*m_gangedIndexMap)[testType].push_back(i);
     }
@@ -3262,7 +3430,7 @@ int DBPixelGeoManager::EmptyRows(int index)
   } else {
     int newIndex = GangedTableIndex(index, GangedType());
     if (newIndex >= 0) {
-      return db()->getInt(m_PixelGangedPixels,"EMPTYROW",newIndex);
+      return (*m_PixelGangedPixels)[newIndex]->getInt("EMPTYROW");
     } else {
       return 0;
     }
@@ -3276,7 +3444,7 @@ int DBPixelGeoManager::EmptyRowConnections(int index)
   } else {
     int newIndex = GangedTableIndex(index, GangedType());
     if (newIndex >= 0) {
-      return db()->getInt(m_PixelGangedPixels,"CONNECTROW",newIndex);
+      return (*m_PixelGangedPixels)[newIndex]->getInt("CONNECTROW");
     } else {
       return 0;
     }
@@ -3310,7 +3478,7 @@ double DBPixelGeoManager::DesignPitchRP(bool isModule3D)
     return m_legacyManager->DesignPitchRP(isInnermostPixelLayer());
   } else {
     int type = designType((ibl()&&isModule3D));
-    return db()->getDouble(m_PixelReadout,"PITCHPHI",type) * Gaudi::Units::mm;
+    return (*m_PixelReadout)[type]->getDouble("PITCHPHI") * Gaudi::Units::mm;
  } 
 }
 
@@ -3320,7 +3488,7 @@ double DBPixelGeoManager::DesignPitchZ(bool isModule3D)
     return m_legacyManager->DesignPitchZ(isInnermostPixelLayer());
   } else {
     int type = designType((ibl()&&isModule3D));
-    return db()->getDouble(m_PixelReadout,"PITCHETA",type) * Gaudi::Units::mm;
+    return (*m_PixelReadout)[type]->getDouble("PITCHETA") * Gaudi::Units::mm;
   }
 }
 
@@ -3331,7 +3499,7 @@ double DBPixelGeoManager::DesignPitchZLong(bool isModule3D)
     return m_legacyManager->DesignPitchZLong(isInnermostPixelLayer());
   } else {
     int type = designType((ibl()&&isModule3D));
-    double pitch = db()->getDouble(m_PixelReadout,"PITCHETALONG",type) * Gaudi::Units::mm;
+    double pitch = (*m_PixelReadout)[type]->getDouble("PITCHETALONG") * Gaudi::Units::mm;
     if (pitch == 0) pitch = DesignPitchZ(isModule3D);
     return pitch;
   }
@@ -3345,8 +3513,12 @@ double DBPixelGeoManager::DesignPitchZLongEnd(bool isModule3D)
   } else {
     int type = designType((ibl()&&isModule3D));
     double pitch = 0;
-    if (db()->testField(m_PixelReadout,"PITCHETAEND",type)) {
-      pitch = db()->getDouble(m_PixelReadout,"PITCHETAEND",type) * Gaudi::Units::mm;
+    try {
+      if (!(*m_PixelReadout)[type]->isFieldNull("PITCHETAEND")) {
+	pitch = (*m_PixelReadout)[type]->getDouble("PITCHETAEND") * Gaudi::Units::mm;
+      }
+    }
+    catch(std::runtime_error&){
     }
     if (pitch == 0) pitch = DesignPitchZLong(isModule3D);
     return pitch;
@@ -3391,7 +3563,7 @@ int DBPixelGeoManager::DesignCircuitsEta(bool isModule3D)
 // Endcap 
 double  DBPixelGeoManager::PixelDiskRMin()
 {
-  return db()->getDouble(m_PixelDisk,"RIDISK",m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble("RIDISK")*mmcm();
 }
 
 ///
@@ -3407,13 +3579,13 @@ int DBPixelGeoManager::PixelDiskNumSupports() {
 double DBPixelGeoManager::PixelDiskSupportRMin(int isup) {
   std::ostringstream field;
   field <<"SUP"<< isup+1 <<"RMIN";
-  return db()->getDouble(m_PixelDisk,field.str(),m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble(field.str())*mmcm();
 }
 
 double DBPixelGeoManager::PixelDiskSupportRMax(int isup) {
   std::ostringstream field;
   field <<"SUP"<< isup+1 <<"RMAX";
-  return db()->getDouble(m_PixelDisk,field.str(),m_currentLD)*mmcm();
+  return (*m_PixelDisk)[m_currentLD]->getDouble(field.str())*mmcm();
 }
 
 
@@ -3428,18 +3600,26 @@ double DBPixelGeoManager::PixelDiskSupportThickness(int isup) {
 
   // First check text file
   // default support thickness
-  if (db()->testFieldTxt(m_PixelDisk,"SUP_THICK")) {
-    tck = db()->getDouble(m_PixelDisk,"SUP_THICK");
-    found = true;
-  } 
+  try {
+    if (!(*m_PixelDisk)[0]->isFieldNull("SUP_THICK")) {
+      tck = (*m_PixelDisk)[0]->getDouble("SUP_THICK");
+      found = true;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   // overwrites if found
-  if (db()->testFieldTxt(m_PixelDisk,prefix.str(),m_currentLD)) {
-    tck = db()->getDouble(m_PixelDisk,prefix.str(),m_currentLD);
-    found = true;
+  try {
+    if (!(*m_PixelDisk)[m_currentLD]->isFieldNull(prefix.str())) {
+      tck = (*m_PixelDisk)[m_currentLD]->getDouble(prefix.str());
+      found = true;
+    }
+  }
+  catch(std::runtime_error&) {
   }
 
   // Now check database
-  if (!found)  tck = db()->getDouble(m_PixelDisk,prefix.str(),m_currentLD);
+  if (!found)  tck = (*m_PixelDisk)[m_currentLD]->getDouble(prefix.str());
 
   if(tck>0.) {
     return tck * mmcm();
@@ -3461,18 +3641,26 @@ int DBPixelGeoManager::PixelDiskSupportMaterialTypeNum(int isup) {
   int imat = 0;
   bool found = false;
   // default material type
-  if (db()->testFieldTxt(m_PixelDisk,"SUP_MAT")) {
-    imat = db()->getInt(m_PixelDisk,"SUP_MAT");
-    found = true;
-  } 
+  try {
+    if (!(*m_PixelDisk)[0]->isFieldNull("SUP_MAT")) {
+      imat = (*m_PixelDisk)[0]->getInt("SUP_MAT");
+      found = true;
+    }
+  }
+  catch(std::runtime_error&) {
+  }
   // overwrites if found
-  if (db()->testFieldTxt(m_PixelDisk,prefix.str(),m_currentLD)) {
-    imat = db()->getInt(m_PixelDisk,prefix.str(),m_currentLD);
-    found = true;
+  try {
+    if (!(*m_PixelDisk)[m_currentLD]->isFieldNull(prefix.str())) {
+      imat = (*m_PixelDisk)[m_currentLD]->getInt(prefix.str());
+      found = true;
+    }
+  }
+  catch(std::runtime_error&) {
   }
 
   if (!found) {
-    imat = db()->getInt(m_PixelDisk,prefix.str(),m_currentLD);
+    imat = (*m_PixelDisk)[m_currentLD]->getInt(prefix.str());
   }
   return imat;
 }
@@ -3484,39 +3672,39 @@ int DBPixelGeoManager::PixelDiskSupportMaterialTypeNum(int isup) {
 
 // return angle of the telescope
 double DBPixelGeoManager::DBMAngle() {
-  return db()->getDouble(m_DBMTelescope,"ANGLE")*Gaudi::Units::deg;
+  return (*m_DBMTelescope)[0]->getDouble("ANGLE")*Gaudi::Units::deg;
 }
 
 // return dimension of the DBM telescope
 double DBPixelGeoManager::DBMTelescopeX() {
-   return db()->getDouble(m_DBMTelescope,"WIDTH")*Gaudi::Units::mm;
+   return (*m_DBMTelescope)[0]->getDouble("WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMTelescopeY() {
-   return db()->getDouble(m_DBMTelescope,"HEIGHT")*Gaudi::Units::mm;
+   return (*m_DBMTelescope)[0]->getDouble("HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMTelescopeZ() {
-   return db()->getDouble(m_DBMTelescope,"LENGTH")*Gaudi::Units::mm;
+   return (*m_DBMTelescope)[0]->getDouble("LENGTH")*Gaudi::Units::mm;
 }
 
 // return height and length of the module cage having a 3-layers structure
 double DBPixelGeoManager::DBMModuleCageY() {
-  return db()->getDouble(m_DBMTelescope,"CAGE_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMTelescope)[0]->getDouble("CAGE_HEIGHT")*Gaudi::Units::mm;
 } 
 double DBPixelGeoManager::DBMModuleCageZ() {
-  return db()->getDouble(m_DBMTelescope,"CAGE_LENGTH")*Gaudi::Units::mm;
+  return (*m_DBMTelescope)[0]->getDouble("CAGE_LENGTH")*Gaudi::Units::mm;
 } 
 
 // return layer spacing
 double DBPixelGeoManager::DBMSpacingZ() {
-  return db()->getDouble(m_DBMCage,"ZSPACING")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("ZSPACING")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMSpacingRadial() {
   if (m_currentLD == 0)
-    return db()->getDouble(m_DBMCage,"RADIAL_SPACE_0")*Gaudi::Units::mm;
+    return (*m_DBMCage)[0]->getDouble("RADIAL_SPACE_0")*Gaudi::Units::mm;
   else if (m_currentLD == 1)
-    return db()->getDouble(m_DBMCage,"RADIAL_SPACE_1")*Gaudi::Units::mm;
+    return (*m_DBMCage)[0]->getDouble("RADIAL_SPACE_1")*Gaudi::Units::mm;
   else if (m_currentLD == 2)
-    return db()->getDouble(m_DBMCage,"RADIAL_SPACE_2")*Gaudi::Units::mm;
+    return (*m_DBMCage)[0]->getDouble("RADIAL_SPACE_2")*Gaudi::Units::mm;
   else {
      msg(MSG::WARNING) << "DBMSpacingRadial() is not found" << endmsg;
      return 0.;
@@ -3524,174 +3712,174 @@ double DBPixelGeoManager::DBMSpacingRadial() {
 }
 // return dimension of bracket unit
 double DBPixelGeoManager::DBMBracketX() {
-  return db()->getDouble(m_DBMBracket,"WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBracketY() {
-  return db()->getDouble(m_DBMBracket,"HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBracketZ() {
-  return db()->getDouble(m_DBMBracket,"THICKNESS")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("THICKNESS")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMTrapezBackTheta() {
-  return db()->getDouble(m_DBMBracket,"TRAPEZBACK_THETA")*Gaudi::Units::deg;
+  return (*m_DBMBracket)[0]->getDouble("TRAPEZBACK_THETA")*Gaudi::Units::deg;
 }
 double DBPixelGeoManager::DBMTrapezBackX() {
-  return db()->getDouble(m_DBMBracket,"TRAPEZBACK_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("TRAPEZBACK_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMTrapezBackY() {
-  return db()->getDouble(m_DBMBracket,"TRAPEZBACK_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("TRAPEZBACK_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMTrapezBackShortZ() {
-  return db()->getDouble(m_DBMBracket,"TRAPEZBACK_ZSHORT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("TRAPEZBACK_ZSHORT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktWindowX() {
-  return db()->getDouble(m_DBMBracket,"WINDOW_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("WINDOW_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktWindowY() {
-  return db()->getDouble(m_DBMBracket,"WINDOW_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("WINDOW_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktWindowOffset() {
-  return db()->getDouble(m_DBMBracket,"WINDOW_OFFSET")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("WINDOW_OFFSET")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktWindowCenterZ() {
-  return db()->getDouble(m_DBMBracket,"WINDOW_CENTERZ")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("WINDOW_CENTERZ")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktTopBlockZ() {
-  return db()->getDouble(m_DBMBracket,"TOPBLOCK_THICK")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("TOPBLOCK_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktSideBlockX() {
-  return db()->getDouble(m_DBMBracket,"SIDEBLOCK_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("SIDEBLOCK_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktSideBlockY() {
-  return db()->getDouble(m_DBMBracket,"SIDEBLOCK_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("SIDEBLOCK_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktLockZ() {
-  return db()->getDouble(m_DBMBracket,"LOCK_THICK")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("LOCK_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktLockY() {
-  return db()->getDouble(m_DBMBracket,"LOCK_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("LOCK_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktFinLongZ() {
-  return db()->getDouble(m_DBMBracket,"COOLINGFIN_ZLONG")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("COOLINGFIN_ZLONG")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktFinHeight() {
-  return db()->getDouble(m_DBMBracket,"COOLINGFIN_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("COOLINGFIN_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktFinThick() {
-  return db()->getDouble(m_DBMBracket,"COOLINGFIN_THICK")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("COOLINGFIN_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMBrcktFinPos() {
-  return db()->getDouble(m_DBMBracket,"COOLINGFIN_POS")*Gaudi::Units::mm;
+  return (*m_DBMBracket)[0]->getDouble("COOLINGFIN_POS")*Gaudi::Units::mm;
 }
 
 // return spacing between V-slide and first layer
 double DBPixelGeoManager::DBMSpace() {
-  return db()->getDouble(m_DBMCage,"SPACING1")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("SPACING1")*Gaudi::Units::mm;
 }
 
 // return dimensions of the main plate
 double DBPixelGeoManager::DBMMainPlateX() {
-  return db()->getDouble(m_DBMCage,"MAINPLATE_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MAINPLATE_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMainPlateY() {
-  return db()->getDouble(m_DBMCage,"MAINPLATE_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MAINPLATE_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMainPlateZ() {
-  return db()->getDouble(m_DBMCage,"MAINPLATE_THICK")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MAINPLATE_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMPlateWindowWidth() {
-  return db()->getDouble(m_DBMCage,"MPWINDOW_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MPWINDOW_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMPlateWindowHeight() {
-  return db()->getDouble(m_DBMCage,"MPWINDOW_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MPWINDOW_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMPlateWindowPos() {
-  return db()->getDouble(m_DBMCage,"MPWINDOW_POS")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("MPWINDOW_POS")*Gaudi::Units::mm;
 }
 // return dimensions of aluminium side plates
 double DBPixelGeoManager::DBMCoolingSidePlateX() {
-  return db()->getDouble(m_DBMCage,"SIDEPLATE_THICK")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("SIDEPLATE_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCoolingSidePlateY() {
-  return db()->getDouble(m_DBMCage,"SIDEPLATE_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("SIDEPLATE_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCoolingSidePlateZ() {
-  return db()->getDouble(m_DBMCage,"SIDEPLATE_LENGTH")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("SIDEPLATE_LENGTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCoolingSidePlatePos() {
-  return db()->getDouble(m_DBMCage,"SIDEPLATE_POS")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("SIDEPLATE_POS")*Gaudi::Units::mm;
 }
 
 // return dimension of sensor, chip and ceramic
 double DBPixelGeoManager::DBMDiamondX() {
-  return db()->getDouble(m_DBMModule,"DIAMOND_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("DIAMOND_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMDiamondY() {
-  return db()->getDouble(m_DBMModule,"DIAMOND_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("DIAMOND_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMDiamondZ() {
-  return db()->getDouble(m_DBMModule,"DIAMOND_THICK")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("DIAMOND_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFEI4X() {
-  return db()->getDouble(m_DBMModule,"FEI4_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("FEI4_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFEI4Y() {
-  return db()->getDouble(m_DBMModule,"FEI4_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("FEI4_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFEI4Z() {
-  return db()->getDouble(m_DBMModule,"FEI4_THICK")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("FEI4_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCeramicX() {
-  return db()->getDouble(m_DBMModule,"CERAMIC_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("CERAMIC_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCeramicY() {
-  return db()->getDouble(m_DBMModule,"CERAMIC_HEIGHT")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("CERAMIC_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMCeramicZ() {
-  return db()->getDouble(m_DBMModule,"CERAMIC_THICK")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("CERAMIC_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMAirGap() {
-  return db()->getDouble(m_DBMModule,"AIR_GAP")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("AIR_GAP")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMKaptonZ() {
-  return db()->getDouble(m_DBMModule,"KAPTONZ")*Gaudi::Units::mm;
+  return (*m_DBMModule)[0]->getDouble("KAPTONZ")*Gaudi::Units::mm;
 }
 
 // flex support
 double DBPixelGeoManager::DBMFlexSupportX() {
-  return db()->getDouble(m_DBMCage,"FLEXSUPP_WIDTH")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("FLEXSUPP_WIDTH")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFlexSupportY() {
-    return db()->getDouble(m_DBMCage,"FLEXSUPP_HEIGHT")*Gaudi::Units::mm;
+    return (*m_DBMCage)[0]->getDouble("FLEXSUPP_HEIGHT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFlexSupportZ() {
-  return db()->getDouble(m_DBMCage,"FLEXSUPP_THICK")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("FLEXSUPP_THICK")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMFlexSupportOffset() {
-    return db()->getDouble(m_DBMCage, "FLEXSUPP_OFFSET")*Gaudi::Units::mm;
+    return (*m_DBMCage)[0]->getDouble("FLEXSUPP_OFFSET")*Gaudi::Units::mm;
 }
 
 // return radius of supporting rod
 double DBPixelGeoManager::DBMRodRadius() {
-  return db()->getDouble(m_DBMCage,"ROD_RADIUS")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("ROD_RADIUS")*Gaudi::Units::mm;
 }
 // return distance between center of rods
 double DBPixelGeoManager::DBMMPlateRod2RodY() {
-  return db()->getDouble(m_DBMCage,"ROD2ROD_VERT")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("ROD2ROD_VERT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMMPlateRod2RodX() {
-  return db()->getDouble(m_DBMCage,"ROD2ROD_HOR")*Gaudi::Units::mm;
+  return (*m_DBMCage)[0]->getDouble("ROD2ROD_HOR")*Gaudi::Units::mm;
 }
 
 // radius and thickness of PP0 board
 double DBPixelGeoManager::DBMPP0RIn() {
-  return db()->getDouble(m_DBMTelescope,"PP0_RIN")*Gaudi::Units::mm;
+  return (*m_DBMTelescope)[0]->getDouble("PP0_RIN")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMPP0ROut() {
-  return db()->getDouble(m_DBMTelescope,"PP0_ROUT")*Gaudi::Units::mm;
+  return (*m_DBMTelescope)[0]->getDouble("PP0_ROUT")*Gaudi::Units::mm;
 }
 double DBPixelGeoManager::DBMPP0Thick() {
-  return db()->getDouble(m_DBMTelescope,"PP0_THICK")*Gaudi::Units::mm;
+  return (*m_DBMTelescope)[0]->getDouble("PP0_THICK")*Gaudi::Units::mm;
 }
 
 

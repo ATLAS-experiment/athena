@@ -90,7 +90,7 @@ To execute the test:
 
 .. code-block:: bash
 
-   athena.py --CA /path/to/athena/Reconstruction/DiTauRec/python/StandAloneDiTauBuilder.py
+   athena.py /path/to/athena/Reconstruction/DiTauRec/python/StandAloneDiTauBuilder.py
 
 |
 

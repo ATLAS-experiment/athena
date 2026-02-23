@@ -12,6 +12,7 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Common.hpp"
+#include "Acts/Utilities/MathHelpers.hpp"
 
 #include <utility>
 
@@ -57,6 +58,16 @@ namespace ActsTrk{
         using namespace Acts::UnitLiterals;
         constexpr double timeCnv = Gaudi::Units::ns/ 1_ns;
         return timeCnv * actsT;
+    }
+    /// @brief Converts a velocity from Athena to Acts units
+    /// @param athenaV: Velocity to convert
+    inline constexpr double velocityToActs(const double athenaV) {
+        return athenaV  / timeToActs(1.);
+    }
+    /// @brief Converts an acceleration from Athena to Acts units
+    /// @param athenaA: Acceleration to convert
+    inline constexpr double accelerationToActs(const double athenaA) {
+        return athenaA / Acts::square(timeToActs(1.));
     }
     /// @brief Converts a direction vector from athena units into acts units
     /// @param athenaDir: Unit normalized vector to convert

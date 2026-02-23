@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #if defined(FLATTEN) && defined(__GNUC__)
@@ -22,6 +22,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/DiamondVolumeBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Surfaces/CylinderBounds.hpp"
 
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
@@ -71,13 +72,16 @@ namespace MuonGMR4 {
                                                 const std::string& descr,
                                                 const Identifier& channelId) const {
 
-        if (boundVol.inside(gctx.context(), point, tolerance)) {
+        // Explicitly inline Volume::inside here so that it gets
+        // flattened in debug builds.  Gives a significant speedup.
+        //if (boundVol.inside(gctx.context(), point, tolerance)) {
+        const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
+        if (boundVol.volumeBounds().inside(locPos,tolerance)) {
             ATH_MSG_VERBOSE("In channel "<<m_idHelperSvc->toString(channelId)
                             <<", point "<<descr <<" is inside of the chamber "<<std::endl<<chamb<<std::endl
                             <<"Local position:" <<Amg::toString(boundVol.globalToLocalTransform(gctx.context()) * point));
             return StatusCode::SUCCESS;
         }
-        const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
         
         StripDesign planeTrapezoid{};
         planeTrapezoid.defineTrapezoid(chamb.halfXShort(), chamb.halfXLong(), chamb.halfY());
@@ -284,6 +288,7 @@ namespace MuonGMR4 {
         }
     }
 
+
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call
@@ -312,12 +317,17 @@ namespace MuonGMR4 {
         }
         const double stepLength = 1. / m_overlapSamples;
 
+        const Acts::VolumeBounds& volBounds = volume.volumeBounds();
+        const Acts::Transform3& transform = volume.globalToLocalTransform(gctx.context());
         for (unsigned edge1 = 1; edge1 < chamberEdges.size(); ++edge1) {
             for (unsigned edge2 = 0; edge2 < edge1; ++edge2) {
                 for (unsigned step = 0 ; step <= m_overlapSamples; ++step) {
                     const double section = stepLength * step;
                     const Amg::Vector3D testPoint = section* chamberEdges[edge1] + (1. -section) *chamberEdges[edge2];
-                    if (volume.inside (gctx.context(), testPoint)) {
+                    // Using acts::Volume::inside is horribly slow in dbg builds.
+                    // Using the bounds method directly is much faster.
+                    //if (volume.inside (gctx.context(), testPoint)) {
+                    if (volBounds.inside (transform * testPoint)) {
                         return true;
                     }
                 }
@@ -341,10 +351,18 @@ namespace MuonGMR4 {
             return StatusCode::FAILURE;
         }
 
+        // Retrieve bounds here rather than inside the loop below,
+        // so we only need to do it O(N) rather than O(N^2) times.
+        std::vector<std::shared_ptr<Acts::Volume> > chamberBoundsVec;
+        chamberBoundsVec.reserve (chamberVec.size());
+        for (const Chamber* ch : chamberVec)
+          chamberBoundsVec.push_back (ch->boundingVolume(gctx));
+
         std::set<const Chamber*> overlapChambers{};
         std::stringstream overlapstream{};
         for (std::size_t chIdx = 0; chIdx< chamberVec.size(); ++chIdx) {
             const Chamber& chamber{*chamberVec[chIdx]};
+            const Acts::Volume& chamberBounds = *chamberBoundsVec[chIdx];
             if (m_dumpObjs) {
                 saveEnvelope(gctx, std::format("Chamber_{:}{:}{:}{:}{:}", 
                                                 ActsTrk::to_string(chamber.detectorType()),
@@ -352,10 +370,10 @@ namespace MuonGMR4 {
                                                 Acts::abs(chamber.stationEta()),
                                                 chamber.stationEta() > 0 ? 'A' : 'C',
                                                 chamber.stationPhi()), 
-                            *chamber.boundingVolume(gctx), chamber.readoutEles());
+                            chamberBounds, chamber.readoutEles());
             }
             ATH_CHECK(allReadoutInEnvelope(gctx, chamber));
-            const std::vector<Amg::Vector3D> chambCorners = cornerPoints(gctx, *chamber.boundingVolume(gctx));
+            const std::vector<Amg::Vector3D> chambCorners = cornerPoints(gctx, chamberBounds);
             /// Check the overlap with other chambers
             std::vector<const Chamber*> overlaps{};
             for (std::size_t chIdx1 = 0; chIdx1<chamberVec.size(); ++chIdx1) {
@@ -363,7 +381,7 @@ namespace MuonGMR4 {
                     continue;
                 }
                 const Chamber* overlapTest{chamberVec[chIdx1]};
-                if (hasOverlap(gctx, chambCorners, *(overlapTest->boundingVolume(gctx)))) {
+                if (hasOverlap(gctx, chambCorners, *chamberBoundsVec[chIdx1])) {
                     overlaps.push_back(overlapTest);
                 }
             }
@@ -439,29 +457,40 @@ namespace MuonGMR4 {
 
     StatusCode MuonChamberToolTest::checkTrackingGeometry(const ActsTrk::GeometryContext& gctx,
                                                           std::shared_ptr<const Acts::TrackingGeometry>& trackingGeometry) const {
-        //visit the volumes and check the overlaps
+
+        //visit the volumes and check the overlaps with the other volumes in the tracking geometry
+        // also check overlaps between volumes and surfaces (e.g surfaces where the passive material is mapped)
         std::vector<const Acts::TrackingVolume*> volumeVec{};
         std::vector<const Acts::TrackingVolume*> overlapVolumes{};
+        std::vector<const Acts::Surface*> surfacesVec{};
         //keep onyl the chamber volumes - not the cylinders
         trackingGeometry->visitVolumes([&](const Acts::TrackingVolume* vol){
-            if(!(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder)){
+            //for the cylinder type volumes , fetch the inner surfaces only (e.g passive material surfaces)
+            if(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder){
+                Acts::ObjVisualization3D visualHelper{};   
+                std::ranges::for_each(vol->surfaces(), [&](const auto& surf){                 
+                    surfacesVec.push_back(&surf);
+                });
+                return;                
+            }            
                 //dump the tracking volumes into obj 
-                if(m_dumpObjs){
-                    Acts::ObjVisualization3D visualHelper{};   
-                    for(const auto& surf : vol->surfaces()){                
-                   
-                        Acts::GeometryView3D::drawSurface(visualHelper, surf, gctx.context());
-                         
-                    }
-                    std::string volName = vol->volumeName();
-                    Acts::GeometryView3D::drawVolume(visualHelper, *vol, gctx.context());
-                    ATH_MSG_DEBUG("Save new tracking volume 'MsTrackingVol_"<<volName<<".obj'");
-                    visualHelper.write(std::format("MsTrackingVol_{:}.obj", volName));
-
+            if(m_dumpObjs){
+                Acts::ObjVisualization3D visualHelper{};   
+                for(const auto& surf : vol->surfaces()){              
+                   Acts::GeometryView3D::drawSurface(visualHelper, surf, gctx.context());                         
                 }
-                volumeVec.push_back(vol);            
+                std::string volName = vol->volumeName();
+                Acts::GeometryView3D::drawVolume(visualHelper, *vol, gctx.context());
+                ATH_MSG_DEBUG("Save new tracking volume 'MsTrackingVol_"<<volName<<".obj'");
+                visualHelper.write(std::format("MsTrackingVol_{:}.obj", volName));
+
             }
-        });
+            volumeVec.push_back(vol);            
+            
+        });   
+
+        ATH_MSG_VERBOSE("Fetched "<< surfacesVec.size()<< "surfaces");
+
 
         for(std::size_t vIdx = 0; vIdx < volumeVec.size(); vIdx++){
             const Acts::TrackingVolume* testVol{volumeVec[vIdx]};
@@ -504,48 +533,85 @@ namespace MuonGMR4 {
 
             //check if this test volume overlaps with the other volumes in the tracking geometry
             for(std::size_t vIdx1 = 0 ; vIdx1 < volumeVec.size(); vIdx1++){
-            bool isChild = std::ranges::find_if(childrenVol,
-                [&](const Acts::TrackingVolume& tv){ return &tv == volumeVec[vIdx1]; }
-            ) != childrenVol.end();
+                bool isChild = std::ranges::find_if(childrenVol,
+                    [&](const Acts::TrackingVolume& tv){ return &tv == volumeVec[vIdx1]; }
+                ) != childrenVol.end();
 
-            bool isMother = (testVol->motherVolume() == volumeVec[vIdx1]);
+                bool isMother = (testVol->motherVolume() == volumeVec[vIdx1]);
 
-            if(vIdx1 == vIdx || isMother){
-                    continue;
-            }
-             //check if the child volume is entirely enclosed by the mother volume
-            if(isChild){
-                std::vector<Amg::Vector3D> childEdges = cornerPoints(gctx,*volumeVec[vIdx1]);
-                for(const auto& edge : childEdges){
-                    if(!(testVol->inside(gctx.context(), edge, 0.01))){
-                        ATH_MSG_FATAL("The children volume's " << volumeVec[vIdx1]->volumeName() 
-                        <<" vertex point " <<Amg::toString(edge)
-                        <<" is outside the parent volume" << testVol->volumeName());
-                        return StatusCode::FAILURE;
-                    }
+                if(vIdx1 == vIdx || isMother){
+                        continue;
                 }
-                continue;
+                //check if the child volume is entirely enclosed by the mother volume
+                if(isChild){
+                    std::vector<Amg::Vector3D> childEdges = cornerPoints(gctx,*volumeVec[vIdx1]);
+                    for(const auto& edge : childEdges){
+                        if(!(testVol->inside(gctx.context(), edge, 0.01))){
+                            ATH_MSG_FATAL("The children volume's " << volumeVec[vIdx1]->volumeName() 
+                            <<" vertex point " <<Amg::toString(edge)
+                            <<" is outside the parent volume" << testVol->volumeName());
+                            return StatusCode::FAILURE;
+                        }
+                    }
+                    continue;
 
+                }
+                if(hasOverlap(gctx, edges, *volumeVec[vIdx1])){
+                    overlaps.push_back(volumeVec[vIdx1]);
+                }            
             }
-            if(hasOverlap(gctx, edges, *volumeVec[vIdx1])){
-                overlaps.push_back(volumeVec[vIdx1]);
+
+            //check if the tracking volume overlaps with surfaces of the tracking geometry (e.g cylinders of the barrel where material is mapped)
+            for(const auto& surf : surfacesVec){
+                double radius{0.};
+                ATH_MSG_VERBOSE("Checking surface "<<surf->name()<< " , "<<surf->geometryId());
+                if(const auto* cylSurf = dynamic_cast<const Acts::CylinderSurface*>(surf)){
+                    using BoundEnum = Acts::CylinderBounds::BoundValues;
+                    const auto& bounds = static_cast<const Acts::CylinderBounds&>(cylSurf->bounds());
+                    radius = bounds.get(BoundEnum::eR);
+                }else{
+                     ATH_MSG_FATAL("The surface "<< surf->geometryId()<<", "<< surf->name()
+                    <<" is not a cylinder surface - i dont expect any other type at the moment");
+                    return StatusCode::FAILURE;
+                }
+                //if the volume's corners are all below the cylinder surface radius it means this is next station surface 
+                //and we are checking the volumes of the previous station it does not mean overlap
+                auto [min,max] = std::ranges::minmax_element(edges, [&](const auto& cornerA, const auto& cornerB){
+                    return cornerA.perp() < cornerB.perp();
+                });
+                double rmin{min->perp()};
+                double rmax{max->perp()};
+                bool overlaps = (radius > rmin && radius < rmax);
+                if(overlaps){
+                    ATH_MSG_FATAL("The volume " << testVol->volumeName() << "overlaps with the surface "<< surf->name() << "with geo id" << surf->geometryId());
+                }
+              
+            }      
+            
+              //dump the surfaces in obj
+                if(m_dumpObjs){
+                    Acts::ObjVisualization3D visualHelper{};   
+                    for(const auto& surf : surfacesVec){
+                        Acts::GeometryView3D::drawSurface(visualHelper, *surf, gctx.context());
+                    }
+                    visualHelper.write("PassiveSurfaces.obj");
+                }
+
+            if(overlaps.empty()){
+                ATH_MSG_DEBUG("No overlaps detected for the volume "<<testVol->volumeName());
+                continue;
+            }else{
+                overlapVolumes.push_back(testVol);
+                ATH_MSG_ALWAYS("The volume " << testVol->volumeName() << " overlaps with: ");
+                for(const auto& overlap: overlaps){
+                        ATH_MSG_ALWAYS(" Volume: " << overlap->volumeName());
+                }
             }
         }
-        if(overlaps.empty()){
-            ATH_MSG_DEBUG("No overlaps detected for the volume "<<testVol->volumeName());
-            continue;
-        }else{
-            overlapVolumes.push_back(testVol);
-            ATH_MSG_ALWAYS("The volume " << testVol->volumeName() << " overlaps with: ");
-            for(const auto& overlap: overlaps){
-                    ATH_MSG_ALWAYS(" Volume: " << overlap->volumeName());
-            }
+        if(overlapVolumes.empty()){
+            ATH_MSG_ALWAYS("No overlaps detected in the tracking geometry!!");
         }
-    }
-    if(overlapVolumes.empty()){
-        ATH_MSG_ALWAYS("No overlaps detected in the tracking geometry!!");
-    }
-    return overlapVolumes.empty() || m_ignoreOverlapCh ? StatusCode::SUCCESS : StatusCode::FAILURE;    
+        return overlapVolumes.empty() || m_ignoreOverlapCh ? StatusCode::SUCCESS : StatusCode::FAILURE;    
     }
     
     void MuonChamberToolTest::saveEnvelope(const ActsTrk::GeometryContext& gctx,

@@ -1,8 +1,8 @@
 //eflowRec includes
-#include "eflowRec/PFChargedFlowElementCreatorAlgorithm.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "PFChargedFlowElementCreatorAlgorithm.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
 
 //EDM includes
 #include "xAODBase/IParticleContainer.h"

@@ -18,9 +18,8 @@
 namespace ActsTrk
 {
     MaterialTrackRecorder::MaterialTrackRecorder(const Config& config):
-        AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >( "MessageSvc" ),"MaterialTrackRecorder"),
-        m_cfg(config)
-    {}
+        AthMessaging{"MaterialTrackRecorder"},
+        m_cfg{config}{}
 
     void MaterialTrackRecorder::BeginOfEventAction(const G4Event*)
     {

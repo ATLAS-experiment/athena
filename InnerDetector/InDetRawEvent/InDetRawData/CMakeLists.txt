@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetRawData )
@@ -14,3 +14,8 @@ atlas_add_dictionary( InDetRawDataDict
                       InDetRawData/InDetRawDataCLASS_DEF.h
                       InDetRawData/selection.xml
                       LINK_LIBRARIES InDetRawData )
+
+atlas_add_test( PhaseIIInDetRawDataContainer_test
+   SOURCES test/PhaseIIInDetRawDataContainer_test.cxx
+   LINK_LIBRARIES InDetRawData
+   POST_EXEC_SCRIPT nopost.sh )

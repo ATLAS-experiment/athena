@@ -153,7 +153,7 @@ const void* IdentifiableCacheBase::get (IdentifierHash hash)
        ptr = m_maker->typelessMake (hash).release();
      }
      catch (...) {
-       // FIXME: Can this be done with RAII?
+       m_vec[hash].store( ABORTED );
        notifyHash(hash);
        throw;
      }

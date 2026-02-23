@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
+from AnalysisAlgorithmsConfig.ConfigSequence import groupBlocks
 from AthenaCommon.SystemOfUnits	import GeV
 from AthenaConfiguration.Enums import LHCPeriod
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
@@ -46,7 +47,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
             "PHYSLITE derivations.")
         self.addOption ('minPt', 10*GeV, type=float,
-            info=r"the minimum $p_\mathrm{T}$ cut to apply to calibrated photons.")
+            info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated photons.")
         self.addOption ('maxEta', 2.37, type=float,
             info=r"maximum photon $\vert\eta\vert$.")
         self.addOption ('forceFullSimConfigForP4', False, type=bool,
@@ -293,13 +294,12 @@ class PhotonCalibrationConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
 
 
-class PhotonWorkingPointConfig (ConfigBlock) :
-    """the ConfigBlock for the photon working point
-
-    This may at some point be split into multiple blocks (29 Aug 22)."""
+class PhotonWorkingPointSelectionConfig (ConfigBlock) :
+    """the ConfigBlock for the photon working point selection"""
 
     def __init__ (self) :
-        super (PhotonWorkingPointConfig, self).__init__ ()
+        super (PhotonWorkingPointSelectionConfig, self).__init__ ()
+        self.setBlockName('PhotonWorkingPointSelection')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -309,7 +309,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             "`loose`).")
         self.addOption ('postfix', None, type=str,
             info="a postfix to apply to decorations and algorithm names. "
-            "Typically not needed here as selectionName is used internally.")
+            "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
             info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.")
         self.addOption ('isolationWP', None, type=str,
@@ -321,32 +321,12 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         self.addOption ('closeByCorrection', False, type=bool,
             info="whether to use close-by-corrected isolation working points.")
         self.addOption ('recomputeIsEM', False, type=bool,
-            info="whether to rerun the cut-based selection, or rely on derivation flags.")
+            info="whether to rerun the cut-based selection (`True`), or rely on derivation flags (`False`).")
         self.addOption ('doFSRSelection', False, type=bool,
             info="whether to accept additional photons close to muons for the "
             "purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE.",
             expertMode=True)
-        self.addOption ('noEffSFForID', False, type=bool,
-            info="disables the calculation of ID efficiencies and scale factors. "
-            "Experimental! only useful to test a new WP for which scale "
-            "factors are not available.",
-            expertMode=True)
-        self.addOption ('noEffSFForIso', False, type=bool,
-            info="disables the calculation of isolation efficiencies and scale factors. "
-            "Experimental! only useful to test a new WP for which scale "
-            "factors are not available.",
-            expertMode=True)
-        self.addOption ('saveDetailedSF', True, type=bool,
-            info="save all the independent detailed object scale factors.")
-        self.addOption ('saveCombinedSF', False, type=bool,
-            info="save the combined object scale factor.")
-        self.addOption ('forceFullSimConfigForID', False, type=bool,
-            info="whether to force the ID tool to use the configuration meant "
-            "for full simulation samples. Only for testing purposes.")
-        self.addOption ('forceFullSimConfigForIso', False, type=bool,
-            info="whether to force the isolation tool to use the configuration meant "
-            "for full simulation samples. Only for testing purposes.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -356,19 +336,9 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        log = logging.getLogger('PhotonWorkingPointConfig')
-
         # The setup below is inappropriate for Run 1
         if config.geometry() is LHCPeriod.Run1:
             raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
-
-        if self.forceFullSimConfigForID:
-            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for ID")
-            log.warning("This is only intended to be used for testing purposes")
-           
-        if self.forceFullSimConfigForIso:
-            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for Iso")
-            log.warning("This is only intended to be used for testing purposes") 
 
         postfix = self.postfix
         if postfix is None :
@@ -439,6 +409,79 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                                  preselection=self.addSelectionToPreselection)
 
+
+class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
+    """the ConfigBlock for the photon working point efficiency computation"""
+
+    def __init__ (self) :
+        super (PhotonWorkingPointEfficiencyConfig, self).__init__ ()
+        self.addDependency('PhotonWorkingPointSelection', required=True)
+        self.addDependency('EventSelection', required=False)
+        self.addDependency('EventSelectionMerger', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the input container.")
+        self.addOption ('selectionName', '', type=str,
+            noneAction='error',
+            info="the name of the photon selection to define (e.g. `tight` or "
+            "`loose`).")
+        self.addOption ('postfix', None, type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here as `selectionName` is used internally.")
+        self.addOption ('qualityWP', None, type=str,
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.")
+        self.addOption ('isolationWP', None, type=str,
+            info="the isolation WP to use. Supported isolation WPs: "
+            "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.")
+        self.addOption ('noEffSFForID', False, type=bool,
+            info="disables the calculation of ID efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available.",
+            expertMode=True)
+        self.addOption ('noEffSFForIso', False, type=bool,
+            info="disables the calculation of isolation efficiencies and scale factors. "
+            "Experimental! only useful to test a new WP for which scale "
+            "factors are not available.",
+            expertMode=True)
+        self.addOption ('saveDetailedSF', True, type=bool,
+            info="save all the independent detailed object scale factors.")
+        self.addOption ('saveCombinedSF', False, type=bool,
+            info="save the combined object scale factor.")
+        self.addOption ('forceFullSimConfigForID', False, type=bool,
+            info="whether to force the ID tool to use the configuration meant "
+            "for full simulation samples. Only for testing purposes.")
+        self.addOption ('forceFullSimConfigForIso', False, type=bool,
+            info="whether to force the isolation tool to use the configuration meant "
+            "for full simulation samples. Only for testing purposes.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        if self.postfix is not None :
+            return self.containerName + '_' + self.selectionName + self.postfix
+        return self.containerName + '_' + self.selectionName
+
+    def makeAlgs (self, config) :
+
+        log = logging.getLogger('PhotonWorkingPointEfficiencyConfig')
+
+        # The setup below is inappropriate for Run 1
+        if config.geometry() is LHCPeriod.Run1:
+            raise ValueError ("Can't set up the PhotonWorkingPointConfig with %s, there must be something wrong!" % config.geometry().value)
+
+        if self.forceFullSimConfigForID:
+            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for ID")
+            log.warning("This is only intended to be used for testing purposes")
+           
+        if self.forceFullSimConfigForIso:
+            log.warning("You are running PhotonWorkingPointConfig forcing full sim config for Iso")
+            log.warning("This is only intended to be used for testing purposes") 
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
+
         sfList = []
         # Set up the ID/reco photon efficiency correction algorithm:
         if config.dataType() is not DataType.Data and not self.noEffSFForID:
@@ -500,3 +543,8 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
 
+            
+@groupBlocks
+def PhotonWorkingPoint(seq):
+    seq.append(PhotonWorkingPointSelectionConfig())
+    seq.append(PhotonWorkingPointEfficiencyConfig())

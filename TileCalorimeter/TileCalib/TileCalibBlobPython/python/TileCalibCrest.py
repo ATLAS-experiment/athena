@@ -147,9 +147,10 @@ class TileBlobReaderCrest(TileCalibLogger):
             prefix=prefix.strip('-').split('-')[0]
         if prefix.startswith('Calo') and 'NoiseCell' not in prefix:
             prefix='CALO'+prefix[4:]
-        if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
+            prefix=prefix.replace('Pileupnoiselumi','PileUpNoiseLumi')
+        if 'UPD1' in globalTag or 'UPD4' in globalTag or ('COND' not in globalTag and 'CREST' not in globalTag):
             if prefix != '':
-                if globalTag.startswith(prefix) or globalTag.startswith(prefix.upper()):
+                if prefix in globalTag or prefix.upper() in globalTag:
                     tag=globalTag
                 else:
                     tag=prefix+'-'+globalTag
@@ -158,6 +159,7 @@ class TileBlobReaderCrest(TileCalibLogger):
                 tag = TileCalibUtils.getFullTag(folder, globalTag)
                 if tag.startswith('Calo') and 'NoiseCell' not in tag:
                     tag='CALO'+tag[4:]
+                    tag=tag.replace('Pileupnoiselumi','PileUpNoiseLumi')
                 self.log().info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
             else:
                 tag=globalTag

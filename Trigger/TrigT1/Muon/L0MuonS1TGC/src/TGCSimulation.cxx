@@ -17,10 +17,7 @@ StatusCode TGCSimulation::initialize() {
   ATH_CHECK(m_outputMuonRoIKey.initialize());
 
   // TGC cabling service
-  if (!m_cabling) {
-    ATH_CHECK(m_cabling.retrieve());
-  }
-  
+  ATH_CHECK(m_cablingKey.initialize());
   /// retrieve the monitoring tool
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 

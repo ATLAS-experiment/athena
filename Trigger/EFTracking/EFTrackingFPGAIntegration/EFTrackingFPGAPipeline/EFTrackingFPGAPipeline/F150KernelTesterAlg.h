@@ -12,7 +12,6 @@
 #include "EFTrackingFPGAUtility/TestVectorTool.h"
 #include "EFTrackingFPGAUtility/FPGADataFormatTool.h"
 #include "EFTrackingFPGAUtility/OutputConversionTool.h"
-#include "EFTrackingFPGAPipeline/DataPreparationPipeline.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
 
@@ -165,4 +164,3 @@ namespace EFTrackingFPGAIntegration
 }
 
 #endif // EFTRACKING_FPGA_INTEGRATION_F150KERNELTESTERALG_H
-

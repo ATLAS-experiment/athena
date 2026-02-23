@@ -22,7 +22,7 @@
 #include "PersistentDataModel/DataHeader.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 
 #include <algorithm>
 #include <charconv>
@@ -38,11 +38,6 @@ StatusCode AthenaPoolCnvSvc::initialize() {
    ATH_CHECK(dmcsvc.retrieve());
    // Retrieve PoolSvc
    ATH_CHECK(m_poolSvc.retrieve());
-   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
-   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
-      propertyServer->getProperty(&defContainerType).ignore();
-   }
-   m_defContainerType = defContainerType.value();
    // Retrieve ClassIDSvc
    ATH_CHECK(m_clidSvc.retrieve());
    // Register this service for 'I/O' events
@@ -52,22 +47,12 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
       return(StatusCode::FAILURE);
    }
-   // Validate provided event data technologies and fill the internal cache
-   for (const auto& [key, value] : m_storageTechProp.value()) {
-      try {
-         const auto dbType = pool::DbType::getType(value);
-         if (dbType == pool::TEST_StorageType) {
-            ATH_MSG_FATAL(std::format("Unknown storage type requested for file {}: {}", key, value));
-            return StatusCode::FAILURE;
-         }
-         m_storageTechMap.emplace(key, dbType.type());
-      } catch (const std::exception& e) {
-        ATH_MSG_FATAL(std::format("Exception while getting storage type for file {}: {}", key, e.what()));
-        return StatusCode::FAILURE;
-      } catch (...) {
-        ATH_MSG_FATAL(std::format("Unknown exception while getting storage type for file {}", key));
-        return StatusCode::FAILURE;
-      }
+   // Global POOL container naming scheme
+   if (auto scheme = APRDefaults::parseNamingScheme(m_containerNamingSchemeProp.value())) {
+      APRDefaults::setNamingScheme(*scheme);
+   } else {
+      ATH_MSG_ERROR(std::format("Invalid PoolContainerNamingScheme: {}, see APRDefaults.h for the full list.", m_containerNamingSchemeProp.value()));
+      return StatusCode::FAILURE;
    }
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
@@ -161,20 +146,20 @@ StatusCode AthenaPoolCnvSvc::createObj(IOpaqueAddress* pAddress, DataObject*& re
    }
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, m_chronoMap);
-   if (!m_persSvcPerInputType.empty()) { // Use separate PersistencySvc for each input data type
+   if (!m_persSvcPerInputType.value().empty()) { // Use separate PersistencySvc for each input data type
       TokenAddress* tokAddr = dynamic_cast<TokenAddress*>(pAddress);
       if (tokAddr != nullptr && tokAddr->getToken() != nullptr && (tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "(") || tokAddr->getToken()->contID().starts_with(m_persSvcPerInputType.value() + "_"))) {
          const unsigned int maxContext = m_poolSvc->getInputContextMapSize();
          const unsigned int auxContext = m_poolSvc->getInputContext(tokAddr->getToken()->classID().toString() + tokAddr->getToken()->dbID().toString(), 1);
+         if (m_poolSvc->getInputContextMapSize() > maxContext) {
+            if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, auxContext, false, true, false).isSuccess()) {
+               ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
+            }
+         }
          char text[32];
          const std::string contextStr = std::format("[CTXT={:08X}]", auxContext);
          std::strncpy(text, contextStr.c_str(), sizeof(text) - 1);
          text[sizeof(text) - 1] = '\0';
-         if (m_poolSvc->getInputContextMapSize() > maxContext) {
-            if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), "FID:" + tokAddr->getToken()->dbID().toString(), m_persSvcPerInputType.value(), auxContext).isSuccess()) {
-               ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for id = " << auxContext << ".");
-            }
-         }
          tokAddr->getToken()->setAuxString(text);
       }
    }
@@ -253,12 +238,6 @@ StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSp
 StatusCode AthenaPoolCnvSvc::connectOutput(const std::string& outputConnectionSpec) {
 // This is called before DataObjects are being converted.
    std::string outputConnection = outputConnectionSpec.substr(0, outputConnectionSpec.find('['));
-   // Extract the technology
-   int tech{0};
-   if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
-      ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
-      return(StatusCode::FAILURE);
-   }
    unsigned int contextId = outputContextId(outputConnection);
    try {
       if (!m_poolSvc->connect(pool::ITransaction::UPDATE, contextId).isSuccess()) {
@@ -290,12 +269,6 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
    // StopWatch listens from here until the end of this current scope
    PMonUtils::BasicStopWatch stopWatch("commitOutput", m_chronoMap);
    std::unique_lock<std::mutex> lock(m_mutex);
-   // Extract the technology
-   int tech{0};
-   if (!decodeOutputSpec(outputConnection, tech).isSuccess()) {
-      ATH_MSG_ERROR("connectOutput FAILED extract file name and technology.");
-      return(StatusCode::FAILURE);
-   }
    unsigned int contextId = outputContextId(outputConnection);
    if (!processPoolAttributes(m_domainAttr, outputConnection, contextId).isSuccess()) {
       ATH_MSG_DEBUG("commitOutput failed process POOL domain attributes.");
@@ -328,6 +301,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
       ATH_MSG_ERROR("commitOutput FAILED to cleanup converters.");
       return(StatusCode::FAILURE);
    }
+
    return(StatusCode::SUCCESS);
 }
 
@@ -428,36 +402,6 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
    }
    return(StatusCode::SUCCESS);
 }
-//__________________________________________________________________________
-StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-   if (fileSpec.starts_with ( "ROOTKEY:")) {
-      outputTech = pool::ROOTKEY_StorageType.type();
-      fileSpec.erase(0, 8);
-   } else if (fileSpec.starts_with ( "ROOTTREE:")) {
-      outputTech = pool::ROOTTREE_StorageType.type();
-      fileSpec.erase(0, 9);
-   } else if (fileSpec.starts_with ( "ROOTTREEINDEX:")) {
-      outputTech = pool::ROOTTREEINDEX_StorageType.type();
-      fileSpec.erase(0, 14);
-   } else if (fileSpec.starts_with ( "ROOTRNTUPLE:")) {
-      outputTech = pool::ROOTRNTUPLE_StorageType.type();
-      fileSpec.erase(0, 12);
-   } else if (outputTech == 0) {
-      // Find the appropriate event data technology for this file
-      // This will be used for event data and its data header
-      // First we look for an exact file name match
-      // If that fails, we look for a wildcard ("*") match
-      // If that also fails, we use the default value from PoolSvc
-      if (auto it = m_storageTechMap.find(fileSpec); it != m_storageTechMap.end()) {
-         outputTech = it->second;
-      } else if (it = m_storageTechMap.find("*"); it != m_storageTechMap.end()) {
-         outputTech = it->second;
-      } else {
-         outputTech = pool::DbType::getType(m_defContainerType).type();
-      }
-   }
-   return StatusCode::SUCCESS;
-}
 //______________________________________________________________________________
 StatusCode AthenaPoolCnvSvc::registerCleanUp(IAthenaPoolCleanUp* cnv) {
    m_cnvs.push_back(cnv);
@@ -488,20 +432,20 @@ StatusCode AthenaPoolCnvSvc::cleanUp(const std::string& connection) {
 StatusCode AthenaPoolCnvSvc::setInputAttributes(const std::string& fileName) {
    // Set attributes for input file
    m_lastInputFileName = fileName; // Save file name for printing attributes per event
+   if (!m_persSvcPerInputType.empty()) {
+// Loop over all extra event input contexts
+      const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
+      for (const auto& [label, id]: extraInputContextMap) {
+         if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, id, false, true, false).isSuccess()) {
+            ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
+         }
+      }
+   }
    if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, IPoolSvc::kInputStream, false, true, false).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed setting POOL database/container attributes.");
    }
    if (!processPoolAttributes(m_inputAttr, m_lastInputFileName, IPoolSvc::kInputStream, true, false).isSuccess()) {
       ATH_MSG_DEBUG("setInputAttribute failed getting POOL database/container attributes.");
-   }
-   if (!m_persSvcPerInputType.empty()) {
-      // Loop over all extra event input contexts and switch off TTreeCache
-      const auto& extraInputContextMap = m_poolSvc->getInputContextMap();
-      for (const auto& [label, id]: extraInputContextMap) {
-         if (!m_poolSvc->setAttribute("TREE_CACHE", "0", pool::DbType(pool::ROOTTREE_StorageType).type(), m_lastInputFileName, m_persSvcPerInputType.value(), id).isSuccess()) {
-            ATH_MSG_DEBUG("setInputAttribute failed to switch off TTreeCache for = " << label << ".");
-         }
-      }
    }
    return(StatusCode::SUCCESS);
 }

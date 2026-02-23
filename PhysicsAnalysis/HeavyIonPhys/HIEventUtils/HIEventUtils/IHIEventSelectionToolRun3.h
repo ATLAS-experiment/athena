@@ -48,11 +48,15 @@ enum class SelectionMask : unsigned int {
   PUFCalVsZDCTight = bit(6),
   PUFCalVsZDCAny = PUFCalVsZDCLoose | PUFCalVsZDCNominal | PUFCalVsZDCTight,
   PUOOSingleVertexNominal = bit(7),
+  PUZDCPresampler = bit(8),
+
   // default cuts for PB
-  PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose,
+  PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose | PUZDCPresampler,
   // default cuts for OO
   OODefault = NoEventError | PUOOSingleVertexNominal | PUFCalVsNTrackLoose
+
 };
+
 
 std::string toString(SelectionMask);
 
@@ -93,21 +97,12 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
-  /// @brief true if this is pileup event
-  /// Code sample to obtain presampler energies
-  /// Float_t PreSamplerAmp_A = 0;
-  /// Float_t PreSamplerAmp_C = 0;
-  /// xAOD::ZdcModuleContainer * zdcModules = 0;
-  /// CHECK( evtStore()->retrieve(zdcModules, "ZdcModules") );
-  /// for (const auto ZdcModule : *zdcModules) {
-  ///     if (ZdcModule->zdcType()!=0) continue;
-  ///     if (ZdcModule->zdcSide()>0)
-  ///     PreSamplerAmp_C+=accPreSamplerAmpC(*ZdcModule); if
-  ///     (ZdcModule->zdcSide()<0)
-  ///     PreSamplerAmp_A+=accPreSamplerAmpA(*ZdcModule);
-  /// }
-  virtual bool puFCalVsZDC(
-      IonDataType dataType, float fcalEt, float presamplerA, float presamplerC,
+  /// @brief true if this is not pileup event
+  virtual bool puZDCPresampler(HI::IonDataType when,
+                               const xAOD::ZdcModuleContainer* zdcModules,
+                               HI::PileupVariation variation) const = 0;
+  virtual bool puZDCPresampler(
+      IonDataType dataType, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
 
   /// @brief true if this is pileup event

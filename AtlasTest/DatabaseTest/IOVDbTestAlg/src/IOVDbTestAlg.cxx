@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IOVDbTestAlg.h"
@@ -75,19 +75,8 @@ void IOVDbTestAlg::waitForSecond() const {
 	
 }
 
-StatusCode IOVDbTestAlg::testCallBack( IOVSVC_CALLBACK_ARGS_P( i, keys) ) { 
-  // print out the keys we were given (for info)
-  msg() << MSG::INFO << "IOVDbTestAlg::testCallBack callback invoked for keys: i = " << i << " ";
-  for (std::list<std::string>::const_iterator itr=keys.begin(); itr!=keys.end(); ++itr) {
-    msg() << *itr << " ";
-  }
-  msg() << endmsg;
-  return  StatusCode::SUCCESS;
-}
-
-
 // Not thread-safe due to binding DataHandle.
-StatusCode IOVDbTestAlg::initialize ATLAS_NOT_THREAD_SAFE (){
+StatusCode IOVDbTestAlg::initialize(){
     ATH_MSG_DEBUG( "in initialize()" );
 
     // Get Output Stream tool for writing
@@ -108,14 +97,6 @@ StatusCode IOVDbTestAlg::initialize ATLAS_NOT_THREAD_SAFE (){
         ATH_MSG_DEBUG( "Read with BeginRun " );
     }
 
-    // register callbacks for test of online change of constants
-    if (!m_online) return StatusCode::SUCCESS;
-    
-    const DataHandle<IOVDbTestMDTEleMap> mdtelemap;
-    ATH_CHECK( detStore()->regFcn(&IOVDbTestAlg::testCallBack, this, mdtelemap, "/IOVDbTest/IOVDbTestMDTEleMap") );
-    ATH_MSG_INFO( "Registered callback for IOVDbTestAlg::testCallBack" );
-   
-    
     return StatusCode::SUCCESS;
 }
 

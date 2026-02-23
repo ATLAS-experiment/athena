@@ -122,7 +122,9 @@ acc.merge(EventInfoCnvAlgCfg(flags))
 
 AthenaOutputStream=CompFactory.AthenaOutputStream
 AthenaOutputStreamTool=CompFactory.AthenaOutputStreamTool
-writingTool = AthenaOutputStreamTool( "MaterialStepCollectionStreamTool" )
+writingTool = AthenaOutputStreamTool( "MaterialStepCollectionStreamTool",
+                                      TopLevelContainerName = "",
+                                      SubLevelBranchName = "<type>/<key>" )
 
 outputStream = AthenaOutputStream(name = "MaterialStepCollectionStream",
                                   WritingTool = writingTool,

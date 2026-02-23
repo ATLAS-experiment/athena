@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERSYSTEM_H
@@ -56,7 +56,7 @@ namespace VP1Trig {
     friend class VP1TriggerProcessor;
     
     //Mains
-    bool loadTriggerHandles(StoreGateSvc* m_storeGate, QString triglvl);
+    bool loadTriggerHandles(StoreGateSvc* m_storeGate, const QString& triglvl);
     void clearTriggerHandles();
     
     //Tool Handles
@@ -69,9 +69,9 @@ namespace VP1Trig {
     std::vector<VP1Trig::VP1TriggerHandleL1> m_handleL1;
     
     //Trigger data access handles (granted access only)
-    std::vector<VP1Trig::VP1TriggerHandleEF> getHandleEF() { return m_handleEF; };
-    std::vector<VP1Trig::VP1TriggerHandleL2> getHandleL2() { return m_handleL2; };
-    std::vector<VP1Trig::VP1TriggerHandleL1> getHandleL1() { return m_handleL1; };
+    const std::vector<VP1Trig::VP1TriggerHandleEF>& getHandleEF() { return m_handleEF; };
+    const std::vector<VP1Trig::VP1TriggerHandleL2>& getHandleL2() { return m_handleL2; };
+    const std::vector<VP1Trig::VP1TriggerHandleL1>& getHandleL1() { return m_handleL1; };
   };
 }
 #endif

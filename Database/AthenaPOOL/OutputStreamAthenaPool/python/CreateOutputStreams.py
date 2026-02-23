@@ -24,7 +24,9 @@ def createOutputStream( streamName, fileName = "", asAlg = False, noTag = False,
 
 
    # define athena output stream
-   writingTool = AthenaOutputStreamTool( streamName + "Tool" )
+   writingTool = AthenaOutputStreamTool( streamName + "Tool",
+                                         TopLevelContainerName = "",
+                                         SubLevelBranchName = "<type>/<key>")
    outputStream = AthenaOutputStream(
       streamName,
       WritingTool = writingTool,

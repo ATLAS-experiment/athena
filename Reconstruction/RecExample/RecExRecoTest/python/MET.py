@@ -1,4 +1,4 @@
-#!/usr/bin/env athena.py --CA
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":

@@ -9,7 +9,6 @@
 #include <AthenaKernel/IOVInfiniteRange.h>
 
 #include "Acts/Surfaces/PlanarBounds.hpp"
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
 
 #include "MuonNSWCommonDecode/NSWOfflineHelper.h"
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -21,11 +20,12 @@ namespace MuonR4{
         ATH_CHECK(m_alignKey.initialize());
         ATH_CHECK(m_cablingMdtKey.initialize(SG::AllowEmpty));
         ATH_CHECK(m_cablingRpcKey.initialize(SG::AllowEmpty));
+        ATH_CHECK(m_cablingTgcKey.initialize(SG::AllowEmpty));
         return StatusCode::SUCCESS;
     }
      template <typename Key_t,
                 typename... OtherKey_t>
-    StatusCode RegionSelectorCondAlg::addDependency(const EventContext& ctx,
+    StatusCode RegionSelectorCondAlg::addCondDependency(const EventContext& ctx,
                                 SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
                                const SG::ReadCondHandleKey<Key_t>& key,
                                OtherKey_t... others) const {
@@ -38,7 +38,7 @@ namespace MuonR4{
             writeHandle.addDependency(readHandle);
         }
         if constexpr(sizeof...(others) > 0) {
-            ATH_CHECK(addDependency(ctx, writeHandle, others...));
+            ATH_CHECK(addCondDependency(ctx, writeHandle, others...));
         }
         return StatusCode::SUCCESS;
     }
@@ -79,8 +79,8 @@ namespace MuonR4{
                 }
                 return {cabling->getROBId(m_idHelperSvc->moduleHash(moduleID), msgStream())};
             } case TGC: {
-                SmartIF<MuonTGC_CablingSvc> cabling{Gaudi::svcLocator()->service("MuonTGC_CablingSvc")};
-                if (!cabling.isValid()) {
+                const Muon::TgcCablingMap* cabling{};
+                if (!SG::get(cabling, m_cablingTgcKey, ctx).isSuccess()) {
                     THROW_EXCEPTION("Failed to load Tgc cabling");
                 }
                 int subDetectorId{}, rodId{};
@@ -107,7 +107,8 @@ namespace MuonR4{
             return StatusCode::SUCCESS;
         }
         writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
-        ATH_CHECK(addDependency(ctx, writeHandle, m_alignKey, m_cablingMdtKey, m_cablingRpcKey));
+        ATH_CHECK(addCondDependency(ctx, writeHandle, m_alignKey, m_cablingMdtKey,
+                                                      m_cablingRpcKey, m_cablingTgcKey));
 
         auto writeCdo = std::make_unique<RegSelSiLUT>();
         const ActsTrk::DetectorAlignStore* alignDeltas{nullptr};

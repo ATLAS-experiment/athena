@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -129,15 +129,11 @@ StatusCode PixelDetectorTool::create()
   const PixelID * idHelper = nullptr;
   ATH_CHECK(detStore()->retrieve(idHelper, "PixelID"));
 
-  // Retrieve the Geometry DB Interface
-  ATH_CHECK(m_geometryDBSvc.retrieve());
-
   // Pass athena services to factory, etc
   m_athenaComps = new PixelGeoModelAthenaComps;
   m_athenaComps->setDetStore(detStore().operator->());
   m_athenaComps->setGeoDbTagSvc(&*geoDbTagSvc);
   m_athenaComps->setRDBAccessSvc(&*rdbAccessSvc);
-  m_athenaComps->setGeometryDBSvc(&*m_geometryDBSvc);
   m_athenaComps->setIdHelper(idHelper);
 
   // BCM Tool.

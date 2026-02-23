@@ -50,7 +50,6 @@
 + Control/Navigation
 + Control/PerformanceMonitoring/PerfMonComps
 + Control/PerformanceMonitoring/PerfMonKernel
-+ Control/PyKernel
 + Control/RngComps
 + Control/RootUtils
 + Control/SGComps
@@ -113,7 +112,6 @@
 + DetectorDescription/GeoModel/GeoModelUtilities
 + DetectorDescription/GeoModel/GeoSpecialShapes
 + DetectorDescription/GeoPrimitives
-+ DetectorDescription/GeometryDBSvc
 + DetectorDescription/IdDict
 + DetectorDescription/IdDictDetDescr
 + DetectorDescription/IdDictDetDescrCnv

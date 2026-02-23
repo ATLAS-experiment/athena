@@ -264,7 +264,7 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
 
     if setup == 'Calib' and not flags.Muon.usePhaseIIGeoSetup:
         muFastAlg.DoCalibrationStream = True
-        muFastAlg.MuonCalDataScouting = False
+        muFastAlg.MuonCalDataScouting = True
         muFastAlg.MuonCalBufferSize   = 1024*1024
 
     elif setup == 'MuonCalibDataScouting' and not flags.Muon.usePhaseIIGeoSetup:

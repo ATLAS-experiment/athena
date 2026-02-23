@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetVertexNNTagger.h"
@@ -63,8 +63,8 @@ namespace JetPileupTag {
     
         // Use the Path Resolver to find the jvt file and retrieve the likelihood histogram
         std::string configPath = PathResolverFindCalibFile(configDir+"/"+paramFileName);
-        ATH_MSG_INFO("  Reading JVT NN file from:\n    " << paramFileName << "\n");
-        ATH_MSG_INFO("                     resolved in  :\n    " << configPath << "\n\n");
+        ATH_MSG_INFO("Reading JVT NN file from: " << paramFileName);
+        ATH_MSG_DEBUG("                     resolved in  :\n    " << configPath << "\n\n");
 
         std::ifstream fconfig( configPath.c_str() );
         if ( !fconfig.is_open() ) {
@@ -96,8 +96,8 @@ namespace JetPileupTag {
         m_lwnn = std::make_unique<lwt::generic::FastGraph<double> >(cfg,order);
 
         std::string cutsPath = PathResolverFindCalibFile(configDir+"/"+cutFileName);
-        ATH_MSG_INFO("  Reading JVT NN cut file from:\n    " << cutFileName << "\n");
-        ATH_MSG_INFO("                     resolved in  :\n    " << cutsPath << "\n\n");
+        ATH_MSG_INFO("Reading JVT NN cut file from: " << cutFileName);
+        ATH_MSG_DEBUG("                     resolved in  :\n    " << cutsPath << "\n\n");
         std::ifstream fcuts( cutsPath.c_str() );
         if ( !fcuts.is_open() ) {
             ATH_MSG_ERROR( "Error opening cuts file: " << cutFileName );

@@ -139,7 +139,9 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     # --------------------
     def getmuEFSA(self, flags, is_probe_leg=False):
-        return self.getStep(flags, 'muEFSA',[ muEFSASequenceGenCfg], is_probe_leg=is_probe_leg)
+        useBucketFilter = 'mlbkt' in self.chainPart['addInfo']
+        step_name = 'muEFSA_mlbkt' if useBucketFilter else 'muEFSA'
+        return self.getStep(flags, step_name, [muEFSASequenceGenCfg], is_probe_leg=is_probe_leg, useBucketFilter=useBucketFilter)
 
     # --------------------
     def getmuEFCB(self, flags, is_probe_leg=False):

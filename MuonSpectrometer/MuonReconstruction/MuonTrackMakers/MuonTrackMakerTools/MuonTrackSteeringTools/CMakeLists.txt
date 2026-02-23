@@ -1,6 +1,4 @@
-################################################################################
-# Package: MuonTrackSteeringTools
-################################################################################
+# Copyright (C) 2002-2026 by CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MuonTrackSteeringTools )
@@ -12,8 +10,4 @@ atlas_add_component( MuonTrackSteeringTools
                      LINK_LIBRARIES AthenaBaseComps AthenaKernel CxxUtils GeoPrimitives Identifier EventPrimitives GaudiKernel MuonReadoutGeometry MuPatPrimitives FourMomUtils
 			            MuonIdHelpersLib MuonStationIndexLib MuonCompetingRIOsOnTrack MuonPrepRawData MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib MuonRecToolInterfaces MuonSegmentMakerUtils 
 			 	    TrkDetDescrUtils TrkGeometry TrkSurfaces TrkEventPrimitives TrkMeasurementBase TrkParameters TrkPseudoMeasurementOnTrack TrkSegment TrkTrack TrkTrackSummary 
-				    TrkExInterfaces TrkExUtils TrkFitterInterfaces TrkToolInterfaces TrkDriftCircleMath MagFieldElements MagFieldConditions MuonSegmentMakerToolInterfaces MuonTrackMakerUtils )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-
+				    TrkExInterfaces TrkExUtils TrkFitterInterfaces TrkToolInterfaces TrkDriftCircleMath MagFieldConditions MuonSegmentMakerToolInterfaces MuonTrackMakerUtils )

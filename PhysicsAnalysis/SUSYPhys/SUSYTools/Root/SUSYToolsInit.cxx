@@ -1776,7 +1776,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_tauSmearingTool.setProperty("RecommendationTag", m_tauSmearingToolRecommendationTag) );
       if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc23") );}
       else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
-      ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
       ATH_CHECK( m_tauSmearingTool.setProperty("MVATESQualityCheck", m_ApplyMVATESQualityCheck) );
       ATH_CHECK( m_tauSmearingTool.setProperty("useFastSim", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );

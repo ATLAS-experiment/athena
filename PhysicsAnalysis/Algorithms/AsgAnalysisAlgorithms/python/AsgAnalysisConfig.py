@@ -63,8 +63,8 @@ class CommonServicesConfig (ConfigBlock) :
         self.addOption ('enableExpertMode', False, type=bool,
             info="allows CP experts and CPAlgorithm devs to use non-recommended configurations. "
             "DO NOT USE FOR ANALYSIS.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
-            info="name of the output stream to save the cut bookkeeper in.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save metadata histograms in.")
         self.addOption ('setupONNX', False, type=bool,
             info="creates an instance of `AthOnnx::OnnxRuntimeSvc`.")
 
@@ -76,17 +76,24 @@ class CommonServicesConfig (ConfigBlock) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
-        if self.runSystematics is False :
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
+
+        # Handle all possible configuration options for systematics
+        if self.runSystematics is False:
             runSystematics = self.runSystematics
-        elif config.noSystematics() is not None :
+        elif config.noSystematics() is not None:
             # if option not set:
             # check to see if set in config accumulator
             self.runSystematics = not config.noSystematics()
             runSystematics = self.runSystematics
-        else :
+        else:
             runSystematics = True
 
-        if runSystematics :
+        # Now update the global configuration
+        config._noSystematics = not runSystematics
+
+        if runSystematics:
             sysService.sigmaRecommended = 1
             if config.dataType() is DataType.Data:
                 # Only one type of allowed systematics on data: the JER variations!
@@ -111,7 +118,7 @@ class CommonServicesConfig (ConfigBlock) :
             # print out all systematics
             allSysDumper = config.createAlgorithm( 'CP::SysListDumperAlg', 'SystematicsPrinter' )
             allSysDumper.histogramName = self.systematicsHistogram
-            allSysDumper.RootStreamName = self.streamName
+            allSysDumper.RootStreamName = streamName
 
             if self.separateWeightSystematics:
                 # print out only the weight systematics (for more efficient histogramming down the line)
@@ -128,7 +135,7 @@ class CommonServicesConfig (ConfigBlock) :
             metadataHistAlg.dataType = str(config.dataType().value)
             metadataHistAlg.campaign = str(config.dataYear()) if config.dataType() is DataType.Data else str(config.campaign().value)
             metadataHistAlg.mcChannelNumber = str(config.dsid())
-            metadataHistAlg.RootStreamName = self.streamName
+            metadataHistAlg.RootStreamName = streamName
             if config.dataType() is DataType.Data:
                 etag = "unavailable"
             else:
@@ -192,21 +199,21 @@ class PileupReweightingBlock (ConfigBlock):
         super (PileupReweightingBlock, self).__init__ ()
         self.addOption ('campaign', None, type=None,
             info="the MC campaign for the PRW auto-configuration.")
-        self.addOption ('files', None, type=None,
+        self.addOption ('files', None, type=list,
             info="the input files being processed (list of strings). "
             "Alternative to auto-configuration.")
         self.addOption ('useDefaultConfig', True, type=bool,
             info="whether to use the central PRW files.")
-        self.addOption ('userLumicalcFiles', None, type=None,
+        self.addOption ('userLumicalcFiles', None, type=list,
             info="user-provided lumicalc files (list of strings). Alternative "
             "to auto-configuration.")
-        self.addOption ('userLumicalcFilesPerCampaign', None, type=None,
+        self.addOption ('userLumicalcFilesPerCampaign', None, type=dict,
             info="user-provided lumicalc files (dictionary of list of strings, "
             "with MC campaigns as the keys). Alternative to auto-configuration.")
-        self.addOption ('userPileupConfigs', None, type=None,
+        self.addOption ('userPileupConfigs', None, type=list,
             info="user-provided PRW files (list of strings). Alternative to "
             "auto-configuration.")
-        self.addOption ('userPileupConfigsPerCampaign', None, type=None,
+        self.addOption ('userPileupConfigsPerCampaign', None, type=dict,
             info="user-provided PRW files (dictionary of list of strings, with "
             "MC campaigns as the keys).")
         self.addOption ('postfix', '', type=str,
@@ -388,7 +395,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             "`False` or `True` to override.")
         self.addOption ('histPattern', None, type=str,
             info="the histogram name pattern for the cut-bookkeeper histogram names.")
-        self.addOption ('streamName', 'ANALYSIS', type=str,
+        self.addOption ('streamName', None, type=str,
             info="name of the output stream to save the cut bookkeeper in.")
         self.addOption ('detailedPDFinfo', False, type=bool,
             info="save the necessary information to run the LHAPDF tool offline.")
@@ -403,10 +410,11 @@ class GeneratorAnalysisBlock (ConfigBlock):
         self.addOption ('doHFProdFracReweighting', False, type=bool,
             info="whether to apply HF production fraction reweighting.")
         self.addOption ('truthParticleContainer', 'TruthParticles', type=str,
-            info="the name of the truth particle container to use for HF production fraction reweighting.")
+            info="the name of the truth particle container to use for HF production fraction reweighting.")       
+
     def instanceName (self) :
         """Return the instance name for this block"""
-        return self.streamName
+        return self.streamName or "DEFAULT"
 
     def makeAlgs (self, config) :
 
@@ -414,6 +422,9 @@ class GeneratorAnalysisBlock (ConfigBlock):
             # there are no generator weights in data!
             return
         log = logging.getLogger('makeGeneratorAnalysisSequence')
+
+        # Setup stream name
+        streamName = self.streamName or config.defaultHistogramStream()
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -424,7 +435,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         # Set up the CutBookkeepers algorithm:
         if self.saveCutBookkeepers:
             alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
-            alg.RootStreamName = self.streamName
+            alg.RootStreamName = streamName
             alg.runNumber = self.runNumber
             if self.cutBookkeepersSystematics is None:
                 alg.enableSystematics = not config.noSystematics()
@@ -500,7 +511,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             if DSID == "000000":
                 log.warning("HF production fraction reweighting will return dummy weights of 1.0")
 
-            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', 'SysTruthWeightAlg' + self.streamName )
+            alg = config.createAlgorithm( 'CP::SysTruthWeightAlg', f'SysTruthWeightAlg_{streamName}' )
             config.addPrivateTool( 'sysTruthWeightTool', 'PMGTools::PMGHFProductionFractionTool' )
             alg.decoration = 'prodFracWeight_%SYS%'
             alg.TruthParticleContainer = self.truthParticleContainer
@@ -522,9 +533,9 @@ class PtEtaSelectionBlock (ConfigBlock):
             "object within the container. Specifying a name (e.g. `loose`) "
             "applies the cut only to those object who also pass that selection.")
         self.addOption ('minPt', None, type=float,
-            info=r"minimum $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"minimum $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('maxPt', None, type=float,
-            info=r"maximum  $p_\mathrm{T}$ value to cut on, in MeV.")
+            info=r"maximum  $p_\mathrm{T}$ value to cut on (in MeV).")
         self.addOption ('minEta', None, type=float,
             info=r"minimum $\vert\eta\vert$ value to cut on.")
         self.addOption ('maxEta', None, type=float,
@@ -596,14 +607,18 @@ class ObjectCutFlowBlock (ConfigBlock):
         self.addOption ('forceCutSequence', False, type=bool,
             info="whether to force the cut sequence and not accept objects "
             "if previous cuts failed.")
+        self.addOption ('streamName', None, type=str,
+            info="name of the output stream to save the cutflow histogram in.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
+        streamName = self.streamName or config.defaultHistogramStream()
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
+        alg.RootStreamName = streamName
         alg.histPattern = 'cflow_' + self.containerName + "_" + self.selectionName + '_%SYS%'
         alg.selections = config.getSelectionCutFlow (self.containerName, self.selectionName)
         alg.input = config.readName (self.containerName)
@@ -666,6 +681,7 @@ class OutputThinningBlock (ConfigBlock):
 
     def __init__ (self) :
         super (OutputThinningBlock, self).__init__ ()
+        self.setBlockName('Thinning')
         self.addOption ('containerName', '', type=str,
             noneAction='error',
             info="the name of the input container.")
@@ -684,7 +700,7 @@ class OutputThinningBlock (ConfigBlock):
         self.addOption ('deepCopy', False, type=bool,
             info="run a deep copy of the container.")
         self.addOption ('sortPt', False, type=bool,
-            info=r"whether to sort objects in $p_\mathrm{T}.")
+            info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
 

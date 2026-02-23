@@ -19,20 +19,27 @@ def SoftBFinderToolCfg(flags, name="SoftBFinderTool", **myargs):
     mlog.info("entering SoftBFinderTool configuration")
     acc = ComponentAccumulator()
     acc.merge(BeamSpotCondAlgCfg(flags))
+
+    # Allow overrides (with defaults)
+    iniV2T_cosSVPVCut = myargs.pop("IniV2T_cosSVPVCut", 0.4)
+    iniV2T_v2tBDTCut  = myargs.pop("IniV2T_v2tBDTCut", -0.7)
+    finV2T_cosSVPVCut = myargs.pop("FinV2T_cosSVPVCut", 0.4)
+    finV2T_v2tBDTCut  = myargs.pop("FinV2T_v2tBDTCut", 0.)
+
     
     #-- 2-track vertex initial selector
     iniV2Targs = {}
     iniV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
     iniV2Targs.setdefault("useVertexCleaning"  ,  True)
-    iniV2Targs.setdefault("cosSVPVCut"  ,  0.4)
-    iniV2Targs.setdefault("v2tBDTCut"   , -0.7)
+    iniV2Targs.setdefault("cosSVPVCut"  ,  iniV2T_cosSVPVCut)
+    iniV2Targs.setdefault("v2tBDTCut"   ,  iniV2T_v2tBDTCut)
     iniV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("IniV2TSelector",**iniV2Targs)
     #-- 2-track vertex final selector
     finV2Targs = {}
     finV2Targs.setdefault("Vrt2TrPtMin" , 1000.)
     finV2Targs.setdefault("useVertexCleaning"  ,  True)
-    finV2Targs.setdefault("cosSVPVCut"  ,  0.4)
-    finV2Targs.setdefault("v2tBDTCut"   ,  0.)
+    finV2Targs.setdefault("cosSVPVCut"  ,  finV2T_cosSVPVCut)
+    finV2Targs.setdefault("v2tBDTCut"   ,  finV2T_v2tBDTCut)
     finV2TSelector = CompFactory.Rec.TwoTrackVrtBDTSelector("FinV2TSelector",**finV2Targs)
 
     #-- NVSI track selection cuts
