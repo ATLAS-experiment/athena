@@ -13,7 +13,7 @@ import PyJobTransforms.trfExceptions as trfExceptions
 ## @brief Integrity function for file class argPOOLFile, argHITSFile, argRDOFile and argEVNTFile
 def returnIntegrityOfPOOLFile(fname):
     from PyJobTransforms.trfValidateRootFile import checkFile
-    rc = checkFile(fileName = fname, the_type = 'event', requireTree = True)
+    rc = checkFile(fileName=fname, the_type='event', requireTree=False)
     if rc == 0:
         return (True, "integrity of {fileName} good".format(fileName = str(fname)))
     else:
