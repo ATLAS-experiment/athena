@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METTauAssociator.h 
@@ -16,9 +16,7 @@
 
 // METReconstruction includes
 #include "METReconstruction/METAssociator.h"
-//Includes for DataHandles
 #include "StoreGate/ReadDecorHandle.h"
-#include "StoreGate/DataHandle.h"
 
 
 namespace met{
