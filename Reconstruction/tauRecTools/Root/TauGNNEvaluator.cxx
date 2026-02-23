@@ -128,7 +128,6 @@ StatusCode TauGNNEvaluator::execute(xAOD::TauJet &tau) const {
   const SG::Accessor<float> output(m_output_varname);
   const SG::Accessor<float> out_ptau(m_output_ptau);
   const SG::Accessor<float> out_pjet(m_output_pjet);
-  const SG::Decorator<char> out_trkclass("GNTau_TrackClass");
   // Set default score and overwrite later
   if(m_output_discriminant != Discriminant::Disabled) output(tau) = -1111.0f;
   out_ptau(tau) = -1111.0f;
