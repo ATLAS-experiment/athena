@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOL_DBSTORAGESVC_H
 #define POOL_DBSTORAGESVC_H
 
 // Framework include files
-#include "StorageSvc/DbSession.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "POOLCore/DbPrint.h"
@@ -18,6 +17,7 @@ namespace pool  {
 
   // Forward declarations
   class DbOption;
+  class IOODatabase;
 
   /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
     *
@@ -42,14 +42,15 @@ namespace pool  {
     std::string         m_name;
     /// Reference counter                          
     unsigned int        m_refCount;
-    /// Database session handle
-    DbSession           m_sesH;
     /// Database domain handle
     DbDomain            m_domH;
     /// Property: AgeLimit indicating the maximal allowed age of files
     int                 m_ageLimit;
     /// Technology type
     DbType              m_type;
+    /// Loaded StorageSvc implementation type (for m_type)
+    IOODatabase*        m_implementation;
+
   public:
 
     /// Standard Constructor: Constructs an object of type DbStorageSvc.
@@ -67,8 +68,6 @@ namespace pool  {
     /// Label of the specific class
     static const char* catalogLabel()  {   return "pool_DbStorageSvc";       }
 
-    /// Database session handle
-    DbSession& sessionHdl()                               {   return m_sesH;  }
     /// Database domain handle
     DbDomain& domainHdl()                                 {   return m_domH;  }
 
@@ -304,6 +303,11 @@ namespace pool  {
       */
     virtual StatusCode setDomainOption(const SessionH  sessionH, 
                                        const DbOption& opt) override final;
+
+  private:
+    /// Access technology implementations
+    IOODatabase* db();
+
   };
 }       // End namespace pool
 #endif  // POOL_DBSTORAGESVC_H
