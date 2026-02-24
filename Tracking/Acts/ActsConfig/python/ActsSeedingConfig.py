@@ -134,6 +134,7 @@ def ActsStripSeedingToolCfg(flags,
     impactMax = 20. * ActsUnits.mm
     collisionRegionAbsMax = 200. * ActsUnits.mm
     deltaRMiddleMaxSPRange = 150 * ActsUnits.mm
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
     if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
         impactMax = 300. * ActsUnits.mm
         collisionRegionAbsMax = 500. * ActsUnits.mm
