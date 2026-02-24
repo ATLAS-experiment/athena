@@ -94,14 +94,9 @@ class MuonStationTypeBuilder : public AthAlgTool {
 
     std::unique_ptr<Trk::TrackingVolume> processTgcStation(const GeoVPhysVol* cv, Cache&) const;
 
-    std::unique_ptr<Trk::DetachedTrackingVolume> process_sTGC(const Identifier& id,
+    std::unique_ptr<Trk::DetachedTrackingVolume> process_NSW(const Identifier& id,
                                                               const GeoVPhysVol* gv,
                                                               const Amg::Transform3D& transf) const;
-
-    std::unique_ptr<Trk::DetachedTrackingVolume> process_MM(const Identifier& id,
-                                                            const GeoVPhysVol* gv,
-                                                            const Amg::Transform3D& transf) const;
-
     /** components */
     std::unique_ptr<Trk::TrackingVolume> processMdtBox(const Trk::Volume& trkVol,
                                                        const GeoVPhysVol*,
@@ -137,8 +132,6 @@ class MuonStationTypeBuilder : public AthAlgTool {
     std::pair<std::unique_ptr<Trk::Layer>,
               std::vector<std::unique_ptr<Trk::Layer>>> createLayerRepresentation(Trk::TrackingVolume& trVol) const;
 
-
-    Identifier identifyNSW(const std::string&, const Amg::Transform3D&) const;
 
     // used to be private ..
     double get_x_size(const GeoVPhysVol*) const;

@@ -19,11 +19,9 @@ namespace Muon {
   */
 
 class MuonStationBuilderCond final
-    : public MuonStationBuilderImpl,
-      virtual public Trk::IDetachedTrackingVolumeBuilderCond {
+    : public extends<MuonStationBuilderImpl, Trk::IDetachedTrackingVolumeBuilderCond> {
    public:
-    MuonStationBuilderCond(const std::string&, const std::string&,
-                           const IInterface*);
+    using base_class::base_class;
     virtual ~MuonStationBuilderCond() = default;
     virtual StatusCode initialize() override;
 

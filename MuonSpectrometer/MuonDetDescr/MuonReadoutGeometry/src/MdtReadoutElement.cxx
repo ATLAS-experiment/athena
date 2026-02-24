@@ -479,7 +479,7 @@ namespace MuonGM {
     MdtReadoutElement::deformedTransform(int tubeLayer, int tube) const {
 
         const MuonStation* ms = parentMuonStation();
-        if (!ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
+        if (true || !ms->hasBLines() && !ms->hasMdtAsBuiltParams()) {
             return Amg::Transform3D::Identity();
         }
         const Amg::Vector3D fixedPoint = ms->getBlineFixedPointInAmdbLRS();
