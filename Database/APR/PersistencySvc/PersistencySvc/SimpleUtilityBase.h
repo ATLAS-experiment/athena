@@ -37,10 +37,8 @@ namespace pool {
      virtual void 	printSyntax() {}
 
     protected:
-     std::string	        executableName;
+     std::string	              executableName;
      std::string                technologyName;
-
-     pool::Session*             session = nullptr;
      pool::IStorageSvc*         storageSvc = nullptr;
 
      std::vector< std::string > args;

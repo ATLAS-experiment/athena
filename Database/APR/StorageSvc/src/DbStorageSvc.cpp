@@ -99,15 +99,6 @@ unsigned int DbStorageSvc::release()   {
   return count;
 }
 
-//--- IInterface::queryInterface
-StatusCode DbStorageSvc::queryInterface(const Guid& riid, void** ppvInterface)  {
-  if ( IStorageSvc::interfaceID() == riid )  {
-    *ppvInterface = static_cast<IStorageSvc*>(this);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
 /// IService implementation: Initilize Service                          
 StatusCode DbStorageSvc::initialize()   {
   return StatusCode::SUCCESS;
@@ -246,74 +237,59 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 }
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(int accessmode, int technology, SessionH& refSession)  {
+StatusCode DbStorageSvc::startSession(int accessmode, int technology) {
   m_type   = DbType(technology).majorType();
-  refSession = 0;
   if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
       m_domH.setAgeLimit(m_ageLimit);
-      refSession = SessionH(m_domH.ptr());
       return StatusCode::SUCCESS;
   }
   ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
   return StatusCode::FAILURE;
 }
 
-/// End the Database session.
-StatusCode DbStorageSvc::endSession(const SessionH session) {
-  if( session == SessionH(m_domH.ptr()) )  {
-    return m_domH.close();
-  }
-  return StatusCode::FAILURE;
-}
-
 /// Check the existence of a logical Database unit.
-StatusCode 
-DbStorageSvc::existsConnection( const SessionH session, int /* mode */,const FileDescriptor& fDesc) {
-  if ( m_domH.isValid() && session == SessionH(m_domH.ptr()) )   {
-    DbDatabase dbH = m_domH.find(fDesc.FID());
-    if ( dbH.isValid() )  {  // Already connected to database ...
-      return StatusCode::SUCCESS;
-    }
-    if( m_domH.existsDbase(fDesc.PFN()) ) {
-      return StatusCode::SUCCESS;
-    }
+StatusCode DbStorageSvc::existsConnection(const FileDescriptor& fDesc) {
+  DbDatabase dbH = m_domH.find(fDesc.FID());
+  if ( dbH.isValid() )  {  // Already connected to database ...
+    return StatusCode::SUCCESS;
+  }
+  if( m_domH.existsDbase(fDesc.PFN()) ) {
+    return StatusCode::SUCCESS;
   }
   return StatusCode::FAILURE;
 }
 
 /// Connect to a logical Database unit.
-StatusCode DbStorageSvc::connect(const SessionH session,int mod,FileDescriptor& fDesc)  {
+StatusCode DbStorageSvc::connect(int mod, FileDescriptor& fDesc) {
   StatusCode sc = StatusCode::FAILURE;
   fDesc.setDbc(0);
-  if ( m_domH.isValid() && session == SessionH(m_domH.ptr()) )   {
-    DbDatabase dbH = m_domH.find(fDesc.FID());
-    if ( dbH.isValid() )  {
-      int all = pool::READ + pool::CREATE + pool::UPDATE;
-      int wr  = pool::CREATE + pool::UPDATE;
-      int m   = dbH.openMode();
-      if ( (m&all) && mod == pool::READ )
-        ;
-      else if ( m&wr && mod&pool::CREATE )
-        ;
-      else if ( m&wr && mod&pool::UPDATE )
-        ;
-      else
-        dbH.close().ignore();
-    }
-    // No Else!
-    if ( !dbH.isValid() )  {
-      sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
-      if ( !sc.isSuccess() )    {
-        ATH_MSG_ERROR( "Cannot connect to Database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
-        return sc;
-      }
-    }
-    else {
-      sc = StatusCode::SUCCESS;
-    }
-    DbConnection* dbc = new DbConnection(dbH.type().type(), dbH.name(), dbH.ptr());
-    fDesc.setDbc(dbc);
+  DbDatabase dbH = m_domH.find(fDesc.FID());
+  if( dbH.isValid() ) {
+    int all = pool::READ + pool::CREATE + pool::UPDATE;
+    int wr  = pool::CREATE + pool::UPDATE;
+    int m   = dbH.openMode();
+    if ( (m&all) && mod == pool::READ )
+    ;
+    else if ( m&wr && mod&pool::CREATE )
+    ;
+    else if ( m&wr && mod&pool::UPDATE )
+    ;
+    else
+      dbH.close().ignore();
   }
+  // No Else!
+  if ( !dbH.isValid() )  {
+    sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), mod);
+    if ( !sc.isSuccess() )    {
+      ATH_MSG_ERROR( "Cannot connect to Database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
+      return sc;
+    }
+  }
+  else {
+    sc = StatusCode::SUCCESS;
+  }
+  DbConnection* dbc = new DbConnection(dbH.type().type(), dbH.name(), dbH.ptr());
+  fDesc.setDbc(dbc);
   return sc;
 }
 
@@ -345,30 +321,10 @@ StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
   return StatusCode::FAILURE;
 }
 
-
 /// End/Finish an existing Transaction sequence.
 StatusCode DbStorageSvc::endTransaction( ConnectionH connection, Transaction::Action typ)
 {
    return ( (DbDatabaseObj*)connection->handle() )->transAct( typ );
-}
-
-/// Access options for a given database domain.
-StatusCode DbStorageSvc::getDomainOption(const SessionH  sessionH, DbOption& opt)  {
-  if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
-    return m_domH.getOption(opt);
-  }
-  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
-  return StatusCode::FAILURE;
-}
-
-/// Set options for a given database domain.
-StatusCode
-DbStorageSvc::setDomainOption(const SessionH  sessionH, const DbOption& opt)  {
-  if ( m_domH.isValid() && sessionH == SessionH(m_domH.ptr()) )   {
-    return m_domH.setOption(opt);
-  }
-  ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
-  return StatusCode::FAILURE;
 }
 
 /// Access technology implementations

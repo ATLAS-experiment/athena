@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOL_ISTORAGESVC_H
@@ -25,7 +25,6 @@ namespace pool  {
   class FileDescriptor;
   class DbOption;
 
-  typedef class Session            *SessionH;
   typedef class DatabaseConnection *ConnectionH;
   typedef const class Shape        *ShapeH;
 
@@ -39,10 +38,6 @@ namespace pool  {
     *
     * The activity of the storage manager includes the Transaction handling and
     * hence the management of
-    *     - Database sessions:
-    *       The Database session handles Databases of one given type. This
-    *       involves specific handling of a given domain represented
-    *       by a technology type. 
     *     - Database connections: A connection is equivalent to the triple
     *       (OCISession, OCIServer, OCISvcCtx) in ORACLE, a login to a 
     *       datasource using ODBC, or a single federation for Objectivity.
@@ -59,15 +54,6 @@ namespace pool  {
     virtual ~IStorageSvc()   {     }
 
   public:
-    /// Retrieve interface ID
-    static const Guid& interfaceID();
-
-    /// Retrieve category name
-    static const char* category()             { return "pool_IStorageSvc"; }
-
-    /// IInterface implementation: Query interfaces of Interface
-    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnkn) = 0;
-
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef() = 0;
 
@@ -154,15 +140,10 @@ namespace pool  {
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE
       * @param    tech     [IN] Flag indicating the technology type of the
       *                         Database  the user  wants to connect to.
-      * @param    session [OUT] Token or handle to the Database session.
-      *                         This handle may later be used to open a
-      *                         new Database connection.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode startSession(int                 mode,
-                                    int                 tech,
-                                    SessionH&           session) = 0;
+      virtual StatusCode startSession(int mode, int tech) = 0;
 
     /// End the Database session.
     /** The  request to end a Database session requires, that all pending 
@@ -171,29 +152,19 @@ namespace pool  {
       * will be lost. The token will be invalidated may not be used at any 
       * longer once the session ended.
       *
-      * @param    session  [IN] Handle to the Database 
-      *                         session. This handle was retrieved when 
-      *                         starting the session. 
-      *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endSession(  const SessionH           session) = 0;
+    virtual StatusCode endSession() = 0;
 
     /// Check the existence of a logical Database unit.
     /** 
-      *
-      * @param    sessionH [IN] Session context to be used to open the Database.
-      * @param    mode     [IN] Flag to indicate the accessmode of the session.
-      *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE.
       * @param    refDB   [I/O] Descriptor of the Database to be opened. 
       *                         On successful return the Database handle is
       *                         valid.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode existsConnection(const SessionH        sessionH,
-                                        int                   mode,
-                                        const FileDescriptor& refDB) = 0;
+    virtual StatusCode existsConnection(const FileDescriptor& refDB) = 0;
 
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
@@ -202,7 +173,6 @@ namespace pool  {
       * such as root, MS Access, ODBC/Text etc., this is involves the 
       * opening of the requested file.
       *
-      * @param    sessionH [IN] Session context to be used to open the Database.
       * @param    mode     [IN] Flag to indicate the accessmode of the session.
       *                         READ, NEW/CREATE/WRITE, UPDATE, RECREATE.
       * @param    refDB   [I/O] Descriptor of the Database to be opened. 
@@ -211,9 +181,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode connect(   const SessionH      sessionH,
-                                  int                 mode,
-                                  FileDescriptor&     refDB) = 0;
+    virtual StatusCode connect(int mode, FileDescriptor& refDB) = 0;
 
     /// Disconnect from a logical Database unit.
     /** The  request for disconnect requires, that all pending Transactions
@@ -263,12 +231,11 @@ namespace pool  {
       * Note: The options depend on the underlying implementation
       * and are not normalized.
       *
-      *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
       *  @return StatusCode code indicating success or failure.
       */
-    virtual StatusCode getDomainOption(const SessionH  sessionH, DbOption& opt) = 0;
+    virtual StatusCode getDomainOption(DbOption& opt) = 0;
 
     /// Set options for a given database domain.
     /** Domain options are global options, which refer to the
@@ -277,12 +244,11 @@ namespace pool  {
       * Note: The options depend on the underlying implementation
       * and are not normalized.
       *
-      *  @param   sessionH  [IN] Session context to be used to open the Database.
       *  @param   opt       [IN] Reference to option object.
       *
       *  @return StatusCode code indicating success or failure.
       */
-    virtual StatusCode setDomainOption(const SessionH  sessionH, const DbOption& opt) = 0;
+    virtual StatusCode setDomainOption(const DbOption& opt) = 0;
 
   };
 
