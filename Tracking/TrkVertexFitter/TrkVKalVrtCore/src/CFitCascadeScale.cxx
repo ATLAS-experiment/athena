@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Idea:
@@ -92,8 +92,12 @@ int fitVertexCascadeScale( VKVertex * vk, double & distToVertex )
       fittedVrt[2]=vk->refIterV[2]+vk->fitV[2];
 //
 //  Particle creation and propagation
-      double localField=Trk::vkalMagFld::getMagFld(fittedVrt,(vk->vk_fitterControl).get());
-      combinedTrack( Charge, dptot, VrtMomCov, localField, parV0, covParV0);
+      double vBx,vBy,vBz;
+      Trk::vkalMagFld::getMagFld(fittedVrt[0], fittedVrt[1], fittedVrt[2],vBx,vBy,vBz,(vk->vk_fitterControl).get());
+      double lPhi   = atan2(dptot[1], dptot[0]);
+      double lTheta = acos(dptot[2] / sqrt(dptot[0]*dptot[0]+dptot[1]*dptot[1]+dptot[2]*dptot[2]));
+      double effectiveField = Trk::vkalMagFld::getEffField(vBx, vBy, vBz, lPhi, lTheta); 
+      combinedTrack( Charge, dptot, VrtMomCov, effectiveField, parV0, covParV0);
       covParV0[0]=std::abs(covParV0[0]); covParV0[2]=std::abs(covParV0[2]); covParV0[5]=fabs(covParV0[5]);
       covParV0[9]=std::abs(covParV0[9]); covParV0[14]=std::abs(covParV0[14]);  //VK protection against numerical problems
       Trk::vkalPropagator::Propagate(-999, Charge, parV0, covParV0, fittedVrt,
