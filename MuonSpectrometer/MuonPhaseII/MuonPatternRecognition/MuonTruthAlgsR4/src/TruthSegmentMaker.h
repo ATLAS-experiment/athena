@@ -138,7 +138,7 @@ namespace MuonR4{
           /** @brief Build segments from muon hits only */
           Gaudi::Property<bool> m_useOnlyMuonHits{this, "useOnlyMuonHits", true};
           /** @brief Construct segments from pile-up hits without GenParticleLink */
-          Gaudi::Property<bool> m_includePileUpHits{this, "includePileUpHits", true};
+          Gaudi::Property<bool> m_includePileUpHits{this, "includePileUpHits", false};
           /** @brief Minimum energy threshold for pile up hits to be converted  */
           Gaudi::Property<float> m_pileUpHitMinE{this, "energyThresholdPileUp", 1.*Gaudi::Units::GeV};
           /** @brief Maximum energy loss between two pile-up hits */

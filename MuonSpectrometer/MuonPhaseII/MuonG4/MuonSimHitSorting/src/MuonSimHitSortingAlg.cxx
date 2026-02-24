@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonSimHitSortingAlg.h"
 
@@ -61,18 +61,22 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
         dupFreeHits.reserve(allSimHits.size());
         std::ranges::copy_if(allSimHits, std::back_inserter(dupFreeHits), 
             [&dupFreeHits, this] (const xAOD::MuonSimHit* hit) {
-                const int barcode = hit->genParticleLink().barcode();
+                const int barcode = hit->genParticleLink().id();
                 const Identifier hitId = hit->identify();
                 const Amg::Vector3D lPos{xAOD::toEigen(hit->localPosition())};
                 const Amg::Vector3D lDir{xAOD::toEigen(hit->localDirection())};
-                ATH_MSG_VERBOSE("Check sim hit "<<m_idHelperSvc->toString(hitId)<<", pdgId:"<<hit->pdgId()
-                                <<", barcode: "<<barcode
-                                <<" at "<<Amg::toString(lPos, 2)<<"direction: "<<Amg::toString(lDir, 2));
+                ATH_MSG_VERBOSE("Check sim hit "<<m_idHelperSvc->toString(hitId)<<", pdgId: "<<hit->pdgId()
+                                <<", link: "<<hit->genParticleLink()
+                                <<" at "<<Amg::toString(lPos, 2)<<", direction: "<<Amg::toString(lDir, 2));
                 return std::ranges::find_if(dupFreeHits, 
                                     [&](const xAOD::MuonSimHit* selHit) {
                             if (selHit->identify() != hitId || 
-                                barcode != selHit->genParticleLink().barcode()) return false;
-                            if (barcode) return true;
+                                barcode != selHit->genParticleLink().id()) {
+                                    return false;
+                            }
+                            if (barcode) {
+                                return true;
+                            }
                             const Amg::Vector3D dPos = lPos - xAOD::toEigen(selHit->localPosition());
                             const Amg::Vector3D dDir = lDir - xAOD::toEigen(selHit->localDirection());
                             return dPos.mag() < tolerance && dDir.mag() < tolerance;
@@ -88,6 +92,7 @@ StatusCode MuonSimHitSortingAlg::execute(const EventContext& ctx) const {
         for (const xAOD::MuonSimHit* copy_me : allSimHits) {
             xAOD::MuonSimHit* newHit = writeHandle->push_back(std::make_unique<xAOD::MuonSimHit>());
             (*newHit) = (*copy_me);
+            ATH_CHECK(newHit->genParticleLink().cptr() == copy_me->genParticleLink().cptr());
         }
     } else {
         ATH_CHECK(writeHandle.record(std::make_unique<xAOD::MuonSimHitContainer>(*allSimHits.asDataVector())));

@@ -34,7 +34,7 @@ MuonSimHit_v1& MuonSimHit_v1::operator=(const MuonSimHit_v1& other) {
    if (this != &other) {
       static_cast<SG::AuxElement&>(*this) = other;
 #ifndef __CLING__
-      m_hepMCLink.release();
+      releaseParticleLink();
 #endif
    }
    return (*this);
@@ -69,16 +69,20 @@ const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
    if (!m_hepMCLink) {
       auto link = std::make_unique<HepMcParticleLink>(acc_uniqueID(*this),
                                                       acc_mcEventIndex(*this),
-                                                      HepMcParticleLink::IS_EVENTNUM, 
+                                                      HepMcParticleLink::IS_POSITION, 
                                                       HepMcParticleLink::IS_ID);
       return *m_hepMCLink.set(std::move(link));
    }
    return (*m_hepMCLink);
 }
 void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
-   m_hepMCLink.release();
-   acc_mcEventIndex(*this) = link.eventIndex();
+   releaseParticleLink();
+   acc_mcEventIndex(*this) = link.getEventPositionInCollection(SG::CurrentEventStore::store());
    acc_uniqueID(*this) = link.id();
+}
+
+std::unique_ptr<const HepMcParticleLink> MuonSimHit_v1::releaseParticleLink() {
+   return m_hepMCLink.release();
 }
 
 }
