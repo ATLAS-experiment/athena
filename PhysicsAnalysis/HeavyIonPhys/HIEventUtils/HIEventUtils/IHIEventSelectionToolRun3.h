@@ -51,12 +51,13 @@ enum class SelectionMask : unsigned int {
   PUZDCPresampler = bit(8),
 
   // default cuts for PB
-  PBDefault = NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose | PUZDCPresampler,
+  PBDefault =
+      NoEventError | PUFCalVsNTrackLoose | PUFCalVsZDCLoose,// | PUZDCPresampler, this needs to be added back once we can read PreSampleAmp
   // default cuts for OO
-  OODefault = NoEventError | PUOOSingleVertexNominal | PUFCalVsNTrackLoose
+  OODefault = NoEventError | PUOOSingleVertexNominal | PUFCalVsNTrackLoose |
+              PUFCalVsZDCLoose
 
 };
-
 
 std::string toString(SelectionMask);
 
@@ -80,6 +81,12 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
                            const xAOD::ZdcModuleContainer* zdcModules,
                            HI::PileupVariation variation) const = 0;
 
+  virtual float fcalEt(HI::IonDataType when,
+                       const xAOD::HIEventShapeContainer* es) const = 0;
+
+  virtual float zdcE(HI::IonDataType when,
+                     const xAOD::ZdcModuleContainer* zdcModules) const = 0;
+
   /// @brief true if this is pileup event
   virtual bool puZDCvsFCal(
       IonDataType dataType, float fcalEt, float zdcE,
@@ -92,6 +99,10 @@ class IHIEventSelectionToolRun3 : public virtual asg::IAsgTool {
       const xAOD::TrackParticleContainer* tracks,
       const xAOD::VertexContainer* vertices,
       PileupVariation variation = PileupVariation::Nominal) const = 0;
+
+  virtual int nTrk(IonDataType dataType,
+                   const xAOD::TrackParticleContainer* tracks,
+                   const xAOD::VertexContainer* vertices)  const = 0;
 
   virtual bool puFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
