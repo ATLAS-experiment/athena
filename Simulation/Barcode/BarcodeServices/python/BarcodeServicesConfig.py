@@ -18,6 +18,7 @@ def BarcodeSvcCfg(flags, **kwargs):
         TruthStrategy.MC15aPlus: MC15aPlusBarcodeSvcCfg,
         TruthStrategy.MC15aPlusLLP: MC15aPlusLLPBarcodeSvcCfg,
         TruthStrategy.Validation: ValidationBarcodeSvcCfg,
+        TruthStrategy.MSLLPValidation: MSLLPValidationBarcodeSvcCfg,
         # TruthStrategy.Cosmic: CosmicBarcodeSvcCfg,
     }
     MCxCfg = stratmap[flags.Sim.TruthStrategy]
@@ -55,6 +56,10 @@ def MC15aPlusLLPBarcodeSvcCfg(flags, name="Barcode_MC15aPlusLLPBarcodeSvc", **kw
 
 
 def MC15aBarcodeSvcCfg(flags, name="Barcode_MC15aBarcodeSvc", **kwargs):
+    return MC12BarcodeSvcCfg(flags, name, **kwargs)
+
+
+def MSLLPValidationBarcodeSvcCfg(flags, name="Barcode_MSLLPValidationBarcodeSvc", **kwargs):
     return MC12BarcodeSvcCfg(flags, name, **kwargs)
 
 
