@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiliconIDDetDescrCnv.h"
@@ -72,7 +72,7 @@ SiliconIDDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID& 
+CLID
 SiliconIDDetDescrCnv::classID() { 
     return ClassID_traits<SiliconID>::ID(); 
 }
