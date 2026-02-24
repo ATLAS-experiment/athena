@@ -43,9 +43,11 @@ class SeedingToolBase: public AthAlgTool {
 
   int runCCA(int, std::vector<GNN_Edge>&) const;
 
-  void extractSeedsFromTheGraph(int, int, int, std::vector<GNN_Edge>&, std::vector<std::tuple<float, int, std::vector<unsigned int> > >&) const;
+  void extractSeedsFromTheGraph(int, int, int, std::vector<GNN_Edge>&, std::vector<std::pair<float, std::vector<unsigned int> > >&) const;
 
   bool check_z0_bitmask(const unsigned short&, const float&, const float&, const float&) const;
+
+  float estimate_curvature(const std::array<const GNN_Node*, 3>&) const;
   
   ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
 
