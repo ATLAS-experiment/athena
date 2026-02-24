@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -15,7 +15,6 @@
 // Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbAccessObj.h"
-#include "StorageSvc/DbSession.h"
 #include "POOLCore/DbPrint.h"
 
 /*
@@ -24,6 +23,7 @@
 namespace pool    {
 
   // Forward declarations
+  class IOODatabase;
   class DbDatabaseObj;
   class DbOption;
   class IDbDomain;
@@ -39,25 +39,18 @@ namespace pool    {
   */
   class DbDomainObj : public  DbAccessObj<std::string, DbDatabaseObj >, public APRMessaging  {
   private:
-    /// Handle to session
-    DbSession       m_session;
     /// Maximal age of files allowed.
     int             m_maxAge;
     /// Technology dependent stuff
     IDbDomain*      m_info;
   public:
     /// Constructor
-    DbDomainObj(DbSession&  session, 
-                const DbType&     typ,
-                DbAccessMode      mode = pool::READ);
+    DbDomainObj(IOODatabase* imp, const DbType& typ, DbAccessMode mode = pool::READ);
     /// Standard destructor
     virtual ~DbDomainObj();
     /// Access to technology dependent implementation
     IDbDomain* info()                   {    return m_info;     }
     const IDbDomain* info() const       {    return m_info;     }
-    /// Access session handle
-    DbSession& session()                {    return m_session;  }
-    const DbSession& session() const    {    return m_session;  }
     /// Set the maximal allowed age limit for files in this domain
     void       setAgeLimit(int value)   {    m_maxAge = value;  }
     /// Access the maximal age limit

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //  ====================================================================
@@ -25,6 +25,9 @@
 #include "StorageSvc/DbConnection.h"
 #include "DbDatabaseObj.h"
 #include "StorageSvc/FileDescriptor.h"
+#include "StorageSvc/IOODatabase.h"
+
+#include "Gaudi/PluginService.h"
 
 #include <vector>
 #include <memory>
@@ -53,10 +56,10 @@ DbStorageSvc::DbStorageSvc(const string& name)
 : APRMessaging(name),
   m_name(name),
   m_refCount(0),
-  m_sesH(),
   m_domH(POOL_StorageType),
   m_ageLimit(2),
-  m_type(POOL_StorageType)
+  m_type(POOL_StorageType),
+  m_implementation(nullptr)
 {
   static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
   if ( als )    {
@@ -75,7 +78,10 @@ DbStorageSvc::DbStorageSvc(const string& name)
 DbStorageSvc::~DbStorageSvc() {
   m_domH.close().ignore();
   m_domH = 0;
-  m_sesH = 0;
+  if( m_implementation ) {
+    m_implementation->release();
+    m_implementation = nullptr;
+  }
 }
 
 //--- IInterface::addRef
@@ -111,7 +117,6 @@ StatusCode DbStorageSvc::initialize()   {
 StatusCode DbStorageSvc::finalize()   {
   StatusCode rc = m_domH.close();
   m_domH = 0;
-  m_sesH = 0;
   return rc;
 }
 
@@ -241,35 +246,24 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 }
 
 /// Start a new Database Session.
-StatusCode DbStorageSvc::startSession(int accessmode,int technology,SessionH& refSession)  {
+StatusCode DbStorageSvc::startSession(int accessmode, int technology, SessionH& refSession)  {
   m_type   = DbType(technology).majorType();
-  int typ  = DbType(technology).majorType();
-  if ( m_type.majorType() == typ )  {  // Maybe implement this later
-    refSession = 0;
-    if ( m_sesH.open().isSuccess() )  {
-      if ( m_domH.open(m_sesH, m_type, accessmode).isSuccess() )  {
-        m_domH.setAgeLimit(m_ageLimit);
-        refSession = SessionH(m_domH.ptr());
-        return StatusCode::SUCCESS;
-      }
-      ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_ERROR( "Cannot start the Database session." );
-    return StatusCode::FAILURE;
+  refSession = 0;
+  if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
+      m_domH.setAgeLimit(m_ageLimit);
+      refSession = SessionH(m_domH.ptr());
+      return StatusCode::SUCCESS;
   }
-  ATH_MSG_ERROR( "Cannot start database session, the technology type does not match." );
+  ATH_MSG_ERROR( "Cannot connect to the domain: " << DbType(technology).storageName() );
   return StatusCode::FAILURE;
 }
 
 /// End the Database session.
 StatusCode DbStorageSvc::endSession(const SessionH session) {
-  StatusCode sc = StatusCode::FAILURE;
   if( session == SessionH(m_domH.ptr()) )  {
-    sc = m_domH.close();
-    m_sesH = 0;
+    return m_domH.close();
   }
-  return sc;
+  return StatusCode::FAILURE;
 }
 
 /// Check the existence of a logical Database unit.
@@ -375,6 +369,18 @@ DbStorageSvc::setDomainOption(const SessionH  sessionH, const DbOption& opt)  {
   }
   ATH_MSG_ERROR( "Cannot connect to proper technology domain." );
   return StatusCode::FAILURE;
+}
+
+/// Access technology implementations
+IOODatabase* DbStorageSvc::db() {
+  if( !m_implementation ) {
+    const std::string &nam = m_type.storageName();
+    m_implementation = Gaudi::PluginService::Factory<IOODatabase*()>::create(nam).release();
+    if( !m_implementation ) {
+      ATH_MSG_FATAL( "Failed to load plugin for " << nam << " storage type" );
+    }
+  }
+  return m_implementation;
 }
 
 } // namespace pool
