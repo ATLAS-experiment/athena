@@ -27,10 +27,10 @@ references_map = {
     "d2029": "v11",
     "d2030": "v19",
     # Reco
-    "q442": "v108",
-    "q449": "v167",
-    "q452": "v75",
-    "q454": "v96",
+    "q442": "v109",
+    "q449": "v168",
+    "q452": "v76",
+    "q454": "v97",
     # Derivations
     "data_PHYS_Run2": "v74",
     "data_PHYSLITE_Run2": "v40",
@@ -38,10 +38,10 @@ references_map = {
     "data_PHYSLITE_Run3": "v50",
     "mc_PHYS_Run2": "v102",
     "mc_PHYSLITE_Run2": "v49",
-    "mc_PHYS_Run3": "v107",
+    "mc_PHYS_Run3": "v108",
     "mc_PHYSLITE_Run3": "v61",
-    "af3_PHYS_Run2": "v52",
+    "af3_PHYS_Run2": "v53",
     "af3_PHYSLITE_Run2": "v29",
-    "af3_PHYS_Run3": "v87",
+    "af3_PHYS_Run3": "v88",
     "af3_PHYSLITE_Run3": "v63",
 }
