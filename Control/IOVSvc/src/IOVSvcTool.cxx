@@ -482,7 +482,7 @@ IOVSvcTool::regProxy( DataProxy *proxy, const std::string& key) {
   fullname = tname + "[" + key + "]";
 
   m_proxies.insert( proxy );
-  m_names[ proxy ] = fullname;
+  m_names[ proxy ] = std::move(fullname);
 
   return StatusCode::SUCCESS;
 
