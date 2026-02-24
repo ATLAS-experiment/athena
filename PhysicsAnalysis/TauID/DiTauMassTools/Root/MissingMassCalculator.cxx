@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // vim: ts=8 sw=2
@@ -62,7 +62,6 @@ MissingMassCalculator::MissingMassCalculator(
   // iterations for lh. Multiplied by 10 for ll, divided by 10 for hh (to be
   // optimised)
   //  RMSStop=200;// Stop criteria depending of rms of histogram
-  m_reRunWithBestMET = false;
   m_RMSStop = -1; // disable
 
   m_RndmSeedAltering = 0;    // can be changed to re-compute with different random seed
@@ -78,13 +77,10 @@ MissingMassCalculator::MissingMassCalculator(
   m_proposalTryMEt = -1;  // loop on METproposal disable // FIXME should be cleaner
   m_ProposalTryPhi = -1;  // loop on Phiproposal disable
   m_ProposalTryMnu = -1;  // loop on MNuProposal disable
-  m_ProposalTryEtau = -1; // loop on ETauProposal disable
 
   Prob->SetUseTauProbability(true);  // TauProbability is ON by default DRMERGE comment out for now
   Prob->SetUseMnuProbability(false); // MnuProbability is OFF by default
   Prob->SetUseDphiLL(false);         // added by Tomas Davidek for lep-lep
-  m_dTheta3d_binMin = 0.0025;
-  m_dTheta3d_binMax = 0.02;
   preparedInput.m_METresSyst = 0; // no MET resolution systematics by default (+/-1: up/down 1 sigma)
   preparedInput.m_dataType = 1;   // set to "data" by default
   preparedInput.m_fUseTailCleanup = 1; // cleanup by default for lep-had Moriond 2012 analysis
@@ -103,8 +99,6 @@ MissingMassCalculator::MissingMassCalculator(
   preparedInput.m_LFVmode = -1; // by default consider case of H->mu+tau(->ele)
   preparedInput.ClearInput();
 
-  m_nCallprobCalculatorV9fast = 0;
-  m_iterTheta3d = 0;
   m_debugThisIteration = false;
   m_lfvLeplepRefit = true;
   m_SaveLlhHisto = false;
@@ -198,7 +192,6 @@ int MissingMassCalculator::RunMissingMassCalculator(const xAOD::IParticle *part1
                                                                const xAOD::IParticle *part2,
                                                                const xAOD::MissingET *met,
                                                                const int &njets) {
-  m_reRunWithBestMET = false;
 
   OutputInfo.ClearOutput(preparedInput.m_fUseVerbose);
   if (preparedInput.m_fUseVerbose == 1) {
