@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODInDetMeasurement/ContainerAccessor.h"
@@ -115,23 +115,21 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
     
-    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
+    std::vector<std::pair<float, std::vector<unsigned int> > > vOutputSeeds;
 
-    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vSeedCandidates);
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vOutputSeeds);
 
-    if (vSeedCandidates.empty()) return StatusCode::SUCCESS;
+    if (vOutputSeeds.empty()) return StatusCode::SUCCESS;
 
-    seedContainer.reserve(vSeedCandidates.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
+    seedContainer.reserve(vOutputSeeds.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
 
-    for (const auto& seed : vSeedCandidates) {
-
-      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
-
+    for (const auto& seed : vOutputSeeds) {
+      
       // convert space points and add seed to output
-      const float quality = std::get<0>(seed);
+      const float quality = seed.first;
       const float vertexZ = 0.0f;  // not used in GBTS seeding, set to 0
       seedContainer.push_back(
-          std::get<2>(seed),
+          seed.second,
           [&](const unsigned int spIndex) {
             return &spContainer.at(spIndex).externalSpacePoint();
           },
