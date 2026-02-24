@@ -29,8 +29,8 @@ references_map = {
     # Reco
     "q442": "v108",
     "q449": "v167",
-    "q452": "v74",
-    "q454": "v95",
+    "q452": "v75",
+    "q454": "v96",
     # Derivations
     "data_PHYS_Run2": "v74",
     "data_PHYSLITE_Run2": "v40",
