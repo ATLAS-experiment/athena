@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -7,7 +7,6 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "CSC_Digitization/CscDigitizationTool.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
