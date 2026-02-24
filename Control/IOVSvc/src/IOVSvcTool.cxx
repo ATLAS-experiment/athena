@@ -711,14 +711,14 @@ void IOVSvcTool::setRange_impl (SG::DataProxy* proxy, IOVRange& iovr)
     }
 
 
-    startITR sitr = ent->getStartITR();
+    const auto sitr = ent->getStartITR();
     if ( !ent->removedStart() ) {
       p_startSet->erase( sitr );
     }
 
 
 
-    stopITR pitr = ent->getStopITR();
+    const auto pitr = ent->getStopITR();
     if ( !ent->removedStop() ) {
       p_stopSet->erase( pitr );
     }
@@ -941,25 +941,24 @@ IOVSvcTool::preLoadProxies(const EventContext& /*ctx*/) {
 
 void 
 IOVSvcTool::PrintStartSet() const {
-  startITR start_itr;
   std::string objname;
   
-  if (m_startSet_Clock.begin() != m_startSet_Clock.end()) {
+  if (!m_startSet_Clock.empty()) {
     msg() << endl << "ClockTime start set: " << endl;
-    for (start_itr = m_startSet_Clock.begin(); start_itr!=m_startSet_Clock.end(); ++start_itr ) {
-      objname = m_names.at( (*start_itr)->proxy() );
-      msg() << "  " << objname << " (" << (*start_itr)->proxy() << ") "
-            << (*start_itr)->range()->start() << endl;    
+    for (const auto ent : m_startSet_Clock) {
+      objname = m_names.at( ent->proxy() );
+      msg() << "  " << objname << " (" << ent->proxy() << ") "
+            << ent->range()->start() << endl;
     }
     msg() << endl;
   }
 
-  if (m_startSet_RE.begin() != m_startSet_RE.end()) {
+  if (!m_startSet_RE.empty()) {
     msg() << "Run/Event start set: " << endl;
-    for (start_itr = m_startSet_RE.begin(); start_itr!=m_startSet_RE.end();++start_itr ) {
-      objname = m_names.at( (*start_itr)->proxy() );
-      msg() << "  " << objname << " (" << (*start_itr)->proxy() << ") "
-            << (*start_itr)->range()->start() << endl;    
+    for (const auto ent : m_startSet_RE) {
+      objname = m_names.at( ent->proxy() );
+      msg() << "  " << objname << " (" << ent->proxy() << ") "
+            << ent->range()->start() << endl;
     }
   }
 
@@ -969,25 +968,24 @@ IOVSvcTool::PrintStartSet() const {
 
 void 
 IOVSvcTool::PrintStopSet() const {
-  stopITR  stop_itr;
   std::string objname;
   
-  if (m_stopSet_Clock.begin() != m_stopSet_Clock.end()) {
+  if (!m_stopSet_Clock.empty()) {
     msg() << endl << "ClockTime stop set: " << endl;
-    for( stop_itr=m_stopSet_Clock.begin(); stop_itr!=m_stopSet_Clock.end(); ++stop_itr ) {
-      objname = m_names.at((*stop_itr)->proxy());
-      msg() << "  " << objname << " (" << (*stop_itr)->proxy() << ") "
-            << (*stop_itr)->range()->stop() << endl;    
+    for( const auto ent : m_stopSet_Clock ) {
+      objname = m_names.at(ent->proxy());
+      msg() << "  " << objname << " (" << ent->proxy() << ") "
+            << ent->range()->stop() << endl;
     }
     msg() << endl;
   }
   
-  if (m_stopSet_RE.begin() != m_stopSet_RE.end()) {
+  if (!m_stopSet_RE.empty()) {
     msg() << "Run/Event stop set: " << endl;
-    for( stop_itr=m_stopSet_RE.begin(); stop_itr!=m_stopSet_RE.end(); ++stop_itr ) {
-      objname = m_names.at((*stop_itr)->proxy());
-      msg() << "  " << objname << " (" << (*stop_itr)->proxy() << ") "
-            << (*stop_itr)->range()->stop() << endl;    
+    for( const auto ent : m_stopSet_RE ) {
+      objname = m_names.at(ent->proxy());
+      msg() << "  " << objname << " (" << ent->proxy() << ") "
+            << ent->range()->stop() << endl;
     }
   }
 }
@@ -1021,7 +1019,7 @@ IOVSvcTool::PrintProxyMap(const SG::DataProxy* dp) const {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void 
-IOVSvcTool::scanStartSet(startSet &pSet, const std::string &type, 
+IOVSvcTool::scanStartSet(IOVEntry::StartSet_t &pSet, const std::string &type,
                          std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 			 const IOVTime& curTime) const {
 
@@ -1031,7 +1029,7 @@ IOVSvcTool::scanStartSet(startSet &pSet, const std::string &type,
     msg() << MSG::DEBUG << "--> scan for resets: start set: " << type << endl;
   }
 
-  startITR start_itr( pSet.begin() );
+  auto start_itr( pSet.begin() );
   while ( start_itr != pSet.end() ) {
     
     if ((*start_itr)->range()->start() > curTime) {
@@ -1058,7 +1056,7 @@ IOVSvcTool::scanStartSet(startSet &pSet, const std::string &type,
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 void 
-IOVSvcTool::scanStopSet(stopSet &pSet, const std::string &type,
+IOVSvcTool::scanStopSet(IOVEntry::StopSet_t &pSet, const std::string &type,
                         std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 			const IOVTime& curTime) const {
 
@@ -1067,7 +1065,7 @@ IOVSvcTool::scanStopSet(stopSet &pSet, const std::string &type,
     msg() << MSG::DEBUG << "--> scan for resets: stop set: " << type << endl;
   }
 
-  stopITR  stop_itr(pSet.begin());
+  auto stop_itr(pSet.begin());
   while ( stop_itr != pSet.end() ) {
     
     if ((*stop_itr)->range()->stop() <= curTime) {
