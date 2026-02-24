@@ -26,15 +26,14 @@
 #include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "IOVSvc/IIOVSvcTool.h"
+#include "SGTools/DataProxy.h"
 
-using SG::DataProxy;
-using SG::TransientAddress;
-
-const std::string defaultStore = "StoreGateSvc";
+#include <ranges>
 
 
 namespace {
 
+const std::string defaultStore = "StoreGateSvc";
 
 /**
  * @brief Helper to check two EventIDBase objects for equality.
@@ -71,21 +70,6 @@ IOVSvc::IOVSvc( const std::string& name, ISvcLocator* svc )
     p_detStore("StoreGateSvc/DetectorStore",name),
     p_condSvc("CondSvc",name)
 {
-
-  declareProperty("preLoadRanges",m_preLoadRanges=false);
-  declareProperty("preLoadData",m_preLoadData=false);
-  declareProperty("partialPreLoadData",m_partialPreLoadData=true);
-  declareProperty("preLoadExtensibleFolders", m_preLoadExtensibleFolders=true);
-  declareProperty("updateInterval", m_updateInterval="Event");
-  declareProperty("sortKeys",m_sortKeys=true);
-  declareProperty("forceResetAtBeginRun", m_forceReset=false);
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-IOVSvc::~IOVSvc() {
-
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,29 +79,10 @@ StatusCode IOVSvc::initialize() {
   msg().setLevel( m_outputLevel.value() );
   ATH_MSG_DEBUG( "Initializing IOVSvc" );
 
-  if (!p_sgs.isValid()) {
-    ATH_MSG_ERROR("could not get the Event Store");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( p_sgs.retrieve() );
+  ATH_CHECK( p_detStore.retrieve() );
+  ATH_CHECK( p_condSvc.retrieve() );
 
-  if (!p_detStore.isValid()) {
-    ATH_MSG_ERROR("could not get the Detector Store");
-    return StatusCode::FAILURE;
-  }
-
-  if (!p_condSvc.isValid()) {
-    ATH_MSG_ERROR("could not get the ConditionSvc");
-    return StatusCode::FAILURE;
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode IOVSvc::finalize()
-{
-  ATH_MSG_DEBUG( "Service finalised successfully" );
   return StatusCode::SUCCESS;
 }
 
@@ -127,19 +92,19 @@ StatusCode IOVSvc::finalize()
 /// Register a DataProxy with the service
 ///
 StatusCode 
-IOVSvc::regProxy( DataProxy *proxy, const std::string& key,
+IOVSvc::regProxy( SG::DataProxy *proxy, const std::string& key,
                   const std::string& storeName ) {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "regProxy: no IOVSvcTool associated with store \"" 
                    << storeName << "\" and failed to create one"  );
     return (StatusCode::FAILURE);
   }
 
   IIOVSvcTool *ist2 = getTool( proxy );
-  if (ist2 != 0) {
+  if (ist2 != nullptr) {
     if (ist2 != ist) {
       ATH_MSG_ERROR( "regProxy: when registering proxy for " 
                      << fullProxyName(proxy) << " with store \"" << storeName
@@ -167,16 +132,16 @@ StatusCode
 IOVSvc::regProxy( const CLID& clid, const std::string& key,
                   const std::string& storeName ) {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "regProxy: no IOVSvcTool associated with store \"" 
                    << storeName << "\" and failed to create one."  );
     return (StatusCode::FAILURE);
   }
 
   IIOVSvcTool *ist2 = getTool( clid, key );
-  if (ist2 != 0) {
+  if (ist2 != nullptr) {
     if (ist2 != ist) {
       ATH_MSG_ERROR( "regProxy: when registering proxy for "
                      << fullProxyName(clid,key)
@@ -202,15 +167,14 @@ IOVSvc::regProxy( const CLID& clid, const std::string& key,
 /// Deregister a DataProxy with the service
 ///
 StatusCode 
-IOVSvc::deregProxy( DataProxy *proxy ) {
+IOVSvc::deregProxy( SG::DataProxy *proxy ) {
 
-
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
   IIOVSvcTool *ist = getTool( proxy );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "deregProxy: no IOVSvcTool found for proxy "
           << fullProxyName( proxy ) );
-    return (StatusCode::FAILURE);
+    return StatusCode::FAILURE;
   }
 
   return ist->deregProxy( proxy );
@@ -225,10 +189,9 @@ IOVSvc::deregProxy( DataProxy *proxy ) {
 StatusCode 
 IOVSvc::deregProxy( const CLID& clid, const std::string& key ) {
 
-
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "deregProxy: no IOVSvcTool found for proxy " 
                    << fullProxyName(clid,key) );
     return StatusCode::FAILURE; 
@@ -247,9 +210,8 @@ void
 IOVSvc::ignoreProxy( const CLID& clid, const std::string& key, 
                      const std::string& storeName ) {
 
-
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "ignoreProxy: no IOVSvcTool found for store " 
                    << storeName << " and failed to create one" );
     return;
@@ -265,12 +227,12 @@ IOVSvc::ignoreProxy( const CLID& clid, const std::string& key,
 /// Replace a registered DataProxy with a new version
 ///
 StatusCode 
-IOVSvc::replaceProxy( DataProxy* pOld, DataProxy* pNew, 
+IOVSvc::replaceProxy( SG::DataProxy* pOld, SG::DataProxy* pNew,
                       const std::string& storeName ) {
 
   StatusCode sc(StatusCode::FAILURE);
   IIOVSvcTool *ist = getTool( storeName );
-  if (0 != ist) {
+  if (ist != nullptr) {
     sc = ist->replaceProxy(pOld, pNew);
   } else {
     ATH_MSG_ERROR( "regProxy: no IOVSvcTool associated with store \"" 
@@ -287,12 +249,12 @@ IOVSvc::replaceProxy( DataProxy* pOld, DataProxy* pNew,
 ///
 
 StatusCode 
-IOVSvc::preLoadTAD( const TransientAddress *tad, 
+IOVSvc::preLoadTAD( const SG::TransientAddress *tad,
                     const std::string& storeName ) {
 
 
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "preLoadTAD: no IOVSvcTool associated with store \""
                    << storeName << "\" and failed to create one."  );
     return StatusCode::FAILURE;
@@ -308,11 +270,11 @@ IOVSvc::preLoadTAD( const TransientAddress *tad,
 /// add to a set of TADs that who's data will be preLoaded
 ///
 StatusCode 
-IOVSvc::preLoadDataTAD( const TransientAddress *tad,
+IOVSvc::preLoadDataTAD( const SG::TransientAddress *tad,
                         const std::string& storeName ) {
 
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "preLoadDataTAD: no IOVSvcTool associated with store \""
                    << storeName << "\" and failed to create one."  );
     return StatusCode::FAILURE;
@@ -328,10 +290,10 @@ StatusCode
 IOVSvc::setRange(const CLID& clid, const std::string& key,
                  IOVRange& iovr) {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
 
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
 
     // FIXME - this should be eliminated once the IOVDbSvc is set up to 
     // use store names. There should be no default store for setRange
@@ -354,17 +316,17 @@ StatusCode
 IOVSvc::setRange(const CLID& clid, const std::string& key,
                  IOVRange& iovr, const std::string& storeName) {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
 
   IIOVSvcTool *ist = getTool( storeName );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "setRange: no IOVSvcTool associated with store \""
                    << storeName << "\" and failed to create one."  );
     return StatusCode::FAILURE;
   }
 
   IIOVSvcTool *ist2 = getTool( clid, key );
-  if (ist2 == 0) {
+  if (ist2 == nullptr) {
     ATH_MSG_INFO( "setRange: proxy for " << fullProxyName(clid,key)
                   << " not registered with store \"" << storeName << "\". Doing it now"
                   );
@@ -389,7 +351,7 @@ StatusCode
 IOVSvc::dropObjectFromDB(const CLID& clid, const std::string& key,
                          const std::string& storeName) {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
 
   IIOVSvcTool *ist = getTool( clid, key );
   if (ist == nullptr) {
@@ -398,7 +360,7 @@ IOVSvc::dropObjectFromDB(const CLID& clid, const std::string& key,
     return StatusCode::FAILURE;
   }
 
-  DataProxy* proxy = p_detStore->proxy(clid, key);
+  SG::DataProxy* proxy = p_detStore->proxy(clid, key);
   if (proxy == nullptr) {
     ATH_MSG_DEBUG("Proxy for (clid: " << clid << " key: " << key << ") in store " << storeName
                   << " does not exist. Cannot drop associated object.");
@@ -428,9 +390,8 @@ StatusCode
 IOVSvc::getRange(const CLID& clid, const std::string& key, 
                  IOVRange& iov) const {
 
-
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "getRange: proxy for " << fullProxyName(clid,key)
                    << " not registered"  );
     return StatusCode::FAILURE;
@@ -448,10 +409,10 @@ IOVSvc::getRangeFromDB(const CLID& clid, const std::string& key,
                        std::unique_ptr<IOpaqueAddress>& ioa,
                        const EventIDBase& now) const {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
 
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "getRangeFromDB: proxy for " 
                    << fullProxyName(clid,key) << " not registered"  );
     return StatusCode::FAILURE;
@@ -478,10 +439,10 @@ IOVSvc::getRangeFromDB(const CLID& clid, const std::string& key,
                        std::string& tag,
                        std::unique_ptr<IOpaqueAddress>& ioa) const {
 
-  std::lock_guard<std::recursive_mutex> lock(m_lock);
+  std::scoped_lock lock(m_lock);
 
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "getRangeFromDB: proxy for "
                    << fullProxyName(clid, key) << " not registered"  );
     return StatusCode::FAILURE;
@@ -498,7 +459,7 @@ IOVSvc::setRangeInDB(const CLID& clid, const std::string& key,
                      const IOVRange& range, const std::string &tag) {
   
   IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == 0) {
+  if (ist == nullptr) {
     ATH_MSG_ERROR( "setRangeInDB: proxy for "
                    << fullProxyName(clid,key) << " not registered"  );
     return StatusCode::FAILURE;
@@ -513,11 +474,9 @@ IOVSvc::setRangeInDB(const CLID& clid, const std::string& key,
 StatusCode 
 IOVSvc::reinitialize()
 {
-  // Set flag to reset all proxies 
   StatusCode sc;
-  toolMap::iterator itr = m_toolMap.begin();
-  for ( ; itr!=m_toolMap.end(); ++itr) {
-    sc &= itr->second->reinitialize();
+  for (const auto& [name, ist] : m_toolMap) {
+    sc &= ist->reinitialize();
   }
   return sc;
 
@@ -532,10 +491,11 @@ IOVSvc::createIOVTool( const std::string& storeName, IIOVSvcTool*& ist ) {
 
   std::string store(storeName);
   std::string toolName("IOVSvcTool");
-  if (storeName == "default") store = defaultStore;
-
-  // Append the store name if not default
-  if (store != defaultStore) {
+  if (storeName == "default") {
+    store = defaultStore;
+  }
+  else {
+    // Append the store name if not default
     toolName += '_';
     toolName += store;
   }
@@ -543,7 +503,7 @@ IOVSvc::createIOVTool( const std::string& storeName, IIOVSvcTool*& ist ) {
   ATH_MSG_DEBUG( "Creating " << toolName << " associated with store \"" << store
                  << "\""  );
 
-  toolMap::iterator itr = m_toolMap.find( store );
+  const auto itr = m_toolMap.find( store );
   if ( itr == m_toolMap.end() ) {
     ist = nullptr;
     if (p_toolSvc->retrieveTool( "IOVSvcTool/" + toolName, ist, this ).isFailure()) {
@@ -578,13 +538,10 @@ IOVSvc::createIOVTool( const std::string& storeName )
 IIOVSvcTool* 
 IOVSvc::getTool( const std::string& storeName, bool createIF ) {
 
-  std::string store(storeName);
-  if (storeName == "default") {
-    store = defaultStore;
-  }
+  const std::string store = (storeName=="default" ? defaultStore : storeName);
 
-  toolMap::const_iterator itr = m_toolMap.find( store );
-  IIOVSvcTool *ist(0);
+  const auto itr = m_toolMap.find( store );
+  IIOVSvcTool *ist = nullptr;
   if ( itr == m_toolMap.end() ) {
     ATH_MSG_INFO( "No IOVSvcTool associated with store \"" << store
                   << "\""  );
@@ -603,19 +560,15 @@ IOVSvc::getTool( const std::string& storeName, bool createIF ) {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 IIOVSvcTool* 
-IOVSvc::getTool( DataProxy* proxy ) const {
+IOVSvc::getTool( SG::DataProxy* proxy ) const {
 
-
-  IIOVSvcTool *ist(0);
-  toolMap::const_iterator itr = m_toolMap.begin();
-  for (; itr != m_toolMap.end(); ++itr) {
-    if (itr->second->holdsProxy( proxy )) {
-      ist = itr->second;
+  for (const auto& [name, ist] : m_toolMap) {
+    if (ist->holdsProxy( proxy )) {
       return ist;
     }
   }
 
-  return ist;
+  return nullptr;
 
 }
 
@@ -624,23 +577,20 @@ IOVSvc::getTool( DataProxy* proxy ) const {
 IIOVSvcTool* 
 IOVSvc::getTool( const CLID& clid, const std::string& key ) const {
 
-  IIOVSvcTool *ist(0);
-  toolMap::const_iterator itr = m_toolMap.begin();
-  for (; itr != m_toolMap.end(); ++itr) {
-    if (itr->second->holdsProxy( clid, key )) {
-      ist = itr->second;
+  for (const auto& [name, ist] : m_toolMap) {
+    if (ist->holdsProxy( clid, key )) {
       return ist;
     }
   }
 
-  return ist;
+  return nullptr;
 
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 std::string
-IOVSvc::fullProxyName( const DataProxy* dp ) const {
+IOVSvc::fullProxyName( const SG::DataProxy* dp ) const {
 
   return fullProxyName(dp->clID(), dp->name());
 
@@ -676,14 +626,8 @@ IOVSvc::fullProxyName( const CLID& clid, const std::string& key ) const {
 std::vector<std::string>
 IOVSvc::getStoreNames() const {
 
-  std::vector<std::string> stores;
-
-  toolMap::const_iterator itr = m_toolMap.begin();
-  for( ; itr!=m_toolMap.end(); ++itr) {
-    stores.push_back( itr->first );
-  }
-
-  return stores;
+  auto keys = m_toolMap | std::views::keys;
+  return std::vector<std::string>(keys.begin(), keys.end());
 
 }
 
@@ -692,9 +636,7 @@ IOVSvc::getStoreNames() const {
 void
 IOVSvc::resetAllProxies() {
 
-  toolMap::iterator itr = m_toolMap.begin();
-  for (; itr!= m_toolMap.end(); ++itr) {
-    IIOVSvcTool* ist = itr->second;
+  for (auto& [name, ist] : m_toolMap) {
     ATH_MSG_DEBUG( "resetting all proxies for store \""
                    << ist->getStoreName() << "\""  );
     ist->resetAllProxies();
@@ -721,9 +663,9 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
     return StatusCode::SUCCESS;
   }
 
-  IOVTime t(now.run_number(), now.lumi_block(), (long long)now.time_stamp()*1000000000+now.time_stamp_ns_offset());
-  IOVRange range;
-  std::string tag;
+  IOVTime t(now.run_number(), now.lumi_block(),
+            now.time_stamp()*1000000000LL + now.time_stamp_ns_offset());
+
   // remove storename from key
   std::string sgKey = id.key();
   auto sep = sgKey.find('+');
@@ -732,6 +674,8 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   }
   
   std::unique_ptr<IOpaqueAddress> ioa;
+  std::string tag;
+  IOVRange range;
   if (getRangeFromDB(id.clid(), sgKey, t, range, tag, ioa).isFailure()) {
     ATH_MSG_ERROR( "unable to get range from db for time "  << t << " clid "
                    << id.clid() << " " << sgKey );
@@ -770,8 +714,8 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   // this will talk to the IOVDbSvc, get current run/event from EventInfo 
   // object, load
   SG::DataProxy* dp = ccb->proxy();
-  DataObject* dobj(0);
-  void* v(0);
+  DataObject* dobj = nullptr;
+  void* v = nullptr;
 
   if (dp->store()->createObj(dp->loader(), ioa.get(), dobj).isFailure()) {
     ATH_MSG_ERROR(" could not create a new DataObject ");
@@ -786,7 +730,7 @@ IOVSvc::createCondObj(CondContBase* ccb, const DataObjID& id,
   if (DataBucketBase* dbb = dynamic_cast<DataBucketBase*> (dobj)) {
     dbb->relinquish();
     delete dobj;
-    dobj = 0;
+    dobj = nullptr;
   }
 
   // Some data objects may be reference counted by the address.
