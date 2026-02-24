@@ -3,7 +3,7 @@
 */
 
 // Algs
-#include "src/GridTripletSeedingAlg.h"
+#include "src/GenericSeedingAlg.h"
 #include "src/SeedingAlg.h"
 
 // Tools
@@ -16,7 +16,7 @@
 
 // Algs
 DECLARE_COMPONENT(ActsTrk::SeedingAlg)
-DECLARE_COMPONENT(ActsTrk::GridTripletSeedingAlg)
+DECLARE_COMPONENT(ActsTrk::GenericSeedingAlg)
 
 // Tools
 DECLARE_COMPONENT(ActsTrk::SeedingTool)
