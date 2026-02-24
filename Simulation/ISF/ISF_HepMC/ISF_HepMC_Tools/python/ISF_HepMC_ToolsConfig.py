@@ -275,6 +275,32 @@ def TruthStrategyGroupCaloDecayCfg(flags, name="ISF_MCTruthStrategyGroupCaloDeca
     result.setPrivateTools(CompFactory.ISF.GenericTruthStrategy(name, **kwargs))
     return result
 
+def TruthStrategyGroupCaloMSBroadCfg(flags, name="ISF_MCTruthStrategyGroupCaloMSBroad", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParentMinPt", 500.*MeV)
+    kwargs.setdefault("ChildMinPt" , 500.*MeV)
+    kwargs.setdefault("AllowChildrenOrParentPassKineticCuts", True)
+    # EM processes: Brem(3), GammaConv(14), GammaConvMuMu(15), PairProd(4),
+    # Annihilation(5,6,7), Ionisation(2), PhotoElectric(12), Compton(13)
+    kwargs.setdefault("VertexTypes", [3, 14, 15, 4, 5, 6, 7, 2, 12, 13])
+    kwargs.setdefault("VertexTypeRangeLow" , 201)  # All decay processes
+    kwargs.setdefault("VertexTypeRangeHigh", 298)
+    kwargs.setdefault("Regions", [3, 4])  # Calo + MS
+    result.setPrivateTools(CompFactory.ISF.GenericTruthStrategy(name, **kwargs))
+    return result
+
+
+def TruthStrategyGroupCaloMSHadIntCfg(flags, name="ISF_MCTruthStrategyGroupCaloMSHadInt", **kwargs):
+    result = ComponentAccumulator()
+    kwargs.setdefault("ParentMinPt", 500.*MeV)
+    kwargs.setdefault("ChildMinPt" , 500.*MeV)
+    kwargs.setdefault("AllowChildrenOrParentPassKineticCuts", True)
+    kwargs.setdefault("VertexTypes", [111, 121, 131, 141, 151, 161, 210])
+    kwargs.setdefault("Regions", [3, 4])  # Calo + MS
+    result.setPrivateTools(CompFactory.ISF.GenericTruthStrategy(name, **kwargs))
+    return result
+
+
 def ValidationTruthStrategyCfg(flags, name="ISF_ValidationTruthStrategy", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("ParentMinP", 50.*MeV)

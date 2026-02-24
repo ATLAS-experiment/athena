@@ -87,6 +87,7 @@ class TruthStrategy(FlagEnum):
     PhysicsProcess = 'PhysicsProcess'
     Global = 'Global'
     Validation = 'Validation'
+    MSLLPValidation = 'MSLLPValidation'
     Cosmic = 'Cosmic'
 
 
