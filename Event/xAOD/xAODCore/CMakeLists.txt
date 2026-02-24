@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODCore )
@@ -86,6 +86,10 @@ atlas_add_test( ut_xaodcore_shallowcopy_test
 
 atlas_add_test( ut_xaodcore_basecontainer_test
    SOURCES test/ut_xaodcore_basecontainer.cxx
+   LINK_LIBRARIES AthContainers xAODCore )
+
+atlas_add_test( ut_xaodcore_variablestruct_test
+   SOURCES test/ut_xaodcore_variablestruct_test.cxx
    LINK_LIBRARIES AthContainers xAODCore )
 
 atlas_add_test( auxbase_threading_test
