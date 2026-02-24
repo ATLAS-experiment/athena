@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloIdCnv/CaloIDHelper_IDDetDescrCnv.h
  * @author scott snyder <snyder@bnl.gov>
@@ -123,7 +120,7 @@ public:
    * @brief Return the CLID of the class we create.
    * Required by the converter infrastructure.
    */
-  static const CLID& classID();
+  static CLID classID();
 
 
   /**
