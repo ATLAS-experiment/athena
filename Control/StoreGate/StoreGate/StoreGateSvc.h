@@ -40,7 +40,6 @@
 #include <type_traits>
 
 #include "AthenaKernel/StoreID.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthAllocators/Arena.h"
 
@@ -509,18 +508,6 @@ public:
   /// non-const method - will return an error
   template <typename H, typename TKEY>
   StatusCode regHandle( DataHandle<H>& handle, const TKEY& key);
-
-  /// register a callback function, with handle + key
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, const DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
-
-  /// register a callback function, with handle + key. Non const. Error
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
 
   //@}
   /////////////////////////////////////////////////////////////////////////
