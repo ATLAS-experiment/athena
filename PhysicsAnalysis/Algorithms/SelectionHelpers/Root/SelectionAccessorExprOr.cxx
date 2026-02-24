@@ -34,12 +34,12 @@ getInputAffecting (const ISystematicsSvc& svc,
 StatusCode SelectionAccessorExprOr ::
 fillSystematics (const ISystematicsSvc& svc,
                  const std::vector<CP::SystematicSet>& sysList,
-                 const std::string& objectName)
+                 ISysObjectHandleBase& objectHandle)
 {
   using namespace msgSelectionHelpers;
 
-  ANA_CHECK (m_left->fillSystematics (svc, sysList, objectName));
-  ANA_CHECK (m_right->fillSystematics (svc, sysList, objectName));
+  ANA_CHECK (m_left->fillSystematics (svc, sysList, objectHandle));
+  ANA_CHECK (m_right->fillSystematics (svc, sysList, objectHandle));
   return StatusCode::SUCCESS;
 }
 

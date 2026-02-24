@@ -10,6 +10,7 @@
 //
 
 #include <AsgMessaging/MessageCheck.h>
+#include <SystematicsHandles/AthenaDependencyHelpers.h>
 
 //
 // method implementations
@@ -21,8 +22,7 @@ namespace CP
   SysWriteHandle (T2 *owner, const std::string& propertyName,
                  const std::string& propertyValue,
                  const std::string& propertyDescription)
-    : AsgMessagingForward (owner), m_outputName (propertyValue)
-    , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
+    : SysWriteHandle (propertyValue, owner)
   {
     owner->declareProperty (propertyName, m_outputName, propertyDescription);
   }
@@ -33,6 +33,12 @@ namespace CP
     : AsgMessagingForward (owner), m_outputName (outputName)
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
   {
+#ifndef XAOD_STANDALONE
+    m_addDependency = [owner] (const std::string& name,const std::string& decoName,bool decoWrite) -> StatusCode
+    {
+      return detail::addDependency<T,true>(*owner, name, decoName, decoWrite);
+    };
+#endif
   }
 
 
@@ -160,6 +166,29 @@ namespace CP
       m_outputNameCache.emplace (sys, newName);
     }
     ANA_CHECK (svc.setObjectSystematics (m_outputName, fullAffecting));
+
+    if (m_addDependency)
+    {
+      /// I'm only adding a dependency for nominal here, as there are
+      /// currently no use cases in which a downstream user would only
+      /// read a systematic, but not the nominal. The concern is that we
+      /// might add dozens (or in extreme cases hundreds) of
+      /// dependencies, without those adding providing any value.
+      ANA_CHECK (m_addDependency(getName (CP::SystematicSet{}), "", false));
+    }
+
     return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename T,typename Aux>
+  StatusCode SysWriteHandle<T,Aux> ::
+  addDecorationDependency (const std::string& decoName, bool decoWrite)
+  {
+    if (m_addDependency)
+      return m_addDependency (getName (CP::SystematicSet{}), decoName, decoWrite);
+    else
+      return StatusCode::SUCCESS;
   }
 }

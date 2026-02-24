@@ -12,6 +12,7 @@
 #include <SelectionHelpers/SelectionReadAccessorChar.h>
 
 #include <PATInterfaces/SystematicSet.h>
+#include <SystematicsHandles/ISysHandleBase.h>
 
 //
 // method implementations
@@ -75,8 +76,11 @@ namespace CP
   StatusCode SelectionReadAccessorChar ::
   fillSystematics (const ISystematicsSvc& /*svc*/,
                    const std::vector<CP::SystematicSet>& /*sysList*/,
-                   const std::string& /*objectName*/)
+                   ISysObjectHandleBase& objectHandle)
   {
+    using namespace msgSelectionHelpers;
+
+    ANA_CHECK (objectHandle.addDecorationDependency (m_label, false));
     return StatusCode::SUCCESS;
   }
 }

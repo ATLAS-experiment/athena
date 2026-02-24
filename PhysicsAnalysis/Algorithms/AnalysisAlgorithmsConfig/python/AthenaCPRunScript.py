@@ -27,6 +27,9 @@ class AthenaCPRunScript(CPBaseRunner):
                                   help='Run PerfMon to measure the job performance')
         derivedGroup.add_argument('--pool-file-reading', dest='pool_file_reading',
                                  action='store_true', help='Run the job with the POOL-based file reading')
+        derivedGroup.add_argument('--test-mt-dependencies', dest='test_mt_dependencies',
+                                 type=int, default=None,
+                                 help='Print out multithreading dependencies, and run with the given number of threads')
         return
 
     def makeAlgSequence(self):
@@ -60,6 +63,10 @@ class AthenaCPRunScript(CPBaseRunner):
         from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
         setPerfmonFlagsFromRunArgs(self.flags, self.args)
 
+        if self.args.test_mt_dependencies is not None:
+            self.flags.Concurrency.NumThreads = self.args.test_mt_dependencies
+            self.flags.Scheduler.ShowControlFlow = True
+            self.flags.Scheduler.ShowDataDeps = True
         self.flags.lock()
         self.printFlags()
 

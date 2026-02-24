@@ -32,7 +32,7 @@ class SelectionAccessorExprNot : public SelectionAccessorExprBase {
   virtual StatusCode
   fillSystematics (const ISystematicsSvc& svc,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName) override;
+                   ISysObjectHandleBase& objectHandle) override;
 
  private:
   std::unique_ptr<ISelectionReadAccessor> m_child;
