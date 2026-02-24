@@ -124,7 +124,7 @@ AntiKt4EMPFlow_tauSeedEleRM = JetDefinition("AntiKt",0.4,cst.GPFlow_tauSeedEleRM
 
 AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
                               ghostdefs = standardghosts+flavourghosts, 
-                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr")+standardmods+clustermods,
+                              modifiers = calibmods+truthmods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr")+standardmods+clustermods,
                               lock = True,
 )
 
