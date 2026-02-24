@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,10 +46,10 @@ class PrepRawDataContainer
     virtual ~PrepRawDataContainer();
     
     /** return class ID */
-    static const CLID& classID();
+    static CLID classID();
     
     /** return class ID */
-    virtual const CLID& clID() const;
+    virtual const CLID& clID() const override;
     
     private:
     
