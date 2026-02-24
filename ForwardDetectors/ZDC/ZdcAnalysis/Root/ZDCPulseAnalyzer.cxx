@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZDCPulseAnalyzer.h"
@@ -2677,7 +2677,7 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
         m_nonLinCorrParamsHG.push_back(coeff);
         HGParamsStr += std::to_string(m_nonLinCorrParamsHG.back()) + " ";
       }
-      (*m_msgFunc_p)(ZDCMsg::Debug, HGParamsStr);
+      (*m_msgFunc_p)(ZDCMsg::Debug, std::move(HGParamsStr));
     }
     else if(key == "LGNLCorrCoeffs"){
       std::string LGParamsStr = "LG coefficients = ";
@@ -2685,7 +2685,7 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
         m_nonLinCorrParamsLG.push_back(coeff);
         LGParamsStr += std::to_string(m_nonLinCorrParamsLG.back()) + " ";
       }
-      (*m_msgFunc_p)(ZDCMsg::Debug, LGParamsStr);
+      (*m_msgFunc_p)(ZDCMsg::Debug, std::move(LGParamsStr));
     }
     else {
       result = false;
