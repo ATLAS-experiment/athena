@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -111,7 +111,7 @@ SCT_Layer::preBuild()
 {
     // Build the components required for the layer.
     // We use the layer number as a string quite a bit
-    std::string layerNumStr = intToString(m_iLayer);
+    std::string layerNumStr = std::to_string(m_iLayer);
     // Make the ski
     // The ski length is now reduced to m_activeLength to make room for the cooling inlet/outlet volumes
     m_ski = std::make_unique<SCT_Ski>("Ski"+layerNumStr, m_module, m_stereoSign, m_tilt, m_activeLength,
@@ -383,7 +383,7 @@ SCT_Layer::build(SCT_Identifier id)
     
     // Extra Material
     InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
-    xMat.add(supportLayer, "SCTLayer"+intToString(m_iLayer));
+    xMat.add(supportLayer, "SCTLayer"+std::to_string(m_iLayer));
     
     
     // Now place all the sub layers into the overall layer.

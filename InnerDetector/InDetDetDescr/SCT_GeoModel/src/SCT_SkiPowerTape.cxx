@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -129,7 +129,7 @@ SCT_SkiPowerTape::build()
     // Create the tape
 
     // Label tape with M# at end of string
-    SCT_PowerTape powerTape(getName()+"PowerTapeM"+intToString(iModule + 1), tapeLength,
+    SCT_PowerTape powerTape(getName()+"PowerTapeM"+std::to_string(iModule + 1), tapeLength,
                             m_detectorManager, m_geometryManager, m_materials);
     
     // Calculate x position of tape. This will depend on the module number.

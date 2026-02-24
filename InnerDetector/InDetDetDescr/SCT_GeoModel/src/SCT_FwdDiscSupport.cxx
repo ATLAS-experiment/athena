@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FwdDiscSupport.h"
@@ -42,7 +42,7 @@ SCT_FwdDiscSupport::build()
 {
   // Make the support disk. A simple tube.
   const GeoTube * discSupportShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_thickness);
-  m_material = m_materials->getMaterialForVolume(m_materialName+intToString(m_iWheel), discSupportShape->volume());
+  m_material = m_materials->getMaterialForVolume(m_materialName+std::to_string(m_iWheel), discSupportShape->volume());
   if(!m_material) m_material = m_materials->getMaterial(m_materialName);
   const GeoLogVol * discSupportLog = new GeoLogVol(getName(), discSupportShape, m_material);
 

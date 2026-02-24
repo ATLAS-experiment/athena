@@ -104,7 +104,7 @@ SCT_Forward::preBuild()
   std::vector<SCT_FwdModule*> modules;
   for (int iModuleType = 0; iModuleType < m_numModuleTypes; iModuleType++){
     
-    std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>("FwdModule"+intToString(iModuleType), iModuleType,
+    std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>("FwdModule"+std::to_string(iModuleType), iModuleType,
                                                                             m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
     modules.push_back(module.get());
     m_modules.push_back(std::move(module));
@@ -200,7 +200,7 @@ SCT_Forward::build(SCT_Identifier id)
                     int numPipes = 8 * m_wheels[iWheel]->numRings();
                     
                     // Label Cooling pipe with W# at end of string
-                    SCT_FwdCoolingPipe coolingPipe("OffDiskCoolingPipeW"+intToString(iWheel),
+                    SCT_FwdCoolingPipe coolingPipe("OffDiskCoolingPipeW"+std::to_string(iWheel),
                                                    numPipes, rStart, startPos, endPos,
                                                    m_detectorManager, m_geometryManager, m_materials);
                     
@@ -240,7 +240,7 @@ SCT_Forward::build(SCT_Identifier id)
                     int numModules = m_wheels[iWheel]->totalModules();
                     
                     // Label power tape with W# at end of string
-                    SCT_FwdPowerTape powerTape("OffDiskPowerTapeW"+intToString(iWheel),
+                    SCT_FwdPowerTape powerTape("OffDiskPowerTapeW"+std::to_string(iWheel),
                                                numModules, rStart, startPos, endPos,
                                                m_detectorManager, m_geometryManager, m_materials);
                     
@@ -259,7 +259,7 @@ SCT_Forward::build(SCT_Identifier id)
         // Place Thermal Shield Elements
         //
         for (int iElement = 0; iElement < m_numThermalShieldElements; iElement++){
-            SCT_FwdThermalShieldElement thermalShieldElement("FwdThermalShieldElement"+intToString(iElement),
+            SCT_FwdThermalShieldElement thermalShieldElement("FwdThermalShieldElement"+std::to_string(iElement),
                                                              iElement, m_detectorManager, m_geometryManager, m_materials);
             double elementZPos = thermalShieldElement.zPosition() - zCenter();
             forward->add(new GeoTransform(GeoTrf::TranslateZ3D(elementZPos)));

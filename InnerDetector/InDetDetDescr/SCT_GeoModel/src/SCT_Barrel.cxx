@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_Barrel.h"
@@ -127,8 +127,8 @@ SCT_Barrel::build(SCT_Identifier id)
             // Create the layers
             
             layerLength = 0.;
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
-            barrel->add(new GeoNameTag("Layer#"+intToString(iLayer)));
+            SCT_Layer layer("Layer"+std::to_string(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
+            barrel->add(new GeoNameTag("Layer#"+std::to_string(iLayer)));
             barrel->add(new GeoIdentifierTag(iLayer)); // Identifier layer= iLayer
             id.setLayerDisk(iLayer);
             GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::Transform3D::Identity());
@@ -182,11 +182,11 @@ SCT_Barrel::build(SCT_Identifier id)
     
         for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
             // Create the layers
-            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
+            SCT_Layer layer("Layer"+std::to_string(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
             id.setLayerDisk(iLayer);
             layer.build(id); //MB to verify
             // Store alignable transform
-            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)["Layer#"+intToString(iLayer)], (*m_mapFPV)["Layer#"+intToString(iLayer)]);
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)["Layer#"+std::to_string(iLayer)], (*m_mapFPV)["Layer#"+std::to_string(iLayer)]);
     
         }
     }
