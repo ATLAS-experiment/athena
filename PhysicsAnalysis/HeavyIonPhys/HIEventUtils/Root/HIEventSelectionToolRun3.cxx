@@ -8,11 +8,11 @@
 
 #include "PathResolver/PathResolver.h"
 
-std::string HI::toString(HI::IonDataType when) {
+std::string HI::toString(HI::IonDataType period) {
 #define ENUMDEF(_N)         \
   case HI::IonDataType::_N: \
     return #_N;
-  switch (when) {
+  switch (period) {
     ENUMDEF(PbPb2015)
     ENUMDEF(PbPb2018)
     ENUMDEF(PbPb2023)
@@ -24,7 +24,7 @@ std::string HI::toString(HI::IonDataType when) {
     ENUMDEF(PbPb2026)
     default:
       return std::string("UNKNOWN HI DATA TAKING PERIOD ") +
-             std::to_string(static_cast<uint8_t>(when));
+             std::to_string(static_cast<uint8_t>(period));
   }
 #undef ENUMDEF
 }
@@ -59,6 +59,7 @@ std::string HI::toString(SelectionMask m) {
     ENUMDEF(PUFCalVsZDCNominal)
     ENUMDEF(PUFCalVsZDCTight)
     ENUMDEF(PUOOSingleVertexNominal)
+    ENUMDEF(PUZDCPresampler)
     default:
       return std::string("UNKNOWN mask bit ") +
              std::to_string(static_cast<unsigned int>(m));
@@ -86,11 +87,13 @@ std::unique_ptr<TH1D> loadHist(const std::string& file) {
                                   j.at("fXmax").get<double>());
   const std::vector<double> bins = j.at("fArray").get<std::vector<double>>();
   if (bins.size() != j.at("fNbins").get<size_t>() + 2) {
-    throw std::runtime_error("Histogram " +
-                             j.at("fName").get<std::string>() + " has inconsistent number of bins and fNbins (should +2) value " + std::to_string(bins.size()) +" and " + std::to_string(nbins));
+    throw std::runtime_error(
+        "Histogram " + j.at("fName").get<std::string>() +
+        " has inconsistent number of bins and fNbins (should +2) value " +
+        std::to_string(bins.size()) + " and " + std::to_string(nbins));
   }
 
-  for (size_t bin = 0; bin < nbins+2; bin++) {
+  for (size_t bin = 0; bin < nbins + 2; bin++) {
     h->SetBinContent(bin, bins[bin]);
   }
   h->SetDirectory(0);
@@ -140,7 +143,8 @@ bool HI::HIEventSelectionToolRun3::noDetectorError(
   return true;
 }
 
-float calcFcalEt(const xAOD::HIEventShapeContainer* es) {
+float HI::HIEventSelectionToolRun3::fcalEt(
+    HI::IonDataType, const xAOD::HIEventShapeContainer* es) const {
   float et = 0;
   for (auto slice : *es) {
     const static std::set fcalLayers({21, 22, 23});
@@ -149,7 +153,9 @@ float calcFcalEt(const xAOD::HIEventShapeContainer* es) {
   }
   return et * 1e-6;  // we operate in TeV
 }
-float calcZDCE(const xAOD::ZdcModuleContainer* zdcModules) {
+
+float HI::HIEventSelectionToolRun3::zdcE(
+    HI::IonDataType, const xAOD::ZdcModuleContainer* zdcModules) const {
   float e = 0;
   static const SG::ConstAccessor<float> calibEnergyAccessor("CalibEnergy");
   for (auto module : *zdcModules) {
@@ -159,23 +165,22 @@ float calcZDCE(const xAOD::ZdcModuleContainer* zdcModules) {
 }
 
 bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
-    HI::IonDataType when, const xAOD::HIEventShapeContainer* es,
+    HI::IonDataType period, const xAOD::HIEventShapeContainer* es,
     const xAOD::ZdcModuleContainer* zdcModules,
     HI::PileupVariation variation) const {
-  return puZDCvsFCal(when, calcFcalEt(es), calcZDCE(zdcModules), variation);
+  return puZDCvsFCal(period, fcalEt(period, es), zdcE(period, zdcModules), variation);
 }
 
 bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
-    HI::IonDataType when, float fcalEt, float zdcE,
+    HI::IonDataType period, float fcalEt, float zdcE,
     HI::PileupVariation variation) const {
-  const float cut = zdcCutValue(when, fcalEt, variation);
+  const float cut = zdcCutValue(period, fcalEt, variation);
   return zdcE < cut;
 }
 
-bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(
-    IonDataType dataType, const xAOD::HIEventShapeContainer* es,
-    const xAOD::TrackParticleContainer* tracks,
-    const xAOD::VertexContainer* vertices, PileupVariation variation) const {
+int HI::HIEventSelectionToolRun3::nTrk(HI::IonDataType,
+                 const xAOD::TrackParticleContainer* tracks,
+                 const xAOD::VertexContainer* vertices) const {
   const xAOD::Vertex* pv = 0;
   for (const xAOD::Vertex* vx : *vertices) {
     if (vx->vertexType() == xAOD::VxType::PriVtx) {
@@ -190,10 +195,17 @@ bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(
       count++;
     }
   }
-  return puFCalVsNtracks(dataType, calcFcalEt(es), count, variation);
+  return count;
 }
 
-bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType when,
+bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(
+    HI::IonDataType period, const xAOD::HIEventShapeContainer* es,
+    const xAOD::TrackParticleContainer* tracks,
+    const xAOD::VertexContainer* vertices, PileupVariation variation) const {
+  return puFCalVsNtracks(period, fcalEt(period, es), nTrk(period, tracks, vertices), variation);
+}
+
+bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType period,
                                                    float fcalEt, int ntrk,
                                                    HI::PileupVariation) const {
   ATH_MSG_DEBUG("cutting puFCalVsNtracks: fcalEt " << fcalEt << " ntracks "
@@ -202,7 +214,7 @@ bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType when,
   // https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/#fcal-sumet-ntrk-correlation-cut
   // and more is here:
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
-  if (when == HI::IonDataType::OO2025) {
+  if (period == HI::IonDataType::OO2025) {
     if (ntrk < (-80 + fcalEt * 600))
       return false;
     if (ntrk < (-30 + fcalEt * 400))
@@ -210,7 +222,7 @@ bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType when,
     if (ntrk > (100 + fcalEt * 1700))
       return false;
     return true;
-  } else if (when == HI::IonDataType::NeNe2025) {
+  } else if (period == HI::IonDataType::NeNe2025) {
     if (ntrk < (-70 + fcalEt * 600))
       return false;
     if (ntrk < (-20 + fcalEt * 350))
@@ -223,30 +235,29 @@ bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType when,
 }
 
 bool HI::HIEventSelectionToolRun3::puZDCPresampler(
-    HI::IonDataType when, const xAOD::ZdcModuleContainer* zdcModules,
+    HI::IonDataType period, const xAOD::ZdcModuleContainer* zdcModules,
     HI::PileupVariation variation) const {
   float PreSamplerAmp_A = 0;
   float PreSamplerAmp_C = 0;
-  static const SG::ConstAccessor<float> accPreSamplerAmpA("");
-  static const SG::ConstAccessor<float> accPreSamplerAmpC("");
+  static const SG::ConstAccessor<float> accPreSampleAmp("PreSampleAmp");
   for (const auto module : *zdcModules) {
     if (module->zdcType() != 0)
       continue;
     if (module->zdcSide() > 0)
-      PreSamplerAmp_C += accPreSamplerAmpC(*module);
+      PreSamplerAmp_C += accPreSampleAmp(*module);
     if (module->zdcSide() < 0)
-      PreSamplerAmp_A += accPreSamplerAmpA(*module);
+      PreSamplerAmp_A += accPreSampleAmp(*module);
   }
-  return puZDCPresampler(when, PreSamplerAmp_A, PreSamplerAmp_C, variation);
+  return puZDCPresampler(period, PreSamplerAmp_A, PreSamplerAmp_C, variation);
 }
 
 bool HI::HIEventSelectionToolRun3::puZDCPresampler(
-    HI::IonDataType when, float presamplerA, float presamplerC,
+    HI::IonDataType period, float presamplerA, float presamplerC,
     HI::PileupVariation variation) const {
   // not sure if fcalEt will be involved i.e. apply this cut only above certain
   // fcalEt
 
-  if (when == HI::IonDataType::PbPb2023) {
+  if (period == HI::IonDataType::PbPb2023) {
     // from ATL-COM-PHYS-2025-033 + priv. communication F.Pauwels
     const float peakPositionA = -56;
     const float peakPositionC = -156;
@@ -311,14 +322,14 @@ bool HI::HIEventSelectionToolRun3::puOOVertexCuts(
 }
 
 float HI::HIEventSelectionToolRun3::zdcCutValue(
-    HI::IonDataType when, float fcalEt, HI::PileupVariation variation) const {
+    HI::IonDataType period, float fcalEt, HI::PileupVariation variation) const {
   if (fcalEt > 100.0)
     throw std::runtime_error(
         std::to_string(fcalEt) +
         " the energy that is given to zdcCutValue is well above 100 TeV?, "
         "likely you call it not converting energy to TeV");
 
-  if (when == HI::IonDataType::PbPb2023) {
+  if (period == HI::IonDataType::PbPb2023) {
 
     auto cutFunction = [](float et) {
       const static double a = 334.29, b = -20.39,
@@ -344,7 +355,7 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
   // https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
   // also See Figure 2.6 of
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
-  if (when == HI::IonDataType::OO2025) {
+  if (period == HI::IonDataType::OO2025) {
     //*1e3 below to convert fcalEt from TeV to GeV
     int refbin = m_ZDCEt_UpperCut_5p5Sigma_OO->FindFixBin(fcalEt * 1e3);
     if (refbin < 1)
@@ -357,7 +368,7 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
   // https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
   // also See Figure 2.6 of
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
-  if (when == HI::IonDataType::NeNe2025) {
+  if (period == HI::IonDataType::NeNe2025) {
     //*1e3 below to convert fcalEt from TeV to GeV
     int refbin = m_ZDCEt_UpperCut_4p0Sigma_NeNe->FindFixBin(fcalEt * 1e3);
     if (refbin < 1)
@@ -367,8 +378,8 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
     return m_ZDCEt_UpperCut_4p0Sigma_NeNe->GetBinContent(refbin) * 1e3;
   }
 
-  throw std::runtime_error(std::string("period of id ") + HI::toString(when) +
-                           "is not handled");
+  throw std::runtime_error(std::string("period of id ") + HI::toString(period) +
+                           " is not handled (yet)");
 
   return 0;
 }
@@ -390,7 +401,7 @@ HI::IonDataType HI::HIEventSelectionToolRun3::runNumberToDataType(
                              " not handled by selection tool");
   if (run <= 367384)
     return HI::IonDataType::PbPb2018;
-  if (run <= 461633)
+  if (run <= 463427)
     return HI::IonDataType::PbPb2023;
   if (run <= 489691)
     return HI::IonDataType::PbPb2024_Shadowing;

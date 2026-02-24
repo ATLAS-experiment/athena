@@ -24,10 +24,16 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual StatusCode initialize() override;
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const override;
 
-  virtual bool puZDCvsFCal(HI::IonDataType when,
+  virtual bool puZDCvsFCal(HI::IonDataType period,
                            const xAOD::HIEventShapeContainer* es,
                            const xAOD::ZdcModuleContainer* zdcModules,
                            HI::PileupVariation variation) const override;
+
+  virtual float fcalEt(HI::IonDataType period,
+                       const xAOD::HIEventShapeContainer* es) const override;
+
+  virtual float zdcE(HI::IonDataType period,
+                     const xAOD::ZdcModuleContainer* zdcModules) const override;
 
   virtual bool puZDCvsFCal(
       IonDataType dataType, float fcalEt, float zdcE,
@@ -39,11 +45,15 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
       const xAOD::VertexContainer* vertices,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
+  virtual int nTrk(HI::IonDataType dataType,
+                   const xAOD::TrackParticleContainer* tracks,
+                   const xAOD::VertexContainer* vertices)  const override;
+
   virtual bool puFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puZDCPresampler(HI::IonDataType when,
+  virtual bool puZDCPresampler(HI::IonDataType period,
                                const xAOD::ZdcModuleContainer* zdcModules,
                                HI::PileupVariation variation) const override;
 
