@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEIDCNV_TILEHWIDDETDESCRCNV_H
@@ -24,7 +24,7 @@ public:
     // Storage type and class ID (used by CnvFactory)
     virtual long repSvcType() const override;
     static long storageType();
-    static const CLID& classID();
+    static CLID classID();
 
     TileHWIDDetDescrCnv(ISvcLocator* svcloc);
 };
