@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef DERIVATIONFRAMEWORK_METREMAPPINGALG_H
@@ -13,7 +13,6 @@
 
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthLinks/ElementLink.h"
 
