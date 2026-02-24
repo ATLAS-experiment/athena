@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuPatTrackBuilder.h"
@@ -9,7 +9,6 @@
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonSegment/MuonSegment.h"
 #include "Particle/TrackParticleContainer.h"
-#include "StoreGate/DataHandle.h"
 #include "TrkSegment/SegmentCollection.h"
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackCollection.h"
