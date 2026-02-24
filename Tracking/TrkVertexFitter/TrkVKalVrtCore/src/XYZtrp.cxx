@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVKalVrtCore/XYZtrp.h"
@@ -110,14 +110,14 @@ void  xyztrp(const long int ich, double *vrt0, double *pv0, double *covi, double
 }
 
 
-void  combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double *par, double *covo)
+void  combinedTrack(long int ICH, double *pv0, double *covi, double effectiveBMAG, double *par, double *covo)
 {
 
     double cnv[36];	/* was [6][6] */
 /* ---------------------------------------------------------- */
 /*       Subroutine for convertion for VKalvrtCore            */
-/* Correct magnetic field BMAG at conversion point            */
-/*  is provided externally.                                   */
+/* Correct effective (non-uniform case) magnetic field BMAG   */
+/* at conversion point is provided externally.                */
 /*           (X,Y,Z,PX,PY,PZ) --> (eps,z,theta,phi,1/r)       */
 /*       Input:                                               */
 /*                 ICH      -  charge of track ( +1,0,-1 )    */
@@ -131,7 +131,7 @@ void  combinedTrack(long int ICH, double *pv0, double *covi, double BMAG, double
 /* Author: V.Kostyukhin                                       */
 /* ---------------------------------------------------------- */
 
-    double constBF =BMAG * vkalMagCnvCst;
+    double constBF =effectiveBMAG * vkalMagCnvCst;
 
     double pt = sqrt(pv0[0]*pv0[0] + pv0[1]*pv0[1]);
     double pp = pt*pt + pv0[2]*pv0[2];

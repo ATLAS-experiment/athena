@@ -50,9 +50,14 @@ double cfVrtDstSig( VKVertex * vk, bool UseTrkErr)
 			 vk->refIterV[2] + vk->cnstV[2]};
     long int Charge = 0; for ( it=0; it<NTRK; it++) Charge += vk->TrackList[it]->Charge;
 //std::cout<<" cfVrtDst ntrk="<<NTRK<<" chg="<<Charge<<'\n';
-    double localField=Trk::vkalMagFld::getMagFld(fittedVrt,(vk->vk_fitterControl).get());
+    //double localField=Trk::vkalMagFld::getMagFld(fittedVrt,(vk->vk_fitterControl).get());
+    double vBx,vBy,vBz;
+    Trk::vkalMagFld::getMagFld(fittedVrt[0], fittedVrt[1], fittedVrt[2],vBx,vBy,vBz,(vk->vk_fitterControl).get());
+    double lPhi   = atan2(ptot[1], ptot[0]);
+    double lTheta = acos(ptot[2] / sqrt(ptot[0]*ptot[0]+ptot[1]*ptot[1]+ptot[2]*ptot[2]));
+    double effectiveField = Trk::vkalMagFld::getEffField(vBx, vBy, vBz, lPhi, lTheta); 
     if ( UseTrkErr){
-      combinedTrack( Charge, ptot, vk->fitCovXYZMom, localField, parV0, covParV0);
+      combinedTrack( Charge, ptot, vk->fitCovXYZMom, effectiveField, parV0, covParV0);
     }else{
       double DummyErr[21] = { 1.e-20,
                                   0., 1.e-20,
@@ -60,7 +65,7 @@ double cfVrtDstSig( VKVertex * vk, bool UseTrkErr)
 				  0.,     0.,     0., 1.e-18,
 				  0.,     0.,     0.,     0., 1.e-18,
 				  0.,     0.,     0.,     0.,     0., 1.e-18};
-      combinedTrack( Charge, ptot, DummyErr, localField, parV0, covParV0);
+      combinedTrack( Charge, ptot, DummyErr, effectiveField, parV0, covParV0);
     }
 //
 // Propagation to constraint vertex
