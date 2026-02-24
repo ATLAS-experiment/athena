@@ -65,15 +65,6 @@ namespace pool  {
     DbStorageSvc (const DbStorageSvc&) = delete;
     DbStorageSvc& operator= (const DbStorageSvc&) = delete;
 
-    /// Label of the specific class
-    static const char* catalogLabel()  {   return "pool_DbStorageSvc";       }
-
-    /// Database domain handle
-    DbDomain& domainHdl()                                 {   return m_domH;  }
-
-    /// IInterface implementation: Query interfaces of Interface
-    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnknown) override final;
-
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef() override final;
 

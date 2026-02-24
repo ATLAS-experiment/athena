@@ -99,15 +99,6 @@ unsigned int DbStorageSvc::release()   {
   return count;
 }
 
-//--- IInterface::queryInterface
-StatusCode DbStorageSvc::queryInterface(const Guid& riid, void** ppvInterface)  {
-  if ( IStorageSvc::interfaceID() == riid )  {
-    *ppvInterface = static_cast<IStorageSvc*>(this);
-  }
-  addRef();
-  return StatusCode::SUCCESS;
-}
-
 /// IService implementation: Initilize Service                          
 StatusCode DbStorageSvc::initialize()   {
   return StatusCode::SUCCESS;

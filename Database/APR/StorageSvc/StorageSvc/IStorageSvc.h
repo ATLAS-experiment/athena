@@ -54,15 +54,6 @@ namespace pool  {
     virtual ~IStorageSvc()   {     }
 
   public:
-    /// Retrieve interface ID
-    static const Guid& interfaceID();
-
-    /// Retrieve category name
-    static const char* category()             { return "pool_IStorageSvc"; }
-
-    /// IInterface implementation: Query interfaces of Interface
-    virtual StatusCode queryInterface(const Guid& riid, void** ppvUnkn) = 0;
-
     /// IInterface implementation: Reference Interface instance               
     virtual unsigned int addRef() = 0;
 
