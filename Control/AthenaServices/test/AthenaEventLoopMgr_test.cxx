@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaServices/test/AthenaEventLoopMgr_test.cxx
@@ -111,7 +111,7 @@ public:
 
   virtual StatusCode createObj(IOpaqueAddress* addr, DataObject *& pO) override;
   virtual long int repSvcType() const override;
-  static const CLID& classID() { return ClassID_traits<EventInfo>::ID(); }
+  static CLID classID() { return ClassID_traits<EventInfo>::ID(); }
   static long int storageType()
   { return TestConversionSvc::storageType(); }
 };
