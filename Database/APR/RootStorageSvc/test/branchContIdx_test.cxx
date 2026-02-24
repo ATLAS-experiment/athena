@@ -83,14 +83,13 @@ void test(const DbType storageType, const std::string& filename) {
    }
    storSvc->addRef();
    cout << "Start WRITE session" << endl;
-   pool::Session* sessionHandle = 0;
-   if ( ! ( storSvc->startSession( pool::RECREATE, storageType.type(), sessionHandle ).isSuccess() ) ) {
+   if( !storSvc->startSession( pool::RECREATE, storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    pool::FileDescriptor fd( filename, filename );
-   if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    pool::DatabaseConnection* connection = fd.dbc();
@@ -163,7 +162,7 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
+   if( !storSvc->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
 
@@ -187,11 +186,10 @@ void test(const DbType storageType, const std::string& filename) {
 
    // ===============    READ back
    cout << endl << "Starting READ" << endl;
-   sessionHandle = nullptr;
-   if( !storSvc->startSession( pool::READ, storageType.type(), sessionHandle ).isSuccess() ) {
+   if( !storSvc->startSession( pool::READ, storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start the read session." );
    }
-   if( !storSvc->connect( sessionHandle, pool::READ, fd ).isSuccess() ) {
+   if( !storSvc->connect( pool::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
    // get shape again
@@ -232,7 +230,7 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->disconnect( fd ).isSuccess() ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   if( !storSvc->endSession( sessionHandle ).isSuccess() ) {
+   if( !storSvc->endSession().isSuccess() ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
    storSvc->release();

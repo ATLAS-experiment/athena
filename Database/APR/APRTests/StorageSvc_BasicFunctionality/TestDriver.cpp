@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -49,14 +49,13 @@ TestDriver::testWriting()
    }
    storSvc->addRef();
    cout << "startSession" << endl;
-   pool::Session* sessionHandle = 0;
-   if ( ! ( storSvc->startSession( pool::RECREATE, m_storageType.type(), sessionHandle ).isSuccess() ) ) {
+   if( !storSvc->startSession(pool::RECREATE, m_storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    cout << "Session connect" << endl;
    pool::FileDescriptor fd( m_filename, m_filename );
-   if ( ! ( storSvc->connect( sessionHandle, pool::RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    pool::DatabaseConnection* connection = fd.dbc();
@@ -134,7 +133,7 @@ TestDriver::testWriting()
   if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
     throw std::runtime_error( "Could not disconnect." );
   }
-  if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
   storSvc->release();
@@ -150,13 +149,12 @@ TestDriver::testReading()
   }
   storSvc->addRef();
 
-  pool::Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( pool::READ, m_storageType.type(), sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->startSession(pool::READ, m_storageType.type()).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   pool::FileDescriptor* fd = new pool::FileDescriptor( m_filename, m_filename );
-  if( !storSvc->connect( sessionHandle, pool::READ, *fd ).isSuccess() ) {
+  if( !storSvc->connect(pool::READ, *fd).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
@@ -274,7 +272,7 @@ TestDriver::testReading()
   delete fd;
 
   std::cout << "Closing the session" << std::endl;
-  if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
   storSvc->release();

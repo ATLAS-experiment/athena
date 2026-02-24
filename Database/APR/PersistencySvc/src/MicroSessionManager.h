@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_MICROSESSIONMANAGER_H
@@ -14,7 +14,6 @@ namespace pool {
 
   // forward declarations
   class IStorageSvc;
-  class Session;
   class ITransaction;
 
   namespace PersistencySvc {
@@ -74,7 +73,7 @@ namespace pool {
       DatabaseRegistry&          m_registry;
       ITransaction&              m_transaction;
       IStorageSvc*               m_storageSvc;
-      Session*                   m_session;
+      bool                       m_inSession;
       long                       m_technology;
       std::set<DatabaseHandler*> m_databaseHandlers;
     };

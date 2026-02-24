@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DatabaseHandler.h"
@@ -19,20 +19,16 @@
 #include <memory>
 
 pool::PersistencySvc::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
-                                                        pool::Session* session,
                                                         long technology,
                                                         const std::string& fid,
                                                         const std::string& pfn,
                                                         long accessmode ):
   m_storageSvc( storageSvc ),
-  m_session( session ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
   m_accessMode( accessmode )
 {
-  if ( ! m_storageSvc.connect( m_session,
-                               m_accessMode,
-                               m_fileDescriptor ).isSuccess() ) {
+  if ( ! m_storageSvc.connect( m_accessMode, m_fileDescriptor ).isSuccess() ) {
     throw std::runtime_error( "Could not connect to the database (APR: \" DatabaseHandler::DatabaseHandler \" from \" PersistencySvc \")" );
   }
 }
