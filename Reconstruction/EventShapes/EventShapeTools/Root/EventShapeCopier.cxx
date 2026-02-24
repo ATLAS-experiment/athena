@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EventShapeCopier.cxx 
@@ -32,7 +32,7 @@ EventShapeCopier::~EventShapeCopier() {}
 
 StatusCode EventShapeCopier::initialize() {
 
-  // DataHandles
+  // Handles
   ATH_CHECK( m_inputEventShape.initialize() );
   ATH_CHECK( m_outputEventShape.initialize() );
   m_outputEventShapeIn = m_outputEventShape.key();
