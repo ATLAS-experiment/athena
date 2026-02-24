@@ -58,7 +58,7 @@ namespace CP
   /// the copy.
 
   template<typename T> class SysCopyHandle final
-    : public ISysHandleBase, public asg::AsgMessagingForward
+    : public ISysObjectHandleBase, public asg::AsgMessagingForward
   {
     //
     // public interface
@@ -134,6 +134,8 @@ namespace CP
     fillSystematics (const ISystematicsSvc& svc,
                      const CP::SystematicSet& fullAffecting,
                      const std::vector<CP::SystematicSet>& sysList) override;
+    virtual StatusCode
+    addDecorationDependency (const std::string& decoName, bool decoWrite) override;
 
 
 
@@ -172,6 +174,16 @@ namespace CP
     /// algorithm instead.
   private:
     std::function<StoreType*()> m_evtStoreGetter;
+
+    /// \brief a function to add a data dependency to the parent
+    ///
+    /// This is used in AthenaMT to add a data dependency to the
+    /// algorithm we belong to. This is used instead of a pointer to the
+    /// parent directly because this handle can be held by different
+    /// (and unrelated) algorithm classes, and potentially in the future
+    /// also by tools.
+  private:
+    std::function<StatusCode(const std::string&,const std::string&,const std::string&,bool)> m_addDependency;
   };
 }
 

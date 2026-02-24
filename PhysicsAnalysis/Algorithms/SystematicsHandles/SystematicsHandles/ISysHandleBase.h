@@ -34,10 +34,6 @@ namespace CP
   public:
     virtual bool empty () const noexcept = 0;
 
-    /// \brief get the name pattern before substitution
-  public:
-    virtual std::string getNamePattern () const = 0;
-
     /// \brief get the affecting systematics if this is an input
     /// handle
     ///
@@ -53,6 +49,21 @@ namespace CP
     fillSystematics (const ISystematicsSvc& svc,
                      const CP::SystematicSet& fullAffecting,
                      const std::vector<CP::SystematicSet>& sysList) = 0;
+  };
+
+
+
+  /// @brief a @ref ISysHandleBase for a handle to a specific object/container
+  class ISysObjectHandleBase : public ISysHandleBase
+  {
+  public:
+
+    /// @brief get the name pattern before substitution
+    virtual std::string getNamePattern () const = 0;
+
+    /// @brief add dependency information for the given decoration
+    virtual StatusCode
+    addDecorationDependency (const std::string& decoName, bool decoWrite) = 0;
   };
 }
 

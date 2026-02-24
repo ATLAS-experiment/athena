@@ -16,6 +16,13 @@
 #include <SystematicsHandles/SysWriteDecorHandle.h>
 #include <AsgTools/PropertyWrapper.h>
 
+#include <xAODEgamma/ElectronContainer.h>
+#include <xAODEgamma/PhotonContainer.h>
+#include <xAODJet/JetContainer.h>
+#include <xAODMissingET/MissingETContainer.h>
+#include <xAODMuon/MuonContainer.h>
+#include <xAODTau/TauJetContainer.h>
+
 namespace CP
 {
   /// \brief an algorithm for calling \ref IPileupReweightingTool

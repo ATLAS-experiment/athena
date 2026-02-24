@@ -110,12 +110,12 @@ namespace CP
   StatusCode SelectionAccessorList ::
   fillSystematics (const ISystematicsSvc& svc,
                    const std::vector<CP::SystematicSet>& sysList,
-                   const std::string& objectName)
+                   ISysObjectHandleBase& objectHandle)
   {
     using namespace msgSelectionHelpers;
 
     for (auto& base : m_list)
-      ANA_CHECK (base->fillSystematics (svc, sysList, objectName));
+      ANA_CHECK (base->fillSystematics (svc, sysList, objectHandle));
     return StatusCode::SUCCESS;
   }
 }

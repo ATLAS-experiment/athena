@@ -53,19 +53,8 @@ namespace CP
 
 
 
-  template<typename T> std::string SysReadDecorHandle<T> ::
-  getNamePattern () const
-  {
-    // So far it is undefined what to return here, it could either be
-    // "decorName" or "objectName.decorName".  I'll fill this in once
-    // there is a reason for it to be one or the other.
-    return "";
-  }
-
-
-
   template<typename T> StatusCode SysReadDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle)
   {
     if (m_objectHandle != nullptr)
     {
@@ -79,7 +68,7 @@ namespace CP
 
 
   template<typename T> StatusCode SysReadDecorHandle<T> ::
-  initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum)
+  initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum)
   {
     if (!empty())
       return initialize (sysListHandle, objectHandle);
@@ -132,6 +121,7 @@ namespace CP
       ANA_MSG_DEBUG ("SysReadDecorHandle: " << decorName << " (" << sys.name() << ")");
       m_dataCache.emplace (sys, std::make_tuple (decorName, decorName));
     }
+    ANA_CHECK (m_objectHandle->addDecorationDependency (std::get<0>(m_dataCache.at({})), false));
     return StatusCode::SUCCESS;
   }
 
