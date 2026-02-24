@@ -33,9 +33,9 @@
 #include <string>
 #include <set>
 #include <map>
-#include <list>
 #include <utility>
-
+#include <atomic>
+#include <memory>
 
 class StoreGateSvc;
 class IIncidentSvc;

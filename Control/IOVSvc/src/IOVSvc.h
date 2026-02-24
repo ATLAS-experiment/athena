@@ -26,14 +26,15 @@
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "IOVSvc/IIOVSvcTool.h"
-#include <set>
-#include <map>
-#include <list>
-#include <string>
-#include <mutex>
-
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ICondSvc.h"
+
+#include <set>
+#include <map>
+#include <string>
+#include <mutex>
+#include <memory>
+
 
 
 

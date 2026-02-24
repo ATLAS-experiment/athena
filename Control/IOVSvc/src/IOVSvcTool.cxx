@@ -40,7 +40,6 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <stdexcept>
-#include <atomic>
 
 using SG::DataProxy;
 using SG::TransientAddress;
