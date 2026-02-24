@@ -48,8 +48,8 @@ public:
     }
   };
 
-  typedef std::multiset<IOVEntry*,IOVEntryStartCritereon>::iterator startITR;
-  typedef std::multiset<IOVEntry*,IOVEntryStopCritereon>::iterator  stopITR;
+  typedef std::multiset<IOVEntry*, IOVEntryStartCritereon> StartSet_t;
+  typedef std::multiset<IOVEntry*, IOVEntryStopCritereon> StopSet_t;
 
   IOVEntry( SG::DataProxy *proxy, std::unique_ptr<IOVRange> range):
     m_proxy(proxy), m_range(std::move(range))
@@ -67,11 +67,11 @@ public:
   void setRemovedStart(bool b) { m_removedStart = b; }
   void setRemovedStop(bool b)  { m_removedStop = b;  }
 
-  void setStartITR( startITR itr ) { m_startITR = itr; }
-  void setStopITR(  stopITR  itr ) { m_stopITR  = itr; }
+  void setStartITR( StartSet_t::iterator itr ) { m_startITR = itr; }
+  void setStopITR( StopSet_t::iterator itr ) { m_stopITR  = itr; }
 
-  startITR getStartITR() const { return m_startITR; }
-  stopITR  getStopITR()  const { return m_stopITR;  }
+  StartSet_t::iterator getStartITR() const { return m_startITR; }
+  StopSet_t::iterator  getStopITR()  const { return m_stopITR;  }
 
 private:
   SG::DataProxy* m_proxy{};
@@ -80,8 +80,8 @@ private:
   bool m_removedStart{false};
   bool m_removedStop{false};
 
-  startITR m_startITR{};
-  stopITR  m_stopITR{};
+  StartSet_t::iterator m_startITR{};
+  StopSet_t::iterator m_stopITR{};
 
 };
 

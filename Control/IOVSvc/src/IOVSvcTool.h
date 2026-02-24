@@ -162,11 +162,6 @@ private:
   ServiceHandle<IClassIDSvc> p_CLIDSvc;
   ServiceHandle<IToolSvc> p_toolSvc;
 
-  typedef std::multiset<IOVEntry*, IOVEntry::IOVEntryStartCritereon> startSet;
-  typedef std::multiset<IOVEntry*, IOVEntry::IOVEntryStopCritereon> stopSet;
-  typedef startSet::iterator startITR;
-  typedef stopSet::iterator  stopITR;
-
   std::map< const SG::DataProxy*, std::string> m_names;
 
   mutable std::recursive_mutex m_handleMutex ATLAS_THREAD_SAFE;
@@ -185,11 +180,11 @@ private:
 
   std::map< const SG::DataProxy*, IOVEntry*> m_entries;
 
-  startSet *p_startSet{nullptr};
-  stopSet  *p_stopSet{nullptr};
+  IOVEntry::StartSet_t* p_startSet{nullptr};
+  IOVEntry::StopSet_t* p_stopSet{nullptr};
 
-  startSet m_startSet_Clock, m_startSet_RE;
-  stopSet  m_stopSet_Clock, m_stopSet_RE;
+  IOVEntry::StartSet_t m_startSet_Clock, m_startSet_RE;
+  IOVEntry::StopSet_t m_stopSet_Clock, m_stopSet_RE;
 
   std::set< const SG::TransientAddress*, SortTADptr > m_preLoad;
 
@@ -214,10 +209,10 @@ private:
   Gaudi::Property<std::string> m_updateInterval{this, "updateInterval", "Event"};
 
 
-  void scanStartSet(startSet &pSet, const std::string &type,
+  void scanStartSet(IOVEntry::StartSet_t &pSet, const std::string &type,
                     std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 		    const IOVTime& curTime) const;
-  void scanStopSet(stopSet &pSet, const std::string &type,
+  void scanStopSet(IOVEntry::StopSet_t &pSet, const std::string &type,
                    std::set<SG::DataProxy*, SortDPptr> &proxiesToReset,
 		   const IOVTime& curTime) const;
 
