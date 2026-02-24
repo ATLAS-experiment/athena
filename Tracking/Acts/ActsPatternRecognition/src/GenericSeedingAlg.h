@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRK_GRIDTRIPLETSEEDINGALG_GRIDTRIPLETSEEDINGALG_H
-#define ACTSTRK_GRIDTRIPLETSEEDINGALG_GRIDTRIPLETSEEDINGALG_H
+#ifndef ACTSPATTERNRECOGNITION_GENERICSEEDINGALG_H
+#define ACTSPATTERNRECOGNITION_GENERICSEEDINGALG_H
 
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -33,10 +33,10 @@
 
 namespace ActsTrk {
 
-class GridTripletSeedingAlg : public AthReentrantAlgorithm {
+class GenericSeedingAlg : public AthReentrantAlgorithm {
 
  public:
-  GridTripletSeedingAlg(const std::string &name, ISvcLocator *pSvcLocator);
+  GenericSeedingAlg(const std::string &name, ISvcLocator *pSvcLocator);
 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;

@@ -376,8 +376,8 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy in (SeedingStrategy.GridTriplet, SeedingStrategy.Gbts):
+        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
@@ -413,7 +413,7 @@ def ActsStripSeedingAlgCfg(flags,
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
     if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "src/GridTripletSeedingAlg.h"
+#include "src/GenericSeedingAlg.h"
 
 // ACTS
 #include "Acts/Definitions/Units.hpp"
@@ -25,11 +25,11 @@
 
 namespace ActsTrk {
 
-GridTripletSeedingAlg::GridTripletSeedingAlg(const std::string& name,
+GenericSeedingAlg::GenericSeedingAlg(const std::string& name,
                                              ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator) {}
 
-StatusCode GridTripletSeedingAlg::initialize() {
+StatusCode GenericSeedingAlg::initialize() {
   ATH_MSG_INFO("Initializing " << name() << " ... ");
   if (m_fastTracking)
     ATH_MSG_INFO("   using fast tracking configuration.");
@@ -50,7 +50,7 @@ StatusCode GridTripletSeedingAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode GridTripletSeedingAlg::finalize() {
+StatusCode GenericSeedingAlg::finalize() {
   ATH_MSG_INFO("Seed statistics" << std::endl
                                  << makeTable(m_stat,
                                               std::array<std::string, kNStat>{
@@ -59,7 +59,7 @@ StatusCode GridTripletSeedingAlg::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode GridTripletSeedingAlg::execute(const EventContext& ctx) const {
+StatusCode GenericSeedingAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Executing " << name() << " ... ");
 
   auto timer = Monitored::Timer<std::chrono::milliseconds>("TIME_execute");
