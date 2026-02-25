@@ -58,6 +58,7 @@ BTagSignedIP BTagTrackIpAccessor::getSignedIp(const xAOD::TrackParticle &track, 
   const Amg::Vector3D track_momentum = get_vector3d(m_track_momentum(track));
 
   BTagSignedIP ip;
+
   const double ip_d0 = d0(track);
   ip.ip2d_signed_d0 = std::copysign(ip_d0, std::sin(jet_threeVector.phi() - track_momentum.phi()) * ip_d0);
   const double ip3d_signed_d0 = std::copysign(ip_d0, jet_threeVector.cross(track_momentum).dot(track_momentum.cross(-track_displacement)));
