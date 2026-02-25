@@ -177,9 +177,9 @@ namespace FlavorTagInference {
             [=](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
-              if (tp->pt() <= 0.5e3) return false;
               double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
+              if (tp->pt() <= 0.5e3) return false;
               if (std::abs(aug.d0(*tp)) >= 3.5) return false;
               if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
               if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 8) return false;
