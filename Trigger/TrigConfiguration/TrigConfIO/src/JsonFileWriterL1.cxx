@@ -666,6 +666,9 @@ TrigConf::JsonFileWriterL1::writeJsonFile(const std::string & filename, const L1
          jThrType["XEJWOJ_c_A"] = ei.JWOJ_param('A','c');
          jThrType["XEJWOJ_c_B"] = ei.JWOJ_param('B','c');
          jThrType["XEJWOJ_c_C"] = ei.JWOJ_param('C','c');
+         jThrType["XENOISECUT_noiseCutThrA"] = ei.noiseCutThr('A');
+         jThrType["XENOISECUT_noiseCutThrB"] = ei.noiseCutThr('B');
+         jThrType["XENOISECUT_noiseCutThrC"] = ei.noiseCutThr('C');
       }
 
       if(thrType == "gTE") {

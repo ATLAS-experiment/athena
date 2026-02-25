@@ -620,6 +620,14 @@ namespace TrigConf {
           if(fpga=='C' && param=='c') return m_XEJWOJ_c_C;
           throw std::runtime_error(std::string("L1ThrExtraInfo: ") + fpga + " and " + param  + " not recongnised for gXE JWOJ_param");
       }
+
+      unsigned int noiseCutThr(const char fpga) const {
+          if(fpga=='A') return m_noiseCutThrA;
+          if(fpga=='B') return m_noiseCutThrB;
+          if(fpga=='C') return m_noiseCutThrC;
+          throw std::runtime_error(std::string("L1ThrExtraInfo: FPGA ") + fpga + " not recongnised for gXE noiseCutThr");
+      }
+
    private:
       /** Update the internal members */
       void load();
@@ -642,6 +650,9 @@ namespace TrigConf {
       unsigned int m_XEJWOJ_c_A{0};
       unsigned int m_XEJWOJ_c_B{0};
       unsigned int m_XEJWOJ_c_C{0};
+      unsigned int m_noiseCutThrA{0};
+      unsigned int m_noiseCutThrB{0};
+      unsigned int m_noiseCutThrC{0};
    };
 
    class L1ThrExtraInfo_gTE final : public L1ThrExtraInfoBase {
