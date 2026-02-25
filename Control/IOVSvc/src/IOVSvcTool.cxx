@@ -35,7 +35,6 @@
 
 #include "IOVEntry.h"
 #include "IOVSvc/IOVAddress.h"
-#include "IOVSvc/IOVCallbackError.h"
 
 #include <algorithm>
 #include <stdint.h>
