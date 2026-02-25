@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //author Renato Febbraro
@@ -43,7 +43,7 @@ TileLaserObjByteStreamCnv::TileLaserObjByteStreamCnv(ISvcLocator* svcloc)
 {
 }
 
-const CLID& TileLaserObjByteStreamCnv::classID(){ return ClassID_traits<TileLaserObject>::ID();}
+CLID TileLaserObjByteStreamCnv::classID(){ return ClassID_traits<TileLaserObject>::ID();}
 
 long TileLaserObjByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 
