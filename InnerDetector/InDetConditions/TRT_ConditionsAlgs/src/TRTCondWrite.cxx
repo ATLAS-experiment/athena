@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -56,15 +56,8 @@ StatusCode TRTCondWrite::initialize()
 
     if (m_par_caltextfile != "" && format > 0)
     {
-
         ATH_CHECK(m_rtWriteKey.initialize());
-        if (m_condSvc->regHandle(this, m_rtWriteKey).isFailure())
-            ATH_MSG_ERROR("unable to register WriteCondHandle " << m_rtWriteKey.fullKey());
-        ATH_MSG_INFO("Registered WriteCondHandle " << m_rtWriteKey.fullKey());
         ATH_CHECK(m_t0WriteKey.initialize());
-        if (m_condSvc->regHandle(this, m_t0WriteKey).isFailure())
-            ATH_MSG_ERROR("unable to register WriteCondHandle " << m_t0WriteKey.fullKey());
-        ATH_MSG_INFO("Registered WriteCondHandle " << m_t0WriteKey.fullKey());
     }
     ATH_MSG_INFO(" Initilization done with WriteKey Registraton ");
 
