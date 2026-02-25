@@ -48,6 +48,7 @@ namespace Analysis {
         const xAOD::TrackParticleContainer* collection1{nullptr};
         const xAOD::TrackParticleContainer* collection2{nullptr};
         PairTypeEE pairType=PairTypeEE::ELEL;
+        bool switched=false;
     };
     
     class JpsiFinder_ee:  public Analysis::ICandidateSearch, public AthAlgTool
@@ -65,10 +66,10 @@ namespace Analysis {
         virtual StatusCode performSearch(xAOD::VertexContainer*& vxContainer, xAOD::VertexAuxContainer*& vxAuxContainer) override;
         std::vector<JpsiEECandidate> getPairs(const std::vector<const xAOD::TrackParticle*>&);
         std::vector<JpsiEECandidate> getPairs(const std::vector<const xAOD::Electron*>&);
-        std::vector<JpsiEECandidate> getPairs2Colls(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::Electron*>&, bool);
+        std::vector<JpsiEECandidate> getPairs2Colls(const std::vector<const xAOD::TrackParticle*>&, const std::vector<const xAOD::Electron*>&, bool, bool, bool );
         double getInvariantMass(const JpsiEECandidate&, const std::vector<double>& );
         std::vector<JpsiEECandidate> selectCharges(const std::vector<JpsiEECandidate>& , const std::string&);
-        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection);
+        xAOD::Vertex* fit(const std::vector<const xAOD::TrackParticle*>&, const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* importedElTrackCollection, bool switched );
         bool passesEgammaCuts(const xAOD::Electron*);
         bool isContainedIn(const xAOD::TrackParticle*, const xAOD::TrackParticleContainer*);
         TVector3 trackMomentum(const xAOD::Vertex * vxCandidate, int trkIndex) const;
@@ -98,6 +99,7 @@ namespace Analysis {
         bool m_allChCombs;
         std::string m_electronCollectionKey;
         std::string m_TrkParticleCollection;
+        std::string m_elTrkParticleCollection;
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;
         ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
@@ -105,6 +107,8 @@ namespace Analysis {
         bool m_egammaCuts;
         std::string m_elSelection;
         bool m_doTagAndProbe;
+        bool m_doFakeVertexing;
+        bool m_avoidSelfVertexing;
         int m_numberOfEventsWithJpsi;
     };
 } // end of namespace

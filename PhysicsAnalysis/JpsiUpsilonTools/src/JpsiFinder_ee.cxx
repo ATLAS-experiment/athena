@@ -27,8 +27,8 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/ElectronxAODHelpers.h"
 #include "EventKernel/PdtPdg.h"
 namespace Analysis {
     
@@ -80,17 +80,17 @@ namespace Analysis {
             if (m_diElectrons) {m_trk1M = pd_el->mass(); m_trk2M = pd_el->mass();}
         }
         
-        if (m_doTagAndProbe) ATH_MSG_WARNING("You have requested tag and probe mode. Duplicate mu+trk pairs WILL be allowed, charge ordering WILL NOT be done. Tag track will be first in each candidate");
-        
+        if (m_doTagAndProbe) ATH_MSG_WARNING("You have requested tag and probe mode. Duplicate el+trk pairs WILL be allowed, charge ordering WILL NOT be done. Tag track will be first in each candidate");
+        if (m_doFakeVertexing && m_eltrk) ATH_MSG_WARNING("You have requested fake-vertexing in el+trk mode. Duplicate el+trk pairs WILL be allowed, charge ordering WILL NOT be done. The electron's track will be first in each candidate");
 
 //        // Check that the user's settings are sensible
         bool illogicalOptions(false);
         if ( (m_elel && m_eltrk) || (m_elel && m_trktrk) || (m_eltrk && m_trktrk) ) {
-            ATH_MSG_WARNING("You are requesting incompatible combinations of muons and tracks in the pairs. JpsiEECandidates will be EMPTY!");
+            ATH_MSG_WARNING("You are requesting incompatible combinations of electrons and tracks in the pairs. JpsiEECandidates will be EMPTY!");
             illogicalOptions=true;
         };
         if ( (m_doTagAndProbe && m_elel) || (m_doTagAndProbe && m_trktrk) ) {
-           ATH_MSG_WARNING("You are requesting Tag and Probe analysis but have not requested mu+trk mode. This is impossible. JpsiEECandidates will be EMPTY!");
+           ATH_MSG_WARNING("You are requesting Tag and Probe analysis but have not requested el+trk mode. This is impossible. JpsiEECandidates will be EMPTY!");
             illogicalOptions=true;
         };
         if ( (m_oppChOnly && m_sameChOnly) || (m_oppChOnly && m_allChCombs) || (m_sameChOnly && m_allChCombs) ) {
@@ -98,7 +98,12 @@ namespace Analysis {
             illogicalOptions=true;
         };
         if ( (m_sameChOnly && m_doTagAndProbe) || (m_allChCombs && m_doTagAndProbe) ) {
+            // Too presumptive? 
             ATH_MSG_WARNING("You are requesting same-sign or all-sign combinations in a tag and probe analysis. This doesn't make sense. JpsiEECandidates will be EMPTY!");
+            illogicalOptions=true;
+        }
+        if ( (m_elel && m_doFakeVertexing) ){
+            ATH_MSG_WARNING("You are requesting fake-vertexing in el+el mode. This doesn't make sense. JpsiEECandidates will be EMPTY!");
             illogicalOptions=true;
         }
         if (illogicalOptions) return StatusCode::FAILURE;
@@ -141,6 +146,7 @@ namespace Analysis {
     m_allChCombs(false),
     m_electronCollectionKey("Electrons"),
     m_TrkParticleCollection("InDetTrackParticles"),
+    m_elTrkParticleCollection("GSFTrackParticles"),
     m_iVertexFitter("Trk::TrkVKalVrtFitter", this),
     m_iV0VertexFitter("Trk::V0VertexFitter", this),
     m_trkSelector("InDet::TrackSelectorTool"),
@@ -148,6 +154,8 @@ namespace Analysis {
     m_egammaCuts(true),
     m_elSelection("d0"),
     m_doTagAndProbe(false),
+    m_doFakeVertexing(false),
+    m_avoidSelfVertexing(true),
     m_numberOfEventsWithJpsi(0)
     
     {
@@ -175,12 +183,15 @@ namespace Analysis {
         declareProperty("allChargeCombinations",m_allChCombs);
         declareProperty("electronCollectionKey",m_electronCollectionKey);
         declareProperty("TrackParticleCollection",m_TrkParticleCollection);
+        declareProperty("electronTrackParticleCollection",m_elTrkParticleCollection);
         declareProperty("TrkVertexFitterTool",m_iVertexFitter);
         declareProperty("V0VertexFitterTool",m_iV0VertexFitter);
         declareProperty("TrackSelectorTool",m_trkSelector);
         declareProperty("VertexPointEstimator",m_vertexEstimator);
         declareProperty("useEgammaCuts",m_egammaCuts);
         declareProperty("doTagAndProbe",m_doTagAndProbe);
+        declareProperty("doFakeVertexing",m_doFakeVertexing);
+        declareProperty("avoidSelfVertexing",m_avoidSelfVertexing);
         declareProperty("ElectronSelection",m_elSelection);
     }
     
@@ -217,17 +228,29 @@ namespace Analysis {
         }
         ATH_MSG_DEBUG("Electron container size "<<importedElectronCollection->size());       
 
-        // Get ID tracks
+        // Get tracks
         const xAOD::TrackParticleContainer* importedTrackCollection(0);
+        const xAOD::TrackParticleContainer* importedElTrackCollection(0);
         sc = evtStore()->retrieve(importedTrackCollection,m_TrkParticleCollection);
         if(sc.isFailure()){
             ATH_MSG_WARNING("No TrackParticle collection with name " << m_TrkParticleCollection << " found in StoreGate!");
             return StatusCode::SUCCESS;;
         } else {
         }
-        
-        // Typedef for vectors of tracks and muons
+        if (m_eltrk && m_TrkParticleCollection != m_elTrkParticleCollection){
+            sc = evtStore()->retrieve(importedElTrackCollection,m_elTrkParticleCollection);
+            if(sc.isFailure()){
+                ATH_MSG_WARNING("No TrackParticle collection with name " << m_elTrkParticleCollection << " found in StoreGate!");
+                return StatusCode::SUCCESS;;
+            } else {
+            }
+        } else {
+            importedElTrackCollection = importedTrackCollection;
+        }
+
+        // Typedef for vectors of tracks and electrons
         typedef std::vector<const xAOD::TrackParticle*> TrackBag;
+        typedef std::vector<const xAOD::TrackParticle*> ElTrackBag; // Do we really need this?
         typedef std::vector<const xAOD::Electron*> ElectronBag;
         
         // Select the inner detector tracks
@@ -245,7 +268,7 @@ namespace Analysis {
             ATH_MSG_DEBUG("Number of tracks after ID track selection: " << theIDTracksAfterSelection.size());
         }
         
-        // Select the muons
+        // Select the electrons
         ElectronBag theElectronsAfterSelection;
         xAOD::ElectronContainer::const_iterator elItr;
         if (m_elel || m_eltrk) {
@@ -253,15 +276,22 @@ namespace Analysis {
                 if ( *elItr == NULL ) continue;
                 
                 const xAOD::TrackParticle* elTrk(0);
-                if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
+                if ( m_elTrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
                     static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
                     if ( ! refittedTrackParticleLink.isAvailable(*(*elItr)) || ! refittedTrackParticleLink(*(*elItr)).isValid() ) continue;
                     elTrk = *refittedTrackParticleLink(*(*elItr));
-                } else {
+                }
+                if ( m_elTrkParticleCollection == "GSFTrackParticles" ) {
                     if (!(*elItr)->trackParticleLink().isValid()) continue; // No electrons without ID tracks
                     elTrk = (*elItr)->trackParticleLink().cachedElement();
+                } 
+                if ( m_elTrkParticleCollection == "InDetTrackParticles" ) {
+                    if (!(*elItr)->trackParticleLink().isValid()) continue; 
+                    elTrk = (*elItr)->trackParticleLink().cachedElement();
+                    if (! xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( elTrk ) ) continue;
+                    elTrk = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( elTrk ); 
                 }
-                if ( elTrk==NULL) continue;
+                if ( elTrk == NULL) continue;
                 if ( !m_trkSelector->decision(*elTrk, vx) ) continue; // all ID tracks must pass basic tracking cuts
                 if ( fabs(elTrk->pt())<m_thresholdPt ) continue; // higher pt cut if needed
         
@@ -271,12 +301,13 @@ namespace Analysis {
             if (theElectronsAfterSelection.size() == 0) return StatusCode::SUCCESS;;
             ATH_MSG_DEBUG("Number of electrons after selection: " << theElectronsAfterSelection.size());
         }
+
         
         // Sort into pairs - end result will be a vector of JpsiEECandidate structs
         std::vector<JpsiEECandidate> jpsiCandidates;
-        if (m_elel) jpsiCandidates = getPairs(theElectronsAfterSelection);
+        if (m_elel) jpsiCandidates   = getPairs(theElectronsAfterSelection);
         if (m_trktrk) jpsiCandidates = getPairs(theIDTracksAfterSelection);
-        if (m_eltrk) jpsiCandidates = getPairs2Colls(theIDTracksAfterSelection,theElectronsAfterSelection,m_doTagAndProbe);
+        if (m_eltrk) jpsiCandidates  = getPairs2Colls(theIDTracksAfterSelection,theElectronsAfterSelection,m_doTagAndProbe,m_doFakeVertexing,m_avoidSelfVertexing);
         if (jpsiCandidates.size() > 0) m_numberOfEventsWithJpsi++;
 
         ATH_MSG_DEBUG("Number of pairs with ee from a B decay: " << jpsiCandidates.size() );
@@ -290,18 +321,23 @@ namespace Analysis {
         // and set the appropriate track collections for the combined muon tracks where appropriate (for saving to persistency later)
         
         // el+trk or trk+trk - always ID track collection
-        if (m_eltrk || m_trktrk) {
+        if (m_eltrk) {
+            for (jpsiItr=jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr) {
+                (*jpsiItr).collection1 = importedElTrackCollection;
+                (*jpsiItr).collection2 = importedTrackCollection;
+            }
+        }
+        if (m_trktrk) {
             for (jpsiItr=jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr) {
                 (*jpsiItr).collection1 = importedTrackCollection;
                 (*jpsiItr).collection2 = importedTrackCollection;
             }
         }
         
-        std::vector<const xAOD::TrackParticleContainer*>::iterator muTrkCollItr;
         if (m_elel) {
             for (jpsiItr=jpsiCandidates.begin(); jpsiItr!=jpsiCandidates.end(); ++jpsiItr) {
                 if ( m_useTrackMeasurement ) {
-                  if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
+                  if ( m_elTrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
                     static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
                     (*jpsiItr).trackParticle1 = *refittedTrackParticleLink(*((*jpsiItr).el1));
                     (*jpsiItr).trackParticle2 = *refittedTrackParticleLink(*((*jpsiItr).el2));
@@ -309,8 +345,8 @@ namespace Analysis {
                     (*jpsiItr).trackParticle1 = (*jpsiItr).el1->trackParticleLink().cachedElement();
                     (*jpsiItr).trackParticle2 = (*jpsiItr).el2->trackParticleLink().cachedElement();
                   }
-                  (*jpsiItr).collection1 = importedTrackCollection;
-                  (*jpsiItr).collection2 = importedTrackCollection;
+                  (*jpsiItr).collection1 = importedElTrackCollection;
+                  (*jpsiItr).collection2 = importedElTrackCollection;
                 } else {
 		   ATH_MSG_WARNING("Not setup for non-track electron measurements yet....");
 		}
@@ -390,13 +426,13 @@ namespace Analysis {
             theTracks.push_back((*jpsiItr).trackParticle1);
             theTracks.push_back((*jpsiItr).trackParticle2);
             ATH_MSG_DEBUG("theTracks size (should be two!) " << theTracks.size() << " being vertexed with tracks " << importedTrackCollection);
-            xAOD::Vertex* myVxCandidate = fit(theTracks,importedTrackCollection); // This line actually does the fitting and object making
+            xAOD::Vertex* myVxCandidate = fit(theTracks,importedTrackCollection, importedElTrackCollection, (*jpsiItr).switched); // This line actually does the fitting and object making
             if (myVxCandidate != 0) {
                 // Chi2 cut if requested
                 double chi2 = myVxCandidate->chiSquared();
                 ATH_MSG_DEBUG("chi2 is: " << chi2);
                 if (m_Chi2Cut == 0.0 || chi2 <= m_Chi2Cut) {             
-                	// decorate the candidate with refitted tracks and muons via the BPhysHelper
+                	// decorate the candidate with refitted tracks and electrons via the BPhysHelper
                 	xAOD::BPhysHelper jpsiHelper(myVxCandidate);
                 	jpsiHelper.setRefTrks();
                 	if (m_elel || m_eltrk) {
@@ -418,7 +454,6 @@ namespace Analysis {
             }
         }
         ATH_MSG_DEBUG("vxContainer size " << vxContainer->size());
-        
         return StatusCode::SUCCESS;;
     }
     
@@ -428,7 +463,7 @@ namespace Analysis {
     // fit - does the fit
     // ---------------------------------------------------------------------------------
     
-    xAOD::Vertex* JpsiFinder_ee::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,const xAOD::TrackParticleContainer* importedTrackCollection) {
+    xAOD::Vertex* JpsiFinder_ee::fit(const std::vector<const xAOD::TrackParticle*> &inputTracks,const xAOD::TrackParticleContainer* importedTrackCollection, const xAOD::TrackParticleContainer* importedElTrackCollection, bool switched ) {
         ATH_MSG_DEBUG("inside JpsiFinder_ee::fit");
         Trk::TrkV0VertexFitter* concreteVertexFitter=0;
         if (m_useV0Fitter) {
@@ -440,7 +475,6 @@ namespace Analysis {
                 return NULL;
             }
         }
-        
         const Trk::Perigee& aPerigee1 = inputTracks[0]->perigeeParameters();
         const Trk::Perigee& aPerigee2 = inputTracks[1]->perigeeParameters();
         int sflag = 0;
@@ -454,9 +488,24 @@ namespace Analysis {
             if(myVxCandidate != 0){
             std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
             for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++)
-            { ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const) 
-            mylink.setStorableObject(*importedTrackCollection, true); 
-            newLinkVector.push_back( mylink ); }
+            { 
+                ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const) 
+                if ( m_trktrk ){ 
+                    mylink.setStorableObject(*importedTrackCollection, true); 
+                }
+                if ( m_elel ){
+                    mylink.setStorableObject(*importedElTrackCollection, true);
+                }
+                if ( m_eltrk ) {
+                    unsigned int whichColl = switched ? ( i + 1 ) % 2 : i;
+                    if ( whichColl == 0 ){
+                        mylink.setStorableObject(*importedElTrackCollection, true); 
+                    } else {
+                        mylink.setStorableObject(*importedTrackCollection, true); 
+                    }
+                }  
+                newLinkVector.push_back( mylink ); 
+            }
             
             myVxCandidate->clearTracks();
             myVxCandidate->setTrackParticleLinks( newLinkVector );
@@ -473,7 +522,20 @@ namespace Analysis {
             std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
             for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++){ 
                 ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const) 
-                mylink.setStorableObject(*importedTrackCollection, true); 
+                if ( m_trktrk ){ 
+                    mylink.setStorableObject(*importedTrackCollection, true); 
+                }
+                if ( m_elel ){
+                    mylink.setStorableObject(*importedElTrackCollection, true);
+                }
+                if ( m_eltrk ) {
+                    unsigned int whichColl = switched ? ( i + 1 ) % 2 : i;
+                    if ( whichColl == 0 ){
+                        mylink.setStorableObject(*importedElTrackCollection, true); 
+                    } else {
+                        mylink.setStorableObject(*importedTrackCollection, true); 
+                    }
+                } 
                 newLinkVector.push_back( mylink );
                 ATH_MSG_DEBUG("Set a link!");
             }
@@ -554,27 +616,23 @@ namespace Analysis {
     // getPairs2Colls: forms up 2-plets of tracks from two independent collections
     // ---------------------------------------------------------------------------------
     
-    std::vector<JpsiEECandidate> JpsiFinder_ee::getPairs2Colls(const std::vector<const xAOD::TrackParticle*> &tracks, const std::vector<const xAOD::Electron*> &electrons, bool tagAndProbe){
+    std::vector<JpsiEECandidate> JpsiFinder_ee::getPairs2Colls(const std::vector<const xAOD::TrackParticle*> &tracks, const std::vector<const xAOD::Electron*> &electrons, bool tagAndProbe, bool fakeVertexing, bool avoidSelfVertexing ){
         
         std::vector<JpsiEECandidate> myPairs;
 
-        if ( m_TrkParticleCollection == "GSFCaloContainer" ) { // TODO: the name should not be hardcoded here
-            ATH_MSG_FATAL("NOT READY YET!");
-            return(myPairs);
-        }
-
         JpsiEECandidate pair;
         std::vector<const xAOD::TrackParticle*>::const_iterator trkItr;
-        std::vector<const xAOD::Electron*>::const_iterator muItr;
+        std::vector<const xAOD::Electron*>::const_iterator elItr;
         
-        // Unless user is running in tag and probe mode, remove tracks which are also identified as muons
+        // Unless user is running in tag and probe mode, remove tracks which are also identified as electrons
         std::vector<const xAOD::TrackParticle*> tracksToKeep;
-        if (!tagAndProbe) {
+        if (!tagAndProbe && !fakeVertexing ) {
+            // TODO: THIS WOULD NOT WORK! 
             if(tracks.size()>=1 && electrons.size()>=1){
                 for(trkItr=tracks.begin();trkItr<tracks.end();trkItr++){
                     bool trackIsElectron(false);
-                    for(muItr=electrons.begin();muItr<electrons.end();muItr++){
-                      if ( (*muItr)->trackParticleLink().cachedElement() == (*trkItr) ) {
+                    for(elItr=electrons.begin();elItr<electrons.end();elItr++){
+                      if ( (*elItr)->trackParticleLink().cachedElement() == (*trkItr) ) {
                           trackIsElectron=true; 
                           break;
                         }
@@ -586,17 +644,43 @@ namespace Analysis {
         
         if(tracksToKeep.size()>=1 && electrons.size()>=1){
             for(trkItr=tracksToKeep.begin();trkItr<tracksToKeep.end();trkItr++){
-                for(muItr=electrons.begin();muItr<electrons.end();muItr++){
-                    pair.el1 = *muItr;
-                    // Muon track 1st
-                    pair.trackParticle1 = (*muItr)->trackParticleLink().cachedElement();
+                for(elItr=electrons.begin();elItr<electrons.end();elItr++){
+                    pair.el1 = *elItr;
+                    // Electron track 1st
+                    if ( m_elTrkParticleCollection == "GSFCaloContainer" ) {
+                        static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
+                        pair.trackParticle1 = *refittedTrackParticleLink(*(*elItr));
+                    }
+                    if ( m_elTrkParticleCollection == "GSFTrackParticles" ) {
+                        pair.trackParticle1 = (*elItr)->trackParticleLink().cachedElement();
+                    }
+                    if ( m_elTrkParticleCollection == "InDetTrackParticles" ) {
+                        pair.trackParticle1 = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( (*elItr)->trackParticleLink().cachedElement() );
+                    }
                     pair.trackParticle2 = *trkItr;
-                    pair.pairType = ELTRK;
-                    myPairs.push_back(pair);
+                    bool addToPairs(true);
+                    const xAOD::TrackParticle* elTP1Compare;
+                    if ( avoidSelfVertexing && ( tagAndProbe || fakeVertexing ) ) { // Otherwise automatically avoided!
+                        if ( m_TrkParticleCollection == "InDetTrackParticles" ) {
+                            elTP1Compare = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF( (*elItr)->trackParticle(0) );
+                        }
+                        if ( m_TrkParticleCollection == "GSFTrackParticles" ) {
+                            elTP1Compare = (*elItr)->trackParticle(0);
+                        }
+                        if ( m_TrkParticleCollection == "GSFCaloContainer" ) {
+                            static const SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer> > refittedTrackParticleLink("gsfCaloTrackParticleLink");
+                            elTP1Compare = *refittedTrackParticleLink(*(*elItr));
+                        }
+                        if ( elTP1Compare == (*trkItr) ) { addToPairs = false; }
+                    }
+                    if ( addToPairs ) {
+                        pair.pairType = ELTRK;
+                        myPairs.push_back(pair);
+                    }
                 }
             }
         }
-        
+
         return(myPairs);
     }
     
@@ -615,12 +699,12 @@ namespace Analysis {
       // construct 4-vectors from track perigee parameters using given mass hypotheses.
       // NOTE: in new data model (xAOD) the defining parameters are expressed as perigee parameters w.r.t. the beamspot
       // NOTE2: TrackParticle::p4() method already returns TLorentzVector, however, we want to enforce our own mass hypothesis
-      TLorentzVector mu1;
-      TLorentzVector mu2;
-      mu1.SetVectM(jpsiIn.trackParticle1->p4().Vect(), mass1);
-      mu2.SetVectM(jpsiIn.trackParticle2->p4().Vect(), mass2);
+      TLorentzVector el1;
+      TLorentzVector el2;
+      el1.SetVectM(jpsiIn.trackParticle1->p4().Vect(), mass1);
+      el2.SetVectM(jpsiIn.trackParticle2->p4().Vect(), mass2);
       
-      return (mu1+mu2).M();
+      return (el1+el2).M();
         
     }
     
@@ -649,14 +733,17 @@ namespace Analysis {
             if(qOverP1*qOverP2<0.0) oppCh=true; // product charge < 0
             if(qOverP1*qOverP2>0.0) sameCh=true; // product charge > 0
             // +ve should be first so swap
-            // Don't do it for tag and probe analyses (because tag muon must not change position)
-            if (oppCh && qOverP1<0.0 && !m_doTagAndProbe) {
+            // Don't do it for tag and probe analyses (because tag electron must not change position)
+            // Also don't do it for eltrk if it's to be used in JpsiPlusXTracks 
+            // because it'd mess up duplication avoidance in JpsiPlusXTracks!
+            if (oppCh && qOverP1<0.0 && !m_doTagAndProbe && !( m_doFakeVertexing && m_eltrk ) ) {
             	tmpJpsi.trackParticle1 = (*jpsiItr).trackParticle2;
             	tmpJpsi.trackParticle2 = (*jpsiItr).trackParticle1;
             	tmpJpsi.el1 = (*jpsiItr).el2;
             	tmpJpsi.el2 = (*jpsiItr).el1;
             	tmpJpsi.collection1 = (*jpsiItr).collection2;
             	tmpJpsi.collection2 = (*jpsiItr).collection1;
+                tmpJpsi.switched = true;
             }
             if (oppCh && (opposite || all) ) jpsis.push_back(tmpJpsi);
             if (sameCh && (same || all) ) jpsis.push_back(tmpJpsi);
