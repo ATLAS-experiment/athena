@@ -79,6 +79,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
 
     FTAG1SlimmingHelper.SmartCollections += [
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                           "AntiKt4LCTopoJets",
                                           ]
 
     if flags.GeoModel.Run >= LHCPeriod.Run4:
@@ -98,6 +99,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FTAG1SlimmingHelper.AllVariables += [
             "InDetLargeD0TrackParticles",
             "AntiKt4EMPFlowJets",
+            "AntiKt4LCTopoJets",
             "AntiKt4UFOCSSKJets",
             "CaloCalFwdTopoTowers",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
@@ -137,7 +139,7 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
     FTAG1SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
 
     # Add labels in EMTopo jets
-    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
+    FTAG1SlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal", "AntiKt4LCTopoJets.HadronConeExclTruthLabelID.HadronGhostTruthLabelID.GhostBHadronsFinal.GhostCHadronsFinal.GhostTausFinal.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal"]
 
     # update AppendToDictionary
     extra_AppendToDictionary = {} #only add those items specifically for FTAG1 here!
@@ -371,11 +373,10 @@ def FTAG1ExtraContentCfg(flags):
     from JetRecConfig.JetRecConfig import JetRecCfg
     jetList = []
     #=======================================
-    # CSSK R = 0.4 UFO jets
+    # LCTopo R = 0.4 jets
     #=======================================
-    from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
-    jetList += [AntiKt4UFOCSSK]
-
+    from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+    jetList += [AntiKt4LCTopo]
 
     for jd in jetList:
         acc.merge(JetRecCfg(flags,jd))
