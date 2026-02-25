@@ -113,7 +113,7 @@ def FlavorTaggingCfg(
                 pfx=trackAugmenterPrefix,
             )
         )
-    else:      
+    else:
         acc.merge(BTagTrackAugmenterAlgCfg(
             cfgFlags,
             TrackCollection=trackCollection,
