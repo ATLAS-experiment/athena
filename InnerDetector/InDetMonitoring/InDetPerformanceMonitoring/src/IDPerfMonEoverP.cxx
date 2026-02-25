@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -118,7 +118,8 @@ IDPerfMonEoverP::IDPerfMonEoverP(const std::string& name,
 // The following properties are specified at run-time
 // (declared in jobOptions file)
   declareProperty("RefitTracks",                      m_refitEverything);
-  declareProperty("isDATA", m_isDATA);
+  declareProperty("isDATA",                           m_isDATA);
+  declareProperty("FillVertexInfo",                   m_fillVertexInfo = false, "job option to activate the filling of the vertex info");
   declareProperty("ReFitterTool",                     m_TrackRefitter, "ToolHandle for track fitter implementation");
   declareProperty("ReFitterTool2",                    m_TrackRefitter_no2, "ToolHandle for track fitter implementation");
   declareProperty("TrigDecisionTool",                 m_trigDec, "The TrigDecisionTool instance.");
@@ -175,8 +176,9 @@ StatusCode IDPerfMonEoverP::initialize()
     ATH_MSG_FATAL("Unable to retrieve " << m_trigDec << " turn it off");
     return StatusCode::FAILURE;
   }
-  else
-    ATH_MSG_INFO("Retrieved tool" << m_trigDec );
+  else {
+    ATH_MSG_INFO("Retrieved tool " << m_trigDec );
+  }
 
 
   //
@@ -304,10 +306,10 @@ StatusCode IDPerfMonEoverP::initialize()
       m_validationTree->Branch("ClusterEta"         ,  m_ClusterEta, "ClusterEta[nElectrons]/F");
       m_validationTree->Branch("ClusterPhi"         ,  m_ClusterPhi, "ClusterPhi[nElectrons]/F");
 
-      m_validationTree->Branch("IsEMLoose"          ,  m_IsEMLoose, "m_IsEMLoose[nElectrons]/B");
-      m_validationTree->Branch("IsEMMedium"         ,  m_IsEMMedium, "m_IsEMMedium[nElectrons]/B");
-      m_validationTree->Branch("IsEMTight"          ,  m_IsEMTight, "m_IsEMTight[nElectrons]/B");
-      m_validationTree->Branch("isGoodOQ"          ,  m_isGoodOQ, "isGoodOQ[nElectrons]/B");
+      m_validationTree->Branch("IsEMLoose"          ,  m_IsEMLoose, "m_IsEMLoose[nElectrons]/O");
+      m_validationTree->Branch("IsEMMedium"         ,  m_IsEMMedium, "m_IsEMMedium[nElectrons]/O");
+      m_validationTree->Branch("IsEMTight"          ,  m_IsEMTight, "m_IsEMTight[nElectrons]/O");
+      m_validationTree->Branch("isGoodOQ"          ,  m_isGoodOQ, "isGoodOQ[nElectrons]/O");
 
       m_validationTree->Branch("nTRT"               , m_nTRT , "nTRT[nElectrons]/I");
       m_validationTree->Branch("nSCT"               , m_nSCT, "nSCT[nElectrons]/I");
@@ -465,7 +467,6 @@ StatusCode IDPerfMonEoverP::initialize()
     ATH_MSG_WARNING("Tight electron likelihood tool initialize() failed!");
   ATH_MSG_INFO( "Initialization completed successfully");
   return StatusCode::SUCCESS;
-
 }
 
 // FINALIZE METHOD:
@@ -505,9 +506,11 @@ StatusCode IDPerfMonEoverP::execute()
   ATH_MSG_DEBUG("Retrieved Trigger info.");
   fillTriggerInformation();
 
-  if ( not fillVertexInformation(trackParticleVertexMap, primaryVertexFirstCandidate) ){
-    ATH_MSG_DEBUG("No Primary Vertex info found");
-  }
+  if (m_fillVertexInfo) {
+    if ( not fillVertexInformation(trackParticleVertexMap, primaryVertexFirstCandidate) ){
+      ATH_MSG_DEBUG("No Primary Vertex info found");
+    }
+  } // doVertexInfo
 
   ATH_MSG_DEBUG("MET info.being stored");
   if( storeMETinformation() ) {
@@ -547,102 +550,109 @@ StatusCode IDPerfMonEoverP::execute()
     ATH_MSG_DEBUG("Dealing with electron: "<< m_electronCounter+1);
     if (m_electronCounter >= NOS_ELECTRONS) break;
     const xAOD::Electron *pThisElectron = (*iter);
-    m_author[m_electronCounter] = pThisElectron->author(xAOD::EgammaParameters::AuthorElectron);
 
-    // Cluster Info
-    fillElectronInfo ( pThisElectron );
-    // Fill General info
-    fillGeneral( pThisElectron );
-    // Fill IsEm info
-    fillIsEM( pThisElectron );
-
-    //Get the track particle
-    const xAOD::TrackParticle* mytp = (*iter)->trackParticle();
-    if ( mytp != nullptr ) ATH_MSG_DEBUG("-- electron: "<< m_electronCounter+1 << "  pt: " << mytp->p4().Perp() );
-    
-    
-    if( mytp != nullptr ){
-      uint8_t dummy(0);
-      auto summaryByDetector=[&mytp,&dummy]( const xAOD::SummaryType & t){
-        return mytp->summaryValue(dummy, t) ? (dummy) : (-1);
-      };
-      m_nTRT[m_electronCounter]      = summaryByDetector( xAOD::numberOfTRTHits  );
-      m_nSCT[m_electronCounter]      = summaryByDetector( xAOD::numberOfSCTHits );
-      m_nPIX[m_electronCounter]      = summaryByDetector( xAOD::numberOfPixelHits );
-      m_nBLayer[m_electronCounter]   = summaryByDetector( xAOD::numberOfInnermostPixelLayerHits);
-      m_nTRTout[m_electronCounter]   = summaryByDetector( xAOD::numberOfTRTOutliers);
-      m_nSCTout[m_electronCounter]   = summaryByDetector( xAOD::numberOfSCTOutliers);
-      m_nTRTHT[m_electronCounter]    = summaryByDetector( xAOD::numberOfTRTHighThresholdHits);
-      m_nTRTHTout[m_electronCounter] = summaryByDetector( xAOD::numberOfTRTHighThresholdOutliers);
-    } else{
-      ATH_MSG_DEBUG("Electron with no track particle??   Possibly Forward");
-      continue;
-    }
-
-    //Find which if any vertex the electron track is associated to
-    VxPos myVxPos = findAssociatedVertex( trackParticleVertexMap,
-                                          primaryVertexFirstCandidate,
-                                          pThisElectron );
-    m_associatedToVtx[m_electronCounter] = myVxPos.second;
-    if( mytp->track() ){
-      const Trk::Track* oTrkTrack = mytp->track();
-         if (oTrkTrack){
-           const Trk::Perigee* oMeasPer =  oTrkTrack->perigeeParameters() ;
-	         if (oMeasPer) addToValidationNtuple( oMeasPer, pThisElectron->caloCluster(), 0 );
-           fillLastMeasurement( oTrkTrack , 0 );
-         }
-       }
-    else {
-      ATH_MSG_DEBUG("mytp->track() == 0");
-      const Trk::Perigee* oMeasPer = &(mytp->perigeeParameters()) ;
-      addToValidationNtuple( oMeasPer, pThisElectron->caloCluster(), 0 );
-    }
-
-
-    if(m_refitEverything) {
-      // First Refitter................
-      ATH_MSG_DEBUG(  "Refitting the track" );
-
-      IegammaTrkRefitterTool::Cache cache1{};
-      StatusCode sc = m_TrackRefitter->refitTrack(Gaudi::Hive::currentContext(),
-						  pThisElectron->trackParticle()->track(),
-						  cache1 );
-
-      if (sc == StatusCode::SUCCESS){
-        Trk::Track* trkTrack= cache1.refittedTrack.release();
-        m_refittedTracks_no1->push_back(trkTrack);
-        addToValidationNtuple( cache1.refittedTrackPerigee ,pThisElectron->caloCluster(), 1 );
-        fillLastMeasurement(trkTrack, 1 );
-      } else {
-        ATH_MSG_DEBUG(  "Track Refit Failed" );
+    if (pThisElectron->passSelection("LHTight") ) { // keep only tight electrons
+      m_author[m_electronCounter] = pThisElectron->author(xAOD::EgammaParameters::AuthorElectron);
+      
+      // Cluster Info
+      fillElectronInfo ( pThisElectron );
+      // Fill General info
+      fillGeneral( pThisElectron );
+      // Fill IsEm info
+      fillIsEM( pThisElectron );
+      
+      //Get the track particle
+      const xAOD::TrackParticle* mytp = (*iter)->trackParticle();
+      if ( mytp != nullptr ) ATH_MSG_DEBUG("-- electron: "<< m_electronCounter+1 << "  pt: " << mytp->p4().Perp() );
+      
+      if( mytp != nullptr ){
+	uint8_t dummy(0);
+	auto summaryByDetector=[&mytp,&dummy]( const xAOD::SummaryType & t){
+	  return mytp->summaryValue(dummy, t) ? (dummy) : (-1);
+	};
+	m_nTRT[m_electronCounter]      = summaryByDetector( xAOD::numberOfTRTHits  );
+	m_nSCT[m_electronCounter]      = summaryByDetector( xAOD::numberOfSCTHits );
+	m_nPIX[m_electronCounter]      = summaryByDetector( xAOD::numberOfPixelHits );
+	m_nBLayer[m_electronCounter]   = summaryByDetector( xAOD::numberOfInnermostPixelLayerHits);
+	m_nTRTout[m_electronCounter]   = summaryByDetector( xAOD::numberOfTRTOutliers);
+	m_nSCTout[m_electronCounter]   = summaryByDetector( xAOD::numberOfSCTOutliers);
+	m_nTRTHT[m_electronCounter]    = summaryByDetector( xAOD::numberOfTRTHighThresholdHits);
+	m_nTRTHTout[m_electronCounter] = summaryByDetector( xAOD::numberOfTRTHighThresholdOutliers);
       }
-      //******************************************************//
-      // Refit tracks using the second refitter if it is present
-      //******************************************************//
-      ATH_MSG_DEBUG(  "Refitting the track again" );
-
-      IegammaTrkRefitterTool::Cache cache2{};
-      sc = m_TrackRefitter_no2->refitTrack(Gaudi::Hive::currentContext(),
-                                           pThisElectron->trackParticle()->track(),
-                                           cache2 );
-
-      if (sc == StatusCode::SUCCESS){
-        Trk::Track* trkTrack= cache2.refittedTrack.release();
-        //Add the refitted track to the TrackCollection
-        m_refittedTracks_no2->push_back( trkTrack );
-        //Add data to the trkRefitterNtuple
-
-        addToValidationNtuple( cache2.refittedTrackPerigee ,pThisElectron->caloCluster(), 2 );
-        fillLastMeasurement( trkTrack, 2 );
-      } else {
-        ATH_MSG_DEBUG( "Track Refit Failed" );
+      else{
+	ATH_MSG_DEBUG("Electron with no track particle??   Possibly Forward");
+	continue;
       }
-    } else {
-      ATH_MSG_DEBUG(  "Not Refitting the track -- DO NOTHING" );
-    }//End if >6 silicon hits;
-    //Increment the electron counter for the validation nutple
-    ++m_electronCounter;
-  }
+      
+      //Find which if any vertex the electron track is associated to
+      VxPos myVxPos = findAssociatedVertex( trackParticleVertexMap,
+					    primaryVertexFirstCandidate,
+					    pThisElectron );
+      m_associatedToVtx[m_electronCounter] = myVxPos.second;
+      if( mytp->track() ){
+	const Trk::Track* oTrkTrack = mytp->track();
+	if (oTrkTrack){
+	  const Trk::Perigee* oMeasPer =  oTrkTrack->perigeeParameters() ;
+	  if (oMeasPer) addToValidationNtuple( oMeasPer, pThisElectron->caloCluster(), 0 );
+	  fillLastMeasurement( oTrkTrack , 0 );
+	}
+      }
+      else {
+	ATH_MSG_DEBUG("mytp->track() == 0");
+	const Trk::Perigee* oMeasPer = &(mytp->perigeeParameters()) ;
+	addToValidationNtuple( oMeasPer, pThisElectron->caloCluster(), 0 );
+      }
+      
+
+      if(m_refitEverything) {
+	// First Refitter................
+	ATH_MSG_DEBUG(  "Refitting the track" );
+	
+	IegammaTrkRefitterTool::Cache cache1{};
+	StatusCode sc = m_TrackRefitter->refitTrack(Gaudi::Hive::currentContext(),
+						    pThisElectron->trackParticle()->track(),
+						    cache1 );
+	
+	if (sc == StatusCode::SUCCESS){
+	  Trk::Track* trkTrack= cache1.refittedTrack.release();
+	  m_refittedTracks_no1->push_back(trkTrack);
+	  addToValidationNtuple( cache1.refittedTrackPerigee ,pThisElectron->caloCluster(), 1 );
+	  fillLastMeasurement(trkTrack, 1 );
+	} else {
+	  ATH_MSG_DEBUG(  "Track Refit Failed" );
+	}
+	//******************************************************//
+	// Refit tracks using the second refitter if it is present
+	//******************************************************//
+	ATH_MSG_DEBUG(  "Refitting the track again" );
+	
+	IegammaTrkRefitterTool::Cache cache2{};
+	sc = m_TrackRefitter_no2->refitTrack(Gaudi::Hive::currentContext(),
+					     pThisElectron->trackParticle()->track(),
+					     cache2 );
+	
+	if (sc == StatusCode::SUCCESS){
+	  Trk::Track* trkTrack= cache2.refittedTrack.release();
+	  //Add the refitted track to the TrackCollection
+	  m_refittedTracks_no2->push_back( trkTrack );
+	  //Add data to the trkRefitterNtuple
+	  
+	  addToValidationNtuple( cache2.refittedTrackPerigee ,pThisElectron->caloCluster(), 2 );
+	  fillLastMeasurement( trkTrack, 2 );
+	}
+	else {
+	  ATH_MSG_DEBUG( "Track Refit Failed" );
+	}
+      }
+      else {
+	ATH_MSG_DEBUG(  "Not Refitting the track -- DO NOTHING" );
+      }//End if >6 silicon hits;
+      
+      //Increment the electron counter for the validation nutple
+      ++m_electronCounter;
+    } // isTightElec
+  } // loop on electrons
+  
   // Commit Data to Ntuple;
   if( m_validationMode ) validationAction();
   // Fill much smaller tree
@@ -658,8 +668,8 @@ StatusCode IDPerfMonEoverP::execute()
       Trk::Track* trkTrack= cache.refittedTrack.release(); 
       selectedElectrons->push_back(trkTrack);
     }
-	}
-
+  }
+  
   //******************************************************//
   //* Add the newly created TrackCollection to StoreGate *//
   //******************************************************//
