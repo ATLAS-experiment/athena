@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStream/TgcRdoContByteStreamCnv.h"
@@ -26,7 +26,7 @@ TgcRdoContByteStreamCnv::TgcRdoContByteStreamCnv(ISvcLocator* svcloc) :
     AthConstConverter(storageType(), classID(), svcloc, "TgcRdoContByteStreamCnv"), m_tool("Muon::TgcRdoContByteStreamTool") {}
 
 // class ID
-const CLID& TgcRdoContByteStreamCnv::classID() { return ClassID_traits<TgcRdoContainer>::ID(); }
+CLID TgcRdoContByteStreamCnv::classID() { return ClassID_traits<TgcRdoContainer>::ID(); }
 
 long TgcRdoContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 

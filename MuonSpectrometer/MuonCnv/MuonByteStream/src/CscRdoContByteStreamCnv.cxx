@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStream/CscRdoContByteStreamCnv.h"
@@ -14,7 +14,7 @@ CscRdoContByteStreamCnv::CscRdoContByteStreamCnv(ISvcLocator* svcloc) :
     AthConstConverter(storageType(), classID(), svcloc, "CscRdoContByteStreamCnv"), m_tool("Muon::CscRdoContByteStreamTool") {}
 
 // class ID
-const CLID& CscRdoContByteStreamCnv::classID() { return ClassID_traits<CscRawDataContainer>::ID(); }
+CLID CscRdoContByteStreamCnv::classID() { return ClassID_traits<CscRawDataContainer>::ID(); }
 
 long CscRdoContByteStreamCnv::storageType() { return ByteStreamAddress::storageType(); }
 
