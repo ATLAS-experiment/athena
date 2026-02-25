@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOBYTESTREAM_L1TOPOBYTESTREAMCNV_H
@@ -61,7 +61,7 @@ public:
   /// Function needed by the framework
   static long storageType();
   /// Function needed by the framework
-  static const CLID& classID();
+  static CLID classID();
 
  private:
   /// Tool doing the actual conversion
