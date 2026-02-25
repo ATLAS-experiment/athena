@@ -732,6 +732,9 @@ def getConfig_gXE(do_HI_tob_thresholds):
         "XEJWOJ_c_A": 0,
         "XEJWOJ_c_B": 0,
         "XEJWOJ_c_C": 0,
+        "XENOISECUT_noiseCutThrA": 16,
+        "XENOISECUT_noiseCutThrB": 16,
+        "XENOISECUT_noiseCutThrC": 20,
         "resolutionMeV": 200
     }
     return confObj
