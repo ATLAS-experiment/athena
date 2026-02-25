@@ -259,6 +259,11 @@ def IDAlignMonGenericTracksAlgCfg(helper, alg, **kwargs):
     title = 'd_{0} (BS) Vs #phi_{0} (ECC);Track #phi_{0} [rad];d_{0} (BS) [mm]'
     genericTrackGroup.defineHistogram(varName, type='TH2F', path=pathtrack, title=title, xbins=m_phiBins, xmin=0, xmax= 2 * M_PI, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange, cutmask='isTrackECC')
    
+    # d0_origin 
+    varName = 'm_pT,m_d0;D0orVsPt'
+    title = 'd_{0} (origin) Vs p_{T};Signed track p_{T} [GeV];d_{0} (origin) [mm]'
+    genericTrackGroup.defineHistogram( varName, type='TH2F', path=pathtrack, title=title, xbins=200, xmin=-m_pTRange, xmax=m_pTRange, ybins=m_d0BsNbins, ymin=-m_d0BsRange, ymax=m_d0BsRange )
+
     ## Eta-ID vs Phi-ID vs hits 
     ### Pixel barrel and endcap
     layersPix = ['0', '1', '2', '3']
