@@ -22,11 +22,11 @@ JetHistoTriggEfficiency::JetHistoTriggEfficiency( const std::string& type,  cons
 
 
 StatusCode JetHistoTriggEfficiency::initialize() {
-  ATH_MSG_INFO("  initialize "    );
+  ATH_MSG_DEBUG("  initialize "    );
 
   if(m_selectTool.isEnabled()){
     ATH_CHECK(m_selectTool.retrieve());
-    ATH_MSG_INFO( " pre-select jets with "<< m_selectTool->name() );
+    ATH_MSG_DEBUG( " pre-select jets with "<< m_selectTool->name() );
   } else {m_selectTool.disable();}
 
   ATH_CHECK(m_jetVar.retrieve());
