@@ -40,7 +40,6 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <stdexcept>
-#include <atomic>
 
 using SG::DataProxy;
 using SG::TransientAddress;
@@ -482,7 +481,7 @@ IOVSvcTool::regProxy( DataProxy *proxy, const std::string& key) {
   fullname = tname + "[" + key + "]";
 
   m_proxies.insert( proxy );
-  m_names[ proxy ] = fullname;
+  m_names[ proxy ] = std::move(fullname);
 
   return StatusCode::SUCCESS;
 
