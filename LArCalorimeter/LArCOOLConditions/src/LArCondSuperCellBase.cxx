@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCOOLConditions/LArCondSuperCellBase.h"
@@ -9,7 +9,6 @@
 #include "GaudiKernel/IService.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
 
 LArCondSuperCellBase::LArCondSuperCellBase(const std::string& name) :
