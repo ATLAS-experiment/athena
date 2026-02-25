@@ -1,0 +1,70 @@
+MuonCalibrationConfig:
+  - name: pt
+    description: muon $p_\mathrm{T}$
+  - name: eta
+    description: muon $\eta$ (no systematics)
+  - name: phi
+    description: muon $\phi$ (no systematics)
+  - name: charge
+    description: muon charge (no systematics)
+  - name: e
+    description: muon $E$ (*since AnalysisBase 25.2.13*)
+  - name: truth_type
+    description: type of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_origin
+    description: origin of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: d0
+    description: the $d_0$ parameter
+    toggled_by: writeTrackD0Z0
+  - name: d0sig
+    description: the $d_0$ significance
+    toggled_by: writeTrackD0Z0
+  - name: z0
+    description: the $z_0$ parameter
+    toggled_by: writeTrackD0Z0
+  - name: z0sintheta
+    description: the $z_0\sin\theta$ parameter
+    toggled_by: writeTrackD0Z0
+  - name: z0sinthetasig
+    description: the $z_0\sin\theta$ significance
+    toggled_by: writeTrackD0Z0
+  - name: muonType
+    description: reconstruction type of the muon (combined, standalone, ...) (no systematics)
+    toggled_by: writeColumnarToolVariables
+
+MuonWorkingPointSelectionConfig:
+  - name: select
+    description: whether the muon passes the quality and isolation cuts
+  - name: is_bad
+    description: the "bad muon veto" flag, only with quality `HighPt`
+
+MuonWorkingPointEfficiencyConfig:
+  - name: reco_effSF
+    description: the per-muon reconstruction SF
+    toggled_by: saveDetailedSF
+  - name: BadMuonVeto_effSF
+    description: the dedicated "bad muon veto" SF, only with quality `HighPt`
+    toggled_by: saveDetailedSF
+  - name: isol_effSF
+    description: the per-muon isolation SF
+    toggled_by: saveDetailedSF
+  - name: TTVA_effSF
+    description: the per-muon track-to-vertex-association SF
+    toggled_by: saveDetailedSF
+  - name: effSF
+    description: the per-muon combined SF
+    toggled_by: saveCombinedSF
+
+MuonTriggerAnalysisSFBlock:
+  - name: <prefixSF>
+    description: the per-muon trigger efficiency SF
+    toggled_by: saveSF
+  - name: <prefixEff>
+    description: the per-muon trigger MC efficiency
+    toggled_by: saveEff
+  - name: <prefixEffData>
+    description: the per-muon trigger data efficiency
+    toggled_by: saveEffData
+
