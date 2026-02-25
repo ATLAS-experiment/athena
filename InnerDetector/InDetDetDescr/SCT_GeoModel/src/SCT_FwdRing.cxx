@@ -236,7 +236,7 @@ SCT_FwdRing::build(SCT_Identifier id)
             
             
             // Add the module
-            std::string moduleName = "FwdModuleR" + std::to_string(m_iRing) + "#" + std::to_string(idModule);
+            std::string moduleName = std::format("FwdModuleR{}#{}",m_iRing,idModule);
             ring->add(new GeoNameTag(moduleName));
             ring->add(new GeoIdentifierTag(idModule));
             GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(modulePos);
@@ -304,7 +304,7 @@ SCT_FwdRing::build(SCT_Identifier id)
             
             id.setPhiModule(idModule);
             m_module->build(id);
-            std::string key="FwdModuleR" + std::to_string(m_iRing)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+            std::string key=std::format("FwdModuleR{}_{}_{}_{}_{}",m_iRing,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
             
             // Store alignable transform
             m_detectorManager->addAlignableTransform(1, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);

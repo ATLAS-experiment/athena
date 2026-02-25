@@ -58,29 +58,25 @@ SCT_FwdModule::SCT_FwdModule(const std::string & name, int ringType,
     m_ringType(ringType)
 {
     getParameters();
-    if(!m_sqliteReader)
-    {
-        m_hybrid = std::make_unique<SCT_FwdHybrid>("SCT_FwdHybrid"+std::to_string(ringType), m_ringType, m_detectorManager, m_geometryManager, materials);
-        m_spine  = std::make_unique<SCT_FwdSpine>("SCT_FwdSpine"+std::to_string(ringType), m_ringType, m_detectorManager, m_geometryManager, materials);
-        m_subspineL  = std::make_unique<SCT_FwdSubSpine>("SCT_FwdSubSpineL"+std::to_string(ringType), m_ringType, SUBSPINE_LEFT,
-                                                         m_detectorManager, m_geometryManager, materials);
-        m_subspineR  = std::make_unique<SCT_FwdSubSpine>("SCT_FwdSubSpineR"+std::to_string(ringType), m_ringType, SUBSPINE_RIGHT,
-                                                         m_detectorManager, m_geometryManager, materials);
-        if (m_connectorPresent) {
-            m_connector = std::make_unique<SCT_FwdModuleConnector>("SCT_FwdModuleConnector"+std::to_string(ringType), m_ringType,
-                                                                   m_detectorManager, m_geometryManager, materials);
-        }
+    if(!m_sqliteReader) {
+      m_hybrid = std::make_unique<SCT_FwdHybrid>(std::format("SCT_FwdHybrid{}",ringType), m_ringType, m_detectorManager, m_geometryManager, materials);
+      m_spine  = std::make_unique<SCT_FwdSpine>(std::format("SCT_FwdSpine{}",ringType), m_ringType, m_detectorManager, m_geometryManager, materials);
+      m_subspineL  = std::make_unique<SCT_FwdSubSpine>(std::format("SCT_FwdSubSpineL{}",ringType), m_ringType, SUBSPINE_LEFT,
+						       m_detectorManager, m_geometryManager, materials);
+      m_subspineR  = std::make_unique<SCT_FwdSubSpine>(std::format("SCT_FwdSubSpineR{}",ringType), m_ringType, SUBSPINE_RIGHT,
+						       m_detectorManager, m_geometryManager, materials);
+      if (m_connectorPresent) {
+	m_connector = std::make_unique<SCT_FwdModuleConnector>(std::format("SCT_FwdModuleConnector{}",ringType), m_ringType,
+							       m_detectorManager, m_geometryManager, materials);
+      }
     }
-    m_sensor = std::make_unique<SCT_FwdSensor>("ECSensor"+std::to_string(ringType), m_ringType,
+    m_sensor = std::make_unique<SCT_FwdSensor>(std::format("ECSensor{}",ringType), m_ringType,
     m_detectorManager, m_geometryManager, materials, m_sqliteReader, m_mapFPV, m_mapAX);
     m_logVolume = SCT_FwdModule::preBuild();
 
 }
 
-SCT_FwdModule::~SCT_FwdModule()
-{
-}
-  
+SCT_FwdModule::~SCT_FwdModule() = default;
 
 void 
 SCT_FwdModule::getParameters()
@@ -210,7 +206,7 @@ GeoVPhysVol * SCT_FwdModule::build(SCT_Identifier id)
         
         int bottomSideNumber = (m_upperSide) ? 0 : 1;
         id.setSide(bottomSideNumber);
-        module->add(new GeoNameTag("Sensor_Side#"+std::to_string(bottomSideNumber)));
+        module->add(new GeoNameTag(std::format("Sensor_Side#{}",bottomSideNumber)));
         module->add(new GeoIdentifierTag(600+bottomSideNumber));
         module->add(bottomTransform);
         GeoVPhysVol * bottomSensorPV = m_sensor->build(id);
@@ -238,7 +234,7 @@ GeoVPhysVol * SCT_FwdModule::build(SCT_Identifier id)
         
         int topSideNumber = m_upperSide;
         id.setSide(topSideNumber);
-        module->add(new GeoNameTag("Sensor_Side#"+std::to_string(topSideNumber)));
+        module->add(new GeoNameTag(std::format("Sensor_Side#{}",topSideNumber)));
         module->add(new GeoIdentifierTag(600+topSideNumber));
         module->add(topTransform);
         GeoVPhysVol * topSensorPV = m_sensor->build(id);
@@ -252,26 +248,23 @@ GeoVPhysVol * SCT_FwdModule::build(SCT_Identifier id)
             module->add(m_sensor->getInactive());
         };
     }
-    else{
-        
-        int bottomSideNumber = (m_upperSide) ? 0 : 1;
-        id.setSide(bottomSideNumber);
-        m_sensor->build(id);
-        
-        // Store transform
-        std::string key="FwdSensor_Side#"+std::to_string(bottomSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
-        
-        int topSideNumber = m_upperSide;
-        id.setSide(topSideNumber);
-        
-        m_sensor->build(id);
-        
-        key="FwdSensor_Side#"+std::to_string(topSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        
-        // Store transform
-        m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
-        
+    else {
+      int bottomSideNumber = (m_upperSide) ? 0 : 1;
+      id.setSide(bottomSideNumber);
+      m_sensor->build(id);
+
+      // Store transform
+      std::string key=std::format("FwdSensor_Side#{}_{}_{}_{}_{}",bottomSideNumber,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
+      m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
+
+      int topSideNumber = m_upperSide;
+      id.setSide(topSideNumber);
+
+      m_sensor->build(id);
+
+      // Store transform
+      key=std::format("FwdSensor_Side#{}_{}_{}_{}_{}",topSideNumber,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
+      m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
     }
     return module;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_Forward.h"
@@ -35,27 +35,30 @@
 #include "GaudiKernel/SystemOfUnits.h"
 
 #include <cmath>
-#include <sstream>
 #include <utility>
 
-SCT_Forward::SCT_Forward(const std::string & name, int ec,
+SCT_Forward::SCT_Forward(const std::string & name,
+			 int ec,
                          InDetDD::SCT_DetectorManager* detectorManager,
                          SCT_GeometryManager* geometryManager,
                          SCT_MaterialManager* materials,
                          GeoModelIO::ReadGeoModel* sqliteReader,
                          std::shared_ptr<std::map<std::string, GeoFullPhysVol*>>        mapFPV,
                          std::shared_ptr<std::map<std::string, GeoAlignableTransform*>> mapAX)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader, std::move(mapFPV), std::move(mapAX)),
-    m_endcap(ec)
+: SCT_UniqueComponentFactory(name,
+			     detectorManager,
+			     geometryManager,
+			     materials,
+			     sqliteReader,
+			     std::move(mapFPV),
+			     std::move(mapAX)),
+  m_endcap(ec)
 {
   getParameters();
   m_logVolume = SCT_Forward::preBuild();
-
 }
 
-SCT_Forward::~SCT_Forward()
-{
-}
+SCT_Forward::~SCT_Forward() = default;
 
 void 
 SCT_Forward::getParameters()
@@ -104,7 +107,7 @@ SCT_Forward::preBuild()
   std::vector<SCT_FwdModule*> modules;
   for (int iModuleType = 0; iModuleType < m_numModuleTypes; iModuleType++){
     
-    std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>("FwdModule"+std::to_string(iModuleType), iModuleType,
+    std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>(std::format("FwdModule{}",iModuleType), iModuleType,
                                                                             m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
     modules.push_back(module.get());
     m_modules.push_back(std::move(module));
@@ -112,8 +115,8 @@ SCT_Forward::preBuild()
 
   for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
     // Build Wheels
-    std::ostringstream name; name << "Wheel" << iWheel << ((m_endcap > 0) ? "A" : "C");
-    m_wheels.push_back(std::make_unique<SCT_FwdWheel>(name.str(), iWheel, modules, m_endcap,
+    std::string name = std::format("Wheel{}{}",iWheel,((m_endcap > 0) ? "A" : "C"));
+    m_wheels.push_back(std::make_unique<SCT_FwdWheel>(name, iWheel, modules, m_endcap,
                                                       m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX));
   }
 
@@ -139,9 +142,8 @@ SCT_Forward::build(SCT_Identifier id)
         for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
             
             SCT_FwdWheel * wheel = m_wheels[iWheel].get();
-            std::ostringstream wheelName; wheelName << "Wheel#" << iWheel;
             double zpos = wheel->zPosition() - zCenter();
-            forward->add(new GeoNameTag(wheelName.str()));
+            forward->add(new GeoNameTag(std::format("Wheel#{}",iWheel)));
             forward->add(new GeoIdentifierTag(iWheel));
             GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::TranslateZ3D(zpos));
             forward->add(transform);
@@ -200,7 +202,7 @@ SCT_Forward::build(SCT_Identifier id)
                     int numPipes = 8 * m_wheels[iWheel]->numRings();
                     
                     // Label Cooling pipe with W# at end of string
-                    SCT_FwdCoolingPipe coolingPipe("OffDiskCoolingPipeW"+std::to_string(iWheel),
+                    SCT_FwdCoolingPipe coolingPipe(std::format("OffDiskCoolingPipeW{}",iWheel),
                                                    numPipes, rStart, startPos, endPos,
                                                    m_detectorManager, m_geometryManager, m_materials);
                     
@@ -240,7 +242,7 @@ SCT_Forward::build(SCT_Identifier id)
                     int numModules = m_wheels[iWheel]->totalModules();
                     
                     // Label power tape with W# at end of string
-                    SCT_FwdPowerTape powerTape("OffDiskPowerTapeW"+std::to_string(iWheel),
+                    SCT_FwdPowerTape powerTape(std::format("OffDiskPowerTapeW{}",iWheel),
                                                numModules, rStart, startPos, endPos,
                                                m_detectorManager, m_geometryManager, m_materials);
                     
@@ -259,42 +261,39 @@ SCT_Forward::build(SCT_Identifier id)
         // Place Thermal Shield Elements
         //
         for (int iElement = 0; iElement < m_numThermalShieldElements; iElement++){
-            SCT_FwdThermalShieldElement thermalShieldElement("FwdThermalShieldElement"+std::to_string(iElement),
-                                                             iElement, m_detectorManager, m_geometryManager, m_materials);
-            double elementZPos = thermalShieldElement.zPosition() - zCenter();
-            forward->add(new GeoTransform(GeoTrf::TranslateZ3D(elementZPos)));
-            forward->add(thermalShieldElement.getVolume());
+	  SCT_FwdThermalShieldElement thermalShieldElement(std::format("FwdThermalShieldElement{}",iElement),
+							   iElement, m_detectorManager, m_geometryManager, m_materials);
+	  double elementZPos = thermalShieldElement.zPosition() - zCenter();
+	  forward->add(new GeoTransform(GeoTrf::TranslateZ3D(elementZPos)));
+	  forward->add(thermalShieldElement.getVolume());
         }
         
         // Extra Material
         InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
         xMat.add(forward, "SCTEndcap", zCenter());
         if (m_endcap > 0) {
-            xMat.add(forward, "SCTEndcapA", zCenter());
+	  xMat.add(forward, "SCTEndcapA", zCenter());
         } else {
-            xMat.add(forward, "SCTEndcapC", zCenter());
+	  xMat.add(forward, "SCTEndcapC", zCenter());
         }
 
-    }else
-    {
-        for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
-            
-            SCT_FwdWheel * wheel = m_wheels[iWheel].get();
-            std::ostringstream wheelName; wheelName << "Wheel#" << iWheel;
-            id.setLayerDisk(iWheel);
-            wheel->build(id);
-            
-            std::string key=wheelName.str()+"_"+std::to_string(id.getBarrelEC());
-            
-            // Store the alignable transform
-            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
-        }
-        if (m_endcap > 0) {
-	  forward= (*m_mapFPV)["SCTEndcapA"];
-        } else {
-	  forward= (*m_mapFPV)["SCTEndcapC"];
-        }
-    
+    }
+    else {
+      for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
+	SCT_FwdWheel * wheel = m_wheels[iWheel].get();
+	id.setLayerDisk(iWheel);
+	wheel->build(id);
+
+	// Store the alignable transform
+	std::string key = std::format("Wheel#{}_{}",iWheel,id.getBarrelEC());
+	m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
+      }
+      if (m_endcap > 0) {
+	forward= (*m_mapFPV)["SCTEndcapA"];
+      } else {
+	forward= (*m_mapFPV)["SCTEndcapC"];
+      }
+
     }
     return forward;
 }

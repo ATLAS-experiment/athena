@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FSIFibreMask.h"
@@ -14,6 +14,7 @@
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/Units.h"
 
+#include <format>
 
 SCT_FSIFibreMask::SCT_FSIFibreMask(const std::string & name, int iLayer, double length,
                                    InDetDD::SCT_DetectorManager* detectorManager,
@@ -43,7 +44,7 @@ SCT_FSIFibreMask::build()
 {
   // Make the support cyliner. A simple tube.
   const GeoTube * fibreMaskShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_length);
-  m_material = m_materials->getMaterialForVolume(m_materialName+std::to_string(m_iLayer), fibreMaskShape->volume());
+  m_material = m_materials->getMaterialForVolume(std::format("{}{}",m_materialName,m_iLayer), fibreMaskShape->volume());
   const GeoLogVol * fibreMaskLog = new GeoLogVol(getName(), fibreMaskShape, m_material);
 
   GeoPhysVol * fibreMask = new GeoPhysVol(fibreMaskLog);

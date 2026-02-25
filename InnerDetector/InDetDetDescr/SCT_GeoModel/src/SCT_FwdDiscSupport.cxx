@@ -3,9 +3,7 @@
 */
 
 #include "SCT_FwdDiscSupport.h"
-
 #include "SCT_MaterialManager.h"
-
 #include "SCT_GeometryManager.h"
 #include "SCT_ForwardParameters.h"
 
@@ -13,6 +11,8 @@
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoPhysVol.h"
 #include "GeoModelKernel/Units.h"
+
+#include <format>
 
 SCT_FwdDiscSupport::SCT_FwdDiscSupport(const std::string & name, int iWheel,
                                        InDetDD::SCT_DetectorManager* detectorManager,
@@ -42,7 +42,7 @@ SCT_FwdDiscSupport::build()
 {
   // Make the support disk. A simple tube.
   const GeoTube * discSupportShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_thickness);
-  m_material = m_materials->getMaterialForVolume(m_materialName+std::to_string(m_iWheel), discSupportShape->volume());
+  m_material = m_materials->getMaterialForVolume(std::format("{}{}",m_materialName,m_iWheel), discSupportShape->volume());
   if(!m_material) m_material = m_materials->getMaterial(m_materialName);
   const GeoLogVol * discSupportLog = new GeoLogVol(getName(), discSupportShape, m_material);
 
