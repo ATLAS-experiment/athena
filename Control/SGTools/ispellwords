@@ -152,7 +152,6 @@ pMap
 pmap
 IStringPool
 VersionedKey
-CallBackID
 behaviour
 metafunction
 pointee
