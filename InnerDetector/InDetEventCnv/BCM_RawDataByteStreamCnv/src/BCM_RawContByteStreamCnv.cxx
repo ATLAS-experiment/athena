@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ StatusCode BCM_RawContByteStreamCnv::initialize() {
 ////////////////////////
 // classID() - returning BCM_RDO_Container ID
 ////////////////////////
-const CLID& BCM_RawContByteStreamCnv::classID() {
+CLID BCM_RawContByteStreamCnv::classID() {
   return ClassID_traits<BCM_RDO_Container>::ID();
 }
 
