@@ -119,8 +119,7 @@ def FlavorTaggingCfg(
             TrackCollection=trackCollection,
             PrimaryVertexCollectionName=pv_col,
             prefix=trackAugmenterPrefix,
-        ))
-            
+        ))     
 
     if not fast:
         acc.merge(JetTagVertexDecoratorCfg(
@@ -165,8 +164,7 @@ def FlavorTaggingCfg(
                 JetCollection,
                 trackCollection,
                 JetTrackAssociator,
-            ))
-     
+            )) 
         else:
             args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
@@ -179,7 +177,6 @@ def FlavorTaggingCfg(
             for flip_config in _get_flip_config(dirname):
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
              
-
     return acc
 
 def JetBTagginglessByVertexAlgCfg(
