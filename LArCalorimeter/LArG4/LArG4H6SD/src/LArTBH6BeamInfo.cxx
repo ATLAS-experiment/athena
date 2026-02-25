@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6BeamInfo.h"
@@ -9,7 +9,6 @@
 
 // Gaudi Includes
 #include "GaudiKernel/SystemOfUnits.h"
-#include "StoreGate/DataHandle.h"
 
 using namespace Gaudi::Units;
 
