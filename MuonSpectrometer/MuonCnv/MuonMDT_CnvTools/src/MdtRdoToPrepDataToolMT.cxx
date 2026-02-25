@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToPrepDataToolMT.h"
@@ -196,7 +196,7 @@ namespace Muon {
             }
         }
 
-        // check if initializing of DataHandle objects success
+        // initialize handle keys
         ATH_CHECK(m_rdoContainerKey.initialize());
         ATH_CHECK(m_mdtPrepDataContainerKey.initialize());
         ATH_CHECK(m_readKey.initialize());
