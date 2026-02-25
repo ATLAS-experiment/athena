@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -157,9 +157,6 @@ MagField::AtlasFieldMapCondAlg::updateFieldMap(const EventContext& ctx,
                     << readHandle.key());
       return StatusCode::FAILURE;
     }
-
-    // // handle for COOL field map filenames
-    // const DataHandle<CondAttrListCollection> mapHandle;
 
     // Get the validitiy range
     EventIDRange rangeW;
