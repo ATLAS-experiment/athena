@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**   @file SCT_Clusterization.cxx
@@ -106,7 +106,6 @@ namespace InDet {
     SG::ReadHandle<SCT_RDO_Container> rdoContainer{m_rdoContainerKey, ctx};
     ATH_CHECK(rdoContainer.isValid());
 
-    // Anything to dereference the DataHandle will trigger the converter
     SCT_RDO_Container::const_iterator rdoCollections{rdoContainer->begin()};
     SCT_RDO_Container::const_iterator rdoCollectionsEnd{rdoContainer->end()};
     bool dontDoClusterization{false};

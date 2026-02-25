@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,6 @@
 #include "InDetIdentifier/TRT_ID.h"
 //
 #include "GaudiKernel/ISvcLocator.h"
-#include "StoreGate/DataHandle.h"
 
 
 
