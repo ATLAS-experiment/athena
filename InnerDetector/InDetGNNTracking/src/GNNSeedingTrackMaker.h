@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GNNSeedingTrackMaker_H
@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "StoreGate/DataHandle.h"
 
 // data containers
 #include "InDetPrepRawData/PixelClusterContainer.h"
