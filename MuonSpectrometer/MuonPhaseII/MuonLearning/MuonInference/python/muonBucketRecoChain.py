@@ -74,6 +74,7 @@ if __name__=="__main__":
         bucketTool = cfg.popToolsAndMerge(
             GraphBucketFilterToolCfg(
                 flags,
+                ModelPath="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx"
                 )
         )
         cfg.merge(
