@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUFASTSTEERING_H
@@ -21,7 +21,7 @@
 #include "CscSegmentMaker.h"
 #include "FtfRoadDefiner.h"
 
-//adding a part of DataHandle for AthenaMT
+//handle key classes for AthenaMT
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
