@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscROD_Decoder.h"
@@ -9,7 +9,6 @@
 #include "GaudiKernel/TypeNameString.h"
 #include "MuonRDO/CscRawDataCollection.h"
 #include "MuonRDO/CscRawDataContainer.h"
-#include "StoreGate/DataHandle.h"
 #include "eformat/Issue.h"
 
 using eformat::helper::SourceIdentifier;
