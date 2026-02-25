@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArFebHeaderContByteStreamCnv.h"
@@ -28,7 +28,7 @@ LArFebHeaderContByteStreamCnv::LArFebHeaderContByteStreamCnv(ISvcLocator* svcloc
   m_rdpSvc("ROBDataProviderSvc", name())
 {}
 
-const CLID& LArFebHeaderContByteStreamCnv::classID(){
+CLID LArFebHeaderContByteStreamCnv::classID(){
   return ClassID_traits<LArFebHeaderContainer>::ID() ;
 }
 
