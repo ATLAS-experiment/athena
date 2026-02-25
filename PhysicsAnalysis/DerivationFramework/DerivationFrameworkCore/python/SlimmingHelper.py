@@ -425,6 +425,8 @@ class SlimmingHelper:
                 elif collectionName=="AntiKt4LCTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4LCTopoJetsCPContent import AntiKt4LCTopoJetsCPContent
                         items.extend(AntiKt4LCTopoJetsCPContent)
+                        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
+                        items.extend(BTaggingStandardContent(self.flags, "AntiKt4LCTopoJets"))
                 elif collectionName=="AntiKt4EMTopoJets":
                         from DerivationFrameworkJetEtMiss.AntiKt4EMTopoJetsCPContent import AntiKt4EMTopoJetsCPContent
                         items.extend(AntiKt4EMTopoJetsCPContent)
