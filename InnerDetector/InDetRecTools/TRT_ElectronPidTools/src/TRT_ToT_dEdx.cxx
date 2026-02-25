@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ToT_dEdx.h"
@@ -17,7 +17,6 @@
 
 #include "TF1.h"
 
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
