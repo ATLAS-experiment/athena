@@ -29,9 +29,9 @@ StatusCode JetMonitoringAlg::initialize() {
   ATH_CHECK( m_jetFillerTools.retrieve() );
 
   // print out what we have 
-  ATH_MSG_INFO( "Scheduled Histo fillers/selectors : ");
+  ATH_MSG_DEBUG( "Scheduled Histo fillers/selectors : ");
   for(const auto& t: m_jetFillerTools){
-    ATH_MSG_INFO( "--> "<< t->name() );
+    ATH_MSG_DEBUG( "--> "<< t->name() );
   }
   
   return AthMonitorAlgorithm::initialize();
