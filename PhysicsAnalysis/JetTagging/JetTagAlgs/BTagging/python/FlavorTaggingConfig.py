@@ -119,7 +119,7 @@ def FlavorTaggingCfg(
             TrackCollection=trackCollection,
             PrimaryVertexCollectionName=pv_col,
             prefix=trackAugmenterPrefix,
-        ))     
+        ))
 
     if not fast:
         acc.merge(JetTagVertexDecoratorCfg(
@@ -164,7 +164,7 @@ def FlavorTaggingCfg(
                 JetCollection,
                 trackCollection,
                 JetTrackAssociator,
-            )) 
+            ))
         else:
             args['remapping'].setdefault('BTagTrackToJetAssociator', 'GhostTrack')
 
@@ -176,7 +176,7 @@ def FlavorTaggingCfg(
         if cfgFlags.BTagging.RunFlipTaggers and networks.get('flip', True):
             for flip_config in _get_flip_config(dirname):
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
-             
+
     return acc
 
 def JetBTagginglessByVertexAlgCfg(
@@ -194,7 +194,7 @@ def JetBTagginglessByVertexAlgCfg(
     trackCollection='InDetTrackParticles'
 
     acc = ComponentAccumulator()
-         
+
     acc.merge(BTagTrackAugmenterByVertexAlgCfg(
         cfgFlags,
         TrackCollection='InDetTrackParticles',
@@ -202,7 +202,7 @@ def JetBTagginglessByVertexAlgCfg(
         prefix=trackAugmenterPrefix,
         dzCut=max(dzCut_vec),
     ))        
-       
+
     for networks in cfgFlags.BTagging.NNs.get(JetCollection, []):
         assert isinstance(networks['folds'], list)
         dirnames = [Path(path).parent for path in networks['folds']]
