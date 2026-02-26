@@ -37,7 +37,7 @@ case $ArtProcess in
 
       echo "Merging IDPVM output files"
       inputIDPVMfiles=$(ls art_core_*/physval_idtide.ntuple.root | paste -sd,)
-      mergeIDPVM.py --filesInput $inputIDPVMfiles --outputFile physval_idtide.ntuple.root
+      run mergeIDPVM.py --filesInput $inputIDPVMfiles --outputFile physval_idtide.ntuple.root
 
       echo "download latest result"
       run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"
