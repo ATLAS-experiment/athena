@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -11,6 +11,7 @@
 
 #include <iomanip>
 #include <utility>
+#include <ranges>
 
 
 #include "MuonReadoutGeometry/MdtReadoutElement.h"
@@ -394,4 +395,14 @@ namespace MuonGM {
     void MuonStation::setPhysVol(const PVLink& vol) { m_physVol = vol; }
     PVConstLink MuonStation::getPhysVol() const {return m_physVol; }
     PVLink MuonStation::getPhysVol() { return m_physVol; }
+
+    std::vector<const MuonReadoutElement*> MuonStation::getReadoutElements() const {
+        std::vector<const MuonReadoutElement*> result{};
+        std::ranges::transform(m_REwithAlTransfInStation, std::back_inserter(result),
+                                [](const auto& idReAlign){ 
+                                    const MuonReadoutElement* re = idReAlign.second.first;
+                                    return re; 
+                                });
+        return result;
+    }
 }  // namespace MuonGM
