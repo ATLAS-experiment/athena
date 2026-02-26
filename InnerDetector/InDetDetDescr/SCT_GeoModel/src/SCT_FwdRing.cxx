@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FwdRing.h"
@@ -236,7 +236,7 @@ SCT_FwdRing::build(SCT_Identifier id)
             
             
             // Add the module
-            std::string moduleName = "FwdModuleR" + intToString(m_iRing) + "#" + intToString(idModule);
+            std::string moduleName = std::format("FwdModuleR{}#{}",m_iRing,idModule);
             ring->add(new GeoNameTag(moduleName));
             ring->add(new GeoIdentifierTag(idModule));
             GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(modulePos);
@@ -304,7 +304,7 @@ SCT_FwdRing::build(SCT_Identifier id)
             
             id.setPhiModule(idModule);
             m_module->build(id);
-            std::string key="FwdModuleR" + intToString(m_iRing)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+            std::string key=std::format("FwdModuleR{}_{}_{}_{}_{}",m_iRing,id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
             
             // Store alignable transform
             m_detectorManager->addAlignableTransform(1, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);

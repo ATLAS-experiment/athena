@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_ComponentFactory.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelRead/ReadGeoModel.h"
-#include <sstream>
 #include <string>
 #include <utility>
 
@@ -23,16 +22,7 @@ SCT_ComponentFactory::SCT_ComponentFactory(const std::string & name,
     m_name(name)
 {}
 
-SCT_ComponentFactory::~SCT_ComponentFactory() 
-{}
-
-std::string 
-SCT_ComponentFactory::intToString(int i) const
-{
-  std::ostringstream str;
-  str << i;
-  return str.str();
-}
+SCT_ComponentFactory::~SCT_ComponentFactory() = default;
 
 double
 SCT_ComponentFactory::epsilon() const

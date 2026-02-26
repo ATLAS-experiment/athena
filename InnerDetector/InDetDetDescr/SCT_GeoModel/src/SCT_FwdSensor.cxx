@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FwdSensor.h"
@@ -304,14 +304,13 @@ GeoVPhysVol *SCT_FwdSensor::build(SCT_Identifier id)
 {
     
     GeoFullPhysVol * sensor=nullptr;
-    if (m_sqliteReader)
-    {
-        
-        std::string key="FwdSensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        
-        sensor = (*m_mapFPV)[key];
-    } else
-        sensor= new GeoFullPhysVol(m_logVolume);
+    if (m_sqliteReader) {
+      std::string key=std::format("FwdSensor_Side#{}_{}_{}_{}_{}",id.getSide(),id.getBarrelEC(),id.getLayerDisk(),id.getEtaModule(),id.getPhiModule());
+      sensor = (*m_mapFPV)[key];
+    }
+    else {
+      sensor= new GeoFullPhysVol(m_logVolume);
+    }
     
     // Make detector element and add to collection
     // Only do so if we have a valid id helper.
