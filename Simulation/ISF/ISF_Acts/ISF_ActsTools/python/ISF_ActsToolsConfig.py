@@ -6,6 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
+from AthenaCommon.Constants import INFO
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
 def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
@@ -55,17 +56,31 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     """Return ISF_FatrasSimHitCreatorID configured with ComponentAccumulator"""
     acc = ComponentAccumulator()
     mlog = logging.getLogger(name)
-    mlog.info('Start configuration ISF_ActsFatrasSimTool')
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-    kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    mlog.info('Start configuration ISF_ActsFatraSimTool')
 
-    kwargs.setdefault("MaxSteps", 2000)
-    
+    kwargs.setdefault("MaxSteps", 20000)
+
+    from ISF_FatrasServices.ISF_FatrasConfig import fatrasKinematicFilterCfg
+    kwargs.setdefault("ParticleFilter", acc.addPublicTool(acc.popToolsAndMerge(fatrasKinematicFilterCfg(flags))))
     # added https://its.cern.ch/jira/browse/ATLASSIM-7245
     from ISF_Services.ISF_ServicesConfig import TruthServiceCfg
     kwargs.setdefault("TruthRecordService", acc.getPrimaryAndMerge(TruthServiceCfg(flags)))
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RNGService", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
+    
+    # Ensure GeoIDSvc is configured
+    from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg
+    kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)))
+
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
+
+    tgSvc = acc.getService("ActsTrackingGeometrySvc")
+    tgSvc.OutputLevel = INFO
+    if flags.Detector.EnableITk:
+      tgSvc.printGeometry = False
+      tgSvc.UseBlueprint = True
+      tgSvc.BuildSubDetectors = ["Calo", "ITkPixel","ITkStrip","HGTD"]
 
     kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
     writtenContainers =[]
@@ -81,7 +96,6 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     if flags.Detector.EnableITkStrip:
         if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
            writtenContainers += [("SiHitCollection", "ITkStripHits_Fatras")]
-
     kwargs.setdefault("ExtraOutputs", writtenContainers)
     acc.setPrivateTools(CompFactory.ISF.ActsFatrasSimTool(name, **kwargs))
     return acc

@@ -64,7 +64,8 @@ def ActsTrackingGeometrySvcCfg(flags,
     if flags.Detector.GeometryCalo:
       subDetectors += ["Calo"]
       blueprintTools += [acc.popToolsAndMerge(caloBlueprintNodeBuilderCfg(flags))]
-    if flags.Detector.GeometryMuon:
+    # Muon system is currently disabled for simulation. Enabling it for non-simulation use cases. 
+    if flags.Detector.GeometryMuon and 'ACTS' not in flags.Sim.ISF.Simulator.value:
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
       acc.merge(MuonGeoModelCfg(flags))  

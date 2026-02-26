@@ -122,12 +122,12 @@ void ActsFatrasWriteHandler::createHits(const ISF::ISFParticle& isp,
         ATH_MSG_VERBOSE(name() << " eta_module (atlas)" << (isPixel ? m_pixIdHelper->eta_module(hitId)  : m_sctIdHelper->eta_module(hitId)));
         ATH_MSG_VERBOSE(name() << " phi_module (atlas)" << (isPixel ? m_pixIdHelper->phi_module(hitId)  : m_sctIdHelper->phi_module(hitId)));
 
-        auto partLink = isp.getParticleLink();
+        auto truth_barcode = isp.barcode();
         auto siHit = SiHit(localEntryHep,
                           localExitHep,
                           energyDeposit,
                           time,
-                          *partLink,
+                          truth_barcode,
                           isPixel ? 0 : 1,
                           isPixel ? m_pixIdHelper->barrel_ec(hitId)  : m_sctIdHelper->barrel_ec(hitId),
                           isPixel ? m_pixIdHelper->layer_disk(hitId) : m_sctIdHelper->layer_disk(hitId),
