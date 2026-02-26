@@ -55,6 +55,7 @@ public:
     m_proxy(proxy), m_range(std::move(range))
     {}
 
+  IOVRange* range() { return m_range.get(); }
   const IOVRange* range() const { return m_range.get(); }
   void setRange( std::unique_ptr<IOVRange> range) { m_range = std::move(range); }
 

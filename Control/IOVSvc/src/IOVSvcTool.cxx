@@ -52,22 +52,6 @@ namespace {
 //
 
 bool
-SortTADptr::operator() ( const SG::TransientAddress* x, 
-                         const SG::TransientAddress* y) const {
-
-  if ( x->clID() == y->clID() ) {
-    return ( x->name() < y->name() );
-  } else {
-    return ( x->clID() < y->clID() );
-  }
-
-}
-
-//
-///////////////////////////////////////////////////////////////////////////
-//
-
-bool
 SortDPptr::operator() (const SG::DataProxy* a, const SG::DataProxy *b) const {
   if (a&&b) {
     if (a->name()!=b->name()) return a->name()<b->name();
@@ -95,18 +79,7 @@ IOVSvcTool::IOVSvcTool(const std::string& type, const std::string& name,
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-IOVSvcTool::~IOVSvcTool() {
-
-  // cleanup
-
-  for (auto& [dp, ent] : m_entries) delete ent;
-  for (auto tad : m_preLoad) delete tad;
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
+StatusCode
 IOVSvcTool::initialize() {
 
   SmartIF<IProperty> iovSvcProp{service("IOVSvc")};
@@ -278,7 +251,7 @@ IOVSvcTool::handle(const Incident &inc) {
     
     if (first) {
 
-      for (const auto tad : m_preLoad) {
+      for (const auto& tad : m_preLoad) {
         StatusCode sc = regProxy(tad->clID(), tad->name());
         if (StatusCode::SUCCESS != sc) {
           ATH_MSG_ERROR("handle: Could not register proxy for " <<
@@ -491,6 +464,8 @@ IOVSvcTool::deregProxy( SG::DataProxy *proxy) {
 
 namespace {
 
+  /// Helper to remove an item from a set by using its custom
+  /// comparison operator if they are identical (same address).
   template <class SET>
   void removeFromSet (IOVEntry* ent, SET& set)
   {
@@ -538,16 +513,16 @@ IOVSvcTool::replaceProxy( SG::DataProxy *pOld,
   m_names[pNew]=tname + "[" + pNew->name() + "]";
 
   if (pOld != pNew) {
-    const auto ent = m_entries.find(pOld);
-    if (ent != m_entries.end()) {
-      removeFromSet (ent->second, m_startSet_Clock);
-      removeFromSet (ent->second, m_startSet_RE);
-      removeFromSet (ent->second, m_stopSet_Clock);
-      removeFromSet (ent->second, m_stopSet_RE);
+    const auto itr = m_entries.find(pOld);
+    if (itr != m_entries.end()) {
+      IOVEntry* ent = itr->second.get();
+      removeFromSet (ent, m_startSet_Clock);
+      removeFromSet (ent, m_startSet_RE);
+      removeFromSet (ent, m_stopSet_Clock);
+      removeFromSet (ent, m_stopSet_RE);
 
-      setRange_impl (pNew, *(const_cast<IOVRange*>(ent->second->range())));
-      delete ent->second;
-      m_entries.erase (ent);
+      setRange_impl (pNew, *ent->range());
+      m_entries.erase (itr);
     }
   }
 
@@ -618,8 +593,7 @@ IOVSvcTool::preLoadTAD( const SG::TransientAddress *tad_in ) {
     return StatusCode::SUCCESS;
   }
 
-  SG::TransientAddress* tad = new SG::TransientAddress (tad_in->clID(),tad_in->name());
-  m_preLoad.insert( tad );
+  m_preLoad.insert( std::make_unique<SG::TransientAddress>(tad_in->clID(),tad_in->name()) );
 
   return StatusCode::SUCCESS;
 }
@@ -646,9 +620,9 @@ IOVSvcTool::preLoadDataTAD( const SG::TransientAddress *tad_in ) {
     return StatusCode::SUCCESS;
   }
 
-  SG::TransientAddress* tad = new SG::TransientAddress (tad_in->clID(),tad_in->name());
-  m_preLoad.insert( tad );
+  auto tad = std::make_unique<SG::TransientAddress>(tad_in->clID(),tad_in->name());
   m_partPreLoad.insert( TADkey(*tad) );
+  m_preLoad.insert( std::move(tad) );
 
   return StatusCode::SUCCESS;
 }
@@ -670,35 +644,31 @@ void IOVSvcTool::setRange_impl (SG::DataProxy* proxy, IOVRange& iovr)
   const auto itr = m_entries.find(proxy);
   if ( itr != m_entries.end() ) {
 
-    IOVEntry *ent = itr->second;
-    const IOVRange *irn = ent->range();
+    const auto& ent = itr->second;
 
-    if (*irn == iovr) {
+    if (*ent->range() == iovr) {
       ATH_MSG_DEBUG("Range has not changed. Returning");
       return;
       // is this true? still in the start and stop sets? FIXME
     }
-
 
     const auto sitr = ent->getStartITR();
     if ( !ent->removedStart() ) {
       p_startSet->erase( sitr );
     }
 
-
-
     const auto pitr = ent->getStopITR();
     if ( !ent->removedStop() ) {
       p_stopSet->erase( pitr );
     }
 
-    delete ent;
   }
 
   ATH_MSG_DEBUG("adding to start and stop sets");
-  IOVEntry *ent = m_entries[ proxy ] = new IOVEntry(proxy, std::move(range));
-  ent->setStartITR( p_startSet->insert( ent ) );
-  ent->setStopITR(  p_stopSet->insert( ent ) );
+  auto ent = std::make_unique<IOVEntry>(proxy, std::move(range));
+  ent->setStartITR( p_startSet->insert( ent.get() ) );
+  ent->setStopITR(  p_stopSet->insert( ent.get() ) );
+  m_entries.insert_or_assign(proxy, std::move(ent));
 }
 
 
@@ -811,8 +781,7 @@ IOVSvcTool::setRangeInDB(const CLID& clid, const std::string& key,
   }
 
   std::scoped_lock lock(m_handleMutex);
-  const auto itr = m_entries.find(dp);
-  if (itr == m_entries.end()) {
+  if (!m_entries.contains(dp)) {
     ATH_MSG_WARNING(fullProxyName(clid,key) << " not registered with the IOVSvc");
   }
 

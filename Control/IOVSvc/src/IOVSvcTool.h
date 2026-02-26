@@ -50,18 +50,19 @@ namespace SG {
   class DataProxy;
 }
 
-class SortTADptr {
-public:
-  bool operator() ( const SG::TransientAddress*, 
-                    const SG::TransientAddress* ) const;
+struct SortTADptr {
+  using is_transparent = void;
+
+  template<typename X, typename Y>
+  bool operator() (X&& x, Y&& y) const {
+    return x->clID() == y->clID() ? x->name() < y->name() : x->clID() < y->clID();
+  }
 };
 
-class SortDPptr {
-public:
-  bool operator() ( const SG::DataProxy*, 
+struct SortDPptr {
+  bool operator() ( const SG::DataProxy*,
                     const SG::DataProxy* ) const;
 };
-
 
 class IOVSvcTool: public extends<AthAlgTool, IIOVSvcTool, IIncidentListener> {
 
@@ -142,9 +143,6 @@ public:
     m_ignoredProxies.insert(proxy);
   }
 
-  // Destructor.
-  virtual ~IOVSvcTool();
-
 private:
 
   StatusCode preLoadProxies(const EventContext& ctx);
@@ -178,7 +176,7 @@ private:
   std::set<SG::DataProxy*> m_ignoredProxies;
   std::set< std::pair<CLID, std::string> > m_ignoredProxyNames;
 
-  std::map< const SG::DataProxy*, IOVEntry*> m_entries;
+  std::map< const SG::DataProxy*, std::unique_ptr<IOVEntry> > m_entries;
 
   IOVEntry::StartSet_t* p_startSet{nullptr};
   IOVEntry::StopSet_t* p_stopSet{nullptr};
@@ -186,7 +184,7 @@ private:
   IOVEntry::StartSet_t m_startSet_Clock, m_startSet_RE;
   IOVEntry::StopSet_t m_stopSet_Clock, m_stopSet_RE;
 
-  std::set< const SG::TransientAddress*, SortTADptr > m_preLoad;
+  std::set< std::unique_ptr<const SG::TransientAddress>, SortTADptr > m_preLoad;
 
   typedef std::tuple <CLID, std::string> TADkey_t;
   TADkey_t TADkey (const SG::DataProxy& p)
