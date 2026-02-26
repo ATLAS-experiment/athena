@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
 /* date of creation : 27/01/2004 */
-
-#include <cstdint>
 
 #ifndef CALO_GAIN_H
 #define CALO_GAIN_H
 
 namespace CaloGain {
-  enum CaloGain : int8_t {
+  enum CaloGain {
     TILELOWLOW =-16 ,
     TILELOWHIGH =-15 ,
     TILEHIGHLOW  = -12,
