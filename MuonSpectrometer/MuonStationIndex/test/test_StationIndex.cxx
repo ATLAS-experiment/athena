@@ -198,6 +198,28 @@ int main (){
        }
     }
 
+     for (DetectorRegionIndex detReg : {DetectorRegionIndex::EndcapA, DetectorRegionIndex::Barrel, DetectorRegionIndex::EndcapC}) {
+        for (ChIndex chIdx : {ChIndex::BIS, ChIndex::BIL, ChIndex::BMS, ChIndex::BML, ChIndex::BOS, ChIndex::BOL, ChIndex::BEE,
+                              ChIndex::EIS, ChIndex::EIL, ChIndex::EMS, ChIndex::EML, ChIndex::EOS, ChIndex::EOL, ChIndex::EES, 
+                              ChIndex::EEL, ChIndex::CSS, ChIndex::CSL}){
+
+            const unsigned hash = regionChamberHash(detReg, chIdx);
+            PRINT_INFO("Test combination of "<<regionName(detReg)<<" ("<<toInt(detReg)<<") & "
+                        <<chName(chIdx)<<"("<<toInt(chIdx)<<") -> hash: "<<hash);
+            if (hash >= regionChamberHashMax()){
+                PRINT_ERROR("Hash exceeds maximum: "<<regionChamberHashMax());
+                exit_code = EXIT_FAILURE;
+            }
+            /// Back conversion
+            auto [detBack, chamberBack] = decomposeRegionChamberHash(hash);
+            if ( (detBack != detReg) || (chamberBack != chIdx)) {
+                PRINT_ERROR("Back conversion resulted in "<<regionName(detBack)<<" ("<<toInt(detBack)<<") & "
+                            <<chName(chamberBack)<<"("<<toInt(chamberBack)<<") -> hash: "<<regionChamberHash(detBack, chamberBack));
+                exit_code = EXIT_FAILURE;
+            }
+       }
+    }
+
 
   return exit_code;
 }

@@ -22,10 +22,11 @@
 #include <Acts/Geometry/DiamondVolumeBounds.hpp>
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Surfaces/CylinderSurface.hpp>
+#include <Acts/Surfaces/DiscSurface.hpp>
+#include "Acts/Surfaces/RadialBounds.hpp"
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
 #include <Acts/Visualization/GeometryView3D.hpp>
-
 
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
@@ -36,13 +37,22 @@
 
 using namespace Acts::UnitLiterals;
 namespace {
+
   //Muon System IDs
-constexpr std::size_t s_muonBarrelId = 30;
-constexpr std::size_t s_muonEndcapAId = 31;
-constexpr std::size_t s_muonEndcapCId = 32;
-constexpr std::size_t s_muonEndcapMiddleAId = 33;
-constexpr std::size_t s_muonEndcapMiddleCId = 34;
+  constexpr std::size_t s_muonBarrelId = 30;
+  constexpr std::size_t s_muonEndcapAId = 31;
+  constexpr std::size_t s_muonEndcapCId = 32;
+  constexpr std::size_t s_muonEndcapMiddleAId = 33;
+  constexpr std::size_t s_muonEndcapMiddleCId = 34;
+
+  //helper function to flag a chamber or a sector as BIS78 
+  bool isBIS78(const MuonGMR4::MuonReadoutElement* element){    
+        Muon::MuonStationIndex::ChIndex chamberIdx = element->chamberIndex();
+        return chamberIdx == Muon::MuonStationIndex::ChIndex::BIS && std::abs(element->stationEta())>=7;
+  }
+
 }
+
 
 namespace ActsTrk {
 
@@ -101,11 +111,12 @@ std::visit([&](auto& elems) {
 auto muonNode = std::make_shared<Acts::Experimental::CylinderContainerBlueprintNode>("MuonNode", Acts::AxisDirection::AxisZ);
 
 Acts::VolumeBoundFactory boundsFactory{};
-auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI", Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory, {StIdx::BI, StIdx::BM, StIdx::BO});
-auto endcapANode = buildMuonNode(gctx, endcapOuterAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory, {StIdx::EO});
-auto endcapCNode = buildMuonNode(gctx, endcapOuterCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory, {StIdx::EO});
-auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleAId), boundsFactory, {StIdx::EM});
-auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory, {StIdx::EM});
+auto barrelNode = buildMuonNode(gctx, barrelStations, "BI_BM_BO_EE_EI", Acts::GeometryIdentifier().withVolume(s_muonBarrelId), boundsFactory, {ChIdx::BIS, ChIdx::BML, ChIdx::BOL, 
+                                                                                                                                               ChIdx::EIS, ChIdx::EIL});
+auto endcapANode = buildMuonNode(gctx, endcapOuterAStations, "EO_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapAId), boundsFactory);
+auto endcapCNode = buildMuonNode(gctx, endcapOuterCStations, "EO_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapCId), boundsFactory);
+auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleAId), boundsFactory, {ChIdx::EML, ChIdx::EMS});
+auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory, {ChIdx::EML, ChIdx::EMS});
 
 //Add to the muon barrel child node (e.g calo or Itk) - if existed
 if(childNode){
@@ -127,7 +138,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
                                         const std::string& name, 
                                         const Acts::GeometryIdentifier& id,
                                         Acts::VolumeBoundFactory& boundsFactory, 
-                                        const std::vector<StIdx>& passiveStationIds) const {
+                                        const std::vector<ChIdx>& passiveStationIds) const {
 
     const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
     std::vector<std::string> stationNames;
@@ -140,13 +151,11 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     double minZ{std::numeric_limits<double>::max()};
     int chamberId = 1;  
     std::vector<std::shared_ptr<Acts::Surface>> passiveSurfaces;
-    passiveSurfaces.reserve(passiveStationIds.size());
 
     std::visit([&](const auto& elems){
     
     using SetType = std::decay_t<decltype(elems)>;
-    std::unordered_map<StIdx, SetType> elementsPerStation;
-    passiveSurfaces.reserve(passiveStationIds.size());
+    std::unordered_map<unsigned int, SetType> elementsPerStation;
   
     for(const auto& element : elems){
       auto vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(*context),
@@ -171,8 +180,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
         for(const Amg::Vector3D& vertex: polyhedron.vertices){
           outerRadius = std::max(outerRadius, vertex.perp());
         }
-      }
-     
+      }     
       std::shared_ptr<Acts::Experimental::StaticBlueprintNode> node;
       const bool isSingleMdt =
           (element->readoutEles().size() == 1 &&
@@ -192,12 +200,14 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
           THROW_EXCEPTION("No blueprint node constructed");
       }
       nodes.emplace_back(std::move(node));
-
       //keep the elements of the stations we want to assign passive material surfaces
-      if(!Acts::rangeContainsValue(passiveStationIds, toStationIndex(element->chamberIndex()))){
+     
+      if(!Acts::rangeContainsValue(passiveStationIds, element->chamberIndex())){
         continue;
       }
-      elementsPerStation[toStationIndex(element->chamberIndex())].push_back(element);
+
+      DetIdx detIdx = Muon::MuonStationIndex::toDetectorRegionIndex(element->chamberIndex(), element->side());    
+      elementsPerStation[Muon::MuonStationIndex::regionChamberHash(detIdx, element->chamberIndex())].push_back(element);
     }
     //construct the surfaces we want to map passive material on
     passiveSurfaces = getPassiveMaterialSurfaces(gctx, std::move(elementsPerStation));
@@ -239,13 +249,6 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
   std::vector<surfacePtr> readoutSurfaces;
   Acts::GeometryIdentifier::Value mdtId{1};
 
-  //lamda function for BIS78 MDT case
-  auto isBIS78 = [](const MuonGMR4::MuonReadoutElement* rElem) {
-    return rElem->detectorType() == DetectorType::Mdt &&
-           rElem->chamberIndex() == Muon::MuonStationIndex::ChIndex::BIS && 
-           std::abs(rElem->stationEta()) >= 7;
-  };
-
   for (const MuonGMR4::MuonReadoutElement* readoutEle : element.readoutEles()) {
 
     std::vector<surfacePtr> detSurfaces = readoutEle->getSurfaces();
@@ -267,7 +270,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           //special treatment of BIS78 MDT multilayer
           //use different shape because of clashes with EIL chambers 
           std::shared_ptr<Acts::VolumeBounds> mdtBounds{nullptr};
-          if(isBIS78(readoutEle) && mdtReadoutEle->multilayer() == 2){
+          if(isBIS78(mdtReadoutEle) && mdtReadoutEle->multilayer() == 2){
             
             //find the minimum and the maximum tube length (x dimension of the diamond bounds)
             std::vector<double> tubeLengths;
@@ -343,46 +346,118 @@ template<typename ElementSet_t>
 std::vector<std::shared_ptr<Acts::Surface>> 
 MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   const Acts::GeometryContext& gctx,
-  const std::unordered_map<StIdx, ElementSet_t>& elementsPerStation) const {
+  const std::unordered_map<unsigned int, ElementSet_t>& elementsPerStation) const {
 
-  constexpr double margin{5._mm};
-
-  const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
+  //this is a margin to put the surfaces along Z 
+  //(a margin distance from the corresponding chamber's boundary surface)
+  constexpr double margin{4._mm};
 
   std::vector<std::shared_ptr<Acts::Surface>> surfaces;
   surfaces.reserve(elementsPerStation.size());
-  //temporary build barrel passive material surfaces - we will think for the endcap
-  if(elementsPerStation.contains(StIdx::EO) || 
-     elementsPerStation.contains(StIdx::EM)){
-    ATH_MSG_WARNING("Do not assign passive material surfaes for the endcaps for now - will do later !");
-    return surfaces;
-  }
+  LayIdx layIdx = LayIdx::LayerIndexMax;
+  DetIdx detIdx = DetIdx::DetectorRegionIndexMax;
   
+  const ActsTrk::GeometryContext* context = gctx.get<const ActsTrk::GeometryContext* >();
 
-  //handle barrel passive surfaces for now only
-  for(const auto& [idx, elements] : elementsPerStation){
+  //lamda function to reject BIS78 chambers from the extension of the passive surface
+  //otherwise they create overlap with the NSW sectors - stop a little bit before the cylinder of the passive surface
+  const auto rejectBIS78 = [&](const MuonGMR4::MuonReadoutElement* readoutEle) {
+    bool reject{false};
+    switch (readoutEle->detectorType()) {
+      case DetectorType::Mdt: {
+        const auto* techEle =
+          static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
+        if (techEle->multilayer() == 2) {
+          reject = true;
+        }
+        break;
+      }
+      case DetectorType::Rpc: {
+        const auto* techEle =
+          static_cast<const MuonGMR4::RpcReadoutElement*>(readoutEle);
+        if (techEle->doubletZ() == 2) {
+          reject = true;
+        }
+        break;
+      }
+      default:
+        break;
+    }
+    return isBIS78(readoutEle) && reject;
+  };
+ 
+  for(const auto& [hash, elements] : elementsPerStation){
+
+    //decompose the layer hash to the detector region idx and layer index
+    const auto& [detIdxVal, chIdx] = Muon::MuonStationIndex::decomposeRegionChamberHash(hash);
+    layIdx = Muon::MuonStationIndex::toLayerIndex(chIdx);
+    detIdx = detIdxVal;
 
     double maxZ{std::numeric_limits<double>::lowest()};
     double minZ{std::numeric_limits<double>::max()};
-    double radius{std::numeric_limits<double>::max()};
+    double rMin{std::numeric_limits<double>::max()};
+    double rMax{std::numeric_limits<double>::lowest()};
+       //loop through the elements of every station to construct the cylinder/disc  surfaces
+    for(const auto& el : elements){  
 
-    //loop through the elements of every station to construct the cylinder surfaces
-    for(const auto& el : elements){
-      const Amg::Transform3D locToGlobal = el->localToGlobalTransform(*context);
-      Amg::Vector3D center = locToGlobal.translation();
-      double r = center.perp();
-      radius = std::min(radius, r - el->halfZ());
-      minZ = std::min(minZ, center.z() - el->halfXLong());
-      maxZ = std::max(maxZ, center.z() + el->halfXLong());
-    
+      if(rejectBIS78(el->readoutEles().front())){
+        continue;
+      }
+      //for the rMin we use the center of the chamber insetad of the vertices - otherwise there is overlap with the chamber volume
+      const Amg::Transform3D& locToGlobal = el->localToGlobalTransform(*context);
+      const auto& bounds = el->bounds();
+      for(const auto& surface : bounds->orientedSurfaces(locToGlobal)){
+        const auto& surfaceRepr = (*surface.surface);
+        const Acts::Polyhedron& polyhedron = surfaceRepr.polyhedronRepresentation(gctx);
+        const Amg::Vector3D& center = surfaceRepr.center(gctx);
+        rMin = std::min(rMin, center.perp());
+        minZ = std::min(minZ, center.z());
+        maxZ = std::max(maxZ, center.z());
+        rMax = std::max(rMax, center.perp());
+      }
+
     }
-
     double halfZ = 0.5*std::abs(maxZ-minZ);  
-    Amg::Transform3D trf = Amg::getTranslateZ3D(halfZ + minZ);
-    std::shared_ptr<Acts::Surface> surface = Acts::Surface::makeShared<Acts::CylinderSurface>(
-    trf, std::make_shared<Acts::CylinderBounds>(radius - margin, halfZ));
-    surfaces.push_back(surface);
-    ATH_MSG_VERBOSE("Putting passive material surface for station " << stName(idx) << ": minZ = " << minZ << ", maxZ = " << maxZ<< "and radius "<< radius);
+    Amg::Transform3D trf = Amg::Transform3D::Identity();
+    double zShift{0.};
+    //the chambers are groupd per chamber index and detector region(side) - we can use the first one for the distinction
+    const auto& testCh = elements.front();
+    int8_t side = testCh->side();
+    switch (testCh->chamberIndex()) {      
+      //small NSW sectors (disc passive surface in front of NSW and one in front of EMS)
+      case ChIdx::EIS : 
+      case ChIdx::EMS :{
+        side > 0 ? zShift = minZ - margin : zShift = maxZ + margin;
+        trf = Amg::getTranslateZ3D(zShift);
+        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
+        surfaces.push_back(surface);
+        break;
+      //large sectors (disc passive surface after NSW/EIL and after EML)
+    } case ChIdx::EIL :
+      case ChIdx::EML : {
+        // HARDCODED!! (maybe think a better solution in the future) 
+        // But for the EIL that we put after the EIS/EIL chambers we extend the radius of the disc surface 
+        // in order to have a better coverage for the projections from EE
+        if(testCh->chamberIndex() == ChIdx::EIL){
+          rMax += 60*margin;
+        }
+        side > 0 ? zShift = maxZ + margin : zShift = minZ - margin;
+        trf = Amg::getTranslateZ3D(zShift);
+        auto surface = Acts::Surface::makeShared<Acts::DiscSurface>(trf, std::make_shared<Acts::RadialBounds>(0., rMax));
+        surfaces.push_back(surface);
+        break;
+    } case ChIdx::BIS :
+      case ChIdx::BML :
+      case ChIdx::BOL : {
+       trf = Amg::getTranslateZ3D(halfZ + minZ);
+       auto surface = Acts::Surface::makeShared<Acts::CylinderSurface>(
+        trf, std::make_shared<Acts::CylinderBounds>(rMin - margin, halfZ));
+       surfaces.push_back(surface);
+      break;
+    } default :
+    throw std::runtime_error("No implementation of passive material surface for this station!!!! - sorry :) ");
+    }    
+     ATH_MSG_VERBOSE("Putting passive material surface for station " << layerName(layIdx) << "/ "<< regionName(detIdx) << ": minZ = " << minZ << ", maxZ = " << maxZ<< "and radius "<< rMax);
   }
 
   if(msgLvl(MSG::VERBOSE)){
