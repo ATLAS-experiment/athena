@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CTP_CTPSIMULATION_H
 #define TRIGT1CTP_CTPSIMULATION_H
@@ -10,7 +10,6 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
-#include "StoreGate/DataHandle.h"
 
 // monitoring from HLT
 #include "GaudiKernel/ITHistSvc.h"

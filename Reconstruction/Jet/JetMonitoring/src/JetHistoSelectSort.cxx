@@ -22,19 +22,19 @@ JetHistoSelectSort::JetHistoSelectSort( const std::string& type,  const std::str
 
 
 StatusCode JetHistoSelectSort::initialize() {
-  ATH_MSG_INFO("  initialize "    );
+  ATH_MSG_DEBUG("  initialize JetHistoSelectSort "    );
 
   ATH_CHECK(m_jetFillerTools.retrieve() );
 
-  ATH_MSG_INFO( " Scheduled Histo fillers/selectors : ");
+  ATH_MSG_DEBUG( " Scheduled Histo fillers/selectors : ");
   for(const auto& t: m_jetFillerTools){
-    ATH_MSG_INFO( "--> "<< t->name() );
+    ATH_MSG_DEBUG( "--> "<< t->name() );
   }
 
   
   if(m_selectTool.isEnabled()){
     ATH_CHECK(m_selectTool.retrieve());
-    ATH_MSG_INFO( " Selecting with "<< m_selectTool->name() );
+    ATH_MSG_DEBUG( " Selecting with "<< m_selectTool->name() );
   }
   if(m_inverseJetSel){
     ATH_MSG_DEBUG( "   inverse Jet Selection will be applied" );
@@ -42,12 +42,12 @@ StatusCode JetHistoSelectSort::initialize() {
 
   if(m_eventSelTool.isEnabled()){
     ATH_CHECK(m_eventSelTool.retrieve());
-    ATH_MSG_INFO( " Selecting with "<< m_eventSelTool->name() );
+    ATH_MSG_DEBUG( " Selecting with "<< m_eventSelTool->name() );
   }
   
   if( m_sortVar.isEnabled() ){
     ATH_CHECK(m_sortVar.retrieve());
-    ATH_MSG_INFO( "Sorting on var =("<< m_sortVar->describe() << ")");    
+    ATH_MSG_DEBUG( "Sorting on var =("<< m_sortVar->describe() << ")");
   }  
     
   return StatusCode::SUCCESS;
