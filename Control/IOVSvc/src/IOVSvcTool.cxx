@@ -521,7 +521,7 @@ IOVSvcTool::replaceProxy( SG::DataProxy *pOld,
       removeFromSet (ent, m_stopSet_Clock);
       removeFromSet (ent, m_stopSet_RE);
 
-      setRange_impl (pNew, *(const_cast<IOVRange*>(ent->range())));
+      setRange_impl (pNew, *ent->range());
       m_entries.erase (itr);
     }
   }
