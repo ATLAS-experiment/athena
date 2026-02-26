@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef MUONSTGC_CNVTOOLS_NSWTP_RAWDATAPROVIDERTOOLMT_H
-#define MUONSTGC_CNVTOOLS_NSWTP_RAWDATAPROVIDERTOOLMT_H
+#ifndef MUONSTGC_CNVTOOLS_NSWTP_RawDataProviderTool_H
+#define MUONSTGC_CNVTOOLS_NSWTP_RawDataProviderTool_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
@@ -16,33 +16,32 @@
 
 namespace Muon {
 
-class NSWTP_RawDataProviderToolMT : virtual public IMuonRawDataProviderTool, public AthAlgTool 
-{
+class NSWTP_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool> {
  public:
   using IMuonRawDataProviderTool::convert;
   
-  NSWTP_RawDataProviderToolMT(const std::string& type, const std::string& name, const IInterface* parent);
-  virtual ~NSWTP_RawDataProviderToolMT() = default;
+  using base_class::base_class;
+
+  virtual ~NSWTP_RawDataProviderTool() = default;
 
   StatusCode initialize() override;
 
-  // unimplemented
-  StatusCode convert() const override;
-  StatusCode convert(const ROBFragmentList&) const override;
-  StatusCode convert(const std::vector<IdentifierHash>&) const override;
-  StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&) const override;
-
   // implemented
-  StatusCode convert(const ROBFragmentList& fragments, const EventContext& ctx) const override;
+
+  StatusCode convert(const std::vector<IdentifierHash>& chamberHashes, 
+                     const EventContext& ctx) const override;
+  StatusCode convert(const std::vector<uint32_t>& robIDS, 
+                     const EventContext& ctx) const override;
   StatusCode convert(const EventContext& ctx) const override;
 
  private:
+
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<INSWTP_ROD_Decoder>      m_decoder{this, "Decoder", "Muon::NSWTP_ROD_Decoder/NSWTP_ROD_Decoder"};
-  ServiceHandle<IROBDataProviderSvc>    m_robDataProvider;
+  ServiceHandle<IROBDataProviderSvc>  m_robDataProvider{this, "RobProviderSvc", "ROBDataProviderSvc"};
   SG::WriteHandleKey<xAOD::NSWTPRDOContainer> m_rdoContainerKey{this, "RdoLocation", "", "Name of of the RDO container to write to"};
 };
 
 }  // namespace Muon
 
-#endif  // MUONSTGC_CNVTOOLS_NSWTP_RAWDATAPROVIDERTOOLMT_H
+#endif  // MUONSTGC_CNVTOOLS_NSWTP_RawDataProviderTool_H

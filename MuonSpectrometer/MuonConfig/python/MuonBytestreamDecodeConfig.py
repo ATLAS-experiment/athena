@@ -255,7 +255,7 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonStgcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "sTGCRDO"
-    MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
+    MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
                                                                    RdoLocation = keyName,
                                                                    SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )
@@ -286,7 +286,7 @@ def NswTrigProcessorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDat
     result = ComponentAccumulator()
     kwargs.setdefault("Decoder", result.popToolsAndMerge(NswTrigProcessorRodDecoderCfg(flags)))
     kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_TrigProcessor_RDO" )
-    the_tool = CompFactory.Muon.NSWTP_RawDataProviderToolMT(name = name, **kwargs)
+    the_tool = CompFactory.Muon.NSWTP_RawDataProviderTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
@@ -314,10 +314,9 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="sTgcPadTriggerRawDataProvider
 
     # Setup the RAW data provider tool
     keyName = flags.Overlay.BkgPrefix + "NSW_PadTrigger_RDO" if flags.Common.isOverlay else "NSW_PadTrigger_RDO"
-    Muon__PadTrig_RawDataProviderToolMT = CompFactory.Muon.PadTrig_RawDataProviderToolMT
-    MuonsTgcPadTriggerRawDataProviderTool = Muon__PadTrig_RawDataProviderToolMT(name = "sTgcPadTriggerRawDataProviderTool",
-                                                                                Decoder = STGCPadTriggerRodDecoder,
-                                                                                RdoLocation = keyName)
+    MuonsTgcPadTriggerRawDataProviderTool = CompFactory.Muon.PadTrig_RawDataProviderTool(name = "sTgcPadTriggerRawDataProviderTool",
+                                                                                         Decoder = STGCPadTriggerRodDecoder,
+                                                                                         RdoLocation = keyName)
 
 
     # Setup the RAW data provider algorithm

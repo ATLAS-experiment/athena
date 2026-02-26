@@ -74,9 +74,8 @@ def MuonBytestream2RdoConfig(flags):
     acc.addEventAlgo(TgcRawDataProvider)
     # for sTGC
     if flags.Detector.GeometrysTGC:
-        Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
         from MuonConfig.MuonBytestreamDecodeConfig import sTgcRODDecoderCfg
-        MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "STGC_RawDataProviderToolMT"+postFix,
+        MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "STGC_RawDataProviderToolMT"+postFix,
                                                                        Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags,
                                                                                                      name = "sTgcROD_Decoder"+postFix)),
                                                                        RdoLocation = "sTGCRDO_L1")
