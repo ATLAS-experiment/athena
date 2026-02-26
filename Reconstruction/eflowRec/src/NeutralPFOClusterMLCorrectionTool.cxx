@@ -12,24 +12,84 @@ StatusCode NeutralPFOClusterMLCorrectionTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-void NeutralPFOClusterMLCorrectionTool::correctContainer(xAOD::FlowElementContainer &container) const
+void NeutralPFOClusterMLCorrectionTool::correctContainer(xAOD::FlowElementContainer &neutral_pfos, xAOD::FlowElementContainer &charged_pfos) const
 {
-
-  for (xAOD::FlowElement *pfo : container)
-  {
-    if (pfo->isCharged())
-    {
-      ATH_MSG_WARNING("NeutralPFOClusterMLCorrectionTool: Charged FlowElement found in neutral FlowElementContainer with index " + std::to_string(pfo->index()));
-      continue;
-    }
-
-    const xAOD::CaloCluster *cls = getLinkedCluster(*pfo);
-    if (cls != nullptr)
-      scaleEnergyToAlternativeSignalState(*pfo, *cls);
-  }
+  for (xAOD::FlowElement *neutral_pfo : neutral_pfos)
+  { correctFlowElement(*neutral_pfo, charged_pfos); }
 }
 
-void NeutralPFOClusterMLCorrectionTool::scaleEnergyToAlternativeSignalState(xAOD::FlowElement &pfo, const xAOD::CaloCluster &cls) const
+void NeutralPFOClusterMLCorrectionTool::correctFlowElement(xAOD::FlowElement &neutral_pfo, const xAOD::FlowElementContainer &charged_pfos) const
+{
+  if (neutral_pfo.isCharged())
+  {
+    ATH_MSG_WARNING("NeutralPFOClusterMLCorrectionTool: Charged FlowElement found in neutral FlowElementContainer with index " + std::to_string(neutral_pfo.index()));
+    return;
+  }
+  const xAOD::CaloCluster *cls = getLinkedCluster(neutral_pfo);
+  if (cls == nullptr)
+  { return; }
+  
+  std::pair<float,float> charged_corrections = getChargedCorrectionsToCluster(cls, charged_pfos);
+  scaleEnergyToAlternativeSignalState(neutral_pfo, *cls, charged_corrections);
+}
+
+std::pair<float,float>
+NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToCluster(
+    const xAOD::CaloCluster* cls_ptr,
+    const xAOD::FlowElementContainer& charged_pfos) const
+{
+    std::pair<float, float> corr_total  = {0.f,0.f};
+    for (const xAOD::FlowElement* fe : charged_pfos) {
+      const std::pair<float,float> corr = getChargedCorrectionsToClusterFromSingleFe(cls_ptr, *fe);
+      corr_total.first += corr.first;
+      corr_total.second += corr.second;
+    }
+    return corr_total;
+}
+
+std::pair<float,float>
+NeutralPFOClusterMLCorrectionTool::getChargedCorrectionsToClusterFromSingleFe(
+    const xAOD::CaloCluster* cls_ptr,
+    const xAOD::FlowElement& fe) const
+{
+  float corr_pfo_e  = 0.f;
+  float corr_weight_e   = 0.f;
+  // FlowElements store links to clusters with weights
+  const auto& cl_links = fe.otherObjectLinks();
+  const auto& cl_weights = fe.otherObjectWeights();
+
+  // Loop over all cluster links of this FE
+  bool has_matched_cluster = false;
+  for (size_t i = 0; i < cl_links.size(); ++i) {
+
+    const ElementLink<xAOD::IParticleContainer>& link = cl_links[i];
+    float weight = cl_weights[i];
+
+    // Skip invalid links
+    if (!link.isValid()) continue;
+
+    // Check if this link points to the same cluster
+    const xAOD::IParticle* ip = *link;
+    const xAOD::CaloCluster* linked_cluster =
+      dynamic_cast<const xAOD::CaloCluster*>(ip);
+
+    if (!linked_cluster) continue;
+
+    // Compare pointer identity
+    if (linked_cluster == cls_ptr) {
+      has_matched_cluster = true;
+      corr_weight_e  += weight;
+    }
+  }
+  
+  if (has_matched_cluster)
+  { corr_pfo_e = fe.e(); }
+
+  return {corr_pfo_e, corr_weight_e};
+}
+
+
+void NeutralPFOClusterMLCorrectionTool::scaleEnergyToAlternativeSignalState(xAOD::FlowElement &neutral_pfo, const xAOD::CaloCluster &cls, const std::pair<float,float> &charged_corrections) const
 {
   // Scale factor is defined as the ratio of the cluster energy stored in decoration
   // to the energy in the EM calibration state (UNCALIBRATED). This scale factor is then applied to the PFO energy.
@@ -45,30 +105,36 @@ void NeutralPFOClusterMLCorrectionTool::scaleEnergyToAlternativeSignalState(xAOD
   const double clusterDecorEnergy = clusterMLCorrectedEnergyAccessor.isAvailable(cls) ? clusterMLCorrectedEnergyAccessor(cls) : clusterEMEnergy;
   const double scaleFactor = clusterEMEnergy > FLT_MIN ? clusterDecorEnergy / clusterEMEnergy : 1.0;
 
-  ATH_MSG_DEBUG("NeutralPFOClusterMLCorrectionTool: Scaling PFO with index " << pfo.index()
-            << " energy from " << pfo.e() << " to " << (pfo.e() * scaleFactor)
+  const float corr_charged_pfo_e = charged_corrections.first;
+  const float corr_weight_e = charged_corrections.second;
+
+  const double neutral_pfo_e = (neutral_pfo.e() + corr_weight_e) * scaleFactor - corr_charged_pfo_e;
+
+
+  ATH_MSG_DEBUG("NeutralPFOClusterMLCorrectionTool: Scaling PFO with index " << neutral_pfo.index()
+            << " energy from " << neutral_pfo.e() << " to " << (neutral_pfo.e() * scaleFactor)
             << " using cluster index " << cls.index()
             << " EM energy " << clusterEMEnergy
             << " Decor energy " << clusterDecorEnergy
             << " scale factor " << scaleFactor);
 
-  pfo.setP4(pfo.pt() * scaleFactor, pfo.eta(), pfo.phi(), pfo.m() * scaleFactor);
+  neutral_pfo.setP4(neutral_pfo_e / cosh(neutral_pfo.eta()), neutral_pfo.eta(), neutral_pfo.phi(), neutral_pfo.m());
 }
 
-const xAOD::CaloCluster *NeutralPFOClusterMLCorrectionTool::getLinkedCluster(const xAOD::FlowElement &pfo) const
+const xAOD::CaloCluster *NeutralPFOClusterMLCorrectionTool::getLinkedCluster(const xAOD::FlowElement &neutral_pfo) const
 {
   // Returns xAOD::Type::CaloCluster type link. There should be at most one such link.
   // It can happen that no such link exists. This can happen due to negative cells subtraction.
   // Empty link is returned if no valid cluster link is found.
-  const std::vector<ElementLink<xAOD::IParticleContainer>> &otherObjectLinks = pfo.otherObjectLinks();
+  const std::vector<ElementLink<xAOD::IParticleContainer>> &otherObjectLinks = neutral_pfo.otherObjectLinks();
   if (otherObjectLinks.size() > 1)
-    ATH_MSG_ERROR("NeutralPFOClusterMLCorrectionTool: Multiple links found for neutral FlowElement with index " + std::to_string(pfo.index()));
+    ATH_MSG_ERROR("NeutralPFOClusterMLCorrectionTool: Multiple links found for neutral FlowElement with index " + std::to_string(neutral_pfo.index()));
 
   bool hasValidLink = !otherObjectLinks.empty() && otherObjectLinks[0].isValid();
   if (hasValidLink)
   {
     if ((**otherObjectLinks[0]).type() != xAOD::Type::CaloCluster)
-      ATH_MSG_ERROR("NeutralPFOClusterMLCorrectionTool: Link for neutral FlowElement with index " + std::to_string(pfo.index()) + " is not of type CaloCluster");
+      ATH_MSG_ERROR("NeutralPFOClusterMLCorrectionTool: Link for neutral FlowElement with index " + std::to_string(neutral_pfo.index()) + " is not of type CaloCluster");
 
     return static_cast<const xAOD::CaloCluster *>(*otherObjectLinks[0]);
   }
