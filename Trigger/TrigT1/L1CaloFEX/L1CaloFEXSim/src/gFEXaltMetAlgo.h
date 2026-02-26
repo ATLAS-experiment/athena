@@ -30,28 +30,29 @@ namespace LVL1 {
     /** standard Athena-Algorithm method */
     virtual StatusCode initialize() override;
 
-
-    virtual void setAlgoConstant(std::vector<int>&& A_thr,
-                         std::vector<int>&& B_thr,
-                         const int rhoPlusThr) override;
                                  
+    virtual void setAlgoConstant(std::vector<int>&& A_thr,
+                             std::vector<int>&& B_thr,
+                             std::vector<int>&& C_thr,
+                             const int rhoPlusThr) override;
 
-    virtual void altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral &Btwr,
-                            std::array<uint32_t, 4> & outTOB) const override;
-
-
+    virtual void altMetAlgo(const gTowersCentral &Atwr,
+                        const gTowersCentral &Btwr,
+                        const gTowersCentral &Ctwr,
+                        std::array<uint32_t, 4> & outTOB) const override;
 
   private:
 
-    std::array<std::vector<int>, 2> m_etaThr;
+    std::array<std::vector<int>, 3> m_etaThr;   // A, B, C
     int m_rhoPlusThr{};
     
     
     void metFPGA(const gTowersCentral &twrs, int & MET_x, int & MET_y, const unsigned short FPGA_NO) const;
 
     void metTotal(const int A_MET_x, const int A_MET_y,
-                  const int B_MET_x, const int B_MET_y,
-                  int & MET_x, int & MET_y, int & MET) const;
+              const int B_MET_x, const int B_MET_y,
+              const int C_MET_x, const int C_MET_y,
+              int & MET_x, int & MET_y, int & MET) const;
 
     int get_rho(const gTowersCentral &twrs) const;
 
@@ -63,7 +64,7 @@ namespace LVL1 {
 
     int sumEtFPGArms(const gTowersCentral &twrs, const int sigma) const;
 
-    int sumEt(const int A_sumEt, const int  B_sumEt) const;
+    int sumEt(const int A_sumEt, const int B_sumEt, const int C_sumEt) const;
 
     float sinLUT(const unsigned int phiIDX, const unsigned int aw) const;
 
