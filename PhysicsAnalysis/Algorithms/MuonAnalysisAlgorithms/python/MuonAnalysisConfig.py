@@ -288,6 +288,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (MuonWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('MuonWorkingPointEfficiency')
         self.addDependency('MuonWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)

@@ -415,6 +415,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (PhotonWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('PhotonWorkingPointEfficiency')
         self.addDependency('PhotonWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)

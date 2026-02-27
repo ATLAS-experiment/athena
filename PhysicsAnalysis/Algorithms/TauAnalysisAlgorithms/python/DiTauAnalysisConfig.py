@@ -168,6 +168,7 @@ class DiTauWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (DiTauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('DiTauWorkingPointEfficiency')
         self.addDependency('DiTauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
