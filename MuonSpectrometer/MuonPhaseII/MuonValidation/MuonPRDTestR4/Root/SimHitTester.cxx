@@ -5,7 +5,8 @@
 #include "MuonPRDTestR4/SimHitTester.h"
 #include "StoreGate/ReadHandle.h"
 namespace {
-    static const SG::ConstAccessor<std::int16_t> acc_phiChannel{"SDO_phiChannel"};
+    using ChVec_t = std::vector<std::uint16_t>;
+    static const SG::ConstAccessor<ChVec_t> acc_phiChannel{"SDO_phiChannels"};
 }
 
 namespace MuonValR4{
@@ -110,7 +111,10 @@ namespace MuonValR4{
         }
         int phiChannel = -9999;
         if ( idHelperSvc()->isRpc(id) || idHelperSvc()->isTgc(id)) {
-           phiChannel = (acc_phiChannel.isAvailable(simHit)) ? acc_phiChannel(simHit) : phiChannel;
+	   if (acc_phiChannel.isAvailable(simHit) && acc_phiChannel(simHit).size() > 0) {
+              assert(acc_phiChannel(simHit).size() == 1);
+              phiChannel = acc_phiChannel(simHit)[0];
+	   }
         }
         m_phiChannel.push_back(phiChannel);
 
