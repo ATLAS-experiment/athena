@@ -30,10 +30,12 @@
 namespace {
    void popRenounced(const std::vector<std::string>  &renounce,
                      std::vector<Gaudi::DataHandle *> &new_input_handles) {
-      for (const std::string &a_key : renounce) {
-         if (new_input_handles.back()->objKey() == a_key ) {
-            new_input_handles.pop_back();
-            break;
+      if (!new_input_handles.empty()) {
+         for (const std::string &a_key : renounce) {
+            if (new_input_handles.back()->objKey() == a_key ) {
+               new_input_handles.pop_back();
+               break;
+            }
          }
       }
    }
