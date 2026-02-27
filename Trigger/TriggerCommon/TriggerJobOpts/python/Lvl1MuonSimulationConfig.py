@@ -60,28 +60,33 @@ def MuonBytestream2RdoConfig(flags):
                                                                              WriteOutRpcSectorLogic = False,
                                                                              Decoder = RPCRodDecoder,
                                                                              RdoLocation = "RPCPAD_L1" )
-    RpcRawDataProvider = CompFactory.Muon.RpcRawDataProvider(name = "RpcRawDataProvider" + postFix,
-                                                              ProviderTool = MuonRpcRawDataProviderTool)
+    RpcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = "RpcRawDataProvider" + postFix,
+                                                              ProviderTool = MuonRpcRawDataProviderTool,
+                                                              UseHashIds = False,
+                                                              DecodePerRoI = True)
     acc.addEventAlgo(RpcRawDataProvider)
     # for TGC
     TGCRodDecoder = CompFactory.Muon.TGC_RodDecoderReadout(name = "TGC_RodDecoderReadout" + postFix)
-    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderTool(name = "TGC_RawDataProviderToolMT" + postFix,
+    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderTool(name = "TGC_RawDataProviderTool" + postFix,
                                                                              TgcContainerCacheKey = MuonCacheNames.TgcCache,
                                                                              Decoder = TGCRodDecoder,
                                                                              RdoLocation = "TGCRDO_L1")
-    TgcRawDataProvider = CompFactory.Muon.TgcRawDataProvider(name = "TgcRawDataProvider" + postFix,
-                                                              ProviderTool = MuonTgcRawDataProviderTool)
+    TgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = "TgcRawDataProvider" + postFix,
+                                                              ProviderTool = MuonTgcRawDataProviderTool,
+                                                              UseHashIds = True,
+                                                              DecodePerRoI = True)
     acc.addEventAlgo(TgcRawDataProvider)
     # for sTGC
     if flags.Detector.GeometrysTGC:
         from MuonConfig.MuonBytestreamDecodeConfig import sTgcRODDecoderCfg
-        MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "STGC_RawDataProviderToolMT"+postFix,
+        MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "STGC_RawDataProviderTool"+postFix,
                                                                        Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags,
                                                                                                      name = "sTgcROD_Decoder"+postFix)),
                                                                        RdoLocation = "sTGCRDO_L1")
-        Muon__sTgcRawDataProvider=CompFactory.Muon.sTgcRawDataProvider
-        sTgcRawDataProvider = Muon__sTgcRawDataProvider(name       = "sTgcRawDataProvider"+postFix,
-                                                        ProviderTool = MuonsTgcRawDataProviderTool )
+        sTgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name       = "sTgcRawDataProvider"+postFix,
+                                                        ProviderTool = MuonsTgcRawDataProviderTool,
+                                                        UseHashIds = False,
+                                                        DecodePerRoI = False)
         acc.addEventAlgo(sTgcRawDataProvider)
 
     # for MM
@@ -92,8 +97,10 @@ def MuonBytestream2RdoConfig(flags):
                                                                   Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags,
                                                                                                  name="MM_RODDecoder"+postFix)),
                                                                   RdoLocation = "MMRDO_L1")
-        Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
-        MmRawDataProvider = Muon__MmRawDataProvider(name = "MmRawDataProvider"+postFix, ProviderTool = MuonMmRawDataProviderTool )
+        MmRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = "MmRawDataProvider"+postFix,
+                                                                   ProviderTool = MuonMmRawDataProviderTool,
+                                                                   UseHashIds = False,
+                                                                   DecodePerRoI = False)
         acc.addEventAlgo(MmRawDataProvider)
 
     if flags.Trigger.L1MuonSim.EmulateNSW and flags.Trigger.L1MuonSim.NSWVetoMode:
@@ -103,8 +110,10 @@ def MuonBytestream2RdoConfig(flags):
                                                                                 CsmContainerCacheKey = MuonCacheNames.MdtCsmCache,
                                                                                 Decoder = MDTRodDecoder,
                                                                                 RdoLocation = "MDTCSM_L1")
-        MdtRawDataProvider = CompFactory.Muon.MdtRawDataProvider(name = "MdtRawDataProvider" + postFix,
-                                                                 ProviderTool = MuonMdtRawDataProviderTool)
+        MdtRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = "MdtRawDataProvider" + postFix,
+                                                                 ProviderTool = MuonMdtRawDataProviderTool,
+                                                                 UseHashIds = False,
+                                                                 DecodePerRoI = True)
         acc.addEventAlgo(MdtRawDataProvider)
         # for CSC
         if flags.Detector.GeometryCSC:
@@ -115,8 +124,13 @@ def MuonBytestream2RdoConfig(flags):
                                                                                     CscContainerCacheKey = MuonCacheNames.CscCache,
                                                                                     Decoder = CSCRodDecoder,
                                                                                     RdoLocation = "CSCRDO_L1" )
-            CscRawDataProvider = CompFactory.Muon.CscRawDataProvider(name = "CscRawDataProvider" + postFix,
-                                                                     ProviderTool = MuonCscRawDataProviderTool)
+            CscRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = "CscRawDataProvider" + postFix,
+                                                                     ProviderTool = MuonCscRawDataProviderTool,
+                                                                     UseHashIds = True,
+                                                                     DecodePerRoI = True,
+                                                                     RequireDetectorManager = True,
+                                                                     DetectorManagerKey = "MuonDetectorManager",
+                                                                     IgnoreMissingRoIs = True)
             acc.addEventAlgo(CscRawDataProvider)
 
     return acc
