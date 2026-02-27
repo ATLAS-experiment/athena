@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecVector_test.cxx
@@ -39,15 +39,7 @@ T makeT(int x=0) { return makeT1(x, static_cast<T*>(nullptr)); }
 template <class T>
 std::vector<T> makeTVec (const std::vector<int>& v)
 {
-#if HAVE_STD_RANGES
   return CxxUtils::to<std::vector<T> >(v | std::views::transform (makeT<T>));
-#else
-  std::vector<T> out;
-  for (int x : v) {
-    out.push_back (makeT<T> (x));
-  }
-  return out;
-#endif
 }
 
 
