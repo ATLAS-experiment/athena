@@ -320,6 +320,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__ (self) :
         super (TauWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('TauWorkingPointEfficiency')
         self.addDependency('TauWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)
