@@ -9,10 +9,12 @@ output variables metadata from a YAML file.
 import inspect
 import yaml
 import re
+import logging
 from typing import Any, Dict, List, Type, Optional, Union
 
 from AthenaCommon.Utils.unixtools import find_datafile
 
+logger = logging.getLogger("AutogenDocumentation")
 
 def load_output_variables(yaml_filepath: str) -> Dict[str, List[Dict[str, Any]]]:
     """
@@ -215,7 +217,6 @@ def extract_from_classes(
         # Load and merge all YAML files
         for yaml_file in yaml_files:
             # Locate the file
-            print(yaml_file)
             resolved_path = find_datafile(yaml_file)
             if resolved_path is None:
                 raise FileNotFoundError(f"Could not locate YAML file: {yaml_file}")
@@ -245,7 +246,7 @@ def save_as_yaml(data: List[Dict[str, Any]], filepath: str) -> None:
     """Save extracted data as YAML."""
     with open(filepath, "w") as f:
         yaml.dump(data, f, default_flow_style=False, sort_keys=False)
-    print(f"Saved YAML to {filepath}")
+    logger.info(f"Saved YAML to {filepath}")
 
 
 def generate_block_markdown(block_info: Dict[str, Any]) -> str:
@@ -358,8 +359,8 @@ def generate_block_markdown(block_info: Dict[str, Any]) -> str:
                 markdown += f"    - `{var_name}`: {var_desc}\n"
             markdown += "\n"
     else:
-        print(
-            f"  Block {block_info.get('class')} didn't register any output variables."
+        logger.warning(
+            f"Block {block_info.get('class')} didn't register any output variables."
         )
 
     return markdown
@@ -416,4 +417,4 @@ def process_markdown_with_autogen(
     with open(output_filepath, "w") as f:
         f.writelines(output_lines)
 
-    print(f"Processed markdown saved to {output_filepath}")
+    logger.info(f"Processed markdown saved to {output_filepath}.")
