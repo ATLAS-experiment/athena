@@ -124,7 +124,6 @@
 + Reconstruction/egamma/egammaRecEvent
 + Reconstruction/egamma/egammaUtils
 + Reconstruction/tauRecTools
-+ Reconstruction/DiTauRecTools
 + Simulation/SimulationConfig
 + Tools/PathResolver
 + Tools/ART
