@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODEGAMMA_VERSIONS_ELECTRONCONTAINER_V1_H
@@ -12,7 +12,7 @@
 
 // Local include(s):
 #include "xAODEgamma/versions/Electron_v1.h"
-#include "xAODEgamma/versions/EgammaContainer_v1.h"
+#include "xAODEgamma/EgammaContainer.h"
 
 
 namespace xAOD {
