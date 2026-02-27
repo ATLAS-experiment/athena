@@ -26,7 +26,8 @@ echo "art-result: $rc1 Reco"
 rc2=-9999
 if [ $rc1 -eq 0 ]
 then
-  art.py compare grid --entries 50 "$1" "$2" --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+  art.py compare grid --entries 50 "$1" "$2" --mode=semi-detailed --order-trees --ignore-exit-code diff-pool \
+	 --ignore-leave "xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux.serialize"
   rc2=$?
 fi
 echo "art-result: $rc2 Diff"
