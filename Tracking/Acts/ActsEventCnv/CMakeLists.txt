@@ -25,6 +25,8 @@ atlas_add_component(ActsEventCnv
     InDetRIO_OnTrack
     MuonReadoutGeometry
     MuonReadoutGeometryR4
+    MuonRecToolInterfaces
+    MuonRIO_OnTrack
     StoreGateLib
     TrkEventPrimitives
     TrkExUtils
@@ -35,6 +37,7 @@ atlas_add_component(ActsEventCnv
     TrkTrack
     xAODInDetMeasurement
     xAODMeasurementBase
+    xAODMuonPrepData
     xAODTracking)
 
 atlas_add_test(ActsEventCnvTrackTest

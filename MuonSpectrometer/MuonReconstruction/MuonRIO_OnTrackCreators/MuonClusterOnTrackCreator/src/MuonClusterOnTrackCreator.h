@@ -94,6 +94,7 @@ namespace Muon {
         Gaudi::Property<double> m_fixedErrorRpcEta{this, "FixedErrorRpcEta", 5.};
         Gaudi::Property<double> m_fixedErrorTgcPhi{this, "FixedErrorTgcPhi", 5.};
         Gaudi::Property<double> m_fixedErrorRpcPhi{this, "FixedErrorRpcPhi", 5.};
+        Gaudi::Property<bool> m_restrictWarnings{this, "RestrictWarnings", false};
     };
 }  // namespace Muon
 #endif  // MuonClusterOnTrackCreator_H

@@ -65,7 +65,10 @@ namespace Muon {
         const Trk::Surface& rio_surface = EL->surface(RIO.identify());
         if (!rio_surface.globalToLocal(GP, GP, lp)) {
             Amg::Vector3D lpos = rio_surface.transform().inverse() * GP;
-            ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
+	    //sTGC surfaces end up with a 20um shift in z when converted from ACTS track parameters, so optionally don't warn for such cases
+	    if(!m_restrictWarnings || fabs(fabs(lpos.z())-0.02)>1e-6){
+	      ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
+	    }
             lp[Trk::locX] = lpos.x();
             lp[Trk::locY] = lpos.y();
             positionAlongZ = lpos.z();
