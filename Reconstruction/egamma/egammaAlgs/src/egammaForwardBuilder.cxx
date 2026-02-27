@@ -295,10 +295,9 @@ StatusCode egammaForwardBuilder::execute(const EventContext& ctx) const
       
       // Save the bool result.
       const asg::AcceptData accept = selector->accept(ctx, el);
-      el->setPassSelection(static_cast<bool>(accept), name);
-      // Save the NN. ||||||||||||||||||| Need to find the corresponding function
-      el->setSelectionisEM(static_cast<bool>(accept), "NN" + name);
+      el->setPassSelection(static_cast<bool>(accept), "DNN"+name);
     }
+    std::string LikeliHoodName = "DNN_Score";
     const auto selector = m_forwardElectronNNSelectors[0];
     float val=selector->calculate(ctx,el);
     el->setLikelihoodValue(val,LikeliHoodName);
