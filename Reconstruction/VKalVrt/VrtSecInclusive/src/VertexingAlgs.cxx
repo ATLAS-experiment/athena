@@ -36,18 +36,21 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::extractIncompatibleTrackPairs( std::vector<WrkVrt>* workVerticesContainer )
+  StatusCode VrtSecInclusive::extractIncompatibleTrackPairs( const EventContext& ctx,
+							     std::vector<WrkVrt>* workVerticesContainer )
   {
 
     // Output SVs as xAOD::Vertex
     // Needs a conversion function from WrkVrtSet to xAOD::Vertex here.
     // The supposed form of the function will be as follows:
-    const xAOD::TrackParticleContainer* trackParticleContainer{};
-    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
 
+    SG::WriteHandle<xAOD::VertexContainer> trackHandle;
     xAOD::VertexContainer *twoTrksVertexContainer{};
     if( m_FillIntermediateVertices ) {
-      ATH_CHECK( evtStore()->retrieve( twoTrksVertexContainer, "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString ) );
+      trackHandle = SG::makeHandle( m_twoTrksVertexKey, ctx );
+      ATH_CHECK( trackHandle.record(std::make_unique<xAOD::VertexContainer>(),
+				    std::make_unique<xAOD::VertexAuxContainer>()) );
+      twoTrksVertexContainer = trackHandle.ptr();
     }
 
     m_incomp.clear();
@@ -388,7 +391,8 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::findNtrackVertices( std::vector<WrkVrt> *workVerticesContainer )
+  StatusCode VrtSecInclusive::findNtrackVertices( const EventContext&,
+						  std::vector<WrkVrt> *workVerticesContainer )
   {
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": begin");
     if(m_doDisappearingTrackVertexing){
@@ -750,7 +754,8 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::rearrangeTracks( std::vector<WrkVrt> *workVerticesContainer )
+  StatusCode VrtSecInclusive::rearrangeTracks( const EventContext&,
+					       std::vector<WrkVrt> *workVerticesContainer )
   {
     if(m_doDisappearingTrackVertexing){
       ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": skip");
@@ -976,7 +981,8 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::reassembleVertices( std::vector<WrkVrt>* workVerticesContainer )
+  StatusCode VrtSecInclusive::reassembleVertices( const EventContext&,
+						  std::vector<WrkVrt>* workVerticesContainer )
   {
     // Here, the supposed issue is that, the position of the reconstructed vertex may be significantly
     // displaced from its truth position, even if the constituent tracks are all from that truth.
@@ -1097,14 +1103,16 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::associateNonSelectedTracks( std::vector<WrkVrt>* workVerticesContainer )
+  StatusCode VrtSecInclusive::associateNonSelectedTracks( const EventContext& ctx,
+							  std::vector<WrkVrt>* workVerticesContainer )
   {
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackHandle = SG::makeHandle( m_TrackLocation, ctx );
+    ATH_CHECK( trackHandle.isValid() );
+    const xAOD::TrackParticleContainer *allTracks = trackHandle.cptr();
 
-    const xAOD::TrackParticleContainer *allTracks{};
-    ATH_CHECK( evtStore()->retrieve(allTracks, m_TrackLocation) );
-
-    const xAOD::VertexContainer *pvs{};
-    ATH_CHECK( evtStore()->retrieve( pvs, "PrimaryVertices") );
+    SG::ReadHandle<xAOD::VertexContainer> primVtxHandle = SG::makeHandle( m_PrimVrtLocation, ctx );
+    ATH_CHECK( primVtxHandle.isValid() );
+    const xAOD::VertexContainer *pvs = primVtxHandle.cptr();
 
     if( !m_decor_isAssociated ) {
       m_decor_isAssociated.emplace ( "is_associated" + m_augVerString );
@@ -1305,7 +1313,8 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::mergeByShuffling( std::vector<WrkVrt> *workVerticesContainer )
+  StatusCode VrtSecInclusive::mergeByShuffling( const EventContext&,
+						std::vector<WrkVrt> *workVerticesContainer )
   {
 
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": #verticess = " << workVerticesContainer->size() );
@@ -1454,7 +1463,8 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::mergeFinalVertices( std::vector<WrkVrt> *workVerticesContainer )
+  StatusCode VrtSecInclusive::mergeFinalVertices( const EventContext&,
+						  std::vector<WrkVrt> *workVerticesContainer )
   {
 
     unsigned mergeCounter { 0 };
@@ -1510,20 +1520,18 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::refitAndSelectGoodQualityVertices( std::vector<WrkVrt> *workVerticesContainer )
+  StatusCode VrtSecInclusive::refitAndSelectGoodQualityVertices( const EventContext& ctx,
+								 std::vector<WrkVrt> *workVerticesContainer )
   {
-
     // Output SVs as xAOD::Vertex
     // Needs a conversion function from workVerticesContainer to xAOD::Vertex here.
     // The supposed form of the function will be as follows:
 
     try {
-
-      xAOD::VertexContainer *secondaryVertexContainer{};
-      ATH_CHECK( evtStore()->retrieve( secondaryVertexContainer, "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString ) );
-
-      const xAOD::TrackParticleContainer* trackParticleContainer{};
-      ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
+      SG::WriteHandle<xAOD::VertexContainer> secVtxHandle = SG::makeHandle( m_vertexKey, ctx );
+      ATH_CHECK( secVtxHandle.record( std::make_unique<xAOD::VertexContainer>(),
+				      std::make_unique<xAOD::VertexAuxContainer>() ) );
+      xAOD::VertexContainer *secondaryVertexContainer = secVtxHandle.ptr();
 
       enum { kPt, kEta, kPhi, kD0, kZ0, kErrP, kErrD0, kErrZ0, kChi2SV };
       if( m_trkDecors.empty() ) {
@@ -1544,7 +1552,6 @@ namespace VKalVrtAthena {
       std::map<const WrkVrt*, const xAOD::Vertex*> wrkvrtLinkMap;
 
       //----------------------------------------------------------
-      const auto& ctx = Gaudi::Hive::currentContext();
 
       ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": input #vertices = " << workVerticesContainer->size() );
 
@@ -2206,16 +2213,14 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::monitorVertexingAlgorithmStep( std::vector<WrkVrt>* workVerticesContainer, const std::string& name, bool final ) {
-
+  StatusCode VrtSecInclusive::monitorVertexingAlgorithmStep( const EventContext& ctx,
+							     std::vector<WrkVrt>* workVerticesContainer, const std::string& name, bool final ) {
     if( m_FillIntermediateVertices ) {
 
-      const xAOD::TrackParticleContainer* trackParticleContainer{};
-      ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
-
-      xAOD::VertexContainer* intermediateVertexContainer{};
-
-      ATH_CHECK( evtStore()->retrieve( intermediateVertexContainer, "VrtSecInclusive_IntermediateVertices_" + name + m_augVerString ) );
+      SG::WriteHandle<xAOD::VertexContainer> vertexHandle = SG::makeHandle( m_intermediateVertexKey[name], ctx );
+      ATH_CHECK( vertexHandle.record(std::make_unique<xAOD::VertexContainer>(),
+				     std::make_unique<xAOD::VertexAuxContainer>()) );
+      xAOD::VertexContainer* intermediateVertexContainer = vertexHandle.ptr();
 
       for( auto& wrkvrt : *workVerticesContainer ) {
 
