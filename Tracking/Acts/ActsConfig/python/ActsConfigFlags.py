@@ -5,7 +5,6 @@ from AthenaConfiguration.Enums import FlagEnum
 
 class SeedingStrategy(FlagEnum):
     Default = "Default"
-    Orthogonal = "Orthogonal"
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"

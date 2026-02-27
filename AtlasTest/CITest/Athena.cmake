@@ -368,9 +368,6 @@ atlas_add_citest( ACTS_ValidateClusters
 atlas_add_citest( ACTS_ValidateSeeds
    SCRIPT ActsValidateSeeds.sh )
 
-atlas_add_citest( ACTS_ValidateOrthogonalSeeds 
-   SCRIPT ActsValidateOrthogonalSeeds.sh )
-
 atlas_add_citest( ACTS_ValidateGbtsSeeds 
    SCRIPT ActsValidateGbtsSeeds.sh )
 
