@@ -4,6 +4,8 @@ from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
 from egammaTools.EMTrackMatchBuilderConfig import EMTrackMatchBuilderCfg
 from ElectronPhotonSelectorTools.AsgForwardElectronIsEMSelectorsConfig import (
     AsgForwardElectronIsEMSelectorCfg)
+from ElectronPhotonSelectorTools.ForwardElectronSelectorConfig import (
+    AsgForwardElectronSelectorToolCfg)
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -44,6 +46,34 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         acc.merge(MediumFwdElectronSelector)
         acc.merge(TightFwdElectronSelector)
 
+    if "forwardelectronNNselectors" not in kwargs:
+        LooseFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+            flags,
+            "LooseForwardNNElectronSelector",
+            "Loose")
+        MediumFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+            flags,
+            "MediumForwardNNElectronSelector",
+            "Medium")
+        TightFwdElectronSelector_NN = AsgForwardElectronSelectorToolCfg(
+            flags,
+            "TightForwardNNElectronSelector",
+            "Tight")
+
+
+        kwargs.setdefault("forwardelectronNNselectors",
+                          [LooseFwdElectronSelector_NN.popPrivateTools(),
+                          MediumFwdElectronSelector_NN.popPrivateTools(),
+                          TightFwdElectronSelector_NN.popPrivateTools()])
+        kwargs.setdefault(
+            "forwardelectronNNselectorResultNames",
+            ["Loose", "Medium", "Tight"])
+
+        acc.merge(LooseFwdElectronSelector_NN)
+        acc.merge(MediumFwdElectronSelector_NN)
+        acc.merge(TightFwdElectronSelector_NN)
+
+        
     if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         egOQ = egammaOQFlagsBuilderCfg(flags)
         kwargs["ObjectQualityTool"] = egOQ.popPrivateTools()
