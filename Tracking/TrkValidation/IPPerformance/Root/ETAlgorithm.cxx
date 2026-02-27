@@ -8,17 +8,7 @@
 
 // ROOT includes
 #include <TSystem.h>
-
-// RCU include for throwing an exception+message
-//#include <RootCoreUtils/ThrowMsg.h>
-
-//  for isMC()
-// #include <xAODAnaHelpers/HelperFunctions.h>
-// #include "xAODEventInfo/EventInfo.h"
-
-// this is needed to distribute the algorithm to the workers
-// but we don't need this in Athena
-//ClassImp(ET::AlgorithmRegistry)
+#include <stdexcept>
 
 int ETAlgorithmRegistry::countRegistered(std::string className){
 
@@ -37,10 +27,6 @@ int ETAlgorithmRegistry::countRegistered(std::string className){
   return 0;
 
 }
-
-// this is needed to distribute the algorithm to the workers
-// but we don't need this in Athena
-//ClassImp(ET::Algorithm)
 
 
 ETAlgorithm::ETAlgorithm(const std::string& name,

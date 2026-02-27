@@ -110,8 +110,6 @@ StatusCode IPNtupleDumper :: initialize ()
 
   //Track to vertex tool
   ANA_CHECK(m_trktovxtool.retrieve());
-  //ANA_CHECK( trktovxtool->setProperty( "doUsedInFit", true ) );
-  //ANA_CHECK( trktovxtool->setProperty( "requirePriVtx", false ) );
 
   //LoosePrimary Track Selection
   ANA_CHECK(m_LoosePrimary_selTool.retrieve());

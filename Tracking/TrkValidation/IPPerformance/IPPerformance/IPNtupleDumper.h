@@ -24,8 +24,7 @@
 #include "IPPerformance/ETAlgorithm.h"
 #include "IPPerformance/TrackTruthHelper.h"
 #include "IPPerformance/ReturnCheck.h"
-#include "AsgTools/AnaToolHandle.h"
-#include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "GaudiKernel/ToolHandle.h"
 #ifndef __MAKECINT__
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"

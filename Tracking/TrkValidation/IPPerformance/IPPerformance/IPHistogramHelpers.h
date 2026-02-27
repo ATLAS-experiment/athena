@@ -6,6 +6,9 @@
 #include "TH3.h"
 #include "TH2.h"
 #include "TH1.h"
+#include <vector>
+#include <memory>
+#include <string>
 
 namespace IPHistogramHelpers {
     const int fDebug = 0;
@@ -19,7 +22,6 @@ namespace IPHistogramHelpers {
     std::vector<float> CalcRms90(TH1* h);
     
     template <typename ToCall, typename... Args> ToCall return_type_of(ToCall(*)(Args...)); 
-    //    using ReturnTypeOfFitting = decltype(return_type_of(singleGauss_f));
     using ReturnTypeOfFitting = double (*)(double*, double*);
     ReturnTypeOfFitting FitOption(TH1* hist, std::string WithFitting, std::vector<double>& initial);
     

@@ -1,13 +1,9 @@
 #ifndef BASEHISTO_H
 #define BASEHISTO_H
 
-//#include <EventLoop/StatusCode.h>
-
 #include "TH3.h"
 #include "TH2.h"
 #include "TH1.h"
-#include "TFile.h"
-#include "TDirectoryFile.h"
 #include <string>
 #include <map>
 #include <vector>

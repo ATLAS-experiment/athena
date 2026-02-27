@@ -1,11 +1,6 @@
 #ifndef IPPerformance_Algorithm_H
 #define IPPerformance_Algorithm_H
 
-// Infrastructure include(s):
-//#include "xAODRootAccess/Init.h"
-//#include "xAODRootAccess/TEvent.h"
-//#include "xAODRootAccess/TStore.h"
-
 #include <xAODRootAccess/Init.h>
 #include <xAODRootAccess/TEvent.h>
 #include <xAODRootAccess/TStore.h>
@@ -13,6 +8,8 @@
 #include <AnaAlgorithm/AnaAlgorithm.h>
 
 #include <string>
+#include <map>
+#include <vector>
 
 //namespace ET {
 

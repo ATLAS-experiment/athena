@@ -64,10 +64,6 @@ public:
 private:
     ToolHandle<GoodRunsListSelectionTool>    m_grl;//{this,"grl","GoodRunsListSelectionTool"};
     SG::WriteDecorHandleKey<xAOD::EventInfo> m_grlKey {this, "grlKey", "EventInfo.passGRL", "Decoration for GRL"};
-    //ToolHandle<CP::PileupReweightingTool>    m_pileuptool{this,"pileuptool","CP::PileupReweightingTool"};
-    
-   // ToolHandle<TrigConf::xAODConfigTool>     m_trigConfTool{this,"trigConfTool","TrigConf::xAODConfigTool"};
-    //ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{this, "trigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool" };
     
     int m_eventCounter;     //!public:
 

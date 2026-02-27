@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 import IPPerformance
@@ -66,16 +66,6 @@ if __name__=='__main__':
     from IPPerformance.IPPerformanceConfig import IPNtupleDumperCfg
     acc.merge(IPNtupleDumperCfg(flags))
 
-    #This works   
-    #from PhotonVertexSelection.PhotonVertexSelectionConfig import DecoratePhotonPointingAlgCfg
-    #acc.merge(DecoratePhotonPointingAlgCfg(flags)
-                                        #,
-                                        #useLRTTracks = args.mergeLargeD0Tracks,
-                                        #TargetPDGIDs = args.pdgIds,
-                                        #SecondaryVertexContainer = args.vertexContainer,
-                                        #TruthVertexContainer = args.truthVertexContainer
-                                        #)
-    #)
 
     acc.printConfig(withDetails=True)
 
