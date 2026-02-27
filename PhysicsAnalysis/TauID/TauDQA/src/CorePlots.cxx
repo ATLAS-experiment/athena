@@ -64,10 +64,10 @@ namespace Tau{
     m_cluster_logEt = Book1D("cluster_logEt" , "log(cluster E_{T});log(cluster E_{T});Entries",50,1.5,6.5);
     m_cluster_eta = Book1D("cluster_eta" , "cluster eta;cluster eta;Entries",50,-2.6,2.6);
     m_cluster_phi = Book1D("cluster_phi" , "cluster phi;cluster phi;Entries",32,-3.2,3.2);
-    m_cluster_secondR = Book1D("cluster_secondR" , "cluster SECOND_R;cluster SECOND_R;Entries",50,-1.,6.);
-    m_cluster_secondLambda = Book1D("cluster_secondLambda" , "cluster SECOND_LAMBDA;cluster SECOND_LAMBDA;Entries",50,2.,6.5);
-    m_cluster_centerLambda = Book1D("cluster_centerLambda" , "cluster CENTER_LAMBDA;cluster CENTER_LAMBDA;Entries",50,1.,4.);
-    m_cluster_firstEngDens = Book1D("cluster_firstEngDens" , "cluster FIRST_ENG_DENS;cluster FIRST_ENG_DENS;Entries",50,-6.,1.);
+    m_cluster_secondR = Book1D("cluster_secondR" , "log(cluster SECOND_R);log(cluster SECOND_R);Entries",50,-1.,6.);
+    m_cluster_secondLambda = Book1D("cluster_secondLambda" , "log(cluster SECOND_LAMBDA);log(cluster SECOND_LAMBDA);Entries",50,2.,6.5);
+    m_cluster_centerLambda = Book1D("cluster_centerLambda" , "log(cluster CENTER_LAMBDA);log(cluster CENTER_LAMBDA);Entries",50,1.,4.);
+    m_cluster_firstEngDens = Book1D("cluster_firstEngDens" , "log(cluster FIRST_ENG_DENS);log(cluster FIRST_ENG_DENS);Entries",50,-6.,1.);
     m_cluster_EMproba = Book1D("cluster_EMproba" , "cluster EM_PROBABILITY;cluster EM_PROBABILITY;Entries",20,0.,1.); 
 
     // Et-weighted average of cluster moments used in MVA TES
