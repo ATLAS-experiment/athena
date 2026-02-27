@@ -197,8 +197,7 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}CSCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "CSCRDO"
-    Muon__CSC_RawDataProviderToolMT=CompFactory.Muon.CSC_RawDataProviderToolMT
-    MuonCscRawDataProviderTool = Muon__CSC_RawDataProviderToolMT(name    = "CSC_RawDataProviderToolMT",
+    MuonCscRawDataProviderTool = CompFactory.Muon.CSC_RawDataProviderTool(name    = "CSC_RawDataProviderTool",
                                                                  Decoder = CSCRodDecoder,
                                                                  RdoLocation = keyName)
     if flags.Muon.MuonTrigger:

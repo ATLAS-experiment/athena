@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// CSC_RawDataProviderToolMT.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
-#include "CSC_RawDataProviderToolMT.h"
+#include "CSC_RawDataProviderTool.h"
 
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamCnvSvcBase/ByteStreamCnvSvcBase.h"
@@ -22,38 +18,67 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 //================ Constructor =================================================
 
-Muon::CSC_RawDataProviderToolMT::CSC_RawDataProviderToolMT(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p) {
-    declareProperty("CscContainerCacheKey", m_rdoContainerCacheKey, "Optional external cache for the CSC container");
-}
 
 //================ Destructor =================================================
 
-Muon::CSC_RawDataProviderToolMT::~CSC_RawDataProviderToolMT() = default;
+Muon::CSC_RawDataProviderTool::~CSC_RawDataProviderTool() = default;
 
 //================ Initialisation =================================================
 
-StatusCode Muon::CSC_RawDataProviderToolMT::initialize() {
-    // call initialize from base class
-    ATH_CHECK(CSC_RawDataProviderToolCore::initialize());
+StatusCode Muon::CSC_RawDataProviderTool::initialize() {
+    ATH_CHECK(m_cabling.retrieve());
+    ATH_CHECK(m_robDataProvider.retrieve());
+    ATH_MSG_INFO("Retrieved service " << m_robDataProvider);
+
+    ATH_CHECK(m_idHelperSvc.retrieve());
+    m_hid2re.set(m_cabling.get(), &m_idHelperSvc->cscIdHelper());
+
+    // Retrieve decoder
+    ATH_CHECK(m_decoder.retrieve());
+    ATH_MSG_INFO("Retrieved tool " << m_decoder);
+
+    ATH_CHECK(m_containerKey.initialize());
+    ATH_CHECK(m_eventInfoKey.initialize());
 
     // Initialise the container cache if available
     ATH_CHECK(m_rdoContainerCacheKey.initialize(!m_rdoContainerCacheKey.key().empty()));
 
-    ATH_CHECK(m_idHelperSvc.retrieve());
-
+    ATH_MSG_INFO("initialize() successful in " << name());
     return StatusCode::SUCCESS;
 }
 
 //============================================================================================
 
-// new one
+StatusCode Muon::CSC_RawDataProviderTool::convertIntoContainer(
+    const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, const EventContext& ctx,
+    CscRawDataContainer& container) const {
+    std::set<uint32_t> robIdSet;
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 
-StatusCode Muon::CSC_RawDataProviderToolMT::convert(const std::vector<IdentifierHash>& rdoIdhVect) const {
-    return this->convert(rdoIdhVect, Gaudi::Hive::currentContext());
+    ATH_MSG_DEBUG("Before processing numColls=" << container.numberOfCollections());
+
+    ATH_MSG_DEBUG("vector of ROB ID to decode: size = " << vecRobs.size());
+
+    for (const ROBFragment* frag : vecRobs) {
+        uint32_t robid = frag->rod_source_id();
+
+        // check if this ROBFragment was already decoded (EF case in ROIs
+        if (!robIdSet.insert(robid).second) {
+            ATH_MSG_DEBUG(" ROB Fragment with ID  " << std::hex << robid << std::dec << " already decoded, skip");
+        } else {
+            m_decoder->fillCollection(*eventInfo, *frag, container);
+        }
+    }
+
+    ATH_MSG_DEBUG("After processing numColls=" << container.numberOfCollections());
+
+    return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::CSC_RawDataProviderToolMT::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const {
+//============================================================================================
+// New EventContext-based convert methods
+
+StatusCode Muon::CSC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const {
     IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
 
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
@@ -71,23 +96,19 @@ StatusCode Muon::CSC_RawDataProviderToolMT::convert(const std::vector<Identifier
     return convert(vecOfRobf, ctx);
 }
 
-StatusCode Muon::CSC_RawDataProviderToolMT::convert(const EventContext& ctx) const {
+StatusCode Muon::CSC_RawDataProviderTool::convert(const EventContext& ctx) const {
     std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
     const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
     ATH_MSG_VERBOSE("Number of ROB ids " << robIds.size());
-    // ask ROBDataProviderSvc for the vector of ROBFragment for all MDT ROBIDs
+    // ask ROBDataProviderSvc for the vector of ROBFragment for all CSC ROBIDs
     m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
     ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
 
     return convert(vecOfRobf, ctx);
 }
 
-StatusCode Muon::CSC_RawDataProviderToolMT::convert(const ROBFragmentList& vecRobs,
-                                                    const std::vector<IdentifierHash>& /* collections */) const {
-    return this->convert(vecRobs, Gaudi::Hive::currentContext());
-}
 
-StatusCode Muon::CSC_RawDataProviderToolMT::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const {
+StatusCode Muon::CSC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const {
     SG::WriteHandle<CscRawDataContainer> rdoContainerHandle(m_containerKey, ctx);
 
     // Split the methods to have one where we use the cache and one where we just setup the container
@@ -109,7 +130,7 @@ StatusCode Muon::CSC_RawDataProviderToolMT::convert(const ROBFragmentList& vecRo
         return StatusCode::FAILURE;
     }
 
-    // call conversion function from the base class
+    // call conversion function
     ATH_CHECK(convertIntoContainer(vecRobs, ctx, *container));
 
     return StatusCode::SUCCESS;
