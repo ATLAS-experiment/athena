@@ -106,7 +106,7 @@ def MuonBytestream2RdoConfig(flags):
     if flags.Trigger.L1MuonSim.EmulateNSW and flags.Trigger.L1MuonSim.NSWVetoMode:
         # for MDT
         MDTRodDecoder = CompFactory.MdtROD_Decoder(name = "MdtROD_Decoder" + postFix)
-        MuonMdtRawDataProviderTool = CompFactory.Muon.MDT_RawDataProviderToolMT(name = "MDT_RawDataProviderToolMT" + postFix,
+        MuonMdtRawDataProviderTool = CompFactory.Muon.MDT_RawDataProviderTool(name = f"MDT_RawDataProviderTool{postFix}",
                                                                                 CsmContainerCacheKey = MuonCacheNames.MdtCsmCache,
                                                                                 Decoder = MDTRodDecoder,
                                                                                 RdoLocation = "MDTCSM_L1")

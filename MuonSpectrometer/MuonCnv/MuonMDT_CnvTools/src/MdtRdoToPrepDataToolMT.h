@@ -13,7 +13,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include "MdtCalibInterfaces/IMdtCalibrationTool.h"
-#include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
 #include "MuonMDT_CnvTools/IMDT_RDO_Decoder.h"
 
