@@ -753,6 +753,7 @@ std::unique_ptr<Trk::Track> ActsToTrkConverterTool::convertFitResult(const Event
     const Acts::CalibrationContext cctx{getCalibrationContext(ctx)};
     const Acts::GeometryContext gctx{m_trackingGeometryTool->getGeometryContext(ctx).context()};
     Acts::ParticleHypothesis hypothesis{Acts::ParticleHypothesis::pion()};
+    if(m_convertMuons) hypothesis = Acts::ParticleHypothesis::muon();
     
     // Get the fit output object
     const auto& acts_track = fitResult.value();

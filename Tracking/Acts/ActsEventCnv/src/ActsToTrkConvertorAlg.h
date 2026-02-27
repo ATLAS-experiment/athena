@@ -17,6 +17,8 @@
 #include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
 #include "Acts/Geometry/GeometryContext.hpp"
+#include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
+#include "MuonPrepRawData/MuonPrepDataContainer.h"
 
 namespace ActsTrk
 {
@@ -26,7 +28,7 @@ namespace ActsTrk
   public:
     using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~ActsToTrkConvertorAlg() = default;
-
+    
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
@@ -38,7 +40,7 @@ namespace ActsTrk
 
     std::unique_ptr<Trk::MeasurementBase>
     makeRIO_OnTrack(const xAOD::UncalibratedMeasurement &uncalibMeas,
-                    const Trk::TrackParameters &parm) const;
+                    const Trk::TrackParameters &parm, bool getSecMeas) const;
 
   private:
     PublicToolHandle<ActsTrk::ITrackingGeometryTool> m_trackingGeometryTool{this, "TrackingGeometryTool", "ActsTrackingGeometryTool"};
@@ -46,11 +48,24 @@ namespace ActsTrk
     ToolHandle<Trk::IBoundaryCheckTool> m_boundaryCheckTool{this, "BoundaryCheckTool", "InDet::InDetBoundaryCheckTool", "Boundary checking tool for detector sensitivities"};
     ToolHandle<Trk::IRIO_OnTrackCreator> m_RotCreatorTool{this, "RotCreatorTool", "", "optional RIO_OnTrack creator tool"};
     ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool{this, "SummaryTool", "ToolHandle for track summary tool"};
+    ToolHandle<Muon::IMuonClusterOnTrackCreator> m_muonClusterCreator{this, "MuonClusterCreator", "", "Muon cluster creator tool"};
 
     SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey{this, "ACTSTracksLocation", "SiSPSeededActsTrackContainer",
                                                                          "Output track collection (ActsTrk variant)"};
     SG::WriteHandleKey<::TrackCollection> m_tracksKey{this, "TracksLocation", "SiSPSeededActsTracks",
                                                       "Output track collection"};
+
+    template <class PrdType> 
+    const PrdType* fetchPrd(const Identifier& prdId, const Muon::MuonPrepDataContainerT<PrdType>* prdContainer) const;
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", ""};
+    SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_keyMdt{this, "MdtKey", ""};
+    SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_keyRpc{this, "RpcKey", ""};
+    SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_keyTgc{this, "TgcKey", ""};
+    SG::ReadHandleKey<Muon::MMPrepDataContainer> m_keyMm{this, "MmKey", ""};
+    SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_keyStgc{this, "sTgcKey", ""};
+
+
+
   };
 
 }
