@@ -158,10 +158,9 @@ def MdtBytestreamDecodeCfg(flags, name="MuonMdtRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}MDTCSM" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MDTCSM"
-    Muon__MDT_RawDataProviderToolMT=CompFactory.Muon.MDT_RawDataProviderToolMT
-    MuonMdtRawDataProviderTool = Muon__MDT_RawDataProviderToolMT(name    = "MDT_RawDataProviderToolMT",
-                                                                 Decoder = MDTRodDecoder,
-                                                                 RdoLocation = keyName)
+    MuonMdtRawDataProviderTool = CompFactory.Muon.MDT_RawDataProviderTool(name    = "MDT_RawDataProviderTool",
+                                                                          Decoder = MDTRodDecoder,
+                                                                          RdoLocation = keyName)
 
     if flags.Muon.MuonTrigger:
         MuonMdtRawDataProviderTool.CsmContainerCacheKey = MuonCacheNames.MdtCsmCache
