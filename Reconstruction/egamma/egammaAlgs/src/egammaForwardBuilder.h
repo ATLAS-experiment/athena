@@ -52,6 +52,7 @@
 #include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
 
 #include "EgammaAnalysisInterfaces/IAsgForwardElectronIsEMSelector.h"
+#include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 //
 #include <memory>
 #include <string>
@@ -224,12 +225,28 @@ protected:
     "The selectors that we need to apply to the FwdElectron object"
   };
 
+  ToolHandleArray<IAsgElectronLikelihoodTool> m_forwardElectronNNSelectors {
+    this,
+    "forwardelectronNNselectors",
+    {},
+    "The selectors that we need to apply to the FwdElectron object"
+  };
+
+  
   Gaudi::Property<std::vector<std::string>> m_forwardElectronIsEMSelectorResultNames {
     this,
     "forwardelectronIsEMselectorResultNames",
     {},
     "The selector result names"
   };
+
+  Gaudi::Property<std::vector<std::string>> m_forwardElectronNNSelectorResultNames {
+    this,
+    "forwardelectronNNselectorResultNames",
+    {},
+    "The selector result names"
+  };
+
 };
 #endif
 
