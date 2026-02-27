@@ -13,9 +13,14 @@ def RDOtoBS_Steering(flags):
         from PixelReadoutGeometry.PixelReadoutGeometryConfig import ITkPixelReadoutManagerCfg
         acc.merge(ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager"))
 
-        from ITkPixelByteStreamCnv.ITkPixelEncodingAlgConfig import ITkPixelEncodingAlgCfg
+        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelEncodingAlgCfg
         acc.merge( ITkPixelEncodingAlgCfg(flags) )
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
         acc.merge(ByteStreamWriteCfg(flags, ['ITkPixelRDO_Container#ITkPixelRDOs']))
+
+        #ITk strips
+        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawContByteStreamToolProviderToolCfg
+        acc.merge(ITkStripRawContByteStreamToolProviderToolCfg(flags))
+        acc.merge(ByteStreamWriteCfg(flags, ['SCT_RDO_Container#ITkStripRDOs']))
 
     return acc
