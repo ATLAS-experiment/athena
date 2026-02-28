@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigServices )
@@ -34,7 +34,7 @@ atlas_add_library( TrigServicesHelper
                    python/TrigServicesHelper.cxx
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} GaudiKernel TrigKernel )
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${Python_LIBRARIES} GaudiKernel TrigKernel )
 
 atlas_add_test( TrigMessageSvc
                 SOURCES test/test_TrigMessageSvc.cxx
