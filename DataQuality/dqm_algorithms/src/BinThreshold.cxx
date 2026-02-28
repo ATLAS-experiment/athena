@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BinThreshold.cxx checks bins wrt to a threshold value and returns dqm_core::Result
@@ -12,6 +12,7 @@
 #include <TH1.h>
 #include <TF1.h>
 #include <TClass.h>
+#include <TRegexp.h>
 #include <ers/ers.h>
 
 #include <iostream>
@@ -71,17 +72,14 @@ dqm_algorithms::BinThreshold::execute(	const std::string &  name,
   const int ymax = (int) dqm_algorithms::tools::GetFirstFromMap( "yMax", config.getParameters(), -1); 
   const int ymin = (int) dqm_algorithms::tools::GetFirstFromMap( "yMin", config.getParameters(), -1); 
 
-  std::string ignoreBins     = dqm_algorithms::tools::GetFirstFromMap("IgnoreBins", config.getGenericParameters(), "-1");  //The format is a list of int pairs, separated with : and split by comas. The symbol * can be used to indicate rows or columns. Ex: "2:3,5:*,*:7"
+  std::string ignoreBins = dqm_algorithms::tools::GetFirstFromMap("IgnoreBins", config.getGenericParameters(), "-1");  
 
-  std::vector<int> hotColumns,  hotRows;
-  std::vector<std::vector<int>> hotBins;
+  std::vector<std::string> hotRows;
+  std::vector<std::string> hotCols;
+  std::vector<std::pair<std::string,std::string>> hotBins;
 
-  parseVetoList(ignoreBins, hotRows, hotColumns, hotBins);
+  parseIgnoreList(ignoreBins, hotRows, hotCols, hotBins);
 
-  bool vetoHotRows = false;    if (hotRows.size() > 0)    vetoHotRows = true;
-  bool vetoHotBins = false;    if (hotBins.size() > 0)    vetoHotBins = true;
-  bool vetoHotColumns = false; if (hotColumns.size() > 0) vetoHotColumns = true;
-  
   if (histogram->GetEntries() < minstat ) {
     dqm_core::Result *result = new dqm_core::Result(dqm_core::Result::Undefined);
     result->tags_["InsufficientEntries"] = histogram->GetEntries();
@@ -138,35 +136,69 @@ dqm_algorithms::BinThreshold::execute(	const std::string &  name,
     result->tags_["Effective_BinThreshold"] = bin_threshold;
   }
 
-  //bools for skiping threshold comparison of vetoed rows, columns and bins
-  bool skipColumn = false;
-  bool skipRow    = false;
-  bool skipBin    = false;
+  //bools for skiping threshold comparison of ignored rows, columns and bins
+  bool skipCol;
+  bool skipRow;
+  std::pair<bool,bool> skipBin;
+  std::pair<const char*, const char*> binLabel;
 
   for ( int i = range[0]; i <= range[1]; ++i ) {
-    skipColumn = false;
-    for (int column  : hotColumns){
-      if (vetoHotColumns && ( column == i || skipColumn == true)) skipColumn = true;
+    skipCol = false;
+    binLabel.first  = nullptr;
+    binLabel.second = nullptr;
+
+    if ( !hotCols.empty() ) {
+      for (const auto& col : hotCols){
+
+        // Check if the given string matches the bin index or the bin label
+        binLabel.first = histogram->GetXaxis()->GetBinLabel(i);
+        if ( std::to_string(i)==col || TString(binLabel.first).Contains(TRegexp((col).c_str(),true)) ) skipCol = true;
+      }
     }
-    //Skip column if it is in list of vetoed columns
-    if (skipColumn) continue;
+    //Skip column if ignored
+    if (skipCol) continue;
+
     //Skip bin threshold comparison if xmax!=-1 and i>xmax
     if (xmax!=-1 && i>xmax) continue;
     //Skip bin threshold comparison if xmin!=-1 and i<xmin
     if (xmin!=-1 && i<xmin) continue;
 
     for ( int j = range[2]; j <= range[3]; ++j ) {
-      skipRow = false; skipBin = false;
-      for (int row  : hotRows){
-	if (vetoHotRows && ( row == j || skipRow == true)) skipRow = true;
+      skipRow = false;
+      binLabel.first  = nullptr; 
+      binLabel.second = nullptr; 
+
+      if ( !hotRows.empty() ) {
+        for (const auto& row : hotRows){
+
+          // Check if the given string matches the bin index or the bin label
+          binLabel.second = histogram->GetYaxis()->GetBinLabel(j);
+          if ( std::to_string(j)==row || TString(binLabel.second).Contains(TRegexp((row).c_str(),true)) ) skipRow = true;
+        }
       }
-      for (const auto& pair : hotBins){
-	if (vetoHotBins && ( (pair[0] == i && pair[1] == j) || skipBin == true)) skipBin = true;
-      }
-      //Skip Bin if it is in list of vetoed bins
-      if (skipBin) continue;
-      //Skip Row if it is in list of vetoed rows
+      //Skip row if ignored
       if (skipRow) continue;
+
+      skipBin.first  = false;
+      skipBin.second = false;
+      binLabel.first  = nullptr; 
+      binLabel.second = nullptr;
+ 
+      if ( !hotBins.empty() ) {
+        for (const auto& bin : hotBins){
+
+          // Check col (bin.first)
+          binLabel.first = histogram->GetXaxis()->GetBinLabel(i);
+          if ( std::to_string(i)==bin.first || TString(binLabel.first).Contains(TRegexp((bin.first).c_str(),true)) ) skipBin.first = true;
+ 
+          // Check row (bin.second)
+          binLabel.second = histogram->GetYaxis()->GetBinLabel(j);
+          if ( std::to_string(j)==bin.second || TString(binLabel.second).Contains(TRegexp((bin.second).c_str(),true)) ) skipBin.second = true;
+        }
+      }
+      //Skip bin if ignored
+      if (skipBin.first && skipBin.second) continue;
+
       //Skip bin threshold comparison if ymax!=-1 and j>ymax
       if (ymax!=-1 && j>ymax) continue;
       //Skip bin threshold comparison if ymin!=-1 and j<ymin
@@ -235,25 +267,30 @@ dqm_algorithms::BinThreshold::CompareBinThreshold(const std::string & type, doub
   return 0;
 }
 
-void dqm_algorithms::BinThreshold::parseVetoList(const std::string& input, std::vector<int>& rows, std::vector<int>& columns, std::vector<std::vector<int>>& bins) {
+void dqm_algorithms::BinThreshold::parseIgnoreList(const std::string& inputBins, 
+                                                   std::vector<std::string>& ignoredRows,
+                                                   std::vector<std::string>& ignoredCols,
+                                                   std::vector<std::pair<std::string,std::string>>& ignoredBins) {
+  // Remove "" from input string
+  std::string inputBins_new = "";
+  for (char c : inputBins) if (c != '"') inputBins_new+=c;
 
-  std::string inputNoQuotes;
-  for (char c : input) if (c != '"') inputNoQuotes += c;
-
-  std::stringstream ss(inputNoQuotes);
-  std::string token;
-
-  while (std::getline(ss, token, ',')) {
-    std::stringstream pairStream(token);
-    std::string first, second;
-
-    if (std::getline(pairStream, first, ':') && std::getline(pairStream, second, ':')) {
-      if (first == "*") {
-	rows.push_back(std::stoi(second));
-      } else if (second == "*") {
-	columns.push_back(std::stoi(first));
-      } else {
-	bins.push_back({std::stoi(first), std::stoi(second)});
+  if (!inputBins_new.empty()) {
+    std::stringstream ss(inputBins_new);
+    std::string token;
+  
+    while (std::getline(ss, token, ',')) {
+      std::stringstream pairStream(token);
+      std::string first, second;
+  
+      if (std::getline(pairStream, first, ':') && std::getline(pairStream, second, ':')) {
+        if (first == "*") {
+          ignoredRows.push_back(second);
+        } else if (second == "*") {
+          ignoredCols.push_back(first);
+        } else {
+          ignoredBins.push_back(std::make_pair(first,second));
+        }
       }
     }
   }
@@ -276,7 +313,7 @@ dqm_algorithms::BinThreshold::printDescription(std::ostream& out)
   out<<"Optional Parameter: xmax: maximum x range"<<std::endl;
   out<<"Optional Parameter: ymin: minimum y range"<<std::endl;
   out<<"Optional Parameter: ymax: maximum y range\n"<<std::endl;
-  out<<"Optional Parameter: ignoreBins: list of bins to ignore in the threshold comparison (x,y) in a string, separated by comas and semicolons. Ex: 1:3,6:7. It also allows to pass rows and columns like *:4 and *:4 respectively \n"<<std::endl;
+  out<<"Optional Parameter: IgnoreBins: List of bins to be plotted in the DQ histograms but ignored in the DQ mismatch check>\n"<<std::endl;
   
 }
 
