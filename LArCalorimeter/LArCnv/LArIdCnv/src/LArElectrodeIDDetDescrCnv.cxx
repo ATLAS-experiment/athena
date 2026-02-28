@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -64,7 +64,7 @@ LArElectrodeIDDetDescrCnv::storageType()
 }
 
 //--------------------------------------------------------------------
-const CLID& 
+CLID
 LArElectrodeIDDetDescrCnv::classID() { 
     return ClassID_traits<LArElectrodeID>::ID(); 
 }
