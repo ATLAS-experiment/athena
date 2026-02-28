@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonDigitContainer.cxx
@@ -43,9 +43,15 @@ sTgcDigitContainer::~sTgcDigitContainer() = default;
 
 // return the class ID
 
-const CLID& sTgcDigitContainer::classID()
+CLID sTgcDigitContainer::classID()
 {
   return ClassID_traits<sTgcDigitContainer>::ID(); 
+}
+
+const CLID& sTgcDigitContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 //**********************************************************************
