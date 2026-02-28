@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLCUSTCNV_H
@@ -97,7 +97,7 @@ protected:
 
 public:
    /// @return class ID.
-   static const CLID& classID();
+   static CLID classID();
 };
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustCnv.icc"
