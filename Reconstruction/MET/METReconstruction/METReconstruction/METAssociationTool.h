@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METAssociationTool.h 
@@ -24,7 +24,6 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 #include "CxxUtils/checker_macros.h"
-#include "StoreGate/DataHandle.h"
 
 
 // METRecoInterface includes
