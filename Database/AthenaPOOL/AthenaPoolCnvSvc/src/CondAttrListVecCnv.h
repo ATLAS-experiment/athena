@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_CONDATTRLISTVECCNV_H
@@ -49,7 +49,7 @@ public:
    static long storageType();
 
    /// @return class ID.
-   static const CLID& classID();
+   static CLID classID();
 
    /// Constructor
    CondAttrListVecCnv(ISvcLocator* svcloc);
