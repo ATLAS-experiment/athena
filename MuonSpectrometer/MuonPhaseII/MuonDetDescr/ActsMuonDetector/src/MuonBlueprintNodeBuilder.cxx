@@ -1,6 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonBlueprintNodeBuilder.h"
@@ -408,7 +407,6 @@ MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
       const auto& bounds = el->bounds();
       for(const auto& surface : bounds->orientedSurfaces(locToGlobal)){
         const auto& surfaceRepr = (*surface.surface);
-        const Acts::Polyhedron& polyhedron = surfaceRepr.polyhedronRepresentation(gctx);
         const Amg::Vector3D& center = surfaceRepr.center(gctx);
         rMin = std::min(rMin, center.perp());
         minZ = std::min(minZ, center.z());
