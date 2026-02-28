@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef MUONSTGC_CNVTOOLS_PadTrig_RawDataProviderTool_H
 #define MUONSTGC_CNVTOOLS_PadTrig_RawDataProviderTool_H
 
@@ -18,7 +22,7 @@ class PadTrig_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProvi
  public:
   
   
-  using base_class::base_class;;
+  using base_class::base_class;
   virtual ~PadTrig_RawDataProviderTool() = default;
 
   StatusCode initialize() override;
