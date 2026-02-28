@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HGTD_IDCNV_HGTD_IDDETDESCRCNV_H
@@ -33,7 +33,7 @@ public:
 
     // Storage type and class ID (used by CnvFactory)
     static long storageType();
-    static const CLID& classID();
+    static CLID classID();
 
     HGTD_IDDetDescrCnv(ISvcLocator* svcloc);
 
