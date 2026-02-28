@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_TGCRDOCONAINTER_H
@@ -39,10 +39,10 @@ public:
   void push_back(TgcRawData* rawData);
   
   // class ID
-  static const CLID& classID(); 
+  static CLID classID();
 
   /** return class ID */
-  virtual const CLID& clID() const {return classID();}
+  virtual const CLID& clID() const override;
 
 private:
 

@@ -18,7 +18,7 @@ public:
     NSW_PadTriggerDataContainer();
     NSW_PadTriggerDataContainer(unsigned int hashMax);
     
-    static const CLID& classID();
+    static CLID classID();
     const CLID& clID() const override;
 
     std::string string() const;
