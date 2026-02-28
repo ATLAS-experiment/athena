@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 //Dear emacs, this is -*-c++-*-
@@ -116,8 +116,8 @@ class EventInfo {
 
   /// \name DataObject-like clid accessors
   //@{
-  static const CLID& classID();
-  const CLID& clID() const;
+  static CLID classID();
+  CLID clID() const;
   //@}
 
   /// \name Event information accessors
@@ -304,7 +304,7 @@ EventInfo::averageInteractionsPerCrossing() const {
   return result;
 }
 
-inline const CLID&
+inline CLID
 EventInfo::clID() const {
   return classID();
 }
@@ -312,7 +312,7 @@ EventInfo::clID() const {
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(EventInfo, 2101, 1)
 
-inline const CLID &
+inline CLID
 EventInfo::classID() {
   return ClassID_traits<EventInfo>::ID();
 }

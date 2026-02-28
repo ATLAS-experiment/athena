@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "McEventSelector/McEventCnv.h"
@@ -42,7 +42,7 @@ McEventCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj) {
 long
 McEventCnv::storageType()     { return McCnvSvc::storageType(); }
 
-const CLID&
+CLID
 McEventCnv::classID()  { return EventInfo::classID(); }
 
 
