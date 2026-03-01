@@ -16,9 +16,9 @@
 #ifndef IOVDbSvc_IOVDbSvc_h
 #define IOVDbSvc_IOVDbSvc_h
 
-#include "GaudiKernel/IInterface.h"
-#include "GaudiKernel/IService.h"
-#include "AthenaBaseComps/AthService.h"
+#include "IOVDbConn.h"
+#include "IOVDbFolder.h"
+
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/IIncidentListener.h"
@@ -26,37 +26,28 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/IAddressCreator.h"
 #include "GaudiKernel/IIoComponent.h"
-#include "SGTools/DataProxy.h"
-#include "EventInfoMgt/ITagInfoMgr.h"
-#include "PoolSvc/IPoolSvc.h"
-#include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
 
+#include "AthenaBaseComps/AthService.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "AthenaKernel/IIOVDbSvc.h"
-#include "IOVDbSvc/IIOVCondDbSvc.h"
 #include "AthenaKernel/IOVTime.h"
 #include "AthenaKernel/IAddressProvider.h"
-
 #include "CoolKernel/IDatabase.h"
 #include "CoolKernel/ValidityKey.h"
-
-#include "IOVDbConn.h"
-#include "IOVDbFolder.h"
+#include "EventInfoMgt/ITagInfoMgr.h"
+#include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
+#include "IOVDbSvc/IIOVCondDbSvc.h"
+#include "PoolSvc/IPoolSvc.h"
 
 #include <string>
 #include <vector>
 #include <map>
 #include <memory>
 
-class IOVSvc;
-class IOVTime;
 class IOVRange;
 class StoreGateSvc; 
 class IClassIDSvc;
-
 class EventID;
-class ITagInfoMgr;
-
 class IOVMetaDataContainer;
 class CondAttrListCollection;
 
@@ -83,7 +74,6 @@ public:
   
   /// Forward base class ctor
   using base_class::base_class;
-  virtual ~IOVDbSvc();
 
   /// Service init
   virtual StatusCode initialize() override;
