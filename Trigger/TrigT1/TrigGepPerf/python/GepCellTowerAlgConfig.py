@@ -8,13 +8,15 @@ def GepCellTowerAlgCfg(
         name='GepCellTowerAlg',
         outputCellTowerKey='GEPCellTowers',
         gepCellMapKey='GepCells',
+        minEt=0.,
         OutputLevel=None):
     
     cfg = ComponentAccumulator()
 
     alg = CompFactory.GepCellTowerAlg(name,
                                 outputCellTowerKey=outputCellTowerKey,
-                                gepCellMapKey=gepCellMapKey
+                                gepCellMapKey=gepCellMapKey,
+                                minEt=minEt
                                 )
     if OutputLevel is not None:
         alg.OutputLevel = OutputLevel
