@@ -12,10 +12,6 @@ namespace Tau{
   {
   }
 
-  DecayModeMigration::~DecayModeMigration()
-  {
-  }
-
   void DecayModeMigration::initializePlots()
   {
     m_migration_panTau = Book1D("panTau_migration",m_sTauJetContainerName + " panTau migration",DECAYSIZE,0,DECAYSIZE);

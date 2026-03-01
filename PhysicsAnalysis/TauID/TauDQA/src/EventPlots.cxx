@@ -13,10 +13,6 @@ EventPlots::EventPlots(PlotBase* pParent, const std::string& sDir):
 {	
 }
 
-EventPlots::~EventPlots()
-{
-}
-
 void EventPlots::initializePlots(){
 
    m_avgmu = Book1D("AverageMu","Average Interaction per bunch crossing; <mu>; # Events", 16, 0.0, 80.0);  

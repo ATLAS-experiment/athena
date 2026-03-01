@@ -13,7 +13,7 @@ namespace Tau{
 class CorePlots: public PlotBase {
   public:
     CorePlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-    virtual ~CorePlots();
+    virtual ~CorePlots() = default;
     void fill(const xAOD::TauJet& tau, float weight);
 
     TH1*  m_ipZ0SinThetaSigLeadTrk{};

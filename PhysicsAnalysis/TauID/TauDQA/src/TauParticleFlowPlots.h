@@ -16,7 +16,7 @@ namespace Tau{
 class TauParticleFlowPlots: public PlotBase {
   public:
     TauParticleFlowPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-    virtual ~TauParticleFlowPlots();
+    virtual ~TauParticleFlowPlots() = default;
 
     void fill(const xAOD::TauJet& tau, float weight);
 

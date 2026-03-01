@@ -13,10 +13,6 @@ namespace Tau{
   {	
   }
 	
-  CorePlots::~CorePlots()
-  {
-  }
-
   void CorePlots::initializePlots(){
 
     m_ipZ0SinThetaSigLeadTrk           = Book1D("ipZ0SinThetaSigLeadTrk",m_sTauJetContainerName + "Tau ipZ0SinThetaSigLeadTrk ;ipZ0SinThetaSigLeadTrk ;# of Taus", 50, -10, 10);

@@ -15,7 +15,7 @@ namespace Tau{
 class EventPlots: public PlotBase {
    public:
       EventPlots(PlotBase *pParent, const std::string& sDir);
-      virtual ~EventPlots();
+      virtual ~EventPlots() = default;
       
       void fill(float avg_mu, float weight);
 

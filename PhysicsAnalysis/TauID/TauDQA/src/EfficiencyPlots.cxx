@@ -13,10 +13,6 @@ namespace Tau{
   {	
   }
 
-  EfficiencyPlots::~EfficiencyPlots()
-  {
-  }
-
   void EfficiencyPlots::initializePlots()
   {
     m_eff_pt_jetGNTauloose       = BookTProfile("Eff_Pt_jetGNTauloose"," Matched Tau loose GNTau eff in pt; pt; eff", 20, 0., 150.0);

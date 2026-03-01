@@ -14,10 +14,6 @@ TauIDVariablesPlots::TauIDVariablesPlots(PlotBase* pParent, const std::string& s
    m_sTauJetContainerName(sTauJetContainerName)
 {
 }
-	
-TauIDVariablesPlots::~TauIDVariablesPlots()
-{
-}
 
 void TauIDVariablesPlots::initializePlots(){
 

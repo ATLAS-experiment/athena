@@ -13,7 +13,7 @@ namespace Tau{
 class TauKinematicPlots:public PlotBase {
    public:      
       TauKinematicPlots(PlotBase *pParent, const std::string& sDir, std::string sParticleType);
-      ~TauKinematicPlots();
+      virtual ~TauKinematicPlots() = default;
       void fill(const xAOD::IParticle& prt, float weight);
       
       TH1* eta{};
