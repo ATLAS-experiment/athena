@@ -9,6 +9,7 @@
 #include "ElectronPhotonSelectorTools/AsgElectronSelectorTool.h"
 #include "ElectronPhotonSelectorTools/AsgForwardElectronCalibrationTool.h"
 #include "ElectronPhotonSelectorTools/AsgForwardElectronSelectorTool.h"
+#include "ElectronPhotonSelectorTools/ForwardElectronToolsTestAlg.h"
 
 
 // Project include(s).
@@ -25,3 +26,4 @@ DECLARE_COMPONENT( AsgForwardElectronLikelihoodTool )
 DECLARE_COMPONENT( AsgElectronSelectorTool )
 DECLARE_COMPONENT( AsgForwardElectronCalibrationTool )
 DECLARE_COMPONENT( AsgForwardElectronSelectorTool )
+DECLARE_COMPONENT( ForwardElectronToolsTestAlg )
