@@ -285,9 +285,9 @@ void dqm_algorithms::BinThreshold::parseIgnoreList(const std::string& inputBins,
   
       if (std::getline(pairStream, first, ':') && std::getline(pairStream, second, ':')) {
         if (first == "*") {
-          ignoredRows.push_back(second);
+          ignoredRows.push_back(std::move(second));
         } else if (second == "*") {
-          ignoredCols.push_back(first);
+          ignoredCols.push_back(std::move(first));
         } else {
           ignoredBins.push_back(std::make_pair(first,second));
         }
