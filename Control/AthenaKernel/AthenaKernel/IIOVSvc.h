@@ -61,9 +61,7 @@ public:
 
   /// @name IOVRange accessors
   //@{ 
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
-			      IOVRange&) = 0;
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
+  virtual StatusCode setRange(const CLID& clid, const std::string& key,
 			      IOVRange&,
 			      const std::string& storeName) = 0;
 

@@ -288,32 +288,6 @@ IOVSvc::preLoadDataTAD( const SG::TransientAddress *tad,
 
 StatusCode 
 IOVSvc::setRange(const CLID& clid, const std::string& key,
-                 IOVRange& iovr) {
-
-  std::scoped_lock lock(m_lock);
-
-  IIOVSvcTool *ist = getTool( clid, key );
-  if (ist == nullptr) {
-
-    // FIXME - this should be eliminated once the IOVDbSvc is set up to 
-    // use store names. There should be no default store for setRange
-
-    ATH_MSG_WARNING( "setRange(CLID,key,range) for unregistered proxies "
-                     << "is deprecated - you need to specify a store! "
-                     << "This will be an ERROR soon!" );
-
-    return setRange(clid,key,iovr, defaultStore );
-
-  } else {
-    return ist->setRange( clid, key, iovr );
-  }
-
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-StatusCode 
-IOVSvc::setRange(const CLID& clid, const std::string& key,
                  IOVRange& iovr, const std::string& storeName) {
 
   std::scoped_lock lock(m_lock);
