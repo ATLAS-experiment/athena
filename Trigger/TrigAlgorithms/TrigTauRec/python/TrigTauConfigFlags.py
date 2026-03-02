@@ -75,6 +75,32 @@ def createTrigTauConfigFlags():
         'Tight': (0.50, 0.94, 0.80),
     })
 
+
+    #####################################################################################
+    # GNTauExt Dev1 ID (loose/mediumGNTauDev1/... chains)
+    #####################################################################################
+    # Using ONNX inference
+
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.ONNXConfig', 'HLTGNTauExt_v0p1/network.onnx')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.MaxTracks', 10)
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.MaxClusters', 30)
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.NodeNameTau', 'GNTauExt_phadtau')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.NodeNameJet', 'GNTauExt_pbkg')
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.OutputDiscriminant', 1) # 0: -log(PJet), 1: PTau
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.ScoreFlatteningConfig', ['HLTGNTauExt_v0p1/flattening_map_0p.root', 'HLTGNTauExt_v0p1/flattening_map_1p.root', 'HLTGNTauExt_v0p1/flattening_map_mp.root'])
+    flags.addFlag('Trigger.Offline.Tau.GNTauDev1.TargetWPs', {
+        # Target efficiencies (0P, 1P, MP) for each WP
+        'Loose': (0.86, 0.98, 0.93), 
+        'Medium': (0.62, 0.96, 0.91), 
+
+        'LooseVar1': (0.88, 0.97, 0.92), 
+        'MediumVar1': (0.64, 0.95, 0.90), 
+
+        'LooseVar2': (0.87, 0.98, 0.94), 
+        'MediumVar2': (0.63, 0.96, 0.92), 
+    })
+
+
     return flags
 
 

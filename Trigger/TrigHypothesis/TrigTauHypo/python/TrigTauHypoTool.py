@@ -58,10 +58,15 @@ class TauCuts:
                 id_wp = self._chain_part['selection'].removesuffix(self._id).lower()
 
                 # Check for a perf selection specifier
-                sfx = id_wp[-2:]
-                if sfx in ['np', 'pc', 'pi']: id_wp = id_wp[:-2]
-                if sfx in ['np', 'pi']: self._do_perfcore = False
-                if sfx in ['np', 'pc']: self._do_perfiso = False
+                if id_wp.endswith('noperf'):
+                    id_wp = id_wp.removesuffix('noperf')
+                    self._do_perfcore = self._do_perfiso = False
+                elif id_wp.endswith('perfcore'):
+                    id_wp = id_wp.removesuffix('perfcore')
+                    self._do_perfiso = False
+                elif id_wp.endswith('perfiso'):
+                    id_wp = id_wp.removesuffix('perfiso')
+                    self._do_perfcore = False
 
                 # Find the matching WP with the correct casing
                 def find_wp(wp: str, fail: bool = True) -> str:

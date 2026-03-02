@@ -215,7 +215,7 @@ def trigTauWPDecoratorCfg(flags, tau_id: str, precision_seq_name: str, tauContai
             'flatteningFile1Prong': id_flags.ScoreFlatteningConfig,
             'flatteningFile3Prong': id_flags.ScoreFlatteningConfig,
         }
-    elif isinstance(id_flags.ScoreFlatteningConfig, (list, tuple)) and len(id_flags.ONNXConfig) == 3:
+    elif isinstance(id_flags.ScoreFlatteningConfig, (list, tuple)) and len(id_flags.ScoreFlatteningConfig) == 3:
         cfg = {
             'flatteningFile0Prong': id_flags.ScoreFlatteningConfig[0],
             'flatteningFile1Prong': id_flags.ScoreFlatteningConfig[1],
