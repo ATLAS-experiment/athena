@@ -55,9 +55,7 @@ public:
   virtual std::vector<std::string> getStoreNames() const override;
 
   /// Update Range from dB
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
-                              IOVRange&) override;
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
+  virtual StatusCode setRange(const CLID& clid, const std::string& key,
                               IOVRange& io,
                               const std::string& storeName) override;
 
