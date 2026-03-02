@@ -4,7 +4,7 @@
 atlas_subdir( HDF5Utils )
 
 # Grab HDF5 from AnalysisBaseExternals.
-find_package( HDF5 1.10.1 COMPONENTS CXX HL)
+find_package( HDF5 1.10.1 COMPONENTS CXX )
 
 # find root
 find_package(ROOT COMPONENTS RIO Hist Tree Net Core TreePlayer)
@@ -41,7 +41,7 @@ unset(_exe_sources)
 atlas_add_executable( hdf5-merge
   util/hdf5-merge.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}
-  LINK_LIBRARIES HDF5Utils ${Boost_LIBRARIES} ${HDF5_LIBRARIES} )
+  LINK_LIBRARIES HDF5Utils ${Boost_LIBRARIES} ${HDF5_LIBRARIES})
 
 atlas_install_scripts( bin/hdf5-merge-nolock )
 
@@ -79,7 +79,7 @@ atlas_add_test( test_hdf5_writer
 atlas_add_executable( test-histogram
   util/test-histogram.cxx
   INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES HDF5Utils ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+  LINK_LIBRARIES HDF5Utils ${HDF5_LIBRARIES})
 atlas_install_scripts( test/test-histogram-output )
 
 atlas_add_test( test_histogram

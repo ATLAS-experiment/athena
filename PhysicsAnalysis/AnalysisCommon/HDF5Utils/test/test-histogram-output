@@ -14,19 +14,35 @@ function check() {
     fi
 }
 
-# weighted hist
-check 'h3dw/histogram[0,1,2]' 0.5
-check 'h3dw/histogram[0,1,3]' 10
-check 'h3dw/histogram[0,1,1]' 0
+# weighted hist (storage/values)
+check 'h3dw/storage/values[0,1,2]' 0.5
+check 'h3dw/storage/values[0,1,3]' 10
+check 'h3dw/storage/values[0,1,1]' 0
 
-# profile hist
-check 'h3dp/sum_of_weights_squared[0,1,0]' 0
-check 'h3dp/sum_of_weights_squared[0,1,2]' 0.5
-check 'h3dp/sum_of_weights[0,1,2]' 1
-check 'h3dp/count[0,1,2]' 2
-check 'h3dp/variance[0,1,2]' 0
+# profile hist (storage/*)
+check 'h3dp/storage/sum_of_weights_squared[0,1,0]' 0
+check 'h3dp/storage/sum_of_weights_squared[0,1,2]' 0.5
+check 'h3dp/storage/sum_of_weights[0,1,2]' 1
+check 'h3dp/storage/count[0,1,2]' 2
+check 'h3dp/storage/variances[0,1,2]' 0
 
-# category hist
-check 'h1c/histogram[0]' 0
-check 'h1c/histogram[2]' 1
-check 'h1c/histogram[4]' 1
+# category hist (storage/values)
+check 'h1c/storage/values[0]' 0
+check 'h1c/storage/values[2]' 1
+check 'h1c/storage/values[4]' 1
+
+# integer storage (storage/values): layout is [underflow, bin0, bin1, bin2, overflow]
+check 'h1i/storage/values[1]' 1
+check 'h1i/storage/values[2]' 2
+
+# atomic integer storage (storage/values)
+check 'h1a/storage/values[2]' 1
+check 'h1a/storage/values[3]' 1
+
+# thread-safe double storage (storage/values)
+check 'h1td/storage/values[1]' 1
+check 'h1td/storage/values[2]' 2
+
+# thread-safe float storage (storage/values)
+check 'h1tf/storage/values[2]' 1
+check 'h1tf/storage/values[3]' 2

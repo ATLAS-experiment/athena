@@ -149,6 +149,32 @@ Currently we support:
  - `STANDARD`: use standard native precision
  - `HALF_PRECISION`: 16 bit
 
+Writing Histograms
+------------------
+
+This package provides `H5Utils::hist::write_hist_to_group()` (in
+`HDF5Utils/histogram.h`) to write `boost::histogram` objects directly
+to an HDF5 group. The output follows the
+[UHI serialization standard][uhi], so histograms can be read back in
+Python with any UHI-compatible library such as
+[boost-histogram](https://github.com/scikit-hep/boost-histogram):
+
+```C++
+#include "HDF5Utils/histogram.h"
+namespace bh = boost::histogram;
+auto h = bh::make_weighted_histogram(
+  bh::axis::regular<>(100, 0.0, 500.0, "pT"));
+// ... fill h ...
+H5::H5File file("out.h5", H5F_ACC_TRUNC);
+H5Utils::hist::write_hist_to_group(file, h, "pT");
+```
+
+```python
+import h5py, uhi.io.hdf5 as uhi_h5
+with h5py.File("out.h5") as f:
+    h = uhi_h5.read(f["pT"])
+```
+
 Merging files
 -------------
 
@@ -204,6 +230,7 @@ wasn't sufficiently complicated to merit including as an external
 package, and some modifications were required to build in the ATLAS
 environment. As such the two projects may diverge.
 
+[uhi]: https://uhi.readthedocs.io/en/latest/serialization.html
 [1]: https://github.com/dguest/ttree2hdf5/issues
 [1j]: https://its.cern.ch/jira/projects/ATLASG/
 [2]: https://github.com/dguest/th2hdf5
