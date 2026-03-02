@@ -18,7 +18,6 @@ atlas_add_library( ActsGeometryLib
                    src/ActsStrawLayerBuilder.cxx
                    src/ActsHGTDLayerBuilder.cxx
                    src/ActsTrackingGeometrySvc.cxx
-                   src/SimpleCylinderDetBuilderTool.cxx
                    src/ItkBlueprintNodeBuilder.cxx    
                    src/CaloBlueprintNodeBuilder.cxx
                    src/TrackingGeoAlignVisitor.cxx
