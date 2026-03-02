@@ -167,10 +167,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                           'PhotonShowerShapeFudgeAlg' )
             config.addPrivateTool( 'showerShapeFudgeTool',
                                     'ElectronPhotonVariableCorrectionTool' )
-            if config.geometry is LHCPeriod.Run2: 
+            if config.geometry() is LHCPeriod.Run2: 
                 alg.showerShapeFudgeTool.ConfigFile = \
               'EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf'
-            if config.geometry is LHCPeriod.Run3:
+            if config.geometry() is LHCPeriod.Run3:
                 alg.showerShapeFudgeTool.ConfigFile = \
               'EGammaVariableCorrection/TUNE23/ElPhVariableNominalCorrection.conf'
             alg.photons = config.readName (self.containerName)
