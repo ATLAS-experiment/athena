@@ -1377,23 +1377,6 @@ bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string&
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-bool SGImplSvc::bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                              IResetable* ir, SG::DataProxy *&dp,
-                                              const CallBackID& /*c*/,
-                                              const IOVSvcCallBackFcn& /*fcn*/,
-                                              bool /*trigger*/)
-{
-  lock_t lock (m_mutex);
-  bool ret = bindHandleToProxy (id, key, ir, dp);
-  if (ret) {
-    StatusCode sc = m_pIOVSvc->regProxy(dp,key);
-    if (sc.isFailure()) return false;
-  }
-  return true;
-}
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
 StatusCode 
 SGImplSvc::record_HistObj(const CLID& id, const std::string& key,
                           const std::string& store, 

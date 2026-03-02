@@ -95,6 +95,8 @@ namespace MuonGM {
         const TgcReadoutElement* getTgcReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
         const CscReadoutElement* getCscReadoutElement(const IdentifierHash& id) const;  //!< access via detector-element hash id
 
+        std::vector<const MuonReadoutElement*> getAllReadoutElements() const;
+      
         inline unsigned int nMuonStation() const;  //!< Number of MuonStations
 
         inline unsigned int nMdtRE() const;   //!< Number of Mdt ReadoutElements
@@ -131,8 +133,6 @@ namespace MuonGM {
         void setCutoutsBogFlag(int flag);
         inline int  IncludeCutoutsBogFlag() const;
 
-        // Retrieve all muon stations
-        std::vector<const MuonStation*> getMuonStations() const;
         // Add a MuonStation to the list
         void addMuonStation(std::unique_ptr<MuonStation>&& mst);
         const MuonStation* getMuonStation(const std::string& stName, int eta, int phi) const;

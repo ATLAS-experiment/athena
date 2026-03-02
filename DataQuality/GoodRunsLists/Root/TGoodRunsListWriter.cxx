@@ -235,7 +235,7 @@ Root::TGoodRunsListWriter::GetXMLString()
   }
 
   xmlFreeTextWriter(writer);
-  m_xmlstring = (const char *) buf->content;
+  m_xmlstring = (const char *) xmlBufferContent(buf);
   xmlBufferFree(buf);
 
 #else
@@ -522,28 +522,28 @@ Root::TGoodRunsListWriter::ConvertInput(const char *in, const char *encoding)
   }
   
   size = (int) strlen(in) + 1;
-  out_size = size * 2 - 1;
-  out = (unsigned char *) xmlMalloc((size_t) out_size);
-  
-  if (out != 0) {
-    temp = size - 1;
-    ret = handler->input(out, &out_size, (const xmlChar *) in, &temp);
-    if ((ret < 0) || (temp - size + 1)) {
-      if (ret < 0) {
-	m_logger << kWARNING << "ConvertInput: conversion wasn't successful." << GEndl;
-      } else {
-	m_logger << kWARNING << "ConvertInput: conversion wasn't successful. Converted: " << temp << " octets." << GEndl;
-      }
-      
-      xmlFree(out);
-      out = 0;
-    } else {
-      out = (unsigned char *) xmlRealloc(out, out_size + 1);
-      out[out_size] = 0;  /*null terminating out */
-    }
+  temp = size - 1;
+
+  xmlBufferPtr inBuf = xmlBufferCreateSize(size);
+  xmlBufferPtr outBuf = xmlBufferCreateSize(size * 2);
+  xmlBufferAdd(inBuf, (const xmlChar *) in, temp);
+  ret = xmlCharEncInFunc(handler, outBuf, inBuf);
+
+  if (ret < 0) {
+    m_logger << kWARNING << "ConvertInput: conversion wasn't successful." << GEndl;
+    out = 0;
   } else {
-    m_logger << kWARNING << "ConvertInput: no mem" << GEndl;
+    out_size = xmlBufferLength(outBuf);
+    out = (unsigned char *) xmlMalloc((size_t) out_size + 1);
+    if (out != 0) {
+      memcpy(out, xmlBufferContent(outBuf), out_size);
+      out[out_size] = 0;
+    } else {
+      m_logger << kWARNING << "ConvertInput: no mem" << GEndl;
+    }
   }
+  xmlBufferFree(inBuf);
+  xmlBufferFree(outBuf);
 
 #else
 

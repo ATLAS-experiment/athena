@@ -25,11 +25,11 @@ public:
 public:
     /** Decoding method. - current methods: let's keep them! */
     typedef std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> ROBFragmentList;
-    virtual StatusCode convert(const ROBFragmentList&) const = 0;
-    virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&) const = 0;
+    virtual StatusCode convert(const ROBFragmentList&) const { return StatusCode::FAILURE; }
+    virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&) const { return StatusCode::FAILURE; }
     /** the new ones */
-    virtual StatusCode convert() const = 0; //!< for the entire event 
-    virtual StatusCode convert(const std::vector<IdentifierHash>&) const = 0; //!< for a selection of rdo collections
+    virtual StatusCode convert() const { return StatusCode::FAILURE; } //!< for the entire event 
+    virtual StatusCode convert(const std::vector<IdentifierHash>&) const { return StatusCode::FAILURE; }//!< for a selection of rdo collections
     virtual StatusCode convert(const std::vector<uint32_t>&) const {return StatusCode::FAILURE;}
     /** Event Context functions **/
     virtual StatusCode convert(const EventContext&) const {return StatusCode::FAILURE;}

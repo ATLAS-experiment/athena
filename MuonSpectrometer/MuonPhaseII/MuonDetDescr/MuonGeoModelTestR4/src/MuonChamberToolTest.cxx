@@ -23,6 +23,9 @@
 #include "Acts/Geometry/DiamondVolumeBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 #include "Acts/Surfaces/CylinderBounds.hpp"
+#include "Acts/Surfaces/RadialBounds.hpp"
+#include "Acts/Surfaces/CylinderSurface.hpp"
+#include "Acts/Surfaces/DiscSurface.hpp"
 
 #include "Acts/Visualization/ObjVisualization3D.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
@@ -466,8 +469,7 @@ namespace MuonGMR4 {
         //keep onyl the chamber volumes - not the cylinders
         trackingGeometry->visitVolumes([&](const Acts::TrackingVolume* vol){
             //for the cylinder type volumes , fetch the inner surfaces only (e.g passive material surfaces)
-            if(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder){
-                Acts::ObjVisualization3D visualHelper{};   
+            if(vol->volumeBounds().type() == Acts::VolumeBounds::BoundsType::eCylinder){  
                 std::ranges::for_each(vol->surfaces(), [&](const auto& surf){                 
                     surfacesVec.push_back(&surf);
                 });
@@ -562,40 +564,48 @@ namespace MuonGMR4 {
             }
 
             //check if the tracking volume overlaps with surfaces of the tracking geometry (e.g cylinders of the barrel where material is mapped)
+             auto [min,max] = std::ranges::minmax_element(edges, [&](const auto& cornerA, const auto& cornerB){
+                    return cornerA.perp() < cornerB.perp();
+                });
+            double rmin{min->perp()};
+            double rmax{max->perp()};
+            bool hasoverlap{false};
             for(const auto& surf : surfacesVec){
                 double radius{0.};
+                double halfZ{0.};
                 ATH_MSG_VERBOSE("Checking surface "<<surf->name()<< " , "<<surf->geometryId());
                 if(const auto* cylSurf = dynamic_cast<const Acts::CylinderSurface*>(surf)){
                     using BoundEnum = Acts::CylinderBounds::BoundValues;
                     const auto& bounds = static_cast<const Acts::CylinderBounds&>(cylSurf->bounds());
+                    const auto& center = cylSurf->center(gctx.context());
                     radius = bounds.get(BoundEnum::eR);
+                    halfZ = bounds.get(BoundEnum:: eHalfLengthZ);
+                    //check for overlap in R in case the surface and the volume have overlapping Z position
+                    if(center.z() + halfZ > min->z()){
+                        hasoverlap = (radius > rmin && radius < rmax);
+                    }
+                }else if(const auto* discSurf = dynamic_cast<const Acts::DiscSurface*>(surf)){
+                    using BoundEnum = Acts::RadialBounds::BoundValues;
+                    const auto& bounds = static_cast<const Acts::RadialBounds&>(discSurf->bounds());
+                    const auto& center = discSurf->center(gctx.context());
+                    radius = bounds.get(BoundEnum::eMaxR);
+                    //these are endcap passive discsc - witht the endcap chambers check if there is overlap in Z 
+                    // with the barrel check if there is overlap in R and Z
+                    if(center.z() > min->z() && center.z() < max->z()){
+                        hasoverlap = (radius > rmin && radius < rmax);
+                    }                   
+
                 }else{
-                     ATH_MSG_FATAL("The surface "<< surf->geometryId()<<", "<< surf->name()
-                    <<" is not a cylinder surface - i dont expect any other type at the moment");
+                    ATH_MSG_FATAL("The surface "<< surf->geometryId()<<", "<< surf->name()
+                    <<" is not a cylinder surface or disc - i dont expect any other type at the moment");
                     return StatusCode::FAILURE;
                 }
-                //if the volume's corners are all below the cylinder surface radius it means this is next station surface 
-                //and we are checking the volumes of the previous station it does not mean overlap
-                auto [min,max] = std::ranges::minmax_element(edges, [&](const auto& cornerA, const auto& cornerB){
-                    return cornerA.perp() < cornerB.perp();
-                });
-                double rmin{min->perp()};
-                double rmax{max->perp()};
-                bool overlaps = (radius > rmin && radius < rmax);
-                if(overlaps){
+                
+                if(hasoverlap){
                     ATH_MSG_FATAL("The volume " << testVol->volumeName() << "overlaps with the surface "<< surf->name() << "with geo id" << surf->geometryId());
                 }
               
-            }      
-            
-              //dump the surfaces in obj
-                if(m_dumpObjs){
-                    Acts::ObjVisualization3D visualHelper{};   
-                    for(const auto& surf : surfacesVec){
-                        Acts::GeometryView3D::drawSurface(visualHelper, *surf, gctx.context());
-                    }
-                    visualHelper.write("PassiveSurfaces.obj");
-                }
+            }    
 
             if(overlaps.empty()){
                 ATH_MSG_DEBUG("No overlaps detected for the volume "<<testVol->volumeName());

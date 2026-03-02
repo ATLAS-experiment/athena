@@ -18,12 +18,12 @@ JetHistoHTFiller::JetHistoHTFiller( const std::string& type,  const std::string 
 
 
 StatusCode JetHistoHTFiller::initialize() {
-  ATH_MSG_INFO(" Initializing " << name() << " with " << m_minPt << " and "<< m_maxEta);
+  ATH_MSG_DEBUG(" Initializing " << name() << " with " << m_minPt << " and "<< m_maxEta);
   return StatusCode::SUCCESS;
 }
 
 StatusCode JetHistoHTFiller::finalize() {
-  ATH_MSG_INFO ("Finalizing " << name());
+  ATH_MSG_DEBUG ("Finalizing " << name());
   return StatusCode::SUCCESS;
 }
 

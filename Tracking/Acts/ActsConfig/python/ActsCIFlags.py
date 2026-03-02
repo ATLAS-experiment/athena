@@ -76,12 +76,6 @@ def actsValidateLargeRadiusSeedsFlags(flags) -> None:
     from ActsConfig.ActsConfigFlags import SeedingStrategy
     flags.Acts.SeedingStrategy = SeedingStrategy.Default
     flags.Tracking.writeSeedValNtuple = True
-    
-def actsValidateOrthogonalSeedsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (orthogonal seeding)"""
-    from ActsConfig.ActsConfigFlags import SeedingStrategy
-    flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
-    actsValidateSeedsFlags(flags)
 
 def actsValidateGbtsSeedsFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (GBTS seeding)"""

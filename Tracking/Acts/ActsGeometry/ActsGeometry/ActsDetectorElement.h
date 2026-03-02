@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
@@ -79,6 +79,8 @@ public:
   virtual const Acts::Transform3 &
   localToGlobalTransform(const Acts::GeometryContext &gctx) const final override;
 
+  virtual const Acts::Transform3 &
+  localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const final override;
   /// Return surface associated with this identifier, which should come from the
   virtual const Acts::Surface &surface() const final override;
   /// Returns whether the detector element is sensitive

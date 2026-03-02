@@ -70,7 +70,7 @@ namespace CP
   StatusCode SelectionReadAccessorNull ::
   fillSystematics (const ISystematicsSvc& /*svc*/,
                    const std::vector<CP::SystematicSet>& /*sysList*/,
-                   const std::string& /*objectName*/)
+                   ISysObjectHandleBase& /*objectHandle*/)
   {
     return StatusCode::SUCCESS;
   }

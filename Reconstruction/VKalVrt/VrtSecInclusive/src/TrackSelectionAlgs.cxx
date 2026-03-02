@@ -223,16 +223,16 @@ namespace VKalVrtAthena {
   }
 
   //____________________________________________________________________________________________________
-  StatusCode  VrtSecInclusive::selectTracksInDet() {
-
+  StatusCode  VrtSecInclusive::selectTracksInDet(const EventContext& ctx) {
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": begin"  );
 
     //--------------------------------------------------------
     //  Extract tracks from xAOD::TrackParticle container
     //
 
-    const xAOD::TrackParticleContainer* trackParticleContainer{};
-    ATH_CHECK( evtStore()->retrieve( trackParticleContainer, m_TrackLocation) );
+    SG::ReadHandle<xAOD::TrackParticleContainer> trackHandle = SG::makeHandle( m_TrackLocation, ctx );
+    ATH_CHECK( trackHandle.isValid() );    
+    const xAOD::TrackParticleContainer* trackParticleContainer = trackHandle.cptr();
 
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": Extracted xAOD::TrackParticle number=" << trackParticleContainer->size() );
 
@@ -251,10 +251,10 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode  VrtSecInclusive::selectTracksFromMuons() {
-
-    const xAOD::MuonContainer* muons{};
-    ATH_CHECK( evtStore()->retrieve( muons, m_MuonLocation) );
+  StatusCode  VrtSecInclusive::selectTracksFromMuons(const EventContext& ctx) {
+    SG::ReadHandle<xAOD::MuonContainer> muonHandle = SG::makeHandle( m_MuonLocation, ctx );
+    ATH_CHECK( muonHandle.isValid() );    
+    const xAOD::MuonContainer* muons = muonHandle.cptr();
 
 
     for( const auto *const muon : *muons ) {
@@ -277,10 +277,10 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode  VrtSecInclusive::selectTracksFromElectrons() {
-
-    const xAOD::ElectronContainer *electrons{};
-    ATH_CHECK( evtStore()->retrieve( electrons, m_ElectronLocation ) );
+  StatusCode  VrtSecInclusive::selectTracksFromElectrons(const EventContext& ctx) {
+    SG::ReadHandle<xAOD::ElectronContainer> electronsHandle = SG::makeHandle( m_ElectronLocation, ctx );
+    ATH_CHECK( electronsHandle.isValid() );
+    const xAOD::ElectronContainer *electrons = electronsHandle.cptr();
 
     for( const auto *const electron : *electrons ) {
       if( 0 == electron->nTrackParticles() ) continue;
@@ -300,22 +300,24 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  StatusCode  VrtSecInclusive::selectInDetAndGSFTracks() {
-
+  StatusCode  VrtSecInclusive::selectInDetAndGSFTracks(const EventContext& ctx) {
     ATH_MSG_DEBUG( " > " << __FUNCTION__ << ": begin"  );
 
     //--------------------------------------------------------
     //  Extract tracks from xAOD::TrackParticle container
     //
 
-    const xAOD::TrackParticleContainer* IDtracks{};
-    ATH_CHECK( evtStore()->retrieve( IDtracks, m_TrackLocation) );
+    SG::ReadHandle<xAOD::TrackParticleContainer> IDtracksHandle = SG::makeHandle( m_TrackLocation, ctx );
+    ATH_CHECK( IDtracksHandle.isValid() );    
+    const xAOD::TrackParticleContainer* IDtracks = IDtracksHandle.cptr();
 
-    const xAOD::ElectronContainer *electrons{};
-    ATH_CHECK( evtStore()->retrieve( electrons, m_ElectronLocation ) );
+    SG::ReadHandle<xAOD::ElectronContainer> electronsHandle = SG::makeHandle( m_ElectronLocation, ctx );
+    ATH_CHECK(electronsHandle.isValid() );
+    const xAOD::ElectronContainer *electrons = electronsHandle.cptr();
 
-    const xAOD::MuonContainer* muons{};
-    ATH_CHECK( evtStore()->retrieve( muons, m_MuonLocation) );
+    SG::ReadHandle<xAOD::MuonContainer> muonsHandle = SG::makeHandle( m_MuonLocation, ctx );
+    ATH_CHECK( muonsHandle.isValid() );
+    const xAOD::MuonContainer* muons = muonsHandle.cptr();
 
     std::vector<const xAOD::TrackParticle*> IDTrksFromEls;
 

@@ -1,0 +1,51 @@
+InDetTrackCalibrationConfig:
+  - name: pt
+    description: track $p_\mathrm{T}$
+  - name: eta
+    description: track $\eta$ (no systematics)
+  - name: phi
+    description: track $\phi$ (no systematics)
+  - name: charge
+    description: track charge (no systematics)
+  - name: qOverP
+    description: track $Q/p$
+  - name: d0
+    description: track $d_0$
+  - name: z0
+    description: track $z_0$
+  - name: vz
+    description: track $v_z$ (no systematics)
+  - name: numberOfInnermostPixelLayerHits
+    description: number of hits in the innermost pixel layer (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfPixelDeadSensors
+    description: number of dead pixel sensors (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfPixelHits
+    description: number of pixel hits (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfPixelHoles
+    description: number of pixel holes (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfPixelSharedHits
+    description: number of shared pixel hits (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfSCTDeadSensors
+    description: number of dead SCT sensors (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfSCTHits
+    description: number of SCT hits (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfSCTHoles
+    description: number of SCT holes (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfSCTSharedHits
+    description: number of shared SCT hits (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfTRTHits
+    description: number of TRT hits (no systematics)
+    toggled_by: outputTrackSummaryInfo
+  - name: numberOfTRTOutliers
+    description: number of TRT outliers (no systematics)
+    toggled_by: outputTrackSummaryInfo
+

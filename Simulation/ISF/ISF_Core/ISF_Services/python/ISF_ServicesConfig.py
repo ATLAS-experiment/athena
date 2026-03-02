@@ -16,6 +16,8 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
     TruthStrategyGroupIDCfg,
     TruthStrategyGroupIDHadIntCfg,
     TruthStrategyGroupCaloMuBremCfg,
+    TruthStrategyGroupCaloMSBroadCfg,
+    TruthStrategyGroupCaloMSHadIntCfg,
     ValidationTruthStrategyCfg,
     FCSParamTruthStrategyCfg
 )
@@ -94,6 +96,7 @@ def TruthServiceCfg(flags, **kwargs):
         # TruthStrategy.PhysicsProcess: PhysicsProcessTruthServiceCfg,
         # TruthStrategy.Global: GlobalTruthServiceCfg,
         TruthStrategy.Validation: ValidationTruthServiceCfg,
+        TruthStrategy.MSLLPValidation: MSLLPValidationTruthServiceCfg,
         # TruthStrategy.Cosmic: CosmicTruthServiceCfg,
     }
     xCfg = stratmap[flags.Sim.TruthStrategy]
@@ -267,3 +270,33 @@ def MC18TruthServiceCfg(flags, name="ISF_MC18TruthService", **kwargs):
 
 def MC18LLPTruthServiceCfg(flags, name="ISF_MC18LLPTruthService", **kwargs):
     return MC15aPlusLLPTruthServiceCfg(flags, name, **kwargs)
+
+
+# MSLLPValidation Truth Service Configuration
+def MSLLPValidationTruthServiceCfg(flags, name="ISF_MSLLPValidationTruthService", **kwargs):
+    result = ComponentAccumulator()
+    AtlasRegion = ROOT.AtlasDetDescr.AtlasRegion
+
+    if "TruthStrategies" not in kwargs:
+        truthCfgs = [
+            # MC15aPlusLLP strategies
+            KeepLLPDecayChildrenStrategyCfg,
+            KeepLLPHadronicInteractionChildrenStrategyCfg,
+            TruthStrategyGroupID_MC15Cfg,
+            TruthStrategyGroupIDHadInt_MC15Cfg,
+            TruthStrategyGroupCaloMuBremCfg,
+            TruthStrategyGroupCaloDecay_MC15Cfg,
+            LLPTruthStrategyCfg,
+            # Broad Calo+MS strategies (500 MeV pT threshold)
+            TruthStrategyGroupCaloMSBroadCfg,
+            TruthStrategyGroupCaloMSHadIntCfg,
+        ]
+        truthStrats = [result.popToolsAndMerge(cfg(flags)) for cfg in truthCfgs]
+        kwargs.setdefault("TruthStrategies", truthStrats)
+
+    kwargs.setdefault("ForceEndVtxInRegions",
+        [AtlasRegion.fAtlasID, AtlasRegion.fAtlasCalo, AtlasRegion.fAtlasMS])
+    truthService = result.getPrimaryAndMerge(
+        MC15aPlusTruthServiceCfg(flags, name, **kwargs))
+    result.addService(truthService, primary=True)
+    return result

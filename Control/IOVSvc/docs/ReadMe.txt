@@ -33,8 +33,6 @@ IOVRange: a start and stop IOVTime
 
 IOVEntry: associates a callback function with a key and a IOVRange
 
-CallBackID: used to identify a callback function
-
 IOVSvc: the service
 
 

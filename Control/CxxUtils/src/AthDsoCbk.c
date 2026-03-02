@@ -85,15 +85,18 @@ struct dlfcn_hook
   void *pad[4];
 };
 
-// FIXME: Disable use of this as of 2.34, as _dlfcn_hook is no longer exported
-// from libc.  Trying to get it to work again would be way fragile.
-// Consider using the supported audit functionality
-// (man rtld-audit) once we no longer need the root dso loading workaround.
-#if __GLIBC_PREREQ(2, 34)
-  static struct dlfcn_hook *_dlfcn_hook;
-#else
-  extern struct dlfcn_hook *_dlfcn_hook __attribute__ ((nocommon));
-#endif
+// `_dlfcn_hook` was removed in glibc >= 2.34 and is no longer exported.
+// Some builds use an older glibc sysroot (so __GLIBC_PREREQ(2,34) evaluates
+// false at compile time) but run on newer systems such as AlmaLinux 9
+// (glibc 2.34) where the symbol does not exist.
+//
+// Declaring it extern in this situation introduces a GLIBC_PRIVATE
+// dependency and causes link/runtime failures.  Always use a local static
+// declaration to avoid referencing the removed libc symbol.
+//
+// NOTE: `_dlfcn_hook` was never public API; a future replacement should use
+// the supported rtld-audit mechanism (see `man rtld-audit`).
+static struct dlfcn_hook *_dlfcn_hook;
 
 void *ath_dlopen( const char *fname, int mode, void *dl_caller );
 int ath_dlclose( void *handle );
@@ -109,10 +112,10 @@ static struct dlfcn_hook ath_dl_hook = {
   ath_dlopen, ath_dlclose, ath_dlsym, ath_dlvsym, ath_dlerror,
   ath_dladdr, ath_dladdr1, ath_dlinfo, ath_dlmopen, { 0, 0, 0, 0 }
 };
-static pthread_mutex_t ath_dl_hook_lock = PTHREAD_MUTEX_INITIALIZER; 
+static pthread_mutex_t ath_dl_hook_lock = PTHREAD_MUTEX_INITIALIZER;
 
-void* 
-ath_dlopen( const char *fname, int mode, void *dl_caller ) 
+void*
+ath_dlopen( const char *fname, int mode, void *dl_caller )
 {
   struct ath_dso_event dso_evt;
   int idx;
@@ -144,7 +147,7 @@ ath_dlopen( const char *fname, int mode, void *dl_caller )
 }
 
 int
-ath_dlclose( void *handle ) 
+ath_dlclose( void *handle )
 {
   int result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -156,7 +159,7 @@ ath_dlclose( void *handle )
 }
 
 void*
-ath_dlsym( void *handle, const char *name, void *dl_caller ) 
+ath_dlsym( void *handle, const char *name, void *dl_caller )
 {
   void *result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -168,7 +171,7 @@ ath_dlsym( void *handle, const char *name, void *dl_caller )
 }
 
 void*
-ath_dlvsym( void *handle, const char *name, const char *version, void *dl_caller ) 
+ath_dlvsym( void *handle, const char *name, const char *version, void *dl_caller )
 {
   void *result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -180,7 +183,7 @@ ath_dlvsym( void *handle, const char *name, const char *version, void *dl_caller
 }
 
 char*
-ath_dlerror( void ) 
+ath_dlerror( void )
 {
   char *result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -192,7 +195,7 @@ ath_dlerror( void )
 }
 
 int
-ath_dladdr( const void *address, Dl_info *info ) 
+ath_dladdr( const void *address, Dl_info *info )
 {
   int result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -204,7 +207,7 @@ ath_dladdr( const void *address, Dl_info *info )
 }
 
 int
-ath_dladdr1( const void *address, Dl_info *info, void **extra_info, int flags ) 
+ath_dladdr1( const void *address, Dl_info *info, void **extra_info, int flags )
 {
   int result = 0;
   pthread_mutex_lock(&ath_dl_hook_lock);
@@ -216,7 +219,7 @@ ath_dladdr1( const void *address, Dl_info *info, void **extra_info, int flags )
 }
 
 int
-ath_dlinfo( void *handle, int request, void *arg, void *dl_caller ) 
+ath_dlinfo( void *handle, int request, void *arg, void *dl_caller )
 {
   if( dl_caller ) {}
   int result = 0;
@@ -229,7 +232,7 @@ ath_dlinfo( void *handle, int request, void *arg, void *dl_caller )
 }
 
 void*
-ath_dlmopen( Lmid_t nsid, const char *file, int mode, void *dl_caller ) 
+ath_dlmopen( Lmid_t nsid, const char *file, int mode, void *dl_caller )
 {
   if( dl_caller ) {}
   void *result = 0;
@@ -242,7 +245,7 @@ ath_dlmopen( Lmid_t nsid, const char *file, int mode, void *dl_caller )
 }
 
 void
-ath_dl_hook_install() 
+ath_dl_hook_install()
 {
   pthread_mutex_init(&ath_dl_hook_lock, NULL);
   /*printf("AthDsoCbk: installing mutex in tid [%d]\n", pthread_self());*/
@@ -265,7 +268,7 @@ fetch_vmem (void)
   if (fp == NULL) {
     return -999;
   }
-  
+
   /* FIXME: error handling... */
   (void)fscanf(fp, "%80u%80u%80u", &siz, &rss, &shd);
   fclose (fp);
@@ -287,7 +290,7 @@ ath_dso_event_cbk_default(const struct ath_dso_event* evt, void *userdata)
   return 0;
 }
 
-/* register a callback function with the dso-cbk framework 
+/* register a callback function with the dso-cbk framework
  * @return 0 on success
  *        -1 on failure
  */
@@ -331,7 +334,7 @@ ath_dso_cbk_unregister(ath_dso_event_cbk_t cbk)
 static void setup() __attribute__ ((constructor));
 static void cleanup() __attribute__ ((destructor));
 
-void 
+void
 setup()
 {
   static int initialized = 0;
@@ -342,7 +345,7 @@ setup()
     g_dso_callbacks = arraylist_new(0);
 
     ath_dl_hook_install();
-    
+
   }
 }
 
@@ -354,7 +357,7 @@ cleanup()
   if (!finalized) {
     finalized = 1;
     ath_dl_hook_release();
-    
+
     /* free list of registered callbacks */
     for (i = 0; i != g_dso_callbacks->length; ++i) {
       ath_dso_event_cbk * elem = g_dso_callbacks->data[i];

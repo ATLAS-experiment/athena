@@ -55,6 +55,14 @@ public:
   using MuonSectorSet = MuonGMR4::MuonDetectorManager::MuonSectorSet;
   /** @brief Abrivation of the station index */
   using StIdx = Muon::MuonStationIndex::StIndex;
+  /** @brief Abrivatin for the detector region index */
+  using DetIdx = Muon::MuonStationIndex::DetectorRegionIndex;
+  /** @brief Abrivation for the layer index */
+  using LayIdx = Muon::MuonStationIndex::LayerIndex;
+  /** @brief Abrivation for the chamber index */
+  using ChIdx = Muon::MuonStationIndex::ChIndex;
+  /** @brief Abrivation for the stations indices */
+  using DetLayIdx_t = std::pair<DetIdx, LayIdx>;
   /** @brief Hide the flexibility to build the tracking geometry from sectors or chambers
    *         behind a variant */
   using EnvelopeSet_t = std::variant<MuonChamberSet, MuonSectorSet>;
@@ -101,7 +109,7 @@ private:
    * This function uses the elements of the station to construct the surfaces and define their bounds */
   template <typename ElementSet_t>
    std::vector<surfacePtr> getPassiveMaterialSurfaces(const Acts::GeometryContext& gctx,
-                                                     const std::unordered_map<StIdx, ElementSet_t>& elementsPerStation) const;
+                                                     const std::unordered_map<unsigned int, ElementSet_t>& elementsPerStation) const;
 
   /** @brief Check if the chamber is in this node
     * @param element The element to check (chamber or sector)
@@ -122,14 +130,14 @@ private:
    *  @param side The side (A, C or Both)
    *  @param id The geometry identifier of this node
    *  @param boundsFactory The factory for volume bounds
-   *  @param passiveStationIds The station Ids for which we apply passive material surfaces (e.g to keep only BI,BM,BO for the barrel node)
+   *  @param passiveStationIds The ids with the chamber indices we want to put passive material surfaces on
    */
   staticNodePtr buildMuonNode(const Acts::GeometryContext& gctx,
                               const EnvelopeSet_t& elements,
                               const std::string& name,
                               const Acts::GeometryIdentifier& id,
                               Acts::VolumeBoundFactory& boundsFactory,
-                              const std::vector<StIdx>& passiveStationIds = {}) const;
+                              const std::vector<ChIdx>& passiveStationIds = {}) const;
 };
 
 } //namespace ActsTrk

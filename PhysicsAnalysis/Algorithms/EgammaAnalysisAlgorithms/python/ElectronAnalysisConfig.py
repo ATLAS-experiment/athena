@@ -561,6 +561,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
 
     def __init__(self) :
         super (ElectronWorkingPointEfficiencyConfig, self).__init__ ()
+        self.setBlockName('ElectronWorkingPointEfficiency')
         self.addDependency('ElectronWorkingPointSelection', required=True)
         self.addDependency('EventSelection', required=False)
         self.addDependency('EventSelectionMerger', required=False)

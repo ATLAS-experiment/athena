@@ -15,6 +15,15 @@ def MuonHitDumperCfg(flags, name="MuonHitDumper", **kwargs):
     result.addEventAlgo(CompFactory.MuonR4.MlHitDumperAlg(name, **kwargs))
     return result
 
+def BucketScoreDumpCfg(flags, name="GraphBucketFilterTool", **kwargs):
+    from MuonInference.InferenceConfig import GraphBucketFilterToolCfg
+    kwargs_copy = kwargs.copy()
+    kwargs_copy.setdefault("ReadSpacePoints", "MuonSpacePoints")
+    kwargs_copy.setdefault("WriteSpacePointKey", "")
+    kwargs_copy.setdefault("ModelPath", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx")
+    kwargs_copy.setdefault("BiasClass0", 1.0)
+    return GraphBucketFilterToolCfg(flags, name=name, **kwargs_copy)
+
 def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
@@ -25,6 +34,17 @@ def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
     doCalo = bool(kwargs.pop("DoCaloDump", False))
     if doCalo:
         result.merge(CaloCellsDumperCfg(flags))
+    
+    doMLBucketScore = bool(kwargs.pop("DoMLBucketScore", False))
+    doMLBucketFilter = bool(kwargs.pop("DoMLBucketFilter", False))
+    mlBucketBias = kwargs.pop("MLBucketBias", 1.0)
+    if doMLBucketScore:
+        kwargs.setdefault("DoMLBucketScore", True)
+        toolCfg = BucketScoreDumpCfg(flags, BiasClass0=mlBucketBias)
+        inferenceTool = result.popToolsAndMerge(toolCfg)
+        kwargs.setdefault("InferenceTool", inferenceTool)
+    if doMLBucketFilter:
+        kwargs.setdefault("DoMLBucketFilter", True)
     
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SCT_FwdWheel.h"
@@ -66,12 +66,9 @@ SCT_FwdWheel::SCT_FwdWheel(const std::string & name,
 {
   getParameters();
   m_logVolume = SCT_FwdWheel::preBuild();
-  
 }
 
-SCT_FwdWheel::~SCT_FwdWheel()
-{
-}
+SCT_FwdWheel::~SCT_FwdWheel() = default;
 
 void
 SCT_FwdWheel::getParameters()
@@ -134,126 +131,121 @@ SCT_FwdWheel::getParameters()
 const GeoLogVol * 
 SCT_FwdWheel::preBuild()
 {
-    // The rings
-    for (int iRing = 0; iRing < m_numRings; iRing++){
-        std::string ringName = "Ring"+intToString(iRing)+"For"+getName();
-        int ringType = m_ringType[iRing];
-        m_rings.push_back(std::make_unique<SCT_FwdRing>(ringName, m_modules[ringType], m_iWheel, iRing, m_endcap,m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV,m_mapAX));
-    }
-    
-    if(m_sqliteReader) return nullptr;
-    
-    // Calculate total number of modules
-    m_totalModules = 0;
-    for (int iRing = 0; iRing < m_numRings; iRing++){
-        m_totalModules += m_rings[iRing]->numModules();
-    }
-    
-    // Create disc support.
-    m_discSupport = std::make_unique<SCT_FwdDiscSupport>("DiscSupport"+intToString(m_iWheel), m_iWheel,
-                                                         m_detectorManager, m_geometryManager, m_materials);
-    
-    
-    // Create Patch Panel
-    for (int iPPType = 0; iPPType < m_numPatchPanelTypes; iPPType++) {
-        m_patchPanel.push_back(std::make_unique<SCT_FwdPatchPanel>("PatchPanel"+intToString(iPPType), iPPType,
-                                                                   m_detectorManager, m_geometryManager, m_materials));
-    }
-    
-    // Create Patch Pannel Connector and Cooling, and disc Fixations
-    if (m_pPConnectorPresent) {
-        m_pPConnector = std::make_unique<SCT_FwdPPConnector>("PPConnector",
-                                                             m_detectorManager, m_geometryManager, m_materials);
-    }
-    if (m_pPCoolingPresent) {
-        m_pPCooling = std::make_unique<SCT_FwdPPCooling>("PPCooling",
-                                                         m_detectorManager, m_geometryManager, m_materials);
-    }
-    if (m_discFixationPresent) {
-        m_discFixation = std::make_unique<SCT_FwdDiscFixation>("DiscFixation",
-                                                               m_detectorManager, m_geometryManager, m_materials);
-    }
-    
-    // Create the FSI types
-    m_fsiType.resize(m_numFSITypes);
-    for (unsigned int iFSI = 0; iFSI < m_fsiVector->size(); iFSI++) {
-        int type = (*m_fsiVector)[iFSI]->simType();
-        if (!m_fsiType[type]) {
-            m_fsiType[type] = std::make_unique<SCT_FwdFSI>("FSI"+intToString(type), type,
-                                                           m_detectorManager, m_geometryManager, m_materials);
-        }
-    }
-    
-    // Calculate the extent of the envelope
-    // Use support disc as starting values.
-    double maxOuterRadius = m_discSupport->outerRadius();
-    double minInnerRadius = m_discSupport->innerRadius();
-    double maxModuleThickness = 0.5 * m_discSupport->thickness();
-    
-    
-    // Extend min max accounting for rings
-    for (int iRing = 0; iRing < m_numRings; iRing++){
-        maxOuterRadius = std::max(m_rings[iRing]->outerRadius(), maxOuterRadius);
-        minInnerRadius = std::min(m_rings[iRing]->innerRadius(), minInnerRadius);
-        maxModuleThickness = std::max(maxModuleThickness, m_rings[iRing]->thicknessOuter() +  m_rings[iRing]->ringOffset());
-    }
-    m_ringMaxRadius = maxOuterRadius;
-    
-    // If first or last wheel there is nothing protruding beyond the rings so we reduce the
-    // envelope size. Comes to about 20 mm. Note the front becomes the back later for the last wheel.
-    if ((m_iWheel == 0) || (m_iWheel == m_numWheels - 1)) {
-        m_thicknessFront = maxModuleThickness + 1*Gaudi::Units::mm; // We give plenty of safety as we have the room.
-        // But now modified by disc fixations
-        if(m_discFixationPresent) {
-            m_thicknessFront = std::max(m_thicknessFront,m_discFixation->radius() + m_safety);
-        }
-    }
-    
-    // The outer radius is now defined by the patch panel cooling if present
-    if(m_pPCoolingPresent) {
-        double ppCoolingOuterRadius = sqrt(sqr(m_patchPanel[2]->outerRadius() + m_pPCooling->deltaR()) + sqr(m_pPCooling->rphi())) + m_safety;
-        maxOuterRadius = std::max(ppCoolingOuterRadius, maxOuterRadius);
-    }
-    
-    // Or maybe by the disc fixations...
-    if(m_discFixationPresent) {
-        double discFixationOuterRadius = sqrt(sqr(m_ringMaxRadius + m_discFixation->thickness() + m_safety) + sqr(m_discFixation->radius())) + m_safety;
-        maxOuterRadius = std::max(discFixationOuterRadius, maxOuterRadius);
-    }
-    
-    m_rotateWheel = +1; // +1 normal, -1 rotate (ie last wheel)
-    if (m_numRings > 0) { // Should always be true
-        m_rotateWheel = (m_rings[0]->discRotated()) ? -1 : +1 ;
-    }
-    
-    // swap thickness front/back (this only happens for the last wheel).
-    if (m_rotateWheel < 0) {
-        double tmp = m_thicknessFront;
-        m_thicknessFront = m_thicknessBack;
-        m_thicknessBack  = tmp;
-    }
-    
-    m_thickness =  m_thicknessFront +  m_thicknessBack;
-    
-    m_innerRadius = minInnerRadius - m_safety;
-    m_outerRadius = maxOuterRadius + m_safety;
-    
-    
-    // TODO. Have to account for FSI and patch panels
-    //m_thickness   = 2. * maxRingOffset + maxThickness;
-    // m_thickness  = 100 * Gaudi::Units::mm;
-    
-    // Make envelope for the wheel
-    double envelopeShift = 0.5*(m_thicknessBack - m_thicknessFront);
-    const GeoTube * tmpShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_thickness);
-    const GeoShape & fwdWheelEnvelopeShape = *tmpShape <<  GeoTrf::Translate3D(0, 0, envelopeShift);
-    
-    const GeoLogVol * fwdWheelLog =
-    new GeoLogVol(getName(), &fwdWheelEnvelopeShape, m_materials->gasMaterial());
-    
-    
-    return fwdWheelLog;
+  // The rings
+  for (int iRing = 0; iRing < m_numRings; iRing++){
+    std::string ringName = std::format("Ring{}For{}",iRing,getName());
+    int ringType = m_ringType[iRing];
+    m_rings.push_back(std::make_unique<SCT_FwdRing>(ringName, m_modules[ringType], m_iWheel, iRing, m_endcap,m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV,m_mapAX));
+  }
 
+  if(m_sqliteReader) return nullptr;
+
+  // Calculate total number of modules
+  m_totalModules = 0;
+  for (int iRing = 0; iRing < m_numRings; iRing++){
+    m_totalModules += m_rings[iRing]->numModules();
+  }
+
+  // Create disc support.
+  m_discSupport = std::make_unique<SCT_FwdDiscSupport>(std::format("DiscSupport{}",m_iWheel), m_iWheel,
+						       m_detectorManager, m_geometryManager, m_materials);
+
+  // Create Patch Panel
+  for (int iPPType = 0; iPPType < m_numPatchPanelTypes; iPPType++) {
+    m_patchPanel.push_back(std::make_unique<SCT_FwdPatchPanel>(std::format("PatchPanel{}",iPPType), iPPType,
+							       m_detectorManager, m_geometryManager, m_materials));
+  }
+
+  // Create Patch Pannel Connector and Cooling, and disc Fixations
+  if (m_pPConnectorPresent) {
+    m_pPConnector = std::make_unique<SCT_FwdPPConnector>("PPConnector",
+							 m_detectorManager, m_geometryManager, m_materials);
+  }
+  if (m_pPCoolingPresent) {
+    m_pPCooling = std::make_unique<SCT_FwdPPCooling>("PPCooling",
+						     m_detectorManager, m_geometryManager, m_materials);
+  }
+  if (m_discFixationPresent) {
+    m_discFixation = std::make_unique<SCT_FwdDiscFixation>("DiscFixation",
+							   m_detectorManager, m_geometryManager, m_materials);
+  }
+
+  // Create the FSI types
+  m_fsiType.resize(m_numFSITypes);
+  for (unsigned int iFSI = 0; iFSI < m_fsiVector->size(); iFSI++) {
+    int type = (*m_fsiVector)[iFSI]->simType();
+    if (!m_fsiType[type]) {
+      m_fsiType[type] = std::make_unique<SCT_FwdFSI>(std::format("FSI{}",type), type,
+						     m_detectorManager, m_geometryManager, m_materials);
+    }
+  }
+
+  // Calculate the extent of the envelope
+  // Use support disc as starting values.
+  double maxOuterRadius = m_discSupport->outerRadius();
+  double minInnerRadius = m_discSupport->innerRadius();
+  double maxModuleThickness = 0.5 * m_discSupport->thickness();
+
+  // Extend min max accounting for rings
+  for (int iRing = 0; iRing < m_numRings; iRing++){
+    maxOuterRadius = std::max(m_rings[iRing]->outerRadius(), maxOuterRadius);
+    minInnerRadius = std::min(m_rings[iRing]->innerRadius(), minInnerRadius);
+    maxModuleThickness = std::max(maxModuleThickness, m_rings[iRing]->thicknessOuter() +  m_rings[iRing]->ringOffset());
+  }
+  m_ringMaxRadius = maxOuterRadius;
+
+  // If first or last wheel there is nothing protruding beyond the rings so we reduce the
+  // envelope size. Comes to about 20 mm. Note the front becomes the back later for the last wheel.
+  if ((m_iWheel == 0) || (m_iWheel == m_numWheels - 1)) {
+    m_thicknessFront = maxModuleThickness + 1*Gaudi::Units::mm; // We give plenty of safety as we have the room.
+    // But now modified by disc fixations
+    if(m_discFixationPresent) {
+      m_thicknessFront = std::max(m_thicknessFront,m_discFixation->radius() + m_safety);
+    }
+  }
+
+  // The outer radius is now defined by the patch panel cooling if present
+  if(m_pPCoolingPresent) {
+    double ppCoolingOuterRadius = sqrt(sqr(m_patchPanel[2]->outerRadius() + m_pPCooling->deltaR()) + sqr(m_pPCooling->rphi())) + m_safety;
+    maxOuterRadius = std::max(ppCoolingOuterRadius, maxOuterRadius);
+  }
+
+  // Or maybe by the disc fixations...
+  if(m_discFixationPresent) {
+    double discFixationOuterRadius = sqrt(sqr(m_ringMaxRadius + m_discFixation->thickness() + m_safety) + sqr(m_discFixation->radius())) + m_safety;
+    maxOuterRadius = std::max(discFixationOuterRadius, maxOuterRadius);
+  }
+
+  m_rotateWheel = +1; // +1 normal, -1 rotate (ie last wheel)
+  if (m_numRings > 0) { // Should always be true
+    m_rotateWheel = (m_rings[0]->discRotated()) ? -1 : +1 ;
+  }
+
+  // swap thickness front/back (this only happens for the last wheel).
+  if (m_rotateWheel < 0) {
+    double tmp = m_thicknessFront;
+    m_thicknessFront = m_thicknessBack;
+    m_thicknessBack  = tmp;
+  }
+
+  m_thickness =  m_thicknessFront +  m_thicknessBack;
+
+  m_innerRadius = minInnerRadius - m_safety;
+  m_outerRadius = maxOuterRadius + m_safety;
+
+  // TODO. Have to account for FSI and patch panels
+  //m_thickness   = 2. * maxRingOffset + maxThickness;
+  // m_thickness  = 100 * Gaudi::Units::mm;
+  
+  // Make envelope for the wheel
+  double envelopeShift = 0.5*(m_thicknessBack - m_thicknessFront);
+  const GeoTube * tmpShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_thickness);
+  const GeoShape & fwdWheelEnvelopeShape = *tmpShape <<  GeoTrf::Translate3D(0, 0, envelopeShift);
+
+  const GeoLogVol * fwdWheelLog =
+    new GeoLogVol(getName(), &fwdWheelEnvelopeShape, m_materials->gasMaterial());
+
+  return fwdWheelLog;
 }
 
 GeoVPhysVol * 
@@ -296,7 +288,7 @@ SCT_FwdWheel::build(SCT_Identifier id)
         double ringOuterZ = ring->ringOffset() +  ring->thicknessOuter();
         maxZOfRingsFront = std::max(maxZOfRingsFront, ringOuterZ);
         
-        std::string ringNameTag = "Ring#" + intToString(ring->identifier());
+        std::string ringNameTag = std::format("Ring#{}",ring->identifier());
         wheel->add(new GeoNameTag(ringNameTag));
         wheel->add(new GeoIdentifierTag(ring->identifier()));
         wheel->add(new GeoTransform(GeoTrf::Translate3D(0, 0, ringZpos)));
@@ -305,7 +297,7 @@ SCT_FwdWheel::build(SCT_Identifier id)
         
         // Position cooling
         // Get a pointer to the cooling ring.
-        SCT_FwdRingCooling cooling("RingCoolingW"+intToString(m_iWheel)+"R"+intToString(iRing),
+        SCT_FwdRingCooling cooling(std::format("RingCoolingW{}R{}",m_iWheel,iRing),
                                    iRing, m_detectorManager, m_geometryManager, m_materials);
         double coolingZpos = ring->ringSide() * (0.5*(m_discSupport->thickness() + cooling.thickness()));
         wheel->add(new GeoTransform(GeoTrf::TranslateZ3D(coolingZpos)));
@@ -313,8 +305,7 @@ SCT_FwdWheel::build(SCT_Identifier id)
         
         // Power Tapes
         // Get a pointer to the power tape
-        SCT_FwdDiscPowerTape powerTape("PowerTapeW"+intToString(m_iWheel)+
-                                       "R"+intToString(iRing), iRing,
+        SCT_FwdDiscPowerTape powerTape(std::format("PowerTapeW{}R{}",m_iWheel,iRing), iRing,
                                        m_detectorManager, m_geometryManager, m_materials);
         
         double powerTapeZpos = ring->ringSide() * (0.5*(m_discSupport->thickness() + powerTape.thickness()) +
@@ -432,7 +423,7 @@ SCT_FwdWheel::build(SCT_Identifier id)
         std::string optoharnessName = "OptoHarnessO";
         if(m_numRings > 1) {optoharnessName+="M";}
         if(m_numRings > 2) {optoharnessName+="I";}
-        SCT_FwdOptoHarness optoharness(optoharnessName+"W"+intToString(m_iWheel), m_numRings,
+        SCT_FwdOptoHarness optoharness(std::format("{}W{}",optoharnessName,m_iWheel), m_numRings,
                                        m_detectorManager, m_geometryManager, m_materials);
         double optoHarnessZpos = 0.5*m_rotateWheel*(m_discSupport->thickness() + optoharness.thickness());
         wheel->add(new GeoTransform(GeoTrf::TranslateZ3D(optoHarnessZpos)));
@@ -502,18 +493,16 @@ SCT_FwdWheel::build(SCT_Identifier id)
     // Extra Material
     InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
     xMat.add(wheel, "SCTDisc");
-    xMat.add(wheel, "SCTDisc"+intToString(m_iWheel));
+    xMat.add(wheel, std::format("SCTDisc{}",m_iWheel));
     if (m_endcap > 0) {
-        xMat.add(wheel, "SCTDiscA");
-        xMat.add(wheel, "SCTDiscA"+intToString(m_iWheel));
-    } else {
-        xMat.add(wheel, "SCTDiscC");
-        xMat.add(wheel, "SCTDiscC"+intToString(m_iWheel));
+      xMat.add(wheel, "SCTDiscA");
+      xMat.add(wheel, std::format("SCTDiscA{}",m_iWheel));
+    }
+    else {
+      xMat.add(wheel, "SCTDiscC");
+      xMat.add(wheel, std::format("SCTDiscC{}",m_iWheel));
     }
     
-    
-    
     return wheel;
-    
 }
 

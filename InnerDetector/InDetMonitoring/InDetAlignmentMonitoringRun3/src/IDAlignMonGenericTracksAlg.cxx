@@ -551,9 +551,7 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
 
     //d0
     auto d0_m = Monitored::Scalar<float>( "m_d0", trkd0 );
-    fill(genericTrackGroup, d0_m);
     auto errD0_m = Monitored::Scalar<float>( "m_errD0", Err_d0 );
-    fill(genericTrackGroup, errD0_m);
     auto d0_bscorr_m = Monitored::Scalar<float>( "m_d0_bscorr", d0bscorr );
 
     // Phi
@@ -572,7 +570,12 @@ StatusCode IDAlignMonGenericTracksAlg::fillHistograms( const EventContext& ctx )
     auto pTRes_m = Monitored::Scalar<float>( "m_pTRes", std::fabs(Err_qOverP / qOverP) );
 
     //d0 (BS) vs Eta, vs Phi (Phi, Barrel, EndCap A, EndCap C), vs pT // Eta vs Npixhits_per_track, SCT, TRT // Eta for positive and negative tracks 
-    fill(genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m, eta_m, isTrkPositive, isTrkNegative, d0_bscorr_m, phi_m, isTrackBarrel, isTrackECA, isTrackECC, errPhi_m, pT_m, errPt_m, pTRes_m);
+    fill( genericTrackGroup, npixelhits_per_track_m, nscthits_per_track_m, ntrthits_per_track_m,
+	  pT_m, errPt_m, pTRes_m,
+	  eta_m, 
+	  d0_m, errD0_m, d0_bscorr_m,
+	  phi_m, errPhi_m,
+	  isTrkPositive, isTrkNegative,isTrackBarrel, isTrackECA, isTrackECC );
     
     auto p_m = Monitored::Scalar<float>( "m_p", trkP );
     fill(genericTrackGroup, p_m);

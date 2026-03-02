@@ -39,7 +39,6 @@
 #include "AthenaKernel/StoreID.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "CxxUtils/RefCountedPtr.h"
 
@@ -618,11 +617,6 @@ private:
   /// Also do registration with IOVSvc.
   bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
                                      IResetable* ir, SG::DataProxy *&dp);
-  bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                     IResetable* ir, SG::DataProxy *&dp,
-                                     const CallBackID& c,
-                                     const IOVSvcCallBackFcn& fcn,
-                                     bool trigger);
 
 /// remove proxy from store, unless it is reset only.         
   /// provide pTrans!=0 (must match proxy...) to save time

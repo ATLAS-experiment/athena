@@ -755,26 +755,12 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
             ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
             MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
 
-            from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
-            pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-            strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
-            ActsITkSiSpacePointsSeedMakerOrthogonal = \
-                acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                       name="ActsSiSpacePointsSeedMakerOrthogonal",
-                                                                       SeedToolPixel=pixel_orthogonal_seeding_tool,
-                                                                       SeedToolStrip=strip_orthogonal_seeding_tool))
-            ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
-            MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
-
-            
-            
         from GaudiKernel.GaudiHandles import PrivateToolHandleArray
         
         privateSeedingTools = [ITkSiSpacePointsSeedMaker, ActsITkSiSpacePointsSeedMaker]
 
         if addOtherSeedingAlgorithms:
             privateSeedingTools.append(ActsGbtsITkSiSpacePointsSeedMaker)
-            privateSeedingTools.append(ActsITkSiSpacePointsSeedMakerOrthogonal)
         
         kwargs.setdefault("SeedingTools",
                           PrivateToolHandleArray(privateSeedingTools))

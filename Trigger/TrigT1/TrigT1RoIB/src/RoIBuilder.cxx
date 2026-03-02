@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -377,7 +377,6 @@ namespace ROIB {
       //
       auto roibHandle = SG::makeHandle( m_roibRDOLocation, ctx );
       CHECK( roibHandle.record( std::move( roib_rdo_result ) ) );
-      // no owerwrite possible with DataHandles
 
       return StatusCode::SUCCESS;
    }

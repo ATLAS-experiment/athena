@@ -560,6 +560,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 
             alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
             alg.jets = config.readName(self.containerName)
+            alg.jetsOut = config.copyName(self.containerName)
 
         if self.jetInput == "UFO" and config.dataType() is not DataType.Data:
             # set up the FF smearing algorithm

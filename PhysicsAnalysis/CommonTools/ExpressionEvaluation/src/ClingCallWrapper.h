@@ -1,7 +1,11 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
-#pragma once
+#ifndef ROOTUTILS_CLINGCALLWRAPPER_H
+#define ROOTUTILS_CLINGCALLWRAPPER_H
+
+#include "NormalizedTypeNameUtil.h"
+
 #include <type_traits>
 #include <array>
 #include <string>
@@ -211,10 +215,11 @@ ClingCallWrapper<T_ReturnValue, T_MethodArgs...> getClingCallWrapperChecked(Clin
    if (!call_wrapper.template isReturnTypeMatching<T_ReturnValue>()) {
       std::stringstream amsg;
       amsg << "Return type mismatch. Desired "
-           << ROOT::Internal::GetDemangledTypeName(typeid(T_ReturnValue))
+           << getNormalizedTypeName<T_ReturnValue>()
            << " != is " << call_wrapper.getReturnTypeNormalizedName();
       throw std::runtime_error(amsg.str());
    }
    return ClingCallWrapper<T_ReturnValue, T_MethodArgs...>(std::forward<decltype(call_wrapper)>(call_wrapper));
 }
 }
+#endif

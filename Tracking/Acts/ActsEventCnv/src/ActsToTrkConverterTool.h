@@ -112,7 +112,11 @@ private:
   Gaudi::Property<bool> m_extractMuonSurfaces{
      this, "ExtractMuonSurfaces", false,
      "If True, use the MuonDetectorManager to extract the Muon surfaces"};
-  
+
+  Gaudi::Property<bool> m_convertMuons{
+    this, "ConvertMuonTracks", false,
+    "If True, use the muon as ParticleHypothesis"};
+
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   
   /** @brief Detector manager to fetch the legacy Trk surfaces */

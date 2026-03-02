@@ -1,7 +1,7 @@
 // This is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LeptonTaggers/DecoratePLIT.h"
@@ -187,6 +187,11 @@ namespace Prompt {
     ATH_CHECK(m_dec_trk_electron_track.initialize());
     ATH_CHECK(m_dec_trk_muon_track.initialize());
     ATH_CHECK(m_dec_trk_dr_leptontrack.initialize());
+
+    renounce(m_acc_trk_dr_lepton);
+    renounce(m_acc_trk_dr_leptontrack);
+    renounce(m_acc_trk_electron_track);
+    renounce(m_acc_trk_muon_track);
 
     return StatusCode::SUCCESS;
 

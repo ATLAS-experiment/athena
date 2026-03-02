@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGORITHMS_RENAMEHITCOLLECTIONSALG_H
@@ -74,12 +74,12 @@ namespace ISF {
       StatusCode copyCollections( const SG::ReadHandleKey<T>& inputReadHandleKeys,
                                   const SG::WriteHandleKey<T>& outputWriteHandleKey, const EventContext &ctx) const;
 
-    /** Copy the given hit into the given output collection, container or DataHandle */
+    /** Copy the given hit into the given output collection, container or handle */
     template <typename HitType_t, typename OutputType_t>
       void insertCopy(const HitType_t& hit, OutputType_t& outputHandle) const;
 
     /** Copy the given const pointer to a hit into the given output collection,
-        container or DataHandle */
+        container or handle */
     template <typename HitType_t, typename OutputType_t>
       void insertCopy(HitType_t * const hit, OutputType_t& outputHandle) const;
 
@@ -254,7 +254,7 @@ namespace ISF {
   }
 
 
-  /** Copy the given hit into the given output collection, container or DataHandle */
+  /** Copy the given hit into the given output collection, container or handle */
   template <typename HitType_t, typename OutputType_t>
   inline void ISF::RenameHitCollectionsAlg::insertCopy(const HitType_t& hit,
                                                        OutputType_t& outputHandle) const {
@@ -264,7 +264,7 @@ namespace ISF {
   }
 
 
-  /** Copy the given const pointer to a hit into the given output collection, container or DataHandle */
+  /** Copy the given const pointer to a hit into the given output collection, container or handle */
   template <typename HitType_t, typename OutputType_t>
   inline void ISF::RenameHitCollectionsAlg::insertCopy(HitType_t * const hit,
                                                        OutputType_t& outputHandle) const {

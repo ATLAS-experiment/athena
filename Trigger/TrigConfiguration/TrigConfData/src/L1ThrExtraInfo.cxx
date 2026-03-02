@@ -708,6 +708,12 @@ TrigConf::L1ThrExtraInfo_gXE::load()
          m_XEJWOJ_c_B = x.second.getValue<unsigned int>();
       } else if( x.first == "XEJWOJ_c_C" ){
          m_XEJWOJ_c_C = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrA" ){
+         m_noiseCutThrA = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrB" ){
+         m_noiseCutThrB = x.second.getValue<unsigned int>();
+      } else if( x.first == "XENOISECUT_noiseCutThrC" ){
+         m_noiseCutThrC = x.second.getValue<unsigned int>();
       }
    }
 }

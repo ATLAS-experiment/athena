@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Bootstrap.h"
@@ -72,11 +72,16 @@ MdtCsmContainer::hashFcn()
 
 //**********************************************************************
 
-const CLID& MdtCsmContainer::classID()    
+CLID MdtCsmContainer::classID()
 {
   return ClassID_traits<MdtCsmContainer>::ID();       
-  //      static const CLID CLID_MdtCsmContainer= 4187; 
-  //      return CLID_MdtCsmContainer ; 
+}
+
+
+const CLID& MdtCsmContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 

@@ -12,16 +12,10 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <memory>
-
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class IOVRange;
 class IOVTime;
-class IIOVSvcTool;
-class CallBackID;
-class IOpaqueAddress;
 class CondContBase;
 class DataObjID;
 class EventIDBase;
@@ -106,11 +100,6 @@ public:
   // supply a list of TADs whose data will be preloaded via a 'partial preload' flag
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress *,
 				     const std::string& storeName="StoreGateSvc" ) = 0;
-
-  /// get the names of the tools that have been triggered
-  virtual StatusCode getTriggeredTools(const std::string& key,
-  				       std::set<std::string>& tools,
-				       const std::string& storeName="StoreGateSvc") = 0;
 
   /// reset all proxies known to IOVSvc
   virtual void resetAllProxies() = 0;

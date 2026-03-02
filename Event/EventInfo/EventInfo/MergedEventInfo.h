@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTINFO_MERGEDEVENTINFO_H
@@ -52,8 +52,8 @@ public:
 
   /// \name DataObject-like clid accessors
   //@{
-  static const CLID& classID();
-  const CLID& clID() const;
+  static CLID classID();
+  CLID clID() const;
   //@}
 
   /// \name Event information accessors
@@ -81,7 +81,7 @@ MergedEventInfo::origEvent_ID() const {
   return EventInfo::event_ID();
 }
 
-inline const CLID&
+inline CLID
 MergedEventInfo::clID() const {
   return classID();
 }
@@ -89,7 +89,7 @@ MergedEventInfo::clID() const {
 # include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF(MergedEventInfo, 220174395, 1)
 
-inline const CLID &
+inline CLID
 MergedEventInfo::classID() {
   return ClassID_traits<MergedEventInfo>::ID();
 }

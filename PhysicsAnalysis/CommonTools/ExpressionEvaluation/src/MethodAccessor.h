@@ -9,6 +9,7 @@
 #include "ExpressionEvaluation/IProxyLoader.h"
 #include "ExpressionEvaluation/IAccessor.h"
 #include "RootUtils/TSMethodCall.h"
+#include "NormalizedTypeNameUtil.h"
 
 #include "TClass.h"
 #include "AthContainers/normalizedTypeinfoName.h"
@@ -214,50 +215,31 @@ namespace ExpressionParsing {
          ExpressionParsing::IAccessor::VariableType m_vectorType;
       };
 
+      template <typename T>
+      static std::pair<std::string, std::pair<std::unique_ptr<IMethodAccessorKit>, TInterpreter::EReturnType> > keyAndIntMethodKit() {
+         return std::make_pair(RootUtils::getNormalizedTypeName<T>(),
+                               std::make_pair(std::make_unique<MethodAccessorKit<T> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
+                                              TInterpreter::EReturnType::kLong));
+      }
+      template <typename T>
+      static std::pair<std::string, std::pair<std::unique_ptr<IMethodAccessorKit>, TInterpreter::EReturnType> > keyAndDoubleMethodKit() {
+         return std::make_pair(RootUtils::getNormalizedTypeName<T>(),
+                               std::make_pair(std::make_unique<MethodAccessorKit<T> >(IProxyLoader::VT_DOUBLE, IProxyLoader::VT_VECDOUBLE),
+                                              TInterpreter::EReturnType::kDouble));
+      }
    public:
       MethodAccessorFactory() {
-         m_kits.insert( std::make_pair(std::string("int"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<int> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("int32_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::int32_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("std::int32_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::int32_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("unsigned int"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<unsigned int> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("uint32_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::uint32_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("std::uint32_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::uint32_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("long"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<long> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("int64_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::int64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("std::int64_t"),
-                              std::make_pair(std::make_unique<MethodAccessorKit<std::int64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                             TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("unsigned long"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<unsigned long> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("uint64_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::uint64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("std::uint64_t"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<std::uint64_t> >(IProxyLoader::VT_INT,IProxyLoader::VT_VECINT),
-                                                      TInterpreter::EReturnType::kLong)));
-         m_kits.insert( std::make_pair(std::string("double"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<double> >(IProxyLoader::VT_DOUBLE, IProxyLoader::VT_VECDOUBLE),
-                                                      TInterpreter::EReturnType::kDouble)));
-         m_kits.insert( std::make_pair(std::string("float"),
-                                       std::make_pair(std::make_unique<MethodAccessorKit<float> >(IProxyLoader::VT_DOUBLE, IProxyLoader::VT_VECDOUBLE),
-                                                      TInterpreter::EReturnType::kDouble)));
+         m_kits.insert(keyAndIntMethodKit<bool>());
+         m_kits.insert(keyAndIntMethodKit<std::int8_t>());
+         m_kits.insert(keyAndIntMethodKit<std::int16_t>());
+         m_kits.insert(keyAndIntMethodKit<std::int32_t>());
+         m_kits.insert(keyAndIntMethodKit<std::int64_t>());
+         m_kits.insert(keyAndIntMethodKit<std::uint8_t>());
+         m_kits.insert(keyAndIntMethodKit<std::uint16_t>());
+         m_kits.insert(keyAndIntMethodKit<std::uint32_t>());
+         m_kits.insert(keyAndIntMethodKit<std::uint64_t>());
+         m_kits.insert(keyAndDoubleMethodKit<double>());
+         m_kits.insert(keyAndDoubleMethodKit<float>());
       }
 
       /** Create an accessor which calls the specified method of an AuxElement.

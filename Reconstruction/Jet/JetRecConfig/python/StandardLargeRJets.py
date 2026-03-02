@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from .JetDefinition import  JetDefinition
@@ -66,6 +66,15 @@ AntiKt10LCTopo = JetDefinition("AntiKt",1.0,cst.LCTopoOrigin,
 #Remove VR track jets from ghosts for core reco
 AntiKt10LCTopo_noVR = AntiKt10LCTopo.clone(
     ghostdefs = standardghosts+flavourghosts
+)
+
+# Jet collection specifically for tau CP without modifiers, ghosts, ...
+AntiKt10LCTopo_tau = JetDefinition("AntiKt",1.0,cst.LCTopoOrigin,
+                                   ghostdefs = ["Track"],
+                                   modifiers = ("Sort", "Filter:50000"),
+                                   standardRecoMode = True,
+                                   ghostarea = 0.,
+                                   lock = True
 )
 
 AntiKt10LCTopo_withmoms = AntiKt10LCTopo.clone(

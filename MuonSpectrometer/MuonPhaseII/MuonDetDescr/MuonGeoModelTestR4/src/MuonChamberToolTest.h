@@ -22,7 +22,6 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
-#include "Acts/Surfaces/CylinderSurface.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
 
 namespace MuonGMR4 { 
