@@ -320,8 +320,6 @@ std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
                          const std::vector<std::pair<unsigned int, unsigned int> > &used_modules) {
    // container for which the Range is not atomic
    using PixelRawDataContainerNonMT = PhaseII::IndexedRanges<PhaseII::PixelRawDataContainer, PhaseII::DataRange >;
-   using RangeNType  = decltype(PhaseII::DataRange().size());
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
 
    // create one hit container per ROI (or thread) without an atomic range structure
    std::vector<PixelRawDataContainerNonMT> roi_rdo_container;
@@ -410,8 +408,6 @@ std::size_t roiFillNonMT(const PhaseIIPixelRawDataContainer &rdo_container,
 std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
                       const std::vector<std::vector<unsigned int> > &rois) {
    static_assert( std::atomic<PhaseII::DataRange>::is_always_lock_free );
-   using RangeNType  = decltype(PhaseII::DataRange().size());
-   using RangeContainerIndexType  = decltype(PhaseII::DataRange().containerIndex());
    std::atomic<unsigned int> n_rejected_work=0u;
 
 
