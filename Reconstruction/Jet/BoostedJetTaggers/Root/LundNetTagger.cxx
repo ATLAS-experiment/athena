@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAOD_ANALYSIS
-#include "BoostedJetTaggers/LundJetOnnxAlg.h"
+#include "BoostedJetTaggers/LundNetTagger.h"
 
 // xAOD and StoreGate
 #include "xAODJet/JetContainer.h"
-#include "StoreGate/ReadHandle.h"
 #include "xAODPFlow/FlowElement.h"
 #include "AthOnnxUtils/OnnxUtils.h"
 // AthOnnx
@@ -15,16 +13,16 @@
 // ONNX Runtime
 #include <onnxruntime_cxx_api.h>
 #include "PathResolver/PathResolver.h"
-#include "StoreGate/WriteDecorHandle.h"
 
 #include <sstream>
 #include <cmath>
+LundNetTagger::LundNetTagger( const std::string& name ) :
+  JSSTaggerBase( name )
+{}
 
-//static const char* k_input_names[]  = {"x","edge_index","batch","Ntrk","counts"};
-//static const char* k_output_names[] = {"output"};
-StatusCode LundJetOnnxAlg::initialize() {
+StatusCode LundNetTagger::initialize() {
 
-  ATH_MSG_INFO("Initializing LundJetOnnxAlg");
+  ATH_MSG_INFO("Initializing LundNetTagger");
 
   ATH_MSG_INFO("Loading ONNX model from: " << m_modelPath);
   // -------------------------
@@ -52,7 +50,7 @@ StatusCode LundJetOnnxAlg::initialize() {
   try {
     m_session = std::make_unique<Ort::Session>(
 					       *m_env,
-					       m_resolvedModelPath.c_str(),   // ← ahora es estable
+					       m_resolvedModelPath.c_str(),
 					       sessionOptions
 					       );
   } catch (const Ort::Exception& e) {
@@ -62,50 +60,84 @@ StatusCode LundJetOnnxAlg::initialize() {
 
   ATH_MSG_INFO("ONNX Runtime session successfully created");
 
+  size_t numOutputs = m_session->GetOutputCount();
+  ATH_MSG_DEBUG("Number of ONNX outputs: " << numOutputs);
+
+  Ort::TypeInfo typeInfo = m_session->GetOutputTypeInfo(0);
+  auto tensorInfo = typeInfo.GetTensorTypeAndShapeInfo();
+  std::vector<int64_t> shape = tensorInfo.GetShape();
+  ATH_MSG_DEBUG("ONNX output shape: [" << shape[0] << " , " << shape[1] << " ]");
+
+  m_classN = shape[1]; // Check m_classN here
+
+
   // -------------------------
   // Decorations
   // -------------------------
   ATH_MSG_INFO("InputJetContainer: " << m_inputJetContainer);
-  ATH_MSG_INFO("Prefix: '" << m_prefix << "'");
+  ATH_MSG_INFO("Prefix: " << m_prefix);
   ATH_MSG_INFO("kT selection: " << m_kTSelection);
+  ATH_MSG_INFO("scoreName: " << m_scoreName);
   std::string decorFull =
     m_inputJetContainer.value() + "." +
     m_prefix.value() +
     m_scoreName.value();
   std::string validDecorFull =
-    m_inputJetContainer.value() + "." +
-    m_prefix.value() +
-    "LundNetValid";
+    decorFull + "LundNetValid";
+  std::string classNDecorFull =
+    decorFull + "LundNetClassN";
   
-  m_scoreDecorKey = decorFull;
   m_validDecorKey = validDecorFull;
-  ATH_CHECK(m_scoreDecorKey.initialize());
+  m_classNDecorKey = classNDecorFull;
+  m_scoreOneDecorKey = decorFull + "LundNetScoreP1";
+  m_scoreTwoDecorKey = decorFull + "LundNetScoreP2";
+  m_scoreThreeDecorKey = decorFull + "LundNetScoreP3";
+  m_scoreFourDecorKey = decorFull + "LundNetScoreP4";
+  m_scoreFiveDecorKey = decorFull + "LundNetScoreP5";
+  
   ATH_CHECK(m_validDecorKey.initialize());
+  ATH_CHECK(m_classNDecorKey.initialize());
+  ATH_CHECK(m_scoreOneDecorKey.initialize());
+  ATH_CHECK(m_scoreTwoDecorKey.initialize());
+  ATH_CHECK(m_scoreThreeDecorKey.initialize());
+  ATH_CHECK(m_scoreFourDecorKey.initialize());
+  ATH_CHECK(m_scoreFiveDecorKey.initialize());
+
   ATH_MSG_INFO("Will write decoration: " << decorFull);
+
+  /// Call base class initialize
+  ATH_CHECK( JSSTaggerBase::initialize() );
+
+  ATH_MSG_INFO( "LundNetTagger tool initialized" );
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode LundJetOnnxAlg::execute(const EventContext& ctx) const {
+StatusCode LundNetTagger::decorate( const xAOD::JetContainer& jets ) const {
 
-  SG::ReadHandle<xAOD::JetContainer> jets(m_inputJetContainer, ctx);
-  if (!jets.isValid()) {
-    ATH_MSG_ERROR("Failed to retrieve JetContainer: " << m_inputJetContainer);
-    return StatusCode::FAILURE;
-  }
-
-  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreDecor(m_scoreDecorKey, ctx);
-  SG::WriteDecorHandle<xAOD::JetContainer, char> validDecor(m_validDecorKey, ctx);
+  SG::WriteDecorHandle<xAOD::JetContainer, char> validDecor(m_validDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, int> classNDecor(m_classNDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreOneDecor(m_scoreOneDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreTwoDecor(m_scoreTwoDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreThreeDecor(m_scoreThreeDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreFourDecor(m_scoreFourDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreFiveDecor(m_scoreFiveDecorKey);
   // ONNX helpers
   Ort::AllocatorWithDefaultOptions allocator;
   auto memory_info =
     Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
-  for (const xAOD::Jet* jptr : *jets) {
+  for (const xAOD::Jet* jptr : jets) {
 
     const xAOD::Jet& jet = *jptr;
 
     validDecor(*jptr) = 0;
+    classNDecor(*jptr) = -99;
+    scoreOneDecor(*jptr) = -999.9f; // Initialize bad entry
+    scoreTwoDecor(*jptr) = -999.9f;
+    scoreThreeDecor(*jptr) = -999.9f;
+    scoreFourDecor(*jptr) = -999.9f;
+    scoreFiveDecor(*jptr) = -999.9f;
     // ---------------------------
     // Build inputs
     // ---------------------------
@@ -235,24 +267,227 @@ StatusCode LundJetOnnxAlg::execute(const EventContext& ctx) const {
     // ---------------------------
     if (output_tensors.empty() || !output_tensors.front().IsTensor()) {
       ATH_MSG_WARNING("Invalid output tensor");
-      //scoreDecor(*jptr) = -999.f;
       continue;
     }
 
     float* out_data =
       output_tensors.front().GetTensorMutableData<float>();
 
-    float score = out_data[0]; // shape [-1,1], batch=1
+    std::vector<float> score_vec(5, -999.9f); // Supports upto 5 maximum
+    for(unsigned int i = 0; i < m_classN; i++){
+      score_vec[i] = out_data[i]; // Fill the score_vec
+    }
 
-    scoreDecor(*jptr) = score;
     validDecor(*jptr) = 1;
+    classNDecor(*jptr) = m_classN;
+    scoreOneDecor(*jptr) = score_vec[0]; // Supports multi-class
+    scoreTwoDecor(*jptr) = score_vec[1];
+    scoreThreeDecor(*jptr) = score_vec[2];
+    scoreFourDecor(*jptr) = score_vec[3];
+    scoreFiveDecor(*jptr) = score_vec[4];
     
-    ATH_MSG_DEBUG("Jet decorated with LundNet score = " << score);
+    // Printout the all score_vec
+    ATH_MSG_DEBUG("Jet decorated with LundNet score_vec:");
+    ATH_MSG_DEBUG(" score_vec[0] : " << score_vec[0]);
+    ATH_MSG_DEBUG(" score_vec[1] : " << score_vec[1]);
+    ATH_MSG_DEBUG(" score_vec[2] : " << score_vec[2]);
+    ATH_MSG_DEBUG(" score_vec[3] : " << score_vec[3]);
+    ATH_MSG_DEBUG(" score_vec[4] : " << score_vec[4]);
   }
 
   return StatusCode::SUCCESS;
 }
-bool LundJetOnnxAlg::buildOnnxInputs(const xAOD::Jet& jet,
+
+/////////// AnalysisBase
+StatusCode LundNetTagger::tag( const xAOD::Jet& jet ) const {
+  /// Create asg::AcceptData object
+  asg::AcceptData acceptData( &m_acceptInfo );
+
+  /// Reset the AcceptData cut results
+  ATH_CHECK( resetCuts( acceptData ) );
+  /// Check basic kinematic selection
+  ATH_CHECK( checkKinRange( jet, acceptData ) );
+
+  SG::WriteDecorHandle<xAOD::JetContainer, char> validDecor(m_validDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, int> classNDecor(m_classNDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreOneDecor(m_scoreOneDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreTwoDecor(m_scoreTwoDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreThreeDecor(m_scoreThreeDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreFourDecor(m_scoreFourDecorKey);
+  SG::WriteDecorHandle<xAOD::JetContainer, float> scoreFiveDecor(m_scoreFiveDecorKey);
+  // ONNX helpers
+  Ort::AllocatorWithDefaultOptions allocator;
+  auto memory_info =
+    Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+
+  validDecor(jet) = 0;
+  classNDecor(jet) = -99;
+  scoreOneDecor(jet) = -999.9f; // Initialize bad entry
+  scoreTwoDecor(jet) = -999.9f;
+  scoreThreeDecor(jet) = -999.9f;
+  scoreFourDecor(jet) = -999.9f;
+  scoreFiveDecor(jet) = -999.9f;
+  // ---------------------------
+  // Build inputs
+  // ---------------------------
+  std::vector<float>   x_flat;              // [num_nodes * 3]
+  std::vector<int64_t> edge_index_flat;     // [2 * num_edges]
+  std::vector<int64_t> batch_vec;            // [num_nodes]
+  std::vector<int64_t> counts_vec;           // unused but kept
+  std::vector<float>   Ntrk_vec;             // [1]
+
+  bool ok = buildOnnxInputs(
+          jet, x_flat, edge_index_flat, batch_vec, counts_vec, Ntrk_vec
+          );
+
+  if (!ok) {
+    ATH_MSG_DEBUG("Skipping jet: couldn't build inputs");
+    return StatusCode::SUCCESS;
+  }
+
+  const int64_t num_nodes = batch_vec.size();
+
+  if (num_nodes == 0 || x_flat.size() != static_cast<size_t>(num_nodes * 3)) {
+    ATH_MSG_WARNING("Inconsistent node inputs");
+    return StatusCode::SUCCESS;
+  }
+
+  // ---------------------------
+  // Create ONNX tensors
+  // ---------------------------
+  const int64_t min_nodes = 2;
+
+  if (num_nodes < min_nodes) {
+    ATH_MSG_DEBUG("Skipping jet: num_nodes < 2");
+    return StatusCode::SUCCESS;
+  }
+  
+  const int64_t num_edges = edge_index_flat.size() / 2;
+  if (num_edges < 1) {
+    ATH_MSG_DEBUG("Skipping jet: no edges in graph");
+    return StatusCode::SUCCESS;
+  }
+  
+  // x : [num_nodes, 3]
+  std::vector<int64_t> x_shape = { num_nodes, 3 };
+  Ort::Value x_tensor =
+    Ort::Value::CreateTensor<float>(
+            memory_info,
+            x_flat.data(),
+            x_flat.size(),
+            x_shape.data(),
+            x_shape.size()
+            );
+
+  // edge_index : [2, num_edges]
+  std::vector<int64_t> ei_shape = {
+    2,
+    static_cast<int64_t>(edge_index_flat.size() / 2)
+  };
+  Ort::Value edge_tensor =
+    Ort::Value::CreateTensor<int64_t>(
+        memory_info,
+        edge_index_flat.data(),
+        edge_index_flat.size(),
+        ei_shape.data(),
+        ei_shape.size()
+        );
+
+  // batch : [num_nodes]
+  std::vector<int64_t> batch_shape = { num_nodes };
+  Ort::Value batch_tensor =
+    Ort::Value::CreateTensor<int64_t>(
+        memory_info,
+        batch_vec.data(),
+        batch_vec.size(),
+        batch_shape.data(),
+        batch_shape.size()
+        );
+
+  // Ntrk : [batch_size]
+  std::vector<int64_t> ntrk_shape = {static_cast<int64_t>(Ntrk_vec.size())};
+  Ort::Value ntrk_tensor =
+    Ort::Value::CreateTensor<float>(
+            memory_info,
+            Ntrk_vec.data(),
+            Ntrk_vec.size(),
+            ntrk_shape.data(),
+            ntrk_shape.size()
+            );
+  std::array<Ort::Value, 4> input_tensors = {
+    std::move(x_tensor),
+    std::move(edge_tensor),
+    std::move(batch_tensor),
+    std::move(ntrk_tensor)
+  };
+
+  std::array<const char*, 4> input_names = {
+    "x",
+    "edge_index",
+    "batch",
+    "Ntrk"
+  };
+
+  std::array<const char*, 1> output_names = {
+    "output"
+  };
+
+  // ---------------------------
+  // Run inference
+  // ---------------------------
+  std::vector<Ort::Value> output_tensors;
+  try {
+    output_tensors = m_session->Run(
+            Ort::RunOptions{nullptr},
+            input_names.data(),
+            input_tensors.data(),
+            input_tensors.size(),
+            output_names.data(),
+            output_names.size()
+            );
+  }
+  catch (const Ort::Exception& e) {
+    ATH_MSG_ERROR("ONNX Runtime exception: " << e.what());
+    return StatusCode::SUCCESS;
+  }
+
+  // ---------------------------
+  // Read output
+  // ---------------------------
+  if (output_tensors.empty() || !output_tensors.front().IsTensor()) {
+    ATH_MSG_WARNING("Invalid output tensor");
+    return StatusCode::SUCCESS;
+  }
+
+  float* out_data =
+    output_tensors.front().GetTensorMutableData<float>();
+
+  std::vector<float> score_vec(5, -999.9f); // Supports upto 5 maximum
+  for(unsigned int i = 0; i < m_classN; i++){
+    score_vec[i] = out_data[i]; // Fill the score_vec
+  }
+
+  validDecor(jet) = 1;
+  classNDecor(jet) = m_classN;
+  scoreOneDecor(jet) = score_vec[0]; // Supports multi-class
+  scoreTwoDecor(jet) = score_vec[1];
+  scoreThreeDecor(jet) = score_vec[2];
+  scoreFourDecor(jet) = score_vec[3];
+  scoreFiveDecor(jet) = score_vec[4];
+  
+  // Printout the all score_vec
+  ATH_MSG_DEBUG("Jet decorated with LundNet score_vec:");
+  ATH_MSG_DEBUG(" score_vec[0] : " << score_vec[0]);
+  ATH_MSG_DEBUG(" score_vec[1] : " << score_vec[1]);
+  ATH_MSG_DEBUG(" score_vec[2] : " << score_vec[2]);
+  ATH_MSG_DEBUG(" score_vec[3] : " << score_vec[3]);
+  ATH_MSG_DEBUG(" score_vec[4] : " << score_vec[4]);
+
+  return StatusCode::SUCCESS;
+
+}
+
+bool LundNetTagger::buildOnnxInputs(const xAOD::Jet& jet,
                                      std::vector<float>& out_x_float,
                                      std::vector<int64_t>& out_edge_index_int64,
                                      std::vector<int64_t>& out_batch_int64,
@@ -383,8 +618,8 @@ bool LundJetOnnxAlg::buildOnnxInputs(const xAOD::Jet& jet,
     float dr_std = (f_ln1overdR - m_mean_dr) / m_std_dr;
 
     out_x_float.push_back(dr_std);
-    out_x_float.push_back(kt_std);
     out_x_float.push_back(z_std);
+    out_x_float.push_back(kt_std);
   }
 
   // Reindex old->new for masked nodes
@@ -394,25 +629,54 @@ bool LundJetOnnxAlg::buildOnnxInputs(const xAOD::Jet& jet,
     if (mask[i]) old2new[i] = new_idx++;
   }
 
+
+  std::vector<int64_t> srcs;
+  std::vector<int64_t> dsts;
+
   // Build edges (only include edges where both endpoints survive)
   for (size_t child = 0; child < n_nodes; ++child) {
     if (!mask[child]) continue;
+    int new_child = old2new[child];
     int p1 = (child < idp1.size()) ? idp1[child] : -1;
     int p2 = (child < idp2.size()) ? idp2[child] : -1;
     if (p1 >= 0 && p1 < static_cast<int>(n_nodes) && old2new[p1] >= 0) {
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[p1]));
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[child]));
-      // optionally also add reverse if model expects undirected edges (you did both)
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[child]));
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[p1]));
+
+      int new_parent = old2new[p1];
+
+      // parent -> child
+      srcs.push_back(static_cast<int64_t>(new_parent));
+      dsts.push_back(static_cast<int64_t>(new_child));
+
+      // child -> parent  (bidirectional)
+      srcs.push_back(static_cast<int64_t>(new_child));
+      dsts.push_back(static_cast<int64_t>(new_parent));
     }
     if (p2 >= 0 && p2 < static_cast<int>(n_nodes) && old2new[p2] >= 0) {
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[p2]));
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[child]));
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[child]));
-      out_edge_index_int64.push_back(static_cast<int64_t>(old2new[p2]));
+      int new_parent = old2new[p2];
+
+      // parent -> child
+      srcs.push_back(static_cast<int64_t>(new_parent));
+      dsts.push_back(static_cast<int64_t>(new_child));
+
+      // child -> parent  (bidirectional)
+      srcs.push_back(static_cast<int64_t>(new_child));
+      dsts.push_back(static_cast<int64_t>(new_parent));
     }
   }
+
+  size_t E = srcs.size();   // number of directed edges
+  out_edge_index_int64.clear();
+  out_edge_index_int64.reserve(2 * E);
+
+  // First row: all sources
+  out_edge_index_int64.insert(out_edge_index_int64.end(),
+                        srcs.begin(),
+                        srcs.end());
+
+  // Second row: all destinations
+  out_edge_index_int64.insert(out_edge_index_int64.end(),
+                        dsts.begin(),
+                        dsts.end());
 
   // batch vector: all nodes belong to graph 0
   for (int64_t i = 0; i < new_idx; ++i) out_batch_int64.push_back(0);
@@ -440,4 +704,3 @@ bool LundJetOnnxAlg::buildOnnxInputs(const xAOD::Jet& jet,
 
   return true;
 }
-#endif //ATHENA-ONLY
