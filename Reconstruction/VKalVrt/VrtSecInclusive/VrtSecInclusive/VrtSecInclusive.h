@@ -98,7 +98,9 @@ namespace VKalVrtAthena {
     virtual StatusCode initEvent();
 
   private:
-
+    StatusCode defineDummyCollections(const EventContext& ctx);
+    StatusCode dummyVertexContainer(const EventContext& ctx,
+				    const SG::WriteHandleKey<xAOD::VertexContainer>& handleKey);
     /////////////////////////////////////////////////////////
     //
     //  Member Variables
@@ -578,6 +580,7 @@ namespace VKalVrtAthena {
     void lockLeptonDecorations( const SG::AuxVectorData* cont ) const;
     StatusCode lockTrackDecorations( bool onlySelection, const EventContext& ctx ) const;
 
+    std::unordered_map<std::string, bool> m_vertexCollectionsDefinitions;
   };
 
 } // end of namespace bracket
