@@ -66,8 +66,18 @@ bool sTgcDigitMaker::getIonizationPoint(const TimedHit& hit,
               << " position " << Amg::toString(locHitPos, 2) << " direction" << Amg::toString(locHitDir, 2) 
               << " mclink " << hit->genParticleLink() << " PDG ID " << hit->pdgId() );
   
+  Amg::Vector3D hitOnWireSurf = locHitPos;
   const double scale = Amg::intersect<3>(locHitPos, locHitDir, Amg::Vector3D::UnitZ(), 0.).value_or(0);
-  Amg::Vector3D hitOnWireSurf = locHitPos + scale * locHitDir;
+  const double halfStep = 0.5 * hit->stepLength();
+
+  // If Geant step length is smaller than the scale to wire plane, use the steplength
+  // to find the closest point to the wire plane.
+  if (std::abs(scale) <= halfStep) {
+    hitOnWireSurf = locHitPos + scale * locHitDir;
+  }
+  else {
+    hitOnWireSurf = locHitPos + Acts::copySign(halfStep, scale) * locHitDir;
+  }
 
   const Identifier hitId = hit->identify();
   const IdentifierHash wireLayHash = reEle->createHash(m_idHelper.gasGap(hitId),
@@ -80,11 +90,36 @@ bool sTgcDigitMaker::getIonizationPoint(const TimedHit& hit,
     return false;
   }
 
+  // Check to see if a valid wire exists for the hit on wire surface, if not
+  // revert back to hit position, prestep and poststep, and check if there is a 
+  // wire close to it, else, skip the hit.
   std::pair<int, int> wireGrpWireNum = wireDesign.wireNumber(hitOnWire2D);
+  
+  // Check if hit position gives valid wire group number
   if (wireGrpWireNum.first < 0) {
-    ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Unable to retrieve the wire number, skipping the hit: " 
-                 << m_idHelperSvc->toString(hitId)<<" @"<<Amg::toString(hitOnWire2D));
-    return false;  
+    const Amg::Vector2D locHitPos2D = stripLayer.to2D(locHitPos, true);
+    wireGrpWireNum = wireDesign.wireNumber(locHitPos2D);
+
+    // Check if prestep position gives valid wire group number
+    if (wireGrpWireNum.first < 0) {
+      const Amg::Vector3D preStepPos = locHitPos - halfStep * locHitDir;
+      const Amg::Vector2D preStepPos2D = stripLayer.to2D(preStepPos, true);
+      wireGrpWireNum = wireDesign.wireNumber(preStepPos2D);
+
+      // Check if poststep position gives valid wire group number
+      if (wireGrpWireNum.first < 0) {
+        const Amg::Vector3D postStepPos = locHitPos + halfStep * locHitDir;
+        const Amg::Vector2D postStepPos2D = stripLayer.to2D(postStepPos, true);
+        wireGrpWireNum = wireDesign.wireNumber(postStepPos2D);
+      
+        // else return empty digit
+        if (wireGrpWireNum.first < 0) {
+        ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Unable to retrieve the wire number, skipping the hit: " 
+                    << m_idHelperSvc->toString(hitId)<<" @"<<Amg::toString(locHitPos2D));
+        return false; 
+        }
+      }
+    }
   }
   int wireNumber = wireDesign.numPitchesToGroup(wireGrpWireNum.first) + wireGrpWireNum.second;
   const int numWires = wireDesign.nAllWires();
@@ -196,8 +231,16 @@ sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& condContainers,
   digiInput.posOnSurf = ionization.posOnWire;
   digiInput.hitDir = xAOD::toEigen(hit->localDirection());
   digiInput.reEle = m_detMgr->getsTgcReadoutElement(hitId);
-  
-  
+
+  ATH_MSG_DEBUG("Ionization_info: distance: " << ionization.distance
+    << " locHitPos: " <<Amg::toString(xAOD::toEigen(hit->localPosition()), 3)
+    << " locHitDir: " <<Amg::toString(xAOD::toEigen(hit->localDirection()), 3)
+    << " posOnTrack: " <<Amg::toString(ionization.posOnSegment, 3)
+    << " posOnWire: " << Amg::toString(ionization.posOnWire, 3)
+    << " total charge: " << calculateTotalCharge(energyDeposit, condContainers.rndEngine)
+    << " EDep: " << energyDeposit
+    <<" "<<m_idHelperSvc->toStringGasGap(hitId)); 
+
   //##################################################################################
   //######################################### strip readout ##########################
   //##################################################################################
@@ -299,8 +342,10 @@ sTgcDigitVec sTgcDigitMaker::processStripChargeSharing(const DigiInput& digiInpu
   const int gasGap = m_idHelper.gasGap(digiInput.hitId);
   const auto& design = digiInput.reEle->stripDesign(digiInput.reEle->measurementHash(digiInput.hitId));
   // Upper half of the strip cluster
-  for (int iStrip = 0; iStrip <= max_neighbor; ++iStrip) {
-    for (int sign : {-1 , 1}) {
+  for (int sign : {-1, 1}) {
+    for (int iStrip = 0; iStrip <= max_neighbor; ++iStrip) {
+
+      if (iStrip == 0 && sign == +1) continue;  // center only once
       int currentStrip = stripNumber + sign*iStrip;
       if (currentStrip > design.numStrips() || currentStrip < 1) {
         ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<" Breaking the upper half strip loop stripNumber: " 
@@ -478,6 +523,12 @@ sTgcDigitVec sTgcDigitMaker::processWireDigitization(const DigiInput& digiInput)
   const Amg::Vector2D hitOnWireSurf = digiInput.reEle->stripLayer(wireLayHash).to2D(digiInput.posOnSurf, true);
   if(!wireDesign.insideTrapezoid(hitOnWireSurf)) {
     ATH_MSG_DEBUG("Outside of the wire surface boundary :" << m_idHelperSvc->toString(digiInput.hitId)
+                 << " local position " <<Amg::toString(hitOnWireSurf, 2));
+    return {};
+  }
+
+  if (digiInput.reEle->isEtaZero(digiInput.reEle->measurementHash(digiInput.hitId), digiInput.posOnSurf.block<2,1>(0,0))) {
+    ATH_MSG_DEBUG("Hit inside wireCutout :" << m_idHelperSvc->toString(digiInput.hitId)
                  << " local position " <<Amg::toString(hitOnWireSurf, 2));
     return {};
   }
