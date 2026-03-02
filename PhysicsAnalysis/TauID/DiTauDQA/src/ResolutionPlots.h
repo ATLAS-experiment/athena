@@ -14,7 +14,7 @@ namespace DiTau{
   class ResolutionPlots: public PlotBase {
   public:
     ResolutionPlots(PlotBase *pParent, const std::string& sDir, const std::string& sDiTauJetContainerName);
-    virtual ~ResolutionPlots();
+    virtual ~ResolutionPlots() = default;
     void fill(const xAOD::DiTauJet& ditau, float weight);
     
     TH1* m_lead_subjet_ptResolution{};

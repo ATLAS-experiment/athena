@@ -15,10 +15,6 @@ GeneralTauPlots::GeneralTauPlots(PlotBase* pParent, const std::string& sDir, con
 {	
 }
 
-GeneralTauPlots::~GeneralTauPlots()
-{
-}
-
 void GeneralTauPlots::initializePlots(){
 
    m_tauCharge      = Book1D("Charge",m_sTauJetContainerName + " Tau charge; charge; # Taus",7,-3.,4.);

@@ -11,9 +11,6 @@ namespace DiTau{
   ResolutionPlots::ResolutionPlots(PlotBase *pParent, const std::string& sDir, const std::string& sDiTauJetContainerName):
     PlotBase(pParent, sDir),
     m_sDiTauJetContainerName{sDiTauJetContainerName} {}
-
-    ResolutionPlots::~ResolutionPlots() = default;  
-  
   
   void ResolutionPlots::initializePlots(){
     m_lead_subjet_ptResolution = Book1D("lead_subjet_ptResolution",m_sDiTauJetContainerName + " lead subjet ptResolution; lead subjet pt(TauReco)/pt(visTauTruth); # Part",100,0.5,1.5);

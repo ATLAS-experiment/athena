@@ -13,10 +13,6 @@ namespace DiTau{
   {
   }
 	
-  CorePlots::~CorePlots()
-  {
-  }
-
   void CorePlots::initializePlots(){
 
     pt       = Book1D("pt" , "DiTau pt; DiTau Transverse Momentum [GeV];Entries / 10 GeV",30,50.,350.);
