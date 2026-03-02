@@ -85,7 +85,7 @@ class TileBlobReaderCrest(TileCalibLogger):
         self.__remote = (("http://" in db) or ("https://" in db) or ("CREST" in db))
         if self.__remote:
             if 'http' not in self.__db:
-                self.__db = os.getenv(db,os.getenv('CREST_HOST',os.getenv('CREST_SERVER_PATH','http://crest-j23.cern.ch:8081/api-v6.0')))
+                self.__db = os.getenv(db,os.getenv('CREST_HOST',os.getenv('CREST_SERVER_PATH','https://atlas-crest-dev-mgr.cern.ch:443/api-v6.0')))
             self.log().info('Host %s' , (self.__db))
             self.__api_instance = CrestApi(host=self.__db)
             socks = os.getenv('CREST_SOCKS', 'False')
