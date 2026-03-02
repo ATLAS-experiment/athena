@@ -31,7 +31,6 @@
 #include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
-#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimOfflineTrackCollection.h"
 #include "StoreGate/WriteHandleKey.h"

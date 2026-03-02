@@ -25,7 +25,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimEventInfoCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
-#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrackCollection.h"
@@ -134,8 +133,7 @@ class FPGATrackSimSecondStageAlg : public AthAlgorithm
         SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey{this, "FPGATrackSimHitKey", "FPGAHits_2nd", "FPGATrackSim Hits key"};
         SG::ReadHandleKey<FPGATrackSimTrackCollection> m_FPGAInputTrackKey {this, "FPGATrackSimTrack1stKey", "FPGATracks_1st", "FPGATrackSim tracks 1st stage key"};
 
-        // Write out SECOND STAGE roads, hits in roads, and tracks.
-        SG::WriteHandleKey<FPGATrackSimHitContainer> m_FPGAHitInRoadsKey{this, "FPGATrackSimHitInRoads2ndKey","FPGAHitsInRoads_2nd","FPGATrackSim Hits in 1st stage roads key"};
+        // Write out SECOND STAGE roads and tracks.
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FPGARoadKey{this, "FPGATrackSimRoad2ndKey","FPGARoads_2nd","FPGATrackSim Roads 2nd stage key"};
         SG::WriteHandleKey<FPGATrackSimTrackCollection> m_FPGATrackKey{this, "FPGATrackSimTrack2ndKey","FPGATracks_2nd","FPGATrackSim Tracks 2nd stage key"};
 

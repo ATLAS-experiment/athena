@@ -31,27 +31,52 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
                   const xAOD::PixelClusterContainer & pixelContainer,
                   const xAOD::StripClusterContainer & stripContainer,
                   std::vector<ActsTrk::ProtoTrack> & foundProtoTracks,
-                  const FPGATrackSimHitContainer& hitsInRoads,
                   const std::vector<FPGATrackSimRoad>& roads) const {
 
     ATH_MSG_INFO("Creating Acts proto-tracks from FPGA roads...");
 
-    if (hitsInRoads.size() > 0) {
-      std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClusterMap;
+    if (roads.size() > 0) {
+      std::unordered_map<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClusterMap;
       for (const xAOD::PixelCluster* cluster : pixelContainer) {
         pixelClusterMap.emplace(cluster->identifier(), cluster);
       }
 
-      std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClusterMap;
+      std::unordered_map<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClusterMap;
       for (const xAOD::StripCluster* cluster : stripContainer) {
         stripClusterMap.emplace(cluster->identifier(), cluster);
       
       }
-      for(size_t roadIndex=0; roadIndex<=hitsInRoads.size()-1;roadIndex++) { 
-        std::vector<ActsTrk::ATLASUncalibSourceLink> points;  
-        ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, hitsInRoads.at(roadIndex)));
+      for (const FPGATrackSimRoad& road : roads) { 
+        std::vector<ActsTrk::ATLASUncalibSourceLink> points;
+        
+        // Process measurements directly from road's shared_ptr hits
+        for (size_t l = 0; l < road.getNLayers(); ++l) {
+          for (const auto& layerH : road.getHitPtrs(l)) {
+            if (!layerH || !layerH->isReal()) continue;
+            
+            if (layerH->isPixel()) {
+              ATH_MSG_DEBUG("Looking for Pixel cluster to match");
+              auto it = pixelClusterMap.find(layerH->getRdoIdentifier());
+              if (it != pixelClusterMap.end()) {
+                ATH_CHECK(matchTrackMeasurements<xAOD::PixelCluster>(ctx, *(it->second), *layerH, points, pixelContainer));
+              }
+            }
+            else if (layerH->isStrip()) {
+              ATH_MSG_DEBUG("Looking for Strip cluster to match");
+              auto it = stripClusterMap.find(layerH->getRdoIdentifier());
+              if (it != stripClusterMap.end()) {
+                ATH_CHECK(matchTrackMeasurements<xAOD::StripCluster>(ctx, *(it->second), *layerH, points, stripContainer));
+              }
+            }
+            else {
+              ATH_MSG_ERROR("FPGA hit not classified as pixel or strip");
+              return StatusCode::FAILURE;
+            }
+          }
+        }
+        
         if (points.size()) {
-          std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(roads.at(roadIndex));
+          std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(road);
           foundProtoTracks.emplace_back(points, std::move(inputPerigee));
           ATH_MSG_INFO("Made a prototrack with " << points.size() << " measurements");
         }
@@ -68,13 +93,13 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
                                                  const std::vector<FPGATrackSimTrack>& tracks) const {
 
   ATH_MSG_INFO("Creating Acts proto-tracks from FPGA tracks...");
-  // Initialize multimaps for pixel and strip clusters
-  std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClusterMap;
+  // Initialize unordered maps for pixel and strip clusters
+  std::unordered_map<xAOD::DetectorIdentType, const xAOD::PixelCluster*> pixelClusterMap;
   for (const xAOD::PixelCluster* cluster : pixelContainer) {
     pixelClusterMap.emplace(cluster->identifier(), cluster);
   }
 
-  std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClusterMap;
+  std::unordered_map<xAOD::DetectorIdentType, const xAOD::StripCluster*> stripClusterMap;
   for (const xAOD::StripCluster* cluster : stripContainer) {
     stripClusterMap.emplace(cluster->identifier(), cluster);
   }
@@ -82,51 +107,21 @@ StatusCode FPGAActsTrkConverter::findProtoTracks(const EventContext& ctx,
     if (not track.passedOR()) continue;
     std::vector<ActsTrk::ATLASUncalibSourceLink> points;
     const auto& hits = track.getFPGATrackSimHitPtrs();
-    auto hitCollection = std::make_unique<FPGATrackSimHitCollection>();
-    hitCollection->reserve(hits.size());
     for (const auto& hit : hits) {
-      if (!hit) {
-        ATH_MSG_ERROR("Null hit pointer in track");
-        return StatusCode::FAILURE;
-      }
-      hitCollection->push_back(new FPGATrackSimHit(*hit));
-    }
-    ATH_CHECK(findPrototrackMeasurements(ctx, pixelContainer, stripContainer, pixelClusterMap, stripClusterMap, points, *hitCollection));
-    if (points.size()) {
-      ATH_MSG_DEBUG("\tMaking a proto-track with " << points.size() << " clusters");
-      std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(track);
-      foundProtoTracks.emplace_back(points, std::move(inputPerigee));
-    }
-  }
-  return StatusCode::SUCCESS;
-}
-
-StatusCode FPGAActsTrkConverter::findPrototrackMeasurements( const EventContext& ctx,
-                                                             const xAOD::PixelClusterContainer& pixelContainer,
-                                                             const xAOD::StripClusterContainer& stripContainer,
-                                                             const std::multimap<xAOD::DetectorIdentType, const xAOD::PixelCluster*> & pixelClusterMap,
-                                                              const std::multimap<xAOD::DetectorIdentType, const xAOD::StripCluster*> & stripClusterMap,
-                                                             std::vector<ActsTrk::ATLASUncalibSourceLink>& measurements,
-                                                             const FPGATrackSimHitCollection& hits) const {
-  if (hits.empty()) {
-  ATH_MSG_ERROR("Found FPGATrack without hits");
-  return StatusCode::FAILURE;
-  }
-
-  for (const FPGATrackSimHit* h : hits) {
-    if (h->isReal()) {
-      if (h->isPixel()) {
+      if (!hit->isReal()) continue;
+      
+      if (hit->isPixel()) {
         ATH_MSG_DEBUG("Looking for Pixel cluster to match");
-        auto range = pixelClusterMap.equal_range(h->getRdoIdentifier());
-        for (auto it = range.first; it != range.second; ++it) {
-          ATH_CHECK(matchTrackMeasurements<xAOD::PixelCluster>(ctx, *(it->second), *h, measurements, pixelContainer));
+        auto it = pixelClusterMap.find(hit->getRdoIdentifier());
+        if (it != pixelClusterMap.end()) {
+          ATH_CHECK(matchTrackMeasurements<xAOD::PixelCluster>(ctx, *(it->second), *hit, points, pixelContainer));
         }
       }
-      else if (h->isStrip()) {
+      else if (hit->isStrip()) {
         ATH_MSG_DEBUG("Looking for Strip cluster to match");
-        auto range = stripClusterMap.equal_range(h->getRdoIdentifier());
-        for (auto it = range.first; it != range.second; ++it) {
-          ATH_CHECK(matchTrackMeasurements<xAOD::StripCluster>(ctx, *(it->second), *h, measurements, stripContainer));
+        auto it = stripClusterMap.find(hit->getRdoIdentifier());
+        if (it != stripClusterMap.end()) {
+          ATH_CHECK(matchTrackMeasurements<xAOD::StripCluster>(ctx, *(it->second), *hit, points, stripContainer));
         }
       }
       else {
@@ -134,8 +129,11 @@ StatusCode FPGAActsTrkConverter::findPrototrackMeasurements( const EventContext&
         return StatusCode::FAILURE;
       }
     }
-    else {
-      ATH_MSG_DEBUG("Skipping hit as non-Real");
+    
+    if (points.size()) {
+      ATH_MSG_DEBUG("\tMaking a proto-track with " << points.size() << " clusters");
+      std::unique_ptr<Acts::BoundTrackParameters> inputPerigee = makeParams(track);
+      foundProtoTracks.emplace_back(points, std::move(inputPerigee));
     }
   }
   return StatusCode::SUCCESS;
