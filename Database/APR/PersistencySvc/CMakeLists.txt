@@ -29,7 +29,7 @@ atlas_add_executable( pool_insertFileToCatalog
    LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
 
 atlas_add_executable( FCcmd
-   utilities/FCcmd.cpp utilities/CommandLine.cpp
+   utilities/FCcmd.cpp
    LINK_LIBRARIES POOLCore PersistencySvc )
 
 atlas_add_test( FCcmd
