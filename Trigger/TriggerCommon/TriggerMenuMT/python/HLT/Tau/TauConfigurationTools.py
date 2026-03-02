@@ -27,6 +27,7 @@ def getPrecisionSequenceTauIDs(flags, precision_sequence: str) -> list[str]:
 
     # Additional Tau ID algorithms to run ONLY if we're using the Dev menu
     dev_tau_ids = {
+        'MVA': ['GNTauDev1'],
     }
 
     ret = tau_ids[precision_sequence]

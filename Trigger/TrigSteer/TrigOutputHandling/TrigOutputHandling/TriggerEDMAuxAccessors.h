@@ -35,6 +35,9 @@ auto charAccessors = initAccessors<char>(
   "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
   "overflow",
   "GNTau_VeryLoose", "GNTau_Loose", "GNTau_Medium", "GNTau_Tight",
+  "GNTauDev1_Loose", "GNTauDev1_Medium", 
+  "GNTauDev1_LooseVar1", "GNTauDev1_MediumVar1", 
+  "GNTauDev1_LooseVar2", "GNTauDev1_MediumVar2", 
   "NNJvtTrkAugV1Pass"
   );
 
@@ -202,6 +205,7 @@ auto floatAccessors = initAccessors<float>(
   "ClusterEta", "ClusterPhi",
   "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
   "GNTau_Score", "GNTau_ScoreSigTrans", 
+  "GNTauDev1_Score", "GNTauDev1_ScoreSigTrans", 
   "pixQ2mod",
   "adScore",
   "E_frac_subl",
