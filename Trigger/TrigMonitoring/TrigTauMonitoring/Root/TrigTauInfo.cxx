@@ -96,9 +96,9 @@ void TrigTauInfo::parseTriggerString(bool remove_L1_phase1_thresholds)
                 }
 
                 // Get the perf-selection suffix
-                if(tau_id.starts_with("pc")) tau_id = tau_id.substr(2);
-                else if(tau_id.starts_with("pi")) tau_id = tau_id.substr(2);
-                else if(tau_id.starts_with("np")) tau_id = tau_id.substr(2);
+                if(tau_id.starts_with("perfcore")) tau_id = tau_id.substr(8);
+                else if(tau_id.starts_with("perfiso")) tau_id = tau_id.substr(7);
+                else if(tau_id.starts_with("noperf")) tau_id = tau_id.substr(6);
 
                 // Override for the old trigger names
                 if(tau_id == "RNN") {
