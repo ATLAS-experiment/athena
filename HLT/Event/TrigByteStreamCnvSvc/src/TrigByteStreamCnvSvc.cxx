@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -21,8 +21,8 @@
 #include "hltinterface/DataCollector.h"
 
 // System includes
+#include <format>
 #include <sstream>
-#include <iomanip>
 #include <chrono>
 
 // Local helper functions
@@ -40,13 +40,7 @@ namespace {
     T word;
   };
   template<typename T> std::ostream& operator<<(std::ostream& str, const printWordHex<T>& pw) {
-    str << "0x" << std::hex << std::setfill('0') << std::setw(2*sizeof(T));
-    // Prevent printing char as ASCII character
-    if (sizeof(T)==1)
-      str << static_cast<int>(pw.word);
-    else
-      str << pw.word;
-    str << std::dec;
+    str << std::format("0x{:0{}x}", pw.word, 2*sizeof(T));
     return str;
   }
   template<typename T> struct printNWordsHex {
