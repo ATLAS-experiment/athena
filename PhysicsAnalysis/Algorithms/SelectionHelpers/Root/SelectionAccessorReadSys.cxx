@@ -116,7 +116,7 @@ namespace CP
       ANA_CHECK (makeSelectionReadAccessor (decorName + suffix, accessor));
       m_dataCache.emplace (sys, std::make_tuple (decorName, std::move (accessor)));
     }
-    ANA_CHECK (objectHandle.addDecorationDependency (std::get<0>(m_dataCache.at({})), false));
+    ANA_CHECK (objectHandle.addDecorationDependency (svc, baseName, false));
     return StatusCode::SUCCESS;
   }
 }

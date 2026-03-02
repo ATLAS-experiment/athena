@@ -25,6 +25,8 @@ namespace CP
     : SysWriteHandle (propertyValue, owner)
   {
     owner->declareProperty (propertyName, m_outputName, propertyDescription);
+    owner->declareProperty (propertyName + "Type", m_outputType,
+                            "an explicit type name for output dependencies");
   }
 
 
@@ -34,9 +36,8 @@ namespace CP
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
   {
 #ifndef XAOD_STANDALONE
-    m_addDependency = [owner] (const std::string& name,const std::string& decoName,bool decoWrite) -> StatusCode
-    {
-      return detail::addDependency<T,true>(*owner, name, decoName, decoWrite);
+    m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      owner->addDependency(id, mode);
     };
 #endif
   }
@@ -167,15 +168,7 @@ namespace CP
     }
     ANA_CHECK (svc.setObjectSystematics (m_outputName, fullAffecting));
 
-    if (m_addDependency)
-    {
-      /// I'm only adding a dependency for nominal here, as there are
-      /// currently no use cases in which a downstream user would only
-      /// read a systematic, but not the nominal. The concern is that we
-      /// might add dozens (or in extreme cases hundreds) of
-      /// dependencies, without those adding providing any value.
-      ANA_CHECK (m_addDependency(getName (CP::SystematicSet{}), "", false));
-    }
+    ANA_CHECK (addDecorationDependency(svc, "", false));
 
     return StatusCode::SUCCESS;
   }
@@ -184,11 +177,17 @@ namespace CP
 
   template<typename T,typename Aux>
   StatusCode SysWriteHandle<T,Aux> ::
-  addDecorationDependency (const std::string& decoName, bool decoWrite)
+  addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite)
   {
-    if (m_addDependency)
-      return m_addDependency (getName (CP::SystematicSet{}), decoName, decoWrite);
-    else
-      return StatusCode::SUCCESS;
+#ifdef XAOD_STANDALONE
+    (void) svc;
+    (void) decoName;
+    (void) decoWrite;
+    return StatusCode::SUCCESS;
+#else
+    const CLID clid = detail::getClidForDependency<T>(m_outputType, decoName, decoWrite);
+    ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clid, m_outputName, Gaudi::DataHandle::Writer, decoName, decoWrite));
+    return StatusCode::SUCCESS;
+#endif
   }
 }

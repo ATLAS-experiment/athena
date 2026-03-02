@@ -13,6 +13,7 @@
 
 #include <PATInterfaces/SystematicSet.h>
 #include <SystematicsHandles/ISysHandleBase.h>
+#include <SystematicsHandles/ISystematicsSvc.h>
 
 //
 // method implementations
@@ -59,14 +60,15 @@ namespace CP
 
 
   StatusCode SelectionWriteAccessorBits ::
-  fillSystematics (const ISystematicsSvc& /*svc*/,
-                   const CP::SystematicSet& /*fullAffecting*/,
+  fillSystematics (const ISystematicsSvc& svc,
+                   const CP::SystematicSet& fullAffecting,
                    const std::vector<CP::SystematicSet>& /*sysList*/,
                    ISysObjectHandleBase& objectHandle)
   {
     using namespace msgSelectionHelpers;
 
-    ANA_CHECK (objectHandle.addDecorationDependency (m_label, true));
+    ANA_CHECK (svc.setDecorSystematics (objectHandle.getNamePattern(), m_label, fullAffecting));
+    ANA_CHECK (objectHandle.addDecorationDependency (svc, m_label, true));
     return StatusCode::SUCCESS;
   }
 }

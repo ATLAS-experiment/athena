@@ -74,13 +74,13 @@ namespace CP
 
 
   StatusCode SelectionReadAccessorChar ::
-  fillSystematics (const ISystematicsSvc& /*svc*/,
+  fillSystematics (const ISystematicsSvc& svc,
                    const std::vector<CP::SystematicSet>& /*sysList*/,
                    ISysObjectHandleBase& objectHandle)
   {
     using namespace msgSelectionHelpers;
 
-    ANA_CHECK (objectHandle.addDecorationDependency (m_label, false));
+    ANA_CHECK (objectHandle.addDecorationDependency (svc, m_label, false));
     return StatusCode::SUCCESS;
   }
 }

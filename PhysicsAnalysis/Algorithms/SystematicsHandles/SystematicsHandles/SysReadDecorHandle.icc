@@ -121,7 +121,7 @@ namespace CP
       ANA_MSG_DEBUG ("SysReadDecorHandle: " << decorName << " (" << sys.name() << ")");
       m_dataCache.emplace (sys, std::make_tuple (decorName, decorName));
     }
-    ANA_CHECK (m_objectHandle->addDecorationDependency (std::get<0>(m_dataCache.at({})), false));
+    ANA_CHECK (m_objectHandle->addDecorationDependency (svc, m_decorName, false));
     return StatusCode::SUCCESS;
   }
 

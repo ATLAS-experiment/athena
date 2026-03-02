@@ -135,7 +135,7 @@ namespace CP
                      const CP::SystematicSet& fullAffecting,
                      const std::vector<CP::SystematicSet>& sysList) override;
     virtual StatusCode
-    addDecorationDependency (const std::string& decoName, bool decoWrite) override;
+    addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite) override;
 
 
 
@@ -150,6 +150,13 @@ namespace CP
     /// \brief the (optional) name of the copy we create
   private:
     std::string m_outputName;
+
+    /// \brief the (optional) type of the container
+    ///
+    /// This is needed to declare outputs in AthenaMT with the correct
+    /// type.
+  private:
+    std::string m_typeName;
 
     /// \brief the cache of names we use
   private:
@@ -175,15 +182,14 @@ namespace CP
   private:
     std::function<StoreType*()> m_evtStoreGetter;
 
-    /// \brief a function to add a data dependency to the parent
+#ifndef XAOD_STANDALONE
+    /// \brief a function to add a data dependency to the parent algorithm
     ///
-    /// This is used in AthenaMT to add a data dependency to the
-    /// algorithm we belong to. This is used instead of a pointer to the
-    /// parent directly because this handle can be held by different
-    /// (and unrelated) algorithm classes, and potentially in the future
-    /// also by tools.
+    /// This wraps the owner's addDependency call and is used by
+    /// addDecorationDependency to register MT dependencies.
   private:
-    std::function<StatusCode(const std::string&,const std::string&,const std::string&,bool)> m_addDependency;
+    std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> m_addAlgDependency;
+#endif
   };
 }
 

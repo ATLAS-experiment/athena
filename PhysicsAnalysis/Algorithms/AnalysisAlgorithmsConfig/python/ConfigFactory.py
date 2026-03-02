@@ -276,6 +276,22 @@ class ConfigFactory():
         self.addAlgConfigBlock(algName="Uncertainties", alg=JetUncertaintiesConfig,
             superBlocks="Jets")
 
+        # muons
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
+        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
+        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
+            superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
+        self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
+                               superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
+        self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
+                               superBlocks="Muons")
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
+        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
+                               superBlocks="Muons")
+
         # electrons
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig
         self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
@@ -298,22 +314,6 @@ class ConfigFactory():
         from EgammaAnalysisAlgorithms.PhotonExtraVariablesConfig import PhotonExtraVariablesBlock
         self.addAlgConfigBlock(algName="ExtraVariables", alg=PhotonExtraVariablesBlock,
             superBlocks="Photons")
-
-        # muons
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
-        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
-        self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
-            superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonTriggerAnalysisSFBlock
-        self.addAlgConfigBlock(algName="TriggerSF", alg=MuonTriggerAnalysisSFBlock,
-                               superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonLRTMergedConfig
-        self.addAlgConfigBlock(algName="LRTMerging", alg=MuonLRTMergedConfig,
-                               superBlocks="Muons")
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonContainerMergingConfig
-        self.addAlgConfigBlock(algName="ContainerMerging", alg=MuonContainerMergingConfig,
-                               superBlocks="Muons")
 
         # tauJets
         from TauAnalysisAlgorithms.TauAnalysisConfig import TauCalibrationConfig

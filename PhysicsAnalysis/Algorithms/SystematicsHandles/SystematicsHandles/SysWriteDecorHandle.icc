@@ -129,7 +129,7 @@ namespace CP
       m_dataCache.emplace (sys, std::make_tuple (newName, newName));
     }
     ANA_CHECK (svc.setDecorSystematics (m_objectHandle->getNamePattern(), m_decorName, fullAffecting));
-    ANA_CHECK (m_objectHandle->addDecorationDependency (std::get<0>(m_dataCache.at({})), true));
+    ANA_CHECK (m_objectHandle->addDecorationDependency (svc, m_decorName, true));
     return StatusCode::SUCCESS;
   }
 

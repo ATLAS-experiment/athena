@@ -62,8 +62,7 @@ namespace CP
     virtual std::string getNamePattern () const = 0;
 
     /// @brief add dependency information for the given decoration
-    virtual StatusCode
-    addDecorationDependency (const std::string& decoName, bool decoWrite) = 0;
+    virtual StatusCode addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite) = 0;
   };
 }
 

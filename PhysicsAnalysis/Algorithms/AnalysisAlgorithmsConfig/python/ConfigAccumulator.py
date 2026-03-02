@@ -96,14 +96,18 @@ class ContainerConfig :
         self.outputs = {}
         self.meta = {}
 
-    def currentName (self) :
+    def currentName (self, *, nominal=False) :
         if self.index == 0 :
             if self.sourceName is None :
                 raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
-            return self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
-        return self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
+            result = self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
+        else :
+            result = self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
+        if nominal :
+             result = result.replace("%SYS%", "NOSYS")
+        return result
 
     @staticmethod
     def systematicsName (name, *, noSysSuffix) :
@@ -447,6 +451,15 @@ class ConfigAccumulator :
         if self._pass == 0 :
             DualUseConfig.addPrivateTool (self._currentAlg, propertyName, toolType)
 
+    def setExtraInputs (self, inputs) :
+        """set extra input dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraInputs = inputs
+
+    def setExtraOutputs (self, outputs) :
+        """set extra output dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraOutputs = outputs
 
     def setSourceName (self, containerName, sourceName,
                        *, originalName = None, isMet = False) :
@@ -482,7 +495,7 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName()
 
 
-    def readName (self, containerName) :
+    def readName (self, containerName, *, nominal=False) :
         """get the name of the "current copy" of the given container
 
         As extra copies get created during processing this will track
@@ -491,7 +504,7 @@ class ConfigAccumulator :
         """
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
-        return self._containerConfig[containerName].currentName()
+        return self._containerConfig[containerName].currentName(nominal=nominal)
 
 
     def copyName (self, containerName) :
