@@ -85,6 +85,7 @@ class MuonCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'MuonShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::MuonContainer'
 
         # Set up the eta-cut on all muons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
@@ -350,6 +351,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
                                    'MuonEfficiencyScaleFactorAlgReco' )
             config.addPrivateTool( 'efficiencyScaleFactorTool',
                             'CP::MuonEfficiencyScaleFactors' )
+            config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
             alg.scaleFactorDecoration = 'muon_reco_effSF' + postfix + "_%SYS%"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'muon_reco_bad_eff' + postfix

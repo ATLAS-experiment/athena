@@ -71,7 +71,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self.printFlags()
 
         self.initServiceCfg()
-        if self.args.pool_file_reading:
+        if self.args.pool_file_reading or self.args.test_mt_dependencies is not None:
             from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
             self.cfg.merge(PoolReadCfg(self.flags))
         else:

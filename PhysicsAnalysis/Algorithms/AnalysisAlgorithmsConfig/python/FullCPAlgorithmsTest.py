@@ -165,6 +165,26 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
         configSeq.setOptionValue ('.recalibratePhyslite', False)
 
 
+    # set up the muon analysis algorithm sequence:
+    configSeq += config.makeConfig ('Muons')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.decorateTruth', True)
+    configSeq.setOptionValue ('.writeTrackD0Z0', True)
+    configSeq.setOptionValue ('.recalibratePhyslite', False)
+
+    configSeq += config.makeConfig ('Muons.WorkingPoint')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionName', 'medium')
+    configSeq.setOptionValue ('.quality', 'Medium')
+    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
+
+    configSeq += config.makeConfig ('Muons.IFFClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq += config.makeConfig ('Muons.MCTCClassification')
+    configSeq.setOptionValue ('.containerName', 'AnaMuons')
+    configSeq.setOptionValue ('.prefix', 'truth_')
+
+
     # Include, and then set up the electron analysis algorithm sequence:
     likelihood = True
     configSeq += config.makeConfig ('Electrons')
@@ -222,26 +242,6 @@ def makeTestSequenceBlocks (dataType, algSeq, isPhyslite,
     configSeq += config.makeConfig ('Photons.PtEtaSelection')
     configSeq.setOptionValue ('.containerName', 'AnaPhotons')
     configSeq.setOptionValue ('.minPt', photonMinPt)
-
-
-    # set up the muon analysis algorithm sequence:
-    configSeq += config.makeConfig ('Muons')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.decorateTruth', True)
-    configSeq.setOptionValue ('.writeTrackD0Z0', True)
-    configSeq.setOptionValue ('.recalibratePhyslite', False)
-
-    configSeq += config.makeConfig ('Muons.WorkingPoint')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.selectionName', 'medium')
-    configSeq.setOptionValue ('.quality', 'Medium')
-    configSeq.setOptionValue ('.isolation', 'Loose_VarRad')
-
-    configSeq += config.makeConfig ('Muons.IFFClassification')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq += config.makeConfig ('Muons.MCTCClassification')
-    configSeq.setOptionValue ('.containerName', 'AnaMuons')
-    configSeq.setOptionValue ('.prefix', 'truth_')
 
 
     # TODO: MCP should restore this when the recommendations for Tight WP exist in R23

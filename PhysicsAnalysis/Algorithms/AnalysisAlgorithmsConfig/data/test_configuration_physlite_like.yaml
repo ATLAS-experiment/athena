@@ -1,0 +1,136 @@
+# This is a test configuration that tests our ability to run a sequence
+# of blocks comparable to what is used in PHYSLITE production.
+
+CommonServices:
+  enableExpertMode: True
+  runSystematics: False
+  # this is disabled in PHYSLITE, but not sure we want to disable it here
+  #fixDAODTruthRecord: False
+
+PileupReweighting: {}
+
+EventCleaning:
+ #runEventCleaning: True
+ noFilter: True
+
+Muons:
+  - containerName: AnaMuons
+    recalibratePhyslite: False
+    WorkingPoint:
+      - selectionName: loose
+        trackSelection: False
+        quality: Loose
+        isolation: NonIso
+
+Electrons:
+  - containerName: AnaElectrons
+    isolationCorrection: True
+    minPt: 0.
+    # This is set to True in PHYSLITE, but doesn't work for me
+    #decorateSamplingPattern: True
+    decorateEmva: True
+    WorkingPoint:
+      - selectionName: looseLH
+        trackSelection: False
+        identificationWP: LooseLH
+        addSelectionToPreselection: False
+        isolationWP: NonIso
+        doFSRSelection: True
+        muonsForFSRSelection: AnaMuons
+        noEffSF: True
+      - selectionName: looseDNN
+        trackSelection: False
+        identificationWP: LooseDNN
+        addSelectionToPreselection: False
+        isolationWP: NonIso
+        doFSRSelection: True
+        muonsForFSRSelection: AnaMuons
+        noEffSF: True
+  - containerName: AnaSiHitElectrons
+    isolationCorrection: True
+    minPt: 0.
+    postfix: SiHit
+    decorateEmva: True
+    WorkingPoint:
+      - selectionName: SiHits
+        trackSelection: False
+        identificationWP: SiHitElectron
+        isolationWP: NonIso
+        doFSRSelection: True
+        muonsForFSRSelection: AnaMuons
+        mainElectronContainer: AnaElectrons
+        noEffSF: True
+        postfix: SiHit
+
+Photons:
+  - containerName: AnaPhotons
+    recomputeIsEM: False
+    minPt: 0.
+    decorateEmva: True
+    WorkingPoint:
+      - selectionName: loose
+        qualityWP: Loose
+        isolationWP: NonIso
+        doFSRSelection: True
+        muonsForFSRSelection: AnaMuons
+        recomputeIsEM: False
+        noEffSFForID: True
+        noEffSFForIso: True
+
+TauJets:
+  - containerName: AnaTauJets
+    # this is not in PHYSLITE, but it doesn't work for me without it
+    rerunTruthMatching: False
+    WorkingPoint:
+      - selectionName: baseline
+        quality: Baseline
+
+Jets:
+  - containerName: AnaJets
+    jetCollection: AntiKt4EMPFlowJets
+    runFJvtSelection: False
+    runJvtSelection: False
+    Uncertainties: {}
+  - containerName: AnaLargeRJets
+    jetCollection: AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets
+    runGhostMuonAssociation: False
+    minPt: 0.
+    maxPt: 0.
+    maxRapidity: 0.
+    minMass: 0.
+    maxMass: 0.
+
+Thinning:
+  - containerName: AnaMuons
+    selectionName: loose
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaElectrons
+    selectionName: looseLH||looseDNN
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaSiHitElectrons
+    selectionName: SiHits
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaPhotons
+    selectionName: loose
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaTauJets
+    selectionName: baseline
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaJets
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True
+  - containerName: AnaLargeRJets
+    deepCopy: True
+    sortPt: True
+    noUniformSelection: True

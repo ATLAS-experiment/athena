@@ -103,6 +103,7 @@ class TauCalibrationConfig (ConfigBlock):
         alg.smearingTool.Campaign = "mc23" if config.geometry() is LHCPeriod.Run3 else "mc20"
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
+        config.setExtraOutputs ({('xAOD::IParticleContainer' , 'StoreGateSvc+' + config.readName(self.containerName, nominal=True) + '.RNNEleScoreSigTrans_v1')})
         alg.preselection = config.getPreselection (self.containerName, '')
 
         # Additional decorations
@@ -230,6 +231,7 @@ class TauWorkingPointSelectionConfig (ConfigBlock) :
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
+        alg.selectionTool.TauContainerName = config.readName (self.containerName, nominal=True)
         if self.useSelectionConfigFile:
             inputfile = nameFormat.format(self.quality.lower())
             alg.selectionTool.ConfigPath = inputfile

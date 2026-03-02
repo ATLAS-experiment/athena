@@ -150,6 +150,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::ElectronContainer'
 
         # Set up the eta-cut on all electrons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' )
@@ -166,6 +167,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         # Select electrons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronObjectQualityAlg' )
+        config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
         alg.selectionDecoration = 'goodOQ' + self.postfix + ',as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSELECTRON
@@ -235,6 +237,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.isolationCorrectionTool.CorrFile = "IsolationCorrections/v6/isolation_ptcorrections_rel22_mc20.root"
             alg.egammas = config.readName (self.containerName)
             alg.egammasOut = config.copyName (self.containerName)
+            alg.egammasType = 'xAOD::ElectronContainer'
             alg.preselection = config.getPreselection (self.containerName, '')
         else:
             log.warning("You are not applying the isolation corrections")
@@ -329,6 +332,14 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             info="whether to accept additional electrons close to muons for "
             "the purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE.",
+            expertMode=True)
+        self.addOption ('muonsForFSRSelection', None, type=str,
+            info="the name of the muon container to use for the FSR selection. "
+            "If not specified, AnalysisMuons is used.",
+            expertMode=True)
+        self.addOption ('mainElectronContainer', None, type=str,
+            info="the name of the main electron container to use for the SiHit selection. "
+            "If not specified, this defaults to AnalysisElectrons.",
             expertMode=True)
 
     def instanceName (self) :
@@ -454,6 +465,10 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             selDec = 'siHitEvtHasLeptonPair' + selectionPostfix + ',as_char'
             algDec.selectionName     = selDec.split(",")[0]
             algDec.ElectronContainer = config.readName (self.containerName)
+            if self.muonsForFSRSelection is not None:
+                algDec.AnalMuonContKey = config.readName (self.muonsForFSRSelection)
+            if self.mainElectronContainer is not None:
+                algDec.AnalElectronContKey = config.readName (self.mainElectronContainer)
             # Set flag to only collect SiHit electrons for events with an electron or muon pair to minimize size increase from SiHit electrons
             algDec.RequireTwoLeptons = True
             config.addSelection (self.containerName, self.selectionName, selDec,
@@ -509,6 +524,8 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
+            if self.muonsForFSRSelection is not None:
+                alg.MuonContKey = config.readName (self.muonsForFSRSelection)
             # For SiHit electrons, set flag to remove FSR electrons.
             # For standard electrons, FSR electrons need to be added as they may be missed by the standard selection.
             # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.

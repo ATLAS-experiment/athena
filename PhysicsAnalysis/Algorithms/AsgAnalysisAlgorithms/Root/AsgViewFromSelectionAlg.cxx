@@ -197,6 +197,19 @@ namespace CP
       m_accessors.push_back (std::make_pair (std::move (accessor), ignore));
     }
 
+#ifndef XAOD_STANDALONE
+    const CLID clidRead = detail::getClidForDependency<xAOD::IParticleContainer>("", "deco", false);
+    const CLID clidWrite = detail::getClidForDependency<xAOD::IParticleContainer>("", "deco", true);
+    std::function<void(const DataObjID&, Gaudi::DataHandle::Mode)> addAlgDependency = [this] (const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      this->addDependency(id, mode);
+    };
+    for (const auto& decoName : m_systematicsList.service().getObjectDecorations(m_inputHandle.getNamePattern()))
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), m_systematicsList.service(), addAlgDependency, clidRead, m_inputHandle.getNamePattern(), Gaudi::DataHandle::Reader, decoName, false));
+      ANA_CHECK (detail::addSysDependency(msg(), m_systematicsList.service(), addAlgDependency, clidWrite, m_outputHandle.getNamePattern(), Gaudi::DataHandle::Writer, decoName, true));
+    }
+#endif
+
     return StatusCode::SUCCESS;
   }
 

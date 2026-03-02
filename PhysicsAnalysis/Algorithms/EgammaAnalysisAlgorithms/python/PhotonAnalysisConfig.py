@@ -147,6 +147,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'PhotonShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::PhotonContainer'
 
         # Set up the eta-cut on all photons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' )
@@ -179,6 +180,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
         # Select photons only with good object quality.
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonObjectQualityAlg' )
+        config.setExtraInputs ({('xAOD::EventInfo', 'EventInfo.RandomRunNumber')})
         alg.selectionDecoration = 'goodOQ,as_bits'
         config.addPrivateTool( 'selectionTool', 'CP::EgammaIsGoodOQSelectionTool' )
         alg.selectionTool.Mask = xAOD.EgammaParameters.BADCLUSPHOTON
@@ -327,6 +329,10 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             "purpose of FSR corrections to these muons. Expert feature "
             "requested by the H4l analysis running on PHYSLITE.",
             expertMode=True)
+        self.addOption ('muonsForFSRSelection', None, type=str,
+            info="the name of the muon container to use for the FSR selection. "
+            "If not specified, AnalysisMuons is used.",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -393,6 +399,8 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg')
             alg.selectionDecoration = wpFlag
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
+            if self.muonsForFSRSelection is not None:
+                alg.MuonContKey = config.readName (self.muonsForFSRSelection)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :

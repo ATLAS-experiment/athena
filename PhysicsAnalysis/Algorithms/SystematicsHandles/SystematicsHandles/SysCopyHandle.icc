@@ -27,6 +27,8 @@ namespace CP
   {
     owner->declareProperty (propertyName, m_inputName, propertyDescription);
     owner->declareProperty (propertyName + "Out", m_outputName, "the (optional) name of the copy we create of " + propertyName);
+    owner->declareProperty (propertyName + "Type", m_typeName,
+                            "an explicit type name for output dependencies");
   }
 
   template<typename T> template<typename T2> SysCopyHandle<T> ::
@@ -35,35 +37,8 @@ namespace CP
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
   {
 #ifndef XAOD_STANDALONE
-    m_addDependency = [owner] (const std::string& inName, const std::string& outName,const std::string& decoName,bool decoWrite) -> StatusCode
-    {
-      // if no output name is given, we act like an update or read handle on the input name
-      if (outName.empty())
-      {
-        if constexpr (std::is_const_v<T>)
-          return detail::addDependency<std::remove_const_t<T>,0>(*owner, inName, decoName, decoWrite);
-        else 
-          return detail::addDependency<std::remove_const_t<T>,2>(*owner, inName, decoName, decoWrite);
-      }
-
-      // otherwise we read the input name and write the output name
-
-      // if this is for adding a decoration, we only declare it for the
-      // output
-      if (decoName.empty() || decoWrite == false)
-      {
-        if (detail::addDependency<std::remove_const_t<T>,0>(*owner, inName, decoName, decoWrite).isFailure())
-          return StatusCode::FAILURE;
-      }
-
-      // if this is for reading a decoration, we only declare it for the
-      // input
-      if (decoName.empty() || decoWrite == true)
-      {
-        if (detail::addDependency<std::remove_const_t<T>,1>(*owner, outName, decoName, decoWrite).isFailure())
-          return StatusCode::FAILURE;
-      }
-      return StatusCode::SUCCESS;
+    m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      owner->addDependency(id, mode);
     };
 #endif
   }
@@ -200,16 +175,19 @@ namespace CP
     if (!m_evtStore)
       m_evtStore = m_evtStoreGetter();
 
-    if (m_addDependency)
+#ifndef XAOD_STANDALONE
+    ANA_CHECK (addDecorationDependency(svc, "", false));
+    if (!m_outputName.empty())
     {
-      /// I'm only adding a dependency for nominal here, as there are
-      /// currently no use cases in which a downstream user would only
-      /// read a systematic, but not the nominal. The concern is that we
-      /// might add dozens (or in extreme cases hundreds) of
-      /// dependencies, without those adding providing any value.
-      const auto& cache = m_nameCache.at (CP::SystematicSet{});
-      ANA_CHECK (m_addDependency (std::get<0>(cache), std::get<1>(cache), "", false));
+      const CLID clidRead = detail::getClidForDependency<std::remove_const_t<T>>("", "deco", false);
+      const CLID clidWrite = detail::getClidForDependency<std::remove_const_t<T>>(m_typeName, "deco", true);
+      for (const auto& decoName : svc.getObjectDecorations(m_inputName))
+      {
+        ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, false));
+        ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidWrite, m_outputName, Gaudi::DataHandle::Writer, decoName, true));
+      }
     }
+#endif
 
     return StatusCode::SUCCESS;
   }
@@ -217,13 +195,44 @@ namespace CP
 
 
   template<typename T> StatusCode SysCopyHandle<T> ::
-  addDecorationDependency (const std::string& decoName, bool decoWrite)
+  addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite)
   {
-    if (m_addDependency)
+#ifdef XAOD_STANDALONE
+    (void) svc;
+    (void) decoName;
+    (void) decoWrite;
+    return StatusCode::SUCCESS;
+#else
+    const CLID clidRead = detail::getClidForDependency<std::remove_const_t<T>>("", decoName, decoWrite);
+    const CLID clidWrite = detail::getClidForDependency<std::remove_const_t<T>>(m_typeName, decoName, decoWrite);
+
+    // if no output name is given, we act like an update or read handle on the input name
+    if (m_outputName.empty())
     {
-      const auto& cache = m_nameCache.at (CP::SystematicSet{});
-      return m_addDependency (std::get<0>(cache), std::get<1>(cache), decoName, decoWrite);
-    } else
+      if (!std::is_const_v<T>)
+        ANA_MSG_INFO ("SysCopyHandle acting as update handle for " << m_inputName << " this likely won't work in AthenaMT");
+
+      // Both const (read) and non-const (update) use Reader mode for dependencies
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
       return StatusCode::SUCCESS;
+    }
+
+    // otherwise we read the input name and write the output name
+
+    // if this is for reading a decoration, we only declare it for the
+    // input
+    if (decoName.empty() || decoWrite == false)
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
+    }
+
+    // if this is for adding a decoration, we only declare it for the
+    // output
+    if (decoName.empty() || decoWrite == true)
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidWrite, m_outputName, Gaudi::DataHandle::Writer, decoName, decoWrite));
+    }
+    return StatusCode::SUCCESS;
+#endif
   }
 }

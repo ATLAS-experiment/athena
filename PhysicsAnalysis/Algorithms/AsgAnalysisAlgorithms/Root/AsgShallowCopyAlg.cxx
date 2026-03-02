@@ -8,6 +8,7 @@
 #include <AsgAnalysisAlgorithms/AsgShallowCopyAlg.h>
 
 #include <SystematicsHandles/CopyHelpers.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
 #include <xAODCore/AuxContainerBase.h>
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODEgamma/PhotonContainer.h>
@@ -91,6 +92,11 @@ namespace CP
     {
       m_function =
         &AsgShallowCopyAlg::executeTemplate<xAOD::MissingETContainer>;
+    }
+    else if (evtStore()->contains<xAOD::CaloClusterContainer>(m_inputHandle.getName(sys)))
+    {
+      m_function =
+        &AsgShallowCopyAlg::executeTemplate<xAOD::CaloClusterContainer>;
     }
     else
     {
