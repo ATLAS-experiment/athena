@@ -230,19 +230,21 @@ namespace VKalVrtAthena {
     // Instantiate and initialize our event info decorator write
     m_vertexingStatusKey = "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString + "_status";
     ATH_CHECK( m_vertexingStatusKey.initialize() );
-
+    
     m_vertexKey = "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString;
     m_twoTrksVertexKey = "VrtSecInclusive_" + m_all2trksVerticesContainerName + m_augVerString;
     ATH_CHECK( m_vertexKey.initialize() );
     ATH_CHECK( m_twoTrksVertexKey.initialize(m_FillIntermediateVertices) );
-
-
+    m_vertexCollectionsDefinitions[m_vertexKey.key()] = false;
+    if (m_FillIntermediateVertices) m_vertexCollectionsDefinitions[m_twoTrksVertexKey.key()] = false;
+    
     if ( m_FillIntermediateVertices ) {
       for( auto itr = m_vertexingAlgorithms.begin(); itr!=m_vertexingAlgorithms.end(); ++itr ) {
 	const std::string& nameAlgo = itr->first;
 	std::string fullName = "VrtSecInclusive_IntermediateVertices_" + nameAlgo + m_augVerString;
 	m_intermediateVertexKey[nameAlgo] = SG::WriteHandleKey<xAOD::VertexContainer>( this, nameAlgo, fullName );
 	ATH_CHECK( m_intermediateVertexKey[nameAlgo].initialize() );
+	m_vertexCollectionsDefinitions[m_intermediateVertexKey[nameAlgo].key()] = false;
       }
     }
 
@@ -257,6 +259,37 @@ namespace VKalVrtAthena {
     return StatusCode::SUCCESS;
   }
 
+
+  StatusCode VrtSecInclusive::dummyVertexContainer(const EventContext& ctx,
+						   const SG::WriteHandleKey<xAOD::VertexContainer>& handleKey)
+  {
+    SG::WriteHandle<xAOD::VertexContainer> vHandle = SG::makeHandle( handleKey, ctx );
+    ATH_CHECK( vHandle.record( std::make_unique<xAOD::VertexContainer>(),
+			       std::make_unique<xAOD::VertexAuxContainer>() ) );
+    m_vertexCollectionsDefinitions.at(handleKey.key()) = true;
+    return StatusCode::SUCCESS;
+  }
+  
+  StatusCode VrtSecInclusive::defineDummyCollections(const EventContext& ctx)
+  {
+    if ( not m_vertexCollectionsDefinitions.at(m_vertexKey.key()) ) {
+      ATH_CHECK( dummyVertexContainer(ctx, m_vertexKey) );
+    }
+
+    if (m_FillIntermediateVertices) {
+      if (not m_vertexCollectionsDefinitions.at( m_twoTrksVertexKey.key() )) {
+	ATH_CHECK( dummyVertexContainer(ctx, m_twoTrksVertexKey) );
+      }
+
+      for (const auto& [nameAlgo, handleKey] : m_intermediateVertexKey) {
+	if (not m_vertexCollectionsDefinitions.at( handleKey.key() )) {
+	  ATH_CHECK( dummyVertexContainer(ctx, handleKey) );
+	}
+      }
+    }
+    
+    return StatusCode::SUCCESS;
+  }
 
 
   //__________________________________________________________________________
@@ -285,6 +318,11 @@ namespace VKalVrtAthena {
     //
     ATH_MSG_DEBUG("VrtSecInclusive execute()");
 
+    // Reset values
+    for (auto& [key, val] : m_vertexCollectionsDefinitions) {
+      val = false;
+    }
+    
     m_vertexingStatus = -1;
 
     SG::ReadHandle<xAOD::EventInfo> eventInfo = SG::makeHandle(m_eventInfoKey, ctx);
@@ -300,6 +338,7 @@ namespace VKalVrtAthena {
     if(sc.isFailure()) {
       ATH_MSG_WARNING("Problem in initEvent ");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -309,6 +348,7 @@ namespace VKalVrtAthena {
     if (sc.isFailure() ) {
       ATH_MSG_WARNING("Failure in getEventInfo() ");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -354,6 +394,7 @@ namespace VKalVrtAthena {
 
       ATH_MSG_WARNING("processPrimaryVertices() failed");
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -375,6 +416,7 @@ namespace VKalVrtAthena {
       m_vertexingStatus = 1;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       ATH_CHECK( lockTrackDecorations( true, ctx ) );
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -383,6 +425,7 @@ namespace VKalVrtAthena {
       m_vertexingStatus = 2;
       vertexingStatusDecor(*eventInfo) = m_vertexingStatus;
       ATH_CHECK( lockTrackDecorations( true, ctx ) );
+      ATH_CHECK(defineDummyCollections(ctx));
       return StatusCode::SUCCESS;
     }
 
@@ -440,6 +483,7 @@ namespace VKalVrtAthena {
 
     ATH_MSG_VERBOSE( "execute: process done." );
     // end
+    ATH_CHECK(defineDummyCollections(ctx));
     return StatusCode::SUCCESS;
 
   }

@@ -51,6 +51,7 @@ namespace VKalVrtAthena {
       ATH_CHECK( trackHandle.record(std::make_unique<xAOD::VertexContainer>(),
 				    std::make_unique<xAOD::VertexAuxContainer>()) );
       twoTrksVertexContainer = trackHandle.ptr();
+      m_vertexCollectionsDefinitions[m_twoTrksVertexKey.key()] = true;
     }
 
     m_incomp.clear();
@@ -1532,6 +1533,7 @@ namespace VKalVrtAthena {
       ATH_CHECK( secVtxHandle.record( std::make_unique<xAOD::VertexContainer>(),
 				      std::make_unique<xAOD::VertexAuxContainer>() ) );
       xAOD::VertexContainer *secondaryVertexContainer = secVtxHandle.ptr();
+      m_vertexCollectionsDefinitions[m_vertexKey.key()] = true;
 
       enum { kPt, kEta, kPhi, kD0, kZ0, kErrP, kErrD0, kErrZ0, kChi2SV };
       if( m_trkDecors.empty() ) {
@@ -2221,7 +2223,8 @@ namespace VKalVrtAthena {
       ATH_CHECK( vertexHandle.record(std::make_unique<xAOD::VertexContainer>(),
 				     std::make_unique<xAOD::VertexAuxContainer>()) );
       xAOD::VertexContainer* intermediateVertexContainer = vertexHandle.ptr();
-
+      m_vertexCollectionsDefinitions[ m_intermediateVertexKey.at(name).key() ] = true;
+      
       for( auto& wrkvrt : *workVerticesContainer ) {
 
         xAOD::Vertex* vertex = new xAOD::Vertex;
