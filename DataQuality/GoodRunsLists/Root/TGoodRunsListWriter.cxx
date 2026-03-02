@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include <stdlib.h>
-// #include <stdio.h>
 #include <string.h>
 #include "TROOT.h"
 
@@ -526,6 +525,8 @@ Root::TGoodRunsListWriter::ConvertInput(const char *in, const char *encoding)
 
   xmlBufferPtr inBuf = xmlBufferCreateSize(size);
   xmlBufferPtr outBuf = xmlBufferCreateSize(size * 2);
+  //xmlBufferAdd does not return a value
+  //coverity[CHECKED_RETURN:FALSE]
   xmlBufferAdd(inBuf, (const xmlChar *) in, temp);
   ret = xmlCharEncInFunc(handler, outBuf, inBuf);
 
