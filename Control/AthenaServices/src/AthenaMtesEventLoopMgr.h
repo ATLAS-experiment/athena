@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAMTESEVENTLOOPMGR_H
@@ -254,8 +254,6 @@ public:
   bool m_inTestMode { false };
    
 private:
-  StoreGateSvc* eventStore() const;
-
   void modifyEventContext(EventContext& ctx, const EventID& eID, bool consume_modifier_stream);
 
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;

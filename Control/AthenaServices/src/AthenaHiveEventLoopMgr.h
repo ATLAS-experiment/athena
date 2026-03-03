@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_ATHENAHIVEEVENTLOOPMGR_H
@@ -267,8 +267,6 @@ public:
   // typedef std::vector<std::string> VectorName;
 
 private:
-  StoreGateSvc* eventStore() const;
-
   ServiceHandle<Athena::IConditionsCleanerSvc> m_conditionsCleaner;
 };
 
