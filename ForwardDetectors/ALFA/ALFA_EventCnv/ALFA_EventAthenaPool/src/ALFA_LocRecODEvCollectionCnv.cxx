@@ -15,7 +15,7 @@ ALFA_LocRecODEvCollection_PERS* ALFA_LocRecODEvCollectionCnv::createPersistent(A
 }
 
 
-ALFA_LocRecODEvCollection* ALFA_LocRecODEvCollectionCnv::createTransient() {
+ALFA_LocRecODEvCollection* ALFA_LocRecODEvCollectionCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "ALFA_LocRecODEvCollectionConverter" );
     
     ALFA_LocRecODEvCollectionCnv_p1   TPConverter_p1;
@@ -23,15 +23,10 @@ ALFA_LocRecODEvCollection* ALFA_LocRecODEvCollectionCnv::createTransient() {
     ALFA_LocRecODEvCollection       *trans_cont(nullptr); // probably inicialization
     static const pool::Guid p1_guid ("D6688847-9903-4FDE-B709-879B0E470073");
     
-    if( this->compareClassGuid(p1_guid)) {
-         std::unique_ptr< ALFA_LocRecODEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_LocRecODEvCollection_p1 >() );
+    if( this->compareClassGuid(token, p1_guid)) {
+         std::unique_ptr< ALFA_LocRecODEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_LocRecODEvCollection_p1 >(token) );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
-    }
-//    else if( m_token.find("CLID=35722E01-C4E3-420E-8A7E-E375C5E7989D") != std::string::npos) {
-        // old version from before TP separation, just return it
-//        trans_cont = this->poolReadObject<ALFA_DigitCollection>();
-//    }  
-       else {
+    } else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }
     return trans_cont;

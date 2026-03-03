@@ -17,7 +17,7 @@ InDetSimDataCollection_PERS* InDetSimDataCollectionCnv::createPersistent(InDetSi
 }
 
 
-InDetSimDataCollection* InDetSimDataCollectionCnv::createTransient() {
+InDetSimDataCollection* InDetSimDataCollectionCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "InDetSimDataCollection" );
     InDetSimDataCollectionCnv_p1   converter_p1;
     InDetSimDataCollectionCnv_p2   converter_p2;
@@ -31,25 +31,25 @@ InDetSimDataCollection* InDetSimDataCollectionCnv::createTransient() {
     static const pool::Guid   p1_guid("333EF996-1672-4AB8-917D-187F908F1EDE");
     static const pool::Guid   old_guid("5A50C32E-C036-4A49-AE97-716D53210BE1");
 
-    if( this->compareClassGuid(p4_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p4 >   col_vect( this->poolReadObject< InDetSimDataCollection_p4 >() );
+    if( this->compareClassGuid(token, p4_guid)) {
+        std::unique_ptr< InDetSimDataCollection_p4 >   col_vect( this->poolReadObject< InDetSimDataCollection_p4 >(token) );
         trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p3_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p3 >   col_vect( this->poolReadObject< InDetSimDataCollection_p3 >() );
+    else if( this->compareClassGuid(token, p3_guid)) {
+        std::unique_ptr< InDetSimDataCollection_p3 >   col_vect( this->poolReadObject< InDetSimDataCollection_p3 >(token) );
         trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p2_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p2 >   col_vect( this->poolReadObject< InDetSimDataCollection_p2 >() );
+    else if( this->compareClassGuid(token, p2_guid)) {
+        std::unique_ptr< InDetSimDataCollection_p2 >   col_vect( this->poolReadObject< InDetSimDataCollection_p2 >(token) );
         trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
-    else if( this->compareClassGuid(p1_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p1 >   col_vect( this->poolReadObject< InDetSimDataCollection_p1 >() );
+    else if( this->compareClassGuid(token, p1_guid)) {
+        std::unique_ptr< InDetSimDataCollection_p1 >   col_vect( this->poolReadObject< InDetSimDataCollection_p1 >(token) );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
-    else if(  this->compareClassGuid(old_guid)) {
+    else if(  this->compareClassGuid(token, old_guid)) {
         // old version from before TP separation, just return it
-        trans_cont = this->poolReadObject<InDetSimDataCollection>();
+        trans_cont = this->poolReadObject<InDetSimDataCollection>(token);
     }  else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }

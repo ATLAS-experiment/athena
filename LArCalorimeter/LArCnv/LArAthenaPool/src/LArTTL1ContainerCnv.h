@@ -41,7 +41,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual LArTTL1Container* createTransient();
+  virtual LArTTL1Container* createTransient(const Token* token);
 
 };
 

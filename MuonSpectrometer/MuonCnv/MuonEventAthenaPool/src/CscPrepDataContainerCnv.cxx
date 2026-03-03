@@ -46,28 +46,28 @@ CscPrepDataContainer_PERS*    CscPrepDataContainerCnv::createPersistent (Muon::C
     return pers;
 }
 
-Muon::CscPrepDataContainer* CscPrepDataContainerCnv::createTransient() {
+Muon::CscPrepDataContainer* CscPrepDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "CscPrepDataContainerCnv" );
     static const pool::Guid   p0_guid("C48250B1-7575-DFA1-1313-01AAAF759AEA"); // before t/p split
     static const pool::Guid   p1_guid("B941657D-1ABF-4A88-B23C-6C4212CD04B3"); // with CscPrepData_tlp1
     static const pool::Guid   p2_guid("BF5DA875-6D5B-4DCA-9CD8-E0ABC4FD92F5"); // with CscPrepDataContainer_p2
-    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
+    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     Muon::CscPrepDataContainer* p_collection(nullptr);
-    if( compareClassGuid(p2_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< Muon::CscPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::CscPrepDataContainer_p2 >() );
+    if( compareClassGuid(token, p2_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
+        std::unique_ptr< Muon::CscPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::CscPrepDataContainer_p2 >(token) );
         p_collection = m_converter_p2.createTransient( p_coll.get(), log );
-    } else if( compareClassGuid(p1_guid) ) {
+    } else if( compareClassGuid(token, p1_guid) ) {
       CscPrepDataContainerCnv_tlp1 tpConvertor_p1;
-      std::unique_ptr< Muon::CscPrepDataContainer_tlp1 > col_vect( poolReadObject< Muon::CscPrepDataContainer_tlp1 >() );
+      std::unique_ptr< Muon::CscPrepDataContainer_tlp1 > col_vect( poolReadObject< Muon::CscPrepDataContainer_tlp1 >(token) );
       p_collection = m_TPConverter.createTransient( col_vect.get(), log );
-      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 1 detected"<<endmsg;
+      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p0_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): Old input file"<<std::endl;
+    else if( compareClassGuid(token, p0_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
         throw std::runtime_error("Not currently supporting reading non TP-split PRDs");
-        //std::unique_ptr< CscPrepDataContainer_p0 >   col_vect( poolReadObject< CscPrepDataContainer_p0 >() );
+        //std::unique_ptr< CscPrepDataContainer_p0 >   col_vect( poolReadObject< CscPrepDataContainer_p0 >(token) );
         //p_collection = m_converter_p0.createTransient( col_vect.get(), log );
     }
     else {

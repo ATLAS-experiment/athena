@@ -28,7 +28,7 @@ public:
   SkimDecisionCollectionCnv (ISvcLocator* svcloc) : SkimDecisionCollectionCnvBase(svcloc) {}
 protected:
   virtual SkimDecisionCollection_PERS*  createPersistent (SkimDecisionCollection* transCont);
-  virtual SkimDecisionCollection*     createTransient ();
+  virtual SkimDecisionCollection*     createTransient(const Token* token);
 
  private:
   SkimDecisionCollectionCnv_p1   m_TPConverter;

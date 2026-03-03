@@ -33,7 +33,7 @@ TrigHisto1DContainer_PERS * TrigHisto1DContainerCnv::createPersistent( TrigHisto
  
 
 //createTransient
-TrigHisto1DContainer* TrigHisto1DContainerCnv::createTransient()
+TrigHisto1DContainer* TrigHisto1DContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigHisto1DContainerConverter" );
   
@@ -45,17 +45,17 @@ TrigHisto1DContainer* TrigHisto1DContainerCnv::createTransient()
 
   TrigHisto1DContainer *p_container = 0;
 
-  if(compareClassGuid(tlp1_guid)) {
-    poolReadObject<TrigHisto1DContainer_PERS>(*m_TPConverter);
+  if(compareClassGuid(token, tlp1_guid)) {
+    poolReadObject<TrigHisto1DContainer_PERS>(*m_TPConverter, token);
     p_container = m_TPConverter->createTransient(mlog);
   }
-  else if(compareClassGuid(p1_guid)) {
-     std::unique_ptr< TrigHisto1DContainer_p1 > col_vect( poolReadObject< TrigHisto1DContainer_p1 >() );
+  else if(compareClassGuid(token, p1_guid)) {
+     std::unique_ptr< TrigHisto1DContainer_p1 > col_vect( poolReadObject< TrigHisto1DContainer_p1 >(token) );
      TrigHisto1DContainerCnv_p1 converter;
      p_container = converter.createTransient( col_vect.get(), mlog );
   }
-  else if(compareClassGuid(trans_guid)) {
-    p_container = poolReadObject<TrigHisto1DContainer>();
+  else if(compareClassGuid(token, trans_guid)) {
+    p_container = poolReadObject<TrigHisto1DContainer>(token);
   }
   else  {
     throw std::runtime_error( "Unsupported persistent version of TrigHisto1DContainer" );

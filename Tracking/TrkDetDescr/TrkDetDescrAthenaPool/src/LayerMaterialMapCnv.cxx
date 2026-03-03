@@ -51,7 +51,7 @@ LayerMaterialMapCnv::createPersistentWithKey (Trk::LayerMaterialMap* transCont,
 // Create transient collection
 //-----------------------------------------------------------------------------
 Trk::LayerMaterialMap*
-LayerMaterialMapCnv::createTransientWithKey (const std::string& key)
+LayerMaterialMapCnv::createTransientWithKey (const Token* token, const std::string& key)
 {
   static const pool::Guid tlp1_guid( "3DA92DBD-DA78-43A2-BFDF-9E19E2BF1E8A" );
 
@@ -59,8 +59,8 @@ LayerMaterialMapCnv::createTransientWithKey (const std::string& key)
 
   MsgStream log (m_msgSvc, "LayerMaterialMapCnv: " + key);
 
-  if( compareClassGuid( tlp1_guid ) ) {
-    poolReadObject< Trk::LayerMaterialMap_tlp1 >( m_TPConverter_tlp1 );
+  if( compareClassGuid(token,  tlp1_guid ) ) {
+    poolReadObject< Trk::LayerMaterialMap_tlp1 >( m_TPConverter_tlp1, token );
     p_collection = m_TPConverter_tlp1.createTransient( log );
   }       
   return p_collection;

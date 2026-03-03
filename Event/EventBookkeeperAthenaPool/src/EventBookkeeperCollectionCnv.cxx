@@ -17,19 +17,19 @@ EventBookkeeperCollection_PERS* EventBookkeeperCollectionCnv::createPersistent(E
   return persObj; 
 }
     
-EventBookkeeperCollection* EventBookkeeperCollectionCnv::createTransient() {
+EventBookkeeperCollection* EventBookkeeperCollectionCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "EventBookkeeperCollectionConverter" );
   //p1_guid matches the number in EventBookkeeperTPCnv/selection.xtml and is generated with uuidgen | tr "[:lower:]" "[:upper:]"
   static const pool::Guid   p1_guid("461506EA-7376-448C-A4AF-640654D313C3");
   static const pool::Guid   p2_guid("4CB34AE0-ECE5-404B-8CB7-B2E20F509DBE");
-  if( compareClassGuid(p1_guid) ) {
+  if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< EventBookkeeperCollection_p1 > col_vect( poolReadObject< EventBookkeeperCollection_p1 >() );
+    std::unique_ptr< EventBookkeeperCollection_p1 > col_vect( poolReadObject< EventBookkeeperCollection_p1 >(token) );
     return m_TPConverterP1.createTransient( col_vect.get(), log );
   }
-  else if( compareClassGuid(p2_guid) ) {
+  else if( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< EventBookkeeperCollection_p2 > col_vect( poolReadObject< EventBookkeeperCollection_p2 >() );
+    std::unique_ptr< EventBookkeeperCollection_p2 > col_vect( poolReadObject< EventBookkeeperCollection_p2 >(token) );
     return m_TPConverter.createTransient( col_vect.get(), log );
   }
   else {

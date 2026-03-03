@@ -25,25 +25,25 @@ LArPhysWaveContainerCnv::createPersistent (LArPhysWaveTransType* transObj)
 }
 
 LArConditionsSubset<LArPhysWave>*
-LArPhysWaveContainerCnv::createTransient ()
+LArPhysWaveContainerCnv::createTransient(const Token* token)
 {   
     MsgStream log(msgSvc(), "LArPhysWaveContainerCnv" ); 
 	log<<MSG::DEBUG<<"READING PHYS WAVE"<<endmsg;
     static const pool::Guid   p1_guid("87E436E2-6FF4-42D3-BC70-6650C076E589");
     static const pool::Guid   p0_guid("C1108D27-6D30-41E8-892D-2AB127B868C9");
-	if( compareClassGuid(p1_guid) ) {
+	if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArPhysWaveSubset_p1 > col_vect( poolReadObject< LArPhysWaveSubset_p1 >() );
+        std::unique_ptr< LArPhysWaveSubset_p1 > col_vect( poolReadObject< LArPhysWaveSubset_p1 >(token) );
         log << MSG::DEBUG << "READING LArPhysWaveSubset_p1" << endmsg; 
 		LArPhysWaveTransType* transObj = TPconverter1.createTransientConst( col_vect.get(), log );
         log << MSG::DEBUG << "READING LArPhysWaveSubset_p1 Success !" << endmsg;
         return transObj;
     }
-    else if(compareClassGuid(p0_guid)){
+    else if(compareClassGuid(token, p0_guid)){
         MsgStream log(msgSvc(), "LArPhysWaveContainerCnv" ); 
         log << MSG::DEBUG << " READING LArPhysWaveSubset (before TP split)" << endmsg; 
 
-        std::unique_ptr< LArConditionsSubset<LArPhysWave> > subset ( poolReadObject< LArConditionsSubset<LArPhysWave> >() );
+        std::unique_ptr< LArConditionsSubset<LArPhysWave> > subset ( poolReadObject< LArConditionsSubset<LArPhysWave> >(token) );
         
         return (createTransient(subset.get()));
     } 

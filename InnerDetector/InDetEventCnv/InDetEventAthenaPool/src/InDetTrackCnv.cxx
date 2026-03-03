@@ -30,20 +30,17 @@ StatusCode InDetTrackCnv::initialize()
 
 // this method just reads the persistent object - no TP conversion here
 void 
-InDetTrackCnv::readObjectFromPool( const std::string& token )
+InDetTrackCnv::readObjectFromPool( const Token* token )
 {
     static const pool::Guid p2_guid( "4E3778E2-1497-4F10-8746-AA02319FAC83" );
     static const pool::Guid p1_guid( "8380F7AC-4A8F-4382-95A5-1234E43D3B08" );
 
-   // set the POOL token which will be used for reading from POOL
-   setToken( token );
-
    // select the object type based on its GUID 
-   if( compareClassGuid( p2_guid ) )     {
+   if( compareClassGuid(token,  p2_guid ) )     {
       // read the object using the main TP converter
-      poolReadObject< InDetTrack_PERS >( m_TPConverter2 );
-   }else if( compareClassGuid( p1_guid ) )     {
-      poolReadObject< InDet::Track_tlp1 >( m_TPConverter1 );
+      poolReadObject< InDetTrack_PERS >( m_TPConverter2, token );
+   }else if( compareClassGuid(token,  p1_guid ) )     {
+      poolReadObject< InDet::Track_tlp1 >( m_TPConverter1, token );
    }
    else
       throw std::runtime_error( "Unsupported version of InDetTrack_PERS (unknown GUID)" );

@@ -32,7 +32,7 @@ MissingEtTruthCnv::createPersistent( MissingEtTruth* transCont )
   return persObj; 
 }
 
-MissingEtTruth* MissingEtTruthCnv::createTransient() 
+MissingEtTruth* MissingEtTruthCnv::createTransient(const Token* token) 
 {
   MsgStream msg( msgSvc(), "MissingEtTruthCnv" );
 
@@ -43,29 +43,29 @@ MissingEtTruth* MissingEtTruthCnv::createTransient()
   static const pool::Guid p2_guid("291A1BDB-A25E-412D-8E49-EF0E1EA1A835");
   static const pool::Guid p3_guid("3FA8CC45-8798-4C24-9D0E-22E5F11AD85F");
 
-  if (  compareClassGuid(p3_guid)) {
+  if (  compareClassGuid(token, p3_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p3> persObj( poolReadObject<MissingEtTruth_p3>() );
+    std::unique_ptr<MissingEtTruth_p3> persObj( poolReadObject<MissingEtTruth_p3>(token) );
     MissingEtTruthCnv_p3 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
-  } else if (  compareClassGuid(p2_guid)) {
+  } else if (  compareClassGuid(token, p2_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p2> persObj( poolReadObject<MissingEtTruth_p2>() );
+    std::unique_ptr<MissingEtTruth_p2> persObj( poolReadObject<MissingEtTruth_p2>(token) );
     MissingEtTruthCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
-  } else if (  compareClassGuid(p1_guid)) {
+  } else if (  compareClassGuid(token, p1_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p1> persObj( poolReadObject<MissingEtTruth_p1>() );
+    std::unique_ptr<MissingEtTruth_p1> persObj( poolReadObject<MissingEtTruth_p1>(token) );
     MissingEtTruthCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
-  } else if ( compareClassGuid(tr_guid) ) { // regular object from before the T/P separation
-    return poolReadObject<MissingEtTruth>();
+  } else if ( compareClassGuid(token, tr_guid) ) { // regular object from before the T/P separation
+    return poolReadObject<MissingEtTruth>(token);
   } else {
     throw std::runtime_error("Unsupported persistent version of MissingEtTruth");
   }

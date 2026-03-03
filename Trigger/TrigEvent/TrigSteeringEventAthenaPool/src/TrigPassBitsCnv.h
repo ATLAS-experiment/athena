@@ -42,7 +42,7 @@ public:
 
 protected:
   virtual TrigPassBits_PERS  *createPersistent(TrigPassBits *transObj);
-  virtual TrigPassBits       *createTransient();
+  virtual TrigPassBits       *createTransient(const Token* token);
 };
 
 

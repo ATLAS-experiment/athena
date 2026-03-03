@@ -29,7 +29,7 @@ public:
   EventBookkeeperCollectionCnv (ISvcLocator* svcloc) : EventBookkeeperCollectionCnvBase(svcloc) {}
 protected:
   virtual EventBookkeeperCollection_PERS*  createPersistent (EventBookkeeperCollection* transCont);
-  virtual EventBookkeeperCollection*     createTransient ();
+  virtual EventBookkeeperCollection*     createTransient(const Token* token);
 
   //  virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter; }
 

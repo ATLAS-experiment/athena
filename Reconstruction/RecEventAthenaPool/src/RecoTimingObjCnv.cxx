@@ -26,7 +26,7 @@ RecoTimingObjCnv::createPersistent( RecoTimingObj* transCont )
   return persObj; 
 }
 
-RecoTimingObj* RecoTimingObjCnv::createTransient() 
+RecoTimingObj* RecoTimingObjCnv::createTransient(const Token* token) 
 {
   // MsgStream msg( msgSvc(), "RecoTimingObjCnv" );
   if ( ! bool(m_msg) )
@@ -36,9 +36,9 @@ RecoTimingObj* RecoTimingObjCnv::createTransient()
   
   static const pool::Guid p1_guid("4A28542C-DD7F-441A-9866-37A74ED49850");
   
-  if ( compareClassGuid(p1_guid) )
+  if ( compareClassGuid(token, p1_guid) )
     {
-      std::unique_ptr<RecoTimingObj_p1> persObj( poolReadObject<RecoTimingObj_p1>() );
+      std::unique_ptr<RecoTimingObj_p1> persObj( poolReadObject<RecoTimingObj_p1>(token) );
       RecoTimingObjCnv_p1 cnv;
       transObj = cnv.createTransient( persObj.get(), *m_msg );
     } else {

@@ -47,7 +47,7 @@ public:
    std::unique_ptr<DataHeader_p6> poolReadObject_p6();
 
    DataHeader_p6* createPersistent(DataHeader* transObj, DataHeaderForm_p6*) ;
-   virtual DataHeader* createTransient() override;
+   virtual DataHeader* createTransient(const Token* token) override;
 
    [[deprecated("this converter uses createPersistent() with 2 arguments")]]
    virtual DataHeader_p6* createPersistent(DataHeader*) override { return nullptr; }

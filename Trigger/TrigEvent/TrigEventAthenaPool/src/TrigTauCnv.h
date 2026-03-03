@@ -42,7 +42,7 @@ public:
 protected:
   TrigTau_PERS*  createPersistent(TrigTau* transCont);
 
-  TrigTau*       createTransient ();
+  TrigTau*       createTransient(const Token* token);
 
  private:
   TrigTauCnv_impl *m_impl;

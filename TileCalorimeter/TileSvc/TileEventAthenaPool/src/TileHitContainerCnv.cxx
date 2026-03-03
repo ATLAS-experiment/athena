@@ -14,7 +14,7 @@ TileHitContainer_PERS* TileHitContainerCnv::createPersistent(TileHitContainer* t
     return persObj;
 }
 
-TileHitContainer* TileHitContainerCnv::createTransient() {
+TileHitContainer* TileHitContainerCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TileHitContainerConverter" );
     TileHitContainerCnv_p1   converter_p1;
 
@@ -23,13 +23,13 @@ TileHitContainer* TileHitContainerCnv::createTransient() {
     static const pool::Guid   p1_guid("E347580F-BBF0-441E-A799-9AC0256F69DF");
     static const pool::Guid   p0_guid("704A373C-EA65-4721-A9B8-F577B683699E");
 
-    if( this->compareClassGuid(p1_guid)) {
-        std::unique_ptr< TileHitContainer_p1 >   cont( this->poolReadObject< TileHitContainer_p1 >() );
+    if( this->compareClassGuid(token, p1_guid)) {
+        std::unique_ptr< TileHitContainer_p1 >   cont( this->poolReadObject< TileHitContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
-    else if( this->compareClassGuid(p0_guid)) {
+    else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileHitCollectionVec* rdoV = this->poolReadObject<TileHitCollectionVec>();
+        TileHitCollectionVec* rdoV = this->poolReadObject<TileHitCollectionVec>(token);
 
         if (mlog.level()<=MSG::DEBUG)
           mlog << MSG::DEBUG << "Read IDC, size " << rdoV->size() << endmsg;

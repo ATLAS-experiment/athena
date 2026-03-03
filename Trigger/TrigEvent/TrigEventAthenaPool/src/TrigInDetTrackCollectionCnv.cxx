@@ -41,7 +41,7 @@ TrigInDetTrackCollection_PERS* TrigInDetTrackCollectionCnv::createPersistent(Tri
 }
 
 //create transient
-TrigInDetTrackCollection* TrigInDetTrackCollectionCnv::createTransient() {
+TrigInDetTrackCollection* TrigInDetTrackCollectionCnv::createTransient(const Token* token) {
   
   MsgStream mlog(msgSvc(), "TrigInDetTrackCollectionConverter" );
   mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::createTransient " << endmsg;
@@ -53,38 +53,38 @@ TrigInDetTrackCollection* TrigInDetTrackCollectionCnv::createTransient() {
   static const pool::Guid p0_guid("5F6029E6-764B-4126-891D-73BFC3CC391C");
   
   TrigInDetTrackCollection  *transObj = 0;
-  if( compareClassGuid(tlp4_guid) ) {
+  if( compareClassGuid(token, tlp4_guid) ) {
     
     mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::reading tlp4 persistent object" << endmsg;
     TrigInDetTrackCollectionCnv_tlp4 tlp4_Converter;
-    poolReadObject< TrigInDetTrackCollection_tlp4 >( tlp4_Converter );
+    poolReadObject< TrigInDetTrackCollection_tlp4 >( tlp4_Converter, token );
     transObj = tlp4_Converter.createTransient( mlog );
-  } else  if( compareClassGuid(tlp3_guid) ) {
+  } else  if( compareClassGuid(token, tlp3_guid) ) {
     
     mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::reading tlp3 persistent object" << endmsg;
     TrigInDetTrackCollectionCnv_tlp3 tlp3_Converter;
-    poolReadObject< TrigInDetTrackCollection_tlp3 >( tlp3_Converter );
+    poolReadObject< TrigInDetTrackCollection_tlp3 >( tlp3_Converter, token );
     transObj = tlp3_Converter.createTransient( mlog );
-  } else if( compareClassGuid(tlp2_guid) ) {
+  } else if( compareClassGuid(token, tlp2_guid) ) {
     
     mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::reading tlp2 persistent object" << endmsg;
     TrigInDetTrackCollectionCnv_tlp2 tlp2_Converter;
-    poolReadObject< TrigInDetTrackCollection_tlp2 >( tlp2_Converter );
+    poolReadObject< TrigInDetTrackCollection_tlp2 >( tlp2_Converter, token );
     transObj = tlp2_Converter.createTransient( mlog );
-  } else if( compareClassGuid(tlp1_guid) ) {
+  } else if( compareClassGuid(token, tlp1_guid) ) {
       
     mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::reading tlp1 persistent object" << endmsg;
     TrigInDetTrackCollectionCnv_tlp1 tlp1_Converter;
-    poolReadObject< TrigInDetTrackCollection_tlp1 >( tlp1_Converter );
+    poolReadObject< TrigInDetTrackCollection_tlp1 >( tlp1_Converter, token );
     transObj = tlp1_Converter.createTransient( mlog );
     
   }
   
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     
     mlog << MSG::DEBUG << "TrigInDetTrackCollectionCnv::reading p0 persistent object" << endmsg;
     // old version from before TP separation, just return it
-    transObj = this->poolReadObject<TrigInDetTrackCollection>();
+    transObj = this->poolReadObject<TrigInDetTrackCollection>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version of Data container");

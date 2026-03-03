@@ -30,7 +30,7 @@ CMXRoI_PERS * CMXRoICnv::createPersistent( CMXRoI *transObj)
  
 
 //createTransient
-CMXRoI * CMXRoICnv::createTransient()
+CMXRoI * CMXRoICnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "CMXRoIConverter" );
   
@@ -39,9 +39,9 @@ CMXRoI * CMXRoICnv::createTransient()
   static const pool::Guid p1_guid( "6EE27E92-E8DE-4F07-810F-025A1450E3BE" );
  
   
-  if ( compareClassGuid(p1_guid) ) {
+  if ( compareClassGuid(token, p1_guid) ) {
      // using unique_ptr ensures deletion of the persistent object
-     std::unique_ptr< CMXRoI_p1 > pers_ref( poolReadObject< CMXRoI_p1 >() );
+     std::unique_ptr< CMXRoI_p1 > pers_ref( poolReadObject< CMXRoI_p1 >(token) );
      return m_TPConverter_p1.createTransient( pers_ref.get(), mlog );
   }
   throw std::runtime_error("Unsupported persistent version of CMXRoI");

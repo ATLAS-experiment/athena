@@ -18,7 +18,7 @@ TrigCaloClusterContainer_PERS * TrigCaloClusterContainerCnv::createPersistent( T
 }//end of create persistent method
 
 //createTransient
-TrigCaloClusterContainer * TrigCaloClusterContainerCnv::createTransient()
+TrigCaloClusterContainer * TrigCaloClusterContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigCaloClusterContainerConverter" );
   
@@ -26,8 +26,8 @@ TrigCaloClusterContainer * TrigCaloClusterContainerCnv::createTransient()
 
   static const pool::Guid p3_guid( "98A28943-662A-4141-82C3-537447264DA3" );
 
- if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigCaloClusterContainer_p3 > col_vect( poolReadObject< TrigCaloClusterContainer_p3 >() );
+ if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigCaloClusterContainer_p3 > col_vect( poolReadObject< TrigCaloClusterContainer_p3 >(token) );
          //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   } else { throw std::runtime_error( "Unsupported persistent version of TrigCaloClusterContainer" ); }

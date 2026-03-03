@@ -29,7 +29,7 @@ protected:
  
    
    virtual TrigCompositeContainer_PERS *createPersistent( TrigCompositeContainer *transObj);
-   virtual TrigCompositeContainer      *createTransient();
+   virtual TrigCompositeContainer      *createTransient(const Token* token);
 
 private:
    TrigCompositeContainerCnv_p1 m_converter;

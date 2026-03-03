@@ -21,7 +21,7 @@ public:
   LArHitContainerCnv(ISvcLocator* svcloc) :  T_AthenaPoolCustomCnv<LArHitContainer, LArHitContainer_PERS >( svcloc) {}
 protected:
   LArHitContainer_PERS*  createPersistent(LArHitContainer* transCont);
-  LArHitContainer*       createTransient ();
+  LArHitContainer*       createTransient(const Token* token);
 };
 
 //#include "LArHitContainerCnv.icc"

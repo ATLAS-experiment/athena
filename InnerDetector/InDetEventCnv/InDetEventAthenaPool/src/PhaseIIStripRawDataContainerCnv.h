@@ -27,7 +27,7 @@ public:
    {}
 protected:
    virtual StripRDO_Container_PERS*   createPersistent (PhaseIIStripRawDataContainer* transCont) override;
-   virtual PhaseIIStripRawDataContainer* createTransient () override;
+   virtual PhaseIIStripRawDataContainer* createTransient(const Token* token) override;
 
    virtual StatusCode initialize() override;
 

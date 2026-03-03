@@ -27,7 +27,7 @@ public:
   TBTailCatcherCnv (ISvcLocator* svcloc) : TBTailCatcherCnvBase(svcloc) {}
 protected:
   virtual TBTailCatcher_PERS*   createPersistent (TBTailCatcher* transCont);
-  virtual TBTailCatcher*        createTransient ();
+  virtual TBTailCatcher*        createTransient(const Token* token);
 
   TBTailCatcherCnv_p1  m_TPConverter;
 };

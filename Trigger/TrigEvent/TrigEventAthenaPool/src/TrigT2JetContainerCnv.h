@@ -41,7 +41,7 @@ protected:
  
    
    virtual TrigT2JetContainer_PERS *createPersistent( TrigT2JetContainer *transObj);
-   virtual TrigT2JetContainer      *createTransient();
+   virtual TrigT2JetContainer      *createTransient(const Token* token);
 
 private:
    TrigT2JetContainerCnv_tlp1   m_converter_tlp1;

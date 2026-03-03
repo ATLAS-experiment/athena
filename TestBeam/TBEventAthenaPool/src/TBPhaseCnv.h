@@ -27,7 +27,7 @@ public:
   TBPhaseCnv (ISvcLocator* svcloc) : TBPhaseCnvBase(svcloc) {}
 protected:
   virtual TBPhase_PERS*   createPersistent (TBPhase* transCont);
-  virtual TBPhase*        createTransient ();
+  virtual TBPhase*        createTransient(const Token* token);
 
   TBPhaseCnv_p1  m_TPConverter;
 };

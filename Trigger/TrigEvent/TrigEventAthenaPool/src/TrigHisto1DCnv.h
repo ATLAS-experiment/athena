@@ -36,7 +36,7 @@ public:
   
 protected:
   TrigHisto1D_PERS* createPersistent(TrigHisto1D* transObj);
-  TrigHisto1D* createTransient();
+  TrigHisto1D* createTransient(const Token* token);
 };
 
 #endif

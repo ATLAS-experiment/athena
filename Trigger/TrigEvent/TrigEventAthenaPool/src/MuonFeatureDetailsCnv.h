@@ -30,7 +30,7 @@ public:
 
 protected:
   virtual MuonFeatureDetails_PERS  *createPersistent(MuonFeatureDetails *transObj);
-  virtual MuonFeatureDetails       *createTransient();
+  virtual MuonFeatureDetails       *createTransient(const Token* token);
 };
 
 

@@ -32,7 +32,7 @@ public:
     EventInfoCnv (ISvcLocator* svcloc);
 protected:
     virtual EventInfo_PERS*   createPersistent (EventInfo* transObj);
-    virtual EventInfo*        createTransient ();
+    virtual EventInfo*        createTransient(const Token* token);
     EventInfo*                massageEventInfo (EventInfo* ei);
 
 private:

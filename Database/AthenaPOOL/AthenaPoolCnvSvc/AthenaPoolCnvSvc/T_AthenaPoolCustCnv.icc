@@ -77,7 +77,7 @@ StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::objectToPool(P* pObj, std::unique_p
 //__________________________________________________________________________
 template <class TRANS, class PERS>
 template <class P>
-StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::poolToObject(const Token*& token, P*& pObj) {
+StatusCode T_AthenaPoolCustCnv<TRANS, PERS>::poolToObject(const Token* token, P*& pObj) {
    pObj = nullptr;
    void* voidPtr = nullptr;
    try {
@@ -160,20 +160,9 @@ T_AthenaPoolCustCnv<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
-// Set the token (in std::string representation) and classID for
-// the object that will be read next.  Required by compareClassGuid()
-template <class TRANS, class PERS>
-inline void T_AthenaPoolCustCnv<TRANS, PERS>::setToken(const std::string& token_str) {
-   delete this->m_i_poolToken; this->m_i_poolToken = nullptr;
-   Token* token = new Token;
-   token->fromString(token_str);
-   this->m_i_poolToken = token; token = nullptr;
-   m_classID = this->m_i_poolToken->classID();
-}
-//__________________________________________________________________________
 // Compare POOL class GUID with the one from object being read
-// To be used in createTransient()
+// To be used in createTransient(const Token* token)
 template <class TRANS, class PERS>
-inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const pool::Guid &guid) const {
-   return(guid == m_classID);
+inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const Token* token, const pool::Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }

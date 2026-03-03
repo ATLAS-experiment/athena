@@ -32,7 +32,7 @@ TrigComposite_PERS* TrigCompositeCnv::createPersistent(TrigComposite* transCont)
 }
 
 
-TrigComposite* TrigCompositeCnv::createTransient() 
+TrigComposite* TrigCompositeCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "TrigCompositeConverter" );
   mlog << MSG::DEBUG << "TrigCompositeCnv::createTransient " << endmsg;
@@ -41,10 +41,10 @@ TrigComposite* TrigCompositeCnv::createTransient()
   
   TrigComposite       *trans_cont(0);
   
-  if( compareClassGuid(p1_guid) ) {
+  if( compareClassGuid(token, p1_guid) ) {
     
     mlog << MSG::DEBUG << "TrigCompositeCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr< TrigComposite_p1 >   col_vect( this->poolReadObject< TrigComposite_p1 >() );
+    std::unique_ptr< TrigComposite_p1 >   col_vect( this->poolReadObject< TrigComposite_p1 >(token) );
     trans_cont = m_impl->m_TPConverter.createTransient( col_vect.get(), mlog );
 
   } else {

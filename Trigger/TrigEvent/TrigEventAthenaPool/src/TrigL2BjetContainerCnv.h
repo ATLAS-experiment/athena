@@ -28,7 +28,7 @@ public:
 protected:
   
    virtual TrigL2BjetContainer_PERS *createPersistent( TrigL2BjetContainer *transObj);
-   virtual TrigL2BjetContainer      *createTransient();
+   virtual TrigL2BjetContainer      *createTransient(const Token* token);
 private:
    TrigL2BjetContainerCnv_tlp1   m_converter1;
    TrigL2BjetContainerCnv_tlp2   m_converter2;

@@ -29,7 +29,7 @@ public:
 protected:
    
    virtual TrigMissingETContainer_PERS *createPersistent( TrigMissingETContainer *transObj);
-   virtual TrigMissingETContainer      *createTransient();
+   virtual TrigMissingETContainer      *createTransient(const Token* token);
 private:
    TrigMissingETContainerCnv_tlp1 m_converter_tlp1;
    TrigMissingETContainerCnv_p3   m_converter;

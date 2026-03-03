@@ -18,9 +18,10 @@
 
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCreateFuncs.h"
-#include "PersistentDataModel/Guid.h"
+#include "PersistentDataModel/Token.h"
 #include <typeinfo>
 #include <memory>
+
 class MsgStream;
 
 
@@ -83,7 +84,7 @@ public:
    * Other errors are reported by raising exceptions.
    */
   std::unique_ptr<Trans_t>
-  createTransient (CNV& parent, const std::string& key, MsgStream& msg);
+  createTransient (CNV& parent, const Token* token, const std::string& key, MsgStream& msg);
 
 
   /**
@@ -98,7 +99,7 @@ public:
    * type that this converter handles, returns false.
    * Other errors are reported by raising exceptions.
    */
-  bool persToTrans (CNV& parent, Trans_t* trans, const std::string& key, MsgStream& msg);
+  bool persToTrans (CNV& parent, Trans_t* trans, const Token* token, const std::string& key, MsgStream& msg);
 
   
 private:
@@ -141,7 +142,7 @@ public:
    * Other errors are reported by raising exceptions.
    */
   std::unique_ptr<Trans_t>
-  createTransient (CNV& parent, const std::string& key, MsgStream& msg);
+  createTransient (CNV& parent, const Token* token, const std::string& key, MsgStream& msg);
 
 
   /**
@@ -156,7 +157,7 @@ public:
    * type that this converter handles, returns false.
    * Other errors are reported by raising exceptions.
    */
-  bool persToTrans (CNV& parent, Trans_t* trans, const std::string& key, MsgStream& msg);
+  bool persToTrans (CNV& parent, Trans_t* trans, const Token* token, const std::string& key, MsgStream& msg);
 
   
 private:

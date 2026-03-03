@@ -61,7 +61,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual ElectronContainer* createTransient();
+  virtual ElectronContainer* createTransient(const Token* token);
 
 };
 

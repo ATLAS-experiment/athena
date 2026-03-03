@@ -33,7 +33,7 @@ public:
     virtual ~MMPrepDataContainerCnv();
     
     virtual MMPrepDataContainer_PERS*   createPersistent (Muon::MMPrepDataContainer* transCont);
-    virtual Muon::MMPrepDataContainer*  createTransient ();
+    virtual Muon::MMPrepDataContainer*  createTransient(const Token* token);
 
     virtual StatusCode initialize();
         

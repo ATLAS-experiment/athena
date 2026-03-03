@@ -41,7 +41,7 @@ class SCT_RDO_ContainerCnv : public SCT_RDO_ContainerCnvBase {
   SCT_RDO_ContainerCnv (ISvcLocator* svcloc);
  protected:
   virtual SCT_RDO_Container_PERS* createPersistent (SCT_RDO_Container* transCont) override;
-  virtual SCT_RDO_Container* createTransient () override;
+  virtual SCT_RDO_Container* createTransient(const Token* token) override;
 
   // Must initialize ID helpers
   virtual StatusCode initialize() override;

@@ -30,22 +30,22 @@ HLTResult_PERS* HLTResultCnv::createPersistent(HLT::HLTResult* transCont)
 }
     
 //create transient
-HLT::HLTResult* HLTResultCnv::createTransient() 
+HLT::HLTResult* HLTResultCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "HLTResultConverter" );
 
   static const pool::Guid p1_guid("9567573D-F35E-4D5E-9A1A-A43B07D3CF3B");
   static const pool::Guid p0_guid("559D6CB9-9A54-4284-A03D-9C745352281D");
   
-  if ( compareClassGuid(p1_guid) ) {
+  if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< HLT::HLTResult_p1 > col_vect( poolReadObject< HLT::HLTResult_p1 >() );
+    std::unique_ptr< HLT::HLTResult_p1 > col_vect( poolReadObject< HLT::HLTResult_p1 >(token) );
     return m_TPConverter->createTransient( col_vect.get(), mlog );
   }
   
-  else if( compareClassGuid(p0_guid) ){
+  else if( compareClassGuid(token, p0_guid) ){
     // old version from before TP separation, just return it
-    return this->poolReadObject<HLT::HLTResult>(); 
+    return this->poolReadObject<HLT::HLTResult>(token); 
   }
 
   throw std::runtime_error("Unsupported persistent version of HLTResult");

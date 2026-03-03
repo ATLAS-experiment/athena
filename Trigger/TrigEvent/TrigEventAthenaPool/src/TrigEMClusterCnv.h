@@ -40,7 +40,7 @@ public:
 protected:
   TrigEMCluster_PERS*  createPersistent(TrigEMCluster* transCont);
 
-  TrigEMCluster*       createTransient ();
+  TrigEMCluster*       createTransient(const Token* token);
 
  private:
   TrigEMClusterCnv_impl* m_impl;

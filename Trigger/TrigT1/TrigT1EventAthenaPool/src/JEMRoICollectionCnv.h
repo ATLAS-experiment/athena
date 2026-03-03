@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual JEMRoICollection_PERS*   createPersistent (JEMRoICollection* transCont);
-  virtual JEMRoICollection*        createTransient ();
+  virtual JEMRoICollection*        createTransient(const Token* token);
 
 private:
   

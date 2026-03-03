@@ -54,7 +54,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual AthExFatObject* createTransient();
+  virtual AthExFatObject* createTransient(const Token* token);
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 

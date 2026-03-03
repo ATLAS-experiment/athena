@@ -27,7 +27,7 @@ public:
 
  protected:
   TrigMonConfigCollection_PERS*  createPersistent(TrigMonConfigCollection* transObj);
-  TrigMonConfigCollection*       createTransient ();
+  TrigMonConfigCollection*       createTransient(const Token* token);
 
  private:
 

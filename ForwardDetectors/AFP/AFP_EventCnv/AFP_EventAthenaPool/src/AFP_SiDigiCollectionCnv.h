@@ -23,7 +23,7 @@ public:
 protected:
 
 	AFP_SiDigiCollection_PERS* createPersistent (AFP_SiDigiCollection *transCont);
-	AFP_SiDigiCollection* createTransient ();
+	AFP_SiDigiCollection* createTransient(const Token* token);
  };
 
 #endif //AFP_SiDigiCollectionCnv_h

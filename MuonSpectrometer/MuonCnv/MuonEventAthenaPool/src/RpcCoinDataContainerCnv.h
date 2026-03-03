@@ -28,7 +28,7 @@ public:
     virtual ~RpcCoinDataContainerCnv();
     
     virtual Muon::RpcCoinDataContainerCnv_p1::PERS*   createPersistent (Muon::RpcCoinDataContainer* transCont);
-    virtual Muon::RpcCoinDataContainer*  createTransient ();
+    virtual Muon::RpcCoinDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

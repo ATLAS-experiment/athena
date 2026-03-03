@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CPMRoICollection_PERS*   createPersistent (CPMRoICollection* transCont);
-  virtual CPMRoICollection*        createTransient ();
+  virtual CPMRoICollection*        createTransient(const Token* token);
 
 private:
   

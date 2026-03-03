@@ -27,7 +27,7 @@ public:
   TBEventInfoCnv (ISvcLocator* svcloc) : TBEventInfoCnvBase(svcloc) {}
 protected:
   virtual TBEventInfo_PERS*   createPersistent (TBEventInfo* transCont);
-  virtual TBEventInfo*        createTransient ();
+  virtual TBEventInfo*        createTransient(const Token* token);
 
   TBEventInfoCnv_p1  m_TPConverter;
 };

@@ -14,7 +14,7 @@ class NSW_PadTriggerDataContainerCnv : public NSW_PadTriggerDataContainerCnvBase
 public:
     NSW_PadTriggerDataContainerCnv(ISvcLocator* svcLocator);
     NSW_PadTriggerDataContainer_PERS* createPersistent(Muon::NSW_PadTriggerDataContainer* transientContainer) final;
-    Muon::NSW_PadTriggerDataContainer* createTransient() final;
+    Muon::NSW_PadTriggerDataContainer* createTransient(const Token* token) final;
 private:
     Muon::NSW_PadTriggerDataContainerCnv_p1 m_TPConverter;
 };

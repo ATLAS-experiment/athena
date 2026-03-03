@@ -25,7 +25,7 @@ public:
 protected:
 
   virtual TrigPassFlagsCollection_PERS *createPersistent( TrigPassFlagsCollection *transObj);
-  virtual TrigPassFlagsCollection      *createTransient();
+  virtual TrigPassFlagsCollection      *createTransient(const Token* token);
 
 private:
   std::unique_ptr<TrigPassFlagsCollectionCnv_impl> m_impl;

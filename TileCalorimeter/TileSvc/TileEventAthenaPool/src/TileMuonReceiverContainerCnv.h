@@ -47,7 +47,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TileMuonReceiverContainer* createTransient();
+  virtual TileMuonReceiverContainer* createTransient(const Token* token);
 
 };
 

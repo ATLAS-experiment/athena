@@ -26,7 +26,7 @@ RODHeaderCollection_PERS * RODHeaderCollectionCnv::createPersistent( RODHeaderCo
  
 
 //createTransient
-RODHeaderCollection * RODHeaderCollectionCnv::createTransient()
+RODHeaderCollection * RODHeaderCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "RODHeaderCollectionConverter" );
   
@@ -35,10 +35,10 @@ RODHeaderCollection * RODHeaderCollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "8226F1B6-374D-424D-B059-E0A1B18A1DA7" );
  
   RODHeaderCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< RODHeaderCollection_PERS > pers_ref( poolReadObject< RODHeaderCollection_PERS >() );
+      std::unique_ptr< RODHeaderCollection_PERS > pers_ref( poolReadObject< RODHeaderCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of RODHeaderCollection" );

@@ -22,19 +22,19 @@ CaloTopoTowerContainerCnv::CaloTopoTowerContainerCnv(ISvcLocator* svcloc)
     CaloTopoTowerContainerCnvBase(svcloc)
 {}
 
-CaloTopoTowerContainer* CaloTopoTowerContainerCnv::createTransient() {
+CaloTopoTowerContainer* CaloTopoTowerContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "CaloTopoTowerContainerCnv::createTransient" );
     CaloTopoTowerContainer* Cont = 0;
     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Starting CaloTopoTowerContainerCnv::PoolToDataObject" << endmsg;
-    if (compareClassGuid(p0_guid)) {
-     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p0 of CaloTopoTowerContainer. GUID=" 
-	 << m_classID.toString() << endmsg;
-     Cont=poolReadObject<CaloTopoTowerContainer>();
+    if (compareClassGuid(token, p0_guid)) {
+     if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p0 of CaloTopoTowerContainer. token=" 
+	 << token->toString() << endmsg;
+     Cont=poolReadObject<CaloTopoTowerContainer>(token);
     }
-    else if(compareClassGuid(p1_guid)) {
-      if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p1 of CaloTopoTowerContainer. GUID=" 
-	  << m_classID.toString() << endmsg;
-      CaloTopoTowerContainerPERS* pers=poolReadObject<CaloTopoTowerContainer_p1>();
+    else if(compareClassGuid(token, p1_guid)) {
+      if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p1 of CaloTopoTowerContainer. token=" 
+	  << token->toString() << endmsg;
+      CaloTopoTowerContainerPERS* pers=poolReadObject<CaloTopoTowerContainer_p1>(token);
       Cont=new CaloTopoTowerContainer();
       m_converter.persToTrans(pers,Cont,log);
       delete pers;

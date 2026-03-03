@@ -16,7 +16,7 @@ AFP_TDSimHitCollection_PERS* AFP_TDSimHitCollectionCnv::createPersistent(AFP_TDS
 	return pPersColl;
 }
 
-AFP_TDSimHitCollection* AFP_TDSimHitCollectionCnv::createTransient()
+AFP_TDSimHitCollection* AFP_TDSimHitCollectionCnv::createTransient(const Token* token)
 {
 	MsgStream mlog(msgSvc(), "AFP_TDSimHitCollectionConverter" );
 
@@ -26,8 +26,8 @@ AFP_TDSimHitCollection* AFP_TDSimHitCollectionCnv::createTransient()
 	AFP_TDSimHitCollectionCnv_p1 TPConverter_p1;
 	AFP_TDSimHitCollection *pTransColl=nullptr;
 
-	if(this->compareClassGuid(p1_guid)){
-		std::unique_ptr<AFP_TDSimHitCollection_p1> col_vect(this->poolReadObject<AFP_TDSimHitCollection_p1>());
+	if(this->compareClassGuid(token, p1_guid)){
+		std::unique_ptr<AFP_TDSimHitCollection_p1> col_vect(this->poolReadObject<AFP_TDSimHitCollection_p1>(token));
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

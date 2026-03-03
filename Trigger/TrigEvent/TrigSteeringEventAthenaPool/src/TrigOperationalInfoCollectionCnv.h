@@ -40,7 +40,7 @@ public:
 protected:
   TrigOperationalInfoCollection_PERS*  createPersistent(TrigOperationalInfoCollection* transObj);
 
-  TrigOperationalInfoCollection*       createTransient ();
+  TrigOperationalInfoCollection*       createTransient(const Token* token);
 
  private:
   TrigOperationalInfoCollectionCnv_impl* m_impl;

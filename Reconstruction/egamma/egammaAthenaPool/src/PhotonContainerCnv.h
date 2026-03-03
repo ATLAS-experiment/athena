@@ -61,7 +61,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual PhotonContainer* createTransient();
+  virtual PhotonContainer* createTransient(const Token* token);
 
 };
 

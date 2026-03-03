@@ -50,7 +50,7 @@ public:
 
 protected:
   virtual TrigInDetTrackTruthMap_PERS*  createPersistent(TrigInDetTrackTruthMap* transObj);
-  virtual TrigInDetTrackTruthMap*       createTransient ();
+  virtual TrigInDetTrackTruthMap*       createTransient(const Token* token);
 
  private:
 

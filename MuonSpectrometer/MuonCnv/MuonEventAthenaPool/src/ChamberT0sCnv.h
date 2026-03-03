@@ -20,7 +20,7 @@ public:
   ChamberT0sCnv (ISvcLocator* svcloc) : ChamberT0sCnvBase(svcloc) {}
 protected:
   virtual ChamberT0s_PERS*   createPersistent (Muon::ChamberT0s* transObj);
-  virtual Muon::ChamberT0s*  createTransient ();
+  virtual Muon::ChamberT0s*  createTransient(const Token* token);
 };
 
 #endif

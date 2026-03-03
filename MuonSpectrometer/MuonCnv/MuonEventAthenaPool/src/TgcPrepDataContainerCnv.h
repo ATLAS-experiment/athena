@@ -35,7 +35,7 @@ public:
     virtual ~TgcPrepDataContainerCnv();
     
     virtual TgcPrepDataContainer_PERS*   createPersistent (Muon::TgcPrepDataContainer* transCont);
-    virtual Muon::TgcPrepDataContainer*  createTransient ();
+    virtual Muon::TgcPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

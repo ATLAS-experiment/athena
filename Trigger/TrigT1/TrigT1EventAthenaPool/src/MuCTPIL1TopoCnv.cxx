@@ -20,12 +20,12 @@ MuCTPIL1Topo_PERS* MuCTPIL1TopoCnv::createPersistent( LVL1::MuCTPIL1Topo* transO
  * Function reading a version of MuCTPIL1Topo from POOL and converting it to
  * a transient MuCTPIL1Topo object.
  */
-LVL1::MuCTPIL1Topo* MuCTPIL1TopoCnv::createTransient() {
+LVL1::MuCTPIL1Topo* MuCTPIL1TopoCnv::createTransient(const Token* token) {
 
    static const pool::Guid p1_guid( "BC2BAC47-504A-4A8A-89D9-2086B9038E18" );
 
-   if( this->compareClassGuid( p1_guid ) ) {
-     std::unique_ptr< MuCTPIL1Topo_p1 > pers_ref( this->poolReadObject< MuCTPIL1Topo_p1 >() );
+   if( this->compareClassGuid(token,  p1_guid ) ) {
+     std::unique_ptr< MuCTPIL1Topo_p1 > pers_ref( this->poolReadObject< MuCTPIL1Topo_p1 >(token) );
      return m_converter.createTransient( pers_ref.get(), msg() );
 
    } else {

@@ -29,7 +29,7 @@ public:
 protected:
    
    virtual TrigPhotonContainer_PERS *createPersistent( TrigPhotonContainer *transObj);
-   virtual TrigPhotonContainer      *createTransient();
+   virtual TrigPhotonContainer      *createTransient(const Token* token);
 
 private:
    TrigPhotonContainerCnv_tlp1   m_converter_tlp1;

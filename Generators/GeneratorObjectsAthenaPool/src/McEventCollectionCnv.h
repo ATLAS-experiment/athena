@@ -47,7 +47,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-   virtual McEventCollection* createTransient();
+   virtual McEventCollection* createTransient(const Token* token);
 
 };
 

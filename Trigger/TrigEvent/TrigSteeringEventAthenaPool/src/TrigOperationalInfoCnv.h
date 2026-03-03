@@ -42,7 +42,7 @@ public:
 protected:
   TrigOperationalInfo_PERS*  createPersistent(TrigOperationalInfo* transObj);
 
-  TrigOperationalInfo*       createTransient ();
+  TrigOperationalInfo*       createTransient(const Token* token);
 
  private:
 

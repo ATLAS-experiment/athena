@@ -27,7 +27,7 @@ LArCaliWaveContainerCnv::createPersistent (LArCaliWaveTransType* transObj)
 }
 
 LArConditionsSubset<LArCaliWaveVec>*
-LArCaliWaveContainerCnv::createTransient ()
+LArCaliWaveContainerCnv::createTransient(const Token* token)
 {   
     MsgStream log(msgSvc(), "LArCaliWaveContainerCnv" ); 
 
@@ -35,27 +35,27 @@ LArCaliWaveContainerCnv::createTransient ()
     static const pool::Guid   p1_guid("9E61BE2D-3274-4459-A5C2-3BBFB7056EBA");
     static const pool::Guid   p0_guid("ECB4AD6C-FF3A-4255-A0E3-7BD566B96A77");
 	
-    if( compareClassGuid(p2_guid) ) {
+    if( compareClassGuid(token, p2_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArCaliWaveSubset_p2 > col_vect( poolReadObject< LArCaliWaveSubset_p2 >() );
+        std::unique_ptr< LArCaliWaveSubset_p2 > col_vect( poolReadObject< LArCaliWaveSubset_p2 >(token) );
         log << MSG::DEBUG << "READING LArCaliWaveSubset_p2" << endmsg; 
 		LArCaliWaveTransType* transObj = TPconverter2.createTransientConst( col_vect.get(), log );
         log << MSG::DEBUG << "READING LArCaliWaveSubset_p2 Success !" << endmsg;
         return transObj;
     }    
-	else if( compareClassGuid(p1_guid) ) {
+	else if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArCaliWaveSubset_p1 > col_vect( poolReadObject< LArCaliWaveSubset_p1 >() );
+        std::unique_ptr< LArCaliWaveSubset_p1 > col_vect( poolReadObject< LArCaliWaveSubset_p1 >(token) );
         log << MSG::DEBUG << "READING LArCaliWaveSubset_p1" << endmsg; 
 		LArCaliWaveTransType* transObj = TPconverter1.createTransientConst( col_vect.get(), log );
         log << MSG::DEBUG << "READING LArCaliWaveSubset_p1 Success !" << endmsg;
         return transObj;
     }
-    else if(compareClassGuid(p0_guid)){
+    else if(compareClassGuid(token, p0_guid)){
         MsgStream log(msgSvc(), "LArCaliWaveContainerCnv" ); 
         log << MSG::DEBUG << " READING LArCaliWaveSubset (before TP split)" << endmsg; 
 
-        std::unique_ptr< LArConditionsSubset<LArCaliWaveVec> > subset ( poolReadObject< LArConditionsSubset<LArCaliWaveVec> >() );
+        std::unique_ptr< LArConditionsSubset<LArCaliWaveVec> > subset ( poolReadObject< LArConditionsSubset<LArCaliWaveVec> >(token) );
         
         return (createTransient(subset.get()));
     } 

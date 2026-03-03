@@ -33,39 +33,39 @@ RPCSimHitCollection_PERS*    RPCSimHitCollectionCnv::createPersistent (RPCSimHit
     return pixdc_p;
 }
 
-RPCSimHitCollection* RPCSimHitCollectionCnv::createTransient() {
+RPCSimHitCollection* RPCSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "RPCSimHitCollectionCnv" );
     static const pool::Guid   p0_guid("45EB013E-FC8E-4612-88B7-6E0CAF718F79"); // before t/p split
     static const pool::Guid   p1_guid("C4C57487-41DC-4706-9604-721D76F0AA52");
     static const pool::Guid   p2_guid("1B611C70-CC6F-42AE-9F6D-7DA6A9A22546");
     static const pool::Guid   p3_guid("B48E5E17-FB26-4BC0-A0E2-5324925EAE2F");
     static const pool::Guid   p4_guid("018E2DAC-18EB-714B-B9BD-F9354E30CB51");
-    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
+    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     RPCSimHitCollection* p_collection(nullptr);
-    if( compareClassGuid(p4_guid) ) {
-      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 4 detected"<<endmsg;
-      std::unique_ptr< Muon::RPCSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p4 >() );
+    if( compareClassGuid(token, p4_guid) ) {
+      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 4 detected"<<endmsg;
+      std::unique_ptr< Muon::RPCSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p4 >(token) );
       p_collection = m_TPConverter_p4.createTransient( col_vect.get(), log );
     }
-    else if( compareClassGuid(p3_guid) ) {
-      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 3 detected"<<endmsg;
-      std::unique_ptr< Muon::RPCSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p3 >() );
+    else if( compareClassGuid(token, p3_guid) ) {
+      if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 3 detected"<<endmsg;
+      std::unique_ptr< Muon::RPCSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p3 >(token) );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
     }
-    else if( compareClassGuid(p2_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< Muon::RPCSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p2 >() );
+    else if( compareClassGuid(token, p2_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
+        std::unique_ptr< Muon::RPCSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p2 >(token) );
         p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
     }
-    else if( compareClassGuid(p1_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 1 detected"<<endmsg;
-        std::unique_ptr< Muon::RPCSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p1 >() );
+    else if( compareClassGuid(token, p1_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
+        std::unique_ptr< Muon::RPCSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::RPCSimHitCollection_p1 >(token) );
         p_collection = m_TPConverter.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p0_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): Old input file"<<std::endl;
-        AthenaHitsVector<RPCSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<RPCSimHit> >();
+    else if( compareClassGuid(token, p0_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
+        AthenaHitsVector<RPCSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<RPCSimHit> >(token);
         size_t size = oldColl->size();
         p_collection=new RPCSimHitCollection("DefaultCollectionName",size);
         p_collection->reserve(size);

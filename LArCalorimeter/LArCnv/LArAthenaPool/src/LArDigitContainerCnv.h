@@ -24,7 +24,7 @@ public:
   LArDigitContainerCnv(ISvcLocator*);
   StatusCode initialize();
 protected:
-  virtual LArDigitContainer* createTransient();
+  virtual LArDigitContainer* createTransient(const Token* token);
   virtual LArDigitContainerPERS* createPersistent(LArDigitContainer*);
  private:
   const LArOnlineID_Base* m_idHelper = nullptr;

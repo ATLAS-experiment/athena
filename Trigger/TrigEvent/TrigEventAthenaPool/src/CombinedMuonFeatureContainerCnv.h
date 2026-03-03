@@ -30,7 +30,7 @@ public:
 protected:
 
   virtual CombinedMuonFeatureContainer_PERS *createPersistent( CombinedMuonFeatureContainer *transObj);
-  virtual CombinedMuonFeatureContainer      *createTransient();
+  virtual CombinedMuonFeatureContainer      *createTransient(const Token* token);
 private:
   CombinedMuonFeatureContainerCnv_tlp1   m_converter1;
   CombinedMuonFeatureContainerCnv_p2     m_converter2;

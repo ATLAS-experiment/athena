@@ -37,7 +37,8 @@ protected:
 
   virtual LayerMaterialMap_PERS* createPersistentWithKey ( Trk::LayerMaterialMap *transCont,
                                                            const std::string& key) override;
-  virtual Trk::LayerMaterialMap* createTransientWithKey (const std::string& key) override;
+  virtual Trk::LayerMaterialMap* createTransientWithKey ( const Token* token,
+                                                          const std::string& key) override;
 
   virtual AthenaPoolTopLevelTPCnvBase* getTopLevelTPCnv() { return &m_TPConverter_tlp1; }
 

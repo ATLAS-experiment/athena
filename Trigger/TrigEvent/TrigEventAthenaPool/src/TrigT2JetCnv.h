@@ -50,7 +50,7 @@ public:
 protected:
    
    virtual TrigT2Jet_PERS *createPersistent( TrigT2Jet *transObj);
-   virtual TrigT2Jet      *createTransient();
+   virtual TrigT2Jet      *createTransient(const Token* token);
  
   private:
  

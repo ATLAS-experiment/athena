@@ -50,7 +50,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TileCosmicMuonContainer* createTransient();
+  virtual TileCosmicMuonContainer* createTransient(const Token* token);
 
 };
 

@@ -27,7 +27,7 @@ TileMuFeature_PERS* TileMuFeatureCnv::createPersistent(TileMuFeature* transObj) 
 }
 
 //createTransient
-TileMuFeature* TileMuFeatureCnv::createTransient() {
+TileMuFeature* TileMuFeatureCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "TileMuFeatureConverter" );
 
     mlog << MSG::DEBUG << "TileMuFeatureCnv::createTransient " << endmsg;
@@ -38,15 +38,15 @@ TileMuFeature* TileMuFeatureCnv::createTransient() {
     static const pool::Guid p0_guid("526B0709-442D-4D2C-8C1F-8C3922149656");
 	// from "TrigEvent/TrigMuonEvent/TrigMuonEvent/selection.xml"
 
-    if( compareClassGuid(p1_guid) ) {
-      std::unique_ptr< TileMuFeature_p1 > col_vect( poolReadObject< TileMuFeature_p1 >() );
+    if( compareClassGuid(token, p1_guid) ) {
+      std::unique_ptr< TileMuFeature_p1 > col_vect( poolReadObject< TileMuFeature_p1 >(token) );
       TileMuFeatureCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
 
     }
-    else if( compareClassGuid(p0_guid) ) {
+    else if( compareClassGuid(token, p0_guid) ) {
       // old version from before TP separation, just return it
-      return this->poolReadObject<TileMuFeature>();
+      return this->poolReadObject<TileMuFeature>(token);
     }
     else {
       throw std::runtime_error("Unsupported persistent version");

@@ -48,7 +48,7 @@ public:
     
 protected:
    virtual CombinedMuonFeature_PERS* createPersistent( CombinedMuonFeature *transObj);
-   virtual CombinedMuonFeature* createTransient();
+   virtual CombinedMuonFeature* createTransient(const Token* token);
  
  
  private:

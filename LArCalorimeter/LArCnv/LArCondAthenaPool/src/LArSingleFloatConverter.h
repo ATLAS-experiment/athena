@@ -31,10 +31,10 @@ protected:
   virtual LArSingleFloatSubset_p1* createPersistent(LArConditionsSubset<LArSingleFloatP>* transObj);
 
   /** Throws and exception if object is not a LArConditionsSubset<LArSingleFloatP> */
-  virtual LArConditionsSubset<LArSingleFloatP>*  createTransient ();
+  virtual LArConditionsSubset<LArSingleFloatP>*  createTransient(const Token* token);
 
   /** returns NULL if object is not a LArConditionsSubset<LArSingleFloatP> */
-  LArConditionsSubset<LArSingleFloatP>*  createTransientSingleFloat ();
+  LArConditionsSubset<LArSingleFloatP>*  createTransientSingleFloat (const Token* token);
 
 
  private:
@@ -49,13 +49,13 @@ LArSingleFloatSubset_p1* LArSingleFloatConverter<TransientClass>::createPersiste
 }
 
 template<class TransientClass>
-LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::createTransientSingleFloat () {
+LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::createTransientSingleFloat (const Token* token) {
   static const pool::Guid p1_guid("85C3E380-4F5C-4F2B-81F0-D7C08A446800");
-  if(this->compareClassGuid(p1_guid) ) {
+  if(this->compareClassGuid(token,p1_guid) ) {
     MsgStream log(this->msgSvc(), "LArSingleFloatCompleteCnv" );
     LArSingleFloatSubset_p1* p;
     LArConditionsSubset<LArSingleFloatP>* t;
-    if(this->poolToObject(this->m_i_poolToken,p).isFailure() ) { // Token is passed via pointer member
+    if(this->poolToObject(token,p).isFailure() ) {
       throw std::runtime_error("POOL read failed");
     }
     t=m_TPconverter.createTransient(p,log);
@@ -66,8 +66,8 @@ LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::c
 }
 
 template<class TransientClass>
-LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::createTransient() {
-  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat();
+LArConditionsSubset<LArSingleFloatP>* LArSingleFloatConverter<TransientClass>::createTransient(const Token* token) {
+  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat(token);
   if (p) return p;
   throw std::runtime_error("Unsupported persistent version of LArConditionsSubset<LArSingleFloat>");
 }

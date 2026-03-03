@@ -27,7 +27,7 @@ TrigTauTracksInfo_PERS* TrigTauTracksInfoCnv::createPersistent(TrigTauTracksInfo
 }
 
 //create transient
-TrigTauTracksInfo* TrigTauTracksInfoCnv::createTransient() 
+TrigTauTracksInfo* TrigTauTracksInfoCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "TrigTauTracksInfoConverter" );
   mlog << MSG::DEBUG << "TrigTauTracksInfoCnv::createTransient " << endmsg;
@@ -37,18 +37,18 @@ TrigTauTracksInfo* TrigTauTracksInfoCnv::createTransient()
   
   TrigTauTracksInfo       *trans_cont(0);
   
-  if( compareClassGuid(tlp1_guid) ) {
+  if( compareClassGuid(token, tlp1_guid) ) {
     
     mlog << MSG::DEBUG << "TrigTauTracksInfoCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigTauTracksInfo_tlp1 >   col_vect( this->poolReadObject< TrigTauTracksInfo_tlp1 >() );
+    std::unique_ptr< TrigTauTracksInfo_tlp1 >   col_vect( this->poolReadObject< TrigTauTracksInfo_tlp1 >(token) );
     trans_cont = m_TPConverter->createTransient( col_vect.get(), mlog );
     
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     
     mlog << MSG::DEBUG << "TrigTauTracksInfoCnv::reading p0 persistent object" << endmsg;
     // old version from before TP separation, just return it
-    trans_cont = this->poolReadObject<TrigTauTracksInfo>();
+    trans_cont = this->poolReadObject<TrigTauTracksInfo>(token);
     
   }  else {
     

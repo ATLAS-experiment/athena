@@ -11,10 +11,10 @@ xAODTriggerMenuJsonAuxContainerCnv( ISvcLocator* svcLoc )
 }
 
 xAOD::TriggerMenuJsonAuxContainer*
-xAODTriggerMenuJsonAuxContainerCnv::createTransientWithKey (const std::string& key) {
+xAODTriggerMenuJsonAuxContainerCnv::createTransientWithKey (const Token* token, const std::string& key) {
 
   std::unique_ptr<xAOD::TriggerMenuJsonAuxContainer_v1> obj
-    { xAODTriggerMenuJsonAuxContainerCnvBase::createTransientWithKey (key) };
+    { xAODTriggerMenuJsonAuxContainerCnvBase::createTransientWithKey (token, key) };
 
   return obj.release();
 }

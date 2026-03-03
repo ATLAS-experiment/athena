@@ -38,7 +38,7 @@ protected:
   virtual HGTD_RDO_Container_PERS_t*
   createPersistent(HGTD_RDO_Container* trans) override;
 
-  virtual HGTD_RDO_Container* createTransient() override;
+  virtual HGTD_RDO_Container* createTransient(const Token* token) override;
 
 private:
   HGTD_RDO_ContainerCNV_t m_converter;

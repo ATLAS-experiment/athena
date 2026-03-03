@@ -27,7 +27,7 @@ class TrigMonEventCollectionCnv
 
  protected:
   TrigMonEventCollection_PERS*  createPersistent(TrigMonEventCollection* transObj);
-  TrigMonEventCollection*       createTransient ();
+  TrigMonEventCollection*       createTransient(const Token* token);
 
  private:
 

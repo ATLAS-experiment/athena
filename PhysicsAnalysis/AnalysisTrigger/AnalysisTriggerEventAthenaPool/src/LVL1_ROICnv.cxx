@@ -19,20 +19,20 @@ LVL1_ROI_PERS* LVL1_ROICnv::createPersistent( LVL1_ROI* transObj ) {
 
 }
 
-LVL1_ROI* LVL1_ROICnv::createTransient() {
+LVL1_ROI* LVL1_ROICnv::createTransient(const Token* token) {
 
   static const pool::Guid p1_guid( "5FBA83E0-77DC-43DD-A511-E4F0A49882E0" );
   static const pool::Guid p0_guid( "3E1829DE-9AA7-489C-AB81-406DF6CC544F" );
 
-  if( this->compareClassGuid( p1_guid ) ) {
+  if( this->compareClassGuid(token,  p1_guid ) ) {
 
-    std::unique_ptr< LVL1_ROI_p1 > pers_ref( this->poolReadObject< LVL1_ROI_p1 >() );
+    std::unique_ptr< LVL1_ROI_p1 > pers_ref( this->poolReadObject< LVL1_ROI_p1 >(token) );
     MsgStream log( this->msgSvc(), "LVL1_ROICnv" );
     return TPConverter.createTransientConst( pers_ref.get(), log );
 
-  } else if( this->compareClassGuid( p0_guid ) ) {
+  } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-    return this->poolReadObject< LVL1_ROI >();
+    return this->poolReadObject< LVL1_ROI >(token);
 
   }
 

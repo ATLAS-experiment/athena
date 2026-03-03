@@ -28,16 +28,16 @@ LArLATOMEHeaderContainerPERS* LArLATOMEHeaderContainerCnv::createPersistent(LArL
     
 
 
-LArLATOMEHeaderContainer* LArLATOMEHeaderContainerCnv::createTransient() {
-   if (compareClassGuid(m_p1_guid)) {
-     ATH_MSG_DEBUG("Reading LArLATOMEHeaderContainer_p1. GUID=" << m_classID.toString());
+LArLATOMEHeaderContainer* LArLATOMEHeaderContainerCnv::createTransient(const Token* token) {
+   if (compareClassGuid(token, m_p1_guid)) {
+     ATH_MSG_DEBUG("Reading LArLATOMEHeaderContainer_p1. token=" << token->toString());
      LArLATOMEHeaderContainer* trans=new LArLATOMEHeaderContainer();
-     std::unique_ptr<LArLATOMEHeaderContainer_p1> pers(poolReadObject<LArLATOMEHeaderContainer_p1>());
+     std::unique_ptr<LArLATOMEHeaderContainer_p1> pers(poolReadObject<LArLATOMEHeaderContainer_p1>(token));
      LArLATOMEHeaderContainerCnv_p1 converter;
      converter.persToTrans(pers.get(), trans, msg());
      return trans;
    } 
-   ATH_MSG_ERROR("Unsupported persistent version of LArLATOMEHeaderContainer. GUID=" << m_classID.toString());
+   ATH_MSG_ERROR("Unsupported persistent version of LArLATOMEHeaderContainer. token=" << token->toString());
    throw std::runtime_error("Unsupported persistent version of Data Collection");
    // not reached
 }

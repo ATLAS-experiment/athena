@@ -12,18 +12,18 @@
 #include "LArSingleFloatUpdater.h"
 
 LArConditionsSubset<LArSingleFloatP>*
-LArDAC2uACompleteCnv::createTransient ()
+LArDAC2uACompleteCnv::createTransient(const Token* token)
 {
   static const pool::Guid   p0_guid("00BB980F-D174-4AD7-A5C7-DC66BA71C4D2");
   // first try the single-float converter
-  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat();
+  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat(token);
   if (p) 
     return p;
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // subset from before TP separation    
     MsgStream log(msgSvc(), "LArDAC2uACompleteCnv" ); 
     log << MSG::DEBUG << "Reading LArDAC2uASubset (original)" << endmsg;     
-    std::unique_ptr< LArConditionsSubset<LArDAC2uAP> > subset ( poolReadObject< LArConditionsSubset<LArDAC2uAP> >() );
+    std::unique_ptr< LArConditionsSubset<LArDAC2uAP> > subset ( poolReadObject< LArConditionsSubset<LArDAC2uAP> >(token) );
     return (createTransient(subset.get()));
     
   } 

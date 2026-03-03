@@ -28,7 +28,7 @@ public:
 protected:
     
    virtual TrigMuonClusterFeature_PERS* createPersistent( TrigMuonClusterFeature *transObj);
-   virtual TrigMuonClusterFeature* createTransient();
+   virtual TrigMuonClusterFeature* createTransient(const Token* token);
 private:
    TrigMuonClusterFeatureCnv_tlp1 m_converter;
 
