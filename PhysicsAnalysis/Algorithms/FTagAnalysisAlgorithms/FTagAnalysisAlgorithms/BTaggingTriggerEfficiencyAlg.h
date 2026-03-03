@@ -68,7 +68,11 @@ namespace CP
     SysReadDecorHandle<char> m_matchingDecoration {
       this, "matchingDecoration", "", "the decoration for offline jet matched to HLT"};
     SysReadDecorHandle<char> m_bTagMatchingDecoration {
-      this, "bTagMatchingDecoration", "", "the decoration for offline jet  matched to HLT b-tag"};
+      this, "bTagTrigMatchingDecoration", "", "the decoration for offline jet  matched to HLT b-tag"};
+    SysReadDecorHandle<char> m_bTagSelectionDecoration {
+      this, "bTagSelectionDecoration", "", "the decoration for offline jet matched to offline b-tag"};
+
+    Gaudi::Property<bool> m_offlineFixedCut {this, "offlineFixedCut", false, "whether offline b-tag WP is FixedCut"};
 
   };
 }
