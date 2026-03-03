@@ -39,9 +39,41 @@ def qgTagAlgCfg(configFlags, **kwargs):
     tool_args.setdefault("ContainerName", jets_container)
     tool = acc.popToolsAndMerge(BJTToolCfg(kwargs, **tool_args))
 
+    # sf tool cfg
+    if 'sfs_file' in kwargs:
+        # input SF file
+        sfs_file = kwargs['sfs_file']
+        sfs_histo = "QGTransformer_ConstScore__" + kwargs['WP'] + "WP"
+
+        # configure the histogram reader
+        sfs_tool_args = {}
+
+        histo2D = {}
+        for parton in ['quark', 'gluon']:
+            for eff in ['eff', 'ineff']:
+                histo2D[parton + '_' + eff] = HistoInputCfg(configFlags, "histo2D",
+                                                            inputFile = sfs_file + '/SF_' + eff + '_' + parton + '_run2.root',
+                                                            histName = sfs_histo,
+                                                            varX = "pt", varY = "eta",
+                                                            InterpType="None")
+                sfs_tool_args.setdefault("HistoReader2D_" + parton + "_" + eff, histo2D[parton + '_' + eff])
+
+        # pick the BJT tool
+        sfs_tool_args.setdefault("JetContainer", jets_container)
+        sfs_tool_args.setdefault("TaggedName", "QGTransformer_Tagged")
+        sfs_tool_args.setdefault("Efficiency", "QGTransformer_Efficiency")
+        sfs_tool_args.setdefault("Inefficiency", "QGTransformer_Inefficiency")
+        sfs_tool_args.setdefault("truthLabelName", "PartonTruthLabelID")
+        sfs_tool_args.setdefault("jetPtMin", 20.)
+        sfs_tool_args.setdefault("jetPtMax", 2500.)
+        sfs_tool_args.setdefault("jetEtaMax", 4.5)
+        sfs_tool = acc.popToolsAndMerge(BJTSFToolCfg(kwargs, **sfs_tool_args))
+
     # configure the BJT algo
     algo_args = {}
     algo_args.setdefault("tagger", tool)
+    if 'sfs_file' in kwargs:
+        algo_args.setdefault("scalefactor", sfs_tool)
     algo_args.setdefault("jets", jets_container)
     acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("qgAlg", **algo_args))
 
@@ -119,5 +151,15 @@ def BJTToolCfg(flags, **kwargs):
         acc.setPrivateTools(CompFactory.SmoothedTopTagger(**kwargs))
     elif flags['tagger'] == 'qg':
         acc.setPrivateTools(CompFactory.BJT.qgTagger(**kwargs))
+
+    return acc
+
+def BJTSFToolCfg(flags, **kwargs):
+
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("OutputLevel", DEBUG)
+
+    acc.setPrivateTools(CompFactory.BJT.ScaleFactors(**kwargs))
 
     return acc

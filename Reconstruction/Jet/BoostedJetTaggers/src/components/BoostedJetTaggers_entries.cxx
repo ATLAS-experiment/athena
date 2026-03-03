@@ -8,6 +8,7 @@
 #include "BoostedJetTaggers/JSSMLTool.h"
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
 #include "BoostedJetTaggers/LundNetTagger.h"
+#include "BoostedJetTaggers/ScaleFactors.h"
 #include "AsgTools/AsgComponentFactories.h"
 
 DECLARE_COMPONENT(SmoothedWZTagger)
@@ -20,6 +21,7 @@ DECLARE_COMPONENT(BJT::qgTagger)
 DECLARE_COMPONENT(AthONNX::JSSMLTool)
 DECLARE_COMPONENT(JSSTaggerUtils)
 DECLARE_COMPONENT(LundNetTagger)
+DECLARE_COMPONENT(BJT::ScaleFactors)
 
 #ifndef XAOD_STANDALONE
 #include "src/BoostedJetTaggerAlg.h"
