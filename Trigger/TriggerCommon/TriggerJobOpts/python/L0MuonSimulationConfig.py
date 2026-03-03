@@ -55,7 +55,7 @@ def MuonBytestream2RdoConfig(flags):
     acc.addEventAlgo(cacheCreator)
     # for RPC
     RPCRodDecoder = CompFactory.Muon.RpcROD_Decoder(name = "RpcROD_Decoder" + postFix, NOBXS=flags.Trigger.L1MuonSim.RPCNBX)
-    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name = "RPC_RawDataProviderToolMT" + postFix,
+    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderTool(name = "RPC_RawDataProviderTool" + postFix,
                                                                              RpcContainerCacheKey = MuonCacheNames.RpcCache,
                                                                              WriteOutRpcSectorLogic = False,
                                                                              Decoder = RPCRodDecoder,

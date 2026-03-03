@@ -49,7 +49,7 @@ def RpcBytestreamDecodeCfg(flags, name="MuonRpcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}RPCPAD" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "RPCPAD"
-    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
+    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderTool(name    = "RPC_RawDataProviderTool",
                                                                  Decoder = RPCRodDecoder,
                                                                  RdoLocation = keyName )
     if flags.Muon.MuonTrigger:
