@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_METAHANDLEKEY_H
@@ -31,9 +31,13 @@ namespace SG {
   protected:
     bool isInit() const { return m_isInit; }
 
+    // Deliberately returning a non-const pointer here from a const
+    // member function.  We don't own the MetaCont, we just reference it.
+    // The Handle<> classes need to get a non-const MetaCont from a
+    // const HandleKey<>.
     MetaCont<T>* getContainer ATLAS_NOT_CONST_THREAD_SAFE () const { return m_cont; }
 
-    StoreGateSvc* getStore() const;
+    const StoreGateSvc* getStore() const;
 
   private:
 

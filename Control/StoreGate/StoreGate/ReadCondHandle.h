@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLE_H
@@ -125,9 +125,8 @@ namespace SG {
 
     if (ATH_UNLIKELY(m_cc == 0)) {
       // try to retrieve it
-      StoreGateSvc* cs = m_hkey.getCS();
       CondContBase *cb(nullptr);
-      if (cs->retrieve(cb, m_hkey.key()).isFailure()) {
+      if (m_hkey.getCS()->retrieve(cb, m_hkey.key()).isFailure()) {
         throw SG::ExcNoCondCont (m_hkey.fullKey().key(), "Can't retrieve.");
       } else {
         m_cc = dynamic_cast< CondCont<T>* > (cb);
