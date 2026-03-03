@@ -3,8 +3,8 @@
 */
 
 #include "UserDatabase.h"
+#include "UserSession.h"
 #include "DatabaseHandler.h"
-#include "TechnologyDispatcher.h"
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
@@ -17,19 +17,15 @@
 
 static const std::string& emptyString = "";
 
-pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::TechnologyDispatcher& technologyDispatcher,
-                                                  const pool::DatabaseConnectionPolicy& policy,
-                                                  IFileCatalog& catalog,
-                                                  pool::ITransaction& transaction,
-                                                  pool::PersistencySvc::DatabaseRegistry& registry,
+pool::PersistencySvc::UserDatabase::UserDatabase( pool::PersistencySvc::UserSession& session,
                                                   const std::string& name,
-                                                  pool::DatabaseSpecification::NameType nameType ):
+                                                  const pool::DatabaseSpecification::NameType nameType ):
   APRMessaging("PersistencySvc::UserDB"),                                                  
-  m_technologyDispatcher( technologyDispatcher ),
-  m_policy( policy ),
-  m_catalog( catalog ),
-  m_transaction( transaction ),
-  m_registry( registry ),
+  m_session( session ),
+  m_policy( session.defaultConnectionPolicy() ),
+  m_catalog( session.fileCatalog() ),
+  m_transaction( session.transaction() ),
+  m_registry( session.registry() ),
   m_name( name ),
   m_nameType( nameType ),
   m_technology( 0 ),
@@ -91,7 +87,7 @@ pool::PersistencySvc::UserDatabase::connectForRead()
       };
 
       // Now we have all the usefull information to open the file.
-      pool::PersistencySvc::MicroSessionManager& sessionManager = m_technologyDispatcher.microSessionManager( m_technology );
+      pool::PersistencySvc::MicroSessionManager& sessionManager = m_session.microSessionManager( m_technology );
       long accessMode = pool::READ;
       if ( m_transaction.type() == pool::ITransaction::UPDATE &&
            m_policy.readMode() == pool::DatabaseConnectionPolicy::UPDATE ) {
@@ -101,7 +97,7 @@ pool::PersistencySvc::UserDatabase::connectForRead()
       m_databaseHandler = m_registry.lookupByFID( m_the_fid );
       if( !m_databaseHandler ) {
          // still no luck - make a new connection
-         m_databaseHandler = sessionManager.connect( m_the_fid, m_the_pfn, accessMode );
+         m_databaseHandler = sessionManager.connect( m_transaction, m_the_fid, m_the_pfn, accessMode );
       }
       if( m_databaseHandler ) {
         m_openMode = ( ( accessMode == pool::READ ) ? pool::IDatabase::READ : pool::IDatabase::UPDATE );
@@ -193,20 +189,19 @@ pool::PersistencySvc::UserDatabase::connectForWrite()
       };
 
       if( accessMode == pool::UPDATE
-          && m_policy.writeModeForNonExisting() == pool::DatabaseConnectionPolicy::CREATE ) {
-         accessMode = pool::UPDATE | pool::CREATE;
-      }
-      m_databaseHandler = m_technologyDispatcher.microSessionManager( m_technology ).connect( m_the_fid, m_the_pfn, accessMode );
-      if( !m_databaseHandler ) {
-	 if( dbRegistered ) {
-	    // creation failed, remove entry from the in-memory catalog
-	    m_catalog.deleteFID( m_the_fid );
-	 }
-	 throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
-      }
-      m_openMode = pool::IDatabase::UPDATE;
-      
-    } // Connection established
+        && m_policy.writeModeForNonExisting() == pool::DatabaseConnectionPolicy::CREATE ) {
+          accessMode = pool::UPDATE | pool::CREATE;
+        }
+        m_databaseHandler = m_session.microSessionManager( m_technology ).connect( m_transaction, m_the_fid, m_the_pfn, accessMode );
+        if( !m_databaseHandler ) {
+          if( dbRegistered ) {
+            // creation failed, remove entry from the in-memory catalog
+            m_catalog.deleteFID( m_the_fid );
+          }
+          throw std::runtime_error( "Could not connect to the file (APR: \" UserDatabase::connectForWrite \" from \" PersistencySvc \")" );
+        }
+        m_openMode = pool::IDatabase::UPDATE;
+      } // Connection established
 
   } // Database handler retrieved
 }
@@ -216,7 +211,7 @@ void
 pool::PersistencySvc::UserDatabase::disconnect()
 {
   if ( m_databaseHandler ) {
-    m_technologyDispatcher.microSessionManager( m_technology ).disconnect( m_databaseHandler );
+    m_session.microSessionManager( m_technology ).disconnect( m_databaseHandler );
     m_openMode = pool::IDatabase::CLOSED;
   }
 }
@@ -260,8 +255,7 @@ pool::PersistencySvc::UserDatabase::fid()
                  m_technology = pool::ROOT_StorageType.type();
                  m_technologySet = true;
               }
-              pool::PersistencySvc::MicroSessionManager& sessionManager = m_technologyDispatcher.microSessionManager( m_technology );
-              m_the_fid = sessionManager.fidForPfn( m_name );
+              m_the_fid = m_session.microSessionManager( m_technology ).fidForPfn( m_name );
               if( ! m_the_fid.empty() ) {
                  // sanity check - verify that the FID is not registered in PFC under a different name
                  std::string  pfn, tech;

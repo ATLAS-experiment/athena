@@ -8,6 +8,7 @@
 #define PERSISTENCYSVC_IPERSISTENCYSVC
 
 #include "DataModelRoot/RootType.h"
+#include "PersistencySvc/ISession.h"
 
 #include <string>
 #include <memory>
@@ -21,7 +22,6 @@ class Token;
 namespace pool {
 
    class IFileCatalog;
-   class ISession;
 
    /** @class IPersistencySvc IPersistencySvc.h PersistencySvc/IPersistencySvc.h
    * 
@@ -29,7 +29,7 @@ namespace pool {
    *  the conversion between transient and persistent objects.
    *
    */
-  class IPersistencySvc { 
+  class IPersistencySvc : virtual public ISession { 
   public:
 
     /// Factory for PersistencySvc
@@ -66,8 +66,6 @@ namespace pool {
                                      const void* object,
                                      const RootType& type ) = 0;
     
-    /// Returns the underlying global session
-    virtual ISession& session() = 0;
 
   protected:
     /// No copy constructor, and no assignment operator

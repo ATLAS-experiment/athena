@@ -20,7 +20,7 @@ namespace pool {
 
   namespace PersistencySvc {
     // forward declarations
-    class TechnologyDispatcher;
+    class UserSession;
     class DatabaseHandler;
     class DatabaseRegistry;
 
@@ -35,13 +35,9 @@ namespace pool {
     {
     public:
       /// Constructor
-      UserDatabase( TechnologyDispatcher& technologyDispatcher,
-		    const DatabaseConnectionPolicy& policy,
-		    IFileCatalog& fileCatalog,
-		    ITransaction& transaction,
-		    DatabaseRegistry& registry,
-		    const std::string& name,
-		    DatabaseSpecification::NameType nameType );
+      UserDatabase( UserSession& session,
+		                const std::string& name,
+		                const DatabaseSpecification::NameType nameType );
 
       /// Destructor
       virtual ~UserDatabase();
@@ -99,8 +95,8 @@ namespace pool {
                                const std::type_info& typeInfo,
                                const std::string& option ) override;
     private:
-      /// Reference to the technology dispatcher
-      TechnologyDispatcher&                   m_technologyDispatcher;
+      /// Reference to the session
+      UserSession&                            m_session;
       /// Reference to the policy
       const DatabaseConnectionPolicy&         m_policy;
       /// Reference to the file catalog

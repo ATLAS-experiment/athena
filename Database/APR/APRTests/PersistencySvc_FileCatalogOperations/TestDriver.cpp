@@ -61,10 +61,10 @@ pool::TestDriver::write()
   pool::DatabaseConnectionPolicy policy;
   policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
   policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  persistencySvc->session().setDefaultConnectionPolicy( policy );
+  persistencySvc->setDefaultConnectionPolicy( policy );
 
   // Start an update transaction
-  if ( ! ( persistencySvc->session().transaction().start( pool::ITransaction::UPDATE ) ) ) {
+  if( !persistencySvc->transaction().start( pool::ITransaction::UPDATE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -95,7 +95,7 @@ pool::TestDriver::write()
   }
 
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !persistencySvc->transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -128,11 +128,11 @@ pool::TestDriver::read()
   catalog.start();
 
   // Starting a read transaction
-  if ( ! persistencySvc->session().transaction().start( pool::ITransaction::READ ) ) {
+  if( !persistencySvc->transaction().start( pool::ITransaction::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  auto db = persistencySvc->session().databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
+  auto db = persistencySvc->databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -176,7 +176,7 @@ pool::TestDriver::read()
   delete container;
 
   std::cout << "Committing the transaction." << std::endl;
-  if ( ! persistencySvc->session().transaction().commit() ) {
+  if( !persistencySvc->transaction().commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
