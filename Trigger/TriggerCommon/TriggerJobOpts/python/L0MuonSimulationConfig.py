@@ -90,8 +90,8 @@ def MuonBytestream2RdoConfig(flags):
     # for MM
     if flags.Detector.GeometryMM:
         from MuonConfig.MuonBytestreamDecodeConfig import MmRDODDecoderCfg
-        Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
-        MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT"+postFix,
+        Muon_MM_RawDataProviderTool = CompFactory.Muon.MM_RawDataProviderTool
+        MuonMmRawDataProviderTool = Muon_MM_RawDataProviderTool(name  = "MM_RawDataProviderTool"+postFix,
                                                                   Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags,
                                                                                                  name="MM_RODDecoder"+postFix)),
                                                                   RdoLocation = "MMRDO_L1")
