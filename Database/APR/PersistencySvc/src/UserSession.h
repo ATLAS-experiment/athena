@@ -5,7 +5,9 @@
 #ifndef INCLUDE_PERSISTENCYSVC_USERSESSION_H
 #define INCLUDE_PERSISTENCYSVC_USERSESSION_H
 
-#include "PersistencySvc/ISession.h"
+#include "PersistencySvc/IPersistencySvc.h"
+
+#include <map>
 
 namespace pool {
 
@@ -15,8 +17,8 @@ namespace pool {
 
     // forward declarations
     class DatabaseRegistry;
-    class TechnologyDispatcher;
     class GlobalTransaction;
+    class MicroSessionManager;
 
     /** @class UserSession
      *
@@ -24,7 +26,7 @@ namespace pool {
      *
      */
 
-    class UserSession : virtual public ISession
+    class UserSession : virtual public pool::IPersistencySvc
     {
     public:
       /// Constructor
@@ -36,9 +38,38 @@ namespace pool {
       UserSession (const UserSession&) = delete;
       UserSession& operator= (const UserSession&) = delete;
 
+
+      /** Retrieves an object from persistent store and return with type information
+       *  The handle to the reflection class is necessary to later delete the object.
+       *  The Guid of the transient class is assumed to be the classID of the token
+       *
+       * @param  token   [IN]  reference to the token for the object
+       * @param  object  [IN]  pointer to memory for the object (created if 0)
+       *
+       * @return void*   The data.
+       *
+       * In case of failure zero is returned.
+       *
+       */
+      void* readObject( const Token& token, void* object = 0 );
+
+
+      /**  registerForWrite registers an object for writing to the persistent medium
+       *   higher level interactions with the framework are necessary.
+       *
+       * @param  place        [IN]  the placement hint
+       * @param  object       [IN]  pointer to transient object which will be written
+       * @param  type         [IN]  reflection class description with the layout of transient object
+       *
+       * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
+       *
+       */
+      Token* registerForWrite( const Placement& place, const void* object, const RootType& type );
+
+
       // Signatures needed for the PersistencySvc
       DatabaseRegistry& registry();
-      TechnologyDispatcher& technologyDispatcher();
+      //TechnologyDispatcher& technologyDispatcher();
 
       /// Sets the default policy when databases are opened/connected
       virtual void setDefaultConnectionPolicy( const DatabaseConnectionPolicy& policy ) override final;
@@ -75,12 +106,16 @@ namespace pool {
       /// Returns the global transaction object
       ITransaction& globalTransaction();
       
+      /// Returns the technology given a technology type.
+      MicroSessionManager& microSessionManager( long technology );
+
     private:
       DatabaseConnectionPolicy*      m_policy;
       IFileCatalog*                  m_catalog;
       DatabaseRegistry*              m_registry;
       GlobalTransaction*             m_transaction;
-      TechnologyDispatcher*          m_technologyDispatcher;
+      std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
+
     };
   }
 }

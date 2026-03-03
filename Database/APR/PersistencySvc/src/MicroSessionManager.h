@@ -33,14 +33,16 @@ namespace pool {
     class MicroSessionManager : virtual public ITechnologySpecificAttributes {
     public:
       /// Constructor
-      MicroSessionManager( DatabaseRegistry& registry,
-                           ITransaction& transaction,
-                           long technology );
+      MicroSessionManager( DatabaseRegistry& registry, long technology );
       /// Destructor
       virtual ~MicroSessionManager();
 
+      /// Connects to the storage service
+      bool connect( ITransaction& transaction );
+
       /// Connects to a database.
-      DatabaseHandler* connect( const std::string& fid,
+      DatabaseHandler* connect( ITransaction& transaction,
+                                const std::string& fid,
                                 const std::string& pfn,
                                 long accessMode );
 
@@ -71,7 +73,6 @@ namespace pool {
 
     private:
       DatabaseRegistry&          m_registry;
-      ITransaction&              m_transaction;
       IStorageSvc*               m_storageSvc;
       bool                       m_inSession;
       long                       m_technology;

@@ -3,10 +3,10 @@
 */
 
 #include "PersistencySvc/IPersistencySvc.h"
-#include "PersistencySvc.h"
+#include "UserSession.h"
 
 std::unique_ptr< pool::IPersistencySvc >
 pool::IPersistencySvc::create( IFileCatalog& catalog )
 {
-   return std::unique_ptr<IPersistencySvc>( new PersistencySvc::PersistencySvc(catalog) );
+   return std::unique_ptr<IPersistencySvc>(  new PersistencySvc::UserSession(catalog) );
 }

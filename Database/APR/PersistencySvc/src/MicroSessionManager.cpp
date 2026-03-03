@@ -16,10 +16,8 @@
 #include <exception>
 
 pool::PersistencySvc::MicroSessionManager::MicroSessionManager( pool::PersistencySvc::DatabaseRegistry& registry,
-                                                                pool::ITransaction& transaction,
                                                                 long technology ):
   m_registry( registry ),
-  m_transaction( transaction ),
   m_storageSvc( 0 ),
   m_inSession( false ),
   m_technology( technology ),
@@ -39,15 +37,30 @@ pool::PersistencySvc::MicroSessionManager::~MicroSessionManager()
 }
 
 
+bool
+pool::PersistencySvc::MicroSessionManager::connect( ITransaction& transaction )
+{
+  if( !m_inSession ) {
+    long mode = pool::READ;
+    if( transaction.type() == ITransaction::UPDATE ) {
+      mode = pool::UPDATE;
+    }
+    m_inSession = m_storageSvc->startSession(mode, m_technology).isSuccess();
+  }
+  return m_inSession;
+}
+
+
 pool::PersistencySvc::DatabaseHandler*
-pool::PersistencySvc::MicroSessionManager::connect( const std::string& fid,
+pool::PersistencySvc::MicroSessionManager::connect( ITransaction& transaction,
+                                                    const std::string& fid,
                                                     const std::string& pfn,
                                                     long accessMode )
 {
-  if ( ! m_transaction.isActive() ) return 0;
-  if ( m_databaseHandlers.empty() ) {
+  if( !transaction.isActive() ) return 0;
+  if( m_databaseHandlers.empty() ) {
     long mode = pool::READ;
-    if ( m_transaction.type() == ITransaction::UPDATE ) {
+    if( transaction.type() == ITransaction::UPDATE ) {
       mode = pool::UPDATE;
     }
 
@@ -154,7 +167,6 @@ pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
   return fid;
 }
 
-
 bool
 pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& attributeName,
                                                             void* data,
@@ -162,14 +174,7 @@ pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& a
                                                             const std::string& option )
 {
   if( !m_inSession ) {
-    long mode = pool::READ;
-    if ( m_transaction.type() == ITransaction::UPDATE ) {
-      mode = pool::UPDATE;
-    }
-    if( !m_storageSvc->startSession(mode, m_technology).isSuccess() ) {
       return false;
-    }
-    m_inSession = true;
   }
   pool::DbOption domainOption( attributeName, option );
   if( !m_storageSvc->getDomainOption(domainOption).isSuccess() ) return false;
@@ -183,14 +188,7 @@ pool::PersistencySvc::MicroSessionManager::setAttributeOfType( const std::string
                                                                const std::string& option )
 {
   if( !m_inSession ) {
-    long mode = pool::READ;
-    if ( m_transaction.type() == ITransaction::UPDATE ) {
-      mode = pool::UPDATE;
-    }
-    if( !m_storageSvc->startSession( mode, m_technology).isSuccess() ) {
       return false;
-    }
-    m_inSession = true;
   }
   pool::DbOption domainOption( attributeName, option );
   if( !domainOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
