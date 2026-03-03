@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 
@@ -228,7 +228,7 @@ class JetUncertaintiesConfig (ConfigBlock) :
         jetUncertaintiesAlg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
         jetUncertaintiesAlg.uncertaintiesTool.ConfigFile = configFile
         from PathResolver import PathResolver
-        if self.analysisFile is not None:
+        if self.analysisFile:
           jetUncertaintiesAlg.uncertaintiesTool.AnalysisFile = PathResolver.FindCalibFile(self.analysisFile)
         if calibArea is not None:
             jetUncertaintiesAlg.uncertaintiesTool.CalibArea = calibArea
