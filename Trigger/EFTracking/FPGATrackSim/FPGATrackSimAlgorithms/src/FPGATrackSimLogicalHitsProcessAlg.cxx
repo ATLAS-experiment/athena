@@ -123,7 +123,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::initialize()
         ATH_CHECK(m_monTool.retrieve());
 
     ATH_CHECK( m_FPGASpacePointsKey.initialize() );
-    ATH_CHECK( m_FPGAHitInRoadsKey.initialize() );
     ATH_CHECK( m_FPGAHitFilteredKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
@@ -167,7 +166,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_1st (m_FPGAHitKey_1st,ctx);
     SG::WriteHandle<ConstDataVector<FPGATrackSimHitCollection>> FPGAHits_2nd (m_FPGAHitKey_2nd,ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_1st (m_FPGARoadKey, ctx);
-    SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_1st (m_FPGAHitInRoadsKey, ctx);
 
     // Use ConstDataVector with VIEW_ELEMENTS for non-owning const pointer storage
     ATH_CHECK( FPGAHits_1st.record (std::make_unique<ConstDataVector<FPGATrackSimHitCollection>>(SG::VIEW_ELEMENTS)) );
@@ -176,7 +174,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
     auto* FPGAHits_2nd_cdv = FPGAHits_2nd.ptr();
 
     ATH_CHECK( FPGARoads_1st.record (std::make_unique<FPGATrackSimRoadCollection>()));
-    ATH_CHECK( FPGAHitsInRoads_1st.record (std::make_unique<FPGATrackSimHitContainer>()));
 
     SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_1stHandle (m_FPGATrackKey, ctx);
     ATH_CHECK(FPGATracks_1stHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
@@ -485,14 +482,6 @@ StatusCode FPGATrackSimLogicalHitsProcessAlg::execute()
 
     // Loop over roads and store them in SG (after track finding to also copy the sector information)
     for (auto const& road : roads_1st) {
-        auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
-        ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
-        for (size_t l = 0; l < road.getNLayers(); ++l) {
-            for (const auto& layerH : road.getHitPtrs(l)) {
-                road_hits->push_back(new FPGATrackSimHit(*layerH));
-            }
-        }
-        FPGAHitsInRoads_1st->push_back(std::move(*road_hits));
         FPGARoads_1st->push_back(road);
     }
 

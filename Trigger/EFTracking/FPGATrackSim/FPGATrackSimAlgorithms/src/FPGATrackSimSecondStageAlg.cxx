@@ -82,7 +82,6 @@ StatusCode FPGATrackSimSecondStageAlg::initialize()
         ATH_CHECK(m_monTool.retrieve());
 
     ATH_CHECK( m_FPGAInputTrackKey.initialize());
-    ATH_CHECK( m_FPGAHitInRoadsKey.initialize() );
     ATH_CHECK( m_FPGARoadKey.initialize() );
     ATH_CHECK( m_FPGATrackKey.initialize() );
     ATH_CHECK( m_FPGAHitKey.initialize() );
@@ -132,10 +131,8 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
 
     // Set up write handles.
     SG::WriteHandle<FPGATrackSimRoadCollection> FPGARoads_2nd (m_FPGARoadKey, ctx);
-    SG::WriteHandle<FPGATrackSimHitContainer> FPGAHitsInRoads_2nd (m_FPGAHitInRoadsKey, ctx);
 
     ATH_CHECK( FPGARoads_2nd.record (std::make_unique<FPGATrackSimRoadCollection>()));
-    ATH_CHECK( FPGAHitsInRoads_2nd.record (std::make_unique<FPGATrackSimHitContainer>()));
 
     SG::WriteHandle<FPGATrackSimTrackCollection> FPGATracks_2ndHandle (m_FPGATrackKey, ctx);
     ATH_CHECK(FPGATracks_2ndHandle.record (std::make_unique<FPGATrackSimTrackCollection>()));
@@ -194,14 +191,6 @@ StatusCode FPGATrackSimSecondStageAlg::execute()
         ATH_CHECK(m_trackExtensionTool->extendTracks(phits_2nd, *FPGAInputTracks, roads));
 
         for (auto const& road : roads) {
-            auto road_hits = std::make_unique<FPGATrackSimHitCollection>();
-            ATH_MSG_DEBUG("Hough Road X Y: " << road.getX() << " " << road.getY());
-            for (size_t l = 0; l < road.getNLayers(); ++l) {
-                for (const auto& layerH : road.getHitPtrs(l)) {
-                    road_hits->push_back(new FPGATrackSimHit(*layerH));
-                }
-            }
-            FPGAHitsInRoads_2nd->push_back(std::move(*road_hits));
             FPGARoads_2nd->push_back(road);
         }
     }
