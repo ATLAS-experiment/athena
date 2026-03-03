@@ -14,7 +14,6 @@ class FTagConfig (ConfigBlock):
             noneAction='error',
             info="the name of the input container.")
         self.addOption ('selectionName', '', type=str,
-            noneAction='error',
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as internally the string "
             "`f'{btagger}_{btagWP}'` is used.")
