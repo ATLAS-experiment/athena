@@ -352,7 +352,7 @@ def MmBytestreamDecodeCfg(flags, name="MuonMmRdoProvider", **kwargs):
    
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}MMRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MMRDO"
-    MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
+    MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderTool(name  = "MM_RawDataProviderTool",
                                                               Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags)),
                                                               RdoLocation = keyName,
                                                               SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain)
