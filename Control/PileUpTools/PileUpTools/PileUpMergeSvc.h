@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file PileUpMergeSvc.h
@@ -112,7 +112,7 @@ public:
 
   /// get EventInfo from SG, by default using p_overStore
   const xAOD::EventInfo* getPileUpEvent( StoreGateSvc* sg,
-                                         const std::string& einame ) const;
+                                         const std::string& einame );
 
 private:
   ServiceHandle<StoreGateSvc> p_overStore;      ///< overlaid SG (default)
