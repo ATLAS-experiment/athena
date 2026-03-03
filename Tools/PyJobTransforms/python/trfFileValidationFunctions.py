@@ -12,7 +12,15 @@ import PyJobTransforms.trfExceptions as trfExceptions
 
 ## @brief Integrity function for file class argPOOLFile, argHITSFile, argRDOFile and argEVNTFile
 def returnIntegrityOfPOOLFile(fname):
-    from PyJobTransforms.trfValidateRootFile import checkFile
+    from PyJobTransforms.trfValidateRootFile import checkFile, msg as logger
+    import multiprocessing
+
+    if (level := msg.getEffectiveLevel()) < logger.getEffectiveLevel():
+        logger.setLevel(level)
+        msg.debug(f"Set logging level of {logger.name!r} to {logging.getLevelName(level)!r}")
+
+    msg.debug(f"Current process: {multiprocessing.current_process().name}")
+
     rc = checkFile(fileName=fname, the_type='event', requireTree=False)
     if rc == 0:
         return (True, "integrity of {fileName} good".format(fileName = str(fname)))

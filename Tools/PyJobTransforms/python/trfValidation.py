@@ -772,13 +772,27 @@ class scriptLogFileReport(logFileReport):
 ## @brief return integrity of file using appropriate validation function
 #  @ detail This method returns the integrity of a specified file using a
 #  @ specified validation function.
-def returnIntegrityOfFile(file, functionName):
+def returnIntegrityOfFile(file, functionName, level=None):
     try:
         import PyJobTransforms.trfFileValidationFunctions as trfFileValidationFunctions
     except Exception as exception:
         msg.error('Failed to import module PyJobTransforms.trfFileValidationFunctions with error {error}'.format(error = exception))
         raise
+
+    import multiprocessing
+
+    if level is not None:
+        if level < msg.getEffectiveLevel():
+            msg.setLevel(level)
+            msg.debug(f"Set logging level of {msg.name!r} to {logging.getLevelName(level)!r}")
+        if level < (logger := trfFileValidationFunctions.msg).getEffectiveLevel():
+            logger.setLevel(level)
+            msg.debug(f"Set logging level of {logger.name!r} to {logging.getLevelName(level)!r}")
+
+    msg.debug(f"Current process: {multiprocessing.current_process().name}")
+
     validationFunction = getattr(trfFileValidationFunctions, functionName)
+    msg.debug(f"Calling {validationFunction.__name__}({file})")
     return validationFunction(file)
 
 
@@ -878,7 +892,8 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
                         workFunction = returnIntegrityOfFile,
                         workFunctionKeywordArguments = {
                             'file': fname,
-                            'functionName': arg.integrityFunction
+                            'functionName': arg.integrityFunction,
+                            'level': msg.getEffectiveLevel(),
                         },
                         workFunctionTimeout = 600
                     )
@@ -890,7 +905,7 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
             jobs = jobs
         )
         # Prepare the parallel job processor.
-        parallelJobProcessor1 = trfUtils.ParallelJobProcessor()
+        parallelJobProcessor1 = trfUtils.ParallelJobProcessor(numberOfProcesses=len(jobs))
         # Submit the file validation jobs to the parallel job processor.
         msg.info('Submitting file validation jobs to parallel job processor')
         parallelJobProcessor1.submit(jobSubmission = jobGroup1)
