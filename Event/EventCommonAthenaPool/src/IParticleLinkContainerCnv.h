@@ -51,7 +51,7 @@ protected:
   virtual IParticleLinkContainer_PERS*   createPersistent ( IParticleLinkContainer* transCont );
 
   /** Member method to create the transient version */
-  virtual IParticleLinkContainer*        createTransient ();
+  virtual IParticleLinkContainer*        createTransient(const Token* token);
 
   /** Create the t/p converter */
   IParticleLinkContainerCnv_p1 m_TPConverter;

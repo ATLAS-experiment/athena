@@ -32,7 +32,7 @@ public:
     virtual ~sTgcPrepDataContainerCnv();
     
     virtual sTgcPrepDataContainer_PERS*   createPersistent (Muon::sTgcPrepDataContainer* transCont);
-    virtual Muon::sTgcPrepDataContainer*  createTransient ();
+    virtual Muon::sTgcPrepDataContainer*  createTransient(const Token* token);
 
     virtual StatusCode initialize();
         

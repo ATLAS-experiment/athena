@@ -28,7 +28,7 @@ public:
   
 protected:
   virtual TRT_BSIdErrContainer_PERS*   createPersistent (TRT_BSIdErrContainer* transCont);
-  virtual TRT_BSIdErrContainer*       createTransient ();
+  virtual TRT_BSIdErrContainer*       createTransient(const Token* token);
 
   TRT_BSIdErrContainerCnv_p1  m_TPConverter;
 };

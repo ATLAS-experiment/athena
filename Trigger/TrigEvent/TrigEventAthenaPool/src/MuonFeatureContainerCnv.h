@@ -26,7 +26,7 @@ public:
 protected:
 
   virtual MuonFeatureContainer_PERS *createPersistent( MuonFeatureContainer *transObj);
-  virtual MuonFeatureContainer      *createTransient();
+  virtual MuonFeatureContainer      *createTransient(const Token* token);
 private:
   MuonFeatureContainerCnv_tlp1   m_converter1;
   MuonFeatureContainerCnv_tlp2   m_converter2;

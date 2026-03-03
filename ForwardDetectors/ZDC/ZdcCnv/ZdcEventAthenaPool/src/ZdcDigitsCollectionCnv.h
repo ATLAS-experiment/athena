@@ -20,7 +20,7 @@ public:
   ZdcDigitsCollectionCnv(ISvcLocator* svcloc) : ZdcDigitsCollectionCnvBase ( svcloc) {}
 protected:
   virtual ZdcDigitsCollection_PERS*  createPersistent(ZdcDigitsCollection* transCont);
-  virtual ZdcDigitsCollection*       createTransient ();
+  virtual ZdcDigitsCollection*       createTransient(const Token* token);
 };
 
 

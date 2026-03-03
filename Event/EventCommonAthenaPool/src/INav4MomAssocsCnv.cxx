@@ -52,7 +52,7 @@ INav4MomAssocsCnv::createPersistent( INav4MomAssocs* transCont )
   return persObj;
 }
 
-INav4MomAssocs* INav4MomAssocsCnv::createTransient() 
+INav4MomAssocs* INav4MomAssocsCnv::createTransient(const Token* token) 
 {
   INav4MomAssocs *transObj = 0;
 
@@ -61,25 +61,25 @@ INav4MomAssocs* INav4MomAssocsCnv::createTransient()
   static const pool::Guid p2_guid("8040BEAA-BC65-43B8-B468-A7157C89ACB3");
   static const pool::Guid p3_guid("455AEE6B-9834-4E72-8F81-2532A52E3BE7");
 
-  if( compareClassGuid(p3_guid) ) {
+  if( compareClassGuid(token, p3_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p3> persObj( poolReadObject<INav4MomAssocs_p3>() );
+    std::unique_ptr<INav4MomAssocs_p3> persObj( poolReadObject<INav4MomAssocs_p3>(token) );
     transObj =  m_tpConverter_p3.createTransient( persObj.get(), msg() );
   }
-  else if ( compareClassGuid(p2_guid) ) {
+  else if ( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p2> persObj( poolReadObject<INav4MomAssocs_p2>() );
+    std::unique_ptr<INav4MomAssocs_p2> persObj( poolReadObject<INav4MomAssocs_p2>(token) );
     transObj = m_tpConverter_p2.createTransient( persObj.get(), msg() );
   }
-  else if( compareClassGuid(p1_guid) ) {
+  else if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p1> persObj( poolReadObject<INav4MomAssocs_p1>() );
+    std::unique_ptr<INav4MomAssocs_p1> persObj( poolReadObject<INav4MomAssocs_p1>(token) );
     INav4MomAssocsCnv_p1 cnv( m_storeGate.get() );
     transObj = cnv.createTransient( persObj.get(), msg() );
   }
-  else if( compareClassGuid(tr_guid) ) {
+  else if( compareClassGuid(token, tr_guid) ) {
      // regular object from before the T/P separation
-     return poolReadObject<INav4MomAssocs>();
+     return poolReadObject<INav4MomAssocs>(token);
   }
   else {
     throw std::runtime_error("Unsupported persistent version of INav4MomAssocs");

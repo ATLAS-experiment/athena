@@ -16,27 +16,27 @@
 static const LArMphysOverMcalSubsetCnv_p1 TPconverter;
 
 LArConditionsSubset<LArSingleFloatP>*
-LArMphysOverMcalMCCnv::createTransient ()
+LArMphysOverMcalMCCnv::createTransient(const Token* token)
 {
   static const pool::Guid   p0_guid("9C53AC43-3FD6-470F-A6FF-1DF80E85ACBF");
   static const pool::Guid   p1_guid("60FB956A-0B7F-450E-BF6A-2A0B8ED55204");
   // first try the single-float converter
-  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat();
+  LArConditionsSubset<LArSingleFloatP>* p=createTransientSingleFloat(token);
   if (p) 
     return p;
-  else if( compareClassGuid(p1_guid) ) {
+  else if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< LArMphysOverMcalSubset_p1 > col_vect( poolReadObject< LArMphysOverMcalSubset_p1 >() );
+    std::unique_ptr< LArMphysOverMcalSubset_p1 > col_vect( poolReadObject< LArMphysOverMcalSubset_p1 >(token) );
     MsgStream log(msgSvc(), "LArMphysOverMcalMCCnv" ); 
     //log << MSG::INFO << "Reading LArMphysOverMcalSubset_p1" << endmsg; 
     return TPconverter.createTransientConst( col_vect.get(), log );
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // subset from before TP separation    
     MsgStream log(msgSvc(), "LArMphysOverMcalMCCnv" ); 
     log << MSG::DEBUG << "Reading LArMphysOverMcalSubset (original)" << endmsg; 
     
-    std::unique_ptr< LArConditionsSubset<LArMphysOverMcalP> > subset ( poolReadObject< LArConditionsSubset<LArMphysOverMcalP> >() );
+    std::unique_ptr< LArConditionsSubset<LArMphysOverMcalP> > subset ( poolReadObject< LArConditionsSubset<LArMphysOverMcalP> >(token) );
     // Here we must convert from LArMphysOverMcalP to LArMphysOverMcalP1
     return (createTransient(subset.get()));
     

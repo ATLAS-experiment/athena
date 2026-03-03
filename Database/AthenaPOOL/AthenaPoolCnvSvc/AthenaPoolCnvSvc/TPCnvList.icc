@@ -23,9 +23,11 @@ namespace AthenaPoolCnvSvc {
 template <class CNV, class TRANS, class ... TPCNVS>
 inline
 TPCnvList<CNV, TRANS, TPCNVS...>::do_create_transient::do_create_transient (CNV& parent,
+                                                                            const Token* token,
                                                                             const std::string& key,
                                                                             MsgStream& msg)
   : m_parent (parent),
+    m_token (token),
     m_key (key),
     m_msg (msg)
 {
@@ -52,7 +54,7 @@ TPCnvList<CNV, TRANS, TPCNVS...>::do_create_transient::operator()
   (typename ELT::Trans_t* p, ELT& elt)
 {
   if (p) return p;
-  return elt.createTransient (m_parent, m_key, m_msg).release();
+  return elt.createTransient (m_parent, m_token, m_key, m_msg).release();
 }
 
 
@@ -66,9 +68,10 @@ TPCnvList<CNV, TRANS, TPCNVS...>::do_create_transient::operator()
 template <class CNV, class TRANS, class ... TPCNVS>
 inline
 TPCnvList<CNV, TRANS, TPCNVS...>::do_pers_to_trans::do_pers_to_trans
-(CNV& parent, TRANS* trans, const std::string& key, MsgStream& msg)
+(CNV& parent, TRANS* trans, const Token* token, const std::string& key, MsgStream& msg)
   : m_parent (parent),
     m_trans (trans),
+    m_token (token),
     m_key (key),
     m_msg (msg)
 {
@@ -93,7 +96,7 @@ bool TPCnvList<CNV, TRANS, TPCNVS...>::do_pers_to_trans::operator()
   (bool found, ELT& elt)
 {
   if (found) return true;
-  return elt.persToTrans (m_parent, m_trans, m_key, m_msg);
+  return elt.persToTrans (m_parent, m_trans, m_token, m_key, m_msg);
 }
 
 
@@ -112,13 +115,14 @@ bool TPCnvList<CNV, TRANS, TPCNVS...>::do_pers_to_trans::operator()
 template <class CNV, class TRANS, class ... TPCNVS>
 std::unique_ptr<TRANS>
 TPCnvList<CNV, TRANS, TPCNVS...>::createTransient (CNV& parent,
+                                                   const Token* token,
                                                    const std::string& key,
                                                    MsgStream& msg)
 {
   // Try createTransient on each TPCnv; stop when one succeeds.
   TRANS* p = nullptr;
   p = boost::fusion::accumulate
-    (m_list, p, do_create_transient(parent, key, msg));
+    (m_list, p, do_create_transient(parent, token, key, msg));
   return std::unique_ptr<TRANS> (p);
 }
 #endif
@@ -140,12 +144,13 @@ TPCnvList<CNV, TRANS, TPCNVS...>::createTransient (CNV& parent,
 template <class CNV, class TRANS, class ... TPCNVS>
 bool TPCnvList<CNV, TRANS, TPCNVS...>::persToTrans (CNV& parent,
                                                     TRANS* trans,
+                                                    const Token* token,
                                                     const std::string& key,
                                                     MsgStream& msg)
 {
   // Try persToTrans on each TPCnv; stop when one succeeds.
   return boost::fusion::accumulate
-    (m_list, false, do_pers_to_trans(parent, trans, key, msg));
+    (m_list, false, do_pers_to_trans(parent, trans, token, key, msg));
 }
 #endif
 

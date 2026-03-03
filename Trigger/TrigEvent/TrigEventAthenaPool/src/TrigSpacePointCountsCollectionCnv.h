@@ -32,7 +32,7 @@ public:
 protected:
   
   virtual TrigSpacePointCountsCollection_PERS *createPersistent( TrigSpacePointCountsCollection *transObj);
-  virtual TrigSpacePointCountsCollection      *createTransient();
+  virtual TrigSpacePointCountsCollection      *createTransient(const Token* token);
 
 private:
   TrigSpacePointCountsCollectionCnv_tlp1 m_converter_tlp1;

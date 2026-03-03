@@ -36,7 +36,7 @@ public:
 protected:
   TrigComposite_PERS*  createPersistent(TrigComposite* transCont);
 
-  TrigComposite*       createTransient ();
+  TrigComposite*       createTransient(const Token* token);
 
  private:
   TrigCompositeCnv_impl* m_impl;

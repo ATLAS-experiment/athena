@@ -26,7 +26,7 @@ JetElementCollection_PERS * JetElementCollectionCnv::createPersistent( JetElemen
  
 
 //createTransient
-JetElementCollection * JetElementCollectionCnv::createTransient()
+JetElementCollection * JetElementCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "JetElementCollectionConverter" );
   
@@ -36,15 +36,15 @@ JetElementCollection * JetElementCollectionCnv::createTransient()
   static const pool::Guid p0_guid( "48B92167-4892-4694-9E9E-E201F1E1FFFE" );
  
   JetElementCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< JetElementCollection_PERS > pers_ref( poolReadObject< JetElementCollection_PERS >() );
+      std::unique_ptr< JetElementCollection_PERS > pers_ref( poolReadObject< JetElementCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
 
-      p_collection = poolReadObject< JetElementCollection >();
+      p_collection = poolReadObject< JetElementCollection >(token);
     
     }else throw std::runtime_error( "Unsupported persistent version of JetElementCollection" );
 

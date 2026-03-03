@@ -27,7 +27,7 @@ public:
   TBTDCCnv (ISvcLocator* svcloc) : TBTDCCnvBase(svcloc) {}
 protected:
   virtual TBTDC_PERS*   createPersistent (TBTDC* transCont);
-  virtual TBTDC*        createTransient ();
+  virtual TBTDC*        createTransient(const Token* token);
 
   TBTDCCnv_p1  m_TPConverter;
 };

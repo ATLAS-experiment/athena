@@ -19,7 +19,7 @@ public:
   RpcByteStreamErrorContainerCnv (ISvcLocator* svcloc) : RpcByteStreamErrorContainerCnvBase(svcloc) {}
 protected:
   virtual RpcByteStreamErrorContainer_PERS*   createPersistent (Muon::RpcByteStreamErrorContainer* transObj);
-  virtual Muon::RpcByteStreamErrorContainer*  createTransient ();
+  virtual Muon::RpcByteStreamErrorContainer*  createTransient(const Token* token);
 };
 
 #endif

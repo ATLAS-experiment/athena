@@ -25,7 +25,7 @@ TauJetContainerCnv :: createPersistent( Analysis :: TauJetContainer *transCont )
     return persObj;
 }
 
-Analysis :: TauJetContainer *TauJetContainerCnv :: createTransient()
+Analysis :: TauJetContainer *TauJetContainerCnv :: createTransient(const Token* token)
 {
     MsgStream msg( msgSvc(), "TauJetContainerCnv" );
 
@@ -37,33 +37,33 @@ Analysis :: TauJetContainer *TauJetContainerCnv :: createTransient()
     static const pool::Guid p4_guid( "87896E97-2688-4373-BD6F-6FC0ED406C2B" );
     static const pool::Guid p5_guid( "7D98A685-ED84-43AD-9B35-69295E19D402" );
 
-    if( compareClassGuid( p5_guid ) ){
+    if( compareClassGuid(token,  p5_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p5> persObj(poolReadObject<TauJetContainer_p5>());
+        std :: unique_ptr<TauJetContainer_p5> persObj(poolReadObject<TauJetContainer_p5>(token));
         TauJetContainerCnv_p5 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
-    else if( compareClassGuid( p4_guid ) ){
+    else if( compareClassGuid(token,  p4_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p4> persObj(poolReadObject<TauJetContainer_p4>());
+        std :: unique_ptr<TauJetContainer_p4> persObj(poolReadObject<TauJetContainer_p4>(token));
         TauJetContainerCnv_p4 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
-    else if( compareClassGuid( p3_guid ) ){
+    else if( compareClassGuid(token,  p3_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p3> persObj( poolReadObject<TauJetContainer_p3>() );
+        std :: unique_ptr<TauJetContainer_p3> persObj( poolReadObject<TauJetContainer_p3>(token) );
         TauJetContainerCnv_p3 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
-    else if( compareClassGuid( p2_guid ) ){
+    else if( compareClassGuid(token,  p2_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p2> persObj( poolReadObject<TauJetContainer_p2>() );
+        std :: unique_ptr<TauJetContainer_p2> persObj( poolReadObject<TauJetContainer_p2>(token) );
         TauJetContainerCnv_p2 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
-    else if( compareClassGuid( p1_guid ) ){
+    else if( compareClassGuid(token,  p1_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p1> persObj( poolReadObject<TauJetContainer_p1>() );
+        std :: unique_ptr<TauJetContainer_p1> persObj( poolReadObject<TauJetContainer_p1>(token) );
         TauJetContainerCnv_p1 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }

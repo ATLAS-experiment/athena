@@ -25,7 +25,7 @@ public:
 protected:
     
     virtual LUCID_RawDataContainer_PERS* createPersistent(LUCID_RawDataContainer* transCont);
-    virtual LUCID_RawDataContainer*      createTransient ();
+    virtual LUCID_RawDataContainer*      createTransient(const Token* token);
 };
 
 #endif

@@ -42,40 +42,40 @@ DetailedTrackTruthCollectionPERS* DetailedTrackTruthCollectionCnv::createPersist
 }
 
 //================================================================
-DetailedTrackTruthCollection* DetailedTrackTruthCollectionCnv::createTransient() {
+DetailedTrackTruthCollection* DetailedTrackTruthCollectionCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "DetailedTrackTruthCollectionCnv" );
   DetailedTrackTruthCollection *trans(nullptr);
 
-  if (compareClassGuid(s_p4_guid)) {
+  if (compareClassGuid(token, s_p4_guid)) {
     trans = new DetailedTrackTruthCollection();
-    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p4. GUID="<<m_classID.toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p4* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p4>();
+    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p4. token="<<token->toString()<<endmsg;
+    Trk::DetailedTrackTruthCollection_p4* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p4>(token);
     m_converter_p4.persToTrans(pers, trans, log);
     delete pers;
   }
-  else if (compareClassGuid(s_p3_guid)) {
+  else if (compareClassGuid(token, s_p3_guid)) {
     trans = new DetailedTrackTruthCollection();
-    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p3* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p3>();
+    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p3. token="<<token->toString()<<endmsg;
+    Trk::DetailedTrackTruthCollection_p3* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p3>(token);
     m_converter_p3.persToTrans(pers, trans, log);
     delete pers;
   }
-  else if (compareClassGuid(s_p2_guid)) {
+  else if (compareClassGuid(token, s_p2_guid)) {
     trans = new DetailedTrackTruthCollection();
-    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p2. GUID="<<m_classID.toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p2* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p2>();
+    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p2. token="<<token->toString()<<endmsg;
+    Trk::DetailedTrackTruthCollection_p2* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p2>(token);
     m_converter_p2.persToTrans(pers, trans, log);
     delete pers;
   }
-  else if (compareClassGuid(s_p1_guid)) {
+  else if (compareClassGuid(token, s_p1_guid)) {
     trans = new DetailedTrackTruthCollection();
-    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p1. GUID="<<m_classID.toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p1* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p1>();
+    log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p1. token="<<token->toString()<<endmsg;
+    Trk::DetailedTrackTruthCollection_p1* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p1>(token);
     m_converter_p1.persToTrans(pers, trans, log);
     delete pers;
   }
   else {
-    std::string info("Unsupported persistent version of DetailedTrackTruthCollection. GUID=" + m_classID.toString());
+    std::string info("Unsupported persistent version of DetailedTrackTruthCollection. token=" + token->toString());
     log<<MSG::FATAL<<info<<endmsg;
     throw std::runtime_error(info);
   }

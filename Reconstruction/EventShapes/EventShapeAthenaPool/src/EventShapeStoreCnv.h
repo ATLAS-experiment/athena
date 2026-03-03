@@ -30,7 +30,7 @@ public:
   EventShapeStoreCnv (ISvcLocator* svcloc) : EventShapeStoreCnvBase(svcloc) {};
 protected:
   virtual EventShapeStore_PERS*   createPersistent (EventShapeStore* transObj);
-  virtual EventShapeStore*        createTransient ();
+  virtual EventShapeStore*        createTransient(const Token* token);
   
 };
 

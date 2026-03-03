@@ -83,7 +83,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual JetCollection* createTransient();
+  virtual JetCollection* createTransient(const Token* token);
 
   /** Connect up the sub-converters that we use to do the
       actual work.

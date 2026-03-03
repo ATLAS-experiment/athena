@@ -16,7 +16,7 @@ AFP_SIDSimHitCollection_PERS* AFP_SIDSimHitCollectionCnv::createPersistent(AFP_S
 	return pPersColl;
 }
 
-AFP_SIDSimHitCollection* AFP_SIDSimHitCollectionCnv::createTransient()
+AFP_SIDSimHitCollection* AFP_SIDSimHitCollectionCnv::createTransient(const Token* token)
 {
 	MsgStream mlog(msgSvc(), "AFP_SIDSimHitCollectionConverter" );
 
@@ -26,8 +26,8 @@ AFP_SIDSimHitCollection* AFP_SIDSimHitCollectionCnv::createTransient()
 	AFP_SIDSimHitCollectionCnv_p1 TPConverter_p1;
 	AFP_SIDSimHitCollection *pTransColl=nullptr;
 
-	if(this->compareClassGuid(p1_guid)){
-		std::unique_ptr<AFP_SIDSimHitCollection_p1> col_vect(this->poolReadObject<AFP_SIDSimHitCollection_p1>());
+	if(this->compareClassGuid(token, p1_guid)){
+		std::unique_ptr<AFP_SIDSimHitCollection_p1> col_vect(this->poolReadObject<AFP_SIDSimHitCollection_p1>(token));
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

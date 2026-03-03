@@ -34,7 +34,7 @@ TrigT2Jet_PERS * TrigT2JetCnv::createPersistent( TrigT2Jet *transObj)
 
 
 //createTransient
-TrigT2Jet * TrigT2JetCnv::createTransient()
+TrigT2Jet * TrigT2JetCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigT2JetConverter" );
   
@@ -44,14 +44,14 @@ TrigT2Jet * TrigT2JetCnv::createTransient()
   static const pool::Guid p0_guid( "242473A8-A320-49F1-A680-136EA26C1FAF" );
  
   TrigT2Jet *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      poolReadObject< TrigT2Jet_PERS >(*m_TPConverter);
+      poolReadObject< TrigT2Jet_PERS >(*m_TPConverter, token);
       p_collection = m_TPConverter->createTransient( m_log );
    
-    }else if( compareClassGuid( p0_guid ) ){
+    }else if( compareClassGuid(token,  p0_guid ) ){
 
-      p_collection = poolReadObject< TrigT2Jet >();
+      p_collection = poolReadObject< TrigT2Jet >(token);
     
     }else  throw std::runtime_error( "Unsupported persistent version of TrigT2Jet" );
      

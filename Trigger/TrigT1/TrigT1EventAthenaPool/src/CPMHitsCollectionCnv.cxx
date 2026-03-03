@@ -26,7 +26,7 @@ CPMHitsCollection_PERS * CPMHitsCollectionCnv::createPersistent( CPMHitsCollecti
  
 
 //createTransient
-CPMHitsCollection * CPMHitsCollectionCnv::createTransient()
+CPMHitsCollection * CPMHitsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "CPMHitsCollectionConverter" );
   
@@ -35,10 +35,10 @@ CPMHitsCollection * CPMHitsCollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "4A309D12-C11D-4666-8253-72522BF7948E" );
  
   CPMHitsCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< CPMHitsCollection_PERS > pers_ref( poolReadObject< CPMHitsCollection_PERS >() );
+      std::unique_ptr< CPMHitsCollection_PERS > pers_ref( poolReadObject< CPMHitsCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
       
     }else  throw std::runtime_error( "Unsupported persistent version of CPMHitsCollection" );

@@ -36,7 +36,7 @@ public:
 protected:
   
   virtual CMMRoI_PERS*   createPersistent (LVL1::CMMRoI* transCont);
-  virtual LVL1::CMMRoI*  createTransient ();
+  virtual LVL1::CMMRoI*  createTransient(const Token* token);
 
 private:
   

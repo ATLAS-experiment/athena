@@ -62,7 +62,7 @@ public:
   /** Read the extending object
       @param token [IN] Token of the object to read
   */
-  virtual void		readObject( const std::string& ) { }
+  virtual void		readObjectFromPool( const Token* ) { }
 
   /** Clone this Athena Converter.
       Returns the cloned instance

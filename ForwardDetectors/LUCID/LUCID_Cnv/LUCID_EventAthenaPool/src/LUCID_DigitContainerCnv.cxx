@@ -16,7 +16,7 @@ LUCID_DigitContainer_PERS* LUCID_DigitContainerCnv::createPersistent(LUCID_Digit
   return persObj;
 }
 
-LUCID_DigitContainer* LUCID_DigitContainerCnv::createTransient() {
+LUCID_DigitContainer* LUCID_DigitContainerCnv::createTransient(const Token* token) {
   
   MsgStream mlog(msgSvc(), "LUCID_DigitContainer");
 
@@ -30,19 +30,19 @@ LUCID_DigitContainer* LUCID_DigitContainerCnv::createTransient() {
   static const pool::Guid p1_guid ("681CDB46-D6D0-4C59-98C9-398B43873B50");
   static const pool::Guid old_guid("49672224-A5AB-4D4C-802E-CA0749038ECC");
   
-  if (this->compareClassGuid(p2_guid)) {
+  if (this->compareClassGuid(token, p2_guid)) {
     
-    std::unique_ptr< LUCID_DigitContainer_p2 > col_vect( this->poolReadObject< LUCID_DigitContainer_p2 >());
+    std::unique_ptr< LUCID_DigitContainer_p2 > col_vect( this->poolReadObject< LUCID_DigitContainer_p2 >(token));
     
     trans_cont = converter_p2.createTransient(col_vect.get(), mlog);
   }
-  else if(this->compareClassGuid(p1_guid)) {
+  else if(this->compareClassGuid(token, p1_guid)) {
     
-    trans_cont = this->poolReadObject<LUCID_DigitContainer>();
+    trans_cont = this->poolReadObject<LUCID_DigitContainer>(token);
   } 
-  else if(this->compareClassGuid(old_guid)) {
+  else if(this->compareClassGuid(token, old_guid)) {
     
-    trans_cont = this->poolReadObject<LUCID_DigitContainer>();
+    trans_cont = this->poolReadObject<LUCID_DigitContainer>(token);
   } 
   else throw std::runtime_error("Unsupported persistent version of Data container");
 

@@ -32,7 +32,7 @@ public:
     virtual ~MDTSimHitCollectionCnv();
 
     virtual MDTSimHitCollection_PERS*   createPersistent (MDTSimHitCollection* transCont);
-    virtual MDTSimHitCollection*        createTransient ();
+    virtual MDTSimHitCollection*        createTransient(const Token* token);
 
 private:
     MDTSimHitCollectionCnv_p1    m_TPConverter_p1;

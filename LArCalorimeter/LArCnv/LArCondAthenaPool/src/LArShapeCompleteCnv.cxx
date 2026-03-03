@@ -43,22 +43,22 @@ LArShapeCompleteCnv::createPersistent (LArShapeTransType2* transObj)
 }
 
 LArConditionsSubset<LArShapeP2>*
-LArShapeCompleteCnv::createTransient () 
+LArShapeCompleteCnv::createTransient(const Token* token) 
 {
   static const pool::Guid   p2_guid("5139AF4A-5947-421A-A775-B2D1134145C7");
   static const pool::Guid   p1_guid("95B61750-4C45-412D-B4D4-9758E9DB40D1");
   static const pool::Guid   p0_guid("055CF2F5-08D0-4EAA-B154-8CE5B1A599E7");
 
   MsgStream log(msgSvc(), "LArShapeCompleteCnv" ); 
-  if( compareClassGuid(p2_guid) ) {  
-    std::unique_ptr< LArShapeSubset_p2 > col_vect( poolReadObject< LArShapeSubset_p2 >() );  
+  if( compareClassGuid(token, p2_guid) ) {  
+    std::unique_ptr< LArShapeSubset_p2 > col_vect( poolReadObject< LArShapeSubset_p2 >(token) );  
     log << MSG::DEBUG << "Reading LArShapeSubset_p1" << endmsg; 
     return TPconverter2.createTransientConst( col_vect.get(), log );
   } 
-  else if( compareClassGuid(p1_guid) ) {  
+  else if( compareClassGuid(token, p1_guid) ) {  
     log << MSG::ERROR << "Sorry if you really want to read LArShapeSubset_p1 you will need to provide a legacy converter" << endmsg;
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     log << MSG::ERROR << "Sorry if you really want to read the very old LArShapeSubset you will need to provide a legacy converter" << endmsg;
   } 
   throw std::runtime_error("Unsupported persistent version of LArShapeCompleteCnv");

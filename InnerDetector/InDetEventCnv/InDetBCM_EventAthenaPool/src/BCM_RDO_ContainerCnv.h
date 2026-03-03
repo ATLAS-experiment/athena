@@ -20,7 +20,7 @@ public:
   
  protected:
   virtual BCM_RDO_Container_p0* createPersistent(BCM_RDO_Container* transCont);
-  virtual BCM_RDO_Container* createTransient();
+  virtual BCM_RDO_Container* createTransient(const Token* token);
 
   BCM_RDO_ContainerCnv_p0 m_Converter;
 };

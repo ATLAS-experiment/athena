@@ -30,7 +30,7 @@ public:
 protected:
     
     virtual ALFA_RawDataContainer_PERS* createPersistent(ALFA_RawDataContainer* transCont);
-    virtual ALFA_RawDataContainer*      createTransient ();
+    virtual ALFA_RawDataContainer*      createTransient(const Token* token);
     
    
 };

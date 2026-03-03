@@ -42,37 +42,37 @@ TrackTruthCollectionPERS* TrackTruthCollectionCnv::createPersistent(TrackTruthCo
 }
 
 //================================================================
-TrackTruthCollection* TrackTruthCollectionCnv::createTransient() {
+TrackTruthCollection* TrackTruthCollectionCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "TrackTruthCollectionCnv" );
   std::unique_ptr<TrackTruthCollection> trans(new TrackTruthCollection());
 
-  if (compareClassGuid(s_p3_guid)) {
-    log<<MSG::DEBUG<<"Read TrackTruthCollection_p3. GUID="<<m_classID.toString()<<endmsg;
-    Trk::TrackTruthCollection_p3* pers=poolReadObject<Trk::TrackTruthCollection_p3>();
+  if (compareClassGuid(token, s_p3_guid)) {
+    log<<MSG::DEBUG<<"Read TrackTruthCollection_p3. token="<<token->toString()<<endmsg;
+    Trk::TrackTruthCollection_p3* pers=poolReadObject<Trk::TrackTruthCollection_p3>(token);
     m_converter_p3.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p2_guid)) {
-    log<<MSG::DEBUG<<"Read TrackTruthCollection_p2. GUID="<<m_classID.toString()<<endmsg;
-    Trk::TrackTruthCollection_p2* pers=poolReadObject<Trk::TrackTruthCollection_p2>();
+  else if (compareClassGuid(token, s_p2_guid)) {
+    log<<MSG::DEBUG<<"Read TrackTruthCollection_p2. token="<<token->toString()<<endmsg;
+    Trk::TrackTruthCollection_p2* pers=poolReadObject<Trk::TrackTruthCollection_p2>(token);
     m_converter_p2.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p1_guid)) {
-    log<<MSG::DEBUG<<"Read TrackTruthCollection_p1. GUID="<<m_classID.toString()<<endmsg;
-    Trk::TrackTruthCollection_p1* pers=poolReadObject<Trk::TrackTruthCollection_p1>();
+  else if (compareClassGuid(token, s_p1_guid)) {
+    log<<MSG::DEBUG<<"Read TrackTruthCollection_p1. token="<<token->toString()<<endmsg;
+    Trk::TrackTruthCollection_p1* pers=poolReadObject<Trk::TrackTruthCollection_p1>(token);
     m_converter_p1.persToTrans(pers, trans.get(), log);
     delete pers;
   }
-  else if (compareClassGuid(s_p0_guid)) {
-    log<<MSG::DEBUG<<"Read version p0 of TrackTruthCollection. GUID="<<m_classID.toString()<<endmsg;
-    TrackTruthVector *pers = poolReadObject<TrackTruthVector>();
+  else if (compareClassGuid(token, s_p0_guid)) {
+    log<<MSG::DEBUG<<"Read version p0 of TrackTruthCollection. token="<<token->toString()<<endmsg;
+    TrackTruthVector *pers = poolReadObject<TrackTruthVector>(token);
     m_converter_p0.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else {
-    log<<MSG::ERROR<<"Unsupported persistent version of TrackTruthCollection. GUID="
-       <<m_classID.toString()<<endmsg;
+    log<<MSG::ERROR<<"Unsupported persistent version of TrackTruthCollection. token="
+       <<token->toString()<<endmsg;
     throw std::runtime_error("Unsupported persistent version of Data Collection");
   }
 

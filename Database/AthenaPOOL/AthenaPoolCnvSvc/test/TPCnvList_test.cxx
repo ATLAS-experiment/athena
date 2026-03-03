@@ -13,8 +13,10 @@
 #include "AthenaPoolCnvSvc/TPCnvList.h"
 #include "AthenaPoolCnvSvcTestDict.h"
 #include "GaudiKernel/MsgStream.h"
+
 #include "TSystem.h"
 #include "TestConverterBase.h"
+
 #include <iostream>
 #include <typeinfo>
 #include <cassert>
@@ -22,6 +24,7 @@
 
 using namespace AthenaPoolCnvSvcTest;
 
+class Token;
 
 class XCnv_p1
   : public TestConverterBase
@@ -73,17 +76,13 @@ const std::string X_p2_guid = "0AAC9C99-726D-4CF4-B9F9-00B6674C57DD";
 class TestConverter
 {
 public:
-  TestConverter (const std::string& guid) : m_guid (guid) {}
+  TestConverter () {}
   
-  bool compareClassGuid (const Guid& guid)
-  { return guid == m_guid; }
+  bool compareClassGuid(const Token* token, const Guid& guid)
+  { return guid == token->classID(); }
 
   template <class T>
-  T* poolReadObject() { return new T (10); }
-  
-
-private:
-  Guid m_guid;
+  T* poolReadObject(const Token* /*token*/) { return new T (10); }
 };
 
 
@@ -91,6 +90,29 @@ void test1()
 {
   std::cout << "test1\n";
   MsgStream msg (nullptr, "");
+  Token X_token;
+  X_token.fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
+                 "[CNT=TestContainer]"
+                 "[CLID=CAE53A87-64AD-4576-A203-1A4142E1E10F]"
+                 "[TECH=00000100]"
+                 "[OID=00000000-00000000]");
+  const Token* X_poolToken = &X_token;
+
+  Token X_p1_token;
+  X_p1_token.fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
+                 "[CNT=TestContainer_p1]"
+                 "[CLID=6AD63B61-BE75-40FC-B0C6-DD3C7801D871]"
+                 "[TECH=00000100]"
+                 "[OID=00000000-00000000]");
+  const Token* X_p1_poolToken = &X_p1_token;
+
+  Token X_p2_token;
+  X_p2_token.fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
+                 "[CNT=TestContainer_p2]"
+                 "[CLID=0AAC9C99-726D-4CF4-B9F9-00B6674C57DD]"
+                 "[TECH=00000100]"
+                 "[OID=00000000-00000000]");
+  const Token* X_p2_poolToken = &X_p2_token;
 
   AthenaPoolCnvSvc::TPCnvList<TestConverter, X,
                               XCnv_p2,
@@ -99,36 +121,41 @@ void test1()
 
   X x2(0);
 
-  TestConverter cnv1 (X_p1_guid);
+  TestConverter cnv1;
   {
-    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv1, "key", msg);
+    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv1, X_p1_poolToken, "key", msg);
     assert (xptr->m_a == 20);
   }
 
-  assert (tpcnv.persToTrans (cnv1, &x2, "key", msg));
+  assert (tpcnv.persToTrans (cnv1, &x2, X_p1_poolToken, "key", msg));
   assert (x2.m_a == 20);
 
-  TestConverter cnv2 (X_p2_guid);
+  TestConverter cnv2;
   {
-    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv2, "key", msg);
+    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv2, X_p2_poolToken, "key", msg);
     assert (xptr->m_a == 30);
   }
 
-  assert (tpcnv.persToTrans (cnv2, &x2, "key", msg));
+  assert (tpcnv.persToTrans (cnv2, &x2, X_p2_poolToken, "key", msg));
   assert (x2.m_a == 30);
 
-  TestConverter cnv0 (X_guid);
+  TestConverter cnv0;
   {
-    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv0, "key", msg);
+    std::unique_ptr<X> xptr = tpcnv.createTransient (cnv0, X_poolToken, "key", msg);
     assert (xptr->m_a == 10);
   }
 
-  assert (tpcnv.persToTrans (cnv0, &x2, "key", msg));
+  assert (tpcnv.persToTrans (cnv0, &x2, X_poolToken, "key", msg));
   assert (x2.m_a == 10);
 
-  TestConverter cnvx ("B3FCEE90-66FC-4AE1-A81B-5257A0306EF8");
-  assert (tpcnv.createTransient (cnvx, "key", msg) == nullptr);
-  assert (!tpcnv.persToTrans (cnvx, &x2, "key", msg));
+  TestConverter cnvx;
+  X_p2_token.fromString("[DB=AEC1DFE2-010B-D811-9832-000347F31C25]"
+                 "[CNT=TestContainer_p2]"
+                 "[CLID=B3FCEE90-66FC-4AE1-A81B-5257A0306EF8]"
+                 "[TECH=00000100]"
+                 "[OID=00000000-00000000]");
+  assert (tpcnv.createTransient (cnvx, X_p2_poolToken, "key", msg) == nullptr);
+  assert (!tpcnv.persToTrans (cnvx, &x2, X_p2_poolToken, "key", msg));
 }
 
 // coverity[root_function]

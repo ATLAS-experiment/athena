@@ -19,7 +19,7 @@ class LArNoisyROSummaryCnv : public LArNoisyROSummaryCnvBase
 public:
   LArNoisyROSummaryCnv(ISvcLocator*);
  protected:
-  virtual LArNoisyROSummary* createTransient();
+  virtual LArNoisyROSummary* createTransient(const Token* token);
   virtual LArNoisyROSummary_PERSISTENT* createPersistent(LArNoisyROSummary*);
   private:
  

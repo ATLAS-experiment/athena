@@ -18,7 +18,7 @@ TrigCompositeContainer_PERS * TrigCompositeContainerCnv::createPersistent( TrigC
 }//end of create persistent method
 
 //createTransient
-TrigCompositeContainer * TrigCompositeContainerCnv::createTransient()
+TrigCompositeContainer * TrigCompositeContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigCompositeContainerConverter" );
   
@@ -27,8 +27,8 @@ TrigCompositeContainer * TrigCompositeContainerCnv::createTransient()
   static const pool::Guid p1_guid( "6D16EA6B-968C-41F0-B5E8-9CC6D5BD7F9A" );
 
   
- if( compareClassGuid( p1_guid ) ){
-         std::unique_ptr< TrigCompositeContainer_p1 > col_vect( poolReadObject< TrigCompositeContainer_p1 >() );
+ if( compareClassGuid(token,  p1_guid ) ){
+         std::unique_ptr< TrigCompositeContainer_p1 > col_vect( poolReadObject< TrigCompositeContainer_p1 >(token) );
          //         std::cout << "Reading IMFC p1" << std::endl; 
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   } else { throw std::runtime_error( "Unsupported persistent version of TrigCompositeContainer" ); }

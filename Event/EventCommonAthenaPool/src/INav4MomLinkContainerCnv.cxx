@@ -35,7 +35,7 @@ INav4MomLinkContainer_PERS* INav4MomLinkContainerCnv::createPersistent( INav4Mom
 
 
 // Create the transient object from the persistent one
-INav4MomLinkContainer* INav4MomLinkContainerCnv::createTransient()
+INav4MomLinkContainer* INav4MomLinkContainerCnv::createTransient(const Token* token)
 {
   // Create the message service for this class
   MsgStream log( msgSvc(), "INav4MomLinkContainerConverter" );
@@ -43,10 +43,10 @@ INav4MomLinkContainer* INav4MomLinkContainerCnv::createTransient()
   // Define the pool IDs
   static const pool::Guid  p1_guid("A7F0A4C5-F343-4724-B317-FB5A890355FA");
 
-  if( compareClassGuid(p1_guid) )
+  if( compareClassGuid(token, p1_guid) )
     {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< INav4MomLinkContainer_PERS > col_vect( poolReadObject< INav4MomLinkContainer_PERS >() );
+      std::unique_ptr< INav4MomLinkContainer_PERS > col_vect( poolReadObject< INav4MomLinkContainer_PERS >(token) );
       return m_TPConverter.createTransient( col_vect.get(), log );
     }
   else

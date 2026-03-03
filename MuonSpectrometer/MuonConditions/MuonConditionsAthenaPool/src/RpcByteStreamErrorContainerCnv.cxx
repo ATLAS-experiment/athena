@@ -16,11 +16,11 @@ RpcByteStreamErrorContainer_PERS* RpcByteStreamErrorContainerCnv::createPersiste
   return persObj;
 }
    
-Muon::RpcByteStreamErrorContainer* RpcByteStreamErrorContainerCnv::createTransient() {
+Muon::RpcByteStreamErrorContainer* RpcByteStreamErrorContainerCnv::createTransient(const Token* token) {
   using namespace Muon;
   static const pool::Guid   p1_guid("4E46BDDC-E1F9-420A-A11F-47EF082A3E3A");
-  if( compareClassGuid(p1_guid) ) {
-    std::unique_ptr< RpcByteStreamErrorContainer_p1 > col_vect( poolReadObject< RpcByteStreamErrorContainer_p1 >() );
+  if( compareClassGuid(token, p1_guid) ) {
+    std::unique_ptr< RpcByteStreamErrorContainer_p1 > col_vect( poolReadObject< RpcByteStreamErrorContainer_p1 >(token) );
     MsgStream log(msgSvc(), "RpcByteStreamErrorContainer_p1" );
     return TPconverter_p1.createTransientConst( col_vect.get(), log );
   } 

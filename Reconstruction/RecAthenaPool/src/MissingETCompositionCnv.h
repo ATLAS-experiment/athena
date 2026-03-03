@@ -31,7 +31,7 @@ class MissingETCompositionCnv : public MissingETCompositionCnvBase
 
  protected:
   virtual MissingETComposition_PERS*   createPersistent (MissingETComposition* transObj);
-  virtual MissingETComposition*        createTransient ();
+  virtual MissingETComposition*        createTransient(const Token* token);
   
  private:
   MissingETCompositionCnv_p2*   m_TPconverter_p2;

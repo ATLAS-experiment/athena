@@ -32,7 +32,7 @@ TrigMuonEFInfoContainer_PERS * TrigMuonEFInfoContainerCnv::createPersistent( Tri
 }
 
 
-TrigMuonEFInfoContainer * TrigMuonEFInfoContainerCnv::createTransient(){
+TrigMuonEFInfoContainer * TrigMuonEFInfoContainerCnv::createTransient(const Token* token){
 
   MsgStream mlog(msgSvc(), "TrigMuonEFInfoContainerConverter" );
   
@@ -43,12 +43,12 @@ TrigMuonEFInfoContainer * TrigMuonEFInfoContainerCnv::createTransient(){
   
   TrigMuonEFInfoContainer *p_collection = 0;
   
-  if( compareClassGuid( p2_guid ) ) {
-    poolReadObject< TrigMuonEFInfoContainer_PERS >(*m_TPConverter2);
+  if( compareClassGuid(token,  p2_guid ) ) {
+    poolReadObject< TrigMuonEFInfoContainer_PERS >(*m_TPConverter2, token);
     p_collection = m_TPConverter2->createTransient( m_log );
   }
-  else if( compareClassGuid( p1_guid ) ) {
-    poolReadObject< TrigMuonEFInfoContainer_tlp1 >(*m_TPConverter1);
+  else if( compareClassGuid(token,  p1_guid ) ) {
+    poolReadObject< TrigMuonEFInfoContainer_tlp1 >(*m_TPConverter1, token);
     p_collection = m_TPConverter1->createTransient( m_log );
   }
   else  throw std::runtime_error( "Unsupported persistent version of TrigMuonEFInfoContainer" );

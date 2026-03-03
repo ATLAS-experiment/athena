@@ -39,7 +39,8 @@ protected:
                                                        const std::string& key) override;
    /// Function reading in the object from the input file
    virtual
-   xAOD::ShallowAuxContainer* createTransientWithKey (const std::string& key) override;
+   xAOD::ShallowAuxContainer* createTransientWithKey ( const Token* token,
+                                                       const std::string& key) override;
 
 
 }; // class xAODShallowAuxContainerCnv

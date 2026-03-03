@@ -18,18 +18,15 @@ PixelGangedClusterAmbiguities_PERS* PixelGangedClusterAmbiguitiesCnv::createPers
     return persObj; 
 }
     
-InDet::PixelGangedClusterAmbiguities* PixelGangedClusterAmbiguitiesCnv::createTransient() {
+InDet::PixelGangedClusterAmbiguities* PixelGangedClusterAmbiguitiesCnv::createTransient(const Token* token) {
     static const pool::Guid   p1_guid("FE36CE7E-EADF-481F-A55A-26DA0030DFAA");
 //     static const pool::Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< InDet::PixelGangedClusterAmbiguities_p1 > col_vect( poolReadObject< InDet::PixelGangedClusterAmbiguities_p1 >() );
+        std::unique_ptr< InDet::PixelGangedClusterAmbiguities_p1 > col_vect( poolReadObject< InDet::PixelGangedClusterAmbiguities_p1 >(token) );
         ATH_MSG_DEBUG("Reading PixelGangedClusterAmbiguities_p1"); 
         return m_TPconverter.createTransient( col_vect.get(), msg() );
     }
-//     else if( compareClassGuid(p0_guid) ) {
-//         dont think there was a "before T/P" split converter
-//     } 
     throw std::runtime_error("Unsupported persistent version of EventInfo");
 }
 

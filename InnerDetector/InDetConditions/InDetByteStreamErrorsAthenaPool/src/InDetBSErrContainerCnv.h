@@ -31,7 +31,7 @@ public:
   
 protected:
   virtual InDetBSErrContainer_PERS*   createPersistent (InDetBSErrContainer* transCont);
-  virtual InDetBSErrContainer*       createTransient ();
+  virtual InDetBSErrContainer*       createTransient(const Token* token);
 
   InDetBSErrContainerCnv_p1  m_TPConverter_p1;
   InDetBSErrContainerCnv_p2  m_TPConverter_PERS; // The latest one should be PERS. Currently p2 is PERS.

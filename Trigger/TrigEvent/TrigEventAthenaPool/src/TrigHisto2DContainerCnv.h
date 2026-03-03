@@ -45,7 +45,7 @@ class TrigHisto2DContainerCnv : public TrigHisto2DContainerCnvBase
   ~TrigHisto2DContainerCnv();
    
    virtual TrigHisto2DContainer_PERS *createPersistent( TrigHisto2DContainer *transObj);
-   virtual TrigHisto2DContainer      *createTransient();
+   virtual TrigHisto2DContainer      *createTransient(const Token* token);
   
  private:
    

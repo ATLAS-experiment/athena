@@ -23,7 +23,7 @@ public:
   LArHitFloatContainerCnv(ISvcLocator* svcloc) :  T_AthenaPoolCustomCnv<LArHitFloatContainer, LArHitContainer_PERS >( svcloc) {}
 protected:
   LArHitContainer_PERS*  createPersistent(LArHitFloatContainer* transCont);
-  LArHitFloatContainer*  createTransient ();
+  LArHitFloatContainer*  createTransient(const Token* token);
   LArHitFloatContainer* copyLArHitToFloat(const LArHitContainer* double_cont);
 };
 

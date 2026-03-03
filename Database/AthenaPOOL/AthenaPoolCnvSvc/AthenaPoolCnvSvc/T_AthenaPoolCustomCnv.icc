@@ -86,9 +86,6 @@ T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
                                                             const Token* token,
                                                             const std::string& key)
 {
-   if (token != nullptr) {
-      this->m_classID = token->classID();
-   }
    TRANS* transObj = nullptr;
    AthenaConverterTLPExtension *extCnv = dynamic_cast<AthenaConverterTLPExtension*>(this);
    // reset the TP converter used for reading, so old value is not used
@@ -96,7 +93,7 @@ T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
       extCnv->resetTPCnvForReading();
    }
    try {
-      transObj = createTransientWithKey(key);
+      transObj = createTransientWithKey(token, key);
    }
    catch(const std::exception& ex) {
     AthenaPoolCnvSvc::throwExcCaughtException (__PRETTY_FUNCTION__,
@@ -116,11 +113,11 @@ T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
 // plus reading of all extending objects
 template <class TRANS, class PERS>
 template <class P>
-inline P* T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject() {
+inline P* T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject(const Token* token) {
    P* persObj = nullptr;
-   if (this->poolToObject(this->m_i_poolToken, persObj).isFailure()) {
+   if (this->poolToObject(token, persObj).isFailure()) {
       std::string error("POOL read failed. Token = ");
-      throw std::runtime_error(error + (this->m_i_poolToken != nullptr ? this->m_i_poolToken->toString() : ""));
+      throw std::runtime_error(error + (token != nullptr ? token->toString() : ""));
    }
    AthenaConverterTLPExtension *extCnv = dynamic_cast<AthenaConverterTLPExtension*>(this);
    if (extCnv != nullptr) {
@@ -133,7 +130,7 @@ inline P* T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject() {
 // using the indicated top-level TP converter
 template <class TRANS, class PERS>
 template <class P>
-inline void T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject(TopLevelTPCnvBase& tlp_converter) {
+inline void T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject(TopLevelTPCnvBase& tlp_converter, const Token* token) {
    AthenaPoolCnvTPExtension *extCnv = dynamic_cast<AthenaPoolCnvTPExtension*>(this);
    // set which Top level TP concerter will by used for reading
    // only matters for extended converters
@@ -141,7 +138,7 @@ inline void T_AthenaPoolCustomCnvWithKey<TRANS, PERS>::poolReadObject(TopLevelTP
       extCnv->usingTPCnvForReading(tlp_converter);
    }
    // read the object
-   P* persObj = poolReadObject<P>();
+   P* persObj = poolReadObject<P>(token);
    // remember the object we just read
    tlp_converter.setTLPersObject(persObj);
    // not returning the object - the TLP converter owns it now
@@ -174,7 +171,7 @@ PERS* T_AthenaPoolCustomCnv<TRANS, PERS>::createPersistentWithKey
 
 template <class TRANS, class PERS>
 TRANS* T_AthenaPoolCustomCnv<TRANS, PERS>::createTransientWithKey
-  (const std::string& /*key*/)
+  (const Token* token, const std::string& /*key*/)
 {
-  return createTransient();
+  return createTransient(token);
 }

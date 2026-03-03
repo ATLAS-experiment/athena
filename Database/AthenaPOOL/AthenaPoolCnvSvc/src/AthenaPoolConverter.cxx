@@ -164,7 +164,6 @@ AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLo
   m_classDesc(),
   m_className(),
   m_classDescs(),
-  m_dataObject(nullptr),
   m_i_poolToken(nullptr),
   m_defContainerType(0) {
 }
@@ -247,12 +246,8 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
    return(placement);
 }
 //__________________________________________________________________________
-const DataObject* AthenaPoolConverter::getDataObject() const {
-   return(m_dataObject);
-}
-//__________________________________________________________________________
-bool AthenaPoolConverter::compareClassGuid(const Guid &guid) const {
-   return(m_i_poolToken ? (guid == m_i_poolToken->classID()) : false);
+bool AthenaPoolConverter::compareClassGuid(const Token* token, const Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::cleanUp(const std::string& /*output*/) {

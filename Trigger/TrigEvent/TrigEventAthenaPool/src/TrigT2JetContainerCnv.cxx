@@ -22,7 +22,7 @@ TrigT2JetContainer_PERS * TrigT2JetContainerCnv::createPersistent( TrigT2JetCont
  
 
 //createTransient
-TrigT2JetContainer * TrigT2JetContainerCnv::createTransient()
+TrigT2JetContainer * TrigT2JetContainerCnv::createTransient(const Token* token)
 {
   
   MsgStream mlog(msgSvc(), "TrigT2JetContainerConverter" );
@@ -33,12 +33,12 @@ TrigT2JetContainer * TrigT2JetContainerCnv::createTransient()
   static const pool::Guid p3_guid( "6215BEE2-45E7-4681-9089-9BD470CDAF4D" );
 
 
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigT2JetContainer_p3 > col_vect( poolReadObject< TrigT2JetContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigT2JetContainer_p3 > col_vect( poolReadObject< TrigT2JetContainer_p3 >(token) );
          //std::cout << "Reading TTCC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
-  } else if( compareClassGuid( tlp1_guid ) ) {
-         std::unique_ptr< TrigT2JetContainer_tlp1 > col_vect( poolReadObject< TrigT2JetContainer_tlp1 >() );
+  } else if( compareClassGuid(token,  tlp1_guid ) ) {
+         std::unique_ptr< TrigT2JetContainer_tlp1 > col_vect( poolReadObject< TrigT2JetContainer_tlp1 >(token) );
          //std::cout << "Reading TTC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
   } else  throw std::runtime_error( "Unsupported persistent version of TrigT2JetContainer" );

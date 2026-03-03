@@ -36,7 +36,7 @@ public:
     virtual ~TgcCoinDataContainerCnv();
     
     virtual TgcCoinDataContainer_PERS*   createPersistent (Muon::TgcCoinDataContainer* transCont);
-    virtual Muon::TgcCoinDataContainer*  createTransient ();
+    virtual Muon::TgcCoinDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

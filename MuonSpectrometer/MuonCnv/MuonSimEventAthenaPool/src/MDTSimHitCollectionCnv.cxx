@@ -33,38 +33,38 @@ MDTSimHitCollection_PERS*    MDTSimHitCollectionCnv::createPersistent (MDTSimHit
     return pixdc_p;
 }
 
-MDTSimHitCollection* MDTSimHitCollectionCnv::createTransient() {
+MDTSimHitCollection* MDTSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MDTSimHitCollectionCnv" );
     static const pool::Guid   p0_guid("D76D06CC-C15F-43E6-BBC3-480DE5DA065D"); // before t/p split
     static const pool::Guid   p1_guid("EA781971-65C5-4B30-9D22-EEFB764BA0B3");
     static const pool::Guid   p2_guid("92880B97-75BB-4C5D-8183-577338059FCC");
     static const pool::Guid   p3_guid("0E9EEEE2-304F-44B8-B1DF-E75297183A02");
     static const pool::Guid   p4_guid("018E2DAC-18EB-7BBC-92AF-EFE3F0E400C2");
-    ATH_MSG_DEBUG("createTransient(): main converter");
+    ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     MDTSimHitCollection* p_collection(nullptr);
-    if( compareClassGuid(p4_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 4 detected");
-      std::unique_ptr< Muon::MDTSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p4 >() );
+    if( compareClassGuid(token, p4_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 4 detected");
+      std::unique_ptr< Muon::MDTSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p4 >(token) );
       p_collection = m_TPConverter_p4.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p3_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
-      std::unique_ptr< Muon::MDTSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p3 >() );
+    } else if( compareClassGuid(token, p3_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
+      std::unique_ptr< Muon::MDTSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p3 >(token) );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p2_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
-      std::unique_ptr< Muon::MDTSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p2 >() );
+    } else if( compareClassGuid(token, p2_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
+      std::unique_ptr< Muon::MDTSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p2 >(token) );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p1_guid) ) {
-        ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
-        // poolReadObject< MDTSimHitCollection_PERS >( m_TPConverter );
+    } else if( compareClassGuid(token, p1_guid) ) {
+        ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
+        // poolReadObject< MDTSimHitCollection_PERS >( tokenm_TPConverter );
         // p_collection = m_TPConverter.createTransient( log );
-        std::unique_ptr< Muon::MDTSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p1 >() );
+        std::unique_ptr< Muon::MDTSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::MDTSimHitCollection_p1 >(token) );
         p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
-    else if( compareClassGuid(p0_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): Old input file"<<std::endl;
-        AthenaHitsVector<MDTSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<MDTSimHit> >();
+    else if( compareClassGuid(token, p0_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
+        AthenaHitsVector<MDTSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<MDTSimHit> >(token);
         size_t size = oldColl->size();
         p_collection=new MDTSimHitCollection("DefaultCollectionName",size);
         p_collection->reserve(size);

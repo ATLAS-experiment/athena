@@ -32,24 +32,24 @@ GenericMuonSimHitCollection_PERS*    GenericMuonSimHitCollectionCnv::createPersi
     return pixdc_p;
 }
 
-GenericMuonSimHitCollection* GenericMuonSimHitCollectionCnv::createTransient() {
+GenericMuonSimHitCollection* GenericMuonSimHitCollectionCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "GenericMuonSimHitCollectionCnv" );
     static const pool::Guid   p1_guid("C2D5D558-2671-11E1-AAFA-001E4F3E5646");
     static const pool::Guid   p2_guid("3760C0D8-C7EA-42C7-925A-E841196F2138");
     static const pool::Guid   p3_guid("018E2DAC-18EB-7635-A068-B08EFB5CD64A");
-    ATH_MSG_DEBUG("createTransient(): main converter");
+    ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
     GenericMuonSimHitCollection* p_collection(nullptr);
-    if( compareClassGuid(p3_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 3 detected");
-      std::unique_ptr< Muon::GenericMuonSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p3 >() );
+    if( compareClassGuid(token, p3_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
+      std::unique_ptr< Muon::GenericMuonSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p3 >(token) );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p2_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 2 detected");
-      std::unique_ptr< Muon::GenericMuonSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p2 >() );
+    } else if( compareClassGuid(token, p2_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
+      std::unique_ptr< Muon::GenericMuonSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p2 >(token) );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p1_guid) ) {
-      ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
-      std::unique_ptr< Muon::GenericMuonSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p1 >() );
+    } else if( compareClassGuid(token, p1_guid) ) {
+      ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
+      std::unique_ptr< Muon::GenericMuonSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::GenericMuonSimHitCollection_p1 >(token) );
       p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------

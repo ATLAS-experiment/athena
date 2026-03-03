@@ -38,7 +38,7 @@ protected:
 
   TrigMuonEFIsolationContainer_PERS* createPersistent(TrigMuonEFIsolationContainer* transCont);
 
-  TrigMuonEFIsolationContainer*      createTransient();
+  TrigMuonEFIsolationContainer*      createTransient(const Token* token);
 
 private:
   TrigMuonEFIsolationContainerCnv_p1 m_converter_p1;

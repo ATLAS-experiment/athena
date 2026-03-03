@@ -19,7 +19,7 @@ TrigTrtHitCounts_PERS* TrigTrtHitCountsCnv::createPersistent(TrigTrtHitCounts* t
   return persObj;
 }
 
-TrigTrtHitCounts* TrigTrtHitCountsCnv::createTransient() {
+TrigTrtHitCounts* TrigTrtHitCountsCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "TrigTrtHitCountsConverter" );
   mlog << MSG::DEBUG << "TrigTrtHitCountsCnv::createTransient " << endmsg;
   
@@ -27,9 +27,9 @@ TrigTrtHitCounts* TrigTrtHitCountsCnv::createTransient() {
   
   TrigTrtHitCounts *transObj = 0;
 
-  if( compareClassGuid(p1_guid) ) {   
+  if( compareClassGuid(token, p1_guid) ) {   
     mlog << MSG::DEBUG << "TrigTrtHitCountsCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr< TrigTrtHitCounts_p1 > pers_ptr( poolReadObject< TrigTrtHitCounts_p1 >() );
+    std::unique_ptr< TrigTrtHitCounts_p1 > pers_ptr( poolReadObject< TrigTrtHitCounts_p1 >(token) );
     TrigTrtHitCountsCnv_p1 converter;
     transObj = converter.createTransient(pers_ptr.get(), mlog);
   }

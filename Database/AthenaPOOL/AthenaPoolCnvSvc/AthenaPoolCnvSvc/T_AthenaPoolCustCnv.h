@@ -75,7 +75,7 @@ protected:
    /// @param token [IN]  POOL token of the persistent representation.
    /// @param pObj  [OUT] pointer to the object read.
    template <class P>
-   StatusCode poolToObject(const Token*& token, P*& pObj);
+   StatusCode poolToObject(const Token* token, P*& pObj);
 
    virtual StatusCode transToPers(TRANS* obj, PERS*& persObj) = 0;
    virtual StatusCode persToTrans(TRANS*& transObj, PERS* obj) = 0;
@@ -83,17 +83,7 @@ protected:
    /// Compare POOL class GUID with the one of the object being read
    /// @param clid [IN] GUID to compare
    /// @return true if the type of the object about to be read matches the GUID
-   virtual bool	compareClassGuid(const Guid &clid) const;
-
-   /// Set the token (in std::string representation) and classID for the object that will be read next.
-   /// Required by compareClassGuid() and poolReadObject().
-   /// Only extending converter needs to call this method explicitely
-   /// @param token [IN] token for the object to be read
-   virtual void setToken(const std::string& token);
- 
-   // the POOL class ID (GUID) of the object being read.
-   // Set by PoolToDataObject() available in createTransient()
-   Guid m_classID;
+   virtual bool	compareClassGuid(const Token* token, const Guid &clid) const;
 
 public:
    /// @return class ID.

@@ -28,7 +28,7 @@ public:
     LArPedestalMCCnv (ISvcLocator* svcloc) : LArPedestalMCCnvBase(svcloc) {}
 protected:
     virtual LArPedestalMCPersType*   createPersistent (LArPedestalMCTransType* transObj);
-    virtual LArPedestalMCTransType*  createTransient ();
+    virtual LArPedestalMCTransType*  createTransient(const Token* token);
 };
 
 #endif

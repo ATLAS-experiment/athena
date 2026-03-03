@@ -17,7 +17,7 @@ ALFA_CLinkEvent_PERS* ALFA_CLinkEventCnv::createPersistent(ALFA_CLinkEvent* tran
 	return persObj;
 }
 
-ALFA_CLinkEvent* ALFA_CLinkEventCnv::createTransient()
+ALFA_CLinkEvent* ALFA_CLinkEventCnv::createTransient(const Token* token)
 {
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_CLinkEventCnv_p1");
 	//LogStream<<MSG::INFO<<"MARK01-ALFA_CLinkEventCnv::createTransient (AthenaPOOL)"<<endmsg;
@@ -27,8 +27,8 @@ ALFA_CLinkEvent* ALFA_CLinkEventCnv::createTransient()
 	ALFA_CLinkEvent *trans_cont(nullptr); // probably inicialization
 	static const pool::Guid p1_guid ("D8FCB0A1-3B3E-4536-B590-1A48347B6E1A");
 
-	if( this->compareClassGuid(p1_guid)){
-		std::unique_ptr< ALFA_CLinkEvent_p1 >   col_vect( this->poolReadObject< ALFA_CLinkEvent_p1 >() );
+	if( this->compareClassGuid(token, p1_guid)){
+		std::unique_ptr< ALFA_CLinkEvent_p1 >   col_vect( this->poolReadObject< ALFA_CLinkEvent_p1 >(token) );
 		trans_cont = TPConverter_p1.createTransient( col_vect.get(), LogStream );
 	}
 	else {

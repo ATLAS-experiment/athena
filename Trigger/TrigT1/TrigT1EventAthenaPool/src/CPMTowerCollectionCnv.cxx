@@ -26,7 +26,7 @@ CPMTowerCollection_PERS * CPMTowerCollectionCnv::createPersistent( CPMTowerColle
  
 
 //createTransient
-CPMTowerCollection * CPMTowerCollectionCnv::createTransient()
+CPMTowerCollection * CPMTowerCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "CPMTowerCollectionConverter" );
   
@@ -35,10 +35,10 @@ CPMTowerCollection * CPMTowerCollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "AF950A9C-D929-4E3D-8B95-53D0B36B78D8" );
  
   CPMTowerCollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< CPMTowerCollection_PERS > pers_ref( poolReadObject< CPMTowerCollection_PERS >() );
+      std::unique_ptr< CPMTowerCollection_PERS > pers_ref( poolReadObject< CPMTowerCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of CPMTowerCollection" );

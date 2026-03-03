@@ -27,7 +27,7 @@ public:
 
 protected:
   TrigMonEvent_PERS*  createPersistent(TrigMonEvent* transObj);  
-  TrigMonEvent*       createTransient ();
+  TrigMonEvent*       createTransient(const Token* token);
 
  private:
 

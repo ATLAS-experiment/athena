@@ -23,10 +23,10 @@ typedef MuonRdoContainerTPCnv<MdtCsmContainer, MdtCsmContainer_p1, MdtCsmContain
 template < >
 inline
 MdtCsmContainer*
-MdtCsmContainerCnv::createTransient()
+MdtCsmContainerCnv::createTransient(const Token* token)
 {
     MsgStream log(msgSvc(), "MdtCsmContainerCnv" );
-    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient() "<< endmsg;
+    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient(const Token* token) "<< endmsg;
     
     // the use of auto pointers ensures that the persistent object is deleted
     // using the correct persistent type pointer
@@ -35,12 +35,12 @@ MdtCsmContainerCnv::createTransient()
     static const pool::Guid	p1_guid("66D77835-5290-4C9A-842A-AF10F384FC93");
     static const pool::Guid	p0_guid("CFDA6FF6-557F-40CB-9C54-B5A7404A9175");
 
-    if( compareClassGuid(p1_guid) ) {
-        std::unique_ptr< MdtCsmContainer_p1 > col_vect( poolReadObject< MdtCsmContainer_p1 >() );
+    if( compareClassGuid(token, p1_guid) ) {
+        std::unique_ptr< MdtCsmContainer_p1 > col_vect( poolReadObject< MdtCsmContainer_p1 >(token) );
         trans_cont = m_TPconverter.createTransient( col_vect.get(), log );
-    } else if(compareClassGuid(p0_guid) ) {
+    } else if(compareClassGuid(token, p0_guid) ) {
         // old version from before TP separation
-        std::unique_ptr< COLL_vector >	col_vect(  this->poolReadObject< COLL_vector >() );
+        std::unique_ptr< COLL_vector >	col_vect(  this->poolReadObject< COLL_vector >(token) );
         trans_cont =  createTransientFrom_p0( col_vect.get(), log );
     } else {
         throw std::runtime_error("Unsupported persistent version of CSC RDO container");

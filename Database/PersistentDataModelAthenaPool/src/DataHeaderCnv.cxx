@@ -261,8 +261,9 @@ StatusCode DataHeaderCnv::updateRepRefs(IOpaqueAddress* pAddress, DataObject* pO
       */
       std::string dhid = pAddress->par()[1];
       if( pObject ) {
-         this->setToken( pAddress->par()[0] );
-         if( !compareClassGuid( DHForm_p6_Guid ) ) {
+         Token poolToken;
+         poolToken.fromString( pAddress->par()[0] );
+         if( !compareClassGuid(&poolToken,  DHForm_p6_Guid ) ) {
             ATH_MSG_ERROR( "updateRepRefs called without DataHeaderForm" );
             return StatusCode::FAILURE;
          }
@@ -561,7 +562,7 @@ void DataHeaderCnv::removeBadElements(DataHeader* dh)
 }
 
 //______________________________________________________________________________
-DataHeader* DataHeaderCnv::createTransient() {
+DataHeader* DataHeaderCnv::createTransient(const Token* token) {
    if (this->m_i_poolToken == nullptr) {
       return(nullptr);
    }
@@ -578,7 +579,7 @@ DataHeader* DataHeaderCnv::createTransient() {
    static const pool::Guid p4_guid("9630EB7B-CCD7-47D9-A39B-CBBF4133CDF2");
    static const pool::Guid p3_guid("EC1318F0-8E28-45F8-9A2D-2597C1CC87A6");
    try {
-      if( compareClassGuid( p6_guid ) ) {
+      if( compareClassGuid(token,  p6_guid ) ) {
          std::unique_ptr<DataHeader_p6> header( poolReadObject_p6() );
          auto dhForm = m_inputDHForms[ header->dhFormToken() ].get();
          auto dh = m_tpInConverter.createTransient( header.get(), *dhForm, m_i_poolToken );
@@ -586,15 +587,15 @@ DataHeader* DataHeaderCnv::createTransient() {
          // To dump the DataHeader uncomment below
          // std::ostringstream ss;  dh->dump(ss); std::cout << ss.str() << std::endl;
          return dh;
-      } else if (this->compareClassGuid( p5_guid )) {
+      } else if (this->compareClassGuid(token,  p5_guid )) {
          std::unique_ptr<DataHeader_p5> obj_p5( poolReadObject_p5() );
          return m_tpInConverter_p5.createTransient( *obj_p5, *m_dhInForm5 ).release();
-      } else if (this->compareClassGuid( p4_guid )) {
-         std::unique_ptr<DataHeader_p4> obj_p4(this->poolReadObject<DataHeader_p4>());
+      } else if (this->compareClassGuid(token,  p4_guid )) {
+         std::unique_ptr<DataHeader_p4> obj_p4(this->poolReadObject<DataHeader_p4>(token));
          DataHeaderCnv_p4 tPconverter_p4;
          return(tPconverter_p4.createTransient(obj_p4.get()));
-      } else if (this->compareClassGuid( p3_guid )) {
-         std::unique_ptr<DataHeader_p3> obj_p3(this->poolReadObject<DataHeader_p3>());
+      } else if (this->compareClassGuid(token,  p3_guid )) {
+         std::unique_ptr<DataHeader_p3> obj_p3(this->poolReadObject<DataHeader_p3>(token));
          DataHeaderCnv_p3 tPconverter_p3;
          return(tPconverter_p3.createTransient(obj_p3.get()));
       }

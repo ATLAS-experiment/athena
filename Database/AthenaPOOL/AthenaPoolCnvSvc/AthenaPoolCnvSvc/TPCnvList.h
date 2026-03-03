@@ -47,7 +47,7 @@ class TPCnvList
   /// on each.  Stop once one succeeds.
   struct do_create_transient
   {
-    do_create_transient (CNV& parent, const std::string& key, MsgStream& msg);
+    do_create_transient (CNV& parent, const Token* token, const std::string& key, MsgStream& msg);
 
     // FIXME: It would be better to pass a unique_ptr through here.
     // But that requires the resolution of DR2055, which g++ only implements
@@ -56,6 +56,7 @@ class TPCnvList
     typename ELT::Trans_t* operator() (typename ELT::Trans_t* p, ELT& elt);
 
     CNV& m_parent;
+    const Token* m_token;
     const std::string& m_key;
     MsgStream& m_msg;
   };
@@ -65,13 +66,14 @@ class TPCnvList
   /// on each.  Stop once one succeeds.
   struct do_pers_to_trans
   {
-    do_pers_to_trans (CNV& parent, TRANS* trans, const std::string& key, MsgStream& msg);
+    do_pers_to_trans (CNV& parent, TRANS* trans, const Token* token, const std::string& key, MsgStream& msg);
     
     template <class ELT>
     bool operator() (bool found, ELT& elt);
 
     CNV& m_parent;
     TRANS* m_trans;
+    const Token* m_token;
     const std::string& m_key;
     MsgStream& m_msg;
   };
@@ -103,7 +105,7 @@ public:
    * Other errors are reported by raising exceptions.
    */
   std::unique_ptr<TRANS>
-  createTransient (CNV& parent, const std::string& key, MsgStream& msg);
+  createTransient (CNV& parent, const Token* token, const std::string& key, MsgStream& msg);
 
   
   /**
@@ -118,7 +120,7 @@ public:
    * the type of any of our TP converters, return false.
    * Other errors are reported by raising exceptions.
    */
-  bool persToTrans (CNV& parent, TRANS* trans, const std::string& key, MsgStream& msg);
+  bool persToTrans (CNV& parent, TRANS* trans, const Token* token, const std::string& key, MsgStream& msg);
   
 
 private:

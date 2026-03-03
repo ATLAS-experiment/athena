@@ -78,10 +78,6 @@ TrackCollection_PERS * TrackCollectionCnv::createPersistentWithKey( TrackCollect
                                                                     const std::string& key)
 {
     std::string logname = "TrackCollectionCnv";
-    if (const DataObject* dObj = getDataObject()) {
-      logname += dObj->name();
-    }
-
     MsgStream log (m_msgSvc, logname );
 
     return m_TPConverter.createPersistentWithKey ( transCont, key, log );
@@ -90,7 +86,7 @@ TrackCollection_PERS * TrackCollectionCnv::createPersistentWithKey( TrackCollect
 //-----------------------------------------------------------------------------
 // Create transient collection
 //-----------------------------------------------------------------------------
-TrackCollection *TrackCollectionCnv::createTransientWithKey(const std::string& key)
+TrackCollection *TrackCollectionCnv::createTransientWithKey(const Token* token, const std::string& key)
 {
     m_log.setLevel( m_msgSvc->outputLevel() );
     static const pool::Guid p7_guid( "D8806153-CA92-4A1A-9859-68E40EB4E336" );
@@ -103,41 +99,41 @@ TrackCollection *TrackCollectionCnv::createTransientWithKey(const std::string& k
     static const pool::Guid p0_guid( "70ECEBFC-BE00-46C2-8B35-4CC12D18DE39" );
 
     TrackCollection *p_collection = nullptr;
-    if( compareClassGuid( p7_guid )){
-      poolReadObject< TrackCollection_PERS >( m_TPConverter );
+    if( compareClassGuid(token,  p7_guid )){
+      poolReadObject< TrackCollection_PERS >( m_TPConverter, token );
       p_collection = m_TPConverter.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p6_guid )){
-      poolReadObject< Trk::TrackCollection_tlp6 >( m_TPConverter_tlp6 );
+    else if( compareClassGuid(token,  p6_guid )){
+      poolReadObject< Trk::TrackCollection_tlp6 >( m_TPConverter_tlp6, token );
       p_collection = m_TPConverter_tlp6.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p5_guid )){
+    else if( compareClassGuid(token,  p5_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp5 >( m_TPConverter_tlp5);
+      poolReadObject< Trk::TrackCollection_tlp5 >( m_TPConverter_tlp5, token );
       p_collection = m_TPConverter_tlp5.createTransientWithKey( key, m_log );
     }   
-    else if( compareClassGuid( p4_guid )){
+    else if( compareClassGuid(token,  p4_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp4 >( m_TPConverter_tlp4);
+      poolReadObject< Trk::TrackCollection_tlp4 >( m_TPConverter_tlp4, token );
       p_collection = m_TPConverter_tlp4.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p3_guid )){
+    else if( compareClassGuid(token,  p3_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp3 >( m_TPConverter_tlp3);
+      poolReadObject< Trk::TrackCollection_tlp3 >( m_TPConverter_tlp3, token );
       p_collection = m_TPConverter_tlp3.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p2_guid ) ) {
+    else if( compareClassGuid(token,  p2_guid ) ) {
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp2 >( m_TPConverter_tlp2 );
+      poolReadObject< Trk::TrackCollection_tlp2 >( m_TPConverter_tlp2, token );
       p_collection = m_TPConverter_tlp2.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p1_guid ) )  {
+    else if( compareClassGuid(token,  p1_guid ) )  {
        initializeOldExtConverters();
-       poolReadObject< Trk::TrackCollection_tlp1 >( m_TPConverter_tlp1 );
+       poolReadObject< Trk::TrackCollection_tlp1 >( m_TPConverter_tlp1, token );
        p_collection = m_TPConverter_tlp1.createTransientWithKey( key, m_log );
     }
-    else if( compareClassGuid( p0_guid ) )  {
-        p_collection = poolReadObject< TrackCollection >();
+    else if( compareClassGuid(token,  p0_guid ) )  {
+        p_collection = poolReadObject< TrackCollection >(token);
     }
     else
         throw std::runtime_error( "Unsupported persistent version of Data Collection" );

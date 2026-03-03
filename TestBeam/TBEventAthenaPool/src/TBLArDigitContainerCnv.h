@@ -28,7 +28,7 @@ class TBLArDigitContainerCnv : public TBLArDigitContainerCnvBase
 public:
   TBLArDigitContainerCnv(ISvcLocator*);
 protected:
-  virtual TBLArDigitContainer* createTransient();
+  virtual TBLArDigitContainer* createTransient(const Token* token);
   virtual TBLArDigitContainerPERS* createPersistent(TBLArDigitContainer*);
  private:
   TBLArDigitContainerCnv_p1 m_converter;

@@ -49,7 +49,7 @@ protected:
   virtual StatusCode initialize() override;
   
   virtual V0Container_PERS *createPersistent( V0Container *transCont) override;
-  virtual V0Container      *createTransient() override;
+  virtual V0Container      *createTransient(const Token* token) override;
 
   AthenaPoolTopLevelTPCnvBase*	getTopLevelTPCnv() { return &m_TPConverter; }
 

@@ -20,21 +20,21 @@ AlignableTransform_PERS* AlignableTransformContainerCnv::createPersistent(Aligna
     return persObj; 
 }
 
-AlignableTransform_TRANS* AlignableTransformContainerCnv::createTransient() {
+AlignableTransform_TRANS* AlignableTransformContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "AlignableTransformContainerCnv" );
     static const pool::Guid   p1_guid("BA1A841C-8D92-45AE-9AD1-9AF7A1736844");
     static const pool::Guid   p0_guid("E779C6B5-3F2A-473E-B35E-6CCB345E0665");
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "AlignableTransformContainer read p1" << endmsg;
-        std::unique_ptr< AlignableTransform_p1 > col_vect( poolReadObject< AlignableTransform_p1 >() );
+        std::unique_ptr< AlignableTransform_p1 > col_vect( poolReadObject< AlignableTransform_p1 >(token) );
         AlignableTransformCnv_p1 cnv;
         return cnv.createTransient( col_vect.get(), log );
     }
-    else if( compareClassGuid(p0_guid) ) {
+    else if( compareClassGuid(token, p0_guid) ) {
         // regular object from before TP separation, just return it
         if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "AlignableTransformContainer read p0" << endmsg;
-        return this->poolReadObject<AlignableTransform>();
+        return this->poolReadObject<AlignableTransform>(token);
     } 
     throw std::runtime_error("Unsupported persistent version of AlignableTransformContainer");
 }

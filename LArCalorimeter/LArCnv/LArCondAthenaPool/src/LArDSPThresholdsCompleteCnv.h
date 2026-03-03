@@ -29,7 +29,7 @@ public:
     LArDSPThresholdsCompleteCnv (ISvcLocator* svcloc) : LArDSPThresholdsCompleteCnvBase(svcloc) {}
 protected:
     virtual LArDSPThrPersType*   createPersistent (LArDSPThrTransType* transObj);
-    virtual LArDSPThrTransType*  createTransient ();
+    virtual LArDSPThrTransType*  createTransient(const Token* token);
 };
 
 

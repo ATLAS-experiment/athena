@@ -29,7 +29,7 @@ public:
     LArOFCCompleteCnv (ISvcLocator* svcloc) : LArOFCCompleteCnvBase(svcloc) {}
 protected:
     virtual LArOFCPersType*    createPersistent (LArOFCTransType* transObj);
-    virtual LArOFCTransType*   createTransient();
+    virtual LArOFCTransType*   createTransient(const Token* token);
     LArOFCTransType*           createTransient(LArConditionsSubset<LArOFCP>* );
 };
 

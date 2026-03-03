@@ -61,7 +61,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual egammaContainer* createTransient();
+  virtual egammaContainer* createTransient(const Token* token);
 
 };
 

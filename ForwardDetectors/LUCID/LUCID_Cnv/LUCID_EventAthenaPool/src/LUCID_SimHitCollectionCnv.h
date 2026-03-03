@@ -26,7 +26,7 @@ public:
 protected:
 
   virtual LUCID_SimHitCollection_PERS* createPersistent(LUCID_SimHitCollection* transCont);
-  virtual LUCID_SimHitCollection*      createTransient ();
+  virtual LUCID_SimHitCollection*      createTransient(const Token* token);
 };
 
 #endif

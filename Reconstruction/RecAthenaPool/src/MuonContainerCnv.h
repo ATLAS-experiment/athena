@@ -66,7 +66,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual Analysis::MuonContainer* createTransient();
+  virtual Analysis::MuonContainer* createTransient(const Token* token);
 
   /** initialize() - need to access Storegate */
   virtual StatusCode initialize();

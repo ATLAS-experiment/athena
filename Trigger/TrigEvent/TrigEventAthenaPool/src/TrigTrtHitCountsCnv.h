@@ -35,7 +35,7 @@ public:
   
 protected:
   TrigTrtHitCounts_PERS* createPersistent(TrigTrtHitCounts* transObj);
-  TrigTrtHitCounts* createTransient();
+  TrigTrtHitCounts* createTransient(const Token* token);
 };
 
 

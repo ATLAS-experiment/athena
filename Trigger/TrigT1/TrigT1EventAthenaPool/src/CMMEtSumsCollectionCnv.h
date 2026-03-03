@@ -34,7 +34,7 @@ public:
 protected:
   
   virtual CMMEtSumsCollection_PERS*   createPersistent (CMMEtSumsCollection* transCont);
-  virtual CMMEtSumsCollection*        createTransient ();
+  virtual CMMEtSumsCollection*        createTransient(const Token* token);
 
 private:
   

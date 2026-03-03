@@ -26,7 +26,7 @@ public:
 protected:
    
    virtual TrigT2MbtsBitsContainer_PERS *createPersistent( TrigT2MbtsBitsContainer *transObj);
-   virtual TrigT2MbtsBitsContainer      *createTransient();
+   virtual TrigT2MbtsBitsContainer      *createTransient(const Token* token);
 
 private:
    TrigT2MbtsBitsContainerCnv_tlp1 m_converter_tlp1;

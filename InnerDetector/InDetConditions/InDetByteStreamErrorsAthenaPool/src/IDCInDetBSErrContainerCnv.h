@@ -21,7 +21,7 @@ public:
 
 protected:
   virtual IDCBSErrContainer_PERS*   createPersistent (IDCInDetBSErrContainer* transCont);
-  virtual IDCInDetBSErrContainer*   createTransient ();
+  virtual IDCInDetBSErrContainer*   createTransient(const Token* token);
 
   IDCInDetBSErrContainerCnv_p1  m_TPConverter;
 };

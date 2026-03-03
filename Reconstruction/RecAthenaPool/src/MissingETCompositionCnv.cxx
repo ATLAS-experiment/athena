@@ -18,23 +18,23 @@ MissingETComposition_PERS* MissingETCompositionCnv::createPersistent(MissingETCo
   return persObj;
 }
 
-MissingETComposition* MissingETCompositionCnv::createTransient()
+MissingETComposition* MissingETCompositionCnv::createTransient(const Token* token)
 {
     static const pool::Guid   p1_guid("78E9CC2F-1FB4-4740-AD44-7C849D9CC865");
     static const pool::Guid   p2_guid("CF4110FB-35B4-4C8B-BB51-FE8C6CBE0277");
     
-  if( compareClassGuid(p2_guid) ){
+  if( compareClassGuid(token, p2_guid) ){
       if ( ! bool(m_TPconverter_p2) )
 	      m_TPconverter_p2 = new MissingETCompositionCnv_p2();
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr<MissingETComposition_p2> shapestore( poolReadObject< MissingETComposition_p2 >() );
+      std::unique_ptr<MissingETComposition_p2> shapestore( poolReadObject< MissingETComposition_p2 >(token) );
       MsgStream report( msgSvc(), "MissingETCompositionCnv" );
       // report << MSG::INFO << "Reading MissingETComposition_p1" << endmsg; 
       return m_TPconverter_p2->createTransient( shapestore.get(), report );
     }
-    else if( compareClassGuid(p1_guid) ) {
+    else if( compareClassGuid(token, p1_guid) ) {
   	    MissingETCompositionCnv_p1 TPconverter_p1;
-        std::unique_ptr<MissingETComposition_p1> shapestore( poolReadObject< MissingETComposition_p1 >() );
+        std::unique_ptr<MissingETComposition_p1> shapestore( poolReadObject< MissingETComposition_p1 >(token) );
         MsgStream report( msgSvc(), "MissingETCompositionCnv" );
         // report << MSG::INFO << "Reading MissingETComposition_p1" << endmsg; 
         return TPconverter_p1.createTransient( shapestore.get(), report );

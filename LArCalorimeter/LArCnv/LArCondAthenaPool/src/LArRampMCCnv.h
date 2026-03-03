@@ -29,7 +29,7 @@ public:
     LArRampMCCnv (ISvcLocator* svcloc) : LArRampMCCnvBase(svcloc) {}
 protected:
     virtual LArRampPersType*   createPersistent (LArRampTransType* transObj);
-    virtual LArRampTransType*  createTransient ();
+    virtual LArRampTransType*  createTransient(const Token* token);
     LArRampTransType*          createTransient(LArConditionsSubset<LArRampP>* orig);
 };
 
