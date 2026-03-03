@@ -9,12 +9,12 @@
 #include <set>
 
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
+#include "PersistencySvc/ITransaction.h"
 
 namespace pool {
 
   // forward declarations
   class IStorageSvc;
-  class ITransaction;
 
   namespace PersistencySvc {
 
@@ -38,10 +38,10 @@ namespace pool {
       virtual ~MicroSessionManager();
 
       /// Connects to the storage service
-      bool connect( ITransaction& transaction );
+      bool connect( ITransaction::Type transType );
 
       /// Connects to a database.
-      DatabaseHandler* connect( ITransaction& transaction,
+      DatabaseHandler* connect( ITransaction::Type transType,
                                 const std::string& fid,
                                 const std::string& pfn,
                                 long accessMode );

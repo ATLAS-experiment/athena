@@ -4,7 +4,6 @@
 
 #include "UserSession.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
-#include "GlobalTransaction.h"
 #include "DatabaseRegistry.h"
 #include "UserDatabase.h"
 #include "DatabaseHandler.h"
@@ -14,21 +13,20 @@
 #include "PersistentDataModel/Placement.h"
 
 pool::PersistencySvc::UserSession::UserSession( pool::IFileCatalog& fileCatalog ):
+  APRMessaging( "APR Session" ),
   m_policy( 0 ),
   m_catalog( &fileCatalog ),
   m_registry( 0 ),
-  m_transaction( 0 )
+  m_transactionType( pool::ITransaction::INACTIVE )
 {
   m_policy = new pool::DatabaseConnectionPolicy;
   m_registry = new pool::PersistencySvc::DatabaseRegistry();
-  m_transaction = new pool::PersistencySvc::GlobalTransaction( *m_registry );
 }
 
 pool::PersistencySvc::UserSession::~UserSession()
 {
   // order is important
   m_technologies.clear();
-  delete m_transaction;
   delete m_registry;
   delete m_policy;
 }
@@ -37,8 +35,8 @@ pool::PersistencySvc::UserSession::~UserSession()
 void*
 pool::PersistencySvc::UserSession::readObject( const Token& token, void* object )
 {
-  void* result( (void*)0 );
-  if ( m_transaction->isActive() ) {
+  void* result {};
+  if( isActive() ) {
     UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
     if ( db.openMode() == pool::IDatabase::CLOSED ) {
       db.setTechnology( token.technology() );
@@ -51,10 +49,10 @@ pool::PersistencySvc::UserSession::readObject( const Token& token, void* object 
 
 Token*
 pool::PersistencySvc::UserSession::registerForWrite( const Placement& place,
-                                                        const void* object,
-                                                        const RootType& type )
+                                                     const void* object,
+                                                     const RootType& type )
 {
-  if( !m_transaction->isActive() || m_transaction->type() != pool::ITransaction::UPDATE ) {
+  if( m_transactionType != pool::ITransaction::UPDATE ) {
     return 0;
   }
   UserDatabase db( *this, place.fileName(), pool::DatabaseSpecification::PFN );
@@ -97,32 +95,64 @@ pool::PersistencySvc::UserSession::disconnectAll()
   return ret;
 }
       
-pool::ITransaction&
-pool::PersistencySvc::UserSession::transaction()
+
+bool
+pool::PersistencySvc::UserSession::start( pool::ITransaction::Type type )
 {
-  return static_cast<pool::ITransaction&>( *m_transaction );
+  if( isActive() || type == pool::ITransaction::INACTIVE ) return false;
+  m_transactionType = type;
+  return true;
 }
 
-const pool::ITransaction&
-pool::PersistencySvc::UserSession::transaction() const
+
+bool
+pool::PersistencySvc::UserSession::commit()
 {
-  return static_cast<const pool::ITransaction&>( *m_transaction );
+  if( isActive() ) {
+    bool OK = true;
+    for( auto db : *m_registry ) {
+      bool bCommit = db->commitTransaction(); // This has to be replaced with a two phase commit
+      if ( ! bCommit ) {
+        ATH_MSG_ERROR("Could not commit the transaction for the database with:" << endmsg
+                      << "FID = " << db->fid() << endmsg   << "PFN = " << db->pfn() );
+      }
+      OK = OK && bCommit;
+    }
+    m_transactionType = INACTIVE;
+    return OK;
+  }
+  return false;
 }
+
+
+bool
+pool::PersistencySvc::UserSession::commitAndHold()
+{
+  if( isActive() ) {
+    bool OK = true;
+    for( auto db : *m_registry ) {
+      bool bCommit = db->commitAndHoldTransaction(); // This has to be replaced with a two phase commit
+      if ( ! bCommit ) {
+        ATH_MSG_ERROR("Could not commit and hold the transaction for the database with:" << endmsg
+            << "FID = " << db->fid() << endmsg  << "PFN = " << db->pfn() );
+      }
+      OK = OK && bCommit;
+    }
+    return OK;
+  }
+  return false;
+}
+
+
 
 std::unique_ptr<pool::IDatabase>
 pool::PersistencySvc::UserSession::databaseHandle( const std::string& dbName,
                                                    DatabaseSpecification::NameType dbNameType )
 {
-  if ( m_transaction->isActive() ) {
+  if( isActive() ) {
      return std::make_unique<UserDatabase>( *this, dbName, dbNameType );
   }
   return nullptr;
-}
-
-pool::ITransaction&
-pool::PersistencySvc::UserSession::globalTransaction()
-{
-  return static_cast< pool::ITransaction& >( *m_transaction );
 }
 
 pool::IFileCatalog&
@@ -168,6 +198,6 @@ pool::ITechnologySpecificAttributes&
 pool::PersistencySvc::UserSession::technologySpecificAttributes( long technology )
 {
   pool::PersistencySvc::MicroSessionManager& mgr = microSessionManager( technology );
-  mgr.connect( *m_transaction );
+  mgr.connect( m_transactionType );
   return mgr;
 }

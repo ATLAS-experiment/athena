@@ -101,8 +101,8 @@ namespace pool {
       const DatabaseConnectionPolicy&         m_policy;
       /// Reference to the file catalog
       IFileCatalog&                           m_catalog;
-      /// Reference to the global transaction
-      ITransaction&                           m_transaction;
+      /// Transaction type (read/update)
+      ITransaction::Type                      m_transactionType;
       /// Reference to the database registry
       DatabaseRegistry&                       m_registry;
       /// The database name
