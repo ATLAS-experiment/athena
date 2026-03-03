@@ -21,6 +21,7 @@
 #include <xAODJet/JetContainer.h>
 
 #include "BoostedJetTaggers/JSSTaggerBase.h"
+#include "BoostedJetTaggers/ScaleFactors.h"
 
 namespace BJT{
 
@@ -41,10 +42,13 @@ namespace BJT{
 
             CP::SysListHandle m_systematicsList{this};
             CP::SysReadHandle<xAOD::JetContainer> m_jets{ this, "jets", "", "jet container to read"};
-
-            // jet tagger
+            
+            // jet tagger WP tool
             // ToDo: should add interface?
             ToolHandle<JSSTaggerBase> m_tagger {this, "tagger", "", "Tagger Tool"};
+            
+            // scale factors tool
+            ToolHandle<IJetDecorator> m_scalefactor {this, "scalefactor", "", "Scale Factors Tool"};
 
     };
 }

@@ -29,6 +29,8 @@ namespace BJT{
 
       // jet tagger tool
       ATH_CHECK(m_tagger.retrieve());
+      if(m_scalefactor)
+        ATH_CHECK(m_scalefactor.retrieve());
 
       return StatusCode::SUCCESS;
     }
@@ -41,8 +43,12 @@ namespace BJT{
         const xAOD::JetContainer *jets = nullptr;
         ANA_CHECK(m_jets.retrieve(jets, sys));
 
-        // jet tagger
+        // jet tagger WP tool
         ATH_CHECK(m_tagger -> decorate(*jets));
+
+        // scale factors tool
+        if(m_scalefactor)
+          ATH_CHECK(m_scalefactor -> decorate(*jets));
 
       }
 
