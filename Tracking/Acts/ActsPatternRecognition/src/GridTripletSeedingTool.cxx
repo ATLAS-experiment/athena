@@ -433,9 +433,9 @@ StatusCode GridTripletSeedingTool::createSeeds2(
 
   Acts::SpacePointContainer2 selectedSpacePoints;
   selectedSpacePoints.createColumns(
-      Acts::SpacePointColumns::CopyFromIndex | Acts::SpacePointColumns::XY |
-      Acts::SpacePointColumns::ZR | Acts::SpacePointColumns::VarianceZ |
-      Acts::SpacePointColumns::VarianceR);
+      Acts::SpacePointColumns::CopyFromIndex |
+      Acts::SpacePointColumns::PackedXY | Acts::SpacePointColumns::PackedZR |
+      Acts::SpacePointColumns::VarianceZ | Acts::SpacePointColumns::VarianceR);
   if (m_useDetailedDoubleMeasurementInfo) {
     selectedSpacePoints.createColumns(Acts::SpacePointColumns::Strip);
   }
@@ -593,10 +593,12 @@ StatusCode GridTripletSeedingTool::createSeeds2(
       continue;
     }
 
-    seedContainer.push_back(Acts::ConstSeedProxy2(seed),
-                            [&](const Acts::SpacePointIndex2 spIndex) {
-                              return selectedXAODSpacePoints[spIndex];
-                            });
+    seedContainer.push_back(
+        Acts::ConstSeedProxy2(seed), [&](const Acts::SpacePointIndex2 spIndex) {
+          const Acts::SpacePointIndex2 originalIndex =
+              selectedSpacePoints.at(spIndex).copyFromIndex();
+          return selectedXAODSpacePoints[originalIndex];
+        });
   }
 
   return StatusCode::SUCCESS;

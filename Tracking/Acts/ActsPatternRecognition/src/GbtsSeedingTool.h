@@ -15,14 +15,9 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 // ACTS CORE
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/SeedFinderGbts.hpp" 
+#include "Acts/Seeding2/GraphBasedTrackSeeder.hpp"
+#include "Acts/Seeding2/GbtsConfig.hpp"
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/Seeding/GbtsConfig.hpp" 
-#include "Acts/Seeding/SeedFinderConfig.hpp"
-#include "Acts/Seeding/SeedFilterConfig.hpp"
-#include "Acts/Seeding/SeedFilter.hpp"
 #include "Acts/EventData/SeedContainer2.hpp"
 #include "Acts/EventData/SpacePointContainer2.hpp"
 
@@ -89,7 +84,7 @@ namespace ActsTrk {
     
     std::vector<Acts::Experimental::TrigInDetSiLayer> m_layerGeometry{}; //layer objects used by GBTS
 
-    std::unique_ptr<Acts::Experimental::SeedFinderGbts> m_finder = nullptr; //the actual seed fining algorithm
+    std::unique_ptr<Acts::Experimental::GraphBasedTrackSeeder> m_finder = nullptr; //the actual seed fining algorithm
     
     
     // used to create the detector layers and which modules correspond to pixels and strips 

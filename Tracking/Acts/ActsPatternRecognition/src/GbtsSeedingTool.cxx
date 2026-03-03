@@ -63,7 +63,7 @@ namespace ActsTrk {
     //create geoemtry object that holds allowed pairing of allowed eta regions in each layer 
     m_gbtsGeo = std::make_unique<Acts::Experimental::GbtsGeometry>( m_layerGeometry, m_connector);
 
-    m_finder = std::make_unique<Acts::Experimental::SeedFinderGbts>(m_cfg, std::move(m_gbtsGeo), m_layerGeometry, logger().cloneWithSuffix("gbtsFinder"));
+    m_finder = std::make_unique<Acts::Experimental::GraphBasedTrackSeeder>(m_cfg, std::move(m_gbtsGeo), m_layerGeometry, logger().cloneWithSuffix("gbtsFinder"));
     
     return StatusCode::SUCCESS;
 }
@@ -91,10 +91,9 @@ namespace ActsTrk {
     );
 
     //add new column for layer ID and clusterwidth
-    auto layerColumn = coreSpacePoints.createColumn<std::uint32_t>("LayerID");
-    auto clusterWidthColumn = coreSpacePoints.createColumn<float>("Cluster_Width");
-    auto localPositionColumn = coreSpacePoints.createColumn<float>("LocalPositionY");
-
+    auto layerColumn = coreSpacePoints.createColumn<std::uint32_t>("layerId");
+    auto clusterWidthColumn = coreSpacePoints.createColumn<float>("clusterWidth");
+    auto localPositionColumn = coreSpacePoints.createColumn<float>("localPositionY");
 
     std::vector<const xAOD::SpacePoint*> tmpSpacePoints;
     std::size_t totalSpacePoints = 0;
@@ -102,7 +101,6 @@ namespace ActsTrk {
     //add spacepoint pointers to singel container, this makes indexing them easier 
     for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
       for (const xAOD::SpacePoint* sp : *spacePoints) {
-
         tmpSpacePoints.emplace_back(sp);
       }
       totalSpacePoints += spacePoints->size();
@@ -112,7 +110,6 @@ namespace ActsTrk {
 
     //add spacepoints to new container
     for(std::size_t idx = 0; idx < tmpSpacePoints.size(); ++idx){
-
       //obtain module hash for spacepoint
       const xAOD::SpacePoint* sp = tmpSpacePoints[idx];
       const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList() ;
@@ -127,8 +124,7 @@ namespace ActsTrk {
       newSp.copyFromIndex() = idx;
 
       //apply beamspot corrections if needed
-      if(m_cfg.beamSpotCorrection){
-        
+      if (m_cfg.beamSpotCorrection) {
         float new_x = static_cast<float>(sp->x() - beamSpotPos[0]);
         float new_y = static_cast<float>(sp->y() - beamSpotPos[1]);
         newSp.x() = new_x;
@@ -136,8 +132,7 @@ namespace ActsTrk {
         newSp.z() = static_cast<float>(sp->z());
         newSp.r() = std::hypot(new_x, new_y);
         newSp.phi() = std::atan2(new_y, new_x);
-        
-      }else{
+      } else {
         float new_x = static_cast<float>(sp->x());
         float new_y = static_cast<float>(sp->y());
         newSp.x() = static_cast<float>(sp->x());
@@ -146,31 +141,22 @@ namespace ActsTrk {
         newSp.r() = std::hypot(new_x, new_y);
         newSp.phi() = std::atan2(sp->y(), sp->x());
       }
-      
+
       newSp.extra(layerColumn) = layer;
-      
-      if(m_cfg.useMl){
-          
+
+      if (m_cfg.useMl) {
           assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
           const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
           newSp.extra(clusterWidthColumn) = pCL->widthInEta();
           newSp.extra(localPositionColumn) = pCL->localPosition<2>().y();
-          
-        }else{
-          newSp.extra(clusterWidthColumn) = 0;
-          newSp.extra(localPositionColumn) = 0;
-          
-        }
-      }    
+      }
+    }
     ATH_MSG_VERBOSE("Spacepoints successfully added to new container");
-    
-    //collect all spacepoint containers objects so they can be passed into the seedfinder
-    auto sPContainerComponents = std::make_tuple(std::move(coreSpacePoints), layerColumn.asConst(), clusterWidthColumn.asConst(), localPositionColumn.asConst());
 
     //compute seeds
     int max_layers = m_are_pixels.size(); 
     Acts::Experimental::RoiDescriptor internalRoi(0, -4.5, 4.5, 0, -std::numbers::pi, std::numbers::pi, 0, -150.0,150.0); //(eta,etaMinus,etaPlus,phi,phiMinus,Phiplus,z,zMinus,zPlus)
-    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, sPContainerComponents, max_layers); 
+    Acts::SeedContainer2 seeds = m_finder->createSeeds(internalRoi, coreSpacePoints, max_layers); 
 
     //add seeds to the output container
     seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
