@@ -1,36 +1,41 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MUONRPCRAWDATAPROVIDERTOOLCORE_H
-#define MUONRPCRAWDATAPROVIDERTOOLCORE_H
+#ifndef MUONRPCRAWDATAPROVIDERTOOL_H
+#define MUONRPCRAWDATAPROVIDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "ByteStreamData/RawEvent.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonRDO/RpcPad_Cache.h"
 #include "MuonRDO/RpcPadContainer.h"
 #include "MuonRDO/RpcSectorLogicContainer.h"
 #include "MuonRPC_CnvTools/IRpcROD_Decoder.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-
 
 namespace Muon {
-    /**
-     * Base class for tools to decode RPC raw data.
-     *
-     * This contains all the logic to decode a vector of ROB fragments into the relevent containers.
-     * The derived classes should do the management of the containers and then call the convertIntoContainers
-     * from the convert functions required by the interface.
-     */
-    class RPC_RawDataProviderToolCore : public AthAlgTool {
-    public:
-        RPC_RawDataProviderToolCore(const std::string& t, const std::string& n, const IInterface* p);
 
-        virtual ~RPC_RawDataProviderToolCore() = default;
+    class RPC_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool> {
+    public:
+        RPC_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p);
+
+        virtual ~RPC_RawDataProviderTool() = default;
 
         virtual StatusCode initialize() override;
+
+        /** Decoding method - IMuonRawDataProviderTool interface (EventContext-based) */
+        using IMuonRawDataProviderTool::convert;
+        virtual StatusCode convert(const ROBFragmentList&, const EventContext&) const override;
+        virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&, const EventContext&) const override;
+        virtual StatusCode convert(const EventContext&) const override;
+        virtual StatusCode convert(const std::vector<IdentifierHash>&, const EventContext&) const override;
+        virtual StatusCode convert(const std::vector<uint32_t>&, const EventContext&) const override;
 
     protected:
         // This function does all the actual work of decoding the data
@@ -41,6 +46,7 @@ namespace Muon {
         std::vector<IdentifierHash> to_be_converted(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                                                     const std::vector<IdentifierHash>& coll) const;
 
+    private:
         SG::ReadCondHandleKey<RpcCablingCondData> m_readKey{this, "ReadKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
 
         // Rob Data Provider handle
@@ -55,7 +61,15 @@ namespace Muon {
         SG::WriteHandleKey<RpcSectorLogicContainer> m_sec{this, "RPCSec", "RPC_SECTORLOGIC",
                                                           "Name of the RPC_SECTORLOGIC produced by RawDataProvider"};
 
-    };  // class RPC_RawDataProviderToolCore
+        /// RPC container cache key
+        SG::UpdateHandleKey<RpcPad_Cache> m_rdoContainerCacheKey{this, "RpcContainerCacheKey", 
+                                                "", "Optional external cache for the RPC container"};
+        /// Turn on/off RpcSectorConfig writing
+        Gaudi::Property<bool> m_WriteOutRpcSectorLogic{this, "WriteOutRpcSectorLogic", true, "Turn on/off RpcSectorLogic writing"};
+   
+        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    };
+
 }  // namespace Muon
 
-#endif  // MUONRPCRAWDATAPROVIDERTOOLCORE_H
+#endif
