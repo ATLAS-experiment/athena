@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <GaudiKernel/DataIncident.h>
@@ -314,12 +314,6 @@ StatusCode AthenaHiveEventLoopMgr::initialize()
   return sc;
 }
 
-inline
-StoreGateSvc* 
-AthenaHiveEventLoopMgr::eventStore() const {
-  return m_eventStore.get();
-}
-
 //=========================================================================
 // property handlers
 //=========================================================================
@@ -527,8 +521,8 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
   unsigned int conditionsRun = ctx.eventID().run_number();
   if (!m_evtIdModSvc.isSet()) {
     const AthenaAttributeList* attr = nullptr;
-    if (eventStore()->contains<AthenaAttributeList> ("Input") &&
-        eventStore()->retrieve(attr, "Input").isSuccess()) {
+    if (m_eventStore->contains<AthenaAttributeList> ("Input") &&
+        m_eventStore->retrieve(attr, "Input").isSuccess()) {
       if (attr->exists ("ConditionsRun")) {
         conditionsRun = (*attr)["ConditionsRun"].data<unsigned int>();
       }
@@ -538,7 +532,7 @@ StatusCode AthenaHiveEventLoopMgr::executeEvent( EventContext &&ctx )
   Gaudi::Hive::setCurrentContext ( ctx );
 
   // Record EventContext in current whiteboard
-  if (eventStore()->record(std::make_unique<EventContext> (ctx),
+  if (m_eventStore->record(std::make_unique<EventContext> (ctx),
                            "EventContext").isFailure())
   {
     ATH_MSG_ERROR ( "Error recording event context object" );
@@ -894,21 +888,21 @@ void AthenaHiveEventLoopMgr::handle(const Incident& inc)
   }
   if (0 != addr) {
     //create its proxy
-    sc = eventStore()->recordAddress(addr);
+    sc = m_eventStore->recordAddress(addr);
     if(!sc.isSuccess()) {
       ATH_MSG_ERROR ( "Error declaring Event object" );
       return;
     }
   }
 
-  if(eventStore()->loadEventProxies().isFailure()) {
+  if(m_eventStore->loadEventProxies().isFailure()) {
     ATH_MSG_WARNING ( "Error loading Event proxies" );
     return;
   }
 
   // Retrieve the legacy EventInfo object
   const EventInfo* pEvent{nullptr};
-  sc = eventStore()->retrieve(pEvent);
+  sc = m_eventStore->retrieve(pEvent);
   if(!sc.isSuccess()) {
     ATH_MSG_ERROR ( "Unable to retrieve Event root object" );
     return;
@@ -918,7 +912,7 @@ void AthenaHiveEventLoopMgr::handle(const Incident& inc)
   m_currentRun = pEvent->event_ID()->run_number();
 
   // Clear Store
-  sc = eventStore()->clearStore();
+  sc = m_eventStore->clearStore();
   if(!sc.isSuccess()) {
     ATH_MSG_ERROR ( "Clear of Event data store failed" );
   }
@@ -987,13 +981,13 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     // Most iterators provide the IOA of an event header (EventInfo, DataHeader)
     if (0 != addr) {
       //create its proxy
-      sc = eventStore()->recordAddress(addr);
+      sc = m_eventStore->recordAddress(addr);
       if( !sc.isSuccess() ) {
 	//! FIXME ???
 	ATH_MSG_WARNING ( "Error declaring Event object" );
 	return 0;
       }
-    } if ((sc=eventStore()->loadEventProxies()).isFailure()) {
+    } if ((sc=m_eventStore->loadEventProxies()).isFailure()) {
       ATH_MSG_ERROR ( "Error loading Event proxies" );
       return -1;
     }
@@ -1001,7 +995,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     bool consume_modifier_stream = false;
     // First try to build a legacy EventInfo object from the TAG information
     // Read the attribute list
-    const AthenaAttributeList* pAttrList = eventStore()->tryConstRetrieve<AthenaAttributeList>("Input");
+    const AthenaAttributeList* pAttrList = m_eventStore->tryConstRetrieve<AthenaAttributeList>("Input");
     if ( pAttrList != nullptr && pAttrList->size() > 6 ) { // Try making EventID-only EventInfo object from in-file TAG
       try {
         unsigned int runNumber = (*pAttrList)["RunNumber"].data<unsigned int>();
@@ -1026,7 +1020,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
             else {
                 // try legacy EventInfo if secondary input did not have attribute list
                 // primary input should not have this EventInfo type
-                const EventInfo* pEventSecondary = eventStore()->tryConstRetrieve<EventInfo>();
+                const EventInfo* pEventSecondary = m_eventStore->tryConstRetrieve<EventInfo>();
                 if (pEventSecondary) {
                     eventNumberSecondary = pEventSecondary->event_ID()->event_number();
                 }
@@ -1061,7 +1055,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
       // Secondly try to retrieve a legacy EventInfo object from the input file
       // Again, m_nevt is incremented after executeEvent in the Hive manager so we don't need a -1
       EventInfoCnvParams::eventIndex = ctx.evt();
-      pEventObserver = eventStore()->tryConstRetrieve<EventInfo>();
+      pEventObserver = m_eventStore->tryConstRetrieve<EventInfo>();
       if (pEventObserver) {
         consume_modifier_stream = false; // stream will already have been consumed during EventInfo TP conversion
         ATH_MSG_DEBUG ( "use EventInfo" );
@@ -1069,7 +1063,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
         // Finally try to retrieve an xAOD::EventInfo object from the
         // input file and build a legacy EventInfo object from that.
         const xAOD::EventInfo* pXEvent{nullptr};
-        sc = eventStore()->retrieve(pXEvent);
+        sc = m_eventStore->retrieve(pXEvent);
         if( !sc.isSuccess() ) {
           ATH_MSG_ERROR ( "Unable to retrieve Event root object" );
           return -1;
@@ -1081,7 +1075,7 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
             std::make_unique<EventID>(eventIDFromxAOD(pXEvent)),
             std::make_unique<EventType>(eventTypeFromxAOD(pXEvent)));
         pEventObserver = pEvent.get();
-        sc = eventStore()->record(std::move(pEvent), "");
+        sc = m_eventStore->record(std::move(pEvent), "");
         if( !sc.isSuccess() )  {
           ATH_MSG_ERROR ( "Error declaring event data object" );
           return -1;
@@ -1124,9 +1118,9 @@ int AthenaHiveEventLoopMgr::declareEventRootAddress(EventContext& ctx){
     m_whiteboard->selectStore( ctx.slot() ).ignore();
 
     ATH_MSG_DEBUG ( "recording EventInfo " << *pEvent->event_ID() << " in "
-            << eventStore()->name() );
+            << m_eventStore->name() );
 
-    sc = eventStore()->record(std::move(pEvent), "McEventInfo");
+    sc = m_eventStore->record(std::move(pEvent), "McEventInfo");
     if( !sc.isSuccess() )  {
       ATH_MSG_ERROR ( "Error declaring event data object" );
       return -1;
@@ -1175,7 +1169,7 @@ EventContext AthenaHiveEventLoopMgr::createEventContext() {
     return EventContext{};       // invalid EventContext
   } else {
     Atlas::setExtendedEventContext(ctx,
-                                   Atlas::ExtendedEventContext( eventStore()->hiveProxyDict() ) );
+                                   Atlas::ExtendedEventContext( m_eventStore->hiveProxyDict() ) );
 
     ATH_MSG_DEBUG ( "created EventContext, num: " << ctx.evt()  << "  in slot: "
             << ctx.slot() );
