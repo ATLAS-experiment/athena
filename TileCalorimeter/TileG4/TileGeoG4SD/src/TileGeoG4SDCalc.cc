@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -105,6 +105,7 @@ StatusCode TileGeoG4SDCalc::initialize() {
   }
   // protection agaist wrong vector size
   if (m_options.deltaTHit.size() % 3 != 1 || deltaT <= 0.0) {
+    m_options.deltaTHit.clear();    // silence bogus warning seen with gcc15 -O3
     m_options.deltaTHit.resize(1);
     m_options.deltaTHit[0] = deltaT;
   }
