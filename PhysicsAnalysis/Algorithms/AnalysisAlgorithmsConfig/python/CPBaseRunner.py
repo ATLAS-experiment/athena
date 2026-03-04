@@ -136,7 +136,7 @@ class CPBaseRunner(ABC):
             if not yamlConfig:
                 from AthenaCommon.Utils.unixtools import find_datafile
                 return find_datafile(self.args.text_config)
-    
+
             if len(yamlConfig) > 1:
                 raise FileExistsError(
                     f'Multiple files named \"{self.args.text_config}\" found in the analysis repository. Please provide a more specific path to the config file.\nMatches found:\n' + '\n'.join(yamlConfig))
@@ -145,7 +145,7 @@ class CPBaseRunner(ABC):
 
     @staticmethod
     def findLocalPathYamlConfig(textConfigPath):
-        configPath = Path(textConfigPath).expanduser()        
+        configPath = Path(textConfigPath).expanduser()
         if configPath.is_absolute() and configPath.is_file():
             return configPath
         cwdPath = Path.cwd() / configPath
@@ -187,6 +187,10 @@ class CPBaseRunner(ABC):
                 line = line.strip()
                 if line.startswith('#') or not line:
                     continue
+                # On grid, input files are listed in one line separated by a comma
+                if ',' in line:
+                    files += line.split(',')
+                    continue
                 line_path = Path(line)
                 if line_path.is_dir():
                     if not any(line_path.iterdir()):
@@ -195,16 +199,18 @@ class CPBaseRunner(ABC):
                     for root_file in line_path.iterdir():
                         if root_file.suffix == '.root':
                             files.append(str(root_file))
+                # This also catches grid input with only one file
                 else:
-                    files += line.split(',')
+                    files.append(line)
+
             # Remove leading/trailing whitespaces from file names
             files = [file.strip() for file in files]
         return files
 
     def setup(self):
-        self.flags = self._defaultFlagsInitialization()
         self.modifyParserArguments()
         self.parser.parse_args()
+        self.flags = self._defaultFlagsInitialization()
         self.config = self._readYamlConfig()
 
     def printAvailableArguments(self):
