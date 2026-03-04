@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
 /**********************************************************************************
  * @Project: HLT SteeringEvent
  * @Package: TrigSteeringEvent
@@ -20,10 +19,6 @@
 #ifndef TRIGSTEERINGEVENT_CHAIN_H
 #define TRIGSTEERINGEVENT_CHAIN_H
 
-#include <vector>
-#include <stdint.h>
-#include <iomanip> 
-
 #include "TrigSteeringEvent/Enums.h"
 #include "TrigConfHLTData/HLTChain.h"
 
@@ -36,8 +31,10 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #endif
 
-//#include "TrigSteeringEvent/GenericResult.h"
-
+#include <vector>
+#include <stdint.h>
+#include <string>
+#include <iomanip>
 #include <iosfwd>
 
 class MsgStream;

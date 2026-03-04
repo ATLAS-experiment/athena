@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
 #ifndef TRIGSTEERINGEVENT_TRIGOPERATIONALINFO_H
 #define TRIGSTEERINGEVENT_TRIGOPERATIONALINFO_H
 
@@ -10,12 +9,12 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "GaudiKernel/MsgStream.h"
 
 #include "AthenaKernel/CLASS_DEF.h"
 // TrigOperationalInfoCollection is included at the end (required by Trigger EDM schema)
 
-//#include "TrigNavigation/Navigation.h"
+class MsgStream;
+
 /**
  * @brief This class defined generic object to store operational info 
  *   available during triggering online i.e. timing infomration.
