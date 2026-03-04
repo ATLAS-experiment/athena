@@ -6,15 +6,14 @@
 #define INCLUDE_PERSISTENCYSVC_ISESSION_H
 
 #include "PersistencySvc/DatabaseSpecification.h"
+#include "PersistencySvc/ITransaction.h"
 #include <string>
-#include <vector>
 #include <memory>
 
 namespace pool {
 
   // forward declarations
   class DatabaseConnectionPolicy;
-  class ITransaction;
   class IDatabase;
   class ITechnologySpecificAttributes;
   class IFileCatalog;
@@ -29,7 +28,7 @@ namespace pool {
    *  the shape transformation registry in use.
    */
 
-  class ISession {
+  class ISession : public ITransaction {
   protected:
   public:
     /// Default destructor

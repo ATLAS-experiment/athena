@@ -2,15 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-//$Id: IPersistencySvc.h 739662 2016-04-12 11:55:10Z krasznaa $
-
 #ifndef PERSISTENCYSVC_IPERSISTENCYSVC
 #define PERSISTENCYSVC_IPERSISTENCYSVC
 
-#include "DataModelRoot/RootType.h"
 #include "PersistencySvc/ISession.h"
-
-#include <string>
+#include "DataModelRoot/RootType.h"
 #include <memory>
 
 class Placement;
@@ -31,12 +27,8 @@ namespace pool {
    */
   class IPersistencySvc : virtual public ISession { 
   public:
-
     /// Factory for PersistencySvc
     static std::unique_ptr<IPersistencySvc> create( IFileCatalog& catalog );
-
-    /// Empty destructor
-    virtual ~IPersistencySvc() {}
 
     /** Retrieves an object from persistent store and return with type information
      *  The handle to the reflection class is necessary to later delete the object.
@@ -66,13 +58,6 @@ namespace pool {
                                      const void* object,
                                      const RootType& type ) = 0;
     
-
-  protected:
-    /// No copy constructor, and no assignment operator
-    IPersistencySvc() {}
-    IPersistencySvc( const IPersistencySvc& );
-    IPersistencySvc& operator=( const IPersistencySvc& );
-
   }; // class IPersistencySvc
 
 } // namespace pool 

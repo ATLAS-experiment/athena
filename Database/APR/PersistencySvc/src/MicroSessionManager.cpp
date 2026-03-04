@@ -38,13 +38,10 @@ pool::PersistencySvc::MicroSessionManager::~MicroSessionManager()
 
 
 bool
-pool::PersistencySvc::MicroSessionManager::connect( ITransaction& transaction )
+pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType )
 {
   if( !m_inSession ) {
-    long mode = pool::READ;
-    if( transaction.type() == ITransaction::UPDATE ) {
-      mode = pool::UPDATE;
-    }
+    long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
     m_inSession = m_storageSvc->startSession(mode, m_technology).isSuccess();
   }
   return m_inSession;
@@ -52,18 +49,14 @@ pool::PersistencySvc::MicroSessionManager::connect( ITransaction& transaction )
 
 
 pool::PersistencySvc::DatabaseHandler*
-pool::PersistencySvc::MicroSessionManager::connect( ITransaction& transaction,
+pool::PersistencySvc::MicroSessionManager::connect( ITransaction::Type transType,
                                                     const std::string& fid,
                                                     const std::string& pfn,
                                                     long accessMode )
 {
-  if( !transaction.isActive() ) return 0;
+  if( transType == ITransaction::INACTIVE ) return 0;
   if( m_databaseHandlers.empty() ) {
-    long mode = pool::READ;
-    if( transaction.type() == ITransaction::UPDATE ) {
-      mode = pool::UPDATE;
-    }
-
+    long mode = (transType == ITransaction::UPDATE) ? pool::UPDATE : pool::READ;
     if( !m_inSession ) {
       if( !m_storageSvc->startSession(mode, m_technology).isSuccess() ) {
         return nullptr;

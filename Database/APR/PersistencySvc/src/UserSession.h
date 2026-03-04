@@ -5,7 +5,10 @@
 #ifndef INCLUDE_PERSISTENCYSVC_USERSESSION_H
 #define INCLUDE_PERSISTENCYSVC_USERSESSION_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "PersistencySvc/IPersistencySvc.h"
+
+#include "POOLCore/DbPrint.h"
 
 #include <map>
 
@@ -17,7 +20,6 @@ namespace pool {
 
     // forward declarations
     class DatabaseRegistry;
-    class GlobalTransaction;
     class MicroSessionManager;
 
     /** @class UserSession
@@ -26,7 +28,7 @@ namespace pool {
      *
      */
 
-    class UserSession : virtual public pool::IPersistencySvc
+    class UserSession : virtual public pool::IPersistencySvc, public APRMessaging
     {
     public:
       /// Constructor
@@ -82,9 +84,27 @@ namespace pool {
        */
       virtual bool disconnectAll() override final;
 
-       /// Returns the transaction object
-      virtual ITransaction& transaction() override final;
-      virtual const ITransaction& transaction() const override final;
+      /// Returns the transaction interface
+      virtual ITransaction& transaction() override final { return *this; }
+      virtual const ITransaction& transaction() const override final { return *this; }
+
+      /// Starts a new transaction. Returns the success of the operation
+      virtual bool start( ITransaction::Type type = READ ) override final;
+
+      /// Commits the transaction.
+      virtual bool commit() override final;
+
+      /// Commits and holds the transaction.
+      virtual bool commitAndHold() override final;
+
+      /// Checks if the transaction is active
+      virtual bool isActive() const override final { return m_transactionType != ITransaction::INACTIVE; }
+
+      /// Returns the transaction type
+      virtual ITransaction::Type type() const override final { return m_transactionType; }
+
+      /// Returns the transaction type
+      ITransaction::Type transactionType() const { return transaction().type(); }
 
       /// Creates and returns a new database handle object
       virtual std::unique_ptr<IDatabase>
@@ -103,9 +123,6 @@ namespace pool {
       virtual  ITechnologySpecificAttributes&
       technologySpecificAttributes( long technology ) override final;
 
-      /// Returns the global transaction object
-      ITransaction& globalTransaction();
-      
       /// Returns the technology given a technology type.
       MicroSessionManager& microSessionManager( long technology );
 
@@ -113,7 +130,7 @@ namespace pool {
       DatabaseConnectionPolicy*      m_policy;
       IFileCatalog*                  m_catalog;
       DatabaseRegistry*              m_registry;
-      GlobalTransaction*             m_transaction;
+      ITransaction::Type             m_transactionType;
       std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
 
     };
