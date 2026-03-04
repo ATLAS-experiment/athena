@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
@@ -173,7 +173,7 @@ namespace H5Utils::hist::detail {
         ax.n_regular_bins = static_cast<int>(ax.edges.size()) - 1;
       }
 
-      axes.push_back(ax);
+      axes.push_back(std::move(ax));
     }
     return axes;
   }
