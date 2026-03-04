@@ -44,8 +44,9 @@ case $ArtProcess in
     if ls art_core_*/physval_idtide.ntuple.root >/dev/null 2>&1 ; then
 
       echo "Merging IDPVM output files"
-      inputIDPVMfiles=$(ls art_core_*/physval_idtide.ntuple.root | paste -sd,)
-      run mergeIDPVM.py --filesInput $inputIDPVMfiles --outputFile physval_idtide.ntuple.root
+      hadd  physval_idtide.ntuple.root art_core_*/physval_idtide.ntuple.root
+      echo "postprocess"
+      postProcessIDPVMHistos physval_idtide.ntuple.root
 
       echo "download latest result"
       run art.py download --user=artprod --dst="$lastref_dir" "$ArtPackage" "$ArtJobName"

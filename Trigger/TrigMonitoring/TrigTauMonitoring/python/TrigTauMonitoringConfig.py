@@ -37,6 +37,7 @@ class TrigTauMonAlgBuilder:
   #=============================================
   hlt_tauid_scores = {
     'tracktwoMVA': {
+      'GNTauDev1': ('GNTauDev1_Score', 'GNTauDev1_ScoreSigTrans'),
       'GNTau': ('GNTau_Score', 'GNTau_ScoreSigTrans'),
       'DeepSet': ('RNNJetScore', 'RNNJetScoreSigTrans'),
     },
@@ -601,7 +602,7 @@ class TrigTauMonAlgBuilder:
     mon_group = self.helper.addGroup(mon_alg, mon_group_name, mon_group_path)
  
     for tau_id, (score, score_sig_trans) in variables.items():
-      if online and tau_id in ['RNN', 'DeepSet', 'RNNLLP', 'GNTau'] or not online and tau_id in ['RNN']: xbins, xmax = 20, 1
+      if online and tau_id in ['RNN', 'DeepSet', 'RNNLLP', 'GNTau', 'GNTauDev1'] or not online and tau_id in ['RNN']: xbins, xmax = 20, 1
       else: xbins, xmax = 100, 7
 
       mon_group.defineHistogram(f'{tau_id}_TauIDScore', title=f'{type_str} {tau_id} TauID score; TauID score; Events', xbins=xbins, xmin=0, xmax=xmax, opt='kAlwaysCreate')

@@ -272,7 +272,7 @@ public:
       return sc;
    }
 
-   static const CLID& classID() { return ClassID_traits<DATA>::ID(); }
+   static CLID classID() { return ClassID_traits<DATA>::ID(); }
 
    virtual long int repSvcType() const;
    static long int storageType();
