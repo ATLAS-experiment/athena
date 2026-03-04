@@ -16,8 +16,24 @@
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
+#include "TH1.h"
 
+#include <array>
+#include <memory>
+#include <vector>
+#include <string>
 namespace ZDC {
+
+// Bit definitions for LIS module status mask
+enum LISModuleStatusBits {
+  LIS_ValidData       ,  // Bit 0: Good Pulse Bit
+  LIS_BadBit          ,  // Bit 1: Generic bad bit (set if any specific issue bits are set)
+  LIS_HighPedestal    ,  // Bit 2: Presumple significantly higher then nominal pedestal
+  LIS_EarlyPulse      ,  // Bit 3: Max sample precedes nominal pulse window
+  LIS_LatePulse       ,  // Bit 4: Max sample follows nominal pulse window
+  LIS_Overflow        ,  // Bit 5: Overflow in any sample
+  LIS_NumStatusBits
+};
 
 // Results class to hold processed LIS waveform quantities
 class LISModuleResults {
@@ -26,14 +42,18 @@ class LISModuleResults {
   int m_maxADC{};
   unsigned int m_maxSample{};
   float m_avgTime{};
+  unsigned int m_moduleStatus{};
+
 
 public:
-  LISModuleResults(float presampleADC, int ADCsum, int maxADC, unsigned int maxSample, float avgTime) :
+  LISModuleResults(float presampleADC, int ADCsum, int maxADC, unsigned int maxSample, float avgTime, unsigned int moduleStatus) :
     m_presampleADC(presampleADC),
     m_ADCsum(ADCsum),
     m_maxADC(maxADC),
     m_maxSample(maxSample),
-    m_avgTime(avgTime)
+    m_avgTime(avgTime),
+    m_moduleStatus(moduleStatus)
+    
   {}
 
   LISModuleResults() = default;
@@ -43,6 +63,7 @@ public:
   int getMaxADC() const { return m_maxADC; }
   unsigned int getMaxSample() const { return m_maxSample; }
   float getAvgTime() const { return m_avgTime; }
+  unsigned int getmoduleStatus() const { return m_moduleStatus; }
 };
 
 class ATLAS_NOT_THREAD_SAFE LISAnalysisTool : public virtual IZdcAnalysisTool, public asg::AsgTool {
@@ -61,13 +82,26 @@ private:
   void initialize_default();
 
   // Processing methods
-  LISModuleResults processLISModule(const xAOD::ZdcModule& module);
+  LISModuleResults processLISModule(const xAOD::ZdcModule& module, unsigned int lumiBlock);
   LISModuleResults processModuleData(int side, int channel, 
                                      const std::vector<unsigned short>& data,
-                                     unsigned int startSample, unsigned int endSample);
+                                     unsigned int startSample, unsigned int endSample,
+                                     unsigned int lumiBlock);
+
+  // Utility method to set a bit in the status word
+  void setStatusBit(unsigned int& statusWord, unsigned int bitIndex);
+  bool CheckStatusBit(unsigned int statusWord, unsigned int bitIndex) { return (statusWord & (1 << bitIndex)) != 0; }
+  StatusCode SetPedestals(unsigned int runNumber);
+  float GetPedestal(int channel, unsigned int lumiBlock);
 
   bool m_init{false};
+  bool m_MominalPedestals{false};
   std::string m_name;
+  unsigned int m_runNumber{0};
+  const int m_nLISChannels = 8;
+  const int m_nSamples = 24;
+
+  const int m_ADCSaturationValue = 3800; // Assuming 12-bit ADC saturation at 4095
 
   // Job properties
   Gaudi::Property<std::string> m_configuration{this, "Configuration", "default", "Which config to use"};
@@ -75,6 +109,11 @@ private:
   Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Suffix for aux data names"};
   Gaudi::Property<unsigned int> m_nBaselineStart{this, "BaselineStart", 0, "Start index for baseline calculation"};
   Gaudi::Property<unsigned int> m_nBaselineEnd{this, "BaselineEnd", 5, "End index for baseline calculation"};
+  Gaudi::Property<unsigned int> m_nPulsStart{this, "PulseStart", 6, "Start index for pulse analysis"}; // May change after looking at pulse shapes more
+  Gaudi::Property<unsigned int> m_nPulsEnd{this, "PulseEnd", 12, "End index for pulse analysis"}; // May change after looking at pulse shapes more
+  Gaudi::Property<std::vector<float>> m_channelPedestals{this, "ChannelPedestals",
+    {100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 },
+    "Per-channel pedestal values to subtract from ADCs"}; // May change after looking at pulse shapes more
 
   std::vector<unsigned int> m_LEDCalreqIdx;
   std::vector<unsigned int> m_LEDBCID;
@@ -109,6 +148,10 @@ private:
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_LISMaxADC{this, "LISMaxADC", "", "LIS pulse max FADC value"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_LISMaxSample{this, "LISMaxSample", "", "LIS max FADC sample"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_LISAvgTime{this, "LISAvgTime", "", "LIS average time"};
+  SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_LISModuleStatus{this, "LISModuleStatus", "", "LIS module status"};
+
+  // Pedestal histograms (one per channel)
+  std::array<std::unique_ptr<TH1>, 8> m_LISPedestals;
 
   bool m_doFADCCorr{};
   double getAmplitudeCorrection(int iside, int imod, bool highGain, float fitAmp);
