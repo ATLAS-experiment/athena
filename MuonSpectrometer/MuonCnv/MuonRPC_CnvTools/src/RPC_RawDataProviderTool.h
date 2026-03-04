@@ -23,23 +23,24 @@ namespace Muon {
 
     class RPC_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool> {
     public:
-        RPC_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p);
-
+        using base_class::base_class;
+     
         virtual ~RPC_RawDataProviderTool() = default;
 
         virtual StatusCode initialize() override;
 
         /** Decoding method - IMuonRawDataProviderTool interface (EventContext-based) */
         using IMuonRawDataProviderTool::convert;
-        virtual StatusCode convert(const ROBFragmentList&, const EventContext&) const override;
-        virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&, const EventContext&) const override;
         virtual StatusCode convert(const EventContext&) const override;
         virtual StatusCode convert(const std::vector<IdentifierHash>&, const EventContext&) const override;
         virtual StatusCode convert(const std::vector<uint32_t>&, const EventContext&) const override;
 
-    protected:
+    private:
+        StatusCode convertIntoContainer(const ROBFragmentList& vecRobs, 
+                                        const std::vector<IdentifierHash>& collections,
+                                        const EventContext& ctx) const;
         // This function does all the actual work of decoding the data
-        StatusCode convertIntoContainers(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
+        StatusCode convertIntoContainers(const ROBFragmentList& vecRobs,
                                          const std::vector<IdentifierHash>& collections, RpcPadContainer* pad,
                                          RpcSectorLogicContainer* logic, const bool& decodeSL) const;
 
@@ -50,7 +51,7 @@ namespace Muon {
         SG::ReadCondHandleKey<RpcCablingCondData> m_readKey{this, "ReadKey", "RpcCablingCondData", "Key of RpcCablingCondData"};
 
         // Rob Data Provider handle
-        ServiceHandle<IROBDataProviderSvc> m_robDataProvider;
+        ServiceHandle<IROBDataProviderSvc> m_robDataProvider{this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
 
         // ROD decoding tool
         ToolHandle<IRpcROD_Decoder> m_decoder{this, "Decoder", "Muon::RpcROD_Decoder/RpcROD_Decoder"};

@@ -61,35 +61,22 @@ namespace Muon {
 
     class NRPC_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool> {
     public:
-        NRPC_RawDataProviderTool(const std::string&, const std::string&, const IInterface*);
-
+        using base_class::base_class;
         /** default destructor */
         virtual ~NRPC_RawDataProviderTool() = default;
 
         /** standard Athena-Algorithm method */
         virtual StatusCode initialize() override;
 
-      
-        /** Convert method - declared in Muon::IMuonRdoToPrepDataTool*/
-        virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs) const override;
-        virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                   const std::vector<IdentifierHash>&) const override;
-        /** the new ones */
-        virtual StatusCode convert() const override;  //!< for the entire event
-        virtual StatusCode convert(const std::vector<IdentifierHash>& HashVec) const override;
-        virtual StatusCode convert(const std::vector<uint32_t>& robIds) const override;  //!< for a particular vector of ROBId's
-        /** EventContext **/
-        virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                   const EventContext& ctx) const override;
-        virtual StatusCode convert(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                   const std::vector<IdentifierHash>&, const EventContext& ctx) const override;
+        using IMuonRawDataProviderTool::convert;
         virtual StatusCode convert(const EventContext& ctx) const override;  //!< for the entire event
-        virtual StatusCode convert(const std::vector<IdentifierHash>& HashVec, const EventContext& ctx) const override;
+        virtual StatusCode convert(const std::vector<IdentifierHash>& HashVec, 
+                                   const EventContext& ctx) const override;
         virtual StatusCode convert(const std::vector<uint32_t>& robIds,
                                    const EventContext& ctx) const override;  //!< for a particular vector of ROBId's
         /** Convert method */
-        virtual StatusCode convertIntoContainer(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                                xAOD::NRPCRDOContainer& nrpcContainer) const;
+        virtual StatusCode convertIntoContainer(const ROBFragmentList& vecRobs,
+                                                const EventContext& ctx) const;
 
         virtual StatusCode fillCollections(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag, xAOD::NRPCRDOContainer& rdoIdc) const;
 

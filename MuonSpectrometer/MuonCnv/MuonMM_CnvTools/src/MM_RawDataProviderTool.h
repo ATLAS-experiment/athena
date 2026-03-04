@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 
-class IdentifierHash;
 
 namespace Muon {
 
@@ -30,7 +29,7 @@ namespace Muon {
   class MM_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool>
   {
     public:
-      MM_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p);
+      using base_class::base_class;
 
       /** Default destructor */
       virtual ~MM_RawDataProviderTool() = default;
@@ -46,7 +45,7 @@ namespace Muon {
 
     protected:
       /** Method that converts the ROBFragments into the passed container */
-      virtual StatusCode convertIntoContainer(const EventContext& ctx, const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&, 
+      virtual StatusCode convertIntoContainer(const EventContext& ctx, const ROBFragmentList&, 
                                               const std::vector<IdentifierHash>&, MM_RawDataContainer&) const;
 
       StatusCode initRdoContainer(const EventContext&, MM_RawDataContainer*&) const;
@@ -62,8 +61,9 @@ namespace Muon {
 
       unsigned int m_maxhashtoUse{0};
 
-      /** Rob Data Provider handle */
-      ServiceHandle<IROBDataProviderSvc>  m_robDataProvider;
+      // Rob Data Provider handle
+      ServiceHandle<IROBDataProviderSvc> m_robDataProvider{this, "ROBDataProviderSvc", "ROBDataProviderSvc"};
+
 
       /**Flag to skip decoding and write empty container**/
       Gaudi::Property<bool> m_skipDecoding{this, "SkipDecoding", false, "Skip the decoding but still write the container"};

@@ -17,7 +17,7 @@ StatusCode PadTrig_RawDataProviderTool::initialize() {
 // Convert all Pad Trigger ROBFragments within the given EventContext
 StatusCode PadTrig_RawDataProviderTool::convert(const EventContext& ctx) const {
   // Get all ROBs!
-  std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> fragments;
+  ROBFragmentList fragments;
   std::vector<uint32_t> robIDs;
 
   // Generate all possible ROB IDs, aka Source Identifiers
