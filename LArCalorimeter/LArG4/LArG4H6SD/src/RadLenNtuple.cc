@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RadLenNtuple.h"
@@ -12,8 +12,6 @@
 #include "GaudiKernel/INTupleSvc.h"
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/SmartDataPtr.h"
-//#include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "SimHelpers/ServiceAccessor.h"
 #include "G4Step.hh"
 #include "G4TouchableHistory.hh"
