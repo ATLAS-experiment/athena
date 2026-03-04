@@ -413,9 +413,9 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
         for(unsigned int bIdx = 0; bIdx < 16; bIdx++) {
 
-	      if (z0_histo[bIdx] == 0) continue;
+	  if (z0_histo[bIdx] == 0) continue;
 
-	      z0_bitmask |= (1 << bIdx);
+	  z0_bitmask |= (1 << bIdx);
         }
 
         B1.m_vIsConnected[n1Idx] = z0_bitmask;//non-zero mask indicates that there is at least one connected edge
@@ -683,13 +683,13 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
       
       int tid = H2T[hit_id];
 
-	if(tid != trackId) {//taken by a better candidate
-          nOther++;
-	}
+      if(tid != trackId) {//taken by a better candidate
+	nOther++;
+      }
     }
 
     if (nOther > hit_share_threshold*nTotal) {
-        std::get<1>(vSeedCandidates[ags.second]) = -1;//reject
+      std::get<1>(vSeedCandidates[ags.second]) = -1;//reject
     }
 
   }
@@ -698,8 +698,10 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
   
   //drop the clones and split seeds if need be
 
-  for (const auto& seed : vSeedCandidates) {
+  for(const auto& ags : vArgSort) {
 
+    const auto& seed = vSeedCandidates[ags.second];
+    
     if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
 
     const auto& vN = std::get<2>(seed);
