@@ -79,6 +79,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
             info="decorate `E_mva_only` on the electrons (needed for columnar tools/PHYSLITE).")
         self.addOption ('decorateSamplingPattern', False, type=bool,
             info="decorate `samplingPattern` on the clusters (meant for PHYSLITE).")
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -151,6 +154,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::ElectronContainer'
+            if self.addGlobalFELinksDep:
+                alg.declareDecorations = ['DFCommonElectronsLHLoose', 'neutralGlobalFELinks', 'chargedGlobalFELinks']
+            else:
+                alg.declareDecorations = ['DFCommonElectronsLHLoose']
 
         # Set up the eta-cut on all electrons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' )
