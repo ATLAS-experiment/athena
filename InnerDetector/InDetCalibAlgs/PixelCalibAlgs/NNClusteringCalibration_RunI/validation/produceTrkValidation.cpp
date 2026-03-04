@@ -1,99 +1,67 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+
+#include "writeNtuple.C"
 
 #include "TFile.h"
 #include "TROOT.h"
 #include "TSystem.h"
-#include "vector"
-#include "TMath.h"
-#include <fstream>
 #include "TDirectory.h"
+
+#include <vector>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include "writeNtuple.C"
+#include <fstream>
 
 using namespace std;
 
 
-vector<TString>  readFileNames( const char * fileName ){
-
-// read from a file a list of input filenames
-// and return a vector of string where the names are stores
-
-vector<TString> allFiles;
-
+vector<TString>  
+readFileNames( const char * fileName ){
+  // read from a file a list of input filenames
+  // and return a vector of string where the names are stores
+  vector<TString> allFiles;
   string line;
   ifstream myfile (fileName);
-  if (myfile.is_open())
-    {
-      while ( !myfile.eof() )
-	{
-	  getline (myfile,line);
-
-	  if(myfile.eof())break;
-        
-          TString Sline = static_cast<TString>(line);
-
-cout << Sline << endl;
-	  allFiles.push_back(Sline);
-	  
-	}
-      myfile.close();
-    }
-  
-  else cout << "Unable to open file " << fileName << endl;
-  
-  
+  if (myfile.is_open()){
+    while ( !myfile.eof() ){
+	    getline (myfile,line);
+	    if(myfile.eof()) break;
+      TString Sline = static_cast<TString>(line);
+      cout << Sline << endl;
+	    allFiles.push_back(Sline);
+	  }
+    myfile.close();
+  } else cout << "Unable to open file " << fileName << endl;
   return allFiles;
-  
-  /*
-    for(int f=0; f<allFiles.size(); f++){
-    
-    cout << allFiles.at(f) << endl;
-    
-    
-    }
-  */
-  
 }
 
 
 
-int countFiles(  vector<TString> j4Files , int maxEvents){
-
-// return number of files files in the list (vector<TString> j4Files) 
-// you need to run on in order to run on maxEvents 
-// return j4Files.size();
+int 
+countFiles(  vector<TString> j4Files , int maxEvents){
+  // return number of files files in the list (vector<TString> j4Files) 
+  // you need to run on in order to run on maxEvents 
+  // return j4Files.size();
   if(maxEvents == -1) return j4Files.size();
-
   int totEntr=0;
-  
   for(int nf=0; nf<j4Files.size(); nf++){
-    
-//    TFile*  f = new TFile(j4Files.at(nf));
     TFile*  f =TFile::Open(j4Files.at(nf));
     if(f->GetSize()==0) continue;
-    
     TTree*  t = (TTree*)f->Get("qcd");
     if(!t)continue;
     double Nj4 = (double)t->GetEntries();
-    
     totEntr+=Nj4;
-    
     f->Close();
-    
-    
     delete f;
     if(totEntr >= maxEvents) {
       if(nf==0)nf++;
       return nf;
-      
     }
   }
-  
   return j4Files.size();
-  
 }
 
 
@@ -149,14 +117,20 @@ int main ( int argc, char *argv[] )
   
   l->m_pathWeightsWithoutTracks = pathWithoutTracks;
   l->m_pathWeightsWithTracks    = pathWithTracks;
-  
- 
-  l->Loop(nParticles, useTrack, outName );
-  
-
+  try{
+    l->Loop(nParticles, useTrack, outName );
+  } 
+  catch (const std::exception& e) {
+    std::cerr << "Standard exception: " << e.what() << '\n';
+    delete l;
+    return 1;
+  } 
+  catch (...) {
+    std::cerr << "Unknown exception caught\n";
+    delete l;
+    return 1;
+  } 
   delete l;
-  
-
   
   return 0;
   
