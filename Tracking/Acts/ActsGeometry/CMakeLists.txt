@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ActsGeometry )
@@ -72,7 +72,6 @@ atlas_add_component( ActsGeometry
                      LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES}
                      ActsGeometryInterfacesLib
                      ActsGeometryLib
-                     ActsEventLib
                      ActsInteropLib
                      EventPrimitives
                      GeoPrimitives

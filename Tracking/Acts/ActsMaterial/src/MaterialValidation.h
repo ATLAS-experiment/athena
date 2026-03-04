@@ -11,7 +11,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsEvent/RecordedMaterialTrackCollection.h"
+#include "ActsGeometry/RecordedMaterialTrackCollection.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 
 #include "Acts/Material/MaterialValidater.hpp"
