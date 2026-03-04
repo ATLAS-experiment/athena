@@ -379,17 +379,21 @@ def LISAnalysisToolCfg(flags, config: str):
             name="LISAnalysisTool",
             Configuration=config,
             BaselineStart=0,
-            BaselineEnd=5
+            BaselineEnd=5,
+            PulseStart=6,
+            PulseEnd=12,
+            ChannelPedestals=[100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0, 100.0]
         )
     )
     return acc
 
-def ZdcLisNtupleCfg(flags, lisInj=False, lisLED=False):
+def ZdcLisNtupleCfg(flags, lisInj=False, lisLED=False, enableTrigger=True):
     acc = ComponentAccumulator()
     LisNtuple = CompFactory.LisNtuple("LisNtuple")
     LisNtuple.enableOutputTree = True
     LisNtuple.lisInj = lisInj
     LisNtuple.lisLED = lisLED
+    LisNtuple.enableTrigger = enableTrigger
     acc.addEventAlgo(LisNtuple)
     acc.addService(CompFactory.THistSvc(Output = ["ANALYSIS DATAFILE='NTUP.root' OPT='RECREATE'"]))    
     return acc
@@ -684,9 +688,9 @@ def LisRecCfg(flags):
 
     DecodeRunMode = 1 # LIS run mode
 
-    if flags.Input.ProjectName in ["data26_900GeV", "data26_13p6TeV"]:
+    if flags.Input.ProjectName in ["data26_comm", "data26_900GeV", "data26_13p6TeV", "data26_cos"]:
         DecodeRunMode = 1 # LIS run mode
-    elif flags.Input.ProjectName in ["data26_comm", "data26_cos", "data_test"]:
+    elif flags.Input.ProjectName in []: #special run mode for 7 lucrod - not currently used
         DecodeRunMode = 2 # 7 lucrod run mode, 2026 jan M week
 
     # LIS processing
