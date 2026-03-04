@@ -106,31 +106,38 @@ Thinning:
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::MuonContainer
   - containerName: AnaElectrons
     selectionName: looseLH||looseDNN
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::ElectronContainer
   - containerName: AnaSiHitElectrons
     selectionName: SiHits
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::ElectronContainer
   - containerName: AnaPhotons
     selectionName: loose
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::PhotonContainer
   - containerName: AnaTauJets
     selectionName: baseline
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::TauJetContainer
   - containerName: AnaJets
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::JetContainer
   - containerName: AnaLargeRJets
     deepCopy: True
     sortPt: True
     noUniformSelection: True
+    containerType: xAOD::JetContainer

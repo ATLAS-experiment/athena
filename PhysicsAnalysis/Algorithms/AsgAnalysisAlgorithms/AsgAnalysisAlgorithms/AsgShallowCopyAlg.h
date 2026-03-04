@@ -53,6 +53,11 @@ namespace CP
     SysWriteHandle<xAOD::IParticleContainer> m_outputHandle {
       this, "output", "", "the output view container to produce"};
 
+    /// \brief an (optional) list of decorations to copy
+  private:
+    Gaudi::Property<std::vector<std::string>> m_declareDecorations {
+      this, "declareDecorations", {}, "the list of decorations to declare (only needed in AthenaMT)"};
+
     /// \brief the templated version of execute for a single systematic
   private:
     template<typename Type> StatusCode

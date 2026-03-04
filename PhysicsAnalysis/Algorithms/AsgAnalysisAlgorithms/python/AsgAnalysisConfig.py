@@ -703,6 +703,8 @@ class OutputThinningBlock (ConfigBlock):
             info=r"whether to sort objects in $p_\mathrm{T}$.")
         self.addOption ('noUniformSelection', False, type=bool,
             info="do not run the union over all selections.")
+        self.addOption ('containerType', None, type=str,
+            info="the type of the container to thin. Only needed in AthenaMT, and only if subsequent code has a data dependency on the created container under that type.")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -735,6 +737,8 @@ class OutputThinningBlock (ConfigBlock):
             config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
+        if self.containerType is not None :
+            alg.outputType = self.containerType
         if selection != '' :
             alg.selection = [selection]
         else :

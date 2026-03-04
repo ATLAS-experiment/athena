@@ -50,7 +50,10 @@ class MuonCalibrationConfig (ConfigBlock):
             info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
             "associated to muons. The tool does not have Run 3 recommendations yet.",
             expertMode=True)
-        
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
+
     def instanceName (self) :
         if self.postfix != "":
             return self.postfix
@@ -86,6 +89,8 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::MuonContainer'
+            if self.addGlobalFELinksDep:
+                alg.declareDecorations = ['neutralGlobalFELinks', 'chargedGlobalFELinks']
 
         # Set up the eta-cut on all muons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',

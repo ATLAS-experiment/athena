@@ -34,6 +34,9 @@ class TauCalibrationConfig (ConfigBlock):
             info="decorate the truth particle information on the reconstructed one.")
         self.addOption ('decorateExtraVariables', True, type=bool,
             info="decorate extra variables for the reconstructed tau-jet.")
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -57,6 +60,15 @@ class TauCalibrationConfig (ConfigBlock):
             inputContainer = self.inputContainer
         config.setSourceName (self.containerName, inputContainer)
 
+        # Set up a shallow copy to decorate
+        if config.wantCopy (self.containerName) :
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'TauShallowCopyAlg' )
+            alg.input = config.readName (self.containerName)
+            alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::TauJetContainer'
+            if self.addGlobalFELinksDep:
+                alg.declareDecorations = ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
@@ -72,7 +84,7 @@ class TauCalibrationConfig (ConfigBlock):
             alg = config.createAlgorithm( 'CP::TauTruthDecorationsAlg',
                                           'TauTruthDecorationsAlg',
                                            reentrant=True )
-            alg.taus = config.readName (self.containerName)
+            alg.taus = config.readName (self.containerName, nominal=True)
             alg.doubleDecorations = ['pt_vis', 'pt_invis', 'eta_vis', 'eta_invis', 'phi_vis', 'phi_invis', 'm_vis', 'm_invis']
             alg.floatDecorations = []
             alg.intDecorations = ['pdgId']
@@ -94,7 +106,7 @@ class TauCalibrationConfig (ConfigBlock):
            alg = config.createAlgorithm( 'CP::TauExtraVariablesAlg',
                                          'TauExtraVariablesAlg',
                                          reentrant=True )
-           alg.taus = config.readName (self.containerName)
+           alg.taus = config.readName (self.containerName, nominal=True)
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' )

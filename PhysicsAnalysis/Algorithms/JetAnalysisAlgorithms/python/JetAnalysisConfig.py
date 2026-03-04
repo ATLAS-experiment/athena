@@ -85,6 +85,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+            alg.outputType = 'xAOD::JetContainer'
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)

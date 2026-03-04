@@ -72,6 +72,9 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info=r"decorate the calo-cluster $\eta$.")
         self.addOption ('decorateEmva', False, type=bool,
             info="decorate `E_mva_only` on the photons (needed for columnar tools/PHYSLITE).")
+        self.addOption ('addGlobalFELinksDep', False, type=bool,
+            info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
+            expertMode=True)
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -148,6 +151,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::PhotonContainer'
+            if self.addGlobalFELinksDep:
+                alg.declareDecorations = ['DFCommonPhotonsCleaning', 'neutralGlobalFELinks', 'chargedGlobalFELinks']
+            else:
+                alg.declareDecorations = ['DFCommonPhotonsCleaning']
 
         # Set up the eta-cut on all photons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' )
