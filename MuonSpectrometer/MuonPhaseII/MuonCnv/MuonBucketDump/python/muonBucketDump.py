@@ -8,6 +8,23 @@ def main(args):
     flags = initConfigFlags()
     flags.PerfMon.doFullMonMT = True
 
+    from AthOnnxComps.OnnxRuntimeFlags import OnnxRuntimeType
+    use_gpu_requested = getattr(args, "use_gpu", True)
+    gpu_available = False
+    try:
+        import onnxruntime as ort
+        gpu_available = "CUDAExecutionProvider" in ort.get_available_providers()
+    except Exception:
+        try:
+            import torch
+            gpu_available = torch.cuda.is_available()
+        except Exception:
+            gpu_available = False
+    if use_gpu_requested and gpu_available:
+        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CUDA
+    else:
+        flags.AthOnnx.ExecutionProvider = OnnxRuntimeType.CPU
+
     flags, cfg = setupGeoR4TestCfg(args)
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
@@ -73,6 +90,12 @@ if __name__=="__main__":
                         help="Bias value for class 0 in ML bucket classification (default: 1.0). Higher values make class 0 less likely.")
 
     parser.add_argument("--doTruthMuonVertexDump", action="store_true", help="Run the TruthMuonVertexDumperAlg to dump truth muon vertex information", default=False)
+    
+    parser.add_argument("--use-gpu", action="store_true", default=True, 
+                       help="Use GPU for ONNX inference (default: True)")
+    parser.add_argument("--use-cpu", dest="use_gpu", action="store_false",
+                       help="Use CPU for ONNX inference")
+    
     args = parser.parse_args()
     main(args)
 

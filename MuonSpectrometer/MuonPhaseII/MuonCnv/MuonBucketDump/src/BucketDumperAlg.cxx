@@ -419,7 +419,7 @@ namespace MuonR4{
             return StatusCode::FAILURE;
         }
         
-        ATH_MSG_INFO("Successfully computed ML bucket scores for " << bucketScoreMap.size() << " buckets");
+        ATH_MSG_DEBUG("Successfully computed ML bucket scores for " << bucketScoreMap.size() << " buckets");
         return StatusCode::SUCCESS;
     }
 
