@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLCNVSVC_T_ATHENAPOOLEXTENDCNV_H
@@ -42,7 +42,7 @@ protected:
   
   /// Read the persistent object from POOL
   /// @param token [IN] token of the object to read
-  virtual void 		readObjectFromPool( const Token* token ) = 0 ;
+  virtual void 		readObjectFromPool( const Token* token ) override = 0 ;
   
 protected:
   /// Write the persistent object to POOL

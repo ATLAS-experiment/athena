@@ -53,7 +53,7 @@ namespace pool {
        * In case of failure zero is returned.
        *
        */
-      void* readObject( const Token& token, void* object = 0 );
+      virtual void* readObject( const Token& token, void* object = 0 ) override;
 
 
       /**  registerForWrite registers an object for writing to the persistent medium
@@ -66,7 +66,7 @@ namespace pool {
        * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
        *
        */
-      Token* registerForWrite( const Placement& place, const void* object, const RootType& type );
+      virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) override;
 
 
       // Signatures needed for the PersistencySvc
