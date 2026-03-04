@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AthenaMonitoringKernel_HistogramFiller_OfflineHistogramProvider_h
@@ -121,14 +121,14 @@ namespace Monitored {
      * Offline ROOT output should have "metadata" TTrees; this function makes them
      *
      */ 
-    void storeMetadata() const {
+    void storeMetadata() {
       std::scoped_lock<std::mutex> metadataLock(s_metadataMutex);
+      auto &histSvc = m_gmTool->histogramService();
       for (const auto &path : m_storedPaths) {
         //std::cout << "Path " << path << std::endl;
         size_t pos = path.find_last_of('/');
         auto splitPath = std::make_pair(path.substr(0, pos), path.substr(pos + 1));
         std::string treePath = splitPath.first + "/metadata";
-        auto &histSvc = m_gmTool->histogramService();
         std::string interval;
         char triggerData[] = "<none>";
         const std::string mergeDataStr = m_histDef->merge == "" ? "<default>" : m_histDef->merge;
