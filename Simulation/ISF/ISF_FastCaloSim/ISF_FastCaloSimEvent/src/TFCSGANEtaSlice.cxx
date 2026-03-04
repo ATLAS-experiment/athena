@@ -172,7 +172,7 @@ void TFCSGANEtaSlice::ExtractExtrapolatorMeansFromInputs() {
 VNetworkBase::NetworkOutputs
 TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
                                    const TFCSExtrapolationState *extrapol,
-                                   TFCSSimulationState simulstate) const {
+                                   TFCSSimulationState &simulstate) const {
   double randUniformZ = 0.;
   NetworkInputs inputs;
 
@@ -202,7 +202,6 @@ TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTruthState *truth,
       std::sqrt(std::pow(p_min, 2) + std::pow(truth->M(), 2)) - truth->M();
   double Ekin_max =
       std::sqrt(std::pow(p_max, 2) + std::pow(truth->M(), 2)) - truth->M();
-
   for (int i = 0; i < m_param.GetLatentSpaceSize(); i++) {
     randUniformZ = CLHEP::RandGauss::shoot(simulstate.randomEngine(), 0.5, 0.5);
     inputs["Noise"].insert(std::pair<std::string, double>(

@@ -139,8 +139,10 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(
     ATH_MSG_WARNING("GAN not loaded correctly.");
     return false;
   }
-
-  const TFCSGANEtaSlice::NetworkOutputs &outputs =
+  // This lock is an attempt to fix ATLASSIM-7031. remove if not necessary
+  // Hold until NetworkOutputs goes out of scope
+  std::scoped_lock lock(m_mutex);
+  TFCSGANEtaSlice::NetworkOutputs outputs =
       m_slice->GetNetworkOutputs(truth, extrapol, simulstate);
   ATH_MSG_VERBOSE("network outputs size: " << outputs.size());
 

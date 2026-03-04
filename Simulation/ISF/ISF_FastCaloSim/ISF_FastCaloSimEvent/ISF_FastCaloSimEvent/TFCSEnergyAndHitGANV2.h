@@ -10,6 +10,7 @@
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
 #include "ISF_FastCaloSimEvent/TFCSGANEtaSlice.h"
 #include <string>
+#include <mutex>
 
 
 // forward declare lwtnn dependencies
@@ -108,6 +109,7 @@ private:
 
   TFCSGANEtaSlice *m_slice = nullptr;
   TFCSGANXMLParameters m_param;
+  mutable std::mutex m_mutex; //!
 
   ClassDefOverride(TFCSEnergyAndHitGANV2, 2) // TFCSEnergyAndHitGANV2
 };
