@@ -7,6 +7,7 @@ atlas_subdir( HIEventUtils )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( nlohmann_json )
 
+
 # Component(s) in the package:
 atlas_add_library( HIEventUtilsLib
                    Root/*.cxx
