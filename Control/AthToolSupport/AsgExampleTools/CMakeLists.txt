@@ -22,8 +22,8 @@ atlas_add_library( AsgExampleToolsLib
    AsgExampleTools/*.h Root/*.cxx ${AsgExampleToolsCintDict}
    PUBLIC_HEADERS AsgExampleTools
    LINK_LIBRARIES AsgTools AsgServicesLib AsgDataHandlesLib AsgTestingLib
-                  CxxUtils ${extra_lib}
-   PRIVATE_LINK_LIBRARIES xAODBase xAODCore )
+                  CxxUtils xAODBase ${extra_lib}
+   PRIVATE_LINK_LIBRARIES xAODCore )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( AsgExampleTools

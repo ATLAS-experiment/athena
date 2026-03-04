@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGEXAMPLETOOLS_EVENTSTORETESTTOOL_H
 #define ASGEXAMPLETOOLS_EVENTSTORETESTTOOL_H
@@ -10,6 +10,8 @@
 
 // Athena include(s).
 #include "AsgTools/AsgTool.h"
+#include "AsgDataHandles/WriteHandleKey.h"
+#include "xAODBase/IParticleContainer.h"
 
 namespace asg {
 
@@ -24,6 +26,9 @@ namespace asg {
       /// Constructor
       EventStoreTestTool( const std::string& toolName );
 
+      /// Initialize
+      virtual StatusCode initialize() override;
+
       /// @name Function(s) inherited from @c asg::IEventStoreTestTool
       /// @{
 
@@ -31,6 +36,9 @@ namespace asg {
       virtual StatusCode performTest() const override;
 
       /// @}
+
+   private:
+      SG::WriteHandleKey<xAOD::IParticleContainer> m_containerKey{this, "ContainerName", "AsgTestIParticles"};
 
    }; // class EventStoreTestTool
 

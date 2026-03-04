@@ -1,12 +1,14 @@
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
 #include "AsgExampleTools/EventStoreTestTool.h"
 
+// Athena include(s);
+#include "AsgDataHandles/WriteHandle.h"
+
 // EDM include(s).
-#include "xAODBase/IParticleContainer.h"
 #include "xAODCore/CLASS_DEF.h"
 
 // System include(s).
@@ -18,6 +20,14 @@ namespace asg {
    EventStoreTestTool::EventStoreTestTool( const std::string& toolName )
    : asg::AsgTool( toolName ) {
 
+   }
+
+   StatusCode EventStoreTestTool::initialize() {
+
+     // Initialize the key.
+     ATH_CHECK( m_containerKey.initialize() );
+
+     return StatusCode::SUCCESS;
    }
 
    StatusCode EventStoreTestTool::performTest() const {
@@ -39,25 +49,25 @@ namespace asg {
          return StatusCode::FAILURE;
       }
 
-      // Record the container into the event store with some elaorate name.
-      static const std::string PARTICLES_NAME = "AsgTestIParticles";
-      ATH_CHECK( evtStore()->record( std::move( particles), PARTICLES_NAME ) );
+      // Record the container into the event store.
+      SG::WriteHandle<xAOD::IParticleContainer> writeHandle(m_containerKey);
+      ATH_CHECK( writeHandle.record( std::move( particles) ) );
 
       // Depending on the environment, figure out what the hashed key for this
       // object is supposed to be.
 #ifdef XAOD_STANDALONE
       const SG::sgkey_t particlesKey =
-         evtStore()->event()->getHash( PARTICLES_NAME );
+         evtStore()->event()->getHash( m_containerKey.key() );
 #else
       static const CLID IPARTICLE_CLID =
          ClassID_traits< xAOD::IParticleContainer >::ID();
       const SG::sgkey_t particlesKey =
-         evtStore()->stringToKey( PARTICLES_NAME, IPARTICLE_CLID );
+         evtStore()->stringToKey( m_containerKey.key(), IPARTICLE_CLID );
 #endif // XAOD_STANDALONE
 
       // Now check that the getName(...) and getKey(...) functions would
       // return the expected values.
-      if( getName( particlesPtr ) != PARTICLES_NAME ) {
+      if( getName( particlesPtr ) != m_containerKey.key() ) {
          ATH_MSG_ERROR( "There is a problem with the asg::AsgTool::getName "
                         "function" );
          return StatusCode::FAILURE;
