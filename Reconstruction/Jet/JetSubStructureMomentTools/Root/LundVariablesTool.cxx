@@ -1,14 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "fastjet/PseudoJet.hh"
+
 #include "JetSubStructureMomentTools/LundVariablesTool.h"
-#include "fastjet/tools/Recluster.hh"
-#include "fastjet/contrib/SoftDrop.hh"
+
 #include "fastjet/JetDefinition.hh"
-#include <iostream>
-#include <queue>
 #include "xAODPFlow/FlowElement.h"
+
+#include <queue>
+#include <cmath> //std::atan2
 
 LundVariablesTool::LundVariablesTool(const std::string& name):
   asg::AsgTool(name)
@@ -111,13 +111,13 @@ StatusCode LundVariablesTool::decorate(const xAOD::JetContainer& jets) const {
 
     SG::AuxElement::Decorator<int> decNSplits(prefix + "nSplits");
 
-    decLnR(*injet)     = lund_all_lnR;
-    decLnKT(*injet)    = lund_all_lnkT;
-    decZ(*injet)       = lund_all_z;
-    decKt(*injet)      = lund_all_kt;
-    decDR(*injet)      = lund_all_deltaR;
-    decIDP1(*injet)    = lund_all_idp1;
-    decIDP2(*injet)    = lund_all_idp2;
+    decLnR(*injet)     = std::move(lund_all_lnR);
+    decLnKT(*injet)    = std::move(lund_all_lnkT);
+    decZ(*injet)       = std::move(lund_all_z);
+    decKt(*injet)      = std::move(lund_all_kt);
+    decDR(*injet)      = std::move(lund_all_deltaR);
+    decIDP1(*injet)    = std::move(lund_all_idp1);
+    decIDP2(*injet)    = std::move(lund_all_idp2);
     decNSplits(*injet) = n_splits;
   }
   
@@ -176,7 +176,7 @@ std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std:
     declust.z       = declust.pt2 / (declust.pt1 + declust.pt2);
     declust.kt      = pJRight.pt() * declust.delta_R;
 
-    declust.varphi = atan2(pJLeft.rap() - pJRight.rap(), pJLeft.delta_phi_to(pJRight));
+    declust.varphi = std::atan2(pJLeft.rap() - pJRight.rap(), pJLeft.delta_phi_to(pJRight));
     result.push_back(std::move(declust));
   }
 

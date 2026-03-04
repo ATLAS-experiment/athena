@@ -1,17 +1,17 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #ifndef JETSUBSTRUCTUREMOMENTTOOLS_LUNDVARIABLESTOOL_H
 #define JETSUBSTRUCTUREMOMENTTOOLS_LUNDVARIABLESTOOL_H
 
-#include "fastjet/PseudoJet.hh"
-#include "JetInterface/IJetDecorator.h"
 
+#include "JetInterface/IJetDecorator.h"
 #include "AsgTools/AsgTool.h"
-#include "AsgTools/PropertyWrapper.h"
-#include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgDataHandles/ReadDecorHandleKey.h"
-#include "AsgDataHandles/ReadDecorHandle.h"
-#include "AsgDataHandles/WriteDecorHandleKey.h"
-#include "AsgDataHandles/WriteDecorHandle.h"
-#include "AthContainers/AuxElement.h"
+
+#include "fastjet/PseudoJet.hh"
+
+#include <string>
+#include <vector>
 
 class LundVariablesTool : public asg::AsgTool, virtual public IJetDecorator {
   ASG_TOOL_CLASS(LundVariablesTool, IJetDecorator)

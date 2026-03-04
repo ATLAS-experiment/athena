@@ -62,7 +62,7 @@ namespace CP
         mode = decoWrite ? Gaudi::DataHandle::Writer : Gaudi::DataHandle::Reader;
       }
 
-      addAlgDependency(DataObjID{clid, fullKeyStr}, mode);
+      addAlgDependency(DataObjID{clid, std::move(fullKeyStr)}, mode);
       return StatusCode::SUCCESS;
     }
   }

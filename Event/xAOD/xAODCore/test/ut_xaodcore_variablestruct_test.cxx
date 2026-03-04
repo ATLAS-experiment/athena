@@ -82,7 +82,7 @@ void test1()
   }
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main()
 {
   std::cout << "xAODCore/ut_xaodcore_variablestruct_test\n";
