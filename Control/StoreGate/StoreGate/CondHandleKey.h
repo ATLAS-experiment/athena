@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_CONDHANDLEKEY_H
@@ -51,7 +51,7 @@ namespace SG {
     // const HandleKey<>.
     CondCont<T>* getCC ATLAS_NOT_CONST_THREAD_SAFE () const { return m_cc; }
 
-    StoreGateSvc* getCS() const;
+    const StoreGateSvc* getCS() const;
 
   private:
 
