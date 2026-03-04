@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArCalibShortCorrector.h"
@@ -32,7 +32,6 @@ StatusCode LArCalibShortCorrector::initialize() {
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( detStore()->retrieve(m_onlineId, "LArOnlineID") );
   ATH_CHECK( detStore()->retrieve(m_caloCellId, "CaloCell_ID") );
-  ATH_CHECK( detStore()->regHandle(m_larPedestal,m_pedKey) );
   return StatusCode::SUCCESS;
 }
 
@@ -123,6 +122,9 @@ StatusCode LArCalibShortCorrector::execute(){
     m_shortsCached=true;
   }
   const size_t nShorts=m_shortedNeighbors.size();
+
+  const ILArPedestal* larPedestal = nullptr;
+  ATH_CHECK( detStore()->retrieve (larPedestal, m_pedKey) );
   
   //Loop over all digits in all containers to find the shorted ones
   
@@ -191,8 +193,8 @@ StatusCode LArCalibShortCorrector::execute(){
       }
 
 
-      float pedestal = m_larPedestal->pedestal(shortedDigits[ii].second->hardwareID(),
-								   shortedDigits[ii].second->gain());
+      float pedestal = larPedestal->pedestal(shortedDigits[ii].second->hardwareID(),
+                                             shortedDigits[ii].second->gain());
       if (pedestal<= (1.0+LArElecCalib::ERRORCODE)) {
 	ATH_MSG_ERROR ( "Failed to get pedestal for channel " <<  m_onlineId->channel_name(shortedDigits[ii].second->hardwareID())
                         << ", gain=" << shortedDigits[ii].second->gain() );
@@ -213,9 +215,4 @@ StatusCode LArCalibShortCorrector::execute(){
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode LArCalibShortCorrector::stop(){ 
-  ATH_MSG_INFO ( "in stop." );
-  return StatusCode::SUCCESS;
-}
 

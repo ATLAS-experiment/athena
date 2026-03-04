@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -29,10 +29,8 @@ class ATLAS_NOT_THREAD_SAFE LArCalibShortCorrector : public AthAlgorithm
   ~LArCalibShortCorrector();
 
   //standard algorithm methods
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode stop();
-  StatusCode finalize(){return StatusCode::SUCCESS;}
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
 
  private:
@@ -45,8 +43,6 @@ class ATLAS_NOT_THREAD_SAFE LArCalibShortCorrector : public AthAlgorithm
   const LArOnlineID*  m_onlineId;
   const CaloCell_ID*  m_caloCellId;
   
-  const DataHandle<ILArPedestal> m_larPedestal;
-
   //Algorithm-Properties:
   std::vector<std::string> m_keylist;
   std::string m_pedKey;
