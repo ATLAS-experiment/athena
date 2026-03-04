@@ -9,7 +9,6 @@
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
 #include <ZdcNtuple/LisNtuple.h>
 
-
 LisNtuple::LisNtuple(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator)
 {
@@ -17,6 +16,7 @@ LisNtuple::LisNtuple(const std::string &name, ISvcLocator *pSvcLocator)
   declareProperty("auxSuffix", m_auxSuffix = "", "Suffix for aux data names");
   declareProperty("lisInj", m_lisInj = false, "LIS injected-pulse run");
   declareProperty("lisLED", m_lisLED = false, "LIS LED run");
+  declareProperty("enableTrigger",  enableTrigger = true, "use trigger info");
 
   m_eventCounter = 0;
 }
@@ -45,6 +45,8 @@ StatusCode LisNtuple::initialize()
 
     m_outputTree->Branch("avgIntPerCrossing", &t_avgIntPerCrossing, "avgIntPerCrossing/F");
     m_outputTree->Branch("actIntPerCrossing", &t_actIntPerCrossing, "actIntPerCrossing/F");
+    m_outputTree->Branch("tbp", &t_tbp, "tbp[16]/i");
+    m_outputTree->Branch("tav", &t_tav, "tav[16]/i");
 
     if (m_lisLED)
       {m_outputTree->Branch("LEDType", &t_LEDType, "LEDType/i");}
@@ -57,17 +59,17 @@ StatusCode LisNtuple::initialize()
     m_outputTree->Branch("LISMaxADC", &t_LISMaxADC, Form("LISMaxADC[%d]/I", nLISChannels));
     m_outputTree->Branch("LISMaxSample", &t_LISMaxSample, Form("LISMaxSample[%d]/i", nLISChannels));
     m_outputTree->Branch("LISAvgTime", &t_LISAvgTime, Form("LISAvgTime[%d]/F", nLISChannels));
+    m_outputTree->Branch("LISModuleStatus", &t_LISModuleStatus, Form("LISModuleStatus[%d]/i", nLISChannels));
     // LIS raw waveform data
     m_outputTree->Branch("LISRawdata", &t_LISRawdata, Form("LISRawdata[%d][%d]/s", nLISChannels, nSamples));
 
+    if (m_lisInj)
+      {
+        m_zdcInjPulserAmpMap = std::make_unique<ZdcInjPulserAmpMap>();
+        ATH_MSG_INFO( "Using JSON file for injector-pulse voltage at path " << m_zdcInjPulserAmpMap->getFilePath() );
+      }
     
-  if (m_lisInj)
-    {
-      m_zdcInjPulserAmpMap = std::make_unique<ZdcInjPulserAmpMap>();
-      ATH_MSG_INFO( "Using JSON file for injector-pulse voltage at path " << m_zdcInjPulserAmpMap->getFilePath() );
     }
-  
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -85,6 +87,19 @@ StatusCode LisNtuple::execute()
 
   if (m_lisInj){
   	processVInjInfo();
+  }
+
+  bool passTrigger = true;
+  m_trigDecision = 0;
+  if (enableTrigger)
+  {
+    ANA_CHECK(evtStore()->retrieve( m_trigDecision, "xTrigDecision"));
+    passTrigger = processTriggerDecision();
+  }
+
+  if(!passTrigger){
+    // The trigger chains will be implemented in the future, for now just fill the tree with all events
+    //return StatusCode::FAILURE;
   }
 
   processLisNtupleFromModules();
@@ -114,6 +129,7 @@ void LisNtuple::processLisNtupleFromModules()
       t_LISMaxADC[ichan] = 0;
       t_LISMaxSample[ichan] = 0;
       t_LISAvgTime[ichan] = 0;
+      t_LISModuleStatus[ichan] = 0;
 
       for (int isam = 0; isam < nSamples; isam++)
       {
@@ -134,6 +150,7 @@ void LisNtuple::processLisNtupleFromModules()
   static const SG::ConstAccessor<int> LISMaxADCAccessor("LISMaxADC" + m_auxSuffix);
   static const SG::ConstAccessor<unsigned int> LISMaxSampleAccessor("LISMaxSample" + m_auxSuffix);
   static const SG::ConstAccessor<float> LISAvgTimeAccessor("LISAvgTime" + m_auxSuffix);
+  static const SG::ConstAccessor<unsigned int> LISModuleStatusAccessor("LISModuleStatus" + m_auxSuffix);
   static const SG::ConstAccessor<std::vector<uint16_t>> g0dataAccessor("g0data" + m_auxSuffix);
   static const SG::ConstAccessor<std::vector<uint16_t>> g1dataAccessor("g1data" + m_auxSuffix);
 
@@ -199,7 +216,7 @@ void LisNtuple::processLisNtupleFromModules()
         t_LISMaxADC[ichan] = LISMaxADCAccessor(*zdcMod);
         t_LISMaxSample[ichan] = LISMaxSampleAccessor(*zdcMod);
         t_LISAvgTime[ichan] = LISAvgTimeAccessor(*zdcMod);
-
+        t_LISModuleStatus[ichan] = LISModuleStatusAccessor(*zdcMod);
         // Read raw waveform data
         if(ichan > 3){
         if (g1dataAccessor.isAvailable(*zdcMod))
@@ -272,6 +289,35 @@ void LisNtuple::processEventInfo()
 StatusCode LisNtuple::finalize()
 {
   return StatusCode::SUCCESS;
+}
+
+bool LisNtuple::processTriggerDecision()  // reimpleneted from ZdcNtuple.cxx
+{
+  ANA_MSG_DEBUG ("Processing trigger");
+
+  bool passTrigger = false;
+
+  t_trigger = 0;
+  t_trigger_TBP = 0;
+
+  for (int i = 0; i < 16; i++)
+  {
+    t_tav[i] = 0;
+    t_tbp[i] = 0;
+  }
+
+  if (m_trigDecision)
+    {
+      for (int i = 0; i < 16; i++)
+	    {
+	      t_tbp[i] = m_trigDecision->tbp().at(i);
+	      t_tav[i] = m_trigDecision->tav().at(i);	  
+	      ANA_MSG_DEBUG( "TD: " << i << " tbp: " << std::hex << t_tbp[i] << "\t" << t_tav[i] );
+	    }
+      t_bunchGroup = m_trigDecision->bgCode();
+    }
+
+  return passTrigger;
 }
 
 void LisNtuple::processVInjInfo(){
