@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
- * @file xAODCore/test/AuxContainerBase_test.cxx
+ * @file xAODCore/test/ut_xaodcore_auxcontainerbase_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Jan, 2016
  * @brief Unit tests for AuxContainerBase.  (sadly incomplete)
