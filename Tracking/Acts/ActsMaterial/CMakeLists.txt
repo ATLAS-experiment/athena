@@ -14,7 +14,7 @@ atlas_add_library( ActsMaterial
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ActsGeometryInterfacesLib ActsEventLib
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ActsGeometryInterfacesLib ActsEventLib ActsGeometryLib
                    Acts::Core Acts::PluginRoot
                    )
 set_target_properties( ActsMaterial PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

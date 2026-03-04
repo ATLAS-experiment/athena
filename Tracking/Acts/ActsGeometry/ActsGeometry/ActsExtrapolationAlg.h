@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSEXTRAPOLATIONALG_H
@@ -11,7 +11,7 @@
 
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
-#include "ActsEvent/RecordedMaterialTrackCollection.h"
+#include "ActsGeometry/RecordedMaterialTrackCollection.h"
 
 // ACTS
 #include "Acts/EventData/TrackParameters.hpp"

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRK_RECORDEDMATERIALTRACKCOLLECTION
-#define ACTSTRK_RECORDEDMATERIALTRACKCOLLECTION
+#ifndef ACTSGEOMETRY_RECORDEDMATERIALTRACKCOLLECTION_H
+#define ACTSGEOMETRY_RECORDEDMATERIALTRACKCOLLECTION_H
 
 #include <Acts/Propagator/MaterialInteractor.hpp>
 #include "AthContainers/DataVector.h"
