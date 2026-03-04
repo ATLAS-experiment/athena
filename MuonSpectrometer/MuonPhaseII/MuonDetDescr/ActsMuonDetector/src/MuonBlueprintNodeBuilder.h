@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSMUONDETECTOR_MUONBLUEPRINTNODEBUILDER_H
@@ -90,14 +90,12 @@ private:
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; 
   
   /** @brief Get the chamber's sensitive elements
-    * @param gctx The geometry context
     * @param element The element for which to get the sensitive elements (chamber or sector)
     * @param chId The geometry identifier of the chamber
     * @param boundsFactory The factory for volume bounds
     *  This function constructs and returns the sensitive elements (volumes and surfaces) of the sector. */
     template<typename T>
-    BluePrintSurfPairs_t getSensitiveElements(const ActsTrk::GeometryContext& gctx,
-                                              const T& element,
+    BluePrintSurfPairs_t getSensitiveElements(const T& element,
                                               const Acts::GeometryIdentifier& chId,
                                               Acts::VolumeBoundFactory& boundsFactory) const
       requires(std::is_same_v<T, MuonGMR4::Chamber> ||

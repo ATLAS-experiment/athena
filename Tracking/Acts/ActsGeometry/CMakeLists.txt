@@ -20,7 +20,8 @@ atlas_add_library( ActsGeometryLib
                    src/ActsTrackingGeometrySvc.cxx
                    src/SimpleCylinderDetBuilderTool.cxx
                    src/ItkBlueprintNodeBuilder.cxx    
-                   src/CaloBlueprintNodeBuilder.cxx              
+                   src/CaloBlueprintNodeBuilder.cxx
+                   src/TrackingGeoAlignVisitor.cxx
                    src/util/*.cxx
                    PUBLIC_HEADERS ActsGeometry
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}

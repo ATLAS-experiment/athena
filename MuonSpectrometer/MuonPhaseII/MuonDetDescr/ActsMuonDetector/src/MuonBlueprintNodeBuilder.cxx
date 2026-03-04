@@ -162,7 +162,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
       // //the chamber geometry id
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
-      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *element, chId, boundsFactory);
+      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*element, chId, boundsFactory);
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
       }
@@ -238,8 +238,7 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
 
 template<typename T>
 MuonBlueprintNodeBuilder::BluePrintSurfPairs_t  
-  MuonBlueprintNodeBuilder::getSensitiveElements(const ActsTrk::GeometryContext& gctx,
-                                                 const T& element, 
+  MuonBlueprintNodeBuilder::getSensitiveElements(const T& element, 
                                                  const Acts::GeometryIdentifier& chId,
                                                  Acts::VolumeBoundFactory& boundsFactory) const 
       requires(std::is_same_v<T, MuonGMR4::Chamber> || std::is_same_v<T, MuonGMR4::SpectrometerSector>){
@@ -253,18 +252,15 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
     std::vector<surfacePtr> detSurfaces = readoutEle->getSurfaces();
     switch(readoutEle->detectorType()){
       case DetectorType::Mdt: {    
-        const auto* mdtReadoutEle = static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
-        const MuonGMR4::MdtReadoutElement::parameterBook& parameters{mdtReadoutEle->getParameters()};
+          const auto* mdtReadoutEle = static_cast<const MuonGMR4::MdtReadoutElement*>(readoutEle);
+          const MuonGMR4::MdtReadoutElement::parameterBook& parameters{mdtReadoutEle->getParameters()};
 
-          // get the transform to the sector's frame
-          const Amg::Vector3D toChamber = element.globalToLocalTransform(gctx)*mdtReadoutEle->center(gctx);
-          Acts::Transform3 mdtTransform = element.localToGlobalTransform(gctx) * Amg::getTranslate3D(toChamber);
+          std::unique_ptr<ActsTrk::VolumePlacement> placement{};
 
           // create the MDT multilayer volume with the dedicated builder
           Acts::Experimental::MultiWireVolumeBuilder::Config mwCfg;
           mwCfg.name = m_detMgr->idHelperSvc()->toStringDetEl(mdtReadoutEle->identify());
           mwCfg.mlSurfaces = detSurfaces;
-          mwCfg.transform = mdtTransform;
 
           //special treatment of BIS78 MDT multilayer
           //use different shape because of clashes with EIL chambers 
@@ -287,20 +283,27 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
             //create the diamond bounds for the volume
             double y2 = (nSmallTubes+1)*parameters.tubePitch ;
             double y1 = 2*parameters.halfY - y2;           
-            mdtTransform = mdtTransform*Amg::getTranslateY3D(parameters.halfY-y2);    
-            mdtBounds = boundsFactory.makeBounds<Acts::DiamondVolumeBounds>(0.5*(*maxX), 0.5*(*maxX), 0.5*(*minX), 
+            placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle, 
+                                                                   Amg::getTranslateY3D(parameters.halfY-y2));   
+            mwCfg.bounds = boundsFactory.makeBounds<Acts::DiamondVolumeBounds>(0.5*(*maxX), 0.5*(*maxX), 0.5*(*minX), 
                                                                             y1, y2, parameters.halfHeight);            
-          }else{
-          //check for rectangular or trapezoidal shape bounds       
-          if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
-            mdtBounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, parameters.halfY, parameters.halfHeight);           
-          } else {            
-            mdtBounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX, 
-              parameters.longHalfX, parameters.halfY, parameters.halfHeight);
+          } else {
+            placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle);
+            //check for rectangular or trapezoidal shape bounds
+            if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
+              mwCfg.bounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, 
+                                                                                parameters.halfY, 
+                                                                                parameters.halfHeight);
+            } else { 
+              mwCfg.bounds = boundsFactory.makeBounds<Acts::TrapezoidVolumeBounds>(parameters.shortHalfX,
+                                                                                   parameters.longHalfX,
+                                                                                   parameters.halfY,
+                                                                                   parameters.halfHeight);
+            }
           }
-          }          
-          mwCfg.bounds = mdtBounds;
-          mwCfg.transform = mdtTransform;
+          mwCfg.alignablePlacement = placement.get();
+          element.addPlacement(std::move(placement));
+
           using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
           mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
                             -parameters.halfY,
@@ -315,10 +318,10 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
 
           mdtVolume->assignGeometryId(chId.withExtra(mdtId++));
           //create the blueprint node for the mdt multilayers
-          std::shared_ptr<Acts::Experimental::StaticBlueprintNode> mdtNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
+          auto mdtNode = std::make_shared<Acts::Experimental::StaticBlueprintNode>(std::move(mdtVolume));
           mdtNode->setNavigationPolicyFactory(mdtBuilder.createNavigationPolicyFactory());
           readoutVolumes.push_back(std::move(mdtNode));
-
+ 
           break;
 
         } case DetectorType::Rpc: 
