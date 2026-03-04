@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCDIGITTORPCRDO_H
@@ -14,7 +14,6 @@
 #include "MuonRDO/RpcPadContainer.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrigT1RPChardware/MatrixReadOutStructure.h"
 #include "TrigT1RPClogic/CMAdata.h"
