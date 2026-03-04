@@ -140,10 +140,9 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
     }
   }
 
-  SaturateJets( AjetsAlt, Asat );
-  SaturateJets( BjetsAlt, Bsat );
-  SaturateJets( CjetsAlt, Csat );
-
+  SaturateJets( AjetsAlt, Asat, 0 );
+  SaturateJets( BjetsAlt, Bsat, 1 );
+  SaturateJets( CjetsAlt, Csat, 2 );
 
   gTowersType AjetsRestricted;
   gTowersType BjetsRestricted;
@@ -163,18 +162,44 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gTowersType hasSeedA;
   gBlockAB(Atwr, gBLKA, hasSeedA, gLJ_seedThrA);
 
-  SaturateBlocks(gBLKA, Asat); 
+  SaturateBlocks(gBLKA, Asat, 0);
+
+  // TODO: Temporary fix to match FW saturation eta-alignment bug.
+  // In firmware, seed_ovf forces et9 to max positive → have_seed=1 unconditionally.
+  // The same −1 eta shift applies: overflow at col K forces have_seed at col K-1.
+  // @see jet_eng.vhd lines 849-870: seed_ovf → et9=max → have_seed=1
+  // Revert this block when the FW saturation alignment is fixed.
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++){
+    for(unsigned int icol = 0; icol < FEXAlgoSpaceDefs::ABcolumns; icol++){
+      if(Asat[irow][icol] && (icol % 6 != 0)) hasSeedA[irow][icol - 1] = 1;
+    }
+  }
 
   gTowersType gBLKB;
   gTowersType hasSeedB;
   gBlockAB(Btwr, gBLKB, hasSeedB, gLJ_seedThrB);  
- SaturateBlocks(gBLKA, Bsat);
+ SaturateBlocks(gBLKB, Bsat, 1);
 
+  // TODO: Temporary fix to match FW saturation eta-alignment bug.
+  // Revert this block when the FW saturation alignment is fixed.
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++){
+    for(unsigned int icol = 0; icol < FEXAlgoSpaceDefs::ABcolumns; icol++){
+      if(Bsat[irow][icol] && (icol % 6 != 0) && icol != 11) hasSeedB[irow][icol - 1] = 1;
+    }
+  }
 
   gTowersType gBLKC;
   gTowersType hasSeedC;
   gBlockAB(Ctwr, gBLKC, hasSeedC, gLJ_seedThrC);  
- SaturateBlocks(gBLKA, Csat);
+ SaturateBlocks(gBLKC, Csat, 2);
+
+  // TODO: Temporary fix to match FW saturation eta-alignment bug.
+  // Revert this block when the FW saturation alignment is fixed.
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++){
+    for(unsigned int icol = 0; icol < FEXAlgoSpaceDefs::ABcolumns; icol++){
+      if(Csat[irow][icol] && (icol % 6 != 0) && (icol % 6 != 5)) hasSeedC[irow][icol - 1] = 1;
+    }
+  }
 
   // sorting by jet engine -- not done in FPGA
   std::array<int, 32> AgBlockOutL{};
@@ -212,7 +237,6 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gBlockMax2( gBLKC, 0, 0, gBlockTOBv[4], gBlockTOBeta[4], gBlockTOBphi[4]);
   // find the leading and subleading gBlock  in the CP column of FPGA C 
   gBlockMax2( gBLKC, 5, 1, gBlockTOBv[5], gBlockTOBeta[5], gBlockTOBphi[5]);
-
 
   // in hardware vetos happen before remote sums come in. 
   gBlockVetoAB(AjetsRestricted, hasSeedA);  
@@ -259,6 +283,17 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
 
   }
 
+  // Emulate firmware sum69o_del_ovf: after remote partial sums are added,
+  // re-saturate jets whose input towers were saturated.
+  // In firmware (jet_eng.vhd), sum69o_del_ovf = delayK(dat_ovf_in, SUM69O_DEL_DELAY)
+  // overrides sum69o_del to max positive *instead of* adding remote_ps.
+  // Without this, the simulation adds remote_ps on top of an already-max jet value,
+  // biasing the max-finder (jetOutAB) toward columns that receive remote partial sums
+  // and shifting the reported eta.
+  // The same -1 eta shift as SaturateJets applies here.
+  SaturateJets( AjetsRestricted, Asat, 0 );
+  SaturateJets( BjetsRestricted, Bsat, 1 );
+  SaturateJets( CjetsRestricted, Csat, 2 );
 
   //Emulate switch to unsigned values by zeroing everything below the jet threshold
   //https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L550
@@ -266,7 +301,6 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   gJetVetoAB(AjetsRestricted,  jetThreshold);
   gJetVetoAB(BjetsRestricted,  jetThreshold);
   gJetVetoAB(CjetsRestricted, jetThreshold);
-
 
   std::array<int, 32> AjetOutL;
   std::array<int, 32> AetaIndL;
@@ -289,8 +323,6 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   std::array<int, 32> CPetaInd;
 
   jetOutAB(CjetsRestricted, CNjetOut, CNetaInd, CPjetOut, CPetaInd);
-
-
 
   gJetTOBgen(AjetOutL, AetaIndL, 0, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
   gJetTOBgen(AjetOutR, AetaIndR, 1, jetThreshold, gJetTOBs, gJetTOBv, gJetTOBeta, gJetTOBphi);
@@ -644,6 +676,7 @@ std::vector<std::unique_ptr<gFEXJetTOB>> gFEXJetAlgo::largeRfinder(
   CTOB2_dat[6] = 0x000000BC | ( (BCID&0x0000000F)<<8 ) | (3<<12) | (CRC<<23);
 
 
+
   return tobs_v;
 
 }
@@ -918,22 +951,59 @@ void gFEXJetAlgo::ZeroNegative(gTowersType & jets) const{
 
 
 // https://gitlab.cern.ch/atlas-l1calo/gfex/firmware/-/blob/devel/common/jet_finder/HDL/jet_eng.vhd#L538
-void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat ) const {
-   for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
-    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
-      if(static_cast<unsigned>(sat[irow][icolumn])) {
-          // this should perhaps be 0xfff -- firmware turncates to 12 bits before sorting.  
-      	      jets[irow][icolumn] = 0x0003ffff;
+void gFEXJetAlgo::SaturateJets( gTowersType & jets, gTowersType sat, int fpga ) const {
+  // TODO: Temporary fix to match FW saturation eta-alignment bug.
+  // In firmware, sum69_ovf = delayK(dat_ovf_in, SUM69_OVF_DELAY=16).
+  // dat_ovf_in for col K arrives at clock K; sum69_ovf fires at clock K+16.
+  // sum69o for col J is computed at clock 17+J (LPS_A_DLY+J).
+  // So overflow at col K fires during sum69o for col K+16-17 = K-1.
+  // Engine-boundary columns:
+  //  - First column (local col 0 = global 0,6): K-1 falls in the dead/gap
+  //    phase of the serialiser → no valid target, skip (icol%6 != 0).
+  //  - Last column (local col 5 = global 5,11): the override is gated by
+  //    have_seed_d5 in jet_eng.vhd.  For extended columns the seed is
+  //    computed from regular etower+htower only (the extended xetower
+  //    contribution is added after the seed stage via lps_a), so the seed
+  //    typically fails and the override is blocked.  This is FPGA-specific:
+  //      FPGA A (fpga=0): cols 5,11 are regular → override goes through.
+  //      FPGA B (fpga=1): col 11 is extended (xetower+xhtower) → skip.
+  //                        col 5 is regular → override goes through.
+  //      FPGA C (fpga=2): all columns extended → skip all last cols.
+  // @see jet_eng.vhd: sum69_ovf forces sum69o to max positive
+  // @see jet_eng.vhd: have_seed_d5 gates delm_din, blocking override
+  // @see delayK.vhd: DLY FFs with combinatorial in/out
+  // Revert this to use icol (not icol-1) when the FW saturation alignment is fixed.
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icol = 0; icol < FEXAlgoSpaceDefs::ABcolumns; icol++){
+      if(sat[irow][icol] && (icol % 6 != 0)){
+        if (fpga == 1 && icol == 11) continue;   // FPGA B col 11 extended
+        if (fpga == 2 && icol % 6 == 5) continue; // FPGA C all last cols extended
+        jets[irow][icol - 1] = 0x0003ffff;
       }
     }
   }
 }
 
-void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, gTowersType sat ) const {
-   for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
-    for(unsigned int icolumn =0; icolumn<FEXAlgoSpaceDefs::ABcolumns; icolumn++){
-      if(static_cast<unsigned>(sat[irow][icolumn])) {
-        gBlkSum[irow][icolumn] = 0x00000fff;
+void gFEXJetAlgo::SaturateBlocks( gTowersType & gBlkSum, gTowersType sat, int fpga ) const {
+  // TODO: Temporary fix to match FW saturation eta-alignment bug.
+  // In firmware, seed_ovf = delayK(dat_ovf_in, SEED_OVF_DELAY=10).
+  // dat_ovf_in for col K arrives at clock K; seed_ovf fires at clock K+10.
+  // et9 for col J is computed at clock 11+J (SEED_DLY+J).
+  // So overflow at col K fires during et9 for col K+10-11 = K-1.
+  // First column (icol%6==0) is always skipped (pulse falls in dead/gap).
+  // Last column skipping is FPGA-specific (see SaturateJets comments):
+  //   FPGA A: no last-col skip (cols 5,11 regular).
+  //   FPGA B: skip col 11 only (extended).
+  //   FPGA C: skip all last cols (all extended).
+  // @see jet_eng.vhd lines 849-863: seed_ovf forces et9/seed_out to max
+  // @see delayK.vhd: DLY FFs with combinatorial in/out
+  // Revert this to use icol (not icol-1) when the FW saturation alignment is fixed.
+  for(unsigned int irow = 0; irow < FEXAlgoSpaceDefs::ABCrows; irow++ ){
+    for(unsigned int icol = 0; icol < FEXAlgoSpaceDefs::ABcolumns; icol++){
+      if(sat[irow][icol] && (icol % 6 != 0)){
+        if (fpga == 1 && icol == 11) continue;   // FPGA B col 11 extended
+        if (fpga == 2 && icol % 6 == 5) continue; // FPGA C all last cols extended
+        gBlkSum[irow][icol - 1] = 0x00000fff;
       }
     }
   }
