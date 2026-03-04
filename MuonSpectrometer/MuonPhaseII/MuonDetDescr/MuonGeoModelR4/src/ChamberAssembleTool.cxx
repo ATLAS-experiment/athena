@@ -429,7 +429,10 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             chamberArgs chambArgs{};
             chambArgs.detEles = std::move(detEles);
             chambArgs.bounds = chamberBox;
-            chambArgs.surface = Acts::Surface::makeShared<Acts::PlaneSurface>(toChambCentre.inverse() * chamberCentre, planeBounds);
+            chambArgs.placement = std::make_unique<ActsTrk::VolumePlacement>(*refEle, chamberCentre);
+            auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Amg::Transform3D::Identity(), planeBounds);
+            chambArgs.placement->connectCenterSurface(surface);
+            chambArgs.surface = surface;
             const Chamber* newChamber {sectorArgs.chambers.emplace_back(std::make_unique<Chamber>(std::move(chambArgs))).get()};
             for (const MuonReadoutElement* re : newChamber->readoutEles()) {
                reIds.insert(re->identify());

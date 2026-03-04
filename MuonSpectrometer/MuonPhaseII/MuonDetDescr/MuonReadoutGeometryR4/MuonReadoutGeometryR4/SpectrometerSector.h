@@ -168,6 +168,8 @@ namespace MuonGMR4 {
             const std::vector<chamberLocation> & chamberLocations() const; 
             /** @brief Returns the logic layer numbering of a given Readout Element */
             const std::vector<unsigned int>& logicalLayerIdx(const MuonReadoutElement* reEle) const;
+            /** @brief Adds a volume placement to the Chamber's memory management  */
+            void addPlacement(std::unique_ptr<ActsTrk::VolumePlacement>&& placement) const;
 
         private:
             defineArgs m_args{};
