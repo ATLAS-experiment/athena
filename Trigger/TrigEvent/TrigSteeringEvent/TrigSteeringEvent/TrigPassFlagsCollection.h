@@ -1,23 +1,21 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-#ifndef TrigSteeringEvent_TrigPassFlagsCollection_h
-#define TrigSteeringEvent_TrigPassFlagsCollection_h
+#ifndef TRIGSTEERINGEVENT_TRIGPASSFLAGSCOLLECTION_H
+#define TRIGSTEERINGEVENT_TRIGPASSFLAGSCOLLECTION_H
 
 #include "AthContainers/DataVector.h"
 #include "xAODCore/BaseInfo.h"
 
-#ifndef TrigSteeringEvent_TrigPassFlags_h
 #include "TrigSteeringEvent/TrigPassFlags.h"
-#endif
+
 
 class TrigPassFlagsCollection : public DataVector<TrigPassFlags> {
 };
 
 CLASS_DEF( TrigPassFlagsCollection , 1210268481 , 1 )
 
-      SG_BASE(TrigPassFlagsCollection, DataVector<TrigPassFlags>);
+SG_BASE(TrigPassFlagsCollection, DataVector<TrigPassFlags>);
 
-#endif // TrigSteeringEvent_TrigPassFlagsCollection_h
+#endif

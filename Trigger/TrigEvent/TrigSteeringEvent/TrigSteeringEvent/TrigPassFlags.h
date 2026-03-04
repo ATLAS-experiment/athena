@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-#ifndef TrigSteeringEvent_TrigPassFlags_h
-#define TrigSteeringEvent_TrigPassFlags_h
+#ifndef TRIGSTEERINGEVENT_TRIGPASSFLAGS_H
+#define TRIGSTEERINGEVENT_TRIGPASSFLAGS_H
 
 #include <vector>
 #include <algorithm>
@@ -179,8 +178,4 @@ namespace HLT {
 
 #include "TrigSteeringEvent/TrigPassFlagsCollection.h"
 
-#endif // TrigSteeringEvent_TrigPassFlags_h
-
-
-
-
+#endif
