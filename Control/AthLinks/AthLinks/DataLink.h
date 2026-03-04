@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLink.h
@@ -109,7 +109,7 @@ public:
   /**
    * @brief Return the CLID for the class that we reference.
    */
-  static const CLID& classID();
+  static CLID classID();
 
 
   //========================================================================
