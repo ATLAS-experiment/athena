@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  *
  * @file HGTD_RawData/HGTD_ALTIROC_RDO_Container.h
  * @author Alexander Leopold <alexander.leopold@cern.ch>
@@ -27,9 +27,9 @@ public:
 
   HGTD_ALTIROC_RDO_Container(unsigned int hashmax);
 
-  static const CLID& classID();
+  static CLID classID();
 
-  virtual const CLID& clID() const { return classID(); }
+  virtual const CLID& clID() const override;
 };
 // FIXME: What should be the correct ID? (using hgtd id + 1 for now)
 CLASS_DEF(HGTD_ALTIROC_RDO_Container, 1218198718, 1)
