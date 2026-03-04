@@ -76,9 +76,6 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
 
 StatusCode TauEfficiencyCorrectionsTool::firstEvent() 
 {
-  const xAOD::EventInfo* xEventInfo = nullptr;
-  ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
-
   return StatusCode::SUCCESS;
 }
 

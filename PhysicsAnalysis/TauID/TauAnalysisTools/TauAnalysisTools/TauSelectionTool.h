@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAUANALYSISTOOLS_TAUSELECTIONTOOL_H
@@ -173,8 +173,6 @@ private:
   void setupCutFlowHistogram();
   int convertStrToJetIDWP(const std::string& sJetIDWP) const;
   int convertStrToEleIDWP(const std::string& sEleIDWP) const;
-  std::string convertJetIDWPToStr(int iJetIDWP) const;
-  std::string convertEleIDWPToStr(int iEleIDWP) const;
 
 protected:
 

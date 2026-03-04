@@ -139,7 +139,6 @@ private:
 
   void setupCutFlowHistogram();
   int  convertStrToOmniIDWP(const std::string& sOmniIDWP) const;
-  std::string convertOmniIDWPToStr(int iOmniIDWP) const;
 
 protected:
   
