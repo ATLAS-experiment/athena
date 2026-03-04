@@ -96,7 +96,7 @@ protected:
                                 std::string FastCaloGANInputFolderName);
 
 private:
-  static int GetBinsInFours(double const &bins);
+  static int GetBinsInFours(double const bins);
   int GetAlphaBinsForRBin(const TAxis *x, int ix, int yBinNum) const;
 
   std::vector<int> m_bin_ninit;

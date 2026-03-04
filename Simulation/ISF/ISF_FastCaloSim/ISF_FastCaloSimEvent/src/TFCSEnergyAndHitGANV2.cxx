@@ -694,7 +694,7 @@ void TFCSEnergyAndHitGANV2::test_path(const std::string &path,
   delete fGAN;
 }
 
-int TFCSEnergyAndHitGANV2::GetBinsInFours(double const &bins) {
+int TFCSEnergyAndHitGANV2::GetBinsInFours(double const bins) {
   if (bins < 4)
     return 4;
   else if (bins < 8)
@@ -712,7 +712,7 @@ int TFCSEnergyAndHitGANV2::GetAlphaBinsForRBin(const TAxis *x, int ix,
     ATH_MSG_DEBUG("yBinNum is special value 32");
     const double widthX = x->GetBinWidth(ix);
     const double radious = x->GetBinCenter(ix);
-    double circumference = radious * 2 * TMath::Pi();
+    double circumference = radious * 2. * TMath::Pi();
     if (m_param.IsSymmetrisedAlpha()) {
       circumference = radious * TMath::Pi();
     }
