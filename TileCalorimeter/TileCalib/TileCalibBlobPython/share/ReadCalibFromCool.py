@@ -521,11 +521,11 @@ for iovs in iovList:
                 print (e)
     if miss:
         if iovs[0][0]!=2147483647:
-            print ("%3i drawers are preseint in DB for run %d lb %d" % (good,iovs[0][0],iovs[0][1]))
-            print ("%3i drawers are missing  in DB for run %d lb %d" % (miss,iovs[0][0],iovs[0][1]))
+            print ("%3i drawers are present in DB for run %d lb %d" % (good,iovs[0][0],iovs[0][1]))
+            print ("%3i drawers are missing in DB for run %d lb %d" % (miss,iovs[0][0],iovs[0][1]))
         else:
-            print ("%3i drawers are preseint in DB" % (good))
-            print ("%3i drawers are missing  in DB" % (miss))
+            print ("%3i drawers are present in DB" % (good))
+            print ("%3i drawers are missing in DB" % (miss))
         if good==0:
             print ("Please, check that you are using correct schema and correct tag")
 
