@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Header: /build/atlas/cvs/atlas/offline/Calorimeter/CaloIdentifier/test/test_cell_id.cxx,v 1.19 2006-03-20 20:32:50 ssnyder Exp $ 
   
 #include "IdDictParser/IdDictParser.h"  
 #include "Identifier/IdentifierHash.h" 
@@ -607,14 +606,14 @@ int main (int argc, char* argv[])
 
 
     std::cout << "HELLO" << std::endl;
-    check_cell_neighbours(idd);
-    check_cell_id_decoding(idd);
-     
+    try {
+      check_cell_neighbours(idd);
+      check_cell_id_decoding(idd);
+    }
+    catch (const std::exception& e) {
+      std::cerr << "Caught exception: " << e.what() << "\n";
+      return 1;
+    }
+
     return 0;  
 }  
-  
- 
- 
- 
- 
- 
