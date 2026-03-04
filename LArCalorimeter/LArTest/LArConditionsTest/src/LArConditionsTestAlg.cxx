@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -70,30 +70,12 @@ StatusCode LArConditionsTestAlg::initialize()
 
 StatusCode LArConditionsTestAlg::execute()
 {
-    ATH_MSG_DEBUG ( " retrieve DataHandle<ILArRamp>  in execute " );
-
     if(m_testCondObjs){ 
 
 	// create cache
         ATH_CHECK(  testCondObjects() );
-// 	StatusCode sc = testDbObjectRead();
-// 	if(sc.isFailure()) {
-//   	    log << MSG::ERROR << "Failed testDbObjectRead " << endmsg;
-//   	    return StatusCode::FAILURE;
-//   	}
-	
     }
     
-
-//    if(m_testCondObject){ 
-// 	std::string key = "LArRamp";
-// 	const ILArRamp* ramp = 0 ;
-// 	detStore()->retrieve(ramp, key);
-// 	if(!ramp) {
-// 	    log<< MSG::ERROR<<" Failed to get LArRamp in execute " << endmsg;
-// 	    return StatusCode::FAILURE ; 
-// 	}
-//     } 
 
     if(m_TB){ 
 	const ILArOFC* ofc = nullptr;
