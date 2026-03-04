@@ -88,7 +88,8 @@ TIDARoiDescriptor::TIDARoiDescriptor( double eta,  double etaMinus,   double eta
 	       phi, phiMinus, phiPlus,
 	       zed, zedMinus, zedPlus ), 
      m_fullscan(false),
-     m_l1Id(0), m_roiId(0), m_roiWord(0)
+     m_l1Id(0), m_roiId(0), m_roiWord(0),
+     m_cached(false), m_dphi(0)
 { 
   // calculate z limits at radius maxRadius
 

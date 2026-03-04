@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -1167,13 +1167,15 @@ public:
     bool first = true;
     
     if ( m_logy ) {      /// increase the number of log labels if only a few decades
+      //coverity[UNREACHABLE]
       for ( unsigned i=0 ; i<size() ; i++, first=false ) { 
-	double ymax = at(i).htest()->GetMaximum();
-	double ymin = at(i).htest()->GetMinimum();
-	at(i).htest()->GetYaxis()->SetMoreLogLabels(true);
-	if ( ymax/ymin>1e6 ) at(i).htest()->GetYaxis()->SetMoreLogLabels(false);
-	break;
+	      double ymax = at(i).htest()->GetMaximum();
+	      double ymin = at(i).htest()->GetMinimum();
+	      at(i).htest()->GetYaxis()->SetMoreLogLabels(true);
+	      if ( ymax/ymin>1e6 ) at(i).htest()->GetYaxis()->SetMoreLogLabels(false);
+	      break;
       }
+
     }
 
     for ( unsigned i=0 ; i<size() ; i++ ) at(i).trim_errors( m_trim_errors );
