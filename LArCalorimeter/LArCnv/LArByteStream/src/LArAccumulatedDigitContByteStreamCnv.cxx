@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArAccumulatedDigitContByteStreamCnv.h"
@@ -37,7 +37,7 @@ LArAccumulatedDigitContByteStreamCnv::LArAccumulatedDigitContByteStreamCnv(ISvcL
   m_rdpSvc("ROBDataProviderSvc", name())
 {}
 
-const CLID& LArAccumulatedDigitContByteStreamCnv::classID(){
+CLID LArAccumulatedDigitContByteStreamCnv::classID(){
   return ClassID_traits<LArAccumulatedDigitContainer>::ID() ;
 }
 

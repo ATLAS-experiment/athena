@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArAccumulatedCalibDigitContByteStreamCnv.h"
@@ -40,7 +40,7 @@ LArAccumulatedCalibDigitContByteStreamCnv::LArAccumulatedCalibDigitContByteStrea
   m_calibLineMappingKey ("LArCalibLineMap")
 {}
 
-const CLID& LArAccumulatedCalibDigitContByteStreamCnv::classID(){
+CLID LArAccumulatedCalibDigitContByteStreamCnv::classID(){
   return ClassID_traits<LArAccumulatedCalibDigitContainer>::ID() ;
 }
 
