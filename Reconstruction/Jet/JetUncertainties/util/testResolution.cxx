@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetUncertainties/JetUncertaintiesTool.h"
@@ -74,9 +74,17 @@ int main (int argc, char* argv[])
     TString config     = argv[4];
     TString component  = argv[5];
     TString isDataStr  = argv[6];
-    if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
-    else           optHelper.Initialize(std::vector<TString>());
-
+    try{
+      if (argc == 8) optHelper.Initialize(jet::utils::vectorize<TString>(argv[7],";"));
+      else           optHelper.Initialize(std::vector<TString>());
+    } catch (const std::exception& e) {
+      std::cerr<<"Exception in optHelper.Initialize: " << e.what()<<std::endl;
+      exit(1);
+    } catch (...) {
+      std::cerr<<"Unknown exception in optHelper.Initialize"<<std::endl;
+      exit(1);
+    }
+   
     if (!outFile.EndsWith(".pdf"))
     {
         printf("Only pdf output files are currently supported\n");
