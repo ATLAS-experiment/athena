@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -256,7 +256,7 @@ const std::vector<TIDA::Track> ibl_filter( const std::vector<TIDA::Track>& tv ) 
 
   if ( ic>=500 ) { 
     ic = 0;
-    if ( h ) { 
+    if ( h && h2) { 
       h->DrawCopy();
       gPad->Print("zphimap.pdf");
       h2->DrawCopy();

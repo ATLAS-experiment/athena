@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:27 CET 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -144,6 +144,7 @@ double findMean(TH1D* s, double frac=0.95) {
     }
     //cppcheck-suppress oppositeInnerCondition
     if ( it>=it_max_report ) {
+      //coverity[DEADCODE]
       std::cerr << s->GetName() << "\tMax iterations " << it << " reached" << std::endl;
     }
     

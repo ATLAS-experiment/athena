@@ -8,7 +8,7 @@
  **     @author  mark sutton
  **     @date    $Id: lumiList.h 780225 2016-10-25 10:04:58Z 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -92,7 +92,9 @@ public:
       vec.push_back( &(itr->second) ); 
       ++itr;
     }
-
+    if (vec.empty()){
+      return;
+    }
     /// sort the vector 
     std::sort(vec.begin(), vec.end(), grl_run::comparison );
 
@@ -101,12 +103,14 @@ public:
     double total = 0;
     for ( unsigned i=vec.size() ; i-- ;  ) total += vec[i]->lbsize();
 
-   
+    if (total == 0){
+      return;
+    }
     double integral = 0;
     for ( unsigned i=0 ; i<vec.size() ; i++ ) {
 
       integral += vec[i]->lbsize();
-
+      
       std::cout << i 
 		<< "\t" << int(100*(i+1.0)/vec.size()) 
 		<< "\t" << int(integral/total*1000)*0.1 
