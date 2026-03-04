@@ -24,7 +24,7 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual StatusCode initialize() override;
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const override;
 
-  virtual bool puZDCvsFCal(HI::IonDataType period,
+  virtual bool noPUZDCvsFCal(HI::IonDataType period,
                            const xAOD::HIEventShapeContainer* es,
                            const xAOD::ZdcModuleContainer* zdcModules,
                            HI::PileupVariation variation) const override;
@@ -35,11 +35,11 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual float zdcE(HI::IonDataType period,
                      const xAOD::ZdcModuleContainer* zdcModules) const override;
 
-  virtual bool puZDCvsFCal(
+  virtual bool noPUZDCvsFCal(
       IonDataType dataType, float fcalEt, float zdcE,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puFCalVsNtracks(
+  virtual bool noPUFCalVsNtracks(
       IonDataType dataType, const xAOD::HIEventShapeContainer* es,
       const xAOD::TrackParticleContainer* tracks,
       const xAOD::VertexContainer* vertices,
@@ -49,19 +49,19 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
                    const xAOD::TrackParticleContainer* tracks,
                    const xAOD::VertexContainer* vertices)  const override;
 
-  virtual bool puFCalVsNtracks(
+  virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puZDCPresampler(HI::IonDataType period,
+  virtual bool noPUZDCPresampler(HI::IonDataType period,
                                const xAOD::ZdcModuleContainer* zdcModules,
                                HI::PileupVariation variation) const override;
 
-  virtual bool puZDCPresampler(
+  virtual bool noPUZDCPresampler(
       IonDataType dataType, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
-  virtual bool puOOVertexCuts(
+  virtual bool noPUOOVertexCuts(
       IonDataType dataType,
       const xAOD::VertexContainer* vertices) const override;
 

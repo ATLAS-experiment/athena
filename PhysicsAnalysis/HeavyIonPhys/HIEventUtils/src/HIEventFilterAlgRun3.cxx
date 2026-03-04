@@ -6,14 +6,13 @@
 
 #include <GaudiKernel/StatusCode.h>
 
-#include "EventBookkeeperTools/FilterReporter.h"
 #include "AthenaMonitoringKernel/Monitored.h"
+#include "EventBookkeeperTools/FilterReporter.h"
 #include "StoreGate/WriteDecorHandle.h"
 
 HI::HIEventFilterAlgRun3::HIEventFilterAlgRun3(const std::string& name,
                                                ISvcLocator* pSvcLocator)
-    : ::AthReentrantAlgorithm(name, pSvcLocator) {
-}
+    : ::AthReentrantAlgorithm(name, pSvcLocator) {}
 
 StatusCode HI::HIEventFilterAlgRun3::initialize() {
   ATH_MSG_DEBUG("Initializing " << name() << "...");
@@ -63,7 +62,7 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
                                : m_selectionMask.value();
   ATH_MSG_DEBUG("Mask requested " << maskToString(maskToUse));
 
-  if (isRequested(maskToUse, HI::SelectionMask::PUFCalVsZDCAny)) {
+  if (isRequested(maskToUse, HI::SelectionMask::NoPUFCalVsZDCAny)) {
     auto esHandle = SG::makeHandle(m_hiEventShapeKey, ctx);
     auto zdcHandle = SG::makeHandle(m_zdcKey, ctx);
     if (!m_monTool.empty()) {
@@ -71,36 +70,36 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
       mon_zdcE = m_tool->zdcE(period, zdcHandle.cptr());
     }
 
-    if (m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
+    if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
                             HI::PileupVariation::Tight)) {
-      store(HI::SelectionMask::PUFCalVsZDCTight, mask);
+      store(HI::SelectionMask::NoPUFCalVsZDCTight, mask);
     }
-    if (m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
+    if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
                             HI::PileupVariation::Nominal)) {
-      store(HI::SelectionMask::PUFCalVsZDCNominal, mask);
+      store(HI::SelectionMask::NoPUFCalVsZDCNominal, mask);
     }
-    if (m_tool->puZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
+    if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
                             HI::PileupVariation::Loose)) {
-      store(HI::SelectionMask::PUFCalVsZDCLoose, mask);
+      store(HI::SelectionMask::NoPUFCalVsZDCLoose, mask);
     }
   }
 
-  if (isRequested(maskToUse, HI::SelectionMask::PUZDCPresampler)) {
+  if (isRequested(maskToUse, HI::SelectionMask::NoPUZDCPresampler)) {
     auto zdcHandle = SG::makeHandle(m_zdcKey, ctx);
-    if (m_tool->puZDCPresampler(period, zdcHandle.cptr(),
+    if (m_tool->noPUZDCPresampler(period, zdcHandle.cptr(),
                                 HI::PileupVariation::Nominal)) {
-      store(HI::SelectionMask::PUZDCPresampler, mask);
+      store(HI::SelectionMask::NoPUZDCPresampler, mask);
     }
   }
 
-  if (isRequested(maskToUse, HI::SelectionMask::PUOOSingleVertexNominal)) {
+  if (isRequested(maskToUse, HI::SelectionMask::NoPUOOSingleVertexNominal)) {
     auto vertexHandle = SG::makeHandle(m_verticesKey, ctx);
-    if (m_tool->puOOVertexCuts(period, vertexHandle.cptr())) {
-      store(HI::SelectionMask::PUOOSingleVertexNominal, mask);
+    if (m_tool->noPUOOVertexCuts(period, vertexHandle.cptr())) {
+      store(HI::SelectionMask::NoPUOOSingleVertexNominal, mask);
     }
   }
 
-  if (isRequested(maskToUse, HI::SelectionMask::PUFCalVsNTrackAny)) {
+  if (isRequested(maskToUse, HI::SelectionMask::NoPUFCalVsNTrackAny)) {
     auto esHandle = SG::makeHandle(m_hiEventShapeKey, ctx);
     auto vertexHandle = SG::makeHandle(m_verticesKey, ctx);
     auto tracksHandle = SG::makeHandle(m_tracksKey, ctx);
@@ -109,15 +108,15 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
       mon_nTrk = m_tool->nTrk(period, tracksHandle.cptr(), vertexHandle.cptr());
     }
 
-    if (m_tool->puFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
+    if (m_tool->noPUFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
                                 vertexHandle.cptr(),
                                 HI::PileupVariation::Loose)) {
-      store(HI::SelectionMask::PUFCalVsNTrackLoose, mask);
+      store(HI::SelectionMask::NoPUFCalVsNTrackLoose, mask);
     }
-    if (m_tool->puFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
+    if (m_tool->noPUFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
                                 vertexHandle.cptr(),
                                 HI::PileupVariation::Nominal)) {
-      store(HI::SelectionMask::PUFCalVsNTrackNominal, mask);
+      store(HI::SelectionMask::NoPUFCalVsNTrackNominal, mask);
     }
   }
 
@@ -127,11 +126,28 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
 
   auto mon_passed = Monitored::Scalar<bool>("passed", filterDecision);
   auto mon_failed = Monitored::Scalar<bool>("failed", not filterDecision);
+  auto mon_PUFCalVsZDCAny_passed = Monitored::Scalar<bool>(
+      "PUFCalVsZDCAny_passed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsZDCAny)) != 0);
+  auto mon_PUFCalVsZDCAny_failed = Monitored::Scalar<bool>(
+      "PUFCalVsZDCAny_failed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsZDCAny)) == 0);
+
+  auto mon_PUFCalVsNTrackAny_passed = Monitored::Scalar<bool>(
+      "PUFCalVsNTrackAny_passed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) != 0);
+  auto mon_PUFCalVsNTrackAny_failed = Monitored::Scalar<bool>(
+      "PUFCalVsNTrackAny_failed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) == 0);
+
   if (m_doFilter)
     filter.setPassed(filterDecision);
   fillCounters(mask);
 
-  Monitored::Group(m_monTool, mon_fcalEt, mon_zdcE, mon_nTrk, mon_passed, mon_failed);
+  Monitored::Group(m_monTool, mon_fcalEt, mon_zdcE, mon_nTrk, mon_passed,
+                   mon_failed, mon_PUFCalVsZDCAny_passed,
+                   mon_PUFCalVsZDCAny_failed, mon_PUFCalVsNTrackAny_passed,
+                   mon_PUFCalVsNTrackAny_failed);
   // record mask for client as decoration of EventInfo object
   SG::WriteDecorHandle<xAOD::EventInfo, mask_t> handle =
       SG::makeHandle<mask_t>(m_decisionBitsKey, ctx);

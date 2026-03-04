@@ -52,20 +52,24 @@ std::string HI::toString(SelectionMask m) {
 
   switch (m) {
     ENUMDEF(NoEventError)
-    ENUMDEF(PUFCalVsNTrackLoose)
-    ENUMDEF(PUFCalVsNTrackNominal)
-    ENUMDEF(PUFCalVsNTrackTight)
-    ENUMDEF(PUFCalVsZDCLoose)
-    ENUMDEF(PUFCalVsZDCNominal)
-    ENUMDEF(PUFCalVsZDCTight)
-    ENUMDEF(PUOOSingleVertexNominal)
-    ENUMDEF(PUZDCPresampler)
+    ENUMDEF(NoPUFCalVsNTrackLoose)
+    ENUMDEF(NoPUFCalVsNTrackNominal)
+    ENUMDEF(NoPUFCalVsNTrackTight)
+    ENUMDEF(NoPUFCalVsZDCLoose)
+    ENUMDEF(NoPUFCalVsZDCNominal)
+    ENUMDEF(NoPUFCalVsZDCTight)
+    ENUMDEF(NoPUOOSingleVertexNominal)
+    ENUMDEF(NoPUZDCPresampler)
     default:
       return std::string("UNKNOWN mask bit ") +
              std::to_string(static_cast<unsigned int>(m));
   }
 #undef ENUMDEF
 }
+
+static const double MeV=1.;
+static const double GeV=1e3;
+static const double TeV=1e6;
 
 std::unique_ptr<TH1D> loadHist(const std::string& file) {
   const std::string path =
@@ -151,7 +155,7 @@ float HI::HIEventSelectionToolRun3::fcalEt(
     if (fcalLayers.contains(slice->layer()))
       et += slice->et();
   }
-  return et * 1e-6;  // we operate in TeV
+  return et * MeV / GeV;  // we operate in GeV
 }
 
 float HI::HIEventSelectionToolRun3::zdcE(
@@ -161,26 +165,27 @@ float HI::HIEventSelectionToolRun3::zdcE(
   for (auto module : *zdcModules) {
     e += calibEnergyAccessor(*module);
   }
-  return e * 1e-3;  // we operate in GeV
+  return e * MeV / GeV;  // we operate in GeV
 }
 
-bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
+bool HI::HIEventSelectionToolRun3::noPUZDCvsFCal(
     HI::IonDataType period, const xAOD::HIEventShapeContainer* es,
     const xAOD::ZdcModuleContainer* zdcModules,
     HI::PileupVariation variation) const {
-  return puZDCvsFCal(period, fcalEt(period, es), zdcE(period, zdcModules), variation);
+  return noPUZDCvsFCal(period, fcalEt(period, es), zdcE(period, zdcModules),
+                     variation);
 }
 
-bool HI::HIEventSelectionToolRun3::puZDCvsFCal(
+bool HI::HIEventSelectionToolRun3::noPUZDCvsFCal(
     HI::IonDataType period, float fcalEt, float zdcE,
     HI::PileupVariation variation) const {
   const float cut = zdcCutValue(period, fcalEt, variation);
   return zdcE < cut;
 }
 
-int HI::HIEventSelectionToolRun3::nTrk(HI::IonDataType,
-                 const xAOD::TrackParticleContainer* tracks,
-                 const xAOD::VertexContainer* vertices) const {
+int HI::HIEventSelectionToolRun3::nTrk(
+    HI::IonDataType, const xAOD::TrackParticleContainer* tracks,
+    const xAOD::VertexContainer* vertices) const {
   const xAOD::Vertex* pv = 0;
   for (const xAOD::Vertex* vx : *vertices) {
     if (vx->vertexType() == xAOD::VxType::PriVtx) {
@@ -198,14 +203,15 @@ int HI::HIEventSelectionToolRun3::nTrk(HI::IonDataType,
   return count;
 }
 
-bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(
+bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(
     HI::IonDataType period, const xAOD::HIEventShapeContainer* es,
     const xAOD::TrackParticleContainer* tracks,
     const xAOD::VertexContainer* vertices, PileupVariation variation) const {
-  return puFCalVsNtracks(period, fcalEt(period, es), nTrk(period, tracks, vertices), variation);
+  return noPUFCalVsNtracks(period, fcalEt(period, es),
+                         nTrk(period, tracks, vertices), variation);
 }
 
-bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType period,
+bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(HI::IonDataType period,
                                                    float fcalEt, int ntrk,
                                                    HI::PileupVariation) const {
   ATH_MSG_DEBUG("cutting puFCalVsNtracks: fcalEt " << fcalEt << " ntracks "
@@ -215,26 +221,29 @@ bool HI::HIEventSelectionToolRun3::puFCalVsNtracks(HI::IonDataType period,
   // and more is here:
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
   if (period == HI::IonDataType::OO2025) {
-    if (ntrk < (-80 + fcalEt * 600))
+    if (ntrk < (-80 + fcalEt * 0.6))
       return false;
-    if (ntrk < (-30 + fcalEt * 400))
+    if (ntrk < (-30 + fcalEt * 0.4))
       return false;
-    if (ntrk > (100 + fcalEt * 1700))
+    if (ntrk > (100 + fcalEt * 1.7))
       return false;
     return true;
   } else if (period == HI::IonDataType::NeNe2025) {
-    if (ntrk < (-70 + fcalEt * 600))
+    if (ntrk < (-70 + fcalEt * 0.6))
       return false;
-    if (ntrk < (-20 + fcalEt * 350))
+    if (ntrk < (-20 + fcalEt * 0.35))
       return false;
-    if (ntrk > (100 + fcalEt * 1700))
+    if (ntrk > (100 + fcalEt * 1.7))
       return false;
     return true;
   }
+  throw std::runtime_error(std::string("puFCalVsNtracks for period of id ") +
+                           HI::toString(period) + " is not handled (yet)");
+
   return false;  // for unimplemented periods
 }
 
-bool HI::HIEventSelectionToolRun3::puZDCPresampler(
+bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
     HI::IonDataType period, const xAOD::ZdcModuleContainer* zdcModules,
     HI::PileupVariation variation) const {
   float PreSamplerAmp_A = 0;
@@ -248,10 +257,10 @@ bool HI::HIEventSelectionToolRun3::puZDCPresampler(
     if (module->zdcSide() < 0)
       PreSamplerAmp_A += accPreSampleAmp(*module);
   }
-  return puZDCPresampler(period, PreSamplerAmp_A, PreSamplerAmp_C, variation);
+  return noPUZDCPresampler(period, PreSamplerAmp_A, PreSamplerAmp_C, variation);
 }
 
-bool HI::HIEventSelectionToolRun3::puZDCPresampler(
+bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
     HI::IonDataType period, float presamplerA, float presamplerC,
     HI::PileupVariation variation) const {
   // not sure if fcalEt will be involved i.e. apply this cut only above certain
@@ -278,7 +287,7 @@ bool HI::HIEventSelectionToolRun3::puZDCPresampler(
   return false;
 }
 
-bool HI::HIEventSelectionToolRun3::puOOVertexCuts(
+bool HI::HIEventSelectionToolRun3::noPUOOVertexCuts(
     HI::IonDataType, const xAOD::VertexContainer* vertices) const {
 
   // This is probably redundant as the vx->vertexType() should not be
@@ -323,24 +332,20 @@ bool HI::HIEventSelectionToolRun3::puOOVertexCuts(
 
 float HI::HIEventSelectionToolRun3::zdcCutValue(
     HI::IonDataType period, float fcalEt, HI::PileupVariation variation) const {
-  if (fcalEt > 100.0)
-    throw std::runtime_error(
-        std::to_string(fcalEt) +
-        " the energy that is given to zdcCutValue is well above 100 TeV?, "
-        "likely you call it not converting energy to TeV");
 
   if (period == HI::IonDataType::PbPb2023) {
-
+    // the cut is expressed in TeV for 23 data
+    const float fcalEtTeV = fcalEt * GeV / TeV;
     auto cutFunction = [](float et) {
       const static double a = 334.29, b = -20.39,
                           c = -2.38;  // from ATL-COM-PHYS-2025-033
       return a + b * et + c * et * et;
     };
 
-    float cut = cutFunction(fcalEt);
-    if (fcalEt <= 1.0)  // below 1 TeV use flat
+    float cut = cutFunction(fcalEtTeV);
+    if (fcalEtTeV <= 1.0)  // below 1 TeV use flat
       cut = cutFunction(1.0);
-    if (fcalEt >= 4.0)  // below 1 TeV use flat
+    if (fcalEtTeV >= 4.0)  // below 1 TeV use flat
       cut = cutFunction(4.0);
 
     if (variation == HI::PileupVariation::Tight) {
@@ -356,30 +361,27 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
   // also See Figure 2.6 of
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
   if (period == HI::IonDataType::OO2025) {
-    //*1e3 below to convert fcalEt from TeV to GeV
-    int refbin = m_ZDCEt_UpperCut_5p5Sigma_OO->FindFixBin(fcalEt * 1e3);
+    int refbin = m_ZDCEt_UpperCut_5p5Sigma_OO->FindFixBin(fcalEt);
     if (refbin < 1)
       refbin = 1;
 
-    //*1e3 below to convert Zdc value in histogram from TeV to GeV
-    return m_ZDCEt_UpperCut_5p5Sigma_OO->GetBinContent(refbin) * 1e3;
+    return m_ZDCEt_UpperCut_5p5Sigma_OO->GetBinContent(refbin);
   }
 
   // https://atlas-heavy-ions.docs.cern.ch/analyzes/2025/
   // also See Figure 2.6 of
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
   if (period == HI::IonDataType::NeNe2025) {
-    //*1e3 below to convert fcalEt from TeV to GeV
-    int refbin = m_ZDCEt_UpperCut_4p0Sigma_NeNe->FindFixBin(fcalEt * 1e3);
+    int refbin = m_ZDCEt_UpperCut_4p0Sigma_NeNe->FindFixBin(fcalEt);
     if (refbin < 1)
       refbin = 1;
 
-    //*1e3 below to convert Zdc value in histogram from TeV to GeV
-    return m_ZDCEt_UpperCut_4p0Sigma_NeNe->GetBinContent(refbin) * 1e3;
+    return m_ZDCEt_UpperCut_4p0Sigma_NeNe->GetBinContent(refbin);
   }
 
-  throw std::runtime_error(std::string("period of id ") + HI::toString(period) +
-                           " is not handled (yet)");
+  throw std::runtime_error(
+      std::string("zdcCutValue needed in FCal vs ZDC E for period of id ") +
+      HI::toString(period) + " is not handled (yet)");
 
   return 0;
 }

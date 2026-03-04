@@ -11,22 +11,22 @@ def HIEventSelectionRun3MonToolCfg(flags):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, "MonTool")
     monTool.defineHistogram( 'fcalEt,zdcE;fcalEt_vs_zdcE_all', path='EXPERT', type='TH2F', title=';FCal Et;ZDC E',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=60)
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=60)
 
-    monTool.defineHistogram( 'fcalEt,zdcE;fcalEt_vs_zdcE_passed', cutmask='passed', path='EXPERT', type='TH2F', title=';FCal Et;ZDC E',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=60)
+    monTool.defineHistogram( 'fcalEt,zdcE;fcalEt_vs_zdcE_passed', cutmask='PUFCalVsZDCAny_passed', path='EXPERT', type='TH2F', title=';FCal Et;ZDC E',
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=60)
 
-    monTool.defineHistogram( 'fcalEt,zdcE;fcalEt_vs_zdcE_failed', cutmask='failed', path='EXPERT', type='TH2F', title=';FCal Et;ZDC E',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=60)
+    monTool.defineHistogram( 'fcalEt,zdcE;fcalEt_vs_zdcE_failed', cutmask='PUFCalVsZDCAny_failed', path='EXPERT', type='TH2F', title=';FCal Et;ZDC E',
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=60)
 
     monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_all', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=600)
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=600)
 
-    monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_passed', cutmask='passed', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=600)
+    monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_passed', cutmask='PUFCalVsNTrackAny_passed', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=600)
 
-    monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_failed', cutmask='failed', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
-                             xbins=160, xmin=0, xmax=8, ybins=120, ymin=0, ymax=600)
+    monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_failed', cutmask='PUFCalVsNTrackAny_failed', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
+                             xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=600)
     prefix=flags.Input.Files[0].split("/")[-1]
     histsvc = CompFactory.THistSvc(Output=[f"EXPERT DATAFILE='{prefix}HIEventSelectionRun3Validation.root' OPT='RECREATE'"])
     acc.addService(histsvc)        
@@ -78,6 +78,7 @@ if __name__ == '__main__':
     flags = initConfigFlags()
     flags.addFlag("HIPeriodToTest", "23")
     flags.Exec.MaxEvents=10
+    flags.Exec.MaxEvents=-1
     flags.Input.Files=lambda fl: [data_hi+test_files[fl.HIPeriodToTest]]
     flags.fillFromArgs()
     flags.lock()
