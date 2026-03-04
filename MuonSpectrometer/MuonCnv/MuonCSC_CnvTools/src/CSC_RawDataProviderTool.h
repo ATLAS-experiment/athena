@@ -35,13 +35,13 @@ namespace Muon {
         // IMuonRawDataProviderTool interface - EventContext-based methods
         using IMuonRawDataProviderTool::convert;
         virtual StatusCode convert(const EventContext& ctx) const override;
-        virtual StatusCode convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const override;
+        virtual StatusCode convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const override;
         virtual StatusCode convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const override;
 
     private:
         /** function to decode the passed ROB fragments into the passed container */
-        StatusCode convertIntoContainer(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs,
-                                        const EventContext& ctx, CscRawDataContainer& container) const;
+        StatusCode convertIntoContainer(const ROBFragmentList& vecRobs,
+                                        const EventContext& ctx) const;
 
         /** member variables for algorithm properties: */
         ToolHandle<ICSC_ROD_Decoder> m_decoder{this, "Decoder", "Muon::CscROD_Decoder/CscROD_Decoder"};

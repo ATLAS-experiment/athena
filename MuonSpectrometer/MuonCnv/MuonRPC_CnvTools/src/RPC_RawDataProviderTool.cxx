@@ -12,10 +12,8 @@
 using eformat::helper::SourceIdentifier;
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
-Muon::RPC_RawDataProviderTool::RPC_RawDataProviderTool(const std::string& t, const std::string& n, const IInterface* p) :
-    base_class(t, n, p), m_robDataProvider("ROBDataProviderSvc", n) {}
-
-StatusCode Muon::RPC_RawDataProviderTool::initialize() {
+namespace Muon{
+StatusCode RPC_RawDataProviderTool::initialize() {
     // retrieve ROD decoder
     ATH_CHECK(m_decoder.retrieve());
 
@@ -45,8 +43,8 @@ StatusCode Muon::RPC_RawDataProviderTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode Muon::RPC_RawDataProviderTool::convertIntoContainers(
-    const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, const std::vector<IdentifierHash>& collections,
+StatusCode RPC_RawDataProviderTool::convertIntoContainers(
+    const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>& collections,
     RpcPadContainer* pad, RpcSectorLogicContainer* logic, const bool& decodeSL) const {
     for (auto itFrag = vecRobs.begin(); itFrag != vecRobs.end(); itFrag++) {
         // convert only if data payload is delivered
@@ -71,7 +69,7 @@ StatusCode Muon::RPC_RawDataProviderTool::convertIntoContainers(
     return StatusCode::SUCCESS;
 }
 
-std::vector<IdentifierHash> Muon::RPC_RawDataProviderTool::to_be_converted(const ROBFragment& robFrag,
+std::vector<IdentifierHash> RPC_RawDataProviderTool::to_be_converted(const ROBFragment& robFrag,
                                                                             const std::vector<IdentifierHash>& coll) const {
     SG::ReadCondHandle<RpcCablingCondData> readHandle{m_readKey};
     const RpcCablingCondData* readCdo{*readHandle};
@@ -94,39 +92,34 @@ std::vector<IdentifierHash> Muon::RPC_RawDataProviderTool::to_be_converted(const
     return to_return;
 }
 
-StatusCode Muon::RPC_RawDataProviderTool::convert(const EventContext& ctx) const {
-    SG::ReadCondHandle<RpcCablingCondData> readHandle{m_readKey, ctx};
-    const RpcCablingCondData* readCdo{*readHandle};
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    std::vector<uint32_t> robIds = readCdo->giveFullListOfRobIds();
-    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    return convert(vecOfRobf, ctx);
+StatusCode RPC_RawDataProviderTool::convert(const EventContext& ctx) const {
+    const RpcCablingCondData* readCdo{nullptr};
+    ATH_CHECK(SG::get(readCdo, m_readKey, ctx));
+    return convert(readCdo->giveFullListOfRobIds(), ctx);
 }
 
-StatusCode Muon::RPC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const {
+StatusCode RPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, 
+                                            const EventContext& ctx) const {
     std::vector<IdentifierHash> collections;
-    return convert(vecRobs, collections, ctx);
-}
-
-StatusCode Muon::RPC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, const EventContext& ctx) const {
-    std::vector<IdentifierHash> collections;
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
+    ROBFragmentList vecOfRobf;
     m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    return convert(vecOfRobf, collections, ctx);
+    return convertIntoContainer(vecOfRobf, collections, ctx);
 }
 
-StatusCode Muon::RPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const {
-    SG::ReadCondHandle<RpcCablingCondData> readHandle{m_readKey, ctx};
-    const RpcCablingCondData* readCdo{*readHandle};
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
+StatusCode RPC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, 
+                                            const EventContext& ctx) const {
+    const RpcCablingCondData* readCdo{nullptr};
+    ATH_CHECK(SG::get(readCdo, m_readKey, ctx));
+    ROBFragmentList vecOfRobf;
     std::vector<uint32_t> robIds;
-    CHECK(readCdo->giveROB_fromRDO(rdoIdhVect, robIds));
+    ATH_CHECK(readCdo->giveROB_fromRDO(rdoIdhVect, robIds));
     m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    return convert(vecOfRobf, rdoIdhVect, ctx);
+    return convertIntoContainer(vecOfRobf, rdoIdhVect, ctx);
 }
 
-StatusCode Muon::RPC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const std::vector<IdentifierHash>& collections,
-                                                  const EventContext& ctx) const {
+StatusCode RPC_RawDataProviderTool::convertIntoContainer(const ROBFragmentList& vecRobs, 
+                                                         const std::vector<IdentifierHash>& collections,
+                                                         const EventContext& ctx) const {
     SG::WriteHandle<RpcPadContainer> rdoContainerHandle(m_containerKey, ctx);
     SG::WriteHandle<RpcSectorLogicContainer> logicHandle(m_sec, ctx);
 
@@ -156,4 +149,5 @@ StatusCode Muon::RPC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs
     ATH_CHECK(convertIntoContainers(vecRobs, collections, pad, logic, true));
 
     return StatusCode::SUCCESS;
+}
 }

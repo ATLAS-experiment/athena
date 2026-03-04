@@ -16,16 +16,15 @@
 
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
-//================ Constructor =================================================
-
+namespace Muon{
 
 //================ Destructor =================================================
 
-Muon::CSC_RawDataProviderTool::~CSC_RawDataProviderTool() = default;
+CSC_RawDataProviderTool::~CSC_RawDataProviderTool() = default;
 
 //================ Initialisation =================================================
 
-StatusCode Muon::CSC_RawDataProviderTool::initialize() {
+StatusCode CSC_RawDataProviderTool::initialize() {
     ATH_CHECK(m_cabling.retrieve());
     ATH_CHECK(m_robDataProvider.retrieve());
     ATH_MSG_INFO("Retrieved service " << m_robDataProvider);
@@ -49,67 +48,11 @@ StatusCode Muon::CSC_RawDataProviderTool::initialize() {
 
 //============================================================================================
 
-StatusCode Muon::CSC_RawDataProviderTool::convertIntoContainer(
-    const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>& vecRobs, const EventContext& ctx,
-    CscRawDataContainer& container) const {
+StatusCode CSC_RawDataProviderTool::convertIntoContainer(
+    const ROBFragmentList& vecRobs, const EventContext& ctx) const {
     std::set<uint32_t> robIdSet;
-    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey, ctx);
 
-    ATH_MSG_DEBUG("Before processing numColls=" << container.numberOfCollections());
-
-    ATH_MSG_DEBUG("vector of ROB ID to decode: size = " << vecRobs.size());
-
-    for (const ROBFragment* frag : vecRobs) {
-        uint32_t robid = frag->rod_source_id();
-
-        // check if this ROBFragment was already decoded (EF case in ROIs
-        if (!robIdSet.insert(robid).second) {
-            ATH_MSG_DEBUG(" ROB Fragment with ID  " << std::hex << robid << std::dec << " already decoded, skip");
-        } else {
-            m_decoder->fillCollection(*eventInfo, *frag, container);
-        }
-    }
-
-    ATH_MSG_DEBUG("After processing numColls=" << container.numberOfCollections());
-
-    return StatusCode::SUCCESS;
-}
-
-//============================================================================================
-// New EventContext-based convert methods
-
-StatusCode Muon::CSC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, const EventContext& ctx) const {
-    IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
-
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    std::vector<uint32_t> robIds;
-
-    for (unsigned int i = 0; i < rdoIdhVect.size(); ++i) {
-        uint32_t rob_id = 0xffff;
-        m_cabling->hash2RobFull(rdoIdhVect[i], rob_id);
-        robIds.push_back(rob_id);
-    }
-    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
-
-    // This would be passed to the function which does not use the IdentifierHash further
-    return convert(vecOfRobf, ctx);
-}
-
-StatusCode Muon::CSC_RawDataProviderTool::convert(const EventContext& ctx) const {
-    std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecOfRobf;
-    const std::vector<uint32_t>& robIds = m_hid2re.allRobIds();
-    ATH_MSG_VERBOSE("Number of ROB ids " << robIds.size());
-    // ask ROBDataProviderSvc for the vector of ROBFragment for all CSC ROBIDs
-    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
-    ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
-
-    return convert(vecOfRobf, ctx);
-}
-
-
-StatusCode Muon::CSC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs, const EventContext& ctx) const {
-    SG::WriteHandle<CscRawDataContainer> rdoContainerHandle(m_containerKey, ctx);
+      SG::WriteHandle rdoContainerHandle{m_containerKey, ctx};
 
     // Split the methods to have one where we use the cache and one where we just setup the container
     const bool externalCacheRDO = !m_rdoContainerCacheKey.key().empty();
@@ -117,7 +60,7 @@ StatusCode Muon::CSC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs
         ATH_CHECK(rdoContainerHandle.record(std::make_unique<CscRawDataContainer>(m_idHelperSvc->cscIdHelper().module_hash_max())));
         ATH_MSG_DEBUG("Created CSCRawDataContainer");
     } else {
-        SG::UpdateHandle<CscRawDataCollection_Cache> update(m_rdoContainerCacheKey, ctx);
+        SG::UpdateHandle update{m_rdoContainerCacheKey, ctx};
         ATH_CHECK(update.isValid());
         ATH_CHECK(rdoContainerHandle.record(std::make_unique<CscRawDataContainer>(update.ptr())));
         ATH_MSG_DEBUG("Created container using cache for " << m_rdoContainerCacheKey.key());
@@ -129,9 +72,65 @@ StatusCode Muon::CSC_RawDataProviderTool::convert(const ROBFragmentList& vecRobs
         ATH_MSG_ERROR("CSC RDO container pointer is null, cannot decode data");
         return StatusCode::FAILURE;
     }
+    const xAOD::EventInfo* eventInfo{nullptr};
+    ATH_CHECK(SG::get(eventInfo, m_eventInfoKey, ctx));
+    
+    ATH_MSG_DEBUG("Before processing numColls=" << container->numberOfCollections());
 
-    // call conversion function
-    ATH_CHECK(convertIntoContainer(vecRobs, ctx, *container));
+    ATH_MSG_DEBUG("vector of ROB ID to decode: size = " << vecRobs.size());
+
+    for (const ROBFragment* frag : vecRobs) {
+        uint32_t robid = frag->rod_source_id();
+
+        // check if this ROBFragment was already decoded (EF case in ROIs
+        if (!robIdSet.insert(robid).second) {
+            ATH_MSG_DEBUG(" ROB Fragment with ID  " << std::hex << robid << std::dec << " already decoded, skip");
+        } else {
+            m_decoder->fillCollection(*eventInfo, *frag, *container);
+        }
+    }
+
+    ATH_MSG_DEBUG("After processing numColls=" << container->numberOfCollections());
 
     return StatusCode::SUCCESS;
+}
+
+//============================================================================================
+// New EventContext-based convert methods
+
+StatusCode CSC_RawDataProviderTool::convert(const std::vector<IdentifierHash>& rdoIdhVect, 
+                                            const EventContext& ctx) const {
+    IdContext cscContext = m_idHelperSvc->cscIdHelper().module_context();
+
+    ROBFragmentList vecOfRobf;
+    std::vector<uint32_t> robIds;
+
+    for (unsigned int i = 0; i < rdoIdhVect.size(); ++i) {
+        uint32_t rob_id = 0xffff;
+        m_cabling->hash2RobFull(rdoIdhVect[i], rob_id);
+        robIds.push_back(rob_id);
+    }
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
+    ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
+
+    // This would be passed to the function which does not use the IdentifierHash further
+    return convertIntoContainer(vecOfRobf, ctx);
+}
+
+StatusCode CSC_RawDataProviderTool::convert(const EventContext& ctx) const {
+    return convert(m_hid2re.allRobIds(), ctx);
+}
+
+StatusCode CSC_RawDataProviderTool::convert(const std::vector<uint32_t>& robIds, 
+                                            const EventContext& ctx) const {
+    ROBFragmentList vecOfRobf;
+
+    ATH_MSG_VERBOSE("Number of ROB ids " << robIds.size());
+    // ask ROBDataProviderSvc for the vector of ROBFragment for all CSC ROBIDs
+    m_robDataProvider->getROBData(ctx, robIds, vecOfRobf);
+    ATH_MSG_VERBOSE("Number of ROB fragments " << vecOfRobf.size());
+
+    return convertIntoContainer(vecOfRobf, ctx);
+  
+}
 }
