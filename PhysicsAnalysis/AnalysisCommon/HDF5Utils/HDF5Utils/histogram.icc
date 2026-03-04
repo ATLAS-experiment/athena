@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
@@ -13,6 +13,7 @@
 #include <optional>
 #include <set>
 #include <string>
+#include <utility>
 
 #include <boost/histogram.hpp>
 
@@ -351,7 +352,7 @@ namespace H5Utils::hist {
       const std::string& ds_name,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
-      assert(space.getSelectNpoints() == flat.size());
+      assert(std::cmp_equal(space.getSelectNpoints(),flat.size()));
       storage.createDataSet(ds_name, type, space, props)
              .write(flat.data(), type);
     };
