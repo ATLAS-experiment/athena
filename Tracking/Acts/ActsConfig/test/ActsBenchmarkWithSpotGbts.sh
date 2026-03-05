@@ -23,7 +23,8 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2;\
                flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
-               flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated;' \
+               flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated; \
+               flags.Acts.doLargeRadius=True;' \
     --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;' \
     --inputRDOFile ${DATADIR}"/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/*" \
     --outputAODFile 'myAOD.pool.root' \
