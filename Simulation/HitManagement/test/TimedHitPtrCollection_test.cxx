@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * @brief test the TimedHitPtrCollection
  * @author ATLAS Collaboration
  */
-// $Id $
 
 /* #define THDEBUG 1 */
 #undef NDEBUG
@@ -39,7 +38,7 @@ using namespace Athena_test;
 
 using namespace std;
 
-int main() {
+int test1() {
   cout << "*** TimedHitPtrCollection_test starts ***" <<endl;
   ISvcLocator* pSvcLoc;
   if (!initGaudi(pSvcLoc)) {
@@ -107,5 +106,14 @@ int main() {
 
   cout << "*** TimedHitPtrCollection_test OK ***" <<endl;
   return 0;
+}
+
+int main() {
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
 
