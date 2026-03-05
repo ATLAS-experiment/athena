@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -26,7 +26,8 @@ if __name__ == "__main__":
     flags.Detector.EnableITkStrip = True
     flags.DQ.useTrigger = False
     flags.Output.HISTFileName = "ActsMonitoringOutput.root"
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1"]
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags.Input.Files = defaultTestFiles.RDO_RUN4
     flags.Exec.MaxEvents = 1
 
     # Set the Main Pass
