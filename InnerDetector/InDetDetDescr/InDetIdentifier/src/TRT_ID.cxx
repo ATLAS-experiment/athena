@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /***************************************************************************
@@ -17,9 +17,7 @@
 #include "Identifier/RangeIterator.h"
 #include "Identifier/IdContext.h"
 #include <set>
-#include <algorithm>
-#include <iostream>
-#include  <cassert>
+#include <cassert>
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -677,7 +675,7 @@ TRT_ID::get_id(const IdentifierHash& hash_id,
       }
     } else if (m_STRAW_INDEX == end) {
       // Do not know how to calculate straw id from hash yet!!
-      std::cout << "Do not know how to calculate straw id from hash yet!!" << std::endl;
+      throw std::runtime_error("TRT_ID::get_id: Do not know how to calculate straw id from hash yet!!");
     }
   }
   return(result);
@@ -784,43 +782,39 @@ TRT_ID::test_trt_ids() {
 
 
   // Check straw hashes
-  //bool debug = false;
   for (unsigned int i = 0; i < m_straw_hash_max; ++i, ++nids) {
     Identifier id = m_straw_vec[i];
     IdentifierHash h1 = straw_hash_bin(id);
     IdentifierHash h2 = straw_hash(id);
-    //IdentifierHash h2 = straw_hash(id, debug);
     if (h1 != h2) {
-      std::cout << "test_trt_ids - bad match: id, bin hash, hash: "
+      ATH_MSG_WARNING( "test_trt_ids - bad match: id, bin hash, hash: "
                 << nids << " "
                 << show_to_string(id) << " "
                 << h1 << " "
-                << h2 << std::endl;
+                << h2 );
       nidsFailed++;
-      //debug = true;
     }
     Identifier id1 = straw_id(h1);
     if (id != id1) {
-      std::cout << "test_trt_ids - bad match: id, bin hash, hash: "
+      ATH_MSG_WARNING( "test_trt_ids - bad match: id, bin hash, hash: "
                 << nids << " "
                 << show_to_string(id) << " "
                 << show_to_string(id1) << " "
                 << h1 << " "
-                << h2 << std::endl;
+                << h2 );
       nidsFailed++;
     }
     if (i % 10000 == 5) {
-      std::cout << "test_trt_ids: id, bin hash, hash: "
+      ATH_MSG_VERBOSE( "test_trt_ids: id, bin hash, hash: "
                 << nids << " "
                 << show_to_string(id) << " "
                 << h1 << " "
-                << h2 << std::endl;
+                << h2 );
     }
   }
 
-  std::cout << "Checked hash calculation for " << nids << " hashes and found "
-            << nidsFailed << " failures to match between binary lookup and calculation "
-            << std::endl;
+  ATH_MSG_WARNING("Checked hash calculation for " << nids << " hashes and found "
+            << nidsFailed << " failures to match between binary lookup and calculation ");
 
   reset_straw_hash_vector();
 
