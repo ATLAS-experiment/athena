@@ -29,7 +29,7 @@ public:
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName{this, "ZdcSumContainerName", "ZdcSums", ""};
   const xAOD::EventInfo *m_eventInfo{};
   int m_eventCounter{};
-  const xAOD::TrigDecision* m_trigDecision;
+  const xAOD::TrigDecision* m_trigDecision{};
 
   // flags
   bool m_enableOutputTree{}; // enable output TTree
@@ -59,15 +59,15 @@ public:
   float t_avgIntPerCrossing{};
   float t_actIntPerCrossing{};
 
-  uint32_t t_tav[nTriggerWords]; //  16*32 = 512, floor(ID/32) to get the position in tav[]
-                                 //  and ID%32 to get the position within each long word
-  uint32_t t_tbp[nTriggerWords];//  16*32 = 512, floor(ID/32) to get the position in tbp[]
-                                //  and ID%32 to get the position within each long word
-  uint64_t t_trigger;
-  uint32_t t_trigger_TBP;
-  float t_prescales[200];
-  bool t_decisions[200];
-  bool t_rerunDecisions[200];
+  uint32_t t_tav[nTriggerWords]{}; //  16*32 = 512, floor(ID/32) to get the position in tav[]
+                                   //  and ID%32 to get the position within each long word
+  uint32_t t_tbp[nTriggerWords]{}; //  16*32 = 512, floor(ID/32) to get the position in tbp[]
+                                   //  and ID%32 to get the position within each long word
+  uint64_t t_trigger{};
+  uint32_t t_trigger_TBP{};
+  float t_prescales[200]{};
+  bool t_decisions[200]{};
+  bool t_rerunDecisions[200]{};
 
   // LED type (for LED events)
   unsigned int t_LEDType{};
