@@ -48,7 +48,7 @@ public:
 
   NetworkOutputs GetNetworkOutputs(const TFCSTruthState *truth,
                                    const TFCSExtrapolationState *extrapol,
-                                   TFCSSimulationState simulstate) const;
+                                   TFCSSimulationState &simulstate) const;
 
   bool IsGanCorrectlyLoaded() const;
   const FitResultsPerLayer& GetFitResults() const { return m_allFitResults; }
