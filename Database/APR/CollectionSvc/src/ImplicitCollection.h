@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_IMPLICITCOLLECTION_H
@@ -16,7 +16,8 @@
 namespace pool {
 
   // forward declarations
-   class ISession;
+   namespace PersistencySvc { class ISession; }
+   using PersistencySvc::ISession;
    class IContainer;
    class ICollectionQuery;
    class ICollectionIterator;

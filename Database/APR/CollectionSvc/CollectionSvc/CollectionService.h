@@ -15,8 +15,9 @@
 namespace pool {
 
   class CollectionDescription;
-  class ISession;
-
+  namespace PersistencySvc { class ISession; }
+  using PersistencySvc::ISession;
+  
   /**
    * @class CollectionService CollectionService.h CollectionSvc/CollectionService.h
    *

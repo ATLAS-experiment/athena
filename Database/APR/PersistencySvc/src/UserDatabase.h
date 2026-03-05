@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_USERDATABASE_H
@@ -7,7 +7,6 @@
 
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
-#include "PersistencySvc/DatabaseSpecification.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "POOLCore/DbPrint.h"
 
@@ -15,7 +14,6 @@ namespace pool {
   // forward declarations
   class DatabaseConnectionPolicy;
   class IFileCatalog;
-  class ITransaction;
    
 
   namespace PersistencySvc {

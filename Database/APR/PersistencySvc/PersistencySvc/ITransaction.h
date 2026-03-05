@@ -35,6 +35,10 @@ namespace pool {
 
     /// Returns the transaction type
     virtual Type type() const = 0;
+
+  protected:
+    /// Default destructor
+    virtual ~ITransaction() = default;  
   };
 
 }
