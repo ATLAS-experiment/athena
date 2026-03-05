@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # STDM6.py - derivation dedicated for the special runs at low mu (AFP analysis)
 
 # Based on PHYS derivation:
@@ -212,10 +212,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                            "TauJets",
                                            "TauJets_MuonRM",
                                            "DiTauJets",
-                                           "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                          ]
+                                           "DiTauJetsLowPt"]
     if TauJets_EleRM_in_input:
         STDM6SlimmingHelper.SmartCollections.append("TauJets_EleRM")
 
