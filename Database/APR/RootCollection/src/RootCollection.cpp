@@ -41,21 +41,21 @@ namespace pool {
 
   namespace RootCollection {
 
-     RootCollection::RootCollection(
-            const pool::CollectionDescription* description,
-            pool::ICollection::OpenMode mode,
-            pool::ISession* )
-        : APRMessaging( "RootCollection"),
-         m_description( *description ),
-         m_name( description->name() ),
-         m_fileName( description->connection() ),
-         m_mode( mode ),
-         m_file( 0 ),
-         m_tree( 0 ),
-         m_session( 0 ),
-         m_open( false ) {
-        RootCollection::open();
-     }
+     RootCollection::RootCollection( const pool::CollectionDescription* description,
+                                     pool::ICollection::OpenMode mode,
+                                     pool::PersistencySvc::ISession* session )
+         : APRMessaging( "RootCollection"),
+           m_description( *description ),
+           m_name( description->name() ),
+           m_fileName( description->connection() ),
+           m_mode( mode ),
+           m_file( 0 ),
+           m_tree( 0 ),
+           m_session( session ),
+           m_open( false ) 
+      {
+         RootCollection::open();
+      }
 
 
      RootCollection::~RootCollection() {

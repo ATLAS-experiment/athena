@@ -6,7 +6,7 @@
 #define INCLUDE_PERSISTENCYSVC_USERSESSION_H
 
 #include "AthenaBaseComps/AthMessaging.h"
-#include "PersistencySvc/IPersistencySvc.h"
+#include "PersistencySvc/ISession.h"
 
 #include "POOLCore/DbPrint.h"
 
@@ -28,7 +28,7 @@ namespace pool {
      *
      */
 
-    class UserSession : virtual public pool::IPersistencySvc, public APRMessaging
+    class UserSession : public ISession, public APRMessaging
     {
     public:
       /// Constructor
@@ -51,7 +51,6 @@ namespace pool {
        * @return void*   The data.
        *
        * In case of failure zero is returned.
-       *
        */
       virtual void* readObject( const Token& token, void* object = 0 ) override;
 
@@ -64,7 +63,6 @@ namespace pool {
        * @param  type         [IN]  reflection class description with the layout of transient object
        *
        * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
-       *
        */
       virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) override;
 

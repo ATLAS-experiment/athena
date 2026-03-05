@@ -12,6 +12,14 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Placement.h"
 
+
+std::unique_ptr< pool::PersistencySvc::ISession >
+pool::PersistencySvc::createSession( IFileCatalog& catalog )
+{
+   return std::unique_ptr<ISession>(  new pool::PersistencySvc::UserSession(catalog) );
+}
+
+
 pool::PersistencySvc::UserSession::UserSession( pool::IFileCatalog& fileCatalog ):
   APRMessaging( "APR Session" ),
   m_policy( 0 ),

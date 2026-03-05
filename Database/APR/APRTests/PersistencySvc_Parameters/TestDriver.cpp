@@ -15,7 +15,6 @@
 #include "PersistencySvc/ITransaction.h"
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IDatabase.h"
-#include "PersistencySvc/IPersistencySvc.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -48,21 +47,21 @@ pool::TestDriver::write()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::PersistencySvc::createSession(catalog);
 
   // Set up the policy.
   pool::DatabaseConnectionPolicy policy;
   policy.setWriteModeForNonExisting( pool::DatabaseConnectionPolicy::CREATE );
   policy.setWriteModeForExisting( pool::DatabaseConnectionPolicy::OVERWRITE );
-  persistencySvc->setDefaultConnectionPolicy( policy );
+  dbsession->setDefaultConnectionPolicy( policy );
 
   // Start an update transaction
-  if( !persistencySvc->transaction().start( pool::ITransaction::UPDATE ) ) {
+  if( !dbsession->start( pool::ITransaction::UPDATE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
   // Opening again a database
-  auto db = persistencySvc->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  auto db = dbsession->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -72,7 +71,7 @@ pool::TestDriver::write()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if( !persistencySvc->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
@@ -87,15 +86,15 @@ pool::TestDriver::read()
   catalog.start();
 
   std::cout << "Creating the persistency service" << std::endl;
-  std::unique_ptr< pool::IPersistencySvc > persistencySvc( pool::IPersistencySvc::create(catalog) );
+  auto dbsession = pool::PersistencySvc::createSession(catalog);
 
   // Starting a read transaction
-  if( !persistencySvc->transaction().start( pool::ITransaction::READ ) ) {
+  if( !dbsession->start( pool::ITransaction::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
   // Opening the database for reading
-  auto db = persistencySvc->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  auto db = dbsession->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
   if( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -104,7 +103,7 @@ pool::TestDriver::read()
 
   // Committing the transaction
   std::cout << "Committing the transaction." << std::endl;
-  if( !persistencySvc->transaction().commit() ) {
+  if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
 
