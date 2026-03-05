@@ -41,7 +41,7 @@ CmxJetTobByteStreamxAODCnv::CmxJetTobByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& CmxJetTobByteStreamxAODCnv::classID() {
+CLID CmxJetTobByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::CMXJetTobContainer>::ID();
 }
 

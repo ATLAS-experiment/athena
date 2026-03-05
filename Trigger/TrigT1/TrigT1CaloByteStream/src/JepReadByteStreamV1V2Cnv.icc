@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -47,7 +47,7 @@ JepReadByteStreamV1V2Cnv<Container>::~JepReadByteStreamV1V2Cnv()
 // CLID
 
 template <typename Container>
-const CLID& JepReadByteStreamV1V2Cnv<Container>::classID()
+CLID JepReadByteStreamV1V2Cnv<Container>::classID()
 {
   return ClassID_traits<Container>::ID();
 }

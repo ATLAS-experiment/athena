@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -41,7 +41,7 @@ JemEtSumsByteStreamxAODCnv::JemEtSumsByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& JemEtSumsByteStreamxAODCnv::classID() {
+CLID JemEtSumsByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::JEMEtSumsContainer>::ID();
 }
 

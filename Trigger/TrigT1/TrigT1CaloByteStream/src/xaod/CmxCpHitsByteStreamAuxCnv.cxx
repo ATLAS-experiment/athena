@@ -59,7 +59,7 @@ CmxCpHitsByteStreamAuxCnv::CmxCpHitsByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CmxCpHitsByteStreamAuxCnv::classID() {
+CLID CmxCpHitsByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CMXCPHitsAuxContainer>::ID();
 }
 

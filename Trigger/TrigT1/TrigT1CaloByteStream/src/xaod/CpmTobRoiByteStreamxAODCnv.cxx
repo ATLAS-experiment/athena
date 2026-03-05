@@ -41,7 +41,7 @@ CpmTobRoiByteStreamxAODCnv::CpmTobRoiByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& CpmTobRoiByteStreamxAODCnv::classID() {
+CLID CpmTobRoiByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::CPMTobRoIContainer>::ID();
 }
 

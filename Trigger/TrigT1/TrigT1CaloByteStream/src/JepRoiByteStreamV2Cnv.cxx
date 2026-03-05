@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,7 +42,7 @@ JepRoiByteStreamV2Cnv::~JepRoiByteStreamV2Cnv()
 
 // CLID
 
-const CLID& JepRoiByteStreamV2Cnv::classID()
+CLID JepRoiByteStreamV2Cnv::classID()
 {
   return ClassID_traits<LVL1::JEPRoIBSCollectionV2>::ID();
 }

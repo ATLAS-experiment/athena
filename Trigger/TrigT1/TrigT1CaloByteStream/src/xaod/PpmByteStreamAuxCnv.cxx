@@ -44,7 +44,7 @@ PpmByteStreamAuxCnv::PpmByteStreamAuxCnv(ISvcLocator* svcloc) :
 
 }
 
-const CLID& PpmByteStreamAuxCnv::classID() {
+CLID PpmByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::TriggerTowerAuxContainer>::ID();
 }
 
