@@ -268,13 +268,12 @@ def HIGG1D1Cfg(flags):
                                               "InDetTrackParticles",
                                               "AntiKt4EMTopoJets",
                                               "AntiKt4EMPFlowJets",
-
+                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                               "MET_Baseline_AntiKt4EMTopo",
                                               "MET_Baseline_AntiKt4EMPFlow",
                                               "TauJets",
                                               "DiTauJets",
-                                              "DiTauJetsLowPt",
-                                              "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+                                              "DiTauJetsLowPt"]
     
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []

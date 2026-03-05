@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TEST2.py - derivation framework example demonstrating skimming via means of string 
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -55,8 +55,7 @@ def TEST2Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
-                                            "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+                                            "DiTauJetsLowPt"]
     TEST2ItemList = TEST2SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST2", ItemList=TEST2ItemList, AcceptAlgs=["TEST2Kernel"]))

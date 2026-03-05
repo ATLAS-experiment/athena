@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TEST6.py - derivation framework example demonstrating pre-selection, such that only
 # after passing the skimming do heavier augmentation tools run 
 
@@ -62,8 +62,7 @@ def TEST6Cfg(flags):
                                             "MET_Baseline_AntiKt4EMPFlow",
                                             "TauJets",
                                             "DiTauJets",
-                                            "DiTauJetsLowPt",
-                                            "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"]
+                                            "DiTauJetsLowPt"]
     TEST6ItemList = TEST6SlimmingHelper.GetItemList()
 
     acc.merge(OutputStreamCfg(flags, "DAOD_TEST6", ItemList=TEST6ItemList, AcceptAlgs=["TEST6Kernel"]))

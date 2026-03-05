@@ -274,7 +274,6 @@ def JETM3Cfg(flags):
                                              "TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
         JETM3SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets","AntiKt4TruthJets","AntiKt10TruthJets",
-                                                 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
                                                  "AntiKt10TruthSoftDropBeta100Zcut10Jets"]
 
     # Trigger content
