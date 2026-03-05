@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef INDETIDENTIFIER_TRT_ID_H
@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <string>
 #include <map>
+#include <stdexcept>
 #include <cassert>
+#include <vector>
 
 
 class IdDictDictionary;
@@ -317,7 +319,9 @@ private:
 
   // print out the invalid message
   void invalidMessage() const;
-
+  //compose errMsg used in exception
+  std::string errMsg(const std::string & txt, unsigned v, size_t limit) const;
+  //
   bool m_is_valid;
   size_type m_trt_region_index;
   size_type m_INDET_INDEX;
@@ -378,7 +382,11 @@ private:
 //using the macros below we can assign an identifier (and a version)
 //This is required and checked at compile time when you try to record/retrieve
 CLASS_DEF(TRT_ID, 2518, 1)
-
+inline std::string
+TRT_ID::errMsg(const std::string & txt, unsigned v, size_t lim) const {
+  return txt + std::to_string(v) + " " + std::to_string(lim);
+  
+}
 
 //----------------------------------------------------------------------------
 inline bool
@@ -702,9 +710,8 @@ TRT_ID::straw_layer_hash(Identifier straw_layer_id) const {
 //----------------------------------------------------------------------------
 inline
 IdentifierHash
-TRT_ID::straw_hash(Identifier straw_id) const
-//TRT_ID::straw_hash       (Identifier straw_id, bool debug) const
-{
+TRT_ID::straw_hash(Identifier straw_id) const{
+  
   // Check if TRT_ID is valid for this layout
   if (!m_is_valid) invalidMessage();
 
@@ -720,8 +727,7 @@ TRT_ID::straw_hash(Identifier straw_id) const
       hcIndex = (be < 0) ? m_hash_calcs_barrel_indexes[index].first :
                 m_hash_calcs_barrel_indexes[index].second;
     } else {
-      std::cout << "straw_hash: index > barrel_index size - " << index
-                << " " << m_hash_calcs_barrel_indexes.size() << std::endl;
+      throw std::out_of_range(errMsg("straw_hash: index > barrel_index size - ", index, m_hash_calcs_barrel_indexes.size()));
     }
   } else {
     unsigned int index = lw;
@@ -729,8 +735,7 @@ TRT_ID::straw_hash(Identifier straw_id) const
       hcIndex = (be < 0) ? m_hash_calcs_endcap_indexes[index].first :
                 m_hash_calcs_endcap_indexes[index].second;
     } else {
-      std::cout << "straw_hash: index > endcap_index size - " << index
-                << " " << m_hash_calcs_endcap_indexes.size() << std::endl;
+      throw std::out_of_range(errMsg("straw_hash: index > endcap_index size - ", index, m_hash_calcs_endcap_indexes.size()));
     }
   }
 
@@ -744,12 +749,9 @@ TRT_ID::straw_hash(Identifier straw_id) const
              (lw - hc.m_layerMin) * hc.m_nStrawLayers +
              (sl - hc.m_strLayerMin) * hc.m_nstraws +
              straw(straw_id);
-
-
     return(result);
   } else {
-    std::cout << "straw_hash: hc index > hcCalc  size - " << hcIndex
-              << " " << m_hash_calcs.size() << std::endl;
+    throw std::out_of_range(errMsg("straw_hash: hc index > hcCalc  size - ", hcIndex, m_hash_calcs.size()));
   }
   return(result);
 }
