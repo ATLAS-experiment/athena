@@ -131,6 +131,25 @@ int main(int, char*[]) {
     h5h::write_hist_to_group(out_file, h1c, "h1c");
   }
 
+  // unsigned char (uint8) storage
+  {
+    using uint8_storage = bh::dense_storage<uint8_t>;
+    auto h1u8 = bh::make_histogram_with(
+      uint8_storage{}, dax_t(3, -1.5, 1.5, "x"));
+    h1u8(0.0);   // bin 1, storage index 2
+    h1u8(1.0);   // bin 2, storage index 3
+    h5h::write_hist_to_group(out_file, h1u8, "h1u8");
+  }
+
+  // unsigned short (uint16) storage
+  {
+    using uint16_storage = bh::dense_storage<uint16_t>;
+    auto h1u16 = bh::make_histogram_with(
+      uint16_storage{}, dax_t(3, -1.5, 1.5, "x"));
+    h1u16(0.0);   // bin 1, storage index 2
+    h1u16(1.0);   // bin 2, storage index 3
+    h5h::write_hist_to_group(out_file, h1u16, "h1u16");
+  }
 
   return 0;
 }
