@@ -280,7 +280,7 @@ if inTagIsFullTag:
 if not inputIsFile:
     log.info("Initializing folder %s with tag %s", inFolder, inTag)
 reader = TileCalibCrest.TileBlobReaderCrest(inSchema,inFolder,inTag)
-blob = reader.getBlob(-1,chan,(end,endlumi),False)
+blob = reader.getBlob(-1,chan,((rb if rb>0 else end),0),False)
 if blob is None:
     log.critical("Could not locate a data blob in CREST payload for COOL channel %s", chan)
     sys.exit(1)
