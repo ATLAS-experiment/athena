@@ -27,6 +27,9 @@ class CavernBackground(FlagEnum):
     WriteWorld = 'WriteWorld'
     SignalWorld = 'SignalWorld'
 
+class InDetParameterization(FlagEnum):
+    NONE = 0
+    FatrasG4 = 1
 
 class LArParameterization(FlagEnum):
     NoFrozenShowers = 0

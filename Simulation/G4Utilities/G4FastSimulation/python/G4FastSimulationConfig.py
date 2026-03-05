@@ -17,6 +17,17 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     result.setPrivateTools(CompFactory.DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
     return result
 
+
+
+def FatrasG4Cfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    # Name of region where FatrasG4 will be triggered
+    kwargs.setdefault("RegionName", "InDet")
+
+    result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
+    return result
+
+
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Set the parametrization service
