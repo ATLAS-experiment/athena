@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -905,9 +905,14 @@ int main() {
   Gaudi::Hive::setCurrentContext(ctx);
 
 
-  testTileDCSState();
-  testTileDCSCondAlg(svcLoc);
-  testTileDCSTool(svcLoc);
+  try {
+    testTileDCSState();
+    testTileDCSCondAlg(svcLoc);
+    testTileDCSTool(svcLoc);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }
