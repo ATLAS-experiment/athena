@@ -66,8 +66,13 @@ class TauCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::TauJetContainer'
+            decorations = []
             if self.addGlobalFELinksDep:
-                alg.declareDecorations = ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+                decorations += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorations += ['IsTruthMatched', 'truthJetLink', 'truthParticleLink']
+            if decorations:
+                alg.declareDecorations = decorations
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() is not DataType.Data:

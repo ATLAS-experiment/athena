@@ -9,35 +9,31 @@
 #define ASG_ANALYSIS_ALGORITHMS__EVENT_DECORATOR_ALG_H
 
 #include <xAODEventInfo/EventInfo.h>
-#include <AnaAlgorithm/AnaAlgorithm.h>
-#include <SystematicsHandles/SysReadHandle.h>
-#include <SystematicsHandles/SysListHandle.h>
+#include <AnaAlgorithm/AnaReentrantAlgorithm.h>
+#include <AsgDataHandles/ReadHandleKey.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <map>
 #include <functional>
 
 namespace CP
 {
-  /// \brief an algorithm for decorating EventInfo
+  /// \brief an algorithm for decorating EventInfo with constant values
 
-  class EventDecoratorAlg final : public EL::AnaAlgorithm
+  class EventDecoratorAlg final : public EL::AnaReentrantAlgorithm
   {
   public:
 
     /// \brief the standard constructor
-    using EL::AnaAlgorithm::AnaAlgorithm;
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
     StatusCode initialize () override;
-    StatusCode execute () override;
+    StatusCode execute (const EventContext& ctx) const override;
 
 
 
   private:
 
-    /// \brief the systematics list we run
-    SysListHandle m_systematicsList {this};
-
     /// \brief the name of the event info object
-    CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {this, "eventInfo", "EventInfo", "the input EventInfo object"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "eventInfo", "EventInfo", "the input EventInfo object"};
 
     /// \brief the uint32_t decorations to add
     Gaudi::Property<std::map<std::string, uint32_t>> m_uint32Decorations {this, "uint32Decorations", {}, "the uint32_t decorations to add"};
