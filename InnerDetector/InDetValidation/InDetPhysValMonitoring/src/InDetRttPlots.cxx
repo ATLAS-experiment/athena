@@ -29,8 +29,11 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   if (m_config.doNTracks)                             m_nTracks = std::make_unique<InDetPerfPlot_nTracks>(this, "Tracks/Tracks"); 
   if (m_config.doHitResidualPlot)                     m_hitResidualPlot= std::make_unique<InDetPerfPlot_HitResidual>(this, "Tracks/Hits/Residuals", m_config.isITk);
   if (m_config.doHitEffPlot)                          m_hitEffPlot= std::make_unique<InDetPerfPlot_HitEfficiency>(this, "Tracks/Hits/Efficiency", m_config.isITk);
-  if (m_config.doFakePlots)                           m_fakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/FakeRate");
-  if (m_config.doMissingTruthFakePlots)               m_missingTruthFakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/Unlinked/FakeRate", true);
+  if (m_config.doFakePlots){
+    m_fakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/FakeRate",FakeRateCategory::Linked);
+    m_fakePlotsTotal= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/FakeRate",FakeRateCategory::Total);
+  }
+  if (m_config.doMissingTruthFakePlots)               m_missingTruthFakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/Unlinked/FakeRate", FakeRateCategory::Unlinked);
   if (m_config.doResolutionPlotPrim)                  m_resolutionPlotPrim= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Primary");
   if (m_config.doResolutionPlotPrim_truthFromB)       m_resolutionPlotPrim_truthFromB= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/TruthFromB");
   if (m_config.doHitsRecoTracksPlots)                 m_hitsRecoTracksPlots= std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Selected/HitsOnTracks", m_config.isITk);
@@ -324,6 +327,7 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake,
     if (m_hitsUnlinkedTracksPlots) m_hitsUnlinkedTracksPlots->fill(track, mu, weight);
   }
 
+  m_fakePlotsTotal->fill(track, isFake, weight, mu);
 }
 
 
