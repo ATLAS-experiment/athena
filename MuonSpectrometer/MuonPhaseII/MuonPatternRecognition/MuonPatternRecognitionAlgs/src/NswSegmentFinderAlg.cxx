@@ -283,7 +283,7 @@ NswSegmentFinderAlg::HitVec
             }
             auto hit = layer.at(j);
             const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
-            ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify()));
+            ATH_MSG_VERBOSE("Trying extension with hit " << m_idHelperSvc->toString(hit->identify())<<" and pull "<<pull);
            
             //find the hit with the minimum pull (check at least one hit after we have increasing pulls)
             if (pull > minPull) {
@@ -352,6 +352,12 @@ std::unique_ptr<SegmentSeed>
 
     double interceptX = segPos.x();
     double interceptY = segPos.y();
+
+    //seed quality check - we expect the tanAlpha not to be too big which would mean big deflection along the strip layers
+    if(std::abs(tanAlpha) > m_maxTanAlpha){
+        ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - tanAlpha "<<tanAlpha<<" above threshold "<<m_maxTanAlpha);
+        return nullptr;
+    }
 
 
     // extend the seed to the segment -- include hits from the other layers too
@@ -638,8 +644,7 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                         if (seed->getHitsInMax().size() < m_minSeedHits) { 
                             seeds.push_back(std::move(seed));                           
                             continue;
-                        }
-                                             
+                        }                                             
                         std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());
                         processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
                         seeds.push_back(std::move(seed));                                    
@@ -677,7 +682,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     if (m_visionTool.isEnabled()) {
         MuonValR4::IPatternVisualizationTool::PrimitiveVec primitives{};
         constexpr double legX{0.2};
-        double legY{0.8};
+        double legY{0.8};       
         for (const SpacePoint* sp : max.getHitsInMax()) {
             const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
             if (!simHit) {
@@ -716,6 +721,20 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
                                       "truth", std::move(primitives));
     }
 
+    //dump spacepoints associated with truth sim hits to an obj file
+    if(m_dumpObj){
+        Acts::ObjVisualization3D visualHelper{};
+         for (const SpacePoint* sp : max.getHitsInMax()) {
+            const xAOD::MuonSimHit* simHit = getTruthMatchedHit(*sp->primaryMeasurement());
+            if (!simHit) {
+                continue;
+            }
+            MuonValR4::drawSpacePoint(gctx, *sp, visualHelper);
+        }
+        visualHelper.write(std::format("Event_{:}_{:}_spacepoints_truth.obj", ctx.eventID().event_number(), max.getHitsInMax().front()->chamber()->identString()));       
+    }
+
+
     UsedHitMarker_t allUsedHits = emptyBookKeeper(stripHitsLayers); 
     std::size_t nSeeds{0}, nExtSeeds{0}, nSegments{0}; //for the seed statistics
 
@@ -726,7 +745,21 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         ATH_MSG_DEBUG("From " << source << ": built " << returnSeeds.size() << " seeds and " << returnSegments.size() << " segments.");
         for(auto& seed : returnSeeds) {            
             ++nSeeds;
+            Acts::ObjVisualization3D visualHelper{};
             if(seed->getHitsInMax().size() < m_minSeedHits){
+                ATH_MSG_VERBOSE("Seed with "<< seed->getHitsInMax().size() <<" hits rejected");
+                for(const auto& hit : seed->getHitsInMax()){
+                     ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<", "
+                                <<Amg::toString(hit->localPosition())<<", dir: "
+                                <<Amg::toString(hit->sensorDirection()));
+                     if(m_dumpObj){
+                        MuonValR4::drawSpacePoint(gctx, *hit, visualHelper);
+                     }
+
+                }
+                if(m_dumpObj){
+                    visualHelper.write(std::format("Event_{:}_{:}_notExtendedSeed.obj", ctx.eventID().event_number(), seed->getHitsInMax().front()->chamber()->identString()));
+                }
                 continue;
             }                   
             ++nExtSeeds;
@@ -744,10 +777,12 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     //continue with the combinatorial seeding for the strip measurements
     if(m_doOnlyMMCombinatorics){
 
+        ATH_MSG_VERBOSE("Start building combinatoric seeds only from Micromegas");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
 
     }else{
 
+        ATH_MSG_VERBOSE("Start building combinatoric seeds from Micromegas and sTgc hits");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "MM and STGC combinatoric segment seeds");
 
@@ -851,6 +886,7 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
         auto [seeds, segments] = findSegmentsFromMaximum(*max, *gctx, ctx);
        
         if (msgLvl(MSG::VERBOSE)) {
+            ATH_MSG_VERBOSE("Hits from Hough maximum");
             for(const auto& hitMax : max->getHitsInMax()){
                 ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitMax->identify())<<", "
                                 <<Amg::toString(hitMax->localPosition())<<", dir: "
@@ -881,13 +917,19 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
         }
 
         for (auto &seg : segments) {
-
             const Parameters pars = localSegmentPars(*gctx, *seg);
 
             ATH_MSG_VERBOSE("Segment parameters : "<<toString(pars));
 
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSegment(ctx, *seg, "#phi-segment");
+            }
+
+            if(m_dumpObj){
+                Acts::ObjVisualization3D visualHelper{};
+                MuonValR4::drawSegmentMeasurements(*gctx, *seg, visualHelper);
+                MuonValR4::drawSegmentLine(*gctx, *seg, visualHelper);
+                visualHelper.write(std::format("Event_{:}_segment_{:}.obj", ctx.eventID().event_number(), seg->msSector()->identString()));
             }
             
             writeSegments->push_back(std::move(seg));
