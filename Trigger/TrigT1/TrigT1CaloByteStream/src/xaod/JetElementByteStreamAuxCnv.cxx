@@ -58,7 +58,7 @@ JetElementByteStreamAuxCnv::JetElementByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& JetElementByteStreamAuxCnv::classID() {
+CLID JetElementByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::JetElementAuxContainer>::ID();
 }
 

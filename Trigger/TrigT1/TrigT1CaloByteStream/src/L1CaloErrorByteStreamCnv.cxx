@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,7 +35,7 @@ L1CaloErrorByteStreamCnv::~L1CaloErrorByteStreamCnv()
 
 // CLID
 
-const CLID& L1CaloErrorByteStreamCnv::classID()
+CLID L1CaloErrorByteStreamCnv::classID()
 {
   return ClassID_traits<std::vector<unsigned int> >::ID();
 }

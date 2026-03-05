@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ RodHeaderByteStreamCnv::~RodHeaderByteStreamCnv()
 
 // CLID
 
-const CLID& RodHeaderByteStreamCnv::classID()
+CLID RodHeaderByteStreamCnv::classID()
 {
   return ClassID_traits<DataVector<LVL1::RODHeader> >::ID();
 }

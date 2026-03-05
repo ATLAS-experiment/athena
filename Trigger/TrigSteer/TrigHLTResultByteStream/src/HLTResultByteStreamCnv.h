@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigHLTResultByteStreamCnv_h
@@ -80,7 +80,7 @@ namespace HLT {
     virtual StatusCode createRep(DataObject* pObj, IOpaqueAddress*& pAddr); //!< create bytestream from RDOs (HLTResult)
 
     static long storageType();    //!< storageType
-    static const CLID& classID(); //!< CLID
+    static CLID classID(); //!< CLID
 
     long repSvcType() const { return i_repSvcType(); } //!< return repSvcType
 

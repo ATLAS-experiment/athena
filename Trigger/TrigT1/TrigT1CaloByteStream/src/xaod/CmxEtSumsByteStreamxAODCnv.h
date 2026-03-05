@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_CMXETSUMSBYTESTREAMXAODCNV_H
@@ -46,7 +46,7 @@ public:
   virtual long repSvcType() const { return i_repSvcType(); }
   static  long storageType();
 
-  static const CLID& classID();
+  static CLID classID();
 
 private:
   /// Converter name
