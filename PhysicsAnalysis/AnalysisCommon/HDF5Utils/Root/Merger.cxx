@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "HDF5Utils/DefaultMerger.h"
+#include "HDF5Utils/Merger.h"
 #include "HDF5Utils/MergeUtils.h"
+#include "HDF5Utils/HistogramMerger.h"
+#include "HDF5Utils/IHistogram.h"
 #include <exception>
 #include <iostream>
 
 namespace H5Utils {
 
-  DefaultMerger::DefaultMerger(
+  Merger::Merger(
       hsize_t mergeAxis,
       int chunkSize,
       bool requireSameFormat,
@@ -19,11 +21,12 @@ namespace H5Utils {
     m_chunkSize(chunkSize),
     m_requireSameFormat(requireSameFormat),
     m_bufferSize(bufferSize),
-    m_measureBufferInRows(bufferInRows) {}
+    m_measureBufferInRows(bufferInRows),
+    m_histMerger(std::make_unique<H5Utils::hist::HistogramMerger>()) {}
 
-  DefaultMerger::~DefaultMerger() {}
+  Merger::~Merger() {}
 
-  void DefaultMerger::merge(
+  void Merger::merge(
       H5::Group& target,
       const H5::Group& source)
   {
@@ -36,7 +39,7 @@ namespace H5Utils {
       std::string childName = source.getObjnameByIdx(ii);
       // Find the correct index in the target
       hsize_t targetIdx = 0;
-      for (; targetIdx < target.getNumObjs(); ++targetIdx) 
+      for (; targetIdx < target.getNumObjs(); ++targetIdx)
         if (target.getObjnameByIdx(targetIdx) == childName)
           break;
       bool found = targetIdx != target.getNumObjs();
@@ -55,8 +58,14 @@ namespace H5Utils {
         case H5G_GROUP:
           {
             H5::Group sg = source.openGroup(childName);
-            H5::Group tg = found ? 
-              target.openGroup(childName) : 
+            // UHI histogram groups are accumulated separately and written
+            // once all source files have been processed.
+            if (sg.attrExists("uhi_schema")) {
+              m_histMerger->add(sg.getObjName(), sg);
+              continue;
+            }
+            H5::Group tg = found ?
+              target.openGroup(childName) :
               createFrom(target, sg);
             try {
               merge(tg, sg);
@@ -75,8 +84,8 @@ namespace H5Utils {
                         << childName << "'" << std::endl;
               break;
             }
-            H5::DataSet td = found ? 
-              target.openDataSet(childName) : 
+            H5::DataSet td = found ?
+              target.openDataSet(childName) :
               createFrom(target, sd);
             try {
               merge(td, sd);
@@ -88,14 +97,14 @@ namespace H5Utils {
           }
           break;
         default:
-          break; 
+          break;
       }
     } //> end loop over children
     // TODO - this did no check to see if target contained something source
     // didn't, this is probably fine though.
   } //> end function merge(group)
 
-  void DefaultMerger::merge(
+  void Merger::merge(
       H5::DataSet& target,
       const H5::DataSet& source)
   {
@@ -110,10 +119,24 @@ namespace H5Utils {
     mergeDatasets(target, source, m_mergeAxis, bufferSize);
   }
 
-  H5::DataSet DefaultMerger::createFrom(
+  H5::Group Merger::createFrom(
+      H5::H5Location& targetLocation,
+      const H5::Group& source)
+  {
+    H5::Group newGroup = targetLocation.createGroup(source.getObjName());
+    merge(newGroup, source);
+    return newGroup;
+  }
+
+  H5::DataSet Merger::createFrom(
       H5::H5Location& targetLocation,
       const H5::DataSet& source)
   {
     return createDataSet(targetLocation, source, m_mergeAxis, m_chunkSize);
+  }
+
+  void Merger::flush(H5::Group& dst)
+  {
+    m_histMerger->write(dst);
   }
 } //> end namespace H5Utils

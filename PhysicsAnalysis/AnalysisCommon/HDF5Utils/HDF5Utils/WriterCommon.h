@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef H5UTILS_COMMON_H
-#define H5UTILS_COMMON_H
+#ifndef H5UTILS_WRITERCOMMON_H
+#define H5UTILS_WRITERCOMMON_H
 
 namespace H5 {
   class CompType;
@@ -39,6 +39,6 @@ namespace H5Utils {
   }
 }
 
-#include "common.icc"
+#include "WriterCommon.icc"
 
 #endif

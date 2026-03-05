@@ -1,24 +1,27 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef HDF5Utils_DefaultMerger_H
-#define HDF5Utils_DefaultMerger_H
+#ifndef HDF5Utils_Merger_H
+#define HDF5Utils_Merger_H
 
-#include "HDF5Utils/IH5Merger.h"
+#include "H5Cpp.h"
+namespace H5Utils::hist { class HistogramMerger; }
+
+#include <memory>
 
 /**
- * @file DefaultMerger
+ * @file Merger.h
  * @author Jon Burr
  *
- * The default merging implementation
+ * The default H5 merging implementation
  */
 
 namespace H5Utils {
   /**
-   * @class Default H5 Merger
+   * @class H5 Merger
    */
-  class DefaultMerger : public IH5Merger {
+  class Merger {
     public:
       /**
        * @brief Create the merger
@@ -32,32 +35,37 @@ namespace H5Utils {
        * @param bufferInRows Whether the buffer size is specified in rows or
        * bytes
        */
-      DefaultMerger(
+      Merger(
           hsize_t mergeAxis = 0,
           int chunkSize = -1,
           bool requireSameFormat = true,
           std::size_t bufferSize = -1,
           bool bufferInRows = false);
 
-      ~DefaultMerger();
-
-      using IH5Merger::merge;
-      using IH5Merger::createFrom;
+      ~Merger();
 
       /**
        * @brief Merge a source group into a target group
        * @param target The group to merge into
        * @param source The group to merge from
        */
-      void merge(H5::Group& target, const H5::Group& source) override;
+      void merge(H5::Group& target, const H5::Group& source);
 
       /**
        * @brief Merge a source dataset into a target dataset
        * @param target The dataset to merge into
        * @param source The dataset to merge from
        */
-      void merge(H5::DataSet& target, const H5::DataSet& source) override;
+      void merge(H5::DataSet& target, const H5::DataSet& source);
 
+      /**
+       * @brief Make a new group from information in a source group
+       * @param targetLocation Where the new group will be created
+       * @param source The group to use to create the new group
+       */
+      H5::Group createFrom(
+          H5::H5Location& targetLocation,
+          const H5::Group& source);
 
       /**
        * @brief Make a new dataset from information in a source dataset
@@ -66,7 +74,13 @@ namespace H5Utils {
        */
       H5::DataSet createFrom(
           H5::H5Location& targetLocation,
-          const H5::DataSet& source) override;
+          const H5::DataSet& source);
+
+      /**
+       * @brief Write all accumulated histogram data to the output.
+       * @param dst The root group of the output file.
+       */
+      void flush(H5::Group& dst);
 
     protected:
       /// The axis to merge along
@@ -79,7 +93,9 @@ namespace H5Utils {
       std::size_t m_bufferSize;
       /// Whether to measure the buffer in bytes or rows
       bool m_measureBufferInRows;
-  }; //> end class DefaultMerger
+      /// Accumulator for UHI histogram groups
+      std::unique_ptr<H5Utils::hist::HistogramMerger> m_histMerger;
+  }; //> end class Merger
 } //> end namespace H5Utils
 
-#endif //> !HDF5Utils_DefaultMerger_H
+#endif //> !HDF5Utils_Merger_H

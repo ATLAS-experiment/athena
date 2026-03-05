@@ -16,7 +16,7 @@
 #include "WriterConfiguration.h"
 #include "H5Traits.h"
 #include "CompressedTypes.h"
-#include "common.h"
+#include "WriterCommon.h"
 #include "defaults.h"
 
 #include "H5Cpp.h"

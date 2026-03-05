@@ -1,19 +1,18 @@
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
+#include "HDF5Utils/HistCommon.h"
 
 #include <vector>
 #include <cassert>
-#include <array>
 #include <cmath>
 #include <cstdint>
 #include <numeric>
 #include <optional>
 #include <set>
 #include <string>
-#include <utility>
 
 #include <boost/histogram.hpp>
 
@@ -54,25 +53,6 @@ namespace H5Utils::hist::detail {
   template <typename T>
   using array_t = typename array_type<T>::type;
 
-  // H5 typing magic
-  template <typename T>
-  const H5::DataType hdf5_t;
-  template<>
-  const H5::DataType hdf5_t<double> = H5::PredType::NATIVE_DOUBLE;
-  template<>
-  const H5::DataType hdf5_t<float> = H5::PredType::NATIVE_FLOAT;
-  template<>
-  const H5::DataType hdf5_t<int> = H5::PredType::NATIVE_INT;
-  template<>
-  const H5::DataType hdf5_t<long> = H5::PredType::NATIVE_LONG;
-  template<>
-  const H5::DataType hdf5_t<long long> = H5::PredType::NATIVE_LLONG;
-  template<>
-  const H5::DataType hdf5_t<unsigned long> = H5::PredType::NATIVE_ULONG;
-  template<>
-  const H5::DataType hdf5_t<unsigned long long> = H5::PredType::NATIVE_ULLONG;
-
-
   // function to flatten the histogram array
   template <typename T, typename F>
   std::vector<array_t<T>> get_flat_hist_array(const T& hist,
@@ -94,8 +74,8 @@ namespace H5Utils::hist::detail {
       for (size_t dim_p1 = hist.rank(); dim_p1 != 0; dim_p1--) {
         size_t dim = dim_p1 - 1;
         auto ops = hist.axis(dim).options();
-        size_t underflow = (ops & bh::axis::option::underflow) ? 1 : 0;
-        size_t overflow = (ops & bh::axis::option::overflow) ? 1 : 0;
+        int underflow = (ops & bh::axis::option::underflow) ? 1 : 0;
+        int overflow = (ops & bh::axis::option::overflow) ? 1 : 0;
         // ugly check to decide if we have to add underflow offset
         int h5idx_signed = hist_idx.index(dim) + underflow;
         if (h5idx_signed < 0) throw std::logic_error("neg signed index");
@@ -131,16 +111,7 @@ namespace H5Utils::hist::detail {
     return true;
   }
 
-  struct Axis
-  {
-    std::vector<float> edges{};
-    std::string name{};
-    bool underflow{false};
-    bool overflow{false};
-    bool is_int_or_category{false};
-    // set iff the axis has equal-width bins (regular axis)
-    std::optional<int> n_regular_bins{};
-  };
+  // Axis struct is defined in HistAxis.h (included via HistCommon.h).
 
   template <typename T>
   std::vector<Axis> get_axes(const T& hist) {
@@ -179,58 +150,10 @@ namespace H5Utils::hist::detail {
     return axes;
   }
 
-  inline void chkerr(herr_t code, const std::string& error) {
-    if (code < 0) throw std::runtime_error("error setting " + error);
-  }
-
   template <typename T>
   auto product(const std::vector<T>& v) {
     return std::accumulate(
       v.begin(), v.end(), T(1), std::multiplies<hsize_t>{});
-  }
-
-  // Attribute helpers
-
-  inline void write_str_attr(H5::H5Object& obj,
-                             const std::string& key,
-                             const std::string& val)
-  {
-    H5::StrType strtype(H5::PredType::C_S1, H5T_VARIABLE);
-    H5::DataSpace scalar(H5S_SCALAR);
-    H5::Attribute attr = obj.createAttribute(key, strtype, scalar);
-    const char* cstr = val.c_str();
-    attr.write(strtype, &cstr);
-  }
-
-  inline void write_bool_attr(H5::H5Object& obj,
-                              const std::string& key,
-                              bool val)
-  {
-    H5::DataSpace scalar(H5S_SCALAR);
-    uint8_t v = val ? 1 : 0;
-    H5::Attribute attr = obj.createAttribute(
-      key, H5::PredType::NATIVE_UINT8, scalar);
-    attr.write(H5::PredType::NATIVE_UINT8, &v);
-  }
-
-  inline void write_int_attr(H5::H5Object& obj,
-                             const std::string& key,
-                             int64_t val)
-  {
-    H5::DataSpace scalar(H5S_SCALAR);
-    H5::Attribute attr = obj.createAttribute(
-      key, H5::PredType::NATIVE_INT64, scalar);
-    attr.write(H5::PredType::NATIVE_INT64, &val);
-  }
-
-  inline void write_double_attr(H5::H5Object& obj,
-                                const std::string& key,
-                                double val)
-  {
-    H5::DataSpace scalar(H5S_SCALAR);
-    H5::Attribute attr = obj.createAttribute(
-      key, H5::PredType::NATIVE_DOUBLE, scalar);
-    attr.write(H5::PredType::NATIVE_DOUBLE, &val);
   }
 
   // Return the UHI storage type string for histogram type T.
@@ -291,57 +214,7 @@ namespace H5Utils::hist {
     H5::DataType type = hdf5_t<array_t<T>>;
 
     // Write ref_axes
-    H5::Group ref_axes_group = group.createGroup("ref_axes");
-    for (size_t ax_n = 0; ax_n < axes.size(); ax_n++) {
-      const auto& ax = axes.at(ax_n);
-      H5::Group ax_group = ref_axes_group.createGroup(
-        "axis_" + std::to_string(ax_n));
-
-      if (ax.n_regular_bins) {
-        write_str_attr(ax_group, "type", "regular");
-        write_double_attr(ax_group, "lower",
-                          static_cast<double>(ax.edges.front()));
-        write_double_attr(ax_group, "upper",
-                          static_cast<double>(ax.edges.back()));
-        write_int_attr(ax_group, "bins", *ax.n_regular_bins);
-      } else {
-        write_str_attr(ax_group, "type", "variable");
-        std::array<hsize_t,1> edgedims{ax.edges.size()};
-        H5::DataSpace edge_space(1, edgedims.data());
-        H5::DSetCreatPropList edge_props;
-        edge_props.setChunk(1, edgedims.data());
-        edge_props.setDeflate(7);
-        H5::DataSet edge_ds = ax_group.createDataSet(
-          "edges", hdf5_t<float>, edge_space, edge_props);
-        edge_ds.write(ax.edges.data(), hdf5_t<float>);
-      }
-
-      write_bool_attr(ax_group, "underflow", ax.underflow);
-      write_bool_attr(ax_group, "overflow", ax.overflow);
-      write_bool_attr(ax_group, "circular", false);
-
-      // Write axis name into a metadata subgroup (key matches Python output)
-      H5::Group ax_meta = ax_group.createGroup("metadata");
-      if (!ax.name.empty()) {
-        write_str_attr(ax_meta, "metadata", ax.name);
-      }
-      ax_group.createGroup("writer_info");
-    }
-
-    // Write "axes" object-reference dataset (required by the UHI reader)
-    {
-      std::vector<hobj_ref_t> axis_refs(axes.size());
-      for (size_t ax_n = 0; ax_n < axes.size(); ax_n++) {
-        std::string ax_path = "ref_axes/axis_" + std::to_string(ax_n);
-        chkerr(H5Rcreate(&axis_refs.at(ax_n), group.getId(),
-                         ax_path.c_str(), H5R_OBJECT, -1),
-               "axis object reference");
-      }
-      hsize_t ref_dims[1] = {axes.size()};
-      H5::DataSpace ref_space(1, ref_dims);
-      group.createDataSet("axes", H5::PredType::STD_REF_OBJ, ref_space)
-           .write(axis_refs.data(), H5::PredType::STD_REF_OBJ);
-    }
+    detail::write_axes(group, axes);
 
     // Write storage group
     H5::Group storage = group.createGroup("storage");
@@ -352,7 +225,7 @@ namespace H5Utils::hist {
       const std::string& ds_name,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
-      assert(std::cmp_equal(space.getSelectNpoints(),flat.size()));
+      assert(space.getSelectNpoints() == static_cast<hssize_t>(flat.size()));
       storage.createDataSet(ds_name, type, space, props)
              .write(flat.data(), type);
     };

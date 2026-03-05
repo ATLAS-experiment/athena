@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the project's name and version.
 atlas_subdir( HDF5Utils )
@@ -14,10 +14,11 @@ find_package( Boost 1.54.0 COMPONENTS program_options)
 
 # Add the hdf tuple library
 atlas_add_library(HDF5Utils
-  Root/HdfTuple.cxx Root/common.cxx Root/H5Traits.cxx Root/CompressedTypes.cxx
-  Root/DefaultMerger.cxx
+  Root/HdfTuple.cxx Root/WriterCommon.cxx Root/H5Traits.cxx Root/CompressedTypes.cxx
+  Root/Merger.cxx
+  Root/HistCommon.cxx
+  Root/HistogramMerger.cxx
   Root/H5Print.cxx
-  Root/IH5Merger.cxx
   Root/MergeUtils.cxx
   PUBLIC_HEADERS HDF5Utils
   DEFINITIONS ${HDF5_CXX_DEFINITIONS}
