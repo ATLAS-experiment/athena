@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 Run geantino processing for material step creation
 """
@@ -28,7 +28,8 @@ parser.add_argument("--maxEvents",default=10, type=int,
                     help="The number of events to run. 0 skips execution")
 parser.add_argument("--skipEvents",default=0, type=int,
                     help="The number of events to skip")
-parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-03-00-00", type=str,
+from AthenaConfiguration.TestDefaults import defaultGeometryTags
+parser.add_argument("--geometrytag",default=defaultGeometryTags.RUN4, type=str,
                     help="The geometry tag to use")
 parser.add_argument("--inputevntfile",
                     default="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/EVNT/mc15_14TeV.singlegeantino_E10GeV_etaFlatnp0_6.5M.evgen.EVNT.pool.root",
