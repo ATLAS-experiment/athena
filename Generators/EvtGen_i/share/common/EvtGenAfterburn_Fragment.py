@@ -7,8 +7,8 @@ if runArgs.trfSubstepName == 'afterburn':
 #   genSeq.EvtInclusiveDecay.McEventsR = "StoreGateSvc/GEN_EVENT_EVTGEN"
 #   genSeq.EvtInclusiveDecay.McEventsRW = "StoreGateSvc/GEN_EVENT_EVTGEN"
 
-   if hasattr(testSeq, "FixHepMC"):
-      fixSeq.remove(FixHepMC)
+   if hasattr(fixSeq, "FixHepMC"):
+      fixSeq.remove(FixHepMC())
 
    if hasattr(testSeq, "TestHepMC"):
       testSeq.remove(TestHepMC())
