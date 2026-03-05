@@ -726,7 +726,7 @@ def dictFromChainName(flags, chainInfo):
                     #incorrectL1=True
 
         if thisSignature in ['Electron','Photon'] and not ('UPC' in stream): # don't apply for HI UPC chains
-            if 'EM' not in thisL1 and 'BKee' not in thisL1 and 'All' not in thisL1:
+            if 'EM' not in thisL1 and 'eTAU' not in thisL1 and 'BKee' not in thisL1 and 'All' not in thisL1:
                 log.error("Standard egamma chains should be seeded from L1_EM. Check %s seeded from %s (defined L1: %s),  signature %s",chainDict['chainName'],thisL1,l1Thresholds,thisSignature)
                 #incorrectL1=True
 

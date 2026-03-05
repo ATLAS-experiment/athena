@@ -522,8 +522,17 @@ def setupMenu():
         # ATR-23723
         ChainProp(name='HLT_e5_nopid_L1eEM5', groups=SingleElectronGroup+SupportPhIGroup+['RATE:CPS_eEM5']+['PS:NoBulkMCProd']), #ATR-27264
 
-        #------------ support background studies
+        # ATR-32345
+        ChainProp(name='HLT_e5_nopid_L1eTAU12', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e10_nopid_L1eTAU20', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e15_nopid_L1eTAU20', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e15_nopid_L1eTAU30', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e15_nopid_L1eTAU35', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e20_nopid_L1eTAU35', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e40_nopid_L1eTAU60', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e50_nopid_L1eTAU70', groups=SingleElectronGroup+SupportPhIGroup+['PS:NoBulkMCProd']),
 
+        #------------ support background studies
         ChainProp(name='HLT_e10_lhvloose_L1eEM9', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM9']),
         ChainProp(name='HLT_e14_lhvloose_L1eEM12L', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM12L']),
         ChainProp(name='HLT_e20_lhvloose_L1eEM18L', groups=SupportPhIGroup+SingleElectronGroup+['RATE:CPS_eEM18L']),
