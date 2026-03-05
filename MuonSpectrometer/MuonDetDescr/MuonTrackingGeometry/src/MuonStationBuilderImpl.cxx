@@ -66,26 +66,33 @@
 
 
 namespace {
-    std::pair<Amg::Vector3D, Amg::Vector3D> surroundingBox(const PVConstLink vol) {
-        Amg::Vector3D min{1.e9 , 1.e9, 1.e9}, max{-1.e9, -1.e9, -1.e9};
-        vol->getLogVol()->getShape()->extent(min.x(), min.y(), min.z(), max.x(), max.y(), max.z());
-        GeoVolumeCursor amArsch{vol};
-        while (!amArsch.atEnd()) {
-            const PVConstLink cv = amArsch.getVolume();
-            auto [cMin, cMax] = surroundingBox(cv);
-            cMin = amArsch.getTransform() * cMin;
-            cMax = amArsch.getTransform() * cMax;
-            
-            min.x() = std::min(min.x(), cMin.x());
-            min.y() = std::min(min.y(), cMin.y());
-            min.z() = std::min(min.z(), cMin.z());
+    std::string printVolumes(const Trk::TrackingVolume& volume,
+                             const Amg::Vector3D& pos,
+                             const std::size_t level) {
+        std::stringstream sstr{};
+        sstr<<level<<") "<<volume.volumeName()<<"trf: "<<Amg::toString(volume.transform())<<", "<<volume.inside(pos)<<std::endl;
 
-            max.x() = std::max(max.x(), cMax.x());
-            max.y() = std::max(max.y(), cMax.y());
-            max.z() = std::max(max.z(), cMax.z());
-            amArsch.next();
+        if (volume.confinedLayers()) {            
+            for (const auto lay : volume.confinedLayers()->arrayObjects()) {
+                sstr<<" - confined lay: "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*pos)
+                            <<", "<<lay->isOnLayer(pos)<<std::endl;
+            }
         }
-        return std::make_pair(min, max);
+        for (const auto lay : volume.confinedArbitraryLayers()) {
+            sstr<<" + arbitrary: "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*pos)
+                <<", "<<lay->isOnLayer(pos)<<std::endl;
+        }
+        if (volume.confinedVolumes()) {
+            for (const auto subVol : volume.confinedVolumes()->arrayObjects()){
+                sstr<<printVolumes(*subVol, pos, level + 1)<<std::endl;
+            }
+        }
+
+
+        
+       
+
+        return sstr.str();
     }
 }
 
@@ -251,10 +258,9 @@ std::vector<const Trk::Surface*> MuonStationBuilderImpl::fetchSurfaces(const Ide
 }
 
 
-void MuonStationBuilderImpl::identifyLayers(
-    Trk::TrackingVolume& station, 
-    const Identifier& stationID,  
-    const MuonGM::MuonDetectorManager* detMgr) const {
+void MuonStationBuilderImpl::identifyLayers(Trk::TrackingVolume& station, 
+                                            const Identifier& stationID,  
+                                            const MuonGM::MuonDetectorManager* detMgr) const {
 
   for (const Trk::Surface* surface : fetchSurfaces(stationID, detMgr)) {
         const Amg::Vector3D& gpi = surface->center();
@@ -269,22 +275,8 @@ void MuonStationBuilderImpl::identifyLayers(
                        <<", local: "<<Amg::toString(assocVol->transform().inverse()*gpi));
         Trk::Layer* assocLay = assocVol->associatedLayer(gpi);
         if (!assocLay) {
-            if (assocVol->confinedLayers()) {
-            for (const auto lay : assocVol->confinedLayers()->arrayObjects()) {
-                ATH_MSG_ERROR("Stonjek "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*gpi)
-                            <<", "<<lay->isOnLayer(gpi));
-            }
-            }
-            for (const auto lay : assocVol->confinedArbitraryLayers()) {
-                ATH_MSG_ERROR("Stonjek "<<Amg::toString(lay->surfaceRepresentation().transform().inverse()*gpi)
-                            <<", "<<lay->isOnLayer(gpi));
-            }
-
-            // confinedArbitraryLayers
-
             THROW_EXCEPTION("There is no associated tracking layer for "<<m_idHelperSvc->toStringGasGap(surfId)
-                            <<", "<<GeoTrf::toString(assocVol->transform().inverse() * surface->transform())
-                            <<", "<<Amg::toString(assocVol->transform().inverse()* gpi));
+                            <<"\n "<<printVolumes(station, gpi , 0));
         }
         assocLay->setLayerType(surfId.get_identifier32().get_compact());
     }
@@ -453,12 +445,6 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const GeoVPhysVol* cv,
     const auto& [locToGlob, volId] = gmInfo;
     const std::string stName = m_idHelperSvc->stationNameString(volId);
     
-    if (stName == "BIS" && m_idHelperSvc->stationEta(volId) == 7 ) {
-        return nullptr;
-    } 
-    // if (stName == "BMS" && std::abs(m_idHelperSvc->stationEta(volId)) == 4) {
-    //     return nullptr;
-    // }
     ATH_MSG_ALWAYS(" Building station prototype for " << vname<<", "<<m_idHelperSvc->toStringChamber(volId)
                 <<"\n"<<printVolume(cv) );
 
@@ -522,16 +508,6 @@ MuonStationBuilderImpl::buildDetachedTrackingVolumeType(const GeoVPhysVol* cv,
             break;
         }
     }
-
-
-   
-    const auto [min, max] = surroundingBox(cv);
- 
-    halfX1 = halfX2 = 0.5*(max.x() - min.x());
-    halfY1 = halfY2 = 0.5*(max.y() - min.y());
-    halfZ = 0.5*(max.z() - min.z());
-    ATH_MSG_ALWAYS("Surrounding box :"<<halfX1<<", "<<halfY1<<", "<<halfZ<<"  -> "<<
-                    Amg::toString(Amg::getTranslate3D(0.5*(min+max))));
     if (shapeS->typeID() == GeoTrd::getClassTypeID()) {
         const auto trd = dynamic_pointer_cast<const GeoTrd>(shapeS);
         halfX1 = trd->getXHalfLength1();

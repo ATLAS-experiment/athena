@@ -16,6 +16,9 @@
 // Trk
 #include <fstream>
 
+#include "GeoModelHelpers/getChildNodesWithTrf.h"
+#include "GeoModelHelpers/GeoShapeUtils.h"
+
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoShapeShift.h"
@@ -68,24 +71,27 @@
 #include <map>
 #include <memory>
 
-const InterfaceID& Muon::MuonStationTypeBuilder::interfaceID() {
+namespace Muon{
+
+const InterfaceID& MuonStationTypeBuilder::interfaceID() {
     static const InterfaceID IID_IMuonStationTypeBuilder("MuonStationTypeBuilder", 1, 0);
     return IID_IMuonStationTypeBuilder;
 }
 
 
 
+
 // constructor
-Muon::MuonStationTypeBuilder::MuonStationTypeBuilder(const std::string& t,
+MuonStationTypeBuilder::MuonStationTypeBuilder(const std::string& t,
                                                      const std::string& n,
                                                      const IInterface* p)
     : AthAlgTool(t, n, p) {
-    declareInterface<Muon::MuonStationTypeBuilder>(this);
+    declareInterface<MuonStationTypeBuilder>(this);
 }
 
 // Athena standard methods
 // initialize
-StatusCode Muon::MuonStationTypeBuilder::initialize() {
+StatusCode MuonStationTypeBuilder::initialize() {
     // Retrieve the tracking volume array creator
     // -------------------------------------------
     ATH_CHECK(m_trackingVolumeArrayCreator.retrieve());
@@ -104,7 +110,7 @@ StatusCode Muon::MuonStationTypeBuilder::initialize() {
     return StatusCode::SUCCESS;
 }
 
-std::vector<std::unique_ptr<Trk::Layer>> Muon::MuonStationTypeBuilder::processBoxComponentsArbitrary(const GeoVPhysVol* mv,
+std::vector<std::unique_ptr<Trk::Layer>> MuonStationTypeBuilder::processBoxComponentsArbitrary(const GeoVPhysVol* mv,
                                                                                                      const Trk::CuboidVolumeBounds& envelope,
                                                                                                      Cache& /*cache*/) const {
     ATH_MSG_ALWAYS( " processing station components for "<< mv->getLogVol()->getName());
@@ -131,7 +137,7 @@ std::vector<std::unique_ptr<Trk::Layer>> Muon::MuonStationTypeBuilder::processBo
 }
 
 std::unique_ptr<Trk::TrackingVolumeArray>
-        Muon::MuonStationTypeBuilder::processBoxStationComponents(const GeoVPhysVol* mv,
+        MuonStationTypeBuilder::processBoxStationComponents(const GeoVPhysVol* mv,
                                                                   const Trk::CuboidVolumeBounds& envelope,
                                                                   Cache& cache) const {
     ATH_MSG_DEBUG( " processing station components for "
@@ -150,7 +156,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
     for (const auto& [cv, transf] : geoGetVolumes(mv)) {
         const GeoLogVol* clv = cv->getLogVol();
         std::shared_ptr<Trk::VolumeBounds> volBounds{};
-        std::unique_ptr<Trk::Volume> vol{};
+        std::unique_ptr<Trk::Volume> vol = Trk::GeoShapeConverter{}.translateGeoShape(clv->getShape(), transf);
         if (clv->getShape()->type() == "Trd") {
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
             const double halfX1{trd->getXHalfLength1()}, halfX2{trd->getXHalfLength2()},
@@ -233,7 +239,8 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             ATH_MSG_WARNING(" clash between component and envelope:" << compName[i] << "upper:" << uppX << ">" << maxX);
         }
         // close Rpc if no further components
-        if (openRpc && compName[i].compare(0, 3, "RPC") != 0 && compName[i].compare(0, 3, "Ded") != 0) {
+        if (openRpc && compName[i].compare(0, 3, "RPC") != 0 && 
+                       compName[i].compare(0, 3, "Ded") != 0) {
             // low edge of current volume
             double Xcurr = compVol[i]->center().x() - compBounds->halflengthX();
             if (Xcurr >= currX + rpclowXsize + rpcuppXsize) {
@@ -247,7 +254,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
                 currX = Xcurr;
                 openRpc = false;
             } else {
-                ATH_MSG_WARNING("clash in Rpc definition!");
+                ATH_MSG_WARNING(__func__<<"()"<<__LINE__<<" - Clash in Rpc definition!");
             }
         }
         // close spacer if no further components
@@ -401,7 +408,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             volSteps.push_back(currX);
             openRpc = false;
         } else {
-            ATH_MSG_WARNING("clash in Rpc definition!(last volume)");
+            ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - clash in Rpc definition!(last volume)");
         }
     }
     // create VolumeArray (1DX)
@@ -413,7 +420,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
 }
 
 std::unique_ptr<Trk::TrackingVolumeArray>
-    Muon::MuonStationTypeBuilder::processTrdStationComponents(const GeoVPhysVol* mv,
+    MuonStationTypeBuilder::processTrdStationComponents(const GeoVPhysVol* mv,
                                                               const Trk::TrapezoidVolumeBounds& envelope,
                                                               Cache& cache) const {
     ATH_MSG_DEBUG( " processing station components for " << mv->getLogVol()->getName());
@@ -661,12 +668,12 @@ std::unique_ptr<Trk::TrackingVolumeArray>
 }
 
 // finalize
-StatusCode Muon::MuonStationTypeBuilder::finalize() {
+StatusCode MuonStationTypeBuilder::finalize() {
     ATH_MSG_INFO( " finalize() successful");
     return StatusCode::SUCCESS;
 }
 //
-std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox(const Trk::Volume& vol,
+std::unique_ptr<Trk::TrackingVolume> MuonStationTypeBuilder::processMdtBox(const Trk::Volume& vol,
                                                                                  const GeoVPhysVol* gv,
                                                                                  const Amg::Transform3D& transf,
                                                                                  double zShift, Cache& cache) const {
@@ -696,7 +703,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
             active = 1;
         }
         if ((clv->getName()) == "MultiLayerFoam") {
-            xv = decodeX(clv->getShape());
+            xv = get_x_size(cv);
             for (auto& i : cache.m_mdtFoamMat) {
                 if (std::abs(xv - 0.5 * i->thickness()) < 0.001) {
                     mdtMat = i.get();
@@ -818,7 +825,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processMdtBox
 }
 //
 std::unique_ptr<Trk::TrackingVolume>
-    Muon::MuonStationTypeBuilder::processMdtTrd(const Trk::Volume& vol,
+    MuonStationTypeBuilder::processMdtTrd(const Trk::Volume& vol,
                                                 const GeoVPhysVol* gv,
                                                 const Amg::Transform3D& transf,
                                                 Cache& cache) const {
@@ -851,7 +858,7 @@ std::unique_ptr<Trk::TrackingVolume>
             active = 1;
         }
         if ((clv->getName()) == "MultiLayerFoam") {
-            xv = decodeX(clv->getShape());
+            xv = get_x_size(cv);
             for (auto& i : cache.m_mdtFoamMat) {
                 if (std::abs(xv - 0.5 * i->thickness()) < 0.001) {
                     mdtMat = i.get();
@@ -952,7 +959,7 @@ std::unique_ptr<Trk::TrackingVolume>
     return std::make_unique<Trk::TrackingVolume>(vol, *m_muonMaterial, std::move(mdtLayerArray), nullptr, "MDT");
 
 }
-std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(const Trk::Volume& vol,
+std::unique_ptr<Trk::TrackingVolume> MuonStationTypeBuilder::processRpc(const Trk::Volume& vol,
                                                                               const std::vector<const GeoVPhysVol*>& gv,
                                                                               const std::vector<Amg::Transform3D>& transfc, Cache& cache) const {
     // layers correspond to DedModules and RpcModules; all substructures
@@ -1137,7 +1144,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processRpc(co
 }
 //
 
-std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer(const Trk::Volume& vol,
+std::unique_ptr<Trk::TrackingVolume> MuonStationTypeBuilder::processSpacer(const Trk::Volume& vol,
                                                                                  std::vector<const GeoVPhysVol*> gv,
                                                                                  std::vector<Amg::Transform3D> transf) const {
     // spacers: one level below, assumed boxes
@@ -1339,7 +1346,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processSpacer
     return spacer;
 }
 
-std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscStation(const GeoVPhysVol* mv,
+std::unique_ptr<Trk::TrackingVolume> MuonStationTypeBuilder::processCscStation(const GeoVPhysVol* mv,
                                                                                      const std::string& name,
                                                                                      Cache& cache) const {
     // CSC stations have the particularity of displacement in Z between
@@ -1523,7 +1530,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processCscSta
     return std::make_unique<Trk::TrackingVolume>(*envelope, *m_muonMaterial, nullptr, std::move(compArray), name);
 }
 
-std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* cv, Cache& cache) const {
+std::unique_ptr<Trk::TrackingVolume> MuonStationTypeBuilder::processTgcStation(const GeoVPhysVol* cv, Cache& cache) const {
 
     const GeoLogVol* clv = cv->getLogVol();
     const std::string& tgc_name = clv->getName();
@@ -1558,7 +1565,7 @@ std::unique_ptr<Trk::TrackingVolume> Muon::MuonStationTypeBuilder::processTgcSta
     return nullptr;
 }
 
-std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::process_NSW(const Identifier& nswId,
+std::unique_ptr<Trk::DetachedTrackingVolume> MuonStationTypeBuilder::process_NSW(const Identifier& nswId,
                                                                                        const GeoVPhysVol* gv,
                                                                                        const  Amg::Transform3D& transf) const {
 
@@ -1591,7 +1598,6 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
 
     std::vector<std::unique_ptr<Trk::PlaneLayer>> layers{};
     unsigned int ic = 1;
-    const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
     for (const auto& [cv, trc] : geoGetVolumes(gv)) {
         auto layer = std::make_unique<Trk::PlaneLayer>(trc * envelope_trf_local, layBounds,
                                                   stgcLayMaterial, sTgc_layerMat.thickness());
@@ -1621,25 +1627,42 @@ std::unique_ptr<Trk::DetachedTrackingVolume> Muon::MuonStationTypeBuilder::proce
     // create prototype as detached tracking volume
     return std::make_unique<Trk::DetachedTrackingVolume>(vName, std::move(sTgc), std::move(layerRepr), nullptr);
 }
-double Muon::MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
-    double xlow{0.}, xup{0.};
-    // subcomponents
-    GeoVolumeVec_t vols = geoGetVolumes(pv);
-    if (vols.empty()) {
-        return decodeX(pv->getLogVol()->getShape());
+std::pair<Amg::Vector3D, Amg::Vector3D> MuonStationTypeBuilder::surroundingBox(const PVConstLink& physVol) const {
+    Amg::Vector3D min{1.e9,1.e9,1.e9}, max{-1.e-9, -1.e-9, -1.e-9};
+    const GeoLogVol* logVol = physVol->getLogVol();
+    logVol->getShape()->extent(min.x(), min.y(), min.z(), max.x(), max.y(), max.z());
+    const bool isEther = logVol->getMaterial()->getName().find("special") != std::string::npos;
+    const auto [firstOp, secondOp] = getOps(logVol->getShape());
+    /// assume that non-boolean shapes are enclosing the volume envelope. 
+    //  Except the volume is made up out of the special material 
+    if ( !isEther && !(!firstOp || !secondOp)) {
+        return std::make_pair(min, max);
     }
 
-    for (const auto& [cv, transf] : vols) {
-        const GeoLogVol* clv = cv->getLogVol();
-        double xh = decodeX(clv->getShape());
-        xlow = std::min(xlow, (transf.translation())[0] - xh);
-        xup = std::max(xup, (transf.translation())[0] + xh);
-    }
+    for (const auto& childNode : getChildrenWithRef(physVol, false)) {
+        auto [cMin, cMax] = surroundingBox(childNode.volume);
+        cMin = childNode.transform * cMin;
+        cMax = childNode.transform * cMax;
+            
+        min.x() = std::min(min.x(), cMin.x());
+        min.y() = std::min(min.y(), cMin.y());
+        min.z() = std::min(min.z(), cMin.z());
 
-    return std::max(-xlow, xup);
+        max.x() = std::max(max.x(), cMax.x());
+        max.y() = std::max(max.y(), cMax.y());
+        max.z() = std::max(max.z(), cMax.z());
+      
+    }
+    return std::make_pair(min, max);
+       
+}
+ 
+double MuonStationTypeBuilder::get_x_size(const GeoVPhysVol* pv) const {
+    const auto [boxLow, boxHigh] = surroundingBox(pv);
+    return 0.5*(boxHigh.x() - boxLow.x());
 }
 
-Trk::MaterialProperties Muon::MuonStationTypeBuilder::getAveragedLayerMaterial(const GeoVPhysVol* pv,
+Trk::MaterialProperties MuonStationTypeBuilder::getAveragedLayerMaterial(const GeoVPhysVol* pv,
                                                                               double volume,
                                                                               double thickness) const {
     ATH_MSG_DEBUG( "::getAveragedLayerMaterial:processing ");
@@ -1670,7 +1693,7 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::getAveragedLayerMaterial(c
     return sumMat;
 }
 
-std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComponent(const GeoVPhysVol* pv,
+std::unique_ptr<Trk::LayerArray> MuonStationTypeBuilder::processCSCTrdComponent(const GeoVPhysVol* pv,
                                                                                       const Trk::TrapezoidVolumeBounds& compBounds,
                                                                                       const Amg::Transform3D& transf,
                                                                                       Cache& cache) const {
@@ -1787,7 +1810,7 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processCSCTrdComp
 }
 
 std::unique_ptr<Trk::LayerArray>
-    Muon::MuonStationTypeBuilder::processCSCDiamondComponent(const GeoVPhysVol* pv,
+    MuonStationTypeBuilder::processCSCDiamondComponent(const GeoVPhysVol* pv,
                                                              const Trk::DoubleTrapezoidVolumeBounds& compBounds,
                                                              const Amg::Transform3D& transf,
                                                              Cache& cache) const {
@@ -1905,7 +1928,7 @@ std::unique_ptr<Trk::LayerArray>
 
 }
 
-std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processTGCComponent(const GeoVPhysVol* pv,
+std::unique_ptr<Trk::LayerArray> MuonStationTypeBuilder::processTGCComponent(const GeoVPhysVol* pv,
                                                                                   const Trk::TrapezoidVolumeBounds& tgcBounds,
                                                                                   const Amg::Transform3D& transf,
                                                                                   Cache& cache) const {
@@ -2012,64 +2035,8 @@ std::unique_ptr<Trk::LayerArray> Muon::MuonStationTypeBuilder::processTGCCompone
 
 }
 
-double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
-    double xHalf{0.};
-
-    const GeoTrd* trd = dynamic_cast<const GeoTrd*>(sh);
-    const GeoBox* box = dynamic_cast<const GeoBox*>(sh);
-    const GeoTube* tub = dynamic_cast<const GeoTube*>(sh);
-    const GeoTubs* tubs = dynamic_cast<const GeoTubs*>(sh);
-    const GeoShapeShift* shift = dynamic_cast<const GeoShapeShift*>(sh);
-    const GeoShapeUnion* uni = dynamic_cast<const GeoShapeUnion*>(sh);
-    const GeoShapeSubtraction* sub = dynamic_cast<const GeoShapeSubtraction*>(sh);
-    const GeoSimplePolygonBrep* spb =  dynamic_cast<const GeoSimplePolygonBrep*>(sh);
-
-    if (!trd && !box && !tub && !tubs && !shift && !uni && !sub && !spb) {
-        ATH_MSG_WARNING("decodeX(GeoShape="
-                        << sh->type() << "): shape type " << sh->type()
-                        << " is unknown, returning xHalf=0");
-        return xHalf;
-    }
-
-    if (spb) {
-        for (unsigned int i = 0; i < spb->getNVertices(); i++) {
-            ATH_MSG_DEBUG(" XVertex " << spb->getXVertex(i) << " YVertex "
-                                      << spb->getYVertex(i));
-            if (spb->getXVertex(i) > xHalf)
-                xHalf = spb->getXVertex(i);
-        }
-        ATH_MSG_DEBUG(" GeoSimplePolygonBrep xHalf " << xHalf);
-    }
-
-    if (trd){
-        xHalf = std::max(trd->getXHalfLength1(), trd->getXHalfLength2());
-    }
-    if (box) {
-        xHalf = box->getXHalfLength();
-    }
-    if (tub) {
-        xHalf = tub->getRMax();
-    }
-    if (sub) {
-        // be careful to handle properly GeoModel habit of subtracting large
-        // volumes from smaller ones
-        double xA = decodeX(sub->getOpA());
-        xHalf = xA;
-    }
-    if (uni) {
-        xHalf = std::max(decodeX(uni->getOpA()), decodeX(uni->getOpB()));
-    }
-    if (shift) {
-        double xA = decodeX(shift->getOp());
-        double xB = shift->getX().translation().x();
-        xHalf = xA + std::abs(xB);
-    }
-
-    return xHalf;
-}
-
 std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
-    Muon::MuonStationTypeBuilder::createLayerRepresentation(Trk::TrackingVolume& trVol) const {
+    MuonStationTypeBuilder::createLayerRepresentation(Trk::TrackingVolume& trVol) const {
 
     std::unique_ptr<Trk::Layer> layRepr{};
 
@@ -2193,7 +2160,7 @@ std::pair<std::unique_ptr<Trk::Layer>,std::vector<std::unique_ptr<Trk::Layer>>>
     return std::make_pair(std::move(layRepr), std::move(multi));
 }
 
-Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(const Trk::TrackingVolume& vol, double sf) const {
+Trk::MaterialProperties MuonStationTypeBuilder::collectStationMaterial(const Trk::TrackingVolume& vol, double sf) const {
     Trk::MaterialProperties layMat(0., 10.e10, 10.e10, 13., 26., 0.);
 
     // sf is surface of the new layer used to calculate the average 'thickness'
@@ -2271,7 +2238,7 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     return layMat;
 }
 
-void Muon::MuonStationTypeBuilder::printVolumeBounds(const std::string & comment, const Trk::VolumeBounds& volBounds) const {
+void MuonStationTypeBuilder::printVolumeBounds(const std::string & comment, const Trk::VolumeBounds& volBounds) const {
 
     ATH_MSG_DEBUG(comment);
 
@@ -2312,7 +2279,7 @@ void Muon::MuonStationTypeBuilder::printVolumeBounds(const std::string & comment
     }
 }
 
-double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& volBounds) {
+double MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& volBounds) {
 
     const Trk::CuboidVolumeBounds* box = dynamic_cast<const Trk::CuboidVolumeBounds*>(&volBounds);
     if (box)
@@ -2334,7 +2301,7 @@ double Muon::MuonStationTypeBuilder::envelopeThickness(const Trk::VolumeBounds& 
 }
 
 std::unique_ptr<Trk::SurfaceBounds>
-    Muon::MuonStationTypeBuilder::getLayerBoundsFromEnvelope(const Trk::Volume& envelope) {
+    MuonStationTypeBuilder::getLayerBoundsFromEnvelope(const Trk::Volume& envelope) {
 
     const Trk::CuboidVolumeBounds* box =
         dynamic_cast<const Trk::CuboidVolumeBounds*>(&(envelope.volumeBounds()));
@@ -2355,7 +2322,7 @@ std::unique_ptr<Trk::SurfaceBounds>
     return nullptr;
 }
 
-double Muon::MuonStationTypeBuilder::area(const Trk::SurfaceBounds& sb) {
+double MuonStationTypeBuilder::area(const Trk::SurfaceBounds& sb) {
 
     const Trk::RectangleBounds* box = dynamic_cast<const Trk::RectangleBounds*>(&sb);
     if (box) {
@@ -2371,4 +2338,5 @@ double Muon::MuonStationTypeBuilder::area(const Trk::SurfaceBounds& sb) {
                2 * (dtrd->medHalflengthX() + dtrd->maxHalflengthX()) * dtrd->halflengthY2();
     }
     return 0.;
+}
 }

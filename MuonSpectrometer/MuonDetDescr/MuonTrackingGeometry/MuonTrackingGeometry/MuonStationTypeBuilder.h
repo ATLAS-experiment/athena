@@ -76,6 +76,8 @@ class MuonStationTypeBuilder : public AthAlgTool {
     StatusCode finalize();
     /** Interface methode */
     static const InterfaceID& interfaceID();
+
+    std::pair<Amg::Vector3D, Amg::Vector3D> surroundingBox(const PVConstLink& physVol) const;
     /** steering routine */
     std::unique_ptr<Trk::TrackingVolumeArray> processBoxStationComponents(const GeoVPhysVol* cv,
                                                                           const Trk::CuboidVolumeBounds& envBounds,
@@ -135,7 +137,6 @@ class MuonStationTypeBuilder : public AthAlgTool {
 
     // used to be private ..
     double get_x_size(const GeoVPhysVol*) const;
-    double decodeX(const GeoShape*) const;
     static double envelopeThickness(const Trk::VolumeBounds& vb) ;
     Trk::MaterialProperties getAveragedLayerMaterial(const GeoVPhysVol*, double,
                                                      double) const;
