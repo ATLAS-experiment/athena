@@ -349,6 +349,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.FPGATrackSimEventSelectionSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimEventSelectionSvcCfg(flags))
     tool.FPGATrackSimMappingSvc = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
     tool.OutputLevel=flags.Trigger.FPGATrackSim.loglevel
+    tool.enableMonitoring = flags.Trigger.FPGATrackSim.GenScan.enableMonitoring
     tool.Monitoring = Monitor
     tool.BinnedHits = BinnnedHits
     tool.rin=cutset["rin"]
