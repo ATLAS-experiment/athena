@@ -3874,6 +3874,24 @@ HLT_e10_nopid_L1eEM9:
     4: 62
     5: 62
     6: 61
+HLT_e10_nopid_L1eTAU20:
+  eventCount: 19
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 19
+    5: 19
+    6: 19
+  stepFeatures:
+    0: 53
+    1: 53
+    2: 190
+    3: 47
+    4: 47
+    5: 47
+    6: 46
 HLT_e120_etcut_L1eEM26M:
   eventCount: 2
   stepCounts:
@@ -4223,6 +4241,60 @@ HLT_e15_nopid_L1eEM9:
     4: 45
     5: 45
     6: 45
+HLT_e15_nopid_L1eTAU20:
+  eventCount: 17
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 17
+    4: 17
+    5: 17
+    6: 17
+  stepFeatures:
+    0: 50
+    1: 50
+    2: 176
+    3: 38
+    4: 38
+    5: 38
+    6: 38
+HLT_e15_nopid_L1eTAU30:
+  eventCount: 17
+  stepCounts:
+    0: 18
+    1: 18
+    2: 18
+    3: 17
+    4: 17
+    5: 17
+    6: 17
+  stepFeatures:
+    0: 37
+    1: 37
+    2: 145
+    3: 34
+    4: 34
+    5: 34
+    6: 34
+HLT_e15_nopid_L1eTAU35:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
+    6: 15
+  stepFeatures:
+    0: 30
+    1: 30
+    2: 126
+    3: 29
+    4: 29
+    5: 29
+    6: 29
 HLT_e17_lhloose_mu10_L1eEM18L_MU8F:
   eventCount: 0
   stepCounts:
@@ -4455,6 +4527,24 @@ HLT_e20_nopid_L1eEM18M:
     4: 10
     5: 10
     6: 10
+HLT_e20_nopid_L1eTAU35:
+  eventCount: 15
+  stepCounts:
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
+    6: 15
+  stepFeatures:
+    0: 30
+    1: 30
+    2: 126
+    3: 28
+    4: 28
+    5: 28
+    6: 28
 HLT_e24_dnnloose_2e12_dnnloose_L1eEM24L_3eEM12L:
   eventCount: 0
   stepFeatures:
@@ -9167,6 +9257,24 @@ HLT_e40_nopid_L1eEM18M:
     4: 8
     5: 8
     6: 8
+HLT_e40_nopid_L1eTAU60:
+  eventCount: 8
+  stepCounts:
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
+    6: 8
+  stepFeatures:
+    0: 13
+    1: 13
+    2: 64
+    3: 11
+    4: 11
+    5: 11
+    6: 11
 HLT_e50_etcut_L1eEM26M:
   eventCount: 6
   stepCounts:
@@ -9209,6 +9317,24 @@ HLT_e50_nopid_L1eEM26M:
     4: 8
     5: 8
     6: 8
+HLT_e50_nopid_L1eTAU70:
+  eventCount: 7
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+    4: 7
+    5: 7
+    6: 7
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 51
+    3: 9
+    4: 9
+    5: 9
+    6: 9
 HLT_e5_dnntight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9:
   eventCount: 0
   stepCounts:
@@ -9559,6 +9685,24 @@ HLT_e5_nopid_L1eEM5:
     4: 144
     5: 144
     6: 127
+HLT_e5_nopid_L1eTAU12:
+  eventCount: 20
+  stepCounts:
+    0: 20
+    1: 20
+    2: 20
+    3: 20
+    4: 20
+    5: 20
+    6: 20
+  stepFeatures:
+    0: 67
+    1: 67
+    2: 224
+    3: 81
+    4: 81
+    5: 81
+    6: 75
 HLT_e5_nopid_lrtloose_L1eEM5:
   eventCount: 18
   stepCounts:
