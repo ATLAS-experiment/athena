@@ -59,7 +59,7 @@ RodHeaderByteStreamAuxCnv::RodHeaderByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& RodHeaderByteStreamAuxCnv::classID() {
+CLID RodHeaderByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::RODHeaderAuxContainer>::ID();
 }
 

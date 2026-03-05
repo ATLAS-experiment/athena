@@ -42,7 +42,7 @@ PpmByteStreamxAODCnv::PpmByteStreamxAODCnv(ISvcLocator* svcloc) :
 
 // CLID
 
-const CLID& PpmByteStreamxAODCnv::classID() {
+CLID PpmByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::TriggerTowerContainer>::ID();
 }
 

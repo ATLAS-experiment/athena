@@ -59,7 +59,7 @@ JemTobRoiByteStreamAuxCnv::JemTobRoiByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& JemTobRoiByteStreamAuxCnv::classID() {
+CLID JemTobRoiByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::JEMTobRoIAuxContainer>::ID();
 }
 
