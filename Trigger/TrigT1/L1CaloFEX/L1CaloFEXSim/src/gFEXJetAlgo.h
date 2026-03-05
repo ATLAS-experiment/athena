@@ -66,9 +66,9 @@ namespace LVL1 {
 
     virtual void ZeroNegative( gTowersType & jets ) const;
 
-    virtual void SaturateJets( gTowersType & jets, const gTowersType & sat ) const;
+    virtual void SaturateJets( gTowersType & jets, const gTowersType & sat, int fpga ) const;
 
-    virtual void SaturateBlocks( gTowersType & gBlkSum, const gTowersType & sat ) const;
+    virtual void SaturateBlocks( gTowersType & gBlkSum, const gTowersType & sat, int fpga ) const;
 
     virtual void gBlockAB(const gTowersType& twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
     

@@ -173,7 +173,10 @@ if iter>0:
     jdata = dict(sorted(jdata.items(), key=lambda item: int(item[0])))
 
 if output=="":
-    output = folderTag
+    if folderTag and folderTag!="HEAD":
+        output = folderTag
+    else:
+        output = folderPath.replace("/","")+"-HEAD"
 if "." not in output:
     (sinceRun,sinceLumi) = (maxSince>>32,maxSince&0xFFFFFFFF)
     suff = "." + str(sinceRun) + "." + str(sinceLumi) + ".json"

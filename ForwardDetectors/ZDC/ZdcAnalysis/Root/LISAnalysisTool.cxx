@@ -2,6 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <sstream>
 #include <AsgDataHandles/ReadHandle.h>
 #include <AsgDataHandles/ReadDecorHandle.h>
 #include <AsgDataHandles/WriteHandle.h>
@@ -10,6 +11,10 @@
 #include "AthContainers/ConstAccessor.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "ZdcUtils/ZdcEventInfo.h"
+#include "PathResolver/PathResolver.h"
+#include "TFile.h"
+#include "TString.h"
+#include "TH1D.h"
 
 namespace ZDC {
 
@@ -25,7 +30,19 @@ LISAnalysisTool::LISAnalysisTool(std::string const& name) :
 StatusCode LISAnalysisTool::initialize() {
   ATH_MSG_INFO("Initializing LISAnalysisTool with configuration: " << m_configuration);
   ATH_MSG_INFO("Initializing LISAnalysisTool with BaselineStart: " << m_nBaselineStart << ", BaselineEnd: " << m_nBaselineEnd);
+  ATH_MSG_INFO("Initializing LISAnalysisTool with PulseStart: " << m_nPulsStart << ", PulseEnd: " << m_nPulsEnd);
   
+  // Format channel pedestals for printing
+  std::ostringstream pedestalStr;
+  pedestalStr << "[";
+  for (size_t i = 0; i < m_channelPedestals.value().size(); ++i) {
+    if (i > 0) pedestalStr << ", ";
+    pedestalStr << m_channelPedestals.value()[i];
+  }
+  pedestalStr << "]";
+  ATH_MSG_INFO("Initializing LISAnalysisTool with Pedestals: " << pedestalStr.str());
+
+
   initialize_default();
 
   ATH_MSG_INFO("LIS Configuration:");
@@ -72,6 +89,9 @@ StatusCode LISAnalysisTool::initialize() {
     m_LISAvgTime = m_zdcModuleContainerName + ".LISAvgTime" + auxSuffix;
     ATH_CHECK(m_LISAvgTime.initialize());
 
+    m_LISModuleStatus = m_zdcModuleContainerName + ".LISModuleStatus" + auxSuffix;
+    ATH_CHECK(m_LISModuleStatus.initialize());
+
   }
 
   m_init = true;
@@ -82,7 +102,7 @@ StatusCode LISAnalysisTool::initialize() {
 
 void LISAnalysisTool::initialize_default() {
   // PbPb 2025 configuration
-  m_numSamples = 24;
+  m_numSamples = m_nSamples;
   m_preSample = 0;
   m_deltaTSample = 3.125;
   m_sampleAnaStart = 5;
@@ -90,12 +110,126 @@ void LISAnalysisTool::initialize_default() {
   m_nBaselineSamples = m_nBaselineEnd - m_nBaselineStart;
 
   m_LEDBCID = {3476, 3479, 3482};
-  m_LEDCalreqIdx = {0 ,1 ,2};}
+  m_LEDCalreqIdx = {0 ,1 ,2};
+}
+
+StatusCode LISAnalysisTool::SetPedestals(unsigned int runNumber)
+{
+  std::string filename;
+  std::string runString;
+  
+  runString = ("ZdcCalib_Run"+TString::Itoa(runNumber,10)+".root").Data();
+  
+  filename = PathResolverFindCalibFile("ZdcAnalysis/" + runString );
+
+  if (filename.empty())
+    {
+      ATH_MSG_INFO("No LIS pedestals file found - using default pedestals");
+      return StatusCode::FAILURE;
+    }
+  
+  ATH_MSG_INFO("Opening LIS pedestals file " << filename);
+  std::unique_ptr<TFile> fLISPed(TFile::Open(filename.c_str(), "READ"));
+  
+  if (!fLISPed->IsOpen()) {
+    ATH_MSG_INFO ("SetPedestals: failed to open file: " << filename << ". Using default pedestals.");
+    return StatusCode::FAILURE;
+  }
+  
+  // Read 8 TH1D histograms (one for each channel/module)
+  // Each histogram contains pedestal value (y-axis) vs lumiblock (x-axis)
+  //
+  bool readSuccess = true;
+  
+  for (int channel = 0; channel < m_nLISChannels; channel++) {
+    std::string histName = "LIS_Pedestal_ch" + std::to_string(channel);
+    
+    ATH_MSG_DEBUG("SetPedestals: Searching for histogram: " << histName);
+    
+    TH1D* hist_ptr = static_cast<TH1D*>(fLISPed->GetObjectChecked(histName.c_str(), "TH1D"));
+    
+    if (!hist_ptr) {
+      ATH_MSG_ERROR("SetPedestals: unable to read pedestal histogram " << histName);
+      readSuccess = false;
+      break;
+    }
+    else {
+      ATH_MSG_INFO("Successfully read pedestal histogram for channel " << channel);
+      // Store the histogram in member variable
+      hist_ptr->SetDirectory(0); 
+      m_LISPedestals[channel].reset(hist_ptr);
+    }
+  }
+    
+  fLISPed->Close();
+
+  if (readSuccess) {
+    ATH_MSG_INFO("Successfully loaded LIS pedestals from file");
+  }
+  else {
+    ATH_MSG_ERROR("SetPedestals: due to at least one error, LIS pedestals not loaded from file");
+  }
+  
+  return readSuccess ? StatusCode::SUCCESS : StatusCode::FAILURE;
+}
+
+float LISAnalysisTool::GetPedestal(int channel, unsigned int lumiBlock) {
+  // Check if channel is valid
+  if (channel >= m_nLISChannels) {
+    ATH_MSG_WARNING("GetPedestals: invalid channel " << channel << ", returning 0");
+    return 0;
+  }
+
+  ATH_MSG_DEBUG("GetPedestals: m_MominalPedestals " << m_MominalPedestals );
+
+  if(!m_MominalPedestals) {
+    // Check if histogram is available for this channel
+    if (m_LISPedestals[channel]) {
+      // Find the bin corresponding to this lumiblock
+
+      if(lumiBlock < m_LISPedestals[channel]->GetXaxis()->GetXmin() || lumiBlock > m_LISPedestals[channel]->GetXaxis()->GetXmax())
+      {
+        ATH_MSG_DEBUG("GetPedestals: channel " << channel << ", LB " << lumiBlock 
+                     << ", lumiblock out of histogram range");
+      }
+      else{
+
+        int bin = m_LISPedestals[channel]->FindBin(lumiBlock);
+        float pedestal = m_LISPedestals[channel]->GetBinContent(bin);
+        
+        // Check if pedestal value is valid (non-zero)
+        if (pedestal > 0) {
+          ATH_MSG_DEBUG("GetPedestals: channel " << channel << ", LB " << lumiBlock 
+                       << ", pedestal = " << pedestal << " (from histogram)");
+          return pedestal;
+        }
+        else {
+          ATH_MSG_DEBUG("GetPedestals: channel " << channel << ", LB " << lumiBlock 
+                       << ", no valid histogram entry");
+        }
+      }
+    }
+    else {
+      ATH_MSG_DEBUG("GetPedestals: no histogram available for channel " << channel);
+    }
+  }
+
+  // Fallback to predefined pedestals
+  ATH_MSG_DEBUG("GetPedestals: channel " << channel << ", LB " << lumiBlock 
+               << ", using default pedestal = " << m_channelPedestals.value()[channel]);
+
+  return m_channelPedestals.value()[channel];
+}
+
+void LISAnalysisTool::setStatusBit(unsigned int& statusWord, unsigned int bitIndex) {
+  statusWord |= (1 << bitIndex);
+}
 
 LISModuleResults LISAnalysisTool::processModuleData(
     int side, int channel,
     const std::vector<unsigned short>& data,
-    unsigned int startSample, unsigned int endSample)
+    unsigned int startSample, unsigned int endSample,
+    unsigned int lumiBlock)
 {
   ATH_MSG_DEBUG("Processing LIS data for side " << side << ", channel " << channel);
 
@@ -103,6 +237,7 @@ LISModuleResults LISAnalysisTool::processModuleData(
   int maxADCsub = -999;
   unsigned int maxSample = 0;
   float avgTime = 0.f;
+  unsigned int moduleStatus = 0; 
 
   if (data.empty()) {
     ATH_MSG_DEBUG("Empty waveform data");
@@ -114,6 +249,9 @@ LISModuleResults LISAnalysisTool::processModuleData(
     return LISModuleResults();
   }
 
+  // Get pedestal for this channel using histogram if available, otherwise use predefined value
+  float ModPedestal = GetPedestal(channel, lumiBlock);
+
   // Calculate presample (baseline) from first few samples
   float preFADC = 0;
   unsigned int nBaseline = std::min(m_nBaselineSamples, static_cast<unsigned int>(data.size()));
@@ -124,7 +262,7 @@ LISModuleResults LISAnalysisTool::processModuleData(
 
   // Process samples in analysis window
   for (unsigned int sample = startSample; sample <= endSample; sample++) {
-    int FADCsub = static_cast<int>(data[sample]) - static_cast<int>(std::round(preFADC));
+    int FADCsub = static_cast<int>(data[sample]) - static_cast<int>(std::round(ModPedestal));
 
     float time = (sample + 0.5f) * m_deltaTSample;
     ADCSum += FADCsub;
@@ -144,14 +282,44 @@ LISModuleResults LISAnalysisTool::processModuleData(
     avgTime = 0.f;
   }
 
+  // Set status bits
+  if(std::abs(preFADC - ModPedestal) > 15) { 
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_HighPedestal); // Set high pedestal bit
+  }
+
+  if(maxSample < m_nPulsStart) {
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_EarlyPulse); // Set early pulse bit
+  }
+  else if(maxSample > m_nPulsEnd) {
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_LatePulse); // Set late pulse bit
+  }
+
+  if(maxADCsub > m_ADCSaturationValue){ // ADC overflow threshold
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_Overflow); // Set overflow bit
+  }
+
+  bool hasBadStatus = false;
+  for(int ibit = 1; ibit < LISModuleStatusBits::LIS_NumStatusBits; ibit++){
+    if(CheckStatusBit(moduleStatus, ibit)){
+      hasBadStatus = true;
+      break;
+    }
+  }
+  if(!hasBadStatus) {
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_ValidData); // Set good status bit if no other bits are set
+  }
+  else{
+    setStatusBit(moduleStatus, LISModuleStatusBits::LIS_BadBit); // Set generic bad bit if any specific issue bits are set
+  }
+
   ATH_MSG_DEBUG("  Presample: " << preFADC << ", ADCSum: " << ADCSum 
                << ", MaxADC: " << maxADCsub << ", MaxSample: " << maxSample
                << ", AvgTime: " << avgTime);
 
-  return LISModuleResults(preFADC, ADCSum, maxADCsub, maxSample, avgTime);
+  return LISModuleResults(preFADC, ADCSum, maxADCsub, maxSample, avgTime, moduleStatus);
 }
 
-LISModuleResults LISAnalysisTool::processLISModule(const xAOD::ZdcModule& module) {
+LISModuleResults LISAnalysisTool::processLISModule(const xAOD::ZdcModule& module, unsigned int lumiBlock) {
   ATH_MSG_DEBUG("Processing LIS module: side=" << module.zdcSide() 
                << ", module=" << module.zdcModule()
                << ", channel=" << module.zdcChannel());
@@ -185,7 +353,7 @@ LISModuleResults LISAnalysisTool::processLISModule(const xAOD::ZdcModule& module
   }
 
   return processModuleData(module.zdcSide(), module.zdcChannel(), 
-                          waveform, m_sampleAnaStart, m_sampleAnaEnd);
+                          waveform, m_sampleAnaStart, m_sampleAnaEnd, lumiBlock);
 }
 
 StatusCode LISAnalysisTool::recoZdcModules(
@@ -218,6 +386,21 @@ StatusCode LISAnalysisTool::recoZdcModules(
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, unsigned int> eventTypeHandle(m_eventTypeKey);
   SG::ReadDecorHandle<xAOD::ZdcModuleContainer, std::vector<uint16_t>> rodBCIDHandle(m_robBCIDKey);
 
+  // Get lumiblock from event info
+  unsigned int lumiBlock = eventInfo->lumiBlock();
+
+  unsigned int thisRunNumber = eventInfo->runNumber();
+  if (thisRunNumber != m_runNumber) {
+    ATH_MSG_INFO("LIS analysis tool will be configured for run " << thisRunNumber );    
+    ATH_MSG_INFO("Pedestals will be configured for run " << thisRunNumber);
+    StatusCode status = SetPedestals(thisRunNumber);
+    if (status != StatusCode::SUCCESS) {
+      ATH_MSG_ERROR("Failed to set pedestals from calibration file for run " << thisRunNumber << ", using nominal pedestal values instead!");
+      m_MominalPedestals = true;
+    }
+     
+    m_runNumber = thisRunNumber;
+  }
   // Loop over the sum container to find event-level info (side == 0)
   //
   bool haveZdcEventInfo = false;
@@ -282,23 +465,21 @@ StatusCode LISAnalysisTool::recoZdcModules(
     ATH_MSG_DEBUG("Event with BCID = " << bcid << " has LED type " << evtLEDType);
   }
 
-
   // Create write decoration handles
-  SG::WriteDecorHandle<xAOD::ZdcModuleContainer,unsigned int> LEDTypeHandle(m_ZdcLEDType);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> LEDTypeHandle(m_ZdcLEDType);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> presampleHandle(m_LISPresampleADC);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, int> adcSumHandle(m_LISADCSum);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, int> maxADCHandle(m_LISMaxADC);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> maxSampleHandle(m_LISMaxSample);
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> avgTimeHandle(m_LISAvgTime);
+  SG::WriteDecorHandle<xAOD::ZdcModuleContainer, unsigned int> moduleStatusHandle(m_LISModuleStatus);
 
   ATH_MSG_DEBUG("Processing " << moduleContainer.size() << " modules");
 
   // Loop over modules and process LIS channels (module=5, type=2)
   for (const auto* zdcModule : moduleContainer) {
       
-      LISModuleResults results = processLISModule(*zdcModule);
-
-
+      LISModuleResults results = processLISModule(*zdcModule, lumiBlock);
 
       ATH_MSG_DEBUG("Writing aux decors to LIS module: side=" << zdcModule->zdcSide() 
                    << ", channel=" << zdcModule->zdcChannel());
@@ -309,7 +490,7 @@ StatusCode LISAnalysisTool::recoZdcModules(
       maxADCHandle(*zdcModule) = results.getMaxADC();
       maxSampleHandle(*zdcModule) = results.getMaxSample();
       avgTimeHandle(*zdcModule) = results.getAvgTime();
-    
+      moduleStatusHandle(*zdcModule) = results.getmoduleStatus();
   }
 
 

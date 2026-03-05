@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -16,16 +16,17 @@ PURPOSE:	Keep the important output variables
 DATE:		V1.0 Jan 13th , 2009 
 
 ******************************************************/
-#include <iostream>
-#include <vector>
-#include <map>
-#include <string>
+
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthContainers/DataVector.h"
 #include "EventKernel/INavigable4Momentum.h"
 #include "FourMom/P4PtEtaPhiMBase.h"
 #include "Navigation/NavigableTerminalNode.h"
+
+#include <vector>
+#include <map>
+#include <string>
 
 // Forward declaration(s):
 class MsgStream;
@@ -36,25 +37,26 @@ class TrigMuonClusterFeature : public P4PtEtaPhiMBase,
 
  public:
 
-  /** Constructors */
-  TrigMuonClusterFeature();
+  TrigMuonClusterFeature() = default;
   TrigMuonClusterFeature( float eta, float phi, int nroi, int njet, int ntrk ); 
 
-  /** Destructor */
-  ~TrigMuonClusterFeature ();
+  ~TrigMuonClusterFeature () override = default;
 
   /** Copy pointer constructor. */
   TrigMuonClusterFeature ( const TrigMuonClusterFeature* mfeature ) ;
-  /** Copy reference constructor. */
-  TrigMuonClusterFeature ( const TrigMuonClusterFeature& mfeature ) ;
-  /** Assignement operator. */
-  TrigMuonClusterFeature& operator=(const TrigMuonClusterFeature& mfeature);
+  //copy c'tor
+  TrigMuonClusterFeature ( const TrigMuonClusterFeature& mfeature ) = default;
+  //move c'tor
+  TrigMuonClusterFeature(TrigMuonClusterFeature&&) noexcept = default;
+  //move assignment
+  TrigMuonClusterFeature& operator=(TrigMuonClusterFeature&&) noexcept = default;
+  /** Assignment operator. */
+  TrigMuonClusterFeature& operator=(const TrigMuonClusterFeature& mfeature) = default;
 
-  //Ovveride pure virtual methods
-  double pt(void)  const { return 0.0; }
-  double eta(void) const { return m_eta; }
-  double phi(void) const { return m_phi; }
-  double m(void)   const { return 0.0; }
+  virtual double pt()  const override { return 0.0; }
+  virtual double eta() const override { return m_eta; }
+  virtual double phi() const override { return m_phi; }
+  virtual double m()   const override { return 0.0; }
 
   inline int getNRoi() const { return m_nroi ;};
   inline int getNTRK() const { return m_ntrk ;};
@@ -63,11 +65,11 @@ class TrigMuonClusterFeature : public P4PtEtaPhiMBase,
   inline float getPhi() const { return m_phi ; };
 
   private:
-  float m_eta;
-  float m_phi;
-  int m_nroi;
-  int m_njet;
-  int m_ntrk;
+  float m_eta{};
+  float m_phi{};
+  int m_nroi{};
+  int m_njet{};
+  int m_ntrk{};
 
 };
 /// Helper function for printing the object
@@ -81,8 +83,8 @@ inline bool operator!= ( const TrigMuonClusterFeature& a, const TrigMuonClusterF
 
 /** @brief comparison with feedback
  * Function compares two objects and returns "semi verbose" output 
- * in the form of map where there are varaibel names and differences
- * between two obejcts
+ * in the form of map where there are variable names and differences
+ * between two objects
  * @param variableChange - map to record the differences
  * In case of collections (or objects when the size may be different) that information can also be returned in varaibleChange
  */

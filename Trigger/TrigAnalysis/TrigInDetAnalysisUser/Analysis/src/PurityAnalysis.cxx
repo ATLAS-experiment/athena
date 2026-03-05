@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    $Id: PurityAnalysis.cxx 688225 2015-08-07 20:12:06Z 
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -569,7 +569,8 @@ void PurityAnalysis::execute(const std::vector<TIDA::Track*>& reftracks,
      }
 
   }
-
+  //dump must be false here
+  //coverity[DEADCODE]
   if ( dump && m_print ) { 
     
     std::cout << "PurityAnalysis::execute() missed a high pT track - dumping tracks" << std::endl;

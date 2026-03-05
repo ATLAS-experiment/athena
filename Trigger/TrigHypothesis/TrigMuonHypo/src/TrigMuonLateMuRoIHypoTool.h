@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONLATEMUROIHYPO_TRIGMUONLATEMUROIHYPOTOOL_H 
@@ -11,6 +11,8 @@
 
 class StoreGateSvc;
 class TriggerElement;
+class TrigRoiDescriptor;
+
 class TrigMuonLateMuRoIHypoTool: public ::AthAlgTool {
   enum { MaxNumberTools = 20 };  
  public:

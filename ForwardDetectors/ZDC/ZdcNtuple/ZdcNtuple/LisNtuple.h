@@ -11,7 +11,12 @@
 #include "xAODForward/ZdcModuleContainer.h"
 #include <string>
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
+#include <xAODTrigger/TrigDecision.h>
+#include <TrigDecisionTool/TrigDecisionTool.h>
+#include <cstdint> //for uint32_t etc
+#include <memory>
 
+class TTree;
 class LisNtuple : public EL::AnaAlgorithm
 {
 public:
@@ -24,12 +29,16 @@ public:
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName{this, "ZdcSumContainerName", "ZdcSums", ""};
   const xAOD::EventInfo *m_eventInfo{};
   int m_eventCounter{};
+  const xAOD::TrigDecision* m_trigDecision{};
 
   // flags
   bool m_enableOutputTree{}; // enable output TTree
+  bool enableTrigger{}; // use trigger info
   bool m_lisInj{}; // LIS injected-pulse run
   bool m_lisLED{}; // LIS LED run
   std::string m_auxSuffix{}; // suffix for aux data names when reprocessing
+
+  static constexpr int nTriggerWords = 16; // 16 words in trigDecision->tbp() and trigDecision->tav()
 
   // output tree
   TTree *m_outputTree{};
@@ -50,6 +59,16 @@ public:
   float t_avgIntPerCrossing{};
   float t_actIntPerCrossing{};
 
+  uint32_t t_tav[nTriggerWords]{}; //  16*32 = 512, floor(ID/32) to get the position in tav[]
+                                   //  and ID%32 to get the position within each long word
+  uint32_t t_tbp[nTriggerWords]{}; //  16*32 = 512, floor(ID/32) to get the position in tbp[]
+                                   //  and ID%32 to get the position within each long word
+  uint64_t t_trigger{};
+  uint32_t t_trigger_TBP{};
+  float t_prescales[200]{};
+  bool t_decisions[200]{};
+  bool t_rerunDecisions[200]{};
+
   // LED type (for LED events)
   unsigned int t_LEDType{};
 
@@ -67,6 +86,7 @@ public:
   int t_LISMaxADC[nLISChannels]{};
   unsigned int t_LISMaxSample[nLISChannels]{};
   float t_LISAvgTime[nLISChannels]{};
+  unsigned int t_LISModuleStatus[nLISChannels]{};
 
   // LIS raw waveform data
   uint16_t t_LISRawdata[nLISChannels][nSamples]{};
@@ -75,6 +95,7 @@ public:
 
   void processEventInfo();
   void processLisNtupleFromModules();
+  bool processTriggerDecision();
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
