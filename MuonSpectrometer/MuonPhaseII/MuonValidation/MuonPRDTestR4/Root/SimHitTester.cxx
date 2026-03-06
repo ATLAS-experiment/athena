@@ -93,6 +93,8 @@ namespace MuonValR4{
         m_mass.push_back(simHit.mass());
         m_identifier->push_back(id);
 
+	m_secIndex.push_back(idHelperSvc()->sector(id));
+
         if ( idHelperSvc()->isRpc(id) ) {
             HepMC::FourVector fourVec(0.,0.,0.,0.);
             HepMC::FourVector vertex(0.,0.,0.,0.);
