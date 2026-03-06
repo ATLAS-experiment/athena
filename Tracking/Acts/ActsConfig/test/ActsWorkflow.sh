@@ -10,7 +10,6 @@ ignore_pattern=""
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
-  	     flags.Acts.doITkConversion=True; \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
 	     flags.Detector.GeometryHGTD=True; \

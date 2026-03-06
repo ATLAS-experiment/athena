@@ -442,8 +442,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doITkFastTracking", False)
 
     # Turn running of Conversion second tracking pass on and off
-    icf.addFlag("Tracking.doITkConversion",
-                lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
+    icf.addFlag("Tracking.doITkConversion", lambda prevFlags: (
+        not prevFlags.Tracking.doITkFastTracking and prevFlags.Detector.EnableCalo))
 
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder
