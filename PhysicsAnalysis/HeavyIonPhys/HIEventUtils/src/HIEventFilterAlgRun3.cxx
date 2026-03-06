@@ -50,6 +50,8 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
   auto mon_fcalEt = Monitored::Scalar<float>("fcalEt");
   auto mon_zdcE = Monitored::Scalar<float>("zdcE");
   auto mon_nTrk = Monitored::Scalar<float>("nTrk");
+  auto mon_zdcPreSampleA = Monitored::Scalar<float>("zdcPreSampleA");
+  auto mon_zdcPreSampleC = Monitored::Scalar<float>("zdcPreSampleC");
 
   // go over required masks and ask tool if cut is passed
   const HI::IonDataType period = m_tool->toDataType(eventInfoHandle.cptr());
@@ -71,23 +73,27 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
     }
 
     if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
-                            HI::PileupVariation::Tight)) {
+                              HI::PileupVariation::Tight)) {
       store(HI::SelectionMask::NoPUFCalVsZDCTight, mask);
     }
     if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
-                            HI::PileupVariation::Nominal)) {
+                              HI::PileupVariation::Nominal)) {
       store(HI::SelectionMask::NoPUFCalVsZDCNominal, mask);
     }
     if (m_tool->noPUZDCvsFCal(period, esHandle.cptr(), zdcHandle.cptr(),
-                            HI::PileupVariation::Loose)) {
+                              HI::PileupVariation::Loose)) {
       store(HI::SelectionMask::NoPUFCalVsZDCLoose, mask);
     }
   }
 
   if (isRequested(maskToUse, HI::SelectionMask::NoPUZDCPresampler)) {
     auto zdcHandle = SG::makeHandle(m_zdcKey, ctx);
+    if (!m_monTool.empty()) {
+      std::tie(mon_zdcPreSampleA, mon_zdcPreSampleC) =
+          m_tool->ZDCPresamplerAmps(zdcHandle.cptr());
+    }
     if (m_tool->noPUZDCPresampler(period, zdcHandle.cptr(),
-                                HI::PileupVariation::Nominal)) {
+                                  HI::PileupVariation::Nominal)) {
       store(HI::SelectionMask::NoPUZDCPresampler, mask);
     }
   }
@@ -109,13 +115,13 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
     }
 
     if (m_tool->noPUFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
-                                vertexHandle.cptr(),
-                                HI::PileupVariation::Loose)) {
+                                  vertexHandle.cptr(),
+                                  HI::PileupVariation::Loose)) {
       store(HI::SelectionMask::NoPUFCalVsNTrackLoose, mask);
     }
     if (m_tool->noPUFCalVsNtracks(period, esHandle.cptr(), tracksHandle.cptr(),
-                                vertexHandle.cptr(),
-                                HI::PileupVariation::Nominal)) {
+                                  vertexHandle.cptr(),
+                                  HI::PileupVariation::Nominal)) {
       store(HI::SelectionMask::NoPUFCalVsNTrackNominal, mask);
     }
   }
@@ -132,13 +138,20 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
   auto mon_PUFCalVsZDCAny_failed = Monitored::Scalar<bool>(
       "PUFCalVsZDCAny_failed",
       (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsZDCAny)) == 0);
-
   auto mon_PUFCalVsNTrackAny_passed = Monitored::Scalar<bool>(
       "PUFCalVsNTrackAny_passed",
-      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) != 0);
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) !=
+          0);
   auto mon_PUFCalVsNTrackAny_failed = Monitored::Scalar<bool>(
       "PUFCalVsNTrackAny_failed",
-      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) == 0);
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUFCalVsNTrackAny)) ==
+          0);
+  auto mon_NoPUZDCPresampler_passed = Monitored::Scalar<bool>(
+      "NoPUZDCPresampler_passed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUZDCPresampler)) != 0);
+  auto mon_NoPUZDCPresampler_failed = Monitored::Scalar<bool>(
+      "NoPUZDCPresampler_failed",
+      (mask & static_cast<mask_t>(HI::SelectionMask::NoPUZDCPresampler)) == 0);
 
   if (m_doFilter)
     filter.setPassed(filterDecision);
@@ -147,7 +160,9 @@ StatusCode HI::HIEventFilterAlgRun3::execute(const EventContext& ctx) const {
   Monitored::Group(m_monTool, mon_fcalEt, mon_zdcE, mon_nTrk, mon_passed,
                    mon_failed, mon_PUFCalVsZDCAny_passed,
                    mon_PUFCalVsZDCAny_failed, mon_PUFCalVsNTrackAny_passed,
-                   mon_PUFCalVsNTrackAny_failed);
+                   mon_PUFCalVsNTrackAny_failed, mon_zdcPreSampleA,
+                   mon_zdcPreSampleC, mon_NoPUZDCPresampler_failed,
+                   mon_NoPUZDCPresampler_passed);
   // record mask for client as decoration of EventInfo object
   SG::WriteDecorHandle<xAOD::EventInfo, mask_t> handle =
       SG::makeHandle<mask_t>(m_decisionBitsKey, ctx);
