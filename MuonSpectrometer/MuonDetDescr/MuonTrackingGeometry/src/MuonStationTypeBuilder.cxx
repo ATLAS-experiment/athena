@@ -138,87 +138,89 @@ std::vector<std::unique_ptr<Trk::Layer>> MuonStationTypeBuilder::processBoxCompo
 
 std::unique_ptr<Trk::TrackingVolumeArray>
         MuonStationTypeBuilder::processBoxStationComponents(const GeoVPhysVol* mv,
-                                                                  const Trk::CuboidVolumeBounds& envelope,
-                                                                  Cache& cache) const {
+                                                            const Trk::CuboidVolumeBounds& envelope,
+                                                            Cache& cache) const {
     ATH_MSG_DEBUG( " processing station components for "
                          << mv->getLogVol()->getName());
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
     constexpr double tolerance{0.001};
 
-    // loop over children volumes; ( make sure they do not exceed enveloping
-    // volume boundaries ?) split into connected subvolumes ( assume ordering
-    // along X unless otherwise )
-    std::vector<std::unique_ptr<Trk::Volume>> compVol;
-    std::vector<std::string> compName;
-    std::vector<const GeoVPhysVol*> compGeo;
-    std::vector<Amg::Transform3D> compTransf;
+    struct TranslatedBox{
+        std::unique_ptr<Trk::Volume> volume{};
+
+        std::string name{};
+
+        PVConstLink geoPV{};
+
+        Amg::Transform3D transform{};
+    };
+
+    std::vector<TranslatedBox> preTranslated{};
     for (const auto& [cv, transf] : geoGetVolumes(mv)) {
-        const GeoLogVol* clv = cv->getLogVol();
-        std::shared_ptr<Trk::VolumeBounds> volBounds{};
-        std::unique_ptr<Trk::Volume> vol = Trk::GeoShapeConverter{}.translateGeoShape(clv->getShape(), transf);
-        if (clv->getShape()->type() == "Trd") {
-            const GeoTrd* trd = dynamic_cast<const GeoTrd*>(clv->getShape());
-            const double halfX1{trd->getXHalfLength1()}, halfX2{trd->getXHalfLength2()},
-                         halfY1{trd->getYHalfLength1()}, halfY2{trd->getYHalfLength2()},
-                         halfZ{trd->getZHalfLength()};
-            volBounds = std::make_unique<Trk::CuboidVolumeBounds>(std::max(halfX1, halfX2), std::max(halfY1, halfY2), halfZ);
-        } else if (clv->getShape()->type() == "Box") {
-            const GeoBox* box = dynamic_cast<const GeoBox*>(clv->getShape());
-            volBounds = Trk::GeoShapeConverter::convert(box);
-        } else {
-            double xSize = get_x_size(cv);
-            ATH_MSG_VERBOSE("subvolume not box nor trapezoid, estimated x size:" << xSize);
-            volBounds = std::make_shared<Trk::CuboidVolumeBounds>(xSize, envelope.halflengthY(), envelope.halflengthZ());
-        }
-        vol = std::make_unique<Trk::Volume>(makeTransform(transf), std::move(volBounds));
-        ATH_MSG_VERBOSE("subvolume center:" << Amg::toString(vol->center()));
-        std::string cname = clv->getName();
+        TranslatedBox newCmp{};
+        const auto [boxLow, boxHigh] = surroundingBox(cv);
+        auto volBounds = std::make_unique<Trk::CuboidVolumeBounds>(0.5*(boxHigh.x() - boxLow.x()),
+                                                                   0.5*(boxHigh.y() - boxLow.y()),
+                                                                   0.5*(boxHigh.z() - boxLow.z()));
+        newCmp.volume = std::make_unique<Trk::Volume>(makeTransform(transf), std::move(volBounds));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - subvolume center:" 
+                        << Amg::toString(newCmp.volume->center()));
+        newCmp.name = cv->getLogVol()->getName();
         const std::string& vname = mv->getLogVol()->getName();
-        int nameSize = vname.size() - 8;
-        if (cname.compare(0, nameSize, vname, 0, nameSize) == 0)
-            cname = cname.substr(nameSize, cname.size() - nameSize);
-        // order in X
-        if (compVol.empty() || vol->center().x() >= compVol.back()->center().x()) {
-            compVol.push_back(std::move(vol));
-            compName.push_back(cname);
-            compGeo.push_back(cv);
-            compTransf.push_back(transf);
-        } else {
-            std::vector<std::unique_ptr<Trk::Volume>>::iterator volIter = compVol.begin();
-            std::vector<std::string>::iterator nameIter = compName.begin();
-            std::vector<const GeoVPhysVol*>::iterator geoIter = compGeo.begin();
-            std::vector<Amg::Transform3D>::iterator transfIter =
-                compTransf.begin();
-            while (vol->center().x() >= (*volIter)->center().x()) {
-                ++volIter;
-                ++nameIter;
-                ++geoIter;
-                ++transfIter;
-            }
-            compVol.insert(volIter, std::move(vol));
-            compName.insert(nameIter, cname);
-            compGeo.insert(geoIter, cv);
-            compTransf.insert(transfIter, transf);
+        const std::size_t nameSize = vname.size() - 8;
+        if (newCmp.name.starts_with(vname.substr(0, nameSize))) {
+            newCmp.name = newCmp.name.substr(nameSize, newCmp.name.size() - nameSize);
         }
+        auto insert_itr = std::ranges::find_if(preTranslated, [&newCmp](const TranslatedBox& box){
+                return newCmp.volume->center().x() < box.volume->center().x();
+        });
+        preTranslated.insert(insert_itr, std::move(newCmp));
     }  // loop over components
 
     // define enveloping volumes for each "technology"
     std::vector<std::shared_ptr<Trk::TrackingVolume>> trkVols{};
-    double envX = envelope.halflengthX();
-    double envY = envelope.halflengthY();
-    double envZ = envelope.halflengthZ();
+    const double envX = envelope.halflengthX();
+    const double envY = envelope.halflengthY();
+    const double envZ = envelope.halflengthZ();
     double currX = -envX;
-    double maxX = envX;
     bool openSpacer{false}, openRpc{false};
     std::vector<const GeoVPhysVol*> geoSpacer{}, geoRpc{};
     std::vector<Amg::Transform3D> transfSpacer{}, transfRpc{};
     double spacerlowXsize{0.}, spaceruppXsize{0.}, rpclowXsize{0.}, rpcuppXsize{0.};
+    
     std::vector<float> volSteps;
     volSteps.push_back(-envX);
-    for (unsigned i = 0; i < compVol.size(); ++i) {
+    
+    auto closeRpc = [&](const double lowX){
+        if (!openRpc) {
+            return;
+        }
+
+        // low edge of current volume
+        if (lowX >= currX + rpclowXsize + rpcuppXsize) {
+            auto rpcBounds = std::make_shared<Trk::CuboidVolumeBounds>(0.5 * (lowX - currX), envY, envZ);
+            Amg::Transform3D rpcTrf{Amg::getTranslateX3D(currX + rpcBounds->halflengthX())};
+            auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(rpcTrf),  std::move(rpcBounds));
+            std::unique_ptr<Trk::TrackingVolume> rpcTrkVol = processRpc(*rpcVol, geoRpc, transfRpc, cache);
+            trkVols.push_back(std::move(rpcTrkVol));
+            volSteps.push_back(lowX);
+            currX = lowX;
+        } else {
+            ATH_MSG_WARNING(__func__<<"()"<<__LINE__<<" - Clash in Rpc definition!");
+        }
+        geoRpc.clear();
+        transfRpc.clear();
+        openRpc = false;    
+ 
+    };
+
+
+
+
+    for (TranslatedBox& translated : preTranslated) {
         bool comp_processed = false;
-        const Trk::VolumeBounds& volBounds = compVol[i]->volumeBounds();
+        const Trk::VolumeBounds& volBounds = translated.volume->volumeBounds();
         const Trk::CuboidVolumeBounds* compBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&volBounds);
         // check return to comply with coverity
         if (!compBounds) {
@@ -227,82 +229,66 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             continue;
         }
         //
-        double lowX = compVol[i]->center().x() - compBounds->halflengthX();
-        double uppX = compVol[i]->center().x() + compBounds->halflengthX();
+        double lowX = translated.volume->center().x() - compBounds->halflengthX();
+        double uppX = translated.volume->center().x() + compBounds->halflengthX();
 
         /// BIS78 volumes
-        if (lowX < currX && (compName[i].compare("RPC28") != 0 && compName[i].compare("RPC29") !=0)) {
-            ATH_MSG_WARNING(" clash between components in volume:" << compName[i] << "current:" << currX
+        if (lowX < currX && (translated.name.find("RPC28") == std::string::npos && 
+                             translated.name.find("RPC29") == std::string::npos)) {
+            ATH_MSG_WARNING(" clash between components in volume:" << translated.name << "current:" << currX
                           << ": low edge of next volume:" << lowX);
         }
-        if (uppX > maxX) {
-            ATH_MSG_WARNING(" clash between component and envelope:" << compName[i] << "upper:" << uppX << ">" << maxX);
+        if (uppX > envX) {
+            ATH_MSG_WARNING(" clash between component and envelope:" << translated.name << "upper:" << uppX << ">" << envX);
         }
         // close Rpc if no further components
-        if (openRpc && compName[i].compare(0, 3, "RPC") != 0 && 
-                       compName[i].compare(0, 3, "Ded") != 0) {
-            // low edge of current volume
-            double Xcurr = compVol[i]->center().x() - compBounds->halflengthX();
-            if (Xcurr >= currX + rpclowXsize + rpcuppXsize) {
-                auto rpcBounds = std::make_shared<Trk::CuboidVolumeBounds>(0.5 * (Xcurr - currX), envY, envZ);
-                Amg::Transform3D rpcTrf{Amg::getTranslateX3D(currX + rpcBounds->halflengthX())};
-                auto rpcVol = std::make_unique<Trk::Volume>(makeTransform(rpcTrf),
-                                                            std::move(rpcBounds));
-                std::unique_ptr<Trk::TrackingVolume> rpcTrkVol = processRpc(*rpcVol, geoRpc, transfRpc, cache);
-                trkVols.push_back(std::move(rpcTrkVol));
-                volSteps.push_back(Xcurr);
-                currX = Xcurr;
-                openRpc = false;
-            } else {
-                ATH_MSG_WARNING(__func__<<"()"<<__LINE__<<" - Clash in Rpc definition!");
-            }
+        if (openRpc && !translated.name.starts_with("RPC") && 
+                       !translated.name.starts_with("Ded")) {
+           closeRpc(lowX);
         }
         // close spacer if no further components
-        if (openSpacer && compName[i].compare(0, 1, "C") != 0 && compName[i].compare(0, 2, "LB") != 0) {
+        if (openSpacer && translated.name[0] != 'C'
+                       && !translated.name.starts_with("LB")) {
             // low edge of current volume
-            double Xcurr = compVol[i]->center().x() - compBounds->halflengthX();
-            if (Xcurr - currX - (spacerlowXsize + spaceruppXsize) >= -tolerance) {
-                auto spacerBounds = std::make_shared<Trk::CuboidVolumeBounds>(0.5 * (Xcurr - currX), envY, envZ);
+            if (lowX - currX - (spacerlowXsize + spaceruppXsize) >= -tolerance) {
+                auto spacerBounds = std::make_shared<Trk::CuboidVolumeBounds>(0.5 * (lowX - currX), envY, envZ);
                 Amg::Transform3D spacerTrf{Amg::getTranslateX3D(currX + spacerBounds->halflengthX())};
                 Trk::Volume spacerVol(makeTransform(spacerTrf), std::move(spacerBounds));
                 std::unique_ptr<Trk::TrackingVolume> spacerTrkVol{processSpacer(spacerVol, geoSpacer, transfSpacer)};
                 trkVols.emplace_back(std::move(spacerTrkVol));
-                volSteps.push_back(Xcurr);
-                currX = Xcurr;
+                volSteps.push_back(lowX);
+                currX = lowX;
                 openSpacer = false;
             } else {
                 ATH_MSG_WARNING("clash in spacer definition!");
             }
         }
-        if (compName[i].compare(0, 3, "RPC") == 0 || compName[i].compare(0, 3, "Ded") == 0) {
+        if (translated.name.starts_with("RPC") || 
+            translated.name.starts_with("Ded")) {
             if (!openRpc) {
                 openRpc = true;
-                geoRpc.clear();
-                geoRpc.push_back(compGeo[i]);
-                transfRpc.clear();
-                transfRpc.push_back(compTransf[i]);
                 // establish temporary volume size
                 rpclowXsize = compVol[i]->center().x() - currX;
-                rpcuppXsize = compBounds->halflengthX();
+                rpcuppXsize = compBounds->halflengthX(); 
                 // check clash at low edge
                 if (std::abs(rpclowXsize) < compBounds->halflengthX() - tolerance) {
                     ATH_MSG_WARNING("rpc low edge - not enough space");
-                }
-            } else {
-                geoRpc.push_back(compGeo[i]);
-                transfRpc.push_back(compTransf[i]);
-                // check temporary volume size
-                if (std::abs(compVol[i]->center().x() - currX) < compBounds->halflengthX() - tolerance) {
-                    ATH_MSG_WARNING("rpc low edge - not enough space");
-                }
-                if (compVol[i]->center().x() + compBounds->halflengthX() > currX + rpclowXsize + rpcuppXsize) {
-                    rpcuppXsize += (compVol[i]->center().x() + compBounds->halflengthX()) -
-                                   (currX + rpclowXsize + rpcuppXsize);
-                }
+                }           
             }
+            geoRpc.push_back(translated.geoPV);
+            transfRpc.push_back(translated.transform);
+            // check temporary volume size
+            if (std::abs(translated.volume->center().x() - currX) < compBounds->halflengthX() - tolerance) {
+                ATH_MSG_WARNING("rpc low edge - not enough space");
+            }
+            if (translated.volume->center().x() + compBounds->halflengthX() > 
+                currX + rpclowXsize + rpcuppXsize) {
+                rpcuppXsize += (translated.volume->center().x() + compBounds->halflengthX()) -
+                                (currX + rpclowXsize + rpcuppXsize);
+            
             comp_processed = true;
         }
-        if (compName[i].compare(0, 1, "C") == 0 || compName[i].compare(0, 2, "LB") == 0) {
+        if (translated.name.compare(0, 1, "C") == 0 || translated.name.compare(0, 2, "LB") == 0) {
             if (!openSpacer) {
                 openSpacer = true;
                 geoSpacer.clear();
@@ -333,7 +319,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             }
             comp_processed = true;
         }
-        if (compName[i].compare(0, 3, "MDT") == 0) {
+        if (translated.name.compare(0, 3, "MDT") == 0) {
             std::unique_ptr<Trk::Volume> mdtVol;
             // remove z shift in transform !! bugfix !!
             double zShift = compVol[i]->transform().translation().z();
@@ -377,7 +363,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
             zShift = 0.;
         }
         if (!comp_processed) {
-            ATH_MSG_WARNING("unknown technology:" << compName[i]);
+            ATH_MSG_WARNING("unknown technology:" << translated.name);
         }
     }  // end loop over station children
 
@@ -396,6 +382,7 @@ std::unique_ptr<Trk::TrackingVolumeArray>
         }
     }
     // there may be an Rpc still open
+    closeRpc(envX);
     if (openRpc) {
         if (maxX >= currX + rpclowXsize + rpcuppXsize) {
             auto rpcBounds = std::make_shared<Trk::CuboidVolumeBounds>(0.5 * (maxX - currX), envY, envZ);
