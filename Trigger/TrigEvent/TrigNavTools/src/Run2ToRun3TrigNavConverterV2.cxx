@@ -831,13 +831,13 @@ StatusCode Run2ToRun3TrigNavConverterV2::collapseFeaturesProxies(ConvProxySet_t 
                         filterFEAs(p->te->getFeatureAccessHelpers(), run2Nav))
       {
         ATH_MSG_ERROR("Proxies grouped by FEA hash have actually distinct features (specific FEAs are different)");
-        for (auto id: p->passChains ) ATH_MSG_ERROR("... chain id for this proxy " << id);
-        ATH_MSG_ERROR(".... TE id of this proxy: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
+        for (auto id: p->passChains ) ATH_MSG_ERROR("  Chain ID: " << id);
+        ATH_MSG_ERROR("  TE ID: " << TrigConf::HLTUtils::hash2string(p->te->getId()));
         for ( auto fea: first->te->getFeatureAccessHelpers() ) {
-          ATH_MSG_ERROR("FEA1 " << fea);
+          ATH_MSG_ERROR("  FEA (reference): " << fea);
         }
         for ( auto fea: p->te->getFeatureAccessHelpers() ) {
-          ATH_MSG_ERROR("FEA2 " << fea);
+          ATH_MSG_ERROR("  FEA (mismatched): " << fea);
         }
 
         return StatusCode::FAILURE;
@@ -1189,7 +1189,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::updateTerminusNode(xAOD::TrigCompositeC
         return StatusCode::FAILURE;
       }
     }
-    if (m_tdt->isPassed(chainName))
+    if (m_tdt->isPassed(chainName, TrigDefs::Physics | TrigDefs::allowResurrectedDecision) )
     {
       filteredIDs.insert(idToCheck);
     }
@@ -1512,11 +1512,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::allProxiesConnected(const ConvProxySet_
   {
     if (p->children.empty() and p->parents.empty() and not p->runChains.empty())
     {
-      ATH_MSG_ERROR("Orphanted proxy N chains run:" << p->runChains.size());
+      ATH_MSG_ERROR("Orphaned proxy, N chains run: " << p->runChains.size());
       return StatusCode::FAILURE;
     }
   }
-  ATH_MSG_DEBUG("CHECK OK, no orphanted proxies");
+  ATH_MSG_DEBUG("CHECK OK, no orphaned proxies");
   return StatusCode::SUCCESS;
 }
 
