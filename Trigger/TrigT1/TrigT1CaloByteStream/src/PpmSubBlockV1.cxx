@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -116,13 +116,13 @@ void PpmSubBlockV1::fillPpmData(const int chan, const std::vector<int>& lut,
   const int sliceF = slicesFadc();
   const int slices = sliceL + sliceF;
   const int chanPerSubBlock = channelsPerSubBlock();
-  int dataSize = m_datamap.size();
+  size_t dataSize = m_datamap.size();
   if (dataSize == 0) {
     dataSize = slices * chanPerSubBlock;
     m_datamap.resize(dataSize);
   }
   // coverity[divide_by_zero : FALSE]
-  int offset = (chan % chanPerSubBlock) * slices;
+  size_t offset = (chan % chanPerSubBlock) * slices;
   if (offset + slices <= dataSize) {
     for (int pos = 0; pos < sliceL; ++pos) {
       uint32_t datum = (lut[pos] & s_lutMask) << s_lutBit;
