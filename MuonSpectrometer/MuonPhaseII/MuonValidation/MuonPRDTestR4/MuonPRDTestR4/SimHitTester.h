@@ -53,6 +53,8 @@ namespace MuonValR4{
            /** @brief Identifier of the phi channel, if any **/
            VectorBranch<int>& m_phiChannel{parent().newVector<int>(m_collName+"_phiChannel")};
 
+           VectorBranch<int>& m_secIndex{parent().newVector<int>(m_collName+"_sectorIndex")};
+
            PtEtaPhiEBranch m_truthParticleP4{parent(), m_collName+"_truthPart_"};
            CartesFourVecBranch m_truthParticleProdVtx{parent(), m_collName+"_prodVertex_", CartesFourVecBranch::Type::Pos};
            VectorBranch<int>& m_truthParticleBarcode{parent().newVector<int>(m_collName+"_truthPart_barcode")};

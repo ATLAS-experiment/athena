@@ -61,8 +61,9 @@ namespace MuonValR4 {
                     return false;
                 }
 
-                const int RPClayer = int(idHelperSvc()->stationIndex(Id)); // RPC[0-3] --> 0:BI, 1:BM, 2:BO, 3:BE 
-                const bool isBI = rdoEl->nPhiStrips() == 0;
+                const int RPClayer = int(idHelperSvc()->stationIndex(Id)); // RPC[0-3] --> 0:BI, 1:BM, 2:BO, 3:BE
+	        const std::string stationName= idHelperSvc()->stationNameString(Id);	
+                const bool isBI = stationName == "BIS" || stationName == "BIL";
 		
 		const ActsTrk::GeometryContext& geoCtx = getGeoCtx(ctx);
                 const Amg::Vector3D gpos{rdoEl->stripPosition(geoCtx, Id)};
@@ -97,16 +98,16 @@ namespace MuonValR4 {
                             << ", Run = " << ctx.eventID().run_number()
                             << ", Event = " << ctx.eventID().event_number());
 		    }
-		    const float dt = timeL - timeR; // in ns
+		    const float dt = timeR - timeL; // in ns
 		    m_RPC_dig_timeDiff.push_back(dt);
 
 		    float dy{0};
 		    if (nL && nR) {
     			dy = 0.5 * propVelocity * dt; // in mm
 		    } else if (nL) {
-    			dy = propVelocity * dt - stripHalfLength;
+    			dy = propVelocity * dt + stripHalfLength;
                     } else if (nR) {
-                        dy = propVelocity * dt + stripHalfLength;
+                        dy = propVelocity * dt - stripHalfLength;
 		    } // else: no timing info --> dy = 0
 		    if (std::abs(dy) > stripHalfLength) {
                         ATH_MSG_WARNING("Computed dy outside strip bounds. "
@@ -120,6 +121,7 @@ namespace MuonValR4 {
                         dy = std::clamp(dy, -stripHalfLength, stripHalfLength);
                     }
    	            const Amg::Vector3D lpos3DFix(lpos3D.x(), lpos3D.y() + dy, lpos3D.z());
+   	            // const Amg::Vector3D lpos3DFix(lpos3D.x(), dy, lpos3D.z());
 		    const Amg::Vector3D gposFix = g2l.inverse() * lpos3DFix;	    
 		    m_RPC_dig_localPos3DFix.push_back(lpos3DFix);
 		    m_RPC_dig_globalPosFix.push_back(gposFix);
@@ -145,7 +147,7 @@ namespace MuonValR4 {
                 m_RPC_tot.push_back(digit->ToT());
                 m_RPC_dig_id.push_back(Id);
 		m_RPC_secIndex.push_back(idHelperSvc()->sector(Id));
-		m_RPC_stationName.push_back(idHelperSvc()->stationNameString(Id));
+		m_RPC_stationName.push_back(stationName);
 		m_RPC_layerIndex.push_back(RPClayer);
 		m_RPC_isBI.push_back(int(isBI));
 		// debug branches
