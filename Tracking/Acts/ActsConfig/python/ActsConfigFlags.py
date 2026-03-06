@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
@@ -91,7 +91,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling
-    actscf.addFlag('Acts.doITkConversion', False)
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    actscf.addFlag('Acts.doITkConversion', lambda pcf: (
+        pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
     actscf.addFlag('Acts.doLargeRadius', False)
     actscf.addFlag('Acts.doLowPt', False)
     

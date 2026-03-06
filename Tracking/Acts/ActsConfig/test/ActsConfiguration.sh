@@ -49,8 +49,7 @@ checkIdpvmOnFile() {
 failed_tests=()
 
 # Few flags
-activate_all_flags="flags.Acts.doITkConversion=True; \
-                    flags.Acts.doLargeRadius=True; \
+activate_all_flags="flags.Acts.doLargeRadius=True; \
 		    flags.Acts.doLowPt=True; \
 		    flags.Tracking.ITkActsLegacyPass.storeSeparateContainer=True; \
         	    flags.Tracking.ITkActsLargeRadiusPass.storeSeparateContainer=True; \

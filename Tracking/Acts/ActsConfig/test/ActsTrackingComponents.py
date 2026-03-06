@@ -45,6 +45,5 @@ if __name__ == "__main__":
     printConfiguration(current_flags)
 
     # Test workflow with Conversion pass
-    flags.Acts.doITkConversion = True
     current_flags = deduceConfiguration(flags, "ActsConversion")
     printConfiguration(current_flags)
