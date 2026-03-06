@@ -48,7 +48,7 @@ def defineMenu():
         # ATR-22696
         'L1_eTAU60HL',
         'L1_eTAU80HL',
-        
+
         #ATR28783
         'L1_6J15',
         # TOPO
@@ -210,7 +210,6 @@ def defineMenu():
         'L1_3eEM12L':'',
 
         # non-primary TAU
-        'L1_eTAU35':'',
         'L1_eTAU40HM':'',
         'L1_2TAU8':'',
         'L1_eEM18M_2eTAU20M':'',

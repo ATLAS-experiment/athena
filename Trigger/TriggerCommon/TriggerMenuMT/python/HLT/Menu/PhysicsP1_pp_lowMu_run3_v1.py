@@ -154,7 +154,7 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup, monGroups=['idMon:t0']),
         ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=[PhysicsStream], groups=BphysicsGroup+SingleMuonGroup+PrimaryL1MuGroup, monGroups=['idMon:shifter']),
 
-        ChainProp(name='HLT_mu10_mu6_bBmumux_Bidperf_L1MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], stream=['BphysDelayed','express'], groups=BphysicsGroup+SupportGroup, monGroups=['idMon:shifter']),
+        ChainProp(name='HLT_mu10_mu6_bBmumux_Bidperf_L1MU5VF', l1SeedThresholds=['MU5VF','MU5VF'], stream=[PhysicsStream,'express'], groups=BphysicsGroup+SupportGroup, monGroups=['idMon:shifter']),
     ]
 
     chains['Egamma'] = [
@@ -366,6 +366,10 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_j30_pf_ftf_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
         ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter']), 
         ChainProp(name='HLT_j30_pf_ftf_PhysicsTLA_L1jTE50', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter']), 
+        ChainProp(name='HLT_j0_perf_pf_ftf_L1jTE100', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        ChainProp(name='HLT_j30_pf_ftf_L1jTE100', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=LowMuGroupPhI+SingleJetGroup),  
+        ChainProp(name='HLT_j0_pf_ftf_PhysicsTLA_L1jTE100', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter']), 
+        ChainProp(name='HLT_j30_pf_ftf_PhysicsTLA_L1jTE100', l1SeedThresholds=['FSNOSEED'], stream=['TLA'], groups=LowMuGroupPhI+SingleJetGroup, monGroups=['tlaMon:shifter']), 
         
         
         # TLA intercalibration support (mirroring full-build jet chains, j15 is already above) - ATR-32402
@@ -428,6 +432,9 @@ def getLowMuPhysicsSignatures():
 
         ChainProp(name='HLT_j15f_L1jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j25f_L1jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
+        # ATR-32289
+        ChainProp(name='HLT_j15f_L1CALMTEA_jTE5', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
+        ChainProp(name='HLT_j25f_L1CALMTEA_jTE10', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j35f_L1jTE20', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j45f_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),
         ChainProp(name='HLT_j60f_L1jJ50p30ETA49', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=SingleJetGroup+LowMuGroupPhI),

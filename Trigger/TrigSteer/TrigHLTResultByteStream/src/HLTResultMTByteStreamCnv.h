@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGHLTRESULTBYTESTREAM_HLTResultMTByteStreamCnv_H
@@ -38,7 +38,7 @@ namespace HLT {
     /// Storage type used by this converter
     static long storageType();
     /// CLID of the class HLTResultMT converted by this converter
-    static const CLID& classID();
+    static CLID classID();
 
     long repSvcType() const override { return i_repSvcType(); } //!< return repSvcType
 
