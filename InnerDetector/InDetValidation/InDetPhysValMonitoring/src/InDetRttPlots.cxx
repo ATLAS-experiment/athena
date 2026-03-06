@@ -327,7 +327,7 @@ InDetRttPlots::fillFakeRate(const xAOD::TrackParticle& track, const bool isFake,
     if (m_hitsUnlinkedTracksPlots) m_hitsUnlinkedTracksPlots->fill(track, mu, weight);
   }
 
-  m_fakePlotsTotal->fill(track, isFake, weight, mu);
+  if(m_fakePlotsTotal) m_fakePlotsTotal->fill(track, isFake, weight, mu);
 }
 
 
