@@ -97,11 +97,9 @@ log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
 from ActsConfig.ActsMaterialConfig import MaterialValidationCfg
-acc.merge(MaterialValidationCfg(flags))
-
-from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-acc.merge(MaterialTrackWriterCfg(flags, FileName="material-tracks-validation.root",
-                                 MaterialTrackCollectionKey="OutputMaterialTracks"))
+acc.merge(MaterialValidationCfg(flags,
+                                StoreTracks=True,
+                                MaterialTrackCollectionKey="OutputMaterialTracks"))
 
 acc.printConfig(withDetails = True, summariseProps = True)
 

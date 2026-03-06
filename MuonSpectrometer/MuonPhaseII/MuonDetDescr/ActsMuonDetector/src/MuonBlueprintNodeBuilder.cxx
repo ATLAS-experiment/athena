@@ -38,11 +38,11 @@ using namespace Acts::UnitLiterals;
 namespace {
 
   //Muon System IDs
-  constexpr std::size_t s_muonBarrelId = 30;
-  constexpr std::size_t s_muonEndcapAId = 31;
-  constexpr std::size_t s_muonEndcapCId = 32;
-  constexpr std::size_t s_muonEndcapMiddleAId = 33;
-  constexpr std::size_t s_muonEndcapMiddleCId = 34;
+  constexpr std::size_t s_muonBarrelId = 80;
+  constexpr std::size_t s_muonEndcapAId = 81;
+  constexpr std::size_t s_muonEndcapCId = 82;
+  constexpr std::size_t s_muonEndcapMiddleAId = 83;
+  constexpr std::size_t s_muonEndcapMiddleCId = 84;
 
   //helper function to flag a chamber or a sector as BIS78 
   bool isBIS78(const MuonGMR4::MuonReadoutElement* element){    

@@ -33,11 +33,15 @@ def MaterialTrackRecorderUserActionSvcCfg(configFlags, name="ActsTrk::MaterialTr
 
   return acc
 
-def MaterialTrackWriterCfg(configFlags, name="MaterialTrackWriter", FileName="MaterialTracks.root", **kwargs) :
+def MaterialTrackWriterCfg(configFlags,
+                           name="MaterialTrackWriter",
+                           FileName="material-tracks.root",
+                           OutStream="ACTSMATERIALWRITER",
+                           **kwargs) :
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
-  kwargs.setdefault("OutStream", "ACTSMATERIALWRITER")
+  kwargs.setdefault("OutStream", OutStream)
   kwargs.setdefault("useTrackingGeometry", True)
   
   from MuonConfig.MuonConfigUtils import setupHistSvcCfg
@@ -67,37 +71,69 @@ def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwar
   acc.setPrivateTools(CompFactory.ActsTrk.RootMaterialWriterTool(name, **kwargs))
   return acc
 
-def MaterialMappingCfg(configFlags, name="MaterialMapping", **kwargs) :
+def MaterialMappingCfg(configFlags,
+                       inputFiles,
+                       name="MaterialMapping",
+                       StoreTracks=False,
+                       OutputMappedMaterialTracks="OuputMappedMaterialTracks",
+                       OutputUnmappedMaterialTracks="OutputUnmappedMaterialTracks",
+                       **kwargs) :
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
 
   # Need geometry
   from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-  acc.merge( ActsTrackingGeometrySvcCfg(configFlags,
-                                        RunConsistencyChecks=False,
-                                        ObjDebugOutput=False))
+  acc.merge( ActsTrackingGeometrySvcCfg(configFlags))
 
   mapwriters = [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
   kwargs.setdefault("MaterialMapWriters", mapwriters)
 
+  kwargs.setdefault("MappedMaterialTrackCollectionKey", OutputMappedMaterialTracks)
+  kwargs.setdefault("UnmappedMaterialTrackCollectionKey", OutputUnmappedMaterialTracks)
+
+
+  acc.merge(MaterialTrackReaderCfg(configFlags, FileNames=inputFiles))
+
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialMapping(name, **kwargs), primary = True)
+
+  if StoreTracks:
+      from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
+      acc.merge(MaterialTrackWriterCfg(configFlags,
+                                       name="MappedMaterialTrackWriter",
+                                       FileName="material-tracks-mapped.root",
+                                       OutStream="ACTSMAPPEDMATERIALWRITER",
+                                       MaterialTrackCollectionKey=OutputMappedMaterialTracks))
+      acc.merge(MaterialTrackWriterCfg(configFlags,
+                                       name="UnmappedMaterialTrackWriter",
+                                       FileName="material-tracks-unmapped.root",
+                                       OutStream="ACTSUNMAPPEDMATERIALWRITER",
+                                       MaterialTrackCollectionKey=OutputUnmappedMaterialTracks))
 
   return acc
 
 
-def MaterialValidationCfg(configFlags, name="MaterialValidation", **kwargs) :
+def MaterialValidationCfg(configFlags,
+                          StoreTracks=True,
+                          OutputMaterialTracks="OutputMaterialTracks",
+                          name="MaterialValidation", **kwargs) :
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
 
   # Need geometry
   from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-  acc.merge( ActsTrackingGeometrySvcCfg(configFlags,
-                                        RunConsistencyChecks=False,
-                                        ObjDebugOutput=False))
+  acc.merge( ActsTrackingGeometrySvcCfg(configFlags))
+
+  kwargs.setdefault("MaterialTrackCollectionKey", OutputMaterialTracks)
 
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialValidation(name, **kwargs), primary = True)
+  if StoreTracks:
+      from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
+      acc.merge(MaterialTrackWriterCfg(configFlags,
+                                       FileName="material-tracks-validation.root",
+                                       MaterialTrackCollectionKey=OutputMaterialTracks))
+
 
   return acc
 
