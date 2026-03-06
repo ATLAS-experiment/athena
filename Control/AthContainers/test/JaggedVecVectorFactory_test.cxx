@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecVectorFactory_test.cxx
@@ -47,11 +47,7 @@ namespace {
 template <class CONT, class ITER>
 void copyRange (const CONT& c, ITER it)
 {
-#if HAVE_STD_RANGES
   std::ranges::copy (c, it);
-#else
-  std::copy (c.begin(), c.end(), it);
-#endif
 }
 
 
