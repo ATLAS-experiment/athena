@@ -67,6 +67,7 @@ from DerivationFrameworkBPhys.BPHY6 import BPHY6Cfg
 from DerivationFrameworkBPhys.BPHY10 import BPHY10Cfg
 from DerivationFrameworkBPhys.BPHY12 import BPHY12Cfg
 from DerivationFrameworkBPhys.BPHY13 import BPHY13Cfg
+from DerivationFrameworkBPhys.BPHY14 import BPHY14Cfg
 from DerivationFrameworkBPhys.BPHY15 import BPHY15Cfg
 from DerivationFrameworkBPhys.BPHY16 import BPHY16Cfg
 from DerivationFrameworkBPhys.BPHY18 import BPHY18Cfg
@@ -176,7 +177,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'IDTR2Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
-           'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
+           'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY14Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
            'BPHY21Cfg', 'BPHY22Cfg', 'BPHY23Cfg', 'BPHY24Cfg', 'BPHY25Cfg', 'BPHY28Cfg',
            'STDM6Cfg', 'STDM7Cfg','STDM13Cfg','STDM16Cfg','STDM17Cfg',
