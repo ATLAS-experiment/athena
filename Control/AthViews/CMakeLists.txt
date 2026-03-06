@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthViews )
@@ -21,12 +21,6 @@ atlas_add_component( AthViewsDFlow
                      src_dflow/*.cxx
                      src_dflow/components/*.cxx
                      LINK_LIBRARIES AthExHiveLib AthViews AthenaBaseComps AthenaKernel StoreGateLib )
-
-atlas_add_dictionary( AthViewsAlgsDict
-                      AthViews/AthViewsWriteDict.h
-                      AthViews/selection.xml
-                      LINK_LIBRARIES AthLinks TrigSteeringEvent
-                      ELEMENT_LINKS TrigRoiDescriptorCollection )
 
 # Tests in the package:
 atlas_add_test( ViewLinking_test

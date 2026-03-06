@@ -21,6 +21,7 @@
 #include "TrigSteeringEvent/TrigPassFlagsCollection.h"
 #include "TrigSteeringEvent/StringSerializer.h"
 
+#include "AthLinks/ElementLink.h"
 #include <vector>
 
 namespace TrigSteeringEventDict {
@@ -28,6 +29,7 @@ namespace TrigSteeringEventDict {
   TrigRoiDescriptorCollection troi;
   std::vector<TrigRoiDescriptor*> troi_vec;
   std::vector<const TrigRoiDescriptor*> troi_const_vec;
+  ElementLink<TrigRoiDescriptorCollection> troi_el;
 
   TrigSuperRoiCollection tsroi;
   std::vector<TrigSuperRoi*> tsroi_vec;
