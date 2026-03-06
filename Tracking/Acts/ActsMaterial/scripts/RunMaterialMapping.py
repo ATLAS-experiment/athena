@@ -97,19 +97,9 @@ if args.verboseStoreGate:
 log.debug('Dumping of ConfigFlags now.')
 flags.dump()
 
-from ActsConfig.ActsMaterialConfig import MaterialTrackReaderCfg
 import glob
-acc.merge(MaterialTrackReaderCfg(flags,
-                                 FileNames=glob.glob(args.inputFile)))
-
 from ActsConfig.ActsMaterialConfig import MaterialMappingCfg
-acc.merge(MaterialMappingCfg(flags))
-
-from ActsConfig.ActsMaterialConfig import MaterialTrackWriterCfg
-acc.merge(MaterialTrackWriterCfg(flags, name="MappedMaterialTrackWriter", FileName="material-tracks-mapped.root",
-                                 MaterialTrackCollectionKey="OutputMappedMaterialTracks"))
-acc.merge(MaterialTrackWriterCfg(flags, name="UnmappedMaterialTrackWriter", FileName="material-tracks-unmapped.root",
-                                 MaterialTrackCollectionKey="OutputUnmappedMaterialTracks"))
+acc.merge(MaterialMappingCfg(flags, inputFiles=glob.glob(args.inputFiles), StoreTracks=False))
 
 acc.printConfig(withDetails = True, summariseProps = True)
 
