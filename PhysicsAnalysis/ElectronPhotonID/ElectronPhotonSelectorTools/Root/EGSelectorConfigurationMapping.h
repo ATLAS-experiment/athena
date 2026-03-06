@@ -153,6 +153,13 @@ const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
     "ElectronPhotonSelectorTools/offline/mc20_20240628/"
     "ElectronDNNMulticlassTight.conf"}
 };
+//----------------------------------------------------------
+// Photon BDT working points 
+const std::map<std::string, std::string> PhotonBDTPointToConfFile = {
+  { "TightBDTPhoton_Run3",
+    "ElectronPhotonSelectorTools/"
+    "PhotonIsBDTTightSelectorCutDefs_mc23.conf" },
+};
 }
 ////////////////////////////////////////////
 #endif
