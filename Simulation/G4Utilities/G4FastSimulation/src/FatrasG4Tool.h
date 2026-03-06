@@ -12,7 +12,7 @@ class G4VFastSimulationModel;
 
 class FatrasG4Tool: public FastSimulationBase
 {
- public:
+public:
 
   FatrasG4Tool(const std::string& type, const std::string& name, const IInterface *parent);   //!< Default constructor
 
@@ -22,10 +22,8 @@ protected:
    base classes. */
   virtual G4VFastSimulationModel* makeFastSimModel() override final;  
  
- private:
-  
-  // Flag to enable G4 transportation
-  Gaudi::Property<bool> m_doG4Transport{this, "doG4Transport", false, "Flag to enable G4 transportation"};
+private:
+
 };
 
 #endif //G4FASTSIMULATION_FATRASG4TOOL_H

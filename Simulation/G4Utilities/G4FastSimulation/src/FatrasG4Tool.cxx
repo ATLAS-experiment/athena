@@ -16,5 +16,5 @@ G4VFastSimulationModel* FatrasG4Tool::makeFastSimModel()
   ATH_MSG_DEBUG("Initializing Fast Simulation Model FatrasG4");
 
   // Create the FatrasG4 fast simulation model
-  return new FatrasG4(name(), getRegion(), m_doG4Transport, this);
+  return new FatrasG4(name(), getRegion());
 }

@@ -10,22 +10,11 @@
 // Geant4 fast simulation base class
 #include "G4VFastSimulationModel.hh"
 
-// FatrasG4 tool
-#include "FatrasG4Tool.h"
-
-
-class G4FieldTrack;
-class G4SafetyHelper;
-
 class FatrasG4: public G4VFastSimulationModel
 {
  public:
-
-    
   FatrasG4(const std::string& name,
-                G4Region* region,
-                bool doG4Transport,
-                FatrasG4Tool * FatrasG4Tool);
+	   G4Region* region);
   
   virtual ~FatrasG4() = default;
 
@@ -36,11 +25,7 @@ class FatrasG4: public G4VFastSimulationModel
   Checks that geometric location, energy, and particle type are within bounds **/
   virtual G4bool ModelTrigger(const G4FastTrack &) override final;
 
-  
  private:
-
-  // Boolean flag to enable Geant4 transportation
-  bool m_doG4Transport;
 
 };
 
