@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 // TCTDecorCheck.h - Description
@@ -19,7 +19,6 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 //#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
  
 #include "xAODJet/JetContainer.h" 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#define ARTRU          // Choice of TR generator
@@ -16,7 +16,6 @@
 #include "GeoModelInterfaces/StoredMaterialManager.h" //Material Manager
 #include "GeoMaterial2G4/Geo2G4MaterialFactory.h" //Converting GeoMaterial -> G4Material
 #include "PathResolver/PathResolver.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/StoreGateSvc.h" //Detector Store
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
