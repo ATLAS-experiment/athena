@@ -198,21 +198,21 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         config.addOutputVar (self.containerName, 'qOverP', 'qOverP')
         config.addOutputVar (self.containerName, 'd0', 'd0')
         config.addOutputVar (self.containerName, 'z0', 'z0')
-        config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True)
+        config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True, auxType='float')
 
         # decorate track summary information on the reconstructed object:
         if self.outputTrackSummaryInfo:
-            config.addOutputVar (self.containerName, 'numberOfInnermostPixelLayerHits', 'numberOfInnermostPixelLayerHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfPixelDeadSensors', 'numberOfPixelDeadSensors', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfPixelHits', 'numberOfPixelHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfPixelHoles', 'numberOfPixelHoles', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfPixelSharedHits', 'numberOfPixelSharedHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfSCTDeadSensors', 'numberOfSCTDeadSensors', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfSCTHits', 'numberOfSCTHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfSCTHoles', 'numberOfSCTHoles', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfSCTSharedHits', 'numberOfSCTSharedHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfTRTHits', 'numberOfTRTHits', noSys=True)
-            config.addOutputVar (self.containerName, 'numberOfTRTOutliers', 'numberOfTRTOutliers', noSys=True)
+            config.addOutputVar (self.containerName, 'numberOfInnermostPixelLayerHits', 'numberOfInnermostPixelLayerHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfPixelDeadSensors', 'numberOfPixelDeadSensors', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfPixelHits', 'numberOfPixelHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfPixelHoles', 'numberOfPixelHoles', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfPixelSharedHits', 'numberOfPixelSharedHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfSCTDeadSensors', 'numberOfSCTDeadSensors', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfSCTHits', 'numberOfSCTHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfSCTHoles', 'numberOfSCTHoles', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfSCTSharedHits', 'numberOfSCTSharedHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfTRTHits', 'numberOfTRTHits', noSys=True, auxType='unsigned_char')
+            config.addOutputVar (self.containerName, 'numberOfTRTOutliers', 'numberOfTRTOutliers', noSys=True, auxType='unsigned_char')
 
 
 class InDetTrackWorkingPointConfig (ConfigBlock):
