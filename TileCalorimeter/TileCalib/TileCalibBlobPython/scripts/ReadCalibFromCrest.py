@@ -289,6 +289,9 @@ if iov:
 
         #=== IOV only option
         if iovonly or IOVONLY:
+            if comment:
+                for iovs in iovList:
+                    log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
             option = 1 if iovonly else 0
             option += (2 if IOVONLY else 0)
             blobReader.dumpIovs(iovList,rosmin,rosmax,modmin,modmax,option,(rosmin<=0),True)
@@ -349,15 +352,6 @@ for iovs in iovList:
                 modSpec = 'EBspC10'
             elif modName in ['EBA15','EBC18']:
                 modSpec = 'EBspD4'
-            elif modName in ['EBC29','EBC32','EBC34','EBC37']:
-                modSpec = 'EBspE4'
-            elif modName in ['EBA07', 'EBA25', 'EBA44', 'EBA53',
-                             'EBC07', 'EBC25', 'EBC44', 'EBC53',
-                             'EBC28', 'EBC31', 'EBC35', 'EBC38' ]:
-                modSpec = 'EBspE1'
-            elif modName in ['EBA08', 'EBA24', 'EBA43', 'EBA54',
-                             'EBC08', 'EBC24', 'EBC43', 'EBC54' ]:
-                modSpec = 'EBMBTS'
             else:
                 modSpec = modName
             try:

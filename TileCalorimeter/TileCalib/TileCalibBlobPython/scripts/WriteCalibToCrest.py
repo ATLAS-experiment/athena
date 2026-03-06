@@ -432,8 +432,7 @@ for since in iovList:
     log.info("Comment: %s", comm)
     comments+=[comm]
     nvalUpdated += [0]
-    #commentsSplit+=[blobReader.getComment(since,True)]
-    commentsSplit+=[blobReader.getComment(since)]
+    commentsSplit+=[blobReader.getComment(since,True)]
     blobWriters += [TileCalibCrest.TileBlobWriterCrest(outSchema,outfolderPath,typeName)]
 log.info( "\n" )
 
@@ -485,15 +484,6 @@ if len(txtFile)>0:
                     modSpec = 'EBspC10'
                 elif modName in ['EBA15','EBC18']:
                     modSpec = 'EBspD4'
-                elif modName in ['EBC29','EBC32','EBC34','EBC37']:
-                    modSpec = 'EBspE4'
-                elif modName in ['EBA07', 'EBA25', 'EBA44', 'EBA53',
-                                 'EBC07', 'EBC25', 'EBC44', 'EBC53',
-                                 'EBC28', 'EBC31', 'EBC35', 'EBC38' ]:
-                    modSpec = 'EBspE1'
-                elif modName in ['EBA08', 'EBA24', 'EBA43', 'EBA54',
-                                 'EBC08', 'EBC24', 'EBC43', 'EBC54' ]:
-                    modSpec = 'EBMBTS'
                 else:
                     modSpec = modName
                 newDrawer=True
