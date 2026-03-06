@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NswSegmentFinderAlg.h"
@@ -586,14 +586,14 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
             if(!seedHits[1]){
                 continue;
             }
-            for (std::size_t k = j + 1; k < layerSize - 1; ++k) {
-                seedHits[2] = unusedStripHit(hitLayers[k], k);
-                if(!seedHits[2]){
+            for (std::size_t l = layerSize - 1; l > j+1; --l) {
+                seedHits[3] = unusedStripHit(hitLayers[l], l);
+                if(!seedHits[3]){
                     continue;
                 }
-                for (std::size_t l = k + 1; l < layerSize; ++l) {
-                    seedHits[3] = unusedStripHit(hitLayers[l], l);
-                    if(!seedHits[3]){
+                for (std::size_t k = l-1; k > j ; --k) {
+                    seedHits[2] = unusedStripHit(hitLayers[k], k);
+                    if(!seedHits[2]){
                         continue;
                     }
 
