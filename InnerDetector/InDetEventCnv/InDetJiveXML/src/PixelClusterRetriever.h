@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_PIXELCLUSTERRETRIEVER_H
@@ -12,7 +12,6 @@
 #include "InDetPrepRawData/SiClusterContainer.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "StoreGate/DataHandle.h"
 
 namespace JiveXML
 {

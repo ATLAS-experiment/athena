@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -15,7 +15,6 @@
 //Athena includes
 #include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadHandle.h"
 
 //STL includes
