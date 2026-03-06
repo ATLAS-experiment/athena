@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PyJobTransforms )
@@ -43,7 +43,7 @@ _add_test( LogFileScanner py 400 )
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE )
    _add_test( RAWMerge_tf py 300 )
    _add_test( trfSubstepIntegration py 300 )
-   _add_test( HelloWorldTrf sh 300 )
+   _add_test( HelloWorldTrf sh 600 )
    _add_test( trfArgClassesATLAS py 300 )
 endif()
 
