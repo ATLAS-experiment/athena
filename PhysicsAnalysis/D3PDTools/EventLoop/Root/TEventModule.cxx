@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -86,7 +86,7 @@ namespace EL
         m_event->setOtherMetaDataTreeNamePattern( m_otherMetaDataTreeNamePattern );
       }
       if (!m_summaryReport.value())
-        xAOD::TFileAccessTracer::enableDataSubmission (false);
+        xAOD::TFileAccessTracer::instance().enableDataSubmission (false);
 
       m_store.reset (new xAOD::TStore);
 
