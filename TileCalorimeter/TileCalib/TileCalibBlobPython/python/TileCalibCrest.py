@@ -603,8 +603,7 @@ class TileBlobWriterCrest(TileCalibLogger):
                 fileName = f'{self.__db[:-5]}.{fileName}'
 
             with open(fileName, 'w') as the_file:
-                json.dump(jdata, the_file)
-                the_file.write('\n')
+                json.dump(jdata, the_file, separators=(',', ':'), sort_keys=True)
 
         #=== print info
         self.log().info( 'Writting tag "%s"', fullTag)
