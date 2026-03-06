@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <cassert>
 
 // LWTNN
 #include "lwtnn/LightweightGraph.hh"
@@ -102,31 +103,27 @@ bool TFCSEnergyAndHitGAN::initializeNetwork(
   set_eta_max(etaMax / 100.0);
   set_eta_nominal((etaMin + etaMax) / 200.0);
 
-  std::string inputFile =
-      FastCaloGANInputFolderName + "/neural_net_" + std::to_string(pid) +
-      "_eta_" + std::to_string(etaMin) + "_" + std::to_string(etaMax) + ".json";
-  if (inputFile.empty()) {
-    ATH_MSG_ERROR("Could not find json file " << inputFile);
+  std::string inputFile = std::format("{}/neural_net_{}_eta_{}_{}.json", 
+                                     FastCaloGANInputFolderName, pid, etaMin, etaMax);
+  ATH_MSG_INFO("For pid: " << pid << " and eta " << etaMin << "-" << etaMax
+                           << ", loading json file " << inputFile);
+  std::ifstream input(inputFile);
+  if (!input.is_open()) { // check: verify the file actually exists and opened
+    ATH_MSG_ERROR(std::format("Could not open json file: {}", inputFile));
     return false;
-  } else {
-    ATH_MSG_INFO("For pid: " << pid << " and eta " << etaMin << "-" << etaMax
-                             << ", loading json file " << inputFile);
-    std::ifstream input(inputFile);
-    std::stringstream sin;
-    sin << input.rdbuf();
-    input.close();
-    // build the graph
-    auto config = lwt::parse_json_graph(sin);
-    m_graph = new lwt::LightweightGraph(config);
-    if (m_graph == nullptr) {
-      ATH_MSG_ERROR("Could not create LightWeightGraph from  " << inputFile);
-      return false;
-    }
-    if (m_input != nullptr) {
-      delete m_input;
-    }
-    m_input = new std::string(sin.str());
   }
+  std::stringstream sin;
+  sin << input.rdbuf();
+  input.close();
+  // build the graph
+  auto config = lwt::parse_json_graph(sin);
+  m_graph = new lwt::LightweightGraph(config);
+  assert(m_graph!=nullptr);
+  if (m_input != nullptr) {
+    delete m_input;
+  }
+  m_input = new std::string(sin.str());
+
   m_GANLatentSize = 50;
 
   // Get all Binning histograms to store in memory
@@ -142,7 +139,7 @@ bool TFCSEnergyAndHitGAN::initializeNetwork(
 
 void TFCSEnergyAndHitGAN::GetBinning(
     int pid, int etaMid, const std::string &FastCaloGANInputFolderName) {
-  std::string xmlFullFileName = FastCaloGANInputFolderName + "/binning.xml";
+  const std::string xmlFullFileName = std::format("{}/binning.xml", FastCaloGANInputFolderName);
   ATH_MSG_DEBUG("Opening XML file in " << xmlFullFileName);
 
   std::vector<Binning> AllBinning;
@@ -191,10 +188,8 @@ void TFCSEnergyAndHitGAN::GetBinning(
                                          << " binsInAlpha: " << binsInAlpha
                                          << " edges: " << s);
 
-              std::string name = "hist_pid_" + std::to_string(nodePid) +
-                                 "_etaSliceNumber_" +
-                                 std::to_string(EtaMaxList.size()) + "_layer_" +
-                                 std::to_string(layer);
+              std::string name = std::format("hist_pid_{}_etaSliceNumber_{}_layer_{}", 
+                                               nodePid, EtaMaxList.size(), layer);
               int xBins = edges.size() - 1;
               if (xBins == 0) {
                 xBins = 1; // remove warning
@@ -759,7 +754,7 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState *simulstate,
   GAN.Write();
   fGAN->ls();
   fGAN->Close();
-
+  delete fGAN;
   fGAN = TFile::Open("FCSGANtest.root");
   TFCSEnergyAndHitGAN *GAN2 = (TFCSEnergyAndHitGAN *)(fGAN->Get("GAN"));
   GAN2->Print();
@@ -767,4 +762,5 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState *simulstate,
   GAN2->setLevel(MSG::DEBUG);
   GAN2->simulate(*simulstate, truth, extrapol);
   simulstate->Print();
+  delete fGAN;
 }

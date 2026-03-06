@@ -148,6 +148,6 @@ void TestFCalIdentifiers(TString sampling="Sampling_0"){
   
   
 
-
+  delete inputFile;
 
 }
