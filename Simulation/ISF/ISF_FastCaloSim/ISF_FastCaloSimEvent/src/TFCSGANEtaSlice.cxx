@@ -19,11 +19,10 @@
 #include "TH1D.h"
 
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <sstream>
 #include <cmath>
-
+#include <format>
+#include <stdexcept>
 
 TFCSGANEtaSlice::TFCSGANEtaSlice() {}
 
@@ -77,33 +76,41 @@ bool TFCSGANEtaSlice::LoadGAN() {
   bool success = true;
 
   if (m_pid == 211) {
-    inputFileName = m_param.GetInputFolder() + "/neural_net_" +
-                    std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_All.*";
+    inputFileName = std::format("{}/neural_net_{}_eta_{}_{}_All.*",
+                                m_param.GetInputFolder(),
+                                m_pid,
+                                m_etaMin,
+                                m_etaMax);
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
     m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else if (m_pid == 2212) {
-    inputFileName = m_param.GetInputFolder() + "/neural_net_" +
-                    std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_High10.*";
+    inputFileName = std::format("{}/neural_net_{}_eta_{}_{}_High10.*",
+                                m_param.GetInputFolder(),
+                                m_pid,
+                                m_etaMin,
+                                m_etaMax);
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
     m_net_all = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_all == nullptr)
       success = false;
   } else {
-    inputFileName = m_param.GetInputFolder() + "/neural_net_" +
-                    std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_High12.*";
+    inputFileName = std::format("{}/neural_net_{}_eta_{}_{}_High12.*",
+                                m_param.GetInputFolder(),
+                                m_pid,
+                                m_etaMin,
+                                m_etaMax);
     ATH_MSG_DEBUG("Gan input file name " << inputFileName);
     m_net_high = TFCSNetworkFactory::create(inputFileName);
     if (m_net_high == nullptr)
       success = false;
 
-    inputFileName = m_param.GetInputFolder() + "/neural_net_" +
-                    std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) +
-                    "_" + std::to_string(m_etaMax) + "_UltraLow12.*";
+    inputFileName = std::format("{}/neural_net_{}_eta_{}_{}_UltraLow12.*",
+                                m_param.GetInputFolder(),
+                                m_pid,
+                                m_etaMin,
+                                m_etaMax);
     m_net_low = TFCSNetworkFactory::create(std::move(inputFileName));
     if (m_net_low == nullptr)
       success = false;
@@ -112,21 +119,25 @@ bool TFCSGANEtaSlice::LoadGAN() {
 }
 
 void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
-  std::string rootFileName = m_param.GetInputFolder() + "/rootFiles/pid" +
-                             std::to_string(m_pid) + "_E1048576_eta_" +
-                             std::to_string(m_etaMin) + "_" +
-                             std::to_string(m_etaMin + 5) + ".root";
+  std::string rootFileName = std::format("{}/rootFiles/pid{}_E1048576_eta_{}_{}.root",
+                                         m_param.GetInputFolder(),
+                                         m_pid,
+                                         m_etaMin,
+                                         m_etaMin + 5);
   ATH_MSG_DEBUG("Opening file " << rootFileName);
-  TFile *file = TFile::Open(rootFileName.c_str(), "read");
+  std::unique_ptr<TFile> file (TFile::Open(rootFileName.c_str(), "read"));
+  if (!file || file->IsZombie()) {
+      throw std::runtime_error(std::format("Failed to open or initialize ROOT file: {}", rootFileName));
+  }
   for (int layer : m_param.GetRelevantLayers()) {
     ATH_MSG_DEBUG("Layer " << layer);
     TFCSGANXMLParameters::Binning binsInLayers = m_param.GetBinning();
     TH2D *h2 = &binsInLayers[layer];
 
-    std::string histoName = "r" + std::to_string(layer) + "w";
+    std::string histoName = std::format("r{}w", layer);
     TH1D *h1 = (TH1D *)file->Get(histoName.c_str());
     if (std::isnan(h1->Integral())) {
-      histoName = "r" + std::to_string(layer);
+      histoName = std::format("r{}", layer);
       h1 = (TH1D *)file->Get(histoName.c_str());
     }
 
@@ -151,17 +162,20 @@ void TFCSGANEtaSlice::CalculateMeanPointFromDistributionOfR() {
 }
 
 void TFCSGANEtaSlice::ExtractExtrapolatorMeansFromInputs() {
-  std::string rootFileName = m_param.GetInputFolder() + "/rootFiles/pid" +
-                             std::to_string(m_pid) + "_E65536_eta_" +
-                             std::to_string(m_etaMin) + "_" +
-                             std::to_string(m_etaMin + 5) + "_validation.root";
+  std::string rootFileName = std::format("{}/rootFiles/pid{}_E65536_eta_{}_{}_validation.root",
+                                         m_param.GetInputFolder(),
+                                         m_pid,
+                                         m_etaMin,
+                                         m_etaMin + 5);
   ATH_MSG_DEBUG("Opening file " << rootFileName);
-  TFile *file = TFile::Open(rootFileName.c_str(), "read");
+  std::unique_ptr<TFile> file (TFile::Open(rootFileName.c_str(), "read"));
+  if (!file || file->IsZombie()) {
+    throw std::runtime_error(std::format("Failed to open or initialize ROOT file: {}", rootFileName));
+  }
   for (int layer : m_param.GetRelevantLayers()) {
-    std::string branchName = "extrapWeight_" + std::to_string(layer);
     TH1D *h = new TH1D("h", "h", 100, 0.01, 1);
     TTree *tree = (TTree *)file->Get("rootTree");
-    std::string command = branchName + ">>h";
+    std::string command = std::format("extrapWeight_{}>>h", layer);
     tree->Draw(command.c_str());
     m_extrapolatorWeights[layer] = h->GetMean();
     ATH_MSG_DEBUG("Extrapolation: layer " << layer << " mean "
