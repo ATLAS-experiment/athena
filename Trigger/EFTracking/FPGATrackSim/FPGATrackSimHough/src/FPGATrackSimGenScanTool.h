@@ -134,6 +134,7 @@ protected:
     Gaudi::Property<double> m_etaWeight_5hits{this, "etaChi2Weight_5hits", 1.0, "Weight for eta component of chi2 in genscan fit for 5 hit roads"};  
     Gaudi::Property<bool> m_inBinFiltering {this, "inBinFiltering", true, "Filter roads that appear to be outside their bin"};
     Gaudi::Property<int> m_keepHitsStrategy {this, "keepHitsStrategy", -1, "If this is less than 0, do nothing. If 1, pick 3 hits furthest apart. If 2, pick 3 inner hits. If 3, pick 3 outer hits. If 4, drop only middle hit for 5/5 otherwise keep all 4 hits for 4/5"};
+    Gaudi::Property<bool> m_enableMonitoring{this, "enableMonitoring", false, "Turn on monitoring (will be needed for cut optimization and detailed studies, but will increase runtime)"};
 
     ///////////////////////////////////////////////////////////////////////
     // Core
