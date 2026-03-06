@@ -26,7 +26,7 @@ namespace Muon {
 
    
     // implemented
-    using IMuonRawDataProviderTool::convert;
+    
     StatusCode convert(const EventContext& ctx) const override;
 
     StatusCode convert(const std::vector<IdentifierHash>&, const EventContext&) const override;

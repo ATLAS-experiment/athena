@@ -31,7 +31,7 @@ namespace Muon
       /** Standard AlgTool method */
       virtual StatusCode initialize() override;
       // used
-      using IMuonRawDataProviderTool::convert;
+      
 
       virtual StatusCode convert(const EventContext& ctx) const override;
       virtual StatusCode convert(const std::vector<IdentifierHash>& chamberHashes, 

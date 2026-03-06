@@ -68,7 +68,7 @@ namespace Muon {
         /** standard Athena-Algorithm method */
         virtual StatusCode initialize() override;
 
-        using IMuonRawDataProviderTool::convert;
+        
         virtual StatusCode convert(const EventContext& ctx) const override;  //!< for the entire event
         virtual StatusCode convert(const std::vector<IdentifierHash>& HashVec, 
                                    const EventContext& ctx) const override;

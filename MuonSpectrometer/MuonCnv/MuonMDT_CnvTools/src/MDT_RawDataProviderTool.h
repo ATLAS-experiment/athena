@@ -38,7 +38,7 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         /** IMuonRawDataProviderTool interface - EventContext-based methods */
-        using IMuonRawDataProviderTool::convert;
+        
         virtual StatusCode convert(const EventContext& ctx) const override;
         virtual StatusCode convert(const std::vector<IdentifierHash>& HashVec, 
                                    const EventContext& ctx) const override;

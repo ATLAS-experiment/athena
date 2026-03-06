@@ -18,7 +18,7 @@ namespace Muon {
 
 class NSWTP_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProviderTool> {
  public:
-  using IMuonRawDataProviderTool::convert;
+  
   
   using base_class::base_class;
 

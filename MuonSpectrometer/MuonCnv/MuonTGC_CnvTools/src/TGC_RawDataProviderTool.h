@@ -38,7 +38,7 @@ class TGC_RawDataProviderTool
     /** Standard AlgTool method */
     virtual StatusCode initialize() override;
     /** EventContext ones **/
-    using IMuonRawDataProviderTool::convert;
+    
     virtual StatusCode convert(const EventContext&) const override;
     virtual StatusCode convert(const std::vector<IdentifierHash>&,
                                const EventContext&) const override;

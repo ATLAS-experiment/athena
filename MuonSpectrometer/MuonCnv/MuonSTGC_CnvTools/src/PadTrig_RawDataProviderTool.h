@@ -28,7 +28,7 @@ class PadTrig_RawDataProviderTool : public extends<AthAlgTool, IMuonRawDataProvi
   StatusCode initialize() override;
 
   // implemented
-  using IMuonRawDataProviderTool::convert;
+  
   StatusCode convert(const EventContext& ctx) const override;
 
   StatusCode convert(const std::vector<IdentifierHash>& chamberHashes, 
