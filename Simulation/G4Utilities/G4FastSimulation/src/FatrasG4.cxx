@@ -27,12 +27,8 @@
 
 
 FatrasG4::FatrasG4(const std::string& name,
-                         G4Region* region,
-                         bool doG4Transport,
-                         FatrasG4Tool * /*FatrasG4Tool*/)
-
-: G4VFastSimulationModel(name, region),
-  m_doG4Transport(doG4Transport)
+		   G4Region* region)
+  : G4VFastSimulationModel(name, region)
 {
 }
 
