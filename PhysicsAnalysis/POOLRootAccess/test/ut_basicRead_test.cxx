@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,22 +21,22 @@
 //coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
-   xAOD::TFileAccessTracer::enableDataSubmission(false); // disable file reporting in unittest 
-  
+   xAOD::TFileAccessTracer::instance().enableDataSubmission(false); // disable file reporting in unittest
+
    ANA_CHECK_SET_TYPE (int);
    using namespace asg::msgUserCode;
-   
+
 
    std::string whatToRead = "$ASG_TEST_FILE_MC";
    if(argc>1) whatToRead = argv[1];
 
-   std::cout << "reading: " << whatToRead << std::endl; 
+   std::cout << "reading: " << whatToRead << std::endl;
 
    const xAOD::EventInfo_v1* evtInfo = 0;
 
 
    ANA_CHECK (xAOD::Init());
-   TChain* c = new TChain("CollectionTree"); 
+   TChain* c = new TChain("CollectionTree");
    c->Add(whatToRead.c_str());
    xAOD::TEvent evt2;
    ANA_CHECK (evt2.readFrom(c));
@@ -79,7 +79,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    st.Print();
    std::cout << "POOLRootAccess Event rate = " << double(maxEvt)/st.RealTime() << " Hz" << std::endl;
 
-   xAOD::TFileAccessTracer::enableDataSubmission(false);
+   xAOD::TFileAccessTracer::instance().enableDataSubmission(false);
 
 
    return 0;

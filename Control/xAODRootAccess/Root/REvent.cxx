@@ -16,6 +16,7 @@
 #include "xAODRootAccess/tools/TIncident.h"
 #include "xAODRootAccess/tools/Utils.h"
 #include "xAODRootAccess/tools/TEventFormatRegistry.h"
+#include "xAODRootAccess/tools/TFileAccessTracer.h"
 
 // Framework include(s).
 #include "AthContainers/AuxElement.h"
@@ -70,21 +71,21 @@ std::string  getFieldNameFromKey( const std::string& key ) {
   // build RNTuple field name from the key of the output object
   // RNTuple field names require replacing '.' with ':' for <cont>Aux. or <cont>AuxDyn.<var>
   std::string fieldName = key;
-  if (fieldName.rfind("Aux.") != std::string::npos || fieldName.rfind("AuxDyn.") != std::string::npos) { 
+  if (fieldName.rfind("Aux.") != std::string::npos || fieldName.rfind("AuxDyn.") != std::string::npos) {
     std::replace(fieldName.begin(), fieldName.end(), '.', ':');
   }
   return fieldName;
 }
 
 
-StatusCode getInfoForFieldCreation( const std::string& key, const xAOD::TVirtualManager& mgr, 
+StatusCode getInfoForFieldCreation( const std::string& key, const xAOD::TVirtualManager& mgr,
                                     std::string& fieldName, std::string& className ) {
 
   // Get field name from the key
   fieldName = getFieldNameFromKey(key);
 
-  // Get class name from holder 
-  // There are two managers to consider: 
+  // Get class name from holder
+  // There are two managers to consider:
   //   ROutObjManager   - standard objects
   //   RAuxFieldManager - aux either simple type (isPrimitive) or - aux non-simple type
   // Check for ROutObjManager
@@ -165,6 +166,9 @@ StatusCode REvent::readFrom(TFile& inFile) {
 StatusCode REvent::readFrom(std::string_view fileName) {
 
   ATH_MSG_INFO("REvent::readFrom:  fileName " << fileName);
+
+  // Set up the file access tracer.
+  TFileAccessTracer::instance().add(fileName);
 
   // Clear the cached input objects.
   m_inputObjects.clear();
@@ -334,7 +338,7 @@ StatusCode REvent::readFrom(std::string_view fileName) {
 
 
 
-/// This function should be called to create a file for writing and 
+/// This function should be called to create a file for writing and
 /// setup the output RNTuple and metadata trees
 ///
 /// @param file the TFile to which the output is writter
@@ -343,7 +347,7 @@ StatusCode REvent::writeTo(TFile& file) {
 
   // Save filefor writing
   m_outputFile = &file;
-  
+
   ATH_MSG_DEBUG("REvent::writeTo - opened output file " << m_outputFile->GetName());
 
   // Access the EventFormat object associated with this file:
@@ -476,7 +480,7 @@ StatusCode REvent::finishWritingTo(TFile& file) {
   // Get entry for writing
   auto rnEntry = metaDataWriter->GetModel().CreateBareEntry();
 
-  // Now loop over all object managers and bind the output object pointers 
+  // Now loop over all object managers and bind the output object pointers
   // to the those in the output metadata RNTuple
   for (auto &[key, mgr] : m_outputMetaObjects) {
 
@@ -504,7 +508,7 @@ StatusCode REvent::finishWritingTo(TFile& file) {
   }
 
   // Now clean up:
-  
+
   // reset output EventFormat
   m_outputEventFormat = 0;
   m_outputObjects.clear();
@@ -516,7 +520,7 @@ StatusCode REvent::finishWritingTo(TFile& file) {
   m_eventWriter.reset();
 
   metaDataWriter.reset();
-  
+
   // Return gracefully:
   return StatusCode::SUCCESS;
 } // finishWriting
@@ -688,7 +692,7 @@ bool REvent::hasOutput() const {
   // Get entry for writing
   auto rnEntry = m_eventWriter->GetModel().CreateBareEntry();
 
-  // Now loop over all object managers and bind the output object pointers 
+  // Now loop over all object managers and bind the output object pointers
   // to the those in the output RNTuple
   ::Int_t nbytes = 0;
   for (auto &[key, mgr] : m_outputObjects) {
@@ -749,7 +753,7 @@ StatusCode REvent::getNames(const std::string& targetClassName,
 
   // Get list of fields from
   // the input metadata tree or input tree
-  
+
   ROOT::RNTupleReader* reader = (metadata) ? m_metaReader.get() : m_eventReader.get();
   if (reader == nullptr) {
     ATH_MSG_ERROR("No input file is connected");
@@ -768,7 +772,7 @@ StatusCode REvent::getNames(const std::string& targetClassName,
       }
   }
 
-  // check output objects 
+  // check output objects
   if (m_eventWriter && !metadata){
       ATH_MSG_DEBUG("scanning output objects for type name " << targetClassName);
       // add in names for all top level fields
@@ -789,7 +793,7 @@ StatusCode REvent::getNames(const std::string& targetClassName,
 
   // Search though EventFormat for entries where class matches the provided
   // typeName
-  
+
   ATH_MSG_DEBUG("scanning output Aux objects for type name " << targetClassName);
 
   for( const auto& object : outAux ) {
@@ -1339,10 +1343,10 @@ StatusCode REvent::setAuxStore(const std::string& key,
 /// @returns <code>kTRUE</code> if the operation was successful, or
 ///          <code>kFALSE</code> if it was not
 ///
-StatusCode REvent::record( void* obj, 
+StatusCode REvent::record( void* obj,
                            const std::string& typeName,
                            const std::string& key,
-                           bool overwrite, 
+                           bool overwrite,
                            bool metadata,
                            bool isOwner ) {
 
@@ -1384,7 +1388,7 @@ StatusCode REvent::record( void* obj,
   // key may not be used for recording.
   if( ( ! overwrite ) &&
     ( m_inputObjects.find( key ) != m_inputObjects.end() ) ) {
-    ATH_MSG_FATAL( "Object " << typeName << "/" << key << 
+    ATH_MSG_FATAL( "Object " << typeName << "/" << key <<
                    " already accessed from the input, can't be overwritten in memory" );
     return StatusCode::FAILURE;
   }
@@ -1415,7 +1419,7 @@ StatusCode REvent::record( void* obj,
     // of the object if it has any:
     ATH_CHECK( putAux( *outmgrPtr ) );
 
-    /// Add field to RNTuple model 
+    /// Add field to RNTuple model
     ATH_CHECK( addField(key, *outmgrPtr) );
 
     // Return at this point, as we don't want to run the rest of
@@ -1483,7 +1487,7 @@ StatusCode REvent::recordAux(TVirtualManager& mgr, const std::string& key,
 /// The first time an aux store variable is encountered, an RAuxFieldManager
 /// is created to manage it. And for each call, the manager holder is set
 /// to point to the aux variable.
-/// Note: this may be called when recording an aux container, but new aux 
+/// Note: this may be called when recording an aux container, but new aux
 ///       variables may be created up to a call to fill
 /// One also needs to keep track of empty aux containers on the first event
 /// to allow to add in the aux fields to the RNTuple model for the next event
@@ -1599,7 +1603,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
 
         // Let's create an RAuxFieldManager for this property:
         static constexpr bool IS_OWNER = false;
-        auto auxmgr = std::make_unique<RAuxFieldManager>( 
+        auto auxmgr = std::make_unique<RAuxFieldManager>(
           std::make_unique<THolder>(aux->getIOData( id ), *brType, IS_OWNER), isPrimitive );
         outmgrPtr = auxmgr.get();
 
@@ -1617,7 +1621,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
           cl = TClass::GetClass( brTypeName.c_str() );
           // If still not found...
           if( ! cl ) {
-            ATH_MSG_FATAL( "Dictionary not available for variable \"" << dynKey 
+            ATH_MSG_FATAL( "Dictionary not available for variable \"" << dynKey
                             << "\" of type \"" << brTypeName << "\"" );
             return StatusCode::FAILURE;
           }
@@ -1628,7 +1632,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
 
         // Let's create an RAuxFieldManager for this property - not a primitive:
         static constexpr bool IS_OWNER = false;
-        auto auxmgr = std::make_unique<RAuxFieldManager>( 
+        auto auxmgr = std::make_unique<RAuxFieldManager>(
           std::make_unique<THolder>(aux->getIOData( id ), cl, IS_OWNER), isPrimitive );
         outmgrPtr = auxmgr.get();
         objects[ dynKey ] = std::move(auxmgr);
@@ -1637,7 +1641,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
       // For event data, add in the the new fields to the RNTuple model and event format metadata
       if (!metadata) {
 
-        /// Add field to RNTuple model 
+        /// Add field to RNTuple model
         ATH_CHECK( addField(dynKey, *outmgrPtr) );
 
         // If all went fine, let's add this branch to the event format
@@ -1653,7 +1657,7 @@ StatusCode REvent::putAux( TVirtualManager& vmgr, ::Bool_t metadata ) {
 
       // We don't need to do the rest:
       continue;
-    } 
+    }
 
     ATH_MSG_DEBUG("REvent::putAux -  setObj " << dynKey);
 
