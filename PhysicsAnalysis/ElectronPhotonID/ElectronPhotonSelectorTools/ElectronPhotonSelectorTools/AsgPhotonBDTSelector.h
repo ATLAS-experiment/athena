@@ -75,7 +75,7 @@ private:
   StatusCode loadConfig();
   // Core accept method (BDT-based selection)
   asg::AcceptData acceptBDT(const EventContext& ctx, const xAOD::Photon& ph, unsigned int* isEM = nullptr) const;
-  const asg::AcceptInfo& getAcceptInfo() const;
+  virtual const asg::AcceptInfo& getAcceptInfo() const override;
 
   // Tool to compute and decorate score
   ToolHandle<PhotonBDTCalculator> m_bdtTool {this, "BDTTool", "", "Photon BDT calculator tool"};
