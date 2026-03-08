@@ -25,9 +25,9 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
   virtual bool noDetectorError(const xAOD::EventInfo* eventInfo) const override;
 
   virtual bool noPUZDCvsFCal(HI::IonDataType period,
-                           const xAOD::HIEventShapeContainer* es,
-                           const xAOD::ZdcModuleContainer* zdcModules,
-                           HI::PileupVariation variation) const override;
+                             const xAOD::HIEventShapeContainer* es,
+                             const xAOD::ZdcModuleContainer* zdcModules,
+                             HI::PileupVariation variation) const override;
 
   virtual float fcalEt(HI::IonDataType period,
                        const xAOD::HIEventShapeContainer* es) const override;
@@ -47,19 +47,22 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
 
   virtual int nTrk(HI::IonDataType dataType,
                    const xAOD::TrackParticleContainer* tracks,
-                   const xAOD::VertexContainer* vertices)  const override;
+                   const xAOD::VertexContainer* vertices) const override;
 
   virtual bool noPUFCalVsNtracks(
       IonDataType dataType, float fcalEt, int ntrk,
       PileupVariation variation = PileupVariation::Nominal) const override;
 
   virtual bool noPUZDCPresampler(HI::IonDataType period,
-                               const xAOD::ZdcModuleContainer* zdcModules,
-                               HI::PileupVariation variation) const override;
+                                 const xAOD::ZdcModuleContainer* zdcModules,
+                                 HI::PileupVariation variation) const override;
 
   virtual bool noPUZDCPresampler(
       IonDataType dataType, float presamplerA, float presamplerC,
       PileupVariation variation = PileupVariation::Nominal) const override;
+
+  virtual std::pair<float, float> ZDCPresamplerAmps(
+      const xAOD::ZdcModuleContainer* zdcModules) const override;
 
   virtual bool noPUOOVertexCuts(
       IonDataType dataType,

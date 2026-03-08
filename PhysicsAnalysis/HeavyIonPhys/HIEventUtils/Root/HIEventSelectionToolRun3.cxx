@@ -67,9 +67,9 @@ std::string HI::toString(SelectionMask m) {
 #undef ENUMDEF
 }
 
-static const double MeV=1.;
-static const double GeV=1e3;
-static const double TeV=1e6;
+static const double MeV = 1.;
+static const double GeV = 1e3;
+static const double TeV = 1e6;
 
 std::unique_ptr<TH1D> loadHist(const std::string& file) {
   const std::string path =
@@ -173,7 +173,7 @@ bool HI::HIEventSelectionToolRun3::noPUZDCvsFCal(
     const xAOD::ZdcModuleContainer* zdcModules,
     HI::PileupVariation variation) const {
   return noPUZDCvsFCal(period, fcalEt(period, es), zdcE(period, zdcModules),
-                     variation);
+                       variation);
 }
 
 bool HI::HIEventSelectionToolRun3::noPUZDCvsFCal(
@@ -208,12 +208,11 @@ bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(
     const xAOD::TrackParticleContainer* tracks,
     const xAOD::VertexContainer* vertices, PileupVariation variation) const {
   return noPUFCalVsNtracks(period, fcalEt(period, es),
-                         nTrk(period, tracks, vertices), variation);
+                           nTrk(period, tracks, vertices), variation);
 }
 
-bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(HI::IonDataType period,
-                                                   float fcalEt, int ntrk,
-                                                   HI::PileupVariation) const {
+bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(
+    HI::IonDataType period, float fcalEt, int ntrk, HI::PileupVariation) const {
   ATH_MSG_DEBUG("cutting puFCalVsNtracks: fcalEt " << fcalEt << " ntracks "
                                                    << ntrk);
   // for reference, thes numbers are taken from:
@@ -243,13 +242,13 @@ bool HI::HIEventSelectionToolRun3::noPUFCalVsNtracks(HI::IonDataType period,
   return false;  // for unimplemented periods
 }
 
-bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
-    HI::IonDataType period, const xAOD::ZdcModuleContainer* zdcModules,
-    HI::PileupVariation variation) const {
+std::pair<float, float> HI::HIEventSelectionToolRun3::ZDCPresamplerAmps(
+    const xAOD::ZdcModuleContainer* zdcModules) const {
   float PreSamplerAmp_A = 0;
   float PreSamplerAmp_C = 0;
   static const SG::ConstAccessor<float> accPreSampleAmp("PreSampleAmp");
   for (const auto module : *zdcModules) {
+
     if (module->zdcType() != 0)
       continue;
     if (module->zdcSide() > 0)
@@ -257,15 +256,19 @@ bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
     if (module->zdcSide() < 0)
       PreSamplerAmp_A += accPreSampleAmp(*module);
   }
+  return {PreSamplerAmp_A, PreSamplerAmp_C};
+}
+
+bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
+    HI::IonDataType period, const xAOD::ZdcModuleContainer* zdcModules,
+    HI::PileupVariation variation) const {
+  auto [PreSamplerAmp_A, PreSamplerAmp_C] = ZDCPresamplerAmps(zdcModules);
   return noPUZDCPresampler(period, PreSamplerAmp_A, PreSamplerAmp_C, variation);
 }
 
 bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
     HI::IonDataType period, float presamplerA, float presamplerC,
     HI::PileupVariation variation) const {
-  // not sure if fcalEt will be involved i.e. apply this cut only above certain
-  // fcalEt
-
   if (period == HI::IonDataType::PbPb2023) {
     // from ATL-COM-PHYS-2025-033 + priv. communication F.Pauwels
     const float peakPositionA = -56;
@@ -281,10 +284,12 @@ bool HI::HIEventSelectionToolRun3::noPUZDCPresampler(
     }
     if (presamplerA > (peakPositionA + sigma * peakWidthA) and
         presamplerC > (peakPositionC + sigma * peakWidthC)) {
-      return true;  // it is pileup
+      return false;  // it is pileup
     }
+    return true;
   }
-  return false;
+  throw std::runtime_error(std::string("ZDC PreSampleAmp for period of id ") +
+                           HI::toString(period) + " is not handled (yet)");
 }
 
 bool HI::HIEventSelectionToolRun3::noPUOOVertexCuts(

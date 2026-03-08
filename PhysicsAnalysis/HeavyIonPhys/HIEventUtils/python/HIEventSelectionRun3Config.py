@@ -27,6 +27,26 @@ def HIEventSelectionRun3MonToolCfg(flags):
 
     monTool.defineHistogram( 'fcalEt,nTrk;fcalEt_vs_nTrk_failed', cutmask='PUFCalVsNTrackAny_failed', path='EXPERT', type='TH2F', title=';FCal Et;nTrk',
                              xbins=160, xmin=0, xmax=1000, ybins=120, ymin=0, ymax=600)
+    
+
+
+    monTool.defineHistogram( 'zdcPreSampleA;zdcPreSampleA_all', path='EXPERT', type='TH1F', title='all;ZDCPreampleAmp side A',
+                             xbins=100, xmin=-400, xmax=1000)
+
+    monTool.defineHistogram( 'zdcPreSampleC;zdcPreSampleC_all', path='EXPERT', type='TH1F', title='all;ZDCPreampleAmp side C',
+                             xbins=100, xmin=-400, xmax=1000)
+
+
+    monTool.defineHistogram( 'zdcPreSampleA,zdcPreSampleC', path='EXPERT', type='TH2F', title='correlation;ZDCPreampleAmp side A;ZDCPreampleAmp side C',
+                             xbins=50, xmin=-400, xmax=1000, ybins=50, ymin=-400, ymax=1000)
+
+    monTool.defineHistogram( 'zdcPreSampleA;zdcPreSampleA_failed', cutmask="NoPUZDCPresampler_failed", path='EXPERT', type='TH1F', title='failed;ZDCPreampleAmp side A',
+                             xbins=100, xmin=-400, xmax=1000)
+
+    monTool.defineHistogram( 'zdcPreSampleC;zdcPreSampleC_failed', cutmask="NoPUZDCPresampler_failed", path='EXPERT', type='TH1F', title='failed;ZDCPreampleAmp side C',
+                             xbins=100, xmin=-400, xmax=1000)
+    
+    
     prefix=flags.Input.Files[0].split("/")[-1]
     histsvc = CompFactory.THistSvc(Output=[f"EXPERT DATAFILE='{prefix}HIEventSelectionRun3Validation.root' OPT='RECREATE'"])
     acc.addService(histsvc)        
@@ -46,7 +66,9 @@ def HIEventSelectionRun3Cfg(flags, enableValidation=False):
     # ZDC modules collection change its name
     zdcKey=None
     zdcNeeded=True  # in the future add check if ZDC info is required in fact
-    if zdcNeeded and "ZDCModules" in flags.Input.Collections:
+    if zdcNeeded and "ZdcModules" in flags.Input.Collections:
+        zdcKey="ZdcModules"
+    elif zdcNeeded and "ZDCModules" in flags.Input.Collections:
         zdcKey="ZDCModules"
     elif zdcNeeded and "ZdcSums" in flags.Input.Collections:
         zdcKey="ZdcSums"
