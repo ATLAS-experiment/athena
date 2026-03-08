@@ -12,6 +12,8 @@
  <class name="DataVector<TrigRoiDescriptor>" />
  <class name="std::vector<TrigRoiDescriptor*>" />
  <class name="std::vector<const TrigRoiDescriptor*>" />
+ <!-- Used by Views as decoration -->
+ <class name="std::vector<ElementLink<TrigRoiDescriptorCollection>>" />
 
  <class name="TrigPassBits" id="AE9EA3A9-5E80-4DCA-90D0-A40BBC5F68DD">
    <field name="m_container_ptr" transient="true" />

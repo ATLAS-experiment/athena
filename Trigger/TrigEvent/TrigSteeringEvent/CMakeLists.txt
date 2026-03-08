@@ -21,6 +21,7 @@ elseif( XAOD_ANALYSIS )
    atlas_add_dictionary( TrigSteeringEventDict
       TrigSteeringEvent/TrigSteeringEventDict.h TrigSteeringEvent/selection.xml
       DATA_LINKS TrigRoiDescriptor TrigSuperRoi
+      ELEMENT_LINKS TrigRoiDescriptorCollection
       LINK_LIBRARIES TrigSteeringEvent )
 else()
    # External dependencies:
@@ -37,6 +38,7 @@ else()
    atlas_add_dictionary( TrigSteeringEventDict
       TrigSteeringEvent/TrigSteeringEventDict.h TrigSteeringEvent/selection.xml
       DATA_LINKS TrigRoiDescriptor TrigSuperRoi
+      ELEMENT_LINKS TrigRoiDescriptorCollection
       LINK_LIBRARIES TrigSteeringEvent )
 
    # Second dictionary for athena-only classes.
