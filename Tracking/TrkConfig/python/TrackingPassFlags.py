@@ -233,6 +233,7 @@ def createITkTrackingPassFlags():
 
     # --- flags for ACTS tracking
     icf.addFlag("isSecondaryPass", False)
+    icf.addFlag("isLargeD0", False)
 
     return icf
 
