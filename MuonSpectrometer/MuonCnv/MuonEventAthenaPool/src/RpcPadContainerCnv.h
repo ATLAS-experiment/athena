@@ -26,10 +26,10 @@ RpcPadContainerCnv;
 template < >
 inline
 RpcPadContainer*
-RpcPadContainerCnv::createTransient()
+RpcPadContainerCnv::createTransient(const Token* token)
 {
     MsgStream log(msgSvc(), "RpcPadContainerCnv" );
-    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient() "<< endmsg;
+    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Entered createTransient(const Token* token) "<< endmsg;
 
     // the use of auto pointers ensures that the persistent object is deleted
     // using the correct persistent type pointer
@@ -38,24 +38,24 @@ RpcPadContainerCnv::createTransient()
     static const pool::Guid	p2_guid("3B29433B-015F-4664-AB3F-A6B2FAA8C97F");
     static const pool::Guid	p1_guid("60A912DD-7920-4DCE-986E-6CD5644835BD");
     static const pool::Guid	p0_guid("85B897F6-E15D-4215-9DAC-EA2828BCEEC9");
-    if( compareClassGuid(p2_guid) ) {
+    if( compareClassGuid(token, p2_guid) ) {
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** createTransient - p2 " << endmsg;
 
-        std::unique_ptr< RpcPadContainer_p2 > col_vect( poolReadObject< RpcPadContainer_p2 >() );
+        std::unique_ptr< RpcPadContainer_p2 > col_vect( poolReadObject< RpcPadContainer_p2 >(token) );
         trans_cont = m_TPconverter.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p1_guid) ) {
+    } else if( compareClassGuid(token, p1_guid) ) {
         if (log.level() <= MSG::DEBUG)log << MSG::DEBUG << " **** createTransient - p1 "
             << endmsg;
 
-        std::unique_ptr< RpcPadContainer_p1 > col_vect( poolReadObject< RpcPadContainer_p1 >() );
+        std::unique_ptr< RpcPadContainer_p1 > col_vect( poolReadObject< RpcPadContainer_p1 >(token) );
         RpcPadContainerCnv_p1 cnv;
         trans_cont = cnv.createTransient( col_vect.get(), log );
-    } else if( compareClassGuid(p0_guid) ) {
+    } else if( compareClassGuid(token, p0_guid) ) {
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** createTransient - p0 "
             << endmsg;
 
         // old version from before TP separation
-        std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >() );
+        std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >(token) );
         trans_cont = createTransientFrom_p0( col_vect.get(), log );
     }
     else {

@@ -8,7 +8,6 @@
 //    Main class for building the GeoModel geometry, and handle the GeometryManager and
 //    DetectorManager.
 //
-#include "StoreGate/DataHandle.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorManager.h"

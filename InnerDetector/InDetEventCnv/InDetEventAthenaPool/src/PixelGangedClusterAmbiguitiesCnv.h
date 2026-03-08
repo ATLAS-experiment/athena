@@ -27,7 +27,7 @@ public:
   PixelGangedClusterAmbiguitiesCnv (ISvcLocator* svcloc) : PixelGangedClusterAmbiguitiesCnvBase(svcloc, "PixelGangedClusterAmbiguitiesConverter") {}
 protected:
   virtual PixelGangedClusterAmbiguities_PERS*   createPersistent (InDet::PixelGangedClusterAmbiguities* transObj);
-  virtual InDet::PixelGangedClusterAmbiguities*        createTransient ();
+  virtual InDet::PixelGangedClusterAmbiguities*        createTransient(const Token* token);
 private:
   PixelGangedClusterAmbiguitiesCnv_p1 m_TPconverter;
 };

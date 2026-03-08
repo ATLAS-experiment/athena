@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MPIHiveEventLoopMgr.h"
 
@@ -494,8 +494,4 @@ StatusCode MPIHiveEventLoopMgr::drainLocalScheduler() {
   }
 
   return fail;
-}
-
-inline StoreGateSvc* MPIHiveEventLoopMgr::eventStore() const {
-  return m_eventStore.get();
 }

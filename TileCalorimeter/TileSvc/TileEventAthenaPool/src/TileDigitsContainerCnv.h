@@ -20,7 +20,7 @@ public:
 
 protected:
   TileDigitsContainer_PERS*  createPersistent(TileDigitsContainer* transCont);
-  TileDigitsContainer*       createTransient ();
+  TileDigitsContainer*       createTransient(const Token* token);
 };
 
 

@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_SGIMPLSVC_H
@@ -39,7 +39,6 @@
 #include "AthenaKernel/StoreID.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "AthenaKernel/IHiveStoreMgr.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "CxxUtils/RefCountedPtr.h"
 
@@ -230,25 +229,6 @@ public:
   }
 
   //@}
-
-  /////////////////////////////////////////////////////////////////////////
-  /// \name IOVSvc interface
-  //@{
-
-  /// register a callback function(2) with an already registered function(1)
-  StatusCode regFcn (const CallBackID& c1,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-
-  /// register a callback function(2) with an already registered AlgTool
-  StatusCode regFcn (const std::string& toolName,
-                     const CallBackID& c2,
-                     const IOVSvcCallBackFcn& fcn,
-                     bool trigger = false);
-  
-  //@}
-  /////////////////////////////////////////////////////////////////////////
 
   /// get proxy for a given data object address in memory
   virtual SG::DataProxy* proxy(const void* const pTransient) const override final;
@@ -637,11 +617,6 @@ private:
   /// Also do registration with IOVSvc.
   bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
                                      IResetable* ir, SG::DataProxy *&dp);
-  bool bindHandleToProxyAndRegister (const CLID& id, const std::string& key,
-                                     IResetable* ir, SG::DataProxy *&dp,
-                                     const CallBackID& c,
-                                     const IOVSvcCallBackFcn& fcn,
-                                     bool trigger);
 
 /// remove proxy from store, unless it is reset only.         
   /// provide pTrans!=0 (must match proxy...) to save time

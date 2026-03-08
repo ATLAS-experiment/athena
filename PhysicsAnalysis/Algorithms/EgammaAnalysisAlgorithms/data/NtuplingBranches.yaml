@@ -1,0 +1,96 @@
+ElectronCalibrationConfig:
+  - name: pt
+    description: electron $p_\mathrm{T}$
+  - name: eta
+    description: electron $\eta$ (no systematics)
+  - name: phi
+    description: electron $\phi$ (no systematics)
+  - name: charge
+    description: electron charge (no systematics)
+  - name: e
+    description: electron $E$ (*since AnalysisBase 25.2.13*)
+  - name: truth_type
+    description: type of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_origin
+    description: origin of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_firstEgMotherPdgId
+    description: PDG ID of the mother truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_firstEgMotherTruthOrigin
+    description: origin of the mother truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_firstEgMotherTruthType
+    description: type of the mother truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: caloEta2
+    description: the calo-cluster $\eta$ from the 2nd sampling layer (no systematics)
+    toggled_by: decorateCaloClusterEta
+  - name: d0sig
+    description: the $d_0$ significance (no systematics)
+    toggled_by: writeTrackD0Z0
+  - name: z0sintheta
+    description: the $z_0\sin\theta$ parameter (no systematics)
+    toggled_by: writeTrackD0Z0
+
+ElectronWorkingPointSelectionConfig:
+  - name: select
+    description: whether the electron passes the ID and isolation cuts
+
+ElectronWorkingPointEfficiencyConfig:
+  - name: reco_effSF
+    description: the per-electron reconstruction SF
+  - name: id_effSF
+    description: the per-electron ID SF
+  - name: isol_effSF
+    description: the per-electron isolation SF
+  - name: ecids_effSF
+    description: the per-electron charge-ID selector SF
+    toggled_by: chargeIDSelectionRun2
+  - name: charge_misid_effSF
+    description: the per-electron charge-misID SF
+    toggled_by: addChargeMisIDSF
+
+ElectronTriggerAnalysisSFBlock:
+  - name: <prefixSF>
+    description: the per-electron trigger efficiency SF
+  - name: <prefixEff>
+    description: the per-electron trigger MC efficiency
+    toggled_by: saveEff
+
+PhotonCalibrationConfig:
+  - name: pt
+    description: photon $p_\mathrm{T}$
+  - name: eta
+    description: photon $\eta$ (no systematics)
+  - name: phi
+    description: photon $\phi$ (no systematics)
+  - name: e
+    description: photon $E$ (*since AnalysisBase 25.2.13*)
+  - name: truth_type
+    description: type of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: truth_origin
+    description: origin of the corresponding truth particle (no systematics)
+    toggled_by: decorateTruth
+  - name: caloEta2
+    description: the calo-cluster $\eta$ from the 2nd sampling layer (no systematics)
+    toggled_by: decorateCaloClusterEta
+
+PhotonWorkingPointSelectionConfig:
+  - name: select
+    description: whether the photon passes the ID and isolation cuts
+
+PhotonWorkingPointEfficiencyConfig:
+  - name: id_effSF
+    description: the per-photon ID SF
+  - name: isol_effSF
+    description: the per-photon isolation SF
+
+PhotonExtraVariablesBlock:
+  - name: conversionType
+    description: photon conversion type (no systematics)
+  - name: caloEta2
+    description: calorimeter $\eta$ from 2nd sampling layer (no systematics)
+

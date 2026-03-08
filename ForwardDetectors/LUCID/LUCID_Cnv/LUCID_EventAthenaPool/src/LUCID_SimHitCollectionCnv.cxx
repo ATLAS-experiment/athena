@@ -20,7 +20,7 @@ LUCID_SimHitCollection_PERS* LUCID_SimHitCollectionCnv::createPersistent(LUCID_S
 }
 
 
-LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient() {
+LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient(const Token* token) {
   MsgStream mlog(msgSvc(), "LUCID_SimHitCollectionCnv");
   mlog << MSG::DEBUG << "In LUCID_SimHitCollectionCnv::createTransient " << endmsg;
   LUCID_SimHitCollectionCnv_p1 converter_p1;
@@ -32,23 +32,23 @@ LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient() {
   static const pool::Guid old_guid("7BCDF079-FD96-4B18-B1E7-FA5EDDB026F2");
 
   LUCID_SimHitCollection* trans_cont{};
-  if (this->compareClassGuid(p3_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p3 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p3 >());
+  if (this->compareClassGuid(token, p3_guid)) {
+    std::unique_ptr< LUCID_SimHitCollection_p3 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p3 >(token));
     trans_cont = converter_p3.createTransient(col_vect.get(), mlog);
   }
-  else if (this->compareClassGuid(p2_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p2 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p2 >());
+  else if (this->compareClassGuid(token, p2_guid)) {
+    std::unique_ptr< LUCID_SimHitCollection_p2 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p2 >(token));
     trans_cont = converter_p2.createTransient(col_vect.get(), mlog);
   }
-  else if(this->compareClassGuid(p1_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p1 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p1 >());
+  else if(this->compareClassGuid(token, p1_guid)) {
+    std::unique_ptr< LUCID_SimHitCollection_p1 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p1 >(token));
     trans_cont = converter_p1.createTransient(col_vect.get(), mlog);
   }
-  else if(this->compareClassGuid(old_guid)) {
-    trans_cont = this->poolReadObject<LUCID_SimHitCollection>();
+  else if(this->compareClassGuid(token, old_guid)) {
+    trans_cont = this->poolReadObject<LUCID_SimHitCollection>(token);
   }
   else {
-    mlog << MSG::ERROR << "BAD GUID: " << m_i_poolToken->toString() << endmsg;
+    mlog << MSG::ERROR << "BAD GUID: " << token->toString() << endmsg;
     throw std::runtime_error("Unsupported persistent version of Data container");
   }
   return trans_cont;

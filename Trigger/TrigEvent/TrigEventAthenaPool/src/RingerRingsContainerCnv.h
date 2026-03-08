@@ -29,7 +29,7 @@ public:
 protected:
  
   virtual RingerRingsContainer_PERS *createPersistent(RingerRingsContainer *transObj);
-  virtual RingerRingsContainer *createTransient();
+  virtual RingerRingsContainer *createTransient(const Token* token);
 
 private:
   RingerRingsContainerCnv_tlp1 m_converter_tlp1;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
 #define MUONRECTOOLINTERFACESR4_IPATTERNVISUALIZATIONTOOL_H
@@ -109,22 +109,6 @@ namespace MuonValR4{
                                           const MuonR4::Segment& segment,
                                           const std::string& extraLabel,
                                           PrimitiveVec&& extraPaints) const = 0;
-
-            /** @brief Visualize the measurement objects associated with a reconstructed segment fromt he segment.             
-             *  @param ctx: EventContext used to access geometry, calibration, and alignment conditions.
-             *  @param segment: Reference to the reconstructed segment whose measurements shall be visualized.
-             *  @param extraLabel: The extra label for the obj file otuput name.*/    
-            virtual void visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
-                                                          const MuonR4::Segment& segment,
-                                                          const std::string& extraLabel) const = 0;
-
-            /** @brief Visualize the underlying measurement objects from the calibrated space points.             
-             *  @param ctx: EventContext used to access geometry, calibration, and alignment conditions.
-             *  @param measVec: Reference to the calibrated spacepoints we want to visualize.
-             *  @param extraLabel: The extra label for the obj file output name.*/   
-            virtual void visualizeSegmentsMeasurementsObj(const EventContext& ctx, 
-                                                          const MuonR4::Segment::MeasVec& measVec,
-                                                          const std::string& extraLabel) const = 0;
 
             /** @brief Returns whether the hit has been used on the labeled segments we refer to (e.g. truth or data Zµµ)
              *  @param hit: Reference to the hit to check */

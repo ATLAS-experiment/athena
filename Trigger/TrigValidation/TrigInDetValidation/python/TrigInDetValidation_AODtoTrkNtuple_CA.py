@@ -253,8 +253,11 @@ if ( True ) :
 
     #displaced jet lrt
     "HLT_j180_.*dispjet.*_L1J100:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ", 
-    "HLT_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ"
+    "HLT_j180_.*dispjet.*_L1jJ160:key=HLT_IDTrack_DJLRT_FTF:roi=HLT_Roi_DJ",
 
+    "HLT_2mu4_l2io_invmDimu_L12MU3V:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh",
+    "HLT_mu4_bBhh_L1MU3V:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh"
+      
     ]
 
   from PyUtils.Helpers import release_metadata

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PFOClusterMLCorrectionAlgorithm_H
@@ -14,13 +14,12 @@
 ///
 //////////////////////////////////////////////////
 
-#include "eflowRec/IPFOContainerCorrectionTool.h"
+#include "IPFOContainerCorrectionTool.h"
 
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/FlowElementContainer.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 
 class PFOClusterMLCorrectionAlgorithm : public AthReentrantAlgorithm
 {

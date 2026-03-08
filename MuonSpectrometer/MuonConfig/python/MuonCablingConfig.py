@@ -59,40 +59,13 @@ def RPCLegacyCablingConfigCfg(flags):
     return acc
 
 
-def TGCCablingDbToolCfg(flags):
-    acc = ComponentAccumulator()
-
-    filename = 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db'
-    acc.setPrivateTools(CompFactory.TGCCablingDbTool(name = "TGCCablingDbTool",
-                                                     filename_ASD2PP_DIFF_12 = filename))
-
-    return acc
-
-
-def MuonTGC_CablingSvcCfg(flags):
-    acc = ComponentAccumulator()
-
-    svc = CompFactory.MuonTGC_CablingSvc()
-    tool = acc.popToolsAndMerge(TGCCablingDbToolCfg(flags))
-    # The same tool is used as a public tool by TGCCableASDToPP and a
-    # private tool by MuonTGC_CablingSvc - not great...
-    acc.addPublicTool(tool)
-    svc.TGCCablingDbTool = tool
-    acc.addService(svc, primary = True)
-
-    return acc
-
-
-def TGCCablingConfigCfg(flags):
+def TGCCablingConfigCfg(flags, name="TgcCablingCondAlg", **kwargs):
     acc = ComponentAccumulator()
     if not flags.Detector.GeometryTGC: return acc
 
-    acc.merge(MuonTGC_CablingSvcCfg(flags))
-
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    dbName = 'TGC_OFL' if flags.Input.isMC else 'TGC'
-    acc.merge(addFolders(flags, '/TGC/CABLING/MAP_SCHEMA', dbName))
-
+    kwargs.setdefault("databaseASDtoPPdiff", 'ASD2PP_diff_12_OFL.db' if flags.Input.isMC else 'ASD2PP_diff_12_ONL.db')
+    the_alg = CompFactory.Muon.TgcCablingCondAlg(name, **kwargs)
+    acc.addCondAlgo(the_alg, primary = True)
     return acc
 
 # This should be checked by experts since I just wrote it based on 

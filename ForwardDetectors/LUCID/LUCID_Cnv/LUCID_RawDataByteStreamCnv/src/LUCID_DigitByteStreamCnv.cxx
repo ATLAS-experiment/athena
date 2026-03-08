@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_DigitByteStreamCnv.h"
@@ -34,7 +34,7 @@ StatusCode LUCID_DigitByteStreamCnv::initialize() {
   return StatusCode::SUCCESS;
 }
 
-const CLID& LUCID_DigitByteStreamCnv::classID() {
+CLID LUCID_DigitByteStreamCnv::classID() {
 
   return ClassID_traits<LUCID_DigitContainer>::ID();
 }

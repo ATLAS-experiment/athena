@@ -15,7 +15,7 @@ def EfexSimMonitoringConfig(flags):
 
     # sim monitoring requires knowing how close to a LAr masking the event is, add MaskedSCCondAlg
     from LArBadChannelTool.LArBadChannelConfig import LArMaskedSCCfg
-    result.merge( LArMaskedSCCfg(flags, reloadEveryEvent = flags.Common.isOnline and flags.DQ.doMonitoring) )
+    result.merge( LArMaskedSCCfg(flags) )
 
     # use L1Calo's special MonitoringCfgHelper
     from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper

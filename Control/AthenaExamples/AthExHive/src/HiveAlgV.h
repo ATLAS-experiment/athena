@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,7 +30,7 @@ public:
   // Define the initialize and execute methods:
   
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   
 private:
   
@@ -45,10 +45,10 @@ private:
     this, "Key_WV", {}, "Array of WriteHandleKey<HiveDataObj>" };
 
   // do the actual reading of the ReadHandleArray
-  StatusCode read() const;
+  StatusCode read(const EventContext& ctx) const;
 
   // do the actual writing of the ReadHandleArray
-  StatusCode write();
+  StatusCode write(const EventContext& ctx) const;
    
 };
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -7,11 +7,10 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "TrkCompetingRIOsOnTrack/CompetingRIOsOnTrack.h"
-// CLHEP
-//#include "CLHEP/Matrix/SymMatrix.h"
+
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-
+#include "GaudiKernel/MsgStream.h"
 #include <boost/io/ios_state.hpp>
 #include <iostream>
 

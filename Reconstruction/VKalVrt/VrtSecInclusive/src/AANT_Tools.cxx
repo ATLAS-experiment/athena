@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -264,7 +264,7 @@ namespace VKalVrtAthena {
     
     for ( const xAOD::TrackParticle* trk : m_selectedTracks ) {
       
-      if( m_jp.FillNtuple ) {
+      if( m_FillNtuple ) {
         uint8_t tmpT;
         if( !(trk->summaryValue(tmpT,xAOD::numberOfPixelHits)) )  tmpT=0;
         m_ntupleVars->get< vector<int> >( "SVTrk_PixHits" ).emplace_back( (int) tmpT);
@@ -285,7 +285,7 @@ namespace VKalVrtAthena {
       //
       const auto& perigee = trk->perigeeParameters();
       
-      if( m_jp.FillNtuple ) {
+      if( m_FillNtuple ) {
       
         double phi       = perigee.parameters()[Trk::phi];
         double theta     = perigee.parameters()[Trk::theta];
@@ -311,7 +311,7 @@ namespace VKalVrtAthena {
       
         double matchProb = -1;
         int uniqueID = HepMC::UNDEFINED_ID;
-        if(m_jp.doTruth) 
+        if(m_doTruth) 
           {  
             const xAOD::TruthParticle* aTemp_truth = getTrkGenParticle( trk );
             if( aTemp_truth )

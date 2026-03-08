@@ -7,7 +7,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "ReadoutGeometryBase/SiCellId.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"

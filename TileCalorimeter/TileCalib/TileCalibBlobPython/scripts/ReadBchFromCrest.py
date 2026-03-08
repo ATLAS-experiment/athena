@@ -165,9 +165,12 @@ if len(tag)==0 or tag.endswith('HEAD'):
         tag=''
 
 folderTag = tag
-if folderTag.upper().startswith("TILE") or folderTag.upper().startswith("CALO") :
+tag = tag.upper()
+tag1 = tag.split('_')[1][:4] if '_' in tag else tag[:4]
+if tag1 == "TILE" or tag1 == "CALO" or tag.startswith("TILE") or tag.startswith("CALO"):
     folderPath=""
-log.info("Initializing folder %s with tag %s", folderPath, folderTag)
+if not os.path.isfile(schema):
+    log.info("Initializing folder %s with tag %s", folderPath, folderTag)
 
 #=== create bad channel manager
 mgr = TileBchCrest.TileBchMgr()
@@ -260,6 +263,9 @@ if iov:
 
         #=== IOV only option
         if iovonly or IOVONLY:
+            if comment:
+                for iovs in iovList:
+                    log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
             option = 1 if iovonly else 0
             option += (2 if IOVONLY else 0)
             blobReader.dumpIovs(iovList,rosmin,rosmax,modmin,modmax,option,(rosmin<=0),True)

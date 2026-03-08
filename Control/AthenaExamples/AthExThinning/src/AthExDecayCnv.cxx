@@ -56,7 +56,7 @@ AthExDecayCnv::createPersistent(AthExDecay* transCont)
   return persObj; 
 }
 
-AthExDecay* AthExDecayCnv::createTransient() 
+AthExDecay* AthExDecayCnv::createTransient(const Token* token) 
 {
    MsgStream msg( msgSvc(), "AthExDecayConverter" );
 
@@ -64,10 +64,10 @@ AthExDecay* AthExDecayCnv::createTransient()
 
    static const pool::Guid p1_guid("FD6FC38A-2EE4-4EC6-916B-DBF6A8E88A03");
 
-   if ( compareClassGuid(p1_guid) ) {
+   if ( compareClassGuid(token, p1_guid) ) {
 
      // using unique_ptr ensures deletion of the persistent object
-     std::unique_ptr<AthExDecay_p1> persObj( poolReadObject<AthExDecay_p1>() );
+     std::unique_ptr<AthExDecay_p1> persObj( poolReadObject<AthExDecay_p1>(token) );
      AthExDecayCnv_p1 cnv;
      transObj = cnv.createTransient( persObj.get(), msg );
      

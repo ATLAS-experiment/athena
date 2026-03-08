@@ -190,13 +190,16 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    int pucA = 0;
    int pucB = 0;
    int pucC = 0;
+   int pucA_JWJ = 0;
+   int pucB_JWJ = 0;
+   int pucC_JWJ = 0;
    //note that jetThreshold is not a configurable parameter in firmware, it is used to check that jet values are positive
    int jetThreshold = FEXAlgoSpaceDefs::jetThr; //this threshold is set by the online software 
 
    if (FEXAlgoSpaceDefs::ENABLE_PUC == true){
-      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA,  1,  pucA);
-      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB,  1,  pucB);
-      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC,  1,  pucC);
+      m_gFEXJetAlgoTool->pileUpCalculation(Atwr50, gLJ_rhoMaxA, 1, pucA, pucA_JWJ);
+      m_gFEXJetAlgoTool->pileUpCalculation(Btwr50, gLJ_rhoMaxB, 1, pucB, pucB_JWJ);
+      m_gFEXJetAlgoTool->pileUpCalculation(Ctwr50, gLJ_rhoMaxC, 1, pucC, pucC_JWJ);
    }
    
    
@@ -278,7 +281,7 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
                                        aFPGA_C, bFPGA_C,
                                        gXE_seedThrA, gXE_seedThrB, gXE_seedThrC);
 
-   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, Btwr, Ctwr, outJwojTOB);
+   auto global_tobs = m_gFEXJwoJAlgoTool->jwojAlgo(Atwr, pucA_JWJ, Btwr, pucB_JWJ, Ctwr, pucC_JWJ, outJwojTOB);
 
    m_gScalarEJwojTobWords.resize(1);
    m_gMETComponentsJwojTobWords.resize(1);
@@ -292,14 +295,19 @@ StatusCode gFEXSim::executegFEXSim(const gTowersIDs& tmp_gTowersIDs_subset, gFEX
    m_gMHTComponentsJwojTobWords[0] = outJwojTOB[2];//
    m_gMSTComponentsJwojTobWords[0] = outJwojTOB[3];//
 
+   //Parameters related to altMet (noise cut and rho+RMS algorithms)
+   auto & thr_gXE_altMet = l1Menu->thrExtraInfo().gXE();
+   int noiseCutThrA = thr_gXE_altMet.noiseCutThr('A');
+   int noiseCutThrB = thr_gXE_altMet.noiseCutThr('B');
+   int noiseCutThrC = thr_gXE_altMet.noiseCutThr('C');
 
-   //Set constants for noise cut and rho+RMS and run the algorithms
-   std::vector<int> thr_A (12, 0);//To be retrieved from COOL database in the future
-   std::vector<int> thr_B (12, 0);//To be retrieved from COOL database in the future
+   std::vector<int> thr_A(12, noiseCutThrA);
+   std::vector<int> thr_B(12, noiseCutThrB);
+   std::vector<int> thr_C(16, noiseCutThrC);   
 
-   m_gFEXaltMetAlgoTool->setAlgoConstant(std::move(thr_A) , std::move(thr_B), 10000/200);
-      
-   m_gFEXaltMetAlgoTool->altMetAlgo(Atwr, Btwr, outAltMetTOB);
+   m_gFEXaltMetAlgoTool->setAlgoConstant(std::move(thr_A) , std::move(thr_B), std::move(thr_C), 10000/200);
+
+   m_gFEXaltMetAlgoTool->altMetAlgo(Atwr, Btwr, Ctwr, outAltMetTOB);
 
    m_gMETComponentsNoiseCutTobWords.resize(1);
    m_gMETComponentsRmsTobWords.resize(1);

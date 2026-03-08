@@ -21,7 +21,6 @@
 #include "CaloUtils/CaloCellCorrection.h"
 
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
 

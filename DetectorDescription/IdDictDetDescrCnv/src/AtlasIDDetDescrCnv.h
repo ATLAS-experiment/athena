@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -28,7 +28,7 @@ public:
 
     // Storage type and class ID (used by CnvFactory)
     static long int    storageType();
-    static const CLID& classID();
+    static CLID classID();
 
     AtlasIDDetDescrCnv(ISvcLocator* svcloc);
 };

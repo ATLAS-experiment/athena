@@ -16,7 +16,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloInterface/ICaloAffectedTool.h"
 #include "CaloConditions/CaloAffectedRegionInfoVec.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 
 namespace xAOD {
   class IParticle;

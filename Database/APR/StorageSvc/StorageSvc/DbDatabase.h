@@ -145,11 +145,6 @@ namespace pool  {
                   const std::string& pfn,
                   const std::string& fid,
                   DbAccessMode mode = pool::READ);
-    /// Re-open database with changing access permissions
-    /** @param   mode      [IN]  Open mode (Valid modes are READ, UPDATE).
-      * @return Status code indicating success or failure.
-      */
-    StatusCode reopen(DbAccessMode mode = pool::READ);
     /// Close Database
     StatusCode close();
     /// End database access, but still leave database accessible
@@ -189,7 +184,7 @@ namespace pool  {
     /// Add association link to link container
     StatusCode makeLink(Token* pToken, Token::OID_t& linkH);
     /// Add persistent shape to the Database
-    StatusCode addShape (const DbTypeInfo* pShape);
+    StatusCode addShape(const DbTypeInfo* pShape);
     /// Retrieve persistent type information by class handle
     const DbTypeInfo* objectShape(const RootType& typeH);
     /// Retrieve persistent type information by name
@@ -201,8 +196,6 @@ namespace pool  {
     /// Allow access to all known containers
     StatusCode containers(std::vector<const Token*>& conts, bool intern=false);
     StatusCode containers(std::vector<IDbContainer*>& conts, bool intern=false);
-    /// Allow access to all known associations between containers
-    StatusCode associations(std::vector<const Token*>& assocs);
     /// Allow access to all known shapes used by the database
     StatusCode shapes(std::vector<const DbTypeInfo*>& shaps);
     /// Let the implementation access the internals

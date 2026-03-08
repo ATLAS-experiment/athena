@@ -27,7 +27,7 @@ public:
   SCT_FlaggedCondDataCnv(ISvcLocator* svcloc) : SCT_FlaggedCondDataCnvBase(svcloc) {}
 protected:
   virtual SCT_FlaggedCondData_PERS* createPersistent(SCT_FlaggedCondData* transCont);
-  virtual SCT_FlaggedCondData* createTransient();
+  virtual SCT_FlaggedCondData* createTransient(const Token* token);
 
   SCT_FlaggedCondDataCnv_p1 m_TPConverter;
 };

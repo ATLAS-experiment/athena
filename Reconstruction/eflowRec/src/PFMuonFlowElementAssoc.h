@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -16,7 +16,6 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODPFlow/FlowElementContainer.h"
 #include "StoreGate/WriteDecorHandle.h"

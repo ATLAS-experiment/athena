@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PyUtils )
@@ -68,13 +68,22 @@ else()
        PROPERTIES TIMEOUT 450
        LOG_IGNORE_PATTERN "Ran 1 test in |CheckABICompatibility|standard library|import imp|imp module" )
 
-   atlas_add_test( Decorators
+    atlas_add_test( Decorators
        SCRIPT test/test_Decorators.py
        POST_EXEC_SCRIPT nopost.sh
-   )
+    )
     
     atlas_add_test( fprint_test
                     SCRIPT python -m PyUtils.fprint )
+
+    # tests that should not run in AthGeneration, AthSimulation or analysis releases
+    if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
+        atlas_add_test( filter_files_raw_run3_data22
+                        SCRIPT test/filter_files_raw_run3_data22.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        POST_EXEC_SCRIPT nopost.sh
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+    endif()
 
     # Create python package dependencies in release building mode.
     # Used as input for `acmd.py cmake depends`:

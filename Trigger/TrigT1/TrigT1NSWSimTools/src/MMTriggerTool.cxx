@@ -21,6 +21,7 @@ namespace NSWL1 {
     ATH_CHECK(m_keyMmDigitContainer.initialize());
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_detectorManagerKey.initialize());
+    ATH_CHECK(m_dcsKey.initialize(!m_isMC));
 
     if(m_doNtuple and Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
       ATH_MSG_ERROR("DoNtuple is not possible in multi-threaded mode");
@@ -173,12 +174,28 @@ namespace NSWL1 {
       return StatusCode::FAILURE;
     }
 
+    const NswDcsDbData* dcsData = nullptr;
+    if(!m_isMC) {
+      SG::ReadCondHandle<NswDcsDbData> dcsDataHandle{m_dcsKey, ctx};
+      if(!dcsDataHandle.isValid()) {
+        ATH_MSG_ERROR("Failed to retrieve DCS data while running on data");
+        return StatusCode::FAILURE;
+      }
+      dcsData = dcsDataHandle.cptr();
+    }
+
     for (const MmDigitCollection* digitCollection : *readMmDigitContainer) {
 
       std::vector<std::shared_ptr<MMT_Hit> > ev_hits;
       for (const MmDigit* digit : *digitCollection) {
         const Identifier id = digit->identify();
         if (not m_idHelperSvc->isMM(id)) continue;
+
+        if(!m_isMC) {
+          if(!dcsData->isConnectedChannel(id) or !dcsData->isGood(ctx, id) or !dcsData->isGoodHv(id) or !dcsData->isGoodEltx(id)) continue;
+          bool disabled = false;
+          if(!dcsData->isGoodTDaq(ctx,id,disabled)) continue;
+        }
 
         const std::string stationName = m_idHelperSvc->chamberNameString(id);
         const int stationEta = m_idHelperSvc->stationEta(id);

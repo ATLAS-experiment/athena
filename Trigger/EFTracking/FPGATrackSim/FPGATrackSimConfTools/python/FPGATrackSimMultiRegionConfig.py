@@ -28,7 +28,6 @@ def FPGATrackSimRunFirstStageOnManyRegions(flags):
                   **{'FPGATrackSimHitKey_1st': f"FPGAHits_1st_reg{region}",
                      'FPGATrackSimHitKey_2nd': f"FPGAHits_2nd_reg{region}",
                      'FPGATrackSimHitFiltered1stKey': f"FPGAHitsFiltered_1st_reg{region}",
-                     'FPGATrackSimHitInRoads1stKey': f"FPGAHitsInRoads_1st_reg{region}",
                      'FPGATrackSimRoad1stKey': f"FPGARoads_1st_reg{region}",
                      'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}",
                      'FPGATrackSimSpacePoints1stKey': f"FPGASpacePoints_1st_reg{region}"}))
@@ -47,7 +46,6 @@ def FPGATrackSimRunSecondStageOnManyRegions(flags):
         acc.merge(FPGATrackSimSecondStageConfig.FPGATrackSimSecondStageAlgCfg(flags2nd,
                   **{'FPGATrackSimHitKey': f"FPGAHits_2nd_reg{region}",
                      'FPGATrackSimTrack1stKey': f"FPGATracks_1st_reg{region}",
-                     'FPGATrackSimHitInRoads2ndKey': f"FPGAHitsInRoads_2nd_reg{region}",
                      'FPGATrackSimRoad2ndKey': f"FPGARoads_2nd_reg{region}",
                      'FPGATrackSimTrack2ndKey': f"FPGATracks_2nd_reg{region}"}))
     return acc
@@ -73,11 +71,9 @@ def FPGATrackSimRegionMergeringAlgCfg(flagsIn,name="FPGATrackSimRegionMergingAlg
     regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
     TrackCollections = [f"FPGATracks_{stage}_reg{region}" for region in regionList]
     RoadCollections = [f"FPGARoads_{stage}_reg{region}" for region in regionList]
-    HitsInRoadsCollections = [f"FPGAHitsInRoads_{stage}_reg{region}" for region in regionList]
     
     kwargs.setdefault('FPGATrackSimTrackCollections',TrackCollections)
     kwargs.setdefault('FPGATrackSimRoadCollections',RoadCollections)
-    kwargs.setdefault('FPGATrackSimHitsInRoadsCollections',HitsInRoadsCollections)
     
     regionMerging = CompFactory.FPGATrackSim.FPGATrackSimRegionMergingAlg(name,**kwargs)
     regionMerging.doOverlapRemoval = flags.Trigger.FPGATrackSim.doOverlapRemovalBetweenRegions

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -12,7 +12,6 @@
 
 // Framework include files
 #include "StorageSvc/DbDomain.h"
-#include "StorageSvc/DbSession.h"
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
 #include "CxxUtils/checker_macros.h"
@@ -28,19 +27,11 @@ DbDomain::DbDomain(DbDomainObj* dom)   {
   if ( dom ) setType(dom->type());
 }
 
-StatusCode DbDomain::open(DbSession& sesH,const DbType& typ,DbAccessMode mod)  {
-  if ( !isValid() )   {
-    if ( sesH.isValid() )    {
-      DbType db_typ(typ.majorType());
-      DbDomainObj* dom = sesH.find(db_typ);
-      if ( !dom )   {
-        dom = new DbDomainObj(sesH, db_typ, mod);
-      }
-      switchPtr(dom);
-      return dom->open(mod);
-    }
-    close().ignore();
-    return StatusCode::FAILURE;
+StatusCode DbDomain::open(IOODatabase* imp, const DbType& typ, DbAccessMode mod)  {
+  if ( !isValid() ) {
+    DbDomainObj* dom = new DbDomainObj(imp, typ.majorType(), mod);
+    switchPtr(dom);
+    return dom->open(mod);
   }
   return StatusCode::SUCCESS;
 }
@@ -72,7 +63,7 @@ void DbDomain::switchPtr(DbDomainObj* obj) {
    }
 }
 
-/// Add domain to session
+/// Add database to domain
 StatusCode DbDomain::add(const string& nam, DbDatabaseObj* dbH) {
   StatusCode sc = StatusCode::FAILURE;
   if ( isValid() && dbH )    {
@@ -84,7 +75,7 @@ StatusCode DbDomain::add(const string& nam, DbDatabaseObj* dbH) {
   return sc;
 }
 
-/// Find domain in session
+/// Remove a database from the domain
 StatusCode DbDomain::remove(DbDatabaseObj* dbH) {
   StatusCode sc = StatusCode::FAILURE;
   if ( isValid() && dbH )    {
@@ -99,12 +90,6 @@ StatusCode DbDomain::remove(DbDatabaseObj* dbH) {
   return sc;
 }
 
-/// Check for the existence of a domain within a session
-bool DbDomain::exist(DbSession& sH, int typ) const
-{  return sH.find(typ) != 0;                                            }
-
-DbSession DbDomain::containedIn() const 
-{  return isValid() ? ptr()->session() : DbSession();                   }
 
 /// Access to access mode
 DbAccessMode DbDomain::openMode() const
@@ -118,7 +103,7 @@ const string& DbDomain::name() const
 int DbDomain::refCount() const
 {  return isValid() ? ptr()->refCount() : int(INVALID);                 }
 
-/// Find domain in session
+/// Find database in domain
 const DbDatabaseObj* DbDomain::find(const string& db_name) const 
 {  return isValid() ? ptr()->find(db_name) : 0;                         }
 

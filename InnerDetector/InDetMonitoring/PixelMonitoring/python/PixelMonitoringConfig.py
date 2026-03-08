@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.Enums import BeamType
 
@@ -71,7 +71,8 @@ def PixelMonitoringConfig(flags):
             for k, v in kwargsClusMonAlg.items():
                 setattr(pixelAthClusterMonAlg, k, v)
 
-            from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg
+            from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+                InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg)
             TrackSelectionTool = acc.popToolsAndMerge(
                 InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(
                     flags, maxNPixelHoles = 2)) # Default for TightPrimary is 0
@@ -111,7 +112,8 @@ def PixelMonitoringConfig(flags):
             for k, v in kwargsMVAMonAlg.items():
                 setattr(pixelAthMVAMonAlg, k, v)
 
-            from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg
+            from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+                InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg)
             TrackSelectionTool = acc.popToolsAndMerge(
                 InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags,
                                                                     maxNPixelHoles

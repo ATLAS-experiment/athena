@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
@@ -6,7 +7,7 @@
 # Usefull for quick testing using EMTopo jets for tau seeding 
 # run with
 #
-# athena --CA runTauOnly_EMTopo.py 
+# athena runTauOnly_EMTopo.py 
 # or
 # python runTauOnly_EMTopo.py
 

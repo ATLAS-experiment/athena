@@ -1,9 +1,11 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/MultiRange.h"
-#include <iostream>
+#include "GaudiKernel/MsgStream.h"
+
+#include <sstream>
 #include <algorithm> //remove_if
 #include <ranges>
 #include <numeric>
@@ -233,10 +235,7 @@ bool MultiRange::const_identifier_factory::operator == (const const_identifier_f
   return (m_id == other.m_id);
 } 
  
-//----------------------------------------------- 
-void MultiRange::show () const {
-  show (std::cout);
-}
+
 
 void MultiRange::show (std::ostream& s) const { 
   range_vector::size_type i; 
@@ -246,6 +245,12 @@ void MultiRange::show (std::ostream& s) const {
     r.show (s); 
   } 
 } 
+
+void MultiRange::show (MsgStream & out) const { 
+  std::ostringstream os;
+  show(os);
+  out << os.str();
+}
  
 //----------------------------------------------- 
 MultiRange::operator std::string () const { 

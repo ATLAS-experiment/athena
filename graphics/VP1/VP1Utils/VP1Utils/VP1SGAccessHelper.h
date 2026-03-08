@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -43,7 +43,7 @@ public:
   template <typename T>
   bool retrieve(SG::ConstIterator<T>& begin, SG::ConstIterator<T>& end, bool silent = false );//Returns false in case of errors.
   //silent = true means all output will be redirected to verbose level
-  //  -> NB: This DataHandle retrieval is something we should avoid in VP1!!!
+  //  -> NB: This SG retrieval is something we should avoid in VP1!!!
   //  -> If you absolutely need to use it (due to bad implementations
   //  -> in upstream data providers), please use VP1SGContentsHelper
   //  -> to check that there is not more than one collection of the

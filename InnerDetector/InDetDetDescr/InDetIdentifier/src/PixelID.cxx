@@ -19,12 +19,11 @@
 #include "Identifier/IdContext.h"
 #include <set>
 #include <algorithm>
-#include <iostream>
 
 using InDetIdentifierPkg::formatOutput;
 
-PixelID::PixelID()
-  : AtlasDetectorID("PixelID", "pixel")
+PixelID::PixelID(const std::string & name, const std::string & group)
+  : AtlasDetectorID(name, group)
 {
   m_barrel_field.add_value(0);
   m_dbm_field.add_value(0); //DBM
@@ -682,20 +681,20 @@ PixelID::initLevelsFromDict() {
   
   if (msgLvl(MSG::DEBUG)){ 
     for (int i{};i != nImplementations; ++i){
-      std::cout<< formatOutput(m_implNames[i], m_impl[i]);
-      m_impl[i].ored_field().show();
+      msg() << formatOutput(m_implNames[i], m_impl[i]);
+      m_impl[i].ored_field().show(msg());
     }
     
     //
-    std::cout << "PixelID::initLevelsFromDict - found levels \n";
-    std::cout << "subdet        " << m_INDET_INDEX << "\n";
-    std::cout << "part          " << m_PIXEL_INDEX << "\n";
-    std::cout << "barrel_endcap " << m_BARREL_EC_INDEX << "\n";
-    std::cout << "layer or disk " << m_LAYER_DISK_INDEX << "\n";
-    std::cout << "phi_module    " << m_PHI_MODULE_INDEX << "\n";
-    std::cout << "eta_module    " << m_ETA_MODULE_INDEX << "\n";
-    std::cout << "phi_index     " << m_PHI_INDEX_INDEX << "\n";
-    std::cout << "eta_index     " << m_ETA_INDEX_INDEX << "\n";
+    msg() << "PixelID::initLevelsFromDict - found levels \n";
+    msg() << "subdet        " << m_INDET_INDEX << "\n";
+    msg() << "part          " << m_PIXEL_INDEX << "\n";
+    msg() << "barrel_endcap " << m_BARREL_EC_INDEX << "\n";
+    msg() << "layer or disk " << m_LAYER_DISK_INDEX << "\n";
+    msg() << "phi_module    " << m_PHI_MODULE_INDEX << "\n";
+    msg() << "eta_module    " << m_ETA_MODULE_INDEX << "\n";
+    msg() << "phi_index     " << m_PHI_INDEX_INDEX << "\n";
+    msg() << "eta_index     " << m_ETA_INDEX_INDEX << "\n";
   }
   return(0);
 }

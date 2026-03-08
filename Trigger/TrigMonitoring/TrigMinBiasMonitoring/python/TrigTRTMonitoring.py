@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 """
 @brief Configuration for the heavy-ion part of MinBias monitoring
@@ -18,7 +18,8 @@ def TrigTRTMonCfg(flags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     alg = monConfig.addAlgorithm(CompFactory.TRTMonitoringAlg, 'TRTMonitoringAlg')
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_LoosePrimary_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_LoosePrimary_Cfg)
     trkSel = monConfig.resobj.popToolsAndMerge(InDetTrackSelectionTool_LoosePrimary_Cfg(flags))
     alg.TrackSelectionTool = trkSel
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionEvaluation_GenAccessor_h_
 #define _ExpressionEvaluation_GenAccessor_h_
@@ -21,13 +21,19 @@ namespace ExpressionParsing {
       template <class T_Dest, class T_Cont, class T_Helper>
       static void fillVector(T_Helper &helper, SG::ReadHandle<T_Cont> &handle, std::vector<T_Dest> &result) {
          result.reserve(1);
-         result.push_back( static_cast<T_Dest>( helper.get( *handle ) ));
+         auto val = helper.get( *handle );
+         // @TODO or throw an exception if the type conversion is not loss-less?
+         assert( val == static_cast<decltype(val)>(static_cast<T_Dest>(val)));
+         result.push_back( static_cast<T_Dest>(val));
       }
 
       template <class T_Dest, class T_Cont, class T_Helper>
       static T_Dest getScalar(T_Helper &helper, SG::ReadHandle<T_Cont> &handle,const T_Dest &dummy) {
          (void) dummy;
-         return static_cast<T_Dest>( helper.get( *handle ) );
+         auto val = helper.get( *handle );
+         // @TODO or throw an exception if the type conversion is not loss-less?
+         assert( val == static_cast<decltype(val)>(static_cast<T_Dest>(val)));
+         return static_cast<T_Dest>( val );
       }
    };
 
@@ -41,7 +47,10 @@ namespace ExpressionParsing {
          //         helper.checkSize(n_elements);
          result.reserve(n_elements);
          for(std::size_t idx =0; idx <n_elements; ++idx) {
-            result.push_back( static_cast<T_Dest>( helper.get(*handle, idx)) );
+            auto val = helper.get(*handle, idx);
+            // @TODO or throw an exception if the type conversion is not loss-less?
+            assert( val == static_cast<decltype(val)>(static_cast<T_Dest>(val)));
+            result.push_back( static_cast<T_Dest>( val ) );
          }
       }
       template <class T_Dest, class T_Cont, class T_Helper>
@@ -50,8 +59,10 @@ namespace ExpressionParsing {
          if (getContainerSize(*handle) != 1) {
             BaseAccessor::throwVectorContainsNotOneElement(handle.key(), getContainerSize(*handle));
          }
-
-         return static_cast<T_Dest>( helper.get(*handle, 0));
+         auto val = helper.get(*handle, 0);
+         // @TODO or throw an exception if the type conversion is not loss-less?
+         assert( val == static_cast<decltype(val)>(static_cast<T_Dest>(val)));
+         return static_cast<T_Dest>(val);
       }
    };
 
@@ -62,22 +73,22 @@ namespace ExpressionParsing {
    template <class T_Cont, class T_HelperKit, class T_ScalarVectorHelper>
    class GenAccessor : public BaseAccessor {
    public:
-      GenAccessor(const SG::ReadHandleKey<T_Cont> &key, T_HelperKit &&helper_kit, IProxyLoader::VariableType variable_type)
+      GenAccessor(const SG::ReadHandleKey<T_Cont> &key, T_HelperKit &&helper_kit, IAccessor::VariableType variable_type)
          : BaseAccessor(variable_type),
            m_key(&key),
            m_helperKit(std::move(helper_kit))
       {}
 
-      virtual int loadInt(const EventContext& ctx) const override {
+      virtual int loadInt(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadScalar<int>(ctx);
       }
-      virtual double loadDouble(const EventContext& ctx) const override {
+      virtual double loadDouble(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadScalar<double>(ctx);
       }
-      virtual std::vector<int> loadVecInt(const EventContext& ctx) const override {
+      virtual std::vector<int> loadVecInt(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadVector<int>(ctx);
       }
-      virtual std::vector<double> loadVec(const EventContext& ctx) const override {
+      virtual std::vector<double> loadVec(const EventContext& ctx, [[maybe_unused]] const std::string &var_name) const override {
          return this->loadVector<double>(ctx);
       }
    protected:

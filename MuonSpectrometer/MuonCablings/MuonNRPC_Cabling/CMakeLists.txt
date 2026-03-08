@@ -12,7 +12,7 @@ atlas_add_component( MuonNRPC_Cabling
                      src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel GaudiKernel StoreGateLib MuonIdHelpersLib 
-                                    MuonCablingData AthenaPoolUtilities MuonCondSvcLib PathResolver SGTools )
+                                    MuonCablingData AthenaPoolUtilities PathResolver SGTools )
 
 atlas_install_python_modules( python/*.py 
                              POST_BUILD_CMD ${ATLAS_FLAKE8} )

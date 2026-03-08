@@ -13,7 +13,7 @@ namespace DiTau{
 class CorePlots: public PlotBase {
   public:
     CorePlots(PlotBase *pParent, const std::string& sDir, std::string sDiTauJetContainerName);
-    virtual ~CorePlots();
+    virtual ~CorePlots() = default;
     void fill(const xAOD::DiTauJet& ditau, float weight);
 
     TH1* eta{};

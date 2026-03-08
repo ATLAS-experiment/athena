@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TEnv.h>
@@ -32,7 +32,7 @@ StatusCode PileupAreaCalibStep::calibrate(xAOD::JetContainer& jetCont) const {
   SG::ReadHandle<xAOD::EventShape> rhRhoKey(m_rhoKey);
   double rho=0;
   if(!rhRhoKey.isValid()){
-    ATH_MSG_FATAL("Could not retrieve xAOD::EventShape DataHandle : "<< m_rhoKey.key());
+    ATH_MSG_FATAL("Could not retrieve xAOD::EventShape : "<< m_rhoKey.key());
     return StatusCode::FAILURE;
   }
   const xAOD::EventShape * eventShape = rhRhoKey.cptr();

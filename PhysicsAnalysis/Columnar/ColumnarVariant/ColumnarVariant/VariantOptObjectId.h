@@ -129,19 +129,19 @@ namespace columnar
     OptObjectId (std::nullopt_t) noexcept {}
 
     OptObjectId (ObjectId<CI,CM> val_object) noexcept
-      : m_data (val_object.getData()), m_variantIndex (val_object.getVariantIndex()), m_objectIndex (val_object.getObjectIndex())
+      : m_dataArea (val_object.getDataArea()), m_variantIndex (val_object.getVariantIndex()), m_objectIndex (val_object.getObjectIndex())
     {}
 
     template<ContainerIdConcept CI2>
       requires (CI::template isValidContainer<CI2>())
     OptObjectId (ObjectId<CI2,CM> val_object) noexcept
-      : m_data (val_object.getData()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (val_object.getIndex())
+      : m_dataArea (val_object.getDataArea()), m_variantIndex (CI::template getVariantIndex<CI2>()), m_objectIndex (val_object.getIndex())
     {}
 
     template<ContainerIdConcept CI2>
       requires (CI::template isValidContainer<CI2>())
     OptObjectId (OptObjectId<CI2,CM> val_object) noexcept
-      : m_data (val_object.getData())
+      : m_dataArea (val_object.getDataArea())
     {
       if (val_object.has_value())
       {
@@ -183,12 +183,12 @@ namespace columnar
     [[nodiscard]] ObjectId<CI,CM> value () const {
       if (m_variantIndex == invalidVariantIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,CM> (m_data, m_variantIndex, m_objectIndex);}
+      return ObjectId<CI,CM> (m_dataArea, m_variantIndex, m_objectIndex);}
 
     [[nodiscard]] ObjectId<CI,CM> operator * () const {
       if (m_variantIndex == invalidVariantIndex)
         throw std::bad_optional_access();
-      return ObjectId<CI,CM> (m_data, m_variantIndex, m_objectIndex);
+      return ObjectId<CI,CM> (m_dataArea, m_variantIndex, m_objectIndex);
     }
 
     [[nodiscard]] bool operator == (const OptObjectId<CI,CM>& that) const noexcept {
@@ -201,8 +201,8 @@ namespace columnar
     /// ============================
   public:
 
-    explicit OptObjectId (void **val_data, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
-      : m_data (val_data), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
+    explicit OptObjectId (void **val_dataArea, std::size_t val_variantIndex, std::size_t val_objectIndex) noexcept
+      : m_dataArea (val_dataArea), m_variantIndex (val_variantIndex), m_objectIndex (val_objectIndex)
     {}
 
     [[nodiscard]] std::size_t getVariantIndex () const noexcept {
@@ -211,8 +211,8 @@ namespace columnar
     [[nodiscard]] std::size_t getObjectIndex () const noexcept {
       return m_objectIndex;}
 
-    [[nodiscard]] void **getData () const noexcept {
-      return m_data;}
+    [[nodiscard]] void **getDataArea () const noexcept {
+      return m_dataArea;}
 
 
 
@@ -220,7 +220,7 @@ namespace columnar
     /// ===============
   private:
 
-    void **m_data = nullptr;
+    void **m_dataArea = nullptr;
     std::size_t m_variantIndex = invalidVariantIndex;
     std::size_t m_objectIndex = invalidObjectIndex;
   };

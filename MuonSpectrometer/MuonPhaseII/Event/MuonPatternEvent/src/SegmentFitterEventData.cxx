@@ -114,7 +114,7 @@ namespace MuonR4{
                                                     const Acts::ParticleHypothesis hypot) {
             const auto& surface = segment.msSector()->surface();
 
-            const Amg::Vector3D locPos = surface.transform(gctx.context()).inverse() * 
+            const Amg::Vector3D locPos = surface.localToGlobalTransform(gctx.context()).inverse() * 
                                          segment.position();
              Acts::BoundVector boundPars{};
             boundPars[Acts::eBoundLoc0] = locPos.x();

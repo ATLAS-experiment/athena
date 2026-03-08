@@ -17,7 +17,7 @@ class NSW_TrigRawDataContainerCnv : public NSW_TrigRawDataContainerCnvBase {
     NSW_TrigRawDataContainerCnv(ISvcLocator* svcLocator);
     virtual ~NSW_TrigRawDataContainerCnv()=default;
     virtual NSW_TrigRawDataContainer_PERS* createPersistent(Muon::NSW_TrigRawDataContainer* transCont) override;
-    virtual Muon::NSW_TrigRawDataContainer* createTransient() override;
+    virtual Muon::NSW_TrigRawDataContainer* createTransient(const Token* token) override;
 
   private:
     Muon::NSW_TrigRawDataContainerCnv_p1 m_TPConverter_p1;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CaloCellPrefetchIterator_test.cxx
@@ -296,10 +296,16 @@ int main()
   TileID* tile_helper = new TileID;
   CaloCell_ID* helper = make_helper (tile_helper);
   DDMap_t ddmap;
-  std::vector<const CaloCell*> cells = make_cells (helper, tile_helper, ddmap);
+  try {
+    std::vector<const CaloCell*> cells = make_cells (helper, tile_helper, ddmap);
 
-  test1 (cells);
-  test2 (cells);
-  test3 (cells);
+    test1 (cells);
+    test2 (cells);
+    test3 (cells);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+  return 0;
 }
 

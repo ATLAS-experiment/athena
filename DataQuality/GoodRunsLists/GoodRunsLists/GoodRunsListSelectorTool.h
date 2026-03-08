@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GoodRunsLists_GoodRunsListSelectorTool_H
@@ -14,29 +14,26 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAthenaEvtLoopPreSelectTool.h"
 #include "GoodRunsLists/RegularFormula.h"
-
+#include "GoodRunsLists/TGoodRunsListReader.h"
+#include "GoodRunsLists/TGRLCollection.h"
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 
-//typedef std::pair< std::vector<std::string>, std::vector<std::string> > vvPair; 
 
 /** @class GoodRunsListSelectorTool
  *  @brief This file contains the class definition for the GoodRunsListSelectorTool class.
  **/
 
-class TFormula;
-
-namespace Root {
-  class TGRLCollection;
-  class TGoodRunsListReader;
-}
 
 class GoodRunsListSelectorTool : public extends<AthAlgTool, IGoodRunsListSelectorTool, IAthenaEvtLoopPreSelectTool>
 {
  public:    
-  GoodRunsListSelectorTool( const std::string&, const std::string&, const IInterface* );
-  virtual ~GoodRunsListSelectorTool();
+  //Delegate constructor
+  using base_class::base_class;
+  
+  virtual ~GoodRunsListSelectorTool() {};
 
   /// Initialize AlgTool
   StatusCode initialize();
@@ -58,27 +55,26 @@ class GoodRunsListSelectorTool : public extends<AthAlgTool, IGoodRunsListSelecto
   const std::map< std::string, vvPair >& getGRLSelectorRegistry() { return m_registry; }
 
   /// get grl/brl collection
-  const Root::TGRLCollection* getGRLCollection() const { return m_grlcollection; } 
-  const Root::TGRLCollection* getBRLCollection() const { return m_brlcollection; }
+  const Root::TGRLCollection* getGRLCollection() const { return m_grlcollection.get(); } 
+  const Root::TGRLCollection* getBRLCollection() const { return m_brlcollection.get(); }
 
  protected:
 
   bool fileExists(const char* fileName);
 
-  std::vector<std::string> m_goodrunslistVec;
-  std::vector<std::string> m_blackrunslistVec;
+  Gaudi::Property<std::vector<std::string> > m_goodrunslistVec{this, "GoodRunsListVec", {}, "list of input xml files"};
+  Gaudi::Property<std::vector<std::string> > m_blackrunslistVec{this,"BlackRunsListVec", {}, "list of input xml files"}; 
 
-  Root::TGRLCollection* m_grlcollection;
-  Root::TGRLCollection* m_brlcollection;
 
-  Root::TGoodRunsListReader* m_reader;
+  std::unique_ptr<Root::TGRLCollection> m_grlcollection{new Root::TGRLCollection()};
+  std::unique_ptr<Root::TGRLCollection> m_brlcollection{new Root::TGRLCollection()};
 
-  std::map< std::string,TFormula* > m_dqformula;
+  std::unique_ptr<Root::TGoodRunsListReader> m_reader{new Root::TGoodRunsListReader()};
 
-  int  m_boolop;
-  bool m_passthrough;
-  bool m_rejectanybrl;
-  bool m_eventselectormode;
+  Gaudi::Property<int>  m_boolop{this,"BoolOperation",0};
+  Gaudi::Property<bool> m_passthrough{this,"PassThrough",true};
+  Gaudi::Property<bool> m_rejectanybrl{this,"RejectBlackRunsInEventSelector",false};
+  Gaudi::Property<bool> m_eventselectormode{this,"EventSelectorMode",false};
 
   std::map< std::string, vvPair > m_registry;
 

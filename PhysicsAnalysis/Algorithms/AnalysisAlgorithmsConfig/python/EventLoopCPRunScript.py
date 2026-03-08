@@ -18,15 +18,14 @@ class EventLoopCPRunScript(CPBaseRunner):
                                  action='store_true', help='Run the job with the direct driver')
         derivedGroup.add_argument('--work-dir', dest='work_dir', nargs='?', const='workDir', default=None,
                                   help='The work directory for the EL job. defaults to "workDir".')
-        derivedGroup.add_argument('--merge-output-files', dest='merge_output_files', action='store_true', help='Merge the output histogram and n-tuple files into a single file.')
         derivedGroup.add_argument('--dump-full-config', dest='dump_full_config', action='store_true', help='Save the full CP configuration log to a json file. This can be useful for debugging purposes.')
-        
+
         expertGroup = self.parser.add_argument_group('Experts arguments')
         expertGroup.add_argument('--run-perf-stat', dest='run_perf_stat', action='store_true', help='Run xAOD::PerfStats to get input branch access data. This is mostly useful for AMG experts wanting to understand branch access patterns.')
         expertGroup.add_argument('--algorithm-timers', dest='algorithm_timers', action='store_true', help='Enable algorithm timers. This is mostly useful for AMG experts wanting to understand tool performance.')
         expertGroup.add_argument('--algorithm-memory-monitoring', dest='algorithm_memory_monitoring', action='store_true', help='Enable algorithm memory monitoring. This is mostly useful for AMG experts wanting to understand tool memory usage. Note that this is imperfect and may in cases assign memory to the wrong algorithm.')
         return
-        
+
     def makeAlgSequence(self):
         from AnaAlgorithm.AlgSequence import AlgSequence
         from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
@@ -40,8 +39,9 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
         self.algSeq = algSeq
+        self.modifyAlgSequence()
         return algSeq
-    
+
     def readSamples(self):
         import ROOT
         self.sampleHandler = ROOT.SH.SampleHandler()
@@ -50,7 +50,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         for file in self.inputList:
             sampleFiles.add(file)
         self.sampleHandler.add(sampleFiles)
-    
+
     # This functionality should not be in the runscript, instead should be put into PrintConfiguration alg.
     # This is a temporary solution to dump the full config until PrintConfiguration alg is completely ready.
     def _dumpFullConfig(self):
@@ -60,20 +60,20 @@ class EventLoopCPRunScript(CPBaseRunner):
             output_dict = {}
             try:
                 save_algs_from_sequence_ELjob(self.algSeq, output_dict)
-                json.dump(output_dict, seq_out_file, ensure_ascii=False, indent=4) 
-            except Exception as e: 
+                json.dump(output_dict, seq_out_file, ensure_ascii=False, indent=4)
+            except Exception as e:
                 self.logger.warning(f'Dumping full config failed with: {e}')
                 self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
             try:
                 combine_tools_and_algorithms_ELjob(combine_dictionaries=False, alg_file="_alg_sequence.json", output_file="full_config.json")
                 self.logger.info("Combining full config to full_config.json succeeded")
-                
+
             except Exception as e:
                 self.logger.warning(f'Combining full config failed with: {e}')
                 self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
             finally:
                 os.remove("_alg_sequence.json")
-            
+
     def moveOutputFiles(self):
         from pathlib import Path
         import shutil
@@ -92,7 +92,7 @@ class EventLoopCPRunScript(CPBaseRunner):
             shutil.move(str(rootfilePath), str(currentDir / f"{self.outputName}.root"))
         else:
             self.logger.warning(f"Root file {rootfilePath} does not exist or merging is enabled, skipping move.")
-        #move histogram file if it exists    
+        #move histogram file if it exists
         if histfilePath.exists():
             self.logger.info(f"Moving {histfilePath} to {currentDir / f'hist-{self.outputName}.root'}")
             if histfileSymlink.is_symlink(): # The check is needed to avoid FileNotFoundError if using direct driver
@@ -100,13 +100,13 @@ class EventLoopCPRunScript(CPBaseRunner):
             shutil.move(str(histfilePath), str(currentDir / f"hist-{self.outputName}.root"))
         else:
             self.logger.warning(f"Histogram file {histfilePath} does not exist or merging, skipping move.")
-            
+
         newHistFile = currentDir / f"hist-{self.outputName}.root"
         # rename merged hist-ntuple to output_name.root
         if self.args.merge_output_files and newHistFile.exists():
             self.logger.info(f"renaming the hist-{self.outputName}.root to {self.outputName}.root")
             newHistFile.rename(currentDir / f"{self.outputName}.root")
-        
+
     def driverSubmit(self, driver):
         '''
         Important if you want to run code after submitting the job, with external driver e.g., ExecDriver.
@@ -120,14 +120,14 @@ class EventLoopCPRunScript(CPBaseRunner):
         else:
             os.waitpid(pid, 0) # parent waits for child process to finish
             return
-        
+
     def getExitCode(self):
         import ROOT
-        statusCode = ROOT.EL.Driver.retrieve(self.args.work_dir if self.args.work_dir else 'workDir') 
+        statusCode = ROOT.EL.Driver.retrieve(self.args.work_dir if self.args.work_dir else 'workDir')
         if statusCode:
             return 0
         return 1
-    
+
     def run(self):
         self.setup()
         # importing ROOT has a long upfront time, so we do it here
@@ -136,21 +136,21 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.readSamples()
         self.flags.lock()
         self.printFlags()
-        
+
         self.job = ROOT.EL.Job()
         self.job.sampleHandler(self.sampleHandler)
         self.job.options().setDouble(ROOT.EL.Job.optFilesPerWorker, 100)
         self.job.options().setDouble(ROOT.EL.Job.optMaxEvents, self.flags.Exec.MaxEvents)
         self.job.options().setString(ROOT.EL.Job.optSubmitDirMode, 'unique-link')
         self.job.options().setDouble(ROOT.EL.Job.optSkipEvents, self.flags.Exec.SkipEvents)
-        
+
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
         if self.args.merge_output_files:
             self.job.options().setString(ROOT.EL.Job.optStreamAliases, "ANALYSIS=" + ROOT.EL.Job.histogramStreamName)
         else:
             self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
-        
+
         if self.args.run_perf_stat:
             self.job.options().setBool(ROOT.EL.Job.optXAODPerfStats, 1)
         if self.args.algorithm_timers:
@@ -160,11 +160,11 @@ class EventLoopCPRunScript(CPBaseRunner):
 
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
         self.driverSubmit(driver)
-        
+
         if self.args.dump_full_config:
             self._dumpFullConfig()
         exitCode = self.getExitCode()
-        
+
         if self.args.work_dir is None: # move output if work_dir is not used
             self.moveOutputFiles()
 

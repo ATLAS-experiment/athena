@@ -1,8 +1,8 @@
 /*
-    Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration                                                                                                   
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-/**              
+/**
    Author: Will Buttinger
 
    This is a demonstration of how to use a TrigDecisionTool in a simple 'standalone' macro.
@@ -41,7 +41,7 @@
 
   // the lines below are just here because this macro is run as a unittest, they are not necessary to copy
   gInterpreter->ProcessLine("#include \"xAODRootAccess/tools/TFileAccessTracer.h\"");
-  gInterpreter->ProcessLine("xAOD::TFileAccessTracer::enableDataSubmission(false);"); // disable file reporting in unittest
+  gInterpreter->ProcessLine("xAOD::TFileAccessTracer::instance().enableDataSubmission(false);"); // disable file reporting in unittest
   exit(testPassed? 0 : 1); // this is just so the macro can be used as a unit test
 
 }

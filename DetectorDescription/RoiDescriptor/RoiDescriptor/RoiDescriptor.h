@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    RoiDescriptor.h        
@@ -37,6 +37,7 @@
  * -# etaPlus      : pseudo-rapidity at zedPlus
  */
 
+//coverity[MISSING_MOVE_ASSIGNMENT]
 class RoiDescriptor : public IRoiDescriptor {
 
 public:

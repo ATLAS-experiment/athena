@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_RAWDATACONTAINER_P4_H
@@ -19,6 +19,7 @@
 #include "InDetEventAthenaPool/InDetRawData_p2.h"
 #include "InDetEventAthenaPool/InDetRawDataCollection_p1.h"
 
+class PhaseIIStripRawDataContainerCnv;
 
 class SCT_RawDataContainer_p4
 {
@@ -26,6 +27,7 @@ class SCT_RawDataContainer_p4
 /// Default constructor
   SCT_RawDataContainer_p4();
   friend class SCT_RawDataContainerCnv_p4;
+  friend class PhaseIIStripRawDataContainerCnv;
  private:
   std::vector<InDetRawDataCollection_p1>  m_collections;
   std::vector<InDetRawData_p2>            m_rawdata;

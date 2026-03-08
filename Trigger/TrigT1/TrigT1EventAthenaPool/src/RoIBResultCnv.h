@@ -38,7 +38,7 @@ public:
 protected:
 
    virtual RoIBResult_PERS*  createPersistent( ROIB::RoIBResult* transObj );
-   virtual ROIB::RoIBResult* createTransient();
+   virtual ROIB::RoIBResult* createTransient(const Token* token);
 private:
    RoIBResultCnv_p1 m_converter;
 

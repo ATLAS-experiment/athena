@@ -169,6 +169,9 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doLargeD0", doLargeD0)
     icf.addFlag("Tracking.storeSeparateLargeD0Container", True)
 
+    # Store separate track particles collection reconstructed in regards to the beam line
+    icf.addFlag("Tracking.storeBeamLineTrackParticles", lambda prevFlags: prevFlags.Overlay.DataOverlay)
+
     # Special configuration for low-mu runs
     icf.addFlag("Tracking.doLowMu", False)
     # Turn running of doLowPt second pass on and off
@@ -439,8 +442,8 @@ def createTrackingConfigFlags():
     icf.addFlag("Tracking.doITkFastTracking", False)
 
     # Turn running of Conversion second tracking pass on and off
-    icf.addFlag("Tracking.doITkConversion",
-                lambda prevFlags: not prevFlags.Tracking.doITkFastTracking)
+    icf.addFlag("Tracking.doITkConversion", lambda prevFlags: (
+        not prevFlags.Tracking.doITkFastTracking and prevFlags.Detector.EnableCalo))
 
     # Allows TrigFastTrackFinder to be run as an offline algorithm by replacing
     # SiSPSeededTrackFinder

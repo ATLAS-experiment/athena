@@ -31,7 +31,7 @@ public:
 protected:
   /// Extend base-class conversion methods
   virtual P*	createPersistent(T* rdoC);
-  virtual T*	createTransient ();
+  virtual T*	createTransient (const Token* token);
   // pass the MuonIdHelperSvc to the CscRawDataCnv
   virtual StatusCode initialize();
 

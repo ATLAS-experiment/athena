@@ -30,7 +30,7 @@ public:
 protected:
    
    virtual TrigEMClusterContainer_PERS *createPersistent( TrigEMClusterContainer *transObj);
-   virtual TrigEMClusterContainer      *createTransient();
+   virtual TrigEMClusterContainer      *createTransient(const Token* token);
 
 private:
    TrigEMClusterContainerCnv_tlp1 m_converter_tlp1;

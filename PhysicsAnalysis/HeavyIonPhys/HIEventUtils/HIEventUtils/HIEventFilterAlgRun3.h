@@ -10,7 +10,7 @@
 
 // FrameWork includes
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AthenaBaseComps/AthFilterAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "HIEventUtils/IHIEventSelectionToolRun3.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -18,10 +18,13 @@
 #include "xAODHIEvent/HIEventShapeContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "EventBookkeeperTools/FilterReporterParams.h"
+
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 namespace HI {
 
-class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
+class HIEventFilterAlgRun3 : public ::AthReentrantAlgorithm {
 
  public:
   HIEventFilterAlgRun3(const std::string& name, ISvcLocator* pSvcLocator);
@@ -29,7 +32,8 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   virtual ~HIEventFilterAlgRun3() = default;
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode finalize() override;
 
  private:
   using mask_t = unsigned int;
@@ -42,12 +46,16 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
       "Mask required to pass the event, by default only NoEventError is "
       "required"};
 
+  Gaudi::Property<bool> m_useIonDataTypeDefaultMask{
+      this, "UseIonDataTypeDefaultMask", true,
+      "use predefined selection for each data taking IonDataType"};
+
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
       this, "EventInfo", "EventInfo", "EventInfo key"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey{
-      this, "Tracks", "InDetTrackParticle", "Tracks key"};
+      this, "Tracks", "InDetTrackParticles", "Tracks key"};
   SG::ReadHandleKey<xAOD::VertexContainer> m_verticesKey{
-      this, "Vertices", "Vertices", "Vertices key"};
+      this, "Vertices", "PrimaryVertices", "Vertices key"};
   SG::ReadHandleKey<xAOD::HIEventShapeContainer> m_hiEventShapeKey{
       this, "HIEventShape", "HIEventShape", "Vertices key"};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcKey{
@@ -60,13 +68,22 @@ class HIEventFilterAlgRun3 : public ::AthFilterAlgorithm {
   ToolHandle<HI::IHIEventSelectionToolRun3> m_tool{this, "SelectionTool",
                                                    "HIEventSelectionToolRun3"};
 
-  auto isRequested(HI::SelectionMask m) const {
-    return (m_selectionMask & static_cast<mask_t>(m)) != 0;
+  ToolHandle<GenericMonitoringTool> m_monTool{ this, "MonTool", "", "Tool to monitor performance of selection" };
+
+  FilterReporterParams m_filterParams{
+      this, "HIEventFilterRun3",
+      "Records number of events that pass the filter"};
+
+  auto isRequested(const mask_t mask, HI::SelectionMask req) const {
+    return (mask & static_cast<mask_t>(req)) != 0;
   }
 
-  void store(HI::SelectionMask m, mask_t& mask) {
+  void store(HI::SelectionMask m, mask_t& mask) const {
     mask |= static_cast<mask_t>(m);
   }
+  std::string maskToString(const mask_t m) const;
+
+  void fillCounters(const mask_t m) const;
 };
 }  // namespace HI
 #endif  //> !HIEVENTUTILS_HIEVENTFILTERALGRUN3_H

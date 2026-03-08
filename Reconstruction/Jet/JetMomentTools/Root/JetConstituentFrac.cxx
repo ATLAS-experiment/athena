@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetMomentTools/JetConstituentFrac.h"
@@ -17,7 +17,7 @@ JetConstituentFrac::JetConstituentFrac(const std::string& name)
 //**********************************************************************
 
 StatusCode JetConstituentFrac::initialize() {
-  ATH_MSG_INFO("Initializing JetConstituentFrac " << name());
+  ATH_MSG_DEBUG("Initializing JetConstituentFrac " << name());
   
   if(m_jetContainerName.empty()){
     ATH_MSG_ERROR("JetConstituentFrac needs to have its input jet container configured!");

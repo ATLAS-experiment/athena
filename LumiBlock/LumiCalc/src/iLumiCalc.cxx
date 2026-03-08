@@ -9,6 +9,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include "CollectionSvc/CollectionService.h"
 #include "CollectionSvc/ICollection.h"
+#include "StorageSvc/DbType.h"
+
 #include "DataModelRoot/RootType.h"
 
 #include "TTree.h"
@@ -455,7 +457,6 @@ int main(int argc, char * argv[]){
     logger << Root::kINFO << "Being in TAG file mode..." << Root::GEndl;
 
     Root::TGoodRunsListReader reader;
-    std::string type = "RootCollection";
     for(std::vector<std::string>::iterator it = tagfile.begin(); it != tagfile.end(); ++it){
       logger << Root::kINFO << "Processing file: <" << (*it) << ">" <<  Root::GEndl;
       int n = (*it).find(".root");
@@ -463,7 +464,7 @@ int main(int argc, char * argv[]){
 
       // get Value for a Key
       pool::CollectionService collectionService;
-      pool::ICollection* collection = collectionService.open(tagfilename, type, tagfilename);
+      pool::ICollection* collection = collectionService.open(tagfilename, pool::ROOT_StorageType.type(), tagfilename);
       if(collection == NULL) {
          logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
          exit(-1);

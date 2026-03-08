@@ -20,7 +20,7 @@ MuonFeatureContainer_PERS * MuonFeatureContainerCnv::createPersistent( MuonFeatu
 
 
 //createTransient
-MuonFeatureContainer * MuonFeatureContainerCnv::createTransient()
+MuonFeatureContainer * MuonFeatureContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "MuonFeatureContainerConverter" );
   
@@ -31,27 +31,27 @@ MuonFeatureContainer * MuonFeatureContainerCnv::createTransient()
   static const pool::Guid tlp1_guid( "039BE61C-DE27-48B3-A2AE-7172BB755CEE" );
   static const pool::Guid p0_guid( "45225F26-A517-4E8B-BA93-DDFD1217B9A8" );
   
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_tlp1 > col_vect( poolReadObject< MuonFeatureContainer_tlp1 >() );
+         std::unique_ptr< MuonFeatureContainer_tlp1 > col_vect( poolReadObject< MuonFeatureContainer_tlp1 >(token) );
 	 //         std::cout << "Reading MFC p1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog ) ;
   }
-  else if( compareClassGuid( tlp2_guid ) )     
+  else if( compareClassGuid(token,  tlp2_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_tlp2 > col_vect( poolReadObject< MuonFeatureContainer_tlp2 >() );
+         std::unique_ptr< MuonFeatureContainer_tlp2 > col_vect( poolReadObject< MuonFeatureContainer_tlp2 >(token) );
 	 // std::cout << "Reading MFC p2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog ) ;
   }
-  else if( compareClassGuid( p3_guid ) )     
+  else if( compareClassGuid(token,  p3_guid ) )     
   {
-         std::unique_ptr< MuonFeatureContainer_p3 > col_vect( poolReadObject< MuonFeatureContainer_p3 >() );
+         std::unique_ptr< MuonFeatureContainer_p3 > col_vect( poolReadObject< MuonFeatureContainer_p3 >(token) );
 	 // std::cout << "Reading MFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   }
-  else if( compareClassGuid( p0_guid ) )
+  else if( compareClassGuid(token,  p0_guid ) )
   {
-         return poolReadObject< MuonFeatureContainer >();
+         return poolReadObject< MuonFeatureContainer >(token);
   }
   else  throw std::runtime_error( "Unsupported persistent version of MuonFeatureContainer" );
   

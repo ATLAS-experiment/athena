@@ -13,11 +13,6 @@ EVetoPlots::EVetoPlots(PlotBase* pParent, const std::string& sDir, std::string s
 {
 }
 	
-EVetoPlots::~EVetoPlots()
-{
-}
-
-
 void EVetoPlots::initializePlots(){
 
   m_id_RNNEleScore         = Book1D("id_RNNEleScore",m_sTauJetContainerName + " RNNEleScore ; RNNEleScore; # Tau",20,0.,1.00);

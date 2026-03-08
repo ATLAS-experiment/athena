@@ -18,7 +18,7 @@ public:
   
  protected:
   virtual P*  createPersistent(T* transCont);
-  virtual T*  createTransient ();
+  virtual T*  createTransient (const Token* token);
   
   C m_Converter;
 };

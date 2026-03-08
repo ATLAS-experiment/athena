@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaRootComps )
@@ -20,7 +20,7 @@ atlas_add_component( AthenaRootComps
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaRootCompsLib AthenaRootKernel CxxUtils DataModelRoot EventInfo FileCatalog GaudiKernel PersistentDataModel PoolSvcLib RootUtils SGTools StoreGateLib xAODCore xAODEventInfo xAODRootAccess )
+                     LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaRootCompsLib AthenaRootKernel CxxUtils DataModelRoot EventInfo GaudiKernel PersistentDataModel PersistencySvc PoolSvcLib RootUtils SGTools StoreGateLib xAODCore xAODEventInfo xAODRootAccess )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

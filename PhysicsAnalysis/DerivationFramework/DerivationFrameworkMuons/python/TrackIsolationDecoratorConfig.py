@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -12,7 +12,8 @@ deco_prefix = 'MUON_'
 def TrackIsolationToolCfg(ConfigFlags,name= "TrackIsolationTool", **kwargs):
 
     acc = ComponentAccumulator()
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TrackTools_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_TrackTools_Cfg)
     kwargs.setdefault("TrackSelectionTool",acc.popToolsAndMerge(InDetTrackSelectionTool_TrackTools_Cfg(ConfigFlags,
                                                                                      maxZ0SinTheta = 3.,
                                                                                      minPt         = 1000.,
@@ -31,10 +32,10 @@ def MuonTrackIsolationDecorAlgCfg(
     from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import isoTTVAToolCfg
     ttvaTool = result.popToolsAndMerge(
         isoTTVAToolCfg(ConfigFlags, WorkingPoint=ttvaWP))
-    from InDetConfig.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import isoTrackSelectionToolCfg
     trackSelTool = result.popToolsAndMerge(
         isoTrackSelectionToolCfg(ConfigFlags, minPt=trackPt))
-    
+   
     wpName = "{WP}TTVA_pt{ptCut}".format(WP = ttvaWP, ptCut = trackPt)
     kwargs.setdefault("customName", wpName)
     ## Minimal pt cut on the ID tracks

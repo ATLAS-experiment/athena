@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // *************************************************************************
@@ -38,7 +38,7 @@ class LUCID_DigitByteStreamCnv: public Converter, public AthMessaging {
 
   virtual long repSvcType() const override { return i_repSvcType(); }
   static  long storageType();
-  static const CLID& classID();
+  static CLID classID();
 
   StatusCode fillFEA(LUCID_DigitContainer* RDO_container, RawEventWrite* re);
 

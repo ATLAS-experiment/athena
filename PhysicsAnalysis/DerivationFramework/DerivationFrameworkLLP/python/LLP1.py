@@ -102,7 +102,8 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     deco_ptcones_suffix = ["ptcone40", "ptcone30", "ptcone20"]
     deco_prefix = 'LLP1_'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_Loose_Cfg)
     TrackSelectionToolStd = acc.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(flags,
                                                                                    name = "TrackSelectionToolStd",
                                                                                    maxZ0SinTheta = 3.0,
@@ -991,7 +992,6 @@ def LLP1Cfg(flags):
                                            "TauJets_MuonRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
     if flags.Tracking.doLargeD0:
         LLP1SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
@@ -1031,7 +1031,7 @@ def LLP1Cfg(flags):
                                         "LVL1MuonRoIs",
                                         "NCB_MuonSegments"]
     if flags.Tracking.doLargeD0:
-        LLP1SlimmingHelper.AllVariables = ["MuonSegments_LRT",
+        LLP1SlimmingHelper.AllVariables += ["MuonSegments_LRT",
                                            "CombinedMuonsLRTTrackParticles",
                                            "ExtraPolatedMuonsLRTTrackParticles",
                                            "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
@@ -1074,8 +1074,7 @@ def LLP1Cfg(flags):
         StaticContent += ["xAOD::TrackParticleContainer#ValidationMuSAExtrapolatedTrackParticles"]
         StaticContent += ["xAOD::TrackParticleAuxContainer#ValidationMuSAExtrapolatedTrackParticlesAux."]
 
-    LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
-                                          "Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
+    LLP1SlimmingHelper.ExtraVariables += ["Electrons.LHValue.DFCommonElectronsLHVeryLooseNoPixResult.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "Photons.DFCommonPhotonsIsEMMedium.DFCommonPhotonsIsEMMediumIsEMValue.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "Muons.meanDeltaADCCountsMDT",
                                           "egammaClusters.phi_sampl.eta0.phi0",

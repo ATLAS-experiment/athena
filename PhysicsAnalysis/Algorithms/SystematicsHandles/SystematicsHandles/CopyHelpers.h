@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,6 +10,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgMessaging/MessageCheck.h>
+#include <AsgMessaging/MsgStream.h>
 #include <AsgMessaging/StatusCode.h>
 #include <CxxUtils/checker_macros.h>
 #include <xAODBase/IParticleContainer.h>
@@ -17,6 +18,8 @@
 #include <xAODCore/ShallowCopy.h>
 
 #include <memory>
+#include <type_traits>
+#include <utility> //std::declval
 
 namespace CP
 {
@@ -95,6 +98,10 @@ namespace CP
               // element.
               const T* originContainer =
                  dynamic_cast< const T* >( ( *inputObject )[ 0 ]->container() );
+              if (!originContainer){
+                ANA_MSG_ERROR( "Dynamic cast failed." );
+                return StatusCode::FAILURE;
+              }
               // Make sure that every element in the view container has the same
               // parent.
               for( size_t i = 1; i < inputObject->size(); ++i ) {
@@ -203,8 +210,11 @@ namespace CP
             if( inputObject->size() ) {
                // Get the pointer to the "owning container" from the first
                // element.
-               const T* originContainer =
-                 dynamic_cast< const T* >( ( *inputObject )[ 0 ]->container() );
+               const T* originContainer = dynamic_cast< const T* >( ( *inputObject )[ 0 ]->container() );
+               if (!originContainer){
+                 ANA_MSG_ERROR( "Dynamic cast returned nullptr!" );
+                 return StatusCode::FAILURE;
+               }
                // Make sure that every element in the view container has the same
                // parent.
                for( size_t i = 1; i < inputObject->size(); ++i ) {

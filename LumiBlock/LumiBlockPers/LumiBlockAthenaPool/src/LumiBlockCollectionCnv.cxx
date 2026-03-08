@@ -18,17 +18,17 @@ LumiBlockCollection_PERS* LumiBlockCollectionCnv::createPersistent(LumiBlockColl
   return persObj; 
 }
     
-LumiBlockCollection* LumiBlockCollectionCnv::createTransient() {
+LumiBlockCollection* LumiBlockCollectionCnv::createTransient(const Token* token) {
   MsgStream log(msgSvc(), "LumiBlockCollectionConverter" );
   static const pool::Guid   p1_guid("CF1F40C9-6125-4C35-87FF-DDA2C319000C");
   static const pool::Guid   p2_guid("DEF9282A-F174-4382-8248-B94567CD869F");
 
-  if( compareClassGuid(p2_guid) ) {
-    std::unique_ptr< LumiBlockCollection_p2 > col_vect( poolReadObject< LumiBlockCollection_p2 >() );
+  if( compareClassGuid(token, p2_guid) ) {
+    std::unique_ptr< LumiBlockCollection_p2 > col_vect( poolReadObject< LumiBlockCollection_p2 >(token) );
     return m_converter.createTransient( col_vect.get(), log );
   }
-  else if( compareClassGuid(p1_guid) ) {
-    std::unique_ptr< LumiBlockCollection_p1 > col_vect( poolReadObject< LumiBlockCollection_p1 >() );
+  else if( compareClassGuid(token, p1_guid) ) {
+    std::unique_ptr< LumiBlockCollection_p1 > col_vect( poolReadObject< LumiBlockCollection_p1 >(token) );
     return m_converter_p1.createTransient( col_vect.get(), log );
   }
   else {

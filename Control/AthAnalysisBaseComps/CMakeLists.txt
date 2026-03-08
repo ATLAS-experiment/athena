@@ -23,6 +23,3 @@ atlas_add_dictionary( AthAnalysisBaseCompsDict
                       AthAnalysisBaseComps/selection.xml
                       LINK_LIBRARIES AthAnalysisBaseCompsLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
-

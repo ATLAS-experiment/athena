@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCNVTOOLINTERFACES_IMUONRAWDATAPROVIDERTOOL_H
@@ -24,21 +24,11 @@ public:
 
 public:
     /** Decoding method. - current methods: let's keep them! */
-    typedef std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> ROBFragmentList;
-    virtual StatusCode convert(const ROBFragmentList&) const = 0;
-    virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&) const = 0;
-    /** the new ones */
-    virtual StatusCode convert() const = 0; //!< for the entire event 
-    virtual StatusCode convert(const std::vector<IdentifierHash>&) const = 0; //!< for a selection of rdo collections
-    virtual StatusCode convert(const std::vector<uint32_t>&) const {return StatusCode::FAILURE;}
+    using ROBFragmentList = std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>;
     /** Event Context functions **/
-    virtual StatusCode convert(const EventContext&) const {return StatusCode::FAILURE;}
-    virtual StatusCode convert(const ROBFragmentList&, const EventContext&) const {return StatusCode::FAILURE;}
-    virtual StatusCode convert(const ROBFragmentList&, const std::vector<IdentifierHash>&, const EventContext&) const {return StatusCode::FAILURE;}
-    virtual StatusCode convert(const std::vector<IdentifierHash>&, const EventContext&) const {return StatusCode::FAILURE;}
-    virtual StatusCode convert(const std::vector<uint32_t>&, const EventContext&) const {return StatusCode::FAILURE;}
-    
-    
+    virtual StatusCode convert(const EventContext&) const  = 0;
+    virtual StatusCode convert(const std::vector<IdentifierHash>&, const EventContext&) const  = 0;
+    virtual StatusCode convert(const std::vector<uint32_t>&, const EventContext&) const = 0;
 };
 }
 

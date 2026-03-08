@@ -115,6 +115,14 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_mu20_idperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
         ChainProp(name='HLT_mu20_ivarperf_L1MU12FCH', groups=SupportGroup+SingleMuonGroup, monGroups=['idMon:shifter']),
 
+        # ML bucket filter test chains
+        ChainProp(name='HLT_mu20_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup),
+        ChainProp(name='HLT_mu24_ivarmedium_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportPhIGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
+        ChainProp(name='HLT_mu22_mlbkt_mu8noL1_mlbkt_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_2mu14_mlbkt_L12MU8F', groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online','muonMon:shifter']),
+        ChainProp(name='HLT_3mu6_mlbkt_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=SupportPhIGroup+MultiMuonGroup, monGroups=['muonMon:online']),
+
         # HL-LHC TDR inspired chains
         ChainProp(name="HLT_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
     ]
@@ -217,16 +225,16 @@ def addMCSignatures(chains):
     ]
 
     chainsMC['Tau'] = [
-        ChainProp(name='HLT_tau140_mediumRNN_tracktwoMVA_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
-        ChainProp(name="HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU120", groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:online','tauMon:t0']),
-        ChainProp(name='HLT_tau180_mediumRNN_tracktwoMVA_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
-        ChainProp(name='HLT_tau200_mediumRNN_tracktwoMVA_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name='HLT_tau140_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name="HLT_tau160_mediumGNTau_L1eTAU120", groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:online','tauMon:t0']),
+        ChainProp(name='HLT_tau180_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name='HLT_tau200_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
 
-        ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
-        ChainProp(name='HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']), 
-        ChainProp(name='HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50', l1SeedThresholds=['cTAU35M','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20', l1SeedThresholds=['eTAU80','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
-        ChainProp(name='HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1eTAU80_2eTAU60', l1SeedThresholds=['eTAU80', 'eTAU60'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
+        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']), 
+        ChainProp(name='HLT_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50', l1SeedThresholds=['cTAU35M','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='HLT_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20', l1SeedThresholds=['eTAU80','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
+        ChainProp(name='HLT_tau80_mediumGNTau_tau60_mediumGNTau_03dRAB_L1eTAU80_2eTAU60', l1SeedThresholds=['eTAU80', 'eTAU60'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
 
         # tau LLP
         ChainProp(name='HLT_tau180_mediumRNN_tracktwoLLP_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:shifter']),
@@ -239,11 +247,12 @@ def addMCSignatures(chains):
         ChainProp(name="HLT_tau25_idperf_tracktwoMVA_L1cTAU20M", groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
 
         # Phase-II di-tau
-        ChainProp(name='HLT_tau30_mediumRNN_tracktwoMVA_tau20_mediumRNN_tracktwoMVA_03dRAB30_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']),
+        ChainProp(name='HLT_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name='HLT_tau140_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
         ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1eTAU28M_2eTAU20M', l1SeedThresholds=['eTAU28M', 'eTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup),
+        ChainProp(name='HLT_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB28_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
+        ChainProp(name='HLT_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online','tauMon:shifter']), 
     ]
 
     chainsMC['Jet'] = [

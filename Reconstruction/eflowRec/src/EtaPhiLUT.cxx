@@ -5,7 +5,7 @@
 #include <cmath>
 #include <algorithm>
 
-#include "eflowRec/EtaPhiLUT.h"
+#include "EtaPhiLUT.h"
 
 namespace eflowRec {
 

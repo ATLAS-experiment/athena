@@ -283,7 +283,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_minPullThreshold{this, "maxPull", 5.};
         
         //minimum number of hits required to form a seed after extension
-        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 4};
+        UnsignedIntegerProperty m_minSeedHits{this, "minSeedHits", 6};
 
         //maximum number of MM Clusters that are invalid in the seed
         UnsignedIntegerProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4};
@@ -295,7 +295,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         BooleanProperty m_doOnlyMMCombinatorics{this, "doOnlyMMCombinatorics", false};
 
         //maximum number that hit is allowed to be used
-        UnsignedIntegerProperty m_maxUsed{this, "maxHitIsUsed", 8};
+        UnsignedIntegerProperty m_maxUsed{this, "maxHitIsUsed", 6};
 
         //minimum number of strips required for MMClusers not to be invalid
         UnsignedIntegerProperty m_minClusSize{this, "minClusterSize", 1};
@@ -309,8 +309,14 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         //maximum number of dY window size for killing hits on the layer from the segments 
         DoubleProperty m_maxdYWindow{this, "maxdYWindow", 4.*Gaudi::Units::cm};  
 
+        //maximum tanAlpha for the seed quality check
+        DoubleProperty m_maxTanAlpha{this, "maxTanAlpha", 0.2};
+
         //dump statistics for the seeds per sector
         BooleanProperty m_dumpSeedStatistics{this, "dumpStatistics", true};
+
+        //dump the space points in an obj file
+        BooleanProperty m_dumpObj{this, "dumpObj", false};
 
         std::unique_ptr<SeedStatistics> m_seedCounter ATLAS_THREAD_SAFE{};
 

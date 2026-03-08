@@ -36,19 +36,19 @@ MMPrepDataContainer_PERS*    MMPrepDataContainerCnv::createPersistent (Muon::MMP
     return pers;
 }
 
-Muon::MMPrepDataContainer* MMPrepDataContainerCnv::createTransient() {
+Muon::MMPrepDataContainer* MMPrepDataContainerCnv::createTransient(const Token* token) {
     MsgStream log(msgSvc(), "MMPrepDataContainerCnv" );
     static const pool::Guid   p1_guid("5E5C97E2-8D7C-11E2-9FCB-001517648C14"); 
     static const pool::Guid   p2_guid("86B42223-304D-4AFA-8E94-A49B23AC8865"); 
-    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): main converter"<<endmsg;
+    if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): main converter"<<endmsg;
     Muon::MMPrepDataContainer* p_collection(nullptr);
-    if( compareClassGuid(p1_guid) ) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 1 detected"<<endmsg;
-        std::unique_ptr< Muon::MMPrepDataContainer_p1 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p1 >() );
+    if( compareClassGuid(token, p1_guid) ) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
+        std::unique_ptr< Muon::MMPrepDataContainer_p1 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p1 >(token) );
         p_collection = m_converter_p1.createTransient( p_coll.get(), log );
-    } else if(compareClassGuid(p2_guid)) {
-        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< Muon::MMPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p2 >() );
+    } else if(compareClassGuid(token, p2_guid)) {
+        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
+        std::unique_ptr< Muon::MMPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::MMPrepDataContainer_p2 >(token) );
         p_collection = m_converter_p2.createTransient( p_coll.get(), log );
 
     }else {

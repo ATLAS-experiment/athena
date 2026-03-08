@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,7 +12,6 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
@@ -144,8 +143,6 @@ class ATLAS_NOT_THREAD_SAFE LArShapeDumper : public AthAlgorithm
      "SG key of the resulting CaloSuperCellDetDescrManager" };
   const LArOnlineID* m_onlineHelper;
   const	LArOnline_SuperCellID* m_onlineHelperSC;
-  //const DataHandle<ILArAutoCorr> m_autoCorr;
-  //const DataHandle<LArPhysWaveContainer> m_physWave;
 
   bool m_doStream, m_doTrigger, m_doOFCIter, 
 	m_doAllEvents, m_doRoIs, m_doAllLvl1, m_dumpChannelInfos;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ActsGeoUtils_TransformCache_H
 #define ActsGeoUtils_TransformCache_H
@@ -18,37 +18,35 @@ namespace ActsTrk {
    *           As soon as the alignment store is accessed, the nominal surface is released from memory.
    *           In order to be used for each detector technology, the virtual <fetchTransform> needs to
    *           be defined further downstream. The method is called everytime when a new cache is invoked. */
-  class TransformCache {
+  class TransformCacheBase {
       public:
-          TransformCache(const IdentifierHash& cacheHash,
-                         const DetectorType type);
-          
-          TransformCache(const TransformCache& other) = delete;
-          TransformCache& operator=(const TransformCache& other) = delete;
-
-          virtual ~TransformCache();
-
-
-          /** @brief Returns the Identifier of the transform cache */
-          virtual Identifier identify() const = 0;
+          TransformCacheBase(const IdentifierHash& cacheHash,
+                             const DetectorType type);
+          /** @brief Delete the copy constructor */
+          TransformCacheBase(const TransformCacheBase& other) noexcept = delete;
+          /** @brief Delete the copy assignment operator */
+          TransformCacheBase& operator=(const TransformCacheBase& other) noexcept = delete;
+          /** @brief Delete the move constructor */
+          TransformCacheBase(TransformCacheBase&& other) noexcept = delete;
+          /** @brief Delete the move assignment operator */
+          TransformCacheBase& operator=(TransformCacheBase& other) noexcept = delete;
+          /** @brief Default destructors */
+          virtual ~TransformCacheBase();
           /** @brief Returns the sensor hash of this transformation cache */
           IdentifierHash hash() const;
-          /** @brief Returns the parent IDetectorElement owning the cache*/
-          virtual const IDetectorElement* parent() const = 0;
-          
           /** @brief Returns the matching transformation from the alignment store. 
             *        If a nullptr is given, then it's equivalent to the case that the transformation
             *        is pointing to a perfectly aligned surface. In this case, the internal nominal
-            *        transformation cache is invoked.
-            * */
+            *        transformation cache is invoked. 
+            * @param store: Pointer to the detector aligment store */
           const Amg::Transform3D& getTransform(const DetectorAlignStore* store) const;
 
 #ifndef SIMULATIONBASE
           /** @brief returns the cached transform from the Acts Geometry context */
-          const Amg::Transform3D& transform(const Acts::GeometryContext& gctx) const;
+          const Amg::Transform3D& getTransform(const Acts::GeometryContext& gctx) const;
 #endif
           /** @brief resets the nominal cache associated with the detector element*/
-          void releaseNominalCache() const;
+          virtual void releaseNominalCache() const;
           /** @brief returns the detector type of the cache*/
           DetectorType detectorType() const;
       protected:
@@ -63,6 +61,19 @@ namespace ActsTrk {
   };
 
 
+  /** @brief Implementation used for the Detector elements.  */
+  class TransformCache : public TransformCacheBase {
+    public:
+      /** @brief Copy the constructors from the base class */
+      using TransformCacheBase::TransformCacheBase;
+      /** @brief Returns the Identifier of the transform cache */
+      virtual Identifier identify() const = 0;
+      /** @brief Returns the parent IDetectorElement owning the cache*/
+      virtual const IDetectorElement* parent() const = 0;
+      /** @brief Release the nominal cache and release the transform
+       *         from the */
+      virtual void releaseNominalCache() const final;
+  };
 
   template<typename CachingDetectorEle> 
   class TransformCacheDetEle: public TransformCache {

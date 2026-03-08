@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONRDO_NSW_MMTP_RAWDATACONAINTER_H
@@ -17,8 +17,8 @@ namespace Muon
     NSW_MMTP_RawDataContainer();
     virtual ~NSW_MMTP_RawDataContainer() = default;
 
-    static const CLID& classID();
-    virtual const CLID& clID() const {return classID();}
+    static CLID classID();
+    virtual const CLID& clID() const override;
 
   };
 }

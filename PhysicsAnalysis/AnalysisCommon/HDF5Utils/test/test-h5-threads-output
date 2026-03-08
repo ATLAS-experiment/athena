@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -eu
+
+THREADS=100
+EVENTS=1000
+
+OUTPUT=/dev/null
+if [[ -v VERBOSE ]]; then
+    OUTPUT=/dev/stdout
+fi
+echo "running in verbose mode" > $OUTPUT
+
+cd $(mktemp -d)
+echo "testing in $PWD" > $OUTPUT
+
+# dump 1M entries, 1k threads 1k times
+echo "generating events: $THREADS threads, $EVENTS events" > $OUTPUT
+test-hdf5-threads $THREADS $EVENTS > /dev/null
+
+function dump() {
+    h5ls -ldS mt_output.h5
+}
+
+# this will print if there are any repeats
+echo "checking for duplicates" > $OUTPUT
+dump | awk 'a[$0]++ {print $0}' > dups.txt
+if [[ -s dups.txt ]]; then
+   echo "found duplicated outputs!"
+   cat dups.txt
+   exit 1
+fi
+
+# check total outputs
+echo "checking total number of output values " > $OUTPUT
+N_NUMBERS=$(dump | tail -n +3 | grep -P -o '(?=)[0-9]+' | wc -l)
+echo "found $N_NUMBERS output values" > $OUTPUT
+N_EXPECTED=$((THREADS*EVENTS*2))
+if (( N_EXPECTED != N_NUMBERS )) ; then
+    cat <<EOF
+expected $N_EXPECTED numbers ($THREADS threads, $EVENTS events)
+found $N_NUMBERS
+EOF
+    exit 1
+fi
+
+# finding max and min
+echo "find minimum and maximum values" > $OUTPUT
+MIN=$N_NUMBERS
+MAX=0
+while read LINE; do
+    if (( LINE < MIN )) ; then MIN=$LINE; fi
+    if (( LINE > MAX )) ; then MAX=$LINE; fi
+done < <(dump | tail -n +3 | grep -P -o '(?=)[0-9]+')
+
+echo "min $MIN, max $MAX" > $OUTPUT
+if (( MIN < 0 )); then
+    echo "min $MIN is less than zero"
+    exit 1
+fi
+if (( MAX > (THREADS-1) && MAX > (EVENTS-1) )) ; then
+    echo "max + 1 is greater than $THREADS and $EVENTS"
+    exit 1
+fi

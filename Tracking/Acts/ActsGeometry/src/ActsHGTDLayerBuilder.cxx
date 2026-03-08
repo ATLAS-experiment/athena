@@ -193,7 +193,7 @@ void ActsHGTDLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
     // want to figure out bins in phi
     for (const auto &srf : pl.surfaces()) {
       auto elm = dynamic_cast<const ActsDetectorElement *>(
-          srf->associatedDetectorElement());
+          srf->surfacePlacement());
       if (elm) {
         auto id = elm->identify();
         phiModuleByRing.insert(m_cfg.idHelper->phi_module(id));

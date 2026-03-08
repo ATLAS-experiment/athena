@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -32,7 +32,8 @@ def TauVertexFinderCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauVertexFinder'
 
-    from InDetConfig.InDetTrackSelectionToolConfig import Tau_InDetTrackSelectionToolForTJVACfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        Tau_InDetTrackSelectionToolForTJVACfg)
     from TrackVertexAssociationTool.TrackVertexAssociationToolConfig import TauTTVAToolCfg
 
     # Algorithm that overwrites numTrack() and charge() of tauJets in container
@@ -42,7 +43,6 @@ def TauVertexFinderCfg(flags):
                                       UseTJVA                 = flags.Tau.doTJVA,
                                       AssociatedTracks="GhostTrack", # OK??
                                       InDetTrackSelectionToolForTJVA = result.popToolsAndMerge(Tau_InDetTrackSelectionToolForTJVACfg(flags)),
-                                      Key_trackPartInputContainer= flags.Tau.ActiveConfig.TrackCollection,
                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
                                       TVATool = result.popToolsAndMerge(TauTTVAToolCfg(flags)),
                                       inEleRM = flags.Tau.ActiveConfig.inTauEleRM,
@@ -170,7 +170,8 @@ def TauTrackRNNClassifierCfg(flags):
 
     myTauTrackClassifier = TauTrackRNNClassifier( name = _name,
                                                   Classifiers = [ result.popToolsAndMerge(TauTrackRNNCfg(flags)) ],
-                                                  classifyLRT = _classifyLRT )
+                                                  classifyLRT = _classifyLRT,
+                                                  classifyLRTWithDedicated = flags.Tau.classifyLRTWithDedicated)
 
     result.setPrivateTools(myTauTrackClassifier)
     return result

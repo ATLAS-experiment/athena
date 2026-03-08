@@ -58,7 +58,7 @@ CmxEtSumsByteStreamAuxCnv::CmxEtSumsByteStreamAuxCnv(ISvcLocator* svcloc) :
 {
 }
 
-const CLID& CmxEtSumsByteStreamAuxCnv::classID() {
+CLID CmxEtSumsByteStreamAuxCnv::classID() {
   return ClassID_traits<xAOD::CMXEtSumsAuxContainer>::ID();
 }
 

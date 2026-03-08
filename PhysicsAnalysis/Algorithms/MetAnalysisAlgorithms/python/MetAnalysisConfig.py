@@ -67,7 +67,7 @@ class MetAnalysisConfig (ConfigBlock):
         self.addOption ('tauUseMVAResolution', True, type=bool,
             info="whether to use MVA resolution for taus-jets (for MET significance).")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
-            info="whether to save some additional (event-based) MET significance variables")
+            info="whether to save some additional (event-based) MET significance variables.")
         self.addOption ('useLRT', False, type=bool,
             info="whether to use LRT MET Core and association map.")
         self.addOption ('useCaloSoftTerm', False, type=bool,
@@ -75,6 +75,9 @@ class MetAnalysisConfig (ConfigBlock):
             expertMode=True)
         self.addOption ('softTermResolution', -1.0, type=float,
             info="override the default soft term resolution in METSignificance.",
+            expertMode=True)
+        self.addOption ('switchTauMuOrder', False, type=bool,
+            info="whether to switch order of taus and muons",
             expertMode=True)
 
     def instanceName (self) :
@@ -112,6 +115,7 @@ class MetAnalysisConfig (ConfigBlock):
         alg.makerTool.JetSelection = self.metWP
         alg.makerTool.DoPFlow = 'PFlow' in metSuffix or metSuffix=="AnalysisMET"
         alg.makerTool.DoSetMuonJetEMScale = self.setMuonJetEMScale if self.muons else False
+        alg.switchTauMu = self.switchTauMuOrder
 
         if config.dataType() is not DataType.Data :
             config.addPrivateTool( 'systematicsTool', 'met::METSystematicsTool' )

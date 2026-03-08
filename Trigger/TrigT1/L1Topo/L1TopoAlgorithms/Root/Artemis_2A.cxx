@@ -30,8 +30,7 @@
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
 #include "L1TopoSimulationUtils/Helpers.h"
-//TODO: replace once correct ARTEMIS NN is available via Externals, using Gelato NN as placeholder for now
-#include <VAENetwork.h>
+#include <ArtemisNetwork.h>
 
 REGISTER_ALG_TCS(ARTEMIS_2A)
 
@@ -109,9 +108,9 @@ TCS::ARTEMIS_2A::initialize() {
       std::string hname_accept = "hAnomalyScore_accept_bit"+std::to_string((int)i);
       std::string hname_reject = "hAnomalyScore_reject_bit"+std::to_string((int)i);
       // score
-      bookHist(m_histAccept, hname_accept, "ADScore", 2000, 0, 2000000);
-      bookHist(m_histReject, hname_reject, "ADScore", 2000, 0, 2000000);
-   }
+      bookHist(m_histAccept, hname_accept, "AD score", 150, 0, 100000);
+      bookHist(m_histReject, hname_reject, "AD score", 150, 0, 100000);
+}
 
    return StatusCode::SUCCESS;
 }
@@ -119,8 +118,8 @@ TCS::ARTEMIS_2A::initialize() {
 
 TCS::StatusCode
 TCS::ARTEMIS_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & input,
-                                  const std::vector<TCS::TOBArray *> & output,
-                                  Decision & decision )
+                                    const std::vector<TCS::TOBArray *> & output,
+                                    Decision & decision )
 {
 
 
@@ -145,67 +144,78 @@ TCS::ARTEMIS_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & i
                               || TSU::isAmbiguousAnywhere(mus,  p_NumberLeading3, p_minEt3)
                               || TSU::isAmbiguousAnywhere(met,  p_NumberLeading4, p_minEt4);
 
-      std::vector<u_int> jet_pt(6,0), tau_pt(4,0), mu_pt(4,0), met_pt(1,0);
+      std::vector<u_int> jet_pt(6,0),  tau_pt(4,0),  mu_pt(4,0),  met_pt(1,0);
       std::vector<int>   jet_eta(6,0), tau_eta(4,0), mu_eta(4,0); //no met_eta
       std::vector<int>   jet_phi(6,0), tau_phi(4,0), mu_phi(4,0), met_phi(1,0);
 
-      bool highEtVeto = false;
+      bool highEtVeto = false;  // high-Et veto, to be applied later
       
       for (u_int i = 0; i<(*jets).size() && i<6; ++i) {
          if ( parType_t( (*jets)[i].Et() ) <= p_minEt1 ) { continue; } //ET cut, leave NN inputs at default values (0)
-         if ( p_maxEt1 > 0 && parType_t( (*jets)[i].Et() ) > p_maxEt1 ) { highEtVeto = true; } // high-Et veto, to be applied later
          jet_pt[i] = (*jets)[i].Et();
          jet_eta[i] = (*jets)[i].eta();
          jet_phi[i] = (*jets)[i].phi();
       }
+      if ( ( p_maxEt1 > 0 && parType_t( jet_pt[0] ) > p_maxEt1)
+        || ( p_maxEt2 > 0 && parType_t( jet_pt[1] ) > p_maxEt2)         
+        || ( p_maxEt3 > 0 && parType_t( jet_pt[2] ) > p_maxEt3)     
+        || ( p_maxEt4 > 0 && parType_t( jet_pt[3] ) > p_maxEt4) ) { highEtVeto = true; }
+
       for (u_int i = 0; i < (*taus).size() && i<4; ++i) {
          if ( parType_t( (*taus)[i].Et() ) <= p_minEt2 ) { continue; } //ET cut, leave NN inputs at default values (0)
-         if ( p_maxEt2 > 0 &&parType_t( (*taus)[i].Et() ) > p_maxEt2 ) { highEtVeto = true; } // high-Et veto, to be applied later
          tau_pt[i] = (*taus)[i].Et();
          tau_eta[i] = (*taus)[i].eta();
          tau_phi[i] = (*taus)[i].phi();
       }
+      if ( p_maxEt5 > 0 && parType_t( tau_pt[0] ) > p_maxEt5) { highEtVeto = true; }
+
       for (u_int i = 0; i < (*mus).size() && i<4; ++i) {
          if ( parType_t( (*mus)[i].Et() ) <= p_minEt3 ) { continue; } //ET cut, leave NN inputs at default values (0)
-         if ( p_maxEt3 > 0 &&parType_t( (*mus)[i].Et() ) > p_maxEt3 ) { highEtVeto = true; } // high-Et veto, to be applied later
          mu_pt[i] = (*mus)[i].Et();
          mu_eta[i] = (*mus)[i].eta();
          mu_phi[i] = (*mus)[i].phi();
       }
+      if ( p_maxEt6 > 0 && parType_t( mu_pt[0] ) > p_maxEt6) { highEtVeto = true; }
+
       for (u_int i = 0; i < (*met).size() && i<1; ++i) {
          if ( parType_t( (*met)[i].Et() ) <= p_minEt4 ) { continue; } //ET cut, leave NN inputs at default values (0)
-         if ( p_maxEt4 > 0 && parType_t( (*met)[i].Et() ) > p_maxEt4 ) { highEtVeto = true; } // high-Et veto, to be applied later
          met_pt[i] = (*met)[i].Et();
          met_phi[i] = (*met)[i].phi();
       }
+      if ( p_maxEt7 > 0 && parType_t( met_pt[0] ) > p_maxEt7) { highEtVeto = true; }
+
       
-      
-      ADVAE2A::VAENetwork AD_Network( jet_pt[0], jet_eta[0], jet_phi[0],
-                              jet_pt[1], jet_eta[1], jet_phi[1],
-                              jet_pt[2], jet_eta[2], jet_phi[2],
-                              jet_pt[3], jet_eta[3], jet_phi[3],
-                              jet_pt[4], jet_eta[4], jet_phi[4],
-                              jet_pt[5], jet_eta[5], jet_phi[5],
-                              tau_pt[0], tau_eta[0], tau_phi[0],
-                              tau_pt[1], tau_eta[1], tau_phi[1],
-                              tau_pt[2], tau_eta[2], tau_phi[2],
-                              tau_pt[3], tau_eta[3], tau_phi[3],
-                              mu_pt [0], mu_eta [0], mu_phi [0],
-                              mu_pt [1], mu_eta [1], mu_phi [1],
-                              mu_pt [2], mu_eta [2], mu_phi [2],
-                              mu_pt [3], mu_eta [3], mu_phi [3],
-                              met_pt[0], met_phi[0] );
+      ARTEMIS2A::ArtemisNetwork AD_Network( jet_pt[0], jet_eta[0], jet_phi[0],
+                                            jet_pt[1], jet_eta[1], jet_phi[1],
+                                            jet_pt[2], jet_eta[2], jet_phi[2],
+                                            jet_pt[3], jet_eta[3], jet_phi[3],
+                                            jet_pt[4], jet_eta[4], jet_phi[4],
+                                            jet_pt[5], jet_eta[5], jet_phi[5],
+                                            tau_pt[0], tau_eta[0], tau_phi[0],
+                                            tau_pt[1], tau_eta[1], tau_phi[1],
+                                            tau_pt[2], tau_eta[2], tau_phi[2],
+                                            tau_pt[3], tau_eta[3], tau_phi[3],
+                                            mu_pt [0], mu_eta [0], mu_phi [0],
+                                            mu_pt [1], mu_eta [1], mu_phi [1],
+                                            mu_pt [2], mu_eta [2], mu_phi [2],
+                                            mu_pt [3], mu_eta [3], mu_phi [3],
+                                            met_pt[0], met_phi[0] );
+
       std::vector<int64_t> anomScoreInt64Vec = AD_Network.getAnomalyScoreInt64Vec();
+
+      // Calculate event score = mu^2 - log(std^2)
+      int64_t anomScoreInt64 = 0;
+      anomScoreInt64 =  ((anomScoreInt64Vec.at(0) * anomScoreInt64Vec.at(0)) >> 10)  // Drop extra precision
+                       +((anomScoreInt64Vec.at(1) * anomScoreInt64Vec.at(1)) >> 10)
+                       +((anomScoreInt64Vec.at(2) * anomScoreInt64Vec.at(2)) >> 10)
+                       +((anomScoreInt64Vec.at(3) * anomScoreInt64Vec.at(3)) >> 10)
+                       -  anomScoreInt64Vec.at(4) - anomScoreInt64Vec.at(5) - anomScoreInt64Vec.at(6) - anomScoreInt64Vec.at(7);
 
       for(u_int i=0; i<numberOutputBits(); ++i) {
          bool accept = false;
          // Retrieve threshold
          int32_t threshold = int32_t ( p_AnomalyScoreThresh[i] );
-         // Calculate event score
-         int64_t anomScoreInt64 = 0;
-         anomScoreInt64 = ( anomScoreInt64Vec.at(0)*anomScoreInt64Vec.at(0) ) + 
-                          ( anomScoreInt64Vec.at(1)*anomScoreInt64Vec.at(1) ) + 
-                          ( anomScoreInt64Vec.at(2)*anomScoreInt64Vec.at(2) );
+         // Get decision bit
          if ( anomScoreInt64 > threshold && !highEtVeto ) {
             accept = true;
             decision.setBit(i, true);
@@ -233,8 +243,8 @@ TCS::ARTEMIS_2A::processBitCorrect( const std::vector<TCS::TOBArray const *> & i
 
 TCS::StatusCode
 TCS::ARTEMIS_2A::process( const std::vector<TCS::TOBArray const *> & input,
-                        const std::vector<TCS::TOBArray *> & output,
-                        Decision & decision )
+                          const std::vector<TCS::TOBArray *> & output,
+                          Decision & decision )
 {
     // as there is a bitwise implementation available use it
     return this->processBitCorrect(input, output, decision);

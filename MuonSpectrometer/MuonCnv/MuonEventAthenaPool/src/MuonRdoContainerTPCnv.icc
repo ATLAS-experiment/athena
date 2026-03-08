@@ -39,7 +39,7 @@ template <class T, class P, class CONV>
 inline
 T*
 MuonRdoContainerTPCnv<T,P, CONV >
-::createTransient()
+::createTransient(const Token* /*token*/)
 {
    MsgStream log(this->msgSvc(), "MuonRdoContainerTPCnv" ); 
    if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** Warning: using default createTransient() - (possibly missing specialized version of this method" << endmsg;

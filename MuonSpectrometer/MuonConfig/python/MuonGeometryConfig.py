@@ -266,11 +266,13 @@ def RegionSelCondAlgCfg(flags, detector: str, **kwargs):
     result.merge(MdtCondDbAlgCfg(flags))
 
     the_alg = None
-    if flags.Muon.usePhaseIIGeoSetup:
+    if (flags.Muon.usePhaseIIGeoSetup and flags.Trigger.Muon.useNewRegionSelector ):
         if not flags.Detector.GeometryMDT: 
             kwargs.setdefault("MdtCablingKey", "")
         if not flags.Detector.GeometryRPC:
             kwargs.setdefault("RpcCablingKey", "")
+        if not flags.Detector.GeometryTGC:
+            kwargs.setdefault("TgcCablingKey", "")
         alignDet = ""
         if detector == "MDT":    alignDet = "Mdt"
         elif detector == "RPC":  alignDet = "Rpc"

@@ -28,7 +28,7 @@ public:
     MuonSimDataCollectionCnv(ISvcLocator* svcloc);
     virtual ~MuonSimDataCollectionCnv();
     virtual MuonSimDataCollection_PERS*   createPersistent (MuonSimDataCollection* transCont);
-    virtual MuonSimDataCollection*        createTransient ();
+    virtual MuonSimDataCollection*        createTransient(const Token* token);
 
 private:
     MuonSimDataCollectionCnv_p1    m_TPConverter_p1;

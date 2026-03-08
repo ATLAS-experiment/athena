@@ -1,3 +1,4 @@
+#!/usr/bin/env athena.py
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 # Simple script to run a
@@ -6,7 +7,7 @@
 # Usefull for quick testing using EMPFlowML jets for tau seeding
 # run with
 #
-# athena --CA runTauOnly_EMPFlowML.py 
+# athena runTauOnly_EMPFlowML.py 
 # or
 # python runTauOnly_EMPFlowML.py
 

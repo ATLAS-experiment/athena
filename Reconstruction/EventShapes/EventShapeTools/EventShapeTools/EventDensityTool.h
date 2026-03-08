@@ -1,7 +1,7 @@
 // EventDensityTool.h    -*- C++ -*- 
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,7 +73,7 @@ private:
   // Temporarily included until trigger jet-finding properly moves to DH
   ToolHandle<IPseudoJetGetter> m_trigPJGet{""};
 
-  // DataHandles
+  // Handles
   SG::ReadHandleKey<PseudoJetContainer> m_inPJKey{this, "InputContainer", "", "ReadHandleKey for input PseudoJetVector"};
   SG::WriteHandleKey<xAOD::EventShape> m_outEDKey{this, "OutputContainer", "GenericEventDensity", "WriteHandleKey for output EventDensity"};
 

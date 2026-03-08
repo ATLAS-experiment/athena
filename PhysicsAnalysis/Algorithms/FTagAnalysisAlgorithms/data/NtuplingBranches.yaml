@@ -1,0 +1,36 @@
+FTagConfig:
+  - name: select
+    description: the per-jet tagging decision (no systematics)
+  - name: quantile
+    description: only for pseudo-continuous b-tagging, the per-jet PCBT bin (no systematics)
+  - name: '{btagger}'
+    description: the per-jet discriminant from tagger `{btagger}` (no systematics)
+    toggled_by: saveScores
+  - name: '{btagger}_pu'
+    description: the per-jet light-flavour probability from tagger `{btagger}` (no systematics)
+    toggled_by: saveScores
+  - name: '{btagger}_pc'
+    description: the per-jet charm-flavour probability from tagger `{btagger}` (no systematics)
+    toggled_by: saveScores
+  - name: '{btagger}_pb'
+    description: the per-jet bottom-flavour probability from tagger `{btagger}` (no systematics)
+    toggled_by: saveScores
+  - name: '{btagger}_ptau'
+    description: the per-jet tau-jet-flavour probability from tagger `{btagger}` (no systematics)
+    toggled_by: saveScores
+
+FTagJetSFBlock:
+  - name: '{btagger}_{btagWP}_eff'
+    description: the per-jet b-tagging efficiency SF
+    toggled_by: savePerJetSF
+
+FTagEventSFBlock:
+  - name: weight_ftag_effSF_{btagger}_{btagWP}
+    description: the per-event b-tagging efficiency SF
+
+XbbConfig:
+  - name: jet_Xbbtagger_XbbWP_select
+    description: tagger decision on the jet
+  - name: jet_Xbbtagger_XbbWP_effSF
+    description: per-jet efficiency scale factor
+

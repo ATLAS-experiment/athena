@@ -16,10 +16,6 @@ public:
   StatusCode runGraphInference(const EventContext& ctx, GraphRawData& graphData) const override final;
 
 private:
-  /// Input: buckets to filter
-  SG::ReadHandleKey<MuonR4::SpacePointContainer> m_readKey{
-      this, "ReadSpacePointKey", "MuonSpacePoints"};
-
   /// Output: buckets that pass the class selection
   SG::WriteHandleKey<MuonR4::SpacePointContainer> m_writeKey{
       this, "WriteSpacePointKey", "FilteredMlBuckets"};

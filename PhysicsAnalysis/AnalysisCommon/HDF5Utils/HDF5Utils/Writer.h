@@ -16,7 +16,7 @@
 #include "WriterConfiguration.h"
 #include "H5Traits.h"
 #include "CompressedTypes.h"
-#include "common.h"
+#include "WriterCommon.h"
 #include "defaults.h"
 
 #include "H5Cpp.h"
@@ -26,6 +26,7 @@
 #include <memory>
 #include <cassert>
 #include <set>
+#include <mutex>
 
 namespace H5Utils {
 
@@ -377,6 +378,7 @@ namespace H5Utils {
     std::vector<SharedConsumer<I> > m_consumers;
     H5::DataSet m_ds;
     H5::DataSpace m_file_space;
+    std::recursive_mutex m_mutex;
   };
 
   template <size_t N, typename I>
@@ -443,8 +445,14 @@ namespace H5Utils {
   template <size_t N, typename I>
   template <typename T>
   void Writer<N, I>::fill(T arg) {
-    if (m_buffer_rows == m_par.batch_size) {
-      flush();
+    // lock witin a scope here to check the buffer size and
+    // (potentially) flush, but we can release it to compute the
+    // output array since that's thread local
+    {
+      std::lock_guard lock(m_mutex);
+      if (m_buffer_rows == m_par.batch_size) {
+        flush();
+      }
     }
 
     // make some assertions to simplify debugging, the errors can be
@@ -478,6 +486,11 @@ namespace H5Utils {
       m_consumers, std::move(arg), m_par.extent);
     hsize_t n_el = buf.element_offsets.size();
     std::vector<hsize_t> elements;
+
+    // lock again here since we're done with the local stuff: there's
+    // some access to class variables below which we need to do one
+    // thread at a time.
+    std::lock_guard lock(m_mutex);
     for (const auto& el_local: buf.element_offsets) {
       std::array<hsize_t, N+1> el_global;
       el_global[0] = m_offset + m_buffer_rows;
@@ -493,6 +506,7 @@ namespace H5Utils {
 
   template <size_t N, typename I>
   void Writer<N, I>::flush() {
+    std::lock_guard lock(m_mutex);
     const hsize_t buffer_size = m_buffer_rows;
     if (buffer_size == 0) return;
 
@@ -538,7 +552,18 @@ namespace H5Utils {
     const Consumers<I>& consumers,
     const std::array<hsize_t, N>& extent = internal::uniform<N>(5),
     hsize_t batch_size = defaults::batch_size) {
-    return Writer<N,I>(group, name, consumers, extent, batch_size);
+    WriterConfiguration<N> config;
+    config.name = name;
+    config.extent = extent;
+    config.batch_size = batch_size;
+    return Writer<N,I>(group, consumers, config);
+  }
+  template <size_t N, class I>
+  Writer<N,I> makeWriter(
+    H5::Group& group,
+    const Consumers<I>& consumers,
+    const WriterConfiguration<N>& config) {
+    return Writer<N,I>(group, consumers, config);
   }
 
   /** @brief CRefConsumer

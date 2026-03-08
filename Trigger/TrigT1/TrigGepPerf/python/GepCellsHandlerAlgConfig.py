@@ -9,6 +9,7 @@ def GepCellsHandlerAlgCfg(flags, name='GepCellsHandlerAlg',
                            GEPEnergyEncodingScheme = "6-40-4", 
                            HardwareStyleEnergyEncoding = True, 
                            TruncationOfOverflowingFEBs = True,
+                           NoiseThreshold = 2.,
                            WriteAllCells = False,
                            CleanOutputCells = False,
                            OutputLevel=None):
@@ -21,6 +22,7 @@ def GepCellsHandlerAlgCfg(flags, name='GepCellsHandlerAlg',
         GEPEnergyEncodingScheme = GEPEnergyEncodingScheme,
         HardwareStyleEnergyEncoding = HardwareStyleEnergyEncoding,
         TruncationOfOverflowingFEBs = TruncationOfOverflowingFEBs,
+        NoiseThreshold = NoiseThreshold,
         WriteAllCells = WriteAllCells
     )
 

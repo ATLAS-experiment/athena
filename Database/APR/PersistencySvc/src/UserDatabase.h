@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_USERDATABASE_H
@@ -7,7 +7,6 @@
 
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
-#include "PersistencySvc/DatabaseSpecification.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
 #include "POOLCore/DbPrint.h"
 
@@ -15,12 +14,11 @@ namespace pool {
   // forward declarations
   class DatabaseConnectionPolicy;
   class IFileCatalog;
-  class ITransaction;
    
 
   namespace PersistencySvc {
     // forward declarations
-    class TechnologyDispatcher;
+    class UserSession;
     class DatabaseHandler;
     class DatabaseRegistry;
 
@@ -35,13 +33,9 @@ namespace pool {
     {
     public:
       /// Constructor
-      UserDatabase( TechnologyDispatcher& technologyDispatcher,
-		    const DatabaseConnectionPolicy& policy,
-		    IFileCatalog& fileCatalog,
-		    ITransaction& transaction,
-		    DatabaseRegistry& registry,
-		    const std::string& name,
-		    DatabaseSpecification::NameType nameType );
+      UserDatabase( UserSession& session,
+		                const std::string& name,
+		                const DatabaseSpecification::NameType nameType );
 
       /// Destructor
       virtual ~UserDatabase();
@@ -51,11 +45,9 @@ namespace pool {
 
       /// Connects explicitly to the database for read operations
       virtual void connectForRead() override;
-      virtual void connectForRead( const DatabaseConnectionPolicy& policy ) override;
 
       /// Connects explicitly to the database for write/update operations
       virtual void connectForWrite() override;
-      virtual void connectForWrite( const DatabaseConnectionPolicy& policy ) override;
 
       /// Disconnects from the database
       virtual void disconnect() override;
@@ -101,14 +93,14 @@ namespace pool {
                                const std::type_info& typeInfo,
                                const std::string& option ) override;
     private:
-      /// Reference to the technology dispatcher
-      TechnologyDispatcher&                   m_technologyDispatcher;
+      /// Reference to the session
+      UserSession&                            m_session;
       /// Reference to the policy
       const DatabaseConnectionPolicy&         m_policy;
       /// Reference to the file catalog
       IFileCatalog&                           m_catalog;
-      /// Reference to the global transaction
-      ITransaction&                           m_transaction;
+      /// Transaction type (read/update)
+      ITransaction::Type                      m_transactionType;
       /// Reference to the database registry
       DatabaseRegistry&                       m_registry;
       /// The database name

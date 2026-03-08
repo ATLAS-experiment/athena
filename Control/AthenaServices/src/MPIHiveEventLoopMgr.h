@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_MPIHIVEEVENTLOOPMGR_H
@@ -73,8 +73,6 @@ class MPIHiveEventLoopMgr : public AthenaHiveEventLoopMgr {
   UnsignedIntegerProperty m_firstEventIndex{
       this, "FirstEventIndex", 0, "First event index (Exec.SkipEvents)"};
   int m_evtSelectorCurrentPos = 0;
-
-  StoreGateSvc* eventStore() const;
 };
 
 #endif  // ATHENASERVICES_MPIHIVEEVENTLOOPMGR_H

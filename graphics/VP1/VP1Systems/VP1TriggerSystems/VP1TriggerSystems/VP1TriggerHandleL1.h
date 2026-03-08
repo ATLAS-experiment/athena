@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1TRIGGERHANDLEL1_H
@@ -71,7 +71,7 @@ namespace VP1Trig {
     
     //**** Run by: Class Internal ****
     bool processitem();
-    bool processFeature(int processId, QString roiId, QString feature);
+    bool processFeature(int processId, const QString& roiId, QString feature);
 
     //**** Data: QTree format ****
     QTreeWidgetItem* m_qtrigitem;

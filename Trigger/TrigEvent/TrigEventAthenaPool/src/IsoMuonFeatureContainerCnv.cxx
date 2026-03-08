@@ -21,7 +21,7 @@ IsoMuonFeatureContainer_PERS * IsoMuonFeatureContainerCnv::createPersistent( Iso
 }//end of create persistent method
 
 //createTransient
-IsoMuonFeatureContainer * IsoMuonFeatureContainerCnv::createTransient()
+IsoMuonFeatureContainer * IsoMuonFeatureContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "IsoMuonFeatureContainerConverter" );
   
@@ -33,23 +33,23 @@ IsoMuonFeatureContainer * IsoMuonFeatureContainerCnv::createTransient()
   static const pool::Guid p0_guid( "3962B221-2A36-4160-AEE5-3BB6BC29BB46" );
 
   //IsoMuonFeatureContainer *p_collection = 0;
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_p3 > col_vect( poolReadObject< IsoMuonFeatureContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< IsoMuonFeatureContainer_p3 > col_vect( poolReadObject< IsoMuonFeatureContainer_p3 >(token) );
 	 //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-    }else if( compareClassGuid( p2_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_p2 > col_vect( poolReadObject< IsoMuonFeatureContainer_p2 >() );
+    }else if( compareClassGuid(token,  p2_guid ) ){
+         std::unique_ptr< IsoMuonFeatureContainer_p2 > col_vect( poolReadObject< IsoMuonFeatureContainer_p2 >(token) );
 	 //         std::cout << "Reading IMFC p2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog ) ;
 
-    }else if( compareClassGuid( tlp1_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_tlp1 > col_vect( poolReadObject< IsoMuonFeatureContainer_tlp1 >() );
+    }else if( compareClassGuid(token,  tlp1_guid ) ){
+         std::unique_ptr< IsoMuonFeatureContainer_tlp1 > col_vect( poolReadObject< IsoMuonFeatureContainer_tlp1 >(token) );
 	 //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog );
       
-    }else if( compareClassGuid( p0_guid ) ){
-         return poolReadObject< IsoMuonFeatureContainer >();
+    }else if( compareClassGuid(token,  p0_guid ) ){
+         return poolReadObject< IsoMuonFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of IsoMuonFeatureContainer" );
   

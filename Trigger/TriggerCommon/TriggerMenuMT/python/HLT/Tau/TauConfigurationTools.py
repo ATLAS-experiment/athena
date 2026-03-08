@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
@@ -27,6 +27,7 @@ def getPrecisionSequenceTauIDs(flags, precision_sequence: str) -> list[str]:
 
     # Additional Tau ID algorithms to run ONLY if we're using the Dev menu
     dev_tau_ids = {
+        'MVA': ['GNTauDev1'],
     }
 
     ret = tau_ids[precision_sequence]
@@ -47,7 +48,7 @@ rnn_wps = ['verylooseRNN', 'looseRNN', 'mediumRNN', 'tightRNN']
 noid_selections = ['perf', 'idperf']
 meson_selections = ['kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion']
 
-def getChainIDConfigName(chainPart) -> str:
+def getChainIDConfigName(flags, chainPart) -> str:
     '''Clean the ID configuration for a chainPart dict'''
     sel = chainPart['selection']
 
@@ -60,16 +61,16 @@ def getChainIDConfigName(chainPart) -> str:
     elif chainPart['reconstruction'] in ['tracktwoLLP', 'trackLRT'] and sel in rnn_wps:
         return 'RNNLLP'
 
+    # Sort ID names from longest to shortest, to check for a full match
+    tau_ids = sorted(list(flags.Trigger.Offline.Tau), key=len, reverse=True)
+    for tau_id in tau_ids:
+        if sel.endswith(tau_id): return tau_id
 
-    # Retrieve the TauID name from the selection string
-    if sel.startswith('veryloose'): sel = sel.removeprefix('veryloose')
-    if sel.startswith('loose'): sel = sel.removeprefix('loose')
-    if sel.startswith('medium'): sel = sel.removeprefix('medium')
-    if sel.startswith('tight'): sel = sel.removeprefix('tight')
-    
     # Remap names (e.g. DS -> DeepSet)
     name_mapping: dict[str, str] = {'DS': 'DeepSet', 'GNT': 'GNTau'}
-    if sel in name_mapping: sel = name_mapping[sel]
+    name_mapping = dict(sorted(name_mapping.items(), key=lambda p: len(p[0]), reverse=True))
+    for short_name, long_name in name_mapping.items():
+        if sel.endswith(short_name): return long_name
 
     return sel
 

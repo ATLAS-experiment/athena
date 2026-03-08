@@ -9,15 +9,15 @@
  *      Author: zhangrui
  */
 
-#include "eflowRec/eflowSubtractor.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowCellSubtractionFacilitator.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowLayerIntegrator.h"
-#include "eflowRec/eflowRecCluster.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowRingSubtractionManager.h"
-#include "eflowRec/eflowTrackClusterLink.h"
+#include "eflowSubtractor.h"
+#include "eflowCaloObject.h"
+#include "eflowCellSubtractionFacilitator.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowLayerIntegrator.h"
+#include "eflowRecCluster.h"
+#include "eflowRecTrack.h"
+#include "eflowRingSubtractionManager.h"
+#include "eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 

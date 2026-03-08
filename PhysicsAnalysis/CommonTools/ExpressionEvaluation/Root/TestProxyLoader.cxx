@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@ namespace ExpressionParsing {
     m_intAccessCount = 0;
   }
 
-  IProxyLoader::VariableType TestProxyLoader::variableTypeFromString(const std::string &varname) const
+  IAccessor::VariableType TestProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     if (varname == "intTEST") return VT_INT;
     else if (varname == "int_TEST") return VT_INT;
@@ -33,26 +33,26 @@ namespace ExpressionParsing {
     else return VT_UNK;
   }
 
-  int TestProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int TestProxyLoader::loadInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     if (varname == "intTEST") { ++m_intAccessCount; return (42+(m_intAccessCount-1)); }
     else if (varname == "int_TEST") { return 24; }
     else throw std::runtime_error("Unknown proxy: " + varname);
   }
 
-  double TestProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double TestProxyLoader::loadDouble([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     if (varname == "doubleTEST") return 42.42;
     else throw std::runtime_error("Unknown proxy: " + varname);
   }
 
-  std::vector<int> TestProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> TestProxyLoader::loadVecInt([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     if (varname == "vectorIntTEST") return std::vector<int>(2, 42);
     else throw std::runtime_error("Unknown proxy: " + varname);
   }
 
-  std::vector<double> TestProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> TestProxyLoader::loadVec([[maybe_unused]] const EventContext& ctx,const std::string &varname) const
   {
     if (varname == "vectorDoubleTEST") return std::vector<double>(2, 42.42);
     else throw std::runtime_error("Unknown proxy: " + varname);

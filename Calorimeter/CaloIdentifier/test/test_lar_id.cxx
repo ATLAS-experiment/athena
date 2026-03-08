@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Header: /build/atlas/cvs/atlas/offline/Calorimeter/CaloIdentifier/test/test_lar_id.cxx,v 1.25 2007-02-19 15:56:25 fledroit Exp $ 
   
 #include "IdDictParser/IdDictParser.h"  
 #include "Identifier/Range.h" 
@@ -1850,23 +1848,23 @@ int main (int argc, char* argv[])
 //      std::cout << "regenerate for tag = initial_layout " << std::endl;
 //      idd.generate_implementation ("initial_layout");  
 
-    check_lar_em_decoding(idd);
+    try {
+      check_lar_em_decoding(idd);
 
-    check_lar_hec_decoding(idd);
+      check_lar_hec_decoding(idd);
 
-    check_lar_fcal_decoding(idd);
+      check_lar_fcal_decoding(idd);
 
-    check_lar_neighbour(idd);
+      check_lar_neighbour(idd);
 
-    //    check_lar_timing(idd);
+      //    check_lar_timing(idd);
 
-    //    check_lar_neighbour_timing(idd);
+      //    check_lar_neighbour_timing(idd);
+    }
+    catch (const std::exception& e) {
+      std::cerr << "Caught exception: " << e.what() << "\n";
+      return 1;
+    }
     
     return 0;  
 }  
-  
- 
- 
- 
- 
- 

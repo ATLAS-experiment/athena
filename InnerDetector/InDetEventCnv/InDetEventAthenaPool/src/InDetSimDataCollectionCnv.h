@@ -30,7 +30,7 @@ public:
   InDetSimDataCollectionCnv (ISvcLocator* svcloc) : InDetSimDataCollectionCnvBase(svcloc) {}
 protected:
   virtual InDetSimDataCollection_PERS*   createPersistent (InDetSimDataCollection* transCont);
-  virtual InDetSimDataCollection* createTransient ();
+  virtual InDetSimDataCollection* createTransient(const Token* token);
 };
 
 #endif // INDETEVENTATHENAPOOL_INDETSIMDATACOLLECTIONCNV_H

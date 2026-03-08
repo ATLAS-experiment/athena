@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_EXTENDEDEVENTCONTEXT_H
@@ -10,7 +10,7 @@
 #include "GaudiKernel/EventContext.h"
 #include "CxxUtils/checker_macros.h"
 
-class TrigRoiDescriptor; //!< Forward declaration
+class IRoiDescriptor; //!< Forward declaration
 namespace SG {
 class ThinningCache;
 }
@@ -26,7 +26,7 @@ namespace Atlas {
 
     ExtendedEventContext(IProxyDict* p,
                          EventIDBase::number_type conditionsRun = EventIDBase::UNDEFNUM,
-                         const TrigRoiDescriptor* roi = nullptr)
+                         const IRoiDescriptor* roi = nullptr)
       : m_proxy (p), m_conditionsRun (conditionsRun), m_roi (roi)
     {}
 
@@ -48,7 +48,7 @@ namespace Atlas {
      * @see EventViewCreatorAlgorithm::execute(const EventContext&)
      * @see TrigCostSvc::processAlg(const EventContext&, const std::string&, const AuditType)
      **/
-    const TrigRoiDescriptor* roiDescriptor() const { return m_roi; }
+    const IRoiDescriptor* roiDescriptor() const { return m_roi; }
 
 
     /**
@@ -76,7 +76,7 @@ namespace Atlas {
   private:
     IProxyDict* m_proxy {nullptr};
     EventIDBase::number_type m_conditionsRun {EventIDBase::UNDEFNUM};
-    const TrigRoiDescriptor* m_roi {nullptr};
+    const IRoiDescriptor* m_roi {nullptr};
     const SG::ThinningCache* m_thinningCache {nullptr};
     std::pmr::memory_resource* m_memResource{nullptr};
   };

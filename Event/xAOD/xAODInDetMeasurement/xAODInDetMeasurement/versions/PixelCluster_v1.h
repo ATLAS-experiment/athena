@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODINDETMEASUREMENT_VERSION_PIXELCLUSTER_V1_H
@@ -8,6 +8,7 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "Identifier/Identifier.h"
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
+#include "xAODCore/VariableStruct.h"
 
 namespace xAOD {
 
@@ -113,6 +114,30 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
     /// Sets the LVL1 accept
     void setLVL1A(int lvl1a);
+
+    /// @}
+
+    /// @name Create a structure of raw pointers for fast filling.
+    /// @{
+
+    struct ClusterVars : public xAOD::VariableStruct
+    {
+      using xAOD::VariableStruct::VariableStruct;
+
+      AUXSTORE_VARSTRUCT_VAR(xAOD::DetectorIdentType,              identifier);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::DetectorIDHashType,             identifierHash);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<2>::element_type,   localPositionDim2);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::CovAccessor<2>::element_type,   localCovarianceDim2);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<3>::element_type,   globalPositionDim3);
+      AUXSTORE_VARSTRUCT_VAR(std::vector<Identifier::value_type>,  rdoList);
+      AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInPhi);
+      AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInEta);
+      AUXSTORE_VARSTRUCT_VAR(float,                                widthInEta);
+      AUXSTORE_VARSTRUCT_VAR(std::vector<int>,                     totList);
+      AUXSTORE_VARSTRUCT_VAR(int,                                  totalToT);
+      AUXSTORE_VARSTRUCT_VAR(float,                                totalCharge);
+      AUXSTORE_VARSTRUCT_VAR(int,                                  lvl1a);
+    };
 
     /// @}
 };

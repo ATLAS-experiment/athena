@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VRTSECINCLUSIVE_UTILITIES_H
@@ -65,9 +65,9 @@ namespace VKalVrtAthena {
       IntersectionPos_endcap *endcap = dynamic_cast<IntersectionPos_endcap*>( layer );
 
       ATH_MSG_VERBOSE( " >>> setIntersection: name = " << endcap->name() <<
-		       ", zpos = " << endcap->zpos() <<
-		       ", Rmin = " << endcap->rmin() <<
-		       ", Rmax = " << endcap->rmax()    );
+                       ", zpos = " << endcap->zpos() <<
+                       ", Rmin = " << endcap->rmin() <<
+                       ", Rmax = " << endcap->rmax()    );
 
       Amg::Transform3D trnsf;
       trnsf.setIdentity();
@@ -95,84 +95,84 @@ namespace VKalVrtAthena {
 
   template<> void genSequence( const xAOD::Muon*, std::vector<unsigned>& trackTypes );
   template<> void genSequence( const xAOD::Electron* electron, std::vector<unsigned>& trackTypes );
-  
+
   //____________________________________________________________________________________________________
   template<class LeptonFlavor>
   const xAOD::TrackParticle* getLeptonTrackParticle( const LeptonFlavor*, const unsigned& ) { return nullptr; }
-  
+
   template<> const xAOD::TrackParticle* getLeptonTrackParticle( const xAOD::Muon* muon, const unsigned& trackType );
   template<> const xAOD::TrackParticle* getLeptonTrackParticle( const xAOD::Electron* electron, const unsigned& trackType );
-  
+
   //____________________________________________________________________________________________________
   template<class LeptonFlavor>
   StatusCode VrtSecInclusive::augmentDVimpactParametersToLeptons( const std::string& containerName )
   {
-    
-    const xAOD::VertexContainer *secondaryVertexContainer( nullptr );
-    ATH_CHECK( evtStore()->retrieve( secondaryVertexContainer, "VrtSecInclusive_" + m_jp.secondaryVerticesContainerName + m_jp.augVerString) );
-    
+
+    const xAOD::VertexContainer *secondaryVertexContainer{};
+    ATH_CHECK( evtStore()->retrieve( secondaryVertexContainer, "VrtSecInclusive_" + m_secondaryVerticesContainerName + m_augVerString) );
+
     using LeptonContainer = DataVector<LeptonFlavor>;
-    
-    const LeptonContainer *leptonContainer( nullptr );
+
+    const LeptonContainer *leptonContainer{};
     ATH_CHECK( evtStore()->retrieve( leptonContainer, containerName ) );
-    
+
     if (m_ipDecors.empty()) {
-      m_ipDecors.emplace_back( "d0_wrtSVs"    + m_jp.augVerString );
-      m_ipDecors.emplace_back( "z0_wrtSVs"    + m_jp.augVerString );
-      m_ipDecors.emplace_back( "pt_wrtSVs"    + m_jp.augVerString );
-      m_ipDecors.emplace_back( "eta_wrtSVs"   + m_jp.augVerString );
-      m_ipDecors.emplace_back( "phi_wrtSVs"   + m_jp.augVerString );
-      m_ipDecors.emplace_back( "d0err_wrtSVs" + m_jp.augVerString );
-      m_ipDecors.emplace_back( "z0err_wrtSVs" + m_jp.augVerString );
+      m_ipDecors.emplace_back( "d0_wrtSVs"    + m_augVerString );
+      m_ipDecors.emplace_back( "z0_wrtSVs"    + m_augVerString );
+      m_ipDecors.emplace_back( "pt_wrtSVs"    + m_augVerString );
+      m_ipDecors.emplace_back( "eta_wrtSVs"   + m_augVerString );
+      m_ipDecors.emplace_back( "phi_wrtSVs"   + m_augVerString );
+      m_ipDecors.emplace_back( "d0err_wrtSVs" + m_augVerString );
+      m_ipDecors.emplace_back( "z0err_wrtSVs" + m_augVerString );
     }
-    
+
     // Grouping decorators
     enum { k_ip_d0, k_ip_z0, k_ip_pt, k_ip_eta, k_ip_phi, k_ip_d0err, k_ip_z0err };
-    
+
     if( !m_decor_svLink ) {
-      m_decor_svLink.emplace ( "svLinks" + m_jp.augVerString );
+      m_decor_svLink.emplace ( "svLinks" + m_augVerString );
     }
-    
+
     // Loop over leptons
     for( const auto& lepton : *leptonContainer ) {
-      
+
       std::vector< std::vector< std::vector<float> > > ip_wrtSVs( m_ipDecors.size() ); // triple nest of { ip parameters, tracks, DVs }
-      
+
       bool linkFlag { false };
-      
+
       std::vector<unsigned> trackTypes;
       genSequence<LeptonFlavor>( lepton, trackTypes );
-    
+
       // Loop over lepton types
       for( auto& trackType : trackTypes ) {
-        
+
         std::vector< std::vector<float> > ip_wrtSV( m_ipDecors.size() ); // nest of { tracks, DVs }
-        
+
         const auto* trk = getLeptonTrackParticle<LeptonFlavor>( lepton, trackType );
-        
+
         if( !trk ) continue;
-      
+
         std::map< const xAOD::Vertex*, std::vector<double> > distanceMap;
-      
+
         std::vector<ElementLink< xAOD::VertexContainer > > links;
-        
+
         // Loop over vertices
         for( const auto vtx : *secondaryVertexContainer ) {
-      
+
           std::vector<double> impactParameters;
           std::vector<double> impactParErrors;
-          
+
           m_fitSvc->VKalGetImpact( trk, vtx->position(), static_cast<int>( lepton->charge() ), impactParameters, impactParErrors );
-          
+
           enum { k_d0, k_z0, k_theta, k_phi, k_qOverP }; // for the impact parameter
           enum { k_d0d0, k_d0z0, k_z0z0 };               // for the par errors
-          
+
           const auto& theta = impactParameters.at( k_theta );
           const auto& phi   = impactParameters.at( k_phi );
           const auto  p     = fabs( 1.0 / impactParameters.at(k_qOverP) );
           const auto  pt    = fabs( p * sin( theta ) );
           const auto  eta   = -log( tan(theta/2.) );
-          
+
           // filling the parameters to the corresponding container
           ip_wrtSV.at( k_ip_d0 )    .emplace_back( impactParameters.at(k_d0) );
           ip_wrtSV.at( k_ip_z0 )    .emplace_back( impactParameters.at(k_z0) );
@@ -181,37 +181,37 @@ namespace VKalVrtAthena {
           ip_wrtSV.at( k_ip_phi )   .emplace_back( phi );
           ip_wrtSV.at( k_ip_d0err ) .emplace_back( impactParErrors.at(k_d0d0) );
           ip_wrtSV.at( k_ip_z0err ) .emplace_back( impactParErrors.at(k_z0z0) );
-          
+
           if( !linkFlag ) {
-            
+
             ElementLink<xAOD::VertexContainer> link_SV( *( dynamic_cast<const xAOD::VertexContainer*>( vtx->container() ) ), static_cast<size_t>( vtx->index() ) );
             links.emplace_back( link_SV );
-            
+
           }
-          
+
         } // end of vertex loop
-        
+
         // The linking to the vertices need to be done only once
         if( !linkFlag ) {
           ( *m_decor_svLink )( *lepton ) = links;
           linkFlag = true;
         }
-        
+
         for( size_t ipar = 0; ipar < ip_wrtSVs.size(); ipar++ ) ip_wrtSVs.at( ipar ).emplace_back( ip_wrtSV.at( ipar ) );
-        
+
       } // end of track type loop
-      
+
       // decoration
       for( size_t ipar = 0; ipar < m_ipDecors.size(); ipar++ ) {
         m_ipDecors.at( ipar )( *lepton ) = ip_wrtSVs.at( ipar );
       }
 
     } // end of lepton container loop
-    
+
     return StatusCode::SUCCESS;
   }
-  
-  
+
+
 }
 
 

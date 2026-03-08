@@ -68,8 +68,8 @@ namespace dqutils {
   }//MonitoringFile::TGCPostProcess
 
   bool
-  MonitoringFile::TGCCheckHistogram(TFile* f, TString& hname) {
-    if (!(f->Get(hname))) {
+  MonitoringFile::TGCCheckHistogram(TFile* f, const std::string& hname) {
+    if (!(f->Get(hname.c_str()))) {
       //std::cerr << "TGC PostProcessing: no such histogram!! : "<< hname << std::endl;
       gDirectory->pwd();
       gDirectory->ls();
@@ -107,38 +107,38 @@ namespace dqutils {
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
 
-      TString tgc_global_dir = tgc_dir + "Global/";
+      std::string tgc_global_dir = tgc_dir + "Global/";
 
-      TString tgc_sub_dir[2] = {
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      TString sac[2] = {
+      static const std::string sac[2] = {
         "_A", "_C"
       };
-      TString side[2] = {
+      static const std::string side[2] = {
         "A", "C"
       };
-      TString sws[2] = {
+      static const std::string sws[2] = {
         "Wire_", "Strip_"
       };
 
       std::stringstream ss;
 
       //Summary histograms
-      TString schambertypesummary[2][4][6];//[ws][station][eta]
+      std::string schambertypesummary[2][4][6];//[ws][station][eta]
       TH1F* chambertypesummary[2][4][6];//
 
-      TString schambersummary[2][2];//[ac][ws]
+      std::string schambersummary[2][2];//[ac][ws]
       TH1F* chambersummary[2][2];//
 
       std::string type[17] = {
@@ -163,7 +163,7 @@ namespace dqutils {
             if (tgc_debug) std::cout << schambertypesummary[ws][station][eta] << std::endl;
 
             chambertypesummary[ws][station][eta] = 0;
-            mf.get(schambertypesummary[ws][station][eta], chambertypesummary[ws][station][eta]);
+            mf.get(schambertypesummary[ws][station][eta].c_str(), chambertypesummary[ws][station][eta]);
             if (!chambertypesummary[ws][station][eta]) {
               //std::cerr <<"TGC PostProcessing: no such histogram!! "<< schambertypesummary[ws][station][eta] <<
               // std::endl;
@@ -181,7 +181,7 @@ namespace dqutils {
           if (tgc_debug) std::cout << schambersummary[ac][ws] << std::endl;
 
           chambersummary[ac][ws] = 0;
-          mf.get(schambersummary[ac][ws], chambersummary[ac][ws]);
+          mf.get(schambersummary[ac][ws].c_str(), chambersummary[ac][ws]);
           if (!chambersummary[ac][ws]) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< schambersummary[ac][ws] << std::endl;
             continue;
@@ -191,10 +191,10 @@ namespace dqutils {
       }// ws
 
       //get number of events processed
-      TString sentries = tgc_global_dir + "Event_Counter";
+      std::string sentries = tgc_global_dir + "Event_Counter";
 
       TH1F* hentries = 0;
-      mf.get(sentries, hentries);
+      mf.get(sentries.c_str(), hentries);
       if (!hentries) {
         //std::cerr <<"TGC PostProcessing: no such histogram!! "<< sentries << std::endl;
         continue;
@@ -208,18 +208,18 @@ namespace dqutils {
           double min = 1.;
           double max = 0.;
 
-          TString sprof = tgc_sub_dir[ac] + "Profile/" + sws[ws] + "Profile_Map" + sac[ac];
-          TString soccu = tgc_sub_dir[ac] + "Occupancy/" + sws[ws] + "Occupancy_Map" + sac[ac];
+          std::string sprof = tgc_sub_dir[ac] + "Profile/" + sws[ws] + "Profile_Map" + sac[ac];
+          std::string soccu = tgc_sub_dir[ac] + "Occupancy/" + sws[ws] + "Occupancy_Map" + sac[ac];
 
           TH2F* hprof = 0;
-          mf.get(sprof, hprof);
+          mf.get(sprof.c_str(), hprof);
           if (!hprof) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< sprof << std::endl;
             continue;
           }
 
           TH2F* hoccu = 0;
-          mf.get(soccu, hoccu);
+          mf.get(soccu.c_str(), hoccu);
           if (!hoccu) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< soccu << std::endl;
             continue;
@@ -280,7 +280,7 @@ namespace dqutils {
               //high occupancy chamber
               if (occu > TGCChamberHighOccupancyCut) {
                 ss.str("");
-                TString schamber = hprof->GetXaxis()->GetBinLabel(binx);
+                std::string schamber = hprof->GetXaxis()->GetBinLabel(binx);
                 int sector = (biny - 1) / 4 + 1;
                 int phi = (biny - 1) % 4;
                 ss << side[ac];
@@ -292,7 +292,7 @@ namespace dqutils {
                 noisychambers.push_back(std::move(p));
               } else if (occu < TGCChamberLowOccupancyCut) {//too low occupancy
                 ss.str("");
-                TString schamber = hprof->GetXaxis()->GetBinLabel(binx);
+                std::string schamber = hprof->GetXaxis()->GetBinLabel(binx);
                 int sector = (biny - 1) / 4 + 1;
                 int phi = (biny - 1) % 4;
                 ss << side[ac];
@@ -309,8 +309,8 @@ namespace dqutils {
           hoccu->SetMinimum(min * 0.95);
           hoccu->SetMaximum(max * 1.05);
 
-          TString occu_dir = tgc_sub_dir[ac] + "Occupancy/";
-          TDirectory* dir = mf.GetDirectory(occu_dir);
+          std::string occu_dir = tgc_sub_dir[ac] + "Occupancy/";
+          TDirectory* dir = mf.GetDirectory(occu_dir.c_str());
 
           if (dir) {
             dir->cd();
@@ -323,8 +323,8 @@ namespace dqutils {
       mf.Write();
 
       // if directory is found, save the summary histogram
-      TString sum_dir = tgc_dir + "Global/Summary";
-      TDirectory* dir = mf.GetDirectory(sum_dir);
+      std::string sum_dir = tgc_dir + "Global/Summary";
+      TDirectory* dir = mf.GetDirectory(sum_dir.c_str());
 
       if (dir) {
         dir->cd();
@@ -347,7 +347,7 @@ namespace dqutils {
       for (int ac = 0; ac < 2; ac++) {
         // if directory is found, save the summary histogram
         sum_dir = tgc_sub_dir[ac] + "Summary/";
-        dir = mf.GetDirectory(sum_dir);
+        dir = mf.GetDirectory(sum_dir.c_str());
         if (dir) {
           dir->cd();
           for (int ws = 0; ws < 2; ws++) {
@@ -392,33 +392,33 @@ namespace dqutils {
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
 
-      TString tgc_sub_dir[2] = {
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      TString sac[2] = {
+      static const std::string sac[2] = {
         "_A", "_C"
       };
-      TString sws[2] = {
+      static const std::string sws[2] = {
         "Wire_", "Strip_"
       };
 
       std::stringstream ss;
 
       //Summary histograms
-      TString schambertypesummary[2][3][6];//[ws][station][eta]
+      std::string schambertypesummary[2][3][6];//[ws][station][eta]
       TH1F* chambertypesummary[2][3][6];//
 
-      TString schambersummary[2][2];//[ac][ws]
+      std::string schambersummary[2][2];//[ac][ws]
       TH1F* chambersummary[2][2];//
 
       std::string type[17] = {
@@ -443,7 +443,7 @@ namespace dqutils {
             if (tgc_debug) std::cout << schambertypesummary[ws][station][eta] << std::endl;
 
             chambertypesummary[ws][station][eta] = 0;
-            mf.get(schambertypesummary[ws][station][eta], chambertypesummary[ws][station][eta]);
+            mf.get(schambertypesummary[ws][station][eta].c_str(), chambertypesummary[ws][station][eta]);
             if (!chambertypesummary[ws][station][eta]) {
               //std::cerr <<"TGC PostProcessing: no such histogram!! "<< schambertypesummary[ws][station][eta] <<
               // std::endl;
@@ -461,7 +461,7 @@ namespace dqutils {
           if (tgc_debug) std::cout << schambersummary[ac][ws] << std::endl;
 
           chambersummary[ac][ws] = 0;
-          mf.get(schambersummary[ac][ws], chambersummary[ac][ws]);
+          mf.get(schambersummary[ac][ws].c_str(), chambersummary[ac][ws]);
           if (!chambersummary[ac][ws]) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< schambersummary[ac][ws] << std::endl;
             continue;
@@ -472,19 +472,19 @@ namespace dqutils {
 
       for (int ac = 0; ac < 2; ac++) {
         for (int ws = 0; ws < 2; ws++) {
-          TString seff = tgc_sub_dir[ac] + "Efficiency/" + sws[ws] + "Efficiency_Map" + sac[ac];
-          TString sden = tgc_sub_dir[ac] + "Efficiency/NumDenom/" + sws[ws] + "Efficiency_Map" + sac[ac] +
+          std::string seff = tgc_sub_dir[ac] + "Efficiency/" + sws[ws] + "Efficiency_Map" + sac[ac];
+          std::string sden = tgc_sub_dir[ac] + "Efficiency/NumDenom/" + sws[ws] + "Efficiency_Map" + sac[ac] +
                          "_Denominator";
 
           TH2F* heff = 0;
-          mf.get(seff, heff);
+          mf.get(seff.c_str(), heff);
           if (!heff) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< seff << std::endl;
             continue;
           }
 
           TH2F* hden = 0;
-          mf.get(sden, hden);
+          mf.get(sden.c_str(), hden);
           if (!hden) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< sden << std::endl;
           }
@@ -536,7 +536,7 @@ namespace dqutils {
               //low efficiency chambers
               if (eff < TGCChamberEfficiencyCut) {
                 ss.str("");
-                TString schamber = heff->GetXaxis()->GetBinLabel(binx);
+                std::string schamber = heff->GetXaxis()->GetBinLabel(binx);
                 int sector = (biny - 1) / 4 + 1;
                 int phi = (biny - 1) % 4;
                 ss << sac[ac];
@@ -551,8 +551,8 @@ namespace dqutils {
             }//biny
           }//binx
 
-          TString eff_dir = tgc_sub_dir[ac] + "Efficiency/";
-          TDirectory* dir = mf.GetDirectory(eff_dir);
+          std::string eff_dir = tgc_sub_dir[ac] + "Efficiency/";
+          TDirectory* dir = mf.GetDirectory(eff_dir.c_str());
 
           if (dir) {
             dir->cd();
@@ -565,8 +565,8 @@ namespace dqutils {
 
       mf.Write();
       // if directory is found, save the summary histogram
-      TString sum_dir = tgc_dir + "Global/Summary";
-      TDirectory* dir = mf.GetDirectory(sum_dir);
+      std::string sum_dir = tgc_dir + "Global/Summary";
+      TDirectory* dir = mf.GetDirectory(sum_dir.c_str());
 
 
       if (dir) {
@@ -590,7 +590,7 @@ namespace dqutils {
       for (int ac = 0; ac < 2; ac++) {
         // if directory is found, save the summary histogram
         sum_dir = tgc_sub_dir[ac] + "Summary/";
-        dir = mf.GetDirectory(sum_dir);
+        dir = mf.GetDirectory(sum_dir.c_str());
         if (dir) {
           dir->cd();
           for (int ws = 0; ws < 2; ws++) {
@@ -634,30 +634,30 @@ namespace dqutils {
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGCLV1/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGCLV1/";
 
-      TString tgc_sub_dir[2] = {
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      TString sac[2] = {
+      static const std::string sac[2] = {
         "_A", "_C"
       };
 
-      TString ssllpt[2] = {
+      static const std::string ssllpt[2] = {
         "SL_Timing", "Low_Pt_Timing"
       };
 
       std::stringstream ss;
       //Summary histograms
-      TString schambertypesummary[6];//[station][eta]
+      std::string schambertypesummary[6];//[station][eta]
       TH1F* chambertypesummary[6];//
 
       std::string type[6] = {
@@ -673,7 +673,7 @@ namespace dqutils {
                                      + "Summary_Of_" + ssllpt[sllpt] + "_Per_Chamber_Type" + ss.str();
 
           chambertypesummary[eta] = 0;
-          mf.get(schambertypesummary[eta], chambertypesummary[eta]);
+          mf.get(schambertypesummary[eta].c_str(), chambertypesummary[eta]);
           if (!chambertypesummary[eta]) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< schambertypesummary[eta] << std::endl;
             continue;
@@ -683,26 +683,26 @@ namespace dqutils {
 
         for (int ac = 0; ac < 2; ac++) {
           //get summary histogram
-          TString ssum = tgc_sub_dir[ac] + "Summary/Summary_Of_" + ssllpt[sllpt] + sac[ac];
-          TString stmap = tgc_sub_dir[ac] + ssllpt[sllpt] + "_Map" + sac[ac];
-          TString stfrac = tgc_sub_dir[ac] + ssllpt[sllpt] + "_Fraction_Map" + sac[ac];
+          std::string ssum = tgc_sub_dir[ac] + "Summary/Summary_Of_" + ssllpt[sllpt] + sac[ac];
+          std::string stmap = tgc_sub_dir[ac] + ssllpt[sllpt] + "_Map" + sac[ac];
+          std::string stfrac = tgc_sub_dir[ac] + ssllpt[sllpt] + "_Fraction_Map" + sac[ac];
 
           TH1F* hsum = 0;
-          mf.get(ssum, hsum);
+          mf.get(ssum.c_str(), hsum);
           if (!hsum) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< ssum << std::endl;
             continue;
           }
 
           TH2F* htmap = 0;
-          mf.get(stmap, htmap);
+          mf.get(stmap.c_str(), htmap);
           if (!htmap) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< stmap << std::endl;
             continue;
           }
 
           TH2F* htfrac = 0;
-          mf.get(stfrac, htfrac);
+          mf.get(stfrac.c_str(), htfrac);
           if (!htfrac) {
             //std::cerr <<"TGC PostProcessing: no such histogram!! "<< stfrac << std::endl;
             continue;
@@ -772,8 +772,8 @@ namespace dqutils {
           }//eta
 
           //write timing fraction
-          TString timing_dir = tgc_sub_dir[ac];
-          TDirectory* dir = mf.GetDirectory(timing_dir);
+          std::string timing_dir = tgc_sub_dir[ac];
+          TDirectory* dir = mf.GetDirectory(timing_dir.c_str());
 
           if (dir) {
             dir->cd();
@@ -783,8 +783,8 @@ namespace dqutils {
           }
 
           //write summary of timing for each side
-          TString sum_dir = tgc_sub_dir[ac] + "Summary/";
-          dir = mf.GetDirectory(sum_dir);
+          std::string sum_dir = tgc_sub_dir[ac] + "Summary/";
+          dir = mf.GetDirectory(sum_dir.c_str());
 
           if (dir) {
             dir->cd();
@@ -796,8 +796,8 @@ namespace dqutils {
         mf.Write();
 
         //write summary of timing for each eta
-        TString sum_dir = tgc_dir + "Global/Summary/";
-        TDirectory* dir = mf.GetDirectory(sum_dir);
+        std::string sum_dir = tgc_dir + "Global/Summary/";
+        TDirectory* dir = mf.GetDirectory(sum_dir.c_str());
 
         if (dir) {
           dir->cd();
@@ -842,36 +842,36 @@ namespace dqutils {
     TKey* key_run(0);
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) {
       if (!key_run->IsFolder()) continue;
-      TString run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) continue;
+      std::string run_dir = key_run->GetName();
+      if (run_dir.find("run") == std::string::npos) continue;
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
-      TString tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
+      std::string tgc_dir = run_dir + "/Muon/MuonRawDataMonitoring/TGC/";
 
-      TString tgc_global_dir = tgc_dir + "Global/";
-      TString tgc_sub_dir[2] = {
+      std::string tgc_global_dir = tgc_dir + "Global/";
+      std::string tgc_sub_dir[2] = {
         tgc_dir + "TGCEA/", tgc_dir + "TGCEC/"
       };
 
-      TString sac[2] = {
+      static const std::string sac[2] = {
         "_A", "_C"
       };
-      TString sws[2] = {
+      static const std::string sws[2] = {
         "Wire_", "Strip_"
       };
-      TString slay[7] = {
+      static const std::string slay[7] = {
         "1", "2", "3", "4", "5", "6", "7"
       };
       std::stringstream ss;
 
       //get number of events processed
-      TString sentries = tgc_global_dir + "Event_Counter";
+      std::string sentries = tgc_global_dir + "Event_Counter";
 
       TH1F* hentries = 0;
-      mf.get(sentries, hentries);
+      mf.get(sentries.c_str(), hentries);
       if (!hentries) {
         //std::cerr <<"TGC PostProcessing: no such histogram!! "<< sentries << std::endl;
         continue;
@@ -891,10 +891,10 @@ namespace dqutils {
               ss.str("");
               if (sector < 10) ss << "0";
               ss << sector << "_Layer" << slay[lay] << "_Phi" << phi4;
-              TString sprof = tgc_sub_dir[ac] + "Profile/" + sws[ws] + "Hit_Profile" + sac[ac] + ss.str();
+              std::string sprof = tgc_sub_dir[ac] + "Profile/" + sws[ws] + "Hit_Profile" + sac[ac] + ss.str();
 
               TH1F* hprof = 0;
-              mf.get(sprof, hprof);
+              mf.get(sprof.c_str(), hprof);
               if (!hprof) {
                 //std::cerr <<"TGC PostProcessing: no such histogram!! "<< sprof << std::endl;
                 continue;

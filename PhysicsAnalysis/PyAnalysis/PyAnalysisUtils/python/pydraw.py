@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #
 # File: pydraw.py
@@ -248,10 +248,13 @@ Scan syntax
 
 The scan command is very similar to draw:
 
-  scan TUPLESPEC.[STMT@ ...]EXPR[:EXPR] [if EXPR]
+  scan TUPLESPEC.[STMT@ ...]EXPR[:EXPR] [if EXPR] [; REDIRECT]
 
 Instead of drawing a histogram, scan prints out a table of the expression
 values.
+
+A semicolon may be followed by a redirection of the form >FNAME to write
+to file FNAME rather than printing, of >>FNAME to append to it.
 
 The formatting of the data printed by scan is currently pretty rudimentary.
 This should probably be improved.
@@ -327,7 +330,7 @@ import token
 import copy
 import ROOT
 import cppyy # noqa: F401
-from io import StringIO #pragma: NO COVER
+from io import StringIO
 from PyAnalysisUtils.draw_obj import draw_obj, get_canvas
 
 
@@ -1186,18 +1189,21 @@ def draw (arg):
     return True
 
 
-def _scan_print (i, *args):
+def _scan_print (f, i, *args):
     """Helper to print out one row of a scan.
 
-    I is the row number and ARGS is a tuple of the column values."""
+    F is the file object to which to write, I is the row number,
+    and ARGS is a tuple of the column values."""
     
     s = '%6d' % i
     for a in args:
         if isinstance(a, int):
             s += ' %8d' % a
+        elif isinstance(a, str):
+            s += ' %8s' % a
         else:
             s += ' %8g' % a
-    print (s)
+    print (s, file=f)
     return
 
 
@@ -1217,15 +1223,34 @@ def scan (arg):
     payload = "_print (_i, %s)" % \
               ','.join (['(%s)'%e for e in c.exprs])
 
+    # Output file handling
+    fname = None
+    append = False
+    if len(c.histspec) > 0:
+        if c.histspec[0].startswith ('>>'):
+            append = True
+            fname = c.histspec[0][2:]
+        elif c.histspec[0].startswith ('>'):
+            fname = c.histspec[0][1:]
+        if fname == '' and len(c.histspec) >= 2:
+            fname = c.histspec[1]
+    if fname:
+        fout = open (fname, 'a' if append else 'w')
+    else:
+        fout = sys.stdout
+
     # Generate the function.
     # It will be defined as _loopfunc in g.
     g = copy.copy (_globals)
-    g['_print'] = _scan_print
+    g['_print'] = lambda i, *args: _scan_print (fout, i, *args)
     ftext = c._make_func (payload, ', _print = _print')
     exec (ftext, g)
 
     # Execute the loop over the data.
     c.tuple_o.loop (g['_loopfunc'], c.lo, c.hi)
+
+    if fname:
+        fout.close()
 
     return True
 

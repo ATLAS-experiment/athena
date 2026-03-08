@@ -14,7 +14,6 @@ atlas_add_component( L1TopoByteStream
                      LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} AthenaBaseComps AthenaKernel TrigT1ResultByteStreamLib ByteStreamCnvSvcBaseLib ByteStreamData GaudiKernel L1TopoRDO StoreGateLib xAODTrigL1Calo )
 
 # Install files from the package:
-atlas_install_joboptions( share/*.py )
 atlas_install_python_modules( python/*.py )
 
 # Unit tests in the package:

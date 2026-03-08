@@ -27,7 +27,7 @@ public:
   TBScintillatorContCnv (ISvcLocator* svcloc) : TBScintillatorContCnvBase(svcloc) {}
 protected:
   virtual TBScintillatorCont_PERS*   createPersistent (TBScintillatorCont* transCont);
-  virtual TBScintillatorCont*        createTransient ();
+  virtual TBScintillatorCont*        createTransient(const Token* token);
 
   TBScintillatorContCnv_p1  m_TPConverter;
 };

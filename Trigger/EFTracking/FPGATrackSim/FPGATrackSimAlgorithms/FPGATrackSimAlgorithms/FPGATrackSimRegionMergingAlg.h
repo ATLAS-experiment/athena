@@ -12,7 +12,6 @@
 // FPGATrackSim libraries
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
-#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
 #include "FPGATrackSimAlgorithms/FPGATrackSimOverlapRemovalTool.h"
 
@@ -43,11 +42,9 @@ namespace FPGATrackSim {
         // Handles
         SG::ReadHandleKeyArray<FPGATrackSimTrackCollection> m_FPGATrackCollectionKeys {this, "FPGATrackSimTrackCollections",{},"List of FPGA track collections from different regions"};
         SG::ReadHandleKeyArray<FPGATrackSimRoadCollection> m_FPGARoadCollectionKeys {this, "FPGATrackSimRoadCollections",{},"List of FPGA road collections from different regions"};
-        SG::ReadHandleKeyArray<FPGATrackSimHitContainer> m_FPGAHitsInRoadsCollectionKeys {this, "FPGATrackSimHitsInRoadsCollections",{},"List of FPGA hits roads"};
 
         SG::WriteHandleKey<FPGATrackSimTrackCollection> m_FinalFPGATrackCollectionKey {this, "FinalFPGATrackCollection","FPGATracks","Outgoing FPGA track collection containing tracks after region merging and OR"};
         SG::WriteHandleKey<FPGATrackSimRoadCollection> m_FinalFPGARoadkCollectionKey {this, "FinalFPGARoadCollection","FPGARoads","Outgoing FPGA road collection containing roads after region merging"};
-        SG::WriteHandleKey<FPGATrackSimHitContainer> m_FinalFPGAHitsInRoadsCollectionKey {this, "FinalFPGAHitsInRoadsCollection","FPGAHitsInRoads","Outgoing FPGA hits-in-roads collection after region merging"};
 
         // chrono service
         ServiceHandle<IChronoStatSvc> m_chrono{this,"ChronoStatSvc","ChronoStatSvc"};
@@ -57,9 +54,7 @@ namespace FPGATrackSim {
         StatusCode mergeTracks(const std::vector<const FPGATrackSimTrackCollection*>& inputTracksPtrs,
                                std::unique_ptr<FPGATrackSimTrackCollection>& outputTracks) const;
         StatusCode mergeRoads(const std::vector<const FPGATrackSimRoadCollection*>& inputRoads,
-                              const std::vector<const FPGATrackSimHitContainer*>& inputHitsInRoads,
-                              std::unique_ptr<FPGATrackSimRoadCollection>& outputRoads,
-                              std::unique_ptr<FPGATrackSimHitContainer>& outputHitsInRoads) const;
+                              std::unique_ptr<FPGATrackSimRoadCollection>& outputRoads) const;
 
         mutable std::atomic<size_t> m_allIncomingTracks{0}, m_nPreORTracks{0}, m_nPostORTracks{0};
     };

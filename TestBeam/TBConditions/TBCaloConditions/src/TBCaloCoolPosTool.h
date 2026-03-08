@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCALOCONDITIONS_TBCALOCOOLPOSTOOL
@@ -7,11 +7,9 @@
 
 #include "TBCaloConditions/ITBCaloPosTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/IIncidentListener.h"
 
-#include "StoreGate/DataHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
-#include "CxxUtils/checker_macros.h"
 
 /** 
  ** Class TBCaloCoolPosTool
@@ -22,46 +20,37 @@
 	
  **/
  
-class ATLAS_NOT_THREAD_SAFE TBCaloCoolPosTool : public extends<AthAlgTool,
-                                                               ITBCaloPosTool, IIncidentListener>
+class TBCaloCoolPosTool : public extends<AthAlgTool, ITBCaloPosTool>
 {
 public:
+    using base_class::base_class;
 
-    TBCaloCoolPosTool(const std::string& type, const std::string& name,
-                const IInterface* parent);   
-  
-    virtual ~TBCaloCoolPosTool() ;
-
-
-    virtual StatusCode initialize() ; 
-
-    virtual StatusCode finalize() ; 
-
-    // IIncidentListner interface
-    virtual void handle(const Incident&) ;
+    virtual StatusCode initialize() override;
 
     ///  access eta value 
-    virtual double eta ()     ;
+    virtual double eta () const override;
 
     ///  access eta value 
-    virtual double  theta ()  ;
+    virtual double  theta () const override;
 
     ///  access eta value 
-    virtual double z ()       ;
+    virtual double z () const override;
 
     ///  access eta value 
-    virtual double delta ()       ;
+    virtual double delta () const override;
 
 private: 
 
-    bool initHandles ATLAS_NOT_THREAD_SAFE ();
+    // For run<1000454, replace TILE_LV_62 with SYSTEM1
 
-    const DataHandle<AthenaAttributeList> m_etaTable; 
-    const DataHandle<AthenaAttributeList> m_thetaTable; 
-    const DataHandle<AthenaAttributeList> m_zTable; 
-    const DataHandle<AthenaAttributeList> m_deltaTable; 
-    
-    bool m_init;	
+    SG::ReadCondHandleKey<AthenaAttributeList> m_etaTableKey
+    { this, "EtaKey", "/TILE/DCS/TILE_LV_62/TABLE/ETA", "" };
+    SG::ReadCondHandleKey<AthenaAttributeList> m_thetaTableKey
+    { this, "EtaKey", "/TILE/DCS/TILE_LV_62/TABLE/THETA", "" };
+    SG::ReadCondHandleKey<AthenaAttributeList> m_zTableKey
+    { this, "EtaKey", "/TILE/DCS/TILE_LV_62/TABLE/Z", "" };
+    SG::ReadCondHandleKey<AthenaAttributeList> m_deltaTableKey
+    { this, "EtaKey", "/TILE/DCS/TILE_LV_62/TABLE/DELTA", "" };
 };
 
 

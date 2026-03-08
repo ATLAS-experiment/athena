@@ -192,7 +192,6 @@ def FPGAConversionAlgCfg(inputFlags, name = 'FPGAConversionAlg', stage = '', **k
 
     kwargs.setdefault("FPGATrackSimClusterKey", "FPGAClusters_1st")
     kwargs.setdefault("FPGATrackSimHitKey", "FPGAHits%s" %(stage))
-    kwargs.setdefault("FPGATrackSimHitInRoadsKey", "FPGAHitsInRoads")
     kwargs.setdefault("FPGATrackSimRoadKey", "FPGARoads")
     kwargs.setdefault("FPGATrackSimTrackKey", "FPGATracks")
     kwargs.setdefault("xAODPixelClusterFromFPGAClusterKey", "xAODPixelClustersFromFPGACluster")

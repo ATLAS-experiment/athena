@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/CscRawDataContainer.h"
@@ -42,9 +42,16 @@ CscRawDataContainer::hashFcn()
 }
 
 // Class ID
-const CLID& CscRawDataContainer::classID()
+CLID CscRawDataContainer::classID()
 {
   return ClassID_traits<CscRawDataContainer>::ID();       
+}
+
+
+const CLID& CscRawDataContainer::clID() const
+{
+  static const CLID cid = classID();
+  return cid;
 }
 
 

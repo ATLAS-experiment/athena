@@ -6,14 +6,18 @@
 #define COLLECTIONSVC_COLLECTIONSERVICE_H
 
 #include "ICollection.h"
+
+#include "StorageSvc/DbType.h"
+
 #include "CxxUtils/checker_macros.h"
 
 
 namespace pool {
 
-  class ICollectionDescription;
-  class ISession;
-
+  class CollectionDescription;
+  namespace PersistencySvc { class ISession; }
+  using PersistencySvc::ISession;
+  
   /**
    * @class CollectionService CollectionService.h CollectionSvc/CollectionService.h
    *
@@ -43,7 +47,7 @@ namespace pool {
      *
      * @param description Specification of collection or collection fragment properties.
      */
-    virtual ICollection* create( const ICollectionDescription& description );
+    virtual ICollection* create( const CollectionDescription& description );
 
 
     /**
@@ -59,7 +63,7 @@ namespace pool {
      * @param session Reference to database session (need only be set for implicit collections).
      */
     virtual ICollection* open( const std::string & name,
-                               const std::string & type,
+                               const DbType& type,
                                const std::string & connection = "",
                                ISession* session = 0 ) const;
 
@@ -68,7 +72,7 @@ namespace pool {
      */
     static void setMessageSvcQuiet( bool quiet=true );
 
-    pool::ICollection* plugin( const ICollectionDescription& description,
+    pool::ICollection* plugin( const CollectionDescription& description,
                                  ICollection::OpenMode openMode,
                                  ISession* session = 0 ) const;
 

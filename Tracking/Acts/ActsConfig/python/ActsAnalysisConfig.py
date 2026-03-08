@@ -755,26 +755,12 @@ def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
             ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
             MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
 
-            from ActsConfig.ActsSeedingConfig import ActsPixelOrthogonalSeedingToolCfg, ActsStripOrthogonalSeedingToolCfg
-            pixel_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-            strip_orthogonal_seeding_tool = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
-            ActsITkSiSpacePointsSeedMakerOrthogonal = \
-                acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                       name="ActsSiSpacePointsSeedMakerOrthogonal",
-                                                                       SeedToolPixel=pixel_orthogonal_seeding_tool,
-                                                                       SeedToolStrip=strip_orthogonal_seeding_tool))
-            ActsITkSiSpacePointsSeedMakerOrthogonal.doSeedConversion = False
-            MonitoringGroupNames.append("ActsOrthogonalITkSiSpacePointSeedMaker")
-
-            
-            
         from GaudiKernel.GaudiHandles import PrivateToolHandleArray
         
         privateSeedingTools = [ITkSiSpacePointsSeedMaker, ActsITkSiSpacePointsSeedMaker]
 
         if addOtherSeedingAlgorithms:
             privateSeedingTools.append(ActsGbtsITkSiSpacePointsSeedMaker)
-            privateSeedingTools.append(ActsITkSiSpacePointsSeedMakerOrthogonal)
         
         kwargs.setdefault("SeedingTools",
                           PrivateToolHandleArray(privateSeedingTools))
@@ -1017,3 +1003,15 @@ def ActsResidualAnalysisAlgCfg(flags,
     return acc
 
 
+def ActsGeoDumpCfg(flags, name="ActsReadoutDump",
+                   outFile="ActsGeoDump.root", **kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
+    kwargs.setdefault("TrackingGeometryTool", result.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
+    from ROOT.ActsTrk import DetectorType
+    kwargs.setdefault("Detectors", [DetectorType.Pixel, DetectorType.Sct])
+    from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+    result.merge(setupHistSvcCfg(flags, outFile=outFile, outStream="ActsReadoutGeoDump"))
+    the_alg = CompFactory.ActsTrk.ReadoutGeoDumpAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result

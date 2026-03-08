@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -176,9 +176,11 @@ namespace G4UA
           relNbAtomsChar = relNbAtomsChar > UCHAR_MAX ? UCHAR_MAX : relNbAtomsChar;
 
           // smaller components than 0.5 % are automatically ignored
+          // ... but entries in fractions need to be in 1-1 correspondence
+          //     with entries in elements
+          fractions.push_back(relNbAtomsChar);
           totalFrac     += relNbAtoms;
           if (relNbAtomsChar) {
-            fractions.push_back(relNbAtomsChar);
             // record composition
             if (m_recordComposition && !m_elementTable->contains(Zint)){
               double curA          =  currentEl->GetA()/CLHEP::gram;

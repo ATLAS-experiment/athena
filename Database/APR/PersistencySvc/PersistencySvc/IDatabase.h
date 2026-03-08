@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_IDATABASE_H
@@ -15,6 +15,17 @@ namespace pool {
   class DatabaseConnectionPolicy;
   class IContainer;
   class ITechnologySpecificAttributes;
+
+  struct DatabaseSpecification {
+    /** Enumeration type specifying the database name field,
+     * wherever the latter is used in methods accessing a database.
+     */
+    enum NameType { UNDEFINED,
+                    PFN,    /// Physical File Name
+                    FID,    /// File IDentifier
+                    LFN     /// Logical File Name
+    };
+  };
 
   /** @class IDatabase IDatabase.h PersistencySvc/IDatabase.h
    *
@@ -34,11 +45,9 @@ namespace pool {
 
     /// Connects explicitly to the database for read operations
     virtual void connectForRead() = 0;
-    virtual void connectForRead( const DatabaseConnectionPolicy& policy ) = 0;
 
     /// Connects explicitly to the database for write/update operations
     virtual void connectForWrite() = 0;
-    virtual void connectForWrite( const DatabaseConnectionPolicy& policy ) = 0;
 
     /// Disconnects from the database
     virtual void disconnect() = 0;

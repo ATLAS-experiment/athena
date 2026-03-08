@@ -18,7 +18,6 @@ from .Physics_pp_run3_v1 import (
     PrimaryPhIGroup,
     SinglePhotonGroup,
     SingleJetGroup,
-    BphysicsGroup,
 )
 from .PhysicsP1_pp_lowMu_run3_v1 import (LowMuGroup, LowMuGroupPhI)
 
@@ -31,18 +30,6 @@ def getDevLowMuSignatures():
         ChainProp(name='HLT_mu3_L1MU3V', stream=['MinBias', 'express'], groups=SingleMuonGroup+SupportGroup, monGroups=['muonMon:shifter','muonMon:online']),
     ]
 
-    chains['Bphysics'] += [
-        # ATR-32209: B -> h+h-
-        ChainProp(name='HLT_mu4_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu6_bBhh_L1MU3V', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu6_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu8_bBhh_L1MU5VF', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu10_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu12_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU8F', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu15_bBhh_L1MU14FCH', stream=['MinBias'], groups=BphysicsGroup+SingleMuonGroup),
-    ]
-
     chains['Egamma'] += [
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_e6_etcut_L1eEM5',    stream=['MinBias'], groups=SingleElectronGroup+SupportPhIGroup),
@@ -53,11 +40,11 @@ def getDevLowMuSignatures():
         ChainProp(name='HLT_e6_lhmedium_L1eEM5', stream=['MinBias'], groups=SingleElectronGroup+SupportPhIGroup),
 
         ChainProp(name='HLT_e10_etcut_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e10_nopid_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter','caloMon:t0']),
-        ChainProp(name='HLT_e10_loose_L1eEM9',    stream=['MinBias', 'express'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter','caloMon:t0']),
-        ChainProp(name='HLT_e10_lhloose_L1eEM9',  stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_nopid_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup,  monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='HLT_e10_loose_L1eEM9',    stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_lhloose_L1eEM9',  stream=['MinBias', 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
         ChainProp(name='HLT_e10_medium_L1eEM9',   stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e10_lhmedium_L1eEM9', stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e10_lhmedium_L1eEM9', stream=['MinBias'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp']),
 
         # ATR-30691/ATR-30692: Oxygen runs
         ChainProp(name='HLT_g6_etcut_L1eEM5',  stream=['MinBias'], groups=SinglePhotonGroup+SupportPhIGroup),

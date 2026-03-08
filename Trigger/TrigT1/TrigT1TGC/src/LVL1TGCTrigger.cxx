@@ -87,6 +87,7 @@ StatusCode LVL1TGCTrigger::initialize()
 
     ATH_CHECK( m_readCondKey.initialize(!m_useRun3Config.value()) );
     ATH_CHECK( m_readLUTs_CondKey.initialize(m_useRun3Config.value()) );
+    ATH_CHECK(m_cablingKey.initialize());
 
     // CondDB is not available for Run3 config. set USE_CONDDB to false to avoid errors.
     // will be removed the below part.
@@ -97,8 +98,6 @@ StatusCode LVL1TGCTrigger::initialize()
     // initialize TGCDataBase
     m_db = new TGCDatabaseManager(&m_tgcArgs, m_readCondKey, m_readLUTs_CondKey);
 
-    // initialize the TGCcabling
-    ATH_CHECK(getCabling());
 
     // create TGCElectronicsSystem
     m_system = std::make_unique<TGCElectronicsSystem>(&m_tgcArgs,m_db);
@@ -139,19 +138,17 @@ StatusCode LVL1TGCTrigger::finalize()
 StatusCode LVL1TGCTrigger::execute()
 {
     ATH_MSG_DEBUG("execute() called");
-    const EventContext& ctx = getContext();
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     
-    if(!m_cabling) {
-      // get cabling svc
-      if(getCabling().isFailure()) return StatusCode::FAILURE;
-    }
+    const Muon::TgcCablingMap* cabling{nullptr};
+    ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
     
     // doMaskOperation is performed at the first event
     // It is better to implement callback against
     // MuonTGC_CablingSvc::updateCableASDToPP (Susumu Oda, 2010/10/27)
     if(m_firstTime) {
       // do mask operation
-      if(getMaskedChannel().isFailure()) return StatusCode::FAILURE;
+      ATH_CHECK(getMaskedChannel(*cabling));
       m_firstTime = false;
     }
     
@@ -159,8 +156,8 @@ StatusCode LVL1TGCTrigger::execute()
     bool doTileMu = m_tgcArgs.TILE_MU();
 
     if (doTileMu && !m_tgcArgs.useRun3Config()) {   // for Run-2
-      SG::ReadCondHandle<TGCTriggerData> readHandle{m_readCondKey, ctx};
-      const TGCTriggerData* readCdo{*readHandle};
+      const TGCTriggerData* readCdo{};
+      ATH_CHECK(SG::get(readCdo, m_readCondKey, ctx));
       doTileMu = readCdo->isActive(TGCTriggerData::CW_TILE);
     }
 
@@ -174,13 +171,8 @@ StatusCode LVL1TGCTrigger::execute()
     std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>  tgcrdo;
     
 
-
-    SG::ReadHandle<TgcDigitContainer> readTgcDigitContainer(m_keyTgcDigit, ctx);
-    if(!readTgcDigitContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve TgcDigitContainer");
-      return StatusCode::FAILURE;
-    }
-    const TgcDigitContainer* tgc_container = readTgcDigitContainer.cptr();
+    const TgcDigitContainer* tgc_container{nullptr};
+    ATH_CHECK(SG::get(tgc_container, m_keyTgcDigit, ctx));
     
     SG::WriteHandle<LVL1MUONIF::Lvl1MuCTPIInputPhase1> wh_muctpiTgc(m_muctpiPhase1Key, ctx);
     ATH_CHECK(wh_muctpiTgc.record(std::make_unique<LVL1MUONIF::Lvl1MuCTPIInputPhase1>()));
@@ -208,22 +200,17 @@ StatusCode LVL1TGCTrigger::execute()
 
       if (m_ProcessAllBunches || bc == m_CurrentBunchTag) {
         m_bctagInProcess = bc;
-        sc = processOneBunch(tgc_container, muctpiinputPhase1, tgcrdo);
+        ATH_CHECK(processOneBunch(*cabling, tgc_container, muctpiinputPhase1, tgcrdo));
       }
-      if (sc.isFailure()) {
-        ATH_MSG_FATAL("Fail to process the bunch " << m_bctagInProcess);
-        return sc;
-      }
+     
     }
 
     
     // before writing the output TgcRdo container,
     // read input TgcRdo and copy the tracklet etc.
-    SG::ReadHandle<TgcRdoContainer> rdoContIn(m_keyTgcRdoIn);
-    if(!rdoContIn.isValid()){
-      ATH_MSG_WARNING("Cannot retrieve TgcRdoContainer with key=" << m_keyTgcRdoIn.key());
-      return sc;
-    }else if(rdoContIn->size()>0) {	
+    const TgcRdoContainer* rdoContIn{nullptr};
+    ATH_CHECK(SG::get(rdoContIn, m_keyTgcRdoIn, ctx));
+    if(rdoContIn->size()>0) {	
       TgcRdoContainer::const_iterator itR = rdoContIn->begin();
       for(; itR!=rdoContIn->end(); ++itR){
 	const TgcRdo* rdoIn = (*itR);
@@ -252,7 +239,8 @@ StatusCode LVL1TGCTrigger::execute()
     return sc;
 }
 
-StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_container,
+StatusCode LVL1TGCTrigger::processOneBunch(const Muon::TgcCablingMap& cabling,
+                                            const TgcDigitContainer* tgc_container,
                                            LVL1MUONIF::Lvl1MuCTPIInputPhase1* muctpiinputPhase1,
 					   std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&  tgcrdo)
 {
@@ -266,7 +254,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
     
     // fill ASDOut to this event
     TGCEvent event;
-    fillTGCEvent(tgcDigitIDs, event);
+    fillTGCEvent(cabling, tgcDigitIDs, event);
     tgcDigitIDs.clear();
     
     // process trigger electronics emulation...
@@ -285,7 +273,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
             m_nEventInSector++;
             m_TimingManager->startPatchPanel(sector, m_db);
             m_TimingManager->startSlaveBoard(sector);
-            if (m_OutputTgcRDO.value()) recordRdoSLB(sector, tgcrdo);
+            if (m_OutputTgcRDO.value()) recordRdoSLB(cabling, sector, tgcrdo);
             // EIFI trigger bits for SL are filled in this method.
           }
         }
@@ -305,7 +293,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
           if(sector==0) continue;
 
           m_TimingManager->startHighPtBoard(sector);
-          if (m_OutputTgcRDO.value()) recordRdoHPT(sector, tgcrdo);
+          if (m_OutputTgcRDO.value()) recordRdoHPT(cabling, sector, tgcrdo);
 
           // EIFI trigger bits are checked if Endcap
           if(sector->getRegionType() == TGCRegionType::ENDCAP && sector->getSL()) {
@@ -321,10 +309,10 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
           if(sector->hasHit()) sector->clearNumberOfHit();
 
           // Fill inner (EIFI/Tile) words
-          if (m_OutputTgcRDO.value() && m_tgcArgs.USE_INNER()) recordRdoInner(sector, tgcrdo);
+          if (m_OutputTgcRDO.value() && m_tgcArgs.USE_INNER()) recordRdoInner(cabling, sector, tgcrdo);
 
           // Fill Lvl1MuCTPInput
-          if (m_OutputTgcRDO.value()) recordRdoSL(sector, tgcrdo);
+          if (m_OutputTgcRDO.value()) recordRdoSL(cabling, sector, tgcrdo);
 
           size_t tgcsystem=0,subsystem=0;
           if(i==0) subsystem = LVL1MUONIF::Lvl1MuCTPIInput::idSideA();
@@ -428,19 +416,15 @@ void LVL1TGCTrigger::doMaskOperation(const TgcDigitContainer* tgc_container,
 }
   
 //////////////////////////////////////////////////
-void  LVL1TGCTrigger::fillTGCEvent(const std::map<Identifier, int>& tgcDigitIDs, TGCEvent& event)
+void  LVL1TGCTrigger::fillTGCEvent(const Muon::TgcCablingMap& cabling,
+                                    const std::map<Identifier, int>& tgcDigitIDs, TGCEvent& event)
 {
     // Loop on TGC detectors (collections)
     for(const auto& itCh : tgcDigitIDs) {
       const Identifier channelId = itCh.first;
-      int subsystemNumber;
-      int octantNumber;
-      int moduleNumber;
-      int layerNumber;
-      int rNumber;
-      int wireOrStrip;
-      int channelNumber;
-      bool status = m_cabling->getOnlineIDfromOfflineID(channelId,
+      int subsystemNumber{0}, octantNumber{0}, moduleNumber{0}, 
+           layerNumber{0}, rNumber{0}, wireOrStrip{0}, channelNumber{0};
+      bool status = cabling.getOnlineIDfromOfflineID(channelId,
                                                         subsystemNumber,
                                                         octantNumber,
                                                         moduleNumber,
@@ -460,13 +444,13 @@ void  LVL1TGCTrigger::fillTGCEvent(const std::map<Identifier, int>& tgcDigitIDs,
         bool  isAside=true;
         bool  isEndcap=true;
 
-        fstatus = m_cabling->getReadoutIDfromOfflineID(channelId,
+        fstatus = cabling.getReadoutIDfromOfflineID(channelId,
                                                        subDetectorID,
                                                        srodID,sswID,
                                                        sbLoc,channelID);
 
         if (fstatus) {
-          fstatus = m_cabling->getSLBIDfromReadoutID(phi, isAside, isEndcap,
+          fstatus = cabling.getSLBIDfromReadoutID(phi, isAside, isEndcap,
                                                      moduleType, slbID,
                                                      subDetectorID,
                                                      srodID, sswID,sbLoc);
@@ -543,8 +527,9 @@ void LVL1TGCTrigger::FillSectorLogicData(LVL1MUONIF::Lvl1MuSectorLogicDataPhase1
 }
 
 //////////////////////////////////////////
-void LVL1TGCTrigger::recordRdoSLB(TGCSector * sector, 
-				  std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&  tgcrdo)
+void LVL1TGCTrigger::recordRdoSLB(const Muon::TgcCablingMap& cabling,
+                                  TGCSector * sector, 
+				                           std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&  tgcrdo)
 {
     uint16_t bcTag=m_CurrentBunchTag, l1Id=0, bcId=0;
     // readoutID
@@ -587,7 +572,7 @@ void LVL1TGCTrigger::recordRdoSLB(TGCSector * sector,
 
         // get ReadoutID
         bool status =
-          m_cabling->getReadoutIDfromSLBID((isEIFI ? phiEIFI : phi),
+          cabling.getReadoutIDfromSLBID((isEIFI ? phiEIFI : phi),
                                            isAside, isEndcap,
                                            moduleType, id,
                                            subDetectorId, rodId,
@@ -667,19 +652,20 @@ void LVL1TGCTrigger::recordRdoSLB(TGCSector * sector,
 }
   
 ////////////////////////////////////////////////////////
-void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
-				  std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
+void LVL1TGCTrigger::recordRdoHPT(const Muon::TgcCablingMap& cabling,
+                                  TGCSector* sector,
+				                          std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
 {
   if(sector->hasHit() == false) return;
 
     // readoutID
-    int subDetectorId, rodId, sswId, sbLoc, secId;
+    int subDetectorId{0}, rodId{0}, sswId{0}, sbLoc{0}, secId{0};
     
     // get numbering scheme info from cabling svc
-    int startEndcapSector, coverageOfEndcapSector;
-    int startForwardSector, coverageOfForwardSector;
+    int startEndcapSector{0}, coverageOfEndcapSector{0};
+    int startForwardSector{0}, coverageOfForwardSector{0};
     rodId = 1;
-    m_cabling->getCoveragefromSRodID(rodId,
+    cabling.getCoveragefromSRodID(rodId,
                                      startEndcapSector,
                                      coverageOfEndcapSector,
                                      startForwardSector,
@@ -689,12 +675,13 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
     uint16_t bcTag=m_CurrentBunchTag, l1Id=0, bcId=0;
     
     // HPTID
-    bool isAside, isEndcap, isStrip; int phi;
+    bool isAside{false}, isEndcap{false}, isStrip{false}; 
+    int phi{0};
     isAside = (sector->getSideId()==0);
     isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
     int module = sector->getModuleId();
     //  sector Id = 0..47 (Endcap) 0..23 (forward)
-    int sectorId;
+    int sectorId{0};
     if (isEndcap){
       sectorId = ((module/3)*2+module%3) + sector->getOctantId()*6;
     } else {
@@ -720,7 +707,7 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
         if (0==out) continue;
 
         // get ReadoutID
-        bool status = m_cabling->getReadoutIDfromHPTID(phi, isAside, isEndcap, isStrip, hpb->getId(),
+        bool status = cabling.getReadoutIDfromHPTID(phi, isAside, isEndcap, isStrip, hpb->getId(),
                                                        subDetectorId, rodId, sswId, sbLoc);
         if (!status) {
           ATH_MSG_WARNING("TGCcablignSvc::getReadoutIDfromHPTID fails");
@@ -734,19 +721,19 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
             int chip  = ichip;
             int index = ihpb;
             int hitId =  out->getHitID(ichip, icand);
-            m_cabling->getRDOHighPtIDfromSimHighPtID(!isEndcap, isStrip,
+            cabling.getRDOHighPtIDfromSimHighPtID(!isEndcap, isStrip,
                                                      index, chip, hitId);
             bool isHPT = out->getPt(ichip,icand)==PtHigh ? 1 : 0;
-            std::unique_ptr<TgcRawData> rawdata(new TgcRawData(bcTag,
-                                                                   static_cast<uint16_t>(subDetectorId),
-                                                                   static_cast<uint16_t>(rodId),
-                                                                   l1Id,
-                                                                   bcId,
-                                                                   isStrip, (!isEndcap), secId, chip, icand,
-                                                                   isHPT, hitId,
-                                                                   out->getPos(ichip, icand),
-                                                                   out->getDev(ichip, icand),
-                                                                   0));
+            auto rawdata = std::make_unique<TgcRawData>(bcTag,
+                                                        static_cast<uint16_t>(subDetectorId),
+                                                        static_cast<uint16_t>(rodId),
+                                                        l1Id,
+                                                        bcId,
+                                                        isStrip, (!isEndcap), secId, chip, icand,
+                                                        isHPT, hitId,
+                                                        out->getPos(ichip, icand),
+                                                        out->getDev(ichip, icand),
+                                                        0);
             addRawData(std::move(rawdata), tgcrdo);
 
             // Print
@@ -773,17 +760,16 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
               else if (hitId == 5) oredId = 1;
               else if (hitId == 6) oredId = 2;
               if (oredId >=0) {
-                std::unique_ptr<TgcRawData> rawdata2(
-                                                       new TgcRawData(bcTag,
-                                                                        static_cast<uint16_t>(subDetectorId),
-                                                                        static_cast<uint16_t>(rodId),
-                                                                        l1Id,
-                                                                        bcId,
-                                                                        isStrip, (!isEndcap), secId, chip, icand,
-                                                                        isHPT, oredId,
-                                                                        out->getPos(ichip, icand),
-                                                                        out->getDev(ichip, icand),
-                                                                        0));
+                auto rawdata2 = std::make_unique<TgcRawData>(bcTag,
+                                                             static_cast<uint16_t>(subDetectorId),
+                                                             static_cast<uint16_t>(rodId),
+                                                             l1Id,
+                                                             bcId,
+                                                             isStrip, (!isEndcap), secId, chip, icand,
+                                                             isHPT, oredId,
+                                                             out->getPos(ichip, icand),
+                                                             out->getDev(ichip, icand),
+                                                             0);
                 addRawData(std::move(rawdata2), tgcrdo);
               }
               ////////////////////
@@ -800,8 +786,9 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
 
   
 ////////////////////////////////////////////////////////
-void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
-				std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
+void LVL1TGCTrigger::recordRdoInner(const Muon::TgcCablingMap& cabling,
+                                    TGCSector * sector,
+				                             std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
 {
     const bool isAside  = sector->getSideId()==0;
     const bool isEndcap = (sector->getRegionType() == TGCRegionType::ENDCAP);
@@ -818,7 +805,7 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     // get readout ID
     int subDetectorId=0, rodId=0, sswId=0, sbLoc=0;
     
-    bool status = m_cabling->getSReadoutIDfromSLID(phi, isAside, isEndcap,
+    bool status = cabling.getSReadoutIDfromSLID(phi, isAside, isEndcap,
                                                    subDetectorId, rodId, sswId, sbLoc);
     if (!status) {
       ATH_MSG_WARNING("TGCcablingSvc::ReadoutIDfromSLID fails in recordRdoInner()" );
@@ -828,9 +815,9 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     //  secID for TGCRawData
     //  0-3(EC), 0-1(FWD) for 1/12 sector
     //  0-15(EC), 0-7(FWD) for 1/3 sector covered by SROD in RUn3
-    int startEndcapSector, coverageOfEndcapSector;
-    int startForwardSector, coverageOfForwardSector;
-    if (!m_cabling->getCoveragefromSRodID(rodId,
+    int startEndcapSector{0}, coverageOfEndcapSector{0};
+    int startForwardSector{0}, coverageOfForwardSector{0};
+    if (!cabling.getCoveragefromSRodID(rodId,
                                           startEndcapSector,
                                           coverageOfEndcapSector,
                                           startForwardSector,
@@ -858,16 +845,16 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
 
     for (int i_slot = 0; i_slot < n_slots; i_slot++) {
       if (inner_eifi[i_slot] > 0) {
-        std::unique_ptr<TgcRawData> rawdata_eifi(new TgcRawData(bcTag,
-                                                                    static_cast<uint16_t>(subDetectorId),
-                                                                    static_cast<uint16_t>(rodId),
-                                                                    l1Id,
-                                                                    bcId,
-                                                                    (!isEndcap),
-                                                                    secId, /*to be checked*/
-                                                                    static_cast<uint16_t>(inner_eifi[i_slot]),
-                                                                    0, /*fi*/
-								static_cast<uint16_t>(i_slot) /*chamber Id*/));
+        auto rawdata_eifi = std::make_unique<TgcRawData>(bcTag,
+                                                         static_cast<uint16_t>(subDetectorId),
+                                                         static_cast<uint16_t>(rodId),
+                                                         l1Id,
+                                                         bcId,
+                                                         (!isEndcap),
+                                                         secId, /*to be checked*/
+                                                         static_cast<uint16_t>(inner_eifi[i_slot]),
+                                                         0, /*fi*/
+								                                         static_cast<uint16_t>(i_slot) /*chamber Id*/);
         addRawData(std::move(rawdata_eifi), tgcrdo);
       }
     }
@@ -878,15 +865,15 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     if (inner_tile > 0) {
       //TgcRawData * rawdata_tile = new TgcRawData(bcTag,
       //std::shared_ptr<TgcRawData> rawdata_tile (
-      std::unique_ptr<TgcRawData> rawdata_tile (new TgcRawData(bcTag,
-                                                                   static_cast<uint16_t>(subDetectorId),
-                                                                   static_cast<uint16_t>(rodId),
-                                                                   l1Id,
-                                                                   bcId,
-                                                                   (!isEndcap),
-                                                                   secId,
-                                                                   inner_tile,
-                                                                   0 /*bcid*/ ));
+      auto rawdata_tile = std::make_unique<TgcRawData>(bcTag,
+                                                       static_cast<uint16_t>(subDetectorId),
+                                                       static_cast<uint16_t>(rodId),
+                                                       l1Id,
+                                                       bcId,
+                                                       (!isEndcap),
+                                                       secId,
+                                                       inner_tile,
+                                                       0 /*bcid*/ );
       addRawData(std::move(rawdata_tile), tgcrdo);
     }
 
@@ -895,20 +882,20 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     if ( m_USENSW ) {
       std::shared_ptr<const LVL1TGC::NSWTrigOut> nsw_trigout = m_system->getNSW()->getOutput(region, !isAside, sectorId);
       for ( int icand=0; icand<(int)nsw_trigout->getNSWeta().size(); icand++ ){
-        std::unique_ptr<TgcRawData> rawdata_nsw (new TgcRawData(bcTag,
-                                                                    static_cast<uint16_t>(subDetectorId),
-                                                                    static_cast<uint16_t>(rodId),
-                                                                    l1Id,
-                                                                    bcId,
-                                                                    (!isEndcap), 
-                                                                    static_cast<uint16_t>(secId), /*?*/
-                                                                    static_cast<uint16_t>(nsw_trigout->getNSWeta().at(icand)),
-                                                                    static_cast<uint16_t>(nsw_trigout->getNSWphi().at(icand)),
-                                                                    static_cast<uint16_t>(icand), //nswcand
-                                                                    static_cast<uint16_t>(nsw_trigout->getNSWDtheta().at(icand)),
-                                                                    0, //nswphires
-                                                                    0, //nswlowres
-                                                                    static_cast<uint16_t>(nsw_trigout->getNSWTriggerProcessor().at(icand))));
+       auto rawdata_nsw = std::make_unique<TgcRawData>(bcTag,
+                                                       static_cast<uint16_t>(subDetectorId),
+                                                       static_cast<uint16_t>(rodId),
+                                                       l1Id,
+                                                       bcId,
+                                                       (!isEndcap), 
+                                                       static_cast<uint16_t>(secId), /*?*/
+                                                       static_cast<uint16_t>(nsw_trigout->getNSWeta().at(icand)),
+                                                       static_cast<uint16_t>(nsw_trigout->getNSWphi().at(icand)),
+                                                       static_cast<uint16_t>(icand), //nswcand
+                                                       static_cast<uint16_t>(nsw_trigout->getNSWDtheta().at(icand)),
+                                                       0, //nswphires
+                                                       0, //nswlowres
+                                                       static_cast<uint16_t>(nsw_trigout->getNSWTriggerProcessor().at(icand)));
         addRawData(std::move(rawdata_nsw), tgcrdo);
       }
     }
@@ -917,26 +904,27 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     if ( m_USEBIS78 ) {
       std::shared_ptr<const LVL1TGC::BIS78TrigOut> bis78_trigout = m_system->getBIS78()->getOutput(sectorId);
       for ( int icand=0; icand<(int)bis78_trigout->getBIS78eta().size(); icand++ ){
-        std::unique_ptr<TgcRawData> rawdata_bis78 (new TgcRawData(bcTag,
-                                                                      static_cast<uint16_t>(subDetectorId),
-                                                                      static_cast<uint16_t>(rodId),
-                                                                      l1Id,
-                                                                      bcId,
-                                                                      (!isEndcap),
-                                                                      static_cast<uint16_t>(secId), /*?*/
-                                                                      static_cast<uint16_t>(bis78_trigout->getBIS78eta().at(icand)),
-                                                                      static_cast<uint16_t>(bis78_trigout->getBIS78phi().at(icand)),
-                                                                      static_cast<uint16_t>(icand),
-                                                                      static_cast<uint16_t>(bis78_trigout->getBIS78Deta().at(icand)),
-                                                                      static_cast<uint16_t>(bis78_trigout->getBIS78Dphi().at(icand))));
+        auto rawdata_bis78 = std::make_unique<TgcRawData>(bcTag,
+                                                          static_cast<uint16_t>(subDetectorId),
+                                                          static_cast<uint16_t>(rodId),
+                                                          l1Id,
+                                                          bcId,
+                                                          (!isEndcap),
+                                                          static_cast<uint16_t>(secId), /*?*/
+                                                          static_cast<uint16_t>(bis78_trigout->getBIS78eta().at(icand)),
+                                                          static_cast<uint16_t>(bis78_trigout->getBIS78phi().at(icand)),
+                                                          static_cast<uint16_t>(icand),
+                                                          static_cast<uint16_t>(bis78_trigout->getBIS78Deta().at(icand)),
+                                                          static_cast<uint16_t>(bis78_trigout->getBIS78Dphi().at(icand)));
         addRawData(std::move(rawdata_bis78), tgcrdo);
       }
     }
 }
   
 ///////////////////////////////////////////////////////
-void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
-				 std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
+void LVL1TGCTrigger::recordRdoSL(const Muon::TgcCablingMap& cabling,
+                                 TGCSector* sector,
+				                        std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>& tgcrdo)
 {
   // check if whether trigger output exists or not
   std::shared_ptr<TGCTrackSelectorOut>  selectorOut;
@@ -965,10 +953,10 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     //  secID for TGCRawData
     //  0-3(EC), 0-1(FWD) for new TGCcabling (1/12sector)
     //  0-5(EC), 0-2(FWD) for new TGCcabling (octant)
-    int startEndcapSector, coverageOfEndcapSector;
-    int startForwardSector, coverageOfForwardSector;
+    int startEndcapSector{0}, coverageOfEndcapSector{0};
+    int startForwardSector{0}, coverageOfForwardSector{0};
     int rodId = 1;
-    m_cabling->getCoveragefromSRodID(rodId,
+    cabling.getCoveragefromSRodID(rodId,
                                      startEndcapSector,
                                      coverageOfEndcapSector,
                                      startForwardSector,
@@ -986,7 +974,7 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     
     // get readout ID
     int subDetectorId = 0, sswId = 0, sbLoc = 0;
-    bool status = m_cabling->getSReadoutIDfromSLID(phi, isAside, isEndcap,
+    bool status = cabling.getSReadoutIDfromSLID(phi, isAside, isEndcap,
                                                    subDetectorId, rodId, sswId, sbLoc);
     if (!status) {
       ATH_MSG_WARNING("TGCcablignSvc::ReadoutIDfromSLID fails"
@@ -1011,15 +999,15 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
       coinFlag = selectorOut->getCoincidenceType(icand);
 
       // create TgcRawData
-      std::unique_ptr<TgcRawData> rawdata(new TgcRawData(bcTag,
-                                                             static_cast<uint16_t>(subDetectorId),
-                                                             static_cast<uint16_t>(rodId),
-                                                             l1Id,
-                                                             bcId,
-                                                             (!isEndcap), secId, 
-                                                             inner, 
-                                                             coinFlag,
-                                                             muplus, threshold, roi));
+      auto rawdata = std::make_unique<TgcRawData>(bcTag,
+                                                  static_cast<uint16_t>(subDetectorId),
+                                                  static_cast<uint16_t>(rodId),
+                                                  l1Id,
+                                                  bcId,
+                                                  (!isEndcap), secId, 
+                                                  inner, 
+                                                  coinFlag,
+                                                  muplus, threshold, roi);
       addRawData(std::move(rawdata), tgcrdo);
       
       ATH_MSG_DEBUG("recordRdoSL  : bcTag =" << bcTag
@@ -1038,8 +1026,7 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
   
 ///////////////////////////////////////////////////////////////////////////////////
 // Mask=0/Fire=1
-StatusCode LVL1TGCTrigger::getMaskedChannel()
-{
+StatusCode LVL1TGCTrigger::getMaskedChannel(const Muon::TgcCablingMap& cabling) {
     std::string fname=m_MaskFileName12.value();
     if (fname.empty()) return StatusCode::SUCCESS;
     
@@ -1080,7 +1067,7 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
         int octno1 = (ids[2]==-99 ? 0  : ids[2]);  int octno2=(ids[2]==-99 ? 7 : ids[2]);
         for(int sysno=sysno1; sysno<=sysno2; sysno+=2) {
           for(int octno=octno1; octno<=octno2; octno++) {
-            bool status = m_cabling->getOfflineIDfromOnlineID(ID,sysno,octno,
+            bool status = cabling.getOfflineIDfromOnlineID(ID,sysno,octno,
                                                               ids[3],ids[4],ids[5],ids[6],ids[7]);
             ATH_MSG_VERBOSE( (OnOff==0 ? "Mask" : "Fire") << " : offlineID=" << ID
                              << " sys=" << sysno << " oct=" << octno << " modno=" << ids[3]
@@ -1105,7 +1092,7 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
         int octno1 = (ids[2]==-99 ? 0  : ids[2]);  int octno2=(ids[2]==-99 ? 7 : ids[2]);
         for(int sysno=sysno1; sysno<=sysno2; sysno+=1) {
           for(int octno=octno1; octno<=octno2; octno++) {
-            bool status = m_cabling->getOfflineIDfromReadoutID(ID, sysno,octno,ids[3],ids[4],ids[5]);
+            bool status = cabling.getOfflineIDfromReadoutID(ID, sysno,octno,ids[3],ids[4],ids[5]);
             ATH_MSG_VERBOSE( (OnOff==0 ? "Mask" : "Fire") << " : offlineID=" << ID
                              << " subdetectorID=" << sysno << " rodId=" << octno << " sswID=" << ids[3]
                              << " SBLoc=" << ids[4] << " channelId=" << ids[5] );
@@ -1226,7 +1213,7 @@ int LVL1TGCTrigger::getLPTTypeInRawData(int type)
     if (itRdo==tgcrdo.end()) {
       // in case TgcRdo with the given subDetectorId and rodId is 
       // not registered yet, create new TgcRdo and add rawdata to it
-      std::unique_ptr<TgcRdo> thisRdo(new TgcRdo(rawdata->subDetectorId(), rawdata->rodId(), rawdata->bcId(), rawdata->l1Id()));
+      auto thisRdo = std::make_unique<TgcRdo>(rawdata->subDetectorId(), rawdata->rodId(), rawdata->bcId(), rawdata->l1Id());
       thisRdo->push_back(std::move(rawdata));
       tgcrdo.insert(std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>::value_type(subDetectorRod, std::move(thisRdo)));
     } else {
@@ -1234,29 +1221,5 @@ int LVL1TGCTrigger::getLPTTypeInRawData(int type)
     }
     return true;
 }
-  
-///////////////////////////////////////////////////////////
-StatusCode LVL1TGCTrigger::getCabling()
-{
-  ATH_MSG_DEBUG("LVL1TGCTrigger::getCabling()");
-
-  // get Cabling service
-  ATH_CHECK(m_cabling.retrieve());
-
-  int maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId;
-  m_cabling->getReadoutIDRanges( maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId);
-  if (maxRodId ==12) {
-      ATH_MSG_INFO(m_cabling->name() << " is OK");
-  } else {
-      ATH_MSG_FATAL("Old TGCcablingSvc(octant segmentation) can not be used !");
-      return StatusCode::FAILURE;
-  }
-
-  ATH_MSG_DEBUG("finished LVL1TGCTrigger::getCabling()");
-
-  return StatusCode::SUCCESS;
-}
-
-
 }  // end of namespace
 

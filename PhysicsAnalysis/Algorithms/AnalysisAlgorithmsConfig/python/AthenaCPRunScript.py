@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 import sys
 from AnalysisAlgorithmsConfig.CPBaseRunner import CPBaseRunner
 
@@ -9,19 +9,29 @@ class AthenaCPRunScript(CPBaseRunner):
         self.logger.info("AthenaCPRunScript initialized")
         self._cfg = None
         self.addCustomArguments()
+        self.configSeq = None
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
-        
+
     @property
     def cfg(self):
         if self._cfg is None:
             raise ValueError('Service configuration not initialized, use initServiceCfg()')
         return self._cfg
-    
+
     def addCustomArguments(self):
-        # derivedGroup = self.parser.add_argument_group('Athena specific arguments') # commented out for now to avoid compilation warning in Athena, add it back when needed
-        # add arguments here derivedGroup.add_argument(...)
+        # add arguments here
+        derivedGroup = self.parser.add_argument_group('Athena specific arguments')
+        derivedGroup.add_argument('--config-only', dest='config_only',
+                                 action='store_true', help='Only generate the configuration and save it to a pickle file')
+        derivedGroup.add_argument('--perfmon', dest='perfmon', default='none',
+                                  help='Run PerfMon to measure the job performance')
+        derivedGroup.add_argument('--pool-file-reading', dest='pool_file_reading',
+                                 action='store_true', help='Run the job with the POOL-based file reading')
+        derivedGroup.add_argument('--test-mt-dependencies', dest='test_mt_dependencies',
+                                 type=int, default=None,
+                                 help='Print out multithreading dependencies, and run with the given number of threads')
         return
-    
+
     def makeAlgSequence(self):
         from AthenaConfiguration.ComponentFactory import CompFactory
         algSeq = CompFactory.AthSequencer()
@@ -32,33 +42,67 @@ class AthenaCPRunScript(CPBaseRunner):
         configAccumulator = ConfigAccumulator(autoconfigFromFlags=self.flags,
                                               algSeq=algSeq,
                                               noSystematics=self.args.no_systematics)
+        if not self.args.merge_output_files:
+            configAccumulator.setDefaultHistogramStream('ANALYSIS_HIST')
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
+        self.configSeq = configSeq
+        self.modifyAlgSequence()
         return configAccumulator.CA
-    
+
     def initServiceCfg(self):
         if not self.flags.locked():
             raise ValueError('Flags must be locked before initializing services')
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
         self._cfg = MainServicesCfg(self.flags)
-    
+
     def run(self):
         self.setup()
+
+        # PerfMon
+        from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+        setPerfmonFlagsFromRunArgs(self.flags, self.args)
+
+        if self.args.test_mt_dependencies is not None:
+            self.flags.Concurrency.NumThreads = self.args.test_mt_dependencies
+            self.flags.Scheduler.ShowControlFlow = True
+            self.flags.Scheduler.ShowDataDeps = True
         self.flags.lock()
         self.printFlags()
-        
-        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+
         self.initServiceCfg()
-        self.cfg.merge(PoolReadCfg(self.flags))
+        if self.args.pool_file_reading or self.args.test_mt_dependencies is not None:
+            from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+            self.cfg.merge(PoolReadCfg(self.flags))
+        else:
+            from AthenaRootComps.xAODEventSelectorConfig import xAODReadCfg
+            self.cfg.merge(xAODReadCfg(self.flags))
+        from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
         self.cfg.merge(CutFlowSvcCfg(self.flags))
-        
+
         outputFile = f"ANALYSIS DATAFILE='{self.outputName}.root' OPT='RECREATE'"
         from AthenaConfiguration.ComponentFactory import CompFactory
         self.cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
+        if not self.args.merge_output_files:
+            outputFileHist = f"ANALYSIS_HIST DATAFILE='hist-{self.outputName}.root' OPT='RECREATE'"
+            from AthenaConfiguration.ComponentFactory import CompFactory
+            self.cfg.addService(CompFactory.THistSvc(Output=[outputFileHist]))
+
+        # Make the main analysis configuration
         self.cfg.merge(self.makeAlgSequence())
+
+        # Performance monitoring and profiling:
+        if self.flags.PerfMon.doFastMonMT or self.flags.PerfMon.doFullMonMT:
+            from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+            self.cfg.merge(PerfMonMTSvcCfg(self.flags))
+
         self.cfg.printConfig()
-        
-        sc = self.cfg.run(self.flags.Exec.MaxEvents)
+
+        # dump pickle if requested
+        if self.args.config_only:
+            with open("CPRunConfig.pkl", "wb") as f:
+                self.cfg.store(f)
+            sys.exit(0)
+
+        sc = self.cfg.run()
         sys.exit(sc.isFailure())
-    

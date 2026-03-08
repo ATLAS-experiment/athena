@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HiveAlgBase.h"
@@ -11,7 +11,7 @@
 
 HiveAlgBase::HiveAlgBase( const std::string& name, 
 			  ISvcLocator* pSvcLocator ) : 
-  ::AthAlgorithm( name, pSvcLocator )
+  ::AthReentrantAlgorithm( name, pSvcLocator )
 {}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,7 @@ StatusCode HiveAlgBase::initialize() {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 unsigned int
-HiveAlgBase::sleep() {
+HiveAlgBase::sleep() const {
 
   const auto& ctx = Gaudi::Hive::currentContext();
   ATHRNG::RNGWrapper* rngWrapper = m_rngSvc->getEngine(this);

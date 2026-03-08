@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ICONTAINER_H
@@ -22,14 +22,8 @@ namespace pool {
 
   class IContainer {
   public:
-    /// Empty destructor
-    virtual ~IContainer() {}
-
     /// Returns the name of this container
-    const std::string& name() const;
-
-    /// Returns the name (fid) of the parent database
-    virtual const std::string& parentDatabaseName() const = 0;
+    virtual const std::string& name() const = 0;
 
     /// Returns the technology identifier for this container
     virtual long technology() const = 0;
@@ -43,13 +37,8 @@ namespace pool {
     virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const = 0;
     virtual ITechnologySpecificAttributes& technologySpecificAttributes() = 0;
 
-  protected:
-    /// Constructor initializing its name
-    explicit IContainer( const std::string& name );
-
-  private:
-    /// The name of the container
-    std::string m_name;
+    /// Virtual destructor for the interface
+    virtual ~IContainer() = default;
   };
 }
 

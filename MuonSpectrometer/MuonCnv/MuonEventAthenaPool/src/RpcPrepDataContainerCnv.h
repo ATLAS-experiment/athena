@@ -33,7 +33,7 @@ public:
     virtual ~RpcPrepDataContainerCnv();
     
     virtual RpcPrepDataContainer_PERS*   createPersistent (Muon::RpcPrepDataContainer* transCont);
-    virtual Muon::RpcPrepDataContainer*  createTransient ();
+    virtual Muon::RpcPrepDataContainer*  createTransient(const Token* token);
 
     // Must initialize ID helpers
     virtual StatusCode initialize();

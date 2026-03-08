@@ -483,7 +483,7 @@ StatusCode MixingEventSelector::resetCriteria(const std::string&,
 // IConverter implementation.
 const CLID& MixingEventSelector::objType() const
 {
-  return ClassID_traits<EventInfo>::ID();
+  static const CLID cid = ClassID_traits<EventInfo>::ID();  return cid;
 }
 long MixingEventSelector::repSvcType() const
 {

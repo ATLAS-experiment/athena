@@ -33,7 +33,7 @@ TrigEMCluster_PERS* TrigEMClusterCnv::createPersistent(TrigEMCluster* transCont)
 }
 
 
-TrigEMCluster* TrigEMClusterCnv::createTransient() 
+TrigEMCluster* TrigEMClusterCnv::createTransient(const Token* token) 
 {
   MsgStream mlog(msgSvc(), "TrigEMClusterConverter" );
   mlog << MSG::DEBUG << "TrigEMClusterCnv::createTransient " << endmsg;
@@ -44,24 +44,24 @@ TrigEMCluster* TrigEMClusterCnv::createTransient()
   
   TrigEMCluster       *trans_cont(0);
   
-  if( compareClassGuid(tlp2_guid) ) {
+  if( compareClassGuid(token, tlp2_guid) ) {
     
     mlog << MSG::DEBUG << "TrigEMClusterCnv::reading tlp2 persistent object" << endmsg;
-    std::unique_ptr< TrigEMCluster_tlp2 >   col_vect( this->poolReadObject< TrigEMCluster_tlp2 >() );
+    std::unique_ptr< TrigEMCluster_tlp2 >   col_vect( this->poolReadObject< TrigEMCluster_tlp2 >(token) );
     trans_cont = m_impl->m_TPConverter2.createTransient( col_vect.get(), mlog );
 
-  } else if( compareClassGuid(tlp1_guid) ) {
+  } else if( compareClassGuid(token, tlp1_guid) ) {
     
     mlog << MSG::DEBUG << "TrigEMClusterCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigEMCluster_tlp1 >   col_vect( this->poolReadObject< TrigEMCluster_tlp1 >() );
+    std::unique_ptr< TrigEMCluster_tlp1 >   col_vect( this->poolReadObject< TrigEMCluster_tlp1 >(token) );
     trans_cont = m_impl->m_TPConverter.createTransient( col_vect.get(), mlog );
 
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
 
     mlog << MSG::DEBUG << "TrigEMClusterCnv::reading p0 persistent object" << endmsg;
     // old version from before TP separation, just return it
-    trans_cont = this->poolReadObject<TrigEMCluster>();
+    trans_cont = this->poolReadObject<TrigEMCluster>(token);
 
   }  else {
 

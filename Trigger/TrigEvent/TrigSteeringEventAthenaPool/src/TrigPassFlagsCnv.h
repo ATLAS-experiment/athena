@@ -41,7 +41,7 @@ public:
 
 protected:
   virtual TrigPassFlags_PERS  *createPersistent(TrigPassFlags *transObj);
-  virtual TrigPassFlags       *createTransient();
+  virtual TrigPassFlags       *createTransient(const Token* token);
 };
 
 

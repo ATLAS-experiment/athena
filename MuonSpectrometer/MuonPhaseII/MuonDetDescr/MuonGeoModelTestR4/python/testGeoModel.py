@@ -27,7 +27,9 @@ class MuonPhaseIITestDefaults:
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-18._0001.data",
         "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/data25_13p6TeV/data25_13p6TeV.00508073.physics_Main.daq.RAW._lb0277._SFO-19._0001.data"]
     ###
-    RDO_ZMUMU_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
+    RDO_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
+    ###
+    RDO_R4 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R4.pool.root"]
     ###
     ###     Layout files
     ###
@@ -42,7 +44,8 @@ class MuonPhaseIITestDefaults:
     GEODB_R4MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_MSOnly.db"
     ### ITk + Calo + R3-MS ATLAS layout
     GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
-   
+    #### Only the passive material
+    GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/MUON_TOROID.db"
 
 def SetupArgParser():
     from argparse import ArgumentParser

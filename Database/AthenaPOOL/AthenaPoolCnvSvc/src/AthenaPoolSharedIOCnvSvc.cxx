@@ -21,10 +21,9 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "PersistentDataModel/DataHeader.h"
-
+#include "PersistencySvc/IFileCatalog.h"
 
 #include "StorageSvc/DbReflex.h"
-#include "FileCatalog/IFileCatalog.h"
 
 #include "AuxDiscoverySvc.h"
 
@@ -662,22 +661,6 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
 		const std::string& refAddress,
 		IOpaqueAddress*& refpAddress) {
    return AthenaPoolCnvSvc::createAddress(svcType, clid, refAddress, refpAddress);
-}
-//__________________________________________________________________________
-StatusCode AthenaPoolSharedIOCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const {
-    auto pos = fileSpec.find("?pmerge=");
-    std::string suffix;
-    // Remove trailing TMemFile for decoding
-    if (pos != std::string::npos) {
-      suffix = fileSpec.substr(pos);
-      fileSpec.erase(pos);
-    }
-    StatusCode sc = AthenaPoolCnvSvc::decodeOutputSpec(fileSpec, outputTech);
-    // Append back the suffix
-    if (!suffix.empty()) {
-        fileSpec += suffix;
-    }
-    return sc;
 }
 //______________________________________________________________________________
 StatusCode AthenaPoolSharedIOCnvSvc::cleanUp(const std::string& connection) {

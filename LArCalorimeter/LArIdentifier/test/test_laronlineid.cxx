@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "IdDictParser/IdDictParser.h"  
@@ -672,13 +672,13 @@ int main (int argc, char* argv[])
     parser.register_external_entity("LArCalorimeter",lArIDFileName);
     IdDictMgr& idd = parser.parse (argv[1]);  
     std::cout << "[MAIN] --> got dict mgr idd" << lArIDFileName << std::endl;
-    check_lar_online_id_decoding(idd);     
+
+    try {
+      check_lar_online_id_decoding(idd);
+    }
+    catch (const std::exception& e) {
+      std::cerr << "Caught exception: " << e.what() << "\n";
+      return 1;
+    }
     return 0;  
 }  
-  
- 
- 
- 
- 
- 
-

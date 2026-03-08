@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
@@ -11,6 +11,9 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
+
+#include "MuonSpacePoint/SpacePoint.h"
+#include "MuonPatternEvent/MuonPatternContainer.h"
 
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Visualization/GeometryView3D.hpp"
@@ -25,6 +28,11 @@
 using namespace Acts::PlanarHelper;
 using namespace MuonR4;
 using namespace Acts::UnitLiterals;
+
+namespace{
+    using CovIdx = MuonR4::SpacePoint::CovIdx;
+}
+
 namespace  MuonValR4 {
     void drawPropagation(const std::vector<Acts::detail::Step>& steps,
                          Acts::ObjVisualization3D& visualHelper,
@@ -42,6 +50,26 @@ namespace  MuonValR4 {
             }
 
         }
+    }
+    void drawSegmentLine(const ActsTrk::GeometryContext& gctx,
+                         const MuonR4::Segment& segment,
+                         Acts::ObjVisualization3D& visualHelper,
+                         const Acts::ViewConfig& viewConfig) {
+        /// Take the local z component of the local to global transform as plane normal
+        const Amg::Transform3D& locToGlob = segment.msSector()->localToGlobalTransform(gctx);
+        const Amg::Vector3D firstSurfPos = locToGlob*segment.measurements().front()->localPosition();
+        const Amg::Vector3D lastSurfPos  = locToGlob*segment.measurements().back()->localPosition();
+        const Amg::Vector3D planeNorm = locToGlob.linear().col(2);
+        /// Create the intersections
+        const auto firstPlaneIsect = intersectPlane(segment.position(), segment.direction(),
+                                                    planeNorm, firstSurfPos);
+        const auto lastPlaneIsect = intersectPlane(segment.position(), segment.direction(),
+                                                    planeNorm, lastSurfPos);
+        
+        Acts::GeometryView3D::drawSegment(visualHelper,
+                                          segment.position() + firstPlaneIsect.pathLength() * segment.direction(),
+                                          segment.position() + lastPlaneIsect.pathLength()  * segment.direction(),
+                                          viewConfig);
     }
     void drawSegmentLine(const ActsTrk::GeometryContext& gctx,
                          const xAOD::MuonSegment& segment,
@@ -74,9 +102,9 @@ namespace  MuonValR4 {
                                                     planeNorm, lastSurfPos);
         
         Acts::GeometryView3D::drawSegment(visualHelper,
-                                              segment.position() + firstPlaneIsect.pathLength() * segment.direction(),
-                                              segment.position() + lastPlaneIsect.pathLength()  * segment.direction(),
-                                              viewConfig);
+                                          segment.position() + firstPlaneIsect.pathLength() * segment.direction(),
+                                          segment.position() + lastPlaneIsect.pathLength()  * segment.direction(),
+                                          viewConfig);
     }
     void drawSegmentMeasurements(const ActsTrk::GeometryContext& gctx,
                                  const xAOD::MuonSegment& segment,
@@ -85,6 +113,14 @@ namespace  MuonValR4 {
         std::vector<const xAOD::UncalibratedMeasurement*> assocMeas = collectMeasurements(segment, false);
         for (const xAOD::UncalibratedMeasurement* meas : assocMeas){
             drawMeasurement(gctx, meas, visualHelper, viewConfig);
+        }
+    }
+    void drawSegmentMeasurements(const ActsTrk::GeometryContext& gctx,
+                                 const MuonR4::Segment& segment,
+                                 Acts::ObjVisualization3D& visualHelper,
+                                 const Acts::ViewConfig& viewConfig) {
+        for (const auto& meas : segment.measurements()) {
+            drawSpacePoint(gctx, *meas, segment.msSector(), visualHelper, viewConfig);
         }
     }
     void drawMeasurement(const ActsTrk::GeometryContext& gctx,
@@ -103,7 +139,7 @@ namespace  MuonValR4 {
                                     lBounds.get(Acts::LineBounds::eHalfLengthZ) :
                                     std::sqrt(meas->localCovariance<2>()(1,1));
             auto newBounds = std::make_unique<Acts::LineBounds>(dR, hZ);
-            auto dummySurface = Acts::Surface::makeShared<Acts::StrawSurface>(surf.transform(tgContext)*
+            auto dummySurface = Acts::Surface::makeShared<Acts::StrawSurface>(surf.localToGlobalTransform(tgContext)*
                                                                               Amg::getTranslate3D(driftCirc->localMeasurementPos()),
                                                                               std::move(newBounds));
             Acts::GeometryView3D::drawSurface(visualHelper, *dummySurface, tgContext,
@@ -186,7 +222,7 @@ namespace  MuonValR4 {
             }
         }
         auto newBounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
-        auto dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.transform(tgContext)*
+        auto dummySurf = Acts::Surface::makeShared<Acts::PlaneSurface>(surf.localToGlobalTransform(tgContext)*
                                                                        Amg::getTranslate3D(locPos),
                                                                        std::move(newBounds));
         Acts::GeometryView3D::drawSurface(visualHelper, *dummySurf, tgContext,
@@ -201,6 +237,50 @@ namespace  MuonValR4 {
         const Amg::Vector3D start = globPos - 0.5 * standardLength * pars.direction();
         const Amg::Vector3D end   = globPos + 0.5 * standardLength * pars.direction();
         Acts::GeometryView3D::drawSegment(visualHelper, start, end, viewConfig);
+    }
+    void drawSpacePoint(const ActsTrk::GeometryContext& gctx,
+                        const MuonR4::SpacePoint& spacePoint,
+                        Acts::ObjVisualization3D& visualHelper,
+                        const Acts::ViewConfig& viewConfig) {
+        if (spacePoint.dimension() == 2 && 
+            spacePoint.primaryMeasurement() != spacePoint.secondaryMeasurement()) {
+            const Amg::Transform3D& locToGlob =  spacePoint.msSector()->localToGlobalTransform(gctx);
+            const double dX = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+            const double dY = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
+            auto bounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
+            const Acts::Transform3 trf = locToGlob * Amg::getTranslate3D(spacePoint.localPosition());
+            auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(trf, std::move(bounds));
+            Acts::GeometryView3D::drawSurface(visualHelper, *surf, gctx.context());
+        } else {
+            drawMeasurement(gctx, spacePoint.primaryMeasurement(), 
+                            visualHelper, viewConfig);
+        }
+    }
+    void drawSpacePoint(const ActsTrk::GeometryContext& gctx,
+                        const MuonR4::CalibratedSpacePoint& spacePoint,
+                        const MuonGMR4::SpectrometerSector* msSector,
+                        Acts::ObjVisualization3D& visualHelper,
+                        const Acts::ViewConfig& viewConfig) {
+        if (spacePoint.type() != xAOD::UncalibMeasType::Other) {
+            drawSpacePoint(gctx, *spacePoint.spacePoint(), visualHelper, viewConfig);
+            return;
+        }
+        const Amg::Transform3D& locToGlob = msSector->localToGlobalTransform(gctx);
+        if (spacePoint.isStraw()) {
+              const double dR = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
+              const double hZ = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+              auto bounds = std::make_unique<Acts::LineBounds>(dR, hZ);
+              const Amg::Transform3D trf = locToGlob * Amg::getTranslate3D(spacePoint.localPosition());
+              auto surface = Acts::Surface::makeShared<Acts::StrawSurface>(trf, std::move(bounds));    
+              Acts::GeometryView3D::drawSurface(visualHelper, *surface, gctx.context());    
+        } else {
+            const double dX = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
+            const double dY = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
+            auto bounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
+            const Acts::Transform3 trf = locToGlob * Amg::getTranslate3D(spacePoint.localPosition());
+            auto surf = Acts::Surface::makeShared<Acts::PlaneSurface>(trf, std::move(bounds));
+            Acts::GeometryView3D::drawSurface(visualHelper, *surf, gctx.context());
+        }
     }
 
     

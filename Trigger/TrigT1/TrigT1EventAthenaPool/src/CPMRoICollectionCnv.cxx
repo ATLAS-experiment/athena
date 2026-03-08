@@ -26,7 +26,7 @@ CPMRoICollection_PERS * CPMRoICollectionCnv::createPersistent( CPMRoICollection 
  
 
 //createTransient
-CPMRoICollection * CPMRoICollectionCnv::createTransient()
+CPMRoICollection * CPMRoICollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "CPMRoICollectionConverter" );
   
@@ -35,10 +35,10 @@ CPMRoICollection * CPMRoICollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "A5867077-621F-4B04-8777-56846085E550" );
  
   CPMRoICollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
            // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< CPMRoICollection_PERS > pers_ref( poolReadObject< CPMRoICollection_PERS >() );
+      std::unique_ptr< CPMRoICollection_PERS > pers_ref( poolReadObject< CPMRoICollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
 
     }else  throw std::runtime_error( "Unsupported persistent version of CPMRoICollection" );

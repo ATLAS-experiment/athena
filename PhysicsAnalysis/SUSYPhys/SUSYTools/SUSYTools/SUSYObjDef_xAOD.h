@@ -734,7 +734,6 @@ namespace ST {
     bool   m_tauDoTTM;
     std::string m_tauSmearingToolRecommendationTag;
     std::string m_tauEffToolRecommendationTag;
-    std::string m_tauSmearingToolGenerator;
     bool m_ApplyMVATESQualityCheck;
     TEnv m_tauConfigReader;
 

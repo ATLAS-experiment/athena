@@ -17,17 +17,17 @@
 HGTD_ClusterContainerCnv::HGTD_ClusterContainerCnv(ISvcLocator* svcloc)
     : HGTD_ClusterContainerCnvBase(svcloc) {}
 
-HGTD_ClusterContainer* HGTD_ClusterContainerCnv::createTransient() {
+HGTD_ClusterContainer* HGTD_ClusterContainerCnv::createTransient(const Token* token) {
 
   static const pool::Guid p1_guid(
       "7B3D57D6-F590-4266-974D-A0807122DA5F"); // with HGTD_Cluster_p1
-  ATH_MSG_DEBUG("createTransient(): main converter");
+  ATH_MSG_DEBUG("createTransient(const Token* token): main converter");
 
   HGTD_ClusterContainer* p_collection(0);
-  if (compareClassGuid(p1_guid)) {
-    ATH_MSG_DEBUG("createTransient(): T/P version 1 detected");
+  if (compareClassGuid(token, p1_guid)) {
+    ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
     std::unique_ptr<HGTD_ClusterContainer_p1> p_coll(
-        poolReadObject<HGTD_ClusterContainer_p1>());
+        poolReadObject<HGTD_ClusterContainer_p1>(token));
     p_collection = m_converter_p1.createTransient(p_coll.get(), msg());
   } else {
     throw std::runtime_error(

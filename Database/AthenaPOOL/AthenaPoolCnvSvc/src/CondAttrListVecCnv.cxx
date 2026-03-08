@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file CondAttrListVecCnv.cxx
@@ -96,7 +96,7 @@ long CondAttrListVecCnv::storageType() {
    return pool::POOL_StorageType.type();
 }
 //__________________________________________________________________________
-const CLID& CondAttrListVecCnv::classID() {
+CLID CondAttrListVecCnv::classID() {
    return(ClassID_traits<CondAttrListVec>::ID());
 }
 //__________________________________________________________________________

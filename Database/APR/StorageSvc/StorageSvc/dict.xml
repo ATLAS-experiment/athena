@@ -1,11 +1,10 @@
 <lcgdict>
  <selection>
-  <!-- package: POOLCore                     -->
+  <!-- package: StorageSvc                   -->
   <class pattern="pool::DbHandleBase*"   rootmap="false"/>
   <class pattern="pool::IDb*"            rootmap="false"/>
   <class pattern="pool::IStorage*"       rootmap="false"/>
 
-  <!-- package: StorageSvc                   -->
   <class name="std::pair<long long,long long>"       rootmap="false"/>
   <class name="pool::IOODatabase"        rootmap="false"/>
 
@@ -13,7 +12,6 @@
  </selection>
 
  <exclusion>
-  <class pattern="pool::DbPrint*"/>
-  <class pattern="pool::DbObjectSwitch*"/>
+   <class pattern="pool::DbPrint*"/>
  </exclusion>
 </lcgdict>

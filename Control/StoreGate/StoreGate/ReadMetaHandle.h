@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READMETAHANDLE_H
@@ -90,9 +90,8 @@ namespace SG {
 
     if (ATH_UNLIKELY(m_cont == 0)) {
       // Try to retrieve it
-      StoreGateSvc* ms = m_hkey.getStore();
       MetaContBase* cb{nullptr};
-      if(ms->retrieve(cb, m_hkey.key()).isFailure()) {
+      if(m_hkey.getStore()->retrieve(cb, m_hkey.key()).isFailure()) {
 	msg << MSG::ERROR
 	    << "can't retrieve " << m_hkey.fullKey()
             << " via base class" << endmsg;

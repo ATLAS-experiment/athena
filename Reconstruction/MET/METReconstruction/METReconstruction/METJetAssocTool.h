@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METJetAssocTool.h 
@@ -16,9 +16,6 @@
 
 // METReconstruction includes
 #include "METReconstruction/METAssociator.h"
-
-//Includes for DataHandles
-#include "StoreGate/DataHandle.h"
 
 namespace met{
   class METJetAssocTool final

@@ -90,18 +90,17 @@ namespace MuonR4::SegmentFit{
             toRet.measurements = copy(toCopy.measurements);
             return toRet;
         }
-    }
- 
-     SegmentLineFitter::Config::RangeArray 
+    } 
+    SegmentLineFitter::Config::RangeArray 
         SegmentLineFitter::Config::defaultRanges() {
             RangeArray rng{};
             constexpr double spatRang = 10._m;
-            constexpr double timeTange = 25._ns;
+            constexpr double timeTange = 50._ns;
             using enum ParamDefs;
             rng[toUnderlying(y0)] = std::array{-spatRang, spatRang};
             rng[toUnderlying(x0)] = std::array{-spatRang, spatRang};
             rng[toUnderlying(phi)] = std::array{-179._degree, 179._degree};
-            rng[toUnderlying(theta)] = std::array{-85._degree,  85._degree};
+            rng[toUnderlying(theta)] = std::array{0._degree,  175._degree};
             rng[toUnderlying(t0)] = std::array{-timeTange, timeTange};
             return rng;
     }
@@ -144,18 +143,33 @@ namespace MuonR4::SegmentFit{
                 <<hitStream.str());
         }
         FitOpts_t fitOpts{};
+        Result_t result{};
         fitOpts.calibContext = cctx;
         fitOpts.calibrator = m_cfg.calibrator;
         fitOpts.selector = m_goodHitSel;
+        //check the degrees of freedom before try the fit
+        const auto dOF = m_fitter.countDoF(calibHits, fitOpts.selector);
+        if((dOF.bending + dOF.nonBending) < m_fitter.config().parsToUse.size()){
+            return result;
+        }
         fitOpts.measurements = std::move(calibHits);
         fitOpts.localToGlobal = localToGlobal;
         fitOpts.startParameters = startPars;
         /// Recall that the time is not the same in Acts & Athena
-        fitOpts.startParameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToActs(fitOpts.startParameters[toUnderlying(ParamDefs::t0)]);
+        constexpr auto t0idx = toUnderlying(ParamDefs::t0);
+        fitOpts.startParameters[t0idx] = ActsTrk::timeToActs(fitOpts.startParameters[t0idx]);
         /// Fit the measurements
-        Result_t result = m_fitter.fit(std::move(fitOpts));
+        result = m_fitter.fit(std::move(fitOpts));
         /// Convert back to athena time units
-        result.parameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToAthena(result.parameters[toUnderlying(ParamDefs::t0)]);
+        if (m_fitter.config().fitT0){
+            result.parameters[t0idx] = ActsTrk::timeToAthena(result.parameters[t0idx]);
+            result.covariance(t0idx, t0idx) = Acts::square(ActsTrk::timeToAthena(1.)) * result.covariance(t0idx, t0idx);
+            for (ParamDefs p : {ParamDefs::x0, ParamDefs::y0, ParamDefs::phi, ParamDefs::theta}) {
+                auto pidx = toUnderlying(p);
+                result.covariance(t0idx, pidx) = ActsTrk::timeToAthena(result.covariance(t0idx, pidx));
+                result.covariance(pidx, t0idx) = ActsTrk::timeToAthena(result.covariance(pidx, t0idx));
+            }
+        }
         centerAlongWire(result);
         return result;
     }
@@ -179,10 +193,12 @@ namespace MuonR4::SegmentFit{
             auto seedCopy = convertToSegment(localToGlobal, parent, copy(segFit));
             m_cfg.visionTool->visualizeSegment(ctx, *seedCopy, "Intermediate fit"); 
         }
-        if (!removeOutliers(cctx, *parent, localToGlobal, segFit)) {
+        if (!removeOutliers(cctx, *parent, localToGlobal,
+                            segFit.converged? segFit.parameters : startPars,
+                            segFit)) {
             return nullptr;
         }          
-        if (!plugHoles(cctx, *parent, localToGlobal, segFit)) {
+        if (!plugHoles(cctx, *parent, localToGlobal, segFit)) {           
             return nullptr;
         }
         auto finalSeg = convertToSegment(localToGlobal, parent, std::move(segFit));
@@ -226,10 +242,15 @@ namespace MuonR4::SegmentFit{
     bool SegmentLineFitter::removeOutliers(const Acts::CalibrationContext& cctx,
                                            const SegmentSeed& seed,
                                            const Amg::Transform3D& localToGlobal,
+                                           const LinePar_t& startPars,
                                            Result_t& fitResult) const {
+      
 
         if (countPrecHits(fitResult.measurements) < m_cfg.nPrecHitCut || fitResult.nDoF == 0
             || fitResult.nIter > m_fitter.config().maxIter) {
+                for(const auto& meas : fitResult.measurements){
+                    ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": Measurement from fitresult is" << (*meas));
+                }
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ 
                             <<": No degree of freedom available. What shall be removed?!. nDoF: "
                             <<fitResult.nDoF<<", n-meas: "<<countPrecHits(fitResult.measurements));
@@ -263,8 +284,8 @@ namespace MuonR4::SegmentFit{
         fitResult.measurements.back()->setFitState(HitState::Outlier);
 
         /** Refit the segment line without the measurement */
-        Result_t newAttempt = callLineFit(cctx, fitResult.parameters, 
-                                          localToGlobal, std::move(fitResult.measurements));
+        Result_t newAttempt = callLineFit(cctx, startPars, localToGlobal, 
+                                          std::move(fitResult.measurements));
         if (newAttempt.converged) {
             newAttempt.nIter+=fitResult.nIter;
             fitResult = std::move(newAttempt);
@@ -277,7 +298,9 @@ namespace MuonR4::SegmentFit{
             fitResult.nIter+=newAttempt.nIter;
             fitResult.measurements = std::move(newAttempt.measurements);
         }
-        return removeOutliers(cctx, seed, localToGlobal, fitResult);
+        return removeOutliers(cctx, seed, localToGlobal,
+                              fitResult.converged ? fitResult.parameters : startPars, 
+                              fitResult);
     }
 
     void SegmentLineFitter::eraseWrongHits(Result_t& candidate) const {
@@ -342,7 +365,7 @@ namespace MuonR4::SegmentFit{
                 }
                 if (lay_a != sorter.sectorLayerNum(*hit_b->spacePoint())) {
                     break;
-                } 
+                }
                 /// Both hits measure eta. They've been sorted by lower chi2 -> reject b
                 if ( (hit_a->measuresEta() && hit_b->measuresEta()) ||
                      (hit_a->measuresPhi() && hit_b->measuresPhi())) {
@@ -350,13 +373,6 @@ namespace MuonR4::SegmentFit{
                         <<m_cfg.idHelperSvc->toString(hit_b->spacePoint()->identify()) <<" in favour of "
                         <<m_cfg.idHelperSvc->toString(hit_a->spacePoint()->identify()));
                     hit_b->setFitState(HitState::Duplicate);
-                    static std::atomic<unsigned> warnCounter{0};
-                    if (hit_a->type() == xAOD::UncalibMeasType::sTgcStripType && (++warnCounter)< 1000) {
-                        ATH_MSG_WARNING(__func__<<"() - "<<__LINE__ 
-                            <<": Please check whether the overlap removal between "
-                            <<m_cfg.idHelperSvc->toString(hit_a->spacePoint()->identify()) <<" & "
-                            <<m_cfg.idHelperSvc->toString(hit_b->spacePoint()->identify())<<" is correct.");
-                    }
                 }
             }
         }
@@ -416,7 +432,7 @@ namespace MuonR4::SegmentFit{
                     continue;
                 }
             }
-            calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, timeOff);
+            calibHit = m_cfg.calibrator->calibrate(ctx, hit.get(), locPos, locDir, ActsTrk::timeToActs(timeOff));
             pull = std::sqrt(SeedingAux::chi2Term(locPos, locDir, *calibHit));
             if (pull <= m_cfg.recoveryPull) {
                 hasCandidate |= calibHit->fitState() == HitState::Valid;

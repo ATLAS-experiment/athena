@@ -403,7 +403,7 @@ StatusCode SCT_FrontEnd::randomNoise(SiChargedDiodeCollection& collection, const
     default: {
       NoiseOccupancy = m_NOBarrel;
       Noise = m_NoiseBarrel;
-      ATH_MSG_ERROR("moduleType(eta): " << moduleType << " unknown, using barrel");
+      ATH_MSG_WARNING("moduleType(eta): " << moduleType << " unknown, using barrel");
     }
     }// end of switch structure
   }

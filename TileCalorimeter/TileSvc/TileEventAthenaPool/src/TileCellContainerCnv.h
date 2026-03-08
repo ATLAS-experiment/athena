@@ -28,7 +28,7 @@ public:
     virtual StatusCode initialize() override;
 
     virtual TileCellVec*       createPersistent(TileCellContainer* cont) override;
-    virtual TileCellContainer* createTransient() override;
+    virtual TileCellContainer* createTransient(const Token* token) override;
 
 private:
     ServiceHandle<StoreGateSvc> m_storeGate;

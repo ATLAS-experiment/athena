@@ -273,7 +273,7 @@ int main() {
    // wevent.msg().setLevel(MSG::DEBUG);
 
    // And connect it to an output file:
-   static const char* const OFNAME = "test.xAOD.root";
+   static const char* const OFNAME = "test_rntuple.xAOD.root";
    std::unique_ptr< ::TFile > ofile( ::TFile::Open( OFNAME, "RECREATE" ) );
    if( ! ofile.get() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Couldn't create test output file: %s" ),
@@ -409,7 +409,7 @@ int main() {
    RETURN_CHECK( APP_NAME, wevent.finishWritingTo(*ofile) );
 
    xAOD::Experimental::REvent rwevent;
-   RETURN_CHECK( APP_NAME, rwevent.readFrom( "test.xAOD.root" ) );
+   RETURN_CHECK( APP_NAME, rwevent.readFrom( OFNAME ) );
 
    // Read in the first event:
    if( rwevent.getEntry( 0 ) < 0 ) {

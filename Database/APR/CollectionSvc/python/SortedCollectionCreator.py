@@ -37,21 +37,20 @@ class SortedCollectionCreator:
          name = attr.name()
          self.attrNames.append(name)
          self.attrTypes[name] = attr.type()
-      self.tokenName = desc.eventReferenceColumnName()
       # make a local copy of the description
       self.collDescription = self.pool.CollectionDescription( desc )
 
 
    def readInputCollections(self, inputCollections):
       """read all input collections into memory"""
+      from PyUtils import PoolFile
       self.collDescription = None
       self.allRows = []
       self.attrNames = []
       self.attrTypes = {}
-      self.tokenName = None
       for inFileName in inputCollections:
          self.debug("Opening {}".format(inFileName))
-         iColl = self.collSvc.open( "Input", "RootCollection", inFileName)
+         iColl = self.collSvc.open( "Input", PoolFile.PoolOpts.CollectionType.RootCollection, inFileName)
          self.debug("{} opened".format(inFileName))
          if self.collDescription is None:
             self.readCollectionDescription(iColl)
@@ -62,7 +61,7 @@ class SortedCollectionCreator:
          while cursor.next():
             row = cursor.currentRow()
             # put the token first in the attribute list, for convenience
-            t = [ row.tokenList()[self.tokenName].toString() ]
+            t = [ row.token().toString() ]
             for nam in self.attrNames:
                t.append( row.attributeList()[nam].data[ self.attrTypes[nam] ]() )
             self.allRows.append(t)   
@@ -96,7 +95,7 @@ class SortedCollectionCreator:
       row = self.pool.CollectionRowBuffer()
       dstColl.initNewRow( row )
       for t in self.allRows:
-         row.tokenList()[0].fromString( t[0] )
+         row.token().fromString( t[0] )
          for idx,nam in enumerate(self.attrNames):
             type = self.attrTypes[nam]
             row.attributeList()[nam].setValue[type]( t[idx+1] )
@@ -105,8 +104,8 @@ class SortedCollectionCreator:
       dstColl.commit()
       dstColl.close()
        
-   def execute(self, inputCollections, outputCollection="PFN:collection.root", sortAttribute="LumiBlockN",
-               sortOrder="Ascending", outputCollectionType="RootCollection"):
+   def execute(self, inputCollections, outputCollection, outputCollectionType, sortAttribute="LumiBlockN",
+               sortOrder="Ascending"):
       sort_opts = ("Ascending", "Descending")
       self.info("Executing SortedCollectionCreator, inputs={}, output='{}' ({}), sort by: {}, order: {}"
                 .format(inputCollections, outputCollection, outputCollectionType, sortAttribute, sortOrder))

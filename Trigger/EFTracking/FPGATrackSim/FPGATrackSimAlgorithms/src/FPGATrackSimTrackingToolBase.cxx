@@ -14,9 +14,9 @@ StatusCode FPGATrackSimTrackingToolBase::setRoadSectors(std::vector<FPGATrackSim
   {
     if (m_useSectors) {
       if(! m_do2ndStage)
-        road.setSector(m_FPGATrackSimBank->SectorBank_1st()->findSector(road.getAllHits()));
+        road.setSector(m_FPGATrackSimBank->SectorBank_1st()->findSector(road.getAllHitPtrs()));
       else
-        road.setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(road.getAllHits()));
+        road.setSector(m_FPGATrackSimBank->SectorBank_2nd()->findSector(road.getAllHitPtrs()));
     }
     else if (m_idealGeoRoads) matchIdealGeoSector(road);
   }

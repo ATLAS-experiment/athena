@@ -53,7 +53,7 @@ public:
 protected:
    
    virtual TrigL2BphysContainer_PERS *createPersistent( TrigL2BphysContainer *transObj);
-   virtual TrigL2BphysContainer      *createTransient();
+   virtual TrigL2BphysContainer      *createTransient(const Token* token);
  
 
   private:

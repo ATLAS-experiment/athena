@@ -19,5 +19,6 @@
 #include "BoostedJetTaggers/qgTagger.h"
 #include "BoostedJetTaggers/JSSMLTool.h"
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
+#include "BoostedJetTaggers/LundNetTagger.h"
 
 #endif // BOOSTEDJETTAGGERS_BOOSTEDJETTAGGERSDICT_H

@@ -1,4 +1,4 @@
-#include "eflowRec/PFSubtractionEnergyRatioCalculator.h"
+#include "PFSubtractionEnergyRatioCalculator.h"
 
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"

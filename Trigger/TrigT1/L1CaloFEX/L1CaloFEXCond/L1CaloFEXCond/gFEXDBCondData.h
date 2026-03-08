@@ -23,6 +23,8 @@ class gFEXDBCondData
     public:
 
         // getters
+        const std::string& get_FWVersion() const;
+
         const std::array<int,12>& get_Aslopes() const;
         const std::array<int,12>& get_Bslopes() const;
         const std::array<int,12>& get_Cslopes() const;
@@ -32,6 +34,8 @@ class gFEXDBCondData
         const std::array<int,12>& get_CnoiseCuts() const;
 
         // setters
+        void set_FWVersion(const std::string& fwVersion);
+
         void set_Aslopes(const std::array<int,12>& params);
         void set_Bslopes(const std::array<int,12>& params);
         void set_Cslopes(const std::array<int,12>& params);
@@ -41,13 +45,14 @@ class gFEXDBCondData
         void set_CnoiseCuts(const std::array<int,12>& params);
 
     private:
-        std::array<int,12> m_Aslopes{0};
-        std::array<int,12> m_Bslopes{0};
-        std::array<int,12> m_Cslopes{0};
+        std::string m_FWVersion{"0.0"};
+        std::array<int,12> m_Aslopes{};
+        std::array<int,12> m_Bslopes{};
+        std::array<int,12> m_Cslopes{};
 
-        std::array<int,12> m_AnoiseCuts{0};
-        std::array<int,12> m_BnoiseCuts{0};
-        std::array<int,12> m_CnoiseCuts{0};
+        std::array<int,12> m_AnoiseCuts{};
+        std::array<int,12> m_BnoiseCuts{};
+        std::array<int,12> m_CnoiseCuts{};
 
 };
 

@@ -13,7 +13,6 @@
 #include "TrkDetDescrUtils/LayerIndex.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaBaseComps/AthService.h"
 #include <string>
 #include <vector>

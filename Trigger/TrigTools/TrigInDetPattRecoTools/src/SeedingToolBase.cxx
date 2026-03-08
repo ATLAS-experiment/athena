@@ -151,6 +151,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
   
   int nEdges = 0;
 
+  float z0_histo_coeff = 16/(max_z0 - min_z0 + 1e-6);//assuming 16-bit z0 bitmask
+
   for(const auto& bg : m_geo->bin_groups()) {//loop over bin groups
     
     TrigFTF_GNN_EtaBin& B1 = storage->getEtaBin(bg.first);
@@ -208,6 +210,10 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
       unsigned short num_created_edges = 0;//the counter for the incoming graph edges created for n1
 
+      bool is_connected = false;
+
+      std::array<unsigned char, 16> z0_histo = {};
+  
       const std::array<float, 5>& n1pars = B1.m_params[n1Idx];
 
       float phi1 = n1pars[2];
@@ -241,6 +247,10 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  
 	  unsigned int n2Idx = B2.m_vPhiNodes[n2PhiIdx].second;
 
+	  unsigned short node_info = B2.m_vIsConnected[n2Idx];
+
+	  if ((lk1 == 80000) && (node_info == 0) ) continue;//skip isolated nodes as their incoming edges lead to nowhere
+ 
 	  unsigned int   n2_first_edge = B2.m_vFirstEdge[n2Idx];
           unsigned short n2_num_edges  = B2.m_vNumEdges[n2Idx];
 	  unsigned int   n2_last_edge  = n2_first_edge + n2_num_edges;
@@ -269,11 +279,21 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
 	  if(ftau < n2pars[0]) continue;
 	  if(ftau > n2pars[1]) continue;
-		
-	  if (m_doubletFilterRZ) {
-		  
-	    float z0 = z1 - r1*tau;
+
+	  float z0 = z1 - r1*tau;
+
+	  if (lk1 == 80000) {//check against non-empty z0 histogram
+	    
+	    if ( !check_z0_bitmask(node_info, z0, min_z0, z0_histo_coeff) ) {
+
+	      continue;
+
+	    }
+	    
+	  }
 	  
+	  if (m_doubletFilterRZ) {
+	    
 	    if(z0 < min_z0 || z0 > max_z0) continue;
 	  
 	    float zouter = z0 + maxOuterRadius*tau;
@@ -366,7 +386,15 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      }
             
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
-	    
+
+	      is_connected = true;//there is at least one good match
+
+	      //edge confirmed - update z0 histogram
+
+	      int z0_bin_index = z0_histo_coeff*(z0 - min_z0);
+
+	      ++z0_histo[z0_bin_index];
+	      
 	      nConnections++;
 	    
 	    }
@@ -375,7 +403,23 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	} //loop over n2 (outer) nodes inside a sliding window on n2 bin
       } //loop over sliding windows associated with n2 bins
 
-      B1.m_vNumEdges[n1Idx] = num_created_edges;//update
+      //updating the n1 node attributes
+      
+      B1.m_vNumEdges[n1Idx] = num_created_edges;
+
+      if (is_connected) {
+
+        unsigned short z0_bitmask = 0x0;
+
+        for(unsigned int bIdx = 0; bIdx < 16; bIdx++) {
+
+	  if (z0_histo[bIdx] == 0) continue;
+
+	  z0_bitmask |= (1 << bIdx);
+        }
+
+        B1.m_vIsConnected[n1Idx] = z0_bitmask;//non-zero mask indicates that there is at least one connected edge
+      }
       
     } //loop over n1 (inner) nodes
   } //loop over bin groups: a single n1 bin and multiple n2 bins
@@ -455,12 +499,12 @@ int SeedingToolBase::runCCA(int nEdges, std::vector<TrigFTF_GNN_Edge>& edgeStora
   return maxLevel;  
 }
 
-void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHits, std::vector<GNN_Edge>& edgeStorage, std::vector<std::tuple<float, int, std::vector<unsigned int> > >& vSeedCandidates) const {
+void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHits, std::vector<GNN_Edge>& edgeStorage, std::vector<std::pair<float, std::vector<unsigned int> > >& vOutputSeeds) const {
 
-  const float edge_mask_min_eta = 1.5;
-  const float hit_share_threshold = 0.49;
-  
-  vSeedCandidates.clear();
+  const float edge_mask_min_eta      = 1.5;
+  const float hit_share_threshold    = 0.49;
+  const float max_eta_for_seed_split = 0.6;
+  const float max_inv_rad_diff       = 0.7e-2;//in inverse meters
 
   int minLevel = 3;//a triplet + 2 confirmation
 
@@ -489,7 +533,15 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
     
   //backtracking
 
+  std::vector<std::tuple<float, int, std::vector<const GNN_Node*>, int > > vSeedCandidates;
+
   vSeedCandidates.reserve(vSeeds.size());
+
+  std::vector<std::pair<float, unsigned int> > vArgSort;
+
+  vArgSort.reserve(vSeeds.size());
+
+  unsigned int seed_counter = 0;
   
   auto tFilter = std::make_unique<TrigFTF_GNN_TrackingFilter>(m_layerGeometry, edgeStorage);
 
@@ -527,33 +579,79 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
 
     if(vN.size()<3) continue;
 
-    std::vector<unsigned int> vSpIdx;
+    unsigned int orig_seed_size = vN.size();
 
-    vSpIdx.resize(vN.size());
-
-    for(unsigned int k = 0; k < vN.size(); k++) {
-      vSpIdx[k] = vN[k]->sp_idx();
-    }
+    float orig_seed_quality = -rs.m_J/orig_seed_size;
     
-    vSeedCandidates.emplace_back(-rs.m_J/vN.size(), 0, vSpIdx);
+    int seed_split_flag = (seed_eta < max_eta_for_seed_split) && (orig_seed_size <= 5) ? 1 : 0;
+
+    if (seed_split_flag == 1) {//split the seed by dropping spacepoints
+      
+      std::array< std::array<const GNN_Node*, 3>, 3> triplets;//2 "drop-outs" and the original seed candidate
+      
+      std::array<float, 3> inv_rads;//triplet parameter estimate
+
+      triplets[0] = {vN[0], vN[orig_seed_size/2], vN[orig_seed_size-1]};
+
+      std::vector<const GNN_Node*> drop_out1 = {vN.begin()+1, vN.end()}; //all but the first one
+      
+      triplets[1] = {drop_out1[0], drop_out1[(orig_seed_size-1)/2], drop_out1[orig_seed_size-2]};
+      
+      std::vector<const GNN_Node*> drop_out2;
+
+      drop_out2.reserve(orig_seed_size-1);
+      
+      for(unsigned int k = 0; k < orig_seed_size; k++) {
+
+        if (k == orig_seed_size/2) continue;//drop the middle SP in the original seed
+        
+        drop_out2.emplace_back(vN[k]);
+      }
+
+      triplets[2] = {drop_out2[0], drop_out2[(orig_seed_size-1)/2], drop_out2[orig_seed_size-2]};
+
+      for (unsigned int k = 0; k < inv_rads.size(); k++) {
+
+        inv_rads[k] = estimate_curvature(triplets[k]);
+	
+      }
+
+      float diffs[3] = {std::abs(inv_rads[1] - inv_rads[0]), std::abs(inv_rads[2] - inv_rads[0]), std::abs(inv_rads[2] - inv_rads[1])};
+
+      bool confirmed = diffs[0] < max_inv_rad_diff && diffs[1] < max_inv_rad_diff && diffs[2] < max_inv_rad_diff;
+
+      if (confirmed) {
+        seed_split_flag = 0;//reset the flag
+      }
+      
+    }
+        
+    vSeedCandidates.emplace_back(orig_seed_quality, 0, vN, seed_split_flag);
+    
+    vArgSort.emplace_back(orig_seed_quality, seed_counter);
+
+    ++seed_counter;
     
   }
-
+  
   //clone removal code goes below ...
 
-  std::sort(vSeedCandidates.begin(), vSeedCandidates.end());
-
+  std::sort(vArgSort.begin(), vArgSort.end());
+  
   std::vector<int> H2T(nHits + 1, 0);//hit to track associations
 
   int trackId = 0;
-    
-  for(const auto& seed : vSeedCandidates) {
 
+  
+  for(const auto& ags : vArgSort) {
+
+    const auto& seed = vSeedCandidates[ags.second];
+    
     trackId++;
     
     for(const auto& h : std::get<2>(seed) ) {//loop over spacepoints indices
 	
-      unsigned int hit_id = h + 1;
+      unsigned int hit_id = h->sp_idx() + 1;
       
       int tid     = H2T[hit_id];
       
@@ -565,27 +663,173 @@ void SeedingToolBase::extractSeedsFromTheGraph(int maxLevel, int nEdges, int nHi
     }      
   }
 
-  for(unsigned int trackIdx = 0; trackIdx < vSeedCandidates.size(); trackIdx++) {
+  unsigned int trackIdx = 0;
+ 
+  for(const auto& ags : vArgSort) {
 
-    int nTotal = std::get<2>(vSeedCandidates[trackIdx]).size();
+    const auto& seed = std::get<2>(vSeedCandidates[ags.second]);
+    
+    int nTotal = seed.size();
+    
     int nOther = 0;
     
     int trackId = trackIdx + 1;
 
-    for(const auto& h : std::get<2>(vSeedCandidates[trackIdx]) ) {
+    ++trackIdx;
 
-      unsigned int hit_id = h + 1;
+    for(const auto& h : seed ) {
+
+      unsigned int hit_id = h->sp_idx() + 1;
       
       int tid = H2T[hit_id];
 
-	if(tid != trackId) {//taken by a better candidate
-          nOther++;
-	}
+      if(tid != trackId) {//taken by a better candidate
+	nOther++;
+      }
     }
 
     if (nOther > hit_share_threshold*nTotal) {
-        std::get<1>(vSeedCandidates[trackIdx]) = -1;//reject
+      std::get<1>(vSeedCandidates[ags.second]) = -1;//reject
     }
 
   }
+
+  vOutputSeeds.reserve(vSeedCandidates.size());
+  
+  //drop the clones and split seeds if need be
+
+  for(const auto& ags : vArgSort) {
+
+    const auto& seed = vSeedCandidates[ags.second];
+    
+    if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
+
+    const auto& vN = std::get<2>(seed);
+ 
+    if (std::get<3>(seed) == 0) {
+      
+      //add seed to output
+
+      std::vector<unsigned int> vSpIdx;
+      
+      vSpIdx.resize(vN.size());
+    
+      for(unsigned int k = 0; k < vSpIdx.size(); k++) {
+	vSpIdx[k] = vN[k]->sp_idx();
+      }
+
+      vOutputSeeds.emplace_back(std::get<0>(seed), vSpIdx);
+
+      continue;
+
+    }
+
+    //seed split into "drop-out" seeds 
+
+    unsigned int seedSize = vN.size();
+        
+    std::array<std::size_t, 2> indices2drop = {0, seedSize / 2ul};//the first and the middle
+
+    for(const auto& skipIdx : indices2drop) {
+        
+      std::vector<unsigned int> new_seed;
+
+      new_seed.reserve(seedSize-1);
+        
+      for (unsigned int k = 0; k < seedSize; k++) {
+          
+	if (k ==  skipIdx) continue;
+          
+	new_seed.emplace_back(vN[k]->sp_idx());
+         
+      }
+
+      vOutputSeeds.emplace_back(std::get<0>(seed), new_seed);
+        
+    }
+  }
+  
+}
+
+bool SeedingToolBase::check_z0_bitmask(const unsigned short& z0_bitmask, const float& z0, const float& min_z0, const float& z0_histo_coeff) const {
+
+  if (z0_bitmask == 0) return true;
+
+  float dz = z0 - min_z0; 
+  int z0_bin_index = z0_histo_coeff*dz;
+
+  if ((z0_bitmask >> z0_bin_index) & 1) return true;
+
+  //check adjacent bins as well
+            
+  const float z0_resolution = 2.5;
+  
+  float dzm = dz - z0_resolution;
+
+  int next_bin  = z0_histo_coeff*dzm;
+
+  if (next_bin >= 0 && next_bin != z0_bin_index) {
+      
+      if ((z0_bitmask >> next_bin) & 1) return true;
+
+  }				  
+
+  float dzp = dz + z0_resolution;
+
+  next_bin  = z0_histo_coeff*dzp;
+
+  if (next_bin < 16 && next_bin != z0_bin_index) {
+		    
+    if ((z0_bitmask >> next_bin) & 1) return true;
+      
+  }
+    
+  return false;
+}
+
+
+float SeedingToolBase::estimate_curvature(const std::array<const GNN_Node*, 3>& sps) const {
+
+  //conformal mapping with the center at the last spacepoint
+
+  float u[2], v[2];
+
+  float x0 = sps[2]->x();
+  float y0 = sps[2]->y();
+
+  float r0 = sps[2]->r();
+  
+  float cosA = x0/r0;
+  
+  float sinA = y0/r0;
+
+  
+  for(unsigned int k=0;k<2;k++) {
+
+    float dx = sps[k]->x() - x0;
+
+    float dy = sps[k]->y() - y0;
+
+    float r2_inv = 1.0/(dx*dx+dy*dy);
+    
+    float xn = dx*cosA + dy*sinA;
+    
+    float yn =-dx*sinA + dy*cosA;
+
+    u[k] = xn*r2_inv;
+    v[k] = yn*r2_inv;    
+  }
+
+  float du = u[0] - u[1];
+
+  if(du==0.0) return 0.0;
+  
+  float A = (v[0] - v[1])/du;
+
+  float B = v[1] - A*u[1];
+  
+  float R = std::sqrt(1 + A*A)/B; //signed radius in mm
+
+  return 1000.0/R; //inverse meters
+  
 }

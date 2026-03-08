@@ -57,6 +57,13 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     }
   }
 
+  if (meta.contains("PT")) {
+    std::string ptDecoratorName = meta["PT"].get<std::string>();
+    if (ptDecoratorName != "default") {
+      m_ptAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(ptDecoratorName);
+      ATH_MSG_INFO("Using decorated pT '" << ptDecoratorName << "' for Efficiency SF.");
+    }
+  }
   // preload pt bins, systematics and SFs for each category
   auto& json_config_OP = m_json_config[m_taggerName][m_jetAuthor][m_OP];
   for (auto& label : meta["labelMapping"].items()) {
@@ -107,7 +114,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   const auto& pts = m_ptMap.at(labelString);
   size_t bin_index = pts.size();
   for (size_t i = 1; i < pts.size(); i++) {
-    if (jet.pt()/1000. < pts[i]) {
+    if (getJetPt(jet)/1000. < pts[i]) {
       bin_index = i-1;
       break;
     }
@@ -115,7 +122,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
 
   const auto& SFs = m_sfMap.at(labelString);
   if (bin_index >= SFs.size()) {
-    ATH_MSG_WARNING("No calibration for jet with pt: " << jet.pt()/1000. << ". Returning scale factor of 0.");
+    ATH_MSG_WARNING("No calibration for jet with pt: " << getJetPt(jet)/1000. << ". Returning scale factor of 0.");
     return CP::CorrectionCode::OutOfValidityRange;
   }
   
@@ -138,6 +145,20 @@ float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size
     result += sys_value*sys_value;
   }
   return std::sqrt(result);
+}
+
+float BTaggingEfficiencyJsonTool::getJetPt( const xAOD::Jet& jet ) const
+{
+  if (!m_ptAcc) {
+    return jet.pt();
+  }
+
+  if (!m_ptAcc->isAvailable(jet)) {
+    ATH_MSG_ERROR("Decorated pT '" << SG::AuxTypeRegistry::instance().getName( m_ptAcc->auxid() ) << "' not available on jet. Cannot proceed.");
+    throw std::runtime_error("Decorated pT not available on jet.");
+  }
+
+  return (*m_ptAcc)(jet);
 }
 
 StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const

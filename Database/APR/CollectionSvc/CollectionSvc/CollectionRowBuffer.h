@@ -1,31 +1,25 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONSVC_COLLECTIONROWBUFFER_H
 #define COLLECTIONSVC_COLLECTIONROWBUFFER_H
-
-#include "TokenList.h"
 
 #include "CoralBase/AttributeList.h"
 #include "CxxUtils/checker_macros.h"
 
 #include <string>
 
+class Token;
 
 namespace pool {
 
   /** 
    * @class CollectionRowBuffer CollectionRowBuffer.h CollectionSvc/CollectionRowBuffer.h
    *
-   * A class that acts as a buffer to be filled with the event reference and associated metadata
-   * values of a given row to be inserted into a collection by its 
-   * data editor object. The reference type row values are provided by the user in the form 
-   * of POOL Token objects which are then internally converted to a database storable type. 
-   * Note that this interface is only intended for data changes, not schema changes. 
-   * To perform the latter operations one should use the schema editor object of the collection.
-   * The CollectionRowBuffer class may also act as a buffer to contain 
-   * the rows of event references and associated metadata resulting from a query.
+   * A class representing a row of a collection. It contains a list of named attributes
+   * and a single POOL object reference. It is used when creatoing a new collection or when
+   * iterating over an existing one.
    */
   class CollectionRowBuffer
   {
@@ -34,12 +28,11 @@ namespace pool {
     CollectionRowBuffer();
 
     /**
-     * Constructor taking Token list and Attribute list schema as input.
+     * Constructor taking Attribute list as input.
      *
-     * @param tokenList List of Tokens
      * @param attributeList List of Attributes.
      */
-    CollectionRowBuffer( const TokenList& tokenList, coral::AttributeList& attributeList );
+    CollectionRowBuffer( coral::AttributeList& attributeList );
 
     /**
      * Copy Constructor.
@@ -73,40 +66,31 @@ namespace pool {
     bool operator!=( const CollectionRowBuffer& rhs ) const;
 
     /**
-     * Sets the Token list schema.
-     *
-     * @param tokenList List of Tokens.
-     */
-    void setTokenList( const TokenList& tokenList );
-
-    /**
      * Sets the Attribute list schema.
      *
      * @param attributeList List of Attributes.
      */
     void setAttributeList( const coral::AttributeList& attributeList );
 
-    /// Returns a reference to the list of Tokens.
-    TokenList& tokenList();
+    /// Returns an object reference.
+    Token& token();
+    const Token& token() const;
+    const std::string& tokenName() const;
 
     /// Returns a reference to the list of Attributes.
     coral::AttributeList& attributeList();
-
-    /// Returns a constant reference to the list of Tokens.
-    const TokenList& tokenList() const;
 
     /// Returns a constant reference to the list of Attributes.
     const coral::AttributeList& attributeList() const;
 
   private:
-    /// List of Tokens.
-    TokenList 				m_tokenList;
+    Token*   				      m_token;
 
     /// List of Attributes.
     // Changed to a pointed to be able to avoid thread-safety checker
     // warnings about AttributeList.  We can change back to holding
     // this by value once those warnings are removed.
-    coral::AttributeList*		m_attributeList;
+    coral::AttributeList*	m_attributeList;
 
     bool deleteAL ATLAS_NOT_THREAD_SAFE ();
   };

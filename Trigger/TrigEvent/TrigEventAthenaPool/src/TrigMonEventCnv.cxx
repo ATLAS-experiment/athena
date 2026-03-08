@@ -33,17 +33,17 @@ TrigMonEvent_PERS* TrigMonEventCnv::createPersistent(TrigMonEvent* transObj)
 
 //---------------------------------------------------------------------------------------------
 //createTransient
-TrigMonEvent* TrigMonEventCnv::createTransient() 
+TrigMonEvent* TrigMonEventCnv::createTransient(const Token* token) 
 {
   (*m_log) << MSG::DEBUG << "TrigMonEventCnv::createTransient " << endmsg;
   
   static const pool::Guid p1_guid("AECD5837-E8DA-4FF3-8601-44B4C17355ED");
   TrigMonEvent *trans_obj(0);
   
-  if( compareClassGuid(p1_guid) ) {
+  if( compareClassGuid(token, p1_guid) ) {
     
     (*m_log) << MSG::DEBUG << "TrigMonEventCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr< TrigMonEvent_p1 >   col_vect( this->poolReadObject< TrigMonEvent_p1 >());
+    std::unique_ptr< TrigMonEvent_p1 >   col_vect( this->poolReadObject< TrigMonEvent_p1 >(token));
     trans_obj = m_TPConverter->createTransient( col_vect.get(), *m_log);
   } 
   else {    

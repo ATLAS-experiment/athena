@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCALIBSTREAM_EVENTINFOCALIBRAWDATAPROVIDER_H
 #define MUONCALIBSTREAM_EVENTINFOCALIBRAWDATAPROVIDER_H
@@ -15,7 +15,6 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteHandle.h"
-#include "StoreGate/DataHandle.h"
 #include "MuCalDecode/CalibData.h"
 #include "MuCalDecode/CalibEvent.h"
 #include "MuCalDecode/CalibUti.h"

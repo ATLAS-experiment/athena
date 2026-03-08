@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_DATABASEHANDLER_H
@@ -17,7 +17,6 @@ class Token;
 namespace pool {
 
   // forward declarations
-  class Session;
   class IStorageSvc;
   class IContainer;
 
@@ -34,7 +33,6 @@ namespace pool {
     public:
       /// Constructor. Connects to the database
       DatabaseHandler( IStorageSvc& storageSvc,
-                       Session* session,
                        long technology,
                        const std::string& fid,
                        const std::string& pfn,
@@ -94,8 +92,6 @@ namespace pool {
     private:
       /// IStorageSvc reference
       IStorageSvc&      m_storageSvc;
-      /// Pointer to the session for this database
-      Session*          m_session;
       /// File descriptor for this database
       FileDescriptor    m_fileDescriptor;
       /// Technology identifier

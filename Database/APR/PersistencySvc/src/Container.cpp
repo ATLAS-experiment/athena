@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Container.h"
@@ -13,12 +13,9 @@
 pool::PersistencySvc::Container::Container( FileDescriptor& fileDescriptor,
                                             long technology,
                                             const std::string& name ):
-  pool::IContainer( name ),
+  m_name( name ),
   m_fileDescriptor( fileDescriptor ),
   m_technology( technology )
-{}
-
-pool::PersistencySvc::Container::~Container()
 {}
 
 pool::ITokenIterator*
@@ -26,12 +23,6 @@ pool::PersistencySvc::Container::tokens()
 {
   return new pool::PersistencySvc::TokenIterator( m_fileDescriptor,
                                                   this->name() );
-}
-
-const std::string&
-pool::PersistencySvc::Container::parentDatabaseName() const
-{
-  return m_fileDescriptor.FID();
 }
 
 long

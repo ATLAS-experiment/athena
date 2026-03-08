@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 // cppcheck-suppress-file stlIfStrFind; cannot use C++20 starts_with in this standalone code
@@ -365,6 +365,7 @@ void contents( std::vector<std::string>&  keys, TDirectory* td,
 	  else matched = false;
 	}
 	if ( matched ) { 
+	  //coverity[DEADCODE]
 	  if ( print ) std::cout << "will process " << td->GetName() << " \t:: " << tobj->GetName() << "\tpatterns: " << patterns.size() << std::endl;
 	  print = false;
 	  keys.push_back( path+tobj->GetName() );

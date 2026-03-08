@@ -37,7 +37,7 @@ StatusCode JetMatcherAlg::initialize() {
      
    */
   
-  ATH_MSG_INFO(" Initializing " << name());
+  ATH_MSG_DEBUG(" Initializing " << name());
 
   if ( m_jetContainerKey2.key().empty() ) {
 
@@ -53,19 +53,19 @@ StatusCode JetMatcherAlg::initialize() {
   if (!m_jetContainerKey1.key().empty()) {
     ++key_count;
     m_matchType = MatchType::xAODJet;
-    ATH_MSG_INFO("will match xAODJet to xAODJet");
+    ATH_MSG_DEBUG("will match xAODJet to xAODJet");
   }
 
   if (!m_l1jetContainerKey1.key().empty()) {
     ++key_count;
     m_matchType = MatchType::JetRoI;
-    ATH_MSG_INFO("will match JetRoI (L1)  to xAODJet");
+    ATH_MSG_DEBUG("will match JetRoI (L1)  to xAODJet");
   }
 
   if (!m_jFexSRJetRoIKey.key().empty()) {
     ++key_count;
     m_matchType = MatchType::jFexSRJetRoI;
-    ATH_MSG_INFO("will match jFexSRJetRoI (L1)  to xAODJet");
+    ATH_MSG_DEBUG("will match jFexSRJetRoI (L1)  to xAODJet");
   }
 
   

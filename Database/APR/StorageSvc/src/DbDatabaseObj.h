@@ -129,8 +129,6 @@ namespace pool    {
 
     /// Open Database object
     StatusCode open();
-    /// Re-open database with changing access permissions
-    StatusCode reopen(DbAccessMode mode);
     /// Close database object
     StatusCode close();
     /// End database access, but still leave database accessible
@@ -159,8 +157,6 @@ namespace pool    {
     /// Allow access to all known containers
     StatusCode containers(std::vector<const Token*>& conts, bool intern);
     StatusCode containers(std::vector<IDbContainer*>& conts, bool intern);
-    /// Allow access to all known associations between containers
-    StatusCode associations(std::vector<const Token*>& conts);
     /// Allow access to all known shapes used by the database
     StatusCode shapes(std::vector<const DbTypeInfo*>& shaps);
     /// Retrieve the number of user parameters

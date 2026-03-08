@@ -59,12 +59,12 @@ std::unique_ptr<ActsTrk::DetectorElementToActsGeometryIdMap>
     };
     Counter counter {};
     trackingGeometry()->visitSurfaces([this, &counter, &detector_element_to_geoid](const Acts::Surface *surface) {
-        if (!surface || !surface->associatedDetectorElement()) {
+        if (!surface || !surface->isSensitive()) {
             ++counter.n_wrong_type;
             return;
         }
         ++counter.n_sensitive_elements;
-        const auto* detEl = dynamic_cast<const IDetectorElementBase*>(surface->associatedDetectorElement());
+        const auto* detEl = dynamic_cast<const IDetectorElementBase*>(surface->surfacePlacement());
         if (!detEl) {           
             return;
         }

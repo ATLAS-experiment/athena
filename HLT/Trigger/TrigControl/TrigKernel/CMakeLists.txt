@@ -1,6 +1,4 @@
-################################################################################
-# Package: TrigKernel
-################################################################################
+# Copyright (C) 2002-2026 by CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigKernel )
@@ -13,4 +11,4 @@ atlas_add_library( TrigKernel
                    INTERFACE
                    PUBLIC_HEADERS TrigKernel
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES GaudiKernel CxxUtils )
+                   LINK_LIBRARIES GaudiKernel )

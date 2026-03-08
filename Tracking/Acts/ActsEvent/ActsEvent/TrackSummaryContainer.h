@@ -56,7 +56,7 @@ class MutableTrackSummaryContainer;
 class TrackSummaryContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
-  static constexpr auto kInvalid = Acts::MultiTrajectoryTraits::kInvalid;
+  static constexpr auto kInvalid = Acts::kTrackIndexInvalid;
   TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr);
   static const std::set<std::string> staticVariables;
   static const std::set<Acts::HashedString> staticVariableHashes;

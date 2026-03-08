@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METSoftTermsTool.h 
@@ -25,9 +25,6 @@
 
 // METReconstruction includes
 #include "METReconstruction/METBuilderTool.h"
-
-//Framework includes
-#include "StoreGate/DataHandle.h"
 
 //#include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"

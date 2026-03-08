@@ -42,7 +42,7 @@ IParticleLinkContainer_PERS* IParticleLinkContainerCnv::createPersistent( IParti
 
 
 // Create the transient object from the persistent one
-IParticleLinkContainer* IParticleLinkContainerCnv::createTransient()
+IParticleLinkContainer* IParticleLinkContainerCnv::createTransient(const Token* token)
 {
   // Create the message service for this class
   MsgStream log( msgSvc(), "IParticleLinkContainerConverter" );
@@ -50,10 +50,10 @@ IParticleLinkContainer* IParticleLinkContainerCnv::createTransient()
   // Define the pool IDs
   static const pool::Guid  p1_guid("E82C71AF-AC5C-453B-9A35-FA45A849838E");
 
-  if( compareClassGuid(p1_guid) )
+  if( compareClassGuid(token, p1_guid) )
     {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< IParticleLinkContainer_PERS > col_vect( poolReadObject< IParticleLinkContainer_PERS >() );
+      std::unique_ptr< IParticleLinkContainer_PERS > col_vect( poolReadObject< IParticleLinkContainer_PERS >(token) );
       return m_TPConverter.createTransient( col_vect.get(), log );
     }
   else

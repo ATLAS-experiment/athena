@@ -66,7 +66,7 @@ protected:
       if the version 1 of poolReadObject is used, the persistent
       object HAS TO BE DELETED manually.
    */
-  virtual TRANS* createTransientWithKey(const std::string& key) = 0;
+  virtual TRANS* createTransientWithKey(const Token* token, const std::string& key) = 0;
 
    /** Read object of type P.  This is an exception-throwing version of poolToObject()
       plus reading of all extending objects.
@@ -74,7 +74,7 @@ protected:
       @return object read from POOL (by pointer)
    */
    template <class P>
-   P* poolReadObject();
+   P* poolReadObject(const Token* token);
 
    /** Read object of type P (plus all extending objects)
       using the indicated top-level TP converter.
@@ -83,7 +83,7 @@ protected:
       @param tlp_converter [IN] top-level TP converter to be used when reading
    */
    template <class P>
-   void poolReadObject(TopLevelTPCnvBase& tlp_converter);
+   void poolReadObject(TopLevelTPCnvBase& tlp_converter, const Token* token);
 
    /// Remember the POOL object to be written out (will be deleted after commit)
    /// @param obj [IN] persistent object
@@ -136,8 +136,8 @@ protected:
   virtual PERS* createPersistent(TRANS* obj) = 0;
   virtual PERS* createPersistentWithKey(TRANS* obj, const std::string& /*key*/) override;
 
-  virtual TRANS* createTransient() = 0;
-  virtual TRANS* createTransientWithKey(const std::string& /*key*/) override;
+  virtual TRANS* createTransient(const Token* token) = 0;
+  virtual TRANS* createTransientWithKey(const Token* token, const std::string& /*key*/) override;
 };
 
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.icc"

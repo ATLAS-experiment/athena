@@ -1916,7 +1916,7 @@ namespace Trk {
                          << " removed as eigenvalue lower than the threshold " << eigenvalue_threshold
                          << ": " << w[i]);
           (*AlignPull)[i] = 0.0;
-          m_modcut++;
+          ++m_modcut;
         }
         else
           (*AlignPull)[i] = (*Align_db)[i] / (*Align_error_db)[i];
@@ -1937,7 +1937,7 @@ namespace Trk {
           ATH_MSG_INFO("  + EigenMode " << i
                          << " removed as pull is lower than " << m_pullcut << ": "
                          << (*AlignPull)[i]);
-          m_modcut++;
+          ++m_modcut;
         }
         else
           wm_stop = true;
@@ -1959,7 +1959,7 @@ namespace Trk {
           ATH_MSG_INFO("  + EigenMode " << i
                          << " removed as diff between eigenvalues, " << w[i] << " and " << w[i+1]
                          << ", is greater than " << m_eigenvalueStep);
-          m_modcut++;
+          ++m_modcut;
         }
         else
           wm_stop = true;
@@ -1982,7 +1982,7 @@ namespace Trk {
                          << " removed as diff between corrections, " << w[i] << " and " << w[i+1]
                          << ", is greater than "
                          << m_Align_db_step);
-          m_modcut++;
+          ++m_modcut;
         }
         else
           wm_stop = true;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRIGCOINDATA_TGCCOINDATACOLLECTION_H
@@ -11,7 +11,7 @@
 
 namespace Muon {
 
-typedef MuonCoinDataCollection< TgcCoinData > TgcCoinDataCollection;
+using TgcCoinDataCollection = MuonCoinDataCollection< TgcCoinData >;
 
     /**Overload of << operator for MsgStream for debug output*/
     MsgStream& operator << ( MsgStream& sl, const TgcCoinDataCollection& coll);

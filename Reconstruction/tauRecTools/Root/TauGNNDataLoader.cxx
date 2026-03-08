@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauGNNDataLoader.h"
@@ -18,6 +18,7 @@ TauGNNDataLoader::TauGNNDataLoader(
     const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig* scalar_input_node = nullptr;
     const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig* track_input_node = nullptr;
     const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig* cluster_input_node = nullptr;
+    const FlavorTagInference::SaltModelGraphConfig::InputNodeConfig* hit_input_node = nullptr;
     for (const auto &in_node : graph_config.inputs) {
         if (in_node.name == config.input_layer_scalar) {
             scalar_input_node = &in_node;
@@ -34,6 +35,10 @@ TauGNNDataLoader::TauGNNDataLoader(
             cluster_input_node = &in_node;
             ATH_MSG_DEBUG("Found cluster input node: " << in_node.name);
         }
+        if (in_node.name == config.input_layer_hits) {
+            hit_input_node = &in_node;
+            ATH_MSG_DEBUG("Found hit input node: " << in_node.name);
+        }
     }
 
     // Fill the variable names of each input layer into the corresponding vector
@@ -41,9 +46,9 @@ TauGNNDataLoader::TauGNNDataLoader(
         for (const auto &in : scalar_input_node->variables) {
             addScalarLoader(in.name, getScalarCalc(in.name));
         }
-    } else {
-        ATH_MSG_ERROR("Scalar input node 'tau_vars' not found in the model input configuration");
-        throw std::runtime_error("Scalar input node 'tau_vars' not found in the model input configuration");
+    } else if(!config.input_layer_scalar.empty()) {
+        ATH_MSG_ERROR("Scalar input node '" + config.input_layer_scalar + "' not found in the model input configuration");
+        throw std::runtime_error("Scalar input node '" + config.input_layer_scalar + "' not found in the model input configuration");
     }
 
     if (track_input_node) {
@@ -64,7 +69,7 @@ TauGNNDataLoader::TauGNNDataLoader(
             trk_config.inputs.push_back({in.name, FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
         }
         addVectorLoader(config.input_layer_tracks, std::make_shared<FlavorTagInference::ConstituentLoaderTauTrack>(trk_config));
-    } else {
+    } else if(!config.input_layer_tracks.empty() && config.n_max_tracks > 0) {
         ATH_MSG_ERROR("Track input node '" + config.input_layer_tracks + "' not found in the model input configuration");
         throw std::runtime_error("Track input node '" + config.input_layer_tracks + "' not found in the model input configuration");
     }
@@ -82,9 +87,27 @@ TauGNNDataLoader::TauGNNDataLoader(
             cls_config.inputs.push_back({in.name, FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
         }
         addVectorLoader(config.input_layer_clusters, std::make_shared<FlavorTagInference::ConstituentLoaderTauCluster>(cls_config, config.max_dr_cluster, config.doVertexCorrection));
-    } else {
+    } else if(!config.input_layer_clusters.empty() && config.n_max_clusters > 0) {
         ATH_MSG_ERROR("Cluster input node '" + config.input_layer_clusters + "' not found in the model input configuration");
         throw std::runtime_error("Cluster input node '" + config.input_layer_clusters + "' not found in the model input configuration");
+    }
+
+    if (hit_input_node) {
+        FlavorTagInference::ConstituentsInputConfig cls_config;
+        cls_config.name = "tauhits";
+        cls_config.output_name = config.input_layer_hits;
+        cls_config.type = FlavorTagInference::ConstituentsType::HIT;
+        cls_config.order = FlavorTagInference::ConstituentsSortOrder::UNDEFINED;
+        cls_config.max_n_constituents = config.n_max_hits;
+        cls_config.selection = FlavorTagInference::ConstituentsSelection::ALL;
+        cls_config.inputs = {};
+        for (const auto &in : hit_input_node->variables) {
+            cls_config.inputs.push_back({in.name, FlavorTagInference::ConstituentsEDMType::CUSTOM_GETTER, false});
+        }
+        addVectorLoader(config.input_layer_hits, std::make_shared<FlavorTagInference::ConstituentLoaderTauHit>(cls_config, config.hits_decor_name));
+    } else if(!config.input_layer_hits.empty() && config.n_max_hits > 0) {
+        ATH_MSG_ERROR("Hit input node '" + config.input_layer_hits + "' not found in the model input configuration");
+        throw std::runtime_error("Hit input node '" + config.input_layer_hits + "' not found in the model input configuration");
     }
 }
 
@@ -114,6 +137,11 @@ ScalarCalc_t TauGNNDataLoader::getScalarCalc(const std::string &name) const {
 
 namespace TauScalarVars {
 using TauDetail = xAOD::TauJetParameters::Detail;
+
+bool eta(const xAOD::TauJet &tau, float &out) {
+    out = tau.eta();
+    return true;
+}
 
 bool absEta(const xAOD::TauJet &tau, float &out) {
     out = std::abs(tau.eta());
@@ -232,6 +260,16 @@ bool ptDetectorAxis(const xAOD::TauJet &tau, float &out) {
 bool ptIntermediateAxis(const xAOD::TauJet &tau, float &out) {
     out = tau.ptIntermediateAxis();
     return true;
+}
+
+bool ptJetSeed(const xAOD::TauJet &tau, float &out) {
+  out = tau.ptJetSeed();
+  return true;
+}
+
+bool etaJetSeed(const xAOD::TauJet &tau, float &out) {
+  out = tau.etaJetSeed();
+  return true;
 }
 
 bool ptJetSeed_log(const xAOD::TauJet &tau, float &out) {

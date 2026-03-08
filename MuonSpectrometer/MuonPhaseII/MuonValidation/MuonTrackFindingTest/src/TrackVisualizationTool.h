@@ -9,6 +9,8 @@
 #include <MuonRecToolInterfacesR4/IRootVisualizationService.h>
 #include <ActsGeometryInterfaces/IExtrapolationTool.h>
 
+#include "TColor.h"
+
 #include <TLegend.h>
 
 namespace MuonR4{
@@ -48,6 +50,9 @@ namespace MuonValR4{
                                       const MuonR4::MsTrackSeedContainer& seeds,
                                       PrimitivesVec_t && extPrimitives) const override final;
 
+
+
+
             /** @brief Visualizes the measurements of the segments on the track seed together
              *         with their predicted local line parameters as an obj file. If parameters
              *         to extrapolate are parsed, then they're extrapolated to the end of the world
@@ -80,7 +85,7 @@ namespace MuonValR4{
                 /** @brief Add new Marker style to the legend entry
                  *  @param marker: TMarkerStyle code to add
                  *  @param label: Text to be dispayed */
-                void addMarker(const int marker, const std::string& label);
+                void addMarker(const int marker, const std::string& label, const int color = kBlack);
                 /** @brief Add the primitives of the legend to the Canvas */
                 void fillPrimitives(Canvas_t& canvas);
                 std::unique_ptr<TLegend> legend{};
@@ -117,6 +122,12 @@ namespace MuonValR4{
                                      const DisplayView view,
                                      PlotLegend& legend, 
                                      Canvas_t& canvas) const;
+
+
+            void displaySeedSegmentsGlobalWithTruth(const EventContext& ctx,
+                                                    const DisplayView view,
+                                                    const MuonR4::MsTrackSeedContainer& seeds) const;
+
             /** @brief Transforms the projected vector into the actual view, if it's xy then 
              *         an external phi is needed to place the marker. 
              *  @param phi: Angle for the xy view - taken from the segment direction
@@ -151,6 +162,9 @@ namespace MuonValR4{
             /** @brief How many obj have been produced */
             mutable std::atomic<unsigned> m_objCounter{0};
     };
+
+    //** @brief Visualizing seeds and corresponding segments with different colors */
+    int seedColorIdx(std::size_t iSeed);
 }
 
 #endif

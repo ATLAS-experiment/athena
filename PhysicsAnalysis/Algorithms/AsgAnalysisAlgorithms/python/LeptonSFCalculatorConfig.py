@@ -10,6 +10,10 @@ class LeptonSFCalculatorBlock(ConfigBlock):
 
     def __init__(self):
         super(LeptonSFCalculatorBlock, self).__init__()
+        self.addDependency("ElectronWorkingPointEfficiency", required=False)
+        self.addDependency("PhotonWorkingPointEfficiency", required=False)
+        self.addDependency("MuonWorkingPointEfficiency", required=False)
+        self.addDependency("TauWorkingPointEfficiency", required=False)
         self.addOption('electrons', None, type=str,
                        info='the input electron container, with a possible selection, in the format `container` or `container.selection`.')
         self.addOption('electronSFs', None, type=list,

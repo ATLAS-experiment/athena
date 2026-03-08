@@ -107,14 +107,12 @@ protected:
    /// Set POOL placement hint; pure virtual method implemented by classes templated by type
    virtual Placement setPlacement(const std::string& key, const std::string& output) = 0;
 
-   /// @return data object from the converter.
-   virtual const DataObject* getDataObject() const;
-
-   bool compareClassGuid(const Guid &guid) const;
+   bool compareClassGuid(const Token* token, const Guid &guid) const;
 
 protected: // data
    ServiceHandle<StoreGateSvc> m_detStore;
    ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc;
+   ServiceHandle<IPoolSvc> m_poolSvc;
    RootType              m_classDesc;
 
    typedef std::map<std::string, RootType>            ClassMap;
@@ -122,15 +120,13 @@ protected: // data
    std::string           m_className;
    ClassMap              m_classDescs;
 
-   std::string m_containerPrefix;
-   std::string m_containerNameHint;
-   std::string m_branchNameHint;
-
-   const DataObject*     m_dataObject;
    const Token*          m_i_poolToken;
 
    typedef std::mutex CallMutex;
    CallMutex m_conv_mut;
+
+   /// Default container type (from PoolSvc)
+   int m_defContainerType;
 };
 
 #endif

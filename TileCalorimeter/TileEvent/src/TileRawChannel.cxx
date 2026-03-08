@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -25,6 +25,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <functional> //for placeholders
 
 TileRawChannel::TileRawChannel( const Identifier& id,
 				float amplitude, float time, float quality, float ped )

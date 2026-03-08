@@ -94,10 +94,6 @@ StatusCode DbDatabase::close() {
 long long int DbDatabase::size()
 {  return isValid() ? ptr()->size() : -1;                               }
 
-/// Re-open database with changing access permissions
-StatusCode DbDatabase::reopen(DbAccessMode mod)
-{  return isValid() ? ptr()->reopen(mod) : StatusCode::FAILURE;                       }
-
 /// End database access, but still leave database accessible
 StatusCode DbDatabase::retire()
 {  return isValid() ? ptr()->retire() : StatusCode::FAILURE;                          }
@@ -194,10 +190,6 @@ StatusCode DbDatabase::containers(vector<const Token*>& conts,bool with_internal
 /// Allow access to all known containers
 StatusCode DbDatabase::containers(vector<IDbContainer*>& conts,bool with_internal)
 {  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
-
-/// Allow access to all known associations between containers
-StatusCode DbDatabase::associations(vector<const Token*>& assocs)
-{  return isValid() ? ptr()->associations(assocs) : StatusCode::FAILURE;              }
 
 /// Allow access to all known shapes used by the database
 StatusCode DbDatabase::shapes(vector<const DbTypeInfo*>& shaps)

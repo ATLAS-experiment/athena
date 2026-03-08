@@ -28,7 +28,7 @@
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
 #include "MuonReadoutGeometry/MuonStation.h"
 
-#include "MuonTGC_Cabling/MuonTGC_CablingSvc.h"
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 #include "TGC_RegSelCondAlg.h"
 
@@ -41,11 +41,15 @@ TGC_RegSelCondAlg::TGC_RegSelCondAlg(const std::string& name, ISvcLocator* pSvcL
 }
 
 
+StatusCode TGC_RegSelCondAlg::initialize() {
+   ATH_CHECK(m_cablingKey.initialize());
+   return MuonRegSelCondAlg::initialize();
+}
 
 
 std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext& ctx, EventIDRange& id_range ) const { 
 
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> manager( m_detMgrKey, ctx );
+  SG::ReadCondHandle manager( m_detMgrKey, ctx );
 
   if( !manager.range( id_range ) ) {
     ATH_MSG_ERROR("Failed to retrieve validity range for " << manager.key());
@@ -55,8 +59,11 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
 
   /// now get the TGC cabling service ...
 
-  ServiceHandle<MuonTGC_CablingSvc> cabling("MuonTGC_CablingSvc", name());
-  ATH_CHECK( cabling.retrieve(), {} );
+  SG::ReadCondHandle<Muon::TgcCablingMap> cabling{m_cablingKey, ctx};
+  if( !cabling.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << m_cablingKey.key());
+    return nullptr;
+  }
 
   const TgcIdHelper*  helper = manager->tgcIdHelper();
  

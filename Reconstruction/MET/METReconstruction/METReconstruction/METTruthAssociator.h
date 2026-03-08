@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMuonAssociator.h 
@@ -18,9 +18,6 @@
 #include "METReconstruction/METAssociator.h"
 
 #include "xAODTruth/TruthEventContainer.h"
-
-//Includes for DataHandles
-#include "StoreGate/DataHandle.h"
 
 namespace met{
   class METTruthAssociator final

@@ -42,70 +42,6 @@ def F1X0IntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
 
     return acc
 
-def F1X0XRTIntegrationCfg(flags, name = 'F1X0IntegrationAlg', **kwarg):
-    acc = ComponentAccumulator()
-
-    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
-    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
-    if(flags.FPGADataPrep.doF110):
-        kwarg.setdefault('PixelClusterKernelName','pixel_clustering_tool')
-    else:
-        kwarg.setdefault('PixelClusterKernelName', 'pixclustering_top_v1_0')
-    kwarg.setdefault('StripClusterKernelName','processHits')
-    kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
-    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
-    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
-    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
-    kwarg.setdefault('doF110', flags.FPGADataPrep.doF110)
-
-    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
-        if 'RegSelTool' not in kwarg:
-            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
-            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
-
-    # Set up Chrono service
-    acc.addService(CompFactory.ChronoStatSvc(
-        PrintUserTime = True,
-        PrintSystemTime = True,
-        PrintEllapsedTime = True
-    ))
-
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F1X0XRTIntegrationAlg(name, **kwarg))
-
-    return acc
-
-def F100StreamIntegrationCfg(flags, name = 'F100StreamIntegrationAlg', **kwarg):
-    acc = ComponentAccumulator()
-
-    kwarg.setdefault('bdfID', flags.FPGADataPrep.bdfID) # On the testbed
-    kwarg.setdefault('xclbin', flags.FPGADataPrep.xclbin)
-    kwarg.setdefault('PixelStartClusterKernelName','loaderPixel')
-    kwarg.setdefault('PixelEndClusterKernelName','unloaderPixelCluster')
-    kwarg.setdefault('PixelEndClusterEdmKernelName','unloaderPixelEdm')
-
-    kwarg.setdefault('StripStartClusterKernelName','loaderStrip')
-    kwarg.setdefault('StripEndClusterKernelName','unloaderStrip')
-    kwarg.setdefault('PixelL2GKernelName','l2g_pixel_tool')
-    kwarg.setdefault('StripL2GKernelName','l2g_strip_tool')
-    kwarg.setdefault('PixelEDMPrepKernelName', 'PixelEDMPrep')
-    kwarg.setdefault('StripEDMPrepKernelName', 'StripEDMPrep')
-
-    if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
-        if 'RegSelTool' not in kwarg:
-            from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
-            kwarg.setdefault('RegSelTool', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
-
-    # Set up Chrono service
-    acc.addService(CompFactory.ChronoStatSvc(
-        PrintUserTime = True,
-        PrintSystemTime = True,
-        PrintEllapsedTime = True
-    ))
-
-    acc.addEventAlgo(CompFactory.EFTrackingFPGAIntegration.F100StreamIntegrationAlg(name, **kwarg))
-
-    return acc
-
 def F110IntegrationCfg(flags, name = 'F110IntegrationAlg', **kwarg):
     acc = ComponentAccumulator()
 
@@ -144,6 +80,13 @@ def F110StreamIntegrationCfg(flags, name = 'F110StreamIntegrationAlg', **kwarg):
     kwarg.setdefault('StripStartClusterKernelName','stripLoader')
     kwarg.setdefault('StripEndClusterKernelName','StripEDMWriter')
 
+    kwarg.setdefault('PixelLUTKernelName','LutPixelLoader')
+    kwarg.setdefault('StripLUTKernelName','LutStripLoader')
+
+    kwarg.setdefault('PixelLUTFilePath','/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_LUTS/v1/PixelLut.dat')
+    kwarg.setdefault('StripLUTFilePath','/eos/project/a/atlas-eftracking/FPGA_compilation/FPGA_LUTS/v1/StripLut.dat')
+
+
     if ("isRoI_Seeded" in kwarg) and kwarg["isRoI_Seeded"]:
         if 'RegSelTool' not in kwarg:
             from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
@@ -166,7 +109,7 @@ def F100DataEncodingCfg(flags, name = 'F100DataEncodingAlg', **kwarg):
 
     # Set up Cluster maker tool
     if("FPGADataFormatTool" not in kwarg):
-        from EFTrackingFPGAPipeline.DataPrepConfig import FPGADataFormatToolCfg
+        from EFTrackingFPGAPipeline.FPGAToolsConfig import FPGADataFormatToolCfg
         dataFormatTool = acc.popToolsAndMerge(FPGADataFormatToolCfg(flags))
         kwarg.setdefault('FPGADataFormatTool', dataFormatTool)
 
@@ -183,7 +126,7 @@ def F100EDMConversionCfg(flags, name = 'F100EDMConversionAlg', **kwarg):
     
     # Set up Cluster maker tool
     if("xAODClusterMaker" not in kwarg):
-        from EFTrackingFPGAPipeline.DataPrepConfig import xAODClusterMakerCfg
+        from EFTrackingFPGAPipeline.FPGAToolsConfig import xAODClusterMakerCfg
         clusterMakerTool = acc.popToolsAndMerge(xAODClusterMakerCfg(flags,name="xAODClusterMakerTool",
                                                                     **extractChildKwargs(prefix="xAODClusterMakerTool.", **kwarg)))
         kwarg.setdefault('F100EDMConversionAlg.xAODClusterMaker', clusterMakerTool)
@@ -218,10 +161,6 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
     
     if(flags.FPGADataPrep.doCodeType == "F1X0"):
         acc.merge(F1X0IntegrationCfg(flags, "F1X0IntegrationAlg", **kwargs))
-    elif(flags.FPGADataPrep.doCodeType == "F1X0XRT"):
-        acc.merge(F1X0XRTIntegrationCfg(flags, "F1X0XRTIntegrationAlg", **kwargs))
-    elif(flags.FPGADataPrep.doCodeType == "F100Stream"):
-        acc.merge(F100StreamIntegrationCfg(flags, "F100StreamIntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110"):
         acc.merge(F110IntegrationCfg(flags, "F110IntegrationAlg", **kwargs))
     elif(flags.FPGADataPrep.doCodeType == "F110Stream"):
@@ -242,11 +181,13 @@ def FPGADataPreparation(flags,runStandalone=False): # thsi is used to run the F1
                                            'sortedxAODStripClusterContainer':
                                             'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
 
+    from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
+
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 
             from FPGATrackSimReporting.FPGATrackSimReportingConfig import FPGATrackSimReportingCfg
             acc.merge(FPGATrackSimReportingCfg(flags,
-                                               perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
+                                                perEventReports = False, # set to True if per-event information is needed for debugging (e.g. cluster, tracks). Otherwise it produces a lot of output
                                             **{'xAODPixelClusterContainers' : ['ITkPixelClusters'],
                                                 'xAODStripClusterContainers' : ['ITkStripClusters'],
                                                 'FPGAActsTracks' : [],
@@ -403,6 +344,4 @@ if __name__ == "__main__":
     cfg.printConfig(withDetails=True, summariseProps=True)
     cfg.store(open("F100IntegrationAlg.pkl", "wb"))
     cfg.run(flags.Exec.MaxEvents)
-
-
 

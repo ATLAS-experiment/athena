@@ -39,7 +39,7 @@ public:
 protected:
 
     virtual TrigTauClusterContainer_PERS* createPersistent(TrigTauClusterContainer *transObj);
-    virtual TrigTauClusterContainer* createTransient();
+    virtual TrigTauClusterContainer* createTransient(const Token* token);
 
 private:
     TrigTauClusterContainerCnv_tlp1   m_converter1;

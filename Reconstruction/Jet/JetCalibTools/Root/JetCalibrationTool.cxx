@@ -61,7 +61,7 @@ JetCalibrationTool::~JetCalibrationTool() {
 /////////////////////////////////////////////////////////////////// 
 
 StatusCode JetCalibrationTool::initialize() {
-  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << " jets.  ");
+  ATH_MSG_INFO ("Initializing " << name() << " to calibrate " << m_jetAlgo << "Jets");
 
   TString jetAlgo = m_jetAlgo;
   TString calibSeq = m_calibSeq;
@@ -88,7 +88,8 @@ StatusCode JetCalibrationTool::initialize() {
     ATH_MSG_FATAL( "Couldn't find ConfigFile " << configPath ); return StatusCode::FAILURE;
   } else {
     ATH_MSG_INFO("Reading global JES settings from: " << configPath);
-    ATH_MSG_INFO("resolved in: " << fn);
+    ATH_MSG_DEBUG("resolved in: " << fn);
+    ATH_MSG_INFO("  Calibration sequence: " << calibSeq);
   }
   
   m_globalConfig = new TEnv();

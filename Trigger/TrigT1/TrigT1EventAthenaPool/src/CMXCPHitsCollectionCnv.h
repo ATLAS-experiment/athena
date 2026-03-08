@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CMXCPHitsCollection_PERS*   createPersistent (CMXCPHitsCollection* transCont);
-  virtual CMXCPHitsCollection*        createTransient ();
+  virtual CMXCPHitsCollection*        createTransient(const Token* token);
 
 private:
   

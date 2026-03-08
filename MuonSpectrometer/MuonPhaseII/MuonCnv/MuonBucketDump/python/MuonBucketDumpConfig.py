@@ -15,11 +15,37 @@ def MuonHitDumperCfg(flags, name="MuonHitDumper", **kwargs):
     result.addEventAlgo(CompFactory.MuonR4.MlHitDumperAlg(name, **kwargs))
     return result
 
+def BucketScoreDumpCfg(flags, name="GraphBucketFilterTool", **kwargs):
+    from MuonInference.InferenceConfig import GraphBucketFilterToolCfg
+    kwargs_copy = kwargs.copy()
+    kwargs_copy.setdefault("ReadSpacePoints", "MuonSpacePoints")
+    kwargs_copy.setdefault("WriteSpacePointKey", "")
+    kwargs_copy.setdefault("ModelPath", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx")
+    kwargs_copy.setdefault("BiasClass0", 1.0)
+    return GraphBucketFilterToolCfg(flags, name=name, **kwargs_copy)
+
 def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
     result = ComponentAccumulator()
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
     result.merge(MuonSpacePointFormationCfg(flags))
     kwargs.setdefault("isMC", flags.Input.isMC)
+    
+    # Optional calorimeter chain + dumper
+    doCalo = bool(kwargs.pop("DoCaloDump", False))
+    if doCalo:
+        result.merge(CaloCellsDumperCfg(flags))
+    
+    doMLBucketScore = bool(kwargs.pop("DoMLBucketScore", False))
+    doMLBucketFilter = bool(kwargs.pop("DoMLBucketFilter", False))
+    mlBucketBias = kwargs.pop("MLBucketBias", 1.0)
+    if doMLBucketScore:
+        kwargs.setdefault("DoMLBucketScore", True)
+        toolCfg = BucketScoreDumpCfg(flags, BiasClass0=mlBucketBias)
+        inferenceTool = result.popToolsAndMerge(toolCfg)
+        kwargs.setdefault("InferenceTool", inferenceTool)
+    if doMLBucketFilter:
+        kwargs.setdefault("DoMLBucketFilter", True)
+    
     from RngComps.RngCompsConfig import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", result.getPrimaryAndMerge(AthRNGSvcCfg(flags)))
     spCont = []
@@ -29,7 +55,6 @@ def MuonBucketDumpCfg(flags, name="MuonBucketDumper", **kwargs):
         spCont+=["NswSpacePoints"]
     
     kwargs.setdefault("SpacePointKeys", spCont)
-
     
     the_alg = CompFactory.MuonR4.BucketDumperAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
@@ -54,5 +79,42 @@ def MuonSegmentDumpCfg(flags, name="MuonSegmentDumper", **kwargs):
     kwargs.setdefault("SegmentKeys", segCont)
     
     the_alg = CompFactory.MuonR4.SegmentDumperAlg(name=name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def CaloCellsDumperCfg(flags, name="CaloCellsDumper", **kwargs):
+    """
+    Configure calorimeter reconstruction up to cells and towers and dump:
+      - per-cell energy + position + identifier decoding
+      - per-tower energy + (eta,phi) + a derived direction vector    Default input container key:
+    Default input container key:
+      - "AllCalo" (standard CaloCellContainer produced by CaloRecoCfg)
+    If you want supercells instead, pass:
+      CellContainerKey="SCell"  (or whatever your CaloRecoCfg produces in your setup)
+    """
+    result = ComponentAccumulator()
+
+    # Make sure the reconstructed cell container exists from RDO
+    from CaloRec.CaloRecoConfig import CaloRecoCfg
+    result.merge(CaloRecoCfg(flags))
+    
+    # Build calorimeter towers from cells (default container name is typically "CombinedTower")
+    from CaloRec.CaloTowerMakerConfig import CaloTowerMakerCfg
+    towerMaker = result.getPrimaryAndMerge(CaloTowerMakerCfg(flags))
+
+    kwargs.setdefault("CellContainerKey", "AllCalo")
+    kwargs.setdefault("MinCellEnergyMeV", 0.0)
+    kwargs.setdefault("MaxCells", -1)   # -1 => no cap
+    
+    kwargs.setdefault("TowerContainerKey", getattr(towerMaker, "TowerContainerName", "CombinedTower"))
+    kwargs.setdefault("MinTowerEnergyMeV", 0.0)
+    kwargs.setdefault("MaxTowers", -1)  # -1 => no cap
+
+    result.addEventAlgo(CompFactory.MuonR4.CaloCellsDumperAlg(name, **kwargs))
+    return result
+
+def TruthMuonVertexDumpCfg(flags, name="TruthMuonVertexDumper", **kwargs):
+    result = ComponentAccumulator()
+    the_alg=CompFactory.MuonR4.TruthMuonVertexDumperAlg(name=name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result

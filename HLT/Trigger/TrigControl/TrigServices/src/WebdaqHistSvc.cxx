@@ -274,15 +274,17 @@ LockedHandle<T> WebdaqHistSvc::getShared_i(const std::string& id) const
 {
   tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
   if (m_hists.find(accessor, id)) {
+    auto * obj = accessor->second.obj;
     if (accessor->second.mutex == nullptr) {
       ATH_MSG_ERROR("getShared: found Hist with id \"" << id
                                                        << "\", but it's not marked as shared");
       return {};
     }  
-    T* phist = dynamic_cast<T*>(accessor->second.obj);
+    T* phist = dynamic_cast<T*>(obj);
     if (phist == nullptr) {
+      const char* gotType = obj ? obj->IsA()->GetName() : "<null>";
       ATH_MSG_ERROR("getShared: unable to dcast retrieved shared hist \""
-                    << id << "\" of type " << accessor->second.obj->IsA()->GetName()
+                    << id << "\" of type " << gotType
                     << " to requested type " << System::typeinfoName(typeid(T)));
       return {};
     }

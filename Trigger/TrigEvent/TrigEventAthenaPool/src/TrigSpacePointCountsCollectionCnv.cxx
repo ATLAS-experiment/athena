@@ -21,7 +21,7 @@ TrigSpacePointCountsCollection_PERS * TrigSpacePointCountsCollectionCnv::createP
 
 
 //createTransient
-TrigSpacePointCountsCollection * TrigSpacePointCountsCollectionCnv::createTransient()
+TrigSpacePointCountsCollection * TrigSpacePointCountsCollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigSpacePointCountsCollectionConverter" );
   
@@ -31,18 +31,18 @@ TrigSpacePointCountsCollection * TrigSpacePointCountsCollectionCnv::createTransi
   static const pool::Guid tlp1_guid( "55733D7E-0054-4785-ADA8-3EA70D7477F2" );
   static const pool::Guid p0_guid( "633C9739-C3D1-4F5D-9678-887445DA42B6" );
   
-  if( compareClassGuid( p4_guid ) ) {
-         std::unique_ptr< TrigSpacePointCountsCollection_p4 > col_vect( poolReadObject< TrigSpacePointCountsCollection_p4 >() );
+  if( compareClassGuid(token,  p4_guid ) ) {
+         std::unique_ptr< TrigSpacePointCountsCollection_p4 > col_vect( poolReadObject< TrigSpacePointCountsCollection_p4 >(token) );
          //         std::cout << "Reading IMFC p4" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-  }  else if( compareClassGuid( tlp1_guid ) ) {
-         std::unique_ptr< TrigSpacePointCountsCollection_tlp1 > col_vect( poolReadObject< TrigSpacePointCountsCollection_tlp1 >() );
+  }  else if( compareClassGuid(token,  tlp1_guid ) ) {
+         std::unique_ptr< TrigSpacePointCountsCollection_tlp1 > col_vect( poolReadObject< TrigSpacePointCountsCollection_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
 
-    } else if( compareClassGuid( p0_guid ) ) {
-         return poolReadObject< TrigSpacePointCountsCollection >();
+    } else if( compareClassGuid(token,  p0_guid ) ) {
+         return poolReadObject< TrigSpacePointCountsCollection >(token);
 
     } else throw std::runtime_error( "Unsupported persistent version of TrigSpacePointCountsCollection" );
   

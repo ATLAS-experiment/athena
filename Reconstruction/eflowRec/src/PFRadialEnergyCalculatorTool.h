@@ -6,8 +6,8 @@
 #define PFRADIALENERGYCALCULATORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/IPFBaseTool.h"
+#include "eflowCaloObject.h"
+#include "IPFBaseTool.h"
 
 class PFRadialEnergyCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
 

@@ -405,7 +405,7 @@ TrkObjToString::MeasurementType TrackHandle_TrackContainer::measurementType(
   TrkObjToString::MeasurementType type = TrkObjToString::Unknown;
   if (state.hasReferenceSurface()) {
       const auto *actsElement = dynamic_cast<const ActsDetectorElement *>(
-          state.referenceSurface().associatedDetectorElement());
+          state.referenceSurface().surfacePlacement());
       if (actsElement && common()->muonIdHelperSvc().get()) {
         auto& idhelper = common()->muonIdHelperSvc()->mdtIdHelper(); // This is a lazy way to get an AtlasID helper. Not ideal if muon geometry is off.
         if (idhelper.is_mdt(actsElement->identify())) {
@@ -432,7 +432,7 @@ QString TrackHandle_TrackContainer::measurementText(
   QString text("Unknown Measurement");
   if (state.hasReferenceSurface()) {
     const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(
-        state.referenceSurface().associatedDetectorElement());
+        state.referenceSurface().surfacePlacement());
     if (actsElement) {
       auto& helperSvc = common()->muonIdHelperSvc();
       if (helperSvc->isMuon(actsElement->identify()))

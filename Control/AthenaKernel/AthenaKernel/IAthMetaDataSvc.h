@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IATHMETADATASVC_H
@@ -58,19 +58,20 @@ public: // Non-static members
 
    /// Check if object is already is already in store
    template <typename T, typename TKEY>
-   bool contains(const TKEY& key);
+   bool contains(const TKEY& key) const;
 
-   /// The output MetaData Store
-   virtual StoreGateSvc* outputDataStore() const = 0;
-
-   /// rangeID for the current EventContext - used to index MetaContainers - 
+   /// rangeID for the current EventContext - used to index MetaContainers -
    virtual const std::string currentRangeID() const = 0;
 
+protected:
    /// Hook for implementation to react to recording an object
    virtual void recordHook(const std::type_info&) {}
 
    /// Hook for implementation to react to removing an object
    virtual void removeHook(const std::type_info&) {}
+
+   /// The output MetaData Store
+   virtual StoreGateSvc* outputDataStore() const = 0;
 
 private: // Data
    std::mutex    m_mutex;
@@ -150,7 +151,7 @@ StatusCode IAthMetaDataSvc::remove(const TKEY& key, bool ignoreIfAbsent)
 }
 
 template <typename T, typename TKEY>
-bool IAthMetaDataSvc::contains(const TKEY& key) {
+bool IAthMetaDataSvc::contains(const TKEY& key) const {
   if (!outputDataStore()->contains< MetaCont<T> >(key))
     return false;
   const MetaCont<T>* container =

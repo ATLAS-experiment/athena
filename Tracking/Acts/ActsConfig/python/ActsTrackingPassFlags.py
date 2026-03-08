@@ -90,12 +90,13 @@ def createActsLargeRadiusTrackingPassFlags():
     # Override acts default values
     icf.Xi2max = [100]
     icf.Xi2maxNoAdd = [200]
-    
-    # Mark as secondary pass 
+
+    # Mark as secondary pass
     icf.isSecondaryPass = True
     # Store sepate container for LRT
     # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
     icf.storeSeparateContainer = True
+    icf.isLargeD0 = True
     return icf
 
 # Secondary ACTS Tracking pass for Conversion tracking
@@ -186,6 +187,7 @@ def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
     icf = createActsLargeRadiusTrackingPassFlags()
     icf.extension = "ActsValidateLargeRadiusStandalone"
     icf.isSecondaryPass = False
+    icf.isLargeD0 = True
     return icf
 
 def createActsValidateLargeRadiusSeedsTrackingPassFlags():
@@ -199,6 +201,7 @@ def createActsValidateLargeRadiusSeedsTrackingPassFlags():
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
     icf.isSecondaryPass = False
+    icf.isLargeD0 = True
     setActsDefaultTunings(icf)
     return icf
 

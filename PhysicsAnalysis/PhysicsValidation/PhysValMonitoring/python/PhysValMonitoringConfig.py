@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file PhysValMonitoringConfig.py
@@ -137,9 +137,6 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=None, **kwargs):
     if flags.PhysVal.doLRTMuon:
         from MuonPhysValMonitoring.MuonPhysValConfig import PhysValLRTMuonCfg
         tools.append(acc.popToolsAndMerge(PhysValLRTMuonCfg(flags)))
-    if flags.PhysVal.IDPVM.doActs:
-        from ActsConfig.ActsAnalysisConfig import PhysValActsCfg
-        tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
     if flags.PhysVal.doLLPSecVtx:
         from InDetSecVertexValidation.InDetSecVertexValidationConfig import PhysValSecVtxCfg
         tools.append(acc.popToolsAndMerge(PhysValSecVtxCfg(flags)))

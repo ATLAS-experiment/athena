@@ -154,8 +154,7 @@ StatusCode TEvent::readFrom(::TFile* file, bool useTreeCache,
   TDirectoryReset dr;
 
   // Set up the file access tracer.
-  static TFileAccessTracer tracer ATLAS_THREAD_SAFE;
-  tracer.add(*file);
+  TFileAccessTracer::instance().add(file->GetName());
 
   // Look for the metadata tree:
   m_inMetaTree = file->Get<TTree>(METADATA_OBJECT_NAME);
@@ -413,7 +412,7 @@ StatusCode TEvent::readFrom(::TTree* tree, bool useTreeCache) {
 /// @returns The usual @c StatusCode tyoes
 ///
 StatusCode TEvent::writeTo(TFile& file) {
-  
+
   // Forward call
   ATH_CHECK(writeTo(&file));
 

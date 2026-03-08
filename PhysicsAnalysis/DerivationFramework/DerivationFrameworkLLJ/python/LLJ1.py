@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_LLJ1.py
 # Derivation format to store additional jet information, as UFO jets constituents
@@ -136,7 +136,6 @@ def LLJ1Cfg(flags):
                                            "TauJets_MuonRM",
                                            "DiTauJets",
                                            "DiTauJetsLowPt",
-                                           "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                            ]
     
@@ -200,13 +199,6 @@ def LLJ1Cfg(flags):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(LLJ1SlimmingHelper,writeLC=True,writeEM=True)
 
-    # FTAG Xbb extra content
-    extraList = []
-    for tagger in ["GN2Xv00", "GN2XWithMassv00"]:
-        for score in ["phbb", "phcc", "ptop", "pqcd"]:
-            extraList.append(f"{tagger}_{score}")
-    LLJ1SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
- 
     # Truth extra content
     if flags.Input.isMC:
 

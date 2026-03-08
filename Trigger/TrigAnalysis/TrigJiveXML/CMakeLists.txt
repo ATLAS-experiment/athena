@@ -13,5 +13,3 @@ atlas_add_component( TrigJiveXML
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AnalysisTriggerEvent AthenaBaseComps EventInfo InDetIdentifier JiveXMLLib TrigDecisionToolLib TrigInDetEvent TrigSteeringEvent TrigT1CaloEventLib TrigT1Interfaces TrkPrepRawData xAODTrigL1Calo xAODTrigger )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

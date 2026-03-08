@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 // Local includes
@@ -33,7 +33,7 @@ int
 main(int argc, char* argv[])
 {
 
-  xAOD::TFileAccessTracer::enableDataSubmission(false);
+  xAOD::TFileAccessTracer::instance().enableDataSubmission(false);
   // The application's name:
   const char* APP_NAME = argv[0];
 
@@ -134,4 +134,3 @@ main(int argc, char* argv[])
   ANA_MSG_INFO("===> DONE <===\n");
   return 0;
 }
-

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/LArLATOMEHeaderContByteStreamCnv.h"
@@ -20,7 +20,7 @@ LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* 
 
 LArLATOMEHeaderContByteStreamCnv::~LArLATOMEHeaderContByteStreamCnv() {}
 
-const CLID& LArLATOMEHeaderContByteStreamCnv::classID(){
+CLID LArLATOMEHeaderContByteStreamCnv::classID(){
   return ClassID_traits<LArLATOMEHeaderContainer>::ID() ;
 }
 

@@ -16,7 +16,7 @@ namespace Tau{
 class GeneralTauPlots: public PlotBase {
    public:
       GeneralTauPlots(PlotBase *pParent, const std::string& sDir, const std::string& sTauJetContainerName);
-      virtual ~GeneralTauPlots();
+      virtual ~GeneralTauPlots() = default;
       
       void fill(const xAOD::TauJet& tau, float weight);
 
@@ -31,16 +31,8 @@ class GeneralTauPlots: public PlotBase {
       // RNN
       TH1* m_RNNEleScore{};
       TH1* m_RNNEleScoreSigTrans{};
-      TH1* m_RNNJetScore{};
-      TH1* m_RNNJetScoreSigTrans{};
       TH1* m_GNTauScore{};
       TH1* m_GNTauScoreSigTrans{};
-      TH1* m_ptRNNLoose{};
-      TH1* m_ptRNNMedium{};
-      TH1* m_ptRNNTight{};
-      TH1* m_ptRNNLooseHighPt{};
-      TH1* m_ptRNNMediumHighPt{};
-      TH1* m_ptRNNTightHighPt{};
       TH1* m_ptGNTauLoose{};
       TH1* m_ptGNTauMedium{};
       TH1* m_ptGNTauTight{};

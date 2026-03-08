@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,59 +31,38 @@ namespace Muon{
 template<class CollectionT>
 class MuonCoinDataContainer : public IdentifiableContainer<CollectionT> {
 
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
 public:
-
-    //default for POOL
-//      MuonCoinDataContainer();
     
   // Constructor with parameters:
   MuonCoinDataContainer(unsigned int max);
 
   // Constructor with cache
   MuonCoinDataContainer(EventContainers::IdentifiableCache<CollectionT> * cache);
+
+  MuonCoinDataContainer(const MuonCoinDataContainer&) = delete;
+  MuonCoinDataContainer &operator=(const MuonCoinDataContainer&) = delete;
+
   
   // Destructor:
-  virtual ~MuonCoinDataContainer();
+  virtual ~MuonCoinDataContainer() = default;
 
    /** return class ID */
-   static const CLID& classID() 
+   static CLID classID()
    {
-     //	static CLID id = CLID_T ; 
-     //	return id; 
      return ClassID_traits< MuonCoinDataContainer <CollectionT> > ::ID();
    }
 
    /** return class ID */
-   virtual const CLID& clID() const
+   virtual const CLID& clID() const override
     {
-      return classID();
+      static const CLID cid = classID();
+      return cid;
     }
 
-  ///////////////////////////////////////////////////////////////////
-  // Private methods:
-  ///////////////////////////////////////////////////////////////////
-private:
-
-
-  MuonCoinDataContainer(const MuonCoinDataContainer&);
-  MuonCoinDataContainer &operator=(const MuonCoinDataContainer&);
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
-private:
+ 
 
 };
 
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-/////////////////////////////////////////////////////////////////// 
- 
-typedef MuonCoinDataCollection< TgcCoinData > TgcCoinDataCollection;
-
-// member functions that use Collection T
 #include "MuonTrigCoinData/MuonCoinDataContainer.icc"
 
  

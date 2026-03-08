@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "EventContainers/IdentifiableContainerMT.h"
 #include "EventContainers/IdentifiableCache.h"
@@ -52,7 +52,7 @@ void accessTime(const std::string& name, IdentifiableContainerMT<long unsigned i
 
    auto start5 = std::chrono::steady_clock::now();
    const auto& directaccess = container.GetAllHashPtrPair();
-   for(const auto &[hashId, ptr] : directaccess) {if(hashId != *ptr ) std::abort(); i++; }
+   for(const auto [hashId, ptr] : directaccess) {if(hashId != *ptr ) std::abort(); i++; }
    auto end5 = std::chrono::steady_clock::now();
    std::chrono::duration<double> offlinedir = end5-start5;
    std::cout << name << " direct time " << offlinedir.count() << std::endl;

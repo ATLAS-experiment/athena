@@ -15,20 +15,9 @@ namespace Tau{
 class EfficiencyPlots: public PlotBase {
 public:
   EfficiencyPlots(PlotBase *pParent, const std::string& sDir, std::string sTauJetContainerName);
-  virtual ~EfficiencyPlots();
+  virtual ~EfficiencyPlots() = default;
   
   void fill(const xAOD::TauJet& tau, float weight, float avg_mu);
-  
-  TProfile* m_eff_pt_jetRNNloose{};
-  TProfile* m_eff_pt_jetRNNmed{};
-  TProfile* m_eff_pt_jetRNNtight{};
-  TProfile* m_eff_pt_jetRNNlooseHighPt{};
-  TProfile* m_eff_pt_jetRNNmedHighPt{};
-  TProfile* m_eff_pt_jetRNNtightHighPt{};
-
-  TProfile* m_eff_jetRNNloose{};
-  TProfile* m_eff_jetRNNmed{};
-  TProfile* m_eff_jetRNNtight{};
 
   TProfile* m_eff_pt_jetGNTauloose{};
   TProfile* m_eff_pt_jetGNTaumed{};

@@ -17,9 +17,9 @@ int main ATLAS_NOT_THREAD_SAFE ()
 {
    try {
       std::cout << "Read test starting..." << std::endl;
-      TestDriver driver1( "PFN:test_collection.rntup", "RNTCollection", "test_collection.rntup" );
+      TestDriver driver1( "Writer", pool::ROOTRNTUPLE_StorageType.type(), "test_collection.rntup.root" );
       driver1.write();
-      TestDriver driver2( "PFN:test_collection.rntup", "RootCollection", "test_collection.rntup" );
+      TestDriver driver2( "Input", pool::ROOT_StorageType.type(), "test_collection.rntup.root" );
       driver2.read();
 
    }

@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
 #if !defined(TRIGSTEERINGEVENT_HLTEXTRADATA_H)  && !defined(XAOD_STANDALONE)
 #define TRIGSTEERINGEVENT_HLTEXTRADATA_H
 
@@ -10,12 +9,12 @@
  * @file   HLTExtraData.h
  * @brief  Definition of the HLT extra data in the HLTResult payload
  * @author Frank Winklmeier
- *
- * $Id: $
  */
 
 #include "TrigSteeringEvent/StringSerializer.h"
+
 #include <string>
+#include <stdint.h>
 #include <vector>
 
 namespace HLT {

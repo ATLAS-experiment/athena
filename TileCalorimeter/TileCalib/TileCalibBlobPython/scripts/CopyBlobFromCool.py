@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # File:    CopyBlobFromCool.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
@@ -16,9 +16,9 @@ def usage():
     print ("Read TileCal blobs from COOL and convert them to JSON format for CREST")
     print ("")
     print ("-h, --help      shows this help")
-    print ("-s, --schema=   specify schema to use, ONL or OFL for RUN1 or ONL2 or OFL2 for RUN2 or MC")
+    print ("-s, --schema=   specify schema to use, like 'COOLOFL_TILE/CONDBR2', or sqlite file name like 'tileSqlite.db'")
     print ("-S, --server=   specify server - ORACLE or FRONTIER, default is FRONTIER")
-    print ("-d, --dbname=   specify the database name e.g. CONDBR2")
+    print ("-d, --dbname=   specify the database name e.g. CONDBR2, used together with sqlite file name")
     print ("-f, --folder=   specify folder to use e.g. /TILE/OFL02/STATUS/ADC")
     print ("-t, --tag=      specify tag to use, f.i. UPD1 or UPD4 or tag suffix like RUN2-UPD4-04")
     print ("-r, --run=      specify run  number, by default uses latest iov")
@@ -173,7 +173,10 @@ if iter>0:
     jdata = dict(sorted(jdata.items(), key=lambda item: int(item[0])))
 
 if output=="":
-    output = folderTag
+    if folderTag and folderTag!="HEAD":
+        output = folderTag
+    else:
+        output = folderPath.replace("/","")+"-HEAD"
 if "." not in output:
     (sinceRun,sinceLumi) = (maxSince>>32,maxSince&0xFFFFFFFF)
     suff = "." + str(sinceRun) + "." + str(sinceLumi) + ".json"
@@ -181,8 +184,7 @@ if "." not in output:
 else:
     ofile = output
 with open(ofile, 'w') as the_file:
-    json.dump(jdata,the_file)
-    the_file.write('\n')
+    json.dump(jdata, the_file, separators=(',', ':'), sort_keys=True)
 
 print("see file",ofile)
 

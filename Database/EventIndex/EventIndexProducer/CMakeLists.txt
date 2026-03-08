@@ -48,6 +48,10 @@ endif()
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
+# Aliases:
+atlas_add_alias( EventPicking "EventPicking.py" )
+atlas_add_alias( EventInfo "EventInfo.py" )
+
 # Test(s) in the package:
 atlas_add_test( AODEventPicking_run2_data
                 SCRIPT test/AODEventPicking_run2_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -84,3 +88,12 @@ atlas_add_test( EventPicking_ESD_run3_data22
                 LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 900 )
+
+# tests that should not run in AthGeneration, AthSimulation or analysis releases
+if( NOT GENERATIONBASE AND NOT SIMULATIONBASE AND NOT XAOD_ANALYSIS )
+    atlas_add_test( EventPicking_RAW_run2_data15
+                    SCRIPT test/EventPicking_RAW_run2_data15.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                    LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                    PRIVATE_WORKING_DIRECTORY
+                    PROPERTIES TIMEOUT 900 )
+endif()

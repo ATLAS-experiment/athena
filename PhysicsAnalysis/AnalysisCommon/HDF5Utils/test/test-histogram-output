@@ -1,32 +1,125 @@
 #!/usr/bin/env bash
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 set -eu
 
+declare -A TYPE_MAP
+TYPE_MAP[i64]='H5T_STD_I64'
+TYPE_MAP[f32]='H5T_IEEE_F32'
+TYPE_MAP[f64]='H5T_IEEE_F64'
+TYPE_MAP[u8]='H5T_STD_U8'
+TYPE_MAP[u16]='H5T_STD_U16'
+
 function check() {
-    # check that one number we set is there
-    local TMP=$(mktemp)
-    h5dump -o $TMP -y -d $1 hists.h5 > /dev/null
-    local NUMBER=$(cat $TMP | xargs )
-    if [[ $NUMBER == $2 ]]; then
-        true #echo "number in $1 is correct! ($NUMBER)"
-    else
-        echo "test magic number is incorrect ($NUMBER != $2)"
+    local DATASET="$1"   # with [index], e.g. 'h1i/storage/values[1]'
+    local TYPE="$2"      # short key from TYPE_MAP
+    local VALUE="$3"     # expected numeric value
+    local FILE="$4"      # required (no default)
+
+    # value check
+    local TMP; TMP=$(mktemp)
+    h5dump -o "$TMP" -y -d "$DATASET" "$FILE" > /dev/null
+    local NUMBER; NUMBER=$(cat "$TMP" | xargs)
+    if [[ "$NUMBER" != "$VALUE" ]]; then
+        echo "value check failed for $DATASET in $FILE: expected '$VALUE', got '$NUMBER'"
+        return 1
+    fi
+
+    # type check (strip the [index] suffix to get the base dataset path)
+    local BASE="${DATASET%%\[*}"
+    local EXPECTED="${TYPE_MAP[$TYPE]}"
+    if ! h5dump -p -d "$BASE" "$FILE" 2>/dev/null | grep -q "$EXPECTED"; then
+        local ACTUAL
+        ACTUAL=$(h5dump -p -d "$BASE" "$FILE" 2>/dev/null \
+                 | grep "DATATYPE" | head -1 | xargs)
+        echo "type check failed for $BASE in $FILE: expected '$EXPECTED', got '$ACTUAL'"
         return 1
     fi
 }
 
-# weighted hist
-check 'h3dw/histogram[0,1,2]' 0.5
-check 'h3dw/histogram[0,1,3]' 10
-check 'h3dw/histogram[0,1,1]' 0
+function should_fail() {
+    if "$@" > /dev/null 2>&1; then
+        echo "should_fail: test unexpectedly passed: $*"
+        return 1
+    fi
+}
 
-# profile hist
-check 'h3dp/sum_of_weights_squared[0,1,0]' 0
-check 'h3dp/sum_of_weights_squared[0,1,2]' 0.5
-check 'h3dp/sum_of_weights[0,1,2]' 1
-check 'h3dp/count[0,1,2]' 2
-check 'h3dp/variance[0,1,2]' 0
+# weighted hist (storage/values)
+check 'h3dw/storage/values[0,1,2]' f64 0.5  hists.h5
+check 'h3dw/storage/values[0,1,3]' f64 10   hists.h5
+check 'h3dw/storage/values[0,1,1]' f64 0    hists.h5
 
-# category hist
-check 'h1c/histogram[0]' 0
-check 'h1c/histogram[2]' 1
-check 'h1c/histogram[4]' 1
+# profile hist (storage/*)
+check 'h3dp/storage/sum_of_weights_squared[0,1,0]' f64 0    hists.h5
+check 'h3dp/storage/sum_of_weights_squared[0,1,2]' f64 0.5  hists.h5
+check 'h3dp/storage/sum_of_weights[0,1,2]'         f64 1    hists.h5
+check 'h3dp/storage/count[0,1,2]'                  f64 2    hists.h5
+check 'h3dp/storage/variances[0,1,2]'              f64 0    hists.h5
+
+# category hist (storage/values)
+check 'h1c/storage/values[0]' f64 0  hists.h5
+check 'h1c/storage/values[2]' f64 1  hists.h5
+check 'h1c/storage/values[4]' f64 1  hists.h5
+
+# integer storage (storage/values): layout is [underflow, bin0, bin1, bin2, overflow]
+check 'h1i/storage/values[1]' i64 1  hists.h5
+check 'h1i/storage/values[2]' i64 2  hists.h5
+
+# atomic integer storage (storage/values)
+check 'h1a/storage/values[2]' i64 1  hists.h5
+check 'h1a/storage/values[3]' i64 1  hists.h5
+
+# thread-safe double storage (storage/values)
+check 'h1td/storage/values[1]' f64 1  hists.h5
+check 'h1td/storage/values[2]' f64 2  hists.h5
+
+# thread-safe float storage (storage/values)
+check 'h1tf/storage/values[2]' f32 1  hists.h5
+check 'h1tf/storage/values[3]' f32 2  hists.h5
+
+# uint8 storage
+check 'h1u8/storage/values[2]'  u8  1  hists.h5
+check 'h1u8/storage/values[3]'  u8  1  hists.h5
+
+# uint16 storage
+check 'h1u16/storage/values[2]' u16 1  hists.h5
+check 'h1u16/storage/values[3]' u16 1  hists.h5
+
+# --- merge checks ---
+# Copy the file and merge both copies; values double for additive types.
+cp hists.h5 hists2.h5
+hdf5-merge --overwrite hists.h5 hists2.h5 -o merged.h5
+
+# double storage: 1 fill per file → 2 after merge
+check 'h3d/storage/values[0,1,2]'     f64 2     merged.h5
+# weighted storage
+check 'h3dw/storage/values[0,1,2]'    f64 1     merged.h5
+check 'h3dw/storage/values[0,1,3]'    f64 20    merged.h5
+check 'h3dw/storage/variances[0,1,2]' f64 0.5   merged.h5
+# weighted_mean storage
+check 'h3dp/storage/sum_of_weights[0,1,2]'  f64 2  merged.h5
+check 'h3dp/storage/count[0,1,2]'           f64 4  merged.h5
+check 'h3dp/storage/values[0,1,2]'          f64 1  merged.h5
+# integer storage
+check 'h1i/storage/values[1]'  i64 2  merged.h5
+check 'h1i/storage/values[2]'  i64 4  merged.h5
+
+# type preservation: merged datasets must keep their original HDF5 type
+check 'h1tf/storage/values[2]' f32 2   merged.h5
+check 'h1td/storage/values[1]' f64 2   merged.h5
+check 'h1a/storage/values[2]'  i64 2   merged.h5
+
+# uint8 merged
+check 'h1u8/storage/values[2]'  u8  2  merged.h5
+check 'h1u8/storage/values[3]'  u8  2  merged.h5
+
+# uint16 merged
+check 'h1u16/storage/values[2]' u16 2  merged.h5
+check 'h1u16/storage/values[3]' u16 2  merged.h5
+
+# merge merged.h5 (2x) with the original (1x) → values triple
+hdf5-merge --overwrite merged.h5 hists.h5 -o triple.h5
+check 'h1i/storage/values[1]' i64 3 triple.h5
+
+# self-test: verify that check detects wrong inputs
+should_fail check 'h1i/storage/values[1]' i64 99  merged.h5  # wrong value
+should_fail check 'h1i/storage/values[1]' f32 2   merged.h5  # wrong type

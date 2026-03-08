@@ -40,7 +40,7 @@ namespace pool    {
     DbType                  m_type;
 
     /// Standard destructor
-    ~DbHandleBase() {  m_type.check();                  }
+    ~DbHandleBase() = default;
     /// Standard constructor
     DbHandleBase() : m_ptr(0), m_type(0)  {             }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -15,6 +15,8 @@
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/pool.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 #include "TError.h"
 
 using namespace pool;
@@ -23,6 +25,9 @@ using namespace pool;
 SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
       technologyName( pool::ROOT_StorageType.storageName() )
 {
+   // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
+   Athena::getMessageSvcQuiet = true;
+
    if( argc > 0 && argv[0] )
       executableName = argv[0];
    for ( int i = 1; i < argc; ++i )
@@ -33,7 +38,7 @@ SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
 SimpleUtilityBase::~SimpleUtilityBase()
 {
    if( storageSvc ) {
-      if( session ) storageSvc->endSession( session ).ignore();
+      storageSvc->endSession().ignore();
       storageSvc->release();
    }
 }
@@ -58,7 +63,7 @@ void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
    long technologyId = pool::DbType::getType( technologyName ).majorType();
-   if( ! storageSvc->startSession( pool::READ, technologyId, session ).isSuccess() ) {
+   if( ! storageSvc->startSession( pool::READ, technologyId).isSuccess() ) {
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
@@ -72,7 +77,7 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 {
    std::string fid;
    pool::FileDescriptor fd( fid, pfn );
-   if( ! storageSvc->connect( session, pool::READ, fd ).isSuccess() ) {
+   if( ! storageSvc->connect(pool::READ, fd).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
    pool::DatabaseConnection* connection = fd.dbc();

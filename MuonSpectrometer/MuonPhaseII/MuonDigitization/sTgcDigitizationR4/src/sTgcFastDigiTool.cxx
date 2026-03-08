@@ -12,10 +12,10 @@ namespace {
     }
     using channelType = sTgcIdHelper::sTgcChannelTypes;
     using ChVec_t = std::vector<std::uint16_t>;
-      
-    static const SG::Decorator<ChVec_t> dec_stripCh{"sTgc_stripChannels"};
-    static const SG::Decorator<ChVec_t> dec_wireCh{"sTgc_wireChannels"};
-    static const SG::Decorator<ChVec_t> dec_padCh{"sTgc_padChannels"};
+    /// @brief Declare the secondary phi and eta channels matched to the SDO
+    static const SG::Decorator<ChVec_t> dec_stripCh{"SDO_etaChannels"};
+    static const SG::Decorator<ChVec_t> dec_wireCh{"SDO_phiChannels"};
+    static const SG::Decorator<ChVec_t> dec_padCh{"SDO_padChannels"};
    
 }
 namespace MuonR4 {
@@ -80,10 +80,12 @@ namespace MuonR4 {
             
                 if (digitizedStrip || digitizedPad || digitizedWire) {
                     xAOD::MuonSimHit* sdo = addSDO(simHit, sdoContainer);
-                    ChVec_t& stripChV{dec_stripCh(*sdo)}, wireCh{dec_wireCh(*sdo)}, padCh{dec_padCh(*sdo)};
+                    ChVec_t& stripChV{dec_stripCh(*sdo)};
+                    ChVec_t& wireChV{dec_wireCh(*sdo)};
+                    ChVec_t& padChV{dec_padCh(*sdo)};
                     if (stripCh > 0) { stripChV.push_back(stripCh); }
-                    if (wireChannel > 0) { stripChV.push_back(wireChannel); }
-                    if (padChannel > 0) { stripChV.push_back(padChannel); }
+                    if (wireChannel > 0) { wireChV.push_back(wireChannel); }
+                    if (padChannel > 0) { padChV.push_back(padChannel); }
                     sdo->setIdentifier(digiColl->back()->identify());
                 }
             }
@@ -241,7 +243,7 @@ namespace MuonR4 {
         
         const Amg::Vector2D wirePos = readOutEle->stripLayer(hitHash).to2D(xAOD::toEigen(timedHit->localPosition()), true);
         // do not digitise wires that are never read out in reality
-        bool isInnerQ1 = readOutEle->isEtaZero(hitHash, wirePos);
+        bool isInnerQ1 = readOutEle->isEtaZero(hitHash, xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0));
         if(isInnerQ1) {
             return false;
         }
@@ -320,7 +322,7 @@ namespace MuonR4 {
         const MuonGMR4::PadDesign& design{readOutEle->padDesign(hitHash)};
         
         const auto [padEta, padPhi] = design.channelNumber(padPos);
-        if (padEta < 0 || padPhi < 0) {
+        if (padEta <= 0 || padPhi <= 0) {
             ATH_MSG_VERBOSE("The pad "<<Amg::toString(padPos)<<" in "<<m_idHelperSvc->toStringGasGap(hitId)
                         <<" is outside of the acceptance of "<<std::endl<<design);
             return false;
@@ -331,13 +333,13 @@ namespace MuonR4 {
 
 
         if (!isValid) {
-            ATH_MSG_WARNING("Failed to decuce a valid pad Identifier from "<<Amg::toString(padPos)
+            ATH_MSG_WARNING("Failed to deduce a valid pad Identifier from "<<Amg::toString(padPos)
                             <<" in "<<m_idHelperSvc->toStringGasGap(hitId));
             return false;
         }
         
         /// Check efficiencies
-        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), padPos);
+        bool isInnerQ1 = readOutEle->isEtaZero(readOutEle->measurementHash(hitId), xAOD::toEigen(timedHit->localPosition()).block<2,1>(0,0));
         if (efficiencyMap && efficiencyMap->getEfficiency(hitId, isInnerQ1) < CLHEP::RandFlat::shoot(rndEngine,0.,1.)){
             ATH_MSG_VERBOSE("Simulated pad hit "<<xAOD::toEigen(timedHit->localPosition())
                             << m_idHelperSvc->toString(hitId) <<" is rejected because of efficency modelling");

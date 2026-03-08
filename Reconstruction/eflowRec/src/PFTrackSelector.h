@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef PFTRACKSELECTOR_H
 #define PFTRACKSELECTOR_H
@@ -10,14 +10,13 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "Particle/TrackParticleContainer.h"
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
-#include "eflowRec/eflowRecTrack.h"
+#include "eflowRecTrack.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/VertexContainer.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/Identifier.h"
@@ -10,7 +10,6 @@
 #include <Acts/Surfaces/PlaneSurface.hpp>
 #include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #include <Acts/Geometry/Volume.hpp>
-#include <ActsGeoUtils/NoDeletePtr.h>
 
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "MuonReadoutGeometryR4/MmReadoutElement.h"
@@ -64,7 +63,7 @@ const Acts::PlaneSurface& SpectrometerSector::surface() const {
     return *m_args.surface;
 }
 const Amg::Transform3D& SpectrometerSector::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
-    return surface().transform(gctx.context());
+    return surface().localToGlobalTransform(gctx.context());
 }            
 Amg::Transform3D SpectrometerSector::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
     return localToGlobalTransform(gctx).inverse(); 
@@ -252,6 +251,9 @@ unsigned int SpectrometerSector::nLayerPerReadout (const MuonReadoutElement* rel
         default:
             THROW_EXCEPTION("Unexpected Readout Element Type in nLayerPerReadout()");
     }
+}
+void SpectrometerSector::addPlacement(std::unique_ptr<ActsTrk::VolumePlacement>&& placement) const {
+    m_args.chambers.front()->addPlacement(std::move(placement));
 }
 
 }

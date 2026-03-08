@@ -21,7 +21,6 @@
 // PACKAGE
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/IActsPropStepRootWriterSvc.h"
-#include "ActsGeometryInterfaces/IActsMaterialTrackWriterSvc.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsInterop/Logger.h"
 
@@ -34,15 +33,6 @@
 
 using namespace Acts::UnitLiterals;
 
-namespace Acts{
-  /// Recorded material track
-  /// - this is start:  position, start momentum
-  ///   and the Recorded material
-  using RecordedMaterialTrack =
-      std::pair<std::pair<Acts::Vector3, Acts::Vector3>, RecordedMaterial>;
-}
-
-
 StatusCode ActsExtrapolationAlg::initialize() {
 
   ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
@@ -51,9 +41,7 @@ StatusCode ActsExtrapolationAlg::initialize() {
   ATH_CHECK(m_extrapolationTool.retrieve());
   ATH_CHECK(m_propStepWriterSvc.retrieve());
   ATH_CHECK(m_trackingGeometryTool.retrieve());
-  if (m_writeMaterialTracks) {
-  ATH_CHECK( m_materialTrackWriterSvc.retrieve() );
-  }
+  ATH_CHECK( m_materialTrackCollectionKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
@@ -67,6 +55,23 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
   CLHEP::HepRandomEngine *rngEngine = rngWrapper->getEngine(ctx);
 
   ATH_MSG_VERBOSE("Extrapolating " << m_nParticlePerEvent << " particles");
+
+  // Write to the collection to the EventStore
+  SG::WriteHandle<ActsTrk::RecordedMaterialTrackCollection> materialTracks(m_materialTrackCollectionKey, ctx);
+
+  // Record the collection once per event if not already there
+  if (!materialTracks.isPresent()) {
+      auto coll = std::make_unique<ActsTrk::RecordedMaterialTrackCollection>();
+      ATH_CHECK(materialTracks.record(std::move(coll)));
+  }
+
+  // Add the track to the recorded collection
+  auto* coll = materialTracks.ptr();
+  if (!coll) {
+      ATH_MSG_ERROR("RecordedMaterialTrackCollection ptr() is null for key "
+                    << m_materialTrackCollectionKey.key());
+      return StatusCode::FAILURE;
+  }
 
   for (size_t i = 0; i < m_nParticlePerEvent; i++) {
     double d0 = 0;
@@ -102,15 +107,18 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     Acts::BoundVector pars;
     // cppcheck-suppress constStatement; will be able to initialize this directly with eigen 3.4
     pars << d0, z0, phi, theta, qop, t;
-    std::optional<Acts::BoundSquareMatrix> cov = std::nullopt;
-
-    using PropagationOutput = ActsTrk::IExtrapolationTool::PropagationOutput;
-    PropagationOutput output;
+    std::optional<Acts::BoundMatrix> cov = std::nullopt;
 
     if (charge != 0.) {
       // Perigee, no alignment -> default geo context
       Acts::GenericBoundTrackParameters startParameters(std::move(surface), std::move(pars), std::move(cov), Acts::ParticleHypothesis::pion());
-      output = m_extrapolationTool->propagationSteps(ctx, startParameters);
+      auto result = m_extrapolationTool->propagationSteps(ctx, startParameters);
+      if (!result.ok()) {
+        ATH_MSG_WARNING("Extrapolation tool failed to extrapolate the track: "
+                        << result.error().message());
+        continue;
+      }
+      auto &output = result.value();
       if(output.first.size() == 0) {
         ATH_MSG_WARNING("Got ZERO steps from the extrapolation tool");
       }
@@ -123,7 +131,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
         track.first.first = Acts::Vector3::Zero();
         track.first.second = momentum;
         track.second = std::move(output.second);
-        m_materialTrackWriterSvc->write(track);
+        coll->push_back(track);
       }
     }
 

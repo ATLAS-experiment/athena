@@ -9,7 +9,10 @@
 #include "xAODCaloEvent/CaloTowerAuxContainer.h"
 
 GepCellTowerAlg::GepCellTowerAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
-   AthReentrantAlgorithm( name, pSvcLocator ){
+   AthReentrantAlgorithm( name, pSvcLocator ),
+   m_minEt(0.)
+{
+   declareProperty("minEt", m_minEt);
 }
 
 
@@ -77,7 +80,6 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
 
   // Single loop over cells to accumulate energy into the correct tower
   for (const auto& cell : cells) {
-      if (cell.sigma < 2) continue;
       if (cell.isBadCell()) continue;
 
       int idx = customTowers->index(cell.eta,cell.phi);
@@ -94,7 +96,7 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
     auto p4 = tower->p4();
     // This is equivalent to checking the et of the tower 
     // since e() is the sum of the et of all constituent cells
-    if ( p4.E() == 0 ) continue;
+    if ( p4.E() <= m_minEt ) continue;
 
     // store the calCluster to fix up the Aux container:
     auto *ptr = h_outputCaloClusters->push_back(std::make_unique<xAOD::CaloCluster>());

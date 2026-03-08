@@ -73,6 +73,9 @@ namespace Muon {
     /** convert DetectorRegionIndex + LayerIndex into StIndex */
     StIndex toStationIndex( DetectorRegionIndex region, LayerIndex layer );
 
+    /** convert ChamberIndex + etaSign into DetectorRegionIndex */
+    DetectorRegionIndex toDetectorRegionIndex( ChIndex index, int8_t etaSign );
+
     /** convert DetectorRegionIndex + LayerIndex + isSmall into ChIndex */
     ChIndex toChamberIndex( DetectorRegionIndex region, LayerIndex layer, bool isSmall ) ;
 
@@ -106,13 +109,23 @@ namespace Muon {
     /** create a hash out of region and layer */
     unsigned int sectorLayerHash( DetectorRegionIndex detectorRegionIndex, LayerIndex layerIndex );
 
+    /** create a hash out of chamber index and detector region */
+    unsigned int regionChambernHash( DetectorRegionIndex regionIdx, ChIndex chamberIdx );
+
     /** maximum create a hash out of region and layer */
     constexpr unsigned int sectorLayerHashMax() {
        return toInt(DetectorRegionIndex::DetectorRegionIndexMax)*toInt(LayerIndex::LayerIndexMax);
     }
+    /** maximum create a hash out of chamber and region index */
+    constexpr unsigned int regionChamberHashMax() {
+      return toInt(DetectorRegionIndex::DetectorRegionIndexMax)*toInt(ChIndex::ChIndexMax);
 
+    }
     /** decompose the hash into Region and Layer */
     std::pair<DetectorRegionIndex,LayerIndex> decomposeSectorLayerHash( unsigned int hash );
+
+    /** decompose the hash into Region and Chamber */
+    std::pair<DetectorRegionIndex, ChIndex> decomposeRegionChamberHash( unsigned int hash );
 
     /** return total number of sectors */
     constexpr unsigned numberOfSectors() { return 16; }

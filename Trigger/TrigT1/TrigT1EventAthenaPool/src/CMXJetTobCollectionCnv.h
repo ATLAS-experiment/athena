@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual CMXJetTobCollection_PERS*   createPersistent (CMXJetTobCollection* transCont);
-  virtual CMXJetTobCollection*        createTransient ();
+  virtual CMXJetTobCollection*        createTransient(const Token* token);
 
 private:
   

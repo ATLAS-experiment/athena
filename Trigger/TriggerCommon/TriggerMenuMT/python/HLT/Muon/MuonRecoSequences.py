@@ -347,7 +347,7 @@ def EFMuSADataPrepViewDataVerifierCfg(flags, RoIs, roiName):
     return result
 
 
-def muEFSARecoSequenceCfg( flags, RoIs, name):
+def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
 
     from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
     from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg, MuonSegmentFilterAlgCfg
@@ -372,10 +372,23 @@ def muEFSARecoSequenceCfg( flags, RoIs, name):
 
         # Schedule muon EF reco
         from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
-        acc.merge( MuonSpacePointFormationCfg( flags ) )
-    
+        acc.merge( MuonSpacePointFormationCfg( flags, suffix =f'_{name}' ) )
+        
+        ### Setup the bucket filter if requested
+        if useBucketFilter:
+            from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
+            bucketTool = acc.popToolsAndMerge( GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool_{name}", 
+                                                                        ReadSpacePoints=f"MuonSpacePoints_{name}",
+                                                                        WriteSpacePointKey=f"FilteredMlBuckets_{name}"))
+            acc.merge(GraphInferenceAlgCfg(flags, name=f"GraphInferenceAlg_{name}", InferenceTools=[bucketTool]))
+        
+        ### Setup the new chain
         from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonPatternRecognitionCfg
-        acc.merge(MuonPatternRecognitionCfg(flags))
+        acc.merge(MuonPatternRecognitionCfg(flags, suffix = f'_{name}'))
+        
+        if useBucketFilter:
+            # Change the input container to use filtered buckets
+            acc.getEventAlgo(f"MuonEtaHoughTransformAlg_{name}").SpacePointContainer = f"FilteredMlBuckets_{name}"
 
     else: 
         acc.merge(MuonLayerHoughAlgCfg(flags, "TrigMuonLayerHoughAlg"))
@@ -647,8 +660,6 @@ def muEFInsideOutRecoSequenceCfg(flags, RoIs, name, suffix ):
     acc.merge(MuonCreatorAlgCfg(flags, name="TrigMuonCreatorAlgInsideOut_"+name+suffix,  MuonCandidateLocation=[candidatesName], TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name+suffix,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons"+suffix,
                                          MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons"+suffix, CombinedLocation = "InsideOutCBCombinedMuon"+suffix, MonTool = MuonCreatorAlgMonitoring(flags, "MuonCreatorAlgInsideOut_"+name+suffix)))
-
-
 
   return acc
 

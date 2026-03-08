@@ -23,7 +23,7 @@ public:
 protected:
 
 	AFP_TDSimHitCollection_PERS* createPersistent (AFP_TDSimHitCollection *transCont);
-	AFP_TDSimHitCollection* createTransient ();
+	AFP_TDSimHitCollection* createTransient(const Token* token);
  };
 
 #endif //AFP_TDSimHitCollectionCnv_h

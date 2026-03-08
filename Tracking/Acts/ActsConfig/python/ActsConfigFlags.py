@@ -1,11 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
 
 class SeedingStrategy(FlagEnum):
     Default = "Default"
-    Orthogonal = "Orthogonal"
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"
@@ -92,7 +91,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useCache', False)
     
     # Scheduling
-    actscf.addFlag('Acts.doITkConversion', False)
+    from InDetConfig.ITkActsHelpers import primaryPassUsesActs
+    actscf.addFlag('Acts.doITkConversion', lambda pcf: (
+        pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
     actscf.addFlag('Acts.doLargeRadius', False)
     actscf.addFlag('Acts.doLowPt', False)
     
@@ -130,6 +131,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.Tracks.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
+    actscf.addFlag('Acts.doTruthInspection', False)
 
     # Cluster
     actscf.addFlag("Acts.Clusters.UseWeightedPosition", False)

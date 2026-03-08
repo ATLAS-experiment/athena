@@ -58,8 +58,7 @@ def ExampleMonitoringConfig(flags):
 
     # # Then, add a tool that doesn't have its own configuration function. In
     # # this example, no accumulator is returned, so no merge is necessary.
-    # from MyDomainPackage.MyDomainPackageConf import MyDomainTool
-    # exampleMonAlg.MyDomainTool = MyDomainTool()
+    # exampleMonAlg.MyDomainTool = CompFactory.MyDomainTool()
 
     # Add a generic monitoring tool (a "group" in old language). The returned 
     # object here is the standard GenericMonitoringTool.

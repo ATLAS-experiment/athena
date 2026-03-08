@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -12,16 +12,12 @@
 //***************************************************************************/
 
 #include "gFexTowerSummer.h"
-
-#include <stdio.h>
-
-#include <algorithm>
-#include <fstream>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "L1CaloFEXSim/gFEXCompression.h"
+
+
+#include <vector>
+#include <memory>
+#include <cmath> //M_PI
 
 namespace LVL1 {
 
@@ -74,31 +70,18 @@ StatusCode gFexTowerSummer::execute(const EventContext& ctx) const {
   }
 
   // Atwr, Btwr, Ctwr will contain gTowers towers for each FPGA
-  gtFPGA Atwr  = {{{0}}};
-  gtFPGA Btwr  = {{{0}}};
-  gtFPGA Ctwr  = {{{0}}};
+  gtFPGA Atwr{};
+  gtFPGA Btwr{};
+  gtFPGA Ctwr{};
   
-  gtFPGA AtwrF  = {{{0}}};
-  gtFPGA BtwrF  = {{{0}}};
-  gtFPGA CtwrF  = {{{0}}};
+  gtFPGA AtwrF{};
+  gtFPGA BtwrF{};
+  gtFPGA CtwrF{};
   
-  gtFPGA Asatur  = {{{0}}};
-  gtFPGA Bsatur  = {{{0}}};
-  gtFPGA Csatur  = {{{0}}};
+  gtFPGA Asatur{};
+  gtFPGA Bsatur{};
+  gtFPGA Csatur{};
 
-  for(int irow=0; irow<LVL1::gFEXPos::ABC_ROWS; irow++){
-    for(int icolumn=0; icolumn<LVL1::gFEXPos::AB_COLUMNS; icolumn++){
-      Atwr[irow][icolumn] = 0;
-      AtwrF[irow][icolumn] = 0;
-      Asatur[irow][icolumn] = 0;
-      Btwr[irow][icolumn] = 0;
-      BtwrF[irow][icolumn] = 0;
-      Bsatur[irow][icolumn] = 0;
-      Ctwr[irow][icolumn] = 0;
-      CtwrF[irow][icolumn] = 0;
-      Csatur[irow][icolumn] = 0;      
-    }
-  }
 
   // reconstruct the gTowers/saturation
   ATH_CHECK( gtReconstructABC(ctx, 0, AtwrF, Atwr, Asatur));
@@ -324,9 +307,57 @@ StatusCode gFexTowerSummer::gtReconstructABC(const EventContext& ctx,
       (XFPGA == 1) ? LVL1::gFEXPos::BCALO_TYPE[iFiber] : LVL1::gFEXPos::CCALO_TYPE[iFiber]; 
 
     // saturation
+    // TODO: Route saturation to the correct column based on detector type,
+    // matching the firmware behaviour in tbuilder_sat.vhd.
+    // For regular EM/HAD (types 0, 1), ntower is a tower index (0-383) and
+    // saturation goes to the tower's natural column.
+    // For extended (types 2, 3) and overlap HEC (type 6), ntower is a row
+    // index (0-31) and saturation must go to the special column:
+    //   FPGA A: extended -> col 0, overlap HEC -> col 4
+    //   FPGA B: extended -> col 11, overlap HEC -> col 7
+    // Also skip HEC regular (type 11) saturation for FPGA B to match
+    // the firmware bug in tbuilder_mapper.vhd pFPGA_B SAT_LOW_HEC.
     bool fiberSaturation = (bool)(gfexFiberTower->isSaturated());
     if (fiberSaturation) {
-      saturationData[ntower] = fiberSaturation;
+      if (XFPGA < 2) {
+        // FPGA A and B: route by detector type
+        switch (dataType) {
+          case 0:  // EM
+          case 1:  // TREX / HAD
+            saturationData[ntower] = true;
+            break;
+          case 11: // HEC regular
+            // FPGA-B FW bug: SAT_LOW_HEC checks wrong type, never fires
+            if (XFPGA != 1) {
+              saturationData[ntower] = true;
+            }
+            break;
+          case 2:  // extended EMEC
+          case 3:  // extended HEC
+            {
+              int extCol = (XFPGA == 0) ? 0 : 11;
+              int extTower = ntower * 12 + extCol;
+              if (extTower >= 0 && extTower < 384) {
+                saturationData[extTower] = true;
+              }
+            }
+            break;
+          case 6:  // overlap HEC
+            {
+              int olapCol = (XFPGA == 0) ? 4 : 7;
+              int olapTower = ntower * 12 + olapCol;
+              if (olapTower >= 0 && olapTower < 384) {
+                saturationData[olapTower] = true;
+              }
+            }
+            break;
+          default:
+            break;
+        }
+      } else {
+        // FPGA C: simple saturation routing
+        saturationData[ntower] = true;
+      }
     }
 
     // Get the MLE from the EDM (stored as float)
@@ -532,8 +563,9 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   int FPGA_CONVLIN_TH5 = 4029;
   int FPGA_CONVLIN_TH6 = 4062;
   
-  int FPGA_CONVLIN_OF0 = -5072;
-  int FPGA_CONVLIN_OF1 = -2012;
+  // These two variables are unused
+  //int FPGA_CONVLIN_OF0 = -5072;
+  //int FPGA_CONVLIN_OF1 = -2012;
   int FPGA_CONVLIN_OF2 = -1262;
   int FPGA_CONVLIN_OF3 = -3036;
   int FPGA_CONVLIN_OF4 = -8120;
@@ -547,31 +579,32 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   int oth5 = 0;
   int oth6 = 0;
   
-  int r1shv = 0;
-  int r2shv = 0;
+  // These two variables are unused
+  //int r1shv = 0;
+  //int r2shv = 0;
   int r3shv = 0;
   int r4shv = 0;
   int r5shv = 0;
   int r6shv = 0;
   // int trxv = 0;
   
-  int r1conv = 0;
-  int r2conv = 0;
+  
   int r3conv = 0;
   int r4conv = 0;
   int r5conv = 0;
   int r6conv = 0;
   // int r3offs = 0;
 
-  r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
-  r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
+  //r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
+  //r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
   r3shv = (din &  0x00000FFF) ;
   r4shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
   r5shv = ((din & 0x00000FFF) << 2 )  & 0x00003FFC ;
   r6shv = ((din & 0x00000FFF) << 10 ) & 0x003FFC00 ;
   
-  r1conv =  r1shv + FPGA_CONVLIN_OF0;
-  r2conv =  r2shv + FPGA_CONVLIN_OF1;
+  // These two variables are unused
+  //r1conv =  r1shv + FPGA_CONVLIN_OF0;
+  //r2conv =  r2shv + FPGA_CONVLIN_OF1;
   r3conv =  r3shv + FPGA_CONVLIN_OF2;
   r4conv =  r4shv + FPGA_CONVLIN_OF3;
   r5conv =  r5shv + FPGA_CONVLIN_OF4;
@@ -623,12 +656,15 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )   ) {
     dout = 0;
   } 
+  /** The following cases cannot be reached, given the preceding conditions.
+  
   else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
     dout =  r1conv >>1;
   } 
   else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
     dout = r2conv >>1;
   } 
+  **/
   else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
     dout = r3conv >>1;
   }  
@@ -644,9 +680,11 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
     dout = 0;
   } 
+  /* This code cannot be reached, given the preceding conditions.
   else {
     dout = 0; 
   }
+  */
 
   signExtend(&dout,15);
   

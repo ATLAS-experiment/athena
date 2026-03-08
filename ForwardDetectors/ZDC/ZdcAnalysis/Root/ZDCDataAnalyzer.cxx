@@ -12,7 +12,8 @@
 
 const ZDCJSONConfig::JSONParamList ZDCDataAnalyzer::JSONConfigParams = {
   {"moduleEnabled", {JSON::value_t::array, 4, true, false}},
-  {"iterativeCalibCorr", {JSON::value_t::array, 4, true, false}}
+  {"iterativeCalibCorr", {JSON::value_t::array, 4, true, false}},
+  {"delayedOrder", {JSON::value_t::array, 4, true, false}}
 };
 
 
@@ -102,8 +103,9 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
 
     // Now extract information from ZDCDataAnalyzer-specific configuration
     //
-    JSON sideConfig = m_pulseAnalyzerConfig->getChannelConfig(side, 0);
+    JSON sideConfig = m_dataAnalyzerConfig->getChannelConfig(side, 0);
     JSON modEnable = sideConfig["moduleEnabled"];
+    JSON delayedOrder = sideConfig["delayedOrder"];
     if (!modEnable.is_null()) {
       if (modEnable.size() != 4) {
 	(*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of moduleEnabled");
@@ -114,7 +116,32 @@ ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const JSO
 	m_moduleEnabled[side][module] = modEnable[module];
       }
     }
+    if (!delayedOrder.is_null()) {
+    if (delayedOrder.size() != 4) {
+	(*m_msgFunc_p)(ZDCMsg::Fatal, "Error parsing ZDCDataAnalyzer JSON config, incorrect size of delayedOrder");
+	return;
+      }
+      
+      for (size_t module : {0, 1, 2, 3}) {
+	  m_delayedOrder[side][module] = delayedOrder[module];
+      }
+    }
   }
+
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+
+      (*m_msgFunc_p)(
+          ZDCMsg::Info,
+          "Setting up ZDCPulseAnalyzer for side " + std::to_string(side) +
+              ", module " + std::to_string(module) +
+              ", enabled = " + std::to_string(m_moduleEnabled[side][module]) +
+              ", delayedOrder = " +
+              std::to_string(m_delayedOrder[side][module]));
+    }
+  }
+
+  
 
   // Extract the JSON object for the pulse analyzer(s)
   //

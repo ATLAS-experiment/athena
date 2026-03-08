@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODInDetMeasurement/ContainerAccessor.h"
@@ -33,7 +33,6 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
 
 StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
 
-  seedContainer.spacePoints().reserve(spContainer.size());
   std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
@@ -54,7 +53,6 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     for(size_t idx=0; idx<spContainer.size(); idx++){
         const auto & sp = spContainer.at(idx);
         const auto & extSP = sp.externalSpacePoint();
-        seedContainer.spacePoints().push_back(&extSP);
         const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
 
         bool isPixel(elementlist.size() == 1);
@@ -117,23 +115,25 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
 
     ATH_MSG_DEBUG("Reached Level "<<maxLevel<<" after GNN iterations");
     
-    std::vector<std::tuple<float, int, std::vector<unsigned int> > > vSeedCandidates;
+    std::vector<std::pair<float, std::vector<unsigned int> > > vOutputSeeds;
 
-    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vSeedCandidates);
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vOutputSeeds);
 
-    if (vSeedCandidates.empty()) return StatusCode::SUCCESS;
+    if (vOutputSeeds.empty()) return StatusCode::SUCCESS;
 
-    seedContainer.reserve(vSeedCandidates.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
+    seedContainer.reserve(vOutputSeeds.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
 
-    for (const auto& seed : vSeedCandidates) {
-
-      if (std::get<1>(seed) != 0) continue;//identified as a clone of a better candidate
+    for (const auto& seed : vOutputSeeds) {
       
-      //add seed to output
-	
-      auto newseed = seedContainer.push_back(std::get<2>(seed));
-      newseed.quality() = std::get<0>(seed);
-      
+      // convert space points and add seed to output
+      const float quality = seed.first;
+      const float vertexZ = 0.0f;  // not used in GBTS seeding, set to 0
+      seedContainer.push_back(
+          seed.second,
+          [&](const unsigned int spIndex) {
+            return &spContainer.at(spIndex).externalSpacePoint();
+          },
+          quality, vertexZ);
     }
 
     ATH_MSG_DEBUG("GBTS created "<<seedContainer.size()<<" seeds");

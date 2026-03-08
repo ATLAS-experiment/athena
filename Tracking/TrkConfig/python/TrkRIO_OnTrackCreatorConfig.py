@@ -173,6 +173,20 @@ def ITkBroadRotCreatorCfg(flags, name='ITkBroadRotCreator', **kwargs):
     return acc
 
 
+def ITkRotCreatorDigitalCfg(flags, name='ITkRotCreatorDigital', **kwargs):
+    acc = ComponentAccumulator()
+
+    if 'ToolPixelCluster' not in kwargs:
+        from InDetConfig.SiClusterOnTrackTool_PixelConfig import (
+            ITkPixelClusterOnTrackToolDigitalCfg)
+        kwargs.setdefault("ToolPixelCluster", acc.popToolsAndMerge(
+            ITkPixelClusterOnTrackToolDigitalCfg(flags)))
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        ITkRotCreatorCfg(flags, name, **kwargs)))
+    return acc
+
+
 def MuonRotCreatorCfg(flags, name="MuonRotCreator", **kwargs):
     result = ComponentAccumulator()
 
@@ -217,7 +231,7 @@ def CombinedRotCreatorCfg(flags, name="TrkRotCreator", **kwargs):
                              result.popToolsAndMerge(InDetBroadSCT_ClusterOnTrackToolCfg(flags)))
         else:
             from InDetConfig.SiClusterOnTrackTool_SCTStripConfig import InDetSCT_ClusterOnTrackToolCfg
-            kwargs.setdefault("ToolSCT_Cluster", result.popToolsAnsMerge(InDetSCT_ClusterOnTrackToolCfg(flags)))
+            kwargs.setdefault("ToolSCT_Cluster", result.popToolsAndMerge(InDetSCT_ClusterOnTrackToolCfg(flags)))
     else: ### Just take the muon calibrator
         result.setPrivateTools(result.popToolsAndMerge(MuonRotCreatorCfg(flags, name=name, **kwargs)))
         return result

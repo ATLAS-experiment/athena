@@ -1,0 +1,7 @@
+EventSelectionConfig:
+  - name: <cut>
+    description: event selection flag for every individual cut.
+    toggled_by: debugMode
+  - name: pass_<selection>
+    description: event selection flag for every individual selection.
+

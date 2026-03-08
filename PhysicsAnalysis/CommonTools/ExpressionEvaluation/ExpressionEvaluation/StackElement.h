@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -16,6 +16,11 @@
 
 // Local include(s):
 #include "ExpressionEvaluation/IProxyLoader.h"
+#include "ExpressionEvaluation/IAccessor.h"
+#include "ExpressionEvaluation/PointerCache.h"
+#include "CxxUtils/checker_macros.h"
+
+class EventContext;
 
 /// Namespace holding all the expression evaluation code
 ///
@@ -210,7 +215,7 @@ namespace ExpressionParsing {
       void makeVector( std::size_t n );
 
       /// Set the internal variables of the object based on the objects in SG
-      StackElement valueFromProxy() const;
+      StackElement valueFromProxy(const EventContext& ctx) const;
       /// @}
 
       /// @name Internal functions evaluating binary comparisons
@@ -317,10 +322,10 @@ namespace ExpressionParsing {
       /// Loader for the described variable
       IProxyLoader* m_proxyLoader = nullptr;
       /// Type of the variable provided by the proxy loader
-      mutable std::atomic<IProxyLoader::VariableType> m_variableType = IProxyLoader::VT_UNK;
+      mutable std::atomic<IAccessor::VariableType> m_variableType = IProxyLoader::VT_UNK;
+      mutable PointerCache<IAccessor, std::memory_order_seq_cst> m_accessor ATLAS_THREAD_SAFE;
       /// Internal flag showing whether the type of the variable was already
       /// determined
-      mutable std::atomic<bool> m_determinedVariableType = false;
       mutable std::atomic<bool> m_moved = false;
 
    }; // class StackElement

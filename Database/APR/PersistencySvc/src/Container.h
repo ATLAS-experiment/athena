@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_CONTAINER_H
@@ -30,10 +30,10 @@ namespace pool {
                  const std::string& name );
       
       /// destructor
-      ~Container();
-      
-      /// Returns the name (fid) of the parent database
-      virtual const std::string& parentDatabaseName() const override;
+      virtual ~Container() = default;
+
+      /// Returns the name of this container
+      virtual const std::string& name() const override final { return m_name; }
 
       /// Returns the technology identifier for this container
       virtual long technology() const override;
@@ -63,6 +63,9 @@ namespace pool {
                                const std::string& option ) override;
 
     private:
+      /// The name of the container
+      std::string m_name;
+
       /// Reference to file descriptor of the parent database
       FileDescriptor& m_fileDescriptor;
       

@@ -34,9 +34,12 @@ namespace columnar
     struct ToolPerfData final
     {
       std::string name;
+      std::optional<float> timeRetrieve;
+      std::optional<float> timeCopyRecord;
       std::optional<float> timeCheck;
       std::optional<float> timeCall;
       std::optional<float> timeCall2;
+      std::optional<float> timeClear;
     };
   }
 }

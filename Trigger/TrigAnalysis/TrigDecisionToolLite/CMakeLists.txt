@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigDecisionToolLite )
@@ -12,7 +12,7 @@ atlas_add_library( TrigDecisionToolLiteLib
 atlas_add_dictionary( TrigDecisionToolLiteDict
    TrigDecisionToolLite/TrigDecisionToolLiteDict.h
    TrigDecisionToolLite/selection.xml
-   LINK_LIBRARIES TrigDecisionToolLiteLib ${ROOT_LIBRARIES} )
+   LINK_LIBRARIES TrigDecisionToolLiteLib )
 
 atlas_add_component( TrigDecisionToolLite
    src/components/*.cxx

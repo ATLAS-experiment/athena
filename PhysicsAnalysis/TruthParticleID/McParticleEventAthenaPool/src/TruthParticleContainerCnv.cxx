@@ -50,7 +50,7 @@ TruthParticleContainerCnv::createPersistent(TruthParticleContainer* trans)
   return pers; 
 }
 
-TruthParticleContainer* TruthParticleContainerCnv::createTransient() 
+TruthParticleContainer* TruthParticleContainerCnv::createTransient(const Token* token) 
 {
    MsgStream msg( msgSvc(), "TruthParticleContainerCnv" );
 
@@ -59,15 +59,15 @@ TruthParticleContainer* TruthParticleContainerCnv::createTransient()
    static const pool::Guid p5_guid("2D25E3D9-950B-49E0-A51F-2B6EC93D1A23");
    static const pool::Guid p6_guid("97AC2CEE-7E8A-4E2E-B6B5-FD8545D77FC4");
 
-   if ( compareClassGuid(p6_guid) ) {
+   if ( compareClassGuid(token, p6_guid) ) {
      
-     std::unique_ptr<TruthParticleContainer_p6> pers( poolReadObject<TruthParticleContainer_p6>() );
+     std::unique_ptr<TruthParticleContainer_p6> pers( poolReadObject<TruthParticleContainer_p6>(token) );
      TruthParticleContainerCnv_p6 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
 
-   } else if ( compareClassGuid(p5_guid) ) {
+   } else if ( compareClassGuid(token, p5_guid) ) {
      
-     std::unique_ptr<TruthParticleContainer_p5> pers( poolReadObject<TruthParticleContainer_p5>() );
+     std::unique_ptr<TruthParticleContainer_p5> pers( poolReadObject<TruthParticleContainer_p5>(token) );
      TruthParticleContainerCnv_p5 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
      

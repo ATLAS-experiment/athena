@@ -1,9 +1,7 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#pragma once
-// emacs -*- c++ -*-
 /**
  * \file HLTResult.h
  * \author gianluca.comune@cern.ch simon.george@cern.ch andreas.hoecker@cern.ch

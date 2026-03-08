@@ -31,9 +31,9 @@ namespace MuonR4 {
         trackProxy.container().trackStateContainer().visitBackwards(trackProxy.tipIndex(), 
             [&](const auto& state){
                 Stat_t status{Stat_t::OnTrack};
-                if (state.typeFlags().test(Acts::TrackStateFlag::OutlierFlag)){
+                if (state.typeFlags().isOutlier()){
                     status = Stat_t::Outlier;
-                } else if (state.typeFlags().test(Acts::TrackStateFlag::HoleFlag)) {
+                } else if (state.typeFlags().isHole()) {
                     status = Stat_t::Hole;
                 }
                 if (state.hasUncalibratedSourceLink()) {
@@ -50,7 +50,7 @@ namespace MuonR4 {
                 } else if (state.hasReferenceSurface()) {
                     const Acts::Surface& surf{state.referenceSurface()};
                     /// Surface is not active
-                    const Acts::DetectorElementBase* detEl = surf.associatedDetectorElement();
+                    const Acts::SurfacePlacementBase* detEl = surf.surfacePlacement();
                     if (!detEl) {
                         return;
                     }

@@ -28,7 +28,7 @@ public:
         T_AthenaPoolCustomCnv<SiHitCollection, SiHitCollection_PERS >( svcloc) {}
 protected:
   SiHitCollection_PERS*  createPersistent(SiHitCollection* transCont);
-  SiHitCollection*       createTransient ();
+  SiHitCollection*       createTransient(const Token* token);
 };
 
 

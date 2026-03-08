@@ -16,6 +16,7 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     kwargs.setdefault("dumpPrds", False)
     kwargs.setdefault("dumpDigits", False)
     kwargs.setdefault("dumpSimHits", True)
+    kwargs.setdefault("dumpSpacePoints", False)
     
     ### Overall simhit container dump protected by dumpSimHits property
     ### If property is set to true ensure that only the containers of the activated
@@ -37,6 +38,12 @@ def MuonHitTesterCfg(flags, name="MuonHitTester", outFile="SimHitTest.root", **k
     kwargs.setdefault("dumpRpcPrds", flags.Detector.GeometryRPC)
     kwargs.setdefault("dumpTgcPrds", flags.Detector.GeometryTGC)
     kwargs.setdefault("dumpMmPrds", flags.Detector.GeometryMM)
+
+    kwargs.setdefault("dumpMuonSpacePoints", flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC)
+    kwargs.setdefault("dumpNswSpacePoints", flags.Detector.GeometrysTGC or flags.Detector.GeometryMM)
+    if kwargs.get("dumpSpacePoints"):
+        from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg
+        result.merge( MuonSpacePointFormationCfg( flags ) )
 
     theAlg = CompFactory.MuonValR4.MuonHitTesterAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)

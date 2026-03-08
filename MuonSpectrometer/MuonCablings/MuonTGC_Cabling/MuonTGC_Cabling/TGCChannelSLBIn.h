@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCHANNELSLBIN_HH
@@ -7,77 +7,73 @@
 
 #include "MuonTGC_Cabling/TGCChannelId.h"
 
-namespace MuonTGC_Cabling
-{
+namespace MuonTGC_Cabling {
 
-class TGCChannelSLBIn : public TGCChannelId
-{
-public:
-  // Constructor & Destructor
-  TGCChannelSLBIn(TGCId::SideType side,
-		   TGCId::ModuleType module,
-		   TGCId::RegionType region,
-		   int sector,
-		   int id,
-		   int channel);
+class TGCChannelSLBIn : public TGCChannelId {
+   public:
+    // Constructor & Destructor
+    TGCChannelSLBIn(TGCId::SideType side, TGCId::ModuleType module,
+                    TGCId::RegionType region, int sector, int id, int channel);
 
-  virtual ~TGCChannelSLBIn(void) {}
+    virtual ~TGCChannelSLBIn() = default;
 
-  virtual TGCModuleId* getModule(void) const;
+    virtual std::unique_ptr<TGCModuleId> getModule() const override;
 
-  virtual bool isValid(void) const;
+    virtual bool isValid() const override;
 
-// internal structure in 200 channel of SLBIn
-public:
-  enum CellType {NoCellType=-1,
-		 CellTrig=0,CellA=1,CellB=2,CellC=3,CellD=4,
-		 MaxCellType};
+    // internal structure in 200 channel of SLBIn
+   public:
+    enum CellType {
+        NoCellType = -1,
+        CellTrig = 0,
+        CellA = 1,
+        CellB = 2,
+        CellC = 3,
+        CellD = 4,
+        MaxCellType
+    };
 
-  static int convertChannelInCell(int channel);
-  static CellType convertCellType(int channel);
-  static int convertChannelInSLB(TGCId::ModuleType moduleType, 
-				 CellType cellType, int channel);
-  static int convertChannel(TGCId::ModuleType moduleType, 
-			    CellType cellType, int channelInSLB);
-  static int getLengthOfCell(CellType cellType);
-  static int getOffsetOfCell(CellType cellType);
-  static int getLengthOfSLB(TGCId::ModuleType moduleType,
-			    CellType cellType);
-  static int getAdjacentOfCell(CellType cellType);
-  static int getAdjacentOfSLB(TGCId::ModuleType moduleType,
-			      CellType cellType);
-  
-  virtual CellType getCellType(void) const {
-    return m_cellType;
-  }
-  
-  virtual int getChannelInCell(void) const;
+    static int convertChannelInCell(int channel);
+    static CellType convertCellType(int channel);
+    static int convertChannelInSLB(TGCId::ModuleType moduleType,
+                                   CellType cellType, int channel);
+    static int convertChannel(TGCId::ModuleType moduleType, CellType cellType,
+                              int channelInSLB);
+    static int getLengthOfCell(CellType cellType);
+    static int getOffsetOfCell(CellType cellType);
+    static int getLengthOfSLB(TGCId::ModuleType moduleType, CellType cellType);
+    static int getAdjacentOfCell(CellType cellType);
+    static int getAdjacentOfSLB(TGCId::ModuleType moduleType,
+                                CellType cellType);
 
-  virtual int getChannelInSLB(void) const;
+    virtual CellType getCellType() const { return m_cellType; }
 
-  virtual void setChannel(int channel);
+    virtual int getChannelInCell() const;
 
-private:
-  CellType m_cellType;
-  int m_channelInCell = 0;
-  int m_channelInSLB = 0;
+    virtual int getChannelInSLB() const;
 
-  static const int s_lengthCell[];
-  static const int s_offsetCell[];
-  static const int s_lengthWD[];
-  static const int s_lengthSD[];
-  static const int s_lengthWT[];
-  static const int s_lengthST[];
-  static const int s_adjacentCell[];
-  static const int s_adjacentWD[];
-  static const int s_adjacentSD[];
-  static const int s_adjacentWT[];
-  static const int s_adjacentST[];
+    virtual void setChannel(int channel) override;
 
-  TGCChannelSLBIn(void) {}
-  
+   private:
+    CellType m_cellType;
+    int m_channelInCell = 0;
+    int m_channelInSLB = 0;
+
+    static const int s_lengthCell[];
+    static const int s_offsetCell[];
+    static const int s_lengthWD[];
+    static const int s_lengthSD[];
+    static const int s_lengthWT[];
+    static const int s_lengthST[];
+    static const int s_adjacentCell[];
+    static const int s_adjacentWD[];
+    static const int s_adjacentSD[];
+    static const int s_adjacentWT[];
+    static const int s_adjacentST[];
+
+    TGCChannelSLBIn() {}
 };
-  
-} // end of namespace
- 
+
+}  // namespace MuonTGC_Cabling
+
 #endif

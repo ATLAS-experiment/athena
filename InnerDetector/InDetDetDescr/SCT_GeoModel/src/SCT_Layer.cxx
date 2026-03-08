@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -110,11 +110,9 @@ const GeoLogVol *
 SCT_Layer::preBuild()
 {
     // Build the components required for the layer.
-    // We use the layer number as a string quite a bit
-    std::string layerNumStr = intToString(m_iLayer);
     // Make the ski
     // The ski length is now reduced to m_activeLength to make room for the cooling inlet/outlet volumes
-    m_ski = std::make_unique<SCT_Ski>("Ski"+layerNumStr, m_module, m_stereoSign, m_tilt, m_activeLength,
+    m_ski = std::make_unique<SCT_Ski>(std::format("Ski{}",m_iLayer), m_module, m_stereoSign, m_tilt, m_activeLength,
                                       m_detectorManager, m_geometryManager, m_materials, m_sqliteReader, m_mapFPV, m_mapAX);
     
     
@@ -133,20 +131,20 @@ SCT_Layer::preBuild()
     if(m_sqliteReader) return nullptr;
     
     // Build the Flanges
-    m_flange     = std::make_unique<SCT_Flange>("Flange"+layerNumStr, m_iLayer, m_detectorManager, m_geometryManager, m_materials);
+    m_flange     = std::make_unique<SCT_Flange>(std::format("Flange{}",m_iLayer), m_iLayer, m_detectorManager, m_geometryManager, m_materials);
     
     // Build the SupportCyl
-    m_supportCyl = std::make_unique<SCT_SupportCyl>("SupportCyl"+layerNumStr, m_iLayer, m_cylinderLength,
+    m_supportCyl = std::make_unique<SCT_SupportCyl>(std::format("SupportCyl",m_iLayer), m_iLayer, m_cylinderLength,
                                                     m_detectorManager, m_geometryManager, m_materials);
     
     // Build the FSI end jewel, scorpion and fibre mask
     // Mask runs between scorpions and flange in z - must be built after these
     if (m_includeFSI) {
-        m_endJewel = std::make_unique<SCT_FSIEndJewel>("FSIEndJewel"+layerNumStr, m_detectorManager, m_geometryManager, m_materials);
-        m_scorpion = std::make_unique<SCT_FSIScorpion>("FSIScorpion"+layerNumStr, m_detectorManager, m_geometryManager, m_materials);
-        double length_mask = 0.5*m_cylinderLength - m_flange->length() - m_zScorpion - 0.5*m_scorpion->length();
-        m_fibreMask = std::make_unique<SCT_FSIFibreMask>("FSIFibreMask"+layerNumStr, m_iLayer, length_mask,
-                                                         m_detectorManager, m_geometryManager, m_materials);
+      m_endJewel = std::make_unique<SCT_FSIEndJewel>(std::format("FSIEndJewel",m_iLayer), m_detectorManager, m_geometryManager, m_materials);
+      m_scorpion = std::make_unique<SCT_FSIScorpion>(std::format("FSIScorpion",m_iLayer), m_detectorManager, m_geometryManager, m_materials);
+      double length_mask = 0.5*m_cylinderLength - m_flange->length() - m_zScorpion - 0.5*m_scorpion->length();
+      m_fibreMask = std::make_unique<SCT_FSIFibreMask>(std::format("FSIFibreMask",m_iLayer), m_iLayer, length_mask,
+						       m_detectorManager, m_geometryManager, m_materials);
     }
     
     m_skiAuxPhiStart = 0;
@@ -157,11 +155,11 @@ SCT_Layer::preBuild()
     // Bracket is placed at edge of division.
     // -tiltSign * (r*divisionAngle/2 - bracket_width/2)
     // Works for both +ve and -ve tilt.
-    m_bracket = std::make_unique<SCT_Bracket>("Bracket"+layerNumStr, m_detectorManager, m_geometryManager, m_materials);
+    m_bracket = std::make_unique<SCT_Bracket>(std::format("Bracket",m_iLayer), m_detectorManager, m_geometryManager, m_materials);
     
-    m_harness = std::make_unique<SCT_Harness>("Harness"+layerNumStr, m_cylinderLength,
+    m_harness = std::make_unique<SCT_Harness>(std::format("Harness",m_iLayer), m_cylinderLength,
                                               m_detectorManager, m_geometryManager, m_materials);
-    m_skiPowerTape = std::make_unique<SCT_SkiPowerTape>("SkiPowerTape"+layerNumStr, m_ski.get(), m_cylinderLength,
+    m_skiPowerTape = std::make_unique<SCT_SkiPowerTape>(std::format("SkiPowerTape",m_iLayer), m_ski.get(), m_cylinderLength,
                                                         m_detectorManager, m_geometryManager, m_materials);
     
     int tiltSign = (m_tilt < 0) ? -1 : +1;
@@ -173,7 +171,7 @@ SCT_Layer::preBuild()
     
     
     // Make the SkiAux. This is layer dependent.
-    m_skiAux = std::make_unique<SCT_SkiAux>("SkiAux"+layerNumStr,
+    m_skiAux = std::make_unique<SCT_SkiAux>(std::format("SkiAux",m_iLayer),
                                             m_ski.get(),
                                             m_bracket.get(),
                                             m_harness.get(),
@@ -187,7 +185,7 @@ SCT_Layer::preBuild()
                                             m_materials);
     
     // Build the clamp: we cannot do this until we have the dimensions of SkiAux
-    m_clamp = std::make_unique<SCT_Clamp>("Clamp"+layerNumStr, m_iLayer, m_skiAux->outerRadius(),
+    m_clamp = std::make_unique<SCT_Clamp>(std::format("Clamp",m_iLayer), m_iLayer, m_skiAux->outerRadius(),
                                           m_detectorManager, m_geometryManager, m_materials);
     
     // Build the volume representing the cooling inlets, outlet and U-bends.
@@ -195,7 +193,7 @@ SCT_Layer::preBuild()
     double coolingInnerRadius = m_clamp->outerRadius();
     double clearance = 1*Gaudi::Units::mm;
     double coolingLength = 0.5*m_cylinderLength - 0.5*m_activeLength - clearance;
-    m_coolingEnd = std::make_unique<SCT_CoolingEnd>("CoolingEnd"+layerNumStr, m_iLayer, coolingInnerRadius, coolingLength,
+    m_coolingEnd = std::make_unique<SCT_CoolingEnd>(std::format("CoolingEnd",m_iLayer), m_iLayer, coolingInnerRadius, coolingLength,
                                                     m_detectorManager, m_geometryManager, m_materials);
     
     //
@@ -383,8 +381,7 @@ SCT_Layer::build(SCT_Identifier id)
     
     // Extra Material
     InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
-    xMat.add(supportLayer, "SCTLayer"+intToString(m_iLayer));
-    
+    xMat.add(supportLayer, std::format("SCTLayer{}",m_iLayer));
     
     // Now place all the sub layers into the overall layer.
     layer->add(activeLayer);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,7 +46,7 @@ CpReadByteStreamV1V2Cnv::~CpReadByteStreamV1V2Cnv()
 
 // CLID
 
-const CLID& CpReadByteStreamV1V2Cnv::classID()
+CLID CpReadByteStreamV1V2Cnv::classID()
 {
   return ClassID_traits<DataVector<LVL1::CPMTower> >::ID();
 }

@@ -5,7 +5,7 @@
 #include "RNTupleWriterHelper.h"
 
 #include "ROOT/RNTupleModel.hxx"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 #include "TFile.h"
 
 #include <algorithm>

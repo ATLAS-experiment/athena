@@ -106,8 +106,8 @@ GSC:
     TrigRun2:
       - mod:CaloEnergies
   
-# ----------------
-# 5. Time-Dependent Insitu Calibration
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 4. Time-Dependent Insitu Calibration
 Insitu:
   fileInsitu: 
     - 'JetCalibTools/CalibArea-00-04-82/InsituCalibration/InsituCalibration_80ifb_1516_Nov_2018_4PF_Consolidated.root'
@@ -122,8 +122,43 @@ Insitu:
   RunNumbers: [251102, 314199, 999999]
   CalibrateMC: False
   useOriginalHistCombination: False
-  InScale: "JetGSCScaleMomentum" # do not include in analysis-facing YAML
-  OutScale: "JetInsituScaleMomentum" # do not include in analysis-facing YAML
+  InScale: "JetPtResidualScaleMomentum" # should be JetGSCScaleMomentum in case no PtResidual (see step 6) was derived
+  OutScale: "JetInsituScaleMomentum"
   prereqs:
     default: []
-# ----------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 5. Residual correction for AF3 (configuration will skip this step if data or FullSim)
+AF3:
+  InScale: "JetGSCScaleMomentum"
+  OutScale: "JetFastSimScaleMomentum"
+  CalibConstantFile: "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/AF3_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25.root"
+  histoParams:
+    varX: "pt"
+    varY: "absrapidity"
+    histName: "h_respMap_recoPt_recoY"
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 6. PtResidual correction after GSC
+PtResidual:
+  InScale: "JetGSCScaleMomentum" # configuration will change this to "JetFastSimScaleMomentum" if sample is AF3
+  OutScale: "JetPtResidualScaleMomentum"
+  CalibConstantFile: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/PtResidual_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25.root'
+  useBinCenter: True # If set to False, varYHisto does not need to be defined and varY can be set directly to the correct eta variable
+  histoParams:
+    varX: "pt"
+    varY: "binCenterEta" #used to avoid interpolation along eta
+    varYHisto: "DetectorEta"
+    histName: "h_respMap_recoPt_DetEta"
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------
+# 7. MC-to-MC correction
+MC2MC:
+  InScale: "JetPtResidualScaleMomentum"
+  OutScale: "JetMC2MCScaleMomentum"
+  CalibConstantFileName: 'JetCalibTools/CalibArea-00-04-83/CalibrationFactors/MC2MC_MC20_AntiKt4EMPFlow_R22ConsolidatedApril25'
+  flavours: ['q','c','b','g']
+  PIDLabel: 'PartonTruthLabelID'
+  histoParams:
+    varX: "pt"
+    varY: "absrapidity"
+    histNameBase: "h_respMap_recoPt_recoY"
+  prereqs:
+    default: []

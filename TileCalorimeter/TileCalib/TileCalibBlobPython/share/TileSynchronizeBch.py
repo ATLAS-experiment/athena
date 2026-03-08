@@ -1,24 +1,30 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
-# TileSynchronizeBch.py <TAG1> <TAG2> <MASKONLY> <RUN1> <RUN2>
+# TileSynchronizeBch.py <TAG1> <TAG2> <MASKONLY> <RUN1> <RUN2> <SCHEMA> <OUTPUT_DIR> <AUTHOR>
 # sanya.solodkov@cern.ch July 2016
 # copy bad status from one tag to another (e.g. from UPD4 to UPD1)
 # <TAG1> - origin tag (no default), can be UPD1 or UPD4 or exact tag
 # <TAG2> - destination (no default) can be UPD1 or UPD4 or ONL (for online DB)
 # <MASKONLY> - if "1" or "yes" or "True", channels are only masked and never unmasked
 # <RUN1> - run number to use for <TAG1> (default = MAXRUN)
-# <RUN2> - run number to use for <TAG2> and for sqlite (default = current run)
+# <RUN2> - run number to use for <TAG2> and for sqlite (default = next run)
+# <SCHEMA> - full schema string for input database (optional)
+# <OUTPUT_DIR> - directory for output file tileSqlite.db (optional)
+# <AUTHOR> - user name for comment string (optional)
 
-import sys
+import os,sys
 
 tag1 = "" if len(sys.argv) < 2 else sys.argv[1].rpartition("=")[2]
 tag2 = "" if len(sys.argv) < 3 else sys.argv[2].rpartition("=")[2]
 opt  = "" if len(sys.argv) < 4 else sys.argv[3].rpartition("=")[2]
-run1 = None if len(sys.argv) < 5 else int(sys.argv[4].rpartition("=")[2])
-run2 = None if len(sys.argv) < 6 else int(sys.argv[5].rpartition("=")[2])
-
+run1 = "" if len(sys.argv) < 5 else sys.argv[4].rpartition("=")[2]
+run2 = "" if len(sys.argv) < 6 else sys.argv[5].rpartition("=")[2]
+schema="" if len(sys.argv) < 7 else sys.argv[6]
+if len(sys.argv) >= 8:
+    os.chdir(sys.argv[7])
+author = os.getlogin() if len(sys.argv) < 9 else sys.argv[8]
 
 from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobPython import TileBchTools
@@ -50,23 +56,38 @@ if copyall:
 else:
     log.info( "Copying only BAD statuses from %s to %s", tag1,tag2)
 
-if run1 is None or run1 < 0:
+if not run1.isdigit() or int(run1) < 0:
     badrun=run1
     run1=MAXRUN
-    if badrun is None:
+    if not badrun.isdigit():
         log.info( "First run number was not specified, using maximal possible run number %d for input DB", run1 )
     else:
-        log.warning( "First run number %d is bad, using maximal possible run number %d for input DB", badrun, run1)
-if run2 is None or run2 < 0:
+        log.warning( "First run number %s is bad, using maximal possible run number %d for input DB", badrun, run1)
+else:
+    run1=int(run1)
+if not run2.isdigit() or int(run2) < 0:
     badrun=run2
-    run2=TileCalibTools.getLastRunNumber()
-    if badrun is None:
-        log.info( "Second run number was not specified, using current run number %d for output DB", run2 )
+    run2=TileCalibTools.getNextRunNumber()
+    if not badrun.isdigit():
+        log.info( "Second run number was not specified, using next run number %d for output DB", run2 )
     else:
-        log.warning( "Second run number %d is bad, using current run number %d for output DB", badrun, run2)
+        log.warning( "Second run number %s is bad, using next run number %d for output DB", badrun, run2)
     if run2 is None or run2<0:
         log.error( "Still bad run number")
         sys.exit(2)
+else:
+    run2=int(run2)
+if not schema:
+    schema="COOLOFL_TILE/CONDBR2"
+log.info( "Using schema  %s", schema)
+if tag2[0:3].upper()=="ONL":
+    schema2=schema.replace("COOLOFL_TILE","COOLONL_TILE")
+    schema=schema2.replace("COOLONL_TILE","COOLOFL_TILE")
+    if schema!=schema2:
+        log.info( "Second schema %s", schema2)
+else:
+    schema2=schema
+
 log.info("")
 
 #===================================================================
@@ -74,7 +95,7 @@ log.info("")
 #===================================================================
 
 #=== get DB1
-db1 = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
+db1 = TileCalibTools.openDbConn(schema)
 folder1 = "/TILE/OFL02/STATUS/ADC"
 folderTag1 = TileCalibTools.getFolderTag(db1, folder1, tag1)
 
@@ -87,11 +108,11 @@ mgr1.initialize(db1, folder1, folderTag1, (run1,0))
 #=== get DB2
 online = tag2[0:3].upper()=="ONL"
 if online:
-    db2 = TileCalibTools.openDbConn('COOLONL_TILE/CONDBR2')
+    db2 = TileCalibTools.openDbConn(schema2)
     folder2 = "/TILE/ONL01/STATUS/ADC"
     folderTag2 = ""
 else:
-    db2 = TileCalibTools.openDbConn('COOLOFL_TILE/CONDBR2')
+    db2 = TileCalibTools.openDbConn(schema)
     folder2 = "/TILE/OFL02/STATUS/ADC"
     folderTag2 = TileCalibTools.getFolderTag(db2, folder2, tag2)
 
@@ -230,10 +251,10 @@ for ros in range(1,5):
 if len(comment):
     if online:
         dbw = TileCalibTools.openDb('SQLITE', 'CONDBR2', 'RECREATE','COOLONL_TILE')
-        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_onl01, "tilebeam", "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
+        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_onl01, author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
     else:
         dbw = TileCalibTools.openDb('SQLITE', 'CONDBR2', 'RECREATE','COOLOFL_TILE')
-        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_ofl01, "tilebeam", "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
+        mgr2.commitToDb(dbw, folder2, folderTag2, TileBchDecoder.BitPat_ofl01, author, "synchronizing with %s; updated channels:%s" %(tag1, comment), (run2,0))
     dbw.closeDatabase()
 else:
     log.warning("Folders are in sync, nothing to update")

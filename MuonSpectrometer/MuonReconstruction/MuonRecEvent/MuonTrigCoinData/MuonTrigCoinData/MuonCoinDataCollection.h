@@ -1,14 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// CoinDataCollection.h
-//   Header file for class TrigCoinDataCollection
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef MUONTRIGCOINDATA_MUONCOINDATACOLLECTION_H
 #define MUONTRIGCOINDATA_MUONCOINDATACOLLECTION_H
 
@@ -23,26 +15,21 @@ namespace Muon{
 
 template< class CoinDataT >
 class MuonCoinDataCollection : public DataVector< CoinDataT > {
-
-  ///////////////////////////////////////////////////////////////////
-  // Public methods:
-  ///////////////////////////////////////////////////////////////////
 public:
 
   // Constructor with parameters:
   //   Hashed offline identifier of the DE
   MuonCoinDataCollection(const IdentifierHash idHash);
 
+  MuonCoinDataCollection(const MuonCoinDataCollection&) = delete;
+  MuonCoinDataCollection &operator=(const MuonCoinDataCollection&) = delete;
+
+
  /** Default Constructor (for persistency)*/
-  MuonCoinDataCollection();
+  MuonCoinDataCollection() = default;
                      
   /** Destructor:*/
-  virtual ~MuonCoinDataCollection();
-
-
-  ///////////////////////////////////////////////////////////////////
-  // Const methods:
-  ///////////////////////////////////////////////////////////////////
+  virtual ~MuonCoinDataCollection() = default;
 
   // typedef needed for IdentifiableContainer base class
   typedef Identifier ID;
@@ -55,33 +42,16 @@ public:
   void setIdentifier(Identifier id);
   // plottable
   virtual std::string type() const;
+ 
 
-
-  // typedef needed for IdentifiableContainer base class
-//  typedef TrigCoinData DIGIT;
-
-  ///////////////////////////////////////////////////////////////////
-  // Private methods:
-  ///////////////////////////////////////////////////////////////////
 private:
-
-  MuonCoinDataCollection(const MuonCoinDataCollection&);
-  MuonCoinDataCollection &operator=(const MuonCoinDataCollection&);
-
-  ///////////////////////////////////////////////////////////////////
-  // Private data:
-  ///////////////////////////////////////////////////////////////////
-private:
-  const IdentifierHash m_idHash; 
-  Identifier m_id; // identifier of the DE
+  const IdentifierHash m_idHash{}; 
+  Identifier m_id{}; // identifier of the DE
   
 
 };
 // member functions that use Collection T
 #include "MuonTrigCoinData/MuonCoinDataCollection.icc"
-///////////////////////////////////////////////////////////////////
-// Inline methods:
-///////////////////////////////////////////////////////////////////
 
 }
 

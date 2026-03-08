@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
@@ -77,10 +77,14 @@ public:
   virtual unsigned int storeAlignedTransforms(const ActsTrk::DetectorAlignStore& alignStore) const override;
   
   virtual const Acts::Transform3 &
-  transform(const Acts::GeometryContext &gctx) const final override;
+  localToGlobalTransform(const Acts::GeometryContext &gctx) const final override;
 
+  virtual const Acts::Transform3 &
+  localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const final override;
   /// Return surface associated with this identifier, which should come from the
   virtual const Acts::Surface &surface() const final override;
+  /// Returns whether the detector element is sensitive
+  virtual bool isSensitive() const final override { return true; }
 
   /// Mutable surface to this detector element
   virtual Acts::Surface &surface() final override;
@@ -90,7 +94,7 @@ public:
   const Trk::Surface &atlasSurface() const;
 
   /// Returns the thickness of the module
-  virtual double thickness() const final override;
+  double thickness() const;
 
   IdentityHelper identityHelper() const;
 
@@ -103,7 +107,7 @@ public:
   /// is based on.
   const GeoVDetectorElement *upstreamDetectorElement() const;
 
-  Amg::Transform3D transform(const ActsTrk::DetectorAlignStore* store) const;
+  Amg::Transform3D localToGlobal(const ActsTrk::DetectorAlignStore* store) const;
 private:
   IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
@@ -125,7 +129,7 @@ private:
 namespace ActsTrk{
     template <> inline Amg::Transform3D 
         TransformCacheDetEle<ActsDetectorElement>::fetchTransform(const DetectorAlignStore* store) const{
-        return m_parent->transform(store);
+        return m_parent->localToGlobal(store);
    }
 }
 

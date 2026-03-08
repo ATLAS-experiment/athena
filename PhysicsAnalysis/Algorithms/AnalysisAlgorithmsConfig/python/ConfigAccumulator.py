@@ -96,14 +96,18 @@ class ContainerConfig :
         self.outputs = {}
         self.meta = {}
 
-    def currentName (self) :
+    def currentName (self, *, nominal=False) :
         if self.index == 0 :
             if self.sourceName is None :
                 raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
-            return self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
-        return self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
+            result = self.systematicsName(self.name, noSysSuffix=self.noSysSuffix)
+        else :
+            result = self.systematicsName(f"{self.name}_STEP{self.index}", noSysSuffix=self.noSysSuffix)
+        if nominal :
+             result = result.replace("%SYS%", "NOSYS")
+        return result
 
     @staticmethod
     def systematicsName (name, *, noSysSuffix) :
@@ -140,6 +144,11 @@ class ConfigAccumulator :
     step before the algorithms are created, as the naming of
     containers will depend on where in the chain the container is
     used.
+
+    All arguments passed to the ConfigAccumulator constructor are used
+    as they are. The only exception is the systematics flag:
+    If not explicitly set the decision to run systematics or not
+    will be taken depending on the CommonServicesConfig setup.
     """
 
     def __init__ (self, *, flags=None, algSeq=None, noSysSuffix=False, noSystematics=None, dataType=None, isPhyslite=None, geometry=None, dsid=0, campaign=None, runNumber=None, autoconfigFromFlags=None, dataYear=0):
@@ -241,6 +250,7 @@ class ConfigAccumulator :
         self._noSystematics = noSystematics
         self._noSysSuffix = noSysSuffix
         self._algPostfix = ''
+        self._defaultHistogramStream = 'ANALYSIS'
         self._containerConfig = {}
         self._outputContainers = {}
         self._pass = 0
@@ -312,6 +322,17 @@ class ConfigAccumulator :
     def hltSummary(self) :
         """the HLTSummary configuration to be used for the trigger decision tool"""
         return self._hltSummary
+
+    def defaultHistogramStream(self):
+        """the default histogram stream to be used for output histograms"""
+        return self._defaultHistogramStream
+
+    def setDefaultHistogramStream(self, streamName: str):
+        """set the default histogram stream to be used for output histograms
+        
+        As an advanced option this is not directly exposed by the constructor,
+        but can be set by the user if needed before configuring the job."""
+        self._defaultHistogramStream = streamName
     
     def algPostfix (self) :
         """the current postfix to be appended to algorithm names
@@ -430,6 +451,15 @@ class ConfigAccumulator :
         if self._pass == 0 :
             DualUseConfig.addPrivateTool (self._currentAlg, propertyName, toolType)
 
+    def setExtraInputs (self, inputs) :
+        """set extra input dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraInputs = inputs
+
+    def setExtraOutputs (self, outputs) :
+        """set extra output dependencies for the current algorithm"""
+        if DualUseConfig.isAthena:
+            self._currentAlg.ExtraOutputs = outputs
 
     def setSourceName (self, containerName, sourceName,
                        *, originalName = None, isMet = False) :
@@ -465,7 +495,7 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName()
 
 
-    def readName (self, containerName) :
+    def readName (self, containerName, *, nominal=False) :
         """get the name of the "current copy" of the given container
 
         As extra copies get created during processing this will track
@@ -474,7 +504,7 @@ class ConfigAccumulator :
         """
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
-        return self._containerConfig[containerName].currentName()
+        return self._containerConfig[containerName].currentName(nominal=nominal)
 
 
     def copyName (self, containerName) :

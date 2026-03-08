@@ -7,5 +7,6 @@
 
 #include <ZdcNtuple/ZdcNtuple.h>
 #include <ZdcNtuple/ZdcLEDNtuple.h>
+#include <ZdcNtuple/LisNtuple.h>
 
 #endif

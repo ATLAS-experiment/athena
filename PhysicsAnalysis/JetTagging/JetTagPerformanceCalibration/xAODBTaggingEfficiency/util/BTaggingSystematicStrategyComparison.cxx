@@ -149,7 +149,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     int jet_index = 0;
     for(const xAOD::Jet* jet : *jets){
       // skip jet as any lower than this and you start seeing failed SF/Eff retrieval
-      if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) break;
+      if(jet->pt() < 20000 or std::abs(jet->eta()) > 2.4) continue;
       int truthlabel = -999;
       jet->getAttribute("HadronConeExclTruthLabelID",truthlabel);
       ANA_MSG_INFO("\n- - - - - - - - - - -  Jet " << jet_index << " - - - - - - - - - - - -");

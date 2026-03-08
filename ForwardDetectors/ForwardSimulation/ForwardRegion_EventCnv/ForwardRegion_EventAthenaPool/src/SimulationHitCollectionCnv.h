@@ -23,7 +23,7 @@ public:
 protected:
 
 	SimulationHitCollection_PERS* createPersistent (SimulationHitCollection *transCont);
-	SimulationHitCollection* createTransient ();
+	SimulationHitCollection* createTransient(const Token* token);
  };
 
 #endif //SimulationHitCollectionCnv_h

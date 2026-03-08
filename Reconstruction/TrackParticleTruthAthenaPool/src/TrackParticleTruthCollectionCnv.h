@@ -27,7 +27,7 @@ protected:
 public:
    TrackParticleTruthCollectionCnv(ISvcLocator* svcloc);
 protected:
-  virtual TrackParticleTruthCollection* createTransient();
+  virtual TrackParticleTruthCollection* createTransient(const Token* token);
   virtual TrackParticleTruthCollectionPERS* createPersistent(TrackParticleTruthCollection*);
 private:
   TrackParticleTruthCollectionCnv_p0 m_converter_p0;

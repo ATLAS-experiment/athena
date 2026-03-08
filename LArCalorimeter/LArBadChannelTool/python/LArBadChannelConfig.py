@@ -60,7 +60,10 @@ def LArBadFebCfg(configFlags, tag=None, dbname=None):
     result.addCondAlgo(CompFactory.LArBadFebCondAlg(ReadKey=rekey))
     return result
 
-def LArMaskedSCCfg(configFlags, reloadEveryEvent=False):
+def LArMaskedSCCfg(configFlags):
+     
+    reloadEveryEvent = (configFlags.Common.isOnline and configFlags.DQ.doMonitoring)
+
     result=ComponentAccumulator()
     result.merge(LArOnOffIdMappingSCCfg(configFlags))
     from IOVDbSvc.IOVDbSvcConfig import addFolders

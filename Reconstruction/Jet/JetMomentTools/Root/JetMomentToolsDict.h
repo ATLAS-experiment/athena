@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETMOMENTTOOLS_JETMOMENTTOOLSDICT_H
@@ -14,6 +14,7 @@
 #include "JetMomentTools/JetForwardPFlowJvtTool.h"
 #include "JetMomentTools/JetBalancePFlowJvtTool.h"
 #include "JetMomentTools/JetLArHVTool.h"
+#include "JetMomentTools/JetNumConstitTool.h"
 #include "JetMomentTools/JetOriginCorrectionTool.h"
 #include "JetMomentTools/JetPtAssociationTool.h"
 #include "JetMomentTools/JetTrackMomentsTool.h"

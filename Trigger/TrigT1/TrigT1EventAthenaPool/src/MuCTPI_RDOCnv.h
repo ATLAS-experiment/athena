@@ -37,7 +37,7 @@ public:
 protected:
 
    virtual MuCTPI_RDO_PERS* createPersistent( MuCTPI_RDO* transObj );
-   virtual MuCTPI_RDO*      createTransient();
+   virtual MuCTPI_RDO*      createTransient(const Token* token);
 private:
    MuCTPI_RDOCnv_p1 m_converter;
 

@@ -45,9 +45,12 @@ namespace CP
     {
       m_matchingDecorators.emplace(chain, m_matchingDecoration + "_" + RCU::substitute (chain, "-", "_"));
     }
-    ANA_CHECK(m_particleSelection.initialize(m_systematicsList, m_particlesHandle, SG::AllowEmpty));
 
-    if (m_particlesHandle) ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
+    if (m_particlesHandle)
+    {
+      ANA_CHECK (m_particlesHandle.initialize (m_systematicsList));
+      ANA_CHECK(m_particleSelection.initialize(m_systematicsList, m_particlesHandle, SG::AllowEmpty));
+    }
 
     ANA_CHECK (m_systematicsList.initialize());
 

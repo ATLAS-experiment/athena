@@ -29,6 +29,7 @@ FixHepMC::FixHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("forced_momentum", m_forced_momentum = "MEV", "Forced momentum unit");
   declareProperty("forced_length", m_forced_length = "MM", "Forced length unit");
   declareProperty("ApplyUnitsFix", m_unitsFix = true, "Attempt to identify momentum units problems and fix them");
+  declareProperty("SetHasCycles", m_setHasCycles = false, "Inform HEPMC3 that this event has cycles (loops)");
 }
 #ifndef HEPMC3
 //---->//This is copied from MCUtils
@@ -135,6 +136,15 @@ StatusCode FixHepMC::execute() {
          m_replacedpid_counts[ip->pdg_id()]++;
       }
     }
+
+#ifdef HEPMC3
+    if (m_setHasCycles){
+      // If asked, tag the event as having cycles and alert the user that this problem exists
+      auto cycles = std::make_shared<HepMC3::IntAttribute>(1);
+      evt->add_attribute("cycles",cycles);
+    }
+#endif
+
 #ifdef HEPMC3
     // Add a unit entry to the event weight vector if it's currently empty
     if (evt->weights().empty()) {
@@ -187,7 +197,7 @@ StatusCode FixHepMC::execute() {
       }
       if (units_problem>0){ // No particles should have momenta above 1 PeV; this must be a units issue
         ATH_MSG_INFO("Apparent units problem; beam particles have z-momentum " << units_problem << " in MeV. Will divide by 1000.");
-        MeVToGeV(evt);
+        MC::MeVToGeV(evt);  //Only scales momenta and masses
       }
     }
 

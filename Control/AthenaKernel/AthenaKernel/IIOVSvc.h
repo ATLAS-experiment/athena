@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_IIOVSVC_H
@@ -12,16 +12,10 @@
 
 #include <string>
 #include <vector>
-#include <set>
 #include <memory>
-
-#include "AthenaKernel/IOVSvcDefs.h"
 
 class IOVRange;
 class IOVTime;
-class IIOVSvcTool;
-class CallBackID;
-class IOpaqueAddress;
 class CondContBase;
 class DataObjID;
 class EventIDBase;
@@ -46,42 +40,6 @@ public:
   virtual StatusCode createIOVTool( const std::string& storeName ) = 0;
   virtual std::vector<std::string> getStoreNames() const = 0;
 
-  /// @name interface to the IOVSvc CBTree
-  //@{ 
-
-  /**
-   * @brief register callback function
-   * @param[in] dp       trigger callback after data in dp changes
-   * @param[in] c        a unique identifier of the callback (see CallBackID)
-   * @param[in] fcn      a boost::function object holding the callback function and the object it operates on
-   * @param[in] trigger  request immediate callback of fcn  (default false)
-   */
-  virtual StatusCode regFcn(SG::DataProxy *dp, const CallBackID& c, 
-			    const IOVSvcCallBackFcn& fcn, 
-			    bool trigger=false) = 0;
-
-  /**
-   * @brief register callback function
-   * @param[in] c1       call back fcn2 after callback with CallBackID c1 is triggered
-   * @param[in] c2       a unique identifier of this callback 
-   * @param[in] fcn2     a boost::function object holding the callback function and the object it operates on
-   * @param[in] trigger  request immediate callback of fcn  (default false)
-   */
-  virtual StatusCode regFcn(const CallBackID& c1, const CallBackID& c2, 
-			    const IOVSvcCallBackFcn& fcn2, 
-			    bool trigger=false ) = 0;
-
-  /**
-   * @brief register callback function
-   * @param[in] toolName call back fcn2 after the tool named toolName (registered as a callback) is triggered
-   * @param[in] c2       a unique identifier of the callback (see CallBackID)
-   * @param[in] fcn2     a boost::function object holding the callback function and the object it operates on
-   * @param[in] trigger  request immediate callback of fcn  (default false)
-   */
-  virtual StatusCode regFcn(const std::string &toolName, const CallBackID& c2, 
-  			    const IOVSvcCallBackFcn& fcn2, 
-  			    bool trigger=false) = 0;
-
   /// Subscribe method for DataProxy. key StoreGate key
   virtual StatusCode regProxy(       SG::DataProxy *proxy, 
 			       const std::string& key,
@@ -103,9 +61,7 @@ public:
 
   /// @name IOVRange accessors
   //@{ 
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
-			      IOVRange&) = 0;
-  virtual StatusCode setRange(const CLID& clid, const std::string& key, 
+  virtual StatusCode setRange(const CLID& clid, const std::string& key,
 			      IOVRange&,
 			      const std::string& storeName) = 0;
 
@@ -142,11 +98,6 @@ public:
   // supply a list of TADs whose data will be preloaded via a 'partial preload' flag
   virtual StatusCode preLoadDataTAD( const SG::TransientAddress *,
 				     const std::string& storeName="StoreGateSvc" ) = 0;
-
-  /// get the names of the tools that have been triggered
-  virtual StatusCode getTriggeredTools(const std::string& key,
-  				       std::set<std::string>& tools,
-				       const std::string& storeName="StoreGateSvc") = 0;
 
   /// reset all proxies known to IOVSvc
   virtual void resetAllProxies() = 0;

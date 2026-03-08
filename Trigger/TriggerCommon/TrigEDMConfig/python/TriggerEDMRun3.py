@@ -25,6 +25,31 @@ from TrigEDMConfig.TriggerEDMDefs import Alias, InViews, allowTruncation
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 
 # ------------------------------------------------------------
+
+cPFOVarsToKeep = ['IsInDenseEnvironment',
+                  'TracksExpectedEnergyDeposit',
+                 ]
+
+nPFOVarsToKeep = ['AVG_LAR_Q', 'AVG_TILE_Q', 'BADLARQ_FRAC',
+                  'CENTER_LAMBDA', 'CENTER_MAG',
+                  'EM_PROBABILITY',
+                  'N_BAD_CELLS', 'ENG_BAD_CELLS', 'ENG_POS',
+                  'ISOLATION',
+                  'LAYERENERGY_EMB1', 'LAYERENERGY_EMB2', 'LAYERENERGY_EMB3',
+                  'LAYERENERGY_EME1', 'LAYERENERGY_EME2', 'LAYERENERGY_EME3',
+                  'LAYERENERGY_FCAL0', 'LAYERENERGY_FCAL1', 'LAYERENERGY_FCAL2',
+                  'LAYERENERGY_HEC0', 'LAYERENERGY_HEC1', 'LAYERENERGY_HEC2', 'LAYERENERGY_HEC3',
+                  'LAYERENERGY_MINIFCAL0', 'LAYERENERGY_MINIFCAL1', 'LAYERENERGY_MINIFCAL2', 'LAYERENERGY_MINIFCAL3',
+                  'LAYERENERGY_PreSamplerB', 'LAYERENERGY_PreSamplerE',
+                  'LAYERENERGY_TILE0',
+                  'LAYERENERGY_TileBar0', 'LAYERENERGY_TileBar1', 'LAYERENERGY_TileBar2',
+                  'LAYERENERGY_TileExt0', 'LAYERENERGY_TileExt1', 'LAYERENERGY_TileExt2',
+                  'LAYERENERGY_TileGap1', 'LAYERENERGY_TileGap2', 'LAYERENERGY_TileGap3',
+                  'SECOND_LAMBDA', 'SECOND_R',
+                  'TIMING',
+        ]
+
+
 # ============
 # === JETS ===
 JetVarsToKeep = ['ActiveArea', 'ActiveArea4vec_eta', 'ActiveArea4vec_m', 'ActiveArea4vec_phi', 'ActiveArea4vec_pt', 'AlgorithmType',
@@ -227,12 +252,15 @@ L1TopoErrorFlagVars = '.'.join(['hasGenericRoiError', 'hasGenericDaqError', 'has
                                 'hasCrcDaqError', 'hasRoibDaqDifference', 'hasRoibCtpDifference', 'hasDaqCtpDifference'])
 # ===========
 # === Tau ===
-def getTauIDVars(name: str) -> list[str]:
+def getTauIDVars(name: str, wps: list[str] | None = None, extra_wps: list[str] | None = None) -> list[str]:
+    if wps is None: wps = ['VeryLoose', 'Loose', 'Medium', 'Tight']
+    if extra_wps is not None: wps += extra_wps
     # Default list of variables required for all triggers, according to the naming convention
-    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans', 'VeryLoose', 'Loose', 'Medium', 'Tight']]
+    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans'] + wps]
 
 TauJet_vars = []
 TauJet_vars += getTauIDVars('GNTau')
+TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium', 'LooseVar1', 'MediumVar1', 'LooseVar2', 'MediumVar2'])
 TauJet_vars_str = '.'.join(TauJet_vars)
 
 TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
@@ -889,6 +917,12 @@ TriggerHLTListRun3 = [
 
     ('xAOD::JetContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA',                                                             'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
     ('xAOD::JetAuxContainer#HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLAAux.'+getJetCopyVars('pf_subresjesgscIS_ftf_TLA'), 'BS PhysicsTLA DarkJetPEBTLA FTagPEBTLA ESD', 'Jet'),
+    
+    # PFlow for TLA - ATR-32289 - leaving empty target (ie no "BS PhysicsTLA") for low-mu run 
+    ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', '', 'Jet'),
+    ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), '', 'Jet'),
+    ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', '', 'Jet'),
+    ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), '', 'Jet'),
 
 
     # TLA Photons
@@ -1304,5 +1338,20 @@ def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
             (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')]
 
 
+def getRun3LowMuEDM(flags):
+    """
+    Get additional EDM entries recorded only for low mu runs.
+    """
 
+    TLAEDMTargets = 'BS PhysicsTLA'
+    if flags.Input.isMC:
+        TLAEDMTargets += ' ESD'
 
+    lowMuEDM = [
+        ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfChargedParticleFlowObjectsAux.'+'.'.join(cPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', TLAEDMTargets, 'Jet'),
+        ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), TLAEDMTargets, 'Jet'),
+    ]
+ 
+    return lowMuEDM

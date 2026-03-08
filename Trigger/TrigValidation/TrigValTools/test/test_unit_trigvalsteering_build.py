@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # This is not an ART test. This is a unit test of the framework used for
 # steering Trigger ART tests.
@@ -22,7 +22,7 @@ for test_type in ['athena','athenaHLT','Reco_tf','Trig_reco_tf']:
     ex.type = test_type
     if '_tf' not in test_type:
         # the actual job options don't matter as we just print --help
-        ex.job_options = 'AthExHelloWorld/HelloWorldOptions.py'
+        ex.job_options = 'AthExHelloWorld/HelloWorldConfig.py'
     ex.input = ''
     ex.args = '--help'
     test.exec_steps.append(ex)

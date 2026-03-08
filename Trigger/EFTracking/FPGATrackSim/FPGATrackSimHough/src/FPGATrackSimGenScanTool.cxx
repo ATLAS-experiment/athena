@@ -79,8 +79,8 @@ StatusCode FPGATrackSimGenScanTool::initialize()
   ATH_CHECK(m_FPGATrackSimMapping.retrieve());
   ATH_MSG_INFO("Map specifies :" << m_binnedhits->getNLayers());
   ATH_CHECK(m_binnedhits.retrieve());
-  ATH_CHECK(m_monitoring.retrieve());
-  ATH_MSG_INFO("Monitoring Dir :" << m_monitoring->dir());
+  ATH_CHECK(m_monitoring.retrieve(EnableTool{m_enableMonitoring}));
+  if (m_enableMonitoring) ATH_MSG_INFO("Monitoring Dir :" << m_monitoring->dir());
 
   // Setup layer configuration if not already set from layerMap
   if (m_binnedhits->getNLayers()==0){
@@ -120,8 +120,7 @@ StatusCode FPGATrackSimGenScanTool::initialize()
 
   
   // register histograms
-  ATH_CHECK(m_monitoring->registerHistograms(m_binnedhits.get()));
-
+  if (m_enableMonitoring) ATH_CHECK(m_monitoring->registerHistograms(m_binnedhits.get()));
   // write out the firmware LUTs
   m_binnedhits->getBinTool().writeLUTs();
 
@@ -139,14 +138,15 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   
   roads.clear();
   m_roads.clear();
-  m_monitoring->resetDataFlowCounters();
-  
-  // Currently assume that if less than 100 hits its a single track MC
-  m_monitoring->parseTruthInfo(getTruthTracks(),(hits.size() < 100));
+  if (m_enableMonitoring) {
+    m_monitoring->resetDataFlowCounters();
+    // Currently assume that if less than 100 hits its a single track MC
+    m_monitoring->parseTruthInfo(getTruthTracks(),(hits.size() < 100));
+  }
 
   // do the binning...
   ATH_CHECK(m_binnedhits->fill(hits));
-  m_monitoring->fillBinningSummary(hits);
+  if (m_enableMonitoring) m_monitoring->fillBinningSummary(hits);
 
   // scan over image building pairs for bins over threshold
   for (FPGATrackSimBinArray<BinEntry>::ConstIterator &bin : m_binnedhits->lastStepBinnedHits())
@@ -157,7 +157,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
                                           << bin.idx());  
 
     // Monitor contents of bins passing threshold
-    m_monitoring->fillBinLevelOutput(bin.idx(), bin.data());
+    if (m_enableMonitoring) m_monitoring->fillBinLevelOutput(bin.idx(), bin.data());
     if (m_binningOnly) continue;
       
     // pass hits for bin to filterRoad and get back pairs of hits grouped into pairsets
@@ -195,7 +195,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
 
   if (m_keepHitsStrategy > 0) {
     for (auto & r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHits();
+      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHitPtrs();
       layer_bitmask_t hitmask = r.getHitLayers();
       std::vector<unsigned> toUse = PickHitsToUse(hitmask);
 
@@ -235,7 +235,7 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
   
   // This is monitoring for each bin over threshold
   // It's here so it can get the hitsByLayer
-  m_monitoring->fillHitsByLayer(hitsByLayer);
+  if (m_enableMonitoring) m_monitoring->fillHitsByLayer(hitsByLayer);
 
   // Make Pairs
   HitPairSet pairs;
@@ -247,7 +247,7 @@ StatusCode FPGATrackSimGenScanTool::pairThenGroupFilter(const BinEntry &bindata,
 
   // Require road is still over threshold
   bool passedPairFilter = (filteredpairs.lyrCnt() >= m_threshold);
-  m_monitoring->pairFilterCheck(pairs, filteredpairs, passedPairFilter);
+  if (m_enableMonitoring) m_monitoring->pairFilterCheck(pairs, filteredpairs, passedPairFilter);
 
   // if passed Pair Filter proceed to group the filtered pairs into pairsets
   if (passedPairFilter)
@@ -379,7 +379,7 @@ StatusCode FPGATrackSimGenScanTool::incrementalBuildFilter(const BinEntry &binda
   
   // This is monitoring for each bin over threshold
   // It's here so it can get the hitsByLayer
-  m_monitoring->fillHitsByLayer(hitsByLayer);
+  if (m_enableMonitoring) m_monitoring->fillHitsByLayer(hitsByLayer);
 
   std::vector<IntermediateState> states{m_binnedhits->getNLayers()+1};
   for (unsigned lyridx = 0; lyridx < m_binnedhits->getNLayers(); lyridx++) {
@@ -390,7 +390,7 @@ StatusCode FPGATrackSimGenScanTool::incrementalBuildFilter(const BinEntry &binda
   // this is a little ugly because it requires copying the output pairsets right now
   output_pairsets=states[m_binnedhits->getNLayers()].pairsets;
 
-  m_monitoring->fillBuildGroupsWithPairs(states,m_binnedhits->getNLayers()-m_threshold);
+  if (m_enableMonitoring) m_monitoring->fillBuildGroupsWithPairs(states,m_binnedhits->getNLayers()-m_threshold);
   
   return StatusCode::SUCCESS;
 }
@@ -440,7 +440,7 @@ StatusCode FPGATrackSimGenScanTool::makePairs(const std::vector<std::vector<cons
     }
     lastlastlyr = lastlyr;
     lastlyr = &hitsByLayer[lyr];    
-    m_monitoring->fillPairingHits(lastlyr,lastlastlyr);
+    if (m_enableMonitoring) m_monitoring->fillPairingHits(lastlyr,lastlastlyr);
   }
 
   return StatusCode::SUCCESS;
@@ -450,7 +450,7 @@ StatusCode FPGATrackSimGenScanTool::makePairs(const std::vector<std::vector<cons
 // the bin they are in
 
 bool FPGATrackSimGenScanTool::pairPassesFilter(const HitPair &pair) {
-  m_monitoring->fillPairFilterCuts(pair,m_rin,m_rout);
+  if (m_enableMonitoring) m_monitoring->fillPairFilterCuts(pair,m_rin,m_rout);
   int lyr = std::min(pair.first->layer,pair.second->layer);
   return (std::abs(pair.dPhi()) < m_pairFilterDeltaPhiCut[lyr]) &&
         (std::abs(pair.dEta()) < m_pairFilterDeltaEtaCut[lyr]) &&
@@ -525,84 +525,119 @@ StatusCode FPGATrackSimGenScanTool::groupPairs(HitPairSet &filteredpairs,
 bool FPGATrackSimGenScanTool::pairMatchesPairSet(const HitPairSet &pairset,
                                                  const HitPair &pair,
                                                  bool verbose) {
-  // In order to make it easy to have a long list of possible cuts,
-  // a vector of cutvar structs is used to represent each cut
-  // then apply the AND of all the cuts is done with a std::count_if function
-
-  // define the struct (effectively mapping because variable, configured cut value, 
-  // and histograms for plotting
-  struct cutvar {
-    cutvar(std::string name, double val, double cut, std::vector<TH1D *>& histset) :
-       m_name(std::move(name)), m_val(val), m_cut(cut), m_histset(histset) {}
-    bool passed() { return std::abs(m_val) < m_cut; }
-    void fill(unsigned cat) {  m_histset[cat]->Fill(m_val); }
-    std::string m_name;
-    double m_val;
-    double m_cut;
-    std::vector<TH1D *> &m_histset;
-  };
-
-  // add the cuts to the list of all cuts
-  std::vector<cutvar> allcuts;
-  allcuts.push_back(cutvar("MatchPhi", pairset.MatchPhi(pair),
-                           m_pairSetMatchPhiCut,
-                           m_monitoring->m_pairSetMatchPhi));
-  allcuts.push_back(cutvar("MatchEta", pairset.MatchEta(pair),
-                           m_pairSetMatchEtaCut,
-                           m_monitoring->m_pairSetMatchEta));
-  allcuts.push_back(cutvar("DeltaDeltaPhi", pairset.DeltaDeltaPhi(pair),
-                           m_pairSetDeltaDeltaPhiCut,
-                           m_monitoring->m_deltaDeltaPhi));
-  allcuts.push_back(cutvar("DeltaDeltaEta", pairset.DeltaDeltaEta(pair),
-                           m_pairSetDeltaDeltaEtaCut,
-                           m_monitoring->m_deltaDeltaEta));
-  allcuts.push_back(cutvar("PhiCurvature", pairset.PhiCurvature(pair),
-                           m_pairSetPhiCurvatureCut,
-                           m_monitoring->m_phiCurvature));
-  allcuts.push_back(cutvar("EtaCurvature", pairset.EtaCurvature(pair),
-                           m_pairSetEtaCurvatureCut,
-                           m_monitoring->m_etaCurvature));
+  // Compute all the cut values needed for filtering
+  bool matchPhiPassed = (std::abs(pairset.MatchPhi(pair)) < m_pairSetMatchPhiCut);
+  bool matchEtaPassed = (std::abs(pairset.MatchEta(pair)) < m_pairSetMatchEtaCut);
+  bool deltaDeltaPhiPassed = (std::abs(pairset.DeltaDeltaPhi(pair)) < m_pairSetDeltaDeltaPhiCut);
+  bool deltaDeltaEtaPassed = (std::abs(pairset.DeltaDeltaEta(pair)) < m_pairSetDeltaDeltaEtaCut);
+  bool phiCurvaturePassed = (std::abs(pairset.PhiCurvature(pair)) < m_pairSetPhiCurvatureCut);
+  bool etaCurvaturePassed = (std::abs(pairset.EtaCurvature(pair)) < m_pairSetEtaCurvatureCut);
+  bool phiInExtrapPassed = (std::abs(pairset.PhiInExtrapCurved(pair, m_rin)) < m_pairSetPhiExtrapCurvedCut[0]);
+  bool phiOutExtrapPassed = (std::abs(pairset.PhiOutExtrapCurved(pair, m_rout)) < m_pairSetPhiExtrapCurvedCut[1]);
+  
+  std::vector<bool> allcutsPassed;
+  allcutsPassed.push_back(matchPhiPassed);
+  allcutsPassed.push_back(matchEtaPassed);
+  allcutsPassed.push_back(deltaDeltaPhiPassed);
+  allcutsPassed.push_back(deltaDeltaEtaPassed);
+  allcutsPassed.push_back(phiCurvaturePassed);
+  allcutsPassed.push_back(etaCurvaturePassed);
+  
+  bool deltaPhiCurvaturePassed = true;
+  bool deltaEtaCurvaturePassed = true;
   if (pairset.pairList.size() > 1) {
-    allcuts.push_back(cutvar(
-        "DeltaPhiCurvature", pairset.DeltaPhiCurvature(pair),
-        m_pairSetDeltaPhiCurvatureCut, m_monitoring->m_deltaPhiCurvature));
-    allcuts.push_back(cutvar(
-        "DeltaEtaCurvature", pairset.DeltaEtaCurvature(pair),
-        m_pairSetDeltaEtaCurvatureCut, m_monitoring->m_deltaEtaCurvature));
+    deltaPhiCurvaturePassed = (std::abs(pairset.DeltaPhiCurvature(pair)) < m_pairSetDeltaPhiCurvatureCut);
+    deltaEtaCurvaturePassed = (std::abs(pairset.DeltaEtaCurvature(pair)) < m_pairSetDeltaEtaCurvatureCut);
+    allcutsPassed.push_back(deltaPhiCurvaturePassed);
+    allcutsPassed.push_back(deltaEtaCurvaturePassed);
   }
-  allcuts.push_back(cutvar(
-      "PhiInExtrapCurved", pairset.PhiInExtrapCurved(pair, m_rin),
-      m_pairSetPhiExtrapCurvedCut[0], m_monitoring->m_phiInExtrapCurved));
-  allcuts.push_back(cutvar(
-      "PhiOutExtrapCurved", pairset.PhiOutExtrapCurved(pair, m_rout),
-      m_pairSetPhiExtrapCurvedCut[1], m_monitoring->m_phiOutExtrapCurved));
-
+  allcutsPassed.push_back(phiInExtrapPassed);
+  allcutsPassed.push_back(phiOutExtrapPassed);
+  
   // count number of cuts passed
-  unsigned passedCuts = std::count_if(allcuts.begin(), allcuts.end(),
-                                      [](cutvar& cut) { return cut.passed(); });
-  bool passedAll = (passedCuts == allcuts.size());
+  unsigned passedCuts = std::count_if(allcutsPassed.begin(), allcutsPassed.end(),
+                                      [](bool cut) { return cut; });
+  bool passedAll = (passedCuts == allcutsPassed.size());
 
-  // monitoring
-  bool passedAllButOne = (passedCuts == allcuts.size() - 1);
-  for (cutvar& cut: allcuts) {
-    // the last value computes if an n-1 histogram should be filled
-    m_monitoring->fillPairSetFilterCut(cut.m_histset, cut.m_val, pair,
-                                        pairset.lastpair(),
-                                        (passedAll || (passedAllButOne && !cut.passed())));
-  }
+  // Detailed monitoring with histograms (only if enabled)
+  if (m_enableMonitoring) {
+    // In order to make it easy to have a long list of possible cuts,
+    // a vector of cutvar structs is used to represent each cut
+    // then apply the AND of all the cuts is done with a std::count_if function
 
-  if (verbose)
-  {
-    std::string s = "";
-    for (cutvar &cut : allcuts)
-    {
-      s += cut.m_name + " : (" + cut.passed() + ", " + cut.m_val + "),  ";
+    // define the struct (effectively mapping because variable, configured cut value, 
+    // and histograms for plotting
+    struct cutvar {
+      cutvar(std::string name, double val, double cut, std::vector<TH1D *>& histset) :
+         m_name(std::move(name)), m_val(val), m_cut(cut), m_histset(histset) {}
+      bool passed() { return std::abs(m_val) < m_cut; }
+      void fill(unsigned cat) {  m_histset[cat]->Fill(m_val); }
+      std::string m_name;
+      double m_val;
+      double m_cut;
+      std::vector<TH1D *> &m_histset;
+    };
+
+    // add the cuts to the list of all cuts
+    std::vector<cutvar> allcuts;
+    allcuts.push_back(cutvar("MatchPhi", pairset.MatchPhi(pair),
+                             m_pairSetMatchPhiCut,
+                             m_monitoring->m_pairSetMatchPhi));
+    allcuts.push_back(cutvar("MatchEta", pairset.MatchEta(pair),
+                             m_pairSetMatchEtaCut,
+                             m_monitoring->m_pairSetMatchEta));
+    allcuts.push_back(cutvar("DeltaDeltaPhi", pairset.DeltaDeltaPhi(pair),
+                             m_pairSetDeltaDeltaPhiCut,
+                             m_monitoring->m_deltaDeltaPhi));
+    allcuts.push_back(cutvar("DeltaDeltaEta", pairset.DeltaDeltaEta(pair),
+                             m_pairSetDeltaDeltaEtaCut,
+                             m_monitoring->m_deltaDeltaEta));
+    allcuts.push_back(cutvar("PhiCurvature", pairset.PhiCurvature(pair),
+                             m_pairSetPhiCurvatureCut,
+                             m_monitoring->m_phiCurvature));
+    allcuts.push_back(cutvar("EtaCurvature", pairset.EtaCurvature(pair),
+                             m_pairSetEtaCurvatureCut,
+                             m_monitoring->m_etaCurvature));
+    if (pairset.pairList.size() > 1) {
+      allcuts.push_back(cutvar(
+          "DeltaPhiCurvature", pairset.DeltaPhiCurvature(pair),
+          m_pairSetDeltaPhiCurvatureCut, m_monitoring->m_deltaPhiCurvature));
+      allcuts.push_back(cutvar(
+          "DeltaEtaCurvature", pairset.DeltaEtaCurvature(pair),
+          m_pairSetDeltaEtaCurvatureCut, m_monitoring->m_deltaEtaCurvature));
     }
-    ATH_MSG_DEBUG("PairSet test " << passedAll << " " << s);
-    ATH_MSG_DEBUG("Hits: \n   " << *pairset.lastpair().first << "\n   "
-                               << *pairset.lastpair().second << "\n   "
-                               << *pair.first << "\n   "
-                               << *pair.second);
+    allcuts.push_back(cutvar(
+        "PhiInExtrapCurved", pairset.PhiInExtrapCurved(pair, m_rin),
+        m_pairSetPhiExtrapCurvedCut[0], m_monitoring->m_phiInExtrapCurved));
+    allcuts.push_back(cutvar(
+        "PhiOutExtrapCurved", pairset.PhiOutExtrapCurved(pair, m_rout),
+        m_pairSetPhiExtrapCurvedCut[1], m_monitoring->m_phiOutExtrapCurved));
+
+    // monitoring
+    unsigned monitoringPassedCuts = std::count_if(allcuts.begin(), allcuts.end(),
+                                        [](cutvar& cut) { return cut.passed(); });
+    bool monitoringPassedAll = (monitoringPassedCuts == allcuts.size());
+    bool monitoringPassedAllButOne = (monitoringPassedCuts == allcuts.size() - 1);
+    for (cutvar& cut: allcuts) {
+      // the last value computes if an n-1 histogram should be filled
+      m_monitoring->fillPairSetFilterCut(cut.m_histset, cut.m_val, pair,
+                                          pairset.lastpair(),
+                                          (monitoringPassedAll || (monitoringPassedAllButOne && !cut.passed())));
+    }
+
+    if (verbose)
+    {
+      std::string s = "";
+      for (cutvar &cut : allcuts)
+      {
+        s += cut.m_name + " : (" + cut.passed() + ", " + cut.m_val + "),  ";
+      }
+      ATH_MSG_DEBUG("PairSet test " << monitoringPassedAll << " " << s);
+      ATH_MSG_DEBUG("Hits: \n   " << *pairset.lastpair().first << "\n   "
+                                 << *pairset.lastpair().second << "\n   "
+                                 << *pair.first << "\n   "
+                                 << *pair.second);
+    }
   }
 
   return passedAll;

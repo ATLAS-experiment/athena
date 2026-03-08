@@ -171,57 +171,102 @@ namespace CP {
         }
 
         if (m_useMVALowPt) {
-            // Set up TMVA readers for MVA-based low-pT working point
-            // E and O refer to even and odd event numbers to avoid applying the MVA on events used for training
-            TString weightPath_EVEN_MuidCB = PathResolverFindCalibFile(m_MVAreaderFile_EVEN_MuidCB);
-            TString weightPath_ODD_MuidCB = PathResolverFindCalibFile(m_MVAreaderFile_ODD_MuidCB);
-            TString weightPath_EVEN_MuGirl = PathResolverFindCalibFile(m_MVAreaderFile_EVEN_MuGirl);
-            TString weightPath_ODD_MuGirl = PathResolverFindCalibFile(m_MVAreaderFile_ODD_MuGirl);
-
-            auto make_mva_reader = [](TString file_path) {
-                std::vector<std::string> mva_var_names{"momentumBalanceSignificance",
-                                                       "scatteringCurvatureSignificance",
-                                                       "scatteringNeighbourSignificance",
-                                                       "EnergyLoss",
-                                                       "middleLargeHoles+middleSmallHoles",
-                                                       "muonSegmentDeltaEta",
-                                                       "muonSeg1ChamberIdx",
-                                                       "muonSeg2ChamberIdx"};
-                std::unique_ptr<TMVA::Reader> reader = std::make_unique<TMVA::Reader>(mva_var_names);
-                reader->BookMVA("BDTG", file_path);
-                return reader;
-            };
-            m_readerE_MUID = make_mva_reader(weightPath_EVEN_MuidCB);
-
-            m_readerO_MUID = make_mva_reader(weightPath_ODD_MuidCB);
-
-            m_readerE_MUGIRL = make_mva_reader(weightPath_EVEN_MuGirl);
-
-            m_readerO_MUGIRL = make_mva_reader(weightPath_ODD_MuGirl);
-
-            if (m_useSegmentTaggedLowPt) {
-                TString weightPath_MuTagIMO_etaBin1 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin1);
-                TString weightPath_MuTagIMO_etaBin2 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin2);
-                TString weightPath_MuTagIMO_etaBin3 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin3);
-
-                auto make_mva_reader_MuTagIMO = [](TString file_path, bool useSeg2ChamberIndex) {
-                    std::vector<std::string> mva_var_names;
-                    if (useSeg2ChamberIndex) mva_var_names.push_back("muonSeg2ChamberIndex");
-                    mva_var_names.push_back("muonSeg1ChamberIndex");
-                    mva_var_names.push_back("muonSeg1NPrecisionHits");
-                    mva_var_names.push_back("muonSegmentDeltaEta");
-                    mva_var_names.push_back("muonSeg1GlobalR");
-                    mva_var_names.push_back("muonSeg1Chi2OverDoF");
-                    mva_var_names.push_back("muonSCS");
-
-                    std::unique_ptr<TMVA::Reader> reader = std::make_unique<TMVA::Reader>(mva_var_names);
-                    reader->BookMVA("BDT", file_path);
-                    return reader;
+            if (m_isRun3) {
+                // Helper lambda to load BDT model and scaler
+                auto loadLowPtMVABDTModel = [&](const std::string& calibFile, 
+                                    std::unique_ptr<MVAUtils::BDT>& bdt,
+                                    std::vector<double>& means,
+                                    std::vector<double>& scales) -> StatusCode {
+                    const std::string modelFile = PathResolverFindCalibFile(calibFile);
+                    std::unique_ptr<TFile> rootFile(TFile::Open(modelFile.c_str(), "READ"));
+                    
+                    if (!rootFile || rootFile->IsZombie()) {
+                        ATH_MSG_ERROR("Failed to open model file for Run-3 LowPtMVA: " << modelFile);
+                        return StatusCode::FAILURE;
+                    }
+                    
+                    // Load BDT model
+                    auto* bdt_tree = static_cast<TTree*>(rootFile->Get("xgboost"));
+                    bdt = std::make_unique<MVAUtils::BDT>(bdt_tree);
+                    
+                    // Load scaler
+                    std::unique_ptr<TTree> scaler_tree(static_cast<TTree*>(rootFile->Get("scaler")));
+                    std::vector<double>* mean_ptr = nullptr;
+                    std::vector<double>* scale_ptr = nullptr;
+                    scaler_tree->SetBranchAddress("mean", &mean_ptr);
+                    scaler_tree->SetBranchAddress("scale", &scale_ptr);
+                    
+                    for (Long64_t i = 0; i < scaler_tree->GetEntries(); ++i) {
+                        scaler_tree->GetEntry(i);
+                        for (size_t j = 0; j < mean_ptr->size(); ++j) {
+                            means.push_back((*mean_ptr)[j]);
+                            scales.push_back((*scale_ptr)[j]);
+                        }
+                    }
+                    return StatusCode::SUCCESS;
                 };
 
-                m_reader_MUTAGIMO_etaBin1 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin1, false);
-                m_reader_MUTAGIMO_etaBin2 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin2, false);
-                m_reader_MUTAGIMO_etaBin3 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin3, true);
+                // Load MuidCO model for Run-3 LowPtMVA
+                ATH_CHECK(loadLowPtMVABDTModel("MuonSelectorTools/260130_LowPtMVA_r24run3/xgb_lowPtMVA_MuidCO_wScaler.root",
+                            m_MuidCO, m_lowPtMuidCO_means, m_lowPtMuidCO_scaler));
+
+                // Load MuGirl model for Run-3 LowPtMVA
+                ATH_CHECK(loadLowPtMVABDTModel("MuonSelectorTools/260130_LowPtMVA_r24run3/xgb_lowPtMVA_MuGirl_wScaler.root",
+                            m_MuGirl, m_lowPtMuGirl_means, m_lowPtMuGirl_scaler));
+            }
+            else{
+                // Set up TMVA readers for MVA-based low-pT working point
+                // E and O refer to even and odd event numbers to avoid applying the MVA on events used for training
+                TString weightPath_EVEN_MuidCB = PathResolverFindCalibFile(m_MVAreaderFile_EVEN_MuidCB);
+                TString weightPath_ODD_MuidCB = PathResolverFindCalibFile(m_MVAreaderFile_ODD_MuidCB);
+                TString weightPath_EVEN_MuGirl = PathResolverFindCalibFile(m_MVAreaderFile_EVEN_MuGirl);
+                TString weightPath_ODD_MuGirl = PathResolverFindCalibFile(m_MVAreaderFile_ODD_MuGirl);
+
+                auto make_mva_reader = [](TString file_path) {
+                    std::vector<std::string> mva_var_names{"momentumBalanceSignificance",
+                                                        "scatteringCurvatureSignificance",
+                                                        "scatteringNeighbourSignificance",
+                                                        "EnergyLoss",
+                                                        "middleLargeHoles+middleSmallHoles",
+                                                        "muonSegmentDeltaEta",
+                                                        "muonSeg1ChamberIdx",
+                                                        "muonSeg2ChamberIdx"};
+                    std::unique_ptr<TMVA::Reader> reader = std::make_unique<TMVA::Reader>(mva_var_names);
+                    reader->BookMVA("BDTG", file_path);
+                    return reader;
+                };
+                m_readerE_MUID = make_mva_reader(weightPath_EVEN_MuidCB);
+
+                m_readerO_MUID = make_mva_reader(weightPath_ODD_MuidCB);
+
+                m_readerE_MUGIRL = make_mva_reader(weightPath_EVEN_MuGirl);
+
+                m_readerO_MUGIRL = make_mva_reader(weightPath_ODD_MuGirl);
+
+                if (m_useSegmentTaggedLowPt) {
+                    TString weightPath_MuTagIMO_etaBin1 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin1);
+                    TString weightPath_MuTagIMO_etaBin2 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin2);
+                    TString weightPath_MuTagIMO_etaBin3 = PathResolverFindCalibFile(m_MVAreaderFile_MuTagIMO_etaBin3);
+
+                    auto make_mva_reader_MuTagIMO = [](TString file_path, bool useSeg2ChamberIndex) {
+                        std::vector<std::string> mva_var_names;
+                        if (useSeg2ChamberIndex) mva_var_names.push_back("muonSeg2ChamberIndex");
+                        mva_var_names.push_back("muonSeg1ChamberIndex");
+                        mva_var_names.push_back("muonSeg1NPrecisionHits");
+                        mva_var_names.push_back("muonSegmentDeltaEta");
+                        mva_var_names.push_back("muonSeg1GlobalR");
+                        mva_var_names.push_back("muonSeg1Chi2OverDoF");
+                        mva_var_names.push_back("muonSCS");
+
+                        std::unique_ptr<TMVA::Reader> reader = std::make_unique<TMVA::Reader>(mva_var_names);
+                        reader->BookMVA("BDT", file_path);
+                        return reader;
+                    };
+
+                    m_reader_MUTAGIMO_etaBin1 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin1, false);
+                    m_reader_MUTAGIMO_etaBin2 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin2, false);
+                    m_reader_MUTAGIMO_etaBin3 = make_mva_reader_MuTagIMO(weightPath_MuTagIMO_etaBin3, true);
+                }
             }
         }
         
@@ -769,8 +814,14 @@ namespace CP {
             return false;
 
         if (m_useMVALowPt) {
-            ATH_MSG_VERBOSE("Applying MVA-based selection");
-            return passedLowPtEfficiencyMVACut(mu);
+            if (isRun3()) {
+                ATH_MSG_VERBOSE("Applying Run-3 MVA-based selection");
+                return passedLowPtEfficiencyMVACutRun3(mu);
+            } else {
+                ATH_MSG_VERBOSE("Applying Run-2 MVA-based selection");
+                return passedLowPtEfficiencyMVACut(mu);
+            }
+            
         }
 
         ATH_MSG_VERBOSE("Applying cut-based selection");
@@ -920,6 +971,178 @@ namespace CP {
             return true;
         } else {
             ATH_MSG_VERBOSE("Failed low-pT MVA cut");
+            return false;
+        }
+    }
+
+    bool MuonSelectionTool::passedLowPtEfficiencyMVACutRun3(const xAOD::Muon& mu) const {
+        if (!m_useMVALowPt) {
+            ATH_MSG_DEBUG("Low pt MVA disabled. Return... ");
+            return false;
+        }
+
+        if (mu.author() == xAOD::Muon::MuidCo) {
+            ATH_MSG_VERBOSE("passedLowPtEfficiencyMVACutRun3() for MuidCO");
+
+            //-- Prepare BDT input feature variables
+            float momentumBalanceSig{-1}, CurvatureSig{-1}, scatteringNeigbour{-1};
+            int CaloMuonIDTag{-1};
+            uint8_t nPixelHits{0}, nTRTOutliers{0};
+            float reducedChi2{-1};
+            float etaBalanceSig{-1}, phiBalanceSig{-1};
+            float seg1ChamberIdx{-1};
+
+            retrieveParam(mu, momentumBalanceSig, xAOD::Muon::momentumBalanceSignificance);
+            retrieveParam(mu, CurvatureSig, xAOD::Muon::scatteringCurvatureSignificance);
+            retrieveParam(mu, scatteringNeigbour, xAOD::Muon::scatteringNeighbourSignificance);
+
+            retrieveSummaryValue(mu, nPixelHits, xAOD::SummaryType::numberOfPixelHits);
+            retrieveSummaryValue(mu, nTRTOutliers, xAOD::SummaryType::numberOfTRTOutliers);
+
+            mu.parameter(CaloMuonIDTag, xAOD::Muon::CaloMuonIDTag);
+
+            reducedChi2 = mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+
+            const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+
+            etaBalanceSig = std::abs(idtrack->eta() - metrk->eta());
+            phiBalanceSig = std::abs(idtrack->phi() - metrk->phi());
+                    
+            std::vector<const xAOD::MuonSegment*> muonSegments = getSegmentsSorted(mu);
+            using namespace Muon::MuonStationIndex;
+            seg1ChamberIdx = (!muonSegments.empty()) ? toInt(muonSegments[0]->chamberIndex()) : -9;
+
+            hitSummary summary{};
+            fillSummary(mu, summary);
+
+            //-- Apply clipping
+            etaBalanceSig = std::min(etaBalanceSig, 1.0f);
+            reducedChi2 = std::min(reducedChi2, 100.0f);
+            CurvatureSig = std::clamp(CurvatureSig, -10.0f, 10.0f);
+            scatteringNeigbour = std::clamp(scatteringNeigbour, -10.0f, 10.0f);
+
+            //-- Prepare BDT input feature variables vector
+            std::vector<float> muidCO_feature_vector = {
+                static_cast<float>(nPixelHits),
+                static_cast<float>(nTRTOutliers),
+                static_cast<float>(CaloMuonIDTag),
+                static_cast<float>(mu.energyLossType()),
+                etaBalanceSig,
+                momentumBalanceSig,
+                static_cast<float>(summary.nprecisionLayers),
+                phiBalanceSig,
+                reducedChi2,
+                CurvatureSig,
+                scatteringNeigbour,
+                seg1ChamberIdx
+            };
+
+            //-- Apply scaling
+            for (size_t j=0; j<muidCO_feature_vector.size(); ++j){
+                muidCO_feature_vector[j] = (muidCO_feature_vector[j] - m_lowPtMuidCO_means[j]) / m_lowPtMuidCO_scaler[j];
+            }
+
+            //-- Get BDT response
+            float bdt_score = m_MuidCO->GetClassification(muidCO_feature_vector);
+            ATH_MSG_VERBOSE(" Low-pT MVA BDT score (MuidCo, Run-3) : " << bdt_score);
+
+            //-- cut on discriminant (value motivated by study, slide 10):
+            // https://indico.cern.ch/event/1639238/contributions/6896745/attachments/3208593/5714230/Run-3%20LowPt%20MVA%20WP%20Update.pdf
+            float lowPtMVARun3_MuidCO_cut_value = 0.1300;
+            return (bdt_score > lowPtMVARun3_MuidCO_cut_value);
+            
+        } else if (mu.author() == xAOD::Muon::MuGirl && mu.isAuthor(xAOD::Muon::MuTagIMO)) {
+            ATH_MSG_VERBOSE("passedLowPtEfficiencyMVACutRun3() for MuGirl");
+
+            //-- Prepare BDT input feature variables
+            uint8_t nTRTOutliers{0}, middleClosePrecisionHits{0}, outerClosePrecisionHits{0};
+            float momentumBalanceSig{-1}, seg1ChamberIdx{-1}, energyLoss{-1};
+            int CaloMuonIDTag{-1};
+            float reducedChi2{-1}, etaBalanceSig{-1}, phiBalanceSig{-1};
+            float segmentDeltaEta{-1}, etaPrime{-1}, innerHits{-1};
+            float middleHoles{-1}, nGoodPrecLayers{-1};
+            float nprecisionHoleLayers{-1}, outerHoles{-1};
+
+            retrieveParam(mu, momentumBalanceSig, xAOD::Muon::momentumBalanceSignificance);
+            retrieveParam(mu, segmentDeltaEta, xAOD::Muon::segmentDeltaEta);
+            retrieveParam(mu, energyLoss, xAOD::Muon::EnergyLoss);
+
+            uint8_t middleSmallHoles{0}, middleLargeHoles{0};
+            retrieveSummaryValue(mu, middleSmallHoles, xAOD::MuonSummaryType::middleSmallHoles);
+            retrieveSummaryValue(mu, middleLargeHoles, xAOD::MuonSummaryType::middleLargeHoles);
+            uint8_t outerSmallHoles{0}, outerLargeHoles{0};
+            retrieveSummaryValue(mu, outerSmallHoles, xAOD::MuonSummaryType::outerSmallHoles);
+            retrieveSummaryValue(mu, outerLargeHoles, xAOD::MuonSummaryType::outerLargeHoles);
+            retrieveSummaryValue(mu, nTRTOutliers, xAOD::SummaryType::numberOfTRTOutliers);
+            retrieveSummaryValue(mu, middleClosePrecisionHits, xAOD::MuonSummaryType::middleClosePrecisionHits);
+            retrieveSummaryValue(mu, outerClosePrecisionHits, xAOD::MuonSummaryType::outerClosePrecisionHits);
+
+            mu.parameter(CaloMuonIDTag, xAOD::Muon::CaloMuonIDTag);
+
+            middleHoles = middleSmallHoles + middleLargeHoles;
+            outerHoles = outerSmallHoles + outerLargeHoles;
+            reducedChi2 = mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
+            
+            const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+            const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        
+            etaBalanceSig = std::abs(idtrack->eta() - metrk->eta());
+            etaPrime = std::abs((idtrack->eta() - metrk->eta())/mu.eta());
+            phiBalanceSig = std::abs(idtrack->phi() - metrk->phi());
+
+            std::vector<const xAOD::MuonSegment*> muonSegments = getSegmentsSorted(mu);
+            using namespace Muon::MuonStationIndex;
+            seg1ChamberIdx = (!muonSegments.empty())   ? toInt(muonSegments[0]->chamberIndex()) : -9;
+
+            hitSummary summary{};
+            fillSummary(mu, summary);
+            innerHits = summary.innerSmallHits + summary.innerLargeHits;
+            nGoodPrecLayers = summary.nGoodPrecLayers;
+            nprecisionHoleLayers = summary.nprecisionHoleLayers;
+            
+            //-- Apply clipping
+            etaBalanceSig = std::min(etaBalanceSig, 1.0f);
+            reducedChi2 = std::min(reducedChi2, 100.0f);
+            etaPrime = std::clamp(etaPrime, -10.0f, 10.0f);
+
+            //-- Prepare BDT input feature variables vector
+            std::vector<float> muGirl_feature_vector = {
+                static_cast<float>(nTRTOutliers),
+                static_cast<float>(CaloMuonIDTag),
+                energyLoss,
+                etaBalanceSig,
+                etaPrime,
+                innerHits,
+                static_cast<float>(middleClosePrecisionHits),
+                middleHoles,
+                momentumBalanceSig,
+                nGoodPrecLayers,
+                nprecisionHoleLayers,
+                static_cast<float>(summary.nprecisionLayers),
+                static_cast<float>(outerClosePrecisionHits),
+                outerHoles,
+                phiBalanceSig,
+                reducedChi2,
+                seg1ChamberIdx,
+                segmentDeltaEta
+            };
+
+            //-- Apply scaling
+            for (size_t j=0; j<muGirl_feature_vector.size(); ++j){
+                muGirl_feature_vector[j] = (muGirl_feature_vector[j] - m_lowPtMuGirl_means[j]) / m_lowPtMuGirl_scaler[j];
+            }
+
+            //-- Get BDT response
+            float bdt_score = m_MuGirl->GetClassification(muGirl_feature_vector);
+            ATH_MSG_VERBOSE(" Low-pT MVA BDT score (MuGirl, Run-3) : " << bdt_score);
+
+            //-- cut on discriminant (value motivated by study, slide 11):
+            // https://indico.cern.ch/event/1639238/contributions/6896745/attachments/3208593/5714230/Run-3%20LowPt%20MVA%20WP%20Update.pdf
+            float lowPtMVARun3_MuGirl_cut_value = 0.1550;
+            return (bdt_score > lowPtMVARun3_MuGirl_cut_value);
+        } else {
+            ATH_MSG_WARNING("Invalid author for low-pT MVA in Run-3, failing selection...");
             return false;
         }
     }

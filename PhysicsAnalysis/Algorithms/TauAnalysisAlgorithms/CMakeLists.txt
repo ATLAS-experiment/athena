@@ -18,7 +18,6 @@ atlas_add_component( TauAnalysisAlgorithms src/components/*.cxx
 
 atlas_install_python_modules( python/*.py )
 
-atlas_install_data( data/*.conf )
 atlas_install_data( data/* )
 
 atlas_add_test( TestCPRun2Taus

@@ -16,10 +16,8 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::initialize()
 {
     ATH_CHECK(m_FPGATrackCollectionKeys.initialize());
     ATH_CHECK(m_FPGARoadCollectionKeys.initialize());
-    ATH_CHECK(m_FPGAHitsInRoadsCollectionKeys.initialize());
 
     ATH_CHECK(m_FinalFPGARoadkCollectionKey.initialize());
-    ATH_CHECK(m_FinalFPGAHitsInRoadsCollectionKey.initialize());
     ATH_CHECK(m_FinalFPGATrackCollectionKey.initialize());
 
     ATH_CHECK(m_overlapRemovalTool.retrieve());
@@ -36,9 +34,6 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::execute(const EventContex
 
     std::vector<SG::ReadHandle<FPGATrackSimRoadCollection>> incomingFPGARoadSimTrackCollections = m_FPGARoadCollectionKeys.makeHandles(ctx);
     SG::WriteHandle<FPGATrackSimRoadCollection> finalFPGARoads (m_FinalFPGARoadkCollectionKey, ctx);
-
-    std::vector<SG::ReadHandle<FPGATrackSimHitContainer>> incomingFPGAHitsInRoadsCollections = m_FPGAHitsInRoadsCollectionKeys.makeHandles(ctx);
-    SG::WriteHandle<FPGATrackSimHitContainer> finalFPGAHitsInRoads (m_FinalFPGAHitsInRoadsCollectionKey, ctx);
     
     std::vector<const FPGATrackSimTrackCollection*> incomingFPGATrackSimTrackCollectionsPtrs;
     for (SG::ReadHandle<FPGATrackSimTrackCollection>& trackCollection : incomingFPGATrackSimTrackCollections)
@@ -57,7 +52,6 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::execute(const EventContex
     
     if(m_useRoads){
         std::vector<const FPGATrackSimRoadCollection*> incomingFPGARoadSimTrackCollectionsPtrs;
-        std::vector<const FPGATrackSimHitContainer*> incomingFPGAHitsInRoadsCollectionsPtrs;
         for (SG::ReadHandle<FPGATrackSimRoadCollection>& roadCollection : incomingFPGARoadSimTrackCollections)
         {
             if (!roadCollection.isValid())
@@ -67,29 +61,11 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::execute(const EventContex
             }
             incomingFPGARoadSimTrackCollectionsPtrs.push_back(roadCollection.cptr());
         }
-        for (SG::ReadHandle<FPGATrackSimHitContainer>& hitsInRoadsCollection : incomingFPGAHitsInRoadsCollections)
-        {
-            if (!hitsInRoadsCollection.isValid())
-            {
-                ATH_MSG_ERROR("Invalid FPGAHitsInRoadsCollection key with name " << hitsInRoadsCollection.key());
-                return StatusCode::FAILURE;
-            }
-            incomingFPGAHitsInRoadsCollectionsPtrs.push_back(hitsInRoadsCollection.cptr());
-        }
-        if (incomingFPGARoadSimTrackCollectionsPtrs.size() != incomingFPGAHitsInRoadsCollectionsPtrs.size()) {
-            ATH_MSG_ERROR("Number of road collections and hit containers do not match: " << incomingFPGARoadSimTrackCollectionsPtrs.size() << " vs " << incomingFPGAHitsInRoadsCollectionsPtrs.size());
-            return StatusCode::FAILURE;
-        }
 
         std::unique_ptr<FPGATrackSimRoadCollection> finalFPGARoadsPtr = std::make_unique<FPGATrackSimRoadCollection>(); // temporary collection
-        std::unique_ptr<FPGATrackSimHitContainer> finalFPGAHitsInRoadsPtr = std::make_unique<FPGATrackSimHitContainer>(); // temporary collection
-        ATH_CHECK(mergeRoads(incomingFPGARoadSimTrackCollectionsPtrs,
-                             incomingFPGAHitsInRoadsCollectionsPtrs,
-                             finalFPGARoadsPtr,
-                             finalFPGAHitsInRoadsPtr));
+        ATH_CHECK(mergeRoads(incomingFPGARoadSimTrackCollectionsPtrs, finalFPGARoadsPtr));
                              
         finalFPGARoads = std::move(finalFPGARoadsPtr);
-        finalFPGAHitsInRoads = std::move(finalFPGAHitsInRoadsPtr);
     }
         
 
@@ -149,32 +125,20 @@ StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::mergeTracks(const std::ve
 
 
 StatusCode FPGATrackSim::FPGATrackSimRegionMergingAlg::mergeRoads(const std::vector<const FPGATrackSimRoadCollection*>& inputRoads,
-    const std::vector<const FPGATrackSimHitContainer*>& inputHitsInRoads,
-    std::unique_ptr<FPGATrackSimRoadCollection>& outputRoads,
-    std::unique_ptr<FPGATrackSimHitContainer>& outputHitsInRoads) const{
+    std::unique_ptr<FPGATrackSimRoadCollection>& outputRoads) const{
         size_t numberOfAllRoads = 0;
-        size_t numberOfAllHitsInRoads = 0;
         for (const FPGATrackSimRoadCollection* roadCollection : inputRoads) {
             numberOfAllRoads += roadCollection->size();
         }
-        for (const FPGATrackSimHitContainer* hitsInRoadsContainer : inputHitsInRoads) {
-            numberOfAllHitsInRoads += hitsInRoadsContainer->size();
-        }
 
         ATH_MSG_INFO("Filtering and concatenating " << numberOfAllRoads << " roads from " << inputRoads.size() << " regions");
-        if constexpr (enableBenchmark) m_chrono->chronoStart("Merging Roads and HitsInRoads");
+        if constexpr (enableBenchmark) m_chrono->chronoStart("Merging Roads");
         outputRoads->reserve(numberOfAllRoads);
-        outputHitsInRoads->reserve(numberOfAllHitsInRoads);
 
-        for (size_t i = 0; i < inputRoads.size(); ++i) {
-            const FPGATrackSimRoadCollection* roadCollection = inputRoads[i];
-            const FPGATrackSimHitContainer* hitsInRoadsContainer = inputHitsInRoads[i];
+        for (const FPGATrackSimRoadCollection* roadCollection : inputRoads) {
             outputRoads->insert(outputRoads->end(), roadCollection->begin(), roadCollection->end());
-            for (const auto& hitVec : *hitsInRoadsContainer) {
-                outputHitsInRoads->push_back(hitVec);
-            }
         }
-        if constexpr (enableBenchmark) m_chrono->chronoStop("Merging Roads and HitsInRoads");
+        if constexpr (enableBenchmark) m_chrono->chronoStop("Merging Roads");
 
         return StatusCode::SUCCESS;
     }

@@ -7,6 +7,7 @@
 
 #include "DerivationFrameworkInDet/TrackParticleThinningBase.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include <vector>
 
 namespace DerivationFramework {
@@ -20,6 +21,9 @@ namespace DerivationFramework {
   private:
     virtual std::vector<int> updateMask(const xAOD::TrackParticleContainer* trackParticles) const override final;
     SG::ReadHandleKey< std::vector<float> > m_trackZ0PVKey{ this, "Z0SGEntryName", "", "Collection of floats corresponding to z0 wrt PV for tracks" };
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_tightPrimaryKey{
+        this, "TightPrimaryKey", "InDetTrackParticles.DFCommonTightPrimary",
+        "Decoration key for tight primary selection"};
   };
 }
 

@@ -116,7 +116,7 @@ namespace ActsTrk
     // static member functions used by TrackStatePrinter.icc
     static void printParameters(const Acts::Surface &surface, const Acts::GeometryContext &tgContext, const Acts::BoundVector &bound);
     static std::string actsSurfaceName(const Acts::Surface &surface);
-    static std::string trackStateName(Acts::ConstTrackStateType trackStateType);
+    static std::string trackStateName(Acts::ConstTrackStateTypeMap trackStateType);
 
   };
 

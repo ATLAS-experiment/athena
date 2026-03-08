@@ -54,13 +54,13 @@ namespace GlobalSim {
 	     "enableDump",
 	     {false},
 	     "flag to enable dumps"};
-
-    SG::WriteHandleKey<eEmEg1BDTTOBContainer>
-    m_BDTResultKey {
-      this,
-      "BDTResultKey",
-      "BDTResult"};
     
+    SG::WriteHandleKey<std::vector<float>>
+    m_BDTScoreKey {
+      this,
+      "BDTScoreKey",
+      "eGamma1BDT"};    
+        
     // input to the  BDT Algorithm
     SG::ReadHandleKey<eEmNbhoodTOBContainer>
     m_nbhdTOBContainerReadKey {

@@ -40,7 +40,7 @@ TrigEFBjetContainer_PERS * TrigEFBjetContainerCnv::createPersistent( TrigEFBjetC
 }
  
 //* createTransient *//
-TrigEFBjetContainer * TrigEFBjetContainerCnv::createTransient() {
+TrigEFBjetContainer * TrigEFBjetContainerCnv::createTransient(const Token* token) {
 
   MsgStream mlog(msgSvc(), "TrigEFBjetContainerConverter" );
   
@@ -53,19 +53,19 @@ TrigEFBjetContainer * TrigEFBjetContainerCnv::createTransient() {
  
   TrigEFBjetContainer *p_collection = 0;
 
-  if ( compareClassGuid( tlp2_guid ) ) {
+  if ( compareClassGuid(token,  tlp2_guid ) ) {
     
-    poolReadObject< TrigEFBjetContainer_PERS >(m_impl->m_TPConverter_tlp2);
+    poolReadObject< TrigEFBjetContainer_PERS >(m_impl->m_TPConverter_tlp2, token);
     p_collection = m_impl->m_TPConverter_tlp2.createTransient( m_impl->m_log );
 
-  } else if( compareClassGuid( tlp1_guid ) ) {
+  } else if( compareClassGuid(token,  tlp1_guid ) ) {
 
-    poolReadObject< TrigEFBjetContainer_PERS >(m_impl->m_TPConverter_tlp1);
+    poolReadObject< TrigEFBjetContainer_PERS >(m_impl->m_TPConverter_tlp1, token);
     p_collection = m_impl->m_TPConverter_tlp1.createTransient( m_impl->m_log );
    
-  } else if( compareClassGuid( p0_guid ) || compareClassGuid( p0_guid2 ) ) {
+  } else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ) {
 
-    p_collection = poolReadObject< TrigEFBjetContainer >();
+    p_collection = poolReadObject< TrigEFBjetContainer >(token);
     
   } else  throw std::runtime_error( "Unsupported persistent version of TrigEFBjetContainer" );
      

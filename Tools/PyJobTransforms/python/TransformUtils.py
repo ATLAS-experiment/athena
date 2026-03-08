@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import logging
 msg = logging.getLogger(__name__)
@@ -142,7 +142,8 @@ def SortInput(flags, cfg):
 
     # moved execution to a subprocess, because Gaudi messaging created by collections causes
     # AppManager errors
-    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, sortAttribute=sortTag, sortOrder=sortOrd)
+    from PyUtils import PoolFile
+    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootTTreeCollection, sortAttribute=sortTag, sortOrder=sortOrd)
     if rc != 0:
        msg.error(f"Sorting failed with exit code: {rc}")
 

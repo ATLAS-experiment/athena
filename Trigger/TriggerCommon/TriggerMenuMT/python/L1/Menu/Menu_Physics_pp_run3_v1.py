@@ -213,6 +213,7 @@ def defineMenu():
         # high-priority (low mu)
         'L1_AFP_NSA_BGRP12', 'L1_AFP_NSC_BGRP12', 
         'L1_AFP_A','L1_AFP_C', 'L1_AFP_A_AND_C', 'L1_AFP_A_AND_C_TOF',
+        'L1_AFP_A_AND_C_TOF_jJ20',
         'L1_AFP_A_OR_C_jJ30', 'L1_AFP_A_AND_C_jJ30',
         'L1_MU5VF_AFP_A_OR_C', 'L1_MU5VF_AFP_A_AND_C',
         'L1_eEM9_AFP_A_OR_C', 'L1_eEM9_AFP_A_AND_C',
@@ -363,6 +364,15 @@ def defineMenu():
 
         # ATR-31830
         'L1_110INVM150-eEM50s-eEM10s-2DISAMB-jJ60s',
+
+        # ATR-32290
+        'L1_ZDC_LIS_E0',
+        'L1_ZDC_LIS_E0_EMPTY',
+        'L1_ZDC_LIS_E0_UNPAIRED_ISO',
+        'L1_ZDC_LIS_E0_UNPAIRED_NONISO',
+        'L1_ZDC_LIS_E1',
+        'L1_ZDC_LIS_E2',
+        'L1_RD0_UNPAIRED_NONISO',
         
         ]
 

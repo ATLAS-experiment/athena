@@ -6,7 +6,6 @@
 #define LARRECUTILS_LARFEBCONFIGCONDALG
 
 #include "AthenaBaseComps/AthCondAlgorithm.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "LArRecConditions/LArFebConfig.h"
 #include "StoreGate/CondHandleKeyArray.h"
 #include "StoreGate/WriteCondHandleKey.h"

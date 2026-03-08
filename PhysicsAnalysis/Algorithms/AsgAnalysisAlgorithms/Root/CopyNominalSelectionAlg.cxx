@@ -37,7 +37,7 @@ namespace CP
     ANA_CHECK (m_systematicsList.initialize());
 
     ANA_CHECK (makeSelectionReadAccessor (m_selectionHandle.getSelection(), m_readAccessor));
-    ANA_CHECK (m_readAccessor->fillSystematics (m_systematicsList.service(), m_systematicsList.systematicsVector(), "^$"));
+    ANA_CHECK (m_readAccessor->fillSystematics (m_systematicsList.service(), m_systematicsList.systematicsVector(), m_particlesHandle));
 
     return StatusCode::SUCCESS;
   }

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ==============================================================================
 # Provides configs for the tools used for building/thinning tracking related
@@ -487,7 +487,7 @@ def InDetTrackSelectionToolWrapperCfg(
     acc = ComponentAccumulator()
 
     if "TrackSelectionTool" not in kwargs:
-        from InDetConfig.InDetTrackSelectionToolConfig import (
+        from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
             InDetTrackSelectionToolCfg)
         kwargs.setdefault("TrackSelectionTool", acc.popToolsAndMerge(
             InDetTrackSelectionToolCfg(

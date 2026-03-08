@@ -193,6 +193,10 @@ try:
                                        JetContainer = _jetname
                                        ),
 
+        numConstit = JetModifier("JetNumConstitTool", "numConstit",
+                                 JetContainer = _jetname,
+                                 ),
+
         # *******************
         # Isolation variables
         jetiso = JetModifier("JetIsolationTool","iso",

@@ -39,13 +39,14 @@ TPCnvElt<CNV, TPCNV>::TPCnvElt()
 template <class CNV, class TPCNV>
 std::unique_ptr<typename TPCnvElt<CNV, TPCNV>::Trans_t>
 TPCnvElt<CNV, TPCNV>::createTransient (CNV& parent,
+                                       const Token* token,
                                        const std::string& key,
                                        MsgStream& msg)
 {
-  if (!parent.compareClassGuid (m_guid))
+  if (!parent.compareClassGuid(token, m_guid))
     return std::unique_ptr<typename TPCnvElt<CNV, TPCNV>::Trans_t>();
 
-  std::unique_ptr<Pers_t> old (parent.template poolReadObject<Pers_t>() );
+  std::unique_ptr<Pers_t> old (parent.template poolReadObject<Pers_t>(token) );
   return AthenaPoolCnvSvc::createTransient (m_cnv, old.get(), key, msg);
 }
 
@@ -65,13 +66,14 @@ TPCnvElt<CNV, TPCNV>::createTransient (CNV& parent,
 template <class CNV, class TPCNV>
 bool
 TPCnvElt<CNV, TPCNV>::persToTrans (CNV& parent, Trans_t* trans,
+                                   const Token* token,
                                    const std::string& /*key*/,
                                    MsgStream& msg)
 {
-  if (!parent.compareClassGuid (m_guid))
+  if (!parent.compareClassGuid(token, m_guid))
     return false;
 
-  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>() );
+  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>(token) );
   m_cnv.persToTrans (old.get(), trans, msg);
   return true;
 }
@@ -109,12 +111,13 @@ TPCnvElt<CNV, T_TPCnvNull<TRANS> >::TPCnvElt()
 template <class CNV, class TRANS>
 std::unique_ptr<typename TPCnvElt<CNV, T_TPCnvNull<TRANS> >::Trans_t>
 TPCnvElt<CNV, T_TPCnvNull<TRANS> >::createTransient (CNV& parent,
+                                                     const Token* token,
                                                      const std::string& /*key*/,
                                                      MsgStream& /*msg*/)
 {
   Pers_t* p = nullptr;
-  if (parent.compareClassGuid (m_guid)) {
-    p = parent.template poolReadObject<Pers_t>();
+  if (parent.compareClassGuid(token, m_guid)) {
+    p = parent.template poolReadObject<Pers_t>(token);
   }
   return std::unique_ptr<typename TPCnvElt<CNV, T_TPCnvNull<TRANS> >::Trans_t>(p);
 }
@@ -138,13 +141,14 @@ template <class CNV, class TRANS>
 bool
 TPCnvElt<CNV, T_TPCnvNull<TRANS> >::persToTrans (CNV& parent,
                                                  Trans_t* trans,
+                                                 const Token* token,
                                                  const std::string& /*key*/,
                                                  MsgStream& /*msg*/)
 {
-  if (!parent.compareClassGuid (m_guid))
+  if (!parent.compareClassGuid(token, m_guid))
     return false;
 
-  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>() );
+  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>(token) );
   *trans = *old;
   return true;
 }

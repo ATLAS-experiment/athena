@@ -73,7 +73,7 @@ public:
    * Returns a newly-allocated transient object.
    * Errors are reported by raising exceptions.
    */
-  virtual XAOD* createTransientWithKey (const std::string& key) override;
+  virtual XAOD* createTransientWithKey (const Token* token, const std::string& key) override;
 
   
 private:

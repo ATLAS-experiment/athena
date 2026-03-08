@@ -148,7 +148,7 @@ StatusCode BTaggingTruthTaggingTool::initialize() {
   
   if (m_pathToONNX != ""){
     // 60% = 4, 70% = 3, 77% = 2, 85% = 1, 100% = 0
-    m_OP_index_for_GNN = find(m_availableOP_fixCut.begin(), m_availableOP_fixCut.end(), m_OP) - m_availableOP_fixCut.begin() + 1; // GNN predicts 5 bins    
+    m_OP_index_for_GNN = find(m_availableOP_fixCut.begin(), m_availableOP_fixCut.end(), m_OP.value()) - m_availableOP_fixCut.begin() + 1; // GNN predicts 5 bins
   }
   
   m_eff_syst.clear();

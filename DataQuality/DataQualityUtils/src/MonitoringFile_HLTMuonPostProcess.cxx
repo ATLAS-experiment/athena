@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ namespace dqutils {
     if (fpdbg) std::cout << "Start HLTMuon post-processing" << std::endl;
 
     //start postprocessing
-    TString run_dir;
+    std::string run_dir;
     HLTMuonHistogramDivision(inFilename, run_dir);
 
     //trigger overlap matrix
@@ -55,8 +55,8 @@ namespace dqutils {
   }//MonitoringFile::HLTMuonPostProcess
 
   bool
-  MonitoringFile::HLTMuonCheckHistogram(TFile* f, TString& hname) {
-    if (!(f->Get(hname))) {
+  MonitoringFile::HLTMuonCheckHistogram(TFile* f, const std::string& hname) {
+    if (!(f->Get(hname.c_str()))) {
       if (fpdbg) {
         std::cerr << "HLTMuon PostProcessing: no such histogram!! : " << hname << std::endl;
         gDirectory->pwd();
@@ -68,7 +68,7 @@ namespace dqutils {
   }//MonitoringFile::HLTMuonCheckHistogram
 
   void
-  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string& inFilename, TString& run_dir) {
+  MonitoringFile::HLTMuonTriggerOverlapMatrix(const std::string& inFilename, std::string& run_dir) {
     if (fpdbg) std::cout << "  Start to fill HLTMuon Trigger Overlap Matrix" << std::endl;
 
     PostProcessorFileWrapper mf(inFilename, "HLT Trigger Overlap Matrix");
@@ -99,12 +99,12 @@ namespace dqutils {
     while ((key_run = dynamic_cast<TKey*> (next_run())) != 0) { //== the while commented out at$
       if (!key_run->IsFolder()) continue;
       run_dir = key_run->GetName();
-      if (!run_dir.Contains("run")) {
+      if (run_dir.find("run") == std::string::npos) {
         continue;
       }
       break;
     }
-    if (!run_dir.Contains("run")) {
+    if (run_dir.find("run") == std::string::npos) {
       std::cerr << "HLTMuon: unable to find run directory ..." << std::endl;
       return;
     }
@@ -115,20 +115,20 @@ namespace dqutils {
         std::cout << "HLTMuon: run directory is " << run_dir << std::endl;
       }
 
-      std::string run_dir2 = run_dir.Data();
+      std::string run_dir2 = run_dir;
       //int run_number = atoi( (run_dir2.substr(4, run_dir2.size()-4 )).c_str() );
       //run_number=run_number;
 
       //===HLTMuon
-      // TString muon_dir = run_dir + "/HLT/MuonMon/";
-      TString muon_dir = "/" + run_dir + "/HLT/MuonMon/";
+      // std::string muon_dir = run_dir + "/HLT/MuonMon/";
+      std::string muon_dir = "/" + run_dir + "/HLT/MuonMon/";
 
-      TString cm_dir = muon_dir + "Common/";
+      std::string cm_dir = muon_dir + "Common/";
 
-      TString sol = cm_dir + "Trigger_Overlap";
-      TString solpt = cm_dir + "Trigger_Overlap_Including_Passthrough";
-      TString solf = cm_dir + "Trigger_Overlap_Fraction";
-      TString solfpt = cm_dir + "Trigger_Overlap_Fraction_Including_Passthrough";
+      std::string sol = cm_dir + "Trigger_Overlap";
+      std::string solpt = cm_dir + "Trigger_Overlap_Including_Passthrough";
+      std::string solf = cm_dir + "Trigger_Overlap_Fraction";
+      std::string solfpt = cm_dir + "Trigger_Overlap_Fraction_Including_Passthrough";
 
       TH2F* hol(0);
       TH2F* holpt(0);
@@ -136,7 +136,7 @@ namespace dqutils {
       TH2F* holfpt(0);
 
       //Matrix
-      TDirectory* dir = mf.GetDirectory(cm_dir);
+      TDirectory* dir = mf.GetDirectory(cm_dir.c_str());
       // if (fpdbg) { std::cerr << "matrix directory: " << cm_dir << std::endl; }
       if (!dir) {
         if (fpdbg) {
@@ -145,7 +145,7 @@ namespace dqutils {
         return;
       }
 
-      mf.get(sol, hol);
+      mf.get(sol.c_str(), hol);
       // if (fpdbg) { std::cerr << "matrix file: " << sol << std::endl; }
       if (!hol) {
         if (fpdbg) {
@@ -153,21 +153,21 @@ namespace dqutils {
         }
         continue;
       }
-      mf.get(solpt, holpt);
+      mf.get(solpt.c_str(), holpt);
       if (!holpt) {
         if (fpdbg) {
           std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solpt << std::endl;
         }
         continue;
       }
-      mf.get(solf, holf);
+      mf.get(solf.c_str(), holf);
       if (!holf) {
         if (fpdbg) {
           std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solf << std::endl;
         }
         continue;
       }
-      mf.get(solfpt, holfpt);
+      mf.get(solfpt.c_str(), holfpt);
       if (!holfpt) {
         if (fpdbg) {
           std::cerr << "HLTMuon PostProcessing: no such histogram!! " << solfpt << std::endl;

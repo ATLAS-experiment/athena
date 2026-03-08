@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algs
@@ -16,6 +16,7 @@
 #include "src/SeedsToTrackParamsAlg.h"
 #include "src/ITkAlignMonResidualsAlg.h"
 #include "src/ActsInspectTruthContentAlg.h"
+#include "src/ReadoutGeoDumpAlg.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -33,5 +34,6 @@ DECLARE_COMPONENT( ActsTrk::TrackParticleAnalysisAlg )
 DECLARE_COMPONENT( ActsTrk::SeedsToTrackParamsAlg )
 DECLARE_COMPONENT( ActsTrk::ITkAlignMonResidualsAlg )
 DECLARE_COMPONENT( ActsTrk::ActsInspectTruthContentAlg )
+DECLARE_COMPONENT( ActsTrk::ReadoutGeoDumpAlg )
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

@@ -35,7 +35,7 @@ public:
 protected:
   
   virtual JEMEtSumsCollection_PERS*   createPersistent (JEMEtSumsCollection* transCont);
-  virtual JEMEtSumsCollection*        createTransient ();
+  virtual JEMEtSumsCollection*        createTransient(const Token* token);
 
 private:
   

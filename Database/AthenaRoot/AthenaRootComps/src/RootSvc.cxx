@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootSvc.cxx
@@ -14,7 +14,7 @@
 #include "RootConnection.h"
 
 // POOL/APR includes for Catalog
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 
 // fwk includes
 #include "AthenaKernel/IDictLoaderSvc.h"
@@ -48,7 +48,6 @@ StatusCode RootSvc::initialize() {
   m_catalog = new pool::IFileCatalog;
   try {
     m_catalog->setWriteCatalog("xmlcatalog_file:RootFileCatalog.xml"); // FIXME: Make config
-    m_catalog->connect();
     m_catalog->start();
   } catch (std::exception& e) {
     ATH_MSG_FATAL ("Set up Catalog - caught exception: " << e.what());

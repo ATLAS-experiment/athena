@@ -6,8 +6,9 @@
 
 /** This class is not to needed in AthSimulation */
 #ifndef SIMULATIONBASE
+
+#include <ActsGeoUtils/VolumePlacement.h>
 #include <MuonReadoutGeometryR4/MuonReadoutElement.h>
-#include <AthenaBaseComps/AthMessaging.h>
 
 namespace Acts {
     class VolumeBounds;
@@ -33,9 +34,11 @@ namespace MuonGMR4 {
               /** @brief Associated chamber surface */
               std::shared_ptr<const Acts::PlaneSurface> surface{};             
               /** @brief List of associated readout elements */
-              ReadoutSet  detEles{};
+              ReadoutSet detEles{};
               /** @brief Chamber volume bounds */
               std::shared_ptr<Acts::VolumeBounds> bounds{};
+              /** @brief The placement object */
+              std::unique_ptr<ActsTrk::VolumePlacement> placement{};
           };
           
           /** @brief Standard constructor taking the defineArgs */
@@ -72,7 +75,7 @@ namespace MuonGMR4 {
           const Amg::Transform3D& localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the global -> local transformation 
            *  @param gctx: Geometry context carrrying the alignment transformations */
-          Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
+          const Amg::Transform3D& globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const;
           /** @brief Returns the surface associated with the chamber */
           const Acts::PlaneSurface& surface() const;
           /** @brief Long-extend of the chamber in the x-direction at positive Y */
@@ -94,6 +97,8 @@ namespace MuonGMR4 {
           const SpectrometerSector* parent() const;
           /** @brief Sets the connection to the MS sector enclosing the chamber */
           void setParent(const SpectrometerSector* parent);
+          /** @brief Adds a volume placement to the Chamber's memory management  */
+          void addPlacement(std::unique_ptr<ActsTrk::VolumePlacement>&& placement) const;
         private:
             defineArgs m_args{};
             const SpectrometerSector* m_parent{nullptr};

@@ -77,6 +77,18 @@ def MuonDetectorToolCfg(flags, name="MuonDetectorToolR4", **kwargs):
     result.setPrivateTools(the_tool)
     return result
 
+def ToroidGeoModelToolCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    if not flags.Detector.SpecialGeometryToroid:
+        return result
+    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
+    geoModelSvc = result.getPrimaryAndMerge(GeoModelCfg(flags))
+    ### All nodes that belong to the toroid
+    kwargs.setdefault("TreeTops", ["Toroid"])
+    the_tool = CompFactory.MuonGMR4.ToroidDetectorTool(name="ToroidDetectorTool", **kwargs)
+    geoModelSvc.DetectorTools+=[the_tool]
+    return result
+
 def MuonGeoModelCfg(flags):
     result = ComponentAccumulator()
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg

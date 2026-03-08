@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #----------------------------------------------------------------
 # class LArCondDataDumper
@@ -8,8 +8,6 @@
 #----------------------------------------------------------------
 # python for LArConditionsContainer
 from LArRawConditions.LArConditionsContainer import LArConditionsContainer
-# pyKernel access
-from PyKernel import PyKernel
 
 class LArCondDataDumper(object) :
   def __init__(self, larCablingSvc, outputLevel) :
@@ -135,6 +133,9 @@ class LArCondDataDumper(object) :
       print(" ERROR: Type and Key not the same length")
       return 
 
+    import AthenaPython.PyAthena as PyAthena
+    detStore =  PyAthena.py_svc('StoreGateSvc/DetectorStore')
+
     first = True
 
     for i in range(len(ListofType)):
@@ -150,7 +151,7 @@ class LArCondDataDumper(object) :
       try :
         self.pyroot_typedef_bug_workaround()
 
-        container = PyKernel.retrieveDet(typ,key)
+        container = detStore.retrieve(typ,key)
         if first:
           # First time through get the cabling server and id helper
           #self.larCablingSvc = container.larCablingSvc()

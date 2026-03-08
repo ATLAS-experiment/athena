@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from collections import defaultdict
 from copy import copy, deepcopy
@@ -7,6 +7,7 @@ from enum import EnumMeta
 from operator import attrgetter
 import glob
 import importlib
+import os
 from AthenaCommon.Logging import logging
 from PyUtils.moduleExists import moduleExists
 from PyUtils.Decorators import deprecate
@@ -825,6 +826,8 @@ class AthConfigFlags(object):
             subparsers = {"":[parser,parser.add_subparsers(help=argparse.SUPPRESS)]} # first is category's parser, second is subparsers (effectively the category's subcategories)
             # silence logging while evaluating flags
             logging.root.setLevel(logging.ERROR)
+            os.environ["TDAQ_ERS_WARNING"] = "null"
+            os.environ["TDAQ_ERS_ERROR"] = "null"
             def getParser(category): # get parser for a given category
                 if category not in subparsers.keys():
                     cat1,cat2 = category.rsplit(".",1) if "." in category else ("",category)

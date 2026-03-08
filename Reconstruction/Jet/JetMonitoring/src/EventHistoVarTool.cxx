@@ -19,9 +19,9 @@ StatusCode EventHistoVarTool::initialize() {
   size_t pos = (m_attName.key()).find('.');
   if (pos == std::string::npos){
       m_attName = "EventInfo."+m_attName.key(); // If no container specified, assuming we want "EventInfo"
-      ATH_MSG_INFO("Updated attribute key to "<<m_attName);
+      ATH_MSG_DEBUG("Updated attribute key to "<<m_attName);
   }
-  ATH_MSG_INFO("Event info attribute that will be retrieved: "<<m_attName);
+  ATH_MSG_DEBUG("Event info attribute that will be retrieved: "<<m_attName);
   ATH_CHECK( m_attName.initialize() );
 
   return StatusCode::SUCCESS;

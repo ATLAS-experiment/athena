@@ -29,7 +29,7 @@ class OverlapAnalysisConfig (ConfigBlock):
         self.addOption ('InnerDR', 0.2, type=float,
             info="radius of the inner cone for removing jets (`EleJetORT`/`MuJetORT`).")
         self.addOption ('OuterDR', 0.4, type=float,
-            info="radius of the outer cone for removing leptons (`EleJetORT`/`MuJetORT`)")
+            info="radius of the outer cone for removing leptons (`EleJetORT`/`MuJetORT`).")
         self.addOption ('boostedLeptons', False, type=bool,
             info="whether to enable boosted lepton overlap removal (toggles on the property `UseSlidingDR` of the `ORUtils::EleJetOverlapTool` and `ORUtils::MuJetOverlapTool` tools).")
         self.addOption ('nominalOnly', False, type=bool,
@@ -244,7 +244,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 return False
 
             # if OR decision is added to selection of input container, there is also no point in adding to output
-            if len(containerName.split(".")) > 1 and containerName.split(".")[1] == selectionName:
+            if selectionName in config.getSelectionNames(containerName.split(".")[0]):
                 return False
 
             # otherwise, OR decision is standalone selection, so add it to output

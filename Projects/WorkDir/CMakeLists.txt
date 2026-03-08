@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Project file for building a selected set of packages against an
 # installed ATLAS release/nightly.
@@ -60,20 +60,6 @@ unset( _defaultParentProject )
 # we use the QUIET keyword.
 find_package( AtlasCMake QUIET )
 
-# Find the project that we depend on:
-find_package( ${ATLAS_PROJECT} REQUIRED )
-
-# Set up the project with its version and baseline languages.
-project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
-
-# If the parent project build type was "Release" enable the generation of debug
-# symbols for local builds. If you absolutely do want to keep "Release", use a
-# different capitalization, e.g. "-DCMAKE_BUILD_TYPE=RELEASE".
-if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
-   set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
-      "Build mode for the release" FORCE )
-endif()
-
 # Set up any additional languages that may be available.
 include( CheckLanguage )
 check_language( Fortran )
@@ -87,6 +73,23 @@ endif()
 check_language( HIP )
 if( CMAKE_HIP_COMPILER )
    enable_language( HIP )
+endif()
+
+# Potentially override the Acts package to use a local checkout.
+include(${CMAKE_CURRENT_SOURCE_DIR}/ActsOverride.cmake)
+
+# Find the project that we depend on:
+find_package( ${ATLAS_PROJECT} REQUIRED )
+
+# Set up the project with its version and baseline languages.
+project( WorkDir VERSION ${${ATLAS_PROJECT}_VERSION} LANGUAGES C CXX )
+
+# If the parent project build type was "Release" enable the generation of debug
+# symbols for local builds. If you absolutely do want to keep "Release", use a
+# different capitalization, e.g. "-DCMAKE_BUILD_TYPE=RELEASE".
+if( "${CMAKE_BUILD_TYPE}" STREQUAL "Release" )
+   set( CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING
+      "Build mode for the release" FORCE )
 endif()
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaConfiguration )
@@ -68,9 +68,6 @@ endif()
 
 # tests that should not run in analysis releases and in AthGeneration
 if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
-    atlas_add_test( FPEAndCoreDump
-                    SCRIPT test/testFPEHandling.py )
-
     atlas_add_test( DetectorConfigFlags
                     SCRIPT test/testDetectorFlags.py
                     POST_EXEC_SCRIPT nopost.sh )

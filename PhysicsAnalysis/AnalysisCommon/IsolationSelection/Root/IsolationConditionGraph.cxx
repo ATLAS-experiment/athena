@@ -15,12 +15,11 @@ namespace CP {
 IsolationConditionGraph::IsolationConditionGraph(
     const std::string& name, const std::vector<std::string>& isoTypes,
     std::unique_ptr<TF1> isoFunction,
-    std::vector<TGraph*>&
-        cutGraphs,  // std::vector<std::unique_ptr<TGraph>> cutGraphs,
+    std::vector<std::unique_ptr<TGraph>>&& cutGraphs,
     std::unique_ptr<TH1F> binning, const std::string& isoDecSuffix,
     bool invertCut)
     : IsolationCondition(name, isoTypes, isoDecSuffix),
-      m_cutGraphs(cutGraphs),
+      m_cutGraphs(std::move(cutGraphs)),
       m_isoFunction(std::move(isoFunction)),
       m_binning(std::move(binning)),
       m_invertCut(invertCut) {}

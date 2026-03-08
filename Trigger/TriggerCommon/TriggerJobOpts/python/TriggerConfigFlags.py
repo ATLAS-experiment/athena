@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -21,7 +21,7 @@ def trigGlobalTag(flags):
     """Return global conditions data to be used in the HLT. Return None to indicate that
     no trigger-specific tag is required. Used for IOVDb.GlobalTag in AllConfigFlags.py.
     """
-    return None if flags.Input.isMC else 'CONDBR2-HLTP-2025-01'
+    return None if flags.Input.isMC else 'CONDBR2-HLTP-2026-01'
 
 def trigGeoTag(flags):
     """Return geometry tag to be used in the HLT. Returns None to indicate that
@@ -333,6 +333,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.ESDEDMSet', 'ESD',
                   help='list of EDM objects to be written to ESD')
 
+    flags.addFlag('Trigger.addRun3LowMuEDM', lambda prevFlags: "pp_lowMu_run3" in prevFlags.Trigger.triggerMenuSetup, help="Specify whether to add dedicated low mu EDM. Default is dependent on the menu setup." )
+
     flags.addFlag('Trigger.ExtraEDMList', [],
                   help='list of extra EDM objects to be stored (for testing). Supported features: Add new items. Add extra decorations to existing Aux. Add additional output targets.')
 
@@ -475,7 +477,7 @@ def createTriggerRecoFlags():
         muonflags.Muon.MuonTrigger=True
         muonflags.Muon.SAMuonTrigger=True
         muonflags.Muon.runCommissioningChain=False
-        muonflags.Muon.enableErrorTuning=False
+        muonflags.Muon.enableErrorTuning=False 
         return muonflags
     flags.addFlagsCategory('Trigger.Offline.SA', __muonSA, prefix=True)
 
@@ -501,6 +503,8 @@ def createTriggerRecoFlags():
     
     from AthenaCommon.SystemOfUnits import mm
     flags.addFlag('Trigger.Muon.IsolationDzCut', 2.0*mm, help='Value of dz cut used in muon isolation calculation in the trigger')
+
+    flags.addFlag('Trigger.Muon.useNewRegionSelector', False, help='usage of new region selector')
 
     def __tau():
         from TrigTauRec.TrigTauConfigFlags import createTrigTauConfigFlags

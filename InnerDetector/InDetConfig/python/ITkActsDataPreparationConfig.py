@@ -30,6 +30,9 @@ def ITkActsDataPreparationCfg(flags,
         from ActsConfig.ActsTruthConfig import ActsTruthAssociationAlgCfg, ActsTruthParticleHitCountAlgCfg
         acc.merge(ActsTruthAssociationAlgCfg(flags))
         acc.merge(ActsTruthParticleHitCountAlgCfg(flags))
+        if flags.Acts.doTruthInspection:
+            from ActsConfig.ActsInspectTruthContentConfig import ActsInspectTruthContentAlgCfg
+            acc.merge(ActsInspectTruthContentAlgCfg(flags))
         
     return acc
 

@@ -51,7 +51,7 @@ public:
 protected:
   
    virtual TrigEFBphysContainer_PERS *createPersistent( TrigEFBphysContainer *transObj);
-   virtual TrigEFBphysContainer      *createTransient();
+   virtual TrigEFBphysContainer      *createTransient(const Token* token);
    
   private:
    TrigEFBphysContainerCnv_impl* m_impl;

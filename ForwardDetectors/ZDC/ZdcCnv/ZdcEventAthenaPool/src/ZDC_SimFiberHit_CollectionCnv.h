@@ -29,7 +29,7 @@ public:
   ZDC_SimFiberHit_CollectionCnv(ISvcLocator* svcloc) : ZDC_SimFiberHit_CollectionCnvBase ( svcloc) {}
 protected:
   virtual ZDC_SimFiberHit_Collection_PERS*  createPersistent(ZDC_SimFiberHit_Collection* transCont);
-  virtual ZDC_SimFiberHit_Collection*       createTransient ();
+  virtual ZDC_SimFiberHit_Collection*       createTransient(const Token* token);
 
 };
 

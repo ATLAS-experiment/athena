@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -36,7 +36,7 @@ L1TopoByteStreamxAODCnv::L1TopoByteStreamxAODCnv(ISvcLocator* svcloc)
 
 // CLID
 
-const CLID& L1TopoByteStreamxAODCnv::classID() {
+CLID L1TopoByteStreamxAODCnv::classID() {
   return ClassID_traits<xAOD::L1TopoRawDataContainer>::ID();
 }
 

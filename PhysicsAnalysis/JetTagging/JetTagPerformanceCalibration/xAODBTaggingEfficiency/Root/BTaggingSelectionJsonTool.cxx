@@ -102,6 +102,24 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
     }
   }
 
+  // get the mass name from the json file, using 'default' if not found
+  if (meta.contains("Mass")) {
+    std::string massDecoratorName = meta["Mass"].get<std::string>();
+    if (massDecoratorName != "default") {
+      m_massAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(massDecoratorName);
+      ATH_MSG_INFO("Using decorated mass '" << massDecoratorName << "' for Xbb FM WP.");
+    }
+  
+  }
+  // Same for pT
+  if (meta.contains("PT")) {
+    std::string ptDecoratorName = meta["PT"].get<std::string>();
+    if (ptDecoratorName != "default") {
+      m_ptAcc = std::make_unique<SG::AuxElement::ConstAccessor<float>>(ptDecoratorName);
+      ATH_MSG_INFO("Using decorated pT '" << ptDecoratorName << "' for Xbb FM WP.");
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
@@ -123,12 +141,14 @@ double BTaggingSelectionJsonTool::getTaggerDiscriminant ( const xAOD::Jet& jet) 
   return tagger_discriminant;
 }
 
+
+
 int BTaggingSelectionJsonTool::accept( const xAOD::Jet& jet ) const {
   ///////////////////////////////////////////////
   // Cheatsheet:
   // For fix cut WP, return 0 for not tagged, 1 for tagged
   ////////////////////////////////////////////////
-  return accept( jet.pt(), jet.eta(), jet.m(), getTaggerDiscriminant(jet) );
+  return accept( getJetPt(jet), jet.eta(), getJetMass(jet), getTaggerDiscriminant(jet) );
 }
 
 int BTaggingSelectionJsonTool::accept( double pt, double eta, double mass, double tagger_discriminant ) const {
@@ -167,4 +187,30 @@ int BTaggingSelectionJsonTool::findBin(const std::vector<float>& bins, float val
     }
   }
   return -1;
+}
+
+float BTaggingSelectionJsonTool::getJetMass(const xAOD::Jet& jet) const {
+    if (!m_massAcc) {
+      return jet.m();
+    }
+
+    if (!m_massAcc->isAvailable(jet)) {
+      ATH_MSG_ERROR("Decorated mass '" << SG::AuxTypeRegistry::instance().getName( m_massAcc->auxid() ) << "' not available on jet. Cannot proceed.");
+      throw std::runtime_error("Decorated mass not available on jet.");
+    }
+
+    return (*m_massAcc)(jet);
+}
+
+float BTaggingSelectionJsonTool::getJetPt(const xAOD::Jet& jet) const {
+    if (!m_ptAcc) {
+      return jet.pt();
+    }
+
+    if (!m_ptAcc->isAvailable(jet)) {
+      ATH_MSG_ERROR("Decorated pT '" << SG::AuxTypeRegistry::instance().getName( m_ptAcc->auxid() ) << "' not available on jet. Cannot proceed.");
+      throw std::runtime_error("Decorated pT not available on jet.");
+    }
+
+    return (*m_ptAcc)(jet);
 }

@@ -75,7 +75,7 @@ const Amg::Transform3D& MuonReadoutElement::localToGlobalTransform(const Geometr
     return localToGlobalTransform(ctx, geoTransformHash());
 }
 #ifndef SIMULATIONBASE
-const Acts::Transform3& MuonReadoutElement::transform(const Acts::GeometryContext& anygctx) const {
+const Acts::Transform3& MuonReadoutElement::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
     const GeometryContext *gctx = anygctx.get<const GeometryContext *>();
     return localToGlobalTransform(*gctx, geoTransformHash());
 }

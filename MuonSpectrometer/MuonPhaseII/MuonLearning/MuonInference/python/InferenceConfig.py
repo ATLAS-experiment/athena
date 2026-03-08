@@ -26,9 +26,19 @@ def GraphBucketFilterToolCfg(flags, name ="GraphBucketFilterTool", **kwargs):
     from AthOnnxComps.OnnxRuntimeSessionConfig import OnnxRuntimeSessionToolCfg
 
     result = ComponentAccumulator()
-    kwargs.setdefault("ModelSession", result.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname="MuonInference/edgecnn_multi_bucket_sparse_meta.onnx")))
-    kwargs.setdefault("BiasClass0", 1.0) # Working point selection bias for multi-class comparison
-    kwargs.setdefault("OutputLevel", 3)  # DEBUG level (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
+    model_path = kwargs.pop("ModelPath", "edgecnn_multi_bucket_sparse_meta.onnx")
+    
+    if not model_path.startswith('/'):
+        pass
+    else:
+        pass
+    
+    kwargs.setdefault("ModelSession", result.popToolsAndMerge(OnnxRuntimeSessionToolCfg(flags, model_fname=model_path)))
+    # BiasClass0: Working point selection bias for multi-class comparison
+    # Higher values make class 0 (reject) less likely, accepting more buckets
+    # Typical values: 0.5-2.0. Default: 1.0 (no bias)
+    kwargs.setdefault("BiasClass0", 1.0)
+    kwargs.setdefault("OutputLevel", 3)  # INFO level (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)
 
     the_tool = CompFactory.MuonML.GraphBucketFilterTool(name, **kwargs)
     result.setPrivateTools(the_tool)

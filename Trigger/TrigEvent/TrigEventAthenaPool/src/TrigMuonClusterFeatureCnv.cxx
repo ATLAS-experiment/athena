@@ -24,7 +24,7 @@ TrigMuonClusterFeatureCnv::createPersistent( TrigMuonClusterFeature *transObj)
 //-----------------------------------------------------------------------------
 // Create transient 
 //-----------------------------------------------------------------------------
-TrigMuonClusterFeature *TrigMuonClusterFeatureCnv::createTransient()
+TrigMuonClusterFeature *TrigMuonClusterFeatureCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigMuonClusterFeatureConverter" );
   
@@ -33,13 +33,13 @@ TrigMuonClusterFeature *TrigMuonClusterFeatureCnv::createTransient()
   static const pool::Guid p1_guid("AE4D5D57-689D-40CB-83B3-CB047884952F");
   static const pool::Guid p0_guid("A7B1865B-55D0-49D2-9778-5E0797FB06FE");
 
-  if( compareClassGuid( p1_guid ) ) {
-    std::unique_ptr< TrigMuonClusterFeature_tlp1 > col_vect( poolReadObject< TrigMuonClusterFeature_tlp1 >() );
+  if( compareClassGuid(token,  p1_guid ) ) {
+    std::unique_ptr< TrigMuonClusterFeature_tlp1 > col_vect( poolReadObject< TrigMuonClusterFeature_tlp1 >(token) );
     return m_converter.createTransient( col_vect.get(), mlog );
   }
-  else if( compareClassGuid(p0_guid) ) {
+  else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    return poolReadObject<TrigMuonClusterFeature>();
+    return poolReadObject<TrigMuonClusterFeature>(token);
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

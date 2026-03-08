@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -72,7 +72,7 @@ namespace LArSamples {
       bool makeResidualCorrections(const TString& outputFile, short resTrunc = -1, short timeTrunc = -1, 
                                    double absResTrunc = -1, unsigned int minSize = 0, 
                                    bool weigh = false, bool adjust = false, bool zeroTime = false) const;
-      Residuals* getResiduals(unsigned int hash, CaloGain::CaloGain gain, double absResTrunc = -1, bool adjust = false, bool zeroTime = false) const;
+      std::unique_ptr<Residuals> getResiduals(unsigned int hash, CaloGain::CaloGain gain, double absResTrunc = -1, bool adjust = false, bool zeroTime = false) const;
      
       bool residualParams(int lwb, int upb, CovMatrix& k, TVectorD& means) const;
       CovMatrix kMatrix(int lwb, int upb) { CovMatrix k; TVectorD means; residualParams(lwb, upb, k, means); return k; }

@@ -111,8 +111,9 @@ namespace MuonValR4 {
     std::unique_ptr<TLatex> drawLabel(const std::string& text, 
                                       const double xPos, 
                                       const double yPos,
-                                      const unsigned int fontSize = 18,
-                                      const bool useNDC = true);
+                                      const double textSize = 18,
+                                      const bool useNDC = true,
+                                      const int color = kBlack);
     /** @brief Create a ATLAS label
      *  @param xPos: x-position of the label on the Canvas
      *  @param yPos: y-position of the label on the Canvas

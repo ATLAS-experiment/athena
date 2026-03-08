@@ -13,7 +13,7 @@ dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 ### uncomment this and other lines to enable technical efficiency
 # dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=-1
-rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 ref_idpvm_athena=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/ReferenceHistograms/physval_run4_ttbar200_reco_r25.root
 
 # search in $DATAPATH for matching file
@@ -43,7 +43,7 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
-ignore_pattern="ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsValidateTracksTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern=""
 
 # Run with Athena ambi. resolution
 run "Reconstruction-ckf" \

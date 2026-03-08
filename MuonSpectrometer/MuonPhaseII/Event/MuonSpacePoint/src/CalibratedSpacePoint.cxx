@@ -3,6 +3,7 @@
 */
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <GeoPrimitives/GeoPrimitivesToStringConverter.h> 
+#include <ActsInterop/UnitConverters.h>
 namespace {
     static const Amg::Vector3D zero{Amg::Vector3D::Zero()};
 }
@@ -97,7 +98,7 @@ namespace MuonR4{
             return B ? "yay" : "nay";
         };
         if (hasTime()) {
-            ostr<<", time: "<<time();
+            ostr<<", time: "<<ActsTrk::timeToAthena(time());
         }
         ostr<<", measures eta/phi/time: "<<boolToStr(measuresEta())
             <<"/"<<boolToStr(measuresPhi())<<"/"<<boolToStr(hasTime());

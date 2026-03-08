@@ -32,7 +32,7 @@ TileMuonReceiverContainerCnv::createPersistent( TileMuonReceiverContainer* trans
   return persObj; 
 }
 
-TileMuonReceiverContainer* TileMuonReceiverContainerCnv::createTransient() {
+TileMuonReceiverContainer* TileMuonReceiverContainerCnv::createTransient(const Token* token) {
 
   MsgStream msg( msgSvc(), "TileMuonReceiverContainerCnv" );
 
@@ -41,14 +41,14 @@ TileMuonReceiverContainer* TileMuonReceiverContainerCnv::createTransient() {
   static const pool::Guid tr_guid("A01F819F-4F0B-4713-A275-7DA5F47F77E5");
   static const pool::Guid p1_guid("7F0DA5A3-7773-4852-AE55-A9920FEB31AB");
 
-  if ( compareClassGuid(tr_guid) ) {
+  if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<TileMuonReceiverContainer>();
+    return poolReadObject<TileMuonReceiverContainer>(token);
 
-  } else if ( compareClassGuid(p1_guid) ) {
+  } else if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileMuonReceiverContainer_p1> persObj( poolReadObject<TileMuonReceiverContainer_p1>() );
+    std::unique_ptr<TileMuonReceiverContainer_p1> persObj( poolReadObject<TileMuonReceiverContainer_p1>(token) );
     TileMuonReceiverContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else {

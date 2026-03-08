@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -75,14 +75,13 @@ std::string TestDriver::testWriting()
    }
    storSvc->addRef();
    std::cout << "startSession" << std::endl;
-   Session* sessionHandle = 0;
-   if ( ! ( storSvc->startSession( CREATE, m_storageType.type(), sessionHandle ).isSuccess() ) ) {
+   if( !storSvc->startSession( CREATE, m_storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
    std::cout << "Session connect" << std::endl;
    FileDescriptor fd( m_fileName, m_fileName );
-   if ( ! ( storSvc->connect( sessionHandle, RECREATE, fd ).isSuccess() ) ) {
+   if ( ! ( storSvc->connect( RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    DatabaseConnection* connection = fd.dbc();
@@ -168,7 +167,7 @@ std::string TestDriver::testWriting()
       throw std::runtime_error( "Could not disconnect." );
    }
    std::cout << "Ending Session" << std::endl;
-   if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+   if ( ! ( storSvc->endSession().isSuccess() ) ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
    std::cout << "Releasing StorageSvc" << std::endl;
@@ -192,13 +191,12 @@ TestDriver::testReading(const std::string& testTypeID)
   SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
   SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
-  Session* sessionHandle = 0;
-  if ( ! ( storSvc->startSession( READ, pool::ROOT_StorageType.type(), sessionHandle ).isSuccess() ) ) {
+  if( !storSvc->startSession( READ, pool::ROOT_StorageType.type() ).isSuccess() ) {
     throw std::runtime_error( "Could not start a session." );
   }
 
   FileDescriptor* fd = new FileDescriptor( m_fileName, m_fileName );
-  if( !storSvc->connect( sessionHandle, READ, *fd ).isSuccess() ) {
+  if( !storSvc->connect( READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
   DatabaseConnection* connection = fd->dbc();
@@ -285,7 +283,7 @@ TestDriver::testReading(const std::string& testTypeID)
   delete fd;
 
   std::cout << "Closing the session" << std::endl;
-  if ( ! ( storSvc->endSession( sessionHandle ).isSuccess() ) ) {
+  if ( ! ( storSvc->endSession().isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
   storSvc->release();

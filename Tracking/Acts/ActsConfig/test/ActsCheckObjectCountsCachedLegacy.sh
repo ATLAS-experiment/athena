@@ -1,18 +1,18 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ttbar mu=200 input
-input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1
+input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
+
 n_events=5
 log_file="reco.log"
 
-ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLargeRadiusTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:.*"
+ignore_pattern=""
 
 export ATHENA_CORE_NUMBER=1
 Reco_tf.py \
   --preExec "flags.Exec.FPE=-1; \
        	     flags.Detector.EnableMuon=False; \
-  	     flags.Acts.doITkConversion=True; \
 	     flags.Tracking.doTruth=False; \
 	     flags.Tracking.doITkConversion=False; \
 	     flags.Acts.doLargeRadius=True; \

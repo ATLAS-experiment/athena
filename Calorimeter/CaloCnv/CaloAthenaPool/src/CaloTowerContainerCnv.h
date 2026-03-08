@@ -29,7 +29,7 @@ class CaloTowerContainerCnv : public CaloTowerContainerCnvBase
 public:
   CaloTowerContainerCnv(ISvcLocator* svcloc);
 
-  virtual CaloTowerContainer* createTransient() override;
+  virtual CaloTowerContainer* createTransient(const Token* token) override;
   virtual CaloTowerContainerPERS* createPersistent(CaloTowerContainer*) override;
   
   CaloTowerBuilderToolBase* getTool(const std::string& type,

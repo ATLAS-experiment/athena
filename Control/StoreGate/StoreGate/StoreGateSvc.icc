@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file StoreGateSvc.icc
@@ -10,11 +10,9 @@
 #ifndef STOREGATE_STOREGATESVC_ICC
 #define STOREGATE_STOREGATESVC_ICC
 #include "StoreGate/constraints/KeyConcept.h"
-#include "SGTools/CallBackID.h"
 #include "AthContainersInterfaces/AuxStore_traits.h"
 #include "AthenaKernel/ClassName.h"
 #include "CxxUtils/checker_macros.h"
-#include "boost/bind/bind.hpp"
 #include <vector>
 
 /// macro to help writing the function calls.
@@ -92,76 +90,6 @@ StoreGateSvc::regHandle( DataHandle<H>& /*handle*/, const TKEY& key)
           << endmsg;
 
   return StatusCode::FAILURE;
-}
-
-/// register a callback function, with handle + key
-template <typename T, typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                            const T* obj, const DataHandle<H>& handle, 
-                                            const TKEY& key, bool trigger)
-{
-  CLID clid = ClassID_traits<H>::ID();
-  IResetable *ir = const_cast<IResetable*> (static_cast<const IResetable*> (&handle));
-  SG::DataProxy *dp = 0;
-
-  const CallBackID c(updFcn,obj);
-  using namespace boost::placeholders;
-  IOVSvcCallBackFcn fcn(boost::bind(updFcn,const_cast<T*>(obj), _1, _2));
-
-  bool ret = this->currentStore()->bindHandleToProxyAndRegister
-                                    (clid, key, ir, dp, c, fcn, trigger);
-
-  if (!ret) {
-    return StatusCode::FAILURE;
-  }
-
-  return handle.setState(dp); // FIXME - should be retrieve?
-}
-
-/// register a callback function, with handle + key. Non const. Error
-template <typename T, typename H, typename TKEY>
-StatusCode 
-StoreGateSvc::regFcn(StatusCode (T::* /*updFcn*/)(IOVSVC_CALLBACK_ARGS), 
-                     const T* /*obj*/, DataHandle<H>& /*handle*/, 
-                     const TKEY& key, bool /*trigger*/)
-{
-  error() << "regHandle(): DataHandle must be const: "
-          << ClassName<H>::name() << "[" + key + "]"
-          << endmsg;
-
-  return StatusCode::FAILURE;
-}
-
-
-/// register a callback function(2) with an already registered function(1)
-template <typename T1, typename T2>
-StatusCode 
-StoreGateSvc::regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T1::*fcn1)(IOVSVC_CALLBACK_ARGS), 
-                                            const T1* obj1,
-                                            StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                            const T2* obj2, bool trigger)
-{
-  const CallBackID c1(fcn1, obj1);
-  const CallBackID c2(fcn2, obj2);
-  using namespace boost::placeholders;
-  IOVSvcCallBackFcn fcn( boost::bind(fcn2,const_cast<T2*>(obj2), _1, _2));
-
-  _SGXCALL( regFcn, (c1, c2, fcn, trigger), StatusCode::FAILURE );
-}
-
-
-/// register a callback function(2) with an already registered AlgTool
-template <typename T2>
-StatusCode 
-StoreGateSvc::regFcn ATLAS_NOT_THREAD_SAFE (const std::string& toolName,
-                                            StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                            const T2* obj2, bool trigger)
-{
-  const CallBackID c2(fcn2, obj2);
-  using namespace boost::placeholders;
-  IOVSvcCallBackFcn fcn( boost::bind(fcn2,const_cast<T2*>(obj2),_1,_2));
-  _SGXCALL( regFcn, (toolName, c2, fcn, trigger), StatusCode::FAILURE );
 }
 
 ///////////////////////////////////////////////////////////////////

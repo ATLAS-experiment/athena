@@ -20,6 +20,7 @@ from DigitizationConfig.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXin
 from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
 from LArROD.LArNNChannelBuilder import LArNNRawChannelBuilderCfg
+from LArROD.LArOFFCChannelBuilder import LArOFFCRawChannelBuilderCfg
 from DigitizationConfig.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 # for Trigger Tower
 from CaloConditions.CaloConditionsConfig import CaloTriggerTowerCfg
@@ -244,6 +245,8 @@ def LArDigitizationBasicCfg(flags, **kwargs):
     acc.merge(LArHitEMapToDigitAlgCfg(flags))
     if flags.LAr.ROD.NNRawChannelBuilding:
         acc.merge(LArNNRawChannelBuilderCfg(flags))
+    elif flags.LAr.ROD.OFFCRawChannelBuilding:
+        acc.merge(LArOFFCRawChannelBuilderCfg(flags))
     else:
         acc.merge(LArRawChannelBuilderAlgCfg(flags))
 

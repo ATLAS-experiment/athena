@@ -26,159 +26,157 @@ namespace columnar
 
 
 
-  // in xAOD mode we can do a straightforward conversion from
-  // ElementLink to OptObjectId, as ElementLink contains all the
-  // information about the object
-  template<ContainerIdConcept LT>
-  struct ColumnTypeTraits<OptObjectId<LT>,ColumnarModeXAOD> final
+  namespace detail
   {
-    using CM = ColumnarModeXAOD;
-    using ColumnType = NativeColumn<ElementLink<typename LT::xAODElementLinkType>>;
-    using UserType = OptObjectId<LT>;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = true;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info) {return info;}
-
-    static OptObjectId<LT> convertInput (const ElementLink<typename LT::xAODElementLinkType>& link)
+    // if the columnar mode uses typed links, then the links with the
+    // implicit types can simply redirect to the code for typed links
+    template<ContainerIdConcept LT,ColumnarMode CM>
+      requires (CM::hasTypedLinks == true)
+    class MemoryAccessor<OptObjectId<LT,CM>,CM> final
     {
-      if (link.isValid())
+    public:
+
+      using BaseAccessor = MemoryAccessor<LinkCastColumn<LT,typename LT::xAODElementLinkType>,CM>;
+      static_assert (BaseAccessor::isDefined, "MemoryAccessor for LinkCastColumn must be defined");
+
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = BaseAccessor::viewIsReference;
+      static constexpr bool hasSetter = false;
+      using MemoryType = typename BaseAccessor::MemoryType;
+
+      static void updateColumnInfo (ColumnInfo& info)
       {
-        typename LT::xAODObjectIdType *ptr = *link.cptr();
-        return OptObjectId<LT,CM> (ptr);
-      } else
-      {
-        return OptObjectId<LT,CM> ();
+        BaseAccessor::updateColumnInfo (info);
       }
-    }
-  };
 
-
-  template<ContainerIdConcept LT,typename ELT>
-  struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeXAOD> final
-  {
-    using CM = ColumnarModeXAOD;
-    using ColumnType = NativeColumn<ElementLink<ELT>>;
-    using UserType = OptObjectId<LT>;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = true;
-    static constexpr bool useConvertWithDataInput = false;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info) {return info;}
-
-    static OptObjectId<LT> convertInput (const ElementLink<ELT>& link)
-    {
-      if (link.isValid())
+      [[nodiscard]] static auto makeViewer (void** dataArea)
       {
-        auto *ptr = *link.cptr();
-        if (!ptr) return OptObjectId<LT,CM> ();
-        auto *ptr2 = dynamic_cast<typename LT::xAODObjectIdType*>(ptr);
-        if (!ptr2) throw std::runtime_error ("link not of expected type");
-        return OptObjectId<LT,CM> (ptr2);
-      } else
-      {
-        return OptObjectId<LT,CM> ();
+        return BaseAccessor::makeViewer(dataArea);
       }
-    }
-  };
+    };
 
-
-
-
-
-  // in Array mode we take an index from the underlying column and
-  // combine it with the data vector from the input to get the new
-  // OptObjectId
-  template<ContainerIdConcept LT>
-  struct ColumnTypeTraits<OptObjectId<LT>,ColumnarModeArray>
-  {
-    using CM = ColumnarModeArray;
-    using ColumnType = typename CM::LinkIndexType;
-    using UserType = OptObjectId<LT>;
-    using DataType = void **;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = true;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
+    // I'm just using the MemoryAccessor from OptObjectId, as the
+    // behavior is exactly the same. Note that this is only for regular
+    // container IDs, as e.g. VariantContainerId needs special handling.
+    template<RegularContainerIdConcept LT,typename ELT,ColumnarMode CM>
+      requires (CM::hasTypedLinks == false && MemoryAccessor<OptObjectId<LT>,CM>::isDefined)
+    class MemoryAccessor<LinkCastColumn<LT,ELT>,CM>
     {
-      info.linkTargetNames = {std::string{LT::idName}};
-      return info;
-    }
+    public:
 
-    static OptObjectId<LT> convertInput (void **data, typename CM::LinkIndexType link)
-    {
-      if (link == invalidObjectIndex)
-        return OptObjectId<LT,CM> ();
-      return OptObjectId<LT,CM> (data, link);
-    }
-  };
+      using BaseAccessor = MemoryAccessor<OptObjectId<LT>,CM>;
 
-  // I'm just inheriting the ColumnTypeTraits from OptObjectId, as the
-  // behavior is exactly the same. Note that this is only for regular
-  // container IDs, as e.g. VariantContainerId needs special handling.
-  template<RegularContainerIdConcept LT,typename ELT>
-  struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeArray> : ColumnTypeTraits<OptObjectId<LT>,ColumnarModeArray> {};
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = BaseAccessor::viewIsReference;
+      static constexpr bool hasSetter = false;
+      using MemoryType = typename BaseAccessor::MemoryType;
 
-
-
-
-  // in xAOD Array mode we get links as ElementLinks, but really just
-  // take the index from it and then treat it like Array mode
-  template<ContainerIdConcept LT>
-  struct ColumnTypeTraits<OptObjectId<LT>,ColumnarModeXAODArray>
-  {
-    using CM = ColumnarModeXAODArray;
-    using ColumnType = NativeColumn<ElementLink<typename LT::xAODElementLinkType>>;
-    using UserType = OptObjectId<LT>;
-    using DataType = void **;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = true;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
-    {
-      info.linkTargetNames = {std::string{LT::idName}};
-      return info;
-    }
-
-    static OptObjectId<LT> convertInput (void **data, const auto& link)
-    {
-      if (link.isValid())
+      static void updateColumnInfo (ColumnInfo& info)
       {
-        return OptObjectId<LT,CM> (data, link.index());
-      } else
-      {
-        return OptObjectId<LT,CM> ();
+        BaseAccessor::updateColumnInfo (info);
       }
-    }
-  };
 
-  // This is the same as the above, but for a different ElementLink type
-  template<RegularContainerIdConcept LT,typename ELT>
-  struct ColumnTypeTraits<LinkCastColumn<LT,ELT>,ColumnarModeXAODArray>
-  {
-    using CM = ColumnarModeXAODArray;
-    using ColumnType = NativeColumn<ElementLink<typename ELT::xAODElementLinkType>>;
-    using UserType = OptObjectId<LT>;
-    using DataType = void **;
-    static constexpr bool isNativeType = false;
-    static constexpr bool useConvertInput = false;
-    static constexpr bool useConvertWithDataInput = true;
-    static ColumnInfo& updateColumnInfo (ColumnarTool<CM>& /*columnarTool*/, ColumnInfo& info)
-    {
-      info.linkTargetNames = {std::string{LT::idName}};
-      return info;
-    }
-
-    static OptObjectId<LT> convertInput (void **data, const auto& link)
-    {
-      if (link.isValid())
+      [[nodiscard]] static auto makeViewer (void** dataArea)
       {
-        return OptObjectId<LT,CM> (data, link.index());
-      } else
-      {
-        return OptObjectId<LT,CM> ();
+        return BaseAccessor::makeViewer(dataArea);
       }
-    }
-  };
+    };
+
+
+
+    template<ContainerIdConcept LT,typename ELT>
+    class MemoryAccessor<LinkCastColumn<LT,ELT>,ColumnarModeXAOD> final
+    {
+    public:
+      using CM = ColumnarModeXAOD;
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = false;
+      static constexpr bool hasSetter = false;
+      using MemoryType = ElementLink<ELT>;
+      static auto makeViewer (void**)
+      {
+        return [] (const ElementLink<ELT>& link)
+        {
+          if (link.isValid())
+          {
+            auto *ptr = *link.cptr();
+            if (!ptr) return OptObjectId<LT,CM> ();
+            auto *ptr2 = dynamic_cast<typename LT::xAODObjectIdType*>(ptr);
+            if (!ptr2) throw std::runtime_error ("link not of expected type");
+            return OptObjectId<LT,CM> (ptr2);
+          } else
+          {
+            return OptObjectId<LT,CM> ();
+          }
+        };
+      }
+    };
+
+
+
+
+    // in Array mode we take an index from the underlying column and
+    // combine it with the data vector from the input to get the new
+    // OptObjectId
+    template<ContainerIdConcept LT>
+    class MemoryAccessor<OptObjectId<LT>,ColumnarModeArray> final
+    {
+    public:
+
+      using CM = ColumnarModeArray;
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = false;
+      static constexpr bool hasSetter = false;
+      using MemoryType = typename CM::LinkIndexType;
+
+      static void updateColumnInfo (ColumnInfo& info)
+      {
+        info.linkTargetNames = {std::string{LT::idName}};
+      }
+
+      [[nodiscard]] static auto makeViewer (void** dataArea)
+      {
+        return [dataArea](const MemoryType& link)
+        {
+          if (link == invalidObjectIndex)
+            return OptObjectId<LT,CM> ();
+          return OptObjectId<LT,CM> (dataArea, link);
+        };
+      }
+    };
+
+
+
+    template<ContainerIdConcept LT,typename ELT>
+    class MemoryAccessor<LinkCastColumn<LT,ELT>,ColumnarModeXAODArray> final
+    {
+    public:
+      using CM = ColumnarModeXAODArray;
+      static constexpr bool isDefined = true;
+      static constexpr bool viewIsReference = false;
+      static constexpr bool hasSetter = false;
+      using MemoryType = ElementLink<ELT>;
+
+      static void updateColumnInfo (ColumnInfo& info)
+      {
+        info.linkTargetNames = {std::string{LT::idName}};
+      }
+
+      static auto makeViewer (void** dataArea)
+      {
+        return [dataArea] (const ElementLink<ELT>& link)
+        {
+          if (link.isValid())
+          {
+            return OptObjectId<LT,CM> (dataArea, link.index());
+          } else
+          {
+            return OptObjectId<LT,CM> ();
+          }
+        };
+      }
+    };
+  }
 }
 
 #endif

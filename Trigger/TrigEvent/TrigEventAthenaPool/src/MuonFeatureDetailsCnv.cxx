@@ -21,16 +21,16 @@ MuonFeatureDetails_PERS* MuonFeatureDetailsCnv::createPersistent(MuonFeatureDeta
 }
 
 //createTransient
-MuonFeatureDetails* MuonFeatureDetailsCnv::createTransient() {
+MuonFeatureDetails* MuonFeatureDetailsCnv::createTransient(const Token* token) {
     MsgStream mlog(msgSvc(), "MuonFeatureDetailsConverter" );
 
     mlog << MSG::DEBUG << "MuonFeatureDetailsCnv::createTransient " << endmsg;
 
     static const pool::Guid p1_guid("E841B555-766B-48EF-96F8-F4BE39EE8BCB");
 
-    if( compareClassGuid(p1_guid) ) {
+    if( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr< MuonFeatureDetails_p1 > col_vect( poolReadObject< MuonFeatureDetails_p1 >() );
+      std::unique_ptr< MuonFeatureDetails_p1 > col_vect( poolReadObject< MuonFeatureDetails_p1 >(token) );
       MuonFeatureDetailsCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
     } 

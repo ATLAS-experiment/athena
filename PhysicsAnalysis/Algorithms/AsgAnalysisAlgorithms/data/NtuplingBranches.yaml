@@ -1,0 +1,85 @@
+GeneratorAnalysisBlock:
+  - name: generatorWeight
+    description: the event-level PMG generator weight
+  - name: PDFID1
+    description: incoming parton 1 LHAPDF identification (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: PDFID2
+    description: incoming parton 2 LHAPDF identification (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: PDGID1
+    description: incoming parton 1 PDG identification (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: PDGID2
+    description: incoming parton 2 PDG identification (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: Q
+    description: event scale (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: X1
+    description: incoming parton 1 momentum fraction (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: X2
+    description: incoming parton 2 momentum fraction (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: XF1
+    description: incoming parton 1 PDF value (no systematics)
+    toggled_by: detailedPDFinfo
+  - name: XF2
+    description: incoming parton 2 PDF value (no systematics)
+    toggled_by: detailedPDFinfo
+
+PileupReweightingBlock:
+  - name: eventNumber
+    description: the event number (no systematics)
+  - name: runNumber
+    description: the run number (no systematics)
+  - name: mcChannelNumber
+    description: the MC channel number or DSID (no systematics)
+  - name: weight_pileup
+    description: the weight for pileup reweighting
+  - name: weight_beamspot
+    description: the weight to correct the beamspot size in Run 2 (no systematics)
+  - name: averageInteractionsPerCrossing
+    description: the $\langle\mu\rangle$ per bunch crossing
+  - name: actualInteractionsPerCrossing
+    description: the actual $\mu$ per bunch crossing
+
+BootstrapGeneratorConfig:
+  - name: <decoration>
+    description: the vector of bootstrap weights (no systematics)
+
+OverlapAnalysisConfig:
+  - name: select_or
+    description: the per-object overlap removal decision
+
+FakeBkgBlock:
+  - name: weight_fake_<setupName>
+    description: the fake lepton weight
+
+LeptonSFCalculatorBlock:
+  - name: weight_leptonSF
+    description: the per-event lepton SF (product of all relevant reconstruction/ID/TTVA/isolation SFs across defined objects)
+
+IFFLeptonDecorationBlock:
+  - name: IFFClass
+    description: the decision of the [IFF `TruthClassificationTool`](https://gitlab.cern.ch/atlas/athena/-/tree/21.2/PhysicsAnalysis/AnalysisCommon/TruthClassification) (no systematics)
+
+MCTCLeptonDecorationBlock:
+  - name: MCTC_isPrompt
+    description: whether the particle is classified as prompt (no systematics)
+  - name: MCTC_fromHadron
+    description: whether the particle originated from a hadron decay (no systematics)
+  - name: MCTC_fromBSM
+    description: whether the particle originated from a BSM decay (no systematics)
+  - name: MCTC_fromTau
+    description: whether the particle originated from a tau-lepton decay (no systematics)
+
+OutputAnalysisConfig:
+  - name: <selectionFlagPrefix>_<selectionName>
+    description: object-wise selection flags
+
+VGammaORBlock:
+  - name: in_vgamma_overlap
+    description: can either be 0 or 1 for an event (no systematics). An event should be kept if it is 0 for V+jets samples or if it is 1 for V$\gamma$+jets samples.
+

@@ -28,7 +28,7 @@ public:
 protected:
 
   virtual TrigTauTracksInfoCollection_PERS *createPersistent( TrigTauTracksInfoCollection *transObj);
-  virtual TrigTauTracksInfoCollection      *createTransient();
+  virtual TrigTauTracksInfoCollection      *createTransient(const Token* token);
 
 private:
   TrigTauTracksInfoCollectionCnv_tlp1 m_converter_tlp1;

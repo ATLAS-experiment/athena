@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -40,7 +40,7 @@ namespace VKalVrtAthena {
       for( const auto* vtx : *vertices ) {
         for( size_t iv = 0; iv < vtx->nTrackParticles(); iv++ ) {
           const auto* pvtrk = vtx->trackParticle( iv );
-          if (pvtrk == nullptr) continue;
+          if (!pvtrk) continue;
           // when using lepton-only selection, also need to check if the ID track matched to the GSF track is associated to the PV
            if ( (trk_from_gsf == pvtrk) or (trk == pvtrk) ) {
             is_pv_associated = true;
@@ -285,7 +285,7 @@ namespace VKalVrtAthena {
 
     double chi2Probability = TMath::Prob( vertex.Chi2, vertex.ndof() );
 
-    while (chi2Probability < m_jp.improveChi2ProbThreshold ) {
+    while (chi2Probability < m_improveChi2ProbThreshold ) {
       if( vertex.nTracksTotal() == 2 ) return chi2Probability;
 
       WrkVrt vertex_backup = vertex;
@@ -682,146 +682,7 @@ namespace VKalVrtAthena {
 
 
 
-  //____________________________________________________________________________________________________
-  void VrtSecInclusive::declareProperties() {
-
-    declareProperty("GeoModel",                        m_jp.geoModel                        = VKalVrtAthena::GeoModel::Run2 );
-
-    declareProperty("TrackLocation",                   m_jp.TrackLocation                   = "InDetTrackParticles"         );
-    declareProperty("MuonLocation",                    m_jp.MuonLocation                    = "Muons"                       );
-    declareProperty("ElectronLocation",                m_jp.ElectronLocation                = "Electrons"                   );
-    declareProperty("PrimVrtLocation",                 m_jp.PrimVrtLocation                 = "PrimaryVertices"             );
-    declareProperty("McParticleContainer",             m_jp.truthParticleContainerName      = "TruthParticles"              );
-    declareProperty("MCEventContainer",                m_jp.mcEventContainerName            = "TruthEvents"                 );
-    declareProperty("AugmentingVersionString",         m_jp.augVerString                    = "_VSI"                            );
-    declareProperty("TruthParticleFilter",             m_jp.truthParticleFilter             = "Rhadron"                     ); // Either "", "Kshort", "Rhadron", "HNL", "HadInt", "Bhadron"
-
-    declareProperty("All2trkVerticesContainerName",    m_jp.all2trksVerticesContainerName   = "All2TrksVertices"            );
-    declareProperty("SecondaryVerticesContainerName",  m_jp.secondaryVerticesContainerName  = "SecondaryVertices"           );
-
-    declareProperty("FillHist",                        m_jp.FillHist                        = false                         );
-    declareProperty("FillNtuple",                      m_jp.FillNtuple                      = false                         );
-    declareProperty("FillIntermediateVertices",        m_jp.FillIntermediateVertices        = false                         );
-    declareProperty("DoIntersectionPos",               m_jp.doIntersectionPos               = false                         );
-    declareProperty("DoMapToLocal",                    m_jp.doMapToLocal                    = false                         );
-    declareProperty("DoTruth",                         m_jp.doTruth                         = false                         );
-    declareProperty("DoPVcompatibility",               m_jp.doPVcompatibilityCut            = true                          );
-    declareProperty("DoTightPVcompatibility",          m_jp.doTightPVcompatibilityCut       = false                         );
-    declareProperty("RemoveFake2TrkVrt",               m_jp.removeFakeVrt                   = true                          );
-    declareProperty("DoDelayedFakeReject",             m_jp.removeFakeVrtLate               = false                         );
-    declareProperty("CheckHitPatternStrategy",         m_checkPatternStrategy               = "Classical"                   ); // Either Classical or Extrapolation
-    declareProperty("MCTrackResolution",               m_jp.mcTrkResolution                 = 0.06                          ); // see getTruth for explanation
-    declareProperty("TruthTrkLen",                     m_jp.TruthTrkLen                     = 1000                          ); // in [mm]
-    declareProperty("ExtrapPV",                        m_jp.extrapPV                        = false                         ); // Leave false. only for testing
-    declareProperty("PassThroughTrackSelection",       m_jp.passThroughTrackSelection       = false                         );
-    declareProperty("DoFastMode",                      m_jp.doFastMode                      = false                         );
-
-
-    declareProperty("DoTwoTrSoftBtag",                 m_jp.doTwoTrSoftBtag                 = false                         );
-    declareProperty("TwoTrVrtAngleCut",                m_jp.twoTrVrtAngleCut                = -10                           );
-    declareProperty("TwoTrVrtMinDistFromPVCut",        m_jp.twoTrVrtMinDistFromPV           = 0.                            );
-
-    declareProperty("TruncateListOfWorkingVertices",   m_jp.truncateWrkVertices             = true                           );
-    declareProperty("MaxNumberOfWorkingVertices",      m_jp.maxWrkVertices                  = 1500                           );
-
-    // default values are set upstream - check top of file
-    declareProperty("do_PVvetoCut",                    m_jp.do_PVvetoCut                    = true                          );
-    declareProperty("do_d0Cut",                        m_jp.do_d0Cut                        = true                          );
-    declareProperty("do_z0Cut",                        m_jp.do_z0Cut                        = true                          );
-    declareProperty("do_d0errCut",                     m_jp.do_d0errCut                     = false                         );
-    declareProperty("do_z0errCut",                     m_jp.do_z0errCut                     = false                         );
-    declareProperty("do_d0signifCut",                  m_jp.do_d0signifCut                  = false                         );
-    declareProperty("do_z0signifCut",                  m_jp.do_z0signifCut                  = false                         );
-
-    declareProperty("ImpactWrtBL",                     m_jp.ImpactWrtBL                     = true                          ); // false option is going to be deprecated
-    declareProperty("a0TrkPVDstMinCut",                m_jp.d0TrkPVDstMinCut                = 0.                            ); // in [mm]
-    declareProperty("a0TrkPVDstMaxCut",                m_jp.d0TrkPVDstMaxCut                = 1000.                         ); // in [mm]
-    declareProperty("a0TrkPVSignifCut",                m_jp.d0TrkPVSignifCut                = 0.                            ); // in [mm]
-    declareProperty("twoTrkVtxFormingD0Cut",           m_jp.twoTrkVtxFormingD0Cut           = 1.                            ); // in [mm]
-    declareProperty("zTrkPVDstMinCut",                 m_jp.z0TrkPVDstMinCut                = 0.                            ); // in [mm]
-    declareProperty("zTrkPVDstMaxCut",                 m_jp.z0TrkPVDstMaxCut                = 1000.                         ); // in [mm]
-    declareProperty("zTrkPVSignifCut",                 m_jp.z0TrkPVSignifCut                = 0.                            ); // in unit of sigma
-    declareProperty("TrkA0ErrCut",                     m_jp.d0TrkErrorCut                   = 10000                         ); // in [mm]
-    declareProperty("TrkZErrCut",                      m_jp.z0TrkErrorCut                   = 20000                         ); // in [mm]
-
-    declareProperty("SelTrkMaxCutoff",                 m_jp.SelTrkMaxCutoff                 = 50                            ); // max number of tracks
-    declareProperty("TrkPtCut",                        m_jp.TrkPtCut                        = 1000.                         ); // low pT threshold. in [MeV]
-    declareProperty("TrkChi2Cut",                      m_jp.TrkChi2Cut                      = 3.                            ); // in terms of chi2 / ndof
-    declareProperty("PVcompatibilityCut",              m_jp.pvCompatibilityCut              = -20.                          ); // in [mm]
-    declareProperty("SelVrtChi2Cut",                   m_jp.SelVrtChi2Cut                   = 4.5                           ); // in terms of chi2 / ndof
-
-    declareProperty("CutSctHits",                      m_jp.CutSctHits                      = 0                             );
-    declareProperty("CutPixelHits",                    m_jp.CutPixelHits                    = 0                             );
-    declareProperty("CutSiHits",                       m_jp.CutSiHits                       = 0                             );
-    declareProperty("DoSAloneTRT",                     m_jp.SAloneTRT                       = false                         ); // SAlone = "standalone"
-    declareProperty("CutBLayHits",                     m_jp.CutBLayHits                     = 0                             );
-    declareProperty("CutSharedHits",                   m_jp.CutSharedHits                   = 0                             );
-    declareProperty("doTRTPixCut",                     m_jp.doTRTPixCut                     = false                         ); // mode for R-hadron displaced vertex
-    declareProperty("CutTRTHits",                      m_jp.CutTRTHits                      = 0                             );
-    declareProperty("CutTightSCTHits",                 m_jp.CutTightSCTHits                 = 7                             );
-    declareProperty("CutTightTRTHits",                 m_jp.CutTightTRTHits                 = 20                            );
-
-    declareProperty("TrkExtrapolator",                 m_jp.trkExtrapolator                 = 2                             );
-
-    declareProperty("doReassembleVertices",            m_jp.doReassembleVertices            = false                         );
-    declareProperty("doMergeByShuffling",              m_jp.doMergeByShuffling              = false                         );
-    declareProperty("doSuggestedRefitOnMerging",       m_jp.doSuggestedRefitOnMerging       = true                          ); // sub-option of doMergeByShuffling-1
-    declareProperty("doMagnetMerging",                 m_jp.doMagnetMerging                 = true                          ); // sub-option of doMergeByShuffling-2
-    declareProperty("doWildMerging",                   m_jp.doWildMerging                   = true                          ); // sub-option of doMergeByShuffling-3
-    declareProperty("doMergeFinalVerticesDistance",    m_jp.doMergeFinalVerticesDistance    = false                         );
-    declareProperty("doAssociateNonSelectedTracks",    m_jp.doAssociateNonSelectedTracks    = false                         );
-    declareProperty("doFinalImproveChi2",              m_jp.doFinalImproveChi2              = false                         );
-
-    declareProperty("VertexMergeCut",                  m_jp.VertexMergeCut                  = 3                             );
-    declareProperty("TrackDetachCut",                  m_jp.TrackDetachCut                  = 6                             );
-    declareProperty("associateMinDistanceToPV",        m_jp.associateMinDistanceToPV        = 0.5                           );
-    declareProperty("associateMaxD0Signif",            m_jp.associateMaxD0Signif            = 5.                            ); // wrt. DV in unit of sigma
-    declareProperty("associateMaxZ0Signif",            m_jp.associateMaxZ0Signif            = 5.                            ); // wrt. DV in unit of sigma
-    declareProperty("associatePtCut",                  m_jp.associatePtCut                  = 0.                            ); // in [MeV]
-    declareProperty("associateChi2Cut",                m_jp.associateChi2Cut                = 20.                           );
-    declareProperty("reassembleMaxImpactParameterD0",  m_jp.reassembleMaxImpactParameterD0  = 1.                            ); // wrt. DV in [mm]
-    declareProperty("reassembleMaxImpactParameterZ0",  m_jp.reassembleMaxImpactParameterZ0  = 5.                            ); // wrt. DV in [mm]
-    declareProperty("mergeByShufflingMaxSignificance", m_jp.mergeByShufflingMaxSignificance = 100.                          ); // in unit of sigma
-    declareProperty("mergeByShufflingAllowance",       m_jp.mergeByShufflingAllowance       = 4.                            ); // in unit of sigma
-    declareProperty("VertexMergeFinalDistCut",         m_jp.VertexMergeFinalDistCut         = 1.                            ); // in [mm]
-    declareProperty("VertexMergeFinalDistScaling",     m_jp.VertexMergeFinalDistScaling     = 0.                            ); // in [1/mm]
-    declareProperty("improveChi2ProbThreshold",        m_jp.improveChi2ProbThreshold        = 1.e-4                         );
-
-    // A test implementation for muon vertices
-    declareProperty("doSelectTracksFromMuons",         m_jp.doSelectTracksFromMuons         = false                         );
-    declareProperty("doRemoveCaloTaggedMuons",         m_jp.doRemoveCaloTaggedMuons         = false                         );
-    declareProperty("doSelectTracksFromElectrons",     m_jp.doSelectTracksFromElectrons     = false                         );
-    declareProperty("doSelectIDAndGSFTracks",          m_jp.doSelectIDAndGSFTracks          = false                         );
-    declareProperty("doRemoveNonLeptonVertices",       m_jp.doRemoveNonLeptonVertices       = false                         );
-
-    // Disappearing track vertices
-    declareProperty("doDisappearingTrackVertexing",   m_jp.doDisappearingTrackVertexing     = false                           );
-    declareProperty("twoTrVrtMaxPerigeeDist",         m_jp.twoTrVrtMaxPerigeeDist           = 50                            ); // in [mm]
-    declareProperty("twoTrVrtMinRadius",              m_jp.twoTrVrtMinRadius                = 50                            ); // in [mm]    
-
-
-
-    // Select tracks with additonal LRT Cuts (inspiried by Run 3 LRT optimization studies)
-    declareProperty("doSelectTracksWithLRTCuts",     m_jp.doSelectTracksWithLRTCuts     = false                               );
-
-    // Additional dressing option
-    declareProperty("doAugmentDVimpactParametersToMuons",     m_jp.doAugmentDVimpactParametersToMuons     = false           );
-    declareProperty("doAugmentDVimpactParametersToElectrons", m_jp.doAugmentDVimpactParametersToElectrons = false           );
-
-    // Additional ToolHandles
-    declareProperty("VertexFitterTool",                m_fitSvc, " Private TrkVKalVrtFitter"                                );
-    declareProperty("Extrapolator",                    m_extrapolator                                                       );
-    declareProperty("TrackToVertexTool",               m_trackToVertexTool                                                  );
-    declareProperty("TrackToVertexIPEstimatorTool",    m_trackToVertexIPEstimatorTool                                       );
-    declareProperty("VertexMapper",                    m_vertexMapper                                                       );
-    declareProperty("TruthToTrack",                    m_truthToTrack                                                       );
-
-  }
-
-
-
-
-  //____________________________________________________________________________________________________
+//____________________________________________________________________________________________________
   StatusCode VrtSecInclusive::processPrimaryVertices() {
 
     //--------------------------------------------------------
@@ -830,7 +691,7 @@ namespace VKalVrtAthena {
 
     ATH_CHECK( evtStore()->retrieve( m_primaryVertices, "PrimaryVertices") );
 
-    if( m_jp.FillNtuple ) m_ntupleVars->get<unsigned int>( "NumPV" ) = 0;
+    if( m_FillNtuple ) m_ntupleVars->get<unsigned int>( "NumPV" ) = 0;
     m_thePV = nullptr;
 
     ATH_MSG_DEBUG( "processPrimaryVertices(): pv_size = " << m_primaryVertices->size() );
@@ -848,7 +709,7 @@ namespace VKalVrtAthena {
       // Not considering pile-up; pick-up the first PV
       m_thePV = vertex;
 
-      if( m_jp.FillNtuple ) {
+      if( m_FillNtuple ) {
 
         if( 0 == m_ntupleVars->get<unsigned int>( "NumPV" ) ) {
 
@@ -881,7 +742,7 @@ namespace VKalVrtAthena {
       for( const auto *vertex : *m_primaryVertices ) {
   if( xAOD::VxType::NoVtx != vertex->vertexType() ) continue;
 
-        if( m_jp.FillNtuple ) {
+        if( m_FillNtuple ) {
           // Not considering pile-up; pick-up the first PV
           if( 0 == m_ntupleVars->get<unsigned int>( "NumPV" ) ) {
             m_thePV = vertex;
@@ -1074,7 +935,7 @@ namespace VKalVrtAthena {
       }
     }
 
-    if( m_jp.FillHist ) {
+    if( m_FillHist ) {
       for( auto& pair : m_matchMap ) {
         if( pair.second ) m_hists["nMatchedTruths"]->Fill( m_vertexingAlgorithmStep+2, pair.first->perp() );
       }
@@ -1165,7 +1026,7 @@ namespace VKalVrtAthena {
 
     }
 
-    if( m_jp.FillHist ) {
+    if( m_FillHist ) {
       m_hists["disabledCount"]->Fill( nDisabled );
     }
 
@@ -2159,9 +2020,9 @@ namespace VKalVrtAthena {
   bool VrtSecInclusive::patternCheck( const uint32_t& pattern, const Amg::Vector3D& vertex ) {
     bool flag = false;
 
-    if( m_jp.geoModel == VKalVrtAthena::GeoModel::Run2 ) {
+    if( m_geoModel == VKalVrtAthena::GeoModel::Run2 ) {
       flag = patternCheckRun2( pattern, vertex );
-    } else if( m_jp.geoModel == VKalVrtAthena::GeoModel::Run1 ) {
+    } else if( m_geoModel == VKalVrtAthena::GeoModel::Run1 ) {
       flag = patternCheckRun1( pattern, vertex );
     }
 
@@ -2172,9 +2033,9 @@ namespace VKalVrtAthena {
   bool VrtSecInclusive::patternCheckOuterOnly( const uint32_t& pattern, const Amg::Vector3D& vertex ) {
     bool flag = false;
 
-    if( m_jp.geoModel == VKalVrtAthena::GeoModel::Run2 ) {
+    if( m_geoModel == VKalVrtAthena::GeoModel::Run2 ) {
       flag = patternCheckRun2OuterOnly( pattern, vertex );
-    } else if( m_jp.geoModel == VKalVrtAthena::GeoModel::Run1 ) {
+    } else if( m_geoModel == VKalVrtAthena::GeoModel::Run1 ) {
       flag = patternCheckRun1OuterOnly( pattern, vertex );
     }
 
@@ -2365,9 +2226,9 @@ namespace VKalVrtAthena {
   //____________________________________________________________________________________________________
   void VrtSecInclusive::dumpTruthInformation() {
 
-    const xAOD::EventInfo*              eventInfo      { nullptr };
-    const xAOD::TruthParticleContainer* truthParticles { nullptr };
-    const xAOD::TruthVertexContainer*   truthVertices  { nullptr };
+    const xAOD::EventInfo*              eventInfo{};
+    const xAOD::TruthParticleContainer* truthParticles{};
+    const xAOD::TruthVertexContainer*   truthVertices{};
 
     auto sc0 = evtStore()->retrieve( eventInfo, "EventInfo" );
     if( sc0.isFailure() ) { return; }
@@ -2472,12 +2333,12 @@ namespace VKalVrtAthena {
                                                             { "HadInt",  selectHadInt  }  };
 
 
-    if( selectFuncs.find( m_jp.truthParticleFilter ) == selectFuncs.end() ) {
-      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": invalid function specification: " << m_jp.truthParticleFilter );
+    if( selectFuncs.find( m_truthParticleFilter ) == selectFuncs.end() ) {
+      ATH_MSG_WARNING( " > " << __FUNCTION__ << ": invalid function specification: " << m_truthParticleFilter );
       return;
     }
 
-    auto selectFunc = selectFuncs.at( m_jp.truthParticleFilter );
+    auto selectFunc = selectFuncs.at( m_truthParticleFilter );
 
     // loop over truth vertices
     for( const auto *truthVertex : *truthVertices ) {
@@ -2491,7 +2352,7 @@ namespace VKalVrtAthena {
       }
     }
 
-    if( m_jp.FillHist ) {
+    if( m_FillHist ) {
       for( const auto* truthVertex : m_tracingTruthVertices ) {
         m_hists["nMatchedTruths"]->Fill( 0., truthVertex->perp() );
       }

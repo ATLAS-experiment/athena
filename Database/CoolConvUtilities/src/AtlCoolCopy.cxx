@@ -31,7 +31,7 @@
 #include "CoolApplication/Application.h"
 #include "CoralBase/AttributeListException.h"
 
-#include "FileCatalog/IFileCatalog.h"
+#include "PersistencySvc/IFileCatalog.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITransaction.h"
@@ -3229,7 +3229,6 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
     if (ipool->second.errcode()>0) ++nbad;
   }
   catalog->commit();
-  catalog->disconnect();
   delete catalog;
 
   // produce definition of new dataset if needed
@@ -3262,7 +3261,6 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
       }
     }
     catalog->commit();
-    catalog->disconnect();
     delete catalog;
   }
 
@@ -3346,7 +3344,6 @@ pool::IFileCatalog* AtlCoolCopy::setupCatalog(
         catalog->addReadCatalog(*icat);
       }
     }
-    catalog->connect();
     catalog->start();
     return catalog;
   }

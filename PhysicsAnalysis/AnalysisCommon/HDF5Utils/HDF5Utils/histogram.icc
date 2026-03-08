@@ -3,13 +3,16 @@
 */
 
 #include "H5Cpp.h"
-#include "hdf5_hl.h"
+#include "HDF5Utils/HistCommon.h"
 
 #include <vector>
 #include <cassert>
-#include <array>
+#include <cmath>
+#include <cstdint>
 #include <numeric>
+#include <optional>
 #include <set>
+#include <string>
 
 #include <boost/histogram.hpp>
 
@@ -18,10 +21,18 @@ namespace H5Utils::hist::detail {
 
   // various stuff to inspect the boost histograms
 
-  // inspect the accumulator to see what we can read out
+  // Concepts to inspect which members the accumulator exposes.
   template <typename T>
-  concept HasValue = requires(T t) {
-    t.begin()->value();
+  concept HasValue = requires(T t) { t.begin()->value(); };
+  template <typename T>
+  concept HasVariance = requires(T t) { t.begin()->variance(); };
+  template <typename T>
+  concept HasCount = requires(T t) { t.begin()->count(); };
+  template <typename T>
+  concept HasSumOfWeights = requires(T t) { t.begin()->sum_of_weights(); };
+  template <typename T>
+  concept HasSumOfWeightsSquared = requires(T t) {
+    t.begin()->sum_of_weights_squared();
   };
 
   // figure out the output array type
@@ -42,21 +53,6 @@ namespace H5Utils::hist::detail {
   template <typename T>
   using array_t = typename array_type<T>::type;
 
-  // H5 typing magic
-  template <typename T>
-  const H5::DataType hdf5_t;
-  template<>
-  const H5::DataType hdf5_t<double> = H5::PredType::NATIVE_DOUBLE;
-  template<>
-  const H5::DataType hdf5_t<float> = H5::PredType::NATIVE_FLOAT;
-  template<>
-  const H5::DataType hdf5_t<int> = H5::PredType::NATIVE_INT;
-  template<>
-  const H5::DataType hdf5_t<unsigned long> = H5::PredType::NATIVE_ULONG;
-  template<>
-  const H5::DataType hdf5_t<unsigned long long> = H5::PredType::NATIVE_ULLONG;
-
-
   // function to flatten the histogram array
   template <typename T, typename F>
   std::vector<array_t<T>> get_flat_hist_array(const T& hist,
@@ -64,10 +60,6 @@ namespace H5Utils::hist::detail {
   {
     using out_t = std::vector<array_t<T>>;
     namespace bh = boost::histogram;
-    std::vector<int> hist_dims(hist.rank());
-    for (size_t dim = 0; dim < hist.rank(); dim++) {
-      hist_dims.at(dim) = hist.axis(dim).size();
-    }
 
     // calculate a global index for the flat output array
     auto global_index = [&hist](const auto& hist_idx)
@@ -82,8 +74,8 @@ namespace H5Utils::hist::detail {
       for (size_t dim_p1 = hist.rank(); dim_p1 != 0; dim_p1--) {
         size_t dim = dim_p1 - 1;
         auto ops = hist.axis(dim).options();
-        size_t underflow = (ops & bh::axis::option::underflow) ? 1 : 0;
-        size_t overflow = (ops & bh::axis::option::overflow) ? 1 : 0;
+        int underflow = (ops & bh::axis::option::underflow) ? 1 : 0;
+        int overflow = (ops & bh::axis::option::overflow) ? 1 : 0;
         // ugly check to decide if we have to add underflow offset
         int h5idx_signed = hist_idx.index(dim) + underflow;
         if (h5idx_signed < 0) throw std::logic_error("neg signed index");
@@ -107,56 +99,77 @@ namespace H5Utils::hist::detail {
     return out;
   }
 
-  struct Axis
-  {
-    std::vector<float> edges{};
-    std::string name{};
-    int extra_bins_in_hist{};
-  };
+  // Returns true when all bin widths are equal and positive (regular axis).
+  inline bool is_regular_axis(const std::vector<float>& edges) {
+    if (edges.size() < 2) return false;
+    const double width0 = edges.at(1) - edges.at(0);
+    if (width0 <= 0.0) return false;
+    for (size_t i = 2; i < edges.size(); i++) {
+      const double width = edges.at(i) - edges.at(i-1);
+      if (std::abs(width - width0) > 1e-5 * std::abs(width0)) return false;
+    }
+    return true;
+  }
+
+  // Axis struct is defined in HistAxis.h (included via HistCommon.h).
 
   template <typename T>
   std::vector<Axis> get_axes(const T& hist) {
     using out_t = std::vector<Axis>;
     namespace opts = boost::histogram::axis::option;
-    out_t edges;
+    out_t axes;
     for (size_t ax_n = 0; ax_n < hist.rank(); ax_n++) {
       const auto& axis = hist.axis(ax_n);
       out_t::value_type ax;
       bool underflow = (axis.options() & opts::underflow);
       bool overflow = (axis.options() & opts::overflow);
-      // there are n normal bins + 1 edges, so we start with one less
-      // bin in the histogram then in the edges. Then we add under /
-      // overflow.
-      ax.extra_bins_in_hist = -1 + (underflow ? 1 : 0) + (overflow ? 1: 0);
+      ax.underflow = underflow;
+      ax.overflow = overflow;
       for (const auto& bin: axis) {
         ax.edges.push_back(bin.lower());
       }
-      // add the upper edge too
+      // add the upper edge too, unless this is an integer/category axis
+      // where every bin has the same lower and upper value — in that case
+      // we have exactly N edges for N bins rather than N+1
       if (axis.size() > 0) {
         const auto& last = *axis.rbegin();
-        // for integer binning, which has the same upper and lower bin
-        // value, we have one more bonus bin in the hist and don't save
-        // all the edges
         if (last.upper() == last.lower()) {
-          ax.extra_bins_in_hist += 1;
+          ax.is_int_or_category = true;
         } else {
           ax.edges.push_back(last.upper());
         }
       }
       ax.name = axis.metadata();
-      edges.push_back(std::move(ax));
-    }
-    return edges;
-  }
 
-  inline void chkerr(herr_t code, const std::string& error) {
-    if (code < 0) throw std::runtime_error("error setting " + error);
+      if (is_regular_axis(ax.edges)) {
+        ax.n_regular_bins = static_cast<int>(ax.edges.size()) - 1;
+      }
+
+      axes.push_back(std::move(ax));
+    }
+    return axes;
   }
 
   template <typename T>
   auto product(const std::vector<T>& v) {
     return std::accumulate(
       v.begin(), v.end(), T(1), std::multiplies<hsize_t>{});
+  }
+
+  // Return the UHI storage type string for histogram type T.
+  template <typename T>
+  std::string storage_type_name() {
+    if constexpr (HasSumOfWeightsSquared<T>) {
+      return "weighted_mean";
+    } else if constexpr (HasCount<T>) {
+      return "mean";
+    } else if constexpr (HasVariance<T>) {
+      return "weighted";
+    } else if constexpr (std::is_integral_v<array_t<T>>) {
+      return "int";
+    } else {
+      return "double";
+    }
   }
 }
 
@@ -176,14 +189,22 @@ namespace H5Utils::hist {
     auto axes = get_axes(hist);
     std::vector<hsize_t> ds_dims;
     for (const auto& axis: axes) {
-      int total_size = axis.edges.size() + axis.extra_bins_in_hist;
+      int total_size = static_cast<int>(axis.edges.size())
+                     - (axis.is_int_or_category ? 0 : 1)
+                     + (axis.underflow ? 1 : 0)
+                     + (axis.overflow  ? 1 : 0);
       if (total_size < 0) throw std::logic_error("negative bin count");
       ds_dims.push_back(static_cast<hsize_t>(total_size));
     }
     H5::DataSpace space(ds_dims.size(), ds_dims.data());
 
-    // set up group, props, type of dataset
+    // Create histogram group and write UHI schema version
     H5::Group group = parent_group.createGroup(name);
+    write_int_attr(group, "uhi_schema", 1);
+    group.createGroup("metadata");
+    group.createGroup("writer_info");
+
+    // Dataset creation properties for storage datasets
     H5::DSetCreatPropList props;
     props.setChunk(ds_dims.size(), ds_dims.data());
     props.setDeflate(7);
@@ -192,84 +213,50 @@ namespace H5Utils::hist {
       "no attribute hint");
     H5::DataType type = hdf5_t<array_t<T>>;
 
-    // add the edge datasets
-    H5::Group axgroup = group.createGroup("axes");
-    std::vector<H5::DataSet> axes_ds;
-    for (const auto& axis: axes) {
-      std::array<hsize_t,1> axdims{axis.edges.size()};
-      H5::DataSpace ax_space(axdims.size(), axdims.data());
-      H5::DSetCreatPropList ax_props;
-      ax_props.copy(props);
-      ax_props.setChunk(axdims.size(), axdims.data());
-      const auto& ax_type = hdf5_t<float>;
-      auto ax_ds = axgroup.createDataSet(
-        axis.name,
-        ax_type,
-        ax_space,
-        ax_props);
-      ax_ds.write(axis.edges.data(), ax_type);
-      axes_ds.push_back(ax_ds);
-    }
+    // Write ref_axes
+    detail::write_axes(group, axes);
 
-    // Generic dataset adder. We need to call this multiple times, for
-    // each type of data that the histogram is saving.
-    auto add_moment = [&hist, &type, &space, &props, &group, &axes_ds](
-      const std::string& thisname,
+    // Write storage group
+    H5::Group storage = group.createGroup("storage");
+    write_str_attr(storage, "type", storage_type_name<T>());
+
+    // Helper to write a named dataset into the storage group
+    auto add_dataset = [&hist, &type, &space, &props, &storage](
+      const std::string& ds_name,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
-      assert(static_cast<std::size_t>(space.getSelectNpoints()) == flat.size());
-      H5::DataSet dataset = group.createDataSet(
-        thisname,
-        type,
-        space,
-        props);
-      dataset.write(flat.data(), type);
-      // attach the axes
-      size_t axnum = 0;
-      for (const H5::DataSet& ax: axes_ds) {
-        chkerr(
-          H5DSattach_scale(
-            dataset.getId(), ax.getId(), axnum++),
-          "dimenstion scale");
-      }
+      assert(space.getSelectNpoints() == static_cast<hssize_t>(flat.size()));
+      storage.createDataSet(ds_name, type, space, props)
+             .write(flat.data(), type);
     };
 
-    // Read in the data and write to a dataset. The behavior here
-    // depends on which accumulator was used.
+    // values (the primary bin contents)
     if constexpr (HasValue<T>) {
-      add_moment("histogram",
-        [](const auto& x) { return x->value(); } );
+      add_dataset("values",
+        [](const auto& x) { return x->value(); });
     } else {
-      add_moment("histogram",
-        [](const auto& x) { return *x; } );
+      add_dataset("values",
+        [](const auto& x) { return *x; });
     }
-    // add the variance
-    if constexpr (requires(T t) { t.begin()->variance(); }) {
-      add_moment(
-        "variance",
-        [](const auto& x) { return x->variance();}
-        );
+    // variances
+    if constexpr (HasVariance<T>) {
+      add_dataset("variances",
+        [](const auto& x) { return x->variance(); });
     }
-    // add the counts
-    if constexpr (requires(T t) { t.begin()->count(); }) {
-      add_moment(
-        "count",
-        [](const auto& x) { return x->count(); }
-        );
+    // count (mean / weighted_mean accumulators)
+    if constexpr (HasCount<T>) {
+      add_dataset("count",
+        [](const auto& x) { return x->count(); });
     }
-    // add the sum of weights
-    if constexpr (requires(T t) { t.begin()->sum_of_weights(); }) {
-      add_moment(
-        "sum_of_weights",
-        [](const auto& x) { return x->sum_of_weights(); }
-        );
+    // sum_of_weights (weighted_mean accumulator)
+    if constexpr (HasSumOfWeights<T>) {
+      add_dataset("sum_of_weights",
+        [](const auto& x) { return x->sum_of_weights(); });
     }
-    // add the sum of weights squared
-    if constexpr (requires(T t) { t.begin()->sum_of_weights_squared(); }) {
-      add_moment(
-        "sum_of_weights_squared",
-        [](const auto& x) { return x->sum_of_weights_squared(); }
-        );
+    // sum_of_weights_squared (weighted_mean accumulator)
+    if constexpr (HasSumOfWeightsSquared<T>) {
+      add_dataset("sum_of_weights_squared",
+        [](const auto& x) { return x->sum_of_weights_squared(); });
     }
 
   }

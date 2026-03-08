@@ -30,7 +30,7 @@ public:
 protected:
 
   ALFA_ODHitCollection_PERS*  createPersistent (ALFA_ODHitCollection *transCont);
-  ALFA_ODHitCollection*       createTransient ();
+  ALFA_ODHitCollection*       createTransient(const Token* token);
     
  };
  

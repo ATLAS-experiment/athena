@@ -1,0 +1,6 @@
+KLFitterBlock:
+  - name: eventProbability
+    description: the event probability
+  - name: logLikelihood
+    description: the log of the likelihood
+

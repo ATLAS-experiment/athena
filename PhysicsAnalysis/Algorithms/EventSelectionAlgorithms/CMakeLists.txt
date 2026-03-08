@@ -23,3 +23,5 @@ atlas_add_component( EventSelectionAlgorithms
    LINK_LIBRARIES EventSelectionAlgorithmsLib )
 
 atlas_install_python_modules( python/*.py )
+
+atlas_install_data( data/* )

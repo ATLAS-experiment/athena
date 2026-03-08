@@ -33,7 +33,7 @@ ZdcLucrodMapRun3::ZdcLucrodMapRun3() : asg::AsgMessaging("ZdcLucrodMapRun3")
  
   ifs >> m_mainJson;
 
-  m_lucrodInfo.resize(6);
+  m_lucrodInfo.resize(7); // 7 lucrods including LIS
 
   for (const auto& element: m_mainJson)
     {

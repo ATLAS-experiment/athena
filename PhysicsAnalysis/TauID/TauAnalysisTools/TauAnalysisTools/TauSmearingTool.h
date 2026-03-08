@@ -8,9 +8,6 @@
 /*
   author: Dirk Duschinger
   mail: dirk.duschinger@cern.ch
-  documentation in: ../README.rst
-                    or
-                    https://svnweb.cern.ch/trac/atlasoff/browser/PhysicsAnalysis/TauID/TauAnalysisTools/trunk/README.rst
 */
 
 // Framework include(s):
@@ -68,8 +65,7 @@ private:
 
   Gaudi::Property<std::string> m_sInputFilePath{this, "InputFilePath", ""};
   Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2025-prerec"};
-  Gaudi::Property<std::string> m_sCampaign{this, "Campaign", "mc21"};
-  Gaudi::Property<std::string> m_sGenerator{this, "Generator", "PoPy"};
+  Gaudi::Property<std::string> m_sCampaign{this, "Campaign", "mc23"};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
   Gaudi::Property<bool> m_bApplyFading{this, "ApplyFading", true};
   Gaudi::Property<bool> m_bMVATESQualityCheck{this, "MVATESQualityCheck", true};

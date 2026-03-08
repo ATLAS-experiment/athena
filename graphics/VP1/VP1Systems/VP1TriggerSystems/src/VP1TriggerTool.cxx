@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***********************************************************************************
@@ -96,7 +96,7 @@ bool VP1Trig::VP1TriggerTool::isReady()
 //---          refresh(), e.g. at the particular channel init() or create().       ---
 //--- Default: [ALL] trigger levels; set by constructor.                           ---
 //_____________________________________________________________________________________________
-void VP1Trig::VP1TriggerTool::setTrigLvlToProcess(QString triglvl)
+void VP1Trig::VP1TriggerTool::setTrigLvlToProcess(const QString& triglvl)
 {
   log_verbose("Presetting trigger level flag in VP1Trig::VP1TriggerProcessor");
   m_triggerprocessor->setTrigLvl(triglvl);
@@ -145,7 +145,7 @@ int VP1Trig::VP1TriggerTool::getMuonCount()
 
 //Get trigger data in QTree container format
 //_____________________________________________________________________________________________
-QList<QTreeWidgetItem *> VP1Trig::VP1TriggerTool::getTriggerData_QTree(QString triglvl)
+QList<QTreeWidgetItem *> VP1Trig::VP1TriggerTool::getTriggerData_QTree(const QString& triglvl)
 {
   log_verbose("Requesting data in QTree format from VP1Trig::VP1TriggerProcessor");
   return m_triggerprocessor->getQTrigData(triglvl);

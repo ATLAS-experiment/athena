@@ -28,7 +28,7 @@ class ALFA_RawDataContainerCnv_charge: public ALFA_RawDataContainerCnvBase_charg
   ALFA_RawDataContainerCnv_charge(ISvcLocator* svcloc): ALFA_RawDataContainerCnvBase_charge(svcloc) {}
     
     virtual ALFA_RawDataContainer_charge_PERS* createPersistent(ALFA_RawDataContainer_charge* transCont);
-    virtual ALFA_RawDataContainer_charge*      createTransient ();
+    virtual ALFA_RawDataContainer_charge*      createTransient(const Token* token);
     
    
 };

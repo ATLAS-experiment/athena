@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKSYSTEMDISPLAY_H
@@ -40,9 +40,9 @@ public:
   void userPickedNode(SoNode* pickedNode, SoPath * pickedPath);
   void userChangedSelection(SoCooperativeSelection*, const QSet<SoNode*>&, QSet<SoPath*>);
   QWidget * buildController();
-  void printTrackInfo(QString title, QList<QString> paraname, QList<QString> paravalue);
+  void printTrackInfo(const QString& title, const QList<QString>& paraname, const QList<QString>& paravalue);
 
-private slots:
+private Q_SLOTS:
   void ptCutChanged(double);
   void updateSelectionMode(bool single);
 /*

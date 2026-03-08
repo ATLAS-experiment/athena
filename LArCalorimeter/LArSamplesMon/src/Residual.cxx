@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Residual.h"
@@ -140,21 +140,20 @@ bool Residuals::medianVars(TVectorD& medians, TVectorD& widths) const
 }
 
 
-Residuals* Residuals::truncate(double nWidthsRes, double nWidthsTime, unsigned int nMax) const
+std::unique_ptr<Residuals> Residuals::truncate(double nWidthsRes, double nWidthsTime, unsigned int nMax) const
 {
-  if (size() == 0) return new Residuals();
+  if (size() == 0) return std::make_unique<Residuals>();
   TVectorD medians, widths;
 
   if (nMax > 0) {
-    Residuals* original = new Residuals();
+    auto original = std::make_unique<Residuals>();
     for (unsigned int i = 0; i < nMax; i++) original->add(*residual(i));
-    if (!original->medianVars(medians, widths)) { delete original; return nullptr;}
-    delete original;
+    if (!original->medianVars(medians, widths)) return nullptr;
   }
   else {
     if (!medianVars(medians, widths)) return nullptr;
   }
-  Residuals* truncated = new Residuals();
+  auto truncated = std::make_unique<Residuals>();
 
   for (const Residual& residual : m_residuals) {
     bool pass = true;
@@ -233,7 +232,7 @@ bool ResidualCalculator::remove(const Residual& residual)
 }
 
 
-ShapeErrorData* ResidualCalculator::shapeErrorData() const
+std::unique_ptr<ShapeErrorData> ResidualCalculator::shapeErrorData() const
 {
   TVectorD xi = regresser()->means().GetSub(lwb(), upb(), "I");
   CovMatrix xiErr = regresser()->meanErrorMatrix().GetSub(lwb(), upb(), lwb(), upb(), "I");
@@ -245,7 +244,7 @@ ShapeErrorData* ResidualCalculator::shapeErrorData() const
     CovMatrix xipErr(lwb(), upb());
     // happens for size==2 if we are removing one of the residuals. 
     if (size() > 2) cout << "WARNING: variance of t < 1E-6, returning correction without derivative term. (V = " << denom << ", N = " << size() << ")" << endl;
-    return new ShapeErrorData(xi, xip, xiErr, xipErr, tbar, regresser()->nEntries());
+    return std::make_unique<ShapeErrorData>(xi, xip, xiErr, xipErr, tbar, regresser()->nEntries());
   }  
    
   TVectorD xip = TVectorD(regresser()->covarianceMatrix()[upb() + 1]).GetSub(lwb(), upb(), "I");
@@ -256,7 +255,7 @@ ShapeErrorData* ResidualCalculator::shapeErrorData() const
   CovMatrix xipErr(lwb(), upb());
   for (int k1 = lwb(); k1 <= upb(); k1++) xipErr(k1, k1) = TMath::Power(xipErrVect(k1), 2);
 
-  return new ShapeErrorData(xi, xip, xiErr, xipErr, tbar, regresser()->nEntries());
+  return std::make_unique<ShapeErrorData>(xi, xip, xiErr, xipErr, tbar, regresser()->nEntries());
 }
 
 
@@ -315,11 +314,10 @@ bool Residual::test()
 //   m.Print();
 //   w.Print();
 
-  Residuals* truncated = testVect.truncate(2);
+  std::unique_ptr<Residuals> truncated = testVect.truncate(2);
   if (!truncated) return false;
  
   TH1D* h = truncated->histogram(0, "h", 100, -5, 5);
-  delete truncated;
   h->Draw();
   return true;
 }

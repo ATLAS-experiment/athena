@@ -159,7 +159,7 @@ def getArgumentParser(legacy_args=False, **kwargs):
                    help='number of concurrent events for AthenaMT')
 
     g.add_argument('--CA', action='store_true',
-                   help='force ComponentAccumulator mode')
+                   help=argparse.SUPPRESS)  # deprecated, force ComponentAccumulator mode
 
     g.add_argument('--config-only', metavar='FILE', nargs='?', default=False, const=True,
                    help='run only configuration and optionally store in %(metavar)s')
@@ -326,6 +326,12 @@ def parse(legacy_args=False):
 
     if not (opts.scripts or opts.fromdb) and not opts.interactive:
         parser.error("the following arguments are required: scripts")
+
+    # Deprecation warning:
+    if opts.CA:
+        print(f"{os.path.basename(sys.argv[0])}: Warning: --CA is deprecated."
+              + f" Add a shebang (#!) to {opts.scripts[0]} to enable CA mode." if opts.scripts else "",
+              file=sys.stderr)
 
     set_environment(opts)
     check_tcmalloc(opts)

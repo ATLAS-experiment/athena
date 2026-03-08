@@ -20,7 +20,7 @@ namespace pool {
    // forward declarations
    class IContainer;
    class ITokenIterator;
-   class ICollectionDescription;
+   class CollectionDescription;
    
    /** 
     * @class ImplicitCollectionIterator ImplicitCollectionIterator.h Implicitcollection/ImplicitCollectionIterator.h
@@ -32,8 +32,7 @@ namespace pool {
    {
   public:
      /// Constructor
-     ImplicitCollectionIterator(IContainer& container,
-                                const pool::ICollectionDescription& description );
+     ImplicitCollectionIterator(IContainer& container);
 
      // ------------------- Cursor interface 
 

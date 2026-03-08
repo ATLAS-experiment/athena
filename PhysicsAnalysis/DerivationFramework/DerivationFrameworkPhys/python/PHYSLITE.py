@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_PHYSLITE.py
 # This defines DAOD_PHYSLITE, an unskimmed DAOD format for Run 3.
@@ -60,6 +60,7 @@ def CPAlgorithmsCfg(flags):
 
     subConfig = factory.makeConfig ('Muons')
     subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
+    subConfig.setOptionValue ('.addGlobalFELinksDep', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Muons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisMuons')
@@ -74,6 +75,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::MuonContainer')
     configSeq += subConfig
 
     # set up the electron analysis config (For SiHits electrons, use: LooseLHElectronSiHits.NonIso):
@@ -87,6 +89,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateSamplingPattern', True)
     subConfig.setOptionValue ('.decorateEmva', True)
+    subConfig.setOptionValue ('.addGlobalFELinksDep', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisElectrons')
@@ -114,6 +117,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::ElectronContainer')
     configSeq += subConfig
 
     # So SiHit electrons - should come after the standard selection in order to avoid keeping the same electrons twice
@@ -124,6 +128,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.postfix', 'SiHit')
     subConfig.setOptionValue ('.decorateEmva', True)
+    subConfig.setOptionValue ('.addGlobalFELinksDep', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Electrons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisSiHitElectrons')
@@ -141,6 +146,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::ElectronContainer')
     configSeq += subConfig
 
     # set up the photon analysis config:                                       
@@ -153,6 +159,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.recomputeIsEM', False)
     subConfig.setOptionValue ('.minPt', 0.)
     subConfig.setOptionValue ('.decorateEmva', True)
+    subConfig.setOptionValue ('.addGlobalFELinksDep', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('Photons.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisPhotons')
@@ -170,6 +177,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::PhotonContainer')
     configSeq += subConfig
 
 
@@ -178,6 +186,7 @@ def CPAlgorithmsCfg(flags):
     # Commented for now due to use of public tools
     subConfig = factory.makeConfig ('TauJets')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
+    subConfig.setOptionValue ('.addGlobalFELinksDep', True)
     configSeq += subConfig
     subConfig = factory.makeConfig ('TauJets.WorkingPoint')
     subConfig.setOptionValue ('.containerName', 'AnalysisTauJets')
@@ -190,6 +199,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::TauJetContainer')
     configSeq += subConfig
 
     # set up the jet analysis algorithm config:
@@ -207,6 +217,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::JetContainer')
     configSeq += subConfig
 
     largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
@@ -225,6 +236,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.deepCopy', True)
     subConfig.setOptionValue ('.sortPt', True)
     subConfig.setOptionValue ('.noUniformSelection', True)
+    subConfig.setOptionValue ('.containerType', 'xAOD::JetContainer')
     configSeq += subConfig
 
     from AnalysisAlgorithmsConfig.ConfigAccumulator import ConfigAccumulator
@@ -453,8 +465,10 @@ def PHYSLITECfg(flags):
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSLITESlimmingHelper)
-        from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
-        acc.merge(HFClassificationCommonCfg(flags))
+        # This block is only needed if input is AOD, as it is already done for PHYS->PHYSLITE
+        if 'StreamAOD' in flags.Input.ProcessingTags:
+            from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
+            acc.merge(HFClassificationCommonCfg(flags))
 
     # Save the extra variables which aren't included by other means
     btag_variables = [f'GN2v01_p{x}' for x in ['b', 'c', 'u', 'tau']]

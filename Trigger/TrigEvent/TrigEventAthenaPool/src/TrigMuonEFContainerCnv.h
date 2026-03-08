@@ -28,7 +28,7 @@ public:
 protected:
   
   virtual TrigMuonEFContainer_PERS *createPersistent( TrigMuonEFContainer *transObj);
-  virtual TrigMuonEFContainer      *createTransient();
+  virtual TrigMuonEFContainer      *createTransient(const Token* token);
 
 private:
   TrigMuonEFContainerCnv_tlp1 m_converter_tlp1;

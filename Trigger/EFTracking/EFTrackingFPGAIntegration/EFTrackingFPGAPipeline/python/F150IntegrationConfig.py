@@ -52,11 +52,22 @@ def FPGA150Pipeline(flags, runStandalone=False): # this is used to run the F150 
     
     acc.merge(F150IntegrationAlgCfg(flags, "F150IntegrationAlg", **kwargs))
 
-    acc.merge(F100EDMConversionCfg(flags))
-    acc.merge(FPGAClusterSortingCfg(flags,**{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone else 'ITkPixelClusters',
-                                             'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone else 'ITkStripClusters'}))
+    acc.merge(F100EDMConversionCfg(flags,
+                                   **{'xAODClusterMakerTool.PixelClusterContainerKey':
+                                       'FPGAPixelClusters' if flags.FPGADataPrep.DoClusterSorting
+                                                           else'ITkPixelClusters',
+                                      'xAODClusterMakerTool.StripClusterContainerKey':
+                                          'FPGAStripClusters' if flags.FPGADataPrep.DoClusterSorting
+                                                              else 'ITkStripClusters'}))
+    if(flags.FPGADataPrep.DoClusterSorting):
+        acc.merge(FPGAClusterSortingCfg(flags,
+                                        **{'sortedxAODPixelClusterContainer': 'SortedFPGAPixelClusters' if runStandalone
+                                                                                                        else 'ITkPixelClusters',
+                                           'sortedxAODStripClusterContainer': 'SortedFPGAStripClusters' if runStandalone
+                                                                                                        else 'ITkStripClusters'}))
 
-    acc.merge(F150EDMConversionCfg(flags))
+    acc.merge(F150EDMConversionCfg(flags,
+                                   **{'FPGASpacePointsKey' : 'ITkPixelSpacePoints'}))
 
     if(not runStandalone):
         if(not flags.FPGADataPrep.ForTiming): 

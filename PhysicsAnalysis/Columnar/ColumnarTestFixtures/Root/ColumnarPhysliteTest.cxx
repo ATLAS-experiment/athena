@@ -47,10 +47,12 @@
 
 #include <boost/core/demangle.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cstdint>
 #include <format>
 #include <memory>
+#include <span>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -68,24 +70,6 @@ namespace columnar
 
   namespace TestUtils
   {
-    // I never figured out how the keys get calculated, so I looked
-    // at what's in the input file, and hard-coded it here.
-    static const std::unordered_map<std::string,SG::sgkey_t> knownKeys =
-    {
-      {"AnalysisMuons", 0x3a6b126f},
-      {"AnalysisElectrons", 0x3902fec0},
-      {"AnalysisPhotons", 0x35d1472f},
-      {"AnalysisJets", 0x1afd1919},
-      {"egammaClusters", 0x15788d1f},
-      {"GSFConversionVertices", 0x1f3e85c9},
-      {"InDetTrackParticles", 0x1d3890db},
-      {"CombinedMuonTrackParticles", 0x340d9196},
-      {"ExtrapolatedMuonTrackParticles", 0x14e35e9f},
-      {"GSFTrackParticles", 0x2e42db0b},
-      {"InDetForwardTrackParticles", 0x143c6846},
-      {"MuonSpectrometerTrackParticles", 0x3993c8f3},
-    };
-
     template<typename T>
     class BranchReader final
     {
@@ -242,6 +226,9 @@ namespace columnar
         if (!m_branch)
           throw std::runtime_error ("failed to get branch: " + m_branchName);
         m_branch->SetMakeClass (1);
+        // FIX ME: I have to have some hard-coded size, see explanation
+        // below.
+        m_dataVec.resize (100);
         if (!m_dataVec.empty())
           m_branch->SetAddress (m_dataVec.data());
       }
@@ -252,8 +239,18 @@ namespace columnar
           throw std::runtime_error ("branch not connected: " + m_branchName);
         if (m_dataVec.size() < size)
         {
-          m_dataVec.resize (size);
-          m_branch->SetAddress (m_dataVec.data());
+          // FIX ME: in one of the latest releases the repointing below
+          // breaks, and causes memory corruption. so I'm now
+          // preallocating and fail rather than reallocate, and the
+          // problem goes away. maybe it should be investigated at some
+          // point, but this is a test and I already spend a fair amount
+          // of time investigating this. the harm is that this test
+          // consumes a few hundreds bytes more in memory and we may have
+          // to occasionally increase the buffer size to cover all test
+          // files and branch lengths.
+          throw std::runtime_error ("requested size exceeds buffer size for branch: " + m_branchName);
+          // m_dataVec.resize (size);
+          // m_branch->SetAddress (m_dataVec.data());
         }
         if (size > 0 && m_branch->GetEntry (entry) <= 0)
           throw std::runtime_error ("failed to get entry " + std::to_string (entry) + " for branch: " + m_branchName);
@@ -294,6 +291,7 @@ namespace columnar
         bool isOffset = false;
         bool primary = false;
         bool enabled = false;
+        std::size_t columnIndex = ColumnVectorHeader::nullIndex;
       };
       std::vector<OutputColumnInfo> outputColumns;
 
@@ -301,11 +299,21 @@ namespace columnar
 
       virtual bool connect (TTree *tree, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string,ColumnInfo>& requestedColumns) = 0;
 
+      /// @brief lookup and store column indices from the header for all enabled output columns
+      void connectColumnIndices (const ColumnVectorHeader& header)
+      {
+        for (auto& col : outputColumns)
+        {
+          if (col.enabled)
+            col.columnIndex = header.getColumnIndex (col.name);
+        }
+      }
+
       virtual void clearColumns () = 0;
 
       virtual void getEntry (Long64_t entry) = 0;
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) = 0;
+      virtual void setData (ColumnVectorData& columnData) = 0;
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) = 0;
 
@@ -343,10 +351,10 @@ namespace columnar
         data[1] += 1;
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& columnData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, data.size(), data.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, data.size(), data.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
@@ -359,7 +367,7 @@ namespace columnar
       virtual void collectColumnData () override
       {}
     };
-  
+
     template<typename T>
     struct ColumnDataScalar final : public TestUtils::IColumnData
     {
@@ -403,10 +411,10 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& columnData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, outData.size(), outData.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -495,12 +503,12 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& columnData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, outData.size(), outData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
         if (offsetColumn)
         {
           if (offsetColumn->size() != offsets.size())
@@ -577,10 +585,10 @@ namespace columnar
         outData.resize (offsetColumn->back(), defaultValue);
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& columnData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, outData.size(), outData.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, outData.size(), outData.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
@@ -657,12 +665,12 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -785,12 +793,12 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -816,7 +824,7 @@ namespace columnar
         {
           if (index == invalidObjectIndex)
             nullEntries += 1;
-        }        
+        }
       }
     };
 
@@ -899,14 +907,14 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, innerOffsets.size(), innerOffsets.data());
-        if (outputColumns.at(2).enabled)
-          tool.setColumn (outputColumns.at(2).name, outerOffsets.size(), outerOffsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, innerOffsets.size(), innerOffsets.data());
+        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(2).columnIndex, outerOffsets.size(), outerOffsets.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1038,12 +1046,12 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1221,14 +1229,14 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
-        if (outputColumns.at(2).enabled)
-          tool.setColumn (outputColumns.at(2).name, keyColumnData.size(), keyColumnData.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(2).columnIndex, keyColumnData.size(), keyColumnData.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1409,14 +1417,14 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
-        if (outputColumns.at(2).enabled)
-          tool.setColumn (outputColumns.at(2).name, keysColumn.size(), keysColumn.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(2).columnIndex, keysColumn.size(), keysColumn.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1517,14 +1525,14 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
-        if (outputColumns.at(2).enabled)
-          tool.setColumn (outputColumns.at(2).name, columnHashData.size(), columnHashData.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
+        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(2).columnIndex, columnHashData.size(), columnHashData.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1593,9 +1601,9 @@ namespace columnar
           requestedColumns.erase (iter);
         }
 
-        if (auto offsetIter = offsetColumns.find (outputColumns.at(0).name); offsetIter != offsetColumns.end())
-          throw std::runtime_error ("duplicate size column: " + outputColumns.at(0).name);
-        offsetColumns.emplace (outputColumns.at(0).name, &offsets);
+        // For multi-tool support, skip if offset column already registered
+        if (auto offsetIter = offsetColumns.find (outputColumns.at(0).name); offsetIter == offsetColumns.end())
+          offsetColumns.emplace (outputColumns.at(0).name, &offsets);
 
         return true;
       }
@@ -1621,16 +1629,16 @@ namespace columnar
         offsets.push_back (namesHash.size());
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, offsets.size(), offsets.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, namesData.size(), namesData.data());
-        if (outputColumns.at(2).enabled)
-          tool.setColumn (outputColumns.at(2).name, namesOffsets.size(), namesOffsets.data());
-        if (outputColumns.at(3).enabled)
-          tool.setColumn (outputColumns.at(3).name, namesHash.size(), namesHash.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, offsets.size(), offsets.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, namesData.size(), namesData.data());
+        if (outputColumns.at(2).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(2).columnIndex, namesOffsets.size(), namesOffsets.data());
+        if (outputColumns.at(3).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(3).columnIndex, namesHash.size(), namesHash.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
@@ -1705,12 +1713,12 @@ namespace columnar
         benchmarkUnpack.stopTimer ();
       }
 
-      virtual void setData (TestUtils::ToolWrapperData& tool) override
+      virtual void setData (ColumnVectorData& colData) override
       {
-        if (outputColumns.at(0).enabled)
-          tool.setColumn (outputColumns.at(0).name, columnData.size(), columnData.data());
-        if (outputColumns.at(1).enabled)
-          tool.setColumn (outputColumns.at(1).name, offsets.size(), offsets.data());
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(0).columnIndex, columnData.size(), columnData.data());
+        if (outputColumns.at(1).columnIndex != ColumnVectorHeader::nullIndex)
+          colData.setColumn (outputColumns.at(1).columnIndex, offsets.size(), offsets.data());
       }
 
       [[nodiscard]] virtual BranchPerfData getPerfData (float emptyTime) override
@@ -1733,6 +1741,53 @@ namespace columnar
         entries += columnData.size();
       }
     };
+
+
+    namespace
+    {
+      /// @brief wrapper around a tool and its benchmarks for mode 2
+      struct ToolData
+      {
+        std::string name;
+        ColumnarTool<ColumnarModeArray>* tool = nullptr;
+        std::unique_ptr<ToolColumnVectorMap> toolWrapper;
+        bool noRepeatCall = false;
+        bool runToolTwice = false;
+
+        Benchmark benchmarkCall;
+        Benchmark benchmarkCall2;
+
+        ToolData (const UserConfiguration& config, const TestDefinition& td,
+                  ColumnVectorHeader& columnHeader)
+          : name (td.name)
+          , noRepeatCall (td.noRepeatCall)
+          , runToolTwice (config.runToolTwice)
+          , benchmarkCall ("", config.batchSize)
+          , benchmarkCall2 ("", config.batchSize)
+        {
+          tool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(td.tool);
+          if (!tool)
+            throw std::runtime_error ("tool is not a ColumnarTool<ColumnarModeArray>: " + td.name);
+          if (!td.containerRenames.empty())
+            renameContainers (*tool, td.containerRenames);
+          toolWrapper = std::make_unique<ToolColumnVectorMap> (columnHeader, *tool);
+        }
+
+        /// @brief call the tool with timing, optionally twice
+        void call (ColumnVectorData& columnData)
+        {
+          benchmarkCall.startTimer ();
+          columnData.callNoCheck (*tool);
+          benchmarkCall.stopTimer ();
+          if (runToolTwice && !noRepeatCall)
+          {
+            benchmarkCall2.startTimer ();
+            columnData.callNoCheck (*tool);
+            benchmarkCall2.stopTimer ();
+          }
+        }
+      };
+    }
   }
 
 
@@ -1774,7 +1829,7 @@ namespace columnar
     return true;
   }
 
-  void ColumnarPhysLiteTest :: setupKnownColumns (const TestDefinition& testDefinition)
+  void ColumnarPhysLiteTest :: setupKnownColumns (std::span<const TestDefinition> testDefinitions)
   {
     using namespace TestUtils;
 
@@ -1914,8 +1969,17 @@ namespace columnar
 
     // For METMaker we need to preplace all of the MET terms that we
     // expect to be used, that's what this line does.
-    if (!testDefinition.metTermNames.empty())
-      knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", testDefinition.metTermNames));
+    std::vector<std::string> allMetTermNames;
+    for (const auto& td : testDefinitions)
+    {
+      for (const auto& name : td.metTermNames)
+      {
+        if (std::find (allMetTermNames.begin(), allMetTermNames.end(), name) == allMetTermNames.end())
+          allMetTermNames.push_back (name);
+      }
+    }
+    if (!allMetTermNames.empty())
+      knownColumns.push_back (std::make_shared<ColumnDataOutputMet> ("OutputMET", allMetTermNames));
 
     // For METMaker we need various extra columns to run. This may need
     // some work to avoid, but would likey be worth it.
@@ -1932,15 +1996,16 @@ namespace columnar
     knownColumns.push_back (std::make_shared<ColumnDataOutVector<MissingETBase::Types::bitmask_t>> ("METAssoc_AnalysisMET.useObjectFlags", 0));
   }
 
-  void ColumnarPhysLiteTest :: setupColumns (ToolColumnVectorMap& toolWrapper)
+  void ColumnarPhysLiteTest :: setupColumns (const ColumnVectorHeader& columnHeader)
   {
     using namespace asg::msgUserCode;
 
-    std::unordered_map<std::string,ColumnInfo> requestedColumns;
-    for (auto& column : toolWrapper.getTool().getColumnInfo())
-      requestedColumns[column.name] = std::move (column);
+    // Get all column info directly from the header (all tools have already
+    // registered their columns via ToolColumnVectorMap)
+    auto requestedColumns = columnHeader.getAllColumnInfo();
 
-    for (auto& name : toolWrapper.getColumnNames())
+    // Print requested columns
+    for (auto& [name, info] : requestedColumns)
       std::cout << "requested columns: " << name << std::endl;
 
     for (auto& column : knownColumns)
@@ -1991,7 +2056,7 @@ namespace columnar
       if (!myColumn->connect (tree, offsetColumns, requestedColumns))
       {
         ANA_MSG_WARNING ("failed to connect dynamic output column: " << info.name);
-        return false; 
+        return false;
       }
       usedColumns.push_back (myColumn);
       return true;
@@ -2007,33 +2072,49 @@ namespace columnar
 
   void ColumnarPhysLiteTest :: doCall (const TestDefinition& testDefinition)
   {
+    doCallMulti ({testDefinition});
+  }
+
+  void ColumnarPhysLiteTest :: doCallMulti (const std::vector<TestDefinition>& testDefinitions)
+  {
     using namespace asg::msgUserCode;
     auto userConfiguration = TestUtils::UserConfiguration::fromEnvironment();
 
-    if (!testDefinition.sysName.empty())
+    // apply systematics for all test definitions
+    for (const auto& td : testDefinitions)
     {
-      auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(testDefinition.tool);
-      if (!sysTool)
-        throw std::runtime_error ("tool does not support systematics");
-      std::cout << "applying systematic variation: " << testDefinition.sysName << std::endl;
-      if (sysTool->applySystematicVariation (CP::SystematicSet (testDefinition.sysName)).isFailure())
-        throw std::runtime_error ("failed to apply systematic variation: " + testDefinition.sysName);
+      if (!td.sysName.empty())
+      {
+        auto *sysTool = dynamic_cast<CP::ISystematicsTool*>(td.tool);
+        if (!sysTool)
+          throw std::runtime_error ("tool does not support systematics");
+        std::cout << "applying systematic variation: " << td.sysName << std::endl;
+        if (sysTool->applySystematicVariation (CP::SystematicSet (td.sysName)).isFailure())
+          throw std::runtime_error ("failed to apply systematic variation: " + td.sysName);
+      }
     }
+
     if constexpr (columnarAccessMode == 2)
     {
-      auto *myTool = dynamic_cast<ColumnarTool<ColumnarModeArray>*>(testDefinition.tool);
-      if (!testDefinition.containerRenames.empty())
-        renameContainers (*myTool, testDefinition.containerRenames);
+      // Create shared column header for all tools
       ColumnVectorHeader columnHeader;
-      ToolColumnVectorMap toolWrapper (columnHeader, *myTool);
 
-      setupKnownColumns (testDefinition);
-      setupColumns (toolWrapper);
+      // Build vector of ToolData from all testDefinitions
+      std::vector<TestUtils::ToolData> toolDataVec;
+      for (const auto& td : testDefinitions)
+        toolDataVec.emplace_back (userConfiguration, td, columnHeader);
 
-      Benchmark benchmarkCall (testDefinition.name, userConfiguration.batchSize);
-      Benchmark benchmarkCall2 (testDefinition.name + "(call2)", userConfiguration.batchSize);
-      Benchmark benchmarkCheck (testDefinition.name + "(column check)", userConfiguration.batchSize);
+      setupKnownColumns (testDefinitions);
+      // Set up columns using the shared header (all tools have already registered
+      // their columns via ToolColumnVectorMap, so we get all columns from the header)
+      setupColumns (columnHeader);
+
+      // Connect column indices from header to each column for direct setting
+      for (auto& column : usedColumns)
+        column->connectColumnIndices (columnHeader);
+
       Benchmark benchmarkEmpty ("empty");
+      Benchmark benchmarkCheck ("", userConfiguration.batchSize);
 
       const auto numberOfEvents = tree->GetEntries();
       Long64_t entry = 0;
@@ -2047,7 +2128,6 @@ namespace columnar
         benchmarkEmpty.stopTimer ();
 
         ColumnVectorData columnData (&columnHeader);
-        TestUtils::ToolWrapperData toolColumnData (&columnData, &toolWrapper);
         for (auto& column : usedColumns)
           column->getEntry (entry % numberOfEvents);
         if ((entry + 1) % userConfiguration.batchSize == 0)
@@ -2058,19 +2138,14 @@ namespace columnar
               column->collectColumnData ();
           }
           for (auto& column : usedColumns)
-            column->setData (toolColumnData);
+            column->setData (columnData);
+          // Check data once (shared column data)
           benchmarkCheck.startTimer ();
           columnData.checkData ();
           benchmarkCheck.stopTimer ();
-          benchmarkCall.startTimer ();
-          columnData.callNoCheck (*myTool);
-          benchmarkCall.stopTimer ();
-          if (userConfiguration.runToolTwice)
-          {
-            benchmarkCall2.startTimer ();
-            columnData.callNoCheck (*myTool);
-            benchmarkCall2.stopTimer ();
-          }
+          // Call each tool
+          for (auto& toolData : toolDataVec)
+            toolData.call (columnData);
           for (auto& column : usedColumns)
             column->clearColumns ();
           if ((std::chrono::high_resolution_clock::now() - startTime) > userConfiguration.targetTime)
@@ -2084,8 +2159,12 @@ namespace columnar
       std::cout << "Entries in file: " << numberOfEvents << std::endl;
       std::cout << "Total entries read: " << entry << std::endl;
       const float emptyTime = benchmarkEmpty.getEntryTime(0).value();
-      std::cout << "Empty benchmark time: " << emptyTime << "ns" << std::endl;
+      std::cout << "Empty benchmark time: " << emptyTime << "ns (tick=" << Benchmark::getTickDuration() << "ns)" << std::endl;
       benchmarkEmpty.setSilence();
+      const auto checkTime = benchmarkCheck.getEntryTime(emptyTime);
+      if (checkTime)
+        std::cout << "Check data time: " << checkTime.value() << "ns" << std::endl;
+      benchmarkCheck.setSilence();
       {
         std::vector<TestUtils::BranchPerfData> branchPerfData;
         TestUtils::BranchPerfData summary;
@@ -2093,7 +2172,7 @@ namespace columnar
         summary.timeRead = 0;
         summary.timeUnpack = 0;
         summary.timeShallowCopy = 0;
-        summary.entries = std::nullopt; 
+        summary.entries = std::nullopt;
         summary.nullEntries = std::nullopt;
         for (auto& column : usedColumns)
         {
@@ -2148,17 +2227,16 @@ namespace columnar
       }
       {
         std::vector<TestUtils::ToolPerfData> toolPerfData;
-        toolPerfData.emplace_back ();
-        toolPerfData.back().name = testDefinition.name;
-        toolPerfData.back().timeCall = benchmarkCall.getEntryTime(emptyTime);
-        if (userConfiguration.runToolTwice)
-          toolPerfData.back().timeCall2 = benchmarkCall2.getEntryTime(emptyTime);
-        toolPerfData.back().timeCheck = benchmarkCheck.getEntryTime(emptyTime);
-        benchmarkCall.setSilence();
-        benchmarkCall2.setSilence();
-        benchmarkCheck.setSilence();
+        for (auto& toolData : toolDataVec)
+        {
+          toolPerfData.emplace_back ();
+          toolPerfData.back().name = toolData.name;
+          toolPerfData.back().timeCall = toolData.benchmarkCall.getEntryTime (emptyTime);
+          if (userConfiguration.runToolTwice)
+            toolPerfData.back().timeCall2 = toolData.benchmarkCall2.getEntryTime (emptyTime);
+        }
         const std::size_t nameWidth = std::max_element (toolPerfData.begin(), toolPerfData.end(), [] (const auto& a, const auto& b) {return a.name.size() < b.name.size();})->name.size();
-        std::string header = std::format ("{:{}} | call(ns) | call2(ns) | check(ns)", "tool name", nameWidth);
+        std::string header = std::format ("{:{}} | call(ns) | call2(ns)", "tool name", nameWidth);
         std::cout << "\n" << header << std::endl;
         std::cout << std::string (header.size(), '-') << std::endl;
         for (auto& data : toolPerfData)
@@ -2169,106 +2247,41 @@ namespace columnar
           else
             std::cout << "          |";
           if (data.timeCall2)
-            std::cout << std::format ("{:>10.0f} |", data.timeCall2.value());
+            std::cout << std::format ("{:>10.0f}", data.timeCall2.value());
           else
-            std::cout << "           |";
-          if (data.timeCheck)
-            std::cout << std::format ("{:>10.1f}", data.timeCheck.value());
+            std::cout << "          ";
+          std::cout << std::endl;
+        }
+        // Add totals line for multiple tools
+        if (toolPerfData.size() > 1)
+        {
+          std::optional<float> totalCall, totalCall2;
+          for (const auto& data : toolPerfData)
+          {
+            if (data.timeCall)
+              totalCall = totalCall.value_or (0) + data.timeCall.value();
+            if (data.timeCall2)
+              totalCall2 = totalCall2.value_or (0) + data.timeCall2.value();
+          }
+          std::cout << std::string (header.size(), '-') << std::endl;
+          std::cout << std::format ("{:{}} |", "total", nameWidth);
+          if (totalCall)
+            std::cout << std::format ("{:>9.0f} |", totalCall.value());
+          else
+            std::cout << "          |";
+          if (totalCall2)
+            std::cout << std::format ("{:>10.0f}", totalCall2.value());
+          else
+            std::cout << "          ";
           std::cout << std::endl;
         }
       }
     } else if constexpr (columnarAccessMode == 0)
     {
-      // this test simply doesn't work in Athena
-#ifdef XAOD_STANDALONE
-      xAOD::TEvent event;
-      xAOD::TStore store;
-#else
-      POOL::TEvent event;
-#endif
-      ANA_CHECK_THROW (event.readFrom (file.get()));
-
-#ifdef XAOD_STANDALONE
-      Benchmark benchmarkEmptyClear (testDefinition.name + " empty clear");
-      Benchmark benchmarkCallClear (testDefinition.name + " call clear");
-      Benchmark benchmarkPrepClear (testDefinition.name + " prep clear");
-#endif
-      Benchmark benchmarkRepeatCall (testDefinition.name + " repeat-call");
-      Benchmark benchmarkCall (testDefinition.name + " call");
-      Benchmark benchmarkCallCopyRecord (testDefinition.name + " call copy-record");
-      Benchmark benchmarkCallRetrieve (testDefinition.name + " call retrieve");
-      Benchmark benchmarkPrep (testDefinition.name + " prep");
-      Benchmark benchmarkPrepCopyRecord (testDefinition.name + " prep copy-record");
-      Benchmark benchmarkPrepRetrieve (testDefinition.name + " prep retrieve");
-      Benchmark benchmarkGetEntry (testDefinition.name + " getEntry");
-
-      const auto numberOfEvents = event.getEntries();
-#ifdef XAOD_STANDALONE
-      std::cout << "known container keys:" << std::endl;
-      for (auto& [container, key] : columnar::TestUtils::knownKeys)
-      {
-        std::cout << std::format ("  {} -> 0x{:x}, 0x{:x} -> {}", container, event.getHash (container), key, event.getName (key)) << std::endl;
-      }
-#endif
-      if (numberOfEvents == 0){
-        throw std::runtime_error ("ColumnarPhysLiteTest: numberOfEvents == 0");
-      }
-      Long64_t entry = 0;
-
-      // Instead of running for a fixed number of events, we run for a
-      // fixed amount of time.  That is because individual tools can
-      // vary wildly in how long they take to run, and we mostly want to
-      // make sure that we ran the tool enough to get a precise
-      // performance estimate.
-      const auto startTime = std::chrono::high_resolution_clock::now();
-      for (; (std::chrono::high_resolution_clock::now() - startTime) < userConfiguration.targetTime; ++entry)
-      {
-        benchmarkGetEntry.startTimer ();
-        event.getEntry (entry % numberOfEvents);
-        benchmarkGetEntry.stopTimer ();
-        benchmarkPrepRetrieve.startTimer ();
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
-        benchmarkPrepRetrieve.stopTimer ();
-        benchmarkPrepCopyRecord.startTimer ();
-        static const std::string prepPostfix = "Prep";
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), prepPostfix));
-        benchmarkPrepCopyRecord.stopTimer ();
-        benchmarkPrep.startTimer ();
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
-        benchmarkPrep.stopTimer ();
-#ifdef XAOD_STANDALONE
-        benchmarkPrepClear.startTimer ();
-        store.clear ();
-        benchmarkPrepClear.stopTimer ();
-#endif
-        benchmarkCallRetrieve.startTimer ();
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->retrieve (*testDefinition.tool->evtStore()));
-        benchmarkCallRetrieve.stopTimer ();
-        benchmarkCallCopyRecord.startTimer ();
-        static const std::string callPostfix = "Call";
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->copyRecord (*testDefinition.tool->evtStore(), callPostfix));
-        benchmarkCallCopyRecord.stopTimer ();
-        benchmarkCall.startTimer ();
-        ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
-        benchmarkCall.stopTimer ();
-        if (userConfiguration.runToolTwice)
-        {
-          benchmarkRepeatCall.startTimer ();
-          ASSERT_SUCCESS (testDefinition.xAODToolCaller->call ());
-          benchmarkRepeatCall.stopTimer ();
-        }
-#ifdef XAOD_STANDALONE
-        benchmarkCallClear.startTimer ();
-        store.clear ();
-        benchmarkCallClear.stopTimer ();
-        benchmarkEmptyClear.startTimer ();
-        store.clear ();
-        benchmarkEmptyClear.stopTimer ();
-#endif
-      }
-      std::cout << "Total entries read: " << entry << std::endl;
+      TestUtils::runXaodTest (userConfiguration, testDefinitions, file.get());
     } else if constexpr (columnarAccessMode == 100)
     {
+      const auto& testDefinition = testDefinitions[0];
       TestUtils::runXaodArrayTest (userConfiguration, testDefinition, file.get());
     }
   }

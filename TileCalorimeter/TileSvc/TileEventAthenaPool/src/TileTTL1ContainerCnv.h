@@ -48,7 +48,7 @@ protected:
   
   /** Build the transient representation from a persistent one
    */
-  virtual TileTTL1Container* createTransient();
+  virtual TileTTL1Container* createTransient(const Token* token);
 
 };
 

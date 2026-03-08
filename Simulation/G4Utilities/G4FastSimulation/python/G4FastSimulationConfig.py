@@ -17,6 +17,17 @@ def DeadMaterialShowerCfg(flags, **kwargs):
     result.setPrivateTools(CompFactory.DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
     return result
 
+
+
+def FatrasG4Cfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    # Name of region where FatrasG4 will be triggered
+    kwargs.setdefault("RegionName", "InDet")
+
+    result.setPrivateTools(CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs))
+    return result
+
+
 def FastCaloSimCfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Set the parametrization service
@@ -29,12 +40,6 @@ def FastCaloSimCfg(flags, **kwargs):
     kwargs.setdefault("RegionName", "CALO")
     kwargs.setdefault('CaloCellContainerSDName', "ToolSvc.SensitiveDetectorMasterTool.CaloCellContainerSD")
     
-    if flags.Sim.SimplifiedGeoPath:
-        # Enable Geant4 track transportation only if simplified geometry is provided
-        kwargs.setdefault('doG4Transport', True)
-    else:
-        kwargs.setdefault('doG4Transport', False)
-
     # Set the G4CaloTransportTool
     from G4AtlasTools.G4AtlasToolsConfig import G4CaloTransportToolCfg
     kwargs.setdefault("G4CaloTransportTool", result.addPublicTool(result.popToolsAndMerge(G4CaloTransportToolCfg(flags))))

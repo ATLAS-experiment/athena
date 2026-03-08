@@ -1039,7 +1039,7 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
   if(m_readMetadataWithPool) {
       //ensure input file collection created
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
-      m_poolSvc->createCollection( "ImplicitCollection" , "PFN:"+fname , fname ); //FIXME: this throws exceptions which get in the way of debugging with gdb :-(
+      m_poolSvc->createCollection( "PFN:"+fname , fname ); //FIXME: this throws exceptions which get in the way of debugging with gdb :-(
 
       //metadata will be read by MetaDataSvc, triggered by the BeginInputFile call
    } else {

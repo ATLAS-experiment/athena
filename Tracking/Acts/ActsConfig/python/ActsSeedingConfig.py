@@ -19,12 +19,12 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
   kwargs.setdefault("UseBeamTilt", False)
 
-  isLRT = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
+  isLargeD0 = flags.Tracking.ActiveConfig.extension in ["LargeD0", "ActsLargeRadius"]
   
   kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
   kwargs.setdefault("MaxGraphEdges", 3000000)
   kwargs.setdefault("ConnectionFileName",
-                    "binTables_ITK_RUN4_LRT.txt" if isLRT else "binTables_ITK_RUN4.txt")
+                    "binTables_ITK_RUN4_LRT.txt" if isLargeD0 else "binTables_ITK_RUN4.txt")
 
   acc.setPrivateTools(CompFactory.Gbts2ActsSeedingTool(name, **kwargs))
 
@@ -131,49 +131,41 @@ def ActsStripSeedingToolCfg(flags,
                             **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
-    impactMax = 20. * ActsUnits.mm
-    collisionRegionAbsMax = 200. * ActsUnits.mm
-    deltaRMiddleMaxSPRange = 150 * ActsUnits.mm
-    if flags.Tracking.ActiveConfig.extension in ["ActsLargeRadius", "ActsValidateLargeRadiusSeeds", "ActsValidateLargeRadiusStandalone"]:
-        impactMax = 300. * ActsUnits.mm
-        collisionRegionAbsMax = 500. * ActsUnits.mm
-        deltaRMiddleMaxSPRange = 50 * ActsUnits.mm
-
-    
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs.setdefault("doSeedQualitySelection", False)
     # For SpacePointGridConfig
-    kwargs.setdefault("gridRMax" , 1000. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMax" , 600. * ActsUnits.mm)
-    kwargs.setdefault("impactMax" , impactMax)
+    kwargs.setdefault("gridRMax", 1000. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMax", 600. * ActsUnits.mm)
+    kwargs.setdefault("impactMax", 20. * ActsUnits.mm)
+    kwargs.setdefault("minPt", flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
     # For SeedfinderConfig
-    kwargs.setdefault("rMax" , flags.Tracking.ActiveConfig.radMax)
-    kwargs.setdefault("deltaRMinTopSP" , 20. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMaxTopSP" , 300. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMinBottomSP" , 20. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMaxBottomSP" , 300. * ActsUnits.mm)
-    kwargs.setdefault("deltaZMax" , 900. * ActsUnits.mm)
-    kwargs.setdefault("interactionPointCut" , False)
-    kwargs.setdefault("zBinsCustomLooping" , [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
-    kwargs.setdefault("deltaRMiddleMinSPRange" , 30 * ActsUnits.mm)
-    kwargs.setdefault("deltaRMiddleMaxSPRange" , deltaRMiddleMaxSPRange)
-    kwargs.setdefault("useDetailedDoubleMeasurementInfo" , True)
+    kwargs.setdefault("rMax", flags.Tracking.ActiveConfig.radMax)
+    kwargs.setdefault("deltaRMinTopSP", 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxTopSP", 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinBottomSP", 20. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxBottomSP", 300. * ActsUnits.mm)
+    kwargs.setdefault("deltaZMax", 900. * ActsUnits.mm)
+    kwargs.setdefault("interactionPointCut", False)
+    kwargs.setdefault("zBinsCustomLooping", [7, 8, 6, 9, 5, 10, 4, 11, 3, 12, 2])
+    kwargs.setdefault("deltaRMiddleMinSPRange", 30 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMiddleMaxSPRange", 150 * ActsUnits.mm)
+    kwargs.setdefault("useDetailedDoubleMeasurementInfo", True)
     kwargs.setdefault("maxPtScattering", float("inf"))
     # For SeedFilterConfig
-    kwargs.setdefault("useDeltaRorTopRadius" , False)
-    kwargs.setdefault("seedConfirmationInFilter" , False)
-    kwargs.setdefault("impactWeightFactor" , 1.)
-    kwargs.setdefault("compatSeedLimit" , 4)
-    kwargs.setdefault("numSeedIncrement" , 1.)
-    kwargs.setdefault("seedWeightIncrement" , 10100.)
-    kwargs.setdefault("maxSeedsPerSpMConf" , 100)
-    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
+    kwargs.setdefault("useDeltaRorTopRadius", False)
+    kwargs.setdefault("seedConfirmationInFilter", False)
+    kwargs.setdefault("impactWeightFactor", 1.)
+    kwargs.setdefault("compatSeedLimit", 4)
+    kwargs.setdefault("numSeedIncrement", 1.)
+    kwargs.setdefault("seedWeightIncrement", 10100.)
+    kwargs.setdefault("maxSeedsPerSpMConf", 100)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf", 100)
     # For seeding algorithm
-    kwargs.setdefault("zBinNeighborsBottom" , [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
+    kwargs.setdefault("zBinNeighborsBottom", [(0,0),(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0),(0,0)])
     # Any other
     kwargs.setdefault("rBinEdges", [0, kwargs['rMax']])
-    kwargs.setdefault("collisionRegionMin", -1. * collisionRegionAbsMax)
-    kwargs.setdefault("collisionRegionMax", collisionRegionAbsMax)
+    kwargs.setdefault("collisionRegionMin", -200. * ActsUnits.mm)
+    kwargs.setdefault("collisionRegionMax", 200. * ActsUnits.mm)
 
     if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
         acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
@@ -181,56 +173,66 @@ def ActsStripSeedingToolCfg(flags,
         acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
     return acc
 
-def ActsPixelOrthogonalSeedingToolCfg(flags,
-                                      name: str = "ActsPixelOrthogonalSeedingTool",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()    
-    ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
-    return acc
+def ActsLargeRadiusStripSeedingToolCfg(flags,
+                                        name: str = "ActsLargeRadiusStripSeedingTool",
+                                        **kwargs) -> ComponentAccumulator:
+    ## LRT-specific seeding cuts
+    kwargs.setdefault("interactionPointCut", True)
+    kwargs.setdefault("impactMax", 300. * ActsUnits.mm)
+    kwargs.setdefault("collisionRegionMin", -500. * ActsUnits.mm)
+    kwargs.setdefault("collisionRegionMax", 500. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMiddleMaxSPRange", 75 * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinTopSP", 50. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxTopSP", 250. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMinBottomSP", 50. * ActsUnits.mm)
+    kwargs.setdefault("deltaRMaxBottomSP", 250. * ActsUnits.mm)
+    kwargs.setdefault("deltaZMax", 850. * ActsUnits.mm)
+    kwargs.setdefault("cotThetaMax", 6.0)
+    kwargs.setdefault("maxSeedsPerSpM", 3)
+    kwargs.setdefault("zBinEdges", [-3000., -2500, -1400., -910., -500., -250.,  250., 500., 910., 1400., 2500, 3000.])
+    kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
+    kwargs.setdefault("useVariableMiddleSPRange", False)
+    kwargs.setdefault("zBinNeighborsTop", [
+      [0, 0],  # -3000, -2500
+      [-1, 0], # -2500, -1400
+      [-1, 0], # -1400, -910
+      [-1, 0], # -910, -500
+      [-1, 0], # -500, -250
+      [-1, 1], # -250, 250
+      [0, 1],  # 250, 500
+      [0, 1],  # 500, 910
+      [0, 1],  # 910, 1400
+      [0, 1],  # 1400, 2500
+      [0, 0]   # 2500, 3000
+    ])
+    kwargs.setdefault("zBinNeighborsBottom", [
+      [0, 0],  # -3000, -2500
+      [0, 1],  # -2500, -1400
+      [0, 1],  # -1400, -910
+      [0, 1],  # -910, -500
+      [0, 1],  # -500, -250
+      [0, 0],  # -250, 250
+      [-1, 0], # 250, 500
+      [-1, 0], # 500, 910
+      [-1, 0], # 910, 1400
+      [-1, 0], # 1400, 2500
+      [0, 0]   # 2500, 3000
+    ])
+    kwargs.setdefault("rRangeMiddleSP", [
+      [0.0, 0.0],       # -3000, -2500
+      [400.0, 850.0],   # -2500, -1400
+      [500.0, 800.0],   # -1400, -910
+      [500.0, 800.0],   # -910, -500
+      [500.0, 800.0],   # -500, -250
+      [500.0, 800.0],   # -250, 250
+      [500.0, 800.0],   # 250, 500
+      [500.0, 800.0],   # 500, 910
+      [500.0, 800.0],   # 910, 1400
+      [400.0, 850.0],   # 1400, 2500
+      [0.0, 0.0]        # 2500, 3000
+    ])
 
-def ActsFastPixelOrthogonalSeedingToolCfg(flags,
-                                          name: str = "ActsFastPixelOrthogonalSeedingTool", 
-                                          **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool
-
-    ## Additional cuts for fast seed configuration
-    kwargs.setdefault("minPt", 0.9 * ActsUnits.GeV)
-    kwargs.setdefault("collisionRegionMin", -150 * ActsUnits.mm)
-    kwargs.setdefault("collisionRegionMax", 150 * ActsUnits.mm)
-    kwargs.setdefault("useExperimentCuts", True)
-    
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
-    return acc
-
-def ActsStripOrthogonalSeedingToolCfg(flags,
-                                      name: str = "ActsStripOrthogonalSeedingTool",
-                                      **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    
-    ## For ITkStrip, change properties that have to be modified w.r.t. the default values
-    kwargs.setdefault("impactMax" , 20. * ActsUnits.mm)
-    kwargs.setdefault('rMax', 1200. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMinTopSP" , 20. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMaxTopSP" , 300. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMinBottomSP" , 20. * ActsUnits.mm)
-    kwargs.setdefault("deltaRMaxBottomSP" , 300. * ActsUnits.mm)
-    kwargs.setdefault("deltaZMax" , 900. * ActsUnits.mm)
-    kwargs.setdefault("interactionPointCut" , False)
-    kwargs.setdefault("impactWeightFactor" , 1.)
-    kwargs.setdefault("compatSeedLimit" , 4)
-    kwargs.setdefault("seedWeightIncrement" , 10100.)
-    kwargs.setdefault("numSeedIncrement" , 1.)
-    kwargs.setdefault("seedConfirmationInFilter" , False)
-    kwargs.setdefault("maxSeedsPerSpMConf" , 100)
-    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 100)
-    kwargs.setdefault("useDeltaRorTopRadius" , False)
-    kwargs.setdefault("rMinMiddle", 33. * ActsUnits.mm)
-    kwargs.setdefault("rMaxMiddle", 1200. * ActsUnits.mm)
-    
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name, **kwargs))
-    return acc
+    return ActsStripSeedingToolCfg(flags, name, **kwargs)
 
 def ActsPixelGbtsSeedingToolCfg(flags,
                                 name: str = "ActsPixelGbtsSeedingTool", 
@@ -244,7 +246,9 @@ def ActsPixelGbtsSeedingToolCfg(flags,
             acc.popToolsAndMerge(ITkTrigL2LayerNumberToolCfg(flags, **ntargs))
         )
     ## For ITkPixel, use default values for ActsTrk::GbtsSeedingTool
-    kwargs.setdefault("ConnectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
+    kwargs.setdefault("connectorInputFile" , find_datafile("binTables_ITK_RUN4.txt"))
+    kwargs.setdefault("lutInputFile" , find_datafile("gbts_ml_pixel_barrel_loose.lut"))
+    kwargs.setdefault("minPt" , flags.Tracking.ActiveConfig.minPTSeed / GaudiUnits.GeV * ActsUnits.GeV)
 
     acc.setPrivateTools(CompFactory.ActsTrk.GbtsSeedingTool(name = name, **kwargs))
     return acc
@@ -294,12 +298,7 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
         from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            if isFastPrimaryPass(flags):
-                seedTool_pixel = acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags))
-            else:
-                seedTool_pixel = acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags))
-        elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
             seedTool_pixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
             seedTool_pixel = acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags))
@@ -312,8 +311,8 @@ def ActsSiSpacePointsSeedMakerToolCfg(flags,
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            seedTool_strip = acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags))
+        if flags.Tracking.ActiveConfig.isLargeD0:
+            seedTool_strip = acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags))
         else:
             seedTool_strip = acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags))
 
@@ -350,12 +349,7 @@ def ActsPixelSeedingAlgCfg(flags,
     useFastTracking = kwargs.get("useFastTracking", isFastPrimaryPass(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            if useFastTracking:
-                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelOrthogonalSeedingToolCfg(flags)))
-            else:
-                kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelOrthogonalSeedingToolCfg(flags)))
-        elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags)))
         elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags)))
@@ -374,8 +368,8 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+    if flags.Acts.SeedingStrategy in (SeedingStrategy.GridTriplet, SeedingStrategy.Gbts):
+        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
@@ -397,8 +391,8 @@ def ActsStripSeedingAlgCfg(flags,
     acc.merge(ITkStripReadoutGeometryCfg(flags))
 
     if "SeedTool" not in kwargs:
-        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripOrthogonalSeedingToolCfg(flags)))
+        if flags.Tracking.ActiveConfig.isLargeD0:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags)))
         else:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags)))
 
@@ -411,7 +405,7 @@ def ActsStripSeedingAlgCfg(flags,
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
     if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.addEventAlgo(CompFactory.ActsTrk.GridTripletSeedingAlg(name, **kwargs))
+        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     else:
         acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
@@ -478,8 +472,12 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
 
     if processStrips and (flags.Acts.SeedingStrategy is SeedingStrategy.Default or flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet):
-        kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
-                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
+        if flags.Tracking.ActiveConfig.isLargeD0:
+            kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags,
+                                                                                                                   name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
+        else:
+            kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsStripSeedingToolCfg(flags,
+                                                                                                       name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))
         
     if processPixels:
         # Seeding algo

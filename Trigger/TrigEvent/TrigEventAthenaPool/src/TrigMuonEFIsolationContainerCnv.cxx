@@ -26,7 +26,7 @@ TrigMuonEFIsolationContainer_PERS* TrigMuonEFIsolationContainerCnv::createPersis
 }
 
 /// create transient
-TrigMuonEFIsolationContainer* TrigMuonEFIsolationContainerCnv::createTransient() {
+TrigMuonEFIsolationContainer* TrigMuonEFIsolationContainerCnv::createTransient(const Token* token) {
 
   MsgStream mlog(msgSvc(), "TrigMuonEFIsolationContainerConverter" );
   mlog << MSG::DEBUG << "TrigMuonEFIsolationContainerCnv::createTransient" << endmsg;
@@ -36,11 +36,11 @@ TrigMuonEFIsolationContainer* TrigMuonEFIsolationContainerCnv::createTransient()
 
   TrigMuonEFIsolationContainer* trans_cont(0);
 
-  if ( compareClassGuid(p2_guid) ) {
-    std::unique_ptr< TrigMuonEFIsolationContainer_p2 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p2 >() );
+  if ( compareClassGuid(token, p2_guid) ) {
+    std::unique_ptr< TrigMuonEFIsolationContainer_p2 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p2 >(token) );
     trans_cont = m_converter_p2.createTransient( col_vect.get(), mlog );
-  } else if ( compareClassGuid(p1_guid) ) {
-    std::unique_ptr< TrigMuonEFIsolationContainer_p1 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p1 >() );
+  } else if ( compareClassGuid(token, p1_guid) ) {
+    std::unique_ptr< TrigMuonEFIsolationContainer_p1 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p1 >(token) );
     trans_cont = m_converter_p1.createTransient( col_vect.get(), mlog );
   } else {
       

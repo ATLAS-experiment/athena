@@ -22,7 +22,7 @@ TrigPhotonContainer_PERS * TrigPhotonContainerCnv::createPersistent( TrigPhotonC
  
 
 //createTransient
-TrigPhotonContainer * TrigPhotonContainerCnv::createTransient()
+TrigPhotonContainer * TrigPhotonContainerCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "TrigPhotonContainerConverter" );
   
@@ -34,24 +34,24 @@ TrigPhotonContainer * TrigPhotonContainerCnv::createTransient()
   static const pool::Guid p0_guid2( "65F1CCA1-B672-4E26-B74E-397CE6C8F617" );
   static const pool::Guid p0_guid( "CB04DF3E-C363-49E3-9BE1-AD25230AB1EA" );
 
-  if( compareClassGuid( p3_guid ) ){
-         std::unique_ptr< TrigPhotonContainer_p3 > col_vect( poolReadObject< TrigPhotonContainer_p3 >() );
+  if( compareClassGuid(token,  p3_guid ) ){
+         std::unique_ptr< TrigPhotonContainer_p3 > col_vect( poolReadObject< TrigPhotonContainer_p3 >(token) );
          //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
-  } else if( compareClassGuid( tlp2_guid ) )     
+  } else if( compareClassGuid(token,  tlp2_guid ) )     
     {
-      std::unique_ptr< TrigPhotonContainer_tlp2 > col_vect( poolReadObject< TrigPhotonContainer_tlp2 >() );
+      std::unique_ptr< TrigPhotonContainer_tlp2 > col_vect( poolReadObject< TrigPhotonContainer_tlp2 >(token) );
       return m_converter_tlp2.createTransient( col_vect.get(), mlog );
     }   
-  else if( compareClassGuid( tlp1_guid ) )     
+  else if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      std::unique_ptr< TrigPhotonContainer_tlp1 > col_vect( poolReadObject< TrigPhotonContainer_tlp1 >() );
+      std::unique_ptr< TrigPhotonContainer_tlp1 > col_vect( poolReadObject< TrigPhotonContainer_tlp1 >(token) );
       return m_converter_tlp1.createTransient( col_vect.get(), mlog );
     }
-  else if( compareClassGuid( p0_guid ) || compareClassGuid( p0_guid2 ) ){
+  else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ){
 
-      return poolReadObject< TrigPhotonContainer >();
+      return poolReadObject< TrigPhotonContainer >(token);
     
     }
   else  throw std::runtime_error( "Unsupported persistent version of TrigPhotonContainer" );

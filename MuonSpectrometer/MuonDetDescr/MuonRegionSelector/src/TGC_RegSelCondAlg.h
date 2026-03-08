@@ -12,7 +12,7 @@
 #define TGC_RegSelCondAlg_h
 
 #include "MuonRegSelCondAlg.h"
-
+#include "MuonTGC_Cabling/TgcCablingMap.h"
 
 class TGC_RegSelCondAlg : public MuonRegSelCondAlg {
 
@@ -21,6 +21,10 @@ public:
   TGC_RegSelCondAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
   std::unique_ptr<RegSelSiLUT> createTable( const EventContext& ctx, EventIDRange& id_range ) const override;
+
+  StatusCode initialize() override;
+private:
+  SG::ReadCondHandleKey<Muon::TgcCablingMap> m_cablingKey{this, "CablingKey", "MuonTgc_CablingMap"};
 
 
 

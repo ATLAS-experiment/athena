@@ -27,7 +27,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "FPGATrackSimObjects/FPGATrackSimClusterCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimHitCollection.h"
-#include "FPGATrackSimObjects/FPGATrackSimHitContainer.h"
 #include "FPGATrackSimObjects/FPGATrackSimRoadCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimTrackCollection.h"
 #include "FPGATrackSimObjects/FPGATrackSimTruthTrackCollection.h"

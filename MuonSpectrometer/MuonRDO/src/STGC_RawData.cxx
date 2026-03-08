@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/STGC_RawData.h"
 #include "GaudiKernel/MsgStream.h"
+#include <iostream>
 
 
 

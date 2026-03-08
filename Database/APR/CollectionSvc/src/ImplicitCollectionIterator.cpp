@@ -4,7 +4,6 @@
 
 #include "ImplicitCollectionIterator.h"
 #include "CollectionSvc/CollectionDescription.h"
-#include "CollectionSvc/TokenList.h"
 
 #include "PersistencySvc/IContainer.h"
 #include "PersistencySvc/ITokenIterator.h"
@@ -12,17 +11,11 @@
 #include "PersistentDataModel/Token.h"
 
 pool::ImplicitCollectionIterator::
-ImplicitCollectionIterator( pool::IContainer& container,
-                            const pool::ICollectionDescription& description )
-      :
-      m_container( container ),
-      m_tokenIterator( m_container.tokens() ),
-      m_token( 0 )
-{
-   TokenList        tokenList;
-   tokenList.extend( description.eventReferenceColumnName() );
-   m_rowBuffer.setTokenList( tokenList );
-}
+ImplicitCollectionIterator( pool::IContainer& container )
+      : m_container( container ),
+        m_tokenIterator( m_container.tokens() ),
+        m_token( 0 )
+{ }
 
 
 pool::ImplicitCollectionIterator::~ImplicitCollectionIterator()
@@ -52,7 +45,7 @@ pool::ImplicitCollectionIterator::token() const
 const pool::CollectionRowBuffer&
 pool::ImplicitCollectionIterator::currentRow() const
 {
-   m_token->setData( &*m_rowBuffer.tokenList().begin() );
+   m_token->setData( &m_rowBuffer.token() );
    return m_rowBuffer;
 }
 

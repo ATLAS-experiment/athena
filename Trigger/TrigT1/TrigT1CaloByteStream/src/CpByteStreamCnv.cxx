@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,7 +41,7 @@ CpByteStreamCnv::~CpByteStreamCnv()
 
 // CLID
 
-const CLID& CpByteStreamCnv::classID()
+CLID CpByteStreamCnv::classID()
 {
   return ClassID_traits<LVL1::CPBSCollection>::ID();
 }

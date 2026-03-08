@@ -552,7 +552,7 @@ namespace ActsTrk
 
              auto curvilinear_cov_result = ActsTrk::detail::convertActsBoundCovToCurvilinearParam(tgContext, actsParam, magnFieldVect, hypothesis);
              if (curvilinear_cov_result.has_value()) {
-                Acts::BoundSquareMatrix &curvilinear_cov = curvilinear_cov_result.value();
+                Acts::BoundMatrix &curvilinear_cov = curvilinear_cov_result.value();
 
                 // convert q/p components from GeV (Acts) to MeV (Athena)
                 for (unsigned int col_i=0; col_i<4; ++col_i) {
@@ -627,21 +627,18 @@ namespace ActsTrk
                                                         const Acts::PerigeeSurface &perigee_surface) const {
      const Acts::BoundTrackParameters trackParam = track.createParametersAtReference();
 
-     std::optional<const Acts::BoundTrackParameters>
+     Acts::Result<Acts::BoundTrackParameters>
         perigeeParam = m_extrapolationTool->propagate(ctx,
                                                       trackParam,
                                                       perigee_surface,
                                                       Acts::Direction::Backward(), // @TODO try forward if backward fails ?
                                                       m_paramExtrapolationParLimit.value());
-     if (!perigeeParam.has_value()) {
+     if (!perigeeParam.ok()) {
         ATH_MSG_WARNING( "Failed to extrapolate to perigee, started from \n" << trackParam << " " << trackParam.referenceSurface().name() );
-
         return trackParam;
      }
-     else {
-        ATH_MSG_DEBUG( "Succeeded to extrapolate to perigee ");
-        return perigeeParam.value();
-     }
+
+     return perigeeParam.value();
   }
 
 }

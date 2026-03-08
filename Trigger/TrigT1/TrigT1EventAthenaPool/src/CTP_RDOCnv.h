@@ -40,7 +40,7 @@ public:
 protected:
 
    virtual CTP_RDO_PERS* createPersistent( CTP_RDO* transObj );
-   virtual CTP_RDO*      createTransient();
+   virtual CTP_RDO*      createTransient(const Token* token);
 private:
    CTP_RDOCnv_p2 m_converter;
    CTP_RDOCnv_p1 m_converter_p1;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCBYTESTREAMCNV_H
@@ -62,7 +62,7 @@ public:
     virtual long repSvcType() const override { return i_repSvcType(); }
 
     static long storageType();
-	static const CLID& classID();
+    static CLID classID();
 
 private:
 	/// Converter name

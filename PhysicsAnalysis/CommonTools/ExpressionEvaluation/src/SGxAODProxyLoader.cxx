@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -16,8 +16,7 @@
 #include "AthContainers/AuxVectorBase.h"
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/ExtendedEventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
-
+#include "AthContainers/CurrentContext.h"
 
 #include "Utils.h"
 #include "DebugUtils.h"
@@ -25,14 +24,18 @@
 #include "xAODAccessor.h"
 #include "MethodAccessor.h"
 #include "PlainAccessor.h"
+#include "ClingCallWrapper.h"
+
 
 namespace {
    void popRenounced(const std::vector<std::string>  &renounce,
                      std::vector<Gaudi::DataHandle *> &new_input_handles) {
-      for (const std::string &a_key : renounce) {
-         if (new_input_handles.back()->objKey() == a_key ) {
-            new_input_handles.pop_back();
-            break;
+      if (!new_input_handles.empty()) {
+         for (const std::string &a_key : renounce) {
+            if (new_input_handles.back()->objKey() == a_key ) {
+               new_input_handles.pop_back();
+               break;
+            }
          }
       }
    }
@@ -42,8 +45,7 @@ namespace ExpressionParsing {
   SGxAODProxyLoader::SGxAODProxyLoader(StoreGateSvc_t &evtStore, bool verbose) : m_evtStore(evtStore), m_emptyVectorAccessor(std::make_unique<EmptyVectorAccessor>()),m_verbose(verbose) { }
 
   SGxAODProxyLoader::~SGxAODProxyLoader()
-  {
-  }
+  {}
 
   void  SGxAODProxyLoader::reset() {
      m_decorKeys.clear();
@@ -58,14 +60,15 @@ namespace ExpressionParsing {
     methodName = varname.substr(dotPosition + 1);
   }
 
-   std::pair<RootUtils::TSMethodCall, TVirtualCollectionProxy *>
-   SGxAODProxyLoader::getMethodCallAccessor(const std::string &method_name, const std::type_info &info) const {
-     if (m_verbose) {
+  namespace details {
+  std::pair<RootUtils::ClingCallWrapperUncheckedReturnValue<>, TVirtualCollectionProxy *>
+  getMethodCallAccessor(const std::string &method_name, const std::type_info &info, bool verbose) {
+     if (verbose) {
         std::cout << "DEBUG SGxAODProxyLoader search for " << method_name << " in type " << info.name() << std::endl;
      }
      TClass *containerClass = TClass::GetClass(info);
      if (!containerClass) {
-        if (m_verbose) {
+        if (verbose) {
            std::cout << "DEBUG SGxAODProxyLoader search for " << method_name << " in normalisze type " << SG::normalizedTypeinfoName(info) << std::endl;
         }
         containerClass = TClass::GetClass(SG::normalizedTypeinfoName(info).c_str());
@@ -89,26 +92,16 @@ namespace ExpressionParsing {
            throw std::runtime_error(msg.str());
         }
      }
-     RootUtils::TSMethodCall method_call;
-     method_call.setProto (elementClass, method_name, "",
-                           ROOT::kConversionMatch);
-     if (!method_call.call() || !method_call.call()->IsValid()) {
-        std::stringstream msg;
-        msg << "No valid method " << method_name << " for " << info.name() << std::endl;
-        throw std::runtime_error(msg.str());
-     }
-     if (m_verbose && method_call.call()->GetMethod()) {
-        // @TODO check signature "() const
+     RootUtils::ClingCallWrapperUncheckedReturnValue<> method_wrapper(RootUtils::getClingCallWrapper<>(elementClass,method_name,true));
+     if (verbose) {
         std::cout << "DEBUG SGxAODProxyLoader got method " << " . " << method_name << " : "
-                  << method_call.call()->GetMethod()->GetReturnTypeNormalizedName ()
-                  << " proto=" << method_call.call()->GetProto()
-                  << " signature=" << method_call.call()->GetMethod()->GetSignature ()
-                  << " proto=" << method_call.call()->GetMethod()->GetPrototype()
+                  << method_wrapper.getReturnTypeNormalizedName()
+                  << "wrapper="<< typeid(method_wrapper).name()
                   << std::endl;
      }
-     return std::make_pair( method_call, collection_proxy);
+     return std::make_pair(method_wrapper, collection_proxy);
   }
-
+  }
 
    template <class T_Aux>
    std::unique_ptr<IAccessor> SGxAODProxyLoader::createAccessor(const EventContext& ctx,
@@ -119,16 +112,17 @@ namespace ExpressionParsing {
    {
       SG::ReadHandle<T_Aux> handle(key, ctx);
       if (!handle.isValid()) {
-         std::stringstream msg;
-         msg << "Failed to get " << key.key();
-            throw std::runtime_error(msg.str());
+         std::stringstream amsg;
+         amsg << "Failed to get " << key.key();
+         throw std::runtime_error(amsg.str());
       }
       if (getContainerSize(*handle)==0) {
          return std::unique_ptr<IAccessor>();
       }
       if (!isAvailable(*handle,method_id)) {
-         std::pair<RootUtils::TSMethodCall,TVirtualCollectionProxy *> method = getMethodCallAccessor(method_name, typeid(*handle));
-         return MethodAccessorFactory::instance().create( key, std::move(method.first), method.second);
+         auto [method_wrapper, proxy]
+            = details::getMethodCallAccessor(method_name, typeid(*handle), m_verbose);
+         return MethodAccessorFactory::instance().create( key, std::move(method_wrapper), proxy);
       }
       else {
          return ExpressionParsing::AccessorFactory::instance().create( key, method_id , decor_key );
@@ -192,9 +186,22 @@ namespace ExpressionParsing {
     return *(accessor_iter->second);
   }
 
-  IProxyLoader::VariableType SGxAODProxyLoader::variableTypeFromString(const std::string &varname) const {
-     const EventContext& ctx = Gaudi::Hive::currentContext();
-     return getAccessor(ctx, varname).variableType();
+  IAccessor::VariableType SGxAODProxyLoader::variableType(const std::string &varname) const {
+    // This method has to be implemented because it is part of the interface
+    // but the SGxAODProxyLoader will return pointers to different IAccesor objects
+    // depending on the situation and the method variableType will be called of those
+    // objects. Thus, there is really no need to pass the event context through, because
+    // this method is never called and the event context would not be used in all other cases.
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    std::pair< IProxyLoader::VariableType, const IAccessor &>
+       ret = getAccessorFromString(ctx, varname);
+     return ret.first;
+  }
+
+  std::pair< IProxyLoader::VariableType, const IAccessor &>
+  SGxAODProxyLoader::getAccessorFromString(const EventContext &ctx, const std::string &varname) const {
+     const IAccessor &accessor = getAccessor(ctx, varname);
+     return {accessor.variableType(varname), accessor};
   }
 
    namespace {
@@ -215,28 +222,24 @@ namespace ExpressionParsing {
       }
    }
 
-  int SGxAODProxyLoader::loadIntVariableFromString(const std::string &varname) const
+  int SGxAODProxyLoader::loadInt(const EventContext& ctx,const std::string &varname) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    return dump(varname,getAccessor(ctx, varname).loadInt(ctx));
+    return dump(varname,getAccessor(ctx, varname).loadInt(ctx,varname));
   }
 
-  double SGxAODProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
+  double SGxAODProxyLoader::loadDouble(const EventContext& ctx,const std::string &varname) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    return dump(varname,getAccessor(ctx, varname).loadDouble(ctx));
+    return dump(varname,getAccessor(ctx, varname).loadDouble(ctx,varname));
   }
 
-  std::vector<int> SGxAODProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
+  std::vector<int> SGxAODProxyLoader::loadVecInt(const EventContext& ctx,const std::string &varname) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    return dump(varname,getAccessor(ctx, varname).loadVecInt(ctx));
+    return dump(varname,getAccessor(ctx, varname).loadVecInt(ctx,varname));
   }
 
-  std::vector<double> SGxAODProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  std::vector<double> SGxAODProxyLoader::loadVec(const EventContext& ctx,const std::string &varname) const
   {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-    return dump(varname,getAccessor(ctx, varname).loadVec(ctx));
+    return dump(varname,getAccessor(ctx, varname).loadVec(ctx,varname));
   }
 
   bool SGxAODProxyLoader::updateDataDependencies(SGxAODProxyLoader::IParentHelper &parent,

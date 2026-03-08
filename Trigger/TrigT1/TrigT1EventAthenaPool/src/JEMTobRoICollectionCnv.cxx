@@ -26,7 +26,7 @@ JEMTobRoICollection_PERS * JEMTobRoICollectionCnv::createPersistent( JEMTobRoICo
  
 
 //createTransient
-JEMTobRoICollection * JEMTobRoICollectionCnv::createTransient()
+JEMTobRoICollection * JEMTobRoICollectionCnv::createTransient(const Token* token)
 {
   MsgStream mlog(msgSvc(), "JEMTobRoICollectionConverter" );
   
@@ -35,10 +35,10 @@ JEMTobRoICollection * JEMTobRoICollectionCnv::createTransient()
   static const pool::Guid tlp1_guid( "49790040-16E0-4CAB-96A2-31DC010FFB06" );
  
   JEMTobRoICollection *p_collection = 0;
-  if( compareClassGuid( tlp1_guid ) )     
+  if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< JEMTobRoICollection_PERS > pers_ref( poolReadObject< JEMTobRoICollection_PERS >() );
+      std::unique_ptr< JEMTobRoICollection_PERS > pers_ref( poolReadObject< JEMTobRoICollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of JEMTobRoICollection" );

@@ -26,7 +26,7 @@ public:
 protected:
 
   virtual TileMuFeatureContainer_PERS *createPersistent( TileMuFeatureContainer *transObj);
-  virtual TileMuFeatureContainer      *createTransient();
+  virtual TileMuFeatureContainer      *createTransient(const Token* token);
 
 private:
   TileMuFeatureContainerCnv_tlp1   m_converter1;

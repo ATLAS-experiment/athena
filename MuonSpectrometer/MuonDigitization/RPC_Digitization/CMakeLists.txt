@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RPC_Digitization )
@@ -15,4 +15,4 @@ atlas_add_component( RPC_Digitization
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps PileUpToolsLib 
                                     xAODEventInfo GaudiKernel MuonSimData MuonSimEvent HitManagement AthenaKernel 
                                     GeneratorObjects MuonCondData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib 
-                                    PathResolver GeoModelInterfaces GeometryDBSvcLib EventInfoMgtLib RDBAccessSvcLib )
+                                    PathResolver GeoModelInterfaces EventInfoMgtLib RDBAccessSvcLib )

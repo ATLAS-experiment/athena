@@ -2,7 +2,7 @@ Py:AutoConfigFlags    INFO Obtaining metadata of auto-configuration by peeking i
 Py:MetaReader        INFO Current mode used: lite
 Py:MetaReader        INFO Current filenames: ['SimplePoolFile5.root']
 Py:MetaReader        INFO MetaReader is called with the parameter "unique_tag_info_values" set to True. This is a workaround to remove all duplicate values from "/TagInfo" key
-ApplicationMgr       INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Configured successfully
 AthenaEventLoopMgr                                   INFO Initializing AthenaEventLoopMgr
 ReadData                                             INFO in initialize()
 MetaDataSvc                                          INFO Initializing MetaDataSvc
@@ -12,7 +12,7 @@ ToolSvc.AthPoolEx::ReadMeta                          INFO in initialize()
 EventSelector                                       DEBUG Initializing EventSelector
 EventSelector                                       DEBUG reinitialization...
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -38,16 +38,13 @@ SimplePoolFile5.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Reading Param:FID=[C949FD2E-3B8E-9343-AAE0-1E2306911C43]
 SimplePoolFile5.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile5.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainer(DataHeader)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
 POOLContainer(DataHeader)                           DEBUG Opened container POOLContainer(DataHeader) of type ROOT_Tree
-MetaDataSvc                                         DEBUG handle() FirstInputFile for FID:C949FD2E-3B8E-9343-AAE0-1E2306911C43
-MetaDataSvc                                         DEBUG initInputMetaDataStore: file name FID:C949FD2E-3B8E-9343-AAE0-1E2306911C43
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(DataHeader)                             DEBUG Opening
 MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
@@ -68,11 +65,9 @@ ReadData                                            DEBUG data dependencies:
   + INPUT   ( 'ExampleTrackContainer' , 'StoreGateSvc+MyTracks' ) 
 AthenaEventLoopMgr                                   INFO Setup EventSelector service EventSelector
 ApplicationMgr                                       INFO Application Manager Initialized successfully
-StorageSvc                                          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43 PFN=SimplePoolFile5.root
-StorageSvc                                          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43
 RootDatabase                                        DEBUG Closing DB SimplePoolFile5.root
 EventSelector                                       DEBUG Try item: "SimplePoolFile5.root" from the collection list.
-PoolSvc                                             DEBUG createCollection() type=ImplicitCollection, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
+PoolSvc                                             DEBUG createCollection() type=POOL, connection=PFN:SimplePoolFile5.root, name=Input, contextID=0
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -98,10 +93,9 @@ SimplePoolFile5.root                                DEBUG --> Access   DbContain
 ##Params                                            DEBUG Opening
 ##Params                                            DEBUG    attributes# = 1
 ##Params                                            DEBUG Opened container ##Params of type ROOT_Tree
-SimplePoolFile5.root                                DEBUG --->Reading Param:FID=[C949FD2E-3B8E-9343-AAE0-1E2306911C43]
 SimplePoolFile5.root                                DEBUG --->Reading Param:PFN=[SimplePoolFile5.root]
 ##Params                                            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainer(DataHeader)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainer(DataHeader)
 POOLContainer(DataHeader)                           DEBUG Opening
 POOLContainer(DataHeader)                           DEBUG    attributes# = 1
 POOLContainer(DataHeader)                           DEBUG Branch container 'DataHeader'
@@ -119,7 +113,6 @@ MetaDataHdr(DataHeader)                             DEBUG    attributes# = 1
 MetaDataHdr(DataHeader)                             DEBUG Branch container 'DataHeader'
 MetaDataHdr(DataHeader)                             DEBUG Opened container MetaDataHdr(DataHeader) of type ROOT_Tree
 MetaDataSvc                                         DEBUG Loaded input meta data store proxies
-MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(xAOD::FileMetaData_v1/FileMetaData)
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG Opening
 MetaData(xAOD::FileMetaData_v1/FileMetaData)        DEBUG    attributes# = 1
@@ -133,7 +126,6 @@ MetaData(xAOD::FileMetaDataAuxInfo_v1/FileMeta...)  DEBUG Opened container MetaD
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaData_v1 ClassID: 178309087
 MetaDataSvc                                         DEBUG MetaDataSvc will handle xAOD::FileMetaDataAuxInfo_v1 ClassID: 73252552
 ToolSvc.xAODMaker::FileMetaDataTool                  INFO Copied "FileMetaData" to MetaDataStore
-MetaDataSvc                                         DEBUG  calling beginInputFile on ToolSvc.AthPoolEx::ReadMeta for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
 SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaData(ExampleHitContainer_p1/PedestalWriteData)
 MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opening
 MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG    attributes# = 1
@@ -142,7 +134,7 @@ MetaData(ExampleHitContainer_p1/PedestalWriteData)  DEBUG Opened container MetaD
 ToolSvc.AthPoolEx::ReadMeta                          INFO Pedestal x = 56568 y = 7209.89 z = -47603.9 string = <..........o..........o..........o..........o..........o..........o..........o..........o..........o..........o>
 EventSelector                                       DEBUG Get AttributeList from the collection
 EventSelector                                       DEBUG AttributeList size 0
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] POOLContainerForm(DataHeaderForm)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] POOLContainerForm(DataHeaderForm)
 POOLContainerForm(DataHeaderForm)                   DEBUG Opening
 POOLContainerForm(DataHeaderForm)                   DEBUG    attributes# = 1
 POOLContainerForm(DataHeaderForm)                   DEBUG Branch container 'DataHeaderForm'
@@ -152,7 +144,7 @@ AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObj
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 38853911, name = EventInfoAux.
 AthenaPoolAddressProviderSvc                        DEBUG loadAddresses: DataObject address, clid = 45903698, name = EventInfo
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] CollectionTree(EventInfo_p4/McEventInfo)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(EventInfo_p4/McEventInfo)
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Opening
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG    attributes# = 1
 CollectionTree(EventInfo_p4/McEventInfo)            DEBUG Branch container 'EventInfo_p4_McEventInfo'
@@ -177,7 +169,7 @@ ReadData                                             INFO TagInfo:
 ReadData                                             INFO EventInfo event: 4294967297 run: 1
 ReadData                                             INFO Get Smart data ptr 1
 ReadData                                             INFO Could not find ExampleTrackContainer/MyTracks
-SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_Tree] CollectionTree(ExampleHitContainer_p1/MyHits)
+SimplePoolFile5.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(ExampleHitContainer_p1/MyHits)
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Branch container 'ExampleHitContainer_p1_MyHits'
@@ -481,12 +473,6 @@ ReadData                                             INFO Hit x = 1023.7 y = 57.
 ReadData                                             INFO Hit x = 1026.91 y = 52.2228 z = -955.073 detector = DummyHitDetector
 ReadData                                             INFO Hit x = 1030.12 y = 46.5439 z = -956.169 detector = DummyHitDetector
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967306, run #1 10 events processed so far  <<<===
-MetaDataSvc                                         DEBUG handle() EndInputFile for FID:C949FD2E-3B8E-9343-AAE0-1E2306911C43
-MetaDataSvc                                         DEBUG retireMetadataSource: FID:C949FD2E-3B8E-9343-AAE0-1E2306911C43
-MetaDataSvc                                         DEBUG  calling endInputFile on ToolSvc.xAODMaker::FileMetaDataTool for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
-MetaDataSvc                                         DEBUG  calling endInputFile on ToolSvc.AthPoolEx::ReadMeta for GUID "C949FD2E-3B8E-9343-AAE0-1E2306911C43"
-StorageSvc                                          DEBUG Disconnect request for database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43 PFN=SimplePoolFile5.root
-StorageSvc                                          DEBUG Closing database: FID=C949FD2E-3B8E-9343-AAE0-1E2306911C43
 RootDatabase                                        DEBUG Closing DB SimplePoolFile5.root
 AthenaEventLoopMgr                                   INFO No more events in event selection 
 MetaDataSvc                                         DEBUG MetaDataSvc::stop()

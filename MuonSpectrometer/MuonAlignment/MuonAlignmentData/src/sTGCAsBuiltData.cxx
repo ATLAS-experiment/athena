@@ -6,7 +6,7 @@
 
 
 std::ostream& operator<<(std::ostream& ostr, const sTGCAsBuiltData::Parameters& par){
-   return ostr << "Offset " << par.offset << " rotxy " << par.rotation << " scale " << par.scale  << " nonPara " <<  par.nonPara;
+   return ostr << "Offset " << par.offset << " rotxy " << par.rotation << " scale " << par.scale  << " nonPara " <<  par.nonPara << " stripBending " << par.stripBending;
 }
 
 
@@ -17,7 +17,10 @@ sTGCAsBuiltData::sTGCAsBuiltData(const Muon::IMuonIdHelperSvc* idHelperSvc):
 
 
 Amg::Vector2D sTGCAsBuiltData::correctPosition(const Identifier& channelId, const Amg::Vector2D& pos) const {
-    ParMap::const_iterator par_itr = m_asBuiltData.find(m_idHelperSvc->gasGapId(channelId));
+    bool issTgc = m_idHelperSvc->issTgc(channelId);
+    Identifier asBuiltId = issTgc ? m_idHelperSvc->gasGapId(channelId) : m_idHelperSvc->mmIdHelper().pcbID(channelId);
+
+    ParMap::const_iterator par_itr = m_asBuiltData.find(asBuiltId);
     if(par_itr == m_asBuiltData.end()){
         ATH_MSG_WARNING("Missing as built parameters for gas gap " << m_idHelperSvc->toString(channelId));
         return pos;
@@ -31,7 +34,10 @@ Amg::Vector2D sTGCAsBuiltData::correctPosition(const Identifier& channelId, cons
     float shift = (std::fabs(m_idHelperSvc->stationEta(channelId)) == 3 && m_idHelperSvc->stationNameString(channelId) == "STL" ?  24.74 : 0.0);
     ATH_MSG_VERBOSE("applying as built parameters for gas gap " << m_idHelperSvc->toString(m_idHelperSvc->gasGapId(channelId)) << " parameters " << pars);
 
-    correctedPos.x() = pos.x() +  (pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*(pos.x() + shift ) + pars.nonPara * convScale * convScale * (pos.x() + shift  )*pos.y()); 
+    double correction  = pars.offset * convScale  + pars.rotation *convScale * pos.y() + pars.scale*convScale*(pos.x() + shift ) + pars.nonPara * convScale * convScale * (pos.x() + shift  )*pos.y();
+    // we only want to correct the banana shape for the MM
+    if(!issTgc) correction += pars.stripBending*convScale*convScale*pos.y()*pos.y();
+    correctedPos.x() = pos.x() + correction; 
     return correctedPos;
 }
 

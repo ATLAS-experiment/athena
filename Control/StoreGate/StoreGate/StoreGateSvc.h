@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_STOREGATESVC_H
@@ -40,7 +40,6 @@
 #include <type_traits>
 
 #include "AthenaKernel/StoreID.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaKernel/DefaultKey.h"
 #include "AthAllocators/Arena.h"
 
@@ -509,31 +508,6 @@ public:
   /// non-const method - will return an error
   template <typename H, typename TKEY>
   StatusCode regHandle( DataHandle<H>& handle, const TKEY& key);
-
-  /// register a callback function, with handle + key
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, const DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
-
-  /// register a callback function, with handle + key. Non const. Error
-  template <typename T, typename H, typename TKEY>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T::*updFcn)(IOVSVC_CALLBACK_ARGS), 
-                                           const T* obj, DataHandle<H>& handle, 
-                                           const TKEY& key, bool trigger=false);
-
-  /// register a callback function(2) with an already registered function(1)
-  template <typename T1, typename T2>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (StatusCode (T1::*fcn1)(IOVSVC_CALLBACK_ARGS), 
-                                           const T1* obj1,
-                                           StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                           const T2* obj2, bool trigger=false);
-
-  /// register a callback function(2) with an already registered AlgTool
-  template <typename T2>
-  StatusCode regFcn ATLAS_NOT_THREAD_SAFE (const std::string& toolName,
-                                           StatusCode (T2::*fcn2)(IOVSVC_CALLBACK_ARGS), 
-                                           const T2* obj2, bool trigger=false);
 
   //@}
   /////////////////////////////////////////////////////////////////////////

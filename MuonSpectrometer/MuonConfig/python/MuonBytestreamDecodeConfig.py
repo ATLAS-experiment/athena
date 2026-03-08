@@ -49,7 +49,7 @@ def RpcBytestreamDecodeCfg(flags, name="MuonRpcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}RPCPAD" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "RPCPAD"
-    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderToolMT(name    = "RPC_RawDataProviderToolMT",
+    MuonRpcRawDataProviderTool = CompFactory.Muon.RPC_RawDataProviderTool(name    = "RPC_RawDataProviderTool",
                                                                  Decoder = RPCRodDecoder,
                                                                  RdoLocation = keyName )
     if flags.Muon.MuonTrigger:
@@ -58,8 +58,7 @@ def RpcBytestreamDecodeCfg(flags, name="MuonRpcRdoProvider", **kwargs):
 
     
     # Setup the RAW data provider algorithm
-    Muon__RpcRawDataProvider=CompFactory.Muon.RpcRawDataProvider
-    RpcRawDataProvider = Muon__RpcRawDataProvider(name         = name,
+    RpcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name         = name,
                                                   ProviderTool = MuonRpcRawDataProviderTool, **kwargs )
 
     if flags.Muon.MuonTrigger:
@@ -89,8 +88,8 @@ def NrpcBytestreamDecodeCfg(flags, name="MuonNRpcRdoProvider", **kwargs):
                                                                    NrpcRdoKey = keyName )
     
     # Setup the RAW data provider algorithm
-    NrpcRawDataProvider = CompFactory.Muon.NrpcRawDataProvider(name         = name,
-                                                    ProviderTool = MuonNrpcRawDataProviderTool, **kwargs )
+    NrpcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name         = name,
+                                                               ProviderTool = MuonNrpcRawDataProviderTool, **kwargs )
 
     acc.addEventAlgo(NrpcRawDataProvider, primary=True)
     return acc
@@ -113,8 +112,7 @@ def TgcBytestreamDecodeCfg(flags, name="MuonTgcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}TGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "TGCRDO"
-    Muon__TGC_RawDataProviderToolMT=CompFactory.Muon.TGC_RawDataProviderToolMT
-    MuonTgcRawDataProviderTool = Muon__TGC_RawDataProviderToolMT(name    = "TGC_RawDataProviderToolMT",
+    MuonTgcRawDataProviderTool = CompFactory.Muon.TGC_RawDataProviderTool(name    = "TGC_RawDataProviderTool",
                                                                  Decoder = TGCRodDecoder,
                                                                  RdoLocation = keyName )
 
@@ -122,10 +120,12 @@ def TgcBytestreamDecodeCfg(flags, name="MuonTgcRdoProvider", **kwargs):
         MuonTgcRawDataProviderTool.TgcContainerCacheKey   = MuonCacheNames.TgcCache
 
     
+    if flags.Muon.MuonTrigger:
+        kwargs.setdefault("UseHashIds", True)
+
     # Setup the RAW data provider algorithm
-    Muon__TgcRawDataProvider=CompFactory.Muon.TgcRawDataProvider
-    TgcRawDataProvider = Muon__TgcRawDataProvider(name         = name,
-                                                  ProviderTool = MuonTgcRawDataProviderTool, **kwargs )
+    TgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name         = name,
+                                                              ProviderTool = MuonTgcRawDataProviderTool, **kwargs )
     if flags.Muon.MuonTrigger:
         # add RegSelTool
         from RegionSelector.RegSelToolConfig import regSelTool_TGC_Cfg
@@ -158,18 +158,16 @@ def MdtBytestreamDecodeCfg(flags, name="MuonMdtRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}MDTCSM" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MDTCSM"
-    Muon__MDT_RawDataProviderToolMT=CompFactory.Muon.MDT_RawDataProviderToolMT
-    MuonMdtRawDataProviderTool = Muon__MDT_RawDataProviderToolMT(name    = "MDT_RawDataProviderToolMT",
-                                                                 Decoder = MDTRodDecoder,
-                                                                 RdoLocation = keyName)
+    MuonMdtRawDataProviderTool = CompFactory.Muon.MDT_RawDataProviderTool(name    = "MDT_RawDataProviderTool",
+                                                                          Decoder = MDTRodDecoder,
+                                                                          RdoLocation = keyName)
 
     if flags.Muon.MuonTrigger:
         MuonMdtRawDataProviderTool.CsmContainerCacheKey = MuonCacheNames.MdtCsmCache
 
     # Setup the RAW data provider algorithm
-    Muon__MdtRawDataProvider=CompFactory.Muon.MdtRawDataProvider
-    MdtRawDataProvider = Muon__MdtRawDataProvider(name         = name,
-                                                  ProviderTool = MuonMdtRawDataProviderTool, **kwargs )
+    MdtRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name         = name,
+                                                              ProviderTool = MuonMdtRawDataProviderTool, **kwargs )
     if flags.Muon.MuonTrigger:
         # add RegSelTool
         from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
@@ -198,17 +196,15 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}CSCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "CSCRDO"
-    Muon__CSC_RawDataProviderToolMT=CompFactory.Muon.CSC_RawDataProviderToolMT
-    MuonCscRawDataProviderTool = Muon__CSC_RawDataProviderToolMT(name    = "CSC_RawDataProviderToolMT",
+    MuonCscRawDataProviderTool = CompFactory.Muon.CSC_RawDataProviderTool(name    = "CSC_RawDataProviderTool",
                                                                  Decoder = CSCRodDecoder,
                                                                  RdoLocation = keyName)
     if flags.Muon.MuonTrigger:
         MuonCscRawDataProviderTool.CscContainerCacheKey = MuonCacheNames.CscCache
     
     # Setup the RAW data provider algorithm
-    Muon__CscRawDataProvider=CompFactory.Muon.CscRawDataProvider
-    CscRawDataProvider = Muon__CscRawDataProvider(name         = name,
-                                                  ProviderTool = MuonCscRawDataProviderTool, **kwargs )
+    CscRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name         = name,
+                                                              ProviderTool = MuonCscRawDataProviderTool, **kwargs )
     if flags.Muon.MuonTrigger:
         # add RegSelTool
         from RegionSelector.RegSelToolConfig import regSelTool_CSC_Cfg
@@ -256,8 +252,7 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonStgcRdoProvider", **kwargs):
 
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}sTGCRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "sTGCRDO"
-    Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
-    MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
+    MuonsTgcRawDataProviderTool = CompFactory.Muon.STGC_RawDataProviderTool(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = acc.popToolsAndMerge(sTgcRODDecoderCfg(flags)),
                                                                    RdoLocation = keyName,
                                                                    SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )
@@ -266,8 +261,7 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonStgcRdoProvider", **kwargs):
     #    MuonsTgcRawDataProviderTool.sTgcContainerCacheKey = MuonCacheNames.sTgcCache
     
     # Setup the RAW data provider algorithm
-    Muon__sTgcRawDataProvider=CompFactory.Muon.sTgcRawDataProvider
-    sTgcRawDataProvider = Muon__sTgcRawDataProvider(name       = name,
+    sTgcRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = name,
                                                   ProviderTool = MuonsTgcRawDataProviderTool, **kwargs )
     if flags.Muon.MuonTrigger:
         # add RegSelTool
@@ -288,7 +282,7 @@ def NswTrigProcessorRawDataProviderToolCfg(flags, name = "NswTrigProcessorRawDat
     result = ComponentAccumulator()
     kwargs.setdefault("Decoder", result.popToolsAndMerge(NswTrigProcessorRodDecoderCfg(flags)))
     kwargs.setdefault( "RdoLocation", ( flags.Overlay.BkgPrefix  if flags.Common.isOverlay else "") + "NSW_TrigProcessor_RDO" )
-    the_tool = CompFactory.Muon.NSWTP_RawDataProviderToolMT(name = name, **kwargs)
+    the_tool = CompFactory.Muon.NSWTP_RawDataProviderTool(name = name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
@@ -296,8 +290,8 @@ def NswTrigProcByteStreamDecodeCfg(flags, name = "NswProcByteStream"):
     # Make sure muon geometry is configured
     from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
     result.merge(MuonGeoModelCfg(flags))
-    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
-                                                             ProviderTool = result.popToolsAndMerge(NswTrigProcessorRawDataProviderToolCfg(flags)) )
+    the_alg = CompFactory.Muon.MuonRawDataProvider(name = name,
+                                                   ProviderTool = result.popToolsAndMerge(NswTrigProcessorRawDataProviderToolCfg(flags)) )
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -316,15 +310,14 @@ def sTgcPadTriggerBytestreamDecodeCfg(flags, name="sTgcPadTriggerRawDataProvider
 
     # Setup the RAW data provider tool
     keyName = flags.Overlay.BkgPrefix + "NSW_PadTrigger_RDO" if flags.Common.isOverlay else "NSW_PadTrigger_RDO"
-    Muon__PadTrig_RawDataProviderToolMT = CompFactory.Muon.PadTrig_RawDataProviderToolMT
-    MuonsTgcPadTriggerRawDataProviderTool = Muon__PadTrig_RawDataProviderToolMT(name = "sTgcPadTriggerRawDataProviderTool",
-                                                                                Decoder = STGCPadTriggerRodDecoder,
-                                                                                RdoLocation = keyName)
+    MuonsTgcPadTriggerRawDataProviderTool = CompFactory.Muon.PadTrig_RawDataProviderTool(name = "sTgcPadTriggerRawDataProviderTool",
+                                                                                         Decoder = STGCPadTriggerRodDecoder,
+                                                                                         RdoLocation = keyName)
 
 
     # Setup the RAW data provider algorithm
-    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name,
-                                                             ProviderTool = MuonsTgcPadTriggerRawDataProviderTool, **kwargs )
+    the_alg = CompFactory.Muon.MuonRawDataProvider(name = name,
+                                                   ProviderTool = MuonsTgcPadTriggerRawDataProviderTool, **kwargs )
 
     acc.addEventAlgo(the_alg, primary = True)
 
@@ -359,7 +352,7 @@ def MmBytestreamDecodeCfg(flags, name="MuonMmRdoProvider", **kwargs):
    
     # Setup the RAW data provider tool
     keyName = f"{flags.Overlay.BkgPrefix}MMRDO" if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing else "MMRDO"
-    MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
+    MuonMmRawDataProviderTool = CompFactory.Muon.MM_RawDataProviderTool(name  = "MM_RawDataProviderTool",
                                                               Decoder = acc.popToolsAndMerge(MmRDODDecoderCfg(flags)),
                                                               RdoLocation = keyName,
                                                               SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain)
@@ -368,8 +361,7 @@ def MmBytestreamDecodeCfg(flags, name="MuonMmRdoProvider", **kwargs):
     #    MuonMmRawDataProviderTool.RawDataContainerCacheKey = MuonCacheNames.MicromegasCache
 
     # Setup the RAW data provider algorithm
-    Muon__MmRawDataProvider = CompFactory.Muon.MM_RawDataProvider
-    MmRawDataProvider = Muon__MmRawDataProvider(name = name, ProviderTool = MuonMmRawDataProviderTool, **kwargs )
+    MmRawDataProvider = CompFactory.Muon.MuonRawDataProvider(name = name, ProviderTool = MuonMmRawDataProviderTool, **kwargs )
     if flags.Muon.MuonTrigger:
         # add RegSelTool
         from RegionSelector.RegSelToolConfig import regSelTool_MM_Cfg
@@ -400,7 +392,7 @@ def NswMMTPByteStreamDecodeCfg(flags, name = "NswMMTPByteStreamDecode",  **kwarg
     result.merge(MuonGeoModelCfg(flags))
 
     #recycling Pad data provider since not it's not doing anything
-    the_alg = CompFactory.Muon.sTgcPadTriggerRawDataProvider(name = name, ProviderTool = result.popToolsAndMerge(NswMMTPRawDataProviderToolCfg(flags)), **kwargs )
+    the_alg = CompFactory.Muon.MuonRawDataProvider(name = name, ProviderTool = result.popToolsAndMerge(NswMMTPRawDataProviderToolCfg(flags)), **kwargs )
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -478,3 +470,4 @@ if __name__=="__main__":
     if not args.config_only:
         import sys
         sys.exit(not cfg.run().isSuccess())
+

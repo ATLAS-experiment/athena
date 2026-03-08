@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // IOVDbSvc.cxx
@@ -7,38 +7,33 @@
 // Richard Hawkijngs, started 23/11/08
 // based on earlier code by RD Schaffer, Antoine Perus and RH
 
-#include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/StoreClearedIncident.h"
-#include "Gaudi/Interfaces/IOptionsSvc.h"
-#include "GaudiKernel/IIncidentSvc.h"
-#include "GaudiKernel/Guards.h"
-#include "GaudiKernel/IOpaqueAddress.h"
-#include "GaudiKernel/IProperty.h"
-#include "GaudiKernel/IIoComponentMgr.h"
-#include "AthenaKernel/IOVRange.h"
-#include "IOVDbDataModel/IOVMetaDataContainer.h"
-#include "AthenaKernel/IAddressProvider.h"
-#include "FileCatalog/IFileCatalog.h"
-#include "EventInfoUtils/EventIDFromStore.h"
-#include "DBLock/DBLock.h"
-#include "CxxUtils/checker_macros.h"
-
 #include "IOVDbParser.h"
-#include "IOVDbFolder.h"
 #include "IOVDbSvc.h"
 #include "CoralCrestManager.h"
 
+#include "Gaudi/Interfaces/IOptionsSvc.h"
+#include "GaudiKernel/GaudiException.h"
+#include "GaudiKernel/Guards.h"
+#include "GaudiKernel/IIncidentSvc.h"
+#include "GaudiKernel/IIoComponentMgr.h"
+#include "GaudiKernel/IOpaqueAddress.h"
+#include "GaudiKernel/IProperty.h"
+
+#include "AthenaKernel/IOVRange.h"
+#include "CxxUtils/checker_macros.h"
+#include "DBLock/DBLock.h"
+#include "EventInfoUtils/EventIDFromStore.h"
+#include "IOVDbDataModel/IOVMetaDataContainer.h"
+#include "PersistencySvc/IFileCatalog.h"
+#include "StoreGate/StoreClearedIncident.h"
+
 #include <algorithm>
 #include <list>
+#include <ranges>
 #include <utility>
 
-// helper function for getting jobopt properties
-namespace {
-  bool
-  refersToConditionsFolder(const ITagInfoMgr::NameTagPair & thisPair){
-    return thisPair.first.front() == '/';
-  }
 
+namespace {
 
 // Wrap a cool IDatabase with a DBLock.
 class LockedDatabase
@@ -46,8 +41,10 @@ class LockedDatabase
 {
 public:
   LockedDatabase (cool::IDatabasePtr dbptr,
-                  const Athena::DBLock& dblock);
-  virtual ~LockedDatabase();
+                  const Athena::DBLock& dblock)
+    : m_dbptr (std::move(dbptr)), m_dblock (dblock) {}
+
+  virtual ~LockedDatabase() = default;
 
   virtual const cool::DatabaseId& databaseId() const override
   { return m_dbptr->databaseId(); }
@@ -120,23 +117,8 @@ private:
   Athena::DBLock m_dblock;
 };
 
-
-LockedDatabase::LockedDatabase (cool::IDatabasePtr dbptr,
-                                const Athena::DBLock& dblock)
-  : m_dbptr (std::move(dbptr)),
-    m_dblock (dblock)
-{
-}
-
-
-LockedDatabase::~LockedDatabase()
-= default;
-
-
 } // anonymous namespace
 
-
-IOVDbSvc::~IOVDbSvc() = default;
 
 int IOVDbSvc::poolSvcContext()
 {
@@ -157,46 +139,36 @@ int IOVDbSvc::poolSvcContext()
    return m_poolSvcContext;
 }
 
+
 StatusCode IOVDbSvc::initialize() {
-  if (StatusCode::SUCCESS!=AthService::initialize()) return StatusCode::FAILURE;
   // subscribe to events
   ServiceHandle<IIncidentSvc> incSvc("IncidentSvc",name());
-  if (StatusCode::SUCCESS!=incSvc.retrieve()) {
-    ATH_MSG_ERROR( "Unable to get the IncidentSvc" );
-    return StatusCode::FAILURE;
-  }
-  long int pri=100;
-  incSvc->addListener( this, "BeginEvent", pri );
+  ATH_CHECK( incSvc.retrieve() );
+  const long int pri = 100;
+  incSvc->addListener( this, IncidentType::BeginEvent, pri );
   incSvc->addListener( this, "StoreCleared", pri );   // for SP Athena
   incSvc->addListener( this, IncidentType::EndProcessing, pri );  // for MT Athena
 
   // Register this service for 'I/O' events
   ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
-  if (!iomgr.retrieve().isSuccess()) {
-     ATH_MSG_FATAL("Could not retrieve IoComponentMgr !");
-     return(StatusCode::FAILURE);
-  }
-  if (!iomgr->io_register(this).isSuccess()) {
-     ATH_MSG_FATAL("Could not register myself with the IoComponentMgr !");
-     return(StatusCode::FAILURE);
-  }
+  ATH_CHECK( iomgr.retrieve() );
+  ATH_CHECK( iomgr->io_register(this) );
+
   // print warnings/info depending on state of job options
   if (!m_par_manageConnections)
     ATH_MSG_INFO( "COOL connection management disabled - connections kept open throughout job" );
   if (!m_par_managePoolConnections)
     ATH_MSG_INFO( "POOL file connection management disabled - files kept open throught job" );
-  if (m_par_maxNumPoolFiles.value() > 0)
+  if (m_par_maxNumPoolFiles > 0)
     ATH_MSG_INFO( "Only " << m_par_maxNumPoolFiles.value() <<  " POOL conditions files will be open at once" );
-  if (m_par_forceRunNumber.value() > 0 || m_par_forceLumiblockNumber.value() > 0)
+  if (m_par_forceRunNumber > 0 || m_par_forceLumiblockNumber > 0)
     ATH_MSG_WARNING( "Global run/LB number forced to be [" <<
-      m_par_forceRunNumber.value() << "," << m_par_forceLumiblockNumber.value() <<  "]" );
-  if (m_par_forceTimestamp.value() > 0) 
-    ATH_MSG_WARNING( "Global timestamp forced to be " <<
-      m_par_forceTimestamp.value() );
-  if (m_par_cacheRun.value() > 0) 
-    ATH_MSG_INFO( "Run-LB data will be cached in groups of " << 
-      m_par_cacheRun.value() << " runs" );
-  if (m_par_cacheTime.value() > 0)
+                     m_par_forceRunNumber.value() << "," << m_par_forceLumiblockNumber.value() <<  "]" );
+  if (m_par_forceTimestamp > 0)
+    ATH_MSG_WARNING( "Global timestamp forced to be " << m_par_forceTimestamp.value() );
+  if (m_par_cacheRun > 0)
+    ATH_MSG_INFO( "Run-LB data will be cached in groups of " << m_par_cacheRun.value() << " runs" );
+  if (m_par_cacheTime > 0)
     ATH_MSG_INFO( "Timestamp data will be cached in groups of " << m_par_cacheTime.value() << " seconds" );
   if (m_par_cacheAlign > 0) 
     ATH_MSG_INFO( "Cache alignment will be done in " << m_par_cacheAlign.value() << " slices" );
@@ -209,13 +181,13 @@ StatusCode IOVDbSvc::initialize() {
   m_iovTime.reset();
 
   // extract information from EventSelector for run/LB/time overrides
-  if (StatusCode::SUCCESS!=checkEventSel()) return StatusCode::FAILURE;
+  ATH_CHECK( checkEventSel() );
 
   // initialise default connection
   if (!m_par_defaultConnection.empty()) {
     // default connection is readonly if no : in name (i.e. logical conn)
-    bool readonly=(m_par_defaultConnection.value().find(':')==std::string::npos);
-    m_connections.push_back(new IOVDbConn(m_par_defaultConnection,readonly,msg()));
+    bool readonly=(m_par_defaultConnection.find(':')==std::string::npos);
+    m_connections.push_back(std::make_unique<IOVDbConn>(m_par_defaultConnection,readonly,msg()));
   }
 
   // set time of timestampslop in nanoseconds
@@ -228,14 +200,16 @@ StatusCode IOVDbSvc::initialize() {
   }
 
   // setup folders and process tag overrides
-  if (StatusCode::SUCCESS!=setupFolders()) return StatusCode::FAILURE;
+  ATH_CHECK( setupFolders() );
 
   // Set state to initialize
   m_state=IOVDbSvc::INITIALIZATION;
   ATH_MSG_INFO( "Initialised with " << m_connections.size() << 
-    " connections and " << m_foldermap.size() << " folders" );
-  if (m_outputToFile.value()) ATH_MSG_INFO("Db dump to file activated");
-  if (m_crestCoolToFile.value())ATH_MSG_INFO("Crest or Cool dump to file activated");
+                " connections and " << m_foldermap.size() << " folders" );
+
+  if (m_outputToFile)    ATH_MSG_INFO("Db dump to file activated");
+  if (m_crestCoolToFile) ATH_MSG_INFO("Crest or Cool dump to file activated");
+
   ATH_MSG_INFO( "Service IOVDbSvc initialised successfully" );
 
   ATH_CHECK( checkConfigConsistency() );
@@ -247,52 +221,47 @@ StatusCode IOVDbSvc::io_reinit() {
    ATH_MSG_DEBUG("I/O reinitialization...");
    // PoolSvc clears all connections on IO_reinit - forget the stored contextId
    m_poolSvcContext = -1;
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
+
 
 StatusCode IOVDbSvc::io_finalize() {
    ATH_MSG_DEBUG("I/O finalization...");
-   return(StatusCode::SUCCESS);
+   return StatusCode::SUCCESS;
 }
+
 
 StatusCode IOVDbSvc::finalize() {
   // summarise and delete folders, adding total read from COOL
-  unsigned long long nread=0;
-  float readtime=0.;
+  unsigned long long nread = 0;
+  float readtime = 0;
+
   // accumulate a map of readtime by connection
-  typedef std::map<IOVDbConn*,float> CTMap;
-  CTMap ctmap;
-  for (const auto & namePtrPair : m_foldermap) {
-    IOVDbFolder* folder=namePtrPair.second;
+  std::map<IOVDbConn*, float> ctmap;
+  for (const auto & [name, folder] : m_foldermap) {
     folder->summary();
-    nread+=folder->bytesRead();
-    const float& fread=folder->readTime();
-    readtime+=fread;
-    IOVDbConn* cptr=folder->conn();
-    CTMap::iterator citr=ctmap.find(cptr);
-    if (citr!=ctmap.end()) {
-      (citr->second)+=fread;
-    } else {
-      ctmap.insert(CTMap::value_type(cptr,fread));
-    }
-    delete folder;
+    nread += folder->bytesRead();
+    readtime += folder->readTime();
+    const auto& [citr, inserted] = ctmap.try_emplace(folder->conn(), 0);
+    citr->second += folder->readTime();
   }
+  m_foldermap.clear();
   ATH_MSG_INFO(  "Total payload read from IOVDb: " << nread << " bytes in (( " << std::fixed << std::setw(9) << std::setprecision(2) <<
     readtime << " ))s" );
 
   // close and delete connections, printing time in each one
-  for (auto & pThisConnection : m_connections) {
-    float fread=0;
-    CTMap::iterator citr=ctmap.find(pThisConnection);
-    if (citr!=ctmap.end()) fread=citr->second;
-    pThisConnection->setInactive();
-    pThisConnection->summary(fread);
-    delete pThisConnection;
+  for (const auto & conn : m_connections) {
+    float fread = 0;
+    const auto citr = ctmap.find(conn.get());
+    if (citr != ctmap.end()) fread = citr->second;
+    conn->setInactive();
+    conn->summary(fread);
   }
-  // finally remove the msg svc
-  //delete m_log;
-  return AthService::finalize();
+  m_connections.clear();
+
+  return StatusCode::SUCCESS;
 }
+
 
 cool::IDatabasePtr IOVDbSvc::getDatabase(bool readOnly) {
   // get default database connection
@@ -312,6 +281,7 @@ cool::IDatabasePtr IOVDbSvc::getDatabase(bool readOnly) {
   return dbconn;
 }
 
+
 StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   // Read information for folders and setup TADs
   if (storeID!=StoreID::DETECTOR_STORE) return StatusCode::SUCCESS;
@@ -323,15 +293,14 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   // check File Level Meta Data of input, see if any requested folders are available there
   SG::ConstIterator<IOVMetaDataContainer> cont;
   SG::ConstIterator<IOVMetaDataContainer> contEnd;
-  if (StatusCode::SUCCESS==m_h_metaDataStore->retrieve(cont,contEnd)) {
+  if (m_h_metaDataStore->retrieve(cont,contEnd).isSuccess()) {
     unsigned int ncontainers=0;
     unsigned int nused=0;
     for (;cont!=contEnd; ++cont) {
       ++ncontainers;
       const std::string& fname=cont->folderName();
       // check if this folder is in list requested by IOVDbSvc
-      for (const auto & thisNamePtrPair : m_foldermap) {
-        IOVDbFolder* folder = thisNamePtrPair.second;
+      for (const auto & [name, folder] : m_foldermap) {
         // take data from FLMD only if tag override is NOT set
         if (folder->folderName()==fname && !(folder->tagOverride())) {
           ATH_MSG_INFO( "Folder " << fname << " will be taken from file metadata" );
@@ -354,19 +323,18 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   // because the iterator becomes invalid. So first collect the keys
   // to erase in a first pass and then erase them.
   std::vector<std::string> keysToDelete;
-   for (const auto & thisNamePtrPair : m_foldermap)  {
-    if (thisNamePtrPair.second->fromMetaDataOnly() && !thisNamePtrPair.second->readMeta()) {
-      ATH_MSG_INFO( "preLoadAddresses: Removing folder " << thisNamePtrPair.second->folderName() << 
+  for (const auto & [name, folder] : m_foldermap)  {
+    if (folder->fromMetaDataOnly() && !folder->readMeta()) {
+      ATH_MSG_INFO( "preLoadAddresses: Removing folder " << folder->folderName() <<
         ". It should only be in the file meta data and was not found." );
-      keysToDelete.push_back(thisNamePtrPair.first);
+      keysToDelete.push_back(name);
     }
   }
   
   for (auto & thisKey : keysToDelete) {
-    FolderMap::iterator fitr=m_foldermap.find(thisKey);
+    const auto fitr = m_foldermap.find(thisKey);
     if (fitr != m_foldermap.end()) {
       fitr->second->conn()->decUsage();
-      delete (fitr->second);
       m_foldermap.erase(fitr);
     } else {
       ATH_MSG_ERROR( "preLoadAddresses: Could not find folder " << thisKey << " for removal" );
@@ -384,16 +352,14 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   for (const auto & pThisConnection : m_connections) {
     if (pThisConnection->nFolders()>0 || doMeta) {
       // loop over all folders using this connection
-      for (const auto & thisNamePtrPair : m_foldermap) {
-        IOVDbFolder* folder=thisNamePtrPair.second;
-        if (folder->conn()==pThisConnection || (folder->conn()==nullptr && doMeta)) {
+      for (const auto & [name, folder] : m_foldermap) {
+        if (folder->conn()==pThisConnection.get() || (folder->conn()==nullptr && doMeta)) {
           std::unique_ptr<SG::TransientAddress> tad =
-            folder->preLoadFolder( &(*m_h_tagInfoMgr), m_par_cacheRun.value(),
-                                   m_par_cacheTime.value());
-          if (oldconn!=pThisConnection) {
+            folder->preLoadFolder( &(*m_h_tagInfoMgr), m_par_cacheRun, m_par_cacheTime);
+          if (oldconn!=pThisConnection.get()) {
             // close old connection if appropriate
             if (m_par_manageConnections && oldconn!=nullptr) oldconn->setInactive();
-            oldconn=pThisConnection;
+            oldconn=pThisConnection.get();
           }
           if (tad==nullptr) {
             ATH_MSG_ERROR( "preLoadFolder failed for folder " << folder->folderName() );
@@ -401,13 +367,13 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
           }
           // for write-metadata folder, request data preload
           if (folder->writeMeta()) {
-            if (StatusCode::SUCCESS!=m_h_IOVSvc->preLoadDataTAD(tad.get(),folder->eventStore())) {
+            if (m_h_IOVSvc->preLoadDataTAD(tad.get(),folder->eventStore()).isFailure()) {
               ATH_MSG_ERROR( "Could not request IOVSvc to preload metadata for " << folder->folderName() );
               return StatusCode::FAILURE;
             }
           } else {
             // for other folders, just preload TAD (not data)
-            if (StatusCode::SUCCESS!=m_h_IOVSvc->preLoadTAD(tad.get(), folder->eventStore())) {
+            if (m_h_IOVSvc->preLoadTAD(tad.get(), folder->eventStore()).isFailure()) {
               ATH_MSG_ERROR( "Could not request IOVSvc to preload metadata for " << folder->folderName() );
               return StatusCode::FAILURE;
             }
@@ -415,8 +381,7 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
           // Add TAD to Storegate
           tlist.push_back(tad.release());
           // check for IOV override
-          folder->setIOVOverride(m_par_forceRunNumber.value(),
-                                 m_par_forceLumiblockNumber.value(),m_par_forceTimestamp.value());
+          folder->setIOVOverride(m_par_forceRunNumber, m_par_forceLumiblockNumber, m_par_forceTimestamp);
         }
       }
     }
@@ -429,22 +394,25 @@ StatusCode IOVDbSvc::preLoadAddresses(StoreID::type storeID,tadList& tlist) {
   // <key> specification in folder description string
   // build a new foldermap with the updated keys
   FolderMap newmap;
-  for (const auto & thisNamePtrPair : m_foldermap) {
-    newmap[thisNamePtrPair.second->key()]=thisNamePtrPair.second;
+  for (auto & [name, folder] : m_foldermap) {
+    newmap[folder->key()]=std::move(folder);
   }
   m_foldermap=std::move(newmap);
+
   // fill global and explicit folder tags into TagInfo
-  if (StatusCode::SUCCESS!=fillTagInfo()) 
+  if (fillTagInfo().isFailure())
     ATH_MSG_ERROR("Could not fill TagInfo object from preLoadAddresses" );
+
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode IOVDbSvc::loadAddresses(StoreID::type /*storeID*/, tadList& /*list*/ ) {
   // this method does nothing
   return StatusCode::SUCCESS;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* tad,
                                    const EventContext& /*ctx*/)
 {
@@ -463,13 +431,13 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
   // return FAILURE if not - this allows other AddressProviders to be 
   // asked for the TAD
   const std::string& key=tad->name();
-  FolderMap::const_iterator fitr=m_foldermap.find(key);
+  const auto fitr=m_foldermap.find(key);
   if (fitr==m_foldermap.end()) {
     ATH_MSG_VERBOSE( 
         "updateAddress cannot find description for TAD " << key );
     return StatusCode::FAILURE;
   }
-  IOVDbFolder* folder=fitr->second;
+  const auto& folder=fitr->second;
   if (folder->clid()!=tad->clID()) {
     ATH_MSG_VERBOSE( "CLID for TAD " << key << " is " << tad->clID()
              << " but expecting " << folder->clid() );
@@ -523,7 +491,7 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
         folder->setDropped(false);
         // reload cache for this folder (and all others sharing this DB connection)
         ATH_MSG_DEBUG( "Triggering cache load for folder " << folder->folderName());
-        if (StatusCode::SUCCESS!=loadCaches(folder->conn())) {
+        if (loadCaches(folder->conn()).isFailure()) {
            ATH_MSG_ERROR( "Cache load failed for at least one folder from " << folder->conn()->name()
                           << ". You may see errors from other folders sharing the same connection." );
            return StatusCode::FAILURE;
@@ -551,8 +519,8 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
   }
 
   // Pass range onto IOVSvc
-  if (StatusCode::SUCCESS!=m_h_IOVSvc->setRange(tad->clID(),tad->name(),
-                                                range,folder->eventStore())) {
+  if (m_h_IOVSvc->setRange(tad->clID(),tad->name(),
+                           range,folder->eventStore()).isFailure()) {
     ATH_MSG_ERROR( "setRange failed for folder " << folder->folderName() );
     return StatusCode::FAILURE;
   }
@@ -560,7 +528,6 @@ StatusCode IOVDbSvc::updateAddress(StoreID::type storeID, SG::TransientAddress* 
   return StatusCode::SUCCESS;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode IOVDbSvc::getRange( const CLID&        clid, 
                                const std::string& dbKey,
@@ -572,15 +539,15 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
   Athena::DBLock dblock;
 
   ATH_MSG_DEBUG( "getRange  clid: " << clid << " key: \""<< dbKey << "\"  t: " << time );
-  const std::string& key=dbKey;
-  FolderMap::const_iterator fitr=m_foldermap.find(key);
+
+  const auto fitr = m_foldermap.find(dbKey);
   if (fitr==m_foldermap.end()) {
-    ATH_MSG_VERBOSE("getRange cannot find description for dbKey " << key );
+    ATH_MSG_VERBOSE("getRange cannot find description for dbKey " << dbKey );
     return StatusCode::FAILURE;
   }
-  IOVDbFolder* folder=fitr->second;
+  const auto& folder = fitr->second;
   if (folder->clid()!=clid) {
-    ATH_MSG_VERBOSE( "supplied CLID for " << key << " is " 
+    ATH_MSG_VERBOSE( "supplied CLID for " << dbKey << " is "
              << clid
              << " but expecting " << folder->clid() );
     
@@ -596,7 +563,7 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
     folder->setDropped(false);
     // reload cache for this folder (and all others sharing this DB connection)
     ATH_MSG_DEBUG( "Triggering cache load for folder " << folder->folderName() );
-    if (StatusCode::SUCCESS!=loadCaches(folder->conn(),&time)) {
+    if (loadCaches(folder->conn(),&time).isFailure()) {
       ATH_MSG_ERROR( "Cache load failed for at least one folder from " << folder->conn()->name()
                      << ". You may see errors from other folders sharing the same connection." );
       return StatusCode::FAILURE;
@@ -607,7 +574,7 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
   address.reset();
   // setup address and range
   {
-    Gaudi::Guards::AuditorGuard auditor(std::string("FldrSetup:")+(key.empty() ? "anonymous" : key),
+    Gaudi::Guards::AuditorGuard auditor(std::string("FldrSetup:")+(dbKey.empty() ? "anonymous" : dbKey),
                                         auditorSvc(), "preLoadProxy");
     if (!folder->getAddress(vkey,&(*m_h_persSvc),poolSvcContext(),address,
                             range,m_poolPayloadRequested)) {
@@ -632,19 +599,18 @@ StatusCode IOVDbSvc::getRange( const CLID&        clid,
   // Special handling for IOV override: set the infinite validity range
   if (folder->iovOverridden()) {
     if (folder->timeStamp()) {
-      range = IOVRange ( IOVTime(IOVTime::MINTIMESTAMP)
-			 , IOVTime(IOVTime::MAXTIMESTAMP) );
+      range = IOVRange ( IOVTime(IOVTime::MINTIMESTAMP),
+                         IOVTime(IOVTime::MAXTIMESTAMP) );
     }
     else {
-      range = IOVRange ( IOVTime(IOVTime::MINRUN,IOVTime::MINEVENT)
-			 , IOVTime(IOVTime::MAXRUN,IOVTime::MAXEVENT) );
+      range = IOVRange ( IOVTime(IOVTime::MINRUN,IOVTime::MINEVENT),
+                         IOVTime(IOVTime::MAXRUN,IOVTime::MAXEVENT) );
     }
   }
 
   return StatusCode::SUCCESS;
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 StatusCode IOVDbSvc::setRange( const CLID&        /*clid*/,
                                const std::string& /*dbKey*/,
@@ -653,6 +619,7 @@ StatusCode IOVDbSvc::setRange( const CLID&        /*clid*/,
   // this method does nothing
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
                                     const EventContext& ctx)
@@ -705,9 +672,8 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
         ATH_MSG_FATAL( "Conditions database connection " <<  pThisConnection->name() << " cannot be opened - STOP" );
         return StatusCode::FAILURE;
       }
-      for (const auto & thisNamePtrPair: m_foldermap) { 
-        IOVDbFolder* folder=thisNamePtrPair.second;
-        if (folder->conn()!=pThisConnection) continue; 
+      for (const auto & [name, folder]: m_foldermap) {
+        if (folder->conn()!=pThisConnection.get()) continue;
         folder->printCache();
         cool::ValidityKey vkey=folder->iovTime(m_iovTime);
         {
@@ -725,9 +691,11 @@ StatusCode IOVDbSvc::signalBeginRun(const IOVTime& beginRunTime,
   return StatusCode::SUCCESS;
 }
 
+
 void IOVDbSvc::signalEndProxyPreload() {
   // this method does nothing
 }
+
 
 void IOVDbSvc::postConditionsLoad() {
    // Close any open POOL files after loding Conditions
@@ -739,13 +707,13 @@ void IOVDbSvc::postConditionsLoad() {
       m_par_managePoolConnections.set(false);
       m_poolPayloadRequested=false;
       if( m_poolSvcContext ) {
-         if (StatusCode::SUCCESS==m_h_poolSvc->disconnect(m_poolSvcContext)) {
+         if (m_h_poolSvc->disconnect(m_poolSvcContext).isSuccess()) {
             ATH_MSG_DEBUG( "Successfully closed input POOL connections");
          } else {
             ATH_MSG_WARNING( "Unable to close input POOL connections" );
          }
          // reopen transaction
-         if (StatusCode::SUCCESS==m_h_poolSvc->connect(pool::ITransaction::READ, m_poolSvcContext)) {
+         if (m_h_poolSvc->connect(pool::ITransaction::READ, m_poolSvcContext).isSuccess()) {
             ATH_MSG_DEBUG("Reopend read transaction for POOL conditions input files" );
          } else {
             ATH_MSG_WARNING("Cannot reopen read transaction for POOL conditions input files");
@@ -753,6 +721,7 @@ void IOVDbSvc::postConditionsLoad() {
       }
    }
 }
+
 
 void IOVDbSvc::handle( const Incident& inc) {
   // Handle incidents:
@@ -775,6 +744,7 @@ void IOVDbSvc::handle( const Incident& inc) {
   }
 }
 
+
 StatusCode IOVDbSvc::processTagInfo() {
   // Processing of taginfo
   // Set GlobalTag and any folder-specific overrides if given
@@ -791,19 +761,17 @@ StatusCode IOVDbSvc::processTagInfo() {
   }
 
   // now check for tag overrides for specific folders
-  const ITagInfoMgr::NameTagPairVec nameTagPairs = m_h_tagInfoMgr->getInputTags();
-  for (const auto & thisNameTagPair: nameTagPairs) {
+  const ITagInfoMgr::NameTagPairVec& nameTagPairs = m_h_tagInfoMgr->getInputTags();
+  for (const auto & [theTagName, theTag]: nameTagPairs) {
     // assume tags relating to conditions folders start with /
-    if (not refersToConditionsFolder(thisNameTagPair)) continue;
+    if (not theTagName.starts_with('/')) continue;
     // check for folder(s) with this name in (key, ptr) pair
-    for (const auto & thisKeyPtrPair: m_foldermap) {
-      IOVDbFolder* folder=thisKeyPtrPair.second;
+    for (const auto & [name, folder]: m_foldermap) {
       const std::string& ifname=folder->folderName();
-      if (ifname!=thisNameTagPair.first) continue; 
+      if (ifname!=theTagName) continue;
       // use an override from TagInfo only if there is not an explicit jo tag,
       // and folder meta-data is not used, and there is no <noover/> spec,
       // and no global tag set in job options
-      const auto & theTag{thisNameTagPair.second};
       if (folder->joTag().empty() && !folder->readMeta() && !folder->noOverride() && m_par_globalTag.empty()) {
         folder->setTagOverride(theTag,false);
         ATH_MSG_INFO( "TagInfo override for tag " << theTag << " in folder " << ifname );
@@ -816,21 +784,21 @@ StatusCode IOVDbSvc::processTagInfo() {
   return StatusCode::SUCCESS;
 }
 
+
 std::vector<std::string> 
 IOVDbSvc::getKeyList() {
   // return a list of all the StoreGate keys being managed by IOVDbSvc
-  std::vector<std::string> keys;
-  keys.reserve(m_foldermap.size());
-  std::for_each(m_foldermap.begin(),m_foldermap.end(), [&keys](const auto &i){keys.emplace_back(i.first);});
-  return keys;
+  auto keys = std::views::keys(m_foldermap);
+  return {keys.begin(), keys.end()};
 }
+
 
 bool IOVDbSvc::getKeyInfo(const std::string& key, IIOVDbSvc::KeyInfo& info) {
   // return information about given SG key
   // first attempt to find the folder object for this key
-  FolderMap::const_iterator itr = m_foldermap.find(key);
+  const auto itr = m_foldermap.find(key);
   if (itr!=m_foldermap.end()) {
-    const IOVDbFolder* f=itr->second;
+    const IOVDbFolder* f = itr->second.get();
     info.folderName = f->folderName();
     info.tag = f->resolvedTag();
     info.range = f->currentRange();
@@ -845,11 +813,12 @@ bool IOVDbSvc::getKeyInfo(const std::string& key, IIOVDbSvc::KeyInfo& info) {
   }
 }
 
+
 bool IOVDbSvc::dropObject(const std::string& key, const bool resetCache) {
   // find the folder corresponding to this object
-  FolderMap::const_iterator itr=m_foldermap.find(key);
+  const auto itr = m_foldermap.find(key);
   if (itr!=m_foldermap.end()) {
-    IOVDbFolder* folder=itr->second;
+    IOVDbFolder* folder=itr->second.get();
     CLID clid=folder->clid();
     SG::DataProxy* proxy=m_h_detStore->proxy(clid,key);
     if (proxy!=nullptr) {
@@ -888,34 +857,34 @@ StatusCode IOVDbSvc::checkEventSel() {
     return StatusCode::SUCCESS;
   }
 
-  BooleanProperty bprop("OverrideRunNumber",false);
-  ATH_CHECK( bprop.fromString(joSvc->get("EventSelector.OverrideRunNumber")) );
-  if (bprop.value()) {
+  BooleanProperty overrideRunNumber("OverrideRunNumber",false);
+  ATH_CHECK( overrideRunNumber.fromString(joSvc->get("EventSelector.OverrideRunNumber")) );
+  if (overrideRunNumber) {
     // if flag is set, extract Run,LB and time
     ATH_MSG_INFO(  "Setting run/LB/time from EventSelector override in initialize" );
     uint32_t run,lumib;
     uint64_t time;
     bool allGood=true;
-    if (m_par_forceRunNumber.value()!=0 ||
-        m_par_forceLumiblockNumber.value()!=0)
+    if (m_par_forceRunNumber!=0 || m_par_forceLumiblockNumber!=0) {
       ATH_MSG_WARNING( "forceRunNumber property also set" );
+    }
     IntegerProperty iprop1("RunNumber",0);
     if (iprop1.fromString(joSvc->get("EventSelector.RunNumber","INVALID"))) {
-      run=iprop1.value();
+      run=iprop1;
     } else {
       ATH_MSG_ERROR( "Unable to get RunNumber from EventSelector");
       allGood=false;
     }
     IntegerProperty iprop2("FirstLB",0);
     if (iprop2.fromString(joSvc->get("EventSelector.FirstLB","INVALID"))) {
-      lumib=iprop2.value();
+      lumib=iprop2;
     } else {
       ATH_MSG_ERROR( "Unable to get FirstLB from EventSelector");
       allGood=false;
     }
     IntegerProperty iprop3("InitialTimeStamp",0);
     if (iprop3.fromString(joSvc->get("EventSelector.InitialTimeStamp","INVALID"))) {
-      time=iprop3.value();
+      time=iprop3;
     } else {
       ATH_MSG_ERROR("Unable to get InitialTimeStamp from EventSelector" );
       allGood=false;
@@ -933,6 +902,7 @@ StatusCode IOVDbSvc::checkEventSel() {
   return StatusCode::SUCCESS;
 }
 
+
 StatusCode IOVDbSvc::setupFolders() {
   // read the Folders joboptions and setup the folder list
   // no wildcards are allowed
@@ -945,7 +915,7 @@ StatusCode IOVDbSvc::setupFolders() {
   
   //1. Loop through folders
   std::list<IOVDbParser> allFolderdata;
-  for (const auto & thisFolder : m_par_folders.value()) {
+  for (const auto & thisFolder : m_par_folders) {
     ATH_MSG_DEBUG( "Setup folder " << thisFolder );
     IOVDbParser folderdata(thisFolder,msg());
     if (!folderdata.isValid()) {
@@ -976,13 +946,13 @@ StatusCode IOVDbSvc::setupFolders() {
 
     for (auto& folderdata : allFolderdata) {
       const std::string& ifname=folderdata.folderName();
-      if (ifname.compare(0,prefix.size(), prefix)==0 && 
+      if (ifname.starts_with(prefix) &&
           (ifname.size()==prefix.size() || ifname[prefix.size()]=='/')) {
         //Match! 
         folderdata.applyOverrides(keys,msg());
-      }// end if
-    }// end loop over allFolderdata
-  }// end loop over overrides
+      }
+    }
+  }
 
   //3. Remove any duplicates:
   std::list<IOVDbParser>::iterator it1=allFolderdata.begin(); 
@@ -1009,7 +979,7 @@ StatusCode IOVDbSvc::setupFolders() {
 
   //4.Set up folder map with cleaned folder list
 
-  bool hasError=false;
+  bool crestError=false;
   for (const auto& folderdata : allFolderdata) {
     // find the connection specification first - db or dbConnection
     // default is to use the 'default' connection
@@ -1022,19 +992,18 @@ StatusCode IOVDbSvc::setupFolders() {
       for (const auto & pThisConnection : m_connections) {
         if (pThisConnection->name()==connstr) {
           // found existing connection - use that
-          conn=pThisConnection;
+          conn=pThisConnection.get();
           break;
         }
       }
       if (conn==nullptr) {
         // create new read-onlyconnection
-        conn=new IOVDbConn(connstr,true,msg());
-        m_connections.push_back(conn);
+        conn = m_connections.emplace_back(std::make_unique<IOVDbConn>(connstr,true,msg())).get();
       }
     } else {
       // no connection specified - use default if available
       if (!m_par_defaultConnection.empty()) {
-        conn=m_connections[0];
+        conn=m_connections[0].get();
       } else {
         ATH_MSG_FATAL( "Folder request " << folderdata.folderName() << 
           " gives no DB connection information and no default set" );
@@ -1045,34 +1014,36 @@ StatusCode IOVDbSvc::setupFolders() {
     // create the new folder, but only if a folder for this SG key has not
     // already been requested
 
-    std::string crestTag = "";
+    std::string crestTag;
     if (m_par_source == "CREST"){
       crestTag = m_cresttagmap[folderdata.folderName()];
-      if(crestTag.size()==0 && folderdata.folderName().compare("/TagInfo")!=0){
-               ATH_MSG_FATAL( "Global Tag "<<m_par_globalTag<<" hasn't folder: " << folderdata.folderName() <<
-          " in Global Tag Map." );
-	       hasError=true;
-	       continue;
+      if(crestTag.empty() && folderdata.folderName() != "/TagInfo") {
+        ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag << " does not contain folder "
+                       << folderdata.folderName());
+        crestError=true;
+        continue;
       }
     }
     
-    IOVDbFolder* folder=new IOVDbFolder(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
-                                        m_par_checklock, m_outputToFile.value(), m_par_source, m_par_crestServer, crestTag, m_crestCoolToFile);
+    auto folder=std::make_unique<IOVDbFolder>(conn,folderdata,msg(),&(*m_h_clidSvc), &(*m_h_metaDataTool),
+                                              m_par_checklock, m_outputToFile, m_par_source,
+                                              m_par_crestServer, crestTag, m_crestCoolToFile);
     const std::string& key=folder->key();
     if (m_foldermap.find(key)==m_foldermap.end()) {  //This check is too weak. For POOL-based folders, the SG key is in the folder description (not known at this point).
-      m_foldermap[key]=folder;
+      m_foldermap[key]=std::move(folder);
       conn->incUsage();
     } else {
       ATH_MSG_ERROR( "Duplicate request for folder " << 
         folder->folderName() << 
         " associated to already requested Storegate key " << key );
       // clean up this duplicate request
-      delete folder;
     }
   }// end loop over folders
-  // check for folders to be written to metadata
-  if(hasError)
+
+  if(crestError)
     return StatusCode::FAILURE;
+
+  // check for folders to be written to metadata
   for (const auto & folderToWrite : m_par_foldersToWrite) {
     // match wildcard * at end of string only (i.e. /A/* matches /A/B, /A/C/D)
     std::string_view match=folderToWrite;
@@ -1080,30 +1051,28 @@ StatusCode IOVDbSvc::setupFolders() {
     if (idx!=std::string::npos) {
       match=std::string_view(folderToWrite).substr(0,idx);
     }
-    for (const auto & thisFolder : m_foldermap) {
-      IOVDbFolder* fptr=thisFolder.second;
-      if ((fptr->folderName()).compare(0,match.size(), match)==0) {
-        fptr->setWriteMeta();
-        ATH_MSG_INFO( "Folder " << fptr->folderName() << " will be written to file metadata" );
+    for (const auto & [name, folder] : m_foldermap) {
+      if (folder->folderName().starts_with(match)) {
+        folder->setWriteMeta();
+        ATH_MSG_INFO( "Folder " << folder->folderName() << " will be written to file metadata" );
       }
     }//end loop over FolderMap
   }//end loop over  m_par_foldersToWrite
   return StatusCode::SUCCESS;
 }
 
+
 StatusCode IOVDbSvc::fillTagInfo() {
   if (!m_par_globalTag.empty()) {
     ATH_MSG_DEBUG( "Adding GlobalTag " << m_par_globalTag << " into TagInfo" );
-    if (StatusCode::SUCCESS!=m_h_tagInfoMgr->addTag("IOVDbGlobalTag",m_par_globalTag))
-      return StatusCode::FAILURE;
+    ATH_CHECK( m_h_tagInfoMgr->addTag("IOVDbGlobalTag",m_par_globalTag) );
   }
   // add all explicit tags specified in folders
   // can be from Folders or tagOverrides properties
-  for (const auto & thisFolder : m_foldermap) {
-    const IOVDbFolder* folder=thisFolder.second;
+  for (const auto & [name, folder] : m_foldermap) {
     if (!folder->joTag().empty()) {
       ATH_MSG_DEBUG( "Adding folder " << folder->folderName() <<" tag " << folder->joTag() << " into TagInfo" );
-      if (StatusCode::SUCCESS!=m_h_tagInfoMgr->addTag(folder->folderName(),folder->joTag()))
+      if (m_h_tagInfoMgr->addTag(folder->folderName(),folder->joTag()).isFailure())
         return StatusCode::FAILURE;
     }
     // check to see if any input TagInfo folder overrides should be removed
@@ -1113,18 +1082,17 @@ StatusCode IOVDbSvc::fillTagInfo() {
     // an explict joboption tag, nooverride spec, or data comes from metadata
     if (!m_par_globalTag.empty() || !folder->joTag().empty() || folder->noOverride() ||
         folder->readMeta()) {
-      if (StatusCode::SUCCESS!=
-          m_h_tagInfoMgr->removeTagFromInput(folder->folderName())) {
+      if (m_h_tagInfoMgr->removeTagFromInput(folder->folderName()).isFailure()) {
         ATH_MSG_WARNING( "Could not add TagInfo remove request for "
                << folder->folderName() );
       } else {
-        ATH_MSG_INFO( "Added taginfo remove for " << 
-          folder->folderName() );
+        ATH_MSG_INFO( "Added taginfo remove for " << folder->folderName() );
       }
     }
   }
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode IOVDbSvc::loadCaches(IOVDbConn* conn, const IOVTime* time) {
   // load the caches for all folders using the given connection
@@ -1137,8 +1105,7 @@ StatusCode IOVDbSvc::loadCaches(IOVDbConn* conn, const IOVTime* time) {
   if (m_abort) return StatusCode::FAILURE;
   bool access=false;
   StatusCode sc=StatusCode::SUCCESS;
-  for (const auto & thisNamePtrPair : m_foldermap) {
-    IOVDbFolder* folder=thisNamePtrPair.second;
+  for (const auto & [name, folder] : m_foldermap) {
     if (folder->conn()!=conn) continue;
     cool::ValidityKey vkey=folder->iovTime(time==nullptr ? m_iovTime : *time);
     // protect against out of range times (timestamp -1 happened in FDR2)
@@ -1164,30 +1131,33 @@ StatusCode IOVDbSvc::loadCaches(IOVDbConn* conn, const IOVTime* time) {
   // if connection aborted, set overall abort so we do not waste time trying
   // to read data from other schema
   if (conn->aborted()) {
-    ATH_MSG_FATAL( "Connection " << conn->name() << " was aborted, set global abort" );
     m_abort=true;
-    ATH_MSG_FATAL( "loadCache: impossible to load cache!" ); 
-    throw std::exception();
+    throw GaudiException("Connection " + conn->name() + " was aborted",
+                         "IOVDbSvc::loadCache()", StatusCode::FAILURE);
   }
   return sc;
 }
 
+
 StatusCode IOVDbSvc::checkConfigConsistency() const {
-// check consistency of global tag and database instance, if set
+  // check consistency of global tag and database instance, if set
   // catch most common user misconfigurations
   // this is only done here as need global tag to be set even if read from file
   // @TODO should this not be done during initialize
-  if (!m_par_dbinst.empty() && !m_globalTag.empty() and (m_par_source!="CREST")) {
-    const std::string_view tagstub=std::string_view(m_globalTag).substr(0,7);
+
+  if (!m_par_dbinst.empty() && !m_globalTag.empty() && m_par_source!="CREST") {
+    const std::string_view tagstub = std::string_view(m_globalTag).substr(0,7);
     ATH_MSG_DEBUG( "Checking " << m_par_dbinst << " against " <<tagstub );
-    if (((m_par_dbinst=="COMP200" || m_par_dbinst=="CONDBR2") &&
-         (tagstub!="COMCOND" && tagstub!="CONDBR2")) ||
-        (m_par_dbinst=="OFLP200" && (tagstub!="OFLCOND" && tagstub!="CMCCOND"))) {
-      ATH_MSG_FATAL( "Likely incorrect conditions DB configuration! "
-             <<  "Attached to database instance " << m_par_dbinst <<
-        " but global tag begins " << tagstub );
-      ATH_MSG_FATAL( "See Atlas/CoolTroubles wiki for details," <<
-        " or set IOVDbSvc.DBInstance=\"\" to disable check" );
+
+    if ( ((m_par_dbinst=="COMP200" || m_par_dbinst=="CONDBR2") &&
+          (tagstub!="COMCOND" && tagstub!="CONDBR2")) ||
+         (m_par_dbinst=="OFLP200" && (tagstub!="OFLCOND" && tagstub!="CMCCOND")) ) {
+
+      ATH_MSG_FATAL( "Likely incorrect conditions DB configuration! " <<
+                     "Attached to database instance " << m_par_dbinst <<
+                     " but global tag begins " << tagstub );
+      ATH_MSG_FATAL( "See Atlas/CoolTroubles wiki for details,"
+                     " or set IOVDbSvc.DBInstance=\"\" to disable check" );
       return StatusCode::FAILURE;
     }
   }

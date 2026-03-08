@@ -126,42 +126,17 @@ setup:
      - accepting taus with the given track multiplicity
      - if ``NTrack`` is configured, ``NTracks`` configuration wont be considered
 
-   * - ``CutJetRNNScoreSigTrans``
-     - ``JetRNNSigTransRegion``
-     - ``std::vector<double>``
-     - accepting taus within jet RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     - ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
-
    * -
      - ``JetRNNSigTransMin``
      - ``double``
      - accepting taus with a jet RNN score above a lower bound
-     - if ``JetRNNSigTransMin`` is configured, ``JetRNNSigTransRegion`` configuration wont be considered. ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
-
-   * - 
-     - ``JetRNNSigTransMax``
-     - ``double``
-     - accepting taus with a jet RNN score below an upper bound
-     - if ``JetRNNSigTransMax`` is configured, ``JetRNNRegion`` configuration wont be considered. ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
-
-   * - ``CutGNTauScoreSigTrans``
-     - ``GNTauSigTransRegion``
-     - ``std::vector<double>``
-     - accepting taus within jet GNTau score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     - ``GNTauScoreSigTrans_v0prune`` is a transformed GNTau score and provides flat ID efficiencies with respect to pT and pile-up. 
+     - ``JetRNNScoreSigTrans`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
 
    * -
      - ``GNTauSigTransMin``
      - ``double``
      - accepting taus with a jet GNTau score above a lower bound
-     - if ``GNTauSigTransMin`` is configured, ``GNTauSigTransRegion`` configuration wont be considered. ``GNTauScoreSigTrans_v0prune`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
-
-   * - 
-     - ``GNTauSigTransMax``
-     - ``double``
-     - accepting taus with a jet GNTau score below an upper bound
-     - if ``GNTauSigTransMax`` is configured, ``GNTauSigTransRegion`` configuration wont be considered. ``GNTauScoreSigTrans_v0prune`` is a transformed RNN score and provides flat ID efficiencies with respect to pT and pile-up. 
-   
+     - ``GNTauScoreSigTrans_v0prune`` is a transformed GNTau score and provides flat ID efficiencies with respect to pT and pile-up. 
 
    * - ``CutJetIDWP``
      - ``JetIDWP``
@@ -169,23 +144,11 @@ setup:
      - accepting taus passing the given working point
      -
 
-   * - ``CutEleRNNScoreSigTrans``
-     - ``EleRNNSigTransRegion``
-     - ``std::vector<double>``
-     - accepting taus within electron RNN score regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     - This cut is applied only on 1 prong tau
-
    * -
      - ``EleRNNSigTransMin``
      - ``double``
      - accepting taus with a electron RNN score above a lower bound
-     - if ``EleRNNSigTransMin`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
-
-   * -
-     - ``EleRNNSigTransMax``
-     - ``double``
-     - accepting taus with a electron RNN score below an upper bound
-     - if ``EleRNNSigTransMax`` is configured, ``EleRNNSigTransRegion`` configuration wont be considered. This cut is applied only on 1 prong tau
+     - This cut is applied only on 1 prong tau
 
    * - 
      - ``EleIDVersion``

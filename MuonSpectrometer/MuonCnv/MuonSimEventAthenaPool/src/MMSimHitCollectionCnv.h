@@ -31,7 +31,7 @@ public:
     virtual ~MMSimHitCollectionCnv();
 
     virtual MMSimHitCollection_PERS*   createPersistent (MMSimHitCollection* transCont);
-    virtual MMSimHitCollection*        createTransient ();
+    virtual MMSimHitCollection*        createTransient(const Token* token);
 
 private:
     MMSimHitCollectionCnv_p1    m_TPConverter_p1;

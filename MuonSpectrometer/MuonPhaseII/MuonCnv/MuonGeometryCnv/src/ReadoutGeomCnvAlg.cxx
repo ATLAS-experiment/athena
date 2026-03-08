@@ -92,7 +92,6 @@ StatusCode ReadoutGeomCnvAlg::execute(const EventContext& ctx) const {
     writeHandle.addDependency(IOVInfiniteRange::infiniteRunLB());
     /// Prepare the Geometry context
     ActsTrk::GeometryContext geoContext{};
-    using TrackingAlignment = ActsTrk::DetectorAlignStore::TrackingAlignStore;
     for (const SG::ReadCondHandleKey<ActsTrk::DetectorAlignStore>& key : m_alignStoreKeys) {
         SG::ReadCondHandle readHandle{key, ctx};
         if (!readHandle.isValid()) {
@@ -313,6 +312,7 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
     
     const std::vector<const MuonGMR4::RpcReadoutElement*> readoutEles = m_detMgr->getAllRpcReadoutElements();
     ATH_MSG_INFO("Copy "<<readoutEles.size()<<" Rpc readout elements to the legacy system");
+    if (readoutEles.empty()) return StatusCode::SUCCESS;
     const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
     for (const MuonGMR4::RpcReadoutElement* copyMe : readoutEles) {
         const Identifier reId = copyMe->identify();
@@ -409,6 +409,7 @@ StatusCode ReadoutGeomCnvAlg::buildTgc(const ActsTrk::GeometryContext& gctx, Con
                                 return a->stationEta() > b->stationEta();
                             });
     ATH_MSG_INFO("Copy "<<tgcReadouts.size()<<" Tgc readout elements to the legacy system");
+    if (tgcReadouts.empty()) return StatusCode::SUCCESS;
     const TgcIdHelper& idHelper{m_idHelperSvc->tgcIdHelper()};    
     
     using TgcReadoutParams = MuonGM::TgcReadoutParams;
@@ -529,6 +530,8 @@ StatusCode ReadoutGeomCnvAlg::buildMM(const ActsTrk::GeometryContext& gctx, Cons
     }
     const std::vector<const MuonGMR4::MmReadoutElement*> mmReadouts{m_detMgr->getAllMmReadoutElements()};
     ATH_MSG_INFO("Copy "<<mmReadouts.size()<<" Mm readout elements to the legacy system");
+
+    if (mmReadouts.empty()) return StatusCode::SUCCESS;
     
     for (const MuonGMR4::MmReadoutElement* copyMe : mmReadouts) {
         const Identifier reId = copyMe->identify();
@@ -580,6 +583,8 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, C
 
     const std::vector<const MuonGMR4::sTgcReadoutElement*> sTgcReadOuts{m_detMgr->getAllsTgcReadoutElements()};
     ATH_MSG_INFO("Copy "<<sTgcReadOuts.size()<<" sTgc readout elements to the legacy system");
+
+    if (sTgcReadOuts.empty()) return StatusCode::SUCCESS;
 
     for (const MuonGMR4::sTgcReadoutElement* copyMe : sTgcReadOuts) {
         const Identifier reId = copyMe->identify();
@@ -699,6 +704,7 @@ StatusCode ReadoutGeomCnvAlg::buildMdt(const ActsTrk::GeometryContext& gctx, Con
 
     const std::vector<const MuonGMR4::MdtReadoutElement*> mdtReadOuts{m_detMgr->getAllMdtReadoutElements()};
     ATH_MSG_INFO("Copy "<<mdtReadOuts.size()<<" Mdt readout elements to the legacy system");
+    if (mdtReadOuts.empty()) return StatusCode::SUCCESS;
     for (const MuonGMR4::MdtReadoutElement* copyMe : mdtReadOuts) {
         const Identifier reId = copyMe->identify();
         ATH_MSG_DEBUG("Translate "<<m_idHelperSvc->toStringDetEl(reId));

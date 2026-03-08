@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ExpressionEvaluation )
@@ -24,3 +24,8 @@ atlas_add_test( ExpressionParser_test
                 POST_EXEC_SCRIPT nopost.sh
                 PROPERTIES TIMEOUT 300
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
+
+atlas_add_test( PointerCache_test
+                SOURCES test/PointerCache_test.cxx
+                POST_EXEC_SCRIPT nopost.sh
+                PROPERTIES TIMEOUT 300 )

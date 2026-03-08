@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/CalibrationMethods/EtaJESCorrection.h"
@@ -33,7 +33,7 @@ EtaJESCorrection::~EtaJESCorrection() {
 
 StatusCode EtaJESCorrection::initialize() {
 
-  ATH_MSG_INFO("Initializing JES correction.");
+  ATH_MSG_DEBUG("Initializing JES correction.");
 
   if(!m_config){
     ATH_MSG_ERROR("EtaJES tool received a null config pointer.");
@@ -50,9 +50,9 @@ StatusCode EtaJESCorrection::initialize() {
   else{absoluteJESCalibFile.Insert(14,m_calibAreaTag);}
   TString calibFile = PathResolverFindCalibFile(absoluteJESCalibFile.Data());
   m_config->ReadFile(calibFile, kEnvLocal);
-  ATH_MSG_INFO("Reading absolute calibration factors from: " << calibFile);
+  ATH_MSG_DEBUG("Reading absolute calibration factors from: " << calibFile);
   m_jesDesc = m_config->GetValue("AbsoluteJES.Description","");
-  ATH_MSG_INFO("Description: " << m_jesDesc);
+  ATH_MSG_DEBUG("Description: " << m_jesDesc);
 
   // minPt_JES (always in GeV) determines at which point we stop using the correction curve and switch to an extrapolated value
   m_minPt_JES = m_config->GetValue(m_jetAlgo+".MinPtForETAJES",10);

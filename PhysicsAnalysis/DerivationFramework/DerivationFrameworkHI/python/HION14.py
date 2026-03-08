@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # HION14.py
 # author: Mariana Vivas <mariana.vivas.albornoz@cern.ch>
@@ -40,7 +40,8 @@ def HION14TightAugmentationToolCfg(flags):
     acc = ComponentAccumulator()
 
     # Configure track selection tools
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HITight_Cfg 
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_HITight_Cfg )
 
     HITightTrackSelector = acc.popToolsAndMerge(InDetTrackSelectionTool_HITight_Cfg(flags,
                                                                                     name="HITightTrackSelector",
@@ -88,7 +89,8 @@ def HION14KernelCfg(flags, name='HION14Kernel', **kwargs):
     thinningTool = []
 
     # Loose thinning 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_HILoose_Cfg
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+        InDetTrackSelectionTool_HILoose_Cfg)
     
     HILooseTrackSelector = acc.popToolsAndMerge(InDetTrackSelectionTool_HILoose_Cfg(flags,
                                                             name = "HION14TrackSelectionToolLoose",

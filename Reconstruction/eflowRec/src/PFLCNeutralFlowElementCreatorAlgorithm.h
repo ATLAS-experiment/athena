@@ -1,11 +1,10 @@
 #ifndef PFLCNEUTRALFLOWELEMENTCREATORALGORITHM_H
 #define PFLCNEUTRALFLOWELEMENTCREATORALGORITHM_H
 
-#include "eflowRec/eflowCaloObject.h"
+#include "eflowCaloObject.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODPFlow/FlowElement.h"

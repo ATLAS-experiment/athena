@@ -1,12 +1,12 @@
 #!/usr/bin/bash
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 NTHREADS=${1}
 NEVENTS=${2}
-DATADIR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO"
+input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
 # Ignore specific error messages from Acts CKF
-ignore_pattern="ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLowPtTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters,ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+reached.+the.+step.+count.+limit,ActsLegacyTrackFindingAlg.+ERROR.+Propagation.+failed:.+PropagatorError:..+Propagation.+reached.+the.+configured.+maximum.+number.+of.+steps.+with.+the.+initial.+parameters"
+ignore_pattern=""
 
 conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
@@ -18,13 +18,12 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --multithreaded 'True' \
     --autoConfiguration 'everything' \
     --conditionsTag "all:${conditions}" \
-    --geometryVersion 'all:ATLAS-P2-RUN4-03-00-00' \
     --postInclude 'all:PyJobTransforms.UseFrontier' \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags' \
     --steering 'doRAWtoALL' \
-    --preExec 'all:flags.Exec.FPE=-1;flags.Acts.useCache=True;' \
+    --preExec 'all:flags.Exec.FPE=-1;flags.Acts.useCache=True; flags.Acts.doLargeRadius=True;' \
     --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;' \
-    --inputRDOFile ${DATADIR}"/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/*" \
+    --inputRDOFile ${input_rdo} \
     --outputAODFile 'myAOD.pool.root' \
     --jobNumber '1' \
     --ignorePatterns "${ignore_pattern}"

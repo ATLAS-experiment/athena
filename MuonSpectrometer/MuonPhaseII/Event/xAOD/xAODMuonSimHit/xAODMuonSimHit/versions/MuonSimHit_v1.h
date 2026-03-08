@@ -1,4 +1,3 @@
-
 /*
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
@@ -70,6 +69,8 @@ class MuonSimHit_v1 : public SG::AuxElement {
     
     ///@brief Returns the link to the HepMC particle producing this hit
     const HepMcParticleLink& genParticleLink() const;
+    ///@brief Return the pointer to the HepMC particle link and resets the cache
+    std::unique_ptr<const HepMcParticleLink> releaseParticleLink();
     ///@brief Sets the link to the HepMC particle producing this hit
     void setGenParticleLink(const HepMcParticleLink& link);
 private:

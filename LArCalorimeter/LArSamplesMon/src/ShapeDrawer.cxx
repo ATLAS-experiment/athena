@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/ShapeDrawer.h"
@@ -177,24 +177,25 @@ bool ShapeDrawer::draw(const char* title, const AbsShape* shape, const AbsShape*
 }
 
 
-bool ShapeDrawer::drawAndDelete(const char* title, const std::vector<const AbsShape*>& shapes, 
-                   const AbsShape* reference, const AbsShape* refSamples) const
+bool ShapeDrawer::drawAndDelete(const char* title,
+                                std::vector<std::unique_ptr<const AbsShape> >&& shapes,
+                                std::unique_ptr<const AbsShape> reference,
+                                std::unique_ptr<const AbsShape> refSamples) const
 {
-  bool result = draw(title, shapes, reference, refSamples);
-  for (const AbsShape* shape : shapes)
-    delete shape;
-  delete reference;
-  delete refSamples;
+  std::vector<const AbsShape*> shapes1;
+  for (const std::unique_ptr<const AbsShape>& p : shapes)
+    shapes1.push_back (p.get());
+  bool result = draw(title, shapes1, reference.get(), refSamples.get());
   return result;
 }
 
 
-bool ShapeDrawer::drawAndDelete(const char* title, const AbsShape* shape, const AbsShape* reference, const AbsShape* refSamples) const
+bool ShapeDrawer::drawAndDelete(const char* title,
+                                std::unique_ptr<const AbsShape> shape,
+                                std::unique_ptr<const AbsShape> reference,
+                                std::unique_ptr<const AbsShape> refSamples) const
 {
-  bool result = draw(title, shape, reference, refSamples);
-  delete shape;
-  delete reference;
-  delete refSamples;
+  bool result = draw(title, shape.get(), reference.get(), refSamples.get());
   return result;
 }
 

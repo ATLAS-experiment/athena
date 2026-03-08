@@ -17,7 +17,7 @@
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/TokenAddress.h"
 #include "StorageSvc/DbType.h"
-#include "RootUtils/APRDefaults.h"
+#include "StorageSvc/APRDefaults.h"
 #include <format>
 
 //__________________________________________________________________________
@@ -30,20 +30,17 @@ StatusCode AthenaPoolConverter::initialize() {
 
    // We do not retrieve m_detStore as that store may not always be available!
 
+   // Retrieve AthenaPoolCnvSvc
    ATH_CHECK( m_athenaPoolCnvSvc.retrieve() );
 
-   IProperty* propertyServer(dynamic_cast<IProperty*>(m_athenaPoolCnvSvc.get()));
-   StringProperty containerPrefixProp("PoolContainerPrefix", "CollectionTree");
-   StringProperty containerNameHintProp("TopLevelContainerName", "");
-   StringProperty branchNameHintProp("SubLevelBranchName", "<type>/<key>");
-   if (propertyServer) {
-      propertyServer->getProperty(&containerPrefixProp).ignore();
-      propertyServer->getProperty(&containerNameHintProp).ignore();
-      propertyServer->getProperty(&branchNameHintProp).ignore();
+   // Retrieve PoolSvc
+   ATH_CHECK(m_poolSvc.retrieve());
+   StringProperty defContainerType("DefaultContainerType", "ROOTTREEINDEX");
+   if(IProperty* propertyServer = dynamic_cast<IProperty*>(m_poolSvc.get())) {
+      propertyServer->getProperty(&defContainerType).ignore();
    }
-   m_containerPrefix = containerPrefixProp.value();
-   m_containerNameHint = containerNameHintProp.value();
-   m_branchNameHint = branchNameHintProp.value();
+   m_defContainerType = pool::DbType::getType(defContainerType).type();
+
    return StatusCode::SUCCESS;
 }
 //__________________________________________________________________________
@@ -158,48 +155,35 @@ long AthenaPoolConverter::storageType() {
 //__________________________________________________________________________
 AthenaPoolConverter::AthenaPoolConverter(const CLID& myCLID, ISvcLocator* pSvcLocator,
                                          const char* name /*= nullptr*/) :
-		::Converter(storageType(), myCLID, pSvcLocator),
-		::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
+    ::Converter(storageType(), myCLID, pSvcLocator),
+    ::AthMessaging((pSvcLocator != nullptr ? msgSvc() : nullptr),
                                name ? name : "AthenaPoolConverter"),
-	m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
-	m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
-	m_classDesc(),
-	m_className(),
-	m_classDescs(),
-	m_containerPrefix(""),
-	m_containerNameHint(""),
-	m_branchNameHint(""),
-	m_dataObject(nullptr),
-	m_i_poolToken(nullptr) {
+  m_detStore("DetectorStore", name ? name : "AthenaPoolConverter"),
+  m_athenaPoolCnvSvc(pSvcLocator && pSvcLocator->existsService("AthenaPoolSharedIOCnvSvc") ? "AthenaPoolSharedIOCnvSvc" : "AthenaPoolCnvSvc", name ? name : "AthenaPoolConverter"),
+  m_poolSvc("PoolSvc", name ? name : "AthenaPoolConverter"),
+  m_classDesc(),
+  m_className(),
+  m_classDescs(),
+  m_i_poolToken(nullptr),
+  m_defContainerType(0) {
 }
 //__________________________________________________________________________
 Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, const std::string& key, const std::string& output) {
+   // Resulting placement
    Placement placement;
-   // Override streaming parameters from StreamTool if requested.
+
+   // Extract the file name and global technology (if available)
    std::string::size_type pos1 = output.find('[');
    std::string outputConnectionSpec = output.substr(0, pos1);
-   int tech = 0;
-   m_athenaPoolCnvSvc->decodeOutputSpec(outputConnectionSpec, tech).ignore();
-   // Set DB and Container names
    placement.setFileName(outputConnectionSpec);
 
-   std::string containerPrefix = m_containerPrefix;
-   if( containerPrefix == "Default" ) {
-      containerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::EventData : APRDefaults::TTreeNames::EventData;
-   }
-   std::string dhContainerPrefix = pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ? APRDefaults::RNTupleNames::DataHeader : APRDefaults::TTreeNames::DataHeader;
-   std::string containerName;
-
-   // Get Technology from containerPrefix
-   std::size_t colonPos = containerPrefix.find(':');
-   if (colonPos != std::string::npos) {
-      dhContainerPrefix = containerPrefix.substr(0, colonPos + 1) + dhContainerPrefix;
-   }
-
    // Override streaming parameters from StreamTool if requested.
-   std::string containerNameHint = m_containerNameHint;
-   std::string branchNameHint = m_branchNameHint;
-   std::string containerFriendPostfix;
+   std::string containerPrefix{APRDefaults::getEventDataName()};
+   std::string dhContainerPrefix{APRDefaults::getDataHeaderName()};
+   std::string containerName{""};
+   std::string containerNameHint{""};
+   std::string branchNameHint{""};
+   std::string containerFriendPostfix{""};
    while (pos1 != std::string::npos) {
       const std::string::size_type pos2 = output.find('=', pos1);
       const std::string thisKey = output.substr(pos1 + 1, pos2 - pos1 - 1);
@@ -219,62 +203,51 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
       pos1 = output.find('[', pos3);
    }
 
+   // Extract the technology from the container prefix (if available)
+   int tech = m_defContainerType;
+   if (auto colonPost = containerPrefix.find(':'); colonPost != std::string::npos) {
+      tech = pool::DbType::getType(containerPrefix.substr(0, colonPost)).type();
+      containerPrefix.erase(0, colonPost + 1); // Note that DataHeader and EventTag bypass this...
+   }
+
    // ---  Special types:   DataHeader & Form
-   if( tname.compare(0, 10, "DataHeader") == 0 ) {
-      if( tname.compare(10, 4, "Form") == 0 ) {
-         containerName = dhContainerPrefix + "Form" + "(" + tname + ")";
-      } else {
-         if (key[key.size() - 1] == '/') {
-            containerName = dhContainerPrefix + "(" + key + tname + ")";
-         } else {
-            containerName = dhContainerPrefix + "(" + tname + ")";
-         }
-      }
+   if ( tname.starts_with(APRDefaults::DataHeaderTypeName) ) {
+      containerName = std::format("{}{}({}{})",
+         dhContainerPrefix,
+         tname.starts_with(APRDefaults::DataHeaderFormTypeName) ? "Form" : "",
+         key.back() == '/' ? key : "",
+         tname);
    }
    // AttributeList - writing attributes separately to EventTag container group
-   else if (tname.compare(0, 13, "AttributeList") == 0) {
-      // Find the right storage type and name for EventTag values
-      if( pool::ROOTRNTUPLE_StorageType.exactMatch(tech) ) {
-         containerName = std::string(APRDefaults::RNTupleNames::EventTag) + "(" + key + ")";
-      } else {
-         // no indexing needed (nothing points to Tags)
-         // safe to set tech here - it will not be overwritten by decodeOutput
-         tech = pool::ROOTTREE_StorageType.type();
-         containerName = std::string(APRDefaults::TTreeNames::EventTag) + "(" + key + ")";
-      }
+   else if ( tname.starts_with(APRDefaults::EventTagTypeName) ) {
+      containerName = std::format("{}({})",
+         APRDefaults::getEventTagName(),
+         key);
    }
    // all other object types
    else {
-      const std::string typeTok = "<type>", keyTok = "<key>";
-      containerName = containerPrefix + containerFriendPostfix + containerNameHint;
-      if (!branchNameHint.empty()) {
-         containerName += "(" + branchNameHint + ")";
+      constexpr std::string_view typeTok = "<type>", keyTok = "<key>";
+      containerName = std::format("{}{}{}{}",
+                           containerPrefix,
+                           containerFriendPostfix,
+                           containerNameHint,
+                           branchNameHint.empty() ? "" : std::format("({})", branchNameHint));
+      if (auto pos = containerName.find(typeTok); pos != std::string::npos) {
+         containerName.replace(pos, typeTok.size(), tname);
       }
-      const std::size_t pos1 = containerName.find(typeTok);
-      if (pos1 != std::string::npos) {
-         containerName.replace(pos1, typeTok.size(), tname);
-      }
-      const std::size_t pos2 = containerName.find(keyTok);
-      if (pos2 != std::string::npos) {
-         if (key.empty()) {
-            containerName.replace(pos2, keyTok.size(), tname);
-         } else {
-            containerName.replace(pos2, keyTok.size(), key);
-         }
+      if (auto pos = containerName.find(keyTok); pos != std::string::npos) {
+         containerName.replace(pos, keyTok.size(), key.empty() ? tname : key);
       }
    }
-   m_athenaPoolCnvSvc->decodeOutputSpec(containerName, tech).ignore();
+
+   // Set the container name and technology
    placement.setContainerName(containerName);
    placement.setTechnology(tech);
    return(placement);
 }
 //__________________________________________________________________________
-const DataObject* AthenaPoolConverter::getDataObject() const {
-   return(m_dataObject);
-}
-//__________________________________________________________________________
-bool AthenaPoolConverter::compareClassGuid(const Guid &guid) const {
-   return(m_i_poolToken ? (guid == m_i_poolToken->classID()) : false);
+bool AthenaPoolConverter::compareClassGuid(const Token* token, const Guid &guid) const {
+   return(token ? (guid == token->classID()) : false);
 }
 //__________________________________________________________________________
 StatusCode AthenaPoolConverter::cleanUp(const std::string& /*output*/) {

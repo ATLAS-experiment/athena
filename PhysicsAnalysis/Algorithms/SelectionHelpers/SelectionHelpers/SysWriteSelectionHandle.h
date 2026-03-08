@@ -49,8 +49,8 @@ namespace CP
 
     /// \brief initialize the accessor
   public:
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle);
-    StatusCode initialize (SysListHandle& sysListHandle, const ISysHandleBase& objectHandle, SG::AllowEmptyEnum);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle);
+    StatusCode initialize (SysListHandle& sysListHandle, ISysObjectHandleBase& objectHandle, SG::AllowEmptyEnum);
 
 
     /// \brief set the selection decoration
@@ -80,7 +80,6 @@ namespace CP
 
   public:
     virtual bool empty () const noexcept override;
-    virtual std::string getNamePattern () const override;
     virtual CP::SystematicSet
     getInputAffecting (const ISystematicsSvc& svc) const override;
     virtual StatusCode
@@ -100,7 +99,7 @@ namespace CP
 
     /// \brief the object handle we use
   private:
-    const ISysHandleBase *m_objectHandle {nullptr};
+    ISysObjectHandleBase *m_objectHandle {nullptr};
 
     /// \brief the accessor we use
   private:

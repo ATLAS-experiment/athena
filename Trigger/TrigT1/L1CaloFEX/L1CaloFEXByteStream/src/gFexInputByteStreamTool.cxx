@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -569,20 +569,33 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
         if (XMPD_DTYP_ARR[ XMPD_NFI[i] ][17] == 8) {
 
           fiberFields[i][17] = ( Xfiber[i][gPos::W280-1] & 0x0000FF00) >>8  ;         
-          // fill in saturation bits
+          // TODO: Temporary fix to match FW saturation behaviour.
+          // Only propagate saturation to the lower fields (2*k for EM, k for HAD).
+          // The original code also set fiberFieldsSatur[i][k+8]=1 for HAD towers,
+          // which created phantom saturation in the second phi row of EMEC/HEC
+          // fibers. The firmware has no SAT_HIGH field, so only fields 0-7 carry
+          // saturation. Revert this (re-add k+8 propagation) if the FW is updated.
+          //
+          // TODO: Additional fix for FPGA-B (XFPGA==1).
+          // In tbuilder_mapper.vhd pFPGA_B, SAT_LOW_HEC checks "0001" (TREX)
+          // instead of "1011" (HEC regular), so saturation is never propagated
+          // for HEC regular towers in FPGA-B hardware. Skip setting
+          // fiberFieldsSatur for HEC regular fields (type 11) when XFPGA==1
+          // to match the FW bug. Revert when FW is fixed.
             for(unsigned int k=0; k<8; k++){
                 if( fiberFields[i][17] & (1<<k) ) { 
                     fiberSaturation[i][k] = 1;
-                                        // set the correct saturation
                     // EM towers - multiply by two
                     // HAD towers (avoid Tile) - copy the field with +8
                     if ( XMPD_DTYP_ARR[XMPD_NFI[i]][2*k] == 0) {
                         //std::cout << "saturation EM " << i << " " << k << std::endl;
                         fiberFieldsSatur[i][2*k] = 1;
                     } else if ( XMPD_DTYP_ARR[XMPD_NFI[i]][k] != 1) {
-                        //std::cout << "saturation HAD " << i << " " << k << std::endl;
-                        fiberFieldsSatur[i][k] = 1;
-                        fiberFieldsSatur[i][k+8] = 1;
+                        // Skip HEC regular (type 11) saturation for FPGA-B
+                        // due to FW bug in tbuilder_mapper.vhd SAT_LOW_HEC
+                        if (!(XFPGA == 1 && XMPD_DTYP_ARR[XMPD_NFI[i]][k] == 11)) {
+                            fiberFieldsSatur[i][k] = 1;
+                        }
                     }
                 }
             }
@@ -615,7 +628,14 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                     Xsaturation[krow2][kcolumn2] = 1;
                 }
                 //htowers - XMPD_DTYP_ARR = 11 (0b1011) only defined for FPGAa and FPGAb
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 11  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
+                // TODO: Temporary fix to match FW bug in tbuilder_mapper.vhd pFPGA_B.
+                // FPGA-A SAT_LOW_HEC checks "1011" (HEC regular) — correct.
+                // FPGA-B SAT_LOW_HEC checks "0001" (TREX) — wrong, never matches
+                // any EMEC/HEC fiber field, so bit 12 of htower_data is never set
+                // and saturation is never propagated for HEC regular towers.
+                // Skip this condition for FPGA-B to match the actual FW behaviour.
+                // Revert this (remove XFPGA!=1 guard) when the FW is fixed.
+                if( (XFPGA != 1) && (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k] == 11  ) && ( XMPD_GTRN_ARR[i][k] > -1  )  ){
                     Xsaturation[ krow][kcolumn] = 1;
                 }
                 
@@ -643,40 +663,16 @@ void gFexInputByteStreamTool::gtReconstructABC(int XFPGA,
                         Xsaturation[ krow][kcolumn] = 1;
                     }
                 }
-                // repeat for the next k+8 values  (16 values) cases
-                krow = XMPD_GTRN_ARR[i][k+8]/12;
-                kcolumn = XMPD_GTRN_ARR[i][k+8]%12; // column values : 0-11
-
-                korow = XMPD_GTRN_ARR[i][k+8];
-                kxrow = XMPD_GTRN_ARR[i][k+8];
-                
-                //htowers - XMPD_DTYP_ARR = 11 (0b1011) only defined for FPGAa and FPGAb
-                if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 11  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                    Xsaturation[ krow][kcolumn] = 1;
-                }
-
-                if (XFPGA < 2) {
-                    // FPGA a and FPGA b - extended region condition
-                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                         Xsaturation[ kxrow][kxcolumn] = 1;
-                    }
-                    //extended region for FPGAa and FPGAb 
-                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                        Xsaturation[ kxrow][kxcolumn] = 1;
-                    }
-                    //overlap regio for FPGAa and FPGAb - no equivalent for FPGAc
-                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 6  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                        Xsaturation[ korow][kocolumn] = 1; 
-                    }
-                } else {
-                    // FPGAc -- all channels type 3 & 2
-                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 3  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                        Xsaturation[ krow][kcolumn] = 1;
-                    }
-                    if( (XMPD_DTYP_ARR[ XMPD_NFI[i] ][k+8] == 2  ) && ( XMPD_GTRN_ARR[i][k+8] > -1  )  ){
-                        Xsaturation[ krow][kcolumn] = 1;
-                    }
-                } 
+                // TODO: Temporary fix to match FW saturation behaviour.
+                // No k+8 propagation: the firmware has no SAT_HIGH ("1001")
+                // field for any fiber type -- the saturation byte only covers
+                // the lower 8 data channels (fields 0-7). See tbuilder_mapper.vhd
+                // SAT_GEN_8_A and fiber_map_pkg.vhd AMPD_DET_TYPE.
+                // The original code propagated saturation to fiberFieldsSatur[i][k+8]
+                // and then mapped those phantom flags into the second phi row of
+                // EMEC/HEC towers, causing false saturation in simulation.
+                // Revert this (re-add k+8 propagation) if the FW is updated to
+                // include a SAT_HIGH field.
             }// close fiberSaturation loop
         } // k (max 8) loop close
     } // i (max 100) loop close
@@ -1486,8 +1482,9 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int FPGA_CONVLIN_TH5 = 4029;
     int FPGA_CONVLIN_TH6 = 4062;
 
-    int FPGA_CONVLIN_OF0 = -5072;
-    int FPGA_CONVLIN_OF1 = -2012;
+    //These variables are unused
+    //int FPGA_CONVLIN_OF0 = -5072;
+    //int FPGA_CONVLIN_OF1 = -2012;
     int FPGA_CONVLIN_OF2 = -1262;
     int FPGA_CONVLIN_OF3 = -3036;
     int FPGA_CONVLIN_OF4 = -8120;
@@ -1500,32 +1497,31 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     int oth4 = 0;
     int oth5 = 0;
     int oth6 = 0;
-  
-    int r1shv = 0;
-    int r2shv = 0;
+    //these variables are unused
+    //int r1shv = 0;
+    //int r2shv = 0;
     int r3shv = 0;
     int r4shv = 0;
     int r5shv = 0;
     int r6shv = 0;
     // int trxv = 0;
 
-    int r1conv = 0;
-    int r2conv = 0;
+    
     int r3conv = 0;
     int r4conv = 0;
     int r5conv = 0;
     int r6conv = 0;
     // int r3offs = 0;
 
-    r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
-    r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
+    //r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
+    //r2shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
     r3shv = (din &  0x00000FFF) ;
     r4shv = ((din & 0x00000FFF) << 1 )  & 0x00001FFE ;
     r5shv = ((din & 0x00000FFF) << 2 )  & 0x00003FFC ;
     r6shv = ((din & 0x00000FFF) << 10 ) & 0x003FFC00 ;
 
-    r1conv =  r1shv + FPGA_CONVLIN_OF0;
-    r2conv =  r2shv + FPGA_CONVLIN_OF1;
+    //r1conv =  r1shv + FPGA_CONVLIN_OF0;
+    //r2conv =  r2shv + FPGA_CONVLIN_OF1;
     r3conv =  r3shv + FPGA_CONVLIN_OF2;
     r4conv =  r4shv + FPGA_CONVLIN_OF3;
     r5conv =  r5shv + FPGA_CONVLIN_OF4;
@@ -1576,13 +1572,15 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
 
     if( (! oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )   ) {
         dout = 0;
-    } 
+    }
+    /* These cases are logically unreachable, given preceding conditions
     else if( ( oth0) & (! oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout =  r1conv >>1;
     } 
     else if( ( oth0) & (  oth1 ) & (! oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r2conv >>1;
-    } 
+    }
+    */
     else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
         dout = r3conv >>1;
     }  
@@ -1597,11 +1595,12 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     }  
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
         dout = 0;
-    } 
+    }
+    /* logically unreachable
     else {
         dout = 0; 
     }
-
+    */
     signExtend(&dout,15);
 
     datumPtr = dout;

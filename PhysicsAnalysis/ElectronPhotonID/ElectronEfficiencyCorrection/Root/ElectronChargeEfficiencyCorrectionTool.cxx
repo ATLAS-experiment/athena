@@ -310,14 +310,8 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
   m_pt_uplimit = (*it).second.at(0)->GetXaxis()->GetXmax();
   ATH_MSG_VERBOSE("pt limits " << m_pt_lowlimit << ", " << m_pt_uplimit);
 
-  // Check if the input file is in GeV or MeV
-  if (m_pt_uplimit > 1500) {
-    ATH_MSG_VERBOSE("Rates in input file are in MeV");
-    m_gevmev = 1.;
-  } else {
-    ATH_MSG_VERBOSE("Rates in input file are in GeV");
-    m_gevmev = 0.001;
-  }
+  ATH_MSG_VERBOSE("Rates in input file are in GeV");
+  m_gevmev = 0.001;
 
   // Systematics // dynamic too?
   m_affectingSys = affectingSystematics();

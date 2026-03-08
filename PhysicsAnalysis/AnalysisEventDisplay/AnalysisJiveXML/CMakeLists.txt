@@ -13,5 +13,3 @@ atlas_add_component( AnalysisJiveXML
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} AthContainers AthLinks AthenaBaseComps CaloEvent CaloGeoHelpers CompositeParticleEvent GaudiKernel JetEvent JiveXMLLib McParticleEvent Particle TrigCaloEvent TrkEventPrimitives egammaEvent muonEvent tauEvent )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )

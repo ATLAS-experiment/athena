@@ -32,8 +32,7 @@
 Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
   : AthMessaging("Geo2G4Builder")
   , m_detectorName(detectorName)
-  , m_motherTransform(GeoTrf::Transform3D::Identity())
-{
+  , m_motherTransform(GeoTrf::Transform3D::Identity()) {
   if (m_pDetStore.retrieve().isFailure()) {
     THROW_EXCEPTION("ERROR: Geo2G4Builder for detector "<< detectorName << " could not access the detector store.");
   }
@@ -42,42 +41,42 @@ Geo2G4Builder::Geo2G4Builder(const std::string& detectorName)
   if(sc.isFailure()){
     THROW_EXCEPTION(detectorName<<" could not get GeoModelExperiment");
   }
-  else {
-    const GeoVDetectorManager *theManager = m_theExpt->getManager(detectorName);
-    if (!theManager) {
-       THROW_EXCEPTION("Failed to retrieve manager "<<detectorName);
-    }
-    for(unsigned int i=0; i<theManager->getNumTreeTops(); ++i) {
-      m_treeTops.push_back(theManager->getTreeTop(i));
-    }
 
-    ATH_MSG_INFO("Found detector: top volume(s)");
-    for(unsigned int i=0; i<m_treeTops.size();++i) {
-      ATH_MSG_INFO( "   Tree Top " << i << " " << m_treeTops[i]->getLogVol()->getName() );
-    }
+  const GeoVDetectorManager *theManager = m_theExpt->getManager(detectorName);
+  if (!theManager) {
+      THROW_EXCEPTION("Failed to retrieve manager "<<detectorName);
+  }
+  ATH_MSG_DEBUG("Recieve detctor manager "<<detectorName);
+  for(unsigned int i=0; i<theManager->getNumTreeTops(); ++i) {
+    m_treeTops.push_back(theManager->getTreeTop(i));
+  }
 
-    if(m_treeTops.size()>1) {
-        // -------- -------- MATERIAL MANAGER -------- ----------
-        StoredMaterialManager* theMaterialManager = m_pDetStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
-	if(theMaterialManager) {
-          m_matAir = theMaterialManager->getMaterial("std::Air");
-	}
-	else {
-	  m_matAir = m_treeTops[0]->getLogVol()->getMaterial();
-	}
-    }
+  ATH_MSG_DEBUG("Found detector: top volume(s)");
+  for(unsigned int i=0; i<m_treeTops.size();++i) {
+      ATH_MSG_DEBUG( "   Tree Top " << i << " " << m_treeTops[i]->getLogVol()->getName() );
+  }
 
-    if (m_g2gSvc.retrieve().isFailure()) {
-      THROW_EXCEPTION("Failed to retrieve manager Geo2G4Svc");
-    }
+  if(m_treeTops.size()>1) {
+      // -------- -------- MATERIAL MANAGER -------- ----------
+      StoredMaterialManager* theMaterialManager = m_pDetStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
+      if(theMaterialManager) {
+              m_matAir = theMaterialManager->getMaterial("std::Air");
+      } else {
+        m_matAir = m_treeTops[0]->getLogVol()->getMaterial();
+      }
+  }
 
-    m_theBuilder = m_g2gSvc->GetDefaultBuilder();
-    if(m_theBuilder)
-      ATH_MSG_INFO("Set volume builder ---> "<< m_theBuilder->GetKey());
-    else
-      ATH_MSG_WARNING("0 pointer to volume builder."
-                      <<"\n Use 'DefaultBuilder' property of Geo2G4Svc or"
-                      <<"\n 'GetVolumeBuilder' method of Geo2G4Builder");
+  if (m_g2gSvc.retrieve().isFailure()) {
+    THROW_EXCEPTION("Failed to retrieve manager Geo2G4Svc");
+  }
+
+  m_theBuilder = m_g2gSvc->GetDefaultBuilder();
+  if(m_theBuilder) {
+    ATH_MSG_INFO("Set volume builder ---> "<< m_theBuilder->GetKey());
+  } else {
+    ATH_MSG_WARNING("0 pointer to volume builder."
+                    <<"\n Use 'DefaultBuilder' property of Geo2G4Svc or"
+                    <<"\n 'GetVolumeBuilder' method of Geo2G4Builder");
   }
 }
 
@@ -85,34 +84,34 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
 {
   ATH_MSG_DEBUG("Entering Geo2G4Builder::BuildTree()...");
   G4LogicalVolume* result = nullptr;
-  OpticalVolumesMap* optical_volumes = nullptr;
+  std::unique_ptr<OpticalVolumesMap> optical_volumes{};
   const GeoBorderSurfaceContainer* surface_container = nullptr;
 
   // Check whether we have to deal with optical surfaces
   if(m_pDetStore->contains<GeoBorderSurfaceContainer>(m_detectorName)) {
     StatusCode sc = m_pDetStore->retrieve(surface_container,m_detectorName);
     if(sc.isSuccess() && surface_container->size()>0) {
-      optical_volumes = new OpticalVolumesMap();
+      optical_volumes = std::make_unique<OpticalVolumesMap>();
     }
   }
 
   if(m_theBuilder) {
     if(m_treeTops.size()==1) {
       m_motherTransform = m_treeTops[0]->getX();
-      result = m_theBuilder->Build(m_treeTops[0],optical_volumes);
-    }
-    else {
+      result = m_theBuilder->Build(m_treeTops[0], optical_volumes.get());
+    } else if (!m_treeTops.empty()) {
       // Create temporary GeoModel physical volume
       // The shape is composed by TreeTop shapes + their transforms
       const GeoShape& shFirst = (*(m_treeTops[0]->getLogVol()->getShape()))<<(m_treeTops[0]->getX());
-      const GeoShape* shResult = &shFirst;
+      GeoIntrusivePtr<const GeoShape> shResult{&shFirst};
 
       for(unsigned int i=1; i<m_treeTops.size(); i++) {
-        shResult = & shResult->add((*(m_treeTops[i]->getLogVol()->getShape()))<<(m_treeTops[i]->getX()));
+        GeoIntrusivePtr<const GeoShape> booleanOp{&shResult->add((*(m_treeTops[i]->getLogVol()->getShape()))<<(m_treeTops[i]->getX()))};
+        shResult = booleanOp;
       }
 
-      GeoLogVol* lvEnvelope = new GeoLogVol(m_detectorName,shResult,m_matAir);
-      GeoPhysVol* pvEnvelope = new GeoPhysVol(lvEnvelope);
+      auto lvEnvelope = make_intrusive<GeoLogVol>(m_detectorName, shResult, m_matAir);
+      auto pvEnvelope = make_intrusive<GeoPhysVol>(lvEnvelope);
       m_theExpt->addTmpVolume(pvEnvelope);
       result = m_theBuilder->Build(pvEnvelope);
 
@@ -123,14 +122,14 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
       for(unsigned int i=0; i<m_treeTops.size(); i++) {
         // Current Tree Top and its index
         PVConstLink pv = m_treeTops[i];
-	std::optional<unsigned int> childIndx = world->indexOf(pv);
+        std::optional<unsigned int> childIndx = world->indexOf(pv);
 
         // Tree Top transformation
         G4Transform3D theG4Position(Amg::EigenTransformToCLHEP(world->getXToChildVol(*childIndx)));
 
         // Copy number
         int id = 16969;
-	std::optional<int> Qint = world->getIdOfChildVol(*childIndx);
+        std::optional<int> Qint = world->getIdOfChildVol(*childIndx);
         if(Qint) id = *Qint;
 
         // PV Tree Top name
@@ -138,7 +137,7 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
         if (nameTT == "ANON") nameTT = pv->getLogVol()->getName();
 
 
-        G4LogicalVolume* g4LV = m_theBuilder->Build(pv,optical_volumes);
+        G4LogicalVolume* g4LV = m_theBuilder->Build(pv, optical_volumes.get());
         G4ReflectionFactory::Instance()->Place(theG4Position,
                                                nameTT,
                                                g4LV,
@@ -152,12 +151,10 @@ G4LogicalVolume* Geo2G4Builder::BuildTree()
   // build optical surfaces if necessary
   if(optical_volumes) {
     if(optical_volumes->size()>0) {
-      BuildOpticalSurfaces(surface_container,optical_volumes);
-    }
-    else {
+      BuildOpticalSurfaces(surface_container,optical_volumes.get());
+    } else {
       ATH_MSG_WARNING("Optical volumes apparently requested, but none found!  Deleting temps");
     }
-    delete optical_volumes;
   }
 
   return result;

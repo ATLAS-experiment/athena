@@ -23,7 +23,6 @@
 #include "PathResolver/PathResolver.h"
 #include "TrkParameters/TrackParameters.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"

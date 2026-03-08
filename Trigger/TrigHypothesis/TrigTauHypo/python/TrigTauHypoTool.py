@@ -1,14 +1,16 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from typing import Any
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
+from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName
 from .TrigTauHypoMonitoring import getTrigTauPrecisionIDHypoToolMonitoring, getTrigTauPrecisionDiKaonHypoToolMonitoring
 
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigHLTTauHypoTool')
+
 
 #============================================================================================
 # Precision step hypothesis tool
@@ -16,8 +18,7 @@ log = logging.getLogger('TrigHLTTauHypoTool')
 def TrigTauPrecisionHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     chainPart = chainDict['chainParts'][0]
 
-    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName
-    identification = getChainIDConfigName(chainPart)
+    identification = getChainIDConfigName(flags, chainPart)
 
     if identification == 'MesonCuts':
         # Meson cut-based triggers (ATR-22644)
@@ -26,39 +27,91 @@ def TrigTauPrecisionHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str,
         # Everything else
         return TrigTauPrecisionIDHypoToolFromDict(flags, chainDict)
 
+
 #-----------------------------------------------------------------
 # Standard tau triggers configuration
 #-----------------------------------------------------------------
 class TauCuts:
-    def __init__(self, chain_part: dict[str, Any]):
+    def __init__(self, flags, chain_part: dict[str, Any]):
+        self._id = getChainIDConfigName(flags, chain_part)
         self._chain_part = chain_part
 
+        self._id_wp = ''
+        self._highpt_id_wp = ''
+        self._do_perfcore = True
+        self._do_perfiso = True
+
+        self._use_rnn_selection = False
+
+        if self._id in ['idperf', 'noperf', 'perfcore', 'perfiso', 'perf']:
+            self._do_perfcore = self._id in ['perfcore', 'perf']
+            self._do_perfiso = self._id in ['perfiso', 'perf']
+
+        else:
+            if self._id in ['DeepSet', 'RNNLLP'] and self._chain_part['selection'].endswith('RNN'):
+                # Support for the legacy triggers
+                self._use_rnn_selection = True
+                self._id_wp = self._chain_part['selection'][:-3] # Remove the "RNN" suffix
+                if self._id_wp in ['medium', 'tight']: self._highpt_id_wp = 'loose'
+
+            else:
+                id_wp = self._chain_part['selection'].removesuffix(self._id).lower()
+
+                # Check for a perf selection specifier
+                if id_wp.endswith('noperf'):
+                    id_wp = id_wp.removesuffix('noperf')
+                    self._do_perfcore = self._do_perfiso = False
+                elif id_wp.endswith('perfcore'):
+                    id_wp = id_wp.removesuffix('perfcore')
+                    self._do_perfiso = False
+                elif id_wp.endswith('perfiso'):
+                    id_wp = id_wp.removesuffix('perfiso')
+                    self._do_perfcore = False
+
+                # Find the matching WP with the correct casing
+                def find_wp(wp: str, fail: bool = True) -> str:
+                    for twp in getattr(flags.Trigger.Offline.Tau, self._id).TargetWPs.keys():
+                        if twp.lower() == wp: return twp
+                    else:
+                        if fail: ValueError(f'Cannot find the "{self._id}" WP "{wp}"')
+                        else: return ''
+
+                # Standard ID WP
+                self._id_wp = find_wp(id_wp)
+                
+                # High-pT ID WP
+                if id_wp.startswith('medium'): self._highpt_id_wp = find_wp(f'loose{id_wp[6:]}', True)
+                elif id_wp.startswith('tight'): self._highpt_id_wp = find_wp(f'loose{id_wp[5:]}', True)
+                
     @property
-    def n_track_max(self) -> int: return 3
+    def n_track_max(self) -> int:
+        return 3 if self._do_perfcore else 999
 
     @property
-    def n_iso_track_max(self) -> int: return 999 if self._chain_part['selection'] == 'idperf' else 1
+    def n_iso_track_max(self) -> int:
+        return 1 if self._do_perfiso else 999
 
     @property
     def pt_min(self) -> float: return float(self._chain_part['threshold']) * GeV
 
     @property
-    def id_wp(self) -> int:
-        sel = self._chain_part['selection']
+    def id_wp_decor(self) -> str:
+        if not self._id_wp: return ''
+        if self._use_rnn_selection: return self._id_wp
+        return f'{self._id}_{self._id_wp}'
 
-        if sel == 'perf' or sel == 'idperf': return -1  # disabled
-        elif sel.startswith('veryloose'): return 0
-        elif sel.startswith('loose'): return 1
-        elif sel.startswith('medium'): return 2
-        elif sel.startswith('tight'): return 3
-        
-        raise ValueError(f'Invalid selection: {sel}')
+    @property
+    def highpt_id_wp_decor(self) -> int:
+        if not self._highpt_id_wp: return ''
+        if self._use_rnn_selection: return self._highpt_id_wp
+        return f'{self._id}_{self._highpt_id_wp}'
+
 
 def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[str, Any]):
     '''TrigTauPrecisionIDHypoTool configuration for the standard Tau triggers'''
     name = chainDict['chainName']
     chainPart = chainDict['chainParts'][0]
-    cuts = TauCuts(chainPart)
+    cuts = TauCuts(flags, chainPart)
 
     # Setup the Hypothesis tool
     from AthenaConfiguration.ComponentFactory import CompFactory
@@ -67,17 +120,19 @@ def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[st
         PtMin=cuts.pt_min,
         NTracksMax=cuts.n_track_max,
         NIsoTracksMax=cuts.n_iso_track_max,
-        IDWP=cuts.id_wp,
+        IDWP=cuts.id_wp_decor,
+        HighPtIDWP=cuts.highpt_id_wp_decor,
     )
 
-    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainIDConfigName, getChainPrecisionSeqName, useBuiltInTauJetRNNScore, getPrecisionSequenceTauIDs, getTauIDScoreVariables
+    from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getChainPrecisionSeqName, useBuiltInTauJetRNNScore, getPrecisionSequenceTauIDs, getTauIDScoreVariables
 
     id_score_monitoring = {}
     
     precision_seq_name = getChainPrecisionSeqName(chainPart)
-    identification = getChainIDConfigName(chainPart)
-    if identification in ['perf', 'idperf']:
+    identification = getChainIDConfigName(flags, chainPart)
+    if identification in ['idperf', 'noperf', 'perf', 'perfcore', 'perfiso']:
         if identification == 'idperf':
+            # Disable everything, even the pT cut
             currentHypo.AcceptAll = True
 
         # Monitor all the included algorithms
@@ -102,7 +157,6 @@ def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[st
         else:
             # Decorator-based triggers
             currentHypo.IDMethod = 2 # Use decorators
-            currentHypo.IDWPNames = [f'{identification}_{wp}' for wp in getattr(flags.Trigger.Offline.Tau, identification).WPNames]
 
         # Monitor this algorithm only
         id_score_monitoring[identification] = getTauIDScoreVariables(identification, precision_seq_name)
@@ -110,7 +164,7 @@ def TrigTauPrecisionIDHypoToolFromDict(flags: AthConfigFlags, chainDict: dict[st
     # For any triggers following the tracktwoMVA reconstruction (2023+ DeepSet and GNTau)
     if chainPart['reconstruction'] == 'tracktwoMVA':
         currentHypo.TrackPtCut = 1.5*GeV
-        currentHypo.HighPtSelectionLooseIDThr = 200*GeV
+        currentHypo.HighPtSelectionIDThr = 200*GeV
         currentHypo.HighPtSelectionJetThr = 430*GeV
 
     # Only monitor chains with the 'tauMon:online' groups

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -26,7 +26,7 @@
 namespace pool {
    class IContainer;
    class IDatabase;
-   class IPersistencySvc;
+   namespace PersistencySvc { class ISession; }
 }
 
 
@@ -118,9 +118,9 @@ public: // Non-static members
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection(const std::string& collectionType,
-	   const std::string& connection,
+   pool::ICollection* createCollection(const std::string& connection,
 	   const std::string& collectionName,
+           const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
 
    /// @return a token for a container entry.
@@ -158,10 +158,6 @@ public: // Non-static members
    virtual
    StatusCode disconnectDb(const std::string& connection,
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
-
-   /// Get POOL FileSize attribute for database without logging a message
-   virtual
-   long long int getFileSize(const std::string& dbName, long tech, unsigned int contextId) const override;
 
    /// Get POOL attributes - domain
    virtual
@@ -224,13 +220,13 @@ private: // data
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
-   std::vector<pool::IPersistencySvc*>               m_persistencySvcVec;
+   std::vector<pool::PersistencySvc::ISession*>      m_dbSessionVec;
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;
    std::string                                       m_mainOutputLabel{};
    std::map<unsigned int, unsigned int>              m_contextMaxFile;
-   // Cache for open file guids for each m_persistencySvcVec member, protected by m_pers_mut
+   // Cache for open file guids for each m_dbsessionVec member, protected by m_pers_mut
    mutable std::map<unsigned int, std::list<Guid> >  m_guidLists ATLAS_THREAD_SAFE;
 
 private: // properties
@@ -265,7 +261,7 @@ private: // properties
    /// Use DBReplicaSvc to sort database connections, default = true.
    Gaudi::Property<bool> m_sortReplicas{this,"SortReplicas",true};
    /// Default ROOT container type
-   Gaudi::Property<std::string> m_defaultROOTContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
+   Gaudi::Property<std::string> m_defaultContainerType{this, "DefaultContainerType", "ROOTTREEINDEX"};
 
 private: // internal helper functions
    // delete all APR::Persistency Services, Catalog, Mutexes and Indexes

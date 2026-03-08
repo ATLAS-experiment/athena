@@ -10,6 +10,7 @@
 //
 
 #include <AsgMessaging/MessageCheck.h>
+#include <SystematicsHandles/AthenaDependencyHelpers.h>
 #include <SystematicsHandles/CopyHelpers.h>
 
 //
@@ -22,18 +23,25 @@ namespace CP
   SysCopyHandle (T2 *owner, const std::string& propertyName,
                  const std::string& propertyValue,
                  const std::string& propertyDescription)
-    : AsgMessagingForward (owner), m_inputName (propertyValue)
-    , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
+    : SysCopyHandle (propertyValue, "", owner)
   {
     owner->declareProperty (propertyName, m_inputName, propertyDescription);
     owner->declareProperty (propertyName + "Out", m_outputName, "the (optional) name of the copy we create of " + propertyName);
+    owner->declareProperty (propertyName + "Type", m_typeName,
+                            "an explicit type name for output dependencies");
   }
 
   template<typename T> template<typename T2> SysCopyHandle<T> ::
   SysCopyHandle (const std::string &inputName, const std::string &outputName, T2 *owner)
     : AsgMessagingForward (owner), m_inputName(inputName), m_outputName(outputName)
     , m_evtStoreGetter ([owner] () {return &*owner->evtStore();})
-  {}
+  {
+#ifndef XAOD_STANDALONE
+    m_addAlgDependency = [owner](const DataObjID& id, Gaudi::DataHandle::Mode mode) {
+      owner->addDependency(id, mode);
+    };
+#endif
+  }
 
 
 
@@ -166,6 +174,65 @@ namespace CP
     }
     if (!m_evtStore)
       m_evtStore = m_evtStoreGetter();
+
+#ifndef XAOD_STANDALONE
+    ANA_CHECK (addDecorationDependency(svc, "", false));
+    if (!m_outputName.empty())
+    {
+      const CLID clidRead = detail::getClidForDependency<std::remove_const_t<T>>("", "deco", false);
+      const CLID clidWrite = detail::getClidForDependency<std::remove_const_t<T>>(m_typeName, "deco", true);
+      for (const auto& decoName : svc.getObjectDecorations(m_inputName))
+      {
+        ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, false));
+        ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidWrite, m_outputName, Gaudi::DataHandle::Writer, decoName, true));
+      }
+    }
+#endif
+
     return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename T> StatusCode SysCopyHandle<T> ::
+  addDecorationDependency (const ISystematicsSvc& svc, const std::string& decoName, bool decoWrite)
+  {
+#ifdef XAOD_STANDALONE
+    (void) svc;
+    (void) decoName;
+    (void) decoWrite;
+    return StatusCode::SUCCESS;
+#else
+    const CLID clidRead = detail::getClidForDependency<std::remove_const_t<T>>("", decoName, decoWrite);
+    const CLID clidWrite = detail::getClidForDependency<std::remove_const_t<T>>(m_typeName, decoName, decoWrite);
+
+    // if no output name is given, we act like an update or read handle on the input name
+    if (m_outputName.empty())
+    {
+      if (!std::is_const_v<T>)
+        ANA_MSG_INFO ("SysCopyHandle acting as update handle for " << m_inputName << " this likely won't work in AthenaMT");
+
+      // Both const (read) and non-const (update) use Reader mode for dependencies
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
+      return StatusCode::SUCCESS;
+    }
+
+    // otherwise we read the input name and write the output name
+
+    // if this is for reading a decoration, we only declare it for the
+    // input
+    if (decoName.empty() || decoWrite == false)
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidRead, m_inputName, Gaudi::DataHandle::Reader, decoName, decoWrite));
+    }
+
+    // if this is for adding a decoration, we only declare it for the
+    // output
+    if (decoName.empty() || decoWrite == true)
+    {
+      ANA_CHECK (detail::addSysDependency(msg(), svc, m_addAlgDependency, clidWrite, m_outputName, Gaudi::DataHandle::Writer, decoName, decoWrite));
+    }
+    return StatusCode::SUCCESS;
+#endif
   }
 }

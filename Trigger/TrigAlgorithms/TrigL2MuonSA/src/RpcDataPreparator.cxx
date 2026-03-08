@@ -173,7 +173,7 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const EventContext& ctx,
             lutDigit.measuresPhi = measuresPhi;
             lutDigit.stationName = stationName;
             lutDigit.layer       = layer;
-            
+	      
             const float r2 = hitx*hitx+hity*hity;
             float phi = std::atan2(hity,hitx);
             const float l = std::sqrt(hitz*hitz+r2);

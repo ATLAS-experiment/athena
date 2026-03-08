@@ -59,23 +59,11 @@ setup:
      - Description
      - Note
      
-   * - ``CutPt``
-     - ``PtRegion``
-     - ``std::vector<double>``
-     - accepting taus within pt regions (in GeV), each `odd` in the vector is a lower bound, each `even` is an upper bound
-     -
-     
    * -
      - ``PtMin``
      - ``double``
      - accepting taus with a pt above a lower bound (in GeV)
-     - if ``PtMin`` is configured, ``PtRegion`` configuration wont be considered
 
-   * -
-     - ``PtMax``
-     - ``double``
-     - accepting taus with a pt below an upper bound (in GeV)
-     - if ``PtMax`` is configured, ``PtRegion`` configuration wont be considered
 
    * - ``CutAbsEta``
      - ``AbsEtaRegion``
@@ -94,24 +82,12 @@ setup:
      - ``double``
      - accepting taus with an absolute eta below an upper bound
      - if ``AbsEtaMax`` is configured, ``AbsEtaRegion`` configuration wont be considered
-
-   * - ``CutNSubjets``
-     - ``NSubjetsRegion``
-     - ``std::vector<float>``
-     - accepting taus within number of subjets regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-     -
      
    * -
      - ``NSubjetsMin``
      - ``float``
      - accepting taus with a number of subjets above a lower bound
-     - if ``NSubjetsMin`` is configured, ``NSubjetsRegion`` configuration wont be considered
 
-   * -
-     - ``NSubjetsMax``
-     - ``float``
-     - accepting taus with a number of subjets below an upper bound
-     - if ``NSubjetsMax`` is configured, ``NSubjetsRegion`` configuration wont be considered
 
    * - ``CutAbsCharge``
      - ``AbsCharges``
@@ -126,20 +102,10 @@ setup:
      - if ``AbsCharge`` is configured, ``AbsCharges`` configuration wont be considered
 
 
-   * - ``CutOmniScore``
-     - ``OmniScoreRegion``
-     - ``std::vector<double>``
-     - accepting ditaus within OmniScore regions, each `odd` in the vector is a lower bound, each `even` is an upper bound
-
    * -
      - ``OmniScoreMin``
      - ``double``
      - accepting ditaus with a OmniScore above a lower bound
-
-   * -
-     - ``OmniScoreMax``
-     - ``double``
-     - accepting ditaus with a OmniScore below an upper bound
 
 If one wants to use a different setup one has three options:
 

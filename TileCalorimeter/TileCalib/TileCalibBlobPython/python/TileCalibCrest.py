@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TileCalibCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
 # Laura Sargsyan <Laura.Sargsyan@cern.ch>, 2025-09-16
@@ -85,7 +85,7 @@ class TileBlobReaderCrest(TileCalibLogger):
         self.__remote = (("http://" in db) or ("https://" in db) or ("CREST" in db))
         if self.__remote:
             if 'http' not in self.__db:
-                self.__db = os.getenv(db,os.getenv('CREST_HOST',os.getenv('CREST_SERVER_PATH','http://crest-j23.cern.ch:8080/api-v5.0')))
+                self.__db = os.getenv(db,os.getenv('CREST_HOST',os.getenv('CREST_SERVER_PATH','https://atlas-crest-dev-mgr.cern.ch:443/api-v6.0')))
             self.log().info('Host %s' , (self.__db))
             self.__api_instance = CrestApi(host=self.__db)
             socks = os.getenv('CREST_SOCKS', 'False')
@@ -147,9 +147,10 @@ class TileBlobReaderCrest(TileCalibLogger):
             prefix=prefix.strip('-').split('-')[0]
         if prefix.startswith('Calo') and 'NoiseCell' not in prefix:
             prefix='CALO'+prefix[4:]
-        if 'UPD1' in globalTag or 'UPD4' in globalTag or 'COND' not in globalTag:
+            prefix=prefix.replace('Pileupnoiselumi','PileUpNoiseLumi')
+        if 'UPD1' in globalTag or 'UPD4' in globalTag or ('COND' not in globalTag and 'CREST' not in globalTag):
             if prefix != '':
-                if globalTag.startswith(prefix) or globalTag.startswith(prefix.upper()):
+                if prefix in globalTag or prefix.upper() in globalTag:
                     tag=globalTag
                 else:
                     tag=prefix+'-'+globalTag
@@ -158,6 +159,7 @@ class TileBlobReaderCrest(TileCalibLogger):
                 tag = TileCalibUtils.getFullTag(folder, globalTag)
                 if tag.startswith('Calo') and 'NoiseCell' not in tag:
                     tag='CALO'+tag[4:]
+                    tag=tag.replace('Pileupnoiselumi','PileUpNoiseLumi')
                 self.log().info("Resolved localTag \'%s\' to folderTag \'%s\'", globalTag,tag)
             else:
                 tag=globalTag
@@ -601,8 +603,7 @@ class TileBlobWriterCrest(TileCalibLogger):
                 fileName = f'{self.__db[:-5]}.{fileName}'
 
             with open(fileName, 'w') as the_file:
-                json.dump(jdata, the_file)
-                the_file.write('\n')
+                json.dump(jdata, the_file, separators=(',', ':'), sort_keys=True)
 
         #=== print info
         self.log().info( 'Writting tag "%s"', fullTag)

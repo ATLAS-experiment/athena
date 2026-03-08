@@ -43,6 +43,10 @@ PL_OverlapRemoval:
   photons: TruthPhotons
   jets: AntiKt4TruthDressedWZJets
   useRapidityForDeltaR: False
+PL_Resonances:
+  - containerName: "TruthTop"
+  - containerName: "TruthBottom"
+  - containerName: "TruthBoson"
 
 # After configuring each container, many variables will be saved automatically.
 Output:
@@ -56,5 +60,8 @@ Output:
     truth_tau_: TruthTaus
     truth_jet_: AntiKt4TruthDressedWZJets
     truth_met_: TruthMET
+    truth_top_: TruthTop
+    truth_bot_: TruthBottom
+    truth_bos_: TruthBoson
 
 PrintConfiguration: {}

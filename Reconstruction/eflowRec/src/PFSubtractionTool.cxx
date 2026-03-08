@@ -2,17 +2,17 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "eflowRec/PFSubtractionTool.h"
+#include "PFSubtractionTool.h"
 
-#include "eflowRec/eflowCaloObject.h"
-#include "eflowRec/eflowCaloObjectMaker.h"
-#include "eflowRec/eflowEEtaBinnedParameters.h"
-#include "eflowRec/eflowLayerIntegrator.h"
-#include "eflowRec/eflowRecTrack.h"
-#include "eflowRec/eflowTrackClusterLink.h"
-#include "eflowRec/IEFlowCellEOverPTool.h"
-#include "eflowRec/PFClusterFiller.h"
-#include "eflowRec/PFTrackFiller.h"
+#include "eflowCaloObject.h"
+#include "eflowCaloObjectMaker.h"
+#include "eflowEEtaBinnedParameters.h"
+#include "eflowLayerIntegrator.h"
+#include "eflowRecTrack.h"
+#include "eflowTrackClusterLink.h"
+#include "IEFlowCellEOverPTool.h"
+#include "PFClusterFiller.h"
+#include "PFTrackFiller.h"
 
 #include "StoreGate/ReadDecorHandle.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"

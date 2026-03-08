@@ -15,7 +15,7 @@ TileHitVector_PERS* TileHitVectorCnv::createPersistent(TileHitVector* transCont)
 }
 
 
-TileHitVector* TileHitVectorCnv::createTransient() {
+TileHitVector* TileHitVectorCnv::createTransient(const Token* token) {
 
     MsgStream mlog(msgSvc(), "TileHitVectorConverter" );
     TileHitVectorCnv_p1   converter_p1;
@@ -25,15 +25,15 @@ TileHitVector* TileHitVectorCnv::createTransient() {
     static const pool::Guid   p1_guid("65AD597A-BF97-46EE-B9E3-203B35218EA7");
     static const pool::Guid   p0_guid("EA2209D1-C339-453D-AEAD-21C026F0735E");
 
-    if( this->compareClassGuid(p1_guid)) {
+    if( this->compareClassGuid(token, p1_guid)) {
 
-        std::unique_ptr< TileHitVector_p1 > col_vect( this->poolReadObject< TileHitVector_p1 >() );
+        std::unique_ptr< TileHitVector_p1 > col_vect( this->poolReadObject< TileHitVector_p1 >(token) );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
 
-    } else if( this->compareClassGuid(p0_guid)) {
+    } else if( this->compareClassGuid(token, p0_guid)) {
 
         // old version from before TP separation
-        TileOldHitVector* oldVec = this->poolReadObject<TileOldHitVector>();
+        TileOldHitVector* oldVec = this->poolReadObject<TileOldHitVector>(token);
         size_t size = oldVec->size();
         trans_cont = new TileHitVector();
         trans_cont->reserve(size);

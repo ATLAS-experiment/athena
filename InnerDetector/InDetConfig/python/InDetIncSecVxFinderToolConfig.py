@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Define method to construct configures Sec Vtx Finder alg
 # attempted by N Ribaric (@LancasterUNI) neza.ribaric@cern.ch
 
@@ -19,7 +19,8 @@ def InDetIterativeSecVtxFinderToolCfg(flags, name="InDetIterativeSecVtxFinderToo
   from TrkConfig.TrkVertexFittersConfig import AdaptiveVxFitterToolIncSecVtxCfg
   kwargs.setdefault("VertexFitterTool",acc.popToolsAndMerge(AdaptiveVxFitterToolIncSecVtxCfg(flags)))
 
-  from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_AMSVF_Cfg
+  from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+    InDetTrackSelectionTool_AMSVF_Cfg)
   kwargs.setdefault("BaseTrackSelector",acc.popToolsAndMerge(InDetTrackSelectionTool_AMSVF_Cfg(flags)))
 
   from InDetConfig.InDetSecVtxTrackSelectionToolConfig import InDetSecVtxTrackSelectionToolCfg
