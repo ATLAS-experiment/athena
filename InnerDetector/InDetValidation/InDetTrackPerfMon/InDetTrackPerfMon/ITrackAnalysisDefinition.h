@@ -40,6 +40,11 @@ public:
   virtual const std::string& referenceType() const = 0;
   virtual const std::string& testTag() const = 0;
   virtual const std::string& referenceTag() const = 0;
+
+  virtual const std::string& testCollection()       const = 0;
+  virtual const std::string& referenceCollection()  const = 0;
+
+
   virtual const std::string& matchingType() const = 0;
   virtual float truthProbCut() const = 0;
 

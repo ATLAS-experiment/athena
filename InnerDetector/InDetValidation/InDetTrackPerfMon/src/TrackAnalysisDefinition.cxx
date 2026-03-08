@@ -18,6 +18,7 @@ TrackAnalysisDefinition::TrackAnalysisDefinition() :
   m_isTestTrigger(false), m_isTestEFTrigger(false), m_isTestTruth(false), m_isTestOffline(false),
   m_isRefTrigger(false),  m_isRefEFTrigger(false),  m_isRefTruth(false),  m_isRefOffline(false),
   m_testTag(),  m_refTag(),
+  m_testCollection(),  m_refCollection(),
   m_matchingType(),  m_truthProbCut(0),
   m_configuredChains(),
   m_etaBins(),

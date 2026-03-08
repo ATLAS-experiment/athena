@@ -80,7 +80,7 @@ def has_in( item, obj, attr, default=False):
     except TypeError:
         return default
 
-
+    
 # # DON'T USE THIS ANY MORE
 # def hasFlag(obj, name):
 #     """

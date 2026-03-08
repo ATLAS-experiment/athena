@@ -81,6 +81,9 @@ StatusCode TrackAnalysisDefinitionSvc::initialize()
   m_def.m_testTag = m_testTag;
   m_def.m_refTag  = m_refTag;
 
+  m_def.m_testCollection = m_testCollection;
+  m_def.m_refCollection  = m_refCollection;
+
   m_def.m_matchingType = m_matchingType;
   m_def.m_truthProbCut = m_truthProbCut;
 

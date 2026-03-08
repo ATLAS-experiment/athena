@@ -13,14 +13,23 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # just lazy, and like the code to be neater 
-def mktool( ca ):
-    return ComponentAccumulator().popToolsAndMerge(ca)
+def mktool( ca, kak=None ):
+    if kak is not None:
+        return kak.popToolsAndMerge(ca)
+    else:
+        return ComponentAccumulator().popToolsAndMerge(ca)
 
 
 
-def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
+def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None, kak=None ):
 
+    # actually this won't work now - newer releases don't allow you to modify
+    # flags during the configuration, so we sack off the input flags and just
+    # create our own.
     flags = inflags.clone()
+    
+    #  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    #  flags = initConfigFlags()
     
 #   print( "in montool: ", mtool.name )
 
@@ -31,10 +40,14 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
     # in principle, we may be able to get away with sharing some tools betwen
     # analyses in the same signature rather than all these independent tools
     # but we can sort that out later
-#    kak = ComponentAccumulator()
 
-    tool = CompFactory.IDTPM.TrackAnalysis(name )
+#    if kak is None:
+#        kak = ComponentAccumulator()
 
+#  cnt  = ComponentAccumulator()
+    tool = CompFactory.IDTPM.TrackAnalysis(name)
+    #    cnt.setPrivateTools(tool)
+        
     from TrigInDetAnalysisExample.chainString import chainString
     cs = chainString( chain )
 
@@ -46,38 +59,46 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None ):
 
     # allocate the histograms ...
     tool.montool = mtool 
-
     
-    from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
-    from InDetTrackPerfMon.InDetSelectionConfig import VertexQualitySelectionToolCfg
-    from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
-    from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
+#    from InDetTrackPerfMon.InDetSelectionConfig import TrackQualitySelectionToolCfg
+#    from InDetTrackPerfMon.InDetSelectionConfig import VertexQualitySelectionToolCfg
+#    from InDetTrackPerfMon.InDetSelectionConfig import RoiSelectionToolCfg
+#    from InDetTrackPerfMon.InDetSelectionConfig import TrackRoiSelectionToolCfg
 
-    from InDetTrackPerfMon.InDetMatchingConfig  import TrackMatchingToolCfg
+#    from InDetTrackPerfMon.InDetMatchingConfig  import TrackMatchingToolCfg
 
-    from InDetTrackPerfMon.InDetSelectionConfig import sanitise
+#    from InDetTrackPerfMon.InDetSelectionConfig import sanitise
     
     print( "RoiKey: ", cs.roi, "   :: ", name )
     
     flags.addFlag("RoiKey", cs.roi )
-    
-    tool.TrackQualitySelectionTool  = mktool( TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool_" + sanitise(name) ) )
-    tool.VertexQualitySelectionTool = mktool( VertexQualitySelectionToolCfg( flags, name="VertexQualitySelectionTool_" + sanitise(name) ) )
-    tool.RoiSelectionTool           = mktool( RoiSelectionToolCfg( flags, name="RoiSelectionTool_" + sanitise(name) ) )
-
-    tool.TrackRoiSelectionTool = mktool( TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool_" + sanitise(name) ) )
-
 
     # Stable SeltaR matching                                                                                                                                                              
     flags.addFlag("MatchingType", "StableDeltaRMatch")
     flags.addFlag("RefType",  "Offline")
     flags.addFlag("TestType", "Trigger")
 
-    tool.TrackMatchingTool     = mktool( TrackMatchingToolCfg( flags, name="TrackMatchingTool_" + sanitise(name) ) )
-
-
-#    # VertexQualitySelectionTool = name="VertexQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag
+    flags.lock()
     
+    
+#    tool.TrackQualitySelectionTool  = mktool( TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool_" + sanitise(name) ), kak )
+
+    
+#    tool.VertexQualitySelectionTool = mktool( VertexQualitySelectionToolCfg( flags, name="VertexQualitySelectionTool_" + sanitise(name) ), kak )
+#    tool.RoiSelectionTool           = mktool( RoiSelectionToolCfg( flags, name="RoiSelectionTool_" + sanitise(name) ), kak )
+
+#    tool.TrackRoiSelectionTool = mktool( TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool_" + sanitise(name) ), kak )
+
+
+#    tool.TrackMatchingTool     = mktool( TrackMatchingToolCfg( flags, name="TrackMatchingTool_" + sanitise(name) ), kak )
+
+    # VertexQualitySelectionTool = name="VertexQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag
+
+#     mktool( cnt, kak )
+
+#    print("kak: ", kak )
+    
+#    kak.printConfig(withDetails=True, summariseProps=True)
     
     return tool
 

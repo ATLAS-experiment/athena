@@ -114,6 +114,28 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs_setdefault( kwargs, "TestTag", getTag( flags, get_opt( iflags, "TestType" ) ) )
     kwargs_setdefault( kwargs, "RefTag",  getTag( flags, iflags.RefType ) )
 
+    testtype = get_opt( iflags, "TestType" )
+    reftype  = get_opt( iflags, "RefType" )
+
+    # this sort of structure should be implemented once, and once only,
+    # and then ONLY test of ref used for everything else, rather than
+    # implement truth, oiffline and trigger for everything, all the time
+    # and decide only much later somewhere else entirely
+    if testtype == "Trigger":
+        kwargs_setdefault( kwargs, "TestCollection", iflags, "TrigTrkKey", "" )
+    elif testtype == "Offline":
+        kwargs_setdefault( kwargs, "TestCollection", iflags, "OfflineTrkKey", "" )
+    elif testtype == "Truth":
+        kwargs_setdefault( kwargs, "TestCollection", iflags, "TruthPartKey", "" )
+
+    if reftype == "Trigger":
+        kwargs_setdefault( kwargs, "ReferenceCollection", iflags, "TrigTrkKey", "" )
+    elif reftype == "Offline":
+        kwargs_setdefault( kwargs, "ReferenceCollection", iflags, "OfflineTrkKey", "" )
+    elif reftype == "Truth":
+        kwargs_setdefault( kwargs, "ReferenceCollection", iflags, "TruthPartKey", "" )
+
+    
     kwargs_setdefault( kwargs, "MatchingType",      iflags, "MatchingType" )
     kwargs_setdefault( kwargs, "MatchingTruthProb", iflags, "truthProbCut" )
 
@@ -141,6 +163,7 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
     kwargs_setdefault( kwargs, "plotOfflineElectrons",      iflags, "plotOfflineElectrons" )
     kwargs_setdefault( kwargs, "ResolutionMethod",          iflags, "ResolutionMethod" )
     kwargs.setdefault( "isITk", flags.Detector.GeometryITk )
+
     #  AAAAAAARGHHHH !!!!!!!!!!!
     if has_in( "Jet", iflags, "SelectOfflineObject" ):
         kwargs.setdefault( "plotTracksInJets", True )
@@ -154,6 +177,8 @@ def TrackAnalysisDefinitionSvcCfg( flags, name="TrkAnaDefSvc", **kwargs ):
          kwargs.setdefault( "EtaBins", [-1, 9999.] ) # for technical efficiencies ?????
          kwargs.setdefault( "MinSilHits", [flags.Tracking.MainPass.minClusters] ) # for technical efficiencies ????
 
+    print( "SUTT TrackAnalysisDefinition: ", kwargs )
+         
     trkAnaDefSvc = CompFactory.TrackAnalysisDefinitionSvc( name, **kwargs )
     acc.addService( trkAnaDefSvc )
     return acc

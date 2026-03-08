@@ -13,6 +13,8 @@
 
 /// local include
 #include "InDetTrackPerfMon/TrackAnalysis.h"
+#include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 
 /// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
@@ -74,19 +76,66 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   std::cout << "\tleg:     " << m_leg     << std::endl;
   std::cout << "\textra:   " << m_extra   << std::endl;
 
+  /// we probably want to set these in the initialise
+  /// rather than set them for every eveny
+  m_refTracks  = m_offlineTracks;
+
+  std::cout << "SUTT: tes tracks: " << m_testTracks << "\t" << m_triggerTracks << std::endl;
+
+  std::cout << "SUTT: tes tracks: " << m_testTracks << "\t" << m_triggerTracks << std::endl;
+
+
+
+  //m_testTracks = m_triggerTracks;
+
+  /// are these even needed ???
+  
+  m_testContainerName = SG::ReadHandleKey<xAOD::TrackParticleContainer>(m_testTracks);
+  m_refContainerName  = SG::ReadHandleKey<xAOD::TrackParticleContainer>(m_refTracks);
+
+  ATH_CHECK( m_testContainerName.initialize() );
+  ATH_CHECK( m_refContainerName.initialize() );
+  
+  
   //// No, no, no, no, no, the TDT is configured in the algorithm, and the
   ///  same instance is passed into all the tools
   ///  ATH_CHECK( m_tdt.retrieve() );
   
-  ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
+  //  ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
 
-  ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
+  //  ATH_CHECK( m_vertexQualitySelectionTool.retrieve() );
 
-  ATH_CHECK( m_roiSelectionTool.retrieve() );
+  //  ATH_CHECK( m_roiSelectionTool.retrieve() );
 
-  ATH_CHECK( m_trackRoiSelectionTool.retrieve() );
+  //  ATH_CHECK( m_trackRoiSelectionTool.retrieve() );
 
-  ATH_CHECK( m_trackMatchingTool.retrieve() );
+  //  ATH_CHECK( m_trackMatchingTool.retrieve() );
+
+
+  std::unique_ptr<TrackAnalysisDefinition> config = std::make_unique<TrackAnalysisDefinition>();
+
+  config->setTestCollection( m_testTracks );
+  config->setReferenceCollection( m_refTracks );
+
+  config->setTestType( "Trigger" );
+  config->setReferenceType( "Offline" );
+
+  /// these useTrigger/Offline etc flags are redundant, and should all
+  /// be inferred from the track collection names, although they are
+  /// not needed at all, the only thing needed is to workout what sort
+  /// of tracks they are and then call the ReadHandle with th relevant
+  /// type 
+  config->setUseTrigger( true );
+  config->setUseOffline( true );
+  config->setDoTrigNavigation( true );
+
+  /// this should be safe, even though we are taking a pointer
+  /// to an automatic objec t that will go out of scope when this
+  /// returns, because we want the entire processing of this event
+  /// to take place from within this function
+  m_trkAnaDef = std::move( config );
+  
+
   
   // ATH_CHECK( m_vertexRoiSelectionTool.retrieve( EnableTool{ m_trkAnaDefSvc->doTrigNavigation() } ) );
   // ATH_CHECK( m_trkAnaInfoWriteTool.retrieve( EnableTool{ m_writeOut.value() } ) );
@@ -177,7 +226,7 @@ StatusCode IDTPM::TrackAnalysis::bookHistograms()
 /// ------------------------------
 /// ------- fillHistograms -------
 /// ------------------------------
-StatusCode IDTPM::TrackAnalysis::fillHistograms() {
+StatusCode IDTPM::TrackAnalysis::fillHistograms() { // const EventContext& /*ctx*/) {
   if ( execute() )  return StatusCode::SUCCESS;
   return StatusCode::FAILURE;
 }
@@ -190,30 +239,31 @@ bool IDTPM::TrackAnalysis::execute() {
   //   ATH_MSG_INFO("Filling hists " << name() << "\ttrigger: " << m_tool.name() << " ...");
 
   std::cout << "TrackAnalysis:execute() " << name() << std::endl;
-  
-  //  IDTPM::TrackAnalysisCollections thisTrkAnaCollections("duff");
 
   std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks << "\ttesttracks: " << m_testTracks << std::endl;
 
-  m_refTracks = m_offlineTracks;
-  m_testTracks = m_triggerTracks;
 
-  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks << "\ttesttracks: " << m_testTracks << std::endl;
+  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks  << std::endl;
+  std::cout << "TA::execute() " << name() << "\ttesttracks:  " << m_testTracks << std::endl;
 
   std::cout << "TrackAnalysis:execute() " << "ana collections" << std::endl;
+
   
+  IDTPM::TrackAnalysisCollections thisTrkAnaCollections( "duff", m_trkAnaDef.get() );
+
   //  bool anacollections = thisTrkAnaCollections.initialize().isSuccess();
 
   //  std::cout << "\t ana collections: " << anacollections << std::endl;
   
   //  if ( !anacollections )  return false;
 
-#if 0
-
+  
   /// filling TrackAnalysisCollections
   // ATH_CHECK( loadCollections( thisTrkAnaCollections ) );
-  if ( ! loadCollections( thisTrkAnaCollections ).isSuccess() ) return;
+  
+  if ( ! loadCollections( thisTrkAnaCollections ).isSuccess() ) return false;
 
+#if 0
   
   ATH_MSG_DEBUG( "Processing event = " << thisTrkAnaCollections.eventInfo()->eventNumber() << "\n==========================================" );
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
@@ -457,30 +507,58 @@ StatusCode IDTPM::TrackAnalysis::loadCollections( IDTPM::TrackAnalysisCollection
 
   ATH_MSG_INFO( "Loading collections " << name() << "\ttrigger: " << m_trigger );
 
+  /// won't bother with the vertices just yet ...
+  /// eventually we want to replace this with the appropriate templated stuff
+
+  std::cout << "SUTT:  ref type: " << m_trkAnaDef->referenceType() << std::endl;
+  std::cout << "SUTT: test type: " << m_trkAnaDef->testType() << std::endl;
+
+#if 0
   
-  // /// Events
-  // ATH_CHECK( trkAnaColls.fillEventInfo(
-  //     m_eventInfoContainerName, m_truthEventName, m_truthPileUpEventName ) );
+  /// even this could be handled more automatically, from the pointer types passed
+  /// into a rational template TrackAnalysisCollections class
+  if ( m_trkAnaDef->referenceType() == "Truth" ) {
+    const xAOD::TruthParticleContainer* duff = 0; 
+    ATH_CHECK( trkAnaColls.fill( duff, m_trkAnaDef->referenceCollection() ) );
+  }
+  else  {
+    const xAOD::TrackParticleContainer* duff = 0;
+    ATH_CHECK( trkAnaColls.fill( duff, m_trkAnaDef->referenceCollection() ) );
+  }
+  
+  if ( m_trkAnaDef->testType() == "Truth" ) {
+    const xAOD::TruthParticleContainer* duff = 0; 
+    ATH_CHECK( trkAnaColls.fill( duff, m_trkAnaDef->testCollection() ) );
+  }
+  else {
+    const xAOD::TrackParticleContainer* duff = 0;
+    ATH_CHECK( trkAnaColls.fill( duff, m_trkAnaDef->testCollection() ) );
+  }
 
-// trkAnaTest
-// trkAnaRef
+ 
+#else
 
-// trkAnaRef->AddSelectopr(); 
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  std::cout << "GOD DAMIT !!!" << std::endl;
+  
+  if      ( m_trkAnaDef->referenceType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->referenceCollection() ) );
+  else if ( m_trkAnaDef->referenceType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->referenceCollection() ) );
+  else if ( m_trkAnaDef->referenceType() == "Truth"   )  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->referenceCollection() ) );
 
-
-  // /// Tracks
-  // ATH_CHECK( trkAnaTest.fillTruthPartContainer( m_truthParticleName ) );
-  // ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
-  // ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
-
-  // ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
-  // ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
-  // ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
-
-  // /// Vertices
-  // ATH_CHECK( trkAnaColls.fillTruthVertexContainer( m_truthVertexContainerName ) );
-  // ATH_CHECK( trkAnaColls.fillOfflVertexContainer( m_offlineVertexContainerName ) );
-  // ATH_CHECK( trkAnaColls.fillTrigVertexContainer( m_triggerVertexContainerName ) );
-
+  if      ( m_trkAnaDef->testType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->testCollection() ) );
+  else if ( m_trkAnaDef->testType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->testCollection() ) );
+  else if ( m_trkAnaDef->testType() == "Truth"   )  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->testCollection() ) );
+#endif
+  
+  std::cout << "SUTT: done and dusted" << std::endl;
+  
   return StatusCode::SUCCESS;
 }

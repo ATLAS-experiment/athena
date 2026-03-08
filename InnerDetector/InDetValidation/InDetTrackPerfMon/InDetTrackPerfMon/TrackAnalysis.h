@@ -31,7 +31,7 @@
 #include "xAODCore/AuxContainerBase.h"
 
 /// local includes
-#include "InDetTrackPerfMon/ITrackAnalysisDefinitionSvc.h"
+#include "InDetTrackPerfMon/ITrackAnalysisDefinition.h"
 #include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 #include "InDetTrackPerfMon/RoiSelectionTool.h"
 #include "InDetTrackPerfMon/TrackRoiSelectionTool.h"
@@ -71,26 +71,46 @@ public :
   //    TrackAnalysis* clone() const { return new TrackAnalysis(*this); }
   
   void setTDT( ToolHandle<Trig::TrigDecisionTool>& tdt ) { m_tdt = tdt; }
+
+#if 0
+  template<class Collection>
+  StatusCode retrieve( Collection const*& collection, const std::string& key="" ) {
+    /// old implementation - leave in place until after the full validation ...
+    ///    return m_provider->evtStore()->retrieve( container, containerName);
+    if ( m_provider->evtStore()->template contains<Collection>( key ) ) {
+      SG::ReadHandle<Collection> handle(key);
+      if ( handle.isValid() ) {
+	/// commented code intentionally left for development purposes ...
+	/// std::cout << "\t\t\t T_AnalysisConfig::selectTracks() - > TrackSelector" << std::endl;
+	collection = handle.cptr();
+	return StatusCode::SUCCESS;
+      }
+    }
+    return StatusCode::FAILURE;
+  }
+#endif
   
 private :
 
   /// prevent default construction
   TrackAnalysis();
 
-  /// TrackAnalysisDefinitionSvc
-  //    SmartIF<ITrackAnalysisDefinitionSvc> m_trkAnaDefSvc;
+  std::unique_ptr<const ITrackAnalysisDefinition> m_trkAnaDef;
 
   
   /// retrieve all collections && load them into trkAnaCollections object
   template<typename T, typename S=T>
   void loadCollections( TrackCollections<T,S>& trackCollections );
 
+  
   /// retrieve all collections && load them into trkAnaCollections object
   StatusCode loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls );
   
   ToolHandle< IDTPM::ITrackSelectionTool > m_trackQualitySelectionTool { this, "TrackQualitySelectionTool", "", "" };
 
   //   "IDTPM::InDetTrackPerfMon/ITrackSelectionTool", "Wrapper-tool to perform track selection" };
+
+#if 0
   
   ToolHandle< IDTPM::IVertexSelectionTool > m_vertexQualitySelectionTool { this, "VertexQualitySelectionTool",
     "IDTPM::InDetTrackPerfMon/IVertexSelectionTool", "Wrapper-tool to perform general quality-based (truth) vertex selection" };
@@ -98,7 +118,8 @@ private :
   ToolHandle< IDTPM::RoiSelectionTool > m_roiSelectionTool { this, "RoiSelectionTool", "", "roi selection tool" };
     //    "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve && select RoIs" };
   
-  
+
+#endif
   
   /// we can't have all these ReadHandles because we don't know how many we will
   /// actually need until we configure the class, ie if we use Trigger tracks,
@@ -111,8 +132,13 @@ private :
   StringProperty m_triggerTracks { this, "TriggerTracks", "", "trigger track collection" };
   
   /// Offline TrackParticleContainer name
-  //    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_offlineTrkParticleName {
-  //        this, "OfflineTrkParticleContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
+  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_refContainerName; // {
+  //    this, "ReferenceContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
+
+  /// Offline TrackParticleContainer name
+  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_testContainerName; // {
+  //    this, "TestContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
+
   
   /// Trigger TrackParticleContainer name
   //    SG::ReadHandleKey< xAOD::TrackParticleContainer > m_triggerTrkParticleName {

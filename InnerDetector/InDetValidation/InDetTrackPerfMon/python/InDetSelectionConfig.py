@@ -156,7 +156,9 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
          
 #    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
+#   from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
+#   offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectorToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
@@ -364,6 +366,7 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     kwargs.setdefault( "isFromHeavyFlav", truthIsFromHeavyFlav )
     kwargs.setdefault( "isFromLightFlav", truthIsFromLightFlav )
     kwargs.setdefault( "isFromTau", truthIsFromTau )
+    
     if truthMinParentPt!=-9999.    :kwargs.setdefault( "minParentPt", truthMinParentPt )
     if truthMaxParentPt!=-9999.    :kwargs.setdefault( "maxParentPt", truthMaxParentPt )
 

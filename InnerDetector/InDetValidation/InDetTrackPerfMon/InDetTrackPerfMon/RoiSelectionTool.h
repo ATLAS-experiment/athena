@@ -27,12 +27,10 @@
 
 namespace IDTPM {
 
-  typedef TrigCompositeUtils::LinkInfo< TrigRoiDescriptorCollection > roiCollection_t;
+  typedef TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> roiCollection_t;
 
-  class RoiSelectionTool :
-      public virtual asg::IAsgTool, 
-      public asg::AsgTool {
-
+  class RoiSelectionTool : public virtual asg::IAsgTool,public asg::AsgTool {
+    
     ASG_TOOL_CLASS( RoiSelectionTool, IAsgTool );
 
   public:

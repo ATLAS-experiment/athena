@@ -63,6 +63,7 @@ public:
   std::vector< const T* >& test() const { return m_test; }
   std::vector< const S* >&  ref() const { return m_ref; }
   
+
   
 protected:
   
@@ -80,11 +81,10 @@ protected:
   std::vector< const xAOD::Vertex* >   m_testvtx;
   std::vector< const xAOD::Vertex* >   m_refvtx;
   
-
-  /// Lookup table for test-reference matching
+  /// Lookup table for test-reference matching ??
   // std::unique_ptr< ITrackMatchingLookup > m_matches;
   
 }; // class TrackCollections
 
-
+  
 #endif // > !INDETTRACKPERFMON_TRACKCOLLECTIONS_H

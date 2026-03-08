@@ -60,6 +60,12 @@ public:
   virtual const std::string& referenceType() const override { return m_def.m_refTypeStr; };
   virtual const std::string& testTag() const override       { return m_def.m_testTag; };
   virtual const std::string& referenceTag() const override  { return m_def.m_refTag; };
+
+
+
+  virtual const std::string& testCollection()       const  { return m_testCollection; };
+  virtual const std::string& referenceCollection()  const  { return m_refCollection; };
+
   virtual const std::string& matchingType() const override  { return m_def.m_matchingType; };
   virtual float truthProbCut() const override               { return m_def.m_truthProbCut; };
 
@@ -106,15 +112,20 @@ private:
   StringProperty m_refTypeStr  { this, "RefType", "Truth", "Type of track collection to be used as reference" }; 
   BooleanProperty m_doTrigNavigation { this, "doTrigNavigation", false, "Run Trigger Navigation monitoring" };
 
-  bool m_useTrigger{}, m_useEFTrigger{}, m_useTruth{}, m_useOffline{};
+  /// far too many, unecessary flags
+  bool m_useTrigger{},    m_useEFTrigger{},    m_useTruth{},    m_useOffline{};
   bool m_isTestTrigger{}, m_isTestEFTrigger{}, m_isTestTruth{}, m_isTestOffline{};
-  bool m_isRefTrigger{}, m_isRefEFTrigger{}, m_isRefTruth{}, m_isRefOffline{};
+  bool m_isRefTrigger{},  m_isRefEFTrigger{},  m_isRefTruth{},  m_isRefOffline{};
 
   StringProperty m_testTag { this, "TestTag", "offl", "Short label for test track type, used in histo booking" }; 
   StringProperty m_refTag  { this, "RefTag", "truth", "Short label for reference track type, used in histo booking" }; 
 
+  StringProperty m_testCollection { this, "TestCollection",      "", "test track collection name = all these 'short' names are a bit of a waster of time" };
+  StringProperty m_refCollection  { this, "ReferenceCollection", "", "reference track collection name" };
+
+ 
   StringProperty m_matchingType { this, "MatchingType", "DeltaRMatch", "Type of test-reference matching performed" }; 
-  FloatProperty m_truthProbCut  { this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
+  FloatProperty  m_truthProbCut { this, "MatchingTruthProb", 0.5, "Minimal truthProbability for valid matching" };
 
   std::vector< std::string > m_configuredChains;
 

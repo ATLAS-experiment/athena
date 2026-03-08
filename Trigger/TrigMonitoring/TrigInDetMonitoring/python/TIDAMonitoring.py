@@ -618,7 +618,7 @@ if __name__=='__main__':
     file = 'AOD.pool.root'
 
     flags.Input.Files = [file]
-    flags.Input.isMC  = True
+    flags.Input.isMC  = False
 
     flags.Output.HISTFileName = 'duff.root'
 
@@ -638,7 +638,7 @@ if __name__=='__main__':
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    Nevents = 10
+    Nevents = 100
     cfg.run(Nevents)
 
 

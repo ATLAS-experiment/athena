@@ -23,8 +23,7 @@
 ///---------------------------
 ///------- Constructor -------
 ///---------------------------
-IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool(
-    const std::string& name ) :
+IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool( const std::string& name ) :
   asg::AsgTool( name ) { }
 
 
@@ -77,7 +76,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 
   /// Filling Trigger navigation info
   if( m_trkAnaDefSvc->doTrigNavigation() ) {
-    chainAcc( *(wh->back()) ) = chain;
+    chainAcc( *(wh->back()) )  = chain;
     roiIdxAcc( *(wh->back()) ) = roiIdx;
     roiStrAcc( *(wh->back()) ) = roiStr;
   }
@@ -94,7 +93,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTracksAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTruthsAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTruthsAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
   /// Truth->Track
@@ -108,7 +107,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTruthsAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTracksAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTracksAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
   /// Track->Track
@@ -122,7 +121,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTracksAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTracksAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTracksAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
 

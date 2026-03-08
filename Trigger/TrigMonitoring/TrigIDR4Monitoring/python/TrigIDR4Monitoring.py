@@ -10,7 +10,10 @@
 # the different slices 
 
 
-def TrigIDR4Monitoring( flags=None, name=None, monlevel=None ) :  
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+ComponentAccumulator.debugMode = "trackCA trackEventAlgo trackPublicTool trackPrivateTool"
+
+def TrigIDR4Monitoring( flags=None, name=None, monlevel=None, kak=None ) :  
 
         tools = []
 
@@ -39,7 +42,7 @@ def TrigIDR4Monitoring( flags=None, name=None, monlevel=None ) :
 
 #        TIDR4MonElectron(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel )
-        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel )
+        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel, kak )
 #        TIDR4MonMuonLRT(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonTau(      flags, key, toolkey, tools, monlevel )
 #        TIDR4MonBjet(     flags, key, toolkey, tools, monlevel )
@@ -164,10 +167,9 @@ def TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel ) :
 
 
                 
-def TIDR4MonMuon( flags, key, toolkey, tools, monlevel ) :
+def TIDR4MonMuon( flags, key, toolkey, tools, monlevel, kak ) :
                         
         #### muon ####
-
 
         name = "IDMuon"+toolkey+"Tool"
 
@@ -208,7 +210,7 @@ def TIDR4MonMuon( flags, key, toolkey, tools, monlevel ) :
 
                 tidamuon.ntupleChainNames = chains
         
-                tidamuon.MonTools = createTATools( flags,  tidamuon.SliceTag, chains )
+                tidamuon.MonTools = createTATools( flags,  tidamuon.SliceTag, chains, kak=kak )
         
                 tools += [ tidamuon ]
 
@@ -508,21 +510,22 @@ def TrigIDR4MonitoringCA( flags, monlevels=None ):
         from AthenaMonitoring import AthMonitorCfgHelper
         monConfig = AthMonitorCfgHelper(flags, "TrigIDR4Mon")
 
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        
         print( "monlevel: ", monlevels )
         
-        algs  = TrigIDR4Monitoring(flags, "Tier0", monlevel="idMon:t0:shifter" )
+        algs  = TrigIDR4Monitoring(flags, "Tier0", monlevel="idMon:t0:shifter", kak=ca )
         #     algs += TrigIDR4Monitoring(flags, "Shifter", monlevel="idMon:shifter" ) 
 
         if flags.Input.isMC:    
-            algs += TrigIDR4Monitoring( flags, name="PhysVal", monlevel="idMon:t0" )
-            algs += TrigIDR4Monitoring( flags, name="PhysValShifter", monlevel="idMon:shifter" )
+            algs += TrigIDR4Monitoring( flags, name="PhysVal", monlevel="idMon:t0" , kak=ca )
+            algs += TrigIDR4Monitoring( flags, name="PhysValShifter", monlevel="idMon:shifter", kak=ca )
         
 
         for a in algs:
                 monConfig.addAlgorithm(a)
 
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        ca = ComponentAccumulator()
         ca.merge(monConfig.result())
         return ca
 
@@ -531,19 +534,26 @@ def TrigIDR4MonitoringCA( flags, monlevels=None ):
 # create a separate specific monTool for each analysis chain
 # - simplifies the overall analysis configuration
 
-def createTATools( flags, label, chains, excludeTagChains=True ):
+def createTATools( flags, label, chains, excludeTagChains=True, kak=None ):
         tools = []
         from TrigInDetAnalysisExample.chainString import chainString
         from TrigInDetAnalysisExample.TIDAMonTool import createMonTool
 
         from InDetTrackPerfMon.TrackAnalysisConfig import createTrackAnalysis
 
+        print( "SUTT: ", label, kak )
+
+        inflags = flags
+        # inflags = flags.clone()
+        
         for mt in chains :
+        
                 cs = chainString(mt)
                 if excludeTagChains and "tag" in cs.extra:
                         continue
-                tool   = createMonTool( flags, label, mt )
-                tatool = createTrackAnalysis( flags, mt, mt, tool  )  
+                tool   = createMonTool( inflags, label, mt )
+                # tools += [ tool ]
+                tatool = createTrackAnalysis( inflags, mt, mt, tool, kak  )  
                 tools += [ tatool ]
         return tools
         
@@ -613,7 +623,7 @@ if __name__=='__main__':
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    Nevents = 10
+    Nevents = -1
     cfg.run(Nevents)
 
 

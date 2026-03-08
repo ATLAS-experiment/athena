@@ -218,11 +218,16 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   ATH_MSG_DEBUG( "Processing event = " <<
                  thisTrkAnaCollections.eventInfo()->eventNumber() <<
                  "\n==========================================" );
+
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
 
+
+  std::cout <<  "SUTT: ALL Track Info: " << thisTrkAnaCollections.printInfo() << std::endl;;
+
+  
   /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty() ) {
-    ATH_MSG_DEBUG( "Some FULL collections are empty." );
+    ATH_MSG_WARNING( "Some FULL collections are empty." );
   }
 
   /// ------------------------------
@@ -230,9 +235,10 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// ------------------------------
   ATH_CHECK( m_trackQualitySelectionTool->selectTracks( thisTrkAnaCollections ) );
 
+  
   /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::FS ) ) {
-    ATH_MSG_DEBUG( "Some collections are empty after quality selection." );
+    ATH_MSG_WARNING( "Some collections are empty after quality selection." );
   }
 
   /// -------------------------------
@@ -281,7 +287,16 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// -- Main loop over selected RoIs --
     /// ----------------------------------
     /// Only one "dummy" RoI iteration for offline analysis
-    for( size_t ir=0 ; ir<selectedRoisSize ; ir++ ) {
+
+    /// Only one "dummy" RoI iteration for offline analysis
+
+    std::cout << "SUTT: Roi size: " << selectedRoisSize << " " << selectedRois.size() << std::endl; 
+
+
+    /// this isn is insane !! the selectedRoisize variable is NOT actually equal to the
+    /// size of the selectRois vector. WTF ?
+    for( size_t ir=selectedRoisSize ; ir-- ;  ) {
+      //    for( size_t ir=selectedRois.size() ; ir-- ;  ) {
 
       /// clear collections in this RoI from previous iteration
       thisTrkAnaCollections.clear( IDTPM::TrackAnalysisCollections::InRoI );
@@ -335,8 +350,8 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
 
       if( m_doMatch.value() ) {
         ATH_MSG_DEBUG( "Doing Test-Reference matching..." );
-        ATH_CHECK( m_trackMatchingTool->match( thisTrkAnaCollections,
-                                               chainRoIName, thisRoiStr ) );
+        ATH_CHECK( m_trackMatchingTool->match( thisTrkAnaCollections, chainRoIName, thisRoiStr ) );
+                                               
       }
 
       /// --------------------------
@@ -389,18 +404,76 @@ StatusCode InDetTrackPerfMonTool::procHistograms() {
 ///---------------------------
 ///----- loadCollections -----
 ///---------------------------
+/// why is thuis a method of the InDetTrackPerfMonClass, rather than the
+/// TrackAnalysisCollections class ?
+/// If the parameters are being passed by the TrackAnalysisDefinitions(Svc)
+/// then it makes sense for these *ContainerName (RHK ? or just strings ?)
+/// to come from there also
 StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollections& trkAnaColls ) {
 
   ATH_MSG_DEBUG( "Loading collections" );
 
-  /// Events
-  ATH_CHECK( trkAnaColls.fillEventInfo(
-      m_eventInfoContainerName, m_truthEventName, m_truthPileUpEventName ) );
+  std::cout << "SUTT loadcollections: eventInfo " <<  m_eventInfoContainerName.key() << std::endl;
 
+  std::cout << "SUTT loadcollections: truthPart " <<  m_truthParticleName.key() << std::endl;
+  std::cout << "SUTT loadcollections: offTrack  " <<  m_offlineTrkParticleName.key() << std::endl;
+  std::cout << "SUTT loadcollections: trigTrack " <<  m_triggerTrkParticleName.key() << std::endl;
+
+  std::cout << "SUTT loadcollections: truthVertex " <<  m_truthVertexContainerName.key()  << std::endl;
+  std::cout << "SUTT loadcollections: offVertex   " <<  m_offlineVertexContainerName.key() << std::endl;
+  std::cout << "SUTT loadcollections: trigVertex  " <<  m_triggerVertexContainerName.key() << std::endl;
+
+  std::cout << "SUTT: test: " << m_trkAnaDef->testType()      << "\t" << m_trkAnaDef->testTag()      << std::endl;
+  std::cout << "SUTT: ref:  " << m_trkAnaDef->referenceType() << "\t" << m_trkAnaDef->referenceTag() << std::endl;
+
+  std::cout << "SUTT: test coll: " << m_trkAnaDef->testCollection()      << std::endl;
+  std::cout << "SUTT: ref coll:  " << m_trkAnaDef->referenceCollection() << std::endl;
+
+  
+  /// these track collections should perhaps be added to this configuration object - in fact all the
+  /// configuration parameters that need to be passed around, should go there, then we don't need any
+  /// class variables and the fetching could properly be moved to the TrackAnalysisCollection class
+  /// where it arguably belongs, since that class fetches the collections already, so all they should
+  /// need is the name of the collection
+
+  /// Events
+  ATH_CHECK( trkAnaColls.fillEventInfo( m_eventInfoContainerName, m_truthEventName, m_truthPileUpEventName ) );
+
+  //// this is bad practice - trying to fetch truth, offline, and trigger even though
+  ///  really only two should ever be defined (even i nthe case where we want
+  ///  eg truth matched offline as the reference, then the truth matched part
+  ///  should be in the offline selection, and not make it to the list of tracks
+  ///  to be processed
   /// Tracks
+#if 1
   ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
-  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );
+  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );  /// why are some "Tracks" abreviated to "Trk" but not others ????
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );
+#else
+
+  /// can get the names opf the track collections from the anaTrkDef, so really, should
+  /// just be able to retrieve the test anmd reference collections directly,
+  /// but can't be done like this yet
+
+  /// notice here, the name we pass in is always the same, so the problem, it that we have different
+  /// methods and different variables in the class for trigger, offline or truth particles
+  /// if we more sensibly had only the test and reference collections, we would
+  /// always only need
+  ///
+  ///     tc.fetchRefCollection( m_trkAnaDef->referenceCollection() );
+  ///     tc.fetchTestCollection( m_trkAnaDef->testCollection() );
+  ///
+  /// and everything else afterwards would be a lot simpler
+  
+  if      ( m_trkAnaDef->referenceType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->referenceCollection() ) );
+  else if ( m_trkAnaDef->referenceType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->referenceCollection() ) ); 
+  else if ( m_trkAnaDef->referenceType() == "Truth" )    ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->referenceCollection() ) );
+  
+  if      ( m_trkAnaDef->testType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->testCollection() ) );
+  else if ( m_trkAnaDef->testType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->testCollection() ) ); 
+  else if ( m_trkAnaDef->testType() == "Truth" )    ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->testCollection() ) );
+
+#endif
 
   /// Vertices
   ATH_CHECK( trkAnaColls.fillTruthVertexContainer( m_truthVertexContainerName ) );

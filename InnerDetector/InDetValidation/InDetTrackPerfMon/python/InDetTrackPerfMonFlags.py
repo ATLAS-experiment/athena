@@ -190,10 +190,10 @@ def initializeIDTPMTrkAnaConfigFlags( flags ):
     # Set output file names
     prefix = flags.PhysVal.IDTPM.outputFilePrefix
     if 'HIST.root' in prefix :
-        flags.PhysVal.OutputFileName = prefix
+        flags.PhysVal.OutputFileName   = prefix
         flags.Output.AOD_IDTPMFileName = prefix.replace( 'HIST', 'AOD_IDTPM.pool' )
     else :
-        flags.PhysVal.OutputFileName = prefix + '.HIST.root'
+        flags.PhysVal.OutputFileName   = prefix + '.HIST.root'
         flags.Output.AOD_IDTPMFileName = prefix + '.AOD_IDTPM.pool.root'
 
     # Default TrackAnalysis configuration flags category

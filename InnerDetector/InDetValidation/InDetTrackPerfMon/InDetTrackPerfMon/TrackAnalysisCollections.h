@@ -74,92 +74,55 @@ namespace IDTPM {
     /// fill event info
     StatusCode fillEventInfo(
         const SG::ReadHandleKey<xAOD::EventInfo>& eventInfoHandleKey,
-        const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
-        const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey );
+        const SG::ReadHandleKey<xAOD::TruthEventContainer>& truthEventHandleKey,
+        const SG::ReadHandleKey<xAOD::TruthPileupEventContainer>& truthPUEventHandleKey );
 
+    
+    /// more rational generic fill method 
+    template<typename T>
+    StatusCode fill( T const*& container, const std::string& key );
+
+      
     /// fill FULL track collections and vectors
-    StatusCode fillTruthPartContainer( const SG::ReadHandleKey< xAOD::TruthParticleContainer >& truthPartHandleKey );
-
+    StatusCode fillTruthPartContainer( const SG::ReadHandleKey<xAOD::TruthParticleContainer>& truthPartHandleKey );
     StatusCode fillOfflTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
-
     StatusCode fillTrigTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey );
 
     /// proper string methods 
+    StatusCode fillTruthPartContainer( const std::string& key );
     StatusCode fillOfflTrackContainer( const std::string& key );
-
     StatusCode fillTrigTrackContainer( const std::string& key );
 
     /// fill TEST track vectors
-    StatusCode fillTestTruthVec(
-        const std::vector< const xAOD::TruthParticle* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillTestTrackVec(
-        const std::vector< const xAOD::TrackParticle* >& vec,
-        Stage stage = FULL );
+    StatusCode fillTestTruthVec( const std::vector< const xAOD::TruthParticle* >& vec, Stage stage = FULL );
+    StatusCode fillTestTrackVec( const std::vector< const xAOD::TrackParticle* >& vec, Stage stage = FULL );
 
     /// fill REFERENCE track vectors
-    StatusCode fillRefTruthVec(
-        const std::vector< const xAOD::TruthParticle* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillRefTrackVec(
-        const std::vector< const xAOD::TrackParticle* >& vec,
-        Stage stage = FULL );
+    StatusCode fillRefTruthVec( const std::vector< const xAOD::TruthParticle* >& vec, Stage stage = FULL );
+    StatusCode fillRefTrackVec( const std::vector< const xAOD::TrackParticle* >& vec, Stage stage = FULL );
 
     /// fill truth/offline/trigger track vector (TEST || REFERENCE)
-    StatusCode fillTruthPartVec(
-        const std::vector< const xAOD::TruthParticle* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillOfflTrackVec(
-        const std::vector< const xAOD::TrackParticle* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillTrigTrackVec(
-        const std::vector< const xAOD::TrackParticle* >& vec,
-        Stage stage = FULL );
+    StatusCode fillTruthPartVec( const std::vector< const xAOD::TruthParticle* >& vec, Stage stage = FULL );
+    StatusCode fillOfflTrackVec( const std::vector< const xAOD::TrackParticle* >& vec, Stage stage = FULL );
+    StatusCode fillTrigTrackVec( const std::vector< const xAOD::TrackParticle* >& vec, Stage stage = FULL );
 
     /// fill FULL vertex collections and vectors
-    StatusCode fillTruthVertexContainer(
-        const SG::ReadHandleKey< xAOD::TruthVertexContainer >& truthVertexHandleKey );
-
-    StatusCode fillOfflVertexContainer(
-        const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
-
-    StatusCode fillTrigVertexContainer(
-        const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
+    StatusCode fillTruthVertexContainer( const SG::ReadHandleKey< xAOD::TruthVertexContainer >& truthVertexHandleKey );
+    StatusCode fillOfflVertexContainer( const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
+    StatusCode fillTrigVertexContainer( const SG::ReadHandleKey< xAOD::VertexContainer >& handleKey );
 
     /// fill TEST vertex vectors
-    StatusCode fillTestTruthVertexVec(
-        const std::vector< const xAOD::TruthVertex* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillTestRecoVertexVec(
-        const std::vector< const xAOD::Vertex* >& vec,
-        Stage stage = FULL );
+    StatusCode fillTestTruthVertexVec( const std::vector< const xAOD::TruthVertex* >& vec, Stage stage = FULL );
+    StatusCode  fillTestRecoVertexVec( const std::vector< const xAOD::Vertex* >&      vec, Stage stage = FULL );
 
     /// fill REFERENCE vertex vectors
-    StatusCode fillRefTruthVertexVec(
-        const std::vector< const xAOD::TruthVertex* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillRefRecoVertexVec(
-        const std::vector< const xAOD::Vertex* >& vec,
-        Stage stage = FULL );
+    StatusCode fillRefTruthVertexVec( const std::vector< const xAOD::TruthVertex* >& vec, Stage stage = FULL );
+    StatusCode  fillRefRecoVertexVec( const std::vector< const xAOD::Vertex* >&      vec, Stage stage = FULL );
 
     /// fill truth/offline/trigger vertex vector (TEST || REFERENCE)
-    StatusCode fillTruthVertexVec(
-        const std::vector< const xAOD::TruthVertex* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillOfflVertexVec(
-        const std::vector< const xAOD::Vertex* >& vec,
-        Stage stage = FULL );
-
-    StatusCode fillTrigVertexVec(
-        const std::vector< const xAOD::Vertex* >& vec,
-        Stage stage = FULL );
+    StatusCode fillTruthVertexVec( const std::vector< const xAOD::TruthVertex* >& vec, Stage stage = FULL );
+    StatusCode  fillOfflVertexVec( const std::vector< const xAOD::Vertex* >&      vec, Stage stage = FULL );
+    StatusCode  fillTrigVertexVec( const std::vector< const xAOD::Vertex* >&      vec, Stage stage = FULL );
 
     /// --- Utility  methods ---
 
@@ -344,6 +307,30 @@ namespace IDTPM {
  
   }; // class TrackAnalysisCollections
 
+
+  /// more rational generic fill method 
+  template<typename T>
+  StatusCode TrackAnalysisCollections::fill( T const*& container, const std::string& key ) {
+      
+      ATH_MSG_DEBUG( "Loading collection: " << key );
+      
+      SG::ReadHandle<T> pColl( key );
+      
+      if( ! pColl.isValid() ) {
+	ATH_MSG_ERROR( "Non valid collection: " << key );
+	return StatusCode::FAILURE;
+      }
+      
+      /// Fill container                                                                                                                                                                                                         
+      container = pColl.cptr();
+
+      std::cout << "SUTT: TAC: collections: " << key << "\tsize: " << container->size() << std::endl;
+
+      return StatusCode::SUCCESS;
+  }
+
+
+  
 } // namespace IDTPM
 
 #endif // > !INDETTRACKPERFMON_TRACKANALYSISCOLLECTIONS_H

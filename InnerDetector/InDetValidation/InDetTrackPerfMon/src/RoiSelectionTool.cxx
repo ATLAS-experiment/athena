@@ -13,8 +13,7 @@
 ///----------------------------------------
 ///------- parametrized constructor -------
 ///----------------------------------------
-IDTPM::RoiSelectionTool::RoiSelectionTool(
-    const std::string& name ) :
+IDTPM::RoiSelectionTool::RoiSelectionTool( const std::string& name ) :
   asg::AsgTool( name ) { }
 
 
