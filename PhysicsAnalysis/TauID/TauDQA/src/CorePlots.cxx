@@ -60,9 +60,12 @@ namespace Tau{
     m_cluster_logEt = Book1D("cluster_logEt" , "log(cluster E_{T});log(cluster E_{T});Entries",50,1.5,6.5);
     m_cluster_eta = Book1D("cluster_eta" , "cluster eta;cluster eta;Entries",50,-2.6,2.6);
     m_cluster_phi = Book1D("cluster_phi" , "cluster phi;cluster phi;Entries",32,-3.2,3.2);
+    m_cluster_secondR_nl = Book1D("cluster_secondR_nl", "cluster SECOND_R; cluster SECOND_R; Entries", 60,-1.0,50.0);  
     m_cluster_secondR = Book1D("cluster_secondR" , "log(cluster SECOND_R);log(cluster SECOND_R);Entries",50,-1.,6.);
     m_cluster_secondLambda = Book1D("cluster_secondLambda" , "log(cluster SECOND_LAMBDA);log(cluster SECOND_LAMBDA);Entries",50,2.,6.5);
+    m_cluster_centerLambda_nl = Book1D("cluster_centerLambda_nl", "cluster CENTER_LAMBDA; cluster CENTER_LAMBDA;Entries", 60,-1.0,3000.0);
     m_cluster_centerLambda = Book1D("cluster_centerLambda" , "log(cluster CENTER_LAMBDA);log(cluster CENTER_LAMBDA);Entries",50,1.,4.);
+    m_cluster_firstEngDens_nl = Book1D("cluster_firstEngDens_nl", "cluster FIRST_ENG_DENS;cluster FIRST_ENG_DENS;Entries", 60,-1.0,2.0);
     m_cluster_firstEngDens = Book1D("cluster_firstEngDens" , "log(cluster FIRST_ENG_DENS);log(cluster FIRST_ENG_DENS);Entries",50,-6.,1.);
     m_cluster_EMproba = Book1D("cluster_EMproba" , "cluster EM_PROBABILITY;cluster EM_PROBABILITY;Entries",20,0.,1.); 
 
@@ -261,15 +264,18 @@ namespace Tau{
       const xAOD::CaloCluster& cluster = vertexedCluster.clust();
 
       cluster.retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_R, moment);
+      m_cluster_secondR_nl->Fill(moment,weight);
       m_cluster_secondR->Fill(std::log10(moment + 0.1), weight);
 
       cluster.retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_LAMBDA, moment);
       m_cluster_secondLambda->Fill(std::log10(moment + 0.1), weight);
 
       cluster.retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, moment);
+      m_cluster_centerLambda_nl->Fill(moment, weight); 
       m_cluster_centerLambda->Fill(std::log10(moment + 1e-6), weight);
 
       cluster.retrieveMoment(xAOD::CaloCluster::MomentType::FIRST_ENG_DENS, moment);
+      m_cluster_firstEngDens_nl->Fill(moment, weight); 
       if(moment!=0.) moment = std::log10(std::abs(moment));
       m_cluster_firstEngDens->Fill(moment, weight);
 

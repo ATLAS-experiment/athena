@@ -61,9 +61,12 @@ class CorePlots: public PlotBase {
     TH1* m_cluster_logEt{};
     TH1* m_cluster_eta{};
     TH1* m_cluster_phi{};
+    TH1* m_cluster_secondR_nl{};
     TH1* m_cluster_secondR{};
     TH1* m_cluster_secondLambda{};
+    TH1* m_cluster_centerLambda_nl{};
     TH1* m_cluster_centerLambda{};
+    TH1* m_cluster_firstEngDens_nl{};
     TH1* m_cluster_firstEngDens{};
     TH1* m_cluster_EMproba{};
 
