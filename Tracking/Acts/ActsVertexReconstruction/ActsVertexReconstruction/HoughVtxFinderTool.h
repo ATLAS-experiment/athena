@@ -52,13 +52,12 @@ private:
   std::unique_ptr<const Acts::Logger> m_logger{nullptr};
   const Acts::Logger &logger() const { return *m_logger; }
 
-  // spacepoint is required to have "x()", "y()", "z()", and "r()" methods
+  // spacepoint is required to have "x()", "y()", and "z()" methods
   struct SpacePoint {
     SpacePoint(const xAOD::SpacePoint *sp) : m_x(sp->x()), m_y(sp->y()), m_z(sp->z()) {}
     double x() const { return m_x; }
     double y() const { return m_y; }
     double z() const { return m_z; }
-    double r() const { return std::sqrt(m_x * m_x + m_y * m_y); }
    private:
     double m_x, m_y, m_z;
   };
@@ -69,10 +68,7 @@ private:
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
   UnsignedIntegerProperty m_minSPs{this, "minSPs", 100, "Minimum amount of spacepoints to attempt vertex finding"};
-
-  // workaround for a bug in ACTS - defVtxPosition should be (0,0,0), until Athena uses ACTS version that includes PR #5060
-  const bool m_useBeamSpot = false;
-  // BooleanProperty m_useBeamSpot{this, "useBeamSpot", false, "Use beam spot XY positions as the default vertex position"};
+  BooleanProperty m_useBeamSpot{this, "useBeamSpot", true, "Use beam spot XY positions as the default vertex position"};
 
   // Configuration variables
   // For details check ACTS documentation
