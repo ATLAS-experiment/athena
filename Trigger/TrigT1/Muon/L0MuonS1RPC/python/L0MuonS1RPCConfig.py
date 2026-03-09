@@ -56,8 +56,8 @@ if __name__ == "__main__":
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcRdoToRpcDigitCfg
     acc.merge(RpcRdoToRpcDigitCfg(flags))
     ### Create the xAOD::TruthParticles
-    from xAODTruthCnv.xAODTruthCnvConfig import GEN_EVNT2xAODCfg
-    acc.merge(GEN_EVNT2xAODCfg(flags,name="GEN_EVNT2xAOD",AODContainerName="TruthEvent"))
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import HepMCtoXAODTruthCfg
+    acc.merge(HepMCtoXAODTruthCfg(flags))
 
     # example simulation alg
     acc.merge(L0MuonRPCSimCfg(flags,
