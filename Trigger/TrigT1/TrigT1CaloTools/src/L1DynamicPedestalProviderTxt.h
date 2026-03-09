@@ -1,6 +1,6 @@
 /** -*- C++ -*-*/
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /* 
  * @file L1DynamicPedestalProviderTxt.h
@@ -19,13 +19,13 @@
 #include "LumiBlockData/BunchCrossingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include <array>
 #include <cstdint> // for guaranteed size-types
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility> // std::pair
 #include <vector>
+#include <array>
 
 namespace LVL1
 {
