@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloBlueprintNodeBuilder.h"
@@ -24,7 +24,6 @@
 #include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 
 
-#include "Acts/Surfaces/Surface.hpp"
 #include <Acts/Surfaces/SurfaceArray.hpp>
 #include "CaloIdentifier/CaloCell_ID.h"
 
@@ -125,7 +124,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
   //a tolerance value
 
   //Use the same loop to create map bwteeen sampling and vectors of DDE
-  for (auto currentSample : m_caloCylinderSampleList) {
+  for (const auto & currentSample : m_caloCylinderSampleList) {
     caloSampleSurfaceMap[currentSample] = std::vector<std::shared_ptr<Surface> >();
     caloSampleDDEElementsMap[currentSample] = std::vector<const CaloDetDescrElement*>();
   }
@@ -146,7 +145,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
   }
 
   auto sortAllLayersInZ = [&caloSampleDDEElementsMap](const std::vector<std::pair<std::string, CaloCell_ID::CaloSample>>& caloSampleList) {
-    for (auto currentSample : caloSampleList) {
+    for (const auto & currentSample : caloSampleList) {
       std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
       std::sort(currentElements.begin(), currentElements.end(), [](const CaloDetDescrElement* a, const CaloDetDescrElement* b) {return a->z() < b->z();});
       caloSampleDDEElementsMap[currentSample] = std::move(currentElements);
@@ -161,7 +160,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
 
 void ActsTrk::CaloBlueprintNodeBuilder::generateCylinderSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const{
 
-  for (auto currentSample : m_caloCylinderSampleList) {
+  for (const auto & currentSample : m_caloCylinderSampleList) {
 
     std::vector<const CaloDetDescrElement*> currentElements = caloSampleDDEElementsMap[currentSample];
 
