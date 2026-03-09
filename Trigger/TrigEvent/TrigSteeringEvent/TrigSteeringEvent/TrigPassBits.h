@@ -10,7 +10,6 @@
 #include <stdexcept>
 
 #include "xAODCore/CLASS_DEF.h"
-// TrigPassBitsCollection is included at the end (required by Trigger EDM schema)
 
 
 class TrigPassBits {
@@ -88,7 +87,6 @@ namespace HLT {
   }
 } // eof HLT namespace
 
-#include "TrigSteeringEvent/TrigPassBitsCollection.h"
 
 #endif // TrigSteeringEvent_TrigPassBits_h
 

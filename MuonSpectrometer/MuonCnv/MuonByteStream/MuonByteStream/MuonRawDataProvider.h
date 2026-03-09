@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_MUONRAWDATAPROVIDER_H
@@ -9,7 +9,7 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 namespace Muon {
 

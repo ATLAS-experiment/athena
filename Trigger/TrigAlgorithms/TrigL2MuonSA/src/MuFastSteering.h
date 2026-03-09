@@ -9,7 +9,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "MuFastDataPreparator.h"
 #include "MuFastPatternFinder.h"

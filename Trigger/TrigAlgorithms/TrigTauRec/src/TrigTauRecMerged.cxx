@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauRecMerged.h"
@@ -27,7 +27,9 @@
 #include "xAODTau/TauTrackAuxContainer.h"
 
 #include <iterator>
-#include <algorithm>
+#include <algorithm> //std::min
+#include <functional> //std::ref
+#include <cmath> //std::log10
 
 
 TrigTauRecMerged::TrigTauRecMerged(const std::string& name, ISvcLocator* pSvcLocator)
