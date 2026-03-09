@@ -244,7 +244,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endTransaction( ConnectionH conn,
+    virtual StatusCode endTransaction( FileDescriptor& refDB,
                                        Transaction::Action typ) override final;
 
     /// Access options for a given database domain.

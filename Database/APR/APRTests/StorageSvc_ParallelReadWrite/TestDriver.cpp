@@ -14,7 +14,7 @@
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
@@ -60,8 +60,6 @@ TestDriver::testWriting()
   if( !storSvc->connect( pool::RECREATE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
-  pool::DatabaseConnection* connection = fd.dbc();
-
   // Retrieve the dictionary
   RootType class_SimpleTestClass  ( "SimpleTestClass" );
   if ( ! class_SimpleTestClass ) {
@@ -93,7 +91,7 @@ TestDriver::testWriting()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -137,8 +135,7 @@ TestDriver::testParallelReadWrite()
     throw std::runtime_error( "Could not start a connection." );
   }
 
-  pool::DatabaseConnection* connection = fd1.dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( fd1.dbc()->handle() );
   if ( !dbH.isValid() )  {
     throw std::runtime_error( "Database is not valid" );
   }
@@ -226,10 +223,10 @@ TestDriver::testParallelReadWrite()
 
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( fd1.dbc(), pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd1, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
-  if ( ! ( storSvc->endTransaction( fd2.dbc(), pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd2, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -274,8 +271,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not start a connection." );
   }
 
-  pool::DatabaseConnection* connection = fd.dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( fd.dbc()->handle() );
   if ( !dbH.isValid() )  {
     throw std::runtime_error( "Database is not valid" );
   }
@@ -329,7 +325,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Objects read different from objects written" );
   }
 
-  if ( ! ( storSvc->endTransaction( fd.dbc(), pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 

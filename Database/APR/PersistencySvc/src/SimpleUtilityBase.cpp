@@ -12,8 +12,7 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/DatabaseConnection.h"
-#include "StorageSvc/pool.h"
+#include "StorageSvc/DbConnection.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 
@@ -80,8 +79,7 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
    if( ! storageSvc->connect(pool::READ, fd).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
-   pool::DatabaseConnection* connection = fd.dbc();
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fd.dbc()->handle() );
    StatusCode sc = dbH.param( "FID", fid );
    if( !storageSvc->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
       throw std::runtime_error( "Could not retrieve the FID from file \"" + pfn + "\"" );

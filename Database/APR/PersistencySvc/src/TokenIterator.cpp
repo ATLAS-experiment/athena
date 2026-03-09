@@ -16,8 +16,7 @@ pool::PersistencySvc::TokenIterator::TokenIterator( FileDescriptor& fileDescript
                                                     const std::string& containerName) :
   m_container( nullptr ), m_refToken ( nullptr )
 {
-   pool::DatabaseConnection* connection = fileDescriptor.dbc();
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fileDescriptor.dbc()->handle() );
    if ( dbH.isValid() )  {
       m_refToken = new Token(dbH.cntToken(containerName));
       m_container = new DbContainer(m_refToken->technology());

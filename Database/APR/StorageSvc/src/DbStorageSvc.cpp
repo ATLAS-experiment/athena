@@ -19,7 +19,6 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbTransform.h"
 #include "StorageSvc/DbConnection.h"
@@ -322,9 +321,9 @@ StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, int& mode) {
 }
 
 /// End/Finish an existing Transaction sequence.
-StatusCode DbStorageSvc::endTransaction( ConnectionH connection, Transaction::Action typ)
+StatusCode DbStorageSvc::endTransaction(FileDescriptor& refDB, Transaction::Action typ)
 {
-   return ( (DbDatabaseObj*)connection->handle() )->transAct( typ );
+   return refDB.dbc()->handle()->transAct( typ );
 }
 
 /// Access technology implementations
