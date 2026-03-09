@@ -64,14 +64,6 @@ BOOST_AUTO_TEST_CASE(HWIdentifierConstructors){
   HWIdentifier::value_type vt{7647634};
   std::string real_name = boost::core::demangle(typeid(vt).name());
   BOOST_TEST_MESSAGE("HWIdentifier::value_type is " + real_name);//what is value_type?
-  boost::test_tools::output_test_stream output;
-  {//scoped redirect of cout
-    cout_redirect guard( output.rdbuf() );
-    BOOST_CHECK_NO_THROW([[maybe_unused]] HWIdentifier a(vt));//from value type
-  }
-  //should have put a warning in cout
-  BOOST_TEST( output.str().find("WARNING")!= std::string::npos);
-  output.flush();
   //
   Identifier id(454545);
   BOOST_CHECK_NO_THROW([[maybe_unused]] HWIdentifier hwid(id));//from Identifier

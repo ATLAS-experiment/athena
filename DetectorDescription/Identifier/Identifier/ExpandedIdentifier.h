@@ -9,7 +9,7 @@
 #include <string>
 #include <algorithm>//for lexicographical_compare in the .icc file
 #include <boost/container/small_vector.hpp>
-#include <iostream>
+#include <iosfwd>
 
 class MsgStream;
 
@@ -159,7 +159,7 @@ public:
   /// Returns whether the expanded Identifier contains any information
   bool isValid() const;
   /// Display detail to ostream
-  void show (std::ostream & out = std::cout) const;
+  void show (std::ostream & out) const;
   /// Display detail to MsgStream
   void show (MsgStream & out) const;
 private:

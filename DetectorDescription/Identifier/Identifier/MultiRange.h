@@ -9,7 +9,7 @@
 #include "Identifier/Range.h"
 #include "Identifier/RangeIterator.h"
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 class MsgStream;
 
@@ -119,7 +119,7 @@ public:
   const_identifier_factory 	factory_begin () const; 
   identifier_factory 		factory_end (); 
   const_identifier_factory 	factory_end () const; 
-  void show (std::ostream& s = std::cout) const; 
+  void show (std::ostream& s) const; 
   void show (MsgStream & out) const; 
   /// Generate a textual representation of the multirange using the input format 
   operator std::string () const; 

@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(ExpandedIdentifierRepresentation){
   boost::test_tools::output_test_stream output;
   {//scoped redirect of cout
     cout_redirect guard( output.rdbuf( ) );
-    g.show();
+    g.show(std::cout);
   }
   BOOST_CHECK( output.is_equal( "[-3.-2.-1.1.2.3]" ) );
   std::ostringstream s;

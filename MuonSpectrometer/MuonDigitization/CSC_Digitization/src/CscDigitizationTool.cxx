@@ -267,8 +267,7 @@ FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
       ATH_MSG_ERROR ( "Unable to get CSC hash id from CSC Digit collection "
                       << "context begin_index = " << cscContext.begin_index()
                       << " context end_index  = " << cscContext.end_index()
-                      << " the identifier is " );
-      elementId.show();
+                      << " the identifier is \n" << elementId);
     }
 
 
@@ -411,8 +410,7 @@ FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposit
       ATH_MSG_ERROR ( "Unable to get CSC hash id from CSC Digit collection "
                       << "context begin_index = " << cscContext.begin_index()
                       << " context end_index  = " << cscContext.end_index()
-                      << " the identifier is " );
-      elementId.show();
+                      << " the identifier is \n"<< elementId );
     }
 
     if (prevId != elementId) {

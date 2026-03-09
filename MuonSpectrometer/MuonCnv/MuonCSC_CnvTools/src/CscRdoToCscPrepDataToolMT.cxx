@@ -185,8 +185,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
     if (m_idHelperSvc->cscIdHelper().get_hash(stationId, cscHashId, &cscContext)) {
         ATH_MSG_WARNING("Unable to get CSC digiti collection hash id "
                         << "context begin_index = " << cscContext.begin_index() << " context end_index  = " << cscContext.end_index()
-                        << " the identifier is ");
-        stationId.show();
+                        << " the identifier is " << stationId);
     }
     ATH_MSG_DEBUG("Create CSC PRD Collection with hash " << cscHashId << " (givenHashId is " << givenHashId << ")");
     std::unique_ptr<CscStripPrepDataCollection> collection = nullptr;
@@ -239,8 +238,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
 
             IdentifierHash stripHash;
             if (m_idHelperSvc->cscIdHelper().get_channel_hash(channelId, stripHash)) {
-                ATH_MSG_WARNING("Unable to get CSC strip hash id");
-                channelId.show();
+                ATH_MSG_WARNING("Unable to get CSC strip hash id "<<channelId);
             }
 
             bool adctocharge = m_cscCalibTool->adcToCharge(samples, stripHash, charges);
@@ -335,8 +333,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
             if (m_idHelperSvc->cscIdHelper().get_hash(stationId, cscHashId, &cscContext)) {
                 ATH_MSG_WARNING("Unable to get CSC digiti collection hash id "
                                 << "context begin_index = " << cscContext.begin_index()
-                                << " context end_index  = " << cscContext.end_index() << " the identifier is ");
-                stationId.show();
+                                << " context end_index  = " << cscContext.end_index() << " the identifier is "<<stationId);
             }
 
             ATH_MSG_DEBUG("Create CSC PRD Collection with hash " << cscHashId);
@@ -391,8 +388,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
 
                     IdentifierHash stripHash;
                     if (m_idHelperSvc->cscIdHelper().get_channel_hash(channelId, stripHash)) {
-                        ATH_MSG_WARNING("Unable to get CSC strip hash id");
-                        channelId.show();
+                        ATH_MSG_WARNING("Unable to get CSC strip hash id " << channelId);
                     }
 
                     Identifier channelIdFromHash;
@@ -413,8 +409,7 @@ StatusCode CscRdoToCscPrepDataToolMT::decodeImpl(Muon::CscStripPrepDataContainer
                     if (m_idHelperSvc->cscIdHelper().get_hash(stationId, cscHashId, &cscContext)) {
                         ATH_MSG_WARNING("Unable to get CSC hash id from CSC RDO collection "
                                         << "context begin_index = " << cscContext.begin_index()
-                                        << " context end_index  = " << cscContext.end_index() << " the identifier is ");
-                        stationId.show();
+                                        << " context end_index  = " << cscContext.end_index() << " the identifier is "<< stationId);
                     }
 
                     // Check if this strip is already decoded.. Then we don't have to decode it again

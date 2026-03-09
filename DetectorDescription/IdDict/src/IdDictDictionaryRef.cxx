@@ -12,6 +12,8 @@
 #include "IdDict/IdDictRange.h"
 #include "IdDict/IdDictFieldImplementation.h"
 
+#include <iostream>
+
 IdDictDictionaryRef::IdDictDictionaryRef (const std::string& dictionary_name)
   :
   m_dictionary_name(dictionary_name),

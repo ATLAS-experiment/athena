@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "STGC_RdoToDigit.h"
@@ -72,8 +72,7 @@ StatusCode STGC_RdoToDigit::decodeSTGC(const EventContext& ctx, const Muon::STGC
             if (m_idHelperSvc->stgcIdHelper().get_hash(elementId, coll_hash, &stgcContext)) {
                 ATH_MSG_WARNING("Unable to get STGC digit collection hash id "
                                 << "context begin_index = " << stgcContext.begin_index()
-                                << " context end_index  = " << stgcContext.end_index() << " the identifier is ");
-                elementId.show();
+                                << " context end_index  = " << stgcContext.end_index() << " the identifier is "<<elementId);
             }
 
             if (oldId != elementId) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -749,8 +749,7 @@ MdtDigitCollection* MdtDigitizationTool::getDigitCollection(Identifier elementId
     if (m_idHelperSvc->mdtIdHelper().get_hash(elementId, coll_hash, &mdtContext)) {
         ATH_MSG_ERROR("Unable to get MDT hash id from MDT Digit collection "
                       << "context begin_index = " << mdtContext.begin_index() << " context end_index  = " << mdtContext.end_index()
-                      << " the identifier is ");
-        elementId.show();
+                      << " the identifier is \n"<<elementId);
     }
 
     if (coll_hash >= collections.size()) {
