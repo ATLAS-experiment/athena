@@ -13,7 +13,7 @@ atlas_add_library( EGammaVariableCorrectionLib
    Root/*.cxx
    PUBLIC_HEADERS EGammaVariableCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib EgammaAnalysisHelpersLib AthOnnxInterfaces AthContainers AsgDataHandlesLib xAODEventInfo
    PRIVATE_LINK_LIBRARIES PathResolver xAODEgamma xAODEventShape)
 
 if( NOT XAOD_STANDALONE )
