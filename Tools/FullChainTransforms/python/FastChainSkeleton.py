@@ -48,7 +48,8 @@ def fromRunArgs(runArgs):
 
         if flags.Overlay.DataOverlay:
             from SimulationConfig.SimEnums import VertexSource
-            flags.Sim.VertexSource = VertexSource.MatchingBkg
+            if flags.Sim.VertexSource is VertexSource.CondDB:  # check vs the default to allow overriding
+                flags.Sim.VertexSource = VertexSource.MatchingBkg
     else:
         # Setting input files for FastChain without overlay
         if hasattr(runArgs, 'inputEVNTFile'):
