@@ -27,6 +27,10 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include "CxxUtils/libxml2Helper.h"
+
+using namespace CxxUtils;
+
 PunchThroughG4Classifier::PunchThroughG4Classifier(const std::string& type, const std::string& name, const IInterface*  parent)
     : base_class(type, name, parent) {
 }
@@ -57,7 +61,6 @@ StatusCode PunchThroughG4Classifier::finalize(){
 StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scalerConfigFile){
     // Initialize pointers
     xmlDocPtr doc;
-    xmlChar* xmlBuff = nullptr; 
 
     // Parse xml that contains config for MinMaxScaler for each of the network inputs
     doc = xmlParseFile( scalerConfigFile.c_str() );
@@ -71,12 +74,8 @@ StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scaler
 
                 //Get min and max values that we normalise values to
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "ScalerValues" )) {
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        m_scalerMin = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        m_scalerMax = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
+                    GetXmlAttrIfThere(nodeTransform, "min", m_scalerMin);
+                    GetXmlAttrIfThere(nodeTransform, "max", m_scalerMax);
                 }
 
                 //Get values necessary to normalise each input variable
@@ -84,19 +83,13 @@ StatusCode PunchThroughG4Classifier::initializeScaler(const std::string & scaler
                     std::string name = "";
                     double min=-1, max=-1;
 
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "name")) != nullptr) {
-                        name = reinterpret_cast<const char*>(xmlBuff);
-                    }
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        min = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        max = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
+                    GetXmlAttrIfThere(nodeTransform, "name", name);
+                    GetXmlAttrIfThere(nodeTransform, "min", min);
+                    GetXmlAttrIfThere(nodeTransform, "max", max);
 
                     // Insert into maps
-                    m_scalerMinMap.insert ( std::pair<std::string, double>(name, min) );
-                    m_scalerMaxMap.insert ( std::pair<std::string, double>(name, max) );
+                    m_scalerMinMap.emplace ( name, min );
+                    m_scalerMaxMap.emplace ( name, max );
                 }
             }
         }
@@ -131,7 +124,6 @@ StatusCode PunchThroughG4Classifier::initializeNetwork(const std::string & netwo
 StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & calibratorConfigFile){
     // Initialize pointers
     xmlDocPtr doc;
-    xmlChar* xmlBuff = nullptr; 
 
     //parse xml that contains config for isotonic regressor used to calibrate the network output
     ATH_MSG_DEBUG( "[ punchthroughclassifier ] Loading calibrator: " << calibratorConfigFile);
@@ -145,27 +137,19 @@ StatusCode PunchThroughG4Classifier::initializeCalibrator(const std::string & ca
 
                 //get lower and upper bounds of isotonic regressor
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "LimitValues" )) {
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "min")) != nullptr) {
-                        m_calibrationMin = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "max")) != nullptr) {
-                        m_calibrationMax = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
+                    GetXmlAttrIfThere(nodeTransform, "min", m_calibrationMin);
+                    GetXmlAttrIfThere(nodeTransform, "max", m_calibrationMax);
                 }
 
                 //get defined points where isotonic regressor knows transform
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "LinearNorm" )) {
                     double orig = -1;
                     double norm = -1;
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "orig")) != nullptr) {
-                        orig = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
-                    if ((xmlBuff = xmlGetProp(nodeTransform, BAD_CAST "norm")) != nullptr) {
-                        norm = atof(reinterpret_cast<const char*>(xmlBuff));
-                    }
+                    GetXmlAttrIfThere(nodeTransform, "orig", orig);
+                    GetXmlAttrIfThere(nodeTransform, "norm", norm);
 
                     // Insert into maps
-                    m_calibrationMap.insert ( std::pair<double,double>(orig, norm) );
+                    m_calibrationMap.emplace ( orig, norm );
                 }
             }
         }

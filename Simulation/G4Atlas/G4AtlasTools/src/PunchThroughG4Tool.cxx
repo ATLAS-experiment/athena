@@ -35,6 +35,9 @@
 
 // namespace Amg functions
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "CxxUtils/libxml2Helper.h"
+
+using namespace CxxUtils;
 
 PunchThroughG4Tool::PunchThroughG4Tool(const std::string& type, const std::string& name, const IInterface* parent)
   : base_class(type,name,parent)
@@ -929,7 +932,6 @@ int PunchThroughG4Tool::passedParamIterator(int pid, double eta, const std::vect
 std::vector<std::map<std::string, std::string>> PunchThroughG4Tool::getInfoMap(const std::string& mainNode, const std::string &xmlFilePath){
     // Initialize pointers
     xmlDocPtr doc;
-    xmlChar* xmlBuff = nullptr; 
 
     std::vector<std::map<std::string, std::string>>  xml_info;
     doc = xmlParseFile( xmlFilePath.c_str() );
@@ -943,21 +945,11 @@ std::vector<std::map<std::string, std::string>> PunchThroughG4Tool::getInfoMap(c
                         for( xmlNodePtr infoNode = nodeRootChild->children; infoNode != nullptr; infoNode = infoNode->next) {
                             if(xmlStrEqual( infoNode->name, BAD_CAST "item" )){
                                 std::map<std::string, std::string>  xml_info_item;
-
-                                if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "name")) != nullptr) {
-                                    xml_info_item.insert({"name", reinterpret_cast<const char*>(xmlBuff)});
-                                }
-                                if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMins")) != nullptr) {
-                                    xml_info_item.insert({"etaMins", reinterpret_cast<const char*>(xmlBuff)});
-                                }
-                                if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "etaMaxs")) != nullptr) {
-                                    xml_info_item.insert({"etaMaxs", reinterpret_cast<const char*>(xmlBuff)});
-                                }
-                                if ((xmlBuff = xmlGetProp(infoNode, BAD_CAST "pidStr")) != nullptr) {
-                                    xml_info_item.insert({"pidStr", reinterpret_cast<const char*>(xmlBuff)});
-                                }
-
-                                xml_info.push_back(xml_info_item);                                
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "name", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "etaMins", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "etaMaxs", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "pidStr", xml_info_item);
+                                xml_info.emplace_back(std::move(xml_info_item));
                             }
                         }
                     }
@@ -984,7 +976,6 @@ std::vector<double> PunchThroughG4Tool::inversePCA(int pcaCdfIterator, std::vect
 StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inversePCAConfigFile){
     // Initialize pointers
     xmlDocPtr doc;
-    xmlChar* xmlBuff = nullptr; 
 
     doc = xmlParseFile( inversePCAConfigFile.c_str() );
 
@@ -1010,21 +1001,17 @@ StatusCode PunchThroughG4Tool::initializeInversePCA(const std::string & inverseP
                                   std::vector<double> PCA_matrix_row;
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "comp_" + std::to_string(i); // Dynamically create property name
-                                      if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_matrix_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
-                                      }
+                                      AddXmlToCollection<double, std::vector<double> >(pcaNode, propName.c_str(), PCA_matrix_row);
                                   }
-                                  PCA_matrix.push_back(PCA_matrix_row);          
+                                  PCA_matrix.push_back(std::move(PCA_matrix_row));
                                 }
                                 else if (xmlStrEqual( pcaNode->name, BAD_CAST "PCAmeans" )) {
                                   std::vector<double> PCA_means_row;
                                   for (int i = 0; i <= 4; ++i) {
                                       std::string propName = "mean_" + std::to_string(i); // Dynamically create property name
-                                      if ((xmlBuff = xmlGetProp(pcaNode, BAD_CAST propName.c_str())) != nullptr) {
-                                          PCA_means_row.push_back(atof(reinterpret_cast<const char*>(xmlBuff))); // Convert and push to the row
-                                      }
+                                      AddXmlToCollection<double, std::vector<double> >(pcaNode, propName.c_str(), PCA_means_row);
                                   }
-                                  m_PCA_means.push_back(PCA_means_row);  
+                                  m_PCA_means.push_back(std::move(PCA_means_row));
                                 }
 
                             }
@@ -1111,19 +1098,14 @@ StatusCode PunchThroughG4Tool::initializeInverseCDF(const std::string & inverseC
 
 std::map<double, double> PunchThroughG4Tool::getVariableCDFmappings(xmlNodePtr& nodeParent){
     std::map<double, double>  mappings;
-    xmlChar* xmlBuff = nullptr; 
     double ref = -1;
     double quant = -1;
     for( xmlNodePtr node = nodeParent->children; node != nullptr; node = node->next ) {
         //Get min and max values that we normalise values to
         if (xmlStrEqual( node->name, BAD_CAST "CDFmap" )) {
-            if ((xmlBuff = xmlGetProp(node, BAD_CAST "ref")) != nullptr) {
-              ref = atof( reinterpret_cast<const char*> (xmlBuff) );
-            }
-            if ((xmlBuff = xmlGetProp(node, BAD_CAST "quant")) != nullptr) {
-              quant = atof( reinterpret_cast<const char*> (xmlBuff) );
-            }
-            mappings.insert(std::pair<double, double>(ref, quant) );
+            ref = GetXmlAttr(node, "ref", -1);
+            quant = GetXmlAttr(node, "quant", -1);
+            mappings.emplace(ref, quant );
         }
     }
 

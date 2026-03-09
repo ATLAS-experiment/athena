@@ -21,6 +21,10 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
+#include "CxxUtils/libxml2Helper.h"
+
+using namespace CxxUtils;
+
 ISF::PunchThroughClassifier::PunchThroughClassifier(const std::string& type, const std::string& name, const IInterface*  parent)
     : base_class(type, name, parent) {
 
@@ -83,17 +87,17 @@ StatusCode ISF::PunchThroughClassifier::initializeScaler(const std::string & sca
 
                 //Get min and max values that we normalise values to
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "ScalerValues" )) {
-                    m_scalerMin = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "min" ) );
-                    m_scalerMax = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "max" ) );
+                    m_scalerMin = GetXmlAttr<double>( nodeTransform, "min" );
+                    m_scalerMax = GetXmlAttr<double>( nodeTransform, "max" );
                 }
 
                 //Get values necessary to normalise each input variable
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "VarScales" )) {
-                    std::string name = (const char*) xmlGetProp( nodeTransform, BAD_CAST "name" );
-                    double min = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "min" ) );
-                    double max = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "max" ) );
-                    m_scalerMinMap.insert ( std::pair<std::string, double>(name, min) );
-                    m_scalerMaxMap.insert ( std::pair<std::string, double>(name, max) );
+                    std::string name = GetXmlAttr<std::string>( nodeTransform, "name" );
+                    double min = GetXmlAttr<double>( nodeTransform, "min" );
+                    double max = GetXmlAttr<double>( nodeTransform, "max" );
+                    m_scalerMinMap.emplace ( name, min );
+                    m_scalerMaxMap.emplace ( name, max );
                 }
             }
         }
@@ -137,15 +141,15 @@ StatusCode ISF::PunchThroughClassifier::initializeCalibrator(const std::string &
 
                 //get lower and upper bounds of isotonic regressor
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "LimitValues" )) {
-                    m_calibrationMin = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "min" ) );
-                    m_calibrationMax = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "max" ) );
+                    m_calibrationMin = GetXmlAttr<double>( nodeTransform, "min" );
+                    m_calibrationMax = GetXmlAttr<double>( nodeTransform, "max" );
                 }
 
                 //get defined points where isotonic regressor knows transform
                 if (xmlStrEqual( nodeTransform->name, BAD_CAST "LinearNorm" )) {
-                    double orig = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "orig" ) );
-                    double norm = atof( (const char*) xmlGetProp( nodeTransform, BAD_CAST "norm" ) );
-                    m_calibrationMap.insert ( std::pair<double,double>(orig, norm) );
+                    double orig = GetXmlAttr<double>( nodeTransform, "orig" );
+                    double norm = GetXmlAttr<double>( nodeTransform, "norm" );
+                    m_calibrationMap.emplace ( orig, norm );
                 }
             }
         }

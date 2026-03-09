@@ -8,6 +8,9 @@
 
 // Class header include
 #include "ISF_FastCaloSimEvent/TFCSGANXMLParameters.h"
+#include "CxxUtils/libxml2Helper.h"
+
+using namespace CxxUtils;
 
 TFCSGANXMLParameters::TFCSGANXMLParameters() = default;
 
@@ -32,36 +35,29 @@ void TFCSGANXMLParameters::InitialiseFromXML(
       for (xmlNodePtr nodeParticle = nodeRoot->children;
            nodeParticle != nullptr; nodeParticle = nodeParticle->next) {
         if (xmlStrEqual(nodeParticle->name, BAD_CAST "Particle")) {
-          int nodePid = std::stoi(reinterpret_cast<const char*>(
-              xmlGetProp(nodeParticle, BAD_CAST "pid")));
+          int nodePid =  GetXmlAttr<int>(nodeParticle, "pid");
 
           if (nodePid == pid) {
             for (xmlNodePtr nodeBin = nodeParticle->children;
                  nodeBin != nullptr; nodeBin = nodeBin->next) {
               if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
-                int nodeEtaMin = std::stoi(reinterpret_cast<const char*>(
-                    xmlGetProp(nodeBin, BAD_CAST "etaMin")));
-                int nodeEtaMax = std::stoi(reinterpret_cast<const char*>(
-                    xmlGetProp(nodeBin, BAD_CAST "etaMax")));
-                int regionId = std::stoi(reinterpret_cast<const char*>(
-                    xmlGetProp(nodeBin, BAD_CAST "regionId")));
+                int nodeEtaMin = GetXmlAttr<int>(nodeBin, "etaMin");
+                int nodeEtaMax = GetXmlAttr<int>(nodeBin, "etaMax");
+                int regionId   = GetXmlAttr<int>(nodeBin, "regionId");
 
                 if (std::abs(etaMid) > nodeEtaMin &&
                     std::abs(etaMid) < nodeEtaMax) {
 
                   m_symmetrisedAlpha =
                       ReadBooleanAttribute("symmetriseAlpha", nodeParticle);
-                  m_ganVersion = std::stod(reinterpret_cast<const char*>(
-                      xmlGetProp(nodeBin, BAD_CAST "ganVersion")));
-                  m_latentDim = std::stod(reinterpret_cast<const char*>(
-                      xmlGetProp(nodeParticle, BAD_CAST "latentDim")));
+                  m_ganVersion = GetXmlAttr<int>(nodeBin, "ganVersion");
+                  m_latentDim  = GetXmlAttr<int>(nodeParticle, "latentDim");
 
                   for (xmlNodePtr nodeLayer = nodeBin->children;
                        nodeLayer != nullptr; nodeLayer = nodeLayer->next) {
                     if (xmlStrEqual(nodeLayer->name, BAD_CAST "Layer")) {
                       std::vector<double> edges;
-                      std::string s(reinterpret_cast<const char*>(
-                          xmlGetProp(nodeLayer, BAD_CAST "r_edges")));
+                      std::string s(GetXmlAttr<std::string>(nodeLayer, "r_edges"));
 
                       std::istringstream ss(s);
                       std::string token;
@@ -70,10 +66,8 @@ void TFCSGANXMLParameters::InitialiseFromXML(
                         edges.push_back(std::stod(token));
                       }
 
-                      int binsInAlpha = std::stoi(reinterpret_cast<const char*>(
-                          xmlGetProp(nodeLayer, BAD_CAST "n_bin_alpha")));
-                      int layer = std::stoi(reinterpret_cast<const char*>(
-                          xmlGetProp(nodeLayer, BAD_CAST "id")));
+                      int binsInAlpha = GetXmlAttr<int>(nodeLayer, "n_bin_alpha");
+                      int layer = GetXmlAttr<int>(nodeLayer, "id");
 
                       std::string name = "hist_pid_" + std::to_string(nodePid) +
                                          "_region_" + std::to_string(regionId) +
@@ -118,8 +112,7 @@ void TFCSGANXMLParameters::InitialiseFromXML(
 
 bool TFCSGANXMLParameters::ReadBooleanAttribute(const std::string& name,
                                                 xmlNodePtr node) {
-  std::string attribute =
-      reinterpret_cast<const char*>(xmlGetProp(node, BAD_CAST name.c_str()));
+  std::string attribute(GetXmlAttr<std::string>(node, name.c_str()));
   return attribute == "true";
 }
 
