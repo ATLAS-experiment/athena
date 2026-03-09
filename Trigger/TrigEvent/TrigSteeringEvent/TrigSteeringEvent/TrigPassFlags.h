@@ -10,7 +10,6 @@
 #include <stdexcept>
 
 #include "xAODCore/CLASS_DEF.h"
-// TrigPassFlagsCollection is included at the end (required by Trigger EDM schema)
 
 /**
  * A Flag is an ordered collection of bits (vector<bool>) that can
@@ -176,6 +175,5 @@ namespace HLT {
 
 } // eof HLT namespace
 
-#include "TrigSteeringEvent/TrigPassFlagsCollection.h"
 
 #endif

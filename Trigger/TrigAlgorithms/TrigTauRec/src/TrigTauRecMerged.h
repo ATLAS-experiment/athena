@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGTAUREC_TRIGTAURECMERGED_H
@@ -14,13 +14,16 @@
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 #include "tauRecTools/ITauToolBase.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauTrackContainer.h"
+
+#include <map>
+#include <memory>
 
 class TrigTauRecMerged: public AthReentrantAlgorithm {
 public:

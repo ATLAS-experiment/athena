@@ -21,8 +21,8 @@
 #define TRIGSTEERINGEVENT_TRIGROIDESCRIPTOR_H
 
 #include <stdint.h>
-#include <map>
-#include <ostream>
+#include <vector>
+#include <iosfwd>
 
 // can we leave this in for standalone running?
 // #ifndef XAOD_STANDALONE
@@ -50,7 +50,7 @@
  * -# eta : pseudo-rapidity of RoI at zed
  * -# etaPlus  : pseudo-rapidity at zedPlus
  * -# etaMinus : pseudo-rapidity at zedMinus
- * \warning An attempt to cnstruct the objects of this calss with phi0 out of allowed range reasults in throwing exception
+ * \warning An attempt to construct the objects of this class with phi0 out of allowed range results in throwing exception
  */
 
 class TrigRoiDescriptor : public RoiDescriptor {
@@ -156,9 +156,7 @@ std::ostream& operator<<( std::ostream& m, const TrigRoiDescriptor& d ); //<! pr
 CLASS_DEF(TrigRoiDescriptor, 6455, 1)
 // #endif
 
-/// why is this included here? can't packages which need both 
-/// include it explicitly? 
-#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+
 
 #endif // TRIGROIDESCRIPTOR_H
 

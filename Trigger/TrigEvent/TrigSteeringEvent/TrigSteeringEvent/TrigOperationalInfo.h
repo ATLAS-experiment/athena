@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "AthenaKernel/CLASS_DEF.h"
-// TrigOperationalInfoCollection is included at the end (required by Trigger EDM schema)
 
 class MsgStream;
 
@@ -54,6 +53,5 @@ void diff( const TrigOperationalInfo& a, const TrigOperationalInfo& b, std::map<
 
 CLASS_DEF( TrigOperationalInfo , 242645981 , 1 )
 
-#include "TrigSteeringEvent/TrigOperationalInfoCollection.h"
 
 #endif

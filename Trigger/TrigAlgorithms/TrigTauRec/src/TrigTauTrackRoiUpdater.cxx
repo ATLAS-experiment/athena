@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
+
 
 #include "TrigTauTrackRoiUpdater.h"
 
@@ -13,6 +13,7 @@
 #include "CxxUtils/phihelper.h"
 
 #include "xAODTracking/TrackParticle.h"
+#include <cmath>
 
 TrigTauTrackRoiUpdater::TrigTauTrackRoiUpdater(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)

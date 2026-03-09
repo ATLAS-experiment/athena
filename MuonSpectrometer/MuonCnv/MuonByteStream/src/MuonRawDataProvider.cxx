@@ -3,6 +3,7 @@
 */
 
 #include "MuonByteStream/MuonRawDataProvider.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 #include <vector>
 
