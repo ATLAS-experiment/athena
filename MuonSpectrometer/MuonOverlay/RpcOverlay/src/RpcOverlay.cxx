@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Andrei Gaponenko <agaponenko@lbl.gov>, 2006, 2007
@@ -25,7 +25,7 @@ StatusCode RpcOverlay::initialize()
 {
   ATH_MSG_DEBUG("Initializing...");
 
-  ATH_CHECK(m_bkgInputKey.initialize());
+  ATH_CHECK(m_bkgInputKey.initialize(!m_bkgInputKey.empty()));
   ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_bkgInputKey );
   ATH_CHECK(m_signalInputKey.initialize());
   ATH_MSG_VERBOSE("Initialized ReadHandleKey: " << m_signalInputKey );
@@ -40,15 +40,19 @@ StatusCode RpcOverlay::execute(const EventContext& ctx) const
 {
   ATH_MSG_DEBUG("RpcOverlay::execute() begin");
 
+  const RpcDigitContainer *bkgContainerPtr = nullptr;
+  if (!m_bkgInputKey.empty()) {
+    SG::ReadHandle<RpcDigitContainer> bkgContainer (m_bkgInputKey, ctx);
+    if (!bkgContainer.isValid()) {
+      ATH_MSG_ERROR("Could not get background RPC container " << bkgContainer.name() << " from store " << bkgContainer.store());
+      return StatusCode::FAILURE;
+    }
+    bkgContainerPtr = bkgContainer.cptr();
 
-  SG::ReadHandle<RpcDigitContainer> bkgContainer (m_bkgInputKey, ctx);
-  if (!bkgContainer.isValid()) {
-    ATH_MSG_ERROR("Could not get background RPC container " << bkgContainer.name() << " from store " << bkgContainer.store());
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG("Found background RpcDigitContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
+    ATH_MSG_DEBUG("RPC Background = " << Overlay::debugPrint(bkgContainer.cptr()));
+    ATH_MSG_VERBOSE("RPC background has digit_size " << bkgContainer->digit_size());
   }
-  ATH_MSG_DEBUG("Found background RpcDigitContainer called " << bkgContainer.name() << " in store " << bkgContainer.store());
-  ATH_MSG_DEBUG("RPC Background = " << Overlay::debugPrint(bkgContainer.cptr()));
-  ATH_MSG_VERBOSE("RPC background has digit_size " << bkgContainer->digit_size());
 
   SG::ReadHandle<RpcDigitContainer> signalContainer(m_signalInputKey, ctx);
   if (!signalContainer.isValid() ) {
@@ -60,7 +64,7 @@ StatusCode RpcOverlay::execute(const EventContext& ctx) const
   ATH_MSG_VERBOSE("RPC signal has digit_size " << signalContainer->digit_size());
 
   SG::WriteHandle<RpcDigitContainer> outputContainer(m_outputKey, ctx);
-  ATH_CHECK(outputContainer.record(std::make_unique<RpcDigitContainer>(bkgContainer->size())));
+  ATH_CHECK(outputContainer.record(std::make_unique<RpcDigitContainer>(signalContainer->size())));
   if (!outputContainer.isValid()) {
     ATH_MSG_ERROR("Could not record output RpcDigitContainer called " << outputContainer.name() << " to store " << outputContainer.store());
     return StatusCode::FAILURE;
@@ -68,7 +72,7 @@ StatusCode RpcOverlay::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG("Recorded output RpcDigitContainer called " << outputContainer.name() << " in store " << outputContainer.store());
 
   // Do the actual overlay
-  ATH_CHECK(overlayMultiHitContainer(bkgContainer.cptr(), signalContainer.cptr(), outputContainer.ptr()));
+  ATH_CHECK(overlayMultiHitContainer(bkgContainerPtr, signalContainer.cptr(), outputContainer.ptr()));
   ATH_MSG_DEBUG("RPC Result     = " << Overlay::debugPrint(outputContainer.cptr()));
 
 

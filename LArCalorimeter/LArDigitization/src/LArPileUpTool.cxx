@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // +==========================================================================+
@@ -506,6 +506,10 @@ StatusCode LArPileUpTool::processAllSubEvents(const EventContext& ctx)
     {
       if (!m_onlyUseContainerName)
       {
+        if (m_inputDigitContainerKey.empty()) {
+          return StatusCode::SUCCESS;
+        }
+
         SG::ReadHandle<LArDigitContainer> digitCollection(m_inputDigitContainerKey, ctx);
         if (!digitCollection.isValid()) {
           ATH_MSG_ERROR("Could not get LArDigitContainer container " << digitCollection.name() << " from store " << digitCollection.store());
