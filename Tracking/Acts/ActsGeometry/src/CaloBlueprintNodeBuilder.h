@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_CALOBLUEPRINTNODEBUILDER_H
@@ -12,6 +12,11 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
+
+#include <map>
+#include <string>
+#include <vector>
+#include <memory>
 
 using caloSampleSurfaceMap_t = std::map<std::pair<std::string, CaloCell_ID::CaloSample>, std::vector<std::shared_ptr<Acts::Surface> > >;
 using caloSampleDDEElementsMap_t = std::map<std::pair<std::string, CaloCell_ID::CaloSample>, std::vector<const CaloDetDescrElement*> >;
