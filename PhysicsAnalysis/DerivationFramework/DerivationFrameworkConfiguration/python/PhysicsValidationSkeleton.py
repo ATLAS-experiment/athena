@@ -74,6 +74,16 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(flags)
     cfg.merge(PoolReadCfg(flags))
+    
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaConfiguration.Enums import LHCPeriod
+    jetContainer = "AntiKt4EMTopoJets" if flags.GeoModel.Run >= LHCPeriod.Run4 else "AntiKt4EMPFlowJets"
+    cfg.addEventAlgo(CompFactory.FlavorTagDiscriminants.FTagGhostMuonAssociationAlg(
+        "FTagGhostMuonAssociationAlg",
+        jetContainer  = jetContainer,
+        muonContainer = "Muons",
+        outMuons      = f"{jetContainer}.GhostMuons",
+    ))
 
     # Run NTUP_PHYSVAL making
     from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
