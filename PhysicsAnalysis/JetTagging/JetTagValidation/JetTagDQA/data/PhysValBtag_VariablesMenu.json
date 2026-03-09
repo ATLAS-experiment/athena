@@ -239,9 +239,21 @@
             "forData": "false"
         },
 
-        "muon_pT_frac": {
+        "leading_muon_pT_frac": {
             "_comment": "",
-            "title": "muon p_{T}^{frac}",
+            "title": "Leading muon p_{T}^{frac}",
+            "xtitle": "p_{T}(muon) / p_{T}(jet)",
+            "ytitle": "Jets",
+            "path":  {"ART": "", "PHYSVAL": "muon"},
+            "xbins": 100,
+            "xmin": -0.01,
+            "xmax": 1.5,
+            "type": "TH1D",
+            "forData": "true"
+        },
+        "subleading_muon_pT_frac": {
+            "_comment": "",
+            "title": "Sub-leading muon p_{T}^{frac}",
             "xtitle": "p_{T}(muon) / p_{T}(jet)",
             "ytitle": "Jets",
             "path":  {"ART": "", "PHYSVAL": "muon"},
@@ -271,7 +283,7 @@
             "forData": "true"
         },
 
-        "GN3XPV01": {
+	"GN3XPV01": {
             "_comment": "phbb, phcc, phtautauhad, ptop, pqcdbb, pqcdbx, pqcdcx, pqcdll and pwqq",
             "title": "GN3XPV01",
             "xtitle": "GN3XPV01 px",

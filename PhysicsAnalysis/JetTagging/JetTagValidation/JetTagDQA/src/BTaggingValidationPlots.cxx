@@ -57,8 +57,7 @@ namespace JetTagDQA{
     m_truthMatchProbabilityCut = truthMatchProbabilityCut;
   }
 
-  void BTaggingValidationPlots::setTaggerNames(
-                 const std::string& GN2v01Name,
+  void BTaggingValidationPlots::setTaggerNames(const std::string& GN2v01Name,
 					       const std::string& GN3XPV01Name){
     m_GN2v01Name = GN2v01Name;
     m_GN3XPV01Name = GN3XPV01Name;
@@ -251,7 +250,8 @@ namespace JetTagDQA{
     m_jet_phi  = bookHistogram("jet_phi", "jet_phi", m_sParticleType);
 
     // muon vars
-    m_muon_pT_frac = bookHistogram("muon_pT_frac", "muon_pT_frac", m_sParticleType); 
+    m_leading_muon_pT_frac = bookHistogram("leading_muon_pT_frac", "leading_muon_pT_frac", m_sParticleType); 
+    m_subleading_muon_pT_frac = bookHistogram("subleading_muon_pT_frac", "subleading_muon_pT_frac", m_sParticleType); 
 
     // truth info
     m_truthLabel  = bookHistogram("truthLabel", "truth_label", m_sParticleType);
@@ -756,28 +756,39 @@ namespace JetTagDQA{
 
     // fill jet Lxy for the caller of the method
     jet_Lxy = Lxy;
-
+    
     // check if there is a muon and store the relative muon pT
     bool has_muon = false;
-    
-    // get the muon link
-    ElementLink<xAOD::MuonContainer> muonLink;
-    static const SG::ConstAccessor< ElementLink<xAOD::MuonContainer> >
-      softMuon_linkAcc("softMuon_link");
-    if(softMuon_linkAcc.isAvailable(*jet)) {
-      muonLink = softMuon_linkAcc(*jet); 
-    }
 
-    // fill bool and pT frac if there is a muon
-    if ( muonLink.isValid() ) {
-        const xAOD::Muon* muon=(*muonLink);
-        if ( muon != 0 ) {
-            has_muon = true;
-            double muon_pT_frac = muon->pt() / jet->pt();
-            m_muon_pT_frac->Fill(muon_pT_frac, event->beamSpotWeight());
-        }
+    using IPLV = std::vector<ElementLink<xAOD::IParticleContainer>>;
+    static const SG::ConstAccessor<IPLV> ghostMuonsAcc("GhostMuons");
+
+    if (ghostMuonsAcc.isAvailable(*jet)) {
+      const IPLV& muonLinks = ghostMuonsAcc(*jet);
+      std::vector<const xAOD::Muon*> muons;
+      for (const auto& muonLink : muonLinks) {
+        if (!muonLink.isValid()) continue;
+        const xAOD::Muon* muon = dynamic_cast<const xAOD::Muon*>(*muonLink);
+        if (!muon) continue;
+        muons.push_back(muon);
+      }
+      // sort all muons by descending pT
+      std::sort(muons.begin(), muons.end(),[](const xAOD::Muon* a, const xAOD::Muon* b) {
+            return a->pt() > b->pt();
+      });
+      // histogramming first 2 leading muons only
+      const std::vector<TH1*> pT_frac_histos = {
+        m_leading_muon_pT_frac,
+        m_subleading_muon_pT_frac,
+      };
+      int nMuons = std::min(static_cast<int>(muons.size()), static_cast<int>(pT_frac_histos.size()));
+      for (int i = 0; i < nMuons; ++i) {
+        has_muon = true;
+        pT_frac_histos[i]->Fill(muons[i]->pt() / jet->pt(), event->beamSpotWeight());
+      }
+    } else {
+      ATH_MSG_WARNING("Jet has no GhostMuons decoration");
     }
-    
     // fill contains_muon for the caller of this function
     contains_muon = has_muon;
   }
@@ -1289,13 +1300,10 @@ namespace JetTagDQA{
     }
   }
 
-
-
   void BTaggingValidationPlots::finalizePlots(){
   }
 
-
-// methods for the num b-tagged jets
+  // methods for the num b-tagged jets
   void BTaggingValidationPlots::bookNJetsThatPassedWPCutsHistos(){
     // loop over the taggers
     for(std::vector<std::string>::const_iterator tag_iter = m_taggers.begin(); tag_iter != m_taggers.end(); ++tag_iter){
@@ -1364,9 +1372,6 @@ namespace JetTagDQA{
       }
     }
   }
-
-
-
 
   void BTaggingValidationPlots::setTaggerInfos(){
     // list of all taggers
