@@ -1,18 +1,23 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include <TSystem.h>
-#include <TFile.h>
-#include "xAODRootAccess/tools/Message.h"
-#include "xAODRootAccess/Init.h"
-#include "xAODRootAccess/TEvent.h"
-#include "xAODCore/ShallowCopy.h"
-#include "AthContainers/ConstAccessor.h"
 
 #include <ZdcNtuple/ZdcNtuple.h>
 #include <ZdcUtils/ZdcEventInfo.h>
 #include <ZdcConditions/ZdcInjPulserAmpMap.h>
+
+#include "xAODRootAccess/tools/Message.h"
+#include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/TEvent.h"
+#include "xAODCore/ShallowCopy.h"
+
+#include "AthContainers/ConstAccessor.h"
+
+#include <TTree.h>
+#include <TH1.h>
+#include <TSystem.h>
+#include <TFile.h>
+
 
 // this is needed to distribute the algorithm to the workers
 //ClassImp(ZdcNtuple)
@@ -1812,21 +1817,23 @@ void ZdcNtuple::processMBTS()
       int iside = (side == 0) ? 1 : 0; // code maps side 1 into first 16 bits and side -1 into second set
 
       ANA_MSG_VERBOSE ("imbts=" << imbts << " isInner=" << isInner << " iside=" << iside << " index=" << index << " e=" << energies.at(imbts) << " t=" << times.at(imbts));
-      if (isInner)
-      {
-        t_T2mbts_in_e[iside][index] = energies.at(imbts);
-        t_T2mbts_in_t[iside][index] = times.at(imbts);
-        if (TMath::Abs(times.at(imbts)) < 12.0 && energies.at(imbts) > 40 / 222.)
-        {
-          if (iside == 0) t_T2mbts_countCin++;
-          if (iside == 1) t_T2mbts_countAin++;
+      if (iside < 2 and index < 8){ //indices in range?
+        if (isInner)
+        { 
+          t_T2mbts_in_e[iside][index] = energies.at(imbts);
+          t_T2mbts_in_t[iside][index] = times.at(imbts);
+          if (TMath::Abs(times.at(imbts)) < 12.0 && energies.at(imbts) > 40 / 222.)
+          {
+            if (iside == 0) t_T2mbts_countCin++;
+            if (iside == 1) t_T2mbts_countAin++;
+          }
         }
-      }
-      else
-      {
-        t_T2mbts_out_e[iside][index] = energies.at(imbts);
-        t_T2mbts_out_t[iside][index] = times.at(imbts);
-      }
+        else
+        {
+          t_T2mbts_out_e[iside][index] = energies.at(imbts);
+          t_T2mbts_out_t[iside][index] = times.at(imbts);
+        }
+      } //indices check
     }
   }
 

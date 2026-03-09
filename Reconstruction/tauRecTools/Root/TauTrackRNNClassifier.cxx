@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauTrackRNNClassifier.h"
@@ -410,10 +410,14 @@ StatusCode TrackRNN::calculateVars(const std::vector<xAOD::TauTrack*>& vTracks,
       sumpt2_TV += pow((*trk)->pt(), 2.);
     }
   }
-
+  //these are false positives
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt_TV = (sumpt_TV>0.) ? std::log(sumpt_TV) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt2_TV = (sumpt2_TV>0.) ? std::log(sumpt2_TV) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt_PV0 = (sumpt_PV0>0.) ? std::log(sumpt_PV0) : 0.;
+  //cppcheck-suppress invalidFunctionArg
   double log_sumpt2_PV0 = (sumpt2_PV0>0.) ? std::log(sumpt2_PV0) : 0.;
 
   // track variables
