@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNMENTDATA_MDTASBUILTPAR_H
@@ -7,6 +7,7 @@
 
 #include <string>
 #include <array>
+#include <iosfwd>
 
 #include "MuonAlignmentData/MuonAlignmentPar.h"
 

@@ -12,9 +12,8 @@ Muon::IDC_Helper::getCollection ATLAS_NOT_THREAD_SAFE
     IdentifierHash idHash;
     if (idHelper.get_module_hash( collId, idHash )) {
         log << MSG::ERROR << "Unable to get CSC hash id from CSC RDO collection " 
-            << " the identifier is "
-            << endmsg;
-        collId.show();
+            << " the identifier is \n"
+            << collId <<endmsg;
     }
     
     typename IDC::IDENTIFIABLE* collection=0;
@@ -41,9 +40,8 @@ Muon::IDC_Helper::addCollection( const Identifier collId,  IDC* idc, const IDHEL
     IdentifierHash idHash;
     if (idHelper.get_module_hash( collId, idHash )) {
         log << MSG::ERROR << "Unable to get CSC hash id from CSC RDO collection " 
-            << " the identifier is "
-            << endmsg;
-        collId.show();
+            << " the identifier is \n"
+            << collId <<endmsg;
     }
 
     std::unique_ptr<typename IDC::IDENTIFIABLE> collection;

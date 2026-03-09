@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcByteStreamDecoder.h"
@@ -176,10 +176,8 @@ void RpcByteStreamDecoder::print() {
     int ipad = 1;
     // Iterate on pads
     for (pad_it = m_rpcpads->begin(); pad_it != m_rpcpads->end(); ++pad_it, ++ipad) {
-        std::cout << "Pad number " << ipad << " Identifier : " << std::endl;
-        (*pad_it)->identify().show();
-        std::cout << std::endl;
-        std::cout << "Number of Matrices in Pad : " << (*pad_it)->size() << std::endl;
+        std::cout << "Pad number " << ipad << " Identifier : \n" << (*pad_it)->identify();
+        std::cout << "\nNumber of Matrices in Pad : " << (*pad_it)->size() << "\n";
         // Iterate on the pad's coincidence matrices
         RpcPad::const_iterator mat_it;
         int imat = 1;

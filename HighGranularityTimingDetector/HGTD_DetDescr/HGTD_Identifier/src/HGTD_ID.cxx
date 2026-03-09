@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HGTD_Identifier/HGTD_ID.h"
@@ -652,56 +652,56 @@ HGTD_ID::initLevelsFromDict()
             << m_indet_impl.zeroing_mask() << " " 
             << std::dec << m_indet_impl.shift() 
             << " " << m_indet_impl.bits() << " " << m_indet_impl.bits_offset() << " ";
-    m_indet_impl.ored_field().show();
+    m_indet_impl.ored_field().show(std::cout);
     std::cout << "hgtd "  << m_hgtd_impl.decode_index() << " " 
             << (std::string)m_hgtd_impl.ored_field() << " " 
             << std::hex << m_hgtd_impl.mask() << " " 
             << m_hgtd_impl.zeroing_mask() << " " 
             << std::dec << m_hgtd_impl.shift() 
             << " " << m_hgtd_impl.bits() << " " << m_hgtd_impl.bits_offset() << " ";
-    m_hgtd_impl.ored_field().show();
+    m_hgtd_impl.ored_field().show(std::cout);
     std::cout << "ec "  << m_ec_impl.decode_index() << " " 
             << (std::string)m_ec_impl.ored_field() << " " 
             << std::hex << m_ec_impl.mask() << " " 
             << m_ec_impl.zeroing_mask() << " " 
             << std::dec << m_ec_impl.shift() 
             << " " << m_ec_impl.bits() << " " << m_ec_impl.bits_offset() << " ";
-    m_ec_impl.ored_field().show();
+    m_ec_impl.ored_field().show(std::cout);
     std::cout << "layer "  << m_layer_impl.decode_index() << " " 
             << (std::string)m_layer_impl.ored_field() << " " 
             << std::hex << m_layer_impl.mask() << " " 
             << m_layer_impl.zeroing_mask() << " " 
             << std::dec << m_layer_impl.shift() 
             << " " << m_layer_impl.bits() << " " << m_layer_impl.bits_offset() << " ";
-    m_layer_impl.ored_field().show();
+    m_layer_impl.ored_field().show(std::cout);
     std::cout << "phi_mod "  << m_phi_mod_impl.decode_index() << " " 
             << (std::string)m_phi_mod_impl.ored_field() << " " 
             << std::hex << m_phi_mod_impl.mask() << " " 
             << m_phi_mod_impl.zeroing_mask() << " " 
             << std::dec << m_phi_mod_impl.shift() 
             << " " << m_phi_mod_impl.bits() << " " << m_phi_mod_impl.bits_offset() << " ";
-    m_phi_mod_impl.ored_field().show();
+    m_phi_mod_impl.ored_field().show(std::cout);
     std::cout << "eta_mod "  << m_eta_mod_impl.decode_index() << " " 
             << (std::string)m_eta_mod_impl.ored_field() << " " 
             << std::hex << m_eta_mod_impl.mask() << " " 
             << m_eta_mod_impl.zeroing_mask() << " " 
             << std::dec << m_eta_mod_impl.shift() 
             << " " << m_eta_mod_impl.bits() << " " << m_eta_mod_impl.bits_offset() << " ";
-    m_eta_mod_impl.ored_field().show();
+    m_eta_mod_impl.ored_field().show(std::cout);
     std::cout << "phi_index "  << m_phi_index_impl.decode_index() << " " 
             << (std::string)m_phi_index_impl.ored_field() << " " 
             << std::hex << m_phi_index_impl.mask() << " " 
             << m_phi_index_impl.zeroing_mask() << " " 
             << std::dec << m_phi_index_impl.shift() 
             << " " << m_phi_index_impl.bits() << " " << m_phi_index_impl.bits_offset() << " ";
-    m_phi_index_impl.ored_field().show();
+    m_phi_index_impl.ored_field().show(std::cout);
     std::cout << "eta_index "  << m_eta_index_impl.decode_index() << " " 
             << (std::string)m_eta_index_impl.ored_field() << " " 
             << std::hex << m_eta_index_impl.mask() << " " 
             << m_eta_index_impl.zeroing_mask() << " " 
             << std::dec << m_eta_index_impl.shift() 
             << " " << m_eta_index_impl.bits() << " " << m_eta_index_impl.bits_offset() << " ";
-    m_eta_index_impl.ored_field().show();
+    m_eta_index_impl.ored_field().show(std::cout);
 
 
     std::cout << "HGTD_ID::initLevelsFromDict - found levels " << std::endl;

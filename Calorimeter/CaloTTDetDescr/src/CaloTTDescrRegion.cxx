@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -138,11 +138,7 @@ CaloTTDescrRegion::set_cartesian_size ( double     dx,
 void 			
 CaloTTDescrRegion::print		() const
 {
-
-    std::cout << std::endl << " CaloTTDescrRegion print: " 
-	      << std::endl << std::endl;
-    
-    m_id.show();
+    std::cout << std::endl << " CaloTTDescrRegion print: \n\n" << m_id;
     m_descriptor->print();
 }
 

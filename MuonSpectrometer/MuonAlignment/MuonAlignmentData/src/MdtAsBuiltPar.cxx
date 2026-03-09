@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAlignmentData/MdtAsBuiltPar.h"
+#include <iostream>
 
 std::ostream& operator<<(std::ostream& ostr, const MdtAsBuiltPar& par) {
    ostr<<"MdtAsBuilt AMDB id (name,eta,phi,job)=(";
    ostr<<par.AmdbStation()<<",";
    ostr<<par.AmdbEta()<<",";
    ostr<<par.AmdbPhi()<<",";
-   ostr<<par.AmdbJob()<<"), "<<std::endl;
+   ostr<<par.AmdbJob()<<"), \n";
    using multilayer_t = MdtAsBuiltPar::multilayer_t;
    using tubeSide_t = MdtAsBuiltPar::tubeSide_t;  
    for (const multilayer_t ml : {multilayer_t::ML1, multilayer_t::ML2}){
