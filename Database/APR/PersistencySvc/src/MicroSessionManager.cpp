@@ -5,12 +5,11 @@
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
 #include "DatabaseHandler.h"
-#include "StorageSvc/IStorageSvc.h"
 #include "PersistencySvc/ITransaction.h"
-#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/IStorageSvc.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/pool.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include <exception>
@@ -145,8 +144,7 @@ pool::PersistencySvc::MicroSessionManager::fidForPfn( const std::string& pfn )
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
   if( m_storageSvc->existsConnection(fd).isSuccess() ) {
     if ( m_storageSvc->connect(pool::READ, fd).isSuccess() ) {
-      pool::DatabaseConnection* connection = fd.dbc();
-      DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+      DbDatabase dbH( fd.dbc()->handle() );
       if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
       m_storageSvc->disconnect( fd ).ignore();
     }

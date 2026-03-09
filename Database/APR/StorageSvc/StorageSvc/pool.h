@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -12,8 +12,6 @@
 //====================================================================
 #ifndef POOL_POOL_H
 #define POOL_POOL_H 1
-
-// Framework include files
 
 // STL include files
 #include <string>
@@ -43,9 +41,12 @@ namespace pool   {
     UPDATE      =  1<<2, 
     CREATE      =  1<<3, 
     RECREATE    = (1<<4)+(1<<3),
-    WRITE       =  1<<3,
-    DESTROY     =  1<<5
+    WRITE       =  1<<3
   };
+
+  namespace Transaction {
+    enum Action { TRANSACT_COMMIT, TRANSACT_FLUSH };
+  }
 
   /// Issue a debug break
   void      debugBreak();

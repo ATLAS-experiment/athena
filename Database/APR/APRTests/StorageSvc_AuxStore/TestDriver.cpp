@@ -14,7 +14,7 @@
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
@@ -84,10 +84,8 @@ std::string TestDriver::testWriting()
    if ( ! ( storSvc->connect( RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
-   DatabaseConnection* connection = fd.dbc();
-
    DbOption opt("TREE_AUTO_FLUSH", "CollectionTree", 10);
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fd.dbc()->handle() );
    if( !dbH.setOption(opt).isSuccess() ) {
       throw std::runtime_error( "Could not set the TTree autoflush option." );
    }
@@ -145,7 +143,7 @@ std::string TestDriver::testWriting()
          throw std::runtime_error( "Could not write an object" );
       }
       std::cout << "Committing transaction" << std::endl;
-      if( ! ( storSvc->endTransaction( connection, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit ERROR" );
       }
       delete token;
@@ -153,7 +151,7 @@ std::string TestDriver::testWriting()
 
    // Closing the transaction.
    std::cout << "Committing transaction" << std::endl;
-   if ( ! ( storSvc->endTransaction( connection, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Could not end a transaction." );
    }
 
@@ -199,8 +197,7 @@ TestDriver::testReading(const std::string& testTypeID)
   if( !storSvc->connect( READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
-  DatabaseConnection* connection = fd->dbc();
-  DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+  DbDatabase dbH( fd->dbc()->handle() );
   if ( !dbH.isValid() )  {
     throw std::runtime_error( "Database is not valid" );
   }

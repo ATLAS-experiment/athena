@@ -23,7 +23,7 @@
 #include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/DatabaseConnection.h"
+#include "StorageSvc/DbConnection.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbString.h"
@@ -92,8 +92,6 @@ void test(const DbType storageType, const std::string& filename) {
    if ( ! ( storSvc->connect( pool::RECREATE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
-   pool::DatabaseConnection* connection = fd.dbc();
-
    // Retrieve DbString dictionary
    RootType class_String ( "pool::DbString" );
    if ( ! class_String ) {
@@ -112,12 +110,12 @@ void test(const DbType storageType, const std::string& filename) {
 
    // Set container for master index (enables index synchronization between TTrees)
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
-   DbDatabase dbH(static_cast<DbDatabaseObj*>(connection->handle()));
+   DbDatabase dbH( fd.dbc()->handle() );
    if( !dbH.setOption(masterIdxOpt).isSuccess() ) {
      throw std::runtime_error( "Could not set master index option" );
    }
    // Commit here to test empty commits
-   if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
    }
 
@@ -131,7 +129,7 @@ void test(const DbType storageType, const std::string& filename) {
    };
 
    auto Commit = [&](const int) {
-      if( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit FAILED" );
       }
    };

@@ -6,7 +6,7 @@
 #define POOL_ISTORAGESVC_H
 
 // Framework include files
-#include "StorageSvc/Transaction.h"
+#include "StorageSvc/pool.h"
 
 // STL include files
 #include <string>
@@ -25,7 +25,6 @@ namespace pool  {
   class FileDescriptor;
   class DbOption;
 
-  typedef class DatabaseConnection *ConnectionH;
   typedef const class Shape        *ShapeH;
 
   /** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
@@ -197,7 +196,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode disconnect(  FileDescriptor&     refDB) = 0;
+    virtual StatusCode disconnect(FileDescriptor&     refDB) = 0;
 
     /// Query the access mode of a Database unit.
     /**
@@ -206,8 +205,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode openMode(  FileDescriptor&     refDB,
-                                  int&                mode ) = 0;
+    virtual StatusCode openMode(FileDescriptor& refDB, int& mode ) = 0;
 
     /// End/Finish an existing Transaction sequence.
     /** At  this  phase all  objects, which were marked for  write when 
@@ -222,7 +220,7 @@ namespace pool  {
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode endTransaction( ConnectionH conn, Transaction::Action typ) = 0;
+    virtual StatusCode endTransaction(FileDescriptor& refDB, Transaction::Action typ) = 0;
 
     /// Access options for a given database domain.
     /** Domain options are global options, which refer to the
