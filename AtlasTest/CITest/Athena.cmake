@@ -350,6 +350,9 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
+ atlas_add_citest( ACTS_Production
+   SCRIPT ActsProduction.sh )
+ 
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 

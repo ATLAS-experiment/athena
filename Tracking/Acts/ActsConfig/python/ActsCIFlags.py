@@ -4,6 +4,25 @@
 from TrkConfig.TrkConfigFlags import TrackingComponent
 from AthenaConfiguration.Enums import LHCPeriod
 
+def actsProductionFlags(flags) -> None:
+    """flags for ACTS reconstruction to be used for production jobs"""
+    # Reco chain to ACTS flavour
+    flags.Tracking.recoChain = [TrackingComponent.ActsChain]
+    # Track reconstruction algorithms
+    flags.Acts.doAmbiguityResolution = False
+    flags.Tracking.doITkFastTracking = True
+    # Configurations
+    # - calibration strategy is set centrally
+    # - seeding strategy set by the user: default is GridTriplet
+    flags.Tracking.doPixelDigitalClustering = lambda pcf: pcf.GeoModel.Run >= LHCPeriod.Run4    
+    # e-gamma components
+    flags.Egamma.doTracking = True
+    flags.Acts.GsfRefitActs = True
+    flags.Acts.GsfDirectNavigation = True
+    # HGTD components
+    flags.HGTD.doActs = True    
+    
+
 def actsLegacyWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
