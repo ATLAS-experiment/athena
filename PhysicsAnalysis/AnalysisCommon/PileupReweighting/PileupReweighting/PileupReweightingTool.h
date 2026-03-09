@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,6 @@
 #include "AsgTools/ToolHandle.h"
 #include "PATInterfaces/IWeightTool.h"
 
-#include "TrigDecisionInterface/ITrigDecisionTool.h"
 
 namespace CP {
 
@@ -132,10 +131,6 @@ namespace CP {
      void updateHandler(Gaudi::Details::PropertyBase& /*p*/);
 #endif
 
-   protected:
-      virtual bool runLbnOK(Int_t runNbr, Int_t lbn);
-      virtual bool passTriggerBeforePrescale(const TString& trigger) const;
-
    private:
       std::string m_configStream;
       bool m_inConfigMode;
@@ -168,8 +163,6 @@ namespace CP {
       std::unique_ptr< IWeightTool > m_defaultWeightTool;
 
       ToolHandle<IWeightTool> m_weightTool;
-      ToolHandle<IGoodRunsListSelectionTool> m_grlTool;
-      ToolHandle<Trig::ITrigDecisionTool> m_tdt;
 
       // MN:  this prevents ROOT dict generator from complaining about lack of ClassDef()
       // Note: inheriting from TObject and not having ClassDef makes this class unsuitable for I/O

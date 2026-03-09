@@ -1,33 +1,19 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-
-
 #include "PileupReweighting/PileupReweightingTool.h"
-
 
 #include "PathResolver/PathResolver.h"
 
 #include "PATInterfaces/SystematicRegistry.h"
 
-// For Trigger decision conditions
-#include "TrigDecisionInterface/Conditions.h"
-
 #include "AthContainers/ConstAccessor.h"
 #include "AthContainers/Decorator.h"
-
-#ifndef XAOD_STANDALONE
-#include "GaudiKernel/ITHistSvc.h"
-#endif
 
 #ifdef XAOD_STANDALONE
 #include "ReweightUtils/McEventWeight.h"
 #endif
-
-#include "TH1.h"
-#include "TTree.h"
-
 
 namespace CP {
 
@@ -39,8 +25,8 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
 #ifdef XAOD_STANDALONE
    m_defaultWeightTool( new McEventWeight( "DefaultWeightTool" ) ),
 #endif // XAOD_STANDALONE
-   m_weightTool("McEventWeight/myWeightTool"),
-   m_grlTool(""), m_tdt("") {
+   m_weightTool("McEventWeight/myWeightTool")
+{
 
    m_defaultChannel=0;
 
@@ -63,8 +49,6 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
    declareProperty("DataScaleFactorDOWN",m_downVariation=1./1.07,"Set to a value representing the 'down' fluctuation - will report a PRW_DATASF uncertainty to Systematic Registry");
    declareProperty("VaryRandomRunNumber",m_varyRunNumber=false,"If true, then when doing systematic variations, RandomRunNumber will fluctuate as well. Off by default as believed to lead to overestimated uncertainties");
    declareProperty("PeriodAssignments", m_customPeriods={284500,222222,324300,300000,324300,344495,310000,344496,367384,410000,422633,440613,450000,450360,461002,470000,472553,999999}, "Specify period number assignments to run numbers ranges - this is usually an expert option");
-   declareProperty("GRLTool", m_grlTool, "If you provide a GoodRunsListSelectionTool, any information from lumicalc files will be automatically filtered" );
-   declareProperty("TrigDecisionTool",m_tdt, "When using the getDataWeight method, the TDT will be used to check decisions before prescale. Alternatively do expert()->SetTriggerBit('trigger',0) to flag which triggers are not fired before prescale (assumed triggers are fired if not specified)");
 
 #ifdef XAOD_STANDALONE
    declareProperty( "WeightTool", m_weightTool = m_defaultWeightTool.get(),
@@ -97,20 +81,6 @@ void PileupReweightingTool::updateHandler(Gaudi::Details::PropertyBase& /*p*/) {
    EnableDebugging(this->msgLvl(MSG::DEBUG));
 }
 #endif
-
-bool PileupReweightingTool::runLbnOK(Int_t runNbr, Int_t lbn) {
-   if(m_grlTool.empty()) return true;
-   return m_grlTool->passRunLB(runNbr,lbn);
-}
-
-bool PileupReweightingTool::passTriggerBeforePrescale(const TString& trigger) const {
-  if(m_tdt.empty()) return TPileupReweighting::passTriggerBeforePrescale(trigger); 
-  ATH_MSG_VERBOSE("Checking tdt decision of " << trigger);
-  //Note that the trigger *must* be a rerun trigger if this result is to be valid ... could check this in the trigconf is absolutely necessary
-  //but for now we just assume it's a rerun
-  //if it's not rerun, all we will get back here is the TAP result
-  return m_tdt->isPassed( trigger.Data() , TrigDefs::Physics | TrigDefs::allowResurrectedDecision ); // Definitions in TrigDecisionInterface/Conditions.h
-}
 
 bool PileupReweightingTool::isAffectedBySystematic( const CP::SystematicVariation& systematic ) const {
    CP::SystematicSet sys = affectingSystematics(); return sys.find( systematic ) != sys.end();
