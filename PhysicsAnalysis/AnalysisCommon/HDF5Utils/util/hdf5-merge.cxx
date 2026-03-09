@@ -18,7 +18,7 @@
  * with all datasets contained inside them concatenated along a particular axis.
  */
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main(int argc, char* argv[]) {
   // The options
   std::string outputFile = "merged.h5";
@@ -125,6 +125,7 @@ int main(int argc, char* argv[]) {
   for (const std::string& inName : inputFiles) {
     std::cout << "Merging file " << inName << std::endl;
     H5::H5File fIn(inName, H5F_ACC_RDONLY);
+    //this can throw
     merger.merge(fOut, fIn);
   }
 
