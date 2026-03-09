@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -135,7 +135,7 @@ StatusCode TileDigitsMaker::initialize() {
   m_timeStepLo = 25.0 / m_nBinsPerXLo;
 
   m_inputDigitContainerName = m_inputDigitContainerKey.key();
-  ATH_CHECK( m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && m_rndmEvtOverlay) );
+  ATH_CHECK( m_inputDigitContainerKey.initialize(!m_onlyUseContainerName && m_rndmEvtOverlay && !m_inputDigitContainerKey.empty()) );
 
   if (m_rndmEvtOverlay) {
     m_tileNoise = false;
@@ -447,7 +447,7 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
         }
       }
     }
-    else {
+    else if (!m_inputDigitContainerKey.empty()) {
       SG::ReadHandle<TileDigitsContainer> tileDigitsContainerHandle(m_inputDigitContainerKey, ctx);
       if (tileDigitsContainerHandle.isValid()) {
         for (const auto* digitCollection : *tileDigitsContainerHandle) {

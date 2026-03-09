@@ -1,7 +1,7 @@
 
 """Define methods to construct configured TGC overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,7 +12,7 @@ def TGC_OverlayAlgCfg(flags, name="TgcOverlay", **kwargs):
     """Return a ComponentAccumulator for TGCOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TGC_DIGITS")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TGC_DIGITS" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}TGC_DIGITS")
     kwargs.setdefault("OutputKey", "TGC_DIGITS")
 

@@ -1,7 +1,7 @@
 
 """Define methods to construct configured RPC overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,7 +12,7 @@ def RPC_OverlayAlgCfg(flags, name="RpcOverlay", **kwargs):
     """Return a ComponentAccumulator for RPCOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}RPC_DIGITS")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}RPC_DIGITS" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}RPC_DIGITS")
     kwargs.setdefault("OutputKey", "RPC_DIGITS")
 
