@@ -1,7 +1,7 @@
 // This file is really -*- C++ -*-.
 
 /*                                                                                                                      
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration                                               
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration                                               
 */
 
 #ifndef TRIGT1MUCTPIPHASE1_L1TOPOLUT_H
@@ -10,10 +10,11 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include <unordered_map>
+#include <string>
 #include <map>
-#include <set>
 #include <utility>
-#include <sstream>
+#include <vector>
+
 
 namespace LVL1MUCTPIPHASE1
 {
@@ -21,12 +22,8 @@ namespace LVL1MUCTPIPHASE1
 
   struct L1TopoCoordinates
   {
-    bool operator==(const L1TopoCoordinates& rhs) const
-    {
-      return (eta == rhs.eta && phi == rhs.phi && 
-	      eta_min == rhs.eta_min && phi_min == rhs.phi_min &&
-	      ieta == rhs.ieta && iphi == rhs.iphi);
-    }
+    bool operator==(const L1TopoCoordinates& rhs) const = default;
+    
     double eta=0;
     double phi=0;
     double eta_min=0;
@@ -83,34 +80,32 @@ namespace LVL1MUCTPIPHASE1
     
     struct L1TopoLUTKey
     {
-      unsigned short side;
-      unsigned short subsystem;
-      unsigned short sectorID;
-      unsigned short roi;
+      unsigned short side{};
+      unsigned short subsystem{};
+      unsigned short sectorID{};
+      unsigned short roi{};
 
       std::string info()
       {
-	std::stringstream str;
-	str << "side, subsystem, sectorID, roi = " 
-	    << side << ", " << subsystem << ", " << sectorID << ", " << roi;
-	return str.str();
+	return 
+	std::string("side, subsystem, sectorID, roi = ") 
+	    + std::to_string(side) + ", " + std::to_string(subsystem) + ", "
+	     + std::to_string( sectorID) + ", " + std::to_string(roi);
       }
 
       //implement == operator for hashing within unordered_map
-      bool operator==(const L1TopoLUTKey& rhs) const
-      {
-	return (side == rhs.side &&
-		subsystem == rhs.subsystem &&
-		sectorID == rhs.sectorID &&
-		roi == rhs.roi);
-      }
+      bool operator==(const L1TopoLUTKey& rhs) const = default;
+      
     };
 
     struct L1TopoLUTKeyHasher
     {
       unsigned long operator()(const L1TopoLUTKey& key) const
       {
-	return key.side | (key.subsystem << 8) | (key.sectorID << 16) | (key.roi << 24);
+	      return static_cast<unsigned long>(key.side)
+         | (static_cast<unsigned long>(key.subsystem) << 8)
+         | (static_cast<unsigned long>(key.sectorID) << 16)
+         | (static_cast<unsigned long>(key.roi) << 24);
       }
     };
     std::map<unsigned short,std::vector<float>> m_barrel_eta_lookup0;
