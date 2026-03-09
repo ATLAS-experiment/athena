@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //////////////////////////////////////////////////////////////////////
 //  L1DynamicPedestalProviderTxt.cxx 
@@ -316,8 +316,10 @@ void L1DynamicPedestalProviderTxt::parseInputFile(const std::string& fileName,
       S >> C >> ctx.E;
       if(C != "element")
         throw ParseException("got '" + C + "' expected 'element'.");
-      if(ctx.E > s_nElements)
+      if(ctx.E > s_nElements){
+        //coverity[TAINTED_SCALAR]
         throw ParseException("element number (" +  std::to_string(ctx.E) + ") out-of-range.");
+      }
       
       ctx.P = Context::Poly; // advance state
     } else if(ctx.P == Context::Poly) {
