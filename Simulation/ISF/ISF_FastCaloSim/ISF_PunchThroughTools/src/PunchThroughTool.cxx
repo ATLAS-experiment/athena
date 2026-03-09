@@ -52,7 +52,9 @@
 
 //Amg
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
+#include "CxxUtils/libxml2Helper.h"
 
+using namespace CxxUtils;
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -803,11 +805,11 @@ std::vector<std::map<std::string, std::string>> ISF::PunchThroughTool::getInfoMa
                         for( xmlNodePtr infoNode = nodeRootChild->children; infoNode != nullptr; infoNode = infoNode->next) {
                             if(xmlStrEqual( infoNode->name, BAD_CAST "item" )){
                                 std::map<std::string, std::string>  xml_info_item;
-                                xml_info_item.insert({ "name", (const char*) xmlGetProp( infoNode, BAD_CAST "name" ) });
-                                xml_info_item.insert({ "etaMins", (const char*) xmlGetProp( infoNode, BAD_CAST "etaMins" ) });
-                                xml_info_item.insert({ "etaMaxs", (const char*) xmlGetProp( infoNode, BAD_CAST "etaMaxs" ) });
-                                xml_info_item.insert({ "pidStr", (const char*) xmlGetProp( infoNode, BAD_CAST "pidStr" ) });
-                                xml_info.push_back(xml_info_item);                                
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "name", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "etaMins", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "etaMaxs", xml_info_item);
+                                AddXmlToCollectionMap<std::string, std::map<std::string, std::string>>(infoNode, "pidStr", xml_info_item);
+                                xml_info.push_back(std::move(xml_info_item));
                             }
                         }
                     }
@@ -851,21 +853,15 @@ StatusCode ISF::PunchThroughTool::initializeInversePCA(const std::string & inver
 
                                 if (xmlStrEqual( pcaNode->name, BAD_CAST "PCAmatrix" )) {
                                     std::vector<double> PCA_matrix_row;
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_0" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_1" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_2" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_3" ) ) );
-                                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "comp_4" ) ) );
-                                    PCA_matrix.push_back(PCA_matrix_row);          
+                                    for(auto x : {"comp_0", "comp_1", "comp_2", "comp_3", "comp_4"})
+                                       AddXmlToCollection<double, std::vector<double> >(pcaNode, x, PCA_matrix_row);
+                                    PCA_matrix.push_back(std::move(PCA_matrix_row));
                                 }
                                 else if (xmlStrEqual( pcaNode->name, BAD_CAST "PCAmeans" )) {
                                     std::vector<double> PCA_means_row;
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_0" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_1" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_2" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_3" ) ) );
-                                    PCA_means_row.push_back( atof( (const char*) xmlGetProp( pcaNode, BAD_CAST "mean_4" ) ) );
-                                    m_PCA_means.push_back(PCA_means_row);  
+                                    for(auto x : {"mean_0", "mean_1", "mean_2", "mean_3", "mean_4"})
+                                       AddXmlToCollection<double, std::vector<double> >(pcaNode, x, PCA_means_row);
+                                    m_PCA_means.push_back(std::move(PCA_means_row));
                                 }
 
                             }
@@ -948,10 +944,9 @@ std::map<double, double> ISF::PunchThroughTool::getVariableCDFmappings(xmlNodePt
     for( xmlNodePtr node = nodeParent->children; node != nullptr; node = node->next ) {
         //Get min and max values that we normalise values to
         if (xmlStrEqual( node->name, BAD_CAST "CDFmap" )) {
-            double ref = atof( (const char*) xmlGetProp( node, BAD_CAST "ref" ) );
-            double quant = atof( (const char*) xmlGetProp( node, BAD_CAST "quant" ) );
-
-            mappings.insert(std::pair<double, double>(ref, quant) );
+            double ref =  GetXmlAttr<double>( node, "ref" );
+            double quant = GetXmlAttr<double>( node, "quant" );
+            mappings.emplace(ref, quant);
 
         }
     }

@@ -40,6 +40,9 @@
 #include <libxml/xmlreader.h>
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
+#include "CxxUtils/libxml2Helper.h"
+
+using namespace CxxUtils;
 
 //=============================================
 //======= TFCSEnergyAndHitGAN =========
@@ -152,11 +155,10 @@ void TFCSEnergyAndHitGAN::GetBinning(
       for (xmlNodePtr nodeBin = nodeRoot->children; nodeBin != nullptr;
            nodeBin = nodeBin->next) {
         if (xmlStrEqual(nodeBin->name, BAD_CAST "Bin")) {
-          int nodePid = atof((const char *)xmlGetProp(nodeBin, BAD_CAST "pid"));
+          int nodePid = GetXmlAttr<int>(nodeBin, "pid");
           // int nodeEtaMin = atof( (const char*) xmlGetProp( nodeBin, BAD_CAST
           // "etaMin" ) );
-          int nodeEtaMax =
-              atof((const char *)xmlGetProp(nodeBin, BAD_CAST "etaMax"));
+          int nodeEtaMax = GetXmlAttr<int>(nodeBin, "etaMax");
 
           Binning binsInLayer;
           bool correctentry = true;
@@ -167,8 +169,7 @@ void TFCSEnergyAndHitGAN::GetBinning(
                nodeLayer = nodeLayer->next) {
             if (xmlStrEqual(nodeLayer->name, BAD_CAST "Layer")) {
               std::vector<double> edges;
-              std::string s(
-                  (const char *)xmlGetProp(nodeLayer, BAD_CAST "r_edges"));
+              std::string s(GetXmlAttr<std::string>(nodeLayer, "r_edges"));
 
               std::istringstream ss(s);
               std::string token;
@@ -177,10 +178,8 @@ void TFCSEnergyAndHitGAN::GetBinning(
                 edges.push_back(atof(token.c_str()));
               }
 
-              int binsInAlpha = atof(
-                  (const char *)xmlGetProp(nodeLayer, BAD_CAST "n_bin_alpha"));
-              int layer =
-                  atof((const char *)xmlGetProp(nodeLayer, BAD_CAST "id"));
+              int binsInAlpha = GetXmlAttr<int>(nodeLayer, "n_bin_alpha");
+              int layer = GetXmlAttr<int>(nodeLayer, "id");
 
               if (correctentry)
                 ATH_MSG_DEBUG("nodepid=" << nodePid << " nodeEtaMax="
