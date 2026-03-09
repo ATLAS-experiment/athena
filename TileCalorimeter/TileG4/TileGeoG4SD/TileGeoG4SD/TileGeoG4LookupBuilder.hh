@@ -20,6 +20,7 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include "TileGeoG4SD/TileGeoG4Lookup.hh"
 
 class TileGeoG4Cell;
 class TileGeoG4Section;
@@ -53,7 +54,7 @@ public:
 
 private:
   typedef std::map<std::string, TileGeoG4Cell*, std::less<std::string> > TileGeoG4CellMap;
-  typedef std::map<TileDddbManager::TileSections, TileGeoG4Section*, std::less<TileDddbManager::TileSections> > TileGeoG4SectionMap;
+  typedef std::map<TileDddbManager::TileSections, std::unique_ptr<TileGeoG4Section>, std::less<TileDddbManager::TileSections> > TileGeoG4SectionMap;
 
   void CreateGeoG4Cells();
   void CreateGeoG4Sections(bool is_tb);
