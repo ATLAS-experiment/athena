@@ -10,6 +10,7 @@
 
 #include "EGammaVariableCorrection/ElectronPhotonVariableCorrectionBase.h"
 #include "EGammaVariableCorrection/ElectronPhotonVariableCorrectionTool.h"
+#include "EGammaVariableCorrection/ElectronPhotonVariableNFCorrectionTool.h"
 
 
 #endif
