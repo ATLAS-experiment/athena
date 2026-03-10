@@ -12,7 +12,7 @@ endif()
 # Set up the build of the example library.
 atlas_add_component( AthExHIP
    src/*.h src/*.cxx src/*.hip src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel )
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess GaudiKernel )
 set_target_properties( AthExHIP PROPERTIES
    LINKER_LANGUAGE HIP )
 
