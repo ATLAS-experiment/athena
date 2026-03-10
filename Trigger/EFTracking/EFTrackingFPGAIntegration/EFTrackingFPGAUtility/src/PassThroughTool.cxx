@@ -8,7 +8,7 @@
  */
 
 #include "EFTrackingFPGAUtility/PassThroughTool.h"
-
+#include "xAODInDetMeasurement/Utilities.h"
 
 StatusCode PassThroughTool::initialize()
 {
@@ -528,14 +528,14 @@ StatusCode PassThroughTool::getInputClusterData(
             cache.totList[j] = pc->at(i)->totList().at(j);
         }
 
-        cache.totalToT = pc->at(i)->totalToT();
+        cache.totalToT = xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*pc->at(i));
 
         for (long unsigned int j = 0; j < pc->at(i)->chargeList().size(); j++)
         {
             cache.chargeList[j] = pc->at(i)->chargeList().at(j);
         }
 
-        cache.totalCharge = pc->at(i)->totalCharge();
+        cache.totalCharge = xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*pc->at(i));
         cache.energyLoss = pc->at(i)->energyLoss();
         cache.isSplit = pc->at(i)->isSplit();
         cache.splitProbability1 = pc->at(i)->splitProbability1();

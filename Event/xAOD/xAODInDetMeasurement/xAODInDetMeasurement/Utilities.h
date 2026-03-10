@@ -11,10 +11,7 @@
 namespace xAOD::xAODInDetMeasurement::Utilities {
   
   float computeTotalCharge( const SG::AuxElement& cluster);
-  float computeTotalCharge( const std::vector<float>& charges);
-
   int computeTotalToT( const SG::AuxElement& cluster);
-  int computeTotalToT( const std::vector<int>& tots);
 }
 
 #endif 

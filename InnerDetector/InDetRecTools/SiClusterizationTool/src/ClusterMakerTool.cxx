@@ -25,8 +25,6 @@
 
 #include "EventPrimitives/EventPrimitives.h"
 
-#include "xAODInDetMeasurement/Utilities.h"
-
 #include <memory>
 
 using PixelCalib::PixelOfflineCalibData;
@@ -111,9 +109,7 @@ public:
 	m_cluster->setRDOlist(rdoList);
 	m_cluster->globalPosition() = globpos.cast<float>();
 	m_cluster->setToTlist(totList);
-	m_cluster->setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(totList) );
 	m_cluster->setChargelist(chargeList);
-	m_cluster->setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
 	m_cluster->setLVL1A(lvl1a);
 	m_cluster->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
 	m_cluster->setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));

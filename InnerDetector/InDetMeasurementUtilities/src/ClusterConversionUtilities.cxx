@@ -7,8 +7,6 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 
-#include "xAODInDetMeasurement/Utilities.h"
-
 #include "HGTD_PrepRawData/HGTD_Cluster.h"
 #include "xAODInDetMeasurement/HGTDClusterContainer.h"
 #include "xAODInDetMeasurement/HGTDClusterAuxContainer.h"
@@ -95,9 +93,7 @@ namespace TrackingUtilities {
     xaodCluster.setRDOlist(RDOs);
     xaodCluster.globalPosition() = globalPosition;
     xaodCluster.setToTlist(ToTs);
-    xaodCluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(ToTs) );
     xaodCluster.setChargelist(charges);
-    xaodCluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(charges) );
     xaodCluster.setLVL1A(indetCluster.LVL1A());
     xaodCluster.setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
     xaodCluster.setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));

@@ -8,7 +8,6 @@
 #include <xAODInDetMeasurement/PixelCluster.h>
 #include <xAODInDetMeasurement/PixelClusterContainer.h>
 #include <xAODInDetMeasurement/PixelClusterAuxContainer.h>
-#include <xAODInDetMeasurement/Utilities.h>
 #include <InDetPrepRawData/SiWidth.h>
 #include <TrkSurfaces/Surface.h>
 
@@ -225,9 +224,7 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   xaodcluster.setIdentifier( cluster.ids.front() );
   xaodcluster.setRDOlist(std::move(cluster.ids));
   xaodcluster.globalPosition() = globalPos.cast<float>();
-  xaodcluster.setTotalToT( xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(cluster.tots) );
   xaodcluster.setToTlist(std::move(cluster.tots));
-  xaodcluster.setTotalCharge( xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(chargeList) );
   xaodcluster.setChargelist(std::move(chargeList));
   xaodcluster.setLVL1A(cluster.lvl1min);
   xaodcluster.setChannelsInPhiEta(rowWidth,colWidth);
