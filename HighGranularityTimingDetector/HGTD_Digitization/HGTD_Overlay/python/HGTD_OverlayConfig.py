@@ -11,13 +11,14 @@ def HGTD_OverlayAlgCfg(flags, name="HGTD_Overlay", **kwargs):
     """Return a ComponentAccumulator for HGTD overlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}HGTD_RDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}HGTD_RDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}HGTD_RDOs")
     kwargs.setdefault("OutputKey", "HGTD_RDOs")
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'HGTD_RDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'HGTD_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do HGTD overlay
     acc.addEventAlgo(CompFactory.HGTD_Overlay(name, **kwargs))

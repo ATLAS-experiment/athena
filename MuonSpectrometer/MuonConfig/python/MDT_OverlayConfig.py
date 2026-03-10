@@ -1,7 +1,7 @@
 
 """Define methods to construct configured MDT overlay algorithms
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -12,7 +12,7 @@ def MDT_OverlayAlgCfg(flags, name="MdtOverlay", **kwargs):
     """Return a ComponentAccumulator for MDTOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}MDT_DIGITS")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}MDT_DIGITS" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}MDT_DIGITS")
     kwargs.setdefault("OutputKey", "MDT_DIGITS")
 

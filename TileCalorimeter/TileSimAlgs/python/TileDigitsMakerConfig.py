@@ -61,11 +61,12 @@ def TileDigitsMakerCfg(flags, **kwargs):
         tileNoise = False
         tileCoherNoise = False
 
-        kwargs['InputTileDigitContainer'] = f'{flags.Overlay.BkgPrefix}TileDigitsCnt'
+        kwargs['InputTileDigitContainer'] = f'{flags.Overlay.BkgPrefix}TileDigitsCnt' if not flags.Overlay.IgnoreBkgInputs else ""
         kwargs['TileDQstatus'] = 'TileDQstatus'
 
-        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-        acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
+        if kwargs['InputTileDigitContainer']:
+            from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+            acc.merge(SGInputLoaderCfg(flags, [f'TileDigitsContainer#{kwargs["InputTileDigitContainer"]}']))
 
         from TileRecUtils.TileDQstatusConfig import TileDQstatusAlgCfg
         acc.merge(TileDQstatusAlgCfg(flags))

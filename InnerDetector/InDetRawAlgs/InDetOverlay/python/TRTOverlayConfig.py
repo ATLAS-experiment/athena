@@ -12,14 +12,15 @@ def TRTOverlayAlgCfg(flags, name="TRTOverlay", **kwargs):
     acc = ComponentAccumulator()
 
     kwargs.setdefault("SortBkgInput", flags.Overlay.DataOverlay)
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TRT_RDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}TRT_RDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}TRT_RDOs")
     kwargs.setdefault("SignalInputSDOKey", f"{flags.Overlay.SigPrefix}TRT_SDO_Map")
     kwargs.setdefault("OutputKey", "TRT_RDOs")
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'TRT_RDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TRT_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
     acc.merge(TRT_ReadoutGeometryCfg(flags))

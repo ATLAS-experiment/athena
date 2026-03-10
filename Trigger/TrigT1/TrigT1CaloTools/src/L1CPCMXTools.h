@@ -1,21 +1,24 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef LVL1L1CPCMXTOOLS_H
 #define LVL1L1CPCMXTOOLS_H
 
-#include <string>
-#include <vector>
-
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthContainers/DataVector.h"
 #include "TrigT1CaloToolInterfaces/IL1CPCMXTools.h"
 #include "xAODTrigL1Calo/CMXCPTobContainer.h"
 #include "xAODTrigL1Calo/CMXCPHitsContainer.h"
-#include "TrigConfData/L1Menu.h"
+
+#include <string>
+#include <vector>
+#include <cstdint> //uint8_t etc
+
+namespace TrigConf{
+ class L1Menu;
+}
 
 namespace LVL1 {
 class CPMTobRoI;
