@@ -13,7 +13,7 @@
 
 namespace AthHIPExamples {
 
-   StatusCode LinearTransformExampleAlg::initialize() {
+   StatusCode LinearTransformExampleAlg::initialize_worker() {
 
       // Print a bit of information about the selected device.
       std::ostringstream deviceInfo;
@@ -26,10 +26,10 @@ namespace AthHIPExamples {
 
    StatusCode LinearTransformExampleAlg::execute( const EventContext& ) const {
 
+      ATH_MSG_INFO("Starting linearTransform");
       // Create a dummy array variable that will be linearly transformed.
       static constexpr float ARRAY_ELEMENT = 3.141592f;
       std::vector< float > dummyArray( m_arraySize.value(), ARRAY_ELEMENT );
-
       // Perform the transformation.
       linearTransform( m_hipDevice.value(), dummyArray, m_multiplier.value(),
                        m_shift.value() );
