@@ -262,6 +262,7 @@ def setupGeoR4TestCfg(args,  flags = None):
 
     cfg.getService("MessageSvc").verboseLimit = 10000000
     cfg.getService("MessageSvc").debugLimit = 10000000
+    cfg.getService("MessageSvc").errorLimit = 10000000
 
     return flags, cfg
 

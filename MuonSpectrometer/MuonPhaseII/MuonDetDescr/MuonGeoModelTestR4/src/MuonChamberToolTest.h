@@ -46,14 +46,19 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         void saveEnvelope(const ActsTrk::GeometryContext& gctx,
                           const std::string& envName,
                           const Acts::Volume& envelopeVol,
-                          const std::vector<const MuonGMR4::MuonReadoutElement*>& assocRE,
-                          const std::vector<std::shared_ptr<Acts::Volume>>& subVolumes={}) const;
+                          const std::vector<const Acts::Surface*>& assocSurfaces,
+                          const std::vector<const Acts::Volume*>& subVolumes={}) const;
+
+        StatusCode checkPortals(const ActsTrk::GeometryContext& gctx,
+                                const Acts::TrackingVolume& volume) const;
+                                
         /** @brief Check whether the chamber envelopes are consistent */
         StatusCode checkChambers(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check envelopes */
         StatusCode checkEnvelopes(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check tracking geometry volumes */
-        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, std::shared_ptr<const Acts::TrackingGeometry>& trackingGeometry) const;
+        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, 
+                                         const Acts::TrackingGeometry& trackingGeometry) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         template <class EnvelopeType>
           StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
