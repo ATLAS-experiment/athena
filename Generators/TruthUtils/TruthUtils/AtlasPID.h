@@ -356,6 +356,7 @@ template<> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p)
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
 /// of states in QCD are assigned codes 990, 9990, and 110 respectively
+/// TODO Check whether negative values are valid here. (PIDUtils isReggeon only returns true for positive values)
 template<class T> inline bool isTrajectory(const T& p){return isTrajectory(p->pdg_id());}
 template<> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON || std::abs(p) == ODDERON || std::abs(p) == REGGEON; }
 
@@ -367,7 +368,7 @@ template<class T> inline bool isReggeon(const T& p){return isTrajectory(p);}
 /// PDG rule 11b:
 /// The graviton and the boson content of a two-Higgs-doublet scenario
 /// and of additional SU(2)×U(1) groups are found in the range 31–40.
-// APID: includes 38 and 40
+// APID: includes 38 and 40 -  not included by any helper functions in PIDUtils.h
 template<class T> inline bool isBoson(const T& p){return isBoson(p->pdg_id());}
 template<> inline bool isBoson(const int& p){ auto sp = std::abs(p); return sp > 20 && sp < 41; }
 template<> inline bool isBoson(const DecodedPID& p){ return isBoson(p.pid()); }
@@ -388,7 +389,7 @@ template<> inline bool isW(const int& p){ return std::abs(p) == WPLUSBOSON; }
 template<class T> inline bool isHeavyBoson(const T& p){return isHeavyBoson(p->pdg_id());}
 template<> inline bool isHeavyBoson(const int& p){ return p == ZPRIME || p == ZDBLPRIME || std::abs(p) == WPLUSPRIME; }
 
-/// APID: HIGGS boson is only one particle.
+/// APID: HIGGS boson is only one particle. (PIDUtils.h also returns true for pdg_id 26)
 template<class T> inline bool isHiggs(const T& p){return isHiggs(p->pdg_id());}
 template<> inline bool isHiggs(const int& p){ return p == HIGGSBOSON; }
 
