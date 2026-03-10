@@ -14,6 +14,7 @@
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include <AsgTesting/UnitTest.h>
+#include <algorithm>
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
@@ -241,6 +242,80 @@ namespace columnar
     EXPECT_EQ (eventAccessor(id2)[2][0], 7);
     EXPECT_EQ (eventAccessor(id2)[2][1], 8);
     EXPECT_EQ (eventAccessor(id2)[2][2], 9);
+  }
+
+
+  // Tests for renameColumn / renameContainers offset resolution.
+  //
+  // Regression tests for a bug where renameColumn updated the column name
+  // maps but not the container map entry for the old *user* name (e.g.
+  // "Muons"), so convertInternalToUserName("Muons") still returned "Muons"
+  // after renaming it to "AnalysisMuons", leaving offsetName stale.
+
+  TEST (RenameColumnTest, renameContainer_updatesOffsetName)
+  {
+    // A tool with a particle container whose offsetName should point to
+    // EventInfo.  After renaming the container the offsetName reported by
+    // getColumnInfo() must use the new name.
+    MyTool tool;
+    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
+    MyAccessor<uint32_t> varAccessor {tool, "var1"};
+
+    tool.renameColumn ("particles", "AnalysisParticles");
+    tool.renameColumn ("particles.var1", "AnalysisParticles.var1");
+
+    auto columns = tool.getColumnInfo();
+    // Find the offset column for the renamed container.
+    auto it = std::find_if (columns.begin(), columns.end(),
+                            [] (const ColumnInfo& c) { return c.name == "AnalysisParticles"; });
+    ASSERT_NE (it, columns.end());
+    // offsetName must be the user-visible name of EventInfo, not the stale
+    // internal name or an empty string.
+    EXPECT_EQ (it->offsetName, numberOfEventsName);
+
+    // The data column's offsetName must point to the renamed container.
+    auto it2 = std::find_if (columns.begin(), columns.end(),
+                             [] (const ColumnInfo& c) { return c.name == "AnalysisParticles.var1"; });
+    ASSERT_NE (it2, columns.end());
+    EXPECT_EQ (it2->offsetName, "AnalysisParticles");
+  }
+
+
+  TEST (RenameColumnTest, renameContainer_setColumnIndex_works)
+  {
+    // After renaming a container and its columns, setColumnIndex with the
+    // new names must succeed (i.e. locate the underlying internal columns).
+    MyTool tool;
+    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
+    MyAccessor<uint32_t> varAccessor {tool, "var1"};
+
+    tool.renameColumn ("particles", "AnalysisParticles");
+    tool.renameColumn ("particles.var1", "AnalysisParticles.var1");
+
+    EXPECT_NO_THROW (tool.setColumnIndex (numberOfEventsName, 1));
+    EXPECT_NO_THROW (tool.setColumnIndex ("AnalysisParticles", 2));
+    EXPECT_NO_THROW (tool.setColumnIndex ("AnalysisParticles.var1", 3));
+  }
+
+
+  TEST (RenameColumnTest, renameEventInfoContainer_updatesParticleOffsetName)
+  {
+    // Regression test for the specific bug reported in the post-mortem:
+    // renaming EventInfo (the root offset container) must cause any particle
+    // container's offsetName to resolve to the new name, not the old one.
+    MyTool tool;
+    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
+
+    // Rename the event-info container (user name "EventInfo" -> "EventInfoAuxDyn").
+    tool.renameColumn (numberOfEventsName, "EventInfoAuxDyn");
+
+    auto columns = tool.getColumnInfo();
+    auto it = std::find_if (columns.begin(), columns.end(),
+                            [] (const ColumnInfo& c) { return c.name == "particles"; });
+    ASSERT_NE (it, columns.end());
+    // The offsetName of the particle-container column must resolve to the
+    // renamed EventInfo name, not the stale original name.
+    EXPECT_EQ (it->offsetName, "EventInfoAuxDyn");
   }
 }
 
