@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================================
 # Provides configs for the tools used for LLP Derivations
@@ -259,8 +259,25 @@ def ZeroPixelHitMuonMergerAlgCfg(flags, name='LLP1_MuonZPHMergingAlg', **kwargs)
 
 def LRTElectronMergerAlg(flags, name="LLP1_ElectronLRTMergingAlg", **kwargs):
     acc = ComponentAccumulator()
-    alg = CompFactory.CP.ElectronLRTMergingAlg(name, **kwargs)
-    acc.addEventAlgo(alg, primary=True)
+    prompt = kwargs.setdefault ('PromptElectronLocation', 'Electrons')
+    lrt = kwargs.setdefault ('LRTElectronLocation', 'LRTElectrons')
+    ExtraInputs = kwargs.setdefault ('ExtraInputs', [])
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs += [('xAOD::IParticleContainer', f'{prompt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [('xAOD::IParticleContainer', f'{lrt}.{v}')
+                    for v in iso_vars()]
+    ExtraInputs += [
+             ('xAOD::IParticleContainer', f'{lrt}.core57cellsEnergyCorrection'),
+             ('xAOD::IParticleContainer', f'{lrt}.ptcone20'),
+             ('xAOD::IParticleContainer', f'{lrt}.neflowisol20'),
+             ('xAOD::IParticleContainer', f'{prompt}.neflowisol20'),
+        ]
+    alg = CompFactory.CP.ElectronLRTMergingAlg \
+        (name,
+         **kwargs)
+    acc.addEventAlgo(alg,
+                     primary=True)
     return acc
 
 # Photon IsEM setup for LLP1
@@ -441,6 +458,9 @@ def LRTElectronLHSelectorsCfg(flags):
 # RecoverZeroPixelHitMuons setup
 def RecoverZeroPixelHitMuonsCfg(flags):
     acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons"))
+    from IsolationAlgs.DerivationTrackIsoConfig import iso_vars
+    ExtraInputs = [('xAOD::IParticleContainer', 'Muons.' + v)
+                   for v in iso_vars()]
+    acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
     
     return acc 
