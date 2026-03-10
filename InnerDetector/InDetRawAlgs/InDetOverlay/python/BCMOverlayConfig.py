@@ -23,15 +23,16 @@ def BCMOverlayAlgCfg(flags, name="BCMOverlay", **kwargs):
     """Return a ComponentAccumulator for BCMOverlay algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}BCM_RDOs")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}BCM_RDOs" if not flags.Overlay.IgnoreBkgInputs else "")
     kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}BCM_RDOs")
     kwargs.setdefault("OutputKey", "BCM_RDOs")
 
     kwargs.setdefault("isDataOverlay", not flags.Input.isMC)
 
     # Input setup
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'BCM_RDO_Container#{kwargs["BkgInputKey"]}']))
+    if kwargs["BkgInputKey"]:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'BCM_RDO_Container#{kwargs["BkgInputKey"]}']))
 
     # Do BCM overlay
     acc.addEventAlgo(CompFactory.BCMOverlay(name, **kwargs))

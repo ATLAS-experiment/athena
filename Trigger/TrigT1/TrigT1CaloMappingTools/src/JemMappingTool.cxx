@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <cmath>
+
 
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/MsgStream.h"
@@ -10,6 +10,7 @@
 
 #include "JemMappingTool.h"
 
+#include <cmath>
 namespace LVL1 {
 
 // Static constants
@@ -84,10 +85,11 @@ bool JemMappingTool::mapping(const int crate, const int module,
 
   // Phi granularity doubles at FCAL
 
-  const double twoPi   = 2.*M_PI;
-  const double phiBase = M_PI/2. * double(crate)
-                         + M_PI  * double(module/s_modulesPerQuadrant);
-  phi = phiBase + s_phiGran * (double(phiBin) + 0.5);
+  constexpr double twoPi   = 2. * M_PI;
+  const double phiBase =
+    M_PI_2 * static_cast<double>(crate)
+    + M_PI * static_cast<double>(module / s_modulesPerQuadrant);
+  phi = phiBase + s_phiGran * (static_cast<double>(phiBin) + 0.5);
   if (((quadMod == s_extremeNegModule) && (etaBin == 0)) ||
       ((quadMod == s_extremePosModule) && (etaBin == s_etaBinsPerRow - 1))) {
     if (chan < s_etaBinsPerRow) phi -= s_phiGran / 2.;
