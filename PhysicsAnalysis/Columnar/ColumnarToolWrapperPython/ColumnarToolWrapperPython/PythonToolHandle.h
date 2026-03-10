@@ -15,6 +15,7 @@
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarToolWrapper/ToolColumnVectorMap.h>
+#include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <PATInterfaces/ISystematicsTool.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <PATInterfaces/SystematicsUtil.h>
@@ -88,18 +89,7 @@ namespace columnar
       if (m_tool == nullptr)
         preinitialize ();
       {
-        auto columnInfo = m_tool->getColumnInfo ();
-        for (auto& [from, to] : renames)
-        {
-          for (auto& column : columnInfo)
-          {
-            if (column.name.starts_with (from) && (column.name.size() == from.size() || column.name[from.size()] == '.'))
-            {
-              std::string newName = to + column.name.substr (from.size());
-              m_tool->renameColumn (column.name, newName);
-            }
-          }
-        }
+        columnar::renameContainers(*m_tool, renames);
       }
       if (m_toolWrapper)
       {
