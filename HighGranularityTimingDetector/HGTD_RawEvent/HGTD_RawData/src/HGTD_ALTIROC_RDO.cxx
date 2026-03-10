@@ -27,8 +27,8 @@ HGTD_ALTIROC_RDO::HGTD_ALTIROC_RDO(const Identifier rdo_id,
     {
       auto u64 = [](auto x){return static_cast<uint64_t>(x);};
       m_word =  ( crc +
-                  ((toa & 0x7F) << 8) +
-                  ((tot & 0x1FF) << 15) +
-                  ((l1id & 0x3F) << 24) +
-                  ((u64(bcid) & u64(0x3FF)) << 30) ); 
+                  ((u64(toa) & u64(0x7F)) << 8) +
+                  ((u64(tot) & u64(0x1FF)) << 15) +
+                  ((u64(l1id) & u64(0x3F)) << 24) +
+                  ((u64(bcid) & u64(0x3FF)) << 30)); 
     }
