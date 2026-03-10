@@ -162,6 +162,12 @@ StatusCode TrigByteStreamCnvSvc::connectOutput(const std::string& /*outputFile*/
     return StatusCode::FAILURE;
   }
   re->copy_header(inputRawEvent);
+  //Force the header compression type to uncompressed
+  //copy_header may copy the compression type/level if the input event is compressed (e.g. EFDFEmulator case)
+  //This would cause the HLT result to be compressed during bind().
+  //Compression should instead be applied at the DCM/EventBuilder level.
+  re->compression_type(0 /*eformat::UNCOMPRESSED*/);
+  re->compression_level(0);
 
   ATH_MSG_VERBOSE("Created RawEventWrite pointer = " << re);
 
