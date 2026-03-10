@@ -15,7 +15,7 @@ from .Physics_pp_run3_v1 import (
     MultiElectronGroup,
     SingleElectronGroup,
     Topo2Group,
-    #Topo3Group,
+    Topo3Group,
     MinBiasGroup,
     SupportGroup,
     SupportPhIGroup,
@@ -79,6 +79,11 @@ def getLowMuPhysicsSignatures():
         ChainProp(name='HLT_2mu4_L12MU3VF', stream=[PhysicsStream, 'express'], groups=MultiMuonGroup+PrimaryL1MuGroup, monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='HLT_mu4_mu6_L12MU3V', stream=[PhysicsStream], groups=MultiMuonGroup+PrimaryL1MuGroup),
         ChainProp(name='HLT_mu4_mu4noL1_L1MU3V', stream=[PhysicsStream], l1SeedThresholds=['MU3V','FSNOSEED'], groups=MultiMuonGroup+SupportGroup, monGroups=['muonMon:shifter','muonMon:online']),
+
+        #ATR-32488
+        ChainProp(name='HLT_mu4_ivarloose_mu4_mu3noL1_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF', 'MU3VF', 'FSNOSEED'], stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup+Topo3Group),
+        ChainProp(name='HLT_2mu4_L1BPH-7M11-25DR99-2MU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup+Topo3Group),
+        ChainProp(name='HLT_2mu4_ivarloose_L1BPH-7M14-0DR25-MU5VFMU3VF', l1SeedThresholds=['MU3VF'], stream=[PhysicsStream], groups=MultiMuonGroup+SupportGroup+Topo3Group),
 
         #-- tag-and-probe
         ChainProp(name='HLT_mu8_mu4_probe_L1MU5VF', l1SeedThresholds=['MU5VF','PROBEMU3V'], groups=SingleMuonGroup+TagAndProbeGroup),

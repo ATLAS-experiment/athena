@@ -364,8 +364,8 @@ class MonitorDef:
                     # Basic inputs
                     "L1_ZDC_XOR", "L1_ZDC_C_VZDC_A", "L1_ZDC_A_VZDC_C",
                     "L1_1ZDC_A_VZDC_C", "L1_VZDC_A_1ZDC_C",
-                    "L1_1ZDC_A_1ZDC_C", "L1_5ZDC_A_VZDC_C", "L1_VZDC_A_5ZDC_C",
-                    "L1_ZDC_1XOR5", "L1_5ZDC_A_5ZDC_C",
+                    "L1_1ZDC_A_1ZDC_C", "L1_ZDC_1XOR5",
+                    "L1_5ZDC_A_5ZDC_C",
                     # Mu+X
                     "L1_MU3V_jJ40",
                     # Phase-I L1Calo
