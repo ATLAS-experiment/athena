@@ -11,30 +11,31 @@ namespace L0Muon
   /// granularity of the binary representation
   void ICandData::setEta(float eta)
   {
-    /// convert eta to binary
-    m_eta = (uint16_t)(eta / s_etaRange * (float)s_etaBitRange);
+    /// convert eta to binary, taking into account the range from -s_etaRange to +s_etaRange) 
+    m_eta = static_cast<uint16_t>( (eta+s_etaRange) / (2.*s_etaRange) * static_cast<float>(s_etaBitRange));
   }
   void ICandData::setPhi(float phi)
   {
-    m_phi = (uint16_t)(phi / s_phiRange * (float)s_phiBitRange);
+    m_phi = static_cast<uint16_t>(phi / s_phiRange * static_cast<float>(s_phiBitRange));
   }
   void ICandData::setPt(float pt)
   {
-    m_pt = (uint16_t)(pt / s_ptRange * (float)s_ptBitRange);
+    m_pt = static_cast<uint16_t>(pt / s_ptRange * static_cast<float>(s_ptBitRange));
   }
 
   /// get the kinematic parameters
   float ICandData::eta() const
   {
-    return (float)m_eta / (float)s_etaBitRange * s_etaRange;
+    /// return eta with +/- sign from -s_etaRange to +s_etaRange
+    return static_cast<float> (m_eta / static_cast<float>(s_etaBitRange * 2.* s_etaRange) - s_etaRange);
   }
   float ICandData::phi() const
   {
-    return (float)m_phi / (float)s_phiBitRange * s_phiRange;
+    return static_cast<float> (m_phi / static_cast<float>(s_phiBitRange * s_phiRange));
   }
   float ICandData::pt() const
   {
-    return (float)m_pt / (float)s_ptBitRange * s_ptRange;
+    return static_cast<float>(m_pt / static_cast<float>(s_ptBitRange * s_ptRange));
   }
 
 } // namespace L0Muon
