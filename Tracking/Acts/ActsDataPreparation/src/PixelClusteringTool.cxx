@@ -229,8 +229,6 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   xaodcluster.setLVL1A(cluster.lvl1min);
   xaodcluster.setChannelsInPhiEta(rowWidth,colWidth);
   xaodcluster.setWidthInEta(static_cast<float>(etaWidth));
-  xaodcluster.setIsSplit(false);
-  xaodcluster.setSplitProbabilities(0.0, 0.0);
     
   return StatusCode::SUCCESS;
 }

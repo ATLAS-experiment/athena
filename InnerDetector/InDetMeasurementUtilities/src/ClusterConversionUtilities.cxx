@@ -84,9 +84,6 @@ namespace TrackingUtilities {
     const auto& ToTs = indetCluster.totList();
     const auto& charges = indetCluster.chargeList();
     const auto& width = indetCluster.width();
-    auto isSplit = indetCluster.isSplit();
-    auto splitProbability1 = indetCluster.splitProbability1();
-    auto splitProbability2 = indetCluster.splitProbability2();
 
     xaodCluster.setMeasurement<2>(idHash, localPosition, localCovariance);
     xaodCluster.setIdentifier( indetCluster.identify().get_compact() );
@@ -97,8 +94,6 @@ namespace TrackingUtilities {
     xaodCluster.setLVL1A(indetCluster.LVL1A());
     xaodCluster.setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
     xaodCluster.setWidthInEta(static_cast<float>(width.widthPhiRZ()[1]));
-    xaodCluster.setIsSplit(isSplit);
-    xaodCluster.setSplitProbabilities(splitProbability1, splitProbability2);
 
     return StatusCode::SUCCESS;
   }
@@ -250,9 +245,7 @@ namespace TrackingUtilities {
 					   std::move(errorMatrix),
 					   omegax,
 					   omegay,
-					   xaodCluster.isSplit(),
-					   xaodCluster.splitProbability1(),
-					   xaodCluster.splitProbability2());
+					   false, 0, 0);
 
     return StatusCode::SUCCESS;
   }
