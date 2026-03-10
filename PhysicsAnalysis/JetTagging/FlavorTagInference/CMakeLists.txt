@@ -34,6 +34,7 @@ set(FTISource
   Root/CustomGetterUtils.cxx
   Root/DataPrepUtilities.cxx
   Root/ElectronsLoader.cxx
+  Root/MuonsLoader.cxx
   Root/FlipTagEnums.cxx
   Root/FlowElementsLoader.cxx
   Root/FTagDataDependencyNames.cxx

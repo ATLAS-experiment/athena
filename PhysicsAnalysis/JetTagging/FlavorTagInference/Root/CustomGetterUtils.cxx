@@ -4,6 +4,7 @@
 #include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
 
+#include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #include <xAODPFlow/FlowElement.h>
 #include "AthContainers/AuxElement.h"
@@ -173,6 +174,12 @@ namespace {
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::IParticle;
 
+    if (name == "eProbabilityHT") {
+      SG::AuxElement::ConstAccessor<float> eprob_acc(name);
+      return CustomSeqGetter<Tp>([eprob_acc](const Tp& tp, const Jet&) {
+        return eprob_acc(tp);
+      });
+    }
     if (name == "qOverP") {
       return CustomSeqGetter<Tp>([](const Tp& p, const Jet&) {
         return p.qOverP(); 
@@ -486,13 +493,6 @@ namespace {
         return p.caloCluster()->e() * std::abs(p.trackParticle()->qOverP());
       });
     }
-    if (name == "eProbabilityHT") {
-      return CustomSeqGetter<El>([](const El& p, const Jet&) {
-        float eprob = 0.0;
-        p.trackParticle()->summaryValue(eprob, xAOD::eProbabilityHT);
-        return eprob;
-      });
-    }
     auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
     if (track_getter_no_ipdep) {
       auto f = *track_getter_no_ipdep;
@@ -505,6 +505,40 @@ namespace {
       auto f = *track_getter_ipdep;
       return CustomSeqGetter<El>([f](const El& p, const Jet& j) -> double {
         return f(j, {p.trackParticle()})[0];
+      });
+    }
+    return std::nullopt;
+  }
+
+  // Getters from xAOD::Muon
+  std::optional<SequenceGetterFunc<xAOD::Muon>> getterFromMuons(
+      const std::string& name, const std::string& prefix
+  ) {
+    using Jet = xAOD::IParticle;
+    using Mu = xAOD::Muon;
+
+    if (name == "qOverPratio") {
+      return CustomSeqGetter<Mu>([](const Mu& p, const Jet&) -> double {
+        auto track = p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        if ( !track ) { return -9999.0; }
+        auto ms_track = p.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        if ( !ms_track ) { return -9999.0; }
+        return track->qOverP() / ms_track->qOverP();
+      });
+    }
+
+    auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
+    if ( track_getter_no_ipdep ) {
+      auto f = *track_getter_no_ipdep;
+      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
+      });
+    }
+    auto track_getter_ipdep = getterFromTracksWithIpDep(name, prefix);
+    if ( track_getter_ipdep ) {
+      auto f = *track_getter_ipdep;
+      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+        return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
       });
     }
     return std::nullopt;
@@ -553,6 +587,12 @@ namespace {
         }
       }
 
+      if constexpr (std::is_same_v<T, xAOD::Muon>) {
+        if (auto getter = getterFromMuons(name, prefix)){
+          return {*getter, {}};
+        }
+      }
+      
       if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
         if (auto getter = getterFromFlowElements(name)){
           return {*getter, {}};
@@ -689,11 +729,12 @@ namespace {
     }
 
 
-    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron)
+    // Explicit instantiations of supported types (IParticle, FlowElement, TrackParticle, TrackMeasurementValidation, Electron, Muon)
     template class SeqGetter<xAOD::IParticle>;
     template class SeqGetter<xAOD::FlowElement>;
     template class SeqGetter<xAOD::TrackParticle>;
     template class SeqGetter<xAOD::TrackMeasurementValidation>;
     template class SeqGetter<xAOD::Electron>;
+    template class SeqGetter<xAOD::Muon>;
   }
 }

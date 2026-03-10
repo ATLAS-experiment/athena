@@ -137,7 +137,8 @@ namespace FlavorTagInference {
       track_link_name ("BTagTrackToJetAssociator"),
       default_output_value (NAN),
       invalid_ip_key ("invalidIp"),
-      electron_link_name("FTagElectrons")
+      electron_link_name("FTagElectrons"),
+      muon_link_name("FTagMuons")
   {
   }
 
@@ -336,6 +337,9 @@ namespace FlavorTagInference {
       }
       if (auto h = remap_scalar.extract(options.electron_link_name)) {
         options.electron_link_name = h.mapped();
+      }
+      if (auto h = remap_scalar.extract(options.muon_link_name)) {
+        options.muon_link_name = h.mapped();
       }
       options.flip = flip_config;
       options.remap_scalar = remap_scalar;

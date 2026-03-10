@@ -51,6 +51,7 @@ namespace FlavorTagInference {
     float default_output_value;
     std::string invalid_ip_key;
     std::string electron_link_name;
+    std::string muon_link_name;
   };
 
 
