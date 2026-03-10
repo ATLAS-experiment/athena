@@ -94,7 +94,7 @@ namespace {
     return config;
   }
 
-  ConstituentsInputConfig get_electron_input_config(
+  ConstituentsInputConfig get_lepton_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
     const TypeRegexes& type_regexes,
@@ -104,12 +104,12 @@ namespace {
     config.name = name;
     config.order = ConstituentsSortOrder::PT_DESCENDING;
     config.selection = str::match_first(select_regexes, name,
-                                  "electron selection matching");
+                                  "lepton selection matching");
     for (const auto& varname: input_variables) {
       InputVariableConfig input;
       input.name = varname;
       input.type = str::match_first(type_regexes, input.name,
-                                "electron type matching");
+                                "lepton type matching");
       input.flip_sign = false;
       config.inputs.push_back(std::move(input));
     }
@@ -135,6 +135,18 @@ namespace FlavorTagInference {
                "et|deltaPOverP|ptVarCone30OverPt|energyOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // variables extracted from the corresponding track
           {"(numberOf.*|d0.*|abs_eta|qOverP|eProbabilityHT)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+      };
+      TypeRegexes muon_type_regexes {
+          // default muon variables
+          {"(pt|eta|phi|momentumBalanceSignificance|"
+               "scatteringNeighbourSignificance|segmentDelta.*|"
+               "ParamEnergyLoss.*|MeasEnergyLoss.*|CaloMuonScore)"_r, ConstituentsEDMType::FLOAT},
+          {"(quality)"_r, ConstituentsEDMType::UCHAR},
+          // custom variables
+          {"(ptfrac|ptrel|dr|qOverPratio)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // variables extracted from the corresponding track
+          {"(^.*)?(D|Z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          {"(numberOf.*|expect.*|eProbabilityHT|qOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes hits_type_regexes {
           // hits variables
@@ -191,6 +203,10 @@ namespace FlavorTagInference {
       SelRegexes electron_select_regexes {
         {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
       };
+      // And one for muons
+      SelRegexes muon_select_regexes {
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
+      };
       
       if (name.find("tracks") != std::string::npos){
         std::regex flip_sequences;
@@ -222,16 +238,24 @@ namespace FlavorTagInference {
         config.output_name = "hits";
       }
       else if (name.find("electrons") != std::string::npos){
-        config = get_electron_input_config(
+        config = get_lepton_input_config(
           name, input_variables,
           electron_type_regexes,
           electron_select_regexes);
         config.type = ConstituentsType::ELECTRON;
         config.output_name = "electrons";
       }
+      else if (name.find("muons") != std::string::npos){
+        config = get_lepton_input_config(
+          name, input_variables,
+          muon_type_regexes,
+          muon_select_regexes);
+        config.type = ConstituentsType::MUON;
+        config.output_name = "muons";
+      }
       else{
         throw std::runtime_error(
-          "Unknown constituent type: " + name + ". Only tracks, flows, hits and electrons are supported."
+          "Unknown constituent type: " + name + ". Only tracks, flows, hits, electrons and muons are supported."
           );
       }
       return config;

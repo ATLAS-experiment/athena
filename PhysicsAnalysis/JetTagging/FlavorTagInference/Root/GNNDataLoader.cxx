@@ -35,6 +35,9 @@ FlavorTagInference::GNNDataLoader::GNNDataLoader(ISaltModelPtr saltModel, const 
       case ELECTRON:
         addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<ElectronsLoader>(config, fo));
         break;
+      case MUON:
+        addVectorLoader(getVecInputName(salt_model_version, config), std::make_shared<MuonsLoader>(config, fo));
+        break;
       default:
         throw std::runtime_error("Unknown constituent type");
       }

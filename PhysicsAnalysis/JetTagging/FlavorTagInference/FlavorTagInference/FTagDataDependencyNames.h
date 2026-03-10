@@ -12,6 +12,7 @@ namespace FlavorTagInference {
   struct FTagDataDependencyNames {
     std::set<std::string> trackInputs;
     std::set<std::string> electronInputs;
+    std::set<std::string> muonInputs;
     std::set<std::string> bTagInputs;
     std::set<std::string> bTagOutputs;
     FTagDataDependencyNames operator+(FTagDataDependencyNames) const;

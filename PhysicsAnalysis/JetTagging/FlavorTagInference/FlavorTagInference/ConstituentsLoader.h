@@ -50,6 +50,7 @@ namespace FlavorTagInference {
         TRACK,
         HIT,
         ELECTRON,
+        MUON,
         TAUTRACK,
         TAUCLUSTER,
         UNKNOWN

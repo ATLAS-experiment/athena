@@ -170,6 +170,7 @@ def MultifoldGNNCfg(
         defaultOutputValues={},
         foldHashName='jetFoldRankHash',
         electrons='',
+        muons='',
         suffix='',
 ):
     common = commonpath(nnFilePaths)
@@ -248,6 +249,7 @@ def MultifoldGNNCfg(
             container=container,
             constituentContainer=TrackCollection,
             electronContainer=electrons,
+            muonContainer=muons,
             decorator=Tool(**toolargs, **bonusargs),
             undeclaredReadDecorKeys=veto_list,
         )
@@ -345,6 +347,7 @@ def getModifierSet(tagger_name):
         "X", # Xbb tagger
         "L", # lepton decoration
         "E", # Electrons
+        "M", # Muons
         "P", # Particle Flow
         "C", # Charge Tagger (optional, no useful effects)
         "H", # Hybrid model (optional, no useful effects)
