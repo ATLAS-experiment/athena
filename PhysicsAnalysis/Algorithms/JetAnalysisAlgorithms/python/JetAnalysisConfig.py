@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 
@@ -376,26 +376,6 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             log.warning("Uncertainties for R-Scan jets are not yet released!")
 
 
-def _largeLCTopoConfigFile(config, self):
-    is_sim = config.dataType() in {DataType.FullSim}
-    if self.largeRMass == "Comb":
-        if config.dataType() is DataType.Data:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-        if is_sim:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
-    elif self.largeRMass == "Calo":
-        if config.dataType() is DataType.Data:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-        if is_sim:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config "
-    elif self.largeRMass == "TA":
-        if config.dataType() is DataType.Data:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
-        if is_sim:
-            return "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
-    return None
-
-
 class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
@@ -410,9 +390,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             "the correct config blocks to call for small- or large-R jets.")
         self.addOption ('jetInput', '', type=str,
             noneAction='error',
-            info="the type of jet input. Supported options are: `LCTopo`, `TrackCaloCluster`, `UFO`.")
-        self.addOption ('largeRMass', "Comb", type=str,
-            info="the large-R mass definition to use. Supported options are: `Comb`, `Calo`, `TA`.")
+            info="the type of jet input. Supported options are: `UFO`.")
         self.addOption ('recalibratePhyslite', True, type=bool,
             info="whether to run the `CP::JetCalibrationAlg` on PHYSLITE "
             "derivations.")
@@ -511,27 +489,15 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         if(self.jetCollection=="AnalysisLargeRJets") :
             jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-        if self.largeRMass not in ["Comb", "Calo", "TA"]:
-            raise ValueError("Invalid large-R mass defintion {0}!".format(self.largeRMass) )
-
-        if self.jetInput not in ["LCTopo", "TrackCaloCluster", "UFO"]:
+        if self.jetInput not in ["UFO"]:
             raise ValueError("Invalid input type '{0}' for large-R jets!".format(self.jetInput) )
 
-        if self.jetInput == "TrackCaloCluster":
-            # Only one mass defintion supported
-            if self.largeRMass != "Calo":
-                raise ValueError("Invalid large-R TCC jet mass '{0}'!".format(self.largeRMass) )
-            configFile = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"
-        if self.jetInput == "LCTopo":
-            configFile = _largeLCTopoConfigFile(config, self)
-        if self.jetInput == "UFO":
-            configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config"
-            calibArea = "00-04-83"
+        configFile = "JES_MC20PreRecommendation_R10_UFO_CSSK_SoftDrop_JMS_R21Insitu_26Nov2024.config"
+        calibArea = "00-04-83"
         if self.calibToolConfigFile is not None:
             configFile = self.calibToolConfigFile
 
-        # No in situ calibration provided for TCC jets, thus always applying MC calibration sequence only
-        if self.jetInput == "TrackCaloCluster" or config.dataType() is DataType.FullSim or config.dataType() is DataType.FastSim:
+        if config.dataType() is not DataType.Data:
             calibSeq = "EtaJES_JMS"
         elif config.dataType() is DataType.Data:
             calibSeq = "EtaJES_JMS_Insitu"
@@ -602,15 +568,8 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'm', 'm')
 
 # These algorithms set up the jet recommendations as-of 04/02/2019.
-# Jet calibration recommendations
-# https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ApplyJetCalibrationR21
-# Jet uncertainties recommendations
-# Small-R
-# https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
-# Large-R
-# https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertaintiesRel21Moriond2018LargeR
-# JVT recommendations
-# https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JVTCalibrationRel21
+# Jet recommendations:
+# https://atlas-jetetmiss.docs.cern.ch/recs/latest-recs/
 
 @groupBlocks
 def makeJetAnalysisConfig( seq, containerName, jetCollection,
@@ -732,19 +691,17 @@ def makeRScanJetAnalysisConfig( seq, containerName, jetCollection,
 
 
 def makeLargeRJetAnalysisConfig( seq, containerName, jetCollection,
-                                 jetInput, largeRMass = None):
+                                 jetInput):
     """Add algorithms for the R=1.0 jets.
 
       Keyword arguments
         seq -- The sequence to add the algorithms to
         jetCollection -- The jet container to run on.
         jetInput -- The type of input used, read from the collection name.
-        largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TA")
     """
     config = LargeRJetAnalysisConfig()
     config.setOptionValue ('containerName', containerName)
     config.setOptionValue ('jetCollection', jetCollection)
     config.setOptionValue ('jetInput', jetInput)
-    config.setOptionValue ('largeRMass', largeRMass)
     seq.append (config)
 
