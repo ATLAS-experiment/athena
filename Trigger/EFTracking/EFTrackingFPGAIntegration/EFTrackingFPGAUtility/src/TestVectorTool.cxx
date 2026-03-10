@@ -11,6 +11,7 @@
 #include "EFTrackingFPGAUtility/TestVectorTool.h"
 #include "EFTrackingFPGAUtility/FPGADataFormatUtilities.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "xAODInDetMeasurement/Utilities.h"
 #include <fstream>
 
 StatusCode TestVectorTool::initialize()
@@ -243,7 +244,7 @@ StatusCode TestVectorTool::encodePixelL2G(const xAOD::PixelClusterContainer *pix
         // Pixel cluster w10
         isLast = i == (pixelClusters->size() - 1) ? 1 : 0;
         auto pixelCluster_w10 = FPGADataFormatUtilities::fill_EDM_PIXELCLUSTER_w10(pixelClusters->at(i)->globalPosition()[2],
-                                                                                   pixelClusters->at(i)->totalToT(),
+                                                                                   xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*pixelClusters->at(i)),
                                                                                    isLast,
                                                                                    0);
         encodedData.push_back(FPGADataFormatUtilities::get_dataformat_EDM_PIXELCLUSTER_w10(pixelCluster_w10));

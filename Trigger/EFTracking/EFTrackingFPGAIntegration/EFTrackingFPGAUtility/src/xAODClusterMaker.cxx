@@ -356,16 +356,12 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
             row = 20; // width in eta
             double widthInEta = std::bit_cast<float>(pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i + 16]);
 
-            row = 21; // total ToT
-            int totalToT = pixelClusters[row * EFTrackingTransient::MAX_PIXEL_CLUSTERS + i + 16];
-
             Eigen::Matrix<float, 3, 1> globalPosition(globalX, globalY, globalZ);
 
             pixelCl->setMeasurement<2>(idHash, localPosition,localCovariance);
             pixelCl->setIdentifier(id);
             pixelCl->setRDOlist(RDOs);
             pixelCl->globalPosition() = globalPosition;
-            pixelCl->setTotalToT(totalToT);
             pixelCl->setChannelsInPhiEta(channelsInPhi, channelsInEta);
             pixelCl->setWidthInEta(widthInEta);
         }
@@ -566,7 +562,6 @@ StatusCode xAODClusterMaker::makePixelClusterContainer(
             pixelCl->setIdentifier(pxAux.id[i]);
             pixelCl->setRDOlist(RDOs);
             pixelCl->globalPosition() = globalPosition;
-            pixelCl->setTotalToT(pxAux.totalToT[i]);
             pixelCl->setChannelsInPhiEta(pxAux.channelsInPhi[i],
                     pxAux.channelsInEta[i]);
             pixelCl->setWidthInEta(pxAux.widthInEta[i]);

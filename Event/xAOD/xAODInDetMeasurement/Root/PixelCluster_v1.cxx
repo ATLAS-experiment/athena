@@ -68,16 +68,10 @@ AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<int>, totLi
 
 AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<int>, totList, setToTlist)
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, int, totalToT,
-				     setTotalToT)
-
 AUXSTORE_OBJECT_SETTER_AND_GETTER(xAOD::PixelCluster_v1, std::vector<float>, chargeList,
 				  setChargelist)
 
 AUXSTORE_OBJECT_MOVE(xAOD::PixelCluster_v1, std::vector<float>, chargeList, setChargelist)
-
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, totalCharge,
-				     setTotalCharge)
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(xAOD::PixelCluster_v1, float, energyLoss,
                                      setEnergyLoss)

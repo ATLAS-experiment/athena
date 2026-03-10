@@ -4,6 +4,7 @@
 
 #include "EFTrackingFPGAOutputValidation/FPGAOutputValidationAlg.h"
 #include "InDetMeasurementUtilities/Helpers.h"
+#include "xAODInDetMeasurement/Utilities.h"
 
 namespace {
 
@@ -246,7 +247,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<int>("diff_pixel_channelsphi_" +region , cluster0->channelsInPhi() - cluster1->channelsInPhi()),
           Monitored::Scalar<int>("diff_pixel_channelseta_" +region , cluster0->channelsInEta() - cluster1->channelsInEta()),
           Monitored::Scalar<float>("diff_pixel_widtheta_" +region , cluster0->widthInEta() - cluster1->widthInEta()),
-          Monitored::Scalar<int>("diff_pixel_tot_" +region , cluster0->totalToT() - cluster1->totalToT()),
+          Monitored::Scalar<int>("diff_pixel_tot_" +region , xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster0) - xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster1)),
           Monitored::Scalar<int>("diff_pixel_rdos_" +region , cluster0->rdoList().size() - cluster1->rdoList().size()),
           Monitored::Scalar<float>("pixel_globalR_ref_" + region, sqrt(cluster1->globalPosition()[0]*cluster1->globalPosition()[0] + 
                                                                        cluster1->globalPosition()[1]*cluster1->globalPosition()[1])),
@@ -420,7 +421,7 @@ StatusCode FPGAOutputValidationAlg::execute(const EventContext& ctx) const {
           Monitored::Scalar<int>(key.key() + "_CHANNELS_IN_PHI_" + region, cluster->channelsInPhi()),
           Monitored::Scalar<int>(key.key() + "_CHANNELS_IN_ETA_" + region, cluster->channelsInEta()),
           Monitored::Scalar<float>(key.key() + "_WIDTH_IN_ETA_" + region, cluster->widthInEta()),
-          Monitored::Scalar<int>(key.key() + "_TOTAL_TOT_" + region, cluster->totalToT())
+          Monitored::Scalar<int>(key.key() + "_TOTAL_TOT_" + region, xAOD::xAODInDetMeasurement::Utilities::computeTotalToT(*cluster))
         );
       }
     }

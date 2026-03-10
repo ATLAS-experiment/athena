@@ -37,9 +37,7 @@ class PixelClusterAuxContainer_v1 : public AuxContainerBase {
     std::vector<int> channelsInEta;
     std::vector<float> widthInEta;
     std::vector<std::vector<int> > totList;
-    std::vector<int> totalToT;
     std::vector<std::vector<float> > chargeList;
-    std::vector<float> totalCharge;
     std::vector<float> energyLoss;
     std::vector<char> isSplit;
     std::vector<float> splitProbability1;

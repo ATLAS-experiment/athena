@@ -50,13 +50,9 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
     /// Returns the list of ToT of the channels building the cluster
     const std::vector<int>& totList() const;
-    /// Returns the sum of the ToTs of the channels building the cluster
-    int totalToT() const;
 
     /// Returns the list of charges of the channels building the cluster
     const std::vector<float>& chargeList() const;
-    /// Returns the sum of the charges of the channels building the cluster
-    float totalCharge() const;
 
     /// Return the energy loss in the cluster in MeV
     float energyLoss() const;
@@ -93,15 +89,9 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     void setToTlist(const std::vector<int>& tots);
     void setToTlist(std::vector<int>&& tots);
 
-    /// Sets the total ToT
-    void setTotalToT(int totalToT);
-
     /// Sets the list of charges of the channels building the cluster
     void setChargelist(const std::vector<float>& charges);
     void setChargelist(std::vector<float>&& charges);
-
-    /// Sets the total charge
-    void setTotalCharge(float totalCharge);
 
     /// Sets the energy loss in the cluster in MeV
     void setEnergyLoss(float dEdX);
@@ -134,8 +124,6 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInEta);
       AUXSTORE_VARSTRUCT_VAR(float,                                widthInEta);
       AUXSTORE_VARSTRUCT_VAR(std::vector<int>,                     totList);
-      AUXSTORE_VARSTRUCT_VAR(int,                                  totalToT);
-      AUXSTORE_VARSTRUCT_VAR(float,                                totalCharge);
       AUXSTORE_VARSTRUCT_VAR(int,                                  lvl1a);
     };
 
