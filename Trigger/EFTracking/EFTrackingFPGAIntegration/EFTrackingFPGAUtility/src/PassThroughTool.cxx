@@ -537,9 +537,9 @@ StatusCode PassThroughTool::getInputClusterData(
 
         cache.totalCharge = xAOD::xAODInDetMeasurement::Utilities::computeTotalCharge(*pc->at(i));
         cache.energyLoss = pc->at(i)->energyLoss();
-        cache.isSplit = pc->at(i)->isSplit();
-        cache.splitProbability1 = pc->at(i)->splitProbability1();
-        cache.splitProbability2 = pc->at(i)->splitProbability2();
+        cache.isSplit = false;
+        cache.splitProbability1 = 0;
+        cache.splitProbability2 = 0;
         cache.lvl1a = pc->at(i)->lvl1a();
         cache.sizeOfRDOList = pc->at(i)->rdoList().size();
         cache.sizeOfTotList = pc->at(i)->totList().size();

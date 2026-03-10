@@ -57,13 +57,6 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
     /// Return the energy loss in the cluster in MeV
     float energyLoss() const;
 
-    /// Returns if the cluster is split or not
-    bool isSplit() const;
-
-    /// Returns the splitting probabilities for the cluster
-    float splitProbability1() const;
-    float splitProbability2() const;
-
     /// Return the LVL1 accept
     int lvl1a() const;
 
@@ -95,12 +88,6 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
 
     /// Sets the energy loss in the cluster in MeV
     void setEnergyLoss(float dEdX);
-
-    /// Sets if the cluster is split or not
-    void setIsSplit(bool isSplit);
-
-    /// Sets the splitting probabilities for the cluster
-    void setSplitProbabilities(float prob1, float prob2);
 
     /// Sets the LVL1 accept
     void setLVL1A(int lvl1a);

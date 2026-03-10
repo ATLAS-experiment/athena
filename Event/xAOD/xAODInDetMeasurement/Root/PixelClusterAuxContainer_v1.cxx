@@ -19,9 +19,6 @@ PixelClusterAuxContainer_v1::PixelClusterAuxContainer_v1()
     AUX_VARIABLE(totList);
     AUX_VARIABLE(chargeList);
     AUX_VARIABLE(energyLoss);
-    AUX_VARIABLE(isSplit);
-    AUX_VARIABLE(splitProbability1);
-    AUX_VARIABLE(splitProbability2);
     AUX_VARIABLE(lvl1a);
 }
 }  // namespace xAOD

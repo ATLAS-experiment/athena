@@ -407,10 +407,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
     cov(1,1) = siWidth.z()*siWidth.z()/(12*siWidth.colRow().y()*siWidth.colRow().y());
   }
 
-  bool split = false;
-  float splitProb1 = 0;
-  float splitProb2 = 0;
-
   Eigen::Matrix<float,2,1> localPosition(localPos.x(), localPos.y()); 
   Eigen::Matrix<float,2,2> localCovariance;
   localCovariance.setZero();
@@ -427,8 +423,6 @@ StatusCode FPGAClusterConverter::createPixelCluster(const FPGATrackSimHit& h,con
   cl.globalPosition() = globalPosition; 
   cl.setChannelsInPhiEta(siWidth.colRow()[0], siWidth.colRow()[1]);
   cl.setWidthInEta(static_cast<float>(siWidth.widthPhiRZ()[1]));
-  cl.setIsSplit(split);
-  cl.setSplitProbabilities(splitProb1, splitProb2);
   ATH_MSG_DEBUG("\t\txaod width in eta " << cl.widthInEta());
 
   return StatusCode::SUCCESS;
