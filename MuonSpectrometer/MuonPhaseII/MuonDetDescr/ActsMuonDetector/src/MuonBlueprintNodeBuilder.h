@@ -88,14 +88,20 @@ private:
   const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
   /** @brief Flag to control if we want to build the muon node from sectors or chambers  */
   Gaudi::Property<bool> m_useSectors{this, "UseSectors", false}; 
+  /** @brief Flag to control if the volumes should be alignable or not */
+  Gaudi::Property<bool> m_alignableVolumes{this, "AlignableVolumes", true};
+  /** @brief Flag to construct the passive material surfaces */
+  Gaudi::Property<bool> m_buildPassiveVolumes{this, "BuildPassiveVolumes", false};
   
   /** @brief Get the chamber's sensitive elements
+    * @param gctx Geometry context
     * @param element The element for which to get the sensitive elements (chamber or sector)
     * @param chId The geometry identifier of the chamber
     * @param boundsFactory The factory for volume bounds
     *  This function constructs and returns the sensitive elements (volumes and surfaces) of the sector. */
     template<typename T>
-    BluePrintSurfPairs_t getSensitiveElements(const T& element,
+    BluePrintSurfPairs_t getSensitiveElements(const ActsTrk::GeometryContext& gctx,
+                                              const T& element,
                                               const Acts::GeometryIdentifier& chId,
                                               Acts::VolumeBoundFactory& boundsFactory) const
       requires(std::is_same_v<T, MuonGMR4::Chamber> ||
@@ -136,6 +142,9 @@ private:
                               const Acts::GeometryIdentifier& id,
                               Acts::VolumeBoundFactory& boundsFactory,
                               const std::vector<ChIdx>& passiveStationIds = {}) const;
+
+  /** @brief Helper function determining whether a readout element is BIS78 */
+  bool isBIS78(const MuonGMR4::MuonReadoutElement* element) const;
 };
 
 } //namespace ActsTrk

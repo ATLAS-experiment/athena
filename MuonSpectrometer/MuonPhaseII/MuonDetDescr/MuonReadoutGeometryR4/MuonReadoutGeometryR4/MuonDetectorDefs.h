@@ -44,6 +44,8 @@ namespace MuonGMR4 {
           *         into the AMDB coordinate system */
         Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type);
     }
+    /** @brief Returns whether the parsed type is muon */
+    bool isMuon(const ActsTrk::DetectorType type);
 }  // namespace MuonGMR4
 
 

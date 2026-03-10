@@ -26,6 +26,7 @@
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include <Acts/Visualization/ObjVisualization3D.hpp>
 #include <Acts/Visualization/GeometryView3D.hpp>
+#include <Acts/Surfaces/LineBounds.hpp>
 
 #include <MuonReadoutGeometryR4/Chamber.h>
 #include <MuonReadoutGeometryR4/SpectrometerSector.h>
@@ -43,12 +44,6 @@ namespace {
   constexpr std::size_t s_muonEndcapCId = 82;
   constexpr std::size_t s_muonEndcapMiddleAId = 83;
   constexpr std::size_t s_muonEndcapMiddleCId = 84;
-
-  //helper function to flag a chamber or a sector as BIS78 
-  bool isBIS78(const MuonGMR4::MuonReadoutElement* element){    
-        Muon::MuonStationIndex::ChIndex chamberIdx = element->chamberIndex();
-        return chamberIdx == Muon::MuonStationIndex::ChIndex::BIS && std::abs(element->stationEta())>=7;
-  }
 
 }
 
@@ -157,12 +152,19 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
     std::unordered_map<unsigned int, SetType> elementsPerStation;
   
     for(const auto& element : elems){
-      auto vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(*context),
-                                                        element->identString());     
+      std::unique_ptr<Acts::TrackingVolume> vol{};
+      if (m_alignableVolumes) {
+          vol = std::make_unique<Acts::TrackingVolume>(*element->boundingVolume(*context),
+                                                       element->identString());
+      } else {
+          vol = std::make_unique<Acts::TrackingVolume>(element->localToGlobalTransform(*context),
+                                                      element->bounds(),
+                                                      element->identString());
+      }
       // //the chamber geometry id
       Acts::GeometryIdentifier chId = id.withLayer(chamberId++);
       vol->assignGeometryId(chId);
-      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*element, chId, boundsFactory);
+      std::pair<std::vector<staticNodePtr>,std::vector<surfacePtr>> innerStructure = getSensitiveElements(*context, *element, chId, boundsFactory);
       for(auto& surface: innerStructure.second){
         vol->addSurface(surface);
       }
@@ -238,7 +240,8 @@ MuonBlueprintNodeBuilder::buildMuonNode(const Acts::GeometryContext& gctx,
 
 template<typename T>
 MuonBlueprintNodeBuilder::BluePrintSurfPairs_t  
-  MuonBlueprintNodeBuilder::getSensitiveElements(const T& element, 
+  MuonBlueprintNodeBuilder::getSensitiveElements(const ActsTrk::GeometryContext& gctx,
+                                                 const T& element, 
                                                  const Acts::GeometryIdentifier& chId,
                                                  Acts::VolumeBoundFactory& boundsFactory) const 
       requires(std::is_same_v<T, MuonGMR4::Chamber> || std::is_same_v<T, MuonGMR4::SpectrometerSector>){
@@ -261,6 +264,7 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           Acts::Experimental::MultiWireVolumeBuilder::Config mwCfg;
           mwCfg.name = m_detMgr->idHelperSvc()->toStringDetEl(mdtReadoutEle->identify());
           mwCfg.mlSurfaces = detSurfaces;
+          mwCfg.transform = readoutEle->localToGlobalTransform(gctx);
 
           //special treatment of BIS78 MDT multilayer
           //use different shape because of clashes with EIL chambers 
@@ -272,7 +276,10 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
             tubeLengths.reserve(mdtReadoutEle->numTubesInLay());
             for(std::size_t tube = 1; tube < mdtReadoutEle->numTubesInLay(); ++tube){
               const IdentifierHash tubeHash = MuonGMR4::MdtReadoutElement::measurementHash(1,tube);
-              double tubeLength = mdtReadoutEle->tubeLength(tubeHash);
+              const auto& surface = mdtReadoutEle->surface(tubeHash);
+              const auto& lBounds = static_cast<const Acts::LineBounds&>(surface.bounds());
+              using BoundEnum = Acts::LineBounds::BoundValues;
+              const double tubeLength = 2.*lBounds.get(BoundEnum::eHalfLengthZ);
               tubeLengths.push_back(tubeLength);
             }
             auto [minX,maxX] = std::ranges::minmax_element(tubeLengths);
@@ -281,14 +288,20 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
             });
 
             //create the diamond bounds for the volume
-            double y2 = (nSmallTubes+1)*parameters.tubePitch ;
-            double y1 = 2*parameters.halfY - y2;           
-            placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle, 
-                                                                   Amg::getTranslateY3D(parameters.halfY-y2));   
+            constexpr double extraMargin = 1._cm;
+            double y2 = (nSmallTubes+1.)*parameters.tubePitch;
+            double y1 = 2.*parameters.halfY + extraMargin - y2;
+            if (m_alignableVolumes) {         
+                placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle, 
+                                                                       Amg::getTranslateY3D(parameters.halfY + extraMargin -y2));   
+            }
+            mwCfg.transform = mwCfg.transform * Amg::getTranslateY3D(parameters.halfY + extraMargin - y2);
             mwCfg.bounds = boundsFactory.makeBounds<Acts::DiamondVolumeBounds>(0.5*(*maxX), 0.5*(*maxX), 0.5*(*minX), 
-                                                                            y1, y2, parameters.halfHeight);            
+                                                                               y1, y2, parameters.halfHeight);            
           } else {
-            placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle);
+            if (m_alignableVolumes){
+                placement = std::make_unique<ActsTrk::VolumePlacement>(*readoutEle);
+            }
             //check for rectangular or trapezoidal shape bounds
             if(std::abs(parameters.shortHalfX - parameters.longHalfX) < Acts::s_epsilon){
               mwCfg.bounds = boundsFactory.makeBounds<Acts::CuboidVolumeBounds>(parameters.shortHalfX, 
@@ -302,8 +315,9 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
             }
           }
           mwCfg.alignablePlacement = placement.get();
-          element.addPlacement(std::move(placement));
-
+          if (m_alignableVolumes){
+              element.addPlacement(std::move(placement));
+          }
           using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
           mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
                             -parameters.halfY,
@@ -344,12 +358,22 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
   return std::make_pair(std::move(readoutVolumes), std::move(readoutSurfaces));
 }
 
+
+bool MuonBlueprintNodeBuilder::isBIS78(const MuonGMR4::MuonReadoutElement* element) const {    
+      return element->detectorType() == ActsTrk::DetectorType::Mdt && 
+             element->chamberIndex() == Muon::MuonStationIndex::ChIndex::BIS && 
+             element->stationEta()>=7;
+  }
+
 template<typename ElementSet_t>
 std::vector<std::shared_ptr<Acts::Surface>> 
 MuonBlueprintNodeBuilder::getPassiveMaterialSurfaces(
   const Acts::GeometryContext& gctx,
   const std::unordered_map<unsigned int, ElementSet_t>& elementsPerStation) const {
 
+  if (!m_buildPassiveVolumes) {
+      return {};
+  }
   //this is a margin to put the surfaces along Z 
   //(a margin distance from the corresponding chamber's boundary surface)
   constexpr double margin{4._mm};
