@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  MinDeltaPhiIncl2.h
 //  TopoCore
@@ -8,8 +8,9 @@
 #ifndef __TopoCore__MinDeltaPhiIncl2__
 #define __TopoCore__MinDeltaPhiIncl2__
 
-#include <iostream>
 #include "L1TopoInterfaces/DecisionAlg.h"
+#include <vector>
+#include <string>
 
 namespace TCS {
    
