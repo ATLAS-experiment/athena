@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*********************************
  * MinDeltaPhiIncl2.cpp
@@ -10,21 +10,16 @@
  * @param NumberLeading
 **********************************/
 
-#include <cmath>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <algorithm>
+
 
 #include "L1TopoAlgorithms/MinDeltaPhiIncl2.h"
 #include "L1TopoCommon/Exception.h"
 #include "L1TopoInterfaces/Decision.h"
 
+#include <algorithm>
+
 REGISTER_ALG_TCS(MinDeltaPhiIncl2)
 
-// not the best solution but we will move to athena where this comes for free
-#define LOG std::cout << "TCS::MinDeltaPhiIncl2:     "
 
 TCS::MinDeltaPhiIncl2::MinDeltaPhiIncl2(const std::string & name) : DecisionAlg(name)
 {
@@ -162,11 +157,12 @@ TCS::MinDeltaPhiIncl2::process( const std::vector<TCS::TOBArray const *> & input
    bool firstphi = true;
 
    // declare iterator for the tob with min dphi
-   TCS::TOBArray::const_iterator tobmin1,tobmin2;  
+   //TCS::TOBArray::const_iterator tobmin1,tobmin2;  
       
    if (input.size() == 2) {
-   
-      for( TOBArray::const_iterator tob1 = input[0]->begin(); 
+      TCS::TOBArray::const_iterator tobmin1 = input[0]->begin(); //initialised for outer loop
+      TCS::TOBArray::const_iterator tobmin2 = input[1]->end();  //might never change, set to end
+      for( TOBArray::const_iterator tob1; 
            tob1 != input[0]->end() && distance(input[0]->begin(), tob1) < p_NumberLeading1;
            ++tob1)
          {
@@ -199,7 +195,10 @@ TCS::MinDeltaPhiIncl2::process( const std::vector<TCS::TOBArray const *> & input
 
             }
          }
-
+      if ((tobmin1 ==  input[0]->end()) || (tobmin2 == input[1]->end())){
+        TRG_MSG_DEBUG("Iterator tobmin1 or tobmin2 is invalid");
+        return TCS::StatusCode::FAILURE;
+      }
       for(unsigned int i=0; i<numberOutputBits(); ++i) {
           bool accept = mindphi > p_DeltaPhiMin[i] ;
           const bool fillAccept = fillHistos() and (fillHistosBasedOnHardware() ? getDecisionHardwareBit(i) : accept);
