@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -177,12 +177,12 @@ namespace columnar
 
     template<typename T>
       requires requires(T value) {std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>().set (std::declval<SG::AuxElement>(), value);}
-    void set (ObjectId<CI,CM> id, T&& value) const noexcept
+    void set (ObjectId<CI,CM> id, T&& value) const 
     {
       m_accessor.set (id.getXAODObjectNoexcept(), std::forward<T>(value));
     }
 
-    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const noexcept
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> id) const 
     {
       return m_accessor.isAvailable (id.getXAODObjectNoexcept());
     }
