@@ -105,7 +105,7 @@ class PixelCluster_v1 : public UncalibratedMeasurement_v1 {
       AUXSTORE_VARSTRUCT_VAR(xAOD::DetectorIDHashType,             identifierHash);
       AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<2>::element_type,   localPositionDim2);
       AUXSTORE_VARSTRUCT_VAR(xAOD::CovAccessor<2>::element_type,   localCovarianceDim2);
-      AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<3>::element_type,   globalPositionDim3);
+      AUXSTORE_VARSTRUCT_VAR(xAOD::PosAccessor<3>::element_type,   globalPosition);
       AUXSTORE_VARSTRUCT_VAR(std::vector<Identifier::value_type>,  rdoList);
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInPhi);
       AUXSTORE_VARSTRUCT_VAR(int,                                  channelsInEta);
