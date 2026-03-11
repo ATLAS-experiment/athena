@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVIGATION_TYPEINFORMATION_H
 #define TRIGNAVIGATION_TYPEINFORMATION_H
-#include <string>
-#include <iostream>
-#include <vector>
-#include <type_traits>
-#include <typeinfo>
 
-#include <boost/function_types/function_type.hpp>
-#include <boost/function_types/parameter_types.hpp>
-#include <boost/function_types/function_arity.hpp>
-#include <boost/typeof/std/utility.hpp>
+#include <iostream>
 #include <type_traits>
 
 
@@ -34,17 +26,9 @@ static const int last_index=-1;
 // we also define two 'methods' add and join that add a single element
 // and concatenates the present list with a new list respectively
 
-/*  MN: ROOT6 Clang is not able to parse definitions with get_list_index<>
-template <class type,class list_of_types> struct list;
-
-template<class a_list> struct get_list_index {static const int result = 1+ get_list_index<typename a_list::rest>::result;};
-template<class first_element> struct get_list_index<list<first_element,nil> > {static const int result = 0;};
-*/
-
 template<class type,class list_of_types>
 struct list {
   static const int last_index = 1 + list_of_types::last_index;
-  //static const int last_index = get_list_index<list<type,list_of_types> >::result;
   typedef type first;
   typedef list_of_types rest;
   typedef list<type,list_of_types> done;
