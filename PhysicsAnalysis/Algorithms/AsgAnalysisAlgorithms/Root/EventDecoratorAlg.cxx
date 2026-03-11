@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -39,8 +39,10 @@ namespace CP
       // ideal here.
       addDependency(decorKey.fullKey(), decorKey.mode());
 #endif
+      //probably safer to use decorKey by value here, despite coverity warning
+      //coverity[PASS_BY_VALUE]
       m_decFunctions.push_back([decorKey, value](const xAOD::EventInfo& ei) {
-        SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> dec(decorKey);
+        SG::WriteDecorHandle<xAOD::EventInfo,uint32_t> dec(std::move(decorKey));
         dec(ei) = value;
       });
     }
