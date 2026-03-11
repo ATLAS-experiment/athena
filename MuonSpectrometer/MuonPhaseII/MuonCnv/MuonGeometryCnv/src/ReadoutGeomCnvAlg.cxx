@@ -688,6 +688,7 @@ StatusCode  ReadoutGeomCnvAlg::buildSTGC(const ActsTrk::GeometryContext& gctx, C
             padDesign.inputRowPitch = copyPadDesign.padHeight();          
             padDesign.sectorOpeningAngle = copyPadDesign.sectorAngle();
             padDesign.isConvertedFromPhaseII = true;
+            padDesign.isLargeSector = !m_idHelperSvc->isSmallChamber(copyMe->identify());
         }     
         newRE->fillCache();
         ATH_CHECK(dumpAndCompare(gctx, *copyMe, *newRE));
