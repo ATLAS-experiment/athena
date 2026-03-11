@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -1647,7 +1647,10 @@ double LhoodMM_tools::fixNegErr(double n_fake_fit, TMinuit_LHMM* lhoodFit) {
       n_fake_guess_hi = n_fake_guess;
     }
     n_fake_guess = 0.5*(n_fake_guess_lo+n_fake_guess_hi);
-
+    if (n_fake_guess_hi ==0.){
+      ATH_MSG_WARNING("n_fake_guess_hi is zero in LhoodMM_tools::fixNegErr.");
+      continue;
+    }
     if (((n_fake_guess_hi - n_fake_guess_lo)/n_fake_guess_hi < convergeCriteria) || (n_fake_guess_hi < min_n_fake_guess) ) {
       stopSearch = 1;
       if (n_fake_guess_hi < n_fake_fit) {
