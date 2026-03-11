@@ -63,13 +63,13 @@ namespace columnar
     }
 
     /// whether this is a valid link
-    explicit operator bool () const noexcept
+    explicit operator bool () const 
     {
       return m_link->isValid();
     }
 
     /// whether this is a valid link
-    [[nodiscard]] bool has_value () const noexcept
+    [[nodiscard]] bool has_value () const 
     {
       return m_link->isValid();
     }
