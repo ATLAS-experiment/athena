@@ -36,6 +36,19 @@ namespace H5Utils::hist::detail {
   // The histogram group hist_grp must already exist.
   void write_axes(H5::Group& hist_grp, const std::vector<Axis>& axes);
 
+  // n_bins overloads: number of data bins (excluding underflow/overflow) for
+  // each variant alternative of Axis::edges_t.
+  size_t n_bins(const regular_axis_t& r);                        // r.n_bins
+  size_t n_bins(const std::vector<double>& edges);               // edges.size() - 1
+  size_t n_bins(const std::vector<int64_t>& vals);               // vals.size()
+  size_t n_bins(const std::vector<std::string>& labels);         // labels.size()
+  size_t n_bins(const std::pair<int64_t,int64_t>& range);        // range.second - range.first + 1
+
+  // Write a 1-D dataset of variable-length strings.
+  void write_str_dataset(H5::Group& parent,
+                         const std::string& name,
+                         const std::vector<std::string>& values);
+
   // H5 type mapping — must be inline to avoid ODR violations when this
   // header is included in multiple translation units.
   template <typename T>

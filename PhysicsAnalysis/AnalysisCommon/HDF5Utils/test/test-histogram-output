@@ -123,3 +123,34 @@ check 'h1i/storage/values[1]' i64 3 triple.h5
 # self-test: verify that check detects wrong inputs
 should_fail check 'h1i/storage/values[1]' i64 99  merged.h5  # wrong value
 should_fail check 'h1i/storage/values[1]' f32 2   merged.h5  # wrong type
+
+# --- axis-type and value checks ---
+
+# h1v: variable-width axis — edges dataset must be float64
+check 'h1v/ref_axes/axis_0/edges[0]' f64 0   hists.h5
+check 'h1v/ref_axes/axis_0/edges[3]' f64 10  hists.h5
+# storage values for h1v: bh::axis::variable has underflow+overflow by default,
+# so layout is [underflow, bin0, bin1, bin2, overflow]
+check 'h1v/storage/values[1]' f64 1  hists.h5   # bin 0 [0,1) <- h1v(0.5)
+check 'h1v/storage/values[2]' f64 1  hists.h5   # bin 1 [1,3) <- h1v(2.0)
+
+# h1c: category<short> axis {0,4,5,15} — categories dataset must be int64
+check 'h1c/ref_axes/axis_0/categories[0]' i64 0   hists.h5
+check 'h1c/ref_axes/axis_0/categories[1]' i64 4   hists.h5
+check 'h1c/ref_axes/axis_0/categories[3]' i64 15  hists.h5
+
+# h_fmap: map-based labels, bin order = {b, light, c, tau}, two fills
+# category axis has no underflow; layout: [bin0, bin1, bin2, bin3, overflow]
+check 'h_fmap/storage/values[0]' f64 1  hists.h5   # Flav::b
+check 'h_fmap/storage/values[1]' f64 1  hists.h5   # Flav::light
+check 'h_fmap/storage/values[2]' f64 0  hists.h5   # Flav::c (unfilled)
+
+# h_olist: deque list override, shape [letters=3][digits=2][pt=4].
+# Fill (letters=0, digits=10->bin0, pt=0.5->bin0+uf=1): [0,0,1]
+check 'h_olist/storage/values[0,0,1]' f64 1  hists.h5
+check 'h_olist/storage/values[0,0,0]' f64 0  hists.h5
+
+# h_omap: unordered_map override, same shape [3][2][4].
+# Fill (letters=1, digits=20->bin1, pt=1.5->bin1+uf=2): [1,1,2]
+check 'h_omap/storage/values[1,1,2]' f64 1  hists.h5
+check 'h_omap/storage/values[0,0,0]' f64 0  hists.h5

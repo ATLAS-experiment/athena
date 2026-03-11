@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H5Cpp.h"
 #include "HDF5Utils/HistCommon.h"
 
+#include <map>
 #include <vector>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <numeric>
-#include <optional>
 #include <set>
 #include <string>
+#include <format>
 
 #include <boost/histogram.hpp>
 
@@ -52,6 +53,7 @@ namespace H5Utils::hist::detail {
   };
   template <typename T>
   using array_t = typename array_type<T>::type;
+
 
   // function to flatten the histogram array
   template <typename T, typename F>
@@ -99,57 +101,278 @@ namespace H5Utils::hist::detail {
     return out;
   }
 
-  // Returns true when all bin widths are equal and positive (regular axis).
-  inline bool is_regular_axis(const std::vector<float>& edges) {
+
+  // Axes inspection
+
+  // Runtime functions to check axes, this information can't always be
+  // determined statically with the public api.
+  //
+  // Returns true when all bin widths are equal and positive (regular
+  // axis).
+  inline bool is_regular_axis(const std::vector<double>& edges) {
     if (edges.size() < 2) return false;
-    const double width0 = edges.at(1) - edges.at(0);
+    const double width0 = edges[1] - edges[0];
     if (width0 <= 0.0) return false;
     for (size_t i = 2; i < edges.size(); i++) {
-      const double width = edges.at(i) - edges.at(i-1);
-      if (std::abs(width - width0) > 1e-5 * std::abs(width0)) return false;
+      const double width = edges[i] - edges[i-1];
+      if (std::abs(width - width0) > 1e-5 * std::abs(width0)) { return false; }
     }
     return true;
   }
 
-  // Axis struct is defined in HistAxis.h (included via HistCommon.h).
+  // Returns true if bins are contiguous integer sequence
+  inline bool is_contiguous(const std::vector<int64_t>& vals) {
+    if (vals.size() < 2) return true;
+    for (size_t i = 1; i < vals.size(); ++i) {
+      if (vals[i] != vals[i-1] + 1) return false;
+    }
+    return true;
+  }
 
+  // Helper: construct an Axis with name/underflow/overflow filled from the
+  // boost axis options.  Each overload then only needs to set ax.edges.
+  inline Axis make_axis(const auto& bh_ax, const std::string& name)
+  {
+    namespace opts = boost::histogram::axis::option;
+    Axis ax;
+    ax.name      = name;
+    ax.underflow = (bh_ax.options() & opts::underflow) ? true : false;
+    ax.overflow  = (bh_ax.options() & opts::overflow)  ? true : false;
+    return ax;
+  }
+
+
+  // Concepts to label descrete axes
+
+  // A random-access sequence of string labels.
+  // Matches std::vector<string>, std::deque<string>, etc.
+  template<typename L>
+  concept LabelList = requires(const L& lst, size_t i) {
+    { lst[i] } -> std::convertible_to<std::string>;
+    { lst.size() } -> std::convertible_to<size_t>;
+  };
+
+  // A map-like container with key_type and at(key) -> string.
+  // Matches std::map<K, string> but not std::vector<string>.
+  template<typename M>
+  concept LabelMap = requires(const M& m) {
+    { m.at(std::declval<typename M::key_type>()) }
+        -> std::convertible_to<std::string>;
+    { m.size() } -> std::convertible_to<size_t>;
+  };
+
+  // Either a positional label list or a keyed label map.
+  template<typename T>
+  concept LabelOverride = LabelList<T> || LabelMap<T>;
+
+  // Positional list of per-axis label overrides.
+  // Supports std::vector, std::deque (operator[] + size() on const ref).
+  template<typename L>
+  concept AxisOverrideSeq = requires(const L& l, size_t i) {
+    l[i];
+    { l.size() } -> std::convertible_to<size_t>;
+  };
+
+  // String-keyed map of per-axis label overrides.
+  // at(axis_name) returns the label info; find/end used for existence
+  // check.
+  template<typename M>
+  concept AxisOverrideMap = requires(const M& m) {
+    m.at(std::declval<const std::string&>());
+    m.find(std::declval<const std::string&>()) != m.end();
+  };
+
+  // General axis override match
+  template <typename Labels>
+  concept AxisOverrides = AxisOverrideSeq<Labels> || AxisOverrideMap<Labels>;
+
+  // Axis whose bins expose lower()/upper() (regular, variable).
+  // Discrete axes (integer, category) iterate to raw values — no lower().
+  template<typename Ax>
+  concept ContinuousAxis = requires(const Ax& ax) {
+    { ax.begin()->lower() } -> std::convertible_to<double>;
+  };
+
+  // Concept: axis with no lower()/upper() per bin (category, integer).
+  template<typename Ax>
+  concept DiscreteAxis = !ContinuousAxis<Ax>;
+
+
+  // Axis reading functions
+  //
+  // There are several overloads to provide maximum flexibility, both
+  // in what axes are used from boost::histogram and how the user
+  // decides to provide labels for the discrete axis cases.
+
+  // discrete axis where the user has provided labels for each value
+  template<LabelList List>
+  Axis read_one_axis(const DiscreteAxis auto& bh_ax,
+                     const std::pair<std::string, List>& meta)
+  {
+    auto ax = make_axis(bh_ax, meta.first);
+
+    const auto& labels = meta.second;
+    if (labels.size() != static_cast<size_t>(bh_ax.size())) {
+      throw std::invalid_argument(
+        std::format(
+          "axis '{}': label count ({}) != bin count ({})",
+          ax.name, labels.size(), bh_ax.size() ));
+    }
+
+    std::vector<std::string> edge_labels;
+    edge_labels.reserve(labels.size());
+    for (size_t i = 0; i < labels.size(); ++i)
+      edge_labels.push_back(labels[i]);
+    ax.edges = std::move(edge_labels);
+    return ax;
+  }
+
+  // Map-based labeled categorical overload: key = category value,
+  // value = label.
+  //
+  // Reorders map entries to axis bin order, then delegates to
+  // LabelList overload.
+  template<LabelMap Map>
+  Axis read_one_axis(const DiscreteAxis auto& bh_ax,
+                     const std::pair<std::string, Map>& meta)
+  {
+    std::vector<std::string> ordered_labels;
+    for (const auto& bin : bh_ax) {
+      ordered_labels.push_back(meta.second.at(bin));
+    }
+    return read_one_axis(bh_ax,
+      std::pair<std::string, std::vector<std::string>>{
+          meta.first, std::move(ordered_labels)});
+  }
+
+  // Continuous-axis overload (regular, variable): bins are interval_view.
+  Axis read_one_axis(const ContinuousAxis auto& bh_ax,
+                     const std::string& meta)
+  {
+    auto ax = make_axis(bh_ax, meta);
+
+    std::vector<double> dedges;
+    for (const auto& bin : bh_ax) dedges.push_back(bin.lower());
+    if (bh_ax.size() > 0) dedges.push_back(bh_ax.rbegin()->upper());
+    if (is_regular_axis(dedges)) {
+      ax.edges = regular_axis_t{
+        dedges.front(), dedges.back(), dedges.size() - 1};
+    } else {
+      ax.edges = std::move(dedges);
+    }
+    return ax;
+  }
+
+  // Continuous axes reject non-empty label overrides; name taken from
+  // meta.first.
+  template<LabelOverride Override>
+  Axis read_one_axis(const ContinuousAxis auto& bh_ax,
+                     const std::pair<std::string, Override>& meta)
+  {
+    if (meta.second.size() > 0) {
+      throw std::invalid_argument(std::format(
+        "axis '{}' is continuous (regular/variable): "
+        "{} label(s) provided but labels are not valid "
+        "for this axis type",
+        meta.first, meta.second.size()));
+    }
+    return read_one_axis(bh_ax, meta.first);
+  }
+
+  // Discrete-axis overload (integer, category): bins are raw values
+  // -> int64_t.
+  Axis read_one_axis(const auto& bh_ax, const std::string& meta)
+  {
+    auto ax = make_axis(bh_ax, meta);
+
+    std::vector<int64_t> int_vals;
+    for (const auto& bin : bh_ax) int_vals.push_back(static_cast<int64_t>(bin));
+    if (is_contiguous(int_vals)) {
+      ax.edges = std::pair<int64_t,int64_t>{int_vals.front(), int_vals.back()};
+    } else {
+      ax.edges = std::move(int_vals);
+    }
+    return ax;
+  }
+
+  // Extract axis name from plain-string or pair<string,T> metadata.
+  inline const std::string& get_axis_name(const std::string& m) {
+    return m;
+  }
+  template<typename T>
+  inline const std::string& get_axis_name(
+      const std::pair<std::string, T>& m) {
+    return m.first;
+  }
+
+
+  // Top-level Axis builder functions
+
+  // Basic case with no labeling overrides. Labels provided via via
+  // per-axis metadata.
   template <typename T>
   std::vector<Axis> get_axes(const T& hist) {
-    using out_t = std::vector<Axis>;
-    namespace opts = boost::histogram::axis::option;
-    out_t axes;
-    for (size_t ax_n = 0; ax_n < hist.rank(); ax_n++) {
-      const auto& axis = hist.axis(ax_n);
-      out_t::value_type ax;
-      bool underflow = (axis.options() & opts::underflow);
-      bool overflow = (axis.options() & opts::overflow);
-      ax.underflow = underflow;
-      ax.overflow = overflow;
-      for (const auto& bin: axis) {
-        ax.edges.push_back(bin.lower());
-      }
-      // add the upper edge too, unless this is an integer/category axis
-      // where every bin has the same lower and upper value — in that case
-      // we have exactly N edges for N bins rather than N+1
-      if (axis.size() > 0) {
-        const auto& last = *axis.rbegin();
-        if (last.upper() == last.lower()) {
-          ax.is_int_or_category = true;
-        } else {
-          ax.edges.push_back(last.upper());
-        }
-      }
-      ax.name = axis.metadata();
-
-      if (is_regular_axis(ax.edges)) {
-        ax.n_regular_bins = static_cast<int>(ax.edges.size()) - 1;
-      }
-
-      axes.push_back(std::move(ax));
-    }
+    std::vector<Axis> axes;
+    hist.for_each_axis([&axes](const auto& bh_ax) {
+      axes.push_back(read_one_axis(bh_ax, bh_ax.metadata()));
+    });
     return axes;
   }
 
+  // Positional-list override: labels[i] is the LabelList or LabelMap
+  // for axis i.
+  template<typename Hist, AxisOverrideSeq Labels>
+  std::vector<Axis> get_axes(const Hist& hist, const Labels& labels)
+  {
+    if (labels.size() != hist.rank()) {
+      throw std::invalid_argument(std::format(
+        "label list has {} entries but histogram has {} axes",
+        labels.size(), hist.rank()));
+    }
+    std::vector<Axis> axes;
+    size_t i = 0;
+    hist.for_each_axis([&](const auto& bh_ax) {
+      const auto& lbl = labels[i++];
+      using lbl_t = std::decay_t<decltype(lbl)>;
+      axes.push_back(read_one_axis(
+        bh_ax,
+        std::pair<std::string, lbl_t>{
+          get_axis_name(bh_ax.metadata()), lbl}));
+    });
+    return axes;
+  }
+
+  // Map-based override: axes absent from the map fall back to metadata.
+  template<typename Hist, AxisOverrideMap Labels>
+  std::vector<Axis> get_axes(const Hist& hist, const Labels& labels)
+  {
+    std::vector<Axis> axes;
+    hist.for_each_axis([&](const auto& bh_ax) {
+      const std::string& name = get_axis_name(bh_ax.metadata());
+      auto it = labels.find(name);
+      if (it != labels.end()) {
+        if constexpr (ContinuousAxis<std::decay_t<decltype(bh_ax)>>) {
+          throw std::invalid_argument(std::format(
+            "axis '{}' is continuous (regular/variable) and cannot "
+            "have string labels; remove it from the label map",
+            name));
+        }
+        const auto& lbl = it->second;
+        using lbl_t = std::decay_t<decltype(lbl)>;
+        axes.push_back(read_one_axis(
+          bh_ax,
+          std::pair<std::string, lbl_t>{name, lbl}));
+      } else {
+        axes.push_back(read_one_axis(bh_ax, bh_ax.metadata()));
+      }
+    });
+    return axes;
+  }
+
+
+  // Main histogram storage writing functions
+
+  // Simple utility to calculate integer products
   template <typename T>
   auto product(const std::vector<T>& v) {
     return std::accumulate(
@@ -171,29 +394,22 @@ namespace H5Utils::hist::detail {
       return "double";
     }
   }
-}
 
-namespace H5Utils::hist {
-
-  // main hist writing function, this should be all anyone needs to
-  // call
+  // internal top level histogram writer
   template <typename T>
-  void write_hist_to_group(
+  void write_hist_impl(
     H5::Group& parent_group,
     const T& hist,
-    const std::string& name)
+    const std::string& name,
+    const std::vector<Axis>& axes)
   {
-    using namespace detail;
-
     // build the data space
-    auto axes = get_axes(hist);
     std::vector<hsize_t> ds_dims;
     for (const auto& axis: axes) {
-      int total_size = static_cast<int>(axis.edges.size())
-                     - (axis.is_int_or_category ? 0 : 1)
-                     + (axis.underflow ? 1 : 0)
-                     + (axis.overflow  ? 1 : 0);
-      if (total_size < 0) throw std::logic_error("negative bin count");
+      size_t total_size =
+        std::visit([](const auto& e) { return n_bins(e); }, axis.edges)
+        + (axis.underflow ? 1u : 0u)
+        + (axis.overflow  ? 1u : 0u);
       ds_dims.push_back(static_cast<hsize_t>(total_size));
     }
     H5::DataSpace space(ds_dims.size(), ds_dims.data());
@@ -214,7 +430,7 @@ namespace H5Utils::hist {
     H5::DataType type = hdf5_t<array_t<T>>;
 
     // Write ref_axes
-    detail::write_axes(group, axes);
+    write_axes(group, axes);
 
     // Write storage group
     H5::Group storage = group.createGroup("storage");
@@ -225,7 +441,8 @@ namespace H5Utils::hist {
       const std::string& ds_name,
       const auto& func) {
       auto flat = get_flat_hist_array<T>(hist, func);
-      assert(space.getSelectNpoints() == static_cast<hssize_t>(flat.size()));
+      assert(
+        space.getSelectNpoints() == static_cast<hssize_t>(flat.size()));
       storage.createDataSet(ds_name, type, space, props)
              .write(flat.data(), type);
     };
@@ -258,6 +475,32 @@ namespace H5Utils::hist {
       add_dataset("sum_of_weights_squared",
         [](const auto& x) { return x->sum_of_weights_squared(); });
     }
+  }
+}
 
+namespace H5Utils::hist {
+
+  // main hist writing function, this should be all anyone needs to
+  // call
+  template <typename T>
+  void write_hist_to_group(
+    H5::Group& parent_group,
+    const T& hist,
+    const std::string& name)
+  {
+    detail::write_hist_impl(
+      parent_group, hist, name, detail::get_axes(hist));
+  }
+
+  // Overload with external label override (positional list or name map).
+  template <typename T, detail::AxisOverrides Labels>
+  void write_hist_to_group(
+    H5::Group& parent_group,
+    const T& hist,
+    const std::string& name,
+    const Labels& labels)
+  {
+    detail::write_hist_impl(
+      parent_group, hist, name, detail::get_axes(hist, labels));
   }
 }

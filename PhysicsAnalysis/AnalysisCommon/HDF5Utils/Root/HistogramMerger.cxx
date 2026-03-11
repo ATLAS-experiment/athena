@@ -60,6 +60,30 @@ int64_t read_int_attr(const H5::H5Object& obj, const std::string& key) {
 }
 
 // ------------------------------------------------------------------
+// VL-string category reader (RAII-safe)
+// ------------------------------------------------------------------
+std::vector<std::string> read_string_categories(const H5::DataSet& ds)
+{
+  H5::StrType   strtype(H5::PredType::C_S1, H5T_VARIABLE);
+  H5::DataSpace sp = ds.getSpace();
+  hsize_t npts = static_cast<hsize_t>(sp.getSimpleExtentNpoints());
+  std::vector<char*> ptrs(npts, nullptr);
+  ds.read(ptrs.data(), strtype);
+  // RAII guard — destructor calls H5Treclaim regardless of how we leave this scope
+  struct VlGuard {
+    hid_t tid, sid;
+    void* buf;
+    ~VlGuard() { H5Treclaim(tid, sid, H5P_DEFAULT, buf); }
+  } guard{strtype.getId(), sp.getId(), ptrs.data()};
+  std::vector<std::string> labels;
+  labels.reserve(npts);
+  for (char* p : ptrs) {
+    labels.emplace_back(p ? p : "");
+  }
+  return labels;
+}
+
+// ------------------------------------------------------------------
 // Axis I/O
 // ------------------------------------------------------------------
 std::vector<Axis> read_axes(const H5::Group& grp) {
@@ -75,21 +99,31 @@ std::vector<Axis> read_axes(const H5::Group& grp) {
 
     std::string type = read_str_attr(ax_grp, "type");
     if (type == "regular") {
-      double lower = read_double_attr(ax_grp, "lower");
-      double upper = read_double_attr(ax_grp, "upper");
-      int64_t bins = read_int_attr(ax_grp, "bins");
-      ax.n_regular_bins = static_cast<int>(bins);
-      ax.edges.resize(static_cast<size_t>(bins) + 1);
-      for (int64_t i = 0; i <= bins; ++i) {
-        ax.edges[static_cast<size_t>(i)] = static_cast<float>(
-          lower + (upper - lower) * static_cast<double>(i) / static_cast<double>(bins));
-      }
-    } else {
-      // "variable"
+      double  lower = read_double_attr(ax_grp, "lower");
+      double  upper = read_double_attr(ax_grp, "upper");
+      int64_t bins  = read_int_attr   (ax_grp, "bins");
+      ax.edges = regular_axis_t{lower, upper, static_cast<size_t>(bins)};
+    } else if (type == "variable") {
       H5::DataSet edge_ds = ax_grp.openDataSet("edges");
       hsize_t npts = edge_ds.getSpace().getSimpleExtentNpoints();
-      ax.edges.resize(npts);
-      edge_ds.read(ax.edges.data(), H5::PredType::NATIVE_FLOAT);
+      std::vector<double> edges(npts);
+      edge_ds.read(edges.data(), H5::PredType::NATIVE_DOUBLE);
+      ax.edges = std::move(edges);
+    } else if (type == "integer") {
+      int64_t start = read_int_attr(ax_grp, "start");
+      int64_t stop  = read_int_attr(ax_grp, "stop");
+      ax.edges = std::pair<int64_t,int64_t>{start, stop};
+    } else if (type == "category") {
+      H5::DataSet cat_ds = ax_grp.openDataSet("categories");
+      H5::DataType dtype = cat_ds.getDataType();
+      hsize_t npts = cat_ds.getSpace().getSimpleExtentNpoints();
+      if (dtype.getClass() == H5T_STRING) {
+        ax.edges = read_string_categories(cat_ds);
+      } else {
+        std::vector<int64_t> int_vals(npts);
+        cat_ds.read(int_vals.data(), H5::PredType::NATIVE_INT64);
+        ax.edges = std::move(int_vals);
+      }
     }
 
     ax.underflow = read_bool_attr(ax_grp, "underflow");

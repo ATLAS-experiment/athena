@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGDERIVATIONUTILS_METADATAALG_H
@@ -42,6 +42,12 @@ namespace ftag {
     Gaudi::Property<std::string> m_json_output {
       this, "jsonOutput", "", "json output file"
     };
+    ServiceHandle<IH5GroupSvc> m_hist_output_svc {
+      this, "h5OutputHists", "",
+      "output service for histogram output"};
+    Gaudi::Property<bool> m_enable_systematics {
+      this, "enableSystematics", true,
+      "include systematic variations (false = nominal only)"};
     std::unordered_map<size_t, OriginalAodCounts> m_weights;
 
   };
