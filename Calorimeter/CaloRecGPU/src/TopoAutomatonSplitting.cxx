@@ -73,7 +73,7 @@ StatusCode TopoAutomatonSplitting::initialize_non_CUDA()
       }
   };
 
-  //cppchec-suppress internalAstError
+  //cppcheck-suppress internalAstError
   auto process_sampling = [&get_option_from_string](const std::vector<std::string> & sampling_names, std::string & invalid_names, PackType & sampling_option)
   {
     sampling_option = 0;
