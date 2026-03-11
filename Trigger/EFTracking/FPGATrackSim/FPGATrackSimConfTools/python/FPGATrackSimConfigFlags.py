@@ -83,6 +83,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('varyingHitThresholds', [])
     cf.addFlag('MinSpacePointsPerSeed',3)
     cf.addFlag('MaxSpacePointsPerSeed',3)
+    cf.addFlag('runBaselineActs', False) # needed in case we want direct comparison with ACTS tracking (i.e. summary tables at the end of the workflow + InDetTrackParticles in the AOD output for IDTPM ratio plots)
 
     cf.addFlag('runF150hw', False)
 
