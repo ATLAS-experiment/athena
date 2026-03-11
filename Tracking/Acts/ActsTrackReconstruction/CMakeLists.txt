@@ -58,7 +58,7 @@ atlas_add_component( ActsTrackReconstruction
                InDetMeasurementUtilitiesLib)
              
 atlas_add_test ( TrackFindingMeasurementsTest
-  SOURCES test/TrackFindingMeasurementsTest.cxx
+  SOURCES test/TrackFindingMeasurementsTest.cxx src/detail/TrackFindingMeasurements.cxx
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement
   POST_EXEC_SCRIPT nopost.sh )
 

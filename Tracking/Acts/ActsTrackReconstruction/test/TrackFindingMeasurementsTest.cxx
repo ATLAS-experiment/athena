@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 
-#include <array>
-#include <string>
+
 
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
@@ -20,7 +19,9 @@
 
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 
-#include "../src/detail/TrackFindingMeasurements.cxx"
+#include <array>
+#include <string>
+#include <iostream>
 
 template <typename std::size_t N>
 void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
@@ -58,6 +59,8 @@ void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
   }
 }
 
+//coverity[UNCAUGHT_EXCEPT]
+//cppcheck-suppress throwInEntryPoint
 int main() {
   constexpr std::size_t N = 3ul;
 
