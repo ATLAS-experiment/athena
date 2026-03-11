@@ -1,10 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <src/MetadataAlg.h>
 
 #include "HDF5Utils/Writer.h"
+#include "HDF5Utils/histogram.h"
+#include <boost/histogram.hpp>
 
 #include <xAODCutFlow/CutBookkeeper.h>
 #include <xAODCutFlow/CutBookkeeperContainer.h>
@@ -88,6 +90,9 @@ namespace ftag {
 
     if (!m_output_svc.empty()) {
       ATH_CHECK(m_output_svc.retrieve());
+    }
+    if (!m_hist_output_svc.empty()) {
+      ATH_CHECK(m_hist_output_svc.retrieve());
     }
 
     return StatusCode::SUCCESS;
@@ -180,12 +185,14 @@ namespace ftag {
   {
 
     std::vector<CP::SystematicSet> systematics;
-    systematics.emplace_back();
-    for (const CP::SystematicVariation &variation : m_truthWeightTool->affectingSystematics())
-    {
-      auto set = CP::SystematicSet({variation});
-      ATH_MSG_DEBUG("using systematic " << set.name());
-      systematics.emplace_back(set);
+    systematics.emplace_back();               // nominal always first
+    if (m_enable_systematics) {
+      for (const CP::SystematicVariation& v :
+           m_truthWeightTool->affectingSystematics()) {
+        ATH_MSG_DEBUG(
+          "using systematic " << CP::SystematicSet({v}).name());
+        systematics.emplace_back(CP::SystematicSet({v}));
+      }
     }
 
     std::optional<H5::Group> h5_cbk;
@@ -218,6 +225,51 @@ namespace ftag {
         {top_group, *json_cbk}
       };
       out << jroot << std::endl;
+    }
+
+    if (!m_hist_output_svc.empty()) {
+      namespace bh = boost::histogram;
+
+      // Build index->name map and index list in one pass.
+      using sys_map_t = std::map<size_t, std::string>;
+      sys_map_t sys_map;
+      std::vector<size_t> indices;
+      for (const CP::SystematicSet& sys : systematics) {
+        size_t idx = m_truthWeightTool->getSysWeightIndex(sys);
+        sys_map[idx] = sys.name().empty() ? "nominal" : sys.name();
+        indices.push_back(idx);
+      }
+
+      // Categorical axis: bin value = index, metadata = map for labels.
+      using map_meta_t = std::pair<std::string, sys_map_t>;
+      using sys_ax_t = bh::axis::category<size_t, map_meta_t>;
+      const sys_ax_t ax(indices, map_meta_t{"systematic", sys_map});
+
+      // Weighted histogram: bin=(sumOfWeights, sumOfWeightsSquared).
+      auto h_w = bh::make_weighted_histogram(ax);
+
+      // Integer histogram: nEventsProcessed.
+      using int64_storage = bh::dense_storage<int64_t>;
+      auto h_n = bh::make_histogram_with(int64_storage{}, ax);
+
+      // Fill by systematic index.
+      for (size_t idx : indices) {
+        const auto& w = m_weights.at(idx);
+        const auto bin = ax.index(idx);
+        h_w.at(bin) =
+          bh::accumulators::weighted_sum<double>(
+            w.sumOfWeights, w.sumOfWeightsSquared);
+        h_n.at(bin) =
+          static_cast<int64_t>(w.nEventsProcessed);
+      }
+
+      H5::Group hist_grp(
+        m_hist_output_svc->group()
+          ->createGroup("cutBookkeeperHists"));
+      H5Utils::hist::write_hist_to_group(
+        hist_grp, h_w, "sumOfWeights");
+      H5Utils::hist::write_hist_to_group(
+        hist_grp, h_n, "nEventsProcessed");
     }
 
     return StatusCode::SUCCESS;

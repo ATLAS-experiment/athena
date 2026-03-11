@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Dump useful ftag metadata
 
@@ -24,9 +25,13 @@ from JetTagDerivationUtils.MetadataAlgConfig import MetadataAlgCfg
 def get_args():
     parser = ArgumentParser(description=__doc__)
     parser.add_argument('input_files', nargs='*', help=_inputs_help)
-    parser.add_argument('-o', '--h5-output', type=Path)
+    parser.add_argument('-O', '--h5-output', type=Path)
     parser.add_argument('-j', '--json-output', type=Path)
     parser.add_argument('-m', '--max-events', type=int)
+    parser.add_argument('-o', '--h5-hists-output', type=Path)
+    parser.add_argument(
+        '-d', '--disable-systematics',
+        action='store_false', dest='enable_systematics')
     parser.add_argument(
         "-i", "--event-print-interval",
         type=int, default=500,
@@ -54,6 +59,12 @@ def run():
         outputs |= dict(h5_output=output)
     if j := args.json_output:
         outputs |= dict(json_output=j)
+    if o := args.h5_hists_output:
+        hists_svc = CompFactory.H5FileSvc(
+            name='H5FileSvcHists', path=str(o))
+        ca.addService(hists_svc)
+        outputs |= dict(h5_output_hists=hists_svc)
+    outputs |= dict(enable_systematics=args.enable_systematics)
     ca.merge(MetadataAlgCfg(flags, **outputs))
 
     return ca.run()
