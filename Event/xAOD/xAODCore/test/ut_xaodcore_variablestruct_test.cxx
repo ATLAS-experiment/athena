@@ -63,9 +63,9 @@ void test1()
   cont.push_new (N, [](){ return new Cluster; });
 
   ClusterVars vars (cont);
-  assert (vars.id != nullptr);
-  assert (vars.xpos != nullptr);
-  assert (vars.ypos != nullptr);
+  assert (vars.id.size() == N);
+  assert (vars.xpos.size() == N);
+  assert (vars.ypos.size() == N);
 
   for (size_t i = 0; i < N; i++) {
     vars.id[i] = i+10;

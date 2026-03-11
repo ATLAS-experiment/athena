@@ -75,11 +75,11 @@ public:
  *        and xAOD variable name.
  */
 #define AUXSTORE_VARSTRUCT_VAR(TYPE, NAME)                      \
-  static TYPE* getArr##NAME(xAOD::VariableStruct& vars) {       \
+  static SG::Accessor<TYPE>::span getSpan##NAME(xAOD::VariableStruct& vars) { \
     static const SG::Accessor<TYPE> acc (#NAME);                \
-    return acc.getDataArray (vars.m_cont);                      \
+    return acc.getDataSpan (vars.m_cont);                       \
   }                                                             \
-  TYPE* NAME = getArr##NAME(*this)
+  SG::Accessor<TYPE>::span NAME = getSpan##NAME(*this)
 
 
 #endif // not XAODCORE_VARIABLESTRUCT_H
