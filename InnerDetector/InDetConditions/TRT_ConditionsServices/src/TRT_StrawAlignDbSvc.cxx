@@ -57,11 +57,6 @@ StatusCode TRT_StrawAlignDbSvc::initialize()
   bool dxcontainerexists = m_detStore->StoreGateSvc::contains<StrawDxContainer>(m_par_dxcontainerkey) ;
   
   if( dxcontainerexists ) {
-    /*
-    ATH_MSG_INFO (" dx container exists - reg callback ");
-    if( (m_detStore->regFcn(&TRT_StrawAlignDbSvc::IOVCallBack,this,m_dxcontainer,m_par_dxcontainerkey)).isFailure()) 
-      ATH_MSG_ERROR ("Could not register IOV callback for key: " << m_par_dxcontainerkey);
-    */
     ATH_MSG_DEBUG(" dx container exists - do nothing ");
     
   } else {
