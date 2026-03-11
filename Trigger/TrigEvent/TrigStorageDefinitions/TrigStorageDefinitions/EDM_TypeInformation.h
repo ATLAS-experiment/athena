@@ -23,8 +23,15 @@
  * HLT_REGISTER_TYPE(OBJECT, FEATURE, CONTAINER [, AUX])
  */
 #define HLT_REGISTER_TYPE(OBJECT, FEATURE, CONTAINER, ...) \
-    _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER __VA_OPT__(, ) __VA_ARGS__)
+  _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER __VA_OPT__(, ) __VA_ARGS__)
 
 #define HLT_END_TYPE_REGISTRATION(name) done TypeInfo_##name;
+
+
+/**
+ * Register a type map for a package.
+ */
+#define TYPEMAPCLASS(name) \
+  struct class_##name { using map = TypeInfo_##name; };
 
 #endif
