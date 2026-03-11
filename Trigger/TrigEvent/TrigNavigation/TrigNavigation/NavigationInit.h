@@ -20,7 +20,6 @@
 #include "AthLinks/DataLink.h"
 #include "CxxUtils/checker_macros.h"
 
-#include "TrigNavigation/NavigationTraits.h"
 #include "TrigStorageDefinitions/EDM_TypeInfoMethods.h"
 
 namespace HLT{  
