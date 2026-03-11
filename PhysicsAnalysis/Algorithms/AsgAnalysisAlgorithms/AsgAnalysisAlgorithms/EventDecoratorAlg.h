@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -14,6 +14,7 @@
 #include <AsgTools/PropertyWrapper.h>
 #include <map>
 #include <functional>
+#include <cstdint> //for uint32_t
 
 namespace CP
 {
