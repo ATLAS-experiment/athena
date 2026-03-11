@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/features.h
@@ -97,34 +97,11 @@
 # define HAVE_CONVERT_VECTOR 0
 #endif
 
-// Do we have mallinfo2?  Present in glibc 2.33,
-// in which mallinfo is deprecated.
-# if __GLIBC_PREREQ(2, 33)
-# define HAVE_MALLINFO2 1
-#else
-# define HAVE_MALLINFO2 0
-#endif
-
-
-// Do we have malloc hooks?  They were removed in glibc 2.34.
-#if !__GLIBC_PREREQ(2, 34)
-# define HAVE_MALLOC_HOOKS 1
-#else
-# define HAVE_MALLOC_HOOKS 0
-#endif
-
 // Do we have feenableexcept/fedisableexcept
 #if defined(__GLIBC__)
 # define HAVE_FEENABLEEXCEPT 1
 #else
 # define HAVE_FEENABLEEXCEPT 0
-#endif
-
-// Do we have C++20 ranges?
-#if __cpp_lib_ranges
-# define HAVE_STD_RANGES 1
-#else
-# define HAVE_STD_RANGES 0
 #endif
 
 
