@@ -37,12 +37,14 @@
 #include "InDetTrackPerfMon/TrackRoiSelectionTool.h"
 #include "InDetTrackPerfMon/VertexRoiSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackSelectionTool.h"
-#include "IVertexSelectionTool.h"
+#include "InDetTrackPerfMon/IVertexSelectionTool.h"
 #include "InDetTrackPerfMon/ITrackMatchingTool.h"
 #include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
 #include "InDetTrackPerfMon/TrackAnalysisInfoWriteTool.h"
 
 #include "InDetTrackPerfMon/TrackCollections.h"
+
+#include "AnalysisR4.h"
 
 /// STL includes
 #include <string>
@@ -132,12 +134,12 @@ private :
   StringProperty m_triggerTracks { this, "TriggerTracks", "", "trigger track collection" };
   
   /// Offline TrackParticleContainer name
-  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_refContainerName; // {
-  //    this, "ReferenceContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
+  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_refContainerName {
+      this, "ReferenceContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
 
-  /// Offline TrackParticleContainer name
-  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_testContainerName; // {
-  //    this, "TestContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
+  /// Test TrackParticleContainer name
+  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_testContainerName {
+      this, "TestContainerName", "", "Name of container of test tracks" };
 
   
   /// Trigger TrackParticleContainer name
@@ -190,13 +192,13 @@ private :
   //       this, "RoiSelectionTool", "IDTPM::InDetTrackPerfMon/RoiSelectionTool", "Tool to retrieve && select RoIs" };
 
   ToolHandle< IDTPM::TrackRoiSelectionTool > m_trackRoiSelectionTool {
-         this, "TrackRoiSelectionTool", "IDTPM::InDetTrackPerfMon/TrackRoiSelectionTool", "Tool to select track within a RoI" };
+         this, "TrackRoiSelectionTool", "", "Tool to select track within a RoI" };
 
 //  ToolHandle< IDTPM::VertexRoiSelectionTool > m_vertexRoiSelectionTool {
   //    this, "VertexRoiSelectionTool", "IDTPM::InDetTrackPerfMon/VertexRoiSelectionTool", "Tool to select vertices within a RoI" };
 
   ToolHandle< IDTPM::ITrackMatchingTool > m_trackMatchingTool { this, "TrackMatchingTool",
-    "IDTPM::InDetTrackPerfMon/ITrackMatchingTool", "Tool to match test to reference tracks && viceversa" };
+    "", "Tool to match test to reference tracks && viceversa" };
 
   //    ToolHandle< IDTPM::TrackAnalysisInfoWriteTool > m_trkAnaInfoWriteTool {
   //    this, "TrackAnalysisInfoWriteTool", "IDTPM::InDetTrackPerfMon/TrackAnalysisInfoWriteTool", "Tool to write TrackAnalysisInfo to StoreGate" };
@@ -209,8 +211,8 @@ private :
   //    BooleanProperty m_writeOut{ this, "writeOut", false, "Write TrkAnaInfo Collection to AOD_IDTPM" };
 
 
-  ToolHandle<Trig::TrigDecisionTool> m_tdt; // { this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "TDT" };
-  
+  ToolHandle<Trig::TrigDecisionTool> m_tdt; //   { this, "Trig::TrigDecisionTool/TrigDecisionTool", "", "TDT" };
+
   ToolHandle<GenericMonitoringTool> m_tool { this, "montool", "", "histogram montool" };
 
   //  StringProperty m_trigger { this, "trigger", "", "actual trigger chain to select" }; 
@@ -218,13 +220,16 @@ private :
   //  StringProperty m_refTracksCfg { this, "RefTracks", "", "reference tracks" }; 
 
   StringProperty m_trigger { this, "trigger", "", "trigger chain" };
-  
+
+  std::string m_triggerchain;
   std::string m_refTracks;
   std::string m_testTracks;
   std::string m_rois;
   std::string m_vertices;
   std::string m_leg;
   std::string m_extra;
+
+  AnalysisR4* m_anal;
   
 };
 

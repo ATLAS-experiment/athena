@@ -147,7 +147,10 @@ StatusCode TrigIDR4Mon::initialize() {
   std::cout << "TrigIDR4Mon::Legacy            = " << m_legacy   << std::endl;
 #endif
 
-  ATH_CHECK(m_monTools.retrieve());  
+  ATH_CHECK(m_monTools.retrieve());
+  ATH_MSG_INFO( "TrigIDR4Mon::initialize() retrieved " << m_monTools.size() << " MonTools" );
+
+  ATH_CHECK(m_tdt.retrieve());
 
   ATH_CHECK(bookHistograms());
 
@@ -229,8 +232,9 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	/// check this analysis, for this chain, hasn;t been used before ....
 	if (std::find(chains.begin(), chains.end(), selectChain) == chains.end()) { // deduplicate
 
+	  ATH_MSG_INFO( "TrigIDR4Mon::bookHistograms() adding offline tool: " << selectChain );
 	  chains.push_back( selectChain );
-	  (*toolitr)->setTDT( m_tdt );
+	  //	  (*toolitr)->setTDT( m_tdt );
 	  monTools.push_back( toolitr->get() );
 	  //	  monTools.push_back( new TrackAnalysis( "TrackAnalysis", toolitr->name(), this ) );
 	  //	  monTools.back()->addHistograms( (*toolitr) );
@@ -280,15 +284,11 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 	
 	if (  std::find(chains.begin(), chains.end(), selectChain) == chains.end() ) { // deduplicate
 
-	  std::cout << "select chain: " << selectChain << std::endl;
-	  
-	  chains.push_back( selectChain );
-	  //	  monTools.push_back( &(*toolitr) );
+	  ATH_MSG_INFO( "TrigIDR4Mon::bookHistograms() adding trigger tool: " << selectChain );
 
-	  /// so now we have to decide whether to create the TrackAnalysis and give it to
-	  /// to (*toolitr), or give the *toolitr to the TrackAnalysis,
-	  /// or combine them so that there is only the one tool
-	  (*toolitr)->setTDT( m_tdt );
+	  chains.push_back( selectChain );
+
+	  //	  (*toolitr)->setTDT( m_tdt );
 	  monTools.push_back( toolitr->get() );
 	  //  monTools.push_back( new TrackAnalysis( "TrackAnalysis", toolitr->name(), this ) );
 	  //  monTools.back()->addHistograms( (*toolitr) );
@@ -325,6 +325,7 @@ StatusCode TrigIDR4Mon::bookHistograms() {
 StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );
+  ATH_MSG_INFO( "TrigIDR4Mon::fillHistograms() m_tools.size() = " << m_tools.size() );
 
   const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "HLT_e.*" );
   const std::vector<std::string> selectChains = chainGroup->getListOfTriggers();
@@ -343,6 +344,7 @@ StatusCode TrigIDR4Mon::fillHistograms(const EventContext &/*context*/) const {
 #if 1
   /// this is method 3.
   for ( int itools=m_tools.size() ; itools-- ; ) {
+    ATH_MSG_INFO( "TrigIDR4Mon::fillHistograms() calling execute() on tool " << itools << " : " << m_tools[itools]->name() );
     m_tools[itools]->execute();
   }
 #endif

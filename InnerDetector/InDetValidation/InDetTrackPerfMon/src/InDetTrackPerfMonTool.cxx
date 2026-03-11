@@ -218,16 +218,11 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   ATH_MSG_DEBUG( "Processing event = " <<
                  thisTrkAnaCollections.eventInfo()->eventNumber() <<
                  "\n==========================================" );
-
   ATH_MSG_DEBUG( "ALL Track Info: " << thisTrkAnaCollections.printInfo() );
 
-
-  std::cout <<  "SUTT: ALL Track Info: " << thisTrkAnaCollections.printInfo() << std::endl;;
-
-  
   /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty() ) {
-    ATH_MSG_WARNING( "Some FULL collections are empty." );
+    ATH_MSG_DEBUG( "Some FULL collections are empty." );
   }
 
   /// ------------------------------
@@ -235,10 +230,9 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
   /// ------------------------------
   ATH_CHECK( m_trackQualitySelectionTool->selectTracks( thisTrkAnaCollections ) );
 
-  
   /// Check if overall test/reference track vectors are empty
   if( thisTrkAnaCollections.empty( IDTPM::TrackAnalysisCollections::FS ) ) {
-    ATH_MSG_WARNING( "Some collections are empty after quality selection." );
+    ATH_MSG_DEBUG( "Some collections are empty after quality selection." );
   }
 
   /// -------------------------------
@@ -287,16 +281,8 @@ StatusCode InDetTrackPerfMonTool::fillHistograms() {
     /// -- Main loop over selected RoIs --
     /// ----------------------------------
     /// Only one "dummy" RoI iteration for offline analysis
-
-    /// Only one "dummy" RoI iteration for offline analysis
-
-    std::cout << "SUTT: Roi size: " << selectedRoisSize << " " << selectedRois.size() << std::endl; 
-
-
-    /// this isn is insane !! the selectedRoisize variable is NOT actually equal to the
-    /// size of the selectRois vector. WTF ?
+    //  for( size_t ir=selectedRois.size() ; ir-- ;  ) {
     for( size_t ir=selectedRoisSize ; ir-- ;  ) {
-      //    for( size_t ir=selectedRois.size() ; ir-- ;  ) {
 
       /// clear collections in this RoI from previous iteration
       thisTrkAnaCollections.clear( IDTPM::TrackAnalysisCollections::InRoI );
@@ -413,6 +399,7 @@ StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollectio
 
   ATH_MSG_DEBUG( "Loading collections" );
 
+#if 0
   std::cout << "SUTT loadcollections: eventInfo " <<  m_eventInfoContainerName.key() << std::endl;
 
   std::cout << "SUTT loadcollections: truthPart " <<  m_truthParticleName.key() << std::endl;
@@ -428,7 +415,7 @@ StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollectio
 
   std::cout << "SUTT: test coll: " << m_trkAnaDef->testCollection()      << std::endl;
   std::cout << "SUTT: ref coll:  " << m_trkAnaDef->referenceCollection() << std::endl;
-
+#endif
   
   /// these track collections should perhaps be added to this configuration object - in fact all the
   /// configuration parameters that need to be passed around, should go there, then we don't need any
@@ -445,7 +432,7 @@ StatusCode InDetTrackPerfMonTool::loadCollections( IDTPM::TrackAnalysisCollectio
   ///  should be in the offline selection, and not make it to the list of tracks
   ///  to be processed
   /// Tracks
-#if 1
+#if 0
   ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_truthParticleName ) );
   ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_offlineTrkParticleName ) );  /// why are some "Tracks" abreviated to "Trk" but not others ????
   ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_triggerTrkParticleName ) );

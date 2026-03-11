@@ -33,7 +33,8 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
-#include "InDetTrackPerfMon/TrackAnalysis.h"
+// #include "InDetTrackPerfMon/TrackAnalysis.h"
+#include "TrackAnalysis.h"
 
 class TrigIDR4Mon : public AthMonitorAlgorithm {
 

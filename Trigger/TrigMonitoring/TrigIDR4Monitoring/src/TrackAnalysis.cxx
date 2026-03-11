@@ -12,9 +12,15 @@
 
 
 /// local include
-#include "InDetTrackPerfMon/TrackAnalysis.h"
 #include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
 #include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
+// #include "InDetTrackPerfMon/TrackAnalysis.h"
+#include "TrackAnalysis.h"
+
+
+/// monitoring include
+#include "AthenaMonitoringKernel/Monitored.h"
 
 /// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
@@ -38,7 +44,9 @@
 ///------- Parametrized constructor -------
 ///----------------------------------------
 IDTPM::TrackAnalysis::TrackAnalysis( const std::string& type, const std::string& name, const IInterface* parent ) :
-  AthAlgTool( type, name, parent )
+  AthAlgTool( type, name, parent ),
+  m_tdt("Trig::TrigDecisionTool/TrigDecisionTool"),
+  m_anal(0)
 { }
 
 
@@ -56,29 +64,28 @@ IDTPM::TrackAnalysis::~TrackAnalysis() = default;
 ///--------------------------
 StatusCode IDTPM::TrackAnalysis::initialize() {
 
-  std::cout << "name: " << name() << std::endl;
+  ATH_MSG_INFO( "TrackAnalysis::initialize() name: " << name() );
 
-  std::string selectChain = name().substr(name().find("."),name().size());
-  
+  std::string selectChain = name().substr(name().find(".")+1,name().size());
+
   ChainString chainName = selectChain; //chainName.head();
-  
-  if ( chainName.tail()!="" )     m_testTracks = chainName.tail();
-  if ( chainName.roi()!="" )      m_rois       = chainName.roi();
-  if ( chainName.vtx()!="" )      m_vertices   = chainName.vtx();
-  if ( chainName.element()!="" )  m_leg        = chainName.element();
-  if ( chainName.extra()!="" )    m_extra      = chainName.extra();
 
-
-  std::cout << "\ttrigger: " << m_trigger << " " << chainName.head() << std::endl; 
-  std::cout << "\ttracks:  " << m_testTracks << std::endl;
-  std::cout << "\trois:    " << m_rois       << std::endl;
-  std::cout << "\tvtx:     " << m_vertices   << std::endl;
-  std::cout << "\tleg:     " << m_leg     << std::endl;
-  std::cout << "\textra:   " << m_extra   << std::endl;
+  if ( chainName.head()!="" )     m_triggerchain = chainName.head();
+  if ( chainName.tail()!="" )     m_testTracks   = chainName.tail();
+  if ( chainName.roi()!="" )      m_rois         = chainName.roi();
+  if ( chainName.vtx()!="" )      m_vertices     = chainName.vtx();
+  if ( chainName.element()!="" )  m_leg          = chainName.element();
+  if ( chainName.extra()!="" )    m_extra        = chainName.extra();
 
   /// we probably want to set these in the initialise
   /// rather than set them for every eveny
   m_refTracks  = m_offlineTracks;
+
+  ATH_MSG_INFO( "TrackAnalysis::initialize()"
+    << " trigger=" << m_trigger
+    << " testTracks=" << m_testTracks
+    << " refTracks="  << m_refTracks
+    << " rois=" << m_rois );
 
   std::cout << "SUTT: tes tracks: " << m_testTracks << "\t" << m_triggerTracks << std::endl;
 
@@ -99,7 +106,7 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   
   //// No, no, no, no, no, the TDT is configured in the algorithm, and the
   ///  same instance is passed into all the tools
-  ///  ATH_CHECK( m_tdt.retrieve() );
+  //   ATH_CHECK( m_tdt.retrieve() );
   
   //  ATH_CHECK( m_trackQualitySelectionTool.retrieve() );
 
@@ -186,7 +193,13 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   //           thisChain ) );
   // } // close m_configuredChains loop 
 
-  std::cout << "TrackAnalysis::execute() exitting" << std::endl;
+  std::cout << "TrackAnalysis::initialize() exitting" << std::endl;
+
+  m_anal = new AnalysisR4(name());
+
+  m_anal->set_monTool( &m_tool );
+
+  m_anal->initialise();
   
   return StatusCode::SUCCESS;
 }
@@ -238,16 +251,37 @@ bool IDTPM::TrackAnalysis::execute() {
 
   //   ATH_MSG_INFO("Filling hists " << name() << "\ttrigger: " << m_tool.name() << " ...");
 
-  std::cout << "TrackAnalysis:execute() " << name() << std::endl;
 
-  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks << "\ttesttracks: " << m_testTracks << std::endl;
+  //  std::set<std::string> chains;
 
 
-  std::cout << "TA::execute() " << name() << "\t\treftracks: " << m_refTracks  << std::endl;
-  std::cout << "TA::execute() " << name() << "\ttesttracks:  " << m_testTracks << std::endl;
+ 
+  unsigned decisionType = TrigDefs::Physics; // TrigDefs::includeFailedDecisions;
 
-  std::cout << "TrackAnalysis:execute() " << "ana collections" << std::endl;
+  if( !m_tdt->isPassed( m_triggerchain, decisionType ) ) return true;
 
+  std::cout << "[91;1m PROCESSING ------------------------------------------------------------------------------------[m" << std::endl;
+
+  ATH_MSG_INFO( "TrackAnalysis::execute() " << name()
+    << " refTracks=" << m_refTracks
+    << " testTracks=" << m_testTracks );
+
+  std::cout << "trigger chain: " << m_triggerchain << std::endl;
+  
+
+  const std::vector<std::string> configuredChains = m_tdt->getListOfTriggers("HLT_.*");
+
+  std::cout << "[91;1m" << configuredChains.size() << " Configured Chains" << "[m" << std::endl;
+
+#if 0															    
+  for ( unsigned i=0 ; i<configuredChains.size() ; i++ ) {
+    if( m_tdt->isPassed( configuredChains[i], decisionType ) ) std::cout << i << "\t" << "[91;1m" << "Chain " << configuredChains[i] << " pass   (ACN)[m" << std::endl;
+    if ( configuredChains[i] == m_triggerchain ) std::cout << "Mutha ..." << configuredChains[i] << " " <<  m_triggerchain << "\n\n" << std::endl;
+  }
+#endif
+
+  std::cout << "trigger chain: " << m_triggerchain << " :: " << m_tdt->isPassed( m_triggerchain, decisionType ) << "\n" << std::endl;
+  
   
   IDTPM::TrackAnalysisCollections thisTrkAnaCollections( "duff", m_trkAnaDef.get() );
 
@@ -260,9 +294,57 @@ bool IDTPM::TrackAnalysis::execute() {
   
   /// filling TrackAnalysisCollections
   // ATH_CHECK( loadCollections( thisTrkAnaCollections ) );
-  
+
   if ( ! loadCollections( thisTrkAnaCollections ).isSuccess() ) return false;
 
+  ATH_MSG_INFO( "TrackAnalysis::execute() after loadCollections:"
+    << " trigTracks[FULL]="  << thisTrkAnaCollections.trigTrackVec( IDTPM::TrackAnalysisCollections::FULL ).size()
+    << " offlTracks[FULL]="  << thisTrkAnaCollections.offlTrackVec( IDTPM::TrackAnalysisCollections::FULL ).size()
+    << " truthParts[FULL]="  << thisTrkAnaCollections.truthPartVec( IDTPM::TrackAnalysisCollections::FULL ).size() );
+
+  m_anal->execute( thisTrkAnaCollections );
+
+#if 0  
+  // --- Fill reference track distributions ---
+  const auto& refTracks = thisTrkAnaCollections.offlTrackVec( IDTPM::TrackAnalysisCollections::FULL );
+
+  {
+    auto n = Monitored::Scalar<float>("reftrk_N", static_cast<float>(refTracks.size()));
+    Monitored::Group(m_tool, n);
+  }
+
+  for ( const xAOD::TrackParticle* trk : refTracks ) {
+    if ( !trk ) continue;
+    auto pt  = Monitored::Scalar<float>("reftrk_pT",  IDTPM::pT(*trk)  * 1e-3f);
+    auto eta = Monitored::Scalar<float>("reftrk_eta", IDTPM::eta(*trk));
+    auto phi = Monitored::Scalar<float>("reftrk_phi", IDTPM::phi(*trk));
+    auto d0  = Monitored::Scalar<float>("reftrk_d0",  IDTPM::d0(*trk));
+    auto z0  = Monitored::Scalar<float>("reftrk_z0",  IDTPM::z0(*trk));
+    Monitored::Group(m_tool, pt, eta, phi, d0, z0);
+  }
+
+  // --- Fill test (trigger) track distributions ---
+  const auto& testTracks = thisTrkAnaCollections.trigTrackVec(
+      IDTPM::TrackAnalysisCollections::FULL );
+
+  {
+    auto n = Monitored::Scalar<float>("testtrk_N", static_cast<float>(testTracks.size()));
+    Monitored::Group(m_tool, n);
+  }
+
+  for ( const xAOD::TrackParticle* trk : testTracks ) {
+    if ( !trk ) continue;
+    auto pt  = Monitored::Scalar<float>("testtrk_pT",  IDTPM::pT(*trk)  * 1e-3f);
+    auto eta = Monitored::Scalar<float>("testtrk_eta", IDTPM::eta(*trk));
+    auto phi = Monitored::Scalar<float>("testtrk_phi", IDTPM::phi(*trk));
+    auto d0  = Monitored::Scalar<float>("testtrk_d0",  IDTPM::d0(*trk));
+    auto z0  = Monitored::Scalar<float>("testtrk_z0",  IDTPM::z0(*trk));
+    Monitored::Group(m_tool, pt, eta, phi, d0, z0);
+  }
+#endif
+
+
+  
 #if 0
   
   ATH_MSG_DEBUG( "Processing event = " << thisTrkAnaCollections.eventInfo()->eventNumber() << "\n==========================================" );
@@ -510,8 +592,11 @@ StatusCode IDTPM::TrackAnalysis::loadCollections( IDTPM::TrackAnalysisCollection
   /// won't bother with the vertices just yet ...
   /// eventually we want to replace this with the appropriate templated stuff
 
-  std::cout << "SUTT:  ref type: " << m_trkAnaDef->referenceType() << std::endl;
-  std::cout << "SUTT: test type: " << m_trkAnaDef->testType() << std::endl;
+  ATH_MSG_INFO( "TrackAnalysis::loadCollections() "
+    << " refType="  << m_trkAnaDef->referenceType()
+    << " refColl="  << m_trkAnaDef->referenceCollection()
+    << " testType=" << m_trkAnaDef->testType()
+    << " testColl=" << m_trkAnaDef->testCollection() );
 
 #if 0
   
@@ -538,24 +623,37 @@ StatusCode IDTPM::TrackAnalysis::loadCollections( IDTPM::TrackAnalysisCollection
  
 #else
 
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  std::cout << "GOD DAMIT !!!" << std::endl;
-  
-  if      ( m_trkAnaDef->referenceType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->referenceCollection() ) );
-  else if ( m_trkAnaDef->referenceType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->referenceCollection() ) );
-  else if ( m_trkAnaDef->referenceType() == "Truth"   )  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->referenceCollection() ) );
+  if      ( m_trkAnaDef->referenceType() == "Offline" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling ref offline container: " << m_trkAnaDef->referenceCollection() );
+    ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->referenceCollection() ) );
+  }
+  else if ( m_trkAnaDef->referenceType() == "Trigger" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling ref trigger container: " << m_trkAnaDef->referenceCollection() );
+    ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->referenceCollection() ) );
+  }
+  else if ( m_trkAnaDef->referenceType() == "Truth" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling ref truth container: " << m_trkAnaDef->referenceCollection() );
+    ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->referenceCollection() ) );
+  }
+  else {
+    ATH_MSG_WARNING( "TrackAnalysis::loadCollections() unknown referenceType: " << m_trkAnaDef->referenceType() );
+  }
 
-  if      ( m_trkAnaDef->testType() == "Offline" )  ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->testCollection() ) );
-  else if ( m_trkAnaDef->testType() == "Trigger" )  ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->testCollection() ) );
-  else if ( m_trkAnaDef->testType() == "Truth"   )  ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->testCollection() ) );
+  if      ( m_trkAnaDef->testType() == "Offline" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling test offline container: " << m_trkAnaDef->testCollection() );
+    ATH_CHECK( trkAnaColls.fillOfflTrackContainer( m_trkAnaDef->testCollection() ) );
+  }
+  else if ( m_trkAnaDef->testType() == "Trigger" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling test trigger container: " << m_trkAnaDef->testCollection() );
+    ATH_CHECK( trkAnaColls.fillTrigTrackContainer( m_trkAnaDef->testCollection() ) );
+  }
+  else if ( m_trkAnaDef->testType() == "Truth" ) {
+    ATH_MSG_INFO( "TrackAnalysis::loadCollections() filling test truth container: " << m_trkAnaDef->testCollection() );
+    ATH_CHECK( trkAnaColls.fillTruthPartContainer( m_trkAnaDef->testCollection() ) );
+  }
+  else {
+    ATH_MSG_WARNING( "TrackAnalysis::loadCollections() unknown testType: " << m_trkAnaDef->testType() );
+  }
 #endif
   
   std::cout << "SUTT: done and dusted" << std::endl;

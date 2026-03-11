@@ -184,7 +184,8 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
 }
 
 /// Offline track particles
-StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
+  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
   if( m_trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
@@ -213,7 +214,8 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const SG::Re
 }
 
 /// Trigger track particles
-StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
+  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
   if( m_trkAnaDefSvc->useTrigger()) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
@@ -279,6 +281,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const std::s
     m_offlTrackVec[FULL].clear();
   }
 
+
   
   return StatusCode::SUCCESS; 
 }
@@ -333,29 +336,23 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer( const std::s
 
     std::cout << "SUTT: TAC: true tracks: " << key << "\tsize: " << m_truthPartContainer->size() << std::endl;
 
+    
     /// Fill FULL vector
     m_truthPartVec[ FULL ].clear(); // clear to initialize it
 
-
-    std::cout << "SUTT: pile upswitch: " <<  m_trkAnaDefSvc->pileupSwitch() << std::endl;
-    
     /// Grab the entire truth particle collection
     if( m_trkAnaDefSvc->pileupSwitch() == "All" ) {
-      m_truthPartVec[FULL].insert( m_truthPartVec[ FULL ].begin(), pTruthColl->begin(), pTruthColl->end() );
+      m_truthPartVec[ FULL ].insert(
+        m_truthPartVec[ FULL ].begin(), pTruthColl->begin(), pTruthColl->end() );
 
-      std::cout << "SUTT: 0 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
-      
     /// Grab only truth particles from Hard Scatter
     } else if( m_trkAnaDefSvc->pileupSwitch() == "HardScatter" ) {
       if( m_truthEventContainer ) {
         const xAOD::TruthEvent* event = m_truthEventContainer->at(0);
         const auto& links = event->truthParticleLinks();
         for( const auto& link : links ) {
-          if( link.isValid() ) m_truthPartVec[FULL].push_back( *link );
+          if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
         }
-
-	std::cout << "SUTT: 1 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
-
       }
 
     /// Grab only truth particles from Pile Up
@@ -366,10 +363,9 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer( const std::s
           const xAOD::TruthPileupEvent* eventPU = m_truthPUEventContainer->at( ipu );
           const auto& links = eventPU->truthParticleLinks();
           for( const auto& link : links ) {
-            if( link.isValid() ) m_truthPartVec[FULL].push_back( *link );
+            if( link.isValid() ) m_truthPartVec[ FULL ].push_back( *link );
           }
         }
-	std::cout << "SUTT: 2 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
       }
 
     } else {

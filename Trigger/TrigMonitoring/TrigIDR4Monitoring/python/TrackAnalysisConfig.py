@@ -12,15 +12,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-# just lazy, and like the code to be neater 
-def mktool( ca, kak=None ):
-    if kak is not None:
-        return kak.popToolsAndMerge(ca)
-    else:
-        return ComponentAccumulator().popToolsAndMerge(ca)
-
-
-
 def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None, kak=None ):
 
     # actually this won't work now - newer releases don't allow you to modify
@@ -67,7 +58,7 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None, ka
 
 #    from InDetTrackPerfMon.InDetMatchingConfig  import TrackMatchingToolCfg
 
-#    from InDetTrackPerfMon.InDetSelectionConfig import sanitise
+    from InDetTrackPerfMon.InDetSelectionConfig import sanitise
     
     print( "RoiKey: ", cs.roi, "   :: ", name )
     
@@ -101,5 +92,16 @@ def createTrackAnalysis( inflags, name="TrackAnalysis", chain="", mtool=None, ka
 #    kak.printConfig(withDetails=True, summariseProps=True)
     
     return tool
+
+
+
+
+# just lazy, and like the code to be neater 
+def mktool( ca, kak=None ):
+    if kak is not None:
+        return kak.popToolsAndMerge(ca)
+    else:
+        return ComponentAccumulator().popToolsAndMerge(ca)
+
 
 

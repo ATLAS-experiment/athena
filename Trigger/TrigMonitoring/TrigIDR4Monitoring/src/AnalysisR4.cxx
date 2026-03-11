@@ -12,6 +12,7 @@
 #include "AnalysisR4.h"
 
 #include "TrigInDetAnalysisExample/ChainString.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 #include <cmath>
 #include <iostream>
@@ -25,6 +26,12 @@ AnalysisR4::AnalysisR4(const std::string& name,
                                double /*z0Cut*/)
   : m_name(name), m_monTool(0)
 {}
+
+
+AnalysisR4::AnalysisR4(const std::string& name)
+  : m_name(name), m_monTool(0)
+{}
+
 
 
 void AnalysisR4::initialise() {
@@ -207,17 +214,43 @@ void AnalysisR4::initialise() {
 }
 
 
-void AnalysisR4::execute() { 
+void AnalysisR4::execute( IDTPM::TrackAnalysisCollections& collections ) { 
 
-#if 0
+  std::cout << "AnalysisR4::execute() trigTracks[FULL] = " << collections.trigTrackVec( IDTPM::TrackAnalysisCollections::FULL ).size() << std::endl;
+  std::cout << "AnalysisR4::execute() offlTracks[FULL] = " << collections.offlTrackVec( IDTPM::TrackAnalysisCollections::FULL ).size() << std::endl;
+  std::cout << "AnalysisR4::execute() truthParts[FULL] = " << collections.truthPartVec( IDTPM::TrackAnalysisCollections::FULL ).size() << std::endl;
+
+  m_hchain->Fill( 0.5, 1 );
+  m_hchain->Fill( 1.5, 1 ); /// this is not correct - we need to be able to ensure that this is only filled once per event
+
+  // --- Fill reference track distributions ---                                                                         
+  const auto& refTracks  = collections.offlTrackVec( IDTPM::TrackAnalysisCollections::FULL );
+  const auto& testTracks = collections.trigTrackVec( IDTPM::TrackAnalysisCollections::FULL );  /// nope, need to sort out all the roi stuff
+
+  m_hchain->Fill( 3.5, refTracks.size() );
+  m_hchain->Fill( 4.5, testTracks.size() );
   
+  m_hntrk->Fill( refTracks.size() );
+
+  for ( const xAOD::TrackParticle* trk : refTracks ) {
+    if ( !trk ) continue;
+
+    m_htrkpT->Fill( IDTPM::pT(*trk)*0.001 );
+    m_htrketa->Fill( IDTPM::eta(*trk) );
+    m_htrkphi->Fill( IDTPM::phi(*trk) );
+    m_htrkd0->Fill( IDTPM::d0(*trk) );
+    m_htrkz0->Fill( IDTPM::z0(*trk) );
+    
+  }
+  
+#if 0
+
   /// Loop over reference tracks
   std::vector<TIDA::Track*>::const_iterator  reference    = referenceTracks.begin();
   std::vector<TIDA::Track*>::const_iterator  referenceEnd = referenceTracks.end();
 
   /// fill number of times this analysis was called - presumably 
   /// the number of passed RoIs for this chain 
-  m_hchain->Fill( 0.5, 1 );
 
   
   if ( roi!=nullptr ) m_hroieta->Fill( roi->eta(), 1 );
@@ -423,7 +456,7 @@ void AnalysisR4::execute() {
   }
 
 #endif
-  
+
 }
 
 

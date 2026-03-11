@@ -40,9 +40,9 @@ def TrigIDR4Monitoring( flags=None, name=None, monlevel=None, kak=None ) :
         # each signature has it's own function now so it makes it easier to disable 
         # any of them is need be
 
-#        TIDR4MonElectron(    flags, key, toolkey, tools, monlevel )
+        TIDR4MonElectron(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel )
-        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel, kak )
+#        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel, kak )
 #        TIDR4MonMuonLRT(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonTau(      flags, key, toolkey, tools, monlevel )
 #        TIDR4MonBjet(     flags, key, toolkey, tools, monlevel )
@@ -111,8 +111,10 @@ def TIDR4MonElectron( flags, key, toolkey, tools, monlevel ) :
 
         from TrigInDetMonitoring.TIDAChains import getchains
         
-        chains = getchains( flags, 
-                            [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
+        chains = getchains( flags, [ "HLT_e.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1" ] ) #, monlevel )
+
+
+        cckchains =         [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  
                               "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_IDTrig",
                               "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*)(?!.*nogsf.*).*:key=HLT_IDTrack_Electron_GSF",                              
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1",
@@ -123,7 +125,9 @@ def TIDR4MonElectron( flags, key, toolkey, tools, monlevel ) :
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_nogsf_probe_.*inv.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1",
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:te=1",
                               "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_tag:te=0",
-                              "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1" ], monlevel )
+                              "HLT_e.*_lhtight.*_e.*_idperf_tight_probe_.*inv.*:key=HLT_IDTrack_Electron_GSF:extra=el_probe:te=1",
+                              "HLT_e.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1" ] #, monlevel )
+                             
 
         if  len(chains)>0 : 
 
@@ -539,8 +543,12 @@ def createTATools( flags, label, chains, excludeTagChains=True, kak=None ):
         from TrigInDetAnalysisExample.chainString import chainString
         from TrigInDetAnalysisExample.TIDAMonTool import createMonTool
 
-        from InDetTrackPerfMon.TrackAnalysisConfig import createTrackAnalysis
+#       from InDetTrackPerfMon.TrackAnalysisConfig import createTrackAnalysis
+#        from TrigIDR4Monitoring.TrackAnalysisConfig import createTrackAnalysis
 
+        from TrackAnalysisConfig import createTrackAnalysis
+
+        
         print( "SUTT: ", label, kak )
 
         inflags = flags
@@ -623,7 +631,7 @@ if __name__=='__main__':
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    Nevents = -1
+    Nevents = 2000
     cfg.run(Nevents)
 
 

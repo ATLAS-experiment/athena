@@ -81,10 +81,60 @@ protected:
   std::vector< const xAOD::Vertex* >   m_testvtx;
   std::vector< const xAOD::Vertex* >   m_refvtx;
   
-  /// Lookup table for test-reference matching ??
+  /// Lookup table for test-reference matching
   // std::unique_ptr< ITrackMatchingLookup > m_matches;
   
 }; // class TrackCollections
 
+
+#if 0
+
+ refname
+ testname
+
+ if exist<TrackPaqrticle>(refnamne) { reftrack = true; }
+ if exist<TrackPaqrticle>(testnamne)
+
+
+ if( ... )  
+ TrackCollection<TruthPart> tc();
+if (.. ) 
+ TrackCollection<TrackPart> tc();
+ TrackCollection<TruthPart,TrackPart> tc();
+ TrackCollection<TrackPart,Truth> tc();
+ TrackCollection<Truth,Segment> tc();
+
+
+( T
+
+  S
+
+  template<T,S>
+  match( TrackCollectiom<T,S>* tc ) { 
+
+
+  }
+
+
+  double eta(TrackParticxle& t) { return t.eta(); }
+  double eta(Segemt& t) { return t.eta(); }
+  double eta(TruthParticxle& t) { return t.eta0(); }
+
+  eta()
+
+  eta0()
+
+  eta(t); t->eta();
+  
+
+  matcher::match<TrackParticle,TruthParticle>(...);
+  matcher::match<TrackParticle,TruthParticle>(...);
+  matcher::match<TrackParticle,TruthParticle>(...);
+  matcher::match<TrackParticle,TruthParticle>(...);
+
+#endif
+
+
+  
   
 #endif // > !INDETTRACKPERFMON_TRACKCOLLECTIONS_H

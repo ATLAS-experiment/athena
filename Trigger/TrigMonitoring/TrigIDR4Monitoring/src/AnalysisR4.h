@@ -18,16 +18,19 @@
 #include "TrigInDetAnalysis/TIDDirectory.h"
 #include "TrigInDetAnalysisExample/TIDAHistogram.h"
 
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 
 class AnalysisR4 {
 
 public:
+
+  AnalysisR4(const std::string& name);
   
   AnalysisR4(const std::string& name, double pTCut, double etaCut, double d0Cut, double z0Cut);
   
   virtual void initialise();
 
-  virtual void execute();
+  virtual void execute( IDTPM::TrackAnalysisCollections& collections );
 
   virtual void finalise();
 
