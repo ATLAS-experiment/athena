@@ -138,6 +138,9 @@ TFileAccessTracer::~TFileAccessTracer() {
   hdr += "From: ";
   hdr += gSystem->HostName();
   hdr += "\r\n";
+  hdr += "Host: ";
+  hdr += url.GetHost();
+  hdr += "\r\n";
   hdr += "User-Agent: xAODRootAccess\r\n";
   hdr += "Content-Type: application/json\r\n";
   hdr += "Content-Length: ";
