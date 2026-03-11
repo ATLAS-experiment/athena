@@ -8,9 +8,9 @@
  **/
 
 /// local includes
-#include "DeltaRMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/DeltaRMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 
 ///------------------------------------
@@ -26,7 +26,7 @@ StatusCode IDTPM::DeltaRMatchingTool_trk::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;
@@ -57,7 +57,7 @@ StatusCode IDTPM::DeltaRMatchingTool_trkTruth::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;
@@ -88,7 +88,7 @@ StatusCode IDTPM::DeltaRMatchingTool_truthTrk::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;

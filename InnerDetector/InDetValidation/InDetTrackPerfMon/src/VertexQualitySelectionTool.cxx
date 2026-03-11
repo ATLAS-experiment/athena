@@ -8,8 +8,8 @@
  **/
 
 /// Local include(s)
-#include "VertexQualitySelectionTool.h"
-#include "TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/VertexQualitySelectionTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 
 /// Gaudi includes
 #include "GaudiKernel/ISvcLocator.h"
@@ -60,7 +60,7 @@ StatusCode IDTPM::VertexQualitySelectionTool::selectVertices(
         TrackAnalysisCollections::FS ) );
   }
 
-  if( trkAnaDefSvc->useTrigger() or trkAnaDefSvc->useEFTrigger() ) {
+  if( trkAnaDefSvc->useTrigger() || trkAnaDefSvc->useEFTrigger() ) {
     /// Trigger vertices (or EFTrigger, i.e. Trigger vertices
     /// without the trigger navigation / offline-like) copy
     ATH_CHECK( trkAnaColls.fillTrigVertexVec(

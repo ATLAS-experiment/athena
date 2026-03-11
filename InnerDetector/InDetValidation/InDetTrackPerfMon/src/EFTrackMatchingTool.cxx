@@ -8,11 +8,11 @@
  **/
 
 /// local includes
-#include "EFTrackMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
-#include "OfflineObjectDecorHelper.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/EFTrackMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 /// STD include(s)
 #include <algorithm> // for std::find
@@ -50,7 +50,7 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;
@@ -88,15 +88,15 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
                         *track_particle_test, m_truthProbCut.value() );
 
     /// Skip if no truth particle is found
-    if( not truth_particle_test ) {
-      ATH_MSG_WARNING( "Test track not linked to truth. Skipping." );
+    if( ! truth_particle_test ) {
+      ATH_MSG_WARNING( "Test track ! linked to truth. Skipping." );
       continue;
     }
 
     float prob_test = getTruthMatchProb( *track_particle_test );
 
     ATH_MSG_DEBUG( "Test track with pT = " << pT( *track_particle_test ) <<
-                   " is linked to truth with pT = " << pT( *truth_particle_test ) << " and prob = " << prob_test );
+                   " is linked to truth with pT = " << pT( *truth_particle_test ) << " && prob = " << prob_test );
 
     /// Find best offline track matched to same truth
     const xAOD::TrackParticle* track_particle_ref = nullptr;
@@ -111,15 +111,15 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
       /// Skip if no truth particle is found or
       /// if linked truth particle does not
       /// correspond to the original test one
-      if( not truth_particle_tmp ) {
-        ATH_MSG_WARNING( "Reference track not linked to truth. Skipping." );
+      if( ! truth_particle_tmp ) {
+        ATH_MSG_WARNING( "Reference track ! linked to truth. Skipping." );
         continue;
       }
 
       float prob_tmp = getTruthMatchProb( *track_particle_tmp );
 
       ATH_MSG_DEBUG( "Reference track with pT = " << pT( *track_particle_tmp ) <<
-                     " is linked to truth with pT = " << pT( *truth_particle_tmp ) << " and prob = " << prob_tmp );
+                     " is linked to truth with pT = " << pT( *truth_particle_tmp ) << " && prob = " << prob_tmp );
 
       if( truth_particle_tmp != truth_particle_test ) continue;
 
@@ -129,7 +129,7 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
       /// update track_particle_ref, selecting
       /// the best match based on the matching prob
       if( prob_tmp > prob_ref ) {
-        if( not firstMatch ) ATH_MSG_DEBUG( "Found better match. Updating." );
+        if( ! firstMatch ) ATH_MSG_DEBUG( "Found better match. Updating." );
         firstMatch = false;
         track_particle_ref = track_particle_tmp;
         prob_ref = prob_tmp;
@@ -137,7 +137,7 @@ StatusCode IDTPM::EFTrackMatchingTool::match(
 
     } // loop over vRef
 
-    if( not track_particle_ref ) {
+    if( ! track_particle_ref ) {
       ATH_MSG_DEBUG( "No match found for test track with pT = " << pT( *track_particle_test ) );
     } else {
       ATH_MSG_DEBUG( "Found best match: test track with pT = " << pT( *track_particle_test ) << 

@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "ResolutionPlots.h"
-#include "../TrackParametersHelper.h"
+#include "InDetTrackPerfMon/ResolutionPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 /// To be ultimately migrated to IDTPM, no need to duplicate in the meantime
 #include "InDetPhysValMonitoring/ResolutionHelper.h"

@@ -12,9 +12,9 @@
 #include "GaudiKernel/Service.h"
 
 /// Local includes
-#include "TrackAnalysisInfoWriteTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/TrackAnalysisInfoWriteTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 /// STL includes
 #include <sstream>
@@ -23,8 +23,7 @@
 ///---------------------------
 ///------- Constructor -------
 ///---------------------------
-IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool(
-    const std::string& name ) :
+IDTPM::TrackAnalysisInfoWriteTool::TrackAnalysisInfoWriteTool( const std::string& name ) :
   asg::AsgTool( name ) { }
 
 
@@ -57,7 +56,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 {
   ATH_MSG_DEBUG( "Writing TrackAnalysisInfo to StoreGate" );
 
-  if( not wh.key().ends_with( m_anaTag.value() ) ) {
+  if( ! wh.key().ends_with( m_anaTag.value() ) ) {
     ATH_MSG_ERROR( "Invalid TrkAnaInfo container name: " << wh.key() );
     return StatusCode::FAILURE;
   }
@@ -77,7 +76,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 
   /// Filling Trigger navigation info
   if( m_trkAnaDefSvc->doTrigNavigation() ) {
-    chainAcc( *(wh->back()) ) = chain;
+    chainAcc( *(wh->back()) )  = chain;
     roiIdxAcc( *(wh->back()) ) = roiIdx;
     roiStrAcc( *(wh->back()) ) = roiStr;
   }
@@ -94,7 +93,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTracksAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTruthsAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTruthsAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
   /// Truth->Track
@@ -108,7 +107,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTruthsAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTracksAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTracksAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
   /// Track->Track
@@ -122,7 +121,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
             &(trkAnaColls.matches()) );
 
     testTracksAcc( *(wh->back()) ) = std::get<0>( matchInfo );
-    refTracksAcc( *(wh->back()) ) = std::get<1>( matchInfo );
+    refTracksAcc( *(wh->back()) )  = std::get<1>( matchInfo );
     matchDistsAcc( *(wh->back()) ) = std::get<2>( matchInfo );
   }
 
@@ -136,7 +135,7 @@ StatusCode IDTPM::TrackAnalysisInfoWriteTool::write(
 std::string IDTPM::TrackAnalysisInfoWriteTool::printInfo(
     SG::WriteHandle< xAOD::BaseContainer >& wh ) const
 {
-  if( not wh.isValid() ) {
+  if( ! wh.isValid() ) {
     ATH_MSG_ERROR( "Invalid collection" ); return "";
   }
 

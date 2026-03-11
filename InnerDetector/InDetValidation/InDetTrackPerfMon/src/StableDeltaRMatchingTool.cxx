@@ -10,9 +10,9 @@
  */
 
 /// Local include(s)
-#include "StableDeltaRMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/StableDeltaRMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 namespace IDTPM {
 

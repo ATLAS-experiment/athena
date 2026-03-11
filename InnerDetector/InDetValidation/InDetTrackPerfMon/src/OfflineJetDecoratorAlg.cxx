@@ -8,8 +8,8 @@
  **/
 
 /// Local includes
-#include "OfflineJetDecoratorAlg.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/OfflineJetDecoratorAlg.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 ///----------------------------------------
@@ -27,9 +27,9 @@ IDTPM::OfflineJetDecoratorAlg::OfflineJetDecoratorAlg(
 StatusCode IDTPM::OfflineJetDecoratorAlg::initialize() {
 
   ATH_CHECK( m_offlineTrkParticlesName.initialize(
-                not m_offlineTrkParticlesName.key().empty() ) );
+                ! m_offlineTrkParticlesName.key().empty() ) );
 
-  ATH_CHECK( m_jetsName.initialize( not m_jetsName.key().empty() ) );
+  ATH_CHECK( m_jetsName.initialize( ! m_jetsName.key().empty() ) );
 
   /// Create decorations for ID tracks
   IDTPM::createDecoratorKeysAndAccessor( 
@@ -52,14 +52,14 @@ StatusCode IDTPM::OfflineJetDecoratorAlg::execute( const EventContext& ctx ) con
 
   /// retrieve offline track particle container
   SG::ReadHandle< xAOD::TrackParticleContainer > ptracks( m_offlineTrkParticlesName, ctx );
-  if( not ptracks.isValid() ) {
+  if( ! ptracks.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve track particles container" );
     return StatusCode::FAILURE;
   }
 
   /// retrieve jet container
   SG::ReadHandle< xAOD::JetContainer > pjets( m_jetsName, ctx );
-  if( not pjets.isValid() ) {
+  if( ! pjets.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve jets container" );
     return StatusCode::FAILURE;
   }
@@ -105,7 +105,7 @@ StatusCode IDTPM::OfflineJetDecoratorAlg::decorateJetTrack(
   /// loop jet container to look for jet that includes this track
   for( const xAOD::Jet* jet : jets ) {
     /// pass jet cuts
-    if( not passJetCuts( *jet ) ) continue;
+    if( ! passJetCuts( *jet ) ) continue;
 
     /// check if track is within max DeltaR from the jet core
     if( deltaR( *jet, track ) > m_maxTrkJetDR.value() ) continue;
@@ -113,7 +113,7 @@ StatusCode IDTPM::OfflineJetDecoratorAlg::decorateJetTrack(
     /// check if this is a truth c/b-jet
     bool isTruthCjet = false;
     bool isTruthBjet = false;
-    if( not truthJetTagLabel.isAvailable( *jet ) ) {
+    if( ! truthJetTagLabel.isAvailable( *jet ) ) {
       ATH_MSG_WARNING( "Failed to extract b-tag truth label from jet" );
     } else {
       isTruthCjet = ( truthJetTagLabel( *jet ) == 4 );

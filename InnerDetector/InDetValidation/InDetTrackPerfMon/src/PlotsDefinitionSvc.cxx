@@ -9,7 +9,7 @@
 **/
 
 /// Local include(s)
-#include "PlotsDefinitionSvc.h"
+#include "InDetTrackPerfMon/PlotsDefinitionSvc.h"
 
 
 /// -------------------
@@ -43,12 +43,12 @@ StatusCode PlotsDefinitionSvc::initialize() {
   /// Checking validity of plots definitions
   bool allDefsOk( true );
   for( const auto& p : m_plotsDefMap ) {
-    if( not p.second.isValid() ) {
+    if( ! p.second.isValid() ) {
       ATH_MSG_WARNING( "Invalid plot definition: " << p.second.plotDigest() );
       allDefsOk = false;
     }
   }
-  if( not allDefsOk ) {
+  if( ! allDefsOk ) {
     ATH_MSG_WARNING( "Some plots definitions were bad" );
     return StatusCode::RECOVERABLE;
   }
@@ -89,7 +89,7 @@ StatusCode PlotsDefinitionSvc::update(
   std::pair< plotsDefMap_t::iterator, bool > result =
     m_plotsDefMap.insert( plotsDefMap_t::value_type( def.identifier(), def ) );
 
-  if( not result.second ) {
+  if( ! result.second ) {
     ATH_MSG_DEBUG( "Plot definition is already in map. Not added" );
   }
 

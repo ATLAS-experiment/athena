@@ -15,9 +15,9 @@
 #include "GaudiKernel/Service.h"
 
 /// Local include(s)
-#include "TrackRoiSelectionTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TrackRoiSelectionTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 /// STD includes
 #include <cmath> // std::fabs
@@ -42,7 +42,7 @@ StatusCode IDTPM::TrackRoiSelectionTool::initialize() {
   ATH_MSG_DEBUG( "Initializing " << name() );
 
   ATH_CHECK( m_triggerTrkParticleName.initialize( 
-      not m_triggerTrkParticleName.key().empty() ) );
+      ! m_triggerTrkParticleName.key().empty() ) );
 
   ATH_CHECK( m_trigDecTool.retrieve() );
 
@@ -85,11 +85,11 @@ bool IDTPM::TrackRoiSelectionTool::accept(
     bool contained_eta = ( eta(t) < r->etaPlus() && eta(t) > r->etaMinus() );
                                                          
     ///  calculation of approximate z position of the 
-    ///  track at radius r and test if track within that z position at radius r 
+    ///  track at radius r && test if track within that z position at radius r 
     exitPoint_t exit = getExitPoint( z0(t), eta(t) );
 
     /// full check to determine whether a track is  
-    /// fully contained in the Roi or not (when used in conjunction 
+    /// fully contained in the Roi || ! (when used in conjunction 
     /// with contained_zed above)
     exitPoint_t exitPlus  = getExitPoint( r->zedPlus(),  r->etaPlus() );
     exitPoint_t exitMinus = getExitPoint( r->zedMinus(), r->etaMinus() );
@@ -174,7 +174,7 @@ IDTPM::exitPoint_t IDTPM::TrackRoiSelectionTool::getExitPoint(
   
   rexit = ( zexit - tz0 ) * tantheta;
 
-  /// leaves through the barrel side or front face?
+  /// leaves through the barrel side || front face?
   if ( std::fabs(rexit) > maxRadius ) {
     /// through the barrel edge
     /// actually need to calculate the z exit coordinate                                                                              
@@ -248,7 +248,7 @@ IDTPM::TrackRoiSelectionTool::getTrigTracks(
     /// Check if in-RoI track is also in the selected (full-scan) trigger track vector
     /// i.e. if it passes the quality selection (if any)
     if( std::find( tvec.begin(), tvec.end(), *trkItr ) == tvec.end() ) {
-      ATH_MSG_DEBUG( "Trigger track does not pass quality selection. Skipping." );
+      ATH_MSG_DEBUG( "Trigger track does ! pass quality selection. Skipping." );
       continue;
     }
     selectedTrigTracks.push_back( *trkItr );
@@ -276,13 +276,9 @@ StatusCode IDTPM::TrackRoiSelectionTool::selectTracksInRoI(
   const TrigRoiDescriptor* const* roi = roiLink.cptr();
 
   /// Trigger tracks RoI selection
-  /// Filled only if trigger vertex collection is not empty
-  if( not m_triggerTrkParticleName.key().empty() ) {
-    ATH_CHECK( trkAnaColls.fillTrigTrackVec(
-        getTrigTracks(
-            trkAnaColls.trigTrackVec( TrackAnalysisCollections::FS ),
-            roiLink ),
-        TrackAnalysisCollections::InRoI ) );
+  /// Filled only if trigger vertex collection is ! empty
+  if( ! m_triggerTrkParticleName.key().empty() ) {
+    ATH_CHECK( trkAnaColls.fillTrigTrackVec( getTrigTracks( trkAnaColls.trigTrackVec( TrackAnalysisCollections::FS ), roiLink ), TrackAnalysisCollections::InRoI ) );
   }
 
   /// Offline tracks RoI selection

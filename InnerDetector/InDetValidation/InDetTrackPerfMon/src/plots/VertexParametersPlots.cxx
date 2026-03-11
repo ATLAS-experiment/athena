@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "VertexParametersPlots.h"
-#include "../TrackParametersHelper.h" // also includes VertexParametersHelper.h
+#include "InDetTrackPerfMon/VertexParametersPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h" // also includes VertexParametersHelper.h
 
 
 /// -----------------------

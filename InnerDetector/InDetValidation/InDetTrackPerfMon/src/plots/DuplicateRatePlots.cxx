@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "DuplicateRatePlots.h"
-#include "../TrackParametersHelper.h"
+#include "InDetTrackPerfMon/DuplicateRatePlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 /// -----------------------

@@ -8,7 +8,7 @@
  **/
 
 /// Local includes
-#include "OfflineTauDecoratorAlg.h"
+#include "InDetTrackPerfMon/OfflineTauDecoratorAlg.h"
 
 
 ///----------------------------------------
@@ -26,9 +26,9 @@ IDTPM::OfflineTauDecoratorAlg::OfflineTauDecoratorAlg(
 StatusCode IDTPM::OfflineTauDecoratorAlg::initialize() {
 
   ATH_CHECK( m_offlineTrkParticlesName.initialize(
-                not m_offlineTrkParticlesName.key().empty() ) );
+                ! m_offlineTrkParticlesName.key().empty() ) );
 
-  ATH_CHECK( m_tausName.initialize( not m_tausName.key().empty() ) );
+  ATH_CHECK( m_tausName.initialize( ! m_tausName.key().empty() ) );
 
   /// Create decorations for original ID tracks
   IDTPM::createDecoratorKeysAndAccessor( 
@@ -54,14 +54,14 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::execute( const EventContext& ctx ) con
 
   /// retrieve offline track particle container
   SG::ReadHandle< xAOD::TrackParticleContainer > ptracks( m_offlineTrkParticlesName, ctx );
-  if( not ptracks.isValid() ) {
+  if( ! ptracks.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve track particles container" );
     return StatusCode::FAILURE;
   }
 
   /// retrieve tau container
   SG::ReadHandle< xAOD::TauJetContainer > ptaus( m_tausName, ctx );
-  if( not ptaus.isValid() ) {
+  if( ! ptaus.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve taus container" );
     return StatusCode::FAILURE;
   }
@@ -105,9 +105,9 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::decorateTauTrack(
   /// loop muon container to look for muon reconstructed with current ID track
   for( const xAOD::TauJet* tau : taus ) {
 
-    /// Select number of tau tracks (1prong or 3prong)
+    /// Select number of tau tracks (1prong || 3prong)
     int NTauTracks = tau->nTracks();
-    if( m_tauNprongs.value() > 0 and NTauTracks != (int)m_tauNprongs.value() ) continue;
+    if( m_tauNprongs.value() > 0 && NTauTracks != (int)m_tauNprongs.value() ) continue;
 
     /// retrieve ID TrackParticles from jet
     std::vector< const xAOD::TrackParticle* > tauTracks;
@@ -130,7 +130,7 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::decorateTauTrack(
     /// Loop over all the ID tracks of this hadronic tau
     for( const xAOD::TrackParticle* tauTrack : tauTracks ) {
 
-      if( not tauTrack ) {
+      if( ! tauTrack ) {
         ATH_MSG_ERROR( "Corrupted matching tau ID track" );
         continue;
       }
@@ -161,7 +161,7 @@ StatusCode IDTPM::OfflineTauDecoratorAlg::decorateTauTrack(
         }
 
         /// Decoration for All tau (no quality selection)
-        if( isTight or isMedium or isLoose or isVeryLoose ) {
+        if( isTight || isMedium || isLoose || isVeryLoose ) {
           ATH_MSG_DEBUG( "Found matching tau " <<
                          m_tauType.value() << " " <<
                          m_tauNprongs.value() << 

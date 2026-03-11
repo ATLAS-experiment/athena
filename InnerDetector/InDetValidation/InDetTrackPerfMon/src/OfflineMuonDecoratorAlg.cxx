@@ -8,7 +8,7 @@
  **/
 
 /// Local includes
-#include "OfflineMuonDecoratorAlg.h"
+#include "InDetTrackPerfMon/OfflineMuonDecoratorAlg.h"
 
 
 ///----------------------------------------
@@ -26,10 +26,10 @@ IDTPM::OfflineMuonDecoratorAlg::OfflineMuonDecoratorAlg(
 StatusCode IDTPM::OfflineMuonDecoratorAlg::initialize() {
 
   ATH_CHECK( m_offlineTrkParticlesName.initialize(
-                not m_offlineTrkParticlesName.key().empty() ) );
+                ! m_offlineTrkParticlesName.key().empty() ) );
 
   /// Muon collection, if required
-  ATH_CHECK( m_muonsName.initialize( not m_muonsName.key().empty() ) );
+  ATH_CHECK( m_muonsName.initialize( ! m_muonsName.key().empty() ) );
 
   /// Create decorations for original ID tracks
   IDTPM::createDecoratorKeysAndAccessor( 
@@ -52,14 +52,14 @@ StatusCode IDTPM::OfflineMuonDecoratorAlg::execute( const EventContext& ctx ) co
 
   /// retrieve offline track particle container
   SG::ReadHandle< xAOD::TrackParticleContainer > ptracks( m_offlineTrkParticlesName, ctx );
-  if( not ptracks.isValid() ) {
+  if( ! ptracks.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve track particles container" );
     return StatusCode::FAILURE;
   }
 
   /// retrieve muon container
   SG::ReadHandle< xAOD::MuonContainer > pmuons( m_muonsName, ctx );
-  if( not pmuons.isValid() ) {
+  if( ! pmuons.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve muons container" );
     return StatusCode::FAILURE;
   }
@@ -108,7 +108,7 @@ StatusCode IDTPM::OfflineMuonDecoratorAlg::decorateMuonTrack(
                           *( muon->combinedTrackParticleLink() ) : // Combined track
                           *( muon->inDetTrackParticleLink() );  // ID track
 
-    if( not muTrack ) {
+    if( ! muTrack ) {
       ATH_MSG_ERROR( "Corrupted matched muon ID track" );
       return StatusCode::FAILURE;
     }

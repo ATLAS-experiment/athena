@@ -12,8 +12,8 @@ atlas_add_library( InDetTrackPerfMonLib
                    src/*.cxx src/plots/*.cxx
                    PUBLIC_HEADERS InDetTrackPerfMon
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringLib CxxUtils FourMomUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetPhysValMonitoringLib InDetTrackSelectionToolLib InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrkTruthTrackInterfaces TrigDecisionToolLib AsgServicesLib 
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrkTrack TruthUtils nlohmann_json::nlohmann_json )
+                   LINK_LIBRARIES AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils FourMomUtils GaudiKernel InDetIdentifier TrkValHistUtils xAODBase xAODEventInfo xAODJet xAODTracking xAODTruth InDetPhysValMonitoringLib InDetTrackSelectionToolLib InDetTrackSystematicsToolsLib InDetRecToolInterfaces TrkTruthTrackInterfaces TrigDecisionToolLib AsgServicesLib 
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthContainers PATCoreAcceptLib PathResolver StoreGateLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkSurfaces TrkToolInterfaces TrigInDetAnalysisExampleLib TrkTrack TruthUtils nlohmann_json::nlohmann_json )
 
 atlas_add_component( InDetTrackPerfMon
                      src/components/*.cxx

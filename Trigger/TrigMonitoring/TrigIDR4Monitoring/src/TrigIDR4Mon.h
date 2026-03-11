@@ -33,6 +33,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 
+#include "InDetTrackPerfMon/TrackAnalysis.h"
 
 class TrigIDR4Mon : public AthMonitorAlgorithm {
 
@@ -155,12 +156,15 @@ protected:
 
   bool         m_filter_on_roi;
 
-  ToolHandleArray<GenericMonitoringTool> m_monTools { this, "MonTools", {} }; // insane configuration paradigm ?
+  //  ToolHandleArray<GenericMonitoringTool> m_monTools { this, "MonTools", {} }; // insane configuration paradigm ?
+  ToolHandleArray<IDTPM::TrackAnalysis> m_monTools { this, "MonTools", {} }; // insane configuration paradigm ?
 
   SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_trackdummykeys{ this, "OfflineTrackCollections", {"InDetTrackParticles"}, "" };  
 
   SG::ReadHandleKeyArray<xAOD::VertexContainer> m_vtxdummykeys{ this, "OfflineVertexCollections", {"PrimaryVertices"}, "" }; 
 
+  std::vector<IDTPM::TrackAnalysis*> m_tools;
+  
 };
 
 

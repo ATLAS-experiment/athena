@@ -11,79 +11,112 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from InDetTrackPerfMon.ConfigUtils import get_flags
+from InDetTrackPerfMon.ConfigUtils import print_obj
+# from InDetTrackPerfMon.ConfigUtils import hasFlag
+from InDetTrackPerfMon.ConfigUtils import has_in
+from InDetTrackPerfMon.ConfigUtils import kwargs_setdefault
+from InDetTrackPerfMon.ConfigUtils import get_opt
+from InDetTrackPerfMon.ConfigUtils import sanitise
 
+def cleankwargs( kwargs ):
+    for k, v in list(kwargs.items()):
+        if v is None:
+            del kwargs[k]
+    
 def RoiSelectionToolCfg( flags, name="RoiSelectionTool", **kwargs ) :
     '''
     CA-based configuration for the Tool to retrieve and select RoIs 
     '''
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "RoiKey",        flags.PhysVal.IDTPM.currentTrkAna.RoiKey )
-    kwargs.setdefault( "ChainLeg",      flags.PhysVal.IDTPM.currentTrkAna.ChainLeg )
-    kwargs.setdefault( "doTagNProbe",   flags.PhysVal.IDTPM.currentTrkAna.doTagNProbe )
-    kwargs.setdefault( "RoiKeyTag",     flags.PhysVal.IDTPM.currentTrkAna.RoiKeyTag )
-    kwargs.setdefault( "ChainLegTag",   flags.PhysVal.IDTPM.currentTrkAna.ChainLegTag )
-    kwargs.setdefault( "RoiKeyProbe",   flags.PhysVal.IDTPM.currentTrkAna.RoiKeyProbe )
-    kwargs.setdefault( "ChainLegProbe", flags.PhysVal.IDTPM.currentTrkAna.ChainLegProbe )
+    iflags, iname = get_flags( flags, name )
+    
+    kwargs_setdefault( kwargs, "RoiKey",        iflags )
+    kwargs_setdefault( kwargs, "ChainLeg",      iflags )
+    kwargs_setdefault( kwargs, "doTagNProbe",   iflags )
+    kwargs_setdefault( kwargs, "RoiKeyTag",     iflags )
+    kwargs_setdefault( kwargs, "ChainLegTag",   iflags )
+    kwargs_setdefault( kwargs, "RoiKeyProbe",   iflags )
+    kwargs_setdefault( kwargs, "ChainLegProbe", iflags )
 
-    acc.setPrivateTools( CompFactory.IDTPM.RoiSelectionTool( name, **kwargs ) )
+#    print("DEBUG final kwargs for RoiSelectionTool:")
+#    for k, v in kwargs.items():
+#        print(f"  {k} = {v!r}")
+       
+    acc.setPrivateTools( CompFactory.IDTPM.RoiSelectionTool( iname, **kwargs ) )
     return acc
 
 
 def TrackRoiSelectionToolCfg( flags, name="TrackRoiSelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "TriggerTrkParticleContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.TrigTrkKey )
+    iflags, iname = get_flags( flags, name )
+    
+    kwargs_setdefault( kwargs, "TriggerTrkParticleContainerName", iflags )
 
-    acc.setPrivateTools( CompFactory.IDTPM.TrackRoiSelectionTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.TrackRoiSelectionTool( iname, **kwargs ) )
     return acc
 
 
 def VertexRoiSelectionToolCfg( flags, name="VertexRoiSelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
-    kwargs.setdefault( "TriggerVertexContainerName",
-                       flags.PhysVal.IDTPM.currentTrkAna.TrigVtxKey )
+    iflags, iname = get_flags( flags, name )
+        
+    kwargs_setdefault( kwargs,  "TriggerVertexContainerName", iflags, "TrigVtxKey" )
 
-    acc.setPrivateTools( CompFactory.IDTPM.VertexRoiSelectionTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.VertexRoiSelectionTool( iname, **kwargs ) )
     return acc
 
 
 def TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
-    objStr = flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject
-    objQuality = flags.PhysVal.IDTPM.currentTrkAna.ObjectQuality
-    if objQuality == "Medium" and "Jet" in objStr :
-        ## changing default for jets
-        objQuality = "DRtruthJet"
-    kwargs.setdefault( "ObjectType",    objStr )
-    kwargs.setdefault( "ObjectQuality", objQuality )
+    iflags, iname = get_flags( flags, name )
+        
+    objStr = get_opt( iflags, "SelectOfflineObject" )
+    objQuality = get_opt( iflags, "ObjectQuality" )
 
-    if "Tau" in objStr:
-        kwargs.setdefault( "TauType",    flags.PhysVal.IDTPM.currentTrkAna.TauType )
-        kwargs.setdefault( "TauNprongs", flags.PhysVal.IDTPM.currentTrkAna.TauNprongs )
 
-    if "Truth" in objStr:
-        kwargs.setdefault( "MatchingTruthProb", flags.PhysVal.IDTPM.currentTrkAna.TruthProbMin )
+    if objQuality and objStr: 
+        if objQuality == "Medium" and "Jet" in objStr :
+            ## changing default for§ jets
+            objQuality = "DRtruthJet"
+            
+    if  objStr: 
+        kwargs.setdefault( "ObjectType",    objStr )
 
-    acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( name, **kwargs ) )
+    if objQuality:
+        kwargs.setdefault( "ObjectQuality", objQuality )
+
+    if objStr:
+        if "Tau" in objStr:
+            kwargs_setdefault( kwargs,  "TauType",    iflags )
+            kwargs_setdefault( kwargs,  "TauNprongs", iflags )
+
+        if "Truth" in objStr:
+            kwargs_setdefault( kwargs,  "MatchingTruthProb", iflags, "TruthProbMin" )
+
+    acc.setPrivateTools( CompFactory.IDTPM.TrackObjectSelectionTool( iname, **kwargs ) )
     return acc
+
 
 def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
 
+    iflags, iname = get_flags( flags, name )
+
     # Default configurations 
     # ----------------------
-    minHitsVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinHitsVector
-    minPtVector = flags.PhysVal.IDTPM.currentTrkAna.offlMinPtVector
-    maxD0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0Vector
-    maxZ0Vector = flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0Vector
-    etaBins = flags.PhysVal.IDTPM.currentTrkAna.offlEtaBins
-    qualityWP = flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP
+    minHitsVector = get_opt( iflags, "offlMinHitsVector", [] )
+    minPtVector = get_opt( iflags, "offlMinPtVector", [] )
+    maxD0Vector = get_opt( iflags, "offlMaxD0Vector", [] )
+    maxZ0Vector = get_opt( iflags, "offlMaxZ0Vector", [] )
+    etaBins     = get_opt( iflags, "offlEtaBins", [] )
+    qualityWP   = get_opt( iflags, "OfflineQualityWP" )
 
-    #if flags.PhysVal.IDTPM.currentTrkAna.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
+    #if iflags.CustomOfflSel == "EFTracking": # Default selection for EFTracking studies
     ## Selection Working Point common for EF Tracking studies
     if qualityWP == "EFTracking" :
         etaBins = [-1., 2., 2.6, 9999.]
@@ -91,81 +124,71 @@ def OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool", **kwargs ) :
         minPtVector = [900., 400., 400.]
         maxD0Vector = [2., 2., 10.]
         maxZ0Vector = [150., 150., 150.]
-        qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options
+        # this breaks everything cannit have a CutLevel of ""
+        qualityWP = "" # to avoid conflicts with InDetTrackSelectionTool options - WHY NOT JUST GIVE IT A DIFFERENT NAME THEN ?
 
     kwargs_InDetTrackSelectionTool = {}
 
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinPt!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minPt", flags.PhysVal.IDTPM.currentTrkAna.offlMinPt )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxAbsEta", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsEta )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0SinTheta!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxZ0SinTheta", flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0SinTheta )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxZ0 )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxD0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxD0 )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNInnermostLayerHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minNInnermostLayerHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNInnermostLayerHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNBothInnermostLayersHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minNBothInnermostLayersHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNBothInnermostLayersHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNInnermostLayerSharedHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNInnermostLayerSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNInnermostLayerSharedHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNSiHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minNSiHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNSiHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiSharedHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNSiSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiSharedHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiHoles!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNSiHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSiHoles )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNPixelHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minNPixelHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNPixelHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelSharedHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNPixelSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelSharedHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelHoles!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNPixelHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNPixelHoles )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinNSctHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minNSctHits", flags.PhysVal.IDTPM.currentTrkAna.offlMinNSctHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctSharedHits", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctSharedHits )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctHoles!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxNSctHoles", flags.PhysVal.IDTPM.currentTrkAna.offlMaxNSctHoles )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSq", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSq )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "maxChiSqperNdf", flags.PhysVal.IDTPM.currentTrkAna.offlMaxChiSqperNdf )
-    if flags.PhysVal.IDTPM.currentTrkAna.offlMinProb!=-9999.: 
-        kwargs_InDetTrackSelectionTool.setdefault( "minProb", flags.PhysVal.IDTPM.currentTrkAna.offlMinProb )
-    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
+    print_obj( kwargs_InDetTrackSelectionTool )
 
-    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
-        InDetTrackSelectionToolCfg)
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minPt",         iflags, "offlMinPt",     -9999., True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxAbsEta",     iflags, "offlMaxAbsEta", -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0SinTheta", iflags, "offlMaxZ0SinTheta", -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxZ0", iflags, "offlMaxZ0", -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxD0", iflags, "offlMaxD0", -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNInnermostLayerHits",       iflags, "offlMinNInnermostLayerHits",       -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNBothInnermostLayersHits",  iflags, "offlMinNBothInnermostLayersHits",  -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNInnermostLayerSharedHits", iflags, "offlMaxNInnermostLayerSharedHits", -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNSiHits",       iflags, "offlMinNSiHits",         -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNSiSharedHits", iflags, "offlMaxNSiSharedHits",   -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNSiHoles",      iflags, "offlMaxNSiHoles",        -9999, True ) 
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNPixelHits",    iflags, "offlMinNPixelHits",      -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNPixelSharedHits", iflags, "offlMaxNPixelSharedHits", -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNPixelHoles",    iflags, "offlMaxNPixelHoles",    -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minNSctHits",       iflags, "offlMinNSctHits",       -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNSctSharedHits", iflags, "offlMaxNSctSharedHits", -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxNSctHoles",      iflags, "offlMaxNSctHoles",      -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxChiSq",          iflags, "offlMaxChiSq",          -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "maxChiSqperNdf",    iflags, "offlMaxChiSqperNdf",    -9999, True )
+    kwargs_setdefault( kwargs_InDetTrackSelectionTool, "minProb",           iflags, "offlMinProb",           -9999, True )
+
+    print_obj( kwargs_InDetTrackSelectionTool )
+         
+#    kwargs_InDetTrackSelectionTool.setdefault( "CutLevel", qualityWP )
+
+#   from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
+#   offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectorToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import InDetTrackSelectionToolCfg
     offlineSelectionTool = acc.popToolsAndMerge( InDetTrackSelectionToolCfg( flags, **kwargs_InDetTrackSelectionTool) )
 
     kwargs.setdefault( "offlineTool", offlineSelectionTool )
-    kwargs.setdefault( "maxPt", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPt )
-    kwargs.setdefault( "minEta", flags.PhysVal.IDTPM.currentTrkAna.offlMinEta )
-    kwargs.setdefault( "minPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMinPhi )
-    kwargs.setdefault( "maxPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMaxPhi )
-    kwargs.setdefault( "minD0", flags.PhysVal.IDTPM.currentTrkAna.offlMinD0 )
-    kwargs.setdefault( "minZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMinZ0 )
-    kwargs.setdefault( "minQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMinQoPT )
-    kwargs.setdefault( "maxQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMaxQoPT )
-    kwargs.setdefault( "minAbsEta", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsEta )
-    kwargs.setdefault( "minAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsPhi )
-    kwargs.setdefault( "maxAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsPhi )
-    kwargs.setdefault( "minAbsD0", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsD0 )
-    kwargs.setdefault( "maxAbsD0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsD0 )
-    kwargs.setdefault( "minAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsZ0 )
-    kwargs.setdefault( "maxAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsZ0 )
-    kwargs.setdefault( "minAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMinAbsQoPT )
-    kwargs.setdefault( "maxAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.offlMaxAbsQoPT )
-    kwargs.setdefault( "etaBins", etaBins ) 
+    
+    kwargs_setdefault( kwargs,  "maxPt",     iflags, "offlMaxPt"  )
+    kwargs_setdefault( kwargs,  "minEta",    iflags, "offlMinEta" )
+    kwargs_setdefault( kwargs,  "minPhi",    iflags, "offlMinPhi" )
+    kwargs_setdefault( kwargs,  "maxPhi",    iflags, "offlMaxPhi" )
+    kwargs_setdefault( kwargs,  "minD0",     iflags, "offlMinD0"  )
+    kwargs_setdefault( kwargs,  "minZ0",     iflags, "offlMinZ0"  )
+    kwargs_setdefault( kwargs,  "minQoPT",   iflags, "offlMinQoPT" )
+    kwargs_setdefault( kwargs,  "maxQoPT",   iflags, "offlMaxQoPT" )
+    kwargs_setdefault( kwargs,  "minAbsEta", iflags, "offlMinAbsEta" )
+    kwargs_setdefault( kwargs,  "minAbsPhi", iflags, "offlMinAbsPhi" )
+    kwargs_setdefault( kwargs,  "maxAbsPhi", iflags, "offlMaxAbsPhi" )
+    kwargs_setdefault( kwargs,  "minAbsD0",  iflags, "offlMinAbsD0" )
+    kwargs_setdefault( kwargs,  "maxAbsD0",  iflags, "offlMaxAbsD0" )
+    kwargs_setdefault( kwargs,  "minAbsZ0",  iflags, "offlMinAbsZ0" )
+    kwargs_setdefault( kwargs,  "maxAbsZ0",  iflags, "offlMaxAbsZ0" )
+    kwargs_setdefault( kwargs,  "minAbsQoPT", iflags, "offlMinAbsQoPT" )
+    kwargs_setdefault( kwargs,  "maxAbsQoPT", iflags, "offlMaxAbsQoPT" )
+    
+    kwargs.setdefault( "etaBins",    etaBins ) 
     kwargs.setdefault( "minHitsVec", minHitsVector )
-    kwargs.setdefault( "minPtVec", minPtVector )
-    kwargs.setdefault( "maxD0Vec", maxD0Vector )
-    kwargs.setdefault( "maxZ0Vec", maxZ0Vector )
+    kwargs.setdefault( "minPtVec",   minPtVector )
+    kwargs.setdefault( "maxD0Vec",   maxD0Vector )
+    kwargs.setdefault( "maxZ0Vec",   maxZ0Vector )
 
-    acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( name, **kwargs ) )
+#    acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( iname._value, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.OfflineTrackQualitySelectionTool( iname, **kwargs ) )
 
     return acc    
 
@@ -176,71 +199,118 @@ def TruthSelectionBaseToolCfg( flags, name="TruthSelectionBaseTool", **kwargs ) 
     to handle flags internally in IDTPM, i.e. not relying on IDPVM's (default) flags
     '''
     acc = ComponentAccumulator()
+    
+    iflags, iname = get_flags( flags, name )
 
+#    cleankwargs( kwargs )
+    
     ## Baseline requirements to be applied to all analyses
     kwargs.setdefault( "requireStable", True )
     kwargs.setdefault( "requireCharged", True )
     kwargs.setdefault( "selectedCharge", 0 )
-    kwargs.setdefault( "maxEta", 4.0 if flags.Detector.GeometryITk else 2.5 )
+
+    # whny are these flags all set to none somewhere ??
+    # this configuration is far, far, FAR too complicated,
+    # setting should be set in ONE PLACE, and ONE PLACE ONLY
+    # unless the user explicitly wants to change some later
+
+    # values in case the geometry is not set, AAAAARRRGH!!!!!
+    if kwargs.get("maxEta") is None:
+        kwargs["maxEta"] = 2.5
+    else:
+        # this clause won't do anything, because set
+        kwargs.setdefault( "maxEta", 2.5 )
+
+    if kwargs.get("minPt") is None:
+    # values in case the geometry is not set
+        kwargs["minPt"] = 500
+    else:
+        kwargs.setdefault( "minPt", 500 ) 
+
+    
+    if flags.hasFlag( "Detector.GeometryITk" ) :
+        #  do anything is the parameter is already set
+        kwargs.setdefault( "maxEta", 4.0 if flags.Detector.GeometryITk else 2.5 )
+        kwargs.setdefault( "minPt", 1000 if flags.Detector.GeometryITk else 500 )
+
+    print( "by christ 2 !", kwargs["minPt"] )
 
     kwargs.setdefault( "requireOnlyPrimary", True )
     kwargs.setdefault( "maxProdVertRadius", 300. )
 
-    kwargs.setdefault( "minPt", 1000 if flags.Detector.GeometryITk else 500 )
+
     kwargs.setdefault( "ancestorList", [] )
     kwargs.setdefault( "requireSiHit", 0 )
     kwargs.setdefault( "Extrapolator", None )
 
-    acc.setPrivateTools( CompFactory.AthTruthSelectionTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.AthTruthSelectionTool( iname, **kwargs ) )
     return acc
 
 
 def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwargs ) :
     acc = ComponentAccumulator()
 
+    iflags, iname = get_flags( flags, name )
+
+    #    cleankwargs( kwargs )
+    
     # Default configurations 
     # ----------------------
-    truthMinPt      = flags.PhysVal.IDTPM.currentTrkAna.truthMinPt
-    truthMaxPt      = flags.PhysVal.IDTPM.currentTrkAna.truthMaxPt
-    truthMaxAbsEta  = flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsEta
-    truthPdgId      = flags.PhysVal.IDTPM.currentTrkAna.truthPdgId
+    truthMinPt      = get_opt( iflags, "truthMinPt" )
+    truthMaxPt      = get_opt( iflags, "truthMaxPt" )
+    truthMaxAbsEta  = get_opt( iflags, "truthMaxAbsEta" )
+    truthPdgId      = get_opt( iflags, "truthPdgId" )
 
-    truthMinParentPt = flags.PhysVal.IDTPM.currentTrkAna.truthMinParentPt
-    truthMaxParentPt = flags.PhysVal.IDTPM.currentTrkAna.truthMaxParentPt
+    truthMinParentPt = get_opt( iflags, "truthMinParentPt" )
+    truthMaxParentPt = get_opt( iflags, "truthMaxParentPt" )
 
+    print( "truthMinPt: ", truthMinPt )
+    print( "truthMaxPt: ", truthMaxPt )
+    
     ## SelectTruthObject: customised Pt range selection
-    if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    if has_in( "HighPt", iflags, "SelectTruthObject" ) :
         truthMinPt = 10000  # 10 GeV
-        truthMaxPt = -9999. # +inf
-    elif "VeryLowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        truthMaxPt = -9999  # +inf
+    elif has_in( "VeryLowPt", iflags, "SelectTruthObject" ) :
         truthMinPt = 1000   # 1 GeV
         truthMaxPt = 2000   # 2 GeV
-    elif "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    elif has_in( "LowPt", iflags, "SelectTruthObject" ) :
         truthMinPt = 1000   # 1 GeV
         truthMaxPt = 10000  # 10 GeV
 
     ## SelectTruthObjec: cutomised selections
-    if "Muon" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    if has_in( "Muon", iflags, "SelectTruthObject" ) :
         truthPdgId = 13 
-    if "Electron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+    if has_in( "Electron", iflags, "SelectTruthObject" ) :
         truthPdgId = 11
         ## adjusting pT ranges for low/highPt electrons
-        if "HighPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        if has_in( "HighPt", iflags, "SelectTruthObject" ) :
             truthMinPt = 20000  # 20 GeV
             truthMaxPt = -9999. # +inf
-        if "LowPt" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject :
+        if has_in( "LowPt", iflags, "SelectTruthObject" ) :
             truthMinPt = 10000  # 10 GeV
             truthMaxPt = 20000  # 20 GeV
-    truthIsHadron   = ( "Hadron" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
-    truthIsPion     = ( "Pion" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
+
+#    truthIsHadron   = ( "Hadron" in iflags, "SelectTruthObject" )
+#    truthIsPion     = ( "Pion" in iflags, "SelectTruthObject" )
 
     ## SelectTruthObjec: cutomised truth origin selections
-    truthIsFromB = ( "FromB" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
-    truthIsFromC = ( "FromC" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
-    truthIsFromHeavyFlav = ( "FromHeavyFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
-    truthIsFromLightFlav = ( "FromLightFlav" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject )
-    truthIsFromTau = ( "FromTau" in flags.PhysVal.IDTPM.currentTrkAna.SelectTruthObject)
+#   truthIsFromB = ( "FromB" in iflags, "SelectTruthObject" )
+#   truthIsFromC = ( "FromC" in iflags, "SelectTruthObject" )
+#   truthIsFromHeavyFlav = ( "FromHeavyFlav" in iflags, "SelectTruthObject" )
+#   truthIsFromLightFlav = ( "FromLightFlav" in iflags, "SelectTruthObject" )
+#   truthIsFromTau = ( "FromTau" in iflags.SelectTruthObject)
 
+    truthIsHadron   = has_in( "Hadron", iflags, "SelectTruthObject" )
+    truthIsPion     = has_in( "Pion", iflags, "SelectTruthObject" )
+
+    ## SelectTruthObjec: cutomised truth origin selections
+    truthIsFromB = has_in( "FromB", iflags, "SelectTruthObject" )
+    truthIsFromC = has_in( "FromC", iflags, "SelectTruthObject" )
+    truthIsFromHeavyFlav = has_in( "FromHeavyFlav", iflags, "SelectTruthObject" )
+    truthIsFromLightFlav = has_in( "FromLightFlav", iflags, "SelectTruthObject" )
+    truthIsFromTau = has_in( "FromTau", iflags, "SelectTruthObject" ) 
+    
     # TruthSelectionBaseTool properties
     # ---------------------------------
     kwargs_base = {}
@@ -249,46 +319,58 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
     if truthMaxAbsEta!=-9999.   : kwargs_base.setdefault( "maxEta", truthMaxAbsEta )
     if truthPdgId!=-9999.       : kwargs_base.setdefault( "pdgId",  truthPdgId )
 
+#    print( "truthMaxPt:     ", truthMaxPt )
+#    print( "truthMaxPt: (kw)", kwargs["maxPt"] )
+    
+    
     ## remove only primary requirements for Heavy Flavour truth selection - removed for now
     #doHF = truthIsFromB or truthIsFromC or truthIsFromHeavyFlav
     #if doHF                         : kwargs_base.setdefault( "requireOnlyPrimary", False )
     #if doHF or truthIsFromLightFlav : kwargs_base.setdefault( "maxProdVertRadius", -1. )
 
-    kwargs.setdefault( "truthTool" ,
+
+    if "maxPt" in kwargs_base:
+        print( "maxPt in kwargs_base" )
+    else:
+        print( "maxPt NOT in kwargs_base" )
+        
+    kwargs.setdefault("truthTool" ,
         acc.popToolsAndMerge( TruthSelectionBaseToolCfg( flags, **kwargs_base ) ) )
 
     # Additional properties
     # ---------------------
-    kwargs.setdefault( "maxEta", flags.PhysVal.IDTPM.currentTrkAna.truthMaxEta )
-    kwargs.setdefault( "minEta", flags.PhysVal.IDTPM.currentTrkAna.truthMinEta )
-    kwargs.setdefault( "minPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMinPhi )
-    kwargs.setdefault( "maxPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMaxPhi )
-    kwargs.setdefault( "minD0", flags.PhysVal.IDTPM.currentTrkAna.truthMinD0 )
-    kwargs.setdefault( "maxD0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxD0 )
-    kwargs.setdefault( "minZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMinZ0 )
-    kwargs.setdefault( "maxZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxZ0 )
-    kwargs.setdefault( "minQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMinQoPT )
-    kwargs.setdefault( "maxQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMaxQoPT )
-    kwargs.setdefault( "minAbsEta", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsEta )
-    kwargs.setdefault( "minAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsPhi )
-    kwargs.setdefault( "maxAbsPhi", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsPhi )
-    kwargs.setdefault( "minAbsD0", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsD0 )
-    kwargs.setdefault( "maxAbsD0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsD0 )
-    kwargs.setdefault( "minAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsZ0 )
-    kwargs.setdefault( "maxAbsZ0", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsZ0 )
-    kwargs.setdefault( "minAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMinAbsQoPT )
-    kwargs.setdefault( "maxAbsQoPT", flags.PhysVal.IDTPM.currentTrkAna.truthMaxAbsQoPT )
+    kwargs_setdefault( kwargs,  "maxEta", iflags, "truthMaxEta" )
+    kwargs_setdefault( kwargs,  "minEta", iflags, "truthMinEta" )
+    kwargs_setdefault( kwargs,  "minPhi", iflags, "truthMinPhi" )
+    kwargs_setdefault( kwargs,  "maxPhi", iflags, "truthMaxPhi" )
+    kwargs_setdefault( kwargs,  "minD0",  iflags, "truthMinD0" )
+    kwargs_setdefault( kwargs,  "maxD0",  iflags, "truthMaxD0" )
+    kwargs_setdefault( kwargs,  "minZ0",  iflags, "truthMinZ0" )
+    kwargs_setdefault( kwargs,  "maxZ0",  iflags, "truthMaxZ0" )
+    kwargs_setdefault( kwargs,  "minQoPT",    iflags, "truthMinQoPT" )
+    kwargs_setdefault( kwargs,  "maxQoPT",    iflags, "truthMaxQoPT" )
+    kwargs_setdefault( kwargs,  "minAbsEta",  iflags, "truthMinAbsEta" )
+    kwargs_setdefault( kwargs,  "minAbsPhi",  iflags, "truthMinAbsPhi" )
+    kwargs_setdefault( kwargs,  "maxAbsPhi",  iflags, "truthMaxAbsPhi" )
+    kwargs_setdefault( kwargs,  "minAbsD0",   iflags, "truthMinAbsD0" )
+    kwargs_setdefault( kwargs,  "maxAbsD0",   iflags, "truthMaxAbsD0" )
+    kwargs_setdefault( kwargs,  "minAbsZ0",   iflags, "truthMinAbsZ0" )
+    kwargs_setdefault( kwargs,  "maxAbsZ0",   iflags, "truthMaxAbsZ0" )
+    kwargs_setdefault( kwargs,  "minAbsQoPT", iflags, "truthMinAbsQoPT" )
+    kwargs_setdefault( kwargs,  "maxAbsQoPT", iflags, "truthMaxAbsQoPT" )
+
     kwargs.setdefault( "isHadron", truthIsHadron )
-    kwargs.setdefault( "isPion", truthIsPion )
-    kwargs.setdefault( "isFromB", truthIsFromB )
-    kwargs.setdefault( "isFromC", truthIsFromC )
+    kwargs.setdefault( "isPion",   truthIsPion )
+    kwargs.setdefault( "isFromB",  truthIsFromB )
+    kwargs.setdefault( "isFromC",  truthIsFromC )
     kwargs.setdefault( "isFromHeavyFlav", truthIsFromHeavyFlav )
     kwargs.setdefault( "isFromLightFlav", truthIsFromLightFlav )
     kwargs.setdefault( "isFromTau", truthIsFromTau )
-    if truthMinParentPt!=-9999.    :kwargs.setdefault( "minParentPt", truthMinParentPt)
-    if truthMaxParentPt!=-9999.    :kwargs.setdefault( "maxParentPt", truthMaxParentPt)
+    
+    if truthMinParentPt!=-9999.    :kwargs.setdefault( "minParentPt", truthMinParentPt )
+    if truthMaxParentPt!=-9999.    :kwargs.setdefault( "maxParentPt", truthMaxParentPt )
 
-    acc.setPrivateTools( CompFactory.IDTPM.TruthQualitySelectionTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.TruthQualitySelectionTool( iname, **kwargs ) )
 
     return acc
 
@@ -296,28 +378,37 @@ def TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool", **kwa
 def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
+    iflags, iname = get_flags( flags, name )
+
+    # don't understand the logic of all this - it is a bit of a mess
+        
     ## Offline tracks quality selection
-    if flags.PhysVal.IDTPM.currentTrkAna.OfflineQualityWP != "" or flags.PhysVal.IDTPM.currentTrkAna.DoOfflineSelection:
-        kwargs.setdefault( "DoOfflineSelection", True )
-    
+    #    if iflags.OfflineQualityWP != "" or iflags.DoOfflineSelection:
+    if get_opt(iflags, "OfflineQualityWP") != "" or get_opt(iflags, "DoOfflineSelection"):
+        kwargs.setdefault(  "DoOfflineSelection", True )
+
+        # naming insanity !!!!
         kwargs.setdefault( "OfflineSelectionTool", acc.popToolsAndMerge(
-            OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+            OfflineQualitySelectionCfg( flags, name="OfflineSelectionTool_"+sanitise(name) ) ) )
 
     ## Truth particles quality selection
-    if flags.Input.isMC:
+    # wtf is this ??? Just because it is MC does not mean that we ALWAYS
+    # want the truth selection ?
+    # there should be a flag DoTruthSelection so that
+    # if flags.Input.isMC and DoTruthSelection: kwargs.setdefault( "DoTruthSelection", True )
+    if get_opt( flags, "Input.isMC") is True:
         kwargs.setdefault( "DoTruthSelection", True )
     
-        kwargs.setdefault( "TruthSelectionTool", acc.popToolsAndMerge(
-            TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool"+flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+        kwargs.setdefault(  "TruthSelectionTool", acc.popToolsAndMerge(
+            TruthQualitySelectionToolCfg( flags, name="TruthQualitySelectionTool_"+sanitise(name) ) ) )
 
     ## offline track-object selection
-    if flags.PhysVal.IDTPM.currentTrkAna.SelectOfflineObject != "":
+    if get_opt( iflags, "SelectOfflineObject") is True:
         kwargs.setdefault( "DoObjectSelection", True )
     
         if "TrackObjectSelectionTool" not in kwargs:
-           kwargs.setdefault( "TrackObjectSelectionTool", acc.popToolsAndMerge(
-               TrackObjectSelectionToolCfg( flags,
-                   name="TrackObjectSelectionTool" + flags.PhysVal.IDTPM.currentTrkAna.anaTag ) ) )
+           kwargs.setdefault( "TrackObjectSelectionTool", 
+                              acc.popToolsAndMerge( TrackObjectSelectionToolCfg( flags, name="TrackObjectSelectionTool_" + sanitise(name) ) ) )
 
     acc.setPrivateTools( CompFactory.IDTPM.TrackQualitySelectionTool( name, **kwargs ) )
     return acc
@@ -326,7 +417,10 @@ def TrackQualitySelectionToolCfg( flags, name="TrackQualitySelectionTool", **kwa
 def VertexQualitySelectionToolCfg( flags, name="VertexQualitySelectionTool", **kwargs ):
     acc = ComponentAccumulator()
 
+    iflags, iname = get_flags( flags, name )
+
     ## TODO: here other selector tools for vertices
 
-    acc.setPrivateTools( CompFactory.IDTPM.VertexQualitySelectionTool( name, **kwargs ) )
+    acc.setPrivateTools( CompFactory.IDTPM.VertexQualitySelectionTool( iname, **kwargs ) )
     return acc
+ 

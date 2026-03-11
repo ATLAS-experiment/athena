@@ -9,7 +9,7 @@
 **/
 
 /// Local include(s)
-#include "SinglePlotDefinition.h"
+#include "InDetTrackPerfMon/SinglePlotDefinition.h"
 
 /// STL include(s)
 #include <limits> // std::numeric_limits
@@ -57,7 +57,7 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
             std::make_pair( std::numeric_limits<float>::quiet_NaN(),
                             std::numeric_limits<float>::quiet_NaN() );
 
-  /// Recomputing limits and sizes (for variable bin sizes)
+  /// Recomputing limits && sizes (for variable bin sizes)
   setxBinsVec( xBinsVec );
   setyBinsVec( yBinsVec );
   setzBinsVec( zBinsVec );
@@ -68,10 +68,10 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
   setzBinLabelsVec( zBinLabelsVec );
 
   /// Sanity check
-  m_empty = not isValid();
+  m_empty = ! isValid();
 
   // Re-compute digest strings
-  if( not m_empty ) digest();
+  if( ! m_empty ) digest();
 }
 
 
@@ -81,47 +81,47 @@ IDTPM::SinglePlotDefinition::SinglePlotDefinition(
 /// Is the histogram definition valid
 bool IDTPM::SinglePlotDefinition::isValid() const
 {
-  /// non-valid plot if name or type are undefined
-  if( m_name.empty() or m_type.empty() ) return false;
+  /// non-valid plot if name || type are undefined
+  if( m_name.empty() || m_type.empty() ) return false;
 
   /// check if type is valid
   bool sane =
       ( m_type.find( "TH1" ) != std::string::npos ) or
       ( m_type.find( "TH2" ) != std::string::npos ) or
       ( m_type.find( "TH3" ) != std::string::npos ) or
-      ( m_type.find( "TProfile" ) != std::string::npos ) or // 1D and 2D
-      ( m_type.find( "TEfficiency" ) != std::string::npos ); // 1D and 2D
+      ( m_type.find( "TProfile" ) != std::string::npos ) || // 1D && 2D
+      ( m_type.find( "TEfficiency" ) != std::string::npos ); // 1D && 2D
 
   /// check if bin numbers are valid
-  const bool sensibleXBins = ( m_nBinsX != 0 ) and ( not std::isnan( m_nBinsX ) );
-  const bool sensibleYBins = ( m_nBinsY != 0 ) and ( not std::isnan( m_nBinsY ) );
-  const bool sensibleZBins = ( m_nBinsZ != 0 ) and ( not std::isnan( m_nBinsZ ) );
+  const bool sensibleXBins = ( m_nBinsX != 0 ) && ( ! std::isnan( m_nBinsX ) );
+  const bool sensibleYBins = ( m_nBinsY != 0 ) && ( ! std::isnan( m_nBinsY ) );
+  const bool sensibleZBins = ( m_nBinsZ != 0 ) && ( ! std::isnan( m_nBinsZ ) );
 
   /// check validity of axes limits
   /// NB: if yaxis is left undefined, the limits should be NaN,
   /// but (NaN != NaN) is always true, so an extra check is needed
-  const bool sensibleXLimits = ( not std::isnan( m_xAxis.first ) ) and
-                               ( not std::isnan( m_xAxis.second ) ) and
+  const bool sensibleXLimits = ( ! std::isnan( m_xAxis.first ) ) and
+                               ( ! std::isnan( m_xAxis.second ) ) and
                                ( m_xAxis.first != m_xAxis.second );
 
-  const bool sensibleYLimits = ( not std::isnan( m_yAxis.first ) ) and
-                               ( not std::isnan( m_yAxis.second ) ) and
+  const bool sensibleYLimits = ( ! std::isnan( m_yAxis.first ) ) and
+                               ( ! std::isnan( m_yAxis.second ) ) and
                                ( m_yAxis.first != m_yAxis.second );
 
-  const bool sensibleZLimits = ( not std::isnan( m_zAxis.first ) ) and
-                               ( not std::isnan( m_zAxis.second ) ) and
+  const bool sensibleZLimits = ( ! std::isnan( m_zAxis.first ) ) and
+                               ( ! std::isnan( m_zAxis.second ) ) and
                                ( m_zAxis.first != m_zAxis.second );
 
-  /// sanity check for 1D, 2D and 3D plots
-  sane = sane and sensibleXBins and sensibleXLimits;
+  /// sanity check for 1D, 2D && 3D plots
+  sane = sane && sensibleXBins && sensibleXLimits;
 
-  /// sanity check for 2D and 3D plots
+  /// sanity check for 2D && 3D plots
   if( m_is2D ) {
-    sane = sane and sensibleYBins and sensibleYLimits;
+    sane = sane && sensibleYBins && sensibleYLimits;
 
     /// sanity check for 3D plots
     if( m_is3D ) {
-      sane = sane and sensibleZBins and sensibleZLimits;
+      sane = sane && sensibleZBins && sensibleZLimits;
     }
   }
 
@@ -133,7 +133,7 @@ bool IDTPM::SinglePlotDefinition::isValid() const
 /// --- redoIdDigest ---
 /// --------------------
 /// recompute plot identifier, i.e.: "folder/name"
-/// or "name" if folder is empty
+/// || "name" if folder is empty
 void IDTPM::SinglePlotDefinition::redoIdDigest()
 {
   if( m_folder.empty() ){
@@ -183,11 +183,11 @@ void IDTPM::SinglePlotDefinition::redoTitleDigest()
 /// ----------------------
 /// --- redoTypeDigest ---
 /// ----------------------
-/// recompute m_is1D, m_is2D and m_is3D
+/// recompute m_is1D, m_is2D && m_is3D
 void IDTPM::SinglePlotDefinition::redoTypeDigest()
 {
   m_is1D = ( m_type.find("TH1") != std::string::npos ) or
-           ( m_type == "TProfile" ) or ( m_type == "TEfficiency" );
+           ( m_type == "TProfile" ) || ( m_type == "TEfficiency" );
 
   m_is2D = ( m_type.find("TH2") != std::string::npos ) or
            ( m_type.find("2D") != std::string::npos );

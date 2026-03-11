@@ -8,8 +8,8 @@
  **/
 
 /// Local include(s)
-#include "JsonPlotsDefReadTool.h"
-#include "SinglePlotDefinition.h"
+#include "InDetTrackPerfMon/JsonPlotsDefReadTool.h"
+#include "InDetTrackPerfMon/SinglePlotDefinition.h"
 
 /// Json parsing library
 #include <nlohmann/json.hpp>
@@ -98,7 +98,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
       std::string xDoLogLinBinsStr = plotDef.at( "xAxis_doLogLinBins" ).get_ref< cstr_t >();
       if( xDoLogLinBinsStr == "true" ) xDoLogLinBins = true;
       else if( xDoLogLinBinsStr == "false" ) xDoLogLinBins = false;
-      else ATH_MSG_WARNING( "xAxis_doLogLinBins not valid" );
+      else ATH_MSG_WARNING( "xAxis_doLogLinBins ! valid" );
     }
 
     /// yAxis doLogLin
@@ -107,7 +107,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
       std::string yDoLogLinBinsStr = plotDef.at( "yAxis_doLogLinBins" ).get_ref< cstr_t >();
       if( yDoLogLinBinsStr == "true" ) yDoLogLinBins = true;
       else if( yDoLogLinBinsStr == "false" ) yDoLogLinBins = false;
-      else ATH_MSG_WARNING( "yAxis_doLogLinBins not valid" );
+      else ATH_MSG_WARNING( "yAxis_doLogLinBins ! valid" );
     }
 
     /// zAxis doLogLin
@@ -116,7 +116,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
       std::string zDoLogLinBinsStr = plotDef.at( "zAxis_doLogLinBins" ).get_ref< cstr_t >();
       if( zDoLogLinBinsStr == "true" ) zDoLogLinBins = true;
       else if( zDoLogLinBinsStr == "false" ) zDoLogLinBins = false;
-      else ATH_MSG_WARNING( "zAxis_doLogLinBins not valid" );
+      else ATH_MSG_WARNING( "zAxis_doLogLinBins ! valid" );
     }
 
     /// xAxis bins (variable size)
@@ -124,7 +124,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     if( plotDef.contains( "xAxis_bins" ) ) xBinsStrVec = plotDef.at( "xAxis_bins" ).get< strVec_t >();
     std::vector< float > xBinsVec;
     for( cstr_t thisBin : xBinsStrVec ) xBinsVec.push_back( getFloat( thisBin ) );
-    if( not xBinsVec.empty() ) {
+    if( ! xBinsVec.empty() ) {
       /// overwriting binning
       xLow = xBinsVec.front();  xHigh = xBinsVec.back();  nBinsX = xBinsVec.size() - 1;
     }
@@ -134,7 +134,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     if( plotDef.contains( "yAxis_bins" ) ) yBinsStrVec = plotDef.at( "yAxis_bins" ).get< strVec_t >();
     std::vector< float > yBinsVec;
     for( cstr_t thisBin : yBinsStrVec ) yBinsVec.push_back( getFloat( thisBin ) );
-    if( not yBinsVec.empty() ) {
+    if( ! yBinsVec.empty() ) {
       /// overwriting binning
       yLow = yBinsVec.front();  yHigh = yBinsVec.back();  nBinsY = yBinsVec.size() - 1;
     }
@@ -144,7 +144,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     if( plotDef.contains( "zAxis_bins" ) ) zBinsStrVec = plotDef.at( "zAxis_bins" ).get< strVec_t >();
     std::vector< float > zBinsVec;
     for( cstr_t thisBin : zBinsStrVec ) zBinsVec.push_back( getFloat( thisBin ) );
-    if( not zBinsVec.empty() ) {
+    if( ! zBinsVec.empty() ) {
       /// overwriting binning
       zLow = zBinsVec.front();  zHigh = zBinsVec.back();  nBinsZ = zBinsVec.size() - 1;
     }
@@ -164,7 +164,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     /// xAxis bin labels
     strVec_t xBinLabelsVec;
     if( plotDef.contains( "xAxis_labels" ) ) xBinLabelsVec = plotDef.at( "xAxis_labels" ).get< strVec_t >();
-    if( not xBinLabelsVec.empty() ) {
+    if( ! xBinLabelsVec.empty() ) {
       /// overwiting binning
       nBinsX = xBinLabelsVec.size(); xLow = 0; xHigh = nBinsX;
     }
@@ -172,7 +172,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     /// yAxis bin labels
     strVec_t yBinLabelsVec;
     if( plotDef.contains( "yAxis_labels" ) ) yBinLabelsVec = plotDef.at( "yAxis_labels" ).get< strVec_t >();
-    if( not yBinLabelsVec.empty() ) {
+    if( ! yBinLabelsVec.empty() ) {
       /// overwiting binning
       nBinsY = yBinLabelsVec.size(); yLow = 0; yHigh = nBinsY;
     }
@@ -180,7 +180,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
     /// zAxis bin labels
     strVec_t zBinLabelsVec;
     if( plotDef.contains( "zAxis_labels" ) ) zBinLabelsVec = plotDef.at( "zAxis_labels" ).get< strVec_t >();
-    if( not zBinLabelsVec.empty() ) {
+    if( ! zBinLabelsVec.empty() ) {
       /// overwiting binning
       nBinsZ = zBinLabelsVec.size(); zLow = 0; zHigh = nBinsZ;
     }
@@ -194,7 +194,7 @@ IDTPM::JsonPlotsDefReadTool::getPlotsDefinitions() const
         folder );
 
     /// Check if plot definition is valid. Removing
-    if( not plotDefVec.back().isValid() ) {
+    if( ! plotDefVec.back().isValid() ) {
       ATH_MSG_ERROR( "Removing invalid plot :" <<
                      "\n\t- string: " << plotDefStr <<
                      "\n\t- digest: " << plotDefVec.back().plotDigest() );

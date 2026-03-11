@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "NtracksPlots.h"
-#include "../TrackParametersHelper.h"
+#include "InDetTrackPerfMon/NtracksPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 /// -----------------------

@@ -8,11 +8,11 @@
  **/
 
 /// local includes
-#include "TruthTrackMatchingTool.h"
-#include "TrackAnalysisCollections.h"
-#include "TrackMatchingLookup.h"
-#include "OfflineObjectDecorHelper.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TruthTrackMatchingTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 ///---------------------------
 ///------- Constructor -------
@@ -47,7 +47,7 @@ StatusCode IDTPM::TruthTrackMatchingTool::match(
   bool doMatch = trkAnaColls.updateChainRois( chainRoIName, roiStr );
 
   /// checking if matching for chainRoIName has already been processed
-  if( not doMatch ) {
+  if( ! doMatch ) {
     ATH_MSG_WARNING( "Matching for " << chainRoIName <<
                      " was already done. Skipping" );
     return StatusCode::SUCCESS;
@@ -89,7 +89,7 @@ StatusCode IDTPM::TruthTrackMatchingTool::match(
       /// Skip if no truth particle is found or
       /// if linked truth particle does not
       /// correspond to the original test one
-      if( ( not truth_particle_tmp ) or
+      if( ( ! truth_particle_tmp ) or
           ( truth_particle_tmp != truth_particle ) ) continue;
 
       float prob_tmp = getTruthMatchProb( *track_particle );
@@ -106,11 +106,11 @@ StatusCode IDTPM::TruthTrackMatchingTool::match(
     } // loop over vRef
 
     /// skip if no matched_track_particle for this truth particle is found
-    if( not matched_track_particle ) continue;
+    if( ! matched_track_particle ) continue;
 
     ATH_MSG_DEBUG( "Found matched track particle with pT = " <<
                    pT( *matched_track_particle ) <<
-                   " and prob = " << prob );
+                   " && prob = " << prob );
 
     /// Defining test-reference distance as 1-TruthMatchProb
     float dist = 1 - prob;

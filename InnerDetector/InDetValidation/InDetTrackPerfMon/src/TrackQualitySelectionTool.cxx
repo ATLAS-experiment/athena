@@ -8,8 +8,8 @@
  **/
 
 /// Local include(s)
-#include "TrackQualitySelectionTool.h"
-#include "TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackQualitySelectionTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 
 /// Gaudi includes
 #include "GaudiKernel/ISvcLocator.h"
@@ -62,7 +62,7 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
         TrackAnalysisCollections::FS ) );
   }
 
-  if( trkAnaDefSvc->useTrigger() or trkAnaDefSvc->useEFTrigger() ) {
+  if( trkAnaDefSvc->useTrigger() || trkAnaDefSvc->useEFTrigger() ) {
     /// Trigger tracks (or EFTrigger, i.e. Trigger tracks without
     /// the trigger navigation / offline-like) copy
     ATH_CHECK( trkAnaColls.fillTrigTrackVec(
@@ -82,19 +82,19 @@ StatusCode IDTPM::TrackQualitySelectionTool::selectTracks(
       trkAnaColls.printInfo( TrackAnalysisCollections::FS, false ) );
 
   /// Offline track selection
-  if( trkAnaDefSvc->useOffline() and m_doOfflSelection.value() ) {
+  if( trkAnaDefSvc->useOffline() && m_doOfflSelection.value() ) {
     ATH_CHECK( m_offlineSelectionTool->selectTracks( trkAnaColls ) );
   }
 
   /// Truth particles selection
-  if( trkAnaDefSvc->useTruth() and m_doTruthSelection.value() ) {
+  if( trkAnaDefSvc->useTruth() && m_doTruthSelection.value() ) {
     ATH_CHECK( m_truthSelectionTool->selectTracks( trkAnaColls ) );
   }
 
   /// TODO: Do Trigger track selection (?)
 
   /// Select offline tracks matched to offline objects
-  if( trkAnaDefSvc->useOffline() and m_doObjSelection.value() ) {
+  if( trkAnaDefSvc->useOffline() && m_doObjSelection.value() ) {
     ATH_CHECK( m_objSelectionTool->selectTracks( trkAnaColls ) );
   }
 

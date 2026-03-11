@@ -8,9 +8,9 @@
  */
 
 /// local includes
-#include "TrackAnalysisCollections.h"
-#include "TrackParametersHelper.h" // also includes VertexParametersHelper.h
-#include "TrackMatchingLookup.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h" // also includes VertexParametersHelper.h
+#include "InDetTrackPerfMon/TrackMatchingLookup.h"
 
 /// STD include(s)
 #include <algorithm> // for std::find
@@ -19,10 +19,12 @@
 /// -------------------
 /// --- Constructor ---
 /// -------------------
-IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( 
-  const std::string& anaTag ) :
+IDTPM::TrackAnalysisCollections::TrackAnalysisCollections( const std::string& anaTag, const ITrackAnalysisDefinition* trkAnaDef) :
     AthMessaging( "TrackAnalysisCollections"+anaTag ),
-    m_anaTag( anaTag ), m_newChain( true ), m_newRoi( true )
+    m_anaTag(anaTag),
+    /// cheat with the name for the time being, this is NOT a service handle,
+    m_trkAnaDefSvc(trkAnaDef),
+    m_newChain(true),m_newRoi(true) 
 {
   /// tracks
   m_truthPartVec.resize( NStages );
@@ -35,17 +37,36 @@ IDTPM::TrackAnalysisCollections::TrackAnalysisCollections(
   m_trigVertexVec.resize( NStages );
 }
 
+
 /// ------------------
 /// --- initialize ---
 /// ------------------
+/// this is a tool, instantiated, AS NEW for EVERY event, therefor
+/// having an initialize() method of this nature is completely
+/// inappropriate and utterly pointless - do everything, as the 
+/// pattern of use becomes Tool atool(); atool.initialise();
+/// always, so why not simply initialise it correctly in the
+/// constructor ? And why must it to retrieve this trkAnaDefSvc
+/// all the time, when the top level tool has already retrieved
+/// it, and the information doesn't, and indeed mustn't change
+/// throughout the job ? So the correct approach is to pass the
+/// existing config object into the constructor for every event
+/// rather than for the framework to needlessly retrieve the
+/// tool every time it is needed. In fact, we might aw well
+/// drop this as a tool completely, since it has no settable
+/// parameters and just make is a class. 
 StatusCode IDTPM::TrackAnalysisCollections::initialize()
 {
+
+#if 0
+  /// nope, get this during construction ...
   /// load trkAnaDefSvc
   m_trkAnaDefSvc = Gaudi::svcLocator()->service( "TrkAnaDefSvc"+m_anaTag );
   ATH_CHECK( m_trkAnaDefSvc.isValid() );
-
+#endif
+  
   /// construct track matching lookup table
-  /// based on the types of test and reference
+  /// based on the types of test && reference
   /// Truth->Track
   if( m_trkAnaDefSvc->isTestTruth() ) {
     m_matches = std::make_unique< TrackMatchingLookup_truthTrk >( m_anaTag );
@@ -75,24 +96,24 @@ StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
   m_truthPUEventContainer = nullptr;
 
   /// EventInfo
-  SG::ReadHandle< xAOD::EventInfo > pie( eventInfoHandleKey );
-  if( not pie.isValid() ) {
+  SG::ReadHandle< xAOD::EventInfo > pie( eventInfoHandleKey.key() );
+  if( ! pie.isValid() ) {
     ATH_MSG_WARNING( "Shouldn't happen. EventInfo is buggy" );
   } else m_eventInfo = pie.ptr();
 
-  if( not m_trkAnaDefSvc->useTruth() ) return StatusCode::SUCCESS;
+  if( ! m_trkAnaDefSvc->useTruth() ) return StatusCode::SUCCESS;
 
   /// TruthEvent
-  SG::ReadHandle< xAOD::TruthEventContainer > pTruthEventCont( truthEventHandleKey );
-  if( not pTruthEventCont.isValid() ) {
+  SG::ReadHandle< xAOD::TruthEventContainer > pTruthEventCont( truthEventHandleKey.key() );
+  if( ! pTruthEventCont.isValid() ) {
     ATH_MSG_WARNING( "Non valid truth event collection: " << truthEventHandleKey.key() );
   }
   else m_truthEventContainer = pTruthEventCont.ptr();
 
   /// TruthPileupEvent
   if( m_trkAnaDefSvc->hasFullPileupTruth() ) {
-    SG::ReadHandle< xAOD::TruthPileupEventContainer > pTruthPUEventCont( truthPUEventHandleKey );
-    if( not pTruthPUEventCont.isValid() ) {
+    SG::ReadHandle< xAOD::TruthPileupEventContainer > pTruthPUEventCont( truthPUEventHandleKey.key() );
+    if( ! pTruthPUEventCont.isValid() ) {
       ATH_MSG_WARNING( "Non valid truth pile up event collection: " << truthPUEventHandleKey.key() );
     }
     else m_truthPUEventContainer = pTruthPUEventCont.ptr();
@@ -110,8 +131,8 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
 {
   if( m_trkAnaDefSvc->useTruth() ) {
     ATH_MSG_DEBUG( "Loading collection: " << truthPartHandleKey.key() );
-    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( truthPartHandleKey );
-    if( not pTruthColl.isValid() ) {
+    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( truthPartHandleKey.key() );
+    if( ! pTruthColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid truth particles collection: " << truthPartHandleKey.key() );
       return StatusCode::FAILURE;
     }
@@ -163,15 +184,14 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer(
 }
 
 /// Offline track particles
-StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
-  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
   if( m_trkAnaDefSvc->useOffline() ) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
-    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey );
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey.key() );
 
-    if( not pColl.isValid() ) {
+    if( ! pColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid offline tracks collection: " << handleKey.key() );
       return StatusCode::FAILURE;
     }
@@ -193,15 +213,14 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer(
 }
 
 /// Trigger track particles
-StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
-  const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
+StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer( const SG::ReadHandleKey<xAOD::TrackParticleContainer>& handleKey )
 {
   if( m_trkAnaDefSvc->useTrigger()) {
     ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
 
-    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey );
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( handleKey.key() );
 
-    if( not pColl.isValid() ) {
+    if( ! pColl.isValid() ) {
       ATH_MSG_ERROR( "Non valid trigger tracks collection: " << handleKey.key() );
       return StatusCode::FAILURE;
     }
@@ -221,6 +240,152 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer(
 
   return StatusCode::SUCCESS; 
 }
+
+
+
+
+
+/// Offline track particles
+StatusCode IDTPM::TrackAnalysisCollections::fillOfflTrackContainer( const std::string& key )
+{
+
+  /// this isn't how to do it - there are a LOT of parameters
+  /// in the python, set from flags, set from kwargs, and ALSO
+  /// from the trkAnalDefSvc class ???
+
+  /// all this FULL / stage stuff is horendous
+  
+  if( m_trkAnaDefSvc->useOffline() ) {
+    ATH_MSG_DEBUG( "Loading collection: " << key );
+
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( key );
+
+    if( ! pColl.isValid() ) {
+      ATH_MSG_ERROR( "Non valid offline tracks collection: " << key );
+      return StatusCode::FAILURE;
+    }
+
+    /// Fill container
+    m_offlTrackContainer = pColl.ptr();
+
+    std::cout << "SUTT: TAC: offline tracks: " << key << "\tsize: " << m_offlTrackContainer->size() << std::endl;
+    
+    /// Fill FULL vector
+    m_offlTrackVec[FULL].clear(); 
+    m_offlTrackVec[FULL].insert( m_offlTrackVec[ FULL ].begin(), pColl->begin(), pColl->end() );
+  } else {
+    std::cerr << "SUTT: TAC: offline tracks: " << key << " not actually requested" << std::endl;
+    m_offlTrackContainer = nullptr;
+    m_offlTrackVec[FULL].clear();
+  }
+
+  
+  return StatusCode::SUCCESS; 
+}
+
+
+
+/// Trigger track particles
+StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackContainer( const std::string& key )
+{
+  if( m_trkAnaDefSvc->useTrigger()) {
+    ATH_MSG_DEBUG( "Loading collection: " << key );
+
+    SG::ReadHandle< xAOD::TrackParticleContainer > pColl( key );
+
+    if( ! pColl.isValid() ) {
+      ATH_MSG_ERROR( "Non valid trigger tracks collection: " << key );
+      return StatusCode::FAILURE;
+    }
+
+    /// Fill container
+    m_trigTrackContainer = pColl.ptr();
+
+    std::cout << "SUTT: TAC: trigger tracks: " << key << "\tsize: " << m_trigTrackContainer->size() << std::endl;
+
+    /// Fill FULL vector
+    m_trigTrackVec[FULL].clear(); 
+    m_trigTrackVec[FULL].insert( m_trigTrackVec[FULL].begin(), pColl->begin(), pColl->end() );
+  } else {
+    std::cerr << "SUTT: TAC: trigger tracks: " << key << " not actually requested" << std::endl;
+    m_trigTrackContainer = nullptr;
+    m_trigTrackVec[FULL].clear();
+  }
+
+  return StatusCode::SUCCESS; 
+}
+
+
+
+/// Truth particles
+StatusCode IDTPM::TrackAnalysisCollections::fillTruthPartContainer( const std::string& key )
+{
+  if( m_trkAnaDefSvc->useTruth() ) {
+    ATH_MSG_DEBUG( "Loading collection: " << key);
+    SG::ReadHandle< xAOD::TruthParticleContainer > pTruthColl( key );
+    if( ! pTruthColl.isValid() ) {
+      ATH_MSG_ERROR( "Non valid truth particles collection: " << key );
+      return StatusCode::FAILURE;
+    }
+
+    /// Fill container
+    m_truthPartContainer = pTruthColl.ptr();
+
+    std::cout << "SUTT: TAC: true tracks: " << key << "\tsize: " << m_truthPartContainer->size() << std::endl;
+
+    /// Fill FULL vector
+    m_truthPartVec[ FULL ].clear(); // clear to initialize it
+
+
+    std::cout << "SUTT: pile upswitch: " <<  m_trkAnaDefSvc->pileupSwitch() << std::endl;
+    
+    /// Grab the entire truth particle collection
+    if( m_trkAnaDefSvc->pileupSwitch() == "All" ) {
+      m_truthPartVec[FULL].insert( m_truthPartVec[ FULL ].begin(), pTruthColl->begin(), pTruthColl->end() );
+
+      std::cout << "SUTT: 0 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
+      
+    /// Grab only truth particles from Hard Scatter
+    } else if( m_trkAnaDefSvc->pileupSwitch() == "HardScatter" ) {
+      if( m_truthEventContainer ) {
+        const xAOD::TruthEvent* event = m_truthEventContainer->at(0);
+        const auto& links = event->truthParticleLinks();
+        for( const auto& link : links ) {
+          if( link.isValid() ) m_truthPartVec[FULL].push_back( *link );
+        }
+
+	std::cout << "SUTT: 1 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
+
+      }
+
+    /// Grab only truth particles from Pile Up
+    } else if( m_trkAnaDefSvc->pileupSwitch() == "PileUp" ) {
+      if( m_truthPUEventContainer ) {
+        // loop over all pile up events
+        for( size_t ipu=0; ipu < m_truthPUEventContainer->size(); ipu++ ) {
+          const xAOD::TruthPileupEvent* eventPU = m_truthPUEventContainer->at( ipu );
+          const auto& links = eventPU->truthParticleLinks();
+          for( const auto& link : links ) {
+            if( link.isValid() ) m_truthPartVec[FULL].push_back( *link );
+          }
+        }
+	std::cout << "SUTT: 2 m_truthPartVec[FULL] : " << m_truthPartVec[FULL].size() << std::endl;
+      }
+
+    } else {
+      ATH_MSG_ERROR( "Invalid pileupSwitch: " << m_trkAnaDefSvc->pileupSwitch() );
+      return StatusCode::FAILURE;
+    }
+  } else {
+    m_truthPartContainer = nullptr;
+    m_truthPartVec[ FULL ].clear();
+  }
+
+  return StatusCode::SUCCESS; 
+}
+
+
+
 
 /// -------------------------------
 /// --- Fill TEST track vectors ---
@@ -354,7 +519,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigTrackVec(
   const std::vector< const xAOD::TrackParticle* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  if( m_trkAnaDefSvc->useTrigger() or  m_trkAnaDefSvc->useEFTrigger() ) {
+  if( m_trkAnaDefSvc->useTrigger() ||  m_trkAnaDefSvc->useEFTrigger() ) {
     m_trigTrackVec[ stage ].clear();
     m_trigTrackVec[ stage ].insert(
       m_trigTrackVec[ stage ].begin(),
@@ -376,13 +541,13 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTruthVertexContainer(
   m_truthVertexContainer = nullptr;
   m_truthVertexVec[ FULL ].clear();
 
-  /// Skip if not useTruth or if handle key is empty
-  if( not m_trkAnaDefSvc->useTruth() or
+  /// Skip if ! useTruth || if handle key is empty
+  if( ! m_trkAnaDefSvc->useTruth() or
       truthVertexHandleKey.key().empty() ) return StatusCode::SUCCESS;
 
   ATH_MSG_DEBUG( "Loading collection: " << truthVertexHandleKey.key() );
-  SG::ReadHandle< xAOD::TruthVertexContainer > pTruthVertColl( truthVertexHandleKey );
-  if( not pTruthVertColl.isValid() ) {
+  SG::ReadHandle< xAOD::TruthVertexContainer > pTruthVertColl( truthVertexHandleKey.key() );
+  if( ! pTruthVertColl.isValid() ) {
     ATH_MSG_ERROR( "Non valid truth vertex collection: " << truthVertexHandleKey.key() );
     return StatusCode::FAILURE;
   }
@@ -407,13 +572,13 @@ StatusCode IDTPM::TrackAnalysisCollections::fillOfflVertexContainer(
   m_offlVertexContainer = nullptr;
   m_offlVertexVec[ FULL ].clear();
 
-  /// Skip if not useOffline or if handle key is empty
-  if( not m_trkAnaDefSvc->useOffline() or
+  /// Skip if ! useOffline || if handle key is empty
+  if( ! m_trkAnaDefSvc->useOffline() or
       handleKey.key().empty() ) return StatusCode::SUCCESS;
 
   ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
-  SG::ReadHandle< xAOD::VertexContainer > pColl( handleKey );
-  if( not pColl.isValid() ) {
+  SG::ReadHandle< xAOD::VertexContainer > pColl( handleKey.key() );
+  if( ! pColl.isValid() ) {
     ATH_MSG_ERROR( "Non valid offline vertex collection: " << handleKey.key() );
     return StatusCode::FAILURE;
   }
@@ -436,13 +601,13 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigVertexContainer(
   m_trigVertexContainer = nullptr;
   m_trigVertexVec[ FULL ].clear();
 
-  /// Skip if not useTrigger or if handle key is empty
-  if( not m_trkAnaDefSvc->useTrigger() or
+  /// Skip if ! useTrigger || if handle key is empty
+  if( ! m_trkAnaDefSvc->useTrigger() or
       handleKey.key().empty() ) return StatusCode::SUCCESS;
 
   ATH_MSG_DEBUG( "Loading collection: " << handleKey.key() );
-  SG::ReadHandle< xAOD::VertexContainer > pColl( handleKey );
-  if( not pColl.isValid() ) {
+  SG::ReadHandle< xAOD::VertexContainer > pColl( handleKey.key() );
+  if( ! pColl.isValid() ) {
     ATH_MSG_ERROR( "Non valid trigger vertex collection: " << handleKey.key() );
     return StatusCode::FAILURE;
   }
@@ -588,7 +753,7 @@ StatusCode IDTPM::TrackAnalysisCollections::fillTrigVertexVec(
   const std::vector< const xAOD::Vertex* >& vec,
   IDTPM::TrackAnalysisCollections::Stage stage )
 {
-  if( m_trkAnaDefSvc->useTrigger() or m_trkAnaDefSvc->useEFTrigger() ) {
+  if( m_trkAnaDefSvc->useTrigger() || m_trkAnaDefSvc->useEFTrigger() ) {
     m_trigVertexVec[ stage ].clear();
     m_trigVertexVec[ stage ].insert(
       m_trigVertexVec[ stage ].begin(),
@@ -609,7 +774,7 @@ bool IDTPM::TrackAnalysisCollections::empty(
 {
   /// check if empty disabled for FS trigger
   /// track vector (always empty by construction)
-  bool isTrigEmpty  = m_trkAnaDefSvc->useTrigger() and not m_trkAnaDefSvc->useEFTrigger() and 
+  bool isTrigEmpty  = m_trkAnaDefSvc->useTrigger() && ! m_trkAnaDefSvc->useEFTrigger() && 
                       (stage != IDTPM::TrackAnalysisCollections::FS) ?
                       m_trigTrackVec[ stage ].empty() : false;
   bool isEFTrigEmpty  = m_trkAnaDefSvc->useEFTrigger() ?
@@ -619,7 +784,7 @@ bool IDTPM::TrackAnalysisCollections::empty(
   bool isTruthEmpty = m_trkAnaDefSvc->useTruth() ?
                       m_truthPartVec[ stage ].empty() : false;
 
-  if( isTrigEmpty or isEFTrigEmpty or isOfflEmpty or isTruthEmpty ) return true;
+  if( isTrigEmpty || isEFTrigEmpty || isOfflEmpty || isTruthEmpty ) return true;
 
   return false;
 }
@@ -638,7 +803,7 @@ void IDTPM::TrackAnalysisCollections::clear(
     m_offlVertexVec[ FULL ].clear();
     m_trigVertexVec[ FULL ].clear();
   }
-  if( stage == FULL or stage == FS ) {
+  if( stage == FULL || stage == FS ) {
     /// tracks
     m_truthPartVec[ FS ].clear();
     m_offlTrackVec[ FS ].clear();
@@ -648,7 +813,7 @@ void IDTPM::TrackAnalysisCollections::clear(
     m_offlVertexVec[ FS ].clear();
     m_trigVertexVec[ FS ].clear();
   }
-  if( stage == FULL or stage == FS or stage == InRoI ) {
+  if( stage == FULL || stage == FS || stage == InRoI ) {
     /// tracks
     m_truthPartVec[ InRoI ].clear();
     m_offlTrackVec[ InRoI ].clear();
@@ -710,7 +875,7 @@ void IDTPM::TrackAnalysisCollections::copyFS()
   }
 
   /// Debug printout
-  ATH_MSG_DEBUG( "Tracks and vertices after in RoI copy: " << printInfo( InRoI ) );
+  ATH_MSG_DEBUG( "Tracks && vertices after in RoI copy: " << printInfo( InRoI ) );
 }
 
 /// ---------------------------------
@@ -1048,7 +1213,7 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
     it++;
   }
 
-  if( not m_offlTrackVec[ stage ].empty() )
+  if( ! m_offlTrackVec[ stage ].empty() )
     ss << "==========================================" << std::endl;
 
   it = 0;
@@ -1062,7 +1227,7 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
     it++;
   }
 
-  if( not m_truthPartVec[ stage ].empty() )
+  if( ! m_truthPartVec[ stage ].empty() )
       ss << "==========================================" << std::endl;
 
   it = 0;
@@ -1076,7 +1241,7 @@ std::string IDTPM::TrackAnalysisCollections::printInfo(
     it++;
   }
 
-  if( not m_trigTrackVec[ stage ].empty() )
+  if( ! m_trigTrackVec[ stage ].empty() )
     ss << "==========================================" << std::endl;
 
   /// print also vertex info
@@ -1101,7 +1266,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
     it++;
   }
 
-  if( not m_offlVertexVec[ stage ].empty() )
+  if( ! m_offlVertexVec[ stage ].empty() )
     ss << "==========================================" << std::endl;
 
   it = 0;
@@ -1113,7 +1278,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
     it++;
   }
 
-  if( not m_truthVertexVec[ stage ].empty() )
+  if( ! m_truthVertexVec[ stage ].empty() )
       ss << "==========================================" << std::endl;
 
   it = 0;
@@ -1125,7 +1290,7 @@ std::string IDTPM::TrackAnalysisCollections::printVertexInfo(
     it++;
   }
 
-  if( not m_trigVertexVec[ stage ].empty() )
+  if( ! m_trigVertexVec[ stage ].empty() )
     ss << "==========================================" << std::endl;
 
   return ss.str();
@@ -1160,7 +1325,7 @@ bool IDTPM::TrackAnalysisCollections::updateChainRois(
   std::pair< mapChainRoi_t::iterator, bool > result =
       m_chainRois.insert( mapChainRoi_t::value_type( chainRoi, roiStr ) );
 
-  if( not result.second ) {
+  if( ! result.second ) {
     ATH_MSG_WARNING( "ChainRoiName has already been cached. No update." );
     return false;
   }

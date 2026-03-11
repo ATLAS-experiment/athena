@@ -8,7 +8,7 @@
  **/
 
 /// Local includes
-#include "TruthDecoratorAlg.h"
+#include "InDetTrackPerfMon/TruthDecoratorAlg.h"
 
 
 ///----------------------------------------
@@ -26,7 +26,7 @@ IDTPM::TruthDecoratorAlg::TruthDecoratorAlg(
 StatusCode IDTPM::TruthDecoratorAlg::initialize() {
 
   ATH_CHECK( m_truthParticlesName.initialize(
-                not m_truthParticlesName.key().empty() ) );
+                ! m_truthParticlesName.key().empty() ) );
 
   ATH_CHECK( m_truthClassifier.retrieve() );
 
@@ -51,7 +51,7 @@ StatusCode IDTPM::TruthDecoratorAlg::execute( const EventContext& ctx ) const {
 
   /// retrieve truth particle container
   SG::ReadHandle< xAOD::TruthParticleContainer > ptruths( m_truthParticlesName, ctx );
-  if( not ptruths.isValid() ) {
+  if( ! ptruths.isValid() ) {
     ATH_MSG_ERROR( "Failed to retrieve truth particles container" );
     return StatusCode::FAILURE;
   }
@@ -72,7 +72,7 @@ StatusCode IDTPM::TruthDecoratorAlg::execute( const EventContext& ctx ) const {
   }
 
   for( const xAOD::TruthParticle* truth : *ptruths ) {
-    /// decorate current truth particle with its origin and type classes
+    /// decorate current truth particle with its origin && type classes
     ATH_CHECK( decorateTruthParticle( *truth, truth_decor ) );
   }
 

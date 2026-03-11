@@ -8,8 +8,8 @@
  **/
 
 /// local include(s)
-#include "EfficiencyPlots.h"
-#include "../TrackParametersHelper.h"
+#include "InDetTrackPerfMon/EfficiencyPlots.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 /// -----------------------

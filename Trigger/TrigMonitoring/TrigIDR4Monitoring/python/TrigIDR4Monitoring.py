@@ -10,7 +10,10 @@
 # the different slices 
 
 
-def TrigIDR4Monitoring( flags=None, name=None, monlevel=None ) :  
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+ComponentAccumulator.debugMode = "trackCA trackEventAlgo trackPublicTool trackPrivateTool"
+
+def TrigIDR4Monitoring( flags=None, name=None, monlevel=None, kak=None ) :  
 
         tools = []
 
@@ -39,7 +42,7 @@ def TrigIDR4Monitoring( flags=None, name=None, monlevel=None ) :
 
 #        TIDR4MonElectron(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel )
-        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel )
+        TIDR4MonMuon(        flags, key, toolkey+name, tools, monlevel, kak )
 #        TIDR4MonMuonLRT(    flags, key, toolkey, tools, monlevel )
 #        TIDR4MonTau(      flags, key, toolkey, tools, monlevel )
 #        TIDR4MonBjet(     flags, key, toolkey, tools, monlevel )
@@ -86,7 +89,8 @@ def TrigIDR4Monsignature( flags, signature, key, toolkey, tools, monlevel, chain
 
                 tida.ntupleChainNames  = chains
 
-                tida.MonTools = createMonTools( flags, tida.SliceTag, chains )
+#               tida.MonTools = createMonTools( flags, tida.SliceTag, chains )
+                tida.MonTools = createTATools( flags, tida.SliceTag, chains )
 
                 tools += [ tida ]
 
@@ -125,7 +129,7 @@ def TIDR4MonElectron( flags, key, toolkey, tools, monlevel ) :
 
                 tidaegamma.ntupleChainNames  = chains
 
-                tidaegamma.MonTools = createMonTools( flags, tidaegamma.SliceTag, chains )
+                tidaegamma.MonTools = createTATools( flags, tidaegamma.SliceTag, chains )
 
                 tools += [ tidaegamma ]
 
@@ -156,17 +160,16 @@ def TIDR4MonElectronLRT( flags, key, toolkey, tools, monlevel ) :
                 tidaegammalrt.ntupleChainNames  = chains
                 tidaegammalrt.ntupleChainNames += [ "Offline", "Offline:+InDetLargeD0TrackParticles" ]
 
-                tidaegammalrt.MonTools = createMonTools( flags, tidaegammalrt.SliceTag, chains )
+                tidaegammalrt.MonTools = createTATools( flags, tidaegammalrt.SliceTag, chains )
         
                 tools += [ tidaegammalrt ]
                 
 
 
                 
-def TIDR4MonMuon( flags, key, toolkey, tools, monlevel ) :
+def TIDR4MonMuon( flags, key, toolkey, tools, monlevel, kak ) :
                         
         #### muon ####
-
 
         name = "IDMuon"+toolkey+"Tool"
 
@@ -207,7 +210,7 @@ def TIDR4MonMuon( flags, key, toolkey, tools, monlevel ) :
 
                 tidamuon.ntupleChainNames = chains
         
-                tidamuon.MonTools = createMonTools( flags,  tidamuon.SliceTag, chains )
+                tidamuon.MonTools = createTATools( flags,  tidamuon.SliceTag, chains, kak=kak )
         
                 tools += [ tidamuon ]
 
@@ -233,7 +236,7 @@ def TIDR4MonMuonLRT( flags, key, toolkey, tools, monlevel ) :
                 tidamuonlrt.ntupleChainNames  = chains
                 tidamuonlrt.ntupleChainNames += [ "Offline", "Offline:+InDetLargeD0TrackParticles" ]
 
-                tidamuonlrt.MonTools = createMonTools( flags, tidamuonlrt.SliceTag, chains )
+                tidamuonlrt.MonTools = createTATools( flags, tidamuonlrt.SliceTag, chains )
                 
                 tools += [ tidamuonlrt ]
  
@@ -270,7 +273,7 @@ def TIDR4MonTau( flags, key, toolkey, tools, monlevel ) :
 
                 tidatau.ntupleChainNames = chains
         
-                tidatau.MonTools = createMonTools( flags,  tidatau.SliceTag, chains )
+                tidatau.MonTools = createTATools( flags,  tidatau.SliceTag, chains )
                 
                 tools += [ tidatau ]
 
@@ -294,7 +297,7 @@ def TIDR4MonTau( flags, key, toolkey, tools, monlevel ) :
                 tidataulrt.ntupleChainNames  = chains
                 tidataulrt.ntupleChainNames += [ "Offline", "Offline:+InDetLargeD0TrackParticles" ]
 
-                tidataulrt.MonTools = createMonTools( flags, tidataulrt.SliceTag, chains )
+                tidataulrt.MonTools = createTATools( flags, tidataulrt.SliceTag, chains )
 
                 tools += [ tidataulrt ]
 
@@ -339,7 +342,7 @@ def TIDR4MonBjet( flags, key, toolkey, tools, monlevel ) :
                         
                 tidabjet.ntupleChainNames += chains
 
-                tidabjet.MonTools = createMonTools( flags,  tidabjet.SliceTag, chains )
+                tidabjet.MonTools = createTATools( flags,  tidabjet.SliceTag, chains )
                 
                 tools += [ tidabjet ]
 
@@ -368,7 +371,7 @@ def TIDR4MonMinbias( flags, key, toolkey, tools, monlevel ) :
                         
                 tidaminbias.ntupleChainNames += chains
 
-                tidaminbias.MonTools = createMonTools( flags,  tidaminbias.SliceTag, chains )
+                tidaminbias.MonTools = createTATools( flags,  tidaminbias.SliceTag, chains )
                 
                 tools += [ tidaminbias ]
 
@@ -393,7 +396,7 @@ def TIDR4MonCosmic( flags, key, toolkey, tools, monlevel ) :
                         
                 tidacosmic.ntupleChainNames += chains
 
-                tidacosmic.MonTools = createMonTools( flags,  tidacosmic.SliceTag, chains )
+                tidacosmic.MonTools = createTATools( flags,  tidacosmic.SliceTag, chains )
                 
                 tools += [ tidacosmic ]
 
@@ -416,13 +419,14 @@ def TIDR4MonBphys( flags, key, toolkey, tools, monlevel ) :
                             [ "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_FTF",
                               "HLT_mu.*_bBmumux_BsmumuPhi.*:key=HLT_IDTrack_Bmumux_IDTrig",
                               "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_FTF",
-                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig"], monlevel )
+                              "HLT_mu.*_bBmumux_Bidperf.*:key=HLT_IDTrack_Bmumux_IDTrig",
+                              "HLT_.*Bhh.*:key=HLT_IDTrack_Bhh_FTF:roi=HLT_Roi_Bhh" ], monlevel )
 
         if len(chains)>0 :
 
                 tidabphysics.ntupleChainNames += chains
 
-                tidabphysics.MonTools = createMonTools( flags,  tidabphysics.SliceTag, chains )
+                tidabphysics.MonTools = createTATools( flags,  tidabphysics.SliceTag, chains )
 
                 tools += [ tidabphysics ]
 
@@ -447,7 +451,7 @@ def TIDR4MonUtt( flags, key, toolkey, tools, monlevel ) :
                         
                 tidautt.ntupleChainNames += chains
 
-                tidautt.MonTools = createMonTools( flags,  tidautt.SliceTag, chains )
+                tidautt.MonTools = createTATools( flags,  tidautt.SliceTag, chains )
                 
                 tools += [ tidautt ]
 
@@ -462,7 +466,7 @@ def TIDR4MonUtt( flags, key, toolkey, tools, monlevel ) :
 # # create a separate specific monTool for each analysis chain
 # # - simplifies the overall analysis configuration
 
-# def createMonTools( flags, label, chains, excludeTagChains=True ):
+# def createTATools( flags, label, chains, excludeTagChains=True ):
 #         tools = []
 #         from TrigInDetAnalysisExample.chainString import chainString
 #         from TrigInDetAnalysisExample.TIDAMonTool import createMonTool
@@ -472,8 +476,6 @@ def TIDR4MonUtt( flags, key, toolkey, tools, monlevel ) :
 #                 tool = createMonTool( flags, label, mt )
 #                 tools += [ tool ]
 #         return tools
-
-from TrigInDetMonitoring.TIDAMonitoring import createMonTools
 
 
 # create the actual algorithm - calling with this wrapper lets us use the same 
@@ -508,26 +510,53 @@ def TrigIDR4MonitoringCA( flags, monlevels=None ):
         from AthenaMonitoring import AthMonitorCfgHelper
         monConfig = AthMonitorCfgHelper(flags, "TrigIDR4Mon")
 
+        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+        ca = ComponentAccumulator()
+        
         print( "monlevel: ", monlevels )
         
-        algs  = TrigIDR4Monitoring(flags, "Tier0", monlevel="idMon:t0:shifter" )
-        algs += TrigIDR4Monitoring(flags, "Shifter", monlevel="idMon:shifter" ) 
+        algs  = TrigIDR4Monitoring(flags, "Tier0", monlevel="idMon:t0:shifter", kak=ca )
+        #     algs += TrigIDR4Monitoring(flags, "Shifter", monlevel="idMon:shifter" ) 
 
         if flags.Input.isMC:    
-            algs += TrigIDR4Monitoring( flags, name="PhysVal", monlevel="idMon:t0" )
-            algs += TrigIDR4Monitoring( flags, name="PhysValShifter", monlevel="idMon:shifter" )
+            algs += TrigIDR4Monitoring( flags, name="PhysVal", monlevel="idMon:t0" , kak=ca )
+            algs += TrigIDR4Monitoring( flags, name="PhysValShifter", monlevel="idMon:shifter", kak=ca )
         
 
         for a in algs:
                 monConfig.addAlgorithm(a)
 
-        from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-        ca = ComponentAccumulator()
         ca.merge(monConfig.result())
         return ca
 
 
 
+# create a separate specific monTool for each analysis chain
+# - simplifies the overall analysis configuration
+
+def createTATools( flags, label, chains, excludeTagChains=True, kak=None ):
+        tools = []
+        from TrigInDetAnalysisExample.chainString import chainString
+        from TrigInDetAnalysisExample.TIDAMonTool import createMonTool
+
+        from InDetTrackPerfMon.TrackAnalysisConfig import createTrackAnalysis
+
+        print( "SUTT: ", label, kak )
+
+        inflags = flags
+        # inflags = flags.clone()
+        
+        for mt in chains :
+        
+                cs = chainString(mt)
+                if excludeTagChains and "tag" in cs.extra:
+                        continue
+                tool   = createMonTool( inflags, label, mt )
+                # tools += [ tool ]
+                tatool = createTrackAnalysis( inflags, mt, mt, tool, kak  )  
+                tools += [ tatool ]
+        return tools
+        
 
 
 
@@ -575,6 +604,9 @@ if __name__=='__main__':
 
     flags.Output.HISTFileName = 'duff.root'
 
+    # in case we are looking at an express stream file ...
+    flags.Common.doExpressProcessing=True
+    
     flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
@@ -591,7 +623,7 @@ if __name__=='__main__':
     # If you want to turn on more detailed messages ...
     cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    Nevents = 10
+    Nevents = -1
     cfg.run(Nevents)
 
 

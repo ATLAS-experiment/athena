@@ -12,10 +12,10 @@
 #include "GaudiKernel/Service.h"
 
 /// Local includes
-#include "TrackObjectSelectionTool.h"
-#include "TrackAnalysisCollections.h"
-#include "OfflineObjectDecorHelper.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TrackObjectSelectionTool.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 
 ///----------------------------------------
@@ -51,8 +51,8 @@ StatusCode IDTPM::TrackObjectSelectionTool::selectTracks(
   SmartIF<ITrackAnalysisDefinitionSvc> trkAnaDefSvc( svcLoc->service( "TrkAnaDefSvc" + trkAnaColls.anaTag() ) );
   ATH_CHECK( trkAnaDefSvc.isValid() );
 
-  if( not trkAnaDefSvc->useOffline() ) {
-    ATH_MSG_DEBUG( "Tool not enabled if offline tracks are not used." );
+  if( ! trkAnaDefSvc->useOffline() ) {
+    ATH_MSG_DEBUG( "Tool ! enabled if offline tracks are ! used." );
     return StatusCode::SUCCESS;
   }
 
@@ -104,7 +104,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     const xAOD::Electron* ele = getLinkedElectron(
         offTrack, m_objectQuality.value() );
 
-    if( not ele ) return false;
+    if( ! ele ) return false;
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() << 
@@ -118,7 +118,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     const xAOD::Muon* mu = getLinkedMuon(
         offTrack, m_objectQuality.value() );
 
-    if( not mu ) return false;
+    if( ! mu ) return false;
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() <<
@@ -134,7 +134,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
         offTrack, m_tauNprongs.value(),
         m_tauType.value(), m_objectQuality.value() );
 
-    if( not tau ) return false;
+    if( ! tau ) return false;
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " matches with " << m_objectQuality.value() <<
@@ -150,7 +150,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     const xAOD::Jet* jet = getLinkedJet(
         offTrack, m_objectQuality.value() );
 
-    if( not jet ) return false;
+    if( ! jet ) return false;
 
     ATH_MSG_DEBUG( "Offline Track with pt = " << pT( offTrack ) <<
                    " is linked to a " << m_objectQuality.value() <<
@@ -165,7 +165,7 @@ bool IDTPM::TrackObjectSelectionTool::accept(
     const xAOD::TruthParticle* truth = getLinkedTruth(
         offTrack, m_truthProbCut.value() );
 
-    if( not truth ) return false;
+    if( ! truth ) return false;
 
     if( truthVec.empty() ) {
       ATH_MSG_DEBUG( "Truth vector is empty" );
@@ -183,6 +183,6 @@ bool IDTPM::TrackObjectSelectionTool::accept(
   }
 
   ATH_MSG_WARNING( "Type " << m_objectType.value() <<
-                   " is not supported for track-object selection" );
+                   " is ! supported for track-object selection" );
   return false;
 }

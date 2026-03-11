@@ -9,11 +9,11 @@
 **/
 
 /// local includes
-#include "TrackAnalysisPlotsMgr.h"
-#include "TrackAnalysisCollections.h"
-#include "ITrackMatchingLookup.h"
-#include "OfflineObjectDecorHelper.h"
-#include "TrackParametersHelper.h"
+#include "InDetTrackPerfMon/TrackAnalysisPlotsMgr.h"
+#include "InDetTrackPerfMon/TrackAnalysisCollections.h"
+#include "InDetTrackPerfMon/ITrackMatchingLookup.h"
+#include "InDetTrackPerfMon/OfflineObjectDecorHelper.h"
+#include "InDetTrackPerfMon/TrackParametersHelper.h"
 
 /// Gaudi include(s)
 #include "GaudiKernel/ISvcLocator.h"
@@ -55,11 +55,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   if( m_trkAnaDefSvc->plotTrackParameters() ) {
     m_plots_trkParam_vsTest = std::make_unique< TrackParametersPlots >(
         this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->testTag(),
-        ( not m_trkAnaDefSvc->isTestTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        ( ! m_trkAnaDefSvc->isTestTruth() ) && m_trkAnaDefSvc->plotTrackParametersErrors(),
         m_trkAnaDefSvc->plotTracksInJets() );
     m_plots_trkParam_vsRef = std::make_unique< TrackParametersPlots >(
         this, "Tracks/Parameters", m_anaTag, m_trkAnaDefSvc->referenceTag(),
-        ( not m_trkAnaDefSvc->isReferenceTruth() ) and m_trkAnaDefSvc->plotTrackParametersErrors(),
+        ( ! m_trkAnaDefSvc->isReferenceTruth() ) && m_trkAnaDefSvc->plotTrackParametersErrors(),
         m_trkAnaDefSvc->plotTracksInJets() );
   } 
 
@@ -108,11 +108,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
   }
 
   /// Fake Rate plots (only if reference is Truth)
-  if( m_trkAnaDefSvc->plotFakeRates() and m_trkAnaDefSvc->isReferenceTruth() ) {
+  if( m_trkAnaDefSvc->plotFakeRates() && m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_fakeRate = std::make_unique< FakeRatePlots >(
         this, "Tracks/FakeRates", m_anaTag, m_trkAnaDefSvc->testTag(),
         true, m_trkAnaDefSvc->hasFullPileupTruth() );
-    if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
+    if ( ! m_trkAnaDefSvc->unlinkedAsFakes() ) {
       m_plots_missingTruth = std::make_unique< FakeRatePlots >(
           this, "Tracks/FakeRates/Unlinked", m_anaTag, m_trkAnaDefSvc->testTag(),
           true, m_trkAnaDefSvc->hasFullPileupTruth() );
@@ -128,19 +128,19 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
 
   /// Hits on tracks plots
   /// -- all tracks
-  if( m_trkAnaDefSvc->plotHitsOnTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
+  if( m_trkAnaDefSvc->plotHitsOnTracks() && ! m_trkAnaDefSvc->isTestTruth() ) {
     m_plots_hitsOnTrk_vsTest = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
         true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
-  if( m_trkAnaDefSvc->plotHitsOnTracksReference() and not m_trkAnaDefSvc->isReferenceTruth() ) {
+  if( m_trkAnaDefSvc->plotHitsOnTracksReference() && ! m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnTrk_vsRef = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
   /// -- matched tracks
-  if( m_trkAnaDefSvc->plotHitsOnMatchedTracks() and not m_trkAnaDefSvc->isTestTruth() ) {
+  if( m_trkAnaDefSvc->plotHitsOnMatchedTracks() && ! m_trkAnaDefSvc->isTestTruth() ) {
     m_plots_hitsOnMatchedTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
@@ -149,13 +149,13 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
         this, "Tracks/Resolutions/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->referenceTag(), m_trkAnaDefSvc->isITk(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
   }
-  /// -- fake and unlinked tracks
-  if( m_trkAnaDefSvc->plotHitsOnFakeTracks() and m_trkAnaDefSvc->isReferenceTruth() ) {
+  /// -- fake && unlinked tracks
+  if( m_trkAnaDefSvc->plotHitsOnFakeTracks() && m_trkAnaDefSvc->isReferenceTruth() ) {
     m_plots_hitsOnFakeTrk = std::make_unique< HitsOnTracksPlots >(
         this, "Tracks/FakeRates/HitsOnTracks", m_anaTag,
         m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
         true, m_trkAnaDefSvc->hasFullPileupTruth(), m_trkAnaDefSvc->plotHitsOnTracksExpert() );
-    if ( not m_trkAnaDefSvc->unlinkedAsFakes() ) {
+    if ( ! m_trkAnaDefSvc->unlinkedAsFakes() ) {
       m_plots_hitsOnUnlinkedTrk = std::make_unique< HitsOnTracksPlots >(
           this, "Tracks/FakeRates/Unlinked/HitsOnTracks", m_anaTag,
           m_trkAnaDefSvc->testTag(), m_trkAnaDefSvc->isITk(),
@@ -179,11 +179,11 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::initialize()
     m_plots_vtxParam_vsTest = std::make_unique< VertexParametersPlots >(
         this, "Vertices/AllPrimary/Parameters", m_anaTag,
         m_trkAnaDefSvc->testTag(),
-        not m_trkAnaDefSvc->isTestTruth() ); // do associated tracks plots for reco only
+        ! m_trkAnaDefSvc->isTestTruth() ); // do associated tracks plots for reco only
     m_plots_vtxParam_vsRef = std::make_unique< VertexParametersPlots >(
         this, "Vertices/AllPrimary/Parameters", m_anaTag,
         m_trkAnaDefSvc->referenceTag(),
-        not m_trkAnaDefSvc->isReferenceTruth() ); // do associated tracks plots for reco only
+        ! m_trkAnaDefSvc->isReferenceTruth() ); // do associated tracks plots for reco only
 
     /// Vertices multiplicity plots
     m_plots_nVtxParam_vsTest = std::make_unique< VertexParametersPlots >(
@@ -254,7 +254,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fill(
         truthMu, actualMu, weight ) );
   }
 
-  /// Track and vertex multiplicity plots
+  /// Track && vertex multiplicity plots
   std::vector< size_t > testTrackCounts = trkAnaColls.testTrackCounts();
   std::vector< size_t > refTrackCounts = trkAnaColls.refTrackCounts();
 
@@ -356,7 +356,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     }
 
     /// hits on matched tracks plots
-    if( m_plots_hitsOnMatchedTrk and m_plots_hitsOnMatchedTrk_vsRef and isMatched ) {
+    if( m_plots_hitsOnMatchedTrk && m_plots_hitsOnMatchedTrk_vsRef && isMatched ) {
       ATH_CHECK( m_plots_hitsOnMatchedTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
       if( m_trkAnaDefSvc->isReferenceTruth() ) {
         ATH_CHECK( m_plots_hitsOnMatchedTrk_vsRef->fillPlots(
@@ -379,15 +379,15 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
       }
     }
 
-    bool doFakes = m_trkAnaDefSvc->unlinkedAsFakes() ? true : not isUnlinked;
-    if( doFakes and m_plots_fakeRate ) {
+    bool doFakes = m_trkAnaDefSvc->unlinkedAsFakes() ? true : ! isUnlinked;
+    if( doFakes && m_plots_fakeRate ) {
       ATH_CHECK( m_plots_fakeRate->fillPlots( *particle, isFakeTruth, truthMu, actualMu, weight ) );
-      if( m_plots_hitsOnFakeTrk and isFakeTruth ) {
+      if( m_plots_hitsOnFakeTrk && isFakeTruth ) {
         ATH_CHECK( m_plots_hitsOnFakeTrk->fillPlots( *particle, truthMu, actualMu, weight ) );
       }
     }
 
-    /// offline electron plots (Offline is always either test or reference)
+    /// offline electron plots (Offline is always either test || reference)
     if( m_trkAnaDefSvc->isTestOffline() ) {
       if( m_plots_offEle ) {
         ATH_CHECK( m_plots_offEle->fillPlots( *particle, false, weight ) );
@@ -409,14 +409,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTest(
     }
     nGoodVertices++;
 
-    /// getting vertex-associated tracks and their weights
+    /// getting vertex-associated tracks && their weights
     std::vector< const PARTICLE* > vtxTracks{};
     std::vector< float > vtxTrackWeights{};
-    if( not getVertexTracksAndWeights(
+    if( ! getVertexTracksAndWeights(
           *vertex, vtxTracks, vtxTrackWeights,
           particles, m_trkAnaDefSvc->useSelectedVertexTracks() ) ) {
       ATH_MSG_WARNING( "Problem when retrieving vertex-assocciated tracks" );
-      if( not vtxTracks.empty() ) {
+      if( ! vtxTracks.empty() ) {
         ATH_MSG_WARNING( "Invalid associated track links found. Check your input format." );
       }
     }
@@ -483,7 +483,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
 
     /// technical efficiency plots 
     if( m_plots_tech_eff_vsRef ) {
-      if( m_trkAnaDefSvc->isReferenceTruth() and 
+      if( m_trkAnaDefSvc->isReferenceTruth() && 
           nHitsSelVec( *particle, m_trkAnaDefSvc->minSilHits(), m_trkAnaDefSvc->etaBins() ) )
       {
         ATH_CHECK( m_plots_tech_eff_vsRef->fillPlots(
@@ -525,7 +525,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
           *particle, nMatched, truthMu, actualMu, weight ) );
     }
  
-    /// offline electron plots (Offline is always either test or reference)
+    /// offline electron plots (Offline is always either test || reference)
     if( m_trkAnaDefSvc->isReferenceOffline() ) {
       if( m_plots_offEle ) {
         ATH_CHECK( m_plots_offEle->fillPlots( *particle, false, weight ) );
@@ -547,14 +547,14 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsReference(
     }
     nGoodVertices++;
 
-    /// getting vertex-associated tracks and their weights
+    /// getting vertex-associated tracks && their weights
     std::vector< const PARTICLE* > vtxTracks{};
     std::vector< float > vtxTrackWeights{};
-    if( not getVertexTracksAndWeights(
+    if( ! getVertexTracksAndWeights(
           *vertex, vtxTracks, vtxTrackWeights,
           particles, m_trkAnaDefSvc->useSelectedVertexTracks() ) ) {
       ATH_MSG_WARNING( "Problem when retrieving vertex-assocciated tracks" );
-      if( not vtxTracks.empty() ) {
+      if( ! vtxTracks.empty() ) {
         ATH_MSG_WARNING( "Invalid associated track links found. Check your input format." );
       }
     }
@@ -608,7 +608,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
     for( const xAOD::TrackParticle* thisTrack : refTracks ) {
       const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
           *thisTrack, m_trkAnaDefSvc->truthProbCut() );
-      if( not linkedTruth ) {
+      if( ! linkedTruth ) {
         ATH_MSG_WARNING( "Unlinked track!!" );
         continue;
       }
@@ -619,7 +619,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
     } // close loop over reference tracks
 
     /// Fill the histogram only if a matched reference is found
-    if ( not refMatched ) continue;
+    if ( ! refMatched ) continue;
     
     else {
 
@@ -627,7 +627,7 @@ StatusCode IDTPM::TrackAnalysisPlotsMgr::fillPlotsTruth(
       for( const xAOD::TrackParticle* thisTrack : testTracks ) {
         const xAOD::TruthParticle* linkedTruth = getLinkedTruth(
             *thisTrack, m_trkAnaDefSvc->truthProbCut() );
-        if( not linkedTruth ) {
+        if( ! linkedTruth ) {
           ATH_MSG_WARNING( "Unlinked track!!" );
           continue;
         }

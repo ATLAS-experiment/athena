@@ -3,6 +3,336 @@
 import json, os
 from AthenaCommon.Utils.unixtools import find_datafile
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+
+# import sys
+
+def value(obj):
+    return obj._value if hasattr(obj, "_value") else obj
+
+# default useful setter function ....
+def get_opt(obj, name, default=-9999 ):
+    return value(getattr(obj, name, default))
+
+
+# set the default kswargs only if there is such a variable in the flags object
+def kwargs_setdefault_old( kwargs, key, obj, attr=None ):
+    if attr is None:
+        attr = key
+    if hasattr(obj, attr):
+        kwargs.setdefault(key, getattr(obj, attr))
+
+def cleankwargs( kwargs ):
+    for k, v in list(kwargs.items()):
+        if v is None:
+            del kwargs[k]
+            
+def kwargs_setdefault_new( kwargs, key, obj, attr=None, default=None, skip_if_default=False):
+    if attr is None:
+        attr = key
+    val = value(getattr(obj, attr, default))
+    if skip_if_default and val == default:
+        return  # do not set
+    if default is not None: 
+        kwargs.setdefault(key, val)
+
+    
+# _MISSING=objuect()
+# def setdefault(kwargs, key, obj, attr=None, default=_MISSING, skip_if_default=False):
+def kwargs_setdefault(kwargs, key, obj, attr=None, default=..., skip_if_default=False):
+    if attr is None:
+        attr = key
+
+#   print("kwargs_setdefault: ", key, attr, default, skip_if_default )
+        
+    try:
+        val = value(getattr(obj, attr))
+        attr_exists = True
+    except AttributeError:
+        val = ...
+        attr_exists = False
+
+    # what if we have no attribute ? only set if we
+    # provide a default
+    if not attr_exists:
+        if default is ...:
+            return
+        val = value(default)
+
+    # Now, if we want to skip it if there is no attribute etc
+    if skip_if_default and default is not ... and val == value(default):
+        return
+
+    if val is not None:
+        kwargs.setdefault(key, val)
+
+
+# check whether the attribute has an entry with this value, but only if
+# the attribute is actually set
+def has_in( item, obj, attr, default=False):
+    if not hasattr(obj, attr):
+        return default
+    val = getattr(obj, attr)
+    if val is None:
+        return default
+    try:
+        return item in val
+    except TypeError:
+        return default
+
+    
+# # DON'T USE THIS ANY MORE
+# def hasFlag(obj, name):
+#     """
+#     The athena config design is very poor *every* node should be the same, 
+#     but only the top level has a hasFlag() method, so here is a helper 
+#     function that can be called as if top level, or sub objects were the 
+#     same 
+#     """
+#     # pythion complains if we have this directly ...
+#     # if hasattr(obj, "hasFlag") and callable(getattr(obj, "hasFlag")):
+#     f = getattr(obj, "hasFlag", None)
+#     if callable(f):
+#         # top-level ConfigFlags → use the real hasFlag
+#         return obj.hasFlag(name)
+
+#     print( "hasFlag: should never be able to get here because flags in not a tree like structure, it is just dictionary", name )
+    
+#     # Sub-container → walk the dotted path
+#     parts = name.split(".")
+#     current = obj
+#     for part in parts:
+#         if not hasattr(current, part):
+#             return False
+#         current = getattr(current, part)
+#     return True
+
+
+def sanitise(s: str) -> str:
+    """
+    Replace all ':' and '=' characters in the string with '_'.
+    """
+    return s.replace(":", "_").replace("=", "_")
+
+
+
+def print_attrs(obj):
+    for name in dir(obj):
+        # skip built-in / private attributes
+        if name.startswith("__"):
+            continue
+        try:
+            value = getattr(obj, name)
+            print(f"{name} = {value}")
+        except AttributeError:
+            print(f"{name} = <Attribute not accessible>")
+
+
+
+# def getflags(flags, prefix=None):
+#     """
+#     flags_obj: the original flat flags object
+#     prefix: string, e.g., "PhysVal.IDTPM.currentAna"
+#     Returns: a nested FlagNode tree containing all attributes under this prefix
+#     NB: THIS SHOULD NO LONGER BE NEEDED
+#     """
+
+#     if not hasattr(flags, "_flagdict"):
+#         return
+
+#     if prefix is not None:
+#         parts = prefix.split(".")
+#         top_name = parts[0]
+    
+#     # create top node
+# #    top_node = FlagNode(top_name)
+    
+#     # find all attributes of flags_obj that start with the prefix
+#     for name, value in flags._flagdict.items():
+
+#         if prefix is not None and not name.startswith(prefix):
+#             continue
+
+#         print ("name: ", name, value )
+        
+#         if prefix is not None:
+#             # remove the prefix + dot
+#             suffix = name[len(prefix):]
+#             if suffix.startswith("."):
+#                 suffix = suffix[1:]
+        
+#         # split remaining suffix by dots
+
+#             sub_parts = suffix.split(".") if suffix else []
+        
+# #   return top_node
+#     return 
+
+
+ 
+class Node:
+    """
+    Basic node class, so I can get all the egregious flags from a flags object, 
+    and get rid of the flags prefix so that I can use the leaf name easily 
+    without all the nonsense limitations of using the flags directly
+    """
+    def __init__(self, name="root"):
+        self.name = name
+
+    def add(self, attr_name, value):
+        """Dynamically add an attribute to this node"""
+        setattr(self, attr_name, value)
+
+    def has(self, attr_name ):
+        return hasattr( self, attr_name )
+
+    def hasFlag(self, attr_name ):
+        return hasattr( self, attr_name )
+        
+    def print(self):
+        print( "Node: ", self.name )
+        for key, value in self.__dict__.items():
+            print( "Node ", self.name, ": ", key, value )
+
+            
+def print_obj(obj):
+    # print("print_obj:")
+    for key, value in obj.items():
+        print( "obj:", key, value )
+            
+
+            
+def mkbarenode(flags):
+    
+    n = Node()
+
+    # Iterate over all items in the flags
+    for key, value in flags._flagdict.items():
+        n.add(key, value._value)
+
+    return n
+
+
+def mknode( flags, prefix ):
+
+    n = Node(prefix)
+    
+    # Get the rename map (alias -> real paths)
+    rename_map = flags._renamed_map()
+
+    # Iterate over all items in the rename map
+    for real_key, alias_keys in rename_map.items():
+        for alias_key in alias_keys:
+            # Only include keys that match the alias prefix
+            if alias_key.startswith(prefix + '.'):
+                # Fetch the value from _flagdict
+                value = flags._flagdict.get(real_key)
+                key = alias_key.removeprefix(prefix+".")
+                n.add(key, value._value)
+                
+    return n
+
+
+
+def extract_alias_flags( flags, prefix ):
+    """
+    Extracts all flags under a given prefix (e.g., "PhysVal.IDTPM.currentTrkAna")
+    and returns a dictionary mapping the alias names to the real values from _flagdict.
+
+    input:
+        flags : AthConfigFlags instance (after cloneAndReplace)
+        prefix : string, e.g. "PhysVal.IDTPM.currentTrkAna"
+
+    Returns:
+        dict mapping alias key -> value from _flagdict
+        e.g. {
+            "PhysVal.IDTPM.currentTrkAna.enabled": True,
+            "PhysVal.IDTPM.currentTrkAna.anaTag": "_TrkAnaOffl",
+            ...
+        }
+    """
+    # Get the rename map (alias -> real paths)
+    rename_map = flags._renamed_map()
+    extracted = {}
+
+    # Iterate over all items in the rename map
+    for real_key, alias_keys in rename_map.items():
+        for alias_key in alias_keys:
+            # Only include keys that match the alias prefix
+            if alias_key.startswith(prefix + '.'):
+                # Fetch the value from _flagdict
+                value = flags._flagdict.get(real_key)
+                extracted[alias_key] = value
+
+    return extracted
+
+
+
+
+def extract_flags( flags, prefix ):
+    """
+    Extracts all flags under a given prefix eg "PhysVal.IDTPM.currentTrkAna",
+    and returns a dictionary mapping the alias leaf names to the real values 
+    from _flagdict.
+
+    input:
+        flags : AthConfigFlags instance (after cloneAndReplace)
+        prefix : string, e.g. "PhysVal.IDTPM.currentTrkAna"
+
+    Returns:
+        dict mapping leaf key -> value from _flagdict
+        e.g. {
+            "PhysVal.IDTPM.currentTrkAna.enabled": True,
+            "PhysVal.IDTPM.currentTrkAna.anaTag": "_TrkAnaOffl",
+            ...
+        }
+    """
+    extracted = {}
+
+    # Iterate over all items in the rename map
+    for k, v in flags.__flagsdict.items():
+        # Only include keys that match the alias prefix
+        if k.startswith(prefix + '.'):
+                # Fetch the value from _flagdict
+                # here, need to get rid of all the top level PhysVal.... nonsense
+                # so we only have the actual leaf keys
+                key = k.removeprefix(prefix+".")
+                extracted[key] = v
+
+    return extracted
+
+
+            
+
+def get_flags( flags, name ):
+
+#   print( "get_flags:" )
+
+    if isinstance(flags, AthConfigFlags):
+        if flags.hasFlag("PhysVal.IDTPM.currentTrkAna.anaTag"):
+            # print( "WITH IDTPM" )
+
+            iflags = mknode( flags, "PhysVal.IDTPM.currentTrkAna" )
+            
+            if iflags.has( "anaTag" ):
+                iname = iflags.anaTag
+                
+        else:
+            # print( "WITHOUT IDTPM" )
+            iflags = mkbarenode(flags)
+            iname  = sanitise(name)
+            
+#           iflags.print()
+
+    else:
+        iflags = flags
+        iname  = sanitise(name)
+        
+    return iflags, iname
+
+
+        
+
 
 def custom_find_datafile( input_file_name ):
     '''
@@ -16,6 +346,9 @@ def custom_find_datafile( input_file_name ):
     return find_datafile( new_file_name )
 
 
+def getTrackAnaDicts( flags ):
+    return getTrkAnaDicts( flags )
+    
 def getTrkAnaDicts( flags ):
     '''
     utility function to retrieve the flag dictionary
