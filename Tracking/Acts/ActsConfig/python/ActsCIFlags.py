@@ -63,45 +63,6 @@ def actsValidateClustersFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use cluster conversion [xAOD -> InDet] with both Athena and Acts sequences"""
     flags.Tracking.recoChain = [TrackingComponent.ActsValidateClusters]
 
-def actsValidateSpacePointsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use for validating Athena-based space point formation"""
-    flags.Tracking.recoChain = [TrackingComponent.ActsValidateSpacePoints]
-    from ActsConfig.ActsConfigFlags import SeedingStrategy
-    flags.Acts.SeedingStrategy = SeedingStrategy.Default
-
-def actsCoreValidateSpacePointsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use for validating ACTS-based space point formation"""
-    from ActsConfig.ActsConfigFlags import SpacePointStrategy
-    flags.Acts.SpacePointStrategy = SpacePointStrategy.ActsCore    
-    actsValidateSpacePointsFlags(flags)
-    
-def actsValidateSeedsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
-    flags.Tracking.recoChain = [TrackingComponent.ActsValidateSeeds]
-    from ActsConfig.ActsConfigFlags import SeedingStrategy
-    flags.Acts.SeedingStrategy = SeedingStrategy.Default
-    flags.Tracking.writeSeedValNtuple = True
-
-def actsValidateConversionSeedsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
-    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
-                                TrackingComponent.ActsValidateConversionSeeds]
-    flags.Tracking.writeSeedValNtuple = True
-
-def actsValidateLargeRadiusSeedsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction"""
-    flags.Tracking.recoChain = [TrackingComponent.AthenaChain,
-                                TrackingComponent.ActsValidateLargeRadiusSeeds]
-    from ActsConfig.ActsConfigFlags import SeedingStrategy
-    flags.Acts.SeedingStrategy = SeedingStrategy.Default
-    flags.Tracking.writeSeedValNtuple = True
-
-def actsValidateGbtsSeedsFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (GBTS seeding)"""
-    from ActsConfig.ActsConfigFlags import SeedingStrategy
-    flags.Acts.SeedingStrategy = SeedingStrategy.Gbts 
-    actsValidateSeedsFlags(flags)
-
 def actsValidateTracksFlags(flags) -> None:
     """flags for Reco_tf with CA used in CI tests: use ActsTrackFinding during reconstruction"""
     flags.Acts.doAmbiguityResolution = False

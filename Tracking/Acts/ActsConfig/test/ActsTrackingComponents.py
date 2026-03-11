@@ -25,8 +25,6 @@ if __name__ == "__main__":
                       "ActsLargeRadius",
                       "ActsHeavyIon",
                       "ActsValidateClusters",
-                      "ActsValidateSpacePoints",
-                      "ActsValidateSeeds",
                       "ActsValidateTracks",
                       "ActsValidateAmbiguityResolution"]
 

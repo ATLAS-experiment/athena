@@ -10,7 +10,6 @@
 #include "src/GbtsSeedingTool.h"
 #include "src/GridTripletSeedingTool.h"
 #include "src/SeedingTool.h"
-#include "src/SiSpacePointsSeedMaker.h"
 #include "src/TrackParamsEstimationTool.h"
 
 // Algs
@@ -20,6 +19,5 @@ DECLARE_COMPONENT(ActsTrk::GenericSeedingAlg)
 // Tools
 DECLARE_COMPONENT(ActsTrk::SeedingTool)
 DECLARE_COMPONENT(ActsTrk::GbtsSeedingTool)
-DECLARE_COMPONENT(ActsTrk::SiSpacePointsSeedMaker)
 DECLARE_COMPONENT(ActsTrk::TrackParamsEstimationTool)
 DECLARE_COMPONENT(ActsTrk::GridTripletSeedingTool)

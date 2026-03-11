@@ -368,12 +368,6 @@ atlas_add_citest( ACTS_Workflow_HeavyIons
 atlas_add_citest( ACTS_ValidateClusters
    SCRIPT ActsValidateClusters.sh )
 
-atlas_add_citest( ACTS_ValidateSeeds
-   SCRIPT ActsValidateSeeds.sh )
-
-atlas_add_citest( ACTS_ValidateGbtsSeeds 
-   SCRIPT ActsValidateGbtsSeeds.sh )
-
 atlas_add_citest( ACTS_ActsPersistifyEDM 
    SCRIPT ActsPersistifyEDM.sh )
 

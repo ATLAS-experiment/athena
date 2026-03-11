@@ -719,69 +719,6 @@ def ActsBaseEstimatedTrackParamsAnalysisAlgCfg(flags,
 
     return helper.result()
 
-def ActsSeedingAlgorithmAnalysisAlgCfg(flags,
-                                       name: str = "ActsSeedingAlgorithmAnalysis",
-                                       **kwargs) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-    
-    addOtherSeedingAlgorithms = kwargs.pop("addOtherSeedingAlgorithms", False)
-
-    MonitoringGroupNames = []
-
-    if "SeedingTools" not in kwargs:
-        from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
-        ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags))
-        ITkSiSpacePointsSeedMaker.maxSize = 1e8
-        MonitoringGroupNames.append("ITkSiSpacePointSeedMaker")
-
-        from ActsConfig.ActsSeedingConfig import ActsSiSpacePointsSeedMakerToolCfg
-        # The default Acts pixel seeding tool performs by default a seed selection after the seed finding
-        # We have to disable it or a fair comparison with the other seed computations
-        from ActsConfig.ActsSeedingConfig import ActsFastPixelSeedingToolCfg
-        seedToolPixel = acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags, doSeedQualitySelection=False))
-        # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
-        ActsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags, SeedToolPixel=seedToolPixel))
-        ActsITkSiSpacePointsSeedMaker.doSeedConversion = False
-        MonitoringGroupNames.append("ActsITkSiSpacePointSeedMaker")
-
-        if addOtherSeedingAlgorithms:
-            from ActsConfig.ActsSeedingConfig import ActsPixelGbtsSeedingToolCfg
-            gbtsSeedToolPixel = acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags))
-            # We then override the pixel seeding tool inside the ActsSiSpacePointsSeedMakerToolCfg so that we pick this one
-            # Strip will not be Gbts ... so we ignore it
-            ActsGbtsITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsSiSpacePointsSeedMakerToolCfg(flags,
-                                                                                                       name="ActsSiSpacePointsSeedMakerGbts",
-                                                                                                       SeedToolPixel=gbtsSeedToolPixel))
-            ActsGbtsITkSiSpacePointsSeedMaker.doSeedConversion = False
-            MonitoringGroupNames.append("ActsGbtsITkSiSpacePointSeedMaker")
-
-        from GaudiKernel.GaudiHandles import PrivateToolHandleArray
-        
-        privateSeedingTools = [ITkSiSpacePointsSeedMaker, ActsITkSiSpacePointsSeedMaker]
-
-        if addOtherSeedingAlgorithms:
-            privateSeedingTools.append(ActsGbtsITkSiSpacePointsSeedMaker)
-        
-        kwargs.setdefault("SeedingTools",
-                          PrivateToolHandleArray(privateSeedingTools))
-
-    kwargs.setdefault("MonitorNames", MonitoringGroupNames)
-    kwargs.setdefault("DoStrip", not flags.Tracking.doITkFastTracking)
-
-    from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(flags, 'SeedingAlgorithmAnalysisAlgCfg')
-    monitoringAlgorithm = helper.addAlgorithm(CompFactory.ActsTrk.SeedingAlgorithmAnalysisAlg, name, **kwargs)
-
-    if flags.Acts.doAnalysisNtuples:
-      for groupName in MonitoringGroupNames:
-        monitoringGroup = helper.addGroup(monitoringAlgorithm, groupName, '/'+groupName+'/')
-        monitoringGroup.defineTree('eventNumber,stripSeedInitialisationTime,stripSeedProductionTime,pixelSeedInitialisationTime,pixelSeedProductionTime,numberPixelSpacePoints,numberStripSpacePoints,numberPixelSeeds,numberStripSeeds;seedInformation',
-                                  path='ntuples',
-                                  treedef='eventNumber/I:stripSeedInitialisationTime/F:stripSeedProductionTime/F:pixelSeedInitialisationTime/F:pixelSeedProductionTime/F:numberPixelSpacePoints/I:numberStripSpacePoints/I:numberPixelSeeds/I:numberStripSeeds/I')
-
-    acc.merge(helper.result())
-    return acc
-
 
 def ActsPixelEstimatedTrackParamsAnalysisAlgCfg(flags,
                                                 name: str = 'ActsPixelEstimatedTrackParamsAnalysisAlg',
