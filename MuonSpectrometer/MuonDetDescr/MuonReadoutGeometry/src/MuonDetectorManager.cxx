@@ -334,7 +334,7 @@ namespace MuonGM {
         return hash;
     }
     
-    StatusCode MuonDetectorManager::updateAlignment(const ALineContainer& alineData) {
+  StatusCode MuonDetectorManager::updateAlignment(const ALineContainer& alineData, GeoAlignmentStore* alignStore) {
         if (alineData.empty()) {
             ATH_MSG_DEBUG("Got empty A-line container (expected for MC), not applying A-lines...");
             return StatusCode::SUCCESS;
@@ -417,8 +417,9 @@ namespace MuonGM {
                                                 ALine.getParameter(Parameter::transT), 
                                                 ALine.getParameter(Parameter::rotS),
                                                 ALine.getParameter(Parameter::rotZ),
-                                                ALine.getParameter(Parameter::rotT));
-                
+                                                ALine.getParameter(Parameter::rotT),
+						alignStore);
+		thisStation->updateRETransforms(alignStore);
                 thisStation->clearCache();
                 thisStation->fillCache();                
             } else {
@@ -430,8 +431,9 @@ namespace MuonGM {
                                                 ALine.getParameter(Parameter::transT), 
                                                 ALine.getParameter(Parameter::rotS),
                                                 ALine.getParameter(Parameter::rotZ),
-                                                ALine.getParameter(Parameter::rotT));
-                
+							ALine.getParameter(Parameter::rotT),
+							alignStore);
+                thisStation->getMuonReadoutElement(job)->updateTransforms(alignStore);
                 thisStation->getMuonReadoutElement(job)->refreshCache();
                 
             }

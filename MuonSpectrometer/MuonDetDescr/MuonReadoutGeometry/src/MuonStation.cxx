@@ -19,6 +19,9 @@
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "CxxUtils/inline_hints.h"
+
+#include "GeoModelUtilities/GeoAlignmentStore.h"
+
 namespace MuonGM {
 
     MuonStation::MuonStation(std::string_view stName, 
@@ -126,16 +129,16 @@ namespace MuonGM {
         m_firstRequestBlineFixedP = false;
     }
 
-    void MuonStation::setDeltaAmdbLRS(Amg::Transform3D xf) {
+  void MuonStation::setDeltaAmdbLRS(Amg::Transform3D xf, GeoAlignmentStore* alignStore) {
         m_delta_amdb_frame = std::move(xf);
         ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                 << " adding Aline     " << std::endl
                  << "  native_to_amdbl computed from A-line " << Amg::toString(m_native_to_amdbl) << std::endl 
                 << "Station  amdbl_to_global " << endmsg << Amg::toString(m_amdbl_to_global));
-        m_transform->setDelta(m_native_to_amdbl.inverse() * m_delta_amdb_frame * m_native_to_amdbl);
+        m_transform->setDelta(m_native_to_amdbl.inverse() * m_delta_amdb_frame * m_native_to_amdbl, alignStore);
     }
 
-    void MuonStation::setDelta_fromAline(double tras, double traz, double trat, double rots, double rotz, double rott) {
+    void MuonStation::setDelta_fromAline(double tras, double traz, double trat, double rots, double rotz, double rott, GeoAlignmentStore* alignStore) {
         // store here the angles of A-line
         m_rots = rots;
         m_rotz = rotz;
@@ -150,7 +153,7 @@ namespace MuonGM {
         }
 
         // store the delta transform in the local AMDB frame
-        setDeltaAmdbLRS(delta_amdb);
+        setDeltaAmdbLRS(delta_amdb, alignStore);
 
         ATH_MSG_DEBUG("Station " << getStationType() << " at zi/fi " << getEtaIndex() << "/" << getPhiIndex()
                 << " adding Aline     " << setiosflags(std::ios::fixed) << std::setprecision(6) << std::setw(12) 
@@ -183,7 +186,7 @@ namespace MuonGM {
     }
 
     void MuonStation::setDelta_fromAline_forComp(int jobindex, double tras, double traz, double trat, double rots, double rotz,
-                                                 double rott) {
+                                                 double rott, GeoAlignmentStore* alignStore) {
         GeoAlignableTransform* parentToChild = getComponentAlTransf(jobindex);
         if (!parentToChild) {
             ATH_MSG_WARNING( "setDelta_fromAline_forComp: WARNING: component for index " << jobindex
@@ -222,7 +225,7 @@ namespace MuonGM {
                 <<Amg::toString(m_amdbl_to_global * locAmdbStatToLocAmdbComp.inverse().translation()) << " / "
                 << Amg::toString(m_amdbl_to_global.translation()));
 
-        parentToChild->setDelta(childToLocAmdbComponent.inverse() * delta_amdb * childToLocAmdbComponent);
+        parentToChild->setDelta(childToLocAmdbComponent.inverse() * delta_amdb * childToLocAmdbComponent, alignStore);
         ATH_MSG_DEBUG("setDelta_fromAline_forComp2:stationName/Jff/Jzz " << getStationType() << " " << getPhiIndex() << " "
                 << getEtaIndex() << " Job " << jobindex << " Origin of component/station AmdbLocalFrame= "
                 << Amg::toString(m_amdbl_to_global * locAmdbStatToLocAmdbComp.inverse().translation()) << " / "
@@ -261,12 +264,24 @@ namespace MuonGM {
             re->fillCache();
         }
     }
-
+  
     void MuonStation::refreshCache() {
         clearCache();
         fillCache();
     }
 
+  void MuonStation::updateRETransforms(GeoAlignmentStore* geoAlignStore) {
+    for (auto& [jobId, readAlignPair] : m_REwithAlTransfInStation) {
+      MuonReadoutElement* re = readAlignPair.first;
+      if (!re) {
+	ATH_MSG_WARNING(" in MuonStation::updateRETransforms " << getStationType() << " at zi/fi " << getEtaIndex() << "/"
+                        << getPhiIndex() << " trying to get a not existing RE (iteration n. )   " << jobId << " RE is null, skipping" );
+	continue;
+      }
+      re->updateTransforms(geoAlignStore);
+    }
+  }
+  
     void MuonStation::setBline(const BLinePar* bline) {
         if (!bline) return;
         m_hasBLines = true;

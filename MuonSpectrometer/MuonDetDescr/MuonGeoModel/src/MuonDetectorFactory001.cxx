@@ -461,7 +461,7 @@ namespace MuonGM {
 		  mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
 		  mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
 
-		  mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
+		  mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity(),nullptr);
 
                 } else if (nAlines ==1) {
                     AlignPosIterator alast;
@@ -503,7 +503,7 @@ namespace MuonGM {
 			    mst->setTransform(xf);
 			    mst->setNativeToAmdbLRS(tsz_to_szt * station->native_to_tsz_frame(*mysql, (*pit).second));
 			    mst->setNominalAmdbLRSToGlobal(station->tsz_to_global_frame(*mysql, (*pit).second) * tsz_to_szt.inverse());
-			    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity());
+			    mst->setDeltaAmdbLRS(GeoTrf::Transform3D::Identity(),nullptr);
 			    
                             
                         } 
@@ -518,15 +518,21 @@ namespace MuonGM {
                 nstat_ss++;
         } // for ( it = sel.begin(); it != sel.end(); it++ ) {
 
-        log << MSG::INFO << " **************** MuonDetectorFactory001 ****************************" << endmsg << " *** The Muon Chamber Geometry Tree is built with " << endmsg
-            << " *** " << p4->getNChildVols() << " child volumes " << endmsg << " *** " << savemem->NDetectors() << " independent elements and " << endmsg << " *** "
-            << savemem->NDetectorsReused() << " elements cloned or shared " << endmsg << " *** " << nstat_ss << " kinds of stations" << endmsg << " *** " << ntpos_ss
-            << " stations with alignable transforms" << endmsg << " *** " << nAssemblies << " stations are described as Assemblies" << endmsg << " *** "
-            << m_manager->nMuonStation() << " MuonStations " << endmsg << " *** \t " << m_manager->nMdtRE() << " MDT Readout Elements \t " << m_manager->nMdtDE()
-            << " MDT Detector Elements " << endmsg << " *** \t " << m_manager->nCscRE() << " CSC Readout Elements \t " << m_manager->nCscDE() << " CSC Detector Elements " << endmsg
-            << " *** \t " << m_manager->nRpcRE() << " RPC Readout Elements \t " << m_manager->nRpcDE() << " RPC Detector Elements " << endmsg << " *** \t " << m_manager->nTgcRE()
-            << " TGC Readout Elements \t " << m_manager->nTgcDE() << " TGC Detector Elements " << endmsg << " ********************************************************************"
-            << endmsg;
+        log << MSG::INFO
+	    << " **************** MuonDetectorFactory001 ****************************" << endmsg
+	    << " *** The Muon Chamber Geometry Tree is built with " << endmsg
+            << " *** " << p4->getNChildVols() << " child volumes " << endmsg
+	    << " *** " << savemem->NDetectors() << " independent elements and " << endmsg
+	    << " *** " << savemem->NDetectorsReused() << " elements cloned or shared " << endmsg
+	    << " *** " << nstat_ss << " kinds of stations" << endmsg
+	    << " *** " << ntpos_ss << " stations with alignable transforms" << endmsg
+	    << " *** " << nAssemblies << " stations are described as Assemblies" << endmsg
+	    << " *** " << m_manager->nMuonStation() << " MuonStations " << endmsg
+	    << " *** \t " << m_manager->nMdtRE() << " MDT Readout Elements \t " << m_manager->nMdtDE() << " MDT Detector Elements " << endmsg
+	    << " *** \t " << m_manager->nCscRE() << " CSC Readout Elements \t " << m_manager->nCscDE() << " CSC Detector Elements " << endmsg
+            << " *** \t " << m_manager->nRpcRE() << " RPC Readout Elements \t " << m_manager->nRpcDE() << " RPC Detector Elements " << endmsg
+	    << " *** \t " << m_manager->nTgcRE() << " TGC Readout Elements \t " << m_manager->nTgcDE() << " TGC Detector Elements " << endmsg
+	    << " ********************************************************************" << endmsg;
 
         if (m_dumpMemoryBreakDown) {
             umem = GeoPerfUtils::getMem();

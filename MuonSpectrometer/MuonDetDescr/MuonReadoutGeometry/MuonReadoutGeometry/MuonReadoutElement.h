@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -19,6 +19,9 @@
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+
+class GeoAlignmentStore;
+
 ATLAS_CHECK_FILE_THREAD_SAFETY;
 
 namespace MuonGM {   
@@ -131,6 +134,7 @@ namespace MuonGM {
         
         Trk::DetectorElemType detectorType() const override final { return m_type; }
 
+      void updateTransforms(GeoAlignmentStore* alignStore);
     protected:
         MuonReadoutElement(GeoVFullPhysVol* pv, MuonDetectorManager* mgr, Trk::DetectorElemType detType);
         
@@ -168,6 +172,9 @@ namespace MuonGM {
              
         const MuonStation* m_parentMuonStation{nullptr};
         MuonDetectorManager* m_muon_mgr{nullptr};
+
+      Amg::Transform3D m_absTransform{GeoTrf::Transform3D::Identity()};
+      Amg::Transform3D m_defTransform{GeoTrf::Transform3D::Identity()};
     };
 
     Identifier MuonReadoutElement::identify() const { return m_id; }
@@ -196,9 +203,9 @@ namespace MuonGM {
     bool MuonReadoutElement::sideA() const { return (getStationEta() > 0); }
     bool MuonReadoutElement::sideC() const { return (getStationEta() < 0); }
 
-    inline const Amg::Transform3D& MuonReadoutElement::absTransform() const { return getMaterialGeom()->getAbsoluteTransform(); }
+    inline const Amg::Transform3D& MuonReadoutElement::absTransform() const { return m_absTransform; }
 
-    inline const Amg::Transform3D& MuonReadoutElement::defTransform() const { return getMaterialGeom()->getDefAbsoluteTransform(); }
+    inline const Amg::Transform3D& MuonReadoutElement::defTransform() const { return m_defTransform; }
 
 }  // namespace MuonGM
  
