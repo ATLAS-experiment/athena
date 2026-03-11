@@ -25,9 +25,8 @@ DFEF::EFInterfaceEmulator::EFInterfaceEmulator(const boost::property_tree::ptree
     std::lock_guard<std::mutex> lock(m_RWMutex);
     m_file_rw = std::make_unique<FileReaderWriter>(cargs);
   }
-  // TODO: read ptree to get the compression type and level
-  m_comp = eformat::UNCOMPRESSED;
-  m_compLevel = 0;
+  m_comp = eformat::ZLIB;
+  m_compLevel = 2;
 }
 
 void DFEF::EFInterfaceEmulator::open(){
