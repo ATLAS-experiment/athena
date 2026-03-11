@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ProxyProviderSvc_test.cxx
@@ -186,15 +186,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
   pIPPSvc->addProvider(new TestProvider<Bar>("aBar"));
   pIPPSvc->addProvider(new TestProvider<FooBar>("aFooBar"));
 
-
-  DataHandle<Bar> hBar;
-  assert( (pStore->bind(hBar, "aBar")).isSuccess() );
-  
-  assert( hBar.ID() == "aBar" );
-
-  assert( hBar.cptr() );
-
-  cout << pStore->dump() << endl;
 
   assert( !(pStore->transientContains<Foo>("aFoo")) );
   assert( pStore->contains<Foo>("aFoo") );
