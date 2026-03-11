@@ -11,6 +11,9 @@
 #include "xAODMuonPrepData/sTgcMeasurement.h"
 #include "xAODMuonPrepData/CombinedMuonStrip.h"
 #include "xAODMuonPrepData/MMCluster.h"
+#include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
+
+#include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 
 #include "MuonSpacePoint/SpacePoint.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
@@ -128,7 +131,8 @@ namespace  MuonValR4 {
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig) {
         
-        const Acts::Surface& surf = xAOD::muonSurface(meas);
+        ActsTrk::detail::xAODUncalibMeasSurfAcc surfAcc{};
+        const Acts::Surface& surf{*surfAcc.get(meas)};
         const Acts::GeometryContext tgContext = gctx.context();
         const auto& bounds = surf.bounds();
         if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
@@ -209,6 +213,17 @@ namespace  MuonValR4 {
                     } else if (sTgcClus->channelType() == sTgcIdHelper::sTgcChannelTypes::Wire) {
                         dY = std::sqrt(sTgcClus->localCovariance<1>()(0,0));
                         dX = 0.5*sTgcClus->readoutElement()->wireDesign(sTgcClus->measurementHash()).stripLength(sTgcClus->channelNumber());
+                    }
+                } else if (meas->type() == xAOD::UncalibMeasType::Other) {
+                    const auto* pseudo = static_cast<const xAOD::AuxiliaryMeasurement*>(meas);
+                    using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
+                    constexpr double measLength = 1._m;
+                    if (pseudo->calibProjector() == ProjectorType::e1DimNoTime) {
+                        dX = std::sqrt(meas->localCovariance<1>()(0,0));
+                        dY = measLength;
+                    } else if (pseudo->calibProjector() == ProjectorType::e1DimRotNoTime) {
+                        dY = std::sqrt(meas->localCovariance<1>()(0,0));
+                        dX = measLength;
                     }
                 }
                 break;
