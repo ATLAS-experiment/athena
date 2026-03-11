@@ -873,13 +873,11 @@ if __name__ == "__main__":
     FinalProtoTrackChainxAODTracksKey="FPGA"
     flags.Detector.EnableCalo = False 
 
-    # ensure that the xAOD SP and cluster containers are available
-    flags.Tracking.ITkMainPass.doAthenaToActsSpacePoint=True
-    flags.Tracking.ITkMainPass.doAthenaToActsCluster=True
-    from ActsConfig.ActsCIFlags import actsLegacyWorkflowFlags
-    actsLegacyWorkflowFlags(flags)
-    flags.Acts.doRotCorrection = False
+    from ActsConfig.ActsCIFlags import actsWorkflowFlags
+    actsWorkflowFlags(flags)
 
+    if not flags.Trigger.FPGATrackSim.runBaselineActs:
+        flags.Tracking.ITkActsPass.doActsSpacePoint = False
     ############################################
     flags.Concurrency.NumThreads=1
     flags.Concurrency.NumConcurrentEvents=1
@@ -958,7 +956,7 @@ if __name__ == "__main__":
 
         flags.lock()
         flags.dump()
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.MainPass")
+        flags = flags.cloneAndReplace("Tracking.ActiveConfig","Tracking.ITkActsPass",keepOriginal=True)
         acc=MainServicesCfg(flags)
 
         acc.merge(WriteAdditionalFPGATrackSimOutputCfg(flags))
@@ -970,27 +968,28 @@ if __name__ == "__main__":
             if flags.Input.isMC:
                 from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
                 acc.merge(GEN_AOD2xAODCfg(flags))
-
-                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg # TO DO: check if this is indeed necessary for pileup samples
-                acc.merge(addTruthPileupJetsToOutputCfg(flags))
-
-            if flags.Detector.EnableCalo:
-                from CaloRec.CaloRecoConfig import CaloRecoCfg
-                acc.merge(CaloRecoCfg(flags))
+                
+                from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+                acc.merge(addTruthPileupJetsToOutputCfg(flags)) # needed by IDTPM
 
             if flags.Tracking.recoChain:
-                from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-                acc.merge(InDetTrackRecoCfg(flags))
+                if flags.Trigger.FPGATrackSim.runBaselineActs:
+                    # Full ITk reconstruction
+                    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
+                    acc.merge(ITkTrackRecoCfg(flags))
+                else:
+                    # Only schedule data preparation (clustering) for technical efficiency
+                    from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
+                    acc.merge(ITkRecPreProcessingSiliconCfg(flags))
+                
+                from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+                acc.merge(BeamSpotCondAlgCfg(flags))
+                    
                 if flags.Trigger.FPGATrackSim.writeOfflPRDInfo: 
                     from InDetConfig.InDetPrepRawDataToxAODConfig import ITkActsPrepDataToxAODCfg
                     acc.merge( ITkActsPrepDataToxAODCfg( flags,
                                     PixelMeasurementContainer = "ITkPixelMeasurements_offl",
                                     StripMeasurementContainer = "ITkStripMeasurements_offl" ) )
-                from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg
-                acc.merge( TruthParticleIndexDecoratorAlgCfg(flags) )
-                from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
-                acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
-    
 
         # Configure both the dataprep and logical hits algorithms.
         acc.merge(FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepAlgCfg(flags))

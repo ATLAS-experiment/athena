@@ -44,9 +44,6 @@ def FPGAProtoTrackFitCfg(flags,  name="FPGAPrototrackFitterConfig", stage = '', 
     ACTSProtoTrackChainTrackKey = "ACTSProtoTrackChainTestTracks"
     FPGAPrototracks = f"ActsProtoTracks{stage}FromFPGATrack"
     acc = ComponentAccumulator()
-    from InDetConfig.ITkTrackRecoConfig import ITkTrackRecoCfg
-    acc.merge(ITkTrackRecoCfg(flags))
-
 
     # ProtoTrackChain Track algo
     acc.merge(FPGAPrototrackFitAlgCfg(flags,"FPGATrackSimProtoTackFitAlg",
