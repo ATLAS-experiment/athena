@@ -1,21 +1,23 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#include <iostream>
-#include <sstream>
-#include <cassert>
-#include <cstdlib>
 
 #include "TrigConfL1Data/HelperFunctions.h"
 #include "TrigConfL1Data/L1DataDef.h"
 #include "TrigConfL1Data/TriggerItemNode.h"
 #include "TrigConfL1Data/TriggerThreshold.h"
-
-#include "boost/algorithm/string.hpp"
-#include <algorithm>
 #include <boost/algorithm/string/trim.hpp>
+#include "boost/algorithm/string.hpp"
+#include <iostream>
+#include <sstream>
+#include <cassert>
+#include <cstdlib>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <charconv>
+#include <stdexcept>
 using namespace std;
 using namespace TrigConf;
 
@@ -115,7 +117,7 @@ namespace {
       std::string::size_type pos = begin;
       std::string::size_type last = exp.size();
 
-      uint32_t openBrackets = 0;
+      int openBrackets = 0;
       while(pos!=last) {
          char cc = exp[pos];
          if(cc=='(') openBrackets++;
@@ -308,23 +310,23 @@ TrigConf::insertParenthesis(const std::string& givenlogic) {
 }
 
 
-
 uint32_t
-TrigConf::bin2uint(const std::string& binary) {
-   uint32_t value(0);
-   for(char c: binary) {
-      value <<= 1;
-      if(c=='1') value += 1; 
-   }
-   return value;
+TrigConf::bin2uint(const std::string& binary){
+    uint32_t value = 0;
+    auto [ptr, ec] = std::from_chars(binary.data(),
+      binary.data() + binary.size(), value, 2);
+    if (ec != std::errc{} || ptr != binary.data() + binary.size()) {
+        throw std::invalid_argument("Invalid binary string");
+    }
+    return value;
 }
 
 
 std::string
-TrigConf::uint2bin(uint32_t value, uint16_t width) {
-   stringstream ss;
-   for(uint32_t mask = 1 << (width-1); mask>0; mask>>=1)
-      ss << ( (value & mask) == 0 ? '0' : '1' );
-
-   return ss.str();
+TrigConf::uint2bin(uint32_t value, uint16_t width){
+    std::string s(width, '0');
+    for (uint16_t i = 0; i < width; ++i) {
+      s[width - 1 - i] = '0' + ((value >> i) & 1);
+    }
+    return s;
 }
