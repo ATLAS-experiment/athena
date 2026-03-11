@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -1365,12 +1365,17 @@ int main (int argc, char** argv)
   errorcheck::ReportMessage::hideErrorLocus (true);
   auto parser = std::make_unique<IdDictParser>();
 
-  if (argc >= 3 && strcmp (argv[1], "-t") == 0) {
-    timetests (parser.get(), atoi (argv[2]));
-    return 0;
-  }
+  try {
+    if (argc >= 3 && strcmp (argv[1], "-t") == 0) {
+      timetests (parser.get(), atoi (argv[2]));
+      return 0;
+    }
 
-  runtests (parser.get());
+    runtests (parser.get());
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 
   return 0;
 }

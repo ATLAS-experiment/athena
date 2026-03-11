@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -247,10 +247,15 @@ int main()
   assert (sg.isValid());
 
   CaloTester tester;
-  const CaloCellContainer* cells = fill_cells (tester);
-  assert (sg->record (cells, "cells").isSuccess());
+  try {
+    const CaloCellContainer* cells = fill_cells (tester);
+    assert (sg->record (cells, "cells").isSuccess());
 
-  test1(cells,&tester.mgr());
+    test1(cells,&tester.mgr());
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
   return 0;
 }
 
