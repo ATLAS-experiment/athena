@@ -413,7 +413,7 @@ StatusCode Muon::TgcRODReadOut::decodeRodToRdo(
     for (; vDataIndex < firstRawDataIndex + sizeRawData; ++vDataIndex) {
         if (t_debug) {
             log << MSG::DEBUG << "Tgc BS Raw:" << vDataIndex << ":  "
-                << std::hex << vData[vDataIndex] << endmsg;
+                << std::hex << vData[vDataIndex] << std::dec<< endmsg;
         }
 
         // header check
