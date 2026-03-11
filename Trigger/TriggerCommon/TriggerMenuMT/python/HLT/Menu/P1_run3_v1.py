@@ -501,6 +501,7 @@ def addLowMuP1Signatures(chains):
         # ATR-23061, ATR-26394
         # BeamspotPEB chains -- only run preselection without tracking, write PEB data
         ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot', 'RATE:CPS_jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L14jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportPhIGroup),
         # Oxygen
         # ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
         # ChainProp(name='HLT_j0_pf_ftf_preselj20_BeamSpotPEB_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot', 'BW:BeamSpot']+SupportPhIGroup),
@@ -573,6 +574,8 @@ def addLowMuP1Signatures(chains):
     chainsP1['Beamspot'] = [
         # Beamspot chains using FS tracking -- no PEB, fill BeamSpot histograms then reject all events
         ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD', 'RATE:CPS_jJ40']+SupportPhIGroup),
+        ChainProp(name='HLT_beamspot_trkFS_trkfast_BeamSpotPEB_L14jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+SupportPhIGroup),
+        ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L14jJ40' , l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD',  'BW:DISCARD']+SupportPhIGroup),
         # Oxygen
         # ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1ZDC_YN',   l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),
         # ChainProp(name='HLT_j0_pf_ftf_preselj20_beamspotVtx_L1ZDC_XNYN', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['RATE:DISCARD', 'BW:DISCARD']+SupportPhIGroup),

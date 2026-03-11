@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //  TauMatching.cxx
 //  TopoCore
@@ -9,7 +9,8 @@
 #include "L1TopoEvent/TOBArray.h"
 #include "L1TopoEvent/cTauTOBArray.h"
 #include "L1TopoEvent/GenericTOB.h"
-#include <algorithm>
+#include <algorithm> //std::clamp
+#include <iostream> //std::cout used
 
 REGISTER_ALG_TCS(TauMatching)
 
@@ -55,9 +56,7 @@ TCS::TauMatching::sort(const InputTOBArray & input, TOBArray & output) {
 	{std::cout << "I am jTau" << std::endl;}//Do something with jTau
       
       //Currently do nothing!
-      continue;
-      
-      output.push_back( gtob );
+      continue;      
    }
 
 

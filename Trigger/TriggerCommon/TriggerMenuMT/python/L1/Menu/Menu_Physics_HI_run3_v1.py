@@ -213,8 +213,6 @@ def defineMenu():
         'L1_1ZDC_A_VZDC_C', #comb4
         'L1_VZDC_A_1ZDC_C', #comb6
         'L1_1ZDC_A_1ZDC_C', #comb1
-        'L1_5ZDC_A_VZDC_C', #comb5
-        'L1_VZDC_A_5ZDC_C', #comb7
         'L1_ZDC_1XOR5',     #comb2
         'L1_5ZDC_A_5ZDC_C', #comb3
         
@@ -374,7 +372,8 @@ def defineMenu():
         'L1_BPH-0M9-eEM9-eEM7_2MU3V', 'L1_BPH-2M9-2DR15-2MU5VF',
         'L1_BPH-0M9-eEM9-eEM7_MU5VF', 'L1_BPH-2M9-0DR15-2MU3V',
         'L1_BPH-2M9-0DR15-C-MU5VFMU3V', 'L1_BPH-2M9-0DR15-MU5VFMU3V',
-        'L1_BPH-2M9-0DR15-2MU3VF', 
+        'L1_BPH-2M9-0DR15-2MU3VF', 'L1_BPH-7M11-25DR99-2MU3VF',
+        'L1_BPH-7M14-0DR25-MU5VFMU3VF',
 
         'L1_JPSI-1M5-eEM15',
         'L1_0DPHI32-2M5-eEM9M-eEM6M',

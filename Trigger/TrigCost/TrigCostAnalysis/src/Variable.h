@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_VARIABLE_H
@@ -7,6 +7,8 @@
 
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaBaseComps/AthCheckMacros.h"
+#include <string>
+
 
 class TH1; //<! Forward declaration
 
