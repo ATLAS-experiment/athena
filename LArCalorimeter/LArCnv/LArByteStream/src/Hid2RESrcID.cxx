@@ -11,6 +11,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "AthenaKernel/errorcheck.h"
 
 #include <iostream> 
 
@@ -75,7 +76,8 @@ uint32_t  Hid2RESrcID::getRodIDFromROM(const COLLECTION_ID& id) const
 
   COLL_MAP::const_iterator it = m_coll2ROD.find( id ); 
   if(it == m_coll2ROD.end()){
-    std::cout <<" H2d2RESrcID invalid COLL ID in hex "<<std::hex<<id.get_compact()<<std::dec<<std::endl;
+    REPORT_MESSAGE_WITH_CONTEXT(MSG::ERROR, "H2d2RESrcID::getRodIDFromROM")
+      << "invalid COLL ID in hex "<<std::hex<<id.get_compact()<<std::dec<<endmsg;
     std::abort();
   }	
 

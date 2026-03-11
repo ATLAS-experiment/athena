@@ -3,6 +3,7 @@
 */
 
 #include "LArByteStream/ABBAMapping.h"
+#include "GaudiKernel/MsgStream.h"
 
 
 typedef std::map<int, HWIdentifier> abba_map;
@@ -13,7 +14,7 @@ void add_to_map_2(abba_map* map, long value, int key) {
 }
 
 
-void ABBAMapping::fill(abba_map *toFill, int iphi) {
+void ABBAMapping::fill(abba_map *toFill, int iphi, MsgStream& log) {
   if (iphi == 19) {
     add_to_map_2(toFill, 961127936, 0);
     add_to_map_2(toFill, 961126912, 1);
@@ -160,8 +161,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961111552, 157);
     add_to_map_2(toFill, 961108480, 158);
     add_to_map_2(toFill, 961109504, 159);
-    
-    std::cout << "iphi19 filled" << std::endl;
   } else if (iphi == 18) {
     add_to_map_2(toFill, 961127424, 0);
     add_to_map_2(toFill, 961126400, 1);
@@ -308,8 +307,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961143808, 157);
     add_to_map_2(toFill, 961140736, 158);
     add_to_map_2(toFill, 961141760, 159);
-    
-    std::cout << "iphi18 filled" << std::endl;
   } else if (iphi == 21) {
     add_to_map_2(toFill, 961556992, 0);
     add_to_map_2(toFill, 961558016, 1);
@@ -451,8 +448,6 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961648128, 157);
     add_to_map_2(toFill, 961651200, 158);
     add_to_map_2(toFill, 961652224, 159);
-    
-    std::cout << "iphi21 filled" << std::endl;
   } else if (iphi == 20) {
     add_to_map_2(toFill, 961556480, 0);
     add_to_map_2(toFill, 961557504, 1);
@@ -595,9 +590,7 @@ void ABBAMapping::fill(abba_map *toFill, int iphi) {
     add_to_map_2(toFill, 961648640, 157);
     add_to_map_2(toFill, 961645568, 158);
     add_to_map_2(toFill, 961644544, 159);
-    
-    std::cout << "iphi20 filled" << std::endl;
   } else {
-    std::cout << "iphi not known..." << std::endl;
+    log << MSG::ERROR << "iphi " << iphi << " not known..." << endmsg;
   }
 }

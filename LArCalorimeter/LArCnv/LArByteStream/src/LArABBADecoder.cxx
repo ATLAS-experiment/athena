@@ -184,7 +184,7 @@ msg(MSG::ERROR) << "ROD_source_id not found" << endmsg;
 }
 
 
-ABBAMapping::fill(&abba_mapping, iphi);
+ABBAMapping::fill(&abba_mapping, iphi, msg());
 
 
 for (std::size_t index_abba_channel_samples = 0; index_abba_channel_samples < abba_channel_samples.size(); ++index_abba_channel_samples) {

@@ -15,12 +15,15 @@
 #include <string>
 
 class HWIdentifier;
+class MsgStream;
 
 /** @brief Tool to get LATOME SC and SCID mapping file and fill std::map variable with it.*/
 class LATOMEMapping
 {
 public:
-  static void fill(std::map<int, HWIdentifier> *toFill, std::string inputfile);
+  static void fill(std::map<int, HWIdentifier>& toFill,
+                   const std::string& inputfile,
+                   MsgStream& log);
 };
 
 #endif // LATOMEMAPPING_H
