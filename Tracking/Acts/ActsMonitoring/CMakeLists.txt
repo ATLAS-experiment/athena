@@ -44,11 +44,6 @@ atlas_add_component( ActsMonitoring
 
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_test( ActsSeedingToolComparison
-  SCRIPT test/ActsSeedingAlgorithmTest.py
-  PROPERTIES TIMEOUT 900
-  POST_EXEC_SCRIPT nopost.sh )
-
 file(GLOB_RECURSE files "util/*.cxx")
 foreach(_exeFile ${files})
   get_filename_component(_theExec ${_exeFile} NAME_WE)

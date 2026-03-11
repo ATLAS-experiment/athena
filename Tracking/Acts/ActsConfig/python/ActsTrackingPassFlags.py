@@ -142,67 +142,11 @@ def createActsValidateClustersTrackingPassFlags():
     setActsDefaultTunings(icf)
     return icf
 
-def createActsValidateSpacePointsTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsValidateSpacePoints"
-    deactivateAthenaComponents(icf)
-    icf.doAthenaCluster = True
-    icf.doAthenaToActsCluster = True
-    icf.doActsSpacePoint = True
-    # we should schedule here the Acts -> Athena SP converter, but that is not available yet  
-    # so we go for the seeding convertion (i.e. ActsTrk::SiSpacePointSeedMaker) 
-    icf.doActsToAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
-    setActsDefaultTunings(icf)
-    return icf
-
-def createActsValidateSeedsTrackingPassFlags():
-    icf = createITkTrackingPassFlags()
-    icf.extension = "ActsValidateSeeds"
-    deactivateAthenaComponents(icf)
-    icf.doAthenaCluster = True
-    icf.doAthenaSpacePoint = True
-    icf.doAthenaToActsSpacePoint = True
-    icf.doActsToAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
-    return icf
-
-def createActsValidateConversionSeedsTrackingPassFlags():
-    icf = createActsConversionTrackingPassFlags()
-    icf.extension = "ActsValidateConversionSeeds"
-    deactivateAthenaComponents(icf)
-    icf.doAthenaCluster = True
-    icf.doAthenaSpacePoint = True
-    icf.doAthenaToActsSpacePoint = True
-    icf.doActsToAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
-    icf.isSecondaryPass = False
-    setActsDefaultTunings(icf)
-    return icf
-
 def createActsValidateLargeRadiusStandaloneTrackingPassFlags():
     icf = createActsLargeRadiusTrackingPassFlags()
     icf.extension = "ActsValidateLargeRadiusStandalone"
     icf.isSecondaryPass = False
     icf.isLargeD0 = True
-    return icf
-
-def createActsValidateLargeRadiusSeedsTrackingPassFlags():
-    icf = createActsLargeRadiusTrackingPassFlags()
-    icf.extension = "ActsValidateLargeRadiusSeeds"
-    deactivateAthenaComponents(icf)
-    icf.doAthenaCluster = True
-    icf.doAthenaSpacePoint = True
-    icf.doAthenaToActsSpacePoint = True
-    icf.doActsToAthenaSeed = True
-    icf.doAthenaTrack = True
-    icf.doAthenaAmbiguityResolution = True
-    icf.isSecondaryPass = False
-    icf.isLargeD0 = True
-    setActsDefaultTunings(icf)
     return icf
 
 def createActsValidateTracksTrackingPassFlags():

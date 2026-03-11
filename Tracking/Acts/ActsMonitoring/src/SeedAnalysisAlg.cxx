@@ -376,7 +376,6 @@ namespace ActsTrk {
     return std::make_pair(bestBarcode, prob);
   }
 
-  // Same computation as in ActsTrk::SiSpacePointsSeedMaker
   std::array<float, 7> SeedAnalysisAlg::estimateParameters(const ActsTrk::Seed& seed,
 							   float pTPerHelixRadius) const
   {

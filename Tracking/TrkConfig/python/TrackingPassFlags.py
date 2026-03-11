@@ -212,7 +212,6 @@ def createITkTrackingPassFlags():
     # Acts -> Athena EDM converters
     icf.addFlag("doActsToAthenaCluster", False)
     icf.addFlag("doActsToAthenaSpacePoint", False)
-    icf.addFlag("doActsToAthenaSeed", False)
     icf.addFlag("doActsToAthenaTrack", False)
     icf.addFlag("doActsToAthenaResolvedTrack", False)
 
