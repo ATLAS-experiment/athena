@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1TOPOALGORITHM_H
@@ -8,6 +8,8 @@
 #include "TrigConfData/DataStructure.h"
 #include <vector>
 #include <optional>
+#include <stdexcept>
+#include <string>
 
 namespace TrigConf {
 

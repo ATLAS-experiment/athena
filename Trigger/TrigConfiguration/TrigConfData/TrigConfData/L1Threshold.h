@@ -1,11 +1,16 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONFDATA_L1THRESHOLD_H
 #define TRIGCONFDATA_L1THRESHOLD_H
 
 #include "TrigConfData/L1ThresholdBase.h"
+#include <iostream> //for std::cout
+#include <cstdint> //for uint16_t
+#include <string> 
+#include <memory> //std::weak_ptr
+#include <optional>
 
 namespace TrigConf {
 
