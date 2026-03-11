@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include "TrigConfCoolWriter.h"
 
 #include "TrigConfStorage/TrigConfCoolFolderSpec.h"
 #include "TrigConfStorage/TrigConfCoolHLTPayloadConverters.h"
@@ -43,8 +44,6 @@
 #include <sstream>
 #include <set>
 #include <iterator>
-
-#include "TrigConfCoolWriter.h"
 
 using namespace std;
 using namespace cool;
@@ -652,7 +651,6 @@ TrigConf::TrigConfCoolWriter::writeL1MonPayload( const RunRangeVec& runRanges,
                      str << " : previous monitor name" << monNames[index];
                      str << ", current monitor name " << (*mc)->name() << endl;
                      m_ostream << str.str() << endl; 
-                     // throw std::runtime_error(str.str()); 
                   }
                   if(counterType[index] != (*mc)->counterType()) {
                      std::stringstream str;
@@ -660,7 +658,6 @@ TrigConf::TrigConfCoolWriter::writeL1MonPayload( const RunRangeVec& runRanges,
                      str << " : previous type " << counterType[index];
                      str << ", current type " << (*mc)->counterType() << endl;
                      m_ostream << str.str() << endl; 
-                     // throw std::runtime_error(str.str()); 
                   }
                   if(bgId[index] != (*mc)->bunchGroupId()) {
                      std::stringstream str;
@@ -668,7 +665,6 @@ TrigConf::TrigConfCoolWriter::writeL1MonPayload( const RunRangeVec& runRanges,
                      str << " : previous bunch-group id " << bgId[index];
                      str << ", current id " << (*mc)->bunchGroupId() << endl;
                      m_ostream << str.str() << endl; 
-                     // throw std::runtime_error(str.str());
                   }
                   monNames[index]=(*mc)->name();
                   counterType[index]=(*mc)->counterType();
@@ -729,7 +725,6 @@ TrigConf::TrigConfCoolWriter::writeL1MonPayload( const RunRangeVec& runRanges,
             //throw;
          } catch(std::exception & e) {
             m_ostream << "<writeLVL1MonPayload> Caught std::exception: " << e.what() << endl;
-            //throw;
          }
       }
    }
@@ -1123,11 +1118,14 @@ TrigConfCoolWriter::readHltPrescalePayload( unsigned int run, unsigned int lb,
    {
       IFolderPtr hltpskFolder = TrigConfCoolFolderSpec::getHltPrescaleKeyFolder(m_dbPtr);
       IObjectIteratorPtr objects = hltpskFolder->browseObjects( vr.since(), vr.since()+1, 0 );
-      objects->goToNext();
+      if (not objects->goToNext()){
+        throw std::runtime_error("'objects' is empty");
+      }
       const IObject& obj = objects->currentRef();
       const IRecord & payload = obj.payload();
       unsigned int hltpsk = readHltPrescaleKey( payload.attributeList() );
       pss.setId(hltpsk);
+    
    }
 
    // read the prescale set
@@ -1557,7 +1555,9 @@ TrigConf::TrigConfCoolWriter::readL1BunchGroupRunPayload( unsigned int run)
    ValidityRange vr(run);
    IFolderPtr folder = TrigConfCoolFolderSpec::getLvl1BGDescFolder(m_dbPtr);
    IObjectIteratorPtr objects = folder->browseObjects( vr.since(), vr.until()-1, 0 );
-   objects->goToNext();
+   if (not objects->goToNext()){
+     throw std::runtime_error("TrigConfCoolWriter::readL1BunchGroupRunPayload: 'objects' is empty.");
+   }
    const IObject& obj = objects->currentRef();
    const IRecord & payload = obj.payload();
    return readLvl1BGDesc( payload.attributeList() );
@@ -1583,7 +1583,9 @@ TrigConfCoolWriter::readL1BunchGroupLBPayload( unsigned int run, unsigned int lb
    // read the bunch group key
    IFolderPtr lvl1BGKeyFolder = TrigConfCoolFolderSpec::getLvl1BGKeyFolder(m_dbPtr);
    IObjectIteratorPtr objects = lvl1BGKeyFolder->browseObjects( vr.since(), vr.until(), 0 );
-   objects->goToNext();
+   if (not objects->goToNext()){
+     throw std::runtime_error("TrigConfCoolWriter::readL1BunchGroupLBPayload: 'objects' is empty.");
+   }
    const IObject& obj = objects->currentRef();
    const IRecord & payload1 = obj.payload();
    bgKey = readLvl1BGKey( payload1.attributeList() );
@@ -1591,7 +1593,9 @@ TrigConfCoolWriter::readL1BunchGroupLBPayload( unsigned int run, unsigned int lb
    // read the bunch group content
    IFolderPtr lvl1BGContentFolder = TrigConfCoolFolderSpec::getLvl1BGContentFolder(m_dbPtr);
    IObjectIteratorPtr objects2 = lvl1BGContentFolder->browseObjects( vr.since(), vr.until(), 0);
-   objects2->goToNext();
+   if (not objects2->goToNext()){
+     throw std::runtime_error("TrigConfCoolWriter::readL1BunchGroupLBPayload: 'objects2' is empty.");
+   }
    const IObject& obj2 = objects2->currentRef();
    const IRecord & payload2 = obj2.payload();
    vector<BunchGroup> bgV = readLvl1BGContent( payload2.attributeList() );
@@ -1643,12 +1647,12 @@ TrigConfCoolWriter::readL1PrescalePayload( unsigned int run, unsigned int lb,
 
    IFolderPtr lvl1CkFolder = TrigConfCoolFolderSpec::getLvl1ConfKeyFolder(m_dbPtr);
    IObjectIteratorPtr objects = lvl1CkFolder->browseObjects( vr.since(), vr.since()+1, 0 );
-   objects->goToNext();
+   if (not objects->goToNext()){
+     throw std::runtime_error("TrigConfCoolWriter::readL1PrescalePayload: 'objects' is empty.");
+   }
    const IObject& obj = objects->currentRef();
    const IRecord & payload = obj.payload();
    readLvl1ConfigKey( payload.attributeList(), lvl1PrescaleKey );
-
-
    cool::IFolderPtr lvl1PsFolder = TrigConfCoolFolderSpec::getLvl1PrescalesFolder(m_dbPtr);
 
    // resize the vector to the correct size
@@ -1657,14 +1661,12 @@ TrigConfCoolWriter::readL1PrescalePayload( unsigned int run, unsigned int lb,
    prescale.resize( nPrescales );
 
    for(cool::ChannelId channel = 0; channel < nPrescales; channel++) {
-
       objects = lvl1PsFolder->browseObjects( vr.since(), vr.until(), channel );
-
       if(objects->size()!=1) { 
          throw std::runtime_error("Lvl1 prescale access error: found empty prescale channel ");
       }
-
-      objects->goToNext();
+      //already checked size, so this should be ok
+      (void)objects->goToNext();
       const IObject& obj = objects->currentRef();
       const IRecord & payload = obj.payload();
       int64_t prescaleVal=0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_L1TopoMenuLoader
@@ -9,7 +9,8 @@
 #include "TrigConfStorage/DBLoader.h"
 #include "L1TopoConfig/L1TopoMenu.h"
 
-#include <set>
+#include <map>
+//uint comes from sys/types.h ; not ideal, better to use fixed width type
 
 namespace TrigConf {
 
