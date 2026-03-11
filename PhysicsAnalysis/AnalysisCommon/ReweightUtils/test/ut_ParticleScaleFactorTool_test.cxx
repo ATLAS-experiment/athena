@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,7 +17,7 @@
 
 using namespace asg::msgUserCode;
 
-int main() {
+int test1() {
    CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
    ANA_CHECK_SET_TYPE (int); //makes ANA_CHECK return ints if exiting function
 
@@ -128,4 +128,14 @@ int main() {
    std::cout << myTool4->evaluate(e) << std::endl; //should print 1.0
 
    return 0; //zero = success
+}
+
+int main()
+{
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
