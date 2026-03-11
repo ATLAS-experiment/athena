@@ -4,7 +4,7 @@
 
 # use some helper functions from MadGraphUtils
 import ast
-from MadGraphControl.MadGraphUtils import get_lhapdf_id_and_name
+from MCJobOptionUtils.LHAPDFsupport import get_lhapdf_id_and_name
 
 from AthenaCommon import Logging
 mgsyslog = Logging.logging.getLogger('MadGraphSysUtils')
