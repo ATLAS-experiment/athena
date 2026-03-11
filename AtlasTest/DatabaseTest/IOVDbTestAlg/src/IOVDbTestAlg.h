@@ -15,7 +15,6 @@
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 
 #include "RegistrationServices/IIOVRegistrationSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
