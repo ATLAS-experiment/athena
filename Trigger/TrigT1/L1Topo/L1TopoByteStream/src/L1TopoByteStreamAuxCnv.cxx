@@ -82,6 +82,7 @@ StatusCode L1TopoByteStreamAuxCnv::createObj(IOpaqueAddress* pAddr,
   ByteStreamAddress* pBS_Addr = dynamic_cast<ByteStreamAddress*>(pAddr);
   CHECK(pBS_Addr != nullptr);
   // -------------------------------------------------------------------------
+  //coverity[FORWARD_NULL:FALSE]
   const std::string nm = *(pBS_Addr->par());
   ATH_MSG_DEBUG("Creating Objects " << nm);
 

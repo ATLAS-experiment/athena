@@ -1,11 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOSTANALYSIS_MONITORTHREADOCCUPANCY_H
 #define TRIGCOSTANALYSIS_MONITORTHREADOCCUPANCY_H 1
 
 #include "../MonitorBase.h"
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 /**
  * @class MonitorThreadOccupancy
