@@ -48,7 +48,9 @@ class SeedingToolBase: public AthAlgTool {
   bool check_z0_bitmask(const unsigned short&, const float&, const float&, const float&) const;
 
   float estimate_curvature(const std::array<const GNN_Node*, 3>&) const;
-  
+
+  bool validate_triplet(std::array<const GNN_Node*, 3>&, const float pt_scale) const;
+    
   ToolHandle<ITrigL2LayerNumberTool> m_layerNumberTool {this, "layerNumberTool", "TrigL2LayerNumberToolITk"};
 
   const AtlasDetectorID* m_atlasId = nullptr;
@@ -74,8 +76,10 @@ class SeedingToolBase: public AthAlgTool {
   BooleanProperty m_useGPUseedExtraction{this, "UseGPUseedExtraction", true};
   BooleanProperty m_useOldTunings{this, "UseOldTunings", false};
 
-  FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.007};
+  FloatProperty m_tau_ratio_cut{this, "tau_ratio_cut", 0.008};
 
+  FloatProperty m_d0_max{this, "d0_max", 3.0};
+  
   float m_phiSliceWidth = 0.;
 
   std::unique_ptr<GNN_FasTrackConnector> m_connector = nullptr;
