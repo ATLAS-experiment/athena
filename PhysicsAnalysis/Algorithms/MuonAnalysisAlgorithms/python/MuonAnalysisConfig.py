@@ -89,8 +89,13 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::MuonContainer'
+            decorationList = ['DFCommonJetDr']
             if self.addGlobalFELinksDep:
-                alg.declareDecorations = ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+                decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorationList += ['TruthLink']
+            if self.addGlobalFELinksDep or config.dataType() is not DataType.Data:
+                alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all muons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
