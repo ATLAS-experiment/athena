@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -291,6 +291,7 @@ int main(int argc, char** argv) {
             cout << "Loaded job options with " << jo.getObject("properties").getKeys().size() << " properties from " << fn << endl;
             if( cfg.detail ) {
                TrigConf::DataStructure ds = jo.getObject("properties");
+               //cppcheck-suppress throwInEntryPoint
                for( const auto& alg : ds.data()) {
                   std::cout << alg.first << std::endl;
                   for( const auto& prop : alg.second ) {
