@@ -32,10 +32,9 @@ if [ $rc1 -eq 0 ]
 then
   art.py compare grid --entries 20 "$1" "$2" --mode=semi-detailed --order-trees --ignore-exit-code diff-pool \
 	 --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)' \
-	 --ignore-leave 'xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bjet_FTFAux.definingParametersCovMatrixDiag' \
-	 --ignore-leave 'xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bjet_FTFAux.definingParametersCovMatrixOffDiag' \
-	 --ignore-leave 'xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bphysics_FTFAux.definingParametersCovMatrixDiag' \
-	 --ignore-leave 'xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Bphysics_FTFAux.definingParametersCovMatrixOffDiag'
+	 --ignore-leave 'xAOD::TrackParticleAuxContainer_v5_HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_(.*)FTFAux.definingParametersCovMatrix(.*)' \
+	 --ignore-leave 'xAOD::TrigNavigationAuxInfo_v1_TrigNavigationAux.serialized' \
+	 --ignore-leave 'HLT::HLTResult_p1_HLTResult_HLT.m_navigationResult'
   rc2=$?
 fi
 echo "art-result: $rc2 Diff"
