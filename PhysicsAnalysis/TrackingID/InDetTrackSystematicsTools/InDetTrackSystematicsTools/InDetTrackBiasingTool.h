@@ -11,6 +11,7 @@
 #include "PATInterfaces/CorrectionTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "AsgTools/PropertyWrapper.h"
 #include <string>
 #include <vector>
 
@@ -69,77 +70,13 @@ namespace InDet {
 
     float readHistogram(float fDefault, TH2* histogram, float phi, float eta) const;
 
-    float m_biasD0 = 0.f;
-    float m_biasZ0 = 0.f;
-    float m_biasQoverPsagitta = 0.f;
-
-    std::unique_ptr<TH2> m_data15_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data15_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data15_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data15_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data15_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data15_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data16_1stPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_1stPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_1stPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_1stPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data16_1stPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data16_1stPart_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data16_2ndPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_2ndPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data16_2ndPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data16_2ndPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data16_2ndPart_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data17_1stPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_1stPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_1stPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_1stPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data17_1stPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data17_1stPart_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data17_2ndPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_2ndPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data17_2ndPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data17_2ndPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data17_2ndPart_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data18_1stPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_1stPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_1stPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_1stPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data18_1stPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data18_1stPart_biasQoverPsagittaHistError = nullptr; //!
-
-    std::unique_ptr<TH2> m_data18_2ndPart_biasD0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_2ndPart_biasZ0Histogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
-    std::unique_ptr<TH2> m_data18_2ndPart_biasD0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data18_2ndPart_biasZ0HistError = nullptr; //!
-    std::unique_ptr<TH2> m_data18_2ndPart_biasQoverPsagittaHistError = nullptr; //!
-
-    // if neither of these is set manually, then the tool will try to get this from EventInfo in the event store.
-    // these options exist only as a manual override.
-    bool m_isData = false;
-    bool m_isSimulation = false;
-    uint32_t m_runNumber = 0;
-
-    bool m_doD0Bias = true;
-    bool m_doZ0Bias = true;
-    bool m_doQoverPBias = true;
-
-    // allow the user to configure which calibration files to use if desired
-    std::string m_calibFileData15;
-    std::string m_calibFileData16_1stPart;
-    std::string m_calibFileData16_2ndPart;
-    std::string m_calibFileData17_1stPart;
-    std::string m_calibFileData17_2ndPart;
-    std::string m_calibFileData18_1stPart;
-    std::string m_calibFileData18_2ndPart;
+    // one entry per configured run period (ordered by ascending run number)
+    std::vector<std::unique_ptr<TH2>> m_biasD0Histograms; //!
+    std::vector<std::unique_ptr<TH2>> m_biasZ0Histograms; //!
+    std::vector<std::unique_ptr<TH2>> m_biasQoverPsagittaHistograms; //!
+    std::vector<std::unique_ptr<TH2>> m_biasD0HistErrors; //!
+    std::vector<std::unique_ptr<TH2>> m_biasZ0HistErrors; //!
+    std::vector<std::unique_ptr<TH2>> m_biasQoverPsagittaHistErrors; //!
 
     // paths and histogram names in the calibration files
     std::string m_d0_nominal_histName = "d0/d0_theNominal";
@@ -148,6 +85,27 @@ namespace InDet {
     std::string m_d0_uncertainty_histName = "d0/d0_theUncertainty";
     std::string m_z0_uncertainty_histName = "z0/z0_theUncertainty";
     std::string m_sagitta_uncertainty_histName = "sagitta/sagitta_theUncertainty";
+
+    Gaudi::Property<float> m_biasD0{this, "biasD0", 0.f, "Overall d0 bias (mm)."};
+    Gaudi::Property<float> m_biasZ0{this, "biasZ0", 0.f, "Overall z0 bias (mm)."};
+    Gaudi::Property<float> m_biasQoverPsagitta{this, "biasQoverPsagitta", 0.f, "Overall QoverP sagitta bias (TeV^-1)."};
+
+    Gaudi::Property<bool> m_applyD0Bias{this, "applyD0Bias", true, "Whether to apply the d0 bias from the calibration map."};
+    Gaudi::Property<bool> m_applyZ0Bias{this, "applyZ0Bias", true, "Whether to apply the z0 bias from the calibration map."};
+    Gaudi::Property<bool> m_applyQoverPBias{this, "applyQoverPBias", true, "Whether to apply the q/p sagitta bias from the calibration map."};
+
+    // if neither of these is set manually, then the tool will try to get this from EventInfo in the event store.
+    // these options exist only as a manual override.
+    Gaudi::Property<bool> m_isData{this, "isData", false, "Manually flag the input as data."};
+    Gaudi::Property<bool> m_isSimulation{this, "isSimulation", false, "Manually flag the input as simulation."};
+    Gaudi::Property<uint32_t> m_runNumber{this, "runNumber", 0, "Manually override the run number used to select the calibration period."};
+
+    // calibration files and run number bounds for each period, configured per MC campaign via the python config.
+    // runNumberBounds has the form {lower0, upper0, upper1, upper2, ...} (N+1 entries for N periods),
+    // where period i spans (runNumberBounds[i], runNumberBounds[i+1]].
+    // May be omitted when only one calibration file is configured (all run numbers are accepted).
+    Gaudi::Property<std::vector<std::string>> m_calibFiles{this, "calibFiles", {}, "Calibration files, one per run period."};
+    Gaudi::Property<std::vector<unsigned int>> m_runNumberBounds{this, "runNumberBounds", {}, "Run number boundaries: {lower0, upper0, upper1, ...}. May be omitted when only one calibration file is configured."};
 
   }; // class InDetTrackBiasingTool
 

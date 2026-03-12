@@ -42,6 +42,15 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             "by the `InDetTrackBiasingTool`. Expert option in addition to the "
             "recommendations.",
             expertMode=True)
+        self.addOption ('applyD0Bias', True, type=bool,
+            info="whether to apply the $d_0$ bias from the calibration map in the "
+            "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
+        self.addOption ('applyZ0Bias', False, type=bool,
+            info="whether to apply the $z_0$ bias from the calibration map in the "
+            "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
+        self.addOption ('applyQoverPBias', False, type=bool,
+            info="whether to apply the $q/p$ sagitta bias from the calibration map in the "
+            "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
         self.addOption ('customRunNumber', None, type=int,
             info="manually sets the `runNumber` in the `InDetTrackBiasingTool`. "
             "Expert option leads to use of different recommendations. Default is "
@@ -72,15 +81,68 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                              biasD0             :   float=None,
                              biasZ0             :   float=None,
                              biasQoverPsagitta  :   float=None,
-                             customRunNumber    :   int=None) :
+                             customRunNumber    :   int=None,
+                             applyD0Bias        :   bool=True,
+                             applyZ0Bias        :   bool=False,
+                             applyQoverPBias    :   bool=False) :
         toolName = "biasingTool"
         config.addPrivateTool(toolName, "InDet::InDetTrackBiasingTool")
-        if config.geometry() is LHCPeriod.Run3:
-            raise ValueError ('Recommendations are not yet available in Run 3.')
-        elif config.geometry() is not LHCPeriod.Run2:
-            raise ValueError ('No recommendations found for geometry \"'
+
+        # Configure calibration files and run number ranges per MC campaign.
+        # Each calibration file corresponds to events with runNumberBounds[i] < runNumber <= runNumberBounds[i+1];
+        # the tool matches the event run number against these ranges at runtime.
+        if config.geometry() is LHCPeriod.Run2:
+            if config.campaign() is Campaign.MC20a:
+                # 2015 + 2016 recommendations (MC20a)
+                alg.biasingTool.calibFiles = [
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2015.root",
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_1stPart.root",
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_2ndPart.root",
+                ]
+                alg.biasingTool.runNumberBounds = [-1, 296938, 301912, 999999]
+            elif config.campaign() is Campaign.MC20d:
+                # 2017 recommendations (MC20d)
+                alg.biasingTool.calibFiles = [
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_1stPart.root",
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_2ndPart.root",
+                ]
+                alg.biasingTool.runNumberBounds = [-1, 334842, 999999]
+            elif config.campaign() is Campaign.MC20e:
+                # 2018 recommendations (MC20e)
+                alg.biasingTool.calibFiles = [
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_1stPart.root",
+                    "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_2ndPart.root",
+                ]
+                alg.biasingTool.runNumberBounds = [-1, 353000, 999999]
+            else:
+                raise ValueError ('No biasing recommendations found for campaign \"'
+                                  + config.campaign().value + '\" in Run 2. '
+                                  'Please check the configuration.')
+        elif config.geometry() is LHCPeriod.Run3:
+            if config.campaign() is Campaign.MC23a:
+                # 2022 recommendations (MC23a)
+                alg.biasingTool.calibFiles = [
+                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2022_d0z0qoverp_biasing_factor.root",
+                ]
+            elif config.campaign() is Campaign.MC23d:
+                # 2023 recommendations (MC23d)
+                alg.biasingTool.calibFiles = [
+                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2023_d0z0qoverp_biasing_factor.root",
+                ]
+            elif config.campaign() is Campaign.MC23e:
+                # 2024 recommendations (MC23e)
+                alg.biasingTool.calibFiles = [
+                    "dev/InDetTrackSystematicsTools/CalibData_25.2_2025-v00/2024_d0z0qoverp_biasing_factor.root",
+                ]
+            else:
+                raise ValueError ('No biasing recommendations found for campaign \"'
+                                  + config.campaign().value + '\" in Run 3. '
+                                  'Please check the configuration.')
+        else:
+            raise ValueError ('No biasing recommendations found for geometry \"'
                               + config.geometry().value + '\". Please check '
                               'the configuration.')
+
         if biasD0:
             alg.biasingTool.biasD0 = biasD0
         if biasZ0:
@@ -89,6 +151,11 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             alg.biasingTool.biasQoverPsagitta = biasQoverPsagitta
         if customRunNumber:
             alg.biasingTool.runNumber = customRunNumber
+        # By default only the d0 bias is applied; z0 and q/p biasing can be enabled
+        # via the applyZ0Bias / applyQoverPBias options once those maps are validated.
+        alg.biasingTool.applyD0Bias    = applyD0Bias
+        alg.biasingTool.applyZ0Bias    = applyZ0Bias
+        alg.biasingTool.applyQoverPBias = applyQoverPBias
         pass
 
     @staticmethod
@@ -161,7 +228,10 @@ class InDetTrackCalibrationConfig (ConfigBlock):
                                           self.biasD0,
                                           self.biasZ0,
                                           self.biasQoverPsagitta,
-                                          self.customRunNumber)
+                                          self.customRunNumber,
+                                          self.applyD0Bias,
+                                          self.applyZ0Bias,
+                                          self.applyQoverPBias)
                 alg.inDetTracks = config.readName (self.containerName)
                 alg.inDetTracksOut = config.copyName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
