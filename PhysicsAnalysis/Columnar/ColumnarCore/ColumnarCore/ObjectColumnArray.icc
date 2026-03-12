@@ -35,7 +35,7 @@ namespace columnar
         columnBase.setContainerUserName (CI::idName, name);
       m_offsetsData = std::make_unique<ColumnAccessorDataArray> (&m_offsetsIndex, &m_offsetsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
       auto info = options.makeColumnInfo();
-      info.offsetName = (CI::perEventRange ? numberOfEventsName : "");
+      info.offsetName = (CI::perEventRange ? eventContextCIName : "");
       info.isOffset = true;
       columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), std::move (info));
     }

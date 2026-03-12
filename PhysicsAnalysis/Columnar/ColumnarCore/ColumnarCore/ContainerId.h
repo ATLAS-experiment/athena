@@ -10,6 +10,7 @@
 
 #include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/ColumnarDef.h>
 
 class EventContext;
 
@@ -160,7 +161,7 @@ namespace columnar
     // including this here, since everyone needs EventContextId/EventContextRange
     struct eventContext : regularCIBase<EventContext,EventContext>
     {
-      static constexpr std::string_view idName = "eventContext";
+      static constexpr std::string_view idName = eventContextCIName;
 
       // disable retrieve as either ObjectId or ObjectRange, the event
       // context will always be passed into tool code by the caller
