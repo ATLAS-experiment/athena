@@ -109,7 +109,6 @@ namespace ExpressionParsing {
                dumpAux(*handle, 357);
                throw err;
             }
-            return DecorHelper<T_Cont,T_src>(ctx, *m_decorKey, handle);
          }
       private:
          const SG::ReadDecorHandleKey<T_Cont> *m_decorKey;
