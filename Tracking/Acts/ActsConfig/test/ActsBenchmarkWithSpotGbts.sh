@@ -19,11 +19,7 @@ ATHENA_CORE_NUMBER=${NTHREADS} Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --steering 'doRAWtoALL' \
     --preExec 'from ActsConfig.ActsConfigFlags import SeedingStrategy;\
-               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts2;\
-               flags.Tracking.doPixelDigitalClustering=True; \
-               from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy; \
-               flags.Acts.PixelCalibrationStrategy=PixelCalibrationStrategy.Uncalibrated; \
-               flags.Acts.doLargeRadius=True;' \
+               flags.Acts.SeedingStrategy=SeedingStrategy.Gbts;' \
     --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True;' \
     --inputRDOFile ${input_rdo} \
     --outputAODFile 'myAOD.pool.root' \
