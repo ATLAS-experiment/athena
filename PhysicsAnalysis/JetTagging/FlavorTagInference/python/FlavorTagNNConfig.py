@@ -304,7 +304,7 @@ def getModifierSet(tagger_name):
     # - N is the major version number
     # - mods specify the inputs we run on
     # - M is the minor version number
-    tagparse = re.compile('(GN|gn)([0-9])(.*)([vV])([0-9]+)')
+    tagparse = re.compile(r'(GN|gn)([0-9])(.*?)(?:([vV])([0-9]+))?$')
     if not (matches := tagparse.match(tagger_name)):
         raise ValueError(f"can't parse {tagger_name}")
     pfx, major, mods, verchar, minor = matches.groups()
