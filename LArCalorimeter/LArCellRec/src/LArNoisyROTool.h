@@ -83,7 +83,11 @@ class LArNoisyROTool : public extends<AthAlgTool, ILArNoisyROTool> {
 
   std::unordered_map<unsigned int, unsigned int> m_mapPSFEB;
 
-  typedef std::unordered_map<HWIdentifier, unsigned int> HVlinesStatMap;
+  struct HVlinesStatMapValue {
+    uint32_t noisy;
+    uint32_t sharedNoisy;  // each cell is counted with a multiplicity equal to the number of HV lines it is fed by
+  };
+  typedef std::unordered_map<HWIdentifier, HVlinesStatMapValue> HVlinesStatMap;
 
  private:
   ToolHandle<ILArHVMapTool> m_hvMapTool{"LArHVMapTool"};
@@ -116,9 +120,9 @@ class LArNoisyROTool : public extends<AthAlgTool, ILArNoisyROTool> {
 
   Gaudi::Property<bool> m_doHVline{this, "DoHVflag", true, "do HVline flagging"};
 
-  Gaudi::Property<float> m_BadChanFracPerHVline{this, "BadChanFracPerHVline", 0.25, "fraction of bad cells in one HV line"};
-
+  Gaudi::Property<float> m_BadChanFracPerHVline{this, "BadChanFracPerHVline", 0.25, "min fraction of bad cells in one HV line"};
   Gaudi::Property<unsigned int> m_MinBadHV{this, "BadHVCut", 3, " min number of bad HV lines"};
+  Gaudi::Property<unsigned int> m_connChanPerHVline{this, "ConnectedChanPerHVline", 10, "min number of cells connected to HV line for it to be used for HV flag"};
 
   Gaudi::Property<unsigned int> m_MNBLooseCut{this, "MNBLooseCut", 5, "Loose cut on number of cells above CellQualityCut"};
   Gaudi::Property<unsigned int> m_MNBTightCut{this, "MNBTightCut", 17, "Thight cut on number of cells above CellQualityCut"};
