@@ -17,6 +17,8 @@
 
 #include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
+#include <algorithm> //std::min
+#include <iostream>
 
 //coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
@@ -45,7 +47,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    TStopwatch st2;
    st2.Start();
    for(int i=0; i< maxEvt2; i++) {
-      evt2.getEntry(i);
+      if (evt2.getEntry(i) != 0) return -1;
       ANA_CHECK (evt2.retrieve( evtInfo , "EventInfo" ));
       evtInfo->eventNumber();
    }
