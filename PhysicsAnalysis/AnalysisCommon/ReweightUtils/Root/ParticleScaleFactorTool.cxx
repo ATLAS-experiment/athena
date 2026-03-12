@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
@@ -212,6 +212,7 @@ double ParticleScaleFactorTool::evaluate( const xAOD::IParticle* particle ) cons
 
    double nom = histItr->second.getHist(CP::SystematicVariation("")).second->GetBinContent(bin);
    //got here so get nominal hist and do difference ...
+   //coverity[DIVIDE_BY_ZERO:FALSE]
    return nom + (m_currentSyst.parameter()/res.first.parameter()) * (hist->GetBinContent(bin) - nom);
 
 
