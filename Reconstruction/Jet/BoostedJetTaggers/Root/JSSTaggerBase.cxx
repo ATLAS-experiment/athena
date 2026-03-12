@@ -11,9 +11,6 @@
 JSSTaggerBase::JSSTaggerBase(const std::string &name) :
   asg::AsgTool(name),
   m_calibArea(""),
-  m_jetPtMin(200000.),
-  m_jetPtMax(3000000.),
-  m_jetEtaMax(2.0),
   m_strMassCutLow(""),
   m_strMassCutHigh(""),
   m_strScoreCut("")

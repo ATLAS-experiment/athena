@@ -19,20 +19,28 @@ def qgTagAlgCfg(configFlags, **kwargs):
     # BJT config file
     config_file = kwargs['cfg_file']
 
+    # run
+    run = kwargs['run']
+
     # input WP file
-    wps_file = kwargs['wps_file']
+    wps_file = 'QGTagger_WPs_' + run + '.root'
     wps_histo = "QGTransformer_ConstScore__" + kwargs['WP'] + "WP"
 
     # configure the histogram reader
     tool_args = {}
 
     histo2D = HistoInputCfg(configFlags, "histo2D",
-                            inputFile = wps_file,
+                            inputFile = kwargs['calib_path'] + '/' + wps_file,
                             histName = wps_histo,
                             varX = "pt", varY = "eta",
                             InterpType="None")
 
     tool_args.setdefault("HistoReader2D", histo2D)
+
+    # configure the kinematic range
+    tool_args.setdefault("jetPtMin", 20.)
+    tool_args.setdefault("jetPtMax", 2000.)
+    tool_args.setdefault("jetEtaMax", 4.5)
 
     # pick the BJT tool
     tool_args.setdefault("ConfigFile", config_file)
@@ -40,9 +48,8 @@ def qgTagAlgCfg(configFlags, **kwargs):
     tool = acc.popToolsAndMerge(BJTToolCfg(kwargs, **tool_args))
 
     # sf tool cfg
-    if 'sfs_file' in kwargs:
-        # input SF file
-        sfs_file = kwargs['sfs_file']
+    if kwargs['addSFs']:
+        # histo name
         sfs_histo = "QGTransformer_ConstScore__" + kwargs['WP'] + "WP"
 
         # configure the histogram reader
@@ -51,8 +58,11 @@ def qgTagAlgCfg(configFlags, **kwargs):
         histo2D = {}
         for parton in ['quark', 'gluon']:
             for eff in ['eff', 'ineff']:
+                # input SF file
+                sfs_file = 'SF_' + eff + '_' + parton + '_' + run + '.root'
+
                 histo2D[parton + '_' + eff] = HistoInputCfg(configFlags, "histo2D",
-                                                            inputFile = sfs_file + '/SF_' + eff + '_' + parton + '_run2.root',
+                                                            inputFile = kwargs['calib_path'] + '/' + sfs_file,
                                                             histName = sfs_histo,
                                                             varX = "pt", varY = "eta",
                                                             InterpType="None")
@@ -65,14 +75,14 @@ def qgTagAlgCfg(configFlags, **kwargs):
         sfs_tool_args.setdefault("Inefficiency", "QGTransformer_Inefficiency")
         sfs_tool_args.setdefault("truthLabelName", "PartonTruthLabelID")
         sfs_tool_args.setdefault("jetPtMin", 20.)
-        sfs_tool_args.setdefault("jetPtMax", 2500.)
+        sfs_tool_args.setdefault("jetPtMax", 2000.)
         sfs_tool_args.setdefault("jetEtaMax", 4.5)
         sfs_tool = acc.popToolsAndMerge(BJTSFToolCfg(kwargs, **sfs_tool_args))
 
     # configure the BJT algo
     algo_args = {}
     algo_args.setdefault("tagger", tool)
-    if 'sfs_file' in kwargs:
+    if kwargs['addSFs']:
         algo_args.setdefault("scalefactor", sfs_tool)
     algo_args.setdefault("jets", jets_container)
     acc.addEventAlgo(CompFactory.BJT.BoostedJetTaggerAlg("qgAlg", **algo_args))
