@@ -38,7 +38,7 @@ class HIEventFilterAlgRun3 : public ::AthReentrantAlgorithm {
  private:
   using mask_t = unsigned int;
 
-  Gaudi::Property<bool> m_doFilter{this, "doFilter", true,
+  Gaudi::Property<bool> m_doFilter{this, "doFilter", false,
                                    "When false no filtering is actually done"};
   Gaudi::Property<mask_t> m_selectionMask{
       this, "SelectionMask",
