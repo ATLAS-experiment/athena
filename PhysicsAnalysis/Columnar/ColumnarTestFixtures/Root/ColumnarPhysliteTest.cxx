@@ -326,7 +326,7 @@ namespace columnar
 
       ColumnDataEventCount ()
       {
-        outputColumns.push_back ({.name = numberOfEventsName, .isOffset = true});
+        outputColumns.push_back ({.name = eventRangeColumnName, .isOffset = true});
       }
   
       virtual bool connect (TTree * /*tree*/, std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string,ColumnInfo>& requestedColumns) override

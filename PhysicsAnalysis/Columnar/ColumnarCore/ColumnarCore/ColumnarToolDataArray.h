@@ -21,7 +21,7 @@ namespace columnar
     /// @brief standard move constructor
     ColumnDataArray (ColumnDataArray&& other) noexcept;
 
-    ColumnDataArray operator= (ColumnDataArray&& other) noexcept = delete;
+    ColumnDataArray& operator= (ColumnDataArray&& other) noexcept = default;
 
     /// @brief standard destructor
     ~ColumnDataArray () noexcept;
@@ -79,7 +79,7 @@ namespace columnar
     std::unordered_map<std::string,std::vector<std::string>,StringHash,std::equal_to<>> columnUserToInternalNames;
 
     /// @brief the name-column map
-    std::unordered_map<std::string,ColumnDataArray> columns;
+    std::unordered_map<std::string,ColumnDataArray,StringHash,std::equal_to<>> columns;
 
 
     /// @brief convert a column name between user and internal names

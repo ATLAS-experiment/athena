@@ -41,15 +41,15 @@ namespace columnar
       auto columns = tool.getColumnInfo();
       EXPECT_EQ (columns.size(), 1);
       auto& column = columns[0];
-      EXPECT_EQ (column.name, numberOfEventsName);
+      EXPECT_EQ (column.name, eventRangeColumnName);
       EXPECT_EQ (column.index, 0);
     }
-    tool.setColumnIndex (numberOfEventsName, 1);
+    tool.setColumnIndex (eventRangeColumnName, 1);
     {
       auto columns = tool.getColumnInfo();
       EXPECT_EQ (columns.size(), 1);
       auto& column = columns[0];
-      EXPECT_EQ (column.name, numberOfEventsName);
+      EXPECT_EQ (column.name, eventRangeColumnName);
       EXPECT_EQ (column.index, 1);
     }
   }
@@ -59,6 +59,7 @@ namespace columnar
   {
     MyTool tool;
     MyAccessor<uint32_t,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
       EXPECT_EQ (columns.size(), 2);
@@ -67,7 +68,7 @@ namespace columnar
       EXPECT_EQ (column.index, 0);
       EXPECT_EQ (column.type, &typeid (uint32_t));
       EXPECT_EQ (column.accessMode, ColumnAccessMode::input);
-      EXPECT_EQ (column.offsetName, numberOfEventsName);
+      EXPECT_EQ (column.offsetName, eventRangeColumnName);
     }
     tool.setColumnIndex ("EventInfo.var1", 1);
     std::vector<void*> data (2, nullptr);
@@ -91,6 +92,7 @@ namespace columnar
     MyTool tool;
     MyAccessor<ObjectColumn> objectAccessor {tool, "particles"};
     MyAccessor<uint32_t> varAccessor {tool, "var1"};
+    ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
       EXPECT_EQ (columns.size(), 3);
@@ -100,7 +102,7 @@ namespace columnar
         EXPECT_EQ (column.index, 0);
         EXPECT_EQ (column.type, &typeid (ColumnarOffsetType));
         EXPECT_EQ (column.accessMode, ColumnAccessMode::input);
-        EXPECT_EQ (column.offsetName, numberOfEventsName);
+        EXPECT_EQ (column.offsetName, eventRangeColumnName);
       }
       {
         auto& column = columns[2];
@@ -142,6 +144,7 @@ namespace columnar
     MyTool tool;
     MyAccessor<std::vector<uint32_t>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
     MyAccessor<std::vector<RetypeColumn<uint64_t,uint32_t>>,ContainerId::eventInfo> eventRetypeAccessor {tool, "var1"};
+    ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
       EXPECT_EQ (columns.size(), 3);
@@ -156,7 +159,7 @@ namespace columnar
       EXPECT_EQ (columnData.index, 0);
       EXPECT_EQ (columnData.type, &typeid (ColumnarOffsetType));
       EXPECT_EQ (columnData.accessMode, ColumnAccessMode::input);
-      EXPECT_EQ (columnData.offsetName, numberOfEventsName);
+      EXPECT_EQ (columnData.offsetName, eventRangeColumnName);
     }
     tool.setColumnIndex ("EventInfo.var1.offset", 1);
     tool.setColumnIndex ("EventInfo.var1.data", 2);
@@ -187,6 +190,7 @@ namespace columnar
   {
     MyTool tool;
     MyAccessor<std::vector<std::vector<uint32_t>>,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    ASSERT_SUCCESS (tool.initializeColumns());
     {
       auto columns = tool.getColumnInfo();
       ASSERT_EQ (columns.size(), 4);
@@ -204,7 +208,7 @@ namespace columnar
       EXPECT_EQ (columns[3].index, 0);
       EXPECT_EQ (columns[3].type, &typeid (ColumnarOffsetType));
       EXPECT_EQ (columns[3].accessMode, ColumnAccessMode::input);
-      EXPECT_EQ (columns[3].offsetName, numberOfEventsName);
+      EXPECT_EQ (columns[3].offsetName, eventRangeColumnName);
     }
     tool.setColumnIndex ("EventInfo.var1.outerOffset", 1);
     tool.setColumnIndex ("EventInfo.var1.innerOffset", 2);
@@ -245,77 +249,152 @@ namespace columnar
   }
 
 
-  // Tests for renameColumn / renameContainers offset resolution.
-  //
-  // Regression tests for a bug where renameColumn updated the column name
-  // maps but not the container map entry for the old *user* name (e.g.
-  // "Muons"), so convertInternalToUserName("Muons") still returned "Muons"
-  // after renaming it to "AnalysisMuons", leaving offsetName stale.
 
-  TEST (RenameColumnTest, renameContainer_updatesOffsetName)
+  // Tests for renameColumn
+
+  TEST (RenameColumnTest, namedParticles)
   {
-    // A tool with a particle container whose offsetName should point to
-    // EventInfo.  After renaming the container the offsetName reported by
-    // getColumnInfo() must use the new name.
     MyTool tool;
-    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
-    MyAccessor<uint32_t> varAccessor {tool, "var1"};
+    MyAccessor<uint32_t,ContainerId::particle> particleAccessor {tool, "var1"};
+    MyAccessor<ObjectColumn,ContainerId::particle> objectAccessor {tool, "Particles"};
+    ASSERT_SUCCESS (tool.initializeColumns());
 
-    tool.renameColumn ("particles", "AnalysisParticles");
-    tool.renameColumn ("particles.var1", "AnalysisParticles.var1");
-
-    auto columns = tool.getColumnInfo();
-    // Find the offset column for the renamed container.
-    auto it = std::find_if (columns.begin(), columns.end(),
-                            [] (const ColumnInfo& c) { return c.name == "AnalysisParticles"; });
-    ASSERT_NE (it, columns.end());
-    // offsetName must be the user-visible name of EventInfo, not the stale
-    // internal name or an empty string.
-    EXPECT_EQ (it->offsetName, numberOfEventsName);
-
-    // The data column's offsetName must point to the renamed container.
-    auto it2 = std::find_if (columns.begin(), columns.end(),
-                             [] (const ColumnInfo& c) { return c.name == "AnalysisParticles.var1"; });
-    ASSERT_NE (it2, columns.end());
-    EXPECT_EQ (it2->offsetName, "AnalysisParticles");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[0].name, "EventInfo");
+      EXPECT_EQ (columns[0].index, 0);
+      EXPECT_EQ (columns[1].name, "Particles");
+      EXPECT_EQ (columns[1].index, 0);
+      EXPECT_EQ (columns[2].name, "Particles.var1");
+      EXPECT_EQ (columns[2].index, 0);
+    }
+    tool.setColumnIndex ("Particles", 10);
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[1].name, "Particles");
+      EXPECT_EQ (columns[1].index, 10);
+    }
+    tool.setColumnIndex ("Particles.var1", 1);
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[2].name, "Particles.var1");
+      EXPECT_EQ (columns[2].index, 1);
+      EXPECT_EQ (columns[2].offsetName, "Particles");
+    }
+    tool.renameColumn ("Particles.var1", "XParticles.var1");
+    EXPECT_ANY_THROW (tool.renameColumn ("Particles.var1", "XParticles.var1"));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[2].name, "XParticles.var1");
+      EXPECT_EQ (columns[2].index, 1);
+    }
+    tool.setColumnIndex ("XParticles.var1", 2);
+    EXPECT_ANY_THROW (tool.setColumnIndex ("Particles.var1", 3));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[2].name, "XParticles.var1");
+      EXPECT_EQ (columns[2].index, 2);
+    }
+    tool.renameColumn ("Particles", "XParticles");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[1].name, "XParticles");
+      EXPECT_EQ (columns[1].index, 10);
+      EXPECT_EQ (columns[2].name, "XParticles.var1");
+      EXPECT_EQ (columns[2].offsetName, "XParticles");
+    }
+    tool.setColumnIndex ("XParticles", 20);
+    EXPECT_ANY_THROW (tool.setColumnIndex ("Particles", 30));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[1].name, "XParticles");
+      EXPECT_EQ (columns[1].index, 20);
+    }
+    tool.renameColumn ("XParticles.var1", "YParticles.var1");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[2].name, "YParticles.var1");
+      EXPECT_EQ (columns[2].index, 2);
+    }
+    tool.setColumnIndex ("YParticles.var1", 4);
+    EXPECT_ANY_THROW (tool.setColumnIndex ("Particles.var1", 5));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 3);
+      EXPECT_EQ (columns[2].name, "YParticles.var1");
+      EXPECT_EQ (columns[2].index, 4);
+    }
   }
 
-
-  TEST (RenameColumnTest, renameContainer_setColumnIndex_works)
+  TEST (RenameColumnTest, basicEventInfo)
   {
-    // After renaming a container and its columns, setColumnIndex with the
-    // new names must succeed (i.e. locate the underlying internal columns).
     MyTool tool;
-    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
-    MyAccessor<uint32_t> varAccessor {tool, "var1"};
+    MyAccessor<uint32_t,ContainerId::eventInfo> eventAccessor {tool, "var1"};
+    ASSERT_SUCCESS (tool.initializeColumns());
 
-    tool.renameColumn ("particles", "AnalysisParticles");
-    tool.renameColumn ("particles.var1", "AnalysisParticles.var1");
-
-    EXPECT_NO_THROW (tool.setColumnIndex (numberOfEventsName, 1));
-    EXPECT_NO_THROW (tool.setColumnIndex ("AnalysisParticles", 2));
-    EXPECT_NO_THROW (tool.setColumnIndex ("AnalysisParticles.var1", 3));
-  }
-
-
-  TEST (RenameColumnTest, renameEventInfoContainer_updatesParticleOffsetName)
-  {
-    // Regression test for the specific bug reported in the post-mortem:
-    // renaming EventInfo (the root offset container) must cause any particle
-    // container's offsetName to resolve to the new name, not the old one.
-    MyTool tool;
-    MyAccessor<ObjectColumn> particlesHandle {tool, "particles"};
-
-    // Rename the event-info container (user name "EventInfo" -> "EventInfoAuxDyn").
-    tool.renameColumn (numberOfEventsName, "EventInfoAuxDyn");
-
-    auto columns = tool.getColumnInfo();
-    auto it = std::find_if (columns.begin(), columns.end(),
-                            [] (const ColumnInfo& c) { return c.name == "particles"; });
-    ASSERT_NE (it, columns.end());
-    // The offsetName of the particle-container column must resolve to the
-    // renamed EventInfo name, not the stale original name.
-    EXPECT_EQ (it->offsetName, "EventInfoAuxDyn");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[0].name, "EventInfo");
+      EXPECT_EQ (columns[0].index, 0);
+      EXPECT_EQ (columns[1].name, "EventInfo.var1");
+      EXPECT_EQ (columns[1].index, 0);
+    }
+    tool.setColumnIndex ("EventInfo", 10);
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[0].name, "EventInfo");
+      EXPECT_EQ (columns[0].index, 10);
+    }
+    tool.setColumnIndex ("EventInfo.var1", 1);
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[1].name, "EventInfo.var1");
+      EXPECT_EQ (columns[1].index, 1);
+      EXPECT_EQ (columns[1].offsetName, eventRangeColumnName);
+    }
+    tool.renameColumn ("EventInfo.var1", "MyEventInfo.var1");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[1].name, "MyEventInfo.var1");
+      EXPECT_EQ (columns[1].index, 1);
+    }
+    tool.setColumnIndex ("MyEventInfo.var1", 2);
+    EXPECT_ANY_THROW (tool.setColumnIndex ("EventInfo.var1", 3));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[1].name, "MyEventInfo.var1");
+      EXPECT_EQ (columns[1].index, 2);
+    }
+    tool.renameColumn ("EventInfo", "MyEventInfo");
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[0].name, "MyEventInfo");
+      EXPECT_EQ (columns[0].index, 10);
+      EXPECT_EQ (columns[1].name, "MyEventInfo.var1");
+      EXPECT_EQ (columns[1].offsetName, "MyEventInfo");
+    }
+    tool.setColumnIndex ("MyEventInfo", 20);
+    EXPECT_ANY_THROW (tool.setColumnIndex ("EventInfo", 30));
+    {
+      auto columns = tool.getColumnInfo();
+      ASSERT_EQ (columns.size(), 2);
+      EXPECT_EQ (columns[0].name, "MyEventInfo");
+      EXPECT_EQ (columns[0].index, 20);
+    }
   }
 }
 

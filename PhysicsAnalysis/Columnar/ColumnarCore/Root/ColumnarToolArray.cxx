@@ -30,15 +30,9 @@ namespace columnar
       m_data->mainTool = this;
       m_data->sharedTools.push_back (this);
 
-      setContainerUserName (ContainerId::eventContext::idName, numberOfEventsName);
-
-      // this name matches the ContainerId::eventInfo::idName, make sure
-      // to keep them in sync. the reason for hard-coding this in two
-      // places is because ContainerId::eventInfo is defined in a separate
-      // package
-      setContainerUserName ("eventInfo", numberOfEventsName);
+      setContainerUserName (eventContextCIName, eventRangeColumnName);
       m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      addColumn (std::string (ContainerId::eventContext::idName), m_eventsData.get(), {.isOffset = true});
+      addColumn (std::string (eventContextCIName), m_eventsData.get(), {.isOffset = true});
     } else
     {
       m_data = val_parent->m_data;
@@ -99,7 +93,12 @@ namespace columnar
     {
       auto [iter,success] = m_data->columns.try_emplace (column.first, std::move (column.second));
       if (!success)
-        iter->second.mergeData (column.first, std::move (column.second));
+      {
+        if (iter->second.empty())
+          iter->second = std::move (column.second);
+        else if (!column.second.empty())
+          iter->second.mergeData (column.first, std::move (column.second));
+      }
     }
 
     m_data->sharedTools.insert (m_data->sharedTools.end(), subtoolData->sharedTools.begin(), subtoolData->sharedTools.end());
@@ -166,6 +165,8 @@ namespace columnar
     }
 
     auto internalNames = m_data->convertUserToInternalNames (from);
+    if (internalNames.empty())
+      throw std::runtime_error ("column not found for rename: " + from);
     m_data->columnUserToInternalNames[to].insert (m_data->columnUserToInternalNames[to].end(), internalNames.begin(), internalNames.end());
     for (auto& internalName : internalNames)
       m_data->columnInternalToUserNames[internalName] = to;
@@ -181,7 +182,7 @@ namespace columnar
     for (auto& internalName : internalNames)
     {
       if (auto column = m_data->columns.find (internalName);
-          column != m_data->columns.end())
+          column != m_data->columns.end() && !column->second.empty())
       {
         column->second.setIndex (index);
         wasSet = true;
@@ -211,6 +212,16 @@ namespace columnar
     info.accessMode = accessorData->accessMode;
 
     m_data->columns[name].addAccessor (name, info, accessorData);
+
+    // make sure all referenced columns also exist
+    if (!info.offsetName.empty())
+      m_data->columns[info.offsetName];
+    if (!info.replacesColumn.empty())
+      m_data->columns[info.replacesColumn];
+    for (auto& targetName : info.linkTargetNames)
+      m_data->columns[targetName];
+    if (!info.variantLinkKeyColumn.empty())
+      m_data->columns[info.variantLinkKeyColumn];
   }
 
 
@@ -356,13 +367,18 @@ namespace columnar
     if (split == std::string::npos)
       split = name.size();
     auto containerName = name.substr (0, split);
-    auto iter = containerUserToInternalNames.find (containerName);
-    if (iter == containerUserToInternalNames.end())
-      return {std::string (name)};
     std::vector<std::string> result;
-    for (auto& internalContainerName : iter->second)
-      result.push_back (internalContainerName + std::string (name.substr (split)));
-    if (result.empty())
+    if (auto iter = containerUserToInternalNames.find (containerName);
+        iter != containerUserToInternalNames.end())
+    {
+      for (auto& internalContainerName : iter->second)
+      {
+        std::string subname = internalContainerName + std::string (name.substr (split));
+        if (!columnInternalToUserNames.contains (subname) && columns.contains (subname))
+          result.push_back (std::move (subname));
+      }
+    }
+    if (!containerInternalToUserNames.contains (containerName) && !columnInternalToUserNames.contains (name) && columns.contains (name))
       result.push_back (std::string (name));
     return result;
   }

@@ -125,8 +125,10 @@ namespace columnar
     AccessorTemplate () noexcept = default;
 
     AccessorTemplate (ColumnarTool<CM>& columnarTool, const std::string& name, ColumnAccessorOptions&& options = {})
-      : m_accessor (columnarTool, std::move (options), detail::ColumnAccessorOptionsArray{.offsetName = CI::idName, .baseName = std::string (CI::idName) + "." + name})
-    {}
+      : m_accessor (columnarTool, std::move (options), detail::ColumnAccessorOptionsArray{.offsetName = CI::perEventRange ? CI::idName : eventContextCIName, .baseName = std::string (CI::idName) + "." + name})
+    {
+      static_assert (CI::perEventRange + CI::perEventId == 1, "ContainerId must be either per-event-range or per-event-id");
+    }
 
     AccessorTemplate (AccessorTemplate&& that) = default;
     AccessorTemplate& operator = (AccessorTemplate&& that) = default;

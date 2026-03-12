@@ -3,4 +3,4 @@
 # The compiled extension is a private implementation module.
 from .python_tool_handle import PythonToolHandle, numberOfEventsName
 
-__all__ = ("PythonToolHandle", "numberOfEventsName")
+__all__ = ("PythonToolHandle", "numberOfEventsName", "eventRangeColumnName")

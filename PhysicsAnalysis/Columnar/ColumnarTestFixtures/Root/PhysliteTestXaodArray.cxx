@@ -74,7 +74,7 @@ namespace columnar
 
       struct ColumnDataXAEventInfo final : public IColumnReaderXA, asg::AsgMessaging
       {
-        std::string m_name = "EventInfo";
+        std::string m_name {eventRangeColumnName};
         unsigned index = 0;
         std::array<ColumnarOffsetType, 2> data = {0, 1};
         const xAOD::EventInfo* eventInfo = nullptr;
@@ -338,10 +338,10 @@ namespace columnar
         {
           if (*data.info.type != typeid(ColumnarOffsetType))
             throw std::runtime_error ("unexpected type for offset column: " + name + " " + data.info.type->name());
-          if (name == numberOfEventsName)
+          if (name == eventRangeColumnName)
           {
             data.reader = std::make_shared<TestUtils::ColumnDataXAEventInfo> (data.info);
-          } else if (data.info.offsetName == numberOfEventsName)
+          } else if (data.info.offsetName == eventRangeColumnName)
           {
             if (name == "AnalysisMuons")
               data.reader = std::make_shared<TestUtils::ColumnDataXARetrieve<xAOD::MuonContainer>> (data.info, userConfiguration);

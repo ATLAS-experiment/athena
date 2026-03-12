@@ -130,7 +130,8 @@ NB_MODULE(python_tool_handle, module) {
     if (columnar::columnarAccessMode != 2)
         throw nb::import_error("This module can only be used in columnar access mode. Try setting up a ColumnarAnalysis release instead.");
 
-    module.attr("numberOfEventsName") = &columnar::numberOfEventsName;
+    module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
+    module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;
 
     /// load in the ColumnAccessMode enum
     nb::enum_<columnar::ColumnAccessMode>(module, "ColumnAccessMode")
