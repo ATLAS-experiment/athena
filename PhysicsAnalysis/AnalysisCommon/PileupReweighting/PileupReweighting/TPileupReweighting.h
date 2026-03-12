@@ -380,8 +380,14 @@ public:
             }
          }
          void getTriggers(std::vector<TString>& s) {
-            if(trig1==0&&trig2==0&&val.Length()>0) s.push_back(val);
-            else { trig1->getTriggers(s); trig2->getTriggers(s); }
+            if(trig1==0 && trig2==0 && val.Length()>0){ 
+              s.push_back(val);
+            } else { 
+              if (trig1 && trig2) {
+                trig1->getTriggers(s); 
+                trig2->getTriggers(s); 
+              }
+            }
          }
          
          long getBits(const TPileupReweighting* tool) {
