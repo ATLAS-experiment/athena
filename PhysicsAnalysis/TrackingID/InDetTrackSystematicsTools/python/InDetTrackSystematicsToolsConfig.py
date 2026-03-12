@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTrackSystematicsTools package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -130,6 +130,7 @@ def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
 
 def InDetTrackBiasingToolCfg(flags, name="InDetTrackBiasingTool", **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("isMC", flags.Input.isMC)
 
     acc.setPrivateTools(
         CompFactory.InDet.InDetTrackBiasingTool(name, **kwargs))

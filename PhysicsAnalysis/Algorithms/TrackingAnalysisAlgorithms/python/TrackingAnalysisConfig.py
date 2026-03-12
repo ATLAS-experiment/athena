@@ -43,13 +43,13 @@ class InDetTrackCalibrationConfig (ConfigBlock):
             "recommendations.",
             expertMode=True)
         self.addOption ('applyD0Bias', True, type=bool,
-            info="whether to apply the $d_0$ bias from the calibration map in the "
+            info=r"whether to apply the $d_0$ bias from the calibration map in the "
             "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
         self.addOption ('applyZ0Bias', False, type=bool,
-            info="whether to apply the $z_0$ bias from the calibration map in the "
+            info=r"whether to apply the $z_0$ bias from the calibration map in the "
             "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
         self.addOption ('applyQoverPBias', False, type=bool,
-            info="whether to apply the $q/p$ sagitta bias from the calibration map in the "
+            info=r"whether to apply the $q/p$ sagitta bias from the calibration map in the "
             "`InDetTrackBiasingTool`. Overrides the default set by the configuration.")
         self.addOption ('customRunNumber', None, type=int,
             info="manually sets the `runNumber` in the `InDetTrackBiasingTool`. "
@@ -156,6 +156,7 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         alg.biasingTool.applyD0Bias    = applyD0Bias
         alg.biasingTool.applyZ0Bias    = applyZ0Bias
         alg.biasingTool.applyQoverPBias = applyQoverPBias
+        alg.biasingTool.isMC = config.dataType() is not DataType.Data
         pass
 
     @staticmethod

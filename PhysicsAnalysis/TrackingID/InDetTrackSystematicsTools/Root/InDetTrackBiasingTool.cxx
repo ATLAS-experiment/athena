@@ -1,13 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
-#include "xAODEventInfo/EventInfo.h"
-#include <math.h>
-
+#include "AsgDataHandles/ReadHandle.h"
 #include "PathResolver/PathResolver.h"
 
+#include <cmath>
 #include <TH2.h>
 #include <TFile.h>
 
@@ -29,12 +28,6 @@ namespace InDet {
 
   StatusCode InDetTrackBiasingTool::initialize()
   {
-
-    if (m_isData && m_isSimulation) {
-      ATH_MSG_ERROR( "Cannot manually set for both data and simulation!" );
-      return StatusCode::FAILURE;
-    }
-
     if (m_biasD0 != 0.) {
       ATH_MSG_INFO( "overall d0 bias added = " << m_biasD0
         << " mm (not part of an official recommendation)" );
@@ -54,6 +47,8 @@ namespace InDet {
 
     ATH_CHECK( initHistograms() );
 
+    ATH_CHECK(m_evtInfoKey.initialize());
+
     ATH_CHECK( InDetTrackSystematicsTool::initialize() );
 
     return StatusCode::SUCCESS;
@@ -65,26 +60,10 @@ namespace InDet {
 
   CP::CorrectionCode InDetTrackBiasingTool::applyCorrection(xAOD::TrackParticle& track) {
 
-    [[maybe_unused]] static const bool firstTime = [&]() {
-      if ( ! firstCall().isSuccess() ) { // this will check data vs. MC and run number.
-        throw std::runtime_error("Error calling InDetTrackBiasingTool::firstCall");
-      }
-      return false;
-    }();
-
     // determine which run number to use
-    const xAOD::EventInfo* eventInfo = evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
-    if (!eventInfo) {
-      ATH_MSG_ERROR("Could not retrieve EventInfo object!");
-      return CP::CorrectionCode::Error;
-    }
-    auto runNumber = eventInfo->runNumber(); // start with run number stored in event info
+    SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey);
     static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
-    if (m_runNumber > 0) { // if manually-set run number is provided, use it
-      runNumber = m_runNumber;
-    } else if (m_isSimulation && randomRunNumber.isAvailable(*eventInfo)) { // use RandomRunNumber for simulation if available
-      runNumber = randomRunNumber(*(eventInfo));
-    }
+    auto runNumber = m_isMC ? randomRunNumber(*eventInfo) : eventInfo->runNumber();
 
     if (runNumber <= 0) {
       ATH_MSG_WARNING( "Run number not set." );
@@ -140,29 +119,29 @@ namespace InDet {
     // do the biasing
     if ( doD0Bias ) {
       bool d0WmActive = isActive( TRK_BIAS_D0_WM );
-      if ( m_isData || d0WmActive ) {
+      if ( !m_isMC || d0WmActive ) {
         accD0( track ) += readHistogram(m_biasD0, biasD0Histogram, phi, eta);
-        if ( m_isData && d0WmActive ) {
+        if ( !m_isMC && d0WmActive ) {
           accD0( track ) += readHistogram(0., biasD0HistError, phi, eta);
         }
       }
     }
     if ( doZ0Bias ) {
       bool z0WmActive = isActive( TRK_BIAS_Z0_WM );
-      if ( m_isData || z0WmActive ) {
+      if ( !m_isMC || z0WmActive ) {
         accZ0( track ) += readHistogram(m_biasZ0, biasZ0Histogram, phi, eta);
-        if ( m_isData && z0WmActive ) {
+        if ( !m_isMC && z0WmActive ) {
           accZ0( track ) += readHistogram(0., biasZ0HistError, phi, eta);
         }
       }
     }
     if ( doQoverPBias ) {
       bool qOverPWmActive = isActive( TRK_BIAS_QOVERP_SAGITTA_WM );
-      if ( m_isData || qOverPWmActive ) {
-        auto sinTheta = 1.0/cosh(eta);
-        // readHistogram flips the sign of the correction if m_isSimulation is true
+      if ( !m_isMC || qOverPWmActive ) {
+        auto sinTheta = 1.0 / std::cosh(eta);
+        // readHistogram flips the sign of the correction if m_isMC is true
         accQOverP( track ) += 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, biasQoverPsagittaHistogram, phi, eta);
-        if ( m_isData && qOverPWmActive ) {
+        if ( !m_isMC && qOverPWmActive ) {
           accQOverP( track ) += 1.e-6*sinTheta*readHistogram(0., biasQoverPsagittaHistError, phi, eta);
         }
       }
@@ -215,47 +194,6 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode InDetTrackBiasingTool::firstCall()
-  {
-    assert( ! (m_isData && m_isSimulation) );
-
-    const xAOD::EventInfo* ei = nullptr;
-    auto sc = evtStore()->retrieve( ei, "EventInfo" );
-    if ( ! sc.isSuccess() ) {
-      if (m_runNumber <= 0 || !(m_isData||m_isSimulation)) {
-        ATH_MSG_ERROR( "Unable to retrieve from event store. Manually set data/simulation and/or run number." );
-        return StatusCode::FAILURE;
-      }
-    }
-    bool isSim = ei->eventType( xAOD::EventInfo::IS_SIMULATION );
-    if (isSim) {
-      if ( m_isData ) {
-        ATH_MSG_WARNING( "Manually set to data setting, but the type is detected as simulation." );
-        ATH_MSG_WARNING( "Ensure that this behaviour is desired." );
-      } else {
-        m_isSimulation = true;
-      }
-    } else {
-      if ( m_isSimulation ) {
-        ATH_MSG_WARNING( "Manually set to simulation setting, but the type is detected as data." );
-        ATH_MSG_WARNING( "Ensure that this behaviour is desired." );
-      } else {
-        m_isData = true;
-      }
-    }
-    assert( m_isData != m_isSimulation ); // one must be true and the other false
-    if (m_isData) ATH_MSG_INFO( "Set to data. Will apply biases to correct those observed in data." );
-    if (m_isSimulation) ATH_MSG_INFO( "Set to simulation. Will apply biases in direction that is observed in data." );
-
-    // warn if set to simulation but RandomRunNumber not found and no run number provided (will use run number set in event info)
-    static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
-    if (m_isSimulation && !randomRunNumber.isAvailable(*ei) && m_runNumber <= 0) {
-      ATH_MSG_WARNING("Set to simulation with no run number provided, but RandomRunNumber not available. Will use default run number from EventInfo, "
-        "but biasing won't accurately reflect intervals of validity throughout the year. Run PileupReweightingTool first to pick up RandomRunNumber decorations.");
-    }
-    return StatusCode::SUCCESS;
-  }
-
   float InDetTrackBiasingTool::readHistogram(float fDefault, TH2* histogram, float phi, float eta) const {
     if (histogram == nullptr) {
       ATH_MSG_ERROR( "Configuration histogram is invalid. Check the run number and systematic configuration combination.");
@@ -269,7 +207,7 @@ namespace InDet {
     // the sign assumes that we apply a correction opposite to what the maps give
     float f = -1. * histogram->GetBinContent(histogram->FindBin(eta, phi));
     // apply different correction sign if applying correction to MC
-    if (m_isSimulation) f = -f;
+    if (m_isMC) f = -f;
     f += fDefault;   // should be zero unless a manual override is provided
 
     return f;
