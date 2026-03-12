@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfig_Tier0_H
@@ -946,7 +946,7 @@ protected:
 
           /// selectTracks<TruthParticleContainer>( &selectorTruth, "INav4MomTruthEvent" );
 
-          const DataHandle<McEventCollection> mcevent;
+          const McEventCollection* mcevent = nullptr;
 
           /// now as a check go through the GenEvent collection
 
