@@ -1,20 +1,26 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKBIASINGTOOL_H
 #define INDETTRACKSYSTEMATICSTOOLS_INDETTRACKBIASINGTOOL_H
 
 #include "InDetTrackSystematicsTools/IInDetTrackBiasingTool.h"
-#include "AsgTools/AsgTool.h"
-#include "PATInterfaces/CorrectionTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
-#include "xAODTracking/TrackParticleContainer.h"
+
+#include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include <AsgDataHandles/ReadHandleKey.h>
+#include "PATInterfaces/CorrectionTool.h"
+
+#include <xAODEventInfo/EventInfo.h>
+#include "xAODTracking/TrackParticleContainer.h"
+
 #include <string>
 #include <vector>
-
+#include <memory> //for unique_ptr
+#include <cstdint> //for uint32_t
 #include <TH2.h>
 
 #include "TRandom3.h"
@@ -66,7 +72,6 @@ namespace InDet {
   protected:
 
     StatusCode initHistograms();
-    StatusCode firstCall();
 
     float readHistogram(float fDefault, TH2* histogram, float phi, float eta) const;
 
@@ -94,10 +99,7 @@ namespace InDet {
     Gaudi::Property<bool> m_applyZ0Bias{this, "applyZ0Bias", true, "Whether to apply the z0 bias from the calibration map."};
     Gaudi::Property<bool> m_applyQoverPBias{this, "applyQoverPBias", true, "Whether to apply the q/p sagitta bias from the calibration map."};
 
-    // if neither of these is set manually, then the tool will try to get this from EventInfo in the event store.
-    // these options exist only as a manual override.
-    Gaudi::Property<bool> m_isData{this, "isData", false, "Manually flag the input as data."};
-    Gaudi::Property<bool> m_isSimulation{this, "isSimulation", false, "Manually flag the input as simulation."};
+    Gaudi::Property<bool> m_isMC{this, "isMC", true};
     Gaudi::Property<uint32_t> m_runNumber{this, "runNumber", 0, "Manually override the run number used to select the calibration period."};
 
     // calibration files and run number bounds for each period, configured per MC campaign via the python config.
@@ -106,6 +108,8 @@ namespace InDet {
     // May be omitted when only one calibration file is configured (all run numbers are accepted).
     Gaudi::Property<std::vector<std::string>> m_calibFiles{this, "calibFiles", {}, "Calibration files, one per run period."};
     Gaudi::Property<std::vector<unsigned int>> m_runNumberBounds{this, "runNumberBounds", {}, "Run number boundaries: {lower0, upper0, upper1, ...}. May be omitted when only one calibration file is configured."};
+
+    SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
 
   }; // class InDetTrackBiasingTool
 
