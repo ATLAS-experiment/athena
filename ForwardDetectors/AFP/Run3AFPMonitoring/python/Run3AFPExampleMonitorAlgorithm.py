@@ -1,5 +1,5 @@
 # 
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -51,7 +51,6 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     yLabelsHitBarVsTrain = [ '0', '1', '2', '3']
     xLabelsToFEff = [ 'A', 'B', 'C', 'D', 'Tr']
     yLabelsToFEff = [ '0', '1', '2', '3']
-    #xLabelsStationsPlanesProposed = ['fC3', 'fC2', 'fC1', 'fC0', 'nC3', 'nC2', 'nC1', 'nC0', 'nA0', 'nA1', 'nA2', 'nA3', 'fA0', 'fA1' 'fA2','fA3']
 
     AFPSiGroup.defineHistogram('lb,nSiHits', title='Total number of hits divided by number of events;lumiblock;total number of hits', type='TProfile', path='SiT/', xbins=2000, xmin=0.5, xmax=2000.5)
     AFPSiGroup.defineHistogram('eventsPerStation', title='Number of events per stations; station; events', type='TH1I', path='SiT/Aux/', xbins=16, xmin=-0.5, xmax=15.5, xlabels=xLabelsForEventsPerStation )
@@ -75,13 +74,7 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
 
 
     AFPToFGroup.defineHistogram('lb,nTofHits', title='Multiplicity;lumiblock;total number of Hits', type='TProfile', path='ToF/', xbins=2000, xmin=0.5, xmax=2000.5) 
-    AFPToFGroup.defineHistogram('numberOfHit_S0', title='Number of hit per bar station 0;bar', path='ToF/', xbins=4, xmin=-0.5, xmax=3.5)
-    AFPToFGroup.defineHistogram('numberOfHit_S3', title='Number of hit per bar station 3;bar', path='ToF/', xbins=4, xmin=-0.5, xmax=3.5)
-    AFPToFGroup.defineHistogram('barInTrainAllA', title='Number of hits in bar per stationA; barInTrain;hits',type='TH1I', path='ToF/HitsPerBarsInTrain/', xbins=16, xmin=-0.5, xmax=15.5)
-    AFPToFGroup.defineHistogram('barInTrainAllC', title='Number of hits in bar per stationC; barInTrain;hits',type='TH1I', path='ToF/HitsPerBarsInTrain/', xbins=16, xmin=-0.5, xmax=15.5)
     
-    AFPToFGroup.defineHistogram('ToFHits_sideA', title='ToF hits per lumiblock divided by <mu>, side A; lb; hits', path='ToF/StationHits', type='TH1F', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'ToFHits_MU_Weight')
-    AFPToFGroup.defineHistogram('ToFHits_sideC', title='ToF hits per lumiblock divided by <mu>, side C; lb; hits', path='ToF/StationHits', type='TH1F', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'ToFHits_MU_Weight')
     AFPToFGroup.defineHistogram('lb,muPerBXToF', title='<mu>;lumiblock;<mu>', type='TProfile', path='ToF/', xbins=2000, xmin=0.5, xmax=2000.5)
     
     AFPToFGroup.defineHistogram('lbAandCToFEvents', title='Number of events in ToF stations A and C vs lb; lumiblock; events', type='TH1I', path='ToF/Events', xbins=2000, xmin=0.5, xmax=2000.5)
@@ -93,56 +86,8 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     AFPToFGroup.defineHistogram('bcidFrontToF', title='(Front) Paired bunches - ToF; BX; entries', type='TH1I', path='ToF/BCID_Mask', xbins=4000, xmin=-0.5, xmax=3999.5)
     AFPToFGroup.defineHistogram('bcidMiddleToF', title='(Middle) Paired bunches - ToF; BX; entries', type='TH1I', path='ToF/BCID_Mask', xbins=4000, xmin=-0.5, xmax=3999.5)
     AFPToFGroup.defineHistogram('bcidEndToF', title='(End) Paired bunches - ToF; BX; entries', type='TH1I', path='ToF/BCID_Mask', xbins=4000, xmin=-0.5, xmax=3999.5)
-    
-    # TOF: Hits per trains histograms (side A):
-    AFPToFGroup.defineHistogram('lbAToF_T0', title='Number of hits per train (side A, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T1', title='Number of hits per train (side A, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T2', title='Number of hits per train (side A, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T3', title='Number of hits per train (side A, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TAll_Weight')
-    
-    #Front:
-    AFPToFGroup.defineHistogram('lbAToF_T0_Front', title='(Front) Number of hits per train (side A, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T1_Front', title='(Front) Number of hits per train (side A, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T2_Front', title='(Front) Number of hits per train (side A, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T3_Front', title='(Front) Number of hits per train (side A, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TFront_Weight')
-    
-    #Middle
-    AFPToFGroup.defineHistogram('lbAToF_T0_Middle', title='(Middle) Number of hits per train (side A, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T1_Middle', title='(Middle) Number of hits per train (side A, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T2_Middle', title='(Middle) Number of hits per train (side A, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T3_Middle', title='(Middle) Number of hits per train (side A, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TMiddle_Weight')
 
-    #End
-    AFPToFGroup.defineHistogram('lbAToF_T0_End', title='(End) Number of hits per train (side A, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T1_End', title='(End) Number of hits per train (side A, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T2_End', title='(End) Number of hits per train (side A, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbAToF_T3_End', title='(End) Number of hits per train (side A, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideA/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbAToF_TEnd_Weight')
-
-
-    # Hits per trains histograms (side C):
-    AFPToFGroup.defineHistogram('lbCToF_T0', title='Number of hits per train (side C, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T1', title='Number of hits per train (side C, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T2', title='Number of hits per train (side C, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TAll_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T3', title='Number of hits per train (side C, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/All/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TAll_Weight')
-    
-    #Front
-    AFPToFGroup.defineHistogram('lbCToF_T0_Front', title='(Front) Number of hits per train (side C, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T1_Front', title='(Front) Number of hits per train (side C, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T2_Front', title='(Front) Number of hits per train (side C, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TFront_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T3_Front', title='(Front) Number of hits per train (side C, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Front/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TFront_Weight')
-    
-    #Middle
-    AFPToFGroup.defineHistogram('lbCToF_T0_Middle', title='(Middle) Number of hits per train (side C, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T1_Middle', title='(Middle) Number of hits per train (side C, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T2_Middle', title='(Middle) Number of hits per train (side C, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TMiddle_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T3_Middle', title='(Middle) Number of hits per train (side C, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/Middle/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TMiddle_Weight')
-
-    #End
-    AFPToFGroup.defineHistogram('lbCToF_T0_End', title='(End) Number of hits per train (side C, train0) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T1_End', title='(End) Number of hits per train (side C, train1) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T2_End', title='(End) Number of hits per train (side C, train2) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
-    AFPToFGroup.defineHistogram('lbCToF_T3_End', title='(End) Number of hits per train (side C, train3) divided by <mu>; lb; hits/<mu>', type='TH1F', path='ToF/ToFHitsVsLb/sideC/End/', xbins=2000, xmin=-0.5, xmax=1999.5, weight='lbCToF_TEnd_Weight')
-
+    # TOF: AFPToFSiT histograms
     AFPToFSiTGroup.defineHistogram('lqBar_tight_A,fsp0_rows_tight_A;ToFSiTCorrTightXA', title='LQBar vs FSP0 X dim with FSP2 Side A;Train;FSP0 x-pix [50 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=34, ymin=-0.05, ymax=335.5)
     AFPToFSiTGroup.defineHistogram('lqBar_tight_C,fsp0_rows_tight_C;ToFSiTCorrTightXC', title='LQBar vs FSP0 X dim with FSP2 Side C;Train;FSP0 x-pix [50 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=34, ymin=-0.05, ymax=335.5)
     AFPToFSiTGroup.defineHistogram('lqBar_tight_A,fsp0_columns_tight_A;ToFSiTCorrTightYA', title='LQBar vs FSP0 columns with FSP2 hit Side A;Train;FSP0 y-pix [250 um]', type='TH2I', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=80, ymin=-0.5, ymax=79.5)
@@ -162,6 +107,14 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     AFPToFSiTGroup.defineHistogram('lqBar_A,fs_rows_full_A;ToFSiTCorr_FullXA', title='LQBar vs FS rows Full Side A;Train;FSP x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
     AFPToFSiTGroup.defineHistogram('lqBar_C,fs_rows_full_C;ToFSiTCorr_FullXC', title='LQBar vs FS rows Full Side C;Train;FSP x-pix [50 um]', type='TH2F', path='ToFSiTCorr/', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
     
+    # Plane Occupancy
+    AFPSiGroup.defineHistogram('hitPerPlaneEventMuIndex,hitsPerPlaneEventsMu',
+        title='Plane Occupancy;Global Plane Index;Hits on Plane',
+        type='TProfile',
+        path='SiT/PlaneOccupancy/', 
+        xbins=16, xmin=-0.5, xmax=15.5,
+        xlabels=xLabelsStationsPlanes) 
+    
     planeList = ['P0', 'P1', 'P2', 'P3'] 
     array_corr = helper.addArray([planeList], afpToFSiTAlgorithm, 'AFPToFSiTTool', topPath='AFP/ToFSiTCorr/')
     array_corr.defineHistogram('lqBar_A,fs_rows_A;ToFSiTCorrXA_{0}', type='TH2F', title='LQBar vs FS{0} rows Side A;Train;FS{0} x-pix [50 um]', xbins=20, xmin=-1, xmax=4, ybins=346, ymin=-10.5, ymax=335.5)
@@ -173,7 +126,6 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     # Using a map of groups
     layerList = ['P0','P1', 'P2', 'P3'] ## TODO XXX adapt to the enum/xAOD namespace names
     stationList = ['farAside', 'nearAside', 'nearCside', 'farCside']
-    trainList = ['train0', 'train1', 'train2', 'train3']
 
     array = helper.addArray([stationList,layerList], afpSiLayerAlgorithm, 'AFPSiLayerTool', topPath = 'AFP/SiT/')
 
@@ -191,6 +143,7 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     array.defineHistogram('lbClustersPerPlanesEnd,clustersPerPlaneEndPP', title='(End) Number of clusters in station {0}, plane {1} per lumiblock divided by <mu> per event; lumiblock;clusters/<mu> per event', type='TProfile', path='Synchronization/Clusters/End/', xbins=2000, xmin=0.5, xmax=2000.5)
 
     array.defineHistogram('lbhitsPerPlaneProfile, hitsPerPlaneProfile', title='Number of hits in station {0}, plane {1} per lumiblock per event divided by <mu>;lumiblock; hits/<mu> per event', type='TProfile', path='HitsPerPlanesVsLb/', xbins=2000, xmin=0.5, xmax=2000.5)
+
     array.defineHistogram('clusterToT', title='Sum of all hits\' ToT in each cluster, station {0}, layer {1};Cluster ToT; Counts', type='TH1I', path='ClusterToT/', xbins=18, xmin=0.5, xmax=18.5)
 
     array = helper.addArray([stationList], afpSiLayerAlgorithm, 'AFPSiLayerTool', topPath='AFP/SiT/')
@@ -208,15 +161,36 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     arrayToF = helper.addArray([stationList], afpToFAlgorithm, 'AFPToFTool', topPath='AFP/ToF/')
     
     arrayToF.defineHistogram('barInTrainID,trainID', title='ToF hit bar vs train {0};barInTrainID;trainID', type='TH2I', path='HitBarvsTrain/',xbins=4,xmin=-0.5,xmax=3.5,ybins=4,ymin=-0.5,ymax=3.5, xlabels = xLabelsHitBarVsTrain, ylabels = yLabelsHitBarVsTrain)
-    arrayToF = helper.addArray([trainList], afpToFAlgorithm, 'AFPToFTool', topPath='AFP/ToF/')
-    arrayToF.defineHistogram('barInTrainIDA', title='Total hits per bars in {}; barID; hits', type='TH1I', path='HitsPerBarsInTrain/farAside', xbins=4,xmin=-0.5,xmax=3.5)
-    arrayToF.defineHistogram('barInTrainIDC', title='Total hits per bars in {}; barID; hits', type='TH1I', path='HitsPerBarsInTrain/farCside', xbins=4,xmin=-0.5,xmax=3.5)
     
     trainIDListToF = ['T0', 'T1', 'T2', 'T3']
     barInTrainIDListToF = ['A', 'B', 'C', 'D']
-    arrayToF = helper.addArray([trainIDListToF, barInTrainIDListToF], afpToFAlgorithm, 'AFPToFTool', topPath = 'AFP/ToF/')
-    arrayToF.defineHistogram('lbAToF', title='ToF hits vs lumiblock divided by <mu> (train {0}, bar {1}), side A; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/sideA', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'lbAToF_Weight')
-    arrayToF.defineHistogram('lbCToF', title='ToF hits vs lumiblock divided by <mu> (train {0}, bar {1}), side C; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/sideC', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'lbCToF_Weight')
+    sideListToF = ['sideA', 'sideC']
+
+    # Per bar: per-mu TH1F + per event TProfile
+    arrayToFSideBar = helper.addArray([sideListToF, trainIDListToF, barInTrainIDListToF], afpToFAlgorithm, 'AFPToFTool', topPath = 'AFP/ToF/')
+    arrayToFSideBar.defineHistogram('lbToFBar', title='ToF hits vs lumiblock divided by <mu> (train {1}, bar {2}), {0}; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/{0}/BarsAll', xbins=2000, xmin=0.5, xmax=2000.5, weight = 'lbToFBar_Weight')
+    arrayToFSideBar.defineHistogram('lbToFBarPerEvent,hitsPerBarPP', title='ToF hits per event / <mu> (train {1}, bar {2}), {0}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/{0}/BarsAll', xbins=2000, xmin=0.5, xmax=2000.5)
+
+    # Per train: per-mu TH1F + per event TProfile
+    arrayToFSideTrain = helper.addArray([sideListToF, trainIDListToF], afpToFAlgorithm, 'AFPToFTool', topPath = 'AFP/ToF/')
+    arrayToFSideTrain.defineHistogram('barInTrainIDSide', title='Total hits per bars in {0} {1}; barID; hits', type='TH1I', path='HitsPerBarsInTrain/{0}', xbins=4, xmin=-0.5, xmax=3.5)
+    # per-mu TH1F (All/Front/Middle/End)
+    arrayToFSideTrain.defineHistogram('lbToFTrainAll', title='(All) Hits per train / <mu>, {0} {1}; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/{0}/All/', xbins=2000, xmin=0.5, xmax=2000.5, weight='weightToFTrainAll')
+    arrayToFSideTrain.defineHistogram('lbToFTrainFront', title='(Front) Hits per train / <mu>, {0} {1}; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/{0}/Front/', xbins=2000, xmin=0.5, xmax=2000.5, weight='weightToFTrainFront')
+    arrayToFSideTrain.defineHistogram('lbToFTrainMiddle', title='(Middle) Hits per train / <mu>, {0} {1}; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/{0}/Middle/', xbins=2000, xmin=0.5, xmax=2000.5, weight='weightToFTrainMiddle')
+    arrayToFSideTrain.defineHistogram('lbToFTrainEnd', title='(End) Hits per train / <mu>, {0} {1}; lb; hits/<mu>', type='TH1F', path='ToFHitsVsLb/{0}/End/', xbins=2000, xmin=0.5, xmax=2000.5, weight='weightToFTrainEnd')
+    # per event TProfile (All/Front/Middle/End)
+    arrayToFSideTrain.defineHistogram('lbToFPerEvent,hitsPerTrainAllPP', title='(All) Hits per train per event / <mu>, {0} {1}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/{0}/All/', xbins=2000, xmin=0.5, xmax=2000.5)
+    arrayToFSideTrain.defineHistogram('lbToFPerEventFront,hitsPerTrainFrontPP', title='(Front) Hits per train per event / <mu>, {0} {1}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/{0}/Front/', xbins=2000, xmin=0.5, xmax=2000.5)
+    arrayToFSideTrain.defineHistogram('lbToFPerEventMiddle,hitsPerTrainMiddlePP', title='(Middle) Hits per train per event / <mu>, {0} {1}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/{0}/Middle/', xbins=2000, xmin=0.5, xmax=2000.5)
+    arrayToFSideTrain.defineHistogram('lbToFPerEventEnd,hitsPerTrainEndPP', title='(End) Hits per train per event / <mu>, {0} {1}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/{0}/End/', xbins=2000, xmin=0.5, xmax=2000.5)
+
+    # Station-level: per event TProfile
+    arrayToFSide = helper.addArray([sideListToF], afpToFAlgorithm, 'AFPToFTool', topPath = 'AFP/ToF/')
+    arrayToFSide.defineHistogram('lbToFStationPerEvent,hitsPerStationPP', title='ToF hits per event / <mu>, {0}; lb; hits/<mu> per event', type='TProfile', path='ToFHitsVsLbPerEvent/', xbins=2000, xmin=0.5, xmax=2000.5)
+    arrayToFSide.defineHistogram('numberOfHit', title='Number of hit per bar, {0};bar', path='', xbins=4, xmin=-0.5, xmax=3.5)
+    arrayToFSide.defineHistogram('barInTrainAll', title='Number of hits in bar, {0}; barInTrain;hits', type='TH1I', path='HitsPerBarsInTrain/', xbins=16, xmin=-0.5, xmax=15.5)
+    arrayToFSide.defineHistogram('ToFHits_side', title='ToF hits per lumiblock divided by <mu>, {0}; lb; hits', type='TH1F', path='StationHits/', xbins=2000, xmin=0.5, xmax=2000.5, weight='ToFHits_MU_Weight')
     
     #array for ToF cross-bar delta t
     chan_combinations_list = [  "0AB", "0AC", "0AD", "0BC", "0BD", "0CD", "1AB", "1AC", "1AD", "1BC", "1BD", "1CD", 
@@ -228,16 +202,14 @@ def Run3AFPExampleMonitoringConfig(inputFlags):
     result.merge(helper.result())
     return result
     
-
 if __name__=='__main__':
 
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = ['/eos/user/v/vlysenko/DQ/testing/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
-    #flags.Input.Files = ['/eos/user/l/lvicenik/afp_data/data24_13p6TeV/data24_13p6TeV.00484780.physics_Main.merge.AOD.f1514_m2248._lb0793._0003.1']
+    flags.Input.Files = ['/eos/home-v/vlysenko/DQ/testing/data25_13p6TeV.00497370.physics_Main.merge.AOD.f1580_m2272._lb0200._0001.1']
     flags.Input.isMC = False
-    flags.Output.HISTFileName = 'dqm-AFPTest-24.root'
+    flags.Output.HISTFileName = 'tof-clean-mon.root'
     
 
     flags.Concurrency.NumThreads=10
@@ -256,6 +228,3 @@ if __name__=='__main__':
     cfg.merge(exampleMonitorAcc)
 
     cfg.run(1000000)
-
-
-
