@@ -35,7 +35,7 @@ def _getLargeRDiscriminantVars(name, extra_flavours=None):
 def _getStandardSmallRVars():
     vals = ['ID', 'Pt', 'Lxy', 'DR', 'PdgId', 'Barcode']
     algs = ['HadronConeExcl', 'HadronGhost']
-    base = [f'{a}TruthLabel{v}' for v in vals for a in algs + ['PartonTruthLabel'] ]
+    base = [f'{a}TruthLabel{v}' for v in vals for a in algs]
     extended = [f'{a}ExtendedTruthLabelID' for a in algs]
     truth_vars = base + extended
     reco_vars = [

@@ -60,8 +60,13 @@ namespace FlavorTagDiscriminants {
     ATH_CHECK( m_dec_uniqueID.initialize() );
     ATH_CHECK( m_dec_parent_uniqueID.initialize() );
 
+    ATH_CHECK( m_truthParticleLinkKey.initialize() );
+    ATH_CHECK( m_classifierParticleTypeKey.initialize() );
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
-    if (m_use_barcode) m_uid = SG::ConstAccessor<int>("barcode");
+    if (m_use_barcode) {
+      m_uidKey = "TruthParticles.barcode";
+    }
+    ATH_CHECK( m_uidKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -84,6 +89,10 @@ namespace FlavorTagDiscriminants {
     RDH acc_vertex_index(m_acc_vertex_index, ctx);
     RDH acc_parent_uniqueID(m_acc_parent_uniqueID, ctx);
 
+    SG::ReadDecorHandle<xAOD::ElectronContainer, ElementLink<xAOD::TruthParticleContainer>> truthParticleLink(m_truthParticleLinkKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, unsigned int> classifierParticleType(m_classifierParticleTypeKey, ctx);
+    SG::ReadDecorHandle<xAOD::TruthParticleContainer, int> uid(m_uidKey, ctx);
+
     // instantiate decorators
     using WDH = SG::WriteDecorHandle<EC, int>;
     WDH dec_origin_label(m_dec_origin_label, ctx);
@@ -97,7 +106,7 @@ namespace FlavorTagDiscriminants {
     for ( const auto& electron : el_vector ) {
 
       // get the linked truth particle
-      const auto truth_link = m_truthParticleLink(*electron);
+      const auto truth_link = truthParticleLink(*electron);
 
       if (!truth_link || !truth_link.isValid()) {
         // if the truth link is broken, assume PU
@@ -109,7 +118,7 @@ namespace FlavorTagDiscriminants {
         dec_parent_uniqueID(*electron) = HepMC::UNDEFINED_ID;
       } else {
         const auto *truth = *truth_link;
-        int electron_type = m_classifierParticleType(*truth);
+        int electron_type = classifierParticleType(*truth);
 
         if (m_valid_types.count(electron_type)) {
           dec_origin_label(*electron) = acc_origin_label(*truth);
@@ -121,8 +130,8 @@ namespace FlavorTagDiscriminants {
         dec_vertex_index(*electron) = acc_vertex_index(*truth);
         dec_type_label(*electron) = acc_type_label(*truth);
         dec_source_label(*electron) = acc_source_label(*truth);
-        // ATLASRECTS-8290: replace m_uid with ->uid() eventually
-        dec_uniqueID(*electron) = m_uid(*truth);
+        // ATLASRECTS-8290: replace uid with ->uid() eventually
+        dec_uniqueID(*electron) = uid(*truth);
         dec_parent_uniqueID(*electron) = acc_parent_uniqueID(*truth);
       }
     }
