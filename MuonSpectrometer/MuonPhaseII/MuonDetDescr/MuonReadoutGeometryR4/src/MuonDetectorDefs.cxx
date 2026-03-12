@@ -9,9 +9,16 @@
 #   include <Acts/Geometry/CuboidVolumeBounds.hpp>
 #   include <Acts/Geometry/TrapezoidVolumeBounds.hpp>
 #   include <Acts/Geometry/DiamondVolumeBounds.hpp>
+#   include <Acts/Geometry/TrackingVolume.hpp>
 #endif
 
 namespace MuonGMR4 {
+    bool isMuon(const ActsTrk::DetectorType type) {
+        using enum ActsTrk::DetectorType;
+        return type == Mdt || type == Rpc || type == Tgc ||
+               type == Mm || type == sTgc;
+    }
+
     std::unique_ptr<ActsTrk::DetectorAlignStore> copyDeltas(const ActsTrk::DetectorAlignStore& inStore) {
         auto newStore = std::make_unique<ActsTrk::DetectorAlignStore>(inStore);
         if(newStore->geoModelAlignment) {
@@ -109,11 +116,63 @@ namespace MuonGMR4 {
                 THROW_EXCEPTION("Unsupported bound type "<<visitBounds.type());
         }
         return 0.;
-   }
-   bool isMuon(const ActsTrk::DetectorType type) {
-        using enum ActsTrk::DetectorType;
-        return type == Mdt || type == Rpc || type == Tgc ||
-               type == Mm || type == sTgc;
-   }
+    }
+    inline const Acts::Surface* volumeLidBounadry(const Acts::TrackingVolume& volume,
+                                                  const bool fetchBottom) {
+        if (!volume.isAlignable()) {
+            THROW_EXCEPTION("The tracking volume must be alignable "<<volume);
+        }
+        std::size_t portalIdx{volume.portals().size()};
+        switch (volume.volumeBounds().type()) {
+            using enum Acts::VolumeBounds::BoundsType;
+            case eCuboid: {
+                if (fetchBottom) {
+                    portalIdx = Acts::toUnderlying(Acts::CuboidVolumeBounds::Face::NegativeZFace);
+                } else {
+                    portalIdx = Acts::toUnderlying(Acts::CuboidVolumeBounds::Face::PositiveZFace);
+                }
+                break;
+            } case eTrapezoid: {
+                if (fetchBottom) {
+                    portalIdx = Acts::toUnderlying(Acts::CuboidVolumeBounds::Face::NegativeZFace);
+                } else {
+                    portalIdx = Acts::toUnderlying(Acts::CuboidVolumeBounds::Face::PositiveZFace);
+                }
+                break;
+            } case eDiamond: {
+                if (fetchBottom) {                
+                    portalIdx = Acts::toUnderlying(Acts::DiamondVolumeBounds::Face::NegativeZFaceXY);
+                } else {
+                    portalIdx = Acts::toUnderlying(Acts::DiamondVolumeBounds::Face::PositiveZFaceXY);
+                }
+                break;
+            } default: {
+                THROW_EXCEPTION("Unknown boundary type "<<volume.volumeBounds());
+            }
+        }
+        const Acts::VolumePlacementBase* placement = volume.volumePlacement();
+        assert(portalIdx < placement->nPortalPlacements());
+        const Acts::SurfacePlacementBase* portalPlacement = placement->portalPlacement(portalIdx);
+        const Acts::Surface* surface = (&portalPlacement->surface());
+        if (surface->geometryId().withBoundary(0) != volume.geometryId()) {
+            std::stringstream portalStr{};
+            for (const Acts::Portal& portal : volume.portals()) {
+                portalStr<<"\n --- "<<portal.surface().type()<<" "
+                          <<portal.surface().geometryId();
+            }
+            THROW_EXCEPTION("Expected volume and boundary ID to match "
+                <<volume.geometryId()<<" vs. "<<surface->geometryId().withBoundary(0)
+                <<"Portals: "<<portalStr.str());
+        }
+        return surface;
+
+    }
+    const Acts::Surface* bottomBoundary(const Acts::TrackingVolume& volume) {
+        return volumeLidBounadry(volume, true);
+    }
+    const Acts::Surface* topBoundary(const Acts::TrackingVolume& volume) {
+        return volumeLidBounadry(volume, false);
+    }
+
 #endif
 }

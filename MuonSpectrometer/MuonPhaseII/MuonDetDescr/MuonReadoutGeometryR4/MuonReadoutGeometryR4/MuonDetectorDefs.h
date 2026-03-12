@@ -20,10 +20,13 @@
 
 #ifndef SIMULATIONBASE
 #   include "Acts/Geometry/VolumeBounds.hpp"
+#   include "Acts/Surfaces/Surface.hpp"
 #endif
 
 namespace Acts{
     class VolumeBounds;
+    class Surface;
+    class TrackingVolume;
 }
 
 //// This header contains common helper utilities and definitions
@@ -44,8 +47,18 @@ namespace MuonGMR4 {
           *         into the AMDB coordinate system */
         Amg::Transform3D rotationToAMDB(const ActsTrk::DetectorType type);
     }
-    /** @brief Returns whether the parsed type is muon */
+
+    /** @brief Returns whether the parsed type is muon
+     *  @param type: The DetectorType enum */
     bool isMuon(const ActsTrk::DetectorType type);
+
+    /** @brief Returns the boundary surface parallel to the x-y plane at negative local z
+     *  @param volume: Reference to the tracking volume from which the surface is retrieved */
+    const Acts::Surface* bottomBoundary(const Acts::TrackingVolume& volume);
+    /** @brief Returns the boundary surface parallel to the x-y plane at positive local z
+     *  @param volume: Reference to the tracking volume from which the surface is retrieved */
+    const Acts::Surface* topBoundary(const Acts::TrackingVolume& volume);
+
 }  // namespace MuonGMR4
 
 
