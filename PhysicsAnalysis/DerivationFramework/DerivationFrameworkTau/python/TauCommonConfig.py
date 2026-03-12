@@ -122,6 +122,46 @@ def AddTauIDDecorationCfg(flags, **kwargs):
 
     return acc
 
+# Attach displaced Tau ID scores
+def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
+    """Decorate displaced tau ID scores and working points. Follows AddTauIDDisplacedDecorationCfg()"""
+    tauContainerKey = kwargs.setdefault("TauContainerName", "TauJetsLRT")
+
+    flags_TauLRT = flags.cloneAndReplace("Tau.ActiveConfig", "Tau.TauLRT")
+
+    acc = ComponentAccumulator()
+
+    scoreNames = []
+
+    import tauRec.TauToolHolder as tauTools
+    tool_prompt = acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True))
+    scoreNames += ["GNTauScore_v0prune"]
+
+    tool_displaced =  acc.popToolsAndMerge(tauTools.TauGNNDisplacedEvaluatorCfg(flags_TauLRT, tauContainerName=tauContainerKey))
+    scoreNames += ["GNdTauScore", "GNdTauProbTau",  "GNdTauProbJet"]
+
+    kwargs.setdefault("ScoreDecorationKeys", scoreNames)
+    kwargs.setdefault("WPDecorationKeys", [])
+
+    acc.addPublicTool(tool_prompt)
+    acc.addPublicTool(tool_displaced)
+    kwargs.setdefault("TauIDTools", [tool_prompt, tool_displaced])
+
+    tauIDDecoratorWrapper = CompFactory.DerivationFramework.TauIDDecoratorWrapper(
+        name = f"{tauContainerKey}_TauIDDisplacedDecoratorWrapper",
+        **kwargs,
+    )
+    acc.addPublicTool(tauIDDecoratorWrapper)
+
+    prefix = kwargs.pop('prefix', tauContainerKey)
+    acc.addEventAlgo(
+        CompFactory.DerivationFramework.CommonAugmentation(
+            name = f"{prefix}_TauDisplacedIDDecorKernel",
+            AugmentationTools = [tauIDDecoratorWrapper],
+        )
+    )
+    return acc
+
 # TauJets_MuonRM steering
 def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     """Configure the MuonRM AOD tau building"""

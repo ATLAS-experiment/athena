@@ -35,6 +35,14 @@ def JetLargeD0TrackParticleThinningCfg(flags, name, **kwargs):
                       primary = True)
     return acc
 
+def TauLRTThinningCfg(flags, name, **kwargs):
+    """configure tau thinning"""
+
+    acc = ComponentAccumulator()
+    TauLRTThinningTool = CompFactory.DerivationFramework.TauLRTThinningTool
+    acc.addPublicTool(TauLRTThinningTool(name, **kwargs), primary=True)
+    return acc
+
 # RC jet substructure computation tool
 def RCJetSubstructureAugCfg(flags, name, **kwargs):
     """Configure the RC jet substructure computation tool"""

@@ -61,6 +61,7 @@ def createTauConfigFlags():
                         ["GNTauNAprune_flat_model_1p.root", "GNTauNAprune_flat_model_2p.root", "GNTauNAprune_flat_model_3p.root"],
                         ["GNTauNAtrunc_flat_model_1p.root", "GNTauNAtrunc_flat_model_2p.root", "GNTauNAtrunc_flat_model_3p.root"]
                     ])
+    tau_cfg.addFlag("Tau.TauDisplacedGNNConfig", ["GNdTau_pruned_MC23.onnx"])
     tau_cfg.addFlag("Tau.GNTauScoreName", ["GNTauScore_v0prune","GNTauScore_v1trunc"])
     tau_cfg.addFlag("Tau.GNTauTransScoreName", ["GNTauScoreSigTrans_v0prune","GNTauScoreSigTrans_v1trunc"])
     tau_cfg.addFlag("Tau.GNTauMaxTracks", [30,10])
@@ -80,6 +81,7 @@ def createTauConfigFlags():
     # create 2 flag categories, for standard taus and electron-subtracted taus
     tau_cfg.addFlagsCategory("Tau.TauRec", createTauRecConfigFlags, prefix=True)
     tau_cfg.addFlagsCategory("Tau.TauEleRM", createTauEleRMConfigFlags, prefix=True)
+    tau_cfg.addFlagsCategory("Tau.TauLRT", createTauLRTConfigFlags, prefix=True)
     # define ActiveConfig in TauConfigFlags.py so it exists for client code like DerivationFramework that don't want to define it via cloneAndReplace
     # FIXME: this looks more like a hack than good design, maybe dropping Tau.ActiveConfig and using Tau.TauRec as active config would be better?
     tau_cfg.addFlagsCategory("Tau.ActiveConfig", createTauRecConfigFlags, prefix=True)
@@ -130,6 +132,8 @@ def createTauRecConfigFlags():
     flags.addFlag("RemoveElectronCells",        False)
     flags.addFlag("RemovedElectronClusters",    "")
 
+    # Flags for LRT tau
+    flags.addFlag("inTauLRT", False)
     return flags
 
 
@@ -177,6 +181,33 @@ def createTauEleRMConfigFlags():
 
     return flags
 
+def createTauLRTConfigFlags():
+    flags = createTauRecConfigFlags()
+    flags.prefix                     = "TauLRT_"
+    _output_suffix                   = "LRT"
+
+    # Output containers
+    flags.TauJets                    = f"TauJets{_output_suffix}"
+    flags.TauTracks                  = f"TauTracks{_output_suffix}"
+    flags.TauShotClusters            = f"TauShotClusters{_output_suffix}"
+    flags.TauShotClustersLinks       = f"TauShotClusters{_output_suffix}_links"
+    flags.TauShotPFOs                = f"TauShotParticleFlowObjects{_output_suffix}"
+    flags.TauPi0Clusters             = f"TauPi0Clusters{_output_suffix}"
+    flags.TauPi0ClustersLinks        = f"TauPi0Clusters{_output_suffix}_links"
+    flags.TauHadronicPFOs            = f"TauHadronicParticleFlowObjects{_output_suffix}"
+    flags.TauNeutralPFOs             = f"TauNeutralParticleFlowObjects{_output_suffix}"
+    flags.TauChargedPFOs             = f"TauChargedParticleFlowObjects{_output_suffix}"
+    flags.TauSecondaryVertices       = f"TauSecondaryVertices{_output_suffix}"
+    flags.TauFinalPi0s               = f"TauFinalPi0s{_output_suffix}"
+
+    # Transient containers
+    flags.TauJets_tmp                = f"TauJets_tmp{_output_suffix}"
+    flags.TauCommonPi0Cells          = f"TauCommonPi0Cells{_output_suffix}"
+    flags.TauPi0Clusters_tmp         = f"TauPi0Clusters_tmp{_output_suffix}"
+
+    flags.inTauLRT                   = True
+
+    return flags
 
 # Self test
 

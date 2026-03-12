@@ -401,6 +401,18 @@ class SlimmingHelper:
                 elif collectionName=="TauJets_EleRM":
                         from DerivationFrameworkTau.TauJets_LepRMCPContent import TauJets_EleRMCPContent
                         items.extend(TauJets_EleRMCPContent)
+                elif collectionName=="TauJetsLRT":
+                        if "TauJetsLRT" not in self.AppendToDictionary:
+                                self.AppendToDictionary["TauJetsLRT"]                          = 'xAOD::TauJetContainer'
+                                self.AppendToDictionary["TauJetsLRTAux"]                       = 'xAOD::TauJetAuxContainer'
+                                self.AppendToDictionary["TauTracksLRT"]                        = 'xAOD::TauTrackContainer'
+                                self.AppendToDictionary["TauTracksLRTAux"]                     = 'xAOD::TauTrackAuxContainer'
+                                self.AppendToDictionary["TauSecondaryVerticesLRT"]             = 'xAOD::VertexContainer'
+                                self.AppendToDictionary["TauSecondaryVerticesLRTAux"]          = 'xAOD::VertexAuxContainer'
+                                self.AppendToDictionary["TauNeutralParticleFlowObjectsLRT"]    = 'xAOD::PFOContainer'
+                                self.AppendToDictionary["TauNeutralParticleFlowObjectsLRTAux"] = 'xAOD::PFOAuxContainer'
+                        from DerivationFrameworkTau.TauJetsLRTCPContent import TauJetsLRTCPContent
+                        items.extend(TauJetsLRTCPContent)
                 elif collectionName=="MET_Baseline_AntiKt4EMTopo":
                         from DerivationFrameworkJetEtMiss.MET_Baseline_AntiKt4EMTopoCPContent import MET_Baseline_AntiKt4EMTopoCPContent
                         items.extend(MET_Baseline_AntiKt4EMTopoCPContent)

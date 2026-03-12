@@ -299,6 +299,19 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                                         lock = True
         )
 
+    # Do the dedicated LRT-aware tau reconstruction 
+    if flags.Tracking.doLargeD0:
+        from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
+        acc.merge(JetRecCfg(flags, AntiKt4LCTopo))
+
+        # Run tau reconstruction config.
+        from tauRec.TauConfig import TauLRTReconstructionCfg
+        acc.merge(TauLRTReconstructionCfg(flags))
+
+        # Run displaced tau ID decoration.
+        from DerivationFrameworkTau.TauCommonConfig import AddTauIDDisplacedDecorationCfg
+        acc.merge(AddTauIDDisplacedDecorationCfg(flags))
+
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
     acc.merge(JetRecCfg(flags,AntiKt10RCEMTopo))
@@ -715,6 +728,20 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         InDetTrackParticlesKey  = "InDetTrackParticles",
         SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
 
+    if flags.Tracking.doLargeD0:
+        from DerivationFrameworkLLP.LLPToolsConfig import TauLRTThinningCfg
+        tau_lrt_thinning_expression = f"TauJetsLRT.pt >= {flags.Tau.MinPtDAOD}"
+        LLP1TauJetsLRTThinningTool = acc.getPrimaryAndMerge(TauLRTThinningCfg(
+            flags,
+            name                 = "LLP1TauJetLRTThinningTool",
+            StreamName           = kwargs['StreamName'],
+            Taus                 = "TauJetsLRT",
+            TauTracks            = "TauTracksLRT",
+            TrackParticles       = "InDetTrackParticles",
+            TrackLargeD0Particles= "InDetLargeD0TrackParticles",
+            TauNeutralPFOs       = "TauNeutralParticleFlowObjectsLRT",
+            TauSecondaryVertices = "TauSecondaryVerticesLRT",
+            SelectionString      = tau_lrt_thinning_expression))
 
     # ID Tracks associated with secondary vertices
     from DerivationFrameworkLLP.LLPToolsConfig import VSITrackParticleThinningCfg
@@ -819,6 +846,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                            LLP1LRTGSFTrackParticleThinningTool,
                            LLP1LRTElectronTPThinningTool,
                            LLP1LRTMuonTPThinningTool,
+                           LLP1TauJetsLRTThinningTool,
                            LLP1LRTVSITPThinningTool ]
 
     if flags.Tracking.doTrackSegmentsDisappearing:
@@ -994,7 +1022,7 @@ def LLP1Cfg(flags):
                                            "DiTauJetsLowPt",
                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"]
     if flags.Tracking.doLargeD0:
-        LLP1SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT",
+        LLP1SlimmingHelper.SmartCollections += ["LRTElectrons", "MuonsLRT", "TauJetsLRT",
                                                "InDetLargeD0TrackParticles"]
 
     LLP1SlimmingHelper.AllVariables =  ["InDetDisappearingTrackParticles",
@@ -1120,7 +1148,8 @@ def LLP1Cfg(flags):
     if flags.Tracking.doLargeD0:
         LLP1SlimmingHelper.ExtraVariables += [
             "MuonsLRT.topoetcone20_CloseByCorr_LRT.neflowisol20_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr_LRT",
-            "LRTElectrons.topoetcone20_CloseByCorr_LRT.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT"]
+            "LRTElectrons.topoetcone20_CloseByCorr_LRT.ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT.ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr_LRT",
+            "TauJetsLRT.GNdTauScore.GNdTauProbTau.GNdTauProbJet"]
 
     VSITrackAuxVars = [
         "is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV",
