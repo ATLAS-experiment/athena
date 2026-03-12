@@ -24,4 +24,5 @@ atlas_add_library( ActsToolInterfacesLib
 		     SiSpacePointFormationLib
 		     TrkTrack
 		     xAODInDetMeasurement
-		     xAODMeasurementBase )
+		     xAODMeasurementBase
+		     xAODTracking )
