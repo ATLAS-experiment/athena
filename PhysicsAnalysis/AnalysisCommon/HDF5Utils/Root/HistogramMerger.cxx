@@ -295,7 +295,7 @@ public:
     auto [v, dtype] = read_dataset<double>(storage, "values");
     m_storage_dtype = dtype;
     auto check = get_type_checker(dtype);
-    auto w = check(read_dataset<double>(storage, "variances"));
+    std::vector<double> w = check(read_dataset<double>(storage, "variances"));
     if (v.size() != m_values.size() || w.size() != m_variances.size())
       throw std::runtime_error(
         "histogram bin count in input file does not match expected size");
@@ -349,7 +349,7 @@ public:
     auto [means, dtype] = read_dataset<double>(storage, "values");
     m_storage_dtype = dtype;
     auto check = get_type_checker(dtype);
-    auto counts = check(read_dataset<double>(storage, "count"));
+    std::vector<double> counts = check(read_dataset<double>(storage, "count"));
     // variances may not be present; default to zero
     std::vector<double> variances(m_n.size(), 0.0);
     htri_t has_var = H5Lexists(storage.getId(), "variances", H5P_DEFAULT);
@@ -442,8 +442,10 @@ public:
     auto [values, dtype] = read_dataset<double>(storage, "values");
     m_storage_dtype = dtype;
     auto check = get_type_checker(dtype);
-    auto sum_w  = check(read_dataset<double>(storage, "sum_of_weights"));
-    auto sum_w2 = check(read_dataset<double>(storage, "sum_of_weights_squared"));
+    std::vector<double> sum_w  = check(
+      read_dataset<double>(storage, "sum_of_weights"));
+    std::vector<double> sum_w2 = check(
+      read_dataset<double>(storage, "sum_of_weights_squared"));
 
     if (values.size() != m_sum_w.size())
       throw std::runtime_error(
@@ -511,8 +513,8 @@ HistogramMerger::~HistogramMerger() = default;
 
 std::unique_ptr<IHistogram>
 HistogramMerger::make(const H5::Group& src) {
-  auto axes = read_axes(src);
-  auto dims = read_dims(src);
+  std::vector<Axis>    axes = read_axes(src);
+  std::vector<hsize_t> dims = read_dims(src);
 
   H5::Group storage = src.openGroup("storage");
   std::string type = read_str_attr(storage, "type");
