@@ -68,13 +68,16 @@ std::vector<std::string> read_string_categories(const H5::DataSet& ds)
   H5::DataSpace sp = ds.getSpace();
   hsize_t npts = static_cast<hsize_t>(sp.getSimpleExtentNpoints());
   std::vector<char*> ptrs(npts, nullptr);
-  ds.read(ptrs.data(), strtype);
-  // RAII guard — destructor calls H5Treclaim regardless of how we leave this scope
+  // RAII guard must be created before ds.read so that H5Treclaim is
+  // called even if ds.read throws after partial allocation.
+  // H5Treclaim on nullptr entries is a no-op, so early construction
+  // is safe.
   struct VlGuard {
     hid_t tid, sid;
     void* buf;
     ~VlGuard() { H5Treclaim(tid, sid, H5P_DEFAULT, buf); }
   } guard{strtype.getId(), sp.getId(), ptrs.data()};
+  ds.read(ptrs.data(), strtype);
   std::vector<std::string> labels;
   labels.reserve(npts);
   for (char* p : ptrs) {
