@@ -15,6 +15,7 @@
 #include "src/ActsToXAODTrackConverterAlg.h"
 
 // Tools
+#include "src/TrackToTrackParticleCnvTool.h"
 #include "src/ITkAnalogueClusteringTool.h"
 #include "src/ITkStripCalibrationTool.h"
 #include "src/TrackStatePrinterTool.h"
@@ -39,6 +40,7 @@ DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
 DECLARE_COMPONENT( ActsTrk::ActsToXAODTrackConverterAlg )
 
 // Tools
+DECLARE_COMPONENT( ActsTrk::TrackToTrackParticleCnvTool )
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
 DECLARE_COMPONENT( ActsTrk::ITkStripCalibrationTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
