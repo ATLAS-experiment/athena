@@ -59,7 +59,10 @@ namespace FlavorTagDiscriminants {
       this, "ftag_z0AlongBeamspotSignificance", m_ElectronContainerKey, "ftag_z0AlongBeamspotSignificance",
         "Electron z0 significance along beamspot"};
 
-    SG::AuxElement::ConstAccessor<float> m_pt_varcone30{"ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000"};
+    SG::ReadDecorHandleKey< xAOD::ElectronContainer > m_pt_varcone30_key {
+      this, "ptVarCone30Key", m_ElectronContainerKey,
+      "ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000",
+        "Isolation pT variable cone 30"};
 
     const xAOD::Vertex* primary(const xAOD::VertexContainer& vertices) const;
   };

@@ -110,6 +110,7 @@ from DerivationFrameworkFlavourTag.FTAGXBB import FTAGXBBCfg
 from DerivationFrameworkFlavourTag.FTAG4 import FTAG4Cfg
 from DerivationFrameworkFlavourTag.FTAG5 import FTAG5Cfg
 from DerivationFrameworkFlavourTag.FTAGPU import FTAGPUCfg
+from DerivationFrameworkFlavourTag.FTAG1LITE import FTAG1LITECfg
 
 # Jet/Etmiss derivations
 # JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
@@ -170,7 +171,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg','SKIMCfg',
            'PHYSVALCfg',
-           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg', 'FTAG5Cfg', 'FTAGXBBCfg', 'FTAGPUCfg',
+           'FTAG1Cfg', 'FTAG2Cfg', 'FTAG3Cfg', 'FTAG4Cfg', 'FTAG5Cfg', 'FTAGXBBCfg', 'FTAGPUCfg', 'FTAG1LITECfg',
            'HIGG1D1Cfg', 'HIGG9D1Cfg', 'HIGG1D2Cfg',
            'LLP1Cfg', 'LLJ1Cfg',
            'SUSY20Cfg',
