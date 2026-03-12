@@ -7,6 +7,7 @@
 
 #ifndef XAOD_STANDALONE
 #include "../InDetTrackSmearingToolTester.h"
+#include "../InDetTrackBiasingToolTester.h"
 #include "../TrackSystematicsAlg.h"
 #endif
 
@@ -22,5 +23,6 @@ DECLARE_COMPONENT( InDet::InclusiveTrackFilterTool )
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( InDet::InDetTrackSmearingToolTester )
+DECLARE_COMPONENT( InDet::InDetTrackBiasingToolTester )
 DECLARE_COMPONENT( InDet::TrackSystematicsAlg )
 #endif

@@ -128,6 +128,13 @@ def InDetTrackSmearingToolCfg(flags, name="InDetTrackSmearingTool", **kwargs):
         CompFactory.InDet.InDetTrackSmearingTool(name, **kwargs))
     return acc
 
+def InDetTrackBiasingToolCfg(flags, name="InDetTrackBiasingTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    acc.setPrivateTools(
+        CompFactory.InDet.InDetTrackBiasingTool(name, **kwargs))
+    return acc
+
 def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
     acc = ComponentAccumulator()
 
