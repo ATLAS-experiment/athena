@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -73,7 +73,6 @@ namespace DerivationFramework {
     mutable NameIdMap_t m_mctn;
 
     // base counter
-    mutable CutIdentifier m_bid;
     mutable bool          m_bidisset;
     
   }; // class

@@ -70,7 +70,7 @@ namespace DerivationFramework {
     AthAlgTool(t,n,p),
     m_cutFlowSvc("CutFlowSvc/CutFlowSvc", n),
     m_ctbasename(n),
-    m_bid(0), m_bidisset(false) {
+    m_bidisset(false) {
 
     ATH_MSG_DEBUG("Calling constructor with parameters");
 
