@@ -151,10 +151,12 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::PhotonContainer'
+            decorationList = ['DFCommonPhotonsCleaning']
             if self.addGlobalFELinksDep:
-                alg.declareDecorations = ['DFCommonPhotonsCleaning', 'neutralGlobalFELinks', 'chargedGlobalFELinks']
-            else:
-                alg.declareDecorations = ['DFCommonPhotonsCleaning']
+                decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
+            if config.dataType() is not DataType.Data:
+                decorationList += ['TruthLink']
+            alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all photons prior to everything else
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' )
