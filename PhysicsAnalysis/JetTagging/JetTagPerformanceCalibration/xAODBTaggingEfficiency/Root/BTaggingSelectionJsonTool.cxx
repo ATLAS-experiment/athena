@@ -1,10 +1,15 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "PathResolver/PathResolver.h"
-#include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
+
 #include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
+#include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
+#include "PathResolver/PathResolver.h"
+
 #include <fstream>
+#include <cmath>  //std::log
+#include <algorithm>  //std::max
+#include <limits> //std::numeric_limits
 
 BTaggingSelectionJsonTool::BTaggingSelectionJsonTool( const std::string & name)
   : asg::AsgTool( name )
@@ -135,8 +140,12 @@ double BTaggingSelectionJsonTool::getTaggerDiscriminant ( const xAOD::Jet& jet) 
       denominator += frac.fraction * p_output;
     }
   }
-
-  double tagger_discriminant = log(numerator / denominator); 
+  
+  // ep(silon) is the smallest non-subnormal number
+  // the reciprocal of this should not overflow
+  const float ep = std::numeric_limits<float>::min();
+  const float ratio = (std::abs(denominator) < ep ? std::numeric_limits<float>::infinity() : numerator / denominator);
+  const double tagger_discriminant = (std::abs(ratio) < ep ? -std::numeric_limits<double>::infinity() : std::log( ratio ));
 
   return tagger_discriminant;
 }
