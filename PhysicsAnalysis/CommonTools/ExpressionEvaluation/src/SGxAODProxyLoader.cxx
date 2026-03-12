@@ -321,7 +321,8 @@ namespace ExpressionParsing {
 
            auto clid = container_data_id->clid();
            (void) clid;
-           const SG::BaseInfoBase* base_info = (container_data_id ? SG::BaseInfoBase::find (container_data_id->clid()) : nullptr);
+           //container_data_id logically cannot be nullptr here
+           const SG::BaseInfoBase* base_info = SG::BaseInfoBase::find (container_data_id->clid());
            if (!base_info) {
               std::stringstream msg;
               msg << "Missing type information about container " << container_name << ".";

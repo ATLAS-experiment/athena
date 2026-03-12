@@ -302,9 +302,7 @@ namespace ExpressionParsing {
       switch( m_type ) {
 
       case SE_VECINT: {
-         std::vector<double> ret(m_vecIntVal.size());
-         std::transform (m_vecIntVal.begin(), m_vecIntVal.end(), ret.begin(), [](int a) -> double { return a;});
-         return ret;
+         return std::vector<double>(m_vecIntVal.begin(), m_vecIntVal.end());
          break;
       }
       case SE_VECDOUBLE:
@@ -325,7 +323,6 @@ namespace ExpressionParsing {
                                    "StackElement" );
          break;
       }
-      return std::vector<double>();
    }
 
    void StackElement::makeInt() {
