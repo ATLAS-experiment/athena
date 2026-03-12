@@ -856,6 +856,10 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
         return Analysis::kError;
       }
       unsigned int maxVariations = GEV->getNumberOfEigenVariations(flavour); // <----- This gets the number of variations of the flavour
+      if (maxVariations == 0){
+        cerr << "Overall number of available variations is 0!" << endl;
+        return Analysis::kError;
+      }
       if (numVariation > maxVariations-1) {
         cerr << "Asked for global eigenvariation number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
         return Analysis::kError;
@@ -2599,9 +2603,12 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, c
         // If the reference cannot be found, assume that it hasn't yet been retrieved so attempt it now.
         if (it == m_objectIndices.end()) {
           // Omit the printout of container information here (the idea being that showing MC/MC SF information would confuse rather than help)
-          retrieveContainer(label, OP, author, ref, isSF, false); it = m_objectIndices.find(refname);
+          retrieveContainer(label, OP, author, ref, isSF, false); 
+          it = m_objectIndices.find(refname);
         }
-        m_hadronisationReference[idx] = it->second;
+        if (it != m_objectIndices.end()) {
+          m_hadronisationReference[idx] = it->second;
+        }
       }
     } else if (m_useMCMCSF) {
       cerr << "btag Calib: retrieveContainer: MC hadronisation reference map not found -- this should not happen!" << endl;
