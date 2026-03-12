@@ -20,6 +20,8 @@
 #include "xAODRootAccess/Init.h"
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
+#include <algorithm> //std::min
+#include <iostream> 
 
 //coverity[root_function]
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
@@ -95,7 +97,8 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
    st.Start();
    for(int i=0; i< std::min(maxEvt,10000); i++) {
       if (evt.getEntry(i)!=0) {
-        std::cout << "Failed read of event " << i << std::endl; return -1;
+        std::cout << "Failed read of event " << i << std::endl; 
+        return -1;
       }
       evt.retrieve( evtInfo , "EventInfo" ).ignore();
       val[0] += evtInfo->eventNumber();
@@ -111,12 +114,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
 
    std::cout << "doing xAODRootAccess test (using kClassAccess mode)...." <<std::endl;
-   evt2.getEntry(0);
+   if (evt2.getEntry(0) != 0 ) return 1;
    TStopwatch st2;
    st2.Start();
    long val2[4] = {0,0,0,0};
    for(int i=0; i< std::min(maxEvt2,10000); i++) {
-      evt2.getEntry(i);
+      if (evt2.getEntry(i) !=0) return -1;
       evt2.retrieve( evtInfo , "EventInfo" ).ignore();
       val2[0] += evtInfo->eventNumber();
       evt2.retrieve( els, "Electrons" ).ignore();
