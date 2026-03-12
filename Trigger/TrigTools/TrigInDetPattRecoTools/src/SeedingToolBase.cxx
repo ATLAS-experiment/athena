@@ -162,7 +162,7 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
     float rb1 = B1.getMinBinRadius();
     
     const unsigned int lk1 = B1.m_layerKey;
-
+    
     //prepare a sliding window for each bin2 in the group 
 
     std::vector<GBTS_SlidingWindow> vSLW;
@@ -228,6 +228,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 
         const TrigFTF_GNN_EtaBin& B2 = *slw.m_bin;
 
+	const unsigned int lk2 = B2.m_layerKey;
+ 
         float deltaPhi = slw.m_deltaPhi;
       
         //sliding window phi1 +/- deltaPhi
@@ -285,11 +287,8 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	  if (lk1 == 80000) {//check against non-empty z0 histogram
 	    
 	    if ( !check_z0_bitmask(node_info, z0, min_z0, z0_histo_coeff) ) {
-
 	      continue;
-
 	    }
-	    
 	  }
 	  
 	  if (m_doubletFilterRZ) {
@@ -384,6 +383,16 @@ std::pair<int, int> SeedingToolBase::buildTheGraph(const IRoiDescriptor& roi, co
 	      if(dcurv < -cut_dcurv_max || dcurv > cut_dcurv_max) {
 		continue;
 	      }
+
+	      //final check: cuts on pT and d0
+
+	      if (lk1 >= 80000 && lk1 <= 82000 && lk2 >= 81000 && lk2 <= 84000) {//Pixel barrel
+
+                std::array<const GNN_Node*, 3> sps = {B1.m_vn[n1Idx], B2.m_vn[n2Idx], pS->m_n2};
+
+                if (!validate_triplet(sps, pt_scale)) continue;
+		
+              }
             
 	      pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
 
@@ -770,7 +779,7 @@ bool SeedingToolBase::check_z0_bitmask(const unsigned short& z0_bitmask, const f
 
   if (next_bin >= 0 && next_bin != z0_bin_index) {
       
-      if ((z0_bitmask >> next_bin) & 1) return true;
+    if ((z0_bitmask >> next_bin) & 1) return true;
 
   }				  
 
@@ -827,9 +836,66 @@ float SeedingToolBase::estimate_curvature(const std::array<const GNN_Node*, 3>& 
   float A = (v[0] - v[1])/du;
 
   float B = v[1] - A*u[1];
-  
-  float R = std::sqrt(1 + A*A)/B; //signed radius in mm
 
-  return 1000.0/R; //inverse meters
+  return 1000.0*B/std::sqrt(1 + A*A); //inverse meters
   
+}
+
+bool SeedingToolBase::validate_triplet(std::array<const GNN_Node*, 3>& sps, const float pt_scale) const {
+  
+  //conformal mapping with the center at the middle spacepoint
+
+  float u[2], v[2];
+
+  const float x0 = sps[1]->x();
+  const float y0 = sps[1]->y();
+
+  const float r0 = sps[1]->r();
+  
+  const float cosA = x0/r0;
+  
+  const float sinA = y0/r0;
+  
+  for(unsigned int k=0;k<2;k++) {
+
+    int sp_idx = (k==1) ? 2 : k;
+    
+    const float dx = sps[sp_idx]->x() - x0;
+
+    const float dy = sps[sp_idx]->y() - y0;
+
+    const float r2_inv = 1.0/(dx*dx+dy*dy);
+    
+    const float xn = dx*cosA + dy*sinA;
+    
+    const float yn =-dx*sinA + dy*cosA;
+
+    u[k] = xn*r2_inv;
+    v[k] = yn*r2_inv;    
+  }
+
+  const float du = u[0] - u[1];
+
+  if ( du == 0.0 ) return false;
+  
+  const float A = (v[0] - v[1])/du;
+
+  const float B = v[1] - A*u[1];
+
+  if (B != 0.0) {//straight-line track is OK
+  
+    const float R = std::sqrt(1 + A*A)/B; //signed radius in mm
+
+    const float pT = 0.3*R; //asssuming uniform 2T field
+
+    if (std::abs(pT) < pt_scale*m_minPt) return false;
+    
+  }
+    
+  const float d0 = r0*(B*r0 - A);
+
+  if (std::abs(d0) > m_d0_max) return false;
+  
+  return true;
+
 }
