@@ -129,15 +129,16 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
       FEBStats[FEBindex].addBadChannel(channel);
     }
 
-    if(doHVline) {
+    if (doHVline) {
        //HVline, in all calos
        std::vector<HWIdentifier> hvlines;
        m_hvMapTool->GetHVLines(id, cddm,hvlines);
-       for(unsigned int i=0; i<hvlines.size(); ++i) {
-          if(HVStats.contains(hvlines[i])) HVStats[hvlines[i]] += 1; else HVStats[hvlines[i]]=1;
+       for (unsigned int i=0; i<hvlines.size(); ++i) {
+         auto& stats = HVStats[hvlines[i]];
+         stats.noisy += 1;
+         stats.sharedNoisy += static_cast<uint32_t>(hvlines.size());
        }
     }
-
   }
 
   // Store the Saturated flag per partition
@@ -285,40 +286,41 @@ std::unique_ptr<LArNoisyROSummary> LArNoisyROTool::process(const EventContext& c
   if(!hvid || !nCellsperLine ) return noisyRO; // do not have HVcells map
 
   // Count noisy HVlines per partition
-  unsigned int NBadHVEMECA = 0;
-  unsigned int NBadHVEMECC = 0;
-  unsigned int NBadHVEMBA = 0; 
-  unsigned int NBadHVEMBC = 0; 
-  unsigned int NBadHVHECA = 0; 
-  unsigned int NBadHVHECC = 0; 
-  unsigned int NBadHVFCALA = 0; 
-  unsigned int NBadHVFCALC = 0; 
-
+  float NBadHVEMECA = 0;
+  float NBadHVEMECC = 0;
+  float NBadHVEMBA = 0; 
+  float NBadHVEMBC = 0; 
+  float NBadHVHECA = 0; 
+  float NBadHVHECC = 0; 
+  float NBadHVFCALA = 0; 
+  float NBadHVFCALC = 0; 
   // loop over HVlines, to check if they are qualified as noisy
   for ( HVlinesStatMap::const_iterator it = HVStats.begin(); it != HVStats.end(); ++it ) {
-    ATH_MSG_DEBUG(ctx.eventID().event_number()<<" candidate HVline " << it->first << " with " << it->second << " bad channels, out of "<<nCellsperLine->HVNcell(HWIdentifier(it->first))<<" channels");
-    if ( it->second >= m_BadChanFracPerHVline * nCellsperLine->HVNcell(it->first) ) {
+    ATH_MSG_DEBUG(ctx.eventID().event_number()<<" candidate HVline " << it->first << " with " << it->second.noisy << " bad channels, out of "<<nCellsperLine->HVNcell(HWIdentifier(it->first))<<" channels");
+    short nCells = nCellsperLine->HVNcell(it->first);
+    if ( it->second.noisy >= m_BadChanFracPerHVline * nCells && nCells >= static_cast<short>(m_connChanPerHVline)) {
       HWIdentifier hwd(it->first); 
       noisyRO->add_noisy_hvline(hwd);
       const std::vector<HWIdentifier> elecVec = hvid->getLArElectrodeIDvec(hwd);
       int side = m_elecID->zside(elecVec[0]);
       int part = m_elecID->detector(elecVec[0]);
+      const float w = float(it->second.noisy) / it->second.sharedNoisy;
       switch(side) {
          case 1: { ATH_MSG_DEBUG("Elec. side: "<<side);
                     switch(part){
-                    case 0: case 1:{NBadHVEMBC += 1; break;}
-                    case 2: case 3:{NBadHVEMECC += 1; break;}
-                    case 4:        {NBadHVHECC += 1; break;}
-                    case 5:        {NBadHVFCALC += 1; break;}
+                    case 0: case 1:{NBadHVEMBC += w; break;}
+                    case 2: case 3:{NBadHVEMECC += w; break;}
+                    case 4:        {NBadHVHECC += w; break;}
+                    case 5:        {NBadHVFCALC += w; break;}
                     default:       {ATH_MSG_WARNING("Wrong HV line detector "<<part); break;}
                    };
                    break; 
                  }
          case 0: { switch(part){
-                    case 0: case 1:{NBadHVEMBA += 1; break;}
-                    case 2: case 3:{NBadHVEMECA += 1; break;}
-                    case 4:        {NBadHVHECA += 1; break;}
-                    case 5:        {NBadHVFCALA += 1; break;}
+                    case 0: case 1:{NBadHVEMBA += w; break;}
+                    case 2: case 3:{NBadHVEMECA += w; break;}
+                    case 4:        {NBadHVHECA += w; break;}
+                    case 5:        {NBadHVFCALA += w; break;}
                     default:       {ATH_MSG_WARNING("Wrong HV line detector "<<part); break;}
                    };
                    break;               
