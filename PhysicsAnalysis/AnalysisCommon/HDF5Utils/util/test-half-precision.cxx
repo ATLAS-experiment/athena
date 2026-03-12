@@ -29,7 +29,7 @@ consumer_t getFullConsumers() {
 }
 consumer_t getHalfConsumers() {
   consumer_t consumers;
-  auto h = H5Utils::Compression::HALF_PRECISION;
+  H5Utils::Compression h = H5Utils::Compression::HALF_PRECISION;
   HADD(ftype);
   HADD(dtype);
   ADD(btype);
