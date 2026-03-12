@@ -1,6 +1,14 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-#include "TrigConfL1Data/CTPConfig.h"
-#include "L1TopoConfig/L1TopoMenu.h"
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+#include <string>
+
+namespace TXC{
+  class L1TopoMenu;
+}
+
+namespace TrigConf{
+  class CTPConfig;
+}
 
 /** @brief Run 2 to Run 3 L1 menu converter
  *  Converts Run 2 L1 menu and L1Topo menu into run 3 format and writes out a json file

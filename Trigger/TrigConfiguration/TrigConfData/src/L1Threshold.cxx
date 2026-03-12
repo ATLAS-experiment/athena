@@ -1,7 +1,9 @@
-/* Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 
 #include "TrigConfData/L1Threshold.h"
 #include "TrigConfData/L1ThrExtraInfo.h"
+#include <charconv>
+#include <stdexcept>
 
 
 /******************************************
@@ -14,24 +16,24 @@
  * EM
  */
 void
-TrigConf::L1Threshold_EM::load()
-{
-   // read the isolation
-   if( const auto & thrVs = data().get_child_optional("thrValues") ) {
-      for( auto & x : thrVs.get() ) {
-         auto isobits = x.second.get_child("isobits").get_value<std::string>();
-         auto etamin = x.second.get_child("etamin").get_value<unsigned int>();
-         auto etamax = x.second.get_child("etamax").get_value<unsigned int>();
-         auto priority = x.second.get_child("priority").get_value<unsigned int>();
-         // turn bin string into uint, e.g. "01001" -> 9 
-         uint16_t isomask(0);
-         for(char c: isobits) {
-            isomask <<= 1;
-            if(c=='1') isomask += 1;
-         }
-         m_isolationMask.addRangeValue(isomask, etamin, etamax, priority, /*symmetric=*/ false);
+TrigConf::L1Threshold_EM::load(){
+  // read the isolation
+  if( const auto & thrVs = data().get_child_optional("thrValues") ) {
+    for( auto & x : thrVs.get() ) {
+      auto isobits = x.second.get_child("isobits").get_value<std::string>();
+      auto etamin = x.second.get_child("etamin").get_value<unsigned int>();
+      auto etamax = x.second.get_child("etamax").get_value<unsigned int>();
+      auto priority = x.second.get_child("priority").get_value<unsigned int>();
+      // turn bin string into uint, e.g. "01001" -> 9 
+      uint16_t isomask(0);
+      auto [ptr, ec] = std::from_chars(isobits.data(),
+       isobits.data() + isobits.size(), isomask, 2);
+      if (ec != std::errc{} || ptr != isobits.data() + isobits.size()) {
+        throw std::invalid_argument("Invalid isobits value: " + isobits);
       }
-   }
+      m_isolationMask.addRangeValue(isomask, etamin, etamax, priority, /*symmetric=*/ false);
+    }
+  }
 }
 
 void
@@ -52,14 +54,14 @@ TrigConf::L1Threshold_EM::print(std::ostream & os) const {
  * TAU
  */
 void
-TrigConf::L1Threshold_TAU::load()
-{
-   // read the isolation
-   std::string isobits = getAttribute("isobits");
-   m_isolationMask = 0;
-   for(char c: isobits) {
-      m_isolationMask <<= 1;
-      if(c=='1') m_isolationMask += 1;
+TrigConf::L1Threshold_TAU::load(){
+   const std::string isobits = getAttribute("isobits");
+   auto [ptr, ec] = std::from_chars(isobits.data(),
+                                    isobits.data() + isobits.size(),
+                                    m_isolationMask,
+                                    2);
+   if (ec != std::errc{} || ptr != isobits.data() + isobits.size()) {
+      throw std::invalid_argument("Invalid isobits value: " + isobits);
    }
 }
 
