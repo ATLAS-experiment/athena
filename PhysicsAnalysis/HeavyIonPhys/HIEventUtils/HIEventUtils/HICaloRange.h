@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HIEVENTUTILS_HICALORANGE_H
@@ -16,8 +16,22 @@ public:
 
   //public class member functions
   bool LayerInRange(float eta, int layer);
-  inline float getRangeMin(int layer) const {return m_range.find(layer)->second.first;};
-  inline float getRangeMax(int layer) const {return m_range.find(layer)->second.second;};
+  inline float getRangeMin(int layer) const {
+    float result = 0.;
+    auto it = m_range.find(layer);
+    if (it != m_range.end()){
+      result = it->second.first;
+    }
+    return result;
+  }
+  inline float getRangeMax(int layer) const {
+    float result = 0.;
+    auto it = m_range.find(layer);
+    if (it != m_range.end()){
+      result = it->second.second;
+    }
+    return result;
+  }
 
 private:
   //private constructor for singleton
