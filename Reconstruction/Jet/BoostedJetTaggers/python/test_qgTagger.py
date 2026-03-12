@@ -25,12 +25,13 @@ if __name__=='__main__':
 
     # config files
     config_file = "/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/QGTagger_AntiKt04PFlow_Transformer.dat"
-    wps_file = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/QGTagger_WPs.root'
-    sfs_file = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/'
+    calib_path = '/eos/atlas/atlascerngroupdisk/perf-jets/LocalStorage/TAGGING/PreliminaryConfigs/qgTagger/'
 
     testacc = qgTagAlgCfg(flags, tagger='qg', generation='ParT', WP='50',
-                          cfg_file=config_file, wps_file=wps_file,
-                          sfs_file=sfs_file)
+                          cfg_file=config_file, 
+                          calib_path=calib_path,
+                          addSFs=True,
+                          run='run2')
 
     cfg.merge(testacc)
     cfg.run(15)
