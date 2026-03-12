@@ -1506,10 +1506,10 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // int trxv = 0;
 
     
-    int r3conv = 0;
-    int r4conv = 0;
-    int r5conv = 0;
-    int r6conv = 0;
+    unsigned int r3conv = 0;
+    unsigned int r4conv = 0;
+    unsigned int r5conv = 0;
+    unsigned int r6conv = 0;
     // int r3offs = 0;
 
     //r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
