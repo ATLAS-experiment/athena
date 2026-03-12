@@ -60,10 +60,7 @@ def ActsPixelSeedingToolCfg(flags,
         [40, 260],
         [140, 260],
         [0, 0]])
-    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
-    else:
-        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
 def ActsFastPixelSeedingToolCfg(flags,
@@ -167,10 +164,7 @@ def ActsStripSeedingToolCfg(flags,
     kwargs.setdefault("collisionRegionMin", -200. * ActsUnits.mm)
     kwargs.setdefault("collisionRegionMax", 200. * ActsUnits.mm)
 
-    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
-    else:
-        acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
 def ActsLargeRadiusStripSeedingToolCfg(flags,
@@ -292,10 +286,10 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    if flags.Acts.SeedingStrategy in (SeedingStrategy.GridTriplet, SeedingStrategy.Gbts):
-        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
-    else:
+    if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
         acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    else:
+        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     return acc
 
 
@@ -328,10 +322,7 @@ def ActsStripSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkStripSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkStripSeedingMonitoringToolCfg(flags)))
 
-    if flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
-        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
-    else:
-        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     return acc
 
 
@@ -395,7 +386,7 @@ def ActsSeedingCfg(flags,**kwargs) -> ComponentAccumulator:
         kwargs.setdefault('PixelSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsPixelSeedingToolCfg(flags,
                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}PixelSeedingTool')))
 
-    if processStrips and (flags.Acts.SeedingStrategy is SeedingStrategy.Default or flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet):
+    if processStrips and flags.Acts.SeedingStrategy is SeedingStrategy.GridTriplet:
         if flags.Tracking.ActiveConfig.isLargeD0:
             kwargs.setdefault('StripSeedingAlg.SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripSeedingToolCfg(flags,
                                                                                                                    name=f'{flags.Tracking.ActiveConfig.extension}StripSeedingTool')))

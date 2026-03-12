@@ -4,7 +4,6 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
 
 class SeedingStrategy(FlagEnum):
-    Default = "Default"
     Gbts = "Gbts"
     Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"

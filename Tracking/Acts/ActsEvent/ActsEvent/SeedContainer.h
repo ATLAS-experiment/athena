@@ -147,16 +147,6 @@ struct SeedContainer final {
                      seed.vertexZ());
   }
 
-  // convert from old Acts::Seed<Acts::SpacePointProxy> used by SeedingTool and
-  // OrthogonalSeedingTool
-  template <typename sp_proxy_t, std::size_t N>
-  Seed push_back(const Acts::Seed<sp_proxy_t, N>& pSeed) {
-    return push_back(
-        pSeed.sp(),
-        [](const sp_proxy_t* sp) { return &sp->externalSpacePoint(); },
-        pSeed.seedQuality(), pSeed.z());
-  }
-
  private:
   std::uint32_t m_size{0};
   std::vector<std::uint32_t> m_spacePointOffsets;
