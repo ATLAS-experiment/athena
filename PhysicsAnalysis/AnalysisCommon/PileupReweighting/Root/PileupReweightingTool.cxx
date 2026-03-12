@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -155,12 +155,17 @@ float PileupReweightingTool::getCorrectedAverageInteractionsPerCrossing( const x
 }
      
 float PileupReweightingTool::getCorrectedActualInteractionsPerCrossing( const xAOD::EventInfo& eventInfo, bool includeDataScaleFactor ) { 
+   float result = 1.;
+   const float actualInteractions = eventInfo.actualInteractionsPerCrossing();
    if(eventInfo.eventType(xAOD::EventInfo::IS_SIMULATION)) {
-      return eventInfo.actualInteractionsPerCrossing(); //no correction needed for MC
+      return actualInteractions; //no correction needed for MC
    }
    float correctedMu = CP::TPileupReweighting::GetLumiBlockMu(eventInfo.runNumber(),eventInfo.lumiBlock());
    if(correctedMu<0) return correctedMu; //will be -1
-   return eventInfo.actualInteractionsPerCrossing() * (correctedMu/eventInfo.averageInteractionsPerCrossing()) * ( (includeDataScaleFactor) ? m_activeTool->GetDataScaleFactor() : 1.); 
+   if ( const auto avg = eventInfo.averageInteractionsPerCrossing(); avg != 0.){
+     result =  actualInteractions * (correctedMu/avg) * ( (includeDataScaleFactor) ? m_activeTool->GetDataScaleFactor() : 1.); 
+   } 
+   return result;
 }
 
 

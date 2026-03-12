@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TruthParentDecoratorAlg.h"
 
@@ -38,7 +38,7 @@ namespace {
           "[index: "  + std::to_string(match.parent_index) +
           " , max_mask: " + std::to_string(max_idx) + "]");
       }
-      mask |= (0x1u << match.parent_index);
+      mask |= (parent_mask_t{1} << match.parent_index);
     }
     return mask;
   }
