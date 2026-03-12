@@ -335,6 +335,25 @@ def TauReconstructionCfg(flags):
 
     return result
 
+def TauLRTReconstructionCfg(flags):
+    result = ComponentAccumulator()
+
+    # standard tau reconstruction
+    flags_TauLRT = flags.cloneAndReplace("Tau.ActiveConfig", "Tau.TauLRT")
+
+    result.merge(TauBuildAlgCfg(flags_TauLRT))
+
+    result.merge(TauCaloAlgCfg(flags_TauLRT))
+
+    result.merge(TauRunnerAlgCfg(flags_TauLRT))
+
+    if (flags.Output.doWriteESD or flags.Output.doWriteAOD):
+        result.merge(TauOutputCfg(flags_TauLRT))
+
+    if (flags.Output.doWriteAOD and flags.Tau.ThinTaus):
+        result.merge(TauxAODthinngCfg(flags_TauLRT))
+
+    return result
 
 def TauElecSubtractAlgCfg(flags):
 

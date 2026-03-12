@@ -14,6 +14,7 @@ def FullListOfSmartContainers(flags=None):
       "DiTauJetsLowPt",
       "TauJets_MuonRM",
       "TauJets_EleRM",
+      "TauJetsLRT",
       "MET_Baseline_AntiKt4EMTopo",
       "MET_Baseline_AntiKt4EMPFlow",
       "AntiKt2TruthJets",
