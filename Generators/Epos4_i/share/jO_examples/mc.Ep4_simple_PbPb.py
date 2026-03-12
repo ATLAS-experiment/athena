@@ -4,16 +4,9 @@ evgenConfig.contact  = [ "andrii.verbytskyi@mpp.mpg.de", "paulina.majchrzak@cern
 evgenConfig.nEventsPerJob = 10000
 evgenConfig.generators += ["Epos4"]
 
-theApp.EvtMax = 100
-
-
 include("Epos4_i/Epos4_Base_Fragment_PbPb.py")
 
-# ----------------------------------------------------------------------
-# Drop checks
-# ----------------------------------------------------------------------
-
-# Currently dropped. To be changed in subsequent iterations!!
+#To be fixed (TestHepMC is currently not working)
 if hasattr(fixSeq, "FixHepMC"):
    fixSeq.remove(FixHepMC())
 
