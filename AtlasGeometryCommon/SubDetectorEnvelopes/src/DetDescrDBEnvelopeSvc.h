@@ -1,17 +1,20 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// DetDescrDBEnvelopeSvc.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-#ifndef DETDESCRDBENVELOPESVC_H
-#define DETDESCRDBENVELOPESVC_H
+/**
+ * @file  DetDescrDBEnvelopeSvc.h
+ * @class DetDescrDBEnvelopeSvc
+ */
+
+#ifndef SUBDETECTORENVELOPES_DETDESCRDBENVELOPESVC_H
+#define SUBDETECTORENVELOPES_DETDESCRDBENVELOPESVC_H
 
 // STL includes
 #include <string>
 #include <vector>
 #include <utility>
+#include <array>
 
 // GaudiKernel & Athena
 #include "AthenaBaseComps/AthService.h"
@@ -25,79 +28,95 @@
 // GeoModel
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 
-
 /** datatype used for fallback solution */
-typedef std::vector< double >           FallbackDoubleVector;
+using FallbackDoubleVector = std::vector<double>;
 
+class DetDescrDBEnvelopeSvc : public extends<AthService, IEnvelopeDefSvc>
+{
+public:
+  /** public AthService constructor */
+  DetDescrDBEnvelopeSvc(const std::string& name, ISvcLocator* svc);
 
-class DetDescrDBEnvelopeSvc : public extends<AthService, IEnvelopeDefSvc> {
+  /** Destructor */
+  ~DetDescrDBEnvelopeSvc();
 
-  public:
-    /** public AthService constructor */
-    DetDescrDBEnvelopeSvc(const std::string& name, ISvcLocator* svc);
+  /** AthService initialize method.*/
+  virtual StatusCode initialize() override;
 
-    /** Destructor */
-    ~DetDescrDBEnvelopeSvc();
+  /** return a vector of (r,z) pairs, defining the respective envelope */
+  virtual const RZPairVector& getRZBoundary( AtlasDetDescr::AtlasRegion region ) const override { return m_rz[region]; }
 
-    /** AthService initialize method.*/
-    StatusCode initialize();
-    /** AthService finalize method */
-    StatusCode finalize();
+  /** return a vector of (r,z) pairs, defining the envelope on the z>0 region */
+  virtual const RZPairVector &getRPositiveZBoundary( AtlasDetDescr::AtlasRegion region ) const override { return m_rposz[region]; }
 
-    /** return a vector of (r,z) pairs, defining the respective envelope */
-    const RZPairVector& getRZBoundary( AtlasDetDescr::AtlasRegion region ) const
-                      { return m_rz[region]; }
+private:
+  /** retrieve and store the (r,z) values locally for the given DB node.
+      if there are problems with retrieving this from DDDB,
+      try the fallback approach if allowed */
+  StatusCode retrieveRZBoundaryOptionalFallback( const std::string           &dbNode,
+						 const FallbackDoubleVector  &r,
+						 const FallbackDoubleVector  &z,
+						 RZPairVector                &rzVec);
 
-    /** return a vector of (r,z) pairs, defining the envelope on the z>0 region */
-    const RZPairVector &getRPositiveZBoundary( AtlasDetDescr::AtlasRegion region ) const
-                      { return m_rposz[region]; }
+  /** retrieve and store the (r,z) values locally for the given DB node */
+  StatusCode retrieveRZBoundary( const std::string &node, RZPairVector &rzVec);
 
-  private:
-    /** retrieve and store the (r,z) values locally for the given DB node.
-        if there are problems with retrieving this from DDDB,
-        try the fallback approach if allowed */
-    StatusCode retrieveRZBoundaryOptionalFallback( std::string           &dbNode,
-                                                   FallbackDoubleVector  &r,
-                                                   FallbackDoubleVector  &z,
-                                                   RZPairVector          &rzVec);
+  /** use the fallback approach (python arguments) to set the (r,z) values */
+  StatusCode fallbackRZBoundary( const FallbackDoubleVector  &r,
+				 const FallbackDoubleVector  &z,
+				 RZPairVector                &rzVec);
 
-    /** retrieve and store the (r,z) values locally for the given DB node */
-    StatusCode retrieveRZBoundary( std::string &node, RZPairVector &rzVec);
+  /** enable fallback solution:
+   *  @return true if fallback mode is allowed, false if no fallback allowed */
+  bool enableFallback();
 
-    /** use the fallback approach (python arguments) to set the (r,z) values */
-    StatusCode fallbackRZBoundary( FallbackDoubleVector  &r,
-                                   FallbackDoubleVector  &z,
-                                   RZPairVector          &rzVec);
+  /** the DetectorDescription database access method */
+  ServiceHandle<IRDBAccessSvc>       m_dbAccess{this, "RDBAccessSvc", "RDBAccessSvc"};
 
-    /** enable fallback solution:
-     *  @return true if fallback mode is allowed, false if no fallback allowed */
-    bool enableFallback();
+  /** ATLAS GeoModel */
+  ServiceHandle<IGeoModelSvc>        m_geoModelSvc{this, "GeoModelSvc", "GeoModelSvc"};
 
-    /** the DetectorDescription database access method */
-    ServiceHandle<IRDBAccessSvc>       m_dbAccess{this, "RDBAccessSvc", "RDBAccessSvc"};
+  /** main DDDB node for the ATLAS detector */
+  std::string                        m_atlasNode{"ATLAS"};
+  std::string                        m_atlasVersionTag{"AUTO"};
 
-    /** ATLAS GeoModel */
-    ServiceHandle<IGeoModelSvc>       m_geoModelSvc{this, "GeoModelSvc", "GeoModelSvc"};
+  /** the names of the DB nodes for the respective AtlasRegion */
+  std::array<StringProperty,AtlasDetDescr::fNumAtlasRegions> m_node{{
+      {this, "DBUndefinedNode", ""} // Dummy
+      , {this, "DBInDetNode","InDetEnvelope"}
+      , {this, "DBBeamPipeNode", "BeamPipeEnvelope"}
+      , {this, "DBCaloNode", "CaloEnvelope"}
+      , {this, "DBMSNode", "MuonEnvelope"}
+      , {this, "DBCavernNode", "CavernEnvelope"}
+    }};
 
-    /** main DDDB node for the ATLAS detector */
-    std::string                        m_atlasNode;
-    std::string                        m_atlasVersionTag;
+  /** internal (r,z) representation, one RZPairVector for each AtlasRegion */
+  RZPairVector                       m_rz[AtlasDetDescr::fNumAtlasRegions]{};
+  /** internal (r,z) representation for the positive z-side only,
+   *  one RZPairVector for each AtlasRegion */
+  RZPairVector                       m_rposz[AtlasDetDescr::fNumAtlasRegions]{};
 
-    /** the names of the DB nodes for the respective AtlasRegion */
-    std::string                        m_node[AtlasDetDescr::fNumAtlasRegions];
+  /** fallback solution, in case something goes wrong with the DB */
+  Gaudi::Property<bool> m_allowFallback{this, "EnableFallback", false};
+  bool                  m_doFallback{false};
 
-    /** internal (r,z) representation, one RZPairVector for each AtlasRegion */
-    RZPairVector                       m_rz[AtlasDetDescr::fNumAtlasRegions];
-    /** internal (r,z) representation for the positive z-side only,
-     *  one RZPairVector for each AtlasRegion */
-    RZPairVector                       m_rposz[AtlasDetDescr::fNumAtlasRegions];
+  std::array<DoubleArrayProperty,AtlasDetDescr::fNumAtlasRegions> m_fallbackR{{
+      {this, "FallbackUndefinedR", {}} //Dummy
+      , {this, "FallbackInDetR", {}}
+      , {this, "FallbackBeamPipeR", {}}
+      , {this, "FallbackCaloR", {}}
+      , {this, "FallbackMuonR", {}}
+      , {this, "FallbackCavernR", {}}
+    }};
 
-    /** fallback solution, in case something goes wrong with the DB */
-    bool                               m_allowFallback; //!< Python flag
-    bool                               m_doFallback;
-    FallbackDoubleVector               m_fallbackR[AtlasDetDescr::fNumAtlasRegions];
-    FallbackDoubleVector               m_fallbackZ[AtlasDetDescr::fNumAtlasRegions];
+  std::array<DoubleArrayProperty,AtlasDetDescr::fNumAtlasRegions> m_fallbackZ{{
+      {this, "FallbackUndefinedZ", {}} //Dummy
+      , {this, "FallbackInDetZ", {}}
+      , {this, "FallbackBeamPipeZ", {}}
+      , {this, "FallbackCaloZ", {}}
+      , {this, "FallbackMuonZ", {}}
+      , {this, "FallbackCavernZ", {}}
+    }};
 };
 
 #endif // DETDESCRDBENVELOPESVC_H
-
