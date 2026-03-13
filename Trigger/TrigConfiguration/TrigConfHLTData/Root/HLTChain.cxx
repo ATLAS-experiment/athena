@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfHLTData/HLTChain.h"
@@ -417,7 +417,8 @@ TrigConf::HLTChain::print(const std::string& indent, unsigned int detail) const 
 //________________________________________________________________________________
 std::ostream &
 TrigConf::operator<<(std::ostream & o, const TrigConf::HLTChain & c) {
-   int dp = o.precision();
+   const std::streamsize oldPrecision = o.precision();
+   const std::ios::fmtflags oldFlags = o.flags();
    o << "- -- HLTChain printout ------------------------------------- " << endl;
    o << "- --   name='"               << c.name()
      << "' [v "                    << c.m_chain_version << "]"
@@ -455,7 +456,8 @@ TrigConf::operator<<(std::ostream & o, const TrigConf::HLTChain & c) {
    for (; signature   != c.m_HLTSignatureList.end();   ++signature)   o << *(*signature);
    o << "- ---------------------------------------------------------- " << endl;
 
-   o.precision(dp);
+   o.flags(oldFlags);
+   o.precision(oldPrecision);
    return o;
 }
 
