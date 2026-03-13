@@ -70,6 +70,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.muons = "AnalysisMuons"
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
+                extraInputs = [
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_LooseBad".format(baseName=self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection))]
+                config.setExtraInputs (extraInputs)
 
         if self.runTruthJetTagging and config.dataType() is not DataType.Data:
             # Decorate jets with isHS labels (required to retrieve Jvt SFs)
@@ -79,6 +83,13 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.decorator.RecoJetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
             alg.decorator.SuppressOutputDependence=True
+            if self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
+                extraInputs = [
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_phbb".format(baseName= self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_phcc".format(baseName= self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_pqcd".format(baseName= self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2Xv01_ptop".format(baseName= self.jetCollection))]
+                config.setExtraInputs (extraInputs)
 
         # Set up shallow copy if needed and not yet done
         if config.wantCopy (self.containerName) :
