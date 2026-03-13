@@ -18,6 +18,8 @@
 #include <cmath>
 #include <unordered_set>
 #include <vector>
+#include <stdexcept>
+#include <limits>
 
 
 namespace {
@@ -109,13 +111,17 @@ namespace {
   // Encode lepton species into a decimal label.
   // (JetLeptonDecayLabelDecorator::getDecayLabel)
   int getDecayLabel(const std::vector<int>& leps) {
+    //max int value is 2147483647
+    //log10(2147483647) ~ 9.3
+    //To avoid overflow of 'factor' we limit the leps vector size
+    if (leps.size()>9) throw std::overflow_error("getDecayLabel: too many leptons");
     int factor = 1;
     int label = 0;
     for (int pdg : leps) {
       if (pdg == 15) label += factor * 3;
       if (pdg == 13) label += factor * 2;
       if (pdg == 11) label += factor * 1;
-      factor *= 10;
+      factor *= 10; //possible wrap around to negative value if factor is too big
     }
     return label;
   }
@@ -127,11 +133,20 @@ namespace {
     if (std::find(leps.begin(), leps.end(), 15) == leps.end()) {
       return -999;
     }
+    int maxFactor = std::numeric_limits<int>::max() / 10;
     int factor = 1;
     int label = 0;
     for (int pdg : tauLeps) {
-      if (pdg == 11) { label += factor;     factor *= 10; }
-      if (pdg == 13) { label += 2 * factor; factor *= 10; }
+      if (pdg == 11) { 
+        label += factor;
+        if (factor>maxFactor) throw std::overflow_error("getTauLabel:(pdg = 11) factor overflow");
+        factor *= 10; 
+      }
+      if (pdg == 13) { 
+        label += 2 * factor;
+        if (factor>maxFactor) throw std::overflow_error("getTauLabel:(pdg = 13) factor overflow"); 
+        factor *= 10; 
+      }
     }
     return label;
   }
