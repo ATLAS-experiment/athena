@@ -55,7 +55,7 @@ namespace ActsTrk {
     virtual StatusCode initialize() override;
     
     // Interface
-    StatusCode createSeeds2(
+    StatusCode createSeeds(
       const EventContext& ctx,
       const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
       const Eigen::Vector3f& beamSpotPos, float bFieldInZ,

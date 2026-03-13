@@ -31,16 +31,17 @@ StatusCode Gbts2ActsSeedingTool::finalize() {
   return SeedingToolBase::finalize();
 }
 
-StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer, const Acts::Vector3&, const Acts::Vector3&, ActsTrk::SeedContainer& seedContainer) const {
+StatusCode Gbts2ActsSeedingTool::createSeeds(
+      const EventContext& ctx,
+      const std::vector<const xAOD::SpacePointContainer*>&
+          spacePointCollections,
+      const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+      ActsTrk::SeedContainer& seedContainer) const {
+ 
+    (void)ctx;
+    (void)bFieldInZ;
 
-  std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
-
-    SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
-    
-    const Amg::Vector3D &vertex = beamSpotHandle->beamPos();
-    
-    float shift_x = vertex.x() - beamSpotHandle->beamTilt(0)*vertex.z();
-    float shift_y = vertex.y() - beamSpotHandle->beamTilt(1)*vertex.z();
+    std::unique_ptr<GNN_DataStorage> storage = std::make_unique<GNN_DataStorage>(*m_geo, m_mlLUT);
 
     std::vector<std::vector<GNN_Node> > node_storage;//layer-based collections
     node_storage.resize(m_are_pixels.size());
@@ -50,35 +51,42 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     unsigned int nPixelLoaded = 0;
     unsigned int nStripLoaded = 0;
 
-    for(size_t idx=0; idx<spContainer.size(); idx++){
-        const auto & sp = spContainer.at(idx);
-        const auto & extSP = sp.externalSpacePoint();
-        const std::vector<xAOD::DetectorIDHashType>& elementlist = extSP.elementIdList() ;
+    std::size_t totalSpacePoints = 0;
+    for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
+      totalSpacePoints += spacePoints->size();
+    }
 
-        bool isPixel(elementlist.size() == 1);
+    std::vector<const xAOD::SpacePoint*> selectedXAODSpacePoints;
+    selectedXAODSpacePoints.reserve(totalSpacePoints);
 
-	short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->at(static_cast<int>(elementlist[0]));
- 
-	//convert incoming xaod spacepoints into GNN nodes
-	
+    for (const xAOD::SpacePointContainer* spacePoints : spacePointCollections) {
+      for (const xAOD::SpacePoint* sp : *spacePoints) {
+        const auto& pos = sp->globalPosition();
+        const std::vector<xAOD::DetectorIDHashType>& elementlist = sp->elementIdList();
+        const bool isPixel = (elementlist.size() == 1);
+        const short layer = (isPixel ? m_pix_h2l : m_sct_h2l)->at(static_cast<int>(elementlist[0]));
+
+        //convert incoming xaod spacepoints into GNN nodes
+
         GNN_Node& node = node_storage[layer].emplace_back(layer);
 
-        const auto& pos = extSP.globalPosition();	
+        node.m_x = pos.x() - beamSpotPos[0];
+        node.m_y = pos.y() - beamSpotPos[1];
+        node.m_z = pos.z();
+        node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
+        node.m_phi = std::atan2(node.m_y, node.m_x);
+        node.m_idx = selectedXAODSpacePoints.size();
 
-	node.m_x = pos.x() - shift_x;
-	node.m_y = pos.y() - shift_y;
-	node.m_z = pos.z();
-	node.m_r = std::sqrt(std::pow(node.m_x, 2) + std::pow(node.m_y, 2));
-	node.m_phi = std::atan2(node.m_y, node.m_x);
-	node.m_idx = idx;
-
-        if(isPixel && m_useML){
-            //Check type in debug build otherwise assume it is correct
-            assert(dynamic_cast<const xAOD::PixelCluster*>(extSP.measurements().front())!=nullptr);
-            const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(extSP.measurements().front());
-            node.m_pcw = pCL->widthInEta();
-            node.m_locPosY = pCL->localPosition<2>().y();
+        if (isPixel && m_useML){
+          //Check type in debug build otherwise assume it is correct
+          assert(dynamic_cast<const xAOD::PixelCluster*>(sp->measurements().front())!=nullptr);
+          const xAOD::PixelCluster* pCL = static_cast<const xAOD::PixelCluster*>(sp->measurements().front());
+          node.m_pcw = pCL->widthInEta();
+          node.m_locPosY = pCL->localPosition<2>().y();
         }
+
+        selectedXAODSpacePoints.push_back(sp);
+      }
     }
 
     for(size_t l = 0; l < node_storage.size(); l++) {
@@ -117,21 +125,20 @@ StatusCode Gbts2ActsSeedingTool::createSeeds(const EventContext& ctx, const Acts
     
     std::vector<std::pair<float, std::vector<unsigned int> > > vOutputSeeds;
 
-    extractSeedsFromTheGraph(maxLevel, graphStats.first, spContainer.size(), edgeStorage, vOutputSeeds);
+    extractSeedsFromTheGraph(maxLevel, graphStats.first, totalSpacePoints, edgeStorage, vOutputSeeds);
 
     if (vOutputSeeds.empty()) return StatusCode::SUCCESS;
 
     seedContainer.reserve(vOutputSeeds.size(), 7.0f);  // 7 SP/seed to optimise allocations (average is 6.1 SP/seed)
 
     for (const auto& seed : vOutputSeeds) {
-      
       // convert space points and add seed to output
       const float quality = seed.first;
       const float vertexZ = 0.0f;  // not used in GBTS seeding, set to 0
       seedContainer.push_back(
           seed.second,
           [&](const unsigned int spIndex) {
-            return &spContainer.at(spIndex).externalSpacePoint();
+            return selectedXAODSpacePoints[spIndex];
           },
           quality, vertexZ);
     }
