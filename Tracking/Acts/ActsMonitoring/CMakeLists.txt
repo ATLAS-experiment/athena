@@ -5,6 +5,7 @@ atlas_subdir( ActsMonitoring )
 
 # External dependencies
 find_package( Acts COMPONENTS Core )
+find_package( ROOT COMPONENTS Core Tree TreePlayer )
 
 # Component(s) in the package:
 atlas_add_component( ActsMonitoring
