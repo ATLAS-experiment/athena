@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// DetDescrDBEnvelopeSvc.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 // class header include
 #include "DetDescrDBEnvelopeSvc.h"
@@ -24,50 +20,15 @@
 #include "AtlasDetDescr/AtlasRegionHelper.h"
 
 // GeoModel
-#include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 
 /** Constructor */
 DetDescrDBEnvelopeSvc::DetDescrDBEnvelopeSvc(const std::string& name, ISvcLocator* svc) :
-  base_class(name,svc),
-  m_atlasNode("ATLAS"),
-  m_atlasVersionTag("AUTO"),
-  m_node(),
-  m_rz(),
-  m_rposz(),
-  m_allowFallback(false),
-  m_doFallback(false),
-  m_fallbackR(),
-  m_fallbackZ()
+  base_class(name,svc)
 {
-  declareProperty( "DBBeamPipeNode"  , m_node[AtlasDetDescr::fAtlasForward]="BeamPipeEnvelope"  );
-  declareProperty( "DBInDetNode"     , m_node[AtlasDetDescr::fAtlasID]="InDetEnvelope"          );
-  declareProperty( "DBCaloNode"      , m_node[AtlasDetDescr::fAtlasCalo]="CaloEnvelope"       );
-  declareProperty( "DBMSNode"        , m_node[AtlasDetDescr::fAtlasMS]="MuonEnvelope"           );
-  declareProperty( "DBCavernNode"    , m_node[AtlasDetDescr::fAtlasCavern]="CavernEnvelope" );
-
-  // in case something goes wrong with the DB, the user can define 
-  // fallback RZ values
-  declareProperty( "EnableFallback"        , m_allowFallback                 );
-  declareProperty( "FallbackBeamPipeR"     , m_fallbackR[AtlasDetDescr::fAtlasForward] );
-  declareProperty( "FallbackBeamPipeZ"     , m_fallbackZ[AtlasDetDescr::fAtlasForward] );
-  declareProperty( "FallbackInDetR"        , m_fallbackR[AtlasDetDescr::fAtlasID]      );
-  declareProperty( "FallbackInDetZ"        , m_fallbackZ[AtlasDetDescr::fAtlasID]      );
-  declareProperty( "FallbackCaloR"         , m_fallbackR[AtlasDetDescr::fAtlasCalo]    );
-  declareProperty( "FallbackCaloZ"         , m_fallbackZ[AtlasDetDescr::fAtlasCalo]    );
-  declareProperty( "FallbackMuonR"         , m_fallbackR[AtlasDetDescr::fAtlasMS]      );
-  declareProperty( "FallbackMuonZ"         , m_fallbackZ[AtlasDetDescr::fAtlasMS]      );
-  declareProperty( "FallbackCavernR"       , m_fallbackR[AtlasDetDescr::fAtlasCavern]  );
-  declareProperty( "FallbackCavernZ"       , m_fallbackZ[AtlasDetDescr::fAtlasCavern]  );
 }
 
-
-DetDescrDBEnvelopeSvc::~DetDescrDBEnvelopeSvc()
-{
-  // free memory
-  // TODO :)
-}
-
+DetDescrDBEnvelopeSvc::~DetDescrDBEnvelopeSvc() = default;
 
 /** enable fallback solution (if allowed) */
 bool DetDescrDBEnvelopeSvc::enableFallback()
@@ -117,9 +78,9 @@ StatusCode DetDescrDBEnvelopeSvc::initialize()
 
     // cache the volume definitions locally
     for ( int region = AtlasDetDescr::fFirstAtlasRegion; region < AtlasDetDescr::fNumAtlasRegions; region++) {
-      StatusCode sc = retrieveRZBoundaryOptionalFallback( m_node[region],
-                                                          m_fallbackR[region],
-                                                          m_fallbackZ[region],
+      StatusCode sc = retrieveRZBoundaryOptionalFallback( m_node[region].value(),
+                                                          m_fallbackR[region].value(),
+                                                          m_fallbackZ[region].value(),
                                                           m_rposz[region] );
 
       if (sc.isFailure()) {
@@ -135,7 +96,7 @@ StatusCode DetDescrDBEnvelopeSvc::initialize()
   else {
     // cache the volume definitions locally
     for ( int region = AtlasDetDescr::fFirstAtlasRegion; region < AtlasDetDescr::fNumAtlasRegions; region++) {
-      StatusCode sc = fallbackRZBoundary( m_fallbackR[region], m_fallbackZ[region], m_rposz[region] );
+      StatusCode sc = fallbackRZBoundary( m_fallbackR[region].value(), m_fallbackZ[region].value(), m_rposz[region] );
 
       if (sc.isFailure()) {
         ATH_MSG_ERROR("Unable to retrieve sub-detector envelope in (r,z)-space for detector region '" <<
@@ -168,20 +129,13 @@ StatusCode DetDescrDBEnvelopeSvc::initialize()
   return StatusCode::SUCCESS;
 }
 
-
-/** Athena AthService finalize hook */
-StatusCode DetDescrDBEnvelopeSvc::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
 /** retrieve and store the (r,z) values locally for the given DB node.
     if there are problems with retrieving this from DDDB,
     try the fallback approach if allowed */
-StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundaryOptionalFallback( std::string           &dbNode,
-                                                                      FallbackDoubleVector  &r,
-                                                                      FallbackDoubleVector  &z,
-                                                                      RZPairVector          &rzVec)
+StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundaryOptionalFallback( const std::string           &dbNode,
+                                                                      const FallbackDoubleVector  &r,
+                                                                      const FallbackDoubleVector  &z,
+                                                                      RZPairVector                &rzVec)
 {
   // clear the output RZPairVector
   rzVec.clear();
@@ -208,7 +162,7 @@ StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundaryOptionalFallback( std::strin
 
 
 /** retrieve and store the (r,z) values locally for the given DB node */
-StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundary( std::string  &node,
+StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundary( const std::string  &node,
                                                       RZPairVector &rzVec)
 {
   // clear the output RZPairVector
@@ -266,8 +220,8 @@ StatusCode DetDescrDBEnvelopeSvc::retrieveRZBoundary( std::string  &node,
 
 
 /** retrieve and store the (r,z) values locally for the given DB node */
-StatusCode DetDescrDBEnvelopeSvc::fallbackRZBoundary( FallbackDoubleVector &r,
-                                                      FallbackDoubleVector &z,
+StatusCode DetDescrDBEnvelopeSvc::fallbackRZBoundary( const FallbackDoubleVector &r,
+                                                      const FallbackDoubleVector &z,
                                                       RZPairVector &rzVec)
 {
   unsigned short len = r.size();
