@@ -159,6 +159,9 @@ class ElectronCalibrationConfig (ConfigBlock) :
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:
                 decorationList += ['TruthLink']
+            if self.containerName == 'AnalysisSiHitElectrons':
+                decorationList += ['ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+                                   'topoetcone20_CloseByCorr']
             alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all electrons prior to everything else
