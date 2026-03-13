@@ -623,9 +623,9 @@ bool TileJetMonitorAlgorithm::isGoodEvent(const EventContext& ctx) const {
     return true;
   }
 
-  auto jetsSC = xAOD::shallowCopyContainer(*jetContainer);
-  std::unique_ptr< xAOD::JetContainer > jetsCopy(jetsSC.first);
-  std::unique_ptr< xAOD::ShallowAuxContainer > jetsCopyAux(jetsSC.second);
+  auto [jetsCopy, jetsCopyAux] = xAOD::shallowCopyContainer(*jetContainer,ctx);
+  //std::unique_ptr< xAOD::JetContainer > jetsCopy(jetsSC.first);
+  //std::unique_ptr< xAOD::ShallowAuxContainer > jetsCopyAux(jetsSC.second);
 
   // We're attaching decorations here to a temporary object that
   // is not recorded, so we shouldn't use a WriteDecorHandle.
