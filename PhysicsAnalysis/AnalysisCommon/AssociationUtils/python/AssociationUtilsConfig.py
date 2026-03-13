@@ -109,4 +109,26 @@ def OverlapRemovalToolCfg(ConfigFlags,
     acc.setPrivateTools(orTool)
     return acc
 
+def FEAssociationCfg(flags, algName="FEAssociationAlg", toolName="FEAssociationTool"):
+    acc = ComponentAccumulator()
+
+    feTool = CompFactory.ORUtils.FEAssociationTool(
+        toolName,
+        ElectronContainer   = "Electrons",
+        MuonContainer       = "Muons",
+        PhotonContainer     = "Photons",
+        TauContainer        = "TauJets",
+        SmallRJetContainer  = "AntiKt4EMPFlowJets",
+        LargeRJetContainer  = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+        OutputMap           = "FEAssociationMap",
+    )
+
+    alg = CompFactory.ORUtils.FEAssociationAlg(
+        algName,
+        FEAssociationTool = feTool,
+    )
+    acc.addEventAlgo(alg)
+    return acc
+
+
 

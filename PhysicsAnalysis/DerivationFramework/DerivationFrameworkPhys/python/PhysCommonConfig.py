@@ -97,6 +97,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(METCommonCfg(flags))
     acc.merge(HadRecoilMETCfg(flags))
 
+    from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
+    acc.merge(FEAssociationCfg(flags))
+    
     # Trigger matching and postprocessing
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
         from JetTagDerivationUtils.TrigBTagCopierConfig import TrigBTagCopierAlgCfg
