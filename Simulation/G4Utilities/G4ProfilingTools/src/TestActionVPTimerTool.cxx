@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestActionVPTimerTool.h"
@@ -80,7 +80,12 @@ namespace G4UA
       // time_index is map<VolTree, TestActionVPTimer::volumeData>
 
       topPV.push_back(m_report.time_index.begin()->first.front());
-      TestActionVPTimer::volumeData atlasData = m_report.time_index.find(topPV)->second;
+      auto it =  m_report.time_index.find(topPV);
+      if (it == m_report.time_index.end()){
+        ATH_MSG_WARNING("topPV not found.");
+        return StatusCode::FAILURE;
+      }
+      TestActionVPTimer::volumeData atlasData =it->second;
       G4double DeadTime  = m_report.runTime - atlasData.tTotal;
 
       ATH_MSG_INFO("Runtime " << m_report.runTime
