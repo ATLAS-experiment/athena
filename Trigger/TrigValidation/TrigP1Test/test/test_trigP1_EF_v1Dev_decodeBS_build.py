@@ -60,7 +60,7 @@ refcomp = CheckSteps.ChainCompStep("CountRefComp")
 refcomp.input_file = 'ref_v1Dev_decodeBS_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TrigP1Test/share
-refcomp.required = False # Final exit code doesn't depend on this step in main
+refcomp.required = True # Final exit code depends on this step
 CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
 
 import sys
