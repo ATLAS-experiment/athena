@@ -88,7 +88,7 @@ def STDM7StringSkimmingToolCfg(flags):
     # skim on two good leptons    
     muonsRequirements = '(Muons.pt >= 10.*GeV) && (abs(Muons.eta) < 2.6) && (Muons.DFCommonMuonPassPreselection) && (Muons.DFCommonMuonPassIDCuts)'
     electronsRequirements = '(Electrons.pt >= 15.*GeV) && (abs(Electrons.eta) < 2.6) && ((Electrons.DFCommonElectronsLHLoose) || (Electrons.DFCommonElectronsDNNLoose))'
-    tausRequirements = '(TauJets.pt >= 20.*GeV) && (abs(TauJets.eta) < 2.6) && ((TauJets.DFTauRNNLoose || TauJets.DFTauGNTauLoose))'
+    tausRequirements = '(TauJets.pt >= 20.*GeV) && (abs(TauJets.eta) < 2.6) && (TauJets.DFTauGNTauLoose)'
     
     chargedParticleRequirements = '(TruthParticles.pt >= 500) && (TruthParticles.isGenStable)' \
                                   '&& (TruthParticles.charge != 0)' \
