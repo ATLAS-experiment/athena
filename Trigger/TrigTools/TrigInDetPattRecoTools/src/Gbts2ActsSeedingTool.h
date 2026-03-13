@@ -23,11 +23,12 @@ class Gbts2ActsSeedingTool: public SeedingToolBase, public ActsTrk::ISeedingTool
     virtual StatusCode finalize() override;
 
     // Interface
-    virtual StatusCode createSeeds(const EventContext& ctx,
-                  const Acts::SpacePointContainer<ActsTrk::SpacePointCollector, Acts::detail::RefHolder>& spContainer,
-                  const Acts::Vector3& beamSpotPos,
-                  const Acts::Vector3& bField,
-                  ActsTrk::SeedContainer& seedContainer ) const override;
+    virtual StatusCode createSeeds(
+      const EventContext& ctx,
+      const std::vector<const xAOD::SpacePointContainer*>&
+          spacePointCollections,
+      const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
+      ActsTrk::SeedContainer& seedContainer) const override;
 
     protected:
 

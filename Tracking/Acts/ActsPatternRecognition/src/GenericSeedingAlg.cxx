@@ -143,9 +143,9 @@ StatusCode GenericSeedingAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Running Grid Triplet Seed Finding ...");
   time_seedCreation.start();
   try {
-    ATH_CHECK(m_seedsTool->createSeeds2(ctx, allInputCollections,
-                                        beamPos.cast<float>(), bField.z(),
-                                        *seedPtrs));
+    ATH_CHECK(m_seedsTool->createSeeds(ctx, allInputCollections,
+                                       beamPos.cast<float>(), bField.z(),
+                                       *seedPtrs));
   } catch (const std::exception& e) {
     ATH_MSG_ERROR("Exception caught during seed creation: " << e.what());
     return StatusCode::FAILURE;

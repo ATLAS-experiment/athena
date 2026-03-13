@@ -286,10 +286,7 @@ def ActsPixelSeedingAlgCfg(flags,
         from ActsConfig.ActsMonitoringConfig import ActsITkPixelSeedingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsITkPixelSeedingMonitoringToolCfg(flags)))
 
-    if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
-        acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
-    else:
-        acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.GenericSeedingAlg(name, **kwargs))
     return acc
 
 

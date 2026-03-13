@@ -32,7 +32,7 @@ class GridTripletSeedingTool
 
   virtual StatusCode initialize() override;
 
-  StatusCode createSeeds2(const EventContext& ctx,
+  StatusCode createSeeds(const EventContext& ctx,
                           const std::vector<const xAOD::SpacePointContainer*>&
                               spacePointCollections,
                           const Eigen::Vector3f& beamSpotPos, float bFieldInZ,

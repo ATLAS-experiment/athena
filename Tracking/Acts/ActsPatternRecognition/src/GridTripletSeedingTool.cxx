@@ -383,7 +383,7 @@ std::pair<float, float> GridTripletSeedingTool::retrieveRadiusRangeForMiddle(
   return {m_rRangeMiddleSP[zBin][0], m_rRangeMiddleSP[zBin][1]};
 }
 
-StatusCode GridTripletSeedingTool::createSeeds2(
+StatusCode GridTripletSeedingTool::createSeeds(
     const EventContext& ctx,
     const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,

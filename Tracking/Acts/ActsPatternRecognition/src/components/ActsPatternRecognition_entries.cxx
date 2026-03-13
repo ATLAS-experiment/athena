@@ -4,7 +4,6 @@
 
 // Algs
 #include "src/GenericSeedingAlg.h"
-#include "src/SeedingAlg.h"
 
 // Tools
 #include "src/GbtsSeedingTool.h"
@@ -12,7 +11,6 @@
 #include "src/TrackParamsEstimationTool.h"
 
 // Algs
-DECLARE_COMPONENT(ActsTrk::SeedingAlg)
 DECLARE_COMPONENT(ActsTrk::GenericSeedingAlg)
 
 // Tools

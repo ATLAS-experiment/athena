@@ -70,7 +70,7 @@ namespace ActsTrk {
 
   //create seeds
   ATH_FLATTEN
-  StatusCode GbtsSeedingTool::createSeeds2(
+  StatusCode GbtsSeedingTool::createSeeds(
     const EventContext& ctx,
     const std::vector<const xAOD::SpacePointContainer*>& spacePointCollections,
     const Eigen::Vector3f& beamSpotPos, float bFieldInZ,

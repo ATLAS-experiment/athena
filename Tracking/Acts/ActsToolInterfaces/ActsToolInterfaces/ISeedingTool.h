@@ -28,31 +28,10 @@ class ISeedingTool : virtual public IAlgTool {
 
   virtual StatusCode createSeeds(
       const EventContext& ctx,
-      const Acts::SpacePointContainer<ActsTrk::SpacePointCollector,
-                                      Acts::detail::RefHolder>& spContainer,
-      const Acts::Vector3& beamSpotPos, const Acts::Vector3& bField,
-      ActsTrk::SeedContainer& seedContainer) const {
-    (void)ctx;
-    (void)spContainer;
-    (void)beamSpotPos;
-    (void)bField;
-    (void)seedContainer;
-    return StatusCode::FAILURE;
-  }
-
-  virtual StatusCode createSeeds2(
-      const EventContext& ctx,
       const std::vector<const xAOD::SpacePointContainer*>&
           spacePointCollections,
       const Eigen::Vector3f& beamSpotPos, float bFieldInZ,
-      ActsTrk::SeedContainer& seedContainer) const {
-    (void)ctx;
-    (void)spacePointCollections;
-    (void)beamSpotPos;
-    (void)bFieldInZ;
-    (void)seedContainer;
-    return StatusCode::FAILURE;
-  }
+      ActsTrk::SeedContainer& seedContainer) const = 0;
 };
 
 }  // namespace ActsTrk
