@@ -15,7 +15,7 @@ Reco_tf.py \
 	     flags.Acts.doLargeRadius=True; \
 	     flags.Acts.doLowPt=True; \
 	     flags.Detector.EnableCalo=True;" \
-  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
+  --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
   --outputDAOD_IDTRKVALIDFile DAOD.IDTRKVALID.pool.root \
   --outputDAOD_IDTIDEFile DAOD.CTIDE.pool.root \
   --ignorePatterns "${ignore_pattern}" \
