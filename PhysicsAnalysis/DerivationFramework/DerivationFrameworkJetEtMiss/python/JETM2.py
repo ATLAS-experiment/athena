@@ -16,6 +16,10 @@ def JETM2KernelCfg(flags, name='JETM2Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+
+    from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
+    acc.merge(FEAssociationCfg(flags))
+
     if flags.Input.isMC:
         # thinning tools: 
         truthThinningTool = CompFactory.DerivationFramework.MenuTruthThinning(name               = "JETM2TruthThinning",
@@ -162,6 +166,12 @@ def JETM2Cfg(flags):
                                            "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
                                            "MuonSegments.x.y.z.px.py.pz"]
 
+    JETM2SlimmingHelper.AppendToDictionary.update({
+            "FEAssociationMap"   : "xAOD::MissingETAssociationMap",
+            "FEAssociationMapAux": "xAOD::AuxContainerBase",
+        })
+    JETM2SlimmingHelper.AllVariables += ["FEAssociationMap"]
+    
     JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
                                                    'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
                                                    'CSSKGChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
