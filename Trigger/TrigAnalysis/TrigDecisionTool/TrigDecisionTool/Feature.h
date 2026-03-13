@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGER_DECISION_TOOL_Feature_H
@@ -97,8 +97,8 @@ namespace Trig {
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full Athena
   template<typename T> struct link_or_not<T,true>{
     static const bool known =  IsKnownFeature<T>::value; //will cause compile error if not
-    typedef typename Features2Container<T>::type container_type;
-    typedef typename Features2LinkHelper<T,container_type>::type type;
+    using container_type = Features2Container_t<T>;
+    using type = Features2LinkHelper_t<T,container_type>;
   };
 #endif
 

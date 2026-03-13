@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS // Full Athena only
@@ -220,8 +220,8 @@ namespace Trig {
 	//std::cout << "TrigDecisionTool::Feature::get_links: getting links from navi for element in feature list: " << ClassID_traits<FEATURE>::typeName() << std::endl;
 	//std::cout << "TrigDecisionTool::Feature::get_links:                      type originally  requested is: " << ClassID_traits<REQUESTED>::typeName() << std::endl;
 
-	typedef typename Features2Container<FEATURE,EDMLIST>::type container_type;
-	typedef typename Features2Object<FEATURE,EDMLIST>::type object_type;
+	using container_type = Features2Container_t<FEATURE,EDMLIST>;
+	using object_type = Features2Object_t<FEATURE,EDMLIST>;
 
 	const bool do_flatten  = (! std::is_same<REQUESTED,container_type>::value) && std::is_same<FEATURE,container_type>::value;
 	const bool do_retrieve = ! (std::is_same<REQUESTED,container_type>::value && std::is_same<FEATURE,object_type>::value);
@@ -239,9 +239,8 @@ namespace Trig {
 	//const HLT::TriggerElement* sourceTE(0);
 	std::string sourceLabel;
 
-	typedef typename Features2Container<FEATURE,EDMLIST>::type container_type;
-	//typedef typename Features2Object<FEATURE,EDMLIST>::type object_type;
-	typedef typename Features2LinkHelper<FEATURE,container_type>::type link_type;
+	using container_type = Features2Container_t<FEATURE,EDMLIST>;
+	using link_type = Features2LinkHelper_t<FEATURE,container_type>;
 
 	//std::cout << "TrigDecisionTool::Feature::get_links: link_type is: " << typeid(link_type).name() << std::endl;
 
@@ -292,9 +291,8 @@ namespace Trig {
 
       bool result = true;
 #ifndef __GCCXML__
-      //typedef typename Features2Container<T>::type container_type;
-      typedef typename Features2Object<T>::type object_type;
-      typedef typename Object2Features<object_type>::type feature_list;
+      using object_type = Features2Object_t<T>;
+      using feature_list = Object2Features_t<object_type>;
       get_links<T,TypeInfo_EDM> link_getter( te, &data, label, condition, teName, navigation, &result, &sourceTE);
       HLT::TypeInformation::for_each_type<feature_list,get_links<T,TypeInfo_EDM> >::do_it(&link_getter);
 #endif
