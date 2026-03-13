@@ -61,7 +61,7 @@ void checkList(const ActsTrk::detail::TrackFindingMeasurements& measurements,
 
 //coverity[UNCAUGHT_EXCEPT]
 //cppcheck-suppress throwInEntryPoint
-int main() {
+int test1() {
   constexpr std::size_t N = 3ul;
 
   // create containers
@@ -157,4 +157,17 @@ int main() {
   std::size_t index3 = measurementIndex.index(*hgtdContainer[0]);
   std::cout << "Checking index value : " << index3 << " with expected " << pixelContainer.size() + stripContainer.size() << std::endl;
   assert( index3 == pixelContainer.size() + stripContainer.size() );
+
+  return 0;
+}
+
+
+int main()
+{
+  try {
+    return test1();
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
