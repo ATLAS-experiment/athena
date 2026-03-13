@@ -214,6 +214,10 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
 void InDetPerfPlot_VertexTruthMatching::initializePlots() {
 
     book(m_vx_type_truth,"vx_type_truth");
+    book(m_vx_x_diff,"vx_x_diff");
+    book(m_vx_x_diff_pull,"vx_x_diff_pull");
+    book(m_vx_y_diff,"vx_y_diff");
+    book(m_vx_y_diff_pull,"vx_y_diff_pull");
     book(m_vx_z_diff,"vx_z_diff");
     book(m_vx_z_diff_pull,"vx_z_diff_pull");
     if (m_detailLevel >= 200) {
@@ -575,12 +579,20 @@ const xAOD::TruthVertex* InDetPerfPlot_VertexTruthMatching::getTruthVertex(const
 
 void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex& vertex, const xAOD::TruthVertex * tvrt, float weight) {
   // not sure how to deal with this type of histogram
-    if(tvrt){
-      float diff_z=vertex.z()-tvrt->z();
-      const AmgSymMatrix(3)& covariance = vertex.covariancePosition();
-      float err_z = fabs(Amg::error(covariance, 2)) > 1e-7 ? Amg::error(covariance, 2) : 1000.;
-      fillHisto(m_vx_z_diff,diff_z, weight);
-      fillHisto(m_vx_z_diff_pull,diff_z/err_z, weight);
+    if (tvrt) {
+        const float diff_x = vertex.x() - tvrt->x();
+        const float diff_y = vertex.y() - tvrt->y();
+        const float diff_z = vertex.z() - tvrt->z();
+        const AmgSymMatrix(3)& covariance = vertex.covariancePosition();
+        const float err_x = std::abs(Amg::error(covariance, 0)) > 1e-7 ? Amg::error(covariance, 0) : 1000.;
+        const float err_y = std::abs(Amg::error(covariance, 1)) > 1e-7 ? Amg::error(covariance, 1) : 1000.;
+        const float err_z = std::abs(Amg::error(covariance, 2)) > 1e-7 ? Amg::error(covariance, 2) : 1000.;
+        fillHisto(m_vx_x_diff, diff_x, weight);
+        fillHisto(m_vx_x_diff_pull, diff_x / err_x, weight);
+        fillHisto(m_vx_y_diff, diff_y, weight);
+        fillHisto(m_vx_y_diff_pull, diff_y / err_y, weight);
+        fillHisto(m_vx_z_diff, diff_z, weight);
+        fillHisto(m_vx_z_diff_pull, diff_z / err_z, weight);
     }
 
     // Get the match type info for each vertex:
