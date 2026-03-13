@@ -28,6 +28,7 @@ def setActsDefaultTunings(icf):
     # Custom values for config flags
     icf.Xi2max = [25]
     icf.Xi2maxNoAdd = [25]
+    icf.autoReverseSearch = False
 
 
 # Main ACTS Tracking pass    
@@ -97,6 +98,7 @@ def createActsLargeRadiusTrackingPassFlags():
     # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
     icf.storeSeparateContainer = True
     icf.isLargeD0 = True
+    icf.autoReverseSearch = True
     return icf
 
 # Secondary ACTS Tracking pass for Conversion tracking

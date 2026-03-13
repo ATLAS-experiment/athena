@@ -110,7 +110,7 @@ def ActsMainTrackFindingAlgCfg(flags,
     
     kwargs.setdefault("refitSeeds", seedOrder(flags, pixel=[False], strip=[False]))
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    kwargs.setdefault("autoReverseSearch", flags.Acts.autoReverseSearchCKF)
+    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
 
