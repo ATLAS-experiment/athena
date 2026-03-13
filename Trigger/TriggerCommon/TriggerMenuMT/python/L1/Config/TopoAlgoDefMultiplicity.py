@@ -184,12 +184,13 @@ class TopoAlgoDefMultiplicity:
 
         XEThresholds = [ 
             'gXEJWOJ60', 'gXEJWOJ70', 'gXEJWOJ80', 'gXEJWOJ100', 'gXEJWOJ110', 'gXEJWOJ120', 'gXEJWOJ500',
+            'gXENC100',  'gXENC110',
 
             'jXE60', 'jXE70', 'jXE80', 'jXE90', 'jXE100', 'jXE110', 'jXE120', 'jXE500',
 
             'cXE100', 'cXE110',
 
-            'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100', 'jTEFWDA100', 'jTEFWDC100', 
+            'jXEC100', 'jTE200', 'jTEC200', 'jTEFWD100',
             'gTE5', 'gTE10', 'gTE200',
             'gTE280', # gRISTRETTO280 - for HI 25ns bunch spacing test
             'gESPRESSO280',
