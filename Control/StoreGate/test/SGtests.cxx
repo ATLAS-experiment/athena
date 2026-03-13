@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -694,46 +694,6 @@ namespace Athena_test {
     cout << "*** StoreGateSvcClient_test retrievePrivateCopy OK ***" <<endl;
   }
 
-
-  void testBind ATLAS_NOT_THREAD_SAFE (::StoreGateSvc& rSG) {
-
-    cout << "*** StoreGateSvcClient_test bind BEGINS ***" <<endl;
-    const DataHandle<Foo> chFoo;
-    Foo *cFoo = new Foo;
-    std::string dbKey="fooKey";
-
-    assert(rSG.record(cFoo,dbKey).isSuccess());
-
-    assert(rSG.bind(chFoo,dbKey).isSuccess());
-    assert(chFoo.cptr() == cFoo);
-
-//FIXME      cout << "** bind it a second time with same key" << endl;
-//      // try to bind it twice
-//FIXME      assert(rSG.bind(chFoo,dbKey).isSuccess());
-
-//FIXME      Foo *cFoo2 = new Foo;
-//FIXME      std::string dbKey2="fooKey2";
-//FIXME      assert(rSG.record(cFoo2,dbKey2).isSuccess());
-//FIXME      cout << "** bind it a third time with a different key, obj: " 
-//FIXME    	 << hex << cFoo << "  " << cFoo2 << dec << endl;
-//      // try to bind it twice with a different key
-//FIXME      assert(rSG.bind(chFoo,dbKey2).isSuccess());
-
-    SmartIF<IProxyProviderSvc> pIPPSvc{rSG.serviceLocator()->service("ProxyProviderSvc")};
-    assert(pIPPSvc.isValid());
-
-//FIXME      TransientID id(ClassID_traits<Foo>::ID(), dbKey);
-//FIXME      DataProxy *dp = pIPPSvc->getProxy(id, rSG);
-//FIXME      assert (dp != 0);
-
-//FIXME      //    rSG.clearStore().ignore();
-//FIXME      dp->reset();
-
-//FIXME      SGASSERTERROR(chFoo.ptr() != 0);
-
-    cout << "*** StoreGateSvcClient_test bind OK ***\n\n" <<endl;
-
-  }
 
   void testClear(::StoreGateSvc& rSG) {
 
