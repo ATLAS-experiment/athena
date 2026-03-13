@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "EratioMaker.h"
@@ -11,6 +11,7 @@ namespace Gep {
 template <typename T>
 GepEratioAlg<T>::GepEratioAlg(const std::string& name, ISvcLocator* pSvcLocator) 
     : AthReentrantAlgorithm(name, pSvcLocator) {
+    // cppcheck-suppress missingReturn
 }
 
 
