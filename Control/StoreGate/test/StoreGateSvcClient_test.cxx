@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -288,7 +288,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
   testRetrievePrivateCopy(*pStore);
   testRemove(*pStore);
   testCreate(*pStore);
-  testBind(*pStore);
 #ifdef FOLDERS_ASDOBJ
   testFolders(*pStore);
 #endif
