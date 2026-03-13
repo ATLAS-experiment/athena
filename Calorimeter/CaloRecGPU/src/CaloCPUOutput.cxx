@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 // Dear emacs, this is -*- c++ -*-
 //
@@ -9,7 +9,6 @@
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/DataHolders.h"
 #include "CaloRecGPU/StandaloneDataIO.h"
-#include "StoreGate/DataHandle.h"
 
 
 using namespace CaloRecGPU;
