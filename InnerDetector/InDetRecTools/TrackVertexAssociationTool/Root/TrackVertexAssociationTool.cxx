@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Includes from this package
@@ -382,6 +382,8 @@ xAOD::TrackVertexAssociationMap TrackVertexAssociationTool::getUniqueMatchMap(co
 /////////////////////
 
 bool TrackVertexAssociationTool::isMatch(const xAOD::TrackParticle& trk, const xAOD::Vertex& vx, const xAOD::EventInfo* evtInfo) const {
+
+  if (!m_vtxDecoAcc->isAvailable(trk)) return false;
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
