@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloRescaleNoise.h"
@@ -95,6 +95,10 @@ StatusCode CaloRescaleNoise::stop()
   }
 
   FILE* fp = std::fopen("calonoise.txt","w");
+  if (!fp) {
+    ATH_MSG_ERROR("Cannot open file calonoise.txt");
+    return StatusCode::FAILURE;
+  }
 
   const ILArHVScaleCorr *scaleCorr = nullptr;
   if(!m_absScaling) {
