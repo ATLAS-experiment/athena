@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -63,7 +63,7 @@ IDbContainer* RootOODb::createContainer(const std::string& name, const DbType& i
   // Read the default container type from the current domain
   int optValue;
   DbOption opt("DEFAULT_CONTAINER_TYPE","");
-  if( !m_domainCache->getOption(opt).isSuccess() || !opt._getValue(optValue).isSuccess() ) {
+  if( !m_domainCache->getOption(opt).isSuccess() || !opt.getValue(optValue).isSuccess() ) {
     return nullptr;
   }
   const DbType defaultContainerType = DbType(optValue);

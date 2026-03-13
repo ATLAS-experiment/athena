@@ -36,16 +36,16 @@ namespace pool {
       virtual const std::string& name() const override final { return m_name; }
 
       /// Returns the technology identifier for this container
-      virtual long technology() const override;
+      virtual long technology() const override final { return m_technology; }
 
       /** Starts an iteration over the tokens in the container.
        *  Returns a token iterator whose ownership is passed to the user.
        */
       virtual ITokenIterator* tokens() override;
-      
+  
       /// Returns the object holding the technology specific attributes for a given technology domain
-      virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override;
-      virtual ITechnologySpecificAttributes& technologySpecificAttributes() override;
+      virtual const ITechnologySpecificAttributes& technologySpecificAttributes() const override final { return *this; }
+      virtual ITechnologySpecificAttributes& technologySpecificAttributes() override final { return *this; }
 
     protected:
       /// The actual method returning the attribute data given a name
@@ -68,7 +68,7 @@ namespace pool {
 
       /// Reference to file descriptor of the parent database
       FileDescriptor& m_fileDescriptor;
-      
+
       /// The technology identifier
       long m_technology;
     };

@@ -169,7 +169,7 @@ pool::PersistencySvc::MicroSessionManager::attributeOfType( const std::string& a
   }
   pool::DbOption domainOption( attributeName, option );
   if( !m_storageSvc->getDomainOption(domainOption).isSuccess() ) return false;
-  return domainOption.i_getValue( typeInfo, data ).isSuccess();
+  return domainOption.i_getValue(typeInfo, data).isSuccess();
 }
 
 bool

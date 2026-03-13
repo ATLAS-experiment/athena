@@ -181,7 +181,7 @@ pool::PersistencySvc::DatabaseHandler::attribute( const std::string& attributeNa
   pool::DbOption databaseOption( attributeName, option );
   DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   if( !dbH.getOption(databaseOption).isSuccess() ) return false;
-  return databaseOption.i_getValue( typeInfo, data ).isSuccess();
+  return databaseOption.i_getValue(typeInfo, data).isSuccess();
 }
 
 

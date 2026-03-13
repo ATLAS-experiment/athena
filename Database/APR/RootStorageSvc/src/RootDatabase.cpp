@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -130,12 +130,12 @@ StatusCode RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAcce
   CHECK( domH.getOption(opt4) );
   CHECK( domH.getOption(opt5) );
   CHECK( domH.getOption(opt6) );
-  CHECK( opt1._getValue(m_defCompression) );
-  CHECK( opt2._getValue(m_defCompressionAlg) );
-  CHECK( opt3._getValue(m_defSplitLevel) );
-  CHECK( opt4._getValue(m_defAutoSave) );
-  CHECK( opt5._getValue(m_defBufferSize) );
-  CHECK( opt6._getValue(m_branchOffsetTabLen) );
+  CHECK( opt1.getValue(m_defCompression) );
+  CHECK( opt2.getValue(m_defCompressionAlg) );
+  CHECK( opt3.getValue(m_defSplitLevel) );
+  CHECK( opt4.getValue(m_defAutoSave) );
+  CHECK( opt5.getValue(m_defBufferSize) );
+  CHECK( opt6.getValue(m_branchOffsetTabLen) );
   //gDebug = 2;
   TDirectory::TContext dirCtxt(0);
 
@@ -374,11 +374,11 @@ StatusCode RootDatabase::getOption(DbOption& opt)  {
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n, "COMPRESSION_LEVEL") )     // int
-        return opt._setValue(int(m_file->GetCompressionLevel()));
+        return opt.setValue(int(m_file->GetCompressionLevel()));
       else if ( !strcasecmp(n, "COMPRESSION_ALGORITHM") ) // int
-        return opt._setValue(int(m_file->GetCompressionAlgorithm()));
+        return opt.setValue(int(m_file->GetCompressionAlgorithm()));
       else if ( !strcasecmp(n, "COMPRESSION_FACTOR") )    // float
-        return opt._setValue(double(m_file->GetCompressionFactor()));
+        return opt.setValue(double(m_file->GetCompressionFactor()));
       else if ( !strcasecmp(n, "CONTAINER_SPLITLEVEL") )  {
         if (!opt.option().size()) {
           ATH_MSG_ERROR("Must set option to container name to set CONTAINER_SPLITLEVEL");
@@ -390,120 +390,120 @@ StatusCode RootDatabase::getOption(DbOption& opt)  {
         if ( cspit != m_customSplitLevel.end() ) {
           containerSplitLevel = cspit->second;
         }
-        return opt._setValue(int(containerSplitLevel));
+        return opt.setValue(int(containerSplitLevel));
       }
       break;
     case 'B':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"BEST_BUFFER") )            // int
-        return opt._setValue(int(m_file->GetBestBuffer()));
+        return opt.setValue(int(m_file->GetBestBuffer()));
       else if ( !strcasecmp(n,"BYTES_WRITTEN") )          // double
-        return opt._setValue(double(m_file->GetBytesWritten()));
+        return opt.setValue(double(m_file->GetBytesWritten()));
       else if ( !strcasecmp(n,"BYTES_READ") )             // double
-        return opt._setValue(double(m_file->GetBytesRead()));
+        return opt.setValue(double(m_file->GetBytesRead()));
       else if ( !strcasecmp(n,"BYTES_FREE") )             // int
-        return opt._setValue(int(m_file->GetNbytesFree()));
+        return opt.setValue(int(m_file->GetNbytesFree()));
       else if ( !strcasecmp(n,"BYTES_INFO") )             // int
-        return opt._setValue(int(m_file->GetNbytesInfo()));
+        return opt.setValue(int(m_file->GetNbytesInfo()));
       else if ( !strcasecmp(n,"BYTES_KEYS") )             // int
-        return opt._setValue(int(m_file->GetNbytesKeys()));
+        return opt.setValue(int(m_file->GetNbytesKeys()));
       break;
     case 'D':
       if ( !strcasecmp(n,"DEFAULT_COMPRESSION") )         // int
-        return opt._setValue(int(m_defCompression));
+        return opt.setValue(int(m_defCompression));
       else if ( !strcasecmp(n,"DEFAULT_COMPRESSIONALG") ) // int
-        return opt._setValue(int(m_defCompressionAlg));
+        return opt.setValue(int(m_defCompressionAlg));
       else if ( !strcasecmp(n, "DEFAULT_SPLITLEVEL") )    // int
-        return opt._setValue(int(m_defSplitLevel));
+        return opt.setValue(int(m_defSplitLevel));
       else if ( !strcasecmp(n, "DEFAULT_AUTOSAVE") )      // int
-        return opt._setValue(int(m_defAutoSave));   
+        return opt.setValue(int(m_defAutoSave));   
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )    // int
-        return opt._setValue(int(m_defBufferSize));
+        return opt.setValue(int(m_defBufferSize));
       else if ( !strcasecmp(n, "DEFAULT_WRITEPOLICY") )   // int
-        return opt._setValue(int(m_defWritePolicy));
+        return opt.setValue(int(m_defWritePolicy));
       break;
     case 'F':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"FILEBYTES_WRITTEN") )      // double
-        return opt._setValue(double(m_file->GetFileBytesWritten()));
+        return opt.setValue(double(m_file->GetFileBytesWritten()));
       else if ( !strcasecmp(n,"FILEBYTES_READ") )         // double
-        return opt._setValue(double(m_file->GetFileBytesRead()));
+        return opt.setValue(double(m_file->GetFileBytesRead()));
       else if ( !strcasecmp(n,"FILE_READ_CALLS") )        // int
-        return opt._setValue(int(m_file->GetFileReadCalls()));
+        return opt.setValue(int(m_file->GetFileReadCalls()));
       else if ( !strcasecmp(n,"FILE_DESCRIPTOR") )        // int
-        return opt._setValue(int(m_file->GetFd()));
+        return opt.setValue(int(m_file->GetFd()));
       else if ( !strcasecmp(n,"FILE_VERSION") )           // int
-        return opt._setValue(int(m_file->GetVersion()));
+        return opt.setValue(int(m_file->GetVersion()));
       else if ( !strcasecmp(n,"FILE_SIZE") )              // int
-        return opt._setValue((long long int)m_file->GetSize());
+        return opt.setValue((long long int)m_file->GetSize());
       else if ( !strcasecmp(n,"FILE_ERROR") )             // int
-        return opt._setValue(int(m_file->GetErrno()));
+        return opt.setValue(int(m_file->GetErrno()));
       else if ( !strcasecmp(n,"FILE_KEYS") )              // void*
-        return opt._setValue((void*)m_file->GetListOfKeys());
+        return opt.setValue((void*)m_file->GetListOfKeys());
       else if ( !strcasecmp(n,"FILE_END") )               // int
-        return opt._setValue((long long int)m_file->GetEND());
+        return opt.setValue((long long int)m_file->GetEND());
       break;
     case 'G':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"GET_OBJECT") )  {          // void*
         const char* key = "";
-        CHECK( opt._getValue(key) );
-        return opt._setValue((void*)m_file->Get(key));
+        CHECK( opt.getValue(key) );
+        return opt.setValue((void*)m_file->Get(key));
       }
       break;
     case 'I':
       if ( !strcasecmp(n,"IOBYTES_WRITTEN") )             // int
-        return opt._setValue((long long int)(byteCount(WRITE_COUNTER)));
+        return opt.setValue((long long int)(byteCount(WRITE_COUNTER)));
       else if ( !strcasecmp(n,"IOBYTES_READ") )           // int
-        return opt._setValue((long long int)(byteCount(READ_COUNTER)));
+        return opt.setValue((long long int)(byteCount(READ_COUNTER)));
       break;
     case 'M':
       if ( !strcasecmp(n, "MAXIMUM_BUFFERSIZE") )         // int
-        return opt._setValue(int(m_maxBufferSize));
+        return opt.setValue(int(m_maxBufferSize));
       else if ( !strcasecmp(n, "MINIMUM_BUFFERENTRIES") ) // int
-        return opt._setValue(int(m_minBufferEntries));
+        return opt.setValue(int(m_minBufferEntries));
       break;
     case 'N':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"NKEYS") )                  // int
-        return opt._setValue(int(m_file->GetNkeys()));
+        return opt.setValue(int(m_file->GetNkeys()));
       break;
     case 'R':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"READ_CALLS") )             // int
-        return opt._setValue(int(m_file->GetReadCalls()));
+        return opt.setValue(int(m_file->GetReadCalls()));
       else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // int
-        return opt._setValue(int(m_rntBufferedWriteEnabled));
+        return opt.setValue(int(m_rntBufferedWriteEnabled));
       else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // int
-        return opt._setValue(int(m_rntReaderMetricsEnabled));
+        return opt.setValue(int(m_rntReaderMetricsEnabled));
       else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // int
-        return opt._setValue(int(m_rntWriterMetricsEnabled));
+        return opt.setValue(int(m_rntWriterMetricsEnabled));
       else if ( !strcasecmp(n, "RNTUPLE_UNSPLIT_FIELD_LIST") ) // string
-        return opt._setValue(m_rntUnsplitFieldList.c_str());
+        return opt.setValue(m_rntUnsplitFieldList.c_str());
       break;
     case 'T':
       if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
-        return opt._setValue(int(m_branchOffsetTabLen));
+        return opt.setValue(int(m_branchOffsetTabLen));
       } else if( !strcasecmp(n,"TFILE") )  {              // void*
-          return opt._setValue((void*)m_file);
+          return opt.setValue((void*)m_file);
       } else if( !strcasecmp(n+5,"MAX_SIZE") )  {
-          return opt._setValue((long long int)TTree::GetMaxTreeSize());
+          return opt.setValue((long long int)TTree::GetMaxTreeSize());
       } else if( !strcasecmp(n+5,"CACHE_SIZE") ) {
           if (!m_treeNameWithCache.size())
-              return opt._setValue((int)0);
+              return opt.setValue((int)0);
           if ( !m_file ) return FAILURE;
           TTree* tr = getTree( m_treeNameWithCache );
-          if (tr) return opt._setValue((int)tr->GetCacheSize());
-          return opt._setValue((int)0);
+          if (tr) return opt.setValue((int)tr->GetCacheSize());
+          return opt.setValue((int)0);
       } else if( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") ) {
-          return opt._setValue((int)TTreeCache::GetLearnEntries());
+          return opt.setValue((int)TTreeCache::GetLearnEntries());
       } else if( !strcasecmp(n+5,"NAME_WITH_CACHE") ) {
-          return opt._setValue(m_treeNameWithCache.c_str());
+          return opt.setValue(m_treeNameWithCache.c_str());
       }
       break;
     default:
@@ -521,19 +521,19 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
         return FAILURE;
       else if ( !strcasecmp(n, "CD") )  {
         const char* key = "";
-        CHECK( opt._getValue(key) );
+        CHECK( opt.getValue(key) );
         m_file->cd(key);
         return SUCCESS;
       }
       else if ( !strcasecmp(n, "COMPRESSION_LEVEL") )  {
         int val=1;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         m_file->SetCompressionLevel(val);
         return SUCCESS;
       }
       else if ( !strcasecmp(n, "COMPRESSION_ALGORITHM") )  {
         int val=1;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         m_file->SetCompressionAlgorithm(val);
         return SUCCESS;
       }
@@ -544,45 +544,45 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
         }
         string containerName = opt.option();
         int val=m_defSplitLevel;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         m_customSplitLevel.insert(pair< std::string, int>(containerName, val) );
         return SUCCESS;
       }
       break;
     case 'D':
       if (      !strcasecmp(n, "DEFAULT_COMPRESSION") )   // int
-        return opt._getValue(m_defCompression);
+        return opt.getValue(m_defCompression);
       else if ( !strcasecmp(n, "DEFAULT_COMPRESSIONALG") )// int
-        return opt._getValue(m_defCompressionAlg);
+        return opt.getValue(m_defCompressionAlg);
       else if ( !strcasecmp(n, "DEFAULT_SPLITLEVEL") )    // int
-        return opt._getValue(m_defSplitLevel);
+        return opt.getValue(m_defSplitLevel);
       else if ( !strcasecmp(n, "DEFAULT_AUTOSAVE") )      // int
-        return opt._getValue(m_defAutoSave);   
+        return opt.getValue(m_defAutoSave);   
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )    // int
-        return opt._getValue(m_defBufferSize);
+        return opt.getValue(m_defBufferSize);
       else if ( !strcasecmp(n, "DEFAULT_WRITEPOLICY") )   // int
-        return opt._getValue(m_defWritePolicy);
+        return opt.getValue(m_defWritePolicy);
       break;
     case 'F':
       if ( !m_file )
         return FAILURE;
       else if ( !strcasecmp(n,"FILEBYTES_WRITTEN") )   {
         double val = 0;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         Long64_t v = (Long64_t)val;
         m_file->SetFileBytesWritten(v);
         return SUCCESS;
       }
       else if ( !strcasecmp(n,"FILEBYTES_READ") )  {
         double val = 0;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         Long64_t v = (Long64_t)val;
         m_file->SetFileBytesRead(v);
         return SUCCESS;
       }
       else if ( !strcasecmp(n,"FILECACHE_WRITE") )  {
         double val = 0;
-        CHECK( opt._getValue(val) );
+        CHECK( opt.getValue(val) );
         Long64_t v = (Long64_t)val;
         new TFileCacheWrite(m_file, v); //TFile will take ownership and delete its TFileCacheWrite
         return SUCCESS;
@@ -596,7 +596,7 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
     case 'I':
        if( !strcasecmp(n, "INDEX_MASTER") ) {
           char *s = nullptr;
-          if( opt._getValue(s).isSuccess() and s ) {
+          if( opt.getValue(s).isSuccess() and s ) {
              m_indexMaster = s;
              ATH_MSG_DEBUG("INDEX_MASTER set to " << m_indexMaster);
              return SUCCESS;
@@ -607,9 +607,9 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
       break;
     case 'M':
       if ( !strcasecmp(n, "MAXIMUM_BUFFERSIZE") )         // int
-        return opt._getValue(m_maxBufferSize);
+        return opt.getValue(m_maxBufferSize);
       else if ( !strcasecmp(n, "MINIMUM_BUFFERENTRIES") ) // int
-        return opt._getValue(m_minBufferEntries);
+        return opt.getValue(m_minBufferEntries);
       break;
     case 'P':
       if ( !m_file )
@@ -631,15 +631,15 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
       // In the current implementation, these need to be set before calling the c-tor
       // of the underlying class, e.g., RNTupleReader etc.
       else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // bool
-          return opt._getValue(m_rntBufferedWriteEnabled);
+          return opt.getValue(m_rntBufferedWriteEnabled);
       else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // bool
-          return opt._getValue(m_rntReaderMetricsEnabled);
+          return opt.getValue(m_rntReaderMetricsEnabled);
       else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
-          return opt._getValue(m_rntWriterMetricsEnabled);
+          return opt.getValue(m_rntWriterMetricsEnabled);
       else if ( !strcasecmp(n, "RNTUPLE_UNSPLIT_FIELD_LIST") ) // string
       {
           char* tempStr = nullptr;
-          if (opt._getValue(tempStr).isSuccess() && tempStr) {
+          if (opt.getValue(tempStr).isSuccess() && tempStr) {
               m_rntUnsplitFieldList = tempStr;
               return SUCCESS;
           }
@@ -648,11 +648,11 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
       break;
     case 'T':
        if( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
-          return opt._getValue(m_branchOffsetTabLen);
+          return opt.getValue(m_branchOffsetTabLen);
        }
        else if ( !strcasecmp(n+5,"MAX_SIZE") )  {
 	        long long int max_size = TTree::GetMaxTreeSize();
-	        StatusCode sc = opt._getValue(max_size);
+	        StatusCode sc = opt.getValue(max_size);
 	        if ( sc.isSuccess() )  {
 	            TTree::SetMaxTreeSize(max_size);
           }
@@ -664,7 +664,7 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
           ATH_MSG_DEBUG("File name " << name());
 
           int virtMaxSize = 0;
-          CHECK( opt._getValue(virtMaxSize) );
+          CHECK( opt.getValue(virtMaxSize) );
           if (!opt.option().size()) {
              ATH_MSG_ERROR("Must set option to tree name to start TREE_MAX_VIRTUAL_SIZE");
              return FAILURE;
@@ -682,7 +682,7 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
           return setAutoFlush(opt);
        }
        else if ( !strcasecmp(n+5,"CACHE_LEARN_EVENTS") )  {
-          StatusCode s = opt._getValue(m_defTreeCacheLearnEvents);
+          StatusCode s = opt.getValue(m_defTreeCacheLearnEvents);
           if( s.isSuccess() ) {
             for ( auto scheme : APRDefaults::getAllNamingSchemes() ) {
               if ( TTree *tree = getTree( APRDefaults::getEventDataName(scheme) ) ) {
@@ -704,7 +704,7 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
            ATH_MSG_DEBUG("File name " << name());
 
            int cacheSize = 0;
-           CHECK( opt._getValue(cacheSize) );
+           CHECK( opt.getValue(cacheSize) );
            if (!opt.option().size()) {
                ATH_MSG_ERROR("Must set option to tree name to start TREE_CACHE");
                return FAILURE;
@@ -740,7 +740,7 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
        else if ( !strcasecmp(n+5, "ADD_FRIEND") )  {
          char *s = nullptr;
          char *s2 = nullptr;
-         if( opt._getValue(s).isSuccess() and s ) {
+         if( opt.getValue(s).isSuccess() and s ) {
            for (s2 = s; *s2 != '\0'; s2++) {
              if (*s2 == ':') {
                *s2 = '\0';
@@ -778,7 +778,7 @@ StatusCode RootDatabase::setAutoFlush(const DbOption& opt)
    } 
    string treeName = opt.option();
    int val=0;
-   StatusCode sc = opt._getValue(val);
+   StatusCode sc = opt.getValue(val);
    if( sc.isSuccess() )  {
       ATH_MSG_DEBUG("Demand to set AUTO_FLUSH for TTree: " << treeName << " with value: " << val);
       map< string, int >::iterator  tafit = m_autoFlushTrees.find( treeName );
