@@ -1553,7 +1553,7 @@ void MakeUncertaintyPlots(const TString& outFile,TCanvas* canvas,const std::vect
 }
 
 
-int main (int argc, char* argv[])
+int domain (int argc, char* argv[])
 {
     if (argc != 7 && argc != 8)
     {
@@ -1918,4 +1918,15 @@ int main (int argc, char* argv[])
     }
 
     return 0;
+}
+
+
+int main (int argc, char* argv[])
+{
+  try {
+    return domain(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
