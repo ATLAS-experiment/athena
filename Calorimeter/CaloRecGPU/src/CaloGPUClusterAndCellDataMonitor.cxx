@@ -14,7 +14,6 @@
 #include "CaloGPUClusterAndCellDataMonitor.h"
 #include "CaloRecGPU/Helpers.h"
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
-#include "StoreGate/DataHandle.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecUtilities.h"
