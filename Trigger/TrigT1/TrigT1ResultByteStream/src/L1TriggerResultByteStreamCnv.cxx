@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trigger includes
@@ -227,7 +227,7 @@ void L1TriggerResultByteStreamCnv::printRob(const OFFLINE_FRAGMENTS_NAMESPACE_WR
 // =============================================================================
 // CLID / storageType
 // =============================================================================
-const CLID& L1TriggerResultByteStreamCnv::classID() {
+CLID L1TriggerResultByteStreamCnv::classID() {
   return ClassID_traits<xAOD::TrigCompositeContainer>::ID();
 }
 

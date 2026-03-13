@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_ROIBRESULTBYTESTREAMCNV_H
@@ -51,7 +51,7 @@ public:
   /// Function needed by the framework
   static long storageType();
   /// Function needed by the framework
-  static const CLID& classID();
+  static CLID classID();
 
 private:
   /// Tool doing the actual conversion
