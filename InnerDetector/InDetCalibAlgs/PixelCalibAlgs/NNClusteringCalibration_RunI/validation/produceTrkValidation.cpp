@@ -112,27 +112,21 @@ int main ( int argc, char *argv[] )
   TString    pathWithoutTracks  = "/afs/cern.ch/user/g/giacinto/scratch0/PixelClusterisationTF/jetNet/jetNetJune2011/withoutTracks/";
   TString    pathWithTracks     = "/afs/cern.ch/user/g/giacinto/scratch0/PixelClusterisationTF/prepareJetNetNtupleApril2011/withTracks/";
 
-
-  writeNtuple* l = new writeNtuple(tC);
+  writeNtuple l (tC);
   
-  l->m_pathWeightsWithoutTracks = pathWithoutTracks;
-  l->m_pathWeightsWithTracks    = pathWithTracks;
+  l.m_pathWeightsWithoutTracks = pathWithoutTracks;
+  l.m_pathWeightsWithTracks    = pathWithTracks;
   try{
-    l->Loop(nParticles, useTrack, outName );
+    l.Loop(nParticles, useTrack, outName );
   } 
   catch (const std::exception& e) {
     std::cerr << "Standard exception: " << e.what() << '\n';
-    delete l;
     return 1;
   } 
   catch (...) {
     std::cerr << "Unknown exception caught\n";
-    delete l;
     return 1;
   } 
-  delete l;
   
   return 0;
-  
-
 }
