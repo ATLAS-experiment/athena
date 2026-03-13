@@ -111,7 +111,7 @@ def DiTauWPDecoratorCfg(flags, name="DiTauRec_WPDecorator", **kwargs):
     kwargs.setdefault("ScoreName", "omni_score")
     kwargs.setdefault("DiTauContainerName", "DiTauJets")
     kwargs.setdefault("DecorWPNames", ["omni_score_VL", "omni_score_L", "omni_score_M", "omni_score_T"])
-    kwargs.setdefault("DecorWPCuts", [0.40, 0.60, 0.80, 0.9]) #NOTE: these are dummy values for testing, to be updated when WPs values will be offficially decided 
+    kwargs.setdefault("DecorWPCuts", [0.99, 0.995, 0.9990, 0.9994]) #NOTE: the 0.9994 is currently used by Boosted H->tautau analysis 
     acc.setPrivateTools(CompFactory.DiTauWPDecorator(name, **kwargs))
     return acc
 
