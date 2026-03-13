@@ -72,7 +72,11 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.jetsOut = config.copyName (self.containerName)
                 extraInputs = [
                     ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_LooseBad".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection))]
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pb".format(baseName=self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pc".format(baseName=self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_ptau".format(baseName=self.jetCollection)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pu".format(baseName=self.jetCollection))]
                 config.setExtraInputs (extraInputs)
 
         if self.runTruthJetTagging and config.dataType() is not DataType.Data:

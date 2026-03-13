@@ -89,7 +89,10 @@ class MuonCalibrationConfig (ConfigBlock):
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::MuonContainer'
-            decorationList = ['DFCommonJetDr']
+            decorationList = ['DFCommonJetDr','neflowisol20_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr',
+                              'topoetcone20_CloseByCorr']
             if self.addGlobalFELinksDep:
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:

@@ -154,14 +154,13 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::ElectronContainer'
-            decorationList = ['DFCommonElectronsLHLoose']
+            decorationList = ['DFCommonElectronsLHLoose','ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+                              'topoetcone20_CloseByCorr','DFCommonAddAmbiguity']
             if self.addGlobalFELinksDep:
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:
                 decorationList += ['TruthLink']
-            if self.containerName == 'AnalysisSiHitElectrons':
-                decorationList += ['ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
-                                   'topoetcone20_CloseByCorr']
             alg.declareDecorations = decorationList
 
         # Set up the eta-cut on all electrons prior to everything else
