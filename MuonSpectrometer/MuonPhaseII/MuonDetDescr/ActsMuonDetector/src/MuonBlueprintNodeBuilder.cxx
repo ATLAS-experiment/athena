@@ -318,7 +318,6 @@ MuonBlueprintNodeBuilder::BluePrintSurfPairs_t
           if (m_alignableVolumes){
               element.addPlacement(std::move(placement));
           }
-          using BoundsV = Acts::TrapezoidVolumeBounds::BoundValues;
           mwCfg.binning = {{{Acts::AxisDirection::AxisY, Acts::AxisBoundaryType::Bound,
                             -parameters.halfY,
                             parameters.halfY,
