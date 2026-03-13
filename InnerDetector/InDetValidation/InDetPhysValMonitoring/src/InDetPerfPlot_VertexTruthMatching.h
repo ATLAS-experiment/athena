@@ -48,6 +48,10 @@ private:
     float m_cutMinTruthRecoRadialDiff = 0.1;
     ///truth type
     TH1* m_vx_type_truth{};
+    TH1* m_vx_x_diff{};
+    TH1* m_vx_x_diff_pull{};
+    TH1* m_vx_y_diff{};
+    TH1* m_vx_y_diff_pull{};
     TH1* m_vx_z_diff{};
     TH1* m_vx_z_diff_pull{};
     ///hardscatter classification
