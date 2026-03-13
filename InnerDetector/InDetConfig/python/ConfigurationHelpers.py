@@ -17,27 +17,3 @@ def OnlyTrackingPreInclude(flags):
     flags.Reco.EnablePFlow=False
     flags.Reco.EnableTrigger=False
     flags.Reco.EnableTracking=True
-
-    flags.Detector.EnableCalo=False
-    flags.Detector.EnableMuon=False
-    flags.Detector.EnableForward=False
-
-    flags.Detector.GeometryLAr=False
-    flags.Detector.GeometryTile=False
-    flags.Detector.GeometryMBTS=False
-    flags.Detector.GeometryCalo=False
-
-    flags.Detector.GeometryCSC=False
-    flags.Detector.GeometryMDT=False
-    flags.Detector.GeometryRPC=False
-    flags.Detector.GeometryTGC=False
-    flags.Detector.GeometrysTGC=False
-    flags.Detector.GeometryMM=False
-    flags.Detector.GeometryMuon=False
-
-    flags.Detector.GeometryLucid=False
-    flags.Detector.GeometryZDC=False
-    flags.Detector.GeometryALFA=False
-    flags.Detector.GeometryAFP=False
-    flags.Detector.GeometryFwdRegion=False
-    flags.Detector.GeometryForward=False
