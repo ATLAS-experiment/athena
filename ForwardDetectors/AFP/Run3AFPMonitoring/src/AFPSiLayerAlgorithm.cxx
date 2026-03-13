@@ -1,5 +1,5 @@
 /* 
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 *
 *
 *	AFPSiLayerAlgorithm
@@ -128,8 +128,6 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 	auto trackY = Monitored::Scalar<float>("trackY", 0.0);
 	
 	auto planeHits        = Monitored::Scalar<int>("planeHits", 0);
-	auto planeHitsAllMU   = Monitored::Scalar<int>("planeHitsAllMU", 0);
-	auto weightAllPlanes  = Monitored::Scalar<float>("weightAllPlanes", 1.0);
 	
 	auto numberOfHitsPerStation = Monitored::Scalar<int>("numberOfHitsPerStation", 0);
 	
@@ -195,11 +193,6 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 			fill(m_tools[m_StationGroup.at(m_stationnames.at(hitsItr->stationID()))], planeHits);
 			
 			++numberOfHitsPerPlane[hitsItr->stationID()][hitsItr->pixelLayerID()];
-			planeHitsAllMU = reorganizePlanes(hitsItr->stationID(), hitsItr->pixelLayerID());
-			weightAllPlanes = 1 / muPerBX;
-			fill("AFPSiLayerTool", planeHitsAllMU, weightAllPlanes);
-			weightAllPlanes = 1.0;
-			
 			numberOfHitsPerStation = hitsItr->stationID();
 			fill("AFPSiLayerTool", numberOfHitsPerStation);
 
@@ -210,6 +203,8 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 
 	auto hitsPerPlaneProfile          = Monitored::Scalar<float>("hitsPerPlaneProfile", 0.0);
 	auto lbhitsPerPlaneProfile       = Monitored::Scalar<int>("lbhitsPerPlaneProfile", 0);
+	auto hitsPerPlaneEventsMu 		 = Monitored::Scalar<float>("hitsPerPlaneEventsMu", 0.0);
+	auto hitPerPlaneEventMuIndex     = Monitored::Scalar<int>("hitPerPlaneEventMuIndex", 0);
 
 	lbhitsPerPlaneProfile = eventInfo->lumiBlock();
 	for(int i_station = 0; i_station < 4; i_station++)
@@ -217,9 +212,13 @@ StatusCode AFPSiLayerAlgorithm::fillHistograms( const EventContext& ctx ) const 
 		{
 			hitsPerPlaneProfile = numberOfHitsPerPlane[i_station][j_layer]/muPerBX;
 			fill(m_tools[m_StationPlaneGroup.at(m_stationnames.at(i_station)).at(m_pixlayers.at(j_layer))], lbhitsPerPlaneProfile, hitsPerPlaneProfile);
+			if (muPerBX != 0.0) {
+				hitsPerPlaneEventsMu = numberOfHitsPerPlane[i_station][j_layer] / muPerBX;
+			}
+			hitPerPlaneEventMuIndex = reorganizePlanes(i_station, j_layer);
+			fill("AFPSiLayerTool", hitPerPlaneEventMuIndex, hitsPerPlaneEventsMu);
 		}
-	
-			
+		
 	bool noEventsInStations = true;
 	for(int i=0; i<4; i++)
 	{
@@ -419,7 +418,7 @@ StatusCode AFPSiLayerAlgorithm::fillHistogramsPlaneEff(const xAOD::AFPSiHitConta
 	AFPMon::AFPFastReco fast(&afpHitContainer);
 	fast.reco();
 
-	int min_hits[4] = {3, 3, 3, 3};
+	int min_hits[4] = {2, 3, 3, 3};
 	int numStations = 4;
 	int numPlanes = 4;
 	
@@ -443,7 +442,7 @@ StatusCode AFPSiLayerAlgorithm::fillHistogramsPlaneEff(const xAOD::AFPSiHitConta
 	
 	// Precomputed tag planes
 	std::array<std::set<int>, 4> precomputed_tag_planes = {
-		std::set<int>{0, 1, 2, 3},      
+		std::set<int>{1, 2, 3},      
 		std::set<int>{0, 1, 2, 3},   
 		std::set<int>{0, 1, 2, 3},   
 		std::set<int>{0, 1, 2, 3}       

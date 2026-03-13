@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
@@ -28,10 +28,7 @@ def fromRunArgs(runArgs):
     log.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    # set per-event timeout (in ns)
-    flags.Exec.EventTimeOut = 3600*Units.second
-
-    commonRunArgsToFlags(runArgs, flags)
+  
 
     # Autoconfigure enabled subdetectors
     if hasattr(runArgs, 'detectors'):
@@ -61,6 +58,18 @@ def fromRunArgs(runArgs):
         # TODO: trigger setup
 
     # TODO: EVNT?
+
+
+    # Pre-include
+    processPreInclude(runArgs, flags)
+
+    # Pre-exec
+    processPreExec(runArgs, flags)
+
+    # set per-event timeout (in ns)
+    flags.Exec.EventTimeOut = 3600*Units.second
+
+    commonRunArgsToFlags(runArgs, flags)
 
     ## Outputs
     if hasattr(runArgs, 'outputESDFile'):
@@ -200,11 +209,7 @@ def fromRunArgs(runArgs):
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(flags, runArgs)
 
-    # Pre-include
-    processPreInclude(runArgs, flags)
-
-    # Pre-exec
-    processPreExec(runArgs, flags)
+  
 
     # To respect --athenaopts 
     flags.fillFromArgs()

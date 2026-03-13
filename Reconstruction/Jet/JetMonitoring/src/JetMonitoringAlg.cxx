@@ -93,14 +93,16 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
 
     // Apply more up-to-date jet calibrations for offline jet DQ monitoring
     auto shallowCopy = xAOD::shallowCopyContainer( *jets );
+    std::unique_ptr<xAOD::JetContainer> shallowCont(shallowCopy.first);
+    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAuxCont(shallowCopy.second);
     if(!m_calibrationTool.empty()){
-      ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCopy.first));
+      ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCont.get()));
     }
 
     // call each histograming tool on the container
     for(const auto& t: m_jetFillerTools){
       ATH_MSG_DEBUG( " now run "<< t->name() );
-      ATH_CHECK( t->processJetContainer(*this, *shallowCopy.first, ctx) );
+      ATH_CHECK( t->processJetContainer(*this, *shallowCont.get(), ctx) );
     }
  }
   return StatusCode::SUCCESS;
