@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -51,28 +51,28 @@ StatusCode RootDomain::setOption(const DbOption& opt)  {
   switch( ::toupper(n[0]) )  {
     case 'D':
       if ( !strcasecmp(n, "DEFAULT_COMPRESSION") )  {
-        return opt._getValue(m_defCompression);
+        return opt.getValue(m_defCompression);
       }
       else if ( !strcasecmp(n, "DEFAULT_COMPRESSIONALG") )  {
-        return opt._getValue(m_defCompressionAlg);
+        return opt.getValue(m_defCompressionAlg);
       }
       else if ( !strcasecmp(n, "DEFAULT_SPLITLEVEL") )  {
-        return opt._getValue(m_defSplitLevel);
+        return opt.getValue(m_defSplitLevel);
       }
       else if ( !strcasecmp(n, "DEFAULT_AUTOSAVE") )  {
-        return opt._getValue(m_defAutoSave);
+        return opt.getValue(m_defAutoSave);
       }
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )  {
-        return opt._getValue(m_defBufferSize);
+        return opt.getValue(m_defBufferSize);
       }
       else if ( !strcasecmp(n, "DEFAULT_CONTAINER_TYPE") )  {
-        return opt._getValue(m_defContainerType);
+        return opt.getValue(m_defContainerType);
       }
       break;
     case 'E':
       if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
         bool multithreaded = false;
-        StatusCode sc = opt._getValue(multithreaded);
+        StatusCode sc = opt.getValue(multithreaded);
         if ( sc.isSuccess() && multithreaded )  {
            ROOT::EnableThreadSafety();
         }
@@ -80,7 +80,7 @@ StatusCode RootDomain::setOption(const DbOption& opt)  {
       }
       else if ( !strcasecmp(n, "ENABLE_IMPLICITMT") )  {
         int implicitMT = -1;
-        StatusCode sc = opt._getValue(implicitMT);
+        StatusCode sc = opt.getValue(implicitMT);
         if ( sc.isSuccess() )  {
            if ( implicitMT == 0 )  {
               ROOT::EnableImplicitMT();
@@ -94,7 +94,7 @@ StatusCode RootDomain::setOption(const DbOption& opt)  {
     case 'F':
       if ( !strncasecmp(n+5, "READSTREAMERINFO",15) )  {
         int val = 1;
-        StatusCode sc = opt._getValue(val);
+        StatusCode sc = opt.getValue(val);
         if ( sc.isSuccess() )  {
           TFile::SetReadStreamerInfo(val != 0 ? kTRUE : kFALSE);
         }
@@ -104,7 +104,7 @@ StatusCode RootDomain::setOption(const DbOption& opt)  {
     case 'S':
       if ( !strcasecmp(n,"STREAM_MEMBER_WISE") ) {       // int
         int val = 1;
-        StatusCode sc = opt._getValue(val);
+        StatusCode sc = opt.getValue(val);
         if ( sc.isSuccess() )  {
             TVirtualStreamerInfo::SetStreamMemberWise(val);
         }
@@ -113,11 +113,11 @@ StatusCode RootDomain::setOption(const DbOption& opt)  {
       break;
     case 'T':
        if ( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
-	  return opt._getValue(m_branchOffsetTabLen);
+	  return opt.getValue(m_branchOffsetTabLen);
        }
        else if ( !strcasecmp(n+5,"MAX_SIZE") )  {
 	  long long int max_size = TTree::GetMaxTreeSize();
-	  StatusCode sc = opt._getValue(max_size);
+	  StatusCode sc = opt.getValue(max_size);
 	  if ( sc.isSuccess() )  {
 	     TTree::SetMaxTreeSize(max_size);
         }
@@ -135,53 +135,53 @@ StatusCode RootDomain::getOption(DbOption& opt) const   {
   switch( ::toupper(n[0]) )  {
     case 'C':
       if ( !strcasecmp(n, "CLASS") )  {
-        return opt._setValue((void*)ROOT::GetROOT()->GetClass(opt.option().c_str(), kTRUE));
+        return opt.setValue((void*)ROOT::GetROOT()->GetClass(opt.option().c_str(), kTRUE));
       }
       break;
     case 'D':
       if ( !strcasecmp(n, "DEFAULT_COMPRESSION") )  {
-        return opt._setValue(int(m_defCompression));
+        return opt.setValue(int(m_defCompression));
       }
       else if ( !strcasecmp(n, "DEFAULT_COMPRESSIONALG") )  {
-        return opt._setValue(int(m_defCompressionAlg));
+        return opt.setValue(int(m_defCompressionAlg));
       }
       else if ( !strcasecmp(n, "DEFAULT_SPLITLEVEL") )  {
-        return opt._setValue(int(m_defSplitLevel));
+        return opt.setValue(int(m_defSplitLevel));
       }
       else if ( !strcasecmp(n, "DEFAULT_AUTOSAVE") )  {
-        return opt._setValue(int(m_defAutoSave));
+        return opt.setValue(int(m_defAutoSave));
       }
       else if ( !strcasecmp(n, "DEFAULT_BUFFERSIZE") )  {
-        return opt._setValue(int(m_defBufferSize));
+        return opt.setValue(int(m_defBufferSize));
       }
       else if ( !strcasecmp(n, "DEFAULT_CONTAINER_TYPE") )  {
-        return opt._setValue(int(m_defContainerType));
+        return opt.setValue(int(m_defContainerType));
       }
       break;
     case 'E':
       if ( !strcasecmp(n, "ERRNO") )  {
-        return opt._setValue(int(gSystem->GetErrno()));
+        return opt.setValue(int(gSystem->GetErrno()));
       }
       break;
     case 'N':
       if ( !strcasecmp(n, "NUM_CLASSES") )  {
-        return opt._setValue(int(ROOT::GetROOT()->GetNclasses()));
+        return opt.setValue(int(ROOT::GetROOT()->GetNclasses()));
       }
       if ( !strcasecmp(n, "NUM_TYPES") )  {
-        return opt._setValue(int(ROOT::GetROOT()->GetNtypes()));
+        return opt.setValue(int(ROOT::GetROOT()->GetNtypes()));
       }
       break;
     case 'S':
       if ( !strcasecmp(n,"STREAM_MEMBER_WISE") )        // int
-        return opt._setValue(int(TVirtualStreamerInfo::GetStreamMemberWise()));
+        return opt.setValue(int(TVirtualStreamerInfo::GetStreamMemberWise()));
       break;
     case 'T':
        if ( !strcasecmp(n+5,"BRANCH_OFFSETTAB_LEN") )  {
-	  return opt._setValue(int(m_branchOffsetTabLen));
+	  return opt.setValue(int(m_branchOffsetTabLen));
        }
        if ( !strcasecmp(n+5,"MAX_SIZE") )  {
 	  long long int val = TTree::GetMaxTreeSize();
-	  return opt._setValue(val);
+	  return opt.setValue(val);
        }
     default:
       break;

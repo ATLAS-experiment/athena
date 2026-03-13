@@ -493,12 +493,12 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
             CHECK( dbH.getOption(opt4) );
             CHECK( dbH.getOption(opt5) );
             CHECK( dbH.getOption(opt6) );
-            CHECK( opt1._getValue(defSplitLevel) );
-            CHECK( opt2._getValue(defAutoSave) );
-            CHECK( opt3._getValue(defBufferSize) );
-            CHECK( opt4._getValue(branchOffsetTabLen) );
-            CHECK( opt5._getValue(containerSplitLevel) );
-            CHECK( opt6._getValue(auxSplitLevel) );
+            CHECK( opt1.getValue(defSplitLevel) );
+            CHECK( opt2.getValue(defAutoSave) );
+            CHECK( opt3.getValue(defBufferSize) );
+            CHECK( opt4.getValue(branchOffsetTabLen) );
+            CHECK( opt5.getValue(containerSplitLevel) );
+            CHECK( opt6.getValue(auxSplitLevel) );
             if (containerSplitLevel == defSplitLevel) {
                const std::string_view br_name = string_view(m_name).substr(0, m_name.size()-1);
                if( m_auxDynTool and m_auxDynTool->hasAuxStore( br_name, info->clazz().Class() ) ) {
@@ -640,7 +640,7 @@ StatusCode  RootTreeContainer::addObject(DbDatabase& dbH,
                   int dynSplitLevel = splitLevel ? splitLevel - 1 : 0;
                   DbOption opt1("CONTAINER_SPLITLEVEL", RootAuxDynIO::AUXDYN_POSTFIX);
                   CHECK( dbH.getOption(opt1) );
-                  CHECK( opt1._getValue(dynSplitLevel) );
+                  CHECK( opt1.getValue(dynSplitLevel) );
                   // Default buffer size for dynamic attributes, one quarter of other branches (since attrbutes hold less data).
                   int dynBufferSize = bufferSize / 4;
                   // TBranch Writer
@@ -716,11 +716,11 @@ StatusCode RootTreeContainer::getOption(DbOption& opt) {
              branch.auxdyn_reader->resetBytesRead();
           }
        }
-       return opt._setValue((int)m_ioBytes);
+       return opt.setValue((int)m_ioBytes);
     }
     else if ( !strcasecmp(n,"BRANCH") )  {
       TBranch* b = branch(opt.option());
-      return opt._setValue((void*)b);
+      return opt.setValue((void*)b);
     }
     else if ( ::toupper(n[0])=='B' && opt.name().length() > 7 ) {
       TBranch* b = branch(opt.option());
@@ -728,111 +728,111 @@ StatusCode RootTreeContainer::getOption(DbOption& opt) {
         switch(::toupper(n[7]))  {
         case 'B':
           if ( !strcasecmp(n+7,"BASKET_SIZE") )
-            return opt._setValue(int(b->GetBasketSize()));
+            return opt.setValue(int(b->GetBasketSize()));
           break;
         case 'C':
           if ( !strcasecmp(n+7,"COMPRESSION_LEVEL") )
-            return opt._setValue(int(b->GetCompressionLevel()));
+            return opt.setValue(int(b->GetCompressionLevel()));
           if ( !strcasecmp(n+7,"COMPRESSION_ALGORITHM") )
-            return opt._setValue(int(b->GetCompressionAlgorithm()));
+            return opt.setValue(int(b->GetCompressionAlgorithm()));
           break;
         case 'E':
           if ( !strcasecmp(n+7,"ENTRIES") )
-            return opt._setValue(int(b->GetEntries()));
+            return opt.setValue(int(b->GetEntries()));
           break;
         case 'F':
           if ( !strcasecmp(n+7,"FILE_NAME") )
-            return opt._setValue(b->GetFileName());
+            return opt.setValue(b->GetFileName());
           else if ( !strcasecmp(n+7,"FILE") )
-            return opt._setValue((void*)b->GetFile());
+            return opt.setValue((void*)b->GetFile());
           break;
         case 'M':
           if ( !strcasecmp(n+7,"MAX_BASKETS") )
-            return opt._setValue(int(b->GetMaxBaskets()));
+            return opt.setValue(int(b->GetMaxBaskets()));
           break;
         case 'N':
           if ( !strcasecmp(n+7,"NLEAVES") )
-            return opt._setValue(int(b->GetNleaves()));
+            return opt.setValue(int(b->GetNleaves()));
           break;
         case 'S':
           if ( !strcasecmp(n+7,"SPLIT_LEVEL") )
-            return opt._setValue(int(b->GetSplitLevel()));
+            return opt.setValue(int(b->GetSplitLevel()));
           break;
         case 'T':
           if ( !strcasecmp(n+7,"TOTAL_SIZE") )
-            return opt._setValue(double(b->GetTotalSize()));
+            return opt.setValue(double(b->GetTotalSize()));
           else if ( !strcasecmp(n+7,"TOTAL_BYTES") )
-            return opt._setValue(double(b->GetTotBytes()));
+            return opt.setValue(double(b->GetTotBytes()));
           break;
         case 'Z':
           if ( !strcasecmp(n+7,"ZIP_BYTES") )
-            return opt._setValue(double(b->GetZipBytes()));
+            return opt.setValue(double(b->GetZipBytes()));
           break;
         }
       }
     }
     else if ( !strcasecmp(n,"TREE") )  {
-      return opt._setValue((void*)m_tree);
+      return opt.setValue((void*)m_tree);
     }
     else if ( ::toupper(n[0])=='T' && opt.name().length() > 6 ) {
       switch(::toupper(n[5]))   {
       case 'B':
         if ( !strcasecmp(n+5,"BRANCH_IDX") )  {
           int idx = 0;
-          CHECK( opt._getValue(idx) );
+          CHECK( opt.getValue(idx) );
           TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetListOfBranches should be const
           const TObjArray* arr = tree->GetListOfBranches();
-          return opt._setValue((void*)arr->At(idx));
+          return opt.setValue((void*)arr->At(idx));
         }
         if ( !strcasecmp(n+5,"BRANCH_NAME") )  {
           const char* br_nam = nullptr;
-          CHECK( opt._getValue(br_nam) );
+          CHECK( opt.getValue(br_nam) );
           if ( br_nam )  {
             TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetBranch should be const
-            return opt._setValue((void*)tree->GetBranch(br_nam));
+            return opt.setValue((void*)tree->GetBranch(br_nam));
           }
-          opt._setValue((void*)nullptr).ignore();
+          opt.setValue((void*)nullptr).ignore();
         }
         if ( !strcasecmp(n+5,"BRANCH_IDX_NAME") )  {
           int idx = 0;
-          CHECK( opt._getValue(idx) );
+          CHECK( opt.getValue(idx) );
           TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetListOfBranches should be const
           const TObjArray* arr = tree->GetListOfBranches();
           TBranch* br = (TBranch*)arr->At(idx);
           if ( br )  {
-            return opt._setValue(br->GetName());
+            return opt.setValue(br->GetName());
           }
-          opt._setValue((char*)nullptr).ignore();
+          opt.setValue((char*)nullptr).ignore();
         }
         break;
       case 'E':
         if ( !strcasecmp(n+5,"ENTRIES") )
-          return opt._setValue(int(m_tree->GetEntries()));
+          return opt.setValue(int(m_tree->GetEntries()));
         break;
       case 'F':
         if ( !strcasecmp(n+5,"FILE_NUMBER") )
-          return opt._setValue(int(m_tree->GetFileNumber()));
+          return opt.setValue(int(m_tree->GetFileNumber()));
         break;
       case 'M':
         if ( !strcasecmp(n+5,"MAX_SIZE") )
-          return opt._setValue((long long int)m_tree->GetMaxTreeSize());
+          return opt.setValue((long long int)m_tree->GetMaxTreeSize());
         else if ( !strcasecmp(n+5,"MAX_VIRTUAL_SIZE") )
-          return opt._setValue(int(m_tree->GetMaxVirtualSize()));
+          return opt.setValue(int(m_tree->GetMaxVirtualSize()));
         break;
       case 'N':
         if ( !strcasecmp(n+5,"NBRANCHES") ) {
           TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetNBranches should be const
           const int nBranches = tree->GetNbranches();
-          return opt._setValue(nBranches);
+          return opt.setValue(nBranches);
         }
         break;
       case 'T':
         if ( !strcasecmp(n+5,"TOTAL_BYTES") )
-          return opt._setValue(double(m_tree->GetTotBytes()));
+          return opt.setValue(double(m_tree->GetTotBytes()));
         break;
       case 'Z':
         if ( !strcasecmp(n+5,"ZIP_BYTES") )
-          return opt._setValue(double(m_tree->GetZipBytes()));
+          return opt.setValue(double(m_tree->GetZipBytes()));
         break;
       }
     }
@@ -851,7 +851,7 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
         case 'A':
           if ( !strcasecmp(n+7,"AUTODELETE") )  {
             int val=0;
-            CHECK( opt._getValue(val) );
+            CHECK( opt.getValue(val) );
             b->SetAutoDelete(val!=0);
             return SUCCESS;
           }
@@ -859,13 +859,13 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
         case 'C':
           if ( !strcasecmp(n+7,"COMPRESSION_LEVEL") )  {
             int val=1;
-            CHECK( opt._getValue(val) );
+            CHECK( opt.getValue(val) );
             b->SetCompressionLevel(val);
             return SUCCESS;
           }
           if ( !strcasecmp(n+7,"COMPRESSION_ALGORITHM") )  {
             int val=1;
-            CHECK( opt._getValue(val) );
+            CHECK( opt.getValue(val) );
             b->SetCompressionAlgorithm(val);
             return SUCCESS;
           }
@@ -880,7 +880,7 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
         case 'B':
           if ( !strcasecmp(n+7,"BASKET_SIZE") )  {
             int value = 16*1024;
-            CHECK( opt._getValue(value) );
+            CHECK( opt.getValue(value) );
             b->SetBasketSize(value);
             return SUCCESS;
           }
@@ -895,12 +895,12 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
       case 'A':
         if ( !strcasecmp(n+5,"AUTO_SAVE") )  {
           int val=1;
-          CHECK( opt._getValue(val) );
+          CHECK( opt.getValue(val) );
           m_tree->SetAutoSave(val);
           return SUCCESS;
         } else if ( !strcasecmp(n+5,"AUTO_FLUSH") )  {
           int val=1;
-          CHECK( opt._getValue(val) );
+          CHECK( opt.getValue(val) );
           m_tree->SetAutoFlush(val);
           // cout << "----------- setting AUTO_FLUSH for " << m_tree->GetName() << endl;
           return SUCCESS;
@@ -909,7 +909,7 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
       case 'M':
         if ( !strcasecmp(n+5,"MAX_SIZE") )  {
           long long int val=1;
-          CHECK( opt._getValue(val) );
+          CHECK( opt.getValue(val) );
           m_tree->SetMaxTreeSize(val);
           return SUCCESS;
         }
