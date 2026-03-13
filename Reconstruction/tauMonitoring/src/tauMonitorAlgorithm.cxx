@@ -52,10 +52,8 @@ StatusCode tauMonitorAlgorithm::fillHistograms(const EventContext &ctx) const {
     return StatusCode::FAILURE;
   }
 
-  auto shallowCopy = xAOD::shallowCopyContainer(*taus);
-  std::unique_ptr<xAOD::TauJetContainer> shallowTaus(shallowCopy.first);
-  std::unique_ptr<xAOD::ShallowAuxContainer> shallowTausAux(shallowCopy.second);
-
+  auto [shallowTaus, shallowTausAux] = xAOD::shallowCopyContainer(*taus,ctx);
+  
   const int lowerEtThreshold = 15;
   const int higherEtThreshold = 75;
   auto tool = getGroup(m_kinGroupName);
