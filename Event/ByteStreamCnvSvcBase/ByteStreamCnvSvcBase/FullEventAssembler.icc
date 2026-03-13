@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/MsgStream.h"
@@ -92,7 +92,8 @@ FullEventAssembler<IDMAP>::RodToRob(RODMAP& rodMap,
         { // Make a new ROBFragment 
           auto theROB = new OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment(robid,m_runnum,m_lvl1_id,m_bcid,
                                                                            m_lvl1_trigger_type,m_detEvtType,rod->size(),
-                                                                           &(*rod)[0],eformat::STATUS_BACK);
+                                                                           rod->data(),
+                                                                           eformat::STATUS_BACK);
           theROB->minor_version(m_rob_version);
           theROB->rod_minor_version(m_rod_version);
           robMap.emplace(robid, theROB);
