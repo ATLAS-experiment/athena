@@ -333,6 +333,22 @@ JPsiTriggers["Run2"] = [
 ]
 
 
+JPsiDelayedTriggers = {}
+
+JPsiDelayedTriggers["Run3"] = [
+    "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrimary",
+    "HLT_2e5_lhvloose_bBeeM6000_L1BKeePrescaled",
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrimary",
+    "HLT_e5_lhvloose_bBeeM6000_L1BKeePrescaled",
+    "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary",
+    "HLT_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrescaled"
+]
+JPsiDelayedTriggers["Run2"] = [
+    "HLT_2e5_lhvloose_nod0_bBeexM6000t",
+    "HLT_e5_lhvloose_nod0_bBeexM6000t"
+]
+
+
 WTnPTriggers = {}
 
 WTnPTriggers["Run3"] = [
