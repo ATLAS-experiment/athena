@@ -244,7 +244,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorCustomVtxAlg", jetContainer='AntiKt4EMPFlowCustomVtx'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="RNNLoose"))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="GNTauLoose"))
 
     # Decorate if jet passes OR and save decoration DFCommonJets_passOR
     # Use modified OR that does not check overlaps with tauls
@@ -257,7 +257,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
 
     outputLabel = 'DFCommonJets_passOR_EMPFlowCustomVtx'
     bJetLabel = '' #default
-    tauLabel = 'DFTauRNNLoose'
+    tauLabel = 'DFTauGNTauLoose'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel))
     algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_CustomVtx',
                                                 JetKey="AntiKt4EMPFlowCustomVtxJets",

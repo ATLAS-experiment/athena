@@ -123,7 +123,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauAugmentationCfg
-    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="RNNLoose"))
+    acc.merge(AddTauAugmentationCfg(ConfigFlags, wp="GNTauLoose"))
     acc.addSequence(CompFactory.AthSequencer('EventCleanSeq', Sequential=True))
 
     # Overlap for EMTopo
@@ -131,7 +131,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     inputLabel_legacy = 'selected_eventClean_EMTopo'
     outputLabel_legacy = 'DFCommonJets_passOR_EMTopo'
     bJetLabel = '' #default
-    tauLabel = 'DFTauRNNLoose'
+    tauLabel = 'DFTauGNTauLoose'
     orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
     algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",

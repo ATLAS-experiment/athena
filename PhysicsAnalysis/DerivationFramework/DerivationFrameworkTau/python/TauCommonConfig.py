@@ -3,9 +3,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def AddTauAugmentationCfg(flags, wp="RNNVeryLoose", **kwargs):
+def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     kwargs.setdefault("TauContainerName", "TauJets")
- 
+
     acc = ComponentAccumulator()
 
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
@@ -17,11 +17,6 @@ def AddTauAugmentationCfg(flags, wp="RNNVeryLoose", **kwargs):
     TauAugmentationTools = []
 
     config = {
-      "RNNVeryLoose" : "TauAnalysisAlgorithms/tau_selection_veryloose_noeleid.conf",
-      "RNNLoose"     : "TauAnalysisAlgorithms/tau_selection_loose_noeleid.conf",
-      "RNNMedium"    : "TauAnalysisAlgorithms/tau_selection_medium_noeleid.conf",
-      "RNNTight"     : "TauAnalysisAlgorithms/tau_selection_tight_noeleid.conf",
-      
       "GNTauVeryLoose" : "TauAnalysisAlgorithms/tau_selection_gntau_veryloose_noeleid.conf",
       "GNTauLoose"     : "TauAnalysisAlgorithms/tau_selection_gntau_loose_noeleid.conf",
       "GNTauMedium"    : "TauAnalysisAlgorithms/tau_selection_gntau_medium_noeleid.conf",
