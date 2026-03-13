@@ -21,9 +21,11 @@ endif ()
 
 # build a shared library
 #atlas_add_library( IPPerformanceLib IPPerformance/*.h Root/*.h Root/*.cxx ${IPPerformanceDictSource}
-atlas_add_library( IPPerformanceLib 
-	IPPerformance/ETAlgorithm.h IPPerformance/BaseHistos.h IPPerformance/IPhistos.h IPPerformance/TrackTruthHelper.h IPPerformance/EventSelectorAlg.h IPPerformance/IPNtupleDumper.h IPPerformance/JetCalibrator.h IPPerformance/JetSelector.h 
-	Root/ETAlgorithm.cxx Root/BaseHistos.cxx Root/IPhistos.cxx Root/TrackTruthHelper.cxx Root/EventSelectorAlg.cxx Root/IPNtupleDumper.cxx Root/JetCalibrator.cxx Root/JetSelector.cxx ${IPPerformanceDictSource}
+atlas_add_library( IPPerformanceLib  
+       	           IPPerformance/*.h
+                   Root/*.cxx
+                   src/components/*.cxx          
+                   ${IPPerformanceDictSource}
                    PUBLIC_HEADERS IPPerformance
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} xAODBase xAODRootAccess
@@ -61,46 +63,15 @@ if (XAOD_STANDALONE)
 endif()
 
 if( NOT XAOD_STANDALONE )
-  atlas_add_component(IPPerformance
-          ETAlgorithm.h
-          BaseHistos.h
-          IPhistos.h
-          IPPerformance/EventSelectorAlg.h
-          IPNtupleDumper.h
-          TrackTruthHelper.h           
-	  JetCalibrator.h
-	  JetSelector.h
-          Root/ETAlgorithm.cxx
-          Root/BaseHistos.cxx
-          Root/IPhistos.cxx
-	  Root/TrackTruthHelper.cxx
-	  Root/EventSelectorAlg.cxx
-	  Root/IPNtupleDumper.cxx
-	  Root/JetCalibrator.cxx
-	  Root/JetSelector.cxx
-          src/components/*.cxx
-          PUBLIC_HEADERS IPPerformance
-  	INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}
-  	LINK_LIBRARIES ${ROOT_LIBRARIES} IPPerformanceLib  xAODRootAccess 
-          xAODEventInfo xAODTracking xAODJet xAODTruth GoodRunsListsLib TrigDecisionToolLib TrigConfxAODLib  
-          InDetTrackSelectionToolLib xAODBTagging JetCalibToolsLib InDetTrackSystematicsToolsLib 
-          TrackVertexAssociationToolLib JetSelectorToolsLib JetMomentToolsLib  PileupReweightingLib
-          ${extra_libs}
+	atlas_add_component(IPPerformance
+                      src/components/*.cxx
+                      LINK_LIBRARIES IPPerformanceLib
   )
 endif()
 
-#atlas_add_executable( runAnalysis util/runAnalysis.cxx 
-#	INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIR}
-#	LINK_LIBRARIES ${ROOT_LIBRARIES} IPPerformanceLib EventLoop  xAODRootAccess 
-#        xAODEventInfo xAODTracking xAODJet xAODTruth GoodRunsListsLib TrigDecisionToolLib TrigConfxAODLib  
-#        EventLoopGrid InDetTrackSelectionToolLib xAODBTagging JetCalibToolsLib InDetTrackSystematicsToolsLib 
-#        TrackVertexAssociationToolLib JetSelectorToolsLib JetMomentToolsLib  PileupReweightingLib
-#        ${extra_libs}
-#)
-
 
 atlas_install_data( data/* )
-atlas_install_python_modules( python/IPPerformanceConfig.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 
