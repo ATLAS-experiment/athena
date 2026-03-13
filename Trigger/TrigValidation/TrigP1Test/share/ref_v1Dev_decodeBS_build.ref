@@ -10683,6 +10683,10 @@ HLT_noalg_L1gXEJWOJ70:
   eventCount: 1
 HLT_noalg_L1gXEJWOJ80:
   eventCount: 0
+HLT_noalg_L1gXENC100:
+  eventCount: 0
+HLT_noalg_L1gXENC110:
+  eventCount: 0
 HLT_noalg_L1jJ125:
   eventCount: 0
 HLT_noalg_L1jJ125p30ETA49:
@@ -10716,10 +10720,6 @@ HLT_noalg_L1jTE200:
 HLT_noalg_L1jTEC200:
   eventCount: 11
 HLT_noalg_L1jTEFWD100:
-  eventCount: 0
-HLT_noalg_L1jTEFWDA100:
-  eventCount: 0
-HLT_noalg_L1jTEFWDC100:
   eventCount: 0
 HLT_noalg_L1jXE100:
   eventCount: 0
@@ -13583,6 +13583,10 @@ HLT_xe0_cell_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe0_cell_L1gXEJWOJ110:
   eventCount: 0
+HLT_xe0_cell_L1gXENC100:
+  eventCount: 0
+HLT_xe0_cell_L1gXENC110:
+  eventCount: 0
 HLT_xe0_cell_L1jXE100:
   eventCount: 0
 HLT_xe0_cell_L1jXE110:
@@ -13617,6 +13621,10 @@ HLT_xe0_nn_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe0_nn_L1gXEJWOJ110:
   eventCount: 0
+HLT_xe0_nn_L1gXENC100:
+  eventCount: 0
+HLT_xe0_nn_L1gXENC110:
+  eventCount: 0
 HLT_xe0_nn_L1jXE100:
   eventCount: 0
 HLT_xe0_nn_L1jXE110:
@@ -13630,6 +13638,10 @@ HLT_xe0_pfopufit_L1cXE110:
 HLT_xe0_pfopufit_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe0_pfopufit_L1gXEJWOJ110:
+  eventCount: 0
+HLT_xe0_pfopufit_L1gXENC100:
+  eventCount: 0
+HLT_xe0_pfopufit_L1gXENC110:
   eventCount: 0
 HLT_xe0_pfopufit_L1jXE100:
   eventCount: 0
@@ -13933,6 +13945,10 @@ HLT_xe65_cell_xe100_pfopufit_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe65_cell_xe100_pfopufit_L1gXEJWOJ110:
   eventCount: 0
+HLT_xe65_cell_xe100_pfopufit_L1gXENC100:
+  eventCount: 0
+HLT_xe65_cell_xe100_pfopufit_L1gXENC110:
+  eventCount: 0
 HLT_xe65_cell_xe100_pfopufit_L1jXE100:
   eventCount: 0
 HLT_xe65_cell_xe100_pfopufit_L1jXE110:
@@ -13950,6 +13966,8 @@ HLT_xe65_cell_xe105_nn_L1cXE110:
 HLT_xe65_cell_xe105_nn_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe65_cell_xe105_nn_L1gXEJWOJ110:
+  eventCount: 0
+HLT_xe65_cell_xe105_nn_L1gXENC110:
   eventCount: 0
 HLT_xe65_cell_xe105_nn_L1jXE100:
   eventCount: 0
@@ -13981,6 +13999,10 @@ HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe65_cell_xe90_pfopufit_L1gXEJWOJ110:
   eventCount: 0
+HLT_xe65_cell_xe90_pfopufit_L1gXENC100:
+  eventCount: 0
+HLT_xe65_cell_xe90_pfopufit_L1gXENC110:
+  eventCount: 0
 HLT_xe65_cell_xe90_pfopufit_L1jXE100:
   eventCount: 0
 HLT_xe65_cell_xe90_pfopufit_L1jXE110:
@@ -14007,6 +14029,10 @@ HLT_xe75_cell_xe100_pfopufit_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe75_cell_xe100_pfopufit_L1gXEJWOJ110:
   eventCount: 0
+HLT_xe75_cell_xe100_pfopufit_L1gXENC100:
+  eventCount: 0
+HLT_xe75_cell_xe100_pfopufit_L1gXENC110:
+  eventCount: 0
 HLT_xe75_cell_xe100_pfopufit_L1jXE100:
   eventCount: 0
 HLT_xe75_cell_xe100_pfopufit_L1jXE110:
@@ -14024,6 +14050,8 @@ HLT_xe80_cell_xe115_tcpufit_L1cXE110:
 HLT_xe80_cell_xe115_tcpufit_L1gXEJWOJ100:
   eventCount: 0
 HLT_xe80_cell_xe115_tcpufit_L1gXEJWOJ110:
+  eventCount: 0
+HLT_xe80_cell_xe115_tcpufit_L1gXENC110:
   eventCount: 0
 HLT_xe80_cell_xe115_tcpufit_L1jXE100:
   eventCount: 0
