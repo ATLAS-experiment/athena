@@ -286,6 +286,12 @@ class JetUncertaintiesConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+            # Additional decorations
+            alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'AsgEnergyDecoratorAlg' )
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+
         elif (radius == 10):
             if self.jetInput == "UFO" and config.dataType() in [DataType.FullSim, DataType.FastSim]:
                 alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg' )
@@ -319,3 +325,4 @@ class JetUncertaintiesConfig (ConfigBlock) :
                 alg.jetsOut = config.copyName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
                 config.addSelection (self.containerName, '', 'outOfValidity')
+
