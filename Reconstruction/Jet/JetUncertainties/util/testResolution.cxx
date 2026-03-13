@@ -47,7 +47,7 @@ void setJetKinematics(xAOD::Jet& jet, double pt, double eta, double phi, double 
     scaleCombTop.setAttribute(jet, xAOD::JetFourMom_t(pt,eta,phi,mass));
 }
 
-int main (int argc, char* argv[])
+int test1 (int argc, char* argv[])
 {
     StatusCode::enableFailure();
     jet::OptionHelper optHelper;
@@ -287,4 +287,15 @@ int main (int argc, char* argv[])
     canvas.Print(outFile+"]");
 
     return 0;
+}
+
+
+int main (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

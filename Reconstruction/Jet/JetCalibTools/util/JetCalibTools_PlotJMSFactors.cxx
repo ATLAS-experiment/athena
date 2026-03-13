@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetCalibTools/JetCalibrationTool.h"
@@ -44,7 +44,7 @@ double mTA(const double trackMass, const double trackPt, const double caloPt)
 
 
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
 {
     // Check argument usage
     if (argc != 5 && argc != 6)
@@ -340,4 +340,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
     hists_pt_mpt.clear();
 
     return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
