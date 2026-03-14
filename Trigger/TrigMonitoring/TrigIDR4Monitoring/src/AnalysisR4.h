@@ -100,7 +100,6 @@ private:
   TIDA::Histogram<float> m_hd0vsphi;
   TIDA::Histogram<float> m_hd0vsphi_rec;
 
-
   TIDA::Histogram<float> m_hchain;
   TIDA::Histogram<float> m_hroieta;
   TIDA::Histogram<float> m_hntrk;

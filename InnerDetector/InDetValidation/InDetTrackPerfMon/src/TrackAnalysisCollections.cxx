@@ -88,8 +88,8 @@ StatusCode IDTPM::TrackAnalysisCollections::initialize()
 /// ---------------------------
 StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
   const SG::ReadHandleKey<xAOD::EventInfo>& eventInfoHandleKey,
-  const SG::ReadHandleKey< xAOD::TruthEventContainer >& truthEventHandleKey,
-  const SG::ReadHandleKey< xAOD::TruthPileupEventContainer >& truthPUEventHandleKey )
+  const SG::ReadHandleKey<xAOD::TruthEventContainer>& truthEventHandleKey,
+  const SG::ReadHandleKey<xAOD::TruthPileupEventContainer>& truthPUEventHandleKey )
 {
   m_eventInfo = nullptr;
   m_truthEventContainer = nullptr;
@@ -121,6 +121,11 @@ StatusCode IDTPM::TrackAnalysisCollections::fillEventInfo(
 
   return StatusCode::SUCCESS;
 }
+
+
+
+
+
 
 /// ----------------------------------
 /// --- Fill FULL Track containers ---

@@ -296,7 +296,8 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   /// fil the number of offline tracks
   m_hchain->Fill(4.5, testTracks.size() );
 
-  for( ; reference!=referenceEnd ; reference++ ) {
+  //cppcheck-suppress postfixOperator 
+  for( ; reference!=referenceEnd ; reference++ ) { //cppcheck-suppress postfixOperator 
     
     // Get reference parameters
     double referenceEta = (*reference)->eta();

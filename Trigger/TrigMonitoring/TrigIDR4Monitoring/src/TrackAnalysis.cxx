@@ -10,34 +10,27 @@
  **   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
  **/
 
-
-/// local include
 #include "InDetTrackPerfMon/TrackAnalysisDefinition.h"
 #include "InDetTrackPerfMon/TrackAnalysisCollections.h"
 #include "InDetTrackPerfMon/TrackParametersHelper.h"
-// #include "InDetTrackPerfMon/TrackAnalysis.h"
-#include "TrackAnalysis.h"
 
-
-/// monitoring include
 #include "AthenaMonitoringKernel/Monitored.h"
 
-/// gaudi includes
 #include "GaudiKernel/SystemOfUnits.h"
 
-/// EDM includes
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
 #include "TrigInDetAnalysisExample/ChainString.h"
 
-/// STL includes
+#include "TrackAnalysis.h"
+
 #include <algorithm>
 #include <limits>
-#include <cmath> // to get std::isnan(), std::abs etc.
+#include <cmath>
 #include <utility>
-#include <cstdlib> // to getenv
+#include <cstdlib> 
 
 
 ///----------------------------------------
@@ -95,6 +88,8 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
 
   //m_testTracks = m_triggerTracks;
 
+  ATH_CHECK( m_eventInfoName.initialize() );
+  
   /// are these even needed ???
   
   m_testContainerName = SG::ReadHandleKey<xAOD::TrackParticleContainer>(m_testTracks);
@@ -117,7 +112,6 @@ StatusCode IDTPM::TrackAnalysis::initialize() {
   //  ATH_CHECK( m_trackRoiSelectionTool.retrieve() );
 
   //  ATH_CHECK( m_trackMatchingTool.retrieve() );
-
 
   std::unique_ptr<TrackAnalysisDefinition> config = std::make_unique<TrackAnalysisDefinition>();
 
@@ -592,6 +586,9 @@ StatusCode IDTPM::TrackAnalysis::loadCollections( IDTPM::TrackAnalysisCollection
   /// won't bother with the vertices just yet ...
   /// eventually we want to replace this with the appropriate templated stuff
 
+  ATH_CHECK( trkAnaColls.fillEventInfo( m_eventInfoName.key() ) );
+
+  
   ATH_MSG_INFO( "TrackAnalysis::loadCollections() "
     << " refType="  << m_trkAnaDef->referenceType()
     << " refColl="  << m_trkAnaDef->referenceCollection()

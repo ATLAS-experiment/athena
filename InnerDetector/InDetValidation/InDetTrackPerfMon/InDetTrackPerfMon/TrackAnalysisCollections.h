@@ -52,6 +52,12 @@ namespace IDTPM {
     /// - FULL = full track collections, no selectrions
     /// - FS = Full-Scan track collections, after quality-based selection
     /// - InRoI = selected track collections inside the RoI
+    /// FIXME: Why have all these collections ??? Why not just have a
+    ///        simpler, more lightweight container, and create a new 
+    ///        container with the tracks at each stage, so have N simple
+    ///           TrackAnalysisCollections
+    ///        rather than one, complicated class that we have to mess 
+    ///        about with and internally
     enum Stage : size_t { FULL, FS, InRoI, NStages };
 
     /// Enum for counting objects at various stages 
@@ -77,10 +83,15 @@ namespace IDTPM {
         const SG::ReadHandleKey<xAOD::TruthEventContainer>& truthEventHandleKey,
         const SG::ReadHandleKey<xAOD::TruthPileupEventContainer>& truthPUEventHandleKey );
 
-    
     /// more rational generic fill method 
     template<typename T>
     StatusCode fill( T const*& container, const std::string& key );
+
+    template<typename T>
+    StatusCode fillInfo( const T*& t, const std::string& key );
+    
+    StatusCode fillEventInfo( const std::string& key ) { return fillInfo<xAOD::EventInfo>( m_eventInfo, key ); }
+    
 
       
     /// fill FULL track collections and vectors
@@ -308,6 +319,17 @@ namespace IDTPM {
   }; // class TrackAnalysisCollections
 
 
+  template<typename T>
+  StatusCode TrackAnalysisCollections::fillInfo( const T*& t, const std::string& key ) {
+    SG::ReadHandle<T> collection( key );
+    t = collection.get();
+    if ( ! collection.isValid() ) ATH_MSG_WARNING( "Collection " << key << "could not be loaded" );
+    else t = collection.ptr();
+    return StatusCode::SUCCESS;
+  }
+  
+
+
   /// more rational generic fill method 
   template<typename T>
   StatusCode TrackAnalysisCollections::fill( T const*& container, const std::string& key ) {
@@ -317,7 +339,7 @@ namespace IDTPM {
       SG::ReadHandle<T> pColl( key );
       
       if( ! pColl.isValid() ) {
-	ATH_MSG_ERROR( "Non valid collection: " << key );
+	ATH_MSG_ERROR( "No collection: " << key );
 	return StatusCode::FAILURE;
       }
       

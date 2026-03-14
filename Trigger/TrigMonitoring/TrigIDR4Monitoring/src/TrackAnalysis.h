@@ -98,7 +98,6 @@ private :
   TrackAnalysis();
 
   std::unique_ptr<const ITrackAnalysisDefinition> m_trkAnaDef;
-
   
   /// retrieve all collections && load them into trkAnaCollections object
   template<typename T, typename S=T>
@@ -134,12 +133,15 @@ private :
   StringProperty m_triggerTracks { this, "TriggerTracks", "", "trigger track collection" };
   
   /// Offline TrackParticleContainer name
-  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_refContainerName {
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_refContainerName {
       this, "ReferenceContainerName", "InDetTrackParticles", "Name of container of offline tracks" };
 
   /// Test TrackParticleContainer name
-  SG::ReadHandleKey< xAOD::TrackParticleContainer > m_testContainerName {
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_testContainerName {
       this, "TestContainerName", "", "Name of container of test tracks" };
+
+  /// EventInfo Container name
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoName { this, "EventInfo", "EventInfo", "EventInfo name" };
 
   
   /// Trigger TrackParticleContainer name

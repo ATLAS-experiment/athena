@@ -111,7 +111,8 @@ def TIDR4MonElectron( flags, key, toolkey, tools, monlevel ) :
 
         from TrigInDetMonitoring.TIDAChains import getchains
         
-        chains = getchains( flags, [ "HLT_e.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1" ] ) #, monlevel )
+#        chains = getchains( flags, [ "HLT_e.*_e14.*idperf.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1" ] ) #, monlevel )
+        chains = getchains( flags, [ "HLT_e26_lhtight_e14_etcut_L1eEM26M:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron:te=1" ] ) #, monlevel )
 
 
         cckchains =         [ "HLT_e.(?!.*lrtloose.*).*idperf(?!.*lrtloose.*).*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",  

@@ -26,40 +26,76 @@
 #include "InDetTrackPerfMon/VertexParametersHelper.h"
 
 
+/// What the hell ? What is all this "thread local" nonsense in this ? 
+/// if people are decorating class variables to override them, that is a sign
+/// that something is being done incorrectly, and we shouldn't humour people
+/// If you want to change some variables on a class, then create a NEW COLLECTION
+
+/// This code is a bit of a mess - put all the temnplates first, and THEN put the
+/// specialisations grouped by the class, or better still, put the templates
+/// into one header, and then put the specialsations for each class in their
+/// own header, then if and when you want to add another class, you just have
+/// to add a new header rather than mess with this one ! And don't write
+/// templates that depand on previously defined functions for specific classes,
+/// they should only depend on previously defined template functions. 
+/// If you first define a getXXX() for the TackParticle and then define
+/// a getXXX() for the Truth Particle, then why bother with the template
+/// function at all?? just rename those getXXX() functions to XXX() and you
+/// don't need the templates at all. 
+/// But in any case, this all should go and be replaced by an adaptor with
+/// some TrackTraits anyhow
+
+
 namespace IDTPM {
 
   /// Accessor utility function for getting the value of pT
-  template< class U >
+  template< typename U >
   inline float pT( const U& p ) { return p.pt(); }
 
   /// Accessor utility function for getting the value of signed pT
-  template< class U >
+  template< typename U >
   inline float pTsig( const U& p ) {
     return p.charge() ? std::copysign( pT(p), p.charge() ) : 0.;
   }
 
   /// Accessor utility function for getting the value of eta
-  template< class U >
+  template< typename U >
   inline float eta( const U& p ) { return p.eta(); }
-
+  
   /// Accessor utility function for getting the value of theta
+  /// this is an insane way to do it. Write the template to handle one case,
+  /// then you only need the specialisation for any that DON'T conform
+  /// to that definition. 
+  /// if template<U> theta( T& t ) { return p.theta(); }
+  /// then you only need to define the specialisation for any that
+  /// are different, and if none are differt you don;t need any specialisation
+  /// Doing it this way ALWAYS requires the template and the ALL
+  /// specialisations ALL the time, and don't need the template at all 
+  
   inline float getTheta( const xAOD::TrackParticle& p ) { return p.theta(); }
   inline float getTheta( const xAOD::TruthParticle& p ) {
     static thread_local SG::ConstAccessor<float> thetaAcc("theta");
     return (thetaAcc.isAvailable(p)) ? thetaAcc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float theta( const U& p ) { return getTheta( p ); }
 
+  /// for instance, why not simply name the functions
+  /// float theta( TrackParticle ) { ... } and
+  /// float theta( ThuthParticle ) { ... }
+  /// then you don't even need the template function at all, it would
+  /// just be normal function overloading
+
+  
   /// Accessor utility function for getting the value of phi
   inline float getPhi( const xAOD::TrackParticle& p ) { return p.phi0(); }
   inline float getPhi( const xAOD::TruthParticle& p ) {
     static thread_local SG::ConstAccessor<float> phiAcc("phi");
     return (phiAcc.isAvailable(p)) ? phiAcc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float phi( const U& p ) { return getPhi( p ); }
-  //template< class U >
+  //template< typename U >
   //inline float phi( const U& p ) { return p.phi(); }
 
   /// Accessor utility function for getting the value of z0
@@ -68,10 +104,10 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> z0Acc("z0");
     return (z0Acc.isAvailable(p)) ? z0Acc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float z0( const U& p ) { return getZ0( p ); }
 
-  template< class U >
+  template< typename U >
   inline float z0SinTheta( const U& p ) { return z0( p ) * std::sin( theta( p ) ); }
 
   /// Accessor utility function for getting the value of d0
@@ -80,7 +116,7 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> d0Acc("d0");
     return (d0Acc.isAvailable(p)) ? d0Acc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float d0( const U& p ) { return getD0( p ); }
 
   /// Accessor utility function for getting the value of R
@@ -89,7 +125,7 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> prodRAcc("prodR");
     return (prodRAcc.isAvailable(p)) ? prodRAcc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float prodR( const U& p ) { return getProdR( p ); }
 
   /// Accessor utility function for getting the value of Z
@@ -98,7 +134,7 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> prodZAcc("prodZ");
     return (prodZAcc.isAvailable(p)) ? prodZAcc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float prodZ( const U& p ) { return getProdZ( p ); }
 
   /// Accessor utility function for getting the value of qOverP
@@ -107,33 +143,33 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> qOverPAcc("qOverP");
     return (qOverPAcc.isAvailable(p)) ? qOverPAcc(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float qOverP( const U& p ) { return getQoverP( p ); }
 
-  template< class U >
+  template< typename U >
   inline float qOverPT( const U& p ) { return theta(p)==0 ? -9999. : qOverP(p) / std::sin( theta(p) ); }
 
   /// Accessor utility function for getting the value of Energy
-  template< class U >
+  template< typename U >
   inline float eTot( const U& p ) { return p.e(); }
 
   /// Accessor utility function for getting the value of Tranverse energy
-  template< class U >
+  template< typename U >
   inline float eT( const U& p ) { return p.p4().Et(); }
 
   /// Accessor utility function for getting the value of chi^2
   inline float getChiSquared( const xAOD::TrackParticle& p ) { return p.chiSquared(); }
   inline float getChiSquared( const xAOD::TruthParticle& ) { return -9999; }
-  template< class U >
+  template< typename U >
   inline float chiSquared( const U& p ) { return getChiSquared(p); }
 
   /// Accessor utility function for getting the value of #dof
   inline float getNdof( const xAOD::TrackParticle& p ) { return p.numberDoF(); }
   inline float getNdof( const xAOD::TruthParticle& ) { return -9999; }
-  template< class U >
+  template< typename U >
   inline float ndof( const U& p ) { return getNdof(p); }
 
-  /// Accessor utility function for getting the track author
+  /// Accessor utility function for getting the track author ????
   inline std::vector< unsigned int > getAuthor( const xAOD::TrackParticle& p ) {
     std::vector< unsigned int > authorVec;
     std::bitset< xAOD::TrackPatternRecoInfo::NumberOfTrackRecoInfo > patternInfo = p.patternRecoInfo();
@@ -143,41 +179,45 @@ namespace IDTPM {
     return authorVec;
   }
   inline std::vector< unsigned int > getAuthor( const xAOD::TruthParticle& ) { return {}; }
-  template< class U >
+  template< typename U >
   inline std::vector< unsigned int > author( const U& p ) { return getAuthor(p); }
 
   /// Accessor utility function for getting the track hasValidTime
   inline uint8_t getHasValidTime( const xAOD::TrackParticle& p ) { return p.hasValidTime(); }
   inline uint8_t getHasValidTime( const xAOD::TruthParticle& ) { return 0; }
-  template< class U >
+  template< typename U >
   inline uint8_t hasValidTime( const U& p ) { return getHasValidTime(p); }
 
   /// Accessor utility function for getting the track time
   inline float getTime( const xAOD::TrackParticle& p ) { return p.time(); }
   inline float getTime( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float time( const U& p ) { return getTime(p); }
 
   /// Accessor utility function for getting the track parameters covariance
+  /// why ? Why getCov( t, p1, p2 ) instead of just getCov(t)(p1,p2) ?
+  /// don't want to return the whole matric ?? then return a const reference
   inline float getCov( const xAOD::TrackParticle& p, Trk::ParamDefs par1, Trk::ParamDefs par2 ) {
     return p.definingParametersCovMatrix()( par1, par2 ); }
   inline float getCov( const xAOD::TruthParticle&, Trk::ParamDefs, Trk::ParamDefs ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float cov( const U& p, Trk::ParamDefs par1, Trk::ParamDefs par2 ) {
     return getCov( p, par1, par2 ); }
 
+
+  
   /// Accessor utility function for getting the track parameters error
   inline float getError( const xAOD::TrackParticle& p, Trk::ParamDefs par ) {
     return ( cov(p, par, par) < 0 ) ? 0. : std::sqrt( cov(p, par, par) ); }
   inline float getError( const xAOD::TruthParticle&, Trk::ParamDefs ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float error( const U& p, Trk::ParamDefs par ) { return getError( p, par ); }
 
   /// Accessor utility function for getting the track parameters covariance vector
   inline std::vector< float > getCovVec( const xAOD::TrackParticle& p ) {
     return p.definingParametersCovMatrixVec(); }
   inline std::vector< float > getCovVec( const xAOD::TruthParticle& ) { return {}; }
-  template< class U >
+  template< typename U >
   inline std::vector< float > covVec( const U& p ) { return getCovVec( p ); }
 
   /// Accessor utility function for getting the QOverPt error
@@ -191,7 +231,7 @@ namespace IDTPM {
     return qOverPTerr2 > 0 ? std::sqrt( qOverPTerr2 ) : 0.;
   }
   inline float getQOverPTError( const xAOD::TruthParticle& ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float qOverPTError( const U& p ) { return getQOverPTError(p); }
 
   /// Accessor utility function for getting the Pt error
@@ -209,7 +249,7 @@ namespace IDTPM {
     return pTerr2 > 0. ? std::sqrt( pTerr2 ) : 0.;
   }
   inline float getPTError( const xAOD::TruthParticle& ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float pTError( const U& p ) { return getPTError(p); }
 
   /// Accessor utility function for getting the Eta error
@@ -218,7 +258,7 @@ namespace IDTPM {
       error(p, Trk::theta) / ( -2 * std::sin( theta(p) ) * std::cos( theta(p) ) );
     return std::fabs( etaErr ); }
   inline float getEtaError( const xAOD::TruthParticle& ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float etaError( const U& p ) { return getEtaError(p); }
 
   /// Accessor utility function for getting the z0SinTheta error
@@ -230,23 +270,23 @@ namespace IDTPM {
     return z0sinErr2 > 0. ? std::sqrt( z0sinErr2 ) : 0.;
   }
   inline float getZ0SinThetaError( const xAOD::TruthParticle& ) { return 0.; }
-  template< class U >
+  template< typename U >
   inline float z0SinThetaError( const U& p ) { return getZ0SinThetaError(p); }
 
   /// Accessor utility function for getting the DeltaPhi betwen two tracks
-  template< class U1, class U2=U1 >
+  template< typename U1, typename U2=U1 >
   inline float deltaPhi( const U1& p1, const U2& p2 ) {
     return p1.p4().DeltaPhi( p2.p4() );
   }
 
   /// Accessor utility function for getting the DeltaEta betwen two tracks
-  template< class U1, class U2=U1 >
+  template< typename U1, typename U2=U1 >
   inline float deltaEta( const U1& p1, const U2& p2 ) {
     return ( eta(p1) - eta(p2) );
   }
 
   /// Accessor utility function for getting the DeltaR betwen two tracks
-  template< class U1, class U2=U1 >
+  template< typename U1, typename U2=U1 >
   inline float deltaR( const U1& p1, const U2& p2 ) {
     return p1.p4().DeltaR( p2.p4() );
   }
@@ -254,13 +294,13 @@ namespace IDTPM {
   /// Accessor utility function for getting the value of isHadron
   inline float getIsHadron( const xAOD::TrackParticle& ) { return 0; }
   inline float getIsHadron( const xAOD::TruthParticle& p ) { return p.isHadron();}
-  template< class U >
+  template< typename U >
   inline float isHadron( const U& p ) { return getIsHadron( p ); }
 
   /// Accessor utility function for getting the value of isPion
   inline float getIsPion( const xAOD::TrackParticle& ) { return 0; }
   inline float getIsPion( const xAOD::TruthParticle& p ) { return (p.pdgId() == 111 || p.pdgId() == 211);}
-  template< class U >
+  template< typename U >
   inline float isPion( const U& p ) { return getIsPion( p ); }
 
 
@@ -270,7 +310,7 @@ namespace IDTPM {
     SG::ConstAccessor<int> type( "Truth_truthType" );
     return type.isAvailable(p) ? type(p) : -9999;
   }
-  template< class U >
+  template< typename U >
   inline int truthType( const U& p ) { return getTruthType( p ); }
 
   /// Accessor utility function for getting the value of truthOrigin
@@ -279,7 +319,7 @@ namespace IDTPM {
     SG::ConstAccessor<int> origin( "Truth_truthOrigin" );
     return origin.isAvailable(p) ? origin(p) : -9999;
   }
-  template< class U >
+  template< typename U >
   inline int truthOrigin( const U& p ) { return getTruthOrigin( p ); }
 
 
@@ -290,7 +330,7 @@ namespace IDTPM {
            float( iInnerMostPixelHits ) : -9999.;
   }
   inline float getNInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelHits( const U& p ) { return getNInnerMostPixelHits( p ); }
 
   /// Accessor utility function for getting the value of nInnerMostPixelEndcapHits
@@ -300,7 +340,7 @@ namespace IDTPM {
            float( iInnerMostPixelEndcapHits ) : -9999.;
   }
   inline float getNInnerMostPixelEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelEndcapHits( const U& p ) { return getNInnerMostPixelEndcapHits( p ); }
 
   /// Accessor utility function for getting the value of nNextToInnerMostPixelHits
@@ -310,7 +350,7 @@ namespace IDTPM {
            float( iNextToInnerMostPixelHits ) : -9999.;
   }
   inline float getNNextToInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nNextToInnerMostPixelHits( const U& p ) { return getNNextToInnerMostPixelHits( p ); }
 
   /// Accessor utility function for getting the value of nNextToInnerMostPixelEndcapHits
@@ -320,7 +360,7 @@ namespace IDTPM {
            float( iNextToInnerMostPixelEndcapHits ) : -9999.;
   }
   inline float getNNextToInnerMostPixelEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nNextToInnerMostPixelEndcapHits( const U& p ) { return getNNextToInnerMostPixelEndcapHits( p ); }
 
   /// Accessor utility function for getting the value of nInnerMostPixelSharedHits
@@ -330,7 +370,7 @@ namespace IDTPM {
            float( iInnerMostPixelSharedHits ) : -9999.;
   }
   inline float getNInnerMostPixelSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelSharedHits( const U& p ) { return getNInnerMostPixelSharedHits( p ); }
 
   /// Accessor utility function for getting the value of nInnerMostPixelSharedEndcapHits
@@ -340,7 +380,7 @@ namespace IDTPM {
            float( iInnerMostPixelSharedEndcapHits ) : -9999.;
   }
   inline float getNInnerMostPixelSharedEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelSharedEndcapHits( const U& p ) { return getNInnerMostPixelSharedEndcapHits( p ); }
 
   /// Accessor utility function for getting the value of nPixelHits
@@ -350,7 +390,7 @@ namespace IDTPM {
            float( iPixelHits ) : -9999.;
   }
   inline float getNPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelHits( const U& p ) { return getNPixelHits( p ); }
 
   /// Accessor utility function for getting the value of nPixelHoles
@@ -360,7 +400,7 @@ namespace IDTPM {
            float( iPixHoles ) : -9999.;
   }
   inline float getNPixelHoles( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelHoles( const U& p ) { return getNPixelHoles( p ); }
 
   /// Accessor utility function for getting the value of nPixelSharedHits
@@ -370,7 +410,7 @@ namespace IDTPM {
            float( iPixelShared ) : -9999.;
   }
   inline float getNPixelSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelSharedHits( const U& p ) { return getNPixelSharedHits( p ); }
 
   /// Accessor utility function for getting the value of pixeldEdx
@@ -379,7 +419,7 @@ namespace IDTPM {
     return p.summaryValue( iPixeldEdx, xAOD::pixeldEdx ) ? iPixeldEdx : -9999.;
   }
   inline float getPixeldEdx( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float pixeldEdx( const U& p ) { return getPixeldEdx( p ); }
 
   /// Accessor utility function for getting the value of nSCTHits
@@ -389,7 +429,7 @@ namespace IDTPM {
            float( iSctHits ) : -9999.;
   }
   inline float getNSCTHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTHits( const U& p ) { return getNSCTHits( p ); }
 
   /// Accessor utility function for getting the value of nSCTHoles
@@ -399,7 +439,7 @@ namespace IDTPM {
            float( iSctHoles ) : -9999.;
   }
   inline float getNSCTHoles( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTHoles( const U& p ) { return getNSCTHoles( p ); }
 
   /// Accessor utility function for getting the value of nSCTSharedHits
@@ -409,7 +449,7 @@ namespace IDTPM {
            float( iSCTShared ) : -9999.;
   }
   inline float getNSCTSharedHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTSharedHits( const U& p ) { return getNSCTSharedHits( p ); }
 
   /// Accessor utility function for getting the value of nSiHits
@@ -423,11 +463,11 @@ namespace IDTPM {
     static thread_local SG::ConstAccessor<float> prodNSiHits( "nSilHits" );
     return prodNSiHits.isAvailable(p) ? prodNSiHits(p) : -9999.;
   }
-  template< class U >
+  template< typename U >
   inline float nSiHits( const U& p ) { return getNSiHits( p ); }
 
   /// Accessor utility function for getting the value of nSiHoles
-  template< class U >
+  template< typename U >
   inline float nSiHoles( const U& p ) {
     if( nPixelHoles(p)<0 || nSCTHoles(p)<0 ) return -9999.;
     float pnPixelHoles = ( nPixelHoles(p) >= 0 ) ? nPixelHoles(p) : 0.;
@@ -442,7 +482,7 @@ namespace IDTPM {
            float( iTrtHits ) : -9999.;
   }
   inline float getNTRTHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHits( const U& p ) { return getNTRTHits( p ); }
 
   /// Accessor utility function for getting the value of nTRTHitsXe
@@ -452,7 +492,7 @@ namespace IDTPM {
            float( iTrtHitsXe ) : -9999.;
   }
   inline float getNTRTHitsXe( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHitsXe( const U& p ) { return getNTRTHitsXe( p ); }
 
   /// Accessor utility function for getting the value of nTRTHitsAr
@@ -463,7 +503,7 @@ namespace IDTPM {
     return ( pnTRTHits - pnTRTHitsXe );
   }
   inline float getNTRTHitsAr( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHitsAr( const U& p ) { return getNTRTHitsAr( p ); }
 
   /// Accessor utility function for getting the value of nTRTHighThresholdHits
@@ -473,7 +513,7 @@ namespace IDTPM {
            float( iTrtHighThresholdHits ) : -9999.;
   }
   inline float getNTRTHighThresholdHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHighThresholdHits( const U& p ) { return getNTRTHighThresholdHits( p ); }
 
   /// Accessor utility function for getting the value of nTRTHighThresholdHitsXe
@@ -483,7 +523,7 @@ namespace IDTPM {
            float( iTrtHighThresholdHitsXe ) : -9999.;
   }
   inline float getNTRTHighThresholdHitsXe( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHighThresholdHitsXe( const U& p ) { return getNTRTHighThresholdHitsXe( p ); }
 
   /// Accessor utility function for getting the value of nTRTHighThresholdHitsAr
@@ -494,7 +534,7 @@ namespace IDTPM {
     return ( pnTRTHighThresholdHits - pnTRTHighThresholdHitsXe );
   }
   inline float getNTRTHighThresholdHitsAr( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nTRTHighThresholdHitsAr( const U& p ) { return getNTRTHighThresholdHitsAr( p ); }
 
   //EXPERT PLOTS 
@@ -506,7 +546,7 @@ namespace IDTPM {
            float( iInnerMostPixelOutliers ) : -9999.;
   }
   inline float getNInnerMostPixelOutliers( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelOutliers( const U& p ) { return getNInnerMostPixelOutliers( p ); }
 
 
@@ -518,7 +558,7 @@ namespace IDTPM {
            float( iInnerMostPixelEndcapOutliers ) : -9999.;
   }
   inline float getNInnerMostPixelEndcapOutliers( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelEndcapOutliers( const U& p ) { return getNInnerMostPixelEndcapOutliers( p ); }
 
 
@@ -530,7 +570,7 @@ namespace IDTPM {
            float( iInnerMostPixelSplitHits ) : -9999.;
   }
   inline float getNInnerMostPixelSplitHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelSplitHits( const U& p ) { return getNInnerMostPixelSplitHits( p ); }
 
 
@@ -542,7 +582,7 @@ namespace IDTPM {
            float( iInnerMostPixelSplitEndcapHits ) : -9999.;
   }
   inline float getNInnerMostPixelSplitEndcapHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nInnerMostPixelSplitEndcapHits( const U& p ) { return getNInnerMostPixelSplitEndcapHits( p ); }
 
 
@@ -554,7 +594,7 @@ namespace IDTPM {
            float( iNExpectedInnerMostPixelHits ) : -9999.;
   }
   inline float getNExpectedInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nExpectedInnerMostPixelHits( const U& p ) { return getNExpectedInnerMostPixelHits( p ); }
 
 
@@ -566,7 +606,7 @@ namespace IDTPM {
            float( iNExpectedNextToInnerMostPixelHits ) : -9999.;
   }
   inline float getNExpectedNextToInnerMostPixelHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nExpectedNextToInnerMostPixelHits( const U& p ) { return getNExpectedNextToInnerMostPixelHits( p ); }
 
 
@@ -578,7 +618,7 @@ namespace IDTPM {
            float( iNPixelOutliers ) : -9999.;
   }
   inline float getNPixelOutliers( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelOutliers( const U& p ) { return getNPixelOutliers( p ); }
 
 
@@ -590,7 +630,7 @@ namespace IDTPM {
            float( iNPixelContribLayers ) : -9999.;
   }
   inline float getNPixelContribLayers( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelContribLayers( const U& p ) { return getNPixelContribLayers( p ); }
 
 
@@ -602,7 +642,7 @@ namespace IDTPM {
            float( iNPixelSplitHits ) : -9999.;
   }
   inline float getNPixelSplitHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelSplitHits( const U& p ) { return getNPixelSplitHits( p ); }
 
 
@@ -614,7 +654,7 @@ namespace IDTPM {
            float( iNPixelGangedHits ) : -9999.;
   }
   inline float getNPixelGangedHits( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelGangedHits( const U& p ) { return getNPixelGangedHits( p ); }
 
 
@@ -626,7 +666,7 @@ namespace IDTPM {
            float( iNPixelGangedHitsFlaggedFakes ) : -9999.;
   }
   inline float getNPixelGangedHitsFlaggedFakes( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelGangedHitsFlaggedFakes( const U& p ) { return getNPixelGangedHitsFlaggedFakes( p ); }
 
 
@@ -638,7 +678,7 @@ namespace IDTPM {
            float( iNPixelDeadSensors ) : -9999.;
   }
   inline float getNPixelDeadSensors( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nPixelDeadSensors( const U& p ) { return getNPixelDeadSensors( p ); }
 
 
@@ -650,7 +690,7 @@ namespace IDTPM {
            float( iNSCTOutliers ) : -9999.;
   }
   inline float getNSCTOutliers( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTOutliers( const U& p ) { return getNSCTOutliers( p ); }
 
 
@@ -662,7 +702,7 @@ namespace IDTPM {
            float( iNSCTDoubleHoles ) : -9999.;
   }
   inline float getNSCTDoubleHoles( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTDoubleHoles( const U& p ) { return getNSCTDoubleHoles( p ); }
 
 
@@ -674,7 +714,7 @@ namespace IDTPM {
            float( iNSCTDeadSensors ) : -9999.;
   }
   inline float getNSCTDeadSensors( const xAOD::TruthParticle& ) { return -9999.; }
-  template< class U >
+  template< typename U >
   inline float nSCTDeadSensors( const U& p ) { return getNSCTDeadSensors( p ); }
 
 
