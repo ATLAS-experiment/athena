@@ -47,6 +47,6 @@ def PhotonIsEMTightSelectorConfigMC21(theTool):
     '''
 
     #
-    # Tight (same as Run2, to be updated)
+    # Tight (different for Run3, see https://its.cern.ch/jira/browse/ATLEGAMDPD-304)
     #
-    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/mc20_20240510/PhotonIsEMTightSelectorCutDefs_pTdep_mc20_smooth.conf"
+    theTool.ConfigFile = "ElectronPhotonSelectorTools/offline/20180825/PhotonIsEMTightSelectorCutDefs.conf"

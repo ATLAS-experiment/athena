@@ -1,24 +1,53 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
+from Campaigns.Utils import Campaign
 from PathResolver import PathResolver
+from AthenaCommon.Logging import logging
 
 def ElectronVariableCorrectionToolCfg(
         flags, name="ElectronVariableCorrectionTool", **kwargs):
-    """Configure the e/gamma variable correction tool"""
+    """Configure the e/gamma variable correction tool for electrons"""
     acc = ComponentAccumulator()
+    log = logging.getLogger("ElectronVariableCorrectionToolCfg")
     # Can ultimately be configured differently between Run 2 and Run 3 configs
-    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE27/ElVariableNominalCorrection.conf")
+    # TUNE27: e FUDGE FACTORS RUN2 FULL DATA, derived with rel 22.2
+    tuneFile = "EGammaVariableCorrection/TUNE27/ElVariableNominalCorrection.conf"
+    kwargs.setdefault("ConfigFile", tuneFile)
+    log.info("Setting as default FF file: %s", tuneFile)
     acc.setPrivateTools(
         CompFactory.ElectronPhotonVariableCorrectionTool(name, **kwargs))
     return acc
 
 def PhotonVariableCorrectionToolCfg(
         flags, name="PhotonVariableCorrectionTool", **kwargs):
-    """Configure the e/gamma variable correction tool"""
+    """Configure the e/gamma variable correction tool for photons"""
     acc = ComponentAccumulator()
-    # Use TUNE 25 for now for photons
-    kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf")
+    log = logging.getLogger("PhotonVariableCorrectionToolCfg")
+    # fallback tune file if there is no dedicated tuning
+    defaultTuneFile = "EGammaVariableCorrection/TUNE27E/ElPhVariableNominalCorrection.conf"
+    tuneFile = ""
+    mcCampaign = flags.Input.MCCampaign
+    runPeriod = flags.GeoModel.Run
+    if runPeriod is LHCPeriod.Run2:
+        # TUNE25: gamma FUDGE FACTORS RUN2 FULL DATA vs MC15-18, derived with r21.2
+        tuneFile = "EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf"
+    elif runPeriod is LHCPeriod.Run3:
+        if mcCampaign in [Campaign.MC23a, Campaign.MC23d]:
+            # TUNE27AD: gamma FUDGE FACTORS RUN3 2022-2023 vs MC23a-d, derived with r25
+            tuneFile = "EGammaVariableCorrection/TUNE27AD/ElPhVariableNominalCorrection.conf"
+        elif mcCampaign is Campaign.MC23e:
+            # TUNE27E: gamma FUDGE FACTORS RUN3 2024 vs MC23e, derived with r25
+            tuneFile = "EGammaVariableCorrection/TUNE27E/ElPhVariableNominalCorrection.conf"
+        else:
+            log.warning("No default FF file centrally provided for mc campaign %s", mcCampaign.value)
+            tuneFile = defaultTuneFile
+    else:
+        log.warning("No default FF file centrally provided for run period %s", runPeriod.value)
+        tuneFile = defaultTuneFile
+    log.info("Setting as default FF file: %s", tuneFile)
+    kwargs.setdefault("ConfigFile", tuneFile)
     acc.setPrivateTools(
         CompFactory.ElectronPhotonVariableCorrectionTool(name, **kwargs))
     return acc

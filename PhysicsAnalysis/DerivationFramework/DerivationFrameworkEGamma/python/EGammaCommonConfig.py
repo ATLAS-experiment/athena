@@ -36,8 +36,8 @@ def EGammaCommonCfg(flags):
 
     # ====================================================================
     # SHOWER SHAPE CORRECTIONS IN MC
-    # TUNE27: e FUDGE FACTORS RUN2 FULL DATA, derived with rel 22.2
-    # TUNE25: gamma FUDGE FACTORS RUN2 FULL DATA, derived with or 21.2
+    # The default tunes are set in
+    # PhysicsAnalysis/ElectronPhotonID/EGammaVariableCorrection/python/EGammaVariableCorrectionConfig.py
     # AF3 is tuned to FullSim, so same FFs can be used for AF3 and FS
     # ====================================================================
     isMC = flags.Input.isMC
