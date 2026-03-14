@@ -1,14 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/HelperFunctions.h"
-
-#include <TObjString.h>
-#include <TObjArray.h>
-#include <TFile.h>
-#include <TTree.h>
-
 #include <iostream>
 
 namespace tauRecTools {
