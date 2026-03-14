@@ -3,7 +3,7 @@
 */
 
 #include "tauRecTools/HelperFunctions.h"
-#include <iostream>
+
 
 namespace tauRecTools {
   ANA_MSG_SOURCE(msgHelperFunction, "HelperFunction")
