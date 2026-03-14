@@ -464,72 +464,6 @@ MissingMassProb::MissingMassProb(MMCCalibrationSet::e aset, const std::string& p
   s_fit_param[1][2][5][2]=0.0;
   s_fit_param[1][2][5][3]=0.6167*0.00125; // multiplied by a bin size
   s_fit_param[1][2][5][4]=0.0;
-
-  // TER parameterization, for now based on p1130, to be checked and updated with new tag
-  // [tau_type][eta_bin][parameter]
-  // for 1-prongs
-  s_ter_sigma_par[0][0][0]=0.311717;
-  s_ter_sigma_par[0][0][1]=0.0221615;
-  s_ter_sigma_par[0][0][2]=0.859698;
-  s_ter_sigma_par[0][1][0]=0.290019;
-  s_ter_sigma_par[0][1][1]=0.0225794;
-  s_ter_sigma_par[0][1][2]=0.883407;
-  s_ter_sigma_par[0][2][0]=0.352312;
-  s_ter_sigma_par[0][2][1]=0.0196381;
-  s_ter_sigma_par[0][2][2]=0.629708;
-  s_ter_sigma_par[0][3][0]=0.342059;
-  s_ter_sigma_par[0][3][1]=0.0275107;
-  s_ter_sigma_par[0][3][2]=0.48065;
-  s_ter_sigma_par[0][4][0]=0.481564;
-  s_ter_sigma_par[0][4][1]=0.0197219;
-  s_ter_sigma_par[0][4][2]=0.0571714;
-  s_ter_sigma_par[0][5][0]=0.41264;
-  s_ter_sigma_par[0][5][1]=0.0233964;
-  s_ter_sigma_par[0][5][2]=0.515674;
-  s_ter_sigma_par[0][6][0]=0.20112;
-  s_ter_sigma_par[0][6][1]=0.0339914;
-  s_ter_sigma_par[0][6][2]=0.944524;
-  s_ter_sigma_par[0][7][0]=0.0892094;
-  s_ter_sigma_par[0][7][1]=0.0210225;
-  s_ter_sigma_par[0][7][2]=1.34014;
-  s_ter_sigma_par[0][8][0]=0.175554;
-  s_ter_sigma_par[0][8][1]=0.0210968;
-  s_ter_sigma_par[0][8][2]=0.813925;
-  s_ter_sigma_par[0][9][0]=0.0;
-  s_ter_sigma_par[0][9][1]=0.0340279;
-  s_ter_sigma_par[0][9][2]=1.30856;
-  // for 3-prongs
-  s_ter_sigma_par[1][0][0]=0.303356;
-  s_ter_sigma_par[1][0][1]=0.0299807;
-  s_ter_sigma_par[1][0][2]=1.25388;
-  s_ter_sigma_par[1][1][0]=0.358106;
-  s_ter_sigma_par[1][1][1]=0.0229604;
-  s_ter_sigma_par[1][1][2]=1.02222;
-  s_ter_sigma_par[1][2][0]=0.328643;
-  s_ter_sigma_par[1][2][1]=0.025684;
-  s_ter_sigma_par[1][2][2]=1.02594;
-  s_ter_sigma_par[1][3][0]=0.497332;
-  s_ter_sigma_par[1][3][1]=0.0215113;
-  s_ter_sigma_par[1][3][2]=0.30055;
-  s_ter_sigma_par[1][4][0]=0.4493;
-  s_ter_sigma_par[1][4][1]=0.0280311;
-  s_ter_sigma_par[1][4][2]=0.285793;
-  s_ter_sigma_par[1][5][0]=0.427811;
-  s_ter_sigma_par[1][5][1]=0.0316536;
-  s_ter_sigma_par[1][5][2]=0.457286;
-  s_ter_sigma_par[1][6][0]=0.165288;
-  s_ter_sigma_par[1][6][1]=0.0376361;
-  s_ter_sigma_par[1][6][2]=1.3913;
-  s_ter_sigma_par[1][7][0]=0.289798;
-  s_ter_sigma_par[1][7][1]=0.0140801;
-  s_ter_sigma_par[1][7][2]=0.83603;
-  s_ter_sigma_par[1][8][0]=0.186823;
-  s_ter_sigma_par[1][8][1]=0.0213053;
-  s_ter_sigma_par[1][8][2]=0.968934;
-  s_ter_sigma_par[1][9][0]=0.301673;
-  s_ter_sigma_par[1][9][1]=0.0145606;
-  s_ter_sigma_par[1][9][2]=0.514022;
-
   
 }
 
@@ -1035,8 +969,6 @@ double MissingMassProb::MHtProbabilityHH(MissingMassInput& preparedInput, const 
 // first index is the calibration set : 0: MMC2011, 1:MMC2012
 // second index is the decay 0 : lepton, 1 : 1 prong, 2 3 prong
 thread_local double MissingMassProb::s_fit_param[2][3][6][5];
-// first parameter: 0- for 1-prong; 1- for 3-prong
-thread_local double MissingMassProb::s_ter_sigma_par[2][10][3];
 
 // returns dTheta3D probability based on ATLAS parameterization
 double MissingMassProb::dTheta3d_probabilityFast(MissingMassInput& preparedInput, const int & tau_type,const double & dTheta3d,const  double & P_tau) {
