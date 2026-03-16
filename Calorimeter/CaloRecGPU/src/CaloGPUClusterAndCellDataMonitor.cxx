@@ -332,7 +332,7 @@ StatusCode CaloGPUClusterAndCellDataMonitor::update_cell_representation(const Ev
 
           if (first_cluster >= 0)
             {
-              if (second_cluster >= clusters->number)
+              if (first_cluster >= clusters->number)
                 {
                   ATH_MSG_WARNING("Impossible cell assignment: " << i << " " << first_cluster << " (" << std::hex << this_tag << std::dec << ")");
                 }
