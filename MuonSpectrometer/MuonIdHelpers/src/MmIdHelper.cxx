@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpers/MmIdHelper.h"
@@ -73,7 +73,7 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
         m_CHANNEL_INDEX = field->index();
     } else {
         ATH_MSG_ERROR("initLevelsFromDict - unable to find mmChannel' field ");
-        status = 1;
+        return 1;
     }
 
     // reinitialize the module ndex
@@ -96,16 +96,14 @@ int MmIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {
     m_gap_impl = region.implementation(m_GASGAP_INDEX);
     m_cha_impl = region.implementation(m_CHANNEL_INDEX);
 
-    ATH_MSG_DEBUG(" MicroMegas decode index and bit fields for each level: " << std::endl
-                                                                             << " muon        " << m_muon_impl.show_to_string() << std::endl
-                                                                             << " station     " << m_sta_impl.show_to_string() << std::endl
-                                                                             << " eta         " << m_eta_impl.show_to_string() << std::endl
-                                                                             << " phi         " << m_phi_impl.show_to_string() << std::endl
-                                                                             << " technology  " << m_tec_impl.show_to_string() << std::endl
-                                                                             << " multilayer   " << m_mplet_impl.show_to_string()
-                                                                             << std::endl
-                                                                             << " gasgap      " << m_gap_impl.show_to_string() << std::endl
-                                                                             << " channel     " << m_cha_impl.show_to_string());
+    ATH_MSG_DEBUG(" MicroMegas decode index and bit fields for each level: " << "\n muon        " << m_muon_impl 
+                                                                             << "\n station     " << m_sta_impl 
+                                                                             << "\n eta         " << m_eta_impl 
+                                                                             << "\n phi         " << m_phi_impl 
+                                                                             << "\n technology  " << m_tec_impl 
+                                                                             << "\n multilayer   " << m_mplet_impl
+                                                                             << "\n gasgap      " << m_gap_impl 
+                                                                             << "\n channel     " << m_cha_impl);
 
     //
     // Build multirange for the valid set of identifiers
