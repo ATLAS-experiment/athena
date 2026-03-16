@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -81,6 +81,7 @@ void JemSubBlock::fillJetElement(const int slice, const JemJetElement& jetEle)
 {
   if (jetEle.data()) {
     const int channel = jetEle.channel();
+    if (channel<0) [[unlikely]] { return;}
     if (channel < m_channels) {
       resize(m_jeData, m_channels);
       m_jeData[index(slice)*m_channels + channel] = jetEle.data();
