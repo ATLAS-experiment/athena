@@ -232,7 +232,7 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
     # additional contenct from JET-M1
     # Maciej LewickiL: I'd rather keep it the way it is because it will be easier to keep up with any future changes in JET-M1
     STDM6SlimmingHelper.AllVariables += ["MuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                          "AntiKt4EMPFlowJets"]
 
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"

@@ -3,8 +3,6 @@
 AntiKt4EMPFlowJetsCPContent = [
 "Kt4EMPFlowEventShape",
 "Kt4EMPFlowEventShapeAux.Density",
-"Kt4EMPFlowPUSBEventShape",
-"Kt4EMPFlowPUSBEventShapeAux.Density",
 "Kt4EMPFlowNeutEventShape",
 "Kt4EMPFlowNeutEventShapeAux.Density",
 "AntiKt4EMPFlowJets",

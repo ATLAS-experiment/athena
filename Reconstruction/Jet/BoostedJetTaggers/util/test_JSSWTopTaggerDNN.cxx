@@ -225,7 +225,7 @@ int test1( int argc, char* argv[] ) {
   static const SG::ConstAccessor<float> acc_efficiency(tagger+"_efficiency");
   static const SG::ConstAccessor<float> acc_effSF(tagger+"_effSF");
 
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
 
   std::cout << "Total Events in File : " << entries << std::endl;
 

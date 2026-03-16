@@ -165,7 +165,7 @@ def TLA1Cfg(flags):
     TLA1SlimmingHelper.AllVariables = [
         # store event shape variables to get full objects (also included by jet CP content)
         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape", # EMTopo and EMPFlow event shapes
-        "Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape", # newer event shapes for testing (e.g. if offline jet calibration changes)
+        "Kt4EMPFlowNeutEventShape", # new event shape used for Run 3 offline calibration
         # store muon segments in case they are needed for offline jet calibrations
         "MuonSegments",
     ]

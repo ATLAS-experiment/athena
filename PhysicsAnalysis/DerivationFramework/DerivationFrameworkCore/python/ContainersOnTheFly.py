@@ -116,8 +116,6 @@ def ContainersOnTheFly(flags=None):
 
         ["Kt4EMPFlowEventShape","xAOD::EventShape"],
         ["Kt4EMPFlowEventShapeAux","xAOD::EventShapeAuxInfo"],
-        ["Kt4EMPFlowPUSBEventShape","xAOD::EventShape"],
-        ["Kt4EMPFlowPUSBEventShapeAux","xAOD::EventShapeAuxInfo"],
         ["Kt4EMPFlowNeutEventShape","xAOD::EventShape"],
         ["Kt4EMPFlowNeutEventShapeAux","xAOD::EventShapeAuxInfo"],
         ["Kt4EMTopoOriginEventShape","xAOD::EventShape"],

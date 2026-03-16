@@ -133,8 +133,8 @@ def JETM2Cfg(flags):
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
                                         "CHSGlobalClusterMLCorrectedChargedParticleFlowObjects","CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects",
                                         "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
-                                        "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape",
+                                        "Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
     # Low-level inputs
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ClusterVariables, FlowElementVariables, UFOVariables, TrackingVariables,  TrackingVariablesHGTD, FELinks

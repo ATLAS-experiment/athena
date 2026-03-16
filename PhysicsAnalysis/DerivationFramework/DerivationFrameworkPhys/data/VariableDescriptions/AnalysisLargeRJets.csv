@@ -27,6 +27,5 @@ LineNumber,VariableName,Type,Description
 26,Parent,vector<ElementLink<DataVector<xAOD::Jet_v1> > >,Link to ungroomed parent jet
 27,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
 28,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
-29,R10TruthLabel_R21Precision,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following early R21 recommendations
-30,R10TruthLabel_R21Precision_2022v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following R21 recommendations
-31,R10TruthLabel_R22v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following preliminary R22 recommendations
+29,R10TruthLabel_R21Precision_2022v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following R21 recommendations
+30,R10TruthLabel_R22v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following preliminary R22 recommendations

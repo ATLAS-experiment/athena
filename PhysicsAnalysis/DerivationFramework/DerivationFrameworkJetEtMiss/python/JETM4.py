@@ -173,7 +173,7 @@ def JETM4Cfg(flags):
 
     JETM4SlimmingHelper.AllVariables = ["CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
                                         "MuonSegments",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape"]
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape"]
 
     JETM4SlimmingHelper.ExtraVariables = ["TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
 
