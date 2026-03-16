@@ -9,9 +9,11 @@
 #include "IdDict/IdDictRegion.h"
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/RangeIterator.h"
+#include "HgtdOutputFormatting.h"
 #include <set>
 #include <algorithm>
-#include <iostream>
+
+using HgtdIdentifierPkg::formatOutput;
 
 // Constructor
 HGTD_ID::HGTD_ID():
@@ -627,93 +629,34 @@ HGTD_ID::initLevelsFromDict()
 
     const IdDictRegion& region = m_dict->region(m_hgtd_region_index);
 
-    m_indet_impl      = region.implementation(m_INDET_INDEX);
-    m_hgtd_impl       = region.implementation(m_HGTD_INDEX);
-    m_ec_impl         = region.implementation(m_ENDCAP_INDEX);
-    m_layer_impl      = region.implementation(m_LAYER_INDEX);
-    m_phi_mod_impl    = region.implementation(m_PHI_MODULE_INDEX);
-    m_eta_mod_impl    = region.implementation(m_ETA_MODULE_INDEX);
-    m_phi_index_impl  = region.implementation(m_PHI_INDEX_INDEX);
-    m_eta_index_impl  = region.implementation(m_ETA_INDEX_INDEX);
+    m_impl[kIndet]      = region.implementation(m_INDET_INDEX);
+    m_impl[kHgtd]       = region.implementation(m_HGTD_INDEX);
+    m_impl[kEc]        = region.implementation(m_ENDCAP_INDEX);
+    m_impl[kLayer]      = region.implementation(m_LAYER_INDEX);
+    m_impl[kPhiMod]    = region.implementation(m_PHI_MODULE_INDEX);
+    m_impl[kEtaMod]    = region.implementation(m_ETA_MODULE_INDEX);
+    m_impl[kPhiIndex]  = region.implementation(m_PHI_INDEX_INDEX);
+    m_impl[kEtaIndex]  = region.implementation(m_ETA_INDEX_INDEX);
 
-    ATH_MSG_DEBUG("decode index and bit fields for each level: ");
-    ATH_MSG_DEBUG("indet     "  << m_indet_impl.show_to_string());
-    ATH_MSG_DEBUG("hgtd      "  << m_hgtd_impl.show_to_string());
-    ATH_MSG_DEBUG("ec        "  << m_ec_impl.show_to_string());
-    ATH_MSG_DEBUG("layer     "  << m_layer_impl.show_to_string());
-    ATH_MSG_DEBUG("phi_mod   "  << m_phi_mod_impl.show_to_string());
-    ATH_MSG_DEBUG("eta_mod   "  << m_eta_mod_impl.show_to_string());
-    ATH_MSG_DEBUG("phi_index "  << m_phi_index_impl.show_to_string());
-    ATH_MSG_DEBUG("eta_index "  << m_eta_index_impl.show_to_string());
-
-    std::cout << "indet "  << m_indet_impl.decode_index() << " " 
-            << (std::string)m_indet_impl.ored_field() << " " 
-            << std::hex << m_indet_impl.mask() << " " 
-            << m_indet_impl.zeroing_mask() << " " 
-            << std::dec << m_indet_impl.shift() 
-            << " " << m_indet_impl.bits() << " " << m_indet_impl.bits_offset() << " ";
-    m_indet_impl.ored_field().show(std::cout);
-    std::cout << "hgtd "  << m_hgtd_impl.decode_index() << " " 
-            << (std::string)m_hgtd_impl.ored_field() << " " 
-            << std::hex << m_hgtd_impl.mask() << " " 
-            << m_hgtd_impl.zeroing_mask() << " " 
-            << std::dec << m_hgtd_impl.shift() 
-            << " " << m_hgtd_impl.bits() << " " << m_hgtd_impl.bits_offset() << " ";
-    m_hgtd_impl.ored_field().show(std::cout);
-    std::cout << "ec "  << m_ec_impl.decode_index() << " " 
-            << (std::string)m_ec_impl.ored_field() << " " 
-            << std::hex << m_ec_impl.mask() << " " 
-            << m_ec_impl.zeroing_mask() << " " 
-            << std::dec << m_ec_impl.shift() 
-            << " " << m_ec_impl.bits() << " " << m_ec_impl.bits_offset() << " ";
-    m_ec_impl.ored_field().show(std::cout);
-    std::cout << "layer "  << m_layer_impl.decode_index() << " " 
-            << (std::string)m_layer_impl.ored_field() << " " 
-            << std::hex << m_layer_impl.mask() << " " 
-            << m_layer_impl.zeroing_mask() << " " 
-            << std::dec << m_layer_impl.shift() 
-            << " " << m_layer_impl.bits() << " " << m_layer_impl.bits_offset() << " ";
-    m_layer_impl.ored_field().show(std::cout);
-    std::cout << "phi_mod "  << m_phi_mod_impl.decode_index() << " " 
-            << (std::string)m_phi_mod_impl.ored_field() << " " 
-            << std::hex << m_phi_mod_impl.mask() << " " 
-            << m_phi_mod_impl.zeroing_mask() << " " 
-            << std::dec << m_phi_mod_impl.shift() 
-            << " " << m_phi_mod_impl.bits() << " " << m_phi_mod_impl.bits_offset() << " ";
-    m_phi_mod_impl.ored_field().show(std::cout);
-    std::cout << "eta_mod "  << m_eta_mod_impl.decode_index() << " " 
-            << (std::string)m_eta_mod_impl.ored_field() << " " 
-            << std::hex << m_eta_mod_impl.mask() << " " 
-            << m_eta_mod_impl.zeroing_mask() << " " 
-            << std::dec << m_eta_mod_impl.shift() 
-            << " " << m_eta_mod_impl.bits() << " " << m_eta_mod_impl.bits_offset() << " ";
-    m_eta_mod_impl.ored_field().show(std::cout);
-    std::cout << "phi_index "  << m_phi_index_impl.decode_index() << " " 
-            << (std::string)m_phi_index_impl.ored_field() << " " 
-            << std::hex << m_phi_index_impl.mask() << " " 
-            << m_phi_index_impl.zeroing_mask() << " " 
-            << std::dec << m_phi_index_impl.shift() 
-            << " " << m_phi_index_impl.bits() << " " << m_phi_index_impl.bits_offset() << " ";
-    m_phi_index_impl.ored_field().show(std::cout);
-    std::cout << "eta_index "  << m_eta_index_impl.decode_index() << " " 
-            << (std::string)m_eta_index_impl.ored_field() << " " 
-            << std::hex << m_eta_index_impl.mask() << " " 
-            << m_eta_index_impl.zeroing_mask() << " " 
-            << std::dec << m_eta_index_impl.shift() 
-            << " " << m_eta_index_impl.bits() << " " << m_eta_index_impl.bits_offset() << " ";
-    m_eta_index_impl.ored_field().show(std::cout);
-
-
-    std::cout << "HGTD_ID::initLevelsFromDict - found levels " << std::endl;
-    std::cout << "subdet        "      << m_INDET_INDEX        << std::endl;
-    std::cout << "part          "      << m_HGTD_INDEX         << std::endl;
-    std::cout << "endcap        "      << m_ENDCAP_INDEX       << std::endl;
-    std::cout << "layer         "      << m_LAYER_INDEX        << std::endl;
-    std::cout << "phi_module    "      << m_PHI_MODULE_INDEX   << std::endl;
-    std::cout << "eta_module    "      << m_ETA_MODULE_INDEX   << std::endl;
-    std::cout << "phi_index     "      << m_PHI_INDEX_INDEX    << std::endl;
-    std::cout << "eta_index     "      << m_ETA_INDEX_INDEX    << std::endl;
-
+    ATH_MSG_DEBUG("decode index and bit fields for each level:");
+    for (int i{};i != nImplementations; ++i){
+      ATH_MSG_DEBUG( std::left << std::setw(15) << m_implNames[i] << m_impl[i]);
+    }
+    if (msgLvl(MSG::DEBUG)){ 
+      for (int i{};i != nImplementations; ++i){
+        msg() << formatOutput(m_implNames[i], m_impl[i]);
+        m_impl[i].ored_field().show(msg());
+      }
+      msg() << "HGTD_ID::initLevelsFromDict - found levels \n";
+      msg() << "subdet        "      << m_INDET_INDEX        << "\n";
+      msg() << "part          "      << m_HGTD_INDEX         << "\n";
+      msg() << "endcap        "      << m_ENDCAP_INDEX       << "\n";
+      msg() << "layer         "      << m_LAYER_INDEX        << "\n";
+      msg() << "phi_module    "      << m_PHI_MODULE_INDEX   << "\n";
+      msg() << "eta_module    "      << m_ETA_MODULE_INDEX   << "\n";
+      msg() << "phi_index     "      << m_PHI_INDEX_INDEX    << "\n";
+      msg() << "eta_index     "      << m_ETA_INDEX_INDEX    << "\n";
+    }
     return 0;
 }
 
@@ -788,7 +731,7 @@ HGTD_ID::get_id (const IdentifierHash& hash_id,
         }
         else if (m_ETA_INDEX_INDEX == end) {
             // Do not know how to calculate pixel id from hash yet!!
-            std::cout << "Do not know how to calculate pixel id from hash yet!!" << std::endl;
+            result = 1;
         }
     }
 
