@@ -462,6 +462,8 @@ public:
     columnar::EgammaDecorator<float> decEmva;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
+    // test GNN
+    columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> gnn_energy_Acc {*this, "TransformerEnergy"};
     columnar::EgammaAccessor<uint16_t> authorAcc {*this, "author"};
     columnar::EgammaAccessor<std::vector<columnar::OptTrackId>> electronTrackAcc;
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
