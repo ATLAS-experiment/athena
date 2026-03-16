@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile raw channel maker algorithm"""
 
@@ -22,7 +22,7 @@ def TileRawChannelMakerCfg(flags, **kwargs):
     kwargs.setdefault('name', 'TileRChMaker')
     name = kwargs['name']
 
-    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking]:
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPresampling, ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault('TileDigitsContainer', flags.Overlay.BkgPrefix + 'TileDigitsCnt')
     else:
         kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')

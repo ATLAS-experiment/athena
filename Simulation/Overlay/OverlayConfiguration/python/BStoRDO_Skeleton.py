@@ -29,8 +29,6 @@ def fromRunArgs(runArgs):
 
     flags.Reco.EnableHI = True
     flags.Reco.HIMode = HIMode.HI
-    flags.Tracking.doCaloSeededAmbi = False
-    flags.Tracking.doCaloSeededBrem = False
 
     # This is for data overlay
     flags.Overlay.DataOverlay = True
@@ -152,6 +150,10 @@ def fromRunArgs(runArgs):
         from MuonConfig.MuonBytestreamDecodeConfig import MmBytestreamDecodeCfg
         cfg.merge(MmBytestreamDecodeCfg(flags))
         itemList.append(f'Muon::MM_RawDataContainer#{flags.Overlay.BkgPrefix}MMRDO')
+
+    if flags.Detector.EnableCalo:
+        from CaloRec.CaloRecoConfig import CaloRecoCfg
+        cfg.merge(CaloRecoCfg(flags))
 
     if flags.Reco.EnableTracking:
         from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg

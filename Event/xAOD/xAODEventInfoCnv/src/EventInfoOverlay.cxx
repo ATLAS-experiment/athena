@@ -123,14 +123,11 @@ StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
 
   // But clear other detector flags.
   // They'll get set again during reconstruction, if appropriate.
-  // (For now, do this only for simulation.)
-  if (!m_dataOverlay.value()) {
-    for (unsigned idet = 0; idet < xAOD::EventInfo::nDets; ++idet) {
-      auto det = static_cast<xAOD::EventInfo::EventFlagSubDet> (idet);
-      if (det != xAOD::EventInfo::Core) {
-        outputEvent->setEventFlags (det, 0);
-        outputEvent->setErrorState (det, xAOD::EventInfo::NotSet);
-      }
+  for (unsigned idet = 0; idet < xAOD::EventInfo::nDets; ++idet) {
+    auto det = static_cast<xAOD::EventInfo::EventFlagSubDet> (idet);
+    if (det != xAOD::EventInfo::Core) {
+      outputEvent->setEventFlags (det, 0);
+      outputEvent->setErrorState (det, xAOD::EventInfo::NotSet);
     }
   }
 
