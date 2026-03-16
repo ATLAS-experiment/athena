@@ -1197,14 +1197,35 @@ def arrange_output(process_dir=MADGRAPH_GRIDPACK_LOCATION,lhe_version=None,saveP
         outputDS = runArgs.outputTXTFile
     else:
         outputDS = 'tmp_LHE_events.tar.gz'
+        if hasattr(runArgs, "avoidExtracting") and runArgs.avoidExtracting:
+            outputDS = 'tmp_LHE_events.gz'
 
-    mglog.info('Moving file over to '+outputDS.split('.tar.gz')[0]+'.events')
+    outputStem = outputDS
+    if '.tar.gz' in outputDS:
+        outputStem = outputDS.split('.tar.gz')[0]
+    elif '.tgz' in outputDS:
+        outputStem = outputDS.split('.tgz')[0]
+    elif '.gz' in outputDS:
+        outputStem = outputDS.split('.gz')[0]
+    else:
+        mglog.warning(f'Could not figure out what output file type {outputDS} refers to')
+        outputStem = outputDS.split('.')[0]
+    outputStem += '.events'
 
-    shutil.move(os.getcwd()+'/events.lhe',outputDS.split('.tar.gz')[0]+'.events')
+    mglog.info('Moving file over to '+outputStem)
+    shutil.move(os.getcwd()+'/events.lhe',outputStem)
 
-    mglog.info('Re-zipping into dataset name '+outputDS)
-    rezip = stack_subprocess(['tar','cvzf',outputDS,outputDS.split('.tar.gz')[0]+'.events'])
-    rezip.wait()
+    if '.tar.gz' in outputDS or '.tgz' in outputDS:
+        mglog.info('Re-zipping + tarring into dataset name '+outputDS)
+        rezip = stack_subprocess(['tar','cvzf',outputDS,outputStem])
+        rezip.wait()
+    elif '.gz' in outputDS:
+        mglog.info('Re-zipping into dataset name '+outputDS)
+        rezip = stack_subprocess(['gzip',outputStem])
+        rezip.wait()
+        shutil.move(outputStem+'.gz',outputDS)
+    else:
+        mglog.info(f'Could not understand output type for {outputDS} - will leave uncompressed')
 
     if not saveProcDir:
         mglog.info('Removing the process directory')
