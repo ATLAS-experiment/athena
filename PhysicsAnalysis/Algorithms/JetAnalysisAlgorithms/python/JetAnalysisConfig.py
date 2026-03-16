@@ -690,6 +690,12 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
         self.addOption ('maxMass', 600.*GeV, type=float,
             info="the maximum mass cut (in MeV) to apply to calibrated large-R jets.")
 
+        ### bjt
+        self.addOption ('runBoostedJetTagger', False, type=bool,
+            info="whether to run the BJT.")
+
+
+
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName
@@ -956,6 +962,20 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
+            
+
+        ### bjt
+        if self.runBoostedJetTagger :
+            alg = config.createAlgorithm( 'BJT::BoostedJetTaggerAlg', 'BoostedJetTaggerAlg' )
+            
+            config.addPrivateTool( 'tagger', 'SmoothedWZTagger' )
+
+            alg.tagger.JetContainer = self.jetCollection
+            alg.tagger.CalibArea = 'Local'
+            alg.tagger.IsMC = True
+
+            alg.jets = config.readName (self.containerName)
+
 
         config.addOutputVar (self.containerName, 'm', 'm')
 
