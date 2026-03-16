@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 Define sets of standard variables to save in output files.
 The variable lists returned by these functions are used by the smart slimming
@@ -83,45 +83,34 @@ def BTaggingStandardContent(flags, jetcol):
     # basic jet variables
     jetBasicContent = _getVariableList(jetcol, _getStandardSmallRVars())
     # b-tagging variables
+    BTaggingAux = []
+    BTaggingAux += _getSmallRDiscriminantVars(
+        flags.BTagging.AK4TaggerName,
+        extra_flavours=['tau'],
+        flip_modes=['SimpleFlip']
+    )
+    BTaggingAux += ["SV1_NGTinSvx", "SV1_masssvx"] # GN2v01 extra vars
+
     if not _isRun4(flags):
-        # standard outputs for Run 3
-        BTaggingRun3Aux = []
-        BTaggingRun3Aux += _getSmallRDiscriminantVars(
-            'GN2v01',           
-            extra_flavours=['tau'], 
-            flip_modes=['SimpleFlip']
-        )
-        BTaggingRun3Aux += _getSmallRDiscriminantVars(
+        BTaggingAux += _getSmallRDiscriminantVars(
             'GN3V00',           
             extra_flavours=['tau'], 
             flip_modes=['SimpleFlip']
         )
-        BTaggingRun3Aux += _getSmallRDiscriminantVars(
+        BTaggingAux += _getSmallRDiscriminantVars(
             'GN3PflowMuonsV00', 
             extra_flavours=['tau', 'ud', 'g', 's', 'quark'], 
             flip_modes=['SimpleFlip']
         )
-        BTaggingRun3Aux += _getSmallRDiscriminantVars(
+        BTaggingAux += _getSmallRDiscriminantVars(
             'GN3EPCLV01',
             extra_flavours=['tau', 'ud', 'g', 's', 'bquark', 'antibquark', 'cquark', 'anticquark', 'other'],
             flip_modes=['SimpleFlip']
         )
-        BTaggingRun3Aux += ["SV1_NGTinSvx", "SV1_masssvx"] # GN2v01 extra vars
-        BTaggingRun3Aux += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet'] # GN3PflowMuonsV00 extra vars
-        BTaggingRun3Aux += ['GN3EPCLV01_ptFromTruthDressedWZJet'] # GN3EPCLV01 extra vars
-        btagContent = _getVariableList(jetcol, BTaggingRun3Aux)
-    else:
-        # standard outputs for Run 4
-        BTaggingRun4Aux = [ 
-            "SV1_NGTinSvx", 
-            "SV1_masssvx", 
-            "GN2HL_pu", 
-            "GN2HL_pc", 
-            "GN2HL_pb", 
-            "GN2HL_ptau",
-        ]
-        btagContent = _getVariableList(jetcol, BTaggingRun4Aux)
+        BTaggingAux += ['GN3PflowMuonsV00_ptFromTruthDressedWZJet'] # GN3PflowMuonsV00 extra vars
+        BTaggingAux += ['GN3EPCLV01_ptFromTruthDressedWZJet'] # GN3EPCLV01 extra vars
 
+    btagContent = _getVariableList(jetcol, BTaggingAux)
     return btagContent + jetBasicContent
 
 def BTaggingExpertContent(flags, jetcol):

@@ -6,7 +6,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import MetadataCategory
+from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
 from AthenaCommon.Logging import logging
 log_HIGG9D1 = logging.getLogger('HIGG9D1')
 
@@ -26,7 +26,6 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     mainIDInput   = "InDetWithLRTTrackParticles" if doLRT else "InDetTrackParticles"
     if doLRT:
         from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
-        from AthenaConfiguration.Enums import LHCPeriod
         acc.merge(LRTMuonMergerAlg( flags,
                                     PromptMuonLocation    = "Muons",
                                     LRTMuonLocation       = "MuonsLRT",
@@ -212,6 +211,11 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/MC20_2024-10-17_GN2v01_v1.root (run-2) and
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13p6TeV/MC23_2024-10-17_GN2v01_v1.root (run-3)
     HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8 && log(AntiKt4EMPFlowJets.GN2v01_pb/(0.2*AntiKt4EMPFlowJets.GN2v01_pc + (1.-0.2-0.01)*AntiKt4EMPFlowJets.GN2v01_pu + 0.01*AntiKt4EMPFlowJets.GN2v01_ptau))>=0.844) >= 1"
+    # Drop FTAG requirement for Run 4 as WPs are not available
+    # Should ultimately be reworked into a precomputed flag with an FTAG tool rather than hardcoding the FTAG discriminant cut
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        HIGG9D1_smallR_EMPFlow_1b_sel = "count(AntiKt4EMPFlowJets.pt > 18*GeV && abs(AntiKt4EMPFlowJets.eta) < 2.8) >= 1"
+
 
     HIGG9D1_bjet_sel = "%s && %s && %s" % (HIGG9D1_smallR_EMPFlow_2j_sel, HIGG9D1_smallR_EMPFlow_1j_sel, HIGG9D1_smallR_EMPFlow_1b_sel)
     HIGG9D1_bb_skim = acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
