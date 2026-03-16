@@ -1,41 +1,45 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrigStorageDefinitions/TypeInformation.h"
-#include <iostream>
-#include <typeinfo>
+/// Test of EDM type list
 
-using namespace HLT::TypeInformation;
+#include "TrigStorageDefinitions/TypeInformation.h"
 
 struct testX{};
 struct testY{};
 
-int main(){
-  std::cout << "Basic_test" << std::endl;
 
-  typedef newlist::
+// Just a "compilation test"
+int main(){
+  using namespace HLT::TypeInformation;
+
+  // with newlist
+  using mylist = newlist::
     add<testX>::go::
     add<testY>::go::
-    done mylist;
-  std::cout << "with newlist" << std::endl;
-  std::cout << typeid(at<mylist,0>::type).name() << std::endl;
-  std::cout << typeid(at<mylist,1>::type).name() << std::endl;
-  std::cout << typeid(mylist::get<0>::type).name() << std::endl;
-  std::cout << typeid(mylist::get<1>::type).name() << std::endl;
+    done;
 
-  typedef list<testX,list<testY,nil> > manual_list;
-  std::cout << "manual list" << std::endl;
-  std::cout << typeid(at<manual_list,0>::type).name() << std::endl;
-  std::cout << typeid(at<manual_list,1>::type).name() << std::endl;
-  std::cout << typeid(manual_list::get<0>::type).name() << std::endl;
-  std::cout << typeid(manual_list::get<1>::type).name() << std::endl;
+  static_assert( std::is_same_v< at<mylist,0>::type, testX > );
+  static_assert( std::is_same_v< at<mylist,1>::type, testY > );
 
-  typedef list<testY,nil> single_entry_list;
-  std::cout << "single entry" << std::endl;
-  std::cout << typeid(single_entry_list::get<0>::type).name() << std::endl;
+  static_assert( std::is_same_v< mylist::get<0>::type, testX > );
+  static_assert( std::is_same_v< mylist::get<1>::type, testY > );
+
+  // manual list
+  using manual_list = list<testY,
+                           list<testX,nil>>;
+
+  static_assert( std::is_same_v< at<manual_list,0>::type, testX > );
+  static_assert( std::is_same_v< at<manual_list,1>::type, testY > );
+
+  static_assert( std::is_same_v< manual_list::get<0>::type, testX > );
+  static_assert( std::is_same_v< manual_list::get<1>::type, testY > );
+
+  // single entry
+  using single_entry_list = list<testY,nil>;
+
+  static_assert( std::is_same_v< single_entry_list::get<0>::type, testY > );
 
   return 0;
 }
-
-//run unit test with cmt make check
