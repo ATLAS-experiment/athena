@@ -15,10 +15,16 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include <format>
+#include "valgrind/valgrind.h"
 
 
 StatusCode TimeoutAlg::initialize()
 {
+  if (RUNNING_ON_VALGRIND) {
+    ATH_MSG_INFO("Detected running on valgrind. Disabling algorithm timeout");
+    m_timeoutProp=0;
+    return StatusCode::SUCCESS;
+  }
   m_timeout = std::chrono::nanoseconds(m_timeoutProp);
 
   // Subscribe to EndAlgorithms (includes output sequence)

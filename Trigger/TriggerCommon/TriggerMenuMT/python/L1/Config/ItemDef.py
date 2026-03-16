@@ -1045,6 +1045,8 @@ class ItemDef:
         MenuItem('L1_gXEJWOJ110').setLogic( d.gXEJWOJ110 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ120').setLogic( d.gXEJWOJ120 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gXEJWOJ500').setLogic( d.gXEJWOJ500 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXENC100').setLogic( d.gXENC100 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_gXENC110').setLogic( d.gXENC110 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_gMHT500').setLogic( d.gMHT500 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE60' ).setLogic( d.jXE60  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jXE70' ).setLogic( d.jXE70  & physcond).setTriggerType(TT.calo)
