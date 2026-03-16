@@ -1,72 +1,65 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AccMap.h"
 #include <iostream>
-#include <sstream>
+#include <format>
 #ifndef LARG4_STAND_ALONE
 #include "PathResolver/PathResolver.h"
 #endif
 
-AccMap::AccMap()
-{
-  const int i1[10]={0,0,3,2,9,12,10,9,0,2};      // first fold
-  const int i2[10]={2,1,12,12,13,13,13,13,1,4};  // last fold for 10 electronic regions
-
-  m_xmin.resize(m_nmax);
-  m_xmax.resize(m_nmax);
-  m_ymin.resize(m_nmax);
-  m_ymax.resize(m_nmax);
-
-  const double xnorm=14.1591;   // nA/MeV normalisation for accordion maps
+AccMap::AccMap() {
+    // Fold ranges for the 10 electronic regions
+    static constexpr std::array<int, 10> i1 = {0, 0, 3, 2, 9, 12, 10, 9, 0, 2};
+    static constexpr std::array<int, 10> i2 = {2, 1, 12, 12, 13, 13, 13, 13, 1, 4};
+    static constexpr double xnorm = 14.1591;
 
 #ifndef LARG4_STAND_ALONE
-  //std::string larLocation = PathResolver::find_directory("lar","DATAPATH");
-  std::string larLocation = PathResolver::find_directory("LArG4Barrel","ATLASCALDATA");
+    const std::string larLocation = PathResolver::find_directory("LArG4Barrel", "ATLASCALDATA");
 #endif
 
-  for (int iregion=0;iregion<10;iregion++) {
-    // accordion folds
-    for (int ifold=i1[iregion]; ifold<=i2[iregion]; ifold++) {
-      std::ostringstream fn;
-      fn << "fold"<<ifold<<"_region"<<iregion<<".map";
-      std::string filename = fn.str();
-      std::string fileLocation;
+    for (int iregion = 0; iregion < MAX_REGIONS; ++iregion) {
+        
+        // 1. Process Accordion Folds
+        for (int ifold = i1[iregion]; ifold <= i2[iregion]; ++ifold) {
+            // Using std::format for cleaner filename generation
+            std::string filename = std::format("fold{}_region{}.map", ifold, iregion);
+            
+            std::string fileLocation = 
 #ifdef LARG4_STAND_ALONE
-      fileLocation=m_directory+"/"+filename;
+                std::format("{}/{}", m_directory, filename);
 #else
-      //fileLocation=larLocation+"/calo_data/"+filename;
-      fileLocation=larLocation+"/"+filename;
+                std::format("{}/{}", larLocation, filename);
 #endif
-      CurrMap* cm = new CurrMap(fileLocation,xnorm);
-      int code=10*ifold+iregion;
-      m_theMap[code]=cm;
 
-      // add some rounding safety in edges of map
-      m_xmin[ifold]=cm->GetXmin()+0.1;
-      m_xmax[ifold]=cm->GetXmax()-0.1;
-      m_ymin[ifold]=cm->GetYmin()+0.1;
-      m_ymax[ifold]=cm->GetYmax()-0.1;
-    }
-    // straight section
-    for (int istr=1; istr<=2; istr++) {
-      std::ostringstream fn;
-      fn << "straight"<<istr<<"_region"<<iregion<<".map";
-      std::string filename = fn.str();
-      std::string fileLocation;
+            auto cm = std::make_unique<CurrMap>(fileLocation, xnorm);
+            
+            // Add rounding safety for primary folds
+            if (ifold < N_MAX_VEC) {
+                m_xmin[ifold] = cm->GetXmin() + 0.1f;
+                m_xmax[ifold] = cm->GetXmax() - 0.1f;
+                m_ymin[ifold] = cm->GetYmin() + 0.1f;
+                m_ymax[ifold] = cm->GetYmax() - 0.1f;
+            }
+            m_fastMap[ifold][iregion] = std::move(cm);
+        }
+
+        // 2. Process Straight Sections
+        for (int istr = 1; istr <= 2; ++istr) {
+            int ifold = 20 + istr; // Mapping istr 1,2 to index 21,22
+            
+            std::string filename = std::format("straight{}_region{}.map", istr, iregion);
+            
+            std::string fileLocation = 
 #ifdef LARG4_STAND_ALONE
-      fileLocation=m_directory+"/"+filename;
+                std::format("{}/{}", m_directory, filename);
 #else
-      //fileLocation=larLocation+"/calo_data/"+filename;
-      fileLocation=larLocation+"/"+filename;
+                std::format("{}/{}", larLocation, filename);
 #endif
-      CurrMap* cm = new CurrMap(fileLocation,xnorm);
-      int code=10*(20+istr)+iregion;
-      m_theMap[code]=cm;
+            m_fastMap[ifold][iregion] = std::make_unique<CurrMap>(fileLocation, xnorm);
+        }
     }
-  }
-
 }
 
 const AccMap* AccMap::GetAccMap()
@@ -75,33 +68,21 @@ const AccMap* AccMap::GetAccMap()
   return &instance;
 }
 
-void AccMap::Reset()
-{
-  curr_map::iterator it = m_theMap.begin();
-  while (it != m_theMap.end()) {
-    delete (*it).second;
-    m_theMap.erase(it++);
-  }
-}
-
-const CurrMap* AccMap::GetMap(int ifold, int region, int sampling, int eta) const
+const CurrMap* AccMap::GetMap(int ifold, int region, int sampling, int eta) const noexcept
 {
   return this->GetMap(ifold,this->Region(region,sampling,eta));
 }
 
-const CurrMap* AccMap::GetMap(int ifold, int ielecregion) const
-{
-  const int code=10*ifold+ielecregion;
-  const auto mapIter = m_theMap.find(code);
-  if (mapIter != m_theMap.end())
-    return mapIter->second;
-  else {
-    std::cout << " Code " << code << " not found in map ..." << std::endl;
+const CurrMap* AccMap::GetMap(int ifold, int ielecregion) const noexcept {
+    // Direct O(1) lookup with bounds safety
+    if (ifold >= 0 && ifold < MAX_FOLDS && ielecregion >= 0 && ielecregion < MAX_REGIONS) {
+        return m_fastMap[ifold][ielecregion].get();
+    }
+    std::cout << "Fold " << ifold << " Region " << ielecregion << " out of bounds." << std::endl;
     return nullptr;
-  }
 }
 
-int AccMap::Region(int region, int sampling, int eta) const
+int AccMap::Region(int region, int sampling, int eta) const noexcept
 {
   int elecregion=0;
   // logic to compute region vs eta and sampling...
