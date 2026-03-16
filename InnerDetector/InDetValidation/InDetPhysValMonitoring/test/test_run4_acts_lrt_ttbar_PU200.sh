@@ -1,25 +1,22 @@
 #!/bin/bash
-# art-description: Run 4 configuration, ITK only recontruction with ACTS, PU 200
+# art-description: Run 4 configuration, ITK only recontruction with ACTS LRT with Athena LEGACY, PU 200
 # art-type: grid
 # art-include: main/Athena
 # art-output: acts-expert-monitoring*.root
-# art-output: idpvm*.root
+# art-output: *idpvm*.root
 # art-output: *.xml
 # art-output: dcube*
 # art-html: dcube_acts_shifter_last
 # art-athena-mt: 8
 
 lastref_dir=last_results
-#dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
-### uncomment this and other lines to enable technical efficiency
-dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
+dcubeXmlTechEffLRT=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff_lrt.xml
 n_events=-1
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
 
 # search in $DATAPATH for matching file
-#dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
-dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEff -print -quit 2>/dev/null)
+dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEffLRT -print -quit 2>/dev/null)
 
 # Don't run if dcube config not found
 if [ -z "$dcubeXmlTechEffAbsPath" ]; then
@@ -43,11 +40,12 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
+# Run with Athena legacy Fast Tracking
 run "Reconstruction-athena" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
-    	       flags.Tracking.doITkFastTracking=True;" \
+    	       flags.Tracking.doLargeD0=True;" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events} \
@@ -62,22 +60,23 @@ run "IDPVM-athena" \
     runIDPVM.py \
     --filesInput AOD.athena.root \
     --outputFile idpvm.athena.root \
-    --doHitLevelPlots \
     --HSFlag All \
     --doTechnicalEfficiency \
     --doExpertPlots \
-    --OnlyTrackingPreInclude
+    --OnlyTrackingPreInclude \
+    --doLargeD0Tracks
 
 reco_rc=$?
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
 
-# Run with Athena ambi. resolution
+# Run with Acts
 run "Reconstruction-acts" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
-    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True;" \
+    --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
+    	       flags.Acts.doLargeRadius=True;" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events} \
@@ -92,11 +91,12 @@ run "IDPVM-acts" \
     runIDPVM.py \
     --filesInput AOD.acts.root \
     --outputFile idpvm.acts.root \
-    --doHitLevelPlots \
     --HSFlag All \
     --doTechnicalEfficiency \
     --doExpertPlots \
-    --OnlyTrackingPreInclude
+    --OnlyTrackingPreInclude \
+    --doLargeD0Tracks \
+    --largeD0TrackCollection InDetActsLargeRadiusTrackParticles
 
 reco_rc=$?
 if [ $reco_rc != 0 ]; then
@@ -121,7 +121,6 @@ run "dcube-acts-last" \
     -c ${dcubeXmlTechEffAbsPath} \
     -r ${lastref_dir}/idpvm.acts.root \
     idpvm.acts.root
-
 
 # Compare performance WRT legacy Athena
 run "dcube-athena-acts" \
