@@ -766,13 +766,13 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       }
    } else if (token.dbID() != Guid::null()) {
       std::string returnToken;
-      const Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
-      if (metadataToken != nullptr) {
+      Token* metadataToken = getPoolSvc()->getToken("FID:" + token.dbID().toString(), token.contID(), token.oid().first);
+      if( metadataToken ) {
          returnToken = metadataToken->toString();
+         metadataToken->release(); metadataToken = nullptr;
       } else {
          returnToken = token.toString();
       }
-      delete metadataToken; metadataToken = nullptr;
       // Share token
       sc = m_inputStreamingTool->putObject(returnToken.c_str(), returnToken.size() + 1, num);
       if (!sc.isSuccess() || !m_inputStreamingTool->putObject(nullptr, 0, num).isSuccess()) {

@@ -370,7 +370,11 @@ StatusCode AthenaPoolCnvSvc::createAddress(long svcType,
       RootType classDesc = RootType::ByNameNoQuiet(par[2]);
       token->setClassID(pool::DbReflex::guid(classDesc));
    } else {
-      token.reset(m_poolSvc->getToken(par[0], par[1], ip[0]));
+      Token *t = m_poolSvc->getToken(par[0], par[1], ip[0]);
+      if( t ) {
+         token = std::make_unique<Token>(t);
+         t->release();
+      }
    }
    if (token == nullptr) {
       return(StatusCode::RECOVERABLE);
