@@ -1,5 +1,5 @@
 """
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 Main configuration of flavour tagging algorithms.
 The low and high level tagging algorithms are scheduled here.
@@ -55,7 +55,7 @@ def GetTaggerTrainingMap(flags, jet_col):
     return networks_by_jet_col[jet_col]
 
 
-def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTrackParticles', addRenameMaps=None):
+def RetagRenameInputContainerCfg(flags, suffix, JetCollectionShort, tracksKey='InDetTrackParticles', addRenameMaps=None):
     acc=ComponentAccumulator()
     remapSvc = CompFactory.AddressRemappingSvc("AddressRemappingSvc")
     jc = JetCollectionShort
@@ -63,6 +63,7 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
     tc = tracksKey
     jac = 'xAOD::JetAuxContainer'
     tpac = 'xAOD::TrackParticleAuxContainer'
+    tagger = flags.BTagging.AK4TaggerName
 
     vars = ["jetFoldHash",
             "jetFoldHash_noHits",
@@ -104,20 +105,20 @@ def RetagRenameInputContainerCfg(suffix, JetCollectionShort, tracksKey='InDetTra
             "SV1Flip_TrackParticleLinks",
             "SV1Flip_badTracksIP",
             "SV1Flip_vertices",
-            "GN2v01_pb",
-            "GN2v01_pc",
-            "GN2v01_pu",
-            "GN2v01_ptau",
-            "GN2v01SimpleFlip_pb",
-            "GN2v01SimpleFlip_pc",
-            "GN2v01SimpleFlip_pu",
-            "GN2v01SimpleFlip_ptau",
-            "GN2v01_TrackOrigin",
-            "GN2v01_VertexIndex",
-            "GN2v01_TrackLinks",
-            "GN2v01SimpleFlip_TrackOrigin",
-            "GN2v01SimpleFlip_VertexIndex",
-            "GN2v01SimpleFlip_TrackLinks",
+            tagger + "_pb",
+            tagger + "_pc",
+            tagger + "_pu",
+            tagger + "_ptau",
+            tagger + "SimpleFlip_pb",
+            tagger + "SimpleFlip_pc",
+            tagger + "SimpleFlip_pu",
+            tagger + "SimpleFlip_ptau",
+            tagger + "_TrackOrigin",
+            tagger + "_VertexIndex",
+            tagger + "_TrackLinks",
+            tagger + "SimpleFlip_TrackOrigin",
+            tagger + "SimpleFlip_VertexIndex",
+            tagger + "SimpleFlip_TrackLinks",
             "TracksForBTagging",
             "TracksForBTaggingOverPtThreshold",
             "MuonsForBTagging",
@@ -174,7 +175,7 @@ def BTagRecoSplitCfg(flags, JetCollection=['AntiKt4EMPFlowJets']):
     for jc in JetCollection:
         result.merge(
             FlavorTaggingCfg(
-                cfgFlags = flags,
+                flags,
                 JetCollection = jc,
             )
         )

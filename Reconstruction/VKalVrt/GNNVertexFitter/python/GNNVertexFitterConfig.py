@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -17,7 +17,7 @@ def GNNVertexFitterToolCfg(flags, name="GNNVertexFitterTool", **kwargs):
 
     acc.merge(BeamSpotCondAlgCfg(flags))
     kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags)))
-    kwargs.setdefault("GNNModel", "GN2v01")
+    kwargs.setdefault("GNNModel", flags.BTagging.AK4TaggerName)
     kwargs.setdefault("JetCollection", "AntiKt4EMPFlowJets")
     kwargs.setdefault("includePrimaryVertex", False)
     kwargs.setdefault("removeNonHFVertices", False)
