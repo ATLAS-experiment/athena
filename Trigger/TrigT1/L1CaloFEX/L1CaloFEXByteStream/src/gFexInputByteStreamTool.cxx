@@ -1506,10 +1506,10 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     // int trxv = 0;
 
     
-    unsigned int r3conv = 0;
-    unsigned int r4conv = 0;
-    unsigned int r5conv = 0;
-    unsigned int r6conv = 0;
+    int r3conv = 0;
+    int r4conv = 0;
+    int r5conv = 0;
+    int r6conv = 0;
     // int r3offs = 0;
 
     //r1shv = ((din & 0x0000007F) << 9 )  & 0x0000FE00 ;
@@ -1581,15 +1581,19 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     }
     */
     else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+        // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
         dout = r3conv >>1;
     }
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+        // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
         dout = r4conv >>1;
     }
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
+        // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
         dout = r5conv >>1;
     }
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & ( oth5 ) & (! oth6 ) ) {
+        // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
         dout = r6conv >>1;
     }
     else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
