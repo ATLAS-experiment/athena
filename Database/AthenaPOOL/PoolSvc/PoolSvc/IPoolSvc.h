@@ -106,7 +106,7 @@ public: // Non-static members
 	   const pool::DbType& collectionType = pool::POOL_StorageType.type(),
 	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
 
-   /// @return a token for a container entry.
+   /// @return a shared Token ptr for a container entry.
    /// @param connection [IN] string containing the connection/file name.
    /// @param collection [IN] string containing the persistent name of the collection.
    /// @param ientry [IN] entry number for the token to be returned

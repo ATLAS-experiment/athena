@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ITOKENITERATOR_H
@@ -21,7 +21,7 @@ namespace pool {
   class ITokenIterator {
   public:
     /// Empty destructor
-    virtual ~ITokenIterator() {}
+    virtual ~ITokenIterator() = default;
 
     /** @brief Returns the size of the collection.
      */
@@ -32,12 +32,12 @@ namespace pool {
      * @param position  The position to which to seek.
      * @returns True if successful, false otherwise.
      */
+
     virtual bool seek (std::size_t position) = 0;
 
-    /** Returns the pointer to next token.
-     *  Token ownership is passed to the user.
-     *  if no other token is available in the iteration
-     *  sequence, 0 is returned.
+    /**
+     * @brief Advances tne iterator and returns a pointer to next token.
+     * @returns Shared Token ptr (refCount+1) if not at the end, nullptr otherwise.
      */
     virtual Token* next() = 0;
   };

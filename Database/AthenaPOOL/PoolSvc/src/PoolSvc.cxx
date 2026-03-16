@@ -536,8 +536,8 @@ void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {
 }
 //__________________________________________________________________________
 Token* PoolSvc::getToken(const std::string& connection,
-	const std::string& collection,
-	const unsigned long ientry) const {
+	                      const std::string& collection,
+	                      const unsigned long ientry) const {
    std::lock_guard<CallMutex> lock(*m_pers_mut[IPoolSvc::kInputStream]);
    std::unique_ptr<pool::IDatabase> dbH = getDbHandle(IPoolSvc::kInputStream, connection);
    if (dbH == nullptr) {
@@ -550,13 +550,9 @@ Token* PoolSvc::getToken(const std::string& connection,
    if (contH == nullptr) {
       return(nullptr);
    }
-   pool::ITokenIterator* tokenIter = contH->tokens();
-   Token* thisToken = tokenIter->next();
-   for (unsigned long ipos = 0; ipos < ientry; ipos++) {
-      delete thisToken; thisToken = tokenIter->next();
-   }
-   delete tokenIter; tokenIter = nullptr;
-   return(thisToken);
+   auto tokenIter = std::unique_ptr<pool::ITokenIterator>(contH->tokens());
+   // the Token returned by the iterator has the refCount already increased
+   return tokenIter->seek(ientry)? tokenIter->next() : nullptr;
 }
 //__________________________________________________________________________
 StatusCode PoolSvc::connect(pool::ITransaction::Type type, unsigned int contextId) {
