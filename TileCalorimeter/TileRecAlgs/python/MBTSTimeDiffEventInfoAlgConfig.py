@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured MBTS time difference algorithm"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 from TileConfiguration.TileConfigFlags import TileRunType
 
 def MBTSTimeDiffEventInfoAlgCfg(flags, **kwargs):
@@ -23,6 +24,9 @@ def MBTSTimeDiffEventInfoAlgCfg(flags, **kwargs):
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     acc.merge(LArGMCfg(flags))
+
+    if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
+        kwargs.setdefault('EventInfo', flags.Overlay.BkgPrefix + "EventInfo")
 
     MBTSTimeDiffEventInfoAlg=CompFactory.MBTSTimeDiffEventInfoAlg
     acc.addEventAlgo(MBTSTimeDiffEventInfoAlg(**kwargs), primary = True)
