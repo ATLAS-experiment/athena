@@ -15,6 +15,9 @@
 
 #include "CutBookkeeperUtils/OriginalAodCounts.h"
 
+#include <set>
+#include <string>
+
 namespace ftag {
 
   class MetadataAlg final :
@@ -48,7 +51,15 @@ namespace ftag {
     Gaudi::Property<bool> m_enable_systematics {
       this, "enableSystematics", true,
       "include systematic variations (false = nominal only)"};
+    Gaudi::Property<std::set<std::string>> m_allowed_streams {
+      this, "allowedStreams",
+      {"StreamAOD", "StreamEVGEN", "StreamEVNT",
+       "StreamDAOD_PHYS", "StreamDAOD_PHYSLITE"},
+      "CutBookkeeper inputStream values accepted as AllExecutedEvents"
+    };
     std::unordered_map<size_t, OriginalAodCounts> m_weights;
+
+    bool isGoodBook(const xAOD::CutBookkeeper& cbk) const;
 
   };
 

@@ -57,14 +57,6 @@ namespace {
     return counts;
   }
 
-  static const std::vector<std::string> allowed_streams{
-    "StreamAOD", "StreamEVGEN", "StreamEVNT"};
-  bool isGoodBook(const xAOD::CutBookkeeper& cbk) {
-    const auto& s = allowed_streams;
-    return cbk.name() == "AllExecutedEvents"
-      && std::find(s.begin(), s.end(), cbk.inputStream()) != s.end();
-  }
-
 }
 
 namespace ftag {
@@ -75,6 +67,12 @@ namespace ftag {
     AthAlgorithm(name, pSvcLocator),
     m_inputMetaStore("StoreGateSvc/InputMetaDataStore", name)
   {
+  }
+
+  bool MetadataAlg::isGoodBook(const xAOD::CutBookkeeper& cbk) const
+  {
+    return cbk.name() == "AllExecutedEvents"
+      && m_allowed_streams.value().contains(cbk.inputStream());
   }
 
   StatusCode MetadataAlg::initialize()
@@ -136,9 +134,8 @@ namespace ftag {
 
     if (allEvents == nullptr)
     {
-      std::string error(
+      throw std::runtime_error(
         "Could not find AllExecutedEvents CutBookkeeper information.");
-      throw std::runtime_error(error);
     }
 
     for (const xAOD::CutBookkeeper *cbk : *completeCBC)
@@ -183,6 +180,11 @@ namespace ftag {
 
   StatusCode MetadataAlg::finalize ()
   {
+
+    if (m_weights.empty()) {
+      ATH_MSG_WARNING("No CutBookkeeper weights collected; skipping output.");
+      return StatusCode::SUCCESS;
+    }
 
     std::vector<CP::SystematicSet> systematics;
     systematics.emplace_back();               // nominal always first
