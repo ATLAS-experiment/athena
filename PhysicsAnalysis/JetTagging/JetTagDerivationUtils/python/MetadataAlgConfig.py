@@ -7,7 +7,8 @@ from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
 
 
 def MetadataAlgCfg(flags, h5_output=None, json_output=None,
-                   h5_output_hists=None, enable_systematics=True):
+                   h5_output_hists=None, enable_systematics=True,
+                   allowed_streams=None):
     acc = ComponentAccumulator()
     acc.merge(MetaDataSvcCfg(flags))
     opts = {}
@@ -17,6 +18,8 @@ def MetadataAlgCfg(flags, h5_output=None, json_output=None,
         opts |= dict(jsonOutput=str(o))
     if o := h5_output_hists:
         opts |= dict(h5OutputHists=o)
+    if o := allowed_streams:
+        opts |= dict(allowedStreams=o)
     opts |= dict(enableSystematics=enable_systematics)
     if not (h5_output or json_output or h5_output_hists):
         raise ValueError('No outputs given for MetadataAlg')
