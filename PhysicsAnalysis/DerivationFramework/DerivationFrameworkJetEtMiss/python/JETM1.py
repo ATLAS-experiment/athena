@@ -238,7 +238,7 @@ def JETM1Cfg(flags):
                                            "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
     JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "UnAssocMuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                          "AntiKt4EMPFlowJets"]
     
     # Truth containers

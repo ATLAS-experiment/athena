@@ -166,7 +166,7 @@ def LLJ1Cfg(flags):
                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
                                         "CSSKGChargedParticleFlowObjects","CSSKGNeutralParticleFlowObjects",
-                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
                                         "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"
                                         ]
 

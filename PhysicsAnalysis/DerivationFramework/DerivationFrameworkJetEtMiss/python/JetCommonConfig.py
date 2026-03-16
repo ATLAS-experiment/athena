@@ -93,10 +93,6 @@ def AddSidebandEventShapeCfg(ConfigFlags):
     for a in constit_algs:
         acc.addEventAlgo(a)
 
-    #Sideband definition
-    acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='PUSB'))
-    acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'PUSB' ))
-
     #New "sideband" definition when using CHS based on TTVA
     acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
     acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))

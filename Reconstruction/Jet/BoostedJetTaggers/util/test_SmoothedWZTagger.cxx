@@ -224,7 +224,7 @@ int test1( int argc, char* argv[] ) {
   ANA_CHECK( m_Tagger.retrieve() );
 
   // ToDo: update to rel.22+
-  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R21Precision_2022v1");
+  static const SG::ConstAccessor<int> acc_truthLabel("R10TruthLabel_R22v1");
 
   static const SG::ConstAccessor<bool> acc_Tagged(tagger+"_Tagged");
   static const SG::ConstAccessor<bool> acc_PassD2(tagger+"_PassD2");

@@ -1575,7 +1575,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
   configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/SmoothedWZTaggers/");
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
-  configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
+  configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R22v1");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "Winter2024_R22_PreRecs/JSSWTopTaggerDNN/"); 
   configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"); //https://twiki.cern.ch/twiki/bin/view/AtlasProtected/ApplyJetCalibrationR22
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, m_isRun3 ? "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config" : "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config");
