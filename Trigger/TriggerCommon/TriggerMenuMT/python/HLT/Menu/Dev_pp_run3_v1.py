@@ -508,12 +508,6 @@ def getDevSignatures():
 
     chains['Tau'] = [
         # GNTauExt test chains for 2026 (ATR-32383)
-        ChainProp(name='HLT_tau20_mediumnoperfGNTauDev1_L1cTAU20M', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau160_mediumnoperfGNTauDev1_L1eTAU140', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
-        ChainProp(name='HLT_tau35_mediumnoperfGNTauDev1_tau25_mediumnoperfGNTauDev1_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumnoperfGNTauDev1_tau25_mediumnoperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-        ChainProp(name='HLT_tau35_mediumnoperfGNTauDev1_tau25_mediumnoperfGNTauDev1_03dRAB_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
-
         ChainProp(name='HLT_tau20_mediumvar1noperfGNTauDev1_L1cTAU20M', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
         ChainProp(name='HLT_tau160_mediumvar1noperfGNTauDev1_L1eTAU140', groups=SingleTauGroup+SupportPhIGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:t0']),
         ChainProp(name='HLT_tau35_mediumvar1noperfGNTauDev1_tau25_mediumvar1noperfGNTauDev1_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=SupportPhIGroup+MultiTauGroup+Topo2Group, monGroups=['tauMon:online', 'tauMon:shifter']),
@@ -817,9 +811,6 @@ def getDevSignatures():
 
 
         # GNTauExt test chains for 2026 (ATR-32383)
-        ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumnoperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
-        ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumnoperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
-
         ChainProp(name='HLT_mu24_ivarmedium_tau20_mediumvar1noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['tauMon:t0']),
         ChainProp(name='HLT_e26_lhtight_ivarloose_tau20_mediumvar1noperfGNTauDev1_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M', 'PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
 
