@@ -1,10 +1,10 @@
-#include "CaloCalibHitRec/CalibHitToCaloCell.h"
-#include "CaloCalibHitRec/CalibHitIDCheck.h"
-#include "CaloCalibHitRec/CaloCalibClusterMomentsMaker2.h"
-#include "CaloCalibHitRec/CaloCalibClusterTruthAttributerTool.h"
+#include "../CalibHitToCaloCell.h"
+#include "../CalibHitIDCheck.h"
+#include "../CaloCalibClusterMomentsMaker2.h"
+#include "../CaloCalibClusterTruthAttributerTool.h"
 #include "../CaloCalibClusterTruthMapMakerAlgorithm.h"
 #include "../CaloCalibClusterDecoratorAlgorithm.h"
-#include "CaloCalibHitRec/CalibHitToCaloCellTool.h"
+#include "../CalibHitToCaloCellTool.h"
 
 
 DECLARE_COMPONENT( CalibHitToCaloCell )
