@@ -10,7 +10,7 @@ from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCf
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg, BTagTrackAugmenterByVertexAlgCfg
 from BTagging.TrackLeptonConfig import TrackLeptonDecorationCfg
 from FlavorTagInference.FlavorTagNNConfig import MultifoldGNNCfg
-from FlavorTagInference.FlavorTagNNConfig import getModifierSet
+from FlavorTagInference.FlavorTagNNConfig import getDependencySet
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
@@ -48,7 +48,7 @@ def _addDepsByDirname(flags, dirname: str, jetCollection: str) -> ComponentAccum
     """
     acc = ComponentAccumulator()
 
-    modset = getModifierSet(dirname.split('/')[-2])
+    modset = getDependencySet(dirname.split('/')[-2])
 
     if "L" in modset:
         acc.merge(TrackLeptonDecorationCfg(flags))
@@ -57,6 +57,7 @@ def _addDepsByDirname(flags, dirname: str, jetCollection: str) -> ComponentAccum
             flags,
             jetCollection=jetCollection,
         ))
+    # TODO: Need to add "M" here
     if "X" in modset:
         acc.merge(
             CopyJetParentInfoCfg(
@@ -144,7 +145,7 @@ def FlavorTaggingCfg(
             modset = set()
         else:
             acc.merge(_addDepsByDirname(flags, dirname, JetCollection))
-            modset = getModifierSet(dirname.split('/')[-2])
+            modset = getDependencySet(dirname.split('/')[-2])
 
         args = dict(
              flags=flags,
@@ -152,7 +153,8 @@ def FlavorTaggingCfg(
              TrackCollection=trackCollection,
              nnFilePaths=networks['folds'],
              remapping=networks.get('remapping', {}),
-             electrons=('Electrons' if 'E' in modset else '')
+             electrons=('Electrons' if 'E' in modset else ''),
+             muons=('Muons' if 'M' in modset else ''),
         )
 
         if foldHashName := networks.get('hash'):

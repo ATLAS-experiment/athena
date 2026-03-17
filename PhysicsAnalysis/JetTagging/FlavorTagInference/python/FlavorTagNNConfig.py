@@ -296,64 +296,85 @@ def _defaultsFromPaths(nn_paths):
     return defaults
 
 
-def getModifierSet(tagger_name):
+def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[str]:
+    """Return the dependency modifier set for a given tagger.
+
+    The tagger naming convention encodes which additional physics inputs
+    or decorations are required to run a particular flavour-tagging model.
+    This function translates the tagger name into the corresponding set
+    of dependency modifier characters.
+
+    Each modifier indicates that certain reconstructed objects or
+    decorations must be available in the event before the tagger can run.
+
+    The currently defined modifier characters are:
+
+    - ``X`` : Xbb-style tagger for large-R jets.
+    - ``L`` : Track-Lepton decoration (generic lepton-related information).
+    - ``E`` : Electron inputs associated to the jet.
+    - ``M`` : Muon inputs associated to the jet.
+
+    Parameters
+    ----------
+    tagger_name : str
+        Name of the flavour-tagging model (e.g. ``"GN3EPCLV01"``).
+    override : set[str] | None, optional
+        Override the hardcoded list of tagger names and dependencies
+        and simply return the set which is provided here. This is a
+        dev option and should not be used in the main inference. 
+        By default None
+
+    Returns
+    -------
+    set[str]
+        Set of dependency modifier characters describing the inputs
+        required by the tagger.
+
+    Raises
+    ------
+    KeyError
+        If the provided ``tagger_name`` is not present in the internal
+        tagger dependency registry.
     """
-    Translate tagger name into a list of dependencies
-    """
-    # Tagger should be of of the form GN<N><mods>V<M> where:
-    # - N is the major version number
-    # - mods specify the inputs we run on
-    # - M is the minor version number
-    tagparse = re.compile(r'(GN|gn)([0-9])(.*?)(?:([vV])([0-9]+))?$')
-    if not (matches := tagparse.match(tagger_name)):
-        raise ValueError(f"can't parse {tagger_name}")
-    pfx, major, mods, verchar, minor = matches.groups()
-    modset = set()
 
-    # first handle the pre-GN3 taggers, things were not well specified
-    # at this point
-    if int(major) < 3:
-        if "Muon" in mods:
-            modset.add("M")
-        if "Electrons" in mods:
-            modset.add("L")
-        # GN2X also used leponID
-        if "X" in mods:
-            if int(minor) == 2 or "Tau" in mods:
-                modset.add("L")
-        return modset
+    # Check for override
+    if override:
+        return override
 
-    # 2025-10-13: also one special case for GN3PflowMuonsV00, which
-    # was defined before we had any convention here. The tagger and
-    # this exception should ideally be removed soon
-    if tagger_name == "GN3PflowMuonsV00":
-        return {"L", "P"}
+    # Define the dependencies of each tagger in a dict
+    tagger_dep_dict: dict[str, set[str]] = {
+        # Small-R jet taggers
+        "GN2v01": {},
+        "GN3V00": {},
+        "GN3MuonsV00": {"L"},
+        "GN3PflowV00": {"P"},
+        "GN3PflowMuonsV00": {"L"},
+        "GN3PflowMuonsChargeV00": {"L"},
+        "GN3PflowMuonsElectronsHybridV00": {"L", "E"},
+        "GN3V01": {"L", "E"},
+        "GN3EPCLV01": {"E", "L"},
+        "GN3V02": {"E", "M"},
 
-    # See the documentation in
-    # https://ftag.docs.cern.ch/reco_algs/taggers/deploy/#naming-conventions
-    # or
-    # https://gitlab.cern.ch/atlas-flavor-tagging-tools/algorithms/ftag-docs/-/blob/64c70e9770d03a2545271150e163699905d1cba8/docs/reco_algs/taggers/deploy.md#modifiers
+        # Run 4 small-R jet taggers
+        "gn2hl": {},
 
-    if verchar != "V":
-        raise ValueError(
-            f"tagger {tagger_name} should use a uppercase V as the version")
-    if pfx != "GN":
-        raise ValueError(f"Tagger {tagger_name} should start with GN prefix")
-
-    modsetparse = re.compile("[A-Z]")
-    modset = set(modsetparse.findall(mods))
-
-    allowed_mods = {
-        "X", # Xbb tagger
-        "L", # lepton decoration
-        "E", # Electrons
-        "M", # Muons
-        "P", # Particle Flow
-        "C", # Charge Tagger (optional, no useful effects)
-        "H", # Hybrid model (optional, no useful effects)
+        # Large-R jet taggers
+        "gn2xv00": {"X"},
+        "gn2xv01": {"X"},
+        "gn2xwithmassv00": {"X"},
+        "GN2Xv02": {"X", "L"},
+        "GN2Xv00": {"X"},
+        "GN2XTauV00": {"X", "L"},
+        "GN3XV00": {"X"},
+        "GN3XPV01": {"X"},
     }
-    if baddies := modset - allowed_mods:
-        raise ValueError(
-            f"found forbidden modifiers {baddies} in {tagger_name}"
+
+    if tagger_name not in tagger_dep_dict:
+        available = ", ".join(sorted(tagger_dep_dict))
+        raise KeyError(
+            f"Unknown tagger '{tagger_name}'. Available taggers are: {available}\n\n"
+            "Please check the name and add the tagger to the dict in getDependencySet "
+            "if it is a newly deployed tagger!"
         )
-    return modset
+    
+    return tagger_dep_dict[tagger_name]
