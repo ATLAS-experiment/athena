@@ -7,8 +7,19 @@ import math
 import importlib.resources
 from PixelMonitoring.PixelAthMonitoringBase import LabelX, LabelY, baselayers, xbinsl
 
-LB_deg = ROOT.TH1F('TotalDegradationPerLumi', 'b-tag degradation;LB;total b-tag degradation', 3000, -0.5, 2999.5)
-degFactor70 = [0.0032, 0.0078, 0.011, 0.020, 0.023, 0.018, 0.098, 0.10, 0.26, 0.36, 0.33, 0.17, 0.65, 0.79, 0.81]
+###################################
+# Definitions
+###################################
+
+# Final output histogram (LB vs estimated b-tag degradation)
+LB_deg = ROOT.TH1F('TotalDegradationPerLumiAA', 'b-tag degradation;LB;total b-tag degradation', 3000, -0.5, 2999.5)
+
+# Degradation factors 
+# [IBL+BL+L1+L2, IBL+BL+L1, IBL+BL+L2, IBL+L1+L2, BL+L1+L2, IBL+BL, IBL+L1, IBL+L2, BL+L1, BL+L2, L1+L2, IBL-only, BL-only, L1-only, L2-only]
+# FIXME: New factors based on GN2 study
+#degFactor70 = [0.0032, 0.0078, 0.011, 0.020, 0.023, 0.018, 0.098, 0.10, 0.26, 0.36, 0.33, 0.17, 0.65, 0.79, 0.81]
+degFactor70 = [0.0007, 0.003, 0.005, 0.011, 0.0114, 0.012, 0.0695, 0.084, 0.165, 0.225, 0.236, 0.179, 0.590, 0.744, 0.755]
+degfactor_IBL = [1, 1, 1, 1, 0.99937, 0.99931, 0.99924, 0.99915, 0.99797, 0.99768, 0.99728, 0.99675, 0.99422, 0.99253, 0.99140, 0.99895, 0.99895, 0.99140, 0.99253, 0.99422, 0.99675, 0.99728, 0.99768, 0.99797, 0.99915, 0.99924, 0.99931, 0.99937, 1, 1, 1, 1]
 
 def normalize_perEvent(inputs):
     layer = inputs[0][0]['sec'] 
@@ -25,28 +36,38 @@ def normalize_perEvent(inputs):
         histo.SetTitle(histoTitle + " per event, " + layer)
     return [histo]
 
+#FIXME: Update this function
 def badEtaPhi_forAllMaskPatterns(inputs):
-    Th = 0.5
+    Th = 0.5 # Threshold of the FE status for "bad" FE. Do not change.
     LB = inputs[0][0]['LB']
-    rv = []
-    rv1 = []
+    rv = [] # Vector of histograms showing bad FEs in eta-phi for all layer
+    rv1 = [] # Vector of histograms showing bad FEs in eta-phi for all mask pattern
     rv_IBL = ROOT.TH2F() 
     rv_BLayer = ROOT.TH2F() 
     rv_Layer1 = ROOT.TH2F() 
     rv_Layer2 = ROOT.TH2F() 
     totalDeg = 0.0
-    for i in range(len(inputs[0][1])):
+    degfactor_IBLtotal=0
+    for i in range(len(inputs[0][1])): # inputs[0][1] is treated as a vector here, but in fact the size is 1.
         plots = [_[1][i] for _ in inputs] # all plots passed as first element of list
-        for m, plot in enumerate(plots):
+        for m, plot in enumerate(plots): # m: LB number, plot: FE status map for each layer 
+            
+            # Vector showing the eta and phi range of all FEs in this layer
             etaMin = []
             etaMax = []
             phiMin = []
             phiMax = []
-            sec = inputs[m][0]['sec']
-            rv.append(ROOT.TH2F('defectPlot', 'badFERegion', 500, -3.0, 3.0, 500, -math.pi, math.pi))
+            sec = inputs[m][0]['sec'] # layer name
+            # rv.append(ROOT.TH2F('defectPlot', 'badFERegion', 500, -3.0, 3.0, 500, -math.pi, math.pi))
+            # modified for -2.5 < eta < 2.5
+            rv.append(ROOT.TH2F('defectPlot', 'badFERegion', 500, -2.5, 2.5, 500, -math.pi, math.pi))
             rv[m].SetTitle('badFE_EtaPhi_' + sec)
             rv[m].GetXaxis().SetTitle('#eta')
             rv[m].GetYaxis().SetTitle('#phi')
+            
+            ##################################################################
+            # Obtain eta and phi range of each FE in this layer from .txt files
+            ##################################################################
             with importlib.resources.open_text('PixelMonitoring', 'FE_EtaEdge_' + sec + '.txt') as etaInfo: 
                 for line in etaInfo.readlines():
                     toks = line.split()
@@ -63,14 +84,27 @@ def badEtaPhi_forAllMaskPatterns(inputs):
                         phiMax.append(float(toks[4]) - 2*math.pi)
                     else: 
                         phiMax.append(float(toks[4]))
+            
+            ###########################################################################################
+            # Check which FE is "bad" using the FE status plots, and fill eta-phi map of bad FE region
+            # 0: good, (0, 1]: de-sync., 2: disabled
+            ###########################################################################################
             for xbin in range(plot.GetNbinsX()):
                 for ybin in range(plot.GetNbinsY()):
-                    if(plot.GetBinContent(xbin+1, ybin+1) < Th):
+                    if(plot.GetBinContent(xbin+1, ybin+1) < Th): # This FE status is "good"! Skip.
                         continue
-                    etaMin_bin = rv[m].GetXaxis().FindBin(etaMin[xbin] + 3.0/500)
-                    etaMax_bin = rv[m].GetXaxis().FindBin(etaMax[xbin] + 3.0/500)
+                    if sec=='IBL':
+                       degfactor_IBLtotal=degfactor_IBLtotal+(1-degfactor_IBL[xbin])
+                    # Find eta and phi range of this bad FE
+                    # etaMin_bin = rv[m].GetXaxis().FindBin(etaMin[xbin] + 3.0/500)
+                    # etaMax_bin = rv[m].GetXaxis().FindBin(etaMax[xbin] + 3.0/500)
+                    # modified for -2.5 < eta < 2.5
+                    etaMin_bin = rv[m].GetXaxis().FindBin(etaMin[xbin] + 2.5/500)
+                    etaMax_bin = rv[m].GetXaxis().FindBin(etaMax[xbin] + 2.5/500)
                     phiMin_bin = rv[m].GetYaxis().FindBin(phiMin[ybin] + math.pi/500)
                     phiMax_bin = rv[m].GetYaxis().FindBin(phiMax[ybin] + math.pi/500)
+                    
+                    # Fill the histogram showging bad eta-phi region
                     for eta_bin in range(etaMin_bin, etaMax_bin):
                         eta = rv[m].GetXaxis().GetBinCenter(eta_bin)
                         for phi_bin in range(phiMin_bin, phiMax_bin):
@@ -83,7 +117,8 @@ def badEtaPhi_forAllMaskPatterns(inputs):
                             for phi_bin in range(phiMin_bin, rv[m].GetNbinsY()+1):
                                 phi = rv[m].GetYaxis().GetBinCenter(phi_bin)
                                 rv[m].Fill(eta, phi)
-
+            
+            # Rename histograms' title
             if sec == 'IBL':
                 rv_IBL = rv[m].Clone()
                 rv_IBL.SetName('badFE_EtaPhi_IBL_new')
@@ -96,11 +131,20 @@ def badEtaPhi_forAllMaskPatterns(inputs):
             elif sec == 'Layer2':
                 rv_Layer2 = rv[m].Clone()
                 rv_Layer2.SetName('badFE_EtaPhi_Layer2_new')
- 
-        for m in range(0, 15):
-            rv1.append(ROOT.TH2F('defectPlot', 'badFEOverlaps', 500, -3.0, 3.0, 500, -math.pi, math.pi))
+        
+        ##################################################################
+        # Create histograms of bad region in eta-phi for all mask patterns
+        ##################################################################
+
+        # Define the histograms of bad region in eta-phi for all mask patterns
+        for m in range(0, 15): # (0, 15): All mask patterns 
+            # rv1.append(ROOT.TH2F('defectPlot', 'badFEOverlaps', 500, -3.0, 3.0, 500, -math.pi, math.pi))
+            # modified for -2.5 < eta < 2.5
+            rv1.append(ROOT.TH2F('defectPlot', 'badFEOverlaps', 500, -2.5, 2.5, 500, -math.pi, math.pi))
             rv1[m].GetXaxis().SetTitle('#eta')
             rv1[m].GetYaxis().SetTitle('#phi')
+        
+        # Scan the eta-phi maps showing bad FE region for all layers
         for xbin in range(rv[0].GetNbinsX()):
             eta = rv[0].GetXaxis().GetBinCenter(xbin+1)
             for ybin in range(rv[0].GetNbinsY()):
@@ -109,62 +153,70 @@ def badEtaPhi_forAllMaskPatterns(inputs):
                 entBLayer = rv_BLayer.GetBinContent(xbin+1, ybin+1)
                 entLayer1 = rv_Layer1.GetBinContent(xbin+1, ybin+1)
                 entLayer2 = rv_Layer2.GetBinContent(xbin+1, ybin+1)
-                if entIBL >= 1 and entBLayer >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # IBL, B-Layer, Layer1, Layer2
+                
+                # Find regions where bad FEs overlap across multiple layers
+                if entIBL >= 1 and entBLayer >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # IBL & B-Layer & Layer1 & Layer2
                     rv1[0].SetTitle('badFE_EtaPhi_IBL_BLayer_Layer1_Layer2')
                     rv1[0].Fill(eta, phi) 
-                elif entIBL >= 1 and entBLayer >= 1 and entLayer1 >= 1: # IBL, B-Layer, Layer1
+                elif entIBL >= 1 and entBLayer >= 1 and entLayer1 >= 1: # IBL & B-Layer & Layer1
                     rv1[1].SetTitle('badFE_EtaPhi_IBL_BLayer_Layer1')
                     rv1[1].Fill(eta, phi) 
-                elif entIBL >= 1 and entBLayer >= 1 and entLayer2 >= 1: # IBL, B-Layer, Layer2
+                elif entIBL >= 1 and entBLayer >= 1 and entLayer2 >= 1: # IBL & B-Layer & Layer2
                     rv1[2].SetTitle('badFE_EtaPhi_IBL_BLayer_Layer2')
                     rv1[2].Fill(eta, phi) 
-                elif entIBL >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # IBL, Layer2, Layer2
+                elif entIBL >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # IBL & Layer2 & Layer2
                     rv1[3].SetTitle('badFE_EtaPhi_IBL_Layer1_Layer2')
                     rv1[3].Fill(eta, phi) 
-                elif entBLayer >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # B-Layer, Layer2, Layer2
+                elif entBLayer >= 1 and entLayer1 >= 1 and entLayer2 >= 1: # B-Layer & Layer2 & Layer2
                     rv1[4].SetTitle('badFE_EtaPhi_BLayer_Layer1_Layer2')
                     rv1[4].Fill(eta, phi) 
-                elif entIBL >= 1 and entBLayer >= 1: # IBL, B-Layer
+                elif entIBL >= 1 and entBLayer >= 1: # IBL & B-Layer
                     rv1[5].SetTitle('badFE_EtaPhi_IBL_BLayer')
                     rv1[5].Fill(eta, phi) 
-                elif entIBL >= 1 and entLayer1 >= 1: # IBL, Layer1
-                    rv1[6].SetTitle('badFE_EtaPhi_IBL_BLayer')
+                elif entIBL >= 1 and entLayer1 >= 1: # IBL & Layer1
+                    rv1[6].SetTitle('badFE_EtaPhi_IBL_Layer1')
                     rv1[6].Fill(eta, phi) 
-                elif entIBL >= 1 and entLayer2 >= 1: # IBL, Layer2
-                    rv1[7].SetTitle('badFE_EtaPhi_IBL_BLayer')
+                elif entIBL >= 1 and entLayer2 >= 1: # IBL & Layer2
+                    rv1[7].SetTitle('badFE_EtaPhi_IBL_Layer2')
                     rv1[7].Fill(eta, phi) 
-                elif entBLayer >= 1 and entLayer1 >= 1: # B-Layer, Layer1
+                elif entBLayer >= 1 and entLayer1 >= 1: # B-Layer & Layer1
                     rv1[8].SetTitle('badFE_EtaPhi_BLayer_Layer1')
                     rv1[8].Fill(eta, phi) 
-                elif entBLayer >= 1 and entLayer2 >= 1: # B-Layer, Layer2
+                elif entBLayer >= 1 and entLayer2 >= 1: # B-Layer & Layer2
                     rv1[9].SetTitle('badFE_EtaPhi_BLayer_Layer2')
                     rv1[9].Fill(eta, phi) 
-                elif entLayer1 >= 1 and entLayer2 >= 1: # Layer1, Layer2
+                elif entLayer1 >= 1 and entLayer2 >= 1: # Layer1 & Layer2
                     rv1[10].SetTitle('badFE_EtaPhi_Layer1_Layer2')
                     rv1[10].Fill(eta, phi) 
-                elif entIBL >= 1: # IBL
+                elif entIBL >= 1: # IBL only
                     rv1[11].SetTitle('badFE_EtaPhi_onlyIBL')
                     rv1[11].Fill(eta, phi) 
-                elif entBLayer >= 1: # B-Layer
+                elif entBLayer >= 1: # B-Layer only
                     rv1[12].SetTitle('badFE_EtaPhi_onlyBLayer')
                     rv1[12].Fill(eta, phi) 
-                elif entLayer1 >= 1: # Layer1
+                elif entLayer1 >= 1: # Layer1 only
                     rv1[13].SetTitle('badFE_EtaPhi_onlyLayer1')
                     rv1[13].Fill(eta, phi) 
-                elif entLayer2 >= 1: # Layer2
+                elif entLayer2 >= 1: # Layer2 only
                     rv1[14].SetTitle('badFE_EtaPhi_onlyLayer2')
                     rv1[14].Fill(eta, phi) 
 
-        for m in range(0, 15):
-            nBadRegion = rv1[m].Integral()
-            badFrac = nBadRegion/(500*500)
-            deg = (1.0-degFactor70[m])*badFrac
+        # Calculate total degradation, 
+        # FIXME: IBL-only case should be calculated by a different method using degradation factor map
+        for m in range(0, 15): # (0, 15): All mask pattern 
+            if m==11:
+              deg = degfactor_IBLtotal
+            else:
+              nBadRegion = rv1[m].Integral()
+              badFrac = nBadRegion/(500*500)
+              deg = (1.0-degFactor70[m])*badFrac
             totalDeg = totalDeg + deg
-
+    
     a = LB.split('_')
-    LB_deg.Fill(int(a[1]), totalDeg) 
+    LB_deg.Fill(int(a[1]), totalDeg) # Fill the estimated degradation of this LB
     binNum = LB_deg.FindBin(int(a[1]))
     LB_deg.SetBinError(binNum, 0) 
+
     return [rv_IBL, rv_BLayer, rv_Layer1, rv_Layer2, rv1[0], rv1[1], rv1[2], rv1[3], rv1[4], rv1[5], rv1[6], rv1[7], rv1[8], rv1[9], rv1[10], rv1[11], rv1[12], rv1[13], rv1[14], LB_deg] 
 
 ####################################################################
