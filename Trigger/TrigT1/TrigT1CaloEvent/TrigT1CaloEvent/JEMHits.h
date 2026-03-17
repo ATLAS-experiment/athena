@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  //***************************************************************************
@@ -15,13 +15,13 @@
   
   #include "AthenaKernel/CLASS_DEF.h"
 
-
-  #include <iostream>
   #ifndef  TRIGGERSPACE
   #include "TrigT1Interfaces/Coordinate.h"
   #else
   #include "Coordinate.h"
   #endif 
+  
+  #include <vector>
   namespace LVL1 {
   
     class JEMHits  {
@@ -30,7 +30,8 @@
     JEMHits();
     JEMHits(int crate, int module);
     JEMHits(int crate, int module, const std::vector<unsigned int>&  JetHits, int peak);
-  
+    JEMHits& operator=(JEMHits&&) noexcept = default;
+    JEMHits(JEMHits&&) noexcept = default;
     virtual ~JEMHits();
 
     void setPeak(int peak);
@@ -45,9 +46,9 @@
       
   /** Internal data */
     private:
-    int m_crate;
-    int m_module;
-    int m_peak;
+    int m_crate{};
+    int m_module{};
+    int m_peak{};
     std::vector <unsigned int> m_JetHits;
     
     };

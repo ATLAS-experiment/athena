@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include <numeric>
-#include <set>
-#include <utility>
+
 
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/MsgStream.h"
@@ -34,6 +32,10 @@
 #include "ModifySlices.h"
 
 #include "JepByteStreamV2Tool.h"
+
+#include <numeric>
+#include <set>
+#include <utility>
 
 namespace LVL1BS {
 
@@ -958,9 +960,6 @@ void JepByteStreamV2Tool::decodeCmxEnergy(CmxEnergySubBlock* subBlock,
 	exErrBits.set(LVL1::DataError::Parity, exErr >> 1);
 	eyErrBits.set(LVL1::DataError::Parity, eyErr >> 1);
 	etErrBits.set(LVL1::DataError::Parity, etErr >> 1);
-        exErr = exErrBits.error();
-        eyErr = eyErrBits.error();
-        etErr = etErrBits.error();
       } else {
 	CmxEnergySubBlock::SourceType srcType = CmxEnergySubBlock::MAX_SOURCE_TYPE;
 	CmxEnergySubBlock::SumType    sumType = CmxEnergySubBlock::MAX_SUM_TYPE;

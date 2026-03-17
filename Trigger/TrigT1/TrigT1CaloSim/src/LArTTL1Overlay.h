@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ================================================
@@ -27,10 +27,7 @@
 #ifndef TRIGT1CALOSIM_LARTTL1OVERLAY_H
 #define TRIGT1CALOSIM_LARTTL1OVERLAY_H
 
-// STL
-#include <map>
-#include <string>
-#include <vector>
+
 
 // Athena/Gaudi
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -38,6 +35,11 @@
 
 // Calorimeter tower includes
 #include "LArRawEvent/LArTTL1Container.h"
+
+// STL
+#include <map>
+#include <string>
+#include <vector>
 
 namespace LVL1
 {

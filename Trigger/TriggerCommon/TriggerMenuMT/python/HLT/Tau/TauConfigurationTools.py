@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 def getPrecisionSequenceTauIDs(flags, precision_sequence: str) -> list[str]:
     '''Get the list of TauIDs for each HLT tau trigger sequence'''
     tau_ids = {
-        'MVA': ['GNTau', 'MesonCuts'],
+        'MVA': ['GNTau', 'MesonCuts', 'GNTauDev1'],
         'LLP': ['RNNLLP'],
         'LRT': ['RNNLLP'],
     }
@@ -27,7 +27,7 @@ def getPrecisionSequenceTauIDs(flags, precision_sequence: str) -> list[str]:
 
     # Additional Tau ID algorithms to run ONLY if we're using the Dev menu
     dev_tau_ids = {
-        'MVA': ['GNTauDev1'],
+        'MVA': [],
     }
 
     ret = tau_ids[precision_sequence]
