@@ -108,9 +108,6 @@ namespace MuonR4::SegmentFit {
             ConfigSwitches m_cfg{};
             /** @brief Selector to identify the valid hits */
             Selector_t m_goodHitSel{};
-            /** @brief Moves the segment to the average x0 position, if 
-             *         the segment does not contain any measurement. */
-            void centerAlongWire(Result_t& fitResult) const;
             /** @brief Calls the underlying line fitter to determine the segment parameters
              *  @param cctx: Calibration context to fetch later the measurement's calib constants
              *               from StoreGate (It's a packed EventContext*)

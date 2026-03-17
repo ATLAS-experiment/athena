@@ -45,7 +45,7 @@ namespace MuonR4::HoughHelpers{
         /// @param tanAlpha the input inclination angle
         /// @param strip the strip measurement (expressed as a space point)
         /// @return the x offset needed to pass through the center of the strip space point for an inclination angle tanAlpha
-        double houghParamStrip(double tanAlpha, const MuonR4::HoughHitType & dc); 
+        double houghParamStrip(double tanAlpha, const MuonR4::HoughHitType & strip); 
 
         /// @brief Uncertainty parametrisation for strip measurements
         /// @param tanAlpha: the input inclination angle (not used) 
