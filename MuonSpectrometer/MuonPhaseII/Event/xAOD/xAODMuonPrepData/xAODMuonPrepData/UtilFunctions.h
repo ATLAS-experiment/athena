@@ -1,12 +1,14 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_UTILFUNCTIONS_H
 #define XAODMUONPREPDATA_UTILFUNCTIONS_H
 
 #include "GeoPrimitives/GeoPrimitives.h"
 ///
+#include "MuonStationIndex/MuonStationIndex.h"
 #include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMuonPrepData/CombinedMuonStripFwd.h"
 
 
 namespace ActsTrk {
@@ -24,11 +26,17 @@ namespace xAOD{
     /** @brief Returns the associated readout element to the measurement*/
     const MuonGMR4::MuonReadoutElement* muonReadoutElement(const UncalibratedMeasurement* meas);
     /** @brief Returns the associated Acts surface to the measurement */
-    const Acts::Surface& muonSurface(const xAOD::UncalibratedMeasurement* meas);
+    const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas);
     /** @brief Returns the associated identifier from the muon measurement */
     const Identifier& identify(const UncalibratedMeasurement* meas);
     /** @brief Returns the layer hash from an uncalibrated meaurement */
     IdentifierHash layerHash(const UncalibratedMeasurement* meas);
+    /** @brief Transforms the uncalibrated measurement type to a technology index
+        @param aodType Uncalibrated measurement type */
+    ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType);
+    /** @brief Returns the position and covariance from a combined strip measurement
+     *  @param combinedPrd: Combined strip measurement */
+    std::pair<Amg::Vector2D, AmgSymMatrix(2)> positionAndCovariance(const CombinedMuonStrip* combinedPrd);
 }
 
 #endif
