@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPChardware/Pad.h"
-
+#include "TrigT1RPChardware/Matrix.h"
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
-#include "TrigT1RPChardware/Matrix.h"
+
 
 using namespace std;
 

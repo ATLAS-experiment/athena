@@ -3,13 +3,16 @@
 */
 
 #include "TrigT1RPChardware/Matrix.h"
+#include "TrigT1RPChardware/CMAVERSION.h"
 
 #include <array>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <cstring> //strcpy
+#include <sstream>
 
-#include "TrigT1RPChardware/CMAVERSION.h"
+
 
 using namespace std;
 
@@ -124,7 +127,7 @@ Matrix::Matrix(int run, int event, CMAword debug, int subsys, int proj, int sect
 Matrix::~Matrix() {
     ubit16 df = 1;
     deleteRPCdata();
-    if (m_matrixDebug & 1 << df) { cout << "Distructor of Matrix executed " << endl; }
+    if (m_matrixDebug & 1 << df) { cout << "Destructor of Matrix executed " << endl; }
 }  // end-of-Matrix::~Matrix()
 //-----------------------------------------------------------------------//
 void Matrix::deleteRPCdata() {
@@ -1504,10 +1507,12 @@ void Matrix::makeTestPattern(ubit16 mode, ubit16 ktimes) {
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = 1000;
     ubit16 i, j, l;
-    ubit16 IJ[maxtimes][4] = {{0}};
-    ubit16 channels[maxtimes][4][maxchan] = {{{0}}};
-    float times[maxtimes] = {0};
-    char plane[4][3];
+    ubit16 IJ[maxtimes][4]{};
+    //uses >800k stack space in this function
+    //coverity[STACK_USE]
+    ubit16 channels[maxtimes][4][maxchan]{};
+    float times[maxtimes]{};
+    char plane[4][3]{};
     const float timeOffsetHit = 114.675;
     //
     rpcdata *rpcpnt;
@@ -1600,10 +1605,12 @@ void Matrix::makeOutPattern() {
     const float timeOffsetThr = 210.500;
     ubit16 i, l;
     CMAword bit;
-    ubit16 chanHistory[32] = {0};
+    ubit16 chanHistory[32]{};
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = m_nclock;
     ubit16 ntimes, newtime;
+    //uses 50k stack space in this function
+    //coverity[STACK_USE]
     ubit16 nchannels[s_NDLLCYC*8][2][2], channels[s_NDLLCYC*8][2][2][maxchan];
     float time, times[s_NDLLCYC*8]{0};
     //
@@ -1879,7 +1886,6 @@ void Matrix::disp_CMAreg(ubit16 id) const {
                         cout << " Layer " << j << endl;
                         dispRegister(&m_prepr[0][i][j][0][0], i);
                         break;
-                    default: cout << " Matrix::disp_CMAreg id value " << id << " not foreseen " << endl;
                 }  // end-of-switch
             }      // end-of-for(j
         }          // end-of-for(i
@@ -1956,7 +1962,7 @@ void Matrix::dispTrigger(const CMAword *p) const {
     cout << strdisp.str() << endl;
 }  // end-of-Matrix::dispTrigger
 //------------------------------------------------------------------------//
-void Matrix::dispBinary(const CMAword *p, std::ostringstream &strdisp) const {
+void Matrix::dispBinary(const CMAword *p, std::ostream &strdisp) const {
     ubit16 i;
     CMAword j;
     j = 1;
