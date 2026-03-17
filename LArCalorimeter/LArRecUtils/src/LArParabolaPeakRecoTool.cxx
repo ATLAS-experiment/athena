@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRecUtils/LArParabolaPeakRecoTool.h"
@@ -8,9 +8,8 @@
 
 #include "CLHEP/Matrix/Matrix.h"
 #include "CLHEP/Matrix/Vector.h"
-#include <algorithm>
 #include <cmath>
-#include <stdio.h>
+#include <fstream>
 
 using CLHEP::HepMatrix;
 using CLHEP::HepVector;
@@ -32,45 +31,55 @@ LArParabolaPeakRecoTool::LArParabolaPeakRecoTool(const std::string& type, const 
 
 StatusCode LArParabolaPeakRecoTool::initialize()
 {
-  
-  if(m_correctBias){
-
-    std::cout << "LArParabolaPeakRecoTool: correctBias flag is ON " << std::endl;
-    // if want to correct bias, open files
-
-    m_fileShapeName = PathResolver::find_file (m_fileShapeName, "DATAPATH");
-    m_fileADCcorName = PathResolver::find_file (m_fileADCcorName, "DATAPATH");
-
-    m_fileShape = fopen(m_fileShapeName.c_str(),"r");
-    m_fileADCcor = fopen(m_fileADCcorName.c_str(),"r");
-    int idelay, ilayer;
-    float timeValue, adccorValue;
-    
-    // fill correction table
-    while( fscanf(m_fileShape,"%80d %80d %80f",&idelay,&ilayer,&timeValue) != EOF )
-      {
-	if ( ilayer >= 0 && ilayer < 4 && idelay >= 0 && idelay < 25 )
-	  {
-	    m_QT_Shape[ilayer][idelay] = timeValue;
-	    
-	    if ( idelay == 0 && m_QT_Shape[ilayer][0] != 0. )
-	      {
-		m_QT_Shape[ilayer][25]  = m_QT_Shape[ilayer][0] + 25;
-	      }
-	  }
-      }
-    
-    while( fscanf(m_fileADCcor,"%80d %80d %80f",&idelay,&ilayer,&adccorValue) != EOF )
-      {
-	if ( ilayer >= 0 && ilayer < 4 && idelay >= 0 && idelay < 25 )
-	  {
-	    m_QT_ADCcor[ilayer][idelay] = adccorValue;
-	  }
-      }
-    fclose(m_fileADCcor);
-    fclose(m_fileShape);
+  if(!m_correctBias){
+    return StatusCode::SUCCESS;
   }
-
+  ATH_MSG_INFO( "LArParabolaPeakRecoTool: correctBias flag is ON ");
+  // if want to correct bias, open files
+  const std::string shapeFilePath = PathResolver::find_file (m_fileShapeName, "DATAPATH");
+  const std::string adcCorFilePath = PathResolver::find_file (m_fileADCcorName, "DATAPATH");
+  if (shapeFilePath.empty()) {
+    ATH_MSG_ERROR("Could not resolve shape file: " << m_fileShapeName);
+    return StatusCode::FAILURE;
+  }
+  if (adcCorFilePath.empty()) {
+    ATH_MSG_ERROR("Could not resolve ADC correction file: " << m_fileADCcorName);
+    return StatusCode::FAILURE;
+  }
+  m_fileShapeName  = shapeFilePath;
+  m_fileADCcorName = adcCorFilePath;
+  std::ifstream in{m_fileShapeName};
+  if (!in) {
+    ATH_MSG_ERROR("Failed to open shape file: " << m_fileShapeName);
+    return StatusCode::FAILURE;
+  }
+  std::ifstream adcin{m_fileADCcorName};
+  if (!adcin) {
+    ATH_MSG_ERROR("Failed to open ADC correction file: " << m_fileADCcorName);
+    return StatusCode::FAILURE;
+  }
+  //
+  int idelay{-1}, ilayer{-1};
+  float timeValue{};
+  while (in >> idelay >> ilayer >> timeValue) {
+    if (ilayer < 0 || ilayer >= 4 || idelay < 0 || idelay >= 25) {
+      continue;
+    }
+    m_QT_Shape[ilayer][idelay] = timeValue;
+    if (idelay == 0 && m_QT_Shape[ilayer][0] != 0.F) {
+      m_QT_Shape[ilayer][25] = m_QT_Shape[ilayer][0] + 25.F;
+    }
+  }
+  //reset variables
+  idelay = -1;
+  ilayer = -1;
+  float adcCorValue{};
+  while (adcin >> idelay >> ilayer >> adcCorValue) {
+    if (ilayer < 0 || ilayer >= 4 || idelay < 0 || idelay >= 25) {
+      continue;
+    }
+    m_QT_ADCcor[ilayer][idelay] = adcCorValue;
+  }
   return StatusCode::SUCCESS;
 }
 
