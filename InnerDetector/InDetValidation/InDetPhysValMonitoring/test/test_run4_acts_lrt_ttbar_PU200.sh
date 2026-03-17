@@ -52,6 +52,9 @@ run "Reconstruction-athena" \
     --multithreaded
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.athena
+
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
@@ -83,6 +86,9 @@ run "Reconstruction-acts" \
     --multithreaded
 
 reco_rc=$?
+
+mv log.RAWtoALL log.RAWtoALL.acts
+
 if [ $reco_rc != 0 -a $reco_rc != 68 ]; then
     exit $reco_rc
 fi
