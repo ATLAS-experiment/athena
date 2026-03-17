@@ -52,7 +52,6 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('slicesFile', 'eventSelectionSlices/v1.0/slices.txt')
     cf.addFlag('spacePoints', True)
     cf.addFlag('outputMonitorFile',"monitoring.root")
-    cf.addFlag('connectToToITkTracking',True)
     cf.addFlag('loglevel', AthenaCommon.Constants.INFO)
     cf.addFlag('msgLimit',-1)
     cf.addFlag('singleTrackSample',  True)
