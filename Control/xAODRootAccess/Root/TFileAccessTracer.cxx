@@ -133,8 +133,7 @@ TFileAccessTracer::~TFileAccessTracer() {
   // Start constructing the header of the message to send to the server:
   ::TString hdr = "POST /";
   hdr += url.GetFile();
-  hdr += " HTTP/1.0";
-  hdr += "\r\n";
+  hdr += " HTTP/1.1\r\n";
   hdr += "From: ";
   hdr += gSystem->HostName();
   hdr += "\r\n";
@@ -143,6 +142,7 @@ TFileAccessTracer::~TFileAccessTracer() {
   hdr += "\r\n";
   hdr += "User-Agent: xAODRootAccess\r\n";
   hdr += "Content-Type: application/json\r\n";
+  hdr += "Connection: close\r\n";
   hdr += "Content-Length: ";
 
   //
@@ -251,8 +251,10 @@ TFileAccessTracer::~TFileAccessTracer() {
   hdr += "\r\n\r\n";
   const ::TString msg = hdr + pld;
 
-  // Finally, send the message:
+  // Send the message, and try to receive an answer.
   socket.send(msg).ignore();
+  TString response;
+  socket.receive(4096, response).ignore();
 }
 
 TFileAccessTracer& TFileAccessTracer::instance() {
