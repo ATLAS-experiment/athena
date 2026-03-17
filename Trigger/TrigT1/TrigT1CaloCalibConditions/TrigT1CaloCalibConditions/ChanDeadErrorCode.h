@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_CHANDEADERRORCODE_H
@@ -8,6 +8,7 @@
 #include "TrigT1CaloCalibConditions/AbstractErrorCode.h"
 
 #include <string>
+#include <iosfwd>
 
 /**
  *  ChanDeadErrorCode class
@@ -57,6 +58,7 @@ public:
 
 	ChanDeadErrorCode(const ChanDeadErrorCode& e);
 	ChanDeadErrorCode& operator=(const ChanDeadErrorCode& e);
+	ChanDeadErrorCode& operator=(ChanDeadErrorCode&&) noexcept = default;
 	ChanDeadErrorCode& operator|=(const ChanDeadErrorCode& e);
 
 	bool chanValid() const {return (( this->errorCode() & 0xffff) == 0);}
