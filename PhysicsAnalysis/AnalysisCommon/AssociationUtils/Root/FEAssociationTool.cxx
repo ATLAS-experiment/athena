@@ -111,10 +111,13 @@ StatusCode FEAssociationTool::initialize()
   ATH_CHECK(m_phNeutralFELinksKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_tauChargedFELinksKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_tauNeutralFELinksKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_srjChargedFELinksKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_srjNeutralFELinksKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_lrjChargedFELinksKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_lrjNeutralFELinksKey.initialize(SG::AllowEmpty));
+  // You'd think we could use SG::AllowEmpty here, but
+  // `ReadDecorHandleKey` has a custom `initialize(bool)` override that
+  // hides the `initialize(AllowEmptyEnum)` method.
+  ATH_CHECK(m_srjChargedFELinksKey.initialize(!m_srjChargedFELinksKey.empty()));
+  ATH_CHECK(m_srjNeutralFELinksKey.initialize(!m_srjNeutralFELinksKey.empty()));
+  ATH_CHECK(m_lrjChargedFELinksKey.initialize(!m_lrjChargedFELinksKey.empty()));
+  ATH_CHECK(m_lrjNeutralFELinksKey.initialize(!m_lrjNeutralFELinksKey.empty()));
   ATH_CHECK(m_originalObjectLinkKey.initialize(SG::AllowEmpty));
 #else
   ATH_CHECK(m_elKey.initialize());
@@ -372,18 +375,28 @@ void FEAssociationTool::collectFEsFromIndex(const ObjView::Type /*type*/,
   }
   case ObjView::Type::SmallRJet:
   {
-    SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> chargedFEs(m_srjChargedFELinksKey, ctx);
-    SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> neutralFEs(m_srjNeutralFELinksKey, ctx);
-    if (chargedFEs.isAvailable()) { usedGlobal = true; loop_links(chargedFEs(*p), true); }
-    if (neutralFEs.isAvailable()) { usedGlobal = true; loop_links(neutralFEs(*p), false); }
+    // we can only create the handle if the key is non-empty
+    if (!m_srjChargedFELinksKey.empty()) {
+      SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> chargedFEs(m_srjChargedFELinksKey, ctx);
+      if (chargedFEs.isAvailable()) { usedGlobal = true; loop_links(chargedFEs(*p), true); }
+    }
+    if (!m_srjNeutralFELinksKey.empty()) {
+      SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> neutralFEs(m_srjNeutralFELinksKey, ctx);
+      if (neutralFEs.isAvailable()) { usedGlobal = true; loop_links(neutralFEs(*p), false); }
+    }
     break;
   }
   case ObjView::Type::LargeRJet:
   {
-    SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> chargedFEs(m_lrjChargedFELinksKey, ctx);
-    SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> neutralFEs(m_lrjNeutralFELinksKey, ctx);
-    if (chargedFEs.isAvailable()) { usedGlobal = true; loop_links(chargedFEs(*p), true); }
-    if (neutralFEs.isAvailable()) { usedGlobal = true; loop_links(neutralFEs(*p), false); }
+    // we can only create the handle if the key is non-empty
+    if (!m_lrjChargedFELinksKey.empty()) {
+      SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> chargedFEs(m_lrjChargedFELinksKey, ctx);
+      if (chargedFEs.isAvailable()) { usedGlobal = true; loop_links(chargedFEs(*p), true); }
+    }
+    if (!m_lrjNeutralFELinksKey.empty()) {
+      SG::ReadDecorHandle<xAOD::JetContainer, FELinks_t> neutralFEs(m_lrjNeutralFELinksKey, ctx);
+      if (neutralFEs.isAvailable()) { usedGlobal = true; loop_links(neutralFEs(*p), false); }
+    }
     break;
   }
   }

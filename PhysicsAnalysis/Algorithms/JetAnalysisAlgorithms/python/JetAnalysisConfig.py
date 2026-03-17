@@ -70,13 +70,14 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.muons = "AnalysisMuons"
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
+                taggerName = "GN2HL" if config.geometry() >= LHCPeriod.Run4 else "GN2v01"
                 extraInputs = [
                     ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_LooseBad".format(baseName=self.jetCollection)),
                     ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.DFCommonJets_jetClean_TightBad".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pb".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pc".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_ptau".format(baseName=self.jetCollection)),
-                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.GN2v01_pu".format(baseName=self.jetCollection))]
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pb".format(baseName=self.jetCollection, tagger=taggerName)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pc".format(baseName=self.jetCollection, tagger=taggerName)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_ptau".format(baseName=self.jetCollection, tagger=taggerName)),
+                    ( 'xAOD::JetContainer' , "StoreGateSvc+{baseName}.{tagger}_pu".format(baseName=self.jetCollection, tagger=taggerName))]
                 config.setExtraInputs (extraInputs)
 
         if self.runTruthJetTagging and config.dataType() is not DataType.Data:
@@ -101,6 +102,9 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::JetContainer'
+            if self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
+                alg.declareDecorations = ['GN2Xv01_phbb', 'GN2Xv01_phcc',
+                                          'GN2Xv01_pqcd', 'GN2Xv01_ptop']
 
         config.addOutputVar (self.containerName, 'pt', 'pt')
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)

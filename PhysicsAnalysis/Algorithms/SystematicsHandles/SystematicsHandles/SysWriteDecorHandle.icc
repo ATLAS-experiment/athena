@@ -86,6 +86,14 @@ namespace CP
 
 
 
+  template<typename T> const std::string& SysWriteDecorHandle<T> ::
+  getDecorName () const noexcept
+  {
+    return m_decorName;
+  }
+
+
+
   template<typename T> void SysWriteDecorHandle<T> ::
   set (const SG::AuxElement& object, const T& value,
        const CP::SystematicSet& sys) const

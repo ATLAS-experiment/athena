@@ -154,7 +154,11 @@ class ElectronCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::ElectronContainer'
-            decorationList = ['DFCommonElectronsLHLoose','ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
+            decorationList = ['DFCommonElectronsLHLoose',
+                              'neflowisol20',
+                              'ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt500',
+                              'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500',
+                              'ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
                               'topoetcone20_CloseByCorr','DFCommonAddAmbiguity']
             if self.addGlobalFELinksDep:
@@ -466,8 +470,10 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
         if alg is not None:
             alg.particles = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 preselection=self.addSelectionToPreselection)
+            # Don't register WP selection here if FSR enabled - FSR algorithm will create combined selection
+            if not self.doFSRSelection:
+                config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                     preselection=self.addSelectionToPreselection)
 
         # maintain order of selections
         if 'SiHit' in self.identificationWP:
@@ -530,10 +536,16 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
 
         # Set up the FSR selection
         if self.doFSRSelection :
-            # save the flag set for the WP
-            wpFlag = alg.selectionDecoration.split(",")[0]
+            # wpSelection needs the type suffix so SysReadSelectionHandle knows the type
+            # selectionDecoration needs name only for SysWriteDecorHandle
+            wpDecoration = alg.selectionDecoration
+            wpDecorationName = wpDecoration.split(',')[0]
+            # Insert FSR before the postfix (e.g., selectSiHit_SiHits -> selectSiHitFSR_SiHits)
+            underscorePos = wpDecorationName.index('_')
+            outputDecorationName = wpDecorationName[:underscorePos] + 'FSR' + wpDecorationName[underscorePos:]
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg' )
-            alg.selectionDecoration = wpFlag
+            alg.wpSelection = wpDecoration  # Input: read the WP selection (with type suffix)
+            alg.selectionDecoration = outputDecorationName  # Output: combined WP||FSR (or WP&&!FSR for vetoFSR) (name only)
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
             if self.muonsForFSRSelection is not None:
                 alg.MuonContKey = config.readName (self.muonsForFSRSelection)
@@ -542,6 +554,11 @@ class ElectronWorkingPointSelectionConfig (ConfigBlock) :
             # For SiHit electrons FSR electrons are generally always selected, so they should be removed since they will be in the standard electron container.
             if 'SiHit' in self.identificationWP:
                 alg.vetoFSR = True
+
+            # Register the FSR COMBINED selection
+            config.addSelection (self.containerName, self.selectionName,
+                                 alg.selectionDecoration + ',as_char',
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
