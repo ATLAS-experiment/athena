@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TO DO: encapsulate logic from raw data words! And fill the data
@@ -35,6 +35,8 @@ class CTP_RDO {
 
   /// empty default destructor
   ~CTP_RDO();
+  
+  CTP_RDO& operator=(CTP_RDO&&) noexcept = default;
 
   const std::vector<uint32_t> & getDataWords () const {
     return m_dataWords;
