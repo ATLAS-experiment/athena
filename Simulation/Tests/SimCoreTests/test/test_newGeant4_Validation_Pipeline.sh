@@ -26,19 +26,60 @@ DCUBE_CONFIG="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/dcu
 setupATLAS
 mkdir -p athena_latest
 (
-  cd athena_latest
-  test_RUN3_FullG4MT_QS_ttbar_MT.sh
-  SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
+    cd athena_latest
+    asetup main,Athena,latest
+    # test_RUN3_FullG4MT_QS_ttbar_MT.sh
+
+    export ATHENA_CORE_NUMBER=8
+    # RUN3 setup
+    geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+    conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+    Sim_tf.py \
+        --CA \
+        --multithreaded \
+        --conditionsTag "default:${conditions}" \
+        --geometryVersion "default:${geometry}" \
+        --simulator 'FullG4MT_QS' \
+        --postInclude 'PyJobTransforms.UseFrontier' \
+        --preInclude 'EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV' \
+        --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
+        --outputHITSFile "test.CA.HITS.pool.root" \
+        --maxEvents 1000 \
+        --jobNumber 1 \
+        --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+        --imf False
+
+    SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
 )
 
 # Create HITS_SIM.pool.root file for 25.0.47 release
 setupATLAS
 mkdir -p athena_25.0.47
 (
-  cd athena_25.0.47
-  asetup Athena,25.0.47
-  test_RUN3_FullG4MT_QS_ttbar_MT.sh
-  SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
+    cd athena_25.0.47
+    asetup Athena,25.0.47
+    # test_RUN3_FullG4MT_QS_ttbar_MT.sh
+
+    export ATHENA_CORE_NUMBER=8
+    # RUN3 setup
+    geometry=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+    conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+    Sim_tf.py \
+        --CA \
+        --multithreaded \
+        --conditionsTag "default:${conditions}" \
+        --geometryVersion "default:${geometry}" \
+        --simulator 'FullG4MT_QS' \
+        --postInclude 'PyJobTransforms.UseFrontier' \
+        --preInclude 'EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV' \
+        --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
+        --outputHITSFile "test.CA.HITS.pool.root" \
+        --maxEvents 1000 \
+        --jobNumber 1 \
+        --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+        --imf False
+
+    SimValid_tf.py --inputHITSFile test.CA.HITS.pool.root --outputHIST_SIMFile test.CA.HITS_SIM.pool.root
 )
 
 
