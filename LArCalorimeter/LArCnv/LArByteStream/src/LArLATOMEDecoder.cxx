@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DETAIL_DUMP_ON false
@@ -9,13 +9,28 @@
 #include "LArByteStream/LArLATOMEDecoder.h"
 
 #include <byteswap.h>
-
+#include "eformat/Issue.h"
+#include "eformat/index.h" // for helper
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "ByteStreamData/RawEvent.h"
+
 #include "LArByteStream/LATOMEMapping.h"
 #include "LArByteStream/Mon.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
+#include "LArRecConditions/LArCalibLineMapping.h"
+
+#include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawConditions/LArCalibParams.h"
+
+#include "LArRawEvent/LArSCDigit.h"
+#include "LArRawEvent/LArAccumulatedDigitContainer.h"
+#include "LArRawEvent/LArAccumulatedCalibDigitContainer.h"
+#include "LArCabling/LArLATOMEMapping.h"
+
+
+
+
 
 static const InterfaceID IID_ILArLATOMEDecoder("LArLATOMEDecoder", 1, 0);
 
@@ -274,7 +289,7 @@ unsigned int LArLATOMEDecoder::EventProcess::decodeHeader(const uint32_t* p, uns
   ATH_MSG_DEBUG(" nPackets: " << m_nPackets << " iPacket: " << m_iPacket << " nWordsPerPacket: " << m_nWordsPerPacket << " monHeaderSize: " << m_monHeaderSize);
 
   /// now these are taken from the ROD header but the word are still here (maybe we will use them for something else)
-  compareOrSet(m_at0at1Swap, (bswap_32(p[8 + offset])>>30) & 0x1, m_headerDecoded);
+  std::ignore = compareOrSet(m_at0at1Swap, (bswap_32(p[8 + offset])>>30) & 0x1, m_headerDecoded);
   if (!compareOrSet(m_at0typeRec, bswap_32(p[9 + offset]), m_headerDecoded))
     monheadererror |= (1 << monheadererrorbit++);
   if (!compareOrSet(m_at1typeRec, bswap_32(p[12 + offset]), m_headerDecoded))

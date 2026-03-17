@@ -4,6 +4,8 @@
 
 #include "LArByteStream/LArLATOMEHeaderContByteStreamCnv.h"
 #include "LArByteStream/LArLATOMEDecoder.h"
+#include "LArRawEvent/LArLATOMEHeaderContainer.h"
+
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h" 
 #include "ByteStreamData/RawEvent.h" 
 #include "GaudiKernel/DataObject.h"
@@ -11,6 +13,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 // For LATOME while no Condition alg exists
 #include "LArLATOMEROBIDs.h"
+
 
 LArLATOMEHeaderContByteStreamCnv::LArLATOMEHeaderContByteStreamCnv(ISvcLocator* svcloc) :
   AthConstConverter(storageType(), classID(),svcloc,"LArLATOMEHeaderContByteStreamCnv"),
