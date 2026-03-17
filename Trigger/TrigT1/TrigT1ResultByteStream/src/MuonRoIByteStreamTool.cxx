@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -808,13 +808,8 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       // Fill per-candidate monitoring histograms
       using SubsysID_t = LVL1::MuCTPIBits::SubsysID;
       using SubsysID_ut = std::underlying_type_t<SubsysID_t>;
-      SubsysID_t subsysID{SubsysID_t::Undefined};
-      switch (subsystem) {
-      case 0: {subsysID=SubsysID_t::Barrel; break;}
-      case 1: {subsysID=SubsysID_t::Endcap; break;} // Mind the swap in numbering E<->F, see comments above
-      case 2: {subsysID=SubsysID_t::Forward; break;}
-      default: {break;}
-      }
+      static constexpr std::array<SubsysID_t , 3> systems{SubsysID_t::Barrel, SubsysID_t::Endcap, SubsysID_t::Forward};
+      SubsysID_t subsysID = systems[subsystem];
       Monitored::Scalar<SubsysID_ut> monSubsysID{"topoSubsysID", static_cast<SubsysID_ut>(subsysID)};
       std::string subsysName{s_sectorNames[static_cast<size_t>(subsysID)]};
       Monitored::Scalar<float> monEta{"topoEta_"+subsysName, eta};
