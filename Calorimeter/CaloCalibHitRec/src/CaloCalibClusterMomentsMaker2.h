@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCALIBHITREC_CALOCALIBCLUSTERMOMENTSMAKER2_H
@@ -32,6 +32,7 @@ class TruthParticleContainer;
 #include "StoreGate/ReadHandleKeyArray.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
 #include <vector>
@@ -122,7 +123,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
    *
    * This is the list of desired names of moments given in the
    * jobOptions.*/
-  std::vector<std::string>  m_momentsNames; 
+  Gaudi::Property<std::vector<std::string>>  m_momentsNames{this, "MomentsNames", {}};
 
   /** 
    * @brief vector holding the names of valid moments which can be
@@ -149,7 +150,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
    *
    * Only moments listed in this property can later be directly retrieved from
    * AOD - the others are available in the ESD ... */
-  std::vector<std::string>  m_momentsNamesAOD; 
+  Gaudi::Property<std::vector<std::string>>  m_momentsNamesAOD{this, "AODMomentsNames", {}};
 
   /** 
    * @brief set holding the list of moment enums which go in the first store
@@ -164,14 +165,14 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
    *
    * The containers specified in this property should hold calibration
    * hits inside the calorimeter systems. */
-  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_CalibrationHitContainerNames;
+  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_CalibrationHitContainerNames{this, "CalibrationHitContainerNames", {}};
 
   /** 
    * @brief vector of dead material calibration hit container names to use. 
    *
    * The containers specified in this property should hold calibration
    * hits outside the calorimeter systems - i.e. dead material hits ... */
-  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_DMCalibrationHitContainerNames;
+  SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_DMCalibrationHitContainerNames{this, "DMCalibrationHitContainerNames", {}};
 
   /** ReadHandleKey for truth particle container */
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{this,"TruthParticles","TruthParticles","ReadHandleKey for truth particle container"};
@@ -179,40 +180,38 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   /** Conditions Handle Key to access the CaloDetDescrManager */
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{};
+  const CaloDM_ID*   m_caloDM_ID{};
+  const CaloDmDescrManager* m_caloDmDescrManager{};
 
-  const CaloDM_ID*    m_caloDM_ID;
+  int m_n_phi_out{127}; // not more than 127 since we store indices (-127,...-1,0,...,126) and have 8 bits only
+  int m_n_eta_out{127};
+  double m_out_phi_max{M_PI};
+  double m_out_eta_max{6};
 
-  const CaloDmDescrManager* m_caloDmDescrManager; 
-
-  int m_n_phi_out;
-  int m_n_eta_out;
-  double m_out_phi_max;
-  double m_out_eta_max;
-
-  double m_rmaxOut[3];
+  double m_rmaxOut[3]{1.0, 0.5, 0.3};
 
   std::array<std::vector<std::vector<CalibHitIPhiIEtaRange>>,3>  m_i_phi_eta;
 
-  mutable std::atomic<bool> m_foundAllContainers{};
+  mutable std::atomic<bool> m_foundAllContainers{false};
 
   enum keys_dm_energy_sharing {kMatchDmOff, kMatchDmLoose, kMatchDmMedium, kMatchDmTight};
   enum keys_calib_frac_origin {kCalibFracEM, kCalibFracHAD, kCalibFracREST, kCalibFracMax};
 
-  bool m_doDeadEnergySharing;
-  bool m_doOutOfClusterL;
-  bool m_doOutOfClusterM;
-  bool m_doOutOfClusterT;
-  bool m_doDeadL;
-  bool m_doDeadM;
-  bool m_doDeadT;
-  bool m_useParticleID;
-  bool m_doCalibFrac;
-  float m_energyMin;
-  float m_energyMinCalib;
-  float m_apars_alpha;
-  float m_apars_r0;
-  int m_MatchDmType;
+  bool m_doDeadEnergySharing{false};
+  bool m_doOutOfClusterL{false};
+  bool m_doOutOfClusterM{false};
+  bool m_doOutOfClusterT{false};
+  bool m_doDeadL{false};
+  bool m_doDeadM{false};
+  bool m_doDeadT{false};
+  Gaudi::Property<bool> m_useParticleID{this, "UseParticleID", true};
+  bool m_doCalibFrac{false};
+  float m_energyMin{200*CLHEP::MeV};
+  float m_energyMinCalib{20*CLHEP::MeV};
+  float m_apars_alpha{0.5};
+  float m_apars_r0{0.2};
+  Gaudi::Property<int> m_MatchDmType{this, "MatchDmType", kMatchDmLoose};
 
   static double angle_mollier_factor(double x) ;
 };
