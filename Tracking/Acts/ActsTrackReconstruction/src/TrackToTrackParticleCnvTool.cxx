@@ -4,6 +4,7 @@
 #include "TrackToTrackParticleCnvTool.h"
 
 #include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODTracking/TrackingPrimitives.h"
 #include "ActsGeometryInterfaces/ITrackingGeometryTool.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -431,6 +432,11 @@ namespace ActsTrk {
       }
 
       track_particle.setTrackParameters(parametersVec);
+      if( !parametersVec.empty() ) {
+         track_particle.setParameterPosition(0, xAOD::ParameterPosition::FirstMeasurement);
+         track_particle.setParameterPosition(parametersVec.size()-1, xAOD::ParameterPosition::LastMeasurement);
+      }
+
 
       return StatusCode::SUCCESS;
    }
