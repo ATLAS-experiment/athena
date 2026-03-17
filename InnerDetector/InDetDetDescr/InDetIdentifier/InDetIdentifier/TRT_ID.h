@@ -721,38 +721,31 @@ TRT_ID::straw_hash(Identifier straw_id) const{
   int lw = layer_or_wheel(straw_id);
   int sl = straw_layer(straw_id);
 
-  if (is_barrel(straw_id)) {
+  if (is_barrel(straw_id)) { //barrel
     unsigned int index = lw * 32 + sl;
-    if (index < m_hash_calcs_barrel_indexes.size()) {
-      hcIndex = (be < 0) ? m_hash_calcs_barrel_indexes[index].first :
-                m_hash_calcs_barrel_indexes[index].second;
-    } else {
+    if (index >= m_hash_calcs_barrel_indexes.size()) [[unlikely]]{
       throw std::out_of_range(errMsg("straw_hash: index > barrel_index size - ", index, m_hash_calcs_barrel_indexes.size()));
     }
-  } else {
+    hcIndex = (be < 0) ? m_hash_calcs_barrel_indexes[index].first : m_hash_calcs_barrel_indexes[index].second;
+  } else { //endcap
     unsigned int index = lw;
-    if (index < m_hash_calcs_endcap_indexes.size()) {
-      hcIndex = (be < 0) ? m_hash_calcs_endcap_indexes[index].first :
-                m_hash_calcs_endcap_indexes[index].second;
-    } else {
+    if (index >= m_hash_calcs_endcap_indexes.size()) [[unlikely]] {
       throw std::out_of_range(errMsg("straw_hash: index > endcap_index size - ", index, m_hash_calcs_endcap_indexes.size()));
     }
+    hcIndex = (be < 0) ? m_hash_calcs_endcap_indexes[index].first : m_hash_calcs_endcap_indexes[index].second;
   }
-
-
-
+  //
+  if (hcIndex>= m_hash_calcs.size())[[unlikely]]{
+    throw std::out_of_range(errMsg("straw_hash: hc index > hcCalc  size - ", hcIndex, m_hash_calcs.size()));
+  }
+  //last resort
   IdentifierHash result;
-  if (hcIndex < m_hash_calcs.size()) {
-    const HashCalc& hc = m_hash_calcs[hcIndex];
-    result = hc.m_hash +
+  const HashCalc& hc = m_hash_calcs[hcIndex];
+  result = hc.m_hash +
              phi_module(straw_id) * hc.m_deltaPhi +
              (lw - hc.m_layerMin) * hc.m_nStrawLayers +
              (sl - hc.m_strLayerMin) * hc.m_nstraws +
              straw(straw_id);
-    return(result);
-  } else {
-    throw std::out_of_range(errMsg("straw_hash: hc index > hcCalc  size - ", hcIndex, m_hash_calcs.size()));
-  }
   return(result);
 }
 
