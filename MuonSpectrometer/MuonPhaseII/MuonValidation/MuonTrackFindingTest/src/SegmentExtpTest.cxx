@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SegmentExtpTest.h"
@@ -25,6 +25,7 @@
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
+#include "ActsInterop/Logger.h"
 
 using namespace Acts::UnitLiterals;
 using namespace MuonR4::SegmentFit;
@@ -44,7 +45,7 @@ namespace MuonValR4{
         ATH_CHECK(SG::get(segments, m_readKey, ctx));
         const ActsTrk::GeometryContext* gctx{nullptr};
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
-        const auto tgContext = gctx->context();
+        const Acts::GeometryContext tgContext{gctx->context()};
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
@@ -74,11 +75,18 @@ namespace MuonValR4{
 
         };
         StatusCode retCode = StatusCode::SUCCESS;
+
+        SeedingAux::Config cfg{};
+        cfg.parsToUse.clear();
+        SeedingAux pullCalculator{cfg, makeActsAthenaLogger(this, "PullCalculator")};
+
+        SeedingAux::Line_t line{};
+
         for (const xAOD::MuonSegment* segment : *segments) {
             const MuonR4::Segment* detSeg = MuonR4::detailedSegment(*segment);
 
-            const auto segPars = localSegmentPars(*segment);
-            const auto [locPos, locDir] = makeLine(segPars);
+            line.updateParameters(localSegmentPars(*segment));
+
 
             const MuonGMR4::SpectrometerSector* sector = m_detMgr->getSectorEnvelope(segment->chamberIndex(), 
                                                                                      segment->sector(), 
@@ -94,16 +102,16 @@ namespace MuonValR4{
             }
             
             if (msgLvl(MSG::VERBOSE)) {
-
                 std::stringstream sstr{};
-                sstr<<"pos: "<<Amg::toString(segment->position())<<", dir: "
-                    <<Amg::toString(segment->direction())<<", chi2/nDoF: "
-                    <<segment->chiSquared() / segment->numberDoF()<<", nDoF: "<<segment->numberDoF()<<", "
+                sstr<<"pos: "<<Amg::toString(segment->position())
+                    <<", dir: "<<Amg::toString(segment->direction())
+                    <<", chi2/nDoF: "<<segment->chiSquared() / segment->numberDoF()
+                    <<", nDoF: "<<segment->numberDoF()<<", "
                     <<segment->nPrecisionHits()<<", "<<segment->nPhiLayers()<<std::endl;
                 for (const auto& meas : detSeg->measurements()) {
-                    sstr<<"  **** "<<(*meas)<<", chi2: "<<SeedingAux::chi2Term(locPos, locDir, *meas)
+                    sstr<<"  **** "<<(*meas)<<", chi2: "<<SeedingAux::chi2Term(line, *meas)
                         <<", sign: "<<(meas->isStraw() ? 
-                                (SeedingAux::strawSign(locPos,locDir, *meas) == 1 ? "R" : "L") : "-")
+                                (SeedingAux::strawSign(line, *meas) == 1 ? "R" : "L") : "-")
                         <<", geoId: "<<(meas->type() != xAOD::UncalibMeasType::Other ? 
                                            xAOD::muonSurface(meas->spacePoint()->primaryMeasurement()).geometryId()
                                         :  Acts::GeometryIdentifier{})
@@ -111,7 +119,6 @@ namespace MuonValR4{
                 }
                 ATH_MSG_VERBOSE("Run propagation test on "<<sector->identString()<<std::endl<<sstr.str());
             }
-
             for (const auto& meas: detSeg->measurements()) {
                 if (!meas->spacePoint() || 
                     meas->fitState() != MuonR4::CalibratedSpacePoint::State::Valid) {
@@ -121,29 +128,33 @@ namespace MuonValR4{
                 const Acts::Surface& targetSurf{xAOD::muonSurface(sp->primaryMeasurement())};
                
                 const auto& bounds = targetSurf.bounds();
-                Amg::Vector2D lPos{Amg::Vector2D::Zero()};
-                const auto trf = targetSurf.localToGlobalTransform(tgContext).inverse() *
-                                 sector->surface().localToGlobalTransform(tgContext);
+                Amg::Vector2D lPos{Amg::Vector2D::Zero()}, mPos{Amg::Vector2D::Zero()};
+                const Amg::Transform3D toSurf = targetSurf.localToGlobalTransform(tgContext).inverse() *
+                                                sector->surface().localToGlobalTransform(tgContext);
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
-                    lPos = (trf * SeedingAux::extrapolateToPlane(locPos, locDir, *meas)).block<2,1>(0,0);
+                    lPos = (toSurf * SeedingAux::extrapolateToPlane(line, *meas)).block<2,1>(0,0);
                     if (!bounds.inside(lPos, Acts::BoundaryTolerance::AbsoluteEuclidean(-2._mm))){
                         ATH_MSG_WARNING("The position "<<Amg::toString(lPos)
                                 <<" is outside the trapezoid "<<bounds
                                 <<" "<<m_idHelperSvc->toString(sp->identify()));
                             continue;
                     }
+                    mPos = (toSurf * meas->localPosition()).block<2,1>(0,0);
                 } else if (targetSurf.type() == Acts::Surface::SurfaceType::Straw) {
-                    const auto cIsect = lineIntersect<3>(meas->localPosition(),
-                                                         meas->sensorDirection(), 
-                                                         locPos, locDir);
+                    const auto cIsect = lineIntersect<3>(meas->localPosition(), meas->sensorDirection(), 
+                                                         line.position(), line.direction());
                     const auto cIsectPos = cIsect.position();
-                    const auto cPos = trf * cIsectPos;
-                    lPos[0] = cPos.perp() * SeedingAux::strawSign(locPos, locDir, *meas);
-                    lPos[1] = cPos.z();
+                    const Amg::Vector3D closePos = toSurf * cIsectPos;
+                    lPos[0] = Acts::copySign(closePos.perp(), SeedingAux::strawSign(line, *meas));
+                    lPos[1] = closePos.z();
+                    mPos[0] = Acts::copySign(meas->driftRadius(), lPos[0]);
+                    if (meas->measuresPhi()) {
+                        mPos[1] = meas->localPosition().x();
+                    }
                     const auto& lBounds = static_cast<const Acts::LineBounds&>(bounds);
-                    if (std::abs(cPos.z()) > lBounds.get(Acts::LineBounds::eHalfLengthZ) - 2._cm ||
-                        cPos.perp() >lBounds.get(Acts::LineBounds::eR)  - 0.2_mm) {
-                        ATH_MSG_WARNING("The line is not on measurement "
+                    if (std::abs(closePos.z()) > lBounds.get(Acts::LineBounds::eHalfLengthZ) - 2._cm ||
+                        closePos.perp() >lBounds.get(Acts::LineBounds::eR)  - 0.2_mm) {
+                        ATH_MSG_WARNING("The line does not cross tube "
                             <<m_idHelperSvc->toString(sp->identify())
                             <<" "<<Amg::toString(lPos)<<" vs. "<<bounds<<".");
                         continue;
@@ -151,8 +162,8 @@ namespace MuonValR4{
                 }
                 auto extpPars = extrapolate(startPars, *sp);
                 if (!extpPars.ok()) {
-                   ATH_MSG_FATAL("Failed to propagte to "<<(*meas)
-                                <<",\n lPos: "<<Amg::toString(trf * meas->localPosition())
+                   ATH_MSG_FATAL("Failed to propagate to "<<(*meas)
+                                <<",\n lPos: "<<Amg::toString(toSurf * meas->localPosition())
                                 <<", expected: "<<Amg::toString(lPos)<<", "<<targetSurf.bounds());
                    retCode = StatusCode::FAILURE;
                    continue;
@@ -191,6 +202,12 @@ namespace MuonValR4{
                         retCode = StatusCode::FAILURE;
                     }
                 }
+
+                pullCalculator.updateSpatialResidual(line, *meas);
+                ATH_MSG_DEBUG("Analyze residual for "<<m_idHelperSvc->toString(sp->identify())
+                <<" / "<<targetSurf.geometryId()<<" --- measurement: "<<Amg::toString(mPos)<<", extraploated: "
+                    <<Amg::toString(lPos)<<" --> residual: "<<Amg::toString(mPos - lPos)<<" vs. "
+                    <<Amg::toString(pullCalculator.residual()));
             }
             if (m_drawEvent) {
                 visualHelper.write(std::format("ExtTpTest_{:}_{:}_{:}.obj", 

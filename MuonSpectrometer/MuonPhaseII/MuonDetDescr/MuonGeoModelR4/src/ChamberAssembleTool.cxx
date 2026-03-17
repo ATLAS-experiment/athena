@@ -425,7 +425,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             const Amg::Transform3D toChambCentre = refEle->globalToLocalTransform(gctx);
             ATH_MSG_VERBOSE("New chamber candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
-                                                                              surfBoundSet, 0.*Gaudi::Units::cm);
+                                                                              surfBoundSet, 0.1*Gaudi::Units::cm);
             chamberArgs chambArgs{};
             chambArgs.detEles = std::move(detEles);
             chambArgs.bounds = chamberBox;
