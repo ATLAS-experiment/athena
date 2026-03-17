@@ -11,13 +11,18 @@ msg = logging.getLogger(__name__)
 import PyJobTransforms.trfExceptions as trfExceptions
 
 ## @brief Integrity function for file class argPOOLFile, argHITSFile, argRDOFile and argEVNTFile
-def returnIntegrityOfPOOLFile(fname):
+def returnIntegrityOfPOOLFile(fname, **kwargs):
     from PyJobTransforms.trfValidateRootFile import checkFile, msg as logger
     import multiprocessing
 
-    if (level := msg.getEffectiveLevel()) < logger.getEffectiveLevel():
-        logger.setLevel(level)
-        msg.debug(f"Set logging level of {logger.name!r} to {logging.getLevelName(level)!r}")
+    level = kwargs.get('level')
+    if level is not None:
+        if level < msg.getEffectiveLevel():
+            msg.setLevel(level)
+            msg.debug(f"Set logging level of {msg.name!r} to {logging.getLevelName(level)!r}")
+        if level < logger.getEffectiveLevel():
+            logger.setLevel(level)
+            msg.debug(f"Set logging level of {logger.name!r} to {logging.getLevelName(level)!r}")
 
     msg.debug(f"Current process: {multiprocessing.current_process().name}")
 

@@ -772,7 +772,7 @@ class scriptLogFileReport(logFileReport):
 ## @brief return integrity of file using appropriate validation function
 #  @ detail This method returns the integrity of a specified file using a
 #  @ specified validation function.
-def returnIntegrityOfFile(file, functionName, level=None):
+def returnIntegrityOfFile(file, functionName, **kwargs):
     try:
         import PyJobTransforms.trfFileValidationFunctions as trfFileValidationFunctions
     except Exception as exception:
@@ -781,25 +781,27 @@ def returnIntegrityOfFile(file, functionName, level=None):
 
     import multiprocessing
 
+    level = kwargs.get('level')
     if level is not None:
         if level < msg.getEffectiveLevel():
             msg.setLevel(level)
             msg.debug(f"Set logging level of {msg.name!r} to {logging.getLevelName(level)!r}")
-        if level < (logger := trfFileValidationFunctions.msg).getEffectiveLevel():
-            logger.setLevel(level)
-            msg.debug(f"Set logging level of {logger.name!r} to {logging.getLevelName(level)!r}")
 
     msg.debug(f"Current process: {multiprocessing.current_process().name}")
 
     validationFunction = getattr(trfFileValidationFunctions, functionName)
-    msg.debug(f"Calling {validationFunction.__name__}({file})")
-    return validationFunction(file)
+    msg.debug(f"Calling {validationFunction.__name__}({file}, "
+              f"{", ".join(f"{k}={v}" for k, v in kwargs.items())})")
+    return validationFunction(file, **kwargs)
 
 
 ## @brief perform standard file validation
 #  @ detail This method performs standard file validation in either serial or
 #  @ parallel and updates file integrity metadata.
 def performStandardFileValidation(dictionary, io, parallelMode = False, multithreadedMode=False):
+    if io == "output":
+        if multithreadedMode:
+            os.environ['TRF_MULTITHREADED_VALIDATION'] = 'TRUE'
     if parallelMode is False:
         msg.info('Starting legacy (serial) file validation')
         for (key, arg) in dictionary.items():
@@ -817,8 +819,6 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
     
                 if io == "output":
                     msg.info('{0}: Testing corruption...'.format(fname))
-                    if multithreadedMode:
-                        os.environ['TRF_MULTITHREADED_VALIDATION']='TRUE'
                     if arg.getSingleMetadata(fname, 'integrity') is True:
                         msg.info('Corruption test passed.')
                     elif arg.getSingleMetadata(fname, 'integrity') is False:
@@ -851,7 +851,7 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
                 else:
                     msg.info('Guid is %s', arg.getSingleMetadata(fname, 'file_guid'))
         msg.info('Stopping legacy (serial) file validation')
-    if parallelMode is True:
+    elif parallelMode is True:
         msg.info('Starting parallel file validation')
         # Create lists of files and args. These lists are to be used with zip in
         # order to check and update file integrity metadata as appropriate.
@@ -862,12 +862,12 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
         # Create a list for collation of file validation jobs for submission to
         # the parallel job processor.
         jobs = []
+        msg.debug('Collating list of files for validation')
         for (key, arg) in dictionary.items():
             if not isinstance(arg, argFile):
                 continue
             if not arg.io == io:
                 continue
-            msg.debug('Collating list of files for validation')
             for fname in arg.value:
                 msg.debug('Appending file {fileName} to list of files for validation'.format(fileName = str(fname)))
                 # Append the current file to the file list.
@@ -877,80 +877,97 @@ def performStandardFileValidation(dictionary, io, parallelMode = False, multithr
                 # Append the current integrity function name to the integrity
                 # function list if it exists. If it does not exist, raise an
                 # exception.
-                if arg.integrityFunction:
-                    integrityFunctionList.append(arg.integrityFunction)
-                else:
-                    msg.error('Validation function for file {fileName} not available for parallel file validation'.format(fileName = str(fname)))
-                    raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_EXEC_VALIDATION_FAIL'), 'Validation function for file %s not available for parallel file validation' % str(fname))
-                # Compose a job for validation of the current file using the
-                # appropriate validation function, which is derived from the
-                # associated data attribute arg.integrityFunction.
-                jobs.append(
-                    trfUtils.Job(
-                        name = "validation of file {fileName}".format(
-                        fileName = str(fname)),
-                        workFunction = returnIntegrityOfFile,
-                        workFunctionKeywordArguments = {
-                            'file': fname,
-                            'functionName': arg.integrityFunction,
-                            'level': msg.getEffectiveLevel(),
-                        },
-                        workFunctionTimeout = 600
+                if io == "output":
+                    try:
+                        integrityFunctionList.append(arg.integrityFunction)
+                    except AttributeError as e:
+                        errmsg = f'Validation function for file {fname} of type'\
+                            f' {type(arg).__name__!r} not available for parallel file validation: {e}'
+                        msg.error(errmsg)
+                        raise trfExceptions.TransformValidationException(
+                            trfExit.nameToCode('TRF_EXEC_VALIDATION_FAIL'), errmsg)
+                    # Compose a job for validation of the current file using the
+                    # appropriate validation function, which is derived from the
+                    # associated data attribute arg.integrityFunction.
+                    jobs.append(
+                        trfUtils.Job(
+                            name = "validation of file {fileName}".format(
+                                fileName = str(fname)),
+                            workFunction = returnIntegrityOfFile,
+                            workFunctionKeywordArguments = {
+                                'file': fname,
+                                'functionName': arg.integrityFunction,
+                                'level': msg.getEffectiveLevel(),
+                            },
+                            workFunctionTimeout = 600
+                        )
                     )
-                )
         # Contain the file validation jobs in a job group for submission to the
         # parallel job processor.
-        jobGroup1 = trfUtils.JobGroup(
-            name = "standard file validation",
-            jobs = jobs
-        )
-        # Prepare the parallel job processor.
-        parallelJobProcessor1 = trfUtils.ParallelJobProcessor(numberOfProcesses=len(jobs))
-        # Submit the file validation jobs to the parallel job processor.
-        msg.info('Submitting file validation jobs to parallel job processor')
-        parallelJobProcessor1.submit(jobSubmission = jobGroup1)
-        resultsList = parallelJobProcessor1.getResults()
-        msg.info('Parallel file validation complete')
-        # Update file metadata with integrity results using the lists fileList,
-        # argList and resultsList.
-        msg.info('Processing file integrity results')
-        for currentFile, currentArg, currentIntegrityFunction, currentResult in zip(fileList, argList, integrityFunctionList, resultsList):
-            msg.info('{IO} file {fileName} has integrity status {integrityStatus} as determined by integrity function {integrityFunction}'.format(
-                IO = str(io),
-                fileName = str(currentFile),
-                integrityStatus = str(currentResult),
-                integrityFunction = str(currentIntegrityFunction)
-            ))
-            # If the first (Boolean) element of the result tuple for the current
-            # file is True, update the integrity metadata. If it is False, raise
-            # an exception.
-            if currentResult[0] is True:
-                msg.info('Updating integrity metadata for file {fileName}'.format(fileName = str(currentFile)))
-                currentArg._setMetadata(files=[currentFile,], metadataKeys={'integrity': currentResult[0]})
-            else:
-                exceptionMessage = "{IO} file validation failure on file {fileName} with integrity status {integrityStatus} as determined by integrity function {integrityFunction}".format(
+        if io == "output":
+            jobGroup1 = trfUtils.JobGroup(
+                name = "standard file validation",
+                jobs = jobs
+            )
+            # Prepare the parallel job processor.
+            parallelJobProcessor1 = trfUtils.ParallelJobProcessor(numberOfProcesses=len(jobs))
+            # Submit the file validation jobs to the parallel job processor.
+            msg.info('Submitting file validation jobs to parallel job processor')
+            parallelJobProcessor1.submit(jobSubmission = jobGroup1)
+            resultsList = parallelJobProcessor1.getResults()
+            msg.info('Parallel file validation complete')
+            # Update file metadata with integrity results using the lists fileList,
+            # argList and resultsList.
+            msg.info('Processing file integrity results')
+            for currentFile, currentArg, currentIntegrityFunction, currentResult in zip(fileList, argList, integrityFunctionList, resultsList):
+                msg.info('{IO} file {fileName} has integrity status {integrityStatus} as determined by integrity function {integrityFunction}'.format(
                     IO = str(io),
                     fileName = str(currentFile),
                     integrityStatus = str(currentResult),
                     integrityFunction = str(currentIntegrityFunction)
-                )
-                msg.error("exception message: {exceptionMessage}".format(
-                    exceptionMessage = exceptionMessage
                 ))
-                if io == 'input':
-                    exitCodeName = 'TRF_INPUT_FILE_VALIDATION_FAIL'
-                elif io == 'output':
+                # If the first (Boolean) element of the result tuple for the current
+                # file is True, update the integrity metadata. If it is False, raise
+                # an exception.
+                if currentResult[0] is True:
+                    msg.info('Updating integrity metadata for file {fileName}'.format(fileName = str(currentFile)))
+                    currentArg._setMetadata(files=[currentFile,], metadataKeys={'integrity': currentResult[0]})
+                else:
+                    exceptionMessage = "{IO} file validation failure on file {fileName} with integrity status {integrityStatus} as determined by integrity function {integrityFunction}".format(
+                        IO = str(io),
+                        fileName = str(currentFile),
+                        integrityStatus = str(currentResult),
+                        integrityFunction = str(currentIntegrityFunction)
+                    )
+                    msg.error("exception message: {exceptionMessage}".format(
+                        exceptionMessage = exceptionMessage
+                    ))
                     exitCodeName = 'TRF_OUTPUT_FILE_VALIDATION_FAIL'
-                raise trfExceptions.TransformValidationException(
-                    trfExit.nameToCode(exitCodeName),
-                    exceptionMessage
-                )
-            # Perform a check to determine if the file integrity metadata is
-            # correct.
-            if currentArg.getSingleMetadata(currentFile, metadataKey = 'integrity', populate = False) == currentResult[0]:
-                msg.debug("file integrity metadata update successful")
-            else:
-                msg.error("file integrity metadata update unsuccessful")
+                    raise trfExceptions.TransformValidationException(
+                        trfExit.nameToCode(exitCodeName),
+                        exceptionMessage
+                    )
+                # Perform a check to determine if the file integrity metadata is
+                # correct.
+                if currentArg.getSingleMetadata(currentFile, metadataKey = 'integrity', populate = False) == currentResult[0]:
+                    msg.debug("file integrity metadata update successful")
+                else:
+                    msg.error("file integrity metadata update unsuccessful")
+
+        metadataKeys = ('nentries', 'file_guid')
+        msg.info(f"{", ".join(fileList)}: Checking {", ".join(map(repr, metadataKeys))} ...")
+        metadata = {fname: arg.getMetadata(fname, metadataKeys=metadataKeys)[fname]
+                    for fname, arg in zip(fileList, argList, strict=True)}
+        success = {fname: md for fname, md in metadata.items() if None not in md.values()}
+        if len(success):
+            msg.info(f"Checked\n\t{"\n\t".join(
+                f"{fname}: {" ".join(f"{k}={v}" for k, v in md.items())}"
+                for fname, md in success.items())}")
+        if len(success) != len(metadata):
+            errmsg = f"{", ".join(fname for fname in metadata if fname not in success)}:" \
+                f" Could not determine '{"' and/or '".join(metadataKeys)}'"
+            msg.error(errmsg)
+            raise trfExceptions.TransformValidationException(trfExit.nameToCode('TRF_EXEC_VALIDATION_FAIL'), errmsg)
         msg.info('Stopping parallel file validation')
 
 
