@@ -170,7 +170,6 @@ namespace MuonR4::SegmentFit{
                 result.covariance(pidx, t0idx) = ActsTrk::timeToAthena(result.covariance(pidx, t0idx));
             }
         }
-        centerAlongWire(result);
         return result;
     }
     std::unique_ptr<Segment>
@@ -548,21 +547,6 @@ namespace MuonR4::SegmentFit{
         }
         eraseWrongHits(toRecover);
         return true;
-    }
-    void SegmentLineFitter::centerAlongWire(Result_t& result) const {
-        if (std::ranges::any_of(result.measurements,[](const Hit_t& h){
-                return h->measuresPhi();
-            })) {
-            ATH_MSG_VERBOSE("The segment has phi measurements. No centering needed");
-            return;
-        }
-        double avgX{0.};
-        const double nHits = result.measurements.size();
-        std::ranges::for_each(result.measurements, [&avgX, nHits](const Hit_t& hit) {
-            return avgX += hit->localPosition().x() / nHits;
-        });
-        result.parameters[toUnderlying(ParamDefs::x0)] = avgX;
-    }
-         
+    }        
    
 }
