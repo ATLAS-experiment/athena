@@ -980,6 +980,15 @@ namespace CP {
             ATH_MSG_DEBUG("Low pt MVA disabled. Return... ");
             return false;
         }
+        
+        const xAOD::TrackParticle* primary = mu.primaryTrackParticle();
+        const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+        const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+
+        if (!primary || !idtrack || !metrk) {
+            ATH_MSG_VERBOSE("Missing primary, ID, or extrapolated MS track for Run-3 low-pT MVA; failing selection");
+            return false;
+        }
 
         if (mu.author() == xAOD::Muon::MuidCo) {
             ATH_MSG_VERBOSE("passedLowPtEfficiencyMVACutRun3() for MuidCO");
@@ -1001,11 +1010,7 @@ namespace CP {
 
             mu.parameter(CaloMuonIDTag, xAOD::Muon::CaloMuonIDTag);
 
-            reducedChi2 = mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
-
-            const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-            const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
-
+            reducedChi2 = primary->chiSquared() / primary->numberDoF();
             etaBalanceSig = std::abs(idtrack->eta() - metrk->eta());
             phiBalanceSig = std::abs(idtrack->phi() - metrk->phi());
                     
@@ -1082,11 +1087,7 @@ namespace CP {
 
             middleHoles = middleSmallHoles + middleLargeHoles;
             outerHoles = outerSmallHoles + outerLargeHoles;
-            reducedChi2 = mu.primaryTrackParticle()->chiSquared() / mu.primaryTrackParticle()->numberDoF();
-            
-            const xAOD::TrackParticle* idtrack = mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-            const xAOD::TrackParticle* metrk = mu.trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
-        
+            reducedChi2 = primary->chiSquared() / primary->numberDoF();
             etaBalanceSig = std::abs(idtrack->eta() - metrk->eta());
             etaPrime = std::abs((idtrack->eta() - metrk->eta())/mu.eta());
             phiBalanceSig = std::abs(idtrack->phi() - metrk->phi());
