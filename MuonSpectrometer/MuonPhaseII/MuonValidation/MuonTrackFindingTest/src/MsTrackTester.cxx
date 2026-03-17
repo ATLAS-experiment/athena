@@ -106,7 +106,11 @@ namespace MuonValR4 {
         ATH_CHECK(m_fieldCacheKey.initialize());
         ATH_CHECK(m_trackKey.initialize());
         ATH_CHECK(m_summaryTool.retrieve());
+
         ATH_CHECK(m_legacyTrackKey.initialize(!m_legacyTrackKey.empty()));
+        ATH_CHECK(m_legacySegmentKey.initialize(!m_legacySegmentKey.empty()));
+        ATH_CHECK(m_legacyMuonKey.initialize(!m_legacyMuonKey.empty()));
+
         ATH_CHECK(detStore()->retrieve(m_detMgr));
 
         MsTrackSeeder::Config seederCfg{};
@@ -129,6 +133,8 @@ namespace MuonValR4 {
             return m_segSelector->passTrackQuality(Gaudi::Hive::currentContext(),
                                                    *MuonR4::detailedSegment(*seg)); 
         }));
+
+
         if (m_isMC) {
             evOpts |= EventInfoBranch::isMC;
             m_recoSegs->addVariable(std::make_unique<MuonVal::GenericAuxDecorationBranch<unsigned short>>(m_tree, 
@@ -226,6 +232,10 @@ namespace MuonValR4 {
             }
 
             m_tree.addBranch(m_legacyTrks);
+
+
+            m_legacyRecoSegs = std::make_unique<SegmentVariables>(m_tree, m_legacySegmentKey.key(), "LegacyRecoSegments", msgLevel());
+            m_tree.addBranch(m_legacyRecoSegs);
         } 
 
 
@@ -243,13 +253,73 @@ namespace MuonValR4 {
 
         const xAOD::TrackParticleContainer* legacyTrks{nullptr};
         ATH_CHECK(SG::get(legacyTrks, m_legacyTrackKey, ctx));
+
+        //This for now is to be able to retrieve the matching between the legacy segments and tracks ...
+        const xAOD::MuonContainer* legacyMuons{nullptr};
+        ATH_CHECK(SG::get(legacyMuons, m_legacyMuonKey, ctx));
+
+        //Dump also legacy segments
+        const xAOD::MuonSegmentContainer* legacyRecoSegs{nullptr};
+        ATH_CHECK(SG::get(legacyRecoSegs, m_legacySegmentKey, ctx));
+
+
+        std::unordered_map<const xAOD::MuonSegment*, unsigned short> segIndex;
+        
         if (legacyTrks){
+            unsigned short iTrk = 0;
             for (const xAOD::TrackParticle* track : *legacyTrks) {
+                ATH_MSG_VERBOSE("Legacy track "<< iTrk << ": pT: "<<(track->pt() *MeVtoGeV)<<" [GeV], eta: "<<track->eta()
+                                <<", phi: "<<(track->phi() / 1._degree)<<", q: "<<track->charge());
                 m_summaryTool->copySummary(m_summaryTool->makeSummary(ctx, *track->track()),
                                            *track);
                 m_legacyTrks->push_back(track);
+
+                //Change navigation from down to particle track? Initially only tracks were stored/looked at, whereas the following code is to navigate to associated muon segments ... in principle can change the order and thus avoid the matching part and some extra looping
+                unsigned iMuon = 0;
+                for (const xAOD::Muon* muon : *legacyMuons){
+                    ATH_MSG_VERBOSE("iMuon " << iMuon << " pT: "<<(muon->pt() *MeVtoGeV)<<" [GeV], eta: "<<muon->eta()
+                                <<", phi: "<<(muon->phi() / 1._degree)<<", q: "<<muon->charge()  <<", nSegments: "<<muon->nMuonSegments());
+
+                   ++iMuon;
+                  
+                   //MS or ME? MS as we probably don't have yet material and extrapolated to IP 
+                   const xAOD::TrackParticle* msTrack = muon->trackParticle( xAOD::Muon::MuonSpectrometerTrackParticle);
+                   if ( !msTrack || (msTrack != track) ) { continue; }
+
+                   // retrieve associated segments for this track
+                   for (size_t s = 0; s < muon->nMuonSegments(); ++s) {
+                        const xAOD::MuonSegment* segment = muon->muonSegment(s);
+
+                        ATH_MSG_VERBOSE(std::format( "Legacy muon-segment link: segment {:}  @{:}, eta: {:.2f}, phi {:.2f}", 
+                                        printID(*segment), Amg::toString(segment->position()),
+                                        segment->direction().eta(), segment->direction().phi() / 1._degree));
+
+                         segIndex[segment] = iTrk;
+                   }
+
+                }
+                ++iTrk;
             }
         }
+
+        if (legacyRecoSegs) {
+            unsigned short iSeg = 0;
+            m_legacySegToTrkLinks[legacyRecoSegs->size()-1];
+            for (const xAOD::MuonSegment* seg : *legacyRecoSegs) {
+                //Store all segments
+                m_legacyRecoSegs->push_back(*seg);
+
+                //Get the ordering in the legacy segment container to be able to link to the legacy tracks later on
+                m_legacySegToTrkLinks[iSeg] = segIndex.find(seg) != segIndex.end() ? segIndex[seg] : -1;
+
+                ATH_MSG_VERBOSE(std::format( "Dump legacy reco segment index {:} {:}  @{:}, eta: {:.2f}, phi {:.2f} associated muon: {:}", 
+                                iSeg, printID(*seg), Amg::toString(seg->position()),
+                                seg->direction().eta(), seg->direction().phi() / 1._degree, m_legacySegToTrkLinks[iSeg]));
+
+                ++iSeg;
+            }
+        }
+        
         /** Fetch the containers from store gate */
         const xAOD::MuonSegmentContainer* recoSegments{nullptr};
         ATH_CHECK(SG::get(recoSegments, m_recoSegmentKey, ctx));
@@ -268,6 +338,7 @@ namespace MuonValR4 {
             unsigned int seedIdx = m_seedPos.size();
             m_seedPos += seed.position();
             m_seedType+= Acts::toUnderlying(seed.location());
+            m_seedSector += seed.sector();
             m_seedSummary->push_back(ctx, seed);
             ATH_MSG_VERBOSE(" Dump new seed: "<<seed);
             for (const xAOD::MuonSegment* seg : seed.segments()){
@@ -354,6 +425,8 @@ namespace MuonValR4 {
         for (const auto trk : *msTracks) {
             m_trackSummary->push_back(ctx, trk);
         }
+
+        
 
         ATH_CHECK(m_tree.fill(ctx));
         return StatusCode::SUCCESS;

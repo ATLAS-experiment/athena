@@ -64,6 +64,8 @@ namespace MuonValR4{
         SegmentKey_t m_truthSegmentKey{this, "TruthSegmentKey", "MuonTruthSegments"};
         /** @brief Primary segment container */
         SegmentKey_t m_recoSegmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+        /** @brief Legacy segment container */
+        SegmentKey_t m_legacySegmentKey{this, "LegacySegmentKey", "MuonSegments"};
         /** @brief Key to the truth particle collection */
         SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "MuonTruthParticles"};
         /** @brief Decoration dependency to the MS truth track links */
@@ -84,6 +86,9 @@ namespace MuonValR4{
         /** @brief Legacy track reconstruction chain */
         SG::ReadHandleKey<xAOD::TrackParticleContainer> m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
 
+        /** @brief Legacy muons  */
+        SG::ReadHandleKey<xAOD::MuonContainer> m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
+
         std::unique_ptr<MuonR4::MsTrackSeeder> m_seeder{};
         using ParticleBranchPtr_t = std::shared_ptr<MuonVal::IParticleFourMomBranch>;
         ParticleBranchPtr_t m_truthTrks{};
@@ -91,11 +96,14 @@ namespace MuonValR4{
         using SegmentBranchPtr_t = std::shared_ptr<MuonPRDTest::SegmentVariables>;
         SegmentBranchPtr_t m_truthSegs{};
         SegmentBranchPtr_t m_recoSegs{};
+        SegmentBranchPtr_t m_legacyRecoSegs{};
 
         /** @brief Simple seed information */
         MuonVal::ThreeVectorBranch m_seedPos{m_tree, "MsTrkSeed_position"};
         /** @brief Is the seed in the encap or in the barrel chambers */
-        MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MstTrkSeed_type")};
+        MuonVal::VectorBranch<char>& m_seedType{m_tree.newVector<char>("MsTrkSeed_type")};
+        /** @brief Sector of the seed, even center, odd overlap regions, for details see:  */
+        MuonVal::VectorBranch<int>& m_seedSector{m_tree.newVector<int>("MsTrkSeed_sector")};
         /** @brief Maximum separation between the segments on the reference plane */
         MuonVal::VectorBranch<float>& m_seedLength{m_tree.newVector<float>("MsTrkSeed_length")};
         /** @brief Maximum angular difference between the segments part of the seed */
@@ -110,6 +118,10 @@ namespace MuonValR4{
         MuonVal::MatrixBranch<unsigned short>& m_seedRecoSegMatch{m_tree.newMatrix<unsigned short>("MsTrkSeed_segmentLinks")};
         /** @brief Link of the truth segments to the matchin reco segments */
         MuonVal::MatrixBranch<unsigned short>& m_truthSegToRecoLink{m_tree.newMatrix<unsigned short>("TruthSegments_recoSegLinks",-1)};
+
+        /** @brief Link of the legacy track to the legacy segment */
+        MuonVal::VectorBranch<unsigned short>& m_legacySegToTrkLinks{m_tree.newVector<unsigned short>("LegacyRecoSegments_trkLinks")};
+
         /** @brief Links to all MsTrkSeeds that could be matched to the truthMuon, i.e. >= 1 segment*/
         MuonVal::MatrixBranch<unsigned short>& m_truthMuToSeedIdx{m_tree.newMatrix<unsigned short>("TruthMuons_seedLinks", -1)};
         /** @brief Corresponding matching counter of reconstructed segments */
