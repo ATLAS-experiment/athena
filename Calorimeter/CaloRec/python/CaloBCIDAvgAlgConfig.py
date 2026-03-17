@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloBCIDAvgAlgConfig.py
 # Created: Mar 2019, sss
@@ -18,7 +18,7 @@ def CaloBCIDAvgAlgCfg (flags, **kwargs):
 
     from CaloRec.CaloBCIDLumiCondAlgConfig import CaloBCIDLumiCondAlgCfg
     result.merge (CaloBCIDLumiCondAlgCfg (flags))
-    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
          kwargs.setdefault("EventInfoKey", flags.Overlay.BkgPrefix + "EventInfo")
     result.addEventAlgo (CaloBCIDAvgAlg(**kwargs))
     return result

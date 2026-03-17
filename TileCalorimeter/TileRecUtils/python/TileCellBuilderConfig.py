@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell builder tool"""
 
@@ -27,7 +27,7 @@ def TileCellBuilderCfg(flags, mergeChannels=True, **kwargs):
     kwargs.setdefault('E4prContainer', 'E4prContainer' if not testBeam and flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     kwargs['mergeChannels'] = mergeChannels
-    if flags.Common.ProductionStep is ProductionStep.PileUpPretracking:
+    if flags.Common.ProductionStep in [ProductionStep.PileUpPretracking, ProductionStep.MinbiasPreprocessing]:
         kwargs.setdefault('EventInfo', flags.Overlay.BkgPrefix + "EventInfo")
 
     if kwargs['SkipGain'] not in [-1, 0, 1]:
