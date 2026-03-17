@@ -74,19 +74,22 @@ possible_keys = [
 @AccumulatorCache
 def getRun3NavigationContainerFromInput(flags):
     # What to return if we cannot look in the file
-    default_key = 'HLTNav_Summary_OnlineSlimmed' if flags.Trigger.doOnlineNavigationCompactification else 'HLTNav_Summary'
-    to_return = default_key
-
-    if flags.Trigger.doEDMVersionConversion:
-        to_return = 'HLTNav_R2ToR3Summary'
+    from AthenaConfiguration.Enums import LHCPeriod
+    if getattr(flags.Trigger, "doOnlineNavigationCompactification", True) is False:
+        default_key = 'HLTNav_Summary' # This can only be for Run 3(+), and is a very niche case of exporting un-compacted navigation collections for advanced debugging
+    elif getattr(flags.Trigger, "doEDMVersionConversion", False) is True and getattr(flags.GeoModel, "Run", LHCPeriod.Run3) <= LHCPeriod.Run2:
+        default_key = 'HLTNav_R2ToR3Summary' # This can only be for Run 2 navigation conversion.
     else:
-        for key in possible_keys:
-            if key in flags.Input.Collections:
-                to_return = key
-                break
+        default_key = 'HLTNav_Summary_OnlineSlimmed' # This is the default expected key for the navigation container within the serialised HLT payload inside Run 3(+) RAW files.
+    to_return = default_key
+    
+    for key in possible_keys:
+        if key in flags.Input.Collections:
+            to_return = key
+            break
 
     msg = logging.getLogger('getRun3NavigationContainerFromInput')
-    msg.info('Returning %s as the Run 3 trigger navigation colletion to read in this job.', to_return)
+    msg.info('Returning %s as the Run 3 trigger navigation collection to read in this job.', to_return)
 
     # Double check 'possible_keys' is kept up to date
     if to_return not in possible_keys:
