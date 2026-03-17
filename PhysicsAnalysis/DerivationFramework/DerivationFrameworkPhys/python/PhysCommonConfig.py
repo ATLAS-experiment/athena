@@ -98,7 +98,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc.merge(HadRecoilMETCfg(flags))
 
     from AssociationUtils.AssociationUtilsConfig import FEAssociationCfg
-    acc.merge(FEAssociationCfg(flags))
+    acc.merge(FEAssociationCfg(flags,
+        SmallRJetChargedFELinksDecorKey="",
+        SmallRJetNeutralFELinksDecorKey="",
+        LargeRJetChargedFELinksDecorKey="",
+        LargeRJetNeutralFELinksDecorKey=""))
     
     # Trigger matching and postprocessing
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':

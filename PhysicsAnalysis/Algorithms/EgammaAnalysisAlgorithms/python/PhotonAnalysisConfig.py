@@ -151,7 +151,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::PhotonContainer'
-            decorationList = ['DFCommonPhotonsCleaning']
+            decorationList = ['DFCommonPhotonsCleaning',
+                              'ptcone20_CloseByCorr',
+                              'topoetcone20_CloseByCorr',
+                              'topoetcone40_CloseByCorr']
             if self.addGlobalFELinksDep:
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:
@@ -398,18 +401,31 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             alg.selectionTool.selectionFlags = [ dfFlag ]
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             preselection=self.addSelectionToPreselection)
 
         # Set up the FSR selection
         if self.doFSRSelection :
-            # save the flag set for the WP
-            wpFlag = alg.selectionDecoration.split(",")[0]
+            # wpSelection needs the ',as_char' suffix so SysReadSelectionHandle knows the type
+            wpDecoration = alg.selectionDecoration
+            wpDecorationName = wpDecoration.split(',')[0]
+            # Insert FSR before the postfix (e.g., selectEM_loose -> selectEMFSR_loose)
+            underscorePos = wpDecorationName.index('_')
+            outputDecorationName = wpDecorationName[:underscorePos] + 'FSR' + wpDecorationName[underscorePos:]
+
             alg = config.createAlgorithm( 'CP::EgammaFSRForMuonsCollectorAlg', 'EgammaFSRForMuonsCollectorAlg')
-            alg.selectionDecoration = wpFlag
+            alg.wpSelection = wpDecoration  # Input: read the WP selection (with type suffix)
+            alg.selectionDecoration = outputDecorationName  # Output: combined WP||FSR (name only for SysWriteDecorHandle)
             alg.ElectronOrPhotonContKey = config.readName (self.containerName)
             if self.muonsForFSRSelection is not None:
                 alg.MuonContKey = config.readName (self.muonsForFSRSelection)
+
+            # Register the FSR COMBINED selection
+            config.addSelection (self.containerName, self.selectionName,
+                                 alg.selectionDecoration + ',as_char',
+                                 preselection=self.addSelectionToPreselection)
+        else:
+            # No FSR - register the WP selection directly
+            config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
+                                 preselection=self.addSelectionToPreselection)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :

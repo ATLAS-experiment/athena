@@ -87,6 +87,10 @@ namespace CP
   public:
     const std::string& getName (const CP::SystematicSet& sys) const;
 
+    /// \brief get the decoration name we use
+  public:
+    const std::string& getDecorName () const noexcept;
+
 
     /// \brief set the object decoration for the given systematic
   public:
