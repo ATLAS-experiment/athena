@@ -36,8 +36,8 @@ StatusCode LArParabolaPeakRecoTool::initialize()
   }
   ATH_MSG_INFO( "LArParabolaPeakRecoTool: correctBias flag is ON ");
   // if want to correct bias, open files
-  const std::string shapeFilePath = PathResolver::find_file (m_fileShapeName, "DATAPATH");
-  const std::string adcCorFilePath = PathResolver::find_file (m_fileADCcorName, "DATAPATH");
+  std::string shapeFilePath = PathResolver::find_file (m_fileShapeName, "DATAPATH");
+  std::string adcCorFilePath = PathResolver::find_file (m_fileADCcorName, "DATAPATH");
   if (shapeFilePath.empty()) {
     ATH_MSG_ERROR("Could not resolve shape file: " << m_fileShapeName);
     return StatusCode::FAILURE;
@@ -46,8 +46,8 @@ StatusCode LArParabolaPeakRecoTool::initialize()
     ATH_MSG_ERROR("Could not resolve ADC correction file: " << m_fileADCcorName);
     return StatusCode::FAILURE;
   }
-  m_fileShapeName  = shapeFilePath;
-  m_fileADCcorName = adcCorFilePath;
+  m_fileShapeName  = std::move(shapeFilePath);
+  m_fileADCcorName = std::move(adcCorFilePath);
   std::ifstream in{m_fileShapeName};
   if (!in) {
     ATH_MSG_ERROR("Failed to open shape file: " << m_fileShapeName);
