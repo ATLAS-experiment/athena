@@ -11,7 +11,8 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"
-#include "xAODInDetMeasurement/PixelClusterContainer.h"
+
+#include "xAODInDetMeasurement/PixelClusterAuxDataCache.h"
 
 namespace ActsTrk {
 
@@ -21,10 +22,11 @@ namespace ActsTrk {
     class IPixelSpacePointFormationTool : virtual public IAlgTool {
     public:
         DeclareInterfaceID(IPixelSpacePointFormationTool, 1, 0);
+        using PixelCluster_t = traits::ElementProxies<PixelClusterAuxDataCache<Utils::AccessPolicy::Const> >::ClusterProxy<Utils::AccessPolicy::Const>;
 
         /// @name Production of space points
         //@{
-	virtual StatusCode producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+	virtual StatusCode producePixelSpacePoint(const PixelCluster_t& cluster,
 						  xAOD::SpacePoint& sp,
 						  const InDetDD::SiDetectorElement& element) const = 0;
         //@}

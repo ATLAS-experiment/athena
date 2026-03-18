@@ -25,7 +25,7 @@ namespace ActsTrk {
     }
 
     StatusCode
-    PixelSpacePointFormationTool::producePixelSpacePoint(const xAOD::PixelCluster& cluster,
+    PixelSpacePointFormationTool::producePixelSpacePoint(const PixelCluster_t& cluster,
                                                          xAOD::SpacePoint& sp,
                                                          const InDetDD::SiDetectorElement& element) const
     {
@@ -52,7 +52,7 @@ namespace ActsTrk {
 			 cluster.globalPosition(),
 			 cov_r, 
 			 cov_z,
-			 std::vector< const xAOD::UncalibratedMeasurement* >({&cluster}));
+			 std::vector< const xAOD::UncalibratedMeasurement* >({cluster.getInterfaceObject()}));
 	
         return StatusCode::SUCCESS;
     }

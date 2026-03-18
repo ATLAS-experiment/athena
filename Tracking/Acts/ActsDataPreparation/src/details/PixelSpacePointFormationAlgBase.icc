@@ -70,7 +70,7 @@ namespace ActsTrk {
     const xAOD::PixelClusterContainer *pixelClusters = inputPixelClusterContainer.cptr();
     ATH_MSG_DEBUG("Retrieved " << pixelClusters->size() << " clusters from container " << m_pixelClusterContainerKey.key());
     m_stat[kNClusters] += pixelClusters->size();
-    
+    PixelClusterAuxDataCache<> cluster_aux_data_cache(*pixelClusters);
     auto pixelSpacePointContainer = SG::WriteHandle<xAOD::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );
     ATH_CHECK(pixelSpacePointContainer.record( std::make_unique<xAOD::SpacePointContainer>(),
@@ -87,7 +87,7 @@ namespace ActsTrk {
     }
 
     // Reserve space
-    pixelSpacePoints->reserve(pixelClusters->size());
+    pixelSpacePoints->reserve(cluster_aux_data_cache.size());
 
     // Early exit in case we have no clusters
     // We still are saving an empty space point container in SG
@@ -114,9 +114,9 @@ namespace ActsTrk {
     //need to track the index of the spacepoints which are being inserted, so they are continuous and so that the output collection can be trimmed
     unsigned int spIdx = 0;
 
-    for(unsigned int idx=0; idx<pixelClusters->size(); idx++){
-      const xAOD::PixelCluster* cluster = pixelClusters->at(idx);
-      IdentifierHash idHash = cluster->identifierHash();
+    using PixelClusterProxy_t = IPixelSpacePointFormationTool::PixelCluster_t;
+    for (PixelClusterProxy_t cluster_proxy : makePixelClusterAuxDataCacheProxy(cluster_aux_data_cache)) {
+      IdentifierHash idHash = cluster_proxy.identifierHash();
       if constexpr(useCache){
         //check if the idHash is already in the cache
         if(cacheHandle->tryAddFromCache(idHash)) continue;
@@ -131,7 +131,7 @@ namespace ActsTrk {
       //get the index of the output spacepoint, when not using the cache this should be equal to the cluster index
       unsigned int thisSpIdx = spIdx++;
 
-      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(*cluster,
+      ATH_CHECK( m_spacePointMakerTool->producePixelSpacePoint(cluster_proxy,
                                 *pixelSpacePoints->at(thisSpIdx),
                                 *pixelElement ) );
 
@@ -152,6 +152,7 @@ namespace ActsTrk {
         cache_ranges[(*groupIdHash)].emplace_back(groupStartIdx, spIdx);
       }
     }
+
 
     //finally resize the output for the actual number of inserted spacepoints
     pixelSpacePoints->resize(spIdx);
