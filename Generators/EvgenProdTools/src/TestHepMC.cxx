@@ -21,6 +21,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("MaxLoops",      m_maxloops = -1); //< Maximal number of particles allowed in the loops. -1 == any number
   declareProperty("PdgToSearch",      m_pdg = 15); //< @todo This test is a bit weirdly specific to taus
   declareProperty("CmEnergy",         m_cm_energy = -1); // in MeV, -1 = get from event
+  declareProperty("MinTransVtxDisp",  m_min_dist_trans = 0.); // mm
   declareProperty("MaxTransVtxDisp",  m_max_dist_trans = 100.); // mm
   declareProperty("MaxVtxDisp",       m_max_dist = 1000.); // mm;
   declareProperty("EnergyDifference", m_energy_diff = 1000.); // MeV
@@ -417,6 +418,27 @@ StatusCode TestHepMC::execute() {
           filter_pass = false;
         }
       }
+      if (dist_trans2 < m_min_dist_trans*m_min_dist_trans) {
+        ATH_MSG_WARNING("Found vertex position displaced by less than " << m_min_dist_trans
+                        << "mm in transverse distance: " << dist_trans << "mm");
+
+#ifdef HEPMC3
+        for (const auto& part: vtx->particles_in()) {
+#else
+        for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
+          auto part = (*part_it);
+#endif
+          if (m_dumpEvent){
+            ATH_MSG_WARNING("Incoming particle : ");
+            HepMC::Print::line(msg( MSG::WARNING ).stream(), part);
+          }
+        }
+
+        if (m_vtxDisplacedTest) {
+          filter_pass = false;
+        }
+      }
+
       if (dist_trans2 > m_max_dist_trans*m_max_dist_trans) {
         ATH_MSG_WARNING("Found vertex position displaced by more than " << m_max_dist_trans << "mm in transverse distance: " << dist_trans << "mm");
 
@@ -574,6 +596,7 @@ StatusCode TestHepMC::execute() {
         if (m_unknownPDGIDTest && std::find(m_uknownPDGID_tab.begin(),m_uknownPDGID_tab.end(),ppdgid)==m_uknownPDGID_tab.end()){
           ATH_MSG_WARNING("Invalid and unmasked PDG ID found: " << ppdgid);
           filter_pass = false;
+          ++m_unknownPDGIDCheckRate;
         }
       } // End of check for invalid PDG IDs
 
@@ -740,7 +763,7 @@ StatusCode TestHepMC::execute() {
       if (m_tachyonsTest) {
         filter_pass = false;
       }
-      ++m_energyBalanceCheckRate;
+      ++m_tachyonCheckRate;
     } // End of tachyon check
 
     // Unstable particles with no decay vertex
@@ -820,6 +843,7 @@ StatusCode TestHepMC::finalize() {
   ATH_MSG_INFO(" Event rate with invalid Beam Particles = " << m_invalidBeamParticlesCheckRate*100.0/denom << "% (not included in test efficiency)");
   ATH_MSG_INFO(" Event rate with beam particles and status not equal to 4 = " << m_beamParticleswithStatusNotFourCheckRate*100.0/double(m_nPass + m_nFail) << "% (not included in test efficiency)");
   ATH_MSG_INFO(" Event rate with incorrect beam particle energies = " << m_beamEnergyCheckRate*100.0/denom << "% (not included in test efficiency)");
+  ATH_MSG_INFO(" Configured minimum transverse vertex displacement = " << m_min_dist_trans << "~mm");
   ATH_MSG_INFO(" Event rate with NaN (Not A Number) or inf found in the event record vertex positions = " << m_vtxNANandINFCheckRate*100.0/denom << "%");
   if (!m_vtxNaNTest) ATH_MSG_INFO(" The check for NaN or inf in vtx. record is switched off, so is not included in the final TestHepMC efficiency ");
   ATH_MSG_INFO(" Event rate with vertices displaced more than " << m_max_dist_trans << "~mm in transverse direction for particles with status code other than 1 and 2 = " << m_vtxDisplacedstatuscodenot12CheckRate*100.0/denom << "% (not included in test efficiency)");
