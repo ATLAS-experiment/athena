@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -128,9 +128,6 @@ class LArRodDecoder : public AthAlgTool
 {
 
 public: 
-//   typedef EventFormat::RODHeader RODHEADER; //Give default template explicitly to work around apparent compiler bug
-//  typedef eformat::Header<const uint32_t *>  RODHeader ;
-
   /** Constructor
       Standard AlgTool constructor
   */
@@ -185,11 +182,6 @@ public:
   void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                       const uint32_t* p, uint32_t n, LArFebHeaderContainer& coll, const CaloGain::CaloGain) const;
 
-  //Send an error reported by the eformat package to a MsgStream.
-  //inline void report_error (const ers::Issue& error, MsgStream& log);
-  //Inputs: error: The eformat exception
-  //        log:   The Gaudi MsgStream.
-
   //Check an eformat fragment for validity. Report an error if it's not valid.
   template <class T>
   inline bool check_valid (const T* frag, MsgStream& log) const;
@@ -213,8 +205,6 @@ private:
 
   inline void writeFebInfo(
      LArCellCollection& m_coll, LArFebEnergy& febene) const;
-
-  //  inline void writeFebInfo(LArRawChannelContainer& m_coll, LArFebEnergy& febene);
 
   
   SG::ReadHandleKey<xAOD::EventInfo>    m_evt  {this, "EvtInfo", "EventInfo", "EventInfo name"};
@@ -253,22 +243,10 @@ private:
 template <class T>
 inline bool LArRodDecoder::check_valid (const T* frag, MsgStream& /*log*/) const
 { 
-
-
-/* FIXME,  exception?
-  EventFormat::Error error;
-  if (!frag->is_valid (&error)) {
-    report_error (error, log);
-    return false;
-  }
-  return true;
-*/
-
   bool ret=false;
   try {
     ret=frag->check();
   } 
-  //catch ( .... ) {
   catch (eformat::Issue& ex) {
     msg(MSG::WARNING) << "Exception while checking eformat fragment validity: " << ex.what() << endmsg; 
     ret=false;
@@ -276,12 +254,6 @@ inline bool LArRodDecoder::check_valid (const T* frag, MsgStream& /*log*/) const
   return ret;
 
 }
-
-/*
-inline void LArRodDecoder::report_error (const ers::Issue& error, MsgStream& log)
-{ log << MSG::FATAL << "Error reading bytestream event: " << error.what() << endmsg;
-}
-*/
 
 // fillCollection for HLT without automatic BS Cnv
 // default values
@@ -298,11 +270,6 @@ uint32_t LArRodDecoder::fillCollectionHLT(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
 #ifndef NDEBUG
   ATH_MSG_VERBOSE("Prepare LArRodBlockStructure. Got a fragment of size " << n);
 #endif
-/*  if (n<2) //Avoid segmentation fault
-    {(*m_log) << MSG::WARNING << "Got empty Rod Fragment!" << endmsg;
-     return;
-    }
-*/
   const uint32_t blocksize=p[0]; //First word contains block size
   if (blocksize>n) {
     msg(MSG::ERROR) << "Got truncated ROD Fragment!" << endmsg;
@@ -386,7 +353,6 @@ uint32_t LArRodDecoder::fillCollectionHLT(const OFFLINE_FRAGMENTS_NAMESPACE::ROB
         if ( quality>=0 ) { iprovenance|= 0x2000; iquality=(quality& 0xffff);}
 	// time converted to ns
 	collElem->set(energy, time*1e-3, iquality, iprovenance, (CaloGain::CaloGain)gain);
-        //setCellEnergy(collElem,energy, time, quality, (CaloGain::CaloGain)gain);
        }
        continue;
     } 

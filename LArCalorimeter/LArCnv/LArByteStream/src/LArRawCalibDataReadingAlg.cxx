@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArRawCalibDataReadingAlg.h"
@@ -105,7 +105,6 @@ LArRawCalibDataReadingAlg::LArRawCalibDataReadingAlg(const std::string& name, IS
       for (const unsigned iPN: m_vPosNegPreselection) {
 	for (const unsigned iFT: m_vFTPreselection) {
 	  HWIdentifier finalFTId=m_onlineId->feedthrough_Id(iBE,iPN,iFT);
-	  //unsigned int finalFTId32 = finalFTId.get_identifier32().get_compact();
 	  ATH_MSG_INFO("Adding feedthrough Barrel/Endcap=" << iBE << " pos/neg=" << iPN << " FT=" << iFT 
 		       << " (0x" << std::hex << finalFTId.get_identifier32().get_compact() << std::dec << ")");
 	  m_vFinalPreselection.insert(finalFTId);

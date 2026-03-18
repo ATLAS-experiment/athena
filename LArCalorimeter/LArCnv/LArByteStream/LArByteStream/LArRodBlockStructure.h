@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,7 +26,6 @@
    *
    */
                   
-// #include "eformat/RODHeader.h"
 #include "ByteStreamData/RawEvent.h"
 #include <stdint.h>
 #include <iostream>
@@ -34,9 +33,7 @@
 #include <map>
 #include <utility>
 
-//#define LARBYTESTREAMRODBLOCK_CHCKBOUNDARIES
 
-//class LArCablingService; 
 class LArOnlineID; 
 class LArRawChannel; 
 class LArDigit;
@@ -90,7 +87,6 @@ public :
   virtual void sortDataVector( std::vector<const LArAccumulatedCalibDigit*>& );
   virtual void sortDataVector( std::vector<const LArAccumulatedDigit*>& );
   // build full ROD fragment
-  //  virtual void concatinateFEBs(RODHeader* fullHeader=NULL);
   virtual void concatinateFEBs( );
   //Check features of this RodBlock
   virtual bool canSetEnergy() { return false;}
@@ -104,7 +100,6 @@ public :
   // Never to be used while encoding!
   // set full ROD fragment before trying to get anything!
   inline bool     setFragment(const uint32_t* p, uint32_t n);
-  //   virtual bool nextFEB(RODHeader* fullHeader=NULL);
   inline bool     nextFEB ( );
   inline uint32_t getNumberOfWords() const;
   inline uint32_t getFEBID() const;
@@ -168,8 +163,6 @@ public :
   inline void setFirstSample(const int rearrangeFirstSample)
       {m_rearrangeFirstSample=rearrangeFirstSample;}
 
-  //inline uint32_t FebToOfflineGain(const uint32_t gain) const;
-  //inline uint32_t OfflineToFebGain(const uint32_t gain) const;
   inline uint32_t RawToOfflineGain(const uint32_t gain) const;
   inline uint32_t OfflineToRawGain(const uint32_t gain) const;
   virtual inline int FebToRodChannel(int ch) const
@@ -219,8 +212,6 @@ public :
 
   //Offsets for the fixed size Blocks..
   unsigned short m_iHeadBlockSize; 
-  //Only for encoding: Block for Header
-  //std::vector<uint32_t>  m_HeaderBlock;
   //Number of channels per FEB
   int m_channelsPerFEB;
   //Full ROD fragment for decoding
@@ -270,7 +261,6 @@ inline bool LArRodBlockStructure::setFragment(const uint32_t* p, uint32_t n)
   m_FebBlockSize = BlockSize;
   
   m_error_next_feb = false;
-  //std::cout << "1: FEB found with size " << m_FebBlockSize << std::endl;
 
   return setPointers();
 }
@@ -336,16 +326,6 @@ inline int32_t  LArRodBlockStructure::getVROBSumE() const{
 return 0;
 }
 
-/*
-inline int LArRodBlockStructure::FebToRodChannel(int ch) const
-  //{return ch/8 + 16 * (ch%8);}
-{return (ch>>3) + ((ch&0x7)<<4);}
-
-inline int LArRodBlockStructure::RodToFebChannel(int ch) const
-  //{return ch/16 + 8 * (ch%16);}
-{return (ch>>4) + ((ch&0xf)<<3);}
-*/
-
 inline uint32_t LArRodBlockStructure::RawToOfflineGain(const uint32_t gain) const
 {return m_RawToOfflineGainMap[gain];} //For efficency, don't check range
 
@@ -354,8 +334,6 @@ inline uint32_t LArRodBlockStructure::OfflineToRawGain(const uint32_t gain) cons
 
 inline uint16_t LArRodBlockStructure::getHeader16(const unsigned n) const // n should be choosen from the above enum
 {
-  //  std::cout << "getHeader16: " << m_FebBlock << " " << m_FebBlock[5] << " "
-  //    << n << " " << (n>>1) << " " << (m_FebBlock[5]&0xffff) << std::endl;
  if (n&0x1) //n is a odd number 
    return m_FebBlock[n>>1] & 0xffff;  //1,3,5... are fetched from lower bits
  else //n is a even number
@@ -504,18 +482,14 @@ inline bool LArRodBlockStructure::nextFEB()
 
   m_FebBlock += FebOffset; //Jump to the next FEB fragment
   const int32_t BlockSize = getNumberOfWords();
-  //std::cout << "LeftSize=" << LeftSize << " BlockSize=" << BlockSize << std::endl;
   if (BlockSize>LeftSize) {
       std::cout << "Error while decoding LArByteStream: Found FEB block of size " << BlockSize << " in a ROD block of size " << LeftSize << std::endl;
       m_error_next_feb = true;
       return false;
     }
-  //std::cout << "Second FEB ok, size= " << LeftSize <<std::endl;
   
-  //m_FebBlockSize   = LeftSize; //should be =BlockSize;
   m_FebBlockSize=BlockSize;
 
-  //std::cout << "2: FEB found with size " << m_FebBlockSize << std::endl;
   setPointers();
   return true;
 }

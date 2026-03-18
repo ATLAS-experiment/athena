@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of the LArRODBlockStructure_3 class
@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <iostream>
 
-//#define LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) m_logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -90,8 +89,7 @@ bool LArRodBlockPhysicsV0::setPointers()
        m_LowEPtr=reinterpret_cast<const int16_t*>(m_FlagPtr+m_NFlaggingWords);
       }
     else 
-      {//m_FlagPtr=NULL;
-       //m_LowEPtr=NULL;
+      {
        //Bugfix, 9.8.2004, WL: Set pointer to dummy map to read FEB with only high energy block
 	m_FlagPtr=m_DummyBitMap;
 	m_LowEPtr=reinterpret_cast<const int16_t*>(m_FlagPtr);
@@ -106,25 +104,6 @@ bool LArRodBlockPhysicsV0::setPointers()
     m_LowEPtr=NULL;
     m_HighEPtr=NULL;
    }
-#ifdef LARBSDBGOUTPUT
- std::cout << "Fragment offsets: (m_NFlaggingWords=" << m_NFlaggingWords << ")" << std::endl;
- std::cout << "Raw Data: " << LE_getHeader16(RawDataBlkOffset)<< std::endl;
- if (m_FlagPtr)
-   std::cout << "Flags: " << LE_getHeader16(LowEBlkOffset)<< std::endl;
- else
-   std::cout << "Flags: not present" << std::endl;
-
- if (m_LowEPtr)
-   std::cout << "Low Energy: " << LE_getHeader16(LowEBlkOffset)+m_NFlaggingWords << std::endl;
- else
-   std::cout << "Low Energy: not present" << std::endl;
-
-
- if (m_HighEPtr)
-   std::cout << "High Energy: " << LE_getHeader16(HighEBlkOffset)<< std::endl;
- else
-   std::cout << "High Energy: not present" << std::endl;
-#endif
  return true;
 }
 
@@ -154,7 +133,6 @@ void LArRodBlockPhysicsV0::setNextEnergy(const int channel, const int32_t energy
    setNextEnergy(0,0,-1,0);
  //Add data...
  setNextEnergy(energy,time,quality,gain);
- //std::cout << "SetNextEnergy " << channel << " : " << energy << std::endl;
  return;
 }
 //Private function, expects channel number is rod-style ordering
@@ -197,20 +175,16 @@ void LArRodBlockPhysicsV0::setNextEnergy(const int32_t energy, const int32_t tim
     abs_time=abs(time);
     if (abs_time>0x1fff)
       abs_time=0x1fff;
-    //uint32_t gtQ = (gain << 30) | ((time & 0x3fff)<<16) | (0xffff & quality);
     uint32_t gtQ = (gain << 30) | (t_sign<<29) | ((abs_time & 0x1fff)<<16) | (0xffff & quality);
     m_HighEnergyBlock.push_back(gtQ); 
     LARBSDBG("Writing Raw data to High E block. E=" << energy << " Q=" << quality);
    }
  m_EIndex++;
- // if (energy>0)
- //m_ECounter++;
 }
 
 
 void LArRodBlockPhysicsV0::setRawData(const int channel, const std::vector<short>& samples, const uint32_t gain) {
  //Convert Feb to Rod Channel Number:
- //int rcNb=(channel>>3) + ((channel&0x7)<<4);
  int rcNb=FebToRodChannel(channel);
  if (rcNb>=m_channelsPerFEB) 
    {m_logstr << MSG::ERROR << "Attempt to write Energy for channel " << rcNb << " channels into a FEB!" << endmsg;
@@ -253,7 +227,6 @@ void LArRodBlockPhysicsV0::initializeFragment(std::vector<uint32_t>& fragment)
       m_FebBlock=&(*FebIter); //Set m_FebBlock in order to use getHeader-functions.
       uint32_t currFEBid=getHeader32(FEBID); //Get this FEB-ID
       uint16_t currFebSize=getNumberOfWords(); //Size of this FEB-Block
-      //std::cout << "FebID=" << currFEBid << " FEBSize=" << currFebSize << " Vector size=" << fragment.size() << std::endl;
       if (FebIter+currFebSize>fragment.end()) {
 	fragment.clear(); //Clear existing vector
 	m_logstr << MSG::ERROR  << "Got inconsistent ROD-Fragment!" << endmsg; 
@@ -335,25 +308,11 @@ void LArRodBlockPhysicsV0::finalizeFEB()
 
 void  LArRodBlockPhysicsV0::concatinateFEBs() 
 {
-  //std::cout << "Concatinating FEBs. Have "<< m_mFebBlocks.size() <<" febs." << std::endl;
  FEBMAPTYPE::const_iterator feb_it_b=m_mFebBlocks.begin();
  FEBMAPTYPE::const_iterator feb_it_e=m_mFebBlocks.end();
  FEBMAPTYPE::const_iterator feb_it;
  for (feb_it=feb_it_b;feb_it!=feb_it_e;++feb_it) {
    if (feb_it!=feb_it_b) //Not first Feb
-
-/* 
-     if (fullHeader) {//Add middle header
-       m_pRODblock->push_back(fullHeader->version().full());//Format Version number
-       m_pRODblock->push_back(fullHeader->source_id());  //Source identifer
-       m_pRODblock->push_back(fullHeader->run_no());
-       m_pRODblock->push_back(fullHeader->lvl1_id());    //Level 1 identifer
-       m_pRODblock->push_back(fullHeader->bc_id());      //Bunch Crossing identifer 
-       m_pRODblock->push_back(fullHeader->lvl1_type());  //Level 1 trigger type
-       m_pRODblock->push_back(fullHeader->detev_type()); //Detector event type
-     }
-     else //No ROD-Header
-*/
        m_pRODblock->resize( m_pRODblock->size()+m_MiddleHeaderSize);
    
    //Add feb data to rod data block
@@ -420,142 +379,9 @@ int LArRodBlockPhysicsV0::getNextRawData(int& channelNumber, std::vector<short>&
 }
 
 
-
-/*
-void LArRodBlockPhysicsV0::dumpFragment()
-{ 
-  if (m_pRODblock)
-    std::cout << "Dump of LArRodFragment. Block Type=3. Size of vector=" << m_pRODblock->size() <<std::endl;
-  else
-    std::cout << "Dumping FEB block" << std::endl;
- int size_read=0;
- int size_tot=0;
- if (m_pRODblock)
-   size_tot=m_pRODblock->size();  
- do {
-   std::cout <<"Begin of do-while loop:" << std::endl;
-   if (m_pRODblock)
-     m_FebBlock=&m_pRODblock->at(size_read);
-   char s[33];
-   int i;
-   int FlagPosition;
-   int CurrentPosition = 0;
-   
-   std::cout << " Head Block size = " << m_iHeadBlockSize << std::endl;
-   for (i=0;i<m_iHeadBlockSize;i++) {
-     sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-     std::cout << "  " << CurrentPosition << " " << s 
-	       << " = " << (m_FebBlock[CurrentPosition]>>16) 
-	       << " " << (m_FebBlock[CurrentPosition] &0xffff) << std::endl;
-     CurrentPosition++;
-   }
-   std::cout << "Energy Block offset: " << LE_getHeader16(EBlkOffset) << std::endl;
-   std::cout << "tQ Block offset: " << LE_getHeader16(tQBlkOffset) << std::endl;
-   std::cout << "Raw Data Block offset " << LE_getHeader16(RawDataBlkOffset) << std::endl;
-   
-   while (CurrentPosition<getNumberOfWords())
-     {FlagPosition=CurrentPosition;
-      if (CurrentPosition==LE_getHeader16(EBlkOffset))
-	{std::cout << " Found Energy Block at offset = " << LE_getHeader16(EBlkOffset) << std::endl;
-	 for (i=0; i<m_NFlaggingWords; i++) {
-	   sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	   std::cout << "  " << CurrentPosition << " " << s 
-		     << " Flag word" << std::endl;
-	   CurrentPosition++;
-	 }
-	 for (i=0; i<m_NFlaggingWords*32; i++) {
-	   if(getBit(&m_FebBlock[FlagPosition],i)) {
-	     sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	     std::cout << "  " << CurrentPosition << " " << s 
-		       << " ROD Channel "  << i << " FEB Channel " << RodToFebChannel(i)
-		       << " = " << m_FebBlock[CurrentPosition] << std::endl;
-	     CurrentPosition++;
-	   }
-	 }
-	} // end if energy block
-      else if (CurrentPosition==LE_getHeader16(tQBlkOffset))
-	{std::cout << " Found tQ Block at position = "  << LE_getHeader16(tQBlkOffset) << std::endl;
-	FlagPosition = CurrentPosition; 
-	for (i=0; i<m_NFlaggingWords; i++) {
-	  sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	  std::cout << "  " << CurrentPosition << " " << s 
-		    << " Flag word" << std::endl;
-	  CurrentPosition++;
-	}
-	for (i=0; i<m_NFlaggingWords*32; i++) {
-	  if(getBit(&m_FebBlock[FlagPosition],i)) {
-	    sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	    std::cout << "  " << CurrentPosition << " " << s 
-		      << " ROD Channel " << i << " FEB Channel " << RodToFebChannel(i)
-		      << " = " << (m_FebBlock[CurrentPosition]>>16) 
-		      << " " << (m_FebBlock[CurrentPosition] &0xffff) << std::endl;
-	    CurrentPosition++;
-	  }
-	}
-	}// end if tQ block
-      else if (CurrentPosition==LE_getHeader16(RawDataBlkOffset))
-	{std::cout << "Found Raw Data Block at position = "  <<LE_getHeader16(RawDataBlkOffset) << std::endl;
-	FlagPosition = CurrentPosition;
-	for (i=0; i<m_NFlaggingWords; i++) {
-	  sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	  std::cout << "  " << CurrentPosition << " " << s 
-		    << " Flag word" << std::endl;
-	  CurrentPosition++;
-	}
-	for (i=0; i<m_NFlaggingWords*32; i++) {
-	  if(getBit(&m_FebBlock[FlagPosition],i)) {
-	    int nsamples = LE_getHeader16(NSamples);
-	    for(int j=0;j<nsamples;j+=2) {
-	      sprintf(s,"%8.8x",m_FebBlock[CurrentPosition]);
-	      std::cout << "  " << CurrentPosition << " " << s 
-			<< " ROD Channel " << i << " FEB Channel " << RodToFebChannel(i)
-			<< " samples " << j << " and " << j+1 << " = " 
-			<< ((m_FebBlock[CurrentPosition]>>16) & 0x3fff) << " " //Mask gain!
-			<< (m_FebBlock[CurrentPosition] & 0xffff) << std::endl;
-	      CurrentPosition++;
-	    }
-	  }
-	}
-	}// end if Raw Data block
-      else
-	{std::cout << "UNKNOWN block found at position" << CurrentPosition << std::endl;
-	 return;
-	}
-     }// end while
-   size_read+=CurrentPosition+6;
-   std::cout << " ------- End of FEB-Block (size_read=" <<size_read << ", size_tot=" << size_tot << ") -------" << std::endl;
- } while(size_read<size_tot);
- std::cout << " ------------------ End Of ROD-Framgent -----------------" << std::endl;
-}
-*/
-
-/*
-void LArRodBlockPhysicsV0::dumpFragment(const std::vector<uint32_t>& v)
-{
-  uint32_t size_tot = v.size();
-  uint32_t size_read = 0; 
-  std::cout << "LAr ROD vector size =  " << size_tot << std::endl;
-
-  int ifeb=0;
-  while(size_read<size_tot) 
-    {      
-      m_FebBlock = &(v[0]); 
-      m_FebBlock+= size_read;
-      std::cout << "LAr ROD - FEB " << ifeb << std::endl;
-      dumpFragment();
-      // next FEB
-      size_read += getNumberOfWords()+6;
-      ifeb++;
-    }
-  std::cout << "End of ROD-Fragment" << std::endl;
-}
-*/
-
-
 //Sort functions & ordering relation:
 template<class RAWDATA>
 bool LArRodBlockPhysicsV0::operator () 
-  //(const LArRawChannel* ch1, const LArRawChannel* ch2) const
   (const RAWDATA* ch1, const RAWDATA* ch2) const
 {
   HWIdentifier id1 = ch1->channelID(); 

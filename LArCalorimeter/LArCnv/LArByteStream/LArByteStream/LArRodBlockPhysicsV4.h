@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPHYSICSV4_H
@@ -148,7 +148,6 @@ inline int LArRodBlockPhysicsV4::getNextEnergy(int& channelNumber,int32_t& energ
  
   unsigned rodChannelNumber=m_EnergyIndex;      // Index of Channel in ROD-Block
   channelNumber=((rodChannelNumber&0xe)<<2) + ((rodChannelNumber&0x1)<<6) + (rodChannelNumber>>4);    //channel number of the FEB
-  //channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
 
   // get information available for all cells
   // Energy on a 16 bit word and decode ranges

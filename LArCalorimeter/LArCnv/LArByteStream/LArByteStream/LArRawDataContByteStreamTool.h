@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -123,7 +123,6 @@ private:
   /** Construct a RodBlockStructure instance of the proper concrete type. */
   std::unique_ptr<LArRodBlockStructure> makeRodBlockStructure() const;
 
-  //StatusCode prepareWriting();
   /** 
    * @brief Check that all elements in a container have the same gain
    * @param coll Pointer to input container (template)

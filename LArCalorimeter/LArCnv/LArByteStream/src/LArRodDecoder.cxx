@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of LArRodDecoder class 
@@ -11,7 +11,6 @@
 #include "GaudiKernel/IToolSvc.h"
 
 #include "LArByteStream/LArRodBlockStructure.h"
-//#include "LArByteStream/LArRodBlockStructure_0.h"
 #include "LArByteStream/LArRodBlockTransparentV0.h"
 #include "LArByteStream/LArRodBlockCalibrationV0.h"
 // IWS 14.07.2005
@@ -152,7 +151,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	msg(MSG::WARNING) << "Invalid FEB identifer 0x" << std::hex << fId32 << std::dec << ". Skipping" << endmsg;
 	continue;
       }
-      // std::cout << "digit FEBID=" << std::hex<<  " " <<fId32 << std::dec<<std::endl;
       if(m_febExchange) {
         if     (fId32 == m_febId1) {
           fId = HWIdentifier(Identifier32(m_febId2));
@@ -244,7 +242,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	msg(MSG::WARNING) << "Invalid FEB identifer " << std::hex << fId32 << std::dec << ". Skipping" << endmsg;
 	continue;
       }
-      // std::cout << "rawChan FEBID=" << std::hex <<fId32 << std::dec<<std::endl;
 
       if(m_febExchange) {
         if     (fId32 == m_febId1) {
@@ -339,7 +336,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
   if (BlStruct->canSetCalibration()) {
     dac=BlStruct->getDAC();
     delay=BlStruct->getDelay();
-    //    int iFeb=0, iCan=0; //For debug purpose
     do
       {
 	// IWS 24.01.2006 protection against NULL events (null pointer to rawdata block) 
@@ -480,9 +476,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 
       //Now start looping over channels in FEB
       const int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
-      //std::cout << "Processing FEB #" << iFeb++ << std::endl;
-      
-      //int iCan=0;
 
       fcNb=0;
       while (BlStruct->getNextRawData(fcNb,samples,gain))
@@ -491,8 +484,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	  if (samples.size()==0) continue; // Ignore missing cells
 	  cId = m_onlineHelper->channel_Id(fId,fcNb);
 	  calibChannelIDs=&calibLineMapping.calibSlotLine(cId);
-	  //if (calibChannelIDs->size()==0) 
-	  //continue; //Disconnected channel
 	  //For the time being, I assume we are in H8 and have only one calib channel per FEB channel
 
 	  if (calibChannelIDs->size()!=0) {
@@ -505,7 +496,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
 	  samples.clear();
 	  
 	  coll.push_back(dg);
-	  //iCan++;
 	}
     }
     while (BlStruct->nextFEB()); //Get NextFeb
@@ -532,9 +522,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
   int fcNb;
   std::vector< uint64_t > samplesSum;   
   std::vector< uint64_t > samples2Sum;   
-
-  //  for(int i=0;i<16;i++)
-  //  std::cout << " -     " << std::hex << p[i] << std::endl;
 
   LArRodBlockStructure* BlStruct=prepareBlockStructure(robFrag, p, n, RequestedGain);
   if (!BlStruct) return;
@@ -650,13 +637,9 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
   LArAccumulatedDigit * dg=0 ;
   CaloGain::CaloGain calogain;
   uint32_t gain, ntrigger;
-  //int NStep=-1, StepIndex=-1;
   int fcNb;
   std::vector<uint64_t> sampleSum;   
   std::vector< uint64_t > sampleSquare;   
-
-  //  for(int i=0;i<16;i++)
-  //  std::cout << " -     " << std::hex << p[i] << std::endl;
 
   LArRodBlockStructure* BlStruct=prepareBlockStructure(robFrag, p, n, RequestedGain);
   if (!BlStruct) return;
@@ -721,9 +704,6 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
       }
       int NthisFebChannel=m_onlineHelper->channelInSlotMax(fId);
       ntrigger=BlStruct->getNTrigger();
-      //NStep=BlStruct->getNStep();
-      //if(!NStep) NStep=1; // To be able to decode v6 code
-      //StepIndex=BlStruct->getStepIndex();
       while (BlStruct->getNextAccumulatedDigit(fcNb,sampleSum,sampleSquare,gain)) {
 	  if (fcNb>=NthisFebChannel)continue;
 	  if (sampleSquare.size()==0) continue; // Ignore missing cells
@@ -742,19 +722,13 @@ void LArRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragmen
                                    const uint32_t* p, uint32_t n, LArFebHeaderContainer& coll,const CaloGain::CaloGain RequestedGain) const
 {
   LArFebHeader* larFebHeader;
-  //uint32_t NWtot=0;
   HWIdentifier FEBID;
-
-  //  for(int i=0;i<16;i++)
-  //  std::cout << " -     " << std::hex << p[i] << std::endl;
 
   LArRodBlockStructure* BlStruct=prepareBlockStructure(robFrag, p, n, RequestedGain);
   if (!BlStruct) return;
 
   do{
     //Read first FEB. The header of this feb is combined with the ROD-Header
-    //NWtot=BlStruct->getNumberOfWords();
-    //if(NWtot<=4) continue;
 
     FEBID=HWIdentifier(Identifier32(BlStruct->getFEBID()));
     unsigned int FEBID32 = FEBID.get_identifier32().get_compact();
@@ -885,7 +859,6 @@ LArRodDecoder::prepareBlockStructure(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragm
     return nullptr;
   }
 
-  //BlStruct->dumpFragment(v); // For testing purpose
   if (!BlStruct->setFragment(p,n)) {
     constexpr int maxMess = 100;
     static std::atomic<int> nMess = 1;

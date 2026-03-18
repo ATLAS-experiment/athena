@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKCALIBRATIONV0_H
@@ -96,7 +96,6 @@ inline void LArRodBlockCalibrationV0<DSPHEADER>::setDelay(const uint16_t delayVa
 template<class DSPHEADER>
 inline void LArRodBlockCalibrationV0<DSPHEADER>::setDAC(const uint16_t dacValue)
 {this->setHeader16(DSPHEADER::Dac,dacValue);
-//std::cout << "Set DAC-Value to " << dacValue << std::endl;
 }
 
 
