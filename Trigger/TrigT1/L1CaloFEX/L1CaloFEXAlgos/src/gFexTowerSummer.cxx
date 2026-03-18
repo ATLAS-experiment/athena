@@ -666,15 +666,19 @@ void gFexTowerSummer::undoMLE(int &datumPtr ) const{
   } 
   **/
   else if( ( oth0) & (  oth1 ) & ( oth2 ) & (! oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r3conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (! oth4 ) & (! oth5 ) & (! oth6 )  ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r4conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (! oth5 ) & (! oth6 ) ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r5conv >>1;
   } 
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & ( oth5 ) & (! oth6 ) ) {
+    // cppcheck-suppress shiftNegativeLHS; well-defined in c++20
     dout = r6conv >>1;
   }  
   else if( ( oth0) & (  oth1 ) & (  oth2 ) & ( oth3 ) &  (  oth4 ) & (  oth5 ) & ( oth6 )  ) {
