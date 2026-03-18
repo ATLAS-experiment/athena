@@ -1,7 +1,5 @@
 #!/bin/bash
 # art-description: Run 4 configuration, ITK only recontruction with ACTS, no pileup
-# art-input: mc21_14TeV:mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14697
-# art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
 # art-output: acts-expert-monitoring*.root
@@ -14,6 +12,7 @@ lastref_dir=last_results
 dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk.xml
 dcubeXmlTechEff=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=1000
+rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4494_r16632/*
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -44,7 +43,7 @@ run "Reconstruction-athena" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doITkFastTracking=True;" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events}
 
@@ -77,7 +76,7 @@ run "Reconstruction-acts" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
-    --inputRDOFile ${ArtInFile} \
+    --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events}
 
