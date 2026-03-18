@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Example standalone executable using TEvent (from POOL or xAODRootAccess) to read an xAOD
@@ -56,7 +56,7 @@ using namespace asg::msgUserCode;  // messaging
 }
 
 //coverity[root_function]
-int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -162,4 +162,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 #endif
 
   return 0;
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }

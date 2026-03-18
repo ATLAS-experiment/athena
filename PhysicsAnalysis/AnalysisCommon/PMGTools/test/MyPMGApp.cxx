@@ -30,7 +30,7 @@
 using namespace asg::msgUserCode;
 
 //coverity[UNCAUGHT_EXCEPT]
-int main(int argc, char *argv[])
+int test1(int argc, char *argv[])
 {
   ANA_CHECK_SET_TYPE (int); // makes ANA_CHECK return ints if exiting function
 
@@ -175,5 +175,17 @@ int main(int argc, char *argv[])
 
   return 0;
 }
+
+
+int main(int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
+}
+
 
 #endif //> !PMGTOOLS_MYPMGAPP_H
