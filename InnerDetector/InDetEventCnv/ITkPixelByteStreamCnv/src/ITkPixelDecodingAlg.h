@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITKPIXEL_DECODINGALG_H
@@ -18,8 +18,6 @@
 #include "itksw/pix/endec/DecCore.hpp"
 #include <chrono>
 
-
-using namespace itksw::pix::endec;
 
 //class PixelID;
 
