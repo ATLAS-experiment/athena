@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <vector>
+#include <map>
 
 struct MatchedParent;
 

@@ -6,9 +6,10 @@
 #include "StoreGate/WriteDecorHandle.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-#include "TruthUtils/HepMCHelpers.h"
-
 #include <format>
+#include <limits>
+#include <set>
+#include <stdexcept>
 
 // structure to hold info on a matched parent particle
 struct MatchedParent
@@ -32,7 +33,7 @@ namespace {
     parent_mask_t mask = 0x0;
     for (const auto& match: matches) {
       constexpr size_t max_idx = std::numeric_limits<decltype(mask)>::digits;
-      if (match.parent_index > max_idx) {
+      if (match.parent_index >= max_idx) {
         throw std::runtime_error(
           "parent index overflowed the match mask "
           "[index: "  + std::to_string(match.parent_index) +
@@ -458,10 +459,10 @@ void TruthParentDecoratorAlg::addTruthContainer(Barcodex& barcodex,IPMap& ipmap,
   // this determines if a cascade vertex should be saved or not
   auto cascadeWants = [
     &targid,
-    b=m_add_b,
-    c=m_add_c,
-    vsl=m_veto_soft_lepton,
-    vsc=m_veto_soft_charm
+    &b=m_add_b,
+    &c=m_add_c,
+    &vsl=m_veto_soft_lepton,
+    &vsc=m_veto_soft_charm
     ] (const xAOD::TruthParticle* p) {
     if (int n_parents = p->nParents(); n_parents == 1) {
       if (vsl && isSoftLepton(p)) return false;
