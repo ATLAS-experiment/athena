@@ -15,11 +15,10 @@
 #include "ActsGeoUtils/TransformCache.h"
 
 // ACTS
-#include "Acts/Geometry/DetectorElementBase.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 
 // STL
-#include <iostream>
+#include <memory>
 
 namespace InDetDD {
 class TRT_BaseElement;
