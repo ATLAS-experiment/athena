@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGGERMATCHINGTOOL_R3MATCHINGTOOL_H
 #define TRIGGERMATCHINGTOOL_R3MATCHINGTOOL_H
 
 #include "AsgTools/AsgTool.h"
+#include "Gaudi/Property.h"
 #include "AsgTools/ToolHandle.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "TriggerMatchingTool/IMatchScoringTool.h"
@@ -45,6 +46,9 @@ namespace Trig
     ToolHandle<TrigDecisionTool> m_trigDecTool;
     ToolHandle<Trig::IMatchScoringTool> m_scoreTool{
         this, "ScoringTool", "Trig::DRScoringTool","Tool to score pairs of particles"};
+    Gaudi::Property<bool> m_includeSubfeatures{
+        this, "IncludeSubfeatures", false,
+        "When true, also retrieve 'subfeature' links (lower-pT objects from Run2->Run3 conversion)"};
     bool matchObjects(
         const xAOD::IParticle *reco,
         const ElementLink<xAOD::IParticleContainer> &onlineLink,

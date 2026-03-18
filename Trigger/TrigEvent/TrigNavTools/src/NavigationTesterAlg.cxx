@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <iterator>
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "TrigDecisionTool/Conditions.h"
 #include "NavigationTesterAlg.h"
 #include "SpecialCases.h"
 
@@ -77,8 +78,11 @@ namespace Trig {
     {
         for (const std::string &chain : m_chains)
         {
-            ATH_MSG_DEBUG("Begin testing chain " << chain << (m_tdt->isPassed(chain) ? " and will dive into details as the chain passed " : " but will not do anything as the chain did not pass"));
-            if (!m_tdt->isPassed(chain)) continue;
+            if (!m_tdt->isPassed(chain, TrigDefs::Physics | TrigDefs::allowResurrectedDecision)) {
+                ATH_MSG_DEBUG("Skipping chain " << chain << " (not passed)");
+                continue;
+            }
+            ATH_MSG_DEBUG("Testing chain " << chain);
 
             // explicitely excluded chains
             bool isExcluded = false;
@@ -100,7 +104,7 @@ namespace Trig {
             // combinations, we just care that they are the same. Therefore, we can convert the
             // vectors to sets and just look at the differences between them
             CombinationsVector vecCombinationsRun2;
-            ATH_MSG_DEBUG("###### checking features of CHAIN " << chain);
+            ATH_MSG_DEBUG("Checking features of chain " << chain);
             ATH_CHECK(m_toolRun2->retrieveParticles(vecCombinationsRun2, chain));
             auto combsRun2 = vectorToSet(vecCombinationsRun2);
             ATH_MSG_DEBUG("Run 2 size " << combsRun2.size());
@@ -179,11 +183,12 @@ namespace Trig {
 
 
     StatusCode NavigationTesterAlg::verifyCombinationsSize(const CombinationsVector& run2, const CombinationsVector& run3, const std::string& chain) const {
-        if (run2.size() > run3.size()) { // in Run3 we do not use decision per RoI but per object. For single RoI there is more than one object we will have more combinations in Run3
-            ATH_MSG_WARNING("Issue in combination sizes for chain " << chain  
-                        << " using Run 2 navigation " << run2.size() 
-                        << " Run 3 navigation " << run3.size());
-            ATH_MSG_WARNING("Mismatched sizes of combinations for chain " << chain << " (enable WARNING messages for more details), this may be a false positive if chain is incorrectly decoded");    
+        // In Run3 we do not use decision per RoI but per object, so for a single RoI with
+        // more than one object we will have more combinations in Run3 than Run2.
+        if (run2.size() > run3.size()) {
+            ATH_MSG_WARNING("Combination size mismatch for chain " << chain
+                            << ": Run2=" << run2.size() << " Run3=" << run3.size()
+                            << " (possible false positive from chain config decoding)");
             if ( m_failOnDifference ) {
                 return StatusCode::FAILURE;
             }
@@ -234,21 +239,21 @@ namespace Trig {
             result = isAnySubsetPresent(run2, run3);
         }
 
-        if (run2 != run3) 
-        {
-            ATH_MSG_WARNING("Difference in combinations between Run2 and Run3 format for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
-            ATH_MSG_WARNING("Run2 combs: " << run2);
-            ATH_MSG_WARNING("Run3 combs: " << run3);
-        }
-
-        if (not result) // previous not isSubset, loosened condition
-        {
-            ATH_MSG_WARNING("NOT PASSED: failed, Run2 objects are not within a subset of Run3 objects for chain: " << chain << " parsed multiplicities " << ChainNameParser::multiplicities(chain));
-            ATH_MSG_WARNING("Run2 combs: " << run2);
-            ATH_MSG_WARNING("Run3 combs: " << run3);
+        if (not result) {
+            // Subset check failed — this is the more severe condition
+            ATH_MSG_WARNING("Run2 objects not within subset of Run3 for chain " << chain
+                            << " (multiplicities: " << ChainNameParser::multiplicities(chain) << ")");
+            ATH_MSG_WARNING("  Run2 combs: " << run2);
+            ATH_MSG_WARNING("  Run3 combs: " << run3);
             if ( m_failOnDifference ) {
                 return StatusCode::FAILURE;
             }
+        } else if (run2 != run3) {
+            // Combinations differ but subset check passed — informational
+            ATH_MSG_WARNING("Run2/Run3 combinations differ (but subset OK) for chain " << chain
+                            << " (multiplicities: " << ChainNameParser::multiplicities(chain) << ")");
+            ATH_MSG_DEBUG("  Run2 combs: " << run2);
+            ATH_MSG_DEBUG("  Run3 combs: " << run3);
         }
 
         return StatusCode::SUCCESS;

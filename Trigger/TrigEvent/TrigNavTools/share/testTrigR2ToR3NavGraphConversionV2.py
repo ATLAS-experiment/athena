@@ -8,13 +8,18 @@ import sys
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
 
-flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
+# flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1"]
+flags.Input.Files=["/home/damian/hdd1/DAOD/AOD.27174884._000350.pool.root.1"]
+# flags.Input.Files=["/home/przygoda/build/DAOD_PHYS.DAOD.NEW.pool.root"]
+# flags.Input.Files=["/home/damian/hdd1/DAOD/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3126_r9364/AOD.14761208._003510.pool.root.1"]
+### new AOD physics file 
+# flags.Input.Files=["/home/damian/hdd1/DAOD/data25_13p6TeV.00508966.physics_Main.merge.AOD.f1642_m2272/data25_13p6TeV.00508966.physics_Main.merge.AOD.f1642_m2272._lb0140._0005.1"]
 # BELOW: alternative test AOD file
 # flags.Input.Files=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13167/AOD.27162646._000001.pool.root.1"]
 # can browse config for this file here: 
 flags.Detector.GeometryLAr=True
 flags.Detector.GeometryTile=True
-flags.Exec.MaxEvents = 20
+flags.Exec.MaxEvents = 100
 flags.Exec.SkipEvents = 0
 flags.Trigger.doEDMVersionConversion=True
 flags.fillFromArgs()

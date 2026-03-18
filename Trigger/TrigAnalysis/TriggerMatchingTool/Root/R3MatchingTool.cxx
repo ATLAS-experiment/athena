@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TriggerMatchingTool/R3MatchingTool.h"
 #include "xAODBase/IParticleContainer.h"
 #include "TrigCompositeUtils/Combinations.h"
 #include "TrigCompositeUtils/ChainNameParser.h"
+#include "TrigDecisionTool/Conditions.h"
 #include "xAODEgamma/Egamma.h"
 #include <numeric>
 #include <algorithm>
@@ -64,6 +65,22 @@ namespace Trig
       }
       ATH_MSG_DEBUG("Chain " << chainName << " passed");
       VecLinkInfo_t features = m_trigDecTool->features<xAOD::IParticleContainer>(chainName);
+
+      // If IncludeSubfeatures is enabled, also retrieve subfeature links
+      // (lower-pT objects from Run2->Run3 navigation conversion)
+      if (m_includeSubfeatures) {
+          unsigned int condition = rerun ? TrigDefs::Physics | TrigDefs::allowResurrectedDecision : TrigDefs::Physics;
+          VecLinkInfo_t subfeatures = m_trigDecTool->features<xAOD::IParticleContainer>(
+              chainName,
+              condition,
+              "",                          // containerSGKey
+              TrigDefs::lastFeatureOfType, // featureCollectionMode
+              "subfeature",                // navElementLinkKey
+              -1);                         // restrictToLegIndex
+          features.insert(features.end(), subfeatures.begin(), subfeatures.end());
+          ATH_MSG_DEBUG("Added " << subfeatures.size() << " subfeatures for chain " << chainName);
+      }
+
       // See if we have any that have invalid links. This is a sign that the
       // input file does not contain the required information and should be seen
       // as reason for a job failure

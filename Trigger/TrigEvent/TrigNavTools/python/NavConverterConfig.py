@@ -54,11 +54,23 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
     log.info("Assuming these collections are relevant for trigger: %s", " ".join(types))
     cnvAlg.Collections = types
     cnvAlg.Chains = chainsList
+    print("ALL CHAINS for conversion:", cnvAlg.Chains)
+    # cnvAlg.Chains = ['HLT_2mu10_nomucomb'] # example 1
+    cnvAlg.Chains = ['HLT_e17_lhloose_nod0_2e9_lhloose_nod0'] # example 2
+    # cnvAlg.Chains = ['HLT_2mu6_10invm30_pt2_z10']
+    # cnvAlg.Chains = ['HLT_3mu4_nomucomb']
+    # cnvAlg.Chains = ['HLT_mu6_nomucomb_2mu4_nomucomb_delayed_L1MU6_3MU4']
+    # cnvAlg.Chains = ['HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6_bTau']
+    # cnvAlg.Chains = ['HLT_mu6_nomucomb_2mu4_nomucomb_L1MU6_3MU4']
+    # cnvAlg.Chains = ['HLT_2mu14_nomucomb']
+    # cnvAlg.Chains = ['HLT_mu24_ivarloose']
+    # cnvAlg.Chains = ['HLT_e24_lhvloose_nod0_L1EM18VH']
+    # cnvAlg.Chains = ['HLT_mu13_mu13_idperf_Zmumu']
     cnvAlg.doCompression = True # set True for compression
     acc.addEventAlgo(cnvAlg)
 
     if runTheChecker:
-        checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt) #, OutputLevel = 2)
+        checker = CompFactory.Trig.NavigationTesterAlg(FailOnDifference = False, TrigDecisionTool = tdt, OutputLevel = 2)
         checker.RetrievalToolRun2Nav = CompFactory.Trig.IParticleRetrievalTool()
         
         # in conversion job  Run2 TDT is setup as default, we need to setup an alternative to access Run 3 format
@@ -68,8 +80,22 @@ def NavConverterCfg(flags, chainsList = [], runTheChecker = False):
                                                     AcceptMultipleInstance=True,
                                                     TrigConfigSvc = tdt.TrigConfigSvc) #, OutputLevel = 2)
         acc.addPublicTool(run3tdt)
-        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(TrigDecisionTool = run3tdt) #, OutputLevel = 2)
+        checker.RetrievalToolRun3Nav = CompFactory.Trig.R3IParticleRetrievalTool(
+            TrigDecisionTool = run3tdt, OutputLevel = 1)
         checker.Chains = chainsList
+        # checker.Chains = ['HLT_2mu10_nomucomb']
+        checker.Chains = ['HLT_e17_lhloose_nod0_2e9_lhloose_nod0']
+        # checker.Chains = ['HLT_2mu6_10invm30_pt2_z10']
+        # checker.Chains = ['HLT_3mu4_nomucomb']
+        # checker.Chains = ['HLT_mu6_nomucomb_2mu4_nomucomb_delayed_L1MU6_3MU4']
+        # checker.Chains = ['HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6_bTau']
+        # checker.Chains = ['HLT_mu6_nomucomb_2mu4_nomucomb_L1MU6_3MU4']
+        # checker.Chains = ['HLT_2mu14_nomucomb']
+        # checker.Chains = ['HLT_e7_lhmedium_nod0_mu24']
+        # checker.Chains = ['HLT_mu24_iloose_L1MU15']
+        # checker.Chains = ['HLT_mu24_ivarloose']
+        # checker.Chains = ['HLT_e24_lhvloose_nod0_L1EM18VH']
+        # checker.Chains = ['HLT_mu13_mu13_idperf_Zmumu']
         checker.TrigDecisionToolRun3 = run3tdt
         checker.TrigDecisionToolRun2 = tdt
 
