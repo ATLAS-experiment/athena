@@ -63,9 +63,6 @@ class eflowEEtaBinnedParameters :  public eflowEEtaBinBase {
 
   void initialise(const std::vector<double>& eBinBounds, const std::vector<double>& etaBinBounds, bool useAbsEta = true);
 
-  /* for eflowTauTool */
-  bool getOrdering(eflowRingSubtractionManager& subtMan, double e, double eta, eflowFirstIntENUM j1st) const;
-
   void setFudgeMean(int energyBin, int etaBin, eflowFirstIntENUM j1st, double fudgeMean) {
     if (m_bins[energyBin][etaBin]) {
       eflowFirstIntParameters* j1stBin = m_bins[energyBin][etaBin]->getFirstIntBin(j1st);
@@ -87,8 +84,8 @@ class eflowEEtaBinnedParameters :  public eflowEEtaBinBase {
   }
 
 
-  double getInterpolation(const eflowParameters** bin1, const eflowParameters** bin2, double e, double eta) const;
-  eflowFirstIntENUM adjustLFI(double e, double eta, eflowFirstIntENUM j1st) const;
+  double getInterpolation(const eflowParameters** bin1, const eflowParameters** bin2, double e, double eta, bool useLegacyEnergyBinIndexing) const;
+  eflowFirstIntENUM adjustLFI(double e, double eta, eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) const;
 
  private:
 

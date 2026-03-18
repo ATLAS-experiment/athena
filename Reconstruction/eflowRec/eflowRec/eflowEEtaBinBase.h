@@ -26,9 +26,7 @@ Base class which sets up some of the infrastructure to store the e/p reference v
 class eflowEEtaBinBase {
  public:
 
-  enum EnergyInterpolationMode { LIN, LOG };
-
-  eflowEEtaBinBase() :  m_mode(LOG)  { m_useAbsEta = true; }
+  eflowEEtaBinBase() { m_useAbsEta = true; }
   virtual ~eflowEEtaBinBase();
   
   bool binExists(double e, double eta) const  { return (getEBinIndex(e) >= 0 && getEtaBinIndex(eta) >= 0); }
@@ -40,11 +38,10 @@ class eflowEEtaBinBase {
   int getNumEBins() const { return m_eBinBounds.size(); }
   int getNumEtaBins() const { return m_etaBinBounds.size(); }
 
+  int getEBinIndexLegacy(double e) const;
   int getEBinIndex(double e) const;
   int getEtaBinIndex(double eta) const;
   static int getBinIndex(double x, const std::vector<double>& binBounds) ;
-
-  EnergyInterpolationMode m_mode;
 
   static const double m_errorReturnValue;
 

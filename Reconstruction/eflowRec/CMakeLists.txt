@@ -12,7 +12,7 @@ atlas_add_component( eflowRec
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloIdentifier AthContainers AthLinks AthenaBaseComps CxxUtils AthenaKernel GeoPrimitives Identifier xAODBase 
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} CaloEvent CaloIdentifier AthContainers AthLinks AthenaBaseComps CxxUtils AthenaKernel GeoPrimitives Identifier xAODBase PathResolver 
 		     xAODCaloEvent xAODCore xAODEgamma xAODMuon xAODPFlow xAODTau xAODTracking GaudiKernel InDetReadoutGeometry TRT_ReadoutGeometry Particle RecoToolInterfaces 
 		     TrkParameters CaloDetDescrLib CaloUtilsLib StoreGateLib FourMomUtils PathResolver TrkCaloExtension TrkParametersIdentificationHelpers FourMomUtils 
 		     InDetTrackSelectionToolLib AthenaMonitoringKernelLib ICaloTrkMuIdTools AsgMessagingLib AthOnnxruntimeServiceLib)
