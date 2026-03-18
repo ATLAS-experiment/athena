@@ -135,7 +135,7 @@ class TriggerListsHelper:
 
             # TriggerAPI Session based trigger lists
             session = getTapisSession(self.flags)
-            lf = 0.8 # Prescale weighted life fraction of the GRL's LBs 
+            lf = 0.75 # Prescale weighted life fraction of the GRL's LBs 
             api_trigger_names = set()
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.el, livefraction=lf).union(api_trigger_names)
             api_trigger_names = session.getLowestUnprescaled(triggerType=TriggerType.mu, livefraction=lf).union(api_trigger_names)
