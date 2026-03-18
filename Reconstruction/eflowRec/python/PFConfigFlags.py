@@ -17,6 +17,7 @@ def createPFConfigFlags():
     pfConfigFlags.addFlag("PF.useRecExCommon",False) #Toggle whether we are in the RecExCommon config or not.
     pfConfigFlags.addFlag("PF.useMLEOverP",False) #Toggle whether to use the Machine Learning based EOverP inference or not
     pfConfigFlags.addFlag("PF.EOverP_NN_Model",'/afs/cern.ch/user/m/mhodgkin/onnx_15_03_23.onnx') #Model to use in EOverP inference
-    
+    pfConfigFlags.addFlag("PF.EOverP_CellOrdering_ReferenceLocation",'eflowRec/PFCellEOverPTool/Run3/LowMuRuns_2026/v1/') #Reference location for cell ordering and e/p lookup in particle flow, default to Run3 low Mu in R24.
+    pfConfigFlags.addFlag("PF.EOverP_Run3LowMu", False) #Whether to use the dedicated e/p reference values for low mu running in Run 3, or to use the standard reference values derived on high mu Run 2 MC.
     pfConfigFlags.addFlag("PF.addCPData",False)
     return pfConfigFlags

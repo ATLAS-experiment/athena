@@ -100,15 +100,15 @@ void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& p
   }
 }
 
-bool eflowRingSubtractionManager::getOrdering(const eflowEEtaBinnedParameters* binnedParameters, double e, double eta, eflowFirstIntENUM j1st) {
+bool eflowRingSubtractionManager::getOrdering(const eflowEEtaBinnedParameters* binnedParameters, double e, double eta, eflowFirstIntENUM j1st, bool useLegacyEnergyBinIndexing) {
   const eflowParameters* bin1 = nullptr;
   const eflowParameters* bin2 = nullptr;
 
   /* Get the left- and right-bin given (e,eta), return the weight of the two bins and fill the bins to &bin1 and &bin2 */
-  double weight = binnedParameters->getInterpolation(&bin1, &bin2, e, eta);
+  double weight = binnedParameters->getInterpolation(&bin1, &bin2, e, eta, useLegacyEnergyBinIndexing);
   if (!(bin1 && bin2)) { return false; }
 
-  eflowFirstIntENUM adjustedJ1st = binnedParameters->adjustLFI(e, eta, j1st);
+  eflowFirstIntENUM adjustedJ1st = binnedParameters->adjustLFI(e, eta, j1st, useLegacyEnergyBinIndexing);
 
   /* Interpolate the firstInBins */
   eflowFirstIntParameters meanBin;
