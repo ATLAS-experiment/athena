@@ -2,14 +2,22 @@
    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloCalibClusterTruthMapMakerAlgorithm.h"
+#include "CaloCalibHitRec/CaloCalibClusterTruthMapMakerTool.h"
 
-StatusCode CaloCalibClusterTruthMapMakerAlgorithm::initialize(){
 
+CaloCalibClusterTruthMapMakerTool::CaloCalibClusterTruthMapMakerTool(
+    const std::string& type,
+    const std::string& name,
+    const IInterface* parent)
+  : AthAlgTool(type, name, parent)
+{}
+
+StatusCode CaloCalibClusterTruthMapMakerTool::initialize(){
+  ATH_MSG_DEBUG("Recording truth map with key: " << m_mapIdentifierToCalibHitsWriteHandleKey.key());
   ATH_CHECK(m_tileActiveCaloCalibrationHitReadHandleKey.initialize());
   ATH_CHECK(m_tileInactiveCaloCalibrationHitReadHandleKey.initialize());
   ATH_CHECK(m_tileDMCaloCalibrationHitReadHandleKey.initialize());
-
+  
   ATH_CHECK(m_lArActiveCaloCalibrationHitReadHandleKey.initialize());
   ATH_CHECK(m_lArInactiveCaloCalibrationHitReadHandleKey.initialize());
   ATH_CHECK(m_lArDMCaloCalibrationHitReadHandleKey.initialize());
@@ -17,12 +25,13 @@ StatusCode CaloCalibClusterTruthMapMakerAlgorithm::initialize(){
   ATH_CHECK(m_truthParticleReadHandleKey.initialize());
 
   ATH_CHECK(m_mapIdentifierToCalibHitsWriteHandleKey.initialize());
+  
 
   return StatusCode::SUCCESS;
 
 }
 
-StatusCode CaloCalibClusterTruthMapMakerAlgorithm::execute(const EventContext& ctx) const{
+StatusCode CaloCalibClusterTruthMapMakerTool::execute(const EventContext& ctx, [[maybe_unused]]xAOD::CaloClusterContainer* theClusColl) const{
 
   SG::WriteHandle<std::map<Identifier,std::vector<const CaloCalibrationHit*> > > mapIdentifierToCalibHitsWriteHandle(m_mapIdentifierToCalibHitsWriteHandleKey,ctx);
   ATH_CHECK(mapIdentifierToCalibHitsWriteHandle.record(std::make_unique<std::map<Identifier,std::vector<const CaloCalibrationHit*> > >()));
@@ -32,9 +41,9 @@ StatusCode CaloCalibClusterTruthMapMakerAlgorithm::execute(const EventContext& c
 }
 
 
-StatusCode CaloCalibClusterTruthMapMakerAlgorithm::finalize(){return StatusCode::SUCCESS;}
+StatusCode CaloCalibClusterTruthMapMakerTool::finalize(){return StatusCode::SUCCESS;}
 
-void CaloCalibClusterTruthMapMakerAlgorithm::fillIdentifierToCaloHitMap(std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, const EventContext& ctx) const{
+void CaloCalibClusterTruthMapMakerTool::fillIdentifierToCaloHitMap(std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, const EventContext& ctx) const{
 
   //get calibration hit containers and add them to a vector
 
@@ -85,6 +94,7 @@ void CaloCalibClusterTruthMapMakerAlgorithm::fillIdentifierToCaloHitMap(std::map
         continue;
       }
 
+      //fill the map
       Identifier thisIdentifier = thisCalibrationHit->cellID();
 
       auto [it, inserted] =
