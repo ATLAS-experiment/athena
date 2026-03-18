@@ -1,19 +1,20 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCOMBINEDEVENT_TRIGCOMPOSITE_H
 #define TRIGCOMBINEDEVENT_TRIGCOMPOSITE_H
-#include <string>
-#include <vector>
-#include <cmath>
-#include <limits>
-#include <set>
+
 #include "AthenaKernel/CLASS_DEF.h"
 #include "GaudiKernel/ClassID.h"
 #include "TrigNavigation/TrigFeatureLink.h"
-#include "GaudiKernel/MsgStream.h"
 
+#include <string>
+#include <vector>
+#include <set>
+#include <map>
+
+class MsgStream;
 
 
 
@@ -26,19 +27,28 @@
 class TrigComposite {
   
  public:
+ 
+  
   /**
    * @brief Constructs empty composite, no objects no details
    */
-  
   TrigComposite(const std::string& name);
-
+  //
+  /**
+   * @brief Default constructor should not be normally used, needed by the persistency layer
+   */
+  TrigComposite() = default;
+  TrigComposite(TrigComposite&&) noexcept = default;
+  TrigComposite& operator=(TrigComposite&&) noexcept = default;
+  ~TrigComposite() = default;
+  //
   /**
    * @brief Constructs composite with the links to two trigger objects/links to them
    * The validity of the links is not checked during the construction
    */
   TrigComposite(const std::string& name, std::string& label1, TrigFeatureLink t1, std::string& label2, TrigFeatureLink t2);
 
-
+  
   inline const std::string& name() const { return m_name; }
 
 
@@ -158,15 +168,6 @@ class TrigComposite {
   template<typename T>
   void eraseDetail(const std::string& key);
 
-  /**
-   * @brief Deafault constructor, should not be normally used, needed by the persistency layer
-   */
-  TrigComposite();
-
-  /**
-   * @brief Destructor, does nothing special in fact, no links are touched
-   */
-  ~TrigComposite();
 
 
 private:
@@ -210,8 +211,8 @@ private:
   const T& specimen() const; // needed in order to produce the "NULL" detail
   
 
-  std::string m_name;
-  bool m_locked;
+  std::string m_name{"dummy"};
+  bool m_locked{false};
 
 };
 

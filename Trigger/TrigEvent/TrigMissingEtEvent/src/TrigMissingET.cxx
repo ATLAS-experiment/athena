@@ -1,21 +1,15 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigMissingEtEvent/TrigMissingET.h"
 #include "TrigMissingEtEvent/TrigMissingEtComponent.h"
 #include "CxxUtils/StrFormat.h"
+#include "GaudiKernel/MsgStream.h"
 
-#include <string>
 #include <stdio.h>
 #include <string.h>
-#include <cmath>
 
-TrigMissingET::TrigMissingET() :
-  m_ex(0), m_ey(0), m_ez(0), m_sum_et(0), m_sum_e(0),
-  m_flag(0), m_roiWord(0)
-{
-}
 
 
 TrigMissingET::TrigMissingET(unsigned char n) :
@@ -69,7 +63,6 @@ TrigMissingET::TrigMissingET(std::vector< TrigMissingEtComponent >&& compVec)
 }
 
 
-TrigMissingET::~TrigMissingET(){}
 
 
 void TrigMissingET::clear()

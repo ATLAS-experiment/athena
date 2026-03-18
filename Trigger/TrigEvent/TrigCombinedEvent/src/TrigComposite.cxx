@@ -1,20 +1,13 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-//#include <iostream>
-//#include <cmath>
-#include <stdexcept>
 #include "TrigCombinedEvent/TrigComposite.h"
-
+#include "GaudiKernel/MsgStream.h"
+#include <stdexcept>
 
 using namespace std;
 
-TrigComposite::TrigComposite()
-  : m_name("dummy"),
-    m_locked(false)    
-{
-}
 
 TrigComposite::TrigComposite(const std::string& name)
   : m_name(name),
@@ -79,8 +72,6 @@ bool TrigComposite::isValid() const {
     return true;
   return false;
 }
-
-TrigComposite::~TrigComposite(){}
 
 
 
