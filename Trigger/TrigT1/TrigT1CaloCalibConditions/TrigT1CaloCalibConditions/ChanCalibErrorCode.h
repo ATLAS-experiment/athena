@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOCALIBCONDITIONS_CHANCALIBERRORCODE_H
@@ -8,6 +8,7 @@
 #include "TrigT1CaloCalibConditions/AbstractErrorCode.h"
 
 #include <string>
+#include <iosfwd>
 
 /**
  *  ChanCalibErrorCode class
@@ -97,6 +98,7 @@ public:
 
 	ChanCalibErrorCode(const ChanCalibErrorCode& e);
 	ChanCalibErrorCode& operator=(const ChanCalibErrorCode& e);
+	ChanCalibErrorCode& operator=(ChanCalibErrorCode&&) noexcept = default;
 	ChanCalibErrorCode& operator|=(const ChanCalibErrorCode& e);
 
 	using AbstractErrorCode::errorCode;

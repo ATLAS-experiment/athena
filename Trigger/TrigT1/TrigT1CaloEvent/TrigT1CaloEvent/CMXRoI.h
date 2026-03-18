@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGT1CALO_CMXROI_H
 #define TRIGT1CALO_CMXROI_H
@@ -35,7 +35,7 @@ class CMXRoI {
 	  unsigned int exM, unsigned int eyM, unsigned int etM,
 	  int exErrorM, int eyErrorM, int etErrorM,
 	  unsigned int sumEtHitsM, unsigned int missingEtHitsM);
-
+   CMXRoI& operator=(CMXRoI&&) noexcept = default;
    ~CMXRoI();
 
    /// Return Ex

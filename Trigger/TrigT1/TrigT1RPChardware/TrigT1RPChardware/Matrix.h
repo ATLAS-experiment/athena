@@ -1,16 +1,15 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef TrigT1RPChardware_Matrix_H
 #define TrigT1RPChardware_Matrix_H
 
-#include <cstdlib>
-#include <cstring>
-#include <sstream>
-
 #include "MuonCablingTools/BaseObject.h"
 #include "TrigT1RPChardware/Lvl1Def.h"
+
+#include <iosfwd>
+
+
 
 class Matrix : public BaseObject {
 public:
@@ -411,7 +410,7 @@ private:
     void disp_CMAreg(ubit16 id) const;
     void dispRegister(const CMAword *p, ubit16 side) const;
     void dispTrigger(const CMAword *p) const;
-    void dispBinary(const CMAword *p, std::ostringstream &strdisp) const;
+    void dispBinary(const CMAword *p, std::ostream &strdisp) const;
     //
 };  // end-of-class matrix
 #endif
