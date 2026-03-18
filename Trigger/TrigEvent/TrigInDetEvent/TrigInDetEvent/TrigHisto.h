@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETEVENT_TRIGHISTO_H
@@ -31,9 +31,12 @@ namespace TrigHistoCutType {
  */
 class TrigHisto {
  public:
-  TrigHisto(void);
-  virtual ~TrigHisto(void);
+   TrigHisto() = default;
+  /// User declared d'tor means we have to explicitly enable move operations
+  TrigHisto(TrigHisto&&) = default;
+  TrigHisto& operator=(TrigHisto&&) = default;
   
+  virtual ~TrigHisto() = default;
   /** Zero all histogram bins */
   void clear(void);
 
@@ -44,18 +47,18 @@ class TrigHisto {
   }
 
   /** Return the minimum along the x-axis. */
-  float min_x(void) const {
+  float min_x() const {
     return m_min_x;
   }
 
   /** Return the maximum along the x-axis. */
-  float max_x(void) const {
+  float max_x() const {
     return m_max_x;
   }
 
   /** Return the bin contents of the histogram, including 
   * the under and overflow bins. */
-  const std::vector<float>& contents(void) const {
+  const std::vector<float>& contents() const {
     return m_contents;
   }
 
@@ -69,16 +72,14 @@ class TrigHisto {
 		       float value) const;
 
   std::vector<float> m_contents; //<! A vector to contain the contents of the histogram.
-  std::vector<float>::iterator m_itr;
-  std::vector<float>::iterator m_itr_end;
 
   // Histogram limits
-  unsigned int m_nbins_x;
-  unsigned int m_underflowBin_x;
-  unsigned int m_overflowBin_x;
-  float m_min_x;
-  float m_max_x;
-  float m_binSize_x;
+  unsigned int m_nbins_x{};
+  unsigned int m_underflowBin_x{};
+  unsigned int m_overflowBin_x{};
+  float m_min_x{};
+  float m_max_x{};
+  float m_binSize_x{};
 };
 
 #endif
