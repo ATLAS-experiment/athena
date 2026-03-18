@@ -195,7 +195,9 @@ namespace egammaMVAFunctions
     return phi_mod;
   }
   inline float compute_R12_EMEC(const xAOD::CaloCluster& cl){
-    return float(cl.energy_max(CaloSampling::EME1)/cl.energy_max(CaloSampling::EME2));
+    double es1 = cl.energy_max(CaloSampling::EME2);
+    double es2 = cl.energy_max(CaloSampling::EME3);
+    return es2 != 0 ? float(es1/es2) : -1;
   }
 
   // electron functions
