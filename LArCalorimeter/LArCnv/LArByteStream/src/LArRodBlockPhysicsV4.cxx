@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -10,11 +10,9 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
-//#include <cstdio>
 #include "LArByteStream/LArRodBlockPhysicsV4.h"
 #include <iostream>
 
-//#define LARBSDBGOUTPUT
 #ifdef LARBSDBGOUTPUT
 #define MYLEVEL (MSG::FATAL)
 #define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
@@ -114,7 +112,6 @@ bool LArRodBlockPhysicsV4::setPointers()
 
 int LArRodBlockPhysicsV4::getNextRawData(int& channelNumber, std::vector<short>& samples, uint32_t& gain)
 {
-  //std::cout << " I am here !!!!!!!!!!!!!!!!!!!!!! " << std::endl;
 #ifdef LARBSDBGOUTPUT
   MsgStream logstr(Athena::getMessageSvc(), BlockType());
   //Debug output
@@ -130,7 +127,6 @@ int LArRodBlockPhysicsV4::getNextRawData(int& channelNumber, std::vector<short>&
 #endif
     return 0;
   }
-  //const uint16_t block = getHeader16(m_RawDataOff);//Position of the raw FEB data block
   if (!m_RawDataPointer) { //Block does not exist
 #ifdef LARBSDBGOUTPUT
     logstr << MYLEVEL << "No Raw Data Block in this FEB" << endmsg;
@@ -179,14 +175,12 @@ int LArRodBlockPhysicsV4::getNextRawData(int& channelNumber, std::vector<short>&
   uint32_t g;
   LArRodBlockPhysicsV4::getNextEnergy(n,e,t,q,g);
 #endif
-  //std::cout << "Gain= " << gain << " Febgain=" << febgain << std::endl;
   ++m_RawDataIndex;
   unsigned  rearrangeFirstSample=0;
   if (m_rearrangeFirstSample)
     rearrangeFirstSample=m_rearrangeFirstSample; //Overwrite by jobOptions
   else
     rearrangeFirstSample=getFirstSampleIndex();
-  //std::cout << "FebConfig: "<< getFebConfig() << " FirstSampleIndex " << getFirstSampleIndex() <<std::endl;
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
       {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
 	short movedSample=samples[0];
@@ -270,24 +264,18 @@ uint32_t LArRodBlockPhysicsV4::getStatus()  const
 
 uint32_t LArRodBlockPhysicsV4::onlineCheckSum() const
 { 
-  //int size   = getNumberOfWords();
   int index  = getNumberOfWords()-1;
   if(index<m_iHeadBlockSize) return 0;
   uint32_t sum = m_FebBlock[index];
-  //for(int i=size-10;i<size;i++) {
-  //  std::cout << i << " : " << std::hex << m_FebBlock+i << " : " << m_FebBlock[i] << std::endl;
-  //}
   return sum;
 }
 
 uint32_t LArRodBlockPhysicsV4::offlineCheckSum() const
 {
   int end      = getNumberOfWords()-3;
-  //int start    = 0; //m_iHeadBlockSize;
   uint32_t sum = 0;
   for(int i=0;i<end;i++) {
     sum += m_FebBlock[i];
-    //std::cout << i << " : " << std::hex << sum << " : " << m_FebBlock[i] << std::endl;
   }
   return sum & 0x7fffffff;
 }

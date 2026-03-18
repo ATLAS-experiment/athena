@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPYSICSV3_H
@@ -37,7 +37,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 
-#undef  LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) m_logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -81,7 +80,6 @@ protected:
   std::string BlockType() { return std::string("RodBlockPhysicsV3");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
-  //virtual void buildHeader();
   virtual void initializeFragment(std::vector<uint32_t>& fragment);
   virtual void initializeFEB(const uint32_t id);
   virtual void setNumberOfSamples(const uint8_t n);
@@ -135,9 +133,6 @@ protected:
   virtual inline uint16_t getHottestCellIndex();
   virtual inline uint32_t getHottestCellEnergy() const;
 
-  // ----------------- Printing methods -----------------
-  // print the full ROD fragment
-  // virtual void dumpFragment();
   virtual inline  uint32_t  hasPhysicsBlock() const {return LE_getHeader16(EBlkOffset);} ;
   virtual inline  uint32_t  hasRawDataBlock() const {return LE_getHeader16(RawDataBlkOffset);} ;
   virtual inline  uint32_t  hasControlWordBlock() const {return LE_getHeader16(RawDataBlkOffset);} ;
@@ -196,13 +191,11 @@ protected:
   uint16_t m_HottestCellIndex;
   uint32_t m_HottestCellEnergy; // is it a problem that this energy has to be positive ? I hope not !
 
-  //LArCablingService* m_cablingSvc; 
   const LArOnlineID* m_onlineHelper;
   static const uint32_t m_DummyBitMap[4];
   //Private functions:
   inline int FebToRodChannel(int ch) const;
   void setNextEnergy(const uint16_t energy,const int16_t time, const int16_t quality, const uint32_t gain);
-  //  void setNextEnergy(const int32_t energy, const int32_t time, const int32_t quality, const uint32_t gain);
 
   MsgStream m_logstr;
 
@@ -211,7 +204,6 @@ protected:
 inline int LArRodBlockPhysicsV3::FebToRodChannel(int ch) const
 //{return ch/8 + 16 * (ch%8);}
 {return (ch>>3) + ((ch&0x7)<<4);
-//	return ch;
 }
 
 inline int LArRodBlockPhysicsV3::getNextEnergy(int& channelNumber,int32_t& energy,int32_t& time,int32_t& quality, uint32_t& gain)
@@ -225,7 +217,6 @@ inline int LArRodBlockPhysicsV3::getNextEnergy(int& channelNumber,int32_t& energ
   uint16_t tQ; // TimeQuality word
  
   unsigned rodChannelNumber=m_EnergyIndex;    // Index of Channel in ROD-Block
-  // channelNumber=rodChannelNumber;             // Arno claims he is using FEB numbering
   channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
 
   // get information available for all cells
@@ -314,28 +305,12 @@ inline uint16_t  LArRodBlockPhysicsV3::getOfftimeThreshold() const
 
 inline int32_t  LArRodBlockPhysicsV3::getEx() const  // To be checked
 {
-/*  int32_t ex;
-  uint16_t aux;
-  aux = *(m_CounterPtr+4);
-  ex = (int32_t)((*(m_CounterPtr+5)<<16)|(aux & (~(1<<16))));
-  ex=(ex&0x01FFFFFF);
-  if ((*(m_CounterPtr+5))&(1<<15)) // number id negative
-    ex = -ex;
-  return ex;*/
   const uint32_t* copy32u = reinterpret_cast<const uint32_t*>(m_CounterPtr+4);
   return *copy32u;
 }
 
 inline int32_t  LArRodBlockPhysicsV3::getEy() const  // To be checked
 {
-/*  int32_t ey;
-  uint16_t aux;
-  aux = *(m_CounterPtr+6);
-  ey = (int32_t)((*(m_CounterPtr+7)<<16)|(aux & (~(1<<16))));
-  ey=(ey&0x01FFFFFF);
-  if ((*(m_CounterPtr+7))&(1<<15)) // number id negative
-    ey = -ey;
-  return ey;*/
   const uint32_t* copy32u = reinterpret_cast<const uint32_t*>(m_CounterPtr+6);
   return *copy32u;
 }

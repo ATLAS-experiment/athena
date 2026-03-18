@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPYSICSV2_H
@@ -37,7 +37,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 
-//#define LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) m_logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -74,7 +73,6 @@ protected:
   std::string BlockType() { return std::string("RodBlockPhysicsV2");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
-  //virtual void buildHeader();
   virtual void initializeFragment(std::vector<uint32_t>& fragment);
   virtual void initializeFEB(const uint32_t id);
   virtual void setNumberOfSamples(const uint8_t n);
@@ -111,9 +109,6 @@ protected:
   virtual uint16_t getCtrl3(uint32_t adc) const;
   virtual uint32_t getStatus() const;
 
-  // ----------------- Printing methods -----------------
-  // print the full ROD fragment
-  //virtual void dumpFragment();
   virtual inline  uint32_t  hasPhysicsBlock() const {return LE_getHeader16(LowEBlkOffset);} ;
   virtual inline  uint32_t  hasRawDataBlock() const {return LE_getHeader16(RawDataBlkOffset);} ;
 
@@ -140,7 +135,6 @@ protected:
   //Number of flagging words at the beginning of Block 2, 3, and 4 (Depends on the number of channels)
   unsigned short m_NFlaggingWords; 
 
-  //LArCablingService* m_cablingSvc; 
   const LArOnlineID* m_onlineHelper;
   static const uint32_t m_DummyBitMap[4];
   //Private functions:
@@ -201,18 +195,6 @@ inline int LArRodBlockPhysicsV2::getNextEnergy(int& channelNumber,int32_t& energ
       m_LowEIndex++;
       LARBSDBG("*** Reading Raw data form Low E block. E=" << energy);
     }
-  /*
-   if (energy>10000000)
-     std::cout << " Read: Large E found. E=" << energy
-		 << " t=" << time 
-		 << " Q=" << quality 
-		 << " G=" << gain 
-		 << " channel Number=" << channelNumber 
-		 << " LowEIndex=" << m_LowEIndex
-		 << " HighEIndex="<<m_HighEIndex << std::endl;
-   else
-     std::cout << "Read energy" << std::endl;
-  */
   return 1;
 }
 

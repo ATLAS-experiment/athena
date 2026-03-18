@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -49,36 +49,22 @@ int LArRodBlockAccumulatedV3::getNextRawData(int& channelNumber, std::vector<sho
 #ifdef LARBSDBGOUTPUT
   MsgStream logstr(Athena::getMessageSvc(), BlockType());
 #endif
- //Debug output
-  /*
-    LARBSDBG("GetNextRawData for FEB 0x" << MSG::hex << (uint32_t)getHeader32(FEBID) << MSG::dec);
-    LARBSDBG("m_RawDataCounter=" << m_RawDataCounter << " m_RawDataIndex="<<  m_RawDataIndex 
-    << " m_channelsPerFEB=" << m_channelsPerFEB);
-    LARBSDBG("requested gain= " << m_fixedGain);
-  */
-  //std::cout << "RAWDATA " << m_RawDataCounter << std::endl;
   if (m_RawDataCounter>=m_channelsPerFEB) { //Already beyond maximal number of channels
     LARBSDBG("Maximum number of channels reached");
     return 0;
   }
-  //const uint16_t block = getHeader16(m_RawDataOff);//Position of the raw FEB data block
   const uint16_t block = getHeader16(RawDataBlkOff);
   if (!block) { //Block does not exist
     LARBSDBG("No Raw Data Block in this FEB");
     return 0; 
   }
   //The m_RawDataChannel keeps track of the last read channel
-  //std::cout << "endtag=" << endtag << " m_iHeadBlockSize=" << m_iHeadBlockSize << std::endl;
 
   // Get next channel
   channelNumber=m_RawDataCounter;
   uint32_t febgain=0;
   const unsigned int nsamples = getHeader16(NSamples) & 0xff;
   const unsigned int ngains   = getHeader16(NGains);
-  /*
-  LARBSDBG("This FEB has " << nsamples <<  " samples");
-  LARBSDBG("This FEB has " << ngains   <<  " gains");
-  */
   if(ngains==0 || nsamples==0) return 0;
   // Loop over gains to look for m_fixedGain
   unsigned int this_gain=0;
@@ -109,7 +95,6 @@ int LArRodBlockAccumulatedV3::getNextRawData(int& channelNumber, std::vector<sho
       for(unsigned int s=0;s<nsamples;s++) {
 	index  =  offset + s*s_size;
 	x = m_FebBlock[index];
-	//	if((s==0) && (channelNumber==64)) std::cout << "===> " << std::dec << channelNumber << "  " << (x&0xfff) << "  " << std::endl;
 	samples.push_back((short) (x & 0x0fff));  // sample on bits 0 to 11
       } 
     } else { //high channels on higher bits
@@ -124,14 +109,12 @@ int LArRodBlockAccumulatedV3::getNextRawData(int& channelNumber, std::vector<sho
     }
     gain=RawToOfflineGain(febgain);
   }
-  //std::cout << "Gain= " << gain << " Febgain=" << febgain << std::endl;
   ++m_RawDataCounter;
   unsigned  rearrangeFirstSample=0;
   if (m_rearrangeFirstSample)
     rearrangeFirstSample=m_rearrangeFirstSample; //Overwrite by jobOptions
   else
     rearrangeFirstSample=getFirstSampleIndex();
-  //std::cout << "FebConfig: "<< getFebConfig() << " FirstSampleIndex " << getFirstSampleIndex() <<std::endl;
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
       {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
 	short movedSample=samples[0];
@@ -162,11 +145,9 @@ int LArRodBlockAccumulatedV3::getNextAccumulatedDigit(int& channelNumber, std::v
   uint32_t size  = getNumberOfWords();
   if (!block) { //Block does not exist
     LARBSDBG("No Accumulated Digit Block in this FEB");
-    //    std::cout << "index= " << ResultsOff1 <<  "word= " << getHeader16(ResultsOff1) << std::endl; 
     return 0; 
   }
   //The m_Result1Channel keeps track of the last read channel
-  //std::cout << "endtag=" << endtag << " m_iHeadBlockSize=" << m_iHeadBlockSize << std::endl;
 
   // Get next channel
   channelNumber=m_Result1Counter;
@@ -176,51 +157,9 @@ int LArRodBlockAccumulatedV3::getNextAccumulatedDigit(int& channelNumber, std::v
   const unsigned int nsamples  = getHeader16(NSamples);
   const unsigned int ngains    = getHeader16(NGains);
 
-  //if(channelNumber==0) {
-  //  for(uint3_t i=0;i<size;i++) {
-  //    if(i==0)
-  //	std::cout << std::hex << i << " : NWTot       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==1)
-  //	std::cout << std::hex << i << " : FEBid       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==2)
-  //	std::cout << std::hex << i << " : FEBsn       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==3)
-  //	std::cout << std::hex << i << " : Block1      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==4)
-  //	std::cout << std::hex << i << " : Block2      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==5)
-  //	std::cout << std::hex << i << " : Block3      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==6)
-  //	std::cout << std::hex << i << " : Status      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==7)
-  //	std::cout << std::hex << i << " : Gain/Sample " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==8)
-  //	std::cout << std::hex << i << " : 1st/FebConf " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i==9)
-  //	std::cout << std::hex << i << " : InFPGA      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if (i<block)
-  //	std::cout << std::hex << i << " : raw data    " << i-12 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    else if(i-block<bsize) {
-  //	if (i<block+1)
-  //	  std::cout << std::hex << i << " : ntrigger    " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //	else if (i<block+2)
-  //	  std::cout << std::hex << i << " : step i&n    " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //	else if (((i-block-2)%(2*nsamples))<nsamples) 
-  //	  std::cout << std::hex << i << " " << (i-block-2)/(2*nsamples) << " : sum channel " << (i-block-2)/(nsamples+1) << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //	else
-  //	  std::cout << std::hex << i << " " << (i-block-2)/(2*nsamples) << " : sum*sum     " << (i-block-2)%(nsamples+1) << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-  //    }
-  //    else if(i<size-3)
-  //	std::cout << std::hex << i << " : raw data    " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::dec << std::endl;
-  //    else
-  //	std::cout << std::hex << i << " : trailer     " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::dec << std::endl;
-  //  }
-  //}
-
   const unsigned int FebConfig = (int) getFebConfig();
   if(ngains==0 || nsamples==0) return 0;
   // Loop over gains to look for m_fixedGain
-  //unsigned int this_gain=0;
   int offset;
   uint32_t x;
 
@@ -253,14 +192,12 @@ int LArRodBlockAccumulatedV3::getNextAccumulatedDigit(int& channelNumber, std::v
     {
       x=m_FebBlock[offset+i];
       samplesSum[i]=x;
-      //std::cout << "SUM[" << i-1 << "]   = " << std::hex << x << std::endl;
     }
   offset+=nsamples;
   for (unsigned int i=0;i<nsamples;i++)
     {
       x=m_FebBlock[offset+i];
       corr2Sum[i]=x;  
-      //std::cout << "SUMSQ[" << i-1 << "] = " << std::hex << x << std::endl;
     }
   
   gain=RawToOfflineGain(febgain);
@@ -336,12 +273,6 @@ uint16_t LArRodBlockAccumulatedV3::getCtrl1(uint32_t adc)  const
   else x=x&0xffff;
   uint16_t ctrl=x;
   return ctrl;
-  /*
-  int index=getHeader16(RawDataBlkOff)-16;
-  uint32_t x=m_FebBlock[index];
-  if(adc&0x1) return x>>16;
-  return x&0xffff;
-  */
 }
 
 uint16_t LArRodBlockAccumulatedV3::getCtrl2(uint32_t adc)  const
@@ -352,12 +283,6 @@ uint16_t LArRodBlockAccumulatedV3::getCtrl2(uint32_t adc)  const
   else x=x&0xffff;
   uint16_t ctrl=x;
   return ctrl;
-  /*
-  int index=getHeader16(RawDataBlkOff)-8 ;
-  uint32_t x=m_FebBlock[index];
-  if(adc&0x1) return x>>16;
-  return x&0xffff;
-  */
 }
 
 uint16_t LArRodBlockAccumulatedV3::getCtrl3(uint32_t adc)  const
@@ -371,29 +296,14 @@ uint16_t LArRodBlockAccumulatedV3::getCtrl3(uint32_t adc)  const
   else x=x&0xffff;
   uint16_t ctrl=x;
   return ctrl;
-  /*
-  int index=getHeader16(RawDataBlkOff)-3;
-  uint32_t x=m_FebBlock[index];
-  x=x>>16;
-  uint16_t ctrl=x;
-  return ctrl;
-  */
 }
 
 uint32_t LArRodBlockAccumulatedV3::getStatus()  const
 { 
-  // Old version: get Dsp status word
+  // Get Dsp status word
   if(getNumberOfWords()<EventStatus/2) return 0;
   uint32_t x=getHeader32(EventStatus);
   return x;
-
-  // New verion: get Rod status word
-  //int nsamples = getHeader16(NSamples); 
-  //int ngains   = getHeader16(NGains);
-  //int offset   = nsamples*(8+64*ngains)+8;
-  //int index    = getHeader16(RawDataBlkOff)+offset;
-  //uint32_t x   = m_FebBlock[index];
-  //return x;
 }
 
 

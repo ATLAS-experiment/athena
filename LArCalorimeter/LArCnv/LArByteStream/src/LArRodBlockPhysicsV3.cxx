@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of the LArRODBlockStructure_3 class
@@ -18,7 +18,6 @@
 #include <cstdio>
 #include <iostream>
 
-//#define LARBSDBGOUTPUT
 #ifdef  LARBSDBGOUTPUT
 #define LARBSDBG(text) m_logstr<<MSG::DEBUG<<text<<endmsg
 #else
@@ -237,21 +236,12 @@ void LArRodBlockPhysicsV3::setNextEnergy(const int channel, const int32_t energy
    setNextEnergy((int16_t)0,(int16_t)32767,(int16_t)-32767,(uint32_t)0);
 
 
- // update fi needed the hottest cell info
- // m_logstr << MYLEVEL  << "Before " << endmsg;
- // m_logstr << MYLEVEL  << "m_HottestCellIndex : "<< m_HottestCellIndex << endmsg;
- // m_logstr << MYLEVEL  << "m_HottestCellEnergy : "<< m_HottestCellEnergy << endmsg;
-
+ // update if needed the hottest cell info
  if ((energy>0)&&(energy>(int)m_HottestCellEnergy)) 
    {
      m_HottestCellEnergy = abs(energy);
      m_HottestCellIndex = channel;
    }
-
- // m_logstr << MYLEVEL  << "After " << endmsg;
- // m_logstr << MYLEVEL  << "m_HottestCellIndex : "<< m_HottestCellIndex << endmsg;
- // m_logstr << MYLEVEL  << "m_HottestCellEnergy : "<< m_HottestCellEnergy << endmsg;
-
 
  // transform 32 bits data into 16 bits data
  
@@ -336,8 +326,6 @@ void LArRodBlockPhysicsV3::setNextEnergy(const uint16_t energy,const int16_t tim
       twoValues.s[1]=(uint16_t)energy;
     }
   
-  //m_logstr << MSG::DEBUG  << "In setNextEnergy-------------------->>>>> Length of m_EnergyBlock =" << m_EnergyBlock.size() << endmsg; 
-
   LARBSDBG("Writing words: val0= " << twoValues.s[0] << " val1= " << twoValues.s[1]);
   m_EnergyBlock.push_back(twoValues.l);
   LARBSDBG("Writing Raw data to E block. E=" << energy);
@@ -346,18 +334,14 @@ void LArRodBlockPhysicsV3::setNextEnergy(const uint16_t energy,const int16_t tim
   // Summary block is one bit per cell
   
   int mylocalBitwiseIndex = (int) (m_EnergyIndex-1)%32; // 1 bits in SB per channel
-  //  m_logstr << MYLEVEL  << "In setNextEnergy-------------------->>  Summary Block Construction "  << endmsg; 
-  //  m_logstr << MYLEVEL  << "In setNextEnergy-------------------->>  mylocalBitwiseIndex= " << mylocalBitwiseIndex << endmsg; 
   if (mylocalBitwiseIndex==0) // need for a new 32 bits word to store SM info of that cell
     {
-      // m_logstr << MYLEVEL  << "In setNextEnergy-------------------->>  Set new 32 bits word "  << endmsg; 
       uint32_t SB;
       SB = (quality==-32767?0x00000000:0x00000001);
       m_SumBlkBlock.push_back(SB);
     }
   else 
     {
-      // m_logstr << MYLEVEL  << "In setNextEnergy-------------------->>  Use existing 32 bits word "  << endmsg; 
       uint32_t SB=m_SumBlkBlock[m_GainBlock.size()-1]; //Take out last element of vector
       m_SumBlkBlock.pop_back();
       SB=(SB<<1)|(quality==-32767?0x00000000:0x00000001);
@@ -381,11 +365,8 @@ void LArRodBlockPhysicsV3::setNextEnergy(const uint16_t energy,const int16_t tim
   
   // write Time and Chi2 for cells above HighEnergyCellCut threshold
   
-  // m_logstr << MYLEVEL  << "In setNextEnergy-------------------->>>>> treat Time and Chi2"  << endmsg; 
-
   if (quality!=-32767) // Do write Time and Chi2 information
     {
-      // m_logstr << MSG::DEBUG  << "In setNextEnergy-------------------->>>>> treat Time and Chi2 of that hot cell "  << endmsg; 
       // count the number of hot cells
       m_numberHotCell++;
       // count the number of cells offtime
@@ -414,7 +395,6 @@ void LArRodBlockPhysicsV3::setNextEnergy(const uint16_t energy,const int16_t tim
 
 void LArRodBlockPhysicsV3::setRawData(const int channel, const std::vector<short>& samples, const uint32_t gain) {
  //Convert Feb to Rod Channel Number:
- //int rcNb=(channel>>3) + ((channel&0x7)<<4);
  int rcNb=FebToRodChannel(channel);
  if (rcNb>=m_channelsPerFEB) 
    {m_logstr << MSG::ERROR << "Attempt to write Energy for channel " << rcNb << " channels into a FEB!" << endmsg;
@@ -457,7 +437,6 @@ void LArRodBlockPhysicsV3::initializeFragment(std::vector<uint32_t>& fragment)
       m_FebBlock=&(*FebIter); //Set m_FebBlock in order to use getHeader-functions.
       uint32_t currFEBid=getHeader32(FEBID); //Get this FEB-ID
       uint16_t currFebSize=getNumberOfWords(); //Size of this FEB-Block
-      //std::cout << "FebID=" << currFEBid << " FEBSize=" << currFebSize << " Vector size=" << fragment.size() << std::endl;
       if (FebIter+currFebSize>fragment.end()) {
 	fragment.clear(); //Clear existing vector
 	m_logstr << MSG::ERROR  << "Got inconsistent ROD-Fragment!" << endmsg; 
@@ -534,18 +513,6 @@ void LArRodBlockPhysicsV3::finalizeFEB()
  // Write the Energy Ey of the ROD block in a 32 bits word
  // Ex and Ey have to be 32 bits words as they are sums of multiple 16 bits words
 
-
-
-
-/* uint32_t aux;
- aux = abs(m_Ex);
- if (m_Ex<0) aux|=0x80000000;
- m_CounterBlkBlock.push_back(aux);
- aux = abs(m_Ey);
- if (m_Ey<0) aux|=0x80000000;
- m_CounterBlkBlock.push_back(aux);
-*/
-
  uint32_t* aux = (uint32_t*)&m_Ex;
  m_CounterBlkBlock.push_back(*aux);
  aux = (uint32_t*)&m_Ey;
@@ -583,7 +550,6 @@ void LArRodBlockPhysicsV3::finalizeFEB()
      LE_setHeader16(EBlkOffset,m_vFragment->size());
      BlockOffset=LE_getVectorHeader16(EBlkOffset);
      m_logstr << MSG::DEBUG  << "In finalyseFEB-------------------->>>>> " << "Checking for Energy Block :  length= " << n << "  BlockOffset=" << BlockOffset << endmsg; 
-     //m_logstr << MSG::DEBUG  << "In finalyseFEB-------------------->>>>> " << "Checking for Energy Block :  m_EnergyIndex= " << m_EnergyIndex << endmsg; 
      for(unsigned int i=0;i<n;i++)
        m_vFragment->push_back(m_EnergyBlock[i]);
    } 
@@ -597,7 +563,6 @@ void LArRodBlockPhysicsV3::finalizeFEB()
    {
      LE_setHeader16(GainBlkOffset,m_vFragment->size());
      BlockOffset=LE_getVectorHeader16(GainBlkOffset);
-     //m_logstr << MSG::DEBUG  << "In finalyseFEB-------------------->>>>> " << "Checking for Gain Block :  length= " << n << "  BlockOffset=" << BlockOffset << endmsg; 
      for(unsigned int i=0;i<n;i++)
        m_vFragment->push_back(m_GainBlock[i]);
    } 
@@ -615,7 +580,6 @@ void LArRodBlockPhysicsV3::finalizeFEB()
    {
      LE_setHeader16(FebInfoBlkOffset,m_vFragment->size());
      BlockOffset=LE_getVectorHeader16(FebInfoBlkOffset);
-     //m_logstr << MSG::DEBUG  << "In finalyseFEB-------------------->>>>> " << "Checking for FEB Info Block :  length= " << n << "  BlockOffset=" << BlockOffset << endmsg; 
      for(unsigned int i=0;i<n;i++)
        m_vFragment->push_back(m_FebInfoBlock[i]);
    } 
@@ -648,17 +612,6 @@ void LArRodBlockPhysicsV3::finalizeFEB()
    }
  setHeader32(NWTot,m_vFragment->size());
 
- // m_logstr << MSG::DEBUG  << "############################################################################>>>>>  " << endmsg;
- // m_logstr << MSG::DEBUG  << "In finalyseFEB-------------------->>>>> Ofsets summary  (en hexa) : " << endmsg;
- // m_logstr << MSG::DEBUG  << "Summary Block Offset : " << LE_getVectorHeader16(SumBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Counter Block Offset : " << LE_getVectorHeader16(CounterBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Energy Block Offset  : " << LE_getVectorHeader16(EBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Gain Block Offset    : " << LE_getVectorHeader16(GainBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Gain Block Offset    : " << LE_getVectorHeader16(FebInfoBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Raw Data Block Offset: " << LE_getVectorHeader16(RawDataBlkOffset) << endmsg;
- // m_logstr << MSG::DEBUG  << "Number of hot cells  : " << m_numberHotCell << endmsg;
- // m_logstr << MSG::DEBUG  << "############################################################################>>>>>  " << endmsg;
-
  m_logstr << MYLEVEL  << "***********************************************************************"<< endmsg;
  m_logstr << MYLEVEL  << "m_HottestCellIndex : "<< m_HottestCellIndex << endmsg;
  m_logstr << MYLEVEL  << "m_HottestCellEnergy : "<< m_HottestCellEnergy << endmsg;
@@ -675,24 +628,11 @@ void LArRodBlockPhysicsV3::finalizeFEB()
 
 void  LArRodBlockPhysicsV3::concatinateFEBs()
 {
-  //std::cout << "Concatinating FEBs. Have "<< m_mFebBlocks.size() <<" febs." << std::endl;
  FEBMAPTYPE::const_iterator feb_it_b=m_mFebBlocks.begin();
  FEBMAPTYPE::const_iterator feb_it_e=m_mFebBlocks.end();
  FEBMAPTYPE::const_iterator feb_it;
  for (feb_it=feb_it_b;feb_it!=feb_it_e;++feb_it) {
    if (feb_it!=feb_it_b) //Not first Feb
-/*
-     if (fullHeader) {//Add middle header
-       m_pRODblock->push_back(fullHeader->version().full());//Format Version number
-       m_pRODblock->push_back(fullHeader->source_id());  //Source identifer
-       m_pRODblock->push_back(fullHeader->run_no());
-       m_pRODblock->push_back(fullHeader->lvl1_id());    //Level 1 identifer
-       m_pRODblock->push_back(fullHeader->bc_id());      //Bunch Crossing identifer 
-       m_pRODblock->push_back(fullHeader->lvl1_type());  //Level 1 trigger type
-       m_pRODblock->push_back(fullHeader->detev_type()); //Detector event type
-     }
-     else //No ROD-Header
-*/
        m_pRODblock->resize( m_pRODblock->size()+m_MiddleHeaderSize);
    
    //Add feb data to rod data block
@@ -729,7 +669,6 @@ int LArRodBlockPhysicsV3::getNextRawData(int& channelNumber, std::vector<short>&
   LARBSDBG("Found filled channel at positon " << m_RawDataCounter);
   //Found next filled channel
   channelNumber=m_RawDataCounter;
-  //channelNumber=(m_RawDataCounter>>4) + ((m_RawDataCounter&0xf)<<3); //Convert ROD to FEB channel ordering
   unsigned int nsamples = LE_getHeader16(NGainNSamples) & 0x00FF;
   LARBSDBG("This run has " << nsamples <<  " samples");
   int index = m_RawDataIndex*nsamples;
@@ -765,7 +704,6 @@ int LArRodBlockPhysicsV3::getNextRawData(int& channelNumber, std::vector<short>&
 //Sort functions & ordering relation:
 template<class RAWDATA>
 bool LArRodBlockPhysicsV3::operator () 
-  //(const LArRawChannel* ch1, const LArRawChannel* ch2) const
   (const RAWDATA* ch1, const RAWDATA* ch2) const
 {
   HWIdentifier id1 = ch1->channelID(); 
@@ -804,8 +742,6 @@ uint32_t LArRodBlockPhysicsV3::getRadd(uint32_t /*adc*/, uint32_t sample)  const
 { 
   int index=LE_getHeader16(RawDataBlkOffset)-3+(sample+1)/2;
   uint32_t x=m_FebBlock[index];
-  //if(sample&0x1) x=x&0xffff;
-  //else
   x=x&0xffff;
   return x;
 }

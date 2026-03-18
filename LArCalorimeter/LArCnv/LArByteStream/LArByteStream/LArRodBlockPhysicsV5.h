@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBYTESTREAM_LARRODBLOCKPHYSICSV5_H
@@ -20,7 +20,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "LArIdentifier/LArOnlineID.h"
 
-//#define LARBSDBGOUTPUT
 #ifdef LARBSDBGOUTPUT
 #define MYLEVEL (MSG::FATAL)
 #define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
@@ -80,9 +79,6 @@ public:
   virtual uint16_t getCtrl2(uint32_t adc) const;
   virtual uint16_t getCtrl3(uint32_t adc) const;
   virtual uint32_t getStatus() const;
-
-  //virtual uint32_t onlineCheckSum() const;
-  //virtual uint32_t offlineCheckSum() const;
 
   virtual inline  uint32_t  hasCalibBlock()   const {return 0;} ; 
   virtual inline  uint32_t  hasPhysicsBlock() const {return getHeader16(ResultsOff1);} ;
@@ -157,8 +153,6 @@ private:
 
   //For fixed gain mode
   int m_fixedGain;
-  // If one needs to use a log output not only for MSG::DEBUG
-  //MsgStream *m_logstr;
   uint16_t m_numberHotCell = 0U;
   uint16_t m_numberHotCellOffTime; 
   // Needs one threshold to send time/quality another for samples
@@ -204,48 +198,6 @@ inline int LArRodBlockPhysicsV5::getNextEnergy(int& channelNumber,int32_t& energ
  
   unsigned rodChannelNumber=m_EnergyIndex;      // Index of Channel in ROD-Block
   channelNumber=((rodChannelNumber&0xe)<<2) + ((rodChannelNumber&0x1)<<6) + (rodChannelNumber>>4);    //channel number of the FEB
-  //channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
-
-//  if(channelNumber==0) {
-//    int size = getNumberOfWords();
-//    int off1 = getHeader16(ResultsOff1)-8;
-//    int dim1 = getHeader16(ResultsDim1);
-//    int off2 = getHeader16(ResultsOff2)-8;
-//    int dim2 = getHeader16(ResultsDim2);
-//    int off3 = getHeader16(RawDataBlkOff)-8;
-//    int dim3 = getHeader16(RawDataBlkDim);
-//    
-//    for(int i=0;i<size;i++) {
-//      if(i==0)
-//	std::cout << std::hex << i << " : NWTot       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==1)
-//	std::cout << std::hex << i << " : FEBid       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==2)
-//	std::cout << std::hex << i << " : FEBsn       " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==3)
-//	std::cout << std::hex << i << " : Block1      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==4)
-//	std::cout << std::hex << i << " : Block2      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==5)
-//	std::cout << std::hex << i << " : Block3      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==6)
-//	std::cout << std::hex << i << " : Status      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==7)
-//	std::cout << std::hex << i << " : Gain/Sample " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==8)
-//	std::cout << std::hex << i << " : 1st/FebConf " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if(i==9)
-//	std::cout << std::hex << i << " : InFPGA      " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off1 && i<off1+dim1)
-//	std::cout << std::hex << i << " : results1    " << i-off1 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off2 && i<off2+dim2)
-//	std::cout << std::hex << i << " : results2    " << i-off2 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else if (i>=off3 && i<off3+dim3)
-//	std::cout << std::hex << i << " : raw data    " << i-off3 << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//      else 
-//	std::cout << std::hex << i << " " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-//    }
-//  }
 
   // get information available for all cells
   // Energy on a 16 bit word and decode ranges

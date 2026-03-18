@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Implementation of a LArRODBlockStructure class
@@ -10,7 +10,6 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
-//#include <cstdio>
 #include "LArRawEvent/LArDigit.h"
 #include "LArByteStream/LArRodBlockPhysicsV6.h"
 #include "StoreGate/StoreGateSvc.h"
@@ -18,16 +17,12 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include <iostream>
 
-//#define LARBSDBGOUTPUT
 #ifdef LARBSDBGOUTPUT
 #define MYLEVEL (MSG::FATAL)
 #define LARBSDBG(text) logstr<<MYLEVEL<<text<<endmsg
 #else
 #define LARBSDBG(text)
 #endif
-
-//int mycheck_tot=0;
-//int mycheck_err=0;
 
 namespace {
 union ShortLong {
@@ -170,10 +165,6 @@ bool LArRodBlockPhysicsV6::setPointers()
       if(n2 != n2_tmp)     problem=8;
       if (m_requiredNSamples > 0 && 
           getHeader32(NGains) != (uint32_t)0x10000 + m_requiredNSamples) problem=9;
-      //if(getHeader32(NGains)!=0x10000 + (unsigned int)ns) problem=9;
-      //if(getHeader32(InFPGAFormat)!=1) problem=10;
-      //if(m_FebBlock[getNumberOfWords()-2]!=0x12345678) problem=11;
-
       if(problem) { // Try to recompute offsets
 	std::cout << "LArByteStreamProblem " << problem << std::endl;
         std::cout << "NSamples = " << std::dec << ns << std::endl;
@@ -234,63 +225,6 @@ bool LArRodBlockPhysicsV6::setPointers()
 	std::cout << "LArByteStreamProblem " << problem << std::endl;
 	std::cout << "Unrecoverable problem" << std::endl;
       }
-	
-      //uint32_t febId    = getHeader32(FEBID);
-      //uint32_t onCheck  = onlineCheckSum();
-      //uint32_t offCheck = offlineCheckSum();
-      //
-      //mycheck_tot++;
-      //if(onCheck!=offCheck) 
-      //{
-      //	mycheck_err++;
-      //	std::cout << "FebID  checksum " << std::hex << febId << std::endl;
-      //	std::cout << "Online checksum " << std::hex << onCheck << " Offline checksum " << offCheck << std::dec << std::endl;
-      //	std::cout << "Diff1  checksum " << std::hex << onCheck-offCheck << " Diff2   checksum " << offCheck-onCheck << std::dec << std::endl;
-      //	double x=mycheck_err/((double) mycheck_tot)*100.0;
-      //	std::cout << "Number of FEB in error:       " << mycheck_err << " / " << mycheck_tot << " = " << x << " %" << std::endl;
-      //}
-
-      //
-      //if(febId==0x3b1b8000 || febId==0x398b0000 || febId==0x3a988000) {
-      //if(onCheck!=offCheck) {
-      //	std::cout  << "***********************************************************************"<< std::endl;
-      //	std::cout  << "Problem :" << problem << std::endl;
-      //	std::cout  << "Header values :"<< std::endl;
-      //	std::cout  << "************************************************************************"<< std::endl;
-      //	std::cout  << "FebBlockSize              = " <<  m_FebBlockSize              << std::endl;
-      //	std::cout  << "EnergyIndex            = " <<  m_EnergyIndex            << std::endl;
-      //	std::cout  << "TimeQualityIndex       = " <<  m_TimeQualityIndex       << std::endl;
-      //	std::cout  << "DigitsIndex            = " <<  m_DigitsIndex            << std::endl;
-      //	std::cout  << "DigitsChannel          = " <<  m_DigitsChannel          << std::endl;
-      //	std::cout  << "RawDataIndex           = " <<  m_RawDataIndex           << std::endl;
-      //	std::cout  << "GainPointer            = " <<  m_GainPointer            << std::endl;
-      //	std::cout  << "MaskTimeQualityPointer = " <<  m_MaskTimeQualityPointer << std::endl;
-      //	std::cout  << "MaskDigitsPointer      = " <<  m_MaskDigitsPointer      << std::endl;
-      //	std::cout  << "RaddPointer            = " <<  m_RaddPointer            << std::endl;
-      //	std::cout  << "EnergyPointer          = " <<  m_EnergyPointer          << std::endl;
-      //	std::cout  << "SumPointer             = " <<  m_SumPointer             << std::endl;
-      //	std::cout  << "TimeQualityPointer     = " <<  m_TimeQualityPointer     << std::endl;
-      //	std::cout  << "DigitsPointer          = " <<  m_DigitsPointer          << std::endl;
-      //	std::cout  << "RawDataPointer         = " <<  m_RawDataPointer         << std::endl;
-      //	std::cout  << "numberHotCell          = " <<  std::dec << getNbSweetCells1() << " " << getNbSweetCells2() << std::endl;
-      //	std::cout  << "Fragment @    = 0x" << std::hex << m_FebBlock << std::endl;
-      //	std::cout  << "NWTot         =   " << std::dec << getNumberOfWords() << std::endl;
-      //	std::cout  << "FebID         = 0x" << std::hex << getHeader32(FEBID) << std::endl;
-      //	std::cout  << "FebSN         = 0x" << std::hex << getHeader32(FEB_SN) << std::endl;
-      //	std::cout  << "ResultsOff1   = 0x" << std::hex << getHeader16(ResultsOff1) << std::endl;
-      //	std::cout  << "ResultsDim1   = 0x" << std::hex << getHeader16(ResultsDim1) << std::endl;
-      //	std::cout  << "ResultsOff2   = 0x" << std::hex << getHeader16(ResultsOff2) << std::endl;
-      //	std::cout  << "ResultsDim2   = 0x" << std::hex << getHeader16(ResultsDim2) << std::endl;
-      //	std::cout  << "RawDataBlkOff = 0x" << std::hex << getHeader16(RawDataBlkOff) << std::endl;
-      //	std::cout  << "RawDataBlkDim = 0x" << std::hex << getHeader16(RawDataBlkDim) << std::endl;
-      //	std::cout  << "Event status  = 0x" << std::hex << getStatus() << std::dec << std::endl;
-      //	std::cout  << "************************************************************************"<< std::dec << std::endl;
-      //	int size = getNumberOfWords();
-      //	for(int i=0;i<size;i++) {
-      //	  std::cout << std::hex << i << " : " << std::hex << m_FebBlock+i << " : " << std::hex << m_FebBlock[i] << std::endl;
-      //	}
-      //}
-
    }
 
   return true;
@@ -313,7 +247,6 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
 #endif
     return 0;
   }
-  //const uint16_t block = getHeader16(m_RawDataOff);//Position of the raw FEB data block
   if (!m_RawDataPointer) { //Block does not exist
     // Try to get samples and gain from getNextDigits
     return getNextDigits(channelNumber,samples,gain);
@@ -322,7 +255,6 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
   // Get next channel
   unsigned rodChannelNumber=m_RawDataIndex;      // Index of Channel in ROD-Block
   channelNumber=((rodChannelNumber&0xe)<<2) + ((rodChannelNumber&0x1)<<6) + (rodChannelNumber>>4);    //channel number of the FEB
-  //channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
   uint32_t febgain;
   const unsigned int nsamples = getHeader16(NSamples) & 0xff;
   const unsigned int ngains   = getHeader16(NGains);
@@ -338,11 +270,6 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
   int index;
   index = s_size*m_RawDataIndex + offset;
   uint16_t s[2];
-  //for(unsigned int i=0;i<nsamples+1;i++) {
-  //  if(m_RawDataPointer[index+i]>>14) {
-  //  std::cout << "Trying to decode strange raw data value: " << std::hex << m_RawDataPointer[index+i] << std::dec << std::endl;
-  // }
-  //}
   if((nsamples+1)&0x7) {
      s[0]    = m_RawDataPointer[index++]>>2;
      febgain = m_RawDataPointer[index++];
@@ -390,14 +317,12 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
   uint32_t g;
   LArRodBlockPhysicsV6::getNextEnergy(n,e,t,q,g);
 #endif
-  //std::cout << "Gain= " << gain << " Febgain=" << febgain << std::endl;
   ++m_RawDataIndex;
   unsigned  rearrangeFirstSample=0;
   if (m_rearrangeFirstSample)
     rearrangeFirstSample=m_rearrangeFirstSample; //Overwrite by jobOptions
   else
     rearrangeFirstSample=getFirstSampleIndex();
-  //std::cout << "FebConfig: "<< getFebConfig() << " FirstSampleIndex " << rearrangeFirstSample <<std::endl;
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
       {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
 	short movedSample=samples[0];
@@ -413,7 +338,6 @@ int LArRodBlockPhysicsV6::getNextRawData(int& channelNumber, std::vector<short>&
 
 int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& samples, uint32_t& gain)
 {
-  //std::cout << " I am here !!!!!!!!!!!!!!!!!!!!!! " << std::endl;
 #ifdef LARBSDBGOUTPUT
   MsgStream logstr(Athena::getMessageSvc(), BlockType());
   //Debug output
@@ -430,7 +354,6 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
 #endif
     return 0;
   }
-  //const uint16_t block = getHeader16(m_DigitsOff);//Position of the raw FEB data block
   if (!m_DigitsPointer) { //Block does not exist
 #ifdef LARBSDBGOUTPUT
     logstr << MYLEVEL << "No Digits Block in this FEB" << endmsg;
@@ -463,7 +386,6 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
   // Get next channel
   unsigned rodChannelNumber=m_DigitsChannel;      // Index of Channel in ROD-Block
   channelNumber=((rodChannelNumber&0xe)<<2) + ((rodChannelNumber&0x1)<<6) + (rodChannelNumber>>4);    //channel number of the FEB
-  //channelNumber=(rodChannelNumber>>4) + ((rodChannelNumber&0xf)<<3);    //channel number of the FEB
   const unsigned int nsamples = getHeader16(NSamples) & 0xff;
 
   // gain in 2 bits of a 32 bits word 
@@ -480,18 +402,6 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
   int s_size = nsamples;
   int index;
   index = s_size*m_DigitsIndex;
-  //uint16_t s;
-  //for(unsigned int i=0;i<nsamples;i++) {
-  //  s = m_DigitsPointer[index++]>>2;
-  //  samples.push_back(s);
-  //}
-  //int ok=1;
-  //for(unsigned int i=0;i<nsamples;i++) {
-  //  if(m_DigitsPointer[index+i]>>14 && m_DigitsIndex<getNbSweetCells2()-1) {
-  //    std::cout << "Trying to decode strange digits value: " << std::hex << m_DigitsPointer[index+i] << std::dec << std::endl;
-  //    ok=0;
-  //  }
-  //}
   if( nsamples&0x1){
   if(m_DigitsIndex&0x1) {
     samples.push_back(m_DigitsPointer[index-1]>>2);
@@ -528,7 +438,6 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
   for(int i=0;i<nsamples;i++)
     logstr << MYLEVEL << " ===> sample " << i << "    = " << samples[i] << endmsg;
 #endif
-  //std::cout << "Gain= " << gain << " Febgain=" << febgain << std::endl;
   m_DigitsIndex++;
   m_DigitsChannel++;
   unsigned  rearrangeFirstSample=0;
@@ -536,7 +445,6 @@ int LArRodBlockPhysicsV6::getNextDigits(int& channelNumber, std::vector<short>& 
     rearrangeFirstSample=m_rearrangeFirstSample; //Overwrite by jobOptions
   else
     rearrangeFirstSample=getFirstSampleIndex();
-  //std::cout << "FebConfig: "<< getFebConfig() << " FirstSampleIndex " << getFirstSampleIndex() <<std::endl;
   if (rearrangeFirstSample && rearrangeFirstSample<samples.size()) //FIXME: Very ugly hack! See explanation in LArRodDecoder.h file
       {//Change e.g. 3 0 1 2 4 to 0 1 2 3 4 
 	short movedSample=samples[0];
@@ -654,32 +562,6 @@ uint32_t LArRodBlockPhysicsV6::getStatus()  const
   return x;
 }
 
-/*
-uint32_t LArRodBlockPhysicsV6::onlineCheckSum() const
-{ 
-  //int size   = getNumberOfWords();
-  int index  = getNumberOfWords()-1;
-  if(index<m_iHeadBlockSize) return 0;
-  uint32_t sum = m_FebBlock[index];
-  //for(int i=size-10;i<size;i++) {
-  //  std::cout << i << " : " << std::hex << m_FebBlock+i << " : " << m_FebBlock[i] << std::endl;
-  //}
-  return sum;
-}
-
-uint32_t LArRodBlockPhysicsV6::offlineCheckSum() const
-{
-  int end      = getNumberOfWords()-3;
-  //int start    = 0; //m_iHeadBlockSize;
-  uint32_t sum = 0;
-  for(int i=0;i<end;i++) {
-    sum += m_FebBlock[i];
-    //std::cout << i << " : " << std::hex << sum << " : " << m_FebBlock[i] << std::endl;
-  }
-  return sum & 0x7fffffff;
-}
-*/
-
 // start of encoding methods
 void LArRodBlockPhysicsV6::initializeFragment(std::vector<uint32_t>& fragment ){
   m_pRODblock=&fragment; //remember pointer to fragment
@@ -694,12 +576,10 @@ void LArRodBlockPhysicsV6::initializeFragment(std::vector<uint32_t>& fragment ){
       uint16_t currFebSize=getNumberOfWords(); //Size of this FEB-Block
       if (FebIter+currFebSize>fragment.end()) {
         fragment.clear(); //Clear existing vector
-        //*m_logstr << MSG::ERROR  << "Got inconsistent ROD-Fragment!" << endmsg;
         return;
       }
       m_mFebBlocks[currFEBid].assign(FebIter,FebIter+currFebSize); //Copy data from ROD-fragment into FEB-Block
       sizeRead+=currFebSize+m_MiddleHeaderSize;  //6 is the middle header size
-      //LARBSDBG("Found FEB-id " << currFEBid << " in existing ROD-Fragment");
     } // end while
   }
   fragment.clear(); //Clear existing vector
@@ -725,7 +605,6 @@ void LArRodBlockPhysicsV6::initializeFEB(const uint32_t id)
  for(unsigned int i=0;i<4;i++) m_SumBlkBlockE2[i]=0x0;
  m_GainBlock.resize(8);
  for(unsigned int i=0;i<8;i++) m_GainBlock[i]=0x0;
-// m_RawDataBlock.resize(0);
  m_TimeQualityBlock.resize(8);
  for(unsigned int i=0;i<8;i++) m_TimeQualityBlock[i]=0x0;
  m_EnergyBlockEncode.resize(128);
@@ -739,15 +618,10 @@ void LArRodBlockPhysicsV6::initializeFEB(const uint32_t id)
 void LArRodBlockPhysicsV6::setNextEnergy(const int channel, const int32_t energy,
                                          const int32_t time, const int32_t quality, const uint32_t gain)
 {
- //LARBSDBG("setNextEnergy-------------------->>>>>********************** format V4 ***********");
- //LARBSDBG("Channel=" << channel << " energy =" << energy);
  int rcNb=FebToRodChannel(channel);
- //int rcNb=(channel);
  //rcNb ist supposed to equal or bigger than m_EIndex.
  //In the latter case, we fill up the missing  channels with zero
  if (rcNb<m_EnergyIndex) {
-   //*m_logstr << MSG::ERROR  << "LArRODBlockStructure Error: Internal error. Channels not ordered correctly. rcNb=" << rcNb
-   //          << " m_EnergyIndex=" << m_EnergyIndex << endmsg;
    return;
  }
 
@@ -792,8 +666,6 @@ void LArRodBlockPhysicsV6::setNextEnergy(const int channel, const int32_t energy
 
  // Add data...
 
- //LARBSDBG("setNextEnergy-------------------->>>>> Energy = "<< energy << "   Encoded Energy =" << theenergy);
-
  if (abse> m_EnergyThreshold1)
    {
      setNextEnergy(theenergy,thetime,thequality,gain);
@@ -809,13 +681,9 @@ void LArRodBlockPhysicsV6::setNextEnergy(const int channel, const int32_t energy
 void LArRodBlockPhysicsV6::setNextEnergy(const uint16_t energy,const int16_t time, const int16_t quality, const uint32_t gain)
 {
   if (m_EnergyIndex>=m_channelsPerFEB)        //Use m_EIndex to count total number of channels
-    {//*m_logstr << MSG::ERROR  << "LArRodBlockStructure Error: Attempt to write Energy for channel "
-     //       << m_EnergyIndex << " channels into a FEB!" <<endmsg;
+    {
       return;
     }
-  //LARBSDBG("LArRodBlockStructure: Setting Energy for channel " << m_EnergyIndex << ". E=" << energy);
-
-  //LARBSDBG("In setNextEnergy-------------------->>>>> time = " << time << " quality=" << quality);
 
   // Energy
   int endianindex;
@@ -824,8 +692,6 @@ void LArRodBlockPhysicsV6::setNextEnergy(const uint16_t energy,const int16_t tim
   m_EnergyBlockEncode[endianindex] = energy;
 
   // Find correct position
-
-  //LARBSDBG("Writing Raw data to E block. E=" << energy);
 
   // update summary block 
   // Gain is composed of two bits per cell
@@ -873,7 +739,6 @@ void LArRodBlockPhysicsV6::finalizeFEB()
     setNextEnergy((uint16_t)0,(int16_t)32767,(int32_t)-32767,(uint32_t)0);//E=0,t=32767,q=-32767,G=0
 
 uint16_t n;
-//uint16_t BlockOffset;
 uint16_t nsamples=5;
 // checkSum value
 uint32_t sum=0;
@@ -889,12 +754,9 @@ setHeader16(InFPGAFormat_h,0x2);
 
 // Gain block...
 n = m_GainBlock.size();
-//BlockOffset=0;
-//LARBSDBG("Checking Gain Block n=" << n << "BlockOffset=" << BlockOffset);
 //Check if Gain-Block exists and is not yet part of the fragment
 if (n)
   {
-    //LARBSDBG(MSG::DEBUG  << "In finalyseFEB-------------------->>>>> " << "Checking for Gain Block :  length= " << n << "  BlockOffset=" << BlockOffset);
     for(unsigned int i=0;i<n;i++){
       m_vFragment->push_back(m_GainBlock[i]);
       sum+=m_GainBlock[i];
@@ -906,7 +768,6 @@ if (n)
  //Check if Summary Block exists and is not yet part of the fragment
  if (n)
    {
-      //LARBSDBG("In finalizeFEB-------------------->>>>> " << "Checking for Summary Block :  length= " << n << "  BlockOffset=" << BlockOffset);
      for (unsigned i=0;i<n;i++){
        m_vFragment->push_back(m_SumBlkBlockE1[i]);
        sum+=m_SumBlkBlockE1[i];
@@ -916,10 +777,8 @@ if (n)
  // Cells above energy threshold E2 (not included so far)
  n = m_SumBlkBlockE2.size();
  //Check if Summary Block exists and is not yet part of the fragment
- //LARBSDBG("Checking for Summary Block n=" << n << "BlockOffset=" << BlockOffset);
  if (n)
    {
-     //LARBSDBG("In finalizeFEB-------------------->>>>> " << "Checking for Summary Block :  length= " << n << "  BlockOffset=" << BlockOffset);
      for (unsigned i=0;i<n;i++){
        m_vFragment->push_back(m_SumBlkBlockE2[i]);
        sum+=m_SumBlkBlockE2[i];
@@ -942,18 +801,15 @@ if (n)
 
  // Energy block...
  n = 128 ; // Fixed size m_EnergyBlock.size();
- // BlockOffset=getVectorHeader16(ResultsOff1); xxx
  // Block also include time, whenever necessary
  int size_of_block=80+(nsamples+1)/2+(m_TimeQualityBlock.size())/2;
- //LARBSDBG("Checking Energy Block n=" << n << "BlockOffset=" << BlockOffset);
  //Check if Energy-Block exists and is not yet part of the fragment
  if (n)
    {
      setHeader16(ResultsOff1,18);
      setHeader16(ResultsDim1,size_of_block);
-     //LARBSDBG("In finalyseFEB-------------------->>>>> " << "Checking for Energy Block :  length= " << n << "  BlockOffset=" << BlockOffset);
      for(unsigned int i=0;i<n/2;i++) {
-       // WARNING witch one should be >>16 2*i or 2*i+1? To be tested
+       // WARNING which one should be >>16 2*i or 2*i+1? To be tested
        uint32_t Encode = m_EnergyBlockEncode[2*i]+(m_EnergyBlockEncode[2*i+1]<<16);
        m_vFragment->push_back(Encode);
        sum+=Encode;
@@ -962,7 +818,6 @@ if (n)
 
  // Magic numbers (4 or 8) for Ex, Ey and Ez
  n = m_TimeQualityBlock.size();
- //LARBSDBG("Checking Time and Quality Block n=" << n << "BlockOffset=" << BlockOffset);
  //Check if Time and Quality Block exists and is not yet part of the fragment
  if (n)
    {
@@ -1000,7 +855,6 @@ if (n)
    // Three final magic words
    m_vFragment->push_back(0x0); // For the moment
    m_vFragment->push_back(0x12345678); // For the moment
-   //sum+=0x12345678;
    sum+=m_vFragment->size()+1;
    m_vFragment->push_back(sum& 0x7fffffff);
    

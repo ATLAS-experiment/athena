@@ -445,19 +445,8 @@ void LArLATOMEDecoder::EventProcess::decodeChannel(unsigned int& wordshift, unsi
 
 void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, const LArLATOMEMapping* map, const LArOnOffIdMapping* onoffmap,
                                                     const LArCalibLineMapping* clmap) {
-  // Mon* mon = new Mon;
-
   /// some of this info should be used in the LatomeHeader class and for cross checks also (same as for the mon header)
-  // const unsigned int rod_Size_words = robFrag->rod_ndata();
-  // const unsigned int rob_Size_words = robFrag->payload_size_word();
   const unsigned int sourceID = robFrag->rob_source_id();
-  // const unsigned int rod_fragment_size_word = robFrag->rod_fragment_size_word();
-  // const unsigned int rod_header_size_word = robFrag->rod_header_size_word();
-  // const unsigned int rod_trailer_size_word = robFrag->rod_trailer_size_word();
-  // const unsigned int rod_bc_id = robFrag->rod_bc_id();
-  // const unsigned int rod_nstatus = robFrag->rod_nstatus();
-  // const unsigned int rod_status_position = robFrag->rod_status_position();
-  // const uint32_t* rod_start = robFrag->rod_start();
   m_l1ID = robFrag->rod_lvl1_id();
   m_ROBFragSize = robFrag->rod_ndata();
   const uint32_t* p = robFrag->rod_data();

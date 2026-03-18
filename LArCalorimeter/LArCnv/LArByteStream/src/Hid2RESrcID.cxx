@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArByteStream/Hid2RESrcID.h"
@@ -25,8 +25,6 @@ using eformat::helper::SourceIdentifier;
 //   FEB_ID assumes pos-neg. 
 //   I have assumed here, left  for pn=0  (negative?) 
 //                        right for pn=1 (positive?) 
-
-// using ByteStream::Nat8; 
 
 Hid2RESrcID::Hid2RESrcID():
   m_initialized(false),
