@@ -4,6 +4,44 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV
 
+def CaloCalibClusterTruthMapMakerTool(flags, name="CaloCalibClusterTruthMapMakerTool", **kwargs):
+
+    TruthMapMakerTool = CompFactory.CaloCalibClusterTruthMapMakerTool
+    truthMapTool = TruthMapMakerTool()
+
+    return truthMapTool
+
+def CaloCalibHitDecoratorTool(flags, name="CaloCalibClusterDecoratorTool", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
+        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Visible"
+    )
+
+
+    TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
+    truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
+    decoratorTool = DecoratorTool(name,TruthAttributerTool=truth_tool,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    decoratorTool.useCellWeights = True
+    return decoratorTool
+
+def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTool_Full", **kwargs):
+
+    kwargs.setdefault(
+        "CaloClusterWriteDecorHandleKey_NLeadingTruthParticles",
+        "CaloTopoClusters." + flags.Calo.TopoCluster.CalibrationHitDecorationName + "_Full"
+    )
+    TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
+    truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
+    decoratorTool = DecoratorTool(name, TruthAttributerTool=truth_tool, **kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    decoratorTool.useCellWeights = True
+    decoratorTool.StoreFullTruthEnergy = True
+
+    return decoratorTool
+
+
 def caloTopoCoolFolderCfg(flags):
     result=ComponentAccumulator()
     from IOVDbSvc.IOVDbSvcConfig import addFolders
@@ -321,9 +359,7 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
 
     If output writing is enabled (ESD,AOD) the topo clusters are added to them
     """
-
     doLCCalib = flags.Calo.TopoCluster.doTopoClusterLocalCalib
-        
     if clustersname is None:
         clustersname = "CaloCalTopoClusters" if doLCCalib else "CaloTopoClusters"
 
@@ -371,9 +407,17 @@ def CaloTopoClusterCfg(flags, cellsname="AllCalo", clustersname=None, clustersna
     momentsMaker=result.popToolsAndMerge(getTopoMoments(flags))
     CaloTopoCluster.ClusterCorrectionTools += [momentsMaker]
 
+   
     if flags.Calo.TopoCluster.doCalibHitMoments:
-        calibHitsMomentsMaker=getTopoCalibMoments(flags)
-        CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
+            calibHitsMomentsMaker=getTopoCalibMoments(flags)
+            CaloTopoCluster.ClusterCorrectionTools += [calibHitsMomentsMaker]
+            if clustersname == "CaloTopoClusters":
+                caloCalibTruthMapMaker = CaloCalibClusterTruthMapMakerTool(flags)
+                caloCalibDecorator = CaloCalibHitDecoratorTool(flags)
+                caloCalibDecoratorFullEnergy = CaloCalibHitDecoratorFullEnergyTool(flags)
+                CaloTopoCluster.ClusterCorrectionTools += [caloCalibTruthMapMaker, caloCalibDecorator, caloCalibDecoratorFullEnergy]
+
+
     
     if doLCCalib:
         theCaloClusterSnapshot=CaloClusterSnapshot(OutputName=clustersnapname,SetCrossLinks=True,FinalClusterContainerName=clustersname)        
@@ -496,7 +540,6 @@ def CaloTopoClusterConfigTest(flags=None):
         flags.Input.Files = defaultTestFiles.ESD_RUN3_MC
         flags.Output.ESDFileName="esdOut.pool.root"
         flags.Exec.MaxEvents = 10
-
         flags.fillFromArgs()
         flags.lock()
 
@@ -510,6 +553,7 @@ def CaloTopoClusterConfigTest(flags=None):
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
     cfg.merge(topoAcc)
+
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(flags,"xAOD", ItemList =  ["xAOD::CaloClusterContainer#CaloCalTopoClusters*",
