@@ -89,8 +89,8 @@ def createActsLargeRadiusTrackingPassFlags():
     setActsDefaultTunings(icf)
 
     # Override acts default values
-    icf.Xi2max = [100]
-    icf.Xi2maxNoAdd = [200]
+    icf.Xi2max = [75]
+    icf.Xi2maxNoAdd = [100]
 
     # Mark as secondary pass
     icf.isSecondaryPass = True
