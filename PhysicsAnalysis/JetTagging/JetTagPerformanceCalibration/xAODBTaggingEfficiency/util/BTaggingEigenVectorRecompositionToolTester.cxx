@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,7 @@ ANA_MSG_HEADER(testBTagEigenVecRec)
 ANA_MSG_SOURCE(testBTagEigenVecRec, "BTaggingEigenVectorRecompositionToolTester")
 using namespace testBTagEigenVecRec;
 
-int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   const char* TEST_NAME = argv[0];
   if (argc < 3) {
@@ -149,4 +149,15 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   }
   return 0;
 
+}
+
+
+int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
+{
+  try {
+    return test1(argc, argv);
+  } catch (const std::exception& e) {
+    std::cerr << "exception: " << e.what() << "\n";
+    return 1;
+  }
 }
