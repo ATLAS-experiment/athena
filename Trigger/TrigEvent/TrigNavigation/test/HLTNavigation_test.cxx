@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -465,8 +465,8 @@ bool construction_test(HLT::Navigation* hns) {
       te2 = hns->addNode(te1, te1->getId()+100); 
       telist.push_back(te2);
     }
-    // a big join
-    te1 = hns->addNode(telist, te1->getId()+1000); 
+    // a big join; the return value is never used
+    std::ignore = hns->addNode(telist, te1->getId()+1000); 
   }
 
   std::vector<TriggerElement*> typeVec;

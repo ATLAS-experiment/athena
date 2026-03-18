@@ -399,8 +399,8 @@ bool HLT::NavigationCore::getFeaturesInRoI( const TriggerElement* te,
 
   bool oneRetStatus = false;
   bool allRetStatus = false;
-  for ( const TriggerElement* te : roi->getRelated(TriggerElement::sameRoIRelation) ) {
-    oneRetStatus = getFeatures(te, features, label, labels );  // the features will be paked to the end of the vector (see push_back in getFeatures)
+  for ( const TriggerElement* trigEl : roi->getRelated(TriggerElement::sameRoIRelation) ) {
+    oneRetStatus = getFeatures(trigEl, features, label, labels );  // the features will be packed to the end of the vector (see push_back in getFeatures)
     allRetStatus = allRetStatus || oneRetStatus; // that's OK if at least one call returns some feature
   }
   return allRetStatus;

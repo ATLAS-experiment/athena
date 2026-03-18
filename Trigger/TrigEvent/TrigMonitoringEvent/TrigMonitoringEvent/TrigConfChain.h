@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCONF_CHAIN_H
@@ -16,23 +16,24 @@
    monitoring data.
 */
 
+// Local
+#include "TrigMonitoringEvent/TrigConfSig.h"
 // Framework
 #include "AthenaKernel/CLASS_DEF.h"
 
 // C/C++
-#include <iostream>
+#include <iosfwd>
 #include <stdint.h>
 #include <string>
 #include <vector>
 
-// Local
-#include "TrigMonitoringEvent/TrigConfSig.h"
+
 
 class TrigConfChain
 {
  public:
   
-  TrigConfChain();
+  TrigConfChain() = default;
   
   // Constructor for L2 and EF chains
   TrigConfChain(const std::string &chain_name,
@@ -107,19 +108,20 @@ class TrigConfChain
 
   bool matchOutputTE(uint32_t te_id) const;
   
-  void print(std::ostream &os = std::cout) const;
+  void print(std::ostream &os) const;
+  void print() const;
   
  private:
   
-  std::string                   m_chain_name;          // Chain name
-  std::string                   m_lower_name;          // Lower chain name
-  uint32_t                      m_chain_id;            // Hash value from chain_name
-  uint32_t                      m_lower_id;            // Lower chain hash value from chain_name
-  uint16_t                      m_chain_counter;       // Chain counter
-  uint16_t                      m_lower_counter;       // Lower chain counter
-  uint8_t                       m_level;               // Trigger level
-  float                         m_prescale;            // Prescale value
-  float                         m_pass_through;        // Pass_through flag
+  std::string                   m_chain_name{};          // Chain name
+  std::string                   m_lower_name{};          // Lower chain name
+  uint32_t                      m_chain_id{};            // Hash value from chain_name
+  uint32_t                      m_lower_id{};            // Lower chain hash value from chain_name
+  uint16_t                      m_chain_counter{};       // Chain counter
+  uint16_t                      m_lower_counter{};       // Lower chain counter
+  uint8_t                       m_level{};               // Trigger level
+  float                         m_prescale{};            // Prescale value
+  float                         m_pass_through{};        // Pass_through flag
 
   std::vector<uint32_t>         m_lower_ids;           // Lower chain ids (exceptional case!)
   std::vector<float>            m_stream_prescale;     // Stream prescale list
