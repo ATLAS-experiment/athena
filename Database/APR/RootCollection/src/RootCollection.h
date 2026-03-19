@@ -82,7 +82,7 @@ namespace pool {
         virtual const CollectionDescription& description() const final override;
 
         /// Returns a cursor for the collection.
-        virtual ICollectionCursor& cursor() final override;
+        virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
      private:
 

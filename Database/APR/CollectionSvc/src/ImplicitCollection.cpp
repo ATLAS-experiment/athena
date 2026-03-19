@@ -156,9 +156,8 @@ namespace pool {
       return m_description;
    }
 
-   ICollectionCursor& ImplicitCollection::cursor()
+   std::unique_ptr<ICollectionCursor> ImplicitCollection::cursor()
    {
-      ImplicitCollectionIterator* cursor = new ImplicitCollectionIterator( *m_container );
-      return *cursor;
+      return std::make_unique<ImplicitCollectionIterator>( *m_container );
    }
 }
