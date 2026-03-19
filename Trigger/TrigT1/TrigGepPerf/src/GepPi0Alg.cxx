@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 /*
@@ -16,6 +16,9 @@
 #include <regex>
 #include <sstream>
 #include <fstream>
+#include <stdexcept>
+#include <queue>
+#include <cmath>
 
 GepPi0Alg::GepPi0Alg(const std::string& name, ISvcLocator* pSvcLocator ) : 
   AthReentrantAlgorithm(name, pSvcLocator){
@@ -509,7 +512,7 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 
     auto calc_phihashes = [&dir,
 			   &cc_id=m_calocell_id,
-			   nphi=m_er_nphi](auto hash){ //hash: pass by value
+			   &nphi=m_er_nphi](auto hash){ //hash: pass by value
       std::vector<IdentifierHash> path;
       std::vector<IdentifierHash> adjacent;
       path.push_back(hash);
@@ -594,12 +597,13 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 
   
   std::vector<std::string> paths_pat;
-  paths_signif.reserve(paths_signif.size());
+  paths_pat.reserve(paths_signif.size());
 
   for (const auto& p_s: paths_signif) {
     std::string pat{"0"}; // padding to keep the string size as path size
     if (!p_s.empty()) {
       for (std::size_t i = 1; i != p_s.size(); ++i) {
+        
 	if (p_s[i] > p_s[i-1]) {
 	  pat += '1';
 	} else {
