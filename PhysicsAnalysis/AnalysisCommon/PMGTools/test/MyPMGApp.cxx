@@ -8,6 +8,10 @@
 #ifndef PMGTOOLS_MYPMGAPP_H
 #define PMGTOOLS_MYPMGAPP_H
 
+// Local includes
+#include "PMGTools/PMGSherpa22VJetsWeightTool.h"
+#include "PMGTools/PMGTruthWeightTool.h"
+
 // EDM includes
 #include "AsgTools/StandaloneToolHandle.h"
 #include "AsgMessaging/MessageCheck.h"  // for messaging
@@ -22,9 +26,9 @@
 #include "TH1F.h"
 #include "TFile.h"
 
-// Local includes
-#include "PMGTools/PMGSherpa22VJetsWeightTool.h"
-#include "PMGTools/PMGTruthWeightTool.h"
+#include <iostream>
+#include <cmath>
+#include <stdexcept>
 
 // For convenience messaging macros
 using namespace asg::msgUserCode;
@@ -84,7 +88,7 @@ int test1(int argc, char *argv[])
   TH1F *h_njetTruthWZ_Tool = new TH1F("jetmult_AntiKt4TruthWZJets_Tool", "jetmult_AntiKt4TruthWZJets_Tool", 10, -0.5, 9.5);
   TFile *histfile = TFile::Open("hists.root", "RECREATE");
 
-  bool debug = false;
+  constexpr bool debug = false;
 
   for (int i = 0; i < evt.getEntries(); i++) {
     if (evt.getEntry(i) < 0) { ANA_MSG_ERROR("Failed to read event " << i); continue; }
