@@ -164,8 +164,8 @@ StatusCode ElectronPhotonVariableNFCorrectionTool::initialize()
 
     ATH_MSG_VERBOSE("NFolds = " << m_nFolds << ", pattern = " << m_onnxPattern << ", FoldStrategy = " << fsStr);
 
-    if ((int)m_onnxToolsForward.size() != m_nFolds ||
-        (int)m_onnxToolsBackward.size() != m_nFolds) {
+    if (static_cast<int>(m_onnxToolsForward.size()) != m_nFolds ||
+        static_cast<int>(m_onnxToolsBackward.size()) != m_nFolds) {
         ATH_MSG_ERROR("Expected "<<m_nFolds<<" forward/backward tools, "<< "but got "<<m_onnxToolsForward.size()<<" / "<< m_onnxToolsBackward.size());
         return StatusCode::FAILURE;
     }
@@ -310,6 +310,7 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
 
     const auto& onnxToolBackward = m_onnxToolsBackward[fold];
 
+    // index 0 is for kinematics
     int64_t batchSizeKinBack = onnxToolBackward->getBatchSize(
         static_cast<int64_t>(kinematic.size()), 0);
     if (onnxToolBackward->addInput(inputTensorsBack, kinematic, 0, batchSizeKinBack).isFailure()) {
@@ -317,10 +318,17 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
         return CP::CorrectionCode::Error;
     }
 
+    // index 1 is for shower shapes in latent space
     int64_t batchSizeZBack = onnxToolBackward->getBatchSize(static_cast<int64_t>(zVec.size()), 1);
 
     if (onnxToolBackward->addInput(inputTensorsBack, zVec, 1, batchSizeZBack).isFailure()) {
         ATH_MSG_ERROR("Fold " << fold << ": failed to add z input tensor for backward model");
+        return CP::CorrectionCode::Error;
+    }
+
+    // index 2 is for original shower shapes (models use them to cut on std values [-5, 5])
+    if (onnxToolBackward->addInput(inputTensorsBack, ss, 2, batchSizeKinBack).isFailure()) {
+        ATH_MSG_ERROR("Fold " << fold << ": failed to add original SS input tensor for backward model");
         return CP::CorrectionCode::Error;
     }
 
