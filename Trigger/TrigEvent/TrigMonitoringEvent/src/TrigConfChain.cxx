@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// C/C++
-#include <algorithm>
-#include <sstream>
 
 #include "AthenaKernel/errorcheck.h"
 #include "TrigMonitoringEvent/TrigMonSeq.h"
 #include "TrigMonitoringEvent/TrigConfChain.h"
-
+// C/C++
+#include <algorithm>
+#include <sstream>
 
 //--------------------------------------------------------------------------------------      
 uint16_t Trig::getEncodedId(int level,
@@ -42,19 +40,7 @@ uint16_t Trig::getEncodedId(const std::string &level, int counter)
   return 0;
 }
 
-//--------------------------------------------------------------------------------------      
-TrigConfChain::TrigConfChain()
-  :m_chain_name(""),
-   m_lower_name(""),
-   m_chain_id(0),
-   m_lower_id(0),
-   m_chain_counter(0),
-   m_lower_counter(0),
-   m_level(0),
-   m_prescale(0.0),
-   m_pass_through(0.0)
-{
-}
+
 
 //--------------------------------------------------------------------------------------      
 TrigConfChain::TrigConfChain(const std::string &chain_name,
@@ -225,6 +211,11 @@ void TrigConfChain::print(std::ostream &os) const
   os << str(*this) << std::endl;
 }
 
+void TrigConfChain::print() const
+{
+  std::cout << str(*this) << std::endl;
+}
+
 //--------------------------------------------------------------------------------------      
 std::string str(const TrigConfChain &o)
 {
@@ -239,13 +230,13 @@ std::string str(const TrigConfChain &o)
   for(unsigned int i = 0; i < o.getSignature().size(); ++i) {
     s << str(o.getSignature()[i]) << " ";
   }
-  s << std::endl;
+  s << "\n";
   
   s << "   streams: ";
   for(unsigned int i = 0; i < o.getStream().size(); ++i) {
     s << o.getStream()[i] << " ";
   }
-  s << std::endl;
+  s << "\n";
 
   s << "   groups: ";
   for(unsigned int i = 0; i < o.getGroup().size(); ++i) {
