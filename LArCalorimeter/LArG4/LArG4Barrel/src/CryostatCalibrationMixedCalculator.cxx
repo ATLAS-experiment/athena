@@ -66,8 +66,9 @@ namespace LArG4 {
     // LArG4/LArG4Barrel/src/CryostatCalibrationCalculator.cxx
 
     G4bool CalibrationMixedCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
-                                               std::vector<G4double> & energies,
-                                               const eCalculatorProcessing process) const
+                                            LArG4Identifier& identifier_sr,
+                                            std::vector<double>& energies,
+                                            const LArG4::eCalculatorProcessing process) const
     {
       // Use the calculators to determine the energies and the
       // identifier associated with this G4Step.  Note that the
@@ -200,7 +201,7 @@ namespace LArG4 {
                             << std::endl;
                 }
 #endif
-              m_backupCalculator->Process(step, identifier, energies, process);
+              m_backupCalculator->Process(step, identifier, identifier_sr, energies, process);
             }
           else
             {

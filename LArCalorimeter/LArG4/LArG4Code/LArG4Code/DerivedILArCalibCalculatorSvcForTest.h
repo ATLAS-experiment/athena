@@ -125,9 +125,10 @@ public:
   }
 
   G4bool Process (const G4Step* step, LArG4Identifier & identifier,
-                            std::vector<G4double> & energies,
-                            const LArG4::eCalculatorProcessing process = LArG4::kEnergyAndID) const
+                LArG4Identifier& identifier_sr, std::vector<double>& energies, 
+                const LArG4::eCalculatorProcessing process = LArG4::kEnergyAndID) const
   {
+    (void)identifier_sr; //just to silence the unused-parameter warning
     (void)step; //just to silence the unused-parameter warning, the same below
 //    (void)energies;
     (void)process;
