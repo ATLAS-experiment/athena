@@ -64,14 +64,15 @@ namespace PhaseII {
    };
 
    /// @brief A proxy for a strip RDO which adds convenience methods to interpret the data word to the base proxy.
-   template <AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   class StripRawDataProxy  : public RawDataProxyBase<PhaseII::StripRawDataContainer, accessPolicy >
+   template <AccessPolicy accessPolicy=AccessPolicy::Const>
+   class StripRawDataProxy
+      : public RawDataProxyBase<typename Utils::ContainerAccessHelper<PhaseII::StripRawDataContainer, accessPolicy>::ContainerType >
    {
    public:
-      using BASE = RawDataProxyBase<PhaseII::StripRawDataContainer, accessPolicy >;
+      using BASE = RawDataProxyBase<typename Utils::ContainerAccessHelper<PhaseII::StripRawDataContainer, accessPolicy>::ContainerType >;
       using BASE::BASE;
 
-      using ReadOnlyProxy = StripRawDataProxy<AccessPolicy::ReadOnly>;
+      using ReadOnlyProxy = StripRawDataProxy<AccessPolicy::Const>;
       int getGroupSize() const                      {return StripRawDataContainer::getGroupSize(this->dataWord());}
       int getTimeBin() const                        {return StripRawDataContainer::getTimeBin(this->dataWord());}
       int getErrors() const                         {return StripRawDataContainer::getErrors(this->dataWord());}
@@ -95,12 +96,13 @@ namespace PhaseII {
    }
 
    // Define all the proxies for read only access of the strip raw data
-   template <AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   using StripRawDataContainerCollectionTypes = RawDataCollectionTypes<StripRawDataContainer, accessPolicy>;
+   template <AccessPolicy accessPolicy=AccessPolicy::Const>
+   using StripRawDataTypeTraits = RawDataTypeTraits<typename Utils::ContainerAccessHelper<StripRawDataContainer,
+                                                                                                             accessPolicy>::ContainerType >;
 }
 
 // Pool converter do not like namespaces
-using PhaseIIStripRawDataContainer = PhaseII::StripRawDataContainerCollectionTypes<>::ContainerCollection;
+using PhaseIIStripRawDataContainer = PhaseII::StripRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::ContainerCollection;
 
 CLASS_DEF(PhaseIIStripRawDataContainer, 1329968921, 1)
 #endif

@@ -22,8 +22,8 @@ StripRDO_Container_PERS* PhaseIIStripRawDataContainerCnv::createPersistent(Phase
   persObj->m_collections.reserve( transCont->size() );
   unsigned int n_rdos=0;
   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*transCont);
-  using StripRawDataContainerProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-  using StripRawDataProxy = PhaseII::StripRawDataContainerCollectionTypes<>::RawDataProxy;
+  using StripRawDataContainerProxy = PhaseII::StripRawDataTypeTraits<>::RawDataContainerProxy;
+  using StripRawDataProxy = PhaseII::StripRawDataTypeTraits<>::RawDataProxy;
   // convert element index and count total number of elements in all containers.
   for (StripRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
      if (!module_rdo_container_proxy.empty()) {

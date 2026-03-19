@@ -20,8 +20,8 @@ PixelRDO_Container_PERS* PhaseIIPixelRawDataContainerCnv::createPersistent(Phase
   unsigned int n_rdos=0;
 
   auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(*transCont);
-  using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-  using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
+  using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+  using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
   for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
      if (!module_rdo_container_proxy.empty()) {
         IdentifierHash id_hash(module_rdo_container_proxy.identifyHash());

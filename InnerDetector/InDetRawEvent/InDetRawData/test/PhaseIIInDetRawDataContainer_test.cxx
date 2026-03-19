@@ -162,8 +162,8 @@ void fillPixelRawDataContainer ( unsigned int container_i,
 void dump(const PhaseIIPixelRawDataContainer &rdo_container) {
    // first create a proxy representing the entire hit data collection.
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
    // this proxy can be used to iterate over the modules
    for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
       // Each of the proxy representing the hits of a module can be used to
@@ -182,10 +182,10 @@ void conversionTest(PhaseIIPixelRawDataContainer &rdo_container ) {
    if (rdo_container.empty()) return;
 
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   using PixelRawDataProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
+   using PixelRawDataProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataProxy;
 
    static_assert( Utils::isConvertableToReadOnlyProxy<PixelRawDataProxy,PixelRawDataProxyRW> );
 
@@ -237,8 +237,8 @@ void conversionTest(PhaseIIPixelRawDataContainer &rdo_container ) {
 std::size_t test(const PhaseIIPixelRawDataContainer &rdo_container) {
    std::size_t sum{};
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
    for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
       for (PixelRawDataProxy rdo_proxy : module_rdo_container_proxy) {
          for (auto elm :  rdo_proxy.coordinates()) {
@@ -253,10 +253,10 @@ std::size_t test(const PhaseIIPixelRawDataContainer &rdo_container) {
 std::size_t testNonConst(PhaseIIPixelRawDataContainer &rdo_container) {
    std::size_t sum{};
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
-   using PixelRawDataProxyRW = PhaseII::PixelRawDataContainerCollectionTypes<Utils::AccessPolicy::ReadWrite>::RawDataProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+   using PixelRawDataContainerProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
+   using PixelRawDataProxyRW = PhaseII::PixelRawDataTypeTraits<Utils::AccessPolicy::Mutable>::RawDataProxy;
 
    auto a_module_proxy = rdo_container_collection_proxy[0];
    static_assert( std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxy> || std::is_same_v<decltype(a_module_proxy), PixelRawDataContainerProxyRW>);
@@ -294,7 +294,7 @@ std::size_t testAlt(const PhaseIIPixelRawDataContainer &rdo_container) {
 std::size_t countHits(const PhaseIIPixelRawDataContainer &rdo_container) {
    std::size_t sum{};
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
    for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
       sum += module_rdo_container_proxy.size();
    }
@@ -501,8 +501,8 @@ std::size_t roiFillMT(const PhaseIIPixelRawDataContainer &rdo_container,
    // only using the data of each module at most once.
    FNVHash fnvHash;
    auto rdo_container_collection_proxy = PhaseII::makeRawDataCollectionProxy(roi_rdo_container);
-   using PixelRawDataContainerProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataContainerProxy;
-   using PixelRawDataProxy = PhaseII::PixelRawDataContainerCollectionTypes<>::RawDataProxy;
+   using PixelRawDataContainerProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataContainerProxy;
+   using PixelRawDataProxy = PhaseII::PixelRawDataTypeTraits<>::RawDataProxy;
 
    for (PixelRawDataContainerProxy module_rdo_container_proxy : rdo_container_collection_proxy) {
       for (PixelRawDataProxy rdo_proxy : module_rdo_container_proxy) {
