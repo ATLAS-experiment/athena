@@ -4,9 +4,9 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
 
 class SeedingStrategy(FlagEnum):
-    Gbts = "Gbts"
-    Gbts2 = "Gbts2"
     GridTriplet = "GridTriplet"
+    Gbts = "Gbts"
+    GbtsFtf = "GbtsFtf"
     F150 = "F150"
 
 class AmbiguitySolverStrategy(FlagEnum):
@@ -156,7 +156,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
-    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.Gbts2 and
+    actscf.addFlag('Acts.forceTrackOnSeed', lambda pcf: not(pcf.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf and
                                                             pcf.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.AnalogueClusteringAfterSelection)) # forceTrackOnSeed does not seem to work with GBTS seeds and analogue cluster calibration
         
     # Ambiguity resolution    

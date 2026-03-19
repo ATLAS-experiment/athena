@@ -2,21 +2,21 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "GbtsFtfActsSeedingTool.h"
+
 #include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 
-#include "Gbts2ActsSeedingTool.h"
-
 #include <optional>
 
-Gbts2ActsSeedingTool::Gbts2ActsSeedingTool(const std::string& t,
+GbtsFtfActsSeedingTool::GbtsFtfActsSeedingTool(const std::string& t,
 					     const std::string& n,
 					     const IInterface*  p ) : SeedingToolBase(t,n,p)
 {
 }
 
-StatusCode Gbts2ActsSeedingTool::initialize(){
+StatusCode GbtsFtfActsSeedingTool::initialize(){
     ATH_CHECK(SeedingToolBase::initialize());
     ATH_CHECK(m_beamSpotKey.initialize());
     m_sct_h2l = m_layerNumberTool->sctLayers();
@@ -27,11 +27,11 @@ StatusCode Gbts2ActsSeedingTool::initialize(){
     return StatusCode::SUCCESS;
 }
 
-StatusCode Gbts2ActsSeedingTool::finalize() {
+StatusCode GbtsFtfActsSeedingTool::finalize() {
   return SeedingToolBase::finalize();
 }
 
-StatusCode Gbts2ActsSeedingTool::createSeeds(
+StatusCode GbtsFtfActsSeedingTool::createSeeds(
       const EventContext& ctx,
       const std::vector<const xAOD::SpacePointContainer*>&
           spacePointCollections,
