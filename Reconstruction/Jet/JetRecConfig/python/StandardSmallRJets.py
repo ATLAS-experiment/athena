@@ -28,17 +28,17 @@ flavourghosts = [ "BHadronsInitial", "BHadronsFinal", "BQuarksFinal",
 calibmods = (
     "ConstitFourMom",   "CaloEnergies",
     "Calib:T0:mc",
-    "Sort",
+    "Sort","numConstit",
     )
 
 calibmods_lowCut = (
     "ConstitFourMom", "CaloEnergies",
     "Calib:T0:mc:JetArea_Residual",
-    "Sort",
+    "Sort","numConstit",
 )
 
 calibmods_noCut = (
-    "ConstitFourMom", "CaloEnergies", "Sort"
+    "ConstitFourMom","CaloEnergies","Sort","numConstit",
 )
 
 standardmods = (
@@ -63,7 +63,7 @@ substrmods = ("nsubjettiness","ecorr")
 # Standard track jet definition
 # ********************************************************
 AntiKtVR30Rmax4Rmin02PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
-                                              modifiers = ("Sort","JetDeltaRLabel:4500","JetGhostLabel","vr"),
+                                              modifiers = ("Sort","JetDeltaRLabel:4500","JetGhostLabel","vr","numConstit"),
                                               ptmin=4000,
                                               VRMinR = 0.02,
                                               VRMassSc = 30000,
@@ -74,9 +74,9 @@ registerAsInputConstit(AntiKtVR30Rmax4Rmin02PV0Track)
 
 
 AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
-                                modifiers = ("Sort",)+truthmods,
+                                modifiers = ("Sort","numConstit")+truthmods,
                                 ptmin=2000,
-                                  lock = True)
+                                lock = True)
 
 
 # *********************************************************
@@ -142,7 +142,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 # *********************************************************
 AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                    ghostdefs = standardghosts+flavourghosts,
-                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr","jetiso")+truthmods+standardmods,
+                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr","jetiso","numConstit")+truthmods+standardmods,
                                    ptmin = 2000,
                                    lock = True
 )
@@ -170,7 +170,7 @@ AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                           infix = "NoPtCut",
                                           ghostdefs = standardghosts+flavourghosts,
-                                          modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","jetiso")+truthmods+standardmods,
+                                          modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","jetiso","numConstit")+truthmods+standardmods,
                                           ptmin = 1,
                                           lock = True
 )
@@ -202,7 +202,7 @@ AntiKt4EMTopoNoPtCut = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 AntiKt4MLTopo = JetDefinition("AntiKt",0.4,cst.MLTopoOrigin,
                                      infix = "",
                                      ghostdefs = standardghosts+flavourghosts,
-                                     modifiers = ("CaloEnergies", "Sort")+("Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
+                                     modifiers = ("CaloEnergies","Sort","numConstit","Filter:1",)+truthmods+standardmods+clustermods+("JetPtAssociation","jetiso",),
                                      ptmin = 1,
                                      lock = True
 )
@@ -237,25 +237,25 @@ AntiKt4EMTopoLowPt = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 
 AntiKt4Truth = JetDefinition("AntiKt",0.4, cst.Truth,
                              ghostdefs = flavourghosts,
-                             modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                             modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                              lock = True,
 )
 
 AntiKt2Truth = JetDefinition("AntiKt",0.2, cst.Truth,
                              ghostdefs = flavourghosts,
-                             modifiers = ("Sort", "Width")+truthmods,
+                             modifiers = ("Sort", "Width", "numConstit")+truthmods,
                              lock = True,
 )
 
 AntiKt4TruthWZ = JetDefinition("AntiKt",0.4, cst.TruthWZ,
                                ghostdefs = flavourghosts,
-                               modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                               modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                                lock = True,
 )
 
 AntiKt4TruthDressedWZ = JetDefinition("AntiKt",0.4, cst.TruthDressedWZ,
                                       ghostdefs = flavourghosts,
-                                      modifiers = ("Sort", "Width", "jetisoTruth")+truthmods,
+                                      modifiers = ("Sort", "Width", "jetisoTruth", "numConstit")+truthmods,
                                       lock = True,
 )
 
@@ -264,7 +264,7 @@ registerAsInputConstit(AntiKt4TruthDressedWZ)
 
 AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
                                      ghostdefs = flavourghosts,
-                                     modifiers = ("Sort",)+truthmods,
+                                     modifiers = ("Sort", "numConstit")+truthmods,
                                      VRMinR = 0.02,
                                      VRMassSc = 30000,
                                      lock = True
@@ -273,7 +273,7 @@ AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
 AntiKt4TruthGEN = JetDefinition("AntiKt",0.4, cst.TruthGEN,
                                 ptmin = 5000, 
                                 ghostdefs = [],
-                                modifiers = ("Sort", )+truthmods,
+                                modifiers = ("Sort",)+truthmods,
                                 ghostarea = 0.,
                                 lock = True,
 )

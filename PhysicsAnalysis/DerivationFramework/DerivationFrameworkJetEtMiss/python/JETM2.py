@@ -157,9 +157,9 @@ def JETM2Cfg(flags):
     from DerivationFrameworkJetEtMiss.CommonJETMXContent import ExtraJSSVariables
     JETM2SlimmingHelper.ExtraVariables += [".".join(["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"] + ExtraJSSVariables)]
 
-    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
-                                           "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub",
-                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.GhostTrack",
+    JETM2SlimmingHelper.ExtraVariables += ["AntiKt4EMPFlowJets.GhostTower.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
+                                           "AntiKt4EMTopoNoPtCutJets.IsoFixedCone5Pt.IsoFixedCone5PtPUsub.constituentLinks",
+                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter.GhostTrack.constituentLinks",
                                            "GSFTrackParticles.particleHypothesis.vx.vy.vz",
                                            "PrimaryVertices.x.y.z.covariance.trackWeights",
                                            "TauJets.clusterLinks",
@@ -209,14 +209,20 @@ def JETM2Cfg(flags):
         JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets",
                                              "TruthParticles", "TruthVertices","TruthEvents"]
-        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter"]
-        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt10TruthJets","AntiKt4TruthWZJets","AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
 
-        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
+        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt4TruthWZJets",
+                                                 "AntiKt10TruthJets","AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets"]
+
+        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter.constituentLinks",
+                                               "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets.constituentLinks",
+                                               "AntiKt10TruthDressedWZJets.constituentLinks",
+                                               "AntiKt10TruthJets.constituentLinks",
+                                               "AntiKt4TruthJets.constituentLinks",
+                                               "AntiKt4TruthWZJets.IsoFixedCone5Pt.constituentLinks",
+                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.constituentLinks",
+                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalCount.GhostHBosonsCount.GhostZBosonsCount.GhostWBosonsCount",
                                                "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTQuarksFinalPt.GhostHBosonsPt.GhostZBosonsPt.GhostWBosonsPt",
-                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt",
-                                               "AntiKt4TruthWZJets.IsoFixedCone5Pt",
-                                               "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt"]
+                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostBHadronsFinalPt.GhostCHadronsFinalPt"]
 
     # Trigger content
     JETM2SlimmingHelper.IncludeTriggerNavigation = False

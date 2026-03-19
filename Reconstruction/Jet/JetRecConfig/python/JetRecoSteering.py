@@ -39,7 +39,7 @@ def addJetsToOutputCfg(flags,jetdefs, toAOD=True, toESD=True):
 
     for jetdef in jetdefs:
         jetList += [ f"xAOD::JetContainer#{jetdef.fullname()}" ,
-                     f"xAOD::JetAuxContainer#{jetdef.fullname()}Aux.-PseudoJet"]
+                     f"xAOD::JetAuxContainer#{jetdef.fullname()}Aux.-PseudoJet.-numConstit"]
         # Not sure if this trigger special AuxContainer is obsolete in Run3 ?
         # if trigger:
         #   auxprefix = "Trig"

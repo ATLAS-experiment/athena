@@ -266,9 +266,7 @@ class SlimmingHelper:
                         theDictionary = self.NamesAndTypes.copy()
                         theDictionary.update (self.AppendToDictionary)
                         if item in theDictionary.keys():
-                                if (theDictionary[item]=='xAOD::JetAuxContainer'):
-                                        entry = "xAOD::JetAuxContainer#"+item+"."
-                                elif (theDictionary[item]=='xAOD::ShallowAuxContainer'):
+                                if (theDictionary[item]=='xAOD::ShallowAuxContainer'):
                                         entry = "xAOD::ShallowAuxContainer#"+item+"."
                                 elif (theDictionary[item]=='xAOD::MissingETAuxAssociationMap'):
                                         entry = "xAOD::MissingETAuxAssociationMap#"+item+"."
