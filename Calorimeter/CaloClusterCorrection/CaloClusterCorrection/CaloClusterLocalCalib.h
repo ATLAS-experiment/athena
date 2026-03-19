@@ -49,7 +49,7 @@ class CaloClusterLocalCalib : public CaloClusterProcessor {
  private:
 
   /// property:  Classification tools
-  ToolHandleArray<IClusterClassificationTool>  m_classificationTool{this, "ClusterClassificationTool", {}};;
+  ToolHandleArray<IClusterClassificationTool>  m_classificationTool{this, "ClusterClassificationTool", {}};
   //Remark: This handle should be 0 or 1 entries. Our configurable framework can't handle 
   //a not-assigned ToolHandle, therefore this is an array.
   
