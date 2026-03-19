@@ -8,7 +8,7 @@ from AthenaCommon.Utils.unixtools import find_datafile
 from ActsInterop import UnitConstants as ActsUnits
 import AthenaCommon.SystemOfUnits as GaudiUnits
 
-def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwargs) -> ComponentAccumulator:
+def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **kwargs) -> ComponentAccumulator:
   acc = ComponentAccumulator()
 
   if "layerNumberTool" not in kwargs:
@@ -26,7 +26,7 @@ def ActsGbts2SeedingTrigToolCfg(flags,name: str = "Gbts2ActsSeedingTool", **kwar
   kwargs.setdefault("ConnectionFileName",
                     "binTables_ITK_RUN4_LRT.txt" if isLargeD0 else "binTables_ITK_RUN4.txt")
 
-  acc.setPrivateTools(CompFactory.Gbts2ActsSeedingTool(name, **kwargs))
+  acc.setPrivateTools(CompFactory.GbtsFtfActsSeedingTool(name, **kwargs))
 
   return acc
 
@@ -269,8 +269,8 @@ def ActsPixelSeedingAlgCfg(flags,
     if "SeedTool" not in kwargs:
         if flags.Acts.SeedingStrategy is SeedingStrategy.Gbts:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsPixelGbtsSeedingToolCfg(flags)))
-        elif flags.Acts.SeedingStrategy is SeedingStrategy.Gbts2:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsGbts2SeedingTrigToolCfg(flags)))
+        elif flags.Acts.SeedingStrategy is SeedingStrategy.GbtsFtf:
+            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsGbtsFtfSeedingTrigToolCfg(flags)))
         else:
             if useFastTracking:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsFastPixelSeedingToolCfg(flags)))

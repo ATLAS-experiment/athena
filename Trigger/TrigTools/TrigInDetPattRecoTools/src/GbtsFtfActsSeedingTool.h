@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRIGINDETPATTRECOTOOLS_ACTSTOOL_H
-#define TRIGINDETPATTRECOTOOLS_ACTSTOOL_H
+#ifndef TRIGINDETPATTRECOTOOLS_GBTSFTFACTSSEEDINGTOOL_H
+#define TRIGINDETPATTRECOTOOLS_GBTSFTFACTSSEEDINGTOOL_H
 
 #include "ActsToolInterfaces/ISeedingTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -11,12 +11,12 @@
 
 #include "SeedingToolBase.h"
 
-class Gbts2ActsSeedingTool: public SeedingToolBase, public ActsTrk::ISeedingTool {
+class GbtsFtfActsSeedingTool: public SeedingToolBase, public ActsTrk::ISeedingTool {
     public:
 
     // standard AlgTool methods
-    Gbts2ActsSeedingTool(const std::string&,const std::string&,const IInterface*);
-    virtual ~Gbts2ActsSeedingTool(){};
+    GbtsFtfActsSeedingTool(const std::string&,const std::string&,const IInterface*);
+    virtual ~GbtsFtfActsSeedingTool(){}
 
     // standard Athena methods
     virtual StatusCode initialize() override;
