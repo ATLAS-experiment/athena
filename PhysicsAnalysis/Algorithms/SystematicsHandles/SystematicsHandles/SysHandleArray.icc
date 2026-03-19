@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 namespace CP {
   template <typename HANDLE> template <typename OWNER>
   SysHandleArray<HANDLE>::SysHandleArray(
@@ -36,7 +39,7 @@ namespace CP {
       // NB: This will fail if the templated class doesn't have the right
       // constructor
       handles.emplace_back(m_makeHandle(decor));
-      ATH_CHECK(handles.back().initialize(std::forward<Args>(args)...));
+      ATH_CHECK(handles.back().initialize(args...));
     }
     // If we get here then it all worked OK
     m_handles = std::move(handles);
