@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/PackedLinkConstAccessor.icc
@@ -167,8 +167,9 @@ auto
 ConstAccessor<PackedLink<CONT>, ALLOC>::getPackedLinkSpan (const AuxVectorData& container) const
   -> const_PackedLink_span
 {
-  auto beg = reinterpret_cast<const PLink_t*>(container.getDataArray (m_auxid));
-  return const_PackedLink_span (beg, container.size_v());
+  const SG::AuxDataSpanBase sp = *container.getDataSpan (m_auxid);
+  return const_PackedLink_span (reinterpret_cast<const PLink_t*>(sp.beg),
+                                sp.size);
 }
 
 
@@ -182,9 +183,9 @@ auto
 ConstAccessor<PackedLink<CONT>, ALLOC>::getDataLinkSpan (const AuxVectorData& container) const
   -> const_DataLink_span
 {
-  const SG::AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
-  return const_DataLink_span (reinterpret_cast<const DLink_t*>(sp->beg),
-                              sp->size);
+  const SG::AuxDataSpanBase sp = *container.getDataSpan (m_linkedAuxid);
+  return const_DataLink_span (reinterpret_cast<const DLink_t*>(sp.beg),
+                              sp.size);
 }
 
 
