@@ -40,7 +40,6 @@
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepPID/ParticleName.hh"
 
