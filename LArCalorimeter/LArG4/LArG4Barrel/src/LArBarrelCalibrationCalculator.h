@@ -27,9 +27,6 @@ class G4Step;
 // like LArG4BarrelCalibrationCalculator).  This class is contained in
 // the namespace LArG4::Barrel.
 
-
-
-
 namespace LArG4 {
 
   namespace Barrel {
@@ -52,14 +49,16 @@ namespace LArG4 {
       // yet, but you can never tell).  Use the enum (defined in
       // VCalibrationCalculator.h) to control any special processing.
 
-      virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
-                              std::vector<G4double> & energies,
-                              const eCalculatorProcessing process = kEnergyAndID) const override final;
+      virtual G4bool Process(const G4Step* step,
+        LArG4Identifier& identifier,
+        LArG4Identifier& identifier_sr,
+        std::vector<double>& energies,
+        const LArG4::eCalculatorProcessing process) const override final;
 
     private:
-
       // Geometry calculator
       ServiceHandle<ILArBarrelGeometry> m_geometryCalculator{this, "GeometryCalculator", "LArBarrelGeometry"};
+      Gaudi::Property<bool> m_calculateSuperResolutionIdentifier{this, "calculateSuperResolutionIdentifier", false};
 
       // Energy calculator
       CaloG4::SimulationEnergies m_energyCalculator{};

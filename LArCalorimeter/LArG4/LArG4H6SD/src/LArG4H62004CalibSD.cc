@@ -23,9 +23,10 @@ G4bool LArG4H62004CalibSD::ProcessHits(G4Step* a_step,G4TouchableHistory* /*ROhi
   std::cout << "my name: "<<this->GetName()<<", calc: "<<LArG4::m_calculator<<std::endl;
 #endif
   LArG4Identifier ident;
+  LArG4Identifier identifier_sr = LArG4Identifier();
   std::vector<G4double> energies;
   // Convert the G4Step into identifier and energy.
-  G4bool valid = m_calculator->Process(a_step, ident, energies, LArG4::kEnergyAndID);
+  G4bool valid = m_calculator->Process(a_step, ident, identifier_sr, energies, LArG4::kEnergyAndID);
 
   // Check that hit was valid.  (It might be invalid if, for example,
   // it occurred outside the sensitive region.  If such a thing
@@ -66,8 +67,9 @@ G4bool LArG4H62004CalibSD::SpecialHit(G4Step* a_step,
 #endif
   // Convert the G4Step into an identifier.
   LArG4Identifier ident;
+  LArG4Identifier ident_sr;
   std::vector<double> energies;
-  G4bool valid = m_calculator->Process( a_step, ident, energies, LArG4::kOnlyID );
+  G4bool valid = m_calculator->Process( a_step, ident, ident_sr, energies, LArG4::kOnlyID );
 
   // If we can't calculate the identifier, something is wrong.
   if ( ! valid ) return false;

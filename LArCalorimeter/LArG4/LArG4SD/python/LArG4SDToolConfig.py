@@ -30,7 +30,7 @@ def LArActiveSensitiveDetectorToolCfg(flags, name="LArActiveSensitiveDetector", 
     # Running PID calibration hits?
     kwargs.setdefault("ParticleID",flags.Sim.ParticleID)
     # No effect currently
-    kwargs.setdefault("OutputCollectionNames", ["LArCalibrationHitActive"])
+    kwargs.setdefault("OutputCollectionNames", ["LArCalibrationHitActive", "SR_LArCalibrationHitActive"])
 
     from LArG4Barrel.LArG4BarrelConfig import BarrelCalibrationCalculatorCfg, BarrelPresamplerCalibrationCalculatorCfg
     kwargs.setdefault("EMBPSCalibrationCalculator",

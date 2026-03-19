@@ -52,8 +52,9 @@ namespace LArG4 {
     }
 
     G4bool CalibrationLArCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
-                                             std::vector<G4double> & energies,
-                                             const eCalculatorProcessing process) const
+                                            LArG4Identifier& identifier_sr,
+                                            std::vector<double>& energies,
+                                            const LArG4::eCalculatorProcessing process) const
     {
       // Use the calculators to determine the energies and the
       // identifier associated with this G4Step.  Note that the
@@ -253,7 +254,7 @@ namespace LArG4 {
                             << std::endl;
                 }
 #endif
-              m_defaultCalculator->Process(step, identifier, energies, process);
+              m_defaultCalculator->Process(step, identifier, identifier_sr, energies, process);
             }
           else
             {

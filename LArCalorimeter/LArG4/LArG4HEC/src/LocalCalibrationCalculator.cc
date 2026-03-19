@@ -56,6 +56,7 @@ namespace LArG4 {
     }
 
     G4bool LocalCalibrationCalculator::Process(const G4Step* step, LArG4Identifier & identifier,
+                                          LArG4Identifier &,
                                           std::vector<G4double> & energies,
                                           const eCalculatorProcessing process) const
     {

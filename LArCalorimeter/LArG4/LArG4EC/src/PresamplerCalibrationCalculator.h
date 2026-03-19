@@ -58,6 +58,7 @@ namespace LArG4 {
 
 
       virtual G4bool Process (const G4Step* step, LArG4Identifier & identifier,
+                  LArG4Identifier & identifier_sr,
                   std::vector<G4double> & energies,
                   const eCalculatorProcessing p = kEnergyAndID) const override final;
 
