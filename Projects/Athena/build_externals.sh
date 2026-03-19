@@ -11,7 +11,7 @@ ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=108
                         -DLCG_VERSION_POSTFIX="a_ATLAS_9"
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r3.000/Gaudi-v40r3.000.tar.gz;URL_MD5;f73b109129b595a9c0299e8e025b7119"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r3.001/Gaudi-v40r3.001.tar.gz;URL_MD5;86b44fe14086e2fa67b25a797c6bb165"
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v45.5.1/acts-v45.5.1.tar.gz;URL_HASH;SHA256=a5c1ee0bc48ffa9c2fa416496789cef965c782c30bdfdacf793f5f6373f7204d"
                         -DATLAS_ACTS_USE_GNN=FALSE
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.24.0/GeoModel-6.24.0.tar.bz2;URL_MD5;5d436565dd92671aa58cef737bbc2ab6"
