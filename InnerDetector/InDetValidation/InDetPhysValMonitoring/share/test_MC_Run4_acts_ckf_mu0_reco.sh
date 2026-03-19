@@ -40,10 +40,12 @@ run () {
     return $rc
 }
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # Run with Athena ambi. resolution
 run "Reconstruction-ckf" \
-    Reco_tf.py --CA \
-    --steering doRAWtoALL \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateTracksFlags" \
     --preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True; flags.Tracking.doStoreSiSPSeededTracks=True; flags.Tracking.ITkActsValidateTracksPass.storeSiSPSeededTracks=True;' \
     --inputRDOFile ${ArtInFile} \
@@ -78,8 +80,8 @@ ckf_rc=$?
 
 # Run with ACTS ambi. resolution
 run "Reconstruction-ambi" \
-    Reco_tf.py --CA \
-    --steering doRAWtoALL \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.ambi.root \
@@ -109,7 +111,7 @@ ambi_rc=$?
 
 run "Reconstruction-ambi-scored" \
     Reco_tf.py \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateResolvedTracksFlags" \
     --preExec "flags.Acts.doMonitoring=True; \
                from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy; \

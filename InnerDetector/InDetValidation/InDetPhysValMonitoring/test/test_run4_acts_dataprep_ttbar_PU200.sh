@@ -38,11 +38,13 @@ run () {
 # Run ACTS Reco
 export ATHENA_CORE_NUMBER=8
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 run "Reconstruction-acts" \
     Reco_tf.py \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \
     --maxEvents ${nEvents} \
@@ -63,7 +65,7 @@ run "Reconstruction-athena" \
     Reco_tf.py \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=False;flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True;" \

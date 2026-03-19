@@ -42,9 +42,12 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # Run with Athena legacy Fast Tracking
 run "Reconstruction-athena" \
     Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doITkFastTracking=True;" \
@@ -78,6 +81,7 @@ fi
 # Run with Acts
 run "Reconstruction-acts" \
     Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Acts.doLargeRadius=True;" \

@@ -37,14 +37,12 @@ conditions=$(python -c "from AthenaConfiguration.TestDefaults import defaultCond
 
 # Reco step based on test InDetPhysValMonitoring ART setup from Josh Moss.
 run Reco_tf.py \
-  --CA \
   --runNumber="801271" \
   --AMITag="r14519" \
   --autoConfiguration="everything" \
   --conditionsTag "default:${conditions}" \
   --inputRDOFile     ${ArtInFile} \
   --outputAODFile   physval.AOD.root \
-  --steering        doRAWtoALL \
   --checkEventCount False \
   --ignoreErrors    True \
   --maxEvents       100 

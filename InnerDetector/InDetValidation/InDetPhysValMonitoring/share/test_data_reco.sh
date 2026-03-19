@@ -23,7 +23,6 @@ run  Reco_tf.py \
   --conditionsTag   "$conditions" \
   --geometryVersion "$geotag" \
   --outputAODFile   physval.AOD.root \
-  --steering        doRAWtoALL \
   --checkEventCount False \
   --ignoreErrors    True 
 rec_tf_exit_code=$?

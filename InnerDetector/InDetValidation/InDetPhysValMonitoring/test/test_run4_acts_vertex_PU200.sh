@@ -35,9 +35,11 @@ run () {
 }
 
 ignore_pattern=""
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 run "Reconstruction-acts" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsLegacyWorkflowFlags" \
     --ignorePatterns "${ignore_pattern}" \
     --inputRDOFile ${input_rdo} \
@@ -65,7 +67,8 @@ if [ $reco_rc != 0 ]; then
 fi
 
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.athena.root \

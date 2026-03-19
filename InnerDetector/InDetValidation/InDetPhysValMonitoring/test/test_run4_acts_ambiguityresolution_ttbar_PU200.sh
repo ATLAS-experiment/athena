@@ -38,9 +38,12 @@ run () {
 
 export ATHENA_CORE_NUMBER=4
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # Run with legacy Athena
 run "Reconstruction-athena" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --preExec "flags.Tracking.ITkMainPass.doAmbiguityProcessorTrackFit=False;flags.Reco.EnableHGTDExtension=False;" \
     --inputRDOFile ${ArtInFile} \
@@ -69,7 +72,8 @@ fi
 
 # Run with full ACTS chain, including ACTS ambi. resolution
 run "Reconstruction-acts" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsValidateAmbiguityResolutionFlags" \
     --inputRDOFile ${ArtInFile} \
     --outputAODFile AOD.acts.root \

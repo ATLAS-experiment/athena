@@ -38,11 +38,14 @@ run () {
 # We want to schedule Trk->xAOD SP convertion
 # We want to run the Acts Seeding Algorithm
 # We want to activate the analysis of seed and estimated track parameters (flag)
+
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 run "Reconstruction" \
     Reco_tf.py \
     --inputRDOFile ${input_rdo} \
     --outputAODFile AOD.pool.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.doTruth=False; \
                flags.DQ.useTrigger=False; \

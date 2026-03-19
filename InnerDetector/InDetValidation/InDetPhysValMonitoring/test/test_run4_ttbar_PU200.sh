@@ -30,11 +30,13 @@ run () {
     return $rc
 }
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 run "Reconstruction" \
-    Reco_tf.py --CA \
+    Reco_tf.py \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.root \
-    --steering doRAWtoALL \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude
 
 run "IDPVM" \
