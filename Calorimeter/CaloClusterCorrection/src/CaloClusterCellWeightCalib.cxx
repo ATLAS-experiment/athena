@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -18,12 +18,6 @@
 
 #include <cstdlib>
 
-std::string const CaloClusterCellWeightCalib::m_posName = "Signal";
-std::string const CaloClusterCellWeightCalib::m_absName = "AbsSignal";
-std::string const CaloClusterCellWeightCalib::m_rawName = "RawSignal"; 
-
-std::string const CaloClusterCellWeightCalib::m_defName = m_absName;
-
 //////////////////////////////
 // Constructor & Destructor //
 //////////////////////////////
@@ -33,21 +27,7 @@ CaloClusterCellWeightCalib(const std::string& type,
 			   const std::string& name,
 			   const IInterface* pParent)
   : CaloClusterProcessor(type,name,pParent)
-  , m_directionCalculation(m_defName)
-  , m_calibNoiseLikeAll(true)
-  , m_noiseDirectionCalculation(m_defName)
-  , m_eThreshold(0.)
-  , m_ignoreGeoWghts(false)
-  , m_cellWeight(this)
-  , m_calc(nullptr)
-  , m_calc_noise(nullptr)
 {
-  declareProperty("Direction",                m_directionCalculation);
-  declareProperty("BelowThresholdLikeAll",    m_calibNoiseLikeAll);
-  declareProperty("BelowThresholdDirection",  m_noiseDirectionCalculation);
-  declareProperty("EnergyThreshold",          m_eThreshold);
-  declareProperty("IgnoreGeoWeights",         m_ignoreGeoWghts);
-  declareProperty("CellSignalWeightTool",     m_cellWeight);
 }
 
 CaloClusterCellWeightCalib::~CaloClusterCellWeightCalib()
@@ -179,7 +159,7 @@ bool CaloClusterCellWeightCalib::setup(const std::string& name,
 				       std::string&       conf,
 				       MsgStream&         report)
 {
-  if ( CaloClusterCellWeightCalib::cmpNoCase(name,m_posName) )
+  if ( CaloClusterCellWeightCalib::cmpNoCase(name,s_posName) )
     {
       report << MSG::INFO
 	     << "cluster direction ("
@@ -192,7 +172,7 @@ bool CaloClusterCellWeightCalib::setup(const std::string& name,
 	: &CaloClusterCellWeightCalib::f_dirPos;
       return true;
     }
-  else if ( CaloClusterCellWeightCalib::cmpNoCase(name,m_absName) )
+  else if ( CaloClusterCellWeightCalib::cmpNoCase(name,s_absName) )
     {
       report << MSG::INFO
 	     << "cluster direction ("
@@ -205,7 +185,7 @@ bool CaloClusterCellWeightCalib::setup(const std::string& name,
 	: &CaloClusterCellWeightCalib::f_dirAbs;
       return true;
     }
-  else if ( CaloClusterCellWeightCalib::cmpNoCase(name,m_rawName) )
+  else if ( CaloClusterCellWeightCalib::cmpNoCase(name,s_rawName) )
     {
       report << MSG::INFO
 	     << "cluster direction ("
@@ -223,7 +203,7 @@ bool CaloClusterCellWeightCalib::setup(const std::string& name,
       report << MSG::WARNING
 	     << "invalid configuration, use default!"
 	     << endmsg;
-      return this->setup(m_defName,tag,calc,conf,report);
+      return this->setup(s_defName,tag,calc,conf,report);
     }
 }
 

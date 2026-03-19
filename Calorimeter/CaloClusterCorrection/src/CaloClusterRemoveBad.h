@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERCORRECTION_CALOCLUSTERREMOVEBAD_H
@@ -62,11 +62,8 @@ public:
 
     
  private:
- 
-  CaloClusterRemoveBad();
-  
   // property, energy threshold below which a cluster will be rejected.
-  float  m_eThreshold ; 
+  Gaudi::Property<float>  m_eThreshold{this, "EMin", 0.0, "Energy threshold for cluster removal"};
 };
 
 #endif
