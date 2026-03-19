@@ -1287,19 +1287,15 @@ Int_t CP::TPileupReweighting::Initialize() {
       }
    }
    //double totalData =  (m_unrepresentedDataAction==1) ? (m_periods[-1]->sumOfWeights[-1]+unrepDataByChannel[-1]) : m_periods[-1]->sumOfWeights[-1];
-
+   if (totalData == 0){
+     Error("Initialize", "totalData is zero.");
+     throw std::runtime_error("totalData is zero after summing. This should never happen.");
+   }
    if(ignoredData>0.) Warning("Initialize", "Period Assignments missed %f%% data",100.*ignoredData/totalData);
-
-
    if(unrepDataByChannel[-1]) {
       double frac = unrepDataByChannel[-1]/totalData;
       if( frac  > m_unrepDataTolerance) {
-        if (totalData !=0.){
-          Error("Initialize", "%f%% unrepresented data, which suggests something is wrong with your prw config. Try EnableDebugging(true) to investigate",100.* (unrepDataByChannel[-1]/totalData));
-        } else {
-          Error("Initialize", "totalData is zero.");
-          throw std::runtime_error("totalData is zero after summing. This should never happen.");
-        }
+        Error("Initialize", "%f%% unrepresented data, which suggests something is wrong with your prw config. Try EnableDebugging(true) to investigate",100.* (unrepDataByChannel[-1]/totalData));
       }
       if(m_unrepresentedDataAction==1) {
          Warning("Initialize","has %f%% unrepresented data. This was removed (UnrepresentedDataAction=1)",100.*frac);
