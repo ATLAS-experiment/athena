@@ -91,6 +91,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
         acc.merge(FlavorTaggingCfg(flags, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"))
+        if flags.BTagging.RunNewVrtSecInclusive:
+            from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import (
+                NewVrtSecInclusiveAlgTightCfg
+            )
+            acc.merge(NewVrtSecInclusiveAlgTightCfg(flags))
         if flags.GeoModel.Run >= LHCPeriod.Run4:
             acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
 
