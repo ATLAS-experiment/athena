@@ -13,6 +13,8 @@ dcubeXml=dcube_IDPVMPlots_HGTD.xml
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 nEvents=20
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 # Don't run if dcube config not found
@@ -43,7 +45,7 @@ run "Reconstruction-athena" \
     Reco_tf.py \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "InDetConfig.InDetPrepRawDataFormationConfig.HGTDInDetToXAODClusterConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=True;flags.Acts.EDM.PersistifyClusters=True" \
@@ -75,7 +77,7 @@ run "Reconstruction-acts" \
     Reco_tf.py \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=True;flags.Acts.EDM.PersistifyClusters=True" \
@@ -107,7 +109,7 @@ run "Reconstruction-acts-timedclustering" \
     Reco_tf.py \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.timed.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
     --postInclude "ActsConfig.ActsClusterizationConfig.ActsHgtdClusterizationAlgCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
     --preExec "flags.Reco.EnableHGTDExtension=True; \

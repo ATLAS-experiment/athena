@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Steering script for IDPVM ART Run 4 configuration, ITK only recontruction, acts activated, electron events
 

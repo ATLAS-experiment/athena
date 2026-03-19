@@ -37,12 +37,15 @@ run () {
     return $rc
 }
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # Run Athena
 run "Reconstruction-athena" \
     Reco_tf.py \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doITkFastTracking=True;" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events}
@@ -76,6 +79,7 @@ run "Reconstruction-acts" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
 	       flags.Tracking.ITkActsPass.storeSiSPSeededTracks=True;" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events}

@@ -14,6 +14,7 @@ dcubeXmlTechEffLRT=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff_lrt.xml
 n_events=-1
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # search in $DATAPATH for matching file
 dcubeXmlTechEffAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXmlTechEffLRT -print -quit 2>/dev/null)
@@ -46,6 +47,7 @@ run "Reconstruction-athena" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Tracking.doLargeD0=True;" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.athena.root \
     --maxEvents ${n_events} \
@@ -80,6 +82,7 @@ run "Reconstruction-acts" \
     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingRecoPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "flags.Tracking.writeExtendedSi_PRDInfo=True; \
     	       flags.Acts.doLargeRadius=True;" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.acts.root \
     --maxEvents ${n_events} \

@@ -11,6 +11,8 @@ lastref_dir=last_results
 dcubeXml=IDPVMPlots_ITk_FastTrackFinder.xml
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
+
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 # Don't run if dcube config not found
@@ -32,10 +34,9 @@ run () {
 
 run "Reconstruction" \
     Reco_tf.py \
-    --CA \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.root \
-    --steering doRAWtoALL \
+    --conditionsTag "default:${conditionsTag}" \
     --preInclude InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude \
     --preExec "flags.Tracking.useITkFTF=True;flags.Tracking.doITkFastTracking=True;flags.Tracking.ITkFTFPass.useTracklets=True;flags.Tracking.ITkFTFPass.useTrigRoadPredictor=True;flags.Tracking.ITkFTFPass.useTrigTrackFollowing=True"
 

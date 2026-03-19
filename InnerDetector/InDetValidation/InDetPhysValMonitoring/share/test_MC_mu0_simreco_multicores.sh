@@ -203,7 +203,6 @@ case $ArtProcess in
             --inputRDOFile    $rdo \
             --outputAODFile   $aod \
             --conditionsTag   default:$conditionsTag \
-            --steering        doRAWtoALL \
             --checkEventCount False \
             --ignoreErrors    True \
             --maxEvents       -1

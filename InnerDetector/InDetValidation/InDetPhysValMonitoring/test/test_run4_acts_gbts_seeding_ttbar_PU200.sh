@@ -14,6 +14,7 @@ dcubeXml=dcube_IDPVMPlots_ACTS_CKF_ITk_techeff.xml
 n_events=-1
 rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 
+conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
 # search in $DATAPATH for matching file
 dcubeXmlAbsPath=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
@@ -42,7 +43,7 @@ export ATHENA_CORE_NUMBER=8
 # Run Athena with ACTS fast tracking and GBTS core seeding
 run "Reconstruction-gbts" \
     Reco_tf.py \
-     --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsWorkflowFlags" \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.SeedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.doPixelDigitalClustering=True; \
@@ -52,6 +53,7 @@ run "Reconstruction-gbts" \
                flags.Acts.doAnalysisNtuples=False; \
                flags.DQ.useTrigger=False; \
                flags.Output.HISTFileName='acts-analysis.gbts.root'" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.gbts.pool.root \
     --perfmon fullmonmt \
@@ -95,6 +97,7 @@ run "Reconstruction-gbts2" \
                flags.Acts.doAnalysisNtuples=False; \
                flags.DQ.useTrigger=False; \
                flags.Output.HISTFileName='acts-analysis.gbts.root'" \
+    --conditionsTag "default:${conditionsTag}" \
     --inputRDOFile ${rdo} \
     --outputAODFile AOD.gbts2.pool.root \
     --perfmon fullmonmt \
