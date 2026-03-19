@@ -20,9 +20,10 @@ def HION15SkimmingToolCfg(flags):
     acc.getSequence("HION15Sequence").ExtraDataForDynamicConsumers = ExtraData
     acc.getSequence("HION15Sequence").ProcessDynamicDataDependencies = True
     
-    expression = ""
     #Trigger selection
+    filterList = []
     from DerivationFrameworkHI import ListTriggers
+    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import xAODStringSkimmingToolCfg
     from CoolConvUtilities.ParticleTypeUtil import getTypeForRun
     info=getTypeForRun(flags.Input.RunNumbers[0])
     isSmallSystem = False
@@ -31,17 +32,30 @@ def HION15SkimmingToolCfg(flags):
     if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         print('project: ', flags.Input.ProjectName,', isSmallSystem: ', isSmallSystem)
         TriggerDict = ListTriggers.GetTriggers(flags.Input.ProjectName, isSmallSystem)
-        for i, key in enumerate(TriggerDict):
-            expression = expression + '(' + key + ' && count('+JetColl+'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) ' + '|| (' + key + ' && count('+JetColl+'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 ) '
-            if not i == len(TriggerDict) - 1:
-                expression = expression + ' || '
-    else:
-        expression = expression + 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
+        for key in TriggerDict:
+            filterList_trig = []
+            expression = 'count('+JetColl+'AntiKt4HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1  ||  count('+JetColl+'AntiKt2HIJets.pt >' + str(TriggerDict[key]) + '*GeV) >=1 '
 
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
-        xAODStringSkimmingToolCfg)
-    acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            HION15StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
+            flags, name = "HION15StringSkimmingTool_"+key, expression = expression)), primary = True)
+            filterList_trig += [HION15StringSkimmingTool]
+
+            HION15TriggerSkimmingTool = CompFactory.DerivationFramework.TriggerSkimmingTool(name = "HION7TriggerSkimmingTool_"+key, TriggerListOR = [key])
+            acc.addPublicTool(HION15TriggerSkimmingTool)
+            filterList_trig += [HION15TriggerSkimmingTool]
+
+            HION15SkimmingTool_trig  = CompFactory.DerivationFramework.FilterCombinationAND(name="HION7SkimmingTool_trig_"+key,  FilterList=filterList_trig)
+            acc.addPublicTool(HION15SkimmingTool_trig)
+            filterList += [HION15SkimmingTool_trig]
+
+    else:
+        expression = 'count('+JetColl+'AntiKt2HIJets.pt > 15000) > 1 || count('+JetColl+'AntiKt4HIJets.pt > 15000) > 1'
+        HION15StringSkimmingTool = acc.addPublicTool(acc.getPrimaryAndMerge(xAODStringSkimmingToolCfg(
         flags, name = "HION15StringSkimmingTool", expression = expression)), primary = True)
+        filterList += [HION15StringSkimmingTool]
+
+    HION15SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(name="HION15SkimmingTool", FilterList=filterList)
+    acc.addPublicTool(HION15SkimmingTool, primary = True)
 
     return(acc)                             
 
