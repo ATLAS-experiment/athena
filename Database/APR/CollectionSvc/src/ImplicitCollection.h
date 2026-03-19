@@ -58,7 +58,7 @@ namespace pool {
     virtual const CollectionDescription& description() const override;
 
     /// Returns a cursor for the collection.
-    virtual ICollectionCursor& cursor() final override;
+    virtual std::unique_ptr<ICollectionCursor> cursor() final override;
 
   protected:
     void open( ICollection::OpenMode mode, ISession* session );
