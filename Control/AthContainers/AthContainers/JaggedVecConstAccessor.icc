@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecConstAccessor.icc
@@ -179,8 +179,8 @@ auto
 ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getEltSpan (const AuxVectorData& container) const
   -> const_Elt_span
 {
-  auto beg = reinterpret_cast<const Elt_t*> (container.getDataArray (m_auxid));
-  return const_Elt_span (beg, container.size_v());
+  const SG::AuxDataSpanBase sp = *container.getDataSpan (m_auxid);
+  return const_Elt_span (reinterpret_cast<const Elt_t*>(sp.beg), sp.size);
 }
 
 
@@ -194,9 +194,9 @@ auto
 ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::getPayloadSpan (const AuxVectorData& container) const
   -> const_Payload_span
 {
-  const SG::AuxDataSpanBase* sp = container.getDataSpan (m_linkedAuxid);
-  return const_Payload_span (reinterpret_cast<const Payload_t*>(sp->beg),
-                             sp->size);
+  const SG::AuxDataSpanBase sp = *container.getDataSpan (m_linkedAuxid);
+  return const_Payload_span (reinterpret_cast<const Payload_t*>(sp.beg),
+                             sp.size);
 }
 
 

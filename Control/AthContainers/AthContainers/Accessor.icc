@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file Accessor.icc
@@ -132,9 +132,15 @@ inline
 typename Accessor<T, ALLOC>::span
 Accessor<T, ALLOC>::getDataSpan (AuxVectorData& container) const
 {
-  auto beg = reinterpret_cast<container_pointer_type>
-    (container.getDataArray (this->m_auxid));
-  return span (beg, container.size_v());
+  // nb. AuxVectorData::getDataSpan is suitable only for const;
+  // getDataArray may throw if the container is empty.
+  size_t sz = container.size_v();
+  container_pointer_type beg = nullptr;
+  if (sz) {
+    beg = reinterpret_cast<container_pointer_type>
+      (container.getDataArray (this->m_auxid));
+  }
+  return span (beg, sz);
 }
 
 
