@@ -57,7 +57,7 @@ struct TFileAccessTracer::Impl {
   std::set<AccessedFile> m_accessedFiles;
 
   /// Address of the server to send monitoring information to
-  std::string m_serverAddress{"http://event-loop.atlas-ml.org:80"};
+  std::string m_serverAddress{"http://rucio-lb-prod.cern.ch:18762/traces/"};
   /// Overall flag for enabling/disabling the data submission
   std::atomic_bool m_enableDataSumbission{true};
 
