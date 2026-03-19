@@ -25,10 +25,14 @@ def activateActsComponents(icf):
     icf.doActsAmbiguityResolution = lambda pcf: pcf.Acts.doAmbiguityResolution
 
 def setActsDefaultTunings(icf):
+    # ACTS specifc config flags
+    icf.addFlag("isSecondaryPass", False)
+    icf.addFlag("isLargeD0", False)
+    icf.addFlag("autoReverseSearch", False)
+    
     # Custom values for config flags
     icf.Xi2max = [25]
     icf.Xi2maxNoAdd = [25]
-    icf.autoReverseSearch = False
 
 
 # Main ACTS Tracking pass    
@@ -206,7 +210,6 @@ def createEFValidateF100TrackingPassFlags():
     icf.doActsSeed = True
     icf.doActsTrack = True
     
-    setActsDefaultTunings(icf)
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]
@@ -223,7 +226,6 @@ def createEFValidateF150TrackingPassFlags():
     icf.doActsSeed = False
     icf.doActsTrack = True
 
-    setActsDefaultTunings(icf)
     # Override acts default values
     icf.Xi2max = [50]
     icf.Xi2maxNoAdd = [100]

@@ -230,11 +230,6 @@ def createITkTrackingPassFlags():
     icf.addFlag("storeTrackSeeds", False)
     icf.addFlag("storeSiSPSeededTracks", False)
 
-    # --- flags for ACTS tracking
-    icf.addFlag("isSecondaryPass", False)
-    icf.addFlag("isLargeD0", False)
-    icf.addFlag("autoReverseSearch", False)  # track finding starts going inward first if seed is outside the defined RZ boundary
-
     return icf
 
 
