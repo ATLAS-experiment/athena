@@ -2,6 +2,7 @@
 
 AntiKt10TruthJetsCPContent = [
 "AntiKt10TruthJets",
+"AntiKt10TruthJetsAux.pt.eta.phi.m.numConstit",
 "AntiKt10TruthJetsAux.PartonTruthLabelID",
 "AntiKt10TruthJetsAux.GhostBHadronsFinal.GhostBHadronsFinalCount.GhostTQuarksFinal.GhostTQuarksFinalCount",
 "AntiKt10TruthJetsAux.GhostHBosons.GhostHBosonsCount.GhostWBosons.GhostWBosonsCount.GhostZBosons.GhostZBosonsCount",

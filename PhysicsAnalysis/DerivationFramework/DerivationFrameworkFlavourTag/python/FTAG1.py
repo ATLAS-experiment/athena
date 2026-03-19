@@ -180,6 +180,10 @@ def FTAG1CoreCfg(flags, name_tag='FTAG1', extra_SmartCollections=None, extra_All
             from DerivationFrameworkFlavourTag.FtagDerivationConfig import HLTJetFTagDecorationCfg
             acc.merge(HLTJetFTagDecorationCfg(flags))
 
+        FTAG1SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.constituentLinks",
+                                               "AntiKt4TruthDressedWZJets.constituentLinks",
+                                               "AntiKt4TruthJets.constituentLinks"]
+
     # Add ExtraVariables
     FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper, flags)
    
