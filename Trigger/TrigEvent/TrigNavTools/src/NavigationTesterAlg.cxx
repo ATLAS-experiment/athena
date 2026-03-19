@@ -77,8 +77,9 @@ namespace Trig {
     {
         for (const std::string &chain : m_chains)
         {
-            ATH_MSG_DEBUG("Begin testing chain " << chain << (m_tdt->isPassed(chain) ? " and will dive into details as the chain passed " : " but will not do anything as the chain did not pass"));
-            if (!m_tdt->isPassed(chain)) continue;
+            const bool chainPassed = m_tdt->isPassed(chain, TrigDefs::Physics | TrigDefs::allowResurrectedDecision);
+            ATH_MSG_DEBUG("Begin testing chain " << chain << (chainPassed ? " and will dive into details as the chain passed " : " but will not do anything as the chain did not pass"));
+            if (!chainPassed) continue;
 
             // explicitely excluded chains
             bool isExcluded = false;
