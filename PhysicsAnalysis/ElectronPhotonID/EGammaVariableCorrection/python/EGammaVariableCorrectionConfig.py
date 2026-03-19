@@ -58,7 +58,33 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
     """Configure the Normalizing Flow-based photon shower shape correction tool"""
     acc = ComponentAccumulator()
 
-    conf_key = kwargs.setdefault("ConfigFile", "EGammaVariableCorrection/ElectronPhotonVariableNFCorrectionTool.conf")
+    from AthenaConfiguration.Enums import LHCPeriod
+
+    if not flags.Input.isMC:
+        raise RuntimeError("ElectronPhotonVariableNFCorrectionToolCfg: "
+            "NF correction tool should not be called for data"
+        )
+
+    isFullSim = flags.Sim.ISF.Simulator.isFullSim()
+    isRun3 = flags.GeoModel.Run is LHCPeriod.Run3
+    isRun2 = flags.GeoModel.Run is LHCPeriod.Run2
+
+    if isFullSim and isRun3:
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3FS/ElectronPhotonVariableNFCorrectionTool.conf"
+    elif isFullSim and isRun2:
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run2FS/ElectronPhotonVariableNFCorrectionTool.conf"
+    elif not isFullSim and isRun3:
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
+    elif not isFullSim and isRun2:
+        # temporary the same Run3 AF3 models are applied to Run2 AF3
+        default_conf = "EGammaVariableCorrection/NF_y_TUNE1/Run3AF3/ElectronPhotonVariableNFCorrectionTool.conf"
+    else:
+        raise RuntimeError(
+            f"ElectronPhotonVariableNFCorrectionToolCfg: no NF correction config available for Run period {flags.GeoModel.Run} "
+            f"(isFullSim={isFullSim}). Only Run2 and Run3 are supported."
+        )
+
+    conf_key = kwargs.setdefault("ConfigFile", default_conf)
     conf_file = PathResolver.FindCalibFile(conf_key)
     if not conf_file:
         raise RuntimeError(f"PathResolver cannot find {conf_key}")

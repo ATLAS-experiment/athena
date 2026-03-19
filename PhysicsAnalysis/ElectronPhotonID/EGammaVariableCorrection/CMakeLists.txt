@@ -51,7 +51,7 @@ atlas_add_executable( Test_ElectronPhotonVariableCorrectionTool_DictionaryToolHa
    LINK_LIBRARIES ${ROOT_LIBRARIES} EGammaVariableCorrectionLib)
 
 # Install files from the package:
-atlas_install_data( data/*.conf )
+atlas_install_data( data/NF/*.conf )
 
 # Install python modules
 atlas_install_python_modules( python/*.py )

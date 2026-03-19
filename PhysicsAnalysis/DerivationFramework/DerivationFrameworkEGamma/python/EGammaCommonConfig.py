@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 
 def EGammaCommonCfg(flags):
@@ -44,6 +45,7 @@ def EGammaCommonCfg(flags):
     isFullSim = False
     if isMC:
         isFullSim = flags.Sim.ISF.Simulator.isFullSim()
+    isRun2orRun3 = flags.GeoModel.Run in (LHCPeriod.Run2, LHCPeriod.Run3)
 
     print("EGammaCommon: isMC = ", isMC)
     if isMC:
@@ -53,6 +55,7 @@ def EGammaCommonCfg(flags):
         from EGammaVariableCorrection.EGammaVariableCorrectionConfig import (
             ElectronVariableCorrectionToolCfg,
             PhotonVariableCorrectionToolCfg,
+            ElectronPhotonVariableNFCorrectionToolCfg,
         )
 
         ElectronVariableCorrectionTool = acc.popToolsAndMerge(
@@ -64,6 +67,12 @@ def EGammaCommonCfg(flags):
             PhotonVariableCorrectionToolCfg(flags)
         )
         acc.addPublicTool(PhotonVariableCorrectionTool)
+        
+        if isRun2orRun3:
+            PhotonVariableNFCorrectionTool = acc.popToolsAndMerge(
+                ElectronPhotonVariableNFCorrectionToolCfg(flags)
+            )
+            acc.addPublicTool(PhotonVariableNFCorrectionTool)
 
     # ====================================================================
     # ELECTRON LH SELECTORS
@@ -78,7 +87,6 @@ def EGammaCommonCfg(flags):
     from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import electronLHmenu
 
     lhMenu = electronLHmenu.offlineMC21
-    from AthenaConfiguration.Enums import LHCPeriod
     if flags.GeoModel.Run is LHCPeriod.Run2:
         lhMenu = electronLHmenu.offlineMC20
 
@@ -648,6 +656,23 @@ def EGammaCommonCfg(flags):
     ))
 
 
+
+    # decorate photons with the output of IsEM tight
+    # on full-sim or fast-sim MC, normalizing flows-based correction before computing the ID
+    # (but the original shower shapes are not overridden)
+    PhotonPassIsEMTightNF = acc.addPublicTool(acc.popToolsAndMerge(
+        EGSelectionToolWrapperCfg(
+            flags,
+            name="PhotonPassIsEMTightNF",
+            EGammaSelectionTool=PhotonIsEMSelectorTight,
+            EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsIsEMTightNF",
+            ContainerName="Photons",
+        )
+    ))
+
+
     # decorate photons with the photon cleaning flags
     # on MC, fudge the shower shapes before computing the flags
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGPhotonCleaningWrapperCfg
@@ -692,6 +717,7 @@ def EGammaCommonCfg(flags):
         PhotonPassIsEMLoose,
         PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
+        PhotonPassIsEMTightNF,
         PhotonPassCleaning,
         ElectronAmbiguity,
     ]

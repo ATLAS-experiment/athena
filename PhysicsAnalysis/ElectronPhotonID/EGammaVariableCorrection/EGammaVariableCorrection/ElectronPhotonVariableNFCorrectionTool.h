@@ -17,7 +17,7 @@
  * (the order should correspond to order in a model). 
  *
  * The ONNX models are provided per-fold via ToolHandleArray, and the fold is selected
- * event-by-event using EventInfo::eventNumber() (optionally including pT).
+ * event-by-event using EventInfo::eventNumber() (optionally including phi).
  *
  * @author Katerina Kazakova <katerina.kazakova@cern.ch>
  * @date   February 2026
@@ -72,7 +72,7 @@ public:
      *   - NFolds: number of folds (must match number of ONNX tools configured)
      *   - ONNXnamePattern: pattern string (informational; tool arrays are configured externally)
      *   - FoldStrategy: eventNumber or eventNumber_phi
-     *   - ApplyTo: Signal/All
+     *   - ApplyTo: TruthPhotons/All
      */
     virtual StatusCode initialize() override;
 
