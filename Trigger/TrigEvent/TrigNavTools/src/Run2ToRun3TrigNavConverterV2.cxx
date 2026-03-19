@@ -1189,7 +1189,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::updateTerminusNode(xAOD::TrigCompositeC
         return StatusCode::FAILURE;
       }
     }
-    if (m_tdt->isPassed(chainName))
+    if (m_tdt->isPassed(chainName, TrigDefs::Physics | TrigDefs::allowResurrectedDecision))
     {
       filteredIDs.insert(idToCheck);
     }
