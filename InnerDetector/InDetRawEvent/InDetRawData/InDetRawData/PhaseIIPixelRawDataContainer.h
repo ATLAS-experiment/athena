@@ -58,11 +58,12 @@ namespace PhaseII {
    };
 
    /// @brief A proxy for a pixel RDO which adds convenience methods to interpret the data word to the base proxy.
-   template <AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   class PixelRawDataProxy  : public RawDataProxyBase<PhaseII::PixelRawDataContainer, accessPolicy >
+   template <AccessPolicy accessPolicy=AccessPolicy::Const>
+   class PixelRawDataProxy
+      : public RawDataProxyBase<typename Utils::ContainerAccessHelper<PhaseII::PixelRawDataContainer, accessPolicy>::ContainerType >
    {
    public:
-      using BASE = RawDataProxyBase<PhaseII::PixelRawDataContainer, accessPolicy >;
+      using BASE = RawDataProxyBase<typename Utils::ContainerAccessHelper<PhaseII::PixelRawDataContainer, accessPolicy>::ContainerType >;
       using BASE::BASE;
 
       int getToT()    const { return PixelRawDataContainer::getToT(this->dataWord()); }
@@ -83,12 +84,13 @@ namespace PhaseII {
    }
 
    // Define all the proxies for read only access of the pixel raw data
-   template <AccessPolicy accessPolicy=AccessPolicy::ReadOnly>
-   using PixelRawDataContainerCollectionTypes = RawDataCollectionTypes<PixelRawDataContainer, accessPolicy>;
+   template <AccessPolicy accessPolicy=AccessPolicy::Const>
+   using PixelRawDataTypeTraits = RawDataTypeTraits<typename Utils::ContainerAccessHelper<PixelRawDataContainer,
+                                                                                                              accessPolicy>::ContainerType >;
 }
 
 // Pool converter do not like namespaces
-using PhaseIIPixelRawDataContainer = PhaseII::PixelRawDataContainerCollectionTypes<>::ContainerCollection;
+using PhaseIIPixelRawDataContainer = PhaseII::PixelRawDataTypeTraits<PhaseII::AccessPolicy::Mutable>::ContainerCollection;
 
 CLASS_DEF(PhaseIIPixelRawDataContainer, 1261995829, 1)
 #endif
