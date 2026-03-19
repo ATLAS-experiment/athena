@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -30,38 +30,9 @@ using xAOD::CaloCluster;
 CaloLCClassificationTool::CaloLCClassificationTool(const std::string& type,
 						   const std::string& name,
 						   const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_key("EMFracClassify"),
-    m_useSpread(false),
-    m_useNormalizedEnergyDensity(true),
-    m_maxProbability(0.5),
-    m_storeClassificationProbabilityInAOD(true),
-    m_interpolate(false),
-    m_absOpt(false)
+  : AthAlgTool(type,name,parent)
 { 
-
-   declareInterface<IClusterClassificationTool>(this);
-  // Name of data object in conditions store
-  declareProperty("ClassificationKey",m_key);
-  // Use Spread of EM probability for estimate 
-  declareProperty("UseSpread",m_useSpread);
-  // Use normalized energy density
-  declareProperty("UseNormalizedEnergyDensity",m_useNormalizedEnergyDensity);
-  // Maximal EM probability below which all clusters are considered hadronic
-  declareProperty("MaxProbability",m_maxProbability);
-  // Store the classification Probability as a cluster moment in AOD
-  // (if false it goes to ESD only)
-  declareProperty("StoreClassificationProbabilityInAOD",m_storeClassificationProbabilityInAOD);
-  // Use Interpolation or not
-  declareProperty("Interpolate",m_interpolate);
-  //Use weighting of negative clusters?
-  declareProperty("WeightingOfNegClusters",m_absOpt);
-
-  m_interpolateDimensionNames.resize(3);
-  m_interpolateDimensionNames[0] = "DIMC_ETA";
-  m_interpolateDimensionNames[1] = "DIMC_EDENS";
-  m_interpolateDimensionNames[2] = "DIMC_LAMBDA";
-  declareProperty("InterpolateDimensionNames", m_interpolateDimensionNames);
+  declareInterface<IClusterClassificationTool>(this);
 }
 
 StatusCode CaloLCClassificationTool::initialize()

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // include header files
@@ -33,8 +33,6 @@ CaloClusterRemoveDuplicates::CaloClusterRemoveDuplicates(const std::string& type
 							 const IInterface* parent)
   : AthAlgTool(type, name, parent)  
 { 
-  declareProperty ("deta_cut", m_deta_cut = 0.05 );
-  declareProperty ("dphi_cut", m_dphi_cut = 0.05 );
 }
 
 StatusCode

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // include header files
@@ -32,9 +32,6 @@ CaloClusterRemoveBad::CaloClusterRemoveBad(const std::string& type,
                                            const IInterface* parent)
   : CaloClusterProcessor(type, name, parent)  
 { 
-  // Energy threshold for cluster removal.
-  declareProperty ("EMin", m_eThreshold = 0.0,
-                   "Energy threshold for cluster removal.");
 }
 
 

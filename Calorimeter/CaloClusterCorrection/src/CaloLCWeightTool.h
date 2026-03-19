@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOLCWEIGHTTOOL_H
@@ -29,30 +29,27 @@
 class CaloCell_ID;
 class CaloCluster;
 
-class CaloLCWeightTool : public AthAlgTool, virtual public IClusterCellWeightTool
+class CaloLCWeightTool : public extends<AthAlgTool, IClusterCellWeightTool>
 {
  public:
-
+  using base_class::base_class;
   virtual ~CaloLCWeightTool();
 
   virtual StatusCode weight(xAOD::CaloCluster* theCluster, const EventContext& ctx) const override;
   virtual StatusCode initialize() override;
 
-  CaloLCWeightTool(const std::string& type, 
-		   const std::string& name,
-		   const IInterface* parent);
  private:
 
   /**
    * @brief name of the key for had cell weights */
-  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key;
+  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key{this, "CorrectionKey", "HadWeights"};
 
   /**
    * @brief minimal signal/elec_noise ratio for a cell to be weighted
    *
    * Only cells with |energy| above this value times the RMS of the electronics
    * noise are considered in weighting. */
-  double  m_signalOverNoiseCut;
+  Gaudi::Property<double>  m_signalOverNoiseCut{this, "SignalOverNoiseCut", 2};
 
   /**
    * @brief look for em-probability moment and apply relative weight only
@@ -61,7 +58,7 @@ class CaloLCWeightTool : public AthAlgTool, virtual public IClusterCellWeightToo
    * cluster to be em-like. Hadronic weights are applied with the
    * additional hadronic probablity factor (1-p) to all clusters for
    * the cases EM and HAD. */
-  bool  m_useHadProbability;
+  Gaudi::Property<bool>  m_useHadProbability{this, "UseHadProbability", false} ;
 
 
   /**
@@ -73,23 +70,22 @@ class CaloLCWeightTool : public AthAlgTool, virtual public IClusterCellWeightToo
 
   /**
    * @brief interpolate correction coefficients */
-  bool m_interpolate;
+  Gaudi::Property<bool> m_interpolate{this, "Interpolate", false};
 
   /**
    * @brief update also sampling variables */
-  bool m_updateSamplingVars;
+  Gaudi::Property<bool> m_updateSamplingVars{this, "UpdateSamplingVars", false};
   
   /** 
    * @brief vector of names of dimensions in look-up tables to interpolate */
-  std::vector<std::string>  m_interpolateDimensionNames;
+  Gaudi::Property<std::vector<std::string>>  m_interpolateDimensionNames{this, "InterpolateDimensionNames"
+    , {"DIMW_ETA", "DIMW_ENER", "DIMW_EDENS"}};
 
   /** 
    * @brief actual set of dimension id's to interpolate */
-  //std::vector<CaloLocalHadDefs::LocalHadDimensionId> m_interpolateDimensions;
   std::vector<int> m_interpolateDimensions;
 
-
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{};
   
   SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this,"CaloNoiseKey","electronicNoise","SG Key of CaloNoise data object"};
 };

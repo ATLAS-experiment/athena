@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef DEBUG_DMTHINGS
@@ -11,15 +11,11 @@
 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloEvent/CaloPrefetch.h"
-#include "CaloEvent/CaloRecoStatus.h"
 #include "CaloConditions/CaloLocalHadDefs.h"
 #include "CxxUtils/prefetch.h"
 
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
-
-using CLHEP::MeV;
 using xAOD::CaloCluster;
 using namespace std::string_literals; //for suffix 's'
 
@@ -27,52 +23,7 @@ using namespace std::string_literals; //for suffix 's'
 void set_zero_moments(CaloCluster *theCluster);
 #endif
 
-/* ****************************************************************************
-
-**************************************************************************** */
-CaloLCDeadMaterialTool::CaloLCDeadMaterialTool(const std::string& type,
-					       const std::string& name,
-					       const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_key("HadDMCoeff2"),
-    m_recoStatus(CaloRecoStatus::UNKNOWNSTATUS),
-    m_weightModeDM(1),
-    m_MinClusterEnergyToDeal(200.0*MeV),
-    m_MinLookupBinNentry(40),
-    m_MinCellEnergyToDeal(0.0),
-    m_MaxChangeInCellWeight(30.0),
-    m_useHadProbability(false),
-    m_interpolate(false),
-    m_absOpt(false)
-{
-  declareInterface<IClusterCellWeightTool>(this);
-  declareProperty("HadDMCoeffKey",m_key);
-  declareProperty("ClusterRecoStatus",m_recoStatus);
-  declareProperty("WeightModeDM",m_weightModeDM) ;
-  declareProperty("MinClusterEnergyToDeal", m_MinClusterEnergyToDeal);
-  declareProperty("MinLookupBinNentry", m_MinLookupBinNentry);
-  declareProperty("MinCellEnergyToDeal", m_MinCellEnergyToDeal);
-  declareProperty("MaxChangeInCellWeight", m_MaxChangeInCellWeight);
-  declareProperty("UseHadProbability",m_useHadProbability);
-  // Use Interpolation or not
-  declareProperty("Interpolate",m_interpolate);
-  // list of dimensions to interpolate trought in 3 different type of areas
-  m_interpolateDimensionNames["AREA_DMFIT"s] = {"DIMD_ETA"s, "DIMD_ENER"s};
-  m_interpolateDimensionNames["AREA_DMLOOKUP"s] = {"DIMD_ETA"s, "DIMD_ENER"s, "DIMD_LAMBDA"s};
-  m_interpolateDimensionNames["AREA_DMSMPW"s] = {"DIMD_ETA"s, "DIMD_LAMBDA"s};
-  declareProperty("InterpolateDimensionNames", m_interpolateDimensionNames);
-  declareProperty("UpdateSamplingVars",m_updateSamplingVars=false);
-  //Use weighting of negative clusters?
-  declareProperty("WeightingOfNegClusters",m_absOpt);
-}
-
-
-/* ****************************************************************************
-
-**************************************************************************** */
-CaloLCDeadMaterialTool::~CaloLCDeadMaterialTool()
-= default;
-
+CaloLCDeadMaterialTool::~CaloLCDeadMaterialTool() = default;
 
 /* ****************************************************************************
 - CaloLCDeadMaterialTool::initialize
@@ -98,7 +49,7 @@ StatusCode CaloLCDeadMaterialTool::initialize()
       }else if((*it).first == "AREA_DMSMPW") {
         vtmp = &m_interpolateDimensionsSampling;
       }else{
-        msg(MSG::WARNING) << "Unkown dead material area type '" << (*it).first << "'" << std::endl;
+        ATH_MSG_WARNING("Unkown dead material area type '" << (*it).first << "'");
         continue;
       }
       for(std::vector<std::string >::iterator it2 = (*it).second.begin(); it2!=(*it).second.end(); ++it2) {

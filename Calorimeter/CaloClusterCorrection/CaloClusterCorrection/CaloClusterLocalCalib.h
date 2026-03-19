@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -32,18 +32,14 @@
 class CaloClusterLocalCalib : public CaloClusterProcessor {
 
  public:
-  //  /// Standard destructor 
-  //  virtual ~CaloClusterLocalCalib();
   
   /// Tool initialization: load calibration tools specified by jobOptions 
   virtual StatusCode initialize() override;
-
 
   /// Apply corrections to cluster
   using CaloClusterProcessor::execute;
   virtual StatusCode execute(const EventContext& ctx,
                              xAOD::CaloCluster* theCluster) const override;
-
 
   /// Standard AlgTool constructor
   CaloClusterLocalCalib(const std::string& type,
@@ -53,25 +49,20 @@ class CaloClusterLocalCalib : public CaloClusterProcessor {
  private:
 
   /// property:  Classification tools
-  ToolHandleArray<IClusterClassificationTool>  m_classificationTool;
+  ToolHandleArray<IClusterClassificationTool>  m_classificationTool{this, "ClusterClassificationTool", {}};;
   //Remark: This handle should be 0 or 1 entries. Our configurable framework can't handle 
   //a not-assigned ToolHandle, therefore this is an array.
-
-
-  //  IClusterClassificationTool * m_classificationToolPointer ;
   
   /// property: Array of IClusterCellWeightTool 
-  ToolHandleArray<IClusterCellWeightTool> m_calibTools;
+  ToolHandleArray<IClusterCellWeightTool> m_calibTools{this, "LocalCalibTools", {}};
   //  std::vector < IClusterCellWeightTool *> m_calibToolPointers ;
 
   /// property: vector of valid Reco Statuses for the clusters in
   /// order to be calibrated
-  std::vector<int> m_recoStatus;
+  Gaudi::Property<std::vector<int>> m_recoStatus{this, "ClusterRecoStatus", {}};
   
   /// if set to true, negative clusters are weighted as well
-  bool m_absOpt;
-  
-
+  Gaudi::Property<bool> m_absOpt{this, "WeightingOfNegClusters", false};  
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOLCCLASSIFICATIONTOOL_H
@@ -44,7 +44,7 @@ class CaloLCClassificationTool : public AthAlgTool, virtual public IClusterClass
   
   /**
    * @brief name of the key for em fraction data */
-  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key;
+  SG::ReadCondHandleKey<CaloLocalHadCoeff> m_key{this, "ClassificationKey", "EMFracClassify"};
 
   /**
    * @brief if set to true the spread of EM probabilities in each bin is
@@ -57,7 +57,7 @@ class CaloLCClassificationTool : public AthAlgTool, virtual public IClusterClass
    * calculated (mean+spread) and in case the property is false just
    * the mean is used to estimate the EM probability. */
 
-  bool m_useSpread;
+  Gaudi::Property<bool> m_useSpread{this, "UseSpread", false};
 
   /**
    * @brief old data depends on energy density while new data depends on
@@ -68,7 +68,7 @@ class CaloLCClassificationTool : public AthAlgTool, virtual public IClusterClass
    * for neutral pions. The new cond data is and this switch selects
    * the proper normalization for the tool. */
 
-  bool m_useNormalizedEnergyDensity;
+  Gaudi::Property<bool> m_useNormalizedEnergyDensity{this, "UseNormalizedEnergyDensity", true};
 
   /**
    * @brief cut value on EM probability below which all clusters are
@@ -80,7 +80,7 @@ class CaloLCClassificationTool : public AthAlgTool, virtual public IClusterClass
    * considered electromagnetic and clusters falling in bins with no
    * information are tagged as unknown. */
 
-  double m_maxProbability;
+  Gaudi::Property<double> m_maxProbability{this, "MaxProbability", 0.5};
 
   /**
    * @brief if true the phase space probability based on single pions
@@ -92,28 +92,28 @@ class CaloLCClassificationTool : public AthAlgTool, virtual public IClusterClass
    * moment and weight the respective calibration by this (or 1 minus
    * it) to avoid overcorrections. */
 
-  bool m_storeClassificationProbabilityInAOD;
+  Gaudi::Property<bool> m_storeClassificationProbabilityInAOD{this, "StoreClassificationProbabilityInAOD", true};
   
   /**
    * @brief interpolate correction coefficients */
 
-  bool m_interpolate;
+  Gaudi::Property<bool> m_interpolate{this, "Interpolate", false};
 
   /** 
    * @brief vector of names of dimensions in look-up tables to interpolate */
-  std::vector<std::string>  m_interpolateDimensionNames;
+  Gaudi::Property<std::vector<std::string>>  m_interpolateDimensionNames{this, "InterpolateDimensionNames"
+    , {"DIMC_ETA", "DIMC_EDENS", "DIMC_LAMBDA"}};
 
   /** 
    * @brief actual set of dimension id's to interpolate */
-  //std::vector<CaloLocalHadDefs::LocalHadDimensionId> m_interpolateDimensions;
+
   std::vector<int> m_interpolateDimensions;
   
   /** 
    * @brief is set to true, classify neg. Clusters as well */
-  bool m_absOpt;
-  
-  
-  
+
+  Gaudi::Property<bool> m_absOpt{this, "WeightingOfNegClusters", false};
+
 };
 
 #endif
