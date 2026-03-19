@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: $
@@ -220,24 +220,24 @@ namespace xAOD {
     inline
     double pTErr2Unsafe(const xAOD::TrackParticle *tp) {
 
-      //            /   d                       \2    /   d                        \2          d       d
-      // pt_err^2 =|  ------   (pt) *sigma_q/p  |  + | --------   pt * sigma_theta |    +    ----- pt ------- pt * sigma_theta_qp
+      //            /   d                       \2    /   d                        \2          d         d
+      // pt_err^2 =|  ------   (pt) *sigma_q/p  |  + | --------   pt * sigma_theta |   + 2 * ----- pt ------- pt * sigma_theta_qp
       //            \  d q/p                    /     \ d theta                    /          d qp    d theta
 
-      //                d             / d pt           2   d pt                     \   / d pt                  \2
-      //          =   ------   (pt) * | ----- sigma_q/p  + ------- * sigma_theta_qp | + | ------- * sigma_theta |
-      //               d q/p          \ d q/p              d theta                  /   \ d theta               /
+      //                d             / d pt           2       d pt                     \   / d pt                  \2
+      //          =   ------   (pt) * | ----- sigma_q/p  + 2 * ------- * sigma_theta_qp | + | ------- * sigma_theta |
+      //               d q/p          \ d q/p                  d theta                  /   \ d theta               /
 
       //   d                pt
-      // ------ pt  =  - -------------
-      //  d q/p          fabs(qOverP)
+      // ------ pt  =  - --------
+      //  d q/p           qOverP
 
       //   d                pt
       //  ------- pt =   -----------
       //  d theta         tan(theta)
 
       double pt = tp->pt();
-      double diff_qp =  - pt / std::abs(tp->qOverP());
+      double diff_qp =  - pt / tp->qOverP();
 
       double diff_theta = pt / tan( tp->theta() );
 
@@ -254,7 +254,7 @@ namespace xAOD {
       //                                                     6: sigma_d0_th,  sigma_z0_th,  sigma_phi_th, sigma_th^2
       //                                                    10: sigma_d0_qp,  sigma_z0_qp,  sigma_phi_qp, sigma_th_qp, sigma_qp^2
 
-      double pt_err2 = diff_qp * (diff_qp * cov(4, 4) + diff_theta * cov(3, 4) ) + sqr(diff_theta) * cov(3, 3);
+      double pt_err2 = diff_qp * (diff_qp * cov(4, 4) + 2 * diff_theta * cov(3, 4) ) + sqr(diff_theta) * cov(3, 3);
       return pt_err2;
     }
 

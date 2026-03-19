@@ -1,23 +1,16 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // C/C++
 #include <algorithm>
 #include <sstream>
+#include <iostream>
 
 #include "AthenaKernel/errorcheck.h"
 #include "TrigMonitoringEvent/TrigConfSeq.h"
 
 
-//--------------------------------------------------------------------------------------  
-TrigConfSeq::TrigConfSeq()
-  :m_output_te_name(),
-   m_output_te_index(0),
-   m_output_te_id(0),
-   m_topo_te(0)
-{
-}
 
 //--------------------------------------------------------------------------------------  
 TrigConfSeq::TrigConfSeq(unsigned int id,
@@ -105,16 +98,20 @@ void TrigConfSeq::print(std::ostream &os) const
 {
   os << str(*this) << std::endl;
 }
+void TrigConfSeq::print() const
+{
+  std::cout << str(*this) << std::endl;
+}
 
 //--------------------------------------------------------------------------------------  
 std::string str(const TrigConfSeq &o)
 {
   std::stringstream s;  
   s << "TrigConfSeq: " << o.getName() << " id=" << o.getId() 
-    << " contains " << o.getAlg().size() << " algorithm(s): " << std::endl;
+    << " contains " << o.getAlg().size() << " algorithm(s): \n" ;
   
   for(unsigned int i = 0; i < o.getAlg().size(); ++i) {
-    s << "   " << str(o.getAlg()[i]) << std::endl;
+    s << "   " << str(o.getAlg()[i]) << "\n";
   }
 
   return s.str();

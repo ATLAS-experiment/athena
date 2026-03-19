@@ -1,6 +1,6 @@
 // emacs: this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //
 //   @file    TrigRoiDescriptor.h        
@@ -38,7 +38,7 @@
 
 
 /**
- * @brief Describes the Region of Ineterest geometry
+ * @brief Describes the Region of Interest geometry
  *  It has basically 9 parameters
  *
  * -# zed : z position of RoI
@@ -126,6 +126,8 @@ public:
   TrigRoiDescriptor& operator=( const IRoiDescriptor& roi );
 
   TrigRoiDescriptor& operator=( const TrigRoiDescriptor& roi );
+  
+  TrigRoiDescriptor& operator=( TrigRoiDescriptor&& roi ) = default;
 
   // Destructor
   virtual ~TrigRoiDescriptor();

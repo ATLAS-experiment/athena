@@ -55,13 +55,13 @@ void testPtErr() {
        //       double pt = std::abs(1/q_over_p[i]) * sin(theta[j]);
        //       std::cout << "DEBUG calc pt " << pt << " =?= " << p->pt() << " delta " << (pt - p->pt()) / pt << std::endl;
        double pt = p->pt();
-       double diff_qp =  - pt / std::abs(q_over_p[i]);
+       double diff_qp =  - pt / q_over_p[i];
        double diff_theta = pt / tan( theta[j] );
        double a_pt_err2 = xAOD::TrackingHelpers::sqr(diff_qp * q_over_p_uncert);
        a_pt_err2+= xAOD::TrackingHelpers::sqr(diff_theta  * theta_uncert );
        a_pt_err2+= diff_theta  * diff_qp  * cov_theta_q_over_p;
 
-       a_pt_err2 = diff_qp * ( diff_qp * static_cast<float>(xAOD::TrackingHelpers::sqr( q_over_p_uncert)) +  diff_theta  * cov_theta_q_over_p);
+       a_pt_err2 = diff_qp * ( diff_qp * static_cast<float>(xAOD::TrackingHelpers::sqr( q_over_p_uncert)) +  2 * diff_theta  * cov_theta_q_over_p);
        a_pt_err2+= xAOD::TrackingHelpers::sqr(diff_theta)  * static_cast<float>(xAOD::TrackingHelpers::sqr(theta_uncert ));
        
        pt_err2.push_back( a_pt_err2 );
