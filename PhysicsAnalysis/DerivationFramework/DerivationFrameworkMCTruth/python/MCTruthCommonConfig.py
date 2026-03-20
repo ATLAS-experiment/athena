@@ -502,9 +502,9 @@ def AddMiniTruthCollectionLinksCfg(flags, **kwargs):
     return acc
 
 
-def addTruth3ContentToSlimmerTool(slimmer):
+def addTruth3ContentToSlimmerTool(slimmer, reduced=False):
     slimmer.ExtraVariables += [
-        "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.eta.phi.m.numConstit.HadronConeExclTruthLabelID.PartonTruthLabelID.TrueFlavor",
+        f"AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.eta.phi.m.numConstit.HadronConeExclTruthLabelID.HadronConeExclExtendedTruthLabelID.{'HadronGhostTruthLabelID.HadronGhostExtendedTruthLabelID.' if not reduced else ''}PartonTruthLabelID.TrueFlavor",
         "AntiKt10TruthSoftDropBeta100Zcut10Jets.pt.eta.phi.m.Tau1_wta.Tau2_wta.Tau3_wta.D2.numConstit",
         "TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
         "MET_Truth.mpx.mpy.sumet.name.source",
