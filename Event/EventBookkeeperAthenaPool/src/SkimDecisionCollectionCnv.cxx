@@ -23,7 +23,7 @@ SkimDecisionCollection* SkimDecisionCollectionCnv::createTransient(const Token* 
   static const pool::Guid   p1_guid("5705559E-F062-4F15-A220-78A8542EFBF3");
   if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< SkimDecisionCollection_p1 > col_vect( poolReadObject< SkimDecisionCollection_p1 >(token) );
+    std::unique_ptr< SkimDecisionCollection_p1 > col_vect( poolReadObject< SkimDecisionCollection_p1 >() );
     return m_TPConverter.createTransient( col_vect.get(), log );
   }
   else {

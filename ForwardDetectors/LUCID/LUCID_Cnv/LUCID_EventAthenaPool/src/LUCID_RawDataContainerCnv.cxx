@@ -30,11 +30,11 @@ LUCID_RawDataContainer* LUCID_RawDataContainerCnv::createTransient(const Token* 
   static const pool::Guid p1_guid("88937AAE-D299-4A80-8608-96EFB3068F9A");
 
   if (this->compareClassGuid(token, p0_guid)) { // Before T/P separation
-    trans_cont = this->poolReadObject<LUCID_RawDataContainer>(token);
+    trans_cont = this->poolReadObject<LUCID_RawDataContainer>();
   } 
   else if (this->compareClassGuid(token, p1_guid)) { // First persistent version 
     
-    std::unique_ptr< LUCID_RawDataContainer_p1 > col_vect( this->poolReadObject< LUCID_RawDataContainer_p1 >(token));
+    std::unique_ptr< LUCID_RawDataContainer_p1 > col_vect( this->poolReadObject< LUCID_RawDataContainer_p1 >());
     
     trans_cont = converter_p1.createTransient(col_vect.get(), mlog);
   }

@@ -100,40 +100,40 @@ TrackCollection *TrackCollectionCnv::createTransientWithKey(const Token* token, 
 
     TrackCollection *p_collection = nullptr;
     if( compareClassGuid(token,  p7_guid )){
-      poolReadObject< TrackCollection_PERS >( m_TPConverter, token );
+      poolReadObject< TrackCollection_PERS >( m_TPConverter );
       p_collection = m_TPConverter.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p6_guid )){
-      poolReadObject< Trk::TrackCollection_tlp6 >( m_TPConverter_tlp6, token );
+      poolReadObject< Trk::TrackCollection_tlp6 >( m_TPConverter_tlp6 );
       p_collection = m_TPConverter_tlp6.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p5_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp5 >( m_TPConverter_tlp5, token );
+      poolReadObject< Trk::TrackCollection_tlp5 >( m_TPConverter_tlp5);
       p_collection = m_TPConverter_tlp5.createTransientWithKey( key, m_log );
     }   
     else if( compareClassGuid(token,  p4_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp4 >( m_TPConverter_tlp4, token );
+      poolReadObject< Trk::TrackCollection_tlp4 >( m_TPConverter_tlp4);
       p_collection = m_TPConverter_tlp4.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p3_guid )){
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp3 >( m_TPConverter_tlp3, token );
+      poolReadObject< Trk::TrackCollection_tlp3 >( m_TPConverter_tlp3);
       p_collection = m_TPConverter_tlp3.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p2_guid ) ) {
       initializeOldExtConverters();
-      poolReadObject< Trk::TrackCollection_tlp2 >( m_TPConverter_tlp2, token );
+      poolReadObject< Trk::TrackCollection_tlp2 >( m_TPConverter_tlp2 );
       p_collection = m_TPConverter_tlp2.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p1_guid ) )  {
        initializeOldExtConverters();
-       poolReadObject< Trk::TrackCollection_tlp1 >( m_TPConverter_tlp1, token );
+       poolReadObject< Trk::TrackCollection_tlp1 >( m_TPConverter_tlp1 );
        p_collection = m_TPConverter_tlp1.createTransientWithKey( key, m_log );
     }
     else if( compareClassGuid(token,  p0_guid ) )  {
-        p_collection = poolReadObject< TrackCollection >(token);
+        p_collection = poolReadObject< TrackCollection >();
     }
     else
         throw std::runtime_error( "Unsupported persistent version of Data Collection" );

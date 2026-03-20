@@ -24,11 +24,11 @@ LumiBlockCollection* LumiBlockCollectionCnv::createTransient(const Token* token)
   static const pool::Guid   p2_guid("DEF9282A-F174-4382-8248-B94567CD869F");
 
   if( compareClassGuid(token, p2_guid) ) {
-    std::unique_ptr< LumiBlockCollection_p2 > col_vect( poolReadObject< LumiBlockCollection_p2 >(token) );
+    std::unique_ptr< LumiBlockCollection_p2 > col_vect( poolReadObject< LumiBlockCollection_p2 >() );
     return m_converter.createTransient( col_vect.get(), log );
   }
   else if( compareClassGuid(token, p1_guid) ) {
-    std::unique_ptr< LumiBlockCollection_p1 > col_vect( poolReadObject< LumiBlockCollection_p1 >(token) );
+    std::unique_ptr< LumiBlockCollection_p1 > col_vect( poolReadObject< LumiBlockCollection_p1 >() );
     return m_converter_p1.createTransient( col_vect.get(), log );
   }
   else {

@@ -33,13 +33,13 @@ TrigT2MbtsBits* TrigT2MbtsBitsCnv::createTransient(const Token* token) {
 
   if( compareClassGuid(token, p2_guid) ) {   
     mlog << MSG::DEBUG << "TrigT2MbtsBitsCnv::reading p2 persistent object" << endmsg;
-    std::unique_ptr< TrigT2MbtsBits_p2 > pers_ptr( poolReadObject< TrigT2MbtsBits_p2 >(token) );
+    std::unique_ptr< TrigT2MbtsBits_p2 > pers_ptr( poolReadObject< TrigT2MbtsBits_p2 >() );
     TrigT2MbtsBitsCnv_p2 converter;
     transObj = converter.createTransient(pers_ptr.get(), mlog);
   }
   else if( compareClassGuid(token, p1_guid) ) {   
     mlog << MSG::DEBUG << "TrigT2MbtsBitsCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr< TrigT2MbtsBits_p1 > pers_ptr( poolReadObject< TrigT2MbtsBits_p1 >(token) );
+    std::unique_ptr< TrigT2MbtsBits_p1 > pers_ptr( poolReadObject< TrigT2MbtsBits_p1 >() );
     TrigT2MbtsBitsCnv_p1 converter;
     transObj = converter.createTransient(pers_ptr.get(), mlog);
   }

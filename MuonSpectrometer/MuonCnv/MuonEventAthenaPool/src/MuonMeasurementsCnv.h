@@ -34,7 +34,7 @@ protected:
 
   virtual AthenaPoolTopLevelTPCnvBase*  getTopLevelTPCnv() { return &m_TPConverter_p2; }
 
-  virtual void          readObjectFromPool( const Token* );
+  virtual void          readObjectFromPool( const std::string& );
 
   virtual AthenaPoolCnvTPExtension*  clone() { return new MuonMeasurementsCnv(0); }
   

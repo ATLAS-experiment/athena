@@ -24,12 +24,12 @@ TileHitContainer* TileHitContainerCnv::createTransient(const Token* token) {
     static const pool::Guid   p0_guid("704A373C-EA65-4721-A9B8-F577B683699E");
 
     if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< TileHitContainer_p1 >   cont( this->poolReadObject< TileHitContainer_p1 >(token) );
+        std::unique_ptr< TileHitContainer_p1 >   cont( this->poolReadObject< TileHitContainer_p1 >() );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileHitCollectionVec* rdoV = this->poolReadObject<TileHitCollectionVec>(token);
+        TileHitCollectionVec* rdoV = this->poolReadObject<TileHitCollectionVec>();
 
         if (mlog.level()<=MSG::DEBUG)
           mlog << MSG::DEBUG << "Read IDC, size " << rdoV->size() << endmsg;

@@ -67,42 +67,42 @@ PhotonContainer* PhotonContainerCnv::createTransient(const Token* token)
   if ( compareClassGuid(token, p5_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<PhotonContainer_p5> persObj( poolReadObject<PhotonContainer_p5>(token) );
+    std::unique_ptr<PhotonContainer_p5> persObj( poolReadObject<PhotonContainer_p5>() );
     PhotonContainerCnv_p5 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p4_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<PhotonContainer_p4> persObj( poolReadObject<PhotonContainer_p4>(token) );
+    std::unique_ptr<PhotonContainer_p4> persObj( poolReadObject<PhotonContainer_p4>() );
     PhotonContainerCnv_p4 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p3_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<PhotonContainer_p3> persObj( poolReadObject<PhotonContainer_p3>(token) );
+    std::unique_ptr<PhotonContainer_p3> persObj( poolReadObject<PhotonContainer_p3>() );
     PhotonContainerCnv_p3 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<PhotonContainer_p2> persObj( poolReadObject<PhotonContainer_p2>(token) );
+    std::unique_ptr<PhotonContainer_p2> persObj( poolReadObject<PhotonContainer_p2>() );
     PhotonContainerCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<PhotonContainer_p1> persObj( poolReadObject<PhotonContainer_p1>(token) );
+    std::unique_ptr<PhotonContainer_p1> persObj( poolReadObject<PhotonContainer_p1>() );
     PhotonContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<PhotonContainer>(token);
+    return poolReadObject<PhotonContainer>();
 
   } else {
     throw std::runtime_error("Unsupported persistent version of PhotonContainer");

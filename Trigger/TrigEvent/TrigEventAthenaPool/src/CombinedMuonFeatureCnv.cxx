@@ -50,12 +50,12 @@ CombinedMuonFeature *CombinedMuonFeatureCnv::createTransient(const Token* token)
   
    
   if( compareClassGuid(token,  p1_guid ) ) {
-    std::unique_ptr< CombinedMuonFeature_tlp1 >   ptr_tlp1( this->poolReadObject< CombinedMuonFeature_tlp1 >(token) );
+    std::unique_ptr< CombinedMuonFeature_tlp1 >   ptr_tlp1( this->poolReadObject< CombinedMuonFeature_tlp1 >() );
     transObj = m_TPConverter->createTransient( ptr_tlp1.get(), mlog );
   }
   else if( compareClassGuid(token, p0_guid) ) {
     // old version from before TP separation, just return it
-    transObj = this->poolReadObject<CombinedMuonFeature>(token);
+    transObj = this->poolReadObject<CombinedMuonFeature>();
   }  
   else {
     throw std::runtime_error("Unsupported persistent version");

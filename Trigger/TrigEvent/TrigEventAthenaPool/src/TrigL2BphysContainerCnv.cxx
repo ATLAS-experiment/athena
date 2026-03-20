@@ -58,17 +58,17 @@ TrigL2BphysContainer * TrigL2BphysContainerCnv::createTransient(const Token* tok
   TrigL2BphysContainer *p_collection = 0;
   if( compareClassGuid(token,  tlp2_guid ) ) {
     
-    poolReadObject< TrigL2BphysContainer_PERS >(m_impl->m_TPConverter, token);
+    poolReadObject< TrigL2BphysContainer_PERS >(m_impl->m_TPConverter);
     p_collection = m_impl->m_TPConverter.createTransient( m_impl->m_log );
     m_impl->m_log << MSG::DEBUG<< "TrigL2BphysContainerCnv_tlp2" << endmsg;
   } else if( compareClassGuid(token,  tlp1_guid ) ) {
     TrigL2BphysContainerCnv_tlp1  tlp1_Converter;
-    poolReadObject< TrigL2BphysContainer_tlp1 >(tlp1_Converter, token);
+    poolReadObject< TrigL2BphysContainer_tlp1 >(tlp1_Converter);
     p_collection = tlp1_Converter.createTransient( m_impl->m_log );
     
   } else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ){
 	
-    p_collection = poolReadObject< TrigL2BphysContainer >(token);
+    p_collection = poolReadObject< TrigL2BphysContainer >();
     
   }else  throw std::runtime_error( "Unsupported persistent version of TrigL2BphysContainer" );
      

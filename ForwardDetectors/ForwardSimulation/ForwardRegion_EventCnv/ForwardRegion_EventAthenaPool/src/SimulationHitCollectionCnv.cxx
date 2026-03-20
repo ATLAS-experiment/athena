@@ -27,7 +27,7 @@ SimulationHitCollection* SimulationHitCollectionCnv::createTransient(const Token
 	SimulationHitCollection *pTransColl=NULL;
 
 	if(this->compareClassGuid(token, p1_guid)){
-		std::unique_ptr<SimulationHitCollection_p1> col_vect(this->poolReadObject<SimulationHitCollection_p1>(token));
+		std::unique_ptr<SimulationHitCollection_p1> col_vect(this->poolReadObject<SimulationHitCollection_p1>());
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

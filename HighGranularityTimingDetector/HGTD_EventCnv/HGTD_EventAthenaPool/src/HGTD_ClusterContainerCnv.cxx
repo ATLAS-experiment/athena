@@ -27,7 +27,7 @@ HGTD_ClusterContainer* HGTD_ClusterContainerCnv::createTransient(const Token* to
   if (compareClassGuid(token, p1_guid)) {
     ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
     std::unique_ptr<HGTD_ClusterContainer_p1> p_coll(
-        poolReadObject<HGTD_ClusterContainer_p1>(token));
+        poolReadObject<HGTD_ClusterContainer_p1>());
     p_collection = m_converter_p1.createTransient(p_coll.get(), msg());
   } else {
     throw std::runtime_error(

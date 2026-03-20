@@ -37,28 +37,28 @@ TRTUncompressedHitCollection* TRTUncompressedHitCollectionCnv::createTransient(c
 
     TRTUncompressedHitCollection       *trans_cont(nullptr);
     if( this->compareClassGuid(token, p4_guid)) {
-        std::unique_ptr< TRT_HitCollection_p4 >   col_vect( this->poolReadObject< TRT_HitCollection_p4 >(token) );
+        std::unique_ptr< TRT_HitCollection_p4 >   col_vect( this->poolReadObject< TRT_HitCollection_p4 >() );
         trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< TRT_HitCollection_p1 >   col_vect( this->poolReadObject< TRT_HitCollection_p1 >(token) );
+        std::unique_ptr< TRT_HitCollection_p1 >   col_vect( this->poolReadObject< TRT_HitCollection_p1 >() );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p2_guid)) {
-        std::unique_ptr< TRT_HitCollection_p2 >   col_vect( this->poolReadObject< TRT_HitCollection_p2 >(token) );
+        std::unique_ptr< TRT_HitCollection_p2 >   col_vect( this->poolReadObject< TRT_HitCollection_p2 >() );
         trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p3_guid)) {
-        std::unique_ptr< TRT_HitCollection_p3 >   col_vect( this->poolReadObject< TRT_HitCollection_p3 >(token) );
+        std::unique_ptr< TRT_HitCollection_p3 >   col_vect( this->poolReadObject< TRT_HitCollection_p3 >() );
         trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p5_guid)) {
-        std::unique_ptr< TRT_HitCollection_p5 >   col_vect( this->poolReadObject< TRT_HitCollection_p5 >(token) );
+        std::unique_ptr< TRT_HitCollection_p5 >   col_vect( this->poolReadObject< TRT_HitCollection_p5 >() );
         trans_cont = converter_p5.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, old_guid)) {
       // old version from before TP separation - convert to new transient format
-      AthenaHitsVector<TRTUncompressedHit>* oldColl = this->poolReadObject< AthenaHitsVector<TRTUncompressedHit> >(token);
+      AthenaHitsVector<TRTUncompressedHit>* oldColl = this->poolReadObject< AthenaHitsVector<TRTUncompressedHit> >();
       size_t size = oldColl->size();
       trans_cont=new TRTUncompressedHitCollection("DefaultCollectionName",size);
       //do the copy

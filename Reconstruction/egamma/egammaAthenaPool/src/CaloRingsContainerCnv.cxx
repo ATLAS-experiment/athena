@@ -57,12 +57,12 @@ CaloRingsContainer* CaloRingsContainerCnv::createTransient(const Token* token)
 
   if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<CaloRingsContainer_p1> persObj( poolReadObject<CaloRingsContainer_p1>(token) );
+    std::unique_ptr<CaloRingsContainer_p1> persObj( poolReadObject<CaloRingsContainer_p1>() );
     CaloRingsContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else if ( compareClassGuid(token, tr_guid) ) {
     // regular object from before the T/P separation
-    return poolReadObject<CaloRingsContainer>(token);
+    return poolReadObject<CaloRingsContainer>();
   } else {
     throw std::runtime_error("Unsupported persistent version of CaloRingsContainer");
   }

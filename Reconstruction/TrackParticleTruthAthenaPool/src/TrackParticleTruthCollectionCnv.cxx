@@ -46,25 +46,25 @@ TrackParticleTruthCollection* TrackParticleTruthCollectionCnv::createTransient(c
   
   if (compareClassGuid(token, s_p3_guid)) {
     log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p3. token="<<token->toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p3* pers=poolReadObject<Rec::TrackParticleTruthCollection_p3>(token);
+    Rec::TrackParticleTruthCollection_p3* pers=poolReadObject<Rec::TrackParticleTruthCollection_p3>();
     m_converter_p3.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p2_guid)) {
     log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p2. token="<<token->toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p2* pers=poolReadObject<Rec::TrackParticleTruthCollection_p2>(token);
+    Rec::TrackParticleTruthCollection_p2* pers=poolReadObject<Rec::TrackParticleTruthCollection_p2>();
     m_converter_p2.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p1_guid)) {
     log<<MSG::DEBUG<<"Read TrackParticleTruthCollection_p1. token="<<token->toString()<<endmsg;
-    Rec::TrackParticleTruthCollection_p1* pers=poolReadObject<Rec::TrackParticleTruthCollection_p1>(token);
+    Rec::TrackParticleTruthCollection_p1* pers=poolReadObject<Rec::TrackParticleTruthCollection_p1>();
     m_converter_p1.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p0_guid)) {
     log<<MSG::DEBUG<<"Read version p0 of TrackParticleTruthCollection. token="<<token->toString()<<endmsg;
-    TrackParticleTruthVector *pers = poolReadObject<TrackParticleTruthVector>(token);
+    TrackParticleTruthVector *pers = poolReadObject<TrackParticleTruthVector>();
     m_converter_p0.persToTrans(pers, trans.get(), log);
     delete pers;
   }

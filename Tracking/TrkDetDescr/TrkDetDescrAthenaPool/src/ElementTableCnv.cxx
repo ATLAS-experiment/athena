@@ -44,7 +44,7 @@ ElementTableCnv::createTransientWithKey (const Token* token, const std::string& 
    Trk::ElementTable* tCollection = nullptr;
    if( compareClassGuid(token,  p1_guid ) ) {
 
-      std::unique_ptr< ElementTable_PERS >  p_coll( poolReadObject< ElementTable_PERS >(token) );
+      std::unique_ptr< ElementTable_PERS >  p_coll( poolReadObject< ElementTable_PERS >() );
       tCollection = m_TPConverter.createTransient( p_coll.get(), log );
    }
  

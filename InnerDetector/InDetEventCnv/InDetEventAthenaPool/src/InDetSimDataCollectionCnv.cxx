@@ -32,24 +32,24 @@ InDetSimDataCollection* InDetSimDataCollectionCnv::createTransient(const Token* 
     static const pool::Guid   old_guid("5A50C32E-C036-4A49-AE97-716D53210BE1");
 
     if( this->compareClassGuid(token, p4_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p4 >   col_vect( this->poolReadObject< InDetSimDataCollection_p4 >(token) );
+        std::unique_ptr< InDetSimDataCollection_p4 >   col_vect( this->poolReadObject< InDetSimDataCollection_p4 >() );
         trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p3_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p3 >   col_vect( this->poolReadObject< InDetSimDataCollection_p3 >(token) );
+        std::unique_ptr< InDetSimDataCollection_p3 >   col_vect( this->poolReadObject< InDetSimDataCollection_p3 >() );
         trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p2_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p2 >   col_vect( this->poolReadObject< InDetSimDataCollection_p2 >(token) );
+        std::unique_ptr< InDetSimDataCollection_p2 >   col_vect( this->poolReadObject< InDetSimDataCollection_p2 >() );
         trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< InDetSimDataCollection_p1 >   col_vect( this->poolReadObject< InDetSimDataCollection_p1 >(token) );
+        std::unique_ptr< InDetSimDataCollection_p1 >   col_vect( this->poolReadObject< InDetSimDataCollection_p1 >() );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
     else if(  this->compareClassGuid(token, old_guid)) {
         // old version from before TP separation, just return it
-        trans_cont = this->poolReadObject<InDetSimDataCollection>(token);
+        trans_cont = this->poolReadObject<InDetSimDataCollection>();
     }  else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }

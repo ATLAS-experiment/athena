@@ -82,7 +82,7 @@ public:
   { return guid == token->classID(); }
 
   template <class T>
-  T* poolReadObject(const Token* /*token*/) { return new T (10); }
+  T* poolReadObject() { return new T (10); }
 };
 
 

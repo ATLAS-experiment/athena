@@ -63,23 +63,23 @@ INav4MomAssocs* INav4MomAssocsCnv::createTransient(const Token* token)
 
   if( compareClassGuid(token, p3_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p3> persObj( poolReadObject<INav4MomAssocs_p3>(token) );
+    std::unique_ptr<INav4MomAssocs_p3> persObj( poolReadObject<INav4MomAssocs_p3>() );
     transObj =  m_tpConverter_p3.createTransient( persObj.get(), msg() );
   }
   else if ( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p2> persObj( poolReadObject<INav4MomAssocs_p2>(token) );
+    std::unique_ptr<INav4MomAssocs_p2> persObj( poolReadObject<INav4MomAssocs_p2>() );
     transObj = m_tpConverter_p2.createTransient( persObj.get(), msg() );
   }
   else if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<INav4MomAssocs_p1> persObj( poolReadObject<INav4MomAssocs_p1>(token) );
+    std::unique_ptr<INav4MomAssocs_p1> persObj( poolReadObject<INav4MomAssocs_p1>() );
     INav4MomAssocsCnv_p1 cnv( m_storeGate.get() );
     transObj = cnv.createTransient( persObj.get(), msg() );
   }
   else if( compareClassGuid(token, tr_guid) ) {
      // regular object from before the T/P separation
-     return poolReadObject<INav4MomAssocs>(token);
+     return poolReadObject<INav4MomAssocs>();
   }
   else {
     throw std::runtime_error("Unsupported persistent version of INav4MomAssocs");

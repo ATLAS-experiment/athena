@@ -17,12 +17,12 @@ TBEventInfo* TBEventInfoCnv::createTransient(const Token* token) {
    static const pool::Guid   p0_guid("1295BE02-D698-43A8-A2BB-76E5ADCBD228");  // GUID of the transient object
    if( compareClassGuid(token, p1_guid) ) {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< TBEventInfo_p1 > col_vect( poolReadObject< TBEventInfo_p1 >(token) );
+      std::unique_ptr< TBEventInfo_p1 > col_vect( poolReadObject< TBEventInfo_p1 >() );
       return m_TPConverter.createTransient( col_vect.get(), log );
    }
    else if( compareClassGuid(token, p0_guid) ) {
       // regular object from before TP separation, just return it
-      return poolReadObject< TBEventInfo >(token);
+      return poolReadObject< TBEventInfo >();
    } 
    throw std::runtime_error("Unsupported persistent version of Data Collection");
 }

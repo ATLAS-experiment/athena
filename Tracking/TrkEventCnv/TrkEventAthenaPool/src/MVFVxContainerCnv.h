@@ -52,7 +52,7 @@ protected:
 
   virtual AthenaPoolCnvTPExtension*  clone() override { return new MVFVxContainerCnv(0); }
 
-  virtual void          readObjectFromPool( const Token* token) override;
+  virtual void          readObjectFromPool( const std::string& token) override;
 
  private:
   MVFVxContainerCnv_tlp1	m_TPConverter;

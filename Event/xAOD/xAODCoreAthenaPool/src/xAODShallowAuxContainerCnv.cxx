@@ -113,6 +113,6 @@ xAODShallowAuxContainerCnv::createPersistentWithKey( xAOD::ShallowAuxContainer* 
 }
 
 xAOD::ShallowAuxContainer*
-xAODShallowAuxContainerCnv::createTransientWithKey ( const Token* token, const std::string& /*key*/ ) {
-   return poolReadObject<xAOD::ShallowAuxContainer>(token); 
+xAODShallowAuxContainerCnv::createTransientWithKey ( const Token* /*token*/, const std::string& /*key*/ ) {
+   return poolReadObject<xAOD::ShallowAuxContainer>(); 
 }

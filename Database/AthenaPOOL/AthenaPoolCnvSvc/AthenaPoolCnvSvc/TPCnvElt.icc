@@ -46,7 +46,7 @@ TPCnvElt<CNV, TPCNV>::createTransient (CNV& parent,
   if (!parent.compareClassGuid(token, m_guid))
     return std::unique_ptr<typename TPCnvElt<CNV, TPCNV>::Trans_t>();
 
-  std::unique_ptr<Pers_t> old (parent.template poolReadObject<Pers_t>(token) );
+  std::unique_ptr<Pers_t> old (parent.template poolReadObject<Pers_t>() );
   return AthenaPoolCnvSvc::createTransient (m_cnv, old.get(), key, msg);
 }
 
@@ -73,7 +73,7 @@ TPCnvElt<CNV, TPCNV>::persToTrans (CNV& parent, Trans_t* trans,
   if (!parent.compareClassGuid(token, m_guid))
     return false;
 
-  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>(token) );
+  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>() );
   m_cnv.persToTrans (old.get(), trans, msg);
   return true;
 }
@@ -117,7 +117,7 @@ TPCnvElt<CNV, T_TPCnvNull<TRANS> >::createTransient (CNV& parent,
 {
   Pers_t* p = nullptr;
   if (parent.compareClassGuid(token, m_guid)) {
-    p = parent.template poolReadObject<Pers_t>(token);
+    p = parent.template poolReadObject<Pers_t>();
   }
   return std::unique_ptr<typename TPCnvElt<CNV, T_TPCnvNull<TRANS> >::Trans_t>(p);
 }
@@ -148,7 +148,7 @@ TPCnvElt<CNV, T_TPCnvNull<TRANS> >::persToTrans (CNV& parent,
   if (!parent.compareClassGuid(token, m_guid))
     return false;
 
-  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>(token) );
+  std::unique_ptr<Pers_t> old ( parent.template poolReadObject<Pers_t>() );
   *trans = *old;
   return true;
 }

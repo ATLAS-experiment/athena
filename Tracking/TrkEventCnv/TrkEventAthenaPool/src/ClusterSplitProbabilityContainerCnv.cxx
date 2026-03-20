@@ -30,7 +30,7 @@ Trk::ClusterSplitProbabilityContainer *ClusterSplitProbabilityContainerCnv::crea
 
     Trk::ClusterSplitProbabilityContainer *p_collection = nullptr;
     if( compareClassGuid(token,  p1_guid )){
-       std::unique_ptr<ClusterSplitProbabilityContainer_PERS> pers( poolReadObject< ClusterSplitProbabilityContainer_PERS >(token) );
+       std::unique_ptr<ClusterSplitProbabilityContainer_PERS> pers( poolReadObject< ClusterSplitProbabilityContainer_PERS >() );
        p_collection = m_converter.createTransient( pers.get(), log );
     }
     else

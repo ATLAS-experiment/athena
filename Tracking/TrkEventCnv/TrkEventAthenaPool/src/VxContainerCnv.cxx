@@ -68,7 +68,7 @@ VxContainer * VxContainerCnv::createTransient(const Token* token)
   if( compareClassGuid(token,  p2_guid ) ) {
   //  std::cout << "VxContainerCnv::createTransient: do new TP 2" << std::endl;  
      usingTPCnvForReading( m_TPConverter );
-     std::unique_ptr< VxContainer_PERS >  p_coll( poolReadObject< VxContainer_PERS >(token) );
+     std::unique_ptr< VxContainer_PERS >  p_coll( poolReadObject< VxContainer_PERS >() );
 
   /*  
      std::cout<<"READING: Dumping the contents of the VxContainer "<<std::endl;
@@ -98,7 +98,7 @@ VxContainer * VxContainerCnv::createTransient(const Token* token)
         
         VxContainerCnv_tlp1 tmpTPCnv;
         usingTPCnvForReading( tmpTPCnv );
-        std::unique_ptr< Trk::VxContainer_tlp1 >  p_coll( poolReadObject< Trk::VxContainer_tlp1 >(token) );
+        std::unique_ptr< Trk::VxContainer_tlp1 >  p_coll( poolReadObject< Trk::VxContainer_tlp1 >() );
         p_collection = tmpTPCnv.createTransient( p_coll.get(), m_log );
         
     //    std::cout << "VxContainerCnv::createTransient: done! " << std::endl;
@@ -125,7 +125,7 @@ VxContainer * VxContainerCnv::createTransient(const Token* token)
 
   }else if( compareClassGuid(token,  p0_guid ) ){
 //   std::cout << "VxContainerCnv::createTransient: use old converter" << std::endl;  
-   p_collection = poolReadObject< VxContainer >(token);
+   p_collection = poolReadObject< VxContainer >();
    
   }else  throw std::runtime_error( "Unsupported persistent version of VxContainer" );
     

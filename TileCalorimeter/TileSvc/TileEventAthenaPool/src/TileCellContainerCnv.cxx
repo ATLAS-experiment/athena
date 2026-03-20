@@ -248,11 +248,11 @@ TileCellVec* TileCellContainerCnv::createPersistent(TileCellContainer* cont)
     return vecCell.release();
 }
 
-TileCellContainer* TileCellContainerCnv::createTransient(const Token* token)
+TileCellContainer* TileCellContainerCnv::createTransient(const Token* /*token*/)
 {
     // Fill TileCellContainer from vector, creating cells from 3 integers 
 
-    std::unique_ptr<TileCellVec> vec(this->poolReadObject<TileCellVec>(token));
+    std::unique_ptr<TileCellVec> vec(this->poolReadObject<TileCellVec>());
 
     ATH_MSG_DEBUG("Read TileCell Vec, size " << vec->size());
 

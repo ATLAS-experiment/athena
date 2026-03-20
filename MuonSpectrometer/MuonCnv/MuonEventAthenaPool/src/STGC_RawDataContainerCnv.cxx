@@ -42,17 +42,17 @@ STGC_RawDataContainerCnv::createTransient(const Token* token)
   static const pool::Guid	p1_guid("E9229710-DB8A-447E-9546-4BAB079C7547");
 
   if( compareClassGuid(token, p3_guid) ) {
-    std::unique_ptr< STGC_RawDataContainer_p3 >  cont( this->poolReadObject<STGC_RawDataContainer_p3>(token) );
+    std::unique_ptr< STGC_RawDataContainer_p3 >  cont( this->poolReadObject<STGC_RawDataContainer_p3>() );
     const STGC_RawDataContainer_p3* constCont = cont.get();
     transCont =  m_TPConverter_p3.createTransient( constCont, msg() );
 
   } else if( compareClassGuid(token, p2_guid) ) {
-    std::unique_ptr< STGC_RawDataContainer_p2 >  cont( this->poolReadObject<STGC_RawDataContainer_p2>(token) );
+    std::unique_ptr< STGC_RawDataContainer_p2 >  cont( this->poolReadObject<STGC_RawDataContainer_p2>() );
     const STGC_RawDataContainer_p2* constCont = cont.get();
     transCont =  m_TPConverter_p2.createTransient( constCont, msg() );
     
   } else if( compareClassGuid(token, p1_guid) ) {
-    std::unique_ptr< STGC_RawDataContainer_p1 >  cont( this->poolReadObject<STGC_RawDataContainer_p1>(token) );
+    std::unique_ptr< STGC_RawDataContainer_p1 >  cont( this->poolReadObject<STGC_RawDataContainer_p1>() );
     const STGC_RawDataContainer_p1* constCont = cont.get();
     transCont =  m_TPConverter_p1.createTransient( constCont, msg() );
     

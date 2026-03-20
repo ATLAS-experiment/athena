@@ -34,24 +34,24 @@ CaloCalibrationHitContainer* CaloCalibrationHitContainerCnv::createTransient(con
     static const pool::Guid  p0_guid("33CDAED0-F472-47D2-8F28-27C6D6761F35");
 
     if( this->compareClassGuid(token, p4_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p4 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p4 >(token) );
+      std::unique_ptr< CaloCalibrationHitContainer_p4 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p4 >() );
       trans_cont = converter_p4.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p3_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p3 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p3 >(token) );
+      std::unique_ptr< CaloCalibrationHitContainer_p3 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p3 >() );
       trans_cont = converter_p3.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p2_guid)) {
-      std::unique_ptr< CaloCalibrationHitContainer_p2 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p2 >(token) );
+      std::unique_ptr< CaloCalibrationHitContainer_p2 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p2 >() );
       trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< CaloCalibrationHitContainer_p1 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p1 >(token) );
+        std::unique_ptr< CaloCalibrationHitContainer_p1 >   col_vect( this->poolReadObject< CaloCalibrationHitContainer_p1 >() );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation, just return it
-        trans_cont = this->poolReadObject<CaloCalibrationHitContainer>(token);
+        trans_cont = this->poolReadObject<CaloCalibrationHitContainer>();
     }  else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }

@@ -40,7 +40,7 @@ TrigPassBitsCollection * TrigPassBitsCollectionCnv::createTransient(const Token*
   //  TrigPassBitsCollection *p_collection = 0;
   if( compareClassGuid(token,  p1_guid ) )     
   {
-         std::unique_ptr< TrigPassBitsCollection_p1 > col_vect( poolReadObject< TrigPassBitsCollection_p1 >(token) );
+         std::unique_ptr< TrigPassBitsCollection_p1 > col_vect( poolReadObject< TrigPassBitsCollection_p1 >() );
          return m_impl->m_TPconverter_p1.createTransient( col_vect.get(), mlog ) ;
   }
   else  throw std::runtime_error( "Unsupported persistent version of TrigPassBitsCollection" );

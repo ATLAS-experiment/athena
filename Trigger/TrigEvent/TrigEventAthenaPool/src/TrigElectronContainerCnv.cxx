@@ -29,24 +29,24 @@ TrigElectronContainer* TrigElectronContainerCnv::createTransient(const Token* to
     static const pool::Guid p0_guid1("EA6EA1A5-16FC-4DBF-896E-D933B25E65E0");
 
     if( compareClassGuid(token,  p3_guid ) ){
-       std::unique_ptr< TrigElectronContainer_p3 > col_vect( poolReadObject< TrigElectronContainer_p3 >(token) );
+       std::unique_ptr< TrigElectronContainer_p3 > col_vect( poolReadObject< TrigElectronContainer_p3 >() );
        //         std::cout << "Reading IMFC p3" << std::endl;
        return m_converter.createTransient( col_vect.get(), mlog ) ;
 
     } else if ( compareClassGuid(token, tlp2_guid) ) {
 
-      std::unique_ptr< TrigElectronContainer_tlp2 >   col_vect( poolReadObject< TrigElectronContainer_tlp2 >(token) );
+      std::unique_ptr< TrigElectronContainer_tlp2 >   col_vect( poolReadObject< TrigElectronContainer_tlp2 >() );
       return m_converter_tlp2.createTransient( col_vect.get(), mlog );
       
     } else if ( compareClassGuid(token, tlp1_guid) ) {
 
-      std::unique_ptr< TrigElectronContainer_tlp1 >   col_vect( poolReadObject< TrigElectronContainer_tlp1 >(token) );
+      std::unique_ptr< TrigElectronContainer_tlp1 >   col_vect( poolReadObject< TrigElectronContainer_tlp1 >() );
       return m_converter_tlp1.createTransient( col_vect.get(), mlog );
       
     } else if ( compareClassGuid(token, p0_guid1) || compareClassGuid(token, p0_guid2) ) {
       
       // old version from before TP separation, just return it
-      return poolReadObject<TrigElectronContainer>(token);
+      return poolReadObject<TrigElectronContainer>();
       
     }  else {
       

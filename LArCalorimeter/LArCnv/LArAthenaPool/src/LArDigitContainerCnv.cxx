@@ -54,12 +54,12 @@ LArDigitContainer* LArDigitContainerCnv::createTransient(const Token* token) {
 
    if (compareClassGuid(token, p0_guid)) {
      ATH_MSG_DEBUG("Read version p0 of LArDigitContainer. token=" << token->toString());
-     return poolReadObject<LArDigitContainer>(token);
+     return poolReadObject<LArDigitContainer>();
    }
    else if (compareClassGuid(token, p1_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p1. token=" << token->toString());
      LArDigitContainer* trans=new LArDigitContainer();
-     std::unique_ptr<LArDigitContainer_p1> pers(poolReadObject<LArDigitContainer_p1>(token));
+     std::unique_ptr<LArDigitContainer_p1> pers(poolReadObject<LArDigitContainer_p1>());
      LArDigitContainerCnv_p1 converter;
      converter.persToTrans(pers.get(), trans, msg());
      return trans;
@@ -67,7 +67,7 @@ LArDigitContainer* LArDigitContainerCnv::createTransient(const Token* token) {
    else if (compareClassGuid(token, p2_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p2. token=" << token->toString());
      LArDigitContainer* trans=new LArDigitContainer();
-     std::unique_ptr<LArDigitContainer_p2> pers(poolReadObject<LArDigitContainer_p2>(token));
+     std::unique_ptr<LArDigitContainer_p2> pers(poolReadObject<LArDigitContainer_p2>());
      LArDigitContainerCnv_p2 converter(m_idHelper);
      converter.persToTrans(pers.get(), trans, msg());
      return trans;
@@ -75,7 +75,7 @@ LArDigitContainer* LArDigitContainerCnv::createTransient(const Token* token) {
    else if (compareClassGuid(token, p3_guid)) {
      ATH_MSG_DEBUG("Reading LArDigitContainer_p3. token=" << token->toString());
      LArDigitContainer* trans=new LArDigitContainer();
-     std::unique_ptr<LArDigitContainer_p3> pers(poolReadObject<LArDigitContainer_p3>(token));
+     std::unique_ptr<LArDigitContainer_p3> pers(poolReadObject<LArDigitContainer_p3>());
      LArDigitContainerCnv_p3 converter(m_idHelper, m_idSCHelper, m_storeGateSvc.get());
      converter.persToTrans(pers.get(), trans, msg());
      return trans;

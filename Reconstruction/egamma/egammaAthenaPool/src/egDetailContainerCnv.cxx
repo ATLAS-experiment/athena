@@ -61,18 +61,18 @@ egDetailContainer* egDetailContainerCnv::createTransient(const Token* token)
   if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<egDetailContainer>(token);
+    return poolReadObject<egDetailContainer>();
 
   } if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<egDetailContainer_p1> persObj( poolReadObject<egDetailContainer_p1>(token) );
+    std::unique_ptr<egDetailContainer_p1> persObj( poolReadObject<egDetailContainer_p1>() );
     egDetailContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<egDetailContainer_p2> persObj( poolReadObject<egDetailContainer_p2>(token) );
+    std::unique_ptr<egDetailContainer_p2> persObj( poolReadObject<egDetailContainer_p2>() );
     egDetailContainerCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else {

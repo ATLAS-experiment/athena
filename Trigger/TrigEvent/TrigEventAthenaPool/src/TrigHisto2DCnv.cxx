@@ -28,7 +28,7 @@ TrigHisto2D* TrigHisto2DCnv::createTransient(const Token* token) {
 
   if( compareClassGuid(token, p1_guid) ) {
     mlog << MSG::DEBUG << "TrigHisto2DCnv::reading p1 persistent object" << endmsg;
-    std::unique_ptr<TrigHisto2D_p1> pers_ptr( poolReadObject<TrigHisto2D_p1>(token) );
+    std::unique_ptr<TrigHisto2D_p1> pers_ptr( poolReadObject<TrigHisto2D_p1>() );
     TrigHisto2DCnv_p1 converter;
     transObj = converter.createTransient(pers_ptr.get(), mlog);
   }

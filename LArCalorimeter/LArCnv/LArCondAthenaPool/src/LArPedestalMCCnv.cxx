@@ -31,7 +31,7 @@ LArPedestalMCCnv::createTransient(const Token* token)
     static const pool::Guid   p0_guid("C147EFC8-5283-4DAE-AD20-0E2CB79E54B6");
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArPedestalMC_p1 > col_vect( poolReadObject< LArPedestalMC_p1 >(token) );
+        std::unique_ptr< LArPedestalMC_p1 > col_vect( poolReadObject< LArPedestalMC_p1 >() );
         MsgStream log(msgSvc(), "LArPedestalMCCnv" ); 
         //log << MSG::INFO << "Reading LArPedestalMC_p1" << endmsg; 
         return TPconverter.createTransientConst( col_vect.get(), log );
@@ -42,7 +42,7 @@ LArPedestalMCCnv::createTransient(const Token* token)
         MsgStream log(msgSvc(), "LArPedestalMCCnv" ); 
         log << MSG::INFO << "Reading LArPedestalMC (original)" << endmsg; 
 
-        LArPedestalMC* peds =  poolReadObject< LArPedestalMC >(token);
+        LArPedestalMC* peds =  poolReadObject< LArPedestalMC >();
 
         return (peds);
 

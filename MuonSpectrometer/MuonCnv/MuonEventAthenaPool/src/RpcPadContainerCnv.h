@@ -41,13 +41,13 @@ RpcPadContainerCnv::createTransient(const Token* token)
     if( compareClassGuid(token, p2_guid) ) {
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " **** createTransient - p2 " << endmsg;
 
-        std::unique_ptr< RpcPadContainer_p2 > col_vect( poolReadObject< RpcPadContainer_p2 >(token) );
+        std::unique_ptr< RpcPadContainer_p2 > col_vect( poolReadObject< RpcPadContainer_p2 >() );
         trans_cont = m_TPconverter.createTransient( col_vect.get(), log );
     } else if( compareClassGuid(token, p1_guid) ) {
         if (log.level() <= MSG::DEBUG)log << MSG::DEBUG << " **** createTransient - p1 "
             << endmsg;
 
-        std::unique_ptr< RpcPadContainer_p1 > col_vect( poolReadObject< RpcPadContainer_p1 >(token) );
+        std::unique_ptr< RpcPadContainer_p1 > col_vect( poolReadObject< RpcPadContainer_p1 >() );
         RpcPadContainerCnv_p1 cnv;
         trans_cont = cnv.createTransient( col_vect.get(), log );
     } else if( compareClassGuid(token, p0_guid) ) {
@@ -55,7 +55,7 @@ RpcPadContainerCnv::createTransient(const Token* token)
             << endmsg;
 
         // old version from before TP separation
-        std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >(token) );
+        std::unique_ptr< COLL_vector >	col_vect( this->poolReadObject< COLL_vector >() );
         trans_cont = createTransientFrom_p0( col_vect.get(), log );
     }
     else {

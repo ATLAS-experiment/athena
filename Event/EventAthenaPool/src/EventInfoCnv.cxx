@@ -54,35 +54,35 @@ EventInfo* EventInfoCnv::createTransient(const Token* token) {
     static const pool::Guid   p0_guid("380D8BB9-B34F-470F-92CC-06C3D60F7BE4");
     if( compareClassGuid(token, p4_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< EventInfo_p4 > col_vect( poolReadObject< EventInfo_p4 >(token) );
+        std::unique_ptr< EventInfo_p4 > col_vect( poolReadObject< EventInfo_p4 >() );
         MsgStream log(msgSvc(), "EventInfoCnv" );
         //log << MSG::DEBUG << "Reading EventInfo_p4" << endmsg; 
         return massageEventInfo(TPconverter_p4.createTransientConst( col_vect.get(), log ));
     }
     else if( compareClassGuid(token, p3_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< EventInfo_p3 > col_vect( poolReadObject< EventInfo_p3 >(token) );
+        std::unique_ptr< EventInfo_p3 > col_vect( poolReadObject< EventInfo_p3 >() );
         MsgStream log(msgSvc(), "EventInfoCnv" );
         //log << MSG::DEBUG << "Reading EventInfo_p3" << endmsg; 
         return massageEventInfo(TPconverter_p3.createTransientConst( col_vect.get(), log ));
     }
     else if( compareClassGuid(token, p2_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< EventInfo_p2 > col_vect( poolReadObject< EventInfo_p2 >(token) );
+        std::unique_ptr< EventInfo_p2 > col_vect( poolReadObject< EventInfo_p2 >() );
         MsgStream log(msgSvc(), "EventInfoCnv" );
         // log << MSG::DEBUG << "ILIJA Reading EventInfo_p2" << endmsg; 
         return massageEventInfo(TPconverter_p2.createTransientConst( col_vect.get(), log ));
     }
     else if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< EventInfo_p1 > col_vect( poolReadObject< EventInfo_p1 >(token) );
+        std::unique_ptr< EventInfo_p1 > col_vect( poolReadObject< EventInfo_p1 >() );
         MsgStream log(msgSvc(), "EventInfoCnv" );
         //log << MSG::DEBUG << "Reading EventInfo_p1" << endmsg; 
         return massageEventInfo(TPconverter_p1.createTransientConst( col_vect.get(), log ));
     }
     else if( compareClassGuid(token, p0_guid) ) {
         // regular object from before TP separation, just return it
-        EventInfo* ei =  poolReadObject< EventInfo >(token);
+        EventInfo* ei =  poolReadObject< EventInfo >();
 
         // Fill MC event weight in transient EventType from
         // TriggerInfo. This is only needed for MC events: if the

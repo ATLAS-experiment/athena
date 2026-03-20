@@ -31,15 +31,15 @@ TrigRNNOutputContainer * TrigRNNOutputContainerCnv::createTransient(const Token*
   static const pool::Guid p2_guid("B10FA1AF-F38F-4025-83C4-3A83A3F3AE71");
 
   if( compareClassGuid(token,  p2_guid ) ){
-      std::unique_ptr< TrigRNNOutputContainer_p2 > col_vect( poolReadObject< TrigRNNOutputContainer_p2 >(token) );
+      std::unique_ptr< TrigRNNOutputContainer_p2 > col_vect( poolReadObject< TrigRNNOutputContainer_p2 >() );
       //         std::cout << "Reading IMFC p2" << std::endl;
       return m_converter.createTransient( col_vect.get(), mlog ) ;
   } else if ( compareClassGuid(token,  tlp1_guid ) ) {
-      std::unique_ptr< TrigRNNOutputContainer_tlp1 > col_vect( poolReadObject< TrigRNNOutputContainer_tlp1 >(token) );
+      std::unique_ptr< TrigRNNOutputContainer_tlp1 > col_vect( poolReadObject< TrigRNNOutputContainer_tlp1 >() );
       return m_converter_tlp1.createTransient( col_vect.get(), mlog );
   } else if (compareClassGuid(token, tr_guid)) {
       // regular object from before the T/P separation
-      return poolReadObject<TrigRNNOutputContainer>(token);
+      return poolReadObject<TrigRNNOutputContainer>();
   } else
       throw std::runtime_error( "Unsupported persistent version of TrigRNNOutputContainer" );
    

@@ -42,7 +42,7 @@ TrigTauClusterDetails* TrigTauClusterDetailsCnv::createTransient(const Token* to
   if( compareClassGuid(token, tlp1_guid) ) {
     
     mlog << MSG::DEBUG << "TrigTauClusterDetailsCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigTauClusterDetails_tlp1 >   col_vect( this->poolReadObject< TrigTauClusterDetails_tlp1 >(token) );
+    std::unique_ptr< TrigTauClusterDetails_tlp1 >   col_vect( this->poolReadObject< TrigTauClusterDetails_tlp1 >() );
     trans_cont = m_TPConverter->createTransient( col_vect.get(), mlog );
 
   }
@@ -50,7 +50,7 @@ TrigTauClusterDetails* TrigTauClusterDetailsCnv::createTransient(const Token* to
 
     mlog << MSG::DEBUG << "TrigTauClusterDetailsCnv::reading p0 persistent object" << endmsg;
     // old version from before TP separation, just return it
-    trans_cont = this->poolReadObject<TrigTauClusterDetails>(token);
+    trans_cont = this->poolReadObject<TrigTauClusterDetails>();
 
     }  else {
 

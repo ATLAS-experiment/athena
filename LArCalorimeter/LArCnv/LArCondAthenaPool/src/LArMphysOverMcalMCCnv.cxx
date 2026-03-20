@@ -26,7 +26,7 @@ LArMphysOverMcalMCCnv::createTransient(const Token* token)
     return p;
   else if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< LArMphysOverMcalSubset_p1 > col_vect( poolReadObject< LArMphysOverMcalSubset_p1 >(token) );
+    std::unique_ptr< LArMphysOverMcalSubset_p1 > col_vect( poolReadObject< LArMphysOverMcalSubset_p1 >() );
     MsgStream log(msgSvc(), "LArMphysOverMcalMCCnv" ); 
     //log << MSG::INFO << "Reading LArMphysOverMcalSubset_p1" << endmsg; 
     return TPconverter.createTransientConst( col_vect.get(), log );
@@ -36,7 +36,7 @@ LArMphysOverMcalMCCnv::createTransient(const Token* token)
     MsgStream log(msgSvc(), "LArMphysOverMcalMCCnv" ); 
     log << MSG::DEBUG << "Reading LArMphysOverMcalSubset (original)" << endmsg; 
     
-    std::unique_ptr< LArConditionsSubset<LArMphysOverMcalP> > subset ( poolReadObject< LArConditionsSubset<LArMphysOverMcalP> >(token) );
+    std::unique_ptr< LArConditionsSubset<LArMphysOverMcalP> > subset ( poolReadObject< LArConditionsSubset<LArMphysOverMcalP> >() );
     // Here we must convert from LArMphysOverMcalP to LArMphysOverMcalP1
     return (createTransient(subset.get()));
     

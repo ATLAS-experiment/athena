@@ -40,7 +40,7 @@ protected:
     {
       return new JetTagInfoCnv(0);
     }
-  void readObjectFromPool (const Token*);
+  void readObjectFromPool (const std::string &obj);
 
  private:
   Analysis::JetTagInfoCnv_tlp3 m_TPConverter;

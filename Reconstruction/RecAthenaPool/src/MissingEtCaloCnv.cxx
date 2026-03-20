@@ -42,18 +42,18 @@ MissingEtCalo* MissingEtCaloCnv::createTransient(const Token* token)
   static const pool::Guid p3_guid("0B9C9E87-92C8-49D3-8DF1-45ACDDD3336F");
 
   if ( compareClassGuid(token, tr_guid) ) { // regular object from before the T/P separation
-    return poolReadObject<MissingEtCalo>(token);
+    return poolReadObject<MissingEtCalo>();
   }else if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtCalo_p1> persObj( poolReadObject<MissingEtCalo_p1>(token) );
+    std::unique_ptr<MissingEtCalo_p1> persObj( poolReadObject<MissingEtCalo_p1>() );
     MissingEtCaloCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   }else if ( compareClassGuid(token, p2_guid) ) {
-    std::unique_ptr<MissingEtCalo_p2> persObj( poolReadObject<MissingEtCalo_p2>(token) );
+    std::unique_ptr<MissingEtCalo_p2> persObj( poolReadObject<MissingEtCalo_p2>() );
     MissingEtCaloCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   }else if ( compareClassGuid(token, p3_guid) ) {
-    std::unique_ptr<MissingEtCalo_p3> persObj( poolReadObject<MissingEtCalo_p3>(token) );
+    std::unique_ptr<MissingEtCalo_p3> persObj( poolReadObject<MissingEtCalo_p3>() );
     MissingEtCaloCnv_p3 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );    
   } else {

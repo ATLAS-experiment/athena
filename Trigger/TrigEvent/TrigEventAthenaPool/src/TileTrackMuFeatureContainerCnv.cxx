@@ -33,16 +33,16 @@ TileTrackMuFeatureContainer * TileTrackMuFeatureContainerCnv::createTransient(co
   static const pool::Guid p0_guid( "1AFABC18-EB97-412D-B27C-C744ABA6E1DC");
 
   if( compareClassGuid(token,  p3_guid ) ){
-         std::unique_ptr< TileTrackMuFeatureContainer_p3 > col_vect( poolReadObject< TileTrackMuFeatureContainer_p3 >(token) );
+         std::unique_ptr< TileTrackMuFeatureContainer_p3 > col_vect( poolReadObject< TileTrackMuFeatureContainer_p3 >() );
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   
     }else if( compareClassGuid(token,  tlp1_guid ) ) {
-         std::unique_ptr< TileTrackMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileTrackMuFeatureContainer_tlp1 >(token) );
+         std::unique_ptr< TileTrackMuFeatureContainer_tlp1 > col_vect( poolReadObject< TileTrackMuFeatureContainer_tlp1 >() );
          return m_converter1.createTransient( col_vect.get(), mlog );
 
     }else if( compareClassGuid(token,  p0_guid ) ){
       
-         return poolReadObject< TileTrackMuFeatureContainer >(token);
+         return poolReadObject< TileTrackMuFeatureContainer >();
       
     }else  throw std::runtime_error( "Unsupported persistent version of TileTrackMuFeatureContainer" );
   

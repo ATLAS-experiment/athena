@@ -20,7 +20,7 @@ Muon::RpcByteStreamErrorContainer* RpcByteStreamErrorContainerCnv::createTransie
   using namespace Muon;
   static const pool::Guid   p1_guid("4E46BDDC-E1F9-420A-A11F-47EF082A3E3A");
   if( compareClassGuid(token, p1_guid) ) {
-    std::unique_ptr< RpcByteStreamErrorContainer_p1 > col_vect( poolReadObject< RpcByteStreamErrorContainer_p1 >(token) );
+    std::unique_ptr< RpcByteStreamErrorContainer_p1 > col_vect( poolReadObject< RpcByteStreamErrorContainer_p1 >() );
     MsgStream log(msgSvc(), "RpcByteStreamErrorContainer_p1" );
     return TPconverter_p1.createTransientConst( col_vect.get(), log );
   } 

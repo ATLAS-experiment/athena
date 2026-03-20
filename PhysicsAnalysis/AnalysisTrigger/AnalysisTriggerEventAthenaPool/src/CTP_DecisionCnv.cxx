@@ -28,19 +28,19 @@ CTP_Decision* CTP_DecisionCnv::createTransient(const Token* token) {
 
   if( this->compareClassGuid(token,  p2_guid ) ) {
 
-    std::unique_ptr< CTP_Decision_p2 > pers_ref( this->poolReadObject< CTP_Decision_p2 >(token) );
+    std::unique_ptr< CTP_Decision_p2 > pers_ref( this->poolReadObject< CTP_Decision_p2 >() );
     MsgStream log( this->msgSvc(), "CTP_DecisionCnv" );
     return m_converter.createTransient( pers_ref.get(), log );
 
   } else if( this->compareClassGuid(token,  p1_guid ) ) {
 
-    std::unique_ptr< CTP_Decision_p1 > pers_ref( this->poolReadObject< CTP_Decision_p1 >(token) );
+    std::unique_ptr< CTP_Decision_p1 > pers_ref( this->poolReadObject< CTP_Decision_p1 >() );
     MsgStream log( this->msgSvc(), "CTP_DecisionCnv" );
     return m_converter_p1.createTransient( pers_ref.get(), log );
 
   } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-    return this->poolReadObject< CTP_Decision >(token);
+    return this->poolReadObject< CTP_Decision >();
 
   }
 

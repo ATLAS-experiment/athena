@@ -45,23 +45,23 @@ TrigDec::TrigDecision* TrigDecisionCnv::createTransient(const Token* token)
 
   if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< TrigDec::TrigDecision_p1 > col_vect( poolReadObject< TrigDec::TrigDecision_p1 >(token) );
+    std::unique_ptr< TrigDec::TrigDecision_p1 > col_vect( poolReadObject< TrigDec::TrigDecision_p1 >() );
     TrigDec::TrigDecisionCnv_p1 converter;
     return converter.createTransient( col_vect.get(), log );
   } else if ( compareClassGuid(token, p2_guid) ) {
-    std::unique_ptr< TrigDec::TrigDecision_p2 > col_vect( poolReadObject< TrigDec::TrigDecision_p2 >(token) );
+    std::unique_ptr< TrigDec::TrigDecision_p2 > col_vect( poolReadObject< TrigDec::TrigDecision_p2 >() );
     TrigDec::TrigDecisionCnv_p2 converter;
     return converter.createTransient( col_vect.get(), log );
   } else if ( compareClassGuid(token, p3_guid) ) {
-    std::unique_ptr< TrigDec::TrigDecision_p3 > col_vect( poolReadObject< TrigDec::TrigDecision_p3 >(token) );
+    std::unique_ptr< TrigDec::TrigDecision_p3 > col_vect( poolReadObject< TrigDec::TrigDecision_p3 >() );
     TrigDec::TrigDecisionCnv_p3 converter;
     return converter.createTransient( col_vect.get(), log );
   } else if ( compareClassGuid(token, p4_guid) ) {
-    std::unique_ptr< TrigDec::TrigDecision_p4 > col_vect( poolReadObject< TrigDec::TrigDecision_p4 >(token) );
+    std::unique_ptr< TrigDec::TrigDecision_p4 > col_vect( poolReadObject< TrigDec::TrigDecision_p4 >() );
     TrigDec::TrigDecisionCnv_p4 converter;
     return converter.createTransient( col_vect.get(), log );
   } else if ( compareClassGuid(token, p5_guid) ) {
-    std::unique_ptr< TrigDec::TrigDecision_p5 > col_vect( poolReadObject< TrigDec::TrigDecision_p5 >(token) );
+    std::unique_ptr< TrigDec::TrigDecision_p5 > col_vect( poolReadObject< TrigDec::TrigDecision_p5 >() );
     TrigDec::TrigDecisionCnv_p5 converter;
     return converter.createTransient( col_vect.get(), log );
   }

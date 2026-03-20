@@ -60,44 +60,44 @@ McEventCollection* McEventCollectionCnv::createTransient(const Token* token)
    if ( compareClassGuid(token, tr_guid) ) {
 
      // regular object from before the T/P separation
-     return poolReadObject<McEventCollection>(token);
+     return poolReadObject<McEventCollection>();
 
    } else if ( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr<McEventCollection_p1> persObj( poolReadObject<McEventCollection_p1>(token) );
+      std::unique_ptr<McEventCollection_p1> persObj( poolReadObject<McEventCollection_p1>() );
       McEventCollectionCnv_p1 cnv;
       transObj = cnv.createTransient( persObj.get(), msg );
    } else if ( compareClassGuid(token, p2_guid) ) {
 
-      std::unique_ptr<McEventCollection_p2> persObj( poolReadObject<McEventCollection_p2>(token) );
+      std::unique_ptr<McEventCollection_p2> persObj( poolReadObject<McEventCollection_p2>() );
       McEventCollectionCnv_p2 cnv;
       transObj = cnv.createTransient( persObj.get(), msg );
    } else if ( compareClassGuid(token, p3_guid) ) {
 
-      std::unique_ptr<McEventCollection_p3> persObj( poolReadObject<McEventCollection_p3>(token) );
+      std::unique_ptr<McEventCollection_p3> persObj( poolReadObject<McEventCollection_p3>() );
       McEventCollectionCnv_p3 cnv;
       transObj = cnv.createTransient( persObj.get(), msg ); 
    } else if ( compareClassGuid(token, p4_guid) ) {
 
-      std::unique_ptr<McEventCollection_p4> persObj( poolReadObject<McEventCollection_p4>(token) );
+      std::unique_ptr<McEventCollection_p4> persObj( poolReadObject<McEventCollection_p4>() );
       McEventCollectionCnv_p4 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
    } else if ( compareClassGuid(token, p5_guid) ) {
 
-      std::unique_ptr<McEventCollection_p5> persObj( poolReadObject<McEventCollection_p5>(token) );
+      std::unique_ptr<McEventCollection_p5> persObj( poolReadObject<McEventCollection_p5>() );
       McEventCollectionCnv_p5 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
    } else if ( compareClassGuid(token, p6_guid) ) {
 
-      std::unique_ptr<McEventCollection_p6> persObj( poolReadObject<McEventCollection_p6>(token) );
+      std::unique_ptr<McEventCollection_p6> persObj( poolReadObject<McEventCollection_p6>() );
       McEventCollectionCnv_p6 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );
    } else if ( compareClassGuid(token, p7_guid) ) {
 
-      std::unique_ptr<McEventCollection_p7> persObj( poolReadObject<McEventCollection_p7>(token) );
+      std::unique_ptr<McEventCollection_p7> persObj( poolReadObject<McEventCollection_p7>() );
       McEventCollectionCnv_p7 cnv;
       if(isPileup) cnv.setPileup();
       transObj = cnv.createTransient( persObj.get(), msg );

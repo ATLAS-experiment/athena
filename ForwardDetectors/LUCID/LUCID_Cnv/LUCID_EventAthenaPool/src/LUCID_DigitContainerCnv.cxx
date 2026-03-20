@@ -32,17 +32,17 @@ LUCID_DigitContainer* LUCID_DigitContainerCnv::createTransient(const Token* toke
   
   if (this->compareClassGuid(token, p2_guid)) {
     
-    std::unique_ptr< LUCID_DigitContainer_p2 > col_vect( this->poolReadObject< LUCID_DigitContainer_p2 >(token));
+    std::unique_ptr< LUCID_DigitContainer_p2 > col_vect( this->poolReadObject< LUCID_DigitContainer_p2 >());
     
     trans_cont = converter_p2.createTransient(col_vect.get(), mlog);
   }
   else if(this->compareClassGuid(token, p1_guid)) {
     
-    trans_cont = this->poolReadObject<LUCID_DigitContainer>(token);
+    trans_cont = this->poolReadObject<LUCID_DigitContainer>();
   } 
   else if(this->compareClassGuid(token, old_guid)) {
     
-    trans_cont = this->poolReadObject<LUCID_DigitContainer>(token);
+    trans_cont = this->poolReadObject<LUCID_DigitContainer>();
   } 
   else throw std::runtime_error("Unsupported persistent version of Data container");
 

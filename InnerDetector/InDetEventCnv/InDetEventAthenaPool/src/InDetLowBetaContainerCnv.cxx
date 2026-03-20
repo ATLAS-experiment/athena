@@ -34,7 +34,7 @@ InDet::InDetLowBetaContainer *InDetLowBetaContainerCnv::createTransient(const To
 
   InDet::InDetLowBetaContainer *p_collection = nullptr;
   if (compareClassGuid(token, tlp1_guid)) {
-    poolReadObject<InDetLowBetaContainer_PERS>(*m_TPConverter_tlp1, token);
+    poolReadObject<InDetLowBetaContainer_PERS>(*m_TPConverter_tlp1);
     p_collection = m_TPConverter_tlp1->createTransient(msg());
   } else
     throw std::runtime_error("Unsupported persistent version of InDetLowBetaContainer");
