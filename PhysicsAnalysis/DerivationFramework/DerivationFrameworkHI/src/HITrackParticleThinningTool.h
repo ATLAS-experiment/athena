@@ -24,9 +24,6 @@
 #include "AsgTools/ToolHandle.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 
-
-class IThinningSvc;
-
 namespace DerivationFramework {
 
   class HITrackParticleThinningTool : public extends<AthAlgTool, IThinningTool> {

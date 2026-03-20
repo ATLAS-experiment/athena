@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ namespace DerivationFramework
     {
       //declareProperty("InDetTrackParticlesKey", m_TP_key="InDetTrackParticles");
       declareProperty("PrimaryVertexKey", m_vertex_key="PrimaryVertices");
-      declareProperty("PrimaryVertexSelection", m_vertex_scheme="SumPt2");
+      declareProperty("PrimaryVertexSelection", m_vertex_scheme="sumPt2");
       declareProperty("TrackSelectionTool", m_trkSelTool, "Track selection tool" );
     }
   
@@ -59,6 +59,7 @@ namespace DerivationFramework
     StatusCode DerivationFramework::HITrackParticleThinningTool::finalize()
     {
         ATH_CHECK(m_trkSelTool->finalize());
+        ATH_MSG_INFO("Processed " << m_ntot << " tracks, " << m_npass << " were retained.");
         return StatusCode::SUCCESS;
     }
 
@@ -70,8 +71,6 @@ namespace DerivationFramework
 
     // Get the track container
     SG::ThinningHandle<xAOD::TrackParticleContainer> tracks (m_inDetSGKey, ctx);
-   
-    m_ntot+=tracks->size();	
 
     //Define a primary vertex 
     const xAOD::Vertex *primary_vertex(nullptr);
@@ -82,6 +81,10 @@ namespace DerivationFramework
         ATH_MSG_ERROR("Failed to retrieve VertexContainer with key: " << m_vertex_key);
         return StatusCode::FAILURE;
     }
+
+    // Check event contains tracks, if none then thinning complete!
+    unsigned int nTracks = tracks->size();
+    if (nTracks==0) return StatusCode::SUCCESS;
 
     // Variables to track the best vertex based on the scheme
     float ptmax = 0.;
@@ -120,19 +123,25 @@ namespace DerivationFramework
     }
 
     // Loop over tracks, see if they pass, set mask
-    std::vector<bool> mask;
-    mask.reserve(tracks->size());
+    std::vector<bool> mask(nTracks,false); // reject all tracks by default
+    m_ntot += nTracks;
 
     for (auto tp : *tracks) {
         if (tp) {
             const xAOD::Vertex* vert_trk = primary_vertex;
 
             asg::AcceptData acceptData = m_trkSelTool->accept(*tp, vert_trk);
-            mask.push_back(static_cast<bool>(acceptData));
-        } else { 
-            mask.push_back(false);
+            int index = tp->index();
+            mask[index] = static_cast<bool>(acceptData);
         }
     }
+
+    // Count up mask contents
+    unsigned int n_pass=0;
+    for (unsigned int i=0; i<nTracks; ++i) {
+        if (mask[i]) ++n_pass;
+    }
+    m_npass += n_pass;
     
     tracks.keep (mask);
 
