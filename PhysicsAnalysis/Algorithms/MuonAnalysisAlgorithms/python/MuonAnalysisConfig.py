@@ -12,11 +12,11 @@ from Campaigns.Utils import Campaign
 from AthenaCommon.Logging import logging
 
 
-class MuonCalibrationConfig (ConfigBlock):
+class MuonMomentumCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the muon four-momentum correction"""
 
     def __init__ (self) :
-        super (MuonCalibrationConfig, self).__init__ ()
+        super (MuonMomentumCalibrationConfig, self).__init__ ()
         self.setBlockName('Muons')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input muon container. If left empty, automatically defaults "
@@ -41,14 +41,8 @@ class MuonCalibrationConfig (ConfigBlock):
         self.addOption ('calibMode', 'correctData_CB', type=str, info='calibration mode of the `MuonCalibTool` needed to turn on the sagitta bias corrections and to select the muon track calibration type (CB or ID+MS), see https://atlas-mcp.docs.cern.ch/guidelines/muonmomentumcorrections/index.html#cpmuoncalibtool-tool.')
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('writeColumnarToolVariables', False, type=bool,
             info="whether to add variables needed for running the columnar muon tool(s) on the output n-tuple (EXPERIMENTAL).",
-            expertMode=True)
-        self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
-            "associated to muons. The tool does not have Run 3 recommendations yet.",
             expertMode=True)
         self.addOption ('addGlobalFELinksDep', False, type=bool,
             info="whether to add dependencies for the global FE links (needed for PHYSLITE production)",
@@ -140,6 +134,50 @@ class MuonCalibrationConfig (ConfigBlock):
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                 preselection = True)
 
+        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
+        alg.particles = config.readName (self.containerName)
+
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
+        # decorate truth information on the reconstructed object:
+        if self.decorateTruth and config.dataType() is not DataType.Data:
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+        
+        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
+
+
+class MuonIPCalibrationConfig (ConfigBlock) :
+    """the ConfigBlock for the muon impact parameter correction"""
+
+    def __init__ (self) :
+        super (MuonIPCalibrationConfig, self).__init__ ()
+        self.setBlockName('MuonIPCalibration')
+        self.addDependency('Muons', required=True)
+        self.addDependency('MuonWorkingPointSelection', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', "", type=str,
+            info="a postfix to apply to decorations and algorithm names. "
+            "Typically not needed here since the calibration is common to "
+            "all muons.")
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for tracks "
+            "associated to muons. The tool does not have Run 3 recommendations yet.",
+            expertMode=True)
+
+    def instanceName (self) :
+        return self.containerName + self.postfix
+
+    def makeAlgs (self, config) :
+
         # Additional decorations
         if self.writeTrackD0Z0:
             alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
@@ -150,28 +188,12 @@ class MuonCalibrationConfig (ConfigBlock):
                 InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
-        alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
-        alg.particles = config.readName (self.containerName)
-
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
-
-        if self.writeTrackD0Z0:
             config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
             config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
             config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
             config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
             config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
 
-        # decorate truth information on the reconstructed object:
-        if self.decorateTruth and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
-        
-        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
 
 class MuonWorkingPointSelectionConfig (ConfigBlock) :
     """the ConfigBlock for the muon working point selection"""
@@ -672,6 +694,12 @@ class MuonContainerMergingConfig (ConfigBlock) :
         alg.CreateViewCollection = self.createViewCollection
 
 @groupBlocks
+def MuonCalibration(seq):
+    seq.append(MuonMomentumCalibrationConfig())
+    seq.append(MuonIPCalibrationConfig())
+
+@groupBlocks
 def MuonWorkingPoint(seq):
     seq.append(MuonWorkingPointSelectionConfig())
     seq.append(MuonWorkingPointEfficiencyConfig())
+
