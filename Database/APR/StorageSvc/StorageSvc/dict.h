@@ -23,3 +23,4 @@
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 
+#include "StorageSvc/SimpleUtilityBase.h"

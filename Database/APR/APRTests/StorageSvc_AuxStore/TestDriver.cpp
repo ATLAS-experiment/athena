@@ -21,7 +21,7 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/pool.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include <stdexcept>

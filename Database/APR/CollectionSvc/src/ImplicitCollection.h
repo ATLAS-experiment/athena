@@ -8,7 +8,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"

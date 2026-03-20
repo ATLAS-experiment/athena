@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -9,9 +9,9 @@
 #ifndef POOL_DBPRINT_H
 #define POOL_DBPRINT_H 1
 
-#include <atomic>
 #include "AthenaBaseComps/AthMessaging.h"
-#include "SystemTools.h"
+
+#include <atomic>
 
 namespace pool {
 
@@ -26,7 +26,13 @@ namespace pool {
    public:
      DbPrint( const std::string& name );
 
-     static MsgStream& endmsg( MsgStream& s ) { return ::endmsg(s); }
+     // return the configured output level
+     static MSG::Level getOutputLvl();
+
+     // read the output level from environment
+     static MSG::Level getOutputLvlFromEnv();
+
+     static MsgStream& endmsg( MsgStream& s )  { return ::endmsg(s); }
    };
 
 

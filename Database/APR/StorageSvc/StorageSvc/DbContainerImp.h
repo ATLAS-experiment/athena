@@ -15,7 +15,7 @@
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
 #include "StorageSvc/IDbContainer.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
 // STL include files

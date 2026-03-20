@@ -27,7 +27,7 @@ namespace pool    {
   // as from IFileCatalog
   typedef std::string FileID;
 
-  /** @class FileDescriptor FileDescriptor.h POOLCore/FileDescriptor.h
+  /** @class FileDescriptor FileDescriptor.h StorageSvc/FileDescriptor.h
     *
     * Description:
     *
