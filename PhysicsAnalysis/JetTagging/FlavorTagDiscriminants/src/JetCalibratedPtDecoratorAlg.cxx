@@ -14,6 +14,7 @@ namespace FlavorTagDiscriminants {
     const std::string& name, ISvcLocator* loc)
     : AthReentrantAlgorithm(name, loc)
   {
+    declareProperty("JetCalibrationTool", m_calibTool, "Jet calibration tool");
   }
 
   StatusCode JetCalibratedPtDecoratorAlg::initialize() {

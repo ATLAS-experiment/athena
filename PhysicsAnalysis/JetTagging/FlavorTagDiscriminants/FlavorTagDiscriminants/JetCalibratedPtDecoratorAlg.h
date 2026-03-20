@@ -23,9 +23,7 @@ namespace FlavorTagDiscriminants {
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
-    ToolHandle<IJetModifier> m_calibTool {
-      this, "JetCalibrationTool", "",
-        "Jet calibration tool"};
+    ToolHandle<IJetModifier> m_calibTool;
 
     SG::ReadHandleKey<xAOD::JetContainer> m_jetKey {
       this, "JetContainer", "AntiKt4EMPFlowJets",

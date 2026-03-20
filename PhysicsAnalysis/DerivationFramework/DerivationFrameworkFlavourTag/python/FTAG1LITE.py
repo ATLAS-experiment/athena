@@ -244,11 +244,11 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         acc.merge(FlowEnergyDecoratorCfg())
 
     # ── Jet calibrated pT decorator ──
-    # Apply TDD-compatible calibration (JetArea_Residual_EtaJES_GSC) and
-    # decorate each jet with pt_calibrated. Used for the thinning selection
-    # to match TDD's 20 GeV calibrated pT cut exactly.
+    # Register a public JetCalibrationTool with the same name as PHYSLITE's.
+    # Both algorithms use PublicToolHandle, so Gaudi shares a single instance.
+    # In co-production the CA deduplicates; standalone just has one copy.
     calibTool = CompFactory.JetCalibrationTool(
-        "JetCalibTool_FTAG1LITE",
+        "JetCalibTool_AntiKt4EMPFlow",
         JetCollection="AntiKt4EMPFlow",
         ConfigFile="AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_"
                    "CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config",
@@ -256,10 +256,11 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         CalibArea="00-04-83",
         IsData=False,
     )
+    acc.addPublicTool(calibTool)
     acc.addEventAlgo(
         CompFactory.FlavorTagDiscriminants.JetCalibratedPtDecoratorAlg(
             "JetCalibratedPtDecoratorAlg",
-            JetCalibrationTool=calibTool,
+            JetCalibrationTool="JetCalibrationTool/JetCalibTool_AntiKt4EMPFlow",
             JetContainer=JETS,
             ptCalibratedKey=f"{JETS}.pt_calibrated",
         )
