@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DataModelTestDataRead )
@@ -8,7 +8,7 @@ atlas_add_library( DataModelTestDataReadLib
                    src/*.cxx
                    PUBLIC_HEADERS DataModelTestDataRead
                    LINK_LIBRARIES AthContainers AthLinks AthenaKernel DataModelAthenaPoolLib DataModelTestDataCommonLib TrigNavigationLib xAODCore TestTools
-                   PRIVATE_LINK_LIBRARIES AthContainersInterfaces AthenaBaseComps CxxUtils GaudiKernel StoreGateLib TrigSteeringEvent )
+                   PRIVATE_LINK_LIBRARIES AthContainersInterfaces AthenaBaseComps CxxUtils GaudiKernel StoreGateLib TrigSteeringEvent TrigStorageDefinitions )
 
 atlas_add_component( DataModelTestDataRead
                      src/components/*.cxx
