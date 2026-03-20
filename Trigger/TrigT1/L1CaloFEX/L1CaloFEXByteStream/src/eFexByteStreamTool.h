@@ -95,10 +95,10 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
             this, "eTowerContainerWriteKey", "", "Write handle key to ETower container for conversion from ByteStream"};
 
     // Only read keys should be set to non-empty string in python configuration if the tool is in xAOD->BS mode of operation
-    SG::ReadHandleKey<xAOD::eFexEMRoIContainer> m_eEMReadKey {
-            this, "eEMContainerReadKey", "", "Read handle key to eEM (x)TOB container for conversion to ByteStream"};
-    SG::ReadHandleKey<xAOD::eFexTauRoIContainer> m_eTAUReadKey {
-            this, "eTAUContainerReadKey", "", "Read handle key to eTAU (x)TOB container for conversion to ByteStream"};
+    SG::ReadHandleKeyArray<xAOD::eFexEMRoIContainer> m_eEMReadKeys {
+            this, "eEMContainerReadKeys", {}, "Read handle keys to eEM (x)TOB containers for conversion to ByteStream"};
+    SG::ReadHandleKeyArray<xAOD::eFexTauRoIContainer> m_eTAUReadKeys {
+            this, "eTAUContainerReadKeys", {}, "Read handle keys to eTAU (x)TOB containers for conversion to ByteStream"};
 
 
 

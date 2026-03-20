@@ -13,14 +13,19 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
   if writeBS:
     # write BS == read xAOD
     # Note: this is currently unsupported!!!
-    tool.eEMContainerReadKey   = "L1_eEMxRoI"  if xTOBs else "L1_eEMRoI"
-    tool.eTAUContainerReadKey  = "L1_eTauxRoI" if xTOBs else "L1_eTauRoI"
+    if TOBs:
+      tool.eEMContainerReadKeys  += ["L1_eEMRoI"]
+      tool.eTAUContainerReadKeys  += ["L1_eTauRoI"]
+    if xTOBs:
+      tool.eEMContainerReadKeys += ["L1_eEMxRoI"]
+      tool.eTAUContainerReadKeys += ["L1_eTauxRoI"]
     tool.eEMContainerWriteKey  = ""
     tool.eTAUContainerWriteKey = ""
+    efex_roi_moduleids = [0x1000,0x1100]
+    tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
+
   else:
     # read BS == write xAOD
-    tool.eEMContainerReadKey   = ""
-    tool.eTAUContainerReadKey  = ""
     if TOBs or xTOBs or multiSlice:
       efex_roi_moduleids = [0x1000,0x1100]
       tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
@@ -42,42 +47,42 @@ def eFexByteStreamToolCfg(flags, name, *, writeBS=False, TOBs=True, xTOBs=False,
       tool.ROBIDs += efex_raw_ids
       tool.eTowerContainerWriteKey   = "L1_eFexDataTowers"
 
-  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
-    if flags.Trigger.doHLT:
-      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
-      topDir = "EXPERT"
-      monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
-                              title='Decoder Errors;Title;Location',
+    if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+      if flags.Trigger.doHLT:
+        from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+        monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+        topDir = "EXPERT"
+        monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                                title='Decoder Errors;Title;Location',
+                                xbins=1,xmin=0,xmax=1,
+                                ybins=1,ymin=0,ymax=1,
+                                opt=['kCanRebin'],merge="merge")
+        tool.MonTool = monTool
+      else:
+        # if used in offline reconstruction respect DQ convention (ATR-26371)
+        # use L1Calo's special MonitoringCfgHelper
+        from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
+        helper = L1CaloMonitorCfgHelper(flags,None,name)
+
+        # could consider getting rid of this first histogram, since all the info should be accessible in the second
+        # will make decision after gaining experience @ P1
+        helper.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;h_efex_errors', type='TH2I',
+                              path="Developer/ByteStreamDecoders",
+                              fillGroup = f'{name}MonTool',
+                              title='eFEX Decoder Errors;Title;Location',
                               xbins=1,xmin=0,xmax=1,
                               ybins=1,ymin=0,ymax=1,
-                              opt=['kCanRebin'],merge="merge")
-      tool.MonTool = monTool
-    else:
-      # if used in offline reconstruction respect DQ convention (ATR-26371)
-      # use L1Calo's special MonitoringCfgHelper
-      from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
-      helper = L1CaloMonitorCfgHelper(flags,None,name)
-
-      # could consider getting rid of this first histogram, since all the info should be accessible in the second
-      # will make decision after gaining experience @ P1
-      helper.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;h_efex_errors', type='TH2I',
-                             path="Developer/ByteStreamDecoders",
-                             fillGroup = f'{name}MonTool',
-                             title='eFEX Decoder Errors;Title;Location',
-                             xbins=1,xmin=0,xmax=1,
-                             ybins=1,ymin=0,ymax=1,
-                             opt=['kCanRebin','kAlwaysCreate'],merge="merge")
-      helper.defineHistogram('lbn,decoderError;h_efex_errors_vs_lbn', type='TH2I',
-                             path="Expert/ByteStreamDecoders",
-                             hanConfig={"algorithm":"Histogram_Empty","description":"Should be empty. Please report any errors to eFEX software experts."},
-                             fillGroup = f'{name}MonTool',
-                             title='eFEX Decoder Errors;LB;Error',
-                             xbins=1,xmin=0,xmax=1,
-                             ybins=1,ymin=0,ymax=1,
-                             opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge="merge")
-      tool.MonTool = helper.fillGroups[f'{name}MonTool']
-      acc.merge(helper.result())
+                              opt=['kCanRebin','kAlwaysCreate'],merge="merge")
+        helper.defineHistogram('lbn,decoderError;h_efex_errors_vs_lbn', type='TH2I',
+                              path="Expert/ByteStreamDecoders",
+                              hanConfig={"algorithm":"Histogram_Empty","description":"Should be empty. Please report any errors to eFEX software experts."},
+                              fillGroup = f'{name}MonTool',
+                              title='eFEX Decoder Errors;LB;Error',
+                              xbins=1,xmin=0,xmax=1,
+                              ybins=1,ymin=0,ymax=1,
+                              opt=['kAddBinsDynamically','kCanRebin','kAlwaysCreate'],merge="merge")
+        tool.MonTool = helper.fillGroups[f'{name}MonTool']
+        acc.merge(helper.result())
 
 
   acc.setPrivateTools(tool)

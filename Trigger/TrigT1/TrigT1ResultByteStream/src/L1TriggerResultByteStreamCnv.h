@@ -61,6 +61,9 @@ private:
   ToolHandle<IL1TriggerByteStreamTool> m_muonEncoderToolDaq{"MuonRoIByteStreamTool/L1MuonBSEncoderToolDAQ"};
   /// Encoder tool for CTP result
   ToolHandle<IL1TriggerByteStreamTool> m_ctpResultEncoderTool{"CTPResultByteStreamTool/CTPResultBSEncoderTool"};
+  /// eFEX tool
+  ToolHandle<IL1TriggerByteStreamTool> m_efexEncoderTool{"eFexByteStreamTool/eFexBSEncoderTool"};
+  
   // Placeholder for other L1 xAOD outputs:
   // - L1Topo result
   // - L1Calo (Run3) RoIs
