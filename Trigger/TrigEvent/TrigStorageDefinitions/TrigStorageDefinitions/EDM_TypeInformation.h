@@ -10,12 +10,11 @@
 #include "AthLinks/DataLink.h"
 #include "TrigStorageDefinitions/TypeInformation.h"
 
-#define HLT_BEGIN_TYPE_REGISTRATION typedef HLT::TypeInformation::newlist::
+#define HLT_BEGIN_TYPE_REGISTRATION typedef HLT::TypeInformation::List<>
 
 /// Helper to handle variable number of arguments
 #define _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER, ...) \
-  addWithChecking<HLT::TypeInformation::type_info<OBJECT, HLT::TypeInformation::list<FEATURE, \
-    HLT::TypeInformation::nil>, CONTAINER __VA_OPT__(, ) __VA_ARGS__>> ::go::
+  ::merge<HLT::TypeInformation::TypeInfo<OBJECT, HLT::TypeInformation::List<FEATURE>, CONTAINER __VA_OPT__(, ) __VA_ARGS__>>
 
 /**
  * Register an HLT type with optional Aux container.
@@ -25,7 +24,7 @@
 #define HLT_REGISTER_TYPE(OBJECT, FEATURE, CONTAINER, ...) \
   _HLT_REGISTER_INTERNAL(OBJECT, FEATURE, CONTAINER __VA_OPT__(, ) __VA_ARGS__)
 
-#define HLT_END_TYPE_REGISTRATION(name) done TypeInfo_##name;
+#define HLT_END_TYPE_REGISTRATION(name) TypeInfo_##name;
 
 
 /**
