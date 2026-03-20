@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
@@ -18,8 +18,7 @@ def FPGATrackSimMergeOutputsAlgCfg(flags,**kwargs):
     MergeOutputsAlg = CompFactory.FPGATrackSimMergeOutputsAlg(name = 'FPGAMergeOutputsAlg', **kwargs,
                                                             OverlapRemoval = acc.getPrimaryAndMerge(FPGATrackSimOverlapRemovalToolCfg(flags)))
     MergeOutputsAlg.OverlapRemoval.MinChi2 = 1e15 ## disable here
-    MergeOutputsAlg.SkipEvents = flags.Exec.SkipEvents
-    MergeOutputsAlg.SortTracks = flags.Trigger.FPGATrackSim.SortTracks
+    MergeOutputsAlg.SkipWritingEvents = flags.Exec.SkipEvents
     acc.addEventAlgo(MergeOutputsAlg)
 
     return acc

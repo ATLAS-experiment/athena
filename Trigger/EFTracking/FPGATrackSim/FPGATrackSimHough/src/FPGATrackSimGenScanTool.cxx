@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 /**
  * @file FPGATrackSimGenScanTool.cxx
@@ -193,26 +193,7 @@ StatusCode FPGATrackSimGenScanTool::getRoads(const std::vector<std::shared_ptr<c
   // copy roads to output vector
   roads.reserve(m_roads.size());
 
-  if (m_keepHitsStrategy > 0) {
-    for (auto & r : m_roads) {
-      const std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>>& theseHits = r.getAllHitPtrs();
-      layer_bitmask_t hitmask = r.getHitLayers();
-      std::vector<unsigned> toUse = PickHitsToUse(hitmask);
-
-      std::vector<std::vector<std::shared_ptr<const FPGATrackSimHit>>> vec(5); // even if not all layers have hits, they need to be in the vector as empty vectors
-      for (size_t ihit = 0; ihit < toUse.size(); ++ihit) {
-        unsigned int layer = toUse[ihit];
-        if (layer >= theseHits.size() || theseHits[layer].empty()) {
-          ATH_MSG_ERROR("Hit index out of range in keepHitsStrategy: layer=" << layer << ", hits.size()=" << theseHits.size());
-          return StatusCode::FAILURE;
-        }
-        vec[ihit].push_back(theseHits[layer][0]);
-      }
-      r.setHits(std::move(vec));
-    }
-  }
-
-  roads = std::move(m_roads);
+  for (auto & r : m_roads) roads.push_back(std::move(r));
   ATH_MSG_DEBUG("Roads = " << roads.size());
 
   // clear previous event
@@ -910,105 +891,9 @@ bool FPGATrackSimGenScanTool::fitRoad(std::vector<const StoredHit *> const &hits
   // and the summed chi2, which is assuming (right now) an even weighting between the two components.
   // assume only options are 4 or 5 hits for now
   chi2 = (hits.size() == 5) ?
-	  m_etaWeight_5hits * eta_chi2 * eta_chi2 + m_phiWeight_5hits * phi_chi2 * phi_chi2 :
-	  m_etaWeight_4hits * eta_chi2 * eta_chi2 + m_phiWeight_4hits * phi_chi2 * phi_chi2;
-	  
+    m_etaWeight_5hits * eta_chi2  + m_phiWeight_5hits * phi_chi2  :
+    m_etaWeight_4hits * eta_chi2  + m_phiWeight_4hits * phi_chi2 ;	  
 
   return inBin;
 }
 
-std::vector<unsigned> FPGATrackSimGenScanTool::PickHitsToUse(layer_bitmask_t hitmask) const
-{
-  std::vector<unsigned> toUse;
-  switch (m_keepHitsStrategy) {
-    case 1: // try and pick hits furthest apart, use only 3
-      {
-        if (hitmask == 0x1f) { // miss no hits
-          toUse = {0,2,4};
-        }
-        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
-          toUse = {1,3,4};
-        }
-        else if (hitmask == 0x1d) { // miss layer 1
-          toUse = {0,2,4};
-        }
-        else if (hitmask == 0x1b) { // miss layer 2
-          toUse = {0,3,4};
-        }
-        else if (hitmask == 0x17) { // miss layer 3
-          toUse = {0,2,4};
-        }
-        else if (hitmask == 0x0f) { // miss layer 4
-          toUse = {0,2,3};
-        }
-      }
-      break;
-    case 2: // pick inner hits, use only 3
-      {
-        if (hitmask == 0x1f) { // miss no hits
-          toUse = {0,1,2};
-        }
-        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
-          toUse = {1,2,3};
-        }
-        else if (hitmask == 0x1d) { // miss layer 1
-          toUse = {0,2,3};
-        }
-        else if (hitmask == 0x1b) { // miss layer 2
-          toUse = {0,1,3};
-        }
-        else if (hitmask == 0x17) { // miss layer 3
-          toUse = {0,1,2};
-        }
-        else if (hitmask == 0x0f) { // miss layer 4
-          toUse = {0,1,2};
-        }
-      }
-      break;
-    case 3: // pick outer hits, use only 3
-      {
-        if (hitmask == 0x1f) { // miss no hits
-          toUse = {2,3,4};
-        }
-        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
-          toUse = {2,3,4};
-        }
-        else if (hitmask == 0x1d) { // miss layer 1
-          toUse = {2,3,4};
-        }
-        else if (hitmask == 0x1b) { // miss layer 2
-          toUse = {1,3,4};
-        }
-        else if (hitmask == 0x17) { // miss layer 3
-          toUse = {1,2,4};
-        }
-        else if (hitmask == 0x0f) { // miss layer 4
-          toUse = {1,2,3};
-        }
-      }
-      break;
-    case 4: // keep 4 hits, choose middle one to drop if necessary
-      {
-        if (hitmask == 0x1f) { // miss no hits
-          toUse = {0,1,2,3};
-        }
-        else if (hitmask == 0x1e) { // miss inner layer, ie layer 0
-          toUse = {1,2,3,4};
-        }
-        else if (hitmask == 0x1d) { // miss layer 1
-          toUse = {0,2,3,4};
-        }
-        else if (hitmask == 0x1b) { // miss layer 2
-          toUse = {0,1,3,4};
-        }
-        else if (hitmask == 0x17) { // miss layer 3
-          toUse = {0,1,2,4};
-        }
-        else if (hitmask == 0x0f) { // miss layer 4
-          toUse = {0,1,2,3};
-        }
-      }
-      break;
-  }
-  return toUse;
-}

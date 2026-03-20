@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #ifndef FPGATrackSim_LOGICALHITSPROCESSALG_H
 #define FPGATrackSim_LOGICALHITSPROCESSALG_H
@@ -141,6 +141,10 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         Gaudi::Property<bool> m_doLRTHitFiltering {this, "LRTHitFiltering", false, "flag to enable hit/cluster filtering for LRT"};
         Gaudi::Property<bool> m_writeOutputData  {this, "writeOutputData", true,"write the output TTree"};
         Gaudi::Property<float> m_trackScoreCut {this, "TrackScoreCut", 25.0, "Minimum track score (e.g. chi2 or NN)." };
+        Gaudi::Property<std::vector<float>> m_track_Chi2PhiCut {this, "Chi2PhiCut", {-1.0,-1.0}, "Minimum Phi specific Chi2 cuts for vector starting with zero missed hits and counting up, negative is not active" };
+        Gaudi::Property<std::vector<float>> m_track_Chi2EtaCut {this, "Chi2EtaCut", {-1.0,-1.0}, "Minimum Eta specific Chi2 cuts for vector starting with zero missed hits and counting up, negative is not active" };
+        Gaudi::Property<int> m_keepHitsStrategy {this, "keepHitsStrategy", -1, "If this is less than 0, do nothing. If 1, pick 3 hits furthest apart. If 2, pick 3 inner hits. If 3, pick 3 outer hits. If 4, drop only middle hit for 5/5 otherwise keep all 4 hits for 4/5"};
+
         Gaudi::Property<bool> m_writeOutNonSPStripHits {this, "writeOutNonSPStripHits", true, "Write tracks to RootOutput if they have strip hits which are not SPs"};
         Gaudi::Property <int> m_NumOfHitPerGrouping { this, "NumOfHitPerGrouping", 5, "Number of minimum overlapping hits for a track candidate to be removed in the HoughRootOutputTool"};
         Gaudi::Property<bool> m_passLowestChi2TrackOnly {this,"passLowestChi2TrackOnly", false, "case when passing only lowest chi2 track per road"};
@@ -193,6 +197,10 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
 
         void printHitSubregions(std::vector<FPGATrackSimHit> const & hits);
 
+        bool passesChi2Cut(const FPGATrackSimTrack& track);
+        std::vector<unsigned> PickHitsToUse(layer_bitmask_t) const;
+        void MakeSeedTracks(std::vector<FPGATrackSimTrack>& tracks);
+
 
         // Read hits from data prep algorithm. TODO: regionalize.
         SG::ReadHandleKey<FPGATrackSimHitCollection> m_FPGAHitKey {this, "FPGATrackSimHitKey","FPGAHits", "FPGATrackSim hits key"};
@@ -210,6 +218,8 @@ class FPGATrackSimLogicalHitsProcessAlg : public AthAlgorithm
         SG::ReadHandleKey<FPGATrackSimTruthTrackCollection> m_FPGATruthTrackKey {this, "FPGATrackSimTruthTrackKey", "FPGATruthTracks", "FPGATrackSim truth tracks"};
         SG::ReadHandleKey<FPGATrackSimOfflineTrackCollection> m_FPGAOfflineTrackKey {this, "FPGATrackSimOfflineTrackKey", "FPGAOfflineTracks", "FPGATrackSim offline tracks"};
         SG::ReadHandleKey<FPGATrackSimEventInfo> m_FPGAEventInfoKey {this, "FPGATrackSimEventInfoKey", "FPGAEventInfo", "FPGATrackSim event info"};
+
+        
 };
 
 

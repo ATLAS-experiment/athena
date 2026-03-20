@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 '''
 @author Riley Xu - rixu@cern.ch
 @date Feb 6th 2020
@@ -274,11 +274,11 @@ def FPGATrackSimTrackMonCfg(name,flags,variety='road'):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    nbin=1000
+    nbin=200000
     low=-0.5
-    high=99999.5
+    high=1999.5
     if flags.Trigger.FPGATrackSim.singleTrackSample:
-        nbin=100
+        nbin=1000
         high=99.5
     
     phis=getPhiRange(flags)
@@ -300,11 +300,23 @@ def FPGATrackSimTrackMonCfg(name,flags,variety='road'):
         
     ## hisotgram for tracks
     elif variety=='track':
+        # number of tracks
         monTool.defineHistogram('nTracks', path='EXPERT', type='TH1I', title='nTracks', xbins=nbin, xmin=low, xmax=high)
         monTool.defineHistogram('chi2_all', path='EXPERT', type='TH1F', title='chi2_all', xbins=nbin, xmin=low, xmax=high)
         monTool.defineHistogram('best_chi2', path='EXPERT', type='TH1F', title='best_chi2', xbins=nbin, xmin=low, xmax=high)
     
-    ## efficiency histograms  ## cannot add x-y labels
+    # number of hits
+    monTool.defineHistogram('nHits', path='EXPERT', type='TH1I', title='nHits', xbins=20, xmin=-0.5, xmax = 19.5)
+
+    # all tracks (all hits with any number of hits)
+    nbinchi2 = 10000
+    xmaxchi2 = {'chi2':10.0, 'chi2Eta': 1.0, 'chi2Phi' : 0.1}
+    for var in ['chi2','chi2Eta', 'chi2Phi']:
+        for nhit in ['','_4','_5']:
+            for sel in ['','_best']:
+                monTool.defineHistogram(f'{var}{sel}{nhit}', path='EXPERT', type='TH1F', title=f'{var}{sel}{nhit}', xbins=nbinchi2, xmin=0.0, xmax=xmaxchi2[var])
+   
+    ## efficiency histograms
     monTool.defineHistogram(f'eff_{variety},pT_zoom', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs pT_zoom', xbins=10, xmin=0, xmax=10)
     monTool.defineHistogram(f'eff_{variety},pT', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs pT', xbins=20, xmin=0, xmax=100)
     monTool.defineHistogram(f'eff_{variety},eta', path='EXPERT', type='TEfficiency', title=f'eff_{variety} vs eta', xbins=20, xmin=etamin, xmax=etamax)
@@ -319,7 +331,6 @@ def FPGATrackSimTrackMonCfg(name,flags,variety='road'):
     trackmon.MonTool = monTool
 
     ## set as a private tool
-    
     result.setPrivateTools(trackmon)
 
     return result

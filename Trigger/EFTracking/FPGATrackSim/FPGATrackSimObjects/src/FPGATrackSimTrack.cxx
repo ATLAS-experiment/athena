@@ -311,3 +311,11 @@ void FPGATrackSimTrack::setPassedOR(unsigned int code)
 }
 
 
+layer_bitmask_t FPGATrackSimTrack::getHitMask() const {
+  unsigned retv =0;
+  for (unsigned lyr = 0; lyr < m_hit_ptrs.size(); lyr++)
+  {
+    if (m_hit_ptrs[lyr] && m_hit_ptrs[lyr]->isReal()) retv|=(1<< lyr);
+  }
+  return retv;
+}
