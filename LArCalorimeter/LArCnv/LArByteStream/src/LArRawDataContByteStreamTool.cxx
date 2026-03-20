@@ -413,36 +413,36 @@ LArRawDataContByteStreamTool::makeRodBlockStructure() const
 
   case 2:  //Transparent mode, DSP just copies FEB-data                                            
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockTransparent (#2)" );
-    return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >();
+    return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
     break;
 
   case 7: //Calibration mode
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockCalibration (#7)" );
-    return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >();
+    return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >(this->msgSvc().get());
     break;
 
   case 4: //Physics assembly mode
     if ( m_RodBlockVersion == 10 ){
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
-      return std::make_unique<LArRodBlockPhysicsV5>();
+      return std::make_unique<LArRodBlockPhysicsV5>(this->msgSvc().get());
     }
     else if ( m_RodBlockVersion == 12 ){
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#6)" );
-      return std::make_unique<LArRodBlockPhysicsV6>();
+      return std::make_unique<LArRodBlockPhysicsV6>(this->msgSvc().get());
     }
     else {
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#4)" );
-      return std::make_unique<LArRodBlockPhysicsV0>();
+      return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
     }
     break;
 
   case 5: //Physics assembly mode
     ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
-    return std::make_unique<LArRodBlockPhysicsV3>();
+    return std::make_unique<LArRodBlockPhysicsV3>(this->msgSvc().get());
 
   default:
     ATH_MSG_WARNING ( "DSP runmode " << m_DSPRunMode << " is unknown. Using physics assembly mode (#4) by default" );
-    return std::make_unique<LArRodBlockPhysicsV0>();
+    return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
   }
 }
 

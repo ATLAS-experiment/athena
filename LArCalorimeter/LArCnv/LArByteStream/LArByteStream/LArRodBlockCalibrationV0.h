@@ -53,7 +53,7 @@ class LArRodBlockCalibrationV0 : public LArRodBlockTransparentV0<DSPHEADER>
 {
 public:
   // constructor
-  LArRodBlockCalibrationV0() : LArRodBlockTransparentV0<DSPHEADER>()
+  LArRodBlockCalibrationV0(IMessageSvc* msgSvc) : LArRodBlockTransparentV0<DSPHEADER>(msgSvc)
     {};
  
  public:

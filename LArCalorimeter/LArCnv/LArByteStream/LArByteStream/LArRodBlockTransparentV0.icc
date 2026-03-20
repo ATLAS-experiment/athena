@@ -18,7 +18,8 @@
 #endif
 
 template<class DSPHEADER>
-LArRodBlockTransparentV0<DSPHEADER>::LArRodBlockTransparentV0() : LArRodBlockStructure()
+LArRodBlockTransparentV0<DSPHEADER>::LArRodBlockTransparentV0(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 { m_iHeadBlockSize=DSPHEADER::endtag/2; // The implicit cast rounds down to the right size 
   //Fill array of offset to enable for-loops
   m_BlkOffset=DSPHEADER::RawDataBlkOffset; //RawDataOffset

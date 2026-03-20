@@ -116,11 +116,11 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
       if (rodBlockType==4) { //Physics mode
 	switch(rodMinorVersion) {
 	case 12: //Physics mode v6 09.03.2011 for LHC
-	  rodBlock.reset(new LArRodBlockPhysicsV6);
+	  rodBlock.reset(new LArRodBlockPhysicsV6 (this->msgSvc().get()));
 	  break;
 	case 11: //Physics mode v5 16.06.2008 for LHC 
 	case 10: //Physics mode v5 16.06.2008 for LHC 
-	  rodBlock.reset(new LArRodBlockPhysicsV5);
+	  rodBlock.reset(new LArRodBlockPhysicsV5 (this->msgSvc().get()));
 	  break;
 	default: // Unknown version of rod block type 4 (Physics mode)
 	  if (m_failOnCorruption) {
@@ -138,10 +138,10 @@ StatusCode LArRawDataReadingAlg::execute(const EventContext& ctx) const {
       else if (rodBlockType==2) { //Transparent mode
 	switch(rodMinorVersion) {
            case 4:  
-	     rodBlock.reset(new LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0>);
+	     rodBlock.reset(new LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> (this->msgSvc().get()));
              break;
            case 12:
-             rodBlock.reset(new LArRodBlockCalibrationV3);
+             rodBlock.reset(new LArRodBlockCalibrationV3 (this->msgSvc().get()));
              break;
            default:  
 	     ATH_MSG_WARNING("Found unsupported ROD Block version " << rodMinorVersion 

@@ -27,6 +27,7 @@
    */
                   
 #include "ByteStreamData/RawEvent.h"
+#include "GaudiKernel/MsgStream.h"
 #include <stdint.h>
 #include <iostream>
 #include <vector>
@@ -40,6 +41,7 @@ class LArDigit;
 class LArAccumulatedDigit;
 class LArCalibDigit;
 class LArAccumulatedCalibDigit;
+class IMessageSvc;
 
 class LArRodBlockStructure
 {
@@ -57,7 +59,8 @@ protected:
 
 public : 
   // constructor
-  LArRodBlockStructure();
+  LArRodBlockStructure(IMessageSvc* msgSvc,
+                       const std::string& blockType);
   virtual ~LArRodBlockStructure();
 
   // ----------------- Encoding methods -----------------
@@ -237,6 +240,8 @@ public :
   int32_t m_ROB_to_decode;
   const uint32_t* m_virtualROBPointer;
   const uint32_t* m_virtualROBPointerLocal;
+
+  MsgStream m_logstr;
 };
 
 // Implementation of inline-functions:

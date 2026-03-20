@@ -70,10 +70,10 @@ public:
     endtag          //This tag needs to be an odd number, see *) for constructor
   };
   // constructor
-  LArRodBlockCalibrationV1();
+  LArRodBlockCalibrationV1(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockCalibrationV1");}
+  static std::string BlockType() { return std::string("RodBlockCalibrationV1");}
  public:
   //void dumpFragment() { dumpFragment(m_FebBlock); }
   // ----------------- Encoding methods -----------------

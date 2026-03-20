@@ -15,7 +15,8 @@
 
 const uint32_t LArRodBlockStructure::m_RawToOfflineGainMap[4]={0, 2, 1,0};
 const uint32_t LArRodBlockStructure::m_OfflineToRawGainMap[3]={3,2,1};
-LArRodBlockStructure::LArRodBlockStructure()
+LArRodBlockStructure::LArRodBlockStructure(IMessageSvc* msgSvc,
+                                           const std::string& blockType)
   : m_Ex(0),
     m_Ey(0),
     m_Ez(0),
@@ -23,7 +24,8 @@ LArRodBlockStructure::LArRodBlockStructure()
     m_iHeadBlockSize(0),
     m_error_next_feb(false),
     m_virtualROBJump(0),
-    m_ROB_to_decode(0)
+    m_ROB_to_decode(0),
+    m_logstr(msgSvc, blockType)
 {
   
   m_channelsPerFEB=128;

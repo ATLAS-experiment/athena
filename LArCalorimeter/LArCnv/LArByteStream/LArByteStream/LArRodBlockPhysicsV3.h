@@ -49,7 +49,7 @@ class LArRodBlockPhysicsV3 : public LArRodBlockStructure
 {
 public:
   // constructor
-  LArRodBlockPhysicsV3();
+  LArRodBlockPhysicsV3(IMessageSvc* msgSvc);
 
 protected:
   // ----------------- Header words indexes ----------------- Every word is a 16 bits word in the header
@@ -196,9 +196,6 @@ protected:
   //Private functions:
   inline int FebToRodChannel(int ch) const;
   void setNextEnergy(const uint16_t energy,const int16_t time, const int16_t quality, const uint32_t gain);
-
-  MsgStream m_logstr;
-
 };
 
 inline int LArRodBlockPhysicsV3::FebToRodChannel(int ch) const

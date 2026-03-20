@@ -74,10 +74,10 @@ public:
     feb_ssw7
   };
   // constructor
-  LArRodBlockCalibrationV3();
+  LArRodBlockCalibrationV3(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockCalibrationV3");}
+  static std::string BlockType() { return std::string("RodBlockCalibrationV3");}
  public:
   //void dumpFragment() { dumpFragment(m_FebBlock); }
   // ----------------- Encoding methods -----------------

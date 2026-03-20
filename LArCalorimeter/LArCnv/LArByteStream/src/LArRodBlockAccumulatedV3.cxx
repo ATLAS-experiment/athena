@@ -22,7 +22,8 @@
 #endif
 
 
-LArRodBlockAccumulatedV3::LArRodBlockAccumulatedV3() : LArRodBlockStructure()
+LArRodBlockAccumulatedV3::LArRodBlockAccumulatedV3(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 {
   m_iHeadBlockSize=endtag/2; // The implicit cast rounds down to the right size 
   m_fixedGain=CaloGain::LARNGAIN;

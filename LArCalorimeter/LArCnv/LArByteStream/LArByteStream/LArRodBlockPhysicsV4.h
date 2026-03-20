@@ -56,10 +56,10 @@ public:
     endtag          //This tag needs to be an odd number, see *) for constructor
   };
   // constructor
-  LArRodBlockPhysicsV4();
+  LArRodBlockPhysicsV4(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockPhysicsV4");}
+  static std::string BlockType() { return std::string("RodBlockPhysicsV4");}
  public:
   // ----------------- Decoding methods -----------------
   // Never to be used while encoding!

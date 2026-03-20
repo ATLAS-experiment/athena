@@ -20,7 +20,8 @@
 #define LARBSDBG(text)
 #endif
 
-LArRodBlockPhysicsV4::LArRodBlockPhysicsV4() : LArRodBlockStructure()
+LArRodBlockPhysicsV4::LArRodBlockPhysicsV4(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 {
   m_iHeadBlockSize=endtag/2; // The implicit cast rounds down to the right size 
   m_fixedGain=CaloGain::LARNGAIN;
