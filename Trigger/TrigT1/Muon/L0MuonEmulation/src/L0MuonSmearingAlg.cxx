@@ -141,7 +141,10 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
     std::string emu_thr_name = "L0_MUx";
     float thrvalue = static_cast<float>(((ptword>>1) + 0x2) & 0xf);
     outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, extraword);
-
+    if (outputRoIs->back()->pt() == 0.){
+      ATH_MSG_WARNING("L0MuonRoI: pT = 0");
+      continue;
+    }
     ATH_MSG_DEBUG("L0MuonRoI: phi = " << roi_phi << " (0x" << std::hex << phiword << std::dec << "), "
                       << "eta = " << roi_eta << " (0x" << std::hex << etaword << std::dec << "), "
                       << "pT = " << outputRoIs->back()->pt() << " (GeV) (0x" << std::hex << ptword << std::dec << "), "

@@ -57,11 +57,7 @@ StatusCode TrigCaloClusterCalibrator::execute(const EventContext& ctx) const
     // Make a temporary scope - this means that the unique pointers die at the
     // end of the scope (so don't hang around after the move call)
     SG::ReadHandle<xAOD::CaloClusterContainer> inputClusters(m_inputClustersKey, ctx);
-    std::pair<xAOD::CaloClusterContainer*, xAOD::ShallowAuxContainer*> copyPair =
-      xAOD::shallowCopyContainer(*inputClusters);
-    // Show that we're taking ownership explicitly
-    std::unique_ptr<xAOD::CaloClusterContainer> clusters{copyPair.first};
-    std::unique_ptr<xAOD::ShallowAuxContainer> clustersAux{copyPair.second};
+    auto [clusters, clustersAux] = xAOD::shallowCopyContainer(*inputClusters,ctx);
     // And record
     ATH_CHECK( outputClusters.record(std::move(clusters), std::move(clustersAux)));
     // We also need to copy across the cell links information.

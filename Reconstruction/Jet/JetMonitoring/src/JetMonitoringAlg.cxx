@@ -92,9 +92,7 @@ StatusCode JetMonitoringAlg::fillHistograms( const EventContext& ctx ) const {
     }
 
     // Apply more up-to-date jet calibrations for offline jet DQ monitoring
-    auto shallowCopy = xAOD::shallowCopyContainer( *jets );
-    std::unique_ptr<xAOD::JetContainer> shallowCont(shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> shallowAuxCont(shallowCopy.second);
+    auto [shallowCont, shallowContAux] = xAOD::shallowCopyContainer( *jets, ctx );
     if(!m_calibrationTool.empty()){
       ANA_CHECK (m_calibrationTool->applyCalibration(*shallowCont.get()));
     }
