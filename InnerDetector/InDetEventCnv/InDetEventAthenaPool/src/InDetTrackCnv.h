@@ -38,7 +38,7 @@ protected:
 
   virtual AthenaPoolCnvTPExtension*  clone() { return new InDetTrackCnv(0); }
 
-  virtual void       readObjectFromPool( const Token* );
+  virtual void       readObjectFromPool( const std::string& );
 
   
 private:  

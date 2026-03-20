@@ -64,12 +64,12 @@ MVFVxContainer * MVFVxContainerCnv::createTransient(const Token* token)
  
  if( compareClassGuid(token,  p1_guid ) ) {
     // std::cout << "MVFVxContainerCnv::createTransient(const Token* token)" << std::endl;
-    poolReadObject< MVFVxContainer_PERS >( m_TPConverter, token );
+    poolReadObject< MVFVxContainer_PERS >( m_TPConverter );
     p_collection = m_TPConverter.createTransient( log );
   
  } else if( compareClassGuid(token,  p0_guid ) ) {
     // std::cout << "MVFVxContainerCnv::createTransient: use old converter" << std::endl;  
-    p_collection = poolReadObject< MVFVxContainer >(token); 
+    p_collection = poolReadObject< MVFVxContainer >(); 
  } else
     throw std::runtime_error( "Unsupported persistent version of MVFVxContainer (unknown GUID)" );
     
@@ -77,14 +77,17 @@ MVFVxContainer * MVFVxContainerCnv::createTransient(const Token* token)
 }
 
 
-void        MVFVxContainerCnv::readObjectFromPool( const Token* token )
+void        MVFVxContainerCnv::readObjectFromPool( const std::string& token )
 {
   static const pool::Guid p1_guid( "D7BAA7AD-1A46-4DA3-9CA7-350A1A3F0656" );
   
+   // set the POOL token which will be used for reading from POOL
+   setToken( token );
+
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p1_guid ) ) {
       // read the object using the main TP converter
-      poolReadObject< MVFVxContainer_PERS >( m_TPConverter, token );
+      poolReadObject< MVFVxContainer_PERS >( m_TPConverter );
    }
    else
       throw std::runtime_error( "Unsupported version of MVFVxContainer (unknown GUID)" );

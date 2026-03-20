@@ -34,7 +34,7 @@ Muon::CscStripPrepDataContainer* CscStripPrepDataContainerCnv::createTransient(c
 
     Muon::CscStripPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p1_guid) ) {
-        std::unique_ptr< CscStripPrepDataContainer_PERS >  p_coll( poolReadObject< CscStripPrepDataContainer_PERS >(token) );
+        std::unique_ptr< CscStripPrepDataContainer_PERS >  p_coll( poolReadObject< CscStripPrepDataContainer_PERS >() );
         p_collection = m_TPConverter.createTransient( p_coll.get(), msg() );
     }
 

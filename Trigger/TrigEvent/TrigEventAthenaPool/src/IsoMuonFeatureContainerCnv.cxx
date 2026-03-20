@@ -34,22 +34,22 @@ IsoMuonFeatureContainer * IsoMuonFeatureContainerCnv::createTransient(const Toke
 
   //IsoMuonFeatureContainer *p_collection = 0;
   if( compareClassGuid(token,  p3_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_p3 > col_vect( poolReadObject< IsoMuonFeatureContainer_p3 >(token) );
+         std::unique_ptr< IsoMuonFeatureContainer_p3 > col_vect( poolReadObject< IsoMuonFeatureContainer_p3 >() );
 	 //         std::cout << "Reading IMFC p3" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
     }else if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_p2 > col_vect( poolReadObject< IsoMuonFeatureContainer_p2 >(token) );
+         std::unique_ptr< IsoMuonFeatureContainer_p2 > col_vect( poolReadObject< IsoMuonFeatureContainer_p2 >() );
 	 //         std::cout << "Reading IMFC p2" << std::endl;
          return m_converter2.createTransient( col_vect.get(), mlog ) ;
 
     }else if( compareClassGuid(token,  tlp1_guid ) ){
-         std::unique_ptr< IsoMuonFeatureContainer_tlp1 > col_vect( poolReadObject< IsoMuonFeatureContainer_tlp1 >(token) );
+         std::unique_ptr< IsoMuonFeatureContainer_tlp1 > col_vect( poolReadObject< IsoMuonFeatureContainer_tlp1 >() );
 	 //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter1.createTransient( col_vect.get(), mlog );
       
     }else if( compareClassGuid(token,  p0_guid ) ){
-         return poolReadObject< IsoMuonFeatureContainer >(token);
+         return poolReadObject< IsoMuonFeatureContainer >();
       
     }else  throw std::runtime_error( "Unsupported persistent version of IsoMuonFeatureContainer" );
   

@@ -160,9 +160,26 @@ T_AthenaPoolCustCnv<TRANS, PERS>::PoolToDataObject(DataObject*& pObj,
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
+// Set the token (in std::string representation) and classID for
+// the object that will be read next.  Required by compareClassGuid( ) // FIXME
+template <class TRANS, class PERS>
+inline void T_AthenaPoolCustCnv<TRANS, PERS>::setToken(const std::string& token_str) {
+   delete this->m_i_poolToken; this->m_i_poolToken = nullptr;
+   Token* token = new Token;
+   token->fromString(token_str);
+   this->m_i_poolToken = token; token = nullptr;
+}
+//__________________________________________________________________________
 // Compare POOL class GUID with the one from object being read
 // To be used in createTransient(const Token* token)
 template <class TRANS, class PERS>
 inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const Token* token, const pool::Guid &guid) const {
    return(token ? (guid == token->classID()) : false);
+}
+//__________________________________________________________________________
+// Compare POOL class GUID with the one from object being read
+template <class TRANS, class PERS>
+inline bool T_AthenaPoolCustCnv<TRANS, PERS>::compareClassGuid(const std::string& token, const pool::Guid &guid) const {
+   const std::string& classidString = "[CLID=" + guid.toString() + "]";
+   return(token.find(classidString) != std::string::npos);
 }

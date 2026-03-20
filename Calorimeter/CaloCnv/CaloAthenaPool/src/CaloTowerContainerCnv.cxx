@@ -31,12 +31,12 @@ CaloTowerContainer* CaloTowerContainerCnv::createTransient(const Token* token) {
     if (compareClassGuid(token, p0_guid)) {
      if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p0 of CaloTowerContainer. token=" 
 	 << token->toString() << endmsg;
-     Cont=poolReadObject<CaloTowerContainer>(token);
+     Cont=poolReadObject<CaloTowerContainer>();
     }
     else if(compareClassGuid(token, p1_guid)) {
       if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Read version p1 of CaloTowerContainer. token=" 
 	  << token->toString() << endmsg;
-      CaloTowerContainerPERS* pers=poolReadObject<CaloTowerContainer_p1>(token);
+      CaloTowerContainerPERS* pers=poolReadObject<CaloTowerContainer_p1>();
       Cont=new CaloTowerContainer();
       m_converter.persToTrans(pers,Cont,log);
       delete pers;

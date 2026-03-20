@@ -40,7 +40,7 @@ TrigTauTracksInfo* TrigTauTracksInfoCnv::createTransient(const Token* token)
   if( compareClassGuid(token, tlp1_guid) ) {
     
     mlog << MSG::DEBUG << "TrigTauTracksInfoCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr< TrigTauTracksInfo_tlp1 >   col_vect( this->poolReadObject< TrigTauTracksInfo_tlp1 >(token) );
+    std::unique_ptr< TrigTauTracksInfo_tlp1 >   col_vect( this->poolReadObject< TrigTauTracksInfo_tlp1 >() );
     trans_cont = m_TPConverter->createTransient( col_vect.get(), mlog );
     
   }
@@ -48,7 +48,7 @@ TrigTauTracksInfo* TrigTauTracksInfoCnv::createTransient(const Token* token)
     
     mlog << MSG::DEBUG << "TrigTauTracksInfoCnv::reading p0 persistent object" << endmsg;
     // old version from before TP separation, just return it
-    trans_cont = this->poolReadObject<TrigTauTracksInfo>(token);
+    trans_cont = this->poolReadObject<TrigTauTracksInfo>();
     
   }  else {
     

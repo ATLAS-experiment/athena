@@ -31,11 +31,11 @@ TBLArDigitContainer* TBLArDigitContainerCnv::createTransient(const Token* token)
    if (compareClassGuid(token, p0_guid)) {
      log << MSG::DEBUG << "Read version p0 of TBLArDigitContainer. token=" 
          << token->toString() << endmsg;
-     result = poolReadObject<TBLArDigitContainer>(token);
+     result = poolReadObject<TBLArDigitContainer>();
    } else if (compareClassGuid(token, p1_guid)) {
      log << MSG::DEBUG << "Reading TBLArDigitContainer_p1. token=" 
          << token->toString() << endmsg;
-     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>(token));
+     std::unique_ptr<TBLArDigitContainer_p1> pers (poolReadObject<TBLArDigitContainer_p1>());
      m_converter.persToTrans(pers.get(),trans.get(), log);
      result = trans.release();
    } else {

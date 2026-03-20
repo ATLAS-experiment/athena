@@ -45,16 +45,16 @@ TrigVertexCountsCollection* TrigVertexCountsCollectionCnv::createTransient(const
   TrigVertexCountsCollection *p_container = 0;
 
   if(compareClassGuid(token, tlp1_guid)) {
-    poolReadObject<TrigVertexCountsCollection_PERS>(*m_TPConverter, token);
+    poolReadObject<TrigVertexCountsCollection_PERS>(*m_TPConverter);
     p_container = m_TPConverter->createTransient(mlog);
   }
   else if(compareClassGuid(token, p1_guid)) {
-     std::unique_ptr< TrigVertexCountsCollection_p1 > col_vect( poolReadObject< TrigVertexCountsCollection_p1 >(token) );
+     std::unique_ptr< TrigVertexCountsCollection_p1 > col_vect( poolReadObject< TrigVertexCountsCollection_p1 >() );
      TrigVertexCountsCollectionCnv_p1 converter;
      p_container = converter.createTransient( col_vect.get(), mlog );
   }
   else if(compareClassGuid(token, trans_guid)) {
-    p_container = poolReadObject<TrigVertexCountsCollection>(token);
+    p_container = poolReadObject<TrigVertexCountsCollection>();
   }
   else  {
     throw std::runtime_error( "Unsupported persistent version of TrigVertexCountsCollection" );

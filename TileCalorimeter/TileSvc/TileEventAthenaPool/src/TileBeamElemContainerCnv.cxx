@@ -24,12 +24,12 @@ TileBeamElemContainer* TileBeamElemContainerCnv::createTransient(const Token* to
     static const pool::Guid   p0_guid("7FCE8F30-B59E-41E6-9A66-0DCD6134552E");
 
     if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< TileBeamElemContainer_p1 >   cont( this->poolReadObject< TileBeamElemContainer_p1 >(token) );
+        std::unique_ptr< TileBeamElemContainer_p1 >   cont( this->poolReadObject< TileBeamElemContainer_p1 >() );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileBeamElemCollectionVec* rdoV = this->poolReadObject<TileBeamElemCollectionVec>(token);
+        TileBeamElemCollectionVec* rdoV = this->poolReadObject<TileBeamElemCollectionVec>();
 
         if (mlog.level()<=MSG::DEBUG)
           mlog << MSG::DEBUG << "Read IDC, size " << rdoV->size() << endmsg;

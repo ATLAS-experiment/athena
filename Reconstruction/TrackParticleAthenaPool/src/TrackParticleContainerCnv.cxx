@@ -50,21 +50,21 @@ Rec::TrackParticleContainer * TrackParticleContainerCnv::createTransient(const T
   if( compareClassGuid(token,  p3_guid ) ) {
     // std::cout<<"TrackParticleContainerCnv::createTransient p3_guid"<<std::endl;
     
-    poolReadObject< Rec::TrackParticleContainer_tlp3 >(m_TPConverter_tlp3, token);
+    poolReadObject< Rec::TrackParticleContainer_tlp3 >(m_TPConverter_tlp3);
     p_collection = m_TPConverter_tlp3.createTransient(log);
   } 
   else if( compareClassGuid(token,  p2_guid ) ) {
     // std::cout<<"TrackParticleContainerCnv::createTransient p2_guid"<<std::endl;
     
-    poolReadObject< Rec::TrackParticleContainer_tlp2 >(m_TPConverter_tlp2, token);
+    poolReadObject< Rec::TrackParticleContainer_tlp2 >(m_TPConverter_tlp2);
     p_collection = m_TPConverter_tlp2.createTransient(log);
   } 
   else if( compareClassGuid(token,  p1_guid ) ) {
-   poolReadObject< Rec::TrackParticleContainer_tlp1 >(m_TPConverter_tlp1, token);
+   poolReadObject< Rec::TrackParticleContainer_tlp1 >(m_TPConverter_tlp1);
    p_collection = m_TPConverter_tlp1.createTransient(log);
   }
   else if( compareClassGuid(token,  p0_guid ) ) {
-   p_collection = poolReadObject< Rec::TrackParticleContainer >(token);
+   p_collection = poolReadObject< Rec::TrackParticleContainer >();
   }
   else {
     throw std::runtime_error( "Unsupported persistent version of Rec::TrackParticleContainer" );

@@ -38,25 +38,25 @@ CscSimDataCollection* CscSimDataCollectionCnv::createTransient(const Token* toke
     CscSimDataCollection* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 3 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p3 >(token) );
+      std::unique_ptr< Muon::CscSimDataCollection_p3 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p3 >() );
       p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p2_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p2 >(token) );
+      std::unique_ptr< Muon::CscSimDataCollection_p2 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p2 >() );
       p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p1_guid) ) {
       ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
-      std::unique_ptr< Muon::CscSimDataCollection_p1 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p1 >(token) );
+      std::unique_ptr< Muon::CscSimDataCollection_p1 >   col_vect( this->poolReadObject< Muon::CscSimDataCollection_p1 >() );
       p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p0_guid) ){
        if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
-       std::unique_ptr< CscSimDataCollection >   col_vect( poolReadObject< CscSimDataCollection >(token) );
+       std::unique_ptr< CscSimDataCollection >   col_vect( poolReadObject< CscSimDataCollection >() );
        p_collection = col_vect.release();
     }
   //----------------------------------------------------------------

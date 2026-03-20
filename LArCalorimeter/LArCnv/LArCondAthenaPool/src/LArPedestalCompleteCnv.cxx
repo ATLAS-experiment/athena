@@ -32,14 +32,14 @@ LArPedestalCompleteCnv::createTransient(const Token* token)
 
     if (compareClassGuid(token, p2_guid)) {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< LArPedestalSubset_p2 > col_vect( poolReadObject< LArPedestalSubset_p2 >(token) );
+      std::unique_ptr< LArPedestalSubset_p2 > col_vect( poolReadObject< LArPedestalSubset_p2 >() );
       MsgStream log(msgSvc(), "LArPedestalCompleteCnv" ); 
       //log << MSG::INFO << "Reading LArPedestalSubset_p1" << endmsg; 
       return TPconverter2.createTransientConst( col_vect.get(), log );
     }
     else if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr< LArPedestalSubset_p1 > col_vect( poolReadObject< LArPedestalSubset_p1 >(token) );
+        std::unique_ptr< LArPedestalSubset_p1 > col_vect( poolReadObject< LArPedestalSubset_p1 >() );
         MsgStream log(msgSvc(), "LArPedestalCompleteCnv" ); 
         //log << MSG::INFO << "Reading LArPedestalSubset_p1" << endmsg; 
         return TPconverter1.createTransientConst( col_vect.get(), log );
@@ -50,7 +50,7 @@ LArPedestalCompleteCnv::createTransient(const Token* token)
         MsgStream log(msgSvc(), "LArPedestalCompleteCnv" ); 
         log << MSG::DEBUG << "Reading LArPedestalSubset (original)" << endmsg; 
 
-        std::unique_ptr< LArConditionsSubset<LArPedestalP> > subset ( poolReadObject< LArConditionsSubset<LArPedestalP> >(token) );
+        std::unique_ptr< LArConditionsSubset<LArPedestalP> > subset ( poolReadObject< LArConditionsSubset<LArPedestalP> >() );
         // Here we must convert from LArPedestalP to LArPedestalP1
         
         log << MSG::DEBUG << "subset ptr " << subset.get() << endmsg; 

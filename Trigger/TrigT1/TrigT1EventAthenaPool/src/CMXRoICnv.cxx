@@ -41,7 +41,7 @@ CMXRoI * CMXRoICnv::createTransient(const Token* token)
   
   if ( compareClassGuid(token, p1_guid) ) {
      // using unique_ptr ensures deletion of the persistent object
-     std::unique_ptr< CMXRoI_p1 > pers_ref( poolReadObject< CMXRoI_p1 >(token) );
+     std::unique_ptr< CMXRoI_p1 > pers_ref( poolReadObject< CMXRoI_p1 >() );
      return m_TPConverter_p1.createTransient( pers_ref.get(), mlog );
   }
   throw std::runtime_error("Unsupported persistent version of CMXRoI");

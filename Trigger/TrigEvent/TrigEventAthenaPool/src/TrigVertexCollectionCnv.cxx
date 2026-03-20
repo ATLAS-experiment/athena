@@ -51,19 +51,19 @@ TrigVertexCollection * TrigVertexCollectionCnv::createTransient(const Token* tok
   if( compareClassGuid(token,  tlp2_guid ) )     
     {
       mlog << MSG::DEBUG << "TrigVertexCollectionCnv::createPersistent tlp2 called" << endmsg;
-      poolReadObject< TrigVertexCollection_PERS >(*m_TPConverter, token);
+      poolReadObject< TrigVertexCollection_PERS >(*m_TPConverter);
       p_collection = m_TPConverter->createTransient( m_log );
    
     } else if( compareClassGuid(token,  tlp1_guid ) ) {
 
       mlog << MSG::DEBUG << "TrigVertexCollectionCnv::createPersistent tlp1 called" << endmsg;
       TrigVertexCollectionCnv_tlp1  tlp1_Converter;
-      poolReadObject< TrigVertexCollection_tlp1 >(tlp1_Converter, token);
+      poolReadObject< TrigVertexCollection_tlp1 >(tlp1_Converter);
       p_collection = tlp1_Converter.createTransient( m_log );
 
     } else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ){
       mlog << MSG::DEBUG << "TrigVertexCollectionCnv::createPersistent p0 called" << endmsg;
-      p_collection = poolReadObject< TrigVertexCollection >(token);
+      p_collection = poolReadObject< TrigVertexCollection >();
     
     }else  throw std::runtime_error( "Unsupported persistent version of TrigVertexCollection" );
      

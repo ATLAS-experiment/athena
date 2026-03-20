@@ -53,7 +53,7 @@ IParticleLinkContainer* IParticleLinkContainerCnv::createTransient(const Token* 
   if( compareClassGuid(token, p1_guid) )
     {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< IParticleLinkContainer_PERS > col_vect( poolReadObject< IParticleLinkContainer_PERS >(token) );
+      std::unique_ptr< IParticleLinkContainer_PERS > col_vect( poolReadObject< IParticleLinkContainer_PERS >() );
       return m_TPConverter.createTransient( col_vect.get(), log );
     }
   else

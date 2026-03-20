@@ -46,37 +46,37 @@ TGCSimHitCollection* TGCSimHitCollectionCnv::createTransient(const Token* token)
     TGCSimHitCollection* p_collection(nullptr);
     if(compareClassGuid(token, p5_guid) ) {
       log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 5 detected"<<endmsg;
-      std::unique_ptr< Muon::TGCSimHitCollection_p5 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p5 >(token) );
+      std::unique_ptr< Muon::TGCSimHitCollection_p5 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p5 >() );
       p_collection = m_TPConverter_p5.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if(compareClassGuid(token, p4_guid) ) {
       log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 4 detected"<<endmsg;
-      std::unique_ptr< Muon::TGCSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p4 >(token) );
+      std::unique_ptr< Muon::TGCSimHitCollection_p4 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p4 >() );
       p_collection = m_TPConverter_p4.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if(compareClassGuid(token, p3_guid) ) {
         log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 3 detected"<<endmsg;
-        std::unique_ptr< Muon::TGCSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p3 >(token) );
+        std::unique_ptr< Muon::TGCSimHitCollection_p3 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p3 >() );
         p_collection = m_TPConverter_p3.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p2_guid) ) {
         log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< Muon::TGCSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p2 >(token) );
+        std::unique_ptr< Muon::TGCSimHitCollection_p2 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p2 >() );
         p_collection = m_TPConverter_p2.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p1_guid) ) {
         log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
-        std::unique_ptr< Muon::TGCSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p1 >(token) );
+        std::unique_ptr< Muon::TGCSimHitCollection_p1 >   col_vect( this->poolReadObject< Muon::TGCSimHitCollection_p1 >() );
         p_collection = m_TPConverter_p1.createTransient( col_vect.get(), log );
     }
   //----------------------------------------------------------------
     else if( compareClassGuid(token, p0_guid) ) {
         log<<MSG::DEBUG<<"createTransient(const Token* token): Old input file"<<std::endl;
-        AthenaHitsVector<TGCSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<TGCSimHit> >(token);
+        AthenaHitsVector<TGCSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<TGCSimHit> >();
         size_t size = oldColl->size();
         p_collection=new TGCSimHitCollection("DefaultCollectionName",size);
         p_collection->reserve(size);

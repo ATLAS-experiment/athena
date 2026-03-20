@@ -28,15 +28,18 @@ StatusCode MuonCaloEnergiesCnv::initialize()
 
 // this method just reads the persistent object - no TP conversion here
 void 
-MuonCaloEnergiesCnv::readObjectFromPool( const Token* token )
+MuonCaloEnergiesCnv::readObjectFromPool( const std::string& token )
 {
     
    static const pool::Guid p1_guid( "E60630E0-FAA1-4658-9BDD-8BB977C4200B" );
 
+   // set the POOL token which will be used for reading from POOL
+   setToken( token );
+
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p1_guid ) )     {
       // read MuonCaloEnergies_PERS object from POOL using given TLP converter
-      poolReadObject< MuonCaloEnergies_PERS >( m_TPConverter, token );
+      poolReadObject< MuonCaloEnergies_PERS >( m_TPConverter );
    }
    else
       throw std::runtime_error( "Unsupported version of MuonCaloEnergies_PERS (unknown GUID)" );

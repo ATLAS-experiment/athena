@@ -72,7 +72,7 @@ T_AthenaPoolAuxContainerCnv<AUXSTORE, TPCNVS...>::createTransientWithKey (const 
   AthenaPoolCnvSvc::debugCreateTransient (ClassID_traits<AUXSTORE>::ID());
   if ( this->compareClassGuid(token,  m_guid ) ) {
     // It's the latest version, read it directly:
-    return this->template poolReadObject< AUXSTORE >(token);
+    return this->template poolReadObject< AUXSTORE >();
   }
 
   // Try a converter.

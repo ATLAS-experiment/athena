@@ -26,7 +26,7 @@ AFP_TDLocRecoEvCollection* AFP_TDLocRecoEvCollectionCnv::createTransient(const T
     static const pool::Guid p1_guid ("3149C8A8-DEED-4922-8705-1D727A280B9E");
     
     if( this->compareClassGuid(token, p1_guid)) {
-         std::unique_ptr< AFP_TDLocRecoEvCollection_p1 >   col_vect( this->poolReadObject< AFP_TDLocRecoEvCollection_p1 >(token) );
+         std::unique_ptr< AFP_TDLocRecoEvCollection_p1 >   col_vect( this->poolReadObject< AFP_TDLocRecoEvCollection_p1 >() );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
     }
  

@@ -34,21 +34,25 @@ StatusCode JetTagInfoCnv::initialize(void)
 
 /// Read the persistant bit in. Fortunately, we don't have to do
 /// anything at all for this.
-void JetTagInfoCnv::readObjectFromPool (const Token* token)
+void JetTagInfoCnv::readObjectFromPool (const string &token)
 {
   static const pool::Guid p1_guid ("977E2E76-4DA6-4A4B-87A8-2E41353DB9F4");
   static const pool::Guid p2_guid ("50E644C1-E247-41B0-B873-416362824A21");
   static const pool::Guid p3_guid ("8A57BABD-C361-4796-93CD-E8171EF06BC7");
 
+  /// The POOL token which will be used for reading from POOL.
+
+  setToken (token);
+
   /// And use the GUID to select what we want
 
   if(compareClassGuid(token, p3_guid)){
-    poolReadObject<JetTagInfo_tlp3> (m_TPConverter, token);
+    poolReadObject<JetTagInfo_tlp3> (m_TPConverter);
   }
   else if (compareClassGuid(token, p2_guid)) {
-    poolReadObject<JetTagInfo_tlp2> (m_TPConverter_p2, token);
+    poolReadObject<JetTagInfo_tlp2> (m_TPConverter_p2);
   } else if (compareClassGuid(token, p1_guid)) {
-    poolReadObject<JetTagInfo_tlp1> (m_TPConverter_p1, token);
+    poolReadObject<JetTagInfo_tlp1> (m_TPConverter_p1);
   } else {
     throw runtime_error ("Unsupported version of JetTagInfo_tlp1 (unknonw GUID)");
   }

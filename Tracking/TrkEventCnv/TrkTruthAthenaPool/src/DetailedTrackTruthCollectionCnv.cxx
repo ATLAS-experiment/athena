@@ -49,28 +49,28 @@ DetailedTrackTruthCollection* DetailedTrackTruthCollectionCnv::createTransient(c
   if (compareClassGuid(token, s_p4_guid)) {
     trans = new DetailedTrackTruthCollection();
     log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p4. token="<<token->toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p4* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p4>(token);
+    Trk::DetailedTrackTruthCollection_p4* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p4>();
     m_converter_p4.persToTrans(pers, trans, log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p3_guid)) {
     trans = new DetailedTrackTruthCollection();
     log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p3. token="<<token->toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p3* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p3>(token);
+    Trk::DetailedTrackTruthCollection_p3* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p3>();
     m_converter_p3.persToTrans(pers, trans, log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p2_guid)) {
     trans = new DetailedTrackTruthCollection();
     log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p2. token="<<token->toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p2* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p2>(token);
+    Trk::DetailedTrackTruthCollection_p2* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p2>();
     m_converter_p2.persToTrans(pers, trans, log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p1_guid)) {
     trans = new DetailedTrackTruthCollection();
     log<<MSG::DEBUG<<"Read DetailedTrackTruthCollection_p1. token="<<token->toString()<<endmsg;
-    Trk::DetailedTrackTruthCollection_p1* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p1>(token);
+    Trk::DetailedTrackTruthCollection_p1* pers=poolReadObject<Trk::DetailedTrackTruthCollection_p1>();
     m_converter_p1.persToTrans(pers, trans, log);
     delete pers;
   }

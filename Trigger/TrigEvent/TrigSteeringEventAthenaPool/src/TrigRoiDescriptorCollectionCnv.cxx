@@ -60,22 +60,22 @@ TrigRoiDescriptorCollection* TrigRoiDescriptorCollectionCnv::createTransient(con
 
   if( compareClassGuid(token, p3_guid) ) {
 
-    std::unique_ptr< TrigRoiDescriptorCollection_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p3 >(token) );
+    std::unique_ptr< TrigRoiDescriptorCollection_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p3 >() );
     trans_obj = m_impl->m_TPConverter_p3.createTransient( col_vect.get(), mlog );    
   }
   else if( compareClassGuid(token, p2_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptorCollection_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p2 >(token) );
+    std::unique_ptr< TrigRoiDescriptorCollection_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p2 >() );
     trans_obj = m_impl->m_TPConverter_p2.createTransient( col_vect.get(), mlog );    
   }
   else if( compareClassGuid(token, tlp1_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptorCollection_tlp1 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_tlp1 >(token) );
+    std::unique_ptr< TrigRoiDescriptorCollection_tlp1 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_tlp1 >() );
     trans_obj = m_impl->m_TPConverter_tlp1.createTransient( col_vect.get(), mlog );    
   }
   else if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptorCollection_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p1 >(token) );
+    std::unique_ptr< TrigRoiDescriptorCollection_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptorCollection_p1 >() );
     trans_obj = m_impl->m_TPConverter_p1.createTransient( col_vect.get(), mlog );    
   }
   else {

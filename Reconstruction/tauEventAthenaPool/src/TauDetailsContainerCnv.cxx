@@ -37,25 +37,25 @@ Analysis :: TauDetailsContainer *TauDetailsContainerCnv :: createTransient(const
 
     if( compareClassGuid(token,  p4_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauDetailsContainer_tlp4> persObj( poolReadObject<TauDetailsContainer_tlp4>(token) );
+        std :: unique_ptr<TauDetailsContainer_tlp4> persObj( poolReadObject<TauDetailsContainer_tlp4>() );
         TauDetailsContainerCnv_tlp4 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
         else if( compareClassGuid(token,  p3_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauDetailsContainer_tlp3> persObj( poolReadObject<TauDetailsContainer_tlp3>(token) );
+        std :: unique_ptr<TauDetailsContainer_tlp3> persObj( poolReadObject<TauDetailsContainer_tlp3>() );
         TauDetailsContainerCnv_tlp3 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
         else if( compareClassGuid(token,  p2_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauDetailsContainer_tlp2> persObj( poolReadObject<TauDetailsContainer_tlp2>(token) );
+        std :: unique_ptr<TauDetailsContainer_tlp2> persObj( poolReadObject<TauDetailsContainer_tlp2>() );
         TauDetailsContainerCnv_tlp2 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
 	else if( compareClassGuid(token,  p1_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauDetailsContainer_tlp1> persObj( poolReadObject<TauDetailsContainer_tlp1>(token) );
+        std :: unique_ptr<TauDetailsContainer_tlp1> persObj( poolReadObject<TauDetailsContainer_tlp1>() );
         TauDetailsContainerCnv_tlp1 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }

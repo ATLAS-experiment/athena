@@ -26,7 +26,7 @@ SrCaloCalibrationHitContainerCnv::createTransient(const Token* token) {
 
   if (this->compareClassGuid(token, p1_guid)) {
     std::unique_ptr<SrCaloCalibrationHitContainer_p1> col_vect(
-        this->poolReadObject<SrCaloCalibrationHitContainer_p1>(token));
+        this->poolReadObject<SrCaloCalibrationHitContainer_p1>());
     trans_cont = converter_p1.createTransient(col_vect.get(), mlog);
   } else {
     throw std::runtime_error(

@@ -33,21 +33,21 @@ MuonFeature* MuonFeatureCnv::createTransient(const Token* token) {
 
     if( compareClassGuid(token, p1_guid) ) {
 
-      std::unique_ptr< MuonFeature_p1 > col_vect( poolReadObject< MuonFeature_p1 >(token) );
+      std::unique_ptr< MuonFeature_p1 > col_vect( poolReadObject< MuonFeature_p1 >() );
       MuonFeatureCnv_p1 converter;
       return converter.createTransient( col_vect.get(), mlog );
 
     }
     else if( compareClassGuid(token, p2_guid) ) {
 
-      std::unique_ptr< MuonFeature_p2 > col_vect( poolReadObject< MuonFeature_p2 >(token) );
+      std::unique_ptr< MuonFeature_p2 > col_vect( poolReadObject< MuonFeature_p2 >() );
       MuonFeatureCnv_p2 converter;
       return converter.createTransient( col_vect.get(), mlog );
 
     }
     else if( compareClassGuid(token, p0_guid) ) {
       // old version from before TP separation, just return it
-      return this->poolReadObject<MuonFeature>(token);
+      return this->poolReadObject<MuonFeature>();
     }  
     else {
       throw std::runtime_error("Unsupported persistent version");

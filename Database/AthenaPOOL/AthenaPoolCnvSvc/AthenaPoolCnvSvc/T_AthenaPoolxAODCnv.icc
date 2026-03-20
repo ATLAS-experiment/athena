@@ -68,7 +68,7 @@ T_AthenaPoolxAODCnv<XAOD, TPCNVS...>::createTransientWithKey (const Token* token
 
   if ( this->compareClassGuid(token,  m_guid ) ) {
     // It's the latest version, read it directly:
-    c = this->template poolReadObject< XAOD >(token);
+    c = this->template poolReadObject< XAOD >();
   }
   else {
     // Try a converter.

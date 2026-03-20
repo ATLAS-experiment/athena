@@ -24,7 +24,7 @@ ALFA_LocRecEvCollection* ALFA_LocRecEvCollectionCnv::createTransient(const Token
     static const pool::Guid p1_guid ("C392157A-4519-44B5-A472-16D1F74F4CAD");
     
     if( this->compareClassGuid(token, p1_guid)) {
-         std::unique_ptr< ALFA_LocRecEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_LocRecEvCollection_p1 >(token) );
+         std::unique_ptr< ALFA_LocRecEvCollection_p1 >   col_vect( this->poolReadObject< ALFA_LocRecEvCollection_p1 >() );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
     } else {
         throw std::runtime_error("Unsupported persistent version of Data container");

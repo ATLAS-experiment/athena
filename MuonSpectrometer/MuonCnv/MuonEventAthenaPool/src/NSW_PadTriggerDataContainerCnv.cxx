@@ -14,7 +14,7 @@ Muon::NSW_PadTriggerDataContainer* NSW_PadTriggerDataContainerCnv::createTransie
     static const pool::Guid p1_guid("5E3C969A-84BF-4DA1-94B9-F1A6A94C3123");
     if(compareClassGuid(token, p1_guid)) {
         std::unique_ptr<Muon::NSW_PadTriggerDataContainer_p1> pContainer
-            { poolReadObject<Muon::NSW_PadTriggerDataContainer_p1>(token) };
+            { poolReadObject<Muon::NSW_PadTriggerDataContainer_p1>() };
         return m_TPConverter.createTransient(pContainer.get(), log);
     }
     throw std::runtime_error{ "No persistent version match for GUID on-disk" };

@@ -48,14 +48,14 @@ LVL1CTP::Lvl1Result* Lvl1ResultCnv::createTransient(const Token* token)
 
   if ( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< LVL1CTP::Lvl1Result_p1 > col_vect( poolReadObject< LVL1CTP::Lvl1Result_p1 >(token) );
+    std::unique_ptr< LVL1CTP::Lvl1Result_p1 > col_vect( poolReadObject< LVL1CTP::Lvl1Result_p1 >() );
     return m_impl->m_TPConverter_p1.createTransient( col_vect.get(), mlog );
   } else if( compareClassGuid(token, p0_guid) ){
     // old version from before TP separation, just return it
-    return this->poolReadObject<LVL1CTP::Lvl1Result>(token);
+    return this->poolReadObject<LVL1CTP::Lvl1Result>();
   } else if ( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< LVL1CTP::Lvl1Result_p2 > col_vect( poolReadObject< LVL1CTP::Lvl1Result_p2 >(token) );
+    std::unique_ptr< LVL1CTP::Lvl1Result_p2 > col_vect( poolReadObject< LVL1CTP::Lvl1Result_p2 >() );
     return m_impl->m_TPConverter_p2.createTransient( col_vect.get(), mlog );
   }
 

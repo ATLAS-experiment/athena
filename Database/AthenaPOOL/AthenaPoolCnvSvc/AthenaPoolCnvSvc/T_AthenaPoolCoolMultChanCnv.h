@@ -103,13 +103,16 @@ protected:
     //-------------------------------------------------------------------
     // Helper methods intended to by used when implementing createTransient()
 
+    /// specialized version that adds persistency contextID to tokens (for reading)
+    virtual void setToken(const std::string& token) override final;
+
     /** Read object of type P.  This is an exception-throwing version of poolToObject()
         plus reading of all extending objects.
         Version 1 - (see createTransient() above)
         @return object read from POOL (by pointer)
     */
     template <class P>
-    P*                 poolReadObject(const Token* token);
+    P*                 poolReadObject();
 
     ELEM_T*            poolReadObject(const Token* token);
 

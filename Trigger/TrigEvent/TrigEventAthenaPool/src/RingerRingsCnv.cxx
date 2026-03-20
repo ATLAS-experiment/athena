@@ -36,7 +36,7 @@ RingerRings* RingerRingsCnv::createTransient(const Token* token) {
   
   if (compareClassGuid(token, tlp1_guid) ) {
     mlog << MSG::DEBUG << "RingerRingsCnv::reading tlp1 persistent object" << endmsg;
-    std::unique_ptr<RingerRings_tlp1> col_vect(this->poolReadObject<RingerRings_tlp1>(token));
+    std::unique_ptr<RingerRings_tlp1> col_vect(this->poolReadObject<RingerRings_tlp1>());
     trans_cont = m_TPConverter->createTransient(col_vect.get(), mlog);
   } else {
     throw std::runtime_error("Unsupported persistent version of Data container");

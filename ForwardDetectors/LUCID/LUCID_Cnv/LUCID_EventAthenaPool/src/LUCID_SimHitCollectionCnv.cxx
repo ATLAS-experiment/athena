@@ -33,19 +33,19 @@ LUCID_SimHitCollection* LUCID_SimHitCollectionCnv::createTransient(const Token* 
 
   LUCID_SimHitCollection* trans_cont{};
   if (this->compareClassGuid(token, p3_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p3 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p3 >(token));
+    std::unique_ptr< LUCID_SimHitCollection_p3 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p3 >());
     trans_cont = converter_p3.createTransient(col_vect.get(), mlog);
   }
   else if (this->compareClassGuid(token, p2_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p2 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p2 >(token));
+    std::unique_ptr< LUCID_SimHitCollection_p2 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p2 >());
     trans_cont = converter_p2.createTransient(col_vect.get(), mlog);
   }
   else if(this->compareClassGuid(token, p1_guid)) {
-    std::unique_ptr< LUCID_SimHitCollection_p1 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p1 >(token));
+    std::unique_ptr< LUCID_SimHitCollection_p1 > col_vect( this->poolReadObject< LUCID_SimHitCollection_p1 >());
     trans_cont = converter_p1.createTransient(col_vect.get(), mlog);
   }
   else if(this->compareClassGuid(token, old_guid)) {
-    trans_cont = this->poolReadObject<LUCID_SimHitCollection>(token);
+    trans_cont = this->poolReadObject<LUCID_SimHitCollection>();
   }
   else {
     mlog << MSG::ERROR << "BAD GUID: " << token->toString() << endmsg;

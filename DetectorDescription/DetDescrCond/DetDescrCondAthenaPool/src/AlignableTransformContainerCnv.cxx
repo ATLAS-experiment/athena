@@ -27,14 +27,14 @@ AlignableTransform_TRANS* AlignableTransformContainerCnv::createTransient(const 
     if( compareClassGuid(token, p1_guid) ) {
         // using unique_ptr ensures deletion of the persistent object
         if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "AlignableTransformContainer read p1" << endmsg;
-        std::unique_ptr< AlignableTransform_p1 > col_vect( poolReadObject< AlignableTransform_p1 >(token) );
+        std::unique_ptr< AlignableTransform_p1 > col_vect( poolReadObject< AlignableTransform_p1 >() );
         AlignableTransformCnv_p1 cnv;
         return cnv.createTransient( col_vect.get(), log );
     }
     else if( compareClassGuid(token, p0_guid) ) {
         // regular object from before TP separation, just return it
         if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "AlignableTransformContainer read p0" << endmsg;
-        return this->poolReadObject<AlignableTransform>(token);
+        return this->poolReadObject<AlignableTransform>();
     } 
     throw std::runtime_error("Unsupported persistent version of AlignableTransformContainer");
 }

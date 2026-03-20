@@ -27,12 +27,12 @@ LArTTL1Container* LArTTL1ContainerCnv::createTransient(const Token* token) {
   if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<LArTTL1Container>(token);
+    return poolReadObject<LArTTL1Container>();
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<LArTTL1Container_p1> persObj( poolReadObject<LArTTL1Container_p1>(token) );
+    std::unique_ptr<LArTTL1Container_p1> persObj( poolReadObject<LArTTL1Container_p1>() );
     LArTTL1ContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg() );
   } else {

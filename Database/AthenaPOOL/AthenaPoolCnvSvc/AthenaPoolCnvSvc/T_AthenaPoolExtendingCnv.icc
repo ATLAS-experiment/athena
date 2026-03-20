@@ -46,13 +46,25 @@ wasClonedFrom( AthenaConverterTLPExtension *converter )
 
 
 template <class TRANS, class PERS>
+inline void
+T_AthenaPoolExtendingCnv< TRANS, PERS >::setToken(const std::string& token)
+{
+   // set token in base, so local compareClassGuid() will work
+   BaseType::setToken( token );
+   // set token in the original converter so poolReadObject() will work
+   baseAthenaPoolCnv()->T_AthenaPoolExtendingCnv::BaseType::setToken( token );
+}
+
+
+
+template <class TRANS, class PERS>
 template <class P>
 inline  P*
 T_AthenaPoolExtendingCnv< TRANS, PERS >::
-poolReadObject(const Token* token)
+poolReadObject()
 {
    // std::cout << " TPCNVINFO: redirecting poolReadObject() to original APcnv" << std::endl;
-   return baseAthenaPoolCnv()->template poolReadObject<P>(token);
+   return baseAthenaPoolCnv()->template poolReadObject<P>();
 }
 
 
@@ -61,12 +73,12 @@ template <class TRANS, class PERS>
 template <class P>
 void
 T_AthenaPoolExtendingCnv< TRANS, PERS >::
-poolReadObject( TopLevelTPCnvBase& tlp_converter, const Token* token )
+poolReadObject( TopLevelTPCnvBase& tlp_converter )
 {
    // set which Top level TP concerter will by used for reading
    usingTPCnvForReading( tlp_converter );
    // read the object
-   P* persObj =  poolReadObject< P >(token);
+   P* persObj =  poolReadObject< P >();
    // remember the object we just read
    tlp_converter.setTLPersObject( persObj );
 }	

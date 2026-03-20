@@ -39,7 +39,7 @@ CMMRoI * CMMRoICnv::createTransient(const Token* token)
   
   if ( compareClassGuid(token, p1_guid) ) {
      // using unique_ptr ensures deletion of the persistent object
-     std::unique_ptr< CMMRoI_p1 > pers_ref( poolReadObject< CMMRoI_p1 >(token) );
+     std::unique_ptr< CMMRoI_p1 > pers_ref( poolReadObject< CMMRoI_p1 >() );
      return m_TPConverter_p1.createTransient( pers_ref.get(), mlog );
   }
   throw std::runtime_error("Unsupported persistent version of CMMRoI");

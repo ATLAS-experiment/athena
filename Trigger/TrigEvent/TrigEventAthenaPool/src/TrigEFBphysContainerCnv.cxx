@@ -54,18 +54,18 @@ TrigEFBphysContainer * TrigEFBphysContainerCnv::createTransient(const Token* tok
   TrigEFBphysContainer *p_collection = 0;
   if( compareClassGuid(token,  tlp2_guid ) ) {
 
-      poolReadObject< TrigEFBphysContainer_PERS >(m_impl->m_TPConverter, token);
+      poolReadObject< TrigEFBphysContainer_PERS >(m_impl->m_TPConverter);
       p_collection = m_impl->m_TPConverter.createTransient( m_impl->m_log );
    
   } else if( compareClassGuid(token,  tlp1_guid ) ) {
 
     TrigEFBphysContainerCnv_tlp1  tlp1_Converter;
-    poolReadObject< TrigEFBphysContainer_tlp1 >(tlp1_Converter, token);
+    poolReadObject< TrigEFBphysContainer_tlp1 >(tlp1_Converter);
     p_collection = tlp1_Converter.createTransient( m_impl->m_log );
    
   }else if( compareClassGuid(token,  p0_guid ) || compareClassGuid(token,  p0_guid2 ) ){
 
-      p_collection = poolReadObject< TrigEFBphysContainer >(token);
+      p_collection = poolReadObject< TrigEFBphysContainer >();
     
     }else  throw std::runtime_error( "Unsupported persistent version of TrigEFBphysContainer" );
      

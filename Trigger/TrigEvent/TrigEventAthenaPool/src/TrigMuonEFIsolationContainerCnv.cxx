@@ -37,10 +37,10 @@ TrigMuonEFIsolationContainer* TrigMuonEFIsolationContainerCnv::createTransient(c
   TrigMuonEFIsolationContainer* trans_cont(0);
 
   if ( compareClassGuid(token, p2_guid) ) {
-    std::unique_ptr< TrigMuonEFIsolationContainer_p2 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p2 >(token) );
+    std::unique_ptr< TrigMuonEFIsolationContainer_p2 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p2 >() );
     trans_cont = m_converter_p2.createTransient( col_vect.get(), mlog );
   } else if ( compareClassGuid(token, p1_guid) ) {
-    std::unique_ptr< TrigMuonEFIsolationContainer_p1 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p1 >(token) );
+    std::unique_ptr< TrigMuonEFIsolationContainer_p1 > col_vect( this->poolReadObject< TrigMuonEFIsolationContainer_p1 >() );
     trans_cont = m_converter_p1.createTransient( col_vect.get(), mlog );
   } else {
       

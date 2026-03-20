@@ -46,26 +46,26 @@ MissingEtTruth* MissingEtTruthCnv::createTransient(const Token* token)
   if (  compareClassGuid(token, p3_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p3> persObj( poolReadObject<MissingEtTruth_p3>(token) );
+    std::unique_ptr<MissingEtTruth_p3> persObj( poolReadObject<MissingEtTruth_p3>() );
     MissingEtTruthCnv_p3 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
   } else if (  compareClassGuid(token, p2_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p2> persObj( poolReadObject<MissingEtTruth_p2>(token) );
+    std::unique_ptr<MissingEtTruth_p2> persObj( poolReadObject<MissingEtTruth_p2>() );
     MissingEtTruthCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
   } else if (  compareClassGuid(token, p1_guid)) {
 	
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MissingEtTruth_p1> persObj( poolReadObject<MissingEtTruth_p1>(token) );
+    std::unique_ptr<MissingEtTruth_p1> persObj( poolReadObject<MissingEtTruth_p1>() );
     MissingEtTruthCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 	
   } else if ( compareClassGuid(token, tr_guid) ) { // regular object from before the T/P separation
-    return poolReadObject<MissingEtTruth>(token);
+    return poolReadObject<MissingEtTruth>();
   } else {
     throw std::runtime_error("Unsupported persistent version of MissingEtTruth");
   }

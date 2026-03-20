@@ -32,17 +32,17 @@ TrigSpacePointCountsCollection * TrigSpacePointCountsCollectionCnv::createTransi
   static const pool::Guid p0_guid( "633C9739-C3D1-4F5D-9678-887445DA42B6" );
   
   if( compareClassGuid(token,  p4_guid ) ) {
-         std::unique_ptr< TrigSpacePointCountsCollection_p4 > col_vect( poolReadObject< TrigSpacePointCountsCollection_p4 >(token) );
+         std::unique_ptr< TrigSpacePointCountsCollection_p4 > col_vect( poolReadObject< TrigSpacePointCountsCollection_p4 >() );
          //         std::cout << "Reading IMFC p4" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
   }  else if( compareClassGuid(token,  tlp1_guid ) ) {
-         std::unique_ptr< TrigSpacePointCountsCollection_tlp1 > col_vect( poolReadObject< TrigSpacePointCountsCollection_tlp1 >(token) );
+         std::unique_ptr< TrigSpacePointCountsCollection_tlp1 > col_vect( poolReadObject< TrigSpacePointCountsCollection_tlp1 >() );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
 
     } else if( compareClassGuid(token,  p0_guid ) ) {
-         return poolReadObject< TrigSpacePointCountsCollection >(token);
+         return poolReadObject< TrigSpacePointCountsCollection >();
 
     } else throw std::runtime_error( "Unsupported persistent version of TrigSpacePointCountsCollection" );
   

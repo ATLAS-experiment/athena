@@ -26,13 +26,13 @@ LVL1_ROI* LVL1_ROICnv::createTransient(const Token* token) {
 
   if( this->compareClassGuid(token,  p1_guid ) ) {
 
-    std::unique_ptr< LVL1_ROI_p1 > pers_ref( this->poolReadObject< LVL1_ROI_p1 >(token) );
+    std::unique_ptr< LVL1_ROI_p1 > pers_ref( this->poolReadObject< LVL1_ROI_p1 >() );
     MsgStream log( this->msgSvc(), "LVL1_ROICnv" );
     return TPConverter.createTransientConst( pers_ref.get(), log );
 
   } else if( this->compareClassGuid(token,  p0_guid ) ) {
 
-    return this->poolReadObject< LVL1_ROI >(token);
+    return this->poolReadObject< LVL1_ROI >();
 
   }
 

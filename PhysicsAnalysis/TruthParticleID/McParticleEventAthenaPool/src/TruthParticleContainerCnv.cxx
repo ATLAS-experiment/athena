@@ -61,13 +61,13 @@ TruthParticleContainer* TruthParticleContainerCnv::createTransient(const Token* 
 
    if ( compareClassGuid(token, p6_guid) ) {
      
-     std::unique_ptr<TruthParticleContainer_p6> pers( poolReadObject<TruthParticleContainer_p6>(token) );
+     std::unique_ptr<TruthParticleContainer_p6> pers( poolReadObject<TruthParticleContainer_p6>() );
      TruthParticleContainerCnv_p6 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
 
    } else if ( compareClassGuid(token, p5_guid) ) {
      
-     std::unique_ptr<TruthParticleContainer_p5> pers( poolReadObject<TruthParticleContainer_p5>(token) );
+     std::unique_ptr<TruthParticleContainer_p5> pers( poolReadObject<TruthParticleContainer_p5>() );
      TruthParticleContainerCnv_p5 cnv( m_cnvTool.get() );
      trans = cnv.createTransient( pers.get(), msg );
      
