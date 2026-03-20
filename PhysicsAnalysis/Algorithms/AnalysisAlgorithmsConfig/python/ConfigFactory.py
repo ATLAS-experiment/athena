@@ -277,8 +277,8 @@ class ConfigFactory():
             superBlocks="Jets")
 
         # muons
-        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibrationConfig
-        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibrationConfig)
+        from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonCalibration
+        self.addAlgConfigBlock(algName="Muons", alg=MuonCalibration)
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import MuonWorkingPoint
         self.addAlgConfigBlock(algName="WorkingPoint", alg=MuonWorkingPoint,
             superBlocks="Muons")
@@ -293,8 +293,8 @@ class ConfigFactory():
                                superBlocks="Muons")
 
         # electrons
-        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibrationConfig
-        self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibrationConfig)
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronCalibration
+        self.addAlgConfigBlock(algName="Electrons", alg=ElectronCalibration)
         from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import ElectronWorkingPoint
         self.addAlgConfigBlock(algName="WorkingPoint", alg=ElectronWorkingPoint,
             superBlocks="Electrons")

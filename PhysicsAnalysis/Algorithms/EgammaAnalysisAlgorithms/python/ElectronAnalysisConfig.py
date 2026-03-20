@@ -16,11 +16,11 @@ from xAODEgamma.xAODEgammaParameters import xAOD
 import PATCore.ParticleDataType
 
 
-class ElectronCalibrationConfig (ConfigBlock) :
+class ElectronMomentumCalibrationConfig (ConfigBlock) :
     """the ConfigBlock for the electron four-momentum correction"""
 
     def __init__ (self) :
-        super (ElectronCalibrationConfig, self).__init__ ()
+        super (ElectronMomentumCalibrationConfig, self).__init__ ()
         self.setBlockName('Electrons')
         self.addOption ('inputContainer', '', type=str,
             info="the name of the input electron container. If left empty, automatically defaults "
@@ -64,17 +64,10 @@ class ElectronCalibrationConfig (ConfigBlock) :
             "slower first step only has to be run once, while the second is run "
             "once per systematic. ATLASG-2358.",
             expertMode=True)
-        self.addOption ('runTrackBiasing', False, type=bool,
-            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for "
-            "tracks associated to electrons. The tool does not have Run 3 "
-            "recommendations yet.",
-            expertMode=True)
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate truth particle information on the reconstructed one.")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
             info=r"decorate the calo cluster $\eta$.")
-        self.addOption ('writeTrackD0Z0', False, type = bool,
-            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
         self.addOption ('decorateEmva', False, type=bool,
             info="decorate `E_mva_only` on the electrons (needed for columnar tools/PHYSLITE).")
         self.addOption ('decorateSamplingPattern', False, type=bool,
@@ -92,7 +85,7 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
         Factoring this out into its own function, as we want to
         instantiate it in multiple places"""
-        log = logging.getLogger('ElectronCalibrationConfig')
+        log = logging.getLogger('ElectronMomentumCalibrationConfig')
 
         # Set up the calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::EgammaCalibrationAndSmearingAlg', name )
@@ -258,16 +251,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
             log.warning("You are not applying the isolation corrections")
             log.warning("This is only intended to be used for testing purposes")
 
-        # Additional decorations
-        if self.writeTrackD0Z0:
-            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
-                                          'LeptonTrackDecorator' )
-            if config.dataType() is not DataType.Data:
-                if self.runTrackBiasing:
-                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
-                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
-            alg.particles = config.readName (self.containerName)
-
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
 
@@ -278,13 +261,6 @@ class ElectronCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
         config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
 
-        if self.writeTrackD0Z0:
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
-            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
-
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
             config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True, auxType='int')
@@ -293,6 +269,51 @@ class ElectronCalibrationConfig (ConfigBlock) :
             config.addOutputVar (self.containerName, "firstEgMotherPdgId", "truth_firstEgMotherPdgId", noSys=True, auxType='int')
             config.addOutputVar (self.containerName, "firstEgMotherTruthOrigin", "truth_firstEgMotherTruthOrigin", noSys=True, auxType='int')
             config.addOutputVar (self.containerName, "firstEgMotherTruthType", "truth_firstEgMotherTruthType", noSys=True, auxType='int')
+
+
+class ElectronIPCalibrationConfig (ConfigBlock) :
+    """the ConfigBlock for the electron impact parameter correction"""
+
+    def __init__ (self) :
+        super (ElectronIPCalibrationConfig, self).__init__ ()
+        self.setBlockName('ElectronIPCalibration')
+        self.addDependency('Electrons', required=True)
+        self.addDependency('ElectronWorkingPointSelection', required=False)
+        self.addOption ('containerName', '', type=str,
+            noneAction='error',
+            info="the name of the output container after calibration.")
+        self.addOption ('postfix', '', type=str,
+            info="a postfix to apply to decorations and algorithm names. Typically "
+            "not needed here since the calibration is common to all electrons.")
+        self.addOption ('runTrackBiasing', False, type=bool,
+            info="EXPERIMENTAL: This enables the `InDetTrackBiasingTool`, for "
+            "tracks associated to electrons. The tool does not have Run 3 "
+            "recommendations yet.",
+            expertMode=True)
+        self.addOption ('writeTrackD0Z0', False, type = bool,
+            info=r"save the $d_0$ significance and $z_0\sin\theta$ variables.")
+
+    def instanceName (self) :
+        """Return the instance name for this block"""
+        return self.containerName + self.postfix
+
+    def makeAlgs (self, config) :
+
+        # Additional decorations
+        if self.writeTrackD0Z0:
+            alg = config.createAlgorithm( 'CP::AsgLeptonTrackDecorationAlg',
+                                          'LeptonTrackDecorator' )
+            if config.dataType() is not DataType.Data:
+                if self.runTrackBiasing:
+                    InDetTrackCalibrationConfig.makeTrackBiasingTool(config, alg)
+                InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
+            alg.particles = config.readName (self.containerName)
+
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
 
 
 class ElectronWorkingPointSelectionConfig (ConfigBlock) :
@@ -1068,6 +1089,10 @@ class ElectronLRTMergedConfig (ConfigBlock) :
         alg.OutputCollectionName = self.containerName
         alg.CreateViewCollection = False
 
+@groupBlocks
+def ElectronCalibration(seq):
+    seq.append(ElectronMomentumCalibrationConfig())
+    seq.append(ElectronIPCalibrationConfig())
 
 @groupBlocks
 def ElectronWorkingPoint(seq):
