@@ -47,7 +47,7 @@ class LArRodBlockPhysicsV2 : public LArRodBlockStructure
 {
 public:
   // constructor
-  LArRodBlockPhysicsV2();
+  LArRodBlockPhysicsV2(IMessageSvc* msgSvc);
 
 protected:
   // ----------------- Header words indexes -----------------
@@ -70,7 +70,7 @@ protected:
   };
 
  public:
-  std::string BlockType() { return std::string("RodBlockPhysicsV2");}
+  static std::string BlockType() { return std::string("RodBlockPhysicsV2");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
   virtual void initializeFragment(std::vector<uint32_t>& fragment);
@@ -140,11 +140,6 @@ protected:
   //Private functions:
   inline int FebToRodChannel(int ch) const;
   void setNextEnergy(const int32_t energy, const int32_t time, const int32_t quality, const uint32_t gain);
-
-  // log message 
-  MsgStream m_logstr;
-
-
 };
 
 inline int LArRodBlockPhysicsV2::FebToRodChannel(int ch) const

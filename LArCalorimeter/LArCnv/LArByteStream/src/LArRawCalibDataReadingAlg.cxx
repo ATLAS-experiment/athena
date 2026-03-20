@@ -257,11 +257,11 @@ StatusCode LArRawCalibDataReadingAlg::execute(const EventContext& ctx) const {
       rodBlockType=rob.rod_detev_type()&0xff;
       ATH_MSG_VERBOSE("Found version " << rodMinorVersion <<  " of Rod Block Type  " <<  rodBlockType);
       if (rodBlockType==10) { // Accumulated  digits
-	  rodBlock.reset(new LArRodBlockAccumulatedV3);
+         rodBlock.reset(new LArRodBlockAccumulatedV3 (this->msgSvc().get()));
       }//end of rodBlockType ==10
       else if (rodBlockType==7 || rodBlockType==2) { // Calib. digits
          if(rodMinorVersion>=6) { // Accumulated calib. digits
-            rodBlock.reset(new LArRodBlockCalibrationV3);
+            rodBlock.reset(new LArRodBlockCalibrationV3 (this->msgSvc().get()));
          } else {
             ATH_MSG_ERROR("Found unsupported ROD Block version " << rodMinorVersion
                         << " of ROD block type " << rodBlockType);

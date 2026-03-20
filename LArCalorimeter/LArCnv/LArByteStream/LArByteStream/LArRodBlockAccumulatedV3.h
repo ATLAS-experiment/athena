@@ -54,10 +54,10 @@ public:
     NStep
   };
   // constructor
-  LArRodBlockAccumulatedV3();
+  LArRodBlockAccumulatedV3(IMessageSvc* msgSvc);
  
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockAccumulatedV3");}
+  static std::string BlockType() { return std::string("RodBlockAccumulatedV3");}
  public:
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!

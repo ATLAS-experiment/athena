@@ -53,9 +53,9 @@ class LArRodBlockTransparentV0 : public LArRodBlockStructure
 {
 public:
   // constructor
-  LArRodBlockTransparentV0();
+  LArRodBlockTransparentV0(IMessageSvc* msgSvc);
   // ------ Identify RodBlockStructure -------
-  std::string BlockType() { return std::string("RodBlockTransparentV0");}
+  static std::string BlockType() { return std::string("RodBlockTransparentV0");}
   // ----------------- Encoding methods -----------------
   // Never to be used while decoding!
   virtual void initializeFragment(std::vector<uint32_t>& fragment);

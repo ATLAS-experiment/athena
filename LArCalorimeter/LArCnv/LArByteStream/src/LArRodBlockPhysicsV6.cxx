@@ -31,8 +31,8 @@ union ShortLong {
 };
 }
 
-LArRodBlockPhysicsV6::LArRodBlockPhysicsV6()
-  : LArRodBlockStructure(),
+LArRodBlockPhysicsV6::LArRodBlockPhysicsV6(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType()),
     m_onlineHelper(nullptr)
 {
   m_iHeadBlockSize=endtag/2; // The implicit cast rounds down to the right size 

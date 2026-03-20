@@ -34,8 +34,8 @@ union ShortLong {
 
 const uint32_t LArRodBlockPhysicsV2::m_DummyBitMap[4]={0,0,0,0};
 
-LArRodBlockPhysicsV2::LArRodBlockPhysicsV2() : LArRodBlockStructure(),
-m_logstr(Athena::getMessageSvc(), BlockType())
+LArRodBlockPhysicsV2::LArRodBlockPhysicsV2(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 {  
  // retrieve onlineHelper
  const LArOnlineID* online_id;

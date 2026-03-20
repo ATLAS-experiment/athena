@@ -20,7 +20,8 @@
 #endif
 
 
-LArRodBlockCalibrationV3::LArRodBlockCalibrationV3() : LArRodBlockStructure()
+LArRodBlockCalibrationV3::LArRodBlockCalibrationV3(IMessageSvc* msgSvc)
+  : LArRodBlockStructure(msgSvc, BlockType())
 {
   m_iHeadBlockSize=endtag/2; // The implicit cast rounds down to the right size 
   m_fixedGain=CaloGain::LARNGAIN;
