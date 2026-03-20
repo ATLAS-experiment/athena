@@ -129,7 +129,7 @@ void  ActsTrk::CaloBlueprintNodeBuilder::fillMaps(caloSampleSurfaceMap_t& caloSa
     caloSampleDDEElementsMap[currentSample] = std::vector<const CaloDetDescrElement*>();
   }
 
-  for (auto currentSample : m_caloDiscSampleList) {
+  for (const auto & currentSample : m_caloDiscSampleList) {
     caloSampleSurfaceMap[currentSample] = std::vector<std::shared_ptr<Surface> >();
     caloSampleDDEElementsMap[currentSample] = std::vector<const CaloDetDescrElement*>();
   }
