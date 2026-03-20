@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_CLASSID_TRAITS_H
@@ -41,7 +41,7 @@ struct ClassID_traits {
   using has_classID_tag = std::false_type;
   static const int s_version = 0;
 
-  static CLID ID() {
+  static constexpr CLID ID() {
     MY_STATIC_ASSERT(s_isDataObject);
     return CLID_NULL;
   }
@@ -72,7 +72,7 @@ struct ClassID_traits<T> {
   static const bool s_isDataObject = true;
 
   ///the CLID of T
-  static const CLID& ID() { 
+  static CLID ID() {
     return T::classID(); 
   }
 

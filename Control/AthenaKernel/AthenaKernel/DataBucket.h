@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_DATABUCKET_H
@@ -43,7 +43,7 @@ namespace SG {
   
     // DATAOBJECT METHODS
     virtual const CLID& clID() const override;
-    static const CLID& classID();
+    static CLID classID();
 
     // return the pointer as a void*
     virtual void* object() override
