@@ -96,7 +96,7 @@ namespace Trig {
 
 #if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full Athena
   template<typename T> struct link_or_not<T,true>{
-    static const bool known =  IsKnownFeature<T>::value; //will cause compile error if not
+    static_assert( IsKnownFeature<T>::value );
     using container_type = Features2Container_t<T>;
     using type = Features2LinkHelper_t<T,container_type>;
   };

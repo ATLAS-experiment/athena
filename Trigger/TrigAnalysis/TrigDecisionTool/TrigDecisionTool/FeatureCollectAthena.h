@@ -146,7 +146,7 @@ namespace Trig {
     struct get_links {
 
       template<class FEATURE>
-      void do_it() {
+      void operator()() {
 
         using container_type = Features2Container_t<FEATURE,EDMLIST>;
         using object_type = Features2Object_t<FEATURE,EDMLIST>;
@@ -214,7 +214,7 @@ namespace Trig {
       using object_type = Features2Object_t<T>;
       using feature_list = Object2Features_t<object_type>;
       get_links<T,TypeInfo_EDM> link_getter{te, &data, label, condition, teName, navigation, &result, &sourceTE};
-      HLT::TypeInformation::for_each_type<feature_list,get_links<T,TypeInfo_EDM> >::do_it(&link_getter);
+      feature_list::for_each(link_getter);
 #endif
 
       if (result){
