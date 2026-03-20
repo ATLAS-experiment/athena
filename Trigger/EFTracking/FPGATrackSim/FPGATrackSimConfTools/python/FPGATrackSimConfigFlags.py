@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.Constants
 from AthenaConfiguration.Enums import FlagEnum
 
@@ -19,6 +19,7 @@ def createFPGATrackSimConfigFlags():
     cf.addFlag('doMultiTruth', True)
     cf.addFlag('SetTruthParametersForTracks', -1)
     cf.addFlag('FPGATrackSimTestFiles', '')
+    cf.addFlag('SortTracks', False)
     cf.addFlag('FPGATrackSimMatrixFileRegEx', [])
     cf.addFlag('FPGATrackSimMaxnMatrixInputFiles', -1)
     cf.addFlag('outputMergedFPGATrackSimMatrixFile', 'combined_matrix.root')
@@ -148,6 +149,12 @@ def createFPGATrackSimConfigFlags():
     # ACTS Tracking
     cf.addFlag('runCKF',False)
     cf.addFlag('useFPGATruthTrackMatching',False)
+
+
+    # use cut on eta and phi specific chi2 for analytical fitter
+    cf.addFlag('applyEtaPhiChi2Cuts', False)
+    cf.addFlag('applyEtaPhiChi2Cuts4HitOnly', False)
+
     return cf
 
 
@@ -192,6 +199,7 @@ def createBasicFPGATrackSimConfigFlags():
     #pass lowest chi2 track
     cf.addFlag('passLowestChi2TrackOnly', False)
 
+    
     # hough
     cf.addFlag('xVar', 'phi')
     cf.addFlag('yVar', 'q/pt')
@@ -376,6 +384,7 @@ def createGenScanFPGATrackSimConfigFlags():
     cf.addFlag('layerMapFile','')
     cf.addFlag('useLayerRadiiFile',False)
     cf.addFlag('noCuts',False)
+    cf.addFlag('multiStepBinning',False)
 
     cf.addFlag('filterInBin', False)
     cf.addFlag('phiChi2Weight', 1.0)

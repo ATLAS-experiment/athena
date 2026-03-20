@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
@@ -32,6 +32,19 @@ def getNSubregions(filePath):
         n = fields.split()[1]
         return int(n)
 
+def getCutSetFromPath(flags):
+    # this allows the cut file defined in python to be loaded from the map directory
+    cutpath = os.path.join(
+            PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
+            f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
+    log.info("Cut File = %s", cutpath)
+    spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,cutpath)
+    if spec is None:
+        log.error("Failed to find Cut File: %s", cutpath)
+    cutmodule = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(cutmodule)
+    cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+    return cutset
 
 # Need to figure out if we have two output writers or somehow only one.
 def FPGATrackSimWriteOutputCfg(flags):
@@ -254,17 +267,7 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
             toload = 'FPGATrackSimHough.FPGATrackSimGenScanCuts_incr'
         cutset = importlib.import_module(toload).cuts[flags.Trigger.FPGATrackSim.region]
     else:
-        # this allows the cut file defined in python to be loaded from the map directory
-        cutpath = os.path.join(
-             PathResolver.FindCalibDirectory(flags.Trigger.FPGATrackSim.mapsDir),
-             f"{flags.Trigger.FPGATrackSim.GenScan.genScanCuts}.py")
-        print("Cut File = ", cutpath)
-        spec=importlib.util.spec_from_file_location(flags.Trigger.FPGATrackSim.GenScan.genScanCuts,cutpath)
-        if spec is None:
-            print("Failed to find Cut File")
-        cutmodule = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(cutmodule)
-        cutset=cutmodule.cuts[flags.Trigger.FPGATrackSim.region]
+        cutset = getCutSetFromPath(flags)
 
     # make the binned hits class
     BinnnedHits = CompFactory.FPGATrackSimBinnedHits("BinnedHits_1stStage")
@@ -367,13 +370,14 @@ def FPGATrackSimRoadUnionToolGenScanCfg(flags,name="FPGATrackSimRoadUnionToolGen
     tool.binFilter=flags.Trigger.FPGATrackSim.GenScan.binFilter
     tool.reversePairDir=flags.Trigger.FPGATrackSim.GenScan.reverse
     tool.applyPairFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts
-    tool.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
+    tool.applyPairSetFilter= not flags.Trigger.FPGATrackSim.GenScan.noCuts    
     tool.threshold = 4
 
     # set cuts
     for (cut,val) in cutset.items():
         if cut in ["parBins","parSet","parMin","parMax"]:
+            continue
+        if "pairSetChi2" in cut:
             continue
         setattr(tool,cut,val)
 
@@ -637,6 +641,20 @@ def FPGATrackSimLogicalHitsProcessAlgCfg(inputFlags,name="FPGATrackSimLogicalHit
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = getChi2CutNN(flags.Trigger.FPGATrackSim.region)
     else:
         theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = flags.Trigger.FPGATrackSim.ActiveConfig.chi2cut
+
+    if flags.Trigger.FPGATrackSim.applyEtaPhiChi2Cuts:
+        cutset = getCutSetFromPath(flags)
+        theFPGATrackSimLogicalHitsProcessAlg.TrackScoreCut = 1e10
+        scale = 1.0
+        if flags.Trigger.FPGATrackSim.applyEtaPhiChi2Cuts4HitOnly:
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2PhiCut = [1e10,scale*cutset["pairSetChi2PhiCut_best_lowPt_4"]]
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2EtaCut = [1e10,scale*cutset["pairSetChi2EtaCut_best_lowPt_4"]]
+        else:
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2PhiCut = [cutset["pairSetChi2PhiCut_best_lowPt_5"],cutset["pairSetChi2PhiCut_best_lowPt_4"]]
+            theFPGATrackSimLogicalHitsProcessAlg.Chi2EtaCut = [cutset["pairSetChi2EtaCut_best_lowPt_5"],cutset["pairSetChi2EtaCut_best_lowPt_4"]]
+        
+    theFPGATrackSimLogicalHitsProcessAlg.keepHitsStrategy = flags.Trigger.FPGATrackSim.GenScan.keepHitsStrategy
+
     theFPGATrackSimLogicalHitsProcessAlg.passLowestChi2TrackOnly = flags.Trigger.FPGATrackSim.ActiveConfig.passLowestChi2TrackOnly
     theFPGATrackSimLogicalHitsProcessAlg.secondStageStrips = (not flags.Trigger.FPGATrackSim.ActiveConfig.GNN)
     FPGATrackSimMaping = result.getPrimaryAndMerge(FPGATrackSimDataPrepConfig.FPGATrackSimMappingCfg(flags))
@@ -779,13 +797,25 @@ def getChi2CutNN(region):
     return eta_to_chi2.get(abs_etaRange, 0.99) 
 
 
+def ConfigureMultiRegionFlags(flags):
+    print(f"Input Region: {flags.Trigger.FPGATrackSim.regionList} and RegionList: {flags.Trigger.FPGATrackSim.regionList}")
+    # convert regex to array of regions
+    if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
+        flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
+    else: # otherwise use the regionList (this overrides the region flag)
+        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+        flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)    
+    print(f"Running for regions: {flags.Trigger.FPGATrackSim.regionList}")
+
+
+
 def FPGATrackSimF150FlagCfg(flags):    
     FPGATrackSimDataPrepConfig.FPGATrackSimDataPrepFlagCfg(flags)
-    
+        
     flags.Scheduler.ShowDataDeps=True 
-    flags.Scheduler.CheckDependencies=True
+    flags.Scheduler.CheckDependencies=True    
     flags.Debug.DumpEvtStore=False
-    
+
     flags.Trigger.FPGATrackSim.readOfflineObjects=False
     flags.Trigger.FPGATrackSim.doMultiTruth=False
     
@@ -802,7 +832,25 @@ def FPGATrackSimF150FlagCfg(flags):
     flags.Trigger.FPGATrackSim.ExtensionNNVolonnxFile=''
     flags.Trigger.FPGATrackSim.ExtensionNNHitonnxFile=''
     
+    ConfigureMultiRegionFlags(flags)
+    
     return flags
+
+
+# # this is meant to be called in the preExec
+# def FPGATrackSimDoF150FlagCfg():
+#     flags=AthConfigFlags()
+#     print("Calling the F150 preExec flag configuration")
+#     FPGATrackSimF150FlagCfg(flags)
+
+# this is meant to be called in the preExec
+def FPGATrackSimHello():
+    print("HELLO!!!!")
+
+# this is meant to be called in the preExec
+def FPGATrackSimPreInclude(flags):
+    print("Loading FPGATrackSim Config")
+    
 
 def FPGATrackSimSeedingCfg(flags):
     acc=ComponentAccumulator()

@@ -1,9 +1,11 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import AthenaLogger
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from math import pi
+from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
+
 
 def nameWithRegionSuffix(flags, basename):
   return f"{basename}_reg{flags.Trigger.FPGATrackSim.region}"
@@ -447,7 +449,6 @@ def FPGATrackSimRegionFlagCfg(flags):
     if flags.Trigger.FPGATrackSim.regionList == "": # in case of empty list just use the region set to flags.Trigger.FPGATrackSim.region
         flags.Trigger.FPGATrackSim.regionList = [flags.Trigger.FPGATrackSim.region]
     else: # otherwise use the regionList (this overrides the region flag)
-        from FPGATrackSimConfTools.FPGATrackSimHelperFunctions import convertRegionsExpressionToArray
         flags.Trigger.FPGATrackSim.regionList = convertRegionsExpressionToArray(flags.Trigger.FPGATrackSim.regionList)
     return flags
 
@@ -472,7 +473,7 @@ def FPGATrackSimClusteringCfg(flags): # to be used in the Reco_tf configuration
             'xAODPixelClusterFromFPGAHitKey': 'FPGAPixelClusters',
             'xAODStripClusterFromFPGAHitKey': 'FPGAStripClusters',
             'xAODPixelSpacePointFromFPGAKey': 'ITkPixelSpacePoints',
-            'doActsTrk': True,
+            'doActsTrk': False,
             'useRoads': False,          
             'doClusters': False,
             'doHits': True,

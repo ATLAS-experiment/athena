@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGFPGATrackSimOBJECTS_FPGATrackSimTRACK_H
@@ -50,6 +50,10 @@ class FPGATrackSimTrack {
   int getRegion() const { return m_region; }
   unsigned getHoughXBin() const { return m_xBin; }
   unsigned getHoughYBin() const { return m_yBin; }
+
+  // gets the number of non-null hits
+  int getNHits() const { return std::count_if(m_hit_ptrs.begin(), m_hit_ptrs.end(), [](const std::shared_ptr<const FPGATrackSimHit>& hit) { return hit && hit->isReal();});}
+  layer_bitmask_t getHitMask() const;
 
   int   getNMissing() const { return m_nmissing; } // missing coordinates
   unsigned int getTypeMask() const { return m_typemask; }
