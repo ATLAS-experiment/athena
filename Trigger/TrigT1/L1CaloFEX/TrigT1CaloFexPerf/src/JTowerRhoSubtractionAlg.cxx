@@ -175,9 +175,7 @@ namespace LVL1
       ATH_MSG_ERROR("Failed to retrieve " << m_inputKey.key());
       return StatusCode::FAILURE;
     }
-    auto shallowCopy = xAOD::shallowCopyContainer(*inputTowers);
-    std::unique_ptr<xAOD::JGTowerContainer> outputTowers(shallowCopy.first);
-    std::unique_ptr<xAOD::ShallowAuxContainer> outputTowersAux(shallowCopy.second);
+    auto [outputTowers,outputTowersAux] = xAOD::shallowCopyContainer(*inputTowers,ctx);
     xAOD::setOriginalObjectLink(*inputTowers, *outputTowers);
 
     static const JFEXBins jFEXBins = buildFexBins (inputTowers.cptr());
