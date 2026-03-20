@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ITkPixelTranslatorAlg.h"
@@ -22,9 +22,9 @@ StatusCode ITkPixelTranslatorAlg::initialize(){
 StatusCode ITkPixelTranslatorAlg::execute(const EventContext& ctx) const {
     SG::ReadHandle<PixelRDO_Container> rdoContainerHandle(m_pixelRDOKey, ctx);
     std::unique_ptr<ITkPixelRDO_Container> itkpixelrdocontainer = std::make_unique<ITkPixelRDO_Container>(m_pixelId->wafer_hash_max());
-    for (const auto& coll : *rdoContainerHandle){
+    for (const auto* coll : *rdoContainerHandle){
         std::unique_ptr<InDetRawDataCollection< ITkPixelRDORawData >> itkColl = std::make_unique<InDetRawDataCollection< ITkPixelRDORawData >>(coll->identifyHash());
-        for (const auto& rdo : *coll){
+        for (const PixelRDORawData* rdo : *coll){
             std::unique_ptr<ITkPixel1RawData> itkrdo = std::make_unique<ITkPixel1RawData>(rdo->identify(), rdo->getWord());
             itkColl->push_back(itkrdo.release());
         }
