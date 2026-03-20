@@ -30,6 +30,8 @@ from DerivationFrameworkMCTruth.TRUTH3 import TRUTH3Cfg
 from DerivationFrameworkPhys.PHYS import PHYSCfg
 # PHYSLITE - calibrated physics analysis objects, reduced slimming list
 from DerivationFrameworkPhys.PHYSLITE import PHYSLITECfg
+# TREASURE - extended PHYSLITE for TREASURE
+from DerivationFrameworkPhys.TREASURE import TREASURECfg
 # SKIM - format allowing skimming of PHYS/PHYSLITE via a command line string
 from DerivationFrameworkPhys.SKIM import SKIMCfg
 
@@ -197,5 +199,5 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg','TE
            'MUON1Cfg','MUON5Cfg',
            'TLA0Cfg', 'TLA1Cfg', 'TLA2Cfg',
            'HION2Cfg','HION4Cfg','HION5Cfg','HION7Cfg','HION12Cfg','HION14Cfg','HION15Cfg','HIONHPODCfg',
-           'NCB1Cfg'
+           'NCB1Cfg', 'TREASURECfg'
            ]
