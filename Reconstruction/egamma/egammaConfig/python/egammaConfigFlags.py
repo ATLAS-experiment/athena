@@ -62,6 +62,7 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Calib.SuperClusterCorrectionVersion",
                  'v12phiflip_supercluster')
     egcf.addFlag("Egamma.Calib.MVAVersion", 'egammaMVACalib/offline/v7')
+    egcf.addFlag("Egamma.Calib.TransformerVersion", 'egammaMVACalib/offline/v11/')
 
     # The input keys
     egcf.addFlag("Egamma.Keys.Input.CaloCells",
