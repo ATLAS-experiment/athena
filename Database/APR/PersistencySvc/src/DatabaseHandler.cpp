@@ -12,7 +12,7 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbConnection.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <exception>
 #include <memory>

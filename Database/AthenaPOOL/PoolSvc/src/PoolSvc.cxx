@@ -21,7 +21,6 @@
 
 #include "CollectionSvc/CollectionService.h"
 
-#include "POOLCore/DbPrint.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/IContainer.h"
@@ -30,6 +29,7 @@
 #include "PersistencySvc/DatabaseConnectionPolicy.h"
 #include "PersistencySvc/IFileCatalog.h"
 #include "StorageSvc/DbType.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "RelationalAccess/ConnectionService.h"
 #include "RelationalAccess/IConnectionServiceConfiguration.h"

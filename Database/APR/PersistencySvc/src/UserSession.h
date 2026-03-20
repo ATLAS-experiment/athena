@@ -7,8 +7,7 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "PersistencySvc/ISession.h"
-
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <map>
 

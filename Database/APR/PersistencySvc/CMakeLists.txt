@@ -13,12 +13,9 @@ atlas_add_library( PersistencySvc
    src/*.cpp src/*.h src/*.inl
    PUBLIC_HEADERS PersistencySvc
    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} GaudiUtils
-   LINK_LIBRARIES CxxUtils DataModelRoot POOLCore StorageSvc
+   LINK_LIBRARIES CxxUtils DataModelRoot StorageSvc
    PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} ${ROOT_LIBRARIES} AthenaKernel
    GaudiKernel PersistentDataModel )
-
-atlas_add_dictionary( PersistencySvcDict PersistencySvc/dict.h PersistencySvc/dict.xml
-   LINK_LIBRARIES PersistencySvc )
    
 atlas_add_executable( pool_extractFileIdentifier
    utilities/pool_extractFileIdentifier.cpp
@@ -26,11 +23,14 @@ atlas_add_executable( pool_extractFileIdentifier
 
 atlas_add_executable( pool_insertFileToCatalog
    utilities/pool_insertFileToCatalog.cpp
-   LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
+   LINK_LIBRARIES CxxUtils PersistencySvc )
 
 atlas_add_executable( FCcmd
    utilities/FCcmd.cpp
-   LINK_LIBRARIES POOLCore PersistencySvc )
+   LINK_LIBRARIES PersistencySvc )
+
+# Install files from the package:
+atlas_install_scripts( scripts/*.py )
 
 atlas_add_test( FCcmd
    SCRIPT test/FCcmd_test.sh )

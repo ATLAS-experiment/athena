@@ -8,7 +8,7 @@
 // Framework include files
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 /*
  *   POOL namespace declaration
@@ -19,7 +19,7 @@ namespace pool  {
   class DbOption;
   class IOODatabase;
 
-  /** @class DbStorageSvc DbStorageSvc.h POOLCore/DbStorageSvc.h
+  /** @class DbStorageSvc DbStorageSvc.h StorageSvc/DbStorageSvc.h
     *
     * The DbStorageSvc class is able to handle user request for
     *     - transient objects to become persistent and
@@ -29,7 +29,7 @@ namespace pool  {
     *
     * This functionality is defined in the IDbStorageSvc interface and 
     * implemented in the DbStorageSvc class. Please refer to the header
-    * file POOLCore/IDbStorageSvc for further details.
+    * file StorageSvc/IStorageSvc for further details.
     *
     * @author  Markus Frank
     * @version 1.0

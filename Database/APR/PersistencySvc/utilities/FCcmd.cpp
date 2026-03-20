@@ -7,7 +7,7 @@
 */
 
 #include "PersistencySvc/IFileCatalog.h"
-#include "POOLCore/SystemTools.h"
+#include "StorageSvc/SimpleUtilityBase.h"
 
 #include <exception>
 #include <memory>
@@ -95,7 +95,7 @@ inline bool          Options::exists( char opt ) const { return m_argMap.find(op
 
 int main(int argc, char** argv)
 {
-    SystemTools::initGaudi();
+    SimpleUtilityBase::initGaudi();
 
     Options options(argc, argv);
     // possible options:
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
     if( options.exists('u') ){
         catName=options.getOptByName('u');
     }else{
-        catName=SystemTools::GetEnvStr("POOL_CATALOG");
+        catName=getEnvStr("POOL_CATALOG");
     }
     string lfn    = options.getOptByName('l');
     string pfn    = options.getOptByName('p');

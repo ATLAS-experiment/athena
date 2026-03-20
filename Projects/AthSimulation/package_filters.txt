@@ -60,7 +60,6 @@
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
 + Database/APR/CollectionSvc
-+ Database/APR/POOLCore
 + Database/APR/PersistencySvc
 + Database/APR/RootCollection
 + Database/APR/RootStorageSvc

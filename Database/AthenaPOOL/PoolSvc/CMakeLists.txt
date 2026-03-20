@@ -15,4 +15,4 @@ atlas_add_library( PoolSvcLib
 atlas_add_component( PoolSvc
                      PoolSvc/*.h src/*.cxx src/components/*.cxx
                      INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DBReplicaSvcLib DataModelRoot GaudiKernel POOLCore PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )
+                     LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaBaseComps CollectionSvc CxxUtils DBReplicaSvcLib DataModelRoot GaudiKernel PathResolver PersistencySvc PersistentDataModel PoolSvcLib StorageSvc )

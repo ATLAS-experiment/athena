@@ -15,7 +15,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "StorageSvc/IDbDatabase.h"
 #include "StorageSvc/DbDatabase.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include <set>
 #include <map>

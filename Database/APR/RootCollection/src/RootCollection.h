@@ -8,8 +8,7 @@
 #include "CollectionSvc/ICollection.h"
 #include "CollectionSvc/CollectionDescription.h"
 #include "CollectionSvc/CollectionRowBuffer.h"
-
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "GaudiKernel/IFileMgr.h"
 #include "GaudiKernel/SmartIF.h"

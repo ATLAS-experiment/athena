@@ -16,13 +16,13 @@ atlas_add_library( RootCollection
                                 ${VDT_INCLUDE_DIRS} #VDT needed by RNTuple 
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES}
-		   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionSvc POOLCore
+		   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionSvc
                         GaudiKernel PersistencySvc PersistentDataModel RootUtils AthenaBaseComps CxxUtils)
 
 atlas_add_component( RootCollectionComponents
                    src/components/*.cpp
                    NO_PUBLIC_HEADERS
-		   LINK_LIBRARIES CollectionSvc RootCollection POOLCore )
+		   LINK_LIBRARIES CollectionSvc RootCollection )
 
 atlas_add_test( ttree_coll_rw_test
                 SOURCES test/ttree_rw_test.cxx test/rw_test.cxx

@@ -20,7 +20,6 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/IDbDomain.h"
 #include "StorageSvc/IOODatabase.h"
-#include "POOLCore/DbPrint.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/errorcheck.h"

@@ -8,7 +8,7 @@
 #include "PersistencySvc/IDatabase.h"
 #include "PersistencySvc/ISession.h"
 #include "PersistencySvc/ITechnologySpecificAttributes.h"
-#include "POOLCore/DbPrint.h"
+#include "StorageSvc/DbPrint.h"
 
 namespace pool {
   // forward declarations

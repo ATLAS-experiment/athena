@@ -5,16 +5,22 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "PersistencySvc/SimpleUtilityBase.h"
-
+#include "StorageSvc/SimpleUtilityBase.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbConnection.h"
+#include "StorageSvc/DbPrint.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "GaudiKernel/IAppMgrUI.h"
+#include "GaudiKernel/Bootstrap.h"
+#include "GaudiKernel/ISvcManager.h"
+#include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/IProperty.h"
+
 
 #include "TError.h"
 
@@ -114,6 +120,37 @@ int SimpleUtilityBase::run()
       return 1;
    }
    return 0;
+}
+
+
+bool SimpleUtilityBase::initGaudi()   {
+   // Create an instance of an application manager
+   IInterface* iface = Gaudi::createApplicationMgr();
+   if( !iface ) {
+      DbPrint log("APR.initGaudi");
+      log << MSG::WARNING << "Gaudi framework failed to initialize" << endmsg;
+      return false;
+   }
+   SmartIF<IAppMgrUI> appMgr(iface);
+   SmartIF<IProperty> propMgr(iface);
+   
+   propMgr->setProperty( "JobOptionsType", "NONE" ).
+   orThrow("Cannot set JobOptionsType property", "initGaudi");
+   // prevents unwanted output from the AppMgr
+   propMgr->setProperty( "OutputLevel", "4" ).
+   orThrow("Cannot set OutputLevel property", "initGaudi");
+   // minimal configuration
+   propMgr->setProperty( "EventLoop", "MinimalEventLoopMgr" ).
+   orThrow("Cannot set EventLoop property", "initGaudi");
+   // this prevents AppMgr "welcome" output
+   propMgr->setProperty( "AppName", "" ).
+   orThrow("Cannot set AppName property", "initGaudi");
+   
+   if( !appMgr->configure().isSuccess() || !appMgr->initialize().isSuccess() ) {
+      std::cerr << "Gaudi ApplicationMgr failed to initialize" << std::endl;
+      return false;
+   }
+   return true;
 }
 
 

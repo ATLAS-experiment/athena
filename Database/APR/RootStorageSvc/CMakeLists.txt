@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RootStorageSvc )
@@ -14,7 +14,7 @@ atlas_add_component( RootStorageSvc
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
                    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} RootUtils RootUtilsPyROOT
-                                          RootAuxDynIOHeaders StorageSvc POOLCore
+                                          RootAuxDynIOHeaders StorageSvc
                                           GaudiKernel AthenaKernel CxxUtils AthenaBaseComps
                 ) 
 

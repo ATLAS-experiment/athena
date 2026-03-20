@@ -14,12 +14,12 @@ atlas_add_library( CollectionSvc
 		               PUBLIC_HEADERS CollectionSvc
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
 		               LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils StorageSvc
-                   PRIVATE_LINK_LIBRARIES CxxUtils POOLCore PersistencySvc )
+                   PRIVATE_LINK_LIBRARIES CxxUtils PersistencySvc )
 
 atlas_add_component( CollectionSvcComponents
     src/components/*.cpp
     NO_PUBLIC_HEADERS
-    LINK_LIBRARIES CollectionSvc POOLCore )
+    LINK_LIBRARIES CollectionSvc )
 
 atlas_add_dictionary( CollectionSvcDict
 		CollectionSvc/CollectionSvcDict.h
@@ -34,7 +34,7 @@ if( NOT GENERATIONBASE )
   atlas_add_test( Factory_test
                   SOURCES test/Factory_test.cxx
                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-		              LINK_LIBRARIES CollectionSvc POOLCore PersistentDataModel
+		              LINK_LIBRARIES CollectionSvc PersistentDataModel
                   ${ROOT_LIBRARIES}
                   PROPERTIES TIMEOUT 300 )
 

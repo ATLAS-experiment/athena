@@ -108,6 +108,10 @@ namespace pool   {
     /// Decrease the reference count 
     int subRef()   { return --m_count; }
   };
-    
+
+
+  /// Read an environment variable into string (returns empty string if not set)
+  std::string getEnvStr(const std::string& key);
+
 }
 #endif  // POOL_POOL_H
