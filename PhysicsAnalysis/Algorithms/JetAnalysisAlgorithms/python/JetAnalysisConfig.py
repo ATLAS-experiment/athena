@@ -190,25 +190,27 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 "Unsupported fJvt WP '{0}'".format(self.fJvtWP) )
 
         if not config.isPhyslite() or self.recalibratePhyslite:
-            # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
-            alg.HIsetup = self.jetInput == "HI"
-            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            # Create calibration tool as public so it can be shared
+            # (e.g. with FTAG1LITE's JetCalibratedPtDecoratorAlg).
+            # Must be created before the algorithm so EventLoop
+            # initialises the tool first.
+            calibToolName = 'JetCalibTool_' + jetCollectionName[:-4]
+            calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
+            calibTool.JetCollection = jetCollectionName[:-4]
             # Get the correct string to use in the config file name
             if self.jetInput == "EMPFlow":
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "PreRec_R22_PFlow_ResPU_EtaJES_GSC_February23_230215.config"
-                    alg.calibrationTool.CalibArea = "00-04-82"
+                    calibTool.CalibArea = "00-04-82"
                 elif config.geometry() >= LHCPeriod.Run3:
                     configFile = "AntiKt4EMPFlow_MC23a_PreRecR22_Phase2_CalibConfig_ResPU_EtaJES_GSC_241208_InSitu.config"
-                    alg.calibrationTool.CalibArea = "00-04-83"
+                    calibTool.CalibArea = "00-04-83"
             elif self.jetInput == "HI":
                 if config.geometry() is LHCPeriod.Run2:
                     configFile = "JES_MC16_HI_Jan2021_5TeV.config"
                 if config.geometry() is LHCPeriod.Run3:
                     configFile = "AntiKt4HI_MC23_EtaJES_Run3PreRec_Run2VJet_Run3EtaInt_5p36TeV.config"
-                    alg.calibrationTool.CalibArea = "00-04-83"
+                    calibTool.CalibArea = "00-04-83"
             else:
                 if config.dataType() is DataType.FastSim:
                     configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
@@ -216,25 +218,29 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                     configFile = "JES_MC16Recommendation_Consolidated_{0}_Apr2019_Rel21.config"
                 configFile = configFile.format(self.jetInput)
             if self.calibToolCalibArea is not None:
-                alg.calibrationTool.CalibArea = self.calibToolCalibArea
+                calibTool.CalibArea = self.calibToolCalibArea
             if self.calibToolConfigFile is not None:
                 configFile = self.calibToolConfigFile
-            alg.calibrationTool.ConfigFile = configFile
+            calibTool.ConfigFile = configFile
             if config.dataType() is DataType.Data:
                 if self.jetInput == "HI":
-                    alg.calibrationTool.CalibSequence = 'EtaJES_Insitu'
+                    calibTool.CalibSequence = 'EtaJES_Insitu'
                 else:
-                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
+                    calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Insitu'
             else:
                 if self.jetInput == "EMPFlow":
-                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
+                    calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC'
                 elif self.jetInput == "HI":
-                    alg.calibrationTool.CalibSequence = 'EtaJES'
+                    calibTool.CalibSequence = 'EtaJES'
                 else:
-                    alg.calibrationTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
+                    calibTool.CalibSequence = 'JetArea_Residual_EtaJES_GSC_Smear'
             if self.calibToolCalibSeq is not None:
-                alg.calibrationTool.CalibSequence = self.calibToolCalibSeq
-            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
+                calibTool.CalibSequence = self.calibToolCalibSeq
+            calibTool.IsData = (config.dataType() is DataType.Data)
+            # Prepare the jet calibration algorithm
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
+            alg.HIsetup = self.jetInput == "HI"
+            alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
 
@@ -364,26 +370,29 @@ class RScanJetAnalysisConfig (ConfigBlock) :
             if self.jetInput not in ["LCTopo", "HI"]:
                 raise ValueError(
                     "Unsupported input type '{0}' for R-scan jets!".format(self.jetInput) )
+            # Create calibration tool before algorithm (EventLoop ordering)
+            calibToolName = 'JetCalibTool_' + jetCollectionName[:-4]
+            calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
+            calibTool.JetCollection = jetCollectionName[:-4]
+            if self.jetInput=="LCTopo":
+                calibTool.ConfigFile = \
+                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
+                if config.dataType() is DataType.Data:
+                    calibTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
+                else:
+                    calibTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
+            elif self.jetInput=="HI":
+                calibTool.ConfigFile = \
+                    "JES_MC16_HI_Jan2021_5TeV.config"
+                if config.dataType() is DataType.Data:
+                    calibTool.CalibSequence = "EtaJES_Insitu"
+                else:
+                    calibTool.CalibSequence = "EtaJES"
+            calibTool.IsData = (config.dataType() is DataType.Data)
             # Prepare the jet calibration algorithm
             alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
             alg.HIsetup = self.jetInput == "HI"
-            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
-            if self.jetInput=="LCTopo":
-                alg.calibrationTool.ConfigFile = \
-                    "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(self.radius)
-                if config.dataType() is DataType.Data:
-                    alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
-                else:
-                    alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
-            elif self.jetInput=="HI":
-                alg.calibrationTool.ConfigFile = \
-                    "JES_MC16_HI_Jan2021_5TeV.config"
-                if config.dataType() is DataType.Data:
-                    alg.calibrationTool.CalibSequence = "EtaJES_Insitu"
-                else:
-                    alg.calibrationTool.CalibSequence = "EtaJES"
-            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
+            alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName (self.containerName)
             # Logging would be good
             log.warning("Uncertainties for R-Scan jets are not yet released!")
@@ -521,24 +530,27 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             calibArea = self.calibToolCalibArea
 
         if not config.isPhyslite() or self.recalibratePhyslite:
-            # Prepare the jet calibration algorithm
-            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
-            config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
+            # Create calibration tool before algorithm (EventLoop ordering)
+            calibToolName = 'JetCalibTool_' + jetCollectionName[:-4]
+            calibTool = config.createPublicTool( 'JetCalibrationTool', calibToolName )
 
-            alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+            calibTool.JetCollection = jetCollectionName[:-4]
 
             if configFile is None:
                 raise ValueError(f'Unsupported: {self.jetInput=}, {config.dataType()=}')
-            alg.calibrationTool.ConfigFile = configFile
+            calibTool.ConfigFile = configFile
 
             if calibSeq is None:
                 raise ValueError(f'Unsupported: {self.jetInput=}, {config.dataType()=}')
-            alg.calibrationTool.CalibSequence = calibSeq
+            calibTool.CalibSequence = calibSeq
 
             if calibArea is not None:
-                alg.calibrationTool.CalibArea = calibArea
+                calibTool.CalibArea = calibArea
 
-            alg.calibrationTool.IsData = (config.dataType() is DataType.Data)
+            calibTool.IsData = (config.dataType() is DataType.Data)
+            # Prepare the jet calibration algorithm
+            alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg' )
+            alg.calibrationTool = f'{calibTool.getType()}/{calibTool.getName()}'
             alg.jets = config.readName(self.containerName)
             alg.jetsOut = config.copyName(self.containerName)
 
