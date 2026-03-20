@@ -50,11 +50,11 @@ eFexByteStreamTool::eFexByteStreamTool(const std::string& type,
 StatusCode eFexByteStreamTool::initialize() {
 
     // Initialise eEM data handle keys
-    ATH_CHECK(m_eEMReadKey.initialize(!m_eEMReadKey.empty()));
+    ATH_CHECK(m_eEMReadKeys.initialize());
     ATH_CHECK(m_eEMWriteKey.initialize(!m_eEMWriteKey.empty()));
 
     // Initialise eTAU data handle keys
-    ATH_CHECK(m_eTAUReadKey.initialize(!m_eTAUReadKey.empty()));
+    ATH_CHECK(m_eTAUReadKeys.initialize(!m_eTAUReadKeys.empty()));
     ATH_CHECK(m_eTAUWriteKey.initialize(!m_eTAUWriteKey.empty()));
 
     // write keys for xTOBs
@@ -257,8 +257,175 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     return StatusCode::SUCCESS;
 }
 
-StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& , const EventContext& ) {
-    // not supported yet
-    return StatusCode::FAILURE;
+namespace Decoder {
+    struct Tob {
+        uint32_t word0;
+    };
+    struct xTob {
+        uint32_t word0;
+        uint32_t word1;
+    };
+    struct Slice {
+        struct Id {
+            uint32_t sliceNumber = 0;
+            uint32_t fpgaNumber = 0;
+            bool operator<(const Id& r) const {
+                return (fpgaNumber<r.fpgaNumber || (fpgaNumber==r.fpgaNumber && sliceNumber<r.sliceNumber));
+            }
+        };
+        void addTob(const xAOD::eFexEMRoI& tob) {
+            if(tob.isTOB()) {
+                tobs.push_back({.word0=tob.word0()});
+            } else {
+                em_xtobs.push_back({.word0=tob.word0(),.word1=tob.word1()});
+            }
+        }
+        void addTob(const xAOD::eFexTauRoI& tob) {
+            if(tob.isTOB()) {
+                tobs.push_back({.word0=tob.word0()});
+            } else {
+                tau_xtobs.push_back({.word0=tob.word0(),.word1=tob.word1()});
+            }
+        }
+        std::vector<uint32_t> getWords(const Id& id) {
+
+            const uint32_t tobType = (id.fpgaNumber==1) ? 1 : 0; // only fpga1 produce tau tobs
+            const uint32_t numTobs = tobs.size();
+            const uint32_t numEmXtobs = em_xtobs.size();
+            const uint32_t numTauXtobs = tau_xtobs.size();
+            const uint32_t safeMode=0; // tob/xtob data not suppressed
+
+            std::vector<uint32_t> out;
+            out.reserve(numTobs + numEmXtobs*2+numTauXtobs*2 + 1 + (numTobs%2 ? 0 : 1)); // last part to ensure multiple of 64bit
+            for(auto& tob : tobs) out.push_back(tob.word0);
+            for(auto& xtob : em_xtobs) {out.push_back(xtob.word0);out.push_back(xtob.word1);}
+            for(auto& xtob : tau_xtobs) {out.push_back(xtob.word0);out.push_back(xtob.word1);}
+            if(numTobs%2==0) out.push_back(0); // padding word
+
+            uint32_t sliceTrailer = 0;
+            sliceTrailer += (tobType&0x1)<<8;
+            sliceTrailer += (numTobs&0x7)<<9;
+            sliceTrailer += (numEmXtobs&0x3f)<<12;
+            sliceTrailer += (numTauXtobs&0x3f)<<18;
+            sliceTrailer += (id.sliceNumber&0x7)<<24;
+            sliceTrailer += (safeMode&0x1)<<27;
+            sliceTrailer += (id.fpgaNumber&0x3)<<28;
+
+            out.push_back(sliceTrailer);
+            return out;
+        
+        }
+        std::vector<xTob> em_xtobs;
+        std::vector<xTob> tau_xtobs;
+        std::vector<Tob> tobs;
+    };
+    struct Module {
+        struct Id {
+            uint32_t shelfNumber = 0;
+            uint32_t efexNumber = 0;
+            bool operator<(const Id& r) const {
+                return (shelfNumber<r.shelfNumber || (shelfNumber==r.shelfNumber && efexNumber<r.efexNumber));
+            }
+        };
+        void addTob(const xAOD::eFexTauRoI& tob, uint32_t sliceNumber) {
+            const uint32_t fpgaNumber = (tob.isTOB()) ? 1 : tob.fpga(); // must put emTobs in fpga0, tauTobs in fpga1
+            slices[{.sliceNumber=sliceNumber,.fpgaNumber=fpgaNumber}].addTob(tob);
+        }
+        void addTob(const xAOD::eFexEMRoI& tob, uint32_t sliceNumber) {
+            const uint32_t fpgaNumber = (tob.isTOB()) ? 0 : tob.fpga(); // must put emTobs in fpga0, tauTobs in fpga1
+            slices[{.sliceNumber=sliceNumber,.fpgaNumber=fpgaNumber}].addTob(tob);
+        }
+        std::vector<uint32_t> getWords(const Id& id, int numSlices) {
+            std::vector<uint32_t> out;
+
+            for(auto& [id,slice] : slices) {
+                auto sliceWords = slice.getWords(id);
+                out.insert(out.end(), sliceWords.begin(), sliceWords.end());
+            }
+
+            const size_t efexBlockSize = out.size(); // total size
+
+            uint32_t efexTrailer1 = 0;
+            efexTrailer1 += (efexBlockSize&0xfff);
+            efexTrailer1 += (id.efexNumber&0xf)<<12;
+            efexTrailer1 += (id.shelfNumber&0x1)<<16;
+            efexTrailer1 += (numSlices&0xf)<<24;
+
+            uint32_t efexTrailer2 = 0; // should really compute CRC and put in 20 MSBs
+
+            out.push_back(efexTrailer1);
+            out.push_back(efexTrailer2);
+            return out;
+        }
+        std::map<Slice::Id,Slice> slices;
+    };
+    struct Fragment {
+        int numSlices = 1;
+        template<typename T> void addTob(const T& tob, int sliceNumber) {
+            const uint32_t shelfNumber = tob.shelfNumber();
+            const uint32_t efexNumber = tob.eFexNumber();
+            modules[{.shelfNumber=shelfNumber,.efexNumber=efexNumber}].addTob(tob,sliceNumber);
+        }
+        std::vector<uint32_t> getWords(uint32_t shelfNumber) {
+            std::vector<uint32_t> out;
+            for(auto& [id,module] : modules) {
+                if(id.shelfNumber!=shelfNumber) continue;
+                auto words = module.getWords(id,numSlices);
+                out.insert(out.end(),words.begin(),words.end());
+            }
+            // add the rod trailer (the bits that matter, at least)
+            uint32_t rodTrailer1 = 0;
+            uint32_t rodTrailer2 = 0;
+
+            rodTrailer1 += (out.size()&0xffff);
+
+            out.push_back(rodTrailer1);
+            out.push_back(rodTrailer2);
+            return out;
+        }
+        std::map<Module::Id,Module> modules = {};
+    };
+}
+
+StatusCode eFexByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment*>& vrobf , const EventContext& eventContext) {
+
+    // multislice encoding is not yet implemented
+    // to do would need to decide how many slices have been read out (not guaranteed determinable from the out-of-time tobs)
+    // then need to set the sliceNumber appropriately for central TOBs
+
+    Decoder::Fragment f{.numSlices=1}; 
+
+
+    for(auto& key : m_eEMReadKeys) {
+        SG::ReadHandle emTobs(key, eventContext);
+        CHECK(emTobs.isValid());
+        for (const auto &tob: *emTobs) {
+            f.addTob(*tob, f.numSlices / 2 /*sliceNumber .. central is always "half"*/);
+        }
+    }
+    for(auto& key : m_eTAUReadKeys) {
+        SG::ReadHandle tauTobs(key,eventContext);
+        CHECK( tauTobs.isValid() );    
+        for(const auto& tob : *tauTobs) {
+            f.addTob(*tob, f.numSlices/2 /*sliceNumber .. central is always "half"*/);
+        }
+    }
+
+    // clearCache, newRodData, and newRobFragment defined in IL1TriggerByteStreamTool
+    // Allocate memory
+    clearCache(eventContext);
+
+    static const std::vector<uint32_t> mids = {0x1000,0x1100}; // 0x1000,0x1100 are the two shelves
+    for(uint32_t i=0;i<2;i++) { 
+        auto words = f.getWords(i);
+        uint32_t* data = newRodData(eventContext, words.size());
+        std::copy( words.begin(), words.end(), data); // transfer words to cache/reserved array
+
+        // Create ROB fragment
+        uint32_t moduleid = mids[i];
+        eformat::helper::SourceIdentifier sid(eformat::TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid);
+        vrobf.push_back(newRobFragment(eventContext, sid.code(), words.size(), data, 0/*detEvtType??*/));
+    }
+    return StatusCode::SUCCESS;
 }
 

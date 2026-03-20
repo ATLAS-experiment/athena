@@ -576,6 +576,15 @@ if flags.Output.AODFileName != "":
   from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
   cfg.merge(SetupMetaDataForStreamCfg(flags, 'AOD'))
 
+# configure RAW output if requested
+if flags.Output.BSFileName != "":
+  from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamEncoderCfg
+  cfg.merge(L1TriggerByteStreamEncoderCfg(flags))
+
+  from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
+  write = ByteStreamWriteCfg(flags, ["xAOD::TrigCompositeContainer#*"]) # using the current method of trigger encoder by requesting this object type
+  # note that have to have something producing the TrigCompositeContainer object otherwise no BS encoding
+  cfg.merge(write)
 
 if "MuonAlignmentCondAlg" in [a.name for a in cfg.getCondAlgos()]: cfg.getCondAlgo("MuonAlignmentCondAlg").OutputLevel=Constants.ERROR # this alg produces warnings every time, silence it!
 
