@@ -30,13 +30,16 @@ namespace InDet {
          int col_index(const Identifier &rdoID) const { return m_idHelper->row(rdoID); }
          template <typename T_ModuleHelper>
          std::unique_ptr<SCT3_RawData> createNoiseHit(const T_ModuleHelper &helper, const Identifier &identifier, unsigned int cell_idx, unsigned int tot) {
-            unsigned int row_aka_phi=cell_idx % helper.rows();
-            unsigned int col_aka_eta=cell_idx / helper.rows();
+            unsigned int row_aka_phi=cell_idx % helper.rows(); // ->strip
+            unsigned int col_aka_eta=cell_idx / helper.rows(); // ->sensor row i.e. 1
             constexpr unsigned int group_size =1u;
             constexpr unsigned int errors=0u;
-            return std::make_unique<SCT3_RawData>( m_idHelper->strip_id(identifier,row_aka_phi, col_aka_eta),
+            return std::make_unique<SCT3_RawData>( m_idHelper->strip_id(identifier,col_aka_eta, row_aka_phi),
                                                    makeStripWord( /*time bin */ tot, /*stripIn11bits*/ row_aka_phi, group_size, errors ),
                                                    &s_dummyvector);
+         }
+         unsigned int nConsecutiveRows(const SCT_RDORawData &rdo) const {
+            return rdo.getGroupSize();
          }
 
          /** Clone, reject or split strip RDOs depending on overlaps with defects.
@@ -85,7 +88,7 @@ namespace InDet {
                   unsigned int start = overlap.first + overlap.second;
                   unsigned int group_size = last_defect_start - start;
                   if (group_size > 0) {
-                     dest.push_back(std::make_unique<SCT3_RawData>( m_idHelper->strip_id(module_id,start, col_idx_aka_eta),
+                     dest.push_back(std::make_unique<SCT3_RawData>( m_idHelper->strip_id(module_id,col_idx_aka_eta, start),
                                                                     makeStripWord( sct3_rdo.getTimeBin(), start, group_size, getErrorBits(rdo) ),
                                                                     &s_dummyvector));
                      ++n_new;
