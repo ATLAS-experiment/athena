@@ -344,7 +344,20 @@ def L1TriggerByteStreamEncoderCfg(flags):
       flags, name="CTPResultBSEncoderTool", writeBS=True))
     acc.addPublicTool(ctpResultTool)
 
-  # TODO: Run-3 L1Calo, L1Topo, CTP
+  # eFex encoding
+  if flags.Trigger.L1.doeFex:
+    eFexTool = acc.popToolsAndMerge(eFexByteStreamToolCfg(
+          flags,
+          'eFexBSEncoderTool',
+          writeBS=True,
+          TOBs=True,
+          xTOBs=True,
+          multiSlice=False, # multi-slice encoding not yet supported in encoder
+          decodeInputs=flags.Trigger.L1.doCaloInputs
+        ))
+    acc.addPublicTool(eFexTool)
+
+  # TODO: Run-3 L1Calo, L1Topo
 
   return acc
 

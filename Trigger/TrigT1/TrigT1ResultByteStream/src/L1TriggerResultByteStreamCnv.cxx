@@ -58,6 +58,10 @@ StatusCode L1TriggerResultByteStreamCnv::initialize() {
   ATH_MSG_DEBUG("CTP BS encoding is " << (doCTP ? "enabled" : "disabled"));
   ATH_CHECK(m_ctpResultEncoderTool.retrieve(EnableTool(doCTP)));
 
+  const bool doEfex = not serviceLocator()->getOptsSvc().get("ToolSvc.eFexBSEncoderTool.ROBIDs").empty();
+  ATH_MSG_DEBUG("eFex BS encoding is " << (doEfex ? "enabled" : "disabled"));
+  ATH_CHECK(m_efexEncoderTool.retrieve(EnableTool(doEfex)));
+
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -75,6 +79,8 @@ StatusCode L1TriggerResultByteStreamCnv::finalize() {
     ATH_MSG_WARNING("Failed to release tool " << m_muonEncoderToolDaq.typeAndName());
   if (m_ctpResultEncoderTool.isEnabled() && m_ctpResultEncoderTool.release().isFailure())
     ATH_MSG_WARNING("Failed to release tool " << m_ctpResultEncoderTool.typeAndName());
+  if (m_efexEncoderTool.isEnabled() && m_efexEncoderTool.release().isFailure())
+    ATH_MSG_WARNING("Failed to release tool " << m_efexEncoderTool.typeAndName());
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::SUCCESS;
 }
@@ -182,9 +188,9 @@ StatusCode L1TriggerResultByteStreamCnv::createRep(DataObject* pObj, IOpaqueAddr
     }
   }
 
-  //  ===== MuonRoI encoding =================
+  //  ===== MuonRoI + eFex encoding =================
 
-  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq)}) {
+  for (ToolHandle<IL1TriggerByteStreamTool>& tool : {std::reference_wrapper(m_muonEncoderTool), std::reference_wrapper(m_muonEncoderToolDaq), std::reference_wrapper(m_efexEncoderTool)}) {
     if (not tool.isEnabled()) {continue;}
     std::vector<WROBF*> muon_robs;
     ATH_CHECK(tool->convertToBS(muon_robs, ctx)); // TODO: find a way to avoid ThreadLocalContext

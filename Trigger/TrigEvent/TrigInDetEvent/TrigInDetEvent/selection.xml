@@ -31,10 +31,7 @@
 
  <function name="dummyTriggerForTVCollTypedef" />
 
-  <class name="TrigHisto">
-    <field name="m_itr" transient="true" />
-    <field name="m_itr_end" transient="true" />
-  </class>
+  <class name="TrigHisto"/>
   <class name="TrigHisto1D" id="1DC53456-7E55-4C1F-B9AA-820EAE5C2316" />
   <class name="TrigHisto2D" id="3C3241B3-2FDB-4C0B-B2E0-2A38C5FE6990">
     <field name="m_underflowBin_y" transient="true" />
