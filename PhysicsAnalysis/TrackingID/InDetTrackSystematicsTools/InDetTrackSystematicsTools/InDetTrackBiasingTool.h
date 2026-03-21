@@ -79,17 +79,11 @@ namespace InDet {
     std::vector<std::unique_ptr<TH2>> m_biasD0Histograms; //!
     std::vector<std::unique_ptr<TH2>> m_biasZ0Histograms; //!
     std::vector<std::unique_ptr<TH2>> m_biasQoverPsagittaHistograms; //!
-    std::vector<std::unique_ptr<TH2>> m_biasD0HistErrors; //!
-    std::vector<std::unique_ptr<TH2>> m_biasZ0HistErrors; //!
-    std::vector<std::unique_ptr<TH2>> m_biasQoverPsagittaHistErrors; //!
 
     // paths and histogram names in the calibration files
     std::string m_d0_nominal_histName = "d0/d0_theNominal";
     std::string m_z0_nominal_histName = "z0/z0_theNominal";
     std::string m_sagitta_nominal_histName = "sagitta/sagitta_theNominal";
-    std::string m_d0_uncertainty_histName = "d0/d0_theUncertainty";
-    std::string m_z0_uncertainty_histName = "z0/z0_theUncertainty";
-    std::string m_sagitta_uncertainty_histName = "sagitta/sagitta_theUncertainty";
 
     Gaudi::Property<float> m_biasD0{this, "biasD0", 0.f, "Overall d0 bias (mm)."};
     Gaudi::Property<float> m_biasZ0{this, "biasZ0", 0.f, "Overall z0 bias (mm)."};
