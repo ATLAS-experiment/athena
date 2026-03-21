@@ -60,10 +60,15 @@ namespace InDet {
 
   CP::CorrectionCode InDetTrackBiasingTool::applyCorrection(xAOD::TrackParticle& track) {
 
+    if ( !m_isMC ) {
+      ATH_MSG_ERROR( "InDetTrackBiasingTool should only be run on MC." );
+      return CP::CorrectionCode::Error;
+    }
+
     // determine which run number to use
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey);
     static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
-    auto runNumber = m_isMC ? randomRunNumber(*eventInfo) : eventInfo->runNumber();
+    auto runNumber = randomRunNumber(*eventInfo);
 
     if (runNumber <= 0) {
       ATH_MSG_WARNING( "Run number not set." );
@@ -96,9 +101,6 @@ namespace InDet {
     TH2* biasD0Histogram             = m_biasD0Histograms[periodIdx].get();
     TH2* biasZ0Histogram             = m_biasZ0Histograms[periodIdx].get();
     TH2* biasQoverPsagittaHistogram  = m_biasQoverPsagittaHistograms[periodIdx].get();
-    TH2* biasD0HistError             = m_biasD0HistErrors[periodIdx].get();
-    TH2* biasZ0HistError             = m_biasZ0HistErrors[periodIdx].get();
-    TH2* biasQoverPsagittaHistError  = m_biasQoverPsagittaHistErrors[periodIdx].get();
 
     bool doD0Bias    = m_applyD0Bias    && biasD0Histogram != nullptr;
     bool doZ0Bias    = m_applyZ0Bias    && biasZ0Histogram != nullptr;
@@ -117,33 +119,27 @@ namespace InDet {
     const float eta = track.eta();
 
     // do the biasing
+    // Always apply the correction to the nominal; undo it for systematic variations
     if ( doD0Bias ) {
-      bool d0WmActive = isActive( TRK_BIAS_D0_WM );
-      if ( !m_isMC || d0WmActive ) {
-        accD0( track ) += readHistogram(m_biasD0, biasD0Histogram, phi, eta);
-        if ( !m_isMC && d0WmActive ) {
-          accD0( track ) += readHistogram(0., biasD0HistError, phi, eta);
-        }
+      const float d0Corr = readHistogram(m_biasD0, biasD0Histogram, phi, eta);
+      accD0( track ) += d0Corr;
+      if ( isActive( TRK_BIAS_D0_WM ) ) {
+        accD0( track ) -= d0Corr;
       }
     }
     if ( doZ0Bias ) {
-      bool z0WmActive = isActive( TRK_BIAS_Z0_WM );
-      if ( !m_isMC || z0WmActive ) {
-        accZ0( track ) += readHistogram(m_biasZ0, biasZ0Histogram, phi, eta);
-        if ( !m_isMC && z0WmActive ) {
-          accZ0( track ) += readHistogram(0., biasZ0HistError, phi, eta);
-        }
+      const float z0Corr = readHistogram(m_biasZ0, biasZ0Histogram, phi, eta);
+      accZ0( track ) += z0Corr;
+      if ( isActive( TRK_BIAS_Z0_WM ) ) {
+        accZ0( track ) -= z0Corr;
       }
     }
     if ( doQoverPBias ) {
-      bool qOverPWmActive = isActive( TRK_BIAS_QOVERP_SAGITTA_WM );
-      if ( !m_isMC || qOverPWmActive ) {
-        auto sinTheta = 1.0 / std::cosh(eta);
-        // readHistogram flips the sign of the correction if m_isMC is true
-        accQOverP( track ) += 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, biasQoverPsagittaHistogram, phi, eta);
-        if ( !m_isMC && qOverPWmActive ) {
-          accQOverP( track ) += 1.e-6*sinTheta*readHistogram(0., biasQoverPsagittaHistError, phi, eta);
-        }
+      auto sinTheta = 1.0 / std::cosh(eta);
+      const float qOverPCorr = 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, biasQoverPsagittaHistogram, phi, eta);
+      accQOverP( track ) += qOverPCorr;
+      if ( isActive( TRK_BIAS_QOVERP_SAGITTA_WM ) ) {
+        accQOverP( track ) -= qOverPCorr;
       }
     }
 
@@ -183,12 +179,6 @@ namespace InDet {
       ATH_CHECK( initObject<TH2>(m_biasZ0Histograms.back(), m_calibFiles[i], m_z0_nominal_histName) );
       m_biasQoverPsagittaHistograms.emplace_back(nullptr);
       ATH_CHECK( initObject<TH2>(m_biasQoverPsagittaHistograms.back(), m_calibFiles[i], m_sagitta_nominal_histName) );
-      m_biasD0HistErrors.emplace_back(nullptr);
-      ATH_CHECK( initObject<TH2>(m_biasD0HistErrors.back(), m_calibFiles[i], m_d0_uncertainty_histName) );
-      m_biasZ0HistErrors.emplace_back(nullptr);
-      ATH_CHECK( initObject<TH2>(m_biasZ0HistErrors.back(), m_calibFiles[i], m_z0_uncertainty_histName) );
-      m_biasQoverPsagittaHistErrors.emplace_back(nullptr);
-      ATH_CHECK( initObject<TH2>(m_biasQoverPsagittaHistErrors.back(), m_calibFiles[i], m_sagitta_uncertainty_histName) );
     }
 
     return StatusCode::SUCCESS;
@@ -204,10 +194,7 @@ namespace InDet {
     if( eta>2.499 )  eta= 2.499;
     if( eta<-2.499 ) eta=-2.499;
 
-    // the sign assumes that we apply a correction opposite to what the maps give
-    float f = -1. * histogram->GetBinContent(histogram->FindBin(eta, phi));
-    // apply different correction sign if applying correction to MC
-    if (m_isMC) f = -f;
+    float f = histogram->GetBinContent(histogram->FindBin(eta, phi));
     f += fDefault;   // should be zero unless a manual override is provided
 
     return f;

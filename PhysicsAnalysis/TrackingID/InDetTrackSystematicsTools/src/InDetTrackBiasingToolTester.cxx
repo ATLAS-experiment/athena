@@ -10,7 +10,6 @@
 
 // Local include(s):
 #include "InDetTrackBiasingToolTester.h"
-#include "InDetTrackSystematicsTools/InDetTrackSystematics.h"
 #include <TH1.h>
 
 
@@ -18,73 +17,75 @@ namespace InDet {
    InDetTrackBiasingToolTester::InDetTrackBiasingToolTester( const std::string& name, ISvcLocator* svcLoc )
       : AthHistogramAlgorithm( name, svcLoc ),
         m_biasTool( "InDet::InDetTrackSystematicsTools/InDetTrackBiasingTool", this ){
-          declareProperty( "TrackIP", m_Track_IP = "InDetTrackParticles" );
-	  declareProperty( "SystematicEffects", m_systematicsNames );
           declareProperty( "InDetTrackBiasingTool", m_biasTool );
-
         }
 
    StatusCode InDetTrackBiasingToolTester::initialize() {
-     
-      // Greet the user:
-      ATH_MSG_INFO( "Initialising" );
-      ATH_MSG_DEBUG( "InDetTrackBiasingTool   = " << m_biasTool );
 
-      // Retrieve the tools:
+      ATH_MSG_INFO( "Initialising" );
+      ATH_CHECK( m_trackKey.initialize() );
       ATH_CHECK( m_biasTool.retrieve() );
 
-      for (const auto& name : m_systematicsNames) {
-	for (const auto& systpair : InDet::TrackSystematicMap) {
-	  if (name == systpair.second.name()) {
-	    m_systActive.insert(systpair.second);
-	  }
-	}
-      }
-      auto systCode = m_biasTool->applySystematicVariation( m_systActive );
-      if (systCode != StatusCode::SUCCESS) {
-	ATH_MSG_ERROR( "Failure to apply systematic variation." );
-	return StatusCode::FAILURE;
-      }
+      // Nominal: correction is applied, tracks should differ from original
+      ATH_CHECK( book( TH1F("d0_original",       "original d0",                           100, -5.0,  5.0) ) );
+      ATH_CHECK( book( TH1F("z0_original",       "original z0",                           100, -200., 200.) ) );
+      ATH_CHECK( book( TH1F("d0_nominal",        "d0 after nominal correction",            100, -5.0,  5.0) ) );
+      ATH_CHECK( book( TH1F("z0_nominal",        "z0 after nominal correction",            100, -200., 200.) ) );
+      ATH_CHECK( book( TH1F("d0_nominal_delta",  "d0 nominal - original (expect nonzero)", 100, -0.10, 0.10) ) );
+      ATH_CHECK( book( TH1F("z0_nominal_delta",  "z0 nominal - original (expect nonzero)", 100, -0.50, 0.50) ) );
 
-      ATH_CHECK( book( TH1F("d0_original", "original d0", 100, -5.0, 5.0) ) );     
-      ATH_CHECK( book( TH1F("z0_original", "original z0", 100, -200.0, 200.0) ) );     
-      ATH_CHECK( book( TH1F("d0_bias", "d0 after biasing", 100, -5.0, 5.0) ) );     
-      ATH_CHECK( book( TH1F("z0_bias", "z0 after biasing", 100, -200.0, 200.0) ) );     
-      ATH_CHECK( book( TH1F("subtraction_d0", "subtraction_d0", 100, -0.10, 0.10) ) );     
-      ATH_CHECK( book( TH1F("subtraction_z0", "subtraction_z0", 100,-0.50, 0.50) ) );     
+      // Systematic: correction is undone, tracks should be identical to original
+      ATH_CHECK( book( TH1F("d0_systematic",        "d0 after systematic variation",            100, -5.0,  5.0) ) );
+      ATH_CHECK( book( TH1F("z0_systematic",        "z0 after systematic variation",            100, -200., 200.) ) );
+      ATH_CHECK( book( TH1F("d0_systematic_delta",  "d0 systematic - original (expect zero)",   100, -0.10, 0.10) ) );
+      ATH_CHECK( book( TH1F("z0_systematic_delta",  "z0 systematic - original (expect zero)",   100, -0.50, 0.50) ) );
 
-      // Return gracefully:
       return StatusCode::SUCCESS;
    }
 
    StatusCode InDetTrackBiasingToolTester::execute() {
 
-      // Create a shallow container copy and then apply the biasingtool to impact parameters:      
-      const xAOD::TrackParticleContainer *IDParticles = nullptr;
-      ATH_CHECK( evtStore()->retrieve( IDParticles , m_Track_IP ) );
-      std::pair< xAOD::TrackParticleContainer*, xAOD::ShallowAuxContainer* > IDParticles_shallowCopy = xAOD::shallowCopyContainer( *IDParticles );
-      for( xAOD::TrackParticle* track : *IDParticles_shallowCopy.first ) {
-          double d0_1=0.,d0_2=0.,z0_1=0.,z0_2=0.;
-          d0_1=track->d0();
-          z0_1=track->z0();
-          hist("d0_original")->Fill( d0_1 );
-          hist("z0_original")->Fill( z0_1 );
-          if (m_biasTool->applyCorrection(*track) == CP::CorrectionCode::Error) {
-	    ATH_MSG_ERROR( "Could not apply correction." );
-	  }
-          d0_2=track->d0();
-          z0_2=track->z0();
-          hist("d0_bias")->Fill( d0_2 );
-          hist("z0_bias")->Fill( z0_2 ); 
-          hist("subtraction_d0")->Fill( d0_2 - d0_1 );
-          hist("subtraction_z0")->Fill( z0_2 - z0_1 );
-      }
-      delete IDParticles_shallowCopy.first;
-      delete IDParticles_shallowCopy.second;  
+      SG::ReadHandle<xAOD::TrackParticleContainer> IDParticles(m_trackKey);
+      ATH_CHECK( IDParticles.isValid() );
 
-      // Return gracefully:
+      // --- Nominal: no systematics active, correction should be applied ---
+      ATH_CHECK( m_biasTool->applySystematicVariation( {} ) );
+      auto nominalCopy = xAOD::shallowCopyContainer( *IDParticles );
+      for ( xAOD::TrackParticle* track : *nominalCopy.first ) {
+         const double d0_orig = track->d0();
+         const double z0_orig = track->z0();
+         hist("d0_original")->Fill( d0_orig );
+         hist("z0_original")->Fill( z0_orig );
+         if ( m_biasTool->applyCorrection(*track) == CP::CorrectionCode::Error ) {
+            ATH_MSG_ERROR( "Could not apply nominal correction." );
+         }
+         hist("d0_nominal")->Fill( track->d0() );
+         hist("z0_nominal")->Fill( track->z0() );
+         hist("d0_nominal_delta")->Fill( track->d0() - d0_orig );
+         hist("z0_nominal_delta")->Fill( track->z0() - z0_orig );
+      }
+      delete nominalCopy.first;
+      delete nominalCopy.second;
+
+      // --- Systematic: all biasing systematics active, correction should be undone ---
+      ATH_CHECK( m_biasTool->applySystematicVariation( m_biasTool->affectingSystematics() ) );
+      auto systematicCopy = xAOD::shallowCopyContainer( *IDParticles );
+      for ( xAOD::TrackParticle* track : *systematicCopy.first ) {
+         const double d0_orig = track->d0();
+         const double z0_orig = track->z0();
+         if ( m_biasTool->applyCorrection(*track) == CP::CorrectionCode::Error ) {
+            ATH_MSG_ERROR( "Could not apply systematic correction." );
+         }
+         hist("d0_systematic")->Fill( track->d0() );
+         hist("z0_systematic")->Fill( track->z0() );
+         hist("d0_systematic_delta")->Fill( track->d0() - d0_orig );
+         hist("z0_systematic_delta")->Fill( track->z0() - z0_orig );
+      }
+      delete systematicCopy.first;
+      delete systematicCopy.second;
+
       return StatusCode::SUCCESS;
 
-   } // End of the execute()
+   } // End of execute()
 
-} // namespace InDet        
+} // namespace InDet

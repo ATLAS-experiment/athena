@@ -9,6 +9,9 @@
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
+#include "StoreGate/ReadHandleKey.h"
+// EDM include(s):
+#include "xAODTracking/TrackParticleContainer.h"
 // Local include(s):
 #include "InDetTrackSystematicsTools/IInDetTrackBiasingTool.h"
 #include <TH1.h>
@@ -31,16 +34,13 @@ namespace InDet {
       virtual StatusCode execute();
 
    private:
-      /// StoreGate key for the track container to investigate//--->delete in future
-      std::string m_Track_IP;
-            
+      /// StoreGate key for the track container
+      SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackKey{this, "TrackIP", "InDetTrackParticles", "Track particle container"};
+
       /// Connection to the biasing tool
       ToolHandle< IInDetTrackBiasingTool > m_biasTool;
 
-     std::vector< std::string > m_systematicsNames;
-     CP::SystematicSet m_systActive;
-
-   }; // class ITSmeToolTester
+   }; // class InDetTrackBiasingToolTester
 
 } // namespace InDet
 
