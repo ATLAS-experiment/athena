@@ -328,8 +328,7 @@ int fitVertex(VKVertex * vk)
           for( i=0; i<3; i++) dparst[i]=vk->refIterV[i]+vk->fitV[i]; // fitted vertex at global frame
           vrtForCFT.localbmag=Trk::vkalMagFld::getMagFld(dparst,(vk->vk_fitterControl).get());
 	  if ( vk->passNearVertex && it>1 ) {  //No necessary information at first iteration
-            jerr = afterFit(vk, vk->ader, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get());
-            if(jerr!=0) return -17;  // Non-invertable matrix for combined track
+            if(afterFit(vk, vk->ader, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get()) != 0) return -17;  // Non-invertable matrix for combined track
 	    cfdcopy( PartMom, &dparst[3], 3);  //vertex part of it is filled above
             cfdcopy(VrtMomCov,vk->FVC.dcovf,21);  //Used in chi2 caclulation later...
 	    cfdcopy(  PartMom, vk->fitMom, 3);          //save Momentum
@@ -385,8 +384,10 @@ int fitVertex(VKVertex * vk)
 
 // Track near vertex constraint recalculation for next fit
 	if ( vk->passNearVertex ) {
-            if(it==1) jerr = afterFit(vk,        nullptr, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get());
-            else      jerr = afterFit(vk, vk->ader, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get());
+	    int terr;
+            if(it==1) terr = afterFit(vk,  nullptr, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get());
+            else      terr = afterFit(vk, vk->ader, vk->FVC.dcv, PartMom, VrtMomCov, (vk->vk_fitterControl).get());
+            if(terr!=0) return -17; //Wrong combined track
             for( i=0; i<3; i++) dparst[i] = vk->refIterV[i]+vk->fitV[i]; // fitted vertex at global frame
             cfdcopy( PartMom, &dparst[3], 3);
             cfdcopy(VrtMomCov,vk->FVC.dcovf,21);  //Used in chi2 caclulation later...
