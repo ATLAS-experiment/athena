@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -8,8 +8,6 @@
 
 #ifndef ISF_TFCSGANXMLPARAMETERS_H
 #define ISF_TFCSGANXMLPARAMETERS_H 1
-
-#include <libxml/tree.h>
 
 #include <map>
 #include <vector>
@@ -37,8 +35,6 @@ class TFCSGANXMLParameters : public ISF_FCS::MLogging {
   const std::string& GetInputFolder() const { return m_fastCaloGANInputFolderName; };
 
  private:
-  static bool ReadBooleanAttribute(const std::string &name, xmlNodePtr node);
-
   bool m_symmetrisedAlpha{};
   Binning m_binning;
   std::vector<int> m_relevantlayers;
