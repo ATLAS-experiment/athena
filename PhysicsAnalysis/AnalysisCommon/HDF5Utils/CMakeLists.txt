@@ -58,10 +58,17 @@ if (NOT XAOD_STANDALONE)
     )
   atlas_add_component(H5FileSvc
     src/H5FileSvc.cxx
+    src/SubgroupSvc.cxx
     src/components/HDF5Utils_entries.cxx
     INCLUDE_DIRS ${HDF5_INCLUDE_DIRS}
     LINK_LIBRARIES IH5GroupSvc ${HDF5_LIBRARIES}
   )
+  atlas_install_scripts(
+    test/test-subgroup-svc.py
+    test/test-subgroup-svc-output )
+  atlas_add_test( test_subgroup_svc
+    SCRIPT test-subgroup-svc.py
+    POST_EXEC_SCRIPT test-subgroup-svc-output )
 endif()
 
 # unit tests
