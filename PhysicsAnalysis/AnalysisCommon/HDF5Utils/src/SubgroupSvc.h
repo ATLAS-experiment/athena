@@ -28,6 +28,8 @@ private:
     "parent group service"};
   Gaudi::Property<std::string> m_subgroup{this, "subgroup", "",
     "subgroup name"};
+  Gaudi::Property<bool> m_mustBeNew{this, "mustBeNew", false,
+    "fail if subgroup already exists"};
   std::unique_ptr<H5::Group>   m_group   {nullptr};
 };
 

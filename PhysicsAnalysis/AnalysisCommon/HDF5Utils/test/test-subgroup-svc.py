@@ -26,5 +26,10 @@ svc_c = CompFactory.SubgroupSvc("SvcC", subgroup="group_c")
 svc_c.parent = root_svc
 acc.addService(svc_c)
 
+# SvcA2: mustBeNew=False on an already-existing group -> should open it
+svc_a2 = CompFactory.SubgroupSvc("SvcA2", subgroup="group_a")
+svc_a2.parent = root_svc
+acc.addService(svc_a2)
+
 sc = acc.run(0)
 sys.exit(not sc.isSuccess())

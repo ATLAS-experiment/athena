@@ -65,10 +65,14 @@ if (NOT XAOD_STANDALONE)
   )
   atlas_install_scripts(
     test/test-subgroup-svc.py
-    test/test-subgroup-svc-output )
+    test/test-subgroup-svc-output
+    test/test-subgroup-svc-must-new.py )
   atlas_add_test( test_subgroup_svc
     SCRIPT test-subgroup-svc.py
     POST_EXEC_SCRIPT test-subgroup-svc-output )
+  atlas_add_test( test_subgroup_svc_must_new
+    SCRIPT test-subgroup-svc-must-new.py
+    POST_EXEC_SCRIPT nopost.sh )
 endif()
 
 # unit tests

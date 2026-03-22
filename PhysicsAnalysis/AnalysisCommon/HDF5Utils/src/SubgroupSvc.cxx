@@ -18,8 +18,19 @@ StatusCode SubgroupSvc::initialize() {
     return StatusCode::FAILURE;
   }
   ATH_CHECK(m_parent.retrieve());
-  m_group = std::make_unique<H5::Group>(
-    m_parent->group()->createGroup(m_subgroup));
+  H5::Group* parent = m_parent->group();
+  if (parent->nameExists(m_subgroup)) {
+    if (m_mustBeNew) {
+      ATH_MSG_ERROR("subgroup '" << m_subgroup.value()
+                    << "' already exists");
+      return StatusCode::FAILURE;
+    }
+    m_group = std::make_unique<H5::Group>(
+      parent->openGroup(m_subgroup));
+  } else {
+    m_group = std::make_unique<H5::Group>(
+      parent->createGroup(m_subgroup));
+  }
   return StatusCode::SUCCESS;
 }
 
