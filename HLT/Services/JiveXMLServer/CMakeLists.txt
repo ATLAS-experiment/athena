@@ -4,7 +4,7 @@
 atlas_subdir( JiveXMLServer )
 
 # External dependencies:
-find_package( tdaq COMPONENTS ipc cmdline omniORB4 omnithread )
+find_package( tdaq COMPONENTS ipc omniORB4 omnithread )
 find_package( tdaq-common COMPONENTS ers)
 
 # Component(s) in the package:
