@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_PAI_utils_h
@@ -20,10 +20,10 @@ namespace TRT_PAI_utils {
    * @param ytabulated: tabulated @a y values
    * @author Pavel Nevski (adapted to C++ by T.Kittelmann and Mogens Dam)
    */
-  float Interpolate(const float& xval,
+  float Interpolate(float xval,
 		    const std::vector<float>& xtabulated,
 		    const std::vector<float>& ytabulated);
-  inline float calculate_interpolation(const float& xval, const float& x1, const float& x2, const float& y1, const float& y2)
+  inline float calculate_interpolation(float xval, float x1, float x2, float y1, float y2)
   {
     return y1+(y2-y1)*(xval-x1)/(x2-x1);
   }

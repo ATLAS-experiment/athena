@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -343,7 +343,7 @@ double TRT_BarrelDriftTimeData::MaxTabulatedField() const {
 }
 
 //______________________________________________________________________________
-double TRT_BarrelDriftTimeData::DriftTimeAtNoField(const double& dist) const {
+double TRT_BarrelDriftTimeData::DriftTimeAtNoField(double dist) const {
 
   if (dist <= m_tabdists_nofield.front())
     return 0.0; //We are inside the wire!
@@ -380,7 +380,7 @@ double TRT_BarrelDriftTimeData::DriftTimeAtNoField(const double& dist) const {
 }
 
 //______________________________________________________________________________
-double TRT_BarrelDriftTimeData::DriftTimeAtMaxField(const double& dist) const {
+double TRT_BarrelDriftTimeData::DriftTimeAtMaxField(double dist) const {
 
   if (dist <= m_tabdists_maxfield.front())
     return 0.0; //We are inside the wire!

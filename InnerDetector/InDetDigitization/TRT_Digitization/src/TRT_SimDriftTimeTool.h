@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -30,8 +30,8 @@ public:
                        const IInterface* parent);
 
   // ITRT_SimDriftTimeTool interface implementation:
-  virtual double getAverageDriftTime( const double& distIndex,
-                                      const double& effectivefield_squared,
+  virtual double getAverageDriftTime( double distIndex,
+                                      double effectivefield_squared,
                                       int strawGasType) const;
 
   // override intialize() method:
