@@ -49,6 +49,7 @@ public:
       if( m_histSvc ) {
          m_histSvc->registerHist(h);
       } else {
+         h->SetDirectory(nullptr); // release ownership before we take over
          m_localHistStore.push_back(h);
       }
    }
@@ -61,6 +62,7 @@ public:
       if( m_histSvc ) {
          m_histSvc->registerHist(h);
       } else {
+         h->SetDirectory(nullptr); // release ownership before we take over
          m_localHistStore.push_back(h);
       }
    }
