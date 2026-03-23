@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -23,14 +23,14 @@ class TRT_ScaledDriftTimeData : public ITRT_DriftTimeData {
 
 public:
   // //NB: Assumes ownership of pOriginalData!!
-  TRT_ScaledDriftTimeData( ITRT_DriftTimeData* pOriginalData, const double& scaleFactor );
+  TRT_ScaledDriftTimeData( ITRT_DriftTimeData* pOriginalData, double scaleFactor );
 
   ~TRT_ScaledDriftTimeData();
 
   //Interface implementation
   double MaxTabulatedField() const;
-  double DriftTimeAtNoField(const double& distance) const;
-  double DriftTimeAtMaxField(const double& distance) const;
+  double DriftTimeAtNoField(double distance) const;
+  double DriftTimeAtMaxField(double distance) const;
 
 private:
 

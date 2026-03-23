@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -16,7 +16,7 @@
 
 //______________________________________________________________________________
 TRT_ScaledDriftTimeData::TRT_ScaledDriftTimeData(ITRT_DriftTimeData* pOriginalData,//Assumes ownership of pOriginalData!!
-                                                 const double& scaleFactor)
+                                                 double scaleFactor)
   : m_pOriginalData(pOriginalData), m_scaleFactor(scaleFactor) {}
 
 //______________________________________________________________________________
@@ -30,11 +30,11 @@ double TRT_ScaledDriftTimeData::MaxTabulatedField() const {
 }
 
 //______________________________________________________________________________
-double TRT_ScaledDriftTimeData::DriftTimeAtNoField(const double& dist) const {
+double TRT_ScaledDriftTimeData::DriftTimeAtNoField(double dist) const {
   return m_pOriginalData->DriftTimeAtNoField(dist) * m_scaleFactor;
 }
 
 //______________________________________________________________________________
-double TRT_ScaledDriftTimeData::DriftTimeAtMaxField(const double& dist) const {
+double TRT_ScaledDriftTimeData::DriftTimeAtMaxField(double dist) const {
   return m_pOriginalData->DriftTimeAtMaxField(dist) * m_scaleFactor;
 }

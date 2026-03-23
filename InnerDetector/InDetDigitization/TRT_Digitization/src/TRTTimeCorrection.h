@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRT_DIGITIZATION_TRTTIMECORRECTION_H
@@ -41,7 +41,7 @@ public:
    * @return time correction
    */
 
-  double TimeShift(const int& strawID);
+  double TimeShift(int strawID);
 
   /**
    * Calculates the time between the signal reaching the wire and when it
@@ -53,8 +53,8 @@ public:
    * @param propagationTime1: propagation time - direct signal
    * @param propagationTime2: propagation time - reflected signal
    */
-  void PropagationTime(const int& strawID,
-                       const double& meanZ,
+  void PropagationTime(int strawID,
+                       double meanZ,
                        double& propagationTime1,
                        double& propagationTime2);
 
@@ -67,29 +67,29 @@ private:
   void Initialize();
 
   /** Time shift for barrel straws */
-  double calculateTimeShift_Barrel( const unsigned int& iPhi,
-                                    const unsigned int& iRing,
-                                    const unsigned int& iLayer,
-                                    const unsigned int& iStraw,
-                                    const int strawID) ; //Note: Changed from const due to message service hick ups
+  double calculateTimeShift_Barrel( unsigned int iPhi,
+                                    unsigned int iRing,
+                                    unsigned int iLayer,
+                                    unsigned int iStraw,
+                                    int strawID) ; //Note: Changed from const due to message service hick ups
 
   /** Time shift for end cap straws */
-  double calculateTimeShift_EndCap( const unsigned int& iPhi,
-                                    const unsigned int& iWheel,
-                                    const unsigned int& iLayer,
-                                    const int strawID) ; //Note: Changed from const due to message service hick ups
+  double calculateTimeShift_EndCap( unsigned int iPhi,
+                                    unsigned int iWheel,
+                                    unsigned int iLayer,
+                                    int strawID) ; //Note: Changed from const due to message service hick ups
 
   /** Time shift from straw endpoints in global system */
   double calculateTimeShiftFromStrawEnds( const Amg::Vector3D& strawend1_globalcoord,
                                           const Amg::Vector3D& strawend2_globalcoord,
-                                          const int strawID) ;
+                                          int strawID) ;
   /**
    * Calculate the distance along the wire the signal travels before reaching
    * the electronics. Both the direct and reflected signal. The signal starts
    * in the middle of the straw.
    */
-  void calculateSignalDists_Barrel(const unsigned int& iRing,
-                                   const unsigned int& iLayer,
+  void calculateSignalDists_Barrel(unsigned int iRing,
+				   unsigned int iLayer,
                                    double& direct_dist,
                                    double& reflect_dist ) const;
   /**
@@ -97,7 +97,7 @@ private:
    * the electronics. Both the direct and reflected signal. The signal starts
    * in the middle of the straw.
    */
-  void calculateSignalDists_EndCap(const unsigned int& iWheel,
+  void calculateSignalDists_EndCap(unsigned int iWheel,
                                    double& direct_dist,
                                    double& reflect_dist ) const;
 

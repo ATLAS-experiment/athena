@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTNoise.h"
@@ -29,7 +29,7 @@
 #include <utility>
 
 struct TRTDigitSorter {
-  bool operator() (TRTDigit digit1, TRTDigit digit2) { return (digit1.GetStrawID()<digit2.GetStrawID());}
+  bool operator() (const TRTDigit& digit1, const TRTDigit& digit2) { return (digit1.GetStrawID()<digit2.GetStrawID());}
 } TRTDigitSorterObject;
 
 //_____________________________________________________________________________
@@ -450,10 +450,10 @@ void TRTNoise::sortDigits(std::vector<TRTDigit>& digitVect)
 }
 
 //_____________________________________________________________________________
-float TRTNoise::useLookupTable(const float& x, // noise_level
+float TRTNoise::useLookupTable(float x, // noise_level
                                const std::vector<float>& y_given_x,
-                               const float& min_x,
-                               const float& max_x ) {
+                               float min_x,
+                               float max_x ) {
 
   double       bin_withfrac;
   unsigned int lower_index;
@@ -483,8 +483,8 @@ float TRTNoise::useLookupTable(const float& x, // noise_level
 
 //_____________________________________________________________________________
 void TRTNoise::makeInvertedLookupTable( const std::vector<float>& y_given_x,
-                                        const float & min_x,
-                                        const float & max_x,
+                                        float min_x,
+                                        float max_x,
                                         std::vector<float>& x_given_y,
                                         float & min_y,
                                         float & max_y ) {
@@ -537,12 +537,12 @@ void TRTNoise::makeInvertedLookupTable( const std::vector<float>& y_given_x,
 
 //_____________________________________________________________________________
 void TRTNoise::evolve_LT2AmpVsNL_to_include_LTfluct( std::vector<float>& nl_given_lt2na,
-                                                     const float & min_lt2na,
-                                                     const float & max_lt2na,
-                                                     const float relativeLTFluct,
+                                                     float min_lt2na,
+                                                     float max_lt2na,
+                                                     float relativeLTFluct,
                                                      float & new_min_lt2na,
                                                      float & new_max_lt2na,
-                                                     const unsigned int& number_new_bins )
+                                                     unsigned int number_new_bins )
 {
   //RelativeLTfluct should be less than 0.2.
 

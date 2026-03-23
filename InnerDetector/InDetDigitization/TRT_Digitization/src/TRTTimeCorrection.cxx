@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTTimeCorrection.h"
@@ -93,7 +93,7 @@ void TRTTimeCorrection::Initialize() {
 }
 
 //__________________________________________________________________________________________________________
-double TRTTimeCorrection::TimeShift(const int& strawID) {
+double TRTTimeCorrection::TimeShift(int strawID) {
 
   //TODO: Use hit id helpers (but resolve efficiency issues first).
 
@@ -169,11 +169,11 @@ double TRTTimeCorrection::TimeShift(const int& strawID) {
 }
 
 //__________________________________________________________________________________________________________
-double TRTTimeCorrection::calculateTimeShift_Barrel( const unsigned int& iPhi,
-                                                     const unsigned int& iRing,
-                                                     const unsigned int& iLayer,
-                                                     const unsigned int& iStraw,
-                                                     const int strawID)  {
+double TRTTimeCorrection::calculateTimeShift_Barrel( unsigned int iPhi,
+                                                     unsigned int iRing,
+                                                     unsigned int iLayer,
+                                                     unsigned int iStraw,
+                                                     int strawID)  {
 
   const InDetDD::TRT_BarrelElement * barrel_element(m_detmgr->getBarrelElement(0/*positive*/,
                                                                                iRing, iPhi, iLayer ));
@@ -205,10 +205,10 @@ double TRTTimeCorrection::calculateTimeShift_Barrel( const unsigned int& iPhi,
 }
 
 //__________________________________________________________________________________________________________
-double TRTTimeCorrection::calculateTimeShift_EndCap( const unsigned int& iPhi,
-                                                     const unsigned int& iWheel,
-                                                     const unsigned int& iLayer,
-                                                     const int strawID) {
+double TRTTimeCorrection::calculateTimeShift_EndCap( unsigned int iPhi,
+                                                     unsigned int iWheel,
+                                                     unsigned int iLayer,
+                                                     int strawID) {
 
   const InDetDD::TRT_EndcapElement * ec_element(m_detmgr->getEndcapElement(0/*positive*/,
                                                                            iWheel, iLayer, iPhi ));
@@ -235,7 +235,7 @@ double TRTTimeCorrection::calculateTimeShift_EndCap( const unsigned int& iPhi,
 //__________________________________________________________________________________________________________
 double TRTTimeCorrection::calculateTimeShiftFromStrawEnds( const Amg::Vector3D& strawend1_globalcoord,
                                                            const Amg::Vector3D& strawend2_globalcoord,
-                                                           const int strawID )  {
+                                                           int strawID )  {
 
   //The two (hopefully relevant) extreme points of the vertex region:
   Amg::Vector3D vertexExtension1( m_settings->timeOffsetCalcVertexX(),
@@ -284,7 +284,7 @@ double TRTTimeCorrection::calculateTimeShiftFromStrawEnds( const Amg::Vector3D& 
 }
 
 //__________________________________________________________________________________________________________
-void TRTTimeCorrection::PropagationTime(const int& strawID, const double& meanZ,
+void TRTTimeCorrection::PropagationTime(int strawID, double meanZ,
                                         double& propagationTime1, double& propagationTime2) {
 
   double direct_distance, reflect_distance;
@@ -331,7 +331,7 @@ void TRTTimeCorrection::PropagationTime(const int& strawID, const double& meanZ,
   }
 
 //__________________________________________________________________________________________________________
-void TRTTimeCorrection::calculateSignalDists_Barrel(const unsigned int& iRing, const unsigned int& iLayer,
+void TRTTimeCorrection::calculateSignalDists_Barrel(unsigned int iRing, unsigned int iLayer,
                                                     double& direct_dist, double& reflect_dist ) const {
 
   //We need to calculate the distance along the wire that the signal
@@ -354,7 +354,7 @@ void TRTTimeCorrection::calculateSignalDists_Barrel(const unsigned int& iRing, c
 }
 
 //__________________________________________________________________________________________________________
-void TRTTimeCorrection::calculateSignalDists_EndCap(const unsigned int& iWheel,
+void TRTTimeCorrection::calculateSignalDists_EndCap(unsigned int iWheel,
                                                     double& direct_dist,
                                                     double& reflect_dist ) const {
 

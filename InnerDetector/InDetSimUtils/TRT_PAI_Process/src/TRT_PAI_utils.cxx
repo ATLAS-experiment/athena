@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_PAI_utils.h"
@@ -11,7 +11,7 @@
 #include <vector>
 //___________________________________________________________________________
 
-float TRT_PAI_utils::Interpolate(const float& xval,
+float TRT_PAI_utils::Interpolate(float xval,
 				 const std::vector<float>& xtabulated,
 				 const std::vector<float>& ytabulated) {
   //

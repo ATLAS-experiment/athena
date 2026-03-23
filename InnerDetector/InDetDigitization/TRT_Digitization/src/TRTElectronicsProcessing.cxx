@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTElectronicsProcessing.h"
@@ -201,10 +201,10 @@ void TRTElectronicsProcessing::TabulateSignalShape() {
 //___________________________________________________________________________
 
 void TRTElectronicsProcessing::ProcessDeposits( const std::vector<TRTElectronicsProcessing::Deposit>& deposits,
-                                                const int& hitID,
+                                                int hitID,
                                                 TRTDigit& outdigit,
                                                 double lowthreshold,
-                                                const double& noiseamplitude,
+                                                double noiseamplitude,
                                                 int strawGasType,
                                                 CLHEP::HepRandomEngine* rndmEngine,
                                                 CLHEP::HepRandomEngine* elecNoiseRndmEngine,
@@ -329,7 +329,7 @@ void TRTElectronicsProcessing::SignalShaping(int strawGasType) {
 }
 
 //___________________________________________________________________________
-void TRTElectronicsProcessing::DiscriminatorResponse(const double& lowthreshold, const double& highthreshold) {
+void TRTElectronicsProcessing::DiscriminatorResponse(double lowthreshold, double highthreshold) {
   //Input: m_lowThresholdSignal[],m_highThresholdSignal[]
   //
   //Output: m_lowThresholdDiscriminator[], m_highThresholdDiscriminator[]
