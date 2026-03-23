@@ -36,7 +36,7 @@ TRTDigCondFakeMap::TRTDigCondFakeMap( const TRTDigSettings* digset,
 
 //________________________________________________________________________________
 void TRTDigCondFakeMap::setStrawStateInfo(Identifier& TRT_Identifier,
-                                          const double& strawlength,
+                                          double strawlength,
                                           double& noiselevel,
                                           double& relative_noiseamplitude,
                                           CLHEP::HepRandomEngine* rndmEngine) {

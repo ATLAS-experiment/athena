@@ -55,12 +55,12 @@ public:
    * @param numberOfDigitLengths: number of 75ns timeslices to generate
    *                              noise for
    */
-  void reinitElectronicsNoise(const unsigned int& numberOfDigitLengths
+  void reinitElectronicsNoise(unsigned int numberOfDigitLengths
                               /*number of 75ns timeslices*/,
                               CLHEP::HepRandomEngine *rndmEngine);
 
   /** Set electronics noise amplitude */
-  void setElectronicsNoiseAmplitude(const double&);
+  void setElectronicsNoiseAmplitude(double);
 
   /**
    * Add electronics noise to simulated signals in hit straws. Analog noise
@@ -71,7 +71,7 @@ public:
    * @param noiseamplitude: noise amplitude
    */
   void addElectronicsNoise(std::vector<double>& signal,
-                           const double& noiseamplitude /*= 1.0*/,
+                           double noiseamplitude /*= 1.0*/,
                            CLHEP::HepRandomEngine *rndmEngine);
 
 private:
@@ -94,7 +94,7 @@ private:
    */
   double getMax(unsigned int firstbinslowsignal,
                 unsigned int firstbinfastsignal,
-                const unsigned int& binsinwindow );
+                unsigned int binsinwindow );
 
   std::vector<double> m_noiseSignalShape; /**< Tabulated noise signal shape */
 
@@ -118,7 +118,7 @@ private:
    * @return Signal amplitude
    * @param  time: time after signal arrival
    */
-  double NoiseShape(const double& time) const;
+  double NoiseShape(double time) const;
 
   std::vector<double> m_noisepars1;/**< Noise signal params 1 (t<15.5 ns) */
   std::vector<double> m_noisepars2;/**< Noise signal params 2 (t>15.5 ns) */

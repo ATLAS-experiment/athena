@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRTElectronicsNoise.h"
@@ -65,7 +65,7 @@ void TRTElectronicsNoise::getSamplesOfMaxLTOverNoiseAmp(std::vector<float>& maxL
 //_____________________________________________________________________________
 double TRTElectronicsNoise::getMax(unsigned int firstbinslowsignal,
                                    unsigned int firstbinfastsignal,
-                                   const unsigned int& binsinwindow )
+                                   unsigned int binsinwindow )
 {
 
   // This method assumes that firstbinslowsignal + binsinwindow doesn't
@@ -85,7 +85,7 @@ double TRTElectronicsNoise::getMax(unsigned int firstbinslowsignal,
 }
 
 //_____________________________________________________________________________
-void TRTElectronicsNoise::reinitElectronicsNoise(const unsigned int& numberOfDigitLengths /*number of 75ns timeslices*/,
+void TRTElectronicsNoise::reinitElectronicsNoise(unsigned int numberOfDigitLengths /*number of 75ns timeslices*/,
                                                  CLHEP::HepRandomEngine* rndmEngine)
 {
   //This method gives the actual physics shape!
@@ -189,7 +189,7 @@ void TRTElectronicsNoise::tabulateNoiseSignalShape() {
   m_noiseSignalShape.resize(noiseshapebins);
   
   //Normalize:
-  for (double & i : m_noiseSignalShape) {
+  for (double i : m_noiseSignalShape) {
     i /= shapemax;
   };
 
@@ -197,7 +197,7 @@ void TRTElectronicsNoise::tabulateNoiseSignalShape() {
 
 //_____________________________________________________________________________
 void TRTElectronicsNoise::addElectronicsNoise(std::vector<double>& signal,
-                                              const double& noiseamplitude,
+                                              double noiseamplitude,
                                               CLHEP::HepRandomEngine *rndmEngine) {
 
   // complain if uninitialized? (fixme)
@@ -276,7 +276,7 @@ void TRTElectronicsNoise::InitializeNoiseShaping() {
 }
 
 //___________________________________________________________________
-double TRTElectronicsNoise::NoiseShape(const double& time) const {
+double TRTElectronicsNoise::NoiseShape(double time) const {
 
   //convert to nanoseconds:
   const double time_ns(time/CLHEP::nanosecond);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -109,8 +109,8 @@ StatusCode TRT_SimDriftTimeTool::initialize()
 
 //__________________________________________________________________________
 // Don't worry; physical checks on "dist" and "effectivefield_squared" are already performed in TRTProcessingOfStraw.cxx
-double TRT_SimDriftTimeTool::getAverageDriftTime( const double& dist,
-                                                  const double& effectivefield_squared,
+double TRT_SimDriftTimeTool::getAverageDriftTime( double dist,
+                                                  double effectivefield_squared,
                                                   int strawGasType) const
 {
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARDIGITIZATION_LARHITEMPATTODIGITALG_H
@@ -84,11 +84,18 @@ protected:
                        const std::vector<std::pair<float, float> >* TimeE,
                        const LArDigit* rndm_digit,
                        CLHEP::HepRandomEngine* engine,
-                       const std::vector<std::pair<float, float> >* TimeE_DigiHSTruth = nullptr) const;
+                       const std::vector<std::pair<float, float> >* TimeE_DigiHSTruth,
+		       const LArADC2MeV* adc2MeVs,
+		       const ILArfSampl* fSampl,
+		       const ILArPedestal* pedestal,
+		       const ILArNoise* noise,
+		       const LArAutoCorrNoise* autoCorrNoise,
+		       const LArBadChannelCont* bcCont,
+		       const ILArShape* shape) const;
 
-  StatusCode ConvertHits2Samples(const EventContext& ctx, const Identifier & cellId, HWIdentifier ch_id,
-                   CaloGain::CaloGain igain,
-                   const std::vector<std::pair<float,float> >  *TimeE,  staticVecDouble_t& sampleList) const;
+  StatusCode ConvertHits2Samples(const Identifier & cellId, HWIdentifier ch_id, CaloGain::CaloGain igain,
+				 const std::vector<std::pair<float,float> >  *TimeE,  staticVecDouble_t& sampleList,
+				 const ILArShape* shape) const;
 
 
   CaloGain::CaloGain chooseGain(const staticVecDouble_t& samples,const HWIdentifier id, const CaloNum iCalo, const ILArPedestal* ped, const LArADC2MeV* ramp, const float SF) const;
