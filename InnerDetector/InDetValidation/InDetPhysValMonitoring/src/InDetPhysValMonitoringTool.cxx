@@ -193,6 +193,7 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
   rttConfig.detailLevel = m_detailLevel; 
 
   rttConfig.isITk = m_isITk;
+  rttConfig.hasHGTDReco = m_hasHGTDReco;
 
   rttConfig.doTrkInJetPlots = m_doTrackInJetPlots;
   rttConfig.doTrkInJetPlots_fake = m_doTrackInJetPlots;
