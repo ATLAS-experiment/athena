@@ -128,7 +128,8 @@ def parse_recipe(recipe,mux,mlog):
     typesMap={0:"ADC", 1:"RawADC", 2:"Energy", 3:"SelectedEnergy",15:"Invalid"}
     sTypes=[]
     sLengths=[]    
-    for s,m in ["at0_bc",0],["at1_bc",1]:
+    i1,i2=[1,0] if "swap" in recipe else [0,1]
+    for s,m in ["at0_bc",i1],["at1_bc",i2]:
        pos=recipe.find(s)
        if pos >=0:
           n=-1
@@ -187,7 +188,9 @@ def getLArDTInfoForRun(run,quiet=False,connstring="COOLONL_LAR/CONDBR2"):
 
     runDB.closeDatabase()
     sTypes, sLengths = parse_recipe(recipe,mux,mlog_LRF)
+    print(sTypes, sLengths)
     sTypesPEB, sLengthsPEB = parse_recipe(recipePEB,mux,mlog_LRF)
+    print(sTypesPEB, sLengthsPEB)
     return  LArDTRunInfo(sTypes, sLengths, sTypesPEB, sLengthsPEB, timing, adccalib, fw)
 
 # command line driver for convenience

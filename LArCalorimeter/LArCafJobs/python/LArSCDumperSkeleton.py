@@ -78,21 +78,38 @@ def fromRunArgs(runArgs):
        fw=runinfo.FWversion()
        CKeys=[]
        flags.LArSCDump.digitsKey=""
-       for i in range(0,len(runinfo.streamTypes())):
-          if runinfo.streamTypes()[i] ==  "SelectedEnergy":
-                CKeys += ["SC_ET_ID"]
-                flags.LArSCDump.doEt=True
-                flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-          elif runinfo.streamTypes()[i] ==  "Energy":
-                CKeys += ["SC_ET"]
-                flags.LArSCDump.doEt=True
-                flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-          elif runinfo.streamTypes()[i] ==  "RawADC":
-                flags.LArSCDump.digitsKey="SC"
-                flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-          elif runinfo.streamTypes()[i] ==  "ADC":
-                CKeys += ["SC_ADC_BAS"]
-                flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+       if hasattr(runArgs,"doPEBStream") and runArgs.doPEBStream:
+          for i in range(0,len(runinfo.streamTypesPEB())):
+             if runinfo.streamTypesPEB()[i] ==  "SelectedEnergy":
+                   CKeys += ["SC_ET_ID"]
+                   flags.LArSCDump.doEt=True
+                   flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
+             elif runinfo.streamTypesPEB()[i] ==  "Energy":
+                   CKeys += ["SC_ET"]
+                   flags.LArSCDump.doEt=True
+                   flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
+             elif runinfo.streamTypesPEB()[i] ==  "RawADC":
+                   flags.LArSCDump.digitsKey="SC"
+                   flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
+             elif runinfo.streamTypesPEB()[i] ==  "ADC":
+                   CKeys += ["SC_ADC_BAS"]
+                   flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
+       else:
+          for i in range(0,len(runinfo.streamTypes())):
+             if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+                   CKeys += ["SC_ET_ID"]
+                   flags.LArSCDump.doEt=True
+                   flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+             elif runinfo.streamTypes()[i] ==  "Energy":
+                   CKeys += ["SC_ET"]
+                   flags.LArSCDump.doEt=True
+                   flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+             elif runinfo.streamTypes()[i] ==  "RawADC":
+                   flags.LArSCDump.digitsKey="SC"
+                   flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+             elif runinfo.streamTypes()[i] ==  "ADC":
+                   CKeys += ["SC_ADC_BAS"]
+                   flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
                 
     finally:
        flags.LArSCDump.doRawChan=True
@@ -145,8 +162,7 @@ def fromRunArgs(runArgs):
                             FillRODEnergy = flags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
                             ETThreshold = flags.LArSCDump.ETThresh, ETThresholdMain = flags.LArSCDump.ETThreshMain, ADCThreshold=int(runArgs.ADCThresh),
                             TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
-                            TrigDecisionTool=tdt,
-                            OutputLevel=2))
+                            TrigDecisionTool=tdt, OutputLevel=3))
 
     if os.path.exists(flags.LArSCDump.outputNtup):
           os.remove(flags.LArSCDump.outputNtup)
