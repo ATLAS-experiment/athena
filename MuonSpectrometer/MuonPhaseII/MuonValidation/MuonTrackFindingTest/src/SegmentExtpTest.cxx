@@ -204,10 +204,15 @@ namespace MuonValR4{
                 }
 
                 pullCalculator.updateSpatialResidual(line, *meas);
+                const Amg::Vector2D res = mPos - lPos;
+                AmgSymMatrix(2) cov{AmgSymMatrix(2)::Identity()};
+                cov(0,0) = 1./meas->covariance()[1];
+                cov(1,1) = 1./meas->covariance()[0];
                 ATH_MSG_DEBUG("Analyze residual for "<<m_idHelperSvc->toString(sp->identify())
                 <<" / "<<targetSurf.geometryId()<<" --- measurement: "<<Amg::toString(mPos)<<", extraploated: "
-                    <<Amg::toString(lPos)<<" --> residual: "<<Amg::toString(mPos - lPos)<<" vs. "
-                    <<Amg::toString(pullCalculator.residual()));
+                    <<Amg::toString(lPos)<<" --> residual: "<<Amg::toString(res)<<" vs. "
+                    <<Amg::toString(pullCalculator.residual())<<", chi2: "<<pullCalculator.chi2Term(line, *meas)
+                    <<" vs. "<<res.dot(cov*res));
             }
             if (m_drawEvent) {
                 visualHelper.write(std::format("ExtTpTest_{:}_{:}_{:}.obj", 
