@@ -29,16 +29,13 @@ namespace FlavorTagInference {
     std::pair<MuonsLoader::MuonFilter,std::set<std::string>> MuonsLoader::muonFilter(
       ConstituentsSelection config)
     {
-        typedef SG::AuxElement AE;
-        // make sure we record accessors as data dependencies, if any
+        // make sure we record accessors as data dependencies
         std::set<std::string> muon_deps;
 
         switch (config){
           case ConstituentsSelection::R22_DEFAULT:
             return {
-                [](const xAOD::IParticle& jet, const xAOD::Muon* mu) {
-                  TLorentzVector jet_4vec = jet.p4();
-                  TLorentzVector mu_4vec = mu->p4();
+                [](const xAOD::IParticle&, const xAOD::Muon* mu) {
 
                   if (std::abs(mu->eta()) > 2.5) return false;
                   if (mu->pt() <= 2000) return false;
@@ -55,6 +52,34 @@ namespace FlavorTagInference {
                   mu->parameter(momBalSignif, xAOD::Muon::momentumBalanceSignificance);
                   if (momBalSignif == 0) return false;
 
+                  return true;
+              }, muon_deps
+            };
+        case ConstituentsSelection::R22_BJR:
+            return {
+                [](const xAOD::IParticle& jet, const xAOD::Muon* mu) {
+                  if (mu->quality() > 2)
+                    return false;
+                  // Check minimum muon pT
+                  if (mu->pt() < 1000 || mu->pt() > 500000) // 1 < pT < 500 GeV
+                    return false;
+
+                  if (std::abs(mu->eta()) > 2.5) // |eta| < 2.5
+                    return false;
+
+                  // Check if it's inside jet
+                  if (jet.p4().DeltaR(mu->p4()) > 0.4)
+                    return false;
+                  
+                  // Check relative pT
+                  if (mu->p4().Vect().Perp(jet.p4().Vect()) > 5000) // pTrel < 5 GeV
+                    return false;
+
+                  const auto* track = mu->primaryTrackParticle();
+                  if (!track)
+                    return false;
+                  if (std::abs(track->d0()) >= 1)
+                    return false;
                   return true;
               }, muon_deps
             };
@@ -112,8 +137,8 @@ namespace FlavorTagInference {
         std::sort(muons.begin(), muons.end(), std::greater<>());
         std::vector<const xAOD::Muon*> only_muons;
         only_muons.reserve(muons.size());
-        for (const auto& el: muons) {
-          only_muons.push_back(el.second);
+        for (const auto& mu: muons) {
+          only_muons.push_back(mu.second);
         }
         return only_muons;
     }

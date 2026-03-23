@@ -119,7 +119,6 @@ namespace FlavorTagInference {
     // DumpGnnInputs(salt_model_data.gnn_inputs);
     auto input_tracks = salt_model_data.constituents.at("track_features");
 
-
     // run inference
     // -------------
     if (m_defaultZeroTracks && salt_model_data.num_inputs == 0) {

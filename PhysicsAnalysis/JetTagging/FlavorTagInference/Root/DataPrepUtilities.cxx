@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/DataPrepUtilities.h"
@@ -261,6 +261,7 @@ namespace FlavorTagInference {
         {"(rnnip|iprnn|(?:dips|DIPS)[^_]*)(flip)?_p(b|c|u|tau)"_r, EDMType::FLOAT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)(Flip)?_[Nn].*"_r, EDMType::INT},
         {"(JetFitter|SV1|JetFitterSecondaryVertex).*"_r, EDMType::FLOAT},
+        {"EtaJES_GSC_(pt|eta|phi|mass)"_r, EDMType::FLOAT},
         {"(log_)?pt|abs_eta|eta|phi|energy|mass"_r, EDMType::CUSTOM_GETTER},
         {"softMuon_p[bcu]"_r, EDMType::FLOAT},
         {"softMuon_.*"_r, EDMType::FLOAT},
@@ -281,6 +282,7 @@ namespace FlavorTagInference {
         {"((?:dips|DIPS)[^_]*)_.*"_r, "$1_isDefaults"},
         {"rnnipflip_.*"_r, "rnnipflip_isDefaults"},
         {"iprnn_.*"_r, ""},
+        {"EtaJES_GSC_(pt|eta|phi|mass)"_r, ""},
         {"smt_.*"_r, "softMuon_isDefaults"},
         {"softMuon_.*"_r, "softMuon_isDefaults"},
         {"((log_)?pt|abs_eta|eta|phi|energy|mass)"_r, ""}}; // no default for custom cases
@@ -360,10 +362,39 @@ namespace FlavorTagInference {
       std::vector<std::pair<std::string, internal::VarFromJet>> varsFromJet;
 
       for (const auto& input: inputs) {
-        if (input.type != EDMType::CUSTOM_GETTER) {
-          throw std::runtime_error("Unsupported input type");
-        } else {
+        if (input.type == EDMType::FLOAT) {
+          SG::AuxElement::ConstAccessor<float> acc(input.name);
+          deps.bTagInputs.insert(input.name);
+          if (input.default_flag.size() == 0 || input.name == input.default_flag) {
+            internal::VarFromJet getter =
+              [name=input.name, acc](const xAOD::IParticle& j) -> internal::NamedVar {
+                const float value = acc(j);
+                if (std::isnan(value)) {
+                  throw std::runtime_error("Found NAN value for '" + name + "'.");
+                }
+                return {name, value};
+              };
+            varsFromJet.push_back(std::make_pair(input.name, getter));
+          } else {
+            SG::AuxElement::ConstAccessor<char> default_flag(input.default_flag);
+            internal::VarFromJet getter =
+              [name=input.name, acc, default_flag](const xAOD::IParticle& j) -> internal::NamedVar {
+                const float value = acc(j);
+                const bool is_default = default_flag(j);
+                if (std::isnan(value) && !is_default) {
+                  throw std::runtime_error(
+                    "Found NAN value for '" + name
+                    + "'. This is only allowed when using a default"
+                    " value for this input");
+                }
+                return {name, is_default ? NAN : value};
+              };
+            varsFromJet.push_back(std::make_pair(input.name, getter));
+          }
+        } else if (input.type == EDMType::CUSTOM_GETTER) {
           varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
+        } else {
+          throw std::runtime_error("Unsupported input type");
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);
@@ -541,4 +572,3 @@ namespace FlavorTagInference {
   } // end of datapre namespace
 
 } // end of FlavorTagInference namespace
-

@@ -12,6 +12,7 @@ namespace FlavorTagInference {
     FTagDataDependencyNames d1 = *this;
     d1.trackInputs.merge(d2.trackInputs);
     d1.electronInputs.merge(d2.electronInputs);
+    d1.muonInputs.merge(d2.muonInputs);
     d1.bTagInputs.merge(d2.bTagInputs);
     d1.bTagOutputs.merge(d2.bTagOutputs);
     return d1;
@@ -27,6 +28,7 @@ namespace FlavorTagInference {
     return (
       d1.trackInputs == d2.trackInputs &&
       d1.electronInputs == d2.electronInputs &&
+      d1.muonInputs == d2.muonInputs &&
       d1.bTagInputs == d2.bTagInputs &&
       d2.bTagOutputs == d2.bTagOutputs &&
       true
