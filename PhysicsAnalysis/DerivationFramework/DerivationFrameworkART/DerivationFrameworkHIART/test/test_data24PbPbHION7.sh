@@ -10,11 +10,16 @@
 
 set -e
 
+export ATHENA_PROC_NUMBER=8
+export ATHENA_CORE_NUMBER=8
+
 Derivation_tf.py \
 --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/data_hi/data24_hi.00490145.physics_HardProbes.AOD.f1550_m2267_skim \
 --outputDAODFile art.pool.root \
 --formats HION7 \
 --maxEvents -1 \
+--multithreaded true \
+--preExec 'flags.HeavyIon.isDerivation=True' \
 
 echo "art-result: $? reco"
 
