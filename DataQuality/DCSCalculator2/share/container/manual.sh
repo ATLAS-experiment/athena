@@ -12,4 +12,4 @@ cd $TOPDIR
 apptainer --quiet exec --env KRB5CCNAME=$KRB5CCNAME --env-file envvars \
 --bind /eos/user/a/atlasdqm,/eos/project/o/oracle/public/admin,$KRBPATH,/cvmfs \
 --bind /afs/cern.ch/user/a/atlasdqm/private:/config \
---pwd /RunDCSCalc docker://registry.cern.ch/atlas-dqm-core/dcscalculator:latest /bin/bash
+--pwd /RunDCSCalc docker://registry.cern.ch/atlas-dqm-core/dcscalculator:latest /bin/bash $@
