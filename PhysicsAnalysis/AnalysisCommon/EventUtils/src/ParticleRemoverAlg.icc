@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,7 +14,8 @@
 
 
 template<class CONT>
-StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepParticleVec )
+StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepParticleVec,
+                                                const EventContext& ctx )
 {
   ATH_MSG_DEBUG ("removeParticles(...) " << name() << "...");
 
@@ -76,14 +77,20 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
     const auto* originalShallowCopyCont = m_inContList.at(contIdx);
     ATH_MSG_VERBOSE("Got input ShallowCopyContainer with name: " << m_inContNameList.at(contIdx));
 
-    // Create the current shallow copy container and record it to StoreGate
-    auto outContShallowCopy = xAOD::shallowCopyContainer( *outCont );
-    ATH_CHECK( evtStore()->record( outContShallowCopy.first,  m_outContNameList.at(contIdx) ) );
-    ATH_CHECK( evtStore()->record( outContShallowCopy.second, m_outContNameList.at(contIdx) + "Aux." ) );
+    // Create the current shallow copy container
+    auto outContShallowCopy = xAOD::shallowCopyContainer( *outCont, ctx );
+
+    CONT* shallowCopy = outContShallowCopy.first.get();
+    xAOD::ShallowAuxContainer* shallowAuxCopy = outContShallowCopy.second.get();
+
+    // Add the output shallow copy to the list of output containers
+    m_outContList.push_back(outContShallowCopy.first.get());
+
+    // Record it.
+    ATH_CHECK( evtStore()->record( std::move(outContShallowCopy.first),  m_outContNameList.at(contIdx) ) );
+    ATH_CHECK( evtStore()->record( std::move(outContShallowCopy.second), m_outContNameList.at(contIdx) + "Aux." ) );
     ATH_MSG_VERBOSE("Recorded new output ShallowCopyContainer with name: " << m_outContNameList.at(contIdx));
 
-    // Also add the output shallow copy to the list of output containers
-    m_outContList.push_back(outContShallowCopy.first);
 
     // Copy the variables that are stored in the input ShallowCopyContainer
     // locally (i.e., NOT only present in the master container, but where the
@@ -143,7 +150,7 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
       ATH_MSG_VERBOSE("This auxID=" << auxid << " is part of the ShallowCopyAuxStore...");
 
       // Create the variable in the dynamic store of the new ShallowCopyContainer
-      (void)outContShallowCopy.second->getData( auxid, outContSize, outContSize );
+      (void)shallowAuxCopy->getData( auxid, outContSize, outContSize );
 
 
       // Then, loop over these, get the index of the corresponding object in the
@@ -153,7 +160,7 @@ StatusCode ParticleRemoverAlg::removeParticles( const std::vector<bool>& keepPar
       for ( std::size_t i=0; i<outContSize; ++i ) {
         // Get the original shallow copy particle
         const std::size_t inIdx = inPartIdxList.at(i);
-        factory->copy( auxid, *outContShallowCopy.first, i, *originalShallowCopyCont, inIdx, 1 );
+        factory->copy( auxid, *shallowCopy, i, *originalShallowCopyCont, inIdx, 1 );
       }
 
     } // End: Loop over all aux-ids
