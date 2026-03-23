@@ -29,27 +29,6 @@ def ActsIDStripSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
-# not validated yet
-def ActsIDCoreStripSpacePointToolCfg(flags,
-                                   name: str = "ActsIDCoreStripSpacePointTool",
-                                   **kwargs: dict) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    # from ActsConfig.ActsGeometryConfig import ActsDetectorElementToActsGeometryIdMappingAlgCfg
-    # acc.merge( ActsDetectorElementToActsGeometryIdMappingAlgCfg(flags) )
-    # kwargs.setdefault('DetectorElementToActsGeometryIdMapKey', 'DetectorElementToActsGeometryIdMap')
-    kwargs.setdefault("useSCTLayerDep_OverlapCuts", True)
-
-    if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
-        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags)))
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.popToolsAndMerge(ActsTrackingGeometryToolCfg(flags)))
-        
-    acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
-    return acc
-
 def ActsIDPixelSpacePointPreparationAlgCfg(flags,
                                          name: str = "ActsIDPixelSpacePointPreparationAlg",
                                          *,
@@ -157,11 +136,6 @@ def ActsIDStripSpacePointFormationAlgCfg(flags,
         kwargs.setdefault('OSPCache', 'ActsStripOverlapSpacePointCache')
 
     if 'SpacePointFormationTool' not in kwargs:
-        # from ActsConfig.ActsConfigFlags import SpacePointStrategy
-        # if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
-        #     kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsIDCoreStripSpacePointToolCfg(flags)))
-        # else:
-        #     kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsIDStripSpacePointToolCfg(flags)))
         kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsIDStripSpacePointToolCfg(flags)))
 
     if useCache:

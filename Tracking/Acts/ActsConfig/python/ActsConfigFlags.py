@@ -48,12 +48,6 @@ class StripErrorStrategy(FlagEnum):
     CLUSTERING = 0
     PITCH = 1
 
-
-# This is temporary during the integration of ACTS.
-class SpacePointStrategy(FlagEnum):
-    ActsCore = "ActsCore" # ACTS-based SP formation
-    ActsTrk = "ActsTrk" #SP formation without ACTS
-
 class TrackFitterType(FlagEnum):
     KalmanFitter = 'KalmanFitter' # default ACTS fitter to choose
     GaussianSumFitter = 'GaussianSumFitter' # new experimental implementation
@@ -139,7 +133,6 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Clusters.UsePixelBroadErrors", False)
     
     # SpacePoint
-    actscf.addFlag("Acts.SpacePointStrategy", SpacePointStrategy.ActsTrk, type=SpacePointStrategy)  # Define SpacePoint Strategy
     actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
 
     # Seeding
