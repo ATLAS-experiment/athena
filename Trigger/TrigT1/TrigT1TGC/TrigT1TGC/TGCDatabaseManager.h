@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDatabaseManager_hh
@@ -104,6 +104,7 @@ inline std::shared_ptr<LVL1TGC::TGCTileMuCoincidenceLUT> TGCDatabaseManager::get
 
 inline std::shared_ptr<TGCNSWCoincidenceMap> TGCDatabaseManager::getNSWCoincidenceMap(int sideId, int octantId, int moduleId) const
 {
+  if (moduleId >= NumberOfModuleInBW) [[unlikely]] return nullptr;
   return m_mapNSW[sideId][octantId][moduleId];
 }
 
