@@ -50,6 +50,7 @@
 /// helper struct - steer the configuration from the parent tool's side 
 struct InDetRttPlotConfig{
   bool isITk{false};
+  bool hasHGTDReco{false};
 
   /// Plots for (selected) tracks, not necessarily truth matched
   bool doTrackParameters{true}; 

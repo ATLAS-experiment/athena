@@ -23,8 +23,8 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   /// for backward compatibility
   this->m_iDetailLevel = m_config.detailLevel;
   if (m_config.doTrackParameters){
-    m_trackParameters = std::make_unique<InDetPerfPlot_TrackParameters>(this, "Tracks/Selected/Parameters", m_config.isITk);
-    m_unmatchedBiasPlots = std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Selected/Bias", true); // d0 bias plots
+    m_trackParameters = std::make_unique<InDetPerfPlot_TrackParameters>(this, "Tracks/Selected/Parameters", m_config.hasHGTDReco);
+    m_unmatchedBiasPlots = std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Selected/Bias", true, m_config.hasHGTDReco); // d0 bias plots
   }
   if (m_config.doNTracks)                             m_nTracks = std::make_unique<InDetPerfPlot_nTracks>(this, "Tracks/Tracks"); 
   if (m_config.doHitResidualPlot)                     m_hitResidualPlot= std::make_unique<InDetPerfPlot_HitResidual>(this, "Tracks/Hits/Residuals", m_config.isITk);
@@ -34,8 +34,8 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
     m_fakePlotsTotal= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/FakeRate",FakeRateCategory::Total);
   }
   if (m_config.doMissingTruthFakePlots)               m_missingTruthFakePlots= std::make_unique<InDetPerfPlot_FakeRate>(this, "Tracks/Unlinked/FakeRate", FakeRateCategory::Unlinked);
-  if (m_config.doResolutionPlotPrim)                  m_resolutionPlotPrim= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Primary");
-  if (m_config.doResolutionPlotPrim_truthFromB)       m_resolutionPlotPrim_truthFromB= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/TruthFromB");
+  if (m_config.doResolutionPlotPrim)                  m_resolutionPlotPrim= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Primary", false, m_config.hasHGTDReco);
+  if (m_config.doResolutionPlotPrim_truthFromB)       m_resolutionPlotPrim_truthFromB= std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/TruthFromB", false, m_config.hasHGTDReco);
   if (m_config.doHitsRecoTracksPlots)                 m_hitsRecoTracksPlots= std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Selected/HitsOnTracks", m_config.isITk);
   if (m_config.doEffPlots)                            m_effPlots= std::make_unique<InDetPerfPlot_Efficiency>(this, "Tracks/Efficiency", m_config.doTechEffPlots, m_config.isITk);
   if (m_config.doDuplicatePlots)                      m_duplicatePlots = std::make_unique<InDetPerfPlot_Duplicate>(this, "Tracks/Duplicate");
@@ -45,7 +45,7 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   if (m_config.doHardScatterVertexTruthMatchingPlots) m_hardScatterVertexTruthMatchingPlots= std::make_unique<InDetPerfPlot_VertexTruthMatching>(this, "Vertices/HardScatteringVertex", m_iDetailLevel, m_config.isITk);
   if (m_config.doTrtExtensionPlots)                   m_trtExtensionPlots= std::make_unique<InDetPerfPlot_TRTExtension>(this, "Tracks/TRTExtension");
   if (m_config.doNtupleTruthToReco)                   m_ntupleTruthToReco= std::make_unique<InDetPerfNtuple_TruthToReco>(this, "Ntuples", "TruthToReco");
-  if (m_config.doResolutionPlotSecd)                  m_resolutionPlotSecd = std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Secondary");
+  if (m_config.doResolutionPlotSecd)                  m_resolutionPlotSecd = std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Secondary", false, m_config.hasHGTDReco);
   if (m_config.doHitsMatchedTracksPlots)              m_hitsMatchedTracksPlots = std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Matched/HitsOnTracks", m_config.isITk);
   if (m_config.doHitsFakeTracksPlots)                 m_hitsFakeTracksPlots = std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Fakes/HitsOnTracks", m_config.isITk);
   if (m_config.doHitsUnlinkedTracksPlots)             m_hitsUnlinkedTracksPlots = std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Unlinked/HitsOnTracks", m_config.isITk);
@@ -68,19 +68,19 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   }
 
   if (m_config.doTrackParametersPerAuthor){
-    m_trkParaSiSPSeededFinderPlots              = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Parameters", m_config.isITk);
-    m_trkParaInDetExtensionProcessorPlots       = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Parameters", m_config.isITk);
-    m_trkParaTRTSeededTrackFinderPlots          = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Parameters", m_config.isITk);
-    m_trkParaTRTStandalonePlots                 = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/TRTStandalone/Tracks/Parameters", m_config.isITk);
-    m_trkParaSiSpacePointsSeedMaker_LargeD0Plots= std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Parameters", m_config.isITk);
+    m_trkParaSiSPSeededFinderPlots              = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Parameters", m_config.hasHGTDReco);
+    m_trkParaInDetExtensionProcessorPlots       = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Parameters", m_config.hasHGTDReco);
+    m_trkParaTRTSeededTrackFinderPlots          = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Parameters", m_config.hasHGTDReco);
+    m_trkParaTRTStandalonePlots                 = std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/TRTStandalone/Tracks/Parameters", m_config.hasHGTDReco);
+    m_trkParaSiSpacePointsSeedMaker_LargeD0Plots= std::make_unique<InDetPerfPlot_TrackParameters>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Parameters", m_config.hasHGTDReco);
   }
 
   if (m_config.doResolutionsPerAuthor){
-    m_resSiSPSeededFinderPlots                  = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Resolution");
-    m_resInDetExtensionProcessorPlots           = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Resolution");
-    m_resTRTSeededTrackFinderPlots              = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Resolution");
-    m_resTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/TRTStandalone/Tracks/Resolution");
-    m_resSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Resolution");
+    m_resSiSPSeededFinderPlots                  = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/SiSPSeededFinder/Tracks/Resolution", false, m_config.hasHGTDReco);
+    m_resInDetExtensionProcessorPlots           = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/InDetExtensionProcessor/Tracks/Resolution", false, m_config.hasHGTDReco);
+    m_resTRTSeededTrackFinderPlots              = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/TRTSeededTrackFinder/Tracks/Resolution", false, m_config.hasHGTDReco);
+    m_resTRTStandalonePlots                     = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/TRTStandalone/Tracks/Resolution", false, m_config.hasHGTDReco);
+    m_resSiSpacePointsSeedMaker_LargeD0Plots    = std::make_unique<InDetPerfPlot_Resolution>(this, "TracksByAuthor/SiSpacePointsSeedMaker_LargeD0/Tracks/Resolution", false, m_config.hasHGTDReco);
   }
 
   if (m_config.doHitsRecoTracksPlotsPerAuthor){

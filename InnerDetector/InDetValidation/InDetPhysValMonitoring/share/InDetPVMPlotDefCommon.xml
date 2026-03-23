@@ -2666,7 +2666,7 @@
 
 <h id="sigma_vs_eta_d0" type="TProfile" title="#sigma(d_{0}) vs #eta">
   <x title="#eta" n="&NETA;" lo="-&ETA;" hi="&ETA;"/>
-  <y title="#sigma(d_{0}) [mm}" lo="0." hi="10."/>
+  <y title="#sigma(d_{0}) [mm]" lo="0." hi="10."/>
 </h>
 
 <h id="sigma_vs_eta_z0" type="TProfile" title="#sigma(z_{0}) vs #eta">
@@ -2895,6 +2895,10 @@
 </h>
 <h id="truth_prodZ" type="TH1F" title="truth_{prodZ} [mm]">
   <x title="truth_{prodZ} [mm]" n="100" lo="-300.0" hi="300.0"/>
+  <y title="Number of Entries"/>
+</h>
+<h id="truth_time" type="TH1F" title="truth_{time} [ns]">
+  <x title="truth_{time} [ns]" n="160" lo="-&TIMEPARA;" hi="&TIMEPARA;"/>
   <y title="Number of Entries"/>
 </h>
 

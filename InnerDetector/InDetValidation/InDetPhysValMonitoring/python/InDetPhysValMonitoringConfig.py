@@ -231,6 +231,9 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("doTRTExtensionPlots", False)
         kwargs.setdefault("isITk", True)
 
+    if flags.Reco.EnableHGTDExtension:
+        kwargs.setdefault("hasHGTDReco", True)
+
     if flags.PhysVal.IDPVM.doTechnicalEfficiency:
         kwargs.setdefault("fillTechnicalEfficiency", True)
         kwargs.setdefault("EtaBins", flags.Tracking.ITkMainPass.etaBins if flags.Detector.GeometryITk

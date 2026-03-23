@@ -15,8 +15,8 @@
 #include <cmath>
 using namespace IDPVM;
 
-InDetPerfPlot_TrackParameters::InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& sDir, bool isITk) :
-  InDetPlotBase(pParent, sDir), m_isITk{isITk}{
+InDetPerfPlot_TrackParameters::InDetPerfPlot_TrackParameters(InDetPlotBase* pParent, const std::string& sDir, bool hasHGTDReco) :
+  InDetPlotBase(pParent, sDir), m_hasHGTDReco{hasHGTDReco}{
   //nop
   //variable initialised at declaration
 }
@@ -37,7 +37,7 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_reco_ndof,   "reco_ndof");
   book(m_reco_chi2Overndof, "reco_chi2Overndof");
   book(m_reco_author,  "reco_author");
-  if(m_isITk){
+  if(m_hasHGTDReco){
     book(m_reco_time,    "reco_time");
     book(m_reco_hasValidTime_eff_vs_eta, "reco_hasValidTime_eff_vs_eta");
   }
@@ -53,6 +53,7 @@ InDetPerfPlot_TrackParameters::initializePlots() {
   book(m_truth_lowpt,     "truth_lowpt");
   book(m_truth_prodR,  "truth_prodR");
   book(m_truth_prodZ,  "truth_prodZ");
+  book(m_truth_time, "truth_time");
 
   book(m_reco_pt_vs_eta, "reco_pt_vs_eta");
   book(m_reco_phi_vs_eta, "reco_phi_vs_eta");
@@ -82,6 +83,7 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TruthParticle& particle, float w
   static const SG::ConstAccessor<float> qOverPAcc("qOverP");
   static const SG::ConstAccessor<float> prodRAcc("prodR");
   static const SG::ConstAccessor<float> prodZAcc("prodZ");
+  static const SG::ConstAccessor<float> timeAcc("time");
   float d0 = d0Acc.isAvailable(particle) ? d0Acc(particle) : -9999.;
   float z0 = z0Acc.isAvailable(particle) ? z0Acc(particle) : -9999.;
   float theta = thetaAcc.isAvailable(particle) ? thetaAcc(particle) : -9999.;
@@ -89,6 +91,7 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TruthParticle& particle, float w
   float qOverP = qOverPAcc.isAvailable(particle) ? qOverPAcc(particle) : -9999.;
   float prodR = prodRAcc.isAvailable(particle) ? prodRAcc(particle) : -9999.;
   float prodZ = prodZAcc.isAvailable(particle) ? prodZAcc(particle) : -9999.;
+  float time = timeAcc.isAvailable(particle) ? timeAcc(particle) : -9999.;
 
   if(d0 > -9000.) fillHisto(m_truth_d0, d0, weight);
   if(z0 > -9000.) fillHisto(m_truth_z0, z0, weight);
@@ -98,6 +101,7 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TruthParticle& particle, float w
   if(qOverP > -9000.) fillHisto(m_truth_qoverp, qOverP, weight);
   if(prodR > -9000.) fillHisto(m_truth_prodR, prodR, weight);
   if(prodZ > -9000.) fillHisto(m_truth_prodZ, prodZ, weight);
+  if(time > -9000.) fillHisto(m_truth_time, time, weight);
 
   fillHisto(m_truth_eta, eta, weight);
   fillHisto(m_truth_pt, pt, weight);
@@ -152,7 +156,7 @@ InDetPerfPlot_TrackParameters::fill(const xAOD::TrackParticle& particle, float w
     if(patternInfo.test(i)) fillHisto(m_reco_author, i, weight);
   }
 
-  if(m_isITk){
+  if(m_hasHGTDReco){
     static const SG::Accessor< uint8_t > accValidTime("hasValidTime");
     static const SG::Accessor< float > accTime("time");
     if( accValidTime.isAvailable(particle) && accTime.isAvailable(particle) ) {
