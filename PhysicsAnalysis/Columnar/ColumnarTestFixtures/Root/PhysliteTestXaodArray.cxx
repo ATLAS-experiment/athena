@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -25,6 +25,7 @@
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <xAODMuon/MuonContainer.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <AsgTesting/UnitTest.h>
 #include <xAODRootAccess/TEvent.h>
@@ -154,13 +155,13 @@ namespace columnar
             std::string shallowName = containerName + "_shallowCopy";
             std::string shallowAuxName = shallowName + "Aux.";
             benchmarkShallowCopy.startTimer ();
-            auto shallowCopy = xAOD::shallowCopyContainer (*object);
+            auto shallowCopy = xAOD::shallowCopyContainer (*object, Gaudi::Hive::currentContext());
             benchmarkShallowCopy.stopTimer ();
             benchmarkShallowRegister.startTimer ();
-            ATH_CHECK (store.record (shallowCopy.first, shallowName));
-            ATH_CHECK (store.record (shallowCopy.second, shallowAuxName));
+            object = shallowCopy.first.get();
+            ATH_CHECK (store.record (std::move(shallowCopy.first), shallowName));
+            ATH_CHECK (store.record (std::move(shallowCopy.second), shallowAuxName));
             benchmarkShallowRegister.stopTimer ();
-            object = shallowCopy.first;
           }
           return StatusCode::SUCCESS;
         }
