@@ -3,8 +3,8 @@
 # Declare the package name.
 atlas_subdir( xAODTrigger )
 
+set( extra_libs  )
 # Extra dependencies, based on what environment we're in.
-set( extra_libs )
 if( NOT XAOD_STANDALONE )
    set( extra_libs AthenaKernel )
 endif()
@@ -13,12 +13,15 @@ endif()
 find_package( xAODUtilities )
 
 # Component(s) in the package.
+# xAODTrigMissingET and xAODHIEvent are used to hard code container CLIDs. See: TrigComposite_v1::derivesFromIParticle(const CLID clid) 
 atlas_add_library( xAODTrigger
    xAODTrigger/*.h xAODTrigger/versions/*.h xAODTrigger/versions/*.icc
    Root/*.cxx
    PUBLIC_HEADERS xAODTrigger
    LINK_LIBRARIES AthContainers AthLinks xAODCore xAODBase TrigNavStructure CxxUtils TrigT1MuctpiBits
+   xAODTrigMissingET xAODHIEvent
    ${extra_libs} )
+
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTrigger/selection.xml
@@ -29,9 +32,9 @@ atlas_add_xaod_smart_pointer_dicts(
               "xAOD::TrigCompositeContainer_v1" "xAOD::BunchConfContainer_v1"
               "xAOD::TrigPassBitsContainer_v1" "xAOD::TriggerMenuJsonContainer_v1"
               "xAOD::eFexEMRoIContainer_v1"  "xAOD::eFexTauRoIContainer_v1" "xAOD::jFexSRJetRoIContainer_v1"
-	      "xAOD::jFexLRJetRoIContainer_v1" "xAOD::jFexTauRoIContainer_v1" "xAOD::jFexFwdElRoIContainer_v1"
+              "xAOD::jFexLRJetRoIContainer_v1" "xAOD::jFexTauRoIContainer_v1" "xAOD::jFexFwdElRoIContainer_v1"
               "xAOD::jFexSumETRoIContainer_v1" "xAOD::jFexMETRoIContainer_v1"
-	      "xAOD::L1TopoSimResultsContainer_v1"
+              "xAOD::L1TopoSimResultsContainer_v1"
               "xAOD::gFexJetRoIContainer_v1" "xAOD::gFexGlobalRoIContainer_v1"
 
    OBJECTS "xAOD::EnergySumRoI_v1" "xAOD::EnergySumRoI_v2"
