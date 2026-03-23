@@ -11,8 +11,12 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "MuonPatternEvent/MuonPatternContainer.h"
 
+#include "Acts/Utilities/Enumerate.hpp"
+#include "Acts/Surfaces/StrawSurface.hpp"
+#include "Acts/Surfaces/LineBounds.hpp"
+#include "Acts/Definitions/Units.hpp"
 
-
+using namespace Acts::UnitLiterals;
 namespace MuonR4{
     using namespace SegmentFit;
     /** @brief Abrivation of the link to the reco segment container  */
@@ -27,25 +31,6 @@ namespace MuonR4{
     /** @brief Abrivation of the decorated local segment parameters */
     using SegPars_t = xAOD::MeasVector<Acts::toUnderlying(ParamDefs::nPars)>;
 
-    using TechIdx_t = Muon::MuonStationIndex::TechnologyIndex;
-    
-    constexpr TechIdx_t toTechIdx(const xAOD::UncalibMeasType aodType){
-        switch (aodType){
-            case xAOD::UncalibMeasType::MdtDriftCircleType:
-                return TechIdx_t::MDT;
-            case xAOD::UncalibMeasType::RpcStripType:
-                return TechIdx_t::RPC;
-            case xAOD::UncalibMeasType::TgcStripType:
-                return TechIdx_t::TGC;
-            case xAOD::UncalibMeasType::MMClusterType:
-                return TechIdx_t::MM;
-            case xAOD::UncalibMeasType::sTgcStripType:
-                return TechIdx_t::STGC;
-            default:
-                return TechIdx_t::TechnologyUnknown;
-        }
-    }
-
     StatusCode xAODSegmentCnvAlg::initialize() {
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_readKeys.initialize());
@@ -56,6 +41,9 @@ namespace MuonR4{
         ATH_CHECK(m_parentSegKey.initialize());
         ATH_CHECK(m_combMeasKey.initialize());
         ATH_CHECK(m_prdStateKey.initialize());
+#ifdef ACTIVATE_LATER
+        ATH_CHECK(m_auxMeasProv.initialize(m_writeKey.key(), m_convertBeamSpot));
+#endif
         return StatusCode::SUCCESS;
     }
     StatusCode xAODSegmentCnvAlg::execute(const EventContext& ctx) const {
@@ -74,37 +62,33 @@ namespace MuonR4{
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, SegPars_t> dec_locPars{m_localSegParKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, PrdLinkVec_t> dec_prdLinks{m_prdLinkKey, ctx};
         SG::WriteDecorHandle<xAOD::MuonSegmentContainer, std::vector<char>> dec_prdStates{m_prdStateKey, ctx};
+
         using State = CalibratedSpacePoint::State;
-        std::vector<std::tuple<const xAOD::UncalibratedMeasurement*, State>> combineMap{};
-        combineMap.reserve(10);
+        // Cache all measurements that can be combined to two measurements in a single gas gap
+        using PrdTuple_t = std::tuple<const xAOD::UncalibratedMeasurement*, State, std::size_t>;
+        std::vector<PrdTuple_t> combineMap{};
+        std::vector<PrdTuple_t> linkMap{};
+
+        const xAOD::UncalibratedMeasurement* beamSpotMeas{};
+#ifdef ACTIVATE_LATER
+        auto beamSpotMeasCreator = m_auxMeasProv.makeHandle(ctx, gctx->context());
+#endif
         /** @brief Decorate the prd links onto the output muon segment. Eta & phi measurements are absorbed converted
          *         into a CombinedMuonStrip which is a source link linke object carrying a link to both prds. In this way,
          *         only one track state is generated later in the track fit from the two measurements. 
          *         Two assumptions are made for the linking
          *                - There's exclusivley one eta & one phi measurement @maximum on the segment
          *                - The measurements are sorted along the segment trajectory.  */
-        auto decorateLinks = [this, &dec_prdLinks, &prdCombContainer,
-                              &combineMap, & dec_prdStates](const Segment& inSegment, xAOD::MuonSegment& outSegment) {
+        auto decorateLinks = [&](const Segment& inSegment, xAOD::MuonSegment& outSegment) {
             PrdLinkVec_t& links = dec_prdLinks(outSegment);
             std::vector<char>& linkStates = dec_prdStates(outSegment);
             links.reserve(2*inSegment.measurements().size());
             linkStates.reserve(2*inSegment.measurements().size());
-            /** @brief Transform the uncalibrated measurement pointer into a PrdLink & 
-             *         append it to the list of decorated links */
 
-            auto appendLink = [&links, &linkStates](const xAOD::UncalibratedMeasurement* prd, const State st) {
-                if (!prd) {
-                    return;
-                }
-                linkStates.emplace_back(Acts::toUnderlying(st));
-                links.emplace_back(*static_cast<const xAOD::UncalibratedMeasurementContainer*>(prd->container()),
-                                   prd->index());
-            };
             /** @brief Combine the two prds from the space point to a combined muonstrip and link
              *         the latter to the segment. */
-            auto combine = [this,&prdCombContainer,&appendLink](const xAOD::UncalibratedMeasurement* m1, 
-                                                           const xAOD::UncalibratedMeasurement* m2, 
-                                                           const State st) {
+            auto combine = [this,&prdCombContainer](const xAOD::UncalibratedMeasurement* m1, 
+                                                    const xAOD::UncalibratedMeasurement* m2) {
                 auto cmbMeas = prdCombContainer->push_back(std::make_unique<xAOD::CombinedMuonStrip>());
 
                 cmbMeas->setPrimaryStrip(m1);
@@ -114,14 +98,43 @@ namespace MuonR4{
                 if (m_idHelperSvc->measuresPhi(xAOD::identify(m1)) ==
                     m_idHelperSvc->measuresPhi(xAOD::identify(m2))) {
                     THROW_EXCEPTION("Cannot combine "<<m_idHelperSvc->toString(xAOD::identify(m1))
-                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2))
-                                <<" "<<CalibratedSpacePoint::toString(st));
+                                <<" & "<<m_idHelperSvc->toString(xAOD::identify(m2)));
                 }
-                appendLink(cmbMeas, st);
+                return cmbMeas;
             };
-            for (const auto& meas : inSegment.measurements()) {
+            // Loop over the measurements
+            for (const auto& [segIdx, meas] : Acts::enumerate(inSegment.measurements())) {
                 const SpacePoint* sp = meas->spacePoint();
                 if (!sp) {
+                    if (!m_convertBeamSpot) {
+                        continue;
+                    }
+#ifdef ACTIVATE_LATER
+                    // Up to now, there's no variety on the beamspot across the segments
+                    if (!beamSpotMeas) {
+                        if (!beamSpotMeasCreator.ok()) {
+                            ATH_MSG_ERROR("Cannot create a beamspot measurement");
+                            return StatusCode::FAILURE;
+                        }
+
+                        const Amg::Vector3D beamSpot = inSegment.msSector()->localToGlobalTransform(*gctx) *
+                                                       meas->localPosition();
+                        AmgSymMatrix(2) covariance{AmgSymMatrix(2)::Identity()};
+                        using CovIdx = SpacePoint::CovIdx;
+                        using ProjectorType = xAOD::AuxiliaryMeasurement::ProjectorType;
+                        covariance(0,0) = meas->covariance()[Acts::toUnderlying(CovIdx::etaCov)];
+                        covariance(1,1) = meas->covariance()[Acts::toUnderlying(CovIdx::phiCov)];
+                        /// Size of the bounds purely for visualization purposes
+                        auto surf = Acts::Surface::makeShared<Acts::StrawSurface>(Amg::getTranslate3D(beamSpot),
+                                            std::make_shared<Acts::LineBounds>(std::sqrt(covariance(0,0)), 20._m));
+
+                        beamSpotMeas = beamSpotMeasCreator->newMeasurement<2>(surf, 
+                                                ProjectorType::e2DimNoTime, covariance);
+                        ATH_MSG_DEBUG("Created beamspot measurement "<<(*meas)<<", "
+                                      <<surf->toString(gctx->context()));
+                    }
+#endif
+                    linkMap.emplace_back(beamSpotMeas, meas->fitState(), segIdx);
                     continue;
                 }
                 switch (sp->type()) {
@@ -129,22 +142,24 @@ namespace MuonR4{
                      // Mdt &  micromegas are never combined
                      case MdtDriftCircleType:
                      case MMClusterType: {
-                        appendLink(sp->primaryMeasurement(), meas->fitState());
+                        linkMap.emplace_back(sp->primaryMeasurement(), meas->fitState(), segIdx);                        
                         break;
                     } case RpcStripType:
                       case TgcStripType:
                       case sTgcStripType: {
                         if (sp->primaryMeasurement() && sp->secondaryMeasurement()) {
                             if (sp->primaryMeasurement() != sp->secondaryMeasurement()) {
-                                combine(sp->primaryMeasurement(), sp->secondaryMeasurement(), meas->fitState());
+                                linkMap.emplace_back(combine(sp->primaryMeasurement(), 
+                                                             sp->secondaryMeasurement()),
+                                                    meas->fitState(), segIdx);
                             } else {  // BI - RPC measurements
-                                appendLink(sp->primaryMeasurement(), meas->fitState());
+                                linkMap.emplace_back(sp->primaryMeasurement(), meas->fitState(), segIdx);
                             }
                         } else {
                             /// It might be that the segment has anoher 1D-measurement 
                             /// in the same gas gap
                             ATH_MSG_VERBOSE("Append for later combination "<<(*meas));
-                            combineMap.emplace_back(sp->primaryMeasurement(), meas->fitState());
+                            combineMap.emplace_back(sp->primaryMeasurement(), meas->fitState(), segIdx);
                         }
                         break;
                     } default:
@@ -155,6 +170,7 @@ namespace MuonR4{
             for (std::size_t cmbIdx = 0; cmbIdx < combineMap.size(); ++cmbIdx){
                 const xAOD::UncalibratedMeasurement* m1{std::get<0>(combineMap[cmbIdx])};
                 const State s1{std::get<1>(combineMap[cmbIdx])};
+                const std::size_t segIdx1{std::get<2>(combineMap[cmbIdx])};
                 ATH_MSG_VERBOSE("Find another measurement to combine with "
                                 <<m_idHelperSvc->toString(xAOD::identify(m1)));
                 if (cmbIdx +1 < combineMap.size()){
@@ -169,18 +185,36 @@ namespace MuonR4{
                         /// The first measurement should always be the eta measurement 
                         ATH_MSG_VERBOSE("They match");
                         if (m_idHelperSvc->measuresPhi(xAOD::identify(m1))) {
-                            combine(m2, m1, s2);
+                            linkMap.emplace_back(combine(m2, m1), s2, segIdx1);
                         } else {
-                            combine(m1, m2, s1);
+                            linkMap.emplace_back(combine(m1, m2), s1, segIdx1);
                         }
                         ++cmbIdx; // skip the next measurement as it's absorbed here
                         continue;
                     }
                 }
                 ATH_MSG_VERBOSE("No match found");
-                appendLink(m1, s1);
+                linkMap.emplace_back(m1, s1, segIdx1);
             }
+
+            std::ranges::sort(linkMap, [](const auto& a, const auto& b){
+                return std::get<2>(a) < std::get<2>(b);
+            });
+
+            for (const auto& [prd, state, segIdx]: linkMap) {
+                ATH_MSG_VERBOSE("Add link associate to measurement: "
+                    <<m_idHelperSvc->toString(xAOD::identify(prd))<<", "
+                    <<CalibratedSpacePoint::toString(state)
+                    <<", position in segment "<<segIdx);
+                
+                links.emplace_back( 
+                    *static_cast<const xAOD::UncalibratedMeasurementContainer*>(prd->container()), 
+                    prd->index());
+                linkStates.emplace_back(Acts::toUnderlying(state));
+            }
+            linkMap.clear();
             combineMap.clear();
+            return StatusCode::SUCCESS;
         };
 
         for (const SG::ReadHandleKey<SegmentContainer>& key : m_readKeys) {
@@ -204,7 +238,7 @@ namespace MuonR4{
             
 
                 convertedSeg->setIdentifier(sector->sector(), sector->chamberIndex(), sector->side(), 
-                                            toTechIdx(inSegment->summary().tech));
+                                            xAOD::toTechnologyIndex(inSegment->summary().tech));
                 convertedSeg->setFitQuality(inSegment->chi2(), inSegment->nDoF());
                 convertedSeg->setNHits(inSegment->summary().nPrecHits, inSegment->summary().nPhiHits,
                                        inSegment->summary().nEtaTrigHits);
@@ -223,7 +257,7 @@ namespace MuonR4{
                 localPars[Acts::toUnderlying(theta)] = locDir.theta();
                 localPars[Acts::toUnderlying(phi)] = locDir.phi();
                 localPars[Acts::toUnderlying(t0)] = inSegment->segementT0();
-                decorateLinks(*inSegment, *convertedSeg);
+                ATH_CHECK(decorateLinks(*inSegment, *convertedSeg));
             }
         }  
         return StatusCode::SUCCESS;
