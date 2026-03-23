@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/ConstituentsLoader.h"
@@ -75,8 +75,6 @@ namespace {
     }
     return config;
   }
-}
-
   ConstituentsInputConfig get_hits_input_config(
     const std::string& name,
     const std::vector<std::string>& input_variables,
@@ -115,6 +113,7 @@ namespace {
     }
     return config;
   }
+}
 
 namespace FlavorTagInference {
     //
@@ -139,14 +138,17 @@ namespace FlavorTagInference {
       TypeRegexes muon_type_regexes {
           // default muon variables
           {"(pt|eta|phi|momentumBalanceSignificance|"
-               "scatteringNeighbourSignificance|segmentDelta.*|"
-               "ParamEnergyLoss.*|MeasEnergyLoss.*|CaloMuonScore)"_r, ConstituentsEDMType::FLOAT},
+               "scatteringNeighbourSignificance|scatteringCurvatureSignificance|"
+               "segmentDelta.*|EnergyLoss|ParamEnergyLoss.*|MeasEnergyLoss.*|"
+               "CaloMuonScore)"_r, ConstituentsEDMType::FLOAT},
           {"(quality)"_r, ConstituentsEDMType::UCHAR},
           // custom variables
           {"(ptfrac|ptrel|dr|qOverPratio)"_r, ConstituentsEDMType::CUSTOM_GETTER},
           // variables extracted from the corresponding track
           {"(^.*)?(D|Z)0.*"_r, ConstituentsEDMType::CUSTOM_GETTER},
-          {"(numberOf.*|expect.*|eProbabilityHT|qOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER}
+          {"(numberOf.*|expect.*|eProbabilityHT|qOverP)"_r, ConstituentsEDMType::CUSTOM_GETTER},
+          // Extra variables for bJR4 that use primary track associated to muon instead of ID track
+          {"(d0|z0SinTheta|theta|qOverP)(RelativeToBeamspot)?(Variance)?(_MuonPrimaryTrack)?"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes hits_type_regexes {
           // hits variables
@@ -156,6 +158,7 @@ namespace FlavorTagInference {
       TypeRegexes flow_type_regexes {
           // FlowElement variables
           // ConstituentsEDMType picked correspond to the first matching regex
+          {"(eta|phi)"_r, ConstituentsEDMType::FLOAT},
           {"(pt|deta|dphi|dr|energy|isCharged)"_r, ConstituentsEDMType::CUSTOM_GETTER}
       };
       TypeRegexes trk_type_regexes {
@@ -201,11 +204,13 @@ namespace FlavorTagInference {
 
       // For now we have only one selection for electrons
       SelRegexes electron_select_regexes {
-        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT},
+        {".*_r22bjr.*"_r, ConstituentsSelection::R22_BJR}
       };
       // And one for muons
       SelRegexes muon_select_regexes {
-        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT}
+        {".*_r22default.*"_r, ConstituentsSelection::R22_DEFAULT},
+        {".*_r22bjr.*"_r, ConstituentsSelection::R22_BJR}
       };
       
       if (name.find("tracks") != std::string::npos){

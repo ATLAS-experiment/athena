@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "FlavorTagInference/BTagTrackIpAccessor.h"
 #include "FlavorTagInference/CustomGetterUtils.h"
@@ -10,7 +10,9 @@
 #include "AthContainers/AuxElement.h"
 #include "xAODTracking/TrackMeasurementValidation.h"
 #include "xAODEgamma/Electron.h"
+#include "xAODMuon/Muon.h"
 
+#include <limits>
 #include <optional>
 #include <TVector3.h>
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -40,6 +42,9 @@ namespace {
     }
     if (name == "mass") {
       return [](const xAOD::IParticle& j) -> float {return j.m();};
+    }
+    if (name == "phi") {
+      return [](const xAOD::IParticle& j) -> float {return j.phi();};
     }
 
     throw std::logic_error("no match for custom getter " + name);
@@ -90,6 +95,41 @@ namespace {
         return sequence;
       }
   };
+
+  double nanValue() {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
+
+  template <typename F>
+  SequenceGetterFunc<xAOD::Muon> muonPrimaryTrackGetter(F getter)
+  {
+    using Mu = xAOD::Muon;
+    using Jet = xAOD::IParticle;
+
+    return CustomSeqGetter<Mu>([getter](const Mu& mu, const Jet&) -> double {
+      const xAOD::TrackParticle* track = mu.primaryTrackParticle();
+      if (!track) {
+        return nanValue();
+      }
+      return static_cast<double>(getter(*track));
+    });
+  }
+
+  template <typename F>
+  SequenceGetterFunc<xAOD::Muon> muonIdTrackGetter(F getter)
+  {
+    using Mu = xAOD::Muon;
+    using Jet = xAOD::IParticle;
+
+    return CustomSeqGetter<Mu>([getter](const Mu& mu, const Jet& jet) -> double {
+      const xAOD::TrackParticle* track =
+        mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+      if (!track) {
+        return nanValue();
+      }
+      return getter(jet, {track}).front();
+    });
+  }
 
   // Getters from xAOD::TrackParticle with IP dependencies
   std::optional<SequenceGetterFunc<xAOD::TrackParticle>>
@@ -195,6 +235,11 @@ namespace {
           return std::sqrt(tp.definingParametersCovMatrixDiagVec().at(3));
       });
     }
+    if (name == "thetaVariance") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.definingParametersCovMatrixDiagVec().at(3);
+      });
+    }
     if (name == "qOverPUncertainty") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return std::sqrt(tp.definingParametersCovMatrixDiagVec().at(4));
@@ -205,9 +250,19 @@ namespace {
           return tp.z0();
       });
     }
+    if (name == "z0SinThetaRelativeToBeamspot") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.z0() * std::sin(tp.theta());
+      });
+    }
     if (name == "d0RelativeToBeamspot") {
       return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
           return tp.d0();
+      });
+    }
+    if (name == "d0RelativeToBeamspotVariance") {
+      return CustomSeqGetter<Tp>([](const Tp& tp, const Jet&) {
+          return tp.definingParametersCovMatrixDiagVec().at(0);
       });
     }
     if (name == "d0RelativeToBeamspotSignificance") {
@@ -534,6 +589,7 @@ namespace {
         return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
       });
     }
+    
     auto track_getter_ipdep = getterFromTracksWithIpDep(name, prefix);
     if ( track_getter_ipdep ) {
       auto f = *track_getter_ipdep;
@@ -541,6 +597,20 @@ namespace {
         return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
       });
     }
+
+    // Special case of track-dependent variables that use the primary track instead of the ID track
+    const std::string suffix = "_MuonPrimaryTrack";
+    if (name.size() > suffix.size() && name.compare(name.size() - suffix.size(), suffix.size(), suffix) == 0) {
+      auto extracted_name = name.substr(0, name.size() - suffix.size());
+      auto primary_track_getter = getterFromTracksNoIpDep(extracted_name);
+      if ( primary_track_getter ) {
+        auto f = *primary_track_getter;
+        return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+          return f(j, {p.trackParticle(xAOD::Muon::Primary)})[0];
+        });
+      }
+    }
+
     return std::nullopt;
   }
 }
@@ -579,7 +649,7 @@ namespace {
       }
 
       if constexpr (std::is_same_v<T, xAOD::Electron>) {
-        if (auto getterdep = getterFromDecoratedElectrons(name)) {;
+        if (auto getterdep = getterFromDecoratedElectrons(name)) {
           return {getterdep->first, getterdep->second};
         }
         if (auto getter = getterFromElectrons(name, prefix)){
@@ -592,7 +662,7 @@ namespace {
           return {*getter, {}};
         }
       }
-      
+
       if constexpr (std::is_same_v<T, xAOD::FlowElement>) {
         if (auto getter = getterFromFlowElements(name)){
           return {*getter, {}};
@@ -647,8 +717,7 @@ namespace {
             NamedSeqGetter<unsigned char, T>(cfg.name), {cfg.name}
           };
         case ConstituentsEDMType::CUSTOM_GETTER: {
-          return getNamedCustomSeqGetter(
-            cfg.name, options.track_prefix);
+          return getNamedCustomSeqGetter(cfg.name, prefix);
         }
         default: {
           throw std::logic_error("Unknown EDM type for constituent.");
