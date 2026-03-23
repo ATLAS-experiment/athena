@@ -67,24 +67,6 @@ def ActsStripSpacePointToolCfg(flags,
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
     return acc
 
-def ActsCoreStripSpacePointToolCfg(flags,
-                                   name: str = "ActsCoreStripSpacePointTool",
-                                   **kwargs: dict) -> ComponentAccumulator:
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("useSCTLayerDep_OverlapCuts", False)
-    
-    if 'LorentzAngleTool' not in kwargs:
-        from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
-
-    if 'TrackingGeometryTool' not in kwargs:
-        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometryToolCfg
-        kwargs.setdefault('TrackingGeometryTool', acc.getPrimaryAndMerge(ActsTrackingGeometryToolCfg(flags)))
-        
-    acc.setPrivateTools(CompFactory.ActsTrk.CoreStripSpacePointFormationTool(name, **kwargs))
-    return acc
-
 def ActsPixelSpacePointPreparationAlgCfg(flags,
                                          name: str = "ActsPixelSpacePointPreparationAlg",
                                          *,
@@ -209,11 +191,7 @@ def ActsStripSpacePointFormationAlgCfg(flags,
         kwargs.setdefault('OSPCache', 'ActsStripOverlapSpacePointCache')
 
     if 'SpacePointFormationTool' not in kwargs:
-        from ActsConfig.ActsConfigFlags import SpacePointStrategy
-        if flags.Acts.SpacePointStrategy is SpacePointStrategy.ActsCore:
-            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsCoreStripSpacePointToolCfg(flags)))
-        else:
-            kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
+        kwargs.setdefault('SpacePointFormationTool', acc.popToolsAndMerge(ActsStripSpacePointToolCfg(flags)))
 
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsStripSpacePointFormationMonitoringToolCfg
