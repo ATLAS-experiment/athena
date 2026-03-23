@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARL1SIM_LARSCL1MAKER_H
@@ -131,7 +131,7 @@ class LArSCL1Maker : public AthReentrantAlgorithm
 
   /** Method for converting Hits from samples (simplified version
  * of the same method in LarPileUpTool) */
- void ConvertHits2Samples(const EventContext& context, const HWIdentifier & hwSC, CaloGain::CaloGain igain,
+ void ConvertHits2Samples(const ILArShape* shapes, const HWIdentifier & hwSC, CaloGain::CaloGain igain,
        const std::vector<std::pair<float,float> >& TimeE,
 	std::vector<float>& samples) const;
 
