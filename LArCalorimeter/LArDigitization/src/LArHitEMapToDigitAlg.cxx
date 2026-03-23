@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #include "LArHitEMapToDigitAlg.h"
 #include "AthenaKernel/ITriggerTime.h"
@@ -110,6 +110,34 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
      return StatusCode::FAILURE;
    }
 
+  SG::ReadCondHandle<LArADC2MeV> adc2mevHdl(m_adc2mevKey, context);
+  const LArADC2MeV* adc2MeVs=*adc2mevHdl;
+
+  SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey, context);
+  const ILArfSampl* fSampl=*fSamplHdl;
+
+  SG::ReadCondHandle<ILArPedestal> pedHdl(m_pedestalKey, context);
+  const ILArPedestal* pedestal=*pedHdl;
+
+  const ILArNoise* noise=nullptr;
+  if ( (!m_RndmEvtOverlay || m_isMcOverlay)  && !m_pedestalNoise && m_NoiseOnOff ){
+    SG::ReadCondHandle<ILArNoise> noiseHdl(m_noiseKey, context);
+    noise=*noiseHdl;
+  }
+
+  const LArAutoCorrNoise* autoCorrNoise=nullptr;
+  if ( !m_RndmEvtOverlay  &&  m_NoiseOnOff) {
+    SG::ReadCondHandle<LArAutoCorrNoise>  autoCorrNoiseHdl(m_autoCorrNoiseKey, context);
+    autoCorrNoise=*autoCorrNoiseHdl;
+  }
+
+  /** Retrieve BadChannels */
+  SG::ReadCondHandle<LArBadChannelCont> bch{m_bcContKey,context};
+  const LArBadChannelCont* bcCont{*bch};
+
+  SG::ReadCondHandle<ILArShape> shapeHdl(m_shapeKey, context);
+  const ILArShape* shape=*shapeHdl;
+
    // Inputs
    SG::ReadHandle<LArHitEMap> hitmap(m_hitMapKey,context);
    const LArHitEMap* hitmapPtr = hitmap.cptr();
@@ -174,7 +202,14 @@ StatusCode LArHitEMapToDigitAlg::execute(const EventContext& context) const {
                ATH_CHECK(MakeDigit(context, cellID, ch_id, Digit,
                                    dataItemsPool,
                                    Digit_DigiHSTruth, TimeE, digit, engine,
-                                   TimeE_DigiHSTruth));
+                                   TimeE_DigiHSTruth,
+				   adc2MeVs,
+				   fSampl,
+				   pedestal,
+				   noise,
+				   autoCorrNoise,
+				   bcCont,
+				   shape));
                DigitContainer->push_back(Digit);
                if (DigitContainer_DigiHSTruth){
                  DigitContainer_DigiHSTruth->push_back(Digit_DigiHSTruth);
@@ -209,7 +244,15 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
     const std::vector<std::pair<float, float>>* TimeE,
     const LArDigit* rndmEvtDigit,
     CLHEP::HepRandomEngine* engine,
-    const std::vector<std::pair<float, float>>* TimeE_DigiHSTruth) const {
+    const std::vector<std::pair<float, float>>* TimeE_DigiHSTruth,
+    const LArADC2MeV* adc2MeVs,
+    const ILArfSampl* fSampl,
+    const ILArPedestal* pedestal,
+    const ILArNoise* noise,
+    const LArAutoCorrNoise* autoCorrNoise,
+    const LArBadChannelCont* bcCont,
+    const ILArShape* shape) const {
+
   bool createDigit_DigiHSTruth = true;
 
   int sampleGainChoice{2};
@@ -228,32 +271,6 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
   float SF=1.;
   float SigmaNoise;
   staticVecFloat_t rndm_energy_samples(m_NSamples) ;
-
-
-  SG::ReadCondHandle<LArADC2MeV> adc2mevHdl(m_adc2mevKey, ctx);
-  const LArADC2MeV* adc2MeVs=*adc2mevHdl;
-
-  SG::ReadCondHandle<ILArfSampl> fSamplHdl(m_fSamplKey, ctx);
-  const ILArfSampl* fSampl=*fSamplHdl;
-
-  SG::ReadCondHandle<ILArPedestal> pedHdl(m_pedestalKey, ctx);
-  const ILArPedestal* pedestal=*pedHdl;
-
-  const ILArNoise* noise=nullptr;
-  if ( (!m_RndmEvtOverlay || m_isMcOverlay)  && !m_pedestalNoise && m_NoiseOnOff ){
-    SG::ReadCondHandle<ILArNoise> noiseHdl(m_noiseKey, ctx);
-    noise=*noiseHdl;
-  }
-
-  const LArAutoCorrNoise* autoCorrNoise=nullptr;
-  if ( !m_RndmEvtOverlay  &&  m_NoiseOnOff) {
-    SG::ReadCondHandle<LArAutoCorrNoise>  autoCorrNoiseHdl(m_autoCorrNoiseKey, ctx);
-    autoCorrNoise=*autoCorrNoiseHdl;
-  }
-
-  /** Retrieve BadChannels */
-  SG::ReadCondHandle<LArBadChannelCont> bch{m_bcContKey,ctx};
-  const LArBadChannelCont* bcCont{*bch};
 
   int iCalo=0;
   if(m_larem_id->is_lar_em(cellId)) {
@@ -302,11 +319,11 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
 
 
   if (!isDead) {
-    if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE, Samples).isFailure() ) {
+    if( this->ConvertHits2Samples(cellId,ch_id,initialGain,TimeE, Samples, shape).isFailure() ) {
       return StatusCode::SUCCESS;
     }
     if(m_doDigiTruth){
-      if( this->ConvertHits2Samples(ctx, cellId,ch_id,initialGain,TimeE_DigiHSTruth, Samples_DigiHSTruth).isFailure() ) {
+      if( this->ConvertHits2Samples(cellId,ch_id,initialGain,TimeE_DigiHSTruth, Samples_DigiHSTruth, shape).isFailure() ) {
         return StatusCode::SUCCESS;
       }
     }
@@ -427,11 +444,11 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
      }
 
      if (!isDead) {
-       if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE, Samples) == StatusCode::FAILURE ) {
+       if( this->ConvertHits2Samples(cellId,ch_id,igain,TimeE, Samples, shape) == StatusCode::FAILURE ) {
          return StatusCode::SUCCESS;
        }
        if(m_doDigiTruth){
-         if( this->ConvertHits2Samples(ctx, cellId,ch_id,igain,TimeE_DigiHSTruth, Samples_DigiHSTruth) == StatusCode::FAILURE ) {
+         if( this->ConvertHits2Samples(cellId,ch_id,igain,TimeE_DigiHSTruth, Samples_DigiHSTruth, shape) == StatusCode::FAILURE ) {
            return StatusCode::SUCCESS;
          }
        }
@@ -643,9 +660,9 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
 
 // ---------------------------------------------------------------------------------------
 
-StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
-                                                     const Identifier & cellId, const HWIdentifier ch_id, CaloGain::CaloGain igain,
-                                                     const std::vector<std::pair<float,float> >  *TimeE, staticVecDouble_t &sampleList) const
+StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const Identifier & cellId, const HWIdentifier ch_id, CaloGain::CaloGain igain,
+                                                     const std::vector<std::pair<float,float> >  *TimeE, staticVecDouble_t &sampleList,
+						     const ILArShape* shape) const
 
 {
 // Converts  hits of a particular LAr cell into energy samples
@@ -656,10 +673,6 @@ StatusCode LArHitEMapToDigitAlg::ConvertHits2Samples(const EventContext& ctx,
    int j ;
    float energy ;
    float time ;
-
-   SG::ReadCondHandle<ILArShape> shapeHdl(m_shapeKey, ctx);
-   const ILArShape* shape=*shapeHdl;
-
 
 // ........ retrieve data (1/2) ................................
 //
