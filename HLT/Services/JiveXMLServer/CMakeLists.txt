@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JiveXMLServer )
 
 # External dependencies:
-find_package( tdaq COMPONENTS ipc cmdline owl omniORB4 omnithread)
+find_package( tdaq COMPONENTS ipc cmdline omniORB4 omnithread )
 find_package( tdaq-common COMPONENTS ers)
 
 # Component(s) in the package:
