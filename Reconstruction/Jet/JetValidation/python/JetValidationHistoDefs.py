@@ -58,9 +58,6 @@ def GetJetVariables(container, refcontainer=''):
             "NumChargedPFOPt500[0]",
             "NumChargedPFOPt1000[0]",
             "ChargedPFOWidthPt1000[0]",
-            "DFCommonJets_QGTagger_NTracks",
-            "DFCommonJets_QGTagger_TracksWidth",
-            "DFCommonJets_QGTagger_TracksC1",
             "DFCommonJets_fJvt",
         ]
 

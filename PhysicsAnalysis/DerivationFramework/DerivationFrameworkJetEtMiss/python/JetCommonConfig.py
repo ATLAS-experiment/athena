@@ -33,12 +33,12 @@ def StandardJetsInDerivCfg(ConfigFlags):
     acc = ComponentAccumulator()
 
     AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
-        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation","QGTagging")
+        modifiers = AntiKt4EMTopo.modifiers+("JetPtAssociation",)
     )
 
     AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
         ghostdefs = AntiKt4EMPFlow.ghostdefs+["UnAssocMuonSegment"],
-        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
+        modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","fJVT","NNJVT","CaloEnergiesClus","JetPileupLabel","qgtransformer")
     )
 
     AntiKt10UFOCSSKSoftDrop_deriv = AntiKt10UFOCSSKSoftDrop.clone(

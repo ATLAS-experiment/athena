@@ -324,11 +324,12 @@ def STDM16Cfg(flags):
 
     # This variable is augmented by DStarSelectionTool
     STDM16SlimmingHelper.ExtraVariables += ["InDetTrackParticles.trackPassDstar",
-                                            "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+                                            "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostPartons.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
                                             "TruthPrimaryVertices.t.x.y.z",
                                             "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                             "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification",
-                                            "TauJets.dRmax.etOverPtLeadTrk",                                               "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
+                                            "TauJets.dRmax.etOverPtLeadTrk",
+                                            "TauJets_MuonRM.dRmax.etOverPtLeadTrk",
                                             "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                             "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]    
 
