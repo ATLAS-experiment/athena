@@ -15,7 +15,11 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     acc.merge(PixelDCSCondHVAlgCfg(flags))
 
     from InDetConfig.PixelCalibAlgsConfig import PixelChargeToTConversionCfg
-    acc.merge(PixelChargeToTConversionCfg(flags))
+    acc.merge(PixelChargeToTConversionCfg(
+        flags, 
+        # Remap the cluster container to the name used by PixelPrepDataToxAOD
+        PixelClusterContainer=kwargs.get('SiClusterContainer', 'PixelClusters')
+    ))
 
     if "PixelConditionsSummaryTool" not in kwargs:
         from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
@@ -47,8 +51,14 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     acc.merge(ITkPixelDCSCondTempAlgCfg(flags))
     acc.merge(ITkPixelDCSCondHVAlgCfg(flags))
 
+    kwargs.setdefault("SiClusterContainer", "ITkPixelClusters")
+
     from InDetConfig.PixelCalibAlgsConfig import ITkPixelChargeToTConversionCfg
-    acc.merge(ITkPixelChargeToTConversionCfg(flags))
+    acc.merge(ITkPixelChargeToTConversionCfg(
+        flags,
+        # Remap the cluster container to the name used by PixelPrepDataToxAOD
+        PixelClusterContainer=kwargs['SiClusterContainer']
+    ))
 
     if "PixelConditionsSummaryTool" not in kwargs:
         from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
@@ -66,7 +76,6 @@ def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     kwargs.setdefault("PixelDCSStatusCondData", "ITkPixelDCSStatusCondData")
     kwargs.setdefault("ReadKeyTemp", "ITkPixelDCSTempCondData")
     kwargs.setdefault("ReadKeyHV", "ITkPixelDCSHVCondData")    
-    kwargs.setdefault("SiClusterContainer", "ITkPixelClusters")
     kwargs.setdefault("MC_SDOs", "ITkPixelSDO_Map")
     kwargs.setdefault("MC_Hits", "ITkPixelHits")
     kwargs.setdefault("PRD_MultiTruth", "PRD_MultiTruthITkPixel")

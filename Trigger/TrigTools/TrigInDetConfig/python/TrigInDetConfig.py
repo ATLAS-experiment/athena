@@ -33,8 +33,34 @@ def InDetIDCCacheCreatorCfg(flags):
 
 
 
+############################################################################################################################
+# Standalone Space-Point finding
+############################################################################################################################
+@AccumulatorCache
+def trigInDetSPFormationCfg(inflags, roisKey: str, signatureName: str, in_view: bool | str = True) -> ComponentAccumulator:
+  log = logging.getLogger('trigInDetSPFormationCfg')
+  from TrigInDetConfig.utils import getFlagsForActiveConfig
+  flags = getFlagsForActiveConfig(inflags, signatureName, log)
+
+  if in_view:
+    if isinstance(in_view, bool):
+      in_view = 'VDVInDetFTF'
+  else:
+    in_view = None
+ 
+  from TrigInDetConfig.InnerTrackingTrigSequence import InnerTrackingTrigSequence
+  seq = InnerTrackingTrigSequence.create(flags, 
+                                         flags.Tracking.ActiveConfig.input_name, 
+                                         rois = roisKey,
+                                         inView = in_view)
+
+  return seq.sequence('spacePointFormation')
 
 
+
+############################################################################################################################
+# Fast tracking
+############################################################################################################################
 @AccumulatorCache
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
 

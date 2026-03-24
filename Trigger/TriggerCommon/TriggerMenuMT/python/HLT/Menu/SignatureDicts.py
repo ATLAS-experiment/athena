@@ -722,7 +722,10 @@ TauChainParts = {
                         'trackLRT', # RNNLLP triggers
                       ],
     'jet'           : ['lc', 'pf'], # Only use LCTopo jets for now
-    'preselection'  : [],
+    'calohitsPresel': [
+                        # CaloHits step preselection
+                        'idperfCHP', # No preselection, but still run all inferences
+                      ],
     'selection'     : [
                         'idperf', # No selection
                         'perf', # NTrk selection
@@ -738,6 +741,13 @@ TauChainParts = {
 
                         # Meson b-phys triggers (used with tracktwoMVA reco without cutting on the RNN/DeepSet score):
                         'kaonpi1', 'kaonpi2', 'dipion1', 'dipion2', 'dipion3', 'dipion4', 'dikaonmass', 'singlepion',
+                      ],
+    'hitz'          : [
+                        # Default HitZ option, with 10mm z0 sigma cut and 30mm RoI dz0 size
+                        'HitZ',
+
+                        # Test HitZ options: '<max_sigma>mmX<roi_dz>mmHitZ'
+                        # (require additional output containers and tracking RoI configs)
                       ],
     'multiplicity'  : '',
     'trigType'      : ['tau'],
@@ -756,8 +766,9 @@ TauChainParts_Default = {
     'threshold'     : '',
     'reconstruction': 'tracktwoMVA',
     'jet'           : 'lc',
-    'preselection'  : '',
+    'calohitsPresel': '',
     'selection'     : '',
+    'hitz'          : '',
     'multiplicity'  : '',
     'trigType'      : '',
     'tnpInfo'       : '',
@@ -1406,6 +1417,7 @@ AllowedTopos_comb = [
     'anomdet','anomdetL','anomdetM','anomdetT',
     '115masswisoABC','115masswisoABC135',
     '29dphiAA', '29dphiAB', '30dphiAA', '30dphiAB', # g-2 tau triggers
+    '03dRCD30', '03dRCD', # bootstrapped di-tau triggers
     '90invmAB',# TEST
     '1invmAB5','50invmAB130','50invmBC130', # Jpsiee, Zee/Zeg
     '25dphiAA','25dphiBB','25dphiCC','invmAA80', # Low-mass diphoton

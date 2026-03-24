@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBase/IParticleContainer.h"
@@ -206,6 +206,7 @@ auto floatAccessors = initAccessors<float>(
   "d0TJVA", "d0SigTJVA", "z0sinthetaTJVA", "z0sinthetaSigTJVA",
   "GNTau_Score", "GNTau_ScoreSigTrans", 
   "GNTauDev1_Score", "GNTauDev1_ScoreSigTrans", 
+  "HitZ_z0", "HitZ_z0_sigma",
   "pixQ2mod",
   "adScore",
   "E_frac_subl",
