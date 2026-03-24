@@ -14,10 +14,7 @@ import logging
 from PyUtils import RootUtils
 ROOT = RootUtils.import_root()
 from ROOT import TFile, TTree, TDirectory, TStopwatch
-try:
-    from ROOT import RNTupleReader
-except ImportError:
-    from ROOT.Experimental import RNTupleReader
+from ROOT import RNTupleReader
 from PyUtils.PoolFile import isRNTuple
 
 msg = logging.getLogger(__name__)
@@ -85,13 +82,12 @@ def checkNTupleEventWise(ntuple, printInterval = 150000):
         msg.warning('Could not open ntuple %s: %s', ntuple, err)
         return 1
 
-    msg.debug('Checking %s entries ...', reader.GetNEntries())
+    nEntries=reader.GetNEntries()
 
-    try:
-        entry = reader.CreateEntry()
-    except AttributeError:
-        entry = reader.GetModel().CreateEntry()
-    for i in reader:
+    msg.debug('Checking %s entries ...', nEntries)
+
+    entry = reader.CreateEntry()
+    for i in range(nEntries):
         try:
             reader.LoadEntry(i, entry)
         except Exception as err:
@@ -108,10 +104,7 @@ def checkNTupleFieldWise(ntuple):
     """Bulk read each top level field cluster by cluster.
     """
     from array import array
-    try:
-        from ROOT import RException
-    except ImportError:
-        from ROOT.Experimental import RException
+    from ROOT import RException
 
     try:
         reader=RNTupleReader.Open(ntuple)
@@ -124,26 +117,15 @@ def checkNTupleFieldWise(ntuple):
         msg.debug(f"ntupleName={descriptor.GetName()}")
 
         model = reader.GetModel()
-        try:
-            fieldZero = model.GetFieldZero()
-        except AttributeError:
-            # ROOT Version: 6.35.01
-            fieldZero = model.GetConstFieldZero()
-        try:
-            subFields = fieldZero.GetSubFields()
-        except AttributeError:
-            subFields = fieldZero.GetConstSubfields()
+        fieldZero = model.GetConstFieldZero()
+        subFields = fieldZero.GetConstSubfields()
         msg.debug(f"Top level fields number {subFields.size()}")
         for field in subFields:
             msg.debug(f"fieldName={field.GetFieldName()} typeName={field.GetTypeName()}")
             bulk = model.CreateBulk(field.GetFieldName())
 
             for clusterDescriptor in descriptor.GetClusterIterable():
-                try:
-                    clusterIndex = ROOT.Experimental.RClusterIndex(clusterDescriptor.GetId(), 0)
-                except AttributeError:
-                    # ROOT Version: 6.35.01
-                    clusterIndex = ROOT.RNTupleLocalIndex(clusterDescriptor.GetId(), 0)
+                clusterIndex = ROOT.RNTupleLocalIndex(clusterDescriptor.GetId(), 0)
                 size = int(clusterDescriptor.GetNEntries())
                 maskReq = array('b', (True for i in range(size)))
                 msg.debug(f"    cluster #{clusterIndex.GetClusterId()}"
@@ -250,7 +232,7 @@ def checkFile(fileName, the_type, requireTree):
     msg.info('Checking file %s ...', fileName)
 
     enabledIMT = False
-    if not ROOT.ROOT.IsImplicitMTEnabled() and 'TRF_MULTITHREADED_VALIDATION' in os.environ and 'ATHENA_CORE_NUMBER' in os.environ:
+    if not ROOT.ROOT.IsImplicitMTEnabled() and os.environ.keys() >= {'TRF_MULTITHREADED_VALIDATION', 'ATHENA_CORE_NUMBER'}:
         if (nThreads := int(os.environ['ATHENA_CORE_NUMBER'])) >= 0:
             msg.info(f"Setting the number of implicit ROOT threads to {nThreads}")
             ROOT.ROOT.EnableImplicitMT(nThreads)
@@ -258,7 +240,11 @@ def checkFile(fileName, the_type, requireTree):
         else:
             msg.warning(f"Ignored negative ATHENA_CORE_NUMBER ({nThreads})")
 
-    file_handle=TFile.Open(fileName)
+    try:
+        file_handle=TFile.Open(fileName)
+    except OSError as err:
+        msg.error('Could not open file %s: %s', fileName, err)
+        return 1
 
     if not file_handle:
         msg.warning("Can't access file %s.", fileName)
