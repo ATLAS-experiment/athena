@@ -9,6 +9,7 @@
 #define FTAG_HASH_H
 
 namespace FlavorTagInference {
+
   template<typename T>
   std::size_t getHash(const T& obj) {
     return std::hash<T>{}(obj);
@@ -21,6 +22,24 @@ namespace FlavorTagInference {
   inline size_t combine( size_t lhs, size_t rhs ) {
     lhs ^= rhs + 0x517cc1b727220a95 + (lhs << 6) + (lhs >> 2);
     return lhs;
+  }
+  namespace NNHashing {
+    struct NNKey {
+      std::string path;
+      GNNOptions opts;
+      bool operator==(const NNKey& key) const {
+        return path == key.path && opts == key.opts;
+      }
+      std::size_t hash() const {
+        return combine(getHash(path), getHash(opts));
+      }
+    };
+
+    struct NNHasher {
+      std::size_t operator()(const NNKey& o) const {
+        return o.hash();
+      }
+    };
   }
 }
 
