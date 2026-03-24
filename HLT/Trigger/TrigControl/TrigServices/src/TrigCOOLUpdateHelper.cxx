@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -236,8 +236,8 @@ StatusCode TrigCOOLUpdateHelper::getFolderName(CTPfragment::FolderIndex idx, std
   if (itr==m_folderNames.end()) {
     ATH_MSG_ERROR(m_coolFolderName << " does not contain a folder for index/channel " << idx
                   << ". Existing folders are:");
-    for (auto const& [idx, name] : m_folderNames) {
-      ATH_MSG_INFO("   (" << idx << ") " << name);
+    for (auto const& [i, name] : m_folderNames) {
+      ATH_MSG_INFO("   (" << i << ") " << name);
     }
     return StatusCode::FAILURE;
   }

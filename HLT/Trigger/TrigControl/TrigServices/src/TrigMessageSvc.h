@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGSERVICES_TRIGMESSAGESVC_H
 #define TRIGSERVICES_TRIGMESSAGESVC_H
 
-// Include files
-#include <iosfwd>
-#include <map>
-#include <memory>
-#include <mutex>
-#include <set>
-#include <string>
-#include <thread>
-#include <vector>
 
 #include "tbb/concurrent_queue.h"
 
@@ -26,6 +17,16 @@
 #include "Gaudi/Property.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/StatusCode.h"
+
+// Include files
+#include <iosfwd>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <set>
+#include <string>
+#include <thread>
+#include <vector>
 
 // Helper to mark some virtual methods as not supported
 #define NOTSUPPORTED                                                                               \
@@ -90,6 +91,7 @@ public:
 
   ///@{ Not supported by this implementation
   virtual void reportMessage(const StatusCode&, std::string_view) override { NOTSUPPORTED; }
+  //coverity[PASS_BY_VALUE]
   virtual void insertMessage(const StatusCode&, Message) override { NOTSUPPORTED; }
   virtual void eraseMessage() override { NOTSUPPORTED; }
   virtual void eraseMessage(const StatusCode&) override { NOTSUPPORTED; }

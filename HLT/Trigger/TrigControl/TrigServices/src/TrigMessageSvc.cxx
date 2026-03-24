@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigMessageSvc.h"
 #include "GaudiKernel/IAppMgrUI.h"
@@ -258,6 +258,7 @@ void TrigMessageSvc::reportMessage(const Message& msg, int outputLevel)
 {
   if (m_asyncReporting) {
     // msg has to be copied as the reference may become invalid by the time it is used
+    //coverity[PASS_BY_VALUE]
     m_messageActionsQueue.emplace([this, m=Message(msg), outputLevel]() {
       this->i_reportMessage(m, outputLevel); });
   }
