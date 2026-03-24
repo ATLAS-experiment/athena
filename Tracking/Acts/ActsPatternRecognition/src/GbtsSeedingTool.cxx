@@ -9,6 +9,8 @@
 
 #include "src/GbtsSeedingTool.h"
 
+#include "CxxUtils/inline_hints.h"
+
 namespace ActsTrk {
 
   GbtsSeedingTool::GbtsSeedingTool(const std::string& type,
