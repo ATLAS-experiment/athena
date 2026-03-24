@@ -26,7 +26,7 @@ def GraphBucketFilterToolCfg(flags, name ="GraphBucketFilterTool", **kwargs):
     from AthOnnxComps.OnnxRuntimeSessionConfig import OnnxRuntimeSessionToolCfg
 
     result = ComponentAccumulator()
-    model_path = kwargs.pop("ModelPath", "edgecnn_multi_bucket_sparse_meta.onnx")
+    model_path = kwargs.pop("ModelPath", "dev/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx")
     
     if not model_path.startswith('/'):
         pass
