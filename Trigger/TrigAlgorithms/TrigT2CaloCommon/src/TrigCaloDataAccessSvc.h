@@ -1,25 +1,21 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT2CaloCommon_TrigCaloDataAccessSvc_h
 #define TrigT2CaloCommon_TrigCaloDataAccessSvc_h
 
-#include <mutex>
+
 #include "AthenaBaseComps/AthService.h"
+#include "TrigT2CaloCommon/ITrigCaloDataAccessSvc.h"
+
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "LArByteStream/LArRodDecoder.h"
 #include "TileByteStream/TileROD_Decoder.h"
 #include "TileByteStream/TileHid2RESrcID.h"
 #include "LArRawUtils/LArTT_Selector.h"
-#include "TileByteStream/TileCellCont.h"
-#include "TrigT2CaloCommon/LArCellCont.h"
-#include "LArRecEvent/LArFebEnergyCollection.h"
-#include "TileEvent/TileL2Container.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
-#include "IRegionSelector/IRoiDescriptor.h"
 #include "IRegionSelector/IRegSelTool.h"
-#include "TrigT2CaloCommon/ITrigCaloDataAccessSvc.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -31,6 +27,20 @@
 #include "LArRecConditions/LArRoIMap.h"
 #include "LArRecEvent/LArDeadOTXFromSC.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+
+#include <mutex>
+#include <algorithm> //std::copy
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <iterator> //std::back_inserter
+#include <set>
+#include <initializer_list>
+
+class TileCellCont;
+class LArCellCont;
+class IRoiDescriptor;
+
 
 class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc> {
  public:

@@ -275,6 +275,8 @@ LockedHandle<T> WebdaqHistSvc::getShared_i(const std::string& id) const
   tbb::concurrent_hash_map<std::string, THistID>::const_accessor accessor;
   if (m_hists.find(accessor, id)) {
     auto * obj = accessor->second.obj;
+    //accessor is implicitly valid
+    //coverity[FORWARD_NULL]
     if (accessor->second.mutex == nullptr) {
       ATH_MSG_ERROR("getShared: found Hist with id \"" << id
                                                        << "\", but it's not marked as shared");
@@ -596,6 +598,8 @@ void WebdaqHistSvc::monitoringTask(int numSlots, int intervalSeconds, std::atomi
           {
             //Locking the OH mutex before touching the Histogram
             oh_scoped_lock_histogram lock;
+            //accessor is implicitly valid
+            //coverity[FORWARD_NULL]
             obj = accessor->second.obj->Clone(); 
           }
           if (obj == nullptr) {
