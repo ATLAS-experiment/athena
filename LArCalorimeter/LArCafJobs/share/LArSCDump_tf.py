@@ -41,6 +41,10 @@ if __name__ == '__main__':
                              help='Fill only SC with ADCmax - ADC(0) samples above this threshold', group='LArSCDump_tf',
                              default=trfArgClasses.argInt(-1)) 
 
+    trf.parser.add_argument('--doPEBStream', type=trfArgClasses.argFactory(trfArgClasses.argBool),
+                             help='Force the PEB stream processing (using different receipe from RunLog)', group='LArSCDump_tf',
+                             default=trfArgClasses.argBool(False)) 
+
     trf.parseCmdLineArgs(sys.argv[1:])
     trf.execute()
     trf.generateReport()

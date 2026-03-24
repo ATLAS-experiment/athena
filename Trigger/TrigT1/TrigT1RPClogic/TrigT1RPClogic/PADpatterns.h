@@ -1,20 +1,20 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #ifndef PADPATTERNS_H
 #define PADPATTERNS_H
 
-#include <memory>
-#include <string>
-#include <utility>
-#include <list>
+
 #include "TrigT1RPClogic/CMAdata.h"
 #include "TrigT1RPChardware/Pad.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
+#include <memory>
+#include <sstream>
+#include <iosfwd>
 
 class PADpatterns : public RPCtrigDataObject
 {

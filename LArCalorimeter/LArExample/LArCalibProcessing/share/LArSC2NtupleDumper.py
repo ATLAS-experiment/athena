@@ -51,6 +51,7 @@ if __name__=='__main__':
   parser.add_argument('--ETThresh', dest='etthresh', default=-1., help='ET threshold to dump info', type=float)
   parser.add_argument('--ETThreshMain', dest='etthreshmain', default=-1., help='ET threshold from Main to dump info', type=float)
   parser.add_argument('--ADCThresh', dest='adcthresh', default=-1, help='ADC threshold to dump info', type=int)
+  parser.add_argument('--doPEBStream', dest='peb', default=False, help='Is it for PEB stream', action='store_true')
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -136,27 +137,51 @@ if __name__=='__main__':
      fwversion=runinfo.FWversion()   
      if not (args.accsamples or args.acccalibsamples):   
         flags.LArSCDump.digitsKey=""
-        for i in range(0,len(runinfo.streamTypes())):
-           if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
-                 CKeys += ["SC_ET_ID"]
-                 flags.LArSCDump.doEt=True
-                 flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-           elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
-                 CKeys += ["SC_ET"]
-                 flags.LArSCDump.doEt=True
-                 flags.LArSCDump.nEt=runinfo.streamLengths()[i]
-           elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
-                 flags.LArSCDump.digitsKey="SC"
-                 if args.nsamp > 0:
-                    flags.LArSCDump.nSamples=args.nsamp
-                 else:
-                    flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
-           elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
-                 CKeys += ["SC_ADC_BAS"]
-                 if args.nsamp > 0:
-                    flags.LArSCDump.nSamples=args.nsamp
-                 else:
-                    flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+        if args.peb:
+            for i in range(0,len(runinfo.streamTypesPEB())):
+               if args.EtId and runinfo.streamTypesPEB()[i] ==  "SelectedEnergy":
+                     CKeys += ["SC_ET_ID"]
+                     flags.LArSCDump.doEt=True
+                     flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
+               elif args.Et and runinfo.streamTypesPEB()[i] ==  "Energy":
+                     CKeys += ["SC_ET"]
+                     flags.LArSCDump.doEt=True
+                     flags.LArSCDump.nEt=runinfo.streamLengthsPEB()[i]
+               elif args.samples and runinfo.streamTypesPEB()[i] ==  "RawADC":
+                     flags.LArSCDump.digitsKey="SC"
+                     if args.nsamp > 0:
+                        flags.LArSCDump.nSamples=args.nsamp
+                     else:
+                        flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
+               elif args.samplesBas and runinfo.streamTypesPEB()[i] ==  "ADC":
+                     CKeys += ["SC_ADC_BAS"]
+                     if args.nsamp > 0:
+                        flags.LArSCDump.nSamples=args.nsamp
+                     else:
+                        flags.LArSCDump.nSamples=runinfo.streamLengthsPEB()[i]
+
+        else:
+            for i in range(0,len(runinfo.streamTypes())):
+               if args.EtId and runinfo.streamTypes()[i] ==  "SelectedEnergy":
+                     CKeys += ["SC_ET_ID"]
+                     flags.LArSCDump.doEt=True
+                     flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+               elif args.Et and runinfo.streamTypes()[i] ==  "Energy":
+                     CKeys += ["SC_ET"]
+                     flags.LArSCDump.doEt=True
+                     flags.LArSCDump.nEt=runinfo.streamLengths()[i]
+               elif args.samples and runinfo.streamTypes()[i] ==  "RawADC":
+                     flags.LArSCDump.digitsKey="SC"
+                     if args.nsamp > 0:
+                        flags.LArSCDump.nSamples=args.nsamp
+                     else:
+                        flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+               elif args.samplesBas and runinfo.streamTypes()[i] ==  "ADC":
+                     CKeys += ["SC_ADC_BAS"]
+                     if args.nsamp > 0:
+                        flags.LArSCDump.nSamples=args.nsamp
+                     else:
+                        flags.LArSCDump.nSamples=runinfo.streamLengths()[i]
         if  args.nsamp > 0 and args.nsamp < flags.LArSCDump.nSamples:
            flags.LArSCDump.nSamples=args.nsamp
   

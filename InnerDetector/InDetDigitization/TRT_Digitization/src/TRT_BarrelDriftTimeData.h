@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////
@@ -27,8 +27,8 @@ public:
   //Interface implementation:
 
   double MaxTabulatedField() const;
-  double DriftTimeAtNoField(const double& distance) const;
-  double DriftTimeAtMaxField(const double& distance) const;
+  double DriftTimeAtNoField(double distance) const;
+  double DriftTimeAtMaxField(double distance) const;
 
 private:
 

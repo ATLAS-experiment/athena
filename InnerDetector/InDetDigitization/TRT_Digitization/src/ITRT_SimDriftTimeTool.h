@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
  ////////////////////////////////////
@@ -38,8 +38,8 @@ public:
   //possibly different for barrel/endcap).
 
   //This is the average drift time for a certain distance
-  virtual double getAverageDriftTime( const double& dist,
-                                      const double& effectivefield_squared,
+  virtual double getAverageDriftTime( double dist,
+                                      double effectivefield_squared,
                                       int strawGasType = 0) const = 0;
 
   // NB: The passed field value should be the magnitude of the field
