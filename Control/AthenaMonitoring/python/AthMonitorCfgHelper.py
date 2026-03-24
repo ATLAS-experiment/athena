@@ -33,7 +33,7 @@ class AthMonitorCfgHelper(object):
         self.monSeq = AthSequencer('AthMonSeq_' + monName)
         self.monSeq.StopOverride=True
         self.resobj = ComponentAccumulator()
-        self.resobj.addSequence(self.monSeq)
+        # self.resobj.addSequence(self.monSeq) - postpone adding sequence unless actually adding an alg
         if self.flags.DQ.useTrigger:
             from .TriggerInterface import TrigDecisionToolCfg
             self.resobj.merge(TrigDecisionToolCfg(flags))
@@ -92,7 +92,8 @@ class AthMonitorCfgHelper(object):
                 raise ValueError(f'Object {obj} passed to addFilterTools is not a ComponentAccumulator or an AlgTool')
             algObj.FilterTools += [filter]
 
-
+        if self.resobj.getSequence(self.monSeq.name) is None:
+            self.resobj.addSequence(self.monSeq) # add the sequence now
         self.resobj.addEventAlgo(algObj, sequenceName=self.monSeq.name)
         return algObj
 
