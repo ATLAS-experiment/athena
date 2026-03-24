@@ -67,7 +67,7 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
 
   // Collect the associated tracks from TauTrackFinder and either classify 
   // with dedicated TC or not at all
-  if(!m_classifyLRT || m_classifyLRTWithDedicated) {
+  if (!m_classifyLRT) {
     std::vector<xAOD::TauTrack*> vLRTs;
     std::vector<xAOD::TauTrack*>::iterator it = vTracks.begin(); 
     while(it != vTracks.end()) {      
@@ -80,14 +80,9 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
       }
     }
 
-    if (m_classifyLRTWithDedicated) {
-      // decorate LRTs with dedicated TC scores
-      ATH_CHECK(classifyLRTTracks(vLRTs, xTau));
-    } else {
-      // decorate LRTs with default RNN scores
-      for (auto classifier : m_vClassifier) {
-        ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
-      }
+    // decorate LRTs with default RNN scores
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(vLRTs, xTau, vertexContainer, tauTrackCon, true));
     }
   }
 
@@ -138,8 +133,12 @@ StatusCode TauTrackRNNClassifier::executeTrackClassifier(xAOD::TauJet& xTau, xAO
   } 
 
   // classify tracks
-  for (auto classifier : m_vClassifier) {
-    ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer, tauTrackCon));
+  if (m_classifyLRTWithDedicated){
+    ATH_CHECK(classifyLRTTracks(vTracks, xTau));
+  } else {
+    for (auto classifier : m_vClassifier) {
+      ATH_CHECK(classifier->classifyTracks(vTracks, xTau, vertexContainer, tauTrackCon));
+    }
   }
 
   std::vector< ElementLink< xAOD::TauTrackContainer > >& tauTrackLinks(xTau.allTauTrackLinksNonConst());
