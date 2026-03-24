@@ -745,6 +745,18 @@ def EGammaCommonCfg(flags):
         acc.addPublicTool(CoreCellRecoveryTool)
         EGAugmentationTools.append(CoreCellRecoveryTool)
 
+    # decorate electrons and photons with the transformer calibrated energy
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGammaEnergyCalibrationWrapperCfg
+    
+    TransformerEnergyCalibration = acc.addPublicTool(acc.popToolsAndMerge(
+        EGammaEnergyCalibrationWrapperCfg(
+            flags,
+            name="TransformerEnergyCalibration",
+        )
+    ))
+    
+    EGAugmentationTools.append(TransformerEnergyCalibration)
+
     # ==================================================
     # Truth Related tools
     if flags.Input.isMC:

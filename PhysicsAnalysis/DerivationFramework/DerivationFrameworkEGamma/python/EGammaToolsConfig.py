@@ -173,3 +173,21 @@ def EGammaCookieCutClusterToolCfg(flags, name = 'EGCookieCutTool', **kwargs):
         CompFactory.DerivationFramework.EGammaCookieCutClusterTool(
             name, **kwargs))
     return acc
+
+def EGammaEnergyCalibrationWrapperCfg(
+        flags,
+        name="TransformerEnergyCalibration",
+        **kwargs):
+    acc = ComponentAccumulator()
+
+    from egammaTransformerCalib.egammaTransformerCalibConfig import egammaTransformerSvcCfg
+
+    kwargs.setdefault("ElectronContainerName", "Electrons")
+    kwargs.setdefault("PhotonContainerName", "Photons")
+    kwargs.setdefault("decoratorTransformerEnergy", "TransformerEnergy")
+    kwargs.setdefault("decoratorTransformerEnergyPhoton", "TransformerEnergy")
+    kwargs.setdefault("TransformerCalibSvc", acc.getPrimaryAndMerge(egammaTransformerSvcCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.DerivationFramework.EGammaEnergyCalibrationWrapper(name, **kwargs))
+
+    return acc
