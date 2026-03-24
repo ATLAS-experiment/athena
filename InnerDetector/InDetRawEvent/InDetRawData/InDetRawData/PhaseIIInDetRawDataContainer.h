@@ -246,7 +246,7 @@ namespace PhaseII {
    public:
 
       /// @brief return true if the index refers to an element in the container
-      bool isValid(unsigned int index) const      { assert( m_coordinates.size() == m_word.size()); return index < m_coordinates.size(); }
+      bool isValid(unsigned int index) const      { return index < m_coordinates.size() && index < m_word.size(); }
 
       /// @brief return the coordinates i.e. column, row or strip  of a certain RDO (read only).
       const std::array<std::int16_t,NDim> &coordinates(unsigned int index) const { assert(isValid(index)); return m_coordinates[index]; }
@@ -262,9 +262,9 @@ namespace PhaseII {
       bool isSane() const          { return m_coordinates.size() == m_word.size(); }
 
       /// @brief total number of RDOs which are in this container.
-      std::size_t size() const     { assert(isSane()); return m_coordinates.size(); }
+      std::size_t size() const     { return m_coordinates.size(); }
       /// @brief test whether the container is empty i.e. does not contain any RDOs
-      bool empty() const           { assert(isSane()); return m_coordinates.empty(); }
+      bool empty() const           { return m_coordinates.empty(); }
       /// @brief the maximum number RDOs this container can hold without reallocation.
       std::size_t capacity() const { assert(m_coordinates.capacity() == m_word.capacity()); return m_coordinates.capacity(); }
 
@@ -537,8 +537,8 @@ namespace PhaseII {
       using T_RawDataContainer = typename T_RawDataContainerCollection::DataContainerType;
       static_assert( RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy::isConst);
       using ContainerNonConst = std::remove_cvref_t<T_RawDataContainerCollection>;
-      static_assert( std::is_same_v<typename RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy::ContainerNonConst,
-                                    ContainerNonConst>);
+      static_assert( std::is_base_of_v<typename RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy::ContainerNonConst,
+                                       ContainerNonConst>);
       return typename RawDataTypeTraits<const T_RawDataContainer>::ContainerCollectionProxy(&collection);
    }
 
