@@ -80,6 +80,9 @@ struct TFileAccessTracer::Impl {
 ///
 TFileAccessTracer::~TFileAccessTracer() {
 
+  // Make sure that nobody is trying to update the object at this point.
+  std::lock_guard<std::mutex> lock(m_impl->m_mutex);
+
   // If the user turned off the data submission, then stop already here...
   if (m_impl->m_enableDataSumbission == false) {
     return;
