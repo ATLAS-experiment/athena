@@ -177,7 +177,7 @@ def TauTrackRNNClassifierCfg(flags):
 
     # Manually setting for TauLRT reco
     if flags.Tau.ActiveConfig.inTauLRT:
-        _classifyLRT = False
+        _classifyLRT = True
         _classifyLRTWithDedicated = True
 
 
