@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,20 +26,21 @@ class IdentifierHash{
 public:
     using value_type = unsigned int;
     /// Default methods
-    IdentifierHash () = default;
+    constexpr IdentifierHash ()  = default;
     /// Initialization with value
-    IdentifierHash (value_type value);
+    constexpr IdentifierHash(value_type value);
     ///@{ 
     ///Get the value 
-    operator value_type() const;
-    value_type value() const;
+    constexpr operator value_type() const;
+    constexpr value_type value() const;
     ///@}
-    /// Check if id is in a valid state
-    bool is_valid () const;
-    /// Assignment operators
-    IdentifierHash& operator = (value_type value);
-    IdentifierHash& operator += (value_type value);
-    IdentifierHash& operator -= (value_type value);
+    constexpr bool is_valid() const;
+
+    constexpr IdentifierHash& operator=(value_type value);
+
+    constexpr IdentifierHash& operator+=(value_type value);
+
+    constexpr IdentifierHash& operator-=(value_type value);
 
 private:
     ///default value, and indicator of invalid state

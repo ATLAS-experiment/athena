@@ -1,43 +1,31 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
-inline IdentifierHash::IdentifierHash (value_type value)
-    : m_value(value)
-{}
+constexpr IdentifierHash::IdentifierHash(value_type value)  : m_value(value) {}
 
-inline IdentifierHash&
-IdentifierHash::operator = (value_type value){
+constexpr IdentifierHash::operator value_type() const  { return m_value; }
+constexpr IdentifierHash::value_type IdentifierHash::value() const  { return m_value; }
+
+constexpr bool IdentifierHash::is_valid() const  { return m_value != m_max_value; }
+
+constexpr IdentifierHash& IdentifierHash::operator=(value_type value)  {
     m_value = value;
-    return (*this);
+    return *this;
 }
 
-inline IdentifierHash& 				     
-IdentifierHash::operator += (unsigned int value){
+constexpr IdentifierHash& IdentifierHash::operator+=(value_type value)  {
     m_value += value;
-    return (*this);
+    return *this;
 }
 
-inline IdentifierHash& 
-IdentifierHash::operator -= (unsigned int value){
+constexpr IdentifierHash& IdentifierHash::operator-=(value_type value)  {
     m_value = (m_value > value) ? m_value - value : 0;
-    return (*this);
+    return *this;
 }
 
-inline IdentifierHash::operator unsigned int () const{
-    return (m_value);
-}
 
-inline unsigned int 
-IdentifierHash::value() const{
-    return (m_value);
-}
-
-inline bool 
-IdentifierHash::is_valid() const{
-    return (!(m_max_value == m_value));
-}
 
 inline MsgStream& 
 operator << (MsgStream& f, const IdentifierHash& id){
