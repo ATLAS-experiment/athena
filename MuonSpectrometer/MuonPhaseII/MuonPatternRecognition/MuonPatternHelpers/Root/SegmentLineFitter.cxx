@@ -12,6 +12,7 @@ CXXUTILS_TRAPPING_FP;
 
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <MuonSpacePoint/SpacePointPerLayerSorter.h>
+#include <MuonSpacePoint/SpacePointHelpers.h>
 
 #include <ActsInterop/Logger.h>
 #include <ActsInterop/UnitConverters.h>
@@ -33,24 +34,6 @@ namespace MuonR4::SegmentFit{
     using Result_t = SegmentLineFitter::Result_t;
 
     namespace {
-        /** @brief Returns whether the hit suitable for to be used in the fit
-         *  @param hit: Reference to the calibrated space point of interest */
-        bool isGoodHit(const MuonR4::CalibratedSpacePoint& hit) {
-            using enum MuonR4::CalibratedSpacePoint::State;
-            return hit.fitState() == Valid;
-        }
-        /** @brief Returns whether the hit is a muon precision hit */
-        bool isPrecisionHit(const MuonR4::CalibratedSpacePoint& hit) {
-            using enum xAOD::UncalibMeasType;
-            return isGoodHit(hit) && (
-                /// Valid Mdt or micromegas are always precision hits
-                hit.type() == MdtDriftCircleType || hit.type() == MMClusterType ||
-                /// Only consider the stgc strips a precision measurement
-                (hit.type() == sTgcStripType && 
-                static_cast<const xAOD::sTgcMeasurement*>(hit.spacePoint()->primaryMeasurement())->channelType() ==
-                sTgcIdHelper::sTgcChannelTypes::Strip)
-            );
-        }
         /** @brief Counts the number of precision hits
          *  @param hits: Collection of hit participating in the segment fit */
         inline unsigned countPrecHits(const HitVec_t& hits) {
