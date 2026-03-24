@@ -165,7 +165,8 @@ def MuonReconstructionCfg(flags):
 
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here.
     # It's probably better to have as part of TrackBuilding, or Segment building...
-    if flags.Input.isMC  or flags.Overlay.DataOverlay:
+    from AthenaConfiguration.Enums import Format
+    if (flags.Input.isMC or flags.Overlay.DataOverlay) and flags.Input.Format!=Format.BS:
         # filter TrackRecordCollection (true particles in muon spectrometer)
         if "MuonEntryLayerFilter" not in flags.Input.Collections:
             result.addEventAlgo(CompFactory.TrackRecordFilter())

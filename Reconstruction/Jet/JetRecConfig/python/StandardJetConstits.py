@@ -17,6 +17,8 @@ from .JetDefinition import xAODType,  JetInputConstitSeq, JetInputExternal, JetC
 from .StandardJetContext import inputsFromContext, propFromContext
 from .JetRecConfig import isAnalysisRelease 
 from AthenaConfiguration.Enums import BeamType
+from JetRecConfig.JetRecCommon import isMC
+
 
 # Prepare dictionnaries to hold all of our standard definitions.
 # They will be filled from the lists below
@@ -40,12 +42,6 @@ try:
 except ModuleNotFoundError:
     # In some releases TrackCaloClusterRecTools is not existing
     pass
-
-def isMC(flags):
-    """A simple filter function for  testing if we're running in MC
-    returns (bool, str) where the str contains an explanation of why the bool is False.
-    (probably worth re-allocating somehere else)"""
-    return flags.Input.isMC or flags.Overlay.DataOverlay, "Input file is not MC"
 
 def standardReco(input):
     """Returns a helper function which invokes the standard reco configuration for the container 'input' 

@@ -328,7 +328,8 @@ def MuonRDOtoPRDConvertorsCfg(flags):
         acc.merge(CscRDODecodeCfg(flags))
         acc.merge(CscClusterBuildCfg(flags))
 
-    if flags.Input.isMC:
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.isMC and flags.Input.Format!=Format.BS:
         acc.merge(MuonPRD_MultiTruthMakerCfg(flags))
 
     return acc
