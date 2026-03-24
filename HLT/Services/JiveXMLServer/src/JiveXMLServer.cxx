@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <JiveXMLServer/JiveXMLServer.h>
@@ -174,10 +174,8 @@ namespace JiveXML {
    * When the signal handler is called, switch the lock to the post condition
    */
   void JiveXMLServer::signalHandler(int signal){
-    //Store signal
-    m_receivedSignal=signal;
-    //finish semaphore lock
-    m_lock.post();
+    //Store signal and notify thread
+    m_receivedSignal.set_value(signal);
   }
 
   /**
@@ -186,10 +184,11 @@ namespace JiveXML {
    * b) the server thread stopped by itself
    **/
   void JiveXMLServer::Wait(){
-    //just wait for the lock
-    m_lock.wait();
+    auto signal = m_receivedSignal.get_future();
+    //just wait for a signal
+    signal.wait();
     //Tell why the lock was released
-    ERS_INFO("Reached post-condition after received signal " << m_receivedSignal );
+    ERS_INFO("Reached post-condition after received signal " << signal.get() );
   }
 
   /**
