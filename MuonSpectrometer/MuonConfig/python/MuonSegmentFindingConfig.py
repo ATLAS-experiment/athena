@@ -398,7 +398,8 @@ def MuonLayerHoughToolCfg(flags, name = "MuonLayerHoughTool" , **kwargs):
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("DoTruth", False)
     else:
-        kwargs.setdefault("DoTruth", flags.Input.isMC)
+        from AthenaConfiguration.Enums import Format
+        kwargs.setdefault("DoTruth", flags.Input.isMC and flags.Input.Format!=Format.BS)
     layer_hough_tool = CompFactory.Muon.MuonLayerHoughTool(name, **kwargs)
     result.setPrivateTools(layer_hough_tool)
     return result

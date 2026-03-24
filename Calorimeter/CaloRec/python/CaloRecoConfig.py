@@ -23,8 +23,9 @@ def CaloRecoCfg(flags, clustersname=None):
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
             result.merge(TileDigitsFilterCfg(flags))
 
-        from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-        result.merge(LArRawChannelBuilderAlgCfg(flags))
+        if not flags.Input.isMC: # KTJ: Take directly from MC BS
+            from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
+            result.merge(LArRawChannelBuilderAlgCfg(flags))
 
         from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
         result.merge(TileRawChannelMakerCfg(flags))
