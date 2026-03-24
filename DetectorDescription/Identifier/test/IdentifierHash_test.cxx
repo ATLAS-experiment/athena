@@ -17,6 +17,7 @@ BOOST_AUTO_TEST_CASE(IdentifierHashConstructors){
   //compile time tests
   static_assert(std::is_trivially_destructible<IdentifierHash>::value);
   static_assert(std::is_trivially_copy_constructible<IdentifierHash>::value);
+  static_assert(std::is_trivially_copyable<IdentifierHash>::value);
   //
   BOOST_CHECK_NO_THROW(IdentifierHash());
   IdentifierHash e;
