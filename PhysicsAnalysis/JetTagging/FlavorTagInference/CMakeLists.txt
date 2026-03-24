@@ -44,7 +44,7 @@ set(FTISource
   Root/GNNToolifiers.cxx
   Root/SaltModel.cxx
   Root/SaltModelOutput.cxx
-  Root/NNSharingSvc.cxx
+  Root/NNSharingOnnxSvc.cxx
   Root/StringUtils.cxx
   Root/TracksLoader.cxx
   Root/HitsLoader.cxx
@@ -64,6 +64,7 @@ if (NOT XAOD_ANALYSIS)
   list(
     APPEND FTISource
     Root/SaltModelTriton.cxx
+    Root/NNSharingTritonSvc.cxx
     )
 endif()
 

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SaltModelTriton.h"
+#include "FlavorTagInference/SaltModelTriton.h"
 #include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "FlavorTagInference/SaltModelOutput.h"
 #include "CxxUtils/checker_macros.h"
