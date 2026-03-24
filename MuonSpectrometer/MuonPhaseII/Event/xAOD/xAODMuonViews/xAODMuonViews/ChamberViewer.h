@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMUONPREPDATA_CHAMBERVIEWER_H
 #define XAODMUONPREPDATA_CHAMBERVIEWER_H
@@ -113,13 +113,13 @@ namespace xAOD{
                 }
                 /** @brief Loads the hits from the next chamber. 
                  *         Returns false if all chambers have been traversed. */
-                bool next() noexcept {
+                bool next() {
                     if (m_end == m_container.end()) {
                         return false;
                     }
                     m_begin = m_end;
                     if constexpr (ChamberViewConcepts::identifierHashConcept<element_type>) {
-                        const IdentifierHash currentHash = (*m_end)->identifierHash();
+                         const IdentifierHash currentHash = (*m_end)->identifierHash();
                         m_end = std::find_if(m_begin, m_container.end(),
                                          [&currentHash](const_ref meas){
                                             return meas->identifierHash() != currentHash;
