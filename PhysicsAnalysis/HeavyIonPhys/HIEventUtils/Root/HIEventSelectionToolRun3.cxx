@@ -126,6 +126,14 @@ StatusCode HI::HIEventSelectionToolRun3::initialize() {
   // also See Figure 2.6 of
   // https://cds.cern.ch/record/2930965/files/ATL-COM-PHYS-2025-347.pdf
   m_ZDCEt_UpperCut_4p0Sigma_NeNe = loadHist("PUFCalVsZDCNominalNeNe2025.json");
+
+
+  //----------------------------------------------------------------------
+  // https://atlas-heavy-ions.docs.cern.ch/CorrFluc/centrality/
+  // https://cds.cern.ch/record/2921744 ATL-COM-PHYS-2025-033
+
+  m_ZDCEt_UpperCut_5Sigma_PbPb2023 = loadHist("PUFCalVsZDCNominalPbPb2023.json");
+
   return StatusCode::SUCCESS;
 }
 
@@ -340,18 +348,16 @@ float HI::HIEventSelectionToolRun3::zdcCutValue(
 
   if (period == HI::IonDataType::PbPb2023) {
     // the cut is expressed in TeV for 23 data
-    const float fcalEtTeV = fcalEt * GeV / TeV;
-    auto cutFunction = [](float et) {
-      const static double a = 334.29, b = -20.39,
-                          c = -2.38;  // from ATL-COM-PHYS-2025-033
-      return a + b * et + c * et * et;
-    };
+    float fcalEtTeV = fcalEt * GeV / TeV;
 
-    float cut = cutFunction(fcalEtTeV);
-    if (fcalEtTeV <= 1.0)  // below 1 TeV use flat
-      cut = cutFunction(1.0);
-    if (fcalEtTeV >= 4.0)  // below 1 TeV use flat
-      cut = cutFunction(4.0);
+    // float cut = cutFunction(fcalEtTeV);
+    if (fcalEtTeV <= 1.0)  // below 1 TeV use value at 1 TeV
+      fcalEtTeV = 1.0;
+    if (fcalEtTeV >= 4.0)  // above4 TeV use value at 4 TeV
+      fcalEtTeV = 1.0;
+
+    int refbin =  m_ZDCEt_UpperCut_5Sigma_PbPb2023->FindFixBin(fcalEtTeV);
+    float cut = m_ZDCEt_UpperCut_5Sigma_PbPb2023->GetBinContent(refbin);
 
     if (variation == HI::PileupVariation::Tight) {
       cut *= 1.02;

@@ -79,6 +79,8 @@ class HIEventSelectionToolRun3 : public virtual HI::IHIEventSelectionToolRun3,
 
   std::unique_ptr<TH1D> m_ZDCEt_UpperCut_5p5Sigma_OO;
   std::unique_ptr<TH1D> m_ZDCEt_UpperCut_4p0Sigma_NeNe;
+  std::unique_ptr<TH1D> m_ZDCEt_UpperCut_5Sigma_PbPb2023;
+
   float zdcCutValue(IonDataType, float fcalEt, PileupVariation) const;
 
   float ntrkCutValue(IonDataType, float fcalEt, PileupVariation) const;
