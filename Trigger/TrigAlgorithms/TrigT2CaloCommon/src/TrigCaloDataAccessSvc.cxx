@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigCaloDataAccessSvc.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TileByteStream/TileCellCont.h"
+#include "TrigT2CaloCommon/LArCellCont.h"
+#include "IRegionSelector/IRoiDescriptor.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandle.h"
 
@@ -121,8 +124,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
     std::lock_guard<std::mutex> getCollClock{ m_hLTCaloSlot.get( context )->mutex };       
     loadedCells.setRoIs( requestHashIDs );
   }
-  if ( sc ) return StatusCode::FAILURE;
-  else return StatusCode::SUCCESS;
+  return StatusCode::SUCCESS;
 }
 
 StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
@@ -156,6 +158,7 @@ StatusCode TrigCaloDataAccessSvc::loadCollections ( const EventContext& context,
           // Find the collection to dump
           const std::vector<TileCellCollection*>::const_iterator it =
                   (tilecell->find(requestHashIDs[i]));
+          if (it == tilecell->end()) continue;
           TileCellCollection* col = *it;
           if ( col == nullptr ) continue;
           TileCellCollection::const_iterator itt = (*it)->begin();
@@ -590,6 +593,7 @@ unsigned int TrigCaloDataAccessSvc::convertROBs( const EventContext& context,
           // Find the collection to fill
           const std::vector<TileCellCollection*>::const_iterator it =
                   (tilecell->find(rIds[i]));
+          if (it == tilecell->end()) continue;
           TileCellCollection* col = *it;
           if ( robFrags1.size()!=0 && col != nullptr ) {
             size_t roddatasize = robFrags1[0]->rod_ndata();

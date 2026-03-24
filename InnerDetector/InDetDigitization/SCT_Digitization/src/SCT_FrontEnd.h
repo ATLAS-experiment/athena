@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -90,14 +90,14 @@ class  SCT_FrontEnd : public extends<AthAlgTool, IFrontEnd> {
    * stripMax is for benefit of ITkStrips which can have different numbers of strips for module - for SCT this is always 768
    */
   virtual void process(SiChargedDiodeCollection& collection, CLHEP::HepRandomEngine* rndmEngine) const override;
-  StatusCode doSignalChargeForHits(SiChargedDiodeCollection& collectione, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode doThresholdCheckForRealHits(SiChargedDiodeCollection& collectione, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode doThresholdCheckForCrosstalkHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode doClustering(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
-  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
+  StatusCode doSignalChargeForHits(SiChargedDiodeCollection& collectione, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode doThresholdCheckForRealHits(SiChargedDiodeCollection& collectione, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode doThresholdCheckForCrosstalkHits(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode doClustering(SiChargedDiodeCollection& collection, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode prepareGainAndOffset(SiChargedDiodeCollection& collection, int side, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
+  StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, int stripMax) const;
   StatusCode addNoiseDiode(SiChargedDiodeCollection& collection, int strip, int tbin) const;
   static float meanValue(std::vector<float>& calibDataVect) ;
   StatusCode initVectors(int strips, SCT_FrontEndData& data) const;

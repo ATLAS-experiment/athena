@@ -11,7 +11,7 @@
 from AthenaCommon.Logging import logging
 from AthenaCommon.Logging import log as topLog
 topLog.setLevel(logging.WARNING) # default to suppressing all info logging except our own
-log = logging.getLogger('L1CaloPhase1Monitoring.py')
+log = logging.getLogger('l1calo-ath-mon')
 log.setLevel(logging.INFO)
 
 from TrigT1CaloMonitoring.LVL1CaloMonitoringConfig import L1CaloMonitorCfgHelper
@@ -29,6 +29,10 @@ import re
 partition = ispy.IPCPartition(os.getenv("TDAQ_PARTITION","ATLAS"))
 
 flags = initConfigFlags()
+# remove unused flag categories
+neededCats = ["GeoModel","DQ","Trigger","PerfMon","Detector","Muon","Overlay","LAr","Reco"]
+for cat in list(flags._dynaflags.keys()):
+  if cat not in neededCats: del flags._dynaflags[cat]
 flags.Input.Files = [] # so that when no files given we can detect that
 
 # Note: The order in which all these flag defaults get set is very fragile
@@ -36,7 +40,7 @@ flags.Input.Files = [] # so that when no files given we can detect that
 
 
 flags.Exec.OutputLevel = Constants.WARNING # by default make everything output at WARNING level
-flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr","AvalancheSchedulerSvc"] # Re-enable some info messaging though
+flags.Exec.InfoMessageComponents = ["AthenaEventLoopMgr","AthenaHiveEventLoopMgr","THistSvc","PerfMonMTSvc","ApplicationMgr","AvalancheSchedulerSvc"] # Re-enable some info messaging though
 flags.Exec.PrintAlgsSequence = True # print the alg sequence at the start of the job (helpful to see what is scheduled)
 # flags.Exec.FPE = -2 # disable FPE auditing ... set to 0 to re-enable
 
@@ -77,11 +81,12 @@ Extra flags are specified after a " -- " and the following are most relevant fla
   Trigger.enableL1CaloPhase1 : turn on/off the offline simulation [default: True]
   DQ.doMonitoring            : turn on/off the monitoring [default: True]
   Trigger.L1.doCaloInputs    : controls input readout decoding and monitoring [default: False*]
-  Trigger.L1.doCalo          : controls trex (legacy syst) monitoring  [default: False]
-  Trigger.L1.doeFex          : controls efex simulation and monitoring [default: False*]
-  Trigger.L1.dojFex          : controls jfex simulation and monitoring [default: False*]
-  Trigger.L1.dogFex          : controls gfex simulation and monitoring [default: False*]
-  Trigger.L1.doTopo          : controls topo simulation and monitoring [default: False*] (from 2023 Onwards)
+  Trigger.L1.doCalo          : controls trex (legacy syst) monitoring     [default: False]
+  Trigger.L1.doeFex          : controls efex simulation and monitoring    [default: False*]
+  Trigger.L1.dojFex          : controls jfex simulation and monitoring    [default: False*]
+  Trigger.L1.dogFex          : controls gfex simulation and monitoring    [default: False*]
+  Trigger.L1.doTopo          : controls topo simulation and monitoring    [default: False*] (from 2023 Onwards)
+  Trigger.L1.doGlobal        : controls global simulation and monitoring  [default: False]
   DQ.useTrigger              : controls if JetEfficiency monitoring alg is run or not  [default: False]
   PerfMon.doFullMonMT        : print info about execution time of algorithms and memory use etc [default: False]
   Trigger.triggerConfig      : if you specifying this as "FILE:<filename>" the script will use that L1 json menu. [default: "DB" (takes menu from DB for data)]
@@ -105,19 +110,34 @@ parser.add_argument('--evtNumber',default=None,nargs="+",type=int,help="specify 
 parser.add_argument('--stream',default="*",help="stream to lookup files in")
 parser.add_argument('--fexReadoutFilter',action='store_true',help="If specified, will skip events without fexReadout")
 parser.add_argument('--dbOverrides',default=None,nargs="+",type=str,help="specify overrides of COOL database folders in form <folder>=<dbPath> or <folder>:<tag>[=<dbPath>] to override a tag, example: /TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib=mytest.db ")
-parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config. Can also specify in the flags section if start with 'cfg.'")
+parser.add_argument('--postConfig',default=[],nargs="+",type=str,help="specify component properties to apply at the end of the config. Can also specify in the flags section if start with 'cfg.' Use '--postHelp' option to explore the configurables and their properties")
+parser.add_argument('--postInclude',default=[],nargs="+",type=str,help="specify python files to call before configuration completes")
+parser.add_argument('--postHelp',default=None,nargs="*",help="Displays configurables and their properties")
 args,unknown_args = flags.fillFromArgs(parser=parser,return_unknown=True)
 args.postConfig += [x[4:] for x in unknown_args if x.startswith("cfg.")]
 if any([not x.startswith("cfg.") for x in unknown_args]):
   raise KeyError("Unknown flags: " + " ".join([x for x in unknown_args if not x.startswith("cfg.")]))
 if not any([flags.Trigger.L1.doCalo,flags.Trigger.L1.doCaloInputs,flags.Trigger.L1.doeFex,flags.Trigger.L1.dojFex,flags.Trigger.L1.dogFex,flags.Trigger.L1.doTopo,flags.DQ.useTrigger]):
-  log.info("No steering flags specified, turning on phase 1 sim+monitoring (trex,efex,jfex,gfex,topo)")
+  log.info("No steering flags specified, turning on all phase 1 systems (trex,efex,jfex,gfex,topo)")
   flags.Trigger.L1.doCaloInputs = True # flag for saying if inputs should be decoded or not
   flags.Trigger.L1.doCalo = True
   flags.Trigger.L1.doeFex = True
   flags.Trigger.L1.dojFex = True
   flags.Trigger.L1.dogFex = True
   flags.Trigger.L1.doTopo = True
+
+# check input files
+if len(flags.Input.Files)>0:
+  # check input files list for alias to default test files ... substituting them
+  from AthenaConfiguration.TestDefaults import defaultTestFiles
+  flags.Input.Files = [getattr(defaultTestFiles,f,f) for f in flags.Input.Files]
+  flags.Input.Files = [item for x in flags.Input.Files for item in (x if isinstance(x,list) else [x])] # flatten mix of str and list
+  # now also check for non-existent input files before continuing
+  for f in flags.Input.Files:
+    if not os.path.exists(f):
+      log.fatal(f"file '{f}' does not exist")
+      exit(-1)
+
 if args.runNumber is not None:
   # todo: if an exact event number is provided, we can in theory use the event index and rucio to obtain a filename:
   # e.g: event-lookup -D RAW "477048 3459682284"
@@ -138,7 +158,7 @@ if args.runNumber is not None:
   log.info(" ".join(("Found",str(len(flags.Input.Files)),"files")))
 
 customMenuFile = ""
-if flags.Trigger.triggerConfig.startswith("FILE:"):
+if type(flags.Trigger.triggerConfig)==str and flags.Trigger.triggerConfig.startswith("FILE:"):
   customMenuFile = flags.Trigger.triggerConfig.split(":",1)[-1]
   flags.Trigger.triggerConfig="FILE"
 
@@ -149,8 +169,10 @@ if not flags.Common.isOnline and len(flags.Input.Files)==0:
     # this test file is used for generating the han config file
     flags.Input.Files = ["/eos/atlas/atlascerngroupdisk/det-l1calo/OfflineSoftware/TestFiles/data24_13p6TeV/data24_13p6TeV.00477048.physics_Main.daq.RAW._lb0821._SFO-20._0001.data"]
   else:
-    log.fatal("Running in offline mode but no input files provided")
-    exit(1)
+    log.fatal("Running in offline mode but no input files provided. Please specify with: --filesInput <file>")
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    log.fatal("You can specify one of the default test files:" + ",".join([f for f in dir(defaultTestFiles) if f[0].isupper()]))
+    exit(-1)
 elif flags.Common.isOnline:
   log.info("Running Online with Partition: "+partition.name())
   # if the partition name is not set in the flags, run the autoconfig again
@@ -262,11 +284,11 @@ if flags.Common.isOnline and len(flags.Input.Files)==0:
   bsSvc.LVL1Names = [] # name of L1 items to select
   bsSvc.LVL1Logic = "Ignore" # one of: Ignore, Or, And
 elif flags.Input.Format == Format.POOL:
-  log.info(f"Running Offline on {len(flags.Input.Files)} POOL files")
+  log.info(f"Running Offline on {len(flags.Input.Files)} POOL files: {flags.Input.Files[0]} ...")
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   cfg.merge(PoolReadCfg(flags))
 else:
-  log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files")
+  log.info(f"Running Offline on {len(flags.Input.Files)} bytestream files: {flags.Input.Files[0]} ...")
   #from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   #TODO: Figure out why the above line causes CA conflict @ P1 if try to run on a RAW file there
   from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
@@ -342,10 +364,24 @@ if flags.Common.isOnline or (flags.Input.Format != Format.POOL and not flags.Inp
 # rerun sim if required
 if flags.Trigger.enableL1CaloPhase1:
   from L1CaloFEXSim.L1CaloFEXSimCfg import L1CaloFEXSimCfg
+  # create a subsequence for the sim to live in; primarily keeps the config tidy
+  cfg.addSequence(CompFactory.AthSequencer("L1Sim",StopOverride=True),parentName="AthAlgSeq") # this matches the sequence name the helpers will create
+
   # note to self ... could look into input key remapping to avoid conflict with sim from input:
   #   from SGComps.AddressRemappingConfig import InputRenameCfg
   #   acc.merge(InputRenameCfg('xAOD::TriggerTowerContainer', 'xAODTriggerTowers_rerun', 'xAODTriggerTowers'))
-  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""))
+  cfg.merge(L1CaloFEXSimCfg(flags,outputSuffix="_ReSim" if flags.Input.Format == Format.POOL else ""),sequenceName="L1Sim")
+  # scheduling simulation of topo
+  if flags.Trigger.L1.doTopo:
+    from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
+    cfg.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False),sequenceName="L1Sim") # monitoring scheduled separately below
+
+  # Phase II Global simulation...
+  if "doGlobal" in flags.Trigger.L1 and flags.Trigger.L1.doGlobal:
+    # we will create a subsequence just for globalsim too
+    cfg.addSequence(CompFactory.AthSequencer("L1GlobalSim",StopOverride=True),parentName="AthAlgSeq")
+    from GlobalSimulation.GlobalSimulation import GlobalSimulationCfg
+    cfg.merge(GlobalSimulationCfg(flags),sequenceName="L1GlobalSim")
 
   if flags.Trigger.L1.doeFex:
     # print the algoVersions of the eFex from menu:
@@ -357,10 +393,6 @@ if flags.Trigger.enableL1CaloPhase1:
     log.info(f"algoVersions: eEM: {em_algoVersion}, eTAU: {tau_algoVersion}")
 
 
-  # scheduling simulation of topo
-  if flags.Trigger.L1.doTopo:
-    from L1TopoSimulation.L1TopoSimulationConfig import L1TopoSimulationCfg
-    cfg.merge(L1TopoSimulationCfg(flags,readMuCTPI=True,doMonitoring=False)) # monitoring scheduled separately below
 
   # do otf masking:
   # from IOVDbSvc.IOVDbSvcConfig import addFolders,addOverride
@@ -376,6 +408,7 @@ if flags.Trigger.enableL1CaloPhase1:
 
 
 if flags.DQ.doMonitoring:
+  cfg.addSequence(CompFactory.AthSequencer("AthMonSeq_L1CaloMon",StopOverride=True),parentName="AthAlgSeq") # this matches the sequence name the helpers will create
   if flags.Trigger.L1.doCalo:
     from TrigT1CaloMonitoring.PprMonitorAlgorithm import PprMonitoringConfig
     cfg.merge(PprMonitoringConfig(flags))
@@ -391,7 +424,7 @@ if flags.DQ.doMonitoring:
 
   if flags.Trigger.L1.doeFex:
     from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-    cfg.merge(EfexMonitoringConfig(flags))
+    cfg.merge(EfexMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon") # ensures is part of mon sequence that other algs are part of by virtue of their helpers
     EfexMonAlg = cfg.getEventAlgo('EfexMonAlg')
     # do we need next lines??
     EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'] # default is just L1_eEMRoI
@@ -435,9 +468,9 @@ if flags.DQ.doMonitoring:
     from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
     if flags.Trigger.L1.doeFex: cfg.merge(EfexInputMonitoringConfig(flags))
     from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
-    if flags.Trigger.L1.dojFex: cfg.merge(JfexInputMonitoringConfig(flags))
+    if flags.Trigger.L1.dojFex: cfg.merge(JfexInputMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon")
     from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
-    if flags.Trigger.L1.dogFex: cfg.merge(GfexInputMonitoringConfig(flags))
+    if flags.Trigger.L1.dogFex: cfg.merge(GfexInputMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon") # can trigger gFexEmulatedTower alg so must specify to add to sequence
 
 mainSeq = "AthAllAlgSeq"
 if args.fexReadoutFilter:
@@ -468,8 +501,8 @@ from AthenaConfiguration.Utils import setupLoggingLevels
 setupLoggingLevels(flags,cfg)
 
 if any([s.name=="AthenaEventLoopMgr" for s in cfg.getServices()]): cfg.getService("AthenaEventLoopMgr").IntervalInSeconds = 30
-if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]):
-  cfg.getService("AvalancheSchedulerSvc").ShowDataDependencies=True
+if any([s.name=="AthenaHiveEventLoopMgr" for s in cfg.getServices()]): cfg.getService("AthenaHiveEventLoopMgr").EventPrintoutInterval = 100
+if any([s.name=="AvalancheSchedulerSvc" for s in cfg.getServices()]): cfg.getService("AvalancheSchedulerSvc").ShowDataDependencies=True
 
 # need to override a folder tag for LAr while testing v6 firmware...
 if not flags.Input.isMC:
@@ -621,6 +654,19 @@ for conf in args.postConfig:
       print(k,":",*v,sep="\n\t")
     raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
+from AthenaCommon.Include import include
+for inc in args.postInclude: include(inc)
+
+if args.postHelp is not None:
+  from collections import defaultdict
+  availableComps = defaultdict(list)
+  for comp in [c for c in cfg._allComponents()]+cfg.getServices():
+    availableComps[comp.getType()] += [comp.getName()]
+  print("Available comps:")
+  for k,v in availableComps.items():
+    print("",k,":",", ".join(v))
+  exit(0)
+
 # -------- CHANGES GO ABOVE ------------
 
 if flags.Exec.MaxEvents==0: cfg.printConfig(withDetails = True, summariseProps = True, printDefaults = True)
@@ -638,6 +684,17 @@ if cfg.getService("StoreGateSvc").Dump:
   cfg.getService("StoreGateSvc").OutputLevel=3
 if cfg.getService("DetectorStore").Dump:
   cfg.getService("DetectorStore").OutputLevel=3
+
+if args.interactive:
+  from AthenaConfiguration.ComponentAccumulator import startInteractive
+  oldLevel = int(cfg._msg.getEffectiveLevel()) # need effectivelevel to account for inheriting
+  cfg._msg.setLevel(logging.INFO) # reverting to info level to ease interactive
+  print("\n\nEntering interactive configuration mode. You can explore and edit the cfg object. Ctrl+D to configure application and move to pre-initialize step")
+  startInteractive(locals()|{"self":cfg})
+  cfg._msg.setLevel(oldLevel)
+  # force writing the history file so that if job fails we still get our history
+  import readline, os
+  readline.write_history_file(os.path.expanduser( '~/.athena.history' ))
 
 if flags.Exec.MaxEvents==0:
   # create a han config file if running in config-only mode

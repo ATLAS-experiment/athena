@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -23,8 +23,12 @@
 
 #include "AthenaMonitoringKernel/Monitored.h"
 
-
 #include <sstream>
+#include <chrono>
+#include <algorithm> //transform
+#include <numeric> //accumulate
+#include <stdexcept>
+
 
 using TrigCompositeUtils::DecisionID;
 using TrigCompositeUtils::Decision;
@@ -244,9 +248,9 @@ TrigJetHypoTool::decide(const xAOD::JetContainer* jets,
   //monitor the passing jets for each leg (there should only be one per chain!)
   auto legInds = jetCollector.legInds();
   for (const auto& label : legInds) {
-    auto jets = jetCollector.hypoJets(label);
-    auto monitor_nJt = Monitored::Scalar( "NJets", jets.size());      
-    auto htsum =  Monitored::Scalar("HT", std::accumulate(jets.begin(), jets.end(),0.0,
+    const auto & theseJets = jetCollector.hypoJets(label);
+    auto monitor_nJt = Monitored::Scalar( "NJets", theseJets.size());      
+    auto htsum =  Monitored::Scalar("HT", std::accumulate(theseJets.begin(), theseJets.end(),0.0,
 							  [](double sum, const HypoJetVector::value_type jptr){return sum + jptr->et()*0.001;} ));      
     auto monitor_group_passinght = Monitored::Group(m_monTool, monitor_nJt,htsum);
   }

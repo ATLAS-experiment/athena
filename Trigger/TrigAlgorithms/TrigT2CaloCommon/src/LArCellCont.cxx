@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -101,6 +101,7 @@ m_hashSym.resize(onlineId->febHashMax());
 	unsigned int rodId32 = m_conv.getRodIDFromROM(rodId);
 	// index in the collection vector
 	int idx = m_hash(rodId32);
+	
 #ifdef TRIGLARCELLDEBUG
 	std::cout << "LArCellCont\t\t DEBUG \t" 
 	<< idx << " " << std::hex << m_hash.identifier(idx) << std::dec 
@@ -108,6 +109,7 @@ m_hashSym.resize(onlineId->febHashMax());
 #endif
 	// get all channels for a FEB
 	std::map<LArRoIMap::TT_ID,std::vector<LArCell* > > collMap;
+        //coverity[NEGATIVE_RETURNS]
 	if ( (*this)[idx]->size() != 0 ) { // This is the second FEB
 		m_second[idx] = febid;
 	}
@@ -207,12 +209,13 @@ LArCellCont::find(const HWIdentifier& rodid) const{
 const std::vector<LArCellCollection*>::const_iterator
 LArCellCont::find(const unsigned int& rodid) {
 	int idx = m_hash(rodid);
+	//coverity[NEGATIVE_RETURNS]
 	if ( m_eventNumber[idx] != m_event ) { // Decoding a new event
-	m_eventNumber[idx] = m_event;
-	return (std::vector<LArCellCollection*>::const_iterator)((*this).begin()+idx);
-	// Keep track of last decoded number
+	  m_eventNumber[idx] = m_event;
+	  return (std::vector<LArCellCollection*>::const_iterator)((*this).begin()+idx);
+	  // Keep track of last decoded number
 	} else { // Event already decoded. Return Null
-	return (std::vector<LArCellCollection*>::const_iterator)((*this).end());
+	  return (std::vector<LArCellCollection*>::const_iterator)((*this).end());
 	}
 }
 
@@ -237,6 +240,7 @@ void LArCellCont::applyBCIDCorrection(const unsigned int& rodid){
 HWIdentifier
 LArCellCont::findsec(const unsigned int& rodid) const{
 	int idx = m_hash(rodid);
+	//coverity[NEGATIVE_RETURNS]
 	return m_second[idx];
 }
 
