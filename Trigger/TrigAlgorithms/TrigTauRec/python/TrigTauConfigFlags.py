@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from tauRec.TauConfigFlags import createTauConfigFlags
+from TriggerMenuMT.HLT.Tau.TauConfigurationTools import getHitZVariables
 
 def createTrigTauConfigFlags():
     flags = AthConfigFlags()
@@ -16,6 +17,22 @@ def createTrigTauConfigFlags():
 
     # BRT TES pT calibration for all tau triggers
     flags.Trigger.Offline.Tau.MvaTESConfig = 'OnlineMvaTES_BRT_MC23a_v2.weights.root'
+
+
+    #####################################################################################
+    # HitZ network (_hitzperf/cut chains only)
+    #####################################################################################
+    # Using ONNX inference
+
+    flags.addFlag('Trigger.Offline.Tau.HitZ.ONNXConfig', 'TauHitZ_v0p1/network.onnx')
+    flags.addFlag('Trigger.Offline.Tau.HitZ.MaxHits', 200)
+    # Use the Tau and Jet nodes as the z and sigma output variables
+    flags.addFlag('Trigger.Offline.Tau.HitZ.NodeNameTau', 'HitZ_z0') # z-position regression mean
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPTau', getHitZVariables('HitZ')[0])
+    flags.addFlag('Trigger.Offline.Tau.HitZ.NodeNameJet', 'HitZ_z0_stddev') # z-position regression sigma
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputPJet', getHitZVariables('HitZ')[1])
+    flags.addFlag('Trigger.Offline.Tau.HitZ.OutputDiscriminant', -1) # Disable
+    flags.addFlag('Trigger.Offline.Tau.HitZ.DefaultMaxZ0Sigma', 10)
 
 
     #####################################################################################

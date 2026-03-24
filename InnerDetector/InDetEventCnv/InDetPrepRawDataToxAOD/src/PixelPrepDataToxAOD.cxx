@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -300,7 +300,7 @@ StatusCode PixelPrepDataToxAOD::execute()
       AUXDATA(xprd,char,isFake)      =  (char)prd->isFake(); 
       AUXDATA(xprd,char,gangedPixel) =  (char)prd->gangedPixel();
       const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo &
-         splitProb = splitProbContainer.isValid() ? splitProbContainer->splitProbability(prd) : Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
+         splitProb = !m_clusterSplitProbContainer.empty() && splitProbContainer.isValid() ? splitProbContainer->splitProbability(prd) : Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
       AUXDATA(xprd,char,isSplit)      =  static_cast<char>(splitProb.isSplit());
       AUXDATA(xprd,float,splitProbability1)  =  splitProb.splitProbability1();
       AUXDATA(xprd,float,splitProbability2)  =  splitProb.splitProbability2();
