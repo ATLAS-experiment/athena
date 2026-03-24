@@ -377,8 +377,7 @@ def muEFSARecoSequenceCfg( flags, RoIs, name, useBucketFilter=False):
         ### Setup the bucket filter if requested
         if useBucketFilter:
             from MuonInference.InferenceConfig import GraphBucketFilterToolCfg, GraphInferenceAlgCfg
-            bucketTool = acc.popToolsAndMerge( GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool_{name}", 
-                                                                        ReadSpacePoints=f"MuonSpacePoints_{name}",
+            bucketTool = acc.popToolsAndMerge( GraphBucketFilterToolCfg(flags, name=f"GraphBucketFilterTool_{name}",
                                                                         WriteSpacePointKey=f"FilteredMlBuckets_{name}"))
             acc.merge(GraphInferenceAlgCfg(flags, name=f"GraphInferenceAlg_{name}", InferenceTools=[bucketTool]))
         
