@@ -1,4 +1,4 @@
-ElectronCalibrationConfig:
+ElectronMomentumCalibrationConfig:
   - name: pt
     description: electron $p_\mathrm{T}$
   - name: eta
@@ -27,11 +27,25 @@ ElectronCalibrationConfig:
   - name: caloEta2
     description: the calo-cluster $\eta$ from the 2nd sampling layer (no systematics)
     toggled_by: decorateCaloClusterEta
+  - name: caloClusterEnergyReso
+    description: the calo-cluster energy resolution (no systematics)
+
+
+ElectronIPCalibrationConfig:
+  - name: d0
+    description: the $d_0$ parameter
+    toggled_by: writeTrackD0Z0
   - name: d0sig
-    description: the $d_0$ significance (no systematics)
+    description: the $d_0$ significance
+    toggled_by: writeTrackD0Z0
+  - name: z0
+    description: the $z_0$ parameter
     toggled_by: writeTrackD0Z0
   - name: z0sintheta
-    description: the $z_0\sin\theta$ parameter (no systematics)
+    description: the $z_0\sin\theta$ parameter
+    toggled_by: writeTrackD0Z0
+  - name: z0sinthetasig
+    description: the $z_0\sin\theta$ significance
     toggled_by: writeTrackD0Z0
 
 ElectronWorkingPointSelectionConfig:
@@ -77,6 +91,8 @@ PhotonCalibrationConfig:
   - name: caloEta2
     description: the calo-cluster $\eta$ from the 2nd sampling layer (no systematics)
     toggled_by: decorateCaloClusterEta
+  - name: caloClusterEnergyReso
+    description: the calo-cluster energy resolution (no systematics)
 
 PhotonWorkingPointSelectionConfig:
   - name: select

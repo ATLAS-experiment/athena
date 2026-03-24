@@ -1,4 +1,4 @@
-MuonCalibrationConfig:
+MuonMomentumCalibrationConfig:
   - name: pt
     description: muon $p_\mathrm{T}$
   - name: eta
@@ -15,6 +15,11 @@ MuonCalibrationConfig:
   - name: truth_origin
     description: origin of the corresponding truth particle (no systematics)
     toggled_by: decorateTruth
+  - name: muonType
+    description: reconstruction type of the muon (combined, standalone, ...) (no systematics)
+    toggled_by: writeColumnarToolVariables
+
+MuonIPCalibrationConfig:
   - name: d0
     description: the $d_0$ parameter
     toggled_by: writeTrackD0Z0
@@ -30,9 +35,6 @@ MuonCalibrationConfig:
   - name: z0sinthetasig
     description: the $z_0\sin\theta$ significance
     toggled_by: writeTrackD0Z0
-  - name: muonType
-    description: reconstruction type of the muon (combined, standalone, ...) (no systematics)
-    toggled_by: writeColumnarToolVariables
 
 MuonWorkingPointSelectionConfig:
   - name: select
