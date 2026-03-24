@@ -20,6 +20,9 @@
 #include "../FirstChain/eEmMultTestBench.h"
 #include "../FirstChain/eEmMultTestComparator.h"
 
+#include "../FirstChain/PU1SuppTestBench.h"
+#include "../FirstChain/PU1SuppAlgTool.h"
+
 
 DECLARE_COMPONENT(GlobalSim::GlobalSimulationAlg)
 
@@ -39,3 +42,6 @@ DECLARE_COMPONENT(GlobalSim::eEmMultAlgTool)
 
 DECLARE_COMPONENT(GlobalSim::eEmMultTestBench)
 DECLARE_COMPONENT(GlobalSim::eEmMultTestComparator)
+
+DECLARE_COMPONENT(GlobalSim::PU1SuppTestBenchAlg)
+DECLARE_COMPONENT(GlobalSim::PU1SuppAlgTool)
