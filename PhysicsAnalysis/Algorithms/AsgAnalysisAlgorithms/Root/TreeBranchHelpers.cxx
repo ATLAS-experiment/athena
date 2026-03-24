@@ -22,6 +22,13 @@
 #include <TTree.h>
 #include <TBranch.h>
 #include <TVirtualCollectionProxy.h>
+#include "Math/Vector4D.h"
+
+using ROOT::Math::PtEtaPhiEVector;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::PxPyPzEVector;
+using ROOT::Math::PxPyPzMVector;
+
 
 // System include(s):
 #include <regex>
@@ -401,6 +408,22 @@ namespace CP
           SG::ConstAccessor<std::vector<std::vector<float>>> {nominalAuxName};
         else if (typeName == "vector_vector_int")
           SG::ConstAccessor<std::vector<std::vector<int>>> {nominalAuxName};
+        else if (typeName == "PtEtaPhiEVector")
+          SG::ConstAccessor<PtEtaPhiEVector> {nominalAuxName};
+        else if (typeName == "PtEtaPhiMVector")
+          SG::ConstAccessor<PtEtaPhiMVector> {nominalAuxName};
+        else if (typeName == "PxPyPzEVector")
+          SG::ConstAccessor<PxPyPzEVector> {nominalAuxName};
+        else if (typeName == "PxPyPzMVector")
+          SG::ConstAccessor<PxPyPzMVector> {nominalAuxName};
+        else if (typeName == "vector_PtEtaPhiEVector")
+          SG::ConstAccessor<std::vector<PtEtaPhiEVector>> {nominalAuxName};
+        else if (typeName == "vector_PtEtaPhiMVector")
+          SG::ConstAccessor<std::vector<PtEtaPhiMVector>> {nominalAuxName};
+        else if (typeName == "vector_PxPyPzEVector")
+          SG::ConstAccessor<std::vector<PxPyPzEVector>> {nominalAuxName};
+        else if (typeName == "vector_PxPyPzMVector")
+          SG::ConstAccessor<std::vector<PxPyPzMVector>> {nominalAuxName};
         else
         {
           unsigned line = __LINE__ - 2;
