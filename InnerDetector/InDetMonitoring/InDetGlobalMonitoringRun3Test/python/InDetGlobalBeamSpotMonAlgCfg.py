@@ -11,7 +11,7 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
+def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=True):
     '''Function to configures some algorithms in the monitoring system.'''
     
     # Values set by default here
@@ -61,7 +61,7 @@ def HistoInDetGlobalBeamSpotMonAlgCfg(helper, alg, useBeamSpot=False):
             varName = 'm_pvYbeam;pvY'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: y - y_{beam};y-y_{beam} (#mum)",path=pathbs,xbins=100,xmin=-200,xmax=200)
             varName = 'm_pvZbeam;pvZ'
-            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: z - z_{beam};z-z_{beam} (#mum)",path=pathbs,xbins=100,xmin=-500,xmax=500)
+            bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: z - z_{beam};z-z_{beam} (mm)",path=pathbs,xbins=100,xmin=-500,xmax=500)
         else:
             varName = 'm_pvXbeam;pvX'
             bsGroup.defineHistogram(varName, type="TH1F", title="Primary vertex: x;x (mm)",path=pathbs,xbins=100,xmin=-2,xmax=2)
@@ -114,10 +114,10 @@ def InDetGlobalBeamSpotMonAlgCfg(helper, acc,
 
     if 'MinTracksPerVtx'   in jobConfig: kwargs.setdefault("minTracksPerVtx",jobConfig['MinTracksPerVtx'])
     if 'MinTrackPt'        in jobConfig: kwargs.setdefault("minTrackPt",jobConfig['MinTrackPt'])
-    useBeamSpot = False
+    useBeamSpot = True
     if 'useBeamSpot'       in jobConfig:
-        kwargs.setdefault("useBeamspot",jobConfig['useBeamSpot'])
         useBeamSpot = jobConfig['useBeamSpot']
+    kwargs.setdefault("useBeamspot", useBeamSpot)
 
     monAlg = helper.addAlgorithm(
         CompFactory.InDetGlobalBeamSpotMonAlg, name,
