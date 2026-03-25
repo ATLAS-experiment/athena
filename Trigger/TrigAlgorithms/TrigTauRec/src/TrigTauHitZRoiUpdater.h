@@ -9,7 +9,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "xAODTau/TauJetContainer.h"
 
 /**
