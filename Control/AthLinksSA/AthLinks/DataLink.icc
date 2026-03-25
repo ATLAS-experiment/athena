@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef ATHLINKS_DATALINK_ICC
 #define ATHLINKS_DATALINK_ICC
@@ -84,6 +84,23 @@ DataLink< STORABLE >::DataLink( const_pointer data, xAOD::TVirtualEvent* event )
    // Find the identifier of the object that we received:
    findIdentifier();
 }
+
+/// This constructor can be used to create a valid object based on a pointer
+/// to an existing object, that's already part of the current event. In case
+/// the object can not be found in the current event, the constructor throws
+/// an exception.
+/// It also takes a dummy @c EventContext argument, to avoid the need
+/// for downstream #ifdefs.
+///
+/// @param data A constant pointer to the object that the smart pointer
+///             should point to
+///
+template< typename STORABLE >
+DataLink< STORABLE >::DataLink( const_pointer data, const EventContext& )
+   : DataLink( data )
+{
+}
+
 
 /// This is probably the most convenient version of the constructors.
 /// It receives a string identifier (branch name) for the object that the smart
