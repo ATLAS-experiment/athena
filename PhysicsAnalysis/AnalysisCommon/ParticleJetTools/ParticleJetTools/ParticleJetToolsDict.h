@@ -12,7 +12,6 @@
 #include "ParticleJetTools/CopyTruthJetParticles.h"
 #include "ParticleJetTools/ParticleJetDeltaRLabelTool.h"
 #include "ParticleJetTools/ParticleJetGhostLabelTool.h"
-#include "ParticleJetTools/IRCSafeLabelTool.h"
 #include "ParticleJetTools/JetParticleAssociation.h"
 #include "ParticleJetTools/JetParticleCenterOfMassAssociation.h"
 #include "ParticleJetTools/JetParticleShrinkingConeAssociation.h"
