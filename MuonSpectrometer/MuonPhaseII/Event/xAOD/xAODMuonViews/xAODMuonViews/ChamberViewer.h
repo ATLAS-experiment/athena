@@ -4,13 +4,17 @@
 #ifndef XAODMUONPREPDATA_CHAMBERVIEWER_H
 #define XAODMUONPREPDATA_CHAMBERVIEWER_H
 
-#include <stdexcept>
-#include <format>
+
 
 #include <xAODMeasurementBase/MeasurementDefs.h>
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 
 #include "Acts/Utilities/PointerTraits.hpp"
+
+#include <stdexcept>
+#include <format>
+#include <functional> //std::function
+#include <algorithm>  //std::ranges::find_if
 
 namespace xAOD{
     /** @brief Under the assumption that all measurements in an uncalibrated measurement container are sorted by their
@@ -67,7 +71,7 @@ namespace xAOD{
                 
                 /** @brief Standard constructor
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/
-                 ChamberViewer(const HitObjContainer& container) noexcept
+                 ChamberViewer(const HitObjContainer& container) 
                     requires(ChamberViewConcepts::identifierHashConcept<element_type>):
                     m_container{container} {                   
                     next();
@@ -76,7 +80,7 @@ namespace xAOD{
                  *  @param container: UncalibratedMeasurementContainer from which the views per chamber shall be generated*/ 
                  ChamberViewer(const HitObjContainer& container, 
                              const Muon::IMuonIdHelperSvc* idHelperSvc,
-                             const ViewMode mode = ViewMode::DetElement) noexcept
+                             const ViewMode mode = ViewMode::DetElement) 
                     requires(ChamberViewConcepts::identifyConcept<element_type>):
                     m_container{container},
                     m_idHelperSvc{idHelperSvc},
