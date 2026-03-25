@@ -25,8 +25,6 @@
 
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/AuxElement.h"
-#include "SGTools/DataHandleBase.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/SGWPtr.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
@@ -357,25 +355,6 @@ namespace Athena_test
     assert(rSG.retrieve(base, "UnLocked").isSuccess());
     SGASSERTERROR(rSG.retrieve(base, "modSully").isSuccess());
 
-#ifdef TEST_DEPRECATED
-    const DataHandle<Base> chBase;
-    assert(rSG.retrieve(chBase).isSuccess());
-    assert(rSG.retrieve(chBase, "UnLocked").isSuccess());
-
-    DataHandle<Base> hBase;
-    assert(rSG.retrieve(hBase).isSuccess());
-    assert(rSG.retrieve(hBase, "UnLocked").isSuccess());
-
-    const DataHandle<Base> chBaseBeg, chBaseEnd;
-    assert(rSG.retrieve(chBaseBeg, chBaseEnd).isSuccess());
-    assert(chBaseBeg != chBaseEnd);
-#endif
-#ifdef DHR_COMPILEERROR
-    DataHandle<Base> hBaseBeg, hBaseEnd;
-    assert(rSG.retrieve(hBaseBeg, hBaseEnd).isSuccess());
-    assert(hBaseBeg != hBaseEnd);
-#endif
-
     SG::ConstIterator<Base> ciBaseBeg,ciBaseEnd;
     assert(rSG.retrieve(ciBaseBeg, ciBaseEnd).isSuccess());
     assert(ciBaseBeg != ciBaseEnd);
@@ -641,23 +620,6 @@ namespace Athena_test {
     assert (rSG.retrieve<const Foo> ("UnLocked") == cFoo);
     SGASSERTERROR(rSG.retrieve<const Foo> ("UnLockedxxx") != 0);
 
-#ifdef TEST_DEPRECATED
-    const DataHandle<Foo> chFoo;
-    const DataHandle<NotThere> chNotThere;
-    SGASSERTERROR(rSG.retrieve(chFoo).isSuccess());
-    SGASSERTERROR(rSG.retrieve(chNotThere).isSuccess());
-
-    assert(rSG.retrieve(chFoo, "UnLocked").isSuccess());
-    SGASSERTERROR(rSG.retrieve(chFoo, "modSully").isSuccess());
-
-    DataHandle<Foo> hFoo;
-    SGASSERTERROR(rSG.retrieve(hFoo).isSuccess());
-
-    assert(rSG.retrieve(hFoo, "silly").isSuccess());
-    assert(rSG.setConst(hFoo.cptr()).isSuccess());
-    SGASSERTERROR(rSG.retrieve(hFoo, "silly").isSuccess());
-#endif
-
     SG::ConstIterator<Foo> ciFooBeg, ciFooEnd;
     assert(rSG.retrieve(ciFooBeg, ciFooEnd).isSuccess());
     assert(ciFooBeg != ciFooEnd);
@@ -892,12 +854,6 @@ namespace Athena_test {
     // a regular retrieve ignores a missing aux store
     cpVec=rSG.retrieve<const TestVector<BX> >("ErrorVec");
     assert( 0 != cpVec );
-    
-    //deprecated but we need to test it nonetheless...
-#ifdef TEST_DEPRECATED
-    DataHandle<TestVector<BBX> > hBBX;
-    assert(rSG.retrieve(hBBX, "BBVec").isSuccess());    
-#endif
     
     // Test standalone object.
     BX* pb = new BX;
