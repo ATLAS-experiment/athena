@@ -51,7 +51,6 @@
 #include "AthenaKernel/IResetable.h"
 #include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
-#include "StoreGate/DataHandle.h"
 #include "StoreGate/SGWPtr.h"
 #include "StoreGate/SGObjectWithVersion.h"
 #include "CxxUtils/checker_macros.h"
