@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripClusteringTool.h"
@@ -154,6 +154,8 @@ StatusCode
 StripClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IStripClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
+                                  size_t /*icluster*/,
+                                  std::any& /*vars*/,
 				  typename ClusterContainer::iterator itrContainer) const
 {
     const IdentifierHash idHash = element.identifyHash();
