@@ -4,6 +4,8 @@
 // Author: Chengxi Yang (cxyang@berkeley.edu)
 
 #include "DerivationFrameworkEGamma/EGammaEnergyCalibrationWrapper.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 namespace DerivationFramework {
 
@@ -68,10 +70,11 @@ StatusCode EGammaEnergyCalibrationWrapper::addBranches(const EventContext& ctx) 
 
   SG::WriteDecorHandle<xAOD::EgammaContainer, float> photonEnergyDeco{m_photonEnergyDecoKey, ctx};
   for (const xAOD::Egamma* eg : *photons) {
-    const xAOD::CaloCluster* cluster = eg ? eg->caloCluster() : nullptr;
+    if (!eg) continue;
+    const xAOD::CaloCluster* cluster = eg->caloCluster();
     float value = 0;
     if (!cluster) {
-      ATH_MSG_ERROR("Photon object without CaloCluster, storing zero");
+      ATH_MSG_ERROR("Photon object without CaloCluster");
       photonEnergyDeco(*eg) = value;
       continue;
     }

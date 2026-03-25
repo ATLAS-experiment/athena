@@ -6,19 +6,11 @@
 #ifndef DERIVATIONFRAMEWORK_EGAMMAENERGYCALIBRATIONWRAPPER_H
 #define DERIVATIONFRAMEWORK_EGAMMAENERGYCALIBRATIONWRAPPER_H
 
-
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 //
-#include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteDecorHandle.h"
-#include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/WriteDecorHandleKeyArray.h"
-//
-//
-#include "AsgTools/IAsgTool.h"
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "xAODEgamma/EgammaContainer.h"
 // name space of global event info is defined here
 #include "EgammaAnalysisInterfaces/IegammaMVASvc.h"
