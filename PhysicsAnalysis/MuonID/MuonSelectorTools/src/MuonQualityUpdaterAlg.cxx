@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonQualityUpdaterAlg.h"
@@ -8,6 +8,7 @@
 #include "xAODMuon/Muon.h"
 #include "xAODMuon/MuonAuxContainer.h"
 #include "xAODMuon/MuonContainer.h"
+#include "AthContainers/CurrentContext.h"
 
 namespace CP {
 
@@ -34,15 +35,16 @@ namespace CP {
         CHECK(evtStore()->retrieve(muons, m_input_muons));
 
         // create a shallow copy container for the outputs
-        auto OutMuons = xAOD::shallowCopyContainer(*muons);
-        CHECK(evtStore()->record(OutMuons.first, m_output_muons));
-        CHECK(evtStore()->record(OutMuons.second, m_output_muons + "Aux."));
+        auto OutMuons = xAOD::shallowCopyContainer(*muons, Gaudi::Hive::currentContext());
 
-        for (xAOD::Muon* muon : *(OutMuons.first)) {
+        for (xAOD::Muon* muon : *OutMuons.first) {
             m_tool->setQuality(*muon);
             m_tool->setPassesIDCuts(*muon);
             // m_tool->setPassesLowPtEfficiencyCuts(*muon);
         }
+
+        CHECK(evtStore()->record(std::move(OutMuons.first), m_output_muons));
+        CHECK(evtStore()->record(std::move(OutMuons.second), m_output_muons + "Aux."));
 
         return StatusCode::SUCCESS;
     }
