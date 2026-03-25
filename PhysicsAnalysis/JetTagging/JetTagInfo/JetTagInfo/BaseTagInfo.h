@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,7 +16,6 @@
 #define JETTAGINFO_BASETAGINFO_H
 #include "JetEvent/JetTagInfoBase.h"
 #include <vector>
-#include <sys/types.h>
 
 namespace Analysis
 {
@@ -31,26 +30,21 @@ namespace Analysis
 class BaseTagInfo : public JetTagInfoBase
 {
 public:
-    /** default constructor */
-    BaseTagInfo();
-
+    BaseTagInfo() = default;
+    BaseTagInfo(const BaseTagInfo&) = default;
+    BaseTagInfo(BaseTagInfo&&) noexcept = default;
+    BaseTagInfo& operator=(const BaseTagInfo&) = default;
+    BaseTagInfo& operator=(BaseTagInfo&&) noexcept = default;
     /** constructor with info type */
     BaseTagInfo(const TagInfoType& x);
 
-    /** copy destructor */
-    BaseTagInfo(const BaseTagInfo& BaseTagInfo);
-
-    /** assigenment operator */
-    BaseTagInfo &operator= (const BaseTagInfo& rhs);
-
     /** default destructor */
-    virtual ~BaseTagInfo();
+    virtual ~BaseTagInfo() = default;
 
     /** Return and set methods for the likelihood. */
     virtual void                     setTagLikelihood(const std::vector<double>&); //!< to set the tag likelihood for one tagger
     virtual void                     setTagLikelihood(std::vector<double>&&); //!< to set the tag likelihood for one tagger
     virtual const std::vector<double>& tagLikelihood(void) const;                    //!< returns the tag likelihood of one tagger
-//     virtual double                   lhSig(void) const;                            //!< shortcut to retrieve the first element of the tagLikelihood
     virtual void                     setWeight(double weight);                     //!< set the weight for one tagger
     virtual double                   weight() const;                               //!< get the weight of one tagger
     virtual void                     makeValid();                            //!< sets the isValid flag to true, cannot be reversed!
@@ -63,10 +57,10 @@ protected:
     void setValid (bool valid);
     void setTagJetInfoType (const TagInfoType& type);
 
-  bool m_isValid;                      //!< true if the tagger could tag the jet, default is false
+    bool m_isValid{};                      //!< true if the tagger could tag the jet, default is false
     std::vector<double> m_tagLikelihood; //!< vector to hold the taglikelihood (signal plus N background)
-    double m_weight;                     //!< weight for this tag
-    TagInfoType m_tagJetInfoType;        //!< string to hold the info type (specified by the tag tool)
+    double m_weight{};                     //!< weight for this tag
+    TagInfoType m_tagJetInfoType{"NoInfoType"};        //!< string to hold the info type (specified by the tag tool)
 }
 ; // End class
 
@@ -96,12 +90,7 @@ inline const std::vector<double>& BaseTagInfo::tagLikelihood(void) const
   // -> no checking for the size as in the case of lhSig(void)
   return m_tagLikelihood;
 }
-/*inline double BaseTagInfo::lhSig(void) const
-{
-    if (m_tagLikelihood.size()>0) return m_tagLikelihood[0];
-    // cannot return anything when likelihood vector has zero length!!
-    else return -1.;
-}*/
+
 inline void BaseTagInfo::setWeight(double weight)
 {
   m_weight = weight;
