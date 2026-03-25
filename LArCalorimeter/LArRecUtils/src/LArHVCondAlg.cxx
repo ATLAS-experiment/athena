@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./LArHVCondAlg.h" 
@@ -112,8 +112,9 @@ StatusCode LArHVCondAlg::fixVoltageAndCurrent()
 {
   
   std::set<unsigned> changes;
-  for (auto [prop, store]: {std::make_pair(&m_fixHVStrings, &m_fixVoltagePerLine),
-                            std::make_pair(&m_fixCurrentStrings, &m_fixCurrentPerLine)}) {
+  const auto items = {std::make_pair(&m_fixHVStrings, &m_fixVoltagePerLine),
+                      std::make_pair(&m_fixCurrentStrings, &m_fixCurrentPerLine)};
+  for (auto [prop, store]: items) {
     store->clear();
     for (auto& p: prop->value()) {
       std::stringstream ss(p);
