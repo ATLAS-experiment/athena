@@ -237,12 +237,19 @@ namespace PhaseII {
       }
    };
 
+   // assumed cache line size
+   static constexpr std::size_t CACHELINE = 64ul;
+
    /// @brief Base raw data container which provides coordinates of a certain dimension and a data word per RDO (raw data object).
    ///
    /// The class implements the basic container methods to allow its usage together with  proxy container objects
    /// It also provides methods to bit-pack and unpack information into and from a single data word.
+   // In case the raw data is filled concurrently, there will be multiple containers which may be
+   // adjacent to one-another. to ensure that concurrent modification of the content of adjacent
+   // containers will not change the same cache line, an alignment requirement of the the assumed
+   // cache line size is chosen.
    template <std::size_t NDim>
-   class InDetRawDataContainer {
+   class alignas(CACHELINE) InDetRawDataContainer {
    public:
 
       /// @brief return true if the index refers to an element in the container
