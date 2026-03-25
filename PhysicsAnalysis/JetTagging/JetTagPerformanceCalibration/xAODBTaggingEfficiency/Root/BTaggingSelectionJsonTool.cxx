@@ -141,9 +141,9 @@ double BTaggingSelectionJsonTool::getTaggerDiscriminant ( const xAOD::Jet& jet) 
     }
   }
   
-  // ep(silon) is the smallest non-subnormal number
-  // the reciprocal of this should not overflow
+  // Smallest positive normal float; below this, reciprocals may overflow.
   const float ep = std::numeric_limits<float>::min();
+  //coverity[DIVIDE_BY_ZERO]
   const float ratio = (std::abs(denominator) < ep ? std::numeric_limits<float>::infinity() : numerator / denominator);
   const double tagger_discriminant = (std::abs(ratio) < ep ? -std::numeric_limits<double>::infinity() : std::log( ratio ));
 
