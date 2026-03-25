@@ -7,10 +7,19 @@
 #include "eformat_utils.h"
 #include <cstdlib>
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
+#endif
+
 extern "C" std::unique_ptr<daq::df_ef_interface::EventHandler> createEventHandler(const boost::property_tree::ptree &conf){
   std::unique_ptr<daq::df_ef_interface::EventHandler> s(new DFEF::EFInterfaceEmulator(conf));
   return s;
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 DFEF::EFInterfaceEmulator::EFInterfaceEmulator(const boost::property_tree::ptree &cargs)
 {
