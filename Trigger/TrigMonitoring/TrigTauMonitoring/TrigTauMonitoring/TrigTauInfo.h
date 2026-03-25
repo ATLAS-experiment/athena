@@ -38,7 +38,7 @@ public:
     inline const std::vector<std::string>& getHLTTauHitZAlgs() const { return m_HLTTauHitZAlgs; }
 
     inline bool isBootstrappedTauTrigger() const { return m_isBootstrappedTauTrigger;}
-    inline const std::vector<int> getHLTTauLegIndices() const { return m_HLTTauLegIndices; }
+    inline const std::vector<int>& getHLTTauLegIndices() const { return m_HLTTauLegIndices; }
 
     inline const std::string getHLTTauLegContainerSfx() const { return !m_HLTTauLegContainerSfxs.empty() ? m_HLTTauLegContainerSfxs[0] : ""; } // Returns the main HLT tau leg container suffixS
     inline const std::vector<std::string>& getHLTTauLegContainerSfxs() const { return m_HLTTauLegContainerSfxs; }
