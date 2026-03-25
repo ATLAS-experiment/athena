@@ -20,11 +20,11 @@ namespace CP {
     ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_electronsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
-    ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
-    ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_tausTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
-    ANA_CHECK(m_tauTruthSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tauTruthSelection.initialize(m_systematicsList, m_tausTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
