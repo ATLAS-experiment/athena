@@ -33,7 +33,8 @@ namespace FlavorTagInference {
 		    , float client_timeout
 		    , int port
 		    , const std::string& url
-		    , bool useSSL);
+		    , bool useSSL
+		    , const std::string& bearer = "");
 
     virtual InferenceOutput runInference(std::map<std::string, Inputs>& gnn_inputs) const override;
 
@@ -61,6 +62,7 @@ namespace FlavorTagInference {
     int                               m_port{8001};
     std::string                       m_url{};
     bool                              m_useSSL{false};
+    std::string                       m_bearer{};
   }; // Class SaltModelnTriton
 } // end of FlavorTagInference namespace
 
