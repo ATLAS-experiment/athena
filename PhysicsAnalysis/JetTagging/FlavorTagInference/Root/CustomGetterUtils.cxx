@@ -96,10 +96,6 @@ namespace {
       }
   };
 
-  double nanValue() {
-    return std::numeric_limits<double>::quiet_NaN();
-  }
-
   template <typename F>
   SequenceGetterFunc<xAOD::Muon> muonPrimaryTrackGetter(F getter)
   {
@@ -109,7 +105,7 @@ namespace {
     return CustomSeqGetter<Mu>([getter](const Mu& mu, const Jet&) -> double {
       const xAOD::TrackParticle* track = mu.primaryTrackParticle();
       if (!track) {
-        return nanValue();
+        return std::numeric_limits<double>::quiet_NaN();
       }
       return static_cast<double>(getter(*track));
     });
@@ -125,7 +121,7 @@ namespace {
       const xAOD::TrackParticle* track =
         mu.trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
       if (!track) {
-        return nanValue();
+        return std::numeric_limits<double>::quiet_NaN();
       }
       return getter(jet, {track}).front();
     });
