@@ -97,10 +97,14 @@ private:
   Gaudi::Property<bool> m_doAffected{this,"doAffected",true,"create affected region info"};
   Gaudi::Property<bool> m_doAffectedHV{this,"doAffectedHV",true,"include HV non nominal regions info"};
 
-  Gaudi::Property<std::vector<std::string> > m_fixHVStrings{this,"fixHVCorr"};
+  Gaudi::Property<std::vector<std::string> > m_fixHVCorrStrings{this,"fixHVCorr"};
+  Gaudi::Property<std::vector<std::string>> m_fixHVStrings{this,"fixHV"};
+  Gaudi::Property<std::vector<std::string>> m_fixCurrentStrings{this,"fixCurrent"};
 
   // other members:
   const CaloCell_ID* m_calocellID=nullptr;
+  std::unordered_map<unsigned, float> m_fixCurrentPerLine{};
+  std::unordered_map<unsigned, float> m_fixVoltagePerLine{};
   const LArEM_ID* m_larem_id=nullptr;
   const LArHEC_ID* m_larhec_id=nullptr;
   const LArFCAL_ID* m_larfcal_id=nullptr;
@@ -135,6 +139,8 @@ private:
 
   ///Internal structure for HV pathologies
   typedef std::vector<std::vector<unsigned short> > pathVec;
+
+  StatusCode fixVoltageAndCurrent();
 
   StatusCode makeHVScaleCorr (const EventContext& ctx,
                               voltagePerLine_t& voltagePerLine) const;
