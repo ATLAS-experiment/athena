@@ -17,11 +17,9 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-//#include "LArSimEvent/LArHitContainer.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
 #include "StoreGate/WriteHandleKey.h"
-//#include "StoreGate/WriteHandle.h"
 
 #include "StoreGate/ReadCondHandle.h"
 #include "LArRawConditions/LArADC2MeV.h"
