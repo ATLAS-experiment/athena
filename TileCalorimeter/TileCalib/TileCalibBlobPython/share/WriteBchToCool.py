@@ -17,7 +17,9 @@ def usage():
     print ("-f, --folder=   specify folder to use, default is /TILE/OFL02/STATUS/ADC")
     print ("-t, --tag=      specify tag to use, default is RUN2-HLT-UPD1-00")
     print ("-r, --run=      specify run  number, default is 0")
+    print ("-N, --run1=     specify run  number at which new IOV should be ended")
     print ("-l, --lumi=     specify lumi block number, default is 0")
+    print ("-B, --lumi1=    specify lumi block number at which new IOV should be eneded, default is 0")
     print ("-b, --begin=    specify run number of first iov in multi-iov mode, by default uses very first iov")
     print ("-e, --end=      specify run number of last iov in multi-iov mode, by default uses latest iov")
     print ("-L, --endlumi=  specify lumi block number for last iov in multi-iov mode, default is 0")
@@ -37,8 +39,8 @@ def usage():
     print ("-S, --server=     specify server - ORACLE or FRONTIER, default is FRONTIER")
     print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
 
-letters = "hr:l:b:e:L:AM:m:S:s:i:o:t:f:x:c:C:U:npvu"
-keywords = ["help","run=","lumi=","begin=","end=","endlumi=","adjust","module=","mode=","server=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose","update"]
+letters = "hr:l:N:B:b:e:L:AM:m:S:s:i:o:t:f:x:c:C:U:npvu"
+keywords = ["help","run=","lumi=","run1=","lumi1=","begin=","end=","endlumi=","adjust","module=","mode=","server=","schema=","inschema=","outschema=","tag=","folder=","execfile=","comment=","Comment=","user=","online","upd4","verbose","update"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:], letters, keywords)
@@ -50,6 +52,8 @@ except getopt.GetoptError as err:
 # defaults
 run = -1
 lumi = 0
+run1 = -1
+lumi1 = 0
 mode = 0
 server = ''
 schema = 'sqlite://;schema=tileSqlite.db;dbname=CONDBR2'
@@ -103,6 +107,10 @@ for o, a in opts:
         run = int(a)
     elif o in ("-l","--lumi"):
         lumi = int(a)
+    elif o in ("-N","--run1"):
+        run1 = int(a)
+    elif o in ("-B","--lumi1"):
+        lumi1 = int(a)
     elif o in ("-b","--begin"):
         beg = int(a)
         iov = True
@@ -273,6 +281,8 @@ else:
         if run<0:
             log.error( "Bad run number" )
             sys.exit(2)
+    if run1>run or (run1==run and lumi1>lumi):
+        until = (run1,lumi1)
 
     since = (run, lumi)
     iovList = [since]
