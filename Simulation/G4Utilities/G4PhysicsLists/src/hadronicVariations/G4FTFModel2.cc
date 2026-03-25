@@ -1641,10 +1641,13 @@ G4bool G4FTFModel2::AdjustNucleons( G4VSplitableHadron* SelectedAntiBaryon,
       #endif
 
       G4double Mt2 = sqr( TNucleonMass ) + PtNucleon.mag2();
-      G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/(2.0*WplusProjectile*XplusNucleon);
-      G4double YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
-
+      const auto denomProj = (2.0*WplusProjectile*XplusNucleon);
+      G4double YprojectileNucleon{std::numeric_limits<G4double>::max()};
+      if (denomProj != 0.)[[likely]]{
+        G4double Pz = WplusProjectile*XplusNucleon/2.0 - Mt2/(denomProj);
+        G4double E =  WplusProjectile*XplusNucleon/2.0 + Mt2/(denomProj);
+        YprojectileNucleon = 0.5 * std::log( (E + Pz)/(E - Pz) );
+      }
       #ifdef debugAdjust
       G4cout << "YpN Ypr YpN-Ypr " << " " << YprojectileNucleon << " " << YprojectileNucleus
              << " " << YprojectileNucleon - YprojectileNucleus << G4endl
