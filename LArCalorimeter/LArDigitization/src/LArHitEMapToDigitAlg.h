@@ -17,11 +17,9 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include "LArSimEvent/LArHitContainer.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "StoreGate/WriteHandle.h"
 
 #include "StoreGate/ReadCondHandle.h"
 #include "LArRawConditions/LArADC2MeV.h"
@@ -43,6 +41,13 @@
 #include "AthenaKernel/IAthRNGSvc.h"
 
 #include "AthAllocators/DataPool.h"
+
+#include <vector>
+#include <array>
+#include <string>
+#include <utility> //for std::pair
+#include <cstdint> //for uint32_t
+
 namespace CLHEP {
   class HepRandomEngine;
 }

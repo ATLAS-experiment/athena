@@ -16,6 +16,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include <CLHEP/Random/Randomize.h>
 
+#include "StoreGate/WriteHandle.h"
 
 using CLHEP::RandFlat;
 using CLHEP::RandGaussZiggurat;
@@ -439,9 +440,9 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
        if (!m_pedestalNoise) {
          SigmaNoise = noise->noise(ch_id, igain);
        } else {
-         float noise = pedestal->pedestalRMS(ch_id, igain);
-         if (noise >= (1.0 + LArElecCalib::ERRORCODE))
-          SigmaNoise = noise;
+         float thisNoise = pedestal->pedestalRMS(ch_id, igain);
+         if (thisNoise >= (1.0 + LArElecCalib::ERRORCODE))
+          SigmaNoise = thisNoise;
          else
           SigmaNoise = 0.;
        }
@@ -485,14 +486,14 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
             SigmaNoiseZB = noise->noise(ch_id, rndmEvtDigit->gain());
             SigmaNoise = noise->noise(ch_id, igain);
           } else {
-            float noise = pedestal->pedestalRMS(ch_id, rndmEvtDigit->gain());
-            if (noise >= (1.0 + LArElecCalib::ERRORCODE))
-                 SigmaNoiseZB = noise;
+            float thisNoise = pedestal->pedestalRMS(ch_id, rndmEvtDigit->gain());
+            if (thisNoise >= (1.0 + LArElecCalib::ERRORCODE))
+                 SigmaNoiseZB = thisNoise;
             else
                  SigmaNoiseZB = 0.;
-            noise = pedestal->pedestalRMS(ch_id, igain);
-            if (noise >= (1.0 + LArElecCalib::ERRORCODE))
-                 SigmaNoise = noise;
+            thisNoise = pedestal->pedestalRMS(ch_id, igain);
+            if (thisNoise >= (1.0 + LArElecCalib::ERRORCODE))
+                 SigmaNoise = thisNoise;
             else
                  SigmaNoise = 0.;
           }
