@@ -32,7 +32,8 @@ namespace FlavorTagInference {
 								    , m_tritonTimeout
 								    , m_tritonPort
 								    , m_tritonUrl
-								    , m_tritonUseSsl);
+								    , m_tritonUseSsl
+								    , m_tritonBearer);
       ISaltModelPtr saltShared = saltSharedTriton;
       nn = std::make_shared<const GNN>(saltShared, opts);
     }

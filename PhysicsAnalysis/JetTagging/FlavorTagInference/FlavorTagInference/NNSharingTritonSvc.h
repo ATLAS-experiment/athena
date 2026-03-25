@@ -33,7 +33,9 @@ namespace FlavorTagInference
       , "Connect to the Triton server over SSL"};
     Gaudi::Property<std::map<std::string, std::string>> m_tritonPathToName {this, "TritonPathsMap", {}
       , "Mapping of ONNX file paths to Triton model names"};
-  
+    Gaudi::Property<std::string> m_tritonBearer {this, "TritonBearer", ""
+      , "Bearer token for Triton server authentication"};
+
   };
 
 }
