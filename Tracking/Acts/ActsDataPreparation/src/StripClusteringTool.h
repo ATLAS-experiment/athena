@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_DATAPREPARATION_STRIP_CLUSTERING_TOOL_H
@@ -42,10 +42,15 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
+    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
+    { return std::any(); }
+
     virtual StatusCode
     makeClusters(const EventContext& ctx,
 		 typename IStripClusteringTool::ClusterCollection& cluster,
 		 const InDetDD::SiDetectorElement& element,
+                 size_t icluster,
+                 std::any& vars,
 		 typename ClusterContainer::iterator itrContainer) const override;
       
 private:

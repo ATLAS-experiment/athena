@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelClusteringTool.h"
 
@@ -71,7 +71,8 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
 				 const PixelChargeCalibCondData *calibData,
 				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 				 const double lorentz_shift,
-				 xAOD::PixelCluster& xaodcluster) const
+                                 size_t icluster,
+                                 xAOD::PixelCluster::ClusterVars& clusterVars) const
 { 
 
   Amg::Vector2D pos_acc(0,0);
@@ -220,15 +221,17 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   localCovariance(0, 0) = width0 * width0 / 12.0f; 
   localCovariance(1, 1) = width1 * width1 / 12.0f;
   
-  xaodcluster.setMeasurement<2>(moduleHash, localPosition, localCovariance);
-  xaodcluster.setIdentifier( cluster.ids.front() );
-  xaodcluster.setRDOlist(std::move(cluster.ids));
-  xaodcluster.globalPosition() = globalPos.cast<float>();
-  xaodcluster.setToTlist(std::move(cluster.tots));
-  xaodcluster.setChargelist(std::move(chargeList));
-  xaodcluster.setLVL1A(cluster.lvl1min);
-  xaodcluster.setChannelsInPhiEta(rowWidth,colWidth);
-  xaodcluster.setWidthInEta(static_cast<float>(etaWidth));
+  clusterVars.identifierHash[icluster] = moduleHash;
+  xAOD::VectorMap<2>(clusterVars.localPositionDim2[icluster].data()) = localPosition;
+  xAOD::MatrixMap<2>(clusterVars.localCovarianceDim2[icluster].data()) = localCovariance;
+  clusterVars.identifier[icluster] = cluster.ids.front();
+  clusterVars.rdoList[icluster] = std::move(cluster.ids);
+  xAOD::VectorMap<3>(clusterVars.globalPosition[icluster].data()) = globalPos.cast<float>();
+  clusterVars.totList[icluster] = std::move(cluster.tots);
+  clusterVars.lvl1a[icluster] = cluster.lvl1min;
+  clusterVars.channelsInPhi[icluster] = rowWidth;
+  clusterVars.channelsInEta[icluster] = colWidth;
+  clusterVars.widthInEta[icluster] = etaWidth;
     
   return StatusCode::SUCCESS;
 }
@@ -260,14 +263,20 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 }
 
 
+std::any PixelClusteringTool::makeVars (SG::AuxVectorData& cont) const
+{
+  return std::any (xAOD::PixelCluster::ClusterVars (cont));
+}
+
+
 StatusCode
 PixelClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IPixelClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
-				  typename ClusterContainer::iterator itrContainer) const
+                                  size_t icluster,
+                                  std::any& vars,
+				  typename ClusterContainer::iterator /*itrContainer*/) const
 {
-  // We'd need a smarter move here!!!
-  
   // Retrieve the calibration data
   const PixelChargeCalibCondData *calibData = nullptr;
   if (not m_chargeDataKey.empty()) {
@@ -289,17 +298,19 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
   auto calibrationStrategy = calibData ? calibData->getCalibrationStrategy(element.identifyHash()) : PixelChargeCalibCondData::CalibrationStrategy::RD53;
 
   double lorentz_shift = m_pixelLorentzAngleTool->getLorentzShift(element.identifyHash(), ctx);
-  
+
+  auto* clusterVars = std::any_cast<xAOD::PixelCluster::ClusterVars> (&vars);
+  if (!clusterVars) throw std::bad_any_cast();
+
   for (typename IPixelClusteringTool::Cluster& cl : clusters) {
-    xAOD::PixelCluster* xaodCluster = *itrContainer;
     ATH_CHECK(makeCluster(cl,
-			  &element,
-			  design,
-			  calibData,
-			  calibrationStrategy,
-			  lorentz_shift,
-			  *xaodCluster));
-    ++itrContainer;
+                          &element,
+                          design,
+                          calibData,
+                          calibrationStrategy,
+                          lorentz_shift,
+                          icluster++,
+                          *clusterVars));
   }
   
   return StatusCode::SUCCESS;
