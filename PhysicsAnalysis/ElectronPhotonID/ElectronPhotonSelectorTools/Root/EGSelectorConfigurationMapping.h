@@ -157,8 +157,17 @@ const std::map<std::string, std::string> ElectronDNNPointToConfFile = {
 // Photon BDT working points 
 const std::map<std::string, std::string> PhotonBDTPointToConfFile = {
   { "TightBDTPhoton_Run3",
-    "ElectronPhotonSelectorTools/"
+    "ElectronPhotonSelectorTools/offline/mc23_20260310/FudgeFactors/"
     "PhotonIsBDTTightSelectorCutDefs_mc23.conf" },
+  { "TightBDTPhoton_Run3_NFs",
+    "ElectronPhotonSelectorTools/offline/mc23_20260310/NFs/"
+    "PhotonIsBDTTightSelectorCutDefs_mc23_NF.conf" },
+  { "TightBDTPhoton_Run2",
+    "ElectronPhotonSelectorTools/offline/mc20_20260310/FudgeFactors/"
+    "PhotonIsBDTTightSelectorCutDefs_mc20.conf" },
+  { "TightBDTPhoton_Run2_NFs",
+    "ElectronPhotonSelectorTools/offline/mc20_20260310/NFs/"
+    "PhotonIsBDTTightSelectorCutDefs_mc20_NF.conf" }
 };
 }
 ////////////////////////////////////////////

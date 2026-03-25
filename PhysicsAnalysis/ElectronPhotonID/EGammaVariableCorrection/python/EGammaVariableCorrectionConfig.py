@@ -54,7 +54,8 @@ def PhotonVariableCorrectionToolCfg(
 
 
 def ElectronPhotonVariableNFCorrectionToolCfg(
-        flags, name="PhotonVariableNFCorrectionTool", **kwargs):
+        flags, name="PhotonVariableNFCorrectionTool",
+        forceFold=-1, **kwargs):
     """Configure the Normalizing Flow-based photon shower shape correction tool"""
     acc = ComponentAccumulator()
 
@@ -85,6 +86,9 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
         )
 
     conf_key = kwargs.setdefault("ConfigFile", default_conf)
+    if forceFold>=0:
+        kwargs.setdefault("forceOneFold", True)
+        
     conf_file = PathResolver.FindCalibFile(conf_key)
     if not conf_file:
         raise RuntimeError(f"PathResolver cannot find {conf_key}")
@@ -112,6 +116,10 @@ def ElectronPhotonVariableNFCorrectionToolCfg(
     forward_tools  = []
     backward_tools = []
     for i in range(n_folds):
+
+        if forceFold>=0 and i!=forceFold:
+            continue
+        
         fwd_session = CompFactory.AthOnnx.OnnxRuntimeSessionToolCPU(
             f'NFCorrectionORTSessionToolForward_{i}',
             ModelFileName=f'{pattern}_forward_{i}.onnx')

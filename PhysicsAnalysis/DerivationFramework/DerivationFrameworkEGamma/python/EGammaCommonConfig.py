@@ -70,7 +70,7 @@ def EGammaCommonCfg(flags):
         
         if isRun2orRun3:
             PhotonVariableNFCorrectionTool = acc.popToolsAndMerge(
-                ElectronPhotonVariableNFCorrectionToolCfg(flags)
+                ElectronPhotonVariableNFCorrectionToolCfg(flags, forceFold=0)
             )
             acc.addPublicTool(PhotonVariableNFCorrectionTool)
 
@@ -330,7 +330,46 @@ def EGammaCommonCfg(flags):
     )
     acc.addPublicTool(PhotonIsEMSelectorTight)
 
-
+    # ====================================================================
+    # PHOTON BDT SELECTION
+    # ====================================================================
+    photonIDBDTWP = "TightBDTPhoton_Run3"
+    if flags.GeoModel.Run is LHCPeriod.Run2:
+        photonIDBDTWP = "TightBDTPhoton_Run2"
+    from ElectronPhotonSelectorTools.AsgPhotonBDTSelectorConfig import (
+        PhotonBDTCalculatorCfg,
+        AsgPhotonBDTSelectorCfg,
+    )
+    PhotonBDTCalculator = acc.popToolsAndMerge(
+        PhotonBDTCalculatorCfg(
+            flags, 
+            name="PhotonBDTCalculator",
+            useNFs=False,
+        )
+    )   
+    PhotonBDTSelectorTight = acc.popToolsAndMerge(
+        AsgPhotonBDTSelectorCfg(
+            flags,
+            name="PhotonBDTSelectorTight",
+            workingPoint=photonIDBDTWP,
+            useNFs=False,
+        )
+    )
+    PhotonBDTCalculatorNF = acc.popToolsAndMerge(
+        PhotonBDTCalculatorCfg(
+            flags, 
+            name="PhotonBDTCalculatorNF",
+            useNFs=True,
+        )
+    )   
+    PhotonBDTSelectorTightNF = acc.popToolsAndMerge(
+        AsgPhotonBDTSelectorCfg(
+            flags,
+            name="PhotonBDTSelectorTightNF",
+            workingPoint=photonIDBDTWP+"_NFs",
+            useNFs=True,
+        )
+    )
     # ====================================================================
     # RECTANGULAR CLUSTER TOOLS
     # ====================================================================
@@ -391,6 +430,7 @@ def EGammaCommonCfg(flags):
     from DerivationFrameworkEGamma.EGammaToolsConfig import EGSelectionToolWrapperCfg
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
         EGElectronLikelihoodToolWrapperCfg,
+        EGPhotonBDTToolWrapperCfg,
     )
 
     # Note: LH selectors don't need fudging since the LH is tuned to data
@@ -655,7 +695,22 @@ def EGammaCommonCfg(flags):
         )
     ))
 
-
+    # decorate photons with the output of BDT tight
+    # on full-sim MC, fudge the shower shapes before computing the ID
+    # (but the original shower shapes are not overridden)
+    PhotonPassBDTTight = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolWrapperCfg(
+            flags,
+            name="PhotonPassBDTTight",
+            PhotonBDTSelectionTool=PhotonBDTSelectorTight,
+            PhotonObservableTool=PhotonBDTCalculator,
+            EGammaFudgeMCTool=(PhotonVariableCorrectionTool if isFullSim else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsBDT",
+            WorkingPointName="Tight",
+            ContainerName="Photons",
+        )
+    ))
 
     # decorate photons with the output of IsEM tight
     # on full-sim or fast-sim MC, normalizing flows-based correction before computing the ID
@@ -668,6 +723,23 @@ def EGammaCommonCfg(flags):
             EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
             CutType="",
             StoreGateEntryName="DFCommonPhotonsIsEMTightNF",
+            ContainerName="Photons",
+        )
+    ))
+
+    # decorate photons with the output of BDT tight
+    # on full-sim MC, normalizing flows-based correction before computing the ID
+    # (but the original shower shapes are not overridden)
+    PhotonPassBDTTightNF = acc.addPublicTool(acc.popToolsAndMerge(
+        EGPhotonBDTToolWrapperCfg(
+            flags,
+            name="PhotonPassBDTTightNF",
+            PhotonBDTSelectionTool=PhotonBDTSelectorTightNF,
+            PhotonObservableTool=PhotonBDTCalculatorNF,
+            EGammaFudgeMCTool=(PhotonVariableNFCorrectionTool if (isMC and isRun2orRun3) else None),
+            CutType="",
+            StoreGateEntryName="DFCommonPhotonsNFBDT",
+            WorkingPointName="Tight",
             ContainerName="Photons",
         )
     ))
@@ -718,6 +790,8 @@ def EGammaCommonCfg(flags):
         PhotonPassIsEMMedium,
         PhotonPassIsEMTight,
         PhotonPassIsEMTightNF,
+        PhotonPassBDTTight,
+        PhotonPassBDTTightNF,
         PhotonPassCleaning,
         ElectronAmbiguity,
     ]

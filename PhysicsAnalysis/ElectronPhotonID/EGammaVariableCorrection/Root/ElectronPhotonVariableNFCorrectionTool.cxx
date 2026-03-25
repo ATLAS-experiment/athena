@@ -47,6 +47,7 @@ ElectronPhotonVariableNFCorrectionTool::ElectronPhotonVariableNFCorrectionTool(c
 // Select fold index based on event number (and optionally pT)
 int ElectronPhotonVariableNFCorrectionTool::selectFold(unsigned long long eventNumber, float phi) const
 {
+    if(m_forceOneFold) return 0;
     if (m_nFolds <= 1) return 0;
 
     unsigned long long key = eventNumber;
@@ -137,7 +138,7 @@ StatusCode ElectronPhotonVariableNFCorrectionTool::initialize()
     env.ReadFile(resolvedConfig.c_str(), kEnvLocal);
     env.IgnoreDuplicates(false);
 
-    m_nFolds = env.GetValue("NFolds", 0);
+    m_nFolds = (m_forceOneFold)?1:env.GetValue("NFolds", 0);
     if (m_nFolds <= 0) {
         ATH_MSG_ERROR("NFolds not set or invalid in config: " << resolvedConfig);
         return StatusCode::FAILURE;
@@ -249,7 +250,7 @@ const CP::CorrectionCode ElectronPhotonVariableNFCorrectionTool::applyCorrection
     float ptGeV = photon.pt() / 1000.0f;
     const float phi = static_cast<float>(photon.phi());
     const int fold = selectFold(eventNumber, phi);
-
+ 
 
     if (fold < 0 || fold >= m_nFolds) {
         ATH_MSG_ERROR("Selected fold " << fold << " out of range [0," << (m_nFolds-1) << "]");
