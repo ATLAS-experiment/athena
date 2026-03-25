@@ -70,6 +70,11 @@ namespace LArG4 {
       // between atlas and test beam
       Gaudi::Property<bool> m_testbeam{this, "TestBeam", false};
 
+      // Super-resolution granularity: number of sub-cell bins in each dimension
+      Gaudi::Property<int> m_nBinsEtaSR{this, "nBinsEtaSR", 16, "Number of SR sub-cell bins in eta"};
+      Gaudi::Property<int> m_nBinsPhiSR{this, "nBinsPhiSR", 16, "Number of SR sub-cell bins in phi"};
+      Gaudi::Property<int> m_nBinsRadiusSR{this, "nBinsRadiusSR", 5, "Number of SR sub-cell bins in radius"};
+
       G4String m_ecamName;
 
       // global EMBarrel dimensions
