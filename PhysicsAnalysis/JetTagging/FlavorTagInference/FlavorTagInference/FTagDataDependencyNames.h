@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FTAG_DATA_DEPENDENCY_NAMES_H
@@ -15,9 +15,11 @@ namespace FlavorTagInference {
     std::set<std::string> muonInputs;
     std::set<std::string> bTagInputs;
     std::set<std::string> bTagOutputs;
-    FTagDataDependencyNames operator+(FTagDataDependencyNames) const;
-    void operator+=(FTagDataDependencyNames);
-    bool operator==(const FTagDataDependencyNames&) const;
+    //coverity[PASS_BY_VALUE]
+    FTagDataDependencyNames operator+(FTagDataDependencyNames rhs) const;
+    //coverity[PASS_BY_VALUE]
+    FTagDataDependencyNames& operator+=(FTagDataDependencyNames d);
+    bool operator==(const FTagDataDependencyNames&) const = default;
   };
 
 }
