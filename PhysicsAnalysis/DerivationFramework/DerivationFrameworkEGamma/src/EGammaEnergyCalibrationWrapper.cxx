@@ -37,7 +37,8 @@ StatusCode EGammaEnergyCalibrationWrapper::addBranches(const EventContext& ctx) 
   }
 
   for (const xAOD::Egamma* eg : *electrons) {
-    const xAOD::CaloCluster* cluster = eg ? eg->caloCluster() : nullptr;
+    if (!eg) continue;
+    const xAOD::CaloCluster* cluster = eg->caloCluster();
     float value = 0;
     if (!cluster) {
       ATH_MSG_ERROR("Electron object without CaloCluster, storing zero");
