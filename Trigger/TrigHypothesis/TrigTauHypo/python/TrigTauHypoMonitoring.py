@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -36,9 +36,8 @@ def getTrigTauPrecisionIDHypoToolMonitoring(flags: AthConfigFlags, name: str, ta
 
 def getTrigTauPrecisionDiKaonHypoToolMonitoring(flags: AthConfigFlags, name: str):
     monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
-    monTool.HistPath = 'ComboHypo/' + name.replace('leg001_', '')
-
-    # We will fix the naming convention as soon as the first weekly HLT Reprocessing validation goes through, because it will break the references
+    import re
+    monTool.HistPath = 'ComboHypo/' + re.sub(r'leg\d{3}_', '', name)
 
     monTool.defineHistogram('NInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10)
 
@@ -55,3 +54,22 @@ def getTrigTauPrecisionDiKaonHypoToolMonitoring(flags: AthConfigFlags, name: str
     monTool.defineHistogram('EMOverTrkSysPAccepted', path='EXPERT', type='TH1F', title='Accepted Tau E_{T}^{EM} over Track system p_{T}; E_{T}^{EM} / p_{T}^{trk sys}; Entries', xbins=50, xmin=0, xmax=5)
 
     return monTool
+
+
+def getTrigTauCaloHitsIDHypoToolMonitoring(flags: AthConfigFlags, name: str, tau_ids: list[str]):
+    monTool = GenericMonitoringTool(flags, f'MonTool_{name}')
+    monTool.HistPath = f'TrigTauRecMerged_TrigTauCaloHitsIDHypo/{name}'
+
+    # Define quantities to be monitored
+    monTool.defineHistogram('NInputTaus', path='EXPERT', type='TH1F', title='Input Taus (before selection); N Taus; Entries', xbins=10, xmin=0, xmax=10)
+    monTool.defineHistogram('PtAccepted', path='EXPERT', type='TH1F', title='Accepted Tau p_{T}; p_{T} [GeV]; Entries', xbins=80, xmin=0, xmax=800)
+
+    for tau_id in tau_ids:
+        if getattr(flags.Trigger.Offline.Tau, tau_id).OutputDiscriminant == 1: xmax = 1
+        else: xmax = 5
+
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreAccepted_0p;{tau_id}_TauJetScoreAccepted', path='EXPERT', type='TH1F', title=f'Accepted {tau_id} Tau ID score; Score; Entries', xbins=100, xmin=0, xmax=xmax)
+        monTool.defineHistogram(f'{tau_id}_TauJetScoreTransAccepted_0p;{tau_id}_TauJetScoreTransAccepted', path='EXPERT', type='TH1F', title=f'Accepted {tau_id} Tau ID transformed score; Transformed Signal Score; Entries', xbins=100, xmin=0, xmax=1)
+
+    return monTool
+

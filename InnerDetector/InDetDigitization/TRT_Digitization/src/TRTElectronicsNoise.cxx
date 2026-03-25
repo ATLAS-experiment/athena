@@ -189,7 +189,7 @@ void TRTElectronicsNoise::tabulateNoiseSignalShape() {
   m_noiseSignalShape.resize(noiseshapebins);
   
   //Normalize:
-  for (double i : m_noiseSignalShape) {
+  for (double & i : m_noiseSignalShape) {
     i /= shapemax;
   };
 

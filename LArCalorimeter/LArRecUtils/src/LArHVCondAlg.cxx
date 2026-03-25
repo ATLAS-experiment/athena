@@ -38,6 +38,8 @@
 
 #include <cmath> 
 #include <cstdlib>
+#include <set>
+#include <sstream>
 
 #define HV_NON_NOMINAL_TOLERANCE 10 // tolerance : 1V for HV
 #define DEAD_HV_THRESHOLD 10 // HV <10 V="dead"
@@ -79,9 +81,12 @@ StatusCode LArHVCondAlg::initialize(){
   ATH_CHECK(m_outputHVScaleCorrKey.initialize());
   ATH_CHECK(m_affectedKey.initialize());
 
-  m_scaleTool=std::make_unique<LArHVScaleCorrTool>(m_calocellID,msg(),m_fixHVStrings);
+  m_scaleTool=std::make_unique<LArHVScaleCorrTool>(m_calocellID,msg(),m_fixHVCorrStrings);
 
-  ATH_MSG_DEBUG("Configured with doHV " << m_doHV << " doAffected " << m_doAffected << " doAffectedHV " << m_doAffectedHV);
+  ATH_CHECK(fixVoltageAndCurrent());
+
+  ATH_MSG_DEBUG("Configured with doHV " << m_doHV << " doAffected " << m_doAffected 
+                << " doAffectedHV " << m_doAffectedHV);
 
   return StatusCode::SUCCESS;
 }
@@ -101,6 +106,40 @@ StatusCode LArHVCondAlg::execute(const EventContext& ctx) const
   
   return StatusCode::SUCCESS;
 }
+
+
+StatusCode LArHVCondAlg::fixVoltageAndCurrent()
+{
+  
+  std::set<unsigned> changes;
+  for (auto [prop, store]: {std::make_pair(&m_fixHVStrings, &m_fixVoltagePerLine),
+                            std::make_pair(&m_fixCurrentStrings, &m_fixCurrentPerLine)}) {
+    store->clear();
+    for (auto& p: prop->value()) {
+      std::stringstream ss(p);
+      unsigned hvline;
+      float value;
+      ss >> hvline >> value >> std::skipws;
+      if (ss && ss.eof()) {
+        changes.insert(hvline);
+        if (auto empl = store->emplace(hvline, value); !empl.second) {
+          ATH_MSG_WARNING("Setting multiple times HV and/or current for line " << hvline
+                          << ", this will replace the previous value(s).");
+          empl.first->second = value;
+        }
+        continue;
+      }
+      ATH_MSG_ERROR("Couldn't interpret HV or current setting: \"" << p << "\"");
+      return StatusCode::FAILURE;
+    }
+  }
+  if (changes.size() > 0) {
+    ATH_MSG_INFO("Fixed values of voltage and/or current to be used instead of DCS readings are provided for " 
+                << changes.size() << " HV line(s)");
+  }
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
                                           voltagePerLine_t& voltagePerLine) const
@@ -777,8 +816,27 @@ StatusCode LArHVCondAlg::dcs2LineVoltage(voltagePerLine_t& result, const std::ve
       }
     }//end loop over attributeListCollection
   }
+  for (auto [chan, desired]: m_fixVoltagePerLine) {
+    if (auto empl = result.emplace(chan, DCS_t{desired, 0.f}); !empl.second) {
+      DCS_t& dcs = empl.first->second;
+      ATH_MSG_DEBUG("Changing voltage for " << chan << " from " << dcs.hv  << " to " << desired);
+      dcs.hv = desired;
+    } else {
+      ATH_MSG_WARNING("voltage set for channel " << chan << " unknown to DCS.");
+    }
+  }
+  for (auto [chan, desired]: m_fixCurrentPerLine) {
+    if (auto empl = result.emplace(chan, DCS_t{0.f, desired}); !empl.second) {
+      DCS_t& dcs = empl.first->second;
+      ATH_MSG_DEBUG("Changing current for " << chan << " from " << dcs.curr  << " to " << desired);
+      dcs.curr = desired;
+    } else {
+      ATH_MSG_WARNING("current set for channel " << chan << " unknown to DCS and voltage remains 0?!");
+    }
+  }
   return StatusCode::SUCCESS;
 }
+
 
 //=========================================================================================
 StatusCode LArHVCondAlg::searchNonNominalHV_EMB(CaloAffectedRegionInfoVec *vAffected

@@ -1216,10 +1216,16 @@ HLT_Roi_MuonIso
 HLT_Roi_MuonIso_probe
 HLT_Roi_Tau
 HLT_Roi_TauCore
+HLT_Roi_TauCoreHitZ
+HLT_Roi_TauCoreHitZ_probe
 HLT_Roi_TauCore_probe
+HLT_Roi_TauHitsHitZ
+HLT_Roi_TauHitsHitZ_probe
 HLT_Roi_TauIso
 HLT_Roi_TauIsoBDT
 HLT_Roi_TauIsoBDT_probe
+HLT_Roi_TauIsoHitZ
+HLT_Roi_TauIsoHitZ_probe
 HLT_Roi_TauIso_probe
 HLT_Roi_TauLRT
 HLT_Roi_TauLRT_probe
@@ -1271,6 +1277,8 @@ HLT_TrigEMClusters_PhotonsAux.
 HLT_TrigEMClusters_PhotonsAuxDyn.viewIndex
 HLT_TrigTRTHTCounts
 HLT_TrigTRTHTCountsAux.
+HLT_TrigTauRecMerged_CaloHits
+HLT_TrigTauRecMerged_CaloHitsAux.
 HLT_TrigTauRecMerged_CaloMVAOnly
 HLT_TrigTauRecMerged_CaloMVAOnlyAux.
 HLT_TrigTauRecMerged_CaloMVAOnlyAuxDyn.viewIndex

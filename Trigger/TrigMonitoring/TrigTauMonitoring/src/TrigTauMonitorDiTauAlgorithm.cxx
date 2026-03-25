@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigTauMonitorDiTauAlgorithm.h"
@@ -39,7 +39,7 @@ StatusCode TrigTauMonitorDiTauAlgorithm::processEvent(const EventContext& ctx) c
         std::vector<const xAOD::TauJet*> offline_taus = classifyTausAll(offline_taus_with_id, info.getHLTTauThreshold() - threshold_offset);
 
         // Online taus
-        std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true);
+        std::vector<const xAOD::TauJet*> hlt_taus = getOnlineTausAll(trigger, true, info.isBootstrappedTauTrigger());
 
         if(m_do_variable_plots) fillDiTauVars(trigger, hlt_taus);
         if(m_do_efficiency_plots && hlt_not_prescaled_flag) fillDiTauHLTEfficiencies(ctx, trigger, l1_accept_flag, offline_taus, hlt_taus);

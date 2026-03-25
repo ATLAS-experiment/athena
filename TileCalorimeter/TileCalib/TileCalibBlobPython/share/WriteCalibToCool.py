@@ -19,8 +19,10 @@ def usage():
     print ("-t, --tag=      specify tag to use, f.i. RUN2-HLT-UPD1-00 or RUN2-UPD4-00")
     print ("-T, --outtag=     specify output tag if different from input tag")
     print ("-r, --run=      specify run  number, default is 0")
+    print ("-N, --run1=     specify run  number at which new IOV should be ended")
     print ("-R, --run2=     specify run  number for new IOV where correction is undone")
     print ("-l, --lumi=     specify lumi block number, default is 0")
+    print ("-B, --lumi1=    specify lumi block number at which new IOV should be eneded, default is 0")
     print ("-L, --lumi2=    specify lumi block number for new IOV where correction is undone")
     print ("-b, --begin=    specify run number of first iov in multi-iov mode, by default uses very first iov")
     print ("-e, --end=      specify run number of last iov in multi-iov mode, by default uses latest iov")
@@ -48,8 +50,8 @@ def usage():
     print ("-u  --update      set this flag if output sqlite file should be updated, otherwise it'll be recreated")
     print ("-w, --swap=       specify pair of modules which will be swapped in multi-IOV update, e.g. swap=EBA61,EBA63")
 
-letters = "hr:l:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuw:k:"
-keywords = ["help","run=","lumi=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","swap=","keep="]
+letters = "hr:l:N:B:R:L:b:e:AD:S:s:i:o:t:T:f:F:C:G:n:v:x:m:M:U:p:dcazZuw:k:"
+keywords = ["help","run=","lumi=","run1=","lumi1=","run2=","lumi2=","begin=","end=","adjust","module=","server=","schema=","inschema=","outschema=","tag=","outtag=","folder=","outfolder=","nchannel=","ngain=","nval=","version=","txtfile=","comment=","Comment=","user=","prefix=","default","channel","all","zero","allzero","update","swap=","keep="]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -61,6 +63,8 @@ except getopt.GetoptError as err:
 # defaults
 run = -1
 lumi = 0
+run1 = -1
+lumi1 = 0
 run2 = -1
 lumi2 = 0
 server = ''
@@ -144,6 +148,10 @@ for o, a in opts:
         run = int(a)
     elif o in ("-l","--lumi"):
         lumi = int(a)
+    elif o in ("-N","--run1"):
+        run1 = int(a)
+    elif o in ("-B","--lumi1"):
+        lumi1 = int(a)
     elif o in ("-R","--run2"):
         run2 = int(a)
     elif o in ("-L","--lumi2"):
@@ -367,6 +375,8 @@ else:
         if run<0:
             log.error( "Bad run number" )
             sys.exit(2)
+    if (run1>run or (run1==run and lumi1>lumi)) and run2<0:
+        until = (run1,lumi1)
 
     since = (run, lumi)
     iovList = [since]
