@@ -4,8 +4,18 @@
 // PU1suppression.cxx
 #include "PU1Suppression.h"
 
-#include "PU1SuppLUT.h"
-#include "PU1SuppTools.h"
+#include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/StatusCode.h"
+#include "PU1SuppPortsIn.h"
+#include "PU1SuppPortsOut.h"
+
+#include "PU1SuppLUT.h" //MED_LUT
+#include <bitset>
+#include <string>
+#include <sstream>
+#include <ios> //std::hex
+#include <iomanip> //std::setfill
+#include <utility> //std::move
 
 namespace GlobalSim {
 
@@ -44,7 +54,7 @@ StatusCode runPU1Suppression(const PU1SuppPortsIn& input,
     return StatusCode::SUCCESS;  // After this, downstream gets at least some
                                  // TOB back
   }
-  output.m_outputTobs.push_back(remadeHex);
+  output.m_outputTobs.push_back(std::move(remadeHex));
   return StatusCode::SUCCESS;
 }
 }  // namespace GlobalSim

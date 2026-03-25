@@ -12,10 +12,11 @@
 #ifndef PU1SUPPRESSION_H
 #define PU1SUPPRESSION_H
 
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/StatusCode.h"
-#include "PU1SuppPortsIn.h"
-#include "PU1SuppPortsOut.h"
+
+class MsgStream;
+class StatusCode;
+class PU1SuppPortsIn;
+class PU1SuppPortsOut;
 
 namespace GlobalSim {
 
