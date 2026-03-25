@@ -130,7 +130,7 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
    
     # Extra content
     PHYSSlimmingHelper.ExtraVariables += ["AntiKt4EMTopoJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.IsoFixedCone5PtPUsub",
-                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub",
+                                          "AntiKt4EMPFlowJets.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.isJvtHS.isJvtPU.IsoFixedCone5PtPUsub.IRCSafeLabelIFN.IRCSafeLabelGHS.IRCSafeLabelSDF.IRCSafeLabelAKT.IRCSafeLabelCMP",
                                           "TruthPrimaryVertices.t.x.y.z",
                                           "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.numberOfTRTHits.numberOfTRTOutliers",
                                           "EventInfo.GenFiltHT.GenFiltMET.GenFiltHTinclNu.GenFiltPTZ.GenFiltFatJ.HF_Classification.HF_SimpleClassification.HF_ClassificationC5J20.HF_ClassificationC5J25.HF_ClassificationC15J20.HF_ClassificationC15J25",
@@ -187,9 +187,8 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     ## AFP content - SiT and ToF hits to then be used with AfpAnalysisToolbox reconstruction
     PHYSSlimmingHelper.AllVariables += [ 'AFPSiHitContainer', 'AFPToFHitContainer' ]
 
-    ## Hadronic Recoil content
     PHYSSlimmingHelper.AppendToDictionary.update({'MET_Core_AntiKt4EMPFlowHR':'xAOD::MissingETContainer', 'MET_Core_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxContainer',
-                                                   'METAssoc_AntiKt4EMPFlowHR':'xAOD::MissingETAssociationMap', 'METAssoc_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxAssociationMap'})
+                                                  'METAssoc_AntiKt4EMPFlowHR':'xAOD::MissingETAssociationMap', 'METAssoc_AntiKt4EMPFlowHRAux':'xAOD::MissingETAuxAssociationMap'})
 
     PHYSSlimmingHelper.AllVariables += ['METAssoc_AntiKt4EMPFlowHR']
 
