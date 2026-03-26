@@ -254,6 +254,7 @@ class DerivationTest(WorkflowTest):
             self.command = \
                 (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py"
                 f" --formats {' '.join(formats)}"
+                " --multithreaded"
                 " --outputDAODFile myOutput.pool.root"
                 f" --imf False {extra_args}")
 
@@ -265,7 +266,7 @@ class DerivationTest(WorkflowTest):
             self.output_checks.append(FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10))
             self.output_checks.append(MetadataCheck(setup, f"DAOD_{format}"))
 
-        super().__init__(ID, run, type, steps, setup)
+        super().__init__("_".join(test_def), run, type, steps, setup)
 
 
 class GenerationTest(WorkflowTest):

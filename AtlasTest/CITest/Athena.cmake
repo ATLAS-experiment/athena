@@ -140,6 +140,10 @@ atlas_add_citest( DerivationRun2Data_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2Data_PHYS_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun2Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
@@ -151,6 +155,10 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
 
 atlas_add_citest( DerivationRun2MC_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYS_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE
@@ -172,6 +180,10 @@ atlas_add_citest( DerivationRun2MCAF3_PHYSLITE
 
 atlas_add_citest( DerivationRun3Data_PHYS
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYS_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE
@@ -201,8 +213,7 @@ atlas_add_citest( DerivationRun3MC_PHYS
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYS_MT
-   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4 --no-output-checks
-   LOG_IGNORE_PATTERN "WARNING FPE" # Ignore FPEs for now
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
