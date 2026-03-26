@@ -261,7 +261,6 @@ class MetadataCheck(WorkflowCheck):
         ] + ([
             "auto_flush",
             "StreamDAOD_PHYS/eventTypes", "StreamDAOD_PHYSLITE/eventTypes",
-            "metadata_items/SuspectLumiBlocks",
         ] if test.type is WorkflowType.Derivation else []))
 
         validation_file = test.validation_path / file_name
