@@ -72,7 +72,7 @@ ConstAccessor<JaggedVecElt<PAYLOAD_T>, ALLOC>::ConstAccessor (const SG::auxid_t 
  * @brief Constructor.
  * @param name Name of this aux variable.
  * @param clsname The name of its associated class.  May be blank.
- * @param flags Optional flags qualifying the type.  See AuxTypeRegsitry.
+ * @param flags Optional flags qualifying the type.  See AuxTypeRegistry.
  *
  * The name -> auxid lookup is done here.
  */

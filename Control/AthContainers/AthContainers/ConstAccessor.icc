@@ -191,7 +191,7 @@ ConstAccessor<T, ALLOC>::getDataArray (const AuxVectorData& container) const
     
 
 /**
- * @brief Get a span over the auxilary data array.
+ * @brief Get a span over the auxiliary data array.
  * @param container The container from which to fetch the variable.
  */
 template <class T, class ALLOC>

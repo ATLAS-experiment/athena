@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file AthContainers/JaggedVecConversions.cxx
@@ -17,10 +17,10 @@ namespace SG { namespace detail {
 
 /**
  * @brief Resize one jagged vector element.
- * @param eltindex The index of the element to resize.
+ * @param elt_index The index of the element to resize.
  * @param n_new The size of the new element.
  *
- * Any added payload elemnets are default-initialized.
+ * Any added payload elements are default-initialized.
  */
 void JaggedVecProxyBase::resize1 (size_t elt_index, index_type n_new)
 {
