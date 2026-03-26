@@ -179,15 +179,18 @@ namespace TrackingUtilities {
     float qColMin = 0.f;
     float qColMax = 0.f;
     
-    const std::vector<Identifier>& rod_list_cluster = xaodCluster.rdoList();
-    const std::vector<float>& charge_list_cluster = xaodCluster.chargeList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdo_list_cluster = xaodCluster.rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<float> >::element_type
+       charge_list_cluster = xaodCluster.chargeList();
+    std::vector<Identifier> rdo_list_new;
         
-    if (rod_list_cluster.size() == charge_list_cluster.size()) {
-      
-      for (std::size_t i(0); i<rod_list_cluster.size(); ++i) {
-        const Identifier& this_rdo = rod_list_cluster[i];
-        const float this_charge = charge_list_cluster[i];
-        
+    if (rdo_list_cluster.size() == charge_list_cluster.size()) {
+      rdo_list_new.reserve(rdo_list_cluster.size());
+      for (std::size_t i(0); i<rdo_list_cluster.size(); ++i) {
+        Identifier this_rdo(rdo_list_cluster[i]);
+        rdo_list_new.push_back(this_rdo);
+        const float this_charge=charge_list_cluster[i];
         const int row = pixelID.phi_index(this_rdo);
         if (row > rowmax) {
           rowmax = row;
@@ -232,14 +235,14 @@ namespace TrackingUtilities {
     double phiWidth = design->widthFromRowRange(rowmin, rowmax);
     InDet::SiWidth width( Amg::Vector2D(xaodCluster.channelsInPhi(), xaodCluster.channelsInEta()),
 			  Amg::Vector2D(phiWidth,etaWidth) );
-
+    auto tot_list = xaodCluster.totList();
     indetCluster = new InDet::PixelCluster(id,
 					   localPosition,
 					   globalPosition,
-					   std::vector<Identifier>(xaodCluster.rdoList()),
+					   std::move(rdo_list_new),
 					   xaodCluster.lvl1a(),
-					   std::vector<int>(xaodCluster.totList()),
-					   std::vector<float>(xaodCluster.chargeList()),
+					   std::vector<int>(tot_list.begin(), tot_list.end()),
+					   std::vector<float>(charge_list_cluster.begin(),charge_list_cluster.end()),
 					   width,
 					   &element,
 					   std::move(errorMatrix),

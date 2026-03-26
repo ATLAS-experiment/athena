@@ -4,6 +4,8 @@
 #pragma GCC optimize ("O0") 
 // System include(s):
 #include <iostream>
+#include <cstdint>
+#include <type_traits>
 
 // Local include(s):
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
@@ -71,9 +73,20 @@ void fill( xAOD::PixelCluster& pixelCluster) {
 namespace {
 template <typename T>
 std::ostream &operator<<(std::ostream &out, CxxUtils::range_with_conv<CxxUtils::span<T> > element_range) {
-   for (const auto &elm : element_range) {
-      out << " " << elm;
+   out << "[";
+   if constexpr(std::is_same_v<std::remove_cvref_t<T>,Identifier::value_type>) {
+      out << std::hex;
    }
+   static constexpr const char *prefix=std::is_same_v<std::remove_cvref_t<T>,Identifier::value_type> ? "0x" : "";
+   unsigned int count_i=0;
+   for (const auto &elm : element_range) {
+      if (count_i>0) {
+         out << ", ";
+      }
+      out << prefix << elm;
+      ++count_i;
+   }
+   out << std::dec << "]";
    return out;
 }
 }

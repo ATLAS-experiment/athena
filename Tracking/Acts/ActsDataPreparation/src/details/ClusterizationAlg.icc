@@ -155,6 +155,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
       if constexpr (useCache) {
 	idclocks.push_back( std::move(cache_wh) );
       }
+
       // make ACTS clusters
       ATH_CHECK( m_clusteringTool->clusterize(ctx,
 					      *rdos,
@@ -185,7 +186,7 @@ StatusCode ClusterizationAlg<IClusteringTool, useCache>::execute(const EventCont
   DataPool<xAODCluster_t> pool (nClusters);
   clusterContainer->push_new(nClusters, [&pool]() {return pool.nextElementPtr();});
 
-  std::any vars = m_clusteringTool->makeVars (*clusterHandle);
+  std::any vars = m_clusteringTool->createAuxDataCache(*clusterHandle,nClusterRDOs);
 
   // Fill the collection to xAOD format, computing necessary quantities
   std::size_t xaodCounter = 0ul;

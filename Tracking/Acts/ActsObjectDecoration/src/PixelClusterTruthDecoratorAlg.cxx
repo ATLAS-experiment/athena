@@ -136,16 +136,18 @@ namespace ActsTrk {
       return StatusCode::FAILURE;
     }
 
-    const std::vector<Identifier> rdoList = cluster->rdoList();
+    SG::ConstAccessor<SG::JaggedVecElt<Identifier::value_type> >::element_type
+       rdoList = cluster->rdoList();
     std::vector< std::uint64_t > rdoIdentifierList;
     rdoIdentifierList.reserve(rdoList.size());
     int rowmin = std::numeric_limits<int>::max();
     int rowmax = std::numeric_limits<int>::min();
     int colmin = std::numeric_limits<int>::max();
     int colmax = std::numeric_limits<int>::min();
-    for( const Identifier& hitIdentifier : rdoList ){
-      rdoIdentifierList.push_back( hitIdentifier.get_compact() );
+    for( const Identifier::value_type& hitIdentifier_value : rdoList ){
+      rdoIdentifierList.push_back( hitIdentifier_value );
       //May want to addinformation about the individual hits here
+      Identifier hitIdentifier(hitIdentifier_value);
       int row = m_PixelHelper->phi_index(hitIdentifier);
       int col = m_PixelHelper->eta_index(hitIdentifier);
       rowmin = std::min(rowmin, row);

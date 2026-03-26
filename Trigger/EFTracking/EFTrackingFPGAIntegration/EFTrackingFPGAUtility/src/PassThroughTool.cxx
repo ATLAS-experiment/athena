@@ -518,7 +518,7 @@ StatusCode PassThroughTool::getInputClusterData(
 
         for (long unsigned int j = 0; j < pc->at(i)->rdoList().size(); j++)
         {
-            cache.rdoList[j] = pc->at(i)->rdoList().at(j).get_compact();
+            cache.rdoList[j] = pc->at(i)->rdoList().at(j);
         }
 
         cache.channelsInPhi = pc->at(i)->channelsInPhi();

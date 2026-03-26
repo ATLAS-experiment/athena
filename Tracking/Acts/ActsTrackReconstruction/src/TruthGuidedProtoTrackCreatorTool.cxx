@@ -80,8 +80,9 @@ StatusCode ActsTrk::TruthGuidedProtoTrackCreatorTool::findProtoTracks(const Even
         auto identifierList = cluster->rdoList();
 
         // Loop and push back the cluster in the corresponding trith particle
-        for(auto& id: identifierList)
+        for(auto& id_value: identifierList)
         {
+           Identifier id(id_value);
             // Found a match, so push it into the track collection
             if(identToHepMCMap.find(id) != identToHepMCMap.end())
             {

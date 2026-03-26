@@ -42,7 +42,8 @@ public:
          Acts::Ccl::ClusteringData& data,
 	       std::vector<typename IStripClusteringTool::ClusterCollection>& collection) const override;
 
-    virtual std::any makeVars (SG::AuxVectorData& /*cont*/) const override
+    virtual /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+    createAuxDataCache([[maybe_unused]] xAOD::StripClusterContainer& cont, [[maybe_unused]] std::size_t nClusterRDOs) const override
     { return std::any(); }
 
     virtual StatusCode

@@ -56,7 +56,8 @@ public:
        Acts::Ccl::ClusteringData& data,
 	     std::vector<ClusterCollection>& collection) const = 0;
   
-  virtual std::any makeVars (SG::AuxVectorData& cont) const = 0;
+  virtual /*StripClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+  createAuxDataCache(xAOD::StripClusterContainer& cont, std::size_t nClusterRDOs) const = 0;
 
   virtual StatusCode
   makeClusters(const EventContext& ctx,

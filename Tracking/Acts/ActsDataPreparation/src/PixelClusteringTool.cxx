@@ -71,16 +71,12 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
 				 const PixelChargeCalibCondData *calibData,
 				 const PixelChargeCalibCondData::CalibrationStrategy calibStrategy,
 				 const double lorentz_shift,
-                                 size_t icluster,
-                                 xAOD::PixelCluster::ClusterVars& clusterVars) const
+                                 PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable> &clusterAuxDataCache) const
 { 
 
   Amg::Vector2D pos_acc(0,0);
   int tot_acc = 0;
 
-  std::vector<float> chargeList;
-  if (calibData) chargeList.reserve(cluster.ids.size());
-  
   InDetDD::PixelDiodeTree::CellIndexType rowmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
   InDetDD::PixelDiodeTree::CellIndexType colmax = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::min();
   InDetDD::PixelDiodeTree::CellIndexType rowmin = std::numeric_limits<InDetDD::PixelDiodeTree::CellIndexType>::max();
@@ -98,7 +94,7 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   for (size_t i = 0; i < cluster.ids.size(); i++) {
 
     //Construct the identifier class
-    Identifier id = Identifier(cluster.ids[i]);
+    Identifier rdo_id = Identifier(cluster.ids[i]);
 
     // We temporary comment this since it is not used
     // TODO: Check how the ganged info is used in legacy
@@ -111,8 +107,8 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
     float charge = tot;
 
     std::array<InDetDD::PixelDiodeTree::CellIndexType,2> diode_idx
-       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(id),
-                                                m_pixelID->eta_index(id));
+       = InDetDD::PixelDiodeTree::makeCellIndex(m_pixelID->phi_index(rdo_id),
+                                                m_pixelID->eta_index(rdo_id));
     InDetDD::PixelDiodeTree::DiodeProxyWithPosition si_param ( design.diodeProxyFromIdxCachePosition(diode_idx));
 
     if (calibData) {
@@ -131,7 +127,6 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
               moduleHash,
               feValue,
               tot);
-        chargeList.push_back(charge);
       } else {
         charge = calibData->getCharge(diode_type,
                                       moduleHash,
@@ -142,9 +137,9 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
         if (design.getReadoutTechnology() != InDetDD::PixelReadoutTechnology::RD53 && (moduleHash < 12 or moduleHash > 2035)) {
           charge = tot/8.0*(8000.0-1200.0)+1200.0;
         }
-        chargeList.push_back(charge);
       }
     }
+    clusterAuxDataCache.emplace_back_rdos(rdo_id.get_compact(), tot, charge);
     
     const InDetDD::PixelDiodeTree::CellIndexType &row = diode_idx[0];
     const InDetDD::PixelDiodeTree::CellIndexType &col = diode_idx[1];
@@ -180,9 +175,9 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
     
   }
   
-  if (tot_acc > 0)
+  if (tot_acc > 0) {
     pos_acc /= tot_acc;
-
+  }
   
   const int colWidth = colmax - colmin + 1;
   const int rowWidth = rowmax - rowmin + 1;
@@ -220,19 +215,18 @@ PixelClusteringTool::makeCluster(PixelClusteringTool::Cluster &cluster,
   Eigen::Matrix<float,2,2> localCovariance = Eigen::Matrix<float,2,2>::Zero();
   localCovariance(0, 0) = width0 * width0 / 12.0f; 
   localCovariance(1, 1) = width1 * width1 / 12.0f;
-  
-  clusterVars.identifierHash[icluster] = moduleHash;
-  xAOD::VectorMap<2>(clusterVars.localPositionDim2[icluster].data()) = localPosition;
-  xAOD::MatrixMap<2>(clusterVars.localCovarianceDim2[icluster].data()) = localCovariance;
-  clusterVars.identifier[icluster] = cluster.ids.front();
-  clusterVars.rdoList[icluster] = std::move(cluster.ids);
-  xAOD::VectorMap<3>(clusterVars.globalPosition[icluster].data()) = globalPos.cast<float>();
-  clusterVars.totList[icluster] = std::move(cluster.tots);
-  clusterVars.lvl1a[icluster] = cluster.lvl1min;
-  clusterVars.channelsInPhi[icluster] = rowWidth;
-  clusterVars.channelsInEta[icluster] = colWidth;
-  clusterVars.widthInEta[icluster] = etaWidth;
-    
+
+  clusterAuxDataCache.emplace_back(cluster.ids.front(),
+                                   moduleHash,
+                                   std::span<const float, localPosition.rows()>(localPosition.data(), localPosition.rows()),
+                                   std::span<const float, localCovariance.rows()*localCovariance.cols() >(localCovariance.data(),
+                                                                                                          localCovariance.rows()*localCovariance.cols()),
+                                   std::span<const float, globalPos.rows()>(globalPos.cast<float>().eval().data(), globalPos.rows()),
+                                   rowWidth /*channelsInPhi*/,
+                                   colWidth /*channelsInEta*/,
+                                   etaWidth,
+                                   clusterAuxDataCache.currentRdoEndIndex());
+
   return StatusCode::SUCCESS;
 }
 
@@ -263,9 +257,10 @@ PixelClusteringTool::clusterize(const EventContext& /*ctx*/,
 }
 
 
-std::any PixelClusteringTool::makeVars (SG::AuxVectorData& cont) const
+/*PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>*/ std::any
+PixelClusteringTool::createAuxDataCache(xAOD::PixelClusterContainer& cont, std::size_t nClusterRDOs) const
 {
-  return std::any (xAOD::PixelCluster::ClusterVars (cont));
+  return PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable>(cont, nClusterRDOs, false);
 }
 
 
@@ -273,7 +268,7 @@ StatusCode
 PixelClusteringTool::makeClusters(const EventContext& ctx,
 				  typename IPixelClusteringTool::ClusterCollection& clusters,
 				  const InDetDD::SiDetectorElement& element,
-                                  size_t icluster,
+                                  [[maybe_unused]] size_t icluster,
                                   std::any& vars,
 				  typename ClusterContainer::iterator /*itrContainer*/) const
 {
@@ -299,8 +294,9 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
 
   double lorentz_shift = m_pixelLorentzAngleTool->getLorentzShift(element.identifyHash(), ctx);
 
-  auto* clusterVars = std::any_cast<xAOD::PixelCluster::ClusterVars> (&vars);
-  if (!clusterVars) throw std::bad_any_cast();
+  PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable> *clusterAuxDataCache
+     = std::any_cast<PixelClusterAuxDataCache<Utils::AccessPolicy::Mutable> >(&vars);
+  if (!clusterAuxDataCache) throw std::bad_any_cast();
 
   for (typename IPixelClusteringTool::Cluster& cl : clusters) {
     ATH_CHECK(makeCluster(cl,
@@ -309,8 +305,7 @@ PixelClusteringTool::makeClusters(const EventContext& ctx,
                           calibData,
                           calibrationStrategy,
                           lorentz_shift,
-                          icluster++,
-                          *clusterVars));
+                          *clusterAuxDataCache));
   }
   
   return StatusCode::SUCCESS;
