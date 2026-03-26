@@ -23,73 +23,74 @@ endif()
 # common tests
 atlas_add_test( AthConfigFlagsTest
                 SCRIPT test/testAthConfigFlags.py
-                POST_EXEC_SCRIPT nopost.sh )
+                POST_EXEC_SCRIPT noerror.sh )
 
 # tests for analysis releases and Athena
 if( NOT GENERATIONBASE AND NOT SIMULATIONBASE )
     atlas_add_test( AllConfigFlagsTest_AOD_MC
                     SCRIPT test/testAllConfigFlags_AOD_MC.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AllConfigFlagsTest_AOD_data
                     SCRIPT test/testAllConfigFlags_AOD_data.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # tests for Athena-based releases
 if( NOT XAOD_STANDALONE )    
     atlas_add_test( ComponentAccumulatorTest
                     SCRIPT test/testComponentAccumulator.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    LOG_IGNORE_PATTERN "foreach_component is a debugging|was never merged"
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AtlasSemantics
                     SCRIPT test/testAtlasSemantics.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AccumulatorCache
                     SCRIPT test/testAccumulatorCache.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( MainServicesConfig
                     SCRIPT python -m AthenaConfiguration.MainServicesConfig
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # tests that should not run in analysis releases
 if( NOT XAOD_ANALYSIS )
     atlas_add_test( AllConfigFlagsTest_EVNT
                     SCRIPT test/testAllConfigFlags_EVNT.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( GeneratorSequencesConfig
                     SCRIPT test/testGeneratorSequences.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # tests that should not run in analysis releases and in AthGeneration
 if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( DetectorConfigFlags
                     SCRIPT test/testDetectorFlags.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AllConfigFlagsTest_HITS
                     SCRIPT test/testAllConfigFlags_HITS.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
 
 # tests that should run only in Athena
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
     atlas_add_test( AllConfigFlagsTest_BS
                     SCRIPT test/testAllConfigFlags_BS.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AllConfigFlagsTest_RDO
                     SCRIPT test/testAllConfigFlags_RDO.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AllConfigFlagsTest_AOD_Full
                     SCRIPT python -m AthenaConfiguration.AllConfigFlags
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 
     atlas_add_test( AllConfigFlagsTest_TRIG
                     SCRIPT test/testAllConfigFlags_TRIG.py
@@ -97,5 +98,5 @@ if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
 
     atlas_add_test( ComponentAccumulatorTestReco
                     SCRIPT test/testComponentAccumulatorReco.py
-                    POST_EXEC_SCRIPT nopost.sh )
+                    POST_EXEC_SCRIPT noerror.sh )
 endif()
