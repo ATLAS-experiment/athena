@@ -70,10 +70,6 @@ class TGCCabling {
     const TGCModuleId* getSLBFromReadout(TGCId::SideType side, int rodId,
                                          int sswId, int sbLoc) const;
 
-    // readoutID -> RxID
-    int getRxIdFromReadout(TGCId::SideType side, int rodId, int sswId,
-                           int sbLoc) const;
-
     // SSW ID/RX ID-> SLB Module
     std::unique_ptr<TGCModuleId> getSLBFromRxId(TGCId::SideType side, int rodId,
                                                 int sswId, int rxId) const;
@@ -109,12 +105,6 @@ class TGCCabling {
                                 int hpbId, int block, int hitId, int pos,
                                 TGCId::ModuleType moduleType,
                                 bool orChannel) const;
-
-    // readout channel -> coincidence channel
-    bool getLowPtCoincidenceFromReadout(TGCId::SideType side, int rodId,
-                                        int sswId, int sbLoc, int channel,
-                                        int& block, int& pos,
-                                        bool middle = false) const;
 
     // coincidence channel -> readout channel
     bool getReadoutFromLowPtCoincidence(TGCId::SideType side, int rodId,

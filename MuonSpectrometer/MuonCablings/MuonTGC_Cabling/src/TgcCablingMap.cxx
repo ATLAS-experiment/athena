@@ -438,16 +438,16 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
     // build identifier
     std::string stationNameStr;
     switch (asdin->getStation()) {
-        case 0:  // Triplet
+        case TGCId::StationType::M1:  // Triplet
             stationNameStr = (asdin->isForward()) ? "T1F" : "T1E";
             break;
-        case 1:  // Middle Doublet
+        case TGCId::StationType::M2:  // Middle Doublet
             stationNameStr = (asdin->isForward()) ? "T2F" : "T2E";
             break;
-        case 2:  // Pivot Doublet
+        case TGCId::StationType::M3:  // Pivot Doublet
             stationNameStr = (asdin->isForward()) ? "T3F" : "T3E";
             break;
-        case 3:  // Inner
+        case TGCId::StationType::M4:  // Inner
             stationNameStr = (asdin->isForward()) ? "T4F" : "T4E";
             break;
         default:
@@ -462,7 +462,7 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
     int isStrip = (asdin->isStrip()) ? 1 : 0;
     int channel = asdin->getChannel();
 
-    if ((asdin->getStation() == 3) && (asdin->isEndcap())) {
+    if ((asdin->getStation() == TGCId::StationType::M4) && (asdin->isEndcap())) {
         // special treatment for EI
         constexpr std::array<int, 25> phiIE{-1, 1,  2,  3,  4,  5,  6,  7,  8,
                                             -1, 9,  10, 11, 12, 13, 14, 15, -1,
@@ -481,7 +481,7 @@ bool TgcCablingMap::getOfflineIDfromOnlineID(
     // T10S : FI @ statioPhi =2,5,8,11,14,17,20,23
     //  total number of wire channel = 30
     //  (T10  32 channel)
-    if ((asdin->getStation() == 3) && (!isStrip)) {  //  Inner Wire
+    if ((asdin->getStation() == TGCId::StationType::M4) && (!isStrip)) {  //  Inner Wire
         if (asdin->isEndcap()) {
             switch (stationPhi) {
                 case 2:
