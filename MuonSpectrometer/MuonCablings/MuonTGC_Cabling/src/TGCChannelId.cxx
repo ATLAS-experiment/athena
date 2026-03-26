@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTGC_Cabling/TGCChannelId.h"
@@ -59,19 +59,19 @@ void TGCChannelId::setLayer(int v_layer) {
     m_layer = v_layer;
     if (m_layer >= 0 && m_layer <= 2) {
         setMultipletType(Triplet);
-        setStation(0);
+        setStation(StationType::M1);
     }
     if (m_layer >= 3 && m_layer <= 4) {
         setMultipletType(Doublet);
-        setStation(1);
+        setStation(StationType::M2);
     }
     if (m_layer >= 5 && m_layer <= 6) {
         setMultipletType(Doublet);
-        setStation(2);
+        setStation(StationType::M3);
     }
     if (m_layer >= 7 && m_layer <= 8) {
         setMultipletType(Inner);
-        setStation(3);
+        setStation(StationType::M4);
         if (m_sector != -1) {
             m_octant = m_sector / 3;
         }
