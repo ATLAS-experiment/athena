@@ -230,7 +230,8 @@ thresholds th_AnyBinIsError {
         '''
         from AthenaMonitoring import AthMonitorCfgHelper
         self.helper = AthMonitorCfgHelper(flags,monName="L1CaloMon")
-        self.alg = self.helper.addAlgorithm(algClassOrObj,name,addToSubSequence=False,*args, **kwargs) if algClassOrObj is not None else None
+        kwargs.setdefault("addToSubSequence", False)
+        self.alg = self.helper.addAlgorithm(algClassOrObj,name,*args, **kwargs) if algClassOrObj is not None else None
         self.fillGroups = {}
         self.dqEnv = flags.DQ.Environment # used to decide if should defineTree or not ...
 
