@@ -76,6 +76,27 @@ void setProperty(columnar::PythonToolHandle &self, const std::string& key, nb::o
     }
 }
 
+nb::object getColumnVoid(columnar::PythonToolHandle &self, const std::string& key) {
+  auto [size, ptr, type] = self.getColumnVoid(key);
+  // Wrap the raw pointer in a numpy array without copying.  The caller is
+  // responsible for keeping the PythonToolHandle alive while using the result.
+#define MAKE_NDARRAY(T) \
+  nb::ndarray<nb::numpy, T, nb::ro>(static_cast<const T*>(ptr), {size}).cast()
+  if (*type == typeid(float))          return MAKE_NDARRAY(float);
+  if (*type == typeid(double))         return MAKE_NDARRAY(double);
+  if (*type == typeid(char))           return MAKE_NDARRAY(char);
+  if (*type == typeid(int))            return MAKE_NDARRAY(int);
+  if (*type == typeid(std::uint8_t))   return MAKE_NDARRAY(std::uint8_t);
+  if (*type == typeid(std::uint16_t))  return MAKE_NDARRAY(std::uint16_t);
+  if (*type == typeid(std::uint32_t))  return MAKE_NDARRAY(std::uint32_t);
+  if (*type == typeid(std::uint64_t))  return MAKE_NDARRAY(std::uint64_t);
+  if (*type == typeid(std::int16_t))   return MAKE_NDARRAY(std::int16_t);
+  if (*type == typeid(std::int32_t))   return MAKE_NDARRAY(std::int32_t);
+  if (*type == typeid(std::int64_t))   return MAKE_NDARRAY(std::int64_t);
+#undef MAKE_NDARRAY
+  throw std::runtime_error("getColumnVoid: unsupported column type: " + std::string(type->name()));
+}
+
 void setColumnVoid(columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<> column, bool is_const = true) {
   // TODO: figure out how to get type_info from handle instead...
   // nb::handle handle = column.handle();
@@ -336,6 +357,14 @@ NB_MODULE(python_tool_handle, module) {
         .def("__setitem__", &setImmutableColumnVoid,
              "key"_a, "column"_a,
              "Set a void immutable column pointer (nanobind version).")
+
+        .def("__getitem__", &getColumnVoid,
+             "key"_a,
+             "Get a column as a numpy array (zero-copy view into the tool's buffer).")
+
+        .def("keys",
+             &columnar::PythonToolHandle::getColumnNames,
+             "Return the column names (enables dict(handle)).")
 
         .def("call",
              &columnar::PythonToolHandle::call,

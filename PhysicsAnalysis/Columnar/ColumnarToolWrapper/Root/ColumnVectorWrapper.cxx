@@ -278,7 +278,7 @@ namespace columnar
 
 
   std::pair<std::size_t,const void*> ColumnVectorData ::
-  getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst)
+  getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst) const
   {
     if (columnIndex >= m_header->numColumns())
       throw std::runtime_error ("invalid column index: " + std::to_string(columnIndex) + " (max is " + std::to_string(m_header->numColumns()-1) + ")");
