@@ -329,8 +329,10 @@ StatusCode LarEMSamplingFraction::execute()
       if(m_docells) {
 	cell_info_map[id.get_compact()].cell_identifier=id.get_compact();
 	cell_info_map[id.get_compact()].cell_sampling=sampling;
-	cell_info_map[id.get_compact()].cell_eta=caloDDE->eta_raw();
-	cell_info_map[id.get_compact()].cell_phi=caloDDE->phi_raw();
+	if (caloDDE)[[likely]]{
+	  cell_info_map[id.get_compact()].cell_eta=caloDDE->eta_raw();
+	  cell_info_map[id.get_compact()].cell_phi=caloDDE->phi_raw();
+	}
 	cell_info_map[id.get_compact()].cell_energy_reco+=cell->energy();
       }  
     }
