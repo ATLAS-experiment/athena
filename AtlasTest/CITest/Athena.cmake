@@ -148,6 +148,10 @@ atlas_add_citest( DerivationRun2Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
    PROPERTIES PROCESSORS 4 )
 
+atlas_add_citest( DerivationRun2Data_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( DerivationRun2Data_PHYSLITE_from_PHYS
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4 -e ' --inputDAOD_PHYSFile=../../DerivationRun2Data_PHYS/run_data_PHYS_Run2/DAOD_PHYS.myOutput.pool.root' --no-output-checks # go two levels up as the test runs in a subfolder
    PROPERTIES PROCESSORS 4
@@ -163,6 +167,10 @@ atlas_add_citest( DerivationRun2MC_PHYS_MT
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun2MC_PHYSLITE_from_PHYS
@@ -188,6 +196,10 @@ atlas_add_citest( DerivationRun3Data_PHYS_MT
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3Data_PHYSLITE_from_PHYS
@@ -218,6 +230,10 @@ atlas_add_citest( DerivationRun3MC_PHYS_MT
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE
    SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_PHYSLITE_MT
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE_MT --threads 4
    PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( DerivationRun3MC_PHYSLITE_from_PHYS
