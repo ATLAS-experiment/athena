@@ -62,7 +62,7 @@ PileupReweightingTool::PileupReweightingTool( const std::string& name ) :CP::TPi
    declareProperty("DataScaleFactorUP",m_upVariation=1./0.99,"Set to a value representing the 'up' fluctuation - will report a PRW_DATASF uncertainty to Systematic Registry");
    declareProperty("DataScaleFactorDOWN",m_downVariation=1./1.07,"Set to a value representing the 'down' fluctuation - will report a PRW_DATASF uncertainty to Systematic Registry");
    declareProperty("VaryRandomRunNumber",m_varyRunNumber=false,"If true, then when doing systematic variations, RandomRunNumber will fluctuate as well. Off by default as believed to lead to overestimated uncertainties");
-   declareProperty("PeriodAssignments", m_customPeriods={284500,222222,324300,300000,324300,344495,310000,344496,367384,410000,422633,440613,450000,450360,461002,470000,472553,999999}, "Specify period number assignments to run numbers ranges - this is usually an expert option");
+   declareProperty("PeriodAssignments", m_customPeriods={284500,222222,324300,300000,324300,344495,310000,344496,367384,410000,422633,440613,450000,450360,461002,470000,473235,486706,495000,497924,999999}, "Specify period number assignments to run numbers ranges - this is usually an expert option");
    declareProperty("GRLTool", m_grlTool, "If you provide a GoodRunsListSelectionTool, any information from lumicalc files will be automatically filtered" );
    declareProperty("TrigDecisionTool",m_tdt, "When using the getDataWeight method, the TDT will be used to check decisions before prescale. Alternatively do expert()->SetTriggerBit('trigger',0) to flag which triggers are not fired before prescale (assumed triggers are fired if not specified)");
 
