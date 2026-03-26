@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileByteStream/TileRawChannel2Bytes4.h" 
@@ -32,7 +32,7 @@ unsigned int TileRawChannel2Bytes4::getWord(const TileFastRawChannel& rc,
       , (int) std::lround(rc.time() * TIME_FACTOR4 + TIME_OFFSET4)));
 
   unsigned int q = std::max(0,
-      std::min(QUALITY_RANGE4_NOFLAG,
+      std::min(QUALITY_RANGE4_FLAG,
           (int) std::lround(rc.quality() * QUALITY_FACTOR4 + QUALITY_OFFSET4)));
 
   unsigned int w = (a << AMPLITUDE_SHIFT4) | (t << TIME_SHIFT4) | (q << QUALITY_SHIFT4);
