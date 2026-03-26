@@ -408,14 +408,15 @@ if flags.Trigger.enableL1CaloPhase1:
 
 
 if flags.DQ.doMonitoring:
-  cfg.addSequence(CompFactory.AthSequencer("AthMonSeq_L1CaloMon",StopOverride=True),parentName="AthAlgSeq") # this matches the sequence name the helpers will create
+  # create a subsequence for the sim to live in; primarily keeps the config tidy
+  cfg.addSequence(CompFactory.AthSequencer("L1Mon",StopOverride=True),parentName="AthAlgSeq") # this matches the sequence name the helpers will create
   if flags.Trigger.L1.doCalo:
     from TrigT1CaloMonitoring.PprMonitorAlgorithm import PprMonitoringConfig
-    cfg.merge(PprMonitoringConfig(flags))
+    cfg.merge(PprMonitoringConfig(flags),sequenceName="L1Mon")
     from TrigT1CaloMonitoring.PPMSimBSMonitorAlgorithm import PPMSimBSMonitoringConfig
-    cfg.merge(PPMSimBSMonitoringConfig(flags))
+    cfg.merge(PPMSimBSMonitoringConfig(flags),sequenceName="L1Mon")
     from TrigT1CaloMonitoring.OverviewMonitorAlgorithm import OverviewMonitoringConfig
-    cfg.merge(OverviewMonitoringConfig(flags))
+    cfg.merge(OverviewMonitoringConfig(flags),sequenceName="L1Mon")
     # CPM was disabled for run 480893 onwards, so stop monitoring that part
     # could have used detectorMask to determine if CPM is disabled, but will just assume it here
     OverviewMonAlg = cfg.getEventAlgo("OverviewMonAlg")
@@ -424,7 +425,7 @@ if flags.DQ.doMonitoring:
 
   if flags.Trigger.L1.doeFex:
     from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
-    cfg.merge(EfexMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon") # ensures is part of mon sequence that other algs are part of by virtue of their helpers
+    cfg.merge(EfexMonitoringConfig(flags),sequenceName="L1Mon")
     EfexMonAlg = cfg.getEventAlgo('EfexMonAlg')
     # do we need next lines??
     EfexMonAlg.eFexEMTobKeyList = ['L1_eEMRoI', 'L1_eEMxRoI'] # default is just L1_eEMRoI
@@ -435,29 +436,29 @@ if flags.DQ.doMonitoring:
     # monitoring of simulation vs hardware
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.EfexSimMonitorAlgorithm import EfexSimMonitoringConfig
-      cfg.merge(EfexSimMonitoringConfig(flags))
+      cfg.merge(EfexSimMonitoringConfig(flags),sequenceName="L1Mon")
     # EfexSimMonitorAlgorithm = cfg.getEventAlgo('EfexSimMonAlg')
     # and now book the histograms that depend on the containers
     from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringHistConfig
-    cfg.merge(EfexMonitoringHistConfig(flags,EfexMonAlg))
+    cfg.merge(EfexMonitoringHistConfig(flags,EfexMonAlg),sequenceName="L1Mon")
 
   if flags.Trigger.L1.dojFex:
     from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
-    cfg.merge(JfexMonitoringConfig(flags))
+    cfg.merge(JfexMonitoringConfig(flags),sequenceName="L1Mon")
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.JfexSimMonitorAlgorithm import JfexSimMonitoringConfig
-      cfg.merge(JfexSimMonitoringConfig(flags))
+      cfg.merge(JfexSimMonitoringConfig(flags),sequenceName="L1Mon")
   if flags.Trigger.L1.dogFex:
     from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
-    cfg.merge(GfexMonitoringConfig(flags))
+    cfg.merge(GfexMonitoringConfig(flags),sequenceName="L1Mon")
     if not flags.Input.isMC and flags.Trigger.enableL1CaloPhase1:
       from TrigT1CaloMonitoring.GfexSimMonitorAlgorithm import GfexSimMonitoringConfig
-      cfg.merge(GfexSimMonitoringConfig(flags))
+      cfg.merge(GfexSimMonitoringConfig(flags),sequenceName="L1Mon")
     # generally can't include efficiency monitoring because requires too many things we don't have
     # but b.c. alg requires TrigDecisionTool, we activate it if DQ.useTrigger explicitly set
     if flags.DQ.useTrigger:
       from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
-      cfg.merge(JetEfficiencyMonitoringConfig(flags))
+      cfg.merge(JetEfficiencyMonitoringConfig(flags),sequenceName="L1Mon")
 
   if flags.Trigger.L1.doTopo:
     from L1TopoOnlineMonitoring.L1TopoOnlineMonitoringConfig import Phase1TopoMonitoringCfg
@@ -466,11 +467,11 @@ if flags.DQ.doMonitoring:
   # input data monitoring
   if flags.Trigger.L1.doCaloInputs and not flags.Input.isMC:
     from TrigT1CaloMonitoring.EfexInputMonitorAlgorithm import EfexInputMonitoringConfig
-    if flags.Trigger.L1.doeFex: cfg.merge(EfexInputMonitoringConfig(flags))
+    if flags.Trigger.L1.doeFex: cfg.merge(EfexInputMonitoringConfig(flags),sequenceName="L1Mon")
     from TrigT1CaloMonitoring.JfexInputMonitorAlgorithm import JfexInputMonitoringConfig
-    if flags.Trigger.L1.dojFex: cfg.merge(JfexInputMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon")
+    if flags.Trigger.L1.dojFex: cfg.merge(JfexInputMonitoringConfig(flags),sequenceName="L1Mon")
     from TrigT1CaloMonitoring.GfexInputMonitorAlgorithm import GfexInputMonitoringConfig
-    if flags.Trigger.L1.dogFex: cfg.merge(GfexInputMonitoringConfig(flags),sequenceName="AthMonSeq_L1CaloMon") # can trigger gFexEmulatedTower alg so must specify to add to sequence
+    if flags.Trigger.L1.dogFex: cfg.merge(GfexInputMonitoringConfig(flags),sequenceName="L1Mon")
 
 mainSeq = "AthAllAlgSeq"
 if args.fexReadoutFilter:
