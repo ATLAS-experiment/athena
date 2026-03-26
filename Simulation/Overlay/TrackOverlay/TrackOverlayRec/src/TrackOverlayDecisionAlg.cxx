@@ -1,27 +1,19 @@
-/*
- *  *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
- *   *   */
-//
-#include <fstream>
-#include <string>
-#include <iostream>
-#include <vector>
-#include <sstream>
-#include <unistd.h>
-#include <Eigen/Core>
-//
+/**
+ *    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ *   
+ **/
+
+#include "TrackOverlayDecisionAlg.h"
+
 #include "GaudiKernel/SystemOfUnits.h"
-#include "Gaudi/Property.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthPileupEvent.h"
-#include "xAODTruth/TruthPileupEventAuxContainer.h"
 #include "PathResolver/PathResolver.h"
-
-// ONNX Runtime include(s).
-#include <onnxruntime_cxx_api.h>
 //
-#include "TrackOverlayDecisionAlg.h"
 #include "EventBookkeeperTools/FilterReporter.h"
+#include "StoreGate/ReadHandle.h"
+
+#include <Eigen/Core>
 
 namespace TrackOverlayDecisionAlg {
     TrackOverlayDecisionAlg::TrackOverlayDecisionAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
@@ -165,7 +157,7 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     std::vector<float> eventPtVec(pxValues.size(), (eventPt-3.42359395e-01)*eventPt_diff);
     std::vector<float> predictions;
 
-    //Compute the distances using Eigen for Eigen's optimized operations. Initialize matirces. Observed a significant improvement on computing calculation.
+    //Compute the distances using Eigen for Eigen's optimized operations. Initialize matrices. Observed a significant improvement on computing calculation.
     Eigen::VectorXf ptEigen = Eigen::VectorXf::Map(ptValues.data(), ptValues.size());
     Eigen::VectorXf phiEigen = Eigen::VectorXf::Map(phiValues.data(), phiValues.size());
     Eigen::VectorXf etaEigen = Eigen::VectorXf::Map(etaValues.data(), etaValues.size());
@@ -241,6 +233,10 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
        if (prediction > threshold) {
           badTracks++;
         }
+    }
+    if (truthMultiplicity == 0){
+      ATH_MSG_ERROR("truthMultiplicity is zero!");
+      return StatusCode::FAILURE;
     }
     float rouletteScore = static_cast<float>(badTracks) / static_cast<float>(truthMultiplicity);
 
