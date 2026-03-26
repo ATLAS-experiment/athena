@@ -103,6 +103,6 @@ class TauGNNDataLoader : public FlavorTagInference::SaltModelEDMLoaderBase, publ
             {"pt",                        TauScalarVars::pt},
             {"eta",                       TauScalarVars::eta},
             {"ptJetSeed",                 TauScalarVars::ptJetSeed},
-            {"etaJetSSeed",               TauScalarVars::etaJetSeed}
+            {"etaJetSeed",               TauScalarVars::etaJetSeed}
         };
 };
