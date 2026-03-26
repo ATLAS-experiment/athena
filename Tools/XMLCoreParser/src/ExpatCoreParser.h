@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XMLCOREPARSER_EXPATCOREPARSER_H
@@ -9,7 +9,7 @@
 #include <map>
 #include <mutex>
 #include <memory>
-#include "DOMNode.h"
+#include "XMLCoreParser/XMLCoreNode.h"
 #include "CxxUtils/checker_macros.h"
 
 class ExpatCoreParser
@@ -18,7 +18,8 @@ public:
 
   typedef std::map <std::string, std::string> ExternalEntityMap; 
 
-  static std::unique_ptr<CoreParser::DOMNode> parse (const std::string& file_name);
+  static std::unique_ptr<XMLCoreNode> parse (const std::string& file_name);
+  static std::unique_ptr<XMLCoreNode> parse_string (const std::string& text);
 
   static void register_external_entity (const std::string& name, const std::string& file_name);  
   static void register_text_entity (const std::string& name, const std::string& text);  
@@ -26,6 +27,7 @@ public:
 private:
 
   ExpatCoreParser (const std::string& prefix);
+  XMLCoreNode* add_node (std::unique_ptr<XMLCoreNode> node);
   void do_start (const char* el, const char** attr);
   void do_end (const char* el);
   void do_char_data (const XML_Char* s, int len);
@@ -56,15 +58,15 @@ private:
 		      const XML_Char* systemId,
 		      const XML_Char* publicId,
 		      const XML_Char* /*notationName*/);
-  std::unique_ptr<CoreParser::DOMNode> get_document ();
+  std::unique_ptr<XMLCoreNode> get_document ();
 
   static const std::string& find_external_entity (const std::string& name);
   static const std::string& find_text_entity (const std::string& name);
 
   void clean ();
 
-  std::unique_ptr<CoreParser::DOMNode> m_top;
-  CoreParser::DOMNode* m_last;
+  std::unique_ptr<XMLCoreNode> m_top;
+  XMLCoreNode* m_last;
   std::string m_prefix;
 
   static std::mutex s_mutex;
