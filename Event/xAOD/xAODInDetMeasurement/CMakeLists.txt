@@ -10,7 +10,7 @@ find_package( xAODUtilities)
 atlas_add_library( xAODInDetMeasurement
     xAODInDetMeasurement/*.h xAODInDetMeasurement/versions/*.h Root/*.cxx
     PUBLIC_HEADERS xAODInDetMeasurement
-    LINK_LIBRARIES xAODCore GeoPrimitives xAODMeasurementBase Identifier )
+    LINK_LIBRARIES xAODCore GeoPrimitives xAODMeasurementBase Identifier InDetRawData )
 
 atlas_add_xaod_smart_pointer_dicts(
     INPUT xAODInDetMeasurement/selection.xml

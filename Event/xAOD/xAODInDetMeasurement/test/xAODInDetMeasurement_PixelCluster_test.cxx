@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-
+#pragma GCC optimize ("O0") 
 // System include(s):
 #include <iostream>
 
@@ -67,6 +67,17 @@ void fill( xAOD::PixelCluster& pixelCluster) {
 
     return;
 }
+
+namespace {
+template <typename T>
+std::ostream &operator<<(std::ostream &out, CxxUtils::range_with_conv<CxxUtils::span<T> > element_range) {
+   for (const auto &elm : element_range) {
+      out << " " << elm;
+   }
+   return out;
+}
+}
+
 
 void print ( const xAOD::PixelCluster& pixelCluster) {
     std::cout << " --------- MEASUREMENT BASE ------------ " << std::endl;
