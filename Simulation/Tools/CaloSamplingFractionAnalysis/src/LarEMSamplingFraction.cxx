@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LarEMSamplingFraction.h"
@@ -9,13 +9,16 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "LArSimEvent/LArHitContainer.h"
 #include "TileSimEvent/TileHitVector.h"
+#include "TileIdentifier/TileHWID.h"
+#include "CaloIdentifier/TileID.h"
+#include "CaloIdentifier/CaloIdManager.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 
-#include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "Gaudi/Property.h"
 
 #include "GeneratorObjects/McEventCollection.h"
-
+#include "TTree.h"
 #include "TString.h"
 #include <iterator>
 #include <cmath>
