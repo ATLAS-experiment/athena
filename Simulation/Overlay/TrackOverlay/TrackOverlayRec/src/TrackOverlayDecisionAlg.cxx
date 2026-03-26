@@ -234,6 +234,10 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
           badTracks++;
         }
     }
+    if (truthMultiplicity == 0){
+      ATH_MSG_ERROR("truthMultiplicity is zero!");
+      return StatusCode::FAILURE;
+    }
     float rouletteScore = static_cast<float>(badTracks) / static_cast<float>(truthMultiplicity);
 
     FilterReporter filter(m_filterParams, false, ctx);
