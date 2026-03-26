@@ -166,7 +166,7 @@ def getJetQuarkChargeLabelTool(name='jetquarkcharge',
 
     import ParticleJetTools.quarkChargeMap as qcMap
     charge_map = qcMap.hadrons_dict
-
+    
     return CompFactory.JetQuarkChargeLabelingTool(
         name,
         HadronDecorationName = hadron_label,
@@ -197,7 +197,7 @@ def getJetQuarkChargeTool(jetdef, modspec):
         return getJetQuarkChargeLabelTool()
 
     outputLabel,hadronLabel,partonLabel = modspec.split(",")
-
+    
     name = f"jetquarkcharge_{outputLabel}_{hadronLabel}_{partonLabel}"
     return getJetQuarkChargeLabelTool(name,output_label = outputLabel, hadron_label = hadronLabel, parton_label = partonLabel)
 
@@ -276,26 +276,3 @@ def getJetPileupLabelTool(jetdef, modspec):
                                                            TruthJetContainer= "AntiKt4TruthDressedWZJets")
 
     return jetPileupLabelTool
-
-def getIRCSafeLabelTool(jetdef, modspec):
-    """returns the IRCSafe labelling tools, applying four new flavour labelling
-       schemes to truth particle jets and then matching them in terms of deltaR
-       to any type of reconstructed jets (for now the radius of truth jets is
-       set by hand to R = 0.4, so shouldnt really be used for other jets)
-    """
-    tool_kwargs = dict(
-        LabelNameIFN = "IRCSafeLabelIFN",
-        LabelNameCMP = "IRCSafeLabelCMP",
-        LabelNameGHS = "IRCSafeLabelGHS",
-        LabelNameSDF = "IRCSafeLabelSDF",
-        LabelNameAKT = "IRCSafeLabelAKT",
-        BParticleCollection = "TruthLabelBHadronsFinal",
-        CParticleCollection = "TruthLabelCHadronsFinal",
-        TruthParticleCollection = "JetInputTruthParticles",
-        EnabledAlgorithms = ["IFN","CMP","GHS","SDF","AKT"],
-        TruthJetPtMin = 0.0,
-        JetPtMin = 10000.0,
-        DRMax = 0.3,
-        TruthR = 0.4
-    )
-    return CompFactory.IRCSafeLabelTool("jetircsafelabeler", **tool_kwargs)

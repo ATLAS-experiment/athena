@@ -7,16 +7,16 @@ in package configs.
 This dict maps a modifier alias to the JetModifier config object
 that in turn will be responsible for generating a configured tool.
 
-The JetModifier config class is defined in JetDefinition.py
+The JetModifier config class is defined in JetDefinition.py 
 
  Args to the JetModifier constructor are:
    1. Tool Type (ignored if the helper is a custom one)
    2. Tool Name (ignored if the helper is a custom one)
-   3. createfn : helper function which build the actual tool. If none, we just instantiate the tool type.
+   3. createfn : helper function which build the actual tool. If none, we just instantiate the tool type. 
    4. prereqs : Prerequisites  (default to []). Can also be a function which returns a list
-   X. all other keyword arguments are directly interpreted as Property of the tool.
+   X. all other keyword arguments are directly interpreted as Property of the tool. 
        for ex, passing 'PtMin=10.' will configure the tool as in 'tool.PtMin = 10'
-       we can pass function as the value :
+       we can pass function as the value : 
          'JetContainerName=nameFunc' will configure as in 'tool.JetContainerName=nameFunc(jetdef, modspec)'
 
         --> should this be by default? prefer to avoid ignored args
@@ -29,12 +29,12 @@ stdJetModifiers = ldict()
 
 ########################################################################
 # Define the simple modifier setups here -- those defined in JetRec.
-stdJetModifiers.update(
+stdJetModifiers.update( 
     Sort   = JetModifier("JetSorter","jetsort"),
     Filter = JetModifier("JetFilterTool","jetptfilter_{modspec}",
                          # we give a function as PtMin : it will be evaluated when instantiating the tool (modspec is specified with this tool
                          # alias like "Filter:10000" --> PtMin=100000).
-                         PtMin = lambda jdef,modspec: int(modspec)
+                         PtMin = lambda jdef,modspec: int(modspec) 
                          ),
     Filter_ifnotESD = JetModifier("JetFilterTool","jetptfilter_{modspec}",
                                  PtMin = lambda _,modspec: 1,
@@ -96,26 +96,26 @@ try:
     from JetMomentTools import JetMomentToolsConfig
     stdJetModifiers.update(
 
-        # Easy cases, no special config or prereqs, just default tool config
+        # Easy cases, no special config or prereqs, just default tool config 
         ClusterMoments =  JetModifier("JetClusterMomentsTool", "clsmoms", JetContainer = _jetname),
         ECPSFrac =        JetModifier("JetECPSFractionTool", "ecpsfrac", JetContainer = _jetname),
         Width =           JetModifier("JetWidthTool", "width", JetContainer = _jetname),
 
         # More complex cases here
-        CaloEnergies =    JetModifier("JetCaloEnergies", "jetens",
-                                      prereqs=["mod:EMScaleMom"],
+        CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
+                                      prereqs=["mod:EMScaleMom"], 
                                       Calculations=["EMFrac", "HECFrac", "PSFrac", "FracSamplingMax"], JetContainer = _jetname,
                                       ),
-
-        CaloEnergiesLargeR =    JetModifier("JetCaloEnergies", "jetenslargeR",
-                                      prereqs=["mod:EMScaleMom"],
+        
+        CaloEnergiesLargeR =    JetModifier("JetCaloEnergies", "jetenslargeR", 
+                                      prereqs=["mod:EMScaleMom"], 
                                       Calculations=["EMFrac", "HECFrac", "PSFrac", "EM3Frac", "Tile0Frac", "EffNClusts"], JetContainer = _jetname,
                                       calcClusterBasedVars = True,
                                       ),
 
         # CaloEnergiesClus is only relevant for FE-based jet collections
         CaloEnergiesClus = JetModifier("JetCaloEnergies", "jetensclus",
-                                       prereqs=["mod:EMScaleMom"],
+                                       prereqs=["mod:EMScaleMom"], 
                                        Calculations=["EMFrac", "HECFrac", "PSFrac", "FracSamplingMax"], JetContainer = _jetname,
                                        calcClusterBasedVars = True),
 
@@ -158,7 +158,7 @@ try:
         TrackSumMoments = JetModifier("JetTrackSumMomentsTool", "trksummoms",
                                       createfn=JetMomentToolsConfig.getTrackSumMomentsTool,
                                       prereqs = [ inputsFromContext("TVA"),"ghost:Track" ],JetContainer = _jetname),
-        Charge =          JetModifier("JetChargeTool", "jetcharge",
+        Charge =          JetModifier("JetChargeTool", "jetcharge", 
                                       prereqs = [ "ghost:Track" ]),
 
         QGTagging =       JetModifier("JetQGTaggerVariableTool", "qgtagging",
@@ -181,7 +181,7 @@ try:
         ConstitFrac =    JetModifier("JetConstituentFrac", "constitFrac",
                                      JetContainer = _jetname,
                                      ),
-
+        
         groomMRatio =    JetModifier("JetGroomMRatio", "groomMRatio",
                                      JetContainer = _jetname,
                                      ),
@@ -213,8 +213,8 @@ try:
                                    IsolationCalculations = ["IsoFixedCone:5:Pt", ],
                                    RhoKey = "",
                                    ),
-
-
+        
+        
     )
 except ModuleNotFoundError:
     from AthenaCommon import Logging
@@ -246,7 +246,7 @@ stdJetModifiers.update(
                                             "ghost:TausFinal"]
                                    ),
 
-
+    
     JetDeltaRInitialLabel =   JetModifier("ParticleJetDeltaRLabelTool","jetdrlabelerinitial_jetptmin",
                                           createfn=ParticleJetToolsConfig.getJetDeltaRInitialLabelTool,
                                           prereqs=["ghost:BHadronsInitial",
@@ -254,7 +254,7 @@ stdJetModifiers.update(
                                                    "ghost:TausFinal"]
                                    ),
 
-
+    
     JetGhostInitialLabel =    JetModifier("ParticleJetGhostLabelTool","jetghostinitiallabeler",
                                           createfn=ParticleJetToolsConfig.getJetGhostInitialLabelTool,
                                           prereqs=["ghost:BHadronsInitial",
@@ -278,34 +278,26 @@ stdJetModifiers.update(
                                  filterfn=isMC,
                                  createfn=ParticleJetToolsConfig.getJetPileupLabelTool,
                                  prereqs=["input:AntiKt4TruthDressedWZJets"]
-                                 ),
-
-    JetIRCSafeLabel = JetModifier("IRCSafeLabelTool", "jetircsafelabeler",
-                                  filterfn=isMC,
-                                  createfn=ParticleJetToolsConfig.getIRCSafeLabelTool,
-                                  prereqs=["ghost:BHadronsFinal",
-                                           "ghost:CHadronsFinal",
-                                           "input:JetInputTruthParticles"]
                                  )
 )
 
 
 
-# Substructure tools
-stdJetModifiers.update(
+# Substructure tools 
+stdJetModifiers.update( 
     nsubjettiness = JetModifier( "NSubjettinessTool", "nsubjettiness", Alpha = 1.0,
                                  JetContainer = _jetname),
     nsubjettinessR = JetModifier( "NSubjettinessRatiosTool", "nsubjettinessR",),
 
-
+    
     ktdr       = JetModifier("KtDeltaRTool", "ktdr", JetRadius = 0.4),
 
     ktsplitter = JetModifier( "KTSplittingScaleTool", "ktsplitter", JetContainer = _jetname),
-
+    
     angularity = JetModifier( "AngularityTool", "angularity"),
-
+    
     dipolarity = JetModifier( "DipolarityTool", "dipolarity",SubJetRadius = 0.3),
-
+    
     planarflow = JetModifier( "PlanarFlowTool", "planarflow"),
 
     ktmassdrop = JetModifier( "KtMassDropTool", "ktmassdrop"),
@@ -330,7 +322,7 @@ stdJetModifiers.update(
 # Substructure tagger tools: q/g
 try :
     from JetMomentTools import JetMomentToolsConfig
-    stdJetModifiers.update(
+    stdJetModifiers.update( 
         qgtransformer = JetModifier("BoostedJetTaggerTool", "qgtransformer",
                                     createfn=JetMomentToolsConfig.getBoostedJetTaggerToolQG,
                                     JetContainer = _jetname,
@@ -345,7 +337,7 @@ except ModuleNotFoundError:
 # Substructure tagger tools: top
 try :
     from JetMomentTools import JetMomentToolsConfig
-    stdJetModifiers.update(
+    stdJetModifiers.update( 
         toptransformer = JetModifier("BoostedJetTaggerTool", "toptransformer",
                                      createfn=JetMomentToolsConfig.getBoostedJetTaggerToolTop,
                                      JetContainer = _jetname,
@@ -360,7 +352,7 @@ except ModuleNotFoundError:
 # Substructure tagger tools: w
 try :
     from JetMomentTools import JetMomentToolsConfig
-    stdJetModifiers.update(
+    stdJetModifiers.update( 
         wtransformer = JetModifier("BoostedJetTaggerTool", "wtransformer",
                             createfn=JetMomentToolsConfig.getBoostedJetTaggerToolW,
                             JetContainer = _jetname,
@@ -375,7 +367,7 @@ except ModuleNotFoundError:
 # Substructure tagger tools: w mass dec
 try :
     from JetMomentTools import JetMomentToolsConfig
-    stdJetModifiers.update(
+    stdJetModifiers.update( 
         wtransformer_massdec = JetModifier("BoostedJetTaggerTool", "wtransformer_massdec",
                             createfn=JetMomentToolsConfig.getBoostedJetTaggerToolWMassDec,
                             JetContainer = _jetname,

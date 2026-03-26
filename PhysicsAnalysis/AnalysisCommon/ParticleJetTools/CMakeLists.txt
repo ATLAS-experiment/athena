@@ -4,8 +4,6 @@
 atlas_subdir( ParticleJetTools )
 
 find_package( ROOT )
-find_package( FastJet REQUIRED )
-find_package( FastJetContrib REQUIRED COMPONENTS IFNPlugin CMPPlugin GHSAlgo SDFPlugin RecursiveTools )
 
 # Component(s) in the package:
 if( XAOD_STANDALONE )
@@ -14,7 +12,6 @@ if( XAOD_STANDALONE )
       PUBLIC_HEADERS ParticleJetTools
       LINK_LIBRARIES AsgTools EventPrimitives xAODJet xAODTracking xAODTruth
       JetInterface MCTruthClassifierLib JetRecLib AsgDataHandlesLib
-      ${FASTJETCONTRIB_LIBRARIES} ${FASTJET_LIBRARIES}
       PRIVATE_LINK_LIBRARIES AthContainers CxxUtils TruthUtils )
 else()
    atlas_add_library( ParticleJetToolsLib
@@ -23,7 +20,6 @@ else()
       LINK_LIBRARIES AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives 
       GaudiKernel JetInterface JetRecLib MCTruthClassifierLib
       xAODBase xAODEventInfo xAODJet xAODTruth
-      ${FASTJETCONTRIB_LIBRARIES} ${FASTJET_LIBRARIES}
       PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib AthAnalysisBaseCompsLib CxxUtils TruthUtils xAODTracking )
 endif()
 
