@@ -26,6 +26,26 @@ if (XAOD_STANDALONE)
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
     LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperPythonLib AsgTestingLib ColumnarExampleToolsLib
     POST_EXEC_SCRIPT nopost.sh )
+
+  #atlas_add_test( ColumnarToolWrapperPython_import
+  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_import.py
+  #  POST_EXEC_SCRIPT nopost.sh )
+
+  #atlas_add_test( ColumnarToolWrapperPython_atlascp
+  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_atlascp.py
+  #  POST_EXEC_SCRIPT nopost.sh )
+
+  #atlas_add_test( ColumnarToolWrapperPython_example_tools
+  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_example_tools.py
+  #  POST_EXEC_SCRIPT nopost.sh )
+
+  #atlas_add_test( ColumnarToolWrapperPython_wrapper
+  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_wrapper.py
+  #  POST_EXEC_SCRIPT nopost.sh )
+
+  #atlas_add_test( ColumnarToolWrapperPython_bindings
+  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bindings.py
+  #  POST_EXEC_SCRIPT nopost.sh )
 endif ()
 
 # nanobind needs Development.Module. Development.Embed is additionally

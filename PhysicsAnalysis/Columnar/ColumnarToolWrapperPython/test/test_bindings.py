@@ -1,16 +1,24 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Matthew Feickert
+# @author Giordon Stark
 
 # This follows the code Nils wrote in the ColumnarTests at:
 # https://gitlab.cern.ch/atlas-asg/columnar-athena/-/blob/84feea5559c07a6a67233ab5465f90fb6f862509/PhysicsAnalysis/Columnar/ColumnarTests/test/gt_fullTools.cxx
-import python_tool_handle
+
+import os
+import sys
+sys.path.insert(0, os.path.dirname(__file__))
+
+from testutils import _run_tests, approx, xfail
+
 import numpy as np
-import pytest
+
+from ColumnarToolWrapperPython import PythonToolHandle
 
 
 def test_properties():
-    muon_eff_sf_tool_handle = python_tool_handle.PythonToolHandle()
+    muon_eff_sf_tool_handle = PythonToolHandle()
 
     muon_eff_sf_tool_handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
     assert muon_eff_sf_tool_handle.type == "CP::MuonEfficiencyScaleFactors"
@@ -18,7 +26,7 @@ def test_properties():
 
 
 def test_accessors():
-    muon_eff_sf_tool_handle = python_tool_handle.PythonToolHandle()
+    muon_eff_sf_tool_handle = PythonToolHandle()
 
     muon_eff_sf_tool_handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
     muon_eff_sf_tool_handle.initialize()
@@ -51,7 +59,7 @@ def test_accessors():
 
 
 def test_call():
-    muon_eff_sf_tool_handle = python_tool_handle.PythonToolHandle()
+    muon_eff_sf_tool_handle = PythonToolHandle()
 
     muon_eff_sf_tool_handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
     muon_eff_sf_tool_handle.initialize()
@@ -78,23 +86,68 @@ def test_call():
 
     muon_eff_sf_tool_handle.call()
 
-    assert columns["Muons.sfOut"] == pytest.approx(0.99509060382843018)
+    assert columns["Muons.sfOut"] == approx(0.99509060382843018)
     assert columns["Muons.validOut"] == 1
 
 
+def test_dict():
+    """dict(handle) reflects column state: empty before set, populated after set, empty after call()."""
+    handle = PythonToolHandle()
+    handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
+    handle.initialize()
+
+    # Before setting any columns: keys match tool columns, all values are empty
+    result = dict(handle)
+    assert set(result.keys()) == {col.name for col in handle.columns}
+    assert all(len(v) == 0 for v in result.values())
+
+    # After setting columns: set columns are populated, unset remain empty
+    event_info = np.array([0, 1], dtype=np.uint64)
+    event_run = np.array([284500], dtype=np.uint32)
+    event_rand = np.array([284500], dtype=np.uint32)
+    event_mask = np.array([1], dtype=np.uint32)
+    muons = np.array([0, 1], dtype=np.uint64)
+    muons_pt = np.array([10e5], dtype=np.float32)
+    muons_eta = np.array([1], dtype=np.float32)
+    muons_phi = np.array([1], dtype=np.float32)
+    muons_type = np.array([0], dtype=np.uint16)
+    muons_sf = np.array([0], dtype=np.float32)
+    muons_valid = np.array([0], dtype=np.int8)
+    handle["EventInfo"] = event_info
+    handle["EventInfo.runNumber"] = event_run
+    handle["EventInfo.RandomRunNumber"] = event_rand
+    handle["EventInfo.eventTypeBitmask"] = event_mask
+    handle["Muons"] = muons
+    handle["Muons.pt"] = muons_pt
+    handle["Muons.eta"] = muons_eta
+    handle["Muons.phi"] = muons_phi
+    handle["Muons.muonType"] = muons_type
+    handle.set_column_void("Muons.sfOut", muons_sf, False)
+    handle.set_column_void("Muons.validOut", muons_valid, False)
+
+    result = dict(handle)
+    assert len(result["Muons.pt"]) == 1
+    assert result["Muons.pt"][0] == approx(10e5)
+    assert len(result["Muons.isLRT"]) == 0  # optional, not set
+
+    # After call(): all columns reset to empty
+    handle.call()
+    result = dict(handle)
+    assert all(len(v) == 0 for v in result.values())
+
+
 def test_set_property():
-    muon_calib_tool_handle = python_tool_handle.PythonToolHandle()
+    muon_calib_tool_handle = PythonToolHandle()
     muon_calib_tool_handle.set_type_and_name("CP::MuonCalibTool/unique0")
 
     muon_calib_tool_handle.set_property("IsRun3Geo", False)
     muon_calib_tool_handle.set_property("calibMode", 0)
     muon_calib_tool_handle.set_property("ExcludeNSWFromPrecisionLayers", False)
-    muon_calib_tool_handle.set_property("readResolutionCategory", True)
     muon_calib_tool_handle.initialize()
 
     assert muon_calib_tool_handle
 
-    egamma_calib_tool_handle = python_tool_handle.PythonToolHandle()
+    egamma_calib_tool_handle = PythonToolHandle()
 
     egamma_calib_tool_handle.set_type_and_name(
         "CP::EgammaCalibrationAndSmearingTool/unique1"
@@ -109,7 +162,7 @@ def test_set_property():
 
     assert egamma_calib_tool_handle
 
-    egamma_calib_tool_handle = python_tool_handle.PythonToolHandle()
+    egamma_calib_tool_handle = PythonToolHandle()
 
     egamma_calib_tool_handle.set_type_and_name(
         "CP::EgammaCalibrationAndSmearingTool/unique2"
@@ -125,15 +178,14 @@ def test_set_property():
     assert egamma_calib_tool_handle
 
 
-@pytest.mark.xfail(reason="ElementLinks not yet supported")
+@xfail(reason="ElementLinks not yet supported")
 def test_muon_calib_tool():
-    muon_calib_tool_handle = python_tool_handle.PythonToolHandle()
+    muon_calib_tool_handle = PythonToolHandle()
 
     muon_calib_tool_handle.set_type_and_name("CP::MuonCalibTool/unique0")
     muon_calib_tool_handle.set_property("IsRun3Geo", False)
     muon_calib_tool_handle.set_property("calibMode", 0)
     muon_calib_tool_handle.set_property("ExcludeNSWFromPrecisionLayers", False)
-    muon_calib_tool_handle.set_property("readResolutionCategory", True)
     muon_calib_tool_handle.initialize()
 
     columns = {
@@ -175,3 +227,7 @@ def test_muon_calib_tool():
         muon_calib_tool_handle.set_column(name, value)
 
     muon_calib_tool_handle.call()
+
+
+if __name__ == "__main__":
+    _run_tests(sys.modules[__name__])

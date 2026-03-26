@@ -215,7 +215,7 @@ namespace columnar
         return std::make_pair (size, static_cast<CT*>(const_cast<void*>(ptr)));
     }
     [[nodiscard]] std::pair<std::size_t,const void*>
-    getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst);
+    getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst) const;
 
 
     /// @brief do a basic check of the data vector
