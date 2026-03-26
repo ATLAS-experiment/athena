@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaMonitoring )
@@ -62,10 +62,10 @@ atlas_install_runtime( share/test_unit_ExampleMonitorAlgorithm*.ref )
 atlas_add_test( ExampleMonitorAlgorithm_test
     SCRIPT test/test_unit_ExampleMonitorAlgorithm.sh
     PROPERTIES TIMEOUT 300
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
 )
 atlas_add_test( ExampleMonitorAlgorithm_online_test
     SCRIPT test/test_unit_ExampleMonitorAlgorithm_online.sh
     PROPERTIES TIMEOUT 300
-    POST_EXEC_SCRIPT nopost.sh
+    POST_EXEC_SCRIPT noerror.sh
 )
