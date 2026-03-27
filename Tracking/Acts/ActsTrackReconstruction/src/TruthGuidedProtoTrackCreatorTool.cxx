@@ -151,7 +151,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
   Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{static_cast<float>(::charge(truthParticle))}};
+    absPdg, mass, static_cast<float>(::charge(truthParticle))};
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
                                     cov, actsHypothesis);

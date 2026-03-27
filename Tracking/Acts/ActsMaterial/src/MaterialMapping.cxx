@@ -7,7 +7,7 @@
 #include "ActsInterop/Logger.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Material/IntersectionMaterialAssigner.hpp"
-#include "Acts/Material/BinnedSurfaceMaterialAccumulater.hpp"
+#include "Acts/Material/BinnedSurfaceMaterialAccumulator.hpp"
 #include "Acts/Material/TrackingGeometryMaterial.hpp"
 
 ActsTrk::MaterialMapping::MaterialMapping(const std::string& name, ISvcLocator* pSvcLocator) :
@@ -47,29 +47,29 @@ StatusCode ActsTrk::MaterialMapping::initialize()
                                                                                  makeActsAthenaLogger(this, "MaterialAssigner"));
 
     // The binned surface material accumulator
-    Acts::BinnedSurfaceMaterialAccumulater::Config accumulaterConfig;
-    accumulaterConfig.materialSurfaces = materialSurfaces;
-    auto materialAccumulater = std::make_shared<Acts::BinnedSurfaceMaterialAccumulater>(accumulaterConfig,
-                                                                                        makeActsAthenaLogger(this, "MaterialAccumulater"));
+    Acts::BinnedSurfaceMaterialAccumulator::Config accumulatorConfig;
+    accumulatorConfig.materialSurfaces = materialSurfaces;
+    auto materialAccumulator = std::make_shared<Acts::BinnedSurfaceMaterialAccumulator>(accumulatorConfig,
+                                                                                        makeActsAthenaLogger(this, "MaterialAccumulator"));
 
     /// The material mapper
     Acts::MaterialMapper::Config mapperConfig;
     mapperConfig.assignmentFinder = materialAssigner;
-    mapperConfig.surfaceMaterialAccumulater = materialAccumulater;
+    mapperConfig.surfaceMaterialAccumulator = materialAccumulator;
     m_materialMapper = std::make_shared<Acts::MaterialMapper> (mapperConfig,
                                                                makeActsAthenaLogger(this, "MaterialMapper"));
 
     // Create the state object
-    m_mappingState = m_materialMapper->createState();
+    const ActsTrk::GeometryContext& geoContext{m_trackingGeometrySvc->getNominalContext()};
+    m_mappingState = m_materialMapper->createState(geoContext.context());
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode ActsTrk::MaterialMapping::finalize()
 {
-    Acts::TrackingGeometryMaterial detectorMaterial = m_materialMapper->finalizeMaps(*m_mappingState);
-
     const ActsTrk::GeometryContext& geoContext{m_trackingGeometrySvc->getNominalContext()};
+    Acts::TrackingGeometryMaterial detectorMaterial = m_materialMapper->finalizeMaps(*m_mappingState, geoContext.context());
 
     // Loop over the available writers and write the maps
     for (auto& materialWriter : m_materialMapWriters) {

@@ -186,7 +186,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
   Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{1.0f}};
+    absPdg, mass, 1.0f};
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
                                     cov, actsHypothesis);
@@ -235,7 +235,7 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
   Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
   Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, Acts::AnyCharge{1.0f}};
+    absPdg, mass, 1.0f};
 
   return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
                                     cov, actsHypothesis);

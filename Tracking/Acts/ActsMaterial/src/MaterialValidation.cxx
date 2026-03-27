@@ -42,11 +42,11 @@ StatusCode ActsTrk::MaterialValidation::initialize()
     auto materialAssigner = std::make_shared<Acts::IntersectionMaterialAssigner>(assingerConfig,
                                                                                  makeActsAthenaLogger(this, "MaterialAssigner"));
 
-    /// The material validater
-    Acts::MaterialValidater::Config validaterConfig;
-    validaterConfig.materialAssigner = materialAssigner;
-    m_materialValidater = std::make_shared<Acts::MaterialValidater> (validaterConfig,
-                                                                     makeActsAthenaLogger(this, "MaterialValidater"));
+    /// The material validator
+    Acts::MaterialValidator::Config validatorConfig;
+    validatorConfig.materialAssigner = materialAssigner;
+    m_materialValidator = std::make_shared<Acts::MaterialValidator> (validatorConfig,
+                                                                     makeActsAthenaLogger(this, "MaterialValidator"));
 
     return StatusCode::SUCCESS;
 }
@@ -90,7 +90,7 @@ ActsTrk::MaterialValidation::execute (const EventContext& ctx) const
                                 std::sin(phi) * std::sin(theta), std::cos(theta));
 
         // Record the material
-        auto rmTrack = m_materialValidater->recordMaterial(geoContext.context(),
+        auto rmTrack = m_materialValidator->recordMaterial(geoContext.context(),
                                                            magFieldContext,
                                                            startPosition,
                                                            direction);

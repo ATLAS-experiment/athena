@@ -908,7 +908,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     }
 
     auto propagateResult = propagator.makeResult(
-        std::move(state), propagateOnlyResult, referenceSurface, options);
+        std::move(state), propagateOnlyResult, options, true, &referenceSurface);
 
     if (!propagateResult.ok()) {
       ATH_MSG_WARNING("Failed to extrapolate track: " << propagateResult.error().message());
