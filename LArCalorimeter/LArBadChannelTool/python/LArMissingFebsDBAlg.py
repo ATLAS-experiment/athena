@@ -73,6 +73,7 @@ if __name__=="__main__":
     addLArCalibFlags(flags)
 
     flags.Input.isMC = args.MC
+    flags.Input.Files = []
     flags.IOVDb.DatabaseInstance="OFLP200" if args.MC else "CONDBR2"
     flags.LAr.doAlign=False
     flags.Input.RunNumbers=[args.runnumber if args.runnumber>0 else 300000]

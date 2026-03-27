@@ -9,7 +9,7 @@ def LArSC2NtupleCfg(flags, isEmf=False, **kwargs):
        from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
        cfg = ByteStreamReadCfg(flags)
 
-       if kwargs.get("ContainerKey","") != "" or "SC_ADC_BAS" in kwargs.get('SCContainerKeys') or "SC_ET" in kwargs.get('SCContainerKeys'):
+       if kwargs.get("ContainerKey","") != "" or "SC_ADC_BAS" in kwargs.get('SCContainerKeys') or "SC_ET" in kwargs.get('SCContainerKeys') or "SC_ET_ID" in kwargs.get('SCContainerKeys'):
           from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
           cfg.merge(LArRawSCDataReadingCfg(flags,OutputLevel=kwargs['OutputLevel']))
        else:
