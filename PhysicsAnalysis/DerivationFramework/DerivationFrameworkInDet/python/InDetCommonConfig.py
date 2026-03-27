@@ -44,12 +44,11 @@ def InDetCommonCfg(flags, **kwargs):
                 DecorationName = "DFCommonTightPrimary"))
 
         if kwargs['AddPseudoTracks']:
-            from DerivationFrameworkInDet.InDetToolsConfig import (
-                PseudoTrackSelectorCfg)
-            PseudoTrackSelectorTool = acc.getPrimaryAndMerge(
+            from DerivationFrameworkInDet.InDetToolsConfig import PseudoTrackSelectorCfg
+            acc.merge(
                 PseudoTrackSelectorCfg(
                     flags,
-                    name                                 = "PseudoTrackSelectorTool",
+                    name                                 = "InDetSelectedPseudo",
                     RecoTrackParticleLocation            = "InDetTrackParticles",
                     PseudoTrackParticleLocation          = "InDetPseudoTrackParticles",
                     OutputRecoReplacedWithPseudo         = "InDetReplacedWithPseudoTrackParticles",
@@ -60,11 +59,8 @@ def InDetCommonCfg(flags, **kwargs):
                     OutputRecoPlusPseudoNotFromB         = "InDetPlusPseudoNotFromBTrackParticles",
                     OutputRecoNoFakes                    = "InDetNoFakesTrackParticles",
                     OutputRecoNoFakesFromB               = "InDetNoFakesFromBTrackParticles",
-                    OutputRecoNoFakesNotFromB            = "InDetNoFakesNotFromBTrackParticles"))
-
-            acc.addEventAlgo(CommonAugmentation(
-                "InDetSelectedPseudo",
-                AugmentationTools=[PseudoTrackSelectorTool])) # TODO Migrate public tool to AthReentrantAlgorithm
+                    OutputRecoNoFakesNotFromB            = "InDetNoFakesNotFromBTrackParticles"
+                ))
 
         # ====================================================================
         # EXPRESSION OF Z0 AT THE PRIMARY VERTEX

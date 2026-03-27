@@ -477,9 +477,9 @@ def PseudoTrackSelectorCfg(flags, name, **kwargs):
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    acc.addPublicTool(
+    acc.addEventAlgo(
         CompFactory.DerivationFramework.PseudoTrackSelector(
-            name, **kwargs), primary=True)
+            name, **kwargs))
     return acc
 
 # Tool for decorating tracks with the outcome of the track selector tool
