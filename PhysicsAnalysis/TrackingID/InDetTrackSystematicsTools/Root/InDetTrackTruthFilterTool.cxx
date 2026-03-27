@@ -130,10 +130,17 @@ namespace InDet {
     float pt = track->pt();
     float eta = track->eta();
 
+    // try to get origin from track origin tool, which relies on the truth particle link
     int origin = m_trackOriginTool->getTrackOrigin(track);
-    const static SG::ConstAccessor<int> acc_ftagTruthOrigin("ftagTruthOriginLabel");
-    if (acc_ftagTruthOrigin.isAvailable(*track)) {
-      origin = acc_ftagTruthOrigin(*track);
+    
+    // if the truth particle link is broken, use the ftag truth origin label if available
+    if (m_trackOriginTool->getTruth(track) == nullptr) {
+      int exclusive_origin = -1;
+      const static SG::ConstAccessor<int> acc_ftagTruthOrigin("ftagTruthOriginLabel");
+      if (acc_ftagTruthOrigin.isAvailable(*track)) {
+        exclusive_origin = acc_ftagTruthOrigin(*track);
+        origin = InDet::TrkOrigin::getTrkOrigin(exclusive_origin);
+      } // else stays as pileup, which is what getTrackOrigin returns when element link is broken
     }
 
     if ( InDet::TrkOrigin::isFake(origin) ) {
