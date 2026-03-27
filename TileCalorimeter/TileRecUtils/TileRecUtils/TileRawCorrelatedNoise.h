@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCORRELATEDNOISE_H
@@ -25,6 +25,8 @@
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
+
+#include <memory>
 
 
 class TileRawCorrelatedNoise: public AthAlgorithm {

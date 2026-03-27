@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -16,9 +16,8 @@
 #include "AthenaKernel/errorcheck.h"
 #include "PathResolver/PathResolver.h"
 
+#include <cstdio> //sprintf
 
-
-#include <memory>
 
 // #############################################################################
 TileRawCorrelatedNoise::TileRawCorrelatedNoise(const std::string& name, ISvcLocator* pSvcLocator)
@@ -44,7 +43,7 @@ TileRawCorrelatedNoise::~TileRawCorrelatedNoise() {
 StatusCode TileRawCorrelatedNoise::initialize() {
 // #############################################################################
 
-  int PmtToChannelBarrel[48] = {
+  static constexpr int PmtToChannelBarrel[48] = {
    1,  2,  3,  4,  5,  6,  7,  8,
    9, 10, 11, 12, 13, 14, 15, 16,
   17, 18, 19, 20, 21, 22, 23, 24,
@@ -52,7 +51,7 @@ StatusCode TileRawCorrelatedNoise::initialize() {
   31, 36, 35, 34, 39, 38, 37, 42,
   41, 40, 45, 44, 43, 48, 47, 46 };
 
-  int PmtToChannelExtendedBarrel[48] = {
+  static constexpr int PmtToChannelExtendedBarrel[48] = {
    1,  2,  3,  4,  5,  6,  7,  8,
    9, 10, 11, 12, 13, 14, 15, 16,
   17, 18, 19, 20, 21, 22, 23, 24,
@@ -304,7 +303,7 @@ StatusCode TileRawCorrelatedNoise::execute() {
 
   const TileHWID* tileHWID;
   CHECK( detStore()->retrieve(tileHWID, "TileHWID") );
-
+  //coverity[STACK_USE]
   const TileDigits* OriginalDigits[4][64][48];
 
   // go through ALL TileDigits in container
