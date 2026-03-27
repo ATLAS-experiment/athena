@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkTau/DiTauChargeDecorator.h"
 #include "xAODTau/DiTauJetContainer.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteDecorHandle.h"
+#include "GaudiKernel/Chrono.h"
 
 namespace DerivationFramework {
 
@@ -15,13 +16,18 @@ namespace DerivationFramework {
     ATH_CHECK( m_ditauContainerKey.initialize() );
     ATH_CHECK( m_chargeKey.initialize() );
 
+    // get the chrono auditor
+    ATH_CHECK ( m_chronoSvc.retrieve() );
+
     return StatusCode::SUCCESS;
   }
 
 
-  StatusCode DiTauChargeDecorator::addBranches(const EventContext& ctx) const
+  StatusCode DiTauChargeDecorator::execute(const EventContext& ctx) const
   {
-
+    // On your marks.... get set....
+    Chrono chrono( &(*m_chronoSvc), name() );
+    // GO!!
 
     // retrieve tau container
     SG::ReadHandle<xAOD::DiTauJetContainer> ditauJetsReadHandle(m_ditauContainerKey, ctx);

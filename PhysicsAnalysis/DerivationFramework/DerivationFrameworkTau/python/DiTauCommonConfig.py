@@ -52,19 +52,9 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
 def AddDiTauChargeDecoratorCfg(flags, **kwargs):
     """Decorate DiTau charge"""
 
-    kwargs.setdefault("DiTauContainerName", "DiTauJets")
-    kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
-
     acc = ComponentAccumulator()
-
-    DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
-    DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-
-    prefix = kwargs['prefix']
-    diTauChargeDecorator = DiTauChargeDecorator(name               = f"{prefix}_DiTauChargeDecorator",
-                                                DiTauContainerName = kwargs['DiTauContainerName'])
-    acc.addPublicTool(diTauChargeDecorator)
-    acc.addEventAlgo(DiTauChargeDecoratorKernel(name              = f"{prefix}_DiTauIDDecorKernel",
-                                                AugmentationTools = [diTauChargeDecorator])) # TODO Migrate public tool to AthReentrantAlgorithm
+    prefix = kwargs.setdefault("DiTauContainerName", "DiTauJets")
+    acc.addEventAlgo(CompFactory.DerivationFramework.DiTauChargeDecorator(name = f"{prefix}_DiTauChargeDecorKernel",
+                                                DiTauContainerName = kwargs['DiTauContainerName']))
 
     return acc
