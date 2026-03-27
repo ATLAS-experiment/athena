@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -8,10 +8,6 @@
 // Author: S.Binet<binet@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 
-
-// STL includes
-#include <cstdlib> // for random numbers
-#include <stdexcept>
 
 // FrameWork includes
 #include "Gaudi/Property.h"
@@ -30,6 +26,11 @@
 
 // McParticleAlgs includes
 #include "McAodValidationAlg.h"
+
+// STL includes
+#include <cstdlib> // for random numbers
+#include <stdexcept>
+
 
 /////////////////////////////////////////////////////////////////// 
 /// Public methods: 
@@ -121,7 +122,8 @@ StatusCode McAodValidationAlg::finalize()
 StatusCode McAodValidationAlg::execute()
 {  
   ATH_MSG_DEBUG ("Executing " << name() << "...");
-
+  //we don't care this is not crypto-strength random number generator
+  //coverity[dont_call]
   const double random =  std::rand() * 1.;
   ATH_MSG_DEBUG ("Random= " << random);
   
