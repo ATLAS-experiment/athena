@@ -35,8 +35,9 @@ atlas_add_component (GlobalSimulation
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
-atlas_install_runtime(share/*.txt share/*.json)
-atlas_install_data( data/* )
+atlas_install_runtime(share/*.txt share/*.json )
+atlas_install_data( data/* share/*.xml )
+atlas_install_joboptions( share/plugin_*.py )
 
 atlas_add_test(testEgamma1BDT_tv
                SOURCES src/FirstChain/Egamma1BDT/TestEgamma1/all_tests.cxx
