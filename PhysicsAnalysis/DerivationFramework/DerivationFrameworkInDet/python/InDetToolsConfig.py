@@ -44,19 +44,15 @@ def UsedInVertexFitTrackDecoratorCfg(
     return acc
 
 
-
 def HardScatterVertexDecoratorCfg(flags, name = "DFCommonHSDecorator", **kwargs):
     """Configure the hard process vertex decorator"""
     acc = ComponentAccumulator()
     from InDetConfig.InDetHardScatterSelectionToolConfig import InDetHardScatterSelectionToolCfg
-    kwargs.setdefault("HardScatterSelectionTool", acc.getPrimaryAndMerge(InDetHardScatterSelectionToolCfg(flags, name = "HSSelectionTool",
+    kwargs.setdefault("HardScatterSelectionTool", acc.popToolsAndMerge(InDetHardScatterSelectionToolCfg(flags, name = "HSSelectionTool",
                                                                                                                 ReturnDeco = False)))
     kwargs.setdefault("VertexContainerName", "PrimaryVertices")
     kwargs.setdefault("HardScatterDecoName", "hardScatterVertexLink")
-    the_tool = CompFactory.DerivationFramework.HardScatterVertexDecorator(name = "HardScatterDecorTool", **kwargs)
-    acc.addPublicTool(the_tool, primary=True)
-    the_alg = CompFactory.DerivationFramework.CommonAugmentation(name, AugmentationTools=[the_tool]) # TODO Migrate public tool to AthReentrantAlgorithm
-    acc.addEventAlgo(the_alg)
+    acc.addEventAlgo(CompFactory.DerivationFramework.HardScatterVertexDecorator(name, **kwargs))
     return acc
 
 # TrackStateOnSurface decorator
