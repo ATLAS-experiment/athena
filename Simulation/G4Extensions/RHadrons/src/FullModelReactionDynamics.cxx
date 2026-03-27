@@ -2201,6 +2201,7 @@ G4bool FullModelReactionDynamics::TwoCluster(
             {
               rthnve = CLHEP::pi * G4UniformRand();
               phinve = CLHEP::twopi * G4UniformRand();
+              //coverity[COPY_PASTE_ERROR:FALSE]
               vec[i]->SetMomentum( pp*std::sin(rthnve)*std::cos(phinve)*CLHEP::MeV,
                                    pp*std::sin(rthnve)*std::sin(phinve)*CLHEP::MeV,
                                    pp*std::cos(rthnve)*CLHEP::MeV );
@@ -3175,6 +3176,7 @@ void FullModelReactionDynamics::Rotate(
                 {
                   rthnve = CLHEP::pi*G4UniformRand();
                   phinve = CLHEP::twopi*G4UniformRand();
+                  //coverity[COPY_PASTE_ERROR:FALSE]
                   vec[i]->SetMomentum( pp*std::sin(rthnve)*std::cos(phinve)*CLHEP::MeV,
                                        pp*std::sin(rthnve)*std::sin(phinve)*CLHEP::MeV,
                                        pp*std::cos(rthnve)*CLHEP::MeV );
@@ -3976,6 +3978,7 @@ FullModelReactionDynamics::NuclearReaction(
     {
       G4double phinve = CLHEP::twopi*G4UniformRand();
       G4double rthnve = std::acos( std::max( -1.0, std::min( 1.0, -1.0 + 2.0*G4UniformRand() ) ) );
+      //coverity[COPY_PASTE_ERROR:FALSE]
       currentParticle.SetMomentum( p*std::sin(rthnve)*std::cos(phinve),
                                    p*std::sin(rthnve)*std::sin(phinve),
                                    p*std::cos(rthnve) );
