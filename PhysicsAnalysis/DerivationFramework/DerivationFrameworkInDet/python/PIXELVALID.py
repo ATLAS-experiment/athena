@@ -153,7 +153,7 @@ def PIXELVALIDThinningKernelCfg(flags, name="PIXELVALIDThinningKernel", StreamNa
             AugmentationTools=[],
             ThinningTools=thinningTools,
             OutputLevel=INFO),
-            sequenceName="PixelClusterThinningSequence")        
+            sequenceName="PixelClusterThinningSequence")
 
     return acc
 
@@ -176,8 +176,7 @@ def PIXELVALIDKernelCfg(flags, name="PIXELVALIDKernel", StreamName=""):
     tsos_augmentationTools = []
 
     from DerivationFrameworkInDet.InDetToolsConfig import DFTrackStateOnSurfaceDecoratorCfg
-    DFTSOS = acc.getPrimaryAndMerge(DFTrackStateOnSurfaceDecoratorCfg(flags))
-    tsos_augmentationTools.append(DFTSOS)
+    acc.merge(DFTrackStateOnSurfaceDecoratorCfg(flags))
 
     PixelStoreMode = flags.InDet.PixelDumpMode
     if flags.InDet.PixelDumpMode==3:

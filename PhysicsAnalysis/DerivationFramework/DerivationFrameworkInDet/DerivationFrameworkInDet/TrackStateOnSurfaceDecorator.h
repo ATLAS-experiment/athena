@@ -2,18 +2,13 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TrackToVertexWrapper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef DERIVATIONFRAMEWORK_TRACKSTATEONSURFACEDECORATOR_H
 #define DERIVATIONFRAMEWORK_TRACKSTATEONSURFACEDECORATOR_H
 
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODTracking/TrackMeasurementValidationContainer.h"
@@ -51,19 +46,19 @@ namespace Trk {
 
 namespace DerivationFramework {
 
-  class TrackStateOnSurfaceDecorator : public extends<ExpressionParserUser<AthAlgTool>, IAugmentationTool> {
-    public: 
-      using base_class::base_class;
+  class TrackStateOnSurfaceDecorator : public AthReentrantAlgorithm {
+    public:
+      using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
       StatusCode initialize();
       StatusCode finalize();
-      virtual StatusCode addBranches(const EventContext& ctx) const;
+      virtual StatusCode execute(const EventContext& ctx) const;
 
     private:
-      
-      
-      ElementLink< xAOD::TrackMeasurementValidationContainer > buildElementLink( const Trk::PrepRawData*, 
-                                                                  const std::vector<unsigned int>*, 
+
+
+      ElementLink< xAOD::TrackMeasurementValidationContainer > buildElementLink( const Trk::PrepRawData*,
+                                                                  const std::vector<unsigned int>*,
                                                                   const xAOD::TrackMeasurementValidationContainer* ) const;
 
       // --- Steering and configuration flags
@@ -87,7 +82,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<ComTime> m_trtPhaseKey
          { this,"TRTPhaseKey","TRT_Phase", ""};
       StringProperty m_selectionString
-	 { this, "SelectionString", "", "track selections"};
+         { this, "SelectionString", "", "track selections"};
 
       SG::ReadHandleKey<std::vector<unsigned int> > m_pixelMapName
          { this, "PixelMapName", "PixelClustersOffsets" , ""};
@@ -118,7 +113,7 @@ namespace DerivationFramework {
       // For P->T converter of SCT_Clusters
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
 
-     
+
       // --- Services and tools
       const AtlasDetectorID* m_idHelper = nullptr;
       const PixelID*         m_pixId = nullptr;
@@ -127,15 +122,15 @@ namespace DerivationFramework {
 
       ToolHandle<Trk::IUpdator> m_updator {this, "Updator", "Trk::KalmanUpdator"};
       ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator
-	{this, "ResidualPullCalculator",
-	 "Trk::ResidualPullCalculator/ResidualPullCalculator"};
+        {this, "ResidualPullCalculator",
+         "Trk::ResidualPullCalculator/ResidualPullCalculator"};
       ToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool
-	{this, "HoleSearch", "InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool"};
+        {this, "HoleSearch", "InDet::InDetTrackHoleSearchTool/InDetHoleSearchTool"};
       ToolHandle<Trk::IExtrapolator> m_extrapolator
-	{this, "TrackExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
+        {this, "TrackExtrapolator", "Trk::Extrapolator/AtlasExtrapolator"};
       ToolHandle<ITRT_CalDbTool> m_trtcaldbTool {this, "TRT_CalDbTool", "TRT_CalDbTool"};
       ToolHandle<ITRT_ToT_dEdx> m_TRTdEdxTool
-	{this, "TRT_ToT_dEdx", "InDet::TRT_ElectronPidTools/TRT_ToT_dEdx"};
+        {this, "TRT_ToT_dEdx", "InDet::TRT_ElectronPidTools/TRT_ToT_dEdx"};
 
       // --- Private other members
       std::vector<SG::WriteDecorHandleKey<xAOD::EventInfo> > m_trtPhaseDecorKey;
@@ -155,7 +150,7 @@ namespace DerivationFramework {
      Gaudi::Property< std::vector<float> > m_pixelLayerRadii {this, "PixelLayerRadii", {29.5,50.5,88.5,122.5}, "Radii to extrapolate to for estimating track position on layers" };
 
 
-  }; 
+  };
 }
 
 #endif // DERIVATIONFRAMEWORK_TRACKSTATEONSURFACEDECORATOR_H

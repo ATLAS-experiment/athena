@@ -2,9 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TrackStateOnSurfaceDecorator.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 // Author:Anthony Morley
 //
 
@@ -169,10 +166,10 @@ namespace DerivationFramework {
        names[kTrkL2XDecor]="TrkL2X";
        names[kTrkL2YDecor]="TrkL2Y";
        names[kTrkL2ZDecor]="TrkL2Z";
-       createDecoratorKeys(*this,m_containerName, m_sgName, names, m_trackPixFloatDecorKeys);
+       createDecoratorKeys(*this,m_containerName, m_sgName, names, m_trackPixFloatDecorKeys); // FIXME set in configuration
     }
 
-    m_trackTSOSMOSLinkDecorKey = m_containerName.key() + "." + m_sgName + "msosLink";
+    m_trackTSOSMOSLinkDecorKey = m_containerName.key() + "." + m_sgName + "msosLink"; // FIXME set in configuration
     ATH_CHECK( m_trackTSOSMOSLinkDecorKey.initialize() );
 
     ATH_MSG_DEBUG("Initialization finished.");
@@ -186,7 +183,7 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode TrackStateOnSurfaceDecorator::addBranches(const EventContext& ctx) const
+  StatusCode TrackStateOnSurfaceDecorator::execute(const EventContext& ctx) const
   {
     ATH_MSG_DEBUG("Adding TSOS decorations the track particles");
 

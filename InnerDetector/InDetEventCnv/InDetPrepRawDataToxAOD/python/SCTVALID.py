@@ -77,7 +77,7 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
         if flags.InDet.SCTxAODZmumuSkimming:
             MSOSThinningSelectionString = "InDetTrackParticles.pt>10*GeV"
         from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
-        DFTSOS = acc.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="SCTVALID_DFTrackStateOnSurfaceDecorator",
+        acc.merge(TrackStateOnSurfaceDecoratorCfg(flags, name="SCTVALID_DFTrackStateOnSurfaceDecorator",
                                                                         DecorationPrefix = "SCTVALID_",
                                                                         StoreTRT=True,
                                                                         StoreSCT=True,
@@ -85,7 +85,6 @@ def SCTVALIDKernelCfg(flags, name='SCTVALIDKernel', **kwargs):
                                                                         PRDtoTrackMap="",
                                                                         SelectionString=MSOSThinningSelectionString)
                                         )
-        augmentationTools.append(DFTSOS)
 
     from DerivationFrameworkInDet.InDetToolsConfig import EventInfoBSErrDecoratorCfg
     DFEI = acc.getPrimaryAndMerge(EventInfoBSErrDecoratorCfg(flags, name = "SCTxAOD_DFEventInfoBSErrDecorator"))
