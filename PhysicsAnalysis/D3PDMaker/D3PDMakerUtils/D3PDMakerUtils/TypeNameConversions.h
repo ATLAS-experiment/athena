@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -38,7 +38,7 @@ namespace D3PD {
 StatusCode nameToTypeinfo (const std::string& name,
                            std::type_info const* &ti,
                            const std::string& context,
-                           ServiceHandle<IClassIDSvc> clidsvc = 
+                           const ServiceHandle<IClassIDSvc> & clidsvc = 
                              ServiceHandle<IClassIDSvc>("ClassIDSvc",
                                                         "TypeNameConversions"));
 
@@ -54,7 +54,7 @@ StatusCode nameToTypeinfo (const std::string& name,
 StatusCode nameToCLID (const std::string& name,
                        CLID& clid,
                        const std::string& context,
-                       ServiceHandle<IClassIDSvc> clidsvc = 
+                       const ServiceHandle<IClassIDSvc> & clidsvc = 
                          ServiceHandle<IClassIDSvc>("ClassIDSvc",
                                                     "TypeNameConversions"));
 
@@ -67,7 +67,7 @@ StatusCode nameToCLID (const std::string& name,
  * @param context Context name, for error reporting.
  */
 StatusCode clidToTypeinfo (CLID clid,
-                           const std::string& nmae,
+                           const std::string& name,
                            std::type_info const* &ti,
                            const std::string& context);
 
