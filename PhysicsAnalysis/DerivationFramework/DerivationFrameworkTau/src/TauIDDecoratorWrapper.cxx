@@ -6,6 +6,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "xAODCore/ShallowCopy.h"
 #include "AthContainers/Decorator.h"
+#include "GaudiKernel/Chrono.h"
 
 namespace DerivationFramework {
 
@@ -22,12 +23,18 @@ namespace DerivationFramework {
     ATH_CHECK( m_trackWidthKey.initialize() );
     ATH_CHECK( m_passTATTauMuonOLRKey.initialize() );
 
+    // get the chrono auditor
+    ATH_CHECK ( m_chronoSvc.retrieve() );
+
     return StatusCode::SUCCESS;
   }
 
 
-  StatusCode TauIDDecoratorWrapper::addBranches(const EventContext& ctx) const
+  StatusCode TauIDDecoratorWrapper::execute(const EventContext& ctx) const
   {
+    // On your marks.... get set....
+    Chrono chrono( &(*m_chronoSvc), name() );
+    // GO!!
 
     // retrieve tau container
     SG::ReadHandle<xAOD::TauJetContainer> tauJetsReadHandle(m_tauContainerKey, ctx);
