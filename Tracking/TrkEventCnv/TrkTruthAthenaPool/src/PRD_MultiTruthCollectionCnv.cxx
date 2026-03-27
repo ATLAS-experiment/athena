@@ -40,31 +40,31 @@ PRD_MultiTruthCollection* PRD_MultiTruthCollectionCnv::createTransient(const Tok
 
   if (compareClassGuid(token, s_p4_guid)) {
     log<<MSG::DEBUG<<"Read PRD_MultiTruthCollection_p4. token="<<token->toString()<<endmsg;
-    Trk::PRD_MultiTruthCollection_p4* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p4>();
+    Trk::PRD_MultiTruthCollection_p4* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p4>(token);
     m_converter_p4.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p3_guid)) {
     log<<MSG::DEBUG<<"Read PRD_MultiTruthCollection_p3. token="<<token->toString()<<endmsg;
-    Trk::PRD_MultiTruthCollection_p3* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p3>();
+    Trk::PRD_MultiTruthCollection_p3* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p3>(token);
     m_converter_p3.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p2_guid)) {
     log<<MSG::DEBUG<<"Read PRD_MultiTruthCollection_p2. token="<<token->toString()<<endmsg;
-    Trk::PRD_MultiTruthCollection_p2* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p2>();
+    Trk::PRD_MultiTruthCollection_p2* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p2>(token);
     m_converter_p2.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p1_guid)) {
     log<<MSG::DEBUG<<"Read PRD_MultiTruthCollection_p1. token="<<token->toString()<<endmsg;
-    Trk::PRD_MultiTruthCollection_p1* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p1>();
+    Trk::PRD_MultiTruthCollection_p1* pers=poolReadObject<Trk::PRD_MultiTruthCollection_p1>(token);
     m_converter_p1.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p0_guid)) {
     log<<MSG::DEBUG<<"Read version p0 of PRD_MultiTruthCollection. token="<<token->toString()<<endmsg;
-    trans.reset(poolReadObject<PRD_MultiTruthCollection>());
+    trans.reset(poolReadObject<PRD_MultiTruthCollection>(token));
   }
   else {
     log<<MSG::ERROR<<"Unsupported persistent version of PRD_MultiTruthCollection. token="

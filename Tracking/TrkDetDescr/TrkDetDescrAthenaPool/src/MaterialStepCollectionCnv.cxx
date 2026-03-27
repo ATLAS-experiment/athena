@@ -38,7 +38,7 @@ MaterialStepCollectionCnv::createTransientWithKey ( const Token* token, const st
   Trk::MaterialStepCollection* tCollection = nullptr;
   if( compareClassGuid(token,  p1_guid ) ) {
 
-    std::unique_ptr< MaterialStepCollection_PERS >  p_coll( poolReadObject< MaterialStepCollection_PERS >() );
+    std::unique_ptr< MaterialStepCollection_PERS >  p_coll( poolReadObject< MaterialStepCollection_PERS >(token) );
     tCollection = m_TPConverter.createTransient( p_coll.get(), log );
   }
  

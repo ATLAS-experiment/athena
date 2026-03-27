@@ -36,25 +36,25 @@ TrigTauClusterContainer* TrigTauClusterContainerCnv::createTransient(const Token
 
     if(compareClassGuid(token, p5_guid))
     {
-        std::unique_ptr< TrigTauClusterContainer_p5 > col_vect(poolReadObject< TrigTauClusterContainer_p5 >());
+        std::unique_ptr< TrigTauClusterContainer_p5 > col_vect(poolReadObject< TrigTauClusterContainer_p5 >(token));
         //std::cout << "Reading TTCC p5" << std::endl;
         return m_converter5.createTransient(col_vect.get(), mlog);
     }
     else if(compareClassGuid(token, p4_guid))
     {
-        std::unique_ptr< TrigTauClusterContainer_p4 > col_vect(poolReadObject< TrigTauClusterContainer_p4 >());
+        std::unique_ptr< TrigTauClusterContainer_p4 > col_vect(poolReadObject< TrigTauClusterContainer_p4 >(token));
         //std::cout << "Reading TTCC p4" << std::endl;
         return m_converter4.createTransient(col_vect.get(), mlog);
     }
     else if(compareClassGuid(token, p3_guid))
     {
-        std::unique_ptr< TrigTauClusterContainer_p3 > col_vect(poolReadObject< TrigTauClusterContainer_p3 >());
+        std::unique_ptr< TrigTauClusterContainer_p3 > col_vect(poolReadObject< TrigTauClusterContainer_p3 >(token));
         //std::cout << "Reading TTCC p3" << std::endl;
         return m_converter3.createTransient(col_vect.get(), mlog);
     }
     else if(compareClassGuid(token, tlp1_guid))
     {
-        std::unique_ptr< TrigTauClusterContainer_tlp1 > col_vect(poolReadObject< TrigTauClusterContainer_tlp1 >());
+        std::unique_ptr< TrigTauClusterContainer_tlp1 > col_vect(poolReadObject< TrigTauClusterContainer_tlp1 >(token));
         //std::cout << "Reading TTC tlp1" << std::endl;
         return m_converter1.createTransient( col_vect.get(), mlog );
     }

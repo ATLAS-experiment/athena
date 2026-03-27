@@ -31,18 +31,18 @@ TrigMuonEFContainer * TrigMuonEFContainerCnv::createTransient(const Token* token
   static const pool::Guid p0_guid( "BB866230-C9D8-437A-A11B-A0CC08ACD97B" );
   
   if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< TrigMuonEFContainer_p2 > col_vect( poolReadObject< TrigMuonEFContainer_p2 >() );
+         std::unique_ptr< TrigMuonEFContainer_p2 > col_vect( poolReadObject< TrigMuonEFContainer_p2 >(token) );
          //         std::cout << "Reading IMFC p2" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
   } else if( compareClassGuid(token,  p1_guid ) ) {
-         std::unique_ptr< TrigMuonEFContainer_tlp1 > col_vect( poolReadObject< TrigMuonEFContainer_tlp1 >() );
+         std::unique_ptr< TrigMuonEFContainer_tlp1 > col_vect( poolReadObject< TrigMuonEFContainer_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
       
   } else if( compareClassGuid(token,  p0_guid ) ){
       
-         return poolReadObject< TrigMuonEFContainer >();
+         return poolReadObject< TrigMuonEFContainer >(token);
       
     } else  throw std::runtime_error( "Unsupported persistent version of TrigMuonEFContainer" );
   

@@ -17,12 +17,12 @@ TBScintillatorCont* TBScintillatorContCnv::createTransient(const Token* token) {
    static const pool::Guid   p0_guid("AE688514-B192-426D-A971-5CD072593272");  // GUID of the transient object
    if( compareClassGuid(token, p1_guid) ) {
       // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< TBScintillatorCont_p1 > col_vect( poolReadObject< TBScintillatorCont_p1 >() );
+      std::unique_ptr< TBScintillatorCont_p1 > col_vect( poolReadObject< TBScintillatorCont_p1 >(token) );
       return m_TPConverter.createTransient( col_vect.get(), log );
    }
    else if( compareClassGuid(token, p0_guid) ) {
       // regular object from before TP separation, just return it
-      return poolReadObject< TBScintillatorCont >();
+      return poolReadObject< TBScintillatorCont >(token);
    } 
    throw std::runtime_error("Unsupported persistent version of Data Collection");
 }

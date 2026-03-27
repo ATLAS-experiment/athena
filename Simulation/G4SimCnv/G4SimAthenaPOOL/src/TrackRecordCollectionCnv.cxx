@@ -26,12 +26,12 @@ TrackRecordCollection* TrackRecordCollectionCnv::createTransient(const Token* to
     static const pool::Guid   p2_guid("22D044AD-A13A-42BF-B2A4-BDAF5BE2D819");
 
    if( this->compareClassGuid(token, p1_guid))  {
-      std::unique_ptr< TrackRecordCollection_p1 >   col_vect( this->poolReadObject< TrackRecordCollection_p1 >() );
+      std::unique_ptr< TrackRecordCollection_p1 >   col_vect( this->poolReadObject< TrackRecordCollection_p1 >(token) );
       trans_cont = converter.createTransient( col_vect.get(), mlog );
    }
    // New _p2 version faster and smaller
    else  if( this->compareClassGuid(token, p2_guid))  {
-      std::unique_ptr< TrackRecordCollection_p2 >   col_vect( this->poolReadObject< TrackRecordCollection_p2 >() );
+      std::unique_ptr< TrackRecordCollection_p2 >   col_vect( this->poolReadObject< TrackRecordCollection_p2 >(token) );
       trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
    }
    else 

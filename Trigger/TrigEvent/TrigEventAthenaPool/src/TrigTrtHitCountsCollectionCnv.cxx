@@ -33,22 +33,22 @@ TrigTrtHitCountsCollection* TrigTrtHitCountsCollectionCnv::createTransient(const
   static const pool::Guid trans_guid( "7631C2C2-612F-4245-8C8B-D40F59222E1E" );
 
   if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< TrigTrtHitCountsCollection_p2 > col_vect( poolReadObject< TrigTrtHitCountsCollection_p2 >() );
+         std::unique_ptr< TrigTrtHitCountsCollection_p2 > col_vect( poolReadObject< TrigTrtHitCountsCollection_p2 >(token) );
          //         std::cout << "Reading IMFC p2" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
   } else if(compareClassGuid(token, tlp1_guid)) {
 
-         std::unique_ptr< TrigTrtHitCountsCollection_tlp1 > col_vect( poolReadObject< TrigTrtHitCountsCollection_tlp1 >() );
+         std::unique_ptr< TrigTrtHitCountsCollection_tlp1 > col_vect( poolReadObject< TrigTrtHitCountsCollection_tlp1 >(token) );
          //  std::cout << "Reading IMFC tlp1" << std::endl;
          return m_converter_tlp1.createTransient( col_vect.get(), mlog );
 
   } else if(compareClassGuid(token, p1_guid)) {
-         std::unique_ptr< TrigTrtHitCountsCollection_p1 > col_vect( poolReadObject< TrigTrtHitCountsCollection_p1 >() );
+         std::unique_ptr< TrigTrtHitCountsCollection_p1 > col_vect( poolReadObject< TrigTrtHitCountsCollection_p1 >(token) );
          return m_converter_p1.createTransient( col_vect.get(), mlog );
 
   } else if(compareClassGuid(token, trans_guid)) {
-         return poolReadObject<TrigTrtHitCountsCollection>();
+         return poolReadObject<TrigTrtHitCountsCollection>(token);
 
   } else  {
 

@@ -27,16 +27,16 @@ LArHitContainer* LArHitContainerCnv::createTransient(const Token* token) {
     static const pool::Guid   p0_guid("32703AED-CAA5-45ED-B804-8556900CA6B5");
 
     if( this->compareClassGuid(token, p2_guid)) {
-        std::unique_ptr< LArHitContainer_p2 >   col_vect( this->poolReadObject< LArHitContainer_p2 >() );
+        std::unique_ptr< LArHitContainer_p2 >   col_vect( this->poolReadObject< LArHitContainer_p2 >(token) );
         trans_cont = converter_p2.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< LArHitContainer_p1 >   col_vect( this->poolReadObject< LArHitContainer_p1 >() );
+        std::unique_ptr< LArHitContainer_p1 >   col_vect( this->poolReadObject< LArHitContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation, just return it
-        trans_cont = this->poolReadObject<LArHitContainer>();
+        trans_cont = this->poolReadObject<LArHitContainer>(token);
     }  else {
         throw std::runtime_error("Unsupported persistent version of Data container");
     }

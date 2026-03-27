@@ -24,12 +24,12 @@ TileRawChannelContainer* TileRawChannelContainerCnv::createTransient(const Token
     static const pool::Guid   p0_guid("E18095F6-01D9-4E8B-AD51-A8628F92E7FF");
 
     if( this->compareClassGuid(token, p1_guid)) {
-        std::unique_ptr< TileRawChannelContainer_p1 >   cont( this->poolReadObject< TileRawChannelContainer_p1 >() );
+        std::unique_ptr< TileRawChannelContainer_p1 >   cont( this->poolReadObject< TileRawChannelContainer_p1 >(token) );
         trans_cont = converter_p1.createTransient( cont.get(), mlog );
     }
     else if( this->compareClassGuid(token, p0_guid)) {
         // old version from before TP separation
-        TileRawChannelCollectionVec* rdoV = this->poolReadObject<TileRawChannelCollectionVec>();
+        TileRawChannelCollectionVec* rdoV = this->poolReadObject<TileRawChannelCollectionVec>(token);
         bool lDebug = (mlog.level()<=MSG::DEBUG);
 
         if (lDebug) 

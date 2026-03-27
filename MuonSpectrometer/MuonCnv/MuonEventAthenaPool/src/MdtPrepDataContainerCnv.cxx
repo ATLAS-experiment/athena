@@ -53,12 +53,12 @@ Muon::MdtPrepDataContainer* MdtPrepDataContainerCnv::createTransient(const Token
     Muon::MdtPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p2_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< MdtPrepDataContainer_PERS >   col_vect( poolReadObject< MdtPrepDataContainer_PERS >() );
+        std::unique_ptr< MdtPrepDataContainer_PERS >   col_vect( poolReadObject< MdtPrepDataContainer_PERS >(token) );
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << "Delegate TP converter " << endmsg;
         p_collection = m_converter_p2.createTransient( col_vect.get(), log );
     } else if( compareClassGuid(token, p1_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
-        poolReadObject< MdtPrepDataContainer_PERS >( m_converter_tlp1 );
+        poolReadObject< MdtPrepDataContainer_PERS >( m_converter_tlp1, token );
         p_collection = m_converter_tlp1.createTransient( log );
     }
     else {

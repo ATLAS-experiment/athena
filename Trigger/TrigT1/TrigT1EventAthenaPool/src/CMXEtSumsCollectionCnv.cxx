@@ -38,7 +38,7 @@ CMXEtSumsCollection * CMXEtSumsCollectionCnv::createTransient(const Token* token
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< CMXEtSumsCollection_PERS > pers_ref( poolReadObject< CMXEtSumsCollection_PERS >() );
+      std::unique_ptr< CMXEtSumsCollection_PERS > pers_ref( poolReadObject< CMXEtSumsCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else  throw std::runtime_error( "Unsupported persistent version of CMXEtSumsCollection" );

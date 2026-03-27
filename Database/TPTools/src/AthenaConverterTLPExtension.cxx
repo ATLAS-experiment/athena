@@ -115,6 +115,7 @@ void AthenaConverterTLPExtension::readExtendingObjects( void *baseObj )
 	    extendingConverters = extCnvMapIter->second;
 	 }
 	 // load the remaining "pieces" of this object
+	 Token poolToken;
 	 for( TPCnvTokenList_p1::const_iterator it = tokens->begin(); it != tokens->end(); ++it ) {
             if( it->token().size() < 36 ) {
                ostringstream err;
@@ -134,7 +135,9 @@ void AthenaConverterTLPExtension::readExtendingObjects( void *baseObj )
 //		      << " converter ID=" <<  it->converterID()
 //		      << " token=" << it->token() << ", AP converter=" << cnv->second << std::endl;
 
-	    cnv->second->readObject( it->token() );
+//	    cnv->second->readObject( it->token() );
+	    poolToken.fromString( it->token() );
+	    cnv->second->readObjectFromPool( &poolToken );
 	    TopLevelTPCnvBase *extTPCnv = cnv->second->getTopLevelTPCnvForReading();
 	    extTPCnv->addTPConvertersForReadingTo( m_TLCnvForReading );
 	 }

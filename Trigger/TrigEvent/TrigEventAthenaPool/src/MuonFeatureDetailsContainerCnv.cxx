@@ -26,12 +26,12 @@ MuonFeatureDetailsContainer * MuonFeatureDetailsContainerCnv::createTransient(co
     static const pool::Guid p2_guid( "95327E52-C8B2-45E4-9EAF-C65A17AB27F5" );
     
     if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< MuonFeatureDetailsContainer_p2 > col_vect( poolReadObject< MuonFeatureDetailsContainer_p2 >() );
+         std::unique_ptr< MuonFeatureDetailsContainer_p2 > col_vect( poolReadObject< MuonFeatureDetailsContainer_p2 >(token) );
          // std::cout << "Reading MFDC p2" << std::endl; 
          return m_converter.createTransient( col_vect.get(), mlog ) ;
     }
     else if( compareClassGuid(token,  tlp1_guid ) ){
-         std::unique_ptr< MuonFeatureDetailsContainer_tlp1 > col_vect( poolReadObject< MuonFeatureDetailsContainer_tlp1 >() );
+         std::unique_ptr< MuonFeatureDetailsContainer_tlp1 > col_vect( poolReadObject< MuonFeatureDetailsContainer_tlp1 >(token) );
          // std::cout << "Reading MFDC tlp1" << std::endl; 
          return m_converter1.createTransient( col_vect.get(), mlog );
         

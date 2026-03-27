@@ -20,7 +20,7 @@ Muon::NSW_TrigRawDataContainer* NSW_TrigRawDataContainerCnv::createTransient(con
 
   Muon::NSW_TrigRawDataContainer *transCont = nullptr;
   if(compareClassGuid(token, p1_guid)) {
-    std::unique_ptr<Muon::NSW_TrigRawDataContainer_p1> pContainer( this->poolReadObject<Muon::NSW_TrigRawDataContainer_p1>() );
+    std::unique_ptr<Muon::NSW_TrigRawDataContainer_p1> pContainer( this->poolReadObject<Muon::NSW_TrigRawDataContainer_p1>(token) );
     transCont = m_TPConverter_p1.createTransient(pContainer.get(), log);
   } else throw std::runtime_error("No persistent version match for GUID NSW_TrigRawData RDO container");
   return transCont;

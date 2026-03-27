@@ -24,7 +24,7 @@ HGTD_RDO_Container* HGTD_RDO_ContainerCnv::createTransient(const Token* token) {
   if (compareClassGuid(token, p1_guid)) {
     ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
     std::unique_ptr<HGTD_RDO_Container_PERS_t> pers_cont(
-      poolReadObject<HGTD_RDO_Container_PERS_t>());
+      poolReadObject<HGTD_RDO_Container_PERS_t>(token));
 
     trans_cont = m_converter.createTransient(pers_cont.get(), msg());
 

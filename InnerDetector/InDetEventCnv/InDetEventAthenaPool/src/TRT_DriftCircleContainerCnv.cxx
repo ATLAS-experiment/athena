@@ -41,19 +41,19 @@ InDet::TRT_DriftCircleContainer* TRT_DriftCircleContainerCnv::createTransient(co
   InDet::TRT_DriftCircleContainer* p_collection(nullptr);
   if( compareClassGuid(token, p2_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 2 detected");  
-    std::unique_ptr< InDet::TRT_DriftCircleContainer_p2 >   col_vect( poolReadObject< InDet::TRT_DriftCircleContainer_p2 >() );
+    std::unique_ptr< InDet::TRT_DriftCircleContainer_p2 >   col_vect( poolReadObject< InDet::TRT_DriftCircleContainer_p2 >(token) );
     ATH_MSG_DEBUG("Delegate TP converter ");
     p_collection = m_TPConverter2.createTransient( col_vect.get(), msg() );
   }
   else if( compareClassGuid(token, p1_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): T/P version 1 detected");
-    std::unique_ptr< InDet::TRT_DriftCircleContainer_tlp1 >  p_coll( poolReadObject< InDet::TRT_DriftCircleContainer_tlp1 >() );
+    std::unique_ptr< InDet::TRT_DriftCircleContainer_tlp1 >  p_coll( poolReadObject< InDet::TRT_DriftCircleContainer_tlp1 >(token) );
     p_collection = m_TPConverter.createTransient( p_coll.get(), msg() );
   }
   //----------------------------------------------------------------
   else if( compareClassGuid(token, p0_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): Old input file");
-    std::unique_ptr< TRT_DriftCircleContainer_p0 >   col_vect( poolReadObject< TRT_DriftCircleContainer_p0 >() );
+    std::unique_ptr< TRT_DriftCircleContainer_p0 >   col_vect( poolReadObject< TRT_DriftCircleContainer_p0 >(token) );
     p_collection = m_converter_p0.createTransient( col_vect.get(), msg() );
   }
   else {

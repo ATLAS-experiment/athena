@@ -37,12 +37,12 @@ MuonSpShowerContainerCnv::createTransient(const Token* token)
     if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-        return poolReadObject<Rec::MuonSpShowerContainer>();
+        return poolReadObject<Rec::MuonSpShowerContainer>(token);
 
     } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-        std::unique_ptr<MuonSpShowerContainer_p1> persObj( poolReadObject<MuonSpShowerContainer_p1>() );
+        std::unique_ptr<MuonSpShowerContainer_p1> persObj( poolReadObject<MuonSpShowerContainer_p1>(token) );
         MuonSpShowerContainerCnv_p1 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     } else {

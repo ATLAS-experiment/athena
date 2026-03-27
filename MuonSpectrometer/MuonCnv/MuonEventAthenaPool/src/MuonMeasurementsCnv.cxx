@@ -15,21 +15,17 @@ MuonMeasurementsCnv::MuonMeasurementsCnv(ISvcLocator* svcloc):
 
 
 void 
-MuonMeasurementsCnv::readObjectFromPool( const std::string& token )
+MuonMeasurementsCnv::readObjectFromPool( const Token* token )
 {
   static const pool::Guid p1_guid( "C4979DA5-4193-410B-9476-A51708C01CF7" );
   static const pool::Guid p2_guid( "87FC613F-390A-4AB0-9BBF-28CE788867D5" );
 
-   // set the POOL token which will be used for reading from POOL
-   setToken( token );
-
    // select the object type based on its GUID 
    if( compareClassGuid(token,  p2_guid ) )     {
       // read MuonMeasurements_PERS object from POOL using given TLP converter
-      poolReadObject< TPCnv::MuonMeasurements_tlp2 >( m_TPConverter_p2 );
+      poolReadObject< TPCnv::MuonMeasurements_tlp2 >( m_TPConverter_p2, token );
    }else  if( compareClassGuid(token,  p1_guid ) )    {
-      poolReadObject< TPCnv::MuonMeasurements_tlp1 >( m_TPConverter_p1 );   }
+      poolReadObject< TPCnv::MuonMeasurements_tlp1 >( m_TPConverter_p1, token );   }
    else
       throw std::runtime_error( "Unsupported version of MuonMeasurements_PERS (unknown GUID)" );
 }
-

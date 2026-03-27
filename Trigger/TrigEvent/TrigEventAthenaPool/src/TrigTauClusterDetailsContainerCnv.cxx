@@ -29,13 +29,13 @@ TrigTauClusterDetailsContainer * TrigTauClusterDetailsContainerCnv::createTransi
   static const pool::Guid tlp1_guid( "D7DA2036-9F38-4060-A5C9-75C72AF104C4" );
 
   if( compareClassGuid(token,  p2_guid ) ){
-         std::unique_ptr< TrigTauClusterDetailsContainer_p2 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_p2 >() );
+         std::unique_ptr< TrigTauClusterDetailsContainer_p2 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_p2 >(token) );
          //std::cout << "Reading TTCD p2" << std::endl;
          return m_converter.createTransient( col_vect.get(), mlog ) ;
 
     }else if( compareClassGuid(token,  tlp1_guid ) )     
     {
-        std::unique_ptr< TrigTauClusterDetailsContainer_tlp1 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_tlp1 >() );
+        std::unique_ptr< TrigTauClusterDetailsContainer_tlp1 > col_vect( poolReadObject< TrigTauClusterDetailsContainer_tlp1 >(token) );
         //std::cout << "Reading TTCD tlp1" << std::endl;
         return m_converter1.createTransient( col_vect.get(), mlog );
    

@@ -45,15 +45,15 @@ Muon::sTgcPrepDataContainer* sTgcPrepDataContainerCnv::createTransient(const Tok
     Muon::sTgcPrepDataContainer* p_collection(nullptr);
     if( compareClassGuid(token, p3_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 3 detected"<<endmsg;
-        std::unique_ptr< Muon::sTgcPrepDataContainer_p3 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p3 >() );
+        std::unique_ptr< Muon::sTgcPrepDataContainer_p3 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p3 >(token) );
         p_collection = m_converter_p3.createTransient( p_coll.get(), log );
     } else if( compareClassGuid(token, p2_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 2 detected"<<endmsg;
-        std::unique_ptr< Muon::sTgcPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p2 >() );
+        std::unique_ptr< Muon::sTgcPrepDataContainer_p2 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p2 >(token) );
         p_collection = m_converter_p2.createTransient( p_coll.get(), log );
     } else if( compareClassGuid(token, p1_guid) ) {
         if (log.level() <= MSG::DEBUG) log<<MSG::DEBUG<<"createTransient(const Token* token): T/P version 1 detected"<<endmsg;
-        std::unique_ptr< Muon::sTgcPrepDataContainer_p1 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p1 >() );
+        std::unique_ptr< Muon::sTgcPrepDataContainer_p1 >  p_coll( poolReadObject< Muon::sTgcPrepDataContainer_p1 >(token) );
         p_collection = m_converter_p1.createTransient( p_coll.get(), log );
     } else {
         throw std::runtime_error("Unsupported persistent version of sTgcPrepDataContainer");

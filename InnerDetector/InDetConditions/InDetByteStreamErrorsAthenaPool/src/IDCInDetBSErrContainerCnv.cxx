@@ -18,7 +18,7 @@ IDCInDetBSErrContainerCnv::createTransient(const Token* token) {
   const pool::Guid   p1_guid("84056F02-9D9F-4D0C-8D5A-C6C686F5CF76");
   if( compareClassGuid(token, p1_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< InDetBSErrContainer64_p1 > col_vect( poolReadObject< InDetBSErrContainer64_p1 >() );
+    std::unique_ptr< InDetBSErrContainer64_p1 > col_vect( poolReadObject< InDetBSErrContainer64_p1 >(token) );
     return m_TPConverter.createTransient( col_vect.get(), log );
   }
   throw std::runtime_error("Unsupported persistent version of Data Collection");

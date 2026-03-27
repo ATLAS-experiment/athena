@@ -27,7 +27,7 @@ AFP_SiDigiCollection* AFP_SiDigiCollectionCnv::createTransient(const Token* toke
 	AFP_SiDigiCollection *pTransColl=nullptr;
 
 	if(this->compareClassGuid(token, p1_guid)){
-		std::unique_ptr<AFP_SiDigiCollection_p1> col_vect(this->poolReadObject<AFP_SiDigiCollection_p1>());
+		std::unique_ptr<AFP_SiDigiCollection_p1> col_vect(this->poolReadObject<AFP_SiDigiCollection_p1>(token));
 		pTransColl=TPConverter_p1.createTransient(col_vect.get(), mlog);
 	}
 	else{

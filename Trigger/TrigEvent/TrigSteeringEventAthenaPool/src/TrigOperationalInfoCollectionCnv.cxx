@@ -44,13 +44,13 @@ TrigOperationalInfoCollection* TrigOperationalInfoCollectionCnv::createTransient
   
   if( compareClassGuid(token, tlp1_guid) ) {
     
-    std::unique_ptr< TrigOperationalInfoCollection_tlp1 >   col_vect( this->poolReadObject< TrigOperationalInfoCollection_tlp1 >() );
+    std::unique_ptr< TrigOperationalInfoCollection_tlp1 >   col_vect( this->poolReadObject< TrigOperationalInfoCollection_tlp1 >(token) );
     trans_obj = m_impl->m_TPConverter_tlp1.createTransient( col_vect.get(), mlog );
     
   }
   else if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigOperationalInfoCollection_p1 >   col_vect( this->poolReadObject< TrigOperationalInfoCollection_p1 >() );
+    std::unique_ptr< TrigOperationalInfoCollection_p1 >   col_vect( this->poolReadObject< TrigOperationalInfoCollection_p1 >(token) );
     trans_obj = m_impl->m_TPConverter.createTransient( col_vect.get(), mlog );
     
   }

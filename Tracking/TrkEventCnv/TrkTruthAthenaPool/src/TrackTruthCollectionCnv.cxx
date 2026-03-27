@@ -48,25 +48,25 @@ TrackTruthCollection* TrackTruthCollectionCnv::createTransient(const Token* toke
 
   if (compareClassGuid(token, s_p3_guid)) {
     log<<MSG::DEBUG<<"Read TrackTruthCollection_p3. token="<<token->toString()<<endmsg;
-    Trk::TrackTruthCollection_p3* pers=poolReadObject<Trk::TrackTruthCollection_p3>();
+    Trk::TrackTruthCollection_p3* pers=poolReadObject<Trk::TrackTruthCollection_p3>(token);
     m_converter_p3.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p2_guid)) {
     log<<MSG::DEBUG<<"Read TrackTruthCollection_p2. token="<<token->toString()<<endmsg;
-    Trk::TrackTruthCollection_p2* pers=poolReadObject<Trk::TrackTruthCollection_p2>();
+    Trk::TrackTruthCollection_p2* pers=poolReadObject<Trk::TrackTruthCollection_p2>(token);
     m_converter_p2.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p1_guid)) {
     log<<MSG::DEBUG<<"Read TrackTruthCollection_p1. token="<<token->toString()<<endmsg;
-    Trk::TrackTruthCollection_p1* pers=poolReadObject<Trk::TrackTruthCollection_p1>();
+    Trk::TrackTruthCollection_p1* pers=poolReadObject<Trk::TrackTruthCollection_p1>(token);
     m_converter_p1.persToTrans(pers, trans.get(), log);
     delete pers;
   }
   else if (compareClassGuid(token, s_p0_guid)) {
     log<<MSG::DEBUG<<"Read version p0 of TrackTruthCollection. token="<<token->toString()<<endmsg;
-    TrackTruthVector *pers = poolReadObject<TrackTruthVector>();
+    TrackTruthVector *pers = poolReadObject<TrackTruthVector>(token);
     m_converter_p0.persToTrans(pers, trans.get(), log);
     delete pers;
   }

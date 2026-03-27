@@ -87,7 +87,7 @@ PhaseIIStripRawDataContainer* PhaseIIStripRawDataContainerCnv::createTransient(c
   static const pool::Guid   SCT_TP4_guid("6C7540BE-E85C-4777-BC1C-A9FF11460F54"); // for t/p separated version with SCT_RawDataContainer_p4
 
   if( compareClassGuid(token, SCT_TP4_guid) ) {
-     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >() );
+     std::unique_ptr< SCT_RawDataContainer_p4 >   persCont( poolReadObject< SCT_RawDataContainer_p4 >(token) );
     std::unique_ptr<PhaseIIStripRawDataContainer> transCont(std::make_unique<PhaseIIStripRawDataContainer>(m_idHelper->wafer_hash_max(),
                                                                                                            1 /* one container only */ ));
 

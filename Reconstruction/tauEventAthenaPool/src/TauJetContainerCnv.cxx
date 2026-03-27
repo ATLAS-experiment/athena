@@ -39,31 +39,31 @@ Analysis :: TauJetContainer *TauJetContainerCnv :: createTransient(const Token* 
 
     if( compareClassGuid(token,  p5_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p5> persObj(poolReadObject<TauJetContainer_p5>());
+        std :: unique_ptr<TauJetContainer_p5> persObj(poolReadObject<TauJetContainer_p5>(token));
         TauJetContainerCnv_p5 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
     else if( compareClassGuid(token,  p4_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p4> persObj(poolReadObject<TauJetContainer_p4>());
+        std :: unique_ptr<TauJetContainer_p4> persObj(poolReadObject<TauJetContainer_p4>(token));
         TauJetContainerCnv_p4 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
     else if( compareClassGuid(token,  p3_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p3> persObj( poolReadObject<TauJetContainer_p3>() );
+        std :: unique_ptr<TauJetContainer_p3> persObj( poolReadObject<TauJetContainer_p3>(token) );
         TauJetContainerCnv_p3 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
     else if( compareClassGuid(token,  p2_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p2> persObj( poolReadObject<TauJetContainer_p2>() );
+        std :: unique_ptr<TauJetContainer_p2> persObj( poolReadObject<TauJetContainer_p2>(token) );
         TauJetContainerCnv_p2 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }
     else if( compareClassGuid(token,  p1_guid ) ){
         // using unique_ptr ensures deletion of the persistent object
-        std :: unique_ptr<TauJetContainer_p1> persObj( poolReadObject<TauJetContainer_p1>() );
+        std :: unique_ptr<TauJetContainer_p1> persObj( poolReadObject<TauJetContainer_p1>(token) );
         TauJetContainerCnv_p1 cnv;
         transObj = cnv.createTransient( persObj.get(), msg );
     }

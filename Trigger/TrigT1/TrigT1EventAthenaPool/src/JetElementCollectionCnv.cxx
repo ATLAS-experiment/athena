@@ -39,12 +39,12 @@ JetElementCollection * JetElementCollectionCnv::createTransient(const Token* tok
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
      // using unique_ptr ensures deletion of the persistent object
-      std::unique_ptr< JetElementCollection_PERS > pers_ref( poolReadObject< JetElementCollection_PERS >() );
+      std::unique_ptr< JetElementCollection_PERS > pers_ref( poolReadObject< JetElementCollection_PERS >(token) );
       p_collection = m_TPConverter_tlp1.createTransient( pers_ref.get(), mlog );
    
     }else if( compareClassGuid(token,  p0_guid ) ){
 
-      p_collection = poolReadObject< JetElementCollection >();
+      p_collection = poolReadObject< JetElementCollection >(token);
     
     }else throw std::runtime_error( "Unsupported persistent version of JetElementCollection" );
 

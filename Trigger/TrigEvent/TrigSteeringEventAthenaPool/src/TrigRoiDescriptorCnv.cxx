@@ -53,26 +53,26 @@ TrigRoiDescriptor* TrigRoiDescriptorCnv::createTransient(const Token* token)
   
   if( compareClassGuid(token, p3_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p3 >() );
+    std::unique_ptr< TrigRoiDescriptor_p3 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p3 >(token) );
     trans_obj = m_TPConverters->p3.createTransient( col_vect.get(), mlog );
     
   }
   else if( compareClassGuid(token, p2_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p2 >() );
+    std::unique_ptr< TrigRoiDescriptor_p2 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p2 >(token) );
     trans_obj = m_TPConverters->p2.createTransient( col_vect.get(), mlog );
     
   }
   else if( compareClassGuid(token, p1_guid) ) {
     
-    std::unique_ptr< TrigRoiDescriptor_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p1 >() );
+    std::unique_ptr< TrigRoiDescriptor_p1 >   col_vect( this->poolReadObject< TrigRoiDescriptor_p1 >(token) );
     trans_obj = m_TPConverters->p1.createTransient( col_vect.get(), mlog );
     
   }
   else if( compareClassGuid(token, p0_guid) ) {
 
     // old version from before TP separation, just return it
-    trans_obj = this->poolReadObject<TrigRoiDescriptor>();
+    trans_obj = this->poolReadObject<TrigRoiDescriptor>(token);
 
   }  else {
     

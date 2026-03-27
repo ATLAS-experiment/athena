@@ -33,7 +33,7 @@ ZDC_SimFiberHit_Collection* ZDC_SimFiberHit_CollectionCnv::createTransient(const
 
     static const pool::Guid   p1_guid("92374D8F-1A24-4A38-86B4-611AAFA89CFB");
     if( this->compareClassGuid(token, p1_guid)) {
-      std::unique_ptr< ZDC_SimFiberHit_Collection_PERS >   col_vect( this->poolReadObject< ZDC_SimFiberHit_Collection_PERS >() );
+      std::unique_ptr< ZDC_SimFiberHit_Collection_PERS >   col_vect( this->poolReadObject< ZDC_SimFiberHit_Collection_PERS >(token) );
       trans_cont = converter_p1.createTransient(col_vect.get(), mlog );
     }
     else {

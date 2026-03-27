@@ -104,7 +104,7 @@ PixelRDO_Container* PixelRDO_ContainerCnv::createTransient(const Token* token) {
   if( compareClassGuid(token, TP2_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New TP version - TP2 branch");
                                                                                                                                                              
-    std::unique_ptr< InDetRawDataContainer_p2 >   col_vect( poolReadObject< InDetRawDataContainer_p2 >() );
+    std::unique_ptr< InDetRawDataContainer_p2 >   col_vect( poolReadObject< InDetRawDataContainer_p2 >(token) );
     PixelRDO_Container *res = m_converter_TP2.createTransient( col_vect.get(), msg() );
                                                                                                                                                              
     ATH_MSG_DEBUG("createTransient(const Token* token), TP2 branch: returns TRANS = "<<shortPrint(res));
@@ -116,7 +116,7 @@ PixelRDO_Container* PixelRDO_ContainerCnv::createTransient(const Token* token) {
   else if( compareClassGuid(token, TP1_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New TP version - TP1 branch");
                                                                                                                                                              
-    std::unique_ptr< InDetRawDataContainer_p1 >   col_vect( poolReadObject< InDetRawDataContainer_p1 >() );
+    std::unique_ptr< InDetRawDataContainer_p1 >   col_vect( poolReadObject< InDetRawDataContainer_p1 >(token) );
     PixelRDO_Container *res = m_converter_TP1.createTransient( col_vect.get(), msg() );
                                                                                                                                                              
     ATH_MSG_DEBUG("createTransient(const Token* token), TP1 branch: returns TRANS = "<<shortPrint(res));
@@ -128,7 +128,7 @@ PixelRDO_Container* PixelRDO_ContainerCnv::createTransient(const Token* token) {
   else if( compareClassGuid(token, p0_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): Old input file - p0 branch");
 
-    std::unique_ptr< PixelRDO_Container_p0 >   col_vect( poolReadObject< PixelRDO_Container_p0 >() );
+    std::unique_ptr< PixelRDO_Container_p0 >   col_vect( poolReadObject< PixelRDO_Container_p0 >(token) );
     PixelRDO_Container *res = m_converter_p0.createTransient( col_vect.get(), msg() );
 
     ATH_MSG_DEBUG("createTransient(const Token* token), p0 branch: returns TRANS = "<<shortPrint(res));

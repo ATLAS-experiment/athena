@@ -25,7 +25,7 @@ ALFA_ODDigitCollection* ALFA_ODDigitCollectionCnv::createTransient(const Token* 
 
     
     if( this->compareClassGuid(token, p1_guid)) {
-         std::unique_ptr< ALFA_ODDigitCollection_p1 >   col_vect( this->poolReadObject< ALFA_ODDigitCollection_p1 >() );
+         std::unique_ptr< ALFA_ODDigitCollection_p1 >   col_vect( this->poolReadObject< ALFA_ODDigitCollection_p1 >(token) );
         trans_cont = TPConverter_p1.createTransient( col_vect.get(), mlog );
     } else {
         throw std::runtime_error("Unsupported persistent version of Data container");

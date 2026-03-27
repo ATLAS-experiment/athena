@@ -67,42 +67,42 @@ ElectronContainer* ElectronContainerCnv::createTransient(const Token* token)
   if ( compareClassGuid(token, p5_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ElectronContainer_p5> persObj( poolReadObject<ElectronContainer_p5>() );
+    std::unique_ptr<ElectronContainer_p5> persObj( poolReadObject<ElectronContainer_p5>(token) );
     ElectronContainerCnv_p5 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p4_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ElectronContainer_p4> persObj( poolReadObject<ElectronContainer_p4>() );
+    std::unique_ptr<ElectronContainer_p4> persObj( poolReadObject<ElectronContainer_p4>(token) );
     ElectronContainerCnv_p4 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p3_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ElectronContainer_p3> persObj( poolReadObject<ElectronContainer_p3>() );
+    std::unique_ptr<ElectronContainer_p3> persObj( poolReadObject<ElectronContainer_p3>(token) );
     ElectronContainerCnv_p3 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ElectronContainer_p2> persObj( poolReadObject<ElectronContainer_p2>() );
+    std::unique_ptr<ElectronContainer_p2> persObj( poolReadObject<ElectronContainer_p2>(token) );
     ElectronContainerCnv_p2 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ElectronContainer_p1> persObj( poolReadObject<ElectronContainer_p1>() );
+    std::unique_ptr<ElectronContainer_p1> persObj( poolReadObject<ElectronContainer_p1>(token) );
     ElectronContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
 
  } else if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<ElectronContainer>();
+    return poolReadObject<ElectronContainer>(token);
 
   } else {
     throw std::runtime_error("Unsupported persistent version of ElectronContainer");

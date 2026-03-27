@@ -28,7 +28,7 @@ TrigCompositeContainer * TrigCompositeContainerCnv::createTransient(const Token*
 
   
  if( compareClassGuid(token,  p1_guid ) ){
-         std::unique_ptr< TrigCompositeContainer_p1 > col_vect( poolReadObject< TrigCompositeContainer_p1 >() );
+         std::unique_ptr< TrigCompositeContainer_p1 > col_vect( poolReadObject< TrigCompositeContainer_p1 >(token) );
          //         std::cout << "Reading IMFC p1" << std::endl; 
          return m_converter.createTransient( col_vect.get(), mlog ) ;
   } else { throw std::runtime_error( "Unsupported persistent version of TrigCompositeContainer" ); }

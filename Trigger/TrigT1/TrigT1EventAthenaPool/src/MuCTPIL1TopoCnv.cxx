@@ -25,7 +25,7 @@ LVL1::MuCTPIL1Topo* MuCTPIL1TopoCnv::createTransient(const Token* token) {
    static const pool::Guid p1_guid( "BC2BAC47-504A-4A8A-89D9-2086B9038E18" );
 
    if( this->compareClassGuid(token,  p1_guid ) ) {
-     std::unique_ptr< MuCTPIL1Topo_p1 > pers_ref( this->poolReadObject< MuCTPIL1Topo_p1 >() );
+     std::unique_ptr< MuCTPIL1Topo_p1 > pers_ref( this->poolReadObject< MuCTPIL1Topo_p1 >(token) );
      return m_converter.createTransient( pers_ref.get(), msg() );
 
    } else {

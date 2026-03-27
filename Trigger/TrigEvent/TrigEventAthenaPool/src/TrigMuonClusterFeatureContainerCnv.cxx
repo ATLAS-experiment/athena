@@ -45,12 +45,12 @@ TrigMuonClusterFeatureContainer * TrigMuonClusterFeatureContainerCnv::createTran
   TrigMuonClusterFeatureContainer *p_collection = 0;
   if( compareClassGuid(token,  tlp1_guid ) )     
     {
-      poolReadObject< TrigMuonClusterFeatureContainer_PERS >(*m_TPConverter);
+      poolReadObject< TrigMuonClusterFeatureContainer_PERS >(*m_TPConverter, token);
       p_collection = m_TPConverter->createTransient( m_log );
       
     }else if( compareClassGuid(token,  p0_guid ) ){
       
-      p_collection = poolReadObject< TrigMuonClusterFeatureContainer >();
+      p_collection = poolReadObject< TrigMuonClusterFeatureContainer >(token);
       
     }else  throw std::runtime_error( "Unsupported persistent version of TrigMuonClusterFeatureContainer" );
   

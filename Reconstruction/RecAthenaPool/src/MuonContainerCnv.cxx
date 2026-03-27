@@ -84,22 +84,22 @@ Analysis::MuonContainer* MuonContainerCnv::createTransient(const Token* token)
 
   if ( compareClassGuid(token, p6_guid) ) {
 
-    std::unique_ptr<MuonContainer_p6> persObj(poolReadObject<MuonContainer_p6>());
+    std::unique_ptr<MuonContainer_p6> persObj(poolReadObject<MuonContainer_p6>(token));
     transObj = m_cnv_p6.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p5_guid) ) {
 
-    std::unique_ptr<MuonContainer_p5> persObj(poolReadObject<MuonContainer_p5>());
+    std::unique_ptr<MuonContainer_p5> persObj(poolReadObject<MuonContainer_p5>(token));
     transObj = m_cnv_p5.createTransient( persObj.get(), msg );
 
   }  else if ( compareClassGuid(token, p4_guid) ) {
 
-    std::unique_ptr<MuonContainer_p4> persObj(poolReadObject<MuonContainer_p4>());
+    std::unique_ptr<MuonContainer_p4> persObj(poolReadObject<MuonContainer_p4>(token));
     transObj = m_cnv_p4.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p3_guid) ) {
 
-    std::unique_ptr<MuonContainer_p3> persObj(poolReadObject<MuonContainer_p3>());
+    std::unique_ptr<MuonContainer_p3> persObj(poolReadObject<MuonContainer_p3>(token));
     transObj = m_cnv_p3.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p2_guid) ) {
@@ -111,7 +111,7 @@ Analysis::MuonContainer* MuonContainerCnv::createTransient(const Token* token)
        }
     }
  
-    std::unique_ptr<MuonContainer_p2> persObj( poolReadObject<MuonContainer_p2>() );
+    std::unique_ptr<MuonContainer_p2> persObj( poolReadObject<MuonContainer_p2>(token) );
     transObj = m_cnv_p2.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p1_guid) ) {
@@ -124,13 +124,13 @@ Analysis::MuonContainer* MuonContainerCnv::createTransient(const Token* token)
     }
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<MuonContainer_p1> persObj( poolReadObject<MuonContainer_p1>() );
+    std::unique_ptr<MuonContainer_p1> persObj( poolReadObject<MuonContainer_p1>(token) );
     transObj = m_cnv_p1.createTransient( persObj.get(), msg );
 
  } else if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<Analysis::MuonContainer>();
+    return poolReadObject<Analysis::MuonContainer>(token);
 
   } else {
     throw std::runtime_error("Unsupported persistent version of MuonContainer");

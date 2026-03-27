@@ -54,7 +54,7 @@ T_AthenaPoolTPCnvCnv<TRANS, TPCNV_CUR, TPCNVS...>::createTransientWithKey (const
   AthenaPoolCnvSvc::debugCreateTransient (ClassID_traits<TRANS>::ID());
   if ( this->compareClassGuid(token,  m_guid ) ) {
     // It's the latest version.
-    std::unique_ptr<Pers_t> persObj( this->template poolReadObject<Pers_t>() );
+    std::unique_ptr<Pers_t> persObj( this->template poolReadObject<Pers_t>(token) );
     return AthenaPoolCnvSvc::createTransient (m_tpcnv_cur, persObj.get(), key, this->msg()).release();
   }
 

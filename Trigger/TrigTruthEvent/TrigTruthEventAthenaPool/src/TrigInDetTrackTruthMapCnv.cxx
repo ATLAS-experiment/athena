@@ -43,35 +43,35 @@ TrigInDetTrackTruthMap* TrigInDetTrackTruthMapCnv::createTransient(const Token* 
   if( compareClassGuid(token, tlp4_guid) ) {
 
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::reading tlp4 persistent object"  );
-    poolReadObject< TrigInDetTrackTruthMap_tlp4 >( m_trigInDetTrackTruthMapCnv_tlp4 );
+    poolReadObject< TrigInDetTrackTruthMap_tlp4 >( m_trigInDetTrackTruthMapCnv_tlp4, token );
     transObj = m_trigInDetTrackTruthMapCnv_tlp4.createTransient( msg() );
 
   }
   else if( compareClassGuid(token, tlp3_guid) ) {
 
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::reading tlp3 persistent object"  );
-    poolReadObject< TrigInDetTrackTruthMap_tlp3 >( m_trigInDetTrackTruthMapCnv_tlp3 );
+    poolReadObject< TrigInDetTrackTruthMap_tlp3 >( m_trigInDetTrackTruthMapCnv_tlp3, token );
     transObj = m_trigInDetTrackTruthMapCnv_tlp3.createTransient( msg() );
 
   }
   else if( compareClassGuid(token, tlp2_guid) ) {
 
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::reading tlp2 persistent object"  );
-    poolReadObject< TrigInDetTrackTruthMap_tlp2 >( m_trigInDetTrackTruthMapCnv_tlp2 );
+    poolReadObject< TrigInDetTrackTruthMap_tlp2 >( m_trigInDetTrackTruthMapCnv_tlp2, token );
     transObj = m_trigInDetTrackTruthMapCnv_tlp2.createTransient( msg() );
 
   }
   else if( compareClassGuid(token, tlp1_guid) ) {
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::reading tlp1 persistent object"  );
     TrigInDetTrackTruthMapCnv_tlp1  tlp1_Converter;
-    poolReadObject< TrigInDetTrackTruthMap_tlp1 >(tlp1_Converter);
+    poolReadObject< TrigInDetTrackTruthMap_tlp1 >(tlp1_Converter, token);
     transObj = tlp1_Converter.createTransient( msg() );
   }
   else if( compareClassGuid(token, p0_guid) ) {
 
     ATH_MSG_DEBUG( "TrigInDetTrackTruthMapCnv::reading p0 persistent object"  );
     // old version from before TP separation, just return it
-    transObj = this->poolReadObject<TrigInDetTrackTruthMap>();
+    transObj = this->poolReadObject<TrigInDetTrackTruthMap>(token);
   }
   else {
     throw std::runtime_error("Unsupported persistent version of TrigInDetTrackTruthMap");

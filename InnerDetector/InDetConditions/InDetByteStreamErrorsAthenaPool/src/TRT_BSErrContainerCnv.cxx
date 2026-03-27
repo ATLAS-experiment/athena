@@ -28,7 +28,7 @@ TRT_BSErrContainerCnv::createTransient(const Token* token) {
   
   if( compareClassGuid(token, p2_guid) ) {
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr< TRT_BSErrContainer_p2 > col_vect( poolReadObject< TRT_BSErrContainer_p2 >() );
+    std::unique_ptr< TRT_BSErrContainer_p2 > col_vect( poolReadObject< TRT_BSErrContainer_p2 >(token) );
     return m_TPConverter.createTransient( col_vect.get(), log );
   }
 

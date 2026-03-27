@@ -110,35 +110,35 @@ TRT_RDO_Container* TRT_RDO_ContainerCnv::createTransient(const Token* token) {
 
   if( compareClassGuid(token, TP3_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New TP version - TP3 branch");
-    std::unique_ptr< InDetRawDataContainer_p3 >   col_vect( poolReadObject< InDetRawDataContainer_p3 >() );
+    std::unique_ptr< InDetRawDataContainer_p3 >   col_vect( poolReadObject< InDetRawDataContainer_p3 >(token) );
     TRT_RDO_Container *res = m_converter_TP3.createTransient( col_vect.get(), msg() );
     ATH_MSG_DEBUG("createTransient(const Token* token), TP3 branch: returns TRANS = "<<shortPrint(res));
     return res;
   }
   else if( compareClassGuid(token, TP2_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New TP version - TP2 branch");
-    std::unique_ptr< InDetRawDataContainer_p2 >   col_vect( poolReadObject< InDetRawDataContainer_p2 >() );
+    std::unique_ptr< InDetRawDataContainer_p2 >   col_vect( poolReadObject< InDetRawDataContainer_p2 >(token) );
     TRT_RDO_Container *res = m_converter_TP2.createTransient( col_vect.get(), msg() );
     ATH_MSG_DEBUG("createTransient(const Token* token), TP2 branch: returns TRANS = "<<shortPrint(res));
     return res;
   }
   else if( compareClassGuid(token, TP1_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New TP version - TP1 branch");
-    std::unique_ptr< InDetRawDataContainer_p1 >   col_vect( poolReadObject< InDetRawDataContainer_p1 >() );
+    std::unique_ptr< InDetRawDataContainer_p1 >   col_vect( poolReadObject< InDetRawDataContainer_p1 >(token) );
     TRT_RDO_Container *res = m_converter_TP1.createTransient( col_vect.get(), msg() );
     ATH_MSG_DEBUG("createTransient(const Token* token), TP1 branch: returns TRANS = "<<shortPrint(res));
     return res;
   }
   else if( compareClassGuid(token, p1_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): New input file - p1 branch");
-    std::unique_ptr< TRT_RDO_Container_p1 > col_vect( poolReadObject< TRT_RDO_Container_p1 >() );
+    std::unique_ptr< TRT_RDO_Container_p1 > col_vect( poolReadObject< TRT_RDO_Container_p1 >(token) );
     TRT_RDO_Container *res = m_converter_p1.createTransient( col_vect.get(), msg() );
     ATH_MSG_DEBUG("createTransient(const Token* token), p1 branch: returns TRANS = "<<shortPrint(res));
     return res;
   }
   else if( compareClassGuid(token, p0_guid) ) {
     ATH_MSG_DEBUG("createTransient(const Token* token): Old input file - p0 branch");
-    std::unique_ptr< TRT_RDO_Container_p0 >   col_vect( poolReadObject< TRT_RDO_Container_p0 >() );
+    std::unique_ptr< TRT_RDO_Container_p0 >   col_vect( poolReadObject< TRT_RDO_Container_p0 >(token) );
     TRT_RDO_Container *res = m_converter_p0.createTransient( col_vect.get(), msg() );
     ATH_MSG_DEBUG("createTransient(const Token* token), p0 branch: returns TRANS = "<<shortPrint(res));
     return res;

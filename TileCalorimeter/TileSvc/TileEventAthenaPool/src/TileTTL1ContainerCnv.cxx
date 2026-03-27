@@ -44,12 +44,12 @@ TileTTL1Container* TileTTL1ContainerCnv::createTransient(const Token* token) {
   if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<TileTTL1Container>();
+    return poolReadObject<TileTTL1Container>(token);
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<TileTTL1Container_p1> persObj( poolReadObject<TileTTL1Container_p1>() );
+    std::unique_ptr<TileTTL1Container_p1> persObj( poolReadObject<TileTTL1Container_p1>(token) );
     TileTTL1ContainerCnv_p1 cnv;
     transObj = cnv.createTransient( persObj.get(), msg );
   } else {

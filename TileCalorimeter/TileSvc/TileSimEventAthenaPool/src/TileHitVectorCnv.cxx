@@ -27,13 +27,13 @@ TileHitVector* TileHitVectorCnv::createTransient(const Token* token) {
 
     if( this->compareClassGuid(token, p1_guid)) {
 
-        std::unique_ptr< TileHitVector_p1 > col_vect( this->poolReadObject< TileHitVector_p1 >() );
+        std::unique_ptr< TileHitVector_p1 > col_vect( this->poolReadObject< TileHitVector_p1 >(token) );
         trans_cont = converter_p1.createTransient( col_vect.get(), mlog );
 
     } else if( this->compareClassGuid(token, p0_guid)) {
 
         // old version from before TP separation
-        TileOldHitVector* oldVec = this->poolReadObject<TileOldHitVector>();
+        TileOldHitVector* oldVec = this->poolReadObject<TileOldHitVector>(token);
         size_t size = oldVec->size();
         trans_cont = new TileHitVector();
         trans_cont->reserve(size);

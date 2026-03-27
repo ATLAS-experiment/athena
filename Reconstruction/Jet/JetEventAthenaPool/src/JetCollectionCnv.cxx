@@ -64,12 +64,12 @@ JetCollection* JetCollectionCnv::createTransient(const Token* token)
 
   if ( compareClassGuid(token, tlp6_guid) ) {
     msg << MSG::DEBUG << "  JetCollectionCnv:  calling tlp6 converter" <<endmsg;
-    poolReadObject<JetCollection_tlp6> (m_TPConverter);
+    poolReadObject<JetCollection_tlp6> (m_TPConverter, token);
     return m_TPConverter.createTransient(m_log);
 
   } else  if ( compareClassGuid(token, tlp5_guid) ) {
     msg << MSG::DEBUG << "  JetCollectionCnv:  calling tlp5 converter" <<endmsg;
-    poolReadObject<JetCollection_tlp5> (m_tlp5_cnv);
+    poolReadObject<JetCollection_tlp5> (m_tlp5_cnv, token);
     return transObj = m_tlp5_cnv.createTransient(m_log);
 
   } else if ( compareClassGuid(token, tlp2_guid) ) {
@@ -79,39 +79,36 @@ JetCollection* JetCollectionCnv::createTransient(const Token* token)
     // the lastest guy.
 
     msg << MSG::DEBUG << "  JetCollectionCnv:  calling tlp2 converter" <<endmsg;
-    poolReadObject<JetCollection_tlp2> (m_tlp2_cnv);
+    poolReadObject<JetCollection_tlp2> (m_tlp2_cnv, token);
     return m_tlp2_cnv.createTransient(m_log);
-
-//     poolReadObject<JetCollection_tlp2> (m_TPConverter);
-//     return transObj = m_TPConverter.createTransient(m_log);
 
   } else if ( compareClassGuid(token, tr_guid) ) {
 
     // regular object from before the T/P separation
-    return poolReadObject<JetCollection>();
+    return poolReadObject<JetCollection>(token);
 
   } else if ( compareClassGuid(token, p1_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<JetCollection_p1> persObj( poolReadObject<JetCollection_p1>() );
+    std::unique_ptr<JetCollection_p1> persObj( poolReadObject<JetCollection_p1>(token) );
     transObj = m_p1_cnv.createTransient( persObj.get(), msg );
 
   } else if ( compareClassGuid(token, p2_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<JetCollection_p2> persObj( poolReadObject<JetCollection_p2>() );
+    std::unique_ptr<JetCollection_p2> persObj( poolReadObject<JetCollection_p2>(token) );
     transObj = m_p2_cnv.createTransient( persObj.get(), msg );
     
   } else if ( compareClassGuid(token, p3_guid) ) {
 
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<JetCollection_p3> persObj( poolReadObject<JetCollection_p3>() );
+    std::unique_ptr<JetCollection_p3> persObj( poolReadObject<JetCollection_p3>(token) );
     transObj = m_p3_cnv.createTransient( persObj.get(), msg );
     
   } else if ( compareClassGuid(token, pj_guid) ) {
     msg << MSG::DEBUG << " creating pj_guid "<< endmsg;
     // using unique_ptr ensures deletion of the persistent object
-    std::unique_ptr<ParticleJetContainer_p1> persObj( poolReadObject<ParticleJetContainer_p1>() );
+    std::unique_ptr<ParticleJetContainer_p1> persObj( poolReadObject<ParticleJetContainer_p1>(token) );
     transObj = m_pjp1_cnv.createTransient( persObj.get(), msg );
   } else {
     throw std::runtime_error("Unsupported persistent version of JetCollection");
