@@ -5,4 +5,8 @@ def isMC(flags):
     returns (bool, str) where the str contains an explanation of why the bool is False.
     (probably worth re-allocating somehere else)"""
     from AthenaConfiguration.Enums import Format # Test & exclude reading MC BS, no truth info
-    return (flags.Input.isMC or flags.Overlay.DataOverlay) and flags.Input.Format!=Format.BS, "Input file is not MC"
+    return (
+        (flags.Input.isMC or flags.Overlay.DataOverlay)
+        # Allow for case of no input file, i.e. evgen
+        and (flags.Input.FileNentries==-1 or flags.Input.Format!=Format.BS)
+    ), "Input file is not MC"

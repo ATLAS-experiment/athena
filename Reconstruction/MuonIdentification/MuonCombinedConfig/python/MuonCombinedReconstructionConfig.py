@@ -778,7 +778,8 @@ def MuonCombinedReconstructionCfg(flags):
         MuonCombinedTrackSummaryToolCfg(flags)))
 
     # post processing
-    if flags.Input.isMC:
+    from AthenaConfiguration.Enums import Format
+    if flags.Input.isMC and flags.Input.Format != Format.BS:
         result.merge(CombinedMuonTrackTruthAlgsCfg(flags))
         result.merge(CombinedMuonTruthAssociationAlgsCfg(flags))
         if not flags.Muon.usePhaseIIGeoSetup and  \
