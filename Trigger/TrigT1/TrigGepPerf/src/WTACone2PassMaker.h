@@ -1,3 +1,7 @@
+/*
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
 #ifndef WTACone2PassMaker_h
 #define WTACone2PassMaker_h
 
@@ -7,6 +11,9 @@
 #include "./WTAConeMaker.h" // Use the parent class
 
 class WTACone2PassMaker : public WTAConeMaker{       // The 2Pass maker class
+    // Stage1. Reading the input cell towers as they come, et sorted SeedList as result
+    // Stage2. Do the SeedCleaning, critical to have the SeedList et sorted
+    // Stage3. Do the tower>Seed clustering in WTA scheme(Jet eta,phi = seed eta,phi)
     public:
         WTACone2PassMaker(unsigned int RollOffBufferSize = 155)
         : WTAConeMaker(), // Calls WTAConeMaker constructor
@@ -103,8 +110,7 @@ inline void WTACone2PassMaker::MergeConstsToSeeds()
     {
         for(unsigned int j = 0; j < m_SeedList.size(); j++) // Assume Jets are pT sorted, WTA means more energetic jet eats constituent first
         {
-            IntOrFloat dR2 = constituent.dR2(m_SeedList.at(j));
-            if(constituent.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetJet_dR2()) && dR2!=0) // Thistime, the condition is m_JetArea, the usual R2Par, **WARNING: dR2!=0 IS TEMPORARY FOR INT-SIM. NEED TO KNOW TOPOTOWER CREATION
+            if(constituent.IsAssocdR(m_SeedList.at(j), m_WTAConeMakerParameter.GetJet_dR())) // Thistime, the condition is m_Jet_dR, the usual R_PAR
             {
                 m_SeedList.at(j).MergeConstituent(constituent);
                 ResizeThisJetConstituents(m_SeedList.at(j)); // Check JetConstituent N

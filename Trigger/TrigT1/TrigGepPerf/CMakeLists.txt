@@ -7,6 +7,7 @@ atlas_subdir( TrigGepPerf )
 # For example, you can set these flags based on some conditions or manually
 # Here we manually define FLOATING_POINT_SIMULATION
 add_definitions(-DFLOATING_POINT_SIMULATION)
+# add_definitions(-DINTEGER_SIMULATION)
 # add_definitions(-DBITWISE_SIMULATION)
 
 # External package dependencies:

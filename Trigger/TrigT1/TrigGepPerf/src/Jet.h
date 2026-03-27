@@ -15,9 +15,20 @@ namespace Gep{
     std::vector<int> constituentsIndices;
     int nConstituents {0};
     float radius {0};
-    float seedEta {0};
+    float seedEta {0}; // Only for Seeded jets
     float seedPhi {0};
     float seedEt {0};
+    float ring0_Et {0}; // Only for WTACone4jets
+    float ring1_Et {0};
+    float ring2_Et {0};
+    float ring3_Et {0};
+    float ring4_Et {0};
+    int total_TobN {0};
+    int ring0_TobN {0};
+    int ring1_TobN {0};
+    int ring2_TobN {0};
+    int ring3_TobN {0};
+    int ring4_TobN {0};
     
   };
 }
