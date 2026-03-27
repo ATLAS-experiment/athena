@@ -6,16 +6,14 @@
 #include <utility> //std::move
 
 namespace FlavorTagInference {
-
-  FTagDataDependencyNames 
-  FTagDataDependencyNames::operator+(FTagDataDependencyNames d) const {
+  //coverity[PASS_BY_VALUE]
+  FTagDataDependencyNames FTagDataDependencyNames::operator+(FTagDataDependencyNames d) const {
     FTagDataDependencyNames out = *this;
     out += std::move(d);
     return out;
   }
-
-  FTagDataDependencyNames& 
-  FTagDataDependencyNames::operator+=(FTagDataDependencyNames d){
+  //coverity[PASS_BY_VALUE]
+  FTagDataDependencyNames& FTagDataDependencyNames::operator+=(FTagDataDependencyNames d){
     trackInputs.merge(d.trackInputs);
     electronInputs.merge(d.electronInputs);
     muonInputs.merge(d.muonInputs);
