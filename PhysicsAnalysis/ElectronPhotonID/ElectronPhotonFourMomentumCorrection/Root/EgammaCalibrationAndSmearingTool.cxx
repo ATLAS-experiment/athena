@@ -860,6 +860,16 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
     return StatusCode::FAILURE;
 
+  // For columnar, it is important only to set this accessor if it is
+  // needed, as it creates a hard data dependency on the column, which
+  // is not present in older PHYSLITE files, causing the tool to fail.
+  // An alternative would be to mark the column with `isOptional`, but
+  // since it is always required for the GNN calibration (and never
+  // otherwise), declaring it only for the GNN calibration seemed
+  // cleaner.
+  if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+    resetAccessor (m_accessors->gnn_energy_Acc, *this, "TransformerEnergy");
+  }
   if (m_onlyElectrons.value() && m_onlyPhotons.value()) {
     ATH_MSG_ERROR("Cannot select both onlyElectrons and onlyPhotons");
     return StatusCode::FAILURE;
