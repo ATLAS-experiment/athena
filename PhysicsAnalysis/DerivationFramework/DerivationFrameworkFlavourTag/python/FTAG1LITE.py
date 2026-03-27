@@ -258,8 +258,8 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     )
     acc.addPublicTool(calibTool)
     acc.addEventAlgo(
-        CompFactory.FlavorTagDiscriminants.JetCalibratedPtDecoratorAlg(
-            "JetCalibratedPtDecoratorAlg",
+        CompFactory.FlavorTagDiscriminants.JetCalibrationDecoratorAlg(
+            "JetCalibrationDecoratorAlg",
             JetCalibrationTool="JetCalibrationTool/JetCalibTool_AntiKt4EMPFlow",
             JetContainer=JETS,
             ptCalibratedKey=f"{JETS}.pt_calibrated",
