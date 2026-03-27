@@ -656,7 +656,9 @@ for conf in args.postConfig:
     raise ValueError(f"postConfig {conf} had no effect ... typo? See list above of available components")
 
 from AthenaCommon.Include import include
-for inc in args.postInclude: include(inc)
+from AthenaCommon.Configurable import ConfigurableCABehavior
+with ConfigurableCABehavior():
+  for inc in args.postInclude: include(inc)
 
 if args.postHelp is not None:
   from collections import defaultdict
