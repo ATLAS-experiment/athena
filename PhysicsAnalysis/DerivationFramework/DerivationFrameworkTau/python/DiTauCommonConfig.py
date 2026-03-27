@@ -28,7 +28,7 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
 
     diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
             flags,
-            onnxModelPath                   = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
+            onnxModelPath = "TrigTauRec/00-11-02/dev/boosted_ditau_omni_model.onnx",
         ))
 
     diTauWPDecorator = acc.popToolsAndMerge(DiTauTools.DiTauWPDecoratorCfg(
@@ -38,22 +38,14 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
     kwargs.setdefault("DiTauContainerName", "DiTauJets")
     wpDecorationKeys = diTauWPDecorator.DecorWPNames
     decorWPCuts = diTauWPDecorator.DecorWPCuts
-    acc.addPublicTool(diTauOnnxScoreCalculator)
-    acc.addPublicTool(diTauWPDecorator)
 
-    DiTauIDDecoratorWrapper = CompFactory.DerivationFramework.DiTauIDDecoratorWrapper
-    DiTauIDDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
-
-    DiTauIDDecoratorWrapper = DiTauIDDecoratorWrapper(name               = "DiTauIDDecoratorWrapper",
+    acc.addEventAlgo(CompFactory.DerivationFramework.DiTauIDDecoratorWrapper(name = "DiTauIDDecorKernel",
                                                       DiTauContainerName = kwargs['DiTauContainerName'],
                                                       DiTauOnnxDiscriminantTool = diTauOnnxScoreCalculator,
                                                       DiTauWPDecorator = diTauWPDecorator,
                                                       WPDecorationKeys = wpDecorationKeys,
-                                                      DecorWPCuts = decorWPCuts)
+                                                      DecorWPCuts = decorWPCuts))
 
-    acc.addPublicTool(DiTauIDDecoratorWrapper)
-    acc.addEventAlgo(DiTauIDDecoratorKernel(name              = "DiTauIDDecorKernel",
-                                            AugmentationTools = [DiTauIDDecoratorWrapper])) # TODO Migrate public tool to AthReentrantAlgorithm
     return acc
 
 

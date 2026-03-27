@@ -1,19 +1,20 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORKTAU_DITAUIDDECORATORWRAPPER_H
 #define DERIVATIONFRAMEWORKTAU_DITAUIDDECORATORWRAPPER_H
 
-#include "AthenaBaseComps/AthAlgTool.h"
-#include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "StoreGate/ReadHandleKey.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "DiTauRec/DiTauOnnxDiscriminantTool.h"
 #include "DiTauRec/DiTauWPDecorator.h"
-#include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODTau/DiTauJetContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/IChronoStatSvc.h"
 
-#include <string>
 #include <vector>
 
 /**
@@ -22,12 +23,12 @@
 
 namespace DerivationFramework {
 
-  class DiTauIDDecoratorWrapper : public extends<AthAlgTool, IAugmentationTool> {
+  class DiTauIDDecoratorWrapper : public AthReentrantAlgorithm {
   public:
-    using base_class::base_class;
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode addBranches(const EventContext& ctx) const override;
+    virtual StatusCode execute(const EventContext& ctx) const override;
 
   private:
     SG::ReadHandleKey<xAOD::DiTauJetContainer> m_ditauContainerKey { this, "DiTauContainerName", "DiTauJets", "Input tau container key" };
@@ -41,6 +42,7 @@ namespace DerivationFramework {
 
     Gaudi::Property<std::vector<float>> m_WPCuts{this, "DecorWPCuts", {}};
 
+    ServiceHandle<IChronoStatSvc>      m_chronoSvc{this, "ChronoStatSvc",  "ChronoStatSvc"};
   };
 }
 

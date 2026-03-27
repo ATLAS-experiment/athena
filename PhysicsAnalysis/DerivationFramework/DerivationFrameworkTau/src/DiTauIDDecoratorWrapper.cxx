@@ -5,6 +5,7 @@
 #include "DerivationFrameworkTau/DiTauIDDecoratorWrapper.h"
 #include "StoreGate/ReadHandle.h"
 #include "xAODCore/ShallowCopy.h"
+#include "GaudiKernel/Chrono.h"
 
 namespace DerivationFramework {
 
@@ -23,11 +24,17 @@ namespace DerivationFramework {
     ATH_CHECK( m_scoreDecorKey.initialize() );
     ATH_CHECK( m_WPDecorKeys.initialize() );
 
+    // get the chrono auditor
+    ATH_CHECK ( m_chronoSvc.retrieve() );
+
     return StatusCode::SUCCESS;
   }
 
-  StatusCode DiTauIDDecoratorWrapper::addBranches(const EventContext& ctx) const
+  StatusCode DiTauIDDecoratorWrapper::execute(const EventContext& ctx) const
   {
+    // On your marks.... get set....
+    Chrono chrono( &(*m_chronoSvc), name() );
+    // GO!!
 
     // retrieve ditau container
     SG::ReadHandle<xAOD::DiTauJetContainer> ditauJetsReadHandle(m_ditauContainerKey, ctx);
