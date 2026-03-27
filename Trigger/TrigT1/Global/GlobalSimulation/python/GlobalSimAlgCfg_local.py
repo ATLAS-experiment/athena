@@ -16,7 +16,7 @@ def GlobalSimulationAlgCfg(flags,
                            OutputLevel=DEBUG):
 
     logger.setLevel(OutputLevel)
-    logger.info('GlobalSim local config, cfg file:', fn)
+    logger.info('GlobalSim local config, cfg file:'+ fn)
 
     cfg = ComponentAccumulator()
 

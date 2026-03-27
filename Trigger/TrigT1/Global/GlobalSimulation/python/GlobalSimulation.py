@@ -9,5 +9,9 @@ def GlobalSimulationCfg(flags):
     cfg = ComponentAccumulator()
 
     # todo: A GlobalSimulation configured by flags and any extra arguments
+    from GlobalSimulation.GlobalSimAlgCfg_local import GlobalSimulationAlgCfg
+    from PathResolver import PathResolver
+    cfg_fn = PathResolver.FindCalibFile("GlobalSimulation/globalSim_hypo_mult.xml")
+    cfg.merge(GlobalSimulationAlgCfg(flags, fn=cfg_fn, dump=True))
 
     return cfg
